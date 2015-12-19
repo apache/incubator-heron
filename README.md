@@ -1,4 +1,4 @@
 Overview
 ========
 
-**heron** is a project at Twitter.
+**heron** is real time stream processing system, developed at Twitter.
