@@ -1,4 +1,4 @@
 Overview
 ========
 
-**heron** is a project at Twitter.
+**heron** is the next generation streaming project at Twitter.
