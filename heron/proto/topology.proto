@@ -1,0 +1,88 @@
+package heron.proto.api;
+
+option java_package = "com.twitter.heron.api.generated";
+option java_outer_classname = "TopologyAPI";
+
+enum Grouping {
+  SHUFFLE = 1;
+  FIELDS = 2;
+  ALL = 3; 
+  LOWEST = 4; 
+  NONE = 5;
+  DIRECT = 6;
+  CUSTOM = 7;
+}
+
+enum Type {
+  OBJECT = 1; // generic type
+}
+
+message StreamSchema {
+  message KeyType {
+    required string key = 1;
+    required Type type = 2;
+  }
+  repeated KeyType keys = 1;
+}
+
+message StreamId {
+  required string id = 1;
+  required string component_name = 2; // the guy who produced it
+}
+
+message OutputStream {
+  required StreamId stream = 1;
+  required StreamSchema schema = 2;
+}
+
+message InputStream {
+  required StreamId stream = 1;
+  required Grouping gtype = 2;
+  optional StreamSchema grouping_fields = 3;
+  optional bytes custom_grouping_java_object = 4;
+}
+
+message Config {
+  message KeyValue {
+    required string key = 1;
+    // Only one of the below are set
+    optional string value = 2;
+    optional bytes java_serialized_value = 3;
+  }
+  repeated KeyValue kvs = 1;
+}
+
+message Component {
+  // The name of the component. Like Tail-FlatMap
+  required string name = 1;
+  // Only one of the below two are set
+  optional string java_class_name = 2;
+  optional bytes java_object = 4;
+  required Config config = 3;
+}
+
+message Spout {
+  required Component comp = 1;
+  repeated OutputStream outputs = 2;
+}
+
+message Bolt {
+  required Component comp = 1;
+  repeated InputStream inputs = 2;
+  repeated OutputStream outputs = 3;
+}
+
+enum TopologyState {
+  RUNNING = 1;
+  PAUSED = 2;
+  KILLED = 3;
+}
+
+message Topology {
+  required string id = 1;
+  required string name = 2;
+  repeated Spout spouts = 3;
+  repeated Bolt bolts = 4;
+  required TopologyState state = 5;
+  optional Config topology_config = 6;
+}

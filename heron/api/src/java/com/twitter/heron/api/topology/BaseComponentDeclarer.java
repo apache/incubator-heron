@@ -1,0 +1,56 @@
+package com.twitter.heron.api.topology;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import com.google.protobuf.ByteString;
+
+import com.twitter.heron.api.Config;
+import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.api.utils.Utils;
+
+public abstract class BaseComponentDeclarer<T extends ComponentConfigurationDeclarer> extends BaseConfigurationDeclarer<T> {
+  private String name;
+  private IComponent component;
+  private OutputFieldsGetter output;
+  private Map<String, Object> componentConfiguration;
+  public BaseComponentDeclarer(String name, IComponent comp, Number taskParallelism) {
+    this.name = name;
+    this.component = comp;
+    this.componentConfiguration = comp.getComponentConfiguration();
+    if (this.componentConfiguration == null) {
+      this.componentConfiguration = new HashMap<String, Object>();
+    }
+    if (taskParallelism != null) {
+      this.componentConfiguration.put(Config.TOPOLOGY_COMPONENT_PARALLELISM,
+                                      taskParallelism.toString());
+    } else {
+      this.componentConfiguration.put(Config.TOPOLOGY_COMPONENT_PARALLELISM,
+                                      "1");
+    }
+  }
+
+  public abstract T returnThis();
+
+  protected String getName() { return name; }
+
+  @Override
+  public T addConfigurations(Map conf) {
+    componentConfiguration.putAll(conf);
+    return returnThis();
+  }
+  
+  public void dump(TopologyAPI.Component.Builder bldr) {
+    bldr.setName(name);
+    bldr.setJavaObject(ByteString.copyFrom(Utils.serialize(component)));
+
+    TopologyAPI.Config.Builder cBldr = TopologyAPI.Config.newBuilder();
+    for (Map.Entry<String, Object> entry : componentConfiguration.entrySet()) {
+      TopologyAPI.Config.KeyValue.Builder kvBldr = TopologyAPI.Config.KeyValue.newBuilder();
+      kvBldr.setKey(entry.getKey());
+      kvBldr.setValue(entry.getValue().toString());
+      cBldr.addKvs(kvBldr);
+    }
+    bldr.setConfig(cBldr);
+  }
+}

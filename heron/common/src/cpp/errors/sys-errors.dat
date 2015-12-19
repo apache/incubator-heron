@@ -1,0 +1,4 @@
+sys = 0x00010000 "System Errors" {
+  INVALID_PARAMS    Invalid  parameters
+  NOT_IMPLEMENTED   Not implemented
+}
