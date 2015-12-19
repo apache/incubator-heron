@@ -1,0 +1,11 @@
+package heron.proto.testing;
+option java_package = "com.twitter.heron.proto.testing";
+option java_outer_classname = "Tests";
+
+message EchoServerRequest {
+  required string echo_request = 1;
+}
+
+message EchoServerResponse {
+  required string echo_response = 1;
+}

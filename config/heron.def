@@ -1,0 +1,6 @@
+/*
+ * This file is used by configure and can be used to globally #define
+ *
+ */
+
+#undef NOTHING_TO_DEFINE_YET

@@ -1,0 +1,14 @@
+# For centos5
+# To use it: bazel build --config centos5
+build:centos5 --java_toolchain=//tools/java:heron_java_toolchain 
+build:centos5 --ignore_unsupported_sandboxing
+build:centos5 --python2_path /usr/bin/python2.7
+build:centos5 --linkopt -lm
+build:centos5 --linkopt -lpthread
+build:centos5 --linkopt -lunwind
+build:centos5 --linkopt -lrt
+
+# For Mac
+# To use it: bazel build --config darwin
+build:darwin --python2_path /usr/bin/python2.7
+build:darwin --java_toolchain=//tools/java:heron_java_toolchain 
