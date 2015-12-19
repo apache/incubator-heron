@@ -1,0 +1,8 @@
+package heron.proto.system;
+
+option java_package = "com.twitter.heron.proto.system";
+option java_outer_classname = "Stats";
+
+message StMgrStats {
+  // to be defined
+}

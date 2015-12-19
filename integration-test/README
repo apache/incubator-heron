@@ -1,0 +1,37 @@
+This directory (integration-test) contains all the source code and scripts for the
+integration test framework and tests.
+
+The main components are,
+
+ * Test framework (src/java/(core, common))
+   - this forms the core framework which ensures the output of the topology is
+     converted to json, and uploaded to the test server. It also provides helper
+     spouts and bolts which are commonly used by tests.
+
+ * Test topologies (src/java/topology)
+   - Test topologies make use of the above framework library to test heron functionality.
+     Only this section needs to be touched to add any new tests.
+
+ * Test runner (src/python/test_runner)
+   - Test runner picks up the test topologies, launches them on aurora, polls for the actual test
+     results (from the http server), compares that with expected results and kills the topology.
+
+ * Test http server (src/python/http_server)
+   - a simple http server (launched as an aurora job) to host the integration test results
+     Test topologies `post` the result, and test runner `get`s the result.
+
+ * Test launcher (scripts/test_launcher.sh)
+   - this scripts is a helper to launch and kill the above components.
+
+To run the tests on jenkins,
+  Go to "https://ci.twitter.biz/job/heron-staging-integration_tests/"
+  Select 'Build With Parameters'
+  Enter the branch your want to test against, and click 'Build'
+
+Jenkins job will make an E release with pkgrole='jenkins', and pkgname='heron-integration-test',
+and then launch the tests with this release.
+
+To run the tests locally (although not that useful),
+  make
+  cd build/integration-test
+  ./scripts/test_launcher.sh local

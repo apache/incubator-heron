@@ -1,0 +1,15 @@
+## Contains the sources where the states are stored.
+# Each source has these attributes:
+# 1. type - type of state manager (zk or file, etc.)
+# 2. name - name to be used for this source
+# 3. host - currently only used to connect to zk
+# 4. port - port to connect to
+# 5. rootpath - where all the states are stored
+
+-
+    type: "file"
+    name: "local"
+    host: "localhost"
+    port: 0
+    rootpath: "/Users/heron/workspace/heron/state"
+    tunnelhost: "localhost"
