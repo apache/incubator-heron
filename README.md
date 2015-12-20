@@ -1,4 +1,4 @@
 Overview
 ========
 
-**heron** is the next generation streaming project at Twitter.
+**heron** is next generation real time stream processing system, developed at Twitter.
