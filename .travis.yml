@@ -17,8 +17,7 @@ addons:
       - zlib1g-dev
 
 env:
-  - CC=/usr/bin/gcc-4.8
-  - CXX=/usr/bin/g++-4.8
+  - CC=/usr/bin/gcc-4.8 CXX=/usr/bin/g++-4.8
 
 before_install:
   - wget 'https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh'
