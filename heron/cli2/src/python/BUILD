@@ -16,16 +16,6 @@ filegroup(
 )
 
 filegroup(
-    name = "aurora-scheduler-config",
-    srcs = ["aurora_scheduler.conf"],
-)
-
-filegroup(
     name = "local-scheduler-config",
     srcs = ["local_scheduler.conf"],
-)
-
-filegroup(
-    name = "mesos-scheduler-config",
-    srcs = ["mesos_scheduler.conf"],
 )
