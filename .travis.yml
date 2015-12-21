@@ -15,6 +15,7 @@ addons:
       - pkg-config
       - zip
       - zlib1g-dev
+      - libunwind7-dev
 
 env:
   - CC=/usr/bin/gcc-4.8 CXX=/usr/bin/g++-4.8
