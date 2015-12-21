@@ -185,6 +185,46 @@ def discover_include_paths(program):
   return builtin_includes
 
 ######################################################################
+# Generate the shell script that recreates the environment
+######################################################################
+def write_env_exec_file(platform, environ):
+
+  env_exec_file = 'scripts/env_exec.sh'
+  out_file = open(env_exec_file, 'w')
+  out_file.write('#!/bin/bash\n\n')
+  out_file.write('set -eu \n\n')
+
+  # If C environment is set, export them
+  if 'CC' in os.environ:
+    out_file.write('export CC=' + os.environ['CC'] + '\n')
+  if 'CPP' in os.environ:
+    out_file.write('export CPP=' + os.environ['CPP'] + '\n')
+  if 'CFLAGS' in os.environ:
+    out_file.write('export CFLAGS=' + os.environ['CFLAGS'] + '\n')
+
+  # If CXX environment is set, export them
+  if 'CXX' in os.environ:
+    out_file.write('export CXX=' + os.environ['CXX'] + '\n')
+  if 'CXXCPP' in os.environ:
+    out_file.write('export CXXCPP=' + os.environ['CXXCPP'] + '\n')
+  if 'CXXFLAGS' in os.environ:
+    out_file.write('export CXXFLAGS=' + os.environ['CXXFLAGS'] + '\n')
+
+  # If linker environment is set, export them
+  if 'LDFLAGS' in os.environ:
+    out_file.write('export LDFLAGS=' + os.environ['LDFLAGS'] + '\n')
+  if 'LIBS' in os.environ:
+    out_file.write('export LIBS=' + os.environ['LIBS'] + '\n')
+
+  # Invoke the programs
+  out_file.write('# Execute the input programs\n')
+  out_file.write('$*')
+
+  make_executable(env_exec_file)
+  print 'Wrote the environment exec file:  \t"%s"' % (env_exec_file)
+
+
+######################################################################
 # Generate system defines based on processor, os and os version
 ######################################################################
 def generate_system_defines():
@@ -255,6 +295,9 @@ def main():
   env_map['OBJCOPY'] = discover_tool_default('objcopy', "objcopy", 'OBJCOPY', '/usr/bin/objcopy')
   env_map['OBJDUMP'] = discover_tool_default('objdump', "objdump", 'OBJDUMP', '/usr/bin/objdump')
   env_map['STRIP'] = discover_tool_default('strip', "strip", 'STRIP', '/usr/bin/strip')
+
+  # write the environment executable file
+  write_env_exec_file(platform, env_map)
 
 if __name__ == '__main__':
   main()
