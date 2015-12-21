@@ -58,6 +58,7 @@ genrule(
         "include/yaml-cpp/node/detail/node_iterator.h",
     ],
     cmd = "\n".join([
+        "export WORKSPACE_ROOT=$$(pwd)",
         "export INSTALL_DIR=$$(pwd)/$(@D)",
         "export TMP_DIR=$$(mktemp -d -t yaml-cpp.XXXXX)",
         "mkdir -p $$TMP_DIR",
@@ -65,10 +66,13 @@ genrule(
         "cd $$TMP_DIR",
         "tar xfz " + package_file,
         "cd " + package_dir,
-        "cmake -DCMAKE_INSTALL_PREFIX:PATH=$$INSTALL_DIR .",
-        "make install",
+        "$$WORKSPACE_ROOT/$(location //scripts:env_exec) cmake -DCMAKE_INSTALL_PREFIX:PATH=$$INSTALL_DIR .",
+        "$$WORKSPACE_ROOT/$(location //scripts:env_exec) make install",
         "rm -rf $$TMP_DIR",
     ]),
+    tools = [
+        "//scripts:env_exec",
+    ],
 )
 
 cc_library(
