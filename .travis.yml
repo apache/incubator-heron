@@ -1,0 +1,29 @@
+language: java
+
+jdk:
+  - oraclejdk8
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-4.8
+      - g++-4.8
+      - python2.7
+      - wget
+      - pkg-config
+      - zip
+      - zlib1g-dev
+
+env:
+  - CC=/usr/bin/gcc-4.8
+  - CXX=/usr/bin/g++-4.8
+
+before_install:
+  - wget 'https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh'
+  - chmod +x bazel-0.1.2-installer-linux-x86_64.sh
+  - ./bazel-0.1.2-installer-linux-x86_64.sh --user
+
+script: 
+  - bazel --bazelrc=tools/travis-ci/bazel.rc test heron/...
