@@ -25,4 +25,5 @@ before_install:
   - ./bazel-0.1.2-installer-linux-x86_64.sh --user
 
 script: 
+  - ./bazel_configure.py
   - bazel --bazelrc=tools/travis-ci/bazel.rc test heron/...
