@@ -49,7 +49,7 @@ Here's an example build command:
 
 ```bash
 $ cd /path/to/heron/repo
-$ bazel build --define RELEASE=0.1.0-SNAPSHOT release:packages --config=darwin
+$ bazel build --config=darwin --define RELEASE=0.1.0-SNAPSHOT release:packages
 ```
 
 ### Build Directory
@@ -75,28 +75,30 @@ can take one of the following values: `darwin` (Mac OS X), `centos5` (CentOS 5).
 Here's an example test command:
 
 ```bash
-$ bazel test heron/state/tests/java:local_file_state_manager_unittest
+$ bazel test --config=darwin heron/state/tests/java:local_file_state_manager_unittest
 ```
 
-To fetch a full listing of test targets:
+### Discovering Test Targets
+
+To fetch a full listing of all Bazel test targets:
 
 ```bash
 $ bazel query 'kind(".*_test rule", ...)'
 ```
 
-For Java targets only:
+For **Java** targets only:
 
 ```bash
 $ bazel query 'kind("java_test rule", ...)'
 ```
 
-For C++ targets:
+For **C++** targets:
 
 ```bash
 $ bazel query 'kind("cpp_test rule", ...)'
 ```
 
-For Python targets:
+For **Python** targets:
 
 ```bash
 $ bazel query 'kind("pex_test rule", ...)'
