@@ -6,7 +6,6 @@ jdk:
 addons:
   apt:
     sources:
-      - ubuntu-toolchain-r-test
       - debian-sid
     packages:
       - gcc-4.8
