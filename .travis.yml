@@ -1,3 +1,5 @@
+sudo: false
+
 language: java
 
 jdk:
@@ -7,6 +9,7 @@ addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
+      - debian-sid
     packages:
       - gcc-4.8
       - g++-4.8
@@ -15,6 +18,7 @@ addons:
       - pkg-config
       - zip
       - zlib1g-dev
+      - libunwind8-dev
 
 env:
   - CC=/usr/bin/gcc-4.8 CXX=/usr/bin/g++-4.8
@@ -25,4 +29,9 @@ before_install:
   - ./bazel-0.1.2-installer-linux-x86_64.sh --user
 
 script: 
+  - which gcc
+  - gcc --version
+  - which gcc-4.8
+  - gcc-4.8 --version 
+  - ./bazel_configure.py
   - bazel --bazelrc=tools/travis-ci/bazel.rc test heron/...
