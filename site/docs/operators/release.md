@@ -22,8 +22,9 @@ You can build Heron either [as an entirety](#building-a-full-release) or on a
 
 [Bazel](http://bazel.io) is the build tool used by Heron. The releases page for
 Bazel {{book.bazel_version}} can be found
-[here](https://github.com/bazelbuild/bazel/releases), while installation
-instructions can be found [here](http://bazel.io/docs/install.html).
+[here](https://github.com/bazelbuild/bazel/releases/tag/{{book.bazel_version}}),
+while installation instructions can be found
+[here](http://bazel.io/docs/install.html).
 
 ## Configuring Bazel
 
