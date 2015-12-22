@@ -26,5 +26,9 @@ before_install:
   - ./bazel-0.1.2-installer-linux-x86_64.sh --user
 
 script: 
+  - which gcc
+  - gcc --version
+  - which gcc-4.8
+  - gcc-4.8 --version 
   - ./bazel_configure.py
   - bazel --bazelrc=tools/travis-ci/bazel.rc test heron/...
