@@ -1,6 +1,6 @@
 # Compiling a Heron Release
 
-Heron is currently available for Mac OS X and CentOS 5.
+Heron is currently available for Mac OS X 10.10, Ubuntu 12.04, and CentOS 5.
 
 You can build Heron either [as an entirety](#building-a-full-release) or on a
 [component-by-component basis](#building-specific-components).
@@ -18,10 +18,17 @@ You can build Heron either [as an entirety](#building-a-full-release) or on a
 * [Python](https://www.python.org/) >= 2.7
 * [Perl](https://www.perl.org/) >= 5.8.8
 
+## Installing Bazel
+
+[Bazel](http://bazel.io) is the build tool used by Heron. The releases page for
+Bazel {{book.bazel_version}} can be found
+[here](https://github.com/bazelbuild/bazel/releases), while installation
+instructions can be found [here](http://bazel.io/docs/install.html).
+
 ## Configuring Bazel
 
-[Bazel](http://bazel.io) is the build tool used by Heron. There is a Python
-script that you can use to set up Bazel:
+There is a Python script that you can run to configure Bazel on supported
+platforms:
 
 ```bash
 $ cd /path/to/heron/repo
