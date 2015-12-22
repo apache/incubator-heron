@@ -121,7 +121,7 @@ $ bazel query 'kind("java_test rule", ...)'
 For **C++** targets:
 
 ```bash
-$ bazel query 'kind("cpp_test rule", ...)'
+$ bazel query 'kind("cc_test rule", ...)'
 ```
 
 For **Python** targets:
