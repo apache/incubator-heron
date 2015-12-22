@@ -1,4 +1,4 @@
-# Compiling a Heron Release
+# Compiling Heron
 
 Heron is currently available for Mac OS X 10.10, Ubuntu 12.04, and CentOS 5.
 
