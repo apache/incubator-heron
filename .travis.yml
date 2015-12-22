@@ -10,6 +10,8 @@ addons:
     sources:
       - debian-sid
     packages:
+      - gcc-4.8
+      - g++-4.8
       - clang
       - clang++
       - python2.7
@@ -32,5 +34,9 @@ script:
   - clang --version
   - which clang++
   - clang++ --version 
+  - which gcc-4.8
+  - gcc --version
+  - which g++-4.8
+  - g++ --version 
   - ./bazel_configure.py
   - bazel --bazelrc=tools/travis-ci/bazel.rc test heron/...
