@@ -12,14 +12,15 @@ GitBook documentation can be found [here](https://help.gitbook.com/).
 
 ## Building the Docs
 
-To build the docs, simply run `gitbook build` in the `site` directory. The
-resulting artifacts are in `site/_book`.
+To build the docs, simply run `gitbook build` in the `site/docs` directory. The
+resulting artifacts are in `site/docs/_book`. The `_book` directory is ignored
+by Git.
 
 ## Running the Docs Locally
 
-To run the docs locally, navigate to the `site` directory in the Heron repo and
-run `gitbook serve`. This will start up a local web server serving the docs on
-`localhost:4000`. You can specify a different port using the `--port` flag.
+To run the docs locally, navigate to the `site/docs` directory in the Heron repo
+and run `gitbook serve`. This will start up a local web server serving the docs
+on `localhost:4000`. You can specify a different port using the `--port` flag.
 
 ## Building a PDF
 
@@ -39,8 +40,8 @@ a JPEG and save it as `site/cover.jpg`.
 GitBook enables you to set project-wide variables that can be embedded into
 text. These variables can be set in `site/book.json`, within the `variables`
 object. Currently, there is one variable for the general version of the Heron
-docs (`version`) and three variables corresponding to versions of the
-Heron API docs: `scheduler_api_version`, `topology_api_version`, and
+docs (`version`) and three variables corresponding to versions of the Heron API
+docs: `scheduler_api_version`, `topology_api_version`, and
 `metrics_api_version`. They are currently all set to `0.1.0`, which will need to
 change when versioning gets settled.
 
@@ -53,7 +54,7 @@ The current version of the metrics API docs is {{book.metrics_api_version}}.
 Please note that project-level variables don't really work in normal code
 blocks. You'll have to embed special HTML to make them work. This is an
 unfortunate but currently unavoidable limitation of GitBook. Examples of
-workaround can be found in `site/contributors/custom-{scheduler,sink}.md`.
+workaround can be found in `site/docs/contributors/custom-{scheduler,sink}.md`.
 
 ## Structure of the Docs
 
