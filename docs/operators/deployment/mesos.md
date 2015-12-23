@@ -75,12 +75,12 @@ $ heron-cli activate \
 ### Specifying the Configuration Loader
 
 You can use Heron's Mesos configuration loader by setting the
-`--config-loader` flag to `com.twitter.heron.scheduler.aurora.AuroraConfigLoader`.
+`--config-loader` flag to `com.twitter.heron.scheduler.aurora.MesosConfigLoader`.
 Here's an example CLI command:
 
 ```bash
 $ heron-cli submit \
     # Set scheduler overrides, point to a topology JAR, etc.
-    --config-loader=com.twitter.heron.scheduler.mesos.AuroraConfigLoader \
+    --config-loader=com.twitter.heron.scheduler.mesos.MesosConfigLoader \
     # Other parameters
 ```
