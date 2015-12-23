@@ -7,6 +7,15 @@ test --ram_utilization_factor=10
 # This is so we understand failures better
 build --verbose_failures
 
+# Limits the jobs to 25 since the resources are limited
+build --jobs 25
+
+# Link with the appropriate libs
+build --linkopt -lm
+build --linkopt -lpthread
+build --linkopt -lunwind
+build --linkopt -lrt
+
 # This is so we use a recent enough GCC when building.
 build --crosstool_top //tools/travis-ci/toolchain:CROSSTOOL
 

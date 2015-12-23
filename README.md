@@ -1,3 +1,7 @@
+**Heron** is the next generation real time stream processing system developed at Twitter.
+
+[![Build Status](https://travis-ci.com/twitter/heron.svg?token=woUsyvMQCWdrt9jhGR7x&branch=master)](https://travis-ci.com/twitter/heron)
+
 # The Heron OSS Docs
 
 At the moment, Heron's OSS documentation is built using
@@ -71,3 +75,4 @@ There are some basic components of the docs that you should be aware of:
   holds generated HTML, while the `gitbook` directory holds all static assets.
 * The remaining folders hold Markdown documentation content (`concepts`,
   `contributors`, `developers`, and `operators`).
+>>>>>>> master
