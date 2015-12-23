@@ -4,7 +4,8 @@ A Heron **topology** is a directed [acyclic
 graph](https://en.wikipedia.org/wiki/Directed_acyclic_graph) used to process
 streams of data. Heron topologies consist of three basic components:
 [spouts](#spouts) and [bolts](#bolts), which are connected via
-**streams** of [tuples](../developers/java/data-model.html).
+**streams** of [tuples](../developers/java/data-model.html). Below is a visual
+illustration of a simple topology:
 
 ![Heron topology](img/topology.png)
 
@@ -68,8 +69,15 @@ in [Heron's Data Model](../developers/java/data-model.html).
 
 ## Logical Plan
 
-A topology's **logical plan**
+A topology's **logical plan** is analagous to a database [query
+plan](https://en.wikipedia.org/wiki/Query_plan). The image at the top of this
+page is an example logical plan for a topology.
 
 ## Physical Plan
 
-A topology's **physical plan**
+A topology's **physical plan** is related to its logical plan but with the
+crucial difference that a physical plan maps the actual execution logic of a
+topology, including the machines running each spout or bolt and more. Here's a
+rough visual representation of a physical plan:
+
+![Topology Physical Plan](img/physicalplan.png)
