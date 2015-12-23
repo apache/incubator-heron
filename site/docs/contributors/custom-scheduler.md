@@ -13,6 +13,9 @@ or [Amazon ECS](https://aws.amazon.com/ecs/), you can create your own scheduler
 using Heron's [scheduler API](http://heronproject.github.io/scheduler-api/) for
 Java, as detailed in the sections below.
 
+Java is currently the only supported language for custom schedulers. This may
+change in the future.
+
 ## Java Setup
 
 In order to create a custom scheduler, you need to import the `scheduler`
@@ -39,26 +42,50 @@ interfaces:
 
 Interface | Role | Examples
 :-------- |:---- |:--------
-[`IConfig`](http://heronproject.github.io/scheduler-api/com/twitter/scheduler/api/IConfig) | Parsing and loading of configuration for the scheduler | [Aurora](http://heronproject.github.io/scheduler-api/com/twitter/heron/scheduler/aurora/AuroraConfigLoader), [Mesos](http://heronproject.github.io/scheduler-api/com/twitter/heron/scheduler/mesos/MesosConfigLoader), [local](http://heronproject.github.io/scheduler-api/com/twitter/heron/scheduler/local/LocalConfigLoader)
-[`ILauncher`](http://heronproject.github.io/scheduler-api/com/twitter/scheduler/api/ILauncher) | Defines how the scheduler is launched | [Aurora](http://heronproject.github.io/scheduler-api/com/twitter/heron/scheduler/aurora/AuroraLauncher), [Mesos](http://heronproject.github.io/scheduler-api/com/twitter/heron/scheduler/mesos/MesosLauncher), [local](http://heronproject.github.io/scheduler-api/com/twitter/heron/scheduler/local/LocalLauncher)
-`IRuntimeManager` | Handles runtime tasks such as activating topologies, killing topologies, etc. | [Aurora](http://heronproject.github.io/scheduler-api/com/twitter/heron/scheduler/aurora/AuroraTopologyRuntimeManager), [Mesos](http://heronproject.github.io/scheduler-api/com/twitter/heron/scheduler/mesos/MesosTopologyRuntimeManager), [local](http://heronproject.github.io/scheduler-api/com/twitter/heron/scheduler/local/LocalTopologyRuntimeManager)
-`IScheduler` | Defines the scheduler object used to construct topologies | [Mesos](http://heronproject.github.io/scheduler-api/com/twitter/heron/scheduler/mesos/MesosScheduler), [local](http://heronproject.github.io/scheduler-api/com/twitter/heron/scheduler/local/LocalScheduler)
-`IUploader` | Uploads the topology to a shared location that must be accessible to the runtime environment of the topology |
+[`IConfigLoader`](../api/scheduler/com/twitter/heron/scheduler/api/IConfigLoader.html) | Parsing and loading of configuration for the scheduler | [Aurora](../api/scheduler/com/twitter/heron/scheduler/aurora/AuroraConfigLoader.html), [Mesos](../api/scheduler/com/twitter/heron/scheduler/mesos/MesosConfigLoader.html), [local](../api/scheduler/com/twitter/heron/scheduler/local/LocalConfigLoader.html)
+[`ILauncher`](../api/scheduler/com/twitter/heron/scheduler/api/ILauncher.html) | Defines how the scheduler is launched | [Aurora](../api/scheduler/com/twitter/heron/scheduler/aurora/AuroraLauncher.html), [Mesos](../api/scheduler/com/twitter/heron/scheduler/mesos/MesosLauncher.html), [local](../api/scheduler/com/twitter/heron/scheduler/local/LocalLauncher.html)
+[`IRuntimeManager`](../api/scheduler/com/twitter/heron/scheduler/api/IRuntimeManager.html) | Handles runtime tasks such as activating topologies, killing topologies, etc. | [Aurora](../api/scheduler/com/twitter/heron/scheduler/aurora/AuroraTopologyRuntimeManager.html), [Mesos](../api/scheduler/com/twitter/heron/scheduler/mesos/MesosTopologyRuntimeManager.html), [local](../api/scheduler/com/twitter/heron/scheduler/local/LocalTopologyRuntimeManager.html)
+[`IScheduler`](../api/scheduler/com/twitter/heron/scheduler/api/IScheduler.html) | Defines the scheduler object used to construct topologies | [Mesos](http://heronproject.github.io/scheduler-api/com/twitter/heron/scheduler/mesos/MesosScheduler), [local](http://heronproject.github.io/scheduler-api/com/twitter/heron/scheduler/local/LocalScheduler)
+[`IUploader`](../api/scheduler/com/twitter/heron/scheduler/api/IUploader.html) | Uploads the topology to a shared location that must be accessible to the runtime environment of the topology |
+
+Your implementation of those interfaces will need to be on Heron's
+[classpath](https://en.wikipedia.org/wiki/Classpath_(Java)) when you [compile
+Heron](../operators/compiling.html).
 
 ## Loading Configuration
 
 You can set up a configuration loader for a custom scheduler by implementing the
-[`IConfig`](http://heronproject.github.io/scheduler-api/com/twitter/heron/scheduler/api/IConfig)
+[`IConfig`](../api/scheduler/com/twitter/heron/scheduler/api/IConfig.html)
 interface. You can use this interface to load configuration from any source
-you'd like.
+you'd like, e.g. YAML files, JSON files, or a web service.
 
-If you'd like to load configuration from files using the `.conf`-style syntax
-[`DefaultConfigLoader`](http://heronproject.github.io/scheduler-api/com/twitter/heron/scheduler/util/DefaultConfigLoader)
+If you'd like to load configuration from files using the same syntax as Heron's
+default configuration files for the Aurora, Mesos, and local schedulers (in
+`heron/cli2/src/python`), you can implement the
+[`DefaultConfigLoader`](../api/scheduler/com/twitter/heron/scheduler/util/DefaultConfigLoader.html)
+interface.
 
-## Testing Your Scheduler
+## Configurable Parameters
 
+At the very least, your configuration loader will need to be able to load the
+class names (as strings) for your implementations of the components listed
+above, as you can see from the interface definition for
+[`IConfigLoader`](../api/scheduler/com/twitter/heron/scheduler/api/IConfigLoader.html).
 
+## Trying Out Your Scheduler
 
-Once you've implemented a scheduler in Java, you can try it out by submitting a
-topology and specifying your scheduler using the 
+Once you've implemented a custom configuration loader, you'll need to specify
+your loader by class using the `--config-loader` flag. If your loader relies on
+a configuration file, specify the path of that file using the `--config-file`
+flag. Here's an example [topology
+submission](../operators/heron-cli.html#submitting-a-topology) command:
+
+```bash
+$ heron-cli submit "topology.debug:true" \
+    /path/to/topology/my-topology.jar \
+    biz.acme.topologies.MyTopology \
+    --config-file=/path/to/config/my_scheduler.conf \
+    --config-loader=biz.acme.config.MyConfigLoader
+```
+
 
