@@ -51,7 +51,7 @@ genrule(
         "cd $$TMP_DIR",
         "tar xfz " + package_file,
         "cd " + package_dir,
-        "./configure --prefix=$$INSTALL_DIR --enable-shared=no --enable-libunwind=no",
+        "./configure --prefix=$$INSTALL_DIR --enable-shared=no",
         "make install",
         "rm -rf $$TMP_DIR",
     ]),

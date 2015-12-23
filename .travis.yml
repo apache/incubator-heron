@@ -1,4 +1,4 @@
-sudo: false
+sudo: required
 
 language: java
 
@@ -9,7 +9,6 @@ addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
-      - debian-sid
     packages:
       - gcc-4.8
       - g++-4.8
@@ -18,20 +17,23 @@ addons:
       - pkg-config
       - zip
       - zlib1g-dev
-      - libunwind8-dev
 
 env:
-  - CC=/usr/bin/gcc-4.8 CXX=/usr/bin/g++-4.8
+  - CC=gcc-4.8 CXX=g++-4.8
 
 before_install:
+  - wget http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz
+  - tar xvfz libunwind-1.1.tar.gz
+  - cd libunwind-1.1 && ./configure --prefix=/usr && sudo make install && cd ..
   - wget 'https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh'
   - chmod +x bazel-0.1.2-installer-linux-x86_64.sh
   - ./bazel-0.1.2-installer-linux-x86_64.sh --user
 
 script: 
-  - which gcc
-  - gcc --version
   - which gcc-4.8
-  - gcc-4.8 --version 
+  - gcc --version
+  - which g++-4.8
+  - g++ --version 
   - ./bazel_configure.py
-  - bazel --bazelrc=tools/travis-ci/bazel.rc test heron/...
+  - bazel --bazelrc=tools/travis-ci/bazel.rc build heron/...
+  - bazel --bazelrc=tools/travis-ci/bazel.rc test  heron/...
