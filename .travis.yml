@@ -12,7 +12,6 @@ addons:
     packages:
       - gcc-4.8
       - g++-4.8
-      - clang
       - python2.7
       - wget
       - pkg-config
@@ -21,7 +20,7 @@ addons:
       - libunwind8-dev
 
 env:
-  - CC=clang CXX=clang++
+  - CC=gcc-48 CXX=g++-4.8
 
 before_install:
   - wget 'https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh'
@@ -29,11 +28,6 @@ before_install:
   - ./bazel-0.1.2-installer-linux-x86_64.sh --user
 
 script: 
-  - which clang
-  - clang --version
-  - which clang++
-  - clang++ --version 
-  - clang  -E -x c++ - -v 2>&1 < /dev/null
   - which gcc-4.8
   - gcc --version
   - which g++-4.8
