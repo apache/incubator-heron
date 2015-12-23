@@ -5,6 +5,7 @@
   * [Heron Topologies](concepts/topologies.md)
 * [Contributors](contributors/README.md)
   * [Building a Custom Scheduler](contributors/custom-scheduler.md)
+  * [Building a Custom Metrics Sink](contributors/custom-metrics-sink.md)
 * [Operators](operators/README.md)
   * [Deployment](operators/deployment/README.md)
     * [Setting Up ZooKeeper](operators/deployment/zookeeper.md)
