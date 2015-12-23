@@ -6,11 +6,11 @@
 * [Contributors](contributors/README.md)
   * [Building a Custom Scheduler](contributors/custom-scheduler.md)
   * [Building a Custom Metrics Sink](contributors/custom-metrics-sink.md)
+* [Developers](developers/README.md)
+  * [Compiling Heron](developers/compiling.md)
 * [Operators](operators/README.md)
   * [Deployment](operators/deployment/README.md)
     * [Setting Up ZooKeeper](operators/deployment/zookeeper.md)
     * [Aurora](operators/deployment/aurora.md)
     * [Mesos](operators/deployment/mesos.md)
     * [Local scheduler](operators/deployment/local.md)
-  * [Compiling Heron](operators/compiling.md)
-

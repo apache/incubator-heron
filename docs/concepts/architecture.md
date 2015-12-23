@@ -64,7 +64,6 @@ sections below:
 * [Heron Instance](#heron-instance)
 * [Metrics Manager](#metrics-manager)
 * [Heron Tracker](#heron-tracker)
-* [Heron Viz](#heron-viz)
 
 ### Topology Master
 
@@ -176,15 +175,6 @@ Instructions on running the tracker can be found in [Heron
 Tracker](../operators/heron-tracker.html). API docs for the Tracker's JSON API
 can be found in [The Heron Tracker REST
 API](../operators/heron-tracker/heron-tracker-rest-api.html)
-
-### Heron Viz
-
-**Heron Viz** is a UI for viewing metrics collected by a topology's
-[MM](#metrics-manager). When a new topology is submitted to a Heron cluster,
-Heron Viz interacts with the [Heron Tracker](#heron-tracker) to create a visual
-dashboard using the topology's [logical plan](topologies.html#logical-plan).
-
-For more information, see the [Heron Viz](../operators/heron-viz.html) document.
 
 ## Heron UI
 
