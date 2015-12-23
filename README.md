@@ -1,4 +1,8 @@
-# The Heron OSS Docs
+# Heron
+
+TODO
+
+## Heron Documentation
 
 At the moment, Heron's OSS documentation is built using
 [GitBook](https://www.gitbook.com/). To build and run the docs locally, you'll
@@ -6,23 +10,28 @@ need to [install it](https://github.com/GitbookIO/gitbook). GitBook depends on
 [NodeJS](https://nodejs.org/en/) and [npm](https://www.npmjs.com/).
 
 Once you've installed GitBook, you should run `gitbook install` to make sure
-that all the required modules are fetched.
+that all the required modules are fetched.  GitBook documentation can be found
+[here](https://help.gitbook.com/).
 
-GitBook documentation can be found [here](https://help.gitbook.com/).
+### Contributing to the Docs
 
-## Building the Docs
+The Heron docs are currently under very active development. Any help with
+correcting factual errors, adding missing material, improving examples, and more
+would be greatly appreciated.
+
+### Building the Docs
 
 To build the docs, simply run `gitbook build` in the `site/docs` directory. The
 resulting artifacts are in `site/docs/_book`. The `_book` directory is ignored
 by Git.
 
-## Running the Docs Locally
+### Running the Docs Locally
 
 To run the docs locally, navigate to the `site/docs` directory in the Heron repo
 and run `gitbook serve`. This will start up a local web server serving the docs
 on `localhost:4000`. You can specify a different port using the `--port` flag.
 
-## Building a PDF
+### Building a PDF
 
 You can build a PDF of the docs by running `gitbook pdf` in the `site`
 directory. This will produce a PDF called `book.pdf`.
@@ -30,12 +39,12 @@ directory. This will produce a PDF called `book.pdf`.
 **Note**: To build PDFs locally, you will need to install
 [Calibre](http://calibre-ebook.com/).
 
-### PDF Cover Page
+#### PDF Cover Page
 
 If you'd like to add a custom cover page for the PDF version of the docs, create
 a JPEG and save it as `site/cover.jpg`.
 
-## Using GitBook Variables
+### Using GitBook Variables
 
 GitBook enables you to set project-wide variables that can be embedded into
 text. These variables can be set in `site/book.json`, within the `variables`
@@ -56,7 +65,7 @@ blocks. You'll have to embed special HTML to make them work. This is an
 unfortunate but currently unavoidable limitation of GitBook. Examples of
 workaround can be found in `site/docs/contributors/custom-{scheduler,sink}.md`.
 
-## Structure of the Docs
+### Structure of the Docs
 
 There are some basic components of the docs that you should be aware of:
 
