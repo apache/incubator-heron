@@ -24,7 +24,7 @@ env:
 before_install:
   - wget http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz
   - tar xvfz libunwind-1.1.tar.gz
-  - cd libunwind-1.1 && ./configure && sudo make install
+  - cd libunwind-1.1 && ./configure && sudo make install && cd ..
   - wget 'https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh'
   - chmod +x bazel-0.1.2-installer-linux-x86_64.sh
   - ./bazel-0.1.2-installer-linux-x86_64.sh --user
