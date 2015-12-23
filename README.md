@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/twitter/heron.svg?token=woUsyvMQCWdrt9jhGR7x&branch=master)](https://travis-ci.com/twitter/heron)
+
 # Heron
 
 Heron is realtime analytics platform developed by Twitter. It is the direct
