@@ -1,0 +1,13 @@
+{
+  "structure": {
+    "readme": "index.md"
+  },
+  "variables": {
+    "version": "0.1.0",
+    "scheduler_api_version": "0.1.0",
+    "topology_api_version": "0.1.0",
+    "metrics_api_version": "0.1.0",
+    "bazel_version": "0.1.2"
+  },
+  "plugins": ["anchors"]
+}
