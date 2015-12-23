@@ -8,7 +8,7 @@ jdk:
 addons:
   apt:
     sources:
-      - debian-sid
+      - ubuntu-toolchain-r-test
     packages:
       - gcc-4.8
       - g++-4.8
@@ -17,12 +17,14 @@ addons:
       - pkg-config
       - zip
       - zlib1g-dev
-      - libunwind8-dev
 
 env:
   - CC=gcc-48 CXX=g++-4.8
 
 before_install:
+  - wget http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz
+  - tar xvfz libunwind-1.1.tar.gz
+  - cd libunwind-1.1 && ./configure && make install
   - wget 'https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh'
   - chmod +x bazel-0.1.2-installer-linux-x86_64.sh
   - ./bazel-0.1.2-installer-linux-x86_64.sh --user
