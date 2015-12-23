@@ -8,7 +8,7 @@ test --ram_utilization_factor=10
 build --verbose_failures
 
 # This is so we use a recent enough GCC when building.
-build --crosstool_top //tools/travis-ci/toolchain:clang
+build --crosstool_top //tools/travis-ci/toolchain:CROSSTOOL
 
 # This is so we don't use sandboxed execution. Sandboxed execution
 # runs stuff in a container, and since Travis already runs its script
