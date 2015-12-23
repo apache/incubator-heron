@@ -1,8 +1,12 @@
 # The Architecture of Heron
 
-Heron is architecturally similar to its predecessor, [Apache
-Storm](http://storm.apache.org), but different in crucial respects. The sections
-below describe the [design goals](#heron-design-goals) behind Storm as well as crucial
+Heron is the direct successor of [Apache Storm](http://storm.apache.org). From
+an architectural perspective it is markedly different from Storm but fully
+backwards compatible with it from an API perspective.
+
+The sections below clarify the distinction between [Heron and
+Storm](#releationship-with-apache-storm), describe the [design
+goals](#heron-design-goals) behind Heron, and explain major
 [components](#components) of its architecture.
 
 ## Topologies
@@ -13,12 +17,17 @@ in the [Heron Topologies](topologies.html) document.
 
 ## Relationship with Apache Storm
 
-Heron is the direct successor of [Apache Storm](http://storm.apache.org), built
-with the explicit goal of overcoming Storm's performance, reliability, and other
-shortcomings while also retaining full compatibility with Storm's tuple-based
-data model and [topology API](http://storm.apache.org/tutorial.html). For a more
-in-depth discussion of Heron and Storm, see the [Twitter Heron: Stream
-Processing at Scale](http://dl.acm.org/citation.cfm?id=2742788) paper.
+Heron is the direct successor of [Apache Storm](http://storm.apache.org) but
+built with two goals in mind: 
+
+1. Overcoming Storm's performance, reliability, and other shortcomings by
+replacing Storm's thread-based computing model with a process-based model while
+also
+2. retaining full compatibility with Storm's data model and [topology
+API](http://storm.apache.org/tutorial.html).
+
+For a more in-depth discussion of Heron and Storm, see the [Twitter Heron:
+Stream Processing at Scale](http://dl.acm.org/citation.cfm?id=2742788) paper.
 
 ## Heron Design Goals
 
@@ -31,10 +40,10 @@ Processing at Scale](http://dl.acm.org/citation.cfm?id=2742788) paper.
 * **Compatibility** &mdash; Heron is fully API and data model compatible with
   [Apache Storm](#relationship-with-apache-storm), making it easy for developers
   to transition between systems.
-* **Backpressure** &mdash; In a distributed system like Heron, there are no
+* **Back pressure** &mdash; In a distributed system like Heron, there are no
   guarantees that all system components will execute at the same speed. Heron
-  has built-in backpressure mechanisms to ensure that topologies can self-adjust
-  in case components lag.
+  has built-in [back pressure mechanisms](#stream-manager) to ensure that
+  topologies can self-adjust in case components lag.
 * **Performance** &mdash; Many of Heron's design choices have enabled Heron to
   achieve higher throughput and lower latency than Storm while also offering
   enhanced configurability to fine-tune potential latency/throughput trade-offs.
