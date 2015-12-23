@@ -22,6 +22,10 @@ env:
   - CC=gcc-48 CXX=g++-4.8
 
 before_install:
+  - which gcc
+  - gcc --version
+  - which gcc-4.8
+  - gcc-4.8 --version
   - wget http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz
   - tar xvfz libunwind-1.1.tar.gz
   - cd libunwind-1.1 && ./configure && make install
