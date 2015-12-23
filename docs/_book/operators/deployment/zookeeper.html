@@ -1,0 +1,484 @@
+<!DOCTYPE HTML>
+<html lang="en" >
+    
+    <head>
+        
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <title>Setting Up ZooKeeper | Heron</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 2.4.3">
+        
+        
+        <meta name="HandheldFriendly" content="true"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../../gitbook/images/apple-touch-icon-precomposed-152.png">
+        <link rel="shortcut icon" href="../../gitbook/images/favicon.ico" type="image/x-icon">
+        
+    <link rel="stylesheet" href="../../gitbook/style.css">
+    
+        
+        <link rel="stylesheet" href="../../gitbook/plugins/gitbook-plugin-anchors/plugin.css">
+        
+    
+        
+        <link rel="stylesheet" href="../../gitbook/plugins/gitbook-plugin-highlight/website.css">
+        
+    
+    
+
+        
+    
+    
+    <link rel="next" href="../../operators/deployment/aurora.html" />
+    
+    
+    <link rel="prev" href="../../operators/deployment/index.html" />
+    
+
+        
+    </head>
+    <body>
+        
+        
+    <div class="book" data-level="3.1.1" data-basepath="../.." data-revision="Wed Dec 23 2015 14:44:27 GMT-0800 (PST)">
+    
+
+<div class="book-summary">
+    <div class="book-search" role="search">
+        <input type="text" placeholder="Type to search" class="form-control" />
+    </div>
+    <nav role="navigation">
+        <ul class="summary">
+            
+            
+            
+            
+
+            
+
+            
+    
+        <li class="chapter " data-level="0" data-path="index.html">
+            
+                
+                    <a href="../../index.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                        Introduction
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="1" data-path="concepts/index.html">
+            
+                
+                    <a href="../../concepts/index.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>1.</b>
+                        
+                        Concepts
+                    </a>
+            
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.1" data-path="concepts/architecture.html">
+            
+                
+                    <a href="../../concepts/architecture.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>1.1.</b>
+                        
+                        The Architecture of Heron
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="concepts/topologies.html">
+            
+                
+                    <a href="../../concepts/topologies.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>1.2.</b>
+                        
+                        Heron Topologies
+                    </a>
+            
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2" data-path="contributors/index.html">
+            
+                
+                    <a href="../../contributors/index.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>2.</b>
+                        
+                        Contributors
+                    </a>
+            
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.1" data-path="contributors/custom-scheduler.html">
+            
+                
+                    <a href="../../contributors/custom-scheduler.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>2.1.</b>
+                        
+                        Building a Custom Scheduler
+                    </a>
+            
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3" data-path="operators/index.html">
+            
+                
+                    <a href="../../operators/index.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>3.</b>
+                        
+                        Operators
+                    </a>
+            
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.1" data-path="operators/deployment/index.html">
+            
+                
+                    <a href="../../operators/deployment/index.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>3.1.</b>
+                        
+                        Deployment
+                    </a>
+            
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter active" data-level="3.1.1" data-path="operators/deployment/zookeeper.html">
+            
+                
+                    <a href="../../operators/deployment/zookeeper.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>3.1.1.</b>
+                        
+                        Setting Up ZooKeeper
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.2" data-path="operators/deployment/aurora.html">
+            
+                
+                    <a href="../../operators/deployment/aurora.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>3.1.2.</b>
+                        
+                        Aurora
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.3" data-path="operators/deployment/mesos.html">
+            
+                
+                    <a href="../../operators/deployment/mesos.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>3.1.3.</b>
+                        
+                        Mesos
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.4" data-path="operators/deployment/local.html">
+            
+                
+                    <a href="../../operators/deployment/local.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>3.1.4.</b>
+                        
+                        Local scheduler
+                    </a>
+            
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2" data-path="operators/compiling.html">
+            
+                
+                    <a href="../../operators/compiling.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>3.2.</b>
+                        
+                        Compiling Heron
+                    </a>
+            
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+
+            
+            <li class="divider"></li>
+            <li>
+                <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+                    Published with GitBook
+                </a>
+            </li>
+            
+        </ul>
+    </nav>
+</div>
+
+    <div class="book-body">
+        <div class="body-inner">
+            <div class="book-header" role="navigation">
+    <!-- Actions Left -->
+    <a href="#" class="btn pull-left toggle-summary" aria-label="Table of Contents"><i class="fa fa-align-justify"></i></a>
+    <a href="#" class="btn pull-left toggle-search" aria-label="Search"><i class="fa fa-search"></i></a>
+    
+    <div id="font-settings-wrapper" class="dropdown pull-left">
+        <a href="#" class="btn toggle-dropdown" aria-label="Font Settings"><i class="fa fa-font"></i>
+        </a>
+        <div class="dropdown-menu font-settings">
+    <div class="dropdown-caret">
+        <span class="caret-outer"></span>
+        <span class="caret-inner"></span>
+    </div>
+
+    <div class="buttons">
+        <button type="button" id="reduce-font-size" class="button size-2">A</button>
+        <button type="button" id="enlarge-font-size" class="button size-2">A</button>
+    </div>
+
+    <div class="buttons font-family-list">
+        <button type="button" data-font="0" class="button">Serif</button>
+        <button type="button" data-font="1" class="button">Sans</button>
+    </div>
+
+    <div class="buttons color-theme-list">
+        <button type="button" id="color-theme-preview-0" class="button size-3" data-theme="0">White</button>
+        <button type="button" id="color-theme-preview-1" class="button size-3" data-theme="1">Sepia</button>
+        <button type="button" id="color-theme-preview-2" class="button size-3" data-theme="2">Night</button>
+    </div>
+</div>
+
+    </div>
+
+    <!-- Actions Right -->
+    
+    <div class="dropdown pull-right">
+        <a href="#" class="btn toggle-dropdown" aria-label="Share"><i class="fa fa-share-alt"></i>
+        </a>
+        <div class="dropdown-menu font-settings dropdown-left">
+            <div class="dropdown-caret">
+                <span class="caret-outer"></span>
+                <span class="caret-inner"></span>
+            </div>
+            <div class="buttons">
+                <button type="button" data-sharing="twitter" class="button">
+                    Share on Twitter
+                </button>
+                <button type="button" data-sharing="google-plus" class="button">
+                    Share on Google
+                </button>
+                <button type="button" data-sharing="facebook" class="button">
+                    Share on Facebook
+                </button>
+                <button type="button" data-sharing="weibo" class="button">
+                    Share on Weibo
+                </button>
+                <button type="button" data-sharing="instapaper" class="button">
+                    Share on Instapaper
+                </button>
+            </div>
+        </div>
+    </div>
+    
+
+    
+    <a href="#" target="_blank" class="btn pull-right google-plus-sharing-link sharing-link" data-sharing="google-plus" aria-label="Google"><i class="fa fa-google-plus"></i></a>
+    
+    
+    <a href="#" target="_blank" class="btn pull-right facebook-sharing-link sharing-link" data-sharing="facebook" aria-label="Facebook"><i class="fa fa-facebook"></i></a>
+    
+    
+    <a href="#" target="_blank" class="btn pull-right twitter-sharing-link sharing-link" data-sharing="twitter" aria-label="Twitter"><i class="fa fa-twitter"></i></a>
+    
+    
+    
+
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="../../" >Heron</a>
+    </h1>
+</div>
+
+            <div class="page-wrapper" tabindex="-1" role="main">
+                <div class="page-inner">
+                
+                
+                    <section class="normal" id="section-">
+                    
+                        <h1 id="setting-up-zookeeper"><a name="setting-up-zookeeper" class="plugin-anchor" href="#setting-up-zookeeper"><span class="fa fa-link"></span></a>Setting Up ZooKeeper</h1>
+<p>Heron relies on ZooKeeper for a wide variety of cluster coordination tasks. You
+can use either a shared or dedicated ZooKeeper cluster.</p>
+<p>There are a few things you should be aware of regarding Heron and ZooKeeper:</p>
+<ul>
+<li>Heron uses ZooKeeper only for coordination, <em>not</em> for message passing, which
+means that ZooKeeper load should generally be fairly low. A single-node
+and/or shared ZooKeeper <em>may</em> suffice for your Heron cluster, depending on
+usage.</li>
+<li>Heron uses ZooKeeper more efficiently than Storm. This makes Heron less likely
+than Storm to require a bulky or dedicated ZooKeeper cluster, but your use
+case may require one.</li>
+<li>We strongly recommend running ZooKeeper <a href="http://zookeeper.apache.org/doc/r3.3.3/zookeeperAdmin.html#sc_supervision" target="_blank">under
+supervision</a>.</li>
+</ul>
+<h2 id="zookeeper-configuration"><a name="zookeeper-configuration" class="plugin-anchor" href="#zookeeper-configuration"><span class="fa fa-link"></span></a>ZooKeeper Configuration</h2>
+<p>You can make Heron aware of one or more ZooKeeper clusters by modifying the
+<code>zkstateconf.yaml</code> config file, which is contained in <code>heron/state/conf</code>. You&apos;ll
+need to specify the following for each cluster:</p>
+<ul>
+<li><code>type</code> &#x2014; You should set this to <code>zookeeper</code> (the other possibility is
+<code>file</code>, which is used in conjunction with <a href="local.html">local deployment</a>).</li>
+<li><code>name</code> &#x2014; The name you&apos;d like to assign to the cluster. This is
+especially important if you&apos;re using more than one cluster.</li>
+<li><code>host</code></li>
+<li><code>port</code></li>
+<li><code>rootpath</code> &#x2014; The root ZooKeeper node to be used by Heron. We recommend
+providing Heron with an exclusive root node; if you do not, make sure that the
+following child nodes are unused: <code>/tmasters</code>, <code>/topologies</code>, <code>/pplans</code>,
+<code>/executionstate</code>, <code>/schedulers</code>.</li>
+</ul>
+<p>You can also specify an SSH tunnel using the <code>tunnelhost</code> parameter.</p>
+<h2 id="example-zookeeper-configuration"><a name="example-zookeeper-configuration" class="plugin-anchor" href="#example-zookeeper-configuration"><span class="fa fa-link"></span></a>Example ZooKeeper Configuration</h2>
+<p>Below is an example configuration (in <code>heron/state/conf/zkstateconf.yaml</code>):</p>
+<pre><code class="lang-yaml">-
+    type: &quot;zookeeper&quot;
+    name: &quot;zk&quot;
+    host: &quot;zk.acme.biz&quot;
+    port: 2181
+    rootpath: &quot;/heron/cluster&quot;
+    tunnelhost: &quot;tunnel.acme.biz&quot;
+</code></pre>
+<h2 id="multiple-clusters"><a name="multiple-clusters" class="plugin-anchor" href="#multiple-clusters"><span class="fa fa-link"></span></a>Multiple Clusters</h2>
+<p>If you&apos;d like to run multiple Heron clusters, e.g. for a multi-data center
+deployment, you can provide configuration for more than ZooKeeper cluster in
+<code>zkstateconf.yaml</code>. Here&apos;s an example:</p>
+<pre><code class="lang-yaml">-
+    type: &quot;zookeeper&quot;
+    name: &quot;zk1&quot;
+    host: &quot;zk1.acme.biz&quot;
+    port: 2818
+    rootpath: &quot;/heron/cluster&quot;
+    tunnelhost: &quot;tunnel.zk1.acme.biz&quot;
+-
+    type: &quot;zookeeper&quot;
+    name: &quot;zk2&quot;
+    host: &quot;zk2.acme.biz&quot;
+    port: 2818
+    rootpath: &quot;/heron/cluster&quot;
+    tunnelhost: &quot;tunnel.zk2.acme.biz&quot;
+</code></pre>
+
+                    
+                    </section>
+                
+                
+                </div>
+            </div>
+        </div>
+
+        
+        <a href="../../operators/deployment/index.html" class="navigation navigation-prev " aria-label="Previous page: Deployment"><i class="fa fa-angle-left"></i></a>
+        
+        
+        <a href="../../operators/deployment/aurora.html" class="navigation navigation-next " aria-label="Next page: Aurora"><i class="fa fa-angle-right"></i></a>
+        
+    </div>
+</div>
+
+        
+<script src="../../gitbook/app.js"></script>
+
+    
+    <script src="../../gitbook/plugins/gitbook-plugin-livereload/plugin.js"></script>
+    
+
+<script>
+require(["gitbook"], function(gitbook) {
+    var config = {"fontSettings":{"theme":null,"family":"sans","size":2}};
+    gitbook.start(config);
+});
+</script>
+
+        
+    </body>
+    
+</html>
