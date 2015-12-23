@@ -8,8 +8,13 @@ incoming
 [`MetricsRecord`](../api/metrics/com/twitter/heron/metricsmgr/api/metrics/MetricsRecord.html)
 objects.
 
-Heron comes equipped out of the box with three metrics sinks that you can
-apply for a specific topology:
+Java is currently the only supported language for custom metrics sinks. This may
+change in the future.
+
+## Currently
+
+Heron comes equipped out of the box with three metrics sinks that you can apply
+for a specific topology:
 
 * [`GraphiteSink`](../api/metrics/com/twitter/heron/metricsmgr/sink/Graphite.html)
   &mdash; Sends each `MetricsRecord` object to a
@@ -22,8 +27,8 @@ apply for a specific topology:
 * [`FileSink`](../api/metrics/com/twitter/heron/metricsmgr/sink/FileSink.html)
   &mdash; Writes each `MetricsRecord` object to a JSON file at a specified path.
 
-Java is currently the only supported language for custom metrics sinks. This may
-change in the future.
+More on using those sinks can be found in [Metrics
+Manager](../operators/metrics-manager.html).
 
 ## Java Setup
 
@@ -62,6 +67,11 @@ interface, which requires you to implement the following methods:
 * `void close()` &mdash; Closes the stream and releases any system resources
   associated with it; if the stream is already closed, invoking `close()` has no
   effect
+
+Your implementation of those interfaces will need to be on the
+[classpath](https://docs.oracle.com/javase/tutorial/essential/environment/paths.html)
+specified by the `metrics-mgr-classpath`
+when you [compile Heron](../operators/compiling.html).
 
 ## Example Implementation
 
@@ -161,9 +171,4 @@ Modify `BUILD` file
 
 Make sure binaries are synced (in the classpath) or else the class cannot be
 found
-
-## Final Steps
-
-Once you've implement a custom scheduler and ensured that it's on Heron's
-classpath,
 
