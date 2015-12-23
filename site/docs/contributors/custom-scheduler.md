@@ -10,8 +10,8 @@ for cluster management. Heron supports three schedulers out of the box:
 If you'd like to run Heron on a not-yet-supported system, such as
 [YARN](https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-site/YARN.html)
 or [Amazon ECS](https://aws.amazon.com/ecs/), you can create your own scheduler
-using Heron's [scheduler API](http://heronproject.github.io/scheduler-api/) for
-Java, as detailed in the sections below.
+using Heron's [scheduler API](../api/scheduler/index.html), as detailed in the
+sections below.
 
 Java is currently the only supported language for custom schedulers. This may
 change in the future.
@@ -45,12 +45,12 @@ Interface | Role | Examples
 [`IConfigLoader`](../api/scheduler/com/twitter/heron/scheduler/api/IConfigLoader.html) | Parsing and loading of configuration for the scheduler | [Aurora](../api/scheduler/com/twitter/heron/scheduler/aurora/AuroraConfigLoader.html), [Mesos](../api/scheduler/com/twitter/heron/scheduler/mesos/MesosConfigLoader.html), [local](../api/scheduler/com/twitter/heron/scheduler/local/LocalConfigLoader.html)
 [`ILauncher`](../api/scheduler/com/twitter/heron/scheduler/api/ILauncher.html) | Defines how the scheduler is launched | [Aurora](../api/scheduler/com/twitter/heron/scheduler/aurora/AuroraLauncher.html), [Mesos](../api/scheduler/com/twitter/heron/scheduler/mesos/MesosLauncher.html), [local](../api/scheduler/com/twitter/heron/scheduler/local/LocalLauncher.html)
 [`IRuntimeManager`](../api/scheduler/com/twitter/heron/scheduler/api/IRuntimeManager.html) | Handles runtime tasks such as activating topologies, killing topologies, etc. | [Aurora](../api/scheduler/com/twitter/heron/scheduler/aurora/AuroraTopologyRuntimeManager.html), [Mesos](../api/scheduler/com/twitter/heron/scheduler/mesos/MesosTopologyRuntimeManager.html), [local](../api/scheduler/com/twitter/heron/scheduler/local/LocalTopologyRuntimeManager.html)
-[`IScheduler`](../api/scheduler/com/twitter/heron/scheduler/api/IScheduler.html) | Defines the scheduler object used to construct topologies | [Mesos](http://heronproject.github.io/scheduler-api/com/twitter/heron/scheduler/mesos/MesosScheduler), [local](http://heronproject.github.io/scheduler-api/com/twitter/heron/scheduler/local/LocalScheduler)
-[`IUploader`](../api/scheduler/com/twitter/heron/scheduler/api/IUploader.html) | Uploads the topology to a shared location that must be accessible to the runtime environment of the topology |
+[`IScheduler`](../api/scheduler/com/twitter/heron/scheduler/api/IScheduler.html) | Defines the scheduler object used to construct topologies | [Mesos](../api/scheduler/com/twitter/heron/scheduler/mesos/MesosScheduler.html), [local](../api/scheduler/com/twitter/heron/scheduler/local/LocalScheduler.html)
+[`IUploader`](../api/scheduler/com/twitter/heron/scheduler/api/IUploader.html) | Uploads the topology to a shared location that must be accessible to the runtime environment of the topology | [Aurora](), [Mesos](), [local](../api/scheduler/com/twitter/heron/scheduler/local/LocalUploader.html)
 
 Your implementation of those interfaces will need to be on Heron's
-[classpath](https://en.wikipedia.org/wiki/Classpath_(Java)) when you [compile
-Heron](../operators/compiling.html).
+[classpath](https://docs.oracle.com/javase/tutorial/essential/environment/paths.html)
+when you [compile Heron](../operators/compiling.html).
 
 ## Loading Configuration
 
