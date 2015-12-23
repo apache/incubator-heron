@@ -6,6 +6,7 @@ test --ram_utilization_factor=10
 
 # This is so we understand failures better
 build --verbose_failures
+build --jobs 25
 
 # This is so we use a recent enough GCC when building.
 build --crosstool_top //tools/travis-ci/toolchain:CROSSTOOL
