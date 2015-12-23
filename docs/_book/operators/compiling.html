@@ -1,0 +1,522 @@
+<!DOCTYPE HTML>
+<html lang="en" >
+    
+    <head>
+        
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <title>Compiling Heron | Heron</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 2.4.3">
+        
+        
+        <meta name="HandheldFriendly" content="true"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+        <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+        
+    <link rel="stylesheet" href="../gitbook/style.css">
+    
+        
+        <link rel="stylesheet" href="../gitbook/plugins/gitbook-plugin-anchors/plugin.css">
+        
+    
+        
+        <link rel="stylesheet" href="../gitbook/plugins/gitbook-plugin-highlight/website.css">
+        
+    
+    
+
+        
+    
+    
+    
+    <link rel="prev" href="../operators/deployment/local.html" />
+    
+
+        
+    </head>
+    <body>
+        
+        
+    <div class="book" data-level="3.2" data-basepath=".." data-revision="Wed Dec 23 2015 14:44:27 GMT-0800 (PST)">
+    
+
+<div class="book-summary">
+    <div class="book-search" role="search">
+        <input type="text" placeholder="Type to search" class="form-control" />
+    </div>
+    <nav role="navigation">
+        <ul class="summary">
+            
+            
+            
+            
+
+            
+
+            
+    
+        <li class="chapter " data-level="0" data-path="index.html">
+            
+                
+                    <a href="../index.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                        Introduction
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="1" data-path="concepts/index.html">
+            
+                
+                    <a href="../concepts/index.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>1.</b>
+                        
+                        Concepts
+                    </a>
+            
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.1" data-path="concepts/architecture.html">
+            
+                
+                    <a href="../concepts/architecture.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>1.1.</b>
+                        
+                        The Architecture of Heron
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="concepts/topologies.html">
+            
+                
+                    <a href="../concepts/topologies.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>1.2.</b>
+                        
+                        Heron Topologies
+                    </a>
+            
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2" data-path="contributors/index.html">
+            
+                
+                    <a href="../contributors/index.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>2.</b>
+                        
+                        Contributors
+                    </a>
+            
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.1" data-path="contributors/custom-scheduler.html">
+            
+                
+                    <a href="../contributors/custom-scheduler.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>2.1.</b>
+                        
+                        Building a Custom Scheduler
+                    </a>
+            
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3" data-path="operators/index.html">
+            
+                
+                    <a href="../operators/index.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>3.</b>
+                        
+                        Operators
+                    </a>
+            
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.1" data-path="operators/deployment/index.html">
+            
+                
+                    <a href="../operators/deployment/index.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>3.1.</b>
+                        
+                        Deployment
+                    </a>
+            
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.1.1" data-path="operators/deployment/zookeeper.html">
+            
+                
+                    <a href="../operators/deployment/zookeeper.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>3.1.1.</b>
+                        
+                        Setting Up ZooKeeper
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.2" data-path="operators/deployment/aurora.html">
+            
+                
+                    <a href="../operators/deployment/aurora.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>3.1.2.</b>
+                        
+                        Aurora
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.3" data-path="operators/deployment/mesos.html">
+            
+                
+                    <a href="../operators/deployment/mesos.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>3.1.3.</b>
+                        
+                        Mesos
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.4" data-path="operators/deployment/local.html">
+            
+                
+                    <a href="../operators/deployment/local.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>3.1.4.</b>
+                        
+                        Local scheduler
+                    </a>
+            
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter active" data-level="3.2" data-path="operators/compiling.html">
+            
+                
+                    <a href="../operators/compiling.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>3.2.</b>
+                        
+                        Compiling Heron
+                    </a>
+            
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+
+            
+            <li class="divider"></li>
+            <li>
+                <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+                    Published with GitBook
+                </a>
+            </li>
+            
+        </ul>
+    </nav>
+</div>
+
+    <div class="book-body">
+        <div class="body-inner">
+            <div class="book-header" role="navigation">
+    <!-- Actions Left -->
+    <a href="#" class="btn pull-left toggle-summary" aria-label="Table of Contents"><i class="fa fa-align-justify"></i></a>
+    <a href="#" class="btn pull-left toggle-search" aria-label="Search"><i class="fa fa-search"></i></a>
+    
+    <div id="font-settings-wrapper" class="dropdown pull-left">
+        <a href="#" class="btn toggle-dropdown" aria-label="Font Settings"><i class="fa fa-font"></i>
+        </a>
+        <div class="dropdown-menu font-settings">
+    <div class="dropdown-caret">
+        <span class="caret-outer"></span>
+        <span class="caret-inner"></span>
+    </div>
+
+    <div class="buttons">
+        <button type="button" id="reduce-font-size" class="button size-2">A</button>
+        <button type="button" id="enlarge-font-size" class="button size-2">A</button>
+    </div>
+
+    <div class="buttons font-family-list">
+        <button type="button" data-font="0" class="button">Serif</button>
+        <button type="button" data-font="1" class="button">Sans</button>
+    </div>
+
+    <div class="buttons color-theme-list">
+        <button type="button" id="color-theme-preview-0" class="button size-3" data-theme="0">White</button>
+        <button type="button" id="color-theme-preview-1" class="button size-3" data-theme="1">Sepia</button>
+        <button type="button" id="color-theme-preview-2" class="button size-3" data-theme="2">Night</button>
+    </div>
+</div>
+
+    </div>
+
+    <!-- Actions Right -->
+    
+    <div class="dropdown pull-right">
+        <a href="#" class="btn toggle-dropdown" aria-label="Share"><i class="fa fa-share-alt"></i>
+        </a>
+        <div class="dropdown-menu font-settings dropdown-left">
+            <div class="dropdown-caret">
+                <span class="caret-outer"></span>
+                <span class="caret-inner"></span>
+            </div>
+            <div class="buttons">
+                <button type="button" data-sharing="twitter" class="button">
+                    Share on Twitter
+                </button>
+                <button type="button" data-sharing="google-plus" class="button">
+                    Share on Google
+                </button>
+                <button type="button" data-sharing="facebook" class="button">
+                    Share on Facebook
+                </button>
+                <button type="button" data-sharing="weibo" class="button">
+                    Share on Weibo
+                </button>
+                <button type="button" data-sharing="instapaper" class="button">
+                    Share on Instapaper
+                </button>
+            </div>
+        </div>
+    </div>
+    
+
+    
+    <a href="#" target="_blank" class="btn pull-right google-plus-sharing-link sharing-link" data-sharing="google-plus" aria-label="Google"><i class="fa fa-google-plus"></i></a>
+    
+    
+    <a href="#" target="_blank" class="btn pull-right facebook-sharing-link sharing-link" data-sharing="facebook" aria-label="Facebook"><i class="fa fa-facebook"></i></a>
+    
+    
+    <a href="#" target="_blank" class="btn pull-right twitter-sharing-link sharing-link" data-sharing="twitter" aria-label="Twitter"><i class="fa fa-twitter"></i></a>
+    
+    
+    
+
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="../" >Heron</a>
+    </h1>
+</div>
+
+            <div class="page-wrapper" tabindex="-1" role="main">
+                <div class="page-inner">
+                
+                
+                    <section class="normal" id="section-">
+                    
+                        <h1 id="compiling-heron"><a name="compiling-heron" class="plugin-anchor" href="#compiling-heron"><span class="fa fa-link"></span></a>Compiling Heron</h1>
+<p>Heron is currently available for Mac OS X 10.10, Ubuntu 12.04, and CentOS 5.</p>
+<p>You can build Heron either <a href="#building-all-components">as an entirety</a>, on a
+<a href="#building-specific-components">component-by-component basis</a>, or as a <a href="#building-a-full-release-package">release
+package</a>.</p>
+<p>Instructions on running unit tests for Heron can also be found in the <a href="#running-unit-tests">Running
+Unit Tests</a> section at the bottom of this document.</p>
+<h2 id="requirements"><a name="requirements" class="plugin-anchor" href="#requirements"><span class="fa fa-link"></span></a>Requirements</h2>
+<p>You must have the following installed to compile Heron:</p>
+<ul>
+<li><a href="http://bazel.io/docs/install.html" target="_blank">Bazel</a> &gt;= 0.1.2. More on
+Bazel in the <a href="#installing-bazel">section below</a>.</li>
+<li><a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html" target="_blank">Java
+8</a></li>
+<li><a href="http://www.gnu.org/software/autoconf/autoconf.html" target="_blank">Autoconf</a> &gt;= 2.6.3</li>
+<li><a href="https://www.gnu.org/software/automake/" target="_blank">Automake</a> &gt;= 1.11.1</li>
+<li><a href="https://www.gnu.org/software/make/" target="_blank">GNU Make</a> &gt;= 3.81</li>
+<li><a href="https://gcc.gnu.org/" target="_blank">gcc/g++</a> &gt;= 4.8.2 (Linux platforms)</li>
+<li><a href="https://cmake.org/" target="_blank">CMake</a> &gt;= 2.6-patch 4</li>
+<li><a href="https://www.python.org/" target="_blank">Python</a> &gt;= 2.7</li>
+<li><a href="https://www.perl.org/" target="_blank">Perl</a> &gt;= 5.8.8</li>
+</ul>
+<h2 id="installing-bazel"><a name="installing-bazel" class="plugin-anchor" href="#installing-bazel"><span class="fa fa-link"></span></a>Installing Bazel</h2>
+<p><a href="http://bazel.io" target="_blank">Bazel</a> is the build tool used by Heron. The releases page for
+Bazel 0.1.2 can be found
+<a href="https://github.com/bazelbuild/bazel/releases/tag/0.1.2" target="_blank">here</a>,
+while installation instructions can be found
+<a href="http://bazel.io/docs/install.html" target="_blank">here</a>.</p>
+<h2 id="configuring-bazel"><a name="configuring-bazel" class="plugin-anchor" href="#configuring-bazel"><span class="fa fa-link"></span></a>Configuring Bazel</h2>
+<p>There is a Python script that you can run to configure Bazel on supported
+platforms:</p>
+<pre><code class="lang-bash">$ <span class="hljs-built_in">cd</span> /path/to/heron/repo
+$ ./bazel_configure.py
+</code></pre>
+<p>To ensure that Bazel has been installed, run <code>bazel version</code> and check the
+version (listed next to <code>Build label</code> in the script&apos;s output) to ensure that you
+have Bazel 0.1.2 or later.</p>
+<h2 id="building-all-components"><a name="building-all-components" class="plugin-anchor" href="#building-all-components"><span class="fa fa-link"></span></a>Building All Components</h2>
+<p>You can build executables for all Heron components at once (without generating a
+release package) using the <code>bazel build</code> command. You must specify an
+OS-specific configuration using the <code>--config</code> flag. This can take one of the
+following values: <code>darwin</code> (Mac OS X), <code>ubuntu</code> (Ubuntu 12.04), <code>centos5</code>
+(CentOS 5). Here&apos;s an example build command:</p>
+<pre><code class="lang-bash">$ bazel build --config=darwin heron/...
+</code></pre>
+<h3 id="build-directory-for-component-executables"><a name="build-directory-for-component-executables" class="plugin-anchor" href="#build-directory-for-component-executables"><span class="fa fa-link"></span></a>Build Directory for Component Executables</h3>
+<p>All component executables generated by Bazel can be found in the <code>bazel-bin</code>
+folder. The subdirectory varies on the basis of the executable. The
+<code>heron-tracker</code> executable, for example, can be found at
+<code>bazel-bin/heron/tracker/src/python/heron-tracker</code>.</p>
+<h2 id="building-specific-components"><a name="building-specific-components" class="plugin-anchor" href="#building-specific-components"><span class="fa fa-link"></span></a>Building Specific Components</h2>
+<p>As an alternative to building a full release, you can build Heron executables on
+a component-by-component basis using the same <code>bazel build</code> command. Here&apos;s an
+example build command for the <a href="heron-tracker.html">Heron Tracker</a>:</p>
+<pre><code class="lang-bash">$ bazel build heron/tracker/src/python:heron-tracker
+</code></pre>
+<p>Resulting executables can be found in the <code>bazel-bin</code> directory.</p>
+<h2 id="building-a-full-release-package"><a name="building-a-full-release-package" class="plugin-anchor" href="#building-a-full-release-package"><span class="fa fa-link"></span></a>Building a Full Release Package</h2>
+<p>You can build a full Heron release using the <code>release:packages</code> <a href="http://bazel.io/docs/build-ref.html#targets" target="_blank">Bazel
+target</a>. This will package all
+Heron executables into <code>.tar</code> and <code>.tar.gz</code> files at once. You must specify the
+following when building a release package:</p>
+<ul>
+<li>A release name using the <code>RELEASE</code> parameter. For Bazel, this takes the form
+of <code>--define RELEASE={name}</code>.</li>
+<li>An OS-specific configuration using the <code>--config</code> flag.
+This can take one of the following values: <code>darwin</code> (Mac OS X), <code>ubuntu</code>
+(Ubuntu 12.04), <code>centos5</code> (CentOS 5).</li>
+</ul>
+<p>Here&apos;s an example build command:</p>
+<pre><code class="lang-bash">$ <span class="hljs-built_in">cd</span> /path/to/heron/repo
+$ bazel build --config=darwin --define RELEASE=<span class="hljs-number">0.1</span>.<span class="hljs-number">0</span>-SNAPSHOT release:packages
+</code></pre>
+<h3 id="build-directory-for-full-releases"><a name="build-directory-for-full-releases" class="plugin-anchor" href="#build-directory-for-full-releases"><span class="fa fa-link"></span></a>Build Directory for Full Releases</h3>
+<p>All <code>.tar</code> and <code>.tar.gz</code> files generated during Bazel&apos;s build process for a full
+release can be found in <code>bazel-genfiles/release</code>:</p>
+<pre><code class="lang-bash">$ ls bazel-genfiles/release
+RELEASE
+bazel-genfiles/release/heron-api-unversioned.tar
+bazel-genfiles/release/heron-api-unversioned.tar.gz
+<span class="hljs-comment"># etc</span>
+</code></pre>
+<h2 id="running-unit-tests"><a name="running-unit-tests" class="plugin-anchor" href="#running-unit-tests"><span class="fa fa-link"></span></a>Running Unit Tests</h2>
+<p>You can run unit tests for Heron using the <code>bazel test</code> command.</p>
+<p>You must specify an OS-specific configuration using the <code>--config</code> flag. This
+can take one of the following values: <code>darwin</code> (Mac OS X), <code>ubuntu</code> (Ubuntu
+12.04), <code>centos5</code> (CentOS 5).</p>
+<p>Here&apos;s an example test command:</p>
+<pre><code class="lang-bash">$ bazel <span class="hljs-built_in">test</span> --config=darwin heron/state/tests/java:<span class="hljs-built_in">local</span>_file_state_manager_unittest
+</code></pre>
+<h3 id="discovering-test-targets"><a name="discovering-test-targets" class="plugin-anchor" href="#discovering-test-targets"><span class="fa fa-link"></span></a>Discovering Test Targets</h3>
+<p>To fetch a full listing of all Bazel test targets:</p>
+<pre><code class="lang-bash">$ bazel query <span class="hljs-string">&apos;kind(&quot;.*_test rule&quot;, ...)&apos;</span>
+</code></pre>
+<p>For <strong>Java</strong> targets only:</p>
+<pre><code class="lang-bash">$ bazel query <span class="hljs-string">&apos;kind(&quot;java_test rule&quot;, ...)&apos;</span>
+</code></pre>
+<p>For <strong>C++</strong> targets:</p>
+<pre><code class="lang-bash">$ bazel query <span class="hljs-string">&apos;kind(&quot;cc_test rule&quot;, ...)&apos;</span>
+</code></pre>
+<p>For <strong>Python</strong> targets:</p>
+<pre><code class="lang-bash">$ bazel query <span class="hljs-string">&apos;kind(&quot;pex_test rule&quot;, ...)&apos;</span>
+</code></pre>
+
+                    
+                    </section>
+                
+                
+                </div>
+            </div>
+        </div>
+
+        
+        <a href="../operators/deployment/local.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page: Local scheduler"><i class="fa fa-angle-left"></i></a>
+        
+        
+    </div>
+</div>
+
+        
+<script src="../gitbook/app.js"></script>
+
+    
+    <script src="../gitbook/plugins/gitbook-plugin-livereload/plugin.js"></script>
+    
+
+<script>
+require(["gitbook"], function(gitbook) {
+    var config = {"fontSettings":{"theme":null,"family":"sans","size":2}};
+    gitbook.start(config);
+});
+</script>
+
+        
+    </body>
+    
+</html>
