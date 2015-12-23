@@ -11,10 +11,11 @@ objects.
 Java is currently the only supported language for custom metrics sinks. This may
 change in the future.
 
-## Currently
+## Currently-supported Sinks
 
 Heron comes equipped out of the box with three metrics sinks that you can apply
-for a specific topology:
+for a specific topology. The code for these sinks may prove helpful for
+implementing your own.
 
 * [`GraphiteSink`](../api/metrics/com/twitter/heron/metricsmgr/sink/Graphite.html)
   &mdash; Sends each `MetricsRecord` object to a
@@ -27,7 +28,7 @@ for a specific topology:
 * [`FileSink`](../api/metrics/com/twitter/heron/metricsmgr/sink/FileSink.html)
   &mdash; Writes each `MetricsRecord` object to a JSON file at a specified path.
 
-More on using those sinks can be found in [Metrics
+More on using those sinks in a Heron cluster can be found in [Metrics
 Manager](../operators/metrics-manager.html).
 
 ## Java Setup
@@ -160,15 +161,3 @@ sinks:
   - print-sink
   - 
 ```
-
-## Classpath
-
-`metrics-mgr-classpath`
-
-Add Java class alongside the others
-
-Modify `BUILD` file
-
-Make sure binaries are synced (in the classpath) or else the class cannot be
-found
-
