@@ -1,8 +1,15 @@
 # Heron
 
-Heron
+Heron is realtime analytics platform developed by Twitter. It is the direct
+successor of [Apache Storm](http://storm.apache.org), built to be backwards
+compatible with Storm's [topology API](http://storm.apache.org/tutorial.html)
+but with a wide array of architectural improvements. For more on the
+architecture and design goals of Heron, see Heron's
+[documentation](#Heron-Documentation), especially [The Architecture of
+Heron](docs/concepts/architecture.md) and [Heron
+Topologies](docs/concepts/topologies.md).
 
-For more information:
+For information beyond the documentation:
 
 * [Twitter Heron: Stream Processing at
   Scale](http://dl.acm.org/citation.cfm?id=2742788) (academic paper)
@@ -14,14 +21,19 @@ For more information:
 
 ## Heron Documentation
 
-At the moment, Heron's OSS documentation is built using
+Heron's OSS documentation is not yet publicly hosted. You can view the
+documentation locally, however, using the instructions below.
+
+### GitBook
+
+Heron's OSS documentation is currently built using
 [GitBook](https://www.gitbook.com/). To build and run the docs locally, you'll
 need to [install it](https://github.com/GitbookIO/gitbook). GitBook depends on
 [NodeJS](https://nodejs.org/en/) and [npm](https://www.npmjs.com/).
 
 Once you've installed GitBook, you should run `gitbook install` to make sure
-that all the required modules are fetched.  GitBook documentation can be found
-[here](https://help.gitbook.com/).
+that all the required modules are fetched. The documentation for GitBook can be
+found [here](https://help.gitbook.com/).
 
 ### Contributing to the Docs
 
