@@ -58,21 +58,24 @@ interface, which requires you to implement the following methods:
 
 * `void init(Map<String, Object> conf, SinkContext context)` &mdash; Defines the
   initialization behavior of the sink. The `conf` map is the configuration that
-  is passed to the sink by the `.yaml` configuration file; the `SinkContext`
-  object enables you to both access values from the sink's runtime context
-  (including the sink's ID and the topology name) and to
+  is passed to the sink by the `.yaml` configuration file at
+  `heron/config/metrics_sink.yaml`; the
+  [`SinkContext`](../api/metrics/com/twitter/heron/metricsmgr/api/sink/SinkContext.html)
+  object enables you to access values from the sink's runtime context
+  (the ID of the metrics manager, the ID of the sink, and the name of the
+  topology).
 * `void processRecord(MetricsRecord record)` &mdash; Defines how each
   `MetricsRecord` that passes through the sink is processed.
-* `void flush()` &mdash; Flush any buffered metrics; this function is called at the
-  interval specified by the `flush-frequency-ms`
+* `void flush()` &mdash; Flush any buffered metrics; this function is called at
+  the interval specified by the `flush-frequency-ms`. More info can be found in
+  the [Stream Manager](../operators/stream-manager.html) document.
 * `void close()` &mdash; Closes the stream and releases any system resources
   associated with it; if the stream is already closed, invoking `close()` has no
-  effect
+  effect.
 
-Your implementation of those interfaces will need to be on the
-[classpath](https://docs.oracle.com/javase/tutorial/essential/environment/paths.html)
-specified by the `metrics-mgr-classpath`
-when you [compile Heron](../operators/compiling.html).
+Your implementation of those interfaces will need to be packaged into a JAR file
+and distributed to the `metrics-mgr-classpath` folder of your [Heron
+release](../developers/compiling.html).
 
 ## Example Implementation
 
@@ -86,9 +89,6 @@ import com.twitter.heron.metricsmgr.api.sink.IMetricsSink;
 import com.twitter.heron.metricsmgr.api.sink.SinkContext;
 
 public class PrintSink implements IMetricsSink {
-    // We'll use this to extract a parameter from the supplied configuration
-    private final String PARAMETER1 = "";
-
     @Override
     public void init(Map<String, Object> conf, SinkContext context) {
         System.out.println("Sink configuration:");
@@ -102,8 +102,8 @@ public class PrintSink implements IMetricsSink {
 
     @Override
     public void processRecord(MetricsRecord record) {
-        System.out.println("Record received:");
-        System.out.println(record.toString());
+        String recordString = String.format("Record received: %s", record.toString());
+        System.out.println(recordString);
     }
 
     @Override
@@ -120,44 +120,48 @@ public class PrintSink implements IMetricsSink {
 }
 ```
 
-## Using Your Custom Sink
+## Configuring Your Custom Sink
 
-Configurable parameters for all sinks:
+The configuration for your sink needs to be provided in the
+[YAML](http://www.yaml.org/) file at `heron/config/metrics_sinks.yaml`.
 
-* `sinks` &mdash; A list of all sinks that you intend to use. Example:
+At the top of that file there's a `sinks` parameter that lists each available
+sink by name. You should add your sink to that list. Here's an example:
 
-   ```yaml
-   sinks:
-     - first-sink
-     - second-sink
-     - etc
-   ```
+```yaml
+sinks:
+  - file-sink
+  - scribe-sink
+  - tmaster-sink
+  - print-sink
+```
+
+For each sink you need to specify the following:
 
 * `class` &mdash; The Java class name of your custom implementation of the
-  `IMetricsSink` interface, e.g. `com.example.heron.metrics.PrintSink`.
+  `IMetricsSink` interface, e.g. `biz.acme.heron.metrics.PrintSink`.
 * `flush-frequency-ms` &mdash; The frequency (in milliseconds) at which the
   `flush()` method is called in your implementation of `IMetricsSink`.
 * `sink-restart-attempts` &mdash; The number of times that a sink will attempt to
   restart if it throws exceptions and dies. If you do not set this, the default
   is 0; if you set it to -1, the sink will attempt to restart forever.
 
-Alter `metrics_sinks.yaml` and add an entry for your custom sink:
+Below is an example `metrics_sink.yaml` configuration:
 
 ```yaml
 sinks:
   - print-sink
 
 print-sink:
-  class: "com.example.heron.metrics.PrintSink"
+  class: "biz.acme.heron.metrics.PrintSink"
   flush-frequency-ms: 60000 # One minute
   sink-restart-attempts: -1 # Attempt to restart forever
 ```
 
-If you're using multiple sinks your `metrics_sinks.yaml` file may look something
-like this:
+## Using Your Custom Sink
 
-```yaml
-sinks:
-  - print-sink
-  - 
-```
+Once you've made a JAR for your custom Java sink, distributed that JAR to
+`metrics-mgr-classpath` folder, and changed the configuration in
+`heron/config/metrics_sink.yaml`, you'll need to [re-compile
+Heron](../developers/compiling.html). Any topology submitted using that compiled
+version of `heron-cli` will include the custom sink.
