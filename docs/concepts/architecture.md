@@ -53,10 +53,10 @@ Stream Processing at Scale](http://dl.acm.org/citation.cfm?id=2742788) paper.
 * **Efficiency** &mdash; Heron was built with the goal of achieving all of the
   above with the minimal possible resource usage.
 
-## Components
+## Topology Components
 
-The following core components of Heron will be discussed in depth in the
-sections below:
+The following core components of Heron topologies will be discussed in depth in
+the sections below:
 
 * [Topology Master](#topology-master)
 * [Container](#container)
@@ -161,6 +161,18 @@ both the [TM](#topology-master) and to external collectors, such as
 You can adapt Heron to support additional systems by implementing your own
 [metrics sink](../contributors/metrics-sink.html).
 
+## Cluster-level Components
+
+All of the components listed in the sections above can be found in each
+topology. The components listed below are cluster-level components that function
+outside of particular topologies.
+
+### Heron CLI
+
+Heron has a CLI tool called `heron-cli` that is used to manage topologies.
+Documentation can be found in [Managing
+Topologies](../operators/heron-cli.html).
+
 ### Heron Tracker
 
 The **Heron Tracker** (or just Tracker) is a centralized gateway for
@@ -176,7 +188,7 @@ Tracker](../operators/heron-tracker.html). API docs for the Tracker's JSON API
 can be found in [The Heron Tracker REST
 API](../operators/heron-tracker/heron-tracker-rest-api.html)
 
-## Heron UI
+### Heron UI
 
 **Heron UI** is a rich visual interface that you can use to interact with
 topologies. Through Heron UI you can see color-coded visual representations of

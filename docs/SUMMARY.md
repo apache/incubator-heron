@@ -3,7 +3,7 @@
 * [Concepts](concepts/README.md)
   * [The Architecture of Heron](concepts/architecture.md)
   * [Heron Topologies](concepts/topologies.md)
-* [Contributors](contributors/README.md)
+* [Contributing to Heron](contributors/README.md)
   * [Building a Custom Scheduler](contributors/custom-scheduler.md)
   * [Building a Custom Metrics Sink](contributors/custom-metrics-sink.md)
 * [Developers](developers/README.md)
