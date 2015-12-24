@@ -7,8 +7,35 @@ topologies](../concepts/topologies.html#topology-lifecycle).
 ## Obtaining the `heron-cli` Executable
 
 In order to use `heron-cli`, you need to generate a full [Heron
-release](release.html) and distribute the `heron-cli` binary to all machines
-that will be used to manage topologies.
+release](release.html) and distribute the resulting `heron-cli` binary to all
+machines that will be used to manage topologies.
+
+## CLI Flags
+
+There are two flags that are available for all topology management commands
+(`submit`, `activate`, `deactivate`, `restart`, and `kill`):
+
+* `--config-loader` &mdash; Every Heron scheduler must implement a
+  default configuration loader that's responsible for providing the topology's
+  configuration from a file or other source. This flag enables you to specify a
+  non-default loader.
+* `--config-file` &mdash; If you specify a configuration loader using the
+  `--config-loader` flag and that loader draws its configuration from a file
+  (rather than another source), you can use the `--config-file` flag to provide
+  a path for that file.
+
+These flags are especially useful if you're developing a [custom
+scheduler](../contributors/custom-scheduler.html).
+
+Here's an example topology management command that uses both of these flags:
+
+```bash
+$ heron-cli activate "topology.debug:true" \
+    /path/to/topology/my-topology.jar \
+    biz.acme.topologies.MyTopology \
+    --config-loader=biz.acme.config.MyConfigLoader \
+    --config-file=/path/to/config/scheduler.conf
+```
 
 ## Submitting a Topology
 
@@ -20,31 +47,31 @@ deactivated state (more on [activation](#activating-a-topology) and
 Here's the basic syntax:
 
 ```bash
-$ heron-cli submit <scheduler-overrides> <filepath> <classname> [topology args]
+$ heron-cli submit <scheduler overrides> <filepath> <class name> [topology args]
 ```
 
 Arguments of the `submit` command:
 
-* `scheduler-overrides` &mdash; Default parameters that you'd like to override.
+* Scheduler overrides &mdash; Default parameters that you'd like to override.
   The syntax is `"param1:value1 param2:value2 param3:value3"`.
 
   **Example**: `"heron.local.working.directory:/path/to/dir
   topology.debug:true"`
 
-* `filepath` &mdash; The path of the file in which you've packaged the
+* Filepath &mdash; The path of the file in which you've packaged the
   topology's code. For Java topologies this will be a `.jar` file; for
   topologies in other languages (not yet supported), use a `.tar` file.
 
   **Example**: `/path/to/topology/my-topology.jar`
 
-* `classname` &mdash; The class name of the class containing the `main` function for
-  the topology.
+* Class name &mdash; The name of the class containing the `main` function
+  for the topology.
 
   **Example**: `com.example.topologies.MyTopology`
 
-* `topology args` (**optional**) &mdash; Arguments specific to the topology.
-  You will need to supply args only if the `main` function for your topology
-  requires them.
+* Topology args (**optional**) &mdash; Arguments specific to the topology.
+  You will need to supply additional args only if the `main` function for your
+  topology requires them.
 
 ### Example Topology Submission Command
 
