@@ -9,6 +9,7 @@
 * [Developers](developers/README.md)
   * [Compiling Heron](developers/compiling.md)
 * [Operators](operators/README.md)
+  * [Heron CLI](operators/heron-cli.md)
   * [Deployment](operators/deployment/README.md)
     * [Setting Up ZooKeeper](operators/deployment/zookeeper.md)
     * [Aurora](operators/deployment/aurora.md)
