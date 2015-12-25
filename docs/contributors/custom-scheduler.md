@@ -50,7 +50,7 @@ Interface | Role | Examples
 
 Your implementation of those interfaces will need to be on Heron's
 [classpath](https://docs.oracle.com/javase/tutorial/essential/environment/paths.html)
-when you [compile Heron](../operators/compiling.html).
+when you [compile Heron](../developers/compiling.html).
 
 ## Loading Configuration
 

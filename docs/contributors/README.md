@@ -1,1 +1,1 @@
-# How to Contribute to Heron
+# Contributing to Heron
