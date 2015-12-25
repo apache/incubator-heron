@@ -24,7 +24,7 @@ variety of Heron binaries, which can be hosted wherever you'd like, so long as
 it's accessible to Aurora (for example in [Amazon
 S3](https://aws.amazon.com/s3/) or using a local blob storage solution). You can
 build those binaries using the instructions in [Creating a New Heron
-Release](../release.html).
+Release](../compiling.html).
 
 Once your Heron binaries are hosted somewhere that is accessible to Aurora, you
 should run tests to ensure that Aurora can successfully fetch them.
