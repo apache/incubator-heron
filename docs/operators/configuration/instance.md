@@ -18,11 +18,11 @@ Parameter | Meaning | Default
 
 ## Network Configuration
 
-You can configure how the MM collects and transmits data in one (but only one)
-of two ways: **time based** or **size based**. If you choose time based, you can
-specify the maximum batch time (in milliseconds) for reading from and writing to
-the MM's socket; if you choose size based, you can specify maximum batch sizes
-(in bytes) instead.
+You can configure how HIs collect and transmit data in one (but only one) of
+two ways: **time based** or **size based**. If you choose time based, you can
+specify the maximum batch time (in milliseconds) for reading from and writing
+to the HI's socket; if you choose size based, you can specify maximum batch
+sizes (in bytes) instead.
 
 Parameter | Meaning | Default
 :-------- |:------- |:-------
@@ -30,6 +30,14 @@ Parameter | Meaning | Default
 `heron.instance.network.read.batch.size.bytes` | Size based, the maximum batch size in bytes to read from stream manager | 32768
 `heron.instance.network.write.batch.time.ms` | Time based, the maximum batch time in ms for instance to write to stream manager per attempt | 16
 `heron.instance.network.write.batch.size.bytes` | Size based, the maximum batch size in bytes to write to stream manager | 32768
+
+### Other Network Parameters
+
+The following parameters do not need to be set in accordance with a time- or
+size-based system.
+
+Parameter | Meaning | Default
+:-------- |:------- |:-------
 `heron.instance.network.options.socket.send.buffer.size.bytes` | The maximum socket's send buffer size in bytes | 6553600
 `heron.instance.network.options.socket.received.buffer.size.bytes` | The maximum socket's received buffer size in bytes of instance's network options | 8738000
 `heron.instance.reconnect.streammgr.interval.sec` | Interval in seconds to reconnect to the stream manager, including the request timeout in connecting | 5
@@ -37,8 +45,8 @@ Parameter | Meaning | Default
 
 ## Metrics Manager Configuration
 
-These parameters deal with how each HI interacts with [Stream
-Managers](../../concepts/architecture.html#stream-manager).
+These parameters deal with how each HI interacts with the topology's [Stream
+Manager](../../concepts/architecture.html#stream-manager).
 
 Parameter | Meaning | Default
 :-------- |:------- |:-------
@@ -49,7 +57,8 @@ Parameter | Meaning | Default
 ## Tuning
 
 These parameters are used to dynamically tune the available sizes in read and
-write queues to maintain high performance while avoiding garbage collection issues.
+write queues to maintain high performance while avoiding garbage collection
+issues.
 
 Parameter | Meaning | Default
 :-------- |:------- |:-------
@@ -59,8 +68,6 @@ Parameter | Meaning | Default
 `heron.instance.tuning.expected.spout.write.queue.size` | The expected size on write queue in spout | 5
 `heron.instance.tuning.expected.metrics.write.queue.size` | The expected size on metrics write queue | 5
 `heron.instance.tuning.current.sample.weight` | TODO | 0.8
-
-`com.twitter.heron.common.core.base.Communicator.java` --- Backpressure
 
 ## Other Parameters
 
@@ -74,8 +81,4 @@ Parameter | Meaning | Default
 `heron.instance.execute.batch.time.ms` | The maximum time in ms for an bolt instance to execute tuples per attempt | 16
 `heron.instance.execute.batch.size.bytes` | The maximum batch size in bytes for an bolt instance to execute tuples per attempt | 32768
 `heron.instance.state.check.interval.sec` | The time interval for an instance to check the state change, for instance, the interval a spout using to check whether activate/deactivate is invoked | 5
-`heron.instance.acknowledgement.nbuckets` | For efficient acknowledgement | 10
-
-numerator is `TOPOLOGY_MESSAGE_TIMEOUT_SECS`
-Check for expired data and removed
-Similar config for stream manager
+`heron.instance.acknowledgement.nbuckets` | TODO | 10
