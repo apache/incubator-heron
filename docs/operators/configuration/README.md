@@ -8,6 +8,12 @@ Heron cluster rather than to any specific topology.
 specific topology and can be modified at any stage of the topology's
 [lifecycle](../../concepts/topologies.html#topology-lifecycle).
 
+All system-level configs and topology-level defaults are declared in a
+[YAML](http://www.yaml.org/) config file in `heron/config/heron_internals.yaml`
+in the Heron codebase. You can leave that file as is when [compiling
+Heron](../../developers/compiling.html) or modify the values to suit your use
+case.
+
 ## The System Level
 
 There are a small handful of system-level configs for Heron. These are detailed
@@ -24,15 +30,7 @@ specific components in a topology and are detailed in the docs below:
 * [Heron Topology Master](topology-master.html)
 * [Heron Stream Manager](stream-manager.html)
 
-## How Configuration Works
-
-All system-level configs and topology-level defaults are declared in a
-[YAML](http://www.yaml.org/) config file in `heron/config/heron_internals.yaml`.
-You can leave that file as is when [compiling
-Heron](../../developers/compiling.html) or modify the values to suit your use
-case.
-
-## Overriding Topology-level Defaults
+### Overriding Topology-level Defaults
 
 The parameters set in `heron/config/heron_internals.yaml` are defaults that
 will be automatically applied to all topologies in your cluster. You can
@@ -47,8 +45,8 @@ Here's an example:
 ```bash
 $ heron-cli submit "topology.debug:false heron.local.working.directory:/path/to/dir" \
     /path/to/topology/my-topology.jar \
-   biz.acme.topologies.MyTopology \
-   my-topology
+    biz.acme.topologies.MyTopology \
+    my-topology
 ```
 
 More on Heron's CLI tool can be found in [Managing Heron

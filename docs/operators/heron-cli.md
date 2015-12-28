@@ -91,8 +91,6 @@ $ heron-cli submit "heron.local.working.directory:/path/to/dir topology.debug:tr
 
 Flag | Meaning
 :--- | :------
-`--submitter-config-loader` | The class name of the non-default config loader (assuming that the loader is on the classpath).
-`--scheduler-config` | Scheduler config file, if a non-default configuration is being used.
 `--deactivated` | If set, the topology is deployed in a deactivated state.
 
 ## Activating a Topology
