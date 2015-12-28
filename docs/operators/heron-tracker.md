@@ -17,7 +17,7 @@ API documentation.
 ## Starting the Tracker
 
 You can start the Heron Tracker by running the `heron-tracker` executable, which
-is generated as part of a [Heron release](release.html).
+you can generate when you [compile Heron](../developers/compiling.html).
 
 ```bash
 $ cd /path/to/heron/binaries
