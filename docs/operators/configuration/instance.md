@@ -1,6 +1,6 @@
 # Heron Instance Configuration
 
-You can configure all of the [Heron
+You can configure the behavior of the [Heron
 Instances](../../../concepts/architecture.html#heron-instance) (HIs) in a
 topology using the parameters below.
 
