@@ -67,7 +67,7 @@ public void execute(Tuple input) {
 More info on custom serialization can be found in [Creating Custom Tuple
 Serializers](serialization.html).
 
-#### Fields
+### Fields
 
 The `getFields` method returns a
 [`Fields`](http://heronproject.github.io/topology-api/com/twitter/heron/api/tuple/Fields)
@@ -76,23 +76,18 @@ object that contains all of the fields in the tuple. More on fields can be found
 
 ### Other Methods
 
-Method | Returns
-:----- |:-------
-`int size()` | Returns the size of the tuple
-`int fieldIndex(String field)` | Provides the index for a given field; returns `null` if the field isn't present
-`boolean contains(String field)` | Whether the tuple contains the provided field
-`String getSourceComponent()` |
-`int getSourceTask()` |
-`String getSourceStreamId()` |
-`void resetValues()` |
+There are additional methods available for determining the size of Heron
+`Tuple`s, extracting contextual information, and more. For a full listing of
+methods, see the
+[Javadoc](../api/topology/com/twitter/heron/api/tuple/Tuple.html).
 
 ## Fields
 
 From the methods in the list above you can see that you can retrieve single
 values from a Heron tuple on the basis of their index. You can also retrieve
 multiple values using a
-[`Fields`](http://heronproject.github.io/topology-api/com/twitter/heron/api/tuple/Fields)
-object, which can be initialized either using varargs or a list of strings:
+[`Fields`](../api/topology/com/twitter/heron/api/tuple/Fields.html) object,
+which can be initialized either using varargs or a list of strings:
 
 ```java
 // Using varargs
