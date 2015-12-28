@@ -8,6 +8,7 @@
   * [Building a Custom Metrics Sink](contributors/custom-metrics-sink.md)
 * [Developers](developers/README.md)
   * [Compiling Heron](developers/compiling.md)
+  * [Configuring Topologies](developers/topology-config.md)
 * [Operators](operators/README.md)
   * [Heron CLI](operators/heron-cli.md)
   * [Deployment](operators/deployment/README.md)
