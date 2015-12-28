@@ -9,9 +9,8 @@ plan](../concepts/topologies.html#physical-plan) for each topology.
 ## Deploying Heron UI
 
 Heron UI can run either on a machine managed by your Heron cluster's
-[scheduler](deployment/index.html) or outside of your cluster. Each [Heron
-release](release.html) has a `heron-ui` executable that you can use to start up
-Heron UI:
+[scheduler](deployment/index.html) or outside of your cluster. You can
+[compile](compiling.html) a `heron-ui` executable to start up Heron UI:
 
 ```bash
 $ cd /path/to/heron/binaries
@@ -42,7 +41,8 @@ be representative of the UI for your cluster.
 ## Topology Interface
 
 When you click on the link for a specific topology on the main page, you'll be
-taken to
+taken to an interface that provides insight into the logical plan of the
+topology and more (detailed in the sections below).
 
 ### Logical Plan
 
@@ -66,6 +66,10 @@ To see how a specific spout or bolt is distributed throughout containers and
 instances, click on that spout or bolt.
 
 ### Topology Metrics
+
+This component displays a variety of metrics from the last 3 minutes, 10
+minutes, hour, and 3 hours. For a description of each metric, click the small
+**?** icon next to the metric name.
 
 ![UI Metrics](img/topology-metrics.png)
 
