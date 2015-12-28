@@ -10,16 +10,23 @@ container.
 2. An HTTP server that exposes that REST API. This server runs as a separate
 process in each container.
 
-
 The port to connect to heron shell for each container is stored in physical
 plan. Heron tracker picks up this port and connects to shell for appropriate use
 cases. See the next section for more details.
 
-
+## Heron Shell UI
 
 ![Heron Shell](img/heron-shell.png)
 
-## Shell Utilities
+## Heron Shell REST API
+
+* [`/jmap`](#jmap-of-a-process)
+* [`/histo`](#memory-histogram-of-a-process)
+* [`/jstack`](#jstack-of-a-process)
+* [`/pid`](#pid-of-a-process)
+* [`/file`]()
+* [`/filedata`]()
+* [`/download`]()
 
 ### Log files
 
