@@ -1,19 +1,26 @@
-# How Heron Configuration Works
+# Heron Configuration
 
-Heron is configured on a per-topology basis. You can apply a whole configuration
-at any stage of a topology's lifecycle using a [YAML](http://yaml.org) file.
-This means that you can apply one configuration when you
-[submit](../heron-cli.html#submitting-a-topology) a topology, a different one
-when you [activate](../heron-cli.html#activating-a-topology) it, etc.
+Heron can be configured at two levels:
 
-You can specify a location for your YAML configuration file using the 
+1. **The system level** &mdash; System-level configurations apply to the whole
+Heron cluster rather than to any specific topology.
+2. **The topology level** &mdash; Topology configurations apply only to a
+specific topology and can be modified at any stage of the topology's
+[lifecycle](../../concepts/topologies.html#topology-lifecycle).
+
+## The System Level
+
+There are a small handful of system-level configs for Heron. These are detailed
+in [System-level Configuration](system.html).
+
+## The Topology Level
 
 ### Default vs. User-defined Configuration
 
 You can find lists of configurable parameters on a topology-wide or
 per-component basis in the following docs:
 
-* [Topology-level Configuration](topology-config.html)
+* [System-level Configuration](system.html)
 * [Heron Instance](instance.html)
 * [Heron Metrics Manager](metrics-manager.html)
 * [Heron Topology Master](topology-master.html)
