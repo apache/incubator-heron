@@ -4,7 +4,9 @@ The Heron Tracker is a long-running service that continuously gathers a wide
 variety of information about Heron topologies in your cluster(s) and exposes
 that information through a JSON REST API.
 
-For instructions on operating the Tracker, see [this tutorial](TODO).
+More on the role of the Tracker can be found
+[here](../concepts/architecture.html#heron-tracker). For instructions on
+operating the Tracker, see [Heron Tracker](heron-tracker.html).
 
 ## JSON Interface
 
@@ -141,6 +143,9 @@ The value of the `result` field should look something like this:
 
 ### `/topologies/states`
 
+The current execution state of topologies in a cluster. Topologies can be
+grouped by data center, environment, or both.
+
 #### Optional Parameters
 
 * `dc` &mdash; The data center. If the data center you provide is valid, the JSON
@@ -180,19 +185,21 @@ The value of the `result` field should look something like this:
 
 Each execution state object lists the following:
 
-* `release_username` &mdash;
-* `has_tmaster_location` &mdash;
-* `release_tag` &mdash;
-* `uploader_version` &mdash;
-* `dc` &mdash;
-* `jobname` &mdash;
-* `release_version` &mdash;
-* `environ` &mdash;
-* `submission_user` &mdash;
-* `submission_time` &mdash;
-* `viz` &mdash;
-* `role` &mdash;
-* `has_physical_plan` &mdash;
+* `release_username` &mdash; The user that generated the Heron release for the
+  topology
+* `has_tmaster_location` &mdash; Whether the topology's Topology Master
+  currently has a location
+* `release_tag` &mdash; This is a legacy
+* `uploader_version` &mdash; TODO
+* `dc` &mdash; The data center in which the topology is running
+* `jobname` &mdash; TODO
+* `release_version` &mdash; TODO
+* `environ` &mdash; The environment in which the topology is running
+* `submission_user` &mdash; The user that submitted the topology
+* `submission_time` &mdash; The time at which the topology was submitted
+  (timestamp in milliseconds)
+* `role` &mdash; TODO
+* `has_physical_plan` &mdash; Whether the topology currently has a physical plan
 
 ***
 
@@ -232,10 +239,13 @@ The value of the `result` field should lists the following:
 
 ### `/topologies/logicalplan`
 
+Returns a JSON object for the [logical
+plan](../concepts/topologies.html#logical-plan) of a topology.
+
 #### Required Parameters
 
-* `dc` &mdash; The data center
-* `environ` &mdash; The environment
+* `dc` &mdash; The data center in which the topology is running
+* `environ` &mdash; The environment in which the topology is running
 * `topology` &mdash; The name of the topology
 
 #### Example Request
@@ -246,25 +256,32 @@ $ curl "http://heron-tracker-url/topologies/logicalplan?dc=datacenter1&environ=p
 
 #### Response
 
+The value of the `result` field should look something like this:
+
+```json
+TODO
+```
+
 * `spouts` &mdash; A set of JSON objects representing each spout in the topology.
   The following information is listed for each spout:
-  * `source` &mdash; 
+  * `source` &mdash; The source of tuples for the spout.
   * `version` &mdash; The Heron release version for the topology.
   * `type` &mdash; The type of the spout, e.g. `kafka`, `kestrel`, etc.
-  * `outputs` &mdash; TODO
-* `bolts` &mdash;
-  * `outputs` &mdash; A list of outputs for the bolt. Info about each output includes
-    the stream name, the component name, groupings, etc.
-  * `inputs` &mdash; A list of inputs for the bolt. Info about each input includes the
-    stream name, component name, grouping, etc.
+  * `outputs` &mdash; A list of streams to which the spout outputs tuples.
+* `bolts` &mdash; A set of JSON objects representing each bolt in the topology.
+  * `outputs` &mdash; A list of outputs for the bolt.
+  * `inputs` &mdash; A list of inputs for the bolt.
 
 ***
 
 ### `/topologies/physicalplan`
 
+Returns a JSON object for the [physical
+plan](../concepts/topologies.html#physical-plan) of a topology.
+
 #### Required Parameters
 
-* `dc` &mdash; The data center
+* `dc` &mdash; The data center in which the topology is running
 * `environ` &mdash; The environment
 * `topology` &mdash; The name of the topology
 
@@ -276,9 +293,30 @@ $ curl "http://heron-tracker-url/topologies/physicalplan?dc=datacenter1&environ=
 
 #### Response
 
+
+
 ***
 
 ### `/topologies/executionstate`
+
+The current execution state of a given topology.
+
+#### Required Parameters
+
+* `dc` &mdash; The data center in which the topology is running
+* `environ` &mdash; The environment in which the topology is running
+* `topology` &mdash; The name of the topology
+
+#### Example Request
+
+```bash
+$ curl "http://heron-tracker-url/topologies/executionstate?dc=datacenter1&environ=prod&topology=user_topology_1"
+```
+
+#### Response
+
+The value of the `result` field will be a JSON object akin to the one
+documented in a [section above](#-topologies-states).
 
 ***
 
@@ -310,10 +348,10 @@ $ curl "http://heron-tracker-url/topologies/physicalplan?dc=datacenter1&environ=
 
 #### Required Parameters
 
-* `dc` &mdash;
-* `environ` &mdash;
-* `topology` &mdash;
-* `instance` &mdash;
+* `dc` &mdash; The data center in which the topology is running
+* `environ` &mdash; The environment in which the topology is running
+* `topology` &mdash; The name of the topology
+* `instance` &mdash; The instance ID of the desired Heron instance
 
 #### Response
 
