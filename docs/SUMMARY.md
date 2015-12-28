@@ -15,3 +15,5 @@
     * [Aurora](operators/deployment/aurora.md)
     * [Mesos](operators/deployment/mesos.md)
     * [Local scheduler](operators/deployment/local.md)
+  * [Heron Tracker](operators/heron-tracker.md)
+  * [Heron Tracker REST API](operators/heron-tracker-rest-api.md)
