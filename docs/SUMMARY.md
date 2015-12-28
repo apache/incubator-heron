@@ -15,3 +15,4 @@
     * [Aurora](operators/deployment/aurora.md)
     * [Mesos](operators/deployment/mesos.md)
     * [Local scheduler](operators/deployment/local.md)
+  * [Heron UI](operators/heron-ui.md)
