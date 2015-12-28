@@ -31,3 +31,5 @@ A full listing of configurable parameters can be found in the Javadoc for
 Heron's
 [`Config`](http://heronproject.github.io/topology-api/com/twitter/heron/api/Config)
 class.
+
+## Per-Component Configuration Overrides

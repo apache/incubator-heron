@@ -15,15 +15,41 @@ in [System-level Configuration](system.html).
 
 ## The Topology Level
 
-### Default vs. User-defined Configuration
+There is a wide variety of topology-level configurations that you can establish
+as defaults in your Heron cluster. These configurations tend to apply to
+specific components in a topology and are detailed in the docs below:
 
-You can find lists of configurable parameters on a topology-wide or
-per-component basis in the following docs:
-
-* [System-level Configuration](system.html)
 * [Heron Instance](instance.html)
 * [Heron Metrics Manager](metrics-manager.html)
 * [Heron Topology Master](topology-master.html)
 * [Heron Stream Manager](stream-manager.html)
 
-You can override any
+## How Configuration Works
+
+All system-level configs and topology-level defaults are declared in a
+[YAML](http://www.yaml.org/) config file in `heron/config/heron_internals.yaml`.
+You can leave that file as is when [compiling
+Heron](../../developers/compiling.html) or modify the values to suit your use
+case.
+
+## Overriding Topology-level Defaults
+
+The parameters set in `heron/config/heron_internals.yaml` are defaults that
+will be automatically applied to all topologies in your cluster. You can
+override these values on a per-topology basis using **scheduler overrides**.
+These overrides are the second argument in all topology management commands and
+have the following syntax:
+
+    param1:value1 param2:value2 param3:value3 ...
+
+Here's an example:
+
+```bash
+$ heron-cli submit "topology.debug:false heron.local.working.directory:/path/to/dir" \
+    /path/to/topology/my-topology.jar \
+   biz.acme.topologies.MyTopology \
+   my-topology
+```
+
+More on Heron's CLI tool can be found in [Managing Heron
+Topologies](../heron-cli.html).
