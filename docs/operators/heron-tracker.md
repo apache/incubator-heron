@@ -1,12 +1,31 @@
 # The Heron Tracker REST API
 
-The Heron Tracker is a long-running service that continuously gathers a wide
+The **Heron Tracker** is a long-running service that continuously gathers a wide
 variety of information about Heron topologies in your cluster(s) and exposes
-that information through a JSON REST API.
+that information through a JSON REST API.  More on the role of the Tracker can
+be found [here](../concepts/architecture.html#heron-tracker).
 
-More on the role of the Tracker can be found
-[here](../concepts/architecture.html#heron-tracker). For instructions on
-operating the Tracker, see [Heron Tracker](heron-tracker.html).
+The Tracker can run within your Heron cluster (e.g.
+[Mesos](../deployment/mesos.html) or [Aurora](../deployment/aurora.html)) or
+outside of it, provided that the machine on which it runs has access to your
+Heron cluster.
+
+## Starting the Tracker
+
+You can start the Heron Tracker by running the `heron-tracker` executable, which
+you can generate when you [compile Heron](../developers/compiling.html).
+
+```bash
+$ cd /path/to/heron/binaries
+$ ./heron-tracker
+```
+
+By default, the Tracker runs on port 8888. You can specify a different port
+using the `--port` flag:
+
+```bash
+$ ./heron-tracker --port=1234
+```
 
 ## JSON Interface
 
