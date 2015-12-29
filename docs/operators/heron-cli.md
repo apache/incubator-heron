@@ -33,6 +33,7 @@ Here's an example topology management command that uses both of these flags:
 $ heron-cli activate "topology.debug:true" \
     /path/to/topology/my-topology.jar \
     biz.acme.topologies.MyTopology \
+    my-topology /
     --config-loader=biz.acme.config.MyConfigLoader \
     --config-file=/path/to/config/scheduler.conf
 ```
@@ -83,15 +84,13 @@ some scheduler overrides:
 $ heron-cli submit "heron.local.working.directory:/path/to/dir topology.debug:true" \
     /path/to/topology/my-topology.jar \
     com.example.topologies.MyTopology \
-    my-topology # Assuming that this topology requires a name argument
+    my-topology
 ```
 
 ### Other Topology Submission Options
 
 Flag | Meaning
 :--- | :------
-`--submitter-config-loader` | The class name of the non-default config loader (assuming that the loader is on the classpath).
-`--scheduler-config` | Scheduler config file, if a non-default configuration is being used.
 `--deactivated` | If set, the topology is deployed in a deactivated state.
 
 ## Activating a Topology
@@ -105,13 +104,13 @@ $ heron-cli activate <activator-overrides> <topology>
 
 Arguments of the `activate` command:
 
-* `activator-overrides` &mdash; Default activator parameters that you'd like to
+* Activator overrides &mdash; Default activator parameters that you'd like to
   override. The syntax is `"param1:value1 param2:value2 param3:value3"`.
 
   **Example**: `heron.local.working.directory:/path/to/dir topology.debug:true`
 
-* `topology` &mdash; The name of the already-submitted topology that you'd like to
-  activate.
+* Topology name  &mdash; The name of the already-submitted topology that you'd
+  like to activate.
 
 ### Example Topology Activation Command
 
@@ -131,12 +130,12 @@ $ heron-cli deactivate <deactivator-overrides> <topology>
 
 Arguments of the `deactivate` command:
 
-* `deactivator-overrides` &mdash; Deactivation parameters that you'd like to
+* Deactivator overrides &mdash; Deactivation parameters that you'd like to
   override. The syntax is `"param1:value1 param2:value2 param3:value3"`.
 
   **Example**: `heron.local.working.directory:/path/to/dir topology.debug:true`
 
-* `topology` &mdash; The name of the topology that you'd like to deactivate.
+* Topology name &mdash; The name of the topology that you'd like to deactivate.
 
 ## Restarting a Topology
 
@@ -149,22 +148,20 @@ $ heron-cli restart <restarter-overrides> <topology> [shard]
 
 Arguments of the `restart` command:
 
-* `restarter-overrides` &mdash; Restart parameters that you'd like to override. The
-  syntax is `"param1:value1 param2:value2 param3:value3"`.
+* Restarter overrides &mdash; Restart parameters that you'd like to override.
+  The syntax is `"param1:value1 param2:value2 param3:value3"`.
 
   **Example**: `heron.local.working.directory:/path/to/dir topology.debug:true`
 
-* `topology` -- The name of the topology that you'd like to restart.
-* `shard` (**optional**) &mdash; This enables you to specify the shard ID to be
+* Topology name &mdash; The name of the topology that you'd like to restart.
+* Shard ID (**optional**) &mdash; This enables you to specify the shard ID to be
   restarted if you want to restart only a specific shard of the topology.
 
 ### Example Topology Restart Command
 
 ```bash
 $ heron-cli restart "topology.debug:true" \
-    /path/to/topology/my-topology.jar \
-    com.example.topologies.MyTopology \
-    my-topology # Assuming that this topology requires a name argument
+    my-topology
 ```
 
 ## Killing a Topology
@@ -179,17 +176,15 @@ $ heron-cli kill <killer-overrides> <topology>
 
 Arguments of the `kill` command:
 
-* `killer-overrides` &dash; Default scheduler parameters that you'd like to
+* Killer overrides &dash; Default scheduler parameters that you'd like to
   override. The syntax is `"param1:value1 param2:value2 param3:value3"`.
-* `topology` &mdash; The name of the topology that you'd like to kill.
+* Topology name &mdash; The name of the topology that you'd like to kill.
 
 ### Example Topology Kill Command
 
 ```bash
 $ heron-cli kill "topology.debug:true" \
-    /path/to/topology/my-topology.jar \
-    com.example.topologies.MyTopology \
-    my-topology # Assuming that this topology requires a name argument
+    my-topology
 ```
 
 ## Other Commands
