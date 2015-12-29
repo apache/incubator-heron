@@ -16,6 +16,7 @@
     * [Aurora](operators/deployment/aurora.md)
     * [Mesos](operators/deployment/mesos.md)
     * [Local scheduler](operators/deployment/local.md)
+  * [Heron Tracker](operators/heron-tracker.md)
   * [Configuration](operators/configuration/README.md)
     * [System-level Configuration](operators/configuration/system.md)
     * [Topology Master](operators/configuration/tmaster.md)
