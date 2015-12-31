@@ -193,7 +193,7 @@ app = tornado.web.Application([
   (r"^/jmap/([0-9]+$)", JmapHandler),
   (r"^/histo/([0-9]+$)", MemoryHistogramHandler),
   (r"^/jstack/([0-9]+$)", JstackHandler),
-  (r"^/pid/([a-zA-Z0-9_-]+$)", PidHandler),
+  (r"^/pid/(.*)", PidHandler),
   (r"^/browse/(.*)", BrowseHandler),
   (r"^/file/(.*)", FileHandler),
   (r"^/filedata/(.*)", FileDataHandler),
