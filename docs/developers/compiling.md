@@ -111,42 +111,7 @@ bazel-genfiles/release/heron-api-unversioned.tar.gz
 # etc
 ```
 
-## Running Unit Tests
+## Testing Heron
 
-You can run unit tests for Heron using the `bazel test` command.
-
-You must specify an OS-specific configuration using the `--config` flag. This
-can take one of the following values: `darwin` (Mac OS X), `ubuntu` (Ubuntu
-12.04), `centos5` (CentOS 5).
-
-Here's an example test command:
-
-```bash
-$ bazel test --config=darwin heron/state/tests/java:local_file_state_manager_unittest
-```
-
-### Discovering Test Targets
-
-To fetch a full listing of all Bazel test targets:
-
-```bash
-$ bazel query 'kind(".*_test rule", ...)'
-```
-
-For **Java** targets only:
-
-```bash
-$ bazel query 'kind("java_test rule", ...)'
-```
-
-For **C++** targets:
-
-```bash
-$ bazel query 'kind("cc_test rule", ...)'
-```
-
-For **Python** targets:
-
-```bash
-$ bazel query 'kind("pex_test rule", ...)'
-```
+There are a wide variety of unit tests available in Heron's codebase. For more
+information, see [Testing Heron](../contributors/testing.html).
