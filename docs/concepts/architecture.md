@@ -9,6 +9,11 @@ Storm](#releationship-with-apache-storm), describe the [design
 goals](#heron-design-goals) behind Heron, and explain major
 [components](#components) of its architecture.
 
+## Codebase
+
+A detailed guide to the Heron codebase can be found
+[here](../contributors/codebase.html).
+
 ## Topologies
 
 You can think of a Heron cluster as a mechanism for managing the lifecycle of
