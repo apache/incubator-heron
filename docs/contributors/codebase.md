@@ -36,20 +36,25 @@ Heron](../developers/compiling.html).
 
 * **Inter-component communication** &mdash; [Protocol
 Buffers](https://developers.google.com/protocol-buffers/?hl=en). Most `.proto`
-definition files can be found in [`heron/proto`]({{ book.root_url
-}}/heron/proto).
+definition files can be found in [`heron/proto`]({{book.root_url}}/heron/proto).
 
 * **Cluster coordination** &mdash; Heron relies heavily on ZooKeeper for cluster
 coordination, be it for [Mesos/Aurora](../operators/deployment/aurora.html),
-[Mesos alone](../operators/deployment/mesos.html), or a [custom
+[Mesos alone](../operators/deployment/mesos.html), or for a [custom
 scheduler](custom-scheduler.html) that you build.
 
 ## Components
 
+### Topology Master
+
+The Heron [Topology Master](../concepts/architecture.html#topology-master) is
+written in C++. The code is in
+[`heron/tmaster`]({{book.root_url}}/heron/tmaster).
+
 ### Topology API
 
 Heron's API for writing topologies is written in Java. The code for this API can
-be found in [`heron/api`]({{ book.root_url }}/heron/api).
+be found in [`heron/api`]({{book.root_url}}/heron/api).
 
 Documentation for writing topologies can be found in [Building
 Topologies](../developers/topologies.html), while API documentation can be found
@@ -57,24 +62,36 @@ Topologies](../developers/topologies.html), while API documentation can be found
 
 ### Metrics Manager
 
+The Java code for Heron's [Metrics
+Manager](../concepts/architecture.html#metrics-manager) is in
+[`heron/metricsmgr`]({{book.root_url}}/heron/metricsmgr).
+
 If you'd like to implement your own custom metrics handler (known as a **metrics
 sink**), see [Implementing a Custom Metrics Sink](custom-metrics-sink.html).
 
 ### Heron Tracker
 
 The Python code for the [Heron Tracker](../operators/heron-tracker.html) is in
-[`heron/tracker`]({{ book.root_url }}/heron/tracker).
+[`heron/tracker`]({{book.root_url}}/heron/tracker).
 
 The Tracker is a web server written in Python. It relies on the
 [Tornado](http://www.tornadoweb.org/en/stable/) framework. You can add new HTTP
-routes to the Tracker in [application definition]({{ book.root_url
-}}/heron/tracker/src/python/main.py) and corresponding handlers in the
-[`/handlers`]({{ book.root_url }}/heron/tracker/src/python/handlers) directory.
+routes to the Tracker in
+[`main.py`]({{book.root_url}}/heron/tracker/src/python/main.py) and
+corresponding handlers in the [`handlers`]({{ book.root_url
+}}/heron/tracker/src/python/handlers) directory.
 
 ### Heron UI
 
-The code for the [Heron UI](../operators/heron-ui.html) is in [`heron/web`]({{
-book.root_url }}/heron/web).
+The code for the [Heron UI](../operators/heron-ui.html) is in
+[`heron/web`]({{book.root_url}}/heron/web).
+
+Like Heron Tracker, Heron UI is a web server written in Python that relies on
+the [Tornado](http://www.tornadoweb.org/en/stable/) framework. You can add new
+HTTP routes to Heron UI in
+[`main.py`]({{book.root_url}}/heron/web/source/python/main.py) and corresponding
+handlers in the [`handlers`]({{root.book_url}}/heron/web/source/python/handlers)
+directory.
 
 ### 
 
@@ -82,5 +99,5 @@ book.root_url }}/heron/web).
 
 Heron's codebase includes a wide variety of example
 [topologies](../concepts/topologies.html) built using Heron's topology API for
-Java. Those examples can be found in [`heron/examples`]({{ book.root_url
-}}/heron/examples).
+Java. Those examples can be found in
+[`heron/examples`]({{book.root_url}}/heron/examples).
