@@ -16,8 +16,9 @@ extending Kryo's abstract
 class. More information can be found in [Kryo's
 documentation](https://github.com/EsotericSoftware/kryo#serializers).
 
-Once you've created a custom Kryo serializer for a type, make sure that the code
-for the serializer is on Heron's [classpath](compiling.html#classpath).
+## Registering a Serializer
+
+Once you've created a custom Kryo serializer for a type:
 
 1. Make sure that the code for the serializer is on Heron's
 [classpath](compiling.html#classpath).
@@ -29,3 +30,6 @@ your topology. Here's an example:
     - biz.acme.heron.datatypes.CustomType1 # This type will use the default FieldSerializer
     - biz.acme.heron.datatypes.CustomType2: com.example.heron.serialization.CustomSerializer
   ```
+
+Once your custom serializer is on Heron's classpath and Heron is aware of its
+existence, you must [re-compile](compiling.html) Heron.
