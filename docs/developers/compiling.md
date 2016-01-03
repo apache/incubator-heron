@@ -22,7 +22,7 @@ You must have the following installed to compile Heron:
 * [GNU Make](https://www.gnu.org/software/make/) >= 3.81
 * [gcc/g++](https://gcc.gnu.org/) >= 4.8.2 (Linux platforms)
 * [CMake](https://cmake.org/) >= 2.6-patch 4
-* [Python](https://www.python.org/) >= 2.7
+* [Python](https://www.python.org/) >= 2.7 (not including Python 3.x)
 * [Perl](https://www.perl.org/) >= 5.8.8
 
 ## Installing Bazel
