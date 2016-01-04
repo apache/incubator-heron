@@ -17,6 +17,25 @@ documented in the [Configuration](#configuration) section below.
 Heron also has a slightly different API for running topologies in local mode,
 which is documented in the [Local Mode](#local-mode) section below.
 
+## Java Libraries
+
+In order to create topologies using Heron's topology API, you need to import the
+[API library](../api/topology/index.html) into your project.
+
+Here's an example for Maven:
+
+<pre><code class="lang-xml">&lt;dependency&gt;
+  &lt;groupId>com.twitter.heron&lt;/groupId&gt;
+  &lt;artifactId>api&lt;/artifactId&gt;
+  &lt;version&gt;{{book.topology_api_version}}&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+Here's an example for Gradle:
+
+<pre><code class="lang-groovy">dependencies {
+  compile group: "com.twitter.heron", name: "api", version: "{{book.topology_api_version}}"
+}</code></pre>
+
 ## Configuration
 
 The most fundamental difference between Heron and Storm topologies lies in their
@@ -73,45 +92,63 @@ Documentation on managing custom topologies in your Heron cluster using the
 `heron-cli` tool (including submitting, starting, and killing topologies), see
 [Managing Topologies](../operators/heron-cli.html).
 
-## Bolts
+## Streams
 
-Example Heron bolts:
-
-* [`ExclamationBolt`]({{book.root_url}}/heron/examples/src/java/com/twitter/heron/examples/AckingTopology.java#L61)
-* [`CountBolt`]({{book.root_url}}/heron/examples/src/java/com/twitter/heron/examples/TaskHookTopology.java#L179)
-
+Streams are the core abstraction underlying Heron. Streams are initiated by
+[spouts](#spouts), which feed unbounded sequences of tuples into a Heron
+topology; those unbounded tuple sequences are then processed by any number of
+[bolts](#bolts).
 
 ## Spouts
 
-Example Heron spouts:
+Spouts are the information source for Heron topologies. They feed
+[streams](#streams) of tuples into a topology from any source you'd like, from a
+[Kestrel](https://twitter.github.io/kestrel/) queue to a web service API to a
+random list.
+
+Here are some example Heron spouts:
 
 * [`AckingTestWordSpout`]({{book.root_url}}/heron/examples/src/java/com/twitter/heron/examples/AckingTopology.java#L25)
 * [`TestWordSpout`]({{book.root_url}}/heron/examples/src/java/com/twitter/heron/examples/TestWordSpout.java)
 
+## Bolts
+
+Bolts are the processing units within a Heron cluster. Bolts take tuples from
+streams and perform any processing logic that you'd like on each tuple. Here are
+some example Heron bolts:
+
+* [`ExclamationBolt`]({{book.root_url}}/heron/examples/src/java/com/twitter/heron/examples/AckingTopology.java#L61)
+* [`CountBolt`]({{book.root_url}}/heron/examples/src/java/com/twitter/heron/examples/TaskHookTopology.java#L179)
+
 ## Task Hooks
 
-
-
-[](http://storm.apache.org/documentation/Hooks.html)
+As in Storm, you can create task hooks in Heron that run custom code when
+certain events occur within a topology. For more information, see the [Storm
+documentation](http://storm.apache.org/documentation/Hooks.html).
 
 ## Serialization
+
+For more on custom serialization for Heron tuples, see [Custom
+Serialization](serialization.html).
 
 ## Heron's Data Model
 
 For more on Heron's tuple-driven data model, see [this
 document](data-model.html).
 
-## Processing Semantics
-
-## Common Patterns
-
-[](http://storm.apache.org/documentation/Common-patterns.html)
-
 ## Local Mode
 
-[Storm
+As in Storm, in Heron you can run topologies in local mode for the sake of
+debugging. For more information, see the [Storm
 documentation](http://storm.apache.org/tutorial#running-exclamationtopology-in-local-mode)
+
+The crucial difference in Heron is that if you use the `HeronSubmitter` rather
+than the `StormSubmitter` for your topology, you'll need to use Heron's
+`LocalMode`...
+
+TODO
 
 ## Advanced Topics
 
 * [Transactional Topologies using Trident](http://storm.apache.org/documentation/Trident-tutorial.html)
+* [Common Patterns](http://storm.apache.org/documentation/Common-patterns.html)
