@@ -57,7 +57,7 @@ install_jdk8() {
 
 bazel_install() {
     install_jdk8
-    apt-get install -y g++ automake cmake gcc-4.8 g++-4.8 zlib1g-dev zip pkg-config wget
+    apt-get install -y g++ automake cmake gcc-4.8 g++-4.8 zlib1g-dev zip pkg-config wget libssl-dev
     mkdir -p /opt/bazel
     pushd /opt/bazel
         pushd /tmp
