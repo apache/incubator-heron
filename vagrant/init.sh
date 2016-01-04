@@ -57,7 +57,7 @@ install_jdk8() {
 
 bazel_install() {
     install_jdk8
-    apt-get install -y g++ automake cmake gcc-4.8 g++-4.8 zlib1g-dev zip pkg-config wget libevent-dev
+    apt-get install -y g++ automake cmake gcc-4.8 g++-4.8 zlib1g-dev zip pkg-config wget
     mkdir -p /opt/bazel
     pushd /opt/bazel
         pushd /tmp
@@ -72,6 +72,13 @@ bazel_install() {
 }
 
 build_heron() {
+    pushd /tmp
+        wget http://mirror.sdunix.com/gnu/libtool//libtool-2.4.6.tar.gz
+        tar xf libtool*
+        cd libtool-2.4.6
+        sh configure --prefix /usr/local
+        make install 
+    popd
     pushd /vagrant
         export CC=gcc-4.8
         export CXX=g++-4.8
