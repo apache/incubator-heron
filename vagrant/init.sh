@@ -57,7 +57,7 @@ install_jdk8() {
 
 bazel_install() {
     install_jdk8
-    apt-get install -y g++ automake cmake
+    apt-get install -y g++ automake cmake gcc-4.8 g++-4.8 zlib1g-dev zip pkg-config wget libevent-dev
     mkdir -p /opt/bazel
     pushd /opt/bazel
         pushd /tmp
@@ -73,8 +73,12 @@ bazel_install() {
 
 build_heron() {
     pushd /vagrant
+        export CC=gcc-4.8
+        export CXX=g++-4.8
+        export PATH=/sbin:$PATH
+        ~/bin/bazel clean
         ./bazel_configure.py
-        ~/bin/bazel build --config=darwin heron/...
+        ~/bin/bazel --bazelrc=tools/travis-ci/bazel.rc build --config=ubuntu heron/...
     popd
 }
 
