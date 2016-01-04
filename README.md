@@ -23,7 +23,7 @@ For information beyond the documentation:
 
 ## Update
 
-Currently, we are working on ensuring that Heron is easy to in a Mesos Cluster in 
+Currently, we are working on ensuring that Heron is easy to run in a Mesos Cluster in 
 AWS, Mesos/Aurora in AWS and in local laptop. Will post updates as we progress.
 
 ## Heron Documentation
