@@ -7,6 +7,7 @@
   * [The Heron Codebase](contributors/codebase.md)
   * [Building a Custom Scheduler](contributors/custom-scheduler.md)
   * [Building a Custom Metrics Sink](contributors/custom-metrics-sink.md)
+  * [Testing Heron](contributors/testing.md)
 * [Developers](developers/README.md)
   * [Compiling Heron](developers/compiling.md)
   * [Heron's Data Model](developers/data-model.md)
