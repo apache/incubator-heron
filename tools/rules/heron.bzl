@@ -1,3 +1,6 @@
+################################################################################
+# Rule implmentation for installing heron files
+################################################################################
 def install_heron_files_impl(ctx):
 
     # construct the name of destination directories
@@ -55,6 +58,13 @@ def install_heron_files_impl(ctx):
     runfiles = list(set(inputs)) + list(set(outputs))
     return struct(runfiles = ctx.runfiles(files = runfiles))
 
+################################################################################
+# Rule for installing heron files in a given directory
+#  - bin, for binary or executable files that go under bin subfolder
+#  - conf, for configuration files that go under conf subfolder
+#  - lib, for library files that go under lib subfolder
+#  - other, for miscellaneous files that go under the directory 
+################################################################################
 install_heron_files = rule(
     install_heron_files_impl,
     attrs = {
@@ -71,11 +81,17 @@ install_heron_files = rule(
     }
 )
 
+################################################################################
+# Convenience macro for grouping all Heron API files
+################################################################################
 def heron_api_files():
     return [
         "//heron/api/src/java:api-java",
     ]
 
+################################################################################
+# Convenience macros for Heron CLI files
+################################################################################
 def heron_cli_bin_files():
     return [
         "//heron/cli2/src/python:heron-cli2",
@@ -100,6 +116,9 @@ def heron_cli_lib_files():
 def heron_cli_files():
     return heron_cli_bin_files() + heron_cli_lib_files() + heron_cli_conf_files()
 
+################################################################################
+# Convenience macros for Heron core files
+################################################################################
 def heron_core_bin_files():
     return [
         "//heron/controller/src/python:heron-controller",
@@ -126,21 +145,33 @@ def heron_core_lib_files():
 def heron_core_files():
     return heron_core_bin_files() + heron_core_conf_files() + heron_core_lib_files()
 
+################################################################################
+# Convenience macros for Heron Metrics API files
+################################################################################
 def heron_metrics_api_files():
     return [
         "//heron/metricsmgr-api/src/java:metricsmgr-api-java",
     ]
 
+################################################################################
+# Convenience macros for Heron Storm Compatibility API files
+################################################################################
 def heron_storm_compat_files():
     return [
         "//heron/storm/src/java:storm-compatibility-java",
     ]
 
+################################################################################
+# Convenience macros for Heron Tracker files
+################################################################################
 def heron_tracker_files():
     return [
         "//heron/tracker/src/python:heron-tracker",
     ]
 
+################################################################################
+# Macro for running Heron local integration test
+################################################################################
 def local_heron_test(name, srcs, main, topology, args=None, data=None, deps=None):
     working_dir = name + "-working-directory"
     cli_target = name + "-cli-files"
