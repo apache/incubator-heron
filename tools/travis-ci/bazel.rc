@@ -26,6 +26,9 @@ build --crosstool_top //tools/travis-ci/toolchain:CROSSTOOL
 build --spawn_strategy=standalone --genrule_strategy=standalone
 test --test_strategy=standalone
 
+# Ignore unsupported warning for sandboxing
+build --ignore_unsupported_sandboxing
+
 # Below this line, .travis.yml will cat the default bazelrc.
 # This is needed so Bazel starts with the base workspace in its
 # package path.
