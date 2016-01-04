@@ -5,7 +5,7 @@ You can run unit tests for Heron using
 
 To run the test for a given [test
 target](http://bazel.io/docs/test-encyclopedia.html), run `bazel test
-<path/to/target>:<target_name>` and make sure that you specify an OS-specific
+path/to/target:target_name` and make sure that you specify an OS-specific
 configuration using the `--config` flag. This can take one of the following
 values: `darwin` (Mac OS X), `ubuntu` (Ubuntu 12.04), `centos5` (CentOS 5).
 
