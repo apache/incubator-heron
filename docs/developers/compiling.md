@@ -26,6 +26,13 @@ You must have the following installed to compile Heron:
 * [Python](https://www.python.org/) >= 2.7 (not including Python 3.x)
 * [Perl](https://www.perl.org/) >= 5.8.8
 
+(TODO: add separate Linux and Mac OS X sections) Export CC and CXX variables
+```bash
+$ export CC=/usr/bin/clang
+$ export CXX=/usr/bin/clang++
+$ echo $CC $CXX
+```
+
 ## Installing Bazel
 
 [Bazel](http://bazel.io) is the build tool used by Heron. The releases page for
