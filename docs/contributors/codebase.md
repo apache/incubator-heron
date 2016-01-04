@@ -32,9 +32,10 @@ Tracker](../operators/heron-tracker.html).
 Information on setting up and using Bazel for Heron can be found in [Compiling
 Heron](../developers/compiling.html).
 
-* **Inter-component communication** &mdash; [Protocol
-Buffers](https://developers.google.com/protocol-buffers/?hl=en). Most `.proto`
-definition files can be found in [`heron/proto`]({{book.root_url}}/heron/proto).
+* **Inter-component communication** &mdash; Heron uses [Protocol
+Buffers](https://developers.google.com/protocol-buffers/?hl=en) for
+communication between components. Most `.proto` definition files can be found in
+[`heron/proto`]({{book.root_url}}/heron/proto).
 
 * **Cluster coordination** &mdash; Heron relies heavily on ZooKeeper for cluster
 coordination, be it for [Mesos/Aurora](../operators/deployment/aurora.html),
@@ -51,11 +52,29 @@ utilities, networking interfaces, and more.
 
 ## Cluster Scheduling
 
-TODO
+Heron supports three cluster schedulers out of the box:
+[Mesos](../operators/deployment/mesos.html),
+[Aurora](../operators/deployment/aurora.html), and a [local
+scheduler](../operators/deployment/local.html). The Java code for each of those
+schedulers, as well as for the underlying scheduler API, can be found in
+[`heron/scheduler`]({{book.root_url}}/heron/scheduler).
+
+Info on custom schedulers can be found in [Implementing a Custom
+Scheduler](custom-scheduler.html); info on the currently available schedulers
+can be found in [Deploying Heron on
+Aurora](../operators/deployment/aurora.html), [Deploying Heron on
+Mesos](../operators/deployment/mesos.html), and [Local
+Deployment](../operators/deployment/local.html).
 
 ## State Management
 
-TODO
+The parts of Heron's codebase related to
+[ZooKeeper](http://zookeeper.apache.org/) are mostly contained in
+[`heron/state`]({{book.root_url}}/heron/state). There are ZooKeeper-facing
+interfaces for [C++]({{book.root_url}}/heron/state/src/cpp),
+[Java]({{book.root_url}}/heron/state/src/java), and
+[Python]({{book.root_url}}/heron/state/src/python) that are used in a variety of
+Heron components.
 
 ## Topology Components
 
@@ -110,7 +129,7 @@ The Java API for local mode can be found in
 Heron's codebase includes a wide variety of example
 [topologies](../concepts/topologies.html) built using Heron's topology API for
 Java. Those examples can be found in
-[`heron/examples`]({{book.root_url}}/heron/examples).## UI Components
+[`heron/examples`]({{book.root_url}}/heron/examples).
 
 ## User Interface Components
 
@@ -162,3 +181,8 @@ web server are defined in
 [`main.py`]({{book.root_url}}/heron/shell/src/python/main.py) while the HTML,
 JavaScript, CSS, and images for the web UI can be found in the
 [`assets`]({{book.root_url}}/heron/shell/assets) directory.
+
+## Tests
+
+There are a wide variety of tests for Heron that are scattered throughout the
+codebase. For more info see [Testing Heron](testing.html).
