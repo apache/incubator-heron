@@ -34,8 +34,8 @@ script:
   - gcc --version
   - which g++-4.8
   - g++ --version 
+  - cat ~/.bazelrc >> tools/travis-ci/bazel.rc
   - ./bazel_configure.py
   - bazel --bazelrc=tools/travis-ci/bazel.rc build heron/...
   - bazel --bazelrc=tools/travis-ci/bazel.rc test  heron/...
-  - cat ~/.bazelrc >> tools/travis-ci/bazel.rc
   - bazel --bazelrc=tools/travis-ci/bazel.rc build release:packages
