@@ -15,10 +15,10 @@ build:darwin --java_toolchain=//tools/java:heron_java_toolchain
 
 # For Ubuntu
 # To use it: bazel build --config=ubuntu
-build:centos --java_toolchain=//tools/java:heron_java_toolchain 
-build:centos --ignore_unsupported_sandboxing
-build:centos --python2_path /usr/bin/python2.7
-build:centos --linkopt -lm
-build:centos --linkopt -lpthread
-build:centos --linkopt -lunwind
-build:centos --linkopt -lrt
+build:ubuntu --java_toolchain=//tools/java:heron_java_toolchain 
+build:ubuntu --ignore_unsupported_sandboxing
+build:ubuntu --python2_path /usr/bin/python2.7
+build:ubuntu --linkopt -lm
+build:ubuntu --linkopt -lpthread
+build:ubuntu --linkopt -lunwind
+build:ubuntu --linkopt -lrt
