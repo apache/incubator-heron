@@ -29,9 +29,6 @@ test --test_strategy=standalone
 # Ignore unsupported warning for sandboxing
 build --ignore_unsupported_sandboxing
 
-# Below this line, is the default bazelrc shipped with binary
+# Below this line, .travis.yml will cat the default bazelrc.
 # This is needed so Bazel starts with the base workspace in its
 # package path.
-build --package_path %workspace%:/Users/kramasamy/.bazel/base_workspace
-fetch --package_path %workspace%:/Users/kramasamy/.bazel/base_workspace
-query --package_path %workspace%:/Users/kramasamy/.bazel/base_workspace
