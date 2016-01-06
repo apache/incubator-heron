@@ -201,6 +201,8 @@ def write_env_exec_file(platform, environ):
     out_file.write('export CPP=' + os.environ['CPP'] + '\n')
   if 'CFLAGS' in os.environ:
     out_file.write('export CFLAGS=' + os.environ['CFLAGS'] + '\n')
+  if 'CPPFLAGS' in os.environ:
+    out_file.write('export CPPFLAGS=' + os.environ['CPPFLAGS'] + '\n')
 
   # If CXX environment is set, export them
   if 'CXX' in os.environ:
