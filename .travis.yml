@@ -22,9 +22,13 @@ env:
   - CC=gcc-4.8 CXX=g++-4.8
 
 before_install:
+
+  # download and install libunwind
   - wget http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz
   - tar xvfz libunwind-1.1.tar.gz
   - cd libunwind-1.1 && ./configure --prefix=/usr && sudo make install && cd ..
+
+  # download and install bazel
   - wget 'https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh'
   - chmod +x bazel-0.1.2-installer-linux-x86_64.sh
   - ./bazel-0.1.2-installer-linux-x86_64.sh --user
@@ -34,8 +38,16 @@ script:
   - gcc --version
   - which g++-4.8
   - g++ --version 
+
+  # append the bazel default bazelrc to travis-ci/bazel.rc for using rules provided by bazel
   - cat ~/.bazelrc >> tools/travis-ci/bazel.rc
   - ./bazel_configure.py
+
+  # build heron
   - bazel --bazelrc=tools/travis-ci/bazel.rc build heron/...
+
+  # run heron unit tests
   - bazel --bazelrc=tools/travis-ci/bazel.rc test  heron/...
+
+  # build release packages
   - bazel --bazelrc=tools/travis-ci/bazel.rc build release:packages
