@@ -27,6 +27,7 @@ You must have the following installed to compile Heron:
 * [Perl](https://www.perl.org/) >= 5.8.8
 
 (TODO: add separate Linux and Mac OS X sections) Export CC and CXX variables
+
 ```bash
 $ export CC=/usr/bin/clang
 $ export CXX=/usr/bin/clang++
@@ -93,17 +94,15 @@ target](http://bazel.io/docs/build-ref.html#targets). This will package all
 Heron executables into `.tar` and `.tar.gz` files at once. You must specify the
 following when building a release package:
 
-* A release name using the `RELEASE` parameter. For Bazel, this takes the form
-  of `--define RELEASE={name}`.
-* An OS-specific configuration using the `--config` flag.
-  This can take one of the following values: `darwin` (Mac OS X), `ubuntu`
-  (Ubuntu 12.04), `centos5` (CentOS 5).
+* An OS-specific configuration using the `--config` flag. This can take one of
+  the following values: `darwin` (Mac OS X), `ubuntu` (Ubuntu 12.04), `centos`
+  (CentOS 5).
 
 Here's an example build command:
 
 ```bash
 $ cd /path/to/heron/repo
-$ bazel build --config=darwin --define RELEASE=0.1.0-SNAPSHOT release:packages
+$ bazel build --config=darwin release:packages
 ```
 
 ### Build Directory for Full Releases
