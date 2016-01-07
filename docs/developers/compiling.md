@@ -20,10 +20,18 @@ You must have the following installed to compile Heron:
 * [Autoconf](http://www.gnu.org/software/autoconf/autoconf.html) >= 2.6.3
 * [Automake](https://www.gnu.org/software/automake/) >= 1.11.1
 * [GNU Make](https://www.gnu.org/software/make/) >= 3.81
+* [GNU Libtool](http://www.gnu.org/software/libtool/) >= 2.4.6
 * [gcc/g++](https://gcc.gnu.org/) >= 4.8.2 (Linux platforms)
 * [CMake](https://cmake.org/) >= 2.6-patch 4
-* [Python](https://www.python.org/) >= 2.7
+* [Python](https://www.python.org/) >= 2.7 (not including Python 3.x)
 * [Perl](https://www.perl.org/) >= 5.8.8
+
+(TODO: add separate Linux and Mac OS X sections) Export CC and CXX variables
+```bash
+$ export CC=/usr/bin/clang
+$ export CXX=/usr/bin/clang++
+$ echo $CC $CXX
+```
 
 ## Installing Bazel
 
@@ -111,42 +119,7 @@ bazel-genfiles/release/heron-api-unversioned.tar.gz
 # etc
 ```
 
-## Running Unit Tests
+## Testing Heron
 
-You can run unit tests for Heron using the `bazel test` command.
-
-You must specify an OS-specific configuration using the `--config` flag. This
-can take one of the following values: `darwin` (Mac OS X), `ubuntu` (Ubuntu
-12.04), `centos5` (CentOS 5).
-
-Here's an example test command:
-
-```bash
-$ bazel test --config=darwin heron/state/tests/java:local_file_state_manager_unittest
-```
-
-### Discovering Test Targets
-
-To fetch a full listing of all Bazel test targets:
-
-```bash
-$ bazel query 'kind(".*_test rule", ...)'
-```
-
-For **Java** targets only:
-
-```bash
-$ bazel query 'kind("java_test rule", ...)'
-```
-
-For **C++** targets:
-
-```bash
-$ bazel query 'kind("cc_test rule", ...)'
-```
-
-For **Python** targets:
-
-```bash
-$ bazel query 'kind("pex_test rule", ...)'
-```
+There are a wide variety of unit tests available in Heron's codebase. For more
+information, see [Testing Heron](../contributors/testing.html).
