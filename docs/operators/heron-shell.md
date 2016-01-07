@@ -1,20 +1,25 @@
 # Heron Shell
 
-**Heron Shell** is not a shell in the traditional sense but rather a user
-interface that can be used to debug Heron topologies at the
-[container](../concepts/architecture.html#container). Heron Shell consists of
-two basic components:
+The **Heron Shell** is not a shell in the traditional sense but rather a
+user interface that can be used to debug Heron topologies at the
+[container](../concepts/architecture.html#container) level. Heron Shell
+consists of two basic components:
 
 1. A web UI that relies on a REST API that exposes information about the Heron
 container.
 2. An HTTP server that exposes that REST API. This server runs as a separate
 process in each container.
 
-The port to connect to heron shell for each container is stored in physical
-plan. Heron tracker picks up this port and connects to shell for appropriate use
-cases. See the next section for more details.
+The port to connect to the Heron Shell for each container is stored in
+each topology's [physical
+plan](../concepts/topologies.html#physical-plan). [Heron
+Tracker](heron-tracker.html) picks up this port and connects to the
+Heron Shell for appropriate use cases. See the [next
+section](#heron-shell-ui) for more details.
 
 ## Heron Shell UI
+
+The Heron Shell's UI for a topology looks something like this:
 
 ![Heron Shell](img/heron-shell.png)
 
