@@ -83,7 +83,7 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 
 TopologyBuilder topologyBuilder = new TopologyBuilder();
 // Build the topology
-StormSubmitter.submitTopology("my-topology", conf, topologyBuilder.createTopology());
+HeronSubmitter.submitTopology("my-topology", conf, topologyBuilder.createTopology());
 ```
 
 ## Managing Topologies
