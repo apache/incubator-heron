@@ -113,9 +113,9 @@ Here are some example Heron spouts:
 
 ## Bolts
 
-Bolts are the processing units within a Heron cluster. Bolts take tuples from
-streams and perform any processing logic that you'd like on each tuple. Here are
-some example Heron bolts:
+Bolts are the processing units within a Heron cluster. Bolts take tuples
+from streams and perform any processing logic that you'd like on each
+tuple. Here are some example Heron bolts:
 
 * [`ExclamationBolt`]({{book.root_url}}/heron/examples/src/java/com/twitter/heron/examples/AckingTopology.java#L61)
 * [`CountBolt`]({{book.root_url}}/heron/examples/src/java/com/twitter/heron/examples/TaskHookTopology.java#L179)
@@ -142,11 +142,23 @@ As in Storm, in Heron you can run topologies in local mode for the sake of
 debugging. For more information, see the [Storm
 documentation](http://storm.apache.org/tutorial#running-exclamationtopology-in-local-mode)
 
-The crucial difference in Heron is that if you use the `HeronSubmitter` rather
-than the `StormSubmitter` for your topology, you'll need to use Heron's
-`LocalMode`...
+## Integrations
 
-TODO
+A wide variety of extensions have been built for using Storm in
+conjunction with other systems. Due to Heron's backwards compatibility
+with Storm, you can use those extensions in your Heron topologies as
+well. Here are some examples:
+
+* [Kafka](http://storm.apache.org/documentation/storm-kafka.html)
+* [HDFS](http://storm.apache.org/documentation/storm-hdfs.html)
+* [HBase](http://storm.apache.org/documentation/storm-hbase.html)
+* [Hive](http://storm.apache.org/documentation/storm-hive.html)
+* [JDBC](http://storm.apache.org/documentation/storm-jdbc.html)
+* [Redis](http://storm.apache.org/documentation/storm-redis.html)
+* [Solr](http://storm.apache.org/documentation/storm-solr.html)
+* [Microsoft Azure Event
+  Hubs](http://storm.apache.org/documentation/storm-eventhubs.html)
+* [Flux](http://storm.apache.org/documentation/flux.html)
 
 ## Advanced Topics
 
