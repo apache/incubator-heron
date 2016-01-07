@@ -159,8 +159,3 @@ well. Here are some tutorials for a handful of existing extensions:
 * [Microsoft Azure Event
   Hubs](http://storm.apache.org/documentation/storm-eventhubs.html)
 * [Flux](http://storm.apache.org/documentation/flux.html)
-
-## Advanced Topics
-
-* [Transactional Topologies using Trident](http://storm.apache.org/documentation/Trident-tutorial.html)
-* [Common Patterns](http://storm.apache.org/documentation/Common-patterns.html)
