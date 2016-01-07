@@ -147,7 +147,7 @@ documentation](http://storm.apache.org/tutorial#running-exclamationtopology-in-l
 A wide variety of extensions have been built for using Storm in
 conjunction with other systems. Due to Heron's backwards compatibility
 with Storm, you can use those extensions in your Heron topologies as
-well. Here are some examples:
+well. Here are some tutorials for a handful of existing extensions:
 
 * [Kafka](http://storm.apache.org/documentation/storm-kafka.html)
 * [HDFS](http://storm.apache.org/documentation/storm-hdfs.html)
