@@ -21,6 +21,12 @@ For information beyond the documentation:
   Heron](https://blog.twitter.com/2015/flying-faster-with-twitter-heron) (blog
   post)
 
+## Update
+
+Currently, we are working on ensuring that Heron is easy to install and run in a 
+Mesos Cluster in AWS, Mesos/Aurora in AWS and in local laptop. Will post updates 
+as we progress.
+
 ## Heron Documentation
 
 Heron's OSS documentation is not yet publicly hosted. You can view the
@@ -104,4 +110,3 @@ There are some basic components of the docs that you should be aware of:
   holds generated HTML, while the `gitbook` directory holds all static assets.
 * The remaining folders hold Markdown documentation content (`concepts`,
   `contributors`, `developers`, and `operators`).
->>>>>>> master
