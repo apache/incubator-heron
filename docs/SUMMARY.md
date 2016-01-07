@@ -26,4 +26,5 @@
     * [Heron Instance](operators/configuration/instance.md)
     * [Metrics Manager](operators/configuration/metrics-manager.md)
   * [Heron Tracker](operators/heron-tracker.md)
+  * [Heron UI](operators/heron-ui.md)
   * [Heron Shell](operators/heron-shell.md)
