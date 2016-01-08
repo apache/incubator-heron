@@ -112,13 +112,13 @@ $ bazel build --config=darwin release:packages
 ### Build Directory for Full Releases
 
 All `.tar` and `.tar.gz` files generated during Bazel's build process for a full
-release can be found in `bazel-genfiles/release`:
+release can be found in `bazel-bin/release`:
 
 ```bash
-$ ls bazel-genfiles/release
+$ ls bazel-bin/release
 RELEASE
-bazel-genfiles/release/heron-api-unversioned.tar
-bazel-genfiles/release/heron-api-unversioned.tar.gz
+bazel-bin/release/heron-api.tar
+bazel-bin/release/heron-api.tar.gz
 # etc
 ```
 
