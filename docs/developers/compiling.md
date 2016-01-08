@@ -112,7 +112,7 @@ $ bazel build --config=darwin release:packages
 ### Build Directory for Full Releases
 
 All `.tar` and `.tar.gz` files generated during Bazel's build process for a full
-release can be found in `bazel-genfiles/release`:
+release can be found in `bazel-bin/release`:
 
 ```bash
 $ ls bazel-bin/release
