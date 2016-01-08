@@ -115,10 +115,10 @@ All `.tar` and `.tar.gz` files generated during Bazel's build process for a full
 release can be found in `bazel-genfiles/release`:
 
 ```bash
-$ ls bazel-genfiles/release
-RELEASE
-bazel-genfiles/release/heron-api-unversioned.tar
-bazel-genfiles/release/heron-api-unversioned.tar.gz
+$ ls bazel-bin/release
+bazel-bin/release/heron-api.tar.gz
+bazel-bin/release/heron-cli.tar.gz
+bazel-bin/release/heron-core.tar.gz
 # etc
 ```
 
