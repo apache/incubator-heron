@@ -5,7 +5,7 @@ realpath() {
   echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
 }
 
-DOCKER_DIR=$(realpath $(dirname $0))
+DOCKER_DIR=$(dirname $(realpath $0))
 PROJECT_DIR=$(dirname $DOCKER_DIR )
 SRC_TAR="$DOCKER_DIR/src.tar.gz"
 
@@ -20,7 +20,7 @@ trap cleanup EXIT
 
 generate_source() {
   echo "Generating source tarball"
-  tar -C $PROJECT_DIR --exclude-from=$DOCKER_DIR/.tarignore -czf $SRC_TAR .
+  tar --exclude-from=$DOCKER_DIR/.tarignore -C $PROJECT_DIR -czf $SRC_TAR .
 }
 
 run_build() {
@@ -54,10 +54,10 @@ case $# in
   *)
     echo "Usage: $0 <platform> <version_string> [source-tarball] <output-directory> "
     echo "  "
-    echo "Platforms: ubuntu, centos"
+    echo "Platforms: ubuntu14.04, centos7"
     echo "  "
     echo "Example:"
-    echo "  ./build.sh ubuntu 0.1.0-SNAPSHOT ."
+    echo "  ./build.sh ubuntu14.04 0.1.0-SNAPSHOT ."
     echo "  "
     echo "NOTE: If running on OSX, the output directory will need to "
     echo "      be under /Users so virtualbox has access to."
