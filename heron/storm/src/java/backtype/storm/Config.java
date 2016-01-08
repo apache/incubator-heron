@@ -1,12 +1,14 @@
 package backtype.storm;
 
-import backtype.storm.serialization.IKryoDecorator;
-import backtype.storm.serialization.IKryoFactory;
-import com.esotericsoftware.kryo.Serializer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.esotericsoftware.kryo.Serializer;
+
+import backtype.storm.serialization.IKryoDecorator;
+import backtype.storm.serialization.IKryoFactory;
 
 /**
  * Topology configs are specified as a plain old map. This class provides a
@@ -23,7 +25,7 @@ import java.util.Map;
  * use of them by reading them in the prepare method of Bolts or the open method of
  * Spouts. .</p>
  */
-public class Config extends HashMap<String, Object> {
+public class Config extends com.twitter.heron.api.Config {
 
     /**
      * True if Storm should timeout messages or not. Defaults to true. This is meant to be used
