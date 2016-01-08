@@ -1,0 +1,59 @@
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+# 
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+SLAVES=1
+NET_PREFIX="192.168.25."
+
+NODES={"master" => NET_PREFIX + "5"}
+(0..SLAVES-1).each do |i| NODES["slave#{i}"] = NET_PREFIX + (6 + i).to_s end
+
+# create hosts
+File.open('.vagrant/hosts', 'w') do |file|
+  file.write("127.0.0.1\tlocalhost\n")
+  file.write("\n# cluster nodes\n")
+  NODES.each do |name, ip| file.write("#{ip}\t#{name}\n") end
+end
+
+Vagrant.configure(2) do |config|
+  config.vm.box = "ubuntu/trusty64"
+  config.vm.synced_folder "../", "/vagrant"
+
+  config.vm.define "master" do |master|
+    master.vm.provider "virtualbox" do |v|
+      v.memory = 4096
+    end
+
+    master.vm.hostname = "master"
+    master.vm.network :private_network, ip: NODES["master"]
+
+    master.vm.provision "shell", path: "init.sh", args: "master"
+  end
+
+  (0..SLAVES-1).each do |i|
+    config.vm.define "slave#{i}" do |slave|
+      slave.vm.provider "virtualbox" do |v|
+        v.memory = 2048
+        v.cpus = 2
+      end
+
+      slave.vm.hostname = "slave#{i}"
+      slave.vm.network :private_network, ip: NODES[slave.vm.hostname]
+
+      slave.vm.provision "shell", path: "init.sh", args: "slave"
+    end
+  end
+end
