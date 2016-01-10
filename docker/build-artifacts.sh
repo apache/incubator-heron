@@ -45,7 +45,7 @@ dockerfile_path_for_platform() {
 }
 
 copy_bazel_rc() {
-  cp $PROJECT_DIR/tools/docker/bazelrc $DOCKER_DIR/bazelrc
+  cp $PROJECT_DIR/tools/docker/bazel.rc $DOCKER_DIR/bazelrc
 }
 
 run_build() {
