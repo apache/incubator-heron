@@ -111,6 +111,7 @@ pkg_tar(
     package_dir = "bin",
     extension = "tar.gz",
     files = heron_bin_files(),
+    mode = "0755",
 )
 
 pkg_tar(
@@ -118,6 +119,7 @@ pkg_tar(
     package_dir = "conf",
     extension = "tar.gz",
     files = heron_conf_files(),
+    mode = "0644",
 )
 
 pkg_tar(
@@ -125,6 +127,7 @@ pkg_tar(
     package_dir = "lib",
     extension = "tar.gz",
     files = heron_lib_files(),
+    mode = "0644",
 )
 
 pkg_tar(
