@@ -45,6 +45,7 @@ filegroup(
         ":heron-metrics-api",
         ":heron-storm-compat",
         ":heron-tracker",
+        ":heron",
     ],
 )
 
