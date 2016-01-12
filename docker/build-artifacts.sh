@@ -82,7 +82,7 @@ run_build() {
   verify_source_exists $SOURCE_TARBALL
 
   echo "Building heron-compiler container"
-  docker build -t heron-compiler -f $DOCKER_FILE $SCRATCH_DIR
+  docker build -t heron-compiler:$PLATFORM -f $DOCKER_FILE $SCRATCH_DIR
 
   echo "Running build in container"
   docker run \
@@ -90,7 +90,7 @@ run_build() {
     -e HERON_VERSION=$HERON_VERSION \
     -v "$SOURCE_TARBALL:/src.tar.gz:ro" \
     -v "$OUTPUT_DIRECTORY:/dist" \
-    -it "heron-compiler" /compile.sh
+    -it heron-compiler:$PLATFORM /compile.sh
 }
 
 case $# in
