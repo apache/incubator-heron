@@ -10,6 +10,7 @@
   * [Testing Heron](contributors/testing.md)
 * [Developers](developers/README.md)
   * [Compiling Heron](developers/compiling.md)
+    * [Docker](developers/compiling/docker.md)
   * [Custom Serialization](developers/serialization.md)
   * [Heron's Data Model](developers/data-model.md)
 * [Operators](operators/README.md)
