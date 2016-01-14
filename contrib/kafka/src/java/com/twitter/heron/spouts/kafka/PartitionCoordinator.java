@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.twitter.heron.spouts.kafka.SpoutConfig.ZkHosts;
-import com.twitter.heron.storage.StormMetadataStore;
+import com.twitter.heron.storage.MetadataStore;
 
 public class PartitionCoordinator {
   public static final Logger LOG = LoggerFactory.getLogger(PartitionCoordinator.class);
@@ -48,7 +48,7 @@ public class PartitionCoordinator {
   private final String topic;
   private final int refreshFreqMSecs;
 
-  private StormMetadataStore storage;
+  private MetadataStore storage;
   private KafkaMetric.OffsetMetric kafkaOffsets;
   private CuratorFramework curator;
 
@@ -67,7 +67,7 @@ public class PartitionCoordinator {
       int taskIndex,
       int totalTasks,
       String topologyInstanceId,
-      StormMetadataStore storage,
+      MetadataStore storage,
       KafkaMetric.OffsetMetric kafkaOffsetMetric) {
     this.spoutConfig = spoutConfig;
     this.taskIndex = taskIndex;
