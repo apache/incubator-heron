@@ -117,7 +117,6 @@ public class SpoutConfig implements Serializable {
       this.zkRoot = zkRoot;
     }
     this.id = id;
-    zkServers.add("newstormzookeeper.local.twitter.com");  // default location to store offset in zk
   }
 
   /**
