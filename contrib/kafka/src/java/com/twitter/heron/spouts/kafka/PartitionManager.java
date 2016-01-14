@@ -33,7 +33,7 @@ import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.twitter.heron.storage.StormMetadataStore;
+import com.twitter.heron.storage.MetadataStore;
 
 import backtype.storm.Config;
 import backtype.storm.metric.api.CombinedMetric;
@@ -87,7 +87,7 @@ public class PartitionManager {
   private final SpoutConfig spoutConfig;
   private final String topologyInstanceId;
   private final Map stormConf;
-  private final StormMetadataStore storage;
+  private final MetadataStore storage;
   private final KafkaMetric.OffsetMetric kafkaOffsetMetric;
 
   private SimpleConsumer consumer;
@@ -103,7 +103,7 @@ public class PartitionManager {
       Map stormConf,
       SpoutConfig spoutConfig,
       GlobalPartitionId id,
-      StormMetadataStore storage,
+      MetadataStore storage,
       KafkaMetric.OffsetMetric kafkaOffsetMetric) {
     this.partition = id;
     this.spoutConfig = spoutConfig;

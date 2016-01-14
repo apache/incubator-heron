@@ -33,8 +33,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.twitter.heron.spouts.kafka.PartitionManager.KafkaMessageId;
-import com.twitter.heron.storage.StormMetadataStore;
-import com.twitter.heron.storage.StormStoreSerializer;
+import com.twitter.heron.storage.MetadataStore;
+import com.twitter.heron.storage.StoreSerializer;
 
 import backtype.storm.Config;
 import backtype.storm.metric.api.MultiCountMetric;
@@ -56,7 +56,7 @@ public class KafkaSpout extends BaseRichSpout {
   protected SpoutOutputCollector collector;
   protected TransferCollector transferCollector;
   protected PartitionCoordinator coordinator;
-  protected StormMetadataStore storage;
+  protected MetadataStore storage;
   protected MultiCountMetric spoutMetrics;
   protected IOExecutorService.SingleThreadIOExecutorService executor;
   /** Ctor */
@@ -263,9 +263,9 @@ public class KafkaSpout extends BaseRichSpout {
 
   private void initializeStorage(Map conf, TopologyContext topologyContext) {
 
-    // TODO: Add an implementation of StormMetadataStore. Even better if the spout takes
+    // TODO: Add an implementation of MetadataStore. Even better if the spout takes
     // a factory.
-    // storage = < An Implemenation of a StormMetadataStore >
+    // storage = < An Implemenation of a MetadataStore >
 
     int updateMsec = getWithDefault(
 -        conf, SpoutConfig.TOPOLOGY_STORE_UPDATE_MSEC, spoutConfig.storeUpdateMsec);
@@ -273,7 +273,7 @@ public class KafkaSpout extends BaseRichSpout {
     storage.initialize(
         "offset_" + spoutConfig.id, conf.get(Config.TOPOLOGY_NAME).toString(),
         topologyContext.getThisComponentId().toString(),
-        new StormStoreSerializer.DefaultSerializer<Map<Object, Object>>());
+        new StoreSerializer.DefaultSerializer<Map<Object, Object>>());
     // Start commit thread.
     Runnable refreshTask = new Runnable() {
       @Override
