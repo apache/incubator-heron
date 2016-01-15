@@ -112,8 +112,6 @@ def heron_cli_bin_files():
 def heron_cli_conf_files():
     return [
         "//heron/config:config-internals-yaml",
-        "//heron/cli2/src/python:scheduler-config",
-        "//heron/cli2/src/python:local-scheduler-config",
     ]
 
 def heron_cli_lib_files():
