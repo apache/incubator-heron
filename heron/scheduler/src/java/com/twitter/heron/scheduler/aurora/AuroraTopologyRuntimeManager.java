@@ -1,9 +1,6 @@
 package com.twitter.heron.scheduler.aurora;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,25 +26,16 @@ import com.twitter.heron.scheduler.util.TopologyUtility;
 public class AuroraTopologyRuntimeManager implements IRuntimeManager {
   private static final Logger LOG = Logger.getLogger(AuroraTopologyRuntimeManager.class.getName());
   private static final String HERON_BATCH_SIZE = "heron.batch.size";
+  private static final String HERON_CONTROLLER_AURORA = "heron_controller.aurora";
   private RuntimeManagerContext context;
   private String topologyName;
   private String dc;
   private String role;
   private String environ;
 
-  private void writeAuroraFile() {
-    InputStream is = this.getClass().getResourceAsStream("/heron_controller.aurora");
-    File auroraFile = new File("heron_controller.aurora");
-    if (auroraFile.exists()) {
-      auroraFile.delete();
-    }
-    try (FileWriter fw = new FileWriter(auroraFile)) {
-      fw.write(ShellUtility.inputstreamToString(is));
-      auroraFile.deleteOnExit();
-    } catch (IOException e) {
-      LOG.severe("Couldn't find heron_controller.aurora in classpath.");
-      throw new RuntimeException("Couldn't find heron.aurora in classpath");
-    }
+  private String getHeronControllerAuroraPath() {
+    String configPath = context.getConfig().get(Constants.HERON_CONFIG_PATH).toString();
+    return Paths.get(configPath, HERON_CONTROLLER_AURORA).toString();
   }
 
   protected boolean launchAuroraJob(Map<String, String> args) {
@@ -59,7 +47,7 @@ public class AuroraTopologyRuntimeManager implements IRuntimeManager {
     }
     auroraCmd.add(String.format("%s/%s/%s/%s",
         dc, role, "devel", args.get("JOB_NAME")));
-    auroraCmd.add("heron_controller.aurora");
+    auroraCmd.add(getHeronControllerAuroraPath());
     if (context.isVerbose()) {
       auroraCmd.add("--verbose");
     }
@@ -129,11 +117,11 @@ public class AuroraTopologyRuntimeManager implements IRuntimeManager {
     args.put("DC", dc);
     args.put("RUN_ROLE", role);
     args.put("HERON_PACKAGE",
-        context.getProperty(Constants.HERON_RELEASE_TAG, "heron-core-package"));
+        context.getProperty(Constants.HERON_RELEASE_PACKAGE_NAME, "heron-core-package"));
     args.put("RELEASE_ROLE",
-        context.getProperty(Constants.HERON_RELEASE_USER_NAME, "heron"));
+        context.getProperty(Constants.HERON_RELEASE_PACKAGE_ROLE, "heron"));
     args.put("VERSION",
-        context.getProperty(Constants.HERON_RELEASE_VERSION, "live"));
+        context.getProperty(Constants.HERON_RELEASE_PACKAGE_VERSION, "live"));
     if (activate) {
       args.put("CONTROLLERCMD", "/activate");
     } else {
@@ -218,8 +206,10 @@ public class AuroraTopologyRuntimeManager implements IRuntimeManager {
         String.format("%s/%s/%s/%s", dc, role, environ, topologyName),
         context.isVerbose() ? "--verbose" : ""
     };
-    if (0 == ShellUtility.runProcess(
-        context.isVerbose(), auroraCmd, null, null)) {
+
+    LOG.info("auroraCmd=" + Arrays.toString(auroraCmd));
+
+    if (0 == ShellUtility.runProcess(context.isVerbose(), auroraCmd, null, null)) {
       try {
         ExecutionEnvironment.ExecutionState executionState =
             context.getStateManagerAdaptor().getExecutionState().get();
@@ -248,7 +238,6 @@ public class AuroraTopologyRuntimeManager implements IRuntimeManager {
 
   @Override
   public boolean prepareDeactivate() {
-    writeAuroraFile();
     return controlTopology(false) && verifyControllerSuccess(false);
   }
 
@@ -259,7 +248,6 @@ public class AuroraTopologyRuntimeManager implements IRuntimeManager {
 
   @Override
   public boolean prepareActivate() {
-    writeAuroraFile();
     return controlTopology(true) && verifyControllerSuccess(true);
   }
 
