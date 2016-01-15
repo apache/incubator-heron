@@ -25,6 +25,7 @@ TOPOLOGY_RUN_JARS = ['lib/protobuf-java-2.5.0.jar',
                      'lib/slf4j-api-1.7.7.jar',
                      'lib/slf4j-jdk14-1.7.7.jar']
 SCHEDULER_RUN_JARS = ['lib/heron-scheduler.jar']
+APPEND_CLASSPATH = 'append_classpath'
 
 # Create the logger
 Log = logging.getLogger('heron_cli2')
@@ -223,7 +224,7 @@ def submitfatjar(namespace):
 
   exec_heron_class(klass,
                    get_heron_libs(TOPOLOGY_RUN_JARS),
-                   extrajars=[jarfile],
+                   extrajars=[jarfile] + [namespace[APPEND_CLASSPATH]],
                    args=args)
 
   try:
@@ -385,6 +386,7 @@ COMMANDS = {
 def create_parser():
   # Main parser
   parser = argparse.ArgumentParser(epilog = 'Documentation at http://go/heron')
+  parser.add_argument('--' + APPEND_CLASSPATH, help='Jars to be added to classpath', default='')
   subparsers = parser.add_subparsers()
 
   # submit
