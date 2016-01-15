@@ -25,13 +25,7 @@ import com.twitter.heron.state.curator.CuratorStateManager;
  * 2. getSchedulerLocation return NO SCHEDULER_REST_ENDPOINT directly
  */
 public class AuroraStateManager extends CuratorStateManager {
-  public static final String ZKHOST_PREFIX = "zkhost";
-  public static final String ZKPORT_PREFIX = "zkport";
-  public static final String ZKROOT_PREFIX = "zkroot";
-  public static final String TUNNEL_PREFIX = "tunnel";
-
   private static final Logger LOG = Logger.getLogger(AuroraStateManager.class.getName());
-
   private List<Process> processHandles = new ArrayList<>();
 
   @Override
@@ -39,21 +33,13 @@ public class AuroraStateManager extends CuratorStateManager {
     Map<Object, Object> newConf = new HashMap<>();
     newConf.putAll(conf);
 
-    String dc = (String) conf.get(Constants.DC);
-
-    String zkHost = (String) conf.get(
-        ZKHOST_PREFIX + "." + dc);
-    Integer zkPort = Integer.parseInt((String) conf.get(ZKPORT_PREFIX + "." + dc));
-
-    String zkRoot = (String) conf.get((ZKROOT_PREFIX + "." + dc));
-
-    String tunnelHost = (String) conf.get(
-        TUNNEL_PREFIX + "." + dc);
+    String zkHost = (String) conf.get(Constants.ZKHOST);
+    Integer zkPort = Integer.parseInt((String) conf.get(Constants.ZKPORT));
+    String zkRoot = (String) conf.get(Constants.ZKROOT);
+    String tunnelHost = (String) conf.get(Constants.TUNNEL);
 
     // Check tunnel needed
-    int timeout =
-        Integer.parseInt((String) conf.get(Constants.ZK_CONNECTION_TIMEOUT_MS));
-
+    int timeout = Integer.parseInt((String) conf.get(Constants.ZK_CONNECTION_TIMEOUT_MS));
     boolean isVerbose = Boolean.parseBoolean((String) conf.get(Constants.HERON_VERBOSE));
 
     if (!NetworkUtility.isLocationReachable(timeout, 1, 1000, zkHost, zkPort, isVerbose)) {
@@ -70,7 +56,7 @@ public class AuroraStateManager extends CuratorStateManager {
       if (NetworkUtility.isLocationReachable(timeout, 10, 1000, "localhost", freePort, isVerbose)) {
         String newHostPort = String.format("%s:%d", "localhost", freePort);
         LOG.info("Connecting to zookeeper at " + newHostPort);
-        newConf.put(ZK_CONNECTION_STRING, newHostPort);
+        newConf.put(Constants.ZK_CONNECTION_STRING, newHostPort);
         newConf.put(ROOT_ADDRESS, zkRoot);
       } else {
         throw new RuntimeException("Failed to setup the tunnel to Zookeeper Server");
@@ -78,7 +64,7 @@ public class AuroraStateManager extends CuratorStateManager {
     } else {
       String newHostPort = String.format("%s:%d", zkHost, zkPort);
       LOG.info("Connecting to zookeeper at " + String.format("%s:%d", zkHost, zkPort));
-      newConf.put(ZK_CONNECTION_STRING, newHostPort);
+      newConf.put(Constants.ZK_CONNECTION_STRING, newHostPort);
       newConf.put(ROOT_ADDRESS, zkRoot);
     }
 

@@ -1,10 +1,7 @@
 package com.twitter.heron.scheduler.aurora;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,20 +19,16 @@ import com.twitter.heron.scheduler.api.ILauncher;
 import com.twitter.heron.scheduler.api.PackingPlan;
 import com.twitter.heron.scheduler.api.context.LaunchContext;
 import com.twitter.heron.scheduler.service.SubmitterMain;
-import com.twitter.heron.scheduler.twitter.PackerUploader;
 import com.twitter.heron.scheduler.util.NetworkUtility;
 import com.twitter.heron.scheduler.twitter.PackerUtility;
 import com.twitter.heron.scheduler.util.ShellUtility;
 import com.twitter.heron.scheduler.util.TopologyUtility;
-import com.twitter.heron.state.curator.CuratorStateManager;
 
 /**
  * Launch topology on aurora.
  */
 public class AuroraLauncher implements ILauncher {
   private static final Logger LOG = Logger.getLogger(AuroraLauncher.class.getName());
-
-  public static final String HERON_DIR = "heron.dir";
   private static final String HERON_AURORA = "heron.aurora";
 
   //  private DefaultConfigLoader context;
@@ -52,7 +45,6 @@ public class AuroraLauncher implements ILauncher {
     this.environ = context.getPropertyWithException(Constants.ENVIRON);
     this.role = context.getPropertyWithException(Constants.ROLE);
     this.topology = context.getTopology();
-    writeAuroraFile();
   }
 
   @Override
@@ -83,9 +75,10 @@ public class AuroraLauncher implements ILauncher {
     // Set the HeronReleaseState
     ExecutionEnvironment.HeronReleaseState.Builder releaseBuilder =
         ExecutionEnvironment.HeronReleaseState.newBuilder();
-    releaseBuilder.setReleaseUsername(context.getPropertyWithException(Constants.HERON_RELEASE_USER_NAME));
-    releaseBuilder.setReleaseTag(context.getPropertyWithException(Constants.HERON_RELEASE_TAG));
-    releaseBuilder.setReleaseVersion(context.getPropertyWithException(Constants.HERON_RELEASE_VERSION));
+    // TODO(jwu): Update the following constants to proper names.
+    releaseBuilder.setReleaseUsername(context.getPropertyWithException(Constants.HERON_RELEASE_PACKAGE_ROLE));
+    releaseBuilder.setReleaseTag(context.getPropertyWithException(Constants.HERON_RELEASE_PACKAGE_NAME));
+    releaseBuilder.setReleaseVersion(context.getPropertyWithException(Constants.HERON_RELEASE_PACKAGE_VERSION));
     releaseBuilder.setUploaderVersion(context.getProperty(Constants.HERON_UPLOADER_VERSION, "live"));
 
     builder.setReleaseState(releaseBuilder);
@@ -96,38 +89,37 @@ public class AuroraLauncher implements ILauncher {
     }
   }
 
-  private void writeAuroraFile() {
-    InputStream is = this.getClass().getResourceAsStream("/heron.aurora");
-    File auroraFile = new File(HERON_AURORA);
-    if (auroraFile.exists()) {
-      auroraFile.delete();
-    }
-    try (FileWriter fw = new FileWriter(auroraFile)) {
-      fw.write(ShellUtility.inputstreamToString(is));
-      auroraFile.deleteOnExit();
-    } catch (IOException e) {
-      LOG.severe("Couldn't find heron.aurora in classpath.");
-      throw new RuntimeException("Couldn't find heron.aurora in classpath");
-    }
-  }
-
   private String formatJavaOpts(String javaOpts) {
-    String javaOptsBase64 = DatatypeConverter.printBase64Binary(
-        javaOpts.getBytes(Charset.forName("UTF-8")));
+    String javaOptsBase64 = DatatypeConverter.printBase64Binary(javaOpts.getBytes(Charset.forName("UTF-8")));
     return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
   }
 
-
   private String getZkRoot() {
-    return context.getPropertyWithException(CuratorStateManager.ZKROOT_PREFIX + "." + dc);
+    return context.getPropertyWithException(Constants.ZKROOT);
   }
 
   private String getZkHostPort() {
-    String zkHost = context.getPropertyWithException(
-        CuratorStateManager.ZKHOST_PREFIX + "." + dc);
-    String zkPort = context.getPropertyWithException(
-        CuratorStateManager.ZKPORT_PREFIX + "." + dc);
+    String zkHost = context.getPropertyWithException(Constants.ZKHOST);
+    String zkPort = context.getPropertyWithException(Constants.ZKPORT);
     return zkHost + ":" + zkPort;
+  }
+
+  private void addCustomBindProperties(Map<String, String> auroraProperties) {
+    String keyPrefix = Constants.HERON_AURORA_BIND_PREFIX;
+
+    for(Object key: context.getConfig().keySet()) {
+      String strKey = key.toString();
+      if (strKey.startsWith(keyPrefix)) {
+        String bindKey = strKey.substring(keyPrefix.length());
+        String bindValue = context.getConfig().get(key).toString();
+        auroraProperties.put(bindKey, bindValue);
+      }
+    }
+  }
+
+  private String getHeronAuroraPath() {
+    String configDir = context.getConfig().get(Constants.HERON_CONFIG_PATH).toString();
+    return Paths.get(configDir, HERON_AURORA).toString();
   }
 
   @Override
@@ -162,15 +154,11 @@ public class AuroraLauncher implements ILauncher {
     auroraProperties.put("JOB_NAME", topology.getName());
     auroraProperties.put("LOG_DIR",
         context.getProperty("heron.logging.directory", "log-files"));
-    auroraProperties.put("HERON_PACKAGE",
-        context.getPropertyWithException(Constants.HERON_RELEASE_TAG));
     auroraProperties.put("METRICS_MGR_CLASSPATH", "metrics-mgr-classpath/*");
     auroraProperties.put("NUM_SHARDS", "" + (1 + TopologyUtility.getNumContainer(topology)));
     auroraProperties.put("PKG_TYPE", (FileUtility.isOriginalPackageJar(
         FileUtility.getBaseName(SubmitterMain.getOriginalPackageFile())) ? "jar" : "tar"));
     auroraProperties.put("RAM_PER_CONTAINER", containerResource.ram + "");
-    auroraProperties.put("RELEASE_ROLE",
-        context.getProperty(Constants.HERON_RELEASE_USER_NAME, "heron"));
     auroraProperties.put("RUN_ROLE", role);
     auroraProperties.put("STMGR_BINARY", "heron-stmgr");
     auroraProperties.put("TMASTER_BINARY", "heron-tmaster");
@@ -182,11 +170,12 @@ public class AuroraLauncher implements ILauncher {
     auroraProperties.put("TOPOLOGY_NAME", topology.getName());
     auroraProperties.put("TOPOLOGY_PKG",
         PackerUtility.getTopologyPackageName(topology.getName(),
-            context.getProperty(Constants.HERON_RELEASE_TAG, "live")));
-    auroraProperties.put("VERSION",
-        context.getProperty(PackerUploader.HERON_PACKER_PKGVERSION, "live"));
+            context.getProperty(Constants.HERON_RELEASE_PACKAGE_NAME, "live")));
     auroraProperties.put("ZK_NODE", getZkHostPort());
     auroraProperties.put("ZK_ROOT", getZkRoot());
+
+    addCustomBindProperties(auroraProperties);
+
     ArrayList<String> auroraCmd = new ArrayList<>(Arrays.asList(
         "aurora", "job", "create", "--verbose", "--wait-until", "RUNNING"));
     for (String binding : auroraProperties.keySet()) {
@@ -198,16 +187,16 @@ public class AuroraLauncher implements ILauncher {
         auroraProperties.get("RUN_ROLE"),
         auroraProperties.get("ENVIRON"),
         auroraProperties.get("JOB_NAME")));
-    auroraCmd.add(HERON_AURORA);
-    return 0 == ShellUtility.runProcess(
-        true, auroraCmd.toArray(new String[auroraCmd.size()]),
-        new StringBuilder(), new StringBuilder());
+    auroraCmd.add(getHeronAuroraPath());
+
+    String[] cmdline = auroraCmd.toArray(new String[auroraCmd.size()]);
+    LOG.info("cmdline=" + Arrays.toString(cmdline));
+
+    return 0 == ShellUtility.runProcess(true, cmdline,new StringBuilder(), new StringBuilder());
   }
 
   @Override
   public boolean postLaunch(PackingPlan packing) {
     return true;
   }
-
-
 }
