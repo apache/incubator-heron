@@ -85,6 +85,15 @@ install_heron_files = rule(
 # Convenience macro for grouping all Heron API files
 ################################################################################
 def heron_api_files():
+    return heron_api_bin_files() + heron_api_conf_files() + heron_api_lib_files()
+
+def heron_api_bin_files():
+    return []
+
+def heron_api_conf_files():
+    return []
+
+def heron_api_lib_files():
     return [
         "//heron/api/src/java:api-java",
     ]
@@ -92,6 +101,9 @@ def heron_api_files():
 ################################################################################
 # Convenience macros for Heron CLI files
 ################################################################################
+def heron_cli_files():
+    return heron_cli_bin_files() + heron_cli_lib_files() + heron_cli_conf_files()
+
 def heron_cli_bin_files():
     return [
         "//heron/cli2/src/python:heron-cli2",
@@ -113,12 +125,12 @@ def heron_cli_lib_files():
         "//3rdparty/logging:log4j-over-slf4j-java",
     ]
 
-def heron_cli_files():
-    return heron_cli_bin_files() + heron_cli_lib_files() + heron_cli_conf_files()
-
 ################################################################################
 # Convenience macros for Heron core files
 ################################################################################
+def heron_core_files():
+    return heron_core_bin_files() + heron_core_conf_files() + heron_core_lib_files()
+
 def heron_core_bin_files():
     return [
         "//heron/controller/src/python:heron-controller",
@@ -142,13 +154,19 @@ def heron_core_lib_files():
         "//heron/scheduler/src/java:heron-scheduler",
     ]
 
-def heron_core_files():
-    return heron_core_bin_files() + heron_core_conf_files() + heron_core_lib_files()
-
 ################################################################################
 # Convenience macros for Heron Metrics API files
 ################################################################################
 def heron_metrics_api_files():
+    return heron_metrics_api_bin_files() + heron_metrics_api_conf_files() + heron_metrics_api_lib_files()
+
+def heron_metrics_api_bin_files():
+    return []
+
+def heron_metrics_api_conf_files():
+    return []
+
+def heron_metrics_api_lib_files():
     return [
         "//heron/metricsmgr-api/src/java:metricsmgr-api-java",
     ]
@@ -157,6 +175,15 @@ def heron_metrics_api_files():
 # Convenience macros for Heron Storm Compatibility API files
 ################################################################################
 def heron_storm_compat_files():
+    return heron_storm_compat_bin_files() + heron_storm_compat_conf_files() + heron_storm_compat_lib_files()
+
+def heron_storm_compat_bin_files():
+    return []
+
+def heron_storm_compat_conf_files():
+    return []
+
+def heron_storm_compat_lib_files():
     return [
         "//heron/storm/src/java:storm-compatibility-java",
     ]
@@ -165,9 +192,54 @@ def heron_storm_compat_files():
 # Convenience macros for Heron Tracker files
 ################################################################################
 def heron_tracker_files():
+    return heron_tracker_bin_files() + heron_tracker_conf_files() + heron_tracker_lib_files()
+
+def heron_tracker_bin_files():
     return [
         "//heron/tracker/src/python:heron-tracker",
     ]
+
+def heron_tracker_conf_files():
+    return []
+
+def heron_tracker_lib_files():
+    return []
+
+################################################################################
+# Convenience macros for all Heron files
+################################################################################
+def heron_files():
+    return heron_bin_files() + heron_conf_files() + heron_lib_files()
+
+def heron_bin_files():
+    return list(set( \
+        heron_api_bin_files() + \
+        heron_cli_bin_files() +  \
+        heron_core_bin_files() +  \
+        heron_metrics_api_bin_files() +  \
+        heron_storm_compat_bin_files() +  \
+        heron_tracker_bin_files(),
+    ))
+
+def heron_conf_files():
+    return list(set( \
+        heron_api_conf_files() + \
+        heron_cli_conf_files() +  \
+        heron_core_conf_files() +  \
+        heron_metrics_api_conf_files() +  \
+        heron_storm_compat_conf_files() +  \
+        heron_tracker_conf_files(),
+    ))
+
+def heron_lib_files():
+    return list(set( \
+        heron_api_lib_files() + \
+        heron_cli_lib_files() +  \
+        heron_core_lib_files() +  \
+        heron_metrics_api_lib_files() +  \
+        heron_storm_compat_lib_files() +  \
+        heron_tracker_lib_files(),
+    ))
 
 ################################################################################
 # Macro for running Heron local integration test
