@@ -88,8 +88,6 @@ java_library(
         "//3rdparty/protobuf:protobuf-java",
     ],
     resources = [
-        "heron.aurora",
-        "heron_controller.aurora",
     ],
 )
 
@@ -110,8 +108,6 @@ java_binary(
         "//3rdparty/protobuf:protobuf-java",
     ],
     resources = [
-        "heron.aurora",
-        "heron_controller.aurora",
     ],
 )
 
@@ -178,7 +174,5 @@ java_binary(
         "//3rdparty/zookeeper:zookeeper-java",
     ],
     resources = [
-        "heron.aurora",
-        "heron_controller.aurora",
     ],
 )
