@@ -1,7 +1,6 @@
 package com.twitter.heron.scheduler.util;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -14,20 +13,20 @@ import com.twitter.heron.scheduler.api.Constants;
 import com.twitter.heron.scheduler.api.IConfigLoader;
 
 /**
- * Loads config file in Java properties file format.
+ * Loads config in the Java properties file format.
  */
-public class DefaultConfigLoader implements IConfigLoader {
-  private static final Logger LOG = Logger.getLogger(DefaultConfigLoader.class.getName());
+public abstract class AbstractPropertiesConfigLoader implements IConfigLoader {
+  private static final Logger LOG = Logger.getLogger(AbstractPropertiesConfigLoader.class.getName());
 
-  public Properties properties;
+  public final Properties properties = new Properties();
 
-  public static String convertSpaceToEOL(String configOverride) {
+  public static String convertSpaceToEOL(String propertyOverride) {
     // Tokenize strings by spaces. Ignore spaces inside quotes. Ignore \" while parsing.
     StringBuilder token = new StringBuilder();
     ArrayList<String> tokens = new ArrayList<String>();
     boolean escaped = false;
     boolean inQuotes = false;
-    for (char ch : configOverride.toCharArray()) {
+    for (char ch : propertyOverride.toCharArray()) {
       if (!escaped && ch == '\\') {
         escaped = true;
       } else if (escaped) {
@@ -68,33 +67,22 @@ public class DefaultConfigLoader implements IConfigLoader {
   }
 
   /**
+   * Update the underlying Properties using the specified configOverride in the format of Java properties file.
+   *
    * Default override is expected to be using format of java properties file like
-   * "key1:value1 key2=value2 ..."
+   *   "key1:value1 key2=value2 ..."
    */
-  public boolean applyConfigOverride(String configOverride) {
-    if (configOverride == null || configOverride.isEmpty()) {
-      return true;
-    }
+  public final boolean applyOverride(String propertyOverride) {
+    Properties p = new Properties();
 
-    Properties overrides = new Properties();
-    try {
-      overrides.load(new ByteArrayInputStream(convertSpaceToEOL(configOverride).getBytes()));
-
-      for (Enumeration e = overrides.propertyNames(); e.hasMoreElements(); ) {
-        String key = (String) e.nextElement();
-        // Trim leading and ending \" in the string.
-        if (overrides.getProperty(key).startsWith("\"")
-            && overrides.getProperty(key).endsWith("\"")) {
-          properties.setProperty(key, overrides.getProperty(key).replaceAll("^\"|\"$", ""));
-        } else {
-          properties.setProperty(key, overrides.getProperty(key));
-        }
+    if (applyOverride(p, propertyOverride)) {
+      for (String key: p.stringPropertyNames()) {
+        properties.setProperty(key, p.getProperty(key));
       }
-    } catch (IOException e) {
-      LOG.log(Level.SEVERE, "Failed to apply config override " + configOverride, e);
+      return true;
+    } else {
       return false;
     }
-    return true;
   }
 
   /**
@@ -103,14 +91,15 @@ public class DefaultConfigLoader implements IConfigLoader {
    * The configOverride is expected to be using the format of Java properties file like.
    *   "key1:value1 key2=value2 ..."
    *
-   * The properties parsed from configOverride are added to target.
+   * The properties parsed from configOverride are added to the specified target.
    */
-  public final boolean applyConfigOverride(Properties target, String configOverride) {
+  public final boolean applyOverride(Properties target, String configOverride) {
     if (configOverride == null || configOverride.isEmpty()) {
       return true;
     }
 
     Properties overrides = new Properties();
+
     try {
       overrides.load(new ByteArrayInputStream(convertSpaceToEOL(configOverride).getBytes()));
 
@@ -127,41 +116,16 @@ public class DefaultConfigLoader implements IConfigLoader {
       LOG.log(Level.SEVERE, "Failed to apply config override " + configOverride, e);
       return false;
     }
+
     return true;
   }
 
-  public boolean load(String configFile, String configOverride) {
-    Properties oldProperties = this.properties;
-    properties = new Properties();
-
-    if (configFile == null || configFile.isEmpty()) {
-      LOG.info("Config file is not provided. Load config from override cmd arguments.");
-    } else {
-      try {
-        properties.load(new FileInputStream(configFile));
-      } catch (IOException e) {
-        properties = oldProperties;
-        LOG.log(Level.SEVERE, "Failed to load properties config file", e);
-        return false;
-      }
-    }
-
-    if (!applyConfigOverride(configOverride)) {
-      return false;
-    }
-
-    addDefaultProperties();
-    if (Boolean.parseBoolean(properties.getProperty(Constants.HERON_VERBOSE))) {
-      LOG.info("Config parsed: \n" + properties);
+  public final boolean applyConfigPropertyOverride() {
+    if (properties.containsKey(Constants.CONFIG_PROPERTY)) {
+      String configOverride = properties.getProperty(Constants.CONFIG_PROPERTY);
+      return applyOverride(properties, configOverride);
     }
     return true;
-  }
-
-  public void addDefaultProperties() {
-    addPropertyIfNotPresent(Constants.HERON_VERBOSE, Boolean.FALSE.toString());
-    addPropertyIfNotPresent(Constants.DC, Constants.DC);
-    addPropertyIfNotPresent(Constants.ROLE, Constants.ROLE);
-    addPropertyIfNotPresent(Constants.ENVIRON, Constants.ENVIRON);
   }
 
   protected void addPropertyIfNotPresent(String key, String value) {
@@ -170,12 +134,9 @@ public class DefaultConfigLoader implements IConfigLoader {
     }
   }
 
-  protected boolean applyConfigPropertyOverride() {
-    if (properties.containsKey(Constants.CONFIG_PROPERTY)) {
-      String configOverride = properties.getProperty(Constants.CONFIG_PROPERTY);
-      return applyConfigOverride(properties, configOverride);
-    }
-    return true;
+  @Override
+  public Map<Object, Object> getConfig() {
+    return properties;
   }
 
   @Override
@@ -213,11 +174,6 @@ public class DefaultConfigLoader implements IConfigLoader {
     return Boolean.parseBoolean(properties.getProperty(Constants.HERON_VERBOSE));
   }
 
-  @Override
-  public Map<Object, Object> getConfig() {
-    return properties;
-  }
-
   public final String getHeronDir() {
     return properties.getProperty(Constants.HERON_DIR);
   }
@@ -225,4 +181,5 @@ public class DefaultConfigLoader implements IConfigLoader {
   public final String getHeronConfigPath() {
     return properties.getProperty(Constants.HERON_CONFIG_PATH);
   }
+
 }

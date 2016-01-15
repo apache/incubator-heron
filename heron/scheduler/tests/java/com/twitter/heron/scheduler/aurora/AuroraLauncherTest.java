@@ -23,9 +23,9 @@ public class AuroraLauncherTest {
     schedulerConfig.properties.setProperty(Constants.DC, "dc");
     schedulerConfig.properties.setProperty(Constants.ROLE, "me");
     schedulerConfig.properties.setProperty(Constants.ENVIRON, "environ");
-    schedulerConfig.properties.setProperty(Constants.HERON_RELEASE_USER_NAME, "me");
-    schedulerConfig.properties.getProperty(Constants.HERON_RELEASE_TAG, "some-pkg");
-    schedulerConfig.properties.getProperty(Constants.HERON_RELEASE_VERSION, "live");
+    schedulerConfig.properties.setProperty(Constants.HERON_RELEASE_PACKAGE_ROLE, "me");
+    schedulerConfig.properties.getProperty(Constants.HERON_RELEASE_PACKAGE_NAME, "some-pkg");
+    schedulerConfig.properties.getProperty(Constants.HERON_RELEASE_PACKAGE_VERSION, "live");
     schedulerConfig.properties.setProperty(Constants.HERON_UPLOADER_VERSION, "1");
     schedulerConfig.properties.setProperty(RoundRobinPacking.INSTANCE_CPU_DEFAULT, "1.0");
     schedulerConfig.properties.setProperty(RoundRobinPacking.INSTANCE_RAM_DEFAULT,
