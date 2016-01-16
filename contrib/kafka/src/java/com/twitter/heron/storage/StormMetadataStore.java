@@ -24,14 +24,14 @@ import java.util.Map;
  * provides a 2 dimensional map. pKey is like rows of a table and lKey is columns. Some storage
  * system like HBase provide a time dimension to data, storm storage doesn't need it
  * and only use the latest value for a key.
- * All implementation of StormMetadataStore should strive to be interoperable i.e. Clients can read
- * data written by other StormMetadataStore.
+ * All implementation of MetadataStore should strive to be interoperable i.e. Clients can read
+ * data written by other MetadataStore.
  */
-public abstract class StormMetadataStore {
+public abstract class MetadataStore {
   protected String uId;
   protected String topologyName;
   protected String componentId;
-  public StormStoreSerializer serializer;
+  public StoreSerializer serializer;
   protected String keyPrefix;
 
   /** Checks if initialization has been done and has succeeded.
@@ -79,7 +79,7 @@ public abstract class StormMetadataStore {
    */
   public boolean initialize(
       String paramUId, String paramTopologyName, String paramComponentId,
-      StormStoreSerializer paramSerializer) {
+      StoreSerializer paramSerializer) {
     uId = paramUId;
     topologyName = paramTopologyName;
     componentId = paramComponentId;
@@ -87,7 +87,7 @@ public abstract class StormMetadataStore {
     System.out.println("@@@@ " + keyPrefix);
     keyPrefix.replace(" ", "");
     serializer = paramSerializer != null ? paramSerializer
-        : new StormStoreSerializer.DefaultSerializer();
+        : new StoreSerializer.DefaultSerializer();
     return true;
   }
 }
