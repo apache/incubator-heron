@@ -26,16 +26,10 @@ import com.twitter.heron.state.zookeeper.ZkWatcherCallback;
 
 public class CuratorStateManager extends FileSystemStateManager {
   private static final Logger LOG = Logger.getLogger(CuratorStateManager.class.getName());
-
-  public static final String ZKHOST_PREFIX = "zkhost";
-  public static final String ZKPORT_PREFIX = "zkport";
-  public static final String ZKROOT_PREFIX = "zkroot";
-
-  public static final String ZK_CONNECTION_STRING = "zk.connection.string";
-
   private CuratorFramework client;
   private String connectionString;
 
+  public static final String ZK_CONNECTION_STRING = "zk.connection.string";
   @Override
   public void initialize(Map<Object, Object> conf) {
     super.initialize(conf);
