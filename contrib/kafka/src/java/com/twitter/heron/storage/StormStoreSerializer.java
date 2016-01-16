@@ -23,12 +23,12 @@ import com.google.gson.Gson;
 /**
  * Default serializer used by storm storage layer. Encode an object as json.
  */
-public interface StormStoreSerializer<T> {
+public interface StoreSerializer<T> {
   /** Called to convert any object to byte array */
   byte[] serialize(T obj);
 
   /** Default Json serializer */
-  public static class DefaultSerializer<T> implements StormStoreSerializer<T> {
+  public static class DefaultSerializer<T> implements StoreSerializer<T> {
     private static final String ENCODING = "UTF-8";
     private Gson gson = new Gson();
 
