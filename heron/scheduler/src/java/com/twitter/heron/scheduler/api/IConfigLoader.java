@@ -57,7 +57,6 @@ public interface IConfigLoader {
    */
   String getStateManagerClass();
 
-
   /**
    * @return true to show the running details.
    */

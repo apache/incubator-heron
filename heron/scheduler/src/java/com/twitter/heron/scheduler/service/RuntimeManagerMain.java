@@ -48,8 +48,7 @@ public class RuntimeManagerMain {
 
     LOG.info("Config to override in RuntimeManager: " + configOverride);
     if (!commandConfig.load(commandConfigFile, configOverride)) {
-      throw new RuntimeException("Failed to load config. File: " + commandConfigFile
-          + " Override: " + configOverride);
+      throw new RuntimeException("Failed to load config. File: " + commandConfigFile + " Override: " + configOverride);
     }
 
     RuntimeManagerContext context = new RuntimeManagerContext(commandConfig, topologyName);
