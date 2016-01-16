@@ -2,6 +2,8 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
+load("/tools/rules/jarjar_rules", "jarjar_binary")
+
 java_library(
     name = "metricsmgr-lib-java",
     srcs = glob(
@@ -25,7 +27,7 @@ java_library(
 )
 
 java_binary(
-    name = "heron-metricsmgr",
+    name = "metricsmgr-unshaded",
     srcs = glob(["**/MetricsManager.java"]),
     deps = [
         ":metricsmgr-lib-java",
@@ -34,4 +36,10 @@ java_binary(
         "//heron/metricsmgr-api/src/java:metricsmgr-api-java",
         "//heron/proto:proto_metrics_java",
     ],
+)
+
+jarjar_binary(
+    name = "heron-metricsmgr",
+    src = ":metricsmgr-unshaded_deploy.jar",
+    shade = "shade.conf",
 )
