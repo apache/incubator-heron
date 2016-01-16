@@ -116,7 +116,7 @@ def heron_cli_conf_files():
 
 def heron_cli_lib_files():
     return [
-        "//heron/scheduler/src/java:heron-scheduler",
+        "//heron/scheduler/src/java:heron-scheduler_deploy.jar",
         "//3rdparty/protobuf:protobuf-java",
         "//3rdparty/logging:slf4j-api-java",
         "//3rdparty/logging:slf4j-jdk-java", 
@@ -149,7 +149,7 @@ def heron_core_lib_files():
     return [
         "//heron/instance/src/java:heron-instance",
         "//heron/metricsmgr/src/java:heron-metricsmgr",
-        "//heron/scheduler/src/java:heron-scheduler",
+        "//heron/scheduler/src/java:heron-scheduler_deploy.jar",
     ]
 
 ################################################################################

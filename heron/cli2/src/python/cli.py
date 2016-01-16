@@ -24,7 +24,7 @@ TOPOLOGY_RUN_JARS = ['lib/protobuf-java-2.5.0.jar',
                      'lib/log4j-over-slf4j-1.7.7.jar',
                      'lib/slf4j-api-1.7.7.jar',
                      'lib/slf4j-jdk14-1.7.7.jar']
-SCHEDULER_RUN_JARS = ['lib/heron-scheduler.jar']
+SCHEDULER_RUN_JARS = ['lib/heron-scheduler_deploy.jar']
 
 # Create the logger
 Log = logging.getLogger('heron_cli2')
