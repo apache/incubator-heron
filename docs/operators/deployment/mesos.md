@@ -22,7 +22,7 @@ In order to deploy Heron, your Mesos cluster will need to have access to a
 variety of Heron binaries, which can be hosted wherever you'd like, so long as
 it's accessible to Mesos (for example in [Amazon S3](https://aws.amazon.com/s3/)
 or using a local blog storage solution). You can build those binaries using the
-instructions in [Creating a New Heron Release](../compiling.html).
+instructions in [Creating a New Heron Release](../../developers/compiling.html#building-a-full-release-package).
 
 Once your Heron binaries are hosted somewhere that's accessible to Mesos, you
 should run tests to ensure that Mesos can successfully fetch them.
@@ -57,7 +57,7 @@ proper configuration and configuration loader when managing topologies.
 ### Specifying a Configuration
 
 You'll need to specify a scheduler configuration at all stages of a topology's
-[lifecycle](../../topologies.html#topology-lifecycle) by using the
+[lifecycle](../../concepts/topologies.html#topology-lifecycle) by using the
 `--config-file` flag to point at a configuration file. There is a default Mesos
 configuration located in the Heron repository at
 `heron/cli/src/python/mesos_scheduler.conf`. You can use this file as is,

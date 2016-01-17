@@ -6,8 +6,7 @@ You can build Heron either [as an entirety](#building-all-components), on a
 [component-by-component basis](#building-specific-components), or as a [release
 package](#building-a-full-release-package).
 
-Instructions on running unit tests for Heron can also be found in the [Running
-Unit Tests](#running-unit-tests) section at the bottom of this document.
+Instructions on running unit tests for Heron can also be found in [Testing Heron](../contributors/testing.html).
 
 ## Requirements
 
