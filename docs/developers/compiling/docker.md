@@ -12,16 +12,15 @@ platform there are instructions for adding new ones
 
 * [Docker](https://docs.docker.com)
 
-## Recommendation
+## Recommendations for Running Docker in a Virtual Machine
 
-If you are running docker in a virtual machine, it is recommended that
-you adjust your settings to help speed up the build. To do this, open
-VirtualBox and go to the container which docker is running in (usually
-default or whatever name you used to create the VM). Click on the
-virtual machine and then click on settings.
+If you are running Docker in a virtual machine (VM), it is recommended that you
+adjust your settings to help speed up the build. To do this, open
+[VirtualBox](https://www.virtualbox.org/wiki/Downloads) and go to the container
+in which Docker is running (usually "default" or whatever name you used to
+create the VM), click on the VM, and then click on **Settings**.
 
-**Note**: You will need to stop the virtual machine before modifying
-these settings.
+**Note**: You will need to stop the VM before modifying these settings.
 
 ![VirtualBox Processors](img/virtual-box-processors.png)
 ![VirtualBox Memory](img/virtual-box-memory.png)
@@ -52,7 +51,9 @@ NOTE: If running on OSX, the output directory will need to
 
 The following arguments are required:
 
-* `platform` --- Currently, this can be one of: `ubuntu14.04`, `centos7`.
+* `platform` --- Currently, this can be one of: `ubuntu14.04`, `centos7`. You
+  can add other platforms using the [instructions
+  below](#contributing-new-environments).
 * `version-string` --- The Heron release for which you'd like to build
   artifacts.
 * `output-directory` --- The directory in which you'd like the release to be
@@ -64,20 +65,20 @@ Here's an example usage:
 $ docker/build-artifacts.sh ubuntu14.04 0.1.0-SNAPSHOT ~/heron-release
 ```
 
-This will build a docker container specific to Ubuntu 14.04, create a source
-tarball of the heron repository, run a full release build of heron, then copy
-the artifacts into the ~/heron-release directory.
+This will build a Docker container specific to Ubuntu 14.04, create a source
+tarball of the Heron repository, run a full release build of Heron, and then
+copy the artifacts into the `~/heron-release` directory.
 
 Optionally, you can also include a tarball of the Heron source if you have one.
 By default, the script will create a tarball of the current source in the Heron
 repo and use that to build the artifacts.
 
-**Note**: If you are running on Mac OS X, Docker must be run inside a virtual
-machine. Therefore, you must make sure that both the source tarball and
-destination directory are somewhere under your home directory. For example, you
-cannot output the Heron artifacts to `/tmp` because `/tmp` refers to the
-directory inside the VM, not on the host machine. Your home directory, however,
-is automatically linked in to the VM and can be accessed normally.
+**Note**: If you are running on Mac OS X, Docker must be run inside a VM.
+Therefore, you must make sure that both the source tarball and destination
+directory are somewhere under your home directory. For example, you cannot
+output the Heron artifacts to `/tmp` because `/tmp` refers to the directory
+inside the VM, not on the host machine. Your home directory, however, is
+automatically linked in to the VM and can be accessed normally.
 
 After the build has completed, you can go to your output directory and see all
 of the generated artifacts:
