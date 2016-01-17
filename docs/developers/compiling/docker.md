@@ -106,7 +106,8 @@ support for Debian 8, for example, add a file named `Dockerfile.debian8`. Once
 you've done that, follow the instructions in the [Docker
 documentation](https://docs.docker.com/engine/articles/dockerfile_best-practices/).
 
-You should make sure that your `Dockerfile` specifies all of the following:
+You should make sure that your `Dockerfile` specifies *at least* all of the
+following:
 
 1. The OS being used in a
    [`FROM`](https://docs.docker.com/engine/reference/builder/#from) statement.
@@ -160,9 +161,17 @@ You should make sure that your `Dockerfile` specifies all of the following:
    ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
    ```
 
-5. 
+5. An installation script for [Bazel](http://bazel.io/) version 0.1.2 or
+   above. Here's an example:
 
-6. Add the `bazelrc` configuration file for Bazel and the `compile.sh` script:
+   ```dockerfile
+   RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh \
+         && chmod +x /tmp/bazel.sh \
+         && /tmp/bazel.sh
+   ```
+
+6. Add the `bazelrc` configuration file for Bazel and the `compile.sh`
+   script (from the `docker` folder) that compiles Heron:
 
    ```dockerfile
    ADD bazelrc /root/.bazelrc
