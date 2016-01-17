@@ -103,7 +103,7 @@ def exec_heron_class(klass, libjars, extrajars=[], args=[]):
 
   if VERBOSE:
     print('$> %s' % ' '.join(all_args))
-  status = subprocess.call(all_args)
+  status = subprocess.call(all_args, shell=True)
   if status != 0:
     print "User main failed with status %d. Bailing out..." % status
     sys.exit(1)
