@@ -15,6 +15,12 @@ Here's an example test command:
 $ bazel test --config=darwin heron/state/tests/java:local_file_state_manager_unittest
 ```
 
+Here's an example to run all tests:
+
+```bash
+$ bazel test --config=darwin heron/...
+```
+
 ### Discovering Test Targets
 
 To fetch a full listing of all Bazel test targets:
@@ -39,4 +45,4 @@ For **Python** targets:
 
 ```bash
 $ bazel query 'kind("pex_test rule", ...)'
-`
+```

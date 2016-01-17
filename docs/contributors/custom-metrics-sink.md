@@ -17,7 +17,7 @@ Heron comes equipped out of the box with three metrics sinks that you can apply
 for a specific topology. The code for these sinks may prove helpful for
 implementing your own.
 
-* [`GraphiteSink`](../api/metrics/com/twitter/heron/metricsmgr/sink/Graphite.html)
+* [`GraphiteSink`](../api/metrics/com/twitter/heron/metricsmgr/sink/GraphiteSink.html)
   &mdash; Sends each `MetricsRecord` object to a
   [Graphite](http://graphite.wikidot.com/) instance according to a Graphite
   prefix.
