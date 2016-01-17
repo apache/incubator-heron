@@ -1,6 +1,6 @@
 # Heron Topologies
 
-A Heron **topology** is a directed [acyclic
+A Heron **topology** is a [directed acyclic
 graph](https://en.wikipedia.org/wiki/Directed_acyclic_graph) used to process
 streams of data. Heron topologies consist of three basic components:
 [spouts](#spouts) and [bolts](#bolts), which are connected via
@@ -24,19 +24,19 @@ Once you've set up a [Heron cluster](../operators/deployment/index.html), you
 can use Heron's [CLI tool](../operators/heron-cli.html) to manage the entire
 lifecycle of a topology, which typically goes through the following stages:
 
-1. You [submit](../operators/heron-cli.html#submitting-a-topology) the topology
+1. [submit](../operators/heron-cli.html#submitting-a-topology) the topology
    to the cluster. The topology is not yet processing streams but is ready to be
    activated.
-2. You [activate](../operators/heron-cli.html#activating-a-topology) the
+2. [activate](../operators/heron-cli.html#activating-a-topology) the
    topology. Now the topology will begin processing streams in accordance with
    the topology architecture that you've created.
-3. You can [restart](../operators/heron-cli.html#restarting-a-topology) an
+3. [restart](../operators/heron-cli.html#restarting-a-topology) an
    active topology if, for example, you need to apply a changed configuration to
    the topology.
-4. You can [deactivate](../operators/heron-cli.html#deactivating-a-topology) the
+4. [deactivate](../operators/heron-cli.html#deactivating-a-topology) the
    topology at any time. Once deactivated, the topology will stop processing but
    remain submitted in the cluster.
-5. If you [kill](../operators/heron-cli.html#killing-a-topology) a topology it
+5. [kill](../operators/heron-cli.html#killing-a-topology) a topology.  It
    is no longer known to your Heron cluster and can no longer be activated. Once
    killed, the only way to use that topology in your cluster is to re-submit it.
 

@@ -5,9 +5,9 @@ an architectural perspective it is markedly different from Storm but fully
 backwards compatible with it from an API perspective.
 
 The sections below clarify the distinction between [Heron and
-Storm](#releationship-with-apache-storm), describe the [design
+Storm](#relationship-with-apache-storm), describe the [design
 goals](#heron-design-goals) behind Heron, and explain major
-[components](#components) of its architecture.
+[components](#topology-components) of its architecture.
 
 ## Codebase
 
@@ -43,7 +43,7 @@ Stream Processing at Scale](http://dl.acm.org/citation.cfm?id=2742788) paper.
   that they are initially allocated and never exceed those bounds. This makes
   Heron safe to run in shared infrastructure.
 * **Compatibility** &mdash; Heron is fully API and data model compatible with
-  [Apache Storm](#relationship-with-apache-storm), making it easy for developers
+  [Apache Storm](http://storm.apache.org), making it easy for developers
   to transition between systems.
 * **Back pressure** &mdash; In a distributed system like Heron, there are no
   guarantees that all system components will execute at the same speed. Heron
