@@ -98,7 +98,7 @@ def get_classpath(jars):
 def exec_heron_class(klass, libjars, extrajars=[], args=[]):
   all_args = [
       "java", "-client", "-Xmx1g", get_config_opts(),
-      "-cp", get_classpath(libjars + extrajars),
+      "-cp", "\"%s\"" % get_classpath(libjars + extrajars),
   ] + [klass] + list(args)
 
   if VERBOSE:
