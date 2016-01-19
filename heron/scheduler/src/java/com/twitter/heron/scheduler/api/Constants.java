@@ -20,6 +20,8 @@ public class Constants {
   public static final String HERON_RELEASE_PACKAGE_VERSION = "heron.release.package.version";
   public static final String HERON_UPLOADER_VERSION = "heron.uploader.version";
 
+  public static final String HERON_UPLOADER_FILE_SYSTEM_PATH = "heron.uploader.file.system.path";
+
   public static final String DC = "dc";
   public static final String ROLE = "role";
   public static final String ENVIRON = "environ";
