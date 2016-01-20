@@ -167,7 +167,7 @@ def submitTopology(heronCliPath, heronWorkingDirectory, heronCorePath, testJarPa
       '%d' % (len(TEST_INPUT)),
       '--config-file=%s' % (schedulerConfigPath),
       '--config-loader=%s' % (configLoaderClasspath),
-      '--heron-verbose']
+      '--verbose']
   logging.info("Submitting topology: ")
   logging.info(splitcmd)
   subprocess.Popen(splitcmd)
@@ -182,7 +182,7 @@ def killTopology(heronCliPath, heronLocalDirectory, topologyName, schedulerConfi
       '%s' % (topologyName),
       '--config-file=%s' % (schedulerConfigPath),
       '--config-loader=%s' % (configLoaderClasspath),
-      '--heron-verbose']
+      '--verbose']
   logging.info("Killing topology:")
   logging.info(splitcmd)
   # this call can be blocking, no need for subprocess
@@ -211,7 +211,7 @@ def restartShard(heronCliPath, heronLocalDirectory, topologyName, schedulerConfi
       '%d' % shardNum,
       '--config-file=%s' % (schedulerConfigPath),
       '--config-loader=%s' % (configLoaderClasspath),
-      '--heron-verbose']
+      '--verbose']
   logging.info("Killing TMaster command:")
   logging.info(splitcmd)
   if (subprocess.call(splitcmd) != 0):
