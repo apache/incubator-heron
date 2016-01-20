@@ -396,7 +396,7 @@ def create_parser():
   submit_parser.add_argument('--config-loader', help='Scheduler config loader classname', default='com.twitter.heron.scheduler.aurora.AuroraConfigLoader')
   submit_parser.add_argument('--config-property', help="scheduler config properties", action='append', default=[])
   submit_parser.add_argument('--deactivated', help='Deploy topology in deactivated initial state', action='store_true')
-  submit_parser.add_argument('--heron-verbose', action='store_true')
+  submit_parser.add_argument('--verbose', action='store_true')
   submit_parser.set_defaults(command='submit')
 
   # kill
@@ -406,8 +406,7 @@ def create_parser():
   kill_parser.add_argument('--config-path', help='Killer config path', default=os.path.join(get_heron_dir(), 'conf/com/twitter/aurora'))
   kill_parser.add_argument('--config-loader', help='Killer config loader classname', default='com.twitter.heron.scheduler.aurora.AuroraConfigLoader')
   kill_parser.add_argument('--config-property', help="Killer config properties", action='append', default=[])
-  kill_parser.add_argument('--heron-batch-size', type=int, help='Killer batch-size option')
-  kill_parser.add_argument('--heron-verbose', action='store_true')
+  kill_parser.add_argument('--verbose', action='store_true')
   kill_parser.set_defaults(command='kill')
 
   # activate
@@ -417,8 +416,7 @@ def create_parser():
   activate_parser.add_argument('--config-path', help='Activator config path', default=os.path.join(get_heron_dir(), 'conf/com/twitter/aurora'))
   activate_parser.add_argument('--config-loader', help='Activator config loader classname', default='com.twitter.heron.scheduler.aurora.AuroraConfigLoader')
   activate_parser.add_argument('--config-property', help="Activator config properties", action='append', default=[])
-  activate_parser.add_argument('--heron-batch-size', type=int, help='Activator batch-size option')
-  activate_parser.add_argument('--heron-verbose', action='store_true')
+  activate_parser.add_argument('--verbose', action='store_true')
   activate_parser.set_defaults(command='activate')
 
   # deactivate
@@ -428,8 +426,7 @@ def create_parser():
   deactivate_parser.add_argument('--config-path', help='Deactivator config path', default=os.path.join(get_heron_dir(), 'conf/com/twitter/aurora'))
   deactivate_parser.add_argument('--config-loader', help='Deactivator config loader classname', default='com.twitter.heron.scheduler.aurora.AuroraConfigLoader')
   deactivate_parser.add_argument('--config-property', help="Deactivator config properties", action='append', default=[])
-  deactivate_parser.add_argument('--heron-batch-size', type=int, help='Deactivator batch-size option')
-  deactivate_parser.add_argument('--heron-verbose', action='store_true')
+  deactivate_parser.add_argument('--verbose', action='store_true')
   deactivate_parser.set_defaults(command='deactivate')
 
   # restart
@@ -440,18 +437,17 @@ def create_parser():
   restart_parser.add_argument('--config-path', help='Restarter config path', default=os.path.join(get_heron_dir(), 'conf/com/twitter/aurora'))
   restart_parser.add_argument('--config-loader', help='Restarter config loader classname', default='com.twitter.heron.scheduler.aurora.AuroraConfigLoader')
   restart_parser.add_argument('--config-property', help="Restarter config properties", action='append', default=[])
-  restart_parser.add_argument('--heron-batch-size', type=int, help='Restarter batch-size option')
-  restart_parser.add_argument('--heron-verbose', action='store_true')
+  restart_parser.add_argument('--verbose', action='store_true')
   restart_parser.set_defaults(command='restart')
 
   # classpath
   classpath_parser = subparsers.add_parser('classpath', help='Print classpath of heron-cli')
-  classpath_parser.add_argument('--heron-verbose', action='store_true')
+  classpath_parser.add_argument('--verbose', action='store_true')
   classpath_parser.set_defaults(command='classpath')
 
   # version
   version_parser = subparsers.add_parser('version', help='Print version of heron-cli')
-  version_parser.add_argument('--heron-verbose', action='store_true')
+  version_parser.add_argument('--verbose', action='store_true')
   version_parser.set_defaults(command='version')
 
   return parser
@@ -466,7 +462,9 @@ def main():
   args, unknown_args = parser.parse_known_args()
   namespace = vars(args)
   COMMAND = namespace['command']
-  VERBOSE = namespace['heron_verbose']
+  VERBOSE = namespace['verbose']
+  namespace['heron_verbose'] = namespace['verbose']
+  del namespace['verbose']
   if (COMMAND != 'version' and COMMAND != 'classpath'):
     namespace['heron_dir'] = get_heron_dir()
     namespace['heron_config_path'] = namespace['config_path']
