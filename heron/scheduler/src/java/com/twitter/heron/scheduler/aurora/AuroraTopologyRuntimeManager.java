@@ -210,21 +210,8 @@ public class AuroraTopologyRuntimeManager implements IRuntimeManager {
     LOG.info("auroraCmd=" + Arrays.toString(auroraCmd));
 
     if (0 == ShellUtility.runProcess(context.isVerbose(), auroraCmd, null, null)) {
-      try {
-        ExecutionEnvironment.ExecutionState executionState =
-            context.getStateManagerAdaptor().getExecutionState().get();
-        String packageName = String.format(
-            "heron-topology-%s_%s", topologyName, executionState.getReleaseState().getReleaseTag());
-
-        // Remove package from packer (Unset live label).
-        // TODO(nbhagat): Unsetting package live is sufficient. Deleting package is not required
-        return 0 == ShellUtility.runProcess(context.isVerbose(),
-            new String[]{"packer", "unset_live", "--cluster=" + dc, role, packageName},
-            null, null);
-      } catch (ExecutionException | InterruptedException e) {
-        LOG.log(Level.SEVERE, "Successfully killed aurora job but failed to clear package.", e);
-        return false;
-      }
+      LOG.info("Killed topology");
+      return true;
     } else {
       LOG.severe("Failed to kill topology.");
       return false;
