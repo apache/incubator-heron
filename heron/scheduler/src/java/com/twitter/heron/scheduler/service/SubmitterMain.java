@@ -89,7 +89,7 @@ public class SubmitterMain {
     boolean result = uploadRunner.call();
 
     if (!result) {
-      LOG.severe("Failed to upload package. Exitting");
+      LOG.severe("Failed to upload package. Exiting");
       return false;
     }
 

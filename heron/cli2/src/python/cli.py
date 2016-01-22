@@ -109,7 +109,7 @@ def exec_heron_class(klass, libjars, extrajars=[], args=[]):
     sys.exit(1)
 
 def verify_options():
-  # TODO(nbhagat): Verify command-line
+  # TODO: Verify command-line
   pass
 
 def exec_heron_tar(klass,
@@ -124,7 +124,7 @@ def exec_heron_tar(klass,
   # in addition to the topology jar at top level.
   # And pants keeps filename for jar and tar the same except for
   # extension.
-  # TODO(nbhagat): We need to extract heron-core to separate folder.
+  # TODO: We need to extract heron-core to separate folder.
   topology_jar = os.path.basename(topology_tar).replace(".tar.gz", "").replace(".tar", "") + ".jar"
   extrajars = [os.path.join(tmpdir, "heron-instance.jar"),
                os.path.join(tmpdir, topology_jar),
@@ -160,7 +160,7 @@ def launch_all_topologies_found(jar_or_tar_file, tmpdir, submitter_config_loader
   # The HeronSubmitter would have written the .defn file to the tmpdir
   defn_files = glob.glob(tmpdir + '/*.defn')
 
-  # TODO -- We may add the flexibility to overload this file later
+  # TODO: We may add the flexibility to overload this file later
   heron_internals_config_filename = 'heron_internals.yaml'
   if len(defn_files) == 0:
     raise Exception("No topologies found")
@@ -231,7 +231,7 @@ def submitfatjar(namespace):
     launch_all_topologies_found(jarfile,
                                 tmpdir,
                                 namespace['config_loader'],
-                                namespace['config_file'],
+                                namespace['config_path'],
                                 scheduler_overrides)
   finally:
     shutil.rmtree(tmpdir)
@@ -270,7 +270,7 @@ def submittar(namespace):
     launch_all_topologies_found(tar_name,
                                 tmpdir,
                                 namespace['config_loader'],
-                                namespace['config_file'],
+                                namespace['config_path'],
                                 scheduler_overrides)
   finally:
     shutil.rmtree(tmpdir)
@@ -342,7 +342,7 @@ def runtime_manage(namespace):
                             topology_name,
                             namespace['config_loader'],
                             base64.b64encode(config_overrides),
-                            namespace['config_file']])
+                            namespace['config_path']])
 
   except Exception as ex:
     print "Failed to %s topology" %command
@@ -363,7 +363,7 @@ def print_version(namespace):
 
   Prints heron-cli version.
   """
-  with open(os.path.join(get_heron_dir(), '/RELEASE')) as data_file:
+  with open(os.path.join(get_heron_dir(), 'RELEASE')) as data_file:
     version = data_file.read()
     print "Version: " + str(version)
 
@@ -392,53 +392,41 @@ def create_parser():
   submit_parser.add_argument('config-overrides', help='Override scheduler config to provide dc/role/env')
   submit_parser.add_argument('filepath', help='jar or tar filepath')
   submit_parser.add_argument('classname', help='classname')
-  submit_parser.add_argument('--config-loader', help='Submitter config loader classname', default='com.twitter.heron.scheduler.aurora.AuroraConfigLoader')
-  submit_parser.add_argument('--config-file', help='Scheduler config file', default=os.path.join(get_heron_dir(), 'scheduler.conf'))
-  submit_parser.add_argument('--heron-aurora-no-wait', help='Do not wait till all job are RUNNING, wait by default', action='store_true')
-  submit_parser.add_argument('--heron-release-pkgrole')
-  submit_parser.add_argument('--heron-release-pkgname')
-  submit_parser.add_argument('--heron-release-pkgversion')
+  submit_parser.add_argument('--config-path', help='Scheduler config path', default=os.path.join(get_heron_dir(), 'conf/com/twitter/aurora'))
+  submit_parser.add_argument('--config-loader', help='Scheduler config loader classname', default='com.twitter.heron.scheduler.aurora.AuroraConfigLoader')
+  submit_parser.add_argument('--config-property', help="scheduler config properties", action='append', default=[])
   submit_parser.add_argument('--deactivated', help='Deploy topology in deactivated initial state', action='store_true')
-  submit_parser.add_argument('--heron-verbose', action='store_true')
+  submit_parser.add_argument('--verbose', action='store_true')
   submit_parser.set_defaults(command='submit')
 
   # kill
   kill_parser = subparsers.add_parser('kill', help='Kill a topology')
   kill_parser.add_argument('config-overrides', help='Override killer config to provide dc/role/env')
   kill_parser.add_argument('topology', help='topology name')
+  kill_parser.add_argument('--config-path', help='Killer config path', default=os.path.join(get_heron_dir(), 'conf/com/twitter/aurora'))
   kill_parser.add_argument('--config-loader', help='Killer config loader classname', default='com.twitter.heron.scheduler.aurora.AuroraConfigLoader')
-  kill_parser.add_argument('--config-file', help='Killer config file', default=os.path.join(get_heron_dir(), 'scheduler.conf'))
-  kill_parser.add_argument('--heron-batch-size', type=int, help='Killer batch-size option')
-  kill_parser.add_argument('--heron-release-pkgrole')
-  kill_parser.add_argument('--heron-release-pkgname')
-  kill_parser.add_argument('--heron-release-pkgversion')
-  kill_parser.add_argument('--heron-verbose', action='store_true')
+  kill_parser.add_argument('--config-property', help="Killer config properties", action='append', default=[])
+  kill_parser.add_argument('--verbose', action='store_true')
   kill_parser.set_defaults(command='kill')
 
   # activate
   activate_parser = subparsers.add_parser('activate', help='Activate a topology')
   activate_parser.add_argument('config-overrides', help='Override activator config to provide dc/role/env')
   activate_parser.add_argument('topology', help='topology name')
+  activate_parser.add_argument('--config-path', help='Activator config path', default=os.path.join(get_heron_dir(), 'conf/com/twitter/aurora'))
   activate_parser.add_argument('--config-loader', help='Activator config loader classname', default='com.twitter.heron.scheduler.aurora.AuroraConfigLoader')
-  activate_parser.add_argument('--config-file', help='Activator config file', default=os.path.join(get_heron_dir(), 'scheduler.conf'))
-  activate_parser.add_argument('--heron-batch-size', type=int, help='Activator batch-size option')
-  activate_parser.add_argument('--heron-release-pkgrole')
-  activate_parser.add_argument('--heron-release-pkgname')
-  activate_parser.add_argument('--heron-release-pkgversion')
-  activate_parser.add_argument('--heron-verbose', action='store_true')
+  activate_parser.add_argument('--config-property', help="Activator config properties", action='append', default=[])
+  activate_parser.add_argument('--verbose', action='store_true')
   activate_parser.set_defaults(command='activate')
 
   # deactivate
   deactivate_parser = subparsers.add_parser('deactivate', help='Deactivate a topology')
   deactivate_parser.add_argument('config-overrides', help='Override deactivator config to provide dc/role/env')
   deactivate_parser.add_argument('topology', help='topology name')
+  deactivate_parser.add_argument('--config-path', help='Deactivator config path', default=os.path.join(get_heron_dir(), 'conf/com/twitter/aurora'))
   deactivate_parser.add_argument('--config-loader', help='Deactivator config loader classname', default='com.twitter.heron.scheduler.aurora.AuroraConfigLoader')
-  deactivate_parser.add_argument('--config-file', help='Deactivator config file', default=os.path.join(get_heron_dir(), 'scheduler.conf'))
-  deactivate_parser.add_argument('--heron-batch-size', type=int, help='Deactivator batch-size option')
-  deactivate_parser.add_argument('--heron-release-pkgrole')
-  deactivate_parser.add_argument('--heron-release-pkgname')
-  deactivate_parser.add_argument('--heron-release-pkgversion')
-  deactivate_parser.add_argument('--heron-verbose', action='store_true')
+  deactivate_parser.add_argument('--config-property', help="Deactivator config properties", action='append', default=[])
+  deactivate_parser.add_argument('--verbose', action='store_true')
   deactivate_parser.set_defaults(command='deactivate')
 
   # restart
@@ -446,23 +434,20 @@ def create_parser():
   restart_parser.add_argument('config-overrides', help='Override restarter config to provide dc/role/env')
   restart_parser.add_argument('topology', help='topology name')
   restart_parser.add_argument('shard', nargs='?', type=int, default=-1, help='shard id to be restarted')
+  restart_parser.add_argument('--config-path', help='Restarter config path', default=os.path.join(get_heron_dir(), 'conf/com/twitter/aurora'))
   restart_parser.add_argument('--config-loader', help='Restarter config loader classname', default='com.twitter.heron.scheduler.aurora.AuroraConfigLoader')
-  restart_parser.add_argument('--config-file', help='Restarter config file', default=os.path.join(get_heron_dir(), 'scheduler.conf'))
-  restart_parser.add_argument('--heron-batch-size', type=int, help='Restarter batch-size option')
-  restart_parser.add_argument('--heron-release-pkgrole')
-  restart_parser.add_argument('--heron-release-pkgname')
-  restart_parser.add_argument('--heron-release-pkgversion')
-  restart_parser.add_argument('--heron-verbose', action='store_true')
+  restart_parser.add_argument('--config-property', help="Restarter config properties", action='append', default=[])
+  restart_parser.add_argument('--verbose', action='store_true')
   restart_parser.set_defaults(command='restart')
 
   # classpath
   classpath_parser = subparsers.add_parser('classpath', help='Print classpath of heron-cli')
-  classpath_parser.add_argument('--heron-verbose', action='store_true')
+  classpath_parser.add_argument('--verbose', action='store_true')
   classpath_parser.set_defaults(command='classpath')
 
   # version
   version_parser = subparsers.add_parser('version', help='Print version of heron-cli')
-  version_parser.add_argument('--heron-verbose', action='store_true')
+  version_parser.add_argument('--verbose', action='store_true')
   version_parser.set_defaults(command='version')
 
   return parser
@@ -476,10 +461,20 @@ def main():
   parser = create_parser()
   args, unknown_args = parser.parse_known_args()
   namespace = vars(args)
-  namespace['heron_unknown_args'] = unknown_args
-  namespace['heron_dir'] = get_heron_dir()
   COMMAND = namespace['command']
-  VERBOSE = namespace['heron_verbose']
+  VERBOSE = namespace['verbose']
+  namespace['heron_verbose'] = namespace['verbose']
+  del namespace['verbose']
+  if (COMMAND != 'version' and COMMAND != 'classpath'):
+    namespace['heron_dir'] = get_heron_dir()
+    namespace['heron_config_path'] = namespace['config_path']
+    namespace['heron_config_loader'] = namespace['config_loader']
+    if os.path.isfile(namespace['config_path']):
+      namespace['config_file'] = namespace['config_path']
+      namespace['heron_config_file'] = namespace['config_path']
+    namespace['heron_unknown_args'] = unknown_args
+    if namespace.get('config_property') != None:
+      namespace['config_property'] = " ".join(namespace['config_property'])
   atexit.register(cleanup)
   (COMMANDS.get(COMMAND))(namespace)
 

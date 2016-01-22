@@ -8,4 +8,4 @@ currently supports three scheduler options out of the box:
 * [Local scheduler](local.html)
 
 If you'd like to implement a scheduler for a not-yet-supported system, see
-[Implementing a Custom Scheduler](../contributors/custom-scheduler.html).
+[Implementing a Custom Scheduler](../../contributors/custom-scheduler.html).

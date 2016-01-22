@@ -78,8 +78,7 @@ public class DefaultConfigLoader implements IConfigLoader {
 
     Properties overrides = new Properties();
     try {
-      overrides.load(
-          new ByteArrayInputStream(convertSpaceToEOL(configOverride).getBytes()));
+      overrides.load(new ByteArrayInputStream(convertSpaceToEOL(configOverride).getBytes()));
 
       for (Enumeration e = overrides.propertyNames(); e.hasMoreElements(); ) {
         String key = (String) e.nextElement();
@@ -89,6 +88,39 @@ public class DefaultConfigLoader implements IConfigLoader {
           properties.setProperty(key, overrides.getProperty(key).replaceAll("^\"|\"$", ""));
         } else {
           properties.setProperty(key, overrides.getProperty(key));
+        }
+      }
+    } catch (IOException e) {
+      LOG.log(Level.SEVERE, "Failed to apply config override " + configOverride, e);
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Update a target Properties using the specified configOverride in the format of Java properties file.
+   *
+   * The configOverride is expected to be using the format of Java properties file like.
+   *   "key1:value1 key2=value2 ..."
+   *
+   * The properties parsed from configOverride are added to target.
+   */
+  public final boolean applyConfigOverride(Properties target, String configOverride) {
+    if (configOverride == null || configOverride.isEmpty()) {
+      return true;
+    }
+
+    Properties overrides = new Properties();
+    try {
+      overrides.load(new ByteArrayInputStream(convertSpaceToEOL(configOverride).getBytes()));
+
+      for (Enumeration e = overrides.propertyNames(); e.hasMoreElements(); ) {
+        String key = (String) e.nextElement();
+        // Trim leading and ending \" in the string.
+        if (overrides.getProperty(key).startsWith("\"") && overrides.getProperty(key).endsWith("\"")) {
+          target.setProperty(key, overrides.getProperty(key).replaceAll("^\"|\"$", ""));
+        } else {
+          target.setProperty(key, overrides.getProperty(key));
         }
       }
     } catch (IOException e) {
@@ -119,7 +151,7 @@ public class DefaultConfigLoader implements IConfigLoader {
     }
 
     addDefaultProperties();
-    if (Boolean.parseBoolean(properties.getProperty(Constants.HERON_VERBOSE).toString())) {
+    if (Boolean.parseBoolean(properties.getProperty(Constants.HERON_VERBOSE))) {
       LOG.info("Config parsed: \n" + properties);
     }
     return true;
@@ -136,6 +168,14 @@ public class DefaultConfigLoader implements IConfigLoader {
     if (!properties.containsKey(key)) {
       properties.setProperty(key, value);
     }
+  }
+
+  protected boolean applyConfigPropertyOverride() {
+    if (properties.containsKey(Constants.CONFIG_PROPERTY)) {
+      String configOverride = properties.getProperty(Constants.CONFIG_PROPERTY);
+      return applyConfigOverride(properties, configOverride);
+    }
+    return true;
   }
 
   @Override
@@ -176,5 +216,13 @@ public class DefaultConfigLoader implements IConfigLoader {
   @Override
   public Map<Object, Object> getConfig() {
     return properties;
+  }
+
+  public final String getHeronDir() {
+    return properties.getProperty(Constants.HERON_DIR);
+  }
+
+  public final String getHeronConfigPath() {
+    return properties.getProperty(Constants.HERON_CONFIG_PATH);
   }
 }

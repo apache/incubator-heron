@@ -27,8 +27,8 @@ specific components in a topology and are detailed in the docs below:
 
 * [Heron Instance](instance.html)
 * [Heron Metrics Manager](metrics-manager.html)
-* [Heron Topology Master](topology-master.html)
-* [Heron Stream Manager](stream-manager.html)
+* [Heron Topology Master](tmaster.html)
+* [Heron Stream Manager](stmgr.html)
 
 ### Overriding Topology-level Defaults
 

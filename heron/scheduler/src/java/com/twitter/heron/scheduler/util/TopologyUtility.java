@@ -161,9 +161,9 @@ public class TopologyUtility {
           throw new RuntimeException("Invalid component. " + componentAndRam[0] + " not found");
         }
         long requiredRam = Long.parseLong(componentAndRam[1]);
-        if (requiredRam < 300L * Constants.MB && requiredRam > 0) {
+        if (requiredRam < 128L * Constants.MB && requiredRam > 0) {
           throw new RuntimeException(String.format(
-              "Component %s require atleast 300MB ram. Given on %d MB",
+              "Component %s require at least 128MB ram. Given on %d MB",
               componentAndRam[0], requiredRam / Constants.MB));
         }
         ramMap.put(componentAndRam[0], requiredRam);
