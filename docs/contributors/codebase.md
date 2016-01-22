@@ -95,7 +95,7 @@ Manager](../concepts/architecture.html#stream-manager) can be found in
 
 The Java code for [Heron
 instances](../concepts/architecture.html#heron-instance) can be found in
-[`heron/instance`]({{bool.root_url}}/heron/instance).
+[`heron/instance`]({{book.root_url}}/heron/instance).
 
 ### Metrics Manager
 

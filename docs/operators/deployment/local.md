@@ -43,7 +43,7 @@ CLI](../heron-cli.html).
 
 The `heron.core.release.package` parameter is optional. It specifies the path to
 a local TAR file for the `core` component of the desired Heron release. Assuming
-that you've built a full [Heron release](../compiling.html), this TAR will be
+that you've built a full [Heron release](../../developers/compiling.html#building-a-full-release-package), this TAR will be
 located by default at `bazel-genfiles/release/heron-core-unversioned.tar`,
 relative to the root of your Heron repository. If you set
 `heron.core.release.package`, Heron will update all local binaries in Heron's

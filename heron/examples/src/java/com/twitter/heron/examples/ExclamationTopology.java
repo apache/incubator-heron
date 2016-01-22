@@ -35,7 +35,7 @@ public class ExclamationTopology {
     public void execute(Tuple tuple) {
       // System.out.println(tuple.getString(0));
       // _collector.emit(tuple, new Values(tuple.getString(0) + "!!!"));
-      //  _collector.ack(tuple);
+      // _collector.ack(tuple);
       if (++nItems % 100000 == 0) {
         long latency = System.currentTimeMillis() - startTime;
         System.out.println("Done " + nItems + " in " + latency);
@@ -55,23 +55,20 @@ public class ExclamationTopology {
     builder.setSpout("word", new TestWordSpout(), 2);
     builder.setBolt("exclaim1", new ExclamationBolt(), 2)
         .shuffleGrouping("word");
-    //builder.setBolt("exclaim2", new ExclamationBolt(), 2)
-    //        .shuffleGrouping("exclaim1");
 
     Config conf = new Config();
     conf.setDebug(true);
     conf.setMaxSpoutPending(10);
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
-    conf.setComponentRam("word", 500 * 1024 * 1024);
-    conf.setComponentRam("exclaim1", 1024 * 1024 * 1024);
-    conf.setContainerDiskRequested(7L * 1024 * 1024 * 1024);
-    conf.setContainerCpuRequested(2);
+    conf.setComponentRam("word", 128L * 1024 * 1024);
+    conf.setComponentRam("exclaim1", 128L * 1024 * 1024);
+    conf.setContainerDiskRequested(1024L * 1024 * 1024);
+    conf.setContainerCpuRequested(1);
 
     if (args != null && args.length > 0) {
       conf.setNumStmgrs(1);
       HeronSubmitter.submitTopology(args[0], conf, builder.createTopology());
     } else {
-      // TODO:- This is not yet supported
       System.out.println("Local mode not yet supported");
       System.exit(1);
       /*
