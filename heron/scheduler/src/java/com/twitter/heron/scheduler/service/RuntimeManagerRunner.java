@@ -208,7 +208,6 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
    *
    * @return true only when we could get the response and the response is ok
    */
-
   protected boolean isRequestSuccessful(HttpURLConnection connection, IRuntimeManager.Command command) {
     LOG.info(String.format("Received %s response from scheduler...", command.name()));
     Common.StatusCode statusCode;
@@ -245,28 +244,25 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
 
   protected boolean cleanState(SchedulerStateManagerAdaptor stateManager) {
     LOG.info("Cleaning up Heron State");
-    if (!NetworkUtility.awaitResult(
-        stateManager.clearPhysicalPlan(),
-        5, TimeUnit.SECONDS)) {
-      // We would not return false since it is possbile that TMaster didn't write physical plan
-      LOG.severe("Failed to clear physical plan. Check whether TMaster set it correctly.");
+    try {
+      if (!NetworkUtility.awaitResult(stateManager.clearPhysicalPlan(), 5, TimeUnit.SECONDS)) {
+        // We would not return false since it is possbile that TMaster didn't write physical plan
+        LOG.severe("Failed to clear physical plan. Check whether TMaster set it correctly.");
+      }
+    } catch (Exception e) {
+      LOG.log(Level.SEVERE, "Failed to clear physical plan", e);
     }
-
-    if (!NetworkUtility.awaitResult(
-        stateManager.clearExecutionState(),
-        5, TimeUnit.SECONDS)) {
+    
+    if (!NetworkUtility.awaitResult(stateManager.clearExecutionState(), 5, TimeUnit.SECONDS)) {
       LOG.severe("Failed to clear execution state");
-
       return false;
     }
 
-    if (!NetworkUtility.awaitResult(
-        stateManager.clearTopology(),
-        5, TimeUnit.SECONDS)) {
+    if (!NetworkUtility.awaitResult(stateManager.clearTopology(), 5, TimeUnit.SECONDS)) {
       LOG.severe("Failed to clear topology state");
-
       return false;
     }
+
     LOG.info("Cleaned up Heron State");
     return true;
   }
