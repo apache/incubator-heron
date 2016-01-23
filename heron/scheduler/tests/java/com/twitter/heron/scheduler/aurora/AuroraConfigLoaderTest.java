@@ -1,6 +1,5 @@
 package com.twitter.heron.scheduler.aurora;
 
-import java.util.Properties;
 import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,7 +21,6 @@ public class AuroraConfigLoaderTest {
   public void testAuroraOverrides() throws Exception {
     String override = "dc/role/environ";
     AuroraConfigLoader configLoader = AuroraConfigLoader.class.newInstance();
-    configLoader.properties = new Properties();
     // Disables version check
     configLoader.properties.setProperty(Constants.HERON_RELEASE_PACKAGE_NAME, "test");
     configLoader.applyConfigOverride(override);
@@ -35,7 +33,6 @@ public class AuroraConfigLoaderTest {
   public void testAuroraOverridesWithDefaultOverrides() throws Exception {
     String override = "dc/role/environ key1=value1 key2=value2";
     AuroraConfigLoader configLoader = AuroraConfigLoader.class.newInstance();
-    configLoader.properties = new Properties();
     configLoader.properties.setProperty(Constants.HERON_RELEASE_PACKAGE_NAME, "test");
     configLoader.applyConfigOverride(override);
     Assert.assertEquals("dc", configLoader.properties.getProperty(Constants.DC));
@@ -55,7 +52,6 @@ public class AuroraConfigLoaderTest {
     addConfig(override, Constants.HERON_RELEASE_PACKAGE_VERSION, "live");
 
     AuroraConfigLoader configLoader = AuroraConfigLoader.class.newInstance();
-    configLoader.properties = new Properties();
     configLoader.applyConfigOverride(override.toString());
     // Verify translated package
     Assert.assertEquals("live",

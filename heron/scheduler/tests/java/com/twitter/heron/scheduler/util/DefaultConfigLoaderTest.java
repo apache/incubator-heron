@@ -16,7 +16,6 @@ public class DefaultConfigLoaderTest {
   public void testParsingEmptyOverride() {
     String override = "";
     DefaultConfigLoader configLoader = new DefaultConfigLoader();
-    configLoader.properties = new Properties();
     configLoader.applyConfigOverride(override);
     Assert.assertEquals(0, configLoader.properties.entrySet().size());
   }
@@ -24,7 +23,6 @@ public class DefaultConfigLoaderTest {
   public void testParsingSimpleOverride() {
     String override = "key1= value1  key2 =value2    key3   =    \"value3\"";
     DefaultConfigLoader configLoader = new DefaultConfigLoader();
-    configLoader.properties = new Properties();
     configLoader.applyConfigOverride(override);
     Assert.assertEquals("value1", configLoader.properties.getProperty("key1"));
     Assert.assertEquals("value2", configLoader.properties.getProperty("key2"));
@@ -36,7 +34,6 @@ public class DefaultConfigLoaderTest {
   public void testParsingOverrideWithSeparators() {
     String override = "key1=\"subkey1 = value1\"  key2=\"subkey2:value2\" ";
     DefaultConfigLoader configLoader = new DefaultConfigLoader();
-    configLoader.properties = new Properties();
     configLoader.applyConfigOverride(override);
     Assert.assertEquals("subkey1 = value1", configLoader.properties.getProperty("key1"));
     Assert.assertEquals("subkey2:value2", configLoader.properties.getProperty("key2"));
@@ -47,7 +44,6 @@ public class DefaultConfigLoaderTest {
   public void testParsingOverrideWithQuotes() {
     String override = "key1=\"foo:\\\"subkey1 = value1\\\"\"  ";
     DefaultConfigLoader configLoader = new DefaultConfigLoader();
-    configLoader.properties = new Properties();
     configLoader.applyConfigOverride(override);
     Assert.assertEquals("foo:\"subkey1 = value1\"", configLoader.properties.getProperty("key1"));
     Assert.assertEquals(1, configLoader.properties.entrySet().size());
@@ -57,7 +53,6 @@ public class DefaultConfigLoaderTest {
   public void testParsingOverrideWithEscape() {
     String override = "key1=foo\\:\"subkey1 = value1\"  key2=subkey2\\=value2";
     DefaultConfigLoader configLoader = new DefaultConfigLoader();
-    configLoader.properties = new Properties();
     configLoader.applyConfigOverride(override);
     Assert.assertEquals("foo:\"subkey1 = value1\"", configLoader.properties.getProperty("key1"));
     Assert.assertEquals("subkey2=value2", configLoader.properties.getProperty("key2"));
