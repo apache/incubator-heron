@@ -2,7 +2,6 @@ package com.twitter.heron.scheduler.aurora;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -18,7 +17,6 @@ import com.twitter.heron.scheduler.util.TopologyUtilityTest;
 public class AuroraLauncherTest {
   DefaultConfigLoader createRequiredConfig() throws Exception {
     DefaultConfigLoader schedulerConfig = DefaultConfigLoader.class.newInstance();
-    schedulerConfig.properties = new Properties();
     schedulerConfig.addDefaultProperties();
     schedulerConfig.properties.setProperty(Constants.DC, "dc");
     schedulerConfig.properties.setProperty(Constants.ROLE, "me");

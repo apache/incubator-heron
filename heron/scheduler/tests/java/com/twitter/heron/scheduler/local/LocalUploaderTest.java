@@ -34,7 +34,6 @@ public class LocalUploaderTest {
 
   public static DefaultConfigLoader getDefaultConfigLoader() throws Exception {
     DefaultConfigLoader configLoader = DefaultConfigLoader.class.newInstance();
-    configLoader.properties = new Properties();
     configLoader.addDefaultProperties();
     configLoader.properties.setProperty(LocalConfig.WORKING_DIRECTORY, working_directory);
     configLoader.properties.setProperty(
