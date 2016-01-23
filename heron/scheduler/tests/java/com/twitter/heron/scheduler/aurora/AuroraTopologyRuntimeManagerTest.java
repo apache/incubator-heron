@@ -24,7 +24,6 @@ public class AuroraTopologyRuntimeManagerTest {
 
   AuroraConfigLoader createRequiredConfig() throws Exception {
     AuroraConfigLoader schedulerConfig = AuroraConfigLoader.class.newInstance();
-    schedulerConfig.properties = new Properties();
     schedulerConfig.addDefaultProperties();
     schedulerConfig.properties.setProperty(Constants.DC, dc);
     schedulerConfig.properties.setProperty(Constants.ROLE, role);

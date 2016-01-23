@@ -1,7 +1,5 @@
 package com.twitter.heron.scheduler.local;
 
-import java.util.Properties;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +20,6 @@ public class LocalSchedulerTest {
 
   DefaultConfigLoader createRequiredConfig() throws Exception {
     DefaultConfigLoader schedulerConfig = DefaultConfigLoader.class.newInstance();
-    schedulerConfig.properties = new Properties();
     schedulerConfig.addDefaultProperties();
     schedulerConfig.properties.setProperty(LocalConfig.WORKING_DIRECTORY,
         LocalConfig.WORKING_DIRECTORY);
