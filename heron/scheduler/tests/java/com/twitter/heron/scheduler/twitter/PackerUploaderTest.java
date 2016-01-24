@@ -25,7 +25,7 @@ public class PackerUploaderTest {
     configLoader.addDefaultProperties();
     configLoader.properties.setProperty(Constants.DC, dc);
     configLoader.properties.setProperty(Constants.ROLE, role);
-    configLoader.properties.setProperty(Constants.HERON_RELEASE_TAG, pkgName);
+    configLoader.properties.setProperty(Constants.HERON_RELEASE_PACKAGE_NAME, pkgName);
     return configLoader;
   }
 

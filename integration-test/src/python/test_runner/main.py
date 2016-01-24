@@ -108,7 +108,7 @@ def getHTTPResponse(serverAddress, serverPort, topologyName):
 def submitTopology(heronCliPath, dc, role, env, jarPath, classPath, pkgRole, pkgName, args = None):
   logging.info("Submitting topology")
   cmd = ("%s submit %s/%s/%s --heron-release-pkgrole=%s"
-        " --heron-release-pkgname=%s %s %s %s --heron-verbose" % (
+        " --heron-release-pkgname=%s %s %s %s --verbose" % (
     heronCliPath, dc, role, env, pkgRole, pkgName, jarPath, classPath, args))
 
   logging.info("Submitting command: %s" % (cmd))
@@ -123,7 +123,7 @@ def submitTopology(heronCliPath, dc, role, env, jarPath, classPath, pkgRole, pkg
 # Kill a topology using heron-cli
 def killTopology(heronCliPath, dc, role, env, topologyName):
   logging.info("Killing topology")
-  cmd = "%s kill %s/%s/%s %s --heron-verbose" % (
+  cmd = "%s kill %s/%s/%s %s --verbose" % (
     heronCliPath, dc, role, env, topologyName)
 
   logging.info("Submitting command: %s" % (cmd))

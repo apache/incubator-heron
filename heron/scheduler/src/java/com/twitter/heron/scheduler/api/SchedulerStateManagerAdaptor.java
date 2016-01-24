@@ -28,7 +28,6 @@ public class SchedulerStateManagerAdaptor {
    */
   public SchedulerStateManagerAdaptor(IStateManager delegate, String topologyName) {
     this.delegate = delegate;
-
     this.topologyName = topologyName;
   }
 
