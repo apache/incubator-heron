@@ -19,7 +19,7 @@ public class AuroraConfigLoaderTest {
 
   @Test
   public void testAuroraOverrides() throws Exception {
-    String override = "dc/role/environ";
+    String override = "dc=dc role=role environ=environ";
     AuroraConfigLoader configLoader = AuroraConfigLoader.class.newInstance();
     // Disables version check
     configLoader.properties.setProperty(Constants.HERON_RELEASE_PACKAGE_NAME, "test");
@@ -31,7 +31,7 @@ public class AuroraConfigLoaderTest {
 
   @Test
   public void testAuroraOverridesWithDefaultOverrides() throws Exception {
-    String override = "dc/role/environ key1=value1 key2=value2";
+    String override = "dc=dc role=role environ=environ key1=value1 key2=value2";
     AuroraConfigLoader configLoader = AuroraConfigLoader.class.newInstance();
     configLoader.properties.setProperty(Constants.HERON_RELEASE_PACKAGE_NAME, "test");
     configLoader.applyConfigOverride(override);
@@ -44,7 +44,7 @@ public class AuroraConfigLoaderTest {
 
   @Test
   public void testAuroraRespectRespectHeronVersion() throws Exception {
-    StringBuilder override = new StringBuilder("dc/role/environ");
+    StringBuilder override = new StringBuilder("dc=dc role=role environ=environ");
 
     // Add required heron package defaults
     addConfig(override, Constants.HERON_RELEASE_PACKAGE_NAME, "testPackage");
