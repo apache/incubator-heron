@@ -5,7 +5,7 @@ and regular stmgr/metricsmgr/instances (shards > 0).
 """
 
 heron_core_release_url = 'file:///vagrant/heron/dist/{{HERON_PACKAGE}}'
-heron_topology_jar_url = 'file:///vagrant/heron/jobs/{{TOPOLOGY_JAR_FILE}}'
+heron_topology_jar_url = 'file://{{HERON_UPLOADER_HOME}}}/{{DC}}/{{RUN_ROLE}/{{ENVIRON}}/{{TOPOLOGY_NAME}}/{{TOPOLOGY_JAR_FILE}}'
 
 # --- processes ---
 fetch_heron_system = Process(
@@ -15,7 +15,7 @@ fetch_heron_system = Process(
 
 fetch_user_package = Process(
   name = 'fetch_user_package',
-  cmdline = 'curl %s -o {{TOPOLOGY_JAR_FILE}}' % heron_topology_jar_url
+  cmdline = 'curl %s -o {{TOPOLOGY_JAR_FILE}} && tar zxf {{TOPOLOGY_JAR_FILE}}' % heron_topology_jar_url
 )
 
 launch_heron_executor = Process(
