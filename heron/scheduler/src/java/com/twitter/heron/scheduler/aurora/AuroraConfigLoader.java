@@ -22,46 +22,22 @@ public class AuroraConfigLoader extends AbstractPropertiesConfigLoader {
     File schedulerConfFile = Paths.get(configPath, AURORA_SCHEDULER_CONF).toFile();
     File bindConfFile = Paths.get(configPath, AURORA_BIND_CONF).toFile();
 
-    // The configOverride should be in the format: dc/role/environ propertyOverride
-    // where the propertyOverride is optional.
-    String[] parts = configOverride.trim().split("\\s+", 2);
-    if (parts.length == 0) {
-      LOG.severe("dc/role/environ is required.");
-      return false;
-    }
-
-    String clusterInfo = parts[0];
-    String[] clusterParts = clusterInfo.split("/");
-    if (clusterParts.length != 3) {
-      LOG.severe("Cluster parts must be dc/role/environ (without spaces)");
-      return false;
-    }
-
-    String propertyOverride = "";
-    if (parts.length == 2) {
-      propertyOverride = parts[1];
-    }
-
-    String dc = clusterParts[0];
-    String role = clusterParts[1];
-    String environ = clusterParts[2];
-
     // The if condition must be evaluated in order to ensure
     // the correct overriding logic from the lowest to the highest:
     //    aurora_scheduler.conf
     //    cluster.conf
     //    cmdline option --config-property
     PropertiesFileConfigLoader baseLoader = new PropertiesFileConfigLoader();
-    if (baseLoader.load(schedulerConfFile.toString(), propertyOverride)) {
+    if (baseLoader.load(schedulerConfFile.toString(), configOverride)) {
       Properties baseProperties = baseLoader.getProperties();
       Properties bindProperties = new Properties();
+      String dc = baseProperties.getProperty(Constants.DC);
 
       if (ConfigLoaderUtils.loadPropertiesFile(baseProperties, getClusterConfFile(configPath, dc).toString()) &&
           ConfigLoaderUtils.applyConfigPropertyOverride(baseProperties) &&
           ConfigLoaderUtils.loadPropertiesFile(bindProperties, bindConfFile.toString()) &&
           addAuroraBindProperties(baseProperties, bindProperties)) {
         properties.putAll(baseProperties);
-        addClusterInfoProperties(dc, role, environ);
         return true;
       }
     }
@@ -97,49 +73,5 @@ public class AuroraConfigLoader extends AbstractPropertiesConfigLoader {
     }
 
     return true;
-  }
-
-  private void addClusterInfoProperties(String dc, String role, String environ) {
-    properties.setProperty(Constants.DC, dc);
-    properties.setProperty(Constants.ROLE, role);
-    properties.setProperty(Constants.ENVIRON, environ);
-  }
-
-  @Override
-  public boolean applyConfigOverride(String configOverride) {
-    // The configOverride should be in the format: dc/role/environ propertyOverride
-    // where the propertyOverride is optional.
-    String[] parts = configOverride.trim().split("\\s+", 2);
-    if (parts.length == 0) {
-      LOG.severe("dc/role/environ is required.");
-      return false;
-    }
-
-    String clusterInfo = parts[0];
-    String[] clusterParts = clusterInfo.split("/");
-    if (clusterParts.length != 3) {
-      LOG.severe("Cluster parts must be dc/role/environ (without spaces)");
-      return false;
-    }
-
-    String propertyOverride = "";
-    if (parts.length == 2) {
-      propertyOverride = parts[1];
-    }
-
-    String dc = clusterParts[0];
-    String role = clusterParts[1];
-    String environ = clusterParts[2];
-
-    Properties p = new Properties();
-    if (ConfigLoaderUtils.applyPropertyOverride(p, propertyOverride)) {
-      properties.putAll(p);
-      properties.setProperty(Constants.DC, dc);
-      properties.setProperty(Constants.ROLE, role);
-      properties.setProperty(Constants.ENVIRON, environ);
-      return true;
-    } else {
-      return false;
-    }
   }
 }
