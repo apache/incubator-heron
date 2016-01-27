@@ -76,6 +76,10 @@ def get_heron_dir():
   """
   return normclasspath("/".join(os.path.realpath( __file__ ).split('/')[:-7]))
 
+def pass_config_overrides(namespace):
+  parts = namespace['config-overrides'].split('/')[:3]
+  return "dc=%s role=%s environ=%s" % (parts[0], parts[1], parts[2])
+
 def pass_cmdline_override(namespace):
   override = []
   for key in namespace.keys():
@@ -227,7 +231,7 @@ def submitfatjar(namespace):
                    args=args)
 
   try:
-    scheduler_overrides = namespace['config-overrides'] + ' ' + pass_cmdline_override(namespace)
+    scheduler_overrides = pass_config_overrides(namespace) + ' ' + pass_cmdline_override(namespace)
     launch_all_topologies_found(jarfile,
                                 tmpdir,
                                 namespace['config_loader'],
@@ -266,7 +270,7 @@ def submittar(namespace):
 
   exec_heron_tar(klass, tar_name, args, tmpdir)
   try:
-    scheduler_overrides = namespace['config-overrides'] + ' ' + pass_cmdline_override(namespace)
+    scheduler_overrides = pass_config_overrides(namespace) + ' ' + pass_cmdline_override(namespace)
     launch_all_topologies_found(tar_name,
                                 tmpdir,
                                 namespace['config_loader'],
@@ -333,7 +337,7 @@ def runtime_manage(namespace):
   command = namespace['command']
 
   try:
-    config_overrides = namespace['config-overrides'] + ' ' + pass_cmdline_override(namespace)
+    config_overrides = pass_config_overrides(namespace) + ' ' + pass_cmdline_override(namespace)
 
     exec_heron_class('com.twitter.heron.scheduler.service.RuntimeManagerMain',
                      get_heron_libs(SCHEDULER_RUN_JARS),
