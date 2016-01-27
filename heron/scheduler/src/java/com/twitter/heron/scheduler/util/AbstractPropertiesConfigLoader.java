@@ -82,6 +82,12 @@ public abstract class AbstractPropertiesConfigLoader implements IConfigLoader {
   }
 
   public boolean applyConfigOverride(String configOverride) {
-    return ConfigLoaderUtils.applyPropertyOverride(properties, preparePropertyOverride(configOverride));
+    Properties p = new Properties();
+    if (ConfigLoaderUtils.applyPropertyOverride(p, preparePropertyOverride(configOverride))) {
+      properties.putAll(p);
+      return true;
+    } else {
+      return false;
+    }
   }
 }
