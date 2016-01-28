@@ -34,22 +34,22 @@ class JstackHandler(BaseHandler):
   @tornado.gen.coroutine
   def get(self):
     try:
-      dc = self.get_argument_dc()
+      cluster = self.get_argument_cluster()
       environ = self.get_argument_environ()
-      topology = self.get_argument_topology()
+      topology_name = self.get_argument_topology()
       instance = self.get_argument_instance()
-      topologyInfo = self.tracker.getTopologyInfo(topology, dc, environ)
-      ret = yield self.getInstanceJstack(topologyInfo, instance)
+      topology_info = self.tracker.getTopologyInfo(topology, cluster, environ)
+      ret = yield self.getInstanceJstack(topology_info, instance)
       self.write_success_response(ret)
     except Exception as e:
       self.write_error_response(e)
 
   @tornado.gen.coroutine
-  def getInstanceJstack(self, topologyInfo, instance_id):
+  def getInstanceJstack(self, topology_info, instance_id):
     """
     Fetches Instance jstack from heron-shell.
     """
-    pid_response = yield getInstancePid(topologyInfo, instance_id)
+    pid_response = yield getInstancePid(topology_info, instance_id)
     try:
       http_client = tornado.httpclient.AsyncHTTPClient()
       component_id = instance_id.split('_')[1] # Format: container_<id>_<instance_id>
@@ -57,7 +57,7 @@ class JstackHandler(BaseHandler):
       pid = pid_json['stdout'].strip()
       if pid == '':
         raise Exception('Failed to get pid')
-      endpoint = utils.make_shell_endpoint(topologyInfo, instance_id)
+      endpoint = utils.make_shell_endpoint(topology_info, instance_id)
       url = "%s/jstack/%s" % (endpoint, pid)
       response = yield http_client.fetch(url)
       LOG.debug("HTTP call for url: %s" % url)
