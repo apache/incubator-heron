@@ -7,7 +7,7 @@ from heron.tracker.src.python.handlers import BaseHandler
 from heron.tracker.src.python.log import Log as LOG
 
 @tornado.gen.coroutine
-def getInstancePid(topologyInfo, instance_id):
+def getInstancePid(topology_info, instance_id):
   """
   This method is used by other modules, and so it
   is not a part of the class.
@@ -15,7 +15,7 @@ def getInstancePid(topologyInfo, instance_id):
   """
   try:
     http_client = tornado.httpclient.AsyncHTTPClient()
-    endpoint = utils.make_shell_endpoint(topologyInfo, instance_id)
+    endpoint = utils.make_shell_endpoint(topology_info, instance_id)
     url = "%s/pid/%s" % (endpoint, instance_id)
     LOG.debug("HTTP call for url: %s" % url)
     response = yield http_client.fetch(url)
@@ -25,10 +25,10 @@ def getInstancePid(topologyInfo, instance_id):
 
 class PidHandler(BaseHandler):
   """
-  URL - /topologies/jmap?dc=<dc>&topology=<topology> \
+  URL - /topologies/jmap?cluster=<cluster>&topology=<topology> \
         &environ=<environment>&instance=<instance>
   Parameters:
-   - dc - Name of dc.
+   - cluster - Name of the cluster.
    - environ - Running environment.
    - topology - Name of topology (Note: Case sensitive. Can only
                 include [a-zA-Z0-9-_]+)
@@ -50,12 +50,12 @@ class PidHandler(BaseHandler):
   @tornado.gen.coroutine
   def get(self):
     try:
-      dc = self.get_argument_dc()
+      cluster = self.get_argument_cluster()
       environ = self.get_argument_environ()
-      topology = self.get_argument_topology()
+      topology_name = self.get_argument_topology()
       instance = self.get_argument_instance()
-      topologyInfo = self.tracker.getTopologyInfo(topology, dc, environ)
-      result = yield getInstancePid(topologyInfo, instance)
+      topology_info = self.tracker.getTopologyInfo(topology, cluster, environ)
+      result = yield getInstancePid(topology_info, instance)
       self.write_success_response(result)
     except Exception as e:
       self.write_error_response(e)
