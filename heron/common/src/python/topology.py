@@ -28,7 +28,6 @@ class Topology:
     self.physical_plan = None
     self.execution_state = None
     self.id = None
-    self.dc = None
     self.cluster = None
     self.environ = None
     self.tmaster = None
@@ -110,7 +109,7 @@ class Topology:
   def get_execution_state_dc_environ(self, execution_state):
     """
     Helper function to extract dc and environ from execution_state.
-    Returns a tuple (dc, environ).
+    Returns a tuple (cluster, environ).
     """
     # TODO: This should be removed when old version of execution_state is no
     # longer in use.
