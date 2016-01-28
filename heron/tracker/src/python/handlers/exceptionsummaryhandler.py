@@ -30,11 +30,11 @@ class ExceptionSummaryHandler(BaseHandler):
   @tornado.gen.coroutine
   def get(self):
     try:
-      dc = self.get_argument_dc()
+      cluster = self.get_argument_cluster()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
       component = self.get_argument_component()
-      topology = self.tracker.getTopologyByDcEnvironAndName(dc, environ, topology_name)
+      topology = self.tracker.getTopologyByDcEnvironAndName(cluster, environ, topology_name)
       instances = self.get_arguments(constants.PARAM_INSTANCE)
       exceptions_summary = yield tornado.gen.Task(self.getComponentExceptionSummary,
                                                   topology.tmaster, component, instances)
