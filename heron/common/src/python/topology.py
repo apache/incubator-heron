@@ -29,6 +29,7 @@ class Topology:
     self.execution_state = None
     self.id = None
     self.dc = None
+    self.cluster = None
     self.environ = None
     self.tmaster = None
 
@@ -116,19 +117,23 @@ class Topology:
     if execution_state.HasField('aurora'):
       return (execution_state.aurora.jobs[0].dc, execution_state.aurora.jobs[0].environ)
     else:
-      return (execution_state.dc, execution_state.environ)
+      # TODO: remove dc altogether - later
+      if execution_state.HasField('cluster'):
+        return (execution_state.cluster, execution_state.environ)
+      else:
+        return (execution_state.dc, execution_state.environ)
 
   def set_execution_state(self, execution_state):
     if not execution_state:
       self.execution_state = None
-      self.dc = None
+      self.cluster = None
       self.environ = None
     else:
       self.execution_state = execution_state
-      dc, environ = self.get_execution_state_dc_environ(execution_state)
-      self.dc = dc
+      cluster, environ = self.get_execution_state_dc_environ(execution_state)
+      self.cluster = cluster
       self.environ = environ
-      self.zone = dc
+      self.zone = cluster
     self.trigger_watches()
 
   def set_tmaster(self, tmaster):
