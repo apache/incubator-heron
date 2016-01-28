@@ -10,10 +10,10 @@ from heron.tracker.src.python.log import Log as LOG
 
 class MemoryHistogramHandler(BaseHandler):
   """
-  URL - /topologies/histo?dc=<dc>&topology=<topology> \
+  URL - /topologies/histo?cluster=<cluster>&topology=<topology> \
         &environ=<environment>&instance=<instance>
   Parameters:
-   - dc - Name of dc.
+   - cluster - Name of the cluster.
    - environ - Running environment.
    - topology - Name of topology (Note: Case sensitive. Can only
                 include [a-zA-Z0-9-_]+)
@@ -34,12 +34,12 @@ class MemoryHistogramHandler(BaseHandler):
   @tornado.gen.coroutine
   def get(self):
     try:
-      dc = self.get_argument_dc()
+      cluster = self.get_argument_cluster()
       environ = self.get_argument_environ()
-      topology = self.get_argument_topology()
+      topology_name = self.get_argument_topology()
       instance = self.get_argument_instance()
-      topologyInfo = self.tracker.getTopologyInfo(topology, dc, environ)
-      ret = yield self.getInstanceMemoryHistogram(topologyInfo, instance)
+      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, environ)
+      ret = yield self.getInstanceMemoryHistogram(topology_info, instance)
       self.write_success_response(ret)
     except Exception as e:
       self.write_error_response(e)

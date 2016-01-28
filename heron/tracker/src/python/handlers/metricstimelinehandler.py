@@ -12,7 +12,7 @@ class MetricsTimelineHandler(BaseHandler):
   """
   URL - /topologies/metricstimeline
   Parameters:
-   - dc (required)
+   - cluster (required)
    - environ (required)
    - topology (required) name of the requested topology
    - component (required)
@@ -33,20 +33,20 @@ class MetricsTimelineHandler(BaseHandler):
   @tornado.gen.coroutine
   def get(self):
     try:
-      dc = self.get_argument_dc()
+      cluster = self.get_argument_cluster()
       environ = self.get_argument_environ()
-      topName = self.get_argument_topology()
+      topology_name = self.get_argument_topology()
       component = self.get_argument_component()
-      metricNames = self.get_required_arguments_metricnames()
-      startTime = self.get_argument_starttime()
-      endTime = self.get_argument_endtime()
-      self.validateInterval(startTime, endTime)
+      metric_names = self.get_required_arguments_metricnames()
+      start_time = self.get_argument_starttime()
+      end_time = self.get_argument_endtime()
+      self.validateInterval(start_time, end_time)
       instances = self.get_arguments(constants.PARAM_INSTANCE)
 
-      topology = self.tracker.getTopologyByDcEnvironAndName(dc, environ, topName)
+      topology = self.tracker.getTopologyByDcEnvironAndName(cluster, environ, topology_name)
       metrics = yield tornado.gen.Task(self.getMetricsTimeline,
-                                       topology.tmaster, component, metricNames,
-                                       instances, int(startTime), int(endTime))
+                                       topology.tmaster, component, metric_names,
+                                       instances, int(start_time), int(end_time))
       self.write_success_response(metrics)
     except Exception as e:
       self.write_error_response(e)
@@ -54,11 +54,11 @@ class MetricsTimelineHandler(BaseHandler):
   @tornado.gen.coroutine
   def getMetricsTimeline(self,
                          tmaster,
-                         componentName,
-                         metricNames,
+                         component_name,
+                         metric_names,
                          instances,
-                         startTime,
-                         endTime,
+                         start_time,
+                         end_time,
                          callback=None):
     """
     Get the specified metrics for the given component name of this topology.
@@ -91,14 +91,14 @@ class MetricsTimelineHandler(BaseHandler):
     port = tmaster.stats_port
 
     metricRequest = tmaster_pb2.MetricRequest()
-    metricRequest.component_name = componentName
+    metricRequest.component_name = component_name
     if len(instances) > 0:
       for instance in instances:
         metricRequest.instance_id.append(instance)
-    for metricName in metricNames:
+    for metricName in metric_names:
       metricRequest.metric.append(metricName)
-    metricRequest.explicit_interval.start = startTime
-    metricRequest.explicit_interval.end = endTime
+    metricRequest.explicit_interval.start = start_time
+    metricRequest.explicit_interval.end = end_time
     metricRequest.minutely = True
 
     # Serialize the metricRequest to send as a payload
@@ -139,9 +139,9 @@ class MetricsTimelineHandler(BaseHandler):
 
     # Form the response.
     ret = {}
-    ret["starttime"] = startTime
-    ret["endtime"] = endTime
-    ret["component"] = componentName
+    ret["starttime"] = start_time
+    ret["endtime"] = end_time
+    ret["component"] = component_name
     ret["timeline"] = {}
     for metric in metricResponse.metric:
       instance = metric.instance_id
