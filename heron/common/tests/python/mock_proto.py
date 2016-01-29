@@ -8,7 +8,7 @@ from heron.common.src.python import constants
 class MockProto:
   topology_name = "mock_topology_name"
   topology_id = "mock_topology_id"
-  dc = "mock_topology_dc"
+  cluster = "mock_topology_cluster"
   environ = "mock_topology_environ"
 
   def create_mock_spout(self,
@@ -148,7 +148,7 @@ class MockProto:
     estate = protoEState.ExecutionState()
     estate.topology_name = MockProto.topology_name
     estate.topology_id = MockProto.topology_id
-    estate.dc = MockProto.dc
+    estate.cluster = MockProto.cluster
     estate.environ = MockProto.environ
     return estate
 
