@@ -25,13 +25,13 @@ class TopologyTest(unittest.TestCase):
     # Set it to None
     self.topology.set_execution_state(None)
     self.assertIsNone(self.topology.execution_state)
-    self.assertIsNone(self.topology.dc)
+    self.assertIsNone(self.topology.cluster)
     self.assertIsNone(self.topology.environ)
 
     estate = MockProto().create_mock_execution_state()
     self.topology.set_execution_state(estate)
     self.assertEqual(estate, self.topology.execution_state)
-    self.assertEqual(MockProto.dc, self.topology.dc)
+    self.assertEqual(MockProto.cluster, self.topology.cluster)
     self.assertEqual(MockProto.environ, self.topology.environ)
 
   def test_set_tmaster(self):
