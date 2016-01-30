@@ -37,7 +37,6 @@ public class LocalLauncherTest {
 
   DefaultConfigLoader createRequiredConfig() throws Exception {
     DefaultConfigLoader schedulerConfig = DefaultConfigLoader.class.newInstance();
-    schedulerConfig.properties = new Properties();
     schedulerConfig.properties.setProperty(LocalConfig.WORKING_DIRECTORY,
         LocalConfig.WORKING_DIRECTORY);
     schedulerConfig.addDefaultProperties();

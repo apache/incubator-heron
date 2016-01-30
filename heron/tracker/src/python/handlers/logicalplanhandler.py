@@ -8,7 +8,7 @@ class LogicalPlanHandler(BaseHandler):
   """
   URL - /topologies/logicalplan
   Parameters:
-   - dc (required)
+   - cluster (required)
    - environ (required)
    - topology (required) name of the requested topology
 
@@ -21,12 +21,12 @@ class LogicalPlanHandler(BaseHandler):
   @tornado.gen.coroutine
   def get(self):
     try:
-      dc = self.get_argument_dc()
+      cluster = self.get_argument_cluster()
       environ = self.get_argument_environ()
-      topName = self.get_argument_topology()
-      topologyInfo = self.tracker.getTopologyInfo(topName, dc, environ)
-      logicalPlan = topologyInfo["logical_plan"]
-      self.write_success_response(logicalPlan)
+      topology_name = self.get_argument_topology()
+      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, environ)
+      logical_plan = topologyInfo["logical_plan"]
+      self.write_success_response(logical_plan)
     except Exception as e:
       self.write_error_response(e)
 
