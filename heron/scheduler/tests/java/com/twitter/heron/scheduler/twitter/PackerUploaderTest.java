@@ -21,7 +21,6 @@ public class PackerUploaderTest {
 
   public static DefaultConfigLoader getRequiredConfig() throws Exception {
     DefaultConfigLoader configLoader = DefaultConfigLoader.class.newInstance();
-    configLoader.properties = new Properties();
     configLoader.addDefaultProperties();
     configLoader.properties.setProperty(Constants.DC, dc);
     configLoader.properties.setProperty(Constants.ROLE, role);

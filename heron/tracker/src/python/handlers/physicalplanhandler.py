@@ -8,7 +8,7 @@ class PhysicalPlanHandler(BaseHandler):
   """
   URL - /topologies/physicalplan
   Parameters:
-   - dc (required)
+   - cluster (required)
    - environ (required)
    - topology (required) name of the requested topology
 
@@ -22,12 +22,12 @@ class PhysicalPlanHandler(BaseHandler):
   @tornado.gen.coroutine
   def get(self):
     try:
-      dc = self.get_argument_dc()
+      cluster = self.get_argument_cluster()
       environ = self.get_argument_environ()
-      topName = self.get_argument_topology()
-      topologyInfo = self.tracker.getTopologyInfo(topName, dc, environ)
-      physicalPlan = topologyInfo["physical_plan"]
-      self.write_success_response(physicalPlan)
+      topology_name = self.get_argument_topology()
+      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, environ)
+      physical_plan = topologyInfo["physical_plan"]
+      self.write_success_response(physical_plan)
     except Exception as e:
       self.write_error_response(e)
 
