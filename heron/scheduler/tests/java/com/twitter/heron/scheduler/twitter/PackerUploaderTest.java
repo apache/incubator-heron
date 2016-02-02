@@ -21,11 +21,10 @@ public class PackerUploaderTest {
 
   public static DefaultConfigLoader getRequiredConfig() throws Exception {
     DefaultConfigLoader configLoader = DefaultConfigLoader.class.newInstance();
-    configLoader.properties = new Properties();
     configLoader.addDefaultProperties();
     configLoader.properties.setProperty(Constants.DC, dc);
     configLoader.properties.setProperty(Constants.ROLE, role);
-    configLoader.properties.setProperty(Constants.HERON_RELEASE_TAG, pkgName);
+    configLoader.properties.setProperty(Constants.HERON_RELEASE_PACKAGE_NAME, pkgName);
     return configLoader;
   }
 

@@ -9,7 +9,7 @@ class MetricsQueryHandler(BaseHandler):
   """
   URL - /topologies/metricsquery
   Parameters:
-   - dc (required)
+   - cluster (required)
    - environ (required)
    - topology (required) name of the requested topology
    - starttime (required)
@@ -26,18 +26,18 @@ class MetricsQueryHandler(BaseHandler):
   @tornado.gen.coroutine
   def get(self):
     try:
-      dc = self.get_argument_dc()
+      cluster = self.get_argument_cluster()
       environ = self.get_argument_environ()
-      topName = self.get_argument_topology()
-      topology = self.tracker.getTopologyByDcEnvironAndName(dc, environ, topName)
+      topology_name = self.get_argument_topology()
+      topology = self.tracker.getTopologyByDcEnvironAndName(cluster, environ, topology_name)
 
-      startTime = self.get_argument_starttime()
-      endTime = self.get_argument_endtime()
-      self.validateInterval(startTime, endTime)
+      start_time = self.get_argument_starttime()
+      end_time = self.get_argument_endtime()
+      self.validateInterval(start_time, end_time)
 
       query = self.get_argument_query()
       metrics = yield tornado.gen.Task(self.executeMetricsQuery,
-                                       topology.tmaster, query, int(startTime), int(endTime))
+                                       topology.tmaster, query, int(start_time), int(end_time))
       self.write_success_response(metrics)
     except Exception as e:
       self.write_error_response(e)
@@ -46,8 +46,8 @@ class MetricsQueryHandler(BaseHandler):
   def executeMetricsQuery(self,
                          tmaster,
                          queryString,
-                         startTime,
-                         endTime,
+                         start_time,
+                         end_time,
                          callback=None):
     """
     Get the specified metrics for the given query in this topology.
@@ -74,12 +74,12 @@ class MetricsQueryHandler(BaseHandler):
     """
 
     query = Query(self.tracker)
-    metrics = yield query.execute_query(tmaster, queryString, startTime, endTime)
+    metrics = yield query.execute_query(tmaster, queryString, start_time, end_time)
 
     # Parse the response
     ret = {}
-    ret["starttime"] = startTime
-    ret["endtime"] = endTime
+    ret["starttime"] = start_time
+    ret["endtime"] = end_time
     ret["timeline"] = []
 
     if not metrics:

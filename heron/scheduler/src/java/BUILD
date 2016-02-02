@@ -1,5 +1,7 @@
 package(default_visibility = ["//visibility:public"])
 
+load("/tools/rules/jarjar_rules", "jarjar_binary")
+
 java_library(
     name = 'scheduler-lib-java',
     srcs = glob([
@@ -88,8 +90,6 @@ java_library(
         "//3rdparty/protobuf:protobuf-java",
     ],
     resources = [
-        "heron.aurora",
-        "heron_controller.aurora",
     ],
 )
 
@@ -110,8 +110,6 @@ java_binary(
         "//3rdparty/protobuf:protobuf-java",
     ],
     resources = [
-        "heron.aurora",
-        "heron_controller.aurora",
     ],
 )
 
@@ -158,7 +156,7 @@ java_binary(
 )
 
 java_binary(
-    name='heron-scheduler',
+    name='scheduler-unshaded',
     srcs = glob(["**/*.java"]),
     deps = [
         ":scheduler-lib-java",
@@ -178,7 +176,11 @@ java_binary(
         "//3rdparty/zookeeper:zookeeper-java",
     ],
     resources = [
-        "heron.aurora",
-        "heron_controller.aurora",
     ],
+)
+
+jarjar_binary(
+    name = "heron-scheduler",
+    src = ":scheduler-unshaded_deploy.jar",
+    shade = "shade.conf",
 )

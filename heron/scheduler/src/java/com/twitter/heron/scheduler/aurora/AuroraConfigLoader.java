@@ -1,107 +1,77 @@
 package com.twitter.heron.scheduler.aurora;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.File;
 import java.nio.file.Paths;
-import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import com.twitter.heron.scheduler.api.Constants;
-import com.twitter.heron.scheduler.twitter.PackerUploader;
-import com.twitter.heron.scheduler.util.DefaultConfigLoader;
+import com.twitter.heron.scheduler.util.AbstractPropertiesConfigLoader;
+import com.twitter.heron.scheduler.util.ConfigLoaderUtils;
+import com.twitter.heron.scheduler.util.PropertiesFileConfigLoader;
 
-public class AuroraConfigLoader extends DefaultConfigLoader {
+public class AuroraConfigLoader extends AbstractPropertiesConfigLoader {
+  public static final String AURORA_SCHEDULER_CONF = "aurora_scheduler.conf";
+  public static final String AURORA_BIND_CONF = "aurora_bind.conf";
+
   private static final Logger LOG = Logger.getLogger(AuroraConfigLoader.class.getName());
-  private static final ObjectMapper mapper = new ObjectMapper();
-
-  public boolean translatePackageVersion() {
-    // TODO(nbhagat) : Don't hard-code any default values. Read from config.
-    String cluster = properties.getProperty(Constants.DC);
-    String releasePkgName = properties.getProperty(
-        Constants.HERON_RELEASE_TAG, Constants.DEFAULT_RELEASE_PACKAGE);
-    String releasePkgVersion = properties.getProperty(
-        Constants.HERON_RELEASE_VERSION, "live");
-    String heronDir = properties.getProperty(AuroraLauncher.HERON_DIR);
-
-    if (properties.containsKey(PackerUploader.HERON_PACKER_PKGVERSION)) {
-      return true;
-    }
-    if (!releasePkgName.equals(Constants.DEFAULT_RELEASE_PACKAGE)) {
-      properties.setProperty(PackerUploader.HERON_PACKER_PKGVERSION, releasePkgVersion);
-      return true;
-    }
-    String versionsFile = properties.getProperty(
-        Constants.VERSIONS_FILENAME_PREFIX + "." + cluster, "versions.conf");
-    // Try getting version map.
-    try {
-      String content = new String(Files.readAllBytes(Paths.get(heronDir, versionsFile)));
-
-      // Convert the JSON String to JAVA Map
-      Map<String, Object> versionsMap = null;
-      try {
-        versionsMap = mapper.readValue(content, Map.class);
-      } catch (IOException e) {
-        LOG.log(Level.SEVERE, "Failed to parse the String into map: " + content, e);
-      }
-
-      if (releasePkgVersion == null
-          || releasePkgVersion.isEmpty()
-          || "live".equals(releasePkgVersion)) {
-        Integer maxVersion = 1;
-        String maxVersionStr = "live";
-        for (Object versionStr : versionsMap.keySet()) {
-          int version = Integer.parseInt(versionsMap.get(versionStr).toString());
-          if (maxVersion < version) {
-            maxVersion = version;
-            maxVersionStr = versionStr.toString();
-          }
-        }
-        properties.setProperty(PackerUploader.HERON_PACKER_PKGVERSION, maxVersion.toString());
-        properties.setProperty(Constants.HERON_RELEASE_VERSION, maxVersionStr);
-      } else {
-        if (!versionsMap.containsKey(releasePkgVersion)) {
-          LOG.severe("Requested version of heron-core release doesn't exist");
-          return false;
-        }
-        properties.setProperty(PackerUploader.HERON_PACKER_PKGVERSION,
-            versionsMap.get(releasePkgVersion).toString());
-      }
-    } catch (IOException e) {
-      LOG.log(Level.SEVERE, "Failed to find / parse versions file: " + versionsFile, e);
-      LOG.log(Level.SEVERE, "Continuing with live label");
-      properties.setProperty(PackerUploader.HERON_PACKER_PKGVERSION, "live");
-    }
-    return true;
-  }
 
   @Override
-  public boolean applyConfigOverride(String configOverride) {
-    // Follow the style dc/role/environ
-    String[] parts = configOverride.trim().split(" ", 2);
-    if (parts.length == 0) {
-      LOG.severe("dc/role/environ is required.");
-      return false;
-    }
-    String clusterInfo = parts[0];
-    String[] clusterParts = clusterInfo.split("/");
-    if (clusterParts.length != 3) {
-      LOG.severe("Cluster parts must be dc/role/environ (without spaces)");
-      return false;
+  public boolean load(String configPath, String configOverride) {
+    File schedulerConfFile = Paths.get(configPath, AURORA_SCHEDULER_CONF).toFile();
+    File bindConfFile = Paths.get(configPath, AURORA_BIND_CONF).toFile();
+
+    // The if condition must be evaluated in order to ensure
+    // the correct overriding logic from the lowest to the highest:
+    //    aurora_scheduler.conf
+    //    cluster.conf
+    //    cmdline option --config-property
+    PropertiesFileConfigLoader baseLoader = new PropertiesFileConfigLoader();
+    if (baseLoader.load(schedulerConfFile.toString(), configOverride)) {
+      Properties baseProperties = baseLoader.getProperties();
+      Properties bindProperties = new Properties();
+      String dc = baseProperties.getProperty(Constants.DC);
+
+      if (ConfigLoaderUtils.loadPropertiesFile(baseProperties, getClusterConfFile(configPath, dc).toString()) &&
+          ConfigLoaderUtils.applyConfigPropertyOverride(baseProperties) &&
+          ConfigLoaderUtils.loadPropertiesFile(bindProperties, bindConfFile.toString()) &&
+          addAuroraBindProperties(baseProperties, bindProperties)) {
+        properties.putAll(baseProperties);
+        return true;
+      }
     }
 
-    properties.setProperty(Constants.DC, clusterParts[0]);
-    properties.setProperty(Constants.ROLE, clusterParts[1]);
-    properties.setProperty(Constants.ENVIRON, clusterParts[2]);
-    if (parts.length == 2 && !parts[1].isEmpty()) {
-      if (!super.applyConfigOverride(parts[1])) {
+    return false;
+  }
+
+  /* Get the string path: <HERON_CONFIG_PATH>/cluster/<CLUSTER>.conf
+   */
+  private File getClusterConfFile(String configPath, String clusterName) {
+    return Paths.get(configPath, "cluster", String.format("%s.conf", clusterName)).toFile();
+  }
+
+  /* Given the following condition
+   *   - a bind property definition in aurora_bind.conf:
+   *     HERON_PACKAGE: heron.release.package
+   *   - a property definition in aurora_scheduler.conf:
+   *     heron.release.package: heron-core-release.tar.gz
+   *
+   * a new property like the following is added:
+   *     heron.aurora.bind.HERON_PACKAGE: heron-core-release.tar.gz
+   */
+  private boolean addAuroraBindProperties(Properties target, Properties bindProperties) {
+    for (String bindKey: bindProperties.stringPropertyNames()) {
+      String key = bindProperties.getProperty(bindKey);
+      if (target.containsKey(key)) {
+        String key2 = Constants.HERON_AURORA_BIND_PREFIX + bindKey;
+        target.put(key2, target.get(key));
+      } else {
+        LOG.log(Level.SEVERE, "Value not found for property key: " + key);
         return false;
       }
     }
 
-    // Deal with the rest of config
-    return translatePackageVersion();
+    return true;
   }
 }

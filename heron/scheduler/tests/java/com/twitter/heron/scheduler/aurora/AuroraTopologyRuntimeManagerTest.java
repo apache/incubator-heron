@@ -24,14 +24,13 @@ public class AuroraTopologyRuntimeManagerTest {
 
   AuroraConfigLoader createRequiredConfig() throws Exception {
     AuroraConfigLoader schedulerConfig = AuroraConfigLoader.class.newInstance();
-    schedulerConfig.properties = new Properties();
     schedulerConfig.addDefaultProperties();
     schedulerConfig.properties.setProperty(Constants.DC, dc);
     schedulerConfig.properties.setProperty(Constants.ROLE, role);
     schedulerConfig.properties.setProperty(Constants.ENVIRON, environ);
-    schedulerConfig.properties.setProperty(Constants.HERON_RELEASE_USER_NAME, "me");
-    schedulerConfig.properties.getProperty(Constants.HERON_RELEASE_TAG, "some-pkg");
-    schedulerConfig.properties.getProperty(Constants.HERON_RELEASE_VERSION, "live");
+    schedulerConfig.properties.setProperty(Constants.HERON_RELEASE_PACKAGE_ROLE, "me");
+    schedulerConfig.properties.getProperty(Constants.HERON_RELEASE_PACKAGE_NAME, "some-pkg");
+    schedulerConfig.properties.getProperty(Constants.HERON_RELEASE_PACKAGE_VERSION, "live");
     schedulerConfig.properties.setProperty(Constants.HERON_UPLOADER_VERSION, "1");
     return schedulerConfig;
   }

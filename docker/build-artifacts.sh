@@ -7,15 +7,13 @@ realpath() {
 
 DOCKER_DIR=$(dirname $(realpath $0))
 PROJECT_DIR=$(dirname $DOCKER_DIR )
-SRC_TAR="$DOCKER_DIR/src.tar.gz"
+SCRATCH_DIR="$HOME/.heron-compile"
+SRC_TAR="$SCRATCH_DIR/src.tar.gz"
 
 cleanup() {
   if [ -f $SRC_TAR ]; then
-    echo "Cleaning up generate source tarball"
-    rm -rf $SRC_TAR
-
-    echo "Removing bazelrc"
-    rm $DOCKER_DIR/bazelrc
+    echo "Cleaning up scratch dir"
+    rm -rf $SCRATCH_DIR
   fi
 }
 
@@ -41,23 +39,41 @@ verify_source_exists() {
 }
 
 dockerfile_path_for_platform() {
-  echo "$DOCKER_DIR/Dockerfile.$1"
+  echo "$SCRATCH_DIR/Dockerfile.$1"
 }
 
-copy_bazel_rc() {
-  cp $PROJECT_DIR/tools/docker/bazel.rc $DOCKER_DIR/bazelrc
+copy_bazel_rc_to() {
+  cp $PROJECT_DIR/tools/docker/bazel.rc $1
+}
+
+setup_scratch_dir() {
+  if [ ! -f "$1" ]; then
+    mkdir $1
+  fi
+
+  cp $DOCKER_DIR/* $1
+}
+
+setup_output_dir() {
+  if [ ! -d $1 ]; then
+    echo "Creating output directory $1"
+    mkdir $1
+  fi
 }
 
 run_build() {
   PLATFORM=$1
   HERON_VERSION=$2
   OUTPUT_DIRECTORY=$(realpath $4)
+  SOURCE_TARBALL=$3
   DOCKER_FILE=$(dockerfile_path_for_platform $PLATFORM)
 
+  setup_scratch_dir $SCRATCH_DIR
+  setup_output_dir $OUTPUT_DIRECTORY
   verify_dockerfile_exists $DOCKER_FILE
-  copy_bazel_rc
+  copy_bazel_rc_to  $SCRATCH_DIR/bazelrc
 
-  if [ -z "$3" ]; then
+  if [ -z "$SOURCE_TARBALL" ]; then
     generate_source
     SOURCE_TARBALL=$SRC_TAR
   else
@@ -66,7 +82,7 @@ run_build() {
   verify_source_exists $SOURCE_TARBALL
 
   echo "Building heron-compiler container"
-  docker build -t heron-compiler -f $DOCKER_FILE $DOCKER_DIR
+  docker build -t heron-compiler:$PLATFORM -f $DOCKER_FILE $SCRATCH_DIR
 
   echo "Running build in container"
   docker run \
@@ -74,7 +90,7 @@ run_build() {
     -e HERON_VERSION=$HERON_VERSION \
     -v "$SOURCE_TARBALL:/src.tar.gz:ro" \
     -v "$OUTPUT_DIRECTORY:/dist" \
-    -it "heron-compiler" /compile.sh
+    -it heron-compiler:$PLATFORM /compile.sh
 }
 
 case $# in

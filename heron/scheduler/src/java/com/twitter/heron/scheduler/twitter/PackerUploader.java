@@ -12,7 +12,6 @@ import com.twitter.heron.scheduler.util.ShellUtility;
  * A base class for all Packer based Uploaders.
  */
 public class PackerUploader implements IUploader {
-  public static final String HERON_PACKER_PKGVERSION = "heron.packer.pkgversion";
   private static final Logger LOG = Logger.getLogger(PackerUploader.class.getName());
 
   // Note: all protected fields should be initialized in the initialize method
@@ -51,7 +50,7 @@ public class PackerUploader implements IUploader {
     String topologyName = topology.getName();
 
     String releaseTag =
-        context.getProperty(Constants.HERON_RELEASE_TAG, "live");
+        context.getProperty(Constants.HERON_RELEASE_PACKAGE_NAME, "live");
     return PackerUtility.getTopologyPackageName(topologyName, releaseTag);
   }
 

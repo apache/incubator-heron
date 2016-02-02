@@ -185,9 +185,9 @@ public class MesosLauncher implements ILauncher {
     // Set the HeronReleaseState
     ExecutionEnvironment.HeronReleaseState.Builder releaseBuilder =
         ExecutionEnvironment.HeronReleaseState.newBuilder();
-    releaseBuilder.setReleaseUsername(context.getPropertyWithException(Constants.HERON_RELEASE_USER_NAME));
-    releaseBuilder.setReleaseTag(context.getPropertyWithException(Constants.HERON_RELEASE_TAG));
-    releaseBuilder.setReleaseVersion(context.getPropertyWithException(Constants.HERON_RELEASE_VERSION));
+    releaseBuilder.setReleaseUsername(context.getPropertyWithException(Constants.HERON_RELEASE_PACKAGE_ROLE));
+    releaseBuilder.setReleaseTag(context.getPropertyWithException(Constants.HERON_RELEASE_PACKAGE_NAME));
+    releaseBuilder.setReleaseVersion(context.getPropertyWithException(Constants.HERON_RELEASE_PACKAGE_VERSION));
     releaseBuilder.setUploaderVersion(context.getProperty(Constants.HERON_UPLOADER_VERSION, "live"));
 
     builder.setReleaseState(releaseBuilder);
