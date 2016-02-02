@@ -28,5 +28,5 @@ def create_parser(subparsers):
   parser.set_defaults(subcommand='version')
   return parser
 
-def execute(parser, args, unknown_args):
+def run(command, parser, args, unknown_args):
   pass

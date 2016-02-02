@@ -42,6 +42,12 @@ def normalized_class_path(x):
   return identity(x)
 
 ################################################################################
+# Get the normalized class path of all jars
+################################################################################
+def get_classpath(jars):
+  return ':'.join(map(normalized_class_path, jars))
+
+################################################################################
 # Get normalized class path depending on platform
 ################################################################################
 def get_heron_dir():
@@ -52,4 +58,10 @@ def get_heron_dir():
   path = "/".join(os.path.realpath( __file__ ).split('/')[:-7])
   return normalized_class_path(path)
 
-
+################################################################################
+# Get all the heron lib jars with the absolute paths
+################################################################################
+def get_heron_libs(local_jars):
+  heron_dir = get_heron_dir()
+  heron_libs = [os.path.join(heron_dir, f) for f in local_jars]
+  return heron_libs
