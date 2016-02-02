@@ -14,17 +14,22 @@ import subprocess
 import tarfile
 import tempfile
 
+from heron.proto import topology_pb2
 import heron.cli2.src.python.args as args
+import heron.cli2.src.python.execute as execute
+import heron.cli2.src.python.jars as jars
+import heron.cli2.src.python.opts as opts
+import heron.cli2.src.python.utils as utils
 
 def create_parser(subparsers):
   parser = subparsers.add_parser(
       'submit', 
       help='Submit a topology',
-      usage = "%(prog)s [options] config-overrides topology-file-name topology-class-name [topology-args]",
+      usage = "%(prog)s [options] cluster/[role]/[environ] topology-file-name topology-class-name [topology-args]",
       add_help = False)
 
   args.add_titles(parser)
-  args.add_config_overrides(parser)
+  args.add_cluster_role_env(parser)
   args.add_topology_file(parser)
   args.add_topology_class(parser)
   args.add_config(parser)
@@ -39,5 +44,201 @@ def create_parser(subparsers):
   parser.set_defaults(subcommand='submit')
   return parser
 
-def execute(parser, args, unknown_args):
-  pass
+def launch_a_topology(tmp_dir, topology_file, topology_defn_file, heron_internals_file,
+        config_loader, config_path, cluster_role_env):
+
+  # form the path 
+  pkg_path = utils.normalized_class_path(os.path.join(tmp_dir, 'topology.tar.gz'))
+  heron_internals_config_path = os.path.join(utils.get_heron_dir(), heron_internals_file)
+
+  # create a tar package with 
+  create_tar(pkg_path, [topology_file, topology_defn_file, heron_internals_config_path])
+
+  args = [ 
+      pkg_path,
+      config_loader,
+      config_path,
+      base64.b64encode(cluster_role_env),
+      defn_file,
+      heron_internals_config_path,
+      topology_file
+  ]
+
+  # launch topology
+  execute.heron_class(
+      'com.twitter.heron.scheduler.service.SubmitterMain',
+      utils.get_heron_libs(jars.scheduler_jars()),
+      extra_jars=[],
+      args = args
+  )
+
+def launch_topologies(topology_file, tmp_dir, config_loader, config_path, cluster_role_env):
+
+  # The HeronSubmitter would have written the .defn file to the tmpdir
+  defn_files = glob.glob(tmp_dir + '/*.defn')
+
+  # TODO: We may add the flexibility to overload this file later
+  internals_config = 'heron_internals.yaml'
+
+  if len(defn_files) == 0:
+    raise Exception("No topologies found")
+
+  try:
+    for defn_file in defn_files:
+      topology_defn = topology_pb2.Topology()
+      try:
+        f = open(defn_file, "rb")
+        topology_defn.ParseFromString(f.read())
+        f.close()
+      except:
+        raise Exception("Could not open and parse topology defn file %s" % defn_file)
+
+      try:
+        print "Launching topology %s" % topology_defn.name
+        launch_a_topology(tmp_dir,
+                            topology_file,
+                            defn_file,
+                            heron_internals_config_filename,
+                            submitter_config_loader,
+                            submitter_config,
+                            scheduler_overrides)
+        print "Topology \'%s\' launched successfully" % topology_defn.name
+      except Exception as ex:
+        print 'Failed to launch topology \'%s\' because %s' % (topology_defn.name, str(ex))
+        raise
+  except:
+    raise
+
+################################################################################
+# We use the packer to make a package for the jar and dump it
+# to a well-known location. We then run the main method of class
+# with the specified arguments. We pass arguments as heron.options.
+#
+# This will run the jar file with the topology_class_name. The HeronSubmitter
+# inside will write out the topology defn file to a location that
+# we specify. Then we write the topology defn file to a well known
+# packer location. We then write to appropriate places in zookeeper
+# and launch the aurora jobs
+################################################################################
+def submit_fatjar(command, parser, cl_args, unknown_args):
+  try:
+    cluster_role_env = cl_args['cluster/[role]/[env]']
+    topology_file = cl_args['topology-file-name']
+    topology_class_name = cl_args['topology-class-name']
+    topology_args = tuple(unknown_args)
+
+    config_loader = cl_args['config_loader']
+    config_path = cl_args['config_path']
+
+  except KeyError:
+    subparser = utils.get_subparser(parser, command)
+    print(subparser.format_help())
+    parser.exit()
+
+  tmp_dir = tempfile.mkdtemp()
+  opts.set_config('cmdline.topologydefn.tmpdirectory', tmp_dir)
+
+  if cl_args['deploy_deactivated']: 
+    initial_state = topology_pb2.TopologyState.Name(topology_pb2.PAUSED)
+  else:
+    initial_state = topology_pb2.TopologyState.Name(topology_pb2.RUNNING)
+
+  opts.set_config('cmdline.topology.initial.state', initial_state)
+
+  execute.heron_class(
+      topology_class_name,
+      utils.get_heron_libs(jars.topology_jars()),
+      extra_jars = [topology_file],
+      args = topology_args
+  )
+
+  try:
+    config_overrides = \
+        args.parse_cluster_role_env(cluster_role_env) + ' ' + \
+        args.parse_cmdline_override(cl_args)
+
+    launch_topologies( topology_file, tmp_dir, config_loader,
+        config_path, config_overrides)
+
+  finally:
+    shutil.rmtree(tmpdir)
+
+################################################################################
+# Extract and execute the java files inside the tar and then add topology
+# definition file created by running submitTopology
+#
+# We use the packer to make a package for the tar and dump it
+# to a well-known location. We then run the main method of class
+# with the specified arguments. We pass arguments as heron.options.
+# This will run the jar file with the topology class name. 
+# 
+# The HeronSubmitter inside will write out the topology defn file to a location 
+# that we specify. Then we write the topology defn file to a well known
+# packer location. We then write to appropriate places in zookeeper
+# and launch the aurora jobs
+################################################################################
+def submit_tar(command, parser, cl_args, unknown_args):
+  try:
+    cluster_role_env = cl_args['cluster/[role]/[env]']
+    topology_file = cl_args['topology-file-name']
+    topology_class_name = cl_args['topology-class-name']
+    topology_args = tuple(unknown_args)
+
+    config_loader = cl_args['config_loader']
+    config_path = cl_args['config_path']
+
+  except KeyError:
+    subparser = utils.get_subparser(parser, command)
+    print(subparser.format_help())
+    parser.exit()
+
+  tmp_dir = tempfile.mkdtemp()
+  opts.set_config('cmdline.topologydefn.tmpdirectory', tmp_dir)
+
+  if cl_args['deploy_deactivated']:
+    initial_state = topology_pb2.TopologyState.Name(topology_pb2.PAUSED)
+  else:
+    initial_state = topology_pb2.TopologyState.Name(topology_pb2.RUNNING)
+
+  opts.set_config('cmdline.topology.initial.state', initial_state)
+
+  execute.heron_tar(topology_class_name, topology_file, topology_args, tmp_dir)
+
+  try:
+    config_overrides = \
+        args.parse_cluster_role_env(cluster_role_env) + ' ' + \
+        args.parse_cmdline_override(cl_args)
+
+    launch_topologies(topology_file, tmp_dir, config_loader,
+        config_path, config_overrides)
+
+  finally:
+    shutil.rmtree(tmpdir)
+
+################################################################################
+#  Submits the topology to the scheduler
+#  * Depending on the topology file name extension, we treat the file as a 
+#    fatjar (if the ext is .jar) or a tar file (if the ext is .tar/.tar.gz).
+#  * We upload the topology file to the packer, update zookeeper and launch 
+#    aurora jobs representing that topology
+#  * You can see your topology in Heron UI
+################################################################################
+def run(command, parser, cl_args, unknown_args):
+  # get the topology file name
+  topology_file = cl_args['topology-file-name']
+
+  # check to see if the topology file exists
+  if not os.path.isfile(topology_file):
+    print "Topology jar/tar %s does not exist" % topology_file
+    sys.exit(1)
+
+  # check the extension of the file name to see if it is tar/jar file.
+  if topology_file.endswith(".jar"):
+    submit_fatjar(command, parser, cl_args, unknown_args)
+
+  elif topology_file.endswith(".tar") or topology_file.endswith(".tar.gz"):
+    submit_tar(command, parser, cl_args, unknown_args)
+  else:
+    print "Unknown file type. Please use .tar or .jar file"
+    sys.exit(1)
+
