@@ -13,8 +13,11 @@ import sys
 import subprocess
 import tarfile
 import tempfile
+import pprint
 
 import heron.cli2.src.python.help as help
+import heron.cli2.src.python.args as parse
+import heron.cli2.src.python.opts as opts
 import heron.cli2.src.python.activate as activate
 import heron.cli2.src.python.classpath as classpath
 import heron.cli2.src.python.deactivate as deactivate
@@ -77,15 +80,24 @@ def create_parser():
 ################################################################################
 # Main execute 
 ################################################################################
-def execute(command, parser, args, unknown_args):
-  if command == 'submit':
-    return submit.execute(parser, args, unknown_args)
+def run(command, parser, command_args, unknown_args):
+  if command == 'activate':
+    return activate.run(command, parser, command_args, unknown_args)
+
+  elif command == 'deactivate':
+    return deactivate.run(command, parser, command_args, unknown_args)
 
   elif command == 'kill':
-    return kill.execute(parser, args, unknown_args)
+    return kill.run(command, parser, command_args, unknown_args)
+
+  elif command == 'restart':
+    return restart.run(command, parser, command_args, unknown_args)
   
+  elif command == 'submit':
+    return submit.run(command, parser, command_args, unknown_args)
+
   elif command == 'help':
-    return help.execute(parser, args, unknown_args)
+    return help.run(command, parser, command_args, unknown_args)
 
   return 1
 
@@ -102,16 +114,28 @@ def main():
     parser.print_help()
     parser.exit()
 
+  # insert the boolean values for some of the options
+  sys.argv = parse.insert_bool_values(sys.argv)
+
   # parse the args
   args, unknown_args = parser.parse_known_args()
   namespace = vars(args)
+  print namespace
+
+  try:
+    if namespace['verbose']: 
+      opts.set_verbose()
+    if namespace['trace_execution']:
+      opts.set_trace_execution()
+  except:
+    pass
 
   # register cleanup function during exit
   atexit.register(cleanup)
 
   # command to be execute
   command = namespace['subcommand']
-  return execute(command, parser, namespace, unknown_args)
+  return run(command, parser, namespace, unknown_args)
 
 if __name__ == "__main__":
   main()

@@ -13,7 +13,7 @@ def create_parser(subparsers):
   parser._optionals.title = "Optional arguments"
 
   parser.add_argument(
-      'command',
+      'help-command',
       nargs = '?',
       default = 'help',
       help='Provide help for a command')
@@ -21,9 +21,9 @@ def create_parser(subparsers):
   parser.set_defaults(subcommand='help')
   return parser
 
-def execute(parser, args, unknown_args):
+def run(command, parser, args, unknown_args):
   # get the command for detailed help
-  command_help = args['command']
+  command_help = args['help-command']
   
   # if no command is provided, just print main help
   if command_help == 'help':
