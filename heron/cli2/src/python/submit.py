@@ -40,6 +40,7 @@ def create_parser(subparsers):
       default=False)
 
   args.add_verbose(parser)
+  args.add_trace_execution(parser)
 
   parser.set_defaults(subcommand='submit')
   return parser
@@ -52,7 +53,7 @@ def launch_a_topology(tmp_dir, topology_file, topology_defn_file, heron_internal
   heron_internals_config_path = os.path.join(utils.get_heron_dir(), heron_internals_file)
 
   # create a tar package with 
-  create_tar(pkg_path, [topology_file, topology_defn_file, heron_internals_config_path])
+  utils.create_tar(pkg_path, [topology_file, topology_defn_file, heron_internals_config_path])
 
   args = [ 
       pkg_path,
@@ -76,6 +77,7 @@ def launch_topologies(topology_file, tmp_dir, config_loader, config_path, cluste
 
   # The HeronSubmitter would have written the .defn file to the tmpdir
   defn_files = glob.glob(tmp_dir + '/*.defn')
+  print defn_files
 
   # TODO: We may add the flexibility to overload this file later
   internals_config = 'heron_internals.yaml'
@@ -94,14 +96,16 @@ def launch_topologies(topology_file, tmp_dir, config_loader, config_path, cluste
         raise Exception("Could not open and parse topology defn file %s" % defn_file)
 
       try:
-        print "Launching topology %s" % topology_defn.name
-        launch_a_topology(tmp_dir,
-                            topology_file,
-                            defn_file,
-                            heron_internals_config_filename,
-                            submitter_config_loader,
-                            submitter_config,
-                            scheduler_overrides)
+        print "Launching topology \'%s\'" % topology_defn.name
+        launch_a_topology(
+            tmp_dir,
+            topology_file,
+            defn_file,
+            internals_config,
+            config_loader,
+            config_path,
+            cluster_role_env
+        )
         print "Topology \'%s\' launched successfully" % topology_defn.name
       except Exception as ex:
         print 'Failed to launch topology \'%s\' because %s' % (topology_defn.name, str(ex))
@@ -157,11 +161,11 @@ def submit_fatjar(command, parser, cl_args, unknown_args):
         args.parse_cluster_role_env(cluster_role_env) + ' ' + \
         args.parse_cmdline_override(cl_args)
 
-    launch_topologies( topology_file, tmp_dir, config_loader,
+    launch_topologies(topology_file, tmp_dir, config_loader,
         config_path, config_overrides)
 
   finally:
-    shutil.rmtree(tmpdir)
+    shutil.rmtree(tmp_dir)
 
 ################################################################################
 # Extract and execute the java files inside the tar and then add topology
@@ -213,7 +217,7 @@ def submit_tar(command, parser, cl_args, unknown_args):
         config_path, config_overrides)
 
   finally:
-    shutil.rmtree(tmpdir)
+    shutil.rmtree(tmp_dir)
 
 ################################################################################
 #  Submits the topology to the scheduler
