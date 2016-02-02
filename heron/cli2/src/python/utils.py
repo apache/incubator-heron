@@ -4,6 +4,18 @@ import argparse
 import sys
 import subprocess
 import os
+import tarfile
+import contextlib
+
+################################################################################
+# Create a tar file with a given set of files
+################################################################################
+def create_tar(tar_filename, files):
+  with contextlib.closing(tarfile.open(tar_filename, 'w:gz')) as tar:
+    for filename in files:
+      if not os.path.isfile(filename):
+        raise Exception("%s is not an existing file" % filename)
+      tar.add(filename, arcname=os.path.basename(filename))
 
 ################################################################################
 # Retrieve the given subparser from parser
