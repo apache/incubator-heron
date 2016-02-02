@@ -21,12 +21,17 @@ import heron.cli2.src.python.jars as jars
 import heron.cli2.src.python.opts as opts
 import heron.cli2.src.python.utils as utils
 
+################################################################################
+# Create a subparser for the submit command
+################################################################################
 def create_parser(subparsers):
   parser = subparsers.add_parser(
       'submit', 
       help='Submit a topology',
-      usage = "%(prog)s [options] cluster/[role]/[environ] topology-file-name topology-class-name [topology-args]",
-      add_help = False)
+      usage = "%(prog)s [options] cluster/[role]/[environ] " + \
+              "topology-file-name topology-class-name [topology-args]",
+      add_help = False
+  )
 
   args.add_titles(parser)
   args.add_cluster_role_env(parser)
@@ -45,27 +50,31 @@ def create_parser(subparsers):
   parser.set_defaults(subcommand='submit')
   return parser
 
-def launch_a_topology(tmp_dir, topology_file, topology_defn_file, heron_internals_file,
-        config_loader, config_path, cluster_role_env):
+################################################################################
+# Launch a topology given topology jar, its definition file and configurations
+################################################################################
+def launch_a_topology(tmp_dir, topology_file, topology_defn_file, 
+        heron_internals_file, config_loader, config_path, config_overrides):
 
-  # form the path 
+  # get the normalized path for topology.tar.gz and heron_internals.yaml
   pkg_path = utils.normalized_class_path(os.path.join(tmp_dir, 'topology.tar.gz'))
   heron_internals_config_path = os.path.join(utils.get_heron_dir(), heron_internals_file)
 
   # create a tar package with 
-  utils.create_tar(pkg_path, [topology_file, topology_defn_file, heron_internals_config_path])
+  tar_pkg_files = [topology_file, topology_defn_file, heron_internals_config_path]
+  utils.create_tar(pkg_path, tar_pkg_files)
 
-  args = [ 
+  args = [
       pkg_path,
       config_loader,
       config_path,
-      base64.b64encode(cluster_role_env),
+      base64.b64encode(config_overrides),
       defn_file,
       heron_internals_config_path,
       topology_file
   ]
 
-  # launch topology
+  # invoke the submitter to submit and launch the topology
   execute.heron_class(
       'com.twitter.heron.scheduler.service.SubmitterMain',
       utils.get_heron_libs(jars.scheduler_jars()),
@@ -73,11 +82,14 @@ def launch_a_topology(tmp_dir, topology_file, topology_defn_file, heron_internal
       args = args
   )
 
-def launch_topologies(topology_file, tmp_dir, config_loader, config_path, cluster_role_env):
+################################################################################
+# Launch topologies 
+################################################################################
+def launch_topologies(topology_file, tmp_dir, config_loader, config_path, 
+        config_overrides):
 
-  # The HeronSubmitter would have written the .defn file to the tmpdir
+  # the submitter would have written the .defn file to the tmp_dir
   defn_files = glob.glob(tmp_dir + '/*.defn')
-  print defn_files
 
   # TODO: We may add the flexibility to overload this file later
   internals_config = 'heron_internals.yaml'
@@ -87,29 +99,30 @@ def launch_topologies(topology_file, tmp_dir, config_loader, config_path, cluste
 
   try:
     for defn_file in defn_files:
+
+      # load the topology definition from the file
       topology_defn = topology_pb2.Topology()
       try:
         f = open(defn_file, "rb")
         topology_defn.ParseFromString(f.read())
         f.close()
+
       except:
         raise Exception("Could not open and parse topology defn file %s" % defn_file)
 
+      # launch the topology
       try:
         print "Launching topology \'%s\'" % topology_defn.name
         launch_a_topology(
-            tmp_dir,
-            topology_file,
-            defn_file,
-            internals_config,
-            config_loader,
-            config_path,
-            cluster_role_env
+            tmp_dir, topology_file, defn_file, internals_config,
+            config_loader, config_path, config_overrides
         )
         print "Topology \'%s\' launched successfully" % topology_defn.name
+
       except Exception as ex:
         print 'Failed to launch topology \'%s\' because %s' % (topology_defn.name, str(ex))
         raise
+
   except:
     raise
 
@@ -126,29 +139,37 @@ def launch_topologies(topology_file, tmp_dir, config_loader, config_path, cluste
 ################################################################################
 def submit_fatjar(command, parser, cl_args, unknown_args):
   try:
+
+    # extract the necessary arguments
     cluster_role_env = cl_args['cluster/[role]/[env]']
     topology_file = cl_args['topology-file-name']
     topology_class_name = cl_args['topology-class-name']
     topology_args = tuple(unknown_args)
 
+    # extract the scheduler config path and config loader
     config_loader = cl_args['config_loader']
     config_path = cl_args['config_path']
 
   except KeyError:
+    # if some of the arguments are not found, print error and exit
     subparser = utils.get_subparser(parser, command)
     print(subparser.format_help())
     parser.exit()
 
+  # create a temporary directory for topology definition file
   tmp_dir = tempfile.mkdtemp()
-  opts.set_config('cmdline.topologydefn.tmpdirectory', tmp_dir)
 
+  # if topology needs to be launched in deactivated state, do it so
   if cl_args['deploy_deactivated']: 
     initial_state = topology_pb2.TopologyState.Name(topology_pb2.PAUSED)
   else:
     initial_state = topology_pb2.TopologyState.Name(topology_pb2.RUNNING)
 
+  # set the tmp dir and deactivated state in global options 
+  opts.set_config('cmdline.topologydefn.tmpdirectory', tmp_dir)
   opts.set_config('cmdline.topology.initial.state', initial_state)
 
+  # execute main of the topology to create the topology definition
   execute.heron_class(
       topology_class_name,
       utils.get_heron_libs(jars.topology_jars()),
