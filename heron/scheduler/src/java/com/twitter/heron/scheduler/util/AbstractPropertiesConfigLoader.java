@@ -76,7 +76,7 @@ public abstract class AbstractPropertiesConfigLoader implements IConfigLoader {
 
   public final void addDefaultProperties() {
     addPropertyIfNotPresent(Constants.HERON_VERBOSE, Boolean.FALSE.toString());
-    addPropertyIfNotPresent(Constants.DC, Constants.DC);
+    addPropertyIfNotPresent(Constants.CLUSTER, Constants.CLUSTER);
     addPropertyIfNotPresent(Constants.ROLE, Constants.ROLE);
     addPropertyIfNotPresent(Constants.ENVIRON, Constants.ENVIRON);
   }
