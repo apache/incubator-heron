@@ -10,7 +10,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.scheduler.api.Constants;
+import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.scheduler.util.NetworkUtility;
 import com.twitter.heron.scheduler.util.ShellUtility;
 import com.twitter.heron.state.WatchCallback;

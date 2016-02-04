@@ -7,12 +7,15 @@ import java.util.logging.Logger;
 import javax.xml.bind.DatatypeConverter;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.scheduler.api.IConfigLoader;
-import com.twitter.heron.scheduler.api.ILauncher;
-import com.twitter.heron.scheduler.api.IPackingAlgorithm;
-import com.twitter.heron.scheduler.api.IUploader;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
-import com.twitter.heron.scheduler.util.Factory;
+
+import com.twitter.heron.spi.scheduler.IConfigLoader;
+import com.twitter.heron.spi.scheduler.ILauncher;
+import com.twitter.heron.spi.packing.IPackingAlgorithm;
+import com.twitter.heron.spi.uploader.IUploader;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
+import com.twitter.heron.spi.util.Factory;
+
+import com.twitter.heron.scheduler.util.TopologyUtility;
 
 /**
  * Calls Uploader to upload topology package, and Launcher to launch Scheduler.
@@ -58,7 +61,7 @@ public class SubmitterMain {
         DatatypeConverter.parseBase64Binary(submitterConfigOverrideEncoded), Charset.forName("UTF-8"));
     if (!submitTopology(
         topologyPackage, submitterConfigLoader, submitterConfigFile, configOverride,
-        Factory.getTopology(topologyDefnFile))) {
+        TopologyUtility.getTopology(topologyDefnFile))) {
       Runtime.getRuntime().exit(1);
     }
   }

@@ -1,16 +1,11 @@
-package com.twitter.heron.scheduler.util;
+package com.twitter.heron.spi.util;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
-import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.scheduler.api.IConfigLoader;
-import com.twitter.heron.scheduler.api.ILauncher;
-import com.twitter.heron.scheduler.api.IPackingAlgorithm;
-import com.twitter.heron.scheduler.api.IRuntimeManager;
-import com.twitter.heron.scheduler.api.IScheduler;
-import com.twitter.heron.scheduler.api.IUploader;
+import com.twitter.heron.spi.packing.IPackingAlgorithm;
+import com.twitter.heron.spi.scheduler.IConfigLoader;
+import com.twitter.heron.spi.scheduler.ILauncher;
+import com.twitter.heron.spi.scheduler.IRuntimeManager;
+import com.twitter.heron.spi.scheduler.IScheduler;
+import com.twitter.heron.spi.uploader.IUploader;
 import com.twitter.heron.state.IStateManager;
 
 public class Factory {
@@ -51,19 +46,5 @@ public class Factory {
 
   public static IRuntimeManager.Command makeCommand(String commandString) {
     return IRuntimeManager.Command.valueOf(commandString.toUpperCase());
-  }
-
-  public static TopologyAPI.Topology getTopology(String topologyDefnFile) {
-    try {
-      byte[] topologyDefn = Files.readAllBytes(Paths.get(topologyDefnFile));
-      TopologyAPI.Topology topology = TopologyAPI.Topology.parseFrom(topologyDefn);
-      if (!TopologyUtility.verifyTopology(topology)) {
-        throw new RuntimeException("Topology object is Malformed");
-      }
-
-      return topology;
-    } catch (IOException e) {
-      throw new RuntimeException("Failed to read/parse content of " + topologyDefnFile);
-    }
   }
 }
