@@ -1,8 +1,10 @@
-package com.twitter.heron.scheduler.api;
+package com.twitter.heron.spi.scheduler;
 
+
+import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
 
 /**
  * Scheduler object responsible for bringing up topology. Will be instantiated using no-arg

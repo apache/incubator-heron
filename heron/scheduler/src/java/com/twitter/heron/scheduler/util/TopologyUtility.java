@@ -1,5 +1,9 @@
 package com.twitter.heron.scheduler.util;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import java.io.File;
 import java.nio.file.FileSystems;
 import java.nio.file.PathMatcher;
@@ -13,8 +17,8 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.scheduler.api.Constants;
-import com.twitter.heron.scheduler.api.PackingPlan;
+import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.scheduler.service.SubmitterMain;
 
 /**
@@ -24,6 +28,20 @@ public class TopologyUtility {
   private static final Logger LOG = Logger.getLogger(TopologyUtility.class.getName());
 
   private static final long DEFAULT_INSTANCE_RAM = 1 * Constants.GB;
+
+   public static TopologyAPI.Topology getTopology(String topologyDefnFile) {
+    try {
+      byte[] topologyDefn = Files.readAllBytes(Paths.get(topologyDefnFile));
+      TopologyAPI.Topology topology = TopologyAPI.Topology.parseFrom(topologyDefn);
+      if (!TopologyUtility.verifyTopology(topology)) {
+        throw new RuntimeException("Topology object is Malformed");
+      }
+
+      return topology;
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to read/parse content of " + topologyDefnFile);
+    }
+  }
 
   public static String getConfigWithDefault(
       List<TopologyAPI.Config.KeyValue> config, String key, String defaultValue) {

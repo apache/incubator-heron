@@ -1,6 +1,7 @@
-package com.twitter.heron.scheduler.api;
+package com.twitter.heron.spi.packing;
 
-import com.twitter.heron.scheduler.api.context.LaunchContext;
+import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
 
 /**
  * Packing algorithm to use for packing multiple instances into containers. Packing hints like

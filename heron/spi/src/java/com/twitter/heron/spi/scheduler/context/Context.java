@@ -1,10 +1,10 @@
-package com.twitter.heron.scheduler.api.context;
+package com.twitter.heron.spi.scheduler.context;
 
 import java.util.Map;
 
-import com.twitter.heron.scheduler.api.IConfigLoader;
-import com.twitter.heron.scheduler.api.SchedulerStateManagerAdaptor;
-import com.twitter.heron.scheduler.util.Factory;
+import com.twitter.heron.spi.scheduler.IConfigLoader;
+import com.twitter.heron.spi.scheduler.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.util.Factory;
 import com.twitter.heron.state.IStateManager;
 import com.twitter.heron.state.dummy.DummySchedulerStateManager;
 
