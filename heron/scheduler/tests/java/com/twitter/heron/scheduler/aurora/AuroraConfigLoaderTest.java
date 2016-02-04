@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.twitter.heron.scheduler.api.Constants;
+import com.twitter.heron.spi.common.Constants;
 
 public class AuroraConfigLoaderTest {
   private static final Logger LOG = Logger.getLogger(AuroraConfigLoaderTest.class.getName());

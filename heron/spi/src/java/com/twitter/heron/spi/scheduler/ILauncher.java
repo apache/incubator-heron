@@ -1,7 +1,9 @@
-package com.twitter.heron.scheduler.api;
+package com.twitter.heron.spi.scheduler;
+
+import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
 
 import com.twitter.heron.proto.system.ExecutionEnvironment;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
 
 /**
  * Launches scheduler. heron-cli will create Launcher object using default no argument constructor.
