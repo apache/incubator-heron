@@ -1,6 +1,6 @@
-package com.twitter.heron.scheduler.api.context;
+package com.twitter.heron.spi.scheduler.context;
 
-import com.twitter.heron.scheduler.api.IConfigLoader;
+import com.twitter.heron.spi.scheduler.IConfigLoader;
 
 public class RuntimeManagerContext extends Context {
   public static final String RESTART_CONTAINER_INDEX = "shard";

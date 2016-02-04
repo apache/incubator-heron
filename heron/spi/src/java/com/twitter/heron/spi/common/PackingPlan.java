@@ -1,4 +1,4 @@
-package com.twitter.heron.scheduler.api;
+package com.twitter.heron.spi.common;
 
 import java.util.Map;
 

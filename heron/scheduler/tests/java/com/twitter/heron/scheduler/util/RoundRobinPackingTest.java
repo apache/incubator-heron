@@ -8,8 +8,9 @@ import org.junit.Test;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.scheduler.api.PackingPlan;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
+
+import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
 
 public class RoundRobinPackingTest {
   private int countCompoment(String component, Map<String, PackingPlan.InstancePlan> instances,
