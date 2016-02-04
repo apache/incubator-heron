@@ -1,4 +1,4 @@
-package com.twitter.heron.scheduler.api;
+package com.twitter.heron.spi.common;
 
 public class Constants {
   public static final long GB = 1024L * 1024 * 1024;

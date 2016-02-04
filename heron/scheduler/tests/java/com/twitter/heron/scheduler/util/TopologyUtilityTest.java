@@ -23,8 +23,9 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
-import com.twitter.heron.scheduler.api.Constants;
-import com.twitter.heron.scheduler.api.PackingPlan;
+
+import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.common.PackingPlan;
 
 public class TopologyUtilityTest {
   /**
