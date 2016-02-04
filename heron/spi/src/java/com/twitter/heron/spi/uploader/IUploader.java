@@ -1,6 +1,6 @@
-package com.twitter.heron.scheduler.api;
+package com.twitter.heron.spi.uploader;
 
-import com.twitter.heron.scheduler.api.context.LaunchContext;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
 
 /**
  * Uploads topology package to a shared location. This location must be accessible by

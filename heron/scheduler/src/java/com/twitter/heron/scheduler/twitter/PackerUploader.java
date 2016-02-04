@@ -3,9 +3,9 @@ package com.twitter.heron.scheduler.twitter;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.scheduler.api.Constants;
-import com.twitter.heron.scheduler.api.IUploader;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
+import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.uploader.IUploader;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
 import com.twitter.heron.scheduler.util.ShellUtility;
 
 /**
