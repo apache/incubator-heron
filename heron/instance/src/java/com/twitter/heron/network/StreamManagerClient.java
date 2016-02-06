@@ -4,6 +4,7 @@ import java.util.logging.Logger;
 
 import com.google.protobuf.Message;
 
+import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.core.base.Communicator;
 import com.twitter.heron.common.core.base.NIOLooper;
 import com.twitter.heron.common.core.base.SingletonRegistry;
@@ -12,7 +13,6 @@ import com.twitter.heron.common.core.network.HeronSocketOptions;
 import com.twitter.heron.common.core.network.StatusCode;
 import com.twitter.heron.common.utils.misc.Constants;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
-import com.twitter.heron.common.utils.misc.SystemConfig;
 import com.twitter.heron.instance.InstanceControlMsg;
 import com.twitter.heron.metrics.GatewayMetrics;
 import com.twitter.heron.proto.stmgr.StreamManager;

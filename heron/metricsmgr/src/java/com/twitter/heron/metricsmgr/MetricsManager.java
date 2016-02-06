@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.api.metric.MultiCountMetric;
 import com.twitter.heron.api.utils.Utils;
+import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.core.base.Communicator;
 import com.twitter.heron.common.core.base.NIOLooper;
 import com.twitter.heron.common.core.base.SingletonRegistry;
@@ -22,7 +23,6 @@ import com.twitter.heron.common.utils.metrics.JVMMetrics;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
 import com.twitter.heron.common.utils.misc.Constants;
 import com.twitter.heron.common.utils.misc.LoggingHelper;
-import com.twitter.heron.common.utils.misc.SystemConfig;
 import com.twitter.heron.metricsmgr.api.metrics.MetricsRecord;
 import com.twitter.heron.metricsmgr.api.sink.IMetricsSink;
 import com.twitter.heron.metricsmgr.api.sink.SinkContext;

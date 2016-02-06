@@ -85,3 +85,15 @@ java_test(
     size = "small",
 )
 
+java_test(
+    name = "system_config_unittest",
+    srcs = glob(["**/config/SystemConfigTest.java"]),
+    deps = [
+        ":config_test_library",
+        "//heron/common/src/java:config-java",
+        "@bazel_tools//third_party:junit4",
+    ],
+    data = glob(["**/config/testdata/sysconfig.yaml"]),
+    size = "small",
+)
+
