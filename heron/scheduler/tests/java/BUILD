@@ -86,7 +86,7 @@ java_test(
     deps = [
         "//heron/api/src/java:api-java",
         "//heron/spi/src/java:scheduler-spi-java",
-        "//heron/common/src/java:base-lib-java",
+        "//heron/common/src/java:base-java",
         "//heron/scheduler/src/java:scheduler-lib-java",
         "//heron/scheduler/src/java:heron-local-scheduler-lib",
         "//heron/state/src/java:state-java",
@@ -108,7 +108,7 @@ java_test(
     deps = [
         "//heron/api/src/java:api-java",
         "//heron/spi/src/java:scheduler-spi-java",
-        "//heron/common/src/java:base-lib-java",
+        "//heron/common/src/java:base-java",
         "//heron/scheduler/src/java:scheduler-lib-java",
         "//heron/scheduler/src/java:heron-local-scheduler-lib",
         "//heron/state/src/java:state-java",
