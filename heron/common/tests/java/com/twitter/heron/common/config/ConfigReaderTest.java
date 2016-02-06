@@ -1,4 +1,4 @@
-package com.twitter.heron.config;
+package com.twitter.heron.common.config;
 
 import java.nio.file.Paths;
 import java.util.Properties;
@@ -16,7 +16,7 @@ public class ConfigReaderTest {
   public void testLoadFile() throws Exception {
     ConfigReader configReader = ConfigReader.class.newInstance();
 
-    String file = Paths.get(System.getenv("JAVA_RUNFILES"), Constants.TEST_DATA_PATH, "defaults.conf").toString();
+    String file = Paths.get(System.getenv("JAVA_RUNFILES"), Constants.TEST_DATA_PATH, "defaults.yaml").toString();
     Map props = configReader.loadFile(file);
 
     Assert.assertEquals("role", props.get(Constants.ROLE_KEY));
