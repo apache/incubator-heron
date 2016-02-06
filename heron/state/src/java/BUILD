@@ -6,7 +6,7 @@ java_library(
         ["**/*.java"],
     ),
     deps = [
-        "//heron/common/src/java:base-lib-java",
+        "//heron/common/src/java:base-java",
         "//heron/proto:proto-java",
         "//heron/proto:proto_execution_state_java", 
         "//heron/proto:proto_physical_plan_java",
