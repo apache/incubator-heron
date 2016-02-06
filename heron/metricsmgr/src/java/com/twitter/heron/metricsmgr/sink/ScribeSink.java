@@ -19,12 +19,12 @@ import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 
-import com.twitter.heron.api.utils.Utils;
+import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.common.core.base.Constants;
-import com.twitter.heron.metricsmgr.api.metrics.MetricsInfo;
-import com.twitter.heron.metricsmgr.api.metrics.MetricsRecord;
-import com.twitter.heron.metricsmgr.api.sink.IMetricsSink;
-import com.twitter.heron.metricsmgr.api.sink.SinkContext;
+import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
+import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
+import com.twitter.heron.spi.metricsmgr.sink.IMetricsSink;
+import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
 
 /**
  * A metrics sink that writes to Scribe with format required by Twitter Cuckoo
@@ -88,7 +88,7 @@ public class ScribeSink implements IMetricsSink {
 
     topologyName = context.getTopologyName();
 
-    connectRetryAttempts = Utils.getInt(config.get(KEY_SCRIBE_CONNECT_SERVER_ATTEMPTS));
+    connectRetryAttempts = TypeUtils.getInt(config.get(KEY_SCRIBE_CONNECT_SERVER_ATTEMPTS));
 
     // Open the TTransport connection and client to scribe server
     open();
@@ -155,8 +155,8 @@ public class ScribeSink implements IMetricsSink {
   private boolean open() {
     try {
       TSocket socket = new TSocket((String) config.get(KEY_SCRIBE_HOST),
-          Utils.getInt(config.get(KEY_SCRIBE_PORT)),
-          Utils.getInt(config.get(KEY_SCRIBE_TIMEOUT_MS)));
+          TypeUtils.getInt(config.get(KEY_SCRIBE_PORT)),
+          TypeUtils.getInt(config.get(KEY_SCRIBE_TIMEOUT_MS)));
 
       transport = new TFramedTransport(socket);
       transport.open();
@@ -177,8 +177,8 @@ public class ScribeSink implements IMetricsSink {
 
   // Log the message to scribe, optionally retrying
   private void logToScribe(List<LogEntry> pendingEntries) {
-    int retryAttempts = Utils.getInt(config.get(KEY_SCRIBE_RETRY_ATTEMPTS));
-    long retryIntervalMs = Utils.getLong(config.get(KEY_SCRIBE_RETRY_INTERVAL_MS));
+    int retryAttempts = TypeUtils.getInt(config.get(KEY_SCRIBE_RETRY_ATTEMPTS));
+    long retryIntervalMs = TypeUtils.getLong(config.get(KEY_SCRIBE_RETRY_INTERVAL_MS));
     try {
       for (int attempt = 0; attempt < retryAttempts; attempt++) {
         ResultCode result = client.Log(pendingEntries);

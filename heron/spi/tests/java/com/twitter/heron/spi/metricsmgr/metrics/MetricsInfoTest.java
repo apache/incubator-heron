@@ -1,4 +1,4 @@
-package com.twitter.heron.metricsmgr.api.metrics;
+package com.twitter.heron.spi.metricsmgr.metrics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.twitter.heron.metricsmgr.api.metrics.MetricsInfo;
+import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
 
 public class MetricsInfoTest {
   private static final int N = 100;

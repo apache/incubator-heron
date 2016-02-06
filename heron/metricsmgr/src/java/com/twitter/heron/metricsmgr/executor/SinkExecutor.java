@@ -9,9 +9,9 @@ import com.twitter.heron.common.core.base.Communicator;
 import com.twitter.heron.common.core.base.Constants;
 import com.twitter.heron.common.core.base.SlaveLooper;
 import com.twitter.heron.metricsmgr.MetricsSinksConfig;
-import com.twitter.heron.metricsmgr.api.metrics.MetricsRecord;
-import com.twitter.heron.metricsmgr.api.sink.IMetricsSink;
-import com.twitter.heron.metricsmgr.api.sink.SinkContext;
+import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
+import com.twitter.heron.spi.metricsmgr.sink.IMetricsSink;
+import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
 
 /**
  * SinkExecutor is a Runnable, running in a specific thread to drive the IMetricsSink.

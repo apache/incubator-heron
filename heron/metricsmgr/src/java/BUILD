@@ -13,7 +13,7 @@ java_library(
     deps = [
         "//heron/api/src/java:api-java",
         "//heron/common/src/java:common-java",
-        "//heron/metricsmgr-api/src/java:metricsmgr-api-java",
+        "//heron/spi/src/java:metricsmgr-spi-java",
         "//heron/proto:proto_common_java",
         "//heron/proto:proto_metrics_java",
         "//heron/proto:proto_tmaster_java",
