@@ -16,7 +16,7 @@ import org.mockito.InOrder;
 import org.mockito.Mockito;
 
 import com.twitter.heron.api.metric.MultiCountMetric;
-import com.twitter.heron.api.utils.Utils;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.core.base.NIOLooper;
 import com.twitter.heron.common.core.network.HeronClient;
 import com.twitter.heron.common.core.network.HeronSocketOptions;
@@ -155,7 +155,7 @@ public class HandleTMasterLocationTest {
   @Before
   public void before() throws Exception {
     // Get an available port
-    serverPort = Utils.getFreePort();
+    serverPort = SysUtils.getFreePort();
 
     threadsPool = Executors.newFixedThreadPool(2);
 

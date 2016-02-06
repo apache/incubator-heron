@@ -1,8 +1,8 @@
-package com.twitter.heron.metricsmgr.api.sink;
+package com.twitter.heron.spi.metricsmgr.sink;
 
 import java.util.Map;
 
-import com.twitter.heron.metricsmgr.api.metrics.MetricsRecord;
+import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
 
 /**
  * The metrics sink interface. <p>

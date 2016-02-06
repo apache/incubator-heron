@@ -234,7 +234,6 @@ def heron_lib_files():
         heron_api_lib_files() + \
         heron_cli_lib_files() +  \
         heron_core_lib_files() +  \
-        heron_metrics_api_lib_files() +  \
         heron_storm_compat_lib_files() +  \
         heron_tracker_lib_files(),
     ))

@@ -1,4 +1,4 @@
-package com.twitter.heron.metricsmgr.api.metrics;
+package com.twitter.heron.spi.metricsmgr.metrics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,9 +8,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.twitter.heron.metricsmgr.api.metrics.ExceptionInfo;
-import com.twitter.heron.metricsmgr.api.metrics.MetricsInfo;
-import com.twitter.heron.metricsmgr.api.metrics.MetricsRecord;
+import com.twitter.heron.spi.metricsmgr.metrics.ExceptionInfo;
+import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
+import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
 
 public class MetricsRecordTest {
   private static final int N = 100;

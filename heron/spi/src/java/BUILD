@@ -23,3 +23,10 @@ java_library(
         "//3rdparty/protobuf:protobuf-java",
     ],
 )
+
+java_library(
+    name='metricsmgr-spi-java',
+    srcs = glob(
+        ["**/spi/metricsmgr/**/*.java"],
+    ),
+)

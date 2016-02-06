@@ -16,13 +16,13 @@ import org.junit.Test;
 import com.twitter.heron.api.metric.MultiCountMetric;
 import com.twitter.heron.common.core.base.Communicator;
 import com.twitter.heron.common.core.base.SlaveLooper;
-import com.twitter.heron.metricsmgr.MetricsSinksConfig;
-import com.twitter.heron.metricsmgr.api.metrics.ExceptionInfo;
-import com.twitter.heron.metricsmgr.api.metrics.MetricsInfo;
-import com.twitter.heron.metricsmgr.api.metrics.MetricsRecord;
-import com.twitter.heron.metricsmgr.api.sink.IMetricsSink;
-import com.twitter.heron.metricsmgr.api.sink.SinkContext;
+import com.twitter.heron.spi.metricsmgr.metrics.ExceptionInfo;
+import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
+import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
+import com.twitter.heron.spi.metricsmgr.sink.IMetricsSink;
+import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
 import com.twitter.heron.metricsmgr.sink.SinkContextImpl;
+import com.twitter.heron.metricsmgr.MetricsSinksConfig;
 
 public class SinkExecutorTest {
   private static final int FLUSH_INTERVAL_MS = 100;
