@@ -19,7 +19,7 @@ import org.junit.Test;
 
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.serializer.KryoSerializer;
-import com.twitter.heron.api.utils.Utils;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.core.base.Communicator;
 import com.twitter.heron.common.core.base.SingletonRegistry;
@@ -194,7 +194,7 @@ public class SpoutInstanceTest {
             testLooper.exitLoop();
             break;
           }
-          Utils.sleep(Constants.RETRY_INTERVAL_MS);
+          SysUtils.sleep(Constants.RETRY_INTERVAL_MS);
         }
       }
     };
@@ -240,7 +240,7 @@ public class SpoutInstanceTest {
             testLooper.exitLoop();
             break;
           }
-          Utils.sleep(Constants.RETRY_INTERVAL_MS);
+          SysUtils.sleep(Constants.RETRY_INTERVAL_MS);
         }
       }
     };
@@ -282,11 +282,11 @@ public class SpoutInstanceTest {
             if (ackCount.intValue() != 0) {
               break;
             }
-            Utils.sleep(Constants.RETRY_INTERVAL_MS);
+            SysUtils.sleep(Constants.RETRY_INTERVAL_MS);
           }
 
           // Wait the bolt's finishing
-          Utils.sleep(Constants.TEST_WAIT_TIME_MS);
+          SysUtils.sleep(Constants.TEST_WAIT_TIME_MS);
           Assert.assertEquals(10, ackCount.intValue());
           testLooper.exitLoop();
         }
@@ -317,11 +317,11 @@ public class SpoutInstanceTest {
           if (failCount.intValue() != 0) {
             break;
           }
-          Utils.sleep(Constants.RETRY_INTERVAL_MS);
+          SysUtils.sleep(Constants.RETRY_INTERVAL_MS);
         }
 
         // Wait the bolt's finishing
-        Utils.sleep(Constants.TEST_WAIT_TIME_MS);
+        SysUtils.sleep(Constants.TEST_WAIT_TIME_MS);
         Assert.assertEquals(10, failCount.intValue());
         testLooper.exitLoop();
       }
@@ -371,11 +371,11 @@ public class SpoutInstanceTest {
             if (ackCount.intValue() != 0 || failCount.intValue() != 0) {
               break;
             }
-            Utils.sleep(Constants.RETRY_INTERVAL_MS);
+            SysUtils.sleep(Constants.RETRY_INTERVAL_MS);
           }
 
           // Wait the bolt's finishing
-          Utils.sleep(Constants.TEST_WAIT_TIME_MS);
+          SysUtils.sleep(Constants.TEST_WAIT_TIME_MS);
           Assert.assertEquals(5, ackCount.intValue());
           Assert.assertEquals(5, failCount.intValue());
           testLooper.exitLoop();

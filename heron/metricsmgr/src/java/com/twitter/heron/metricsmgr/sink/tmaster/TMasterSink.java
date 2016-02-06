@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.TypeUtils;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.core.base.Communicator;
 import com.twitter.heron.common.core.base.Constants;
 import com.twitter.heron.common.core.base.NIOLooper;
@@ -126,7 +127,7 @@ public class TMasterSink implements IMetricsSink {
 
           long reconnectInterval =
               TypeUtils.getLong(tmasterClientConfig.get(KEY_TMASTER_RECONNECT_INTERVAL_SEC));
-          Utils.sleep(reconnectInterval * Constants.SECONDS_TO_MILLISECONDS);
+          SysUtils.sleep(reconnectInterval * Constants.SECONDS_TO_MILLISECONDS);
           LOG.info("Restarting TMasterClient");
 
           // We would use the TMasterLocation in cache, since
