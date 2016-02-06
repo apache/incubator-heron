@@ -1,4 +1,4 @@
-package com.twitter.heron.metricsmgr.api.metrics;
+package com.twitter.heron.spi.metricsmgr.metrics;
 
 /**
  * An immutable class providing a view of MetricsInfo

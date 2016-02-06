@@ -1,4 +1,4 @@
-package com.twitter.heron.metricsmgr.api.sink;
+package com.twitter.heron.spi.metricsmgr.sink;
 
 /**
  * Context needed for an IMetricsSink to init.
