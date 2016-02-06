@@ -16,14 +16,20 @@ java_library(
 )
 
 java_library(
-    name = 'base-lib-java',
+    name = 'base-java',
     srcs = glob(["**/core/base/*.java"]),
+)
+
+java_library(
+    name = 'basics-java',
+    srcs = glob(["**/basics/*.java"]),
 )
 
 java_library(
     name = 'config-java',
     srcs = glob(["**/config/*.java"]),
     deps = [
+        "//heron/common/src/java:basics-java",
         "//3rdparty/snakeyaml:snakeyaml-java",
     ],
 )
