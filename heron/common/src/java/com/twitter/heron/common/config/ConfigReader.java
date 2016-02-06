@@ -1,4 +1,4 @@
-package com.twitter.heron.config;
+package com.twitter.heron.common.config;
 
 import java.util.Properties;
 import java.util.logging.Logger;

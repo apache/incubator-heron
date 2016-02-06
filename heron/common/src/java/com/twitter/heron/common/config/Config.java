@@ -1,4 +1,4 @@
-package com.twitter.heron.config;
+package com.twitter.heron.common.config;
 
 public class Config {
   private final String cluster;

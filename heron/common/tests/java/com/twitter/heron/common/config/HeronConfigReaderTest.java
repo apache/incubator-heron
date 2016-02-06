@@ -1,4 +1,4 @@
-package com.twitter.heron.config;
+package com.twitter.heron.common.config;
 
 import java.nio.file.Paths;
 import java.util.Properties;
@@ -17,7 +17,7 @@ public class HeronConfigReaderTest {
     HeronConfigReader configReader = HeronConfigReader.class.newInstance();
 
     String configPath = Paths.get(System.getenv("JAVA_RUNFILES"), Constants.TEST_DATA_PATH).toString();
-    Assert.assertTrue(configReader.load("cluster", configPath, "defaults.conf"));
+    Assert.assertTrue(configReader.load("cluster", configPath, "defaults.yaml"));
 
     Map props = configReader.getConfig();
     Assert.assertEquals("role1", props.get(Constants.ROLE_KEY));
@@ -33,7 +33,7 @@ public class HeronConfigReaderTest {
     HeronConfigReader configReader = HeronConfigReader.class.newInstance();
 
     String configPath = Paths.get(System.getenv("JAVA_RUNFILES"), Constants.TEST_DATA_PATH).toString();
-    Assert.assertTrue(configReader.load("cluster", configPath, "defaults1.conf"));
+    Assert.assertTrue(configReader.load("cluster", configPath, "defaults1.yaml"));
 
     Map props = configReader.getConfig();
     Assert.assertEquals("role", props.get(Constants.ROLE_KEY));
@@ -50,7 +50,7 @@ public class HeronConfigReaderTest {
     HeronConfigReader configReader = HeronConfigReader.class.newInstance();
 
     String configPath = Paths.get(System.getenv("JAVA_RUNFILES"), Constants.TEST_DATA_PATH).toString();
-    Assert.assertTrue(configReader.load("cluster", configPath, "defaults2.conf"));
+    Assert.assertTrue(configReader.load("cluster", configPath, "defaults2.yaml"));
 
     Map props = configReader.getConfig();
     Assert.assertEquals("role1", props.get(Constants.ROLE_KEY));

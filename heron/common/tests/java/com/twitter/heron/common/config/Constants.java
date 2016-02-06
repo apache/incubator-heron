@@ -1,4 +1,4 @@
-package com.twitter.heron.config;
+package com.twitter.heron.common.config;
 
 public class Constants {
   public static final String ROLE_KEY = "role";
@@ -9,5 +9,5 @@ public class Constants {
 
   public static final String LAUNCHER_CLASS_KEY = "heron.launcher.class";
 
-  public static final String TEST_DATA_PATH = "/heron/config/tests/java/com/twitter/heron/config/testdata";
+  public static final String TEST_DATA_PATH = "/heron/common/tests/java/com/twitter/heron/common/config/testdata";
 }
