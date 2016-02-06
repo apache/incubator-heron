@@ -55,3 +55,33 @@ java_test(
     ],
     size = "small",
 )
+
+java_library(
+    name = "config_test_library",
+    srcs = glob(["**/config/Constants.java"]),
+)
+
+java_test(
+    name = "config_reader_unittest",
+    srcs = glob(["**/config/ConfigReaderTest.java"]),
+    deps = [
+        ":config_test_library",
+        "//heron/common/src/java:config-java",
+        "@bazel_tools//third_party:junit4",
+    ],
+    data = glob(["**/config/testdata/**/*.yaml"]),
+    size = "small",
+)
+
+java_test(
+    name = "heron_config_reader_unittest",
+    srcs = glob(["**/config/HeronConfigReaderTest.java"]),
+    deps = [
+        ":config_test_library",
+        "//heron/common/src/java:config-java",
+        "@bazel_tools//third_party:junit4",
+    ],
+    data = glob(["**/config/testdata/**/*.yaml"]),
+    size = "small",
+)
+

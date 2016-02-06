@@ -22,7 +22,7 @@ cc_test(
 
 cc_test(
     name = "tuple-cache_unittest",
-    args = ["$(location //heron/config:test-config-internals-yaml)"],
+    args = ["$(location //heron/config/src/yaml:test-config-internals-yaml)"],
     srcs = [
         "tuple-cache_unittest.cpp",
     ],
@@ -30,7 +30,7 @@ cc_test(
         "//heron/stmgr/src/cpp:util-cxx",
         "//3rdparty/gtest:gtest-cxx",
     ],
-    data = ["//heron/config:test-config-internals-yaml"],
+    data = ["//heron/config/src/yaml:test-config-internals-yaml"],
     copts = [
         "-Iheron",
         "-Iheron/common/src/cpp",
@@ -44,7 +44,7 @@ cc_test(
 
 cc_test(
     name = "xor-manager_unittest",
-    args = ["$(location //heron/config:test-config-internals-yaml)"],
+    args = ["$(location //heron/config/src/yaml:test-config-internals-yaml)"],
     srcs = [
         "xor-manager_unittest.cpp",
     ],
@@ -52,7 +52,7 @@ cc_test(
         "//heron/stmgr/src/cpp:util-cxx",
         "//3rdparty/gtest:gtest-cxx",
     ],
-    data = ["//heron/config:test-config-internals-yaml"],
+    data = ["//heron/config/src/yaml:test-config-internals-yaml"],
     copts = [
         "-Iheron",
         "-Iheron/common/src/cpp",

@@ -1,10 +1,9 @@
 package com.twitter.heron.spi.scheduler;
 
 
+import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.scheduler.context.LaunchContext;
-
-import com.twitter.heron.proto.scheduler.Scheduler;
 
 /**
  * Scheduler object responsible for bringing up topology. Will be instantiated using no-arg
@@ -20,7 +19,7 @@ public interface IScheduler {
    * This method will be called after initialize.
    * It is responsible for grabbing resource to launch executor and make sure they
    * get launched.
-   * <p/>
+   * <p>
    *
    * @param packing Initial mapping suggested by running packing algorithm.
    */
