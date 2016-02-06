@@ -46,7 +46,7 @@ java_library(
     srcs = glob(["**/local/*.java"]),
     deps = [
         ":scheduler-lib-java",
-        "//heron/common/src/java:base-lib-java",
+        "//heron/common/src/java:base-java",
         "//heron/state/src/java:state-java",
         "//heron/api/src/java:api-java",
         "//heron/spi/src/java:scheduler-spi-java",
@@ -63,7 +63,7 @@ java_binary(
     srcs = glob(["**/local/*.java"]),
     deps = [
         ":scheduler-lib-java",
-        "//heron/common/src/java:base-lib-java",
+        "//heron/common/src/java:base-java",
         "//heron/state/src/java:state-java",
         "//heron/proto:proto-java",
         "//heron/api/src/java:api-java",
@@ -82,7 +82,7 @@ java_library(
     deps = [
         ":scheduler-lib-java",
         ":scheduler-twitter-lib-java",
-        "//heron/common/src/java:base-lib-java",
+        "//heron/common/src/java:base-java",
         "//heron/state/src/java:state-java",
         "//heron/api/src/java:api-java",
         "//heron/spi/src/java:scheduler-spi-java",
@@ -103,7 +103,7 @@ java_binary(
     deps = [
         ":scheduler-lib-java",
         ":scheduler-twitter-lib-java",
-        "//heron/common/src/java:base-lib-java",
+        "//heron/common/src/java:base-java",
         "//heron/state/src/java:state-java",
         "//heron/api/src/java:api-java",
         "//heron/spi/src/java:scheduler-spi-java",
@@ -126,7 +126,7 @@ java_library(
     deps = [
         ":scheduler-lib-java",
         ":scheduler-twitter-lib-java",
-        "//heron/common/src/java:base-lib-java",
+        "//heron/common/src/java:base-java",
         "//heron/state/src/java:state-java",
         "//heron/api/src/java:api-java",
         "//heron/spi/src/java:scheduler-spi-java",
@@ -148,7 +148,7 @@ java_binary(
     deps = [
         ":scheduler-lib-java",
         ":scheduler-twitter-lib-java",
-        "//heron/common/src/java:base-lib-java",
+        "//heron/common/src/java:base-java",
         "//heron/state/src/java:state-java",
         "//heron/api/src/java:api-java",
         "//heron/spi/src/java:scheduler-spi-java",
@@ -170,7 +170,7 @@ java_binary(
         ":scheduler-twitter-lib-java",
         "//heron/api/src/java:api-java",
         "//heron/spi/src/java:scheduler-spi-java",
-        "//heron/common/src/java:base-lib-java",
+        "//heron/common/src/java:base-java",
         "//heron/state/src/java:state-java",
         "//heron/proto:proto_common_java",
         "//heron/proto:proto_execution_state_java",

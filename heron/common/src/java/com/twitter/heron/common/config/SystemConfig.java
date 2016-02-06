@@ -1,4 +1,4 @@
-package com.twitter.heron.common.utils.misc;
+package com.twitter.heron.common.config;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -6,16 +6,17 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.twitter.heron.common.basics.TypeUtils;
 import org.yaml.snakeyaml.Yaml;
-
-import com.twitter.heron.api.utils.Utils;
 
 /**
  * SystemConfig are a set of configuration parameters that are set by the system
  * All the config associated with time is in the unit of milli-seconds, unless otherwise specified.
  * All the config associated with data szied is in the unit of bytes, unless otherwise specified.
  */
-public class SystemConfig extends HashMap<String, Object> {
+public class SystemConfig {
+  private Map config = new HashMap<String, Object>();
+
   public SystemConfig() {
     super();
   }
@@ -27,31 +28,23 @@ public class SystemConfig extends HashMap<String, Object> {
   @SuppressWarnings("unchecked")
   public SystemConfig(String configFile, boolean mustExist) {
     super();
-    Map config = findAndReadLocalFile(configFile, mustExist);
-    this.putAll(config);
+    this.config = findAndReadLocalFile(configFile, mustExist);
   }
 
   @SuppressWarnings("unchecked")
   public static Map findAndReadLocalFile(String name, boolean mustExist) {
-    Map ret = null;
     try {
       FileInputStream fin = new FileInputStream(new File(name));
-      Yaml yaml = new Yaml();
-      ret = (Map) yaml.load(fin);
     } catch (IOException ioe) {
       if (mustExist) {
         throw new RuntimeException(ioe);
       }
     }
-    if (ret == null) {
-      return new HashMap();
-    } else {
-      return new HashMap(ret);
-    }
+    return ConfigReader.loadFile(name);    
   }
 
   /**
-   * The relative path tot he logging directory
+   * The relative path to the logging directory
    */
   public static final String HERON_LOGGING_DIRECTORY = "heron.logging.directory";
 
@@ -66,7 +59,7 @@ public class SystemConfig extends HashMap<String, Object> {
   public static final String HERON_LOGGING_MAXIMUM_FILES = "heron.logging.maximum.files";
 
   /**
-   * The threadhold level to log error
+   * The threshold level to log error
    */
   public static final String HERON_LOGGING_ERR_THRESHOLD = "heron.logging.err.threshold";
 
@@ -97,11 +90,11 @@ public class SystemConfig extends HashMap<String, Object> {
   public static final String INSTANCE_INTERNAL_SPOUT_WRITE_QUEUE_CAPACITY = "heron.instance.internal.spout.write.queue.capacity";
 
   public int getInstanceInternalMetricsWriteQueueCapacity() {
-    return Utils.getInt(this.get(SystemConfig.INSTANCE_INTERNAL_METRICS_WRITE_QUEUE_CAPACITY));
+    return TypeUtils.getInt(this.config.get(SystemConfig.INSTANCE_INTERNAL_METRICS_WRITE_QUEUE_CAPACITY));
   }
 
   public int getInstanceTuningExpectedMetricsWriteQueueSize() {
-    return Utils.getInt(this.get(SystemConfig.INSTANCE_TUNING_EXPECTED_METRICS_WRITE_QUEUE_SIZE));
+    return TypeUtils.getInt(this.config.get(SystemConfig.INSTANCE_TUNING_EXPECTED_METRICS_WRITE_QUEUE_SIZE));
   }
 
   /**
@@ -145,11 +138,11 @@ public class SystemConfig extends HashMap<String, Object> {
   public static final String INSTANCE_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE_BYTES = "heron.instance.network.options.socket.send.buffer.size.bytes";
 
   public int getInstanceSetDataTupleCapacity() {
-    return Utils.getInt(this.get(SystemConfig.INSTANCE_SET_DATA_TUPLE_CAPACITY));
+    return TypeUtils.getInt(this.config.get(SystemConfig.INSTANCE_SET_DATA_TUPLE_CAPACITY));
   }
 
   public int getInstanceSetControlTupleCapacity() {
-    return Utils.getInt(this.get(SystemConfig.INSTANCE_SET_CONTROL_TUPLE_CAPACITY));
+    return TypeUtils.getInt(this.config.get(SystemConfig.INSTANCE_SET_CONTROL_TUPLE_CAPACITY));
   }
 
   /**
@@ -199,47 +192,47 @@ public class SystemConfig extends HashMap<String, Object> {
   public static final String INSTANCE_FORCE_EXIT_TIMEOUT_MS = "heron.instance.force.exit.timeout.ms";
 
   public long getInstanceForceExitTimeoutMs() {
-    return Utils.getLong(this.get(SystemConfig.INSTANCE_FORCE_EXIT_TIMEOUT_MS));
+    return TypeUtils.getLong(this.config.get(SystemConfig.INSTANCE_FORCE_EXIT_TIMEOUT_MS));
   }
 
   public int getInstanceStateCheckIntervalSec() {
-    return Utils.getInt(this.get(SystemConfig.INSTANCE_STATE_CHECK_INTERVAL_SEC));
+    return TypeUtils.getInt(this.config.get(SystemConfig.INSTANCE_STATE_CHECK_INTERVAL_SEC));
   }
 
   public int getInstanceInternalBoltReadQueueCapacity() {
-    return Utils.getInt(this.get(SystemConfig.INSTANCE_INTERNAL_BOLT_READ_QUEUE_CAPACITY));
+    return TypeUtils.getInt(this.config.get(SystemConfig.INSTANCE_INTERNAL_BOLT_READ_QUEUE_CAPACITY));
   }
 
   public int getInstanceInternalBoltWriteQueueCapacity() {
-    return Utils.getInt(this.get(SystemConfig.INSTANCE_INTERNAL_BOLT_WRITE_QUEUE_CAPACITY));
+    return TypeUtils.getInt(this.config.get(SystemConfig.INSTANCE_INTERNAL_BOLT_WRITE_QUEUE_CAPACITY));
   }
 
   public int getInstanceInternalSpoutReadQueueCapacity() {
-    return Utils.getInt(this.get(SystemConfig.INSTANCE_INTERNAL_SPOUT_READ_QUEUE_CAPACITY));
+    return TypeUtils.getInt(this.config.get(SystemConfig.INSTANCE_INTERNAL_SPOUT_READ_QUEUE_CAPACITY));
   }
 
   public int getInstanceInternalSpoutWriteQueueCapacity() {
-    return Utils.getInt(this.get(SystemConfig.INSTANCE_INTERNAL_SPOUT_WRITE_QUEUE_CAPACITY));
+    return TypeUtils.getInt(this.config.get(SystemConfig.INSTANCE_INTERNAL_SPOUT_WRITE_QUEUE_CAPACITY));
   }
 
   public long getInstanceAckBatchTimeMs() {
-    return Utils.getLong(this.get(SystemConfig.INSTANCE_ACK_BATCH_TIME_MS));
+    return TypeUtils.getLong(this.config.get(SystemConfig.INSTANCE_ACK_BATCH_TIME_MS));
   }
 
   public int getInstanceTuningExpectedBoltReadQueueSize() {
-    return Utils.getInt(this.get(SystemConfig.INSTANCE_TUNING_EXPECTED_BOLT_READ_QUEUE_SIZE));
+    return TypeUtils.getInt(this.config.get(SystemConfig.INSTANCE_TUNING_EXPECTED_BOLT_READ_QUEUE_SIZE));
   }
 
   public int getInstanceTuningExpectedBoltWriteQueueSize() {
-    return Utils.getInt(this.get(SystemConfig.INSTANCE_TUNING_EXPECTED_BOLT_WRITE_QUEUE_SIZE));
+    return TypeUtils.getInt(this.config.get(SystemConfig.INSTANCE_TUNING_EXPECTED_BOLT_WRITE_QUEUE_SIZE));
   }
 
   public int getInstanceTuningExpectedSpoutReadQueueSize() {
-    return Utils.getInt(this.get(SystemConfig.INSTANCE_TUNING_EXPECTED_SPOUT_READ_QUEUE_SIZE));
+    return TypeUtils.getInt(this.config.get(SystemConfig.INSTANCE_TUNING_EXPECTED_SPOUT_READ_QUEUE_SIZE));
   }
 
   public int getInstanceTuningExpectedSpoutWriteQueueSize() {
-    return Utils.getInt(this.get(SystemConfig.INSTANCE_TUNING_EXPECTED_SPOUT_WRITE_QUEUE_SIZE));
+    return TypeUtils.getInt(this.config.get(SystemConfig.INSTANCE_TUNING_EXPECTED_SPOUT_WRITE_QUEUE_SIZE));
   }
 
   /**
@@ -248,91 +241,91 @@ public class SystemConfig extends HashMap<String, Object> {
   public static final String INSTANCE_RECONNECT_STREAMMGR_INTERVAL_SEC = "heron.instance.reconnect.streammgr.interval.sec";
 
   public String getHeronLoggingDirectory() {
-    return (String) this.get(SystemConfig.HERON_LOGGING_DIRECTORY);
+    return (String) this.config.get(SystemConfig.HERON_LOGGING_DIRECTORY);
   }
 
   public int getHeronLoggingMaximumSizeMb() {
-    return Utils.getInt(this.get(SystemConfig.HERON_LOGGING_MAXIMUM_SIZE_MB));
+    return TypeUtils.getInt(this.config.get(SystemConfig.HERON_LOGGING_MAXIMUM_SIZE_MB));
   }
 
   public int getHeronLoggingMaximumFiles() {
-    return Utils.getInt(this.get(SystemConfig.HERON_LOGGING_MAXIMUM_FILES));
+    return TypeUtils.getInt(this.config.get(SystemConfig.HERON_LOGGING_MAXIMUM_FILES));
   }
 
   public int getHeronMetricsExportIntervalSec() {
-    return Utils.getInt(this.get(SystemConfig.HERON_METRICS_EXPORT_INTERVAL_SEC));
+    return TypeUtils.getInt(this.config.get(SystemConfig.HERON_METRICS_EXPORT_INTERVAL_SEC));
   }
 
   public long getInstanceNetworkReadBatchTimeMs() {
-    return Utils.getLong(this.get(SystemConfig.INSTANCE_NETWORK_READ_BATCH_TIME_MS));
+    return TypeUtils.getLong(this.config.get(SystemConfig.INSTANCE_NETWORK_READ_BATCH_TIME_MS));
   }
 
   public long getInstanceNetworkReadBatchSizeBytes() {
-    return Utils.getLong(this.get(SystemConfig.INSTANCE_NETWORK_READ_BATCH_SIZE_BYTES));
+    return TypeUtils.getLong(this.config.get(SystemConfig.INSTANCE_NETWORK_READ_BATCH_SIZE_BYTES));
   }
 
   public long getInstanceNetworkWriteBatchTimeMs() {
-    return Utils.getLong(this.get(SystemConfig.INSTANCE_NETWORK_WRITE_BATCH_TIME_MS));
+    return TypeUtils.getLong(this.config.get(SystemConfig.INSTANCE_NETWORK_WRITE_BATCH_TIME_MS));
   }
 
   public long getInstanceNetworkWriteBatchSizeBytes() {
-    return Utils.getLong(this.get(SystemConfig.INSTANCE_NETWORK_WRITE_BATCH_SIZE_BYTES));
+    return TypeUtils.getLong(this.config.get(SystemConfig.INSTANCE_NETWORK_WRITE_BATCH_SIZE_BYTES));
   }
 
   public int getInstanceNetworkOptionsSocketReceivedBufferSizeBytes() {
-    return Utils.
-        getInt(this.get(SystemConfig.INSTANCE_NETWORK_OPTIONS_SOCKET_RECEIVED_BUFFER_SIZE_BYTES));
+    return TypeUtils.
+        getInt(this.config.get(SystemConfig.INSTANCE_NETWORK_OPTIONS_SOCKET_RECEIVED_BUFFER_SIZE_BYTES));
   }
 
   public int getInstanceNetworkOptionsSocketSendBufferSizeBytes() {
-    return Utils.
-        getInt(this.get(SystemConfig.INSTANCE_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE_BYTES));
+    return TypeUtils.
+        getInt(this.config.get(SystemConfig.INSTANCE_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE_BYTES));
   }
 
   public long getInstanceEmitBatchTimeMs() {
-    return Utils.getLong(this.get(SystemConfig.INSTANCE_EMIT_BATCH_TIME_MS));
+    return TypeUtils.getLong(this.config.get(SystemConfig.INSTANCE_EMIT_BATCH_TIME_MS));
   }
 
   public long getInstanceEmitBatchSizeBytes() {
-    return Utils.getLong(this.get(SystemConfig.INSTANCE_EMIT_BATCH_SIZE_BYTES));
+    return TypeUtils.getLong(this.config.get(SystemConfig.INSTANCE_EMIT_BATCH_SIZE_BYTES));
   }
 
   public long getInstanceExecuteBatchTimeMs() {
-    return Utils.getLong(this.get(SystemConfig.INSTANCE_EXECUTE_BATCH_TIME_MS));
+    return TypeUtils.getLong(this.config.get(SystemConfig.INSTANCE_EXECUTE_BATCH_TIME_MS));
   }
 
   public long getInstanceExecuteBatchSizeBytes() {
-    return Utils.getLong(this.get(SystemConfig.INSTANCE_EXECUTE_BATCH_SIZE_BYTES));
+    return TypeUtils.getLong(this.config.get(SystemConfig.INSTANCE_EXECUTE_BATCH_SIZE_BYTES));
   }
 
   public int getInstanceReconnectStreammgrIntervalSec() {
-    return Utils.
-        getInt(this.get(SystemConfig.INSTANCE_RECONNECT_STREAMMGR_INTERVAL_SEC));
+    return TypeUtils.
+        getInt(this.config.get(SystemConfig.INSTANCE_RECONNECT_STREAMMGR_INTERVAL_SEC));
   }
 
   public int getInstanceReconnectMetricsmgrIntervalSec() {
-    return Utils.
-        getInt(this.get(SystemConfig.INSTANCE_RECONNECT_METRICSMGR_INTERVAL_SEC));
+    return TypeUtils.
+        getInt(this.config.get(SystemConfig.INSTANCE_RECONNECT_METRICSMGR_INTERVAL_SEC));
   }
 
   public int getInstanceMetricsSystemSampleIntervalSec() {
-    return Utils.getInt(this.get(SystemConfig.INSTANCE_METRICS_SYSTEM_SAMPLE_INTERVAL_SEC));
+    return TypeUtils.getInt(this.config.get(SystemConfig.INSTANCE_METRICS_SYSTEM_SAMPLE_INTERVAL_SEC));
   }
 
   public int getInstanceAcknowledgementNbuckets() {
-    return Utils.getInt(this.get(SystemConfig.INSTANCE_ACKNOWLEDGEMENT_NBUCKETS));
+    return TypeUtils.getInt(this.config.get(SystemConfig.INSTANCE_ACKNOWLEDGEMENT_NBUCKETS));
   }
 
   public int getInstanceSlaveFetchPplanIntervalSec() {
-    return Utils.getInt(this.get(SystemConfig.INSTANCE_SLAVE_FETCH_PPLAN_INTERVAL_SEC));
+    return TypeUtils.getInt(this.config.get(SystemConfig.INSTANCE_SLAVE_FETCH_PPLAN_INTERVAL_SEC));
   }
 
   public long getInstanceTuningIntervalMs() {
-    return Utils.getLong(this.get(SystemConfig.INSTANCE_TUNING_INTERVAL_MS));
+    return TypeUtils.getLong(this.config.get(SystemConfig.INSTANCE_TUNING_INTERVAL_MS));
   }
 
   public double getInstanceTuningCurrentSampleWeight() {
-    return Double.parseDouble(this.get(SystemConfig.INSTANCE_TUNING_CURRENT_SAMPLE_WEIGHT).toString());
+    return Double.parseDouble(this.config.get(SystemConfig.INSTANCE_TUNING_CURRENT_SAMPLE_WEIGHT).toString());
   }
 
   /**
@@ -429,29 +422,33 @@ public class SystemConfig extends HashMap<String, Object> {
   public static final String METRICSMGR_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE_BYTES = "heron.metricsmgr.network.options.socket.send.buffer.size.bytes";
 
   public long getMetricsMgrNetworkReadBatchTimeMs() {
-    return Utils.getLong(this.get(SystemConfig.METRICSMGR_NETWORK_READ_BATCH_TIME_MS));
+    return TypeUtils.getLong(this.config.get(SystemConfig.METRICSMGR_NETWORK_READ_BATCH_TIME_MS));
   }
 
   public long getMetricsMgrNetworkReadBatchSizeBytes() {
-    return Utils.getLong(this.get(SystemConfig.METRICSMGR_NETWORK_READ_BATCH_SIZE_BYTES));
+    return TypeUtils.getLong(this.config.get(SystemConfig.METRICSMGR_NETWORK_READ_BATCH_SIZE_BYTES));
   }
 
   public long getMetricsMgrNetworkWriteBatchTimeMs() {
-    return Utils.getLong(this.get(SystemConfig.METRICSMGR_NETWORK_WRITE_BATCH_TIME_MS));
+    return TypeUtils.getLong(this.config.get(SystemConfig.METRICSMGR_NETWORK_WRITE_BATCH_TIME_MS));
   }
 
   public long getMetricsMgrNetworkWriteBatchSizeBytes() {
-    return Utils.getLong(this.get(SystemConfig.METRICSMGR_NETWORK_WRITE_BATCH_SIZE_BYTES));
+    return TypeUtils.getLong(this.config.get(SystemConfig.METRICSMGR_NETWORK_WRITE_BATCH_SIZE_BYTES));
   }
 
   public int getMetricsMgrNetworkOptionsSocketReceivedBufferSizeBytes() {
-    return Utils.
-        getInt(this.get(SystemConfig.METRICSMGR_NETWORK_OPTIONS_SOCKET_RECEIVED_BUFFER_SIZE_BYTES));
+    return TypeUtils.
+        getInt(this.config.get(SystemConfig.METRICSMGR_NETWORK_OPTIONS_SOCKET_RECEIVED_BUFFER_SIZE_BYTES));
   }
 
   public int getMetricsMgrNetworkOptionsSocketSendBufferSizeBytes() {
-    return Utils.
-        getInt(this.get(SystemConfig.METRICSMGR_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE_BYTES));
+    return TypeUtils.
+        getInt(this.config.get(SystemConfig.METRICSMGR_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE_BYTES));
+  }
+  
+  public Object put(String key, Object value) {
+    return this.config.put(key, value);
   }
 }
 
