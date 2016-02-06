@@ -1,4 +1,4 @@
-package com.twitter.heron.config;
+package com.twitter.heron.common.config;
 
 import java.io.FileInputStream;
 import java.io.IOException;
