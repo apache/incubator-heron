@@ -12,18 +12,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.twitter.heron.api.utils.Utils;
+import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.common.core.base.Communicator;
 import com.twitter.heron.common.core.base.Constants;
 import com.twitter.heron.common.core.base.NIOLooper;
 import com.twitter.heron.common.core.base.SingletonRegistry;
 import com.twitter.heron.common.core.network.HeronSocketOptions;
-import com.twitter.heron.metricsmgr.api.metrics.ExceptionInfo;
-import com.twitter.heron.metricsmgr.api.metrics.MetricsFilter;
-import com.twitter.heron.metricsmgr.api.metrics.MetricsInfo;
-import com.twitter.heron.metricsmgr.api.metrics.MetricsRecord;
-import com.twitter.heron.metricsmgr.api.sink.IMetricsSink;
-import com.twitter.heron.metricsmgr.api.sink.SinkContext;
+import com.twitter.heron.spi.metricsmgr.metrics.ExceptionInfo;
+import com.twitter.heron.spi.metricsmgr.metrics.MetricsFilter;
+import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
+import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
+import com.twitter.heron.spi.metricsmgr.sink.IMetricsSink;
+import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 
 /**
@@ -125,7 +125,7 @@ public class TMasterSink implements IMetricsSink {
           LOG.log(Level.SEVERE, "TMasterClient dies in thread: " + t, e);
 
           long reconnectInterval =
-              Utils.getLong(tmasterClientConfig.get(KEY_TMASTER_RECONNECT_INTERVAL_SEC));
+              TypeUtils.getLong(tmasterClientConfig.get(KEY_TMASTER_RECONNECT_INTERVAL_SEC));
           Utils.sleep(reconnectInterval * Constants.SECONDS_TO_MILLISECONDS);
           LOG.info("Restarting TMasterClient");
 
@@ -194,12 +194,12 @@ public class TMasterSink implements IMetricsSink {
 
       HeronSocketOptions socketOptions =
           new HeronSocketOptions(
-              Utils.getLong(tmasterClientConfig.get(KEY_NETWORK_WRITE_BATCH_SIZE_BYTES)),
-              Utils.getLong(tmasterClientConfig.get(KEY_NETWORK_WRITE_BATCH_TIME_MS)),
-              Utils.getLong(tmasterClientConfig.get(KEY_NETWORK_READ_BATCH_SIZE_BYTES)),
-              Utils.getLong(tmasterClientConfig.get(KEY_NETWORK_READ_BATCH_TIME_MS)),
-              Utils.getInt(tmasterClientConfig.get(KEY_SOCKET_SEND_BUFFER_BYTES)),
-              Utils.getInt(tmasterClientConfig.get(KEY_SOCKET_RECEIVED_BUFFER_BYTES)));
+              TypeUtils.getLong(tmasterClientConfig.get(KEY_NETWORK_WRITE_BATCH_SIZE_BYTES)),
+              TypeUtils.getLong(tmasterClientConfig.get(KEY_NETWORK_WRITE_BATCH_TIME_MS)),
+              TypeUtils.getLong(tmasterClientConfig.get(KEY_NETWORK_READ_BATCH_SIZE_BYTES)),
+              TypeUtils.getLong(tmasterClientConfig.get(KEY_NETWORK_READ_BATCH_TIME_MS)),
+              TypeUtils.getInt(tmasterClientConfig.get(KEY_SOCKET_SEND_BUFFER_BYTES)),
+              TypeUtils.getInt(tmasterClientConfig.get(KEY_SOCKET_RECEIVED_BUFFER_BYTES)));
 
       // Reset the Consumer
       metricsCommunicator.setConsumer(looper);
@@ -210,7 +210,7 @@ public class TMasterSink implements IMetricsSink {
               currentTMasterLocation.getMasterPort(),
               socketOptions, metricsCommunicator);
       tMasterClient.
-          setReconnectIntervalSec(Utils.getLong(tmasterClientConfig.get(KEY_TMASTER_RECONNECT_INTERVAL_SEC)));
+          setReconnectIntervalSec(TypeUtils.getLong(tmasterClientConfig.get(KEY_TMASTER_RECONNECT_INTERVAL_SEC)));
 
       LOG.severe(String.format("Starting TMasterClient for the %d time.",
           startedAttempts.incrementAndGet()));
@@ -277,7 +277,7 @@ public class TMasterSink implements IMetricsSink {
   // If so, restart the TMasterClientService with the new TMasterLocation
   private void startTMasterChecker() {
     final int checkIntervalSec =
-        Utils.getInt(sinkConfig.get(KEY_TMASTER_LOCATION_CHECK_INTERVAL_SEC));
+        TypeUtils.getInt(sinkConfig.get(KEY_TMASTER_LOCATION_CHECK_INTERVAL_SEC));
 
     Runnable runnable = new Runnable() {
       @Override
