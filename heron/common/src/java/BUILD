@@ -21,22 +21,9 @@ java_library(
 )
 
 java_library(
-    name = 'core-lib-java',
-    srcs = glob(["**/core/**/*.java"]),
+    name = 'config-java',
+    srcs = glob(["**/config/*.java"]),
     deps = [
-        "//3rdparty/protobuf:protobuf-java",
-    ],
-)
-
-java_library(
-    name = 'heron-utils-lib-java',
-    srcs = glob(["**/utils/**/*.java"]),
-    deps = [
-        ":core-lib-java",
-        "//heron/api/src/java:api-java",
-        "//heron/proto:proto_metrics_java",
-        "//heron/proto:proto_physical_plan_java",
-        "//heron/proto:proto_tuple_java",
         "//3rdparty/snakeyaml:snakeyaml-java",
     ],
 )
