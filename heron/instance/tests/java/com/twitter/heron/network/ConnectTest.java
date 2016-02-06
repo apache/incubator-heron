@@ -19,7 +19,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.twitter.heron.api.utils.Utils;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.core.base.Communicator;
 import com.twitter.heron.common.core.base.NIOLooper;
@@ -96,7 +96,7 @@ public class ConnectTest {
     threadsPool = Executors.newSingleThreadExecutor();
 
     // Get an available port
-    serverPort = Utils.getFreePort();
+    serverPort = SysUtils.getFreePort();
   }
 
   @After
@@ -163,7 +163,7 @@ public class ConnectTest {
 
           break;
         } else {
-          Utils.sleep(Constants.RETRY_INTERVAL_MS);
+          SysUtils.sleep(Constants.RETRY_INTERVAL_MS);
         }
       }
 

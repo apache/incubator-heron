@@ -12,7 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.metric.MultiCountMetric;
-import com.twitter.heron.api.utils.Utils;
+import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.core.base.Communicator;
 import com.twitter.heron.common.core.base.NIOLooper;
@@ -222,7 +222,7 @@ public class MetricsManager {
       // Supply with default value is config is null
       sinksRetryAttempts.put(sinkId,
           restartAttempts == null ?
-              MetricsSinksConfig.DEFAULT_SINK_RESTART_ATTEMPTS : Utils.getInt(restartAttempts));
+              MetricsSinksConfig.DEFAULT_SINK_RESTART_ATTEMPTS : TypeUtils.getInt(restartAttempts));
 
       // Update the list of Communicator in Metrics Manager Server
       metricsManagerServer.addSinkCommunicator(sinkExecutor.getCommunicator());
