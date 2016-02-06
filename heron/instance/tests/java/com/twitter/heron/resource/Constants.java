@@ -22,7 +22,7 @@ public class Constants {
 
   public static final String PHYSICAL_PLAN_HELPER = "com.twitter.heron.utility.PhysicalPlanHelper";
 
-  public static final String HERON_SYSTEM_CONFIG = "com.twitter.heron.common.utils.misc.SystemConfig";
+  public static final String HERON_SYSTEM_CONFIG = "com.twitter.heron.common.config.SystemConfig";
 
   public static final String DEFAULT_CONFIG_RELATIVE_PATH = "../heron/config/src/yaml/heron_internals.yaml";
 
