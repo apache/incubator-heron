@@ -16,7 +16,7 @@ java_test(
         "//3rdparty/protobuf:protobuf-java",
         "@bazel_tools//third_party:junit4",
     ],
-    data = ["//heron/config:config-internals-yaml"],
+    data = ["//heron/config/src/yaml:config-internals-yaml"],
     size = "small",
 )
 
@@ -38,7 +38,7 @@ java_test(
         "//3rdparty/protobuf:protobuf-java",
         "@bazel_tools//third_party:junit4",
     ],
-    data = ["//heron/config:config-internals-yaml"],
+    data = ["//heron/config/src/yaml:config-internals-yaml"],
     size = "small",
 )
 
@@ -60,7 +60,7 @@ java_test(
         "//3rdparty/protobuf:protobuf-java",
         "@bazel_tools//third_party:junit4",
     ],
-    data = ["//heron/config:config-internals-yaml"],
+    data = ["//heron/config/src/yaml:config-internals-yaml"],
     size = "small",
 )
 
@@ -82,7 +82,7 @@ java_test(
         "//3rdparty/protobuf:protobuf-java",
         "@bazel_tools//third_party:junit4",
     ],
-    data = ["//heron/config:config-internals-yaml"],
+    data = ["//heron/config/src/yaml:config-internals-yaml"],
     size = "small",
 )
 
@@ -102,7 +102,7 @@ java_test(
         "//3rdparty/protobuf:protobuf-java",
         "@bazel_tools//third_party:junit4",
     ],
-    data = ["//heron/config:config-internals-yaml"],
+    data = ["//heron/config/src/yaml:config-internals-yaml"],
     size = "small",
 )
 
@@ -122,7 +122,7 @@ java_test(
         "//3rdparty/protobuf:protobuf-java",
         "@bazel_tools//third_party:junit4",
     ],
-    data = ["//heron/config:config-internals-yaml"],
+    data = ["//heron/config/src/yaml:config-internals-yaml"],
     size = "small",
 )
 
@@ -143,7 +143,7 @@ java_test(
         "//3rdparty/protobuf:protobuf-java",
         "@bazel_tools//third_party:junit4",
     ],
-    data = ["//heron/config:config-internals-yaml"],
+    data = ["//heron/config/src/yaml:config-internals-yaml"],
     size = "small",
 )
 
@@ -164,7 +164,7 @@ java_test(
         "//3rdparty/protobuf:protobuf-java",
         "@bazel_tools//third_party:junit4",
     ],
-    data = ["//heron/config:config-internals-yaml"],
+    data = ["//heron/config/src/yaml:config-internals-yaml"],
     size = "small",
 )
 
@@ -185,6 +185,6 @@ java_test(
         "//3rdparty/protobuf:protobuf-java",
         "@bazel_tools//third_party:junit4",
     ],
-    data = ["//heron/config:config-internals-yaml"],
+    data = ["//heron/config/src/yaml:config-internals-yaml"],
     size = "small",
 )
