@@ -111,7 +111,7 @@ def heron_cli_bin_files():
 
 def heron_cli_conf_files():
     return [
-        "//heron/config:config-internals-yaml",
+        "//heron/config/src/yaml:config-internals-yaml",
     ]
 
 def heron_cli_lib_files():
@@ -141,8 +141,8 @@ def heron_core_bin_files():
 def heron_core_conf_files():
     return [
         "//heron/instance/src/java:aurora-logging-properties",
-        "//heron/config:config-internals-yaml",
-        "//heron/config:metrics-sinks-yaml",
+        "//heron/config/src/yaml:config-internals-yaml",
+        "//heron/config/src/yaml:metrics-sinks-yaml",
     ]
 
 def heron_core_lib_files():
