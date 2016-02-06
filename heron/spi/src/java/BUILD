@@ -18,6 +18,7 @@ java_library(
         "//heron/proto:proto_scheduler_java",
         "//heron/proto:proto_tmaster_java",
         "//heron/proto:proto_topology_java",
+        "//3rdparty/snakeyaml:snakeyaml-java",
         "//3rdparty/guava:guava-java",
         "//3rdparty/protobuf:protobuf-java",
     ],

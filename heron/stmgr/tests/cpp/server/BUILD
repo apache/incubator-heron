@@ -2,7 +2,7 @@ package(default_visibility = ["//visibility:public"])
 
 cc_test(
     name = "stmgr_unittest",
-    args = ["$(location //heron/config:test-config-internals-yaml)"],
+    args = ["$(location //heron/config/src/yaml:test-config-internals-yaml)"],
     srcs = [
         "dummy_instance.cpp",
         "dummy_metricsmgr.cpp",
@@ -21,7 +21,7 @@ cc_test(
         "//heron/tmaster/src/cpp:tmaster-cxx",
         "//3rdparty/gtest:gtest-cxx",
     ],
-    data = ["//heron/config:test-config-internals-yaml"],
+    data = ["//heron/config/src/yaml:test-config-internals-yaml"],
     copts = [
         "-Iheron",
         "-Iheron/common/src/cpp",
