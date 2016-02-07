@@ -7,17 +7,13 @@ java_library(
     srcs = glob(["**/*.java"]),
     deps = [
         "//heron/api/src/java:api-java",
+        "//heron/proto:proto_topology_java",
         "//heron/proto:proto_metrics_java",
         "//heron/proto:proto_physical_plan_java",
         "//heron/proto:proto_tuple_java",
         "//3rdparty/snakeyaml:snakeyaml-java",
         "//3rdparty/protobuf:protobuf-java",
     ],
-)
-
-java_library(
-    name = 'base-java',
-    srcs = glob(["**/core/base/*.java"]),
 )
 
 java_library(
@@ -31,5 +27,14 @@ java_library(
     deps = [
         "//heron/common/src/java:basics-java",
         "//3rdparty/snakeyaml:snakeyaml-java",
+    ],
+)
+
+java_library(
+    name = 'network-java',
+    srcs = glob(["**/network/*.java"]),
+    deps = [
+        "//heron/common/src/java:basics-java",
+        "//3rdparty/protobuf:protobuf-java",
     ],
 )

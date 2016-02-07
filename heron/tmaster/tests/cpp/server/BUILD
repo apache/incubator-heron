@@ -19,7 +19,7 @@ cc_test(
     copts = [
         "-Iheron",
         "-Iheron/common/src/cpp",
-        "-Iheron/state/src/cpp",
+        "-Iheron/statemgrs/src/cpp",
         "-Iheron/stmgr/src/cpp",
         "-Iheron/tmaster/src/cpp",
         "-I$(GENDIR)/heron",

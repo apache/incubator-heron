@@ -10,7 +10,7 @@ import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.common.config.SystemConfig;
-import com.twitter.heron.common.core.base.SingletonRegistry;
+import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.proto.stmgr.StreamManager;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.system.PhysicalPlans;

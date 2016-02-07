@@ -18,7 +18,7 @@ import com.twitter.heron.scheduler.service.server.SchedulerServer;
 import com.twitter.heron.scheduler.util.DefaultConfigLoader;
 import com.twitter.heron.scheduler.util.NetworkUtility;
 import com.twitter.heron.scheduler.util.Nullity;
-import com.twitter.heron.state.IStateManager;
+import com.twitter.heron.spi.statemgr.IStateManager;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
