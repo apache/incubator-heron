@@ -17,7 +17,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.core.base.FileUtility;
+import com.twitter.heron.common.basics.FileUtility;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 
 import com.twitter.heron.spi.common.Constants;
@@ -29,7 +29,7 @@ import com.twitter.heron.spi.scheduler.context.LaunchContext;
 import com.twitter.heron.scheduler.service.SubmitterMain;
 import com.twitter.heron.scheduler.util.NetworkUtility;
 import com.twitter.heron.scheduler.util.TopologyUtility;
-import com.twitter.heron.state.FileSystemStateManager;
+import com.twitter.heron.spi.statemgr.FileSystemStateManager;
 
 public class MesosLauncher implements ILauncher {
   private static final Logger LOG = Logger.getLogger(MesosLauncher.class.getName());

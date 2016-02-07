@@ -10,6 +10,7 @@ java_library(
         ["**/*.java"],
     ),
     deps = [
+        "//heron/proto:proto_topology_java",
         "//heron/proto:proto-java",
         "//3rdparty/kryo:kryo-java",
         "//3rdparty/protobuf:protobuf-java",
