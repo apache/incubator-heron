@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 import javax.xml.bind.DatatypeConverter;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.core.base.FileUtility;
+import com.twitter.heron.common.basics.FileUtility;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.PackingPlan;

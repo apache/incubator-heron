@@ -15,8 +15,8 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.core.base.Constants;
-import com.twitter.heron.common.core.base.WakeableLooper;
+import com.twitter.heron.common.basics.Constants;
+import com.twitter.heron.common.basics.WakeableLooper;
 
 import junit.framework.Assert;
 

@@ -8,7 +8,7 @@ import com.twitter.heron.api.metric.MeanReducer;
 import com.twitter.heron.api.metric.MultiCountMetric;
 import com.twitter.heron.api.metric.MultiReducedMetric;
 import com.twitter.heron.common.config.SystemConfig;
-import com.twitter.heron.common.core.base.SingletonRegistry;
+import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.utils.misc.Constants;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.common.utils.topology.TopologyContextImpl;

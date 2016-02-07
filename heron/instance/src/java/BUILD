@@ -3,6 +3,7 @@ licenses(["notice"])
 package(default_visibility = ["//visibility:public"])
 
 load("/tools/rules/jarjar_rules", "jarjar_binary")
+load("/tools/rules/heron", "heron_java_proto_files")
 
 java_library(
     name = "instance-lib-java",
@@ -13,14 +14,8 @@ java_library(
     deps = [
         "//heron/api/src/java:api-java",
         "//heron/common/src/java:common-java",
-        "//heron/proto:proto_common_java",
-        "//heron/proto:proto_metrics_java",
-        "//heron/proto:proto_physical_plan_java",
-        "//heron/proto:proto_stmgr_java", 
-        "//heron/proto:proto_tuple_java", 
         "//3rdparty/logging:logging-java", 
-        "//3rdparty/protobuf:protobuf-java", 
-    ],
+    ] + heron_java_proto_files(),
 )
 
 java_binary(
@@ -30,15 +25,11 @@ java_binary(
     deps = [
         ":instance-lib-java",
         "//heron/common/src/java:common-java",
-        "//heron/proto:proto-java",
-        "//heron/proto:proto_metrics_java",
-        "//heron/proto:proto_physical_plan_java",
-        "//heron/proto:proto_tuple_java",
         # Heron does not need it, we supply this,
         # since we exclude them explicitly in target "heron_binary".
         # Later we might remove it.
         "//3rdparty/logging:logging-java",
-    ],
+    ] + heron_java_proto_files(),
 )
 
 jarjar_binary(

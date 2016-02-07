@@ -12,7 +12,7 @@ java_library(
         "**/spi/util/**/*.java",
     ]),
     deps = [
-        "//heron/state/src/java:state-java",
+        ":statemgr-spi-java",
         "//heron/proto:proto_common_java",
         "//heron/proto:proto_execution_state_java",
         "//heron/proto:proto_scheduler_java",
@@ -29,4 +29,20 @@ java_library(
     srcs = glob(
         ["**/spi/metricsmgr/**/*.java"],
     ),
+)
+
+java_library(
+    name='statemgr-spi-java',
+    srcs = glob(
+        ["**/spi/statemgr/**/*.java"],
+    ),
+    deps = [
+        "//heron/proto:proto_execution_state_java",
+        "//heron/proto:proto_scheduler_java",
+        "//heron/proto:proto_physical_plan_java",
+        "//heron/proto:proto_tmaster_java",
+        "//heron/proto:proto_topology_java",
+        "//3rdparty/protobuf:protobuf-java",
+        "//3rdparty/guava:guava-java",
+    ],
 )

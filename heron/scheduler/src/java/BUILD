@@ -1,6 +1,7 @@
 package(default_visibility = ["//visibility:public"])
 
 load("/tools/rules/jarjar_rules", "jarjar_binary")
+load("/tools/rules/heron", "heron_java_proto_files")
 
 java_library(
     name = 'scheduler-lib-java',
@@ -11,16 +12,11 @@ java_library(
     deps = [
         "//heron/api/src/java:api-java",
         "//heron/spi/src/java:scheduler-spi-java",
-        "//heron/state/src/java:state-java",
-        "//heron/proto:proto_common_java",
-        "//heron/proto:proto_execution_state_java",
-        "//heron/proto:proto_scheduler_java",
-        "//heron/proto:proto_tmaster_java",
+        "//heron/statemgrs/src/java:statemgrs-java",
         "//3rdparty/fasterxml-jackson:fasterxml-jackson-java",   # only for parsing version-*.json file. TODO(nbhagat): Remove it.
         "//3rdparty/guava:guava-java",
-        "//3rdparty/protobuf:protobuf-java",
         "//3rdparty/zookeeper:zookeeper-java",
-    ],
+    ] + heron_java_proto_files(),
 )
 
 java_library(
@@ -32,13 +28,11 @@ java_library(
         ":scheduler-lib-java",
         "//heron/api/src/java:api-java",
         "//heron/spi/src/java:scheduler-spi-java",
-        "//heron/state/src/java:state-java",
-        "//heron/proto:proto-java",
+        "//heron/statemgrs/src/java:statemgrs-java",
         "//3rdparty/fasterxml-jackson:fasterxml-jackson-java",   # only for parsing version-*.json file. TODO(nbhagat): Remove it.
         "//3rdparty/guava:guava-java",
-        "//3rdparty/protobuf:protobuf-java",
         "//3rdparty/zookeeper:zookeeper-java",
-    ],
+    ] + heron_java_proto_files(),
 )
 
 java_library(
@@ -46,16 +40,13 @@ java_library(
     srcs = glob(["**/local/*.java"]),
     deps = [
         ":scheduler-lib-java",
-        "//heron/common/src/java:base-java",
-        "//heron/state/src/java:state-java",
+        "//heron/common/src/java:basics-java",
+        "//heron/statemgrs/src/java:statemgrs-java",
         "//heron/api/src/java:api-java",
         "//heron/spi/src/java:scheduler-spi-java",
-        "//heron/proto:proto_execution_state_java",
-        "//heron/proto:proto_scheduler_java",
-        "//heron/proto:proto_tmaster_java",
+        "//heron/spi/src/java:statemgr-spi-java",
         "//3rdparty/guava:guava-java",
-        "//3rdparty/protobuf:protobuf-java",
-    ],
+    ] + heron_java_proto_files(),
 )
 
 java_binary(
@@ -63,17 +54,13 @@ java_binary(
     srcs = glob(["**/local/*.java"]),
     deps = [
         ":scheduler-lib-java",
-        "//heron/common/src/java:base-java",
-        "//heron/state/src/java:state-java",
-        "//heron/proto:proto-java",
+        "//heron/common/src/java:basics-java",
+        "//heron/statemgrs/src/java:statemgrs-java",
         "//heron/api/src/java:api-java",
         "//heron/spi/src/java:scheduler-spi-java",
-        "//heron/proto:proto_execution_state_java",
-        "//heron/proto:proto_scheduler_java",
-        "//heron/proto:proto_tmaster_java",
+        "//heron/spi/src/java:statemgr-spi-java",
         "//3rdparty/guava:guava-java",
-        "//3rdparty/protobuf:protobuf-java",
-    ],
+    ] + heron_java_proto_files(),
 )
 
 java_library(
@@ -82,19 +69,14 @@ java_library(
     deps = [
         ":scheduler-lib-java",
         ":scheduler-twitter-lib-java",
-        "//heron/common/src/java:base-java",
-        "//heron/state/src/java:state-java",
+        "//heron/common/src/java:basics-java",
+        "//heron/statemgrs/src/java:statemgrs-java",
         "//heron/api/src/java:api-java",
         "//heron/spi/src/java:scheduler-spi-java",
-        "//heron/proto:proto_execution_state_java",
-        "//heron/proto:proto_scheduler_java",
-        "//heron/proto:proto_tmaster_java",
+        "//heron/spi/src/java:statemgr-spi-java",
         "//3rdparty/guava:guava-java",
         "//3rdparty/fasterxml-jackson:fasterxml-jackson-java",
-        "//3rdparty/protobuf:protobuf-java",
-    ],
-    resources = [
-    ],
+    ] + heron_java_proto_files(),
 )
 
 java_binary(
@@ -103,19 +85,14 @@ java_binary(
     deps = [
         ":scheduler-lib-java",
         ":scheduler-twitter-lib-java",
-        "//heron/common/src/java:base-java",
-        "//heron/state/src/java:state-java",
+        "//heron/common/src/java:basics-java",
+        "//heron/statemgrs/src/java:statemgrs-java",
         "//heron/api/src/java:api-java",
         "//heron/spi/src/java:scheduler-spi-java",
-        "//heron/proto:proto_execution_state_java",
-        "//heron/proto:proto_scheduler_java",
-        "//heron/proto:proto_tmaster_java",
+        "//heron/spi/src/java:statemgr-spi-java",
         "//3rdparty/guava:guava-java",
         "//3rdparty/fasterxml-jackson:fasterxml-jackson-java",
-        "//3rdparty/protobuf:protobuf-java",
-    ],
-    resources = [
-    ],
+    ] + heron_java_proto_files(),
 )
 
 java_library(
@@ -126,18 +103,15 @@ java_library(
     deps = [
         ":scheduler-lib-java",
         ":scheduler-twitter-lib-java",
-        "//heron/common/src/java:base-java",
-        "//heron/state/src/java:state-java",
+        "//heron/common/src/java:basics-java",
+        "//heron/statemgrs/src/java:statemgrs-java",
         "//heron/api/src/java:api-java",
         "//heron/spi/src/java:scheduler-spi-java",
-        "//heron/proto:proto_execution_state_java",
-        "//heron/proto:proto_scheduler_java",
-        "//heron/proto:proto_tmaster_java",
+        "//heron/spi/src/java:statemgr-spi-java",
         "//3rdparty/mesos:mesos-java",
         "//3rdparty/fasterxml-jackson:fasterxml-jackson-java",
         "//3rdparty/curator:curator-java",
-        "//3rdparty/protobuf:protobuf-java",
-    ],
+    ] + heron_java_proto_files(),
 )
 
 java_binary(
@@ -148,18 +122,15 @@ java_binary(
     deps = [
         ":scheduler-lib-java",
         ":scheduler-twitter-lib-java",
-        "//heron/common/src/java:base-java",
-        "//heron/state/src/java:state-java",
+        "//heron/common/src/java:basics-java",
+        "//heron/statemgrs/src/java:statemgrs-java",
         "//heron/api/src/java:api-java",
         "//heron/spi/src/java:scheduler-spi-java",
-        "//heron/proto:proto_execution_state_java",
-        "//heron/proto:proto_scheduler_java",
-        "//heron/proto:proto_tmaster_java",
+        "//heron/spi/src/java:statemgr-spi-java",
         "//3rdparty/mesos:mesos-java",
         "//3rdparty/fasterxml-jackson:fasterxml-jackson-java",
         "//3rdparty/curator:curator-java",
-        "//3rdparty/protobuf:protobuf-java",
-    ],
+    ] + heron_java_proto_files(),
 )
 
 java_binary(
@@ -170,21 +141,15 @@ java_binary(
         ":scheduler-twitter-lib-java",
         "//heron/api/src/java:api-java",
         "//heron/spi/src/java:scheduler-spi-java",
-        "//heron/common/src/java:base-java",
-        "//heron/state/src/java:state-java",
-        "//heron/proto:proto_common_java",
-        "//heron/proto:proto_execution_state_java",
-        "//heron/proto:proto_scheduler_java",
-        "//heron/proto:proto_tmaster_java",
+        "//heron/common/src/java:basics-java",
+        "//heron/statemgrs/src/java:statemgrs-java",
+        "//heron/spi/src/java:statemgr-spi-java",
         "//3rdparty/mesos:mesos-java",
         "//3rdparty/guava:guava-java",
         "//3rdparty/fasterxml-jackson:fasterxml-jackson-java",
         "//3rdparty/curator:curator-java",
-        "//3rdparty/protobuf:protobuf-java",
         "//3rdparty/zookeeper:zookeeper-java",
-    ],
-    resources = [
-    ],
+    ] + heron_java_proto_files(),
 )
 
 jarjar_binary(

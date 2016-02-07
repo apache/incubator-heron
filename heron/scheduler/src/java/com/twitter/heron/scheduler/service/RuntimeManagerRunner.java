@@ -15,7 +15,7 @@ import com.twitter.heron.spi.scheduler.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.scheduler.context.RuntimeManagerContext;
 
 import com.twitter.heron.scheduler.util.NetworkUtility;
-import com.twitter.heron.state.curator.CuratorStateManager;
+import com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager;
 
 // TODO(mfu): Should we break it into different handlers?
 public class RuntimeManagerRunner implements Callable<Boolean> {

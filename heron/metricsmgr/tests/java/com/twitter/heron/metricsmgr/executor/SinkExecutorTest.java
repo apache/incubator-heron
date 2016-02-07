@@ -14,8 +14,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.api.metric.MultiCountMetric;
-import com.twitter.heron.common.core.base.Communicator;
-import com.twitter.heron.common.core.base.SlaveLooper;
+import com.twitter.heron.common.basics.Communicator;
+import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.spi.metricsmgr.metrics.ExceptionInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
