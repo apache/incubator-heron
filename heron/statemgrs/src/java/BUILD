@@ -1,20 +1,33 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/heron", "heron_java_proto_files")
+load("/tools/rules/heron_deps", "heron_java_proto_files")
+
+common_deps_files = \
+    heron_java_proto_files() + [
+        "//heron/spi/src/java:statemgr-spi-java",
+        "//3rdparty/guava:guava-java",
+    ]
+
+dummy_deps_files = \
+    common_deps_files
+
+localfs_deps_files = \
+    common_deps_files + [
+        "//heron/common/src/java:basics-java",
+    ]
+    
+zookeeper_deps_files = \
+    localfs_deps_files + [
+        "//3rdparty/curator:curator-java",
+        "//3rdparty/zookeeper:zookeeper-java",
+    ]
 
 java_library(
     name = "statemgrs-java",
     srcs = glob(
         ["**/*.java"],
     ),
-    deps = [
-        "//heron/common/src/java:basics-java",
-        "//heron/spi/src/java:statemgr-spi-java",
-        "//3rdparty/guava:guava-java",
-        "//3rdparty/logging:logging-java",
-        "//3rdparty/curator:curator-java",
-        "//3rdparty/zookeeper:zookeeper-java",
-    ] + heron_java_proto_files(),
+    deps = zookeeper_deps_files, 
 )
 
 java_library(
@@ -22,10 +35,7 @@ java_library(
     srcs = glob(
         ["**/dummy/*.java"],
     ),
-    deps = [
-        "//heron/spi/src/java:statemgr-spi-java",
-        "//3rdparty/guava:guava-java",
-    ] + heron_java_proto_files(),
+    deps = dummy_deps_files, 
 )
 
 java_library(
@@ -33,11 +43,7 @@ java_library(
     srcs = glob(
         ["**/localfs/*.java"],
     ),
-    deps = [
-        "//heron/common/src/java:basics-java",
-        "//heron/spi/src/java:statemgr-spi-java",
-        "//3rdparty/guava:guava-java",
-    ] + heron_java_proto_files(),
+    deps = localfs_deps_files, 
 )
 
 java_library(
@@ -45,11 +51,5 @@ java_library(
     srcs = glob(
         ["**/zookeeper/*.java"],
     ),
-    deps = [
-        "//heron/common/src/java:basics-java",
-        "//heron/spi/src/java:statemgr-spi-java",
-        "//3rdparty/guava:guava-java",
-        "//3rdparty/curator:curator-java",
-        "//3rdparty/zookeeper:zookeeper-java",
-    ] + heron_java_proto_files(),
+    deps = zookeeper_deps_files, 
 )

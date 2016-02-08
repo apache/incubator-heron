@@ -1,5 +1,13 @@
 
-load("/tools/rules/heron", "heron_java_proto_files")
+load("/tools/rules/heron_deps", "heron_java_proto_files")
+
+test_deps_files = \
+    heron_java_proto_files() + [
+        "//heron/api/src/java:api-java",
+        "//heron/common/src/java:common-java",
+        "//heron/instance/src/java:instance-java",
+        "@bazel_tools//third_party:junit4",
+    ]
 
 java_test(
     name = "custom-grouping_unittest",
@@ -7,13 +15,7 @@ java_test(
         ["**/CustomGroupingTest.java"] +
         ["**/resource/*.java"]
     ),
-    deps = [
-        "//heron/api/src/java:api-java",
-        "//heron/common/src/java:common-java",
-        "//heron/instance/src/java:instance-lib-java",
-        "@bazel_tools//third_party:junit4",
-    ] + heron_java_proto_files(),
-
+    deps = test_deps_files,
     data = ["//heron/config/src/yaml:config-internals-yaml"],
     size = "small",
 )
@@ -24,13 +26,7 @@ java_test(
         ["**/BoltInstanceTest.java"] +
         ["**/resource/*.java"]
     ), 
-    deps = [
-        "//heron/api/src/java:api-java",
-        "//heron/common/src/java:common-java",
-        "//heron/instance/src/java:instance-lib-java",
-        "@bazel_tools//third_party:junit4",
-    ] + heron_java_proto_files(),
-
+    deps = test_deps_files,
     data = ["//heron/config/src/yaml:config-internals-yaml"],
     size = "small",
 )
@@ -41,13 +37,7 @@ java_test(
         ["**/ActivateDeactivateTest.java"] +
         ["**/resource/*.java"]
     ),
-    deps = [
-        "//heron/api/src/java:api-java",
-        "//heron/common/src/java:common-java",
-        "//heron/instance/src/java:instance-lib-java",
-        "@bazel_tools//third_party:junit4",
-    ] + heron_java_proto_files(),
-
+    deps = test_deps_files,
     data = ["//heron/config/src/yaml:config-internals-yaml"],
     size = "small",
 )
@@ -58,13 +48,7 @@ java_test(
         ["**/SpoutInstanceTest.java"] +
         ["**/resource/*.java"]
     ),
-    deps = [
-        "//heron/api/src/java:api-java",
-        "//heron/common/src/java:common-java",
-        "//heron/instance/src/java:instance-lib-java",
-        "@bazel_tools//third_party:junit4",
-    ] + heron_java_proto_files(),
-
+    deps = test_deps_files,
     data = ["//heron/config/src/yaml:config-internals-yaml"],
     size = "small",
 )
@@ -75,13 +59,7 @@ java_test(
         ["**/GlobalMetricsTest.java"] +
         ["**/resource/*.java"]
     ),
-    deps = [
-        "//heron/api/src/java:api-java", 
-        "//heron/common/src/java:common-java",
-        "//heron/instance/src/java:instance-lib-java",
-        "@bazel_tools//third_party:junit4",
-    ] + heron_java_proto_files(),
-
+    deps = test_deps_files,
     data = ["//heron/config/src/yaml:config-internals-yaml"],
     size = "small",
 )
@@ -92,13 +70,7 @@ java_test(
         ["**/MultiAssignableMetricTest.java"] +
         ["**/resource/*.java"]
     ),
-    deps = [
-        "//heron/api/src/java:api-java",
-        "//heron/common/src/java:common-java",
-        "//heron/instance/src/java:instance-lib-java",
-        "@bazel_tools//third_party:junit4",
-    ] + heron_java_proto_files(),
-
+    deps = test_deps_files,
     data = ["//heron/config/src/yaml:config-internals-yaml"],
     size = "small",
 )
@@ -109,13 +81,7 @@ java_test(
         ["**/ConnectTest.java"] +
         ["**/resource/*.java"]
     ),
-    deps = [
-        "//heron/api/src/java:api-java",
-        "//heron/common/src/java:common-java",
-        "//heron/instance/src/java:instance-lib-java",
-        "@bazel_tools//third_party:junit4",
-    ] + heron_java_proto_files(),
-
+    deps = test_deps_files,
     data = ["//heron/config/src/yaml:config-internals-yaml"],
     size = "small",
 )
@@ -126,13 +92,7 @@ java_test(
         ["**/HandleReadTest.java"] +
         ["**/resource/*.java"]
     ),
-    deps = [
-        "//heron/api/src/java:api-java", 
-        "//heron/common/src/java:common-java",
-        "//heron/instance/src/java:instance-lib-java",
-        "@bazel_tools//third_party:junit4",
-    ] + heron_java_proto_files(),
-
+    deps = test_deps_files,
     data = ["//heron/config/src/yaml:config-internals-yaml"],
     size = "small",
 )
@@ -143,13 +103,7 @@ java_test(
         ["**/HandleWriteTest.java"] +
         ["**/resource/*.java"]
     ),
-    deps = [
-        "//heron/api/src/java:api-java",
-        "//heron/common/src/java:common-java",
-        "//heron/instance/src/java:instance-lib-java",
-        "@bazel_tools//third_party:junit4",
-    ] + heron_java_proto_files(),
-
+    deps = test_deps_files,
     data = ["//heron/config/src/yaml:config-internals-yaml"],
     size = "small",
 )
