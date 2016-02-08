@@ -3,10 +3,10 @@ package com.twitter.heron.metrics;
 import com.twitter.heron.api.metric.CountMetric;
 import com.twitter.heron.api.metric.MeanReducer;
 import com.twitter.heron.api.metric.ReducedMetric;
+import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.core.base.SingletonRegistry;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
 import com.twitter.heron.common.utils.misc.Constants;
-import com.twitter.heron.common.utils.misc.SystemConfig;
 
 /**
  * Gateway's metrics to be collected, mainly the status of the in & out stream queues.

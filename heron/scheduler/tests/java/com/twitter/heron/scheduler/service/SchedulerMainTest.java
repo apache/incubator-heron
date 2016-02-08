@@ -7,14 +7,15 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.scheduler.api.IConfigLoader;
-import com.twitter.heron.scheduler.api.IPackingAlgorithm;
-import com.twitter.heron.scheduler.api.IScheduler;
-import com.twitter.heron.scheduler.api.PackingPlan;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
+import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.packing.IPackingAlgorithm;
+import com.twitter.heron.spi.scheduler.IConfigLoader;
+import com.twitter.heron.spi.scheduler.IScheduler;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
+import com.twitter.heron.spi.util.Factory;
+
 import com.twitter.heron.scheduler.service.server.SchedulerServer;
 import com.twitter.heron.scheduler.util.DefaultConfigLoader;
-import com.twitter.heron.scheduler.util.Factory;
 import com.twitter.heron.scheduler.util.NetworkUtility;
 import com.twitter.heron.scheduler.util.Nullity;
 import com.twitter.heron.state.IStateManager;

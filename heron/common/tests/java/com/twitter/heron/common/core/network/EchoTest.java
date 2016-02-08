@@ -14,7 +14,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.twitter.heron.api.utils.Utils;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.core.base.NIOLooper;
 import com.twitter.heron.proto.testing.Tests;
 
@@ -162,7 +162,7 @@ public class EchoTest {
     threadsPool = Executors.newSingleThreadExecutor();
 
     // Get an available port
-    serverPort = Utils.getFreePort();
+    serverPort = SysUtils.getFreePort();
   }
 
   @After
