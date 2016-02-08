@@ -1,5 +1,5 @@
 
-load("/tools/rules/heron", "heron_java_proto_files")
+load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 java_test(
     name = "aurora-config-loader_unittest",

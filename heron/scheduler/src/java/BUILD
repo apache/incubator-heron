@@ -1,7 +1,7 @@
 package(default_visibility = ["//visibility:public"])
 
 load("/tools/rules/jarjar_rules", "jarjar_binary")
-load("/tools/rules/heron", "heron_java_proto_files")
+load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 java_library(
     name = 'scheduler-lib-java',
