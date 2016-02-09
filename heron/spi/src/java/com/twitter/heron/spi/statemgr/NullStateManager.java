@@ -1,4 +1,4 @@
-package com.twitter.heron.statemgr.dummy;
+package com.twitter.heron.spi.statemgr;
 
 import java.util.Map;
 
@@ -10,10 +10,11 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
+
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 
-public class DummyStateManager implements IStateManager {
+public class NullStateManager implements IStateManager {
   public SettableFuture<Boolean> brightFuture = SettableFuture.create();
 
   @Override

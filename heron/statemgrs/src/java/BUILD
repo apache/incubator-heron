@@ -8,9 +8,6 @@ common_deps_files = \
         "//3rdparty/guava:guava-java",
     ]
 
-dummy_deps_files = \
-    common_deps_files
-
 localfs_deps_files = \
     common_deps_files + [
         "//heron/common/src/java:basics-java",
@@ -28,14 +25,6 @@ java_library(
         ["**/*.java"],
     ),
     deps = zookeeper_deps_files, 
-)
-
-java_library(
-    name = "dummy-statemgr-java",
-    srcs = glob(
-        ["**/dummy/*.java"],
-    ),
-    deps = dummy_deps_files, 
 )
 
 java_library(

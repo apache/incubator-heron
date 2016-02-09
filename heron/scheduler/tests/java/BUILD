@@ -158,6 +158,7 @@ java_test(
     deps = [
         "//heron/api/src/java:api-java",
         "//heron/spi/src/java:scheduler-spi-java",
+        "//heron/spi/src/java:statemgr-spi-java",
         "//heron/scheduler/src/java:scheduler-lib-java",
         "//heron/statemgrs/src/java:statemgrs-java",
         "//3rdparty/guava:guava-java",
