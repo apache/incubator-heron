@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.core.base.Constants;
 import com.twitter.heron.common.core.base.SingletonRegistry;
 

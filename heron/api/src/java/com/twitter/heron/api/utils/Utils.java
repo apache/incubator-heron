@@ -152,21 +152,6 @@ public class Utils {
     return ret;
   }
 
-  /**
-   * Get available port.
-   *
-   * @return available port.
-   */
-  public static int getFreePort() {
-    try (ServerSocket socket = new ServerSocket(0)) {
-      int port = socket.getLocalPort();
-      socket.close();
-      return port;
-    } catch (IOException ioe) {
-      return -1;
-    }
-  }
-
   public static <S, T> T get(Map<S, T> m, S key, T defaultValue) {
     T ret = m.get(key);
     if (ret == null) {

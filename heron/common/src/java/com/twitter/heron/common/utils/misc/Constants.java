@@ -5,7 +5,7 @@ public class Constants {
    * Bean name for SingletonRegistry
    */
   public static final String PHYSICAL_PLAN_HELPER = "com.twitter.heron.utility.PhysicalPlanHelper";
-  public static final String HERON_SYSTEM_CONFIG = "com.twitter.heron.common.utils.misc.SystemConfig";
+  public static final String HERON_SYSTEM_CONFIG = "com.twitter.heron.common.config.SystemConfig";
 
   /**
    * Thread Name Constants
