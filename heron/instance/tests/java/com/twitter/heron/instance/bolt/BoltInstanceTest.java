@@ -17,7 +17,7 @@ import org.junit.Test;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.serializer.KryoSerializer;
-import com.twitter.heron.api.utils.Utils;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.core.base.Communicator;
 import com.twitter.heron.common.core.base.SingletonRegistry;
 import com.twitter.heron.common.core.base.SlaveLooper;
@@ -184,11 +184,11 @@ public class BoltInstanceTest {
       if (tupleExecutedCount.intValue() == 10) {
         break;
       }
-      Utils.sleep(Constants.RETRY_INTERVAL_MS);
+      SysUtils.sleep(Constants.RETRY_INTERVAL_MS);
     }
 
     // Wait the bolt's finishing
-    Utils.sleep(Constants.TEST_WAIT_TIME_MS);
+    SysUtils.sleep(Constants.TEST_WAIT_TIME_MS);
     Assert.assertEquals(10, tupleExecutedCount.intValue());
     Assert.assertEquals(5, ackCount.intValue());
     Assert.assertEquals(5, failCount.intValue());

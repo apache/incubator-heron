@@ -3,9 +3,10 @@ package com.twitter.heron.scheduler.util;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import com.twitter.heron.scheduler.api.Constants;
-import com.twitter.heron.scheduler.api.IUploader;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
+
+import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
+import com.twitter.heron.spi.uploader.IUploader;
 
 public class FileSystemUploader implements IUploader {
   private volatile LaunchContext context;

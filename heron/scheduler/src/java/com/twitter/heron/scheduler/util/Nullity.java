@@ -4,12 +4,13 @@ import java.util.HashMap;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
-import com.twitter.heron.scheduler.api.ILauncher;
-import com.twitter.heron.scheduler.api.IPackingAlgorithm;
-import com.twitter.heron.scheduler.api.IScheduler;
-import com.twitter.heron.scheduler.api.IUploader;
-import com.twitter.heron.scheduler.api.PackingPlan;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
+
+import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.packing.IPackingAlgorithm;
+import com.twitter.heron.spi.scheduler.ILauncher;
+import com.twitter.heron.spi.scheduler.IScheduler;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
+import com.twitter.heron.spi.uploader.IUploader;
 
 
 /**

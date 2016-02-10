@@ -12,8 +12,8 @@ import com.twitter.heron.common.core.network.StatusCode;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 
 /**
- * TMasterClient would try to connect to TMaster and then send TopologyMaster.PublishMetrics continuously.
- * Notice that TMaster would not send registerRequest or wait for registerResponse.
+ * TMasterClient connects to TMaster and then send TopologyMaster.PublishMetrics continuously.
+ * Note that TMaster will not send registerRequest or wait for registerResponse.
  */
 public class TMasterClient extends HeronClient implements Runnable {
   private static final Logger LOG = Logger.getLogger(TMasterClient.class.getName());

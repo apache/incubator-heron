@@ -6,8 +6,8 @@ import java.util.concurrent.Executors;
 
 import com.sun.net.httpserver.HttpServer;
 
-import com.twitter.heron.scheduler.api.IScheduler;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
+import com.twitter.heron.spi.scheduler.IScheduler;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
 import com.twitter.heron.scheduler.util.NetworkUtility;
 
 public class SchedulerServer {

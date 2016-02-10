@@ -12,7 +12,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.metric.MultiCountMetric;
-import com.twitter.heron.api.utils.Utils;
+import com.twitter.heron.common.basics.TypeUtils;
+import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.core.base.Communicator;
 import com.twitter.heron.common.core.base.NIOLooper;
 import com.twitter.heron.common.core.base.SingletonRegistry;
@@ -22,10 +23,9 @@ import com.twitter.heron.common.utils.metrics.JVMMetrics;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
 import com.twitter.heron.common.utils.misc.Constants;
 import com.twitter.heron.common.utils.misc.LoggingHelper;
-import com.twitter.heron.common.utils.misc.SystemConfig;
-import com.twitter.heron.metricsmgr.api.metrics.MetricsRecord;
-import com.twitter.heron.metricsmgr.api.sink.IMetricsSink;
-import com.twitter.heron.metricsmgr.api.sink.SinkContext;
+import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
+import com.twitter.heron.spi.metricsmgr.sink.IMetricsSink;
+import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
 import com.twitter.heron.metricsmgr.executor.SinkExecutor;
 import com.twitter.heron.metricsmgr.sink.SinkContextImpl;
 import com.twitter.heron.proto.system.Metrics;
@@ -222,7 +222,7 @@ public class MetricsManager {
       // Supply with default value is config is null
       sinksRetryAttempts.put(sinkId,
           restartAttempts == null ?
-              MetricsSinksConfig.DEFAULT_SINK_RESTART_ATTEMPTS : Utils.getInt(restartAttempts));
+              MetricsSinksConfig.DEFAULT_SINK_RESTART_ATTEMPTS : TypeUtils.getInt(restartAttempts));
 
       // Update the list of Communicator in Metrics Manager Server
       metricsManagerServer.addSinkCommunicator(sinkExecutor.getCommunicator());

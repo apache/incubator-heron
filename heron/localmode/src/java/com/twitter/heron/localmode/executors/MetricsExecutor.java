@@ -4,12 +4,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.core.base.Communicator;
 import com.twitter.heron.common.core.base.SlaveLooper;
 import com.twitter.heron.common.core.base.WakeableLooper;
 import com.twitter.heron.common.utils.metrics.JVMMetrics;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
-import com.twitter.heron.common.utils.misc.SystemConfig;
 import com.twitter.heron.proto.system.Metrics;
 
 /**

@@ -5,7 +5,7 @@ java_test(
     ),
     deps = [
         "//heron/api/src/java:api-java",
-        "//heron/common/src/java:base-lib-java",
+        "//heron/common/src/java:base-java",
         "//heron/state/src/java:state-java",
         "//heron/proto:proto_execution_state_java",
         "//heron/proto:proto_scheduler_java",

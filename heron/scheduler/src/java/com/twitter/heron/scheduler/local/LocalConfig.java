@@ -1,7 +1,7 @@
 package com.twitter.heron.scheduler.local;
 
-import com.twitter.heron.scheduler.api.Constants;
-import com.twitter.heron.scheduler.api.context.Context;
+import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.scheduler.context.Context;
 import com.twitter.heron.state.FileSystemStateManager;
 
 public class LocalConfig {

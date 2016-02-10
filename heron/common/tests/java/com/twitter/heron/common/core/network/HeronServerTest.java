@@ -15,7 +15,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.twitter.heron.api.utils.Utils;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.core.base.NIOLooper;
 import com.twitter.heron.proto.testing.Tests;
 
@@ -194,7 +194,7 @@ public class HeronServerTest {
   @Before
   public void before() throws Exception {
     // Get an available port
-    serverPort = Utils.getFreePort();
+    serverPort = SysUtils.getFreePort();
 
     serverLooper = new NIOLooper();
     heronServer = new SimpleHeronServer(serverLooper, SERVER_HOST, serverPort);
