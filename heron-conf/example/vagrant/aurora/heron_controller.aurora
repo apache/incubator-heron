@@ -19,7 +19,7 @@ heron_controller_process = Process(
 # --- tasks ---
 heron_task = SequentialTask(
     name = "setup_and_run",
-    resources = Resources(cpu = 1, ram = 100*MB, disk = 1*GB),
+    resources = Resources(cpu = 1, ram = 250*MB, disk = 1*GB),
     processes = [fetch_heron_system, heron_controller_process],
 )
 

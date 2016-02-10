@@ -6,7 +6,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.twitter.heron.scheduler.api.Constants;
+import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.scheduler.util.AbstractPropertiesConfigLoader;
 import com.twitter.heron.scheduler.util.ConfigLoaderUtils;
 import com.twitter.heron.scheduler.util.PropertiesFileConfigLoader;

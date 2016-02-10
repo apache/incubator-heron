@@ -2,6 +2,7 @@ java_test(
     name = "aurora_config_loader_unittest",
     srcs = glob(["**/aurora/AuroraConfigLoaderTest.java"]),
     deps = [
+        "//heron/spi/src/java:scheduler-spi-java",
         "//heron/scheduler/src/java:scheduler-lib-java",
         "//heron/scheduler/src/java:heron-aurora-scheduler-lib",
         "//heron/scheduler/src/java:scheduler-twitter-lib-java",
@@ -19,6 +20,7 @@ java_test(
     ),
     deps = [
         "//heron/api/src/java:api-java",
+        "//heron/spi/src/java:scheduler-spi-java",
         "//heron/scheduler/src/java:scheduler-lib-java",
         "//heron/scheduler/src/java:scheduler-twitter-lib-java",
         "//heron/scheduler/src/java:heron-aurora-scheduler-lib",
@@ -40,6 +42,7 @@ java_test(
     ),
     deps = [
         "//heron/api/src/java:api-java",
+        "//heron/spi/src/java:scheduler-spi-java",
         "//heron/scheduler/src/java:scheduler-lib-java",
         "//heron/scheduler/src/java:scheduler-twitter-lib-java",
         "//heron/scheduler/src/java:heron-aurora-scheduler-lib",
@@ -59,6 +62,7 @@ java_test(
     ),
     deps = [
         "//heron/api/src/java:api-java",
+        "//heron/spi/src/java:scheduler-spi-java",
         "//heron/scheduler/src/java:scheduler-lib-java",
         "//heron/scheduler/src/java:scheduler-twitter-lib-java",
         "//heron/scheduler/src/java:heron-aurora-scheduler-lib",
@@ -81,7 +85,8 @@ java_test(
     ),
     deps = [
         "//heron/api/src/java:api-java",
-        "//heron/common/src/java:base-lib-java",
+        "//heron/spi/src/java:scheduler-spi-java",
+        "//heron/common/src/java:base-java",
         "//heron/scheduler/src/java:scheduler-lib-java",
         "//heron/scheduler/src/java:heron-local-scheduler-lib",
         "//heron/state/src/java:state-java",
@@ -102,7 +107,8 @@ java_test(
     ),
     deps = [
         "//heron/api/src/java:api-java",
-        "//heron/common/src/java:base-lib-java",
+        "//heron/spi/src/java:scheduler-spi-java",
+        "//heron/common/src/java:base-java",
         "//heron/scheduler/src/java:scheduler-lib-java",
         "//heron/scheduler/src/java:heron-local-scheduler-lib",
         "//heron/state/src/java:state-java",
@@ -121,6 +127,7 @@ java_test(
     ),
     deps = [
         "//heron/api/src/java:api-java",
+        "//heron/spi/src/java:scheduler-spi-java",
         "//heron/scheduler/src/java:scheduler-lib-java",
         "//heron/scheduler/src/java:heron-local-scheduler-lib",
         "//heron/state/src/java:state-java",
@@ -148,6 +155,7 @@ java_test(
     ),
     deps = [
         "//heron/api/src/java:api-java",
+        "//heron/spi/src/java:scheduler-spi-java",
         "//heron/scheduler/src/java:scheduler-lib-java",
         "//heron/state/src/java:state-java",
         "//heron/proto:proto_execution_state_java",
@@ -163,6 +171,7 @@ java_test(
     srcs = glob(["**/service/SchedulerMainTest.java"]),
     deps = [
         "//heron/api/src/java:api-java",
+        "//heron/spi/src/java:scheduler-spi-java",
         "//heron/scheduler/src/java:scheduler-lib-java",
         "//heron/state/src/java:state-java",
         "//3rdparty/powermock:powermock-java",
@@ -177,6 +186,7 @@ java_test(
     srcs = glob(["**/service/SubmitterMainTest.java"]),
     deps = [
         "//heron/api/src/java:api-java",
+        "//heron/spi/src/java:scheduler-spi-java",
         "//heron/scheduler/src/java:scheduler-lib-java",
         "//heron/state/src/java:state-java",
         "//heron/proto:proto_execution_state_java",
@@ -197,6 +207,7 @@ java_test(
     deps = [
         "//heron/api/src/java:api-java",
         "//heron/scheduler/src/java:scheduler-lib-java",
+        "//heron/spi/src/java:scheduler-spi-java",
         "@bazel_tools//third_party:mockito",
         "@bazel_tools//third_party:junit4",
     ],
@@ -211,6 +222,7 @@ java_test(
     ),
     deps = [
         "//heron/api/src/java:api-java",
+        "//heron/spi/src/java:scheduler-spi-java",
         "//heron/scheduler/src/java:scheduler-lib-java",
         "//heron/state/src/java:state-java",
         "@bazel_tools//third_party:mockito",
@@ -234,6 +246,7 @@ java_test(
     srcs = glob(["**/util/DefaultConfigLoaderTest.java"]),
     deps = [
         "//heron/scheduler/src/java:scheduler-lib-java",
+        "//heron/spi/src/java:scheduler-spi-java",
         "@bazel_tools//third_party:junit4",
     ],
     size = "small",
@@ -260,6 +273,7 @@ java_test(
     deps = [
         "//heron/api/src/java:api-java",
         "//heron/scheduler/src/java:scheduler-lib-java",
+        "//heron/spi/src/java:scheduler-spi-java",
         "//heron/state/src/java:state-java",
         "@bazel_tools//third_party:mockito",
         "@bazel_tools//third_party:junit4",
@@ -282,6 +296,7 @@ java_test(
     srcs = glob(["**/util/TopologyUtilityTest.java"]),
     deps = [
         "//heron/api/src/java:api-java",
+        "//heron/spi/src/java:scheduler-spi-java",
         "//heron/scheduler/src/java:scheduler-lib-java",
         "//heron/proto:proto-java",
         "//3rdparty/protobuf:protobuf-java",

@@ -11,13 +11,15 @@ import javax.xml.bind.DatatypeConverter;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.scheduler.api.IConfigLoader;
-import com.twitter.heron.scheduler.api.IPackingAlgorithm;
-import com.twitter.heron.scheduler.api.IScheduler;
-import com.twitter.heron.scheduler.api.PackingPlan;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
+
+import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.packing.IPackingAlgorithm;
+import com.twitter.heron.spi.scheduler.IConfigLoader;
+import com.twitter.heron.spi.scheduler.IScheduler;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
+import com.twitter.heron.spi.util.Factory;
+
 import com.twitter.heron.scheduler.service.server.SchedulerServer;
-import com.twitter.heron.scheduler.util.Factory;
 import com.twitter.heron.scheduler.util.TopologyUtility;
 
 /**
@@ -63,7 +65,7 @@ public class SchedulerMain {
     // The topology def file should locate in root of working directory
     String topologyDefnFile = TopologyUtility.lookUpTopologyDefnFile(".", topologyName);
     runScheduler(schedulerClass, schedulerConfigLoader, schedulerConfigFile,
-        schedulerServerPort, configOverride, Factory.getTopology(topologyDefnFile));
+        schedulerServerPort, configOverride, TopologyUtility.getTopology(topologyDefnFile));
   }
 
   private static HealthCheckRunner makeHealthCheckRunner(IScheduler scheduler) {
