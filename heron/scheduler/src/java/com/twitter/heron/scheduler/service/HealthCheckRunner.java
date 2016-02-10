@@ -1,6 +1,6 @@
 package com.twitter.heron.scheduler.service;
 
-import com.twitter.heron.scheduler.api.IScheduler;
+import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.scheduler.util.NetworkUtility;
 
 import java.util.concurrent.TimeUnit;

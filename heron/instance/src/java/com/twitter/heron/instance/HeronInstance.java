@@ -11,13 +11,13 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.core.base.Communicator;
 import com.twitter.heron.common.core.base.NIOLooper;
 import com.twitter.heron.common.core.base.SingletonRegistry;
 import com.twitter.heron.common.core.base.SlaveLooper;
 import com.twitter.heron.common.utils.misc.Constants;
 import com.twitter.heron.common.utils.misc.LoggingHelper;
-import com.twitter.heron.common.utils.misc.SystemConfig;
 import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.proto.system.PhysicalPlans;

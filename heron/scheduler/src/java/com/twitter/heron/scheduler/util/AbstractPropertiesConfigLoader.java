@@ -3,8 +3,8 @@ package com.twitter.heron.scheduler.util;
 import java.util.Map;
 import java.util.Properties;
 
-import com.twitter.heron.scheduler.api.Constants;
-import com.twitter.heron.scheduler.api.IConfigLoader;
+import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.scheduler.IConfigLoader;
 
 /**
  * Loads config in the Java properties file format.
