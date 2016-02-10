@@ -18,11 +18,13 @@ import java.util.logging.Logger;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
-import com.twitter.heron.scheduler.api.Constants;
-import com.twitter.heron.scheduler.api.IScheduler;
-import com.twitter.heron.scheduler.api.PackingPlan;
-import com.twitter.heron.scheduler.api.SchedulerStateManagerAdaptor;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
+
+import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.scheduler.IScheduler;
+import com.twitter.heron.spi.scheduler.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
+
 import com.twitter.heron.scheduler.mesos.framework.config.FrameworkConfiguration;
 import com.twitter.heron.scheduler.mesos.framework.driver.MesosDriverFactory;
 import com.twitter.heron.scheduler.mesos.framework.driver.MesosJobFramework;
@@ -31,6 +33,7 @@ import com.twitter.heron.scheduler.mesos.framework.jobs.BaseJob;
 import com.twitter.heron.scheduler.mesos.framework.jobs.JobScheduler;
 import com.twitter.heron.scheduler.mesos.framework.state.PersistenceStore;
 import com.twitter.heron.scheduler.mesos.framework.state.ZkPersistenceStore;
+
 import com.twitter.heron.scheduler.util.NetworkUtility;
 import com.twitter.heron.scheduler.util.ShellUtility;
 
