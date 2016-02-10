@@ -11,15 +11,15 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.api.metric.MultiCountMetric;
-import com.twitter.heron.api.utils.Utils;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.core.base.Communicator;
 import com.twitter.heron.common.core.base.NIOLooper;
 import com.twitter.heron.common.core.network.HeronClient;
 import com.twitter.heron.common.core.network.HeronSocketOptions;
 import com.twitter.heron.common.core.network.StatusCode;
-import com.twitter.heron.metricsmgr.api.metrics.ExceptionInfo;
-import com.twitter.heron.metricsmgr.api.metrics.MetricsInfo;
-import com.twitter.heron.metricsmgr.api.metrics.MetricsRecord;
+import com.twitter.heron.spi.metricsmgr.metrics.ExceptionInfo;
+import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
+import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.system.Metrics;
 
@@ -139,7 +139,7 @@ public class MetricsManagerServerTest {
   @Before
   public void before() throws Exception {
     // Get an available port
-    serverPort = Utils.getFreePort();
+    serverPort = SysUtils.getFreePort();
 
     threadsPool = Executors.newFixedThreadPool(2);
 

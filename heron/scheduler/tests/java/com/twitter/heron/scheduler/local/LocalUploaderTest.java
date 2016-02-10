@@ -16,7 +16,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.core.base.FileUtility;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
 import com.twitter.heron.scheduler.util.DefaultConfigLoader;
 import com.twitter.heron.scheduler.util.TopologyUtilityTest;
 

@@ -3,8 +3,8 @@ package com.twitter.heron.scheduler.local;
 import java.util.logging.Logger;
 
 import com.twitter.heron.common.core.base.FileUtility;
-import com.twitter.heron.scheduler.api.IUploader;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
+import com.twitter.heron.spi.uploader.IUploader;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
 
 public class LocalUploader implements IUploader {
   private static final Logger LOG = Logger.getLogger(LocalUploader.class.getName());
