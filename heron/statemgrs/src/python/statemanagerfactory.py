@@ -4,10 +4,10 @@ state managers based on a conf file.
 Returns these state managers.
 """
 
-from heron.state.src.python.config import Config
-from heron.state.src.python.filestatemanager import FileStateManager
-from heron.state.src.python.log import Log as LOG
-from heron.state.src.python.zkstatemanager import ZkStateManager
+from heron.statemgrs.src.python.config import Config
+from heron.statemgrs.src.python.filestatemanager import FileStateManager
+from heron.statemgrs.src.python.log import Log as LOG
+from heron.statemgrs.src.python.zkstatemanager import ZkStateManager
 
 def get_all_state_managers(conf):
   """

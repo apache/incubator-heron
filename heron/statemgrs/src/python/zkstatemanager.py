@@ -2,9 +2,9 @@ import os
 import sys
 import traceback
 
-from heron.state.src.python.log import Log as LOG
-from heron.state.src.python.statemanager import StateManager
-from heron.state.src.python.stateexceptions import StateException
+from heron.statemgrs.src.python.log import Log as LOG
+from heron.statemgrs.src.python.statemanager import StateManager
+from heron.statemgrs.src.python.stateexceptions import StateException
 
 from kazoo.client import KazooClient
 from kazoo.exceptions import NodeExistsError

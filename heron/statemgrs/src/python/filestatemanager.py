@@ -6,8 +6,8 @@ import traceback
 
 from collections import defaultdict
 
-from heron.state.src.python.statemanager import StateManager
-from heron.state.src.python.stateexceptions import StateException
+from heron.statemgrs.src.python.statemanager import StateManager
+from heron.statemgrs.src.python.stateexceptions import StateException
 
 from heron.proto.execution_state_pb2 import ExecutionState
 from heron.proto.physical_plan_pb2 import PhysicalPlan
