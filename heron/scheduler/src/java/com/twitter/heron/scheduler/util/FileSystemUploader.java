@@ -21,11 +21,11 @@ public class FileSystemUploader implements IUploader {
   }
 
   private String getUserTopologyFilePath() {
-    String dc = context.getPropertyWithException(Constants.DC);
+    String cluster = context.getPropertyWithException(Constants.CLUSTER);
     String role = context.getPropertyWithException(Constants.ROLE);
     String environ = context.getPropertyWithException(Constants.ENVIRON);
     String toplogyName = context.getTopology().getName();
-    return String.format("%s/%s/%s/%s/%s", getUploaderFileSystemPath(), dc, role, environ, toplogyName);
+    return String.format("%s/%s/%s/%s/%s", getUploaderFileSystemPath(), cluster, role, environ, toplogyName);
   }
 
   @Override

@@ -31,9 +31,9 @@ public class AuroraConfigLoader extends AbstractPropertiesConfigLoader {
     if (baseLoader.load(schedulerConfFile.toString(), configOverride)) {
       Properties baseProperties = baseLoader.getProperties();
       Properties bindProperties = new Properties();
-      String dc = baseProperties.getProperty(Constants.DC);
+      String cluster = baseProperties.getProperty(Constants.CLUSTER);
 
-      if (ConfigLoaderUtils.loadPropertiesFile(baseProperties, getClusterConfFile(configPath, dc).toString()) &&
+      if (ConfigLoaderUtils.loadPropertiesFile(baseProperties, getClusterConfFile(configPath, cluster).toString()) &&
           ConfigLoaderUtils.applyConfigPropertyOverride(baseProperties) &&
           ConfigLoaderUtils.loadPropertiesFile(bindProperties, bindConfFile.toString()) &&
           addAuroraBindProperties(baseProperties, bindProperties)) {
