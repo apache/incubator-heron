@@ -19,23 +19,22 @@ public class AuroraConfigLoaderTest {
 
   @Test
   public void testAuroraOverrides() throws Exception {
-    String override = "dc=dc role=role environ=environ";
+    String override = "cluster=cluster role=role environ=environ";
     AuroraConfigLoader configLoader = AuroraConfigLoader.class.newInstance();
     // Disables version check
     configLoader.properties.setProperty(Constants.HERON_RELEASE_PACKAGE_NAME, "test");
     configLoader.applyConfigOverride(override);
-    Assert.assertEquals("dc", configLoader.properties.getProperty(Constants.DC));
-    Assert.assertEquals("role", configLoader.properties.getProperty(Constants.ROLE));
+    Assert.assertEquals("cluster", configLoader.properties.getProperty(Constants.CLUSTER));
     Assert.assertEquals("environ", configLoader.properties.getProperty(Constants.ENVIRON));
   }
 
   @Test
   public void testAuroraOverridesWithDefaultOverrides() throws Exception {
-    String override = "dc=dc role=role environ=environ key1=value1 key2=value2";
+    String override = "cluster=cluster role=role environ=environ key1=value1 key2=value2";
     AuroraConfigLoader configLoader = AuroraConfigLoader.class.newInstance();
     configLoader.properties.setProperty(Constants.HERON_RELEASE_PACKAGE_NAME, "test");
     configLoader.applyConfigOverride(override);
-    Assert.assertEquals("dc", configLoader.properties.getProperty(Constants.DC));
+    Assert.assertEquals("cluster", configLoader.properties.getProperty(Constants.CLUSTER));
     Assert.assertEquals("role", configLoader.properties.getProperty(Constants.ROLE));
     Assert.assertEquals("environ", configLoader.properties.getProperty(Constants.ENVIRON));
     Assert.assertEquals("value1", configLoader.properties.getProperty("key1"));
@@ -44,7 +43,7 @@ public class AuroraConfigLoaderTest {
 
   @Test
   public void testAuroraRespectRespectHeronVersion() throws Exception {
-    StringBuilder override = new StringBuilder("dc=dc role=role environ=environ");
+    StringBuilder override = new StringBuilder("cluster=cluster role=role environ=environ");
 
     // Add required heron package defaults
     addConfig(override, Constants.HERON_RELEASE_PACKAGE_NAME, "testPackage");

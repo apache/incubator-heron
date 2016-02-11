@@ -16,7 +16,7 @@ import com.twitter.heron.spi.scheduler.context.RuntimeManagerContext;
 import com.twitter.heron.scheduler.util.TopologyUtilityTest;
 
 public class AuroraTopologyRuntimeManagerTest {
-  private static final String dc = "dc";
+  private static final String cluster = "cluster";
   private static final String environ = "environ";
   private static final String role = "role";
   private static final String tmasterHost = "tmaster.host";
@@ -27,7 +27,7 @@ public class AuroraTopologyRuntimeManagerTest {
   AuroraConfigLoader createRequiredConfig() throws Exception {
     AuroraConfigLoader schedulerConfig = AuroraConfigLoader.class.newInstance();
     schedulerConfig.addDefaultProperties();
-    schedulerConfig.properties.setProperty(Constants.DC, dc);
+    schedulerConfig.properties.setProperty(Constants.CLUSTER, cluster);
     schedulerConfig.properties.setProperty(Constants.ROLE, role);
     schedulerConfig.properties.setProperty(Constants.ENVIRON, environ);
     schedulerConfig.properties.setProperty(Constants.HERON_RELEASE_PACKAGE_ROLE, "me");
@@ -41,7 +41,7 @@ public class AuroraTopologyRuntimeManagerTest {
   private ExecutionEnvironment.ExecutionState dummyExecutionState() {
     return ExecutionEnvironment.ExecutionState.newBuilder()
         .setRole(role)
-        .setDc(dc)
+        .setCluster(cluster)
         .setEnviron(environ)
         .setTopologyId(topologyName)
         .setTopologyName(topologyName)
