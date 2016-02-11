@@ -18,7 +18,6 @@ public class SystemConfig {
   private Map config = new HashMap<String, Object>();
 
   public SystemConfig() {
-    super();
   }
 
   public SystemConfig(String configFile) {

@@ -10,7 +10,9 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 
 /**
- * Loads config file in Java properties file format.
+ * Loads config file in Yaml properties file format based 
+ * on cluster and config path
+ *
  */
 public final class HeronConfigReader extends ConfigReader {
   private static final Logger LOG = Logger.getLogger(ConfigReader.class.getName());
