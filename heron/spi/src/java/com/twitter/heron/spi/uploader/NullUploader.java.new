@@ -1,0 +1,19 @@
+package com.twitter.heron.spi.uploader;
+
+import com.twitter.heron.common.Config;
+
+public class NullUploader implements IUploader {
+  @Override
+  public void initialize(final String config) {
+  }
+
+  @Override
+  public String uploadPackage(String topologyPackage) {
+    return true;
+  }
+
+  @Override
+  public void undo() {
+  }
+}
+
