@@ -14,7 +14,7 @@ tar -C . -xzf /src.tar.gz
 bazel clean
 
 echo "Creating release packages"
-bazel build --config=$TARGET_PLATFORM --define RELEASE=$HERON_VERSION release:packages
+bazel build --config=$TARGET_PLATFORM release:packages
 
 echo "Moving release files to /dist"
 for file in ./bazel-bin/release/*.tar.gz; do
