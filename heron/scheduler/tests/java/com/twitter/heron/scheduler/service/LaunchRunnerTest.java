@@ -112,7 +112,7 @@ public class LaunchRunnerTest {
   @Before
   public void setUp() throws Exception {
     uploader = mock(IUploader.class);
-    config = mock(IConfigLoader.class);
+    config = createConfig();
     packingAlgorithm = mock(IPackingAlgorithm.class);
     launcher = mock(ILauncher.class);
     stateManager = mock(SchedulerStateManagerAdaptor.class);

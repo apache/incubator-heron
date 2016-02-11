@@ -32,6 +32,8 @@ public class AuroraLauncherTest {
         Long.toString(1 * Constants.GB));
     schedulerConfig.properties.setProperty(RoundRobinPacking.STMGR_RAM_DEFAULT,
         Long.toString(1 * Constants.GB));
+    String stateMgrClass = "com.twitter.heron.spi.statemgr.NullStateManager";
+    schedulerConfig.properties.setProperty(Constants.STATE_MANAGER_CLASS, stateMgrClass);
     return schedulerConfig;
   }
 

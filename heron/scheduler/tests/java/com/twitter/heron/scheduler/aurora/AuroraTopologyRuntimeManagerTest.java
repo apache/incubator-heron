@@ -22,6 +22,7 @@ public class AuroraTopologyRuntimeManagerTest {
   private static final String tmasterHost = "tmaster.host";
   private static final int tmasterControlPort = 123;
   private static final String topologyName = "topology";
+  private static final String stateMgrClass = "com.twitter.heron.spi.statemgr.NullStateManager";
 
   AuroraConfigLoader createRequiredConfig() throws Exception {
     AuroraConfigLoader schedulerConfig = AuroraConfigLoader.class.newInstance();
@@ -33,6 +34,7 @@ public class AuroraTopologyRuntimeManagerTest {
     schedulerConfig.properties.getProperty(Constants.HERON_RELEASE_PACKAGE_NAME, "some-pkg");
     schedulerConfig.properties.getProperty(Constants.HERON_RELEASE_PACKAGE_VERSION, "live");
     schedulerConfig.properties.setProperty(Constants.HERON_UPLOADER_VERSION, "1");
+    schedulerConfig.properties.setProperty(Constants.STATE_MANAGER_CLASS, stateMgrClass);
     return schedulerConfig;
   }
 
