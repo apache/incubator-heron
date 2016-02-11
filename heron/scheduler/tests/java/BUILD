@@ -280,6 +280,7 @@ java_test(
     deps = [
         "//heron/api/src/java:api-java",
         "//heron/scheduler/src/java:scheduler-lib-java",
+        "//heron/spi/src/java:statemgr-spi-java",
         "//heron/spi/src/java:scheduler-spi-java",
         "//heron/statemgrs/src/java:statemgrs-java",
         "@bazel_tools//third_party:mockito",
