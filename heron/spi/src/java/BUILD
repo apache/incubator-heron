@@ -1,6 +1,7 @@
 package(default_visibility = ["//visibility:public"])
 
 load("/tools/rules/jarjar_rules", "jarjar_binary")
+load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 java_library(
     name = 'scheduler-spi-java',
@@ -12,7 +13,7 @@ java_library(
         "**/spi/util/**/*.java",
     ]),
     deps = [
-        "//heron/state/src/java:state-java",
+        ":statemgr-spi-java",
         "//heron/proto:proto_common_java",
         "//heron/proto:proto_execution_state_java",
         "//heron/proto:proto_scheduler_java",
@@ -29,4 +30,17 @@ java_library(
     srcs = glob(
         ["**/spi/metricsmgr/**/*.java"],
     ),
+)
+
+statemgr_deps_files = \
+    heron_java_proto_files() + [
+        "//3rdparty/guava:guava-java",
+    ]
+
+java_library(
+    name='statemgr-spi-java',
+    srcs = glob(
+        ["**/spi/statemgr/**/*.java"],
+    ),
+    deps = statemgr_deps_files,
 )

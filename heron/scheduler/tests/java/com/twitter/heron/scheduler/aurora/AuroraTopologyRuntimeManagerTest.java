@@ -16,30 +16,32 @@ import com.twitter.heron.spi.scheduler.context.RuntimeManagerContext;
 import com.twitter.heron.scheduler.util.TopologyUtilityTest;
 
 public class AuroraTopologyRuntimeManagerTest {
-  private static final String dc = "dc";
+  private static final String cluster = "cluster";
   private static final String environ = "environ";
   private static final String role = "role";
   private static final String tmasterHost = "tmaster.host";
   private static final int tmasterControlPort = 123;
   private static final String topologyName = "topology";
+  private static final String stateMgrClass = "com.twitter.heron.spi.statemgr.NullStateManager";
 
   AuroraConfigLoader createRequiredConfig() throws Exception {
     AuroraConfigLoader schedulerConfig = AuroraConfigLoader.class.newInstance();
     schedulerConfig.addDefaultProperties();
-    schedulerConfig.properties.setProperty(Constants.DC, dc);
+    schedulerConfig.properties.setProperty(Constants.CLUSTER, cluster);
     schedulerConfig.properties.setProperty(Constants.ROLE, role);
     schedulerConfig.properties.setProperty(Constants.ENVIRON, environ);
     schedulerConfig.properties.setProperty(Constants.HERON_RELEASE_PACKAGE_ROLE, "me");
     schedulerConfig.properties.getProperty(Constants.HERON_RELEASE_PACKAGE_NAME, "some-pkg");
     schedulerConfig.properties.getProperty(Constants.HERON_RELEASE_PACKAGE_VERSION, "live");
     schedulerConfig.properties.setProperty(Constants.HERON_UPLOADER_VERSION, "1");
+    schedulerConfig.properties.setProperty(Constants.STATE_MANAGER_CLASS, stateMgrClass);
     return schedulerConfig;
   }
 
   private ExecutionEnvironment.ExecutionState dummyExecutionState() {
     return ExecutionEnvironment.ExecutionState.newBuilder()
         .setRole(role)
-        .setDc(dc)
+        .setCluster(cluster)
         .setEnviron(environ)
         .setTopologyId(topologyName)
         .setTopologyName(topologyName)

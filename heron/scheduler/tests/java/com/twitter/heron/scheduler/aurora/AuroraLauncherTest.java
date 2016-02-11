@@ -18,7 +18,7 @@ public class AuroraLauncherTest {
   DefaultConfigLoader createRequiredConfig() throws Exception {
     DefaultConfigLoader schedulerConfig = DefaultConfigLoader.class.newInstance();
     schedulerConfig.addDefaultProperties();
-    schedulerConfig.properties.setProperty(Constants.DC, "dc");
+    schedulerConfig.properties.setProperty(Constants.CLUSTER, "cluster");
     schedulerConfig.properties.setProperty(Constants.ROLE, "me");
     schedulerConfig.properties.setProperty(Constants.ENVIRON, "environ");
     schedulerConfig.properties.setProperty(Constants.HERON_RELEASE_PACKAGE_ROLE, "me");
@@ -32,6 +32,8 @@ public class AuroraLauncherTest {
         Long.toString(1 * Constants.GB));
     schedulerConfig.properties.setProperty(RoundRobinPacking.STMGR_RAM_DEFAULT,
         Long.toString(1 * Constants.GB));
+    String stateMgrClass = "com.twitter.heron.spi.statemgr.NullStateManager";
+    schedulerConfig.properties.setProperty(Constants.STATE_MANAGER_CLASS, stateMgrClass);
     return schedulerConfig;
   }
 

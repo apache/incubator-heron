@@ -1,6 +1,6 @@
 package com.twitter.heron.localmode.instance;
 
-import com.twitter.heron.common.core.base.Communicator;
+import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.proto.system.HeronTuples;
 
 /**

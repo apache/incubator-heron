@@ -13,8 +13,8 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.scheduler.util.NetworkUtility;
 import com.twitter.heron.scheduler.util.ShellUtility;
-import com.twitter.heron.state.WatchCallback;
-import com.twitter.heron.state.curator.CuratorStateManager;
+import com.twitter.heron.spi.statemgr.WatchCallback;
+import com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager;
 
 /**
  * This StateManager is only used for Twitter Aurora environment.

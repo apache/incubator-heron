@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.api.metric.MultiCountMetric;
-import com.twitter.heron.common.core.base.SingletonRegistry;
+import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
 import com.twitter.heron.metricsmgr.sink.SinkContextImpl;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
