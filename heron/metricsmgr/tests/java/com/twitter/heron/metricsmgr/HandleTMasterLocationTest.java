@@ -17,11 +17,11 @@ import org.mockito.Mockito;
 
 import com.twitter.heron.api.metric.MultiCountMetric;
 import com.twitter.heron.common.basics.SysUtils;
-import com.twitter.heron.common.core.base.NIOLooper;
-import com.twitter.heron.common.core.network.HeronClient;
-import com.twitter.heron.common.core.network.HeronSocketOptions;
-import com.twitter.heron.common.core.network.StatusCode;
-import com.twitter.heron.common.core.base.SingletonRegistry;
+import com.twitter.heron.common.basics.NIOLooper;
+import com.twitter.heron.common.basics.SingletonRegistry;
+import com.twitter.heron.common.network.HeronClient;
+import com.twitter.heron.common.network.HeronSocketOptions;
+import com.twitter.heron.common.network.StatusCode;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.proto.tmaster.TopologyMaster;

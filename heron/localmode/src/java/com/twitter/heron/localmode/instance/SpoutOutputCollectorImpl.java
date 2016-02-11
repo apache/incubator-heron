@@ -14,7 +14,7 @@ import com.google.protobuf.ByteString;
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.spout.ISpoutOutputCollector;
-import com.twitter.heron.common.core.base.Communicator;
+import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.utils.metrics.SpoutMetrics;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.common.utils.misc.TupleKeyGenerator;
