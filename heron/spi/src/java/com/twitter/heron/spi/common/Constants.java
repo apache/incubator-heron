@@ -22,9 +22,10 @@ public class Constants {
 
   public static final String HERON_UPLOADER_FILE_SYSTEM_PATH = "heron.uploader.file.system.path";
 
-  public static final String CLUSTER = "cluster";
-  public static final String ROLE = "role";
-  public static final String ENVIRON = "environ";
+  public static final String CLUSTER = "heron.cluster";
+  public static final String ROLE = "heron.role";
+  public static final String ENVIRON = "heron.environ";
+
   public static final String UPLOADER_CLASS = "uploader.class";
   public static final String LAUNCHER_CLASS = "launcher.class";
   public static final String SCHEDULER_CLASS = "scheduler.class";
