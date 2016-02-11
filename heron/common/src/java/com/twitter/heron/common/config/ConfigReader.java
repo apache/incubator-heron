@@ -13,7 +13,7 @@ import java.io.IOException;
 import org.yaml.snakeyaml.Yaml;
 
 /**
- * Loads config file in Java properties file format.
+ * Loads config file in Yaml file format.
  */
 public class ConfigReader {
   private static final Logger LOG = Logger.getLogger(ConfigReader.class.getName());
@@ -71,5 +71,4 @@ public class ConfigReader {
       }
     }
   }
-
 }
