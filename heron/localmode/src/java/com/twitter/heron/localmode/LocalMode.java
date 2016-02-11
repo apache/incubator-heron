@@ -12,7 +12,7 @@ import com.twitter.heron.api.Config;
 import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.config.SystemConfig;
-import com.twitter.heron.common.core.base.SingletonRegistry;
+import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.utils.misc.Constants;
 import com.twitter.heron.localmode.executors.InstanceExecutor;
 import com.twitter.heron.localmode.executors.MetricsExecutor;

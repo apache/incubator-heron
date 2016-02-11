@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.twitter.heron.common.config.SystemConfig;
-import com.twitter.heron.common.core.base.Communicator;
-import com.twitter.heron.common.core.base.SlaveLooper;
-import com.twitter.heron.common.core.base.WakeableLooper;
+import com.twitter.heron.common.basics.Communicator;
+import com.twitter.heron.common.basics.SlaveLooper;
+import com.twitter.heron.common.basics.WakeableLooper;
 import com.twitter.heron.common.utils.metrics.JVMMetrics;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
 import com.twitter.heron.proto.system.Metrics;

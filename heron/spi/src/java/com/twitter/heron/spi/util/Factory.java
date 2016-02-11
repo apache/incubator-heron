@@ -6,7 +6,7 @@ import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.scheduler.IRuntimeManager;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.uploader.IUploader;
-import com.twitter.heron.state.IStateManager;
+import com.twitter.heron.spi.statemgr.IStateManager;
 
 public class Factory {
   public static IStateManager makeStateManager(String stateManagerClass) throws

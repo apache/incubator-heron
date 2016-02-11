@@ -8,17 +8,25 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.PackingPlan;
+
 import com.twitter.heron.spi.packing.IPackingAlgorithm;
+import com.twitter.heron.spi.packing.NullPackingAlgorithm;
+import com.twitter.heron.spi.uploader.NullUploader;
+
 import com.twitter.heron.spi.scheduler.IConfigLoader;
+
+import com.twitter.heron.spi.scheduler.ILauncher;
+import com.twitter.heron.spi.scheduler.NullLauncher;
+
 import com.twitter.heron.spi.scheduler.IScheduler;
+import com.twitter.heron.spi.scheduler.NullScheduler;
 import com.twitter.heron.spi.scheduler.context.LaunchContext;
 import com.twitter.heron.spi.util.Factory;
 
 import com.twitter.heron.scheduler.service.server.SchedulerServer;
 import com.twitter.heron.scheduler.util.DefaultConfigLoader;
 import com.twitter.heron.scheduler.util.NetworkUtility;
-import com.twitter.heron.scheduler.util.Nullity;
-import com.twitter.heron.state.IStateManager;
+import com.twitter.heron.spi.statemgr.IStateManager;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -32,10 +40,10 @@ public class SchedulerMainTest {
 
   private IConfigLoader createConfig() {
     IConfigLoader config = mock(DefaultConfigLoader.class);
-    when(config.getUploaderClass()).thenReturn(Nullity.NullUploader.class.getName());
-    when(config.getLauncherClass()).thenReturn(Nullity.NullLauncher.class.getName());
-    when(config.getSchedulerClass()).thenReturn(Nullity.NullScheduler.class.getName());
-    when(config.getPackingAlgorithmClass()).thenReturn(Nullity.EmptyPacking.class.getName());
+    when(config.getUploaderClass()).thenReturn(NullUploader.class.getName());
+    when(config.getLauncherClass()).thenReturn(NullLauncher.class.getName());
+    when(config.getSchedulerClass()).thenReturn(NullScheduler.class.getName());
+    when(config.getPackingAlgorithmClass()).thenReturn(NullPackingAlgorithm.class.getName());
     when(config.load(anyString(), anyString())).thenReturn(true);
     return config;
   }
@@ -51,9 +59,9 @@ public class SchedulerMainTest {
     PowerMockito.spy(Factory.class);
     PowerMockito.doReturn(config).when(Factory.class, "makeConfigLoader", eq(configLoader));
     PowerMockito.doReturn(mock(IStateManager.class)).when(Factory.class, "makeStateManager", anyString());
-    IScheduler scheduler = spy(new Nullity.NullScheduler());
+    IScheduler scheduler = spy(new NullScheduler());
     PowerMockito.doReturn(scheduler).when(Factory.class, "makeScheduler", eq(schedulerClass));
-    IPackingAlgorithm packingAlgorithm = spy(new Nullity.EmptyPacking());
+    IPackingAlgorithm packingAlgorithm = spy(new NullPackingAlgorithm());
     PowerMockito.doReturn(packingAlgorithm).when(Factory.class, "makePackingAlgorithm", eq(packingAlgorithmClass));
 
     PowerMockito.doReturn(server).when(SchedulerMain.class, "runServer", any(IScheduler.class), any(LaunchContext.class), anyInt());

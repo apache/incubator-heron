@@ -21,7 +21,7 @@ import org.apache.thrift.transport.TSocket;
 
 import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.common.basics.SysUtils;
-import com.twitter.heron.common.core.base.Constants;
+import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
 import com.twitter.heron.spi.metricsmgr.sink.IMetricsSink;
