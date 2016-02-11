@@ -14,11 +14,11 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.common.basics.SysUtils;
-import com.twitter.heron.common.core.base.Communicator;
-import com.twitter.heron.common.core.base.Constants;
-import com.twitter.heron.common.core.base.NIOLooper;
-import com.twitter.heron.common.core.base.SingletonRegistry;
-import com.twitter.heron.common.core.network.HeronSocketOptions;
+import com.twitter.heron.common.basics.Communicator;
+import com.twitter.heron.common.basics.Constants;
+import com.twitter.heron.common.basics.NIOLooper;
+import com.twitter.heron.common.basics.SingletonRegistry;
+import com.twitter.heron.common.network.HeronSocketOptions;
 import com.twitter.heron.spi.metricsmgr.metrics.ExceptionInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsFilter;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;

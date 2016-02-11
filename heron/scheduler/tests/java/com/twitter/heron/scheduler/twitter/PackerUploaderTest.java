@@ -19,6 +19,7 @@ public class PackerUploaderTest {
   public static final String cluster = "cluster";
   public static final String role = "me";
   public static final String pkgName = "pkg";
+  public static final String stateMgrClass = "com.twitter.heron.spi.statemgr.NullStateManager";
 
   public static DefaultConfigLoader getRequiredConfig() throws Exception {
     DefaultConfigLoader configLoader = DefaultConfigLoader.class.newInstance();
@@ -26,6 +27,7 @@ public class PackerUploaderTest {
     configLoader.properties.setProperty(Constants.CLUSTER, cluster);
     configLoader.properties.setProperty(Constants.ROLE, role);
     configLoader.properties.setProperty(Constants.HERON_RELEASE_PACKAGE_NAME, pkgName);
+    configLoader.properties.setProperty(Constants.STATE_MANAGER_CLASS, stateMgrClass);
     return configLoader;
   }
 

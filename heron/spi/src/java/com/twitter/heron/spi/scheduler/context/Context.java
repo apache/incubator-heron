@@ -5,8 +5,7 @@ import java.util.Map;
 import com.twitter.heron.spi.scheduler.IConfigLoader;
 import com.twitter.heron.spi.scheduler.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.util.Factory;
-import com.twitter.heron.state.IStateManager;
-import com.twitter.heron.state.dummy.DummySchedulerStateManager;
+import com.twitter.heron.spi.statemgr.IStateManager;
 
 public class Context {
   private final IConfigLoader configLoader;
@@ -30,9 +29,7 @@ public class Context {
 
   protected IStateManager getContextStateManager(String stateManagerClass)
       throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-    return stateManagerClass == null ?
-        new DummySchedulerStateManager() :
-        Factory.makeStateManager(stateManagerClass);
+    return Factory.makeStateManager(stateManagerClass);
   }
 
   public boolean start() {

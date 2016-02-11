@@ -2,7 +2,7 @@ package com.twitter.heron.scheduler.local;
 
 import java.util.logging.Logger;
 
-import com.twitter.heron.common.core.base.FileUtility;
+import com.twitter.heron.common.basics.FileUtility;
 import com.twitter.heron.spi.uploader.IUploader;
 import com.twitter.heron.spi.scheduler.context.LaunchContext;
 

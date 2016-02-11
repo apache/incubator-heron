@@ -9,6 +9,7 @@ import org.junit.Test;
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
 
+import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.scheduler.context.LaunchContext;
 
@@ -39,9 +40,10 @@ public class RoundRobinPackingTest {
         TopologyUtilityTest.createTopology("testTopology", topologyConfig, spouts, bolts);
     int numInstance = TopologyUtility.getTotalInstance(topology);
     Assert.assertEquals((spouts.size() + bolts.size()) * componentParallelism, numInstance);
-    // Each container should get 1 spout and 1 bolt.
     DefaultConfigLoader configLoader = DefaultConfigLoader.class.newInstance();
-    configLoader.load("", "");
+    String stateMgrClass = "com.twitter.heron.spi.statemgr.NullStateManager";
+    String overrides = String.format("%s=%s", Constants.STATE_MANAGER_CLASS, stateMgrClass);
+    configLoader.load("", overrides);
 
     LaunchContext context = new LaunchContext(configLoader, topology);
 
