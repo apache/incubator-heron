@@ -1,4 +1,4 @@
-package com.twitter.heron.scheduler.util;
+package com.twitter.heron.packing.roundrobin;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,9 +10,11 @@ import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
 
 import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.utils.TopologyUtility;
 import com.twitter.heron.spi.packing.IPackingAlgorithm;
-import com.twitter.heron.spi.scheduler.context.LaunchContext;
 
 /**
  * Round-robin packing algorithm
@@ -20,12 +22,31 @@ import com.twitter.heron.spi.scheduler.context.LaunchContext;
 public class RoundRobinPacking implements IPackingAlgorithm {
   private static final Logger LOG = Logger.getLogger(RoundRobinPacking.class.getName());
   private static final long DEFAULT_DISK_PADDING = 12 * Constants.GB;
-  public static final String STMGR_RAM_DEFAULT = "stmgr.ram.default";
-  public static final String INSTANCE_RAM_DEFAULT = "instance.ram.default";
-  public static final String INSTANCE_CPU_DEFAULT = "instance.cpu.default";
-  public static final String INSTANCE_DISK_DEFAULT = "instance.disk.default";
-  public TopologyAPI.Topology topology;
-  public LaunchContext context;
+
+  protected TopologyAPI.Topology topology;
+  protected long stmgrRamDefault ;
+  protected long instanceRamDefault;
+  protected double instanceCpuDefault; 
+  protected long instanceDiskDefault; 
+
+  @Override
+  public void initialize(Context context) {
+    this.stmgrRamDefault = context.getLongValue(RoundRobinKeys.Config.STMGR_RAM_DEFAULT, 1 * Constants.GB); 
+    this.instanceRamDefault = context.getLongValue(RoundRobinKeys.Config.INSTANCE_RAM_DEFAULT, 1 * Constants.GB);
+    this.instanceCpuDefault = context.getDoubleValue(RoundRobinKeys.Config.INSTANCE_CPU_DEFAULT, 1.0);
+    this.instanceDiskDefault = context.getLongValue(RoundRobinKeys.Config.INSTANCE_DISK_DEFAULT, 1 * Constants.GB);
+    this.topology = (TopologyAPI.Topology)context.get(Keys.Runtime.TOPOLOGY_PHYSICAL_PLAN);
+  }
+
+  @Override
+  public PackingPlan pack() {
+    Map<String, List<String>> containerInstancesMap = getBasePacking();
+    return fillInResource(containerInstancesMap);
+  }
+
+  @Override
+  public void cleanup() {
+  }
 
   private int getLargestContainerSize(Map<String, List<String>> packing) {
     int max = 0;
@@ -38,40 +59,41 @@ public class RoundRobinPacking implements IPackingAlgorithm {
   }
 
   /**
-   * Provide cpu per aurora container.
+   * Provide cpu per container.
    *
    * @param packing packing output.
-   * @return cpu per aurora container.
+   * @return cpu per container.
    */
   public double getContainerCpuHint(Map<String, List<String>> packing) {
-    double defaultInstanceCpu = Double.parseDouble(
-        context.getProperty(INSTANCE_CPU_DEFAULT, "1.0"));
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
-    double totalInstanceCpu = defaultInstanceCpu * TopologyUtility.getTotalInstance(topology);
+    double totalInstanceCpu = instanceCpuDefault * TopologyUtility.getTotalInstance(topology);
     // TODO(nbhagat): Add 1 more cpu for metrics manager also.
     // TODO(nbhagat): Use max cpu here. To get max use packing information.
-    float defaultContainerCpu =
-        (float) (1 + totalInstanceCpu / TopologyUtility.getNumContainer(topology));
-    return Double.parseDouble(TopologyUtility.getConfigWithDefault(
-        topologyConfig, Config.TOPOLOGY_CONTAINER_CPU_REQUESTED, defaultContainerCpu + ""));
+    double defaultContainerCpu =
+        (float) (1 + totalInstanceCpu / TopologyUtility.getNumContainers(topology));
+
+    String cpuHint = TopologyUtility.getConfigWithDefault(
+        topologyConfig, Config.TOPOLOGY_CONTAINER_CPU_REQUESTED, Double.toString(defaultContainerCpu));
+
+    return Double.parseDouble(cpuHint);
   }
 
   /**
-   * Provide disk per aurora container.
+   * Provide disk per container.
    *
    * @param packing packing output.
-   * @return disk per aurora container.
+   * @return disk per container.
    */
   public long getContainerDiskHint(Map<String, List<String>> packing) {
-    long defaultInstanceDisk = Long.parseLong(context.getProperty(
-        INSTANCE_DISK_DEFAULT, Long.toString(1 * Constants.GB)));
     long defaultContainerDisk =
-        defaultInstanceDisk * getLargestContainerSize(packing) + DEFAULT_DISK_PADDING;
+        instanceDiskDefault * getLargestContainerSize(packing) + DEFAULT_DISK_PADDING;
 
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
 
-    return Long.parseLong(TopologyUtility.getConfigWithDefault(
-        topologyConfig, Config.TOPOLOGY_CONTAINER_DISK_REQUESTED, defaultContainerDisk + ""));
+    String diskHint = TopologyUtility.getConfigWithDefault(
+        topologyConfig, Config.TOPOLOGY_CONTAINER_DISK_REQUESTED, Double.toString(defaultContainerDisk));
+
+    return Long.parseLong(diskHint);
   }
 
   /**
@@ -81,14 +103,13 @@ public class RoundRobinPacking implements IPackingAlgorithm {
    */
   public long getDefaultInstanceRam(Map<String, List<String>> packing) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
-    long defaultInstanceRam = Long.parseLong(context.getProperty(
-        INSTANCE_RAM_DEFAULT, Long.toString(1 * Constants.GB)));
-    long stmgrRam = Long.parseLong(context.getProperty(STMGR_RAM_DEFAULT, Long.toString(1 * Constants.GB)));
 
-    long containerRamRequested = Long.parseLong(TopologyUtility.getConfigWithDefault(
-        topologyConfig, Config.TOPOLOGY_CONTAINER_RAM_REQUESTED, "-1"));
+    String containerRam = TopologyUtility.getConfigWithDefault(
+        topologyConfig, Config.TOPOLOGY_CONTAINER_RAM_REQUESTED, "-1");
+
+    long containerRamRequested = Long.parseLong(containerRam);
     return getDefaultInstanceRam(
-        packing, topology, defaultInstanceRam, stmgrRam, containerRamRequested);
+        packing, topology, instanceRamDefault, stmgrRamDefault, containerRamRequested);
   }
 
   /**
@@ -102,7 +123,8 @@ public class RoundRobinPacking implements IPackingAlgorithm {
    */
   public long getContainerRamHint(Map<String, List<String>> packing) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
-    // Get ram mapping with default instance ram value.
+
+    // Get RAM mapping with default instance ram value.
     Map<String, Long> ramMap = TopologyUtility.getComponentRamMap(
         topology, getDefaultInstanceRam(packing));
     // Find container with maximum ram.
@@ -117,9 +139,7 @@ public class RoundRobinPacking implements IPackingAlgorithm {
         maxRamRequired = ramRequired;
       }
     }
-    long stmgrRam = Long.parseLong(context.getProperty(
-        STMGR_RAM_DEFAULT, Long.toString(1 * Constants.GB)));
-    long defaultRequest = maxRamRequired + stmgrRam;
+    long defaultRequest = maxRamRequired + stmgrRamDefault;
     long containerRamRequested = Long.parseLong(TopologyUtility.getConfigWithDefault(
         topologyConfig, Config.TOPOLOGY_CONTAINER_RAM_REQUESTED, "" + defaultRequest));
     if (defaultRequest > containerRamRequested) {
@@ -130,7 +150,7 @@ public class RoundRobinPacking implements IPackingAlgorithm {
   }
 
 
-  public int getNumContainer() {
+  public int getNumContainers() {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     return Integer.parseInt(TopologyUtility.getConfigWithDefault(
         topologyConfig, Config.TOPOLOGY_STMGRS, "1").trim());
@@ -162,12 +182,10 @@ public class RoundRobinPacking implements IPackingAlgorithm {
       Map<String, PackingPlan.InstancePlan> instancePlanMap = new HashMap<>();
 
       for (String instanceId : instanceList) {
-        double instanceCpu = Double.parseDouble(
-            context.getProperty(INSTANCE_CPU_DEFAULT, "1.0"));
         long instanceRam = ramMap.get(getComponentName(instanceId));
         long instanceDisk = 1 * Constants.GB;  // Not used in aurora.
 
-        PackingPlan.Resource resource = new PackingPlan.Resource(instanceCpu, instanceRam, instanceDisk);
+        PackingPlan.Resource resource = new PackingPlan.Resource(instanceCpuDefault, instanceRam, instanceDisk);
         PackingPlan.InstancePlan instancePlan =
             new PackingPlan.InstancePlan(instanceId, getComponentName(instanceId), resource);
         instancePlanMap.put(instanceId, instancePlan);
@@ -196,9 +214,9 @@ public class RoundRobinPacking implements IPackingAlgorithm {
   }
 
   // Return: containerId -> list of InstanceId belonging to this container
-  public Map<String, List<String>> getBasePacking() {
+  private Map<String, List<String>> getBasePacking() {
     Map<String, List<String>> packing = new HashMap<>();
-    int numContainer = getNumContainer();
+    int numContainer = getNumContainers();
     int totalInstance = TopologyUtility.getTotalInstance(topology);
     if (numContainer > totalInstance) {
       throw new RuntimeException("More containers allocated than instance. Bailing out.");
@@ -261,14 +279,5 @@ public class RoundRobinPacking implements IPackingAlgorithm {
       }
     }
     return defaultInstanceRam;
-  }
-
-  @Override
-  public PackingPlan pack(LaunchContext context) {
-    this.topology = context.getTopology();
-    this.context = context;
-
-    Map<String, List<String>> containerInstancesMap = getBasePacking();
-    return fillInResource(containerInstancesMap);
   }
 }

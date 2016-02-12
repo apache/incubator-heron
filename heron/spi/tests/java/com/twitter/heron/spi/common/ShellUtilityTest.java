@@ -1,4 +1,4 @@
-package com.twitter.heron.scheduler.util;
+package com.twitter.heron.spi.common;
 
 import junit.framework.Assert;
 import org.junit.Test;
@@ -11,7 +11,20 @@ import java.lang.StringBuilder;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class ShellUtilityTest {
+
+  private static final Logger LOG = Logger.getLogger(ShellUtilityTest.class.getName());
+
+  private static void wait(int time, TimeUnit unit) {
+    try {
+      Thread.sleep(unit.toMillis(time));
+    } catch (InterruptedException e) {
+      LOG.log(Level.SEVERE, "Sleep interrupted ", e);
+    }
+  }
 
   private static String generateRandomLongString(int size) {
     StringBuilder builder = new StringBuilder();
@@ -21,6 +34,7 @@ public class ShellUtilityTest {
     }
     return builder.toString();
   }
+
   @Test
   public void testRunProcess() {
     String testString = "testString";
@@ -40,7 +54,7 @@ public class ShellUtilityTest {
     Process p = ShellUtility.runASyncProcess(
         true, false, String.format("sleep 1 && echo %s", testString), new File("."));
     // Test process is running and input stream is empty
-    NetworkUtility.await(10, TimeUnit.MILLISECONDS);
+    wait(10, TimeUnit.MILLISECONDS);
     Assert.assertEquals(0, p.getInputStream().available());
   }
 

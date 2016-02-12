@@ -1,4 +1,14 @@
 java_test(
+    name = "shell-utility_unittest",
+    srcs = glob(["**/common/ShellUtilityTest.java"]),
+    deps = [
+        "//heron/spi/src/java:common-spi-java", 
+        "@bazel_tools//third_party:junit4",
+    ],
+    size = "small",
+)
+
+java_test(
     name = "exception_info_unittest",
     srcs = glob(["**/ExceptionInfoTest.java"]),
     deps = [
