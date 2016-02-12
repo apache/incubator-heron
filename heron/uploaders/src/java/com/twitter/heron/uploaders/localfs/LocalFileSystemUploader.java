@@ -6,8 +6,8 @@ import java.nio.file.Paths;
 
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.ShellUtility;
 import com.twitter.heron.spi.newuploader.IUploader;
-import com.twitter.heron.spi.utils.ShellUtility;
 
 public class LocalFileSystemUploader implements IUploader {
   protected String cluster;

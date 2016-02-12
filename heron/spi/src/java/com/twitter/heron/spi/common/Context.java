@@ -66,4 +66,22 @@ public class Context {
 
     return defaultValue;
   }
+
+  public long getLongValue(String key, long defaultValue) {
+    Object value = get(key);
+    if (value != null) {
+      Long lvalue = (Long) value;
+      return lvalue.longValue();
+    }
+    return defaultValue;
+  }
+  
+  public double getDoubleValue(String key, double defaultValue) {
+    Object value = get(key);
+    if (value != null) {
+      Double dvalue = (Double) value;
+      return dvalue.doubleValue();
+    }
+    return defaultValue;
+  }
 }
