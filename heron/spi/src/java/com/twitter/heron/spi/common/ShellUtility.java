@@ -1,4 +1,4 @@
-package com.twitter.heron.spi.utils;
+package com.twitter.heron.spi.common;
 
 import java.io.File;
 import java.io.IOException;

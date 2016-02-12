@@ -4,8 +4,8 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.ShellUtility;
 import com.twitter.heron.spi.newuploader.IUploader;
-import com.twitter.heron.spi.utils.ShellUtility;
 
 /**
  * A base class for all Packer based Uploaders.

@@ -6,7 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.twitter.heron.spi.utils.ShellUtility;
+import com.twitter.heron.spi.common.ShellUtility;
 
 public class PackerUtility {
   private static final Logger LOG = Logger.getLogger(PackerUtility.class.getName());
