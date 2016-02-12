@@ -26,6 +26,15 @@ java_library(
 )
 
 java_library(
+    name='uploader-spi-java',
+    srcs = glob([
+        "**/spi/common/**/*.java",
+        "**/spi/utils/**/*.java",
+        "**/spi/newuploader/**/*.java",
+    ]),
+)
+
+java_library(
     name='metricsmgr-spi-java',
     srcs = glob(
         ["**/spi/metricsmgr/**/*.java"],
