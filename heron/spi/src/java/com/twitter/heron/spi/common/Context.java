@@ -2,12 +2,13 @@ package com.twitter.heron.spi.common;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * Context is an Immutable Map of <String, Object>
  */
 public class Context {
-  private final Map<String, Object> keyValues = new HashMap();
+  private final Map<String, Object> cxtMap = new HashMap();
 
   public static class Builder {
     private final Map<String, Object> keyValues = new HashMap();
@@ -22,7 +23,7 @@ public class Context {
     }
 
     public Builder putAll(Context cxt) {
-      keyValues.putAll(cxt.keyValues);
+      keyValues.putAll(cxt.cxtMap);
       return this;
     }
 
@@ -32,15 +33,15 @@ public class Context {
   }
 
   private Context(Builder build) {
-    this.keyValues.putAll(build.keyValues);
+    this.cxtMap.putAll(build.keyValues);
   }
 
   public Object get(String key) {
-    return keyValues.get(key);
+    return cxtMap.get(key);
   }
 
   public String getStringValue(String key) {
-    return (String) keyValues.get(key);
+    return (String) get(key);
   }
 
   public String getStringValue(String key, String defaultValue) {
@@ -49,29 +50,37 @@ public class Context {
   }
 
   public Boolean getBooleanValue(String key) {
-    return (Boolean) keyValues.get(key);
+    return (Boolean) get(key);
   }
 
-  public boolean getBooleanValue(String key, boolean defaultValue) {
+  public Boolean getBooleanValue(String key, boolean defaultValue) {
     Boolean value = getBooleanValue(key);
     return value != null ? value : defaultValue;
   }
 
-  public long getLongValue(String key, long defaultValue) {
-    Object value = get(key);
-    if (value != null) {
-      Long lvalue = (Long) value;
-      return lvalue.longValue();
-    }
-    return defaultValue;
+  public Long getLongValue(String key) {
+    return (Long) get(key);
   }
 
-  public double getDoubleValue(String key, double defaultValue) {
-    Object value = get(key);
-    if (value != null) {
-      Double dvalue = (Double) value;
-      return dvalue.doubleValue();
-    }
-    return defaultValue;
+  public Double getDoubleValue(String key) {
+    return (Double) get(key);
+  }
+
+  public Long getLongValue(String key, long defaultValue) {
+    Long value = getLongValue(key);
+    return value != null ? value : defaultValue;
+  }
+
+  public Double getDoubleValue(String key, double defaultValue) {
+    Double value = getDoubleValue(key);
+    return value != null ? value : defaultValue;
+  }
+
+  public boolean containsKey(String key) {
+    return cxtMap.containsKey(key);
+  }
+
+  public Set<String> getKeySet() {
+    return cxtMap.keySet();
   }
 }
