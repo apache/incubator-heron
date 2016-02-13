@@ -12,7 +12,7 @@ public class Context {
   public static class Builder {
     private final Map<String, Object> keyValues = new HashMap();
 
-    public static Context.Builder builder() {
+    private static Context.Builder create() {
       return new Builder();
     }
 
@@ -29,6 +29,10 @@ public class Context {
     public Context build() {
       return new Context(this);
     }
+  }
+
+  public static Builder newBuilder() { 
+    return Builder.create(); 
   }
 
   private Context(Builder build) {
