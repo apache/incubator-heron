@@ -1,8 +1,14 @@
 package(default_visibility = ["//visibility:public"])
 
 uploader_spi_files = [
+    "//heron/spi/src/java:common-spi-java",
     "//heron/spi/src/java:uploader-spi-java",
 ]
+
+packer_deps_files = \
+    uploader_spi_files + [
+        "//3rdparty/fasterxml-jackson:fasterxml-jackson-java",
+    ]
 
 java_library(
     name='nulled-uploader',
@@ -11,11 +17,6 @@ java_library(
     ),
     deps = uploader_spi_files,
 )
-
-packer_deps_files = \
-    uploader_spi_files + [ 
-        "//3rdparty/fasterxml-jackson:fasterxml-jackson-java",
-    ]
 
 java_library(
     name='packer-uploader',

@@ -6,10 +6,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.twitter.heron.spi.utils.ShellUtility;
+import com.twitter.heron.spi.common.ShellUtils;
 
-public class PackerUtility {
-  private static final Logger LOG = Logger.getLogger(PackerUtility.class.getName());
+public class PackerUtils {
+  private static final Logger LOG = Logger.getLogger(PackerUtils.class.getName());
 
   private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -29,7 +29,7 @@ public class PackerUtility {
         "packer get_version --cluster %s %s %s %s --json", cluster, role, packageName, version);
 
     StringBuilder jsonStrBuilder = new StringBuilder();
-    if (0 != ShellUtility.runProcess(isVerbose, packerUploadCmd, jsonStrBuilder, null)) {
+    if (0 != ShellUtils.runProcess(isVerbose, packerUploadCmd, jsonStrBuilder, null)) {
       throw new RuntimeException("Fetching info from packer failed");
     } else {
       String jsonStr = jsonStrBuilder.toString();

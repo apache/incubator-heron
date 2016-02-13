@@ -25,13 +25,55 @@ java_library(
     ],
 )
 
+utils_deps_files = \
+    heron_java_proto_files() + [
+        ":common-spi-java",
+        "//heron/api/src/java:api-java",
+        "//3rdparty/guava:guava-java",
+    ]
+
+packing_deps_files = [
+    ":common-spi-java",
+]
+
+uploader_deps_files = [
+    ":common-spi-java",
+]
+
+statemgr_deps_files = \
+    heron_java_proto_files() + [
+        "//3rdparty/guava:guava-java",
+    ]
+
+java_library(
+    name='common-spi-java',
+    srcs = glob([
+        "**/spi/common/**/*.java",
+    ]),
+)
+
+java_library(
+    name='utils-spi-java',
+    srcs = glob([
+        "**/spi/utils/**/*.java",
+    ]),
+    deps = utils_deps_files, 
+)
+
+java_library(
+    name='packing-spi-java',
+    srcs = glob([
+        "**/spi/packing/**/*.java",
+    ]),
+    deps = packing_deps_files, 
+)
+
 java_library(
     name='uploader-spi-java',
     srcs = glob([
-        "**/spi/common/**/*.java",
-        "**/spi/utils/**/*.java",
         "**/spi/newuploader/**/*.java",
     ]),
+    deps = uploader_deps_files,
 )
 
 java_library(
@@ -40,11 +82,6 @@ java_library(
         ["**/spi/metricsmgr/**/*.java"],
     ),
 )
-
-statemgr_deps_files = \
-    heron_java_proto_files() + [
-        "//3rdparty/guava:guava-java",
-    ]
 
 java_library(
     name='statemgr-spi-java',
