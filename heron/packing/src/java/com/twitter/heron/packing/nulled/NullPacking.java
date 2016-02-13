@@ -4,9 +4,9 @@ import java.util.HashMap;
 
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.packing.IPackingAlgorithm;
+import com.twitter.heron.spi.packing.IPacking;
 
-public class NullPackingAlgorithm implements IPackingAlgorithm {
+public class NullPacking implements IPacking {
 
   public void initialize(Context context) {
   }

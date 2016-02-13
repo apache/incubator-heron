@@ -23,8 +23,8 @@ import com.twitter.heron.spi.common.PackingPlan;
 /**
  * Utility to process TopologyAPI.Topology proto
  */
-public class TopologyUtility {
-  private static final Logger LOG = Logger.getLogger(TopologyUtility.class.getName());
+public class TopologyUtils {
+  private static final Logger LOG = Logger.getLogger(TopologyUtils.class.getName());
 
   private static final long DEFAULT_INSTANCE_RAM = 1 * Constants.GB;
 
@@ -32,7 +32,7 @@ public class TopologyUtility {
     try {
       byte[] topologyDefn = Files.readAllBytes(Paths.get(topologyDefnFile));
       TopologyAPI.Topology topology = TopologyAPI.Topology.parseFrom(topologyDefn);
-      if (!TopologyUtility.verifyTopology(topology)) {
+      if (!TopologyUtils.verifyTopology(topology)) {
         throw new RuntimeException("Topology object is Malformed");
       }
 
@@ -225,7 +225,7 @@ public class TopologyUtility {
 
   public static int getNumContainers(TopologyAPI.Topology topology) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
-    return Integer.parseInt(TopologyUtility.getConfigWithDefault(
+    return Integer.parseInt(TopologyUtils.getConfigWithDefault(
         topologyConfig, Config.TOPOLOGY_STMGRS, "1").trim());
   }
 
@@ -242,10 +242,10 @@ public class TopologyUtility {
       String topologyJar = originalPackage.replace(".tar.gz", "").replace(".tar", "") + ".jar";
       classPathBuilder.append(String.format("libs/*:heron-instance.jar:%s:./*", topologyJar));
     }
-    String additionalClasspath = TopologyUtility.getAdditionalClassPath(topology);
+    String additionalClasspath = TopologyUtils.getAdditionalClassPath(topology);
     if (!additionalClasspath.isEmpty()) {
       classPathBuilder.append(":");
-      classPathBuilder.append(TopologyUtility.getAdditionalClassPath(topology));
+      classPathBuilder.append(TopologyUtils.getAdditionalClassPath(topology));
     }
     return classPathBuilder.toString();
   }

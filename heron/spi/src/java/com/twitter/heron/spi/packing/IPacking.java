@@ -7,7 +7,7 @@ import com.twitter.heron.spi.common.PackingPlan;
  * Packing algorithm to use for packing multiple instances into containers. Packing hints like
  * number of container may be passed through scheduler config.
  */
-public interface IPackingAlgorithm {
+public interface IPacking {
   
   /**
    * Initialize the packing algorithm with the incoming context.
