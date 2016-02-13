@@ -34,7 +34,7 @@ public interface IUploader {
    public boolean uploadPackage(String topologyPackageLocation);
 
   /**
-   * Get the return context of the uploader
+   * Get the context specific to the uploader
    *
    * @return Context
    */
