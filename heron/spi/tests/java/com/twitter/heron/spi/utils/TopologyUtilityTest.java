@@ -1,4 +1,4 @@
-package com.twitter.heron.scheduler.util;
+package com.twitter.heron.spi.utils;
 
 import java.util.Arrays;
 import java.util.HashMap;
