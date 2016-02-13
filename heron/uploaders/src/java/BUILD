@@ -1,6 +1,7 @@
 package(default_visibility = ["//visibility:public"])
 
 uploader_spi_files = [
+    "//heron/spi/src/java:common-spi-java",
     "//heron/spi/src/java:uploader-spi-java",
 ]
 

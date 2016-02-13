@@ -75,7 +75,7 @@ public class Context {
     }
     return defaultValue;
   }
-  
+
   public double getDoubleValue(String key, double defaultValue) {
     Object value = get(key);
     if (value != null) {
