@@ -1,4 +1,4 @@
-package com.twitter.heron.scheduler.util;
+package com.twitter.heron.spi.utils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,7 +19,6 @@ import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.PackingPlan;
-import com.twitter.heron.scheduler.service.SubmitterMain;
 
 /**
  * Utility to process TopologyAPI.Topology proto
@@ -224,15 +223,15 @@ public class TopologyUtility {
     return ramMapBuilder.toString();
   }
 
-  public static int getNumContainer(TopologyAPI.Topology topology) {
+  public static int getNumContainers(TopologyAPI.Topology topology) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     return Integer.parseInt(TopologyUtility.getConfigWithDefault(
         topologyConfig, Config.TOPOLOGY_STMGRS, "1").trim());
   }
 
   // TODO(nbhagat): libs is dependent on pants for building. Instead take classpath as argument.
-  public static String makeClasspath(TopologyAPI.Topology topology) {
-    String originalPackage = new File(SubmitterMain.getOriginalPackageFile()).getName();
+  public static String makeClassPath(TopologyAPI.Topology topology, String originalPackageFile) {
+    String originalPackage = new File(originalPackageFile).getName();
     StringBuilder classPathBuilder = new StringBuilder();
     // TODO(nbhagat): Take type of package as argument.
     if (originalPackage.endsWith(".jar")) {
