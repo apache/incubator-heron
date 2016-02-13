@@ -13,13 +13,13 @@ import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.PackingPlan;
-import com.twitter.heron.spi.utils.TopologyUtility;
-import com.twitter.heron.spi.packing.IPackingAlgorithm;
+import com.twitter.heron.spi.utils.TopologyUtils;
+import com.twitter.heron.spi.packing.IPacking;
 
 /**
  * Round-robin packing algorithm
  */
-public class RoundRobinPacking implements IPackingAlgorithm {
+public class RoundRobinPacking implements IPacking {
   private static final Logger LOG = Logger.getLogger(RoundRobinPacking.class.getName());
   private static final long DEFAULT_DISK_PADDING = 12 * Constants.GB;
 
@@ -66,13 +66,13 @@ public class RoundRobinPacking implements IPackingAlgorithm {
    */
   public double getContainerCpuHint(Map<String, List<String>> packing) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
-    double totalInstanceCpu = instanceCpuDefault * TopologyUtility.getTotalInstance(topology);
+    double totalInstanceCpu = instanceCpuDefault * TopologyUtils.getTotalInstance(topology);
     // TODO(nbhagat): Add 1 more cpu for metrics manager also.
     // TODO(nbhagat): Use max cpu here. To get max use packing information.
     double defaultContainerCpu =
-        (float) (1 + totalInstanceCpu / TopologyUtility.getNumContainers(topology));
+        (float) (1 + totalInstanceCpu / TopologyUtils.getNumContainers(topology));
 
-    String cpuHint = TopologyUtility.getConfigWithDefault(
+    String cpuHint = TopologyUtils.getConfigWithDefault(
         topologyConfig, Config.TOPOLOGY_CONTAINER_CPU_REQUESTED, Double.toString(defaultContainerCpu));
 
     return Double.parseDouble(cpuHint);
@@ -90,8 +90,8 @@ public class RoundRobinPacking implements IPackingAlgorithm {
 
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
 
-    String diskHint = TopologyUtility.getConfigWithDefault(
-        topologyConfig, Config.TOPOLOGY_CONTAINER_DISK_REQUESTED, Double.toString(defaultContainerDisk));
+    String diskHint = TopologyUtils.getConfigWithDefault(
+        topologyConfig, Config.TOPOLOGY_CONTAINER_DISK_REQUESTED, Long.toString(defaultContainerDisk));
 
     return Long.parseLong(diskHint);
   }
@@ -104,7 +104,7 @@ public class RoundRobinPacking implements IPackingAlgorithm {
   public long getDefaultInstanceRam(Map<String, List<String>> packing) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
 
-    String containerRam = TopologyUtility.getConfigWithDefault(
+    String containerRam = TopologyUtils.getConfigWithDefault(
         topologyConfig, Config.TOPOLOGY_CONTAINER_RAM_REQUESTED, "-1");
 
     long containerRamRequested = Long.parseLong(containerRam);
@@ -125,7 +125,7 @@ public class RoundRobinPacking implements IPackingAlgorithm {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
 
     // Get RAM mapping with default instance ram value.
-    Map<String, Long> ramMap = TopologyUtility.getComponentRamMap(
+    Map<String, Long> ramMap = TopologyUtils.getComponentRamMap(
         topology, getDefaultInstanceRam(packing));
     // Find container with maximum ram.
     long maxRamRequired = 0;
@@ -140,7 +140,7 @@ public class RoundRobinPacking implements IPackingAlgorithm {
       }
     }
     long defaultRequest = maxRamRequired + stmgrRamDefault;
-    long containerRamRequested = Long.parseLong(TopologyUtility.getConfigWithDefault(
+    long containerRamRequested = Long.parseLong(TopologyUtils.getConfigWithDefault(
         topologyConfig, Config.TOPOLOGY_CONTAINER_RAM_REQUESTED, "" + defaultRequest));
     if (defaultRequest > containerRamRequested) {
       LOG.severe("Container is set to value lower than computed defaults. This could be due" +
@@ -152,7 +152,7 @@ public class RoundRobinPacking implements IPackingAlgorithm {
 
   public int getNumContainers() {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
-    return Integer.parseInt(TopologyUtility.getConfigWithDefault(
+    return Integer.parseInt(TopologyUtils.getConfigWithDefault(
         topologyConfig, Config.TOPOLOGY_STMGRS, "1").trim());
   }
 
@@ -166,7 +166,7 @@ public class RoundRobinPacking implements IPackingAlgorithm {
   }
 
   public PackingPlan fillInResource(Map<String, List<String>> basePacking) {
-    Map<String, Long> ramMap = TopologyUtility.getComponentRamMap(
+    Map<String, Long> ramMap = TopologyUtils.getComponentRamMap(
         topology, getDefaultInstanceRam(basePacking));
 
     Map<String, PackingPlan.ContainerPlan> containerPlanMap = new HashMap<>();
@@ -217,7 +217,7 @@ public class RoundRobinPacking implements IPackingAlgorithm {
   private Map<String, List<String>> getBasePacking() {
     Map<String, List<String>> packing = new HashMap<>();
     int numContainer = getNumContainers();
-    int totalInstance = TopologyUtility.getTotalInstance(topology);
+    int totalInstance = TopologyUtils.getTotalInstance(topology);
     if (numContainer > totalInstance) {
       throw new RuntimeException("More containers allocated than instance. Bailing out.");
     }
@@ -227,7 +227,7 @@ public class RoundRobinPacking implements IPackingAlgorithm {
     }
     int index = 1;
     int globalTaskIndex = 1;
-    Map<String, Integer> parallelismMap = TopologyUtility.getComponentParallelism(topology);
+    Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
     for (String component : parallelismMap.keySet()) {
       int numInstance = parallelismMap.get(component);
       for (int i = 0; i < numInstance; ++i) {
@@ -256,7 +256,7 @@ public class RoundRobinPacking implements IPackingAlgorithm {
     long defaultInstanceRam = instanceRamDefaultValue;
 
     if (containerRamRequested != -1) {
-      Map<String, Long> ramMap = TopologyUtility.getComponentRamMap(topology, -1);
+      Map<String, Long> ramMap = TopologyUtils.getComponentRamMap(topology, -1);
       // Find the minimum possible ram that can be fit in this packing.
       long minInstanceRam = Long.MAX_VALUE;
       for (List<String> instances : packing.values()) {
