@@ -84,6 +84,12 @@ class TMaster
   // in terms of workers
   bool ValidateStMgrsWithPhysicalPlan();
 
+  // If the assignment is already done, then:
+  // 1. Force updating the internal proto::api::Topology inside current_pplan_
+  // with latest one to solve the inconsistent topology def issue.
+  // 2. Distribute physical plan to all active stmgrs
+  bool DistributePhysicalPlan();
+
   // Function called after we set the tmasterlocation
   void SetTMasterLocationDone(proto::system::StatusCode _code);
   // Function called after we get the topology
