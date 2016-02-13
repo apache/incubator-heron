@@ -1,4 +1,4 @@
-package com.twitter.heron.scheduler.util;
+package com.twitter.heron.spi.common;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -17,16 +17,13 @@ import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 
-import com.twitter.heron.proto.system.Common;
-
-
-public class NetworkUtilityTest {
+public class HttpUtilsTest {
   @Test
   public void testFreePort() {
     int numAttempts = 100;
     // Randomized test
     for (int i = 0; i < numAttempts; ++i) {
-      int port = NetworkUtility.getFreePort();
+      int port = HttpUtils.getFreePort();
       // verify that port is free
       try {
         new ServerSocket(port).close();
@@ -47,7 +44,7 @@ public class NetworkUtilityTest {
     Mockito.doNothing().when(os).write(Matchers.any(byte[].class));
     Mockito.doNothing().when(os).close();
 
-    Assert.assertTrue(NetworkUtility.sendHttpResponse(exchange, new byte[0]));
+    Assert.assertTrue(HttpUtils.sendHttpResponse(exchange, new byte[0]));
     Mockito.verify(exchange).getResponseBody();
     Mockito.verify(os, Mockito.atLeastOnce()).write(Matchers.any(byte[].class));
     Mockito.verify(os, Mockito.atLeastOnce()).close();
@@ -58,7 +55,7 @@ public class NetworkUtilityTest {
     HttpExchange exchange = Mockito.mock(HttpExchange.class);
     Mockito.doThrow(new IOException("Designed IO exception for testing")).
         when(exchange).sendResponseHeaders(Matchers.anyInt(), Matchers.anyLong());
-    Assert.assertFalse(NetworkUtility.sendHttpResponse(exchange, new byte[0]));
+    Assert.assertFalse(HttpUtils.sendHttpResponse(exchange, new byte[0]));
     Mockito.verify(exchange, Mockito.never()).getResponseBody();
 
 
@@ -69,13 +66,13 @@ public class NetworkUtilityTest {
 
     Mockito.doThrow(new IOException("Designed IO exception for testing")).
         when(os).write(Matchers.any(byte[].class));
-    Assert.assertFalse(NetworkUtility.sendHttpResponse(exchange, new byte[0]));
+    Assert.assertFalse(HttpUtils.sendHttpResponse(exchange, new byte[0]));
     Mockito.verify(os, Mockito.atLeastOnce()).close();
 
     Mockito.doNothing().when(os).write(Matchers.any(byte[].class));
     Mockito.doThrow(new IOException("Designed IO exception for testing"))
         .when(os).close();
-    Assert.assertFalse(NetworkUtility.sendHttpResponse(exchange, new byte[0]));
+    Assert.assertFalse(HttpUtils.sendHttpResponse(exchange, new byte[0]));
   }
 
   @Test
@@ -91,7 +88,7 @@ public class NetworkUtilityTest {
     Mockito.doReturn(headers).when(exchange).getRequestHeaders();
     Mockito.doReturn(is).when(exchange).getRequestBody();
 
-    Assert.assertArrayEquals(expectedBytes, NetworkUtility.readHttpRequestBody(exchange));
+    Assert.assertArrayEquals(expectedBytes, HttpUtils.readHttpRequestBody(exchange));
     Mockito.verify(is, Mockito.atLeastOnce()).close();
   }
 
@@ -103,7 +100,7 @@ public class NetworkUtilityTest {
 
     Mockito.doReturn("-1").
         when(headers).getFirst(Matchers.anyString());
-    Assert.assertArrayEquals(new byte[0], NetworkUtility.readHttpRequestBody(exchange));
+    Assert.assertArrayEquals(new byte[0], HttpUtils.readHttpRequestBody(exchange));
 
     Mockito.doReturn("10").
         when(headers).getFirst(Matchers.anyString());
@@ -111,7 +108,7 @@ public class NetworkUtilityTest {
     Mockito.doReturn(inputStream).when(exchange).getRequestBody();
     Mockito.doThrow(new IOException("Designed IO exception for testing"))
         .when(inputStream).read(Matchers.any(byte[].class), Matchers.anyInt(), Matchers.anyInt());
-    Assert.assertArrayEquals(new byte[0], NetworkUtility.readHttpRequestBody(exchange));
+    Assert.assertArrayEquals(new byte[0], HttpUtils.readHttpRequestBody(exchange));
     Mockito.verify(inputStream, Mockito.atLeastOnce()).close();
   }
 
@@ -127,7 +124,7 @@ public class NetworkUtilityTest {
     Mockito.doReturn(os).when(connection).getOutputStream();
 
     byte[] data = new byte[dataLength];
-    Assert.assertTrue(NetworkUtility.sendHttpPostRequest(connection, data));
+    Assert.assertTrue(HttpUtils.sendHttpPostRequest(connection, data));
 
     Assert.assertEquals("POST", connection.getRequestMethod());
     Assert.assertEquals("application/x-www-form-urlencoded",
@@ -148,7 +145,7 @@ public class NetworkUtilityTest {
     Mockito.doThrow(new IOException("Designed IO exception for testing")).
         when(connection).getOutputStream();
 
-    Assert.assertFalse(NetworkUtility.sendHttpPostRequest(connection, new byte[0]));
+    Assert.assertFalse(HttpUtils.sendHttpPostRequest(connection, new byte[0]));
 
     connection.disconnect();
   }
@@ -159,16 +156,16 @@ public class NetworkUtilityTest {
 
     // Unable to read response due to wrong response code
     Mockito.doReturn(HttpURLConnection.HTTP_NOT_FOUND).when(connection).getResponseCode();
-    Assert.assertArrayEquals(new byte[0], NetworkUtility.readHttpResponse(connection));
+    Assert.assertArrayEquals(new byte[0], HttpUtils.readHttpResponse(connection));
 
     // Unable to read response due to wrong response content length
     Mockito.doReturn(HttpURLConnection.HTTP_OK).when(connection).getResponseCode();
     Mockito.doReturn(-1).when(connection).getContentLength();
-    Assert.assertArrayEquals(new byte[0], NetworkUtility.readHttpResponse(connection));
+    Assert.assertArrayEquals(new byte[0], HttpUtils.readHttpResponse(connection));
 
     Mockito.doThrow(new IOException("Designed IO exception for testing")).
         when(connection).getResponseCode();
-    Assert.assertArrayEquals(new byte[0], NetworkUtility.readHttpResponse(connection));
+    Assert.assertArrayEquals(new byte[0], HttpUtils.readHttpResponse(connection));
   }
 
   @Test
@@ -182,20 +179,6 @@ public class NetworkUtilityTest {
 
     InputStream is = new ByteArrayInputStream(expectedBytes);
     Mockito.doReturn(is).when(connection).getInputStream();
-    Assert.assertArrayEquals(expectedBytes, NetworkUtility.readHttpResponse(connection));
-  }
-
-  @Test
-  public void testGetHeronStatus() {
-    Common.Status okStatus = Common.Status.newBuilder().
-        setStatus(Common.StatusCode.OK)
-        .build();
-    Assert.assertEquals(okStatus, NetworkUtility.getHeronStatus(true));
-
-    Common.Status notOKStatus = Common.Status.newBuilder().
-        setStatus(Common.StatusCode.NOTOK)
-        .build();
-    Assert.assertEquals(notOKStatus, NetworkUtility.getHeronStatus(false));
-
+    Assert.assertArrayEquals(expectedBytes, HttpUtils.readHttpResponse(connection));
   }
 }

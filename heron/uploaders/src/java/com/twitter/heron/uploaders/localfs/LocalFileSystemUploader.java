@@ -6,7 +6,7 @@ import java.nio.file.Paths;
 
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.ShellUtility;
+import com.twitter.heron.spi.common.ShellUtils;
 import com.twitter.heron.spi.newuploader.IUploader;
 
 public class LocalFileSystemUploader implements IUploader {
@@ -44,7 +44,7 @@ public class LocalFileSystemUploader implements IUploader {
     if (!parent.exists()) parent.mkdirs();
 
     String copyCmdline = String.format("cp %s %s", topologyPackage, filePath);
-    return 0 == ShellUtility.runProcess(verbose, copyCmdline, null, null);
+    return 0 == ShellUtils.runProcess(verbose, copyCmdline, null, null);
   }
 
   @Override

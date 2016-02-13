@@ -73,6 +73,7 @@ java_library(
     srcs = glob([
         "**/spi/newuploader/**/*.java",
     ]),
+    deps = uploader_deps_files,
 )
 
 java_library(
