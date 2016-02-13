@@ -1,4 +1,4 @@
-package com.twitter.heron.spi.utils;
+package com.twitter.heron.spi.common;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,9 +13,9 @@ import java.util.logging.Logger;
 /**
  * Handle shell process.
  */
-public class ShellUtility {
+public class ShellUtils {
 
-  private static final Logger LOG = Logger.getLogger(ShellUtility.class.getName());
+  private static final Logger LOG = Logger.getLogger(ShellUtils.class.getName());
 
   public static String inputstreamToString(InputStream is) {
     char[] buffer = new char[2048];
@@ -136,7 +136,7 @@ public class ShellUtility {
         || destHost.equals("127.0.0.1")) {
       throw new RuntimeException("Trying to open tunnel to localhost.");
     }
-    return ShellUtility.runASyncProcess(verbose, false,
+    return ShellUtils.runASyncProcess(verbose, false,
         new String[] {
             "ssh", String.format("-NL%d:%s:%d", tunnelPort, destHost, destPort), tunnelHost},
         new File(".")

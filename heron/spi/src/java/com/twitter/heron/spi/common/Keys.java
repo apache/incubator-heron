@@ -25,6 +25,7 @@ public class Keys {
   public class Runtime {
     public static final String HERON_CORE_RELEASE_URI = "heron.core.release.uri";
     public static final String TOPOLOGY_PKG_URI = "heron.topology.pkg.uri";
+    public static final String TOPOLOGY_PHYSICAL_PLAN = "heron.topology.physical.plan";
 
     public static final String HERON_RELEASE_PACKAGE = "heron.release.package";
     public static final String HERON_RELEASE_PACKAGE_ROLE = "heron.release.package.role";
