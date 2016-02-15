@@ -38,7 +38,7 @@ public class Context {
   }
 
   private Context(Builder build) {
-    this.ctxMap.putAll(build.keyValues);
+    cxtMap.putAll(build.keyValues);
   }
 
   public static Builder newBuilder() { 
@@ -46,11 +46,7 @@ public class Context {
   }
 
   public int size() {
-    return keyValues.size();
-  }
-
-  private Context(Builder build) {
-    this.cxtMap.putAll(build.keyValues);
+    return cxtMap.size();
   }
 
   public Object get(String key) {
@@ -75,9 +71,8 @@ public class Context {
     return value != null ? value : defaultValue;
   }
 
-<<<<<<< HEAD
   public Long getLongValue(String key) {
-    Object value = keyValues.get(key);
+    Object value = cxtMap.get(key);
     return getLong(value);
   }
 
@@ -90,7 +85,7 @@ public class Context {
   }
 
   public Double getDoubleValue(String key) {
-    Object value = keyValues.get(key);
+    Object value = cxtMap.get(key);
     return getDouble(value);
   }
 
