@@ -24,7 +24,6 @@ import com.twitter.heron.spi.uploader.IUploader;
  */
 public class SubmitterMain {
   private static final Logger LOG = Logger.getLogger(SubmitterMain.class.getName());
-  private static Context baseContext;
 
   public static void main(String[] args) throws
       ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
@@ -32,11 +31,25 @@ public class SubmitterMain {
     String role = args[1];
     String environ = args[2];
     String configPath = args[3];
-    String configOverrideEncoded = args[4];
+    // String configOverrideEncoded = args[4];
 
-    String topologyPackage = args[5];
-    String topologyDefnFile = args[6];
-    String heronInternalsFile = args[7];
-    String originalPackageFile = args[8];
+    // String topologyPackage = args[5];
+    // String topologyDefnFile = args[6];
+    // String heronInternalsFile = args[7];
+    // String originalPackageFile = args[8];
+
+    Context.Builder cb = Context.newBuilder()
+       .put(Keys.Config.CLUSTER, cluster)
+       .put(Keys.Config.ROLE, role)
+       .put(Keys.Config.ENVIRON, environ);
+
+    // Add runtime parameters
+    cb.put(Keys.Runtime.TOPOLOGY_DEFINITION_FILE, topologyDefnFile)
+
+    Context.Builder cb = Context.newBuilder()
+       .putAll(ClusterDefaults.getDefaults())
+       .putAll(ClusterConfig.loadConfig(cluster, configPath));
+
+    System.out.println(cb.build()); 
   }
 }
