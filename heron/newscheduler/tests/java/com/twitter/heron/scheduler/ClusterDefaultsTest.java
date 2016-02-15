@@ -56,23 +56,23 @@ public class ClusterDefaultsTest {
     Context props = ClusterDefaults.getDefaultResources();
 
     Assert.assertEquals(
-        Defaults.Config.STMGR_RAM,
-        (long)props.getLongValue(Keys.Config.STMGR_RAM)
+        Long.valueOf(Defaults.Config.STMGR_RAM),
+        props.getLongValue(Keys.Config.STMGR_RAM)
     );
 
     Assert.assertEquals(
-        Defaults.Config.INSTANCE_CPU,
-        (long)props.getLongValue(Keys.Config.INSTANCE_CPU)
+        Long.valueOf(Defaults.Config.INSTANCE_CPU),
+        props.getLongValue(Keys.Config.INSTANCE_CPU)
     );
 
     Assert.assertEquals(
-        Defaults.Config.INSTANCE_RAM,
-        (long)props.getLongValue(Keys.Config.INSTANCE_RAM)
+        Long.valueOf(Defaults.Config.INSTANCE_RAM),
+        props.getLongValue(Keys.Config.INSTANCE_RAM)
     );
 
     Assert.assertEquals(
-        Defaults.Config.INSTANCE_DISK,
-        (long)props.getLongValue(Keys.Config.INSTANCE_DISK)
+        Long.valueOf(Defaults.Config.INSTANCE_DISK),
+        props.getLongValue(Keys.Config.INSTANCE_DISK)
     );
   }
 }

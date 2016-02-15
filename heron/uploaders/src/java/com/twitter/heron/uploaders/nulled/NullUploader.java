@@ -1,7 +1,7 @@
 package com.twitter.heron.uploaders.nulled;
 
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.newuploader.IUploader;
+import com.twitter.heron.spi.uploader.IUploader;
 
 public class NullUploader implements IUploader {
 
@@ -16,7 +16,7 @@ public class NullUploader implements IUploader {
 
   @Override
   public Context getContext() {
-    return new Context(new Context.Builder());
+    return Context.newBuilder().build();
   }
 
   @Override
@@ -28,4 +28,3 @@ public class NullUploader implements IUploader {
   public void cleanup() {
   }
 }
-
