@@ -14,8 +14,13 @@ import com.twitter.heron.spi.util.Factory;
 public class RuntimeManagerMain {
   private static final Logger LOG = Logger.getLogger(RuntimeManagerMain.class.getName());
 
+  public static IRuntimeManager.Command makeCommand(String commandString) {
+    return IRuntimeManager.Command.valueOf(commandString.toUpperCase());
+  }
+
   public static void main(String[] args) throws Exception {
-    IRuntimeManager.Command command = Factory.makeCommand(args[0]);
+    IRuntimeManager.Command command = makeCommand(args[0]);
+
     String topologyName = args[1];
     String commandConfigLoader = args[2];
     String commandConfigOverrideEncoded = args[3];

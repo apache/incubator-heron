@@ -81,23 +81,23 @@ public class ClusterConfigTest {
     );
 
     Assert.assertEquals(
-        (long)1,
-        (long) props.getLongValue(Keys.Config.INSTANCE_CPU)
+        Long.valueOf(1),
+        props.getLongValue(Keys.Config.INSTANCE_CPU)
     );
 
     Assert.assertEquals(
-        128 * Keys.Metrics.MB,
-        (long) props.getLongValue(Keys.Config.INSTANCE_RAM)
+        Long.valueOf(128 * Keys.Metrics.MB),
+        props.getLongValue(Keys.Config.INSTANCE_RAM)
     );
 
     Assert.assertEquals(
-        256 * Keys.Metrics.MB,
-        (long) props.getLongValue(Keys.Config.INSTANCE_DISK)
+        Long.valueOf(256 * Keys.Metrics.MB),
+        props.getLongValue(Keys.Config.INSTANCE_DISK)
     );
 
     Assert.assertEquals(
-        512 * Keys.Metrics.MB,
-        (long) props.getLongValue(Keys.Config.STMGR_RAM)
+        Long.valueOf(512 * Keys.Metrics.MB),
+        props.getLongValue(Keys.Config.STMGR_RAM)
     );
   }
 
@@ -133,7 +133,6 @@ public class ClusterConfigTest {
     Context props = ClusterConfig.loadUploaderConfig("local", configPath);
 
     Assert.assertEquals(1, props.size());
-
     Assert.assertEquals(
         "/vagrant/heron/jobs",
         props.getStringValue("heron.uploader.file.system.path")

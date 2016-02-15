@@ -8,7 +8,7 @@ import java.util.Set;
  * Context is an Immutable Map of <String, Object>
  */
 public class Context {
-  private final Map<String, Object> cxtMap = new HashMap();
+  private final Map<String, Object> ctxMap = new HashMap();
 
   public static class Builder {
     private final Map<String, Object> keyValues = new HashMap();
@@ -22,8 +22,8 @@ public class Context {
       return this;
     }
 
-    public Builder putAll(Context cxt) {
-      keyValues.putAll(cxt.cxtMap);
+    public Builder putAll(Context ctx) {
+      keyValues.putAll(ctx.ctxMap);
       return this;
     }
 
@@ -38,7 +38,7 @@ public class Context {
   }
 
   private Context(Builder build) {
-    cxtMap.putAll(build.keyValues);
+    ctxMap.putAll(build.keyValues);
   }
 
   public static Builder newBuilder() { 
@@ -46,11 +46,11 @@ public class Context {
   }
 
   public int size() {
-    return cxtMap.size();
+    return ctxMap.size();
   }
 
   public Object get(String key) {
-    return cxtMap.get(key);
+    return ctxMap.get(key);
   }
 
   public String getStringValue(String key) {
@@ -72,7 +72,7 @@ public class Context {
   }
 
   public Long getLongValue(String key) {
-    Object value = cxtMap.get(key);
+    Object value = ctxMap.get(key);
     return getLong(value);
   }
 
@@ -85,7 +85,7 @@ public class Context {
   }
 
   public Double getDoubleValue(String key) {
-    Object value = cxtMap.get(key);
+    Object value = ctxMap.get(key);
     return getDouble(value);
   }
 
@@ -98,11 +98,11 @@ public class Context {
   }
 
   public boolean containsKey(String key) {
-    return cxtMap.containsKey(key);
+    return ctxMap.containsKey(key);
   }
 
   public Set<String> getKeySet() {
-    return cxtMap.keySet();
+    return ctxMap.keySet();
   }
 
   private static Long getLong(Object o) {
@@ -139,5 +139,16 @@ public class Context {
         throw new IllegalArgumentException("Don't know how to convert " + o + " + to double");
       }
     }
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    for (Object obj : ctxMap.entrySet()) {
+      Map.Entry<String, Object> entry = (Map.Entry) obj;
+      sb.append("(\"" + entry.getKey() + "\"");
+      sb.append(", " + entry.getValue() + ")\n");
+    }
+    return sb.toString();
   }
 }

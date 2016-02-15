@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.ShellUtils;
-import com.twitter.heron.spi.newuploader.IUploader;
+import com.twitter.heron.spi.uploader.IUploader;
 
 /**
  * A base class for all Packer based Uploaders.
@@ -84,7 +84,7 @@ public class PackerUploader implements IUploader {
   @Override
   public Context getContext() {
     Context.Builder builder = new Context.Builder()
-        .setStringValue(Keys.Runtime.TOPOLOGY_PKG_URI, topologyURI);
+        .put(Keys.Runtime.TOPOLOGY_PKG_URI, topologyURI);
     return builder.build();
   }
 
