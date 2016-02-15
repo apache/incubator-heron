@@ -22,8 +22,8 @@ public class Context {
       return this;
     }
 
-    public Builder putAll(Context cxt) {
-      keyValues.putAll(cxt.ctxMap);
+    public Builder putAll(Context ctx) {
+      keyValues.putAll(ctx.ctxMap);
       return this;
     }
 
@@ -38,7 +38,7 @@ public class Context {
   }
 
   private Context(Builder build) {
-    this.ctxMap.putAll(build.keyValues);
+    ctxMap.putAll(build.keyValues);
   }
 
   public static Builder newBuilder() { 
