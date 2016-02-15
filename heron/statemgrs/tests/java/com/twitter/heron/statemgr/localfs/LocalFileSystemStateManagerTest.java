@@ -17,7 +17,7 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtility;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
-import com.twitter.heron.spi.statemgr.FileSystemStateManager;
+import com.twitter.heron.statemgr.FileSystemStateManager;
 
 import junit.framework.Assert;
 

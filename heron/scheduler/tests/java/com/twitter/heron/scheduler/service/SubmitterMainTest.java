@@ -29,7 +29,6 @@ import com.twitter.heron.spi.scheduler.IConfigLoader;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.scheduler.NullLauncher;
 
-import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.scheduler.NullScheduler;
 
 import com.twitter.heron.spi.uploader.IUploader;
@@ -43,7 +42,7 @@ import com.twitter.heron.spi.util.Factory;
 
 import com.twitter.heron.scheduler.util.DefaultConfigLoader;
 import com.twitter.heron.spi.statemgr.IStateManager;
-import com.twitter.heron.spi.statemgr.NullStateManager;
+import com.twitter.heron.statemgr.NullStateManager;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;

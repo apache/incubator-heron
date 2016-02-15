@@ -1,4 +1,4 @@
-package com.twitter.heron.packing.nulled;
+package com.twitter.heron.packing;
 
 import java.util.HashMap;
 
@@ -14,7 +14,7 @@ public class NullPacking implements IPacking {
   public PackingPlan pack() {
     return new PackingPlan(
       "",
-      new HashMap<String, PackingPlan.ContainerPlan>(),
+      new HashMap<>(),
       new PackingPlan.Resource(0.0, 0L, 0L));
   }
 

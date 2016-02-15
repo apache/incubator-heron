@@ -19,7 +19,7 @@ public class PackerUploaderTest {
   public static final String cluster = "cluster";
   public static final String role = "me";
   public static final String pkgName = "pkg";
-  public static final String stateMgrClass = "com.twitter.heron.spi.statemgr.NullStateManager";
+  public static final String stateMgrClass = "com.twitter.heron.statemgr.NullStateManager";
 
   public static DefaultConfigLoader getRequiredConfig() throws Exception {
     DefaultConfigLoader configLoader = DefaultConfigLoader.class.newInstance();

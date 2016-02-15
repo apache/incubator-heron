@@ -1,4 +1,4 @@
-package com.twitter.heron.uploaders.nulled;
+package com.twitter.heron.uploaders;
 
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.uploader.IUploader;
