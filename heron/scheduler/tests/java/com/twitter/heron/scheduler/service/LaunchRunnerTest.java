@@ -31,10 +31,9 @@ import com.twitter.heron.spi.packing.NullPackingAlgorithm;
 import com.twitter.heron.spi.uploader.IUploader;
 import com.twitter.heron.spi.uploader.NullUploader;
 
-import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.scheduler.NullScheduler;
 
-import com.twitter.heron.spi.statemgr.NullStateManager;
+import com.twitter.heron.statemgr.NullStateManager;
 import com.twitter.heron.spi.scheduler.IConfigLoader;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.scheduler.NullLauncher;

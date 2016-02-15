@@ -1,4 +1,4 @@
-package com.twitter.heron.spi.statemgr;
+package com.twitter.heron.statemgr;
 
 import java.util.Map;
 
@@ -10,6 +10,8 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
+import com.twitter.heron.spi.statemgr.IStateManager;
+import com.twitter.heron.spi.statemgr.WatchCallback;
 
 @SuppressWarnings("unchecked")
 public class NullStateManager implements IStateManager {
