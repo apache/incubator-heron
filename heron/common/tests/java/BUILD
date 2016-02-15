@@ -9,7 +9,7 @@ java_test(
 )
 
 java_test(
-    name = "wakeable_looper_unittest",
+    name = "wakeable-looper_unittest",
     srcs = glob(["**/WakeableLooperTest.java"]),
     deps = [
         "//heron/common/src/java:common-java",
@@ -19,7 +19,7 @@ java_test(
 )
 
 java_test(
-    name = "file_utility_unittest",
+    name = "file-utility_unittest",
     srcs = glob(["**/FileUtilityTest.java"]),
     deps = [
         "//heron/common/src/java:common-java",
@@ -43,7 +43,7 @@ java_test(
 )
 
 java_test(
-    name = "heron_server_unittest",
+    name = "heron-server_unittest",
     srcs = glob(["**/HeronServerTest.java"]),
     deps = [
         "//heron/common/src/java:common-java",
@@ -60,7 +60,7 @@ java_library(
 )
 
 java_test(
-    name = "config_reader_unittest",
+    name = "config-reader_unittest",
     srcs = glob(["**/config/ConfigReaderTest.java"]),
     deps = [
         ":config-test-java",
@@ -72,8 +72,8 @@ java_test(
 )
 
 java_test(
-    name = "heron_config_reader_unittest",
-    srcs = glob(["**/config/HeronConfigReaderTest.java"]),
+    name = "cluster-config-reader_unittest",
+    srcs = glob(["**/config/ClusterConfigReaderTest.java"]),
     deps = [
         ":config-test-java",
         "//heron/common/src/java:config-java",
@@ -84,7 +84,7 @@ java_test(
 )
 
 java_test(
-    name = "system_config_unittest",
+    name = "system-config_unittest",
     srcs = glob(["**/config/SystemConfigTest.java"]),
     deps = [
         ":config-test-java",

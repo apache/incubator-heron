@@ -3,7 +3,7 @@ package com.twitter.heron.spi.scheduler;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.PackingPlan;
-import com.twitter.heron.spi.scheduler.context.LaunchContext;
+import com.twitter.heron.spi.common.Context;
 
 /**
  * Scheduler object responsible for bringing up topology. Will be instantiated using no-arg
@@ -13,7 +13,7 @@ public interface IScheduler {
   /**
    * This will initialize scheduler using config file. Will be called during start.
    */
-  void initialize(LaunchContext context);
+  void initialize(Context context);
 
   /**
    * This method will be called after initialize.

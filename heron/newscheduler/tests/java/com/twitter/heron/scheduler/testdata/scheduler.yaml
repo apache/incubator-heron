@@ -1,0 +1,5 @@
+# launcher class for submitting the topology to the scheduler
+heron.launcher.class:        com.twitter.heron.scheduler.local.LocalLauncher
+
+# runtime manager class for managing the life cycle of the topologies
+heron.runtime.manager.class: com.twitter.heron.scheduler.local.LocalRuntimeManager
