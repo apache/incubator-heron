@@ -32,7 +32,7 @@ import junit.framework.Assert;
 public class LocalUploaderTest {
   public static final String working_directory = "working-dir";
   public static final String heron_core_release = "heron-core-release";
-  public static final String stateMgrClass = "com.twitter.heron.spi.statemgr.NullStateManager";
+  public static final String stateMgrClass = "com.twitter.heron.statemgr.NullStateManager";
 
   public static DefaultConfigLoader getDefaultConfigLoader() throws Exception {
     DefaultConfigLoader configLoader = DefaultConfigLoader.class.newInstance();

@@ -13,7 +13,7 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
-import com.twitter.heron.spi.statemgr.FileSystemStateManager;
+import com.twitter.heron.statemgr.FileSystemStateManager;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 
 public class LocalFileSystemStateManager extends FileSystemStateManager {

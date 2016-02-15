@@ -36,7 +36,7 @@ import junit.framework.Assert;
 @PrepareForTest({TopologyUtility.class, FileUtility.class, ShellUtility.class})
 
 public class LocalLauncherTest {
-  private static final String stateMgrClass = "com.twitter.heron.spi.statemgr.NullStateManager";
+  private static final String stateMgrClass = "com.twitter.heron.statemgr.NullStateManager";
 
   DefaultConfigLoader createRequiredConfig() throws Exception {
     DefaultConfigLoader schedulerConfig = DefaultConfigLoader.class.newInstance();

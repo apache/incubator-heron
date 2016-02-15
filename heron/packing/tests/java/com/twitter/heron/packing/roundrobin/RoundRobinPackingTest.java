@@ -57,7 +57,7 @@ public class RoundRobinPackingTest {
         .build();
 
     // DefaultConfigLoader configLoader = DefaultConfigLoader.class.newInstance();
-    // String stateMgrClass = "com.twitter.heron.spi.statemgr.NullStateManager";
+    // String stateMgrClass = "com.twitter.heron.statemgr.NullStateManager";
     // String overrides = String.format("%s=%s", Constants.STATE_MANAGER_CLASS, stateMgrClass);
     // configLoader.load("", overrides);
 

@@ -1,4 +1,6 @@
-package com.twitter.heron.spi.statemgr;
+package com.twitter.heron.statemgr;
+
+import com.twitter.heron.spi.statemgr.IStateManager;
 
 import java.util.Map;
 

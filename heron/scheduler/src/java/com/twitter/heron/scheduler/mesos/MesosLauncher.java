@@ -29,7 +29,7 @@ import com.twitter.heron.spi.scheduler.context.LaunchContext;
 import com.twitter.heron.scheduler.service.SubmitterMain;
 import com.twitter.heron.scheduler.util.NetworkUtility;
 import com.twitter.heron.scheduler.util.TopologyUtility;
-import com.twitter.heron.spi.statemgr.FileSystemStateManager;
+import com.twitter.heron.statemgr.FileSystemStateManager;
 
 public class MesosLauncher implements ILauncher {
   private static final Logger LOG = Logger.getLogger(MesosLauncher.class.getName());
