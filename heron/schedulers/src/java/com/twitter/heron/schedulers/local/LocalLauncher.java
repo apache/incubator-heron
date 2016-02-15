@@ -14,15 +14,15 @@ import com.twitter.heron.common.basics.FileUtility;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 
 import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.PackingPlan;
+
 import com.twitter.heron.spi.scheduler.ILauncher;
-import com.twitter.heron.spi.scheduler.context.LaunchContext;
 
 import com.twitter.heron.scheduler.service.SubmitterMain;
 import com.twitter.heron.scheduler.util.DefaultConfigLoader;
-import com.twitter.heron.scheduler.util.NetworkUtility;
-import com.twitter.heron.scheduler.util.ShellUtility;
-import com.twitter.heron.scheduler.util.TopologyUtility;
+import com.twitter.heron.scheduler.util.ShellUtils;
+import com.twitter.heron.scheduler.util.TopologyUtils;
 
 /**
  * Launch topology locally to a working directory.
@@ -42,7 +42,7 @@ public class LocalLauncher implements ILauncher {
   }
 
   @Override
-  public void initialize(LaunchContext context) {
+  public void initialize(Context context) {
     this.context = context;
     this.topology = context.getTopology();
     this.localConfig = new LocalConfig(context);
@@ -52,7 +52,7 @@ public class LocalLauncher implements ILauncher {
   public boolean prepareLaunch(PackingPlan packing) {
     LOG.info("Checking whether the topology has been launched already!");
 
-    if (NetworkUtility.awaitResult(context.getStateManagerAdaptor().isTopologyRunning(), 1000, TimeUnit.MILLISECONDS)) {
+    if (NetworkUtils.awaitResult(context.getStateManagerAdaptor().isTopologyRunning(), 1000, TimeUnit.MILLISECONDS)) {
       LOG.severe("Topology has been running: " + topology.getName());
       return false;
     }
@@ -64,39 +64,46 @@ public class LocalLauncher implements ILauncher {
     LOG.info("Launching topology in local cluster");
     Map<String, String> localProperties = new HashMap<String, String>();
 
-    localProperties.put(LocalConfig.CLASS_PATH, TopologyUtility.makeClasspath(topology));
-    localProperties.put(LocalConfig.COMPONENT_JVM_OPTS_IN_BASE64,
-        formatJavaOpts(TopologyUtility.getComponentJvmOptions(topology)));
-    localProperties.put(LocalConfig.COMPONENT_RAMMAP,
-        TopologyUtility.formatRamMap(TopologyUtility.getComponentRamMap(topology)));
+    // put the binaries & defaults first
     localProperties.put(LocalConfig.HERON_EXECUTOR_BINARY, "heron-executor");
     localProperties.put(LocalConfig.HERON_SCHEDULER_BINARY, "heron-scheduler.jar");
-    localProperties.put(LocalConfig.HERON_INTERNALS_CONFIG_FILENAME,
-        FileUtility.getBaseName(SubmitterMain.getHeronInternalsConfigFile()));
-    localProperties.put(LocalConfig.INSTANCE_DISTRIBUTION,
-        TopologyUtility.packingToString(packing));
-    localProperties.put(LocalConfig.INSTANCE_JVM_OPTS_IN_BASE64,
-        formatJavaOpts(TopologyUtility.getInstanceJvmOptions(topology)));
-    localProperties.put(LocalConfig.METRICS_MGR_CLASSPATH, "metrics-mgr-classpath/*");
-    localProperties.put(LocalConfig.NUM_SHARDS,
-        "" + (1 + TopologyUtility.getNumContainer(topology)));
-    localProperties.put(LocalConfig.PKG_TYPE,
-        (FileUtility.isOriginalPackageJar(
-            FileUtility.getBaseName(SubmitterMain.getOriginalPackageFile())) ? "jar" : "tar"));
     localProperties.put(LocalConfig.STMGR_BINARY, "heron-stmgr");
     localProperties.put(LocalConfig.TMASTER_BINARY, "heron-tmaster");
     localProperties.put(LocalConfig.HERON_SHELL_BINARY, "heron-shell");
+    localProperties.put(LocalConfig.LOG_DIR, localConfig.getLogDir());
+
+    // put the config files
+    localProperties.put(LocalConfig.HERON_INTERNALS_CONFIG_FILENAME,
+        FileUtility.getBaseName(SubmitterMain.getHeronInternalsConfigFile()));
+
+    // put the topology related config
     localProperties.put(Constants.TOPOLOGY_DEFINITION_FILE, topology.getName() + ".defn");
     localProperties.put(LocalConfig.TOPOLOGY_ID, topology.getId());
     localProperties.put(LocalConfig.TOPOLOGY_JAR_FILE,
         FileUtility.getBaseName(SubmitterMain.getOriginalPackageFile()));
     localProperties.put(LocalConfig.TOPOLOGY_NAME, topology.getName());
 
-    localProperties.put(LocalConfig.LOG_DIR, localConfig.getLogDir());
-    localProperties.put(LocalConfig.WORKING_DIRECTORY, localConfig.getWorkingDirectory());
+    // resource related config
+    localProperties.put(LocalConfig.NUM_SHARDS, "" + (1 + TopologyUtility.getNumContainer(topology)));
+    localProperties.put(LocalConfig.COMPONENT_RAMMAP,
+        TopologyUtility.formatRamMap(TopologyUtility.getComponentRamMap(topology)));
+    localProperties.put(LocalConfig.INSTANCE_DISTRIBUTION, TopologyUtility.packingToString(packing));
+
+    // JVM related
+    localProperties.put(LocalConfig.CLASS_PATH, TopologyUtility.makeClasspath(topology));
+    localProperties.put(LocalConfig.COMPONENT_JVM_OPTS_IN_BASE64,
+        formatJavaOpts(TopologyUtility.getComponentJvmOptions(topology)));
+    localProperties.put(LocalConfig.INSTANCE_JVM_OPTS_IN_BASE64,
+        formatJavaOpts(TopologyUtility.getInstanceJvmOptions(topology)));
+    localProperties.put(LocalConfig.METRICS_MGR_CLASSPATH, "metrics-mgr-classpath/*");
+    localProperties.put(LocalConfig.PKG_TYPE,
+        (FileUtility.isOriginalPackageJar(
+            FileUtility.getBaseName(SubmitterMain.getOriginalPackageFile())) ? "jar" : "tar"));
     localProperties.put(LocalConfig.HERON_JAVA_HOME, localConfig.getJavaHome());
-    localProperties.put(LocalConfig.HERON_CORE_RELEASE_PACKAGE,
-        localConfig.getHeronCoreReleasePackage());
+
+    // specific to local scheduler
+    localProperties.put(LocalConfig.WORKING_DIRECTORY, localConfig.getWorkingDirectory());
+    localProperties.put(LocalConfig.HERON_CORE_RELEASE_PACKAGE, localConfig.getHeronCoreReleasePackage());
 
     if (!localSetup(localConfig)) {
       LOG.severe("Failed to complete the local setup...");

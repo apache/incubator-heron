@@ -14,9 +14,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ShellUtilityTest {
+public class ShellUtilsTest {
 
-  private static final Logger LOG = Logger.getLogger(ShellUtilityTest.class.getName());
+  private static final Logger LOG = Logger.getLogger(ShellUtilsTest.class.getName());
 
   private static void wait(int time, TimeUnit unit) {
     try {

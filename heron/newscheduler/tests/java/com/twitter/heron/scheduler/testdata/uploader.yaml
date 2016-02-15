@@ -1,0 +1,3 @@
+# The filesystem path where user topology package will be uploaded. 
+# This is required by FileSystemUploader
+heron.uploader.file.system.path: /vagrant/heron/jobs

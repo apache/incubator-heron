@@ -1,4 +1,4 @@
-package com.twitter.heron.spi.newuploader;
+package com.twitter.heron.spi.uploader;
 
 import com.twitter.heron.spi.common.Context;
 

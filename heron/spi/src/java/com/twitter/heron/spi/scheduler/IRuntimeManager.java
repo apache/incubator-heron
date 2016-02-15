@@ -1,6 +1,6 @@
 package com.twitter.heron.spi.scheduler;
 
-import com.twitter.heron.spi.scheduler.context.RuntimeManagerContext;
+import com.twitter.heron.spi.common.Context;
 
 public interface IRuntimeManager {
 
@@ -11,7 +11,7 @@ public interface IRuntimeManager {
     RESTART;
   }
 
-  void initialize(RuntimeManagerContext context);
+  void initialize(Context context);
 
   void close();
 
