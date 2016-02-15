@@ -1,26 +1,47 @@
 package com.twitter.heron.spi.common;
 
 public class Keys {
+  public class Metrics {
+    public static final long GB = 1024L * 1024 * 1024;
+    public static final long MB = 1024L * 1024;
+  }
+
   public static final String HERON_CORE_RELEASE_URI = "heron.core.release.uri";
   public static final String TOPOLOGY_PKG_URI = "heron.topology.pkg.uri";
 
   public class Config { 
-    // Keys provided by user config
-    public static final String VERBOSE = "heron.config.verbose";
+    // Constants for config provided in the command line
     public static final String CLUSTER = "heron.config.cluster";
     public static final String ROLE = "heron.config.role";
     public static final String ENVIRON = "heron.config.environ";
+    public static final String VERBOSE = "heron.config.verbose";
     public static final String CONFIG_PATH = "heron.config.path";
     public static final String TOPOLOGY_NAME = "heron.config.topology.name";
 
-    // Keys for user provided classes
+    // Constants for config provided user classes
     public static final String UPLOADER_CLASS = "heron.uploader.class";
     public static final String LAUNCHER_CLASS = "heron.launcher.class";
     public static final String SCHEDULER_CLASS = "heron.scheduler.class";
     public static final String RUNTIME_MANAGER_CLASS = "heron.runtime.manager.class";
-    public static final String PACKING_ALGORITHM_CLASS = "heron.packing.algorithm.class";
+    public static final String PACKING_CLASS = "heron.packing.algorithm.class";
     public static final String STATE_MANAGER_CLASS = "heron.state.manager.class";
-  };
+
+    // Constants for config provided user binaries
+    public static final String EXECUTOR_BINARY = "heron.binaries.executor";
+    public static final String STMGR_BINARY = "heron.binaries.stmgr";
+    public static final String TMASTER_BINARY = "heron.binaries.tmaster";
+    public static final String SHELL_BINARY = "heron.binaries.shell";
+    public static final String SCHEDULER_JAR = "heron.jars.scheduler";
+
+    // Constants for config provides files and directories
+    public static final String LOGGING_DIR = "heron.logging.directory";
+
+    // Constants for config provided default values for resources
+    public static final String STMGR_RAM = "heron.stmgr.ram";
+    public static final String INSTANCE_RAM = "heron.instance.ram";
+    public static final String INSTANCE_CPU = "heron.instance.cpu";
+    public static final String INSTANCE_DISK = "heron.instance.disk";
+  }
 
   public class Runtime {
     public static final String HERON_CORE_RELEASE_URI = "heron.core.release.uri";

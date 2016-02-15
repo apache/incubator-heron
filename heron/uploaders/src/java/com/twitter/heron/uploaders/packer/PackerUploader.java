@@ -83,7 +83,8 @@ public class PackerUploader implements IUploader {
 
   @Override
   public Context getContext() {
-    Context.Builder builder = new Context.Builder().setStringValue(Keys.Runtime.TOPOLOGY_PKG_URI, topologyURI);
+    Context.Builder builder = new Context.Builder()
+        .setStringValue(Keys.Runtime.TOPOLOGY_PKG_URI, topologyURI);
     return builder.build();
   }
 

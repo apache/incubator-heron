@@ -7,19 +7,22 @@ common_deps_files = [
     "@bazel_tools//third_party:mockito",
 ]
 
-util_deps_files = common_deps_files + [
-    "//heron/spi/src/java:utils-spi-java", 
-]
+util_deps_files = \
+    common_deps_files + [
+        "//heron/spi/src/java:utils-spi-java", 
+    ]
     
-proto_deps_files = heron_java_proto_files() + util_deps_files
+proto_deps_files = \
+    heron_java_proto_files() + \
+    util_deps_files
 
 api_deps_files = proto_deps_files + [
     "//heron/api/src/java:api-java", 
 ]
 
 java_test(
-    name = "shell-utility_unittest",
-    srcs = glob(["**/common/ShellUtilityTest.java"]),
+    name = "shell-utils_unittest",
+    srcs = glob(["**/common/ShellUtilsTest.java"]),
     deps = common_deps_files, 
     size = "small",
 )
@@ -46,7 +49,7 @@ java_test(
 )
 
 java_test(
-    name = "exception_info_unittest",
+    name = "exception-info_unittest",
     srcs = glob(["**/ExceptionInfoTest.java"]),
     deps = [
         "//heron/spi/src/java:metricsmgr-spi-java", 
@@ -56,7 +59,7 @@ java_test(
 )
 
 java_test(
-    name = "metrics_info_unittest",
+    name = "metrics-info_unittest",
     srcs = glob(["**/MetricsInfoTest.java"]),
     deps = [
         "//heron/spi/src/java:metricsmgr-spi-java", 
@@ -66,7 +69,7 @@ java_test(
 )
 
 java_test(
-    name = "metrics_record_unittest",
+    name = "metrics-record_unittest",
     srcs = glob(["**/MetricsRecordTest.java"]),
     deps = [
         "//heron/spi/src/java:metricsmgr-spi-java", 
