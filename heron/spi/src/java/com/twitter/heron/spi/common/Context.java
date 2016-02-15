@@ -2,12 +2,13 @@ package com.twitter.heron.spi.common;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * Context is an Immutable Map of <String, Object>
  */
 public class Context {
-  private final Map<String, Object> keyValues = new HashMap();
+  private final Map<String, Object> cxtMap = new HashMap();
 
   public static class Builder {
     private final Map<String, Object> keyValues = new HashMap();
@@ -22,7 +23,7 @@ public class Context {
     }
 
     public Builder putAll(Context cxt) {
-      keyValues.putAll(cxt.keyValues);
+      keyValues.putAll(cxt.cxtMap);
       return this;
     }
 
@@ -37,7 +38,7 @@ public class Context {
   }
 
   private Context(Builder build) {
-    this.keyValues.putAll(build.keyValues);
+    this.ctxMap.putAll(build.keyValues);
   }
 
   public static Builder newBuilder() { 
@@ -48,12 +49,16 @@ public class Context {
     return keyValues.size();
   }
 
+  private Context(Builder build) {
+    this.cxtMap.putAll(build.keyValues);
+  }
+
   public Object get(String key) {
-    return keyValues.get(key);
+    return cxtMap.get(key);
   }
 
   public String getStringValue(String key) {
-    return (String) keyValues.get(key);
+    return (String) get(key);
   }
 
   public String getStringValue(String key, String defaultValue) {
@@ -62,20 +67,21 @@ public class Context {
   }
 
   public Boolean getBooleanValue(String key) {
-    return (Boolean) keyValues.get(key);
+    return (Boolean) get(key);
   }
 
-  public boolean getBooleanValue(String key, boolean defaultValue) {
+  public Boolean getBooleanValue(String key, boolean defaultValue) {
     Boolean value = getBooleanValue(key);
     return value != null ? value : defaultValue;
   }
 
-  public long getLongValue(String key) {
+<<<<<<< HEAD
+  public Long getLongValue(String key) {
     Object value = keyValues.get(key);
     return getLong(value);
   }
 
-  public long getLongValue(String key, long defaultValue) {
+  public Long getLongValue(String key, long defaultValue) {
     Object value = get(key);
     if (value != null) {
       return getLong(value);
@@ -83,12 +89,12 @@ public class Context {
     return defaultValue;
   }
 
-  public double getDoubleValue(String key) {
+  public Double getDoubleValue(String key) {
     Object value = keyValues.get(key);
     return getDouble(value);
   }
 
-  public double getDoubleValue(String key, double defaultValue) {
+  public Double getDoubleValue(String key, double defaultValue) {
     Object value = get(key);
     if (value != null) {
       return getDouble(value);
@@ -96,13 +102,21 @@ public class Context {
     return defaultValue;
   }
 
-  private static long getLong(Object o) {
+  public boolean containsKey(String key) {
+    return cxtMap.containsKey(key);
+  }
+
+  public Set<String> getKeySet() {
+    return cxtMap.keySet();
+  }
+
+  private static Long getLong(Object o) {
     if (o instanceof Long) {
-      return ((Long) o).longValue();
+      return ((Long) o);
     } else if (o instanceof Integer) {
-      return ((Integer) o).longValue();
+      return new Long(((Integer) o).longValue());
     } else if (o instanceof Short) {
-      return ((Short) o).longValue();
+      return new Long(((Short) o).longValue());
     } else {
       try {
         return Long.parseLong(o.toString());
@@ -112,17 +126,17 @@ public class Context {
     }
   }
 
-  private static double getDouble(Object o) { 
+  private static Double getDouble(Object o) { 
     if (o instanceof Double) {
-      return ((Double) o).doubleValue();
+      return ((Double) o);
     } else if (o instanceof Float) {
-      return ((Float) o).doubleValue();
+      return new Double(((Float) o).doubleValue());
     } else if (o instanceof Long) {
-      return ((Long) o).doubleValue();
+      return new Double(((Long) o).doubleValue());
     } else if (o instanceof Integer) {
-      return ((Integer) o).doubleValue();
+      return new Double(((Integer) o).doubleValue());
     } else if (o instanceof Short) {
-      return ((Short) o).doubleValue();
+      return new Double(((Short) o).doubleValue());
     } else {
       try {
         return Double.parseDouble(o.toString());
