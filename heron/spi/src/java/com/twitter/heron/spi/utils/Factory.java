@@ -1,7 +1,6 @@
 package com.twitter.heron.spi.util;
 
-import com.twitter.heron.spi.packing.IPackingAlgorithm;
-import com.twitter.heron.spi.scheduler.IConfigLoader;
+import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.scheduler.IRuntimeManager;
 import com.twitter.heron.spi.scheduler.IScheduler;
@@ -12,11 +11,6 @@ public class Factory {
   public static IStateManager makeStateManager(String stateManagerClass) throws
       ClassNotFoundException, InstantiationException, IllegalAccessException {
     return (IStateManager) Class.forName(stateManagerClass).newInstance();
-  }
-
-  public static IConfigLoader makeConfigLoader(String configLoaderClass) throws
-      ClassNotFoundException, InstantiationException, IllegalAccessException {
-    return (IConfigLoader) Class.forName(configLoaderClass).newInstance();
   }
 
   public static IScheduler makeScheduler(String schedulerClass) throws
@@ -39,9 +33,9 @@ public class Factory {
     return (IRuntimeManager) Class.forName(runtimeManagerClass).newInstance();
   }
 
-  public static IPackingAlgorithm makePackingAlgorithm(String packingAlgorithmClass) throws
+  public static IPacking makePacking(String packingClass) throws
       ClassNotFoundException, IllegalAccessException, InstantiationException {
-    return (IPackingAlgorithm) Class.forName(packingAlgorithmClass).newInstance();
+    return (IPackingAlgorithm) Class.forName(packingClass).newInstance();
   }
 
   public static IRuntimeManager.Command makeCommand(String commandString) {
