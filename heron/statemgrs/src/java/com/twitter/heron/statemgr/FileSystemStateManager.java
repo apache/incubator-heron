@@ -1,5 +1,6 @@
 package com.twitter.heron.statemgr;
 
+import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.statemgr.IStateManager;
 
 import java.util.Map;
@@ -10,8 +11,8 @@ public abstract class FileSystemStateManager implements IStateManager {
   protected String rootAddress;
 
   @Override
-  public void initialize(Map<Object, Object> conf) {
-    this.rootAddress = (String) conf.get(ROOT_ADDRESS);
+  public void initialize(Context cxt) {
+    this.rootAddress = cxt.getStringValue(ROOT_ADDRESS);
   }
 
   protected String getTMasterLocationDir() {

@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
+import com.twitter.heron.spi.common.Context;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.api.BackgroundCallback;
@@ -31,8 +32,8 @@ public class CuratorStateManager extends FileSystemStateManager {
 
   public static final String ZK_CONNECTION_STRING = "zk.connection.string";
   @Override
-  public void initialize(Map<Object, Object> conf) {
-    super.initialize(conf);
+  public void initialize(Context cxt) {
+    super.initialize(cxt);
 
     int sessionTimeoutMs = 30 * 1000;
     int connectionTimeoutMs = 30 * 1000;
@@ -40,7 +41,7 @@ public class CuratorStateManager extends FileSystemStateManager {
     int retryCount = 10;
     int retryIntervalMs = 1000;
 
-    connectionString = (String) conf.get(ZK_CONNECTION_STRING);
+    connectionString = (String) cxt.get(ZK_CONNECTION_STRING);
 
     // these are reasonable arguments for the ExponentialBackoffRetry. The first
     // retry will wait 1 second - the second will wait up to 2 seconds - the
@@ -70,6 +71,12 @@ public class CuratorStateManager extends FileSystemStateManager {
     } catch (InterruptedException e) {
       throw new RuntimeException("Failed to initialize CuratorClient", e);
     }
+  }
+
+  @Override
+  public Context getContext() {
+    // No specific context to return.
+    return Context.newBuilder().build();
   }
 
   @Override

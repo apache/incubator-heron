@@ -9,6 +9,7 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
+import com.twitter.heron.spi.common.Context;
 
 /**
  * This file defines the IStateManager interface.
@@ -37,9 +38,18 @@ import com.twitter.heron.proto.tmaster.TopologyMaster;
  */
 
 public interface IStateManager {
-  String NO_SCHEDULER_REST_ENDPOINT = "no_scheduler_endpoint";
 
-  void initialize(Map<Object, Object> conf);
+  /**
+   * Initialize the uploader with the incoming context.
+   */
+  public void initialize(Context context);
+
+  /**
+   * Get the context specific to the StateManager
+   *
+   * @return Context
+   */
+  public Context getContext();
 
   void close();
 
