@@ -50,6 +50,7 @@ uploader_deps_files = [
 
 statemgr_deps_files = \
     heron_java_proto_files() + [
+        ":common-spi-java",
         "//3rdparty/guava:guava-java",
     ]
 

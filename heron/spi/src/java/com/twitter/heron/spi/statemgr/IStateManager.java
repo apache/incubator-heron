@@ -1,7 +1,5 @@
 package com.twitter.heron.spi.statemgr;
 
-import java.util.Map;
-
 import com.google.common.util.concurrent.ListenableFuture;
 
 import com.twitter.heron.api.generated.TopologyAPI;
