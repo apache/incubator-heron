@@ -20,7 +20,7 @@ java_test(
 
 java_test(
     name = "file-utility_unittest",
-    srcs = glob(["**/FileUtilityTest.java"]),
+    srcs = glob(["**/FileUtilsTest.java"]),
     deps = [
         "//heron/common/src/java:common-java",
         "//3rdparty/powermock:powermock-java",

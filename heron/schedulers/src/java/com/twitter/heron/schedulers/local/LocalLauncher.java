@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 import javax.xml.bind.DatatypeConverter;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.basics.FileUtility;
+import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 
 import com.twitter.heron.spi.common.Constants;
@@ -60,27 +60,27 @@ public class LocalLauncher implements ILauncher {
   }
 
   @Override
-  public boolean launchTopology(PackingPlan packing) {
+  public boolean launch(PackingPlan packing) {
     LOG.info("Launching topology in local cluster");
     Map<String, String> localProperties = new HashMap<String, String>();
 
     // put the binaries & defaults first
-    localProperties.put(LocalConfig.HERON_EXECUTOR_BINARY, "heron-executor");
-    localProperties.put(LocalConfig.HERON_SCHEDULER_BINARY, "heron-scheduler.jar");
-    localProperties.put(LocalConfig.STMGR_BINARY, "heron-stmgr");
-    localProperties.put(LocalConfig.TMASTER_BINARY, "heron-tmaster");
-    localProperties.put(LocalConfig.HERON_SHELL_BINARY, "heron-shell");
-    localProperties.put(LocalConfig.LOG_DIR, localConfig.getLogDir());
+    // localProperties.put(LocalConfig.HERON_EXECUTOR_BINARY, "heron-executor");
+    // localProperties.put(LocalConfig.HERON_SCHEDULER_BINARY, "heron-scheduler.jar");
+    // localProperties.put(LocalConfig.STMGR_BINARY, "heron-stmgr");
+    // localProperties.put(LocalConfig.TMASTER_BINARY, "heron-tmaster");
+    // localProperties.put(LocalConfig.HERON_SHELL_BINARY, "heron-shell");
+    // localProperties.put(LocalConfig.LOG_DIR, localConfig.getLogDir());
 
     // put the config files
-    localProperties.put(LocalConfig.HERON_INTERNALS_CONFIG_FILENAME,
-        FileUtility.getBaseName(SubmitterMain.getHeronInternalsConfigFile()));
+    // localProperties.put(LocalConfig.HERON_INTERNALS_CONFIG_FILENAME,
+        FileUtils.getBaseName(SubmitterMain.getHeronInternalsConfigFile()));
 
     // put the topology related config
-    localProperties.put(Constants.TOPOLOGY_DEFINITION_FILE, topology.getName() + ".defn");
+    // localProperties.put(Constants.TOPOLOGY_DEFINITION_FILE, topology.getName() + ".defn");
     localProperties.put(LocalConfig.TOPOLOGY_ID, topology.getId());
-    localProperties.put(LocalConfig.TOPOLOGY_JAR_FILE,
-        FileUtility.getBaseName(SubmitterMain.getOriginalPackageFile()));
+    // localProperties.put(LocalConfig.TOPOLOGY_JAR_FILE,
+        FileUtils.getBaseName(SubmitterMain.getOriginalPackageFile()));
     localProperties.put(LocalConfig.TOPOLOGY_NAME, topology.getName());
 
     // resource related config
@@ -95,15 +95,15 @@ public class LocalLauncher implements ILauncher {
         formatJavaOpts(TopologyUtility.getComponentJvmOptions(topology)));
     localProperties.put(LocalConfig.INSTANCE_JVM_OPTS_IN_BASE64,
         formatJavaOpts(TopologyUtility.getInstanceJvmOptions(topology)));
-    localProperties.put(LocalConfig.METRICS_MGR_CLASSPATH, "metrics-mgr-classpath/*");
-    localProperties.put(LocalConfig.PKG_TYPE,
-        (FileUtility.isOriginalPackageJar(
-            FileUtility.getBaseName(SubmitterMain.getOriginalPackageFile())) ? "jar" : "tar"));
-    localProperties.put(LocalConfig.HERON_JAVA_HOME, localConfig.getJavaHome());
+    // localProperties.put(LocalConfig.METRICS_MGR_CLASSPATH, "metrics-mgr-classpath/*");
+    // localProperties.put(LocalConfig.PKG_TYPE,
+        (FileUtils.isOriginalPackageJar(
+            FileUtils.getBaseName(SubmitterMain.getOriginalPackageFile())) ? "jar" : "tar"));
+    // * localProperties.put(LocalConfig.HERON_JAVA_HOME, localConfig.getJavaHome());
 
     // specific to local scheduler
-    localProperties.put(LocalConfig.WORKING_DIRECTORY, localConfig.getWorkingDirectory());
-    localProperties.put(LocalConfig.HERON_CORE_RELEASE_PACKAGE, localConfig.getHeronCoreReleasePackage());
+    // * localProperties.put(LocalConfig.WORKING_DIRECTORY, localConfig.getWorkingDirectory());
+    // * localProperties.put(LocalConfig.HERON_CORE_RELEASE_PACKAGE, localConfig.getHeronCoreReleasePackage());
 
     if (!localSetup(localConfig)) {
       LOG.severe("Failed to complete the local setup...");
