@@ -17,7 +17,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.basics.FileUtility;
+import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 
 import com.twitter.heron.spi.common.Constants;
@@ -76,7 +76,7 @@ public class MesosLauncher implements ILauncher {
     configOverrides.put("CLUSTER", cluster);
     configOverrides.put("ENVIRON", environ);
     configOverrides.put("HERON_INTERNALS_CONFIG_FILENAME",
-        FileUtility.getBaseName(SubmitterMain.getHeronInternalsConfigFile()));
+        FileUtils.getBaseName(SubmitterMain.getHeronInternalsConfigFile()));
     configOverrides.put("HERON_JAVA_HOME",
         context.getProperty("heron.java.home.path", "/usr/lib/jvm/java-1.8.0-twitter"));
     configOverrides.put("INSTANCE_DISTRIBUTION", TopologyUtility.packingToString(packing));
@@ -87,14 +87,14 @@ public class MesosLauncher implements ILauncher {
     configOverrides.put("LOG_DIR", context.getProperty("heron.logging.directory", "log-files"));
     configOverrides.put("METRICS_MGR_CLASSPATH", "metrics-mgr-classpath/*");
     configOverrides.put("NUM_SHARDS", "" + (1 + TopologyUtility.getNumContainer(topology)));
-    configOverrides.put("PKG_TYPE", (FileUtility.isOriginalPackageJar(
-        FileUtility.getBaseName(SubmitterMain.getOriginalPackageFile())) ? "jar" : "tar"));
+    configOverrides.put("PKG_TYPE", (FileUtils.isOriginalPackageJar(
+        FileUtils.getBaseName(SubmitterMain.getOriginalPackageFile())) ? "jar" : "tar"));
     configOverrides.put("STMGR_BINARY", "heron-stmgr");
     configOverrides.put("TMASTER_BINARY", "heron-tmaster");
     configOverrides.put("HERON_SHELL_BINARY", "heron-shell");
     configOverrides.put("TOPOLOGY_DEFN", topology.getName() + ".defn");
     configOverrides.put("TOPOLOGY_ID", topology.getId());
-    configOverrides.put("TOPOLOGY_JAR_FILE", FileUtility.getBaseName(SubmitterMain.getOriginalPackageFile()));
+    configOverrides.put("TOPOLOGY_JAR_FILE", FileUtils.getBaseName(SubmitterMain.getOriginalPackageFile()));
     configOverrides.put("TOPOLOGY_NAME", topology.getName());
     configOverrides.put("ZK_NODE", context.getProperty(Constants.ZK_CONNECTION_STRING));
     configOverrides.put("ZK_ROOT", context.getProperty(FileSystemStateManager.ROOT_ADDRESS));

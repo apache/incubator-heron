@@ -15,7 +15,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.basics.FileUtility;
+import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.scheduler.context.LaunchContext;
 import com.twitter.heron.scheduler.util.DefaultConfigLoader;
@@ -27,7 +27,7 @@ import junit.framework.Assert;
  * LocalUploader Tester.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(FileUtility.class)
+@PrepareForTest(FileUtils.class)
 
 public class LocalUploaderTest {
   public static final String working_directory = "working-dir";
@@ -61,10 +61,10 @@ public class LocalUploaderTest {
 
     LocalUploader uploader = Mockito.spy(LocalUploader.class.newInstance());
 
-    PowerMockito.mockStatic(FileUtility.class);
-    Mockito.when(FileUtility.isDirectoryExists(Matchers.anyString())).thenReturn(true);
-    Mockito.when(FileUtility.copyFile(Matchers.anyString(), Matchers.anyString())).thenReturn(true);
-    Mockito.when(FileUtility.getBaseName(topologyPkg)).thenReturn(topologyPkg);
+    PowerMockito.mockStatic(FileUtils.class);
+    Mockito.when(FileUtils.isDirectoryExists(Matchers.anyString())).thenReturn(true);
+    Mockito.when(FileUtils.copyFile(Matchers.anyString(), Matchers.anyString())).thenReturn(true);
+    Mockito.when(FileUtils.getBaseName(topologyPkg)).thenReturn(topologyPkg);
 
     DefaultConfigLoader configLoader = getDefaultConfigLoader();
     LaunchContext context =
@@ -77,7 +77,7 @@ public class LocalUploaderTest {
         working_directory, topologyPkg);
 
     PowerMockito.verifyStatic();
-    FileUtility.copyFile(topologyPkg, expectedTarget);
+    FileUtils.copyFile(topologyPkg, expectedTarget);
   }
 
   @Test
@@ -88,10 +88,10 @@ public class LocalUploaderTest {
 
     LocalUploader uploader = Mockito.spy(LocalUploader.class.newInstance());
 
-    PowerMockito.mockStatic(FileUtility.class);
-    Mockito.when(FileUtility.isDirectoryExists(Matchers.anyString())).thenReturn(true);
-    Mockito.when(FileUtility.copyFile(Matchers.anyString(), Matchers.anyString())).thenReturn(false);
-    Mockito.when(FileUtility.getBaseName(topologyPkg)).thenReturn(topologyPkg);
+    PowerMockito.mockStatic(FileUtils.class);
+    Mockito.when(FileUtils.isDirectoryExists(Matchers.anyString())).thenReturn(true);
+    Mockito.when(FileUtils.copyFile(Matchers.anyString(), Matchers.anyString())).thenReturn(false);
+    Mockito.when(FileUtils.getBaseName(topologyPkg)).thenReturn(topologyPkg);
 
     DefaultConfigLoader configLoader = getDefaultConfigLoader();
     LaunchContext context =
@@ -104,7 +104,7 @@ public class LocalUploaderTest {
         working_directory, topologyPkg);
 
     PowerMockito.verifyStatic();
-    FileUtility.copyFile(topologyPkg, expectedTarget);
+    FileUtils.copyFile(topologyPkg, expectedTarget);
   }
 
   /**
@@ -114,12 +114,12 @@ public class LocalUploaderTest {
   public void testUndo() throws Exception {
     LocalUploader uploader = Mockito.spy(LocalUploader.class.newInstance());
 
-    PowerMockito.mockStatic(FileUtility.class);
-    Mockito.when(FileUtility.deleteFile(Matchers.anyString())).thenReturn(true);
+    PowerMockito.mockStatic(FileUtils.class);
+    Mockito.when(FileUtils.deleteFile(Matchers.anyString())).thenReturn(true);
 
     uploader.undo();
 
     PowerMockito.verifyStatic();
-    FileUtility.deleteFile(Matchers.anyString());
+    FileUtils.deleteFile(Matchers.anyString());
   }
 }

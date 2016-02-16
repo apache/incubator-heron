@@ -13,8 +13,8 @@ import java.util.logging.Logger;
 /**
  * Utilities related to File.
  */
-public class FileUtility {
-  private static final Logger LOG = Logger.getLogger(FileUtility.class.getName());
+public class FileUtils {
+  private static final Logger LOG = Logger.getLogger(FileUtils.class.getName());
 
   public static boolean deleteFile(String filename) {
     Path file = new File(filename).toPath();

@@ -33,21 +33,27 @@ public class Keys {
     public static final String SHELL_BINARY = "heron.binaries.shell";
     public static final String SCHEDULER_JAR = "heron.jars.scheduler";
 
-    // Constants for config provides files and directories
-    public static final String LOGGING_DIR = "heron.logging.directory";
+    // Constants for config provided files and directories
+    public static final String LOGGING_DIRECTORY = "heron.logging.directory";
+    public static final String INTERNALS_CONFIG_FILE = "heron.internals.config.file";
+    public static final String TOPOLOGY_DEFINITION_FILE = "heron.topology.definition.file";
+    public static final String TOPOLOGY_JAR_FILE = "heron.topology.jar.file";
+    public static final String TOPOLOGY_PKG_TYPE = "heron.topology.package.type";
 
     // Constants for config provided default values for resources
     public static final String STMGR_RAM = "heron.stmgr.ram";
     public static final String INSTANCE_RAM = "heron.instance.ram";
     public static final String INSTANCE_CPU = "heron.instance.cpu";
     public static final String INSTANCE_DISK = "heron.instance.disk";
+
+    // Consts for config provided paths
+    public static final String METRICS_MANAGER_CLASSPATH = "heron.metrics.manager.classpath";
   }
 
   public class Runtime {
     public static final String CORE_RELEASE_URI = "heron.core.release.uri";
     public static final String TOPOLOGY_PKG_URI = "heron.topology.pkg.uri";
     public static final String TOPOLOGY_PHYSICAL_PLAN = "heron.topology.physical.plan";
-    public static final String TOPOLOGY_DEFINITION_FILE = "heron.topology.definition.file";
 
     public static final String HERON_RELEASE_PACKAGE = "heron.release.package";
     public static final String HERON_RELEASE_PACKAGE_ROLE = "heron.release.package.role";

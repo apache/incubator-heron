@@ -16,7 +16,7 @@ public class Defaults {
     public static final String STATEMGR_YAML = "statemgr.yaml";
     public static final String UPLOADER_YAML = "uploader.yaml";
 
-    public static final String LOGGING_DIR = "log-files";
+    public static final String LOGGING_DIRECTORY = "log-files";
   }
 
   /**
@@ -29,6 +29,9 @@ public class Defaults {
     public static final String TMASTER_BINARY = "heron-tmaster";
     public static final String SHELL_BINARY = "heron-shell";
     public static final String SCHEDULER_JAR = "heron-scheduler.jar";
+
+    // Defaults for config provide paths
+    public static final String METRICS_MANAGER_CLASSPATH = "metrics-mgr-classpath/*";
 
     // Constants for config provided default values for resources
     public static final long STMGR_RAM = 128 * MB;
