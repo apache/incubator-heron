@@ -13,6 +13,7 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
+import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.statemgr.FileSystemStateManager;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 
@@ -22,28 +23,50 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   public static final String IS_INITIALIZE_FILE_TREE = "is.initialize.file.tree";
   public static final String WORKING_DIRECTORY = "heron.local.working.directory";
 
+  // The context passed to state manager
+  private Context baseCxt;
+  // The context owned by state manager
+  private Context stateMgrCxt;
+
   @Override
-  public void initialize(Map<Object, Object> conf) {
-    String rootAddress = (String) conf.get(ROOT_ADDRESS);
+  public void initialize(Context cxt) {
+    baseCxt = cxt;
+    Context.Builder stateMgrCxtBuilder = Context.newBuilder();
+
+    String rootAddress = baseCxt.getStringValue(ROOT_ADDRESS);
     if (rootAddress == null) {
-      Object workingDir = conf.get(WORKING_DIRECTORY);
+      Object workingDir = baseCxt.get(WORKING_DIRECTORY);
       if (workingDir == null) {
         throw new IllegalArgumentException("Misses required config: " + WORKING_DIRECTORY);
       }
       rootAddress = String.format("%s/%s", workingDir, "state");
-      conf.put(ROOT_ADDRESS, rootAddress);
+      stateMgrCxtBuilder.put(ROOT_ADDRESS, rootAddress);
     }
 
-    super.initialize(conf);
+    // If more key values need to be added to stateMgrCxt later, it might be
+    // better to maintain a mutable map and only convert to context in getContext method.
+    stateMgrCxt = stateMgrCxtBuilder.build();
+
+    super.initialize(
+        Context.newBuilder()
+            .putAll(baseCxt)
+            .putAll(stateMgrCxt)
+            .build()
+    );
 
     // By default, we would init the file tree if it is not there
-    boolean isInitLocalFileTree = conf.get(IS_INITIALIZE_FILE_TREE) == null ?
-        true : (Boolean) conf.get(IS_INITIALIZE_FILE_TREE);
+    boolean isInitLocalFileTree = baseCxt.get(IS_INITIALIZE_FILE_TREE) == null ?
+        true : (Boolean) baseCxt.get(IS_INITIALIZE_FILE_TREE);
 
     if (isInitLocalFileTree && !initTree()) {
       throw new IllegalArgumentException("Failed to initialize Local State manager. " +
           "Check rootAddress: " + rootAddress);
     }
+  }
+
+  @Override
+  public Context getContext() {
+    return stateMgrCxt;
   }
 
   protected boolean initTree() {
