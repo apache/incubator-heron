@@ -45,7 +45,7 @@ public class RoundRobinPacking implements IPacking {
   }
 
   @Override
-  public void cleanup() {
+  public void close() {
   }
 
   private int getLargestContainerSize(Map<String, List<String>> packing) {

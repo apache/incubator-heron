@@ -26,5 +26,5 @@ public interface IPacking {
    * This is to for disposing or cleaning up any internal state accumulated by
    * the uploader
    */
-  public void cleanup();
+  public void close();
 }

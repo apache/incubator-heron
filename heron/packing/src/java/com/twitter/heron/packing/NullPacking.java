@@ -18,6 +18,7 @@ public class NullPacking implements IPacking {
       new PackingPlan.Resource(0.0, 0L, 0L));
   }
 
-  public void cleanup() {
+  @Override
+  public void close() {
   }
 }
