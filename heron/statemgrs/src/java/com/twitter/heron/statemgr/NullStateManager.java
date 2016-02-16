@@ -10,6 +10,7 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
+import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 
@@ -18,8 +19,13 @@ public class NullStateManager implements IStateManager {
   public SettableFuture nullFuture = SettableFuture.create();
 
   @Override
-  public void initialize(Map<Object, Object> conf) {
+  public void initialize(Context context) {
     nullFuture.set(null);
+  }
+
+  @Override
+  public Context getContext() {
+    return null;
   }
 
   @Override
