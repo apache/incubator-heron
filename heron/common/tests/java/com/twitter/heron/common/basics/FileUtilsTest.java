@@ -17,11 +17,11 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import junit.framework.Assert;
 
 /**
- * FileUtility Tester.
+ * FileUtils Tester.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({FileUtility.class})
-public class FileUtilityTest {
+@PrepareForTest({FileUtils.class})
+public class FileUtilsTest {
 
   @Before
   public void before() throws Exception {
@@ -38,7 +38,7 @@ public class FileUtilityTest {
   public void testDeleteFile() throws Exception {
     PowerMockito.mockStatic(Files.class);
 
-    Assert.assertTrue(FileUtility.deleteFile(""));
+    Assert.assertTrue(FileUtils.deleteFile(""));
   }
 
   /**
@@ -48,7 +48,7 @@ public class FileUtilityTest {
   public void testCopyFile() throws Exception {
     PowerMockito.mockStatic(Files.class);
 
-    Assert.assertTrue(FileUtility.copyFile("", ""));
+    Assert.assertTrue(FileUtils.copyFile("", ""));
   }
 
   /**
@@ -57,11 +57,11 @@ public class FileUtilityTest {
   @Test
   public void testWriteToFile() throws Exception {
     String currentWorkingDir = Paths.get("").toAbsolutePath().normalize().toString();
-    Assert.assertFalse(FileUtility.writeToFile(currentWorkingDir, null));
+    Assert.assertFalse(FileUtils.writeToFile(currentWorkingDir, null));
 
     PowerMockito.mockStatic(Files.class);
     String randomString = UUID.randomUUID().toString();
-    Assert.assertTrue(FileUtility.writeToFile(randomString, null));
+    Assert.assertTrue(FileUtils.writeToFile(randomString, null));
   }
 
   /**
@@ -73,7 +73,7 @@ public class FileUtilityTest {
     PowerMockito.mockStatic(Files.class);
     PowerMockito.when(Files.readAllBytes(Matchers.any(Path.class))).thenReturn(toRead.getBytes());
 
-    Assert.assertEquals(new String(FileUtility.readFromFile("")), toRead);
+    Assert.assertEquals(new String(FileUtils.readFromFile("")), toRead);
   }
 
   /**
@@ -82,12 +82,12 @@ public class FileUtilityTest {
   @Test
   public void testCreateDirectory() throws Exception {
     String currentWorkingDir = Paths.get("").toAbsolutePath().normalize().toString();
-    Assert.assertFalse(FileUtility.createDirectory(currentWorkingDir));
+    Assert.assertFalse(FileUtils.createDirectory(currentWorkingDir));
 
     String newDir = String.format("%s/%s", currentWorkingDir, UUID.randomUUID().toString());
-    Assert.assertTrue(FileUtility.createDirectory(newDir));
+    Assert.assertTrue(FileUtils.createDirectory(newDir));
 
-    Assert.assertTrue(FileUtility.deleteFile(newDir));
+    Assert.assertTrue(FileUtils.deleteFile(newDir));
   }
 
   /**
@@ -98,11 +98,11 @@ public class FileUtilityTest {
     PowerMockito.mockStatic(Files.class);
     PowerMockito.when(Files.isDirectory(Matchers.any(Path.class))).thenReturn(true);
 
-    Assert.assertTrue(FileUtility.isDirectoryExists(""));
+    Assert.assertTrue(FileUtils.isDirectoryExists(""));
 
     PowerMockito.when(Files.isDirectory(Matchers.any(Path.class))).thenReturn(false);
 
-    Assert.assertFalse(FileUtility.isDirectoryExists(""));
+    Assert.assertFalse(FileUtils.isDirectoryExists(""));
   }
 
   /**
@@ -111,10 +111,10 @@ public class FileUtilityTest {
   @Test
   public void testIsOriginalPackageJar() throws Exception {
     String jarFile = "a.jar";
-    Assert.assertTrue(FileUtility.isOriginalPackageJar(jarFile));
+    Assert.assertTrue(FileUtils.isOriginalPackageJar(jarFile));
 
     String notJarFile = "b.tar";
-    Assert.assertFalse(FileUtility.isOriginalPackageJar(notJarFile));
+    Assert.assertFalse(FileUtils.isOriginalPackageJar(notJarFile));
   }
 
   /**
@@ -123,9 +123,9 @@ public class FileUtilityTest {
   @Test
   public void testGetBaseName() throws Exception {
     String filename = "a/b";
-    Assert.assertEquals("b", FileUtility.getBaseName(filename));
+    Assert.assertEquals("b", FileUtils.getBaseName(filename));
 
     filename = "b";
-    Assert.assertEquals("b", FileUtility.getBaseName(filename));
+    Assert.assertEquals("b", FileUtils.getBaseName(filename));
   }
 }

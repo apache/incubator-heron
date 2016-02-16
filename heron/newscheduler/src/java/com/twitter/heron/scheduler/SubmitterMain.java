@@ -31,24 +31,33 @@ public class SubmitterMain {
     String role = args[1];
     String environ = args[2];
     String configPath = args[3];
-    // String configOverrideEncoded = args[4];
+    String configOverrideEncoded = args[4];
 
-    // String topologyPackage = args[5];
-    // String topologyDefnFile = args[6];
-    // String heronInternalsFile = args[7];
-    // String originalPackageFile = args[8];
+    String topologyPackage = args[5];
+    String topologyDefnFile = args[6];
+    String heronInternalsFile = args[7];
+    String originalPackageFile = args[8];
+    String pkg_type = FileUtils.isOriginalPackageJar(
+        FileUtility.getBaseName(originalPackageFile)) ? "jar" : "tar" ; 
 
-    Context.Builder cb = Context.newBuilder()
-       .put(Keys.Config.CLUSTER, cluster)
-       .put(Keys.Config.ROLE, role)
-       .put(Keys.Config.ENVIRON, environ);
-
-    // Add runtime parameters
-    cb.put(Keys.Runtime.TOPOLOGY_DEFINITION_FILE, topologyDefnFile)
-
-    Context.Builder cb = Context.newBuilder()
+    // First load the defaults, then the config from files to override it 
+    Context.Builder cb1 = Context.newBuilder()
        .putAll(ClusterDefaults.getDefaults())
        .putAll(ClusterConfig.loadConfig(cluster, configPath));
+ 
+    // Add config parameters from the command line
+    Context.Builder cb2 = Context.newBuilder()
+       .put(Keys.Config.CLUSTER, cluster)
+       .put(Keys.Config.ROLE, role)
+       .put(Keys.Config.ENVIRON, environ)
+
+    Context.Builder cb3 = Context.newBuilder()
+       .put(Keys.Config.INTERNALS_CONFIG_FILE, heronInternalsFile)
+       .put(Keys.Config.TOPOLOGY_DEFINITION_FILE, topologyDefnFile)
+       .put(Keys.Config.TOPOLOGY_JAR_FILE, originalPackageFile)
+       .put(Keys.Config.TOPOLOGY_PKG_TYPE, pkg_type)
+
+    // TODO - Karthik override any parameters from the command line
 
     System.out.println(cb.build()); 
   }

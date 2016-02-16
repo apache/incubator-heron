@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 import javax.xml.bind.DatatypeConverter;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.basics.FileUtility;
+import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.PackingPlan;
@@ -147,7 +147,7 @@ public class AuroraLauncher implements ILauncher {
     auroraProperties.put("ENVIRON", environ);
     auroraProperties.put("HERON_EXECUTOR_BINARY", "heron-executor");
     auroraProperties.put("HERON_INTERNALS_CONFIG_FILENAME",
-        FileUtility.getBaseName(SubmitterMain.getHeronInternalsConfigFile()));
+        FileUtils.getBaseName(SubmitterMain.getHeronInternalsConfigFile()));
     auroraProperties.put("HERON_JAVA_HOME",
         context.getProperty("heron.java.home.path", ""));
     auroraProperties.put("INSTANCE_DISTRIBUTION", TopologyUtility.packingToString(packing));
@@ -159,8 +159,8 @@ public class AuroraLauncher implements ILauncher {
         context.getProperty("heron.logging.directory", "log-files"));
     auroraProperties.put("METRICS_MGR_CLASSPATH", "metrics-mgr-classpath/*");
     auroraProperties.put("NUM_SHARDS", "" + (1 + TopologyUtility.getNumContainer(topology)));
-    auroraProperties.put("PKG_TYPE", (FileUtility.isOriginalPackageJar(
-        FileUtility.getBaseName(SubmitterMain.getOriginalPackageFile())) ? "jar" : "tar"));
+    auroraProperties.put("PKG_TYPE", (FileUtils.isOriginalPackageJar(
+        FileUtils.getBaseName(SubmitterMain.getOriginalPackageFile())) ? "jar" : "tar"));
     auroraProperties.put("RAM_PER_CONTAINER", containerResource.ram + "");
     auroraProperties.put("RUN_ROLE", role);
     auroraProperties.put("STMGR_BINARY", "heron-stmgr");
@@ -169,7 +169,7 @@ public class AuroraLauncher implements ILauncher {
     auroraProperties.put("TOPOLOGY_DEFN", topology.getName() + ".defn");
     auroraProperties.put("TOPOLOGY_ID", topology.getId());
     auroraProperties.put("TOPOLOGY_JAR_FILE",
-        FileUtility.getBaseName(SubmitterMain.getOriginalPackageFile()));
+        FileUtils.getBaseName(SubmitterMain.getOriginalPackageFile()));
     auroraProperties.put("TOPOLOGY_NAME", topology.getName());
     auroraProperties.put("TOPOLOGY_PKG",
         PackerUtility.getTopologyPackageName(topology.getName(),
