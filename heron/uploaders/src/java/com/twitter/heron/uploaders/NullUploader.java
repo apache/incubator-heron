@@ -25,6 +25,6 @@ public class NullUploader implements IUploader {
   }
 
   @Override
-  public void cleanup() {
+  public void close() {
   }
 }
