@@ -8,11 +8,8 @@ import javax.xml.bind.DatatypeConverter;
 // and then invoke applyConfigOverride(..) with the decoded String.
 
 public class Base64ConfigLoader extends DefaultConfigLoader {
-
   @Override
-  public boolean applyConfigOverride(String configOverride) {
-    String decodedConfigOverride = new String(
-        DatatypeConverter.parseBase64Binary(configOverride), Charset.forName("UTF-8"));
-    return super.applyConfigOverride(decodedConfigOverride);
+  protected String preparePropertyOverride(String configOverride) {
+    return new String(DatatypeConverter.parseBase64Binary(configOverride), Charset.forName("UTF-8"));
   }
 }

@@ -23,14 +23,25 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
-import com.twitter.heron.scheduler.api.IConfigLoader;
-import com.twitter.heron.scheduler.api.ILauncher;
-import com.twitter.heron.scheduler.api.IPackingAlgorithm;
-import com.twitter.heron.scheduler.api.IUploader;
-import com.twitter.heron.scheduler.api.PackingPlan;
-import com.twitter.heron.scheduler.api.SchedulerStateManagerAdaptor;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
-import com.twitter.heron.scheduler.util.Nullity;
+
+import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.packing.IPackingAlgorithm;
+import com.twitter.heron.spi.packing.NullPackingAlgorithm;
+
+import com.twitter.heron.spi.uploader.IUploader;
+import com.twitter.heron.spi.uploader.NullUploader;
+
+import com.twitter.heron.spi.scheduler.IScheduler;
+import com.twitter.heron.spi.scheduler.NullScheduler;
+
+import com.twitter.heron.spi.statemgr.NullStateManager;
+import com.twitter.heron.spi.scheduler.IConfigLoader;
+import com.twitter.heron.spi.scheduler.ILauncher;
+import com.twitter.heron.spi.scheduler.NullLauncher;
+import com.twitter.heron.spi.scheduler.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
+
+import com.twitter.heron.scheduler.util.DefaultConfigLoader;
 import com.twitter.heron.scheduler.util.TopologyUtilityTest;
 
 import static org.junit.Assert.assertFalse;
@@ -87,10 +98,21 @@ public class LaunchRunnerTest {
         getTopology();
   }
 
+  private IConfigLoader createConfig() {
+    IConfigLoader config = mock(DefaultConfigLoader.class);
+    when(config.getUploaderClass()).thenReturn(NullUploader.class.getName());
+    when(config.getLauncherClass()).thenReturn(NullLauncher.class.getName());
+    when(config.getSchedulerClass()).thenReturn(NullScheduler.class.getName());
+    when(config.getPackingAlgorithmClass()).thenReturn(NullPackingAlgorithm.class.getName());
+    when(config.getStateManagerClass()).thenReturn(NullStateManager.class.getName());
+    when(config.load(anyString(), anyString())).thenReturn(true);
+    return config;
+  }
+
   @Before
   public void setUp() throws Exception {
     uploader = mock(IUploader.class);
-    config = mock(IConfigLoader.class);
+    config = createConfig();
     packingAlgorithm = mock(IPackingAlgorithm.class);
     launcher = mock(ILauncher.class);
     stateManager = mock(SchedulerStateManagerAdaptor.class);
@@ -111,7 +133,7 @@ public class LaunchRunnerTest {
         .thenReturn(trueFuture);
     when(stateManager.setTopology(eq(topology))).thenReturn(trueFuture);
     when(context.getStateManagerAdaptor()).thenReturn(stateManager);
-    when(config.getSchedulerClass()).thenReturn(Nullity.NullScheduler.class.getName());
+    when(config.getSchedulerClass()).thenReturn(NullScheduler.class.getName());
     when(launcher.launchTopology(any(PackingPlan.class))).thenReturn(true);
     when(launcher.prepareLaunch(any(PackingPlan.class))).thenReturn(true);
     when(launcher.postLaunch(any(PackingPlan.class))).thenReturn(true);

@@ -2,15 +2,14 @@ package com.twitter.heron.scheduler.aurora;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.scheduler.api.Constants;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
+import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
 import com.twitter.heron.scheduler.util.DefaultConfigLoader;
 import com.twitter.heron.scheduler.util.RoundRobinPacking;
 import com.twitter.heron.scheduler.util.TopologyUtilityTest;
@@ -18,9 +17,8 @@ import com.twitter.heron.scheduler.util.TopologyUtilityTest;
 public class AuroraLauncherTest {
   DefaultConfigLoader createRequiredConfig() throws Exception {
     DefaultConfigLoader schedulerConfig = DefaultConfigLoader.class.newInstance();
-    schedulerConfig.properties = new Properties();
     schedulerConfig.addDefaultProperties();
-    schedulerConfig.properties.setProperty(Constants.DC, "dc");
+    schedulerConfig.properties.setProperty(Constants.CLUSTER, "cluster");
     schedulerConfig.properties.setProperty(Constants.ROLE, "me");
     schedulerConfig.properties.setProperty(Constants.ENVIRON, "environ");
     schedulerConfig.properties.setProperty(Constants.HERON_RELEASE_PACKAGE_ROLE, "me");
@@ -34,6 +32,8 @@ public class AuroraLauncherTest {
         Long.toString(1 * Constants.GB));
     schedulerConfig.properties.setProperty(RoundRobinPacking.STMGR_RAM_DEFAULT,
         Long.toString(1 * Constants.GB));
+    String stateMgrClass = "com.twitter.heron.spi.statemgr.NullStateManager";
+    schedulerConfig.properties.setProperty(Constants.STATE_MANAGER_CLASS, stateMgrClass);
     return schedulerConfig;
   }
 

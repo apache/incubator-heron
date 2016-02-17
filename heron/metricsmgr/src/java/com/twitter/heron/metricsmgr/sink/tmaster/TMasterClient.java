@@ -4,16 +4,16 @@ import java.util.logging.Logger;
 
 import com.google.protobuf.Message;
 
-import com.twitter.heron.common.core.base.Communicator;
-import com.twitter.heron.common.core.base.NIOLooper;
-import com.twitter.heron.common.core.network.HeronClient;
-import com.twitter.heron.common.core.network.HeronSocketOptions;
-import com.twitter.heron.common.core.network.StatusCode;
+import com.twitter.heron.common.basics.Communicator;
+import com.twitter.heron.common.basics.NIOLooper;
+import com.twitter.heron.common.network.HeronClient;
+import com.twitter.heron.common.network.HeronSocketOptions;
+import com.twitter.heron.common.network.StatusCode;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 
 /**
- * TMasterClient would try to connect to TMaster and then send TopologyMaster.PublishMetrics continuously.
- * Notice that TMaster would not send registerRequest or wait for registerResponse.
+ * TMasterClient connects to TMaster and then send TopologyMaster.PublishMetrics continuously.
+ * Note that TMaster will not send registerRequest or wait for registerResponse.
  */
 public class TMasterClient extends HeronClient implements Runnable {
   private static final Logger LOG = Logger.getLogger(TMasterClient.class.getName());

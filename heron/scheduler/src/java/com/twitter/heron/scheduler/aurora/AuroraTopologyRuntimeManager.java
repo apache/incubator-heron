@@ -12,10 +12,10 @@ import java.util.logging.Logger;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
-import com.twitter.heron.scheduler.api.Constants;
-import com.twitter.heron.scheduler.api.IRuntimeManager;
-import com.twitter.heron.scheduler.api.SchedulerStateManagerAdaptor;
-import com.twitter.heron.scheduler.api.context.RuntimeManagerContext;
+import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.scheduler.IRuntimeManager;
+import com.twitter.heron.spi.scheduler.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.scheduler.context.RuntimeManagerContext;
 import com.twitter.heron.scheduler.util.ShellUtility;
 import com.twitter.heron.scheduler.util.TopologyUtility;
 
@@ -25,11 +25,11 @@ import com.twitter.heron.scheduler.util.TopologyUtility;
  */
 public class AuroraTopologyRuntimeManager implements IRuntimeManager {
   private static final Logger LOG = Logger.getLogger(AuroraTopologyRuntimeManager.class.getName());
-  private static final String HERON_BATCH_SIZE = "heron.batch.size";
+  private static final String HERON_AURORA_BATCH_SIZE = "heron.aurora.batch.size";
   private static final String HERON_CONTROLLER_AURORA = "heron_controller.aurora";
   private RuntimeManagerContext context;
   private String topologyName;
-  private String dc;
+  private String cluster;
   private String role;
   private String environ;
 
@@ -46,7 +46,7 @@ public class AuroraTopologyRuntimeManager implements IRuntimeManager {
       auroraCmd.add(String.format("%s=%s", binding, args.get(binding)));
     }
     auroraCmd.add(String.format("%s/%s/%s/%s",
-        dc, role, "devel", args.get("JOB_NAME")));
+        cluster, role, "devel", args.get("JOB_NAME")));
     auroraCmd.add(getHeronControllerAuroraPath());
     if (context.isVerbose()) {
       auroraCmd.add("--verbose");
@@ -114,7 +114,7 @@ public class AuroraTopologyRuntimeManager implements IRuntimeManager {
     args.put("TMASTER_CONTROLLER_PORT", "" + tMasterLocation.getControllerPort());
     args.put("TOPOLOGY_ID", topology.getId());
     args.put("JOB_NAME", controlJobName);
-    args.put("DC", dc);
+    args.put("CLUSTER", cluster);
     args.put("RUN_ROLE", role);
     args.put("HERON_PACKAGE",
         context.getProperty(Constants.HERON_RELEASE_PACKAGE_NAME, "heron-core-package"));
@@ -155,7 +155,7 @@ public class AuroraTopologyRuntimeManager implements IRuntimeManager {
   public void initialize(RuntimeManagerContext context) {
     this.context = context;
     this.topologyName = context.getTopologyName();
-    this.dc = this.context.getPropertyWithException(Constants.DC);
+    this.cluster = this.context.getPropertyWithException(Constants.CLUSTER);
     this.role = this.context.getPropertyWithException(Constants.ROLE);
     this.environ = this.context.getPropertyWithException(Constants.ENVIRON);
   }
@@ -177,16 +177,17 @@ public class AuroraTopologyRuntimeManager implements IRuntimeManager {
     } catch (InterruptedException | ExecutionException e) {
       LOG.log(Level.SEVERE, "Fetch topology failed. Check if topology is running", e);
     }
-    String batchSize = context.getProperty(HERON_BATCH_SIZE,
-        (1 + TopologyUtility.getNumContainer(topology)) + "");
-    String[] auroraCmd = new String[]{
-        "aurora", "job", "restart", "--batch-size", batchSize,
-        restartShardId == -1 ? String.format("%s/%s/%s/%s", dc, role, environ, topologyName)
-            : String.format("%s/%s/%s/%s/%s", dc, role, environ, topologyName, restartShardId),
-        context.isVerbose() ? "--verbose" : ""
-    };
+    String batchSize = context.getProperty(HERON_AURORA_BATCH_SIZE, (1 + TopologyUtility.getNumContainer(topology)) + "");
 
-    return 0 == ShellUtility.runProcess(context.isVerbose(), auroraCmd, null, null);
+    ArrayList<String> auroraCmd = new ArrayList<>(Arrays.asList(
+            "aurora", "job", "restart", "--batch-size", batchSize,
+            restartShardId == -1 ? String.format("%s/%s/%s/%s", cluster, role, environ, topologyName)
+                : String.format("%s/%s/%s/%s/%s", cluster, role, environ, topologyName, restartShardId)));
+    if (context.isVerbose()) {
+      auroraCmd.add("--verbose");
+    }
+
+    return 0 == ShellUtility.runProcess(context.isVerbose(), auroraCmd.toArray(new String[auroraCmd.size()]), null, null);
   }
 
   @Override
@@ -198,33 +199,20 @@ public class AuroraTopologyRuntimeManager implements IRuntimeManager {
       LOG.log(Level.SEVERE, "Fetch topology failed. Check if topology is running", e);
       return false;
     }
-    String batchSize = context.getProperty(HERON_BATCH_SIZE,
-        (1 + TopologyUtility.getNumContainer(topology)) + "");
+    String batchSize = context.getProperty(HERON_AURORA_BATCH_SIZE, (1 + TopologyUtility.getNumContainer(topology)) + "");
 
-    String[] auroraCmd = {
-        "aurora", "job", "killall", "--batch-size", batchSize,
-        String.format("%s/%s/%s/%s", dc, role, environ, topologyName),
-        context.isVerbose() ? "--verbose" : ""
-    };
+    ArrayList<String> auroraCmd = new ArrayList<>(Arrays.asList(
+            "aurora", "job", "killall", "--batch-size", batchSize,
+            String.format("%s/%s/%s/%s", cluster, role, environ, topologyName)));
+    if (context.isVerbose()) {
+      auroraCmd.add("--verbose");
+    }
 
-    LOG.info("auroraCmd=" + Arrays.toString(auroraCmd));
+    LOG.info("auroraCmd=" + auroraCmd);
 
-    if (0 == ShellUtility.runProcess(context.isVerbose(), auroraCmd, null, null)) {
-      try {
-        ExecutionEnvironment.ExecutionState executionState =
-            context.getStateManagerAdaptor().getExecutionState().get();
-        String packageName = String.format(
-            "heron-topology-%s_%s", topologyName, executionState.getReleaseState().getReleaseTag());
-
-        // Remove package from packer (Unset live label).
-        // TODO(nbhagat): Unsetting package live is sufficient. Deleting package is not required
-        return 0 == ShellUtility.runProcess(context.isVerbose(),
-            new String[]{"packer", "unset_live", "--cluster=" + dc, role, packageName},
-            null, null);
-      } catch (ExecutionException | InterruptedException e) {
-        LOG.log(Level.SEVERE, "Successfully killed aurora job but failed to clear package.", e);
-        return false;
-      }
+    if (0 == ShellUtility.runProcess(context.isVerbose(), auroraCmd.toArray(new String[auroraCmd.size()]), null, null)) {
+      LOG.info("Killed topology");
+      return true;
     } else {
       LOG.severe("Failed to kill topology.");
       return false;

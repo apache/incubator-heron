@@ -9,7 +9,7 @@ from heron.tracker.src.python.log import Log as LOG
 from heron.proto import topology_pb2
 
 from heron.common.src.python.topology import Topology
-from heron.state.src.python import statemanagerfactory
+from heron.statemgrs.src.python import statemanagerfactory
 
 class Tracker:
   """
@@ -98,19 +98,19 @@ class Tracker:
     topology.register_watch(self.setTopologyInfo)
 
     def on_topology_pplan(data):
-      LOG.info("Watch trigerred for topology pplan: " + topologyName)
+      LOG.info("Watch triggered for topology pplan: " + topologyName)
       topology.set_physical_plan(data)
       if not data:
         LOG.debug("No data to be set")
 
     def on_topology_execution_state(data):
-      LOG.info("Watch trigerred for topology execution state: " + topologyName)
+      LOG.info("Watch triggered for topology execution state: " + topologyName)
       topology.set_execution_state(data)
       if not data:
         LOG.debug("No data to be set")
 
     def on_topology_tmaster(data):
-      LOG.info("Watch trigerred for topology tmaster: " + topologyName)
+      LOG.info("Watch triggered for topology tmaster: " + topologyName)
       topology.set_tmaster(data)
       if not data:
         LOG.debug("No data to be set")
