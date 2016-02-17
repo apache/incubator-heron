@@ -90,6 +90,12 @@ java_import(
     jars = ["zookeeper-3.4.6.jar"],
 )
 
+java_import(
+    name = "zookeeper-java-neverlink",
+    jars = ["zookeeper-3.4.6.jar"],
+    neverlink = 1,
+)
+
 filegroup(
     name = "zookeeper",
     srcs = [
