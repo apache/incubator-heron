@@ -119,6 +119,6 @@ public class PackerUploader implements IUploader {
   }
  
   @Override
-  public void cleanup() {
+  public void close() {
   }
 }
