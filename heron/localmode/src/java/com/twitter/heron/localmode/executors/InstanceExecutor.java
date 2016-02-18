@@ -3,8 +3,8 @@ package com.twitter.heron.localmode.executors;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.core.base.Communicator;
-import com.twitter.heron.common.core.base.SlaveLooper;
+import com.twitter.heron.common.basics.Communicator;
+import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.localmode.instance.BoltInstance;

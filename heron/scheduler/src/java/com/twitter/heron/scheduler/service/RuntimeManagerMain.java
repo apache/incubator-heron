@@ -5,10 +5,11 @@ import java.util.logging.Logger;
 
 import javax.xml.bind.DatatypeConverter;
 
-import com.twitter.heron.scheduler.api.IConfigLoader;
-import com.twitter.heron.scheduler.api.IRuntimeManager;
-import com.twitter.heron.scheduler.api.context.RuntimeManagerContext;
-import com.twitter.heron.scheduler.util.Factory;
+import com.twitter.heron.spi.scheduler.IConfigLoader;
+import com.twitter.heron.spi.scheduler.IRuntimeManager;
+import com.twitter.heron.spi.scheduler.context.RuntimeManagerContext;
+
+import com.twitter.heron.spi.util.Factory;
 
 public class RuntimeManagerMain {
   private static final Logger LOG = Logger.getLogger(RuntimeManagerMain.class.getName());
