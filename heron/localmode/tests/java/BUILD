@@ -94,3 +94,10 @@ java_test(
     deps = test_deps_files, 
     size = "small",
 )
+
+java_test(
+    name = "local-mode_unittest",
+    srcs = glob(["**/LocalModeTest.java"]),
+    deps = test_deps_files,
+    size = "small",
+)
