@@ -4,6 +4,7 @@ import argparse
 import atexit
 import base64
 import contextlib
+import getpass
 import glob
 import logging
 import logging.handlers
@@ -78,6 +79,13 @@ def get_heron_dir():
 
 def pass_config_overrides(namespace):
   parts = namespace['config-overrides'].split('/')[:3]
+  if len(parts) == 1:
+    parts.append(getpass.getuser())
+  if len(parts) == 2:
+    parts.append('default')
+  if len(parts[0]) == 0 or len(parts[1]) == 0 or len(parts[2]) == 0:
+    print "Failed to parse config-overrides: %s" % namespace['config-overrides']
+    sys.exit(1)
   return "dc=%s role=%s environ=%s" % (parts[0], parts[1], parts[2])
 
 def pass_cmdline_override(namespace):
