@@ -59,6 +59,6 @@ public class LocalFileSystemUploader implements IUploader {
   }
 
   @Override
-  public void cleanup() {
+  public void close() {
   }
 }

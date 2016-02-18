@@ -3,8 +3,6 @@ package com.twitter.heron.statemgr;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.statemgr.IStateManager;
 
-import java.util.Map;
-
 public abstract class FileSystemStateManager implements IStateManager {
   public static final String ROOT_ADDRESS = "state.root.address";
 
