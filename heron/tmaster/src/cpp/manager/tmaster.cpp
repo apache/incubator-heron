@@ -38,7 +38,7 @@ TMaster::TMaster(const std::string& _zk_hostport,
                  const std::vector<std::string>& _stmgrs,
                  sp_int32 _controller_port,
                  sp_int32 _master_port,
-		             sp_int32 _stats_port,
+                 sp_int32 _stats_port,
                  sp_int32 metricsMgrPort,
                  const std::string& _myhost_name,
                  EventLoop* eventLoop)
@@ -388,14 +388,9 @@ TMaster::ActivateTopologyDone(VCallback<proto::system::StatusCode> cb,
     ::exit(1);
   }
   cb(_code);
+
   // If assignment is already done, send all active stmgrs
-  if (current_pplan_) {
-    current_pplan_->mutable_topology()->set_state(proto::api::RUNNING);
-    StMgrMapIter iter;
-    for (iter = stmgrs_.begin(); iter != stmgrs_.end(); ++iter) {
-      iter->second->NewPhysicalPlan(*current_pplan_);
-    }
-  }
+  DistributePhysicalPlan();
 }
 
 void
@@ -424,14 +419,9 @@ TMaster::DeActivateTopologyDone(VCallback<proto::system::StatusCode> cb,
     ::exit(1);
   }
   cb(_code);
+
   // If assignment is already done, send all active stmgrs
-  if (current_pplan_) {
-    current_pplan_->mutable_topology()->set_state(proto::api::PAUSED);
-    StMgrMapIter iter;
-    for (iter = stmgrs_.begin(); iter != stmgrs_.end(); ++iter) {
-      iter->second->NewPhysicalPlan(*current_pplan_);
-    }
-  }
+  DistributePhysicalPlan();
 }
 
 proto::system::Status*
@@ -519,8 +509,11 @@ TMaster::DoPhysicalPlan(EventLoop::Status)
   proto::system::PhysicalPlan* pplan = MakePhysicalPlan();
   CHECK_NOTNULL(pplan);
   DCHECK(pplan->IsInitialized());
+
+  // Log it to State Manager
   config::PhysicalPlanHelper::LogPhysicalPlan(*pplan);
   LOG(INFO) << "Made a new pplan! Writing it to state" << std::endl;
+
   auto cb = [pplan, this] (proto::system::StatusCode code) {
     this->SetPhysicalPlanDone(pplan, code);
   };
@@ -561,10 +554,7 @@ TMaster::SetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan,
     current_pplan_ = _pplan;
     assignment_in_progress_ = false;
     // We need to pass that on to all streammanagers
-    StMgrMapIter iter;
-    for (iter = stmgrs_.begin(); iter != stmgrs_.end(); ++iter) {
-      iter->second->NewPhysicalPlan(*current_pplan_);
-    }
+    DistributePhysicalPlan();
   }
 }
 
@@ -617,11 +607,39 @@ TMaster::ValidateStMgrsWithPhysicalPlan()
   return true;
 }
 
+bool
+TMaster::DistributePhysicalPlan()
+{
+  if (current_pplan_) {
+    // Force updating the internal proto::api::Topology,
+    // to solve the potential inconsistent topology def between Topology node
+    // and PhysicalPlan node.
+    current_pplan_->mutable_topology()->CopyFrom(*topology_);
+
+    LOG(INFO) << "To distribute new pplan:" << std::endl;
+    config::PhysicalPlanHelper::LogPhysicalPlan(*current_pplan_);
+
+    // Distribute physical plan to all active stmgrs
+    StMgrMapIter iter;
+    for (iter = stmgrs_.begin(); iter != stmgrs_.end(); ++iter) {
+      iter->second->NewPhysicalPlan(*current_pplan_);
+    }
+
+    return true;
+  }
+
+  LOG(ERROR) << "No valid assignment yet" << std::endl;
+  return false;
+}
+
 proto::system::PhysicalPlan*
 TMaster::MakePhysicalPlan()
 {
   // TODO:- At some point, we need to talk to our scheduler
   // and do this scheduling
+
+  // When making physical plan, we would force updating the topology def from
+  // the persistent zk one.
 
   if (current_pplan_) {
     // There is already an existing assignment. However stmgrs might have
@@ -631,7 +649,10 @@ TMaster::MakePhysicalPlan()
     // all match up
     CHECK(ValidateStMgrsWithPhysicalPlan());
     proto::system::PhysicalPlan* new_pplan = new proto::system::PhysicalPlan();
-    new_pplan->mutable_topology()->CopyFrom(current_pplan_->topology());
+
+    // Force reading from the latest proto::api::Topology
+    new_pplan->mutable_topology()->CopyFrom(*topology_);
+
     for (StMgrMapIter iter = stmgrs_.begin(); iter != stmgrs_.end(); ++iter) {
       new_pplan->add_stmgrs()->CopyFrom(*(iter->second->get_stmgr()));
     }

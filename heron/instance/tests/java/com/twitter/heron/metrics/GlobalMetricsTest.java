@@ -8,7 +8,7 @@ import org.junit.Test;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.metric.GlobalMetrics;
 import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.common.core.base.WakeableLooper;
+import com.twitter.heron.common.basics.WakeableLooper;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
 import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 

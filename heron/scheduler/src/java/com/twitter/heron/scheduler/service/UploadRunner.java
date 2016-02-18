@@ -2,8 +2,8 @@ package com.twitter.heron.scheduler.service;
 
 import java.util.concurrent.Callable;
 
-import com.twitter.heron.scheduler.api.IUploader;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
+import com.twitter.heron.spi.uploader.IUploader;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
 
 /**
  * Runs uploader.

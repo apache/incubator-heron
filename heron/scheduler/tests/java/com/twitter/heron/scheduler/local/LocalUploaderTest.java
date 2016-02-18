@@ -15,8 +15,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.core.base.FileUtility;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
+import com.twitter.heron.common.basics.FileUtility;
+import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
 import com.twitter.heron.scheduler.util.DefaultConfigLoader;
 import com.twitter.heron.scheduler.util.TopologyUtilityTest;
 
@@ -31,6 +32,7 @@ import junit.framework.Assert;
 public class LocalUploaderTest {
   public static final String working_directory = "working-dir";
   public static final String heron_core_release = "heron-core-release";
+  public static final String stateMgrClass = "com.twitter.heron.spi.statemgr.NullStateManager";
 
   public static DefaultConfigLoader getDefaultConfigLoader() throws Exception {
     DefaultConfigLoader configLoader = DefaultConfigLoader.class.newInstance();
@@ -38,6 +40,7 @@ public class LocalUploaderTest {
     configLoader.properties.setProperty(LocalConfig.WORKING_DIRECTORY, working_directory);
     configLoader.properties.setProperty(
         LocalConfig.HERON_CORE_RELEASE_PACKAGE, heron_core_release);
+    configLoader.properties.setProperty(Constants.STATE_MANAGER_CLASS, stateMgrClass);
     return configLoader;
   }
 

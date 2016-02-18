@@ -3,9 +3,10 @@ package com.twitter.heron.scheduler.util;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import com.twitter.heron.scheduler.api.Constants;
-import com.twitter.heron.scheduler.api.IUploader;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
+
+import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
+import com.twitter.heron.spi.uploader.IUploader;
 
 public class FileSystemUploader implements IUploader {
   private volatile LaunchContext context;
@@ -20,11 +21,11 @@ public class FileSystemUploader implements IUploader {
   }
 
   private String getUserTopologyFilePath() {
-    String dc = context.getPropertyWithException(Constants.DC);
+    String cluster = context.getPropertyWithException(Constants.CLUSTER);
     String role = context.getPropertyWithException(Constants.ROLE);
     String environ = context.getPropertyWithException(Constants.ENVIRON);
     String toplogyName = context.getTopology().getName();
-    return String.format("%s/%s/%s/%s/%s", getUploaderFileSystemPath(), dc, role, environ, toplogyName);
+    return String.format("%s/%s/%s/%s/%s", getUploaderFileSystemPath(), cluster, role, environ, toplogyName);
   }
 
   @Override
