@@ -5,7 +5,7 @@ java_library(
     srcs = glob(["**/*.java"]),
     deps = [
         "//heron/api/src/java:api-java",
-        "//heron/localmode/src/java:localmode-lib-java",
+        "//heron/localmode/src/java:localmode-java",
         "//3rdparty/json-simple:json-simple-java",
         "//3rdparty/kryo:kryo-java",
     ],

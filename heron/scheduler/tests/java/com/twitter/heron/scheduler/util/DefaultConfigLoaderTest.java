@@ -9,7 +9,7 @@ import java.util.Properties;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.twitter.heron.scheduler.api.Constants;
+import com.twitter.heron.spi.common.Constants;
 
 public class DefaultConfigLoaderTest {
   @Test

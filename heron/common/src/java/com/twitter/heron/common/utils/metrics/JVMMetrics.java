@@ -15,9 +15,9 @@ import com.twitter.heron.api.metric.AssignableMetric;
 import com.twitter.heron.api.metric.MeanReducer;
 import com.twitter.heron.api.metric.MultiAssignableMetric;
 import com.twitter.heron.api.metric.ReducedMetric;
-import com.twitter.heron.common.core.base.Constants;
-import com.twitter.heron.common.core.base.SingletonRegistry;
-import com.twitter.heron.common.utils.misc.SystemConfig;
+import com.twitter.heron.common.config.SystemConfig;
+import com.twitter.heron.common.basics.Constants;
+import com.twitter.heron.common.basics.SingletonRegistry;
 
 /**
  * JVM metrics to be collected
