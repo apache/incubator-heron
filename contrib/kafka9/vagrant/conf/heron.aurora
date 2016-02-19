@@ -1,0 +1,59 @@
+"""
+Launch the topology as a single aurora job with multiple instances.
+The heron-executor is responsible for starting a tmaster (shard 0)
+and regular stmgr/metricsmgr/instances (shards > 0).
+"""
+
+heron_core_release_url = 'file:///vagrant/contrib/kafka9/vagrant/heron-ubuntu/{{HERON_PACKAGE}}'
+heron_topology_jar_url = 'file:///vagrant/contrib/kafka9/vagrant/{{TOPOLOGY_JAR_FILE}}'
+heron_defn_file_url = 'file:///vagrant/contrib/kafka9/vagrant/heron-ubuntu/{{TOPOLOGY_NAME}}.defn'
+metrics_classpath_updated = 'heron-metricsmgr.jar:metrics-mgr-classpath/*'
+
+# --- processes ---
+fetch_heron_system = Process(
+  name = 'fetch_heron_system',
+  cmdline = 'curl %s -o {{HERON_PACKAGE}} && tar zxf {{HERON_PACKAGE}}' % heron_core_release_url
+)
+
+fetch_user_package = Process(
+  name = 'fetch_user_package',
+  cmdline = 'curl %s -o {{TOPOLOGY_JAR_FILE}} && tar zxf {{TOPOLOGY_JAR_FILE}}' % heron_topology_jar_url
+)
+
+fetch_defn_file = Process(
+  name = 'fetch_defn_file',
+  cmdline = 'curl %s -o {{TOPOLOGY_NAME}}.defn' % heron_defn_file_url
+)
+
+launch_heron_executor = Process(
+  name = 'launch_heron_executor',
+  cmdline = './{{HERON_EXECUTOR_BINARY}} {{mesos.instance}} {{TOPOLOGY_NAME}} {{TOPOLOGY_ID}} {{TOPOLOGY_DEFN}} {{INSTANCE_DISTRIBUTION}} {{ZK_NODE}} {{ZK_ROOT}} {{TMASTER_BINARY}} {{STMGR_BINARY}} "%s" {{INSTANCE_JVM_OPTS_IN_BASE64}} {{CLASSPATH}} {{thermos.ports[port1]}} {{thermos.ports[port2]}} {{thermos.ports[port3]}} {{HERON_INTERNALS_CONFIG_FILENAME}} {{COMPONENT_RAMMAP}} {{COMPONENT_JVM_OPTS_IN_BASE64}} {{PKG_TYPE}} {{TOPOLOGY_JAR_FILE}} {{HERON_JAVA_HOME}} {{thermos.ports[http]}} {{LOG_DIR}} {{SHELL_BINARY}} {{thermos.ports[port4]}}' % metrics_classpath_updated,
+  max_failures = 1
+)
+
+discover_profiler_port = Process(
+  name = 'discover_profiler_port',
+  cmdline = 'echo {{thermos.ports[yourkit]}} > yourkit.port'
+)
+
+# --- tasks ---
+heron_task = SequentialTask(
+  name = 'setup_and_run',
+  processes = [fetch_heron_system, fetch_user_package, fetch_defn_file, launch_heron_executor, discover_profiler_port],
+  resources = Resources(cpu = '{{CPUS_PER_CONTAINER}}', ram = '{{RAM_PER_CONTAINER}}', disk = '{{DISK_PER_CONTAINER}}')
+)
+
+# -- jobs ---
+jobs = [
+  Job(
+    name = '{{JOB_NAME}}',
+    cluster = '{{DC}}',
+    role = '{{RUN_ROLE}}',
+    environment = '{{ENVIRON}}',
+    production = '{{ISPRODUCTION}}',
+    service = True,
+    task = heron_task,
+    instances = '{{NUM_SHARDS}}',
+    announce = Announcer(primary_port = 'http')
+  )
+]

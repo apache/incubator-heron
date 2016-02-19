@@ -1,0 +1,36 @@
+"""
+Activate/Deactivate a topology using a aurora job.
+"""
+
+heron_core_release_url = 'file:///vagrant/contrib/kafka9/vagrant/heron-ubuntu/{{HERON_PACKAGE}}'
+
+# --- processes ---
+fetch_heron_system = Process(
+  name = 'fetch_heron_system',
+  cmdline = 'curl %s -o {{HERON_PACKAGE}} && tar zxf {{HERON_PACKAGE}}' % heron_core_release_url
+)
+
+heron_controller_process = Process(
+    name = 'heron-controller',
+    cmdline = './{{HERON_CONTROLLER_BINARY}} {{TMASTER_HOSTNAME}} {{TMASTER_CONTROLLER_PORT}} {{CONTROLLERCMD}} {{TOPOLOGY_ID}}',
+    max_failures = 1
+)
+
+# --- tasks ---
+heron_task = SequentialTask(
+    name = "setup_and_run",
+    resources = Resources(cpu = 1, ram = 250*MB, disk = 1*GB),
+    processes = [fetch_heron_system, heron_controller_process],
+)
+
+# --- jobs ---
+jobs = [
+    Job(
+        name = '{{JOB_NAME}}',
+        cluster = '{{DC}}',
+        role = '{{RUN_ROLE}}',
+        environment = 'devel',
+        task = heron_task,
+        instances = '1'
+    )
+]

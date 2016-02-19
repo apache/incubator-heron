@@ -1,0 +1,8 @@
+
+-
+    type: "zookeeper"
+    name: "zk"
+    host: "master"
+    port: 2181
+    rootpath: "/storm/heron/cluster"
+    tunnelhost: "localhost"

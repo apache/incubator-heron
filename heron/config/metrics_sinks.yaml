@@ -3,7 +3,6 @@
 # We would specify the unique sink-id first
 sinks:
   - file-sink
-  - scribe-sink
   - tmaster-sink
 
 ########### Now we would specify the detailed configuration for every unique sink
@@ -25,20 +24,21 @@ file-sink:
   sink-restart-attempts: -1 # Forever
   filename-output: "metrics.json" # File for metrics to write to
   file-maximum: 5 # maximum number of file saved in disk
+  pretty-print: "true"
 
 ### Config for scribe-sink
-scribe-sink:
-  class: "com.twitter.heron.metricsmgr.sink.ScribeSink"
-  flush-frequency-ms: 60000
-  sink-restart-attempts: -1 # Forever
-  scribe-host: "127.0.0.1" # The host of scribe to be exported metrics to
-  scribe-port: 1463 # The port of scribe to be exported metrics to
-  scribe-category: "cuckoo_json" # The category of the scribe to be exported metrics to
-  service-namespace: "heron" # The service name of the metrics in cuckoo_json
-  scribe-timeout-ms: 200 # The timeout in seconds for metrics manager to write metrics to scribe
-  scribe-connect-server-attempts: 2 # The maximum retry attempts to connect to scribe server
-  scribe-retry-attempts: 5 # The maximum retry attempts to write metrics to scribe
-  scribe-retry-interval-ms: 100 # The interval to retry to write metrics to scribe
+# scribe-sink:
+#   class: "com.twitter.heron.metricsmgr.sink.ScribeSink"
+#   flush-frequency-ms: 60000
+#   sink-restart-attempts: -1 # Forever
+#   scribe-host: "127.0.0.1" # The host of scribe to be exported metrics to
+#   scribe-port: 1463 # The port of scribe to be exported metrics to
+#   scribe-category: "cuckoo_json" # The category of the scribe to be exported metrics to
+#   service-namespace: "heron" # The service name of the metrics in cuckoo_json
+#   scribe-timeout-ms: 200 # The timeout in seconds for metrics manager to write metrics to scribe
+#   scribe-connect-server-attempts: 2 # The maximum retry attempts to connect to scribe server
+#   scribe-retry-attempts: 5 # The maximum retry attempts to write metrics to scribe
+#   scribe-retry-interval-ms: 100 # The interval to retry to write metrics to scribe
 
 ### Config for tmaster-sink
 tmaster-sink:
