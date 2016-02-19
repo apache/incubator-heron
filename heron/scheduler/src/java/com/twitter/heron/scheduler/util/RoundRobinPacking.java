@@ -8,11 +8,10 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
-
-import com.twitter.heron.spi.common.Constants;
-import com.twitter.heron.spi.common.PackingPlan;
-import com.twitter.heron.spi.packing.IPackingAlgorithm;
-import com.twitter.heron.spi.scheduler.context.LaunchContext;
+import com.twitter.heron.scheduler.api.Constants;
+import com.twitter.heron.scheduler.api.IPackingAlgorithm;
+import com.twitter.heron.scheduler.api.PackingPlan;
+import com.twitter.heron.scheduler.api.context.LaunchContext;
 
 /**
  * Round-robin packing algorithm
@@ -20,7 +19,9 @@ import com.twitter.heron.spi.scheduler.context.LaunchContext;
 public class RoundRobinPacking implements IPackingAlgorithm {
   private static final Logger LOG = Logger.getLogger(RoundRobinPacking.class.getName());
   private static final long DEFAULT_DISK_PADDING = 12 * Constants.GB;
-  public static final String STMGR_RAM_DEFAULT = "stmgr.ram.default";
+
+  // include stream mgr, metrics mgr or other daemon processes
+  public static final String DAEMON_PROCESSES_RAM_DEFAULT = "daemon.processes.ram.default";
   public static final String INSTANCE_RAM_DEFAULT = "instance.ram.default";
   public static final String INSTANCE_CPU_DEFAULT = "instance.cpu.default";
   public static final String INSTANCE_DISK_DEFAULT = "instance.disk.default";
@@ -83,12 +84,12 @@ public class RoundRobinPacking implements IPackingAlgorithm {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     long defaultInstanceRam = Long.parseLong(context.getProperty(
         INSTANCE_RAM_DEFAULT, Long.toString(1 * Constants.GB)));
-    long stmgrRam = Long.parseLong(context.getProperty(STMGR_RAM_DEFAULT, Long.toString(1 * Constants.GB)));
+    long daemonProcessesRam = Long.parseLong(context.getProperty(DAEMON_PROCESSES_RAM_DEFAULT, Long.toString(2 * Constants.GB)));
 
     long containerRamRequested = Long.parseLong(TopologyUtility.getConfigWithDefault(
         topologyConfig, Config.TOPOLOGY_CONTAINER_RAM_REQUESTED, "-1"));
     return getDefaultInstanceRam(
-        packing, topology, defaultInstanceRam, stmgrRam, containerRamRequested);
+        packing, topology, defaultInstanceRam, daemonProcessesRam, containerRamRequested);
   }
 
   /**
@@ -117,9 +118,9 @@ public class RoundRobinPacking implements IPackingAlgorithm {
         maxRamRequired = ramRequired;
       }
     }
-    long stmgrRam = Long.parseLong(context.getProperty(
-        STMGR_RAM_DEFAULT, Long.toString(1 * Constants.GB)));
-    long defaultRequest = maxRamRequired + stmgrRam;
+    long daemonProcessesRam = Long.parseLong(context.getProperty(
+        DAEMON_PROCESSES_RAM_DEFAULT, Long.toString(2 * Constants.GB)));
+    long defaultRequest = maxRamRequired + daemonProcessesRam;
     long containerRamRequested = Long.parseLong(TopologyUtility.getConfigWithDefault(
         topologyConfig, Config.TOPOLOGY_CONTAINER_RAM_REQUESTED, "" + defaultRequest));
     if (defaultRequest > containerRamRequested) {
@@ -226,14 +227,14 @@ public class RoundRobinPacking implements IPackingAlgorithm {
    *
    * @param instanceRamDefaultValue Default value of instance ram. If no information is specified,
    * This value will be used.
-   * @param stmgrRam Ram reserved for stream manager
+   * @param daemonProcessesRam Ram reserved for daemon processes, including stream manager or others.
    * @param containerRamRequested If Container notion is valid then pass that, -1 otherwise.
    * @return default ram in bytes.
    */
   public long getDefaultInstanceRam(Map<String, List<String>> packing,
                                     TopologyAPI.Topology topology,
                                     long instanceRamDefaultValue,
-                                    long stmgrRam,
+                                    long daemonProcessesRam,
                                     long containerRamRequested) {
     long defaultInstanceRam = instanceRamDefaultValue;
 
@@ -242,7 +243,7 @@ public class RoundRobinPacking implements IPackingAlgorithm {
       // Find the minimum possible ram that can be fit in this packing.
       long minInstanceRam = Long.MAX_VALUE;
       for (List<String> instances : packing.values()) {
-        Long ramRemaining = containerRamRequested - stmgrRam;  // Remove stmgr.
+        Long ramRemaining = containerRamRequested - daemonProcessesRam;  // Remove daemon processes.
         int defaultInstance = 0;
         for (String id : instances) {
           if (-1 != ramMap.get(getComponentName(id))) {

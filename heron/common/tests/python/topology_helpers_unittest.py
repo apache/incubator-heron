@@ -141,8 +141,8 @@ class TopologyHelpersTest(unittest.TestCase):
     # This is not a good way since this shows the internals
     # of the method. These methods need to be changed.
     # For example, ram_per_contaner could be taken as an argument.
-    original_ram_for_stmgr = constants.RAM_FOR_STMGR
-    constants.RAM_FOR_STMGR = 2
+    original_ram_for_stmgr = constants.RAM_FOR_DAEMON_PROCESSES
+    constants.RAM_FOR_DAEMON_PROCESSES = 2
 
     # When rammap is specified, it should be used.
     topology = self.mock_proto.create_mock_simple_topology(4,8)
@@ -180,12 +180,12 @@ class TopologyHelpersTest(unittest.TestCase):
     self.assertEqual(expected_component_rammap, component_rammap)
 
     # Unmock the things that we mocked.
-    constants.RAM_FOR_STMGR = original_ram_for_stmgr
+    constants.RAM_FOR_DAEMON_PROCESSES = original_ram_for_stmgr
 
   def test_get_ram_per_container(self):
     # Mock a few things
-    original_ram_for_stmgr = constants.RAM_FOR_STMGR
-    constants.RAM_FOR_STMGR = 2
+    original_ram_for_stmgr = constants.RAM_FOR_DAEMON_PROCESSES
+    constants.RAM_FOR_DAEMON_PROCESSES = 2
     original_default_ram_for_instance = constants.DEFAULT_RAM_FOR_INSTANCE
     constants.DEFAULT_RAM_FOR_INSTANCE = 1
 
@@ -216,5 +216,5 @@ class TopologyHelpersTest(unittest.TestCase):
     self.assertEqual(expected_ram_per_container, topology_helpers.get_ram_per_container(topology))
 
     # Unmock the things that we mocked.
-    constants.RAM_FOR_STMGR = original_ram_for_stmgr
+    constants.RAM_FOR_DAEMON_PROCESSES = original_ram_for_stmgr
     constants.DEFAULT_RAM_FOR_INSTANCE = original_default_ram_for_instance

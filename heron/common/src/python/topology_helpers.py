@@ -114,7 +114,7 @@ def get_ram_per_container(topology):
       ramsize += int(rammap[component_name])
     if ramsize > maxsize:
       maxsize = ramsize
-  return maxsize + constants.RAM_FOR_STMGR
+  return maxsize + constants.RAM_FOR_DAEMON_PROCESSES
 
 def get_component_rammap(topology):
   """
@@ -152,7 +152,7 @@ def get_component_rammap(topology):
   # memory equally
   requested_ram_per_container = get_container_ram_requested(topology)
   if requested_ram_per_container != None:
-    ram_for_jvms = requested_ram_per_container - constants.RAM_FOR_STMGR
+    ram_for_jvms = requested_ram_per_container - constants.RAM_FOR_DAEMON_PROCESSES
     ram_per_instance = int(ram_for_jvms / max_instances_in_a_container)
     rammap = {}
     for component in components:

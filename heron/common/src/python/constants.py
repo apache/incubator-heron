@@ -11,6 +11,8 @@ TOPOLOGY_COMPONENT_RAMMAP = "topology.component.rammap"
 TOPOLOGY_STMGRS = "topology.stmgrs"
 TOPOLOGY_WORKER_CHILDOPTS = "topology.worker.childopts"
 TOPOLOGY_ADDITIONAL_CLASSPATH = "topology.additional.classpath"
-RAM_FOR_STMGR = 1 * GB
+
+# include stream mgr, metrics mgr or other daemon processes
+RAM_FOR_DAEMON_PROCESSES = 2 * GB
 DEFAULT_RAM_FOR_INSTANCE = 1 * GB
 DEFAULT_DISK_PADDING_PER_CONTAINER = 12 * GB
