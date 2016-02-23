@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-export VAGRANT_DIR=/vagrant/contrib/kafka9/vagrant
-export DIST_DIR=${VAGRANT_DIR}/heron-ubuntu
-export HERON_CONF_DIR=${VAGRANT_DIR}/conf
-export DEFN_TMP_DIR=${DIST_DIR}/defn-tmp
+VAGRANT_DIR=/vagrant/contrib/kafka9/vagrant
+DIST_DIR=${VAGRANT_DIR}/heron-ubuntu
+HERON_CONF_DIR=${VAGRANT_DIR}/conf
+DEFN_TMP_DIR=${DIST_DIR}/defn-tmp
 
 if [[ $# -ne 2 ]] ; then
     echo 'USAGE: ./submit-09-topology.sh <topology_name> <bootstrap_broker> <source_topic> <target_topic>'
