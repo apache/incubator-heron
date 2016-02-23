@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+export VAGRANT_DIR=/vagrant/contrib/kafka9/vagrant
+export DIST_DIR=${VAGRANT_DIR}/heron-ubuntu
+export HERON_CONF_DIR=${VAGRANT_DIR}/conf
+export DEFN_TMP_DIR=${DIST_DIR}/defn-tmp
+
+if [[ $# -ne 2 ]] ; then
+    echo 'USAGE: ./submit-09-topology.sh <topology_name> <bootstrap_broker> <source_topic> <target_topic>'
+    exit 1
+fi
+
+pushd ${DIST_DIR}
+    ./heron-0.1.0-SNAPSHOT/bin/heron-cli2 submit "example/vagrant/devel" ${DIST_DIR}/topologies/kafka-mirror_deploy.jar com.twitter.heron.KafkaMirrorTopology $1 $2 $3 $4 --config-loader com.twitter.heron.scheduler.aurora.AuroraConfigLoader --config-path ${HERON_CONF_DIR} --tmp-dir ${DEFN_TMP_DIR}
+popd

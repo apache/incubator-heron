@@ -67,6 +67,7 @@ install_kafka-mesos() {
     cp -r kafka-08 kafka-09
     sed -i s/7000/7001/g kafka-09/kafka-mesos.properties
 
+    # No Kafka 8 topology for now, not launching 08 Kafka-Mesos
     # wget -q "http://www.eu.apache.org/dist/kafka/0.8.2.2/kafka_2.10-0.8.2.2.tgz" -P kafka-08
     wget -q "http://www.eu.apache.org/dist/kafka/0.9.0.0/kafka_2.10-0.9.0.0.tgz" -P kafka-09
     popd
@@ -77,6 +78,8 @@ install_kafka-mesos() {
 }
 
 install_aurora_coordinator() {
+    mkdir -p /home/vagrant/aurora
+    pushd /home/vagrant/aurora
     # Installing scheduler
     wget -c https://apache.bintray.com/aurora/aurora-scheduler_0.10.0-1_amd64.deb
     dpkg -i aurora-scheduler_0.10.0-1_amd64.deb
@@ -87,11 +90,33 @@ install_aurora_coordinator() {
     # Installing client
     wget https://apache.bintray.com/aurora/aurora-tools_0.10.0-1_amd64.deb
     dpkg -i aurora-tools_0.10.0-1_amd64.deb
+    popd
 }
 
 install_aurora_worker() {
+    mkdir -p /home/vagrant/aurora
+    pushd /home/vagrant/aurora
     wget -c https://apache.bintray.com/aurora/aurora-executor_0.10.0-1_amd64.deb
     dpkg -i aurora-executor_0.10.0-1_amd64.deb
+    popd
+}
+
+setup_heron_zk_nodes() {
+    mkdir -p /home/vagrant/solr
+    pushd /home/vagrant/solr
+        # Not the fastest way to do this, need to figure out how to put zk-setup.cpp to use for this
+        wget 'http://www.eu.apache.org/dist/lucene/solr/5.4.1/solr-5.4.1.tgz'
+        tar -zxf solr-5.4.1.tgz
+        ./solr-5.4.1/server/scripts/cloud-scripts/zkcli.sh -zkhost master:2181 -cmd makepath /storm/heron/cluster/pplans
+        ./solr-5.4.1/server/scripts/cloud-scripts/zkcli.sh -zkhost master:2181 -cmd makepath /storm/heron/cluster/executionstate
+        ./solr-5.4.1/server/scripts/cloud-scripts/zkcli.sh -zkhost master:2181 -cmd makepath /storm/heron/cluster/tmasters
+        ./solr-5.4.1/server/scripts/cloud-scripts/zkcli.sh -zkhost master:2181 -cmd makepath /storm/heron/cluster/topologies
+    popd
+}
+
+copy_scripts() {
+    # Copying all the scripts to the home directory for simpler launching through 'vagrant ssh master -c'.
+    cp *.sh /home/vagrant
 }
 
 if [[ $1 != "master" && $1 != "slave" ]]; then
@@ -100,7 +125,9 @@ if [[ $1 != "master" && $1 != "slave" ]]; then
 fi
 mode=$1
 
-cd /vagrant/vagrant
+cd /vagrant/contrib/kafka9/vagrant
+
+chmod +x *.sh
 
 # name resolution
 cp .vagrant/hosts /etc/hosts
@@ -139,8 +166,11 @@ update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
 
 install_mesos $mode
 if [ $mode == "master" ]; then
-    install_marathon;
+    install_marathon
     install_kafka-mesos
     install_aurora_coordinator
+    ./setup-dist-dir.sh
+    setup_heron_zk_nodes
+    copy_scripts
 fi
 install_aurora_worker

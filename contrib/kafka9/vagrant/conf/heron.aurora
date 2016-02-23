@@ -5,8 +5,8 @@ and regular stmgr/metricsmgr/instances (shards > 0).
 """
 
 heron_core_release_url = 'file:///vagrant/contrib/kafka9/vagrant/heron-ubuntu/{{HERON_PACKAGE}}'
-heron_topology_jar_url = 'file:///vagrant/contrib/kafka9/vagrant/{{TOPOLOGY_JAR_FILE}}'
-heron_defn_file_url = 'file:///vagrant/contrib/kafka9/vagrant/heron-ubuntu/{{TOPOLOGY_NAME}}.defn'
+heron_topology_jar_url = 'file:///vagrant/contrib/kafka9/vagrant/heron-ubuntu/topologies/{{TOPOLOGY_JAR_FILE}}'
+heron_defn_file_url = 'file:///vagrant/contrib/kafka9/vagrant/heron-ubuntu/defn-tmp/{{TOPOLOGY_NAME}}.defn'
 metrics_classpath_updated = 'heron-metricsmgr.jar:metrics-mgr-classpath/*'
 
 # --- processes ---
@@ -17,7 +17,7 @@ fetch_heron_system = Process(
 
 fetch_user_package = Process(
   name = 'fetch_user_package',
-  cmdline = 'curl %s -o {{TOPOLOGY_JAR_FILE}} && tar zxf {{TOPOLOGY_JAR_FILE}}' % heron_topology_jar_url
+  cmdline = 'curl %s -o {{TOPOLOGY_JAR_FILE}}' % heron_topology_jar_url
 )
 
 fetch_defn_file = Process(
