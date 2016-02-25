@@ -15,6 +15,7 @@ java_library(
     ]),
     deps = [
         "//heron/api/src/java:api-java",
+        "//heron/common/src/java:config-java",
         "//heron/proto:proto_common_java",
         "//heron/proto:proto_execution_state_java",
         "//heron/proto:proto_scheduler_java",
@@ -27,9 +28,12 @@ java_library(
     ],
 )
 
+
 utils_deps_files = \
     heron_java_proto_files() + [
         ":common-spi-java",
+        ":statemgr-spi-java",
+        "//heron/common/src/java:config-java",
         "//heron/api/src/java:api-java",
         "//3rdparty/guava:guava-java",
     ]
@@ -37,20 +41,24 @@ utils_deps_files = \
 scheduler_deps_files = \
     heron_java_proto_files() + [
         ":common-spi-java",
+        "//heron/common/src/java:config-java",
         "//3rdparty/guava:guava-java",
     ]
 
 packing_deps_files = [
     ":common-spi-java",
+    "//heron/common/src/java:config-java",
 ]
 
 uploader_deps_files = [
     ":common-spi-java",
+    "//heron/common/src/java:config-java",
 ]
 
 statemgr_deps_files = \
     heron_java_proto_files() + [
         ":common-spi-java",
+        "//heron/common/src/java:config-java",
         "//3rdparty/guava:guava-java",
     ]
 
@@ -59,6 +67,9 @@ java_library(
     srcs = glob([
         "**/spi/common/**/*.java",
     ]),
+    deps = [
+        "//heron/common/src/java:config-java",
+    ],
 )
 
 java_library(

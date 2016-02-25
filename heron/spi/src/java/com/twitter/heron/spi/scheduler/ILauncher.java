@@ -2,7 +2,7 @@ package com.twitter.heron.spi.scheduler;
 
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.spi.common.PackingPlan;
-import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.Config;
 
 /**
  * Launches scheduler. heron-cli will create Launcher object using default no argument constructor.
@@ -14,7 +14,7 @@ public interface ILauncher {
    * to setup scheduler and other parameters required by launcher to contact
    * services which will launch scheduler.
    */
-  void initialize(Context context);
+  void initialize(Config config, Config runtime);
 
   /**
    * Will be called locally before trying to launch topology remotely

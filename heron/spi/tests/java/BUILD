@@ -20,6 +20,13 @@ api_deps_files = proto_deps_files + [
     "//heron/api/src/java:api-java", 
 ]
 
+java_library(
+    name = "test-utils-java",
+    srcs = glob([
+        "**/TestConstants.java",
+    ]),
+)
+
 java_test(
     name = "shell-utils_unittest",
     srcs = glob(["**/common/ShellUtilsTest.java"]),
@@ -75,5 +82,29 @@ java_test(
         "//heron/spi/src/java:metricsmgr-spi-java", 
         "@bazel_tools//third_party:junit4",
     ],
+    size = "small",
+)
+
+java_test(
+    name = "cluster-defaults_unittest",
+    srcs = glob(["**/ClusterDefaultsTest.java"]),
+    deps = [
+        "//heron/common/src/java:config-java",
+        "//heron/spi/src/java:common-spi-java",
+        "@bazel_tools//third_party:junit4",
+    ],
+    size = "small",
+)
+
+java_test(
+    name = "cluster-config_unittest",
+    srcs = glob(["**/ClusterConfigTest.java"]),
+    deps = [
+        ":test-utils-java",
+        "//heron/common/src/java:config-java",
+        "//heron/spi/src/java:common-spi-java",
+        "@bazel_tools//third_party:junit4",
+    ],
+    data = glob(["**/testdata/**/*.yaml"]),
     size = "small",
 )

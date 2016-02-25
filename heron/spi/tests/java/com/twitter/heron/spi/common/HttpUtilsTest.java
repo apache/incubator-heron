@@ -19,22 +19,6 @@ import org.mockito.Mockito;
 
 public class HttpUtilsTest {
   @Test
-  public void testFreePort() {
-    int numAttempts = 100;
-    // Randomized test
-    for (int i = 0; i < numAttempts; ++i) {
-      int port = HttpUtils.getFreePort();
-      // verify that port is free
-      try {
-        new ServerSocket(port).close();
-      } catch (SocketException se) {
-        Assert.assertTrue("Returned port is not open", false);
-      } catch (IOException e) {
-      }
-    }
-  }
-
-  @Test
   public void testSendHttpResponse() throws Exception {
     HttpExchange exchange = Mockito.mock(HttpExchange.class);
     Mockito.doNothing().when(exchange).sendResponseHeaders(Matchers.anyInt(), Matchers.anyLong());
