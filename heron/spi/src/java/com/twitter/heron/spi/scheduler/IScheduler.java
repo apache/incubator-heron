@@ -3,7 +3,7 @@ package com.twitter.heron.spi.scheduler;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.PackingPlan;
-import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.Config;
 
 /**
  * Scheduler object responsible for bringing up topology. Will be instantiated using no-arg
@@ -13,7 +13,7 @@ public interface IScheduler {
   /**
    * This will initialize scheduler using config file. Will be called during start.
    */
-  void initialize(Context context);
+  void initialize(Config config, Config runtime);
 
   /**
    * This method will be called after initialize.
@@ -24,13 +24,6 @@ public interface IScheduler {
    * @param packing Initial mapping suggested by running packing algorithm.
    */
   void schedule(PackingPlan packing);
-
-  /**
-   * When health check is received from a host, this method will get called.
-   *
-   * @param healthCheckResponse Executor response from health-check.
-   */
-  void onHealthCheck(String healthCheckResponse);
 
   /**
    * Called by SchedulerServer when it receives a http request to kill topology,

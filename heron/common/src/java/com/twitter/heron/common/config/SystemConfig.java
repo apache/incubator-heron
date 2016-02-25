@@ -12,7 +12,7 @@ import org.yaml.snakeyaml.Yaml;
 /**
  * SystemConfig are a set of configuration parameters that are set by the system
  * All the config associated with time is in the unit of milli-seconds, unless otherwise specified.
- * All the config associated with data szied is in the unit of bytes, unless otherwise specified.
+ * All the config associated with data is in the unit of bytes, unless otherwise specified.
  */
 public class SystemConfig {
   private Map config = new HashMap<String, Object>();

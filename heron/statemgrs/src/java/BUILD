@@ -4,6 +4,7 @@ load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 common_deps_files = \
     heron_java_proto_files() + [
+        "//heron/spi/src/java:common-spi-java",
         "//heron/spi/src/java:statemgr-spi-java",
         "//3rdparty/guava:guava-java",
     ]
@@ -30,6 +31,7 @@ java_library(
 java_library(
     name = "localfs-statemgr-java",
     srcs = glob(
+        ["**/FileSystemStateManager.java"],
         ["**/localfs/*.java"],
     ),
     deps = localfs_deps_files, 

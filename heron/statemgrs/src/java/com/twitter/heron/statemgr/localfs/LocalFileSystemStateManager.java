@@ -13,7 +13,7 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
-import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.statemgr.FileSystemStateManager;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 
@@ -23,40 +23,37 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   public static final String IS_INITIALIZE_FILE_TREE = "is.initialize.file.tree";
   public static final String WORKING_DIRECTORY = "heron.local.working.directory";
 
-  // The context passed to state manager
-  private Context baseCxt;
-  // The context owned by state manager
-  private Context stateMgrCxt;
+  // The config owned by state manager
+  private Config stateMgrConfig;
 
   @Override
-  public void initialize(Context cxt) {
-    baseCxt = cxt;
-    Context.Builder stateMgrCxtBuilder = Context.newBuilder();
+  public void initialize(Config config) {
+    Config.Builder stateMgrConfigBuilder = Config.newBuilder();
 
-    String rootAddress = baseCxt.getStringValue(ROOT_ADDRESS);
+    String rootAddress = config.getStringValue(ROOT_ADDRESS);
     if (rootAddress == null) {
-      Object workingDir = baseCxt.get(WORKING_DIRECTORY);
+      Object workingDir = config.get(WORKING_DIRECTORY);
       if (workingDir == null) {
         throw new IllegalArgumentException("Misses required config: " + WORKING_DIRECTORY);
       }
       rootAddress = String.format("%s/%s", workingDir, "state");
-      stateMgrCxtBuilder.put(ROOT_ADDRESS, rootAddress);
+      stateMgrConfigBuilder.put(ROOT_ADDRESS, rootAddress);
     }
 
-    // If more key values need to be added to stateMgrCxt later, it might be
-    // better to maintain a mutable map and only convert to context in getContext method.
-    stateMgrCxt = stateMgrCxtBuilder.build();
+    // If more key values need to be added to stateMgrConfig later, it might be
+    // better to maintain a mutable map and only convert to Config in getConfig method.
+    stateMgrConfig = stateMgrConfigBuilder.build();
 
     super.initialize(
-        Context.newBuilder()
-            .putAll(baseCxt)
-            .putAll(stateMgrCxt)
+        Config.newBuilder()
+            .putAll(config)
+            .putAll(stateMgrConfig)
             .build()
     );
 
     // By default, we would init the file tree if it is not there
-    boolean isInitLocalFileTree = baseCxt.get(IS_INITIALIZE_FILE_TREE) == null ?
-        true : (Boolean) baseCxt.get(IS_INITIALIZE_FILE_TREE);
+    boolean isInitLocalFileTree = config.get(IS_INITIALIZE_FILE_TREE) == null ?
+        true : (Boolean) config.get(IS_INITIALIZE_FILE_TREE);
 
     if (isInitLocalFileTree && !initTree()) {
       throw new IllegalArgumentException("Failed to initialize Local State manager. " +
@@ -65,8 +62,8 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   }
 
   @Override
-  public Context getContext() {
-    return stateMgrCxt;
+  public Config getConfig() {
+    return stateMgrConfig;
   }
 
   protected boolean initTree() {

@@ -40,7 +40,7 @@ public class ShellUtilsTest {
     String testString = "testString";
     StringBuilder stdout = new StringBuilder();
     StringBuilder stderr = new StringBuilder();
-    Assert.assertEquals(0, ShellUtility.runProcess(true, "echo " + testString, stdout, stderr));
+    Assert.assertEquals(0, ShellUtils.runProcess(true, "echo " + testString, stdout, stderr));
     Assert.assertEquals(testString, stdout.toString().trim());
     Assert.assertTrue(stderr.toString().trim().isEmpty());
   }
@@ -51,7 +51,7 @@ public class ShellUtilsTest {
     StringBuilder stdout = new StringBuilder();
     StringBuilder stderr = new StringBuilder();
     // Sleep 1 second and echo some text.
-    Process p = ShellUtility.runASyncProcess(
+    Process p = ShellUtils.runASyncProcess(
         true, false, String.format("sleep 1 && echo %s", testString), new File("."));
     // Test process is running and input stream is empty
     wait(10, TimeUnit.MILLISECONDS);
@@ -62,6 +62,6 @@ public class ShellUtilsTest {
   public void testInputstreamToString() {
     String testString = generateRandomLongString(1024 * 1024);  // 1 MB
     ByteArrayInputStream is = new ByteArrayInputStream(testString.getBytes());
-    Assert.assertEquals(testString, ShellUtility.inputstreamToString(is));
+    Assert.assertEquals(testString, ShellUtils.inputstreamToString(is));
   }
 }

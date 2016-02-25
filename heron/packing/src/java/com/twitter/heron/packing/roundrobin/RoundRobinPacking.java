@@ -6,13 +6,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
 
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.TopologyUtils;
 import com.twitter.heron.spi.packing.IPacking;
 
@@ -30,12 +31,12 @@ public class RoundRobinPacking implements IPacking {
   protected long instanceDiskDefault; 
 
   @Override
-  public void initialize(Context context) {
-    this.stmgrRamDefault = context.getLongValue(RoundRobinKeys.Config.STMGR_RAM_DEFAULT, 1 * Constants.GB); 
-    this.instanceRamDefault = context.getLongValue(RoundRobinKeys.Config.INSTANCE_RAM_DEFAULT, 1 * Constants.GB);
-    this.instanceCpuDefault = context.getDoubleValue(RoundRobinKeys.Config.INSTANCE_CPU_DEFAULT, 1.0);
-    this.instanceDiskDefault = context.getLongValue(RoundRobinKeys.Config.INSTANCE_DISK_DEFAULT, 1 * Constants.GB);
-    this.topology = (TopologyAPI.Topology)context.get(Keys.Runtime.TOPOLOGY_PHYSICAL_PLAN);
+  public void initialize(Config config, Config runtime) {
+    this.stmgrRamDefault = Context.stmgrRam(config);
+    this.instanceRamDefault = Context.instanceRam(config);
+    this.instanceCpuDefault = Context.instanceCpu(config).doubleValue(); 
+    this.instanceDiskDefault = Context.instanceDisk(config);
+    this.topology = Runtime.topology(runtime);
   }
 
   @Override
@@ -73,7 +74,7 @@ public class RoundRobinPacking implements IPacking {
         (float) (1 + totalInstanceCpu / TopologyUtils.getNumContainers(topology));
 
     String cpuHint = TopologyUtils.getConfigWithDefault(
-        topologyConfig, Config.TOPOLOGY_CONTAINER_CPU_REQUESTED, Double.toString(defaultContainerCpu));
+        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_CPU_REQUESTED, Double.toString(defaultContainerCpu));
 
     return Double.parseDouble(cpuHint);
   }
@@ -91,7 +92,7 @@ public class RoundRobinPacking implements IPacking {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
 
     String diskHint = TopologyUtils.getConfigWithDefault(
-        topologyConfig, Config.TOPOLOGY_CONTAINER_DISK_REQUESTED, Long.toString(defaultContainerDisk));
+        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_DISK_REQUESTED, Long.toString(defaultContainerDisk));
 
     return Long.parseLong(diskHint);
   }
@@ -105,7 +106,7 @@ public class RoundRobinPacking implements IPacking {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
 
     String containerRam = TopologyUtils.getConfigWithDefault(
-        topologyConfig, Config.TOPOLOGY_CONTAINER_RAM_REQUESTED, "-1");
+        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED, "-1");
 
     long containerRamRequested = Long.parseLong(containerRam);
     return getDefaultInstanceRam(
@@ -141,7 +142,7 @@ public class RoundRobinPacking implements IPacking {
     }
     long defaultRequest = maxRamRequired + stmgrRamDefault;
     long containerRamRequested = Long.parseLong(TopologyUtils.getConfigWithDefault(
-        topologyConfig, Config.TOPOLOGY_CONTAINER_RAM_REQUESTED, "" + defaultRequest));
+        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED, "" + defaultRequest));
     if (defaultRequest > containerRamRequested) {
       LOG.severe("Container is set to value lower than computed defaults. This could be due" +
           "to incorrect RAM map provided for components.");
@@ -153,7 +154,7 @@ public class RoundRobinPacking implements IPacking {
   public int getNumContainers() {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     return Integer.parseInt(TopologyUtils.getConfigWithDefault(
-        topologyConfig, Config.TOPOLOGY_STMGRS, "1").trim());
+        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_STMGRS, "1").trim());
   }
 
   public String getContainerId(int index) {

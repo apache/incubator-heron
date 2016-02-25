@@ -1,6 +1,7 @@
 package(default_visibility = ["//visibility:public"])
 
 uploader_spi_files = [
+    "//heron/common/src/java:basics-java",
     "//heron/spi/src/java:common-spi-java",
     "//heron/spi/src/java:uploader-spi-java",
 ]
@@ -11,9 +12,9 @@ packer_deps_files = \
     ]
 
 java_library(
-    name='nulled-uploader',
+    name='null-uploader',
     srcs = glob(
-        ["**/nulled/**/*.java"],
+        ["**/NullUploader.java"],
     ),
     deps = uploader_spi_files,
 )

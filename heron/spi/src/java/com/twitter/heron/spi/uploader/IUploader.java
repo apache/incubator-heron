@@ -1,6 +1,6 @@
 package com.twitter.heron.spi.uploader;
 
-import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.Config;
 
 /**
  * Uploads topology package to a shared location. This location must be
@@ -22,23 +22,14 @@ public interface IUploader {
   /**
    * Initialize the uploader with the incoming context.
    */
-  public void initialize(Context context);
+  public void initialize(Config config);
 
   /**
    * UploadPackage will upload the topology package to the given location.
    *
-   * @param topologyPackageLocation Location of topology jar and dependencies
-   * as 1 file.
    * @return true if successful.
    */
-   public boolean uploadPackage(String topologyPackageLocation);
-
-  /**
-   * Get the context specific to the uploader
-   *
-   * @return Context
-   */
-  public Context getContext();
+   public boolean uploadPackage();
 
   /**
    * If subsequent stages fail, undo will be called to free resources used by

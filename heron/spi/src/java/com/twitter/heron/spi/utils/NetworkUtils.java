@@ -47,6 +47,21 @@ public class NetworkUtils {
     }
   }
 
+  /**
+   * Get available port.
+   *
+   * @return available port.
+   */
+  public static int getFreePort() {
+    try (ServerSocket socket = new ServerSocket(0)) {
+      int port = socket.getLocalPort();
+      socket.close();
+      return port;
+    } catch (IOException ioe) {
+      return -1;
+    }
+  }
+
   public static Common.Status getHeronStatus(boolean isOK) {
     Common.Status.Builder status = Common.Status.newBuilder();
     if (isOK) {
