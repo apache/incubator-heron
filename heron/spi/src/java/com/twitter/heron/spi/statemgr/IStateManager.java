@@ -7,7 +7,7 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
-import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.Config;
 
 /**
  * This file defines the IStateManager interface.
@@ -37,17 +37,19 @@ import com.twitter.heron.spi.common.Context;
 
 public interface IStateManager {
 
+  public static final String NO_SCHEDULER_REST_ENDPOINT = "no_scheduler_endpoint";
+
   /**
    * Initialize the uploader with the incoming context.
    */
-  public void initialize(Context context);
+  public void initialize(Config config);
 
   /**
-   * Get the context specific to the StateManager
+   * Get the config specific to the StateManager
    *
-   * @return Context
+   * @return Config
    */
-  public Context getContext();
+  public Config getConfig();
 
   void close();
 
@@ -57,15 +59,6 @@ public interface IStateManager {
    * @return Boolean
    */
   ListenableFuture<Boolean> isTopologyRunning(String topologyName);
-
-  /**
-   * Set the location of Tmaster.
-   * @param location
-   * @param topologyName
-   * @return Boolean - Success or Failure
-   */
-  ListenableFuture<Boolean> setTMasterLocation(
-      TopologyMaster.TMasterLocation location, String topologyName);
 
   /**
    * Set the execution state for the given topology
@@ -84,15 +77,6 @@ public interface IStateManager {
    */
   ListenableFuture<Boolean> setTopology(
       TopologyAPI.Topology topology, String topologyName);
-
-  /**
-   * Set the physical plan for the given topology
-   * @param physicalPlan
-   * @param topologyName
-   * @return Boolean - Success or Failure
-   */
-  ListenableFuture<Boolean> setPhysicalPlan(
-      PhysicalPlans.PhysicalPlan physicalPlan, String topologyName);
 
   /**
    * Set the scheduler location for the given top
@@ -173,6 +157,24 @@ public interface IStateManager {
    */
   ListenableFuture<ExecutionEnvironment.ExecutionState> getExecutionState(
       WatchCallback watcher, String topologyName);
+
+  /**
+   * Set the location of Tmaster.
+   * @param location
+   * @param topologyName
+   * @return Boolean - Success or Failure
+   */
+  ListenableFuture<Boolean> setTMasterLocation(
+      TopologyMaster.TMasterLocation location, String topologyName);
+
+  /**
+   * Set the physical plan for the given topology
+   * @param physicalPlan
+   * @param topologyName
+   * @return Boolean - Success or Failure
+   */
+  ListenableFuture<Boolean> setPhysicalPlan(
+      PhysicalPlans.PhysicalPlan physicalPlan, String topologyName);
 
   /**
    * Get the physical plan for the given topology

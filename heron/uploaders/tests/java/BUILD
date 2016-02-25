@@ -1,0 +1,41 @@
+load("/tools/rules/heron_deps", "heron_java_proto_files")
+
+common_deps_files = [
+    "//3rdparty/powermock:powermock-java",
+    "//3rdparty/commons:commons-io-java",
+    "@bazel_tools//third_party:mockito",
+    "@bazel_tools//third_party:junit4",
+]
+
+spi_deps_files = [
+    "//heron/spi/src/java:common-spi-java",
+    "//heron/spi/src/java:uploader-spi-java",
+    "//heron/spi/src/java:utils-spi-java",
+]
+
+localfs_deps_files = \
+    common_deps_files + \
+    spi_deps_files + [
+        ":local-filesystem-constants-java",
+        "//heron/uploaders/src/java:localfs-uploader",
+    ]
+
+java_library(
+    name = "local-filesystem-constants-java",
+    srcs = glob(["**/localfs/LocalFileSystemConstants.java"]),
+)
+
+java_test(
+    name = "local-filesystem-config_unittest",
+    srcs = glob(["**/localfs/LocalFileSystemConfigTest.java"]),
+    deps = localfs_deps_files,
+    size = "small",
+)
+
+java_test(
+    name = "local-filesystem-uploader_unittest",
+    srcs = glob(["**/localfs/LocalFileSystemUploaderTest.java"]),
+    deps = localfs_deps_files,
+    size = "small",
+    data = glob(["**/localfs/testdata/*.tar"]),
+)

@@ -1,154 +1,137 @@
 package com.twitter.heron.spi.common;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Set;
-
-/**
- * Context is an Immutable Map of <String, Object>
- */
 public class Context {
-  private final Map<String, Object> ctxMap = new HashMap();
 
-  public static class Builder {
-    private final Map<String, Object> keyValues = new HashMap();
-
-    private static Context.Builder create() {
-      return new Builder();
-    }
-
-    public Builder put(String key, Object value) {
-      this.keyValues.put(key, value);
-      return this;
-    }
-
-    public Builder putAll(Context ctx) {
-      keyValues.putAll(ctx.ctxMap);
-      return this;
-    }
-
-    public Builder putAll(Map<String, Object> map) {
-      keyValues.putAll(map);
-      return this;
-    }
-
-    public Context build() {
-      return new Context(this);
-    }
+  public static String cluster(Config cfg) {
+    return cfg.getStringValue(Keys.CLUSTER);
   }
 
-  private Context(Builder build) {
-    ctxMap.putAll(build.keyValues);
+  public static String role(Config cfg) {
+    return cfg.getStringValue(Keys.ROLE);
   }
 
-  public static Builder newBuilder() { 
-    return Builder.create(); 
+  public static String environ(Config cfg) {
+    return cfg.getStringValue(Keys.ENVIRON);
   }
 
-  public int size() {
-    return ctxMap.size();
+  public static Boolean verbose(Config cfg) {
+    return cfg.getBooleanValue(Keys.VERBOSE);
   }
 
-  public Object get(String key) {
-    return ctxMap.get(key);
+  public static String configPath(Config cfg) {
+    return cfg.getStringValue(Keys.CONFIG_PATH);
   }
 
-  public String getStringValue(String key) {
-    return (String) get(key);
+  public static String topologyName(Config cfg) {
+    return cfg.getStringValue(Keys.TOPOLOGY_NAME);
   }
 
-  public String getStringValue(String key, String defaultValue) {
-    String value = getStringValue(key);
-    return value != null ? value : defaultValue;
+  public static String uploaderClass(Config cfg) {
+    return cfg.getStringValue(Keys.UPLOADER_CLASS);
   }
 
-  public Boolean getBooleanValue(String key) {
-    return (Boolean) get(key);
+  public static String launcherClass(Config cfg) {
+    return cfg.getStringValue(Keys.LAUNCHER_CLASS);
   }
 
-  public Boolean getBooleanValue(String key, boolean defaultValue) {
-    Boolean value = getBooleanValue(key);
-    return value != null ? value : defaultValue;
+  public static String schedulerClass(Config cfg) {
+    return cfg.getStringValue(Keys.SCHEDULER_CLASS);
   }
 
-  public Long getLongValue(String key) {
-    Object value = ctxMap.get(key);
-    return getLong(value);
+  public static String runtimeManagerClass(Config cfg) {
+    return cfg.getStringValue(Keys.RUNTIME_MANAGER_CLASS);
   }
 
-  public Long getLongValue(String key, long defaultValue) {
-    Object value = get(key);
-    if (value != null) {
-      return getLong(value);
-    }
-    return defaultValue;
+  public static String packingClass(Config cfg) {
+    return cfg.getStringValue(Keys.PACKING_CLASS);
   }
 
-  public Double getDoubleValue(String key) {
-    Object value = ctxMap.get(key);
-    return getDouble(value);
+  public static String stateManagerClass(Config cfg) {
+    return cfg.getStringValue(Keys.STATE_MANAGER_CLASS);
   }
 
-  public Double getDoubleValue(String key, double defaultValue) {
-    Object value = get(key);
-    if (value != null) {
-      return getDouble(value);
-    }
-    return defaultValue;
+  public static String executorBinary(Config cfg) {
+    return cfg.getStringValue(Keys.EXECUTOR_BINARY);
   }
 
-  public boolean containsKey(String key) {
-    return ctxMap.containsKey(key);
+  public static String stmgrBinary(Config cfg) {
+    return cfg.getStringValue(Keys.STMGR_BINARY);
   }
 
-  public Set<String> getKeySet() {
-    return ctxMap.keySet();
+  public static String tmasterBinary(Config cfg) {
+    return cfg.getStringValue(Keys.TMASTER_BINARY);
   }
 
-  private static Long getLong(Object o) {
-    if (o instanceof Long) {
-      return ((Long) o);
-    } else if (o instanceof Integer) {
-      return new Long(((Integer) o).longValue());
-    } else if (o instanceof Short) {
-      return new Long(((Short) o).longValue());
-    } else {
-      try {
-        return Long.parseLong(o.toString());
-      } catch (NumberFormatException nfe) {
-        throw new IllegalArgumentException("Don't know how to convert " + o + " + to long");
-      }
-    }
+  public static String shellBinary(Config cfg) {
+    return cfg.getStringValue(Keys.SHELL_BINARY);
   }
 
-  private static Double getDouble(Object o) { 
-    if (o instanceof Double) {
-      return ((Double) o);
-    } else if (o instanceof Float) {
-      return new Double(((Float) o).doubleValue());
-    } else if (o instanceof Long) {
-      return new Double(((Long) o).doubleValue());
-    } else if (o instanceof Integer) {
-      return new Double(((Integer) o).doubleValue());
-    } else if (o instanceof Short) {
-      return new Double(((Short) o).doubleValue());
-    } else {
-      try {
-        return Double.parseDouble(o.toString());
-      } catch (NumberFormatException nfe) {
-        throw new IllegalArgumentException("Don't know how to convert " + o + " + to double");
-      }
-    }
+  public static String schedulerJar(Config cfg) {
+    return cfg.getStringValue(Keys.SCHEDULER_JAR);
   }
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    for (Object obj : ctxMap.entrySet()) {
-      Map.Entry<String, Object> entry = (Map.Entry) obj;
-      sb.append("(\"" + entry.getKey() + "\"");
-      sb.append(", " + entry.getValue() + ")\n");
-    }
-    return sb.toString();
+  public static String logDirectory(Config cfg) {
+    return cfg.getStringValue(Keys.LOGGING_DIRECTORY);
+  }
+ 
+  public static String internalsConfigFile(Config cfg) {
+    return cfg.getStringValue(Keys.INTERNALS_CONFIG_FILE);
+  }
+
+  public static String topologyDefinitionFile(Config cfg) {
+    return cfg.getStringValue(Keys.TOPOLOGY_DEFINITION_FILE);
+  }
+
+  public static String topologyJarFile(Config cfg) {
+    return cfg.getStringValue(Keys.TOPOLOGY_JAR_FILE);
+  }
+
+  public static String topologyPackageUri(Config cfg) {
+    return cfg.getStringValue(Keys.TOPOLOGY_PACKAGE_URI);
+  }
+
+  public static String topologyPackageType(Config cfg) {
+    return cfg.getStringValue(Keys.TOPOLOGY_PACKAGE_TYPE);
+  }
+
+  // Constants for config provided default values for resources
+  public static Long stmgrRam(Config cfg) {
+    return cfg.getLongValue(Keys.STMGR_RAM);
+  }
+
+  public static Long instanceRam(Config cfg) {
+    return cfg.getLongValue(Keys.INSTANCE_RAM);
+  }
+
+  public static Double instanceCpu(Config cfg) {
+    return cfg.getDoubleValue(Keys.INSTANCE_CPU);
+  }
+
+  public static Long instanceDisk(Config cfg) {
+    return cfg.getLongValue(Keys.INSTANCE_DISK);
+  }
+
+  public static String heronHome(Config cfg) {
+    return cfg.getStringValue(Keys.HERON_HOME); 
+  }
+
+  public static String heronBin(Config cfg) {
+    return cfg.getStringValue(Keys.HERON_BINS); 
+  }
+  
+  public static String heronConf(Config cfg) {
+    return cfg.getStringValue(Keys.HERON_CONF);
+  }
+
+  public static final String heronLib(Config cfg) {
+    return cfg.getStringValue(Keys.HERON_LIBS);
+  }
+
+  public static final String heronDist(Config cfg) {
+    return cfg.getStringValue(Keys.HERON_DIST);
+  }
+
+  public static final String heronEtc(Config cfg) {
+    return cfg.getStringValue(Keys.HERON_ETC);
   }
 }

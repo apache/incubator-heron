@@ -32,21 +32,6 @@ public class HttpUtils {
   private static final Logger LOG = Logger.getLogger(HttpUtils.class.getName());
 
   /**
-   * Get available port.
-   *
-   * @return available port.
-   */
-  public static int getFreePort() {
-    try (ServerSocket socket = new ServerSocket(0)) {
-      int port = socket.getLocalPort();
-      socket.close();
-      return port;
-    } catch (IOException ioe) {
-      return -1;
-    }
-  }
-
-  /**
    * Blocks current thread
    *
    * @param time Time

@@ -4,10 +4,14 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.logging.Logger;
 
+import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.packing.IPacking;
-import com.twitter.heron.spi.uploader.IUploader;
+import com.twitter.heron.spi.statemgr.IStateManager;
+import com.twitter.heron.spi.utils.TopologyUtils;
+
+import com.twitter.heron.api.generated.TopologyAPI;
 
 /**
  * Calls Uploader to upload topology package, and Launcher to launch Scheduler.
@@ -30,35 +34,94 @@ public class SubmitterMain {
     String cluster = args[0];
     String role = args[1];
     String environ = args[2];
-    String configPath = args[3];
-    String configOverrideEncoded = args[4];
+    String heronHome = args[3];
+    String configPath = args[4];
+    String configOverrideEncoded = args[5];
 
-    String topologyPackage = args[5];
-    String topologyDefnFile = args[6];
-    String heronInternalsFile = args[7];
-    String originalPackageFile = args[8];
-    String pkg_type = FileUtils.isOriginalPackageJar(
-        FileUtility.getBaseName(originalPackageFile)) ? "jar" : "tar" ; 
+    String topologyPackage = args[6];
+    String topologyDefnFile = args[7];
+    String heronInternalsFile = args[8];
+    String originalPackageFile = args[9];
 
     // First load the defaults, then the config from files to override it 
-    Context.Builder cb1 = Context.newBuilder()
-       .putAll(ClusterDefaults.getDefaults())
-       .putAll(ClusterConfig.loadConfig(cluster, configPath));
+    Config.Builder defaultsConfig = Config.newBuilder()
+        .putAll(ClusterDefaults.getDefaults())
+        .putAll(ClusterConfig.loadConfig(heronHome, cluster, configPath));
  
     // Add config parameters from the command line
-    Context.Builder cb2 = Context.newBuilder()
-       .put(Keys.Config.CLUSTER, cluster)
-       .put(Keys.Config.ROLE, role)
-       .put(Keys.Config.ENVIRON, environ)
+    Config.Builder commandLineConfig = Config.newBuilder()
+        .put(Keys.CLUSTER, cluster)
+        .put(Keys.ROLE, role)
+        .put(Keys.ENVIRON, environ);
 
-    Context.Builder cb3 = Context.newBuilder()
-       .put(Keys.Config.INTERNALS_CONFIG_FILE, heronInternalsFile)
-       .put(Keys.Config.TOPOLOGY_DEFINITION_FILE, topologyDefnFile)
-       .put(Keys.Config.TOPOLOGY_JAR_FILE, originalPackageFile)
-       .put(Keys.Config.TOPOLOGY_PKG_TYPE, pkg_type)
+    // Identify the type of topology package
+    String pkgType = FileUtils.isOriginalPackageJar(
+        FileUtils.getBaseName(originalPackageFile)) ? "jar" : "tar" ; 
 
-    // TODO - Karthik override any parameters from the command line
+    // Load the topology definition into topology proto
+    TopologyAPI.Topology topology = TopologyUtils.getTopology(topologyDefnFile);
 
-    System.out.println(cb.build()); 
+    Config.Builder topologyConfig = Config.newBuilder()
+        .put(Keys.TOPOLOGY_ID, topology.getId())
+        .put(Keys.TOPOLOGY_NAME, topology.getName())
+        .put(Keys.TOPOLOGY_DEFINITION_FILE, topologyDefnFile)
+        .put(Keys.TOPOLOGY_PACKAGE_URI, topologyPackage)
+        .put(Keys.TOPOLOGY_JAR_FILE, originalPackageFile)
+        .put(Keys.TOPOLOGY_PACKAGE_TYPE, pkgType);
+
+    Config.Builder systemConfig = Config.newBuilder()
+        .put(Keys.INTERNALS_CONFIG_FILE, heronInternalsFile);
+
+    // TODO (Karthik) override any parameters from the command line
+
+    Config config = Config.newBuilder()
+        .putAll(defaultsConfig.build())
+        .putAll(commandLineConfig.build())
+        .putAll(topologyConfig.build())
+        .putAll(systemConfig.build())
+        .build();
+
+    // submit the topology with the given config
+    if (!submitTopology(config, topology)) {
+      Runtime.getRuntime().exit(1);
+    }
+  }
+ 
+  public static boolean submitTopology(Config config, TopologyAPI.Topology topology) throws
+      ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
+
+    // create an instance of state manager
+    String statemgrClass = Context.stateManagerClass(config);
+    IStateManager statemgr = (IStateManager)Class.forName(statemgrClass).newInstance();
+
+    // build the runtime config
+    Config runtime = Config.newBuilder()
+        .put(Keys.TOPOLOGY_ID, topology.getId())
+        .put(Keys.TOPOLOGY_NAME, topology.getName())
+        .put(Keys.TOPOLOGY_DEFINITION, topology)
+        .put(Keys.STATE_MANAGER, statemgr)
+        .build();
+
+    // upload the topology package to the storage
+    UploadRunner uploadRunner = new UploadRunner(config);
+    boolean result = uploadRunner.call();
+
+    if (!result) {
+      LOG.severe("Failed to upload package. Exiting");
+      return false;
+    }
+
+    // using launch runner, launch the topology
+    LaunchRunner launchRunner = new LaunchRunner(config, runtime);
+    result = launchRunner.call();
+
+    // if failed, undo the uploaded package
+    if (!result) {
+      LOG.severe("Failed to launch topology. Attempting to roll back upload.");
+      uploadRunner.undo();
+      return false;
+    }
+
+    return true;
   }
 }
