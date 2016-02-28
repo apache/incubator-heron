@@ -9,6 +9,9 @@ import javax.xml.bind.DatatypeConverter;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.ClusterConfig;
+import com.twitter.heron.spi.common.ClusterDefaults;
+
 import com.twitter.heron.spi.scheduler.IRuntimeManager;
 import com.twitter.heron.spi.statemgr.IStateManager;
 

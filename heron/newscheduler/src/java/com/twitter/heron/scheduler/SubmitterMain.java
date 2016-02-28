@@ -8,6 +8,9 @@ import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.ClusterConfig;
+import com.twitter.heron.spi.common.ClusterDefaults;
+
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
@@ -40,8 +43,7 @@ public class SubmitterMain {
 
     String topologyPackage = args[6];
     String topologyDefnFile = args[7];
-    String heronInternalsFile = args[8];
-    String originalPackageFile = args[9];
+    String originalPackageFile = args[8];
 
     // First load the defaults, then the config from files to override it 
     Config.Builder defaultsConfig = Config.newBuilder()
@@ -65,21 +67,21 @@ public class SubmitterMain {
         .put(Keys.TOPOLOGY_ID, topology.getId())
         .put(Keys.TOPOLOGY_NAME, topology.getName())
         .put(Keys.TOPOLOGY_DEFINITION_FILE, topologyDefnFile)
-        .put(Keys.TOPOLOGY_PACKAGE_URI, topologyPackage)
+        .put(Keys.TOPOLOGY_PACKAGE_FILE, topologyPackage)
         .put(Keys.TOPOLOGY_JAR_FILE, originalPackageFile)
         .put(Keys.TOPOLOGY_PACKAGE_TYPE, pkgType);
 
-    Config.Builder systemConfig = Config.newBuilder()
-        .put(Keys.INTERNALS_CONFIG_FILE, heronInternalsFile);
-
     // TODO (Karthik) override any parameters from the command line
 
-    Config config = Config.newBuilder()
-        .putAll(defaultsConfig.build())
-        .putAll(commandLineConfig.build())
-        .putAll(topologyConfig.build())
-        .putAll(systemConfig.build())
-        .build();
+    // Build the final config by expanding all the variables
+    Config config = Config.expand(
+        Config.newBuilder()
+            .putAll(defaultsConfig.build())
+            .putAll(commandLineConfig.build())
+            .putAll(topologyConfig.build())
+            .build());
+
+    LOG.info("loaded static config " + config);
 
     // submit the topology with the given config
     if (!submitTopology(config, topology)) {
@@ -102,14 +104,21 @@ public class SubmitterMain {
         .put(Keys.STATE_MANAGER, statemgr)
         .build();
 
+    // initialize the state manager
+    statemgr.initialize(config);
+
     // upload the topology package to the storage
     UploadRunner uploadRunner = new UploadRunner(config);
     boolean result = uploadRunner.call();
 
     if (!result) {
       LOG.severe("Failed to upload package. Exiting");
+      statemgr.close();
       return false;
     }
+
+    // for testing uploader
+    Runtime.getRuntime().exit(0);
 
     // using launch runner, launch the topology
     LaunchRunner launchRunner = new LaunchRunner(config, runtime);
@@ -119,8 +128,12 @@ public class SubmitterMain {
     if (!result) {
       LOG.severe("Failed to launch topology. Attempting to roll back upload.");
       uploadRunner.undo();
+      statemgr.close();
       return false;
     }
+
+    // close the statemanager
+    statemgr.close();
 
     return true;
   }

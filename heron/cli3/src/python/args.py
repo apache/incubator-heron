@@ -2,7 +2,7 @@ import os
 import argparse
 import getpass
 
-import heron.cli2.src.python.utils as utils
+import heron.cli3.src.python.utils as utils
 
 def add_titles(parser):
   parser._positionals.title = "Required arguments"
@@ -70,21 +70,19 @@ def add_cluster_role_env(parser):
   return parser
 
 def add_config(parser):
-  default_config_path = 'conf/com/twitter/aurora'
+
+  # the default config path is user home
+  heron_directory = utils.get_heron_dir()
+  default_config_path = os.path.join(heron_directory, "conf")
+
   parser.add_argument(
       '--config-path',
-      metavar='(a string; path to scheduler config; default: "' + default_config_path + '")',
+      metavar='(a string; path to cluster config; default: "' + default_config_path + '")',
       default=os.path.join(utils.get_heron_dir(), default_config_path))
-
-  default_config_loader = 'com.twitter.heron.scheduler.aurora.AuroraConfigLoader'
-  parser.add_argument(
-      '--config-loader',
-      metavar='(a string; class to load scheduler config; default: "' + default_config_loader + '")',
-      default=default_config_loader)
 
   parser.add_argument(
       '--config-property',
-      metavar='(a string; scheduler config property; default: [])',
+      metavar='(a string; a config property; default: [])',
       action='append',
       default=[])
   return parser
@@ -108,7 +106,7 @@ def parse_cluster_role_env(cluster_role_env):
     print "Failed to parse %s: %s" % (argstr, namespace[argstr])
     sys.exit(1)
 
-  return "cluster=%s role=%s environ=%s" % (parts[0], parts[1], parts[2])
+  return (parts[0], parts[1], parts[2])
 
 ################################################################################
 # Parse the command line for overriding the defaults

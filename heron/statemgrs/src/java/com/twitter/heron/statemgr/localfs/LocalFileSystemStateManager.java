@@ -20,50 +20,22 @@ import com.twitter.heron.spi.statemgr.WatchCallback;
 public class LocalFileSystemStateManager extends FileSystemStateManager {
   private static final Logger LOG = Logger.getLogger(LocalFileSystemStateManager.class.getName());
 
-  public static final String IS_INITIALIZE_FILE_TREE = "is.initialize.file.tree";
-  public static final String WORKING_DIRECTORY = "heron.local.working.directory";
-
-  // The config owned by state manager
-  private Config stateMgrConfig;
+  public static final String IS_INITIALIZE_FILE_TREE = "heron.statemgr.localfs.is.initialize.file.tree";
+  private Config config;
 
   @Override
   public void initialize(Config config) {
-    Config.Builder stateMgrConfigBuilder = Config.newBuilder();
 
-    String rootAddress = config.getStringValue(ROOT_ADDRESS);
-    if (rootAddress == null) {
-      Object workingDir = config.get(WORKING_DIRECTORY);
-      if (workingDir == null) {
-        throw new IllegalArgumentException("Misses required config: " + WORKING_DIRECTORY);
-      }
-      rootAddress = String.format("%s/%s", workingDir, "state");
-      stateMgrConfigBuilder.put(ROOT_ADDRESS, rootAddress);
-    }
-
-    // If more key values need to be added to stateMgrConfig later, it might be
-    // better to maintain a mutable map and only convert to Config in getConfig method.
-    stateMgrConfig = stateMgrConfigBuilder.build();
-
-    super.initialize(
-        Config.newBuilder()
-            .putAll(config)
-            .putAll(stateMgrConfig)
-            .build()
-    );
+    this.config = config;
+    super.initialize(config);
 
     // By default, we would init the file tree if it is not there
-    boolean isInitLocalFileTree = config.get(IS_INITIALIZE_FILE_TREE) == null ?
-        true : (Boolean) config.get(IS_INITIALIZE_FILE_TREE);
+    boolean isInitLocalFileTree = LocalFileSystemContext.initLocalFileTree(config);
 
     if (isInitLocalFileTree && !initTree()) {
       throw new IllegalArgumentException("Failed to initialize Local State manager. " +
           "Check rootAddress: " + rootAddress);
     }
-  }
-
-  @Override
-  public Config getConfig() {
-    return stateMgrConfig;
   }
 
   protected boolean initTree() {

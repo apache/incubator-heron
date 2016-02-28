@@ -44,37 +44,52 @@ public class Misc {
     String hp = FileSystemView.getFileSystemView().getHomeDirectory().getAbsolutePath();
     String homePath = hp.substring(1);
 
-    // If ${HOME} or ~ is specified, substitute them with home path
+    // substitute various variables 
     for (int i = 0 ; i < list.size(); i++) {
       String elem = list.get(i);
 
       if (elem.equals("${HOME}")) {
         list.set(i, homePath);
+
       } else if (elem.equals("~")) {
         list.set(i, homePath);
+
       } else if (elem.equals("${HERON_HOME}")) {
         list.set(i, Context.heronHome(config));
+
       } else if (elem.equals("${HERON_BIN}")) {
         list.set(i, Context.heronBin(config));
+
       } else if (elem.equals("${HERON_CONF}")) {
         list.set(i, Context.heronConf(config));
+
       } else if (elem.equals("${HERON_LIB}")) {
         list.set(i, Context.heronLib(config));
+
       } else if (elem.equals("${HERON_DIST}")) {
         list.set(i, Context.heronDist(config));
+
       } else if (elem.equals("${CLUSTER}")) {
         list.set(i, Context.cluster(config));
+
       } else if (elem.equals("${ROLE}")) {
         list.set(i, Context.role(config));
+
       } else if (elem.equals("${TOPOLOGY}")) {
         list.set(i, Context.topologyName(config));
       }
     }
 
     StringBuilder sb = new StringBuilder();
-    for (String s: list) {
-      sb.append(System.getProperty("file.separator"));
-      sb.append(s);
+    if (list.size() == 1) {
+      sb.append(list.get(0));
+    } else {
+      for (String s: list) {
+        if (!s.startsWith(System.getProperty("file.separator"))) {
+          sb.append(System.getProperty("file.separator"));
+        }
+        sb.append(s);
+      }
     }
     return sb.toString();
   }

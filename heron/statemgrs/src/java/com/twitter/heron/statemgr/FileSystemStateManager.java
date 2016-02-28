@@ -1,16 +1,16 @@
 package com.twitter.heron.statemgr;
 
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.statemgr.IStateManager;
 
 public abstract class FileSystemStateManager implements IStateManager {
-  public static final String ROOT_ADDRESS = "state.root.address";
 
   protected String rootAddress;
 
   @Override
   public void initialize(Config config) {
-    this.rootAddress = config.getStringValue(ROOT_ADDRESS);
+    this.rootAddress = Context.stateRootPath(config);
   }
 
   protected String getTMasterLocationDir() {

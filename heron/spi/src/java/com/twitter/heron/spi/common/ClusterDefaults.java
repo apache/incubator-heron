@@ -16,41 +16,38 @@ public final class ClusterDefaults {
   protected static Config getDefaultHome() {
     Config.Builder cb = Config.newBuilder().put(Keys.HERON_HOME, Defaults.HERON_HOME);
 
-    cb.put(Keys.HERON_BINS, Misc.substitute(Defaults.HERON_HOME, Defaults.HERON_BINS));
-    cb.put(Keys.HERON_CONF, Misc.substitute(Defaults.HERON_HOME, Defaults.HERON_CONF));
-    cb.put(Keys.HERON_DIST, Misc.substitute(Defaults.HERON_HOME, Defaults.HERON_DIST));
-    cb.put(Keys.HERON_ETC, Misc.substitute(Defaults.HERON_HOME, Defaults.HERON_ETC));
-    cb.put(Keys.HERON_LIBS, Misc.substitute(Defaults.HERON_HOME, Defaults.HERON_LIBS));
+    cb.put(Keys.HERON_BIN,  Defaults.HERON_BIN);
+    cb.put(Keys.HERON_CONF, Defaults.HERON_CONF);
+    cb.put(Keys.HERON_DIST, Defaults.HERON_DIST);
+    cb.put(Keys.HERON_ETC,  Defaults.HERON_ETC);
+    cb.put(Keys.HERON_LIB,  Defaults.HERON_LIB);
 
     return cb.build();
   }
 
   protected static Config getDefaultBinaries() {
-    Config homeConfig = getDefaultHome();
     Config.Builder cb = Config.newBuilder();
 
-    cb.put(Keys.EXECUTOR_BINARY, Misc.substitute(homeConfig, Defaults.EXECUTOR_BINARY));
-    cb.put(Keys.STMGR_BINARY, Misc.substitute(homeConfig, Defaults.STMGR_BINARY));
-    cb.put(Keys.TMASTER_BINARY, Misc.substitute(homeConfig, Defaults.TMASTER_BINARY));
-    cb.put(Keys.SHELL_BINARY, Misc.substitute(homeConfig, Defaults.SHELL_BINARY));
+    cb.put(Keys.EXECUTOR_BINARY, Defaults.EXECUTOR_BINARY);
+    cb.put(Keys.STMGR_BINARY, Defaults.STMGR_BINARY);
+    cb.put(Keys.TMASTER_BINARY, Defaults.TMASTER_BINARY);
+    cb.put(Keys.SHELL_BINARY, Defaults.SHELL_BINARY);
 
     return cb.build();
   }
 
   protected static Config getDefaultJars() {
-    Config homeConfig = getDefaultHome();
     Config.Builder cb = Config.newBuilder();
 
-    cb.put(Keys.SCHEDULER_JAR, Misc.substitute(homeConfig, Defaults.SCHEDULER_JAR));
+    cb.put(Keys.SCHEDULER_JAR, Defaults.SCHEDULER_JAR);
 
     return cb.build();
   }
 
   protected static Config getDefaultFilesAndPaths() {
-    Config homeConfig = getDefaultHome();
     Config.Builder cb = Config.newBuilder();
 
-    cb.put(Keys.CORE_PACKAGE_URI, Misc.substitute(homeConfig, Defaults.CORE_PACKAGE_URI));
+    cb.put(Keys.CORE_PACKAGE_URI, Defaults.CORE_PACKAGE_URI);
     cb.put(Keys.METRICS_MANAGER_CLASSPATH, Defaults.METRICS_MANAGER_CLASSPATH);
 
     return cb.build();

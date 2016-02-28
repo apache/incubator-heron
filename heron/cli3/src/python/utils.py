@@ -7,15 +7,23 @@ import os
 import tarfile
 import contextlib
 
+import heron.cli3.src.python.sandbox as sandbox
+
 ################################################################################
 # Create a tar file with a given set of files
 ################################################################################
-def create_tar(tar_filename, files):
+def create_tar(tar_filename, files, config_dir):
   with contextlib.closing(tarfile.open(tar_filename, 'w:gz')) as tar:
     for filename in files:
-      if not os.path.isfile(filename):
+      if os.path.isfile(filename):
+        tar.add(filename, arcname=os.path.basename(filename))
+      else:
         raise Exception("%s is not an existing file" % filename)
-      tar.add(filename, arcname=os.path.basename(filename))
+
+    if os.path.isdir(config_dir):
+      tar.add(config_dir, arcname=sandbox.get_conf_dir())
+    else:
+      raise Exception("%s is not an existing directory" % config_dir)
 
 ################################################################################
 # Retrieve the given subparser from parser
@@ -60,7 +68,7 @@ def get_classpath(jars):
   return ':'.join(map(normalized_class_path, jars))
 
 ################################################################################
-# Get normalized class path depending on platform
+# Get the root of heron dir and various sub directories depending on platform
 ################################################################################
 def get_heron_dir():
   """
@@ -70,10 +78,18 @@ def get_heron_dir():
   path = "/".join(os.path.realpath( __file__ ).split('/')[:-7])
   return normalized_class_path(path)
 
+def get_heron_lib_dir():
+  """
+  This will provide heron lib directory from .pex file.
+  :return: absolute path of heron lib directory
+  """
+  lib_path = os.path.join(get_heron_dir(), "lib")
+  return lib_path
+
 ################################################################################
 # Get all the heron lib jars with the absolute paths
 ################################################################################
 def get_heron_libs(local_jars):
-  heron_dir = get_heron_dir()
-  heron_libs = [os.path.join(heron_dir, f) for f in local_jars]
+  heron_lib_dir = get_heron_lib_dir()
+  heron_libs = [os.path.join(heron_lib_dir, f) for f in local_jars]
   return heron_libs

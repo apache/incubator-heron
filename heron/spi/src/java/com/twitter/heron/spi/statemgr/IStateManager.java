@@ -44,14 +44,7 @@ public interface IStateManager {
    */
   public void initialize(Config config);
 
-  /**
-   * Get the config specific to the StateManager
-   *
-   * @return Config
-   */
-  public Config getConfig();
-
-  void close();
+  public void close();
 
   /**
    * Is the given topology in RUNNING state?

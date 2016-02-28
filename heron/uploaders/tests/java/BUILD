@@ -17,7 +17,7 @@ localfs_deps_files = \
     common_deps_files + \
     spi_deps_files + [
         ":local-filesystem-constants-java",
-        "//heron/uploaders/src/java:localfs-uploader",
+        "//heron/uploaders/src/java:localfs-uploader-java",
     ]
 
 java_library(

@@ -32,12 +32,17 @@ public class Keys {
   public static final String CORE_PACKAGE_URI = "heron.core.release.uri";
   public static final String TOPOLOGY_PACKAGE_URI = "heron.topology.package.uri";
 
+  // Constants for topology 
   public static final String TOPOLOGY_ID = "heron.topology.id";
   public static final String TOPOLOGY_NAME = "heron.topology.name";
   public static final String TOPOLOGY_DEFINITION_FILE = "heron.topology.definition.file";
   public static final String TOPOLOGY_DEFINITION = "heron.topology.definition";
   public static final String TOPOLOGY_JAR_FILE = "heron.topology.jar.file";
+  public static final String TOPOLOGY_PACKAGE_FILE = "heron.topology.package.file";
   public static final String TOPOLOGY_PACKAGE_TYPE = "heron.topology.package.type";
+
+  // Constants for storing state
+  public static final String STATE_ROOT_PATH = "heron.statemgr.root.path";
 
   // Constants for config provided default values for resources
   public static final String STMGR_RAM = "heron.stmgr.ram";
@@ -50,14 +55,26 @@ public class Keys {
 
   // Constants for heron environment
   public static final String HERON_HOME = "heron.home.directory";
-  public static final String HERON_BINS = "heron.bin.directory"; 
+  public static final String HERON_BIN = "heron.bin.directory"; 
   public static final String HERON_CONF = "heron.conf.directory";
-  public static final String HERON_LIBS = "heron.lib.directory";
+  public static final String HERON_LIB = "heron.lib.directory";
   public static final String HERON_DIST = "heron.dist.directory";
   public static final String HERON_ETC  = "heron.etc.directory";
 
+  // Constants for run time config
+  public static final String TOPOLOGY_CLASS_PATH = "heron.topology.class.path";
   public static final String STATE_MANAGER = "heron.state.manager";
+  public static final String JAVA_HOME = "heron.java.home.path";
 
+  public static final String COMPONENT_RAMMAP = "heron.component.rammap";
+  public static final String COMPONENT_JVM_OPTS_IN_BASE64 = "heron.component.jvm.opts.in.base64";
+  public static final String INSTANCE_DISTRIBUTION = "heron.instance.distribution";
+  public static final String INSTANCE_JVM_OPTS_IN_BASE64 = "heron.instance.jvm.opts.in.base64";
+
+  public static final String METRICS_MGR_CLASSPATH = "heron.metrics.mgr.classpath";
+  public static final String NUM_CONTAINERS = "heron.num.containers";
+
+  // Rest 
   public static final String HERON_RELEASE_PACKAGE = "heron.release.package";
   public static final String HERON_RELEASE_PACKAGE_ROLE = "heron.release.package.role";
   public static final String HERON_RELEASE_PACKAGE_NAME = "heron.release.package.name";

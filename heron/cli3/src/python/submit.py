@@ -15,11 +15,11 @@ import tarfile
 import tempfile
 
 from heron.proto import topology_pb2
-import heron.cli2.src.python.args as args
-import heron.cli2.src.python.execute as execute
-import heron.cli2.src.python.jars as jars
-import heron.cli2.src.python.opts as opts
-import heron.cli2.src.python.utils as utils
+import heron.cli3.src.python.args as args
+import heron.cli3.src.python.execute as execute
+import heron.cli3.src.python.jars as jars
+import heron.cli3.src.python.opts as opts
+import heron.cli3.src.python.utils as utils
 
 ################################################################################
 # Create a subparser for the submit command
@@ -53,31 +53,40 @@ def create_parser(subparsers):
 ################################################################################
 # Launch a topology given topology jar, its definition file and configurations
 ################################################################################
-def launch_a_topology(tmp_dir, topology_file, topology_defn_file, 
-        heron_internals_file, config_loader, config_path, config_overrides):
+def launch_a_topology(cluster_role_env, tmp_dir, topology_file, topology_defn_file, 
+        config_path, config_overrides):
 
   # get the normalized path for topology.tar.gz and heron_internals.yaml
-  pkg_path = utils.normalized_class_path(os.path.join(tmp_dir, 'topology.tar.gz'))
-  heron_internals_config_path = os.path.join(utils.get_heron_dir(), heron_internals_file)
+  topology_pkg_path = utils.normalized_class_path(os.path.join(tmp_dir, 'topology.tar.gz'))
+
+  # TO DO - when you give a config path - the name of the directory might be 
+  # different - need to change the name to conf
 
   # create a tar package with 
-  tar_pkg_files = [topology_file, topology_defn_file, heron_internals_config_path]
-  utils.create_tar(pkg_path, tar_pkg_files)
+  tar_pkg_files = [topology_file, topology_defn_file]
+  utils.create_tar(topology_pkg_path, tar_pkg_files, config_path)
 
+  # pass the args to submitter main
   args = [
-      pkg_path,
-      config_loader,
-      config_path,
-      base64.b64encode(config_overrides),
-      defn_file,
-      heron_internals_config_path,
-      topology_file
+      cluster_role_env[0],                # cluster
+      cluster_role_env[1],                # role
+      cluster_role_env[2],                # environ
+      utils.get_heron_dir(),              # heron home directory
+      config_path,                        # path to config
+      base64.b64encode(config_overrides), # override values to config
+      topology_pkg_path,                  # topology package
+      topology_defn_file,                 # topology definition file
+      topology_file                       # original topology file
   ]
+
+  lib_jars = utils.get_heron_libs(
+      jars.scheduler_jars() + jars.uploader_jars()+jars.statemgr_jars()
+  )
 
   # invoke the submitter to submit and launch the topology
   execute.heron_class(
-      'com.twitter.heron.scheduler.service.SubmitterMain',
-      utils.get_heron_libs(jars.scheduler_jars()),
+      'com.twitter.heron.scheduler.SubmitterMain',
+      lib_jars,
       extra_jars=[],
       args = args
   )
@@ -85,14 +94,11 @@ def launch_a_topology(tmp_dir, topology_file, topology_defn_file,
 ################################################################################
 # Launch topologies 
 ################################################################################
-def launch_topologies(topology_file, tmp_dir, config_loader, config_path, 
+def launch_topologies(cluster_role_env, topology_file, tmp_dir, config_path, 
         config_overrides):
 
   # the submitter would have written the .defn file to the tmp_dir
   defn_files = glob.glob(tmp_dir + '/*.defn')
-
-  # TODO: We may add the flexibility to overload this file later
-  internals_config = 'heron_internals.yaml'
 
   if len(defn_files) == 0:
     raise Exception("No topologies found")
@@ -113,10 +119,9 @@ def launch_topologies(topology_file, tmp_dir, config_loader, config_path,
       # launch the topology
       try:
         print "Launching topology \'%s\'" % topology_defn.name
-        launch_a_topology(
-            tmp_dir, topology_file, defn_file, internals_config,
-            config_loader, config_path, config_overrides
-        )
+        launch_a_topology(cluster_role_env, tmp_dir, topology_file, defn_file, 
+            config_path, config_overrides)
+
         print "Topology \'%s\' launched successfully" % topology_defn.name
 
       except Exception as ex:
@@ -147,7 +152,6 @@ def submit_fatjar(command, parser, cl_args, unknown_args):
     topology_args = tuple(unknown_args)
 
     # extract the scheduler config path and config loader
-    config_loader = cl_args['config_loader']
     config_path = cl_args['config_path']
 
   except KeyError:
@@ -178,12 +182,11 @@ def submit_fatjar(command, parser, cl_args, unknown_args):
   )
 
   try:
-    config_overrides = \
-        args.parse_cluster_role_env(cluster_role_env) + ' ' + \
-        args.parse_cmdline_override(cl_args)
+    cluster_role_env = args.parse_cluster_role_env(cluster_role_env)
+    config_overrides = args.parse_cmdline_override(cl_args)
 
-    launch_topologies(topology_file, tmp_dir, config_loader,
-        config_path, config_overrides)
+    launch_topologies(cluster_role_env, topology_file, tmp_dir, config_path, 
+        config_overrides)
 
   finally:
     shutil.rmtree(tmp_dir)
@@ -209,7 +212,6 @@ def submit_tar(command, parser, cl_args, unknown_args):
     topology_class_name = cl_args['topology-class-name']
     topology_args = tuple(unknown_args)
 
-    config_loader = cl_args['config_loader']
     config_path = cl_args['config_path']
 
   except KeyError:
@@ -230,12 +232,10 @@ def submit_tar(command, parser, cl_args, unknown_args):
   execute.heron_tar(topology_class_name, topology_file, topology_args, tmp_dir)
 
   try:
-    config_overrides = \
-        args.parse_cluster_role_env(cluster_role_env) + ' ' + \
-        args.parse_cmdline_override(cl_args)
+    cluster_role_env = args.parse_cluster_role_env(cluster_role_env)
+    config_overrides = args.parse_cmdline_override(cl_args)
 
-    launch_topologies(topology_file, tmp_dir, config_loader,
-        config_path, config_overrides)
+    launch_topologies(cluster_role_env, topology_file, tmp_dir, config_path, config_overrides)
 
   finally:
     shutil.rmtree(tmp_dir)
@@ -249,6 +249,7 @@ def submit_tar(command, parser, cl_args, unknown_args):
 #  * You can see your topology in Heron UI
 ################################################################################
 def run(command, parser, cl_args, unknown_args):
+
   # get the topology file name
   topology_file = cl_args['topology-file-name']
 

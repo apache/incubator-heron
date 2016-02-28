@@ -23,10 +23,14 @@ import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.common.ShellUtils;
 import com.twitter.heron.spi.common.HttpUtils;
+
 import com.twitter.heron.spi.utils.NetworkUtils;
+import com.twitter.heron.spi.utils.Runtime;
 
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.IStateManager;
+
+import com.google.common.util.concurrent.ListenableFuture;
 
 public class LocalScheduler implements IScheduler {
   private static final Logger LOG = Logger.getLogger(LocalScheduler.class.getName());
@@ -48,17 +52,15 @@ public class LocalScheduler implements IScheduler {
     this.config = config;
     this.runtime = runtime;
 
-    this.localConfig = new LocalConfig(context);
-
     LOG.info("Starting to deploy topology: " + Context.topologyName(config));
-    LOG.info("# of containers: " + this.localConfig.getNumContainers());
+    LOG.info("# of containers: " + Runtime.numContainers(config));
 
     // first, run the TMaster executor
     startExecutor(0);
     LOG.info("TMaster is started.");
 
     // for each container, run its own executor
-    int numContainers = Integer.parseInt(this.localConfig.getNumContainers());
+    int numContainers = Integer.parseInt(Runtime.numContainers(config));
     for (int i = 1; i < numContainers; i++) {
       startExecutor(i);
     }
@@ -73,8 +75,10 @@ public class LocalScheduler implements IScheduler {
     LOG.info("Starting a new executor for container: " + container);
 
     // create a process with the executor command and topology working directory
-    final Process regularExecutor = ShellUtils.runASyncProcess(true, true, getExecutorCmd(container),
-        new File(this.localConfig.getWorkingDirectory()));
+    final Process regularExecutor = ShellUtils.runASyncProcess(true, true, 
+        (String)null,
+        // TO DO getExecutorCmd(container),
+        new File(LocalContext.workingDirectory(config)));
 
     // associate the process and its container id
     processToContainer.put(regularExecutor, container);
@@ -208,11 +212,12 @@ public class LocalScheduler implements IScheduler {
 
     // Clean TMasterLocation since we could not set it as ephemeral for local file system
     // We would not clean SchedulerLocation since we would not restart the Scheduler
-    stateManager.deleteTMasterLocation(topologyName);
+    stateManager.deleteTMasterLocation(Context.topologyName(config));
 
     return true;
   }
 
+  /*
   private String getExecutorCmd(int container) {
     int port1 = NetworkUtils.getFreePort();
     int port2 = NetworkUtils.getFreePort();
@@ -253,6 +258,7 @@ public class LocalScheduler implements IScheduler {
         port4
     );
   }
+  */
 
   /**
    * Communicate with TMaster with command

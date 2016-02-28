@@ -22,7 +22,13 @@ public final class ClusterConfigReader extends ConfigReader {
 
     // Read the defaults file, first
     String file1 = Paths.get(configPath, fileName).toString();
+    LOG.info("Cluster " + cluster + " config file " + file1 + "\n");
     Map props1 = loadFile(file1);
+
+    if (props1 == null) {
+      LOG.info("props1 is null \n");
+    }  
+
     if (props1.isEmpty()) {
       LOG.info("Config file " + file1 + " is empty");
     }
