@@ -123,11 +123,14 @@ test_write "${heronrc}"
 echo -n "Uncompressing."
 
 # Cleaning-up, with some guards.
-if [ -d "${base}" -a -x "${base}/bin/heron-cli2" ]; then
+if [ -f "${bin}/heron-cli3" ]; then
+  rm -f "${bin}/heron-cli3"
+fi
+if [ -d "${base}" -a -x "${base}/bin/heron-cli3" ]; then
   rm -fr "${base}"
 fi
 
-mkdir -p ${base} ${base}/bin ${base}/etc ${base}/lib ${base}/conf
+mkdir -p ${base} ${base}/bin ${base}/etc ${base}/lib ${base}/conf ${base}/dist
 echo -n .
 
 unzip -q -o "${BASH_SOURCE[0]}" -d "${base}"
@@ -143,7 +146,7 @@ chmod -R og+rX "${base}"
 chmod -R u+rwX "${base}"
 echo -n .
 
-ln -s "${base}/bin/heron-cli3" "${bin}/heron-cli3"
+#ln -s "${base}/bin/heron-cli3" "${prefix}/heron-cli3"
 echo -n .
 
 if [ -f "${heronrc}" ]; then
