@@ -74,12 +74,6 @@ public class CuratorStateManager extends FileSystemStateManager {
   }
 
   @Override
-  public Config getConfig() {
-    // No specific context to return.
-    return Config.newBuilder().build();
-  }
-
-  @Override
   public void close() {
     LOG.info("Closing the CuratorClient to: " + connectionString);
     client.close();

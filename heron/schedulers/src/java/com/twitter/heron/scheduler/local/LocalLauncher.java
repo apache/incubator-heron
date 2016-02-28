@@ -88,8 +88,8 @@ public class LocalLauncher implements ILauncher {
     Map<String, Long> ramMap = TopologyUtils.getComponentRamMap(topology);
 
     Config.Builder builder = Config.newBuilder()
-        .put(LocalSchedulerKeys.COMPONENT_RAMMAP, TopologyUtils.formatRamMap(ramMap))
-        .put(LocalSchedulerKeys.COMPONENT_JVM_OPTS_IN_BASE64, formatJavaOpts(jvmOptions));
+        .put(Keys.COMPONENT_RAMMAP, TopologyUtils.formatRamMap(ramMap))
+        .put(Keys.COMPONENT_JVM_OPTS_IN_BASE64, formatJavaOpts(jvmOptions));
     return builder.build();
   }
 
@@ -102,8 +102,8 @@ public class LocalLauncher implements ILauncher {
     String jvmOptions = TopologyUtils.getInstanceJvmOptions(topology);
 
     Config.Builder builder = Config.newBuilder()
-        .put(LocalSchedulerKeys.INSTANCE_DISTRIBUTION, distribution)
-        .put(LocalSchedulerKeys.INSTANCE_JVM_OPTS_IN_BASE64, formatJavaOpts(jvmOptions));
+        .put(Keys.INSTANCE_DISTRIBUTION, distribution)
+        .put(Keys.INSTANCE_JVM_OPTS_IN_BASE64, formatJavaOpts(jvmOptions));
     return builder.build(); 
   }
 
@@ -112,10 +112,10 @@ public class LocalLauncher implements ILauncher {
    */
   protected Config resourceConfigs() {
     TopologyAPI.Topology topology = Runtime.topology(runtime);
-    int numShards = 1 + TopologyUtils.getNumContainers(topology);
+    int numContainers = 1 + TopologyUtils.getNumContainers(topology);
 
     Config.Builder builder = Config.newBuilder()
-        .put(LocalSchedulerKeys.NUM_SHARDS, String.valueOf(numShards));
+        .put(Keys.NUM_CONTAINERS, String.valueOf(numContainers));
     return builder.build();
   }
 
@@ -124,7 +124,7 @@ public class LocalLauncher implements ILauncher {
    */
   protected Config filesAndDirsConfigs() {
     Config.Builder builder = Config.newBuilder();
-    builder.put(LocalSchedulerKeys.WORKING_DIRECTORY, topologyWorkingDirectory);
+    builder.put(LocalKeys.WORKING_DIRECTORY, topologyWorkingDirectory);
     return builder.build();
   }
 

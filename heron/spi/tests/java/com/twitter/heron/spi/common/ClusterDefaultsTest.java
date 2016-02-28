@@ -59,8 +59,9 @@ public class ClusterDefaultsTest {
     );
 
     Assert.assertEquals(
-        Long.valueOf(Defaults.INSTANCE_CPU),
-        Context.instanceCpu(props)
+        Double.valueOf(Defaults.INSTANCE_CPU),
+        Context.instanceCpu(props),
+        0.001
     );
 
     Assert.assertEquals(

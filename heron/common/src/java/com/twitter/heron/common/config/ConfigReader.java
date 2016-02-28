@@ -10,6 +10,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+
 import org.yaml.snakeyaml.Yaml;
 
 /**
@@ -25,19 +29,42 @@ public class ConfigReader {
    */
   public static Map loadFile(String propFileName) {
     Map props = new HashMap();
-    if (propFileName == null || propFileName.isEmpty()) {
-      LOG.warning("Config file " + propFileName + " not found\n");
-       return props;
+    if (propFileName == null) {
+      LOG.warning("Config file name cannot be null\n"); 
+      return props;
+    }
+    else if (propFileName.isEmpty()) {
+      LOG.warning("Config file name is empty\n");
+      return props;
     } else {
+
+      // check if the file exists and also it is a regular file
+      Path path = Paths.get(propFileName);
+
+      if (!Files.exists(path)) {
+        LOG.warning("Config file " + propFileName + " does not exist.\n");
+        return props;
+      }
+     
+      if (!Files.isRegularFile(path)) {
+        LOG.warning("Config file " + propFileName + " might be a directory.\n");
+        return props;
+      }
+      
+      LOG.info("Reading config file " + propFileName);
+
+      Map props_yaml = null;
       try {
         FileInputStream fin = new FileInputStream(new File(propFileName));
         Yaml yaml = new Yaml();
-        props = (Map) yaml.load(fin);
+        props_yaml = (Map) yaml.load(fin);
+        LOG.info("Successfully read config file " + propFileName);
       } catch (IOException e) {
         LOG.log(Level.SEVERE, "Failed to load config file: " + propFileName, e); 
       }
+
+      return props_yaml != null ? props_yaml : props;
     }
-    return props;
   }
 
   public static Integer getInt(Object o) {

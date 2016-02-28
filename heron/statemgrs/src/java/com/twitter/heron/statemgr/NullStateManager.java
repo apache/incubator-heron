@@ -24,11 +24,6 @@ public class NullStateManager implements IStateManager {
   }
 
   @Override
-  public Config getConfig() {
-    return null;
-  }
-
-  @Override
   public void close() {
 
   }

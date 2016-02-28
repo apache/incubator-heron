@@ -64,7 +64,7 @@ public class LocalFileSystemUploaderTest {
     String topologyPackage = Paths.get(testTopologyDirectory, "some-topology.tar").toString();
 
     Config newconfig = Config.newBuilder()
-        .putAll(config).put(Keys.TOPOLOGY_PACKAGE_URI, topologyPackage).build();
+        .putAll(config).put(Keys.TOPOLOGY_PACKAGE_FILE, topologyPackage).build();
 
     // create the uploader and load the package
     LocalFileSystemUploader uploader = new LocalFileSystemUploader(); 
@@ -83,7 +83,7 @@ public class LocalFileSystemUploaderTest {
     String topologyPackage = Paths.get(testTopologyDirectory, "doesnot-exist-topology.tar").toString();
 
     Config newconfig = Config.newBuilder()
-        .putAll(config).put(Keys.TOPOLOGY_PACKAGE_URI, topologyPackage).build();
+        .putAll(config).put(Keys.TOPOLOGY_PACKAGE_FILE, topologyPackage).build();
 
     // create the uploader and load the package
     LocalFileSystemUploader uploader = new LocalFileSystemUploader(); 
@@ -100,7 +100,7 @@ public class LocalFileSystemUploaderTest {
     String topologyPackage = Paths.get(testTopologyDirectory, "some-topology.tar").toString();
 
     Config newconfig = Config.newBuilder()
-        .putAll(config).put(Keys.TOPOLOGY_PACKAGE_URI, topologyPackage).build();
+        .putAll(config).put(Keys.TOPOLOGY_PACKAGE_FILE, topologyPackage).build();
 
     // create the uploader and load the package
     LocalFileSystemUploader uploader = new LocalFileSystemUploader(); 

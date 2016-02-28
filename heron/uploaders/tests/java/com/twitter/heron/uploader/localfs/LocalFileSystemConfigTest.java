@@ -1,5 +1,6 @@
 package com.twitter.heron.uploader.localfs;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Properties;
 import java.nio.file.Paths;
@@ -24,19 +25,23 @@ import junit.framework.Assert;
 
 public class LocalFileSystemConfigTest {
 
+  private static final String topologyPackageFile = "/tmp/something.tar.gz";
+
   private Config getDefaultConfig() {
     Config config = Config.newBuilder()
         .put(Keys.CLUSTER, "cluster")
         .put(Keys.ROLE, "role")
         .put(Keys.TOPOLOGY_NAME, "topology")
         .put(Keys.TOPOLOGY_PACKAGE_TYPE, "tar")
+        .put(Keys.TOPOLOGY_PACKAGE_FILE, "/tmp/something.tar.gz")
+        .put(LocalFileSystemKeys.FILE_SYSTEM_DIRECTORY, LocalFileSystemDefaults.FILE_SYSTEM_DIRECTORY)
         .build();
     return config;
   }
 
   @Test
   public void testDefaultConfig() throws Exception {
-    Config config = getDefaultConfig();
+    Config config = Config.expand(getDefaultConfig());
 
     Assert.assertEquals(
         LocalFileSystemContext.fileSystemDirectory(config),
@@ -48,10 +53,11 @@ public class LocalFileSystemConfigTest {
   public void testOverrideConfig() throws Exception {
     String overrideDirectory = "/users/twitter";
 
-    Config config = Config.newBuilder()
-        .putAll(getDefaultConfig())
-        .put(LocalFileSystemKeys.FILE_SYSTEM_DIRECTORY, overrideDirectory)
-        .build();
+    Config config = Config.expand(
+        Config.newBuilder()
+            .putAll(getDefaultConfig())
+            .put(LocalFileSystemKeys.FILE_SYSTEM_DIRECTORY, overrideDirectory)
+            .build());
 
     Assert.assertEquals(
         LocalFileSystemContext.fileSystemDirectory(config),
@@ -61,7 +67,7 @@ public class LocalFileSystemConfigTest {
 
   @Test
   public void testTopologyDirectory() throws Exception {
-    Config config = getDefaultConfig();
+    Config config = Config.expand(getDefaultConfig());
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();
     uploader.initialize(config);
 
@@ -76,12 +82,15 @@ public class LocalFileSystemConfigTest {
 
   @Test
   public void testTopologyFile() throws Exception {
-    Config config = getDefaultConfig();
+    Config config = Config.expand(getDefaultConfig());
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();
     uploader.initialize(config);
 
+    // String destFile = Paths.get(LocalFileSystemContext.fileSystemDirectory(config), 
+    //    "topology." + Context.topologyPackageType(config)).toString();
+
     String destFile = Paths.get(LocalFileSystemContext.fileSystemDirectory(config), 
-        "topology." + Context.topologyPackageType(config)).toString();
+        new File(topologyPackageFile).getName()).toString();
 
     Assert.assertEquals(
         uploader.getTopologyFile(),
@@ -93,10 +102,12 @@ public class LocalFileSystemConfigTest {
   public void testOverrideTopologyDirectory() throws Exception {
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();
     String overrideDirectory = "/users/twitter";
-    Config config = Config.newBuilder()
-        .putAll(getDefaultConfig())
-        .put(LocalFileSystemKeys.FILE_SYSTEM_DIRECTORY, overrideDirectory)
-        .build();
+
+    Config config = Config.expand(
+        Config.newBuilder()
+            .putAll(getDefaultConfig())
+            .put(LocalFileSystemKeys.FILE_SYSTEM_DIRECTORY, overrideDirectory)
+            .build());
 
     uploader.initialize(config);
 
@@ -110,15 +121,16 @@ public class LocalFileSystemConfigTest {
   public void testOverrideTopologyFile() throws Exception {
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();
     String overrideDirectory = "/users/twitter";
-    Config config = Config.newBuilder()
-        .putAll(getDefaultConfig())
-        .put(LocalFileSystemKeys.FILE_SYSTEM_DIRECTORY, overrideDirectory)
-        .build();
+    Config config = Config.expand(
+        Config.newBuilder()
+            .putAll(getDefaultConfig())
+            .put(LocalFileSystemKeys.FILE_SYSTEM_DIRECTORY, overrideDirectory)
+            .build());
 
     uploader.initialize(config);
 
-    String destFile = Paths.get(overrideDirectory, 
-        "topology." + Context.topologyPackageType(config)).toString();
+    String destFile = Paths.get(LocalFileSystemContext.fileSystemDirectory(config), 
+        new File(topologyPackageFile).getName()).toString();
 
     Assert.assertEquals(
         uploader.getTopologyFile(),

@@ -30,11 +30,12 @@ public class LocalFileSystemUploader implements IUploader {
     
     this.destTopologyDirectory = LocalFileSystemContext.fileSystemDirectory(config);
 
-    String fileName = "topology." + Context.topologyPackageType(config);
+    // name of the destination file is the same as the base name of the topology package file
+    String fileName = new File(Context.topologyPackageFile(config)).getName();
     this.destTopologyFile = Paths.get(destTopologyDirectory, fileName).toString();
 
     // get the original topology package location
-    this.topologyPackageLocation = Context.topologyPackageUri(config);
+    this.topologyPackageLocation = Context.topologyPackageFile(config);
   }
 
   protected String getTopologyDirectory() {

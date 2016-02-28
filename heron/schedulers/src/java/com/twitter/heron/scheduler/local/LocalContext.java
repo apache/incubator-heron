@@ -6,14 +6,14 @@ import com.twitter.heron.spi.common.Misc;
 public class LocalContext {
   public static String workingDirectory(Config cfg) {
     String workingDirectory = cfg.getStringValue(
-        LocalSchedulerKeys.WORKING_DIRECTORY, 
-        LocalSchedulerDefaults.WORKING_DIRECTORY);
-    return return Misc.substitute(cfg, workingDirectory);
+        LocalKeys.WORKING_DIRECTORY, 
+        LocalDefaults.WORKING_DIRECTORY);
+    return Misc.substitute(cfg, workingDirectory);
   }
 
   public static String corePackageUri(Config cfg) {
-    String packageUri = cfg.getStringValue(LocalSchedulerKeys.CORE_PACKAGE_URI, 
-        LocalSchedulerDefaults.CORE_PACKAGE_URI);
+    String packageUri = cfg.getStringValue(LocalKeys.CORE_PACKAGE_URI, 
+        LocalDefaults.CORE_PACKAGE_URI);
     return Misc.substitute(cfg, packageUri);
   }
 }

@@ -1,8 +1,10 @@
 package(default_visibility = ["//visibility:public"])
 
+load("/tools/rules/jarjar_rules", "jarjar_binary")
 load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 common_deps_files = [
+   "//heron/common/src/java:common-java",
    "//3rdparty/guava:guava-java",
 ]
 
@@ -18,9 +20,7 @@ spi_deps_files = [
 scheduler_deps_files = \
     common_deps_files + \
     heron_java_proto_files() + \
-    spi_deps_files + [
-        "//heron/common/src/java:common-java",
-    ]
+    spi_deps_files
 
 java_library(
     name = 'scheduler-java',
@@ -31,12 +31,13 @@ java_library(
 )
 
 java_binary(
-    name = 'scheduler',
-    srcs = glob([
-        "**/SubmitterMain.java",
-    ]),
-    main_class = "com.twitter.heron.scheduler.SubmitterMain",
-    deps = [
-        ":scheduler-java",
-    ] + scheduler_deps_files,
+    name = 'scheduler-unshaded',
+    srcs = glob(["**/*.java"]),
+    deps = scheduler_deps_files,
+)
+
+jarjar_binary(
+    name = "heron-scheduler",
+    src = ":scheduler-unshaded_deploy.jar",
+    shade = "shade.conf",
 )
