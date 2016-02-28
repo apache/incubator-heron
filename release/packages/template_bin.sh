@@ -143,17 +143,14 @@ chmod -R og+rX "${base}"
 chmod -R u+rwX "${base}"
 echo -n .
 
-#ln -s "${base}/bin/bazel" "${bin}/bazel"
+ln -s "${base}/bin/heron-cli3" "${bin}/heron-cli3"
 echo -n .
-
-# Uncompress the bazel base install for faster startup time
-#"${bin}/bazel" help >/dev/null
 
 if [ -f "${heronrc}" ]; then
   echo
   echo "${heronrc} already exists, ignoring. It is either a link to"
-  echo "${base}/etc/bazel.heronrc or that it's importing that file with:"
-  echo "  import ${base}/etc/bazel.heronrc"
+  echo "${base}/etc/heron.heronrc or that it's importing that file with:"
+  echo "  import ${base}/etc/heron.heronrc"
 else
   ln -s "${base}/etc/heron.heronrc" "${heronrc}"
   echo .
