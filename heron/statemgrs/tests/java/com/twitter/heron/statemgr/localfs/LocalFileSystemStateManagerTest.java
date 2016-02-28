@@ -3,7 +3,7 @@ package com.twitter.heron.statemgr.localfs;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.Config;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,6 +14,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
@@ -31,10 +32,10 @@ import junit.framework.Assert;
 public class LocalFileSystemStateManagerTest {
   private static final String topologyName = "topologyName";
   private static final String rootAddr = "/";
-  private Context baseCxt =
-      Context.newBuilder()
-        .put(FileSystemStateManager.ROOT_ADDRESS, rootAddr)
-        .put(LocalFileSystemStateManager.IS_INITIALIZE_FILE_TREE, false)
+  private Config config =
+      Config.newBuilder()
+        .put(Keys.STATE_ROOT_PATH, rootAddr)
+        .put(LocalFileSystemKeys.IS_INITIALIZE_FILE_TREE, false)
         .build();
 
   @Before
@@ -45,15 +46,15 @@ public class LocalFileSystemStateManagerTest {
   public void after() throws Exception {
   }
 
-  public Context getCxt() {
-    return baseCxt;
+  public Config getConfig() {
+    return config;
   }
 
   @Test
   public void testInitialize() throws Exception {
     LocalFileSystemStateManager manager =
         Mockito.spy(new LocalFileSystemStateManager());
-    manager.initialize(getCxt());
+    manager.initialize(getConfig());
 
     PowerMockito.spy(FileUtils.class);
     PowerMockito.doReturn(true).
@@ -72,7 +73,7 @@ public class LocalFileSystemStateManagerTest {
   public void testGetSchedulerLocation() throws Exception {
     LocalFileSystemStateManager manager =
         Mockito.spy(new LocalFileSystemStateManager());
-    manager.initialize(getCxt());
+    manager.initialize(getConfig());
 
     Scheduler.SchedulerLocation location = Scheduler.SchedulerLocation.newBuilder().
         setHttpEndpoint("host:1").
@@ -95,7 +96,7 @@ public class LocalFileSystemStateManagerTest {
   public void testSetExecutionState() throws Exception {
     LocalFileSystemStateManager manager =
         Mockito.spy(new LocalFileSystemStateManager());
-    manager.initialize(getCxt());
+    manager.initialize(getConfig());
 
     PowerMockito.spy(FileUtils.class);
     PowerMockito.doReturn(true).
@@ -125,7 +126,7 @@ public class LocalFileSystemStateManagerTest {
     TopologyAPI.Topology topology = TopologyAPI.Topology.getDefaultInstance();
     LocalFileSystemStateManager manager =
         Mockito.spy(new LocalFileSystemStateManager());
-    manager.initialize(getCxt());
+    manager.initialize(getConfig());
 
     PowerMockito.spy(FileUtils.class);
     PowerMockito.doReturn(true).
@@ -152,7 +153,7 @@ public class LocalFileSystemStateManagerTest {
   public void testDeleteExecutionState() throws Exception {
     LocalFileSystemStateManager manager =
         Mockito.spy(new LocalFileSystemStateManager());
-    manager.initialize(getCxt());
+    manager.initialize(getConfig());
 
     PowerMockito.spy(FileUtils.class);
     PowerMockito.doReturn(true).
@@ -177,7 +178,7 @@ public class LocalFileSystemStateManagerTest {
   public void testDeleteTopology() throws Exception {
     LocalFileSystemStateManager manager =
         Mockito.spy(new LocalFileSystemStateManager());
-    manager.initialize(getCxt());
+    manager.initialize(getConfig());
 
     PowerMockito.spy(FileUtils.class);
     PowerMockito.doReturn(true).

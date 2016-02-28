@@ -70,6 +70,10 @@ public class Context {
     return cfg.getStringValue(Keys.SCHEDULER_JAR);
   }
 
+  public static String stateRootPath(Config cfg) {
+    return cfg.getStringValue(Keys.STATE_ROOT_PATH);
+  }
+
   public static String logDirectory(Config cfg) {
     return cfg.getStringValue(Keys.LOGGING_DIRECTORY);
   }
@@ -88,6 +92,10 @@ public class Context {
 
   public static String topologyPackageUri(Config cfg) {
     return cfg.getStringValue(Keys.TOPOLOGY_PACKAGE_URI);
+  }
+
+  public static String topologyPackageFile(Config cfg) {
+    return cfg.getStringValue(Keys.TOPOLOGY_PACKAGE_FILE);
   }
 
   public static String topologyPackageType(Config cfg) {
@@ -116,7 +124,7 @@ public class Context {
   }
 
   public static String heronBin(Config cfg) {
-    return cfg.getStringValue(Keys.HERON_BINS); 
+    return cfg.getStringValue(Keys.HERON_BIN); 
   }
   
   public static String heronConf(Config cfg) {
@@ -124,7 +132,7 @@ public class Context {
   }
 
   public static final String heronLib(Config cfg) {
-    return cfg.getStringValue(Keys.HERON_LIBS);
+    return cfg.getStringValue(Keys.HERON_LIB);
   }
 
   public static final String heronDist(Config cfg) {

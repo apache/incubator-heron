@@ -16,11 +16,11 @@ public final class ClusterConfig {
   protected static Config loadHeronHome(String heronHome, String configPath) {
     Config.Builder cb = Config.newBuilder()
         .put(Keys.HERON_HOME, heronHome) 
-        .put(Keys.HERON_BINS, Misc.substitute(heronHome, Defaults.HERON_BINS))
+        .put(Keys.HERON_BIN,  Misc.substitute(heronHome, Defaults.HERON_BIN))
         .put(Keys.HERON_CONF, configPath)
         .put(Keys.HERON_DIST, Misc.substitute(heronHome, Defaults.HERON_DIST))
         .put(Keys.HERON_ETC,  Misc.substitute(heronHome, Defaults.HERON_ETC))
-        .put(Keys.HERON_LIBS, Misc.substitute(heronHome, Defaults.HERON_LIBS));
+        .put(Keys.HERON_LIB,  Misc.substitute(heronHome, Defaults.HERON_LIB));
 
     return cb.build();
   }

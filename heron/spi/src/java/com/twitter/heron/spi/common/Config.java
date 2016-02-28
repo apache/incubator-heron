@@ -2,6 +2,7 @@ package com.twitter.heron.spi.common;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.Set;
 
 /**
@@ -105,6 +106,20 @@ public class Config {
     return cfgMap.keySet();
   }
 
+  public static Config expand(Config config) {
+    Config.Builder cb = Config.newBuilder();
+    for (String key : config.getKeySet()) {
+      Object value = config.get(key);
+      if (value instanceof String) {
+        String expanded_value = Misc.substitute(config, (String) value);
+        cb.put(key, expanded_value); 
+      } else {
+        cb.put(key, value); 
+      }
+    }
+    return cb.build();
+  } 
+
   private static Long getLong(Object o) {
     if (o instanceof Long) {
       return ((Long) o);
@@ -153,8 +168,9 @@ public class Config {
 
   @Override
   public String toString() {
+    Map<String, Object> treeMap = new TreeMap<String, Object>(cfgMap);
     StringBuilder sb = new StringBuilder();
-    for (Object obj : cfgMap.entrySet()) {
+    for (Object obj : treeMap.entrySet()) {
       Map.Entry<String, Object> entry = (Map.Entry) obj;
       sb.append("(\"" + entry.getKey() + "\"");
       sb.append(", " + entry.getValue() + ")\n");
