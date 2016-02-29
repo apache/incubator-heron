@@ -15,6 +15,11 @@ public class NullUploader implements IUploader {
   }
 
   @Override
+  public String getUri() {
+    return null;
+  }
+
+  @Override
   public boolean undo() {
     return true;
   }

@@ -12,7 +12,7 @@ public class Defaults {
   public static final String STATEMGR_YAML = "statemgr.yaml";
   public static final String UPLOADER_YAML = "uploader.yaml";
 
-  public static final String LOGGING_DIRECTORY = "log-files";
+  public static final String LOGGING_DIRECTORY = "./log-files";
 
   /**
    *  Default values for config binaries, jars and resource values 
@@ -40,4 +40,7 @@ public class Defaults {
   public static final String HERON_DIST = "${HERON_HOME}/dist";
   public static final String HERON_ETC  = "${HERON_HOME}/etc";
   public static final String HERON_LIB = "${HERON_HOME}/lib";
+
+  public static final String HERON_SANDBOX_HOME = "./heron-core";
+  public static final String HERON_SANDBOX_CONF = "./heron-conf";
 }

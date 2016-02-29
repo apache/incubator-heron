@@ -15,9 +15,14 @@ import java.util.regex.Matcher;
 import java.util.Collections;
 import javax.swing.filechooser.FileSystemView;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class Misc {
 
   private static final Logger LOG = Logger.getLogger(Misc.class.getName());
+
+  private static Pattern urlPattern = Pattern.compile("(.+)//(.+)");
 
   public static String substitute(String heronHome, String pathString) {
     Config config = Config.newBuilder()
@@ -27,10 +32,28 @@ public class Misc {
     return substitute(config, pathString);
   }
 
+  private static final boolean isURL(String pathString) {
+    Matcher m = urlPattern.matcher(pathString);
+    return m.matches();
+  }
+
+  private static String substituteURL(Config config, String pathString) {
+    Matcher m = urlPattern.matcher(pathString);
+    if (m.matches()) {
+      StringBuilder sb = new StringBuilder();
+      sb.append(m.group(1)).append("//").append(substitute(config, m.group(2)));
+      return sb.toString();
+    }
+    return pathString;
+  }
+
   public static String substitute(Config config, String pathString) {
 
     // trim the leading and trailing spaces
     String trimmedPath = pathString.trim();
+
+    if (isURL(trimmedPath))
+      return substituteURL(config, trimmedPath);
 
     // get platform independent file separator
     String fileSeparator = Matcher.quoteReplacement(System.getProperty("file.separator"));
@@ -38,11 +61,9 @@ public class Misc {
     // split the trimmed path into a list of components
     List<String> fixedList = Arrays.asList(trimmedPath.split(fileSeparator));
     List<String> list = new LinkedList<String>(fixedList);
-    list.removeAll(Collections.singleton(""));
 
     // get the home path
-    String hp = FileSystemView.getFileSystemView().getHomeDirectory().getAbsolutePath();
-    String homePath = hp.substring(1);
+    String homePath = FileSystemView.getFileSystemView().getHomeDirectory().getAbsolutePath();
 
     // substitute various variables 
     for (int i = 0 ; i < list.size(); i++) {
@@ -80,17 +101,16 @@ public class Misc {
       }
     }
 
-    StringBuilder sb = new StringBuilder();
-    if (list.size() == 1) {
-      sb.append(list.get(0));
-    } else {
-      for (String s: list) {
-        if (!s.startsWith(System.getProperty("file.separator"))) {
-          sb.append(System.getProperty("file.separator"));
-        }
-        sb.append(s);
-      }
+    return combinePaths(list);
+  }
+
+  protected static String combinePaths(List<String> paths) {
+    File file = new File(paths.get(0));
+
+    for (int i = 1; i < paths.size() ; i++) {
+      file = new File(file, paths.get(i));
     }
-    return sb.toString();
+
+    return file.getPath();
   }
 }

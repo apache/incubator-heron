@@ -80,7 +80,7 @@ def launch_a_topology(cluster_role_env, tmp_dir, topology_file, topology_defn_fi
   ]
 
   lib_jars = utils.get_heron_libs(
-      jars.scheduler_jars() + jars.uploader_jars()+jars.statemgr_jars()
+      jars.scheduler_jars() + jars.uploader_jars() + jars.statemgr_jars() + jars.packing_jars()
   )
 
   # invoke the submitter to submit and launch the topology

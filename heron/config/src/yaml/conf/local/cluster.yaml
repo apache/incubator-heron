@@ -1,17 +1,11 @@
 # scheduler class for distributing the topology for execution
 heron.scheduler.class:            com.twitter.heron.scheduler.local.LocalScheduler
 
-# launcher class for submitting and launching the topology
-heron.launcher.class:             com.twitter.heron.scheduler.local.LocalLauncher
-
 # packing algorithm for packing instances into containers
 heron.packing.algorithm.class:    com.twitter.heron.packing.roundrobin.RoundRobinPacking
 
 # uploader class for transferring the topology jar/tar files to storage
 heron.uploader.class:             com.twitter.heron.uploader.localfs.LocalFileSystemUploader
-
-# runtime class for managing topology
-heron.runtime.manager.class:      com.twitter.heron.scheduler.local.LocalRuntimeManager
 
 # state manager class for managing state in a persistent fashion
 heron.state.manager.class:        com.twitter.heron.statemgr.localfs.LocalFileSystemStateManager

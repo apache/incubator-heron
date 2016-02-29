@@ -27,6 +27,7 @@ def heron_client_lib_files():
         "//heron/uploaders/src/java:heron-localfs-uploader",
         "//heron/statemgrs/src/java:heron-zookeeper-statemgr",
         "//heron/statemgrs/src/java:heron-localfs-statemgr",
+        "//heron/packing/src/java:heron-roundrobin-packing",
         "//3rdparty/protobuf:protobuf-java",
         "//3rdparty/logging:slf4j-api-java",
         "//3rdparty/logging:slf4j-jdk-java", 
