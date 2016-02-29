@@ -59,6 +59,11 @@ public class PackerUploader implements IUploader {
   }
 
   @Override
+  public String getUri() {
+    return topologyURI;
+  }
+
+  @Override
   public boolean uploadPackage() {
     LOG.info("Uploading packer package " + getTopologyPackageName());
     String packerUploadCmd = String.format(

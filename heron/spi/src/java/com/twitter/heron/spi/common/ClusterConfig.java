@@ -72,4 +72,14 @@ public final class ClusterConfig {
     String configPath = Misc.substitute(heronHome, Defaults.HERON_CONF);
     return loadConfig(heronHome, cluster, configPath);
   }
+
+  public static Config loadSandboxConfig(String cluster) {
+    String configPath = Misc.substitute(Defaults.HERON_SANDBOX_HOME, Defaults.HERON_SANDBOX_CONF);
+    return loadConfig(Defaults.HERON_SANDBOX_HOME, cluster, configPath);
+  }
+
+  public static Config loadSchedulerConfig() {
+    String configPath = Misc.substitute(Defaults.HERON_SANDBOX_HOME, Defaults.HERON_SANDBOX_CONF);
+    return loadHeronHome(Defaults.HERON_SANDBOX_HOME, configPath);  
+  }
 }

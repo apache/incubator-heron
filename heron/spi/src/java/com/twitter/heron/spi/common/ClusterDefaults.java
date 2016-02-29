@@ -13,9 +13,10 @@ import com.twitter.heron.common.config.ClusterConfigReader;
 
 public final class ClusterDefaults {
 
-  protected static Config getDefaultHome() {
-    Config.Builder cb = Config.newBuilder().put(Keys.HERON_HOME, Defaults.HERON_HOME);
+  public static Config getDefaultHome() {
+    Config.Builder cb = Config.newBuilder();
 
+    cb.put(Keys.HERON_HOME, Defaults.HERON_HOME);
     cb.put(Keys.HERON_BIN,  Defaults.HERON_BIN);
     cb.put(Keys.HERON_CONF, Defaults.HERON_CONF);
     cb.put(Keys.HERON_DIST, Defaults.HERON_DIST);
@@ -25,7 +26,7 @@ public final class ClusterDefaults {
     return cb.build();
   }
 
-  protected static Config getDefaultBinaries() {
+  public static Config getDefaultBinaries() {
     Config.Builder cb = Config.newBuilder();
 
     cb.put(Keys.EXECUTOR_BINARY, Defaults.EXECUTOR_BINARY);
@@ -36,7 +37,7 @@ public final class ClusterDefaults {
     return cb.build();
   }
 
-  protected static Config getDefaultJars() {
+  public static Config getDefaultJars() {
     Config.Builder cb = Config.newBuilder();
 
     cb.put(Keys.SCHEDULER_JAR, Defaults.SCHEDULER_JAR);
@@ -44,7 +45,7 @@ public final class ClusterDefaults {
     return cb.build();
   }
 
-  protected static Config getDefaultFilesAndPaths() {
+  public static Config getDefaultFilesAndPaths() {
     Config.Builder cb = Config.newBuilder();
 
     cb.put(Keys.CORE_PACKAGE_URI, Defaults.CORE_PACKAGE_URI);
@@ -53,7 +54,7 @@ public final class ClusterDefaults {
     return cb.build();
   }
 
-  protected static Config getDefaultResources() {
+  public static Config getDefaultResources() {
     Config.Builder cb = Config.newBuilder();
 
     cb.put(Keys.STMGR_RAM, Long.valueOf(Defaults.STMGR_RAM));

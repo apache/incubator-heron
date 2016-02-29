@@ -40,11 +40,22 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
 
   protected boolean initTree() {
     // Make necessary directories
-    if (FileUtils.isDirectoryExists(getTopologyDir()) || FileUtils.createDirectory(getTopologyDir()) &&
-        FileUtils.isDirectoryExists(getTMasterLocationDir()) || FileUtils.createDirectory(getTMasterLocationDir()) &&
-        FileUtils.isDirectoryExists(getPhysicalPlanDir()) || FileUtils.createDirectory(getPhysicalPlanDir()) &&
-        FileUtils.isDirectoryExists(getExecutionStateDir()) || FileUtils.createDirectory(getExecutionStateDir()) &&
-        FileUtils.isDirectoryExists(getSchedulerLocationDir()) || FileUtils.createDirectory(getSchedulerLocationDir())) {
+    LOG.info(getTopologyDir() + " " + getTMasterLocationDir() + " " + getPhysicalPlanDir() + " " +
+        getExecutionStateDir() + " " + getSchedulerLocationDir());
+
+    boolean x = FileUtils.isDirectoryExists(getTopologyDir()) || FileUtils.createDirectory(getTopologyDir());
+    boolean y = FileUtils.isDirectoryExists(getTMasterLocationDir()) || FileUtils.createDirectory(getTMasterLocationDir());
+    boolean z = FileUtils.isDirectoryExists(getPhysicalPlanDir()) || FileUtils.createDirectory(getPhysicalPlanDir());
+    boolean r = FileUtils.isDirectoryExists(getExecutionStateDir()) || FileUtils.createDirectory(getExecutionStateDir());
+    boolean s = FileUtils.isDirectoryExists(getSchedulerLocationDir()) || FileUtils.createDirectory(getSchedulerLocationDir());
+
+    LOG.info(x + " " + y + " " + z + " " + r + " " + s);
+
+    if ((FileUtils.isDirectoryExists(getTopologyDir()) || FileUtils.createDirectory(getTopologyDir())) &&
+        (FileUtils.isDirectoryExists(getTMasterLocationDir()) || FileUtils.createDirectory(getTMasterLocationDir())) &&
+        (FileUtils.isDirectoryExists(getPhysicalPlanDir()) || FileUtils.createDirectory(getPhysicalPlanDir())) &&
+        (FileUtils.isDirectoryExists(getExecutionStateDir()) || FileUtils.createDirectory(getExecutionStateDir())) &&
+        (FileUtils.isDirectoryExists(getSchedulerLocationDir()) || FileUtils.createDirectory(getSchedulerLocationDir()))) {
       return true;
     }
 

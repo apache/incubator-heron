@@ -10,10 +10,4 @@ public class LocalContext {
         LocalDefaults.WORKING_DIRECTORY);
     return Misc.substitute(cfg, workingDirectory);
   }
-
-  public static String corePackageUri(Config cfg) {
-    String packageUri = cfg.getStringValue(LocalKeys.CORE_PACKAGE_URI, 
-        LocalDefaults.CORE_PACKAGE_URI);
-    return Misc.substitute(cfg, packageUri);
-  }
 }

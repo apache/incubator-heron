@@ -29,13 +29,21 @@ public interface IUploader {
    *
    * @return true if successful.
    */
-   public boolean uploadPackage();
+  public boolean uploadPackage();
+
+  /**
+   * getUri will get the destination URI of where the topology package has 
+   * been uploaded
+   *
+   * @return uri
+   */
+  public String getUri();
 
   /**
    * If subsequent stages fail, undo will be called to free resources used by
    * uploading package. Ideally, this should try to remove the uploaded package.
    */
-   public boolean undo();
+  public boolean undo();
 
   /**
    * This is to for disposing or cleaning up any internal state accumulated by

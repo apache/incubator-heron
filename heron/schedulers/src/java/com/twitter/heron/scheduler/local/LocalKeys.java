@@ -1,7 +1,6 @@
 package com.twitter.heron.scheduler.local;
 
 public class LocalKeys {
-  public static final String CORE_PACKAGE_URI = "heron.core.package.uri";
   public static final String WORKING_DIRECTORY = "heron.scheduler.local.working.directory";
 
   public static final String COMPONENT_JVM_OPTS_IN_BASE64 = "heron.component.jvm.opts.in.base64";

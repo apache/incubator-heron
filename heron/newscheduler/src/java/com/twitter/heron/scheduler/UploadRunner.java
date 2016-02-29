@@ -23,16 +23,32 @@ public class UploadRunner implements Callable<Boolean> {
     // create an instance of the uploader class
     String uploaderClass = Context.uploaderClass(config);
     this.uploader = (IUploader)Class.forName(uploaderClass).newInstance();
+
+    // initialize the uploader with config provided
     this.uploader.initialize(config);
   }
 
-  // upload the topology package
+  /**
+   * Call the upload package method to upload the topology package
+   *
+   * @return true, if successful
+   */
   public Boolean call() {
     return uploader.uploadPackage();
   }
 
   /**
-   * undo the uploaded topology package 
+   * Get the URI of the location where the topology package has been uploaded
+   *
+   * @return uri
+   */
+  public String getUri() {
+    return uploader.getUri();
+  }
+
+  /**
+   * Undo the uploaded topology package, essentially it deletes the topology package
+   * where it was uploaded 
    *
    * @return true, if successful
    */

@@ -23,6 +23,10 @@ public class Runtime {
     return (TopologyAPI.Topology)runtime.get(Keys.TOPOLOGY_DEFINITION);
   }
 
+  public static String topologyPackageUri(Config cfg) {
+    return cfg.getStringValue(Keys.TOPOLOGY_PACKAGE_URI);
+  }
+
   public static IStateManager stateManager(Config runtime) {
     return (IStateManager)runtime.get(Keys.STATE_MANAGER);
   }
