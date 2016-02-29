@@ -96,14 +96,6 @@ public class SubmitterMain {
     String statemgrClass = Context.stateManagerClass(config);
     IStateManager statemgr = (IStateManager)Class.forName(statemgrClass).newInstance();
 
-    // build the runtime config
-    Config runtime = Config.newBuilder()
-        .put(Keys.TOPOLOGY_ID, topology.getId())
-        .put(Keys.TOPOLOGY_NAME, topology.getName())
-        .put(Keys.TOPOLOGY_DEFINITION, topology)
-        .put(Keys.STATE_MANAGER, statemgr)
-        .build();
-
     // initialize the state manager
     statemgr.initialize(config);
 
@@ -117,8 +109,14 @@ public class SubmitterMain {
       return false;
     }
 
-    // for testing uploader
-    Runtime.getRuntime().exit(0);
+    // build the runtime config
+    Config runtime = Config.newBuilder()
+        .put(Keys.TOPOLOGY_ID, topology.getId())
+        .put(Keys.TOPOLOGY_NAME, topology.getName())
+        .put(Keys.TOPOLOGY_DEFINITION, topology)
+        .put(Keys.STATE_MANAGER, statemgr)
+        .put(Keys.TOPOLOGY_PACKAGE_URI, uploadRunner.getUri())
+        .build();
 
     // using launch runner, launch the topology
     LaunchRunner launchRunner = new LaunchRunner(config, runtime);

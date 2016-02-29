@@ -50,3 +50,11 @@ def statemgr_jars():
   ]
   return jars
 
+################################################################################
+# Get the packing algorithm jars
+################################################################################
+def packing_jars():
+  jars = [
+      pick(utils.get_heron_lib_dir(), 'heron-roundrobin-packing*.jar')
+  ]
+  return jars

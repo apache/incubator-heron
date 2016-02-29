@@ -25,5 +25,6 @@ def heron_core_lib_files():
         "//heron/instance/src/java:heron-instance",
         "//heron/metricsmgr/src/java:heron-metricsmgr",
         "//heron/newscheduler/src/java:heron-scheduler",
+        "//heron/packing/src/java:heron-roundrobin-packing",
         "//heron/statemgrs/src/java:heron-zookeeper-statemgr",
     ]

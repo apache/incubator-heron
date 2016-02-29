@@ -38,14 +38,20 @@ public class LocalFileSystemUploader implements IUploader {
     this.topologyPackageLocation = Context.topologyPackageFile(config);
   }
 
-  protected String getTopologyDirectory() {
-    return this.destTopologyDirectory;
+  @Override
+  public String getUri() {
+    StringBuilder sb = new StringBuilder()
+        .append("file://")
+        .append(this.destTopologyFile);
+ 
+    return sb.toString();
   }
 
-  protected String getTopologyFile() {
-    return this.destTopologyFile;
-  }
-
+  /**
+   * Upload the topology package to the destined location in local file system
+   *
+   * @return true, if successful
+   */
   @Override
   public boolean uploadPackage() {
 
@@ -92,6 +98,11 @@ public class LocalFileSystemUploader implements IUploader {
     return true;
   }
 
+  /**
+   * Remove the uploaded topology package for cleaning up
+   *
+   * @return true, if successful
+   */
   @Override
   public boolean undo() {
     LOG.info("Clean uploaded jar");
@@ -101,5 +112,24 @@ public class LocalFileSystemUploader implements IUploader {
 
   @Override
   public void close() {
+  }
+
+  /**
+   * Used for unit testing. Get the topology directory where the package 
+   * is uploaded.
+   *
+   * @return topology directory
+   */
+  protected String getTopologyDirectory() {
+    return this.destTopologyDirectory;
+  }
+
+  /**
+   * Used for unit testing. Get the topology package file
+   *
+   * @return topology file
+   */
+  protected String getTopologyFile() {
+    return this.destTopologyFile;
   }
 }

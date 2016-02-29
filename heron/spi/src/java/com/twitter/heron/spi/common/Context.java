@@ -74,6 +74,10 @@ public class Context {
     return cfg.getStringValue(Keys.STATE_ROOT_PATH);
   }
 
+  public static String corePackageUri(Config cfg) {
+    return cfg.getStringValue(Keys.CORE_PACKAGE_URI);
+  }
+
   public static String logDirectory(Config cfg) {
     return cfg.getStringValue(Keys.LOGGING_DIRECTORY);
   }
@@ -88,10 +92,6 @@ public class Context {
 
   public static String topologyJarFile(Config cfg) {
     return cfg.getStringValue(Keys.TOPOLOGY_JAR_FILE);
-  }
-
-  public static String topologyPackageUri(Config cfg) {
-    return cfg.getStringValue(Keys.TOPOLOGY_PACKAGE_URI);
   }
 
   public static String topologyPackageFile(Config cfg) {
