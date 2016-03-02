@@ -22,7 +22,20 @@ public final class ClusterDefaults {
     cb.put(Keys.HERON_DIST, Defaults.HERON_DIST);
     cb.put(Keys.HERON_ETC,  Defaults.HERON_ETC);
     cb.put(Keys.HERON_LIB,  Defaults.HERON_LIB);
+    return cb.build();
+  }
 
+  public static Config getDefaultFiles() {
+    Config.Builder cb = Config.newBuilder();
+
+    cb.put(Keys.CLUSTER_YAML,   Defaults.CLUSTER_YAML);
+    cb.put(Keys.DEFAULTS_YAML,  Defaults.DEFAULTS_YAML);
+    cb.put(Keys.METRICS_YAML,   Defaults.METRICS_YAML);
+    cb.put(Keys.PACKING_YAML,   Defaults.PACKING_YAML);
+    cb.put(Keys.SCHEDULER_YAML, Defaults.SCHEDULER_YAML);
+    cb.put(Keys.STATEMGR_YAML,  Defaults.STATEMGR_YAML);
+    cb.put(Keys.SYSTEM_YAML,    Defaults.SYSTEM_YAML);
+    cb.put(Keys.UPLOADER_YAML,  Defaults.UPLOADER_YAML);
     return cb.build();
   }
 
@@ -33,7 +46,6 @@ public final class ClusterDefaults {
     cb.put(Keys.STMGR_BINARY, Defaults.STMGR_BINARY);
     cb.put(Keys.TMASTER_BINARY, Defaults.TMASTER_BINARY);
     cb.put(Keys.SHELL_BINARY, Defaults.SHELL_BINARY);
-
     return cb.build();
   }
 
@@ -41,7 +53,6 @@ public final class ClusterDefaults {
     Config.Builder cb = Config.newBuilder();
 
     cb.put(Keys.SCHEDULER_JAR, Defaults.SCHEDULER_JAR);
-
     return cb.build();
   }
 
@@ -49,8 +60,8 @@ public final class ClusterDefaults {
     Config.Builder cb = Config.newBuilder();
 
     cb.put(Keys.CORE_PACKAGE_URI, Defaults.CORE_PACKAGE_URI);
+    cb.put(Keys.LOGGING_DIRECTORY, Defaults.LOGGING_DIRECTORY);
     cb.put(Keys.METRICS_MANAGER_CLASSPATH, Defaults.METRICS_MANAGER_CLASSPATH);
-
     return cb.build();
   }
 
@@ -61,7 +72,6 @@ public final class ClusterDefaults {
     cb.put(Keys.INSTANCE_CPU, Long.valueOf(Defaults.INSTANCE_CPU));
     cb.put(Keys.INSTANCE_RAM, Long.valueOf(Defaults.INSTANCE_RAM));
     cb.put(Keys.INSTANCE_DISK, Long.valueOf(Defaults.INSTANCE_DISK));
-
     return cb.build();
   }
      
@@ -73,7 +83,6 @@ public final class ClusterDefaults {
     cb.putAll(getDefaultJars());
     cb.putAll(getDefaultFilesAndPaths());
     cb.putAll(getDefaultResources());
-
     return cb.build();
   }
 }
