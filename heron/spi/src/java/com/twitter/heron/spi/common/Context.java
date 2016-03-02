@@ -70,8 +70,12 @@ public class Context {
     return cfg.getStringValue(Keys.SCHEDULER_JAR);
   }
 
-  public static String stateRootPath(Config cfg) {
-    return cfg.getStringValue(Keys.STATE_ROOT_PATH);
+  public static String stateManagerConnectionString(Config cfg) {
+    return cfg.getStringValue(Keys.STATEMGR_CONNECTION_STRING);
+  }
+
+  public static String stateManagerRootPath(Config cfg) {
+    return cfg.getStringValue(Keys.STATEMGR_ROOT_PATH);
   }
 
   public static String corePackageUri(Config cfg) {
@@ -82,8 +86,8 @@ public class Context {
     return cfg.getStringValue(Keys.LOGGING_DIRECTORY);
   }
  
-  public static String internalsConfigFile(Config cfg) {
-    return cfg.getStringValue(Keys.INTERNALS_CONFIG_FILE);
+  public static String systemConfigFile(Config cfg) {
+    return cfg.getStringValue(Keys.SYSTEM_YAML);
   }
 
   public static String topologyDefinitionFile(Config cfg) {
@@ -141,5 +145,15 @@ public class Context {
 
   public static final String heronEtc(Config cfg) {
     return cfg.getStringValue(Keys.HERON_ETC);
+  }
+
+  public static final String javaHome(Config cfg) {
+    String javaHome = cfg.getStringValue(Keys.JAVA_HOME);
+    return javaHome == null ? System.getenv("JAVA_HOME") : javaHome;
+  }
+
+  public static final Boolean isZkStateManager(Config cfg) {
+    String stateManagerClass = cfg.getStringValue(Keys.STATE_MANAGER_CLASS);
+    return stateManagerClass.equals(Constants.ZK_STATE_MANAGER_CLASS) ? true : false;
   }
 }
