@@ -21,6 +21,7 @@ public class Constants {
   public static final String HERON_UPLOADER_VERSION = "heron.uploader.version";
 
   public static final String HERON_UPLOADER_FILE_SYSTEM_PATH = "heron.uploader.file.system.path";
+  public static final String HERON_UPLOADER_COPY_COMMAND = "heron.uploader.copy.command";
 
   public static final String DC = "dc";
   public static final String ROLE = "role";
