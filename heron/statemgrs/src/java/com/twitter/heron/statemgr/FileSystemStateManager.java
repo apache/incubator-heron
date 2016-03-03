@@ -10,7 +10,7 @@ public abstract class FileSystemStateManager implements IStateManager {
 
   @Override
   public void initialize(Config config) {
-    this.rootAddress = Context.stateRootPath(config);
+    this.rootAddress = Context.stateManagerRootPath(config);
   }
 
   protected String getTMasterLocationDir() {

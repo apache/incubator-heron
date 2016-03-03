@@ -26,6 +26,13 @@ filegroup(
     ],
 )
 
+genrule(
+    name = "generate-file-list",
+    srcs = heron_core_lib_files(),
+    outs = ["FILES"],
+    cmd = "for i in $(SRCS); do basename $$i; done >$@"
+)
+
 pkg_tar(
     name = "heron-core",
     extension = "tar.gz",

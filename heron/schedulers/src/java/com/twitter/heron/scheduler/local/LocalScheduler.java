@@ -56,8 +56,8 @@ public class LocalScheduler implements IScheduler {
     LOG.info("# of containers: " + Runtime.numContainers(config));
 
     // first, run the TMaster executor
-    startExecutor(0);
-    LOG.info("TMaster is started.");
+    // startExecutor(0);
+    // LOG.info("TMaster is started.");
 
     // for each container, run its own executor
     int numContainers = Integer.parseInt(Runtime.numContainers(config));

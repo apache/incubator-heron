@@ -18,7 +18,8 @@ def print_usage():
          " <metricsmgr_classpath> <instance_jvm_opts_in_base64> <classpath> "
          " <port1> <port2> <port3> <heron_internals_config_file> "
          " <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_jar_file>"
-         " <heron_java_home> <shell-port> <log_dir> <heron_shell_binary> <port4> ")
+         " <heron_java_home> <shell-port> <log_dir> <heron_shell_binary> <port4>"
+         " <cluster> <role> <environ> <scheduler_classpath> <scheduler_port>")
 
 def do_print(statement):
   timestr = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
@@ -128,6 +129,11 @@ class HeronExecutor:
     self.log_dir = args[23]
     self.heron_shell_binary = args[24]
     self.port4 = args[25]
+    self.cluster = args[26]
+    self.role = args[27]
+    self.environ = args[28]
+    self.scheduler_classpath = args[29]
+    self.scheduler_port = args[30]
 
     # Log itself pid
     log_pid_for_process(get_heron_executor_process_name(self.shard), os.getpid())
@@ -190,6 +196,24 @@ class HeronExecutor:
     )
 
     return retval
+
+  def get_scheduler_processes(self):
+    retval = {}
+    scheduler_cmd = [
+           'java',
+           '-cp',
+           scheduler_classpath,
+           'com.twitter.heron.scheduler.SchedulerMain',
+           self.cluster,
+           self.role,
+           self.environ,
+           self.topology_name,
+           self.scheduler_port
+           ]
+    retval["heron-tscheduler"] = scheduler_cmd
+
+    return retval
+
 
   def get_regular_processes(self):
     retval = {}
@@ -326,7 +350,8 @@ class HeronExecutor:
   def launch(self):
     commands = { }
     if self.shard == 0:
-      commands = self.get_tmaster_processes()
+      commands = self.get_scheduler_processes()
+      commands.update(self.get_tmaster_processes())
     else:
       self.untar_if_tar()
       commands = self.get_regular_processes()
@@ -349,7 +374,7 @@ class HeronExecutor:
         sys.exit(1)
 
 def main():
-  if len(sys.argv) != 26:
+  if len(sys.argv) != 31:
     print_usage()
     sys.exit(1)
   executor = HeronExecutor(sys.argv)

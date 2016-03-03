@@ -56,7 +56,7 @@ def create_parser(subparsers):
 def launch_a_topology(cluster_role_env, tmp_dir, topology_file, topology_defn_file, 
         config_path, config_overrides):
 
-  # get the normalized path for topology.tar.gz and heron_internals.yaml
+  # get the normalized path for topology.tar.gz
   topology_pkg_path = utils.normalized_class_path(os.path.join(tmp_dir, 'topology.tar.gz'))
 
   # TO DO - when you give a config path - the name of the directory might be 
@@ -151,7 +151,7 @@ def submit_fatjar(command, parser, cl_args, unknown_args):
     topology_class_name = cl_args['topology-class-name']
     topology_args = tuple(unknown_args)
 
-    # extract the scheduler config path and config loader
+    # extract the config path
     config_path = cl_args['config_path']
 
   except KeyError:
@@ -159,6 +159,11 @@ def submit_fatjar(command, parser, cl_args, unknown_args):
     subparser = utils.get_subparser(parser, command)
     print(subparser.format_help())
     parser.exit()
+
+  config_path = utils.get_heron_cluster_conf_dir(cluster_role_env, config_path);
+  if not os.path.isdir(config_path):
+    print("Config directory does not exist: %s" % config_path);
+    parser.exit();
 
   # create a temporary directory for topology definition file
   tmp_dir = tempfile.mkdtemp()
@@ -182,8 +187,8 @@ def submit_fatjar(command, parser, cl_args, unknown_args):
   )
 
   try:
-    cluster_role_env = args.parse_cluster_role_env(cluster_role_env)
-    config_overrides = args.parse_cmdline_override(cl_args)
+    cluster_role_env = utils.parse_cluster_role_env(cluster_role_env)
+    config_overrides = utils.parse_cmdline_override(cl_args)
 
     launch_topologies(cluster_role_env, topology_file, tmp_dir, config_path, 
         config_overrides)
@@ -219,6 +224,11 @@ def submit_tar(command, parser, cl_args, unknown_args):
     print(subparser.format_help())
     parser.exit()
 
+  config_path = utils.get_heron_cluster_conf_dir(cluster_role_env, config_path);
+  if not os.path.isdir(config_path):
+    print("Config directory does not exist: %s" % config_path);
+    parser.exit();
+
   tmp_dir = tempfile.mkdtemp()
   opts.set_config('cmdline.topologydefn.tmpdirectory', tmp_dir)
 
@@ -232,8 +242,8 @@ def submit_tar(command, parser, cl_args, unknown_args):
   execute.heron_tar(topology_class_name, topology_file, topology_args, tmp_dir)
 
   try:
-    cluster_role_env = args.parse_cluster_role_env(cluster_role_env)
-    config_overrides = args.parse_cmdline_override(cl_args)
+    cluster_role_env = utils.parse_cluster_role_env(cluster_role_env)
+    config_overrides = utils.parse_cmdline_override(cl_args)
 
     launch_topologies(cluster_role_env, topology_file, tmp_dir, config_path, config_overrides)
 

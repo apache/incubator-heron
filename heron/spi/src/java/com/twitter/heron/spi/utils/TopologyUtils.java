@@ -240,7 +240,7 @@ public class TopologyUtils {
     } else {
       // Bundled tar
       String topologyJar = originalPackage.replace(".tar.gz", "").replace(".tar", "") + ".jar";
-      classPathBuilder.append(String.format("libs/*:heron-instance.jar:%s:./*", topologyJar));
+      classPathBuilder.append(String.format("libs/*:%s", topologyJar));
     }
     String additionalClasspath = TopologyUtils.getAdditionalClassPath(topology);
     if (!additionalClasspath.isEmpty()) {

@@ -34,13 +34,3 @@ pex_binary(
         ":heron-cli-lib",
     ],
 )
-
-filegroup(
-    name = "scheduler-config",
-    srcs = ["scheduler.conf"],
-)
-
-filegroup(
-    name = "local-scheduler-config",
-    srcs = ["local_scheduler.conf"],
-)

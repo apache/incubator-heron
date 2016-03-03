@@ -30,7 +30,6 @@ public class CuratorStateManager extends FileSystemStateManager {
   private CuratorFramework client;
   private String connectionString;
 
-  public static final String ZK_CONNECTION_STRING = "zk.connection.string";
   @Override
   public void initialize(Config config) {
     super.initialize(config);
@@ -41,7 +40,7 @@ public class CuratorStateManager extends FileSystemStateManager {
     int retryCount = 10;
     int retryIntervalMs = 1000;
 
-    connectionString = (String) config.get(ZK_CONNECTION_STRING);
+    connectionString = CuratorStateContext.zkConnectionString(config); 
 
     // these are reasonable arguments for the ExponentialBackoffRetry. The first
     // retry will wait 1 second - the second will wait up to 2 seconds - the

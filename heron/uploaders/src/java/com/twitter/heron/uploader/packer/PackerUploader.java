@@ -40,7 +40,7 @@ public class PackerUploader implements IUploader {
     this.topology = Context.topologyName(config); 
     this.verbose = Context.verbose(config); 
 
-    this.topologyPackageLocation = Context.topologyPackageUri(config);
+    this.topologyPackageLocation = Context.topologyJarFile(config);
     this.topologyURI = null;
     this.releaseTag = config.getStringValue(Keys.HERON_RELEASE_PACKAGE_NAME, "live");
 
