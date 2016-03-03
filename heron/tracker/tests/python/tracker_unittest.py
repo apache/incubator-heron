@@ -4,7 +4,7 @@ import unittest2 as unittest
 from mock import call, patch, Mock
 
 from heron.common.src.python.topology import Topology
-from heron.state.src.python import statemanagerfactory
+from heron.statemgrs.src.python import statemanagerfactory
 from heron.tracker.src.python.tracker import Tracker
 
 class TrackerTest(unittest.TestCase):

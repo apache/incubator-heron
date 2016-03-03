@@ -1,7 +1,7 @@
 package com.twitter.heron.scheduler.local;
 
-import com.twitter.heron.scheduler.api.IRuntimeManager;
-import com.twitter.heron.scheduler.api.context.RuntimeManagerContext;
+import com.twitter.heron.spi.scheduler.IRuntimeManager;
+import com.twitter.heron.spi.scheduler.context.RuntimeManagerContext;
 
 /**
  * Handles Runtime tasks like kill/restart/activate/deactivate for heron topology launched

@@ -9,8 +9,8 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.core.base.SlaveLooper;
-import com.twitter.heron.common.core.base.WakeableLooper;
+import com.twitter.heron.common.basics.SlaveLooper;
+import com.twitter.heron.common.basics.WakeableLooper;
 import com.twitter.heron.localmode.utils.PhysicalPlanUtil;
 import com.twitter.heron.localmode.utils.StreamConsumers;
 import com.twitter.heron.localmode.utils.TupleCache;

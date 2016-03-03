@@ -4,15 +4,15 @@ import java.io.IOException;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.twitter.heron.common.core.base.Communicator;
-import com.twitter.heron.common.core.base.NIOLooper;
-import com.twitter.heron.common.core.base.SingletonRegistry;
-import com.twitter.heron.common.core.network.HeronSocketOptions;
+import com.twitter.heron.common.config.SystemConfig;
+import com.twitter.heron.common.basics.Communicator;
+import com.twitter.heron.common.basics.NIOLooper;
+import com.twitter.heron.common.basics.SingletonRegistry;
+import com.twitter.heron.common.network.HeronSocketOptions;
 import com.twitter.heron.common.utils.metrics.JVMMetrics;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
 import com.twitter.heron.common.utils.misc.Constants;
 import com.twitter.heron.common.utils.misc.ErrorReportLoggingHandler;
-import com.twitter.heron.common.utils.misc.SystemConfig;
 import com.twitter.heron.metrics.GatewayMetrics;
 import com.twitter.heron.network.MetricsManagerClient;
 import com.twitter.heron.network.StreamManagerClient;
@@ -107,7 +107,7 @@ public class Gateway implements Runnable {
         systemConfig.getInstanceMetricsSystemSampleIntervalSec());
 
     final long instanceTuningIntervalMs = systemConfig.getInstanceTuningIntervalMs() *
-        com.twitter.heron.common.core.base.Constants.MILLISECONDS_TO_NANOSECONDS;
+        com.twitter.heron.common.basics.Constants.MILLISECONDS_TO_NANOSECONDS;
 
     // Attache Runnable to update the expected stream's expected available capacity
     Runnable tuningStreamQueueSize = new Runnable() {

@@ -24,16 +24,26 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
-import com.twitter.heron.scheduler.api.IConfigLoader;
-import com.twitter.heron.scheduler.api.ILauncher;
-import com.twitter.heron.scheduler.api.IUploader;
-import com.twitter.heron.scheduler.api.PackingPlan;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
+
+import com.twitter.heron.spi.scheduler.IConfigLoader;
+import com.twitter.heron.spi.scheduler.ILauncher;
+import com.twitter.heron.spi.scheduler.NullLauncher;
+
+import com.twitter.heron.spi.scheduler.IScheduler;
+import com.twitter.heron.spi.scheduler.NullScheduler;
+
+import com.twitter.heron.spi.uploader.IUploader;
+import com.twitter.heron.spi.uploader.NullUploader;
+
+import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.packing.NullPackingAlgorithm;
+
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
+import com.twitter.heron.spi.util.Factory;
+
 import com.twitter.heron.scheduler.util.DefaultConfigLoader;
-import com.twitter.heron.scheduler.util.Factory;
-import com.twitter.heron.scheduler.util.Nullity;
-import com.twitter.heron.state.IStateManager;
-import com.twitter.heron.state.dummy.DummySchedulerStateManager;
+import com.twitter.heron.spi.statemgr.IStateManager;
+import com.twitter.heron.spi.statemgr.NullStateManager;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
@@ -79,11 +89,11 @@ public class SubmitterMainTest {
 
   private IConfigLoader createConfig() {
     IConfigLoader config = mock(DefaultConfigLoader.class);
-    when(config.getUploaderClass()).thenReturn(Nullity.NullUploader.class.getName());
-    when(config.getLauncherClass()).thenReturn(Nullity.NullLauncher.class.getName());
-    when(config.getSchedulerClass()).thenReturn(Nullity.NullScheduler.class.getName());
-    when(config.getPackingAlgorithmClass()).thenReturn(Nullity.EmptyPacking.class.getName());
-    when(config.getStateManagerClass()).thenReturn(DummySchedulerStateManager.class.getName());
+    when(config.getUploaderClass()).thenReturn(NullUploader.class.getName());
+    when(config.getLauncherClass()).thenReturn(NullLauncher.class.getName());
+    when(config.getSchedulerClass()).thenReturn(NullScheduler.class.getName());
+    when(config.getPackingAlgorithmClass()).thenReturn(NullPackingAlgorithm.class.getName());
+    when(config.getStateManagerClass()).thenReturn(NullStateManager.class.getName());
     when(config.load(anyString(), anyString())).thenReturn(true);
     return config;
   }
@@ -99,7 +109,7 @@ public class SubmitterMainTest {
     PowerMockito.spy(Factory.class);
 
     PowerMockito.doReturn(config).when(Factory.class, "makeConfigLoader", eq(configLoader));
-    PowerMockito.doReturn(new DummySchedulerStateManager()).when(Factory.class, "makeStateManager", anyString());
+    PowerMockito.doReturn(new NullStateManager()).when(Factory.class, "makeStateManager", anyString());
 
     assertTrue(SubmitterMain.submitTopology(
         topologyPkg, configLoader, submitterConfigFile, configOverride, createTopology(new Config())));
@@ -136,9 +146,9 @@ public class SubmitterMainTest {
     String configLoader = config.getClass().getName();
     String submitterConfigFile = "";
     String configOverride = "";
-    IUploader mockUploader = spy(new Nullity.NullUploader());
-    ILauncher failLauncher = spy(new Nullity.NullLauncher());
-    IStateManager dummyStateManager = spy(new DummySchedulerStateManager());
+    IUploader mockUploader = spy(new NullUploader());
+    ILauncher failLauncher = spy(new NullLauncher());
+    IStateManager dummyStateManager = spy(new NullStateManager());
     when(failLauncher.launchTopology(any(PackingPlan.class))).thenReturn(false);
     PowerMockito.spy(SubmitterMain.class);
     PowerMockito.spy(Factory.class);

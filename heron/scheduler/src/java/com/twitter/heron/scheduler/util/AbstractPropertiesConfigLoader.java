@@ -3,8 +3,8 @@ package com.twitter.heron.scheduler.util;
 import java.util.Map;
 import java.util.Properties;
 
-import com.twitter.heron.scheduler.api.Constants;
-import com.twitter.heron.scheduler.api.IConfigLoader;
+import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.scheduler.IConfigLoader;
 
 /**
  * Loads config in the Java properties file format.
@@ -76,7 +76,7 @@ public abstract class AbstractPropertiesConfigLoader implements IConfigLoader {
 
   public final void addDefaultProperties() {
     addPropertyIfNotPresent(Constants.HERON_VERBOSE, Boolean.FALSE.toString());
-    addPropertyIfNotPresent(Constants.DC, Constants.DC);
+    addPropertyIfNotPresent(Constants.CLUSTER, Constants.CLUSTER);
     addPropertyIfNotPresent(Constants.ROLE, Constants.ROLE);
     addPropertyIfNotPresent(Constants.ENVIRON, Constants.ENVIRON);
   }

@@ -12,15 +12,18 @@ import java.util.logging.Logger;
 import javax.xml.bind.DatatypeConverter;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.core.base.FileUtility;
+import com.twitter.heron.common.basics.FileUtility;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
-import com.twitter.heron.scheduler.api.Constants;
-import com.twitter.heron.scheduler.api.ILauncher;
-import com.twitter.heron.scheduler.api.PackingPlan;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
+import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.common.PackingPlan;
+
+import com.twitter.heron.spi.scheduler.ILauncher;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
+
 import com.twitter.heron.scheduler.service.SubmitterMain;
-import com.twitter.heron.scheduler.util.NetworkUtility;
 import com.twitter.heron.scheduler.twitter.PackerUtility;
+
+import com.twitter.heron.scheduler.util.NetworkUtility;
 import com.twitter.heron.scheduler.util.ShellUtility;
 import com.twitter.heron.scheduler.util.TopologyUtility;
 
@@ -33,7 +36,7 @@ public class AuroraLauncher implements ILauncher {
 
   //  private DefaultConfigLoader context;
   private LaunchContext context;
-  private String dc;
+  private String cluster;
   private String environ;
   private String role;
   private TopologyAPI.Topology topology;
@@ -41,7 +44,7 @@ public class AuroraLauncher implements ILauncher {
   @Override
   public void initialize(LaunchContext context) {
     this.context = context;
-    this.dc = context.getPropertyWithException(Constants.DC);
+    this.cluster = context.getPropertyWithException(Constants.CLUSTER);
     this.environ = context.getPropertyWithException(Constants.ENVIRON);
     this.role = context.getPropertyWithException(Constants.ROLE);
     this.topology = context.getTopology();
@@ -70,7 +73,7 @@ public class AuroraLauncher implements ILauncher {
     ExecutionEnvironment.ExecutionState.Builder builder =
         ExecutionEnvironment.ExecutionState.newBuilder().mergeFrom(executionState);
 
-    builder.setDc(dc).setRole(role).setEnviron(environ);
+    builder.setDc(cluster).setRole(role).setEnviron(environ);
 
     // Set the HeronReleaseState
     ExecutionEnvironment.HeronReleaseState.Builder releaseBuilder =
@@ -139,7 +142,7 @@ public class AuroraLauncher implements ILauncher {
     auroraProperties.put("COMPONENT_RAMMAP",
         TopologyUtility.formatRamMap(TopologyUtility.getComponentRamMap(topology)));
     auroraProperties.put("CPUS_PER_CONTAINER", containerResource.cpu + "");
-    auroraProperties.put("DC", dc);
+    auroraProperties.put("CLUSTER", cluster);
     auroraProperties.put("DISK_PER_CONTAINER", containerResource.disk + "");
     auroraProperties.put("ENVIRON", environ);
     auroraProperties.put("HERON_EXECUTOR_BINARY", "heron-executor");
@@ -183,7 +186,7 @@ public class AuroraLauncher implements ILauncher {
       auroraCmd.add(String.format("%s=%s", binding, auroraProperties.get(binding)));
     }
     auroraCmd.add(String.format("%s/%s/%s/%s",
-        auroraProperties.get("DC"),
+        auroraProperties.get("CLUSTER"),
         auroraProperties.get("RUN_ROLE"),
         auroraProperties.get("ENVIRON"),
         auroraProperties.get("JOB_NAME")));

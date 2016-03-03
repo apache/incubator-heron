@@ -33,6 +33,11 @@ message Instance {
 }
 
 message PhysicalPlan {
+  // PhysicalPlan maintains a dirty copy of topology def, which is owned by the topology node
+  // in state manager.
+  // This value is not guaranteed consistent with actual value, to avoid complicated transactional updates.
+  // To solve the consistent issue, it is required to update toplogy def's value with latest one from State Manager,
+  // and then to distribute the physical plan to all stream mgrs.
   required heron.proto.api.Topology topology = 1;
   repeated StMgr stmgrs = 2;
   repeated Instance instances = 3;

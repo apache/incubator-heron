@@ -24,7 +24,7 @@ import com.twitter.heron.api.metric.ReducedMetric;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
-import com.twitter.heron.common.core.base.Constants;
+import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
 
 /**

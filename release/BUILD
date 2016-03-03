@@ -42,7 +42,6 @@ filegroup(
         ":heron-api",
         ":heron-cli",
         ":heron-core",
-        ":heron-metrics-api",
         ":heron-storm-compat",
         ":heron-tracker",
         ":heron",
@@ -86,12 +85,6 @@ pkg_tar(
     name = "heron-core",
     extension = "tar.gz",
     files = heron_core_files(), 
-)
-
-pkg_tar(
-    name = "heron-metrics-api",
-    extension = "tar.gz",
-    files = heron_metrics_api_files(), 
 )
 
 pkg_tar(
