@@ -14,7 +14,7 @@ public class NullPacking implements IPacking {
   public PackingPlan pack() {
     return new PackingPlan(
       "",
-      new HashMap<>(),
+      new HashMap<String, PackingPlan.ContainerPlan>(),
       new PackingPlan.Resource(0.0, 0L, 0L));
   }
 

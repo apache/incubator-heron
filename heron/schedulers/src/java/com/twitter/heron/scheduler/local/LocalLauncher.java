@@ -19,6 +19,7 @@ import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Defaults;
+import com.twitter.heron.spi.common.Jars;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.PackingPlan;
@@ -45,7 +46,6 @@ public class LocalLauncher implements ILauncher {
   private Config config;
   private Config runtime;
 
-  private TopologyAPI.Topology topology;
   private String topologyWorkingDirectory;
   private String coreReleasePackage;
   private String targetCoreReleaseFile;
@@ -85,127 +85,6 @@ public class LocalLauncher implements ILauncher {
   }
 
   /** 
-   * Pack the default configs into a Config
-   *
-   * @return Config 
-   */
-  protected Config defaultConfigs() {
-    Config.Builder builder = Config.newBuilder()
-        .putAll(ClusterDefaults.getDefaultHome())
-        .putAll(ClusterDefaults.getDefaultBinaries())
-        .putAll(ClusterDefaults.getDefaultJars())
-        .putAll(ClusterConfig.loadSchedulerConfig());
-    return builder.build();
-  }
-
-  /** 
-   * Pack topology related configs into a Config
-   *
-   * @return Config 
-   */
-  protected Config topologyConfigs() {
-    TopologyAPI.Topology topology = Runtime.topology(runtime);
-
-    // get topology attributes, for files get the base name
-    String defFile = FilenameUtils.getName(Context.topologyDefinitionFile(config));
-    String jarFile = FilenameUtils.getName(Context.topologyJarFile(config));
-    String pkgType = Context.topologyPackageType(config);
-
-    // build the config 
-    Config.Builder builder = Config.newBuilder()
-        .put(Keys.TOPOLOGY_ID, topology.getId())
-        .put(Keys.TOPOLOGY_NAME, topology.getName())
-        .put(Keys.TOPOLOGY_DEFINITION_FILE, defFile)
-        .put(Keys.TOPOLOGY_JAR_FILE, jarFile)
-        .put(Keys.TOPOLOGY_PACKAGE_TYPE, pkgType);
-
-    return builder.build();
-  }
-
-  /** 
-   * Pack topology component related configs into a Config
-   *
-   * @return Config
-   */
-  protected Config componentConfigs() {
-    TopologyAPI.Topology topology = Runtime.topology(runtime);
-
-    // get the jvm options for the components supplied topology writer 
-    String jvmOptions = TopologyUtils.getComponentJvmOptions(topology);
-
-    // get the component RAM map specified by the topology writer 
-    Map<String, Long> ramMap = TopologyUtils.getComponentRamMap(topology);
-
-    // build the config  
-    Config.Builder builder = Config.newBuilder()
-        .put(Keys.COMPONENT_RAMMAP, TopologyUtils.formatRamMap(ramMap))
-        .put(Keys.COMPONENT_JVM_OPTS_IN_BASE64, formatJavaOpts(jvmOptions));
-
-    return builder.build();
-  }
-
-  /** 
-   * Pack instance related configs into a Config
-   *
-   * @return Config
-   */
-  protected Config instanceConfigs(PackingPlan packing) {
-    TopologyAPI.Topology topology = Runtime.topology(runtime);
-
-    // get the instance distribution for the packing
-    String distribution = TopologyUtils.packingToString(packing);
-
-    // get instance JVM options specified by topology writer
-    String jvmOptions = TopologyUtils.getInstanceJvmOptions(topology);
-
-    // build the config
-    Config.Builder builder = Config.newBuilder()
-        .put(Keys.INSTANCE_DISTRIBUTION, distribution)
-        .put(Keys.INSTANCE_JVM_OPTS_IN_BASE64, formatJavaOpts(jvmOptions));
-
-    return builder.build(); 
-  }
-
-  /** 
-   * Pack resource related configs into a Config
-   *
-   * @return Config
-   */
-  protected Config resourceConfigs() {
-    TopologyAPI.Topology topology = Runtime.topology(runtime);
- 
-    // get the number of containers, the extra one is for topology master
-    int numContainers = 1 + TopologyUtils.getNumContainers(topology);
-
-    // build the config
-    Config.Builder builder = Config.newBuilder()
-        .put(Keys.NUM_CONTAINERS, String.valueOf(numContainers));
-
-    return builder.build();
-  }
-
-  /** 
-   * Pack configs related to files and directories into a Config
-   *
-   * @return Config
-   */
-  protected Config filesAndDirsConfigs() {
-    Config.Builder builder = Config.newBuilder()
-        .put(Keys.LOGGING_DIRECTORY, Defaults.LOGGING_DIRECTORY)
-        .put(LocalKeys.WORKING_DIRECTORY, topologyWorkingDirectory);
-
-    return builder.build();
-  }
-
-  protected Config binaryConfigs() {
-    Config.Builder builder = Config.newBuilder()
-        .put(LocalKeys.WORKING_DIRECTORY, topologyWorkingDirectory);
-
-    return builder.build();
-  }
-
-
-  /** 
    * Actions to execute before launch such as check whether the
    * topology is already running
    *
@@ -234,18 +113,18 @@ public class LocalLauncher implements ILauncher {
   public boolean launch(PackingPlan packing) {
     LOG.info("Launching topology for local cluster " + Context.cluster(config));
 
+    TopologyAPI.Topology topology = Runtime.topology(runtime);
+
     // get all the config, need to be passed as command line to heron executor
-    Config schedulerConfig = Config.expand(
+    String sandboxHome = Defaults.HERON_SANDBOX_HOME;
+    String sandboxConf = Defaults.HERON_SANDBOX_CONF;
+    Config sandboxConfig = Config.expand(
         Config.newBuilder()
-            .putAll(defaultConfigs())
-            .putAll(topologyConfigs())
-            .putAll(componentConfigs())
-            .putAll(instanceConfigs(packing))
-            .putAll(resourceConfigs())
-            .putAll(filesAndDirsConfigs())
+            .putAll(ClusterDefaults.getDefaults())
+            .putAll(ClusterConfig.loadBasicConfig(sandboxHome, sandboxConf))
             .build());
 
-    LOG.info("loaded scheduler config " + schedulerConfig);
+    LOG.info("loaded sandbox config " + sandboxConfig);
 
     // download the core and topology packages into the working directory
     if (!downloadAndExtractPackages()) {
@@ -254,26 +133,62 @@ public class LocalLauncher implements ILauncher {
     }
 
     String configInBase64 =
-       DatatypeConverter.printBase64Binary(schedulerConfig.asString().getBytes(Charset.forName("UTF-8")));
+       DatatypeConverter.printBase64Binary(sandboxConfig.asString().getBytes(Charset.forName("UTF-8")));
 
     System.out.println(configInBase64);
+
+    int port1 = NetworkUtils.getFreePort();
+    int port2 = NetworkUtils.getFreePort();
+    int port3 = NetworkUtils.getFreePort();
+    int shellPort = NetworkUtils.getFreePort();
+    int port4 = NetworkUtils.getFreePort();
+    int schedulerPort = NetworkUtils.getFreePort();
+
+    if (port1 == -1 || port2 == -1 || port3 == -1) {
+      throw new RuntimeException("Could not find available ports to start topology");
+    }
+
+    String executorCmd = String.format("%s %d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %d %s %s %d %s %s %s %s %d",
+        Context.executorBinary(sandboxConfig),
+        0,
+        topology.getName(),
+        topology.getId(),
+        FilenameUtils.getName(Context.topologyDefinitionFile(config)),
+        TopologyUtils.packingToString(packing),
+        Context.stateManagerConnectionString(config),
+        Context.stateManagerRootPath(config),
+        Context.tmasterBinary(sandboxConfig),
+        Context.stmgrBinary(sandboxConfig),
+        "./heron-core/lib/heron-metricsmgr.jar",       // Jars.getMetricsManagerClassPath(Context.heronLib(sandboxConfig)),
+        formatJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)),
+        TopologyUtils.makeClassPath(topology, Context.topologyJarFile(config)),
+        port1,
+        port2,
+        port3,
+        Context.systemConfigFile(sandboxConfig),
+        TopologyUtils.formatRamMap(TopologyUtils.getComponentRamMap(topology)),
+        formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)),
+        Context.topologyPackageType(config),
+        Context.topologyJarFile(config),
+        Context.javaHome(config),
+        shellPort,
+        Context.logDirectory(sandboxConfig),
+        Context.shellBinary(sandboxConfig),
+        port4,
+        Context.cluster(config),
+        Context.role(config),
+        Context.environ(config),
+        "./heron-core/lib/heron-scheduler.jar:./heron-core/lib/heron-local-scheduler.jar",       
+        schedulerPort
+    );
+
+    System.out.println(executorCmd);
     System.exit(0);
 
-    // form the scheduler path (TO DO: Karthik change to libs directory)
-    String schedulerBinary = Paths.get(topologyWorkingDirectory, Context.schedulerJar(config)).toString(); 
+    LOG.info("Executor command line: " + executorCmd.toString());
 
-    StringBuilder schedulerCmd = new StringBuilder()
-        .append("java").append(" ")
-        .append("-cp").append(" ")
-        .append(schedulerBinary).append(" ")
-        .append("com.twitter.heron.scheduler.service.SchedulerMain").append(" ")
-        .append(Runtime.topologyName(runtime)).append(" ")
-        .append(Context.schedulerClass(config)).append(" ")
-        .append(configInBase64).append(" ")
-        .append(NetworkUtils.getFreePort()).append(" ");
-    LOG.info("Local scheduler command line: " + schedulerCmd.toString());
-
-    return 0 == ShellUtils.runSyncProcess(true, true, schedulerCmd.toString(),
+    // TO DO: we need to run as async process
+    return 0 == ShellUtils.runSyncProcess(true, true, executorCmd.toString(),
         new StringBuilder(), new StringBuilder(), new File(topologyWorkingDirectory));
   }
 

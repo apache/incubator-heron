@@ -45,10 +45,12 @@ public class SubmitterMain {
     String topologyDefnFile = args[7];
     String originalPackageFile = args[8];
 
+    System.out.println(heronHome + " " + configPath);
+
     // First load the defaults, then the config from files to override it 
     Config.Builder defaultsConfig = Config.newBuilder()
         .putAll(ClusterDefaults.getDefaults())
-        .putAll(ClusterConfig.loadConfig(heronHome, cluster, configPath));
+        .putAll(ClusterConfig.loadConfig(heronHome, configPath));
  
     // Add config parameters from the command line
     Config.Builder commandLineConfig = Config.newBuilder()
@@ -81,7 +83,8 @@ public class SubmitterMain {
             .putAll(topologyConfig.build())
             .build());
 
-    LOG.info("loaded static config " + config);
+    LOG.info("Static config loaded successfully ");
+    LOG.info(config.toString());
 
     // submit the topology with the given config
     if (!submitTopology(config, topology)) {

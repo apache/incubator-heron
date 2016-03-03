@@ -34,7 +34,7 @@ public class LocalFileSystemStateManagerTest {
   private static final String rootAddr = "/";
   private Config config =
       Config.newBuilder()
-        .put(Keys.STATE_ROOT_PATH, rootAddr)
+        .put(Keys.STATEMGR_ROOT_PATH, rootAddr)
         .put(LocalFileSystemKeys.IS_INITIALIZE_FILE_TREE, false)
         .build();
 
