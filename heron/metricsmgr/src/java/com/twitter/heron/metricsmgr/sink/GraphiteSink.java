@@ -9,11 +9,11 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.twitter.heron.api.utils.Utils;
-import com.twitter.heron.metricsmgr.api.metrics.MetricsInfo;
-import com.twitter.heron.metricsmgr.api.metrics.MetricsRecord;
-import com.twitter.heron.metricsmgr.api.sink.IMetricsSink;
-import com.twitter.heron.metricsmgr.api.sink.SinkContext;
+import com.twitter.heron.common.basics.TypeUtils;
+import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
+import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
+import com.twitter.heron.spi.metricsmgr.sink.IMetricsSink;
+import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
 
 /**
  * A metrics sink that writes to a Graphite server
@@ -48,7 +48,7 @@ public class GraphiteSink implements IMetricsSink {
 
     // Get Graphite host configurations.
     final String serverHost = (String) conf.get(SERVER_HOST_KEY);
-    final int serverPort = Utils.getInt(conf.get(SERVER_PORT_KEY));
+    final int serverPort = TypeUtils.getInt(conf.get(SERVER_PORT_KEY));
 
     // Safe check
     if (conf.get(SERVER_HOST_KEY) == null ||
@@ -57,7 +57,7 @@ public class GraphiteSink implements IMetricsSink {
     }
 
     int maxServerReconnectAttempts = conf.get(SERVER_HOST_KEY) == null ?
-        DEFAULT_MAX_CONNECTION_FAILURES : Utils.getInt(conf.get(SERVER_MAX_RECONNECT_ATTEMPTS));
+        DEFAULT_MAX_CONNECTION_FAILURES : TypeUtils.getInt(conf.get(SERVER_MAX_RECONNECT_ATTEMPTS));
 
     // Get Graphite metrics graph prefix.
     metricsPrefix = (String) conf.get(METRICS_PREFIX);

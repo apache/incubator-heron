@@ -7,12 +7,17 @@ class TopologiesHandler(BaseHandler):
   """
   URL - /topologies
   Parameters:
-   - dc (optional)
-   - environ (optional)
+   - cluster (optional)
+   - tag (optional)
 
   The response JSON is a dict with following format:
   {
-    <dc1>: {
+    <cluster1>: {
+      <default>: [
+        top1,
+        top2,
+        ...
+      ],
       <environ1>: [
         top1,
         top2,
@@ -21,7 +26,7 @@ class TopologiesHandler(BaseHandler):
       <environ2>: [...],
       ...
     },
-    <dc2>: {...}
+    <cluster2>: {...}
   }
   """
   def initialize(self, tracker):
@@ -29,23 +34,23 @@ class TopologiesHandler(BaseHandler):
 
   @tornado.gen.coroutine
   def get(self):
-    # Get all the values for parameter "dc".
-    dcs = self.get_arguments(constants.PARAM_DC)
+    # Get all the values for parameter "cluster".
+    clusters = self.get_arguments(constants.PARAM_CLUSTER)
     # Get all the values for parameter "environ".
     environs = self.get_arguments(constants.PARAM_ENVIRON)
 
     ret = {}
     topologies = self.tracker.topologies
     for topology in topologies:
-      dc = topology.dc
+      cluster = topology.cluster 
       environ = topology.environ
-      if not dc or not environ:
+      if not cluster or not environ:
         continue
 
-      # This DC is not asked for.
-      # Note that "if not dcs", then
-      # we show for all the dcs.
-      if dcs and dc not in dcs:
+      # This cluster is not asked for.
+      # Note that "if not clusters", then
+      # we show for all the clusters.
+      if clusters and cluster not in clusters:
         continue
 
       # This environ is not asked for.
@@ -54,10 +59,10 @@ class TopologiesHandler(BaseHandler):
       if environs and environ not in environs:
         continue
 
-      if dc not in ret:
-        ret[dc] = {}
-      if environ not in ret[dc]:
-        ret[dc][environ] = []
-      ret[dc][environ].append(topology.name)
+      if cluster not in ret:
+        ret[cluster] = {}
+      if environ not in ret[cluster]:
+        ret[cluster][environ] = []
+      ret[cluster][environ].append(topology.name)
     self.write_success_response(ret)
 
