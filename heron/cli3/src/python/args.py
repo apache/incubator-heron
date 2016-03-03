@@ -1,6 +1,5 @@
 import os
 import argparse
-import getpass
 
 import heron.cli3.src.python.utils as utils
 
@@ -71,13 +70,12 @@ def add_cluster_role_env(parser):
 
 def add_config(parser):
 
-  # the default config path is user home
-  heron_directory = utils.get_heron_dir()
-  default_config_path = os.path.join(heron_directory, "conf")
+  # the default config path
+  default_config_path = utils.get_heron_conf_dir()
 
   parser.add_argument(
       '--config-path',
-      metavar='(a string; path to cluster config; default: "' + default_config_path + '")',
+      metavar='(a string; path to cluster config; default: "' + default_config_path + '/<cluster>")',
       default=os.path.join(utils.get_heron_dir(), default_config_path))
 
   parser.add_argument(
@@ -86,39 +84,3 @@ def add_config(parser):
       action='append',
       default=[])
   return parser
-
-################################################################################
-# Parse the cluster/[role]/[environ], supply defaults, if not provided
-################################################################################
-def parse_cluster_role_env(cluster_role_env):
-  parts = cluster_role_env.split('/')[:3]
-
-  # if role is not provided, use username instead
-  if len(parts) == 1:
-    parts.append(getpass.getuser())
-
-  # if environ is not provided, use 'default'
-  if len(parts) == 2:
-    parts.append('default')
-
-  # if cluster or role or environ is empty, print
-  if len(parts[0]) == 0 or len(parts[1]) == 0 or len(parts[2]) == 0:
-    print "Failed to parse %s: %s" % (argstr, namespace[argstr])
-    sys.exit(1)
-
-  return (parts[0], parts[1], parts[2])
-
-################################################################################
-# Parse the command line for overriding the defaults
-################################################################################
-def parse_cmdline_override(namespace):
-  override = []
-  for key in namespace.keys():
-    # Notice we could not use "if not namespace[key]",
-    # since it would filter out 0 too, rather than just "None"
-    if namespace[key] is None:
-      continue
-    property_key = key.replace('-', '.').replace('_', '.')
-    property_value = str(namespace[key])
-    override.append('%s="%s"' % (property_key, property_value))
-  return ' '.join(override)

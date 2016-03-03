@@ -42,15 +42,13 @@ public class SchedulerMain {
     String cluster = args[0];
     String role = args[1];
     String environ = args[2];
-    String heronHome = args[3];
-    String topologyName = args[4];
-
-    int schedulerServerPort = Integer.parseInt(args[5]);
+    String topologyName = args[3];
+    int schedulerServerPort = Integer.parseInt(args[4]);
 
     // first load the defaults, then the config from files to override it
     Config.Builder defaultConfigs = Config.newBuilder()
         .putAll(ClusterDefaults.getDefaults())
-        .putAll(ClusterConfig.loadConfig(heronHome, cluster));
+        .putAll(ClusterConfig.loadSandboxConfig());
 
     // add config parameters from the command line
     Config.Builder commandLineConfigs = Config.newBuilder()
@@ -59,7 +57,7 @@ public class SchedulerMain {
         .put(Keys.ENVIRON, environ);
 
     // locate the topology definition file in the sandbox/working directory
-    String topologyDefnFile = TopologyUtils.lookUpTopologyDefnFile(heronHome, topologyName);
+    String topologyDefnFile = TopologyUtils.lookUpTopologyDefnFile(".", topologyName);
 
     // load the topology definition into topology proto
     TopologyAPI.Topology topology = TopologyUtils.getTopology(topologyDefnFile);

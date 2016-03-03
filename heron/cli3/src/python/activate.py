@@ -51,8 +51,8 @@ def run(command, parser, cl_args, unknown_args):
  
   try:
     config_overrides = \
-        args.parse_cluster_role_env(cluster_role_env) + ' ' + \
-        args.parse_cmdline_override(cl_args)
+        utils.parse_cluster_role_env(cluster_role_env) + ' ' + \
+        utils.parse_cmdline_override(cl_args)
 
     new_args = [
         command,

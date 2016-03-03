@@ -120,7 +120,6 @@ def main():
   # parse the args
   args, unknown_args = parser.parse_known_args()
   namespace = vars(args)
-  print namespace
 
   try:
     if namespace['verbose']: 

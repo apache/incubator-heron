@@ -1,11 +1,14 @@
+# scheduler class for distributing the topology for execution
+heron.class.scheduler:                       com.twitter.heron.scheduler.local.LocalScheduler
+
 # launcher class for submitting and launching the topology
-heron.launcher.class:                        com.twitter.heron.scheduler.local.LocalLauncher
+heron.class.launcher:                        com.twitter.heron.scheduler.local.LocalLauncher
 
 # runtime class for managing topology
-heron.runtime.manager.class:                 com.twitter.heron.scheduler.local.LocalRuntimeManager
+heron.class.runtime.manager:                 com.twitter.heron.scheduler.local.LocalRuntimeManager
 
 # working directory for the topologies
 heron.scheduler.local.working.directory:     ${HOME}/.herondata/topologies/${CLUSTER}/${ROLE}/${TOPOLOGY}
 
 # location of the core package
-heron.core.release.uri:                      file://${HERON_DIST}/heron-core.tar.gz
+heron.package.core.uri:                      file://${HERON_DIST}/heron-core.tar.gz

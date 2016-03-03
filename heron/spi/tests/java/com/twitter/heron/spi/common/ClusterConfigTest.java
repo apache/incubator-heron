@@ -7,15 +7,33 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 public class ClusterConfigTest {
   private static final Logger LOG = Logger.getLogger(ClusterConfigTest.class.getName());
 
+  String heronHome;
+  String configPath;
+  Config basicConfig;
+
+  @Before
+  public void setUp() {
+    heronHome = Paths.get(System.getenv("JAVA_RUNFILES"), 
+        TestConstants.TEST_DATA_PATH).toString();
+
+    configPath = Paths.get(heronHome, "local").toString();
+
+    basicConfig = Config.newBuilder()
+        .putAll(ClusterConfig.loadHeronHome(heronHome, configPath))
+        .putAll(ClusterConfig.loadConfigHome(heronHome, configPath))
+        .build();
+  }
+
   @Test
   public void testClusterFile() throws Exception {
-    String configPath = Paths.get(System.getenv("JAVA_RUNFILES"), TestConstants.TEST_DATA_PATH).toString();
-    Config props = ClusterConfig.loadClusterConfig("local", configPath);
+
+    Config props = ClusterConfig.loadClusterConfig(basicConfig);
 
     Assert.assertEquals(4, props.size());
 
@@ -42,8 +60,7 @@ public class ClusterConfigTest {
 
   @Test
   public void testDefaultsFile() throws Exception {
-    String configPath = Paths.get(System.getenv("JAVA_RUNFILES"), TestConstants.TEST_DATA_PATH).toString();
-    Config props = ClusterConfig.loadDefaultsConfig("local", configPath);
+    Config props = ClusterConfig.loadDefaultsConfig(basicConfig);
 
     Assert.assertEquals(10, props.size());
 
@@ -96,8 +113,7 @@ public class ClusterConfigTest {
 
   @Test
   public void testSchedulerFile() throws Exception {
-    String configPath = Paths.get(System.getenv("JAVA_RUNFILES"), TestConstants.TEST_DATA_PATH).toString();
-    Config props = ClusterConfig.loadSchedulerConfig("local", configPath);
+    Config props = ClusterConfig.loadSchedulerConfig(basicConfig);
 
     Assert.assertEquals(2, props.size());
 
@@ -114,16 +130,14 @@ public class ClusterConfigTest {
 
   @Test
   public void testPackingFile() throws Exception {
-    String configPath = Paths.get(System.getenv("JAVA_RUNFILES"), TestConstants.TEST_DATA_PATH).toString();
-    Config props = ClusterConfig.loadPackingConfig("local", configPath);
+    Config props = ClusterConfig.loadPackingConfig(basicConfig);
 
     Assert.assertEquals(0, props.size());
   }
 
   @Test
   public void testUploaderFile() throws Exception {
-    String configPath = Paths.get(System.getenv("JAVA_RUNFILES"), TestConstants.TEST_DATA_PATH).toString();
-    Config props = ClusterConfig.loadUploaderConfig("local", configPath);
+    Config props = ClusterConfig.loadUploaderConfig(basicConfig);
 
     Assert.assertEquals(1, props.size());
     Assert.assertEquals(
