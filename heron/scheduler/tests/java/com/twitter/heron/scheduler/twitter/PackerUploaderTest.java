@@ -9,22 +9,25 @@ import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.scheduler.api.Constants;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
+import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
+
 import com.twitter.heron.scheduler.util.DefaultConfigLoader;
 import com.twitter.heron.scheduler.util.TopologyUtilityTest;
 
 public class PackerUploaderTest {
-  public static final String dc = "cluster";
+  public static final String cluster = "cluster";
   public static final String role = "me";
   public static final String pkgName = "pkg";
+  public static final String stateMgrClass = "com.twitter.heron.spi.statemgr.NullStateManager";
 
   public static DefaultConfigLoader getRequiredConfig() throws Exception {
     DefaultConfigLoader configLoader = DefaultConfigLoader.class.newInstance();
     configLoader.addDefaultProperties();
-    configLoader.properties.setProperty(Constants.DC, dc);
+    configLoader.properties.setProperty(Constants.CLUSTER, cluster);
     configLoader.properties.setProperty(Constants.ROLE, role);
     configLoader.properties.setProperty(Constants.HERON_RELEASE_PACKAGE_NAME, pkgName);
+    configLoader.properties.setProperty(Constants.STATE_MANAGER_CLASS, stateMgrClass);
     return configLoader;
   }
 
@@ -42,10 +45,10 @@ public class PackerUploaderTest {
     uploader.initialize(context);
     Assert.assertTrue(uploader.uploadPackage(topologyPkg));
     String expectedPackerAddCmd = String.format("packer add_version --cluster %s %s %s %s --json",
-        dc, role, uploader.getTopologyPackageName(), topologyPkg);
+        cluster, role, uploader.getTopologyPackageName(), topologyPkg);
     Mockito.verify(uploader).runProcess(Matchers.eq(expectedPackerAddCmd), Matchers.any(StringBuilder.class));
     String expectedPackerSetLiveCmd = String.format("packer set_live --cluster %s %s %s latest",
-        dc, role, uploader.getTopologyPackageName());
+        cluster, role, uploader.getTopologyPackageName());
     Mockito.verify(uploader).runProcess(Matchers.eq(expectedPackerSetLiveCmd), Matchers.any(StringBuilder.class));
   }
 
@@ -67,10 +70,10 @@ public class PackerUploaderTest {
     uploader.initialize(context);
     Assert.assertFalse(uploader.uploadPackage(topologyPkg));
     String expectedPackerAddCmd = String.format("packer add_version --cluster %s %s %s %s --json",
-        dc, role, uploader.getTopologyPackageName(), topologyPkg);
+        cluster, role, uploader.getTopologyPackageName(), topologyPkg);
     Mockito.verify(uploader).runProcess(Matchers.eq(expectedPackerAddCmd), Matchers.any(StringBuilder.class));
     String expectedPackerSetLiveCmd = String.format("packer set_live --cluster %s %s %s latest",
-        dc, role, uploader.getTopologyPackageName());
+        cluster, role, uploader.getTopologyPackageName());
     Mockito.verify(uploader, Mockito.never()).runProcess(Matchers.eq(expectedPackerSetLiveCmd), Matchers.any(StringBuilder.class));
   }
 }

@@ -10,8 +10,8 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.api.metric.IMetric;
 import com.twitter.heron.api.metric.IMetricsRegister;
-import com.twitter.heron.common.core.base.Communicator;
-import com.twitter.heron.common.core.base.WakeableLooper;
+import com.twitter.heron.common.basics.Communicator;
+import com.twitter.heron.common.basics.WakeableLooper;
 import com.twitter.heron.proto.system.Metrics;
 
 /**

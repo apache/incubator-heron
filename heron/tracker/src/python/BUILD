@@ -10,7 +10,7 @@ pex_library(
     ),
     deps = [
         "//heron/common/src/python:common",
-        "//heron/state/src/python:zk",
+        "//heron/statemgrs/src/python:zk-statemgr-py",
         "//heron/proto:proto-py",
     ],
     eggs = [
@@ -26,6 +26,6 @@ pex_binary(
         ":heron-tracker-lib",
     ],
     resources = [
-        "//heron/state/conf:stateconfs",
+        "//heron/statemgrs/conf:stateconfs",
     ],
 )

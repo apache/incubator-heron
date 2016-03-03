@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.core.base.Constants;
-import com.twitter.heron.common.core.base.WakeableLooper;
+import com.twitter.heron.common.basics.Constants;
+import com.twitter.heron.common.basics.WakeableLooper;
 
 public class XORManager {
   private final WakeableLooper looper;

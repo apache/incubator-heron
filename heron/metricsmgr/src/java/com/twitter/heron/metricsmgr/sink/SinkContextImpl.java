@@ -1,7 +1,7 @@
 package com.twitter.heron.metricsmgr.sink;
 
 import com.twitter.heron.api.metric.MultiCountMetric;
-import com.twitter.heron.metricsmgr.api.sink.SinkContext;
+import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
 
 /**
  * Context needed for an IMetricsSink to init.

@@ -11,17 +11,24 @@ import java.util.logging.Logger;
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.core.base.SingletonRegistry;
+import com.twitter.heron.common.config.SystemConfig;
+import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.utils.misc.Constants;
-import com.twitter.heron.common.utils.misc.SystemConfig;
 import com.twitter.heron.localmode.executors.InstanceExecutor;
 import com.twitter.heron.localmode.executors.MetricsExecutor;
 import com.twitter.heron.localmode.executors.StreamExecutor;
 import com.twitter.heron.localmode.utils.PhysicalPlanUtil;
 import com.twitter.heron.proto.system.PhysicalPlans;
 
+
+/**
+ * One LocalMode instance can only submit one topology. Please have multiple LocalMode instances
+ * for multiple topologies.
+ */
 public class LocalMode {
   private static final Logger LOG = Logger.getLogger(LocalMode.class.getName());
+
+  private SystemConfig systemConfig;
 
   private final List<InstanceExecutor> instanceExecutors = new LinkedList<>();
 
@@ -31,6 +38,50 @@ public class LocalMode {
   private StreamExecutor streamExecutor;
 
   private MetricsExecutor metricsExecutor;
+
+  public LocalMode() {
+    this(true);
+  }
+
+  public LocalMode(boolean initialize) {
+    if (initialize) {
+      init();
+    }
+  }
+
+  protected void init() {
+    // Instantiate the System Config
+    this.systemConfig = getSystemConfig();
+
+    // Add the SystemConfig into SingletonRegistry. We synchronized on the singleton object here to
+    // make sure the "check and register" is atomic. And wrapping the containsSingleton and
+    // registerSystemConfig for easy of unit testing
+    synchronized (SingletonRegistry.INSTANCE) {
+      if (!isSystemConfigExisted()) {
+        LOG.info("System config not existed. Registering...");
+        registerSystemConfig(systemConfig);
+        LOG.info("System config registered.");
+      } else {
+        LOG.info("System config already existed.");
+      }
+    }
+  }
+
+  /**
+   * Check if the system config is already registered into the SingleRegistry
+   * @return true if it's registered; false otherwise
+   */
+  protected boolean isSystemConfigExisted() {
+    return SingletonRegistry.INSTANCE.containsSingleton(Constants.HERON_SYSTEM_CONFIG);
+  }
+
+  /**
+   * Register the given system config
+   * @param systemConfig
+   */
+  protected void registerSystemConfig(SystemConfig systemConfig) {
+    SingletonRegistry.INSTANCE.registerSingleton(Constants.HERON_SYSTEM_CONFIG, systemConfig);
+  }
 
   /**
    * Handler for catching exceptions thrown by any threads (owned either by topology or heron
@@ -70,12 +121,6 @@ public class LocalMode {
     PhysicalPlans.PhysicalPlan pPlan = PhysicalPlanUtil.getPhysicalPlan(topologyToRun);
 
     LOG.info("Physical Plan: \n" + pPlan);
-
-    // Instantiate the System Config
-    SystemConfig systemConfig = getSystemConfig();
-
-    // Add the SystemConfig into SingletonRegistry
-    SingletonRegistry.INSTANCE.registerSingleton(Constants.HERON_SYSTEM_CONFIG, systemConfig);
 
     // Create the stream executor
     streamExecutor = new StreamExecutor(pPlan);

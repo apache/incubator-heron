@@ -10,7 +10,7 @@ API_VERSION = "1.0.0"
 
 # Parameter Names
 
-PARAM_DC = "dc"
+PARAM_CLUSTER = "cluster"
 PARAM_ENVIRON = "environ"
 PARAM_TOPOLOGY = "topology"
 PARAM_COMPONENT = "component"
