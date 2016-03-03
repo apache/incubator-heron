@@ -8,14 +8,20 @@ import com.twitter.heron.scheduler.api.IUploader;
 import com.twitter.heron.scheduler.api.context.LaunchContext;
 
 /**
- * A source-file parameterized shell copy utility.
+ * A source-file parameterized topology copy utility in use with heron-cli2.
  * 
  * For example:
- *   --config-property heron.uploader.copy.command="cp %s /devops/jobs/"
- * OR
- *   --config-property heron.uploader.copy.command="aws s3 cp %s s3://twitter.com/devops/jobs/"
- * OR
- *   --config-property ="curl -0 -v -X PUT --data-binary @%s https://artifactory.twitter.biz/libs-releases-local/com/twitter/devops/jobs/"
+ * 1. Copy the generated topology.tar.gz to path /devops/jobs/
+ *
+ *   --config-property heron.uploader.copy.command='\"cp %s /devops/jobs/\"''
+ *
+ * 2. Copy the generated topology.tar.gz to AWS S3 s3://twitter.com/devops/jobs/
+ *
+ *   --config-property heron.uploader.copy.command='\"aws s3 cp %s s3://twitter.com/devops/jobs/\"'
+ *
+ * 3. Use curl to upload the generated topology.tar.gz to twitter artifactory
+ *
+ *   --config-property heron.uploader.copy.command='\"curl -0 -v -X PUT --data-binary @%s https://artifactory.twitter.biz/libs-releases-local/com/twitter/devops/jobs/\"'
  */
 public class CopyCommandUploader implements IUploader {
   private volatile LaunchContext context;
