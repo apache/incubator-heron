@@ -4,15 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.twitter.heron.api.Config;
-import com.twitter.heron.api.HeronSubmitter;
-import com.twitter.heron.api.bolt.BaseRichBolt;
-import com.twitter.heron.api.bolt.OutputCollector;
-import com.twitter.heron.api.grouping.CustomStreamGrouping;
-import com.twitter.heron.api.topology.OutputFieldsDeclarer;
-import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.api.tuple.Tuple;
+import backtype.storm.Config;
+import backtype.storm.StormSubmitter;
+import backtype.storm.generated.GlobalStreamId;
+import backtype.storm.grouping.CustomStreamGrouping;
+import backtype.storm.task.OutputCollector;
+import backtype.storm.task.TopologyContext;
+import backtype.storm.task.WorkerTopologyContext;
+import backtype.storm.topology.OutputFieldsDeclarer;
+import backtype.storm.topology.TopologyBuilder;
+import backtype.storm.topology.base.BaseRichBolt;
+import backtype.storm.tuple.Tuple;
 
 /**
  * This is a basic example of a Storm topology.
@@ -45,12 +47,12 @@ public class CustomGroupingTopology {
     }
 
     @Override
-    public void prepare(TopologyContext context, String component, String streamId, List<Integer> targetTasks) {
+    public void prepare(WorkerTopologyContext context, GlobalStreamId stream, List<Integer> targetTasks) {
       this.taskIds = targetTasks;
     }
 
     @Override
-    public List<Integer> chooseTasks(List<Object> values) {
+    public List<Integer> chooseTasks(int taskId, List<Object> values) {
       List<Integer> ret = new ArrayList<Integer>();
       ret.add(taskIds.get(0));
       return ret;
@@ -67,6 +69,6 @@ public class CustomGroupingTopology {
     Config conf = new Config();
 
     conf.setNumStmgrs(1);
-    HeronSubmitter.submitTopology(args[0], conf, builder.createTopology());
+    StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }
 }
