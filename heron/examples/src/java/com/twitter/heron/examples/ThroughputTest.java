@@ -3,18 +3,18 @@ package com.twitter.heron.examples;
 import java.util.Map;
 import java.util.Random;
 
-import com.twitter.heron.api.Config;
-import com.twitter.heron.api.HeronSubmitter;
-import com.twitter.heron.api.bolt.BaseBasicBolt;
-import com.twitter.heron.api.bolt.BasicOutputCollector;
-import com.twitter.heron.api.spout.BaseRichSpout;
-import com.twitter.heron.api.spout.SpoutOutputCollector;
-import com.twitter.heron.api.topology.OutputFieldsDeclarer;
-import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.api.tuple.Fields;
-import com.twitter.heron.api.tuple.Tuple;
-import com.twitter.heron.api.tuple.Values;
+import backtype.storm.Config;
+import backtype.storm.StormSubmitter;
+import backtype.storm.spout.SpoutOutputCollector;
+import backtype.storm.task.TopologyContext;
+import backtype.storm.topology.BasicOutputCollector;
+import backtype.storm.topology.OutputFieldsDeclarer;
+import backtype.storm.topology.TopologyBuilder;
+import backtype.storm.topology.base.BaseBasicBolt;
+import backtype.storm.topology.base.BaseRichSpout;
+import backtype.storm.tuple.Fields;
+import backtype.storm.tuple.Tuple;
+import backtype.storm.tuple.Values;
 
 public class ThroughputTest {
   public static class GenSpout extends BaseRichSpout {
@@ -132,6 +132,6 @@ public class ThroughputTest {
     //conf.put("topology.receiver.buffer.size", 8);
     //conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-Xdebug -Xrunjdwp:transport=dt_socket,address=1%ID%,server=y,suspend=n");
 
-    HeronSubmitter.submitTopology(args[0], conf, builder.createTopology());
+    StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }
 }
