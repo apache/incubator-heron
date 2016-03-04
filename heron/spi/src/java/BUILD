@@ -28,6 +28,10 @@ java_library(
     ],
 )
 
+common_resource_files = [
+    "//heron/config/src/yaml:config-keys-yaml",
+    "//heron/config/src/yaml:config-defaults-yaml",
+]
 
 utils_deps_files = \
     heron_java_proto_files() + [
@@ -70,6 +74,7 @@ java_library(
     deps = [
         "//heron/common/src/java:config-java",
     ],
+    resources = common_resource_files, 
 )
 
 java_library(

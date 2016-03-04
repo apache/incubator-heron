@@ -42,20 +42,6 @@ public class ClusterConfigTest {
         Context.uploaderClass(props)
     );
 
-    Assert.assertEquals(
-        "com.twitter.heron.scheduler.local.LocalScheduler", 
-        Context.schedulerClass(props)
-    );
-
-    Assert.assertEquals(
-        "com.twitter.heron.packing.roundrobin.RoundRobinPacking", 
-        Context.packingClass(props)
-    );
-
-    Assert.assertEquals(
-        "com.twitter.heron.state.localfs.LocalFileStateManager", 
-        Context.stateManagerClass(props)
-    );
   }
 
   @Test
@@ -115,7 +101,12 @@ public class ClusterConfigTest {
   public void testSchedulerFile() throws Exception {
     Config props = ClusterConfig.loadSchedulerConfig(basicConfig);
 
-    Assert.assertEquals(2, props.size());
+    Assert.assertEquals(3, props.size());
+
+    Assert.assertEquals(
+        "com.twitter.heron.scheduler.local.LocalScheduler", 
+        Context.schedulerClass(props)
+    );
 
     Assert.assertEquals(
         "com.twitter.heron.scheduler.local.LocalLauncher",
@@ -132,14 +123,18 @@ public class ClusterConfigTest {
   public void testPackingFile() throws Exception {
     Config props = ClusterConfig.loadPackingConfig(basicConfig);
 
-    Assert.assertEquals(0, props.size());
+    Assert.assertEquals(1, props.size());
+    Assert.assertEquals(
+        "com.twitter.heron.packing.roundrobin.RoundRobinPacking",
+        props.getStringValue("heron.class.packing.algorithm")
+    );
   }
 
   @Test
   public void testUploaderFile() throws Exception {
     Config props = ClusterConfig.loadUploaderConfig(basicConfig);
 
-    Assert.assertEquals(1, props.size());
+    Assert.assertEquals(2, props.size());
     Assert.assertEquals(
         "/vagrant/heron/jobs",
         props.getStringValue("heron.uploader.file.system.path")
