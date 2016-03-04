@@ -8,46 +8,46 @@ import com.twitter.heron.api.generated.TopologyAPI;
 public class Runtime {
 
   public static String topologyId(Config runtime) {
-    return runtime.getStringValue(Keys.TOPOLOGY_ID);
+    return runtime.getStringValue(Keys.get("TOPOLOGY_ID"));
   }
   
   public static String topologyName(Config runtime) {
-    return runtime.getStringValue(Keys.TOPOLOGY_NAME);
+    return runtime.getStringValue(Keys.get("TOPOLOGY_NAME"));
   }
 
   public static String topologyClassPath(Config runtime) {
-    return runtime.getStringValue(Keys.TOPOLOGY_CLASS_PATH);
+    return runtime.getStringValue(Keys.get("TOPOLOGY_CLASS_PATH"));
   }
 
   public static TopologyAPI.Topology topology(Config runtime) {
-    return (TopologyAPI.Topology)runtime.get(Keys.TOPOLOGY_DEFINITION);
+    return (TopologyAPI.Topology)runtime.get(Keys.get("TOPOLOGY_DEFINITION"));
   }
 
   public static String topologyPackageUri(Config cfg) {
-    return cfg.getStringValue(Keys.TOPOLOGY_PACKAGE_URI);
+    return cfg.getStringValue(Keys.get("TOPOLOGY_PACKAGE_URI"));
   }
 
   public static IStateManager stateManager(Config runtime) {
-    return (IStateManager)runtime.get(Keys.STATE_MANAGER);
+    return (IStateManager)runtime.get(Keys.get("STATE_MANAGER"));
   }
 
   public static String componentRamMap(Config runtime) {
-    return runtime.getStringValue(Keys.COMPONENT_RAMMAP);
+    return runtime.getStringValue(Keys.get("COMPONENT_RAMMAP"));
   }
 
   public static String componentJvmOpts(Config runtime) {
-    return runtime.getStringValue(Keys.COMPONENT_JVM_OPTS_IN_BASE64);
+    return runtime.getStringValue(Keys.get("COMPONENT_JVM_OPTS_IN_BASE64"));
   }
 
   public static String instanceDistribution(Config runtime) {
-    return runtime.getStringValue(Keys.INSTANCE_DISTRIBUTION);
+    return runtime.getStringValue(Keys.get("INSTANCE_DISTRIBUTION"));
   }
 
   public static String instanceJvmOpts(Config runtime) {
-    return runtime.getStringValue(Keys.INSTANCE_JVM_OPTS_IN_BASE64);
+    return runtime.getStringValue(Keys.get("INSTANCE_JVM_OPTS_IN_BASE64"));
   }
 
   public static String numContainers(Config runtime) {
-    return runtime.getStringValue(Keys.NUM_CONTAINERS);
+    return runtime.getStringValue(Keys.get("NUM_CONTAINERS"));
   }
 }

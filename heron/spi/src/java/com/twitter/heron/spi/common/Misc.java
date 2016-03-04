@@ -26,15 +26,15 @@ public class Misc {
 
   public static String substitute(String heronHome, String pathString) {
     Config config = Config.newBuilder()
-      .put(Keys.HERON_HOME, heronHome)
+      .put(Keys.get("HERON_HOME"), heronHome)
       .build();
     return substitute(config, pathString);
   }
 
   public static String substitute(String heronHome, String configPath, String pathString) {
     Config config = Config.newBuilder()
-      .put(Keys.HERON_HOME, heronHome)
-      .put(Keys.HERON_CONF, configPath)
+      .put(Keys.get("HERON_HOME"), heronHome)
+      .put(Keys.get("HERON_CONF"), configPath)
       .build();
     return substitute(config, pathString);
   }

@@ -7,44 +7,52 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 public class ClusterDefaultsTest {
   private static final Logger LOG = Logger.getLogger(ClusterDefaultsTest.class.getName());
 
+  Config home;
+  Config props;
+
+  @Before
+  public void initialize() {
+    home = ClusterDefaults.getDefaultHome();
+    props = Config.newBuilder()
+        .putAll(ClusterDefaults.getDefaultBinaries())
+        .putAll(ClusterDefaults.getDefaultJars())
+        .build();
+  }
+
   @Test
   public void testDefaultBinaries() throws Exception {
-    Config home = ClusterDefaults.getDefaultHome();
-    Config props = ClusterDefaults.getDefaultBinaries();
 
     Assert.assertEquals(
-        Misc.substitute(home, Defaults.EXECUTOR_BINARY),
+        Defaults.get("EXECUTOR_BINARY"),
         Context.executorBinary(props)
     );
 
     Assert.assertEquals(
-        Misc.substitute(home, Defaults.STMGR_BINARY),
+        Defaults.get("STMGR_BINARY"),
         Context.stmgrBinary(props)
     );
 
     Assert.assertEquals(
-        Misc.substitute(home, Defaults.TMASTER_BINARY),
+        Defaults.get("TMASTER_BINARY"),
         Context.tmasterBinary(props)
     );
 
     Assert.assertEquals(
-        Misc.substitute(home, Defaults.SHELL_BINARY),
+        Defaults.get("SHELL_BINARY"),
         Context.shellBinary(props)
     );
   }
 
   @Test
   public void testDefaultJars() throws Exception {
-    Config home = ClusterDefaults.getDefaultHome();
-    Config props = ClusterDefaults.getDefaultJars();
-
     Assert.assertEquals(
-        Misc.substitute(home, Defaults.SCHEDULER_JAR),
+        Defaults.get("SCHEDULER_JAR"),
         Context.schedulerJar(props)
     );
   }
@@ -54,23 +62,23 @@ public class ClusterDefaultsTest {
     Config props = ClusterDefaults.getDefaultResources();
 
     Assert.assertEquals(
-        Long.valueOf(Defaults.STMGR_RAM),
+        Defaults.getLong("STMGR_RAM"),
         Context.stmgrRam(props)
     );
 
     Assert.assertEquals(
-        Double.valueOf(Defaults.INSTANCE_CPU),
+        Defaults.getLong("INSTANCE_CPU"),
         Context.instanceCpu(props),
         0.001
     );
 
     Assert.assertEquals(
-        Long.valueOf(Defaults.INSTANCE_RAM),
+        Defaults.getLong("INSTANCE_RAM"),
         Context.instanceRam(props)
     );
 
     Assert.assertEquals(
-        Long.valueOf(Defaults.INSTANCE_DISK),
+        Defaults.getLong("INSTANCE_DISK"),
         Context.instanceDisk(props)
     );
   }

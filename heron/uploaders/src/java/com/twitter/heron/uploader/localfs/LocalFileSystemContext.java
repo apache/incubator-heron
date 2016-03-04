@@ -1,12 +1,10 @@
 package com.twitter.heron.uploader.localfs;
 
-import java.nio.file.Paths;
-
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Context;
 
-public class LocalFileSystemContext {
-  public static String fileSystemDirectory(Config cfg) {
-    return cfg.getStringValue(LocalFileSystemKeys.FILE_SYSTEM_DIRECTORY,
-        LocalFileSystemDefaults.FILE_SYSTEM_DIRECTORY);
+public class LocalFileSystemContext extends Context {
+  public static String fileSystemDirectory(Config config) {
+    return config.getStringValue(LocalFileSystemKeys.get("FILE_SYSTEM_DIRECTORY"));
   }
 }
