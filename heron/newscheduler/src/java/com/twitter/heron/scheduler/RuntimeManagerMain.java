@@ -35,12 +35,12 @@ public class RuntimeManagerMain {
 
     // add config parameters from the command line
     Config.Builder commandLineConfigs = Config.newBuilder()
-        .put(Keys.CLUSTER, cluster)
-        .put(Keys.ROLE, role)
-        .put(Keys.ENVIRON, environ);
+        .put(Keys.get("CLUSTER"), cluster)
+        .put(Keys.get("ROLE"), role)
+        .put(Keys.get("ENVIRON"), environ);
 
     Config.Builder topologyConfigs = Config.newBuilder()
-        .put(Keys.TOPOLOGY_NAME, topologyName);
+        .put(Keys.get("TOPOLOGY_NAME"), topologyName);
 
     Config config = Config.newBuilder()
         .putAll(defaultConfigs.build())
@@ -67,8 +67,8 @@ public class RuntimeManagerMain {
 
     // build the runtime config
     Config runtime = Config.newBuilder()
-        .put(Keys.TOPOLOGY_NAME, topologyName)
-        .put(Keys.STATE_MANAGER, statemgr)
+        .put(Keys.get("TOPOLOGY_NAME"), topologyName)
+        .put(Keys.get("STATE_MANAGER"), statemgr)
         .build();
 
     // create an instance of the runner class

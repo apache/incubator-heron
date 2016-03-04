@@ -52,9 +52,9 @@ public class SchedulerMain {
 
     // add config parameters from the command line
     Config.Builder commandLineConfigs = Config.newBuilder()
-        .put(Keys.CLUSTER, cluster)
-        .put(Keys.ROLE, role)
-        .put(Keys.ENVIRON, environ);
+        .put(Keys.get("CLUSTER"), cluster)
+        .put(Keys.get("ROLE"), role)
+        .put(Keys.get("ENVIRON"), environ);
 
     // locate the topology definition file in the sandbox/working directory
     String topologyDefnFile = TopologyUtils.lookUpTopologyDefnFile(".", topologyName);
@@ -63,8 +63,8 @@ public class SchedulerMain {
     TopologyAPI.Topology topology = TopologyUtils.getTopology(topologyDefnFile);
 
     Config.Builder topologyConfigs = Config.newBuilder()
-        .put(Keys.TOPOLOGY_ID, topology.getId())
-        .put(Keys.TOPOLOGY_NAME, topology.getName());
+        .put(Keys.get("TOPOLOGY_ID"), topology.getId())
+        .put(Keys.get("TOPOLOGY_NAME"), topology.getName());
     
     Config config = Config.newBuilder()
         .putAll(defaultConfigs.build())
@@ -85,10 +85,10 @@ public class SchedulerMain {
 
     // build the runtime config
     Config runtime = Config.newBuilder()
-        .put(Keys.TOPOLOGY_ID, topology.getId())
-        .put(Keys.TOPOLOGY_NAME, topology.getName())
-        .put(Keys.TOPOLOGY_DEFINITION, topology)
-        .put(Keys.STATE_MANAGER, statemgr)
+        .put(Keys.get("TOPOLOGY_ID"), topology.getId())
+        .put(Keys.get("TOPOLOGY_NAME"), topology.getName())
+        .put(Keys.get("TOPOLOGY_DEFINITION"), topology)
+        .put(Keys.get("STATE_MANAGER"), statemgr)
         .build();
 
     // create an instance of scheduler 
