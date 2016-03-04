@@ -1,13 +1,43 @@
 package com.twitter.heron.scheduler.local;
 
+import java.util.logging.Logger;
+import java.util.logging.Level;
+import java.util.HashMap;
+import java.util.Map;
+
+import java.lang.ClassNotFoundException;
+
+import java.io.InputStream;
+import java.nio.file.Paths;
+
+import com.twitter.heron.spi.common.Resource;
+
 public class LocalKeys {
-  public static final String WORKING_DIRECTORY = "heron.scheduler.local.working.directory";
+  private static final Logger LOG = Logger.getLogger(LocalKeys.class.getName());
 
-  public static final String COMPONENT_JVM_OPTS_IN_BASE64 = "heron.component.jvm.opts.in.base64";
-  public static final String COMPONENT_RAMMAP = "heron.component.rammap";
+  // holds the mapping of keys to their corresponding key strings
+  private static Map keys;
 
-  public static final String INSTANCE_DISTRIBUTION = "heron.instance.distribution";
-  public static final String INSTANCE_JVM_OPTS_IN_BASE64 = "heron.instance.jvm.opts.in.base64";
+   // load the resource for config keys
+  static {
+    try {
+      keys = Resource.load(
+          "com.twitter.heron.scheduler.local.LocalKeys", LocalConstants.KEYS_YAML);
+    }
+    catch (ClassNotFoundException e) {
+      LOG.severe("Unable to load the config Keys class " + e);
+      System.exit(1);
+    }
+  }
 
-  public static final String NUM_SHARDS = "heron.num.shards";
+  /*
+   * Get the key string value for the given key
+   *
+   * @param key, the key
+   * @return String, the key string value for the key
+   */
+  public static String get(String key) {
+    return (String) keys.get(key);
+  }
 }
+

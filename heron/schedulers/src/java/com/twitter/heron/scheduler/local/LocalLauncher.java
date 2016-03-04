@@ -116,8 +116,8 @@ public class LocalLauncher implements ILauncher {
     TopologyAPI.Topology topology = Runtime.topology(runtime);
 
     // get all the config, need to be passed as command line to heron executor
-    String sandboxHome = Defaults.HERON_SANDBOX_HOME;
-    String sandboxConf = Defaults.HERON_SANDBOX_CONF;
+    String sandboxHome = Defaults.get("HERON_SANDBOX_HOME");
+    String sandboxConf = Defaults.get("HERON_SANDBOX_CONF");
     Config sandboxConfig = Config.expand(
         Config.newBuilder()
             .putAll(ClusterDefaults.getDefaults())

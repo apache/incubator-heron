@@ -54,9 +54,9 @@ public class SubmitterMain {
  
     // Add config parameters from the command line
     Config.Builder commandLineConfig = Config.newBuilder()
-        .put(Keys.CLUSTER, cluster)
-        .put(Keys.ROLE, role)
-        .put(Keys.ENVIRON, environ);
+        .put(Keys.get("CLUSTER"), cluster)
+        .put(Keys.get("ROLE"), role)
+        .put(Keys.get("ENVIRON"), environ);
 
     // Identify the type of topology package
     String pkgType = FileUtils.isOriginalPackageJar(
@@ -66,12 +66,12 @@ public class SubmitterMain {
     TopologyAPI.Topology topology = TopologyUtils.getTopology(topologyDefnFile);
 
     Config.Builder topologyConfig = Config.newBuilder()
-        .put(Keys.TOPOLOGY_ID, topology.getId())
-        .put(Keys.TOPOLOGY_NAME, topology.getName())
-        .put(Keys.TOPOLOGY_DEFINITION_FILE, topologyDefnFile)
-        .put(Keys.TOPOLOGY_PACKAGE_FILE, topologyPackage)
-        .put(Keys.TOPOLOGY_JAR_FILE, originalPackageFile)
-        .put(Keys.TOPOLOGY_PACKAGE_TYPE, pkgType);
+        .put(Keys.get("TOPOLOGY_ID"), topology.getId())
+        .put(Keys.get("TOPOLOGY_NAME"), topology.getName())
+        .put(Keys.get("TOPOLOGY_DEFINITION_FILE"), topologyDefnFile)
+        .put(Keys.get("TOPOLOGY_PACKAGE_FILE"), topologyPackage)
+        .put(Keys.get("TOPOLOGY_JAR_FILE"), originalPackageFile)
+        .put(Keys.get("TOPOLOGY_PACKAGE_TYPE"), pkgType);
 
     // TODO (Karthik) override any parameters from the command line
 
@@ -114,11 +114,11 @@ public class SubmitterMain {
 
     // build the runtime config
     Config runtime = Config.newBuilder()
-        .put(Keys.TOPOLOGY_ID, topology.getId())
-        .put(Keys.TOPOLOGY_NAME, topology.getName())
-        .put(Keys.TOPOLOGY_DEFINITION, topology)
-        .put(Keys.STATE_MANAGER, statemgr)
-        .put(Keys.TOPOLOGY_PACKAGE_URI, uploadRunner.getUri())
+        .put(Keys.get("TOPOLOGY_ID"), topology.getId())
+        .put(Keys.get("TOPOLOGY_NAME"), topology.getName())
+        .put(Keys.get("TOPOLOGY_DEFINITION"), topology)
+        .put(Keys.get("STATE_MANAGER"), statemgr)
+        .put(Keys.get("TOPOLOGY_PACKAGE_URI"), uploadRunner.getUri())
         .build();
 
     // using launch runner, launch the topology
