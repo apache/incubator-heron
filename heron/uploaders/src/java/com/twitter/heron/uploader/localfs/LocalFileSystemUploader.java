@@ -10,9 +10,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.*;
 import java.util.logging.Logger;
 
-import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.ShellUtils;
 import com.twitter.heron.spi.uploader.IUploader;
 
@@ -31,11 +29,11 @@ public class LocalFileSystemUploader implements IUploader {
     this.destTopologyDirectory = LocalFileSystemContext.fileSystemDirectory(config);
 
     // name of the destination file is the same as the base name of the topology package file
-    String fileName = new File(Context.topologyPackageFile(config)).getName();
+    String fileName = new File(LocalFileSystemContext.topologyPackageFile(config)).getName();
     this.destTopologyFile = Paths.get(destTopologyDirectory, fileName).toString();
 
     // get the original topology package location
-    this.topologyPackageLocation = Context.topologyPackageFile(config);
+    this.topologyPackageLocation = LocalFileSystemContext.topologyPackageFile(config);
   }
 
   @Override

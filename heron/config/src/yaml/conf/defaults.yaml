@@ -1,0 +1,54 @@
+################################################################################
+# Default values for heron directories
+################################################################################
+HERON_HOME:                  /usr/local/heron
+HERON_CONF:                  ${HERON_HOME}/conf
+HERON_BIN:                   ${HERON_HOME}/bin
+HERON_DIST:                  ${HERON_HOME}/dist
+HERON_ETC:                   ${HERON_HOME}/etc"
+HERON_LIB:                   ${HERON_HOME}/lib
+
+################################################################################
+# Default values for config related directories and files
+################################################################################
+CLUSTER_YAML:                ${HERON_CONF}/cluster.yaml
+DEFAULTS_YAML:               ${HERON_CONF}/defaults.yaml
+METRICS_YAML:                ${HERON_CONF}/metrics_sinks.yaml
+PACKING_YAML:                ${HERON_CONF}/packing.yaml
+SCHEDULER_YAML:              ${HERON_CONF}/scheduler.yaml
+STATEMGR_YAML:               ${HERON_CONF}/statemgr.yaml
+SYSTEM_YAML:                 ${HERON_CONF}/heron_internals.yaml
+UPLOADER_YAML:               ${HERON_CONF}/uploader.yaml
+
+LOGGING_DIRECTORY:           ./log-files
+
+################################################################################
+# Default values for heron binaries and jars
+################################################################################
+EXECUTOR_BINARY:             ${HERON_BIN}/heron-executor
+STMGR_BINARY:                ${HERON_BIN}/heron-stmgr
+TMASTER_BINARY:              ${HERON_BIN}/heron-tmaster
+SHELL_BINARY:                ${HERON_BIN}/heron-shell
+SCHEDULER_JAR:               ${HERON_LIB}/heron-scheduler.jar
+
+################################################################################
+# Defaults for config provide files, paths and directories
+################################################################################
+CORE_PACKAGE_URI:            ${HERON_DIST}/heron-core.tar.gz
+METRICS_MANAGER_CLASSPATH:   metrics-mgr-classpath/*
+
+################################################################################
+# Defaults for config provided values for resources, RAM and disk space are 
+# specified in bytes.
+# CPU is specified in number of cores, fractional cores allowed, (e.g) 1.2
+################################################################################
+STMGR_RAM:                   1073741824 
+INSTANCE_CPU:                1
+INSTANCE_RAM:                1073741824 
+INSTANCE_DISK:               1073741824
+
+################################################################################
+# Defaults for config provided values for resources
+################################################################################
+HERON_SANDBOX_HOME:          ./heron-core
+HERON_SANDBOX_CONF:          ./heron-conf

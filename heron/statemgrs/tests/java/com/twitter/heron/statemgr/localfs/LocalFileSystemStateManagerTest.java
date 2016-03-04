@@ -3,7 +3,6 @@ package com.twitter.heron.statemgr.localfs;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.twitter.heron.spi.common.Config;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,7 +13,10 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.statemgr.localfs.LocalFileSystemKeys;
+
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
@@ -32,14 +34,14 @@ import junit.framework.Assert;
 public class LocalFileSystemStateManagerTest {
   private static final String topologyName = "topologyName";
   private static final String rootAddr = "/";
-  private Config config =
-      Config.newBuilder()
-        .put(Keys.STATEMGR_ROOT_PATH, rootAddr)
-        .put(LocalFileSystemKeys.IS_INITIALIZE_FILE_TREE, false)
-        .build();
+  private Config config; 
 
   @Before
   public void before() throws Exception {
+    config = Config.newBuilder()
+        .put(Keys.get("STATEMGR_ROOT_PATH"), rootAddr)
+        .put(LocalFileSystemKeys.get("IS_INITIALIZE_FILE_TREE"), false)
+        .build();
   }
 
   @After
