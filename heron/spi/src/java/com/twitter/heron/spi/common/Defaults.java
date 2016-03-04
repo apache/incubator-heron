@@ -10,8 +10,6 @@ import java.lang.ClassNotFoundException;
 import java.io.InputStream;
 import java.nio.file.Paths;
 
-import com.twitter.heron.common.config.ConfigReader;
-
 public class Defaults {
   private static final Logger LOG = Logger.getLogger(Defaults.class.getName());
 

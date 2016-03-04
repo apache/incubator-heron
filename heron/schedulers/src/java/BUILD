@@ -25,10 +25,18 @@ local_deps_files = \
     spi_deps_files + \
     api_deps_files
 
+java_library(
+    name='local-scheduler-java',
+    srcs = glob(["**/local/*.java"]),
+    deps = local_deps_files,
+    resources = glob(["**/local/*.yaml"]),
+)
+
 java_binary(
     name='local-scheduler-unshaded',
     srcs = glob(["**/local/*.java"]),
     deps = local_deps_files,
+    resources = glob(["**/local/*.yaml"]),
 )
 
 jarjar_binary(
