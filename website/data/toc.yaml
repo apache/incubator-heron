@@ -1,0 +1,23 @@
+sections:
+  - name: Developers
+    sublinks:
+      - name: Getting Started
+        url: /docs/getting-started
+      - name: Compiling Heron
+        url: /docs/developers/compiling
+      - name: Heron's Data Model
+        url: /docs/developers/data-model
+  - name: Operators
+    subcategories:
+      - name: Configuration
+        sublinks:
+          - name: Heron Instance
+            url: /docs/operators/instance
+          - name: Metrics Manager
+            url: /docs/operators/metrics-manager
+  - name: Concepts
+    sublinks:
+      - name: The Architecture of Heron
+        url: /docs/concepts/architecture
+      - name: Heron Topologies
+        url: /docs/concepts/topologies
