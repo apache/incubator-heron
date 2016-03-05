@@ -1,0 +1,16 @@
+= doctype html
+html lang={{.Site.LanguageCode}}
+  head
+    title {{.Site.Title}}
+    {{partial "meta.html" .}}
+    {{partial "css.includes.html" .}}
+    {{partial "js.includes.html" .}}
+  body role=document
+    {{partial "navbar.html" .}}
+    .container
+      .row
+        {{partial "sidenav.html" .}}
+        article.doc-content.col-md-9
+          {{.Content}}
+        hr
+      {{partial "footer.html" .}}

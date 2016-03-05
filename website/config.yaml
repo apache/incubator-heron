@@ -1,0 +1,37 @@
+baseurl: http://docs.sloth.com/
+languageCode: en-us
+title: Apache Heron
+author: Luc Perkins
+
+# Site-level config
+MetaDataFormat: yaml
+taxonomies:
+  tag: tags
+
+# Pygments syntax highlighting
+pygmentsStyle: manni
+pygmentsuseclasses: false
+PygmentsCodeFences: true
+
+# Top navigation menu (weights are to prevent alphabetical ordering)
+menu:
+  main:
+    - Name: Getting Started
+      URL: /docs/developers/getting-started
+      Weight: 1
+    - Name: Docs
+      URL: /docs
+      Weight: 2
+
+# Site-level parameters available through .Site.Params.{key}
+params:
+  author: Luc Perkins
+  versions:
+    schedulerapi: 0.1.0
+  assets:
+    logo: /img/logo.png
+    css:
+      - /css/style.min.css
+    js:
+      - //code.jquery.com/jquery-2.2.1.min.js
+      - /js/app.min.js
