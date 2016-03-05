@@ -32,18 +32,18 @@ EOF
 function usage() {
   echo "Usage: $progname [options]" >&2
   echo "Options are:" >&2
-  echo "  --prefix=/some/path set the prefix path (default=/usr/local/heron)." >&2
+  echo "  --prefix=/some/path set the prefix path (default=/usr/local)." >&2
   echo "  --heronrc= set the heronrc path (default=/usr/local/heron/etc/heron.heronrc)." >&2
   echo "  --user configure for user install, expands to" >&2
   echo '           `--prefix=$HOME/.heron --heronrc=$HOME/.heronrc`.' >&2
   exit 1
 }
 
-prefix="/usr/local/heron"
-base="%prefix%"
+prefix="/usr/local"
 bin="%prefix%/bin"
-conf="%prefix%/conf"
-heronrc="/usr/local/heron/etc/heron.heronrc"
+base="%prefix%/heron"
+conf="%prefix%/heron/conf"
+heronrc="%prefix%/heron/etc/heron.heronrc"
 
 for opt in "${@}"; do
   case $opt in
@@ -54,7 +54,7 @@ for opt in "${@}"; do
       heronrc="$(echo "$opt" | cut -d '=' -f 2-)"
       ;;
     --user)
-      bin="$HOME/.heron/bin"
+      bin="$HOME/bin"
       base="$HOME/.heron"
       heronrc="$HOME/.heronrc"
       ;;
@@ -64,6 +64,7 @@ for opt in "${@}"; do
   esac
 done
 
+bin="${bin//%prefix%/${prefix}}"
 base="${base//%prefix%/${prefix}}"
 heronrc="${heronrc//%prefix%/${prefix}}"
 
@@ -85,6 +86,16 @@ function test_write() {
 if ! which unzip >/dev/null; then
   echo >&2
   echo "unzip not found, please install the corresponding package." >&2
+  echo "See http://heron.github.io/docs/install.html for more information on" >&2
+  echo "dependencies of Heron." >&2
+  exit 1
+fi
+
+# Test for dependencies
+# tar
+if ! which tar >/dev/null; then
+  echo >&2
+  echo "tar not found, please install the corresponding package." >&2
   echo "See http://heron.github.io/docs/install.html for more information on" >&2
   echo "dependencies of Heron." >&2
   exit 1
@@ -116,6 +127,7 @@ if [ ! -x "${JAVA_HOME}/bin/javac" ]; then
 fi
 
 # Test for write access
+test_write "${bin}"
 test_write "${base}"
 test_write "${heronrc}"
 
@@ -130,34 +142,33 @@ if [ -d "${base}" -a -x "${base}/bin/heron-cli3" ]; then
   rm -fr "${base}"
 fi
 
-mkdir -p ${base} ${base}/bin ${base}/etc ${base}/lib ${base}/conf ${base}/dist
+mkdir -p ${bin} ${base}
 echo -n .
 
 unzip -q -o "${BASH_SOURCE[0]}" -d "${base}"
+tar xfz "${base}/heron-client.tar.gz" -C "${base}"
 echo -n .
-cat >"${base}/etc/heron.heronrc" <<EO
-build --package_path %workspace%:${base}/base_workspace
-fetch --package_path %workspace%:${base}/base_workspace
-query --package_path %workspace%:${base}/base_workspace
-EO
+chmod 0755 ${base}/bin/heron-cli3
 echo -n .
 chmod -R og-w "${base}"
 chmod -R og+rX "${base}"
 chmod -R u+rwX "${base}"
 echo -n .
 
-#ln -s "${base}/bin/heron-cli3" "${prefix}/heron-cli3"
+ln -s "${base}/bin/heron-cli3" "${bin}/heron-cli3"
 echo -n .
 
 if [ -f "${heronrc}" ]; then
   echo
-  echo "${heronrc} already exists, ignoring. It is either a link to"
-  echo "${base}/etc/heron.heronrc or that it's importing that file with:"
-  echo "  import ${base}/etc/heron.heronrc"
-else
-  ln -s "${base}/etc/heron.heronrc" "${heronrc}"
-  echo .
+  echo "${heronrc} already exists, moving it to ${heronrc}.bak."
+  mv "${heronrc}" "${heronrc}.bak"
 fi
+
+touch "${heronrc}"
+if [ "${UID}" -eq 0 ]; then
+  chmod 0644 "${bazelrc}"
+fi
+rm "${base}/heron-client.tar.gz"
 
 cat <<EOF
 

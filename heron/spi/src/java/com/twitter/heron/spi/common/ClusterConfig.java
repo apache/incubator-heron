@@ -26,14 +26,22 @@ public final class ClusterConfig {
 
   protected static Config loadConfigHome(String heronHome, String configPath) {
     Config.Builder cb = Config.newBuilder()
-        .put(Keys.get("CLUSTER_YAML"), Misc.substitute(heronHome, configPath, Defaults.get("CLUSTER_YAML")))
-        .put(Keys.get("DEFAULTS_YAML"), Misc.substitute(heronHome, configPath, Defaults.get("DEFAULTS_YAML")))
-        .put(Keys.get("METRICS_YAML"), Misc.substitute(heronHome, configPath, Defaults.get("METRICS_YAML")))
-        .put(Keys.get("PACKING_YAML"), Misc.substitute(heronHome, configPath, Defaults.get("PACKING_YAML")))
-        .put(Keys.get("SCHEDULER_YAML"), Misc.substitute(heronHome, configPath, Defaults.get("SCHEDULER_YAML")))
-        .put(Keys.get("STATEMGR_YAML"), Misc.substitute(heronHome, configPath, Defaults.get("STATEMGR_YAML")))
-        .put(Keys.get("SYSTEM_YAML"), Misc.substitute(heronHome, configPath, Defaults.get("SYSTEM_YAML")))
-        .put(Keys.get("UPLOADER_YAML"), Misc.substitute(heronHome, configPath, Defaults.get("UPLOADER_YAML")));
+        .put(Keys.get("CLUSTER_YAML"), 
+            Misc.substitute(heronHome, configPath, Defaults.get("CLUSTER_YAML")))
+        .put(Keys.get("DEFAULTS_YAML"), 
+            Misc.substitute(heronHome, configPath, Defaults.get("DEFAULTS_YAML")))
+        .put(Keys.get("METRICS_YAML"), 
+            Misc.substitute(heronHome, configPath, Defaults.get("METRICS_YAML")))
+        .put(Keys.get("PACKING_YAML"), 
+            Misc.substitute(heronHome, configPath, Defaults.get("PACKING_YAML")))
+        .put(Keys.get("SCHEDULER_YAML"), 
+            Misc.substitute(heronHome, configPath, Defaults.get("SCHEDULER_YAML")))
+        .put(Keys.get("STATEMGR_YAML"), 
+            Misc.substitute(heronHome, configPath, Defaults.get("STATEMGR_YAML")))
+        .put(Keys.get("SYSTEM_YAML"), 
+            Misc.substitute(heronHome, configPath, Defaults.get("SYSTEM_YAML")))
+        .put(Keys.get("UPLOADER_YAML"), 
+            Misc.substitute(heronHome, configPath, Defaults.get("UPLOADER_YAML")));
     return cb.build();
   }
 
