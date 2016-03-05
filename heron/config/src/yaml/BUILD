@@ -4,12 +4,12 @@ package(default_visibility = ["//visibility:public"])
 
 filegroup(
     name = "config-keys-yaml",
-    srcs = ["conf/keys.yaml"],
+    srcs = ["keys.yaml"],
 )
 
 filegroup(
     name = "config-defaults-yaml",
-    srcs = ["conf/defaults.yaml"],
+    srcs = ["defaults.yaml"],
 )
 
 filegroup(

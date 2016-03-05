@@ -37,12 +37,20 @@ genrule(
 
 load("self_extract_binary", "self_extract_binary")
 
+#self_extract_binary(
+#    name = "install.sh",
+#    bin = heron_client_bin_files(),
+#    conf = heron_client_conf_files(),
+#    local = heron_client_local_files(),
+#    dist = ["//release:heron-core"],
+#    lib = heron_client_lib_files(),
+#    launcher = ":launcher_bin.sh",
+#)
+
 self_extract_binary(
     name = "install.sh",
-    bin = heron_client_bin_files(),
-    conf = heron_client_conf_files(),
-    local = heron_client_local_files(),
-    dist = ["//release:heron-core"],
-    lib = heron_client_lib_files(),
-    launcher = ":launcher_bin.sh",
+    flatten_resources = [
+        "//release:heron-client",
+    ],
+    launcher = ":launcher_bin.sh", 
 )

@@ -21,12 +21,35 @@ def heron_core_conf_files():
     ]
 
 def heron_core_lib_files():
+    return heron_core_lib_scheduler_files() + \
+        heron_core_lib_packing_files() + \
+        heron_core_lib_metricsmgr_files() + \
+        heron_core_lib_statemgr_files() + \
+        heron_core_lib_instance_files()
+
+def heron_core_lib_scheduler_files():
     return [
-        "//heron/instance/src/java:heron-instance",
-        "//heron/metricsmgr/src/java:heron-metricsmgr",
         "//heron/newscheduler/src/java:heron-scheduler",
         "//heron/schedulers/src/java:heron-local-scheduler",
+    ]
+
+def heron_core_lib_packing_files():
+    return [
         "//heron/packing/src/java:heron-roundrobin-packing",
+    ]
+
+def heron_core_lib_metricsmgr_files():
+    return [
+        "//heron/metricsmgr/src/java:heron-metricsmgr",
+    ]
+
+def heron_core_lib_statemgr_files():
+    return [
         "//heron/statemgrs/src/java:heron-localfs-statemgr",
         "//heron/statemgrs/src/java:heron-zookeeper-statemgr",
+    ]
+
+def heron_core_lib_instance_files():
+    return [
+        "//heron/instance/src/java:heron-instance",
     ]

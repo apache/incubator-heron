@@ -19,15 +19,32 @@ def heron_client_local_files():
         "//heron/config/src/yaml:conf-local-yaml",
     ]
 
+def heron_client_lib_scheduler_files():
+    return [
+        "//heron/newscheduler/src/java:heron-scheduler",
+        "//heron/schedulers/src/java:heron-local-scheduler",
+        "//heron/packing/src/java:heron-roundrobin-packing",
+    ]
+
+def heron_client_lib_packing_files():
+    return [
+        "//heron/packing/src/java:heron-roundrobin-packing",
+    ]
+
+def heron_client_lib_statemgr_files():
+    return [
+        "//heron/statemgrs/src/java:heron-zookeeper-statemgr",
+        "//heron/statemgrs/src/java:heron-localfs-statemgr",
+    ]
+
+def heron_client_lib_uploader_files():
+    return [
+        "//heron/uploaders/src/java:heron-localfs-uploader",
+    ]
+
 def heron_client_lib_files():
     return [
         "//heron/examples/src/java:heron-examples",
-        "//heron/newscheduler/src/java:heron-scheduler",
-        "//heron/schedulers/src/java:heron-local-scheduler",
-        "//heron/uploaders/src/java:heron-localfs-uploader",
-        "//heron/statemgrs/src/java:heron-zookeeper-statemgr",
-        "//heron/statemgrs/src/java:heron-localfs-statemgr",
-        "//heron/packing/src/java:heron-roundrobin-packing",
         "//3rdparty/protobuf:protobuf-java",
         "//3rdparty/logging:slf4j-api-java",
         "//3rdparty/logging:slf4j-jdk-java", 

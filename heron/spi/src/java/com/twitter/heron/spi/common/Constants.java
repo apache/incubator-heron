@@ -3,10 +3,10 @@ package com.twitter.heron.spi.common;
 public class Constants {
 
   // name of the resource file that holds the config keys
-  public static final String KEYS_YAML = "heron/config/src/yaml/conf/keys.yaml";
+  public static final String KEYS_YAML = "heron/config/src/yaml/keys.yaml";
 
   // name of the resource file that holds the default values for config keys
-  public static final String DEFAULTS_YAML = "heron/config/src/yaml/conf/defaults.yaml";
+  public static final String DEFAULTS_YAML = "heron/config/src/yaml/defaults.yaml";
 
   public static final long GB = 1024L * 1024 * 1024;
   public static final long MB = 1024L * 1024;
