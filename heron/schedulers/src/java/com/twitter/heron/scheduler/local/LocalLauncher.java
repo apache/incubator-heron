@@ -98,6 +98,7 @@ public class LocalLauncher implements ILauncher {
     IStateManager stateManager = Runtime.stateManager(runtime);
 
     // check if any topology with the same name is running
+    // TODO, by the time, we do this here, it is too late 
     ListenableFuture<Boolean> boolFuture = stateManager.isTopologyRunning(topologyName);
     if (NetworkUtils.awaitResult(boolFuture, 1000, TimeUnit.MILLISECONDS)) {
       LOG.severe("Topology is already running: " + topologyName);
@@ -149,35 +150,35 @@ public class LocalLauncher implements ILauncher {
     }
 
     String executorCmd = String.format("%s %d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %d %s %s %d %s %s %s %s %d",
-        Context.executorBinary(sandboxConfig),
+        LocalContext.executorBinary(sandboxConfig),
         0,
         topology.getName(),
         topology.getId(),
-        FilenameUtils.getName(Context.topologyDefinitionFile(config)),
+        FilenameUtils.getName(LocalContext.topologyDefinitionFile(config)),
         TopologyUtils.packingToString(packing),
-        Context.stateManagerConnectionString(config),
-        Context.stateManagerRootPath(config),
-        Context.tmasterBinary(sandboxConfig),
-        Context.stmgrBinary(sandboxConfig),
+        LocalContext.stateManagerConnectionString(config),
+        LocalContext.stateManagerRootPath(config),
+        LocalContext.tmasterBinary(sandboxConfig),
+        LocalContext.stmgrBinary(sandboxConfig),
         "./heron-core/lib/heron-metricsmgr.jar",       // Jars.getMetricsManagerClassPath(Context.heronLib(sandboxConfig)),
         formatJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)),
         TopologyUtils.makeClassPath(topology, Context.topologyJarFile(config)),
         port1,
         port2,
         port3,
-        Context.systemConfigFile(sandboxConfig),
+        LocalContext.systemConfigFile(sandboxConfig),
         TopologyUtils.formatRamMap(TopologyUtils.getComponentRamMap(topology)),
         formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)),
-        Context.topologyPackageType(config),
-        Context.topologyJarFile(config),
-        Context.javaHome(config),
+        LocalContext.topologyPackageType(config),
+        LocalContext.topologyJarFile(config),
+        LocalContext.javaHome(config),
         shellPort,
-        Context.logDirectory(sandboxConfig),
-        Context.shellBinary(sandboxConfig),
+        LocalContext.logDirectory(sandboxConfig),
+        LocalContext.shellBinary(sandboxConfig),
         port4,
-        Context.cluster(config),
-        Context.role(config),
-        Context.environ(config),
+        LocalContext.cluster(config),
+        LocalContext.role(config),
+        LocalContext.environ(config),
         "./heron-core/lib/heron-scheduler.jar:./heron-core/lib/heron-local-scheduler.jar",       
         schedulerPort
     );
