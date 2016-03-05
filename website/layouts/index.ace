@@ -14,4 +14,3 @@ html lang={{.Site.LanguageCode}}
           p A realtime stream processing enging from Twitter
       .row
         .container
-          {{.Content}}
