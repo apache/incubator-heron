@@ -39,8 +39,8 @@ public class LocalFileSystemStateManagerTest {
   @Before
   public void before() throws Exception {
     config = Config.newBuilder()
-        .put(Keys.get("STATEMGR_ROOT_PATH"), rootAddr)
-        .put(LocalFileSystemKeys.get("IS_INITIALIZE_FILE_TREE"), false)
+        .put(Keys.stateManagerRootPath(), rootAddr)
+        .put(LocalFileSystemKeys.initializeFileTree(), false)
         .build();
   }
 

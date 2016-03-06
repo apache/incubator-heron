@@ -29,13 +29,13 @@ public class LocalFileSystemConfigTest {
 
   private Config getDefaultConfig() {
     Config config = Config.newBuilder()
-        .put(Keys.get("CLUSTER"), "cluster")
-        .put(Keys.get("ROLE"), "role")
-        .put(Keys.get("TOPOLOGY_NAME"), "topology")
-        .put(Keys.get("TOPOLOGY_PACKAGE_TYPE"), "tar")
-        .put(Keys.get("TOPOLOGY_PACKAGE_FILE"), "/tmp/something.tar.gz")
-        .put(LocalFileSystemKeys.get("FILE_SYSTEM_DIRECTORY"), 
-             LocalFileSystemDefaults.get("FILE_SYSTEM_DIRECTORY"))
+        .put(Keys.cluster(), "cluster")
+        .put(Keys.role(), "role")
+        .put(Keys.topologyName(), "topology")
+        .put(Keys.topologyPackageType(), "tar")
+        .put(Keys.topologyPackageFile(), "/tmp/something.tar.gz")
+        .put(LocalFileSystemKeys.fileSystemDirectory(), 
+             LocalFileSystemDefaults.fileSystemDirectory())
         .build();
     return config;
   }
@@ -46,7 +46,7 @@ public class LocalFileSystemConfigTest {
 
     Assert.assertEquals(
         LocalFileSystemContext.fileSystemDirectory(config),
-        Misc.substitute(config, LocalFileSystemDefaults.get("FILE_SYSTEM_DIRECTORY"))
+        Misc.substitute(config, LocalFileSystemDefaults.fileSystemDirectory())
     );
   }
 
@@ -57,7 +57,7 @@ public class LocalFileSystemConfigTest {
     Config config = Config.expand(
         Config.newBuilder()
             .putAll(getDefaultConfig())
-            .put(LocalFileSystemKeys.get("FILE_SYSTEM_DIRECTORY"), overrideDirectory)
+            .put(LocalFileSystemKeys.fileSystemDirectory(), overrideDirectory)
             .build());
 
     Assert.assertEquals(
@@ -77,7 +77,7 @@ public class LocalFileSystemConfigTest {
 
     Assert.assertEquals(
         uploader.getTopologyDirectory(),
-        Misc.substitute(config, LocalFileSystemDefaults.get("FILE_SYSTEM_DIRECTORY"))
+        Misc.substitute(config, LocalFileSystemDefaults.fileSystemDirectory())
     );
   }
 
@@ -104,7 +104,7 @@ public class LocalFileSystemConfigTest {
     Config config = Config.expand(
         Config.newBuilder()
             .putAll(getDefaultConfig())
-            .put(LocalFileSystemKeys.get("FILE_SYSTEM_DIRECTORY"), overrideDirectory)
+            .put(LocalFileSystemKeys.fileSystemDirectory(), overrideDirectory)
             .build());
 
     uploader.initialize(config);
@@ -122,7 +122,7 @@ public class LocalFileSystemConfigTest {
     Config config = Config.expand(
         Config.newBuilder()
             .putAll(getDefaultConfig())
-            .put(LocalFileSystemKeys.get("FILE_SYSTEM_DIRECTORY"), overrideDirectory)
+            .put(LocalFileSystemKeys.fileSystemDirectory(), overrideDirectory)
             .build());
 
     uploader.initialize(config);
