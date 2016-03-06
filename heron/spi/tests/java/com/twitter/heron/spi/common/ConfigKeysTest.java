@@ -82,6 +82,34 @@ public class ConfigKeysTest {
   }
 
   @Test
+  public void testConfig() throws Exception {
+    Assert.assertEquals(
+        "heron.config.cluster",
+        ConfigKeys.get("CLUSTER")
+    );
+    Assert.assertEquals(
+        "heron.config.role",
+        ConfigKeys.get("ROLE")
+    );
+    Assert.assertEquals(
+        "heron.config.environ",
+        ConfigKeys.get("ENVIRON")
+    );
+    Assert.assertEquals(
+        "heron.config.verbose",
+        ConfigKeys.get("VERBOSE")
+    );
+    Assert.assertEquals(
+        "heron.config.path",
+        ConfigKeys.get("CONFIG_PATH")
+    );
+    Assert.assertEquals(
+        "heron.config.property",
+        ConfigKeys.get("CONFIG_PROPERTY")
+    );
+  }
+
+  @Test
   public void testConfigClasses() throws Exception {
     Assert.assertEquals(
         "heron.class.uploader",
