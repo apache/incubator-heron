@@ -124,7 +124,7 @@ public class Config {
     StringBuilder sb = new StringBuilder();
     for (Map.Entry<String, Object> kv : cfgMap.entrySet()) {
       if (kv.getValue() instanceof String) {
-        sb.append(String.format(" %s=\"%s\" ", kv.getKey(), kv.getValue()));
+        sb.append(String.format(" %s=\"%s\" ", kv.getKey(), kv.getValue().toString()));
       }
     }
     return sb.toString();

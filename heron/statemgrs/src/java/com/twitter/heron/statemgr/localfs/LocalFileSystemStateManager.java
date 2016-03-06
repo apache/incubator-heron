@@ -20,14 +20,13 @@ import com.twitter.heron.spi.statemgr.WatchCallback;
 public class LocalFileSystemStateManager extends FileSystemStateManager {
   private static final Logger LOG = Logger.getLogger(LocalFileSystemStateManager.class.getName());
 
-  public static final String IS_INITIALIZE_FILE_TREE = "heron.statemgr.localfs.is.initialize.file.tree";
   private Config config;
 
   @Override
   public void initialize(Config config) {
 
-    this.config = config;
     super.initialize(config);
+    this.config = config;
 
     // By default, we would init the file tree if it is not there
     boolean isInitLocalFileTree = LocalFileSystemContext.initLocalFileTree(config);
@@ -42,14 +41,6 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     // Make necessary directories
     LOG.info(getTopologyDir() + " " + getTMasterLocationDir() + " " + getPhysicalPlanDir() + " " +
         getExecutionStateDir() + " " + getSchedulerLocationDir());
-
-    boolean x = FileUtils.isDirectoryExists(getTopologyDir()) || FileUtils.createDirectory(getTopologyDir());
-    boolean y = FileUtils.isDirectoryExists(getTMasterLocationDir()) || FileUtils.createDirectory(getTMasterLocationDir());
-    boolean z = FileUtils.isDirectoryExists(getPhysicalPlanDir()) || FileUtils.createDirectory(getPhysicalPlanDir());
-    boolean r = FileUtils.isDirectoryExists(getExecutionStateDir()) || FileUtils.createDirectory(getExecutionStateDir());
-    boolean s = FileUtils.isDirectoryExists(getSchedulerLocationDir()) || FileUtils.createDirectory(getSchedulerLocationDir());
-
-    LOG.info(x + " " + y + " " + z + " " + r + " " + s);
 
     if ((FileUtils.isDirectoryExists(getTopologyDir()) || FileUtils.createDirectory(getTopologyDir())) &&
         (FileUtils.isDirectoryExists(getTMasterLocationDir()) || FileUtils.createDirectory(getTMasterLocationDir())) &&

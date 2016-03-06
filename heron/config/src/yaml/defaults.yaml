@@ -5,8 +5,9 @@ HERON_HOME:                  /usr/local/heron
 HERON_CONF:                  ${HERON_HOME}/conf
 HERON_BIN:                   ${HERON_HOME}/bin
 HERON_DIST:                  ${HERON_HOME}/dist
-HERON_ETC:                   ${HERON_HOME}/etc"
+HERON_ETC:                   ${HERON_HOME}/etc
 HERON_LIB:                   ${HERON_HOME}/lib
+JAVA_HOME:                   ${JAVA_HOME}
 
 ################################################################################
 # Default values for config related directories and files
@@ -35,7 +36,16 @@ SCHEDULER_JAR:               ${HERON_LIB}/heron-scheduler.jar
 # Defaults for config provide files, paths and directories
 ################################################################################
 CORE_PACKAGE_URI:            ${HERON_DIST}/heron-core.tar.gz
-METRICS_MANAGER_CLASSPATH:   metrics-mgr-classpath/*
+
+################################################################################
+# Default classpath for various modules 
+################################################################################
+INSTANCE_CLASSPATH:          ${HERON_LIB}/instance/*
+METRICSMGR_CLASSPATH:        ${HERON_LIB}/metricsmgr/*
+PACKING_CLASSPATH:           ${HERON_LIB}/packing/*
+SCHEDULER_CLASSPATH:         ${HERON_LIB}/scheduler/*
+STATEMGR_CLASSPATH:          ${HERON_LIB}/statemgr/*
+UPLOADER_CLASSPATH:          ${HERON_LIB}/uploader/*
 
 ################################################################################
 # Defaults for config provided values for resources, RAM and disk space are 
