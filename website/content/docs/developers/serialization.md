@@ -1,7 +1,5 @@
 ---
 title: Custom Serialization
-tags:
-  - developers
 ---
 
 The tuple is Heron's core data type. Heron's native
