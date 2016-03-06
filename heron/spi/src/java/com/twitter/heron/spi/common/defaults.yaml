@@ -58,7 +58,7 @@ INSTANCE_RAM:                1073741824
 INSTANCE_DISK:               1073741824
 
 ################################################################################
-# Defaults for config provided values for resources
+# Defaults for container sandbox directories
 ################################################################################
 HERON_SANDBOX_HOME:          ./heron-core
 HERON_SANDBOX_CONF:          ./heron-conf

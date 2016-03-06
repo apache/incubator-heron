@@ -98,6 +98,12 @@ STATEMGR_CLASSPATH:            heron.classpath.statemgr
 UPLOADER_CLASSPATH:            heron.classpath.uploader
 
 ################################################################################
+# keys for config provided paths
+################################################################################
+HERON_SANDBOX_HOME:            heron.directory.sandbox.home
+HERON_SANDBOX_CONF:            heron.directory.sandbox.conf 
+
+################################################################################
 # keys for run time config
 ################################################################################
 TOPOLOGY_CLASSPATH:            heron.runtime.topology.class.path
