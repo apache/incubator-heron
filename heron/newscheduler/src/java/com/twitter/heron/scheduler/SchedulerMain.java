@@ -9,6 +9,7 @@ import javax.xml.bind.DatatypeConverter;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.scheduler.Scheduler;
 
+import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
@@ -43,18 +44,23 @@ public class SchedulerMain {
     String role = args[1];
     String environ = args[2];
     String topologyName = args[3];
-    int schedulerServerPort = Integer.parseInt(args[4]);
+    String topologyJarFile = args[4];
+    int schedulerServerPort = Integer.parseInt(args[5]);
 
-    // first load the defaults, then the config from files to override it
+    // first load the defaults from sandbox, then the config from files to override it
     Config.Builder defaultConfigs = Config.newBuilder()
         .putAll(ClusterDefaults.getDefaults())
         .putAll(ClusterConfig.loadSandboxConfig());
 
     // add config parameters from the command line
     Config.Builder commandLineConfigs = Config.newBuilder()
-        .put(Keys.get("CLUSTER"), cluster)
-        .put(Keys.get("ROLE"), role)
-        .put(Keys.get("ENVIRON"), environ);
+        .put(Keys.cluster(), cluster)
+        .put(Keys.role(), role)
+        .put(Keys.environ(), environ);
+
+    // Identify the type of topology package
+    String pkgType = FileUtils.isOriginalPackageJar(
+        FileUtils.getBaseName(topologyJarFile)) ? "jar" : "tar" ;
 
     // locate the topology definition file in the sandbox/working directory
     String topologyDefnFile = TopologyUtils.lookUpTopologyDefnFile(".", topologyName);
@@ -63,14 +69,21 @@ public class SchedulerMain {
     TopologyAPI.Topology topology = TopologyUtils.getTopology(topologyDefnFile);
 
     Config.Builder topologyConfigs = Config.newBuilder()
-        .put(Keys.get("TOPOLOGY_ID"), topology.getId())
-        .put(Keys.get("TOPOLOGY_NAME"), topology.getName());
+        .put(Keys.topologyId(), topology.getId())
+        .put(Keys.topologyName(), topology.getName())
+        .put(Keys.topologyDefinitionFile(), topologyDefnFile)
+        .put(Keys.topologyPackageType(), pkgType)
+        .put(Keys.topologyJarFile(), topologyJarFile);
     
-    Config config = Config.newBuilder()
-        .putAll(defaultConfigs.build())
-        .putAll(commandLineConfigs.build())
-        .putAll(topologyConfigs.build())
-        .build(); 
+    // Build the final config by expanding all the variables
+    Config config = Config.expand(
+        Config.newBuilder()
+            .putAll(defaultConfigs.build())
+            .putAll(commandLineConfigs.build())
+            .putAll(topologyConfigs.build())
+            .build()); 
+
+    System.out.println("loaded scheduler config " + config);
 
     // run the scheduler
     runScheduler(config, schedulerServerPort, topology);
@@ -83,12 +96,29 @@ public class SchedulerMain {
     String statemgrClass = Context.stateManagerClass(config);
     IStateManager statemgr = (IStateManager)Class.forName(statemgrClass).newInstance();
 
+     // initialize the state manager
+    statemgr.initialize(config);
+
+    // create an instance of the packing class 
+    String packingClass = Context.packingClass(config);
+    IPacking packing = (IPacking)Class.forName(packingClass).newInstance();
+
     // build the runtime config
     Config runtime = Config.newBuilder()
-        .put(Keys.get("TOPOLOGY_ID"), topology.getId())
-        .put(Keys.get("TOPOLOGY_NAME"), topology.getName())
-        .put(Keys.get("TOPOLOGY_DEFINITION"), topology)
-        .put(Keys.get("STATE_MANAGER"), statemgr)
+        .put(Keys.topologyId(), topology.getId())
+        .put(Keys.topologyName(), topology.getName())
+        .put(Keys.topologyDefinition(), topology)
+        .put(Keys.stateManager(), statemgr)
+        .put(Keys.numContainers(), TopologyUtils.getNumContainers(topology))
+        .build();
+
+    // get a packed plan and schedule it
+    packing.initialize(config, runtime);
+    PackingPlan packedPlan = packing.pack();
+
+    Config ytruntime = Config.newBuilder()
+        .putAll(runtime)
+        .put(Keys.instanceDistribution(), TopologyUtils.packingToString(packedPlan))
         .build();
 
     // create an instance of scheduler 
@@ -96,7 +126,7 @@ public class SchedulerMain {
     IScheduler scheduler = (IScheduler)Class.forName(schedulerClass).newInstance();
 
     // initialize the scheduler
-    scheduler.initialize(config, runtime);
+    scheduler.initialize(config, ytruntime);
 
     // start the scheduler REST endpoint for receiving requests
     SchedulerServer server = runServer(runtime, scheduler, schedulerServerPort);
@@ -104,14 +134,7 @@ public class SchedulerMain {
     // write the scheduler location to state manager.
     setSchedulerLocation(runtime, server);
 
-    // create an instance of the packing class 
-    String packingClass = Context.packingClass(config);
-    IPacking packing = (IPacking)Class.forName(packingClass).newInstance();
-
-    // get a packed plan and schedule it
-    packing.initialize(config, runtime);
-    PackingPlan packedPlan = packing.pack();
-
+    // schedule the packed plan
     scheduler.schedule(packedPlan);
 
     // We close the state manager when we receive a Kill Request
@@ -127,7 +150,7 @@ public class SchedulerMain {
     // create an instance of the server using scheduler class and port
     final SchedulerServer schedulerServer = new SchedulerServer(runtime, scheduler, port);
 
-    // start the http server
+    // start the http server to manage runtime requests
     schedulerServer.start();
 
     return schedulerServer;

@@ -15,11 +15,8 @@ import javax.xml.bind.DatatypeConverter;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 
-import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Defaults;
-import com.twitter.heron.spi.common.Jars;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.PackingPlan;
@@ -61,7 +58,7 @@ public class LocalLauncher implements ILauncher {
     this.topologyWorkingDirectory = LocalContext.workingDirectory(config);
 
     // get the path of core release URI 
-    this.coreReleasePackage = Context.corePackageUri(config);
+    this.coreReleasePackage = LocalContext.corePackageUri(config);
 
     // form the target dest core release file name
     this.targetCoreReleaseFile = Paths.get(
@@ -94,7 +91,7 @@ public class LocalLauncher implements ILauncher {
   public boolean prepareLaunch(PackingPlan packing) {
     LOG.info("Checking whether the topology has been launched already!");
 
-    String topologyName = Context.topologyName(config);
+    String topologyName = LocalContext.topologyName(config);
     IStateManager stateManager = Runtime.stateManager(runtime);
 
     // check if any topology with the same name is running
@@ -112,13 +109,13 @@ public class LocalLauncher implements ILauncher {
    */
   @Override
   public boolean launch(PackingPlan packing) {
-    LOG.info("Launching topology for local cluster " + Context.cluster(config));
+    LOG.info("Launching topology for local cluster " + LocalContext.cluster(config));
 
     TopologyAPI.Topology topology = Runtime.topology(runtime);
 
     // get all the config, need to be passed as command line to heron executor
-    String sandboxHome = Defaults.get("HERON_SANDBOX_HOME");
-    String sandboxConf = Defaults.get("HERON_SANDBOX_CONF");
+    String sandboxHome = Defaults.sandboxHome();
+    String sandboxConf = Defaults.sandboxConf();
     Config sandboxConfig = Config.expand(
         Config.newBuilder()
             .putAll(ClusterDefaults.getDefaults())
@@ -138,18 +135,13 @@ public class LocalLauncher implements ILauncher {
 
     System.out.println(configInBase64);
 
-    int port1 = NetworkUtils.getFreePort();
-    int port2 = NetworkUtils.getFreePort();
-    int port3 = NetworkUtils.getFreePort();
-    int shellPort = NetworkUtils.getFreePort();
-    int port4 = NetworkUtils.getFreePort();
-    int schedulerPort = NetworkUtils.getFreePort();
+    String schedulerClassPath = new StringBuilder()
+        .append(LocalContext.schedulerClassPath(sandboxConfig)).append(":")
+        .append(LocalContext.packingClassPath(sandboxConfig)).append(":")
+        .append(LocalContext.stateManagerClassPath(sandboxConfig))
+        .toString();
 
-    if (port1 == -1 || port2 == -1 || port3 == -1) {
-      throw new RuntimeException("Could not find available ports to start topology");
-    }
-
-    String executorCmd = String.format("%s %d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %d %s %s %d %s %s %s %s %d",
+    String executorCmd = String.format("%s %d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %d %s %s %d %s %s %s %s %s %s %d",
         LocalContext.executorBinary(sandboxConfig),
         0,
         topology.getName(),
@@ -160,31 +152,30 @@ public class LocalLauncher implements ILauncher {
         LocalContext.stateManagerRootPath(config),
         LocalContext.tmasterBinary(sandboxConfig),
         LocalContext.stmgrBinary(sandboxConfig),
-        "./heron-core/lib/heron-metricsmgr.jar",       // Jars.getMetricsManagerClassPath(Context.heronLib(sandboxConfig)),
+        LocalContext.metricsManagerClassPath(sandboxConfig),
         formatJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)),
-        TopologyUtils.makeClassPath(topology, Context.topologyJarFile(config)),
-        port1,
-        port2,
-        port3,
+        TopologyUtils.makeClassPath(topology, LocalContext.topologyJarFile(config)),
+        NetworkUtils.getFreePort(),
+        NetworkUtils.getFreePort(),
+        NetworkUtils.getFreePort(),
         LocalContext.systemConfigFile(sandboxConfig),
         TopologyUtils.formatRamMap(TopologyUtils.getComponentRamMap(topology)),
         formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)),
         LocalContext.topologyPackageType(config),
         LocalContext.topologyJarFile(config),
         LocalContext.javaHome(config),
-        shellPort,
+        NetworkUtils.getFreePort(),
         LocalContext.logDirectory(sandboxConfig),
         LocalContext.shellBinary(sandboxConfig),
-        port4,
+        NetworkUtils.getFreePort(),
         LocalContext.cluster(config),
         LocalContext.role(config),
         LocalContext.environ(config),
-        "./heron-core/lib/heron-scheduler.jar:./heron-core/lib/heron-local-scheduler.jar",       
-        schedulerPort
+        LocalContext.instanceClassPath(sandboxConfig),
+        LocalContext.metricsSinksFile(sandboxConfig),
+        schedulerClassPath,
+        NetworkUtils.getFreePort()
     );
-
-    System.out.println(executorCmd);
-    System.exit(0);
 
     LOG.info("Executor command line: " + executorCmd.toString());
 
@@ -212,7 +203,7 @@ public class LocalLauncher implements ILauncher {
     ExecutionEnvironment.HeronReleaseState.Builder releaseBuilder =
         ExecutionEnvironment.HeronReleaseState.newBuilder();
 
-    releaseBuilder.setReleaseUsername(Context.role(config));
+    releaseBuilder.setReleaseUsername(LocalContext.role(config));
     releaseBuilder.setReleaseTag(release);
     releaseBuilder.setReleaseVersion(release);
     releaseBuilder.setUploaderVersion(release);
@@ -222,10 +213,10 @@ public class LocalLauncher implements ILauncher {
         ExecutionEnvironment.ExecutionState.newBuilder();
 
     builder.mergeFrom(executionState)
-        .setDc(Context.cluster(config))
-        .setCluster(Context.cluster(config))
-        .setRole(Context.role(config))
-        .setEnviron(Context.environ(config))
+        .setDc(LocalContext.cluster(config))
+        .setCluster(LocalContext.cluster(config))
+        .setRole(LocalContext.role(config))
+        .setEnviron(LocalContext.environ(config))
         .setReleaseState(releaseBuilder);
 
     if (!builder.isInitialized()) {
@@ -277,11 +268,13 @@ public class LocalLauncher implements ILauncher {
       LOG.warning("Unable to delete the core release file: " + targetCoreReleaseFile);
     }
 
-    // fetch the topology package
+    // give warning for overwriting existing topology package
     String topologyPackage = Runtime.topologyPackageUri(runtime);
     LOG.info("Fetching topology package " + Runtime.topologyPackageUri(runtime));
     LOG.info("If topology package is already in the working directory");
     LOG.info("the old one will be overwritten");
+
+    // fetch the topology package
     if (!copyPackage(topologyPackage, targetTopologyPackageFile)) {
       LOG.severe("Failed to fetch the heron core release package.");
       return false;

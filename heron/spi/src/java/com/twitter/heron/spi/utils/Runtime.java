@@ -8,46 +8,46 @@ import com.twitter.heron.api.generated.TopologyAPI;
 public class Runtime {
 
   public static String topologyId(Config runtime) {
-    return runtime.getStringValue(Keys.get("TOPOLOGY_ID"));
+    return runtime.getStringValue(Keys.topologyId());
   }
   
   public static String topologyName(Config runtime) {
-    return runtime.getStringValue(Keys.get("TOPOLOGY_NAME"));
+    return runtime.getStringValue(Keys.topologyName());
   }
 
   public static String topologyClassPath(Config runtime) {
-    return runtime.getStringValue(Keys.get("TOPOLOGY_CLASS_PATH"));
+    return runtime.getStringValue(Keys.topologyClassPath());
   }
 
   public static TopologyAPI.Topology topology(Config runtime) {
-    return (TopologyAPI.Topology)runtime.get(Keys.get("TOPOLOGY_DEFINITION"));
+    return (TopologyAPI.Topology)runtime.get(Keys.topologyDefinition());
   }
 
   public static String topologyPackageUri(Config cfg) {
-    return cfg.getStringValue(Keys.get("TOPOLOGY_PACKAGE_URI"));
+    return cfg.getStringValue(Keys.topologyPackageUri());
   }
 
   public static IStateManager stateManager(Config runtime) {
-    return (IStateManager)runtime.get(Keys.get("STATE_MANAGER"));
+    return (IStateManager)runtime.get(Keys.stateManager());
   }
 
   public static String componentRamMap(Config runtime) {
-    return runtime.getStringValue(Keys.get("COMPONENT_RAMMAP"));
+    return runtime.getStringValue(Keys.componentRamMap());
   }
 
   public static String componentJvmOpts(Config runtime) {
-    return runtime.getStringValue(Keys.get("COMPONENT_JVM_OPTS_IN_BASE64"));
+    return runtime.getStringValue(Keys.componentJvmOpts());
   }
 
   public static String instanceDistribution(Config runtime) {
-    return runtime.getStringValue(Keys.get("INSTANCE_DISTRIBUTION"));
+    return runtime.getStringValue(Keys.instanceDistribution());
   }
 
   public static String instanceJvmOpts(Config runtime) {
-    return runtime.getStringValue(Keys.get("INSTANCE_JVM_OPTS_IN_BASE64"));
+    return runtime.getStringValue(Keys.instanceJvmOpts());
   }
 
-  public static String numContainers(Config runtime) {
-    return runtime.getStringValue(Keys.get("NUM_CONTAINERS"));
+  public static Long numContainers(Config runtime) {
+    return runtime.getLongValue(Keys.numContainers());
   }
 }

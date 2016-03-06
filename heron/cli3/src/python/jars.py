@@ -26,8 +26,7 @@ def topology_jars():
 ################################################################################
 def scheduler_jars():
   jars = [
-      pick(utils.get_heron_lib_dir(), 'heron-scheduler*.jar'),
-      pick(utils.get_heron_lib_dir(), 'heron-local-scheduler*.jar')
+       os.path.join(utils.get_heron_lib_dir(), "scheduler", "*")
   ]
   return jars
 
@@ -36,7 +35,7 @@ def scheduler_jars():
 ################################################################################
 def uploader_jars():
   jars = [
-      pick(utils.get_heron_lib_dir(), 'heron-localfs-uploader*.jar')
+      os.path.join(utils.get_heron_lib_dir(), "uploader", "*")
   ]
   return jars
 
@@ -45,8 +44,7 @@ def uploader_jars():
 ################################################################################
 def statemgr_jars():
   jars = [
-      pick(utils.get_heron_lib_dir(), 'heron-localfs-statemgr*.jar'),
-      pick(utils.get_heron_lib_dir(), 'heron-zookeeper-statemgr*.jar')
+      os.path.join(utils.get_heron_lib_dir(), "statemgr", "*")
   ]
   return jars
 
@@ -55,6 +53,6 @@ def statemgr_jars():
 ################################################################################
 def packing_jars():
   jars = [
-      pick(utils.get_heron_lib_dir(), 'heron-roundrobin-packing*.jar')
+      os.path.join(utils.get_heron_lib_dir(), "packing", "*")
   ]
   return jars
