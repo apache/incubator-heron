@@ -17,7 +17,7 @@ var SRC = {
   sass: srcDir + '/sass/**/*.scss',
   fonts: srcDir + '/fonts/**/*',
   images: srcDir + '/img/**/*',
-  apiDocs: './api'
+  javadoc: './api/**/*'
 }
 
 // Define asset distribution destination
@@ -26,7 +26,7 @@ var DIST = {
   js: distDir + '/js',
   fonts: distDir + '/fonts',
   images: distDir + '/img',
-  apiDocs: distDir,
+  javadoc: './public',
   all: distDir
 }
 
@@ -67,8 +67,8 @@ gulp.task('sass:watch', function() {
 
 // Javadoc
 gulp.task('javadoc', function() {
-  gulp.src(SRC.apiDocs)
-    .pipe(gulp.dest(DIST.apiDocs));
+  gulp.src(SRC.javadoc)
+    .pipe(gulp.dest(DIST.javadoc));
 });
 
 // Fonts

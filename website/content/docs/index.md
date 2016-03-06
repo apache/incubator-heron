@@ -7,16 +7,14 @@ title: Heron Documentation
 description: Welcome!
 ---
 
-Heron is a realtime analytics platform developed by Twitter. It is the
-direct successor of [Apache Storm](http://storm.apache.org), built to be
-backwards compatible with Storm's [topology
-API](http://storm.apache.org/tutorial.html) but with a wide array of
-architectural improvements. For more on the architecture and design
-goals of Heron, see [The Architecture of
-Heron](concepts/architecture.md) and [Heron
-Topologies](concepts/topologies.md).
+Heron is a realtime analytics platform developed by Twitter. It is the direct
+successor of [Apache Storm](http://storm.apache.org), built to be backwards
+compatible with Storm's [topology API](http://storm.apache.org/tutorial.html)
+but with a wide array of architectural improvements. For more on the
+architecture and design goals of Heron, see [The Architecture of
+Heron](concepts/architecture) and [Heron Topologies](concepts/topologies).
 
-For information beyond this documentation:
+Information on Heron from outside this documentation:
 
 * [Twitter Heron: Stream Processing at
   Scale](http://dl.acm.org/citation.cfm?id=2742788) (academic paper)
