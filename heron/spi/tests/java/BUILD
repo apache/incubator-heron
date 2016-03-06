@@ -2,6 +2,7 @@
 load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 common_deps_files = [
+    "//heron/common/src/java:config-java",
     "//heron/spi/src/java:common-spi-java", 
     "@bazel_tools//third_party:junit4",
     "@bazel_tools//third_party:mockito",
@@ -86,25 +87,23 @@ java_test(
 )
 
 java_test(
+    name = "config-keys_unittest",
+    srcs = glob(["**/ConfigKeysTest.java"]),
+    deps = [":test-utils-java"] + common_deps_files,
+    size = "small",
+)
+
+java_test(
     name = "cluster-defaults_unittest",
     srcs = glob(["**/ClusterDefaultsTest.java"]),
-    deps = [
-        "//heron/common/src/java:config-java",
-        "//heron/spi/src/java:common-spi-java",
-        "@bazel_tools//third_party:junit4",
-    ],
+    deps = [":test-utils-java"] + common_deps_files,
     size = "small",
 )
 
 java_test(
     name = "cluster-config_unittest",
     srcs = glob(["**/ClusterConfigTest.java"]),
-    deps = [
-        ":test-utils-java",
-        "//heron/common/src/java:config-java",
-        "//heron/spi/src/java:common-spi-java",
-        "@bazel_tools//third_party:junit4",
-    ],
+    deps = [":test-utils-java"] + common_deps_files,
     data = glob(["**/testdata/**/*.yaml"]),
     size = "small",
 )
