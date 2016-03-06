@@ -2,8 +2,8 @@
 # Default values for heron directories
 ################################################################################
 HERON_HOME:                  /usr/local/heron
-HERON_CONF:                  ${HERON_HOME}/conf
 HERON_BIN:                   ${HERON_HOME}/bin
+HERON_CONF:                  ${HERON_HOME}/conf
 HERON_DIST:                  ${HERON_HOME}/dist
 HERON_ETC:                   ${HERON_HOME}/etc
 HERON_LIB:                   ${HERON_HOME}/lib
