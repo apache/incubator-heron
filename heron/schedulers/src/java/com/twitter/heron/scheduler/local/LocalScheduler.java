@@ -2,6 +2,7 @@ package com.twitter.heron.scheduler.local;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.LinkedList;
@@ -14,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 
@@ -25,11 +27,14 @@ import com.twitter.heron.spi.common.ShellUtils;
 import com.twitter.heron.spi.common.HttpUtils;
 
 import com.twitter.heron.spi.utils.NetworkUtils;
+import com.twitter.heron.spi.utils.TopologyUtils;
 import com.twitter.heron.spi.utils.Runtime;
 
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.IStateManager;
+import org.apache.commons.io.FilenameUtils;
 
+import javax.xml.bind.DatatypeConverter;
 import com.google.common.util.concurrent.ListenableFuture;
 
 public class LocalScheduler implements IScheduler {
@@ -52,20 +57,32 @@ public class LocalScheduler implements IScheduler {
     this.config = config;
     this.runtime = runtime;
 
-    LOG.info("Starting to deploy topology: " + Context.topologyName(config));
-    LOG.info("# of containers: " + Runtime.numContainers(config));
+    LOG.info("Starting to deploy topology: " + LocalContext.topologyName(config));
+    LOG.info("# of containers: " + Runtime.numContainers(runtime));
 
     // first, run the TMaster executor
     // startExecutor(0);
     // LOG.info("TMaster is started.");
 
     // for each container, run its own executor
-    int numContainers = Integer.parseInt(Runtime.numContainers(config));
-    for (int i = 1; i < numContainers; i++) {
+    long numContainers = Runtime.numContainers(runtime);
+    for (int i = 1; i <= numContainers; i++) {
       startExecutor(i);
     }
 
     LOG.info("Executor for each container have been started.");
+  }
+
+  /**
+   * Encode the JVM options
+   *
+   * @return encoded string
+   */
+  protected String formatJavaOpts(String javaOpts) {
+    String javaOptsBase64 = DatatypeConverter.printBase64Binary(
+        javaOpts.getBytes(Charset.forName("UTF-8")));
+
+    return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
   }
 
   /**
@@ -76,9 +93,7 @@ public class LocalScheduler implements IScheduler {
 
     // create a process with the executor command and topology working directory
     final Process regularExecutor = ShellUtils.runASyncProcess(true, true, 
-        (String)null,
-        // TO DO getExecutorCmd(container),
-        new File(LocalContext.workingDirectory(config)));
+        getExecutorCommand(container), new File(LocalContext.workingDirectory(config)));
 
     // associate the process and its container id
     processToContainer.put(regularExecutor, container);
@@ -109,6 +124,60 @@ public class LocalScheduler implements IScheduler {
     monitorService.submit(r);
   }
 
+  private String getExecutorCommand(int container) {  
+
+    TopologyAPI.Topology topology = Runtime.topology(runtime);
+
+    int port1 = NetworkUtils.getFreePort();
+    int port2 = NetworkUtils.getFreePort();
+    int port3 = NetworkUtils.getFreePort();
+    int shellPort = NetworkUtils.getFreePort();
+    int port4 = NetworkUtils.getFreePort();
+
+    if (port1 == -1 || port2 == -1 || port3 == -1) {
+      throw new RuntimeException("Could not find available ports to start topology");
+    }
+
+    String executorCmd = String.format("%s %d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %d %s %s %d %s %s %s %s %s %s %d",
+        LocalContext.executorBinary(config),
+        container,
+        topology.getName(),
+        topology.getId(),
+        FilenameUtils.getName(LocalContext.topologyDefinitionFile(config)),
+        Runtime.instanceDistribution(runtime),
+        LocalContext.stateManagerConnectionString(config),
+        LocalContext.stateManagerRootPath(config),
+        LocalContext.tmasterBinary(config),
+        LocalContext.stmgrBinary(config),
+        LocalContext.metricsManagerClassPath(config),
+        formatJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)),
+        TopologyUtils.makeClassPath(topology, LocalContext.topologyJarFile(config)),
+        port1,
+        port2,
+        port3,
+        LocalContext.systemConfigFile(config),
+        TopologyUtils.formatRamMap(TopologyUtils.getComponentRamMap(topology)),
+        formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)),
+        LocalContext.topologyPackageType(config),
+        LocalContext.topologyJarFile(config),
+        LocalContext.javaHome(config),
+        shellPort,
+        LocalContext.logDirectory(config),
+        LocalContext.shellBinary(config),
+        port4,
+        LocalContext.cluster(config),
+        LocalContext.role(config),
+        LocalContext.environ(config),
+        LocalContext.instanceClassPath(config),
+        LocalContext.metricsSinksFile(config),
+        "not_container_0",
+        0
+    );
+
+    LOG.info("Executor command line: " + executorCmd.toString());
+    return executorCmd;
+  }
+
   /**
    * Schedule the provided packed plan
    */
@@ -123,7 +192,7 @@ public class LocalScheduler implements IScheduler {
   public boolean onKill(Scheduler.KillTopologyRequest request) {
 
     // get the topology name
-    String topologyName = Context.topologyName(config);
+    String topologyName = LocalContext.topologyName(config);
     LOG.info("Command to kill topology: "  + topologyName);
 
     // set the flag that the topology being killed 
@@ -165,7 +234,7 @@ public class LocalScheduler implements IScheduler {
    */
   @Override
   public boolean onActivate(Scheduler.ActivateTopologyRequest request) {
-    LOG.info("Command to activate topology: "  + Context.topologyName(config));
+    LOG.info("Command to activate topology: "  + LocalContext.topologyName(config));
     return sendToTMaster("activate");
   }
 
@@ -174,7 +243,7 @@ public class LocalScheduler implements IScheduler {
    */
   @Override
   public boolean onDeactivate(Scheduler.DeactivateTopologyRequest request) {
-    LOG.info("Command to deactivate topology: "  + Context.topologyName(config));
+    LOG.info("Command to deactivate topology: "  + LocalContext.topologyName(config));
     return sendToTMaster("deactivate");
   }
 
@@ -187,7 +256,7 @@ public class LocalScheduler implements IScheduler {
     int containerId = request.getContainerIndex();
 
     if (containerId == -1) {
-      LOG.info("Command to restart the entire topology: "  + Context.topologyName(config));
+      LOG.info("Command to restart the entire topology: "  + LocalContext.topologyName(config));
 
       // create a new tmp list to store all the Process to be killed
       List<Process> tmpProcessList = new LinkedList<>(processToContainer.keySet());
@@ -196,7 +265,7 @@ public class LocalScheduler implements IScheduler {
       }
     } else {
       // restart that particular container
-      LOG.info("Command to restart a container of topology: "  + Context.topologyName(config));
+      LOG.info("Command to restart a container of topology: "  + LocalContext.topologyName(config));
       LOG.info("Restart container requested: " + containerId);
 
       // locate the container and destroy it
@@ -212,53 +281,10 @@ public class LocalScheduler implements IScheduler {
 
     // Clean TMasterLocation since we could not set it as ephemeral for local file system
     // We would not clean SchedulerLocation since we would not restart the Scheduler
-    stateManager.deleteTMasterLocation(Context.topologyName(config));
+    stateManager.deleteTMasterLocation(LocalContext.topologyName(config));
 
     return true;
   }
-
-  /*
-  private String getExecutorCmd(int container) {
-    int port1 = NetworkUtils.getFreePort();
-    int port2 = NetworkUtils.getFreePort();
-    int port3 = NetworkUtils.getFreePort();
-    int shellPort = NetworkUtils.getFreePort();
-    int port4 = NetworkUtils.getFreePort();
-
-    if (port1 == -1 || port2 == -1 || port3 == -1) {
-      throw new RuntimeException("Could not find available ports to start topology");
-    }
-
-    return String.format("./%s %d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %d %s %s %d",
-        localConfig.getExecutorBinary(),
-        container,
-        localConfig.getTopologyName(),
-        localConfig.getTopologyId(),
-        localConfig.getTopologyDef(),
-        localConfig.getInstanceDistribution(),
-        localConfig.getZkNode(),
-        localConfig.getZkRoot(),
-        localConfig.getTMasterBinary(),
-        localConfig.getStmgrBinary(),
-        localConfig.getMetricsMgrClasspath(),
-        localConfig.getInstanceJvmOptionsBase64(),
-        localConfig.getClasspath(),
-        port1,
-        port2,
-        port3,
-        localConfig.getInternalConfigFilename(),
-        localConfig.getComponentRamMap(),
-        localConfig.getComponentJVMOptionsBase64(),
-        localConfig.getPkgType(),
-        localConfig.getTopologyJarFile(),
-        localConfig.getJavaHome(),
-        shellPort,
-        localConfig.getLogDir(),
-        localConfig.getHeronShellBinary(),
-        port4
-    );
-  }
-  */
 
   /**
    * Communicate with TMaster with command
@@ -268,7 +294,7 @@ public class LocalScheduler implements IScheduler {
    */
   protected boolean sendToTMaster(String command) {
     // get the topology name
-    String topologyName = Context.topologyName(config);
+    String topologyName = LocalContext.topologyName(config);
 
     // get the state manager instance
     IStateManager stateManager = Runtime.stateManager(runtime);
@@ -276,7 +302,7 @@ public class LocalScheduler implements IScheduler {
     // fetch the TMasterLocation for the topology
     LOG.info("Fetching TMaster location for topology: " + topologyName);
     ListenableFuture<TopologyMaster.TMasterLocation> locationFuture = 
-        stateManager.getTMasterLocation(null, Context.topologyName(config));
+        stateManager.getTMasterLocation(null, LocalContext.topologyName(config));
 
     TopologyMaster.TMasterLocation location =
         NetworkUtils.awaitResult(locationFuture, 5, TimeUnit.SECONDS);

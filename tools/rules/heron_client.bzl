@@ -44,7 +44,6 @@ def heron_client_lib_uploader_files():
 
 def heron_client_lib_files():
     return [
-        "//heron/examples/src/java:heron-examples",
         "//3rdparty/protobuf:protobuf-java",
         "//3rdparty/logging:slf4j-api-java",
         "//3rdparty/logging:slf4j-jdk-java", 

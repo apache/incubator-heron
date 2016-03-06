@@ -15,68 +15,69 @@ public final class ClusterConfig {
 
   protected static Config loadHeronHome(String heronHome, String configPath) {
     Config.Builder cb = Config.newBuilder()
-        .put(Keys.get("HERON_HOME"), heronHome) 
-        .put(Keys.get("HERON_BIN"),  Misc.substitute(heronHome, Defaults.get("HERON_BIN")))
-        .put(Keys.get("HERON_CONF"), configPath)
-        .put(Keys.get("HERON_DIST"), Misc.substitute(heronHome, Defaults.get("HERON_DIST")))
-        .put(Keys.get("HERON_ETC"),  Misc.substitute(heronHome, Defaults.get("HERON_ETC")))
-        .put(Keys.get("HERON_LIB"),  Misc.substitute(heronHome, Defaults.get("HERON_LIB")));
+        .put(Keys.heronHome(), heronHome) 
+        .put(Keys.heronBin(),  Misc.substitute(heronHome, Defaults.heronBin()))
+        .put(Keys.heronConf(), configPath)
+        .put(Keys.heronDist(), Misc.substitute(heronHome, Defaults.heronDist()))
+        .put(Keys.heronEtc(),  Misc.substitute(heronHome, Defaults.heronEtc()))
+        .put(Keys.heronLib(),  Misc.substitute(heronHome, Defaults.heronLib()))
+        .put(Keys.javaHome(),  Misc.substitute(heronHome, Defaults.javaHome()));
     return cb.build();
   }
 
   protected static Config loadConfigHome(String heronHome, String configPath) {
     Config.Builder cb = Config.newBuilder()
-        .put(Keys.get("CLUSTER_YAML"), 
-            Misc.substitute(heronHome, configPath, Defaults.get("CLUSTER_YAML")))
-        .put(Keys.get("DEFAULTS_YAML"), 
-            Misc.substitute(heronHome, configPath, Defaults.get("DEFAULTS_YAML")))
-        .put(Keys.get("METRICS_YAML"), 
-            Misc.substitute(heronHome, configPath, Defaults.get("METRICS_YAML")))
-        .put(Keys.get("PACKING_YAML"), 
-            Misc.substitute(heronHome, configPath, Defaults.get("PACKING_YAML")))
-        .put(Keys.get("SCHEDULER_YAML"), 
-            Misc.substitute(heronHome, configPath, Defaults.get("SCHEDULER_YAML")))
-        .put(Keys.get("STATEMGR_YAML"), 
-            Misc.substitute(heronHome, configPath, Defaults.get("STATEMGR_YAML")))
-        .put(Keys.get("SYSTEM_YAML"), 
-            Misc.substitute(heronHome, configPath, Defaults.get("SYSTEM_YAML")))
-        .put(Keys.get("UPLOADER_YAML"), 
-            Misc.substitute(heronHome, configPath, Defaults.get("UPLOADER_YAML")));
+        .put(Keys.clusterFile(),
+            Misc.substitute(heronHome, configPath, Defaults.clusterFile()))
+        .put(Keys.defaultsFile(),
+            Misc.substitute(heronHome, configPath, Defaults.defaultsFile()))
+        .put(Keys.metricsSinksFile(),
+            Misc.substitute(heronHome, configPath, Defaults.metricsSinksFile()))
+        .put(Keys.packingFile(),
+            Misc.substitute(heronHome, configPath, Defaults.packingFile()))
+        .put(Keys.schedulerFile(),
+            Misc.substitute(heronHome, configPath, Defaults.schedulerFile()))
+        .put(Keys.stateManagerFile(),
+            Misc.substitute(heronHome, configPath, Defaults.stateManagerFile()))
+        .put(Keys.systemFile(),
+            Misc.substitute(heronHome, configPath, Defaults.systemFile()))
+        .put(Keys.uploaderFile(), 
+            Misc.substitute(heronHome, configPath, Defaults.uploaderFile()));
     return cb.build();
   }
 
   protected static Config loadClusterConfig(Config config) {
-    String clusterFile = config.getStringValue(Keys.get("CLUSTER_YAML")); 
+    String clusterFile = config.getStringValue(Keys.clusterFile()); 
     Map readConfig = ConfigReader.loadFile(clusterFile);
     return Config.newBuilder().putAll(readConfig).build();
   }
 
   protected static Config loadDefaultsConfig(Config config) {
-    String defaultsFile = config.getStringValue(Keys.get("DEFAULTS_YAML"));
+    String defaultsFile = config.getStringValue(Keys.defaultsFile());
     Map readConfig = ConfigReader.loadFile(defaultsFile);
     return Config.newBuilder().putAll(readConfig).build();
   }
 
   protected static Config loadPackingConfig(Config config) {
-    String packingFile = config.getStringValue(Keys.get("PACKING_YAML"));
+    String packingFile = config.getStringValue(Keys.packingFile());
     Map readConfig = ConfigReader.loadFile(packingFile);
     return Config.newBuilder().putAll(readConfig).build();
   }
 
   protected static Config loadSchedulerConfig(Config config) {
-    String schedulerFile = config.getStringValue(Keys.get("SCHEDULER_YAML"));
+    String schedulerFile = config.getStringValue(Keys.schedulerFile());
     Map readConfig = ConfigReader.loadFile(schedulerFile);
     return Config.newBuilder().putAll(readConfig).build();
   }
 
   protected static Config loadStateManagerConfig(Config config) {
-    String stateMgrFile = config.getStringValue(Keys.get("STATEMGR_YAML"));
+    String stateMgrFile = config.getStringValue(Keys.stateManagerFile());
     Map readConfig = ConfigReader.loadFile(stateMgrFile);
     return Config.newBuilder().putAll(readConfig).build();
   }
 
   protected static Config loadUploaderConfig(Config config) {
-    String uploaderFile = config.getStringValue(Keys.get("UPLOADER_YAML"));
+    String uploaderFile = config.getStringValue(Keys.uploaderFile());
     Map readConfig = ConfigReader.loadFile(uploaderFile);
     return Config.newBuilder().putAll(readConfig).build();
   }
@@ -102,16 +103,9 @@ public final class ClusterConfig {
     return cb.build();
   }
 
-  /*
-  public static Config loadConfig(String heronHome, String configPath) {
-    String configPath = Misc.substitute(heronHome, Defaults.get("HERON_CONF"));
-    return loadConfig(heronHome, configPath);
-  }
-  */
-
   public static Config loadSandboxConfig() {
     String configPath = Misc.substitute(
-        Defaults.get("HERON_SANDBOX_HOME"), Defaults.get("HERON_SANDBOX_CONF"));
-    return loadConfig(Defaults.get("HERON_SANDBOX_HOME"), configPath);
+        Defaults.sandboxHome(), Defaults.sandboxConf());
+    return loadConfig(Defaults.sandboxHome(), configPath);
   }
 }

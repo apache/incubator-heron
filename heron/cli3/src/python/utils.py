@@ -139,6 +139,7 @@ def get_heron_sandbox_conf_dir():
 ################################################################################
 def get_heron_libs(local_jars):
   heron_lib_dir = get_heron_lib_dir()
+  print heron_lib_dir
   heron_libs = [os.path.join(heron_lib_dir, f) for f in local_jars]
   return heron_libs
 

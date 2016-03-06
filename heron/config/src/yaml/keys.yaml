@@ -7,6 +7,7 @@ HERON_CONF:                    heron.directory.conf
 HERON_LIB:                     heron.directory.lib
 HERON_DIST:                    heron.directory.dist
 HERON_ETC:                     heron.directory.etc
+JAVA_HOME:                     heron.directory.java.home
 
 ################################################################################
 # keys for heron configuration files
@@ -89,21 +90,24 @@ INSTANCE_DISK:                 heron.resources.instance.disk
 ################################################################################
 # keys for config provided paths
 ################################################################################
-METRICS_MANAGER_CLASSPATH:     heron.metrics.manager.classpath
+INSTANCE_CLASSPATH:            heron.classpath.instance
+METRICSMGR_CLASSPATH:          heron.classpath.metrics.manager
+PACKING_CLASSPATH:             heron.classpath.packing
+SCHEDULER_CLASSPATH:           heron.classpath.scheduler
+STATEMGR_CLASSPATH:            heron.classpath.statemgr
+UPLOADER_CLASSPATH:            heron.classpath.uploader
 
 ################################################################################
 # keys for run time config
 ################################################################################
-TOPOLOGY_CLASS_PATH:           heron.runtime.topology.class.path
+TOPOLOGY_CLASSPATH:            heron.runtime.topology.class.path
 STATE_MANAGER:                 heron.runtime.state.manager
-JAVA_HOME:                     heron.runtime.java.home.path
 
 COMPONENT_RAMMAP:              heron.runtime.component.rammap
 COMPONENT_JVM_OPTS_IN_BASE64:  heron.runtime.component.jvm.opts.in.base64
 INSTANCE_DISTRIBUTION:         heron.runtime.instance.distribution
 INSTANCE_JVM_OPTS_IN_BASE64:   heron.runtime.instance.jvm.opts.in.base64
 
-METRICS_MGR_CLASSPATH:         heron.runtime.metrics.mgr.classpath
 NUM_CONTAINERS:                heron.runtime.num.containers
 
 ################################################################################

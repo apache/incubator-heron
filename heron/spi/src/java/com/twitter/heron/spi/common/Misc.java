@@ -26,15 +26,15 @@ public class Misc {
 
   public static String substitute(String heronHome, String pathString) {
     Config config = Config.newBuilder()
-      .put(Keys.get("HERON_HOME"), heronHome)
+      .put(Keys.heronHome(), heronHome)
       .build();
     return substitute(config, pathString);
   }
 
   public static String substitute(String heronHome, String configPath, String pathString) {
     Config config = Config.newBuilder()
-      .put(Keys.get("HERON_HOME"), heronHome)
-      .put(Keys.get("HERON_CONF"), configPath)
+      .put(Keys.heronHome(), heronHome)
+      .put(Keys.heronConf(), configPath)
       .build();
     return substitute(config, pathString);
   }
@@ -81,6 +81,11 @@ public class Misc {
 
       } else if (elem.equals("~")) {
         list.set(i, homePath);
+
+      } else if (elem.equals("${JAVA_HOME}")) {
+        String javaPath = System.getenv("JAVA_HOME");
+        list.set(i, javaPath);
+        System.out.println(javaPath);
 
       } else if (elem.equals("${HERON_HOME}")) {
         list.set(i, Context.heronHome(config));
