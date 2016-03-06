@@ -9,4 +9,4 @@ nav.navbar.navbar-inverse.navbar-fixed-top role=navigation
         li
           a href=/docs/getting-started Getting Started
         li
-          a href=/docs/api API Docs
+          a href=/docs/javadoc API Docs

@@ -1,5 +1,2 @@
 ---
-categories:
-tags:
-title: ""
 ---

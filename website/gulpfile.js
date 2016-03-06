@@ -16,8 +16,8 @@ var SRC = {
   css: srcDir + '/css/**/*.css',
   sass: srcDir + '/sass/**/*.scss',
   fonts: srcDir + '/fonts/**/*',
-  images: srcDir + '/img/**/*'
-  //apiDocs: './api/rest-api.md'
+  images: srcDir + '/img/**/*',
+  apiDocs: './api'
 }
 
 // Define asset distribution destination
@@ -26,7 +26,7 @@ var DIST = {
   js: distDir + '/js',
   fonts: distDir + '/fonts',
   images: distDir + '/img',
-  //apiDocs: distDir + '/api/rest-api.html',
+  apiDocs: distDir,
   all: distDir
 }
 
@@ -65,6 +65,12 @@ gulp.task('sass:watch', function() {
   gulp.watch(SRC.sass, ['sass']);
 });
 
+// Javadoc
+gulp.task('javadoc', function() {
+  gulp.src(SRC.apiDocs)
+    .pipe(gulp.dest(DIST.apiDocs));
+});
+
 // Fonts
 gulp.task('fonts', function() {
   gulp.src(SRC.fonts)
@@ -77,15 +83,8 @@ gulp.task('images', function() {
     .pipe(gulp.dest(DIST.images));
 });
 
-// Generate API docs using Aglio
-gulp.task('api-docs', function() {
-  gulp.src(DIST.apiDocs)
-    .pipe($.aglio({template: 'default'}))
-    .pipe(gulp.dest('.'));
-});
-
 // One-time build; doesn't watch for changes
-gulp.task('build', ['js', 'sass', 'css', 'fonts', 'images']);
+gulp.task('build', ['js', 'sass', 'css', 'javadoc', 'fonts', 'images']);
 
 // Delete static folder
 gulp.task('clean', function() {
@@ -93,7 +92,7 @@ gulp.task('clean', function() {
 });
 
 // Run in development (i.e. watch) mode
-gulp.task('dev', ['build', 'api-docs', 'js:watch', 'sass:watch', 'css:watch']);
+gulp.task('dev', ['build', 'js:watch', 'sass:watch', 'css:watch']);
 
 // Help => list tasks
 gulp.task('help', $.taskListing.withFilters(null, 'help'));

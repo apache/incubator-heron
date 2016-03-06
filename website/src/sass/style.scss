@@ -45,6 +45,10 @@ body {
   border: 0;
 }
 
+a.navbar-brand {
+  font-size: 30px;
+}
+
 /*
  * Sidebar
  */
@@ -111,6 +115,25 @@ body {
   max-width: 66%;
   padding: 40px;
   margin-left: $sidebar-width;
+
+  img {
+    max-width: 90%;
+  }
+
+  table {
+    thead {
+      font-size: 16px;
+      border-bottom: 1px solid gray;
+    }
+
+    tr {
+      margin-right: 5px;
+    }
+
+    tbody {
+      font-size: 12px;
+    }
+  }
 }
 @media (min-width: 768px) {
   .main {
