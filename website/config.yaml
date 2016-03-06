@@ -27,7 +27,9 @@ menu:
 params:
   author: Luc Perkins
   versions:
+    metricsapi: 0.1.0
     schedulerapi: 0.1.0
+    topologyapi: 0.1.0
   assets:
     logo: /img/logo.png
     css:
