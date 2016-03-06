@@ -14,6 +14,7 @@ import com.twitter.heron.common.config.ConfigReader;
 public final class ClusterConfig {
 
   protected static Config loadHeronHome(String heronHome, String configPath) {
+    System.out.println(heronHome + " " + Keys.javaHome() + " " + Defaults.javaHome());
     Config.Builder cb = Config.newBuilder()
         .put(Keys.heronHome(), heronHome) 
         .put(Keys.heronBin(),  Misc.substitute(heronHome, Defaults.heronBin()))

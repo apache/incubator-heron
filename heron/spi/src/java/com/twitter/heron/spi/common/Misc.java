@@ -84,7 +84,7 @@ public class Misc {
 
       } else if (elem.equals("${JAVA_HOME}")) {
         String javaPath = System.getenv("JAVA_HOME");
-        list.set(i, javaPath);
+        if (javaPath != null) list.set(i, javaPath);
         System.out.println(javaPath);
 
       } else if (elem.equals("${HERON_HOME}")) {
@@ -113,6 +113,7 @@ public class Misc {
       }
     }
 
+    System.out.println(list.toString());
     return combinePaths(list);
   }
 

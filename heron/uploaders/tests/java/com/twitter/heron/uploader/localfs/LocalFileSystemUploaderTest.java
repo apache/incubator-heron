@@ -44,11 +44,11 @@ public class LocalFileSystemUploaderTest {
 
     // Create the minimum config for tests
     config = Config.newBuilder()
-        .put(Keys.get("CLUSTER"), "cluster")
-        .put(Keys.get("ROLE"), "role")
-        .put(Keys.get("TOPOLOGY_NAME"), "topology")
-        .put(Keys.get("TOPOLOGY_PACKAGE_TYPE"), "tar")
-        .put(LocalFileSystemKeys.get("FILE_SYSTEM_DIRECTORY"), fileSystemDirectory)
+        .put(Keys.cluster(), "cluster")
+        .put(Keys.role(), "role")
+        .put(Keys.topologyName(), "topology")
+        .put(Keys.topologyPackageType(), "tar")
+        .put(LocalFileSystemKeys.fileSystemDirectory(), fileSystemDirectory)
         .build();
   }
 
@@ -64,7 +64,7 @@ public class LocalFileSystemUploaderTest {
     String topologyPackage = Paths.get(testTopologyDirectory, "some-topology.tar").toString();
 
     Config newconfig = Config.newBuilder()
-        .putAll(config).put(Keys.get("TOPOLOGY_PACKAGE_FILE"), topologyPackage).build();
+        .putAll(config).put(Keys.topologyPackageFile(), topologyPackage).build();
 
     // create the uploader and load the package
     LocalFileSystemUploader uploader = new LocalFileSystemUploader(); 
@@ -83,7 +83,7 @@ public class LocalFileSystemUploaderTest {
     String topologyPackage = Paths.get(testTopologyDirectory, "doesnot-exist-topology.tar").toString();
 
     Config newconfig = Config.newBuilder()
-        .putAll(config).put(Keys.get("TOPOLOGY_PACKAGE_FILE"), topologyPackage).build();
+        .putAll(config).put(Keys.topologyPackageFile(), topologyPackage).build();
 
     // create the uploader and load the package
     LocalFileSystemUploader uploader = new LocalFileSystemUploader(); 
@@ -100,7 +100,7 @@ public class LocalFileSystemUploaderTest {
     String topologyPackage = Paths.get(testTopologyDirectory, "some-topology.tar").toString();
 
     Config newconfig = Config.newBuilder()
-        .putAll(config).put(Keys.get("TOPOLOGY_PACKAGE_FILE"), topologyPackage).build();
+        .putAll(config).put(Keys.topologyPackageFile(), topologyPackage).build();
 
     // create the uploader and load the package
     LocalFileSystemUploader uploader = new LocalFileSystemUploader(); 
