@@ -3,16 +3,6 @@ licenses(["notice"])
 package(default_visibility = ["//visibility:public"])
 
 filegroup(
-    name = "config-keys-yaml",
-    srcs = ["keys.yaml"],
-)
-
-filegroup(
-    name = "config-defaults-yaml",
-    srcs = ["defaults.yaml"],
-)
-
-filegroup(
     name = "config-internals-yaml",
     srcs = ["heron_internals.yaml"],
 )

@@ -28,9 +28,19 @@ java_library(
     ],
 )
 
+filegroup(
+    name = "config-keys-yaml",
+    srcs = glob(["**/spi/common/**/keys.yaml"]),
+)
+
+filegroup(
+    name = "config-defaults-yaml",
+    srcs = glob(["**/spi/common/**/defaults.yaml"]),
+)
+
 common_resource_files = [
-    "//heron/config/src/yaml:config-keys-yaml",
-    "//heron/config/src/yaml:config-defaults-yaml",
+    ":config-keys-yaml",
+    ":config-defaults-yaml",
 ]
 
 utils_deps_files = \
