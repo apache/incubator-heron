@@ -1,5 +1,5 @@
 ---
 categories:
-  - "docs"
+  - docs
 tags:
 ---
