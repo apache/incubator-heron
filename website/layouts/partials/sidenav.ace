@@ -4,6 +4,11 @@
     li
       span {{.name}}
       ul
+        {{range .sublinks}}
+        li
+          a href={{.url}} {{.name}}
+        {{end}}
+      ul
         {{range .subcategories}}
         li {{.name}}
         ul
@@ -11,11 +16,6 @@
           li
             a href={{.url}} {{.name}}
           {{end}}
-        {{end}}
-      ul
-        {{range .sublinks}}
-        li
-          a href={{.url}} {{.name}}
         {{end}}
     br
     {{end}}
