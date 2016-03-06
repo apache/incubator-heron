@@ -101,6 +101,13 @@ java_test(
 )
 
 java_test(
+    name = "config-keys-defaults_unittest",
+    srcs = glob(["**/ConfigKeysDefaultsTest.java"]),
+    deps = [":test-utils-java"] + common_deps_files,
+    size = "small",
+)
+
+java_test(
     name = "cluster-defaults_unittest",
     srcs = glob(["**/ClusterDefaultsTest.java"]),
     deps = [":test-utils-java"] + common_deps_files,

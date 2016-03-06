@@ -186,6 +186,14 @@ public class Keys {
     return ConfigKeys.get("HERON_ETC");
   }
 
+  public static String heronSandboxHome() {
+    return ConfigKeys.get("HERON_SANDBOX_HOME");
+  }
+
+  public static String heronSandboxConf() {
+    return ConfigKeys.get("HERON_SANDBOX_CONF");
+  }
+
   public static String instanceClassPath() {
     return ConfigKeys.get("INSTANCE_CLASSPATH");
   }
