@@ -40,17 +40,21 @@ In order to create a custom metrics sink, you need to import the
 
 #### Maven
 
-<pre><code class="lang-xml">&lt;dependency&gt;
-  &lt;groupId>com.twitter.heron&lt;/groupId&gt;
-  &lt;artifactId>metricsmgr-api&lt;/artifactId&gt;
-  &lt;version&gt;{{book.metrics_api_version}}&lt;/version&gt;
-&lt;/dependency&gt;</code></pre>
+```xml
+<dependency>
+  <groupId>com.twitter.heron</groupId>
+  <artifactId>metricsmgr-api</artifactId>
+  <version>{{.Site.Params.versions.metricsapi}}</version>
+</dependency>
+```
 
 #### Gradle
 
-<pre><code class="lang-groovy">dependencies {
-  compile group: "com.twitter.heron", name: "metricsmgr-api", version: "{{book.metrics_api_version}}"
-}</code></pre>
+```groovy
+dependencies {
+  compile group: "com.twitter.heron", name: "metricsmgr-api", version: "{{.Site.Params.versions.metricsapi}}"
+}
+```
 
 ## The `IMetricsSink` Interface
 
