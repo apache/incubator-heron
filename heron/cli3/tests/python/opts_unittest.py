@@ -1,5 +1,5 @@
 import unittest2 as unittest
-import heron.cli2.src.python.opts as opts
+import heron.cli3.src.python.opts as opts
 
 class OptsTest(unittest.TestCase):
   def setUp(self):

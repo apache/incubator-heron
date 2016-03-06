@@ -42,7 +42,10 @@ public class PackerUploader implements IUploader {
 
     this.topologyPackageLocation = Context.topologyJarFile(config);
     this.topologyURI = null;
-    this.releaseTag = config.getStringValue(Keys.get("HERON_RELEASE_PACKAGE_NAME"), "live");
+
+    // TO DO
+    // this.releaseTag = config.getStringValue(Keys.get("HERON_RELEASE_PACKAGE_NAME"), "live");
+    this.releaseTag = Context.corePackageUri(config);
 
     if (cluster.isEmpty() || role.isEmpty()) {
       LOG.severe("cluster, role & env not set properly");

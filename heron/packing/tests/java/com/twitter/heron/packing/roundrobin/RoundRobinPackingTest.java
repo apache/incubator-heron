@@ -53,13 +53,13 @@ public class RoundRobinPackingTest {
     Assert.assertEquals((spouts.size() + bolts.size()) * componentParallelism, numInstance);
 
     Config config = Config.newBuilder()
-        .put(Keys.get("TOPOLOGY_ID"), topology.getId())
-        .put(Keys.get("TOPOLOGY_NAME"), topology.getName())
+        .put(Keys.topologyId(), topology.getId())
+        .put(Keys.topologyName(), topology.getName())
         .putAll(ClusterDefaults.getDefaults())
         .build();
 
     Config runtime = Config.newBuilder()
-        .put(Keys.get("TOPOLOGY_DEFINITION"), topology)
+        .put(Keys.topologyDefinition(), topology)
         .build();
 
     // DefaultConfigLoader configLoader = DefaultConfigLoader.class.newInstance();

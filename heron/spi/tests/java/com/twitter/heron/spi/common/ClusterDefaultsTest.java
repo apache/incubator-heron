@@ -29,22 +29,22 @@ public class ClusterDefaultsTest {
   public void testDefaultBinaries() throws Exception {
 
     Assert.assertEquals(
-        Defaults.get("EXECUTOR_BINARY"),
+        Defaults.executorBinary(),
         Context.executorBinary(props)
     );
 
     Assert.assertEquals(
-        Defaults.get("STMGR_BINARY"),
+        Defaults.stmgrBinary(),
         Context.stmgrBinary(props)
     );
 
     Assert.assertEquals(
-        Defaults.get("TMASTER_BINARY"),
+        Defaults.tmasterBinary(),
         Context.tmasterBinary(props)
     );
 
     Assert.assertEquals(
-        Defaults.get("SHELL_BINARY"),
+        Defaults.shellBinary(),
         Context.shellBinary(props)
     );
   }
@@ -52,7 +52,7 @@ public class ClusterDefaultsTest {
   @Test
   public void testDefaultJars() throws Exception {
     Assert.assertEquals(
-        Defaults.get("SCHEDULER_JAR"),
+        Defaults.schedulerJar(),
         Context.schedulerJar(props)
     );
   }
@@ -62,23 +62,23 @@ public class ClusterDefaultsTest {
     Config props = ClusterDefaults.getDefaultResources();
 
     Assert.assertEquals(
-        Defaults.getLong("STMGR_RAM"),
+        Defaults.stmgrRam(),
         Context.stmgrRam(props)
     );
 
     Assert.assertEquals(
-        Defaults.getLong("INSTANCE_CPU"),
+        Defaults.instanceCpu(),
         Context.instanceCpu(props),
         0.001
     );
 
     Assert.assertEquals(
-        Defaults.getLong("INSTANCE_RAM"),
+        Defaults.instanceRam(),
         Context.instanceRam(props)
     );
 
     Assert.assertEquals(
-        Defaults.getLong("INSTANCE_DISK"),
+        Defaults.instanceDisk(),
         Context.instanceDisk(props)
     );
   }
