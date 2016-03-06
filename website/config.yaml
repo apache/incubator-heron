@@ -5,6 +5,7 @@ author: Luc Perkins
 
 # Site-level config
 MetaDataFormat: yaml
+NewContentEditor: atom
 taxonomies:
   tag: tags
 
