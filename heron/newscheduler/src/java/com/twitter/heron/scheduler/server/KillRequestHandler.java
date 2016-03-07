@@ -52,6 +52,5 @@ public class KillRequestHandler implements HttpHandler {
     // tell the scheduler to shutdown
     LOG.info("Kill request handler issuing a terminate request to scheduler");
     Runtime.schedulerShutdown(runtime).terminate();
-    LOG.info("Kill request handler issued a terminate request to scheduler");
   }
 }
