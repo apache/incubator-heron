@@ -3,20 +3,20 @@ package com.twitter.heron.examples;
 import java.util.Map;
 import java.util.Random;
 
-import com.twitter.heron.api.Config;
-import com.twitter.heron.api.HeronSubmitter;
-import com.twitter.heron.api.bolt.BaseRichBolt;
-import com.twitter.heron.api.bolt.OutputCollector;
-import com.twitter.heron.api.metric.GlobalMetrics;
-import com.twitter.heron.api.spout.BaseRichSpout;
-import com.twitter.heron.api.spout.SpoutOutputCollector;
-import com.twitter.heron.api.topology.OutputFieldsDeclarer;
-import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.api.tuple.Fields;
-import com.twitter.heron.api.tuple.Tuple;
-import com.twitter.heron.api.tuple.Values;
-import com.twitter.heron.api.utils.Utils;
+import backtype.storm.Config;
+import backtype.storm.StormSubmitter;
+import backtype.storm.metric.api.GlobalMetrics;
+import backtype.storm.spout.SpoutOutputCollector;
+import backtype.storm.task.OutputCollector;
+import backtype.storm.task.TopologyContext;
+import backtype.storm.topology.OutputFieldsDeclarer;
+import backtype.storm.topology.TopologyBuilder;
+import backtype.storm.topology.base.BaseRichBolt;
+import backtype.storm.topology.base.BaseRichSpout;
+import backtype.storm.tuple.Fields;
+import backtype.storm.tuple.Tuple;
+import backtype.storm.tuple.Values;
+import backtype.storm.utils.Utils;
 
 /**
  * This is three stage topology. Spout emits to bolt to bolt.
@@ -121,6 +121,6 @@ public class MultiStageAckingTopology {
     conf.setEnableAcking(true);
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
     conf.setNumStmgrs(1);
-    HeronSubmitter.submitTopology(args[0], conf, builder.createTopology());
+    StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }
 }
