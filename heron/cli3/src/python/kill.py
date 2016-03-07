@@ -38,8 +38,8 @@ def create_parser(subparsers):
   return parser
 
 def run(command, parser, cl_args, unknown_args):
-  try:
 
+  try:
     # check if the required arguments are provided
     cluster_role_env = cl_args['cluster/[role]/[env]']
     topology_name = cl_args['topology-name']
@@ -53,6 +53,7 @@ def run(command, parser, cl_args, unknown_args):
     print(subparser.format_help())
     parser.exit()
 
+  # check if the config exists
   config_path = utils.get_heron_cluster_conf_dir(cluster_role_env, config_path);
   if not os.path.isdir(config_path):
     print("Config directory does not exist: %s" % config_path);
