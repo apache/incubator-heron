@@ -27,13 +27,9 @@ public class Shutdown {
   }
 
   public void terminate() {
-    LOG.info("called terminate");
     lock.lock();
-    LOG.info("acquired local");
     terminated = true;
     terminateCondition.signal();
-    LOG.info("delivered the signal");
     lock.unlock();
-    LOG.info("lock unlocked");
   }
 }
