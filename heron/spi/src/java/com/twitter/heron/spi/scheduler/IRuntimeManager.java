@@ -4,14 +4,7 @@ import com.twitter.heron.spi.common.Config;
 
 public interface IRuntimeManager {
 
-  enum Command {
-    KILL,
-    ACTIVATE,
-    DEACTIVATE,
-    RESTART;
-  }
-
-  void initialize(Config config);
+  void initialize(Config config, Config runtime);
 
   void close();
 
