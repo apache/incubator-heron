@@ -27,7 +27,7 @@ public class Jars {
    *
    * @return list of jars
    */
-  public static List<String> getJars(Pattern pattern, String directory) {
+  public static List<String> getJars(final Pattern pattern, String directory) {
 
     // create the filename filter
     FilenameFilter fileNameFilter = new FilenameFilter() {
