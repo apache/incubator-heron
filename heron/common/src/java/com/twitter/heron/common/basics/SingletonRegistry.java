@@ -1,26 +1,39 @@
 package com.twitter.heron.common.basics;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public enum SingletonRegistry {
   INSTANCE;
 
   /**
    * Cache of singleton objects: bean name --> instance
+   * We use HashMap and synchronized all the operations on it.
+   * The reasons are:
+   *   1. The register methods need to be atomic, so make these methods synchronized.
+   *   2. We need synchronized to guarantee the thread safe of singletonObjects (HashMap itself
+   *      is not thread safe).
+   *   3. ConcurrentHashMap doesn't support the register atomic operations and thus we didn't use
+   *      it here
    */
-  private final Map<String, Object> singletonObjects = new ConcurrentHashMap<String, Object>();
+  private final Map<String, Object> singletonObjects = new HashMap<String, Object>();
 
   public boolean containsSingleton(String beanName) {
-    return singletonObjects.containsKey(beanName);
+    synchronized (this.singletonObjects) {
+      return singletonObjects.containsKey(beanName);
+    }
   }
 
   public Object getSingleton(String beanName) {
-    return this.singletonObjects.get(beanName);
+    synchronized (this.singletonObjects) {
+      return this.singletonObjects.get(beanName);
+    }
   }
 
   public int getSingletonCount() {
-    return singletonObjects.size();
+    synchronized (this.singletonObjects) {
+      return singletonObjects.size();
+    }
   }
 
   // Typically invoked during registry configuration, but can also be used for runtime registration
