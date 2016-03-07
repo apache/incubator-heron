@@ -49,18 +49,22 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
   public Boolean call() {
 
     // initialize the runtime manager
-    runtimeManager.initialize(config);
+    runtimeManager.initialize(config, runtime);
 
     // execute the appropriate command
     boolean result = false;
-    if (command.equals("activate"))
+    if (command.equals("activate") || command.equals("resume"))
       result = activateTopologyHandler(Context.topologyName(config));
-    else if (command.equals("deactivate"))
+
+    else if (command.equals("deactivate") || command.equals("suspend"))
       result = deactivateTopologyHandler(Context.topologyName(config));
+
     else if (command.equals("restart"))
       result = restartTopologyHandler(Context.topologyName(config));
+
     else if (command.equals("kill"))
       result = killTopologyHandler(Context.topologyName(config));
+
     else 
       LOG.info("Unknown command for topology: " + command);
 
