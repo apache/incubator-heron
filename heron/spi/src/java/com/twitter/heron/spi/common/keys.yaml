@@ -107,7 +107,8 @@ HERON_SANDBOX_CONF:            heron.directory.sandbox.conf
 # keys for run time config
 ################################################################################
 TOPOLOGY_CLASSPATH:            heron.runtime.topology.class.path
-STATE_MANAGER:                 heron.runtime.state.manager
+SCHEDULER_STATE_MANAGER:       heron.runtime.scheduler.state.manager
+SCHEDULER_SHUTDOWN:            heron.runtime.scheduler.shutdown
 
 COMPONENT_RAMMAP:              heron.runtime.component.rammap
 COMPONENT_JVM_OPTS_IN_BASE64:  heron.runtime.component.jvm.opts.in.base64

@@ -1,6 +1,7 @@
 package com.twitter.heron.scheduler.server;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -10,11 +11,11 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.HttpUtils;
 import com.twitter.heron.spi.scheduler.IScheduler;
-import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.NetworkUtils;
 
 public class KillRequestHandler implements HttpHandler {
+  private static final Logger LOG = Logger.getLogger(KillRequestHandler.class.getName());
 
   private IScheduler scheduler;
   private Config runtime;
@@ -48,8 +49,9 @@ public class KillRequestHandler implements HttpHandler {
     // Send the response back
     HttpUtils.sendHttpResponse(exchange, response.toByteArray());
 
-    // call the close to state manager - for closing files & zookeeper connections
-    Runtime.stateManager(runtime).close();
-    System.exit(0);
+    // tell the scheduler to shutdown
+    LOG.info("Kill request handler issuing a terminate request to scheduler");
+    Runtime.schedulerShutdown(runtime).terminate();
+    LOG.info("Kill request handler issued a terminate request to scheduler");
   }
 }

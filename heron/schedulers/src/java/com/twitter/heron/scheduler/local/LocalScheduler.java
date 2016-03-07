@@ -32,6 +32,8 @@ import com.twitter.heron.spi.utils.Runtime;
 
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.IStateManager;
+import com.twitter.heron.spi.statemgr.SchedulerStateManager;
+
 import org.apache.commons.io.FilenameUtils;
 
 import javax.xml.bind.DatatypeConverter;
@@ -49,7 +51,7 @@ public class LocalScheduler implements IScheduler {
   // map to keep track of the process and the shard it is running
   private final Map<Process, Integer> processToContainer = new ConcurrentHashMap<Process, Integer>();
 
-  // Has the topology been killed?
+  // has the topology been killed?
   private volatile boolean topologyKilled = false;
 
   @Override
@@ -61,12 +63,12 @@ public class LocalScheduler implements IScheduler {
     LOG.info("# of containers: " + Runtime.numContainers(runtime));
 
     // first, run the TMaster executor
-    // startExecutor(0);
-    // LOG.info("TMaster is started.");
+    startExecutor(0);
+    LOG.info("TMaster is started.");
 
     // for each container, run its own executor
     long numContainers = Runtime.numContainers(runtime);
-    for (int i = 1; i <= numContainers; i++) {
+    for (int i = 1; i < numContainers; i++) {
       startExecutor(i);
     }
 
@@ -170,7 +172,7 @@ public class LocalScheduler implements IScheduler {
         LocalContext.environ(config),
         LocalContext.instanceClassPath(config),
         LocalContext.metricsSinksFile(config),
-        "not_container_0",
+        "no_need_since_scheduler_is_started",
         0
     );
 
@@ -214,7 +216,7 @@ public class LocalScheduler implements IScheduler {
     processToContainer.clear();
 
     // get the state manager instance
-    IStateManager stateManager = Runtime.stateManager(runtime);
+    SchedulerStateManager stateManager = Runtime.schedulerStateManager(runtime);
 
     // remove the scheduler location for the topology from state manager
     LOG.info("Removing scheduler location for topology: " + topologyName);
@@ -277,7 +279,7 @@ public class LocalScheduler implements IScheduler {
     }
 
     // get the instance of state manager to clean state
-    IStateManager stateManager = Runtime.stateManager(runtime);
+    SchedulerStateManager stateManager = Runtime.schedulerStateManager(runtime);
 
     // Clean TMasterLocation since we could not set it as ephemeral for local file system
     // We would not clean SchedulerLocation since we would not restart the Scheduler
@@ -297,7 +299,7 @@ public class LocalScheduler implements IScheduler {
     String topologyName = LocalContext.topologyName(config);
 
     // get the state manager instance
-    IStateManager stateManager = Runtime.stateManager(runtime);
+    SchedulerStateManager stateManager = Runtime.schedulerStateManager(runtime);
 
     // fetch the TMasterLocation for the topology
     LOG.info("Fetching TMaster location for topology: " + topologyName);
