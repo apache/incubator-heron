@@ -13,9 +13,13 @@ import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.PackingPlan;
+
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.scheduler.ILauncher;
+
 import com.twitter.heron.spi.statemgr.IStateManager;
+import com.twitter.heron.spi.statemgr.SchedulerStateManager;
+
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.NetworkUtils;
 
@@ -95,7 +99,7 @@ public class LaunchRunner implements Callable<Boolean> {
 
   public Boolean call() {
 
-    IStateManager statemgr = Runtime.stateManager(runtime);
+    SchedulerStateManager statemgr = Runtime.schedulerStateManager(runtime);
     TopologyAPI.Topology topology = Runtime.topology(runtime);
     String topologyName = Context.topologyName(config);
 
