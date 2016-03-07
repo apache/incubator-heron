@@ -169,7 +169,7 @@ public class SchedulerMain {
     scheduler.initialize(config, ytruntime);
 
     // start the scheduler REST endpoint for receiving requests
-    SchedulerServer server = runServer(runtime, scheduler, schedulerServerPort);
+    SchedulerServer server = runServer(ytruntime, scheduler, schedulerServerPort);
 
     // write the scheduler location to state manager.
     setSchedulerLocation(runtime, server);
