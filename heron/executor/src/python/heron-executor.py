@@ -356,8 +356,7 @@ class HeronExecutor:
   def launch(self):
     commands = { }
     if self.shard == 0:
-      commands = self.get_scheduler_processes()
-      commands.update(self.get_tmaster_processes())
+      commands = self.get_tmaster_processes()
     else:
       self.untar_if_tar()
       commands = self.get_regular_processes()

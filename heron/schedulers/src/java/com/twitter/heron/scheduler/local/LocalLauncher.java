@@ -29,6 +29,7 @@ import com.twitter.heron.spi.utils.TopologyUtils;
 
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.IStateManager;
+import com.twitter.heron.spi.statemgr.SchedulerStateManager;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import org.apache.commons.io.FileUtils;
@@ -92,7 +93,7 @@ public class LocalLauncher implements ILauncher {
     LOG.info("Checking whether the topology has been launched already!");
 
     String topologyName = LocalContext.topologyName(config);
-    IStateManager stateManager = Runtime.stateManager(runtime);
+    SchedulerStateManager stateManager = Runtime.schedulerStateManager(runtime);
 
     // check if any topology with the same name is running
     // TODO, by the time, we do this here, it is too late 
@@ -141,46 +142,23 @@ public class LocalLauncher implements ILauncher {
         .append(LocalContext.stateManagerClassPath(sandboxConfig))
         .toString();
 
-    String executorCmd = String.format("%s %d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %d %s %s %d %s %s %s %s %s %s %d",
-        LocalContext.executorBinary(sandboxConfig),
-        0,
-        topology.getName(),
-        topology.getId(),
-        FilenameUtils.getName(LocalContext.topologyDefinitionFile(config)),
-        TopologyUtils.packingToString(packing),
-        LocalContext.stateManagerConnectionString(config),
-        LocalContext.stateManagerRootPath(config),
-        LocalContext.tmasterBinary(sandboxConfig),
-        LocalContext.stmgrBinary(sandboxConfig),
-        LocalContext.metricsManagerClassPath(sandboxConfig),
-        formatJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)),
-        TopologyUtils.makeClassPath(topology, LocalContext.topologyJarFile(config)),
-        NetworkUtils.getFreePort(),
-        NetworkUtils.getFreePort(),
-        NetworkUtils.getFreePort(),
-        LocalContext.systemConfigFile(sandboxConfig),
-        TopologyUtils.formatRamMap(TopologyUtils.getComponentRamMap(topology)),
-        formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)),
-        LocalContext.topologyPackageType(config),
-        LocalContext.topologyJarFile(config),
-        LocalContext.javaHome(config),
-        NetworkUtils.getFreePort(),
-        LocalContext.logDirectory(sandboxConfig),
-        LocalContext.shellBinary(sandboxConfig),
-        NetworkUtils.getFreePort(),
+   String schedulerCmd = String.format("%s %s %s %s %s %s %s %s %s %d",
+        "java",
+        "-cp",
+        schedulerClassPath,
+        "com.twitter.heron.scheduler.SchedulerMain",
         LocalContext.cluster(config),
         LocalContext.role(config),
         LocalContext.environ(config),
-        LocalContext.instanceClassPath(sandboxConfig),
-        LocalContext.metricsSinksFile(sandboxConfig),
-        schedulerClassPath,
+        topology.getName(),
+        LocalContext.topologyJarFile(config),
         NetworkUtils.getFreePort()
     );
 
-    LOG.info("Executor command line: " + executorCmd.toString());
+    LOG.info("Scheduler command line: " + schedulerCmd.toString());
 
     // TO DO: we need to run as async process
-    return 0 == ShellUtils.runSyncProcess(true, true, executorCmd.toString(),
+    return 0 == ShellUtils.runSyncProcess(true, true, schedulerCmd.toString(),
         new StringBuilder(), new StringBuilder(), new File(topologyWorkingDirectory));
   }
 
@@ -234,7 +212,7 @@ public class LocalLauncher implements ILauncher {
   protected boolean downloadAndExtractPackages() {
     
     // log the state manager being used, for visibility and debugging purposes
-    IStateManager stateManager = Runtime.stateManager(runtime);
+    SchedulerStateManager stateManager = Runtime.schedulerStateManager(runtime);
     LOG.info("State manager used: " + stateManager.getClass().getName());
 
     // if the working directory does not exist, create it.

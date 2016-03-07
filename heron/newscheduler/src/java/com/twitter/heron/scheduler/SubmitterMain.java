@@ -12,6 +12,7 @@ import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
 
 import com.twitter.heron.spi.statemgr.IStateManager;
+import com.twitter.heron.spi.statemgr.SchedulerStateManager;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -32,6 +33,68 @@ import com.twitter.heron.api.generated.TopologyAPI;
 public class SubmitterMain {
   private static final Logger LOG = Logger.getLogger(SubmitterMain.class.getName());
 
+  /**
+   * Load the topology config
+   *
+   * @param topologyPackage, tar ball containing user submitted jar/tar, defn and config
+   * @param topologyJarFile, name of the user submitted topology jar/tar file
+   * @param topology, proto in memory version of topology definition 
+   *
+   * @return config, the topology config
+   */
+  protected static Config topologyConfigs(
+      String topologyPackage, String topologyJarFile, String topologyDefnFile, 
+      TopologyAPI.Topology topology) {
+
+    String pkgType = FileUtils.isOriginalPackageJar(
+        FileUtils.getBaseName(topologyJarFile)) ? "jar" : "tar" ; 
+
+    Config config = Config.newBuilder()
+        .put(Keys.topologyId(), topology.getId())
+        .put(Keys.topologyName(), topology.getName())
+        .put(Keys.topologyDefinitionFile(), topologyDefnFile)
+        .put(Keys.topologyPackageFile(), topologyPackage)
+        .put(Keys.topologyJarFile(), topologyJarFile)
+        .put(Keys.topologyPackageType(), pkgType)
+        .build();
+
+    return config;
+  }
+
+  /**
+   * Load the defaults config
+   *
+   * @param heronHome, directory of heron home
+   * @param configPath, directory containing the config
+   *
+   * return config, the defaults config
+   */
+  protected static Config defaultConfigs(String heronHome, String configPath) {
+    Config config = Config.newBuilder()
+        .putAll(ClusterDefaults.getDefaults())
+        .putAll(ClusterConfig.loadConfig(heronHome, configPath))
+        .build();
+    return config;
+  }
+
+  /**
+   * Load the config parameters from the command line
+   *
+   * @param cluster, name of the cluster
+   * @param role, user role
+   * @param environ, user provided environment/tag 
+   *
+   * @return config, the command line config
+   */
+  protected static Config commandLineConfigs(String cluster, String role, String environ) {
+    Config config = Config.newBuilder()
+        .put(Keys.cluster(), cluster)
+        .put(Keys.role(), role)
+        .put(Keys.environ(), environ)
+        .build();
+    return config;
+  }
+
   public static void main(String[] args) throws
       ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
     String cluster = args[0];
@@ -43,48 +106,28 @@ public class SubmitterMain {
 
     String topologyPackage = args[6];
     String topologyDefnFile = args[7];
-    String originalPackageFile = args[8];
+    String topologyJarFile = args[8];
 
     System.out.println(heronHome + " " + configPath);
 
-    // First load the defaults, then the config from files to override it 
-    Config.Builder defaultsConfig = Config.newBuilder()
-        .putAll(ClusterDefaults.getDefaults())
-        .putAll(ClusterConfig.loadConfig(heronHome, configPath));
- 
-    // Add config parameters from the command line
-    Config.Builder commandLineConfig = Config.newBuilder()
-        .put(Keys.cluster(), cluster)
-        .put(Keys.role(), role)
-        .put(Keys.environ(), environ);
-
-    // Identify the type of topology package
-    String pkgType = FileUtils.isOriginalPackageJar(
-        FileUtils.getBaseName(originalPackageFile)) ? "jar" : "tar" ; 
-
-    // Load the topology definition into topology proto
+    // load the topology definition into topology proto
     TopologyAPI.Topology topology = TopologyUtils.getTopology(topologyDefnFile);
 
-    Config.Builder topologyConfig = Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
-        .put(Keys.topologyDefinitionFile(), topologyDefnFile)
-        .put(Keys.topologyPackageFile(), topologyPackage)
-        .put(Keys.topologyJarFile(), originalPackageFile)
-        .put(Keys.topologyPackageType(), pkgType);
-
+    // first load the defaults, then the config from files to override it 
+    // next add config parameters from the command line
+    // load the topology configs 
     // TODO (Karthik) override any parameters from the command line
 
-    // Build the final config by expanding all the variables
+    // build the final config by expanding all the variables
     Config config = Config.expand(
         Config.newBuilder()
-            .putAll(defaultsConfig.build())
-            .putAll(commandLineConfig.build())
-            .putAll(topologyConfig.build())
+            .putAll(defaultConfigs(heronHome, configPath))
+            .putAll(commandLineConfigs(cluster, role, environ))
+            .putAll(topologyConfigs(
+                topologyPackage, topologyJarFile, topologyDefnFile, topology))
             .build());
 
     LOG.info("Static config loaded successfully ");
-    LOG.info(config.asString());
     LOG.info(config.toString());
 
     // submit the topology with the given config
@@ -118,7 +161,7 @@ public class SubmitterMain {
         .put(Keys.topologyId(), topology.getId())
         .put(Keys.topologyName(), topology.getName())
         .put(Keys.topologyDefinition(), topology)
-        .put(Keys.stateManager(), statemgr)
+        .put(Keys.schedulerStateManager(), new SchedulerStateManager(statemgr))
         .put(Keys.topologyPackageUri(), uploadRunner.getUri())
         .build();
 

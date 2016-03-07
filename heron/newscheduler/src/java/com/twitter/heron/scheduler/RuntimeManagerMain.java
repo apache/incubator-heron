@@ -14,6 +14,7 @@ import com.twitter.heron.spi.common.ClusterDefaults;
 
 import com.twitter.heron.spi.scheduler.IRuntimeManager;
 import com.twitter.heron.spi.statemgr.IStateManager;
+import com.twitter.heron.spi.statemgr.SchedulerStateManager;
 
 public class RuntimeManagerMain {
   private static final Logger LOG = Logger.getLogger(RuntimeManagerMain.class.getName());
@@ -25,30 +26,41 @@ public class RuntimeManagerMain {
     String role = args[1];
     String environ = args[2];
     String heronHome = args[3];
-    String topologyName = args[4];
-    String command = args[5];
+    String configPath = args[4];
+    String configOverrideEncoded = args[5];
+    String topologyName = args[6];
+    String command = args[7];
 
     // first load the defaults, then the config from files to override it
-    Config.Builder defaultConfigs = Config.newBuilder()
+    Config.Builder defaultsConfig = Config.newBuilder()
         .putAll(ClusterDefaults.getDefaults())
-        .putAll(ClusterConfig.loadConfig(heronHome, cluster));
+        .putAll(ClusterConfig.loadConfig(heronHome, configPath));
 
     // add config parameters from the command line
-    Config.Builder commandLineConfigs = Config.newBuilder()
+    Config.Builder commandLineConfig = Config.newBuilder()
         .put(Keys.cluster(), cluster)
         .put(Keys.role(), role)
         .put(Keys.environ(), environ);
 
-    Config.Builder topologyConfigs = Config.newBuilder()
+    Config.Builder topologyConfig = Config.newBuilder()
         .put(Keys.topologyName(), topologyName);
 
-    Config config = Config.newBuilder()
-        .putAll(defaultConfigs.build())
-        .putAll(commandLineConfigs.build())
-        .putAll(topologyConfigs.build())
-        .build();
+    // TODO (Karthik) override any parameters from the command line
 
-    boolean rt = manageTopology(config, topologyName, command);
+    // build the final config by expanding all the variables
+    Config config = Config.expand(
+        Config.newBuilder()
+            .putAll(defaultsConfig.build())
+            .putAll(commandLineConfig.build())
+            .putAll(topologyConfig.build())
+            .build());
+
+    LOG.info("Static config loaded successfully ");
+    LOG.info(config.toString());
+
+    // invoke the appropriate command to manage the topology
+    LOG.info("Topology: " + topologyName + " to be " + command + "ed");
+    boolean rt = manageTopology(config, command);
     if (!rt) {
       LOG.severe("Failed to " + command + " topology " + topologyName);
       Runtime.getRuntime().exit(1);
@@ -57,18 +69,20 @@ public class RuntimeManagerMain {
     LOG.info("Topology " + topologyName + " " + command + " successfully");
   }
 
-  public static boolean manageTopology(Config config, String topologyName, String command)
+  public static boolean manageTopology(Config config, String command)
       throws ClassNotFoundException, IllegalAccessException, InstantiationException, IOException {
 
     // create an instance of state manager
     String statemgrClass = Context.stateManagerClass(config);
     IStateManager statemgr = (IStateManager)Class.forName(statemgrClass).newInstance();
-    // TODO - initialize the statemgr everywhere
+
+    // initialize the statemgr
+    statemgr.initialize(config);
 
     // build the runtime config
     Config runtime = Config.newBuilder()
-        .put(Keys.topologyName(), topologyName)
-        .put(Keys.stateManager(), statemgr)
+        .put(Keys.topologyName(), Context.topologyName(config))
+        .put(Keys.schedulerStateManager(), new SchedulerStateManager(statemgr))
         .build();
 
     // create an instance of the runner class
@@ -77,7 +91,8 @@ public class RuntimeManagerMain {
     // invoke the appropriate handlers based on command
     boolean ret = runtimeManagerRunner.call();
 
-    // TODO close the state manager 
+    // close the state manager 
+    statemgr.close();
     return ret;
   }
 }

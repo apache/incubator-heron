@@ -16,7 +16,10 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.HttpUtils;
 import com.twitter.heron.spi.scheduler.IRuntimeManager;
+
 import com.twitter.heron.spi.statemgr.IStateManager;
+import com.twitter.heron.spi.statemgr.SchedulerStateManager;
+
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.NetworkUtils;
 
@@ -71,7 +74,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
   protected Pair<Boolean, HttpURLConnection> createHttpConnection() {
 
     // get the instance of the state manager
-    IStateManager statemgr = Runtime.stateManager(runtime);
+    SchedulerStateManager statemgr = Runtime.schedulerStateManager(runtime);
 
     // fetch scheduler location from state manager
     LOG.info("Fetching scheduler location from state manager for " + command + " topology");
@@ -88,7 +91,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     }
 
     // if there is no scheduler end point, (e.g) aurora, nothing to do (TODO - eliminate Curator)
-    if (schedulerLocation.getHttpEndpoint().equals(statemgr.NO_SCHEDULER_REST_ENDPOINT)) {
+    if (schedulerLocation.getHttpEndpoint().equals(IStateManager.NO_SCHEDULER_REST_ENDPOINT)) {
       LOG.info("Nothing required to be done on scheduler.");
       return Pair.create(true, null);
     }
@@ -373,7 +376,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     LOG.info("Cleaning up Heron State");
 
     // get the instance of the state manager
-    IStateManager statemgr = Runtime.stateManager(runtime);
+    SchedulerStateManager statemgr = Runtime.schedulerStateManager(runtime);
 
     ListenableFuture<Boolean> booleanFuture;
     try {

@@ -222,8 +222,12 @@ public class Keys {
     return ConfigKeys.get("TOPOLOGY_CLASSPATH");
   }
 
-  public static String stateManager() {
-    return ConfigKeys.get("STATE_MANAGER");
+  public static String schedulerStateManager() {
+    return ConfigKeys.get("SCHEDULER_STATE_MANAGER");
+  }
+
+  public static String schedulerShutdown() {
+    return ConfigKeys.get("SCHEDULER_SHUTDOWN");
   }
 
   public static String componentRamMap() {

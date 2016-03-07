@@ -38,32 +38,47 @@ def create_parser(subparsers):
   return parser
 
 def run(command, parser, cl_args, unknown_args):
-  # check if the required arguments are provided
   try:
+
+    # check if the required arguments are provided
     cluster_role_env = cl_args['cluster/[role]/[env]']
     topology_name = cl_args['topology-name']
 
+    # extract the config path
+    config_path = cl_args['config_path']
+
   except KeyError:
+    # if some of the arguments are not found, print error and exit
     subparser = utils.get_subparser(parser, command)
     print(subparser.format_help())
     parser.exit()
 
+  config_path = utils.get_heron_cluster_conf_dir(cluster_role_env, config_path);
+  if not os.path.isdir(config_path):
+    print("Config directory does not exist: %s" % config_path);
+    parser.exit();
+
   try:
-    config_overrides = \
-        utils.parse_cluster_role_env(cluster_role_env) + ' ' + \
-        utils.parse_cmdline_override(cl_args)
+    cluster_role_env = utils.parse_cluster_role_env(cluster_role_env)
+    config_overrides = utils.parse_cmdline_override(cl_args)
 
     new_args = [
-        command,
-        topology_name,
-        cl_args['config_loader'],
-        base64.b64encode(config_overrides),
-        cl_args['config_path']
+        cluster_role_env[0],                # cluster
+        cluster_role_env[1],                # role
+        cluster_role_env[2],                # environ
+        utils.get_heron_dir(),              # heron home directory
+        config_path,                        # path to config
+        base64.b64encode(config_overrides), # override values to config
+        topology_name,                      # topology name
+        command                             # kill 
     ]
 
+    lib_jars = utils.get_heron_libs(jars.scheduler_jars() + jars.statemgr_jars())
+
+    # invoke the runtime manager to kill the topology
     execute.heron_class(
-        'com.twitter.heron.scheduler.service.RuntimeManagerMain',
-        utils.get_heron_libs(jars.scheduler_jars()),
+        'com.twitter.heron.scheduler.RuntimeManagerMain',
+        lib_jars,
         extra_jars=[],
         args= new_args
     )
