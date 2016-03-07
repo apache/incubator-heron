@@ -117,13 +117,24 @@ setup_heron_zk_nodes() {
 copy_scripts() {
     # Copying all the scripts to the home directory for simpler launching through 'vagrant ssh master -c'.
     cp *.sh /home/vagrant
+    cp *.json /home/vagrant
+}
+
+print_usage() {
+    echo "Usage: $0 master|slave mesos|aurora"
 }
 
 if [[ $1 != "master" && $1 != "slave" ]]; then
-    echo "Usage: $0 master|slave"
+    print_usage
     exit 1
 fi
 mode=$1
+
+if [[ $2 != "mesos" && $2 != "aurora" ]]; then
+    print_usage
+    exit 1
+fi
+scheduler=$2
 
 cd /vagrant/contrib/kafka9/vagrant
 
@@ -168,9 +179,16 @@ install_mesos $mode
 if [ $mode == "master" ]; then
     install_marathon
     install_kafka-mesos
-    install_aurora_coordinator
+    if [ $scheduler == "aurora" ]; then
+        install_aurora_coordinator
+    fi
+    if [ $scheduler == "mesos" ]; then
+        ./submit-mesos-scheduler.sh
+    fi
     ./setup-dist-dir.sh
     setup_heron_zk_nodes
     copy_scripts
 fi
-install_aurora_worker
+if [ $scheduler == "aurora" ]; then
+    install_aurora_worker
+fi

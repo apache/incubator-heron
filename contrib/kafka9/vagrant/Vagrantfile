@@ -17,6 +17,7 @@
 
 SLAVES=1
 NET_PREFIX="192.168.3."
+SCHEDULER="mesos"
 
 NODES={"master" => NET_PREFIX + "5"}
 (0..SLAVES-1).each do |i| NODES["slave#{i}"] = NET_PREFIX + (6 + i).to_s end
@@ -47,7 +48,7 @@ Vagrant.configure(2) do |config|
     master.vm.network :private_network, ip: NODES["master"]
     master.vm.network :private_network, ip: NODES["master"].sub(".3.", ".4.")
 
-    master.vm.provision "shell", path: "init.sh", args: "master"
+    master.vm.provision "shell", path: "init.sh", args: "master " + SCHEDULER
   end
 
   (0..SLAVES-1).each do |i|
@@ -61,7 +62,7 @@ Vagrant.configure(2) do |config|
       slave.vm.network :private_network, ip: NODES[slave.vm.hostname]
       slave.vm.network :private_network, ip: NODES[slave.vm.hostname].sub(".3.", ".4.")
 
-      slave.vm.provision "shell", path: "init.sh", args: "slave"
+      slave.vm.provision "shell", path: "init.sh", args: "slave " + SCHEDULER
     end
   end
 end

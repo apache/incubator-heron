@@ -31,6 +31,15 @@ export TOPOLOGY_ONLY="true"
 
 ## Running the cluster
 
+### Choosing the scheduler
+By default, Heron will run on a native Mesos scheduler, but one has an option to run Heron on Aurora scheduler as well.
+In order to do this, go to `Vagrantfile` in this dir and set `SCHEDULER` variable like this:
+
+```
+SCHEDULER="aurora"
+```
+
+### Bringing the cluster up
 In order to bring the cluster up, please run
 
 ```
@@ -41,10 +50,17 @@ After the cluster is up an running, the following components are being provision
 
 - Mesos master + N slave(s) (see `Vagrantfile` to adjust N as well as resources provided to VMs)
 - Marathon
+- Kafka-Mesos scheduler for Kafka-0.9.x
+
+The following depends on a chosen scheduler. If Aurora is chosen:
+ 
 - Aurora scheduler on master
 - Aurora executor on master and all the slaves
-- Kafka-Mesos scheduler for Kafka-0.9.x 
 
+for Mesos scheduler:
+
+- Heron-Mesos scheduler, deployed as a Marathon task 
+ 
 ## Running topology
 
 In order to run the topology, one should set up one or more Kafka broker and submit the topology using Heron CLI
@@ -96,7 +112,11 @@ For the details on managing brokers, please refer to https://github.com/mesos/ka
 In order to run the example topology please run:
 
 ```
-vagrant ssh master -c "./submit-09-topology.sh <topology_name> <bootstrap_broker> <source_topic> <target_topic>" 
+# Aurora:
+vagrant ssh master -c "./submit-09-topology.sh <topology_name> <bootstrap_broker> <source_topic> <target_topic>"
+ 
+# Mesos:
+vagrant ssh master -c "./submit-09-topology-mesos.sh <topology_name> <bootstrap_broker> <source_topic> <target_topic>"
 ```
 
 ## Verification
@@ -118,7 +138,15 @@ cd kafka-09/bin
 
 ## Shutting the topology down
 
-It is still quite unclear on how to gracefully shutdown a Heron topology, which is hopefully to change in the nearest 
+### Mesos
+In order to shut a topology down simply run:
+
+```
+vagrant ssh master -c "./kill-09-topology-mesos.sh <topology_name>"
+```
+
+### Aurora
+It is still quite unclear on how to gracefully shutdown a Heron topology on Aurora, which is hopefully to change in the nearest 
 future. Although it is always possible to kill an Aurora job, responsible for running the topology like this:
 
 ```
@@ -146,7 +174,11 @@ In case if one wants to submit a different topology, simply place the topology f
 `heron-ubuntu/topologies` dir. Then it is possible to launch one's custom topology as follows:
 
 ```
+# Aurora:
 vagrant ssh master -c "./submit-custom-topology.sh <jar_file_name> <main_class_name> <topology_name> <args>"
+
+# Mesos:
+vagrant ssh master -c "./submit-custom-topology-mesos.sh <jar_file_name> <main_class_name> <topology_name> <args>"
 ```
 
 For the required dependencies and the packing that would work, please check `KafkaMirror` topology `BUILD` file.

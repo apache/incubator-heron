@@ -101,15 +101,15 @@ public class MesosScheduler implements IScheduler {
 
     LOG.info("Wait for jobScheduler's availability");
     startLatch = new CountDownLatch(1);
-    mesosJobFramework.setStartNotification(startLatch);
-    try {
-      if (!startLatch.await(MAX_WAIT_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
-        throw new RuntimeException("Job Scheduler does not recover in expected time!");
+    if (mesosJobFramework.setSafeLatch(startLatch)) {
+      try {
+        if (!startLatch.await(MAX_WAIT_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+          throw new RuntimeException("Job Scheduler does not recover in expected time!");
+        }
+      } catch (InterruptedException e) {
+        throw new RuntimeException("Mesos Scheduler is interrupted:", e);
       }
-    } catch (InterruptedException e) {
-      throw new RuntimeException("Mesos Scheduler is interrupted:", e);
     }
-
     for (BaseJob job : executorShardToJob.values()) {
       jobScheduler.registerJob(job);
     }
@@ -203,9 +203,8 @@ public class MesosScheduler implements IScheduler {
         context.getProperty(Constants.HERON_CORE_RELEASE_URI));
 
     String cmd = String.format(
-        "ls -1 | grep -v std | xargs -I{} tar xvf {} && rm %s %s " +
-            "&& mkdir log-files && ./heron-executor",
-        topologyTarfile, heronCoreFile);
+        "rm %s %s && mkdir log-files && ./heron-executor",
+         topologyTarfile, heronCoreFile);
 
     StringBuilder command = new StringBuilder(cmd);
 
@@ -392,14 +391,14 @@ public class MesosScheduler implements IScheduler {
       String sPort5) {
 
     return String.format(
-        "%s %s %s " +
-            "%s %s %s " +
-            "%s %s %s " +
-            "%s %s %s " +
-            "%s %s %s " +
-            "%s %s %s " +
-            "%s %s %s " +
-            "%s %s %s",
+        "\"%s\" \"%s\" \"%s\" " +
+            "\"%s\" \"%s\" \"%s\" " +
+            "\"%s\" \"%s\" \"%s\" " +
+            "\"%s\" \"%s\" \"%s\" " +
+            "\"%s\" \"%s\" \"%s\" " +
+            "\"%s\" \"%s\" \"%s\" " +
+            "\"%s\" \"%s\" \"%s\" " +
+            "\"%s\" \"%s\" \"%s\"",
         context.getProperty("TOPOLOGY_NAME"), context.getProperty("TOPOLOGY_ID"), context.getProperty("TOPOLOGY_DEFN"),
         context.getProperty("INSTANCE_DISTRIBUTION"), context.getProperty("ZK_NODE"), context.getProperty("ZK_ROOT"),
         context.getProperty("TMASTER_BINARY"), context.getProperty("STMGR_BINARY"), context.getProperty("METRICS_MGR_CLASSPATH"),

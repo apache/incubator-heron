@@ -83,7 +83,7 @@ public class MesosLauncher implements ILauncher {
     configOverrides.put("ISPRODUCTION", "" + ("prod".equals(environ)));
     configOverrides.put("JOB_NAME", topology.getName());
     configOverrides.put("LOG_DIR", context.getProperty("heron.logging.directory", "log-files"));
-    configOverrides.put("METRICS_MGR_CLASSPATH", "metrics-mgr-classpath/*");
+    configOverrides.put("METRICS_MGR_CLASSPATH", "heron-metricsmgr.jar:metrics-mgr-classpath/*");
     configOverrides.put("NUM_SHARDS", "" + (1 + TopologyUtility.getNumContainer(topology)));
     configOverrides.put("PKG_TYPE", (FileUtility.isOriginalPackageJar(
         FileUtility.getBaseName(SubmitterMain.getOriginalPackageFile())) ? "jar" : "tar"));
@@ -119,13 +119,13 @@ public class MesosLauncher implements ILauncher {
     StringBuilder overrideBuilder = new StringBuilder();
     for (String key : configOverrides.keySet()) {
       overrideBuilder.append(
-          String.format("%s=%s ", key, safeEncodeB64(configOverrides.get(key))));
+          String.format("%s=%s ", key, wrapInQuotes(configOverrides.get(key))));
     }
 
     overrideBuilder.deleteCharAt(overrideBuilder.length() - 1);
 
     // Encode the config override into Base64
-    String jobDefInJSON = getJobInJSON(safeEncodeB64(overrideBuilder.toString()));
+    String jobDefInJSON = getJobInJSON(safeEncodeB64WWrap(overrideBuilder.toString()));
 
     String endpoint = String.format("%s/%s",
         context.getPropertyWithException(MesosConfig.HERON_MESOS_FRAMEWORK_ENDPOINT),
@@ -213,13 +213,11 @@ public class MesosLauncher implements ILauncher {
 
     String heronCoreReleasePath = getHeronCoreHdfsPath();
 
-    String mesosPackagePath = context.getPropertyWithException(MesosConfig.MESOS_PKG_URI);
-
     jobDef.put("name", topology.getName() + "-framework");
 
     jobDef.put("command",
         String.format("%s; %s",
-            getSetupCommand(topologyPath, heronCoreReleasePath, mesosPackagePath),
+            getSetupCommand(topologyPath, heronCoreReleasePath),
             getRunTopologySchedulerCommand(configOverride)));
 
     jobDef.put("description", "Scheduler for topology: " + topologyName);
@@ -236,7 +234,6 @@ public class MesosLauncher implements ILauncher {
     List<String> uris = new ArrayList<>();
     uris.add(topologyPath);
     uris.add(heronCoreReleasePath);
-    uris.add(mesosPackagePath);
     jobDef.put("uris", uris);
 
     String result = "";
@@ -250,15 +247,13 @@ public class MesosLauncher implements ILauncher {
   }
 
   private String getSetupCommand(String topologyPath,
-                                 String heronCoreReleasePath,
-                                 String mesosPackagePath) {
+                                 String heronCoreReleasePath) {
     String topologyFile = extractFilenameFromUri(topologyPath);
     String heronCoreReleaseFile = extractFilenameFromUri(heronCoreReleasePath);
-    String mesosPacakgeFile = extractFilenameFromUri(mesosPackagePath);
 
     String untarPackage =
-        String.format("ls -1 | grep -v std | xargs -I{} tar xvf {} && rm %s %s %s ",
-            topologyFile, heronCoreReleaseFile, mesosPacakgeFile);
+        String.format("ls -1 | grep -v std | xargs -I{} tar xvf {} && rm %s %s",
+            topologyFile, heronCoreReleaseFile);
 
     String freePortWriter =
         String.format("printf '%%s\\n%%s\\n%%s\\n%%s\\n%%s\\n' %s:%s %s:%s %s:%s %s:%s %s:%s |  tee additional_config.conf",
@@ -279,8 +274,7 @@ public class MesosLauncher implements ILauncher {
     StringBuilder sb = new StringBuilder();
     sb.append(this.context.getPropertyWithException("heron.java.home.path") + "/bin/java");
     sb.append(" ");
-    sb.append("-cp " + "heron-mesos.jar:heron-scheduler.jar" +
-        ":slf4j-api-1.7.7.jar:slf4j-jdk14-1.7.7.jar:log4j-over-slf4j-1.7.7.jar");
+    sb.append("-cp " + "heron-scheduler.jar");
     sb.append(" ");
     sb.append("-Djava.library.path=.");
     sb.append(" ");
@@ -317,9 +311,18 @@ public class MesosLauncher implements ILauncher {
     return context.getPropertyWithException(Constants.TOPOLOGY_PKG_URI);
   }
 
-  private String safeEncodeB64(String javaOpts) {
-    String javaOptsBase64 = DatatypeConverter.printBase64Binary(
-        javaOpts.getBytes(Charset.forName("UTF-8")));
-    return String.format("\"%s\"", javaOptsBase64.replace("=", MesosConfig.BASE64_EQUALS));
+  private String safeEncodeB64WWrap(String toEncode) {
+    return wrapInQuotes(safeEncodeB64(toEncode));
+  }
+
+  private String safeEncodeB64(String toEncode) {
+    String encoded = DatatypeConverter.printBase64Binary(
+            toEncode.getBytes(Charset.forName("UTF-8")));
+
+    return encoded.replace("=", MesosConfig.BASE64_EQUALS);
+  }
+
+  private String wrapInQuotes(String toWrap) {
+    return String.format("\"%s\"", toWrap);
   }
 }

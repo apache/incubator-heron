@@ -1,0 +1,13 @@
+{
+  "id": "heron-mesos",
+  "cmd": "java -cp heron-scheduler.jar com.twitter.heron.scheduler.mesos.framework.FrameworkMain $PORT0 heron-mesos master:5050 vagrant 30 5000 master:2181 30000 30000 /heron-mesos",
+  "cpus": 0.1,
+  "mem": 256,
+  "ports": [31988],
+  "requirePorts": true,
+  "instances": 1,
+  "constraints": [["hostname", "LIKE", "master"]],
+  "uris": [
+    "file:///vagrant/contrib/kafka9/vagrant/heron-ubuntu/heron-core-0.1.0-SNAPSHOT.tar.gz"
+  ]
+}

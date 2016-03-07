@@ -5,7 +5,7 @@ DIST_DIR=${VAGRANT_DIR}/heron-ubuntu
 HERON_CONF_DIR=${VAGRANT_DIR}/conf
 DEFN_TMP_DIR=${DIST_DIR}/defn-tmp
 
-if [[ $# -ne 2 ]] ; then
+if [[ $# -ne 4 ]] ; then
     echo 'USAGE: ./submit-09-topology.sh <topology_name> <bootstrap_broker> <source_topic> <target_topic>'
     exit 1
 fi
