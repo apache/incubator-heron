@@ -39,7 +39,9 @@ class TMaster
           const std::string& _topology_id,
           const std::string& _topdir, const std::vector<std::string>& _stmgrs,
           sp_int32 _controller_port, sp_int32 _master_port, sp_int32 _stats_port,
-          sp_int32 metricsMgrPort, const std::string& _myhost_name, EventLoop* eventLoop);
+          sp_int32 metricsMgrPort, const std::string& metrics_sinks_yaml,
+          const std::string& _myhost_name, EventLoop* eventLoop);
+
   virtual ~TMaster();
 
   const std::string& GetTopologyId() const { return topology_->id(); }
@@ -110,43 +112,49 @@ class TMaster
   void UpdateProcessMetrics(EventLoop::Status);
 
   // map of active stmgr id to stmgr state
-  typedef std::map<std::string, StMgrState*>          StMgrMap;
-  typedef StMgrMap::iterator                StMgrMapIter;
-  StMgrMap                                  stmgrs_;
+  typedef std::map<std::string, StMgrState*>    StMgrMap;
+  typedef StMgrMap::iterator                    StMgrMapIter;
+  StMgrMap                                      stmgrs_;
+
   // map of connection to stmgr id
-  std::map<Connection*, sp_string>               connection_to_stmgr_id_;
+  std::map<Connection*, sp_string>              connection_to_stmgr_id_;
+
   // set of nodemanagers that have not yet connected to us
-  std::set<std::string>                               absent_stmgrs_;
+  std::set<std::string>                         absent_stmgrs_;
 
   // The current physical plan
-  proto::system::PhysicalPlan*              current_pplan_;
+  proto::system::PhysicalPlan*                  current_pplan_;
+
   // The topology as submitted by the user
-  proto::api::Topology*                     topology_;
+  proto::api::Topology*                         topology_;
+
   // The statemgr where we store/retrieve our state
-  heron::common::HeronStateMgr*             state_mgr_;
+  heron::common::HeronStateMgr*                 state_mgr_;
+
   // Our copy of the tmasterlocation
-  proto::tmaster::TMasterLocation*          tmaster_location_;
+  proto::tmaster::TMasterLocation*              tmaster_location_;
 
   // When we are in the middle of doing assignment
   // we set this to true
-  bool                                      assignment_in_progress_;
-  bool                                      do_reassign_;
+  bool                                          assignment_in_progress_;
+  bool                                          do_reassign_;
 
   // State information
-  std::string                                    zk_hostport_;
-  std::string                                    topdir_;
+  std::string                                   zk_hostport_;
+  std::string                                   topdir_;
 
   // Servers that implement our services
-  TController*                              controller_;
-  sp_int32                                  controller_port_;
-  TMasterServer*                            master_;
-  sp_int32                                  master_port_;
-  StatsInterface*                           stats_;
-  sp_int32                                  stats_port_;
-  std::string                                    myhost_name_;
+  TController*                                  controller_;
+  sp_int32                                      controller_port_;
+  TMasterServer*                                master_;
+  sp_int32                                      master_port_;
+  StatsInterface*                               stats_;
+  sp_int32                                      stats_port_;
+  std::string                                   myhost_name_;
+
   // how many times have we tried to establish
   // ourselves as master
-  sp_int32                                  master_establish_attempts_;
+  sp_int32                                      master_establish_attempts_;
 
   // collector
   TMetricsCollector*                        metrics_collector_;

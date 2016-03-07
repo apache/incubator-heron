@@ -19,7 +19,8 @@ def print_usage():
          " <port1> <port2> <port3> <heron_internals_config_file> "
          " <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_jar_file>"
          " <heron_java_home> <shell-port> <log_dir> <heron_shell_binary> <port4>"
-         " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file> <scheduler_classpath> <scheduler_port>")
+         " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file> "
+         " <scheduler_classpath> <scheduler_port>")
 
 def do_print(statement):
   timestr = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
@@ -186,6 +187,7 @@ class HeronExecutor:
            self.zkroot,
            ','.join(self.stmgr_ids),
            self.heron_internals_config_file,
+           self.metrics_sinks_config_file,
            self.port4]
     retval["heron-tmaster"] = tmaster_cmd
 
