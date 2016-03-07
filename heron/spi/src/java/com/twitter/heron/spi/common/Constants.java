@@ -24,5 +24,4 @@ public class Constants {
 
   public static final String ZK_STATE_MANAGER_CLASS = 
       "com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager";
-
 }

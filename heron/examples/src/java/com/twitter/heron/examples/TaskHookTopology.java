@@ -6,27 +6,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import com.twitter.heron.api.Config;
-import com.twitter.heron.api.HeronSubmitter;
-import com.twitter.heron.api.bolt.BaseRichBolt;
-import com.twitter.heron.api.bolt.OutputCollector;
-import com.twitter.heron.api.hooks.ITaskHook;
-import com.twitter.heron.api.hooks.info.BoltAckInfo;
-import com.twitter.heron.api.hooks.info.BoltExecuteInfo;
-import com.twitter.heron.api.hooks.info.BoltFailInfo;
-import com.twitter.heron.api.hooks.info.EmitInfo;
-import com.twitter.heron.api.hooks.info.SpoutAckInfo;
-import com.twitter.heron.api.hooks.info.SpoutFailInfo;
-import com.twitter.heron.api.metric.GlobalMetrics;
-import com.twitter.heron.api.spout.BaseRichSpout;
-import com.twitter.heron.api.spout.SpoutOutputCollector;
-import com.twitter.heron.api.topology.OutputFieldsDeclarer;
-import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.api.tuple.Fields;
-import com.twitter.heron.api.tuple.Tuple;
-import com.twitter.heron.api.tuple.Values;
-import com.twitter.heron.api.utils.Utils;
+import backtype.storm.Config;
+import backtype.storm.StormSubmitter;
+import backtype.storm.hooks.ITaskHook;
+import backtype.storm.hooks.info.BoltAckInfo;
+import backtype.storm.hooks.info.BoltExecuteInfo;
+import backtype.storm.hooks.info.BoltFailInfo;
+import backtype.storm.hooks.info.EmitInfo;
+import backtype.storm.hooks.info.SpoutAckInfo;
+import backtype.storm.hooks.info.SpoutFailInfo;
+import backtype.storm.metric.api.GlobalMetrics;
+import backtype.storm.spout.SpoutOutputCollector;
+import backtype.storm.task.OutputCollector;
+import backtype.storm.task.TopologyContext;
+import backtype.storm.topology.OutputFieldsDeclarer;
+import backtype.storm.topology.TopologyBuilder;
+import backtype.storm.topology.base.BaseRichBolt;
+import backtype.storm.topology.base.BaseRichSpout;
+import backtype.storm.tuple.Fields;
+import backtype.storm.tuple.Tuple;
+import backtype.storm.tuple.Values;
+import backtype.storm.utils.Utils;
 
 public class TaskHookTopology {
   public static class TestTaskHook implements ITaskHook {
@@ -69,10 +69,10 @@ public class TaskHookTopology {
       ++emitted;
       if (emitted % N == 0) {
         System.out.println("emit() is invoked in hook");
-        System.out.println(info.getValues());
-        System.out.println(info.getTaskId());
-        System.out.println(info.getStream());
-        System.out.println(info.getOutTasks());
+        System.out.println(info.values);
+        System.out.println(info.taskId);
+        System.out.println(info.stream);
+        System.out.println(info.outTasks);
       }
     }
 
@@ -82,9 +82,9 @@ public class TaskHookTopology {
       ++spoutAcked;
       if (spoutAcked % N == 0) {
         System.out.println("spoutAck() is invoked in hook");
-        System.out.println(info.getCompleteLatencyMs());
-        System.out.println(info.getMessageId());
-        System.out.println(info.getSpoutTaskId());
+        System.out.println(info.completeLatencyMs);
+        System.out.println(info.messageId);
+        System.out.println(info.spoutTaskId);
       }
     }
 
@@ -94,9 +94,9 @@ public class TaskHookTopology {
       ++spoutFailed;
       if (spoutFailed % N == 0) {
         System.out.println("spoutFail() is invoked in hook");
-        System.out.println(info.getFailLatencyMs());
-        System.out.println(info.getMessageId());
-        System.out.println(info.getSpoutTaskId());
+        System.out.println(info.failLatencyMs);
+        System.out.println(info.messageId);
+        System.out.println(info.spoutTaskId);
       }
     }
 
@@ -106,9 +106,9 @@ public class TaskHookTopology {
       ++boltExecuted;
       if (boltExecuted % N == 0) {
         System.out.println("boltExecute() is invoked in hook");
-        System.out.println(info.getExecuteLatencyMs());
-        System.out.println(info.getExecutingTaskId());
-        System.out.println(info.getTuple());
+        System.out.println(info.executeLatencyMs);
+        System.out.println(info.executingTaskId);
+        System.out.println(info.tuple);
       }
     }
 
@@ -118,9 +118,9 @@ public class TaskHookTopology {
       ++boltAcked;
       if (boltAcked % N == 0) {
         System.out.println("boltAck() is invoked in hook");
-        System.out.println(info.getAckingTaskId());
-        System.out.println(info.getProcessLatencyMs());
-        System.out.println(info.getTuple());
+        System.out.println(info.ackingTaskId);
+        System.out.println(info.processLatencyMs);
+        System.out.println(info.tuple);
       }
     }
 
@@ -130,9 +130,9 @@ public class TaskHookTopology {
       ++boltFailed;
       if (boltFailed % N == 0) {
         System.out.println("boltFail() is invoked in hook");
-        System.out.println(info.getFailingTaskId());
-        System.out.println(info.getFailLatencyMs());
-        System.out.println(info.getTuple());
+        System.out.println(info.failingTaskId);
+        System.out.println(info.failLatencyMs);
+        System.out.println(info.tuple);
       }
     }
   }
@@ -241,6 +241,6 @@ public class TaskHookTopology {
     conf.setAutoTaskHooks(taskHooks);
 
     conf.setNumStmgrs(1);
-    HeronSubmitter.submitTopology(args[0], conf, builder.createTopology());
+    StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }
 }
