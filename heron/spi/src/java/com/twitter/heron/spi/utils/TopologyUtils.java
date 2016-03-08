@@ -26,8 +26,6 @@ import com.twitter.heron.spi.common.PackingPlan;
 public class TopologyUtils {
   private static final Logger LOG = Logger.getLogger(TopologyUtils.class.getName());
 
-  private static final long DEFAULT_INSTANCE_RAM = 1 * Constants.GB;
-
    public static TopologyAPI.Topology getTopology(String topologyDefnFile) {
     try {
       byte[] topologyDefn = Files.readAllBytes(Paths.get(topologyDefnFile));
@@ -149,12 +147,9 @@ public class TopologyUtils {
     return getConfigWithDefault(topologyConfig, Config.TOPOLOGY_ADDITIONAL_CLASSPATH, "");
   }
 
-  public static Map<String, Long> getComponentRamMap(TopologyAPI.Topology topology) {
-    return getComponentRamMap(topology, DEFAULT_INSTANCE_RAM);
-  }
 
-  public static Map<String, Long> getComponentRamMap(TopologyAPI.Topology topology,
-                                                     long defaultRam) {
+  public static Map<String, Long> getComponentRamMap(
+      TopologyAPI.Topology topology, long defaultRam) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     Map<String, Long> ramMap = new HashMap<>();
     Set<String> componentNames = getComponentParallelism(topology).keySet();
