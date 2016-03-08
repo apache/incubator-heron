@@ -60,7 +60,7 @@ public class BoltInstance implements IInstance {
     TopologyContextImpl topologyContext = helper.getTopologyContext();
     serializer = SerializeDeSerializeHelper.getSerializer(topologyContext.getTopologyConfig());
     systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
-        com.twitter.heron.common.utils.misc.Constants.HERON_SYSTEM_CONFIG);
+        SystemConfig.HERON_SYSTEM_CONFIG);
 
     // Get the bolt. Notice, in fact, we will always use the deserialization way to get bolt.
     if (helper.getMyBolt().getComp().hasJavaObject()) {

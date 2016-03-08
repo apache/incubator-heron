@@ -170,7 +170,7 @@ public class JVMMetrics {
 
   public void registerMetrics(MetricsCollector metricsCollector) {
     SystemConfig systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
-        com.twitter.heron.common.utils.misc.Constants.HERON_SYSTEM_CONFIG);
+        SystemConfig.HERON_SYSTEM_CONFIG);
 
     int interval = systemConfig.getHeronMetricsExportIntervalSec();
 
