@@ -222,8 +222,8 @@ public class Keys {
     return ConfigKeys.get("TOPOLOGY_CLASSPATH");
   }
 
-  public static String schedulerStateManager() {
-    return ConfigKeys.get("SCHEDULER_STATE_MANAGER");
+  public static String schedulerStateManagerAdaptor() {
+    return ConfigKeys.get("SCHEDULER_STATE_MANAGER_ADAPTOR");
   }
 
   public static String schedulerShutdown() {

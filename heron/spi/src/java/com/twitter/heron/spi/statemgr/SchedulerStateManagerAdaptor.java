@@ -14,12 +14,12 @@ import com.twitter.heron.spi.statemgr.IStateManager;
  * and provides easier interfaces to invoke in Scheduler.
  */
 
-public class SchedulerStateManager {
+public class SchedulerStateManagerAdaptor {
   private final IStateManager delegate;
 
   /**
-   * Construct SchedulerStateManager, providing only interfaces used 
-   * by scheduler.
+   * Construct SchedulerStateManagerAdaptor providing only the
+   * interfaces used by scheduler.
    *
    * @param delegate, the IStateManager which is already initialized. 
    * Noticed that the initialize and close of IStateManager is not in the 
@@ -28,7 +28,7 @@ public class SchedulerStateManager {
    *
    * @param delegate, the instance of IStateManager
    */
-  public SchedulerStateManager(IStateManager delegate) {
+  public SchedulerStateManagerAdaptor(IStateManager delegate) {
     this.delegate = delegate;
   }
 
@@ -133,7 +133,8 @@ public class SchedulerStateManager {
    *
    * @return Boolean - Success or Failure
    */
-  public ListenableFuture<Boolean> deleteSchedulerLocation(String topologyName) {
+  public ListenableFuture<Boolean> deleteSchedulerLocation(
+      String topologyName) {
     return delegate.deleteSchedulerLocation(topologyName);
   }
 

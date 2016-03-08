@@ -29,7 +29,7 @@ import com.twitter.heron.spi.utils.TopologyUtils;
 
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.IStateManager;
-import com.twitter.heron.spi.statemgr.SchedulerStateManager;
+import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import org.apache.commons.io.FileUtils;
@@ -93,7 +93,7 @@ public class LocalLauncher implements ILauncher {
     LOG.info("Checking whether the topology has been launched already!");
 
     String topologyName = LocalContext.topologyName(config);
-    SchedulerStateManager stateManager = Runtime.schedulerStateManager(runtime);
+    SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
 
     // check if any topology with the same name is running
     // TODO, by the time, we do this here, it is too late 
@@ -212,7 +212,7 @@ public class LocalLauncher implements ILauncher {
   protected boolean downloadAndExtractPackages() {
     
     // log the state manager being used, for visibility and debugging purposes
-    SchedulerStateManager stateManager = Runtime.schedulerStateManager(runtime);
+    SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
     LOG.info("State manager used: " + stateManager.getClass().getName());
 
     // if the working directory does not exist, create it.

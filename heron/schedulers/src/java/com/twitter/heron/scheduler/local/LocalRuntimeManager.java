@@ -2,7 +2,7 @@ package com.twitter.heron.scheduler.local;
 
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.scheduler.IRuntimeManager;
-import com.twitter.heron.spi.statemgr.SchedulerStateManager;
+import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.NetworkUtils;
 
@@ -92,7 +92,7 @@ public class LocalRuntimeManager implements IRuntimeManager {
     String topologyName = LocalContext.topologyName(config);
 
     // get the scheduler state manager
-    SchedulerStateManager statemgr = Runtime.schedulerStateManager(runtime);
+    SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
 
     // issue the request to the state manager
     ListenableFuture<Boolean> boolFuture = statemgr.isTopologyRunning(topologyName);
