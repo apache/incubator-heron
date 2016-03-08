@@ -149,8 +149,14 @@ public class LocalLauncher implements ILauncher {
     LOG.info("Scheduler command line: " + schedulerCmd.toString());
 
 
-    ShellUtils.runASyncProcess(true, false, schedulerCmd.toString(),
+    Process p = ShellUtils.runASyncProcess(true, false, schedulerCmd.toString(),
         new File(topologyWorkingDirectory));
+
+    if (p == null) {
+      LOG.severe("Failed to start SchedulerMain; Check the command: " + schedulerCmd);
+      return false;
+    }
+
     LOG.info(String.format(
         "For checking the status and logs of the topology, use the working directory %s",
         LocalContext.workingDirectory(config)));
