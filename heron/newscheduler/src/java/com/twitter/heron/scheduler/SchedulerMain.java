@@ -113,6 +113,7 @@ public class SchedulerMain {
             .putAll(topologyConfigs(topologyJarFile, topologyDefnFile, topology))
             .build());
 
+    // Set up logging with complete Config
     setupLogging(config);
 
     LOG.info("loaded scheduler config " + config);
@@ -121,6 +122,7 @@ public class SchedulerMain {
     runScheduler(config, schedulerServerPort, topology);
   }
 
+  // Set up logging basing on the Config
   public static void setupLogging(Config config) throws IOException {
     String systemConfigFilename = Context.systemConfigFile(config);
 
