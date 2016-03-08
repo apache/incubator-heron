@@ -189,7 +189,7 @@ def discover_include_paths(program):
 ######################################################################
 def write_env_exec_file(platform, environ):
 
-  env_exec_file = 'scripts/env_exec.sh'
+  env_exec_file = 'scripts/compile/env_exec.sh'
   out_file = open(env_exec_file, 'w')
   out_file.write('#!/bin/bash\n\n')
   out_file.write('set -eu \n\n')
