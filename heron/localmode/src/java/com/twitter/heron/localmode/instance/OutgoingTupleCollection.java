@@ -4,7 +4,6 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.SingletonRegistry;
-import com.twitter.heron.common.utils.misc.Constants;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.proto.system.HeronTuples;
 
@@ -34,7 +33,7 @@ public class OutgoingTupleCollection {
   public OutgoingTupleCollection(PhysicalPlanHelper helper, Communicator<HeronTuples.HeronTupleSet> outQueue) {
     this.outQueue = outQueue;
     this.helper = helper;
-    this.systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(Constants.HERON_SYSTEM_CONFIG);
+    this.systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
     this.dataTupleSetCapacity = systemConfig.getInstanceSetDataTupleCapacity();
     this.controlTupleSetCapacity = systemConfig.getInstanceSetControlTupleCapacity();
   }

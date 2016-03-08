@@ -54,7 +54,7 @@ public class Gateway implements Runnable {
                  final List<Communicator<Metrics.MetricPublisherPublishMessage>> outMetricsQueues)
       throws IOException {
     systemConfig =
-        (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(Constants.HERON_SYSTEM_CONFIG);
+        (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
     // New the client
     this.gatewayLooper = gatewayLooper;

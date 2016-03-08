@@ -14,7 +14,6 @@ import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.network.HeronClient;
 import com.twitter.heron.common.network.HeronSocketOptions;
 import com.twitter.heron.common.network.StatusCode;
-import com.twitter.heron.common.utils.misc.Constants;
 import com.twitter.heron.metrics.GatewayMetrics;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.system.Metrics;
@@ -49,7 +48,7 @@ public class MetricsManagerClient extends HeronClient {
     this.outMetricsQueues = outs;
 
     this.systemConfig =
-        (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(Constants.HERON_SYSTEM_CONFIG);
+        (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
     this.gatewayMetrics = gatewayMetrics;
 

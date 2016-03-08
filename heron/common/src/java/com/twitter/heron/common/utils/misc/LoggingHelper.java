@@ -42,7 +42,7 @@ public class LoggingHelper {
 
   static public FileHandler getFileHandler(String instanceId, String loggingDir) throws IOException {
     SystemConfig systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
-        com.twitter.heron.common.utils.misc.Constants.HERON_SYSTEM_CONFIG);
+        SystemConfig.HERON_SYSTEM_CONFIG);
     // The pattern of file name should be:
     // instance-${instanceId}.log.index
     String pattern = loggingDir + "/" + instanceId + ".log.%g";
