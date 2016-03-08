@@ -1,4 +1,4 @@
-package com.twitter.heron.common.utils.misc;
+package com.twitter.heron.common.utils.logging;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

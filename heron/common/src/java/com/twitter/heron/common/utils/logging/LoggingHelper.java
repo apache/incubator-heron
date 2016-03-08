@@ -1,4 +1,4 @@
-package com.twitter.heron.common.utils.misc;
+package com.twitter.heron.common.utils.logging;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -6,49 +6,72 @@ import java.io.InvalidObjectException;
 import java.io.ObjectStreamException;
 import java.io.PrintStream;
 import java.util.logging.FileHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
-
-import com.twitter.heron.common.config.SystemConfig;
-import com.twitter.heron.common.basics.Constants;
-import com.twitter.heron.common.basics.SingletonRegistry;
 
 /**
  * A helper class to init corresponding LOGGER setting
  */
 public class LoggingHelper {
-  static public void loggerInit(String instanceId, Level level, String loggingDir) throws IOException {
-    // For now we would just consider the FileHandler case
-
+  static public void loggerInit(Level level, boolean isRedirectStdOutErr) throws IOException {
     // The Logger.getLogger("") will get the root Logger, which means, when we create other
     // Loggers from LoggerFactory, they will follow root Logger's configuration.
     Logger.getLogger("").setLevel(level);
-    Logger.getLogger("").addHandler(LoggingHelper.getFileHandler(instanceId, loggingDir));
-    Logger.getLogger("").addHandler(new ErrorReportLoggingHandler());
 
-    // now rebind stdout/stderr to logger
-    Logger logger;
-    LoggingOutputStream los;
+    if (isRedirectStdOutErr) {
+      // now rebind stdout/stderr to logger
+      Logger logger;
+      LoggingOutputStream los;
 
-    logger = Logger.getLogger("stdout");
-    los = new LoggingOutputStream(logger, StdOutErrLevel.STDOUT);
-    System.setOut(new PrintStream(los, true));
+      logger = Logger.getLogger("stdout");
+      los = new LoggingOutputStream(logger, StdOutErrLevel.STDOUT);
+      System.setOut(new PrintStream(los, true));
 
-    logger = Logger.getLogger("stderr");
-    los = new LoggingOutputStream(logger, StdOutErrLevel.STDERR);
-    System.setErr(new PrintStream(los, true));
+      logger = Logger.getLogger("stderr");
+      los = new LoggingOutputStream(logger, StdOutErrLevel.STDERR);
+      System.setErr(new PrintStream(los, true));
+    }
   }
 
-  static public FileHandler getFileHandler(String instanceId, String loggingDir) throws IOException {
-    SystemConfig systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
-        SystemConfig.HERON_SYSTEM_CONFIG);
-    // The pattern of file name should be:
-    // instance-${instanceId}.log.index
-    String pattern = loggingDir + "/" + instanceId + ".log.%g";
-    boolean append = true;
-    int limit = systemConfig.getHeronLoggingMaximumSizeMb() * Constants.MB_TO_BYTES;
-    int count = systemConfig.getHeronLoggingMaximumFiles();
+  static public void addLoggingHandler(Handler handler) {
+    Logger.getLogger("").addHandler(handler);
+  }
+
+  /**
+   * Initialize a <tt>FileHandler</tt> to write to a set of files
+   * with optional append.  When (approximately) the given limit has
+   * been written to one file, another file will be opened.  The
+   * output will cycle through a set of count files.
+   * The pattern of file name should be: ${processId}.log.index
+   * <p/>
+   * The <tt>FileHandler</tt> is configured based on <tt>LogManager</tt>
+   * properties (or their default values) except that the given pattern
+   * argument is used as the filename pattern, the file limit is
+   * set to the limit argument, and the file count is set to the
+   * given count argument, and the append mode is set to the given
+   * <tt>append</tt> argument.
+   * <p/>
+   * The count must be at least 1.
+   *
+   * @param limit the maximum number of bytes to write to any one file
+   * @param count the number of files to use
+   * @param append specifies append mode
+   * @throws IOException if there are IO problems opening the files.
+   * @throws SecurityException if a security manager exists and if
+   * the caller does not have <tt>LoggingPermission("control")</tt>.
+   * @throws IllegalArgumentException if {@code limit < 0}, or {@code count < 1}.
+   * @throws IllegalArgumentException if pattern is an empty string
+   */
+  static public FileHandler getFileHandler(String processId,
+                                           String loggingDir,
+                                           boolean append,
+                                           int limit,
+                                           int count) throws IOException, SecurityException {
+
+    String pattern = loggingDir + "/" + processId + ".log.%g";
+
 
     FileHandler fileHandler = new FileHandler(pattern, limit, count, append);
     fileHandler.setFormatter(new SimpleFormatter());
