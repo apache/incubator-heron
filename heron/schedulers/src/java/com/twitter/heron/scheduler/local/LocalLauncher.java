@@ -153,7 +153,7 @@ public class LocalLauncher implements ILauncher {
         new File(topologyWorkingDirectory));
 
     if (p == null) {
-      LOG.severe("Failed to start SchedulerMain; Check the command: " + schedulerCmd);
+      LOG.severe("Failed to start SchedulerMain using: " + schedulerCmd);
       return false;
     }
 
