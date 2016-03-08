@@ -7,8 +7,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import java.io.File;
+import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.Files;
 
 import org.yaml.snakeyaml.Yaml;
 
@@ -21,23 +26,66 @@ public class ConfigReader {
   /**
    * Load properties from the given YAML file
    *
-   * @return <code>true</code> only if the operation succeeds.
+   * @param fileName, the name of YAML file to read
+   *
+   * @return Map, contains the key value pairs of config
    */
-  public static Map loadFile(String propFileName) {
+  public static Map loadFile(String fileName) {
     Map props = new HashMap();
-    if (propFileName == null || propFileName.isEmpty()) {
-      LOG.warning("Config file " + propFileName + " not found\n");
-       return props;
-    } else {
-      try {
-        FileInputStream fin = new FileInputStream(new File(propFileName));
-        Yaml yaml = new Yaml();
-        props = (Map) yaml.load(fin);
-      } catch (IOException e) {
-        LOG.log(Level.SEVERE, "Failed to load config file: " + propFileName, e); 
-      }
+    if (fileName == null) {
+      LOG.warning("Config file name cannot be null\n"); 
+      return props;
     }
-    return props;
+    else if (fileName.isEmpty()) {
+      LOG.warning("Config file name is empty\n");
+      return props;
+    } else {
+
+      // check if the file exists and also it is a regular file
+      Path path = Paths.get(fileName);
+
+      if (!Files.exists(path)) {
+        LOG.warning("Config file " + fileName + " does not exist.\n");
+        return props;
+      }
+     
+      if (!Files.isRegularFile(path)) {
+        LOG.warning("Config file " + fileName + " might be a directory.\n");
+        return props;
+      }
+      
+      LOG.info("Reading config file " + fileName);
+
+      Map props_yaml = null;
+      try {
+        FileInputStream fin = new FileInputStream(new File(fileName));
+        Yaml yaml = new Yaml();
+        props_yaml = (Map) yaml.load(fin);
+        LOG.info("Successfully read config file " + fileName);
+      } catch (IOException e) {
+        LOG.log(Level.SEVERE, "Failed to load config file: " + fileName, e); 
+      }
+
+      return props_yaml != null ? props_yaml : props;
+    }
+  }
+
+  /**
+   * Load config from the given YAML stream
+   *
+   * @param inputStream, the name of YAML stream to read
+   *
+   * @return Map, contains the key value pairs of config
+   */
+  public static Map loadStream(InputStream inputStream) {
+    LOG.info("Reading config stream");
+
+    Map props_yaml = null;
+    Yaml yaml = new Yaml();
+    props_yaml = (Map) yaml.load(inputStream);
+    LOG.info("Successfully read config");
+
+    return props_yaml != null ? props_yaml : new HashMap();
   }
 
   public static Integer getInt(Object o) {

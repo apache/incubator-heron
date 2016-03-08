@@ -1,23 +1,16 @@
 package com.twitter.heron.spi.scheduler;
 
-import com.twitter.heron.spi.scheduler.context.RuntimeManagerContext;
+import com.twitter.heron.spi.common.Config;
 
 public interface IRuntimeManager {
 
-  enum Command {
-    KILL,
-    ACTIVATE,
-    DEACTIVATE,
-    RESTART;
-  }
-
-  void initialize(RuntimeManagerContext context);
+  void initialize(Config config, Config runtime);
 
   void close();
 
-  boolean prepareRestart(int containerIndex);
+  boolean prepareRestart();
 
-  boolean postRestart(int containerIndex);
+  boolean postRestart();
 
   boolean prepareDeactivate();
 

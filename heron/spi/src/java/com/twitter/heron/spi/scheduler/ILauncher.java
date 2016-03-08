@@ -2,7 +2,7 @@ package com.twitter.heron.spi.scheduler;
 
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.spi.common.PackingPlan;
-import com.twitter.heron.spi.scheduler.context.LaunchContext;
+import com.twitter.heron.spi.common.Config;
 
 /**
  * Launches scheduler. heron-cli will create Launcher object using default no argument constructor.
@@ -14,7 +14,7 @@ public interface ILauncher {
    * to setup scheduler and other parameters required by launcher to contact
    * services which will launch scheduler.
    */
-  void initialize(LaunchContext context);
+  void initialize(Config config, Config runtime);
 
   /**
    * Will be called locally before trying to launch topology remotely
@@ -25,13 +25,13 @@ public interface ILauncher {
 
   /**
    * Starts scheduler. Once this function returns successfully, heron-cli will terminate and
-   * launch process succeed.
+   * the launch process succeeded.
    *
    * @param packing Initial mapping suggested by running packing algorithm.
    * container_id->List of instance_id to be launched on this container.
    * @return true if topology launched successfully, false otherwise.
    */
-  boolean launchTopology(PackingPlan packing);
+  boolean launch(PackingPlan packing);
 
   /**
    * Will be called locally after launching topology remotely
@@ -41,7 +41,7 @@ public interface ILauncher {
   boolean postLaunch(PackingPlan packing);
 
   /**
-   * In case launch fails, this is called to clean up states.
+   * In case launch fails, this is called to clean up state, if any.
    */
   void undo();
 

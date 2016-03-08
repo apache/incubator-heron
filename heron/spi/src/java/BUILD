@@ -4,25 +4,119 @@ load("/tools/rules/jarjar_rules", "jarjar_binary")
 load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 java_library(
-    name = 'scheduler-spi-java',
+    name = 'heron-spi',
     srcs = glob([
         "**/spi/common/**/*.java",
         "**/spi/packing/**/*.java",
         "**/spi/scheduler/**/*.java",
         "**/spi/uploader/**/*.java",
-        "**/spi/util/**/*.java",
+        "**/spi/utils/**/*.java",
+        "**/spi/statemgr/**/*.java",
     ]),
     deps = [
-        ":statemgr-spi-java",
+        "//heron/api/src/java:api-java",
+        "//heron/common/src/java:config-java",
         "//heron/proto:proto_common_java",
         "//heron/proto:proto_execution_state_java",
         "//heron/proto:proto_scheduler_java",
         "//heron/proto:proto_tmaster_java",
         "//heron/proto:proto_topology_java",
+        "//heron/proto:proto_physical_plan_java",
         "//3rdparty/snakeyaml:snakeyaml-java",
         "//3rdparty/guava:guava-java",
         "//3rdparty/protobuf:protobuf-java",
     ],
+)
+
+filegroup(
+    name = "config-keys-yaml",
+    srcs = glob(["**/spi/common/**/keys.yaml"]),
+)
+
+filegroup(
+    name = "config-defaults-yaml",
+    srcs = glob(["**/spi/common/**/defaults.yaml"]),
+)
+
+common_resource_files = [
+    ":config-keys-yaml",
+    ":config-defaults-yaml",
+]
+
+utils_deps_files = \
+    heron_java_proto_files() + [
+        ":common-spi-java",
+        ":statemgr-spi-java",
+        "//heron/common/src/java:config-java",
+        "//heron/api/src/java:api-java",
+        "//3rdparty/guava:guava-java",
+    ]
+
+scheduler_deps_files = \
+    heron_java_proto_files() + [
+        ":common-spi-java",
+        "//heron/common/src/java:config-java",
+        "//3rdparty/guava:guava-java",
+    ]
+
+packing_deps_files = [
+    ":common-spi-java",
+    "//heron/common/src/java:config-java",
+]
+
+uploader_deps_files = [
+    ":common-spi-java",
+    "//heron/common/src/java:config-java",
+]
+
+statemgr_deps_files = \
+    heron_java_proto_files() + [
+        ":common-spi-java",
+        "//heron/common/src/java:config-java",
+        "//3rdparty/guava:guava-java",
+    ]
+
+java_library(
+    name='common-spi-java',
+    srcs = glob([
+        "**/spi/common/**/*.java",
+    ]),
+    deps = [
+        "//heron/common/src/java:config-java",
+    ],
+    resources = common_resource_files, 
+)
+
+java_library(
+    name='utils-spi-java',
+    srcs = glob([
+        "**/spi/utils/**/*.java",
+    ]),
+    deps = utils_deps_files, 
+)
+
+java_library(
+    name='packing-spi-java',
+    srcs = glob([
+        "**/spi/packing/**/*.java",
+    ]),
+    deps = packing_deps_files, 
+)
+
+java_library(
+    name='scheduler-spi-java',
+    srcs = glob([
+        "**/spi/scheduler/**/*.java",
+    ]),
+    deps = scheduler_deps_files, 
+)
+
+java_library(
+    name='uploader-spi-java',
+    srcs = glob([
+        "**/spi/uploader/**/*.java",
+    ]),
+    deps = uploader_deps_files,
 )
 
 java_library(
@@ -31,11 +125,6 @@ java_library(
         ["**/spi/metricsmgr/**/*.java"],
     ),
 )
-
-statemgr_deps_files = \
-    heron_java_proto_files() + [
-        "//3rdparty/guava:guava-java",
-    ]
 
 java_library(
     name='statemgr-spi-java',

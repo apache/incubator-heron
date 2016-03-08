@@ -1,10 +1,18 @@
 package(default_visibility = ["//visibility:public"])
 
+load("/tools/rules/jarjar_rules", "jarjar_binary")
+
 java_binary(
-    name='heron-examples-java',
+    name='examples-unshaded',
     srcs = glob(["**/*.java"]),
     deps = [
         "//heron/storm/src/java:storm-compatibility-java",
     ],
     create_executable = 0,
+)
+
+jarjar_binary(
+    name = 'heron-examples',
+    src  = ":examples-unshaded_deploy.jar",
+    shade = "shade.conf",
 )
