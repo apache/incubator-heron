@@ -21,7 +21,6 @@ import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.network.HeronSocketOptions;
 import com.twitter.heron.common.utils.metrics.JVMMetrics;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
-import com.twitter.heron.common.utils.misc.Constants;
 import com.twitter.heron.common.utils.misc.LoggingHelper;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
 import com.twitter.heron.spi.metricsmgr.sink.IMetricsSink;
@@ -330,7 +329,7 @@ public class MetricsManager {
 
     SystemConfig systemConfig = new SystemConfig(systemConfigFilename, true);
     // Add the SystemConfig into SingletonRegistry
-    SingletonRegistry.INSTANCE.registerSingleton(Constants.HERON_SYSTEM_CONFIG, systemConfig);
+    SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, systemConfig);
 
     // Init the logging setting and redirect the stdout and stderr to logging
     // For now we just set the logging level as INFO; later we may accept an argument to set it.
