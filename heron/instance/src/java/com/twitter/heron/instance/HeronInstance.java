@@ -11,13 +11,15 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.basics.Communicator;
+import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
+import com.twitter.heron.common.config.SystemConfig;
+import com.twitter.heron.common.utils.logging.ErrorReportLoggingHandler;
+import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.common.utils.misc.ThreadNames;
-import com.twitter.heron.common.utils.misc.LoggingHelper;
 import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.proto.system.PhysicalPlans;
@@ -249,7 +251,13 @@ public class HeronInstance {
     Level loggingLevel = Level.INFO;
     String loggingDir = systemConfig.getHeronLoggingDirectory();
 
-    LoggingHelper.loggerInit(instanceId, loggingLevel, loggingDir);
+    // Log to file and TMaster
+    LoggingHelper.loggerInit(loggingLevel, true);
+    LoggingHelper.addLoggingHandler(
+        LoggingHelper.getFileHandler(instanceId, loggingDir, true,
+            systemConfig.getHeronLoggingMaximumSizeMb() * Constants.MB_TO_BYTES,
+            systemConfig.getHeronLoggingMaximumFiles()));
+    LoggingHelper.addLoggingHandler(new ErrorReportLoggingHandler());
 
     LOG.info("\nStarting instance " + instanceId + " for topology " + topologyName
         + " and topologyId " + topologyId + " for component " + componentName
