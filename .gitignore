@@ -18,7 +18,7 @@ makeflags
 #########################
 /bazel-*
 bazel
-scripts/env_exec.sh
+scripts/compile/env_exec.sh
 config/heron-config.h
 tools/cpp/osx_gcc_wrapper.sh
 tools/cpp/CROSSTOOL
