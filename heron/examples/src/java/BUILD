@@ -1,7 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/jarjar_rules", "jarjar_binary")
-
 java_binary(
     name='examples-unshaded',
     srcs = glob(["**/*.java"]),
@@ -11,8 +9,9 @@ java_binary(
     create_executable = 0,
 )
 
-jarjar_binary(
+genrule(
     name = 'heron-examples',
-    src  = ":examples-unshaded_deploy.jar",
-    shade = "shade.conf",
+    srcs = [":examples-unshaded_deploy.jar"],
+    outs = ["heron-examples.jar"],
+    cmd  = "cp $< $@",
 )

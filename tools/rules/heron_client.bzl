@@ -39,6 +39,7 @@ def heron_client_lib_statemgr_files():
 
 def heron_client_lib_uploader_files():
     return [
+        "//heron/uploaders/src/java:heron-null-uploader",
         "//heron/uploaders/src/java:heron-localfs-uploader",
     ]
 
