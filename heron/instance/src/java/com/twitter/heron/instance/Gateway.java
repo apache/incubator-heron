@@ -12,7 +12,7 @@ import com.twitter.heron.common.network.HeronSocketOptions;
 import com.twitter.heron.common.utils.metrics.JVMMetrics;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
 import com.twitter.heron.common.utils.misc.ThreadNames;
-import com.twitter.heron.common.utils.misc.ErrorReportLoggingHandler;
+import com.twitter.heron.common.utils.logging.ErrorReportLoggingHandler;
 import com.twitter.heron.metrics.GatewayMetrics;
 import com.twitter.heron.network.MetricsManagerClient;
 import com.twitter.heron.network.StreamManagerClient;
