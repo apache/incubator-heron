@@ -1,6 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/jarjar_rules", "jarjar_binary")
 load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 common_deps_files = \
@@ -43,10 +42,11 @@ java_binary(
     deps = localfs_deps_files, 
 )
 
-jarjar_binary(
+genrule(
     name = "heron-localfs-statemgr",
-    src = ":localfs-statemgr-unshaded_deploy.jar",
-    shade = "shade.conf",
+    srcs = [":localfs-statemgr-unshaded_deploy.jar"],
+    outs = ["heron-localfs-statemgr.jar"],
+    cmd  = "cp $< $@",
 )
 
 java_library(
@@ -61,8 +61,9 @@ java_binary(
     deps = zookeeper_deps_files,
 )
 
-jarjar_binary(
+genrule(
     name = "heron-zookeeper-statemgr",
-    src = ":zookeeper-statemgr-unshaded_deploy.jar",
-    shade = "shade.conf",
+    srcs = [":zookeeper-statemgr-unshaded_deploy.jar"],
+    outs = ["heron-zookeeper-statemgr.jar"],
+    cmd  = "cp $< $@",
 )
