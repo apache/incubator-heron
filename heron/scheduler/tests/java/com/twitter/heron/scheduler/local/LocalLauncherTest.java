@@ -17,7 +17,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.basics.FileUtility;
+import com.twitter.heron.common.basics.FileUtils;
 
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.scheduler.context.LaunchContext;
@@ -33,10 +33,10 @@ import junit.framework.Assert;
  * LocalLauncher Tester.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({TopologyUtility.class, FileUtility.class, ShellUtility.class})
+@PrepareForTest({TopologyUtility.class, FileUtils.class, ShellUtility.class})
 
 public class LocalLauncherTest {
-  private static final String stateMgrClass = "com.twitter.heron.spi.statemgr.NullStateManager";
+  private static final String stateMgrClass = "com.twitter.heron.statemgr.NullStateManager";
 
   DefaultConfigLoader createRequiredConfig() throws Exception {
     DefaultConfigLoader schedulerConfig = DefaultConfigLoader.class.newInstance();
@@ -92,9 +92,9 @@ public class LocalLauncherTest {
     PowerMockito.doReturn("").
         when(TopologyUtility.class, "makeClasspath", Matchers.any(TopologyAPI.Topology.class));
 
-    PowerMockito.mockStatic(FileUtility.class);
+    PowerMockito.mockStatic(FileUtils.class);
     PowerMockito.
-        when(FileUtility.getBaseName(Matchers.anyString())).thenReturn("");
+        when(FileUtils.getBaseName(Matchers.anyString())).thenReturn("");
 
     Assert.assertTrue(launcher.launchTopology(packing.pack(context)));
 
