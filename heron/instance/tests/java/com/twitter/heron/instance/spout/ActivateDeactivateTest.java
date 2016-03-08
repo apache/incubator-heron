@@ -105,7 +105,7 @@ public class ActivateDeactivateTest {
     // We reset the heron.instance.state.check.interval.sec in SystemConfig for faster test
     SystemConfig systemConfig =
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
-            com.twitter.heron.common.utils.misc.Constants.HERON_SYSTEM_CONFIG);
+            SystemConfig.HERON_SYSTEM_CONFIG);
     systemConfig.put("heron.instance.state.check.interval.sec", 1);
 
     // Now the activateCount and deactivateCount should be 0
