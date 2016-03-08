@@ -1,7 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/jarjar_rules", "jarjar_binary")
-
 uploader_spi_files = [
     "//heron/common/src/java:basics-java",
     "//heron/spi/src/java:common-spi-java",
@@ -25,10 +23,11 @@ java_binary(
     deps = uploader_spi_files,
 )
 
-jarjar_binary(
+genrule(
     name = 'heron-null-uploader',
-    src  = ":null-uploader-unshaded_deploy.jar",
-    shade = "shade.conf",
+    srcs = [":null-uploader-unshaded_deploy.jar"],
+    outs = ["heron-null-uploader.jar"],
+    cmd  = "cp $< $@",
 )
 
 java_library(
@@ -43,10 +42,11 @@ java_binary(
     deps = packer_deps_files,
 )
 
-jarjar_binary(
+genrule(
     name = "heron-packer-uploader",
-    src = ":packer-uploader-unshaded_deploy.jar",
-    shade = "shade.conf",
+    srcs = [":packer-uploader-unshaded_deploy.jar"],
+    outs = ["heron-packer-uploader.jar"],
+    cmd  = "cp $< $@",
 )
 
 java_library(
@@ -63,8 +63,9 @@ java_binary(
     deps = uploader_spi_files,
 )
 
-jarjar_binary(
+genrule(
     name = "heron-localfs-uploader",
-    src = ":localfs-uploader-unshaded_deploy.jar",
-    shade = "shade.conf",
+    srcs = [":localfs-uploader-unshaded_deploy.jar"],
+    outs = ["heron-localfs-uploader.jar"],
+    cmd  = "cp $< $@",
 )

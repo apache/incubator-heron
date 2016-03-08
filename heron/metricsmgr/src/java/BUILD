@@ -2,8 +2,6 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/jarjar_rules", "jarjar_binary")
-
 java_library(
     name = "metricsmgr-java",
     srcs = glob(
@@ -38,8 +36,9 @@ java_binary(
     ],
 )
 
-jarjar_binary(
+genrule(
     name = "heron-metricsmgr",
-    src = ":metricsmgr-unshaded_deploy.jar",
-    shade = "shade.conf",
+    srcs = [":metricsmgr-unshaded_deploy.jar"],
+    outs = ["heron-metricsmgr.jar"],
+    cmd  = "cp $< $@",
 )
