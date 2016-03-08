@@ -4,37 +4,27 @@ import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import javax.xml.bind.DatatypeConverter;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
+import org.apache.commons.io.FileUtils;
+
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
-
-import com.twitter.heron.scheduler.local.LocalContext;
+import com.twitter.heron.spi.common.ClusterConfig;
+import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Defaults;
-import com.twitter.heron.spi.common.ClusterDefaults;
-import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.common.ShellUtils;
-import com.twitter.heron.spi.common.HttpUtils;
-
+import com.twitter.heron.spi.scheduler.ILauncher;
+import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.Runtime;
-import com.twitter.heron.spi.utils.TopologyUtils;
-
-import com.twitter.heron.spi.scheduler.ILauncher;
-import com.twitter.heron.spi.statemgr.IStateManager;
-import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
-
-import com.google.common.util.concurrent.ListenableFuture;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 
 /**
  * Launch topology locally to a working directory.
@@ -83,7 +73,7 @@ public class LocalLauncher implements ILauncher {
     return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
   }
 
-  /** 
+  /**
    * Actions to execute before launch such as check whether the
    * topology is already running
    *
@@ -106,8 +96,8 @@ public class LocalLauncher implements ILauncher {
     return true;
   }
 
-  /** 
-   * Launch the topology 
+  /**
+   * Launch the topology
    */
   @Override
   public boolean launch(PackingPlan packing) {
@@ -133,7 +123,7 @@ public class LocalLauncher implements ILauncher {
     }
 
     String configInBase64 =
-       DatatypeConverter.printBase64Binary(sandboxConfig.asString().getBytes(Charset.forName("UTF-8")));
+        DatatypeConverter.printBase64Binary(sandboxConfig.asString().getBytes(Charset.forName("UTF-8")));
 
     System.out.println(configInBase64);
 
@@ -143,7 +133,7 @@ public class LocalLauncher implements ILauncher {
         .append(LocalContext.stateManagerClassPath(sandboxConfig))
         .toString();
 
-   String schedulerCmd = String.format("%s %s %s %s %s %s %s %s %s %d",
+    String schedulerCmd = String.format("%s %s %s %s %s %s %s %s %s %d",
         "java",
         "-cp",
         schedulerClassPath,
@@ -161,7 +151,8 @@ public class LocalLauncher implements ILauncher {
 
     ShellUtils.runASyncProcess(true, false, schedulerCmd.toString(),
         new File(topologyWorkingDirectory));
-    LOG.info(String.format("Please find working directory %s for more running status.",
+    LOG.info(String.format(
+        "For checking the status and logs of the topology, use the working directory %s",
         LocalContext.workingDirectory(config)));
 
     return true;
@@ -215,13 +206,13 @@ public class LocalLauncher implements ILauncher {
    * @return true if successful
    */
   protected boolean downloadAndExtractPackages() {
-    
+
     // log the state manager being used, for visibility and debugging purposes
     SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
     LOG.info("State manager used: " + stateManager.getClass().getName());
 
     // if the working directory does not exist, create it.
-    File workingDirectory = new File(topologyWorkingDirectory); 
+    File workingDirectory = new File(topologyWorkingDirectory);
     if (!workingDirectory.exists()) {
       LOG.info("The working directory does not exist; creating it.");
       if (!workingDirectory.mkdirs()) {
@@ -262,7 +253,7 @@ public class LocalLauncher implements ILauncher {
       LOG.severe("Failed to fetch the heron core release package.");
       return false;
     }
-    
+
     // untar the topology package
     LOG.info("Untar the topology package: " + topologyPackage);
 
