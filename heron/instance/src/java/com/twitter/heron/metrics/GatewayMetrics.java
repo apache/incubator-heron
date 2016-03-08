@@ -6,7 +6,6 @@ import com.twitter.heron.api.metric.ReducedMetric;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
-import com.twitter.heron.common.utils.misc.Constants;
 
 /**
  * Gateway's metrics to be collected, mainly the status of the in & out stream queues.
@@ -61,7 +60,7 @@ public class GatewayMetrics {
   }
 
   public void registerMetrics(MetricsCollector metricsCollector) {
-    SystemConfig systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(Constants.HERON_SYSTEM_CONFIG);
+    SystemConfig systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
     int interval = systemConfig.getHeronMetricsExportIntervalSec();
 

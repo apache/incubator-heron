@@ -61,7 +61,7 @@ public class HeronInstance {
   public HeronInstance(String topologyName, String topologyId,
                        PhysicalPlans.Instance instance, int streamPort, int metricsPort)
       throws IOException {
-    systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(Constants.HERON_SYSTEM_CONFIG);
+    systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
     // Two WakeableLooper
     gatewayLooper = new NIOLooper();
@@ -235,7 +235,7 @@ public class HeronInstance {
     SystemConfig systemConfig = new SystemConfig(args[9], true);
 
     // Add the SystemConfig into SingletonRegistry
-    SingletonRegistry.INSTANCE.registerSingleton(Constants.HERON_SYSTEM_CONFIG, systemConfig);
+    SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, systemConfig);
 
     // Create the protobuf Instance
     PhysicalPlans.InstanceInfo instanceInfo = PhysicalPlans.InstanceInfo.newBuilder().

@@ -52,7 +52,7 @@ public class Slave implements Runnable {
     this.inControlQueue = inControlQueue;
 
     this.systemConfig =
-        (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(Constants.HERON_SYSTEM_CONFIG);
+        (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
     this.metricsCollector = new MetricsCollector(slaveLooper, metricsOutCommunicator);
 

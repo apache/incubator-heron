@@ -194,7 +194,7 @@ public class ConnectTest {
         try {
           SystemConfig systemConfig =
               (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
-                  com.twitter.heron.common.utils.misc.Constants.HERON_SYSTEM_CONFIG);
+                  SystemConfig.HERON_SYSTEM_CONFIG);
 
           HeronSocketOptions socketOptions = new HeronSocketOptions(
               systemConfig.getInstanceNetworkWriteBatchSizeBytes(),
