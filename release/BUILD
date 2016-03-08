@@ -2,133 +2,170 @@ package(default_visibility = ["//visibility:public"])
 
 load("/tools/build_defs/pkg/pkg", "pkg_tar")
 
-load("/tools/rules/heron", "heron_api_files")
-load("/tools/rules/heron", "heron_api_bin_files")
-load("/tools/rules/heron", "heron_api_conf_files")
-load("/tools/rules/heron", "heron_api_lib_files")
+load("/tools/rules/heron_client", "heron_client_files")
+load("/tools/rules/heron_client", "heron_client_bin_files")
+load("/tools/rules/heron_client", "heron_client_conf_files")
+load("/tools/rules/heron_client", "heron_client_lib_files")
+load("/tools/rules/heron_client", "heron_client_lib_scheduler_files")
+load("/tools/rules/heron_client", "heron_client_lib_packing_files")
+load("/tools/rules/heron_client", "heron_client_lib_statemgr_files")
+load("/tools/rules/heron_client", "heron_client_lib_uploader_files")
 
-load("/tools/rules/heron", "heron_cli_files")
-load("/tools/rules/heron", "heron_cli_bin_files")
-load("/tools/rules/heron", "heron_cli_conf_files")
-load("/tools/rules/heron", "heron_cli_lib_files")
+load("/tools/rules/heron_core", "heron_core_files")
+load("/tools/rules/heron_core", "heron_core_bin_files")
+load("/tools/rules/heron_core", "heron_core_conf_files")
+load("/tools/rules/heron_core", "heron_core_lib_instance_files")
+load("/tools/rules/heron_core", "heron_core_lib_scheduler_files")
+load("/tools/rules/heron_core", "heron_core_lib_metricsmgr_files")
+load("/tools/rules/heron_core", "heron_core_lib_packing_files")
+load("/tools/rules/heron_core", "heron_core_lib_statemgr_files")
 
-load("/tools/rules/heron", "heron_core_files")
-load("/tools/rules/heron", "heron_core_bin_files")
-load("/tools/rules/heron", "heron_core_conf_files")
-load("/tools/rules/heron", "heron_core_lib_files")
+load("/tools/rules/heron_tools", "heron_tools_files")
+load("/tools/rules/heron_tools", "heron_tools_bin_files")
+load("/tools/rules/heron_tools", "heron_tools_conf_files")
+load("/tools/rules/heron_tools", "heron_tools_lib_files")
 
-load("/tools/rules/heron", "heron_metrics_api_files")
-load("/tools/rules/heron", "heron_metrics_api_bin_files")
-load("/tools/rules/heron", "heron_metrics_api_conf_files")
-load("/tools/rules/heron", "heron_metrics_api_lib_files")
-
-load("/tools/rules/heron", "heron_storm_compat_files")
-load("/tools/rules/heron", "heron_storm_compat_bin_files")
-load("/tools/rules/heron", "heron_storm_compat_conf_files")
-load("/tools/rules/heron", "heron_storm_compat_lib_files")
-
-load("/tools/rules/heron", "heron_tracker_files")
-load("/tools/rules/heron", "heron_tracker_bin_files")
-load("/tools/rules/heron", "heron_tracker_conf_files")
-load("/tools/rules/heron", "heron_tracker_lib_files")
-
-load("/tools/rules/heron", "heron_bin_files")
-load("/tools/rules/heron", "heron_conf_files")
-load("/tools/rules/heron", "heron_lib_files")
+load("/tools/rules/heron_examples", "heron_examples_files")
 
 filegroup(
     name = "packages",
     srcs = [
-        ":heron-api",
-        ":heron-cli",
         ":heron-core",
-        ":heron-storm-compat",
-        ":heron-tracker",
-        ":heron",
-    ],
-)
-
-pkg_tar(
-    name = "heron-api",
-    extension = "tar.gz",
-    files = heron_api_files(),
-)
-
-pkg_tar(
-    name = "heron-cli-bin",
-    package_dir = "bin",
-    files = heron_cli_bin_files(),
-)
-
-pkg_tar(
-    name = "heron-cli-lib",
-    package_dir = "lib",
-    files = heron_cli_lib_files(),
-)
-
-pkg_tar(
-    name = "heron-cli-top",
-    files = heron_cli_conf_files(),
-)
-    
-pkg_tar(
-    name = "heron-cli",
-    extension = "tar.gz",
-    deps = [
-        ":heron-cli-top",
-        ":heron-cli-bin",
-        ":heron-cli-lib",
+        ":heron-tools",
+        ":heron-client",
     ],
 )
 
 pkg_tar(
     name = "heron-core",
     extension = "tar.gz",
-    files = heron_core_files(), 
+    deps = [
+        ":heron-core-bin",
+        ":heron-core-lib-scheduler",
+        ":heron-core-lib-packing",
+        ":heron-core-lib-metricsmgr",
+        ":heron-core-lib-statemgr",
+        ":heron-core-lib-instance",
+    ],
 )
 
 pkg_tar(
-    name = "heron-storm-compat",
+    name = "heron-core-bin",
+    package_dir = "heron-core/bin",
+    files = heron_core_bin_files(), 
+)
+
+pkg_tar(
+    name = "heron-core-lib-scheduler",
+    package_dir = "heron-core/lib/scheduler",
+    files = heron_core_lib_scheduler_files(), 
+)
+
+pkg_tar(
+    name = "heron-core-lib-packing",
+    package_dir = "heron-core/lib/packing",
+    files = heron_core_lib_packing_files(), 
+)
+
+pkg_tar(
+    name = "heron-core-lib-metricsmgr",
+    package_dir = "heron-core/lib/metricsmgr",
+    files = heron_core_lib_metricsmgr_files(), 
+)
+
+pkg_tar(
+    name = "heron-core-lib-statemgr",
+    package_dir = "heron-core/lib/statemgr",
+    files = heron_core_lib_statemgr_files(), 
+)
+
+pkg_tar(
+    name = "heron-core-lib-instance",
+    package_dir = "heron-core/lib/instance",
+    files = heron_core_lib_instance_files(), 
+)
+
+pkg_tar(
+    name = "heron-tools",
     extension = "tar.gz",
-    files = heron_storm_compat_files(),
+    files = heron_tools_files(),
 )
 
 pkg_tar(
-    name = "heron-tracker",
-    extension = "tar.gz",
-    files = heron_tracker_files(),
-)
-
-pkg_tar(
-    name = "heron-bin",
+    name = "heron-client-bin",
     package_dir = "bin",
-    extension = "tar.gz",
-    files = heron_bin_files(),
-    mode = "0755",
+    files = heron_client_bin_files(),
 )
 
 pkg_tar(
-    name = "heron-conf",
-    package_dir = "conf",
-    extension = "tar.gz",
-    files = heron_conf_files(),
-    mode = "0644",
-)
-
-pkg_tar(
-    name = "heron-lib",
+    name = "heron-client-lib",
     package_dir = "lib",
-    extension = "tar.gz",
-    files = heron_lib_files(),
-    mode = "0644",
+    files = heron_client_lib_files(),
 )
 
 pkg_tar(
-    name = "heron",
+    name = "heron-client-lib-scheduler",
+    package_dir = "lib/scheduler",
+    files = heron_client_lib_scheduler_files(),
+)
+
+pkg_tar(
+    name = "heron-client-lib-packing",
+    package_dir = "lib/packing",
+    files = heron_client_lib_packing_files(),
+)
+
+pkg_tar(
+    name = "heron-client-lib-statemgr",
+    package_dir = "lib/statemgr",
+    files = heron_client_lib_statemgr_files(),
+)
+
+pkg_tar(
+    name = "heron-client-lib-uploader",
+    package_dir = "lib/uploader",
+    files = heron_client_lib_uploader_files(),
+)
+
+pkg_tar(
+    name = "heron-client-examples",
+    package_dir = "examples",
+    files = heron_examples_files(),
+)
+
+pkg_tar(
+    name = "heron-client-conf-local",
+    package_dir = "conf/local",
+    files = [
+        "//heron/config/src/yaml:conf-local-yaml",
+    ],
+)
+ 
+pkg_tar(
+    name = "heron-client-conf",
+    package_dir = "conf",
+    files = heron_client_conf_files(),
+)
+
+pkg_tar(
+    name = "heron-client-dist",
+    package_dir = "dist",
+    files = [":heron-core"],
+)
+    
+pkg_tar(
+    name = "heron-client",
     extension = "tar.gz",
     deps = [
-        ":heron-bin",
-        ":heron-conf",
-        ":heron-lib",
+        ":heron-client-bin",
+        ":heron-client-conf",
+        ":heron-client-conf-local",
+        ":heron-client-dist",
+        ":heron-client-examples",
+        ":heron-client-lib",
+        ":heron-client-lib-scheduler",
+        ":heron-client-lib-packing",
+        ":heron-client-lib-statemgr",
+        ":heron-client-lib-uploader",
     ],
 )

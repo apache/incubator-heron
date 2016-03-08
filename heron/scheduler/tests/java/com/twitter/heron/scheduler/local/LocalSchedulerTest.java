@@ -18,7 +18,7 @@ import com.twitter.heron.scheduler.util.DefaultConfigLoader;
 public class LocalSchedulerTest {
 
   private static final int shards = 10;
-  private static final String stateMgrClass = "com.twitter.heron.spi.statemgr.NullStateManager";
+  private static final String stateMgrClass = "com.twitter.heron.statemgr.NullStateManager";
 
   DefaultConfigLoader createRequiredConfig() throws Exception {
     DefaultConfigLoader schedulerConfig = DefaultConfigLoader.class.newInstance();

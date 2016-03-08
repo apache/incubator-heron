@@ -49,7 +49,8 @@ public class SubmitterMain {
   }
 
   public static void main(String[] args) throws
-      ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
+      ClassNotFoundException, InstantiationException, IllegalAccessException, IOException 
+  {
     String topologyPackage = args[0];
     String submitterConfigLoader = args[1];
     String submitterConfigFile = args[2];

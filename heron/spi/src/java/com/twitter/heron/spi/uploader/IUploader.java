@@ -1,34 +1,53 @@
 package com.twitter.heron.spi.uploader;
 
-import com.twitter.heron.spi.scheduler.context.LaunchContext;
+import com.twitter.heron.spi.common.Config;
 
 /**
- * Uploads topology package to a shared location. This location must be accessible by
- * runtime environment of topology. The uploader will upload topology jar, topology jar
- * dependencies, topology definition and if required heron core packages and libraries.
- * Uploader outputs string containing all information that will be used by Launcher to
- * launch topology. Launcher will get this Uploader object also.
- * Location passed to uploader will be generated from heron-cli.
- * Implementation of IUploader are required to have a no-argument constructor which will be called
- * to create IUploader object,
+ * Uploads topology package to a shared location. This location must be
+ * accessible by runtime environment of topology. The uploader will upload
+ *
+ *   - topology jar,
+ *   - topology jar dependencies,
+ *   - topology definition, and
+ *   - heron core packages and libraries, if required
+ *
+ * Uploader outputs another context containing the necessary information that
+ * will be used by next stages of topology submission.
+ *
+ * Implementation of IUploader is required to have a no argument constructor
+ * that will be called to create an instance of IUploader.
+ *
  */
 public interface IUploader {
   /**
-   * Initialize Uploader with a config file. heron-cli will pass config file to initialize uploader.
+   * Initialize the uploader with the incoming context.
    */
-  void initialize(LaunchContext context);
+  public void initialize(Config config);
 
   /**
-   * Will be called by heron-cli with relevant parameters.
+   * UploadPackage will upload the topology package to the given location.
    *
-   * @param topologyPackageLocation Location of topology jar and dependencies as 1 file.
    * @return true if successful.
    */
-  boolean uploadPackage(final String topologyPackageLocation);
+  public boolean uploadPackage();
 
   /**
-   * If subsequent stages failed, this will be called to free resources used by uploading package.
-   * This will try to cleanup uploaded package.
+   * getUri will get the destination URI of where the topology package has 
+   * been uploaded
+   *
+   * @return uri
    */
-  void undo();
+  public String getUri();
+
+  /**
+   * If subsequent stages fail, undo will be called to free resources used by
+   * uploading package. Ideally, this should try to remove the uploaded package.
+   */
+  public boolean undo();
+
+  /**
+   * This is to for disposing or cleaning up any internal state accumulated by
+   * the uploader
+   */
+  public void close();
 }
