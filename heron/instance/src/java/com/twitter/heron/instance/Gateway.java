@@ -11,7 +11,7 @@ import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.network.HeronSocketOptions;
 import com.twitter.heron.common.utils.metrics.JVMMetrics;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
-import com.twitter.heron.common.utils.misc.Constants;
+import com.twitter.heron.common.utils.misc.ThreadNames;
 import com.twitter.heron.common.utils.misc.ErrorReportLoggingHandler;
 import com.twitter.heron.metrics.GatewayMetrics;
 import com.twitter.heron.network.MetricsManagerClient;
@@ -126,7 +126,7 @@ public class Gateway implements Runnable {
 
   @Override
   public void run() {
-    Thread.currentThread().setName(Constants.THREAD_GATEWAY_NAME);
+    Thread.currentThread().setName(ThreadNames.THREAD_GATEWAY_NAME);
 
     streamManagerClient.start();
     metricsManagerClient.start();
