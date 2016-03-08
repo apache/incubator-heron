@@ -15,7 +15,7 @@ import com.twitter.heron.spi.common.ClusterDefaults;
 
 import com.twitter.heron.spi.scheduler.IRuntimeManager;
 import com.twitter.heron.spi.statemgr.IStateManager;
-import com.twitter.heron.spi.statemgr.SchedulerStateManager;
+import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.NetworkUtils;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -86,7 +86,7 @@ public class RuntimeManagerMain {
     // build the runtime config
     Config runtime = Config.newBuilder()
         .put(Keys.topologyName(), Context.topologyName(config))
-        .put(Keys.schedulerStateManager(), new SchedulerStateManager(statemgr))
+        .put(Keys.schedulerStateManagerAdaptor(), new SchedulerStateManagerAdaptor(statemgr))
         .build();
 
     // create an instance of the runner class

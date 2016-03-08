@@ -32,7 +32,7 @@ import com.twitter.heron.spi.utils.Runtime;
 
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.IStateManager;
-import com.twitter.heron.spi.statemgr.SchedulerStateManager;
+import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -216,7 +216,7 @@ public class LocalScheduler implements IScheduler {
     processToContainer.clear();
 
     // get the state manager instance
-    SchedulerStateManager stateManager = Runtime.schedulerStateManager(runtime);
+    SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
 
     // remove the scheduler location for the topology from state manager
     LOG.info("Removing scheduler location for topology: " + topologyName);
@@ -279,7 +279,7 @@ public class LocalScheduler implements IScheduler {
     }
 
     // get the instance of state manager to clean state
-    SchedulerStateManager stateManager = Runtime.schedulerStateManager(runtime);
+    SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
 
     // Clean TMasterLocation since we could not set it as ephemeral for local file system
     // We would not clean SchedulerLocation since we would not restart the Scheduler
@@ -299,7 +299,7 @@ public class LocalScheduler implements IScheduler {
     String topologyName = LocalContext.topologyName(config);
 
     // get the state manager instance
-    SchedulerStateManager stateManager = Runtime.schedulerStateManager(runtime);
+    SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
 
     // fetch the TMasterLocation for the topology
     LOG.info("Fetching TMaster location for topology: " + topologyName);

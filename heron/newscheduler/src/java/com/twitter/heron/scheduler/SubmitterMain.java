@@ -12,7 +12,7 @@ import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
 
 import com.twitter.heron.spi.statemgr.IStateManager;
-import com.twitter.heron.spi.statemgr.SchedulerStateManager;
+import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -161,7 +161,7 @@ public class SubmitterMain {
         .put(Keys.topologyId(), topology.getId())
         .put(Keys.topologyName(), topology.getName())
         .put(Keys.topologyDefinition(), topology)
-        .put(Keys.schedulerStateManager(), new SchedulerStateManager(statemgr))
+        .put(Keys.schedulerStateManagerAdaptor(), new SchedulerStateManagerAdaptor(statemgr))
         .put(Keys.topologyPackageUri(), uploadRunner.getUri())
         .build();
 

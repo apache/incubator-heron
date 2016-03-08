@@ -18,7 +18,7 @@ import com.twitter.heron.spi.common.HttpUtils;
 import com.twitter.heron.spi.scheduler.IRuntimeManager;
 
 import com.twitter.heron.spi.statemgr.IStateManager;
-import com.twitter.heron.spi.statemgr.SchedulerStateManager;
+import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.NetworkUtils;
@@ -78,7 +78,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
   protected Pair<Boolean, HttpURLConnection> createHttpConnection() {
 
     // get the instance of the state manager
-    SchedulerStateManager statemgr = Runtime.schedulerStateManager(runtime);
+    SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
 
     // fetch scheduler location from state manager
     LOG.info("Fetching scheduler location from state manager for " + command + " topology");
@@ -380,7 +380,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     LOG.info("Cleaning up Heron State");
 
     // get the instance of the state manager
-    SchedulerStateManager statemgr = Runtime.schedulerStateManager(runtime);
+    SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
 
     ListenableFuture<Boolean> booleanFuture;
     try {
