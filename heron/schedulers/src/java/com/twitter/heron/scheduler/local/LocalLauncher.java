@@ -15,6 +15,7 @@ import javax.xml.bind.DatatypeConverter;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 
+import com.twitter.heron.scheduler.local.LocalContext;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Defaults;
 import com.twitter.heron.spi.common.ClusterDefaults;
@@ -157,9 +158,13 @@ public class LocalLauncher implements ILauncher {
 
     LOG.info("Scheduler command line: " + schedulerCmd.toString());
 
-    // TO DO: we need to run as async process
-    return 0 == ShellUtils.runSyncProcess(true, true, schedulerCmd.toString(),
-        new StringBuilder(), new StringBuilder(), new File(topologyWorkingDirectory));
+
+    ShellUtils.runASyncProcess(true, false, schedulerCmd.toString(),
+        new File(topologyWorkingDirectory));
+    LOG.info(String.format("Please find working directory %s for more running status.",
+        LocalContext.workingDirectory(config)));
+
+    return true;
   }
 
   @Override
