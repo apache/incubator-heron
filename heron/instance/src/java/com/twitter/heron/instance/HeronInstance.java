@@ -16,7 +16,7 @@ import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
-import com.twitter.heron.common.utils.misc.Constants;
+import com.twitter.heron.common.utils.misc.ThreadNames;
 import com.twitter.heron.common.utils.misc.LoggingHelper;
 import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.proto.system.Metrics;
@@ -124,7 +124,7 @@ public class HeronInstance {
       exitExecutor.execute(new ForceExitTask(exited, systemConfig.getInstanceForceExitTimeoutMs()));
 
       // Clean up
-      if (thread.getName().equals(Constants.THREAD_SLAVE_NAME)) {
+      if (thread.getName().equals(ThreadNames.THREAD_SLAVE_NAME)) {
         // Run the SlaveExitTask here since the thread throw exceptions
         // and this Task would never be invoked on exit in future
         new SlaveExitTask().run();

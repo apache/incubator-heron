@@ -18,6 +18,7 @@ import com.twitter.heron.api.metric.ReducedMetric;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.SingletonRegistry;
+import com.twitter.heron.common.utils.misc.ThreadNames;
 
 /**
  * JVM metrics to be collected
@@ -288,8 +289,8 @@ public class JVMMetrics {
         if (threadInfo != null) {
           String threadName = threadInfo.getThreadName();
 
-          if(threadName.equals(com.twitter.heron.common.utils.misc.Constants.THREAD_GATEWAY_NAME) 
-            || threadName.equals(com.twitter.heron.common.utils.misc.Constants.THREAD_SLAVE_NAME)) {
+          if(threadName.equals(ThreadNames.THREAD_GATEWAY_NAME)
+            || threadName.equals(ThreadNames.THREAD_SLAVE_NAME)) {
             threadsCPUTimeNs.scope(threadName).setValue(cpuTime);
             threadsUserCPUTimeNs.scope(threadName).setValue(cpuUserTime);
           }
