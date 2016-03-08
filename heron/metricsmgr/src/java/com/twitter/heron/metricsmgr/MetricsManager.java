@@ -12,22 +12,24 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.metric.MultiCountMetric;
-import com.twitter.heron.common.basics.TypeUtils;
-import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.basics.Communicator;
+import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
+import com.twitter.heron.common.basics.TypeUtils;
+import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.network.HeronSocketOptions;
+import com.twitter.heron.common.utils.logging.ErrorReportLoggingHandler;
+import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.common.utils.metrics.JVMMetrics;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
-import com.twitter.heron.common.utils.misc.LoggingHelper;
-import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
-import com.twitter.heron.spi.metricsmgr.sink.IMetricsSink;
-import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
 import com.twitter.heron.metricsmgr.executor.SinkExecutor;
 import com.twitter.heron.metricsmgr.sink.SinkContextImpl;
 import com.twitter.heron.proto.system.Metrics;
+import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
+import com.twitter.heron.spi.metricsmgr.sink.IMetricsSink;
+import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
 
 /**
  * Main entry to start the Metrics Manager
@@ -336,7 +338,13 @@ public class MetricsManager {
     Level loggingLevel = Level.INFO;
     String loggingDir = systemConfig.getHeronLoggingDirectory();
 
-    LoggingHelper.loggerInit(metricsmgrId, loggingLevel, loggingDir);
+    // Log to file and TMaster
+    LoggingHelper.loggerInit(loggingLevel, true);
+    LoggingHelper.addLoggingHandler(
+        LoggingHelper.getFileHandler(metricsmgrId, loggingDir, true,
+            systemConfig.getHeronLoggingMaximumSizeMb() * Constants.MB_TO_BYTES,
+            systemConfig.getHeronLoggingMaximumFiles()));
+    LoggingHelper.addLoggingHandler(new ErrorReportLoggingHandler());
 
     LOG.info(String.format("Starting Metrics Manager for topology %s with topologyId %s with " +
             "Metrics Manager Id %s, Merics Manager Port: %d.",
