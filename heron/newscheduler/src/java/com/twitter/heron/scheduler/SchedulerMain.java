@@ -21,7 +21,7 @@ import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.scheduler.IScheduler;
 
 import com.twitter.heron.spi.statemgr.IStateManager;
-import com.twitter.heron.spi.statemgr.SchedulerStateManager;
+import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.TopologyUtils;
@@ -145,7 +145,7 @@ public class SchedulerMain {
         .put(Keys.topologyId(), topology.getId())
         .put(Keys.topologyName(), topology.getName())
         .put(Keys.topologyDefinition(), topology)
-        .put(Keys.schedulerStateManager(), new SchedulerStateManager(statemgr))
+        .put(Keys.schedulerStateManagerAdaptor(), new SchedulerStateManagerAdaptor(statemgr))
         .put(Keys.numContainers(), 1 + TopologyUtils.getNumContainers(topology))
         .build();
 
@@ -224,8 +224,8 @@ public class SchedulerMain {
         .build();
 
     LOG.info("Setting SchedulerLocation: " + location);
-    SchedulerStateManager schedulerStateManager = Runtime.schedulerStateManager(runtime);
-    schedulerStateManager.setSchedulerLocation(location, Runtime.topologyName(runtime));
+    SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
+    statemgr.setSchedulerLocation(location, Runtime.topologyName(runtime));
     // TODO - Should we wait on the future here
   }
 }

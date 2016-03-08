@@ -2,7 +2,7 @@ package com.twitter.heron.spi.utils;
 
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.statemgr.SchedulerStateManager;
+import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.api.generated.TopologyAPI;
 
 public class Runtime {
@@ -27,8 +27,8 @@ public class Runtime {
     return cfg.getStringValue(Keys.topologyPackageUri());
   }
 
-  public static SchedulerStateManager schedulerStateManager(Config runtime) {
-    return (SchedulerStateManager)runtime.get(Keys.schedulerStateManager());
+  public static SchedulerStateManagerAdaptor schedulerStateManagerAdaptor(Config runtime) {
+    return (SchedulerStateManagerAdaptor)runtime.get(Keys.schedulerStateManagerAdaptor());
   }
 
   public static Shutdown schedulerShutdown(Config runtime) {
