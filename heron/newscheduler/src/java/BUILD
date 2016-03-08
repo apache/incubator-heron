@@ -1,6 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/jarjar_rules", "jarjar_binary")
 load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 common_deps_files = [
@@ -36,8 +35,9 @@ java_binary(
     deps = scheduler_deps_files,
 )
 
-jarjar_binary(
+genrule(
     name = "heron-scheduler",
-    src = ":scheduler-unshaded_deploy.jar",
-    shade = "shade.conf",
+    srcs = [":scheduler-unshaded_deploy.jar"],
+    outs = ["heron-scheduler.jar"],
+    cmd  = "cp $< $@",
 )

@@ -1,6 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/jarjar_rules", "jarjar_binary")
 load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 packing_deps_files = [
@@ -28,10 +27,11 @@ java_binary(
     deps = packing_deps_files,
 )
 
-jarjar_binary(
+genrule(
     name = "heron-null-packing",
-    src = ":null-packing-unshaded_deploy.jar",
-    shade = "shade.conf",
+    srcs = [":null-packing-unshaded_deploy.jar"],
+    outs = ["heron-null-packing.jar"],
+    cmd  = "cp $< $@",
 )
 
 java_library(
@@ -46,8 +46,9 @@ java_binary(
     deps = roundrobin_deps_files,
 )
 
-jarjar_binary(
+genrule(
     name = "heron-roundrobin-packing",
-    src = ":roundrobin-packing-unshaded_deploy.jar",
-    shade = "shade.conf",
+    srcs = [":roundrobin-packing-unshaded_deploy.jar"],
+    outs = ["heron-roundrobin-packing.jar"],
+    cmd  = "cp $< $@",
 )
