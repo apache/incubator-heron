@@ -1,6 +1,6 @@
 package com.twitter.heron.common.utils.misc;
 
-public class Constants {
+public class ThreadNames {
   /**
    * Thread Name Constants
    */
