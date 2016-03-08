@@ -158,7 +158,8 @@ public class LocalScheduler implements IScheduler {
         port2,
         port3,
         LocalContext.systemConfigFile(config),
-        TopologyUtils.formatRamMap(TopologyUtils.getComponentRamMap(topology)),
+        TopologyUtils.formatRamMap(
+            TopologyUtils.getComponentRamMap(topology, LocalContext.instanceRam(config))),
         formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)),
         LocalContext.topologyPackageType(config),
         LocalContext.topologyJarFile(config),
