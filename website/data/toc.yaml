@@ -1,0 +1,43 @@
+sections:
+  - name: Developers
+    subcategories:
+      - name: Compiling
+        sublinks:
+          - name: Compiling Heron
+            url: /docs/developers/compiling/compiling
+          - name: Compiling Using Docker
+            url: /docs/developers/compiling/docker
+    sublinks:
+      - name: Getting Started
+        url: /docs/getting-started
+      - name: Heron's Data Model
+        url: /docs/developers/data-model
+  - name: Operators
+    subcategories:
+      - name: Configuration
+        sublinks:
+          - name: Heron Instance
+            url: /docs/operators/instance
+          - name: Metrics Manager
+            url: /docs/operators/metrics-manager
+    sublinks:
+      - name: Managing Topologies with the Heron CLI
+        url: /docs/operators/heron-cli
+      - name: The Heron Tracker REST API
+        url: /docs/operators/heron-tracker
+  - name: Concepts
+    sublinks:
+      - name: The Architecture of Heron
+        url: /docs/concepts/architecture
+      - name: Heron Topologies
+        url: /docs/concepts/topologies
+  - name: Contributors
+    sublinks:
+      - name: The Heron Codebase
+        url: /docs/contributors/codebase
+      - name: Testing Heron
+        url: /docs/contributors/testing
+      - name: Implementing a Custom Scheduler
+        url: /docs/contributors/custom-scheduler
+      - name: Implementing a Custom Metrics Sink
+        url: /docs/contributors/custom-metrics-sink

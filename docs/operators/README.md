@@ -1,1 +1,0 @@
-# Heron for Operators
