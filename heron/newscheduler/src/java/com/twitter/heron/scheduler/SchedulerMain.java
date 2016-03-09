@@ -1,33 +1,29 @@
 package com.twitter.heron.scheduler;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.xml.bind.DatatypeConverter;
-
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.proto.scheduler.Scheduler;
-
+import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.FileUtils;
-import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.common.config.SystemConfig;
+import com.twitter.heron.common.utils.logging.LoggingHelper;
+import com.twitter.heron.proto.scheduler.Scheduler;
+import com.twitter.heron.scheduler.server.SchedulerServer;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
-
+import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.scheduler.IScheduler;
-
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
-
 import com.twitter.heron.spi.utils.Runtime;
-import com.twitter.heron.spi.utils.TopologyUtils;
 import com.twitter.heron.spi.utils.Shutdown;
-
-import com.twitter.heron.scheduler.server.SchedulerServer;
+import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
  * Main class of scheduler.
@@ -40,15 +36,14 @@ public class SchedulerMain {
    *
    * @param topologyJarFile, name of the user submitted topology jar/tar file
    * @param topologyDefnFile, name of the topology defintion file
-   * @param topology, proto in memory version of topology definition 
-   *
+   * @param topology, proto in memory version of topology definition
    * @return config, the topology config
    */
   protected static Config topologyConfigs(
       String topologyJarFile, String topologyDefnFile, TopologyAPI.Topology topology) {
 
     String pkgType = FileUtils.isOriginalPackageJar(
-        FileUtils.getBaseName(topologyJarFile)) ? "jar" : "tar" ; 
+        FileUtils.getBaseName(topologyJarFile)) ? "jar" : "tar";
 
     Config config = Config.newBuilder()
         .put(Keys.topologyId(), topology.getId())
@@ -66,7 +61,7 @@ public class SchedulerMain {
    *
    * @param heronHome, directory of heron home
    * @param configPath, directory containing the config
-   *
+   * <p/>
    * return config, the defaults config
    */
   protected static Config defaultConfigs() {
@@ -82,8 +77,7 @@ public class SchedulerMain {
    *
    * @param cluster, name of the cluster
    * @param role, user role
-   * @param environ, user provided environment/tag 
-   *
+   * @param environ, user provided environment/tag
    * @return config, the command line config
    */
   protected static Config commandLineConfigs(String cluster, String role, String environ) {
@@ -119,26 +113,54 @@ public class SchedulerMain {
             .putAll(topologyConfigs(topologyJarFile, topologyDefnFile, topology))
             .build());
 
-    System.out.println("loaded scheduler config " + config);
+    // Set up logging with complete Config
+    setupLogging(config);
+
+    LOG.info("loaded scheduler config " + config);
 
     // run the scheduler
     runScheduler(config, schedulerServerPort, topology);
   }
 
+  // Set up logging basing on the Config
+  public static void setupLogging(Config config) throws IOException {
+    String systemConfigFilename = Context.systemConfigFile(config);
+
+    SystemConfig systemConfig = new SystemConfig(systemConfigFilename, true);
+
+    // Init the logging setting and redirect the stdout and stderr to logging
+    // For now we just set the logging level as INFO; later we may accept an argument to set it.
+    Level loggingLevel = Level.INFO;
+    // TODO(mfu): use systemConfig.getHeronLoggingDirectory() in future
+    // TODO(mfu): currently the folder creation is after the start of scheduler
+    String loggingDir = "./";
+
+    // Log to file
+    LoggingHelper.loggerInit(loggingLevel, true);
+    // TODO(mfu): Pass the scheduler id from cmd
+    String processId = String.format("%s-%s-%s", "heron", Context.topologyName(config), "scheduler");
+    LoggingHelper.addLoggingHandler(
+        LoggingHelper.getFileHandler(processId, loggingDir, true,
+            systemConfig.getHeronLoggingMaximumSizeMb() * Constants.MB_TO_BYTES,
+            systemConfig.getHeronLoggingMaximumFiles()));
+
+    LOG.info("Logging setup done.");
+  }
+
   public static void runScheduler(
       Config config, int schedulerServerPort, TopologyAPI.Topology topology) throws
-          ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
+      ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
 
     // create an instance of state manager
     String statemgrClass = Context.stateManagerClass(config);
-    IStateManager statemgr = (IStateManager)Class.forName(statemgrClass).newInstance();
+    IStateManager statemgr = (IStateManager) Class.forName(statemgrClass).newInstance();
 
-     // initialize the state manager
+    // initialize the state manager
     statemgr.initialize(config);
 
     // create an instance of the packing class 
     String packingClass = Context.packingClass(config);
-    IPacking packing = (IPacking)Class.forName(packingClass).newInstance();
+    IPacking packing = (IPacking) Class.forName(packingClass).newInstance();
 
     // build the runtime config
     Config runtime = Config.newBuilder()
@@ -163,7 +185,7 @@ public class SchedulerMain {
 
     // create an instance of scheduler 
     String schedulerClass = Context.schedulerClass(config);
-    IScheduler scheduler = (IScheduler)Class.forName(schedulerClass).newInstance();
+    IScheduler scheduler = (IScheduler) Class.forName(schedulerClass).newInstance();
 
     // initialize the scheduler
     scheduler.initialize(config, ytruntime);
@@ -194,9 +216,8 @@ public class SchedulerMain {
    * @param runtime, the runtime configuration
    * @param scheduler, an instance of the scheduler
    * @param port, the port for scheduler to listen on
-   *
-   * @return an instance of the http server  
-   */ 
+   * @return an instance of the http server
+   */
   public static SchedulerServer runServer(
       Config runtime, IScheduler scheduler, int port) throws IOException {
 
@@ -210,7 +231,7 @@ public class SchedulerMain {
   }
 
   /**
-   * Set the location of scheduler for other processes to discover 
+   * Set the location of scheduler for other processes to discover
    *
    * @param runtime, the runtime configuration
    * @param schedulerServe, the http server that scheduler listens for receives requests
