@@ -404,7 +404,15 @@ def setup():
   atexit.register(cleanup)
 
 def cleanup():
-  do_print('Executor terminated; exiting all process in executor.')
+  """Handler to trigger when receiving the SIGTERM signal
+  Do cleanup inside this method, including:
+  1. Terminate all children processes
+
+  Note:
+  1. Do not flush anything to standard streams (stdout & stderr)
+  in this method, since standard streams may not be available
+  at this stage.
+  """
   # We would not wait or check whether process spawned dead or not
   os.killpg(0, signal.SIGTERM)
 
