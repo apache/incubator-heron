@@ -26,6 +26,7 @@ RUN yum -y install \
       python-software-properties \
       software-properties-common \
       python-setuptools \
+      zip \
       unzip \
       wget \
       which
