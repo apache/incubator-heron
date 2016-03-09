@@ -27,6 +27,8 @@ import com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager;
 public class AuroraStateManager extends CuratorStateManager {
   private static final Logger LOG = Logger.getLogger(AuroraStateManager.class.getName());
   private List<Process> processHandles = new ArrayList<>();
+  private static final String NO_SCHEDULER_REST_ENDPOINT = "no_scheduler_endpoint";
+
 
   @Override
   public void initialize(Map<Object, Object> conf) {

@@ -8,7 +8,7 @@ import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
-import com.twitter.heron.common.utils.misc.Constants;
+import com.twitter.heron.common.utils.misc.ThreadNames;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.instance.bolt.BoltInstance;
 import com.twitter.heron.instance.spout.SpoutInstance;
@@ -52,7 +52,7 @@ public class Slave implements Runnable {
     this.inControlQueue = inControlQueue;
 
     this.systemConfig =
-        (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(Constants.HERON_SYSTEM_CONFIG);
+        (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
     this.metricsCollector = new MetricsCollector(slaveLooper, metricsOutCommunicator);
 
@@ -152,7 +152,7 @@ public class Slave implements Runnable {
 
   @Override
   public void run() {
-    Thread.currentThread().setName(Constants.THREAD_SLAVE_NAME);
+    Thread.currentThread().setName(ThreadNames.THREAD_SLAVE_NAME);
 
     slaveLooper.loop();
   }

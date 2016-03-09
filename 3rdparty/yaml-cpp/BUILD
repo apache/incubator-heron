@@ -66,12 +66,12 @@ genrule(
         "cd $$TMP_DIR",
         "tar xfz " + package_file,
         "cd " + package_dir,
-        "$$WORKSPACE_ROOT/$(location //scripts:env_exec) cmake -DCMAKE_INSTALL_PREFIX:PATH=$$INSTALL_DIR .",
-        "$$WORKSPACE_ROOT/$(location //scripts:env_exec) make install",
+        "$$WORKSPACE_ROOT/$(location //scripts/compile:env_exec) cmake -DCMAKE_INSTALL_PREFIX:PATH=$$INSTALL_DIR .",
+        "$$WORKSPACE_ROOT/$(location //scripts/compile:env_exec) make install",
         "rm -rf $$TMP_DIR",
     ]),
     tools = [
-        "//scripts:env_exec",
+        "//scripts/compile:env_exec",
     ],
 )
 

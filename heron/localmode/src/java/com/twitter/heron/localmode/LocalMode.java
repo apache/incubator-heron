@@ -13,7 +13,6 @@ import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.basics.SingletonRegistry;
-import com.twitter.heron.common.utils.misc.Constants;
 import com.twitter.heron.localmode.executors.InstanceExecutor;
 import com.twitter.heron.localmode.executors.MetricsExecutor;
 import com.twitter.heron.localmode.executors.StreamExecutor;
@@ -72,7 +71,7 @@ public class LocalMode {
    * @return true if it's registered; false otherwise
    */
   protected boolean isSystemConfigExisted() {
-    return SingletonRegistry.INSTANCE.containsSingleton(Constants.HERON_SYSTEM_CONFIG);
+    return SingletonRegistry.INSTANCE.containsSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
   }
 
   /**
@@ -80,7 +79,7 @@ public class LocalMode {
    * @param systemConfig
    */
   protected void registerSystemConfig(SystemConfig systemConfig) {
-    SingletonRegistry.INSTANCE.registerSingleton(Constants.HERON_SYSTEM_CONFIG, systemConfig);
+    SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, systemConfig);
   }
 
   /**

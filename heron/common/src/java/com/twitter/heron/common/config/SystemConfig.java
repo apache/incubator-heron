@@ -7,14 +7,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.twitter.heron.common.basics.TypeUtils;
-import org.yaml.snakeyaml.Yaml;
 
 /**
  * SystemConfig are a set of configuration parameters that are set by the system
  * All the config associated with time is in the unit of milli-seconds, unless otherwise specified.
- * All the config associated with data szied is in the unit of bytes, unless otherwise specified.
+ * All the config associated with data is in the unit of bytes, unless otherwise specified.
  */
 public class SystemConfig {
+  /**
+   * Bean name for SingletonRegistry
+   */
+  public static final String HERON_SYSTEM_CONFIG = SystemConfig.class.getName();
+
   private Map config = new HashMap<String, Object>();
 
   public SystemConfig() {

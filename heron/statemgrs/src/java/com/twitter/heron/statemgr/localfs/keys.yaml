@@ -1,0 +1,2 @@
+# config key to initialize file directory hierarchy
+IS_INITIALIZE_FILE_TREE:           heron.statemgr.localfs.is.initialize.file.tree

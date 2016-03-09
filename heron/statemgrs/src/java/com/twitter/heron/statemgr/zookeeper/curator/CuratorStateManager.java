@@ -7,6 +7,8 @@ import java.util.logging.Logger;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
+import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Context;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.api.BackgroundCallback;
@@ -20,7 +22,7 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
-import com.twitter.heron.spi.statemgr.FileSystemStateManager;
+import com.twitter.heron.statemgr.FileSystemStateManager;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 import com.twitter.heron.statemgr.zookeeper.ZkWatcherCallback;
 
@@ -29,10 +31,9 @@ public class CuratorStateManager extends FileSystemStateManager {
   private CuratorFramework client;
   private String connectionString;
 
-  public static final String ZK_CONNECTION_STRING = "zk.connection.string";
   @Override
-  public void initialize(Map<Object, Object> conf) {
-    super.initialize(conf);
+  public void initialize(Config config) {
+    super.initialize(config);
 
     int sessionTimeoutMs = 30 * 1000;
     int connectionTimeoutMs = 30 * 1000;
@@ -40,7 +41,7 @@ public class CuratorStateManager extends FileSystemStateManager {
     int retryCount = 10;
     int retryIntervalMs = 1000;
 
-    connectionString = (String) conf.get(ZK_CONNECTION_STRING);
+    connectionString = Context.stateManagerConnectionString(config); 
 
     // these are reasonable arguments for the ExponentialBackoffRetry. The first
     // retry will wait 1 second - the second will wait up to 2 seconds - the

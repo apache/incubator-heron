@@ -4,6 +4,7 @@ load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 common_deps_files = \
     heron_java_proto_files() + [
+        "//heron/spi/src/java:common-spi-java",
         "//heron/spi/src/java:statemgr-spi-java",
         "//3rdparty/guava:guava-java",
     ]
@@ -29,16 +30,40 @@ java_library(
 
 java_library(
     name = "localfs-statemgr-java",
-    srcs = glob(
-        ["**/localfs/*.java"],
-    ),
+    srcs = glob(["**/FileSystemStateManager.java"]) + glob(["**/localfs/**/*.java"]),
+    resources = glob(["**/localfs/**/*.yaml"]),
     deps = localfs_deps_files, 
+)
+
+java_binary(
+    name = "localfs-statemgr-unshaded",
+    srcs = glob(["**/FileSystemStateManager.java"]) + glob(["**/localfs/**/*.java"]),
+    resources = glob(["**/localfs/**/*.yaml"]),
+    deps = localfs_deps_files, 
+)
+
+genrule(
+    name = "heron-localfs-statemgr",
+    srcs = [":localfs-statemgr-unshaded_deploy.jar"],
+    outs = ["heron-localfs-statemgr.jar"],
+    cmd  = "cp $< $@",
 )
 
 java_library(
     name = "zookeeper-statemgr-java",
-    srcs = glob(
-        ["**/zookeeper/*.java"],
-    ),
+    srcs = glob(["**/zookeeper/*.java"]),
     deps = zookeeper_deps_files, 
+)
+
+java_binary(
+    name = "zookeeper-statemgr-unshaded",
+    srcs = glob(["**/zookeeper/*.java"]),
+    deps = zookeeper_deps_files,
+)
+
+genrule(
+    name = "heron-zookeeper-statemgr",
+    srcs = [":zookeeper-statemgr-unshaded_deploy.jar"],
+    outs = ["heron-zookeeper-statemgr.jar"],
+    cmd  = "cp $< $@",
 )
