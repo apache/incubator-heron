@@ -52,7 +52,7 @@ public class ShellUtilsTest {
     StringBuilder stderr = new StringBuilder();
     // Sleep 1 second and echo some text.
     Process p = ShellUtils.runASyncProcess(
-        true, false, String.format("sleep 1 && echo %s", testString), new File("."));
+        true, String.format("sleep 1 && echo %s", testString), new File("."));
     // Test process is running and input stream is empty
     wait(10, TimeUnit.MILLISECONDS);
     Assert.assertEquals(0, p.getInputStream().available());
