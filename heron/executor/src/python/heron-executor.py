@@ -394,11 +394,10 @@ def signal_handler(signal_to_handle, frame):
   sys.exit(signal_to_handle)
 
 def setup():
-  # Redirect stdout and stderr to files
-  # The filename format is stdxxx.pid
-  pid = os.getpid()
-  sys.stdout = open('stdout.%d' %(pid), 'w')
-  sys.stderr = open('stderr.%d' %(pid), 'w')
+  # Redirect stdout and stderr to files in append mode
+  # The filename format is heron-executor.stdxxx
+  sys.stdout = open('heron-executor.stdout', 'a')
+  sys.stderr = open('heron-executor.stderr', 'a')
 
   do_print('Set up process group; executor becomes leader')
   os.setpgrp() # create new process group, become its leader
