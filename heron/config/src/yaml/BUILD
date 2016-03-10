@@ -26,3 +26,33 @@ filegroup(
     name = "conf-local-yaml",
     srcs = glob(["conf/local/*.yaml"]),
 )
+
+filegroup(
+    name = "conf-local-heron-internals",
+    srcs = ["conf/local/heron_internals.yaml"],
+)
+
+filegroup(
+    name = "conf-local-metrics-sinks",
+    srcs = ["conf/local/metrics_sinks.yaml"],
+)
+
+filegroup(
+    name = "conf-local-packing",
+    srcs = ["conf/local/packing.yaml"],
+)
+
+filegroup(
+    name = "conf-local-scheduler",
+    srcs = ["conf/local/scheduler.yaml"],
+)
+
+filegroup(
+    name = "conf-local-statemgr",
+    srcs = ["conf/local/statemgr.yaml"],
+)
+
+filegroup(
+    name = "conf-local-uploader",
+    srcs = ["conf/local/uploader.yaml"],
+)

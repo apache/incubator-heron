@@ -28,7 +28,7 @@ load("/tools/rules/heron_tools", "heron_tools_lib_files")
 load("/tools/rules/heron_examples", "heron_examples_files")
 
 filegroup(
-    name = "install-tars",
+    name = "tar-packages",
     srcs = [
         ":heron-core",
         ":heron-tools",
@@ -37,12 +37,11 @@ filegroup(
 )
 
 filegroup(
-    name = "install-binaries",
+    name = "binary-packages",
     srcs = [
         ":heron-client-install.sh",
     ],
 )
-
 
 pkg_tar(
     name = "heron-core",
@@ -213,4 +212,9 @@ self_extract_binary(
         ":heron-client",
     ],
     launcher = ":launcher_bin.sh", 
+)
+
+filegroup(
+    name = "client-template-bin.sh",
+    srcs = ["template_bin.sh"],
 )
