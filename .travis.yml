@@ -49,5 +49,5 @@ script:
   # run heron unit tests
   - bazel --bazelrc=tools/travis-ci/bazel.rc test  heron/...
 
-  # build release packages
-  - bazel --bazelrc=tools/travis-ci/bazel.rc build release:packages
+  # build packages
+  - bazel --bazelrc=tools/travis-ci/bazel.rc build scripts/packages:install-tars
