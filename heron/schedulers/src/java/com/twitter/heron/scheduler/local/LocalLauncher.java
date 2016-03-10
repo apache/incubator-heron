@@ -149,7 +149,7 @@ public class LocalLauncher implements ILauncher {
     LOG.info("Scheduler command line: " + schedulerCmd.toString());
 
 
-    Process p = ShellUtils.runASyncProcess(true, false, schedulerCmd.toString(),
+    Process p = ShellUtils.runASyncProcess(true, schedulerCmd.toString(),
         new File(topologyWorkingDirectory));
 
     if (p == null) {

@@ -2,9 +2,9 @@ package com.twitter.heron.scheduler.local;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -15,29 +15,24 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.proto.tmaster.TopologyMaster;
+import javax.xml.bind.DatatypeConverter;
 
-import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.PackingPlan;
-import com.twitter.heron.spi.common.ShellUtils;
-import com.twitter.heron.spi.common.HttpUtils;
-
-import com.twitter.heron.spi.utils.NetworkUtils;
-import com.twitter.heron.spi.utils.TopologyUtils;
-import com.twitter.heron.spi.utils.Runtime;
-
-import com.twitter.heron.spi.scheduler.IScheduler;
-import com.twitter.heron.spi.statemgr.IStateManager;
-import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.google.common.util.concurrent.ListenableFuture;
 
 import org.apache.commons.io.FilenameUtils;
 
-import javax.xml.bind.DatatypeConverter;
-import com.google.common.util.concurrent.ListenableFuture;
+import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.proto.scheduler.Scheduler;
+import com.twitter.heron.proto.tmaster.TopologyMaster;
+import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.HttpUtils;
+import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.common.ShellUtils;
+import com.twitter.heron.spi.scheduler.IScheduler;
+import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.NetworkUtils;
+import com.twitter.heron.spi.utils.Runtime;
+import com.twitter.heron.spi.utils.TopologyUtils;
 
 public class LocalScheduler implements IScheduler {
   private static final Logger LOG = Logger.getLogger(LocalScheduler.class.getName());
@@ -94,7 +89,7 @@ public class LocalScheduler implements IScheduler {
     LOG.info("Starting a new executor for container: " + container);
 
     // create a process with the executor command and topology working directory
-    final Process regularExecutor = ShellUtils.runASyncProcess(true, true, 
+    final Process regularExecutor = ShellUtils.runASyncProcess(true,
         getExecutorCommand(container), new File(LocalContext.workingDirectory(config)));
 
     // associate the process and its container id
@@ -114,7 +109,7 @@ public class LocalScheduler implements IScheduler {
             LOG.info("Topology is killed. Not to start new executors.");
             return;
           }
-          
+
           // restart the container
           startExecutor(processToContainer.remove(regularExecutor));
         } catch (InterruptedException e) {
@@ -126,7 +121,7 @@ public class LocalScheduler implements IScheduler {
     monitorService.submit(r);
   }
 
-  private String getExecutorCommand(int container) {  
+  private String getExecutorCommand(int container) {
 
     TopologyAPI.Topology topology = Runtime.topology(runtime);
 
@@ -196,7 +191,7 @@ public class LocalScheduler implements IScheduler {
 
     // get the topology name
     String topologyName = LocalContext.topologyName(config);
-    LOG.info("Command to kill topology: "  + topologyName);
+    LOG.info("Command to kill topology: " + topologyName);
 
     // set the flag that the topology being killed 
     topologyKilled = true;
@@ -237,7 +232,7 @@ public class LocalScheduler implements IScheduler {
    */
   @Override
   public boolean onActivate(Scheduler.ActivateTopologyRequest request) {
-    LOG.info("Command to activate topology: "  + LocalContext.topologyName(config));
+    LOG.info("Command to activate topology: " + LocalContext.topologyName(config));
     return sendToTMaster("activate");
   }
 
@@ -246,7 +241,7 @@ public class LocalScheduler implements IScheduler {
    */
   @Override
   public boolean onDeactivate(Scheduler.DeactivateTopologyRequest request) {
-    LOG.info("Command to deactivate topology: "  + LocalContext.topologyName(config));
+    LOG.info("Command to deactivate topology: " + LocalContext.topologyName(config));
     return sendToTMaster("deactivate");
   }
 
@@ -259,7 +254,7 @@ public class LocalScheduler implements IScheduler {
     int containerId = request.getContainerIndex();
 
     if (containerId == -1) {
-      LOG.info("Command to restart the entire topology: "  + LocalContext.topologyName(config));
+      LOG.info("Command to restart the entire topology: " + LocalContext.topologyName(config));
 
       // create a new tmp list to store all the Process to be killed
       List<Process> tmpProcessList = new LinkedList<>(processToContainer.keySet());
@@ -268,7 +263,7 @@ public class LocalScheduler implements IScheduler {
       }
     } else {
       // restart that particular container
-      LOG.info("Command to restart a container of topology: "  + LocalContext.topologyName(config));
+      LOG.info("Command to restart a container of topology: " + LocalContext.topologyName(config));
       LOG.info("Restart container requested: " + containerId);
 
       // locate the container and destroy it
@@ -304,13 +299,13 @@ public class LocalScheduler implements IScheduler {
 
     // fetch the TMasterLocation for the topology
     LOG.info("Fetching TMaster location for topology: " + topologyName);
-    ListenableFuture<TopologyMaster.TMasterLocation> locationFuture = 
+    ListenableFuture<TopologyMaster.TMasterLocation> locationFuture =
         stateManager.getTMasterLocation(null, LocalContext.topologyName(config));
 
     TopologyMaster.TMasterLocation location =
         NetworkUtils.awaitResult(locationFuture, 5, TimeUnit.SECONDS);
     LOG.info("Fetched TMaster location for topology: " + topologyName);
-   
+
     // for the url request to be sent to TMaster
     String endpoint = String.format("http://%s:%d/%s?topologyid=%s",
         location.getHost(), location.getControllerPort(), command, location.getTopologyId());
