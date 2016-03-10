@@ -85,6 +85,11 @@ public class Config {
     return defaultValue;
   }
 
+  public Integer getIntegerValue(String key) {
+    Object value = cfgMap.get(key);
+    return Convert.getInteger(value);
+  }
+
   public Double getDoubleValue(String key) {
     Object value = cfgMap.get(key);
     return Convert.getDouble(value);

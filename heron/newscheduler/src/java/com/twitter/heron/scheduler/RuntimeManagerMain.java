@@ -34,6 +34,12 @@ public class RuntimeManagerMain {
     String configOverrideEncoded = args[5];
     String topologyName = args[6];
     String command = args[7];
+    
+    // Optional argument in the case of restart - TO DO convert into CLI
+    String containerId = Integer.toString(-1);
+    if (args.length == 9) {
+      containerId = args[8];
+    }
 
     // first load the defaults, then the config from files to override it
     Config.Builder defaultsConfig = Config.newBuilder()
@@ -44,7 +50,8 @@ public class RuntimeManagerMain {
     Config.Builder commandLineConfig = Config.newBuilder()
         .put(Keys.cluster(), cluster)
         .put(Keys.role(), role)
-        .put(Keys.environ(), environ);
+        .put(Keys.environ(), environ)
+        .put(Keys.topologyContainerIdentifier(), containerId);
 
     Config.Builder topologyConfig = Config.newBuilder()
         .put(Keys.topologyName(), topologyName);

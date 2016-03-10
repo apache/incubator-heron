@@ -246,8 +246,11 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
    */
   protected boolean restartTopologyHandler(String topologyName) {
 
+    // get the container id
+    Integer containerId = Context.topologyContainerIdentifier(config); 
+
     // call prepare to restart
-    if (!runtimeManager.prepareRestart()) {
+    if (!runtimeManager.prepareRestart(containerId)) {
       LOG.severe("Failed to prepare restart locally");
       return false;
     }
@@ -262,7 +265,9 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
 
     // form the restart topology request payload
     byte[] data = Scheduler.RestartTopologyRequest.newBuilder()
-        .setTopologyName(topologyName).build().toByteArray();
+        .setTopologyName(topologyName)
+        .setContainerIndex(containerId)
+        .build().toByteArray();
 
     // send the actual http request
     if (!HttpUtils.sendHttpPostRequest(connection, data)) {
@@ -291,7 +296,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     }
 
     // call post restart
-    if (!runtimeManager.postRestart()) {
+    if (!runtimeManager.postRestart(containerId)) {
       LOG.severe("Failed in post restart locally");
       connection.disconnect();
       return false;

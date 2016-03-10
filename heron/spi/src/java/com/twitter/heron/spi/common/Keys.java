@@ -146,6 +146,10 @@ public class Keys {
     return ConfigKeys.get("TOPOLOGY_PACKAGE_TYPE");
   }
 
+  public static String topologyContainerIdentifier() {
+    return ConfigKeys.get("TOPOLOGY_CONTAINER_IDENTIFIER");
+  }
+
   public static String stmgrRam() {
     return ConfigKeys.get("STMGR_RAM");
   }
