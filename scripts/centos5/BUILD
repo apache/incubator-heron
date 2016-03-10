@@ -1,0 +1,352 @@
+package(default_visibility = ["//visibility:public"])
+
+load("/tools/rules/pex_rules", "pex_binary")
+
+release_version = "unversioned"
+
+filegroup(
+    name = "tar-packages",
+    srcs = [
+        ":heron-core",
+        ":heron-client",
+    ],
+)
+
+filegroup(
+    name = "binary-packages",
+    srcs = [
+        ":heron-client-install.sh",
+    ],
+)
+
+
+genrule(
+    name = "heron-core",
+    srcs = [
+        ":hcontroller",
+        ":hexecutor",
+        ":hshell",
+        ":hstmgr",
+        ":htmaster",
+        ":hscheduler",
+        ":hlscheduler",
+        ":hrrpacking",
+        ":hmetricsmgr",
+        ":hlfsstatemgr",
+        ":hzkstatemgr",
+        ":hinstance",
+    ],
+    outs = [
+        "heron-core.tar.gz",
+    ],
+    cmd = " ".join([
+        "export GENDIR=$(GENDIR);",
+        "export BINDIR=$(BINDIR);",
+        "$(location package_release.sh) $(location heron-core.tar.gz)",
+        "--cp $(location hcontroller)    heron-core/bin/heron-controller",
+        "--cp $(location hexecutor)      heron-core/bin/heron-executor",
+        "--cp $(location hshell)         heron-core/bin/heron-shell",
+        "--cp $(location hstmgr)         heron-core/bin/heron-stmgr",
+        "--cp $(location htmaster)       heron-core/bin/heron-tmaster",
+        "--cp $(location hscheduler)     heron-core/lib/scheduler/heron-scheduler.jar",
+        "--cp $(location hlscheduler)    heron-core/lib/scheduler/heron-local-scheduler.jar",
+        "--cp $(location hrrpacking)     heron-core/lib/packing/heron-roundrobin-packing.jar",
+        "--cp $(location hmetricsmgr)    heron-core/lib/metricsmgr/heron-metricsmgr.jar",
+        "--cp $(location hlfsstatemgr)   heron-core/lib/statemgr/heron-localfs-statemgr.jar",
+        "--cp $(location hzkstatemgr)    heron-core/lib/statemgr/heron-zookeeper-statemgr.jar",
+        "--cp $(location hinstance)      heron-core/lib/instance/heron-instance.jar",
+    ]),
+    heuristic_label_expansion = False,
+    tags = ["manual"],
+    tools = ["package_release.sh"],
+)
+
+genrule(
+    name = "heron-client",
+    srcs = [
+        ":heron-core",
+        ":conf-local-heron-internals",
+        ":conf-local-metrics-sinks",
+        ":conf-local-packing",
+        ":conf-local-scheduler",
+        ":conf-local-statemgr",
+        ":conf-local-uploader",
+        ":hcli",
+        ":hexamples",
+        ":hscheduler",
+        ":hlscheduler",
+        ":hrrpacking",
+        ":hlfsstatemgr",
+        ":hzkstatemgr",
+        ":hnuploader",
+        ":hlfsuploader",
+        ":protobuf-java",
+        ":slf4j-api-java",
+        ":slf4j-jdk-java",
+        ":log4j-over-slf4j-java",
+    ],
+    outs = [
+        "heron-client.tar.gz",
+    ],
+    cmd = " ".join([
+        "export GENDIR=$(GENDIR);",
+        "export BINDIR=$(BINDIR);",
+        "$(location package_release.sh) $(location heron-client.tar.gz)",
+        "--cp $(location hcli)                       bin/heron-cli3",
+        "--cp $(location conf-local-heron-internals) conf/local/heron_internals.yaml",
+        "--cp $(location conf-local-metrics-sinks)   conf/local/metrics_sinks.yaml",
+        "--cp $(location conf-local-packing)         conf/local/packing.yaml",
+        "--cp $(location conf-local-scheduler)       conf/local/scheduler.yaml",
+        "--cp $(location conf-local-statemgr)        conf/local/statemgr.yaml",
+        "--cp $(location conf-local-uploader)        conf/local/uploader.yaml",
+        "--cp $(location heron-core)                 dist/heron-core.tar.gz",
+        "--cp $(location hexamples)                  examples/heron-examples.jar",
+        "--cp $(location hscheduler)                 lib/scheduler/heron-scheduler.jar",
+        "--cp $(location hlscheduler)                lib/scheduler/heron-local-scheduler.jar",
+        "--cp $(location hrrpacking)                 lib/packing/heron-roundrobin-packing.jar",
+        "--cp $(location hlfsstatemgr)               lib/statemgr/heron-localfs-statemgr.jar",
+        "--cp $(location hzkstatemgr)                lib/statemgr/heron-zookeeper-statemgr.jar",
+        "--cp $(location hnuploader)                 lib/uploader/heron-null-uploader.jar",
+        "--cp $(location hlfsuploader)               lib/uploader/heron-localfs-uploader.jar",
+        "--cp $(location protobuf-java)              lib/$$(basename $(location protobuf-java))",
+        "--cp $(location slf4j-api-java)             lib/$$(basename $(location slf4j-api-java))",
+        "--cp $(location slf4j-jdk-java)             lib/$$(basename $(location slf4j-jdk-java))",
+        "--cp $(location log4j-over-slf4j-java)      lib/$$(basename $(location log4j-over-slf4j-java))",
+    ]),
+    heuristic_label_expansion = False,
+    tags = ["manual"],
+    tools = ["package_release.sh"],
+)
+
+filegroup(
+    name = "conf-local-heron-internals",
+    srcs = ["//heron/config/src/yaml:conf-local-heron-internals"],
+)
+
+filegroup(
+    name = "conf-local-metrics-sinks",
+    srcs = ["//heron/config/src/yaml:conf-local-metrics-sinks"],
+)
+
+filegroup(
+    name = "conf-local-packing",
+    srcs = ["//heron/config/src/yaml:conf-local-packing"],
+)
+
+filegroup(
+    name = "conf-local-scheduler",
+    srcs = ["//heron/config/src/yaml:conf-local-scheduler"],
+)
+
+filegroup(
+    name = "conf-local-statemgr",
+    srcs = ["//heron/config/src/yaml:conf-local-statemgr"],
+)
+
+filegroup( 
+    name = "conf-local-uploader",
+    srcs = ["//heron/config/src/yaml:conf-local-uploader"],
+)
+
+filegroup(
+    name = "hexamples",
+    srcs = ["//heron/examples/src/java:heron-examples"],
+)
+
+filegroup(
+    name = "htmaster",
+    srcs = ["//heron/tmaster/src/cpp:heron-tmaster"],
+)
+
+filegroup(
+    name = "hstmgr",
+    srcs = ["//heron/stmgr/src/cpp:heron-stmgr"],
+)
+
+filegroup(
+    name = "hinstance",
+    srcs = ["//heron/instance/src/java:heron-instance"],
+)
+
+filegroup(
+    name = "hlogging",
+    srcs = ["//heron/instance/src/java:aurora-logging-properties"],
+)
+
+filegroup(
+    name = "hscheduler",
+    srcs = ["//heron/newscheduler/src/java:heron-scheduler"],
+)
+
+filegroup(
+    name = "hlscheduler",
+    srcs = ["//heron/schedulers/src/java:heron-local-scheduler"],
+)
+
+filegroup(
+    name = "hrrpacking",
+    srcs = ["//heron/packing/src/java:heron-roundrobin-packing"],
+)
+
+filegroup(
+    name = "hmetricsmgr",
+    srcs = ["//heron/metricsmgr/src/java:heron-metricsmgr"],
+)
+
+filegroup(
+    name = "hexecutor",
+    srcs = ["//heron/executor/src/python:heron-executor"],
+)
+
+filegroup(
+    name = "hshell",
+    srcs = ["//heron/shell/src/python:heron-shell"],
+)
+
+filegroup(
+    name = "hcontroller",
+    srcs = ["//heron/controller/src/python:heron-controller"],
+)
+
+filegroup(
+    name = "hcli",
+    srcs = ["//heron/cli3/src/python:heron-cli3"],
+)
+
+filegroup(
+    name = "haurora-job",
+    srcs = ["//heron/cli/src/python:heron-aurora"],
+)
+
+filegroup(
+    name = "hcontroller-job",
+    srcs = ["//heron/cli/src/python:heron-controller-aurora"],
+)
+
+filegroup(
+    name = "hinternals-config",
+    srcs = ["//heron/config:config-internals-yaml"],
+)
+
+filegroup(
+    name = "hcli2",
+    srcs = ["//heron/cli2/src/python:heron-cli2"],
+)
+
+filegroup(
+    name = "hscheduler-config",
+    srcs = ["//heron/cli2/src/python:scheduler-config"],
+)
+
+filegroup(
+    name = "haurora-scheduler-config",
+    srcs = ["//heron/cli2/src/python:aurora-scheduler-config"],
+)
+
+filegroup(
+    name = "hlocal-scheduler-config",
+    srcs = ["//heron/cli2/src/python:local-scheduler-config"],
+)
+
+filegroup(
+    name = "hmesos-scheduler-config",
+    srcs = ["//heron/cli2/src/python:mesos-scheduler-config"],
+)
+
+filegroup(
+    name = "hlfsstatemgr",
+    srcs = ["//heron/statemgrs/src/java:heron-localfs-statemgr"],
+)
+
+filegroup(
+    name = "hzkstatemgr",
+    srcs = ["//heron/statemgrs/src/java:heron-zookeeper-statemgr"],
+)
+
+filegroup(
+    name = "protobuf-java",
+    srcs = ["//3rdparty/protobuf:protobuf-java"],
+)
+
+filegroup(
+    name = "slf4j-api-java",
+    srcs = ["//3rdparty/logging:slf4j-api-java"],
+)
+
+filegroup(
+    name = "slf4j-jdk-java",
+    srcs = ["//3rdparty/logging:slf4j-jdk-java"],
+)
+
+filegroup(
+    name = "log4j-over-slf4j-java",
+    srcs = ["//3rdparty/logging:log4j-over-slf4j-java"],
+)
+
+filegroup(
+    name = "hapi",
+    srcs = ["//heron/api/src/java:api-java"],
+)
+
+filegroup(
+    name = "hmetrics-api",
+    srcs = ["//heron/metricsmgr-api/src/java:metricsmgr-api-java"],
+)
+
+filegroup(
+    name = "hstorm-compat",
+    srcs = ["//heron/storm/src/java:storm-compatibility-java"],
+)
+
+filegroup(
+    name = "hviz",
+    srcs = ["//heron/viz/src/python:heron-viz"],
+)
+
+filegroup(
+    name = "htracker",
+    srcs = ["//heron/tracker/src/python:heron-tracker"],
+)
+
+filegroup(
+    name = "hnuploader",
+    srcs = ["//heron/uploaders/src/java:heron-null-uploader"],
+)
+
+filegroup(
+    name = "hlfsuploader",
+    srcs = ["//heron/uploaders/src/java:heron-localfs-uploader"],
+)
+
+genrule(
+    name = "generate-package-info",
+    outs = ["README.md"],
+    cmd = "$(location //scripts/packages:package-info-generator) $$(find . -name '*status*.txt') >$@",
+    stamp = 1,
+    tools = ["//scripts/packages:package-info-generator"],
+)
+
+genrule(
+    name = "generate-launcher",
+    srcs = [
+        "//scripts/packages:client-template-bin.sh",
+        ":README.md",
+    ],
+    outs = ["launcher_bin.sh"],
+    cmd = """
+        release_info="$$(cat $(location :README.md))"
+        template="$$(cat $(location //scripts/packages:client-template-bin.sh))"
+        echo "$${template//%release_info%/$${release_info}}" >$@
+        """,
+)
+
+load("/scripts/packages/self_extract_binary", "self_extract_binary")
+
+self_extract_binary(
+    name = "heron-client-install.sh",
+    flatten_resources = [
+        ":heron-client",
+    ],
+    launcher = ":launcher_bin.sh",
+)
+
