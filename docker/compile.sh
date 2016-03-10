@@ -13,18 +13,18 @@ tar -C . -xzf /src.tar.gz
 ./bazel_configure.py
 bazel clean
 
-echo "Creating release packages"
-bazel build --config=$TARGET_PLATFORM release:packages
-bazel build --config=$TARGET_PLATFORM release/packages:heron-client-install.sh
+echo "Creating packages"
+bazel build --config=$TARGET_PLATFORM scripts/packages:install-tars
+bazel build --config=$TARGET_PLATFORM scripts/packages:install-binaries
 
-echo "Moving release tar files to /dist"
-for file in ./bazel-bin/release/*.tar.gz; do
+echo "Moving tar files to /dist"
+for file in ./bazel-bin/scripts/packages/*.tar.gz; do
   filename=$(basename $file)
   cp $file /dist/${filename/.tar/-$HERON_VERSION.tar}
 done
 
-echo "Moving release self extracting binaries to /dist"
-for file in ./bazel-bin/release/*.sh; do
+echo "Moving self extracting binaries to /dist"
+for file in ./bazel-bin/scripts/packages/*.sh; do
   filename=$(basename $file)
   cp $file /dist/${filename/.sh/-$HERON_VERSION.sh}
 done
