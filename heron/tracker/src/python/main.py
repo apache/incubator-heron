@@ -11,7 +11,7 @@ from heron.tracker.src.python import log
 from heron.tracker.src.python.log import Log as LOG
 from heron.tracker.src.python.tracker import Tracker
 
-define("stateconf", default='filestateconf', help="Yaml config file without extension for state locations")
+define("stateconf", default='zkstateconf', help="Yaml config file without extension for state locations")
 define("port", default=8888, type=int, help="HTTP port to run the Tracker")
 
 class Application(tornado.web.Application):
