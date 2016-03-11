@@ -26,6 +26,10 @@ public class Context {
     return cfg.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"));
   }
 
+  public static int topologyContainerIdentifier(Config cfg) {
+    return cfg.getIntegerValue(ConfigKeys.get("TOPOLOGY_CONTAINER_IDENTIFIER"));
+  }
+
   public static String uploaderClass(Config cfg) {
     return cfg.getStringValue(ConfigKeys.get("UPLOADER_CLASS"));
   }

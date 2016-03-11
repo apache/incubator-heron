@@ -30,12 +30,12 @@ public class LocalRuntimeManager implements IRuntimeManager {
   }
 
   @Override
-  public boolean prepareRestart() {
+  public boolean prepareRestart(Integer containerId) {
     return isTopologyRunning();
   }
 
   @Override
-  public boolean postRestart() {
+  public boolean postRestart(Integer containerId) {
     return true;
   }
 
