@@ -5,7 +5,7 @@ load("/tools/rules/pex_rules", "pex_binary")
 release_version = "unversioned"
 
 filegroup(
-    name = "tar-packages",
+    name = "tarpkgs",
     srcs = [
         ":heron-core",
         ":heron-client",
@@ -13,7 +13,7 @@ filegroup(
 )
 
 filegroup(
-    name = "binary-packages",
+    name = "binpkgs",
     srcs = [
         ":heron-client-install.sh",
     ],

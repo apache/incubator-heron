@@ -28,7 +28,7 @@ load("/tools/rules/heron_tools", "heron_tools_lib_files")
 load("/tools/rules/heron_examples", "heron_examples_files")
 
 filegroup(
-    name = "tar-packages",
+    name = "tarpkgs",
     srcs = [
         ":heron-core",
         ":heron-tools",
@@ -37,7 +37,7 @@ filegroup(
 )
 
 filegroup(
-    name = "binary-packages",
+    name = "binpkgs",
     srcs = [
         ":heron-client-install.sh",
     ],
