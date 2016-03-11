@@ -277,9 +277,12 @@ public class LocalScheduler implements IScheduler {
     // get the instance of state manager to clean state
     SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
 
-    // Clean TMasterLocation since we could not set it as ephemeral for local file system
+    // If we restart the container including TMaster, wee need to clean TMasterLocation,
+    // since we could not set it as ephemeral for local file system
     // We would not clean SchedulerLocation since we would not restart the Scheduler
-    stateManager.deleteTMasterLocation(LocalContext.topologyName(config));
+    if (containerId == -1 || containerId == 0) {
+      stateManager.deleteTMasterLocation(LocalContext.topologyName(config));
+    }
 
     return true;
   }
