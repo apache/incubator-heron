@@ -86,6 +86,10 @@ TMaster::TMaster(const std::string& _zk_hostport,
   }
 
   current_pplan_ = NULL;
+
+  // The topology as first submitted by the user
+  // It shall only be used to construct the physical plan when TMaster first time starts
+  // Any runtime changes shall be made to current_pplan_->topology
   topology_ = NULL;
   state_mgr_ = heron::common::HeronStateMgr::MakeStateMgr(zk_hostport_, topdir_, eventLoop_);
 
@@ -233,7 +237,9 @@ TMaster::GetTopologyDone(proto::system::StatusCode _code)
   }
   // Ok things are fine. topology_ contains the result
   // Just make sure it makes sense.
-  if (!ValidateTopology()) {
+  CHECK_NOTNULL(topology_);
+
+  if (!ValidateTopology(*topology_)) {
     LOG(ERROR) << "Topology invalid" << std::endl;
     ::exit(1);
   }
@@ -259,7 +265,7 @@ TMaster::GetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan,
     // Something bad happened. Bail out!
     // TODO:- This is not as bad as it seems. Maybe we can delete this assignment
     // and have a new assignment instead.
-    LOG(ERROR) << "For topology " << topology_->name()
+    LOG(ERROR) << "For topology " << tmaster_location_->topology_name()
                << " Error getting assignment Errsettingorcode is "
                << _code << std::endl;
     ::exit(1);
@@ -323,106 +329,42 @@ TMaster::GetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan,
   stats_ = new StatsInterface(eventLoop_, stats_options, metrics_collector_);
 }
 
-bool
-TMaster::ValidateTopology()
-{
-  CHECK_NOTNULL(topology_);
-  if (tmaster_location_->topology_name() != topology_->name()) {
-    LOG(ERROR) << "topology name mismatch! Expected topology name is "
-               << tmaster_location_->topology_name() << " but found in zk "
-               << topology_->name() << std::endl;
-    return false;
-  }
-  if (tmaster_location_->topology_id() != topology_->id()) {
-    LOG(ERROR) << "topology id mismatch! Expected topology id is "
-               << tmaster_location_->topology_id() << " but found in zk "
-               << topology_->id() << std::endl;
-    return false;
-  }
-  std::set<std::string> component_names;
-  for (sp_int32 i = 0; i < topology_->spouts_size(); ++i) {
-    if (component_names.find(topology_->spouts(i).comp().name()) !=
-        component_names.end()) {
-      LOG(ERROR) << "Component names are not unique "
-                 << topology_->spouts(i).comp().name() << "\n";
-      return false;
-    }
-    component_names.insert(topology_->spouts(i).comp().name());
-  }
-
-  for (sp_int32 i = 0; i < topology_->bolts_size(); ++i) {
-    if (component_names.find(topology_->bolts(i).comp().name()) !=
-        component_names.end()) {
-      LOG(ERROR) << "Component names are not unique "
-                 << topology_->bolts(i).comp().name() << "\n";
-      return false;
-    }
-    component_names.insert(topology_->bolts(i).comp().name());
-  }
-
-  return true;
-}
-
 void
 TMaster::ActivateTopology(VCallback<proto::system::StatusCode> cb)
 {
-  CHECK(topology_->state() == proto::api::PAUSED);
+  CHECK(current_pplan_->topology().state() == proto::api::PAUSED);
+  DCHECK(current_pplan_->topology().IsInitialized());
+
   // Set the status
-  topology_->set_state(proto::api::RUNNING);
-  DCHECK(topology_->IsInitialized());
-  auto wCb = [cb, this] (proto::system::StatusCode code) {
-    this->ActivateTopologyDone(std::move(cb), code);
+  proto::system::PhysicalPlan* new_pplan = new proto::system::PhysicalPlan();
+  new_pplan->CopyFrom(*current_pplan_);
+  new_pplan->mutable_topology()->set_state(proto::api::RUNNING);
+
+  auto callback = [new_pplan, this, cb] (proto::system::StatusCode code) {
+    cb(code);
+    this->SetPhysicalPlanDone(new_pplan, code);
   };
 
-  state_mgr_->SetTopology(*topology_, std::move(wCb));
-}
-
-void
-TMaster::ActivateTopologyDone(VCallback<proto::system::StatusCode> cb,
-                              proto::system::StatusCode _code)
-{
-  if (_code != proto::system::OK) {
-    // TODO:- is this valid. There might be zk errors happening, but shd we
-    // try to see if we can recover from this?
-    LOG(ERROR) << "Cannot write activated topology state to statemgr. "
-               << "Errorcode is " << _code << std::endl;
-    ::exit(1);
-  }
-  cb(_code);
-
-  // If assignment is already done, send all active stmgrs
-  DistributePhysicalPlan();
+  state_mgr_->SetPhysicalPlan(*new_pplan, std::move(callback));
 }
 
 void
 TMaster::DeActivateTopology(VCallback<proto::system::StatusCode> cb)
 {
-  CHECK(topology_->state() == proto::api::RUNNING);
+  CHECK(current_pplan_->topology().state() == proto::api::RUNNING);
+  DCHECK(current_pplan_->topology().IsInitialized());
+
   // Set the status
-  topology_->set_state(proto::api::PAUSED);
-  DCHECK(topology_->IsInitialized());
-  auto wCb = [cb, this] (proto::system::StatusCode code) {
-    this->DeActivateTopologyDone(std::move(cb), code);
+  proto::system::PhysicalPlan* new_pplan = new proto::system::PhysicalPlan();
+  new_pplan->CopyFrom(*current_pplan_);
+  new_pplan->mutable_topology()->set_state(proto::api::PAUSED);
+
+  auto callback = [new_pplan, this, cb] (proto::system::StatusCode code) {
+    cb(code);
+    this->SetPhysicalPlanDone(new_pplan, code);
   };
 
-  state_mgr_->SetTopology(*topology_, std::move(wCb));
-}
-
-void
-TMaster::DeActivateTopologyDone(VCallback<proto::system::StatusCode> cb,
-                                proto::system::StatusCode _code)
-{
-  if (_code != proto::system::OK) {
-    // TODO:- is this valid. There might be zk errors happening, but shd we
-    // try to see if we can recover from this?
-    LOG(ERROR) << "Cannot write deactivated topology state to statemgr. "
-               << "Errorcode is " << _code << std::endl;
-    ::exit(1);
-  }
-  cb(_code);
-
-  // If assignment is already done, send all active stmgrs
-  DistributePhysicalPlan();
+  state_mgr_->SetPhysicalPlan(*new_pplan, std::move(callback));
 }
 
 proto::system::Status*
@@ -499,21 +441,17 @@ TMaster::DoPhysicalPlan(EventLoop::Status)
     return;
   }
 
-  if (!ValidateStMgrsWithTopology()) {
-    // TODO:- Do Something better here
-    LOG(ERROR) << "Topology and StMgr mismatch... Dying\n";
-    ::exit(1);
-  }
-
   // TODO:- If current_assignment exists, we need
   // to use as many portions from it as possible
   proto::system::PhysicalPlan* pplan = MakePhysicalPlan();
   CHECK_NOTNULL(pplan);
   DCHECK(pplan->IsInitialized());
 
-  // Log it to State Manager
-  config::PhysicalPlanHelper::LogPhysicalPlan(*pplan);
-  LOG(INFO) << "Made a new pplan! Writing it to state" << std::endl;
+  if (!ValidateStMgrsWithTopology(pplan->topology())) {
+    // TODO:- Do Something better here
+    LOG(ERROR) << "Topology and StMgr mismatch... Dying\n";
+    ::exit(1);
+  }
 
   auto cb = [pplan, this] (proto::system::StatusCode code) {
     this->SetPhysicalPlanDone(pplan, code);
@@ -560,63 +498,10 @@ TMaster::SetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan,
 }
 
 bool
-TMaster::ValidateStMgrsWithTopology()
-{
-  // here we check to see if the total number of instances
-  // accross all stmgrs match up to all the spout/bolt
-  // parallelism the topology has specified
-  sp_int32 ntasks = 0;
-  for (sp_int32 i = 0; i < topology_->spouts_size(); ++i) {
-    ntasks += config::TopologyConfigHelper::GetComponentParallelism(topology_->spouts(i).comp().config());
-  }
-  for (sp_int32 i = 0; i < topology_->bolts_size(); ++i) {
-    ntasks += config::TopologyConfigHelper::GetComponentParallelism(topology_->bolts(i).comp().config());
-  }
-
-  sp_int32 ninstances = 0;
-  for (StMgrMapIter iter = stmgrs_.begin();
-       iter != stmgrs_.end(); ++iter) {
-    ninstances += iter->second->get_num_instances();
-  }
-
-  return ninstances == ntasks;
-}
-
-bool
-TMaster::ValidateStMgrsWithPhysicalPlan()
-{
-  std::map<std::string, std::vector<proto::system::Instance*> > stmgr_to_instance_map;
-  for (sp_int32 i = 0; i < current_pplan_->instances_size(); ++i) {
-    proto::system::Instance* instance = current_pplan_->mutable_instances(i);
-    if (stmgr_to_instance_map.find(instance->stmgr_id()) ==
-        stmgr_to_instance_map.end()) {
-      std::vector<proto::system::Instance*> instances;
-      instances.push_back(instance);
-      stmgr_to_instance_map[instance->stmgr_id()] = instances;
-    } else {
-      stmgr_to_instance_map[instance->stmgr_id()].push_back(instance);
-    }
-  }
-  for (StMgrMapIter iter = stmgrs_.begin(); iter != stmgrs_.end(); ++iter) {
-    if (stmgr_to_instance_map.find(iter->first) == stmgr_to_instance_map.end()) {
-      return false;
-    }
-    if (!iter->second->VerifyInstances(stmgr_to_instance_map[iter->first])) {
-      return false;
-    }
-  }
-  return true;
-}
-
-bool
 TMaster::DistributePhysicalPlan()
 {
   if (current_pplan_) {
-    // Force updating the internal proto::api::Topology,
-    // to solve the potential inconsistent topology def between Topology node
-    // and PhysicalPlan node.
-    current_pplan_->mutable_topology()->CopyFrom(*topology_);
-
+    // First valid the physical plan to distribute
     LOG(INFO) << "To distribute new pplan:" << std::endl;
     config::PhysicalPlanHelper::LogPhysicalPlan(*current_pplan_);
 
@@ -638,21 +523,15 @@ TMaster::MakePhysicalPlan()
 {
   // TODO:- At some point, we need to talk to our scheduler
   // and do this scheduling
-
-  // When making physical plan, we would force updating the topology def from
-  // the persistent zk one.
-
   if (current_pplan_) {
     // There is already an existing assignment. However stmgrs might have
     // died and come up on different machines. This means that
     // we need to just adjust the stmgrs mapping
     // First lets verify that our original pplan and instances
     // all match up
-    CHECK(ValidateStMgrsWithPhysicalPlan());
+    CHECK(ValidateStMgrsWithPhysicalPlan(*current_pplan_));
     proto::system::PhysicalPlan* new_pplan = new proto::system::PhysicalPlan();
-
-    // Force reading from the latest proto::api::Topology
-    new_pplan->mutable_topology()->CopyFrom(*topology_);
+    new_pplan->mutable_topology()->CopyFrom(current_pplan_->topology());
 
     for (StMgrMapIter iter = stmgrs_.begin(); iter != stmgrs_.end(); ++iter) {
       new_pplan->add_stmgrs()->CopyFrom(*(iter->second->get_stmgr()));
@@ -732,6 +611,97 @@ TMaster::RemoveStMgrConnection(Connection* _conn)
   absent_stmgrs_.insert(stmgr->get_id());
   delete stmgr;
   return proto::system::OK;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Below are valid checking functions
+////////////////////////////////////////////////////////////////////////////////
+bool
+TMaster::ValidateTopology(proto::api::Topology _topology)
+{
+  if (tmaster_location_->topology_name() != _topology.name()) {
+    LOG(ERROR) << "topology name mismatch! Expected topology name is "
+               << tmaster_location_->topology_name() << " but found in zk "
+               << _topology.name() << std::endl;
+    return false;
+  }
+  if (tmaster_location_->topology_id() != _topology.id()) {
+    LOG(ERROR) << "topology id mismatch! Expected topology id is "
+               << tmaster_location_->topology_id() << " but found in zk "
+               << _topology.id() << std::endl;
+    return false;
+  }
+  std::set<std::string> component_names;
+  for (sp_int32 i = 0; i < _topology.spouts_size(); ++i) {
+    if (component_names.find(_topology.spouts(i).comp().name()) !=
+        component_names.end()) {
+      LOG(ERROR) << "Component names are not unique "
+                 << _topology.spouts(i).comp().name() << "\n";
+      return false;
+    }
+    component_names.insert(_topology.spouts(i).comp().name());
+  }
+
+  for (sp_int32 i = 0; i < _topology.bolts_size(); ++i) {
+    if (component_names.find(_topology.bolts(i).comp().name()) !=
+        component_names.end()) {
+      LOG(ERROR) << "Component names are not unique "
+                 << _topology.bolts(i).comp().name() << "\n";
+      return false;
+    }
+    component_names.insert(_topology.bolts(i).comp().name());
+  }
+
+  return true;
+}
+
+bool
+TMaster::ValidateStMgrsWithTopology(proto::api::Topology _topology)
+{
+  // here we check to see if the total number of instances
+  // accross all stmgrs match up to all the spout/bolt
+  // parallelism the topology has specified
+  sp_int32 ntasks = 0;
+  for (sp_int32 i = 0; i < _topology.spouts_size(); ++i) {
+    ntasks += config::TopologyConfigHelper::GetComponentParallelism(_topology.spouts(i).comp().config());
+  }
+  for (sp_int32 i = 0; i < _topology.bolts_size(); ++i) {
+    ntasks += config::TopologyConfigHelper::GetComponentParallelism(_topology.bolts(i).comp().config());
+  }
+
+  sp_int32 ninstances = 0;
+  for (StMgrMapIter iter = stmgrs_.begin();
+       iter != stmgrs_.end(); ++iter) {
+    ninstances += iter->second->get_num_instances();
+  }
+
+  return ninstances == ntasks;
+}
+
+bool
+TMaster::ValidateStMgrsWithPhysicalPlan(proto::system::PhysicalPlan _pplan)
+{
+  std::map<std::string, std::vector<proto::system::Instance*> > stmgr_to_instance_map;
+  for (sp_int32 i = 0; i < _pplan.instances_size(); ++i) {
+    proto::system::Instance* instance = _pplan.mutable_instances(i);
+    if (stmgr_to_instance_map.find(instance->stmgr_id()) ==
+        stmgr_to_instance_map.end()) {
+      std::vector<proto::system::Instance*> instances;
+      instances.push_back(instance);
+      stmgr_to_instance_map[instance->stmgr_id()] = instances;
+    } else {
+      stmgr_to_instance_map[instance->stmgr_id()].push_back(instance);
+    }
+  }
+  for (StMgrMapIter iter = stmgrs_.begin(); iter != stmgrs_.end(); ++iter) {
+    if (stmgr_to_instance_map.find(iter->first) == stmgr_to_instance_map.end()) {
+      return false;
+    }
+    if (!iter->second->VerifyInstances(stmgr_to_instance_map[iter->first])) {
+      return false;
+    }
+  }
+  return true;
 }
 
 }} // end of namespace
