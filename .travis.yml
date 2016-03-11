@@ -50,4 +50,5 @@ script:
   - bazel --bazelrc=tools/travis-ci/bazel.rc test  heron/...
 
   # build packages
-  - bazel --bazelrc=tools/travis-ci/bazel.rc build scripts/packages:install-tars
+  - bazel --bazelrc=tools/travis-ci/bazel.rc build scripts/packages:tarpkgs
+  - bazel --bazelrc=tools/travis-ci/bazel.rc build scripts/packages:binpkgs
