@@ -7,23 +7,21 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.twitter.heron.common.basics.Pair;
+import com.google.common.util.concurrent.ListenableFuture;
 
+import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.Common;
-
+import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.HttpUtils;
 import com.twitter.heron.spi.scheduler.IRuntimeManager;
-
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
-
-import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.NetworkUtils;
-
-import com.google.common.util.concurrent.ListenableFuture;
+import com.twitter.heron.spi.utils.Runtime;
 
 public class RuntimeManagerRunner implements Callable<Boolean> {
   private static final Logger LOG = Logger.getLogger(RuntimeManagerRunner.class.getName());
@@ -42,7 +40,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
 
     // create an instance of runtime manager
     String runtimeManagerClass = Context.runtimeManagerClass(config);
-    this.runtimeManager = (IRuntimeManager)Class.forName(runtimeManagerClass).newInstance();
+    this.runtimeManager = (IRuntimeManager) Class.forName(runtimeManagerClass).newInstance();
   }
 
   @Override
@@ -65,7 +63,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     else if (command.equals("kill"))
       result = killTopologyHandler(Context.topologyName(config));
 
-    else 
+    else
       LOG.info("Unknown command for topology: " + command);
 
     runtimeManager.close();
@@ -82,8 +80,8 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
 
     // fetch scheduler location from state manager
     LOG.info("Fetching scheduler location from state manager for " + command + " topology");
-    
-    ListenableFuture<Scheduler.SchedulerLocation> locationFuture = 
+
+    ListenableFuture<Scheduler.SchedulerLocation> locationFuture =
         statemgr.getSchedulerLocation(null, Runtime.topologyName(runtime));
 
     Scheduler.SchedulerLocation schedulerLocation =
@@ -121,6 +119,15 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
    * Handler to activate a topology
    */
   protected boolean activateTopologyHandler(String topologyName) {
+    TopologyAPI.TopologyState state = getRuntimeTopologyState(topologyName);
+    if (state == null) {
+      LOG.severe("Topology still not initialized.");
+      return false;
+    }
+    if (state == TopologyAPI.TopologyState.RUNNING) {
+      LOG.warning("Topology is already activated");
+      return true;
+    }
 
     // call prepare to activate
     if (!runtimeManager.prepareActivate()) {
@@ -132,7 +139,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     Pair<Boolean, HttpURLConnection> ret = createHttpConnection();
     if (ret.second == null)
       return ret.first;
-    
+
     // now, we have a valid connection
     HttpURLConnection connection = ret.second;
 
@@ -183,6 +190,15 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
    * Handler to deactivate a topology
    */
   protected boolean deactivateTopologyHandler(String topologyName) {
+    TopologyAPI.TopologyState state = getRuntimeTopologyState(topologyName);
+    if (state == null) {
+      LOG.severe("Topology still not initialized.");
+      return false;
+    }
+    if (state == TopologyAPI.TopologyState.PAUSED) {
+      LOG.warning("Topology is already deactivated");
+      return true;
+    }
 
     // call prepare to deactivate
     if (!runtimeManager.prepareDeactivate()) {
@@ -194,7 +210,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     Pair<Boolean, HttpURLConnection> ret = createHttpConnection();
     if (ret.second == null)
       return ret.first;
-    
+
     // now, we have a valid connection
     HttpURLConnection connection = ret.second;
 
@@ -247,7 +263,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
   protected boolean restartTopologyHandler(String topologyName) {
 
     // get the container id
-    Integer containerId = Context.topologyContainerIdentifier(config); 
+    Integer containerId = Context.topologyContainerIdentifier(config);
 
     // call prepare to restart
     if (!runtimeManager.prepareRestart(containerId)) {
@@ -259,7 +275,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     Pair<Boolean, HttpURLConnection> ret = createHttpConnection();
     if (ret.second == null)
       return ret.first;
-    
+
     // now, we have a valid connection
     HttpURLConnection connection = ret.second;
 
@@ -323,7 +339,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     Pair<Boolean, HttpURLConnection> ret = createHttpConnection();
     if (ret.second == null)
       return ret.first;
-    
+
     // now, we have a valid connection
     HttpURLConnection connection = ret.second;
 
@@ -397,7 +413,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     } catch (Exception e) {
       LOG.log(Level.SEVERE, "Failed to clear physical plan", e);
     }
-    
+
     booleanFuture = statemgr.deleteExecutionState(topologyName);
     if (!NetworkUtils.awaitResult(booleanFuture, 5, TimeUnit.SECONDS)) {
       LOG.severe("Failed to clear execution state");
@@ -412,5 +428,23 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
 
     LOG.info("Cleaned up Heron State");
     return true;
+  }
+
+  /**
+   * Get current running TopologyState
+   */
+  protected TopologyAPI.TopologyState getRuntimeTopologyState(String topologyName) {
+    // get the instance of the state manager
+    SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
+    ListenableFuture<PhysicalPlans.PhysicalPlan> physicalPlanFuture = statemgr.getPhysicalPlan(null, topologyName);
+    PhysicalPlans.PhysicalPlan plan =
+        NetworkUtils.awaitResult(physicalPlanFuture, 5, TimeUnit.SECONDS);
+
+    if (plan == null) {
+      LOG.severe("Failed to get physical plan for topology: " + topologyName);
+      return null;
+    }
+
+    return plan.getTopology().getState();
   }
 }
