@@ -14,8 +14,8 @@ tar -C . -xzf /src.tar.gz
 bazel clean
 
 echo "Creating packages"
-bazel build --config=$TARGET_PLATFORM scripts/packages:install-tars
-bazel build --config=$TARGET_PLATFORM scripts/packages:install-binaries
+bazel build --config=$TARGET_PLATFORM scripts/packages:tarpkgs
+bazel build --config=$TARGET_PLATFORM scripts/packages:binpkgs
 
 echo "Moving tar files to /dist"
 for file in ./bazel-bin/scripts/packages/*.tar.gz; do
