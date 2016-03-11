@@ -8,9 +8,9 @@ public interface IRuntimeManager {
 
   void close();
 
-  boolean prepareRestart();
+  boolean prepareRestart(Integer containerId);
 
-  boolean postRestart();
+  boolean postRestart(Integer containerId);
 
   boolean prepareDeactivate();
 
