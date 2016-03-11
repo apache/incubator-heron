@@ -193,13 +193,13 @@ genrule(
 genrule(
     name = "generate-launcher",
     srcs = [
-        "template_bin.sh",
+        "client_template_bin.sh",
         ":README.md",
     ],
     outs = ["launcher_bin.sh"],
     cmd = """
         release_info="$$(cat $(location :README.md))"
-        template="$$(cat $(location template_bin.sh))"
+        template="$$(cat $(location client_template_bin.sh))"
         echo "$${template//%release_info%/$${release_info}}" >$@
         """,
 )
@@ -216,5 +216,5 @@ self_extract_binary(
 
 filegroup(
     name = "client-template-bin.sh",
-    srcs = ["template_bin.sh"],
+    srcs = ["client_template_bin.sh"],
 )
