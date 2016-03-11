@@ -17,13 +17,12 @@
 # Heron self-extractable installer
 
 # Installation and etc prefix can be overriden from command line
-install_prefix=${1:-"/usr/local/heron"}
-heronrc=${2:-"/usr/local/heron/etc/heron.heronrc"}
+install_prefix=${1:-"/usr/local/herontools"}
 
 progname="$0"
 
-echo "Heron installer"
-echo "---------------"
+echo "Heron Tools installer"
+echo "--------------------"
 echo
 cat <<'EOF'
 %release_info%
@@ -33,30 +32,24 @@ function usage() {
   echo "Usage: $progname [options]" >&2
   echo "Options are:" >&2
   echo "  --prefix=/some/path set the prefix path (default=/usr/local)." >&2
-  echo "  --heronrc= set the heronrc path (default=/usr/local/heron/etc/heron.heronrc)." >&2
   echo "  --user configure for user install, expands to" >&2
-  echo '           `--prefix=$HOME/.heron --heronrc=$HOME/.heronrc`.' >&2
+  echo '           `--prefix=$HOME/.herontools`.' >&2
   exit 1
 }
 
 prefix="/usr/local"
 bin="%prefix%/bin"
-base="%prefix%/heron"
-conf="%prefix%/heron/conf"
-heronrc="%prefix%/heron/etc/heron.heronrc"
+base="%prefix%/herontools"
+conf="%prefix%/herontools/conf"
 
 for opt in "${@}"; do
   case $opt in
     --prefix=*)
       prefix="$(echo "$opt" | cut -d '=' -f 2-)"
       ;;
-    --heronrc=*)
-      heronrc="$(echo "$opt" | cut -d '=' -f 2-)"
-      ;;
     --user)
       bin="$HOME/bin"
-      base="$HOME/.heron"
-      heronrc="$HOME/.heronrc"
+      base="$HOME/.herontools"
       ;;
     *)
       usage
@@ -66,7 +59,6 @@ done
 
 bin="${bin//%prefix%/${prefix}}"
 base="${base//%prefix%/${prefix}}"
-heronrc="${heronrc//%prefix%/${prefix}}"
 
 function test_write() {
   local file="$1"
@@ -129,16 +121,15 @@ fi
 # Test for write access
 test_write "${bin}"
 test_write "${base}"
-test_write "${heronrc}"
 
 # Do the actual installation
 echo -n "Uncompressing."
 
 # Cleaning-up, with some guards.
-if [ -f "${bin}/heron-cli3" ]; then
-  rm -f "${bin}/heron-cli3"
+if [ -f "${bin}/heron-tracker" ]; then
+  rm -f "${bin}/heron-tracker"
 fi
-if [ -d "${base}" -a -x "${base}/bin/heron-cli3" ]; then
+if [ -d "${base}" -a -x "${base}/bin/heron-tracker" ]; then
   rm -fr "${base}"
 fi
 
@@ -146,33 +137,23 @@ mkdir -p ${bin} ${base}
 echo -n .
 
 unzip -q -o "${BASH_SOURCE[0]}" -d "${base}"
-tar xfz "${base}/heron-client.tar.gz" -C "${base}"
+tar xfz "${base}/heron-tools.tar.gz" -C "${base}"
 echo -n .
-chmod 0755 ${base}/bin/heron-cli3
+chmod 0755 ${base}/bin/heron-tracker
 echo -n .
 chmod -R og-w "${base}"
 chmod -R og+rX "${base}"
 chmod -R u+rwX "${base}"
 echo -n .
 
-ln -s "${base}/bin/heron-cli3" "${bin}/heron-cli3"
+ln -s "${base}/bin/heron-tracker" "${bin}/heron-tracker"
 echo -n .
 
-if [ -f "${heronrc}" ]; then
-  echo
-  echo "${heronrc} already exists, moving it to ${heronrc}.bak."
-  mv "${heronrc}" "${heronrc}.bak"
-fi
-
-touch "${heronrc}"
-if [ "${UID}" -eq 0 ]; then
-  chmod 0644 "${heronrc}"
-fi
-rm "${base}/heron-client.tar.gz"
+rm "${base}/heron-tools.tar.gz"
 
 cat <<EOF
 
-Heron is now installed!
+Heron Tools is now installed!
 
 Make sure you have "${bin}" in your path. 
 
