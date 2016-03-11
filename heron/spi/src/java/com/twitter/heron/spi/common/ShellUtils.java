@@ -82,17 +82,20 @@ public class ShellUtils {
   }
 
   public static Process runASyncProcess(
-      boolean verbose, boolean isInheritIO, String command, File workingDirectory) {
-    return runASyncProcess(verbose, isInheritIO, splitTokens(command), workingDirectory);
+      boolean verbose, String command, File workingDirectory) {
+    return runASyncProcess(verbose, splitTokens(command), workingDirectory);
   }
 
   public static Process runASyncProcess(
-      boolean verbose, boolean isInheritIO, String[] command, File workingDirectory) {
+      boolean verbose, String[] command, File workingDirectory) {
     if (verbose) {
       LOG.info("$> " +  Arrays.toString(command));
     }
 
-    ProcessBuilder pb = getProcessBuilder(isInheritIO, command, workingDirectory);
+    // For AsyncProcess, we will never inherit IO, since parent process will not
+    // be guaranteed alive when children processing trying to flush to
+    // parent processes's IO.
+    ProcessBuilder pb = getProcessBuilder(false, command, workingDirectory);
     Process process = null;
     try {
       process = pb.start();
@@ -136,7 +139,7 @@ public class ShellUtils {
         || destHost.equals("127.0.0.1")) {
       throw new RuntimeException("Trying to open tunnel to localhost.");
     }
-    return ShellUtils.runASyncProcess(verbose, false,
+    return ShellUtils.runASyncProcess(verbose,
         new String[] {
             "ssh", String.format("-NL%d:%s:%d", tunnelPort, destHost, destPort), tunnelHost},
         new File(".")
