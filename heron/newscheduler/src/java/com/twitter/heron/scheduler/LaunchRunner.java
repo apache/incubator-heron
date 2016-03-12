@@ -6,24 +6,18 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
-
-import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.PackingPlan;
-
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.scheduler.ILauncher;
-
-import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
-
-import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.NetworkUtils;
-
-import com.google.common.util.concurrent.ListenableFuture;
+import com.twitter.heron.spi.utils.Runtime;
 
 /**
  * Runs Launcher and launch topology. Also Uploads launch state to state manager.
