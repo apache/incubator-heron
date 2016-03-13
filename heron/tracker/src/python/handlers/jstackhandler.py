@@ -10,10 +10,10 @@ from heron.tracker.src.python.log import Log as LOG
 
 class JstackHandler(BaseHandler):
   """
-  URL - /topologies/jstack?dc=<dc>&topology=<topology> \
+  URL - /topologies/jstack?cluster=<cluster>&topology=<topology> \
         &environ=<environment>&instance=<instance>
   Parameters:
-   - dc - Name of dc.
+   - cluster - Name of cluster.
    - environ - Running environment.
    - topology - Name of topology (Note: Case sensitive. Can only
                 include [a-zA-Z0-9-_]+)
