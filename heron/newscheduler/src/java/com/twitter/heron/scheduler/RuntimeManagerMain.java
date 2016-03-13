@@ -71,14 +71,14 @@ public class RuntimeManagerMain {
     statemgr.initialize(config);
 
     boolean isValid = validateRuntimeManage(statemgr, topologyName);
-    boolean isManageSuccess = false;
+    boolean isSuccessful = false;
 
     // 2. Try to manage topology if valid
     if (isValid) {
       // invoke the appropriate command to manage the topology
       LOG.info("Topology: " + topologyName + " to be " + command + "ed");
 
-      isManageSuccess = manageTopology(config, command, statemgr);
+      isSuccessful = manageTopology(config, command, statemgr);
     }
 
     // 3. Do generic cleaning
@@ -86,7 +86,7 @@ public class RuntimeManagerMain {
     statemgr.close();
 
     // 4. Do post work basing on the result
-    if (!isManageSuccess) {
+    if (!isSuccessful) {
       LOG.severe("Failed to " + command + " topology " + topologyName);
 
       Runtime.getRuntime().exit(1);
