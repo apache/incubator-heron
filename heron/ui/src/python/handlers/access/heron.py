@@ -263,7 +263,7 @@ def get_metrics(cluster, environment, topology, timerange, query):
             endtime = timerange[1],
             query = query)
   )
-
+  logging.info("get_metrics %s" % (request_url))
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
 
@@ -414,7 +414,6 @@ class HeronQueryHandler(QueryHandler):
 
     raise tornado.gen.Return(result)
 
-
-    def get_query(self, metric, component, instance):
-      q = queries.get(metric)
-      return q.format(component, instance)
+  def get_query(self, metric, component, instance):
+    q = queries.get(metric)
+    return q.format(component, instance)

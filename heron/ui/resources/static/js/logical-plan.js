@@ -207,7 +207,7 @@
 
   // TODO: Too long function. Will Refactor.
   function drawLogicalPlan(planController, topology, id, outerWidth, outerHeight,
-          dc, environ, toponame) {
+          cluster, environ, toponame) {
 
     id = id === undefined ? "#content" : id;
     outerWidth = outerWidth === undefined ? 1000 : outerWidth;

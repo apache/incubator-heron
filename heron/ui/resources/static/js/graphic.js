@@ -200,7 +200,7 @@ var groupify = function (nodes, links) {
 
 // TODO: Too long function. Will Refactor.
 var drawLogicalPlan = function(topology, id, width, height,
-        dc, environ, toponame) {
+        cluster, environ, toponame) {
 
   id = id === undefined ? "#content" : id;
   width = width === undefined ? 1000 : width;
@@ -219,7 +219,7 @@ var drawLogicalPlan = function(topology, id, width, height,
     setHash("");
 
     React.renderComponent(
-      AllMetrics({dc: dc, environ: environ, topology: toponame}),
+      AllMetrics({cluster: cluster, environ: environ, topology: toponame}),
       document.getElementById('display-counters')
     );
     dehighlightsptblts();
@@ -380,7 +380,7 @@ var drawLogicalPlan = function(topology, id, width, height,
 
     var component = inputComponents ? "bolt" : "spout" ;
     React.renderComponent(
-    AllMetrics({dc: dc, environ: environ, topology: toponame,
+    AllMetrics({cluster: cluster, environ: environ, topology: toponame,
                    comp_type: component, comp_name: name}),
       document.getElementById('display-counters')
     );

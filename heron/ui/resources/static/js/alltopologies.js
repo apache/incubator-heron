@@ -10,7 +10,7 @@ var TopologyItem = React.createClass({
     };
 
     var topology = this.props.topology;
-    var displaydc = topology.dc.toUpperCase();
+    var displaycluster = topology.cluster.toUpperCase();
     var displaye = topology.environ.toUpperCase();
     var display_time = "-";
     if (topology.submission_time !== "-") {
@@ -32,16 +32,16 @@ var TopologyItem = React.createClass({
 
     return (
        <tr className={state_class}>
-         <td className="col-md-3 break-all"><a className="toponame" href={'/topologies/' + topology.dc + '/' + topology.environ + '/' + topology.name}>{topology.name}</a></td>
-         <td className="col-md-1 topodc">{displaydc}</td>
+         <td className="col-md-3 break-all"><a className="toponame" href={'/topologies/' + topology.cluster + '/' + topology.environ + '/' + topology.name}>{topology.name}</a></td>
+         <td className="col-md-1 topocluster">{displaycluster}</td>
          <td className="col-md-1 topoenviron">{displaye}</td>
          <td className="col-md-1 toporunrole break-all">{topology.role}</td>
          <td className="col-md-1 toporeleaseversion">{topology.release_version}</td>
          <td className="col-md-1 toposubmittedby break-all">{topology.submission_user}</td>
          <td className="col-md-2 toposubmittedat no-break">{display_time}</td>
          <td className="col-md-2 topobutton no-break">
-           <a className="btn btn-primary btn-sm" href={"/topologies/" + [topology.dc, topology.environ, topology.name, "config"].join("/")} target="_self">Config</a>
-           <a className="btn btn-primary btn-sm" href={"http://go/" + [topology.dc, topology.role, topology.environ, topology.name].join("/")} target="_blank">Aurora</a>
+           <a className="btn btn-primary btn-sm" href={"/topologies/" + [topology.cluster, topology.environ, topology.name, "config"].join("/")} target="_self">Config</a>
+           <a className="btn btn-primary btn-sm" href={"http://go/" + [topology.cluster, topology.role, topology.environ, topology.name].join("/")} target="_blank">Aurora</a>
            <a className="btn btn-primary btn-sm" href={topology.viz} target="_blank">Viz</a>
          </td>
        </tr>
@@ -66,13 +66,13 @@ var TopologyTable = React.createClass({
       data:     { format: 'json' },
       success:  function (result) {
         topologies = [];
-        for (var dc in result) {
-          for (var env in result[dc]) {
-            for (var topologyName in result[dc][env]) {
-              estate = result[dc][env][topologyName];
+        for (var cluster in result) {
+          for (var env in result[cluster]) {
+            for (var topologyName in result[cluster][env]) {
+              estate = result[cluster][env][topologyName];
               topologies.push({
                 name: topologyName,
-                dc: estate.dc,
+                cluster: estate.cluster,
                 environ: env,
                 role: estate.role,
                 viz: estate.viz,
@@ -106,7 +106,7 @@ var TopologyTable = React.createClass({
 
     var topologies = this.state.topologies.filter(function(topo, i) {
       if (this.props.env == topo.environ || 'all' == this.props.env) {
-        if (this.props.dc == topo.dc || 'all' == this.props.dc) {
+        if (this.props.cluster == topo.cluster || 'all' == this.props.cluster) {
           // if every filter term is contained in some part of the topology
           var searchAgainst = _.values(topo).filter(_.isString).join(" ").toLowerCase();
           if (filters.every(function (f) { return searchAgainst.indexOf(f) !== -1; })) {
@@ -161,7 +161,7 @@ var TopologyTable = React.createClass({
               <th onClick={sortBy("name")} className={sortClass("name")}>
                 Name
               </th>
-              <th onClick={sortBy("dc")} className={sortClass("dc")}>
+              <th onClick={sortBy("cluster")} className={sortClass("cluster")}>
                 DC
               </th>
               <th onClick={sortBy("environ")} className={sortClass("environ")}>
@@ -213,7 +213,7 @@ var FilterableTopologyTable = React.createClass({
   setStateIntoHash: function (arg) {
     var state = _.extend(this.getStateFromHash(), arg);
     this.changeIsFromUs = true;
-    window.location.hash = '/' + [state.dc, state.environ, state.filter].map(encodeURIComponent).join("/");
+    window.location.hash = '/' + [state.cluster, state.environ, state.filter].map(encodeURIComponent).join("/");
   },
 
   // extract state from the hash
@@ -221,7 +221,7 @@ var FilterableTopologyTable = React.createClass({
     var hash = window.location.hash.substr(1);
     var parts = hash.split("/");
     return {
-      dc: decodeURIComponent(parts[1] || "all"),
+      cluster: decodeURIComponent(parts[1] || "all"),
       environ: decodeURIComponent(parts[2] || "all"),
       filter: decodeURIComponent(parts[3] || "")
     };
@@ -240,7 +240,7 @@ var FilterableTopologyTable = React.createClass({
 
   handleDataCenterClick: function(event) {
     this.setStateIntoHash({
-      dc: event.target.id
+      cluster: event.target.id
     });
     event.preventDefault();
   },
@@ -265,7 +265,7 @@ var FilterableTopologyTable = React.createClass({
       'padding-right': '20px',
     };
 
-    var dcStyle = {
+    var clusterStyle = {
       'padding-left':  '5px',
       'padding-right': '5px'
     };
@@ -282,7 +282,7 @@ var FilterableTopologyTable = React.createClass({
   return (
    <div>
      <div className="row spacer">
-       <div className="col-md-6" style={dcStyle}>
+       <div className="col-md-6" style={clusterStyle}>
          <div className="navbar-custom">
            <div className="navbar-header">
              <button type="button" className="navbar-toggle" data-toggle="collapse" data-target=".navbar-responsive-collapse">
@@ -295,9 +295,9 @@ var FilterableTopologyTable = React.createClass({
 
            <div className="navbar-collapse collapse navbar-responsive-collapse">
              <ul className="nav navbar-nav">
-               <li className=""> <a href="#" id="all" className={this.state.dc == "all" ? 'active' : ''} onClick={this.handleDataCenterClick}>ALL</a></li>
-               <li className=""> <a href="#" id="smf1" className={this.state.dc == "smf1" ? 'active' : ''} onClick={this.handleDataCenterClick}>SMF1</a></li>
-               <li className=""> <a href="#" id="atla" className={this.state.dc == "atla" ? 'active' : ''} onClick={this.handleDataCenterClick}>ATLA</a></li>
+               <li className=""> <a href="#" id="all" className={this.state.cluster == "all" ? 'active' : ''} onClick={this.handleDataCenterClick}>ALL</a></li>
+               <li className=""> <a href="#" id="smf1" className={this.state.cluster == "smf1" ? 'active' : ''} onClick={this.handleDataCenterClick}>SMF1</a></li>
+               <li className=""> <a href="#" id="atla" className={this.state.cluster == "atla" ? 'active' : ''} onClick={this.handleDataCenterClick}>ATLA</a></li>
              </ul>
            </div>
          </div>
@@ -326,7 +326,7 @@ var FilterableTopologyTable = React.createClass({
        </div>
      </div>
      <input id="search-box" placeholder="Search for a topology" type="text" className="form-control col-md-7" style={divStyle} autoFocus={true} onChange={this.handleFilterChange} defaultValue={this.state.filter}/>
-     <TopologyTable  env={this.state.environ} dc={this.state.dc} filter={this.state.filter}/>
+     <TopologyTable  env={this.state.environ} cluster={this.state.cluster} filter={this.state.filter}/>
    </div>
   )
  }
