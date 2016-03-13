@@ -31,7 +31,7 @@ class StatesHandler(BaseHandler):
 
   @tornado.gen.coroutine
   def get(self):
-    # Get all the values for parameter "dc".
+    # Get all the values for parameter "cluster".
     clusters = self.get_arguments(constants.PARAM_CLUSTER)
 
     # Get all the values for parameter "environ".
