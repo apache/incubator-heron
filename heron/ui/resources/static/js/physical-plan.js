@@ -5,7 +5,7 @@
 (function (global) {
   var topo, instances, containers;
 
-  function drawPhysicalPlan(planController, data, div_id, outerWidth, minHeight, dc, environ, toponame) {
+  function drawPhysicalPlan(planController, data, div_id, outerWidth, minHeight, cluster, environ, toponame) {
     var margin = {
       top: 50,
       right: 0,

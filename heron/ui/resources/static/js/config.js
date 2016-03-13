@@ -6,7 +6,7 @@ var ConfigTable = React.createClass({
   },
   getTopologyConfig: function() {
     urlTokens = ['/topologies',
-                   this.props.dc,
+                   this.props.cluster,
                    this.props.environ,
                    this.props.topology,
                    'physicalplan.json'];
