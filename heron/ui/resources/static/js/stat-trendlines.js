@@ -1,7 +1,7 @@
 /**
  * Render trendline for stats below the containers and instances view
  */
-function StatTrendlines(dc, environ, toponame, physicalPlan, logicalPlan) {
+function StatTrendlines(cluster, environ, toponame, physicalPlan, logicalPlan) {
   var result = {};
   var target = d3.select('#stat-trendlines').style('text-align', 'center');
 
@@ -191,7 +191,7 @@ function StatTrendlines(dc, environ, toponame, physicalPlan, logicalPlan) {
         .html([
           '<a class="btn btn-primary btn-xs" target="_blank" href="' + physicalPlan.result.instances[instance].logfile + '">logs</a>',
           '<a class="btn btn-primary btn-xs" target="_blank" href="' + physicalPlan.result.instances[instance].logfile.split('/log-file')[0].replace('file', 'task') + '">job</a>',
-          '<a class="btn btn-primary btn-xs" target="_blank" href="/topologies/' + dc + '/' + environ + '/' + toponame + '/' + name + '/' + instance + '/exceptions">exceptions</a>',
+          '<a class="btn btn-primary btn-xs" target="_blank" href="/topologies/' + cluster + '/' + environ + '/' + toponame + '/' + name + '/' + instance + '/exceptions">exceptions</a>',
           '<a class="btn btn-primary btn-xs" target="_blank" href="' + physicalPlan.result.instances[instance].logfile.split('/file')[0] + '">host</a>',
           '<br>',
           instance
@@ -216,7 +216,7 @@ function StatTrendlines(dc, environ, toponame, physicalPlan, logicalPlan) {
     function executeMetricsQuery() {
       var u = '/topologies/metrics/timeline?'
       var request = [
-        u + 'dc=' + dc,
+        u + 'cluster=' + cluster,
         'environ=' + environ,
         'topology=' + toponame,
         'metric=' + metric.metricName,
