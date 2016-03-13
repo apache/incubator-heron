@@ -29,7 +29,7 @@ class MetricsQueryHandler(BaseHandler):
       cluster = self.get_argument_cluster()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
-      topology = self.tracker.getTopologyByDcEnvironAndName(cluster, environ, topology_name)
+      topology = self.tracker.getTopologyByClusterEnvironAndName(cluster, environ, topology_name)
 
       start_time = self.get_argument_starttime()
       end_time = self.get_argument_endtime()
