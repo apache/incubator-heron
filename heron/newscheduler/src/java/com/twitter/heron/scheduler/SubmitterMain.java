@@ -138,14 +138,14 @@ public class SubmitterMain {
     String topologyName = topology.getName();
 
     boolean isValid = validateSubmit(statemgr, topologyName);
-    boolean isSubmitSuccess = false;
+    boolean isSuccessful = false;
 
     // 2. Try to submit topology if valid
     if (isValid) {
       // invoke method to submit the topology
       LOG.info("Topology: " + topologyName + " to be submitted");
 
-      isSubmitSuccess = submitTopology(config, topology, statemgr);
+      isSuccessful = submitTopology(config, topology, statemgr);
     }
 
     // 3. Do generic cleaning
@@ -153,7 +153,7 @@ public class SubmitterMain {
     statemgr.close();
 
     // 4. Do post work basing on the result
-    if (!isSubmitSuccess) {
+    if (!isSuccessful) {
       LOG.severe("Failed to submit topology " + topologyName);
 
       Runtime.getRuntime().exit(1);
