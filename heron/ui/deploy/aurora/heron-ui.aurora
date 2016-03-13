@@ -1,0 +1,22 @@
+server_install = Packer.install('heron-ui', role = 'heron', version = 'latest')
+
+# Untar task. May run depending on pkg_type
+tracker_url = "http://heron-tracker.prod.heron.service.smf1.twitter.com"
+command = "chmod 755 ./heron-ui && ./heron-ui --port={{thermos.ports[http]}} --tracker_url=" + tracker_url
+server_process = Process(name = 'heron-ui', cmdline = command)
+
+server_task = Task(processes = [server_install, server_process],
+                   resources = Resources(cpu = 3, ram = 2048*MB, disk = 10*1024*MB),
+                   constraints = [Constraint(order=[server_install.name(), server_process.name()])])
+
+jobs = [
+  Job(name = 'heron-ui',
+     cluster = 'smf1',
+     role = 'heron',
+     environment = 'prod',
+     production = 'true',
+     service = True,
+     instances = 5,
+     task = server_task,
+     announce = Announcer())
+]
