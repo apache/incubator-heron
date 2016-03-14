@@ -102,11 +102,11 @@ public class RuntimeManagerMain {
       if (!isSuccessful) {
         LOG.log(Level.SEVERE, "Failed to {0} topology {1}", new Object[]{command, topologyName});
 
-        Runtime.getRuntime().exit(1);
+        System.exit(1);
       } else {
         LOG.log(Level.SEVERE, "Topology {0} {1} successfully", new Object[]{topologyName, command});
 
-        Runtime.getRuntime().exit(0);
+        System.exit(0);
       }
     }
   }
