@@ -135,9 +135,6 @@ public class SubmitterMain {
     String statemgrClass = Context.stateManagerClass(config);
     IStateManager statemgr = (IStateManager) Class.forName(statemgrClass).newInstance();
 
-    // initialize the state manager
-    statemgr.initialize(config);
-
     // Create an instance of the launcher class
     String launcherClass = Context.launcherClass(config);
     ILauncher launcher = (ILauncher) Class.forName(launcherClass).newInstance();
@@ -146,14 +143,18 @@ public class SubmitterMain {
     String packingClass = Context.packingClass(config);
     IPacking packing = (IPacking) Class.forName(packingClass).newInstance();
 
-    UploadRunner uploadRunner = new UploadRunner(config);
-
     // Local variable for convenient access
     String topologyName = topology.getName();
 
     boolean isSuccessful = false;
+    UploadRunner uploadRunner = null;
     // Put it in a try block so that we can always clean resources
     try {
+      // initialize the state manager
+      statemgr.initialize(config);
+
+      uploadRunner = new UploadRunner(config);
+
       boolean isValid = validateSubmit(statemgr, topologyName);
 
       // 2. Try to submit topology if valid
@@ -171,7 +172,9 @@ public class SubmitterMain {
       // 4. Do post work basing on the result
       if (!isSuccessful) {
         // Undo if failed to submit
-        uploadRunner.undo();
+        if (uploadRunner != null) {
+          uploadRunner.undo();
+        }
         launcher.undo();
         LOG.log(Level.SEVERE, "Failed to submit topology {0}. Existing", topologyName);
 

@@ -87,7 +87,6 @@ public class LaunchRunner implements Callable<Boolean> {
   }
 
   public Boolean call() {
-
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
     TopologyAPI.Topology topology = Runtime.topology(runtime);
     String topologyName = Context.topologyName(config);
