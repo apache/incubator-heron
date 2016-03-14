@@ -58,9 +58,6 @@ public class SchedulerMain {
 
   /**
    * Load the defaults config
-   *
-   * @param heronHome, directory of heron home
-   * @param configPath, directory containing the config
    * <p/>
    * return config, the defaults config
    */
@@ -116,7 +113,7 @@ public class SchedulerMain {
     // Set up logging with complete Config
     setupLogging(config);
 
-    LOG.info("loaded scheduler config " + config);
+    LOG.log(Level.INFO, "Loaded scheduler config: {0}", config);
 
     // run the scheduler
     runScheduler(config, schedulerServerPort, topology);
@@ -171,42 +168,56 @@ public class SchedulerMain {
         .put(Keys.numContainers(), 1 + TopologyUtils.getNumContainers(topology))
         .build();
 
-    // get a packed plan and schedule it
-    packing.initialize(config, runtime);
-    PackingPlan packedPlan = packing.pack();
+    SchedulerServer server = null;
 
-    // TO DO - investigate whether the heron executors can be started
-    // in scheduler.schedule method - rather than in scheduler.initialize method
-    Config ytruntime = Config.newBuilder()
-        .putAll(runtime)
-        .put(Keys.instanceDistribution(), TopologyUtils.packingToString(packedPlan))
-        .put(Keys.schedulerShutdown(), new Shutdown())
-        .build();
+    // Put it in a try block so that we can always clean resources
+    try {
+      // get a packed plan and schedule it
+      packing.initialize(config, runtime);
+      PackingPlan packedPlan = packing.pack();
 
-    // create an instance of scheduler 
-    String schedulerClass = Context.schedulerClass(config);
-    IScheduler scheduler = (IScheduler) Class.forName(schedulerClass).newInstance();
+      // TODO - investigate whether the heron executors can be started
+      // in scheduler.schedule method - rather than in scheduler.initialize method
+      Config ytruntime = Config.newBuilder()
+          .putAll(runtime)
+          .put(Keys.instanceDistribution(), TopologyUtils.packingToString(packedPlan))
+          .put(Keys.schedulerShutdown(), new Shutdown())
+          .build();
 
-    // initialize the scheduler
-    scheduler.initialize(config, ytruntime);
+      // create an instance of scheduler
+      String schedulerClass = Context.schedulerClass(config);
+      IScheduler scheduler = (IScheduler) Class.forName(schedulerClass).newInstance();
 
-    // start the scheduler REST endpoint for receiving requests
-    SchedulerServer server = runServer(ytruntime, scheduler, schedulerServerPort);
+      // initialize the scheduler
+      scheduler.initialize(config, ytruntime);
 
-    // write the scheduler location to state manager.
-    setSchedulerLocation(runtime, server);
+      // start the scheduler REST endpoint for receiving requests
+      server = runServer(ytruntime, scheduler, schedulerServerPort);
 
-    // schedule the packed plan
-    scheduler.schedule(packedPlan);
+      // write the scheduler location to state manager.
+      setSchedulerLocation(runtime, server);
 
-    // wait until kill request or some interrupt occurs
-    LOG.info("Waiting for termination... ");
-    Runtime.schedulerShutdown(ytruntime).await();
+      // schedule the packed plan
+      scheduler.schedule(packedPlan);
+
+      // wait until kill request or some interrupt occurs
+      LOG.info("Waiting for termination... ");
+      Runtime.schedulerShutdown(ytruntime).await();
+    } catch (Exception e) {
+      // Log and exit the process
+      LOG.log(Level.SEVERE, "Failed to run scheduler for topology: {0}. Existing", topology.getName());
+      System.exit(1);
+    } finally {
+      // Clean the resources
+      if (server != null) {
+        server.stop();
+      }
+      statemgr.close();
+    }
 
     // stop the server and close the state manager
-    LOG.info("Shutting down topology: " + topology.getName());
-    server.stop();
-    statemgr.close();
+    LOG.log(Level.INFO, "Shutting down topology: {0}", topology.getName());
+
     System.exit(0);
   }
 
@@ -234,7 +245,7 @@ public class SchedulerMain {
    * Set the location of scheduler for other processes to discover
    *
    * @param runtime, the runtime configuration
-   * @param schedulerServe, the http server that scheduler listens for receives requests
+   * @param schedulerServer, the http server that scheduler listens for receives requests
    */
   public static void setSchedulerLocation(Config runtime, SchedulerServer schedulerServer) {
 
@@ -244,7 +255,7 @@ public class SchedulerMain {
         .setHttpEndpoint(String.format("%s:%d", schedulerServer.getHost(), schedulerServer.getPort()))
         .build();
 
-    LOG.info("Setting SchedulerLocation: " + location);
+    LOG.log(Level.INFO, "Setting SchedulerLocation: {0}", location);
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
     statemgr.setSchedulerLocation(location, Runtime.topologyName(runtime));
     // TODO - Should we wait on the future here

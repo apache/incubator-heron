@@ -2,6 +2,7 @@ package com.twitter.heron.scheduler;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -11,6 +12,8 @@ import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.packing.IPacking;
+import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.NetworkUtils;
@@ -135,32 +138,49 @@ public class SubmitterMain {
     // initialize the state manager
     statemgr.initialize(config);
 
+    // Create an instance of the launcher class
+    String launcherClass = Context.launcherClass(config);
+    ILauncher launcher = (ILauncher) Class.forName(launcherClass).newInstance();
+
+    // Create an instance of the packing class
+    String packingClass = Context.packingClass(config);
+    IPacking packing = (IPacking) Class.forName(packingClass).newInstance();
+
+    UploadRunner uploadRunner = new UploadRunner(config);
+
+    // Local variable for convenient access
     String topologyName = topology.getName();
 
-    boolean isValid = validateSubmit(statemgr, topologyName);
     boolean isSuccessful = false;
+    // Put it in a try block so that we can always clean resources
+    try {
+      boolean isValid = validateSubmit(statemgr, topologyName);
 
-    // 2. Try to submit topology if valid
-    if (isValid) {
-      // invoke method to submit the topology
-      LOG.info("Topology: " + topologyName + " to be submitted");
+      // 2. Try to submit topology if valid
+      if (isValid) {
+        // invoke method to submit the topology
+        LOG.log(Level.INFO, "Topology {0} to be submitted", topologyName);
 
-      isSuccessful = submitTopology(config, topology, statemgr);
-    }
+        isSuccessful = submitTopology(config, topology, statemgr, launcher, packing, uploadRunner);
+      }
+    } finally {
+      // 3. Do generic cleaning
+      // close the state manager
+      statemgr.close();
 
-    // 3. Do generic cleaning
-    // close the state manager
-    statemgr.close();
+      // 4. Do post work basing on the result
+      if (!isSuccessful) {
+        // Undo if failed to submit
+        uploadRunner.undo();
+        launcher.undo();
+        LOG.log(Level.SEVERE, "Failed to submit topology {0}. Existing", topologyName);
 
-    // 4. Do post work basing on the result
-    if (!isSuccessful) {
-      LOG.severe("Failed to submit topology " + topologyName);
+        System.exit(1);
+      } else {
+        LOG.log(Level.INFO, "Topology {0} submitted successfully", topologyName);
 
-      Runtime.getRuntime().exit(1);
-    } else {
-      LOG.info("Topology " + topologyName + " submitted successfully");
-
-      Runtime.getRuntime().exit(0);
+        System.exit(0);
+      }
     }
   }
 
@@ -177,15 +197,15 @@ public class SubmitterMain {
     return true;
   }
 
-  public static boolean submitTopology(Config config, TopologyAPI.Topology topology, IStateManager statemgr) throws
-      ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
+  public static boolean submitTopology(Config config, TopologyAPI.Topology topology,
+                                       IStateManager statemgr, ILauncher launcher,
+                                       IPacking packing, UploadRunner uploadRunner)
+      throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
     // upload the topology package to the storage
-    UploadRunner uploadRunner = new UploadRunner(config);
     boolean result = uploadRunner.call();
 
     if (!result) {
-      LOG.severe("Failed to upload package. Exiting");
-      statemgr.close();
+      LOG.severe("Failed to upload package.");
       return false;
     }
 
@@ -199,13 +219,12 @@ public class SubmitterMain {
         .build();
 
     // using launch runner, launch the topology
-    LaunchRunner launchRunner = new LaunchRunner(config, runtime);
+    LaunchRunner launchRunner = new LaunchRunner(config, runtime, launcher, packing);
     result = launchRunner.call();
 
     // if failed, undo the uploaded package
     if (!result) {
       LOG.severe("Failed to launch topology. Attempting to roll back upload.");
-      uploadRunner.undo();
       return false;
     }
     return true;
