@@ -1,24 +1,17 @@
 package com.twitter.heron.scheduler;
 
-import java.nio.charset.Charset;
-import java.util.logging.Logger;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
-import javax.xml.bind.DatatypeConverter;
-
-import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
-
-import com.twitter.heron.spi.scheduler.IRuntimeManager;
+import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.NetworkUtils;
-
-import com.google.common.util.concurrent.ListenableFuture;
 
 public class RuntimeManagerMain {
   private static final Logger LOG = Logger.getLogger(RuntimeManagerMain.class.getName());
@@ -34,7 +27,7 @@ public class RuntimeManagerMain {
     String configOverrideEncoded = args[5];
     String topologyName = args[6];
     String command = args[7];
-    
+
     // Optional argument in the case of restart - TO DO convert into CLI
     String containerId = Integer.toString(-1);
     if (args.length == 9) {
@@ -69,27 +62,57 @@ public class RuntimeManagerMain {
     LOG.info("Static config loaded successfully ");
     LOG.info(config.toString());
 
-    // invoke the appropriate command to manage the topology
-    LOG.info("Topology: " + topologyName + " to be " + command + "ed");
-    boolean rt = manageTopology(config, command);
-    if (!rt) {
-      LOG.severe("Failed to " + command + " topology " + topologyName);
-      Runtime.getRuntime().exit(1);
-    }
-
-    LOG.info("Topology " + topologyName + " " + command + " successfully");
-  }
-
-  public static boolean manageTopology(Config config, String command)
-      throws ClassNotFoundException, IllegalAccessException, InstantiationException, IOException {
-
+    // 1. Do prepare work
     // create an instance of state manager
     String statemgrClass = Context.stateManagerClass(config);
-    IStateManager statemgr = (IStateManager)Class.forName(statemgrClass).newInstance();
+    IStateManager statemgr = (IStateManager) Class.forName(statemgrClass).newInstance();
 
     // initialize the statemgr
     statemgr.initialize(config);
 
+    boolean isValid = validateRuntimeManage(statemgr, topologyName);
+    boolean isSuccessful = false;
+
+    // 2. Try to manage topology if valid
+    if (isValid) {
+      // invoke the appropriate command to manage the topology
+      LOG.info("Topology: " + topologyName + " to be " + command + "ed");
+
+      isSuccessful = manageTopology(config, command, statemgr);
+    }
+
+    // 3. Do generic cleaning
+    // close the state manager
+    statemgr.close();
+
+    // 4. Do post work basing on the result
+    if (!isSuccessful) {
+      LOG.severe("Failed to " + command + " topology " + topologyName);
+
+      Runtime.getRuntime().exit(1);
+    } else {
+      LOG.info("Topology " + topologyName + " " + command + " successfully");
+
+      Runtime.getRuntime().exit(0);
+    }
+  }
+
+
+  public static boolean validateRuntimeManage(IStateManager statemgr, String topologyName) {
+    // Check whether the topology has already been running
+    Boolean isTopologyRunning =
+        NetworkUtils.awaitResult(statemgr.isTopologyRunning(topologyName), 5, TimeUnit.SECONDS);
+
+    if (isTopologyRunning == null || isTopologyRunning.equals(Boolean.FALSE)) {
+      LOG.severe("No such topology exists");
+      return false;
+    }
+
+    return true;
+  }
+
+  public static boolean manageTopology(Config config, String command, IStateManager statemgr)
+      throws ClassNotFoundException, IllegalAccessException, InstantiationException, IOException {
     // build the runtime config
     Config runtime = Config.newBuilder()
         .put(Keys.topologyName(), Context.topologyName(config))
@@ -102,8 +125,6 @@ public class RuntimeManagerMain {
     // invoke the appropriate handlers based on command
     boolean ret = runtimeManagerRunner.call();
 
-    // close the state manager 
-    statemgr.close();
     return ret;
   }
 }
