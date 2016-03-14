@@ -63,16 +63,16 @@ class Tracker:
       onTopologiesWatch = partial(on_topologies_watch, state_manager)
       state_manager.get_topologies(onTopologiesWatch)
 
-  def getTopologyByDcEnvironAndName(self, dc, environ, topName):
+  def getTopologyByClusterEnvironAndName(self, cluster, environ, topName):
     """
-    Find and return the topology given its dc, environ and topology name.
+    Find and return the topology given its cluster, environ and topology name.
     Raises exception if topology is not found, or more than one are found.
     """
     topologies = filter(lambda t: t.name == topName
-                        and t.dc == dc
+                        and t.cluster == cluster
                         and t.environ == environ, self.topologies)
     if not topologies or len(topologies) > 1:
-      raise Exception("Topology not found for {0}, {1}, {2}".format(dc, environ, topName))
+      raise Exception("Topology not found for {0}, {1}, {2}".format(cluster, environ, topName))
 
     # There is only one topology which is returned.
     return topologies[0]
@@ -146,7 +146,7 @@ class Tracker:
     execution_state = utils.convert_execution_state(topology.execution_state)
 
     executionState = {
-      "dc": execution_state.dc,
+      "cluster": execution_state.cluster,
       "environ": execution_state.environ,
       "role": execution_state.role,
       "jobname": topology.name,
@@ -157,7 +157,7 @@ class Tracker:
       "release_version": execution_state.release_state.release_version,
       "uploader_version": execution_state.release_state.uploader_version,
       # TODO: Remove the viz link
-      "viz": utils.make_viz_dashboard_url(topology.name, execution_state.dc, execution_state.environ),
+      "viz": utils.make_viz_dashboard_url(topology.name, execution_state.cluster, execution_state.environ),
       "has_physical_plan": None,
       "has_tmaster_location": None,
     }
@@ -384,20 +384,20 @@ class Tracker:
 
     self.topologyInfos[(topology.name, topology.state_manager_name)] = top
 
-  def getTopologyInfo(self, topologyName, dc, environ):
+  def getTopologyInfo(self, topologyName, cluster, environ):
     """
     Returns the JSON representation of a topology
-    by its name, dc and environ.
+    by its name, cluster and environ.
     Raises exception if no such topology is found.
     """
     # Iterate over the values to filter the desired topology.
     for (topology_name, state_manager_name), topologyInfo in self.topologyInfos.iteritems():
       executionState = topologyInfo["execution_state"]
       if (topologyName == topology_name and
-          dc == executionState["dc"] and
+          cluster == executionState["cluster"] and
           environ == executionState["environ"]):
         return topologyInfo
     LOG.info("Could not find topology info for topology: {0}, \
-             dc: {1} and environ: {2}".format(topologyName, dc, environ))
+             cluster: {1} and environ: {2}".format(topologyName, cluster, environ))
     raise Exception("No topology found")
 

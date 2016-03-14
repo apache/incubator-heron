@@ -25,7 +25,7 @@ class LogicalPlanHandler(BaseHandler):
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
       topology_info = self.tracker.getTopologyInfo(topology_name, cluster, environ)
-      logical_plan = topologyInfo["logical_plan"]
+      logical_plan = topology_info["logical_plan"]
       self.write_success_response(logical_plan)
     except Exception as e:
       self.write_error_response(e)
