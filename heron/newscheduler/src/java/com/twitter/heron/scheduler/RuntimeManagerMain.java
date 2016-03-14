@@ -71,9 +71,6 @@ public class RuntimeManagerMain {
     String statemgrClass = Context.stateManagerClass(config);
     IStateManager statemgr = (IStateManager) Class.forName(statemgrClass).newInstance();
 
-    // initialize the statemgr
-    statemgr.initialize(config);
-
     // create an instance of runtime manager
     String runtimeManagerClass = Context.runtimeManagerClass(config);
     IRuntimeManager runtimeManager = (IRuntimeManager) Class.forName(runtimeManagerClass).newInstance();
@@ -82,6 +79,9 @@ public class RuntimeManagerMain {
 
     // Put it in a try block so that we can always clean resources
     try {
+      // initialize the statemgr
+      statemgr.initialize(config);
+
       boolean isValid = validateRuntimeManage(statemgr, topologyName);
 
       // 2. Try to manage topology if valid
