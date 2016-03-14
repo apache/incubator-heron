@@ -28,19 +28,18 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
 
   private final Config config;
   private final Config runtime;
-  private final String command;
+  private final IRuntimeManager.Command command;
   private final IRuntimeManager runtimeManager;
 
-  public RuntimeManagerRunner(Config config, Config runtime, String command) throws
+  public RuntimeManagerRunner(Config config, Config runtime,
+                              IRuntimeManager.Command command,
+                              IRuntimeManager runtimeManager) throws
       ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
 
     this.config = config;
     this.runtime = runtime;
-    this.command = command.toLowerCase();
-
-    // create an instance of runtime manager
-    String runtimeManagerClass = Context.runtimeManagerClass(config);
-    this.runtimeManager = (IRuntimeManager) Class.forName(runtimeManagerClass).newInstance();
+    this.command = command;
+    this.runtimeManager = runtimeManager;
   }
 
   @Override
@@ -51,22 +50,23 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
 
     // execute the appropriate command
     boolean result = false;
-    if (command.equals("activate") || command.equals("resume"))
-      result = activateTopologyHandler(Context.topologyName(config));
+    switch (command) {
+      case ACTIVATE:
+        result = activateTopologyHandler(Context.topologyName(config));
+        break;
+      case DEACTIVATE:
+        result = deactivateTopologyHandler(Context.topologyName(config));
+        break;
+      case RESTART:
+        result = restartTopologyHandler(Context.topologyName(config));
+        break;
+      case KILL:
+        result = killTopologyHandler(Context.topologyName(config));
+        break;
+      default:
+        LOG.severe("Unknown command for topology: " + command);
+    }
 
-    else if (command.equals("deactivate") || command.equals("suspend"))
-      result = deactivateTopologyHandler(Context.topologyName(config));
-
-    else if (command.equals("restart"))
-      result = restartTopologyHandler(Context.topologyName(config));
-
-    else if (command.equals("kill"))
-      result = killTopologyHandler(Context.topologyName(config));
-
-    else
-      LOG.info("Unknown command for topology: " + command);
-
-    runtimeManager.close();
     return result;
   }
 
@@ -79,7 +79,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
 
     // fetch scheduler location from state manager
-    LOG.info("Fetching scheduler location from state manager for " + command + " topology");
+    LOG.log(Level.INFO, "Fetching scheduler location from state manager to {0} topology", command);
 
     ListenableFuture<Scheduler.SchedulerLocation> locationFuture =
         statemgr.getSchedulerLocation(null, Runtime.topologyName(runtime));
@@ -88,7 +88,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
         NetworkUtils.awaitResult(locationFuture, 5, TimeUnit.SECONDS);
 
     if (schedulerLocation == null) {
-      LOG.severe("Failed to get scheduler location for " + command + " topology");
+      LOG.log(Level.INFO, "Failed to get scheduler location to {0} topology", command);
       return Pair.create(false, null);
     }
 
@@ -101,14 +101,14 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     LOG.info("Scheduler is listening on location: " + schedulerLocation.toString());
 
     // construct the http request for command
-    String endpoint = String.format("http://%s/%s", schedulerLocation.getHttpEndpoint(), command);
+    String endpoint = getCommandEndpoint(schedulerLocation.getHttpEndpoint(), command);
 
     // construct the http url connection
     HttpURLConnection connection;
     try {
       connection = HttpUtils.getConnection(endpoint);
     } catch (IOException e) {
-      LOG.log(Level.SEVERE, "Failed to connect to scheduler http endpoint: " + endpoint);
+      LOG.log(Level.SEVERE, "Failed to connect to scheduler http endpoint: {0}", endpoint);
       return Pair.create(false, null);
     }
 
@@ -233,7 +233,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
           .mergeFrom(HttpUtils.readHttpResponse(connection))
           .build().getStatus().getStatus();
     } catch (Exception e) {
-      LOG.log(Level.SEVERE, "Failed to parse deactivate response: " + e);
+      LOG.log(Level.SEVERE, "Failed to parse deactivate response: ", e);
       connection.disconnect();
       return false;
     }
@@ -300,7 +300,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
           .mergeFrom(HttpUtils.readHttpResponse(connection))
           .build().getStatus().getStatus();
     } catch (Exception e) {
-      LOG.log(Level.SEVERE, "Failed to parse restart response: " + e);
+      LOG.log(Level.SEVERE, "Failed to parse restart response: ", e);
       connection.disconnect();
       return false;
     }
@@ -362,7 +362,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
           .mergeFrom(HttpUtils.readHttpResponse(connection))
           .build().getStatus().getStatus();
     } catch (Exception e) {
-      LOG.log(Level.SEVERE, "Failed to parse kill response: " + e);
+      LOG.log(Level.SEVERE, "Failed to parse kill response: ", e);
       connection.disconnect();
       return false;
     }
@@ -407,7 +407,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     try {
       booleanFuture = statemgr.deletePhysicalPlan(topologyName);
       if (!NetworkUtils.awaitResult(booleanFuture, 5, TimeUnit.SECONDS)) {
-        // We would not return false since it is possbile that TMaster didn't write physical plan
+        // We would not return false since it is possible that TMaster didn't write physical plan
         LOG.severe("Failed to clear physical plan. Check whether TMaster set it correctly.");
       }
     } catch (Exception e) {
@@ -441,10 +441,23 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
         NetworkUtils.awaitResult(physicalPlanFuture, 5, TimeUnit.SECONDS);
 
     if (plan == null) {
-      LOG.severe("Failed to get physical plan for topology: " + topologyName);
+      LOG.log(Level.SEVERE, "Failed to get physical plan for topology {0}", topologyName);
       return null;
     }
 
     return plan.getTopology().getState();
+  }
+
+  /**
+   * Construct the endpoint to send http request for a particular command
+   * Make sure the construction matches server sides.
+   *
+   * @param schedulerEndpoint The scheduler http endpoint
+   * @param command The command to request
+   * @return The http endpoint for particular command
+   */
+  protected String getCommandEndpoint(String schedulerEndpoint, IRuntimeManager.Command command) {
+    // Currently the server side receives command request in lower case
+    return String.format("http://%s/%s", schedulerEndpoint, command.name().toLowerCase());
   }
 }
