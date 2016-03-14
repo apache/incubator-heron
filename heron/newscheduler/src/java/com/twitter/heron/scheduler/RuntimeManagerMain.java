@@ -2,6 +2,7 @@ package com.twitter.heron.scheduler;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.spi.common.ClusterConfig;
@@ -86,7 +87,7 @@ public class RuntimeManagerMain {
       // 2. Try to manage topology if valid
       if (isValid) {
         // invoke the appropriate command to manage the topology
-        LOG.info("Topology: " + topologyName + " to be " + command + "ed");
+        LOG.log(Level.INFO, "Topology: {0} to be {1}ed", new Object[]{topologyName, command});
 
         isSuccessful = manageTopology(config, command, statemgr, runtimeManager);
       }
@@ -99,11 +100,11 @@ public class RuntimeManagerMain {
 
       // 4. Do post work basing on the result
       if (!isSuccessful) {
-        LOG.severe("Failed to " + command + " topology " + topologyName);
+        LOG.log(Level.SEVERE, "Failed to {0} topology {1}", new Object[]{command, topologyName});
 
         Runtime.getRuntime().exit(1);
       } else {
-        LOG.info("Topology " + topologyName + " " + command + " successfully");
+        LOG.log(Level.SEVERE, "Topology {0} {1} successfully", new Object[]{topologyName, command});
 
         Runtime.getRuntime().exit(0);
       }
