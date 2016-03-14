@@ -3,6 +3,16 @@ package com.twitter.heron.spi.scheduler;
 import com.twitter.heron.spi.common.Config;
 
 public interface IRuntimeManager {
+  enum Command {
+    KILL,
+    ACTIVATE,
+    DEACTIVATE,
+    RESTART;
+
+    public static Command makeCommand(String commandString) {
+      return Command.valueOf(commandString.toUpperCase());
+    }
+  }
 
   void initialize(Config config, Config runtime);
 

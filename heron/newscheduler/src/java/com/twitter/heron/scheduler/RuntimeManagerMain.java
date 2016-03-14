@@ -2,6 +2,7 @@ package com.twitter.heron.scheduler;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.spi.common.ClusterConfig;
@@ -9,6 +10,7 @@ import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.scheduler.IRuntimeManager;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.NetworkUtils;
@@ -26,13 +28,15 @@ public class RuntimeManagerMain {
     String configPath = args[4];
     String configOverrideEncoded = args[5];
     String topologyName = args[6];
-    String command = args[7];
+    String sCommand = args[7];
 
     // Optional argument in the case of restart - TO DO convert into CLI
     String containerId = Integer.toString(-1);
     if (args.length == 9) {
       containerId = args[8];
     }
+
+    IRuntimeManager.Command command = IRuntimeManager.Command.makeCommand(sCommand);
 
     // first load the defaults, then the config from files to override it
     Config.Builder defaultsConfig = Config.newBuilder()
@@ -70,30 +74,40 @@ public class RuntimeManagerMain {
     // initialize the statemgr
     statemgr.initialize(config);
 
-    boolean isValid = validateRuntimeManage(statemgr, topologyName);
+    // create an instance of runtime manager
+    String runtimeManagerClass = Context.runtimeManagerClass(config);
+    IRuntimeManager runtimeManager = (IRuntimeManager) Class.forName(runtimeManagerClass).newInstance();
+
     boolean isSuccessful = false;
 
-    // 2. Try to manage topology if valid
-    if (isValid) {
-      // invoke the appropriate command to manage the topology
-      LOG.info("Topology: " + topologyName + " to be " + command + "ed");
+    // Put it in a try block so that we can always clean resources
+    try {
+      boolean isValid = validateRuntimeManage(statemgr, topologyName);
 
-      isSuccessful = manageTopology(config, command, statemgr);
-    }
+      // 2. Try to manage topology if valid
+      if (isValid) {
+        // invoke the appropriate command to manage the topology
+        LOG.log(Level.INFO, "Topology: {0} to be {1}ed", new Object[]{topologyName, command});
 
-    // 3. Do generic cleaning
-    // close the state manager
-    statemgr.close();
+        isSuccessful = manageTopology(config, command, statemgr, runtimeManager);
+      }
+    } finally {
+      // 3. Do generic cleaning
+      // close the state manager
+      statemgr.close();
+      // close the runtime manager
+      runtimeManager.close();
 
-    // 4. Do post work basing on the result
-    if (!isSuccessful) {
-      LOG.severe("Failed to " + command + " topology " + topologyName);
+      // 4. Do post work basing on the result
+      if (!isSuccessful) {
+        LOG.log(Level.SEVERE, "Failed to {0} topology {1}", new Object[]{command, topologyName});
 
-      Runtime.getRuntime().exit(1);
-    } else {
-      LOG.info("Topology " + topologyName + " " + command + " successfully");
+        Runtime.getRuntime().exit(1);
+      } else {
+        LOG.log(Level.SEVERE, "Topology {0} {1} successfully", new Object[]{topologyName, command});
 
-      Runtime.getRuntime().exit(0);
+        Runtime.getRuntime().exit(0);
+      }
     }
   }
 
@@ -111,7 +125,9 @@ public class RuntimeManagerMain {
     return true;
   }
 
-  public static boolean manageTopology(Config config, String command, IStateManager statemgr)
+  public static boolean manageTopology(
+      Config config, IRuntimeManager.Command command,
+      IStateManager statemgr, IRuntimeManager runtimeManager)
       throws ClassNotFoundException, IllegalAccessException, InstantiationException, IOException {
     // build the runtime config
     Config runtime = Config.newBuilder()
@@ -120,7 +136,8 @@ public class RuntimeManagerMain {
         .build();
 
     // create an instance of the runner class
-    RuntimeManagerRunner runtimeManagerRunner = new RuntimeManagerRunner(config, runtime, command);
+    RuntimeManagerRunner runtimeManagerRunner =
+        new RuntimeManagerRunner(config, runtime, command, runtimeManager);
 
     // invoke the appropriate handlers based on command
     boolean ret = runtimeManagerRunner.call();
