@@ -73,30 +73,40 @@ public class RuntimeManagerMain {
     // initialize the statemgr
     statemgr.initialize(config);
 
-    boolean isValid = validateRuntimeManage(statemgr, topologyName);
+    // create an instance of runtime manager
+    String runtimeManagerClass = Context.runtimeManagerClass(config);
+    IRuntimeManager runtimeManager = (IRuntimeManager) Class.forName(runtimeManagerClass).newInstance();
+
     boolean isSuccessful = false;
 
-    // 2. Try to manage topology if valid
-    if (isValid) {
-      // invoke the appropriate command to manage the topology
-      LOG.info("Topology: " + topologyName + " to be " + command + "ed");
+    // Put it in a try block so that we can always clean resources
+    try {
+      boolean isValid = validateRuntimeManage(statemgr, topologyName);
 
-      isSuccessful = manageTopology(config, command, statemgr);
-    }
+      // 2. Try to manage topology if valid
+      if (isValid) {
+        // invoke the appropriate command to manage the topology
+        LOG.info("Topology: " + topologyName + " to be " + command + "ed");
 
-    // 3. Do generic cleaning
-    // close the state manager
-    statemgr.close();
+        isSuccessful = manageTopology(config, command, statemgr, runtimeManager);
+      }
+    } finally {
+      // 3. Do generic cleaning
+      // close the state manager
+      statemgr.close();
+      // close the runtime manager
+      runtimeManager.close();
 
-    // 4. Do post work basing on the result
-    if (!isSuccessful) {
-      LOG.severe("Failed to " + command + " topology " + topologyName);
+      // 4. Do post work basing on the result
+      if (!isSuccessful) {
+        LOG.severe("Failed to " + command + " topology " + topologyName);
 
-      Runtime.getRuntime().exit(1);
-    } else {
-      LOG.info("Topology " + topologyName + " " + command + " successfully");
+        Runtime.getRuntime().exit(1);
+      } else {
+        LOG.info("Topology " + topologyName + " " + command + " successfully");
 
-      Runtime.getRuntime().exit(0);
+        Runtime.getRuntime().exit(0);
+      }
     }
   }
 
@@ -115,7 +125,8 @@ public class RuntimeManagerMain {
   }
 
   public static boolean manageTopology(
-      Config config, IRuntimeManager.Command command, IStateManager statemgr)
+      Config config, IRuntimeManager.Command command,
+      IStateManager statemgr, IRuntimeManager runtimeManager)
       throws ClassNotFoundException, IllegalAccessException, InstantiationException, IOException {
     // build the runtime config
     Config runtime = Config.newBuilder()
@@ -124,7 +135,8 @@ public class RuntimeManagerMain {
         .build();
 
     // create an instance of the runner class
-    RuntimeManagerRunner runtimeManagerRunner = new RuntimeManagerRunner(config, runtime, command);
+    RuntimeManagerRunner runtimeManagerRunner =
+        new RuntimeManagerRunner(config, runtime, command, runtimeManager);
 
     // invoke the appropriate handlers based on command
     boolean ret = runtimeManagerRunner.call();

@@ -31,16 +31,15 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
   private final IRuntimeManager.Command command;
   private final IRuntimeManager runtimeManager;
 
-  public RuntimeManagerRunner(Config config, Config runtime, IRuntimeManager.Command command) throws
+  public RuntimeManagerRunner(Config config, Config runtime,
+                              IRuntimeManager.Command command,
+                              IRuntimeManager runtimeManager) throws
       ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
 
     this.config = config;
     this.runtime = runtime;
     this.command = command;
-
-    // create an instance of runtime manager
-    String runtimeManagerClass = Context.runtimeManagerClass(config);
-    this.runtimeManager = (IRuntimeManager) Class.forName(runtimeManagerClass).newInstance();
+    this.runtimeManager = runtimeManager;
   }
 
   @Override
@@ -68,7 +67,6 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
         LOG.severe("Unknown command for topology: " + command);
     }
 
-    runtimeManager.close();
     return result;
   }
 
