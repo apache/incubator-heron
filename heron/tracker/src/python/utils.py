@@ -48,7 +48,7 @@ def make_shell_logfiles_url(host, shell_port, cwd, instance_id=None):
   else:
     return "http://%s:%d/file/log-files/%s.log.0" % (host, shell_port, instance_id)
 
-def make_viz_dashboard_url(name, dc, environ):
+def make_viz_dashboard_url(name, cluster, environ):
   """
   Link to the dashboard. Must override to return a valid url.
   """

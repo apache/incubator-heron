@@ -40,6 +40,7 @@ filegroup(
     name = "binpkgs",
     srcs = [
         ":heron-client-install.sh",
+        ":heron-tools-install.sh",
     ],
 )
 

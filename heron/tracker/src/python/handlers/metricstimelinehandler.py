@@ -43,7 +43,7 @@ class MetricsTimelineHandler(BaseHandler):
       self.validateInterval(start_time, end_time)
       instances = self.get_arguments(constants.PARAM_INSTANCE)
 
-      topology = self.tracker.getTopologyByDcEnvironAndName(cluster, environ, topology_name)
+      topology = self.tracker.getTopologyByClusterEnvironAndName(cluster, environ, topology_name)
       metrics = yield tornado.gen.Task(self.getMetricsTimeline,
                                        topology.tmaster, component, metric_names,
                                        instances, int(start_time), int(end_time))
