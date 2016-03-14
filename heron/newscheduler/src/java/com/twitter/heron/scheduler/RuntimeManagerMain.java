@@ -9,6 +9,7 @@ import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.scheduler.IRuntimeManager;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.NetworkUtils;
@@ -26,13 +27,15 @@ public class RuntimeManagerMain {
     String configPath = args[4];
     String configOverrideEncoded = args[5];
     String topologyName = args[6];
-    String command = args[7];
+    String sCommand = args[7];
 
     // Optional argument in the case of restart - TO DO convert into CLI
     String containerId = Integer.toString(-1);
     if (args.length == 9) {
       containerId = args[8];
     }
+
+    IRuntimeManager.Command command = IRuntimeManager.Command.makeCommand(sCommand);
 
     // first load the defaults, then the config from files to override it
     Config.Builder defaultsConfig = Config.newBuilder()
@@ -111,7 +114,8 @@ public class RuntimeManagerMain {
     return true;
   }
 
-  public static boolean manageTopology(Config config, String command, IStateManager statemgr)
+  public static boolean manageTopology(
+      Config config, IRuntimeManager.Command command, IStateManager statemgr)
       throws ClassNotFoundException, IllegalAccessException, InstantiationException, IOException {
     // build the runtime config
     Config runtime = Config.newBuilder()
