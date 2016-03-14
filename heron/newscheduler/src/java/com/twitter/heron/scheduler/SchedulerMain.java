@@ -152,9 +152,6 @@ public class SchedulerMain {
     String statemgrClass = Context.stateManagerClass(config);
     IStateManager statemgr = (IStateManager) Class.forName(statemgrClass).newInstance();
 
-    // initialize the state manager
-    statemgr.initialize(config);
-
     // create an instance of the packing class 
     String packingClass = Context.packingClass(config);
     IPacking packing = (IPacking) Class.forName(packingClass).newInstance();
@@ -172,6 +169,9 @@ public class SchedulerMain {
 
     // Put it in a try block so that we can always clean resources
     try {
+      // initialize the state manager
+      statemgr.initialize(config);
+
       // get a packed plan and schedule it
       packing.initialize(config, runtime);
       PackingPlan packedPlan = packing.pack();
