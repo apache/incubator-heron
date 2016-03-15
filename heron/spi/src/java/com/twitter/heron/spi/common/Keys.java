@@ -167,13 +167,13 @@ public class Keys {
   }
 
   public static String heronHome() {
-    return ConfigKeys.get("HERON_HOME"); 
+    return ConfigKeys.get("HERON_HOME");
   }
 
   public static String heronBin() {
-    return ConfigKeys.get("HERON_BIN"); 
+    return ConfigKeys.get("HERON_BIN");
   }
-  
+
   public static String heronConf() {
     return ConfigKeys.get("HERON_CONF");
   }
@@ -228,6 +228,18 @@ public class Keys {
 
   public static String schedulerStateManagerAdaptor() {
     return ConfigKeys.get("SCHEDULER_STATE_MANAGER_ADAPTOR");
+  }
+
+  public static String packingClassInstance() {
+    return ConfigKeys.get("PACKING_CLASS_INSTANCE");
+  }
+
+  public static String launcherClassInstance() {
+    return ConfigKeys.get("LAUNCHER_CLASS_INSTANCE");
+  }
+
+  public static String runtimeManagerClassInstance() {
+    return ConfigKeys.get("RUNTIME_MANAGER_CLASS_INSTANCE");
   }
 
   public static String schedulerShutdown() {

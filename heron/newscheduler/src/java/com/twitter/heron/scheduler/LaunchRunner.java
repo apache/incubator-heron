@@ -36,21 +36,15 @@ public class LaunchRunner implements Callable<Boolean> {
 
     this.config = config;
     this.runtime = runtime;
-
-    // Create an instance of the launcher class 
-    String launcherClass = Context.launcherClass(config);
-    this.launcher = (ILauncher)Class.forName(launcherClass).newInstance();
-
-    // Create an instance of the packing class
-    String packingClass = Context.packingClass(config);
-    this.packing = (IPacking)Class.forName(packingClass).newInstance();
+    this.launcher = Runtime.launcherClassInstance(runtime);
+    this.packing = Runtime.packingClassInstance(runtime);
   }
 
   public ExecutionEnvironment.ExecutionState createBasicExecutionState() {
     ExecutionEnvironment.ExecutionState executionState;
     TopologyAPI.Topology topology = Runtime.topology(runtime);
 
-    ExecutionEnvironment.ExecutionState.Builder builder = 
+    ExecutionEnvironment.ExecutionState.Builder builder =
         ExecutionEnvironment.ExecutionState.newBuilder();
 
     // set the topology name, id, submitting user and time
@@ -69,7 +63,7 @@ public class LaunchRunner implements Callable<Boolean> {
   /**
    * Trim the topology definition for storing into state manager.
    * This is because the user generated spouts and bolts
-   * might be huge. 
+   * might be huge.
    *
    * @return trimmed topology
    */
@@ -92,7 +86,6 @@ public class LaunchRunner implements Callable<Boolean> {
   }
 
   public Boolean call() {
-
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
     TopologyAPI.Topology topology = Runtime.topology(runtime);
     String topologyName = Context.topologyName(config);
@@ -106,7 +99,9 @@ public class LaunchRunner implements Callable<Boolean> {
 
     // invoke the prepare launch sequence
     if (!launcher.prepareLaunch(packedPlan)) {
-      LOG.severe(launcher.getClass().getName() + " Failed to prepare launch topology locally.");
+      LOG.log(Level.SEVERE,
+          "{0} failed to prepare launch topology locally",
+          launcher.getClass().getName());
       return false;
     }
 
@@ -142,7 +137,9 @@ public class LaunchRunner implements Callable<Boolean> {
 
     // invoke the post launch sequence 
     if (!launcher.postLaunch(packedPlan)) {
-      LOG.severe(launcher.getClass().getName() + " failed to post launch topology locally.");
+      LOG.log(Level.SEVERE,
+          "{0} failed to post launch topology locally",
+          launcher.getClass().getName());
       return false;
     }
 

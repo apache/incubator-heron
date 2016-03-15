@@ -1,16 +1,19 @@
 package com.twitter.heron.spi.utils;
 
-import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.packing.IPacking;
+import com.twitter.heron.spi.scheduler.ILauncher;
+import com.twitter.heron.spi.scheduler.IRuntimeManager;
+import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 public class Runtime {
 
   public static String topologyId(Config runtime) {
     return runtime.getStringValue(Keys.topologyId());
   }
-  
+
   public static String topologyName(Config runtime) {
     return runtime.getStringValue(Keys.topologyName());
   }
@@ -20,7 +23,7 @@ public class Runtime {
   }
 
   public static TopologyAPI.Topology topology(Config runtime) {
-    return (TopologyAPI.Topology)runtime.get(Keys.topologyDefinition());
+    return (TopologyAPI.Topology) runtime.get(Keys.topologyDefinition());
   }
 
   public static String topologyPackageUri(Config cfg) {
@@ -28,11 +31,23 @@ public class Runtime {
   }
 
   public static SchedulerStateManagerAdaptor schedulerStateManagerAdaptor(Config runtime) {
-    return (SchedulerStateManagerAdaptor)runtime.get(Keys.schedulerStateManagerAdaptor());
+    return (SchedulerStateManagerAdaptor) runtime.get(Keys.schedulerStateManagerAdaptor());
+  }
+
+  public static IPacking packingClassInstance(Config runtime) {
+    return (IPacking) runtime.get(Keys.packingClassInstance());
+  }
+
+  public static ILauncher launcherClassInstance(Config runtime) {
+    return (ILauncher) runtime.get(Keys.launcherClassInstance());
+  }
+
+  public static IRuntimeManager runtimeManagerClassInstance(Config runtime) {
+    return (IRuntimeManager) runtime.get(Keys.runtimeManagerClassInstance());
   }
 
   public static Shutdown schedulerShutdown(Config runtime) {
-    return (Shutdown)runtime.get(Keys.schedulerShutdown());
+    return (Shutdown) runtime.get(Keys.schedulerShutdown());
   }
 
   public static String componentRamMap(Config runtime) {
