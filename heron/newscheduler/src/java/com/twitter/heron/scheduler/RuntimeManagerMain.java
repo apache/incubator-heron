@@ -99,15 +99,17 @@ public class RuntimeManagerMain {
       runtimeManager.close();
 
       // 4. Do post work basing on the result
-      if (!isSuccessful) {
-        LOG.log(Level.SEVERE, "Failed to {0} topology {1}", new Object[]{command, topologyName});
+    }
 
-        System.exit(1);
-      } else {
-        LOG.log(Level.SEVERE, "Topology {0} {1} successfully", new Object[]{topologyName, command});
+    // Log the result and exit
+    if (!isSuccessful) {
+      LOG.log(Level.SEVERE, "Failed to {0} topology {1}", new Object[]{command, topologyName});
 
-        System.exit(0);
-      }
+      System.exit(1);
+    } else {
+      LOG.log(Level.SEVERE, "Topology {0} {1} successfully", new Object[]{topologyName, command});
+
+      System.exit(0);
     }
   }
 
