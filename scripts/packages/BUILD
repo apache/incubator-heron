@@ -40,9 +40,13 @@ filegroup(
     name = "binpkgs",
     srcs = [
         ":heron-client-install.sh",
+        ":heron-tools-install.sh",
     ],
 )
 
+################################################################################
+# Heron core packaging
+################################################################################
 pkg_tar(
     name = "heron-core",
     extension = "tar.gz",
@@ -92,12 +96,26 @@ pkg_tar(
     files = heron_core_lib_instance_files(), 
 )
 
+################################################################################
+# Heron tools packaging
+################################################################################
+pkg_tar(
+    name = "heron-tools-bin",
+    package_dir = "bin",
+    files = heron_tools_bin_files(),
+)
+
 pkg_tar(
     name = "heron-tools",
     extension = "tar.gz",
-    files = heron_tools_files(),
+    deps = [
+        ":heron-tools-bin",
+    ],
 )
 
+################################################################################
+# Heron client packaging
+################################################################################
 pkg_tar(
     name = "heron-client-bin",
     package_dir = "bin",
@@ -191,15 +209,29 @@ genrule(
 )
 
 genrule(
-    name = "generate-launcher",
+    name = "generate-client-launcher",
     srcs = [
-        "template_bin.sh",
+        "client_template_bin.sh",
         ":README.md",
     ],
-    outs = ["launcher_bin.sh"],
+    outs = ["client_launcher_bin.sh"],
     cmd = """
         release_info="$$(cat $(location :README.md))"
-        template="$$(cat $(location template_bin.sh))"
+        template="$$(cat $(location client_template_bin.sh))"
+        echo "$${template//%release_info%/$${release_info}}" >$@
+        """,
+)
+
+genrule(
+    name = "generate-tools-launcher",
+    srcs = [
+        "tools_template_bin.sh",
+        ":README.md",
+    ],
+    outs = ["tools_launcher_bin.sh"],
+    cmd = """
+        release_info="$$(cat $(location :README.md))"
+        template="$$(cat $(location tools_template_bin.sh))"
         echo "$${template//%release_info%/$${release_info}}" >$@
         """,
 )
@@ -211,10 +243,23 @@ self_extract_binary(
     flatten_resources = [
         ":heron-client",
     ],
-    launcher = ":launcher_bin.sh", 
+    launcher = ":client_launcher_bin.sh", 
+)
+
+self_extract_binary(
+    name = "heron-tools-install.sh",
+    flatten_resources = [
+        ":heron-tools",
+    ],
+    launcher = ":tools_launcher_bin.sh", 
 )
 
 filegroup(
     name = "client-template-bin.sh",
-    srcs = ["template_bin.sh"],
+    srcs = ["client_template_bin.sh"],
+)
+
+filegroup(
+    name = "tools-template-bin.sh",
+    srcs = ["tools_template_bin.sh"],
 )

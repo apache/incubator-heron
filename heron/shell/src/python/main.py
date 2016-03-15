@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import pkgutil
 import stat
@@ -204,5 +205,9 @@ app = tornado.web.Application([
 if __name__ == '__main__':
   define("port", default=9999, help="Runs on the given port", type=int)
   parse_command_line()
+
+  logger = logging.getLogger(__file__)
+  logger.info("Starting Heron Shell")
+
   app.listen(options.port)
   tornado.ioloop.IOLoop.instance().start()

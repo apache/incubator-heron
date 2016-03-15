@@ -5,8 +5,8 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
+import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
-import com.twitter.heron.spi.statemgr.IStateManager;
 
 /**
  * This file provides a Adaptor for Scheduler.
@@ -21,11 +21,10 @@ public class SchedulerStateManagerAdaptor {
    * Construct SchedulerStateManagerAdaptor providing only the
    * interfaces used by scheduler.
    *
-   * @param delegate, the IStateManager which is already initialized. 
-   * Noticed that the initialize and close of IStateManager is not in the 
-   * SchedulerStateManager. Users are restricted from using those interfaces 
+   * @param delegate, the IStateManager which is already initialized.
+   * Noticed that the initialize and close of IStateManager is not in the
+   * SchedulerStateManager. Users are restricted from using those interfaces
    * since it is upto the abstract scheduler to decide when to open and close.
-   *
    * @param delegate, the instance of IStateManager
    */
   public SchedulerStateManagerAdaptor(IStateManager delegate) {
@@ -35,8 +34,6 @@ public class SchedulerStateManagerAdaptor {
   /**
    * Is the given topology in RUNNING state?
    *
-   * @param topologyName
-   *
    * @return Boolean
    */
   public ListenableFuture<Boolean> isTopologyRunning(String topologyName) {
@@ -45,9 +42,6 @@ public class SchedulerStateManagerAdaptor {
 
   /**
    * Set the execution state for the given topology
-   *
-   * @param executionState
-   * @param topologyName
    *
    * @return Boolean - Success or Failure
    */
@@ -59,9 +53,7 @@ public class SchedulerStateManagerAdaptor {
   /**
    * Set the topology definition for the given topology
    *
-   * @param topology
    * @param topologyName, the name of the topology
-   *
    * @return Boolean - Success or Failure
    */
   public ListenableFuture<Boolean> setTopology(
@@ -71,9 +63,6 @@ public class SchedulerStateManagerAdaptor {
 
   /**
    * Set the scheduler location for the given topology
-   *
-   * @param location
-   * @param topologyName
    *
    * @return Boolean - Success or Failure
    */
@@ -85,8 +74,6 @@ public class SchedulerStateManagerAdaptor {
   /**
    * Delete the tmaster location for the given topology
    *
-   * @param topologyName
-   *
    * @return Boolean - Success or Failure
    */
   public ListenableFuture<Boolean> deleteTMasterLocation(String topologyName) {
@@ -95,8 +82,6 @@ public class SchedulerStateManagerAdaptor {
 
   /**
    * Delete the execution state for the given topology
-   *
-   * @param topologyName
    *
    * @return Boolean - Success or Failure
    */
@@ -107,8 +92,6 @@ public class SchedulerStateManagerAdaptor {
   /**
    * Delete the topology definition for the given topology
    *
-   * @param topologyName
-   *
    * @return Boolean - Success or Failure
    */
   public ListenableFuture<Boolean> deleteTopology(String topologyName) {
@@ -118,8 +101,6 @@ public class SchedulerStateManagerAdaptor {
   /**
    * Delete the physical plan for the given topology
    *
-   * @param topologyName
-   *
    * @return Boolean - Success or Failure
    */
   public ListenableFuture<Boolean> deletePhysicalPlan(String topologyName) {
@@ -128,8 +109,6 @@ public class SchedulerStateManagerAdaptor {
 
   /**
    * Delete the scheduler location for the given topology
-   *
-   * @param topologyName
    *
    * @return Boolean - Success or Failure
    */
@@ -142,12 +121,10 @@ public class SchedulerStateManagerAdaptor {
    * Get the tmaster location for the given topology
    *
    * @param watcher @see com.twitter.heron.spi.statemgr.WatchCallback
-   * @param topologyName
-   *
    * @return TMasterLocation
    */
   public ListenableFuture<TopologyMaster.TMasterLocation> getTMasterLocation(
-            WatchCallback watcher, String topologyName) {
+      WatchCallback watcher, String topologyName) {
     return delegate.getTMasterLocation(watcher, topologyName);
   }
 
@@ -155,12 +132,10 @@ public class SchedulerStateManagerAdaptor {
    * Get the scheduler location for the given topology
    *
    * @param watcher @see com.twitter.heron.spi.statemgr.WatchCallback
-   * @param topologyName
-   *
    * @return SchedulerLocation
    */
   public ListenableFuture<Scheduler.SchedulerLocation> getSchedulerLocation(
-            WatchCallback watcher, String topologyName) {
+      WatchCallback watcher, String topologyName) {
     return delegate.getSchedulerLocation(watcher, topologyName);
   }
 
@@ -168,8 +143,6 @@ public class SchedulerStateManagerAdaptor {
    * Get the topology definition for the given topology
    *
    * @param watcher @see com.twitter.heron.spi.statemgr.WatchCallback
-   * @param topologyName
-   *
    * @return Topology
    */
   public ListenableFuture<TopologyAPI.Topology> getTopology(
@@ -181,12 +154,21 @@ public class SchedulerStateManagerAdaptor {
    * Get the execution state for the given topology
    *
    * @param watcher @see com.twitter.heron.spi.statemgr.WatchCallback
-   * @param topologyName
-   *
    * @return ExecutionState
    */
   public ListenableFuture<ExecutionEnvironment.ExecutionState> getExecutionState(
       WatchCallback watcher, String topologyName) {
     return delegate.getExecutionState(null, topologyName);
+  }
+
+  /**
+   * Get the physical plan for the given topology
+   *
+   * @param watcher @see com.twitter.heron.spi.statemgr.WatchCallback
+   * @return PhysicalPlans.PhysicalPlan
+   */
+  public ListenableFuture<PhysicalPlans.PhysicalPlan> getPhysicalPlan(
+      WatchCallback watcher, String topologyName) {
+    return delegate.getPhysicalPlan(null, topologyName);
   }
 }

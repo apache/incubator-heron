@@ -45,11 +45,11 @@ class MemoryHistogramHandler(BaseHandler):
       self.write_error_response(e)
 
   @tornado.gen.coroutine
-  def getInstanceMemoryHistogram(self, topologyInfo, instance_id):
+  def getInstanceMemoryHistogram(self, topology_info, instance_id):
     """
     Fetches Instance top memory item as histogram.
     """
-    pid_response = yield getInstancePid(topologyInfo, instance_id)
+    pid_response = yield getInstancePid(topology_info, instance_id)
     try:
       http_client = tornado.httpclient.AsyncHTTPClient()
       component_id = instance_id.split('_')[1] # Format: container_<id>_<instance_id>
@@ -57,7 +57,7 @@ class MemoryHistogramHandler(BaseHandler):
       pid = pid_json['stdout'].strip()
       if pid == '':
         raise Exception('Failed to get pid')
-      endpoint = utils.make_shell_endpoint(topologyInfo, instance_id)
+      endpoint = utils.make_shell_endpoint(topology_info, instance_id)
       url = "%s/histo/%s" % (endpoint, pid)
       response = yield http_client.fetch(url)
       LOG.debug("HTTP call for url: %s" % url)
