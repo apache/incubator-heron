@@ -18,6 +18,7 @@ zookeeper_deps_files = \
     localfs_deps_files + [
         "//3rdparty/curator:curator-java",
         "//3rdparty/zookeeper:zookeeper-java",
+        "//3rdparty/logging:logging-java"
     ]
 
 java_library(
@@ -51,13 +52,13 @@ genrule(
 
 java_library(
     name = "zookeeper-statemgr-java",
-    srcs = glob(["**/zookeeper/*.java"]),
+    srcs = glob(["**/zookeeper/**/*.java"]) + glob(["**/FileSystemStateManager.java"]),
     deps = zookeeper_deps_files, 
 )
 
 java_binary(
     name = "zookeeper-statemgr-unshaded",
-    srcs = glob(["**/zookeeper/*.java"]),
+    srcs = glob(["**/zookeeper/**/*.java"]) + glob(["**/FileSystemStateManager.java"]),
     deps = zookeeper_deps_files,
 )
 
