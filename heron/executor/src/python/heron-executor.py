@@ -333,6 +333,7 @@ class HeronExecutor:
     process_dict = { }
     # First start all the processes
     for (name, cmd) in commands.items():
+      print "Starting process %s %s" % (name, ' '.join(cmd))
       p = self.run_process(name, cmd)
       process_dict[p.pid] = (p, name, 1)
 
