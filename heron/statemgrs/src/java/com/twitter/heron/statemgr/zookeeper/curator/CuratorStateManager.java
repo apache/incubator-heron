@@ -1,14 +1,11 @@
 package com.twitter.heron.statemgr.zookeeper.curator;
 
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
-import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Context;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.api.BackgroundCallback;
@@ -22,8 +19,10 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
-import com.twitter.heron.statemgr.FileSystemStateManager;
+import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.statemgr.WatchCallback;
+import com.twitter.heron.statemgr.FileSystemStateManager;
 import com.twitter.heron.statemgr.zookeeper.ZkWatcherCallback;
 
 public class CuratorStateManager extends FileSystemStateManager {
@@ -41,7 +40,7 @@ public class CuratorStateManager extends FileSystemStateManager {
     int retryCount = 10;
     int retryIntervalMs = 1000;
 
-    connectionString = Context.stateManagerConnectionString(config); 
+    connectionString = Context.stateManagerConnectionString(config);
 
     // these are reasonable arguments for the ExponentialBackoffRetry. The first
     // retry will wait 1 second - the second will wait up to 2 seconds - the
@@ -75,8 +74,10 @@ public class CuratorStateManager extends FileSystemStateManager {
 
   @Override
   public void close() {
-    LOG.info("Closing the CuratorClient to: " + connectionString);
-    client.close();
+    if (client != null) {
+      LOG.info("Closing the CuratorClient to: " + connectionString);
+      client.close();
+    }
   }
 
   public String getConnectionString() {
