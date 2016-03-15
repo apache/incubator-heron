@@ -63,7 +63,7 @@ CORE_PACKAGE_URI:                heron.package.core.uri
 TOPOLOGY_PACKAGE_URI:            heron.package.topology.uri
 
 ################################################################################
-# keys for topology 
+# keys for topology
 ################################################################################
 TOPOLOGY_ID:                     heron.topology.id
 TOPOLOGY_NAME:                   heron.topology.name
@@ -110,6 +110,9 @@ HERON_SANDBOX_CONF:              heron.directory.sandbox.conf
 TOPOLOGY_CLASSPATH:              heron.runtime.topology.class.path
 SCHEDULER_STATE_MANAGER_ADAPTOR: heron.runtime.scheduler.state.manager.adaptor
 SCHEDULER_SHUTDOWN:              heron.runtime.scheduler.shutdown
+PACKING_CLASS_INSTANCE:          heron.runtime.packing.class.instance
+LAUNCHER_CLASS_INSTANCE:         heron.runtime.launcher.class.instance
+RUNTIME_MANAGER_CLASS_INSTANCE:  heron.runtime.runtime.manager.class.instance
 
 COMPONENT_RAMMAP:                heron.runtime.component.rammap
 COMPONENT_JVM_OPTS_IN_BASE64:    heron.runtime.component.jvm.opts.in.base64
@@ -119,12 +122,12 @@ INSTANCE_JVM_OPTS_IN_BASE64:     heron.runtime.instance.jvm.opts.in.base64
 NUM_CONTAINERS:                  heron.runtime.num.containers
 
 ################################################################################
-# Rest 
+# Rest
 ################################################################################
 HERON_RELEASE_PACKAGE:           heron.release.package
 HERON_RELEASE_PACKAGE_ROLE:      heron.release.package.role
 HERON_RELEASE_PACKAGE_NAME:      heron.release.package.name
 HERON_RELEASE_PACKAGE_VERSION:   heron.release.package.version
 HERON_UPLOADER_VERSION:          heron.uploader.version
-  
+
 HERON_AURORA_BIND_PREFIX:        heron.aurora.bind.
