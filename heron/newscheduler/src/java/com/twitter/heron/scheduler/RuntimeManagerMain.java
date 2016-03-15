@@ -71,9 +71,6 @@ public class RuntimeManagerMain {
     String statemgrClass = Context.stateManagerClass(config);
     IStateManager statemgr = (IStateManager) Class.forName(statemgrClass).newInstance();
 
-    // initialize the statemgr
-    statemgr.initialize(config);
-
     // create an instance of runtime manager
     String runtimeManagerClass = Context.runtimeManagerClass(config);
     IRuntimeManager runtimeManager = (IRuntimeManager) Class.forName(runtimeManagerClass).newInstance();
@@ -82,6 +79,9 @@ public class RuntimeManagerMain {
 
     // Put it in a try block so that we can always clean resources
     try {
+      // initialize the statemgr
+      statemgr.initialize(config);
+
       boolean isValid = validateRuntimeManage(statemgr, topologyName);
 
       // 2. Try to manage topology if valid
@@ -102,11 +102,11 @@ public class RuntimeManagerMain {
       if (!isSuccessful) {
         LOG.log(Level.SEVERE, "Failed to {0} topology {1}", new Object[]{command, topologyName});
 
-        Runtime.getRuntime().exit(1);
+        System.exit(1);
       } else {
         LOG.log(Level.SEVERE, "Topology {0} {1} successfully", new Object[]{topologyName, command});
 
-        Runtime.getRuntime().exit(0);
+        System.exit(0);
       }
     }
   }
@@ -133,11 +133,12 @@ public class RuntimeManagerMain {
     Config runtime = Config.newBuilder()
         .put(Keys.topologyName(), Context.topologyName(config))
         .put(Keys.schedulerStateManagerAdaptor(), new SchedulerStateManagerAdaptor(statemgr))
+        .put(Keys.runtimeManagerClassInstance(), runtimeManager)
         .build();
 
     // create an instance of the runner class
     RuntimeManagerRunner runtimeManagerRunner =
-        new RuntimeManagerRunner(config, runtime, command, runtimeManager);
+        new RuntimeManagerRunner(config, runtime, command);
 
     // invoke the appropriate handlers based on command
     boolean ret = runtimeManagerRunner.call();

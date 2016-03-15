@@ -32,14 +32,13 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
   private final IRuntimeManager runtimeManager;
 
   public RuntimeManagerRunner(Config config, Config runtime,
-                              IRuntimeManager.Command command,
-                              IRuntimeManager runtimeManager) throws
+                              IRuntimeManager.Command command) throws
       ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
 
     this.config = config;
     this.runtime = runtime;
     this.command = command;
-    this.runtimeManager = runtimeManager;
+    this.runtimeManager = Runtime.runtimeManagerClassInstance(runtime);
   }
 
   @Override
