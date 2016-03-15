@@ -103,52 +103,52 @@ public class SchedulerMain {
     Options options = new Options();
 
     Option cluster = Option.builder("c")
-                         .desc("Cluster name in which the topology needs to run on")
-                         .longOpt("cluster")
-                         .hasArgs()
-                         .argName("cluster")
-                         .required()
-                         .build();
+        .desc("Cluster name in which the topology needs to run on")
+        .longOpt("cluster")
+        .hasArgs()
+        .argName("cluster")
+        .required()
+        .build();
 
     Option role = Option.builder("r")
-                      .desc("Role under which the topology needs to run")
-                      .longOpt("role")
-                      .hasArgs()
-                      .argName("role")
-                      .required()
-                      .build();
+        .desc("Role under which the topology needs to run")
+        .longOpt("role")
+        .hasArgs()
+        .argName("role")
+        .required()
+        .build();
 
     Option environment = Option.builder("e")
-                            .desc("Environment under which the topology needs to run")
-                            .longOpt("environment")
-                            .hasArgs()
-                            .argName("environment")
-                            .required()
-                            .build();
+        .desc("Environment under which the topology needs to run")
+        .longOpt("environment")
+        .hasArgs()
+        .argName("environment")
+        .required()
+        .build();
 
     Option topologyName = Option.builder("n")
-                              .desc("Name of the topology")
-                              .longOpt("topology_name")
-                              .hasArgs()
-                              .argName("topology name")
-                              .required()
-                              .build();
+        .desc("Name of the topology")
+        .longOpt("topology_name")
+        .hasArgs()
+        .argName("topology name")
+        .required()
+        .build();
 
     Option topologyJar = Option.builder("f")
-                              .desc("Topology jar file path")
-                              .longOpt("topology_jar")
-                              .hasArgs()
-                              .argName("topology jar file")
-                              .required()
-                              .build();
+        .desc("Topology jar file path")
+        .longOpt("topology_jar")
+        .hasArgs()
+        .argName("topology jar file")
+        .required()
+        .build();
 
     Option schedulerHTTPPort = Option.builder("p")
-                                  .desc("Http Port number on which the scheduler listens for requests")
-                                  .longOpt("http_port")
-                                  .hasArgs()
-                                  .argName("http port")
-                                  .required()
-                                  .build();
+        .desc("Http Port number on which the scheduler listens for requests")
+        .longOpt("http_port")
+        .hasArgs()
+        .argName("http port")
+        .required()
+        .build();
 
     options.addOption(cluster);
     options.addOption(role);
@@ -163,9 +163,9 @@ public class SchedulerMain {
   private static Options constructHelpOptions() {
     Options options = new Options();
     Option help = Option.builder("h")
-                      .desc("List all options and their description")
-                      .longOpt("help")
-                      .build();
+        .desc("List all options and their description")
+        .longOpt("help")
+        .build();
 
     options.addOption(help);
     return options;
