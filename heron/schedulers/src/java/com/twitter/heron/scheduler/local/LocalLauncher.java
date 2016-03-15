@@ -49,7 +49,7 @@ public class LocalLauncher implements ILauncher {
     // get the topology working directory
     this.topologyWorkingDirectory = LocalContext.workingDirectory(config);
 
-    // get the path of core release URI 
+    // get the path of core release URI
     this.coreReleasePackage = LocalContext.corePackageUri(config);
 
     // form the target dest core release file name
@@ -121,17 +121,17 @@ public class LocalLauncher implements ILauncher {
         .append(LocalContext.stateManagerClassPath(sandboxConfig))
         .toString();
 
-    String schedulerCmd = String.format("%s %s %s %s %s %s %s %s %s %d",
+    String schedulerCmd = String.format("%s %s %s %s %s %s %s %s %s %s",
         "java",
         "-cp",
         schedulerClassPath,
         "com.twitter.heron.scheduler.SchedulerMain",
-        LocalContext.cluster(config),
-        LocalContext.role(config),
-        LocalContext.environ(config),
-        topology.getName(),
-        LocalContext.topologyJarFile(config),
-        NetworkUtils.getFreePort()
+        "--cluster " + LocalContext.cluster(config),
+        "--role " + LocalContext.role(config),
+        "--environment " + LocalContext.environ(config),
+        "--topology_name " + topology.getName(),
+        "--topology_jar " + LocalContext.topologyJarFile(config),
+        "--http_port " + NetworkUtils.getFreePort()
     );
 
     LOG.info("Scheduler command line: " + schedulerCmd.toString());
