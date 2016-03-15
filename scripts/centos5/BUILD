@@ -9,6 +9,7 @@ filegroup(
     srcs = [
         ":heron-core",
         ":heron-client",
+        ":heron-tools",
     ],
 )
 
@@ -16,10 +17,13 @@ filegroup(
     name = "binpkgs",
     srcs = [
         ":heron-client-install.sh",
+        ":heron-tools-install.sh",
     ],
 )
 
-
+################################################################################
+# Heron core packaging
+################################################################################
 genrule(
     name = "heron-core",
     srcs = [
@@ -61,6 +65,9 @@ genrule(
     tools = ["package_release.sh"],
 )
 
+################################################################################
+# Heron client packaging
+################################################################################
 genrule(
     name = "heron-client",
     srcs = [
@@ -112,6 +119,28 @@ genrule(
         "--cp $(location slf4j-api-java)             lib/$$(basename $(location slf4j-api-java))",
         "--cp $(location slf4j-jdk-java)             lib/$$(basename $(location slf4j-jdk-java))",
         "--cp $(location log4j-over-slf4j-java)      lib/$$(basename $(location log4j-over-slf4j-java))",
+    ]),
+    heuristic_label_expansion = False,
+    tags = ["manual"],
+    tools = ["package_release.sh"],
+)
+
+################################################################################
+# Heron tools packaging
+################################################################################
+genrule(
+    name = "heron-tools",
+    srcs = [
+        ":htracker",
+    ],
+    outs = [
+        "heron-tools.tar.gz",
+    ],
+    cmd = " ".join([
+        "export GENDIR=$(GENDIR);",
+        "export BINDIR=$(BINDIR);",
+        "$(location package_release.sh) $(location heron-tools.tar.gz)",
+        "--cp $(location htracker)                   bin/heron-tracker",
     ]),
     heuristic_label_expansion = False,
     tags = ["manual"],
@@ -327,15 +356,29 @@ genrule(
 )
 
 genrule(
-    name = "generate-launcher",
+    name = "generate-client-launcher",
     srcs = [
         "//scripts/packages:client-template-bin.sh",
         ":README.md",
     ],
-    outs = ["launcher_bin.sh"],
+    outs = ["client_launcher_bin.sh"],
     cmd = """
         release_info="$$(cat $(location :README.md))"
         template="$$(cat $(location //scripts/packages:client-template-bin.sh))"
+        echo "$${template//%release_info%/$${release_info}}" >$@
+        """,
+)
+
+genrule(
+    name = "generate-tools-launcher",
+    srcs = [
+        "//scripts/packages:tools-template-bin.sh",
+        ":README.md",
+    ],
+    outs = ["tools_launcher_bin.sh"],
+    cmd = """
+        release_info="$$(cat $(location :README.md))"
+        template="$$(cat $(location //scripts/packages:tools-template-bin.sh))"
         echo "$${template//%release_info%/$${release_info}}" >$@
         """,
 )
@@ -347,6 +390,13 @@ self_extract_binary(
     flatten_resources = [
         ":heron-client",
     ],
-    launcher = ":launcher_bin.sh",
+    launcher = ":client_launcher_bin.sh",
 )
 
+self_extract_binary(
+    name = "heron-tools-install.sh",
+    flatten_resources = [
+        ":heron-tools",
+    ],
+    launcher = ":tools_launcher_bin.sh",
+)
