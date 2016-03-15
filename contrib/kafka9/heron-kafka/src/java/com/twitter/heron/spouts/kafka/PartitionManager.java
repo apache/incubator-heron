@@ -10,7 +10,9 @@ import com.twitter.heron.api.metric.MeanReducer;
 import com.twitter.heron.api.metric.ReducedMetric;
 import com.twitter.heron.api.spout.ISpoutOutputCollector;
 import com.twitter.heron.api.utils.Utils;
-import com.twitter.heron.storage.StormMetadataStore;
+import com.twitter.heron.spouts.kafka.common.KeyValueSchemeAsMultiScheme;
+import com.twitter.heron.spouts.kafka.common.StringMultiSchemeWithTopic;
+import com.twitter.heron.storage.MetadataStore;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
 import org.json.simple.JSONValue;
@@ -62,7 +64,7 @@ public class PartitionManager {
     private final SpoutConfig spoutConfig;
     private final String topologyInstanceId;
     private final Map stormConf;
-    private final StormMetadataStore storage;
+    private final MetadataStore storage;
     private final KafkaMetric.OffsetMetric kafkaOffsetMetric;
 
     private KafkaConsumer<byte[], byte[]> consumer;
@@ -80,7 +82,7 @@ public class PartitionManager {
             Map stormConf,
             SpoutConfig spoutConfig,
             Integer id,
-            StormMetadataStore storage,
+            MetadataStore storage,
             KafkaMetric.OffsetMetric kafkaOffsetMetric,
             Properties kafkaProps) {
         this.partition = id;
@@ -673,7 +675,7 @@ public class PartitionManager {
         fetchAPIMessageCount.incrBy(numMessages);
 
         if (numMessages == 0) {
-            timestampOfLatestEmittedTuple = -1L;
+            timestampOfLatestEmittedTuple = kafka.api.OffsetRequest.LatestTime();
         } else {
             LOG.debug("Non-empty fetch from Kafka, current consumer position for partition " + partition + ":" +
                     consumer.position(new TopicPartition(spoutConfig.topic, partition)));

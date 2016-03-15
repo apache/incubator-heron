@@ -5,9 +5,9 @@ import com.twitter.heron.api.HeronSubmitter;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.bolts.kafka.KafkaBolt;
 import com.twitter.heron.bolts.kafka.mapper.KafkaMirrorMapper;
-import com.twitter.heron.spouts.kafka.ByteArrayKeyValueScheme;
+import com.twitter.heron.spouts.kafka.common.ByteArrayKeyValueScheme;
+import com.twitter.heron.spouts.kafka.common.KeyValueSchemeAsMultiScheme;
 import com.twitter.heron.spouts.kafka.KafkaSpout;
-import com.twitter.heron.spouts.kafka.KeyValueSchemeAsMultiScheme;
 import com.twitter.heron.spouts.kafka.SpoutConfig;
 
 import java.util.Properties;
