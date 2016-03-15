@@ -40,7 +40,9 @@ class Application(tornado.web.Application):
       (r"(.*)", handlers.DefaultHandler),
     ]
     settings = dict(
-      static_path=os.path.dirname(__file__)
+      static_path = os.path.dirname(__file__),
+      debug = True,
+      serve_traceback = True
     )
     tornado.web.Application.__init__(self, tornadoHandlers, **settings)
 

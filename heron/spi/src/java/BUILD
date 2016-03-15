@@ -47,6 +47,8 @@ utils_deps_files = \
     heron_java_proto_files() + [
         ":common-spi-java",
         ":statemgr-spi-java",
+        ":scheduler-spi-java",
+        ":packing-spi-java",
         "//heron/common/src/java:config-java",
         "//heron/api/src/java:api-java",
         "//3rdparty/guava:guava-java",

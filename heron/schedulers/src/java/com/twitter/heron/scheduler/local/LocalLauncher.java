@@ -81,18 +81,6 @@ public class LocalLauncher implements ILauncher {
    */
   @Override
   public boolean prepareLaunch(PackingPlan packing) {
-    LOG.info("Checking whether the topology has been launched already!");
-
-    String topologyName = LocalContext.topologyName(config);
-    SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
-
-    // check if any topology with the same name is running
-    // TODO, by the time, we do this here, it is too late 
-    ListenableFuture<Boolean> boolFuture = stateManager.isTopologyRunning(topologyName);
-    if (NetworkUtils.awaitResult(boolFuture, 1000, TimeUnit.MILLISECONDS)) {
-      LOG.severe("Topology is already running: " + topologyName);
-      return false;
-    }
     return true;
   }
 

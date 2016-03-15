@@ -20,7 +20,7 @@ class Config:
     conf_file = os.path.join("conf", conf_name + ".yaml")
 
     # Read the configuration file from package
-    confString = pkgutil.get_data("heron.state", conf_file)
+    confString = pkgutil.get_data("heron.statemgrs", conf_file)
     self.locations = yaml.load(confString)
     self.validate_state_locations()
 
