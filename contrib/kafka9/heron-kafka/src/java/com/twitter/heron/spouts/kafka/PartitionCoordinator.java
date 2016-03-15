@@ -1,7 +1,9 @@
 package com.twitter.heron.spouts.kafka;
 
 import com.twitter.heron.api.Config;
-import com.twitter.heron.storage.StormMetadataStore;
+import com.twitter.heron.spouts.kafka.common.GlobalPartitionInformation;
+import com.twitter.heron.spouts.kafka.common.Partition;
+import com.twitter.heron.storage.MetadataStore;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +25,7 @@ public class PartitionCoordinator {
     private final String topic;
     private final int refreshFreqMSecs;
 
-    private StormMetadataStore storage;
+    private MetadataStore storage;
     private KafkaMetric.OffsetMetric kafkaOffsets;
     private DynamicKafkaBrokerReader dynamicBrokersReader;
 
@@ -45,7 +47,7 @@ public class PartitionCoordinator {
             int taskIndex,
             int totalTasks,
             String topologyInstanceId,
-            StormMetadataStore storage,
+            MetadataStore storage,
             KafkaMetric.OffsetMetric kafkaOffsetMetric,
             String componentId) {
         this.spoutConfig = spoutConfig;

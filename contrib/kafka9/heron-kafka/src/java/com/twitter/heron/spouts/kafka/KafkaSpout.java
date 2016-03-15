@@ -12,9 +12,12 @@ import com.twitter.heron.api.spout.BaseRichSpout;
 import com.twitter.heron.api.spout.SpoutOutputCollector;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.storage.StormMetadataStore;
-import com.twitter.heron.storage.StormStoreSerializer;
+import com.twitter.heron.spouts.kafka.common.FilterOperator;
+import com.twitter.heron.spouts.kafka.common.IOExecutorService;
+import com.twitter.heron.spouts.kafka.common.TransferCollector;
 
+import com.twitter.heron.storage.MetadataStore;
+import com.twitter.heron.storage.StoreSerializer;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -33,7 +36,7 @@ public class KafkaSpout extends BaseRichSpout {
     protected SpoutOutputCollector collector;
     protected TransferCollector transferCollector;
     protected PartitionCoordinator coordinator;
-    protected StormMetadataStore storage;
+    protected MetadataStore storage;
     protected MultiCountMetric spoutMetrics;
     protected IOExecutorService.SingleThreadIOExecutorService executor;
 
@@ -94,7 +97,7 @@ public class KafkaSpout extends BaseRichSpout {
     public void nextTuple() {
         long startTime = System.nanoTime();
         spoutMetrics.scope("nextTupleCalls").incr();
-        TransferCollector.EmitData emitData = transferCollector.getEmitItems(1, TimeUnit.MILLISECONDS);
+        com.twitter.heron.spouts.kafka.common.TransferCollector.EmitData emitData = transferCollector.getEmitItems(1, TimeUnit.MILLISECONDS);
         if (emitData != null) {
             collector.emit(emitData.streamId, emitData.tuple, emitData.messageId);
             LOG.info("Just emitted a new message");
@@ -267,7 +270,7 @@ public class KafkaSpout extends BaseRichSpout {
             storage.initialize(
                     "offset_" + spoutConfig.id, conf.get(Config.TOPOLOGY_NAME).toString(),
                     topologyContext.getThisComponentId(),
-                    new StormStoreSerializer.DefaultSerializer<Map<Object, Object>>());
+                    new StoreSerializer.DefaultSerializer<Map<Object, Object>>());
         }
         // Start commit thread.
         Runnable refreshTask = new Runnable() {
