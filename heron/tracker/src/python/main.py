@@ -13,14 +13,11 @@ from heron.tracker.src.python import log
 from heron.tracker.src.python.log import Log as LOG
 from heron.tracker.src.python.tracker import Tracker
 
-define("stateconf", default='zkstateconf', help="Yaml config file without extension for state locations")
-define("port", default=8888, type=int, help="HTTP port to run the Tracker")
-
 class Application(tornado.web.Application):
-  def __init__(self):
+  def __init__(self, config_file):
     tracker = Tracker()
     self.tracker = tracker
-    tracker.synch_topologies(options.stateconf)
+    tracker.synch_topologies(config_file)
     tornadoHandlers = [
       (r"/", handlers.MainHandler),
       (r"/topologies", handlers.TopologiesHandler, {"tracker":tracker}),
@@ -103,19 +100,20 @@ def add_config(parser):
 def create_parsers():
   parser = argparse.ArgumentParser(
       epilog = 'For detailed documentation, go to http://go/heron',
-      usage = "%(prog)s [options] <command>",
-      formatter_class=SubcommandHelpFormatter,
+      usage = "%(prog)s [options] [help]",
       add_help = False)
 
   parser = add_titles(parser)
   parser = add_config(parser)
 
-  ya_parser = argparse.ArgumentParser(parents = [parser], add_help = False)
-  subparsers = ya_parser.add_subparsers(
-      title = "Available commands",
-      # metavar = 'help          Prints help')
-      metavar = '<command> [command-options]')
+  ya_parser = argparse.ArgumentParser(
+      parents = [parser],
+      formatter_class=SubcommandHelpFormatter,
+      add_help = False)
 
+  subparsers = ya_parser.add_subparsers(
+      title = "Available commands")
+  
   help_parser = subparsers.add_parser(
       'help',
       help='Prints help',
@@ -128,22 +126,22 @@ def main():
   log.configure(log.logging.DEBUG)
 
   # create the parser and parse the arguments
-  # (parser, help_parser) = create_parsers()
+  (parser, ya_parser) = create_parsers()
   
-  # (args, remaining) = parser.parse_known_args()
+  (args, remaining) = parser.parse_known_args()
 
-  # if remaining:
-  #   yaargs = help_parser.parse_args(args = remaining, namespace=args)
-  #   print yaargs
-  # else:
-  #   print args
-  # sys.exit(0) 
+  if remaining:
+    yaargs = ya_parser.parse_args(args = remaining, namespace=args)
+    parser.print_help()
+    parser.exit()
 
-  options.parse_command_line()
-  port = options.port
-  LOG.info("Running on port: " + str(port))
-  http_server = tornado.httpserver.HTTPServer(Application())
-  http_server.listen(port)
+  namespace = vars(args)
+
+  LOG.info("Running on port: %d", namespace['port'])
+  LOG.info("Using config file: %s", namespace['config_file'])
+
+  http_server = tornado.httpserver.HTTPServer(Application(namespace['config_file']))
+  http_server.listen(namespace['port'])
   tornado.ioloop.IOLoop.instance().start()
 
 if __name__ == "__main__":
