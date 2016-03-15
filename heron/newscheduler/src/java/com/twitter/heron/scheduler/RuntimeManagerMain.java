@@ -133,11 +133,12 @@ public class RuntimeManagerMain {
     Config runtime = Config.newBuilder()
         .put(Keys.topologyName(), Context.topologyName(config))
         .put(Keys.schedulerStateManagerAdaptor(), new SchedulerStateManagerAdaptor(statemgr))
+        .put(Keys.runtimeManagerClassInstance(), runtimeManager)
         .build();
 
     // create an instance of the runner class
     RuntimeManagerRunner runtimeManagerRunner =
-        new RuntimeManagerRunner(config, runtime, command, runtimeManager);
+        new RuntimeManagerRunner(config, runtime, command);
 
     // invoke the appropriate handlers based on command
     boolean ret = runtimeManagerRunner.call();

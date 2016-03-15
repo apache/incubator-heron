@@ -31,14 +31,13 @@ public class LaunchRunner implements Callable<Boolean> {
   private ILauncher launcher;
   private IPacking packing;
 
-  public LaunchRunner(Config config, Config runtime,
-                      ILauncher launcher, IPacking packing) throws
+  public LaunchRunner(Config config, Config runtime) throws
       ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
 
     this.config = config;
     this.runtime = runtime;
-    this.launcher = launcher;
-    this.packing = packing;
+    this.launcher = Runtime.launcherClassInstance(runtime);
+    this.packing = Runtime.packingClassInstance(runtime);
   }
 
   public ExecutionEnvironment.ExecutionState createBasicExecutionState() {
