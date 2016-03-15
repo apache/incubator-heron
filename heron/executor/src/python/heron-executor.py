@@ -312,7 +312,8 @@ class HeronExecutor:
     retval = {}
 
     retval[self.heron_shell_binary] = ['%s' % self.heron_shell_binary,
-                             '--port=%s' % self.shell_port]
+                                       '--port=%s' % self.shell_port,
+                                       '--log_file_prefix=%s/heron-shell.log' % self.log_dir]
 
     return retval
 
