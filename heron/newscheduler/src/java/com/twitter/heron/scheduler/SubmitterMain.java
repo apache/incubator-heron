@@ -219,10 +219,12 @@ public class SubmitterMain {
         .put(Keys.topologyDefinition(), topology)
         .put(Keys.schedulerStateManagerAdaptor(), new SchedulerStateManagerAdaptor(statemgr))
         .put(Keys.topologyPackageUri(), uploadRunner.getUri())
+        .put(Keys.launcherClassInstance(), launcher)
+        .put(Keys.packingClassInstance(), packing)
         .build();
 
     // using launch runner, launch the topology
-    LaunchRunner launchRunner = new LaunchRunner(config, runtime, launcher, packing);
+    LaunchRunner launchRunner = new LaunchRunner(config, runtime);
     result = launchRunner.call();
 
     // if failed, undo the uploaded package
