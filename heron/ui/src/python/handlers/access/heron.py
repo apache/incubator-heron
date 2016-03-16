@@ -7,7 +7,7 @@ from tornado.options import options
 from fetch import fetch_url_as_json
 from query import QueryHandler
 
-DATACENTERS_URL_FMT       = "%s/cluster"
+CLUSTER_URL_FMT           = "%s/cluster"
 TOPOLOGIES_URL_FMT        = "%s/topologies"
 EXECUTION_STATE_URL_FMT   = "%s/executionstate"   % TOPOLOGIES_URL_FMT
 lOGICALPLAN_URL_FMT       = "%s/logicalplan"      % TOPOLOGIES_URL_FMT
