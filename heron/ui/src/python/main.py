@@ -63,22 +63,22 @@ def main(argv):
   tornado.log.enable_pretty_logging()
 
   # create the parser and parse the arguments
-  (parser, ya_parser) = args.create_parsers()
-  (clargs, remaining) = parser.parse_known_args()
+  (parser, child_parser) = args.create_parsers()
+  (parsed_args, remaining) = parser.parse_known_args()
   if remaining:
-    yaargs = ya_parser.parse_args(args = remaining, namespace=clargs)
+    child_parser.parse_args(args = remaining, namespace=parsed_args)
     parser.print_help()
     parser.exit()
 
   # log additional information
-  namespace = vars(clargs)
-  LOG.info("Running on port: %d", namespace['port'])
-  LOG.info("Using tracker url: %s", namespace['tracker_url'])
+  command_line_args = vars(parsed_args)
+  LOG.info("Running on port: %d", command_line_args['port'])
+  LOG.info("Using tracker url: %s", command_line_args['tracker_url'])
 
   # pass the options to tornado and start the ui server
-  define_options(namespace['port'], namespace['tracker_url'])
+  define_options(command_line_args['port'], command_line_args['tracker_url'])
   http_server = tornado.httpserver.HTTPServer(Application())
-  http_server.listen(namespace['port'])
+  http_server.listen(command_line_args['port'])
   tornado.ioloop.IOLoop.instance().start()
 
 if __name__ == "__main__":
