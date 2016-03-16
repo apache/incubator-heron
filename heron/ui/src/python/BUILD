@@ -4,9 +4,10 @@ load("/tools/rules/pex_rules", "pex_library", "pex_binary")
 
 pex_library(
     name = "heron-ui-lib",
-    srcs = glob([
-        "handlers/**/*.py",
-    ]),
+    srcs = glob(
+        ["**/*.py"],
+        exclude = ["main.py"],
+    ),
     eggs = [
         "//3rdparty/eggs:tornado",
         "//3rdparty/eggs:pycrypto",

@@ -1,5 +1,5 @@
-import os
-import sys
+import os, sys
+import argparse
 
 import tornado.ioloop
 import tornado.options
@@ -10,12 +10,9 @@ import tornado.template
 from tornado.options import options, define
 
 from heron.ui.src.python import handlers
-
-# default params
-# port for the web to ui to listen on
-DEFAULT_PORT = 8889
-# url to connect for to heron tracker for metrics
-DEFAULT_TRACKER_URL = "http://localhost"
+from heron.ui.src.python import args
+from heron.ui.src.python import log
+from heron.ui.src.python.log import Log as LOG
 
 class Application(tornado.web.Application):
   def __init__(self):
@@ -57,20 +54,31 @@ class Application(tornado.web.Application):
     )
     tornado.web.Application.__init__(self, callbacks, **settings)
 
-def define_options():
-  define("port", default=DEFAULT_PORT)
-  define("tracker_url", default=DEFAULT_TRACKER_URL)
+def define_options(port, tracker_url):
+  define("port", default=port)
+  define("tracker_url", default=tracker_url)
 
 def main(argv):
-  define_options()
-  tornado.options.parse_command_line()
-
-  # enable logging for tornado
+  log.configure(log.logging.DEBUG)
   tornado.log.enable_pretty_logging()
 
-  port = options.port
+  # create the parser and parse the arguments
+  (parser, ya_parser) = args.create_parsers()
+  (clargs, remaining) = parser.parse_known_args()
+  if remaining:
+    yaargs = ya_parser.parse_args(args = remaining, namespace=clargs)
+    parser.print_help()
+    parser.exit()
+
+  # log additional information
+  namespace = vars(clargs)
+  LOG.info("Running on port: %d", namespace['port'])
+  LOG.info("Using tracker url: %s", namespace['tracker_url'])
+
+  # pass the options to tornado and start the ui server
+  define_options(namespace['port'], namespace['tracker_url'])
   http_server = tornado.httpserver.HTTPServer(Application())
-  http_server.listen(port)
+  http_server.listen(namespace['port'])
   tornado.ioloop.IOLoop.instance().start()
 
 if __name__ == "__main__":
