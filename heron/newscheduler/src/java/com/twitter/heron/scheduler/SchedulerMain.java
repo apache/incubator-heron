@@ -94,11 +94,13 @@ public class SchedulerMain {
     return config;
   }
 
+  // Print usage options
   private static void usage(Options options) {
     HelpFormatter formatter = new HelpFormatter();
     formatter.printHelp( "SchedulerMain", options );
   }
 
+  // Construct all required command line options
   private static Options constructOptions() {
     Options options = new Options();
 
@@ -160,6 +162,7 @@ public class SchedulerMain {
     return options;
   }
 
+  // construct command line help options
   private static Options constructHelpOptions() {
     Options options = new Options();
     Option help = Option.builder("h")
