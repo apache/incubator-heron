@@ -2,8 +2,8 @@
 
 ## Overview
 
-With the help of this image one should be able to run an example `KafkaMirror` topology on Heron. Heron will launch 
-itself on top of Aurora cluster. 
+With the help of this image one should be able to run example topologies located in the `examples` dir on Heron. Heron 
+will launch itself on top of Aurora or Mesos cluster. 
 Other topologies would also run on this image, read further for instructions. 
 
 ## Prerequisites
@@ -23,7 +23,7 @@ A dedicated Docker image is used for building the dist. In order to build, pleas
 
 The release packages and a sample topology will be packed to `heron-ubuntu` directory. If you have already built Heron 
 dist, you may simply copy all the dist files to `heron-ubuntu` sub-dir in this directory.
-If you want to build only `KafkaMirror` topology, please set the following before running `build-heron` script:
+If you want to build only the example topologies, please set the following before running `build-heron` script:
 
 ```
 export TOPOLOGY_ONLY="true"
@@ -50,7 +50,8 @@ After the cluster is up an running, the following components are being provision
 
 - Mesos master + N slave(s) (see `Vagrantfile` to adjust N as well as resources provided to VMs)
 - Marathon
-- Kafka-Mesos scheduler for Kafka-0.9.x
+- Kafka-Mesos scheduler for Kafka-0.9.x 
+- Kafka-Mesos scheduler for Kafka-0.8.x 
 
 The following depends on a chosen scheduler. If Aurora is chosen:
  
@@ -113,28 +114,52 @@ In order to run the example topology please run:
 
 ```
 # Aurora:
-vagrant ssh master -c "./submit-09-topology.sh <topology_name> <bootstrap_broker> <source_topic> <target_topic>"
+vagrant ssh master -c "./submit-<kafka_version>-topology.sh <topology_name> <bootstrap_broker> <source_topic> <target_topic>"
  
 # Mesos:
-vagrant ssh master -c "./submit-09-topology-mesos.sh <topology_name> <bootstrap_broker> <source_topic> <target_topic>"
+vagrant ssh master -c "./submit-<kafka_version>-topology-mesos.sh <topology_name> <bootstrap_broker> <source_topic> <target_topic>"
 ```
+
+Set `08` or `09` for Kafka versions
 
 ## Verification
 
 In order to verify correct work of the topology, one may use standard Kafka CLI clients which can be found in vagrant 
-home dir:
+home dir. For Kafka 0.9 execute:
 
 ```
 vagrant ssh master
 
-cd kafka-09/bin
+cd kafka-09
+tar -zxf kafka_2.10-0.9.0.0.tgz
+cd kafka_2.10-0.9.0.0/bin
 
 # Type some messages into the opened shell here:
-./kafka-console-producer.sh --topic foo --broker-list master:5000
+./kafka-console-producer.sh --topic <source_topic> --broker-list <bootstrap_broker>
  
 # You should see your messages when consuming from the target topic here:
-./kafka-console-consumer.sh --topic foo_mirrored --bootstrap-server master:5000 --new-consumer --from-beginning
+./kafka-console-consumer.sh --topic <target_topic> --bootstrap-server <bootstrap_broker> --new-consumer --from-beginning
 ```
+
+For Kafka 0.8:
+
+```
+vagrant ssh master
+
+cd kafka-08
+tar -zxf kafka_2.10-0.8.2.2.tgz
+cd kafka_2.10-0.8.2.2/bin
+
+# Type messages here. 
+./kafka-console-producer.sh --topic <source_topic> --broker-list <bootstrap_broker> --new-producer
+
+# You should see your messages when consuming from the target topic here:
+./kafka-console-consumer.sh --zookeeper master:2181/kafka-08 --topic <target_topic> --from-beginning
+```
+
+**NOTE:** you may need to send at least several messages to Kafka 0.8 producer for them to show up at the target topic,
+ as 0.8 consumer reads messages with certain buffer length. When received at the topology end it doesn't flush 
+ immediately
 
 ## Shutting the topology down
 
@@ -142,7 +167,7 @@ cd kafka-09/bin
 In order to shut a topology down simply run:
 
 ```
-vagrant ssh master -c "./kill-09-topology-mesos.sh <topology_name>"
+vagrant ssh master -c "./kill-topology-mesos.sh <topology_name>"
 ```
 
 ### Aurora
@@ -181,4 +206,4 @@ vagrant ssh master -c "./submit-custom-topology.sh <jar_file_name> <main_class_n
 vagrant ssh master -c "./submit-custom-topology-mesos.sh <jar_file_name> <main_class_name> <topology_name> <args>"
 ```
 
-For the required dependencies and the packing that would work, please check `KafkaMirror` topology `BUILD` file.
+For the required dependencies and the packing that would work, please check the example topologies `BUILD` files.

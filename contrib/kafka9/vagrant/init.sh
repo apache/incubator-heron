@@ -67,13 +67,12 @@ install_kafka-mesos() {
     cp -r kafka-08 kafka-09
     sed -i s/7000/7001/g kafka-09/kafka-mesos.properties
 
-    # No Kafka 8 topology for now, not launching 08 Kafka-Mesos
-    # wget -q "http://www.eu.apache.org/dist/kafka/0.8.2.2/kafka_2.10-0.8.2.2.tgz" -P kafka-08
+    wget -q "http://www.eu.apache.org/dist/kafka/0.8.2.2/kafka_2.10-0.8.2.2.tgz" -P kafka-08
     wget -q "http://www.eu.apache.org/dist/kafka/0.9.0.0/kafka_2.10-0.9.0.0.tgz" -P kafka-09
     popd
 
     # run APP
-    # curl -X POST -H "Content-Type: application/json" --data @kafka-08.json http://master:8080/v2/apps
+    curl -X POST -H "Content-Type: application/json" --data @kafka-08.json http://master:8080/v2/apps
     curl -X POST -H "Content-Type: application/json" --data @kafka-09.json http://master:8080/v2/apps
 }
 
