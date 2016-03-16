@@ -152,7 +152,7 @@ public class SchedulerMain {
     String statemgrClass = Context.stateManagerClass(config);
     IStateManager statemgr = (IStateManager) Class.forName(statemgrClass).newInstance();
 
-    // create an instance of the packing class 
+    // create an instance of the packing class
     String packingClass = Context.packingClass(config);
     IPacking packing = (IPacking) Class.forName(packingClass).newInstance();
 
@@ -205,7 +205,7 @@ public class SchedulerMain {
       Runtime.schedulerShutdown(ytruntime).await();
     } catch (Exception e) {
       // Log and exit the process
-      LOG.log(Level.SEVERE, "Failed to run scheduler for topology: {0}. Existing", topology.getName());
+      LOG.log(Level.SEVERE, "Failed to run scheduler for topology: {0}. Exiting", topology.getName());
       System.exit(1);
     } finally {
       // Clean the resources
