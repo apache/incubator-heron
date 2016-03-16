@@ -294,8 +294,8 @@ var FilterableTopologyTable = React.createClass({
            <div className="navbar-collapse collapse navbar-responsive-collapse">
              <ul className="nav navbar-nav">
                <li className=""> <a href="#" id="all" className={this.state.cluster == "all" ? 'active' : ''} onClick={this.handleDataCenterClick}>ALL</a></li>
-               <li className=""> <a href="#" id="smf1" className={this.state.cluster == "smf1" ? 'active' : ''} onClick={this.handleDataCenterClick}>local</a></li>
-               <li className=""> <a href="#" id="atla" className={this.state.cluster == "atla" ? 'active' : ''} onClick={this.handleDataCenterClick}>localzk</a></li>
+               <li className=""> <a href="#" id="smf1" className={this.state.cluster == "smf1" ? 'active' : ''} onClick={this.handleDataCenterClick}>LOCAL</a></li>
+               <li className=""> <a href="#" id="atla" className={this.state.cluster == "atla" ? 'active' : ''} onClick={this.handleDataCenterClick}>LOCALZK</a></li>
              </ul>
            </div>
          </div>
