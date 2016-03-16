@@ -288,14 +288,14 @@ var FilterableTopologyTable = React.createClass({
                <span className="icon-bar"></span>
                <span className="icon-bar"></span>
              </button>
-             <a className="navbar-brand" style={brandStyle}>datacenter</a>
+             <a className="navbar-brand" style={brandStyle}>cluster</a>
            </div>
 
            <div className="navbar-collapse collapse navbar-responsive-collapse">
              <ul className="nav navbar-nav">
                <li className=""> <a href="#" id="all" className={this.state.cluster == "all" ? 'active' : ''} onClick={this.handleDataCenterClick}>ALL</a></li>
-               <li className=""> <a href="#" id="smf1" className={this.state.cluster == "smf1" ? 'active' : ''} onClick={this.handleDataCenterClick}>SMF1</a></li>
-               <li className=""> <a href="#" id="atla" className={this.state.cluster == "atla" ? 'active' : ''} onClick={this.handleDataCenterClick}>ATLA</a></li>
+               <li className=""> <a href="#" id="smf1" className={this.state.cluster == "smf1" ? 'active' : ''} onClick={this.handleDataCenterClick}>local</a></li>
+               <li className=""> <a href="#" id="atla" className={this.state.cluster == "atla" ? 'active' : ''} onClick={this.handleDataCenterClick}>localzk</a></li>
              </ul>
            </div>
          </div>
