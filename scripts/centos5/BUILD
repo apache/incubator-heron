@@ -132,6 +132,7 @@ genrule(
     name = "heron-tools",
     srcs = [
         ":htracker",
+        ":hui",
     ],
     outs = [
         "heron-tools.tar.gz",
@@ -141,6 +142,7 @@ genrule(
         "export BINDIR=$(BINDIR);",
         "$(location package_release.sh) $(location heron-tools.tar.gz)",
         "--cp $(location htracker)                   bin/heron-tracker",
+        "--cp $(location hui)                        bin/heron-ui",
     ]),
     heuristic_label_expansion = False,
     tags = ["manual"],
@@ -335,6 +337,11 @@ filegroup(
 filegroup(
     name = "htracker",
     srcs = ["//heron/tracker/src/python:heron-tracker"],
+)
+
+filegroup(
+    name = "hui",
+    srcs = ["//heron/ui/src/python:heron-ui"],
 )
 
 filegroup(
