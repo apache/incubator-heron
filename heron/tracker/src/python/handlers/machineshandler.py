@@ -40,7 +40,7 @@ class MachinesHandler(BaseHandler):
     ret = {}
 
     if len(topology_names) > 1:
-      if not dcs:
+      if not clusters:
         message = "Missing argument" + constants.PARAM_CLUSTER
         self.write_error_response(message)
         return
