@@ -310,8 +310,8 @@ public class LocalScheduler implements IScheduler {
     LOG.info("Fetched TMaster location for topology: " + topologyName);
 
     // for the url request to be sent to TMaster
-    String endpoint = String.format("http://localhost:%d/%s?topologyid=%s",
-        location.getControllerPort(), command, location.getTopologyId());
+    String endpoint = String.format("http://%s:%d/%s?topologyid=%s",
+        location.getHost(), location.getControllerPort(), command, location.getTopologyId());
     LOG.info("HTTP URL for TMaster: " + endpoint);
 
     // create a URL connection
