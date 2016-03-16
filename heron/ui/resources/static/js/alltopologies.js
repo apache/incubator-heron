@@ -42,7 +42,6 @@ var TopologyItem = React.createClass({
          <td className="col-md-2 topobutton no-break">
            <a className="btn btn-primary btn-sm" href={"/topologies/" + [topology.cluster, topology.environ, topology.name, "config"].join("/")} target="_self">Config</a>
            <a className="btn btn-primary btn-sm" href={"http://go/" + [topology.cluster, topology.role, topology.environ, topology.name].join("/")} target="_blank">Aurora</a>
-           <a className="btn btn-primary btn-sm" href={topology.viz} target="_blank">Viz</a>
          </td>
        </tr>
     );
@@ -75,7 +74,6 @@ var TopologyTable = React.createClass({
                 cluster: estate.cluster,
                 environ: env,
                 role: estate.role,
-                viz: estate.viz,
                 has_physical_plan: estate.has_physical_plan,
                 has_tmaster_location: estate.has_tmaster_location,
                 release_version: estate.release_version,
