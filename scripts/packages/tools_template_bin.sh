@@ -22,7 +22,7 @@ install_prefix=${1:-"/usr/local/herontools"}
 progname="$0"
 
 echo "Heron Tools installer"
-echo "--------------------"
+echo "---------------------"
 echo
 cat <<'EOF'
 %release_info%
@@ -147,6 +147,7 @@ chmod -R u+rwX "${base}"
 echo -n .
 
 ln -s "${base}/bin/heron-tracker" "${bin}/heron-tracker"
+ln -s "${base}/bin/heron-ui"      "${bin}/heron-ui"
 echo -n .
 
 rm "${base}/heron-tools.tar.gz"
