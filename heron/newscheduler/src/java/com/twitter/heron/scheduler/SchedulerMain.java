@@ -313,7 +313,7 @@ public class SchedulerMain {
       Runtime.schedulerShutdown(ytruntime).await();
     } catch (Exception e) {
       // Log and exit the process
-      LOG.log(Level.SEVERE, "Failed to run scheduler for topology: {0}. Existing", topology.getName());
+      LOG.log(Level.SEVERE, "Failed to run scheduler for topology: {0}. Exiting", topology.getName());
       System.exit(1);
     } finally {
       // Clean the resources
