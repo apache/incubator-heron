@@ -105,14 +105,24 @@ def getMetricsTimeline(tmaster,
   ret["endtime"] = end_time
   ret["component"] = component_name
   ret["timeline"] = {}
+
+  # Loop through all the metrics
+  # One instance corresponds to one metric, which can have
+  # multiple IndividualMetrics for each metricname requested.
   for metric in metricResponse.metric:
     instance = metric.instance_id
+
+    # Loop through all individual metrics.
     for im in metric.metric:
       metricname = im.name
       if metricname not in ret["timeline"]:
         ret["timeline"][metricname] = {}
       if instance not in ret["timeline"][metricname]:
         ret["timeline"][metricname][instance] = {}
+
+      # We get minutely metrics.
+      # Interval-values correspond to the minutely mark for which
+      # this metric value corresponds to.
       for interval_value in im.interval_values:
         ret["timeline"][metricname][instance][interval_value.interval.start] = interval_value.value
 
