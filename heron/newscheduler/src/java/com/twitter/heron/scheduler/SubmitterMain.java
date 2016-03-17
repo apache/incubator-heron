@@ -176,7 +176,7 @@ public class SubmitterMain {
           uploadRunner.undo();
         }
         launcher.undo();
-        LOG.log(Level.SEVERE, "Failed to submit topology {0}. Exiting", topologyName);
+        LOG.log(Level.SEVERE, "Failed to submit topology {0}. Existing", topologyName);
 
         System.exit(1);
       } else {
