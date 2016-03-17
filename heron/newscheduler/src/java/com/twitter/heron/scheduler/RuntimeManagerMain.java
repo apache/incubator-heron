@@ -15,8 +15,80 @@ import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.NetworkUtils;
 
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.HelpFormatter;
+
 public class RuntimeManagerMain {
   private static final Logger LOG = Logger.getLogger(RuntimeManagerMain.class.getName());
+
+  // Print usage options
+  private static void usage(Options options) {
+    HelpFormatter formatter = new HelpFormatter();
+    formatter.printHelp( "SchedulerMain", options );
+  }
+
+  // Construct all required command line options
+  private static Options constructOptions() {
+    Options options = new Options();
+
+    Option cluster = Option.builder("c")
+        .desc("Cluster name in which the topology needs to run on")
+        .longOpt("cluster")
+        .hasArgs()
+        .argName("cluster")
+        .required()
+        .build();
+
+    Option role = Option.builder("r")
+        .desc("Role under which the topology needs to run")
+        .longOpt("role")
+        .hasArgs()
+        .argName("role")
+        .required()
+        .build();
+
+    Option environment = Option.builder("e")
+        .desc("Environment under which the topology needs to run")
+        .longOpt("environment")
+        .hasArgs()
+        .argName("environment")
+        .required()
+        .build();
+
+    Option topologyName = Option.builder("n")
+        .desc("Name of the topology")
+        .longOpt("topology_name")
+        .hasArgs()
+        .argName("topology name")
+        .required()
+        .build();
+
+    Option topologyName = Option.builder("n")
+        .desc("Heron home directory")
+        .longOpt("heron_home")
+        .hasArgs()
+        .argName("heron home dir")
+        .required()
+        .build();
+
+  }
+
+   // construct command line help options
+  private static Options constructHelpOptions() {
+    Options options = new Options();
+    Option help = Option.builder("h")
+        .desc("List all options and their description")
+        .longOpt("help")
+        .build();
+
+    options.addOption(help);
+    return options;
+  }
 
   public static void main(String[] args)
       throws ClassNotFoundException, IllegalAccessException, InstantiationException, IOException {
