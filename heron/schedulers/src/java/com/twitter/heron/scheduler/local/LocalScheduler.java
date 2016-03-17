@@ -193,7 +193,7 @@ public class LocalScheduler implements IScheduler {
     String topologyName = LocalContext.topologyName(config);
     LOG.info("Command to kill topology: " + topologyName);
 
-    // set the flag that the topology being killed 
+    // set the flag that the topology being killed
     topologyKilled = true;
 
     // destroy/kill the process for each container
@@ -328,11 +328,16 @@ public class LocalScheduler implements IScheduler {
     HttpUtils.sendHttpGetRequest(connection);
     LOG.info("Sent the HTTP payload to TMaster");
 
+    boolean success = false;
     // get the response and check if it is successful
     try {
-      if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+      int responseCode = connection.getResponseCode();
+      if (responseCode == HttpURLConnection.HTTP_OK) {
         LOG.info("Successfully got a HTTP response from TMaster for " + command);
-        return true;
+        success = true;
+      } else {
+        LOG.info(String.format("Non OK HTTP response %d from TMaster for command %s",
+          responseCode, command));
       }
     } catch (IOException e) {
       LOG.log(Level.SEVERE, "Failed to receive HTTP response from TMaster for " + command + " :", e);
@@ -340,6 +345,6 @@ public class LocalScheduler implements IScheduler {
       connection.disconnect();
     }
 
-    return true;
+    return success;
   }
 }

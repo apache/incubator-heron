@@ -113,9 +113,9 @@ public class SubmitterMain {
     // load the topology definition into topology proto
     TopologyAPI.Topology topology = TopologyUtils.getTopology(topologyDefnFile);
 
-    // first load the defaults, then the config from files to override it 
+    // first load the defaults, then the config from files to override it
     // next add config parameters from the command line
-    // load the topology configs 
+    // load the topology configs
     // TODO (Karthik) override any parameters from the command line
 
     // build the final config by expanding all the variables
@@ -181,7 +181,7 @@ public class SubmitterMain {
 
     // Log the result and exit
     if (!isSuccessful) {
-      LOG.log(Level.SEVERE, "Failed to submit topology {0}. Existing", topologyName);
+      LOG.log(Level.SEVERE, "Failed to submit topology {0}. Exiting", topologyName);
 
       System.exit(1);
     } else {
