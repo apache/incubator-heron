@@ -2,7 +2,7 @@ import math
 import tornado.httpclient
 import tornado.gen
 
-from heron.tracker.src.python.handlers.metricstimelinehandler import getMetricsTimeline
+from heron.tracker.src.python.metricstimeline import getMetricsTimeline
 
 #####################################################################
 # Data Structure for fetched Metrics
