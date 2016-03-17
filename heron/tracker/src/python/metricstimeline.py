@@ -66,6 +66,7 @@ def getMetricsTimeline(tmaster,
   # with the HTTP request.
   metricRequestString = metricRequest.SerializeToString()
 
+  # Form and send the http request.
   url = "http://{0}:{1}/stats".format(host, port)
   request = tornado.httpclient.HTTPRequest(url,
                                            body=metricRequestString,
