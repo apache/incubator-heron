@@ -181,7 +181,7 @@ public class SubmitterMain {
 
     // Log the result and exit
     if (!isSuccessful) {
-      LOG.log(Level.SEVERE, "Failed to submit topology {0}. Existing", topologyName);
+      LOG.log(Level.SEVERE, "Failed to submit topology {0}. Exiting", topologyName);
 
       System.exit(1);
     } else {
