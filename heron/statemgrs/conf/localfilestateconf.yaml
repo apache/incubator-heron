@@ -11,5 +11,5 @@
     name: "local"
     host: "localhost"
     port: 0
-    rootpath: "/<file-system-dir>/.herondata/repository/state/local"
+    rootpath: "~/.herondata/repository/state/local"
     tunnelhost: "localhost"
