@@ -176,14 +176,18 @@ public class SubmitterMain {
           uploadRunner.undo();
         }
         launcher.undo();
-        LOG.log(Level.SEVERE, "Failed to submit topology {0}. Existing", topologyName);
-
-        System.exit(1);
-      } else {
-        LOG.log(Level.INFO, "Topology {0} submitted successfully", topologyName);
-
-        System.exit(0);
       }
+    }
+
+    // Log the result and exit
+    if (!isSuccessful) {
+      LOG.log(Level.SEVERE, "Failed to submit topology {0}. Existing", topologyName);
+
+      System.exit(1);
+    } else {
+      LOG.log(Level.INFO, "Topology {0} submitted successfully", topologyName);
+
+      System.exit(0);
     }
   }
 
