@@ -100,7 +100,7 @@ public class RuntimeManagerMain {
 
       // 4. Do post work basing on the result
       if (!isSuccessful) {
-        LOG.log(Level.SEVERE, "Failed to {0} topology {1}. Exiting", new Object[]{command, topologyName});
+        LOG.log(Level.SEVERE, "Failed to {0} topology {1}. Existing", new Object[]{command, topologyName});
 
         System.exit(1);
       } else {
