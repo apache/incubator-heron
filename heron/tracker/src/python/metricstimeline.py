@@ -37,19 +37,27 @@ def getMetricsTimeline(tmaster,
     "message": "..."
   }
   """
+  # Tmaster is the proto object and must have host and port for stats.
   if not tmaster or not tmaster.host or not tmaster.stats_port:
     raise Exception("No Tmaster found")
 
   host = tmaster.host
   port = tmaster.stats_port
 
+  # Create the proto request object to get metrics.
+
   metricRequest = tmaster_pb2.MetricRequest()
   metricRequest.component_name = component_name
+
+  # If no instances are give, metrics for all instances
+  # are fetched by default.
   if len(instances) > 0:
     for instance in instances:
       metricRequest.instance_id.append(instance)
+
   for metricName in metric_names:
     metricRequest.metric.append(metricName)
+
   metricRequest.explicit_interval.start = start_time
   metricRequest.explicit_interval.end = end_time
   metricRequest.minutely = True
