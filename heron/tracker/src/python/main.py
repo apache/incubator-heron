@@ -1,23 +1,25 @@
+import argparse
 import os
 import sys
-import argparse
 import tornado.httpserver
 import tornado.ioloop
 import tornado.web
+
 from tornado.escape import json_encode, utf8
 from tornado.options import define, options
 
-from heron.tracker.src.python import utils
+from heron.tracker.src.python import constants
 from heron.tracker.src.python import handlers
 from heron.tracker.src.python import log
 from heron.tracker.src.python.log import Log as LOG
+from heron.tracker.src.python import utils
 from heron.tracker.src.python.tracker import Tracker
 
 class Application(tornado.web.Application):
-  def __init__(self, config_file):
+  def __init__(self):
     tracker = Tracker()
     self.tracker = tracker
-    tracker.synch_topologies(config_file)
+    tracker.synch_topologies(options.config_file)
     tornadoHandlers = [
       (r"/", handlers.MainHandler),
       (r"/topologies", handlers.TopologiesHandler, {"tracker":tracker}),
@@ -78,11 +80,9 @@ def add_titles(parser):
   parser._optionals.title = "Optional arguments"
   return parser
 
-def add_config(parser):
-
-  # the default config file path
+def add_arguments(parser):
   default_config_file = os.path.join(
-      utils.get_heron_tracker_conf_dir(), "localfilestateconf.yaml")
+      utils.get_heron_tracker_conf_dir(), constants.DEFAULT_CONFIG_FILE)
 
   parser.add_argument(
       '--config-file',
@@ -91,20 +91,20 @@ def add_config(parser):
 
   parser.add_argument(
       '--port',
-      metavar='(an integer; port to listen; default: 8888)',
+      metavar='(an integer; port to listen; default: ' + str(constants.DEFAULT_PORT) + ')',
       type = int, 
-      default=8888)
+      default=constants.DEFAULT_PORT)
 
   return parser
 
 def create_parsers():
   parser = argparse.ArgumentParser(
-      epilog = 'For detailed documentation, go to http://go/heron',
+      epilog = 'For detailed documentation, go to http://github.com/twitter/heron',
       usage = "%(prog)s [options] [help]",
       add_help = False)
 
   parser = add_titles(parser)
-  parser = add_config(parser)
+  parser = add_arguments(parser)
 
   ya_parser = argparse.ArgumentParser(
       parents = [parser],
@@ -122,12 +122,15 @@ def create_parsers():
   help_parser.set_defaults(help=True)
   return (parser, ya_parser)
 
+def define_options(port, config_file):
+  define("port", default=port)
+  define("config_file", default=config_file)
+
 def main():
   log.configure(log.logging.DEBUG)
 
   # create the parser and parse the arguments
   (parser, ya_parser) = create_parsers()
-  
   (args, remaining) = parser.parse_known_args()
 
   if remaining:
@@ -136,14 +139,15 @@ def main():
     parser.exit()
 
   namespace = vars(args)
-
   LOG.info("Running on port: %d", namespace['port'])
   LOG.info("Using config file: %s", namespace['config_file'])
 
-  http_server = tornado.httpserver.HTTPServer(Application(namespace['config_file']))
+  # TO DO check if the config file exists
+
+  define_options(namespace['port'], namespace['config_file'])
+  http_server = tornado.httpserver.HTTPServer(Application())
   http_server.listen(namespace['port'])
   tornado.ioloop.IOLoop.instance().start()
 
 if __name__ == "__main__":
   main()
-

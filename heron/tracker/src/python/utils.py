@@ -2,7 +2,8 @@
 Contains utility functions used by tracker.
 """
 
-import os, sys
+import os
+import sys
 import string
 
 # directories for heron tools distribution
@@ -54,7 +55,7 @@ def make_shell_logfiles_url(host, shell_port, cwd, instance_id=None):
   else:
     return "http://%s:%d/file/log-files/%s.log.0" % (host, shell_port, instance_id)
 
-def make_viz_dashboard_url(name, dc, environ):
+def make_viz_dashboard_url(name, cluster, environ):
   """
   Link to the dashboard. Must override to return a valid url.
   """
@@ -71,9 +72,17 @@ def convert_execution_state(execution_state):
 # Get normalized class path depending on platform
 ################################################################################
 def identity(x):
+  """
+  This will return the input arg 
+  :return: input argument
+  """
   return x
 
 def cygpath(x):
+  """
+  This will return the path of input arg for windows
+  :return: the path in windows
+  """
   command = ['cygpath', '-wp', x]
   p = subprocess.Popen(command,stdout=subprocess.PIPE)
   output, errors = p.communicate()
@@ -81,6 +90,10 @@ def cygpath(x):
   return lines[0]
 
 def normalized_class_path(x):
+  """
+  This will return the class path depending on the platform
+  :return: the class path
+  """
   if sys.platform == 'cygwin':
     return cygpath(x)
   return identity(x)
