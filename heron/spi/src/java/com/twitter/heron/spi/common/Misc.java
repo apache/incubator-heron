@@ -147,6 +147,9 @@ public class Misc {
       } else if (elem.equals("${HERON_DIST}")) {
         list.set(i, Context.heronDist(config));
 
+      } else if (elem.equals("${HERON_SANDBOX_HOME}")) {
+        list.set(i, Context.heronSandboxHome(config));
+
       } else if (elem.equals("${CLUSTER}")) {
         list.set(i, Context.cluster(config));
 
