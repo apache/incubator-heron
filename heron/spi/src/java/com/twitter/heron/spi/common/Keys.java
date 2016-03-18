@@ -82,6 +82,10 @@ public class Keys {
     return ConfigKeys.get("CLUSTER_YAML");
   }
 
+  public static String clientFile() {
+    return ConfigKeys.get("CLIENT_YAML");
+  }
+
   public static String defaultsFile() {
     return ConfigKeys.get("DEFAULTS_YAML");
   }
