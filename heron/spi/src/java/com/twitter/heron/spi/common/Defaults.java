@@ -195,7 +195,7 @@ public class Defaults {
   }
 
   public static String heronSandboxBin() {
-    return ConfigKeys.get("HERON_SANDBOX_BIN");
+    return ConfigDefaults.get("HERON_SANDBOX_BIN");
   }
 
   public static String heronSandboxConf() {

@@ -239,7 +239,7 @@ public class Context {
     return cfg.getStringValue(Keys.stateManagerSandboxFile());
   }
 
-  public static String systemSandboxFile(Config cfg) {
+  public static String systemConfigSandboxFile(Config cfg) {
     return cfg.getStringValue(Keys.systemSandboxFile());
   }
 

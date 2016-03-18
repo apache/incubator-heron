@@ -145,6 +145,7 @@ public final class ClusterDefaults {
     cb.putAll(getSandboxBinaries());
     cb.putAll(getSandboxJars());
     cb.putAll(getSandboxFilesAndPaths());
+    cb.putAll(getDefaultResources());
     return cb.build();
   }
 }
