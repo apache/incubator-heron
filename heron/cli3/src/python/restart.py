@@ -49,7 +49,7 @@ def run(command, parser, cl_args, unknown_args):
   try:
     cluster_role_env = cl_args['cluster/[role]/[env]']
     topology_name = cl_args['topology-name']
-    container_identifier = cl_args['container-identifier']
+    container_id = cl_args['container-id']
 
     # extract the config path
     config_path = cl_args['config_path']
@@ -78,7 +78,7 @@ def run(command, parser, cl_args, unknown_args):
         "--config_overrides " + base64.b64encode(config_overrides),
         "--topology_name " + topology_name,
         "--command " + command,
-        "--container_id " + str(container_identifier)
+        "--container_id " + str(container_id)
     ]
 
     lib_jars = utils.get_heron_libs(jars.scheduler_jars() + jars.statemgr_jars())
