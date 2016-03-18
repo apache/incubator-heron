@@ -184,7 +184,7 @@ if [ $mode == "master" ]; then
     if [ $scheduler == "mesos" ]; then
         ./submit-mesos-scheduler.sh
     fi
-    ./setup-dist-dir.sh
+    ./../../../setup-cli-ubuntu.sh
     setup_heron_zk_nodes
     copy_scripts
 fi

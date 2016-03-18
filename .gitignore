@@ -116,8 +116,8 @@ com_crashlytics_export_strings.xml
 docs/_book/
 docs/node_modules/
 
-# dists generated for a Vagrant image
-contrib/kafka9/vagrant/heron-ubuntu/
+# dist
+dist/
 
 # Vagrant work dirs
 vagrant/.vagrant/

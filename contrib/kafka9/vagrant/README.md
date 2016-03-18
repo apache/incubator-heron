@@ -15,15 +15,15 @@ There are two requirements for a host machine. Please refer to official docs for
 
 ## Build
 
-A dedicated Docker image is used for building the dist. In order to build, please run
+A dedicated Docker image is used for building the dist. In order to build, please run in a project root
   
 ```
-./build-heron.sh
+./build-ubuntu.sh
 ```
 
-The release packages and a sample topology will be packed to `heron-ubuntu` directory. If you have already built Heron 
-dist, you may simply copy all the dist files to `heron-ubuntu` sub-dir in this directory.
-If you want to build only the example topologies, please set the following before running `build-heron` script:
+The release packages and a sample topology will be packed to `dist/ubuntu` directory. If you have already built Heron 
+dist, you may simply copy all the dist files to `dist/ubuntu` sub-dir in the root directory.
+If you want to build only the example topologies, please set the following before running `build-ubuntu` script:
 
 ```
 export TOPOLOGY_ONLY="true"
@@ -53,7 +53,7 @@ After the cluster is up an running, the following components are being provision
 - Kafka-Mesos scheduler for Kafka-0.9.x 
 - Kafka-Mesos scheduler for Kafka-0.8.x 
 
-The following depends on a chosen scheduler. If Aurora is chosen:
+The following depends on a chosen scheduler. If Aurora is chosen:cd 
  
 - Aurora scheduler on master
 - Aurora executor on master and all the slaves
@@ -184,11 +184,11 @@ topology name, as it will be still in a running state, as it is visible to Heron
 ## Customization
 
 In case if one wants to update the Heron or topology code, it is possible to use the updated dist without restarting
-Vagrant cluster. Just run `build-heron` script as it was referred in `Build` section. If Heron release dist was updated 
+Vagrant cluster. Just run `build-ubuntu` script as it was referred in `Build` section. If Heron release dist was updated 
 during the build, please run:
 
 ```
-vagrant ssh master -c "./setup-dist-dir"
+vagrant ssh master -c "./../vagrant/setup-cli-ubuntu.sh"
 ```
 
 After that, the next topology submits will use the latest build.
@@ -196,7 +196,7 @@ After that, the next topology submits will use the latest build.
 ## Submitting custom topology
 
 In case if one wants to submit a different topology, simply place the topology fat jar into the 
-`heron-ubuntu/topologies` dir. Then it is possible to launch one's custom topology as follows:
+`dist/topologies` dir. Then it is possible to launch one's custom topology as follows:
 
 ```
 # Aurora:

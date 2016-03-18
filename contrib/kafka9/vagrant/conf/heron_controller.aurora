@@ -2,7 +2,7 @@
 Activate/Deactivate a topology using a aurora job.
 """
 
-heron_core_release_url = 'file:///vagrant/contrib/kafka9/vagrant/heron-ubuntu/{{HERON_PACKAGE}}'
+heron_core_release_url = 'file:///vagrant/dist/ubuntu/{{HERON_PACKAGE}}'
 
 # --- processes ---
 fetch_heron_system = Process(

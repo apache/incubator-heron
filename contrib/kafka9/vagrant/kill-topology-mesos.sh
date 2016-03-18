@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
-VAGRANT_DIR=/vagrant/contrib/kafka9/vagrant
-DIST_DIR=${VAGRANT_DIR}/heron-ubuntu
-HERON_CONF_PATH=${VAGRANT_DIR}/conf/mesos_scheduler.conf
+DIST_DIR=/vagrant/dist/ubuntu
+HERON_CONF_PATH=/vagrant/contrib/kafka9/vagrant/conf/mesos_scheduler.conf
 
 if [[ $# -ne 1 ]] ; then
     echo 'USAGE: ./kill-topology-mesos.sh <topology_name>'

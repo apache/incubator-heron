@@ -29,9 +29,10 @@ pack_release() {
     bazel build --config=$TARGET_PLATFORM --define RELEASE=$HERON_VERSION release:packages
 
     echo "Moving release files to /dist"
+    mkdir -p /dist/$TARGET_PLATFORM
     for file in ./bazel-bin/release/*.tar.gz; do
         filename=$(basename $file)
-        cp $file /dist/${filename/.tar/-$HERON_VERSION.tar}
+        cp $file /dist/$TARGET_PLATFORM/${filename/.tar/-$HERON_VERSION.tar}
     done
 }
 

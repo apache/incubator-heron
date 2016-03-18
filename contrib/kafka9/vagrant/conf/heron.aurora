@@ -4,9 +4,9 @@ The heron-executor is responsible for starting a tmaster (shard 0)
 and regular stmgr/metricsmgr/instances (shards > 0).
 """
 
-heron_core_release_url = 'file:///vagrant/contrib/kafka9/vagrant/heron-ubuntu/{{HERON_PACKAGE}}'
-heron_topology_jar_url = 'file:///vagrant/contrib/kafka9/vagrant/heron-ubuntu/topologies/{{TOPOLOGY_JAR_FILE}}'
-heron_defn_file_url = 'file:///vagrant/contrib/kafka9/vagrant/heron-ubuntu/defn-tmp/{{TOPOLOGY_NAME}}.defn'
+heron_core_release_url = 'file:///vagrant/dist/ubuntu/{{HERON_PACKAGE}}'
+heron_topology_jar_url = 'file:///vagrant/dist/topologies/{{TOPOLOGY_JAR_FILE}}'
+heron_defn_file_url = 'file:///vagrant/dist/ubuntu/defn-tmp/{{TOPOLOGY_NAME}}.defn'
 metrics_classpath_updated = 'heron-metricsmgr.jar:metrics-mgr-classpath/*'
 
 # --- processes ---

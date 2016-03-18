@@ -8,6 +8,6 @@
   "instances": 1,
   "constraints": [["hostname", "LIKE", "master"]],
   "uris": [
-    "file:///vagrant/contrib/kafka9/vagrant/heron-ubuntu/heron-core-0.1.0-SNAPSHOT.tar.gz"
+    "file:///vagrant/dist/ubuntu/heron-core-0.1.0-SNAPSHOT.tar.gz"
   ]
 }
