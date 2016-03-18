@@ -56,8 +56,8 @@ INSTANCE_DISK:                1073741824
 ################################################################################
 HERON_SANDBOX_HOME:           ./heron-core
 HERON_SANDBOX_CONF:           ./heron-conf
-HERON_SANDBOX_BIN:            ${HERON_SANBOX_HOME}/bin
-HERON_SANDBOX_LIB:            ${HERON_SANBOX_HOME}/lib
+HERON_SANDBOX_BIN:            ${HERON_SANDBOX_HOME}/bin
+HERON_SANDBOX_LIB:            ${HERON_SANDBOX_HOME}/lib
 HERON_SANDBOX_JAVA_HOME:      /usr/lib/jvm/default-java
 
 ################################################################################
