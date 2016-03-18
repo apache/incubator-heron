@@ -77,7 +77,7 @@ def run(command, parser, cl_args, unknown_args):
         "--config_file" + config_path,
         "--config_overrides " + base64.b64encode(config_overrides),
         "--topology_name " + topology_name,
-        "--command " + command
+        "--command " + command,
         "--container_id " + str(container_identifier)
     ]
 
