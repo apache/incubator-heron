@@ -28,10 +28,10 @@ public final class ClusterConfig {
   protected static Config loadSandboxHome(String heronSandboxHome, String configPath) {
     Config.Builder cb = Config.newBuilder()
         .put(Keys.heronSandboxHome(), heronSandboxHome) 
-        .put(Keys.heronSandboxBin(),  Misc.substitute(heronSandboxHome, Defaults.heronSandboxBin()))
+        .put(Keys.heronSandboxBin(),  Misc.substituteSandbox(heronSandboxHome, Defaults.heronSandboxBin()))
         .put(Keys.heronSandboxConf(), configPath)
-        .put(Keys.heronSandboxLib(),  Misc.substitute(heronSandboxHome, Defaults.heronSandboxLib()))
-        .put(Keys.javaSandboxHome(),  Misc.substitute(heronSandboxHome, Defaults.javaSandboxHome()));
+        .put(Keys.heronSandboxLib(),  Misc.substituteSandbox(heronSandboxHome, Defaults.heronSandboxLib()))
+        .put(Keys.javaSandboxHome(),  Misc.substituteSandbox(heronSandboxHome, Defaults.javaSandboxHome()));
     return cb.build();
   }
 
@@ -59,21 +59,21 @@ public final class ClusterConfig {
   protected static Config loadSandboxConfigHome(String heronSandboxHome, String configPath) {
     Config.Builder cb = Config.newBuilder()
         .put(Keys.clusterSandboxFile(),
-            Misc.substitute(heronSandboxHome, configPath, Defaults.clusterSandboxFile()))
+            Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.clusterSandboxFile()))
         .put(Keys.defaultsSandboxFile(),
-            Misc.substitute(heronSandboxHome, configPath, Defaults.defaultsSandboxFile()))
+            Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.defaultsSandboxFile()))
         .put(Keys.metricsSinksSandboxFile(),
-            Misc.substitute(heronSandboxHome, configPath, Defaults.metricsSinksSandboxFile()))
+            Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.metricsSinksSandboxFile()))
         .put(Keys.packingSandboxFile(),
-            Misc.substitute(heronSandboxHome, configPath, Defaults.packingSandboxFile()))
+            Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.packingSandboxFile()))
         .put(Keys.schedulerSandboxFile(),
-            Misc.substitute(heronSandboxHome, configPath, Defaults.schedulerSandboxFile()))
+            Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.schedulerSandboxFile()))
         .put(Keys.stateManagerSandboxFile(),
-            Misc.substitute(heronSandboxHome, configPath, Defaults.stateManagerSandboxFile()))
+            Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.stateManagerSandboxFile()))
         .put(Keys.systemSandboxFile(),
-            Misc.substitute(heronSandboxHome, configPath, Defaults.systemSandboxFile()))
+            Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.systemSandboxFile()))
         .put(Keys.uploaderSandboxFile(), 
-            Misc.substitute(heronSandboxHome, configPath, Defaults.uploaderSandboxFile()));
+            Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.uploaderSandboxFile()));
     return cb.build();
   }
 
@@ -125,10 +125,12 @@ public final class ClusterConfig {
 
   public static Config loadConfig(String heronHome, String configPath) {
     Config homeConfig = loadBasicConfig(heronHome, configPath); 
+    Config sandboxConfig = loadBasicSandboxConfig();
 
     Config.Builder cb = Config.newBuilder()
         .putAll(homeConfig)
-        .putAll(loadDefaultsConfig(Context.clusterFile(homeConfig)))
+        .putAll(sandboxConfig)
+        .putAll(loadClusterConfig(Context.clusterFile(homeConfig)))
         .putAll(loadPackingConfig(Context.packingFile(homeConfig)))
         .putAll(loadSchedulerConfig(Context.schedulerFile(homeConfig)))
         .putAll(loadStateManagerConfig(Context.stateManagerFile(homeConfig)))
@@ -141,7 +143,6 @@ public final class ClusterConfig {
 
     Config.Builder cb = Config.newBuilder()
         .putAll(sandboxConfig)
-        .putAll(loadDefaultsConfig(Context.clusterSandboxFile(sandboxConfig)))
         .putAll(loadPackingConfig(Context.packingSandboxFile(sandboxConfig)))
         .putAll(loadSchedulerConfig(Context.schedulerSandboxFile(sandboxConfig)))
         .putAll(loadStateManagerConfig(Context.stateManagerSandboxFile(sandboxConfig)))
