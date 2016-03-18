@@ -71,7 +71,7 @@ public class SchedulerMain {
    */
   protected static Config defaultConfigs() {
     Config config = Config.newBuilder()
-        .putAll(ClusterDefaults.getDefaults())
+        .putAll(ClusterDefaults.getSandboxDefaults())
         .putAll(ClusterConfig.loadSandboxConfig())
         .build();
     return config;
@@ -230,7 +230,7 @@ public class SchedulerMain {
 
   // Set up logging basing on the Config
   public static void setupLogging(Config config) throws IOException {
-    String systemConfigFilename = Context.systemConfigFile(config);
+    String systemConfigFilename = Context.systemConfigSandboxFile(config);
 
     SystemConfig systemConfig = new SystemConfig(systemConfigFilename, true);
 
@@ -317,7 +317,8 @@ public class SchedulerMain {
       Runtime.schedulerShutdown(ytruntime).await();
     } catch (Exception e) {
       // Log and exit the process
-      LOG.log(Level.SEVERE, "Failed to run scheduler for topology: {0}. Exiting", topology.getName());
+      LOG.log(Level.SEVERE, "Exception occurred", e);
+      LOG.log(Level.SEVERE, "Failed to run scheduler for topology: {0}. Exiting...", topology.getName());
       System.exit(1);
     } finally {
       // Clean the resources

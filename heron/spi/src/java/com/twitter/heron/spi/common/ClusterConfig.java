@@ -25,10 +25,22 @@ public final class ClusterConfig {
     return cb.build();
   }
 
+  protected static Config loadSandboxHome(String heronSandboxHome, String configPath) {
+    Config.Builder cb = Config.newBuilder()
+        .put(Keys.heronSandboxHome(), heronSandboxHome) 
+        .put(Keys.heronSandboxBin(),  Misc.substituteSandbox(heronSandboxHome, Defaults.heronSandboxBin()))
+        .put(Keys.heronSandboxConf(), configPath)
+        .put(Keys.heronSandboxLib(),  Misc.substituteSandbox(heronSandboxHome, Defaults.heronSandboxLib()))
+        .put(Keys.javaSandboxHome(),  Misc.substituteSandbox(heronSandboxHome, Defaults.javaSandboxHome()));
+    return cb.build();
+  }
+
   protected static Config loadConfigHome(String heronHome, String configPath) {
     Config.Builder cb = Config.newBuilder()
         .put(Keys.clusterFile(),
             Misc.substitute(heronHome, configPath, Defaults.clusterFile()))
+        .put(Keys.clientFile(),
+            Misc.substitute(heronHome, configPath, Defaults.clientFile()))
         .put(Keys.defaultsFile(),
             Misc.substitute(heronHome, configPath, Defaults.defaultsFile()))
         .put(Keys.metricsSinksFile(),
@@ -46,38 +58,58 @@ public final class ClusterConfig {
     return cb.build();
   }
 
-  protected static Config loadClusterConfig(Config config) {
-    String clusterFile = config.getStringValue(Keys.clusterFile()); 
+  protected static Config loadSandboxConfigHome(String heronSandboxHome, String configPath) {
+    Config.Builder cb = Config.newBuilder()
+        .put(Keys.clusterSandboxFile(),
+            Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.clusterSandboxFile()))
+        .put(Keys.defaultsSandboxFile(),
+            Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.defaultsSandboxFile()))
+        .put(Keys.metricsSinksSandboxFile(),
+            Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.metricsSinksSandboxFile()))
+        .put(Keys.packingSandboxFile(),
+            Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.packingSandboxFile()))
+        .put(Keys.schedulerSandboxFile(),
+            Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.schedulerSandboxFile()))
+        .put(Keys.stateManagerSandboxFile(),
+            Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.stateManagerSandboxFile()))
+        .put(Keys.systemSandboxFile(),
+            Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.systemSandboxFile()))
+        .put(Keys.uploaderSandboxFile(), 
+            Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.uploaderSandboxFile()));
+    return cb.build();
+  }
+
+  protected static Config loadClusterConfig(String clusterFile) {
     Map readConfig = ConfigReader.loadFile(clusterFile);
     return Config.newBuilder().putAll(readConfig).build();
   }
 
-  protected static Config loadDefaultsConfig(Config config) {
-    String defaultsFile = config.getStringValue(Keys.defaultsFile());
+  protected static Config loadClientConfig(String clientFile) {
+    Map readConfig = ConfigReader.loadFile(clientFile);
+    return Config.newBuilder().putAll(readConfig).build();
+  }
+
+  protected static Config loadDefaultsConfig(String defaultsFile) {
     Map readConfig = ConfigReader.loadFile(defaultsFile);
     return Config.newBuilder().putAll(readConfig).build();
   }
 
-  protected static Config loadPackingConfig(Config config) {
-    String packingFile = config.getStringValue(Keys.packingFile());
+  protected static Config loadPackingConfig(String packingFile) {
     Map readConfig = ConfigReader.loadFile(packingFile);
     return Config.newBuilder().putAll(readConfig).build();
   }
 
-  protected static Config loadSchedulerConfig(Config config) {
-    String schedulerFile = config.getStringValue(Keys.schedulerFile());
+  protected static Config loadSchedulerConfig(String schedulerFile) {
     Map readConfig = ConfigReader.loadFile(schedulerFile);
     return Config.newBuilder().putAll(readConfig).build();
   }
 
-  protected static Config loadStateManagerConfig(Config config) {
-    String stateMgrFile = config.getStringValue(Keys.stateManagerFile());
+  protected static Config loadStateManagerConfig(String stateMgrFile) {
     Map readConfig = ConfigReader.loadFile(stateMgrFile);
     return Config.newBuilder().putAll(readConfig).build();
   }
 
-  protected static Config loadUploaderConfig(Config config) {
-    String uploaderFile = config.getStringValue(Keys.uploaderFile());
+  protected static Config loadUploaderConfig(String uploaderFile) {
     Map readConfig = ConfigReader.loadFile(uploaderFile);
     return Config.newBuilder().putAll(readConfig).build();
   }
@@ -90,22 +122,39 @@ public final class ClusterConfig {
     return config;
   }
 
+  public static Config loadBasicSandboxConfig() {
+    Config config = Config.newBuilder()
+        .putAll(loadSandboxHome(Defaults.heronSandboxHome(), Defaults.heronSandboxConf()))
+        .putAll(loadSandboxConfigHome(Defaults.heronSandboxHome(), Defaults.heronSandboxConf()))
+        .build();
+    return config;
+  }
+
   public static Config loadConfig(String heronHome, String configPath) {
     Config homeConfig = loadBasicConfig(heronHome, configPath); 
+    Config sandboxConfig = loadBasicSandboxConfig();
 
     Config.Builder cb = Config.newBuilder()
         .putAll(homeConfig)
-        .putAll(loadDefaultsConfig(homeConfig))
-        .putAll(loadPackingConfig(homeConfig))
-        .putAll(loadSchedulerConfig(homeConfig))
-        .putAll(loadStateManagerConfig(homeConfig))
-        .putAll(loadUploaderConfig(homeConfig));
+        .putAll(sandboxConfig)
+        .putAll(loadClusterConfig(Context.clusterFile(homeConfig)))
+        .putAll(loadClientConfig(Context.clientFile(homeConfig)))
+        .putAll(loadPackingConfig(Context.packingFile(homeConfig)))
+        .putAll(loadSchedulerConfig(Context.schedulerFile(homeConfig)))
+        .putAll(loadStateManagerConfig(Context.stateManagerFile(homeConfig)))
+        .putAll(loadUploaderConfig(Context.uploaderFile(homeConfig)));
     return cb.build();
   }
 
   public static Config loadSandboxConfig() {
-    String configPath = Misc.substitute(
-        Defaults.sandboxHome(), Defaults.sandboxConf());
-    return loadConfig(Defaults.sandboxHome(), configPath);
+    Config sandboxConfig = loadBasicSandboxConfig(); 
+
+    Config.Builder cb = Config.newBuilder()
+        .putAll(sandboxConfig)
+        .putAll(loadPackingConfig(Context.packingSandboxFile(sandboxConfig)))
+        .putAll(loadSchedulerConfig(Context.schedulerSandboxFile(sandboxConfig)))
+        .putAll(loadStateManagerConfig(Context.stateManagerSandboxFile(sandboxConfig)))
+        .putAll(loadUploaderConfig(Context.uploaderSandboxFile(sandboxConfig)));
+    return cb.build();
   }
 }
