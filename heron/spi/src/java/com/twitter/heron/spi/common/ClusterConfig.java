@@ -39,6 +39,8 @@ public final class ClusterConfig {
     Config.Builder cb = Config.newBuilder()
         .put(Keys.clusterFile(),
             Misc.substitute(heronHome, configPath, Defaults.clusterFile()))
+        .put(Keys.clientFile(),
+            Misc.substitute(heronHome, configPath, Defaults.clientFile()))
         .put(Keys.defaultsFile(),
             Misc.substitute(heronHome, configPath, Defaults.defaultsFile()))
         .put(Keys.metricsSinksFile(),
@@ -79,6 +81,11 @@ public final class ClusterConfig {
 
   protected static Config loadClusterConfig(String clusterFile) {
     Map readConfig = ConfigReader.loadFile(clusterFile);
+    return Config.newBuilder().putAll(readConfig).build();
+  }
+
+  protected static Config loadClientConfig(String clientFile) {
+    Map readConfig = ConfigReader.loadFile(clientFile);
     return Config.newBuilder().putAll(readConfig).build();
   }
 
@@ -131,6 +138,7 @@ public final class ClusterConfig {
         .putAll(homeConfig)
         .putAll(sandboxConfig)
         .putAll(loadClusterConfig(Context.clusterFile(homeConfig)))
+        .putAll(loadClientConfig(Context.clientFile(homeConfig)))
         .putAll(loadPackingConfig(Context.packingFile(homeConfig)))
         .putAll(loadSchedulerConfig(Context.schedulerFile(homeConfig)))
         .putAll(loadStateManagerConfig(Context.stateManagerFile(homeConfig)))
