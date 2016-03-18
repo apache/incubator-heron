@@ -14,38 +14,40 @@ public class ClusterDefaultsTest {
   private static final Logger LOG = Logger.getLogger(ClusterDefaultsTest.class.getName());
 
   Config home;
+  Config sandbox;
   Config props;
 
   @Before
   public void initialize() {
     home = ClusterDefaults.getDefaultHome();
+    sandbox = ClusterDefaults.getSandboxHome();
     props = Config.newBuilder()
-        .putAll(ClusterDefaults.getDefaultBinaries())
         .putAll(ClusterDefaults.getDefaultJars())
+        .putAll(ClusterDefaults.getSandboxBinaries())
         .build();
   }
 
   @Test
-  public void testDefaultBinaries() throws Exception {
+  public void testSandboxBinaries() throws Exception {
 
     Assert.assertEquals(
-        Defaults.executorBinary(),
-        Context.executorBinary(props)
+        Defaults.executorSandboxBinary(),
+        Context.executorSandboxBinary(props)
     );
 
     Assert.assertEquals(
-        Defaults.stmgrBinary(),
-        Context.stmgrBinary(props)
+        Defaults.stmgrSandboxBinary(),
+        Context.stmgrSandboxBinary(props)
     );
 
     Assert.assertEquals(
-        Defaults.tmasterBinary(),
-        Context.tmasterBinary(props)
+        Defaults.tmasterSandboxBinary(),
+        Context.tmasterSandboxBinary(props)
     );
 
     Assert.assertEquals(
-        Defaults.shellBinary(),
-        Context.shellBinary(props)
+        Defaults.shellSandboxBinary(),
+        Context.shellSandboxBinary(props)
     );
   }
 

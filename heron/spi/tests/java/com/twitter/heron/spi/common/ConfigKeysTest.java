@@ -140,20 +140,20 @@ public class ConfigKeysTest {
   @Test
   public void testBinaries() throws Exception {
     Assert.assertEquals(
-        "heron.binaries.executor", 
-        ConfigKeys.get("EXECUTOR_BINARY")
+        "heron.binaries.sandbox.executor", 
+        ConfigKeys.get("SANDBOX_EXECUTOR_BINARY")
     );
     Assert.assertEquals(
-        "heron.binaries.stmgr", 
-        ConfigKeys.get("STMGR_BINARY")
+        "heron.binaries.sandbox.stmgr", 
+        ConfigKeys.get("SANDBOX_STMGR_BINARY")
     );
     Assert.assertEquals(
-        "heron.binaries.tmaster", 
-        ConfigKeys.get("TMASTER_BINARY")
+        "heron.binaries.sandbox.tmaster", 
+        ConfigKeys.get("SANDBOX_TMASTER_BINARY")
     );
     Assert.assertEquals(
-        "heron.binaries.shell", 
-        ConfigKeys.get("SHELL_BINARY")
+        "heron.binaries.sandbox.shell", 
+        ConfigKeys.get("SANDBOX_SHELL_BINARY")
     );
     Assert.assertEquals(
         "heron.jars.scheduler", 

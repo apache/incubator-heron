@@ -33,7 +33,7 @@ public class ClusterConfigTest {
   @Test
   public void testClusterFile() throws Exception {
 
-    Config props = ClusterConfig.loadClusterConfig(basicConfig);
+    Config props = ClusterConfig.loadClusterConfig(Context.clusterFile(basicConfig));
 
     Assert.assertEquals(4, props.size());
 
@@ -46,28 +46,28 @@ public class ClusterConfigTest {
 
   @Test
   public void testDefaultsFile() throws Exception {
-    Config props = ClusterConfig.loadDefaultsConfig(basicConfig);
+    Config props = ClusterConfig.loadDefaultsConfig(Context.defaultsFile(basicConfig));
 
     Assert.assertEquals(10, props.size());
 
     Assert.assertEquals(
         "heron-executor", 
-        Context.executorBinary(props)
+        Context.executorSandboxBinary(props)
     );
 
     Assert.assertEquals(
         "heron-stmgr", 
-        Context.stmgrBinary(props)
+        Context.stmgrSandboxBinary(props)
     );
 
     Assert.assertEquals(
         "heron-tmaster",
-        Context.tmasterBinary(props)
+        Context.tmasterSandboxBinary(props)
     );
 
     Assert.assertEquals(
         "heron-shell",
-        Context.shellBinary(props)
+        Context.shellSandboxBinary(props)
     );
 
     Assert.assertEquals(
@@ -99,7 +99,7 @@ public class ClusterConfigTest {
 
   @Test
   public void testSchedulerFile() throws Exception {
-    Config props = ClusterConfig.loadSchedulerConfig(basicConfig);
+    Config props = ClusterConfig.loadSchedulerConfig(Context.schedulerFile(basicConfig));
 
     Assert.assertEquals(3, props.size());
 
@@ -121,7 +121,7 @@ public class ClusterConfigTest {
 
   @Test
   public void testPackingFile() throws Exception {
-    Config props = ClusterConfig.loadPackingConfig(basicConfig);
+    Config props = ClusterConfig.loadPackingConfig(Context.packingFile(basicConfig));
 
     Assert.assertEquals(1, props.size());
     Assert.assertEquals(
@@ -132,7 +132,7 @@ public class ClusterConfigTest {
 
   @Test
   public void testUploaderFile() throws Exception {
-    Config props = ClusterConfig.loadUploaderConfig(basicConfig);
+    Config props = ClusterConfig.loadUploaderConfig(Context.uploaderFile(basicConfig));
 
     Assert.assertEquals(2, props.size());
     Assert.assertEquals(
