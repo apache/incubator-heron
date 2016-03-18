@@ -68,8 +68,7 @@ def run(command, parser, cl_args, unknown_args):
         "--role " + cluster_role_env[1],
         "--environment " + cluster_role_env[2],
         "--heron_home " + utils.get_heron_dir(),
-        "--config_file" + config_path,
-        "--config_overrides " + base64.b64encode(config_overrides),
+        "--config_file " + config_path,
         "--topology_name " + topology_name,
         "--command " + command
     ]
