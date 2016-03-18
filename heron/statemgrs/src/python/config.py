@@ -15,13 +15,12 @@ class Config:
     }
   """
 
-  def __init__(self, conf_name):
-    conf_module = "heron.state"
-    conf_file = os.path.join("conf", conf_name + ".yaml")
+  def __init__(self, conf_file):
 
-    # Read the configuration file from package
-    confString = pkgutil.get_data("heron.statemgrs", conf_file)
-    self.locations = yaml.load(confString)
+    # Read the configuration file
+    with open(conf_file, 'r') as f:
+      self.locations = yaml.load(f)
+
     self.validate_state_locations()
 
   def validate_state_locations(self):

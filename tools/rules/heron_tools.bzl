@@ -7,10 +7,13 @@ def heron_tools_files():
 def heron_tools_bin_files():
     return [
         "//heron/tracker/src/python:heron-tracker",
+        "//heron/ui/src/python:heron-ui",
     ]
 
 def heron_tools_conf_files():
-    return []
+    return [
+        "//heron/statemgrs/conf:stateconfs",
+    ]
 
 def heron_tools_lib_files():
     return []

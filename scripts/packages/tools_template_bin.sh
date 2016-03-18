@@ -22,7 +22,7 @@ install_prefix=${1:-"/usr/local/herontools"}
 progname="$0"
 
 echo "Heron Tools installer"
-echo "--------------------"
+echo "---------------------"
 echo
 cat <<'EOF'
 %release_info%
@@ -129,6 +129,9 @@ echo -n "Uncompressing."
 if [ -f "${bin}/heron-tracker" ]; then
   rm -f "${bin}/heron-tracker"
 fi
+if [ -f "${bin}/heron-ui" ]; then
+  rm -f "${bin}/heron-ui"
+fi
 if [ -d "${base}" -a -x "${base}/bin/heron-tracker" ]; then
   rm -fr "${base}"
 fi
@@ -139,7 +142,7 @@ echo -n .
 unzip -q -o "${BASH_SOURCE[0]}" -d "${base}"
 tar xfz "${base}/heron-tools.tar.gz" -C "${base}"
 echo -n .
-chmod 0755 ${base}/bin/heron-tracker
+chmod 0755 ${base}/bin/heron-tracker ${base}/bin/heron-ui
 echo -n .
 chmod -R og-w "${base}"
 chmod -R og+rX "${base}"
@@ -147,6 +150,7 @@ chmod -R u+rwX "${base}"
 echo -n .
 
 ln -s "${base}/bin/heron-tracker" "${bin}/heron-tracker"
+ln -s "${base}/bin/heron-ui"      "${bin}/heron-ui"
 echo -n .
 
 rm "${base}/heron-tools.tar.gz"

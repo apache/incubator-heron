@@ -25,6 +25,14 @@ import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.Shutdown;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.HelpFormatter;
+
 /**
  * Main class of scheduler.
  */
@@ -86,15 +94,115 @@ public class SchedulerMain {
     return config;
   }
 
-  public static void main(String[] args) throws
-      ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
+  // Print usage options
+  private static void usage(Options options) {
+    HelpFormatter formatter = new HelpFormatter();
+    formatter.printHelp( "SchedulerMain", options );
+  }
 
-    String cluster = args[0];
-    String role = args[1];
-    String environ = args[2];
-    String topologyName = args[3];
-    String topologyJarFile = args[4];
-    int schedulerServerPort = Integer.parseInt(args[5]);
+  // Construct all required command line options
+  private static Options constructOptions() {
+    Options options = new Options();
+
+    Option cluster = Option.builder("c")
+        .desc("Cluster name in which the topology needs to run on")
+        .longOpt("cluster")
+        .hasArgs()
+        .argName("cluster")
+        .required()
+        .build();
+
+    Option role = Option.builder("r")
+        .desc("Role under which the topology needs to run")
+        .longOpt("role")
+        .hasArgs()
+        .argName("role")
+        .required()
+        .build();
+
+    Option environment = Option.builder("e")
+        .desc("Environment under which the topology needs to run")
+        .longOpt("environment")
+        .hasArgs()
+        .argName("environment")
+        .required()
+        .build();
+
+    Option topologyName = Option.builder("n")
+        .desc("Name of the topology")
+        .longOpt("topology_name")
+        .hasArgs()
+        .argName("topology name")
+        .required()
+        .build();
+
+    Option topologyJar = Option.builder("f")
+        .desc("Topology jar file path")
+        .longOpt("topology_jar")
+        .hasArgs()
+        .argName("topology jar file")
+        .required()
+        .build();
+
+    Option schedulerHTTPPort = Option.builder("p")
+        .desc("Http Port number on which the scheduler listens for requests")
+        .longOpt("http_port")
+        .hasArgs()
+        .argName("http port")
+        .required()
+        .build();
+
+    options.addOption(cluster);
+    options.addOption(role);
+    options.addOption(environment);
+    options.addOption(topologyName);
+    options.addOption(topologyJar);
+    options.addOption(schedulerHTTPPort);
+
+    return options;
+  }
+
+  // construct command line help options
+  private static Options constructHelpOptions() {
+    Options options = new Options();
+    Option help = Option.builder("h")
+        .desc("List all options and their description")
+        .longOpt("help")
+        .build();
+
+    options.addOption(help);
+    return options;
+  }
+
+  public static void main(String[] args) throws
+      ClassNotFoundException, InstantiationException, IllegalAccessException, IOException, ParseException {
+
+    Options options = constructOptions();
+    Options helpOptions = constructHelpOptions();
+    CommandLineParser parser = new DefaultParser();
+    // parse the help options first.
+    CommandLine cmd = parser.parse(helpOptions, args, true);;
+
+    if(cmd.hasOption("h")) {
+      usage(options);
+      return;
+    }
+
+    try {
+      // Now parse the required options
+      cmd = parser.parse(options, args);
+    } catch(ParseException e) {
+      LOG.severe("Error parsing command line options: " + e.getMessage());
+      usage(options);
+      System.exit(1);
+    }
+
+    String cluster = cmd.getOptionValue("cluster");
+    String role = cmd.getOptionValue("role");
+    String environ = cmd.getOptionValue("environment");
+    String topologyName = cmd.getOptionValue("topology_name");
+    String topologyJarFile = cmd.getOptionValue("topology_jar");
+    int schedulerServerPort = Integer.parseInt(cmd.getOptionValue("http_port"));
 
     // locate the topology definition file in the sandbox/working directory
     String topologyDefnFile = TopologyUtils.lookUpTopologyDefnFile(".", topologyName);
@@ -152,7 +260,7 @@ public class SchedulerMain {
     String statemgrClass = Context.stateManagerClass(config);
     IStateManager statemgr = (IStateManager) Class.forName(statemgrClass).newInstance();
 
-    // create an instance of the packing class 
+    // create an instance of the packing class
     String packingClass = Context.packingClass(config);
     IPacking packing = (IPacking) Class.forName(packingClass).newInstance();
 
@@ -205,7 +313,7 @@ public class SchedulerMain {
       Runtime.schedulerShutdown(ytruntime).await();
     } catch (Exception e) {
       // Log and exit the process
-      LOG.log(Level.SEVERE, "Failed to run scheduler for topology: {0}. Existing", topology.getName());
+      LOG.log(Level.SEVERE, "Failed to run scheduler for topology: {0}. Exiting", topology.getName());
       System.exit(1);
     } finally {
       // Clean the resources

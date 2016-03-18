@@ -106,10 +106,17 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "heron-tools-conf",
+    package_dir = "conf",
+    files = heron_tools_conf_files(),
+)
+
+pkg_tar(
     name = "heron-tools",
     extension = "tar.gz",
     deps = [
         ":heron-tools-bin",
+        ":heron-tools-conf",
     ],
 )
 
