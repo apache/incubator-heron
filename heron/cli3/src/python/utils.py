@@ -18,7 +18,7 @@ ETC_DIR  = "etc"
 LIB_DIR  = "lib"
 
 # directories for heron sandbox
-SANDBOX_CONF_DIR = "heron-conf"
+SANDBOX_CONF_DIR = "./heron-conf"
 
 ################################################################################
 # Create a tar file with a given set of files
