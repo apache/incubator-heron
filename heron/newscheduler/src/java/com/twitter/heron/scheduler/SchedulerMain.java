@@ -4,6 +4,14 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.FileUtils;
@@ -24,14 +32,6 @@ import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.Shutdown;
 import com.twitter.heron.spi.utils.TopologyUtils;
-
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.HelpFormatter;
 
 /**
  * Main class of scheduler.
@@ -97,7 +97,7 @@ public class SchedulerMain {
   // Print usage options
   private static void usage(Options options) {
     HelpFormatter formatter = new HelpFormatter();
-    formatter.printHelp( "SchedulerMain", options );
+    formatter.printHelp("SchedulerMain", options);
   }
 
   // Construct all required command line options
@@ -181,9 +181,10 @@ public class SchedulerMain {
     Options helpOptions = constructHelpOptions();
     CommandLineParser parser = new DefaultParser();
     // parse the help options first.
-    CommandLine cmd = parser.parse(helpOptions, args, true);;
+    CommandLine cmd = parser.parse(helpOptions, args, true);
+    ;
 
-    if(cmd.hasOption("h")) {
+    if (cmd.hasOption("h")) {
       usage(options);
       return;
     }
@@ -191,7 +192,7 @@ public class SchedulerMain {
     try {
       // Now parse the required options
       cmd = parser.parse(options, args);
-    } catch(ParseException e) {
+    } catch (ParseException e) {
       LOG.severe("Error parsing command line options: " + e.getMessage());
       usage(options);
       System.exit(1);
@@ -236,9 +237,12 @@ public class SchedulerMain {
     // Init the logging setting and redirect the stdout and stderr to logging
     // For now we just set the logging level as INFO; later we may accept an argument to set it.
     Level loggingLevel = Level.INFO;
-    // TODO(mfu): use systemConfig.getHeronLoggingDirectory() in future
-    // TODO(mfu): currently the folder creation is after the start of scheduler
-    String loggingDir = "./";
+    // TODO(mfu): The folder creation may be duplicated with heron-executor in future
+    // TODO(mfu): Remove the creation in future if feasible
+    String loggingDir = systemConfig.getHeronLoggingDirectory();
+    if (!FileUtils.isDirectoryExists(loggingDir)) {
+      FileUtils.createDirectory(loggingDir);
+    }
 
     // Log to file
     LoggingHelper.loggerInit(loggingLevel, true);
