@@ -29,7 +29,7 @@ public class RuntimeManagerMain {
   // Print usage options
   private static void usage(Options options) {
     HelpFormatter formatter = new HelpFormatter();
-    formatter.printHelp( "SchedulerMain", options );
+    formatter.printHelp( "RuntimeManagerMain", options );
   }
 
   // Construct all required command line options
