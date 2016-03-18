@@ -73,6 +73,7 @@ public class SubmitterMain {
   protected static Config defaultConfigs(String heronHome, String configPath) {
     Config config = Config.newBuilder()
         .putAll(ClusterDefaults.getDefaults())
+        .putAll(ClusterDefaults.getSandboxDefaults())
         .putAll(ClusterConfig.loadConfig(heronHome, configPath))
         .build();
     return config;
