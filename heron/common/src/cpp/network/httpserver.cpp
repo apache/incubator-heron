@@ -46,10 +46,11 @@ HTTPServer::~HTTPServer()
 
 sp_int32 HTTPServer::Start()
 {
-  sp_string host = options_.get_host();
   sp_int32 port = options_.get_port();
 
-  sp_int32 retval = evhttp_bind_socket(http_, host.c_str(), port);
+  LOG(INFO) << "Starting Http Server bound to " << "0.0.0.0" << ":" << port ;
+  // Bind to INADDR_ANY instead of using the hostname
+  sp_int32 retval = evhttp_bind_socket(http_, "0.0.0.0", port);
   if (retval == 0) {
     // record the successfully bound hostport
     hostports_.push_back(std::make_pair(host, port));
