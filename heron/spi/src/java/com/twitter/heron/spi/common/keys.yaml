@@ -13,6 +13,7 @@ JAVA_HOME:                       heron.directory.java.home
 # keys for heron configuration files
 ################################################################################
 CLUSTER_YAML:                    heron.config.file.cluster.yaml
+CLIENT_YAML:                     heron.config.file.client.yaml
 DEFAULTS_YAML:                   heron.config.file.defaults.yaml
 METRICS_YAML:                    heron.config.file.metrics.yaml
 PACKING_YAML:                    heron.config.file.packing.yaml
@@ -42,12 +43,8 @@ PACKING_CLASS:                   heron.class.packing.algorithm
 STATE_MANAGER_CLASS:             heron.class.state.manager
 
 ################################################################################
-# keys for config provided user binaries
+# keys for config provided user binaries and jars
 ################################################################################
-EXECUTOR_BINARY:                 heron.binaries.executor
-STMGR_BINARY:                    heron.binaries.stmgr
-TMASTER_BINARY:                  heron.binaries.tmaster
-SHELL_BINARY:                    heron.binaries.shell
 SCHEDULER_JAR:                   heron.jars.scheduler
 
 ################################################################################
@@ -99,12 +96,6 @@ STATEMGR_CLASSPATH:              heron.classpath.statemgr
 UPLOADER_CLASSPATH:              heron.classpath.uploader
 
 ################################################################################
-# keys for config provided paths
-################################################################################
-HERON_SANDBOX_HOME:              heron.directory.sandbox.home
-HERON_SANDBOX_CONF:              heron.directory.sandbox.conf
-
-################################################################################
 # keys for run time config
 ################################################################################
 TOPOLOGY_CLASSPATH:              heron.runtime.topology.class.path
@@ -131,3 +122,48 @@ HERON_RELEASE_PACKAGE_VERSION:   heron.release.package.version
 HERON_UPLOADER_VERSION:          heron.uploader.version
 
 HERON_AURORA_BIND_PREFIX:        heron.aurora.bind.
+
+################################################################################
+# keys for config provided paths
+################################################################################
+HERON_SANDBOX_HOME:              heron.directory.sandbox.home
+HERON_SANDBOX_BIN:               heron.directory.sandbox.bin
+HERON_SANDBOX_CONF:              heron.directory.sandbox.conf
+HERON_SANDBOX_LIB:               heron.directory.sandbox.lib
+HERON_SANDBOX_JAVA_HOME:         heron.directory.sandbox.java.home
+
+################################################################################
+# keys for sandbox heron configuration files
+################################################################################
+SANDBOX_CLUSTER_YAML:            heron.config.sandbox.file.cluster.yaml
+SANDBOX_DEFAULTS_YAML:           heron.config.sandbox.file.defaults.yaml
+SANDBOX_METRICS_YAML:            heron.config.sandbox.file.metrics.yaml
+SANDBOX_PACKING_YAML:            heron.config.sandbox.file.packing.yaml
+SANDBOX_SCHEDULER_YAML:          heron.config.sandbox.file.scheduler.yaml
+SANDBOX_STATEMGR_YAML:           heron.config.sandbox.file.statemgr.yaml
+SANDBOX_SYSTEM_YAML:             heron.config.sandbox.file.system.yaml
+SANDBOX_UPLOADER_YAML:           heron.config.sandbox.file.uploader.yaml
+
+################################################################################
+# keys for sandbox config provided user binaries
+################################################################################
+SANDBOX_EXECUTOR_BINARY:         heron.binaries.sandbox.executor
+SANDBOX_STMGR_BINARY:            heron.binaries.sandbox.stmgr
+SANDBOX_TMASTER_BINARY:          heron.binaries.sandbox.tmaster
+SANDBOX_SHELL_BINARY:            heron.binaries.sandbox.shell
+SANDBOX_SCHEDULER_JAR:           heron.jars.sandbox.scheduler
+
+################################################################################
+# keys for config provided files and directories
+################################################################################
+SANDBOX_LOGGING_DIRECTORY:       heron.directory.sandbox.logging
+
+################################################################################
+# keys for sandbox config provided paths
+################################################################################
+SANDBOX_INSTANCE_CLASSPATH:      heron.classpath.sandbox.instance
+SANDBOX_METRICSMGR_CLASSPATH:    heron.classpath.sandbox.metrics.manager
+SANDBOX_PACKING_CLASSPATH:       heron.classpath.sandbox.packing
+SANDBOX_SCHEDULER_CLASSPATH:     heron.classpath.sandbox.scheduler
+SANDBOX_STATEMGR_CLASSPATH:      heron.classpath.sandbox.statemgr
+SANDBOX_UPLOADER_CLASSPATH:      heron.classpath.sandbox.uploader
