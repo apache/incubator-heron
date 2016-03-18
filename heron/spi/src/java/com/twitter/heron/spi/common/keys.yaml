@@ -13,6 +13,7 @@ JAVA_HOME:                       heron.directory.java.home
 # keys for heron configuration files
 ################################################################################
 CLUSTER_YAML:                    heron.config.file.cluster.yaml
+CLIENT_YAML:                     heron.config.file.client.yaml
 DEFAULTS_YAML:                   heron.config.file.defaults.yaml
 METRICS_YAML:                    heron.config.file.metrics.yaml
 PACKING_YAML:                    heron.config.file.packing.yaml
