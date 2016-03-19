@@ -26,8 +26,8 @@ public class Context {
     return cfg.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"));
   }
 
-  public static int topologyContainerIdentifier(Config cfg) {
-    return cfg.getIntegerValue(ConfigKeys.get("TOPOLOGY_CONTAINER_IDENTIFIER"));
+  public static int topologyContainerId(Config cfg) {
+    return cfg.getIntegerValue(ConfigKeys.get("TOPOLOGY_CONTAINER_ID"));
   }
 
   public static String uploaderClass(Config cfg) {
@@ -143,13 +143,13 @@ public class Context {
   }
 
   public static String heronHome(Config cfg) {
-    return cfg.getStringValue(ConfigKeys.get("HERON_HOME")); 
+    return cfg.getStringValue(ConfigKeys.get("HERON_HOME"));
   }
 
   public static String heronBin(Config cfg) {
-    return cfg.getStringValue(ConfigKeys.get("HERON_BIN")); 
+    return cfg.getStringValue(ConfigKeys.get("HERON_BIN"));
   }
-  
+
   public static String heronConf(Config cfg) {
     return cfg.getStringValue(ConfigKeys.get("HERON_CONF"));
   }
@@ -200,13 +200,13 @@ public class Context {
   }
 
   public static String heronSandboxHome(Config cfg) {
-    return cfg.getStringValue(ConfigKeys.get("HERON_SANDBOX_HOME")); 
+    return cfg.getStringValue(ConfigKeys.get("HERON_SANDBOX_HOME"));
   }
 
   public static String heronSandboxBin(Config cfg) {
-    return cfg.getStringValue(ConfigKeys.get("HERON_SANDBOX_BIN")); 
+    return cfg.getStringValue(ConfigKeys.get("HERON_SANDBOX_BIN"));
   }
-  
+
   public static String heronSandboxConf(Config cfg) {
     return cfg.getStringValue(ConfigKeys.get("HERON_SANDBOX_CONF"));
   }

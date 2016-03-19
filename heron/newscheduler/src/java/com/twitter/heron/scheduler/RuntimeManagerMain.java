@@ -77,10 +77,10 @@ public class RuntimeManagerMain {
         .build();
 
     Option configFile = Option.builder("p")
-        .desc("Path of the config file")
-        .longOpt("config_file")
+        .desc("Path of the config files")
+        .longOpt("config_path")
         .hasArgs()
-        .argName("config file")
+        .argName("config path")
         .required()
         .build();
 
@@ -185,7 +185,7 @@ public class RuntimeManagerMain {
         .put(Keys.cluster(), cluster)
         .put(Keys.role(), role)
         .put(Keys.environ(), environ)
-        .put(Keys.topologyContainerIdentifier(), containerId);
+        .put(Keys.topologyContainerId(), containerId);
 
     Config.Builder topologyConfig = Config.newBuilder()
         .put(Keys.topologyName(), topologyName);
