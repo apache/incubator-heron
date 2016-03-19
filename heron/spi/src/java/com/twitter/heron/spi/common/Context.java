@@ -58,6 +58,10 @@ public class Context {
     return cfg.getStringValue(Keys.clusterFile());
   }
 
+  public static String clientFile(Config cfg) {
+    return cfg.getStringValue(Keys.clientFile());
+  }
+
   public static String defaultsFile(Config cfg) {
     return cfg.getStringValue(Keys.defaultsFile());
   }
@@ -86,22 +90,6 @@ public class Context {
     return cfg.getStringValue(Keys.uploaderFile());
   }
 
-  public static String executorBinary(Config cfg) {
-    return cfg.getStringValue(ConfigKeys.get("EXECUTOR_BINARY"));
-  }
-
-  public static String stmgrBinary(Config cfg) {
-    return cfg.getStringValue(ConfigKeys.get("STMGR_BINARY"));
-  }
-
-  public static String tmasterBinary(Config cfg) {
-    return cfg.getStringValue(ConfigKeys.get("TMASTER_BINARY"));
-  }
-
-  public static String shellBinary(Config cfg) {
-    return cfg.getStringValue(ConfigKeys.get("SHELL_BINARY"));
-  }
-
   public static String schedulerJar(Config cfg) {
     return cfg.getStringValue(ConfigKeys.get("SCHEDULER_JAR"));
   }
@@ -118,10 +106,6 @@ public class Context {
     return cfg.getStringValue(ConfigKeys.get("CORE_PACKAGE_URI"));
   }
 
-  public static String logDirectory(Config cfg) {
-    return cfg.getStringValue(ConfigKeys.get("LOGGING_DIRECTORY"));
-  }
- 
   public static String systemConfigFile(Config cfg) {
     return cfg.getStringValue(ConfigKeys.get("SYSTEM_YAML"));
   }
@@ -213,5 +197,105 @@ public class Context {
   public static final Boolean isZkStateManager(Config cfg) {
     String stateManagerClass = cfg.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS"));
     return stateManagerClass.equals(Constants.ZK_STATE_MANAGER_CLASS) ? true : false;
+  }
+
+  public static String heronSandboxHome(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("HERON_SANDBOX_HOME")); 
+  }
+
+  public static String heronSandboxBin(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("HERON_SANDBOX_BIN")); 
+  }
+  
+  public static String heronSandboxConf(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("HERON_SANDBOX_CONF"));
+  }
+
+  public static final String heronSandboxLib(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("HERON_SANDBOX_LIB"));
+  }
+
+  public static final String javaSandboxHome(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("HERON_SANDBOX_JAVA_HOME"));
+  }
+
+  public static String clusterSandboxFile(Config cfg) {
+    return cfg.getStringValue(Keys.clusterSandboxFile());
+  }
+
+  public static String defaultsSandboxFile(Config cfg) {
+    return cfg.getStringValue(Keys.defaultsSandboxFile());
+  }
+
+  public static String metricsSinksSandboxFile(Config cfg) {
+    return cfg.getStringValue(Keys.metricsSinksSandboxFile());
+  }
+
+  public static String packingSandboxFile(Config cfg) {
+    return cfg.getStringValue(Keys.packingSandboxFile());
+  }
+
+  public static String schedulerSandboxFile(Config cfg) {
+    return cfg.getStringValue(Keys.schedulerSandboxFile());
+  }
+
+  public static String stateManagerSandboxFile(Config cfg) {
+    return cfg.getStringValue(Keys.stateManagerSandboxFile());
+  }
+
+  public static String systemConfigSandboxFile(Config cfg) {
+    return cfg.getStringValue(Keys.systemSandboxFile());
+  }
+
+  public static String uploaderSandboxFile(Config cfg) {
+    return cfg.getStringValue(Keys.uploaderSandboxFile());
+  }
+
+  public static String executorSandboxBinary(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("SANDBOX_EXECUTOR_BINARY"));
+  }
+
+  public static String stmgrSandboxBinary(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("SANDBOX_STMGR_BINARY"));
+  }
+
+  public static String tmasterSandboxBinary(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("SANDBOX_TMASTER_BINARY"));
+  }
+
+  public static String shellSandboxBinary(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("SANDBOX_SHELL_BINARY"));
+  }
+
+  public static String schedulerSandboxJar(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("SANDBOX_SCHEDULER_JAR"));
+  }
+
+  public static String logSandboxDirectory(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("SANDBOX_LOGGING_DIRECTORY"));
+  }
+
+  public static final String instanceSandboxClassPath(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("SANDBOX_INSTANCE_CLASSPATH"));
+  }
+
+  public static final String metricsManagerSandboxClassPath(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("SANDBOX_METRICSMGR_CLASSPATH"));
+  }
+
+  public static final String packingSandboxClassPath(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("SANDBOX_PACKING_CLASSPATH"));
+  }
+
+  public static final String schedulerSandboxClassPath(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("SANDBOX_SCHEDULER_CLASSPATH"));
+  }
+
+  public static final String stateManagerSandboxClassPath(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("SANDBOX_STATEMGR_CLASSPATH"));
+  }
+
+  public static final String uploaderSandboxClassPath(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("SANDBOX_UPLOADER_CLASSPATH"));
   }
 }

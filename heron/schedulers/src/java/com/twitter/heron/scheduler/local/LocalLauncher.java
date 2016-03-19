@@ -93,32 +93,16 @@ public class LocalLauncher implements ILauncher {
 
     TopologyAPI.Topology topology = Runtime.topology(runtime);
 
-    // get all the config, need to be passed as command line to heron executor
-    String sandboxHome = Defaults.sandboxHome();
-    String sandboxConf = Defaults.sandboxConf();
-    Config sandboxConfig = Config.expand(
-        Config.newBuilder()
-            .putAll(ClusterDefaults.getDefaults())
-            .putAll(ClusterConfig.loadBasicConfig(sandboxHome, sandboxConf))
-            .build());
-
-    LOG.info("loaded sandbox config " + sandboxConfig);
-
     // download the core and topology packages into the working directory
     if (!downloadAndExtractPackages()) {
       LOG.severe("Failed to download the core and topology packages");
       return false;
     }
 
-    String configInBase64 =
-        DatatypeConverter.printBase64Binary(sandboxConfig.asString().getBytes(Charset.forName("UTF-8")));
-
-    System.out.println(configInBase64);
-
     String schedulerClassPath = new StringBuilder()
-        .append(LocalContext.schedulerClassPath(sandboxConfig)).append(":")
-        .append(LocalContext.packingClassPath(sandboxConfig)).append(":")
-        .append(LocalContext.stateManagerClassPath(sandboxConfig))
+        .append(LocalContext.schedulerSandboxClassPath(config)).append(":")
+        .append(LocalContext.packingSandboxClassPath(config)).append(":")
+        .append(LocalContext.stateManagerSandboxClassPath(config))
         .toString();
 
     String schedulerCmd = String.format("%s %s %s %s %s %s %s %s %s %s",
@@ -135,7 +119,6 @@ public class LocalLauncher implements ILauncher {
     );
 
     LOG.info("Scheduler command line: " + schedulerCmd.toString());
-
 
     Process p = ShellUtils.runASyncProcess(true, schedulerCmd.toString(),
         new File(topologyWorkingDirectory));

@@ -84,24 +84,24 @@ public class ConfigDefaultsTest {
   @Test
   public void testBinaries() throws Exception {
     Assert.assertEquals(
-        "${HERON_BIN}/heron-executor", 
-        ConfigDefaults.get("EXECUTOR_BINARY")
+        "${HERON_SANDBOX_BIN}/heron-executor", 
+        ConfigDefaults.get("SANDBOX_EXECUTOR_BINARY")
     );
     Assert.assertEquals(
-        "${HERON_BIN}/heron-stmgr", 
-        ConfigDefaults.get("STMGR_BINARY")
+        "${HERON_SANDBOX_BIN}/heron-stmgr", 
+        ConfigDefaults.get("SANDBOX_STMGR_BINARY")
     );
     Assert.assertEquals(
-        "${HERON_BIN}/heron-tmaster", 
-        ConfigDefaults.get("TMASTER_BINARY")
+        "${HERON_SANDBOX_BIN}/heron-tmaster", 
+        ConfigDefaults.get("SANDBOX_TMASTER_BINARY")
     );
     Assert.assertEquals(
-        "${HERON_BIN}/heron-shell", 
-        ConfigDefaults.get("SHELL_BINARY")
+        "${HERON_SANDBOX_BIN}/heron-shell", 
+        ConfigDefaults.get("SANDBOX_SHELL_BINARY")
     );
     Assert.assertEquals(
         "heron.jars.scheduler", 
-        "${HERON_LIB}/heron-scheduler.jar", 
+        "${HERON_LIB}/scheduler/heron-scheduler.jar", 
         ConfigDefaults.get("SCHEDULER_JAR")
     );
   }

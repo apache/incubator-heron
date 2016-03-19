@@ -1,0 +1,2 @@
+# location of the core package
+heron.package.core.uri:                      file://${HERON_DIST}/heron-core.tar.gz
