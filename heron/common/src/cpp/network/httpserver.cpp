@@ -46,6 +46,7 @@ HTTPServer::~HTTPServer()
 
 sp_int32 HTTPServer::Start()
 {
+  sp_string host = options_.get_host();
   sp_int32 port = options_.get_port();
 
   LOG(INFO) << "Starting Http Server bound to " << "0.0.0.0" << ":" << port ;
