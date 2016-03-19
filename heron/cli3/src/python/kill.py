@@ -64,13 +64,14 @@ def run(command, parser, cl_args, unknown_args):
     config_overrides = utils.parse_cmdline_override(cl_args)
 
     new_args = [
-        "--cluster " + cluster_role_env[0],
-        "--role " + cluster_role_env[1],
-        "--environment " + cluster_role_env[2],
-        "--heron_home " + utils.get_heron_dir(),
-        "--config_file " + config_path,
-        "--topology_name " + topology_name,
-        "--command " + command
+        "--cluster", cluster_role_env[0],
+        "--role", cluster_role_env[1],
+        "--environment", cluster_role_env[2],
+        "--heron_home", utils.get_heron_dir(),
+        "--config_file", config_path,
+        "--config_overrides", base64.b64encode(config_overrides),
+        "--topology_name", topology_name,
+        "--command", command,
     ]
 
     lib_jars = utils.get_heron_libs(jars.scheduler_jars() + jars.statemgr_jars())
