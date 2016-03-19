@@ -130,8 +130,8 @@ public class Keys {
     return ConfigKeys.get("TOPOLOGY_PACKAGE_TYPE");
   }
 
-  public static String topologyContainerIdentifier() {
-    return ConfigKeys.get("TOPOLOGY_CONTAINER_IDENTIFIER");
+  public static String topologyContainerId() {
+    return ConfigKeys.get("TOPOLOGY_CONTAINER_ID");
   }
 
   public static String stmgrRam() {

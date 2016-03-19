@@ -23,7 +23,7 @@ def create_parser(subparsers):
   parser = subparsers.add_parser(
       'restart',
       help='Restart a topology',
-      usage = "%(prog)s [options] cluster/[role]/[env] topology-name [shard-identifier]",
+      usage = "%(prog)s [options] cluster/[role]/[env] topology-name [container-id]",
       add_help = False)
 
   args.add_titles(parser)
@@ -31,7 +31,7 @@ def create_parser(subparsers):
   args.add_topology(parser)
 
   parser.add_argument(
-      'container-identifier',
+      'container-id',
       nargs='?',
       type=int,
       default=-1,
@@ -74,7 +74,7 @@ def run(command, parser, cl_args, unknown_args):
         "--role", cluster_role_env[1],
         "--environment", cluster_role_env[2],
         "--heron_home", utils.get_heron_dir(),
-        "--config_file", config_path,
+        "--config_path", config_path,
         "--config_overrides", base64.b64encode(config_overrides),
         "--topology_name", topology_name,
         "--command", command,
