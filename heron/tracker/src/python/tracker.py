@@ -8,7 +8,7 @@ from heron.tracker.src.python.log import Log as LOG
 
 from heron.proto import topology_pb2
 
-from heron.common.src.python.topology import Topology
+from heron.tracker.src.python.topology import Topology
 from heron.statemgrs.src.python import statemanagerfactory
 
 class Tracker:

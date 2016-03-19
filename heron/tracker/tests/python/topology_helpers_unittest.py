@@ -2,8 +2,8 @@ import unittest2 as unittest
 from mock import patch
 
 from heron.common.src.python import constants
-from heron.common.src.python import topology_helpers
-from heron.common.src.python.topology import Topology
+from heron.tracker.src.python import topology_helpers
+from heron.tracker.src.python.topology import Topology
 from mock_proto import MockProto
 
 class TopologyHelpersTest(unittest.TestCase):
