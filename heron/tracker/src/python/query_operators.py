@@ -2,6 +2,8 @@ import math
 import tornado.httpclient
 import tornado.gen
 
+from heron.tracker.src.python.metricstimeline import getMetricsTimeline
+
 #####################################################################
 # Data Structure for fetched Metrics
 #####################################################################
@@ -87,7 +89,7 @@ class TS(Operator):
     # Fetch metrics for start-60 to end+60 because the minute mark
     # may be a little skewed. By getting a couple more values,
     # we can then truncate based on the interval needed.
-    metrics = yield tracker.getMetricsTimeline(
+    metrics = yield getMetricsTimeline(
         tmaster, self.component, [self.metricName], self.instances,
         start - 60, end + 60)
     if not metrics:

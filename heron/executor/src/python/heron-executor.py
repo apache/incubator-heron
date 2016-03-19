@@ -50,6 +50,9 @@ def stmgr_list(count):
 def metricsmgr_list(count):
   return id_list("metricsmgr-", 0, count)
 
+def heron_shell_list(count):
+  return id_list("heron-shell-", 0, count)
+
 def get_heron_executor_process_name(shard_id):
   return 'heron-executor-' + str(shard_id)
 
@@ -78,6 +81,7 @@ def atomic_write_file(path, content):
 
 def log_pid_for_process(process_name, pid):
   filename = get_process_pid_filename(process_name)
+  do_print('Logging pid %d to file %s' %(pid, filename))
   atomic_write_file(filename, str(pid))
 
 class HeronExecutor:
@@ -125,6 +129,7 @@ class HeronExecutor:
     self.topology_jar_file = args[20]
     self.stmgr_ids = stmgr_list(len(self.instance_distribution))
     self.metricsmgr_ids = metricsmgr_list(len(self.instance_distribution))
+    self.heron_shell_ids = heron_shell_list(len(self.instance_distribution))
     self.heron_java_home = args[21]
     self.shell_port = args[22]
     self.log_dir = args[23]
@@ -311,7 +316,7 @@ class HeronExecutor:
     """
     retval = {}
 
-    retval[self.heron_shell_binary] = ['%s' % self.heron_shell_binary,
+    retval[self.heron_shell_ids[self.shard]] = ['%s' % self.heron_shell_binary,
                                        '--port=%s' % self.shell_port,
                                        '--log_file_prefix=%s/heron-shell.log' % self.log_dir]
 

@@ -62,22 +62,6 @@ public class Keys {
     return ConfigKeys.get("STATE_MANAGER_CLASS");
   }
 
-  public static String executorBinary() {
-    return ConfigKeys.get("EXECUTOR_BINARY");
-  }
-
-  public static String stmgrBinary() {
-    return ConfigKeys.get("STMGR_BINARY");
-  }
-
-  public static String tmasterBinary() {
-    return ConfigKeys.get("TMASTER_BINARY");
-  }
-
-  public static String shellBinary() {
-    return ConfigKeys.get("SHELL_BINARY");
-  }
-
   public static String schedulerJar() {
     return ConfigKeys.get("SCHEDULER_JAR");
   }
@@ -94,12 +78,12 @@ public class Keys {
     return ConfigKeys.get("CORE_PACKAGE_URI");
   }
 
-  public static String logDirectory() {
-    return ConfigKeys.get("LOGGING_DIRECTORY");
-  }
-
   public static String clusterFile() {
     return ConfigKeys.get("CLUSTER_YAML");
+  }
+
+  public static String clientFile() {
+    return ConfigKeys.get("CLIENT_YAML");
   }
 
   public static String defaultsFile() {
@@ -190,14 +174,6 @@ public class Keys {
     return ConfigKeys.get("HERON_ETC");
   }
 
-  public static String heronSandboxHome() {
-    return ConfigKeys.get("HERON_SANDBOX_HOME");
-  }
-
-  public static String heronSandboxConf() {
-    return ConfigKeys.get("HERON_SANDBOX_CONF");
-  }
-
   public static String instanceClassPath() {
     return ConfigKeys.get("INSTANCE_CLASSPATH");
   }
@@ -268,5 +244,105 @@ public class Keys {
 
   public static String javaHome() {
     return ConfigKeys.get("JAVA_HOME");
+  }
+
+  public static String heronSandboxHome() {
+    return ConfigKeys.get("HERON_SANDBOX_HOME");
+  }
+
+  public static String heronSandboxBin() {
+    return ConfigKeys.get("HERON_SANDBOX_BIN");
+  }
+
+  public static String heronSandboxConf() {
+    return ConfigKeys.get("HERON_SANDBOX_CONF");
+  }
+
+  public static String heronSandboxLib() {
+    return ConfigKeys.get("HERON_SANDBOX_LIB");
+  }
+
+  public static String javaSandboxHome() {
+    return ConfigKeys.get("HERON_SANDBOX_JAVA_HOME");
+  }
+
+  public static String clusterSandboxFile() {
+    return ConfigKeys.get("SANDBOX_CLUSTER_YAML");
+  }
+
+  public static String defaultsSandboxFile() {
+    return ConfigKeys.get("SANDBOX_DEFAULTS_YAML");
+  }
+
+  public static String metricsSinksSandboxFile() {
+    return ConfigKeys.get("SANDBOX_METRICS_YAML");
+  }
+
+  public static String packingSandboxFile() {
+    return ConfigKeys.get("SANDBOX_PACKING_YAML");
+  }
+
+  public static String schedulerSandboxFile() {
+    return ConfigKeys.get("SANDBOX_SCHEDULER_YAML");
+  }
+
+  public static String stateManagerSandboxFile() {
+    return ConfigKeys.get("SANDBOX_STATEMGR_YAML");
+  }
+
+  public static String systemSandboxFile() {
+    return ConfigKeys.get("SANDBOX_SYSTEM_YAML");
+  }
+
+  public static String uploaderSandboxFile() {
+    return ConfigKeys.get("SANDBOX_UPLOADER_YAML");
+  }
+
+  public static String executorSandboxBinary() {
+    return ConfigKeys.get("SANDBOX_EXECUTOR_BINARY");
+  }
+
+  public static String stmgrSandboxBinary() {
+    return ConfigKeys.get("SANDBOX_STMGR_BINARY");
+  }
+
+  public static String tmasterSandboxBinary() {
+    return ConfigKeys.get("SANDBOX_TMASTER_BINARY");
+  }
+
+  public static String shellSandboxBinary() {
+    return ConfigKeys.get("SANDBOX_SHELL_BINARY");
+  }
+
+  public static String schedulerSandboxJar() {
+    return ConfigKeys.get("SANDBOX_SCHEDULER_JAR");
+  }
+
+  public static String logSandboxDirectory() {
+    return ConfigKeys.get("SANDBOX_LOGGING_DIRECTORY");
+  }
+
+  public static String instanceSandboxClassPath() {
+    return ConfigKeys.get("SANDBOX_INSTANCE_CLASSPATH");
+  }
+
+  public static String metricsManagerSandboxClassPath() {
+    return ConfigKeys.get("SANDBOX_METRICSMGR_CLASSPATH");
+  }
+
+  public static String packingSandboxClassPath() {
+    return ConfigKeys.get("SANDBOX_PACKING_CLASSPATH");
+  }
+
+  public static String schedulerSandboxClassPath() {
+    return ConfigKeys.get("SANDBOX_SCHEDULER_CLASSPATH");
+  }
+
+  public static String stateManagerSandboxClassPath() {
+    return ConfigKeys.get("SANDBOX_STATEMGR_CLASSPATH");
+  }
+
+  public static String uploaderSandboxClassPath() {
+    return ConfigKeys.get("SANDBOX_UPLOADER_CLASSPATH");
   }
 }

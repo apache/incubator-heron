@@ -129,6 +129,9 @@ echo -n "Uncompressing."
 if [ -f "${bin}/heron-tracker" ]; then
   rm -f "${bin}/heron-tracker"
 fi
+if [ -f "${bin}/heron-ui" ]; then
+  rm -f "${bin}/heron-ui"
+fi
 if [ -d "${base}" -a -x "${base}/bin/heron-tracker" ]; then
   rm -fr "${base}"
 fi
@@ -139,7 +142,7 @@ echo -n .
 unzip -q -o "${BASH_SOURCE[0]}" -d "${base}"
 tar xfz "${base}/heron-tools.tar.gz" -C "${base}"
 echo -n .
-chmod 0755 ${base}/bin/heron-tracker
+chmod 0755 ${base}/bin/heron-tracker ${base}/bin/heron-ui
 echo -n .
 chmod -R og-w "${base}"
 chmod -R og+rX "${base}"
