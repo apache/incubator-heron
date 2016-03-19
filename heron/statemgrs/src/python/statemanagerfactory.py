@@ -1,3 +1,5 @@
+import os
+
 """
 Factory function that instantiates and connects to the requested
 state managers based on a conf file.
@@ -51,7 +53,7 @@ def get_all_file_state_managers(conf):
   state_locations = Config(conf).get_state_locations_of_type("file")
   for location in state_locations:
     name = location['name']
-    rootpath = location['rootpath']
+    rootpath = os.path.expanduser(location['rootpath'])
     LOG.info("Connecting to file state with rootpath: " + rootpath)
     state_manager = FileStateManager(name, rootpath)
     try:
