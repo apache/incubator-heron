@@ -1,8 +1,8 @@
 import unittest2 as unittest
 import mock
 
-from heron.common.src.python.topology import Topology
 from mock_proto import MockProto
+from heron.tracker.src.python.topology import Topology
 
 class TopologyTest(unittest.TestCase):
   def setUp(self):
