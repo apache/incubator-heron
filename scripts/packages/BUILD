@@ -63,37 +63,37 @@ pkg_tar(
 pkg_tar(
     name = "heron-core-bin",
     package_dir = "heron-core/bin",
-    files = heron_core_bin_files(), 
+    files = heron_core_bin_files(),
 )
 
 pkg_tar(
     name = "heron-core-lib-scheduler",
     package_dir = "heron-core/lib/scheduler",
-    files = heron_core_lib_scheduler_files(), 
+    files = heron_core_lib_scheduler_files(),
 )
 
 pkg_tar(
     name = "heron-core-lib-packing",
     package_dir = "heron-core/lib/packing",
-    files = heron_core_lib_packing_files(), 
+    files = heron_core_lib_packing_files(),
 )
 
 pkg_tar(
     name = "heron-core-lib-metricsmgr",
     package_dir = "heron-core/lib/metricsmgr",
-    files = heron_core_lib_metricsmgr_files(), 
+    files = heron_core_lib_metricsmgr_files(),
 )
 
 pkg_tar(
     name = "heron-core-lib-statemgr",
     package_dir = "heron-core/lib/statemgr",
-    files = heron_core_lib_statemgr_files(), 
+    files = heron_core_lib_statemgr_files(),
 )
 
 pkg_tar(
     name = "heron-core-lib-instance",
     package_dir = "heron-core/lib/instance",
-    files = heron_core_lib_instance_files(), 
+    files = heron_core_lib_instance_files(),
 )
 
 ################################################################################
@@ -172,7 +172,15 @@ pkg_tar(
         "//heron/config/src/yaml:conf-local-yaml",
     ],
 )
- 
+
+pkg_tar(
+    name = "heron-client-conf-aurora",
+    package_dir = "conf/devcluster",
+    files = [
+        "//heron/config/src/yaml:conf-aurora-yaml",
+    ],
+)
+
 pkg_tar(
     name = "heron-client-conf",
     package_dir = "conf",
@@ -184,7 +192,7 @@ pkg_tar(
     package_dir = "dist",
     files = [":heron-core"],
 )
-    
+
 pkg_tar(
     name = "heron-client",
     extension = "tar.gz",
@@ -192,6 +200,7 @@ pkg_tar(
         ":heron-client-bin",
         ":heron-client-conf",
         ":heron-client-conf-local",
+        ":heron-client-conf-aurora",
         ":heron-client-dist",
         ":heron-client-examples",
         ":heron-client-lib",
@@ -250,7 +259,7 @@ self_extract_binary(
     flatten_resources = [
         ":heron-client",
     ],
-    launcher = ":client_launcher_bin.sh", 
+    launcher = ":client_launcher_bin.sh",
 )
 
 self_extract_binary(
@@ -258,7 +267,7 @@ self_extract_binary(
     flatten_resources = [
         ":heron-tools",
     ],
-    launcher = ":tools_launcher_bin.sh", 
+    launcher = ":tools_launcher_bin.sh",
 )
 
 filegroup(
