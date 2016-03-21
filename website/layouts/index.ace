@@ -10,7 +10,7 @@ html lang={{.Site.LanguageCode}}
     .container-fluid
       .row
         .jumbotron.text-center
-          img.img-responsive.pull-left src={{.Site.Params.assets.logo}} 
+          img.img-responsive.center-block src={{.Site.Params.assets.logo}} 
           h1 {{.Site.Title}} 
           p A realtime stream processing engine from Twitter
       .hero-bar 
