@@ -31,13 +31,21 @@ You must have the following installed to compile Heron:
 * [Python](https://www.python.org/) >= 2.7 (not including Python 3.x)
 * [Perl](https://www.perl.org/) >= 5.8.8
 
-(TODO: add separate Linux and Mac OS X sections) Export CC and CXX variables
+Export CC and CXX variables with path specific to your machine:
 
+```bash
+$ export CC=/your-path-to/bin/clang
+$ export CXX=/your-path-to/bin/clang++
+$ echo $CC $CXX
+```
+
+Example path for Mac OS X:
 ```bash
 $ export CC=/usr/bin/clang
 $ export CXX=/usr/bin/clang++
 $ echo $CC $CXX
 ```
+
 
 ## Installing Bazel
 
