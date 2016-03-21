@@ -1,6 +1,7 @@
 nav.navbar.navbar-inverse.navbar-fixed-top role=navigation
   .container-fluid
     .navbar-header
+      img.img-responsive.pull-left src={{.Site.Params.assets.logo}} 
       a.navbar-brand href=/ {{.Site.Title}}
     #navbar.navbar-collapse.collapse
       ul.nav.navbar-nav.navbar-right
