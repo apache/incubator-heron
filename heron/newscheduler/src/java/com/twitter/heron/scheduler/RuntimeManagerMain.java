@@ -15,28 +15,165 @@ import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.NetworkUtils;
 
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.HelpFormatter;
+
 public class RuntimeManagerMain {
   private static final Logger LOG = Logger.getLogger(RuntimeManagerMain.class.getName());
 
+  // Print usage options
+  private static void usage(Options options) {
+    HelpFormatter formatter = new HelpFormatter();
+    formatter.printHelp( "RuntimeManagerMain", options );
+  }
+
+  // Construct all required command line options
+  private static Options constructOptions() {
+    Options options = new Options();
+
+    Option cluster = Option.builder("c")
+        .desc("Cluster name in which the topology needs to run on")
+        .longOpt("cluster")
+        .hasArgs()
+        .argName("cluster")
+        .required()
+        .build();
+
+    Option role = Option.builder("r")
+        .desc("Role under which the topology needs to run")
+        .longOpt("role")
+        .hasArgs()
+        .argName("role")
+        .required()
+        .build();
+
+    Option environment = Option.builder("e")
+        .desc("Environment under which the topology needs to run")
+        .longOpt("environment")
+        .hasArgs()
+        .argName("environment")
+        .required()
+        .build();
+
+    Option topologyName = Option.builder("n")
+        .desc("Name of the topology")
+        .longOpt("topology_name")
+        .hasArgs()
+        .argName("topology name")
+        .required()
+        .build();
+
+    Option heronHome = Option.builder("d")
+        .desc("Diretory where heron is installed")
+        .longOpt("heron_home")
+        .hasArgs()
+        .argName("heron home dir")
+        .required()
+        .build();
+
+    Option configFile = Option.builder("p")
+        .desc("Path of the config files")
+        .longOpt("config_path")
+        .hasArgs()
+        .argName("config path")
+        .required()
+        .build();
+
+    // TODO: Need to figure out the exact format
+    Option configOverrides = Option.builder("o")
+        .desc("Command line config overrides")
+        .longOpt("config_overrides")
+        .hasArgs()
+        .argName("config overrides")
+        .build();
+
+    Option command = Option.builder("m")
+        .desc("Command to run")
+        .longOpt("command")
+        .hasArgs()
+        .required()
+        .argName("command to run")
+        .build();
+
+    Option containerId = Option.builder("i")
+        .desc("Container Id for restart command")
+        .longOpt("container_id")
+        .hasArgs()
+        .argName("container id")
+        .build();
+
+    options.addOption(cluster);
+    options.addOption(role);
+    options.addOption(environment);
+    options.addOption(topologyName);
+    options.addOption(configFile);
+    options.addOption(configOverrides);
+    options.addOption(command);
+    options.addOption(heronHome);
+    options.addOption(containerId);
+
+    return options;
+  }
+
+   // construct command line help options
+  private static Options constructHelpOptions() {
+    Options options = new Options();
+    Option help = Option.builder("h")
+        .desc("List all options and their description")
+        .longOpt("help")
+        .build();
+
+    options.addOption(help);
+    return options;
+  }
+
   public static void main(String[] args)
-      throws ClassNotFoundException, IllegalAccessException, InstantiationException, IOException {
+      throws ClassNotFoundException, IllegalAccessException,
+      InstantiationException, IOException, ParseException {
 
-    String cluster = args[0];
-    String role = args[1];
-    String environ = args[2];
-    String heronHome = args[3];
-    String configPath = args[4];
-    String configOverrideEncoded = args[5];
-    String topologyName = args[6];
-    String sCommand = args[7];
+    Options options = constructOptions();
+    Options helpOptions = constructHelpOptions();
+    CommandLineParser parser = new DefaultParser();
+    // parse the help options first.
+    CommandLine cmd = parser.parse(helpOptions, args, true);;
 
-    // Optional argument in the case of restart - TO DO convert into CLI
-    String containerId = Integer.toString(-1);
-    if (args.length == 9) {
-      containerId = args[8];
+    if(cmd.hasOption("h")) {
+      usage(options);
+      return;
     }
 
-    IRuntimeManager.Command command = IRuntimeManager.Command.makeCommand(sCommand);
+    try {
+      // Now parse the required options
+      cmd = parser.parse(options, args);
+    } catch(ParseException e) {
+      LOG.severe("Error parsing command line options: " + e.getMessage());
+      usage(options);
+      System.exit(1);
+    }
+
+    String cluster = cmd.getOptionValue("cluster");
+    String role = cmd.getOptionValue("role");
+    String environ = cmd.getOptionValue("environment");
+    String heronHome = cmd.getOptionValue("heron_home");
+    String configPath = cmd.getOptionValue("config_path");
+    //TODO: Still not being used. Need to decide upon a format.
+    // String configOverrideEncoded = cmd.getOptionValue("config_overrides");
+    String topologyName = cmd.getOptionValue("topology_name");
+    String commandOption = cmd.getOptionValue("command");
+
+    // Optional argument in the case of restart
+    // TODO(karthik): convert into CLI
+    String containerId = Integer.toString(-1);
+    if (cmd.hasOption("container_id")) {
+      containerId = cmd.getOptionValue("container_id");
+    }
+
+    IRuntimeManager.Command command = IRuntimeManager.Command.makeCommand(commandOption);
 
     // first load the defaults, then the config from files to override it
     Config.Builder defaultsConfig = Config.newBuilder()
@@ -48,12 +185,12 @@ public class RuntimeManagerMain {
         .put(Keys.cluster(), cluster)
         .put(Keys.role(), role)
         .put(Keys.environ(), environ)
-        .put(Keys.topologyContainerIdentifier(), containerId);
+        .put(Keys.topologyContainerId(), containerId);
 
     Config.Builder topologyConfig = Config.newBuilder()
         .put(Keys.topologyName(), topologyName);
 
-    // TODO (Karthik) override any parameters from the command line
+    // TODO(Karthik): override any parameters from the command line
 
     // build the final config by expanding all the variables
     Config config = Config.expand(
