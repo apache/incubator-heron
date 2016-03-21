@@ -19,6 +19,14 @@ import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.HelpFormatter;
+
 /**
  * Calls Uploader to upload topology package, and Launcher to launch Scheduler.
  * TODO(nbhagat): Use commons cli to parse command line.
@@ -95,18 +103,144 @@ public class SubmitterMain {
     return config;
   }
 
-  public static void main(String[] args) throws
-      ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
-    String cluster = args[0];
-    String role = args[1];
-    String environ = args[2];
-    String heronHome = args[3];
-    String configPath = args[4];
-    String configOverrideEncoded = args[5];
+  // Print usage options
+  private static void usage(Options options) {
+    HelpFormatter formatter = new HelpFormatter();
+    formatter.printHelp( "SubmitterMain", options );
+  }
 
-    String topologyPackage = args[6];
-    String topologyDefnFile = args[7];
-    String topologyJarFile = args[8];
+  // Construct all required command line options
+  private static Options constructOptions() {
+    Options options = new Options();
+
+    Option cluster = Option.builder("c")
+        .desc("Cluster name in which the topology needs to run on")
+        .longOpt("cluster")
+        .hasArgs()
+        .argName("cluster")
+        .required()
+        .build();
+
+    Option role = Option.builder("r")
+        .desc("Role under which the topology needs to run")
+        .longOpt("role")
+        .hasArgs()
+        .argName("role")
+        .required()
+        .build();
+
+    Option environment = Option.builder("e")
+        .desc("Environment under which the topology needs to run")
+        .longOpt("environment")
+        .hasArgs()
+        .argName("environment")
+        .required()
+        .build();
+
+    Option heronHome = Option.builder("d")
+        .desc("Diretory where heron is installed")
+        .longOpt("heron_home")
+        .hasArgs()
+        .argName("heron home dir")
+        .required()
+        .build();
+
+    Option configFile = Option.builder("p")
+        .desc("Path of the config files")
+        .longOpt("config_path")
+        .hasArgs()
+        .argName("config path")
+        .required()
+        .build();
+
+    // TODO: Need to figure out the exact format
+    Option configOverrides = Option.builder("o")
+        .desc("Command line config overrides")
+        .longOpt("config_overrides")
+        .hasArgs()
+        .argName("config overrides")
+        .build();
+
+    Option topologyPackage = Option.builder("y")
+        .desc("tar ball containing user submitted jar/tar, defn and config")
+        .longOpt("topology_package")
+        .hasArgs()
+        .argName("topology package")
+        .build();
+
+    Option topologyDefn = Option.builder("f")
+        .desc("serialized file containing Topology protobuf")
+        .longOpt("topology_defn")
+        .hasArgs()
+        .argName("topology definition")
+        .build();
+
+    Option topologyJar = Option.builder("j")
+        .desc("user heron topology jar")
+        .longOpt("topology_jar")
+        .hasArgs()
+        .argName("topology jar")
+        .build();
+
+    options.addOption(cluster);
+    options.addOption(role);
+    options.addOption(environment);
+    options.addOption(heronHome);
+    options.addOption(configFile);
+    options.addOption(configOverrides);
+    options.addOption(topologyPackage);
+    options.addOption(topologyDefn);
+    options.addOption(topologyJar);
+
+    return options;
+  }
+
+  // construct command line help options
+  private static Options constructHelpOptions() {
+    Options options = new Options();
+    Option help = Option.builder("h")
+        .desc("List all options and their description")
+        .longOpt("help")
+        .build();
+
+    options.addOption(help);
+    return options;
+  }
+
+  public static void main(String[] args) throws
+      ClassNotFoundException, InstantiationException,
+      IllegalAccessException, IOException, ParseException {
+
+    Options options = constructOptions();
+    Options helpOptions = constructHelpOptions();
+    CommandLineParser parser = new DefaultParser();
+    // parse the help options first.
+    CommandLine cmd = parser.parse(helpOptions, args, true);;
+
+    if(cmd.hasOption("h")) {
+      usage(options);
+      return;
+    }
+
+    try {
+      // Now parse the required options
+      cmd = parser.parse(options, args);
+    } catch(ParseException e) {
+      LOG.severe("Error parsing command line options: " + e.getMessage());
+      usage(options);
+      System.exit(1);
+    }
+
+    String cluster = cmd.getOptionValue("cluster");;
+    String role = cmd.getOptionValue("role");;
+    String environ = cmd.getOptionValue("environment");;
+    String heronHome = cmd.getOptionValue("heron_home");;
+    String configPath = cmd.getOptionValue("config_path");;
+    String configOverrideEncoded = cmd.getOptionValue("config_overrides");;
+
+    String topologyPackage = cmd.getOptionValue("topology_package");;
+    String topologyDefnFile = cmd.getOptionValue("topology_defn");;
+    String topologyJarFile = cmd.getOptionValue("topology_jar");;
 
     System.out.println(heronHome + " " + configPath);
 
