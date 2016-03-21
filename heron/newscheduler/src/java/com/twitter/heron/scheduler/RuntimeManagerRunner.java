@@ -262,7 +262,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
   protected boolean restartTopologyHandler(String topologyName) {
 
     // get the container id
-    Integer containerId = Context.topologyContainerIdentifier(config);
+    Integer containerId = Context.topologyContainerId(config);
 
     // call prepare to restart
     if (!runtimeManager.prepareRestart(containerId)) {
