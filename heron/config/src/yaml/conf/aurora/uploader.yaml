@@ -3,3 +3,6 @@ heron.class.uploader:                            com.twitter.heron.uploader.loca
 
 # name of the directory to upload topologies for local file system uploader
 heron.uploader.localfs.file.system.directory:    /vagrant/.herondata/repository/topologies/${CLUSTER}/${ROLE}/${TOPOLOGY}
+
+# URI of heron core release package
+heron.core.release.package.uri:                  "file:///vagrant/.herondata/dist/heron-core-release.tar.gz"

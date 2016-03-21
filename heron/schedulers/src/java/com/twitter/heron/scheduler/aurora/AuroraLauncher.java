@@ -1,22 +1,18 @@
 package com.twitter.heron.scheduler.aurora;
 
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.xml.bind.DatatypeConverter;
 
-import org.apache.commons.io.FilenameUtils;
-
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.PackingPlan;
-import com.twitter.heron.spi.common.ShellUtils;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.TopologyUtils;
@@ -71,7 +67,7 @@ public class AuroraLauncher implements ILauncher {
     auroraProperties.put("HERON_EXECUTOR_BINARY", Context.executorSandboxBinary(config));
     auroraProperties.put("TOPOLOGY_NAME", topology.getName());
     auroraProperties.put("TOPOLOGY_ID", topology.getId());
-    auroraProperties.put("TOPOLOGY_DEFN", FilenameUtils.getName(Context.topologyDefinitionFile(config)));
+    auroraProperties.put("TOPOLOGY_DEFN", FileUtils.getBaseName(Context.topologyDefinitionFile(config)));
     auroraProperties.put("INSTANCE_DISTRIBUTION", TopologyUtils.packingToString(packing));
     auroraProperties.put("ZK_NODE", Context.stateManagerConnectionString(config));
     auroraProperties.put("ZK_ROOT", Context.stateManagerRootPath(config));
@@ -90,7 +86,7 @@ public class AuroraLauncher implements ILauncher {
         formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
     auroraProperties.put("PKG_TYPE", Context.topologyPackageType(config));
     auroraProperties.put("TOPOLOGY_JAR_FILE",
-        FilenameUtils.getBaseName(Context.topologyJarFile(config)));
+        FileUtils.getBaseName(Context.topologyJarFile(config)));
     auroraProperties.put("HERON_JAVA_HOME", Context.javaSandboxHome(config));
 
     auroraProperties.put("LOG_DIR", Context.logSandboxDirectory(config));
@@ -101,7 +97,7 @@ public class AuroraLauncher implements ILauncher {
     auroraProperties.put("DISK_PER_CONTAINER", containerResource.disk + "");
     auroraProperties.put("RAM_PER_CONTAINER", containerResource.ram + "");
 
-    auroraProperties.put("NUM_SHARDS", (1 + TopologyUtils.getNumContainers(topology)) + "");
+    auroraProperties.put("NUM_CONTAINERS", (1 + TopologyUtils.getNumContainers(topology)) + "");
 
     auroraProperties.put("CLUSTER", Context.cluster(config));
     auroraProperties.put("ENVIRON", Context.environ(config));
@@ -112,30 +108,19 @@ public class AuroraLauncher implements ILauncher {
     auroraProperties.put("SCHEDULER_CLASSPATH", Context.schedulerSandboxClassPath(config));
 
     // TODO(mfu): Following configs need customization before using
-    auroraProperties.put("TOPOLOGY_PKG", "topology.tar.gz");
-    auroraProperties.put("HERON_PACKAGE", "heron-core-release.tar.gz");
+    // TODO(mfu): Put the constant in Constants.java
+    String heronCoreReleasePkgURI = (String) config.get("heron.core.release.package.uri");
+    String topologyPkgURI = Runtime.topologyPackageUri(runtime);
+
+    auroraProperties.put("HERON_CORE_RELEASE_PKG_URI", heronCoreReleasePkgURI);
+    auroraProperties.put("TOPOLOGY_PKG_URI", topologyPkgURI);
     auroraProperties.put("ISPRODUCTION", "" + "prod".equals(Context.environ(config)));
-    auroraProperties.put("TOPOLOGIES_REPO",
-        (String) config.get("heron.uploader.localfs.file.system.directory"));
+    auroraProperties.put("TOPOLOGY_PKG_NAME", FileUtils.getBaseName(topologyPkgURI));
+    auroraProperties.put("HERON_PACKAGE_NAME", FileUtils.getBaseName(heronCoreReleasePkgURI));
 
-    ArrayList<String> auroraCmd = new ArrayList<>(Arrays.asList(
-        "aurora", "job", "create", "--verbose",
-        "--wait-until", "RUNNING"));
-    for (String binding : auroraProperties.keySet()) {
-      auroraCmd.add("--bind");
-      auroraCmd.add(String.format("%s=%s", binding, auroraProperties.get(binding)));
-    }
-    auroraCmd.add(String.format("%s/%s/%s/%s",
-        Context.cluster(config),
+    return AuroraUtils.createAuroraJob(topology.getName(), Context.cluster(config),
         Context.role(config),
-        Context.environ(config),
-        topology.getName()));
-    auroraCmd.add(getHeronAuroraPath());
-
-    String[] cmdline = auroraCmd.toArray(new String[auroraCmd.size()]);
-    LOG.info("cmdline=" + Arrays.toString(cmdline));
-
-    return 0 == ShellUtils.runProcess(true, cmdline, new StringBuilder(), new StringBuilder());
+        Context.environ(config), getHeronAuroraPath(), auroraProperties);
   }
 
   private String getHeronAuroraPath() {
