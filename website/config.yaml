@@ -32,9 +32,10 @@ params:
     schedulerapi: 0.1.0
     topologyapi: 0.1.0
   assets:
-    logo: /img/logo.png
+    logo: /img/logo54x54.png #logo.png
     css:
       - /css/style.min.css
     js:
       - //code.jquery.com/jquery-2.2.1.min.js
       - /js/app.min.js
+  tagline: Realtime, Distributed, Fault-Tolerant Stream Processing
