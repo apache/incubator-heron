@@ -1,21 +1,21 @@
 """
 Launch the topology as a single aurora job with multiple instances.
-The heron-executor is responsible for starting a tmaster (shard 0)
-and regular stmgr/metricsmgr/instances (shards > 0).
+The heron-executor is responsible for starting a tmaster (container 0)
+and regular stmgr/metricsmgr/instances (container index > 0).
 """
 
-heron_core_release_url = 'file:///vagrant/.herondata/dist/{{HERON_PACKAGE}}'
-heron_topology_jar_url = 'file://{{TOPOLOGIES_REPO}}/{{TOPOLOGY_PKG}}'
+heron_core_release_uri = '{{HERON_CORE_RELEASE_PKG_URI}}'
+heron_topology_jar_uri = '{{TOPOLOGY_PKG_URI}}}'
 
 # --- processes ---
 fetch_heron_system = Process(
   name = 'fetch_heron_system',
-  cmdline = 'curl %s -o {{HERON_PACKAGE}} && tar zxf {{HERON_PACKAGE}}' % heron_core_release_url
+  cmdline = 'curl %s -o {{HERON_PACKAGE_NAME}} && tar zxf {{HERON_PACKAGE_NAME}}' % heron_core_release_uri
 )
 
 fetch_user_package = Process(
   name = 'fetch_user_package',
-  cmdline = 'curl %s -o {{TOPOLOGY_PKG}} && tar zxf {{TOPOLOGY_PKG}}' % heron_topology_jar_url
+  cmdline = 'curl %s -o {{TOPOLOGY_PKG_NAME}} && tar zxf {{TOPOLOGY_PKG_NAME}}' % heron_topology_jar_uri
 )
 
 launch_heron_executor = Process(
@@ -46,7 +46,7 @@ jobs = [
     production = '{{ISPRODUCTION}}',
     service = True,
     task = heron_task,
-    instances = '{{NUM_SHARDS}}',
+    instances = '{{NUM_CONTAINERS}}',
     announce = Announcer(primary_port = 'http')
   )
 ]
