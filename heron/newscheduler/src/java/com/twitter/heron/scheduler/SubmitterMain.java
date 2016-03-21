@@ -139,7 +139,7 @@ public class SubmitterMain {
         .build();
 
     Option heronHome = Option.builder("d")
-        .desc("Diretory where heron is installed")
+        .desc("Directory where heron is installed")
         .longOpt("heron_home")
         .hasArgs()
         .argName("heron home dir")
