@@ -21,9 +21,9 @@ import heron.cli3.src.python.utils as utils
 
 def create_parser(subparsers):
   parser = subparsers.add_parser(
-      'restart', 
+      'restart',
       help='Restart a topology',
-      usage = "%(prog)s [options] cluster/[role]/[env] topology-name [shard-identifier]",
+      usage = "%(prog)s [options] cluster/[role]/[env] topology-name [container-id]",
       add_help = False)
 
   args.add_titles(parser)
@@ -31,10 +31,10 @@ def create_parser(subparsers):
   args.add_topology(parser)
 
   parser.add_argument(
-      'container-identifier', 
-      nargs='?', 
-      type=int, 
-      default=-1, 
+      'container-id',
+      nargs='?',
+      type=int,
+      default=-1,
       help='Identifier of the container to be restarted')
 
   args.add_config(parser)
@@ -49,7 +49,7 @@ def run(command, parser, cl_args, unknown_args):
   try:
     cluster_role_env = cl_args['cluster/[role]/[env]']
     topology_name = cl_args['topology-name']
-    container_identifier = cl_args['container-identifier']
+    container_id = cl_args['container-id']
 
     # extract the config path
     config_path = cl_args['config_path']
@@ -64,21 +64,21 @@ def run(command, parser, cl_args, unknown_args):
   if not os.path.isdir(config_path):
     print("Config directory does not exist: %s" % config_path);
     parser.exit();
-  
+
   try:
     cluster_role_env = utils.parse_cluster_role_env(cluster_role_env)
     config_overrides = utils.parse_cmdline_override(cl_args)
 
     new_args = [
-        cluster_role_env[0],                # cluster
-        cluster_role_env[1],                # role
-        cluster_role_env[2],                # environ
-        utils.get_heron_dir(),              # heron home directory
-        config_path,                        # path to config
-        base64.b64encode(config_overrides), # override values to config
-        topology_name,                      # topology name
-        command,                            # restart
-        str(container_identifier)           # container identifier
+        "--cluster", cluster_role_env[0],
+        "--role", cluster_role_env[1],
+        "--environment", cluster_role_env[2],
+        "--heron_home", utils.get_heron_dir(),
+        "--config_path", config_path,
+        "--config_overrides", base64.b64encode(config_overrides),
+        "--topology_name", topology_name,
+        "--command", command,
+        "--container_id", str(container_id)
     ]
 
     lib_jars = utils.get_heron_libs(jars.scheduler_jars() + jars.statemgr_jars())

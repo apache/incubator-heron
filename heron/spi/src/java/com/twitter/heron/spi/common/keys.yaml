@@ -69,7 +69,7 @@ TOPOLOGY_DEFINITION:             heron.topology.definition
 TOPOLOGY_JAR_FILE:               heron.topology.jar.file
 TOPOLOGY_PACKAGE_FILE:           heron.topology.package.file
 TOPOLOGY_PACKAGE_TYPE:           heron.topology.package.type
-TOPOLOGY_CONTAINER_IDENTIFIER:   heron.topology.container.identifier
+TOPOLOGY_CONTAINER_ID:           heron.topology.container.id
 
 ################################################################################
 # keys for storing state
