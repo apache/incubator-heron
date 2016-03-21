@@ -61,7 +61,7 @@ html lang={{.Site.LanguageCode}}
               h2 Get Started
           .row 
             .col-sm-12
-              h4 Run Topologies using pre-compiled Heron binaries.
+              h4 Run Topologies using pre-compiled Heron binaries
               a.btn.btn-success href=docs/getting-started Get Started
             .col-sm-12
               h4 Compile Heron from Source (for Heron Developers)
