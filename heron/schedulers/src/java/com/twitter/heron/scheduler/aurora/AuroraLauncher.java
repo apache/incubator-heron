@@ -1,5 +1,6 @@
 package com.twitter.heron.scheduler.aurora;
 
+import java.io.File;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -124,7 +125,7 @@ public class AuroraLauncher implements ILauncher {
   }
 
   private String getHeronAuroraPath() {
-    return Context.heronConf(config) + "/heron.aurora";
+    return new File(Context.heronConf(config), "heron.aurora").getPath();
   }
 
   @Override
