@@ -22,6 +22,7 @@ class Application(tornado.web.Application):
     tracker.synch_topologies(options.config_file)
     tornadoHandlers = [
       (r"/", handlers.MainHandler),
+      (r"/clusters", handlers.ClustersHandler),
       (r"/topologies", handlers.TopologiesHandler, {"tracker":tracker}),
       (r"/topologies/states", handlers.StatesHandler, {"tracker":tracker}),
       (r"/topologies/info", handlers.TopologyHandler, {"tracker":tracker}),
@@ -125,6 +126,7 @@ def create_parsers():
 def define_options(port, config_file):
   define("port", default=port)
   define("config_file", default=config_file)
+  define("clusters", default=constants.DEFAULT_CLUSTER)
 
 def main():
   log.configure(log.logging.DEBUG)
@@ -138,15 +140,18 @@ def main():
     parser.print_help()
     parser.exit()
 
-  namespace = vars(args)
-  LOG.info("Running on port: %d", namespace['port'])
-  LOG.info("Using config file: %s", namespace['config_file'])
+  configuration = vars(args)
+  config_file = configuration['config_file']
+  port = configuration['port']
+
+  LOG.info("Running on port: %d", config_file)
+  LOG.info("Using config file: %s", port)
 
   # TO DO check if the config file exists
-
-  define_options(namespace['port'], namespace['config_file'])
+  # TO DO add config option for cluster name
+  define_options(port, config_file)
   http_server = tornado.httpserver.HTTPServer(Application())
-  http_server.listen(namespace['port'])
+  http_server.listen(port)
   tornado.ioloop.IOLoop.instance().start()
 
 if __name__ == "__main__":

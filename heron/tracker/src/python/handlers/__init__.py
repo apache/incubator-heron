@@ -1,4 +1,5 @@
 from basehandler import BaseHandler
+from clustershandler import ClustersHandler
 from defaulthandler import DefaultHandler
 from exceptionhandler import ExceptionHandler
 from exceptionsummaryhandler import ExceptionSummaryHandler
