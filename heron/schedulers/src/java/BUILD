@@ -3,6 +3,7 @@ package(default_visibility = ["//visibility:public"])
 load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 common_deps_files = [
+    "//heron/common/src/java:basics-java",
     "//3rdparty/commons:commons-io-java",
     "//3rdparty/guava:guava-java",
 ]
@@ -42,5 +43,26 @@ genrule(
     name = "heron-local-scheduler",
     srcs = [":local-scheduler-unshaded_deploy.jar"],
     outs = ["heron-local-scheduler.jar"],
+    cmd  = "cp $< $@",
+)
+
+java_library(
+    name='aurora-scheduler-java',
+    srcs = glob(["**/aurora/*.java"]),
+    deps = local_deps_files,
+    resources = glob(["**/aurora/*.aurora"]),
+)
+
+java_binary(
+    name='aurora-scheduler-unshaded',
+    srcs = glob(["**/aurora/*.java"]),
+    deps = local_deps_files,
+    resources = glob(["**/aurora/*.aurora"]),
+)
+
+genrule(
+    name = "heron-aurora-scheduler",
+    srcs = [":aurora-scheduler-unshaded_deploy.jar"],
+    outs = ["heron-aurora-scheduler.jar"],
     cmd  = "cp $< $@",
 )
