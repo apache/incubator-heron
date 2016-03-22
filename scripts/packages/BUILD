@@ -175,7 +175,7 @@ pkg_tar(
 
 pkg_tar(
     name = "heron-client-conf-aurora",
-    package_dir = "conf/devcluster",
+    package_dir = "conf/aurora",
     files = [
         "//heron/config/src/yaml:conf-aurora-yaml",
     ],
