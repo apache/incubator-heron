@@ -15,8 +15,13 @@ html lang={{.Site.LanguageCode}}
           p A realtime stream processing engine from Twitter
       .hero-bar 
         .container style="text-align: center;"
-          a.btn.btn-success href=docs/getting-started Get Started
-          a.btn.btn-success href=docs/developers/compiling/compiling/ Get Source
+          .row 
+            .col-sm-6
+              h4 Run Topologies using pre-compiled Heron binaries
+              a.btn.btn-success href=docs/getting-started Get Started
+            .col-sm-6
+              h4 Compile Heron from Source (for Heron Developers)
+              a.btn.btn-success href=docs/developers/compiling/compiling/ Get Source
       .landing-feature-1
         .container style="text-align: center;"
           .row
@@ -60,10 +65,10 @@ html lang={{.Site.LanguageCode}}
             .col-sm-12
               h2 Get Started
           .row 
-            .col-sm-12
+            .col-sm-6
               h4 Run Topologies using pre-compiled Heron binaries
               a.btn.btn-success href=docs/getting-started Get Started
-            .col-sm-12
+            .col-sm-6
               h4 Compile Heron from Source (for Heron Developers)
               a.btn.btn-success href=docs/developers/compiling/compiling/ Get Source
       .landing-feature-1
