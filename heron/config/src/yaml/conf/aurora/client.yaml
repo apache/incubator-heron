@@ -1,3 +1,3 @@
 # location of the core package
-heron.package.core.uri:                      file://${HERON_DIST}/heron-core.tar.gz
+heron.package.core.uri:                      "file:///vagrant/.herondata/dist/heron-core-release.tar.gz"
 heron.directory.java.home:                   /usr/lib/jvm/java-1.8.0-openjdk-amd64/

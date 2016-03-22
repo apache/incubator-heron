@@ -65,35 +65,34 @@ public class AuroraLauncher implements ILauncher {
         packing.containers.values().iterator().next().resource;
     Map<String, String> auroraProperties = new HashMap<>();
 
-    auroraProperties.put("HERON_EXECUTOR_BINARY", Context.executorSandboxBinary(config));
+    auroraProperties.put("SANDBOX_EXECUTOR_BINARY", Context.executorSandboxBinary(config));
     auroraProperties.put("TOPOLOGY_NAME", topology.getName());
     auroraProperties.put("TOPOLOGY_ID", topology.getId());
-    auroraProperties.put("TOPOLOGY_DEFN", FileUtils.getBaseName(Context.topologyDefinitionFile(config)));
+    auroraProperties.put("TOPOLOGY_DEFINITION_FILE", FileUtils.getBaseName(Context.topologyDefinitionFile(config)));
     auroraProperties.put("INSTANCE_DISTRIBUTION", TopologyUtils.packingToString(packing));
-    auroraProperties.put("ZK_NODE", Context.stateManagerConnectionString(config));
-    auroraProperties.put("ZK_ROOT", Context.stateManagerRootPath(config));
-    auroraProperties.put("TMASTER_BINARY", Context.tmasterSandboxBinary(config));
-    auroraProperties.put("STMGR_BINARY", Context.stmgrSandboxBinary(config));
-    auroraProperties.put("METRICS_MGR_CLASSPATH", Context.metricsManagerSandboxClassPath(config));
+    auroraProperties.put("STATEMGR_CONNECTION_STRING", Context.stateManagerConnectionString(config));
+    auroraProperties.put("STATEMGR_ROOT_PATH", Context.stateManagerRootPath(config));
+    auroraProperties.put("SANDBOX_TMASTER_BINARY", Context.tmasterSandboxBinary(config));
+    auroraProperties.put("SANDBOX_STMGR_BINARY", Context.stmgrSandboxBinary(config));
+    auroraProperties.put("SANDBOX_METRICSMGR_CLASSPATH", Context.metricsManagerSandboxClassPath(config));
     auroraProperties.put("INSTANCE_JVM_OPTS_IN_BASE64",
         formatJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)));
-    auroraProperties.put("CLASSPATH", TopologyUtils.makeClassPath(topology, Context.topologyJarFile(config)));
+    auroraProperties.put("TOPOLOGY_CLASSPATH", TopologyUtils.makeClassPath(topology, Context.topologyJarFile(config)));
 
-    auroraProperties.put("HERON_INTERNALS_CONFIG_FILENAME", Context.systemConfigSandboxFile(config));
+    auroraProperties.put("SANDBOX_SYSTEM_YAML", Context.systemConfigSandboxFile(config));
     auroraProperties.put("COMPONENT_RAMMAP",
         TopologyUtils.formatRamMap(
             TopologyUtils.getComponentRamMap(topology, Context.instanceRam(config))));
     auroraProperties.put("COMPONENT_JVM_OPTS_IN_BASE64",
         formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
-    auroraProperties.put("PKG_TYPE", Context.topologyPackageType(config));
+    auroraProperties.put("TOPOLOGY_PACKAGE_TYPE", Context.topologyPackageType(config));
     auroraProperties.put("TOPOLOGY_JAR_FILE",
         FileUtils.getBaseName(Context.topologyJarFile(config)));
-    auroraProperties.put("HERON_JAVA_HOME", Context.javaSandboxHome(config));
+    auroraProperties.put("HERON_SANDBOX_JAVA_HOME", Context.javaSandboxHome(config));
 
-    auroraProperties.put("LOG_DIR", Context.logSandboxDirectory(config));
-    auroraProperties.put("SHELL_BINARY", Context.shellSandboxBinary(config));
+    auroraProperties.put("SANDBOX_LOGGING_DIRECTORY", Context.logSandboxDirectory(config));
+    auroraProperties.put("SANDBOX_SHELL_BINARY", Context.shellSandboxBinary(config));
 
-    auroraProperties.put("JOB_NAME", topology.getName());
     auroraProperties.put("CPUS_PER_CONTAINER", containerResource.cpu + "");
     auroraProperties.put("DISK_PER_CONTAINER", containerResource.disk + "");
     auroraProperties.put("RAM_PER_CONTAINER", containerResource.ram + "");
@@ -102,22 +101,19 @@ public class AuroraLauncher implements ILauncher {
 
     auroraProperties.put("CLUSTER", Context.cluster(config));
     auroraProperties.put("ENVIRON", Context.environ(config));
-    auroraProperties.put("RUN_ROLE", Context.role(config));
+    auroraProperties.put("ROLE", Context.role(config));
 
-    auroraProperties.put("INSTANCE_CLASSPATH", Context.instanceSandboxClassPath(config));
-    auroraProperties.put("METRICS_SINK_CONFIG", Context.metricsSinksSandboxFile(config));
-    auroraProperties.put("SCHEDULER_CLASSPATH", Context.schedulerSandboxClassPath(config));
+    auroraProperties.put("SANDBOX_INSTANCE_CLASSPATH", Context.instanceSandboxClassPath(config));
+    auroraProperties.put("SANDBOX_METRICS_YAML", Context.metricsSinksSandboxFile(config));
+    auroraProperties.put("SANDBOX_SCHEDULER_CLASSPATH", Context.schedulerSandboxClassPath(config));
 
     // TODO(mfu): Following configs need customization before using
     // TODO(mfu): Put the constant in Constants.java
-    String heronCoreReleasePkgURI = (String) config.get("heron.core.release.package.uri");
+    String heronCoreReleasePkgURI = Context.corePackageUri(config);
     String topologyPkgURI = Runtime.topologyPackageUri(runtime);
 
-    auroraProperties.put("HERON_CORE_RELEASE_PKG_URI", heronCoreReleasePkgURI);
-    auroraProperties.put("TOPOLOGY_PKG_URI", topologyPkgURI);
-    auroraProperties.put("ISPRODUCTION", "" + "prod".equals(Context.environ(config)));
-    auroraProperties.put("TOPOLOGY_PKG_NAME", FileUtils.getBaseName(topologyPkgURI));
-    auroraProperties.put("HERON_PACKAGE_NAME", FileUtils.getBaseName(heronCoreReleasePkgURI));
+    auroraProperties.put("CORE_PACKAGE_URI", heronCoreReleasePkgURI);
+    auroraProperties.put("TOPOLOGY_PACKAGE_URI", topologyPkgURI);
 
     return AuroraUtils.createAuroraJob(topology.getName(), Context.cluster(config),
         Context.role(config),
@@ -149,7 +145,7 @@ public class AuroraLauncher implements ILauncher {
     ExecutionEnvironment.ExecutionState.Builder builder =
         ExecutionEnvironment.ExecutionState.newBuilder().mergeFrom(executionState);
 
-    builder.setDc(Context.cluster(config))
+    builder.setCluster(Context.cluster(config))
         .setRole(Context.role(config))
         .setEnviron(Context.environ(config));
 
