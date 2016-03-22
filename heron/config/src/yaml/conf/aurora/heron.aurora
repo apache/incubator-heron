@@ -4,23 +4,25 @@ The heron-executor is responsible for starting a tmaster (container 0)
 and regular stmgr/metricsmgr/instances (container index > 0).
 """
 
-heron_core_release_uri = '{{HERON_CORE_RELEASE_PKG_URI}}'
-heron_topology_jar_uri = '{{TOPOLOGY_PKG_URI}}}'
+heron_core_release_uri = '{{CORE_PACKAGE_URI}}'
+heron_topology_jar_uri = '{{TOPOLOGY_PACKAGE_URI}}'
+core_release_file = "heron-core-release.tar.gz"
+topology_package_file = "topology.tar.gz"
 
 # --- processes ---
 fetch_heron_system = Process(
   name = 'fetch_heron_system',
-  cmdline = 'curl %s -o {{HERON_PACKAGE_NAME}} && tar zxf {{HERON_PACKAGE_NAME}}' % heron_core_release_uri
+  cmdline = 'curl %s -o %s && tar zxf %s' % (heron_core_release_uri, core_release_file, core_release_file)
 )
 
 fetch_user_package = Process(
   name = 'fetch_user_package',
-  cmdline = 'curl %s -o {{TOPOLOGY_PKG_NAME}} && tar zxf {{TOPOLOGY_PKG_NAME}}' % heron_topology_jar_uri
+  cmdline = 'curl %s -o %s && tar zxf %s' % (heron_topology_jar_uri, topology_package_file, topology_package_file)
 )
 
 launch_heron_executor = Process(
   name = 'launch_heron_executor',
-  cmdline = '{{HERON_EXECUTOR_BINARY}} {{mesos.instance}} {{TOPOLOGY_NAME}} {{TOPOLOGY_ID}} {{TOPOLOGY_DEFN}} {{INSTANCE_DISTRIBUTION}} {{ZK_NODE}} {{ZK_ROOT}} {{TMASTER_BINARY}} {{STMGR_BINARY}} "{{METRICS_MGR_CLASSPATH}}" {{INSTANCE_JVM_OPTS_IN_BASE64}} "{{CLASSPATH}}" {{thermos.ports[port1]}} {{thermos.ports[port2]}} {{thermos.ports[port3]}} {{HERON_INTERNALS_CONFIG_FILENAME}} {{COMPONENT_RAMMAP}} {{COMPONENT_JVM_OPTS_IN_BASE64}} {{PKG_TYPE}} {{TOPOLOGY_JAR_FILE}} {{HERON_JAVA_HOME}} {{thermos.ports[http]}} {{LOG_DIR}} {{SHELL_BINARY}} {{thermos.ports[port4]}} {{CLUSTER}} {{RUN_ROLE}} {{ENVIRON}} "{{INSTANCE_CLASSPATH}}" {{METRICS_SINK_CONFIG}} "{{SCHEDULER_CLASSPATH}}" "{{thermos.ports[scheduler]}}"',
+  cmdline = '{{SANDBOX_EXECUTOR_BINARY}} {{mesos.instance}} {{TOPOLOGY_NAME}} {{TOPOLOGY_ID}} {{TOPOLOGY_DEFINITION_FILE}} {{INSTANCE_DISTRIBUTION}} {{STATEMGR_CONNECTION_STRING}} {{STATEMGR_ROOT_PATH}} {{SANDBOX_TMASTER_BINARY}} {{SANDBOX_STMGR_BINARY}} "{{SANDBOX_METRICSMGR_CLASSPATH}}" {{INSTANCE_JVM_OPTS_IN_BASE64}} "{{TOPOLOGY_CLASSPATH}}" {{thermos.ports[port1]}} {{thermos.ports[port2]}} {{thermos.ports[port3]}} {{SANDBOX_SYSTEM_YAML}} {{COMPONENT_RAMMAP}} {{COMPONENT_JVM_OPTS_IN_BASE64}} {{TOPOLOGY_PACKAGE_TYPE}} {{TOPOLOGY_JAR_FILE}} {{HERON_SANDBOX_JAVA_HOME}} {{thermos.ports[http]}} {{SANDBOX_LOGGING_DIRECTORY}} {{SANDBOX_SHELL_BINARY}} {{thermos.ports[port4]}} {{CLUSTER}} {{ROLE}} {{ENVIRON}} "{{SANDBOX_INSTANCE_CLASSPATH}}" {{SANDBOX_METRICS_YAML}} "{{SANDBOX_SCHEDULER_CLASSPATH}}" "{{thermos.ports[scheduler]}}"',
   max_failures = 1
 )
 
@@ -39,11 +41,10 @@ heron_task = SequentialTask(
 # -- jobs ---
 jobs = [
   Job(
-    name = '{{JOB_NAME}}',
+    name = '{{TOPOLOGY_NAME}}',
     cluster = '{{CLUSTER}}',
-    role = '{{RUN_ROLE}}',
+    role = '{{ROLE}}',
     environment = '{{ENVIRON}}',
-    production = '{{ISPRODUCTION}}',
     service = True,
     task = heron_task,
     instances = '{{NUM_CONTAINERS}}',
