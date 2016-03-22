@@ -1,6 +1,6 @@
 import os, fnmatch
 
-import heron.cli3.src.python.utils as utils
+import heron.cli.src.python.utils as utils
 
 ################################################################################
 # Get the topology jars - TODO, make the jars independent version free
