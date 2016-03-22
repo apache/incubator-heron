@@ -10,5 +10,5 @@ if [[ $# -ne 4 ]] ; then
 fi
 
 pushd ${DIST_DIR}/ubuntu
-    ./heron-0.1.0-SNAPSHOT/bin/heron-cli2 submit "example/vagrant/devel" ${DIST_DIR}/topologies/kafka-08-mirror_deploy.jar com.twitter.heron.KafkaOldMirrorTopology $1 $2 $3 $4 --config-loader com.twitter.heron.scheduler.aurora.AuroraConfigLoader --config-path ${HERON_CONF_DIR} --tmp-dir ${DEFN_TMP_DIR}
+    ./heron-0.1.0-SNAPSHOT/bin/heron-cli2 submit "example/vagrant/devel" ${DIST_DIR}/topologies/kafka-08-mirror_deploy.jar com.twitter.heron.KafkaOldMirrorTopology $1 $2 $3 $4 master:2181 /kafka-08 --config-loader com.twitter.heron.scheduler.aurora.AuroraConfigLoader --config-path ${HERON_CONF_DIR} --tmp-dir ${DEFN_TMP_DIR}
 popd
