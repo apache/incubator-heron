@@ -28,6 +28,11 @@ filegroup(
 )
 
 filegroup(
+    name = "conf-aurora-yaml",
+    srcs = glob(["conf/aurora/*"]),
+)
+
+filegroup(
     name = "conf-local-heron-internals",
     srcs = ["conf/local/heron_internals.yaml"],
 )
