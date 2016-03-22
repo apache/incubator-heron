@@ -1,8 +1,8 @@
 import subprocess
 
-import heron.cli3.src.python.opts  as opts
-import heron.cli3.src.python.utils as utils
-import heron.cli3.src.python.utils as jars
+import heron.cli.src.python.opts  as opts
+import heron.cli.src.python.utils as utils
+import heron.cli.src.python.utils as jars
 
 ################################################################################
 # Execute a heron class given the args and the jars needed for class path
