@@ -12,3 +12,4 @@ heron.directory.sandbox.java.home:           /usr/lib/jvm/java-1.8.0-openjdk-amd
 
 # True if no scheduler is running
 heron.runtime.no.scheduler.rest.endpoint:    True
+
