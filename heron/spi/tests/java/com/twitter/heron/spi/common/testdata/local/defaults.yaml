@@ -1,20 +1,20 @@
 # tell the name of heron executor binary
-heron.binaries.executor:              heron-executor
+heron.binaries.sandbox.executor:              heron-executor
 
 # tell the name of stream manager  binary
-heron.binaries.stmgr:                 heron-stmgr
+heron.binaries.sandbox.stmgr:                 heron-stmgr
 
 # tell the name of topology master binary
-heron.binaries.tmaster:               heron-tmaster
+heron.binaries.sandbox.tmaster:               heron-tmaster
 
 # tell the name of heron shell binary
-heron.binaries.shell:                 heron-shell
+heron.binaries.sandbox.shell:                 heron-shell
 
 # name of the scheduler jar 
-heron.jars.scheduler:                 heron-scheduler.jar
+heron.jars.scheduler:                         heron-scheduler.jar
 
 # logging directory for log files
-heron.directory.logging:              log-files/
+heron.directory.sandbox.logging:              log-files/
 
 # Heron Instance default parameters
 heron.resources.instance.cpu:         1

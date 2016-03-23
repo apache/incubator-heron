@@ -60,6 +60,40 @@ public class Misc {
   }
 
   /**
+   * Given a string representing heron sandbox home, substitute occurrences of
+   * ${HERON_SANDBOX_HOME} in the provided path.
+   *
+   * @param heronSandboxHome, string representing a path to heron sandbox home
+   * @param pathString, string representing a path including ${HERON_SANDBOX_HOME}
+   *
+   * @return String, string that represents the modified path 
+   */
+  public static String substituteSandbox(String heronSandboxHome, String pathString) {
+    Config config = Config.newBuilder()
+      .put(Keys.heronSandboxHome(), heronSandboxHome)
+      .build();
+    return substitute(config, pathString);
+  }
+
+  /**
+   * Given strings representing heron home and heron conf, substitute occurrences of
+   * ${HERON_SANDBOX_HOME} and ${HERON_SANDBOX_CONF} in the provided path.
+   *
+   * @param heronSandboxHome, string representing a path heron sandbox home
+   * @param configPath, string representing a path to heron conf
+   * @param pathString, string representing a path including ${HERON_SANDBOX_HOME}/${HERON_SANDBOX_CONF}
+   *
+   * @return String, string that represents the modified path
+   */
+  public static String substituteSandbox(String heronSandboxHome, String configPath, String pathString) {
+    Config config = Config.newBuilder()
+      .put(Keys.heronSandboxHome(), heronSandboxHome)
+      .put(Keys.heronSandboxConf(), configPath)
+      .build();
+    return substitute(config, pathString);
+  }
+
+  /**
    * Given a string, check if it is a URL - URL, according to our definition is
    * the presence of two consecutive forward slashes //
    *
@@ -146,6 +180,18 @@ public class Misc {
 
       } else if (elem.equals("${HERON_DIST}")) {
         list.set(i, Context.heronDist(config));
+
+      } else if (elem.equals("${HERON_SANDBOX_HOME}")) {
+        list.set(i, Context.heronSandboxHome(config));
+
+      } else if (elem.equals("${HERON_SANDBOX_BIN}")) {
+        list.set(i, Context.heronSandboxBin(config));
+
+      } else if (elem.equals("${HERON_SANDBOX_CONF}")) {
+        list.set(i, Context.heronSandboxConf(config));
+
+      } else if (elem.equals("${HERON_SANDBOX_LIB}")) {
+        list.set(i, Context.heronSandboxLib(config));
 
       } else if (elem.equals("${CLUSTER}")) {
         list.set(i, Context.cluster(config));
