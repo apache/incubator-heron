@@ -85,6 +85,23 @@ public class MesosJobFramework implements Scheduler {
     this.endLatch = latch;
   }
 
+  public synchronized boolean setSafeLatch(CountDownLatch latch) {
+    if (!isRecovered) {
+      this.startLatch = latch;
+      return true;
+    }
+
+    return false;
+  }
+
+  private synchronized void safeSetRecovered() {
+    isRecovered = true;
+
+    if (startLatch != null) {
+      startLatch.countDown();
+    }
+  }
+
   public void reconcileTasks(final SchedulerDriver schedulerDriver) {
     LOG.info("Starting reconcile executor.");
     // First set up
@@ -103,11 +120,7 @@ public class MesosJobFramework implements Scheduler {
     if (!isRecovered && remaining.isEmpty()) {
       LOG.info("No tasks need to reconcile.");
 
-      isRecovered = true;
-
-      if (startLatch != null) {
-        startLatch.countDown();
-      }
+      safeSetRecovered();
     }
 
     Runnable r = new Runnable() {
@@ -303,11 +316,7 @@ public class MesosJobFramework implements Scheduler {
       // No remaining, release the flag
       if (!isRecovered && remaining.isEmpty()) {
         LOG.info("All tasks are reconciled! Release the flag!");
-        isRecovered = true;
-
-        if (startLatch != null) {
-          startLatch.countDown();
-        }
+        safeSetRecovered();
       }
 
 

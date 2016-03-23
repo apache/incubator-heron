@@ -34,6 +34,10 @@ public class MesosDriverFactory {
     }
   }
 
+  public void join() {
+    get().join();
+  }
+
   public SchedulerDriver get() {
     if (mesosDriver == null) {
       LOG.info("SchedulerDriver not exists yet. To create a new one...");

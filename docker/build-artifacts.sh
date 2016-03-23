@@ -88,6 +88,7 @@ run_build() {
   docker run \
     --rm \
     -e HERON_VERSION=$HERON_VERSION \
+    -e TOPOLOGY_ONLY=$TOPOLOGY_ONLY \
     -v "$SOURCE_TARBALL:/src.tar.gz:ro" \
     -v "$OUTPUT_DIRECTORY:/dist" \
     -it heron-compiler:$PLATFORM /compile.sh

@@ -100,6 +100,10 @@ public class JobScheduler {
     mesosDriver.start();
   }
 
+  public void join() {
+    mesosDriver.join();
+  }
+
   public void stop() {
     LOG.info("Shutting down the Job Scheduler!");
     mesosDriver.close();

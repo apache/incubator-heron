@@ -4,11 +4,16 @@ import argparse
 import atexit
 import base64
 import contextlib
+<<<<<<< HEAD
+import errno
+=======
 import getpass
+>>>>>>> master
 import glob
 import logging
 import logging.handlers
 import os
+import re
 import shutil
 import sys
 import subprocess
@@ -223,7 +228,16 @@ def submitfatjar(namespace):
   args = tuple(namespace['heron_unknown_args'])
 
   print 'Deprecation Warning: fatjar will be deprecated soon. Please use tar format ..'
-  tmpdir = tempfile.mkdtemp()
+  specified_tmpdir = namespace['tmp_dir']
+  if specified_tmpdir is not None:
+    tmpdir = specified_tmpdir
+    # Making sure the dir exists
+    mkdir_p(tmpdir)
+    # Cleaning up all the previous defn files in the tmp dir
+    purge(tmpdir, '^.+\.defn$')
+  else:
+    tmpdir = tempfile.mkdtemp()
+
   set_config_opt('cmdline.topologydefn.tmpdirectory', tmpdir)
 
   if namespace['deactivated']:
@@ -246,7 +260,22 @@ def submitfatjar(namespace):
                                 namespace['config_path'],
                                 scheduler_overrides)
   finally:
-    shutil.rmtree(tmpdir)
+    if specified_tmpdir is None:
+        shutil.rmtree(tmpdir)
+
+def purge(dir, pattern):
+    for f in os.listdir(dir):
+        if re.search(pattern, f):
+            os.remove(os.path.join(dir, f))
+
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
 
 def submittar(namespace):
   """Syntax: heron-cli submittar <dc>/<role>/<environ> topology-tar-path class args
@@ -408,6 +437,7 @@ def create_parser():
   submit_parser.add_argument('--config-loader', help='Scheduler config loader classname', default='com.twitter.heron.scheduler.aurora.AuroraConfigLoader')
   submit_parser.add_argument('--config-property', help="scheduler config properties", action='append', default=[])
   submit_parser.add_argument('--deactivated', help='Deploy topology in deactivated initial state', action='store_true')
+  submit_parser.add_argument('--tmp-dir', help='Tmp dir to store .defn files in')
   submit_parser.add_argument('--verbose', action='store_true')
   submit_parser.set_defaults(command='submit')
 
