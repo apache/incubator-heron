@@ -15,16 +15,16 @@ import tarfile
 import tempfile
 import pprint
 
-import heron.cli3.src.python.help as help
-import heron.cli3.src.python.args as parse
-import heron.cli3.src.python.opts as opts
-import heron.cli3.src.python.activate as activate
-import heron.cli3.src.python.classpath as classpath
-import heron.cli3.src.python.deactivate as deactivate
-import heron.cli3.src.python.kill as kill
-import heron.cli3.src.python.restart as restart
-import heron.cli3.src.python.submit as submit
-import heron.cli3.src.python.version as version
+import heron.cli.src.python.help as help
+import heron.cli.src.python.args as parse
+import heron.cli.src.python.opts as opts
+import heron.cli.src.python.activate as activate
+import heron.cli.src.python.classpath as classpath
+import heron.cli.src.python.deactivate as deactivate
+import heron.cli.src.python.kill as kill
+import heron.cli.src.python.restart as restart
+import heron.cli.src.python.submit as submit
+import heron.cli.src.python.version as version
 
 class _HelpAction(argparse._HelpAction):
   def __call__(self, parser, namespace, values, option_string=None):
