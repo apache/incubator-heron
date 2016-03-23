@@ -4,7 +4,7 @@ pex_test(
     name = "opts_unittest",
     srcs = ["opts_unittest.py"],
     deps = [
-        "//heron/cli3/src/python:heron-cli-lib",
+        "//heron/cli/src/python:heron-lib",
     ],
     eggs = [
         "//3rdparty/eggs:pytest",

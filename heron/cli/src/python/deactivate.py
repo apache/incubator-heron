@@ -14,16 +14,16 @@ import subprocess
 import tarfile
 import tempfile
 
-import heron.cli3.src.python.args as args
-import heron.cli3.src.python.execute as execute
-import heron.cli3.src.python.jars as jars
-import heron.cli3.src.python.utils as utils
+import heron.cli.src.python.args as args
+import heron.cli.src.python.execute as execute
+import heron.cli.src.python.jars as jars
+import heron.cli.src.python.utils as utils
 
 def create_parser(subparsers):
   parser = subparsers.add_parser(
-      'activate',
-      help='Activate a topology',
-      usage = "%(prog)s [options] cluster/[role]/[environ] topology-name",
+      'deactivate',
+      help='Deactivate a topology',
+      usage = "%(prog)s [options] cluster/[role]/[env] topology-name",
       add_help = False)
 
   args.add_titles(parser)
@@ -34,7 +34,7 @@ def create_parser(subparsers):
   args.add_verbose(parser)
   args.add_trace_execution(parser)
 
-  parser.set_defaults(subcommand='activate')
+  parser.set_defaults(subcommand='deactivate')
   return parser
 
 def run(command, parser, cl_args, unknown_args):
@@ -48,11 +48,12 @@ def run(command, parser, cl_args, unknown_args):
     config_path = cl_args['config_path']
 
   except KeyError:
+    # if some of the arguments are not provided, print error and exit
     subparser = utils.get_subparser(parser, command)
     print(subparser.format_help())
     parser.exit()
 
-  # check if the config path exists
+  # check if the config exists
   config_path = utils.get_heron_cluster_conf_dir(cluster_role_env, config_path);
   if not os.path.isdir(config_path):
     print("Config directory does not exist: %s" % config_path);
@@ -85,8 +86,9 @@ def run(command, parser, cl_args, unknown_args):
 
   except Exception as ex:
     print 'Error: %s' % str(ex)
-    print 'Failed to activate topology \'%s\'' % topology_name
+    print 'Failed to deactivate topology \'%s\'' % topology_name
     sys.exit(1)
 
-  print 'Successfully activated topology \'%s\'' % topology_name
+  print 'Successfully deactivated topology \'%s\'' % topology_name
   sys.exit(0)
+
