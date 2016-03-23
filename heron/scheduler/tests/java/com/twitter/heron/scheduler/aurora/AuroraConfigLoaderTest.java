@@ -1,6 +1,5 @@
 package com.twitter.heron.scheduler.aurora;
 
-import java.util.Properties;
 import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.twitter.heron.scheduler.api.Constants;
+import com.twitter.heron.spi.common.Constants;
 
 public class AuroraConfigLoaderTest {
   private static final Logger LOG = Logger.getLogger(AuroraConfigLoaderTest.class.getName());
@@ -20,25 +19,22 @@ public class AuroraConfigLoaderTest {
 
   @Test
   public void testAuroraOverrides() throws Exception {
-    String override = "dc/role/environ";
+    String override = "cluster=cluster role=role environ=environ";
     AuroraConfigLoader configLoader = AuroraConfigLoader.class.newInstance();
-    configLoader.properties = new Properties();
     // Disables version check
     configLoader.properties.setProperty(Constants.HERON_RELEASE_PACKAGE_NAME, "test");
     configLoader.applyConfigOverride(override);
-    Assert.assertEquals("dc", configLoader.properties.getProperty(Constants.DC));
-    Assert.assertEquals("role", configLoader.properties.getProperty(Constants.ROLE));
+    Assert.assertEquals("cluster", configLoader.properties.getProperty(Constants.CLUSTER));
     Assert.assertEquals("environ", configLoader.properties.getProperty(Constants.ENVIRON));
   }
 
   @Test
   public void testAuroraOverridesWithDefaultOverrides() throws Exception {
-    String override = "dc/role/environ key1=value1 key2=value2";
+    String override = "cluster=cluster role=role environ=environ key1=value1 key2=value2";
     AuroraConfigLoader configLoader = AuroraConfigLoader.class.newInstance();
-    configLoader.properties = new Properties();
     configLoader.properties.setProperty(Constants.HERON_RELEASE_PACKAGE_NAME, "test");
     configLoader.applyConfigOverride(override);
-    Assert.assertEquals("dc", configLoader.properties.getProperty(Constants.DC));
+    Assert.assertEquals("cluster", configLoader.properties.getProperty(Constants.CLUSTER));
     Assert.assertEquals("role", configLoader.properties.getProperty(Constants.ROLE));
     Assert.assertEquals("environ", configLoader.properties.getProperty(Constants.ENVIRON));
     Assert.assertEquals("value1", configLoader.properties.getProperty("key1"));
@@ -47,7 +43,7 @@ public class AuroraConfigLoaderTest {
 
   @Test
   public void testAuroraRespectRespectHeronVersion() throws Exception {
-    StringBuilder override = new StringBuilder("dc/role/environ");
+    StringBuilder override = new StringBuilder("cluster=cluster role=role environ=environ");
 
     // Add required heron package defaults
     addConfig(override, Constants.HERON_RELEASE_PACKAGE_NAME, "testPackage");
@@ -55,7 +51,6 @@ public class AuroraConfigLoaderTest {
     addConfig(override, Constants.HERON_RELEASE_PACKAGE_VERSION, "live");
 
     AuroraConfigLoader configLoader = AuroraConfigLoader.class.newInstance();
-    configLoader.properties = new Properties();
     configLoader.applyConfigOverride(override.toString());
     // Verify translated package
     Assert.assertEquals("live",

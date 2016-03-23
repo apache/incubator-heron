@@ -17,8 +17,10 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.core.base.FileUtility;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
+import com.twitter.heron.common.basics.FileUtils;
+
+import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
 import com.twitter.heron.scheduler.util.DefaultConfigLoader;
 import com.twitter.heron.scheduler.util.RoundRobinPacking;
 import com.twitter.heron.scheduler.util.ShellUtility;
@@ -31,16 +33,17 @@ import junit.framework.Assert;
  * LocalLauncher Tester.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({TopologyUtility.class, FileUtility.class, ShellUtility.class})
+@PrepareForTest({TopologyUtility.class, FileUtils.class, ShellUtility.class})
 
 public class LocalLauncherTest {
+  private static final String stateMgrClass = "com.twitter.heron.statemgr.NullStateManager";
 
   DefaultConfigLoader createRequiredConfig() throws Exception {
     DefaultConfigLoader schedulerConfig = DefaultConfigLoader.class.newInstance();
-    schedulerConfig.properties = new Properties();
     schedulerConfig.properties.setProperty(LocalConfig.WORKING_DIRECTORY,
         LocalConfig.WORKING_DIRECTORY);
     schedulerConfig.addDefaultProperties();
+    schedulerConfig.properties.setProperty(Constants.STATE_MANAGER_CLASS, stateMgrClass);
     return schedulerConfig;
   }
 
@@ -89,9 +92,9 @@ public class LocalLauncherTest {
     PowerMockito.doReturn("").
         when(TopologyUtility.class, "makeClasspath", Matchers.any(TopologyAPI.Topology.class));
 
-    PowerMockito.mockStatic(FileUtility.class);
+    PowerMockito.mockStatic(FileUtils.class);
     PowerMockito.
-        when(FileUtility.getBaseName(Matchers.anyString())).thenReturn("");
+        when(FileUtils.getBaseName(Matchers.anyString())).thenReturn("");
 
     Assert.assertTrue(launcher.launchTopology(packing.pack(context)));
 
@@ -124,4 +127,4 @@ public class LocalLauncherTest {
         Matchers.eq(expectedUntarCmd), Matchers.any(StringBuilder.class),
         Matchers.any(StringBuilder.class), Matchers.any(File.class));
   }
-} 
+}

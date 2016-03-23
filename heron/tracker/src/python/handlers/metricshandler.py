@@ -12,7 +12,7 @@ class MetricsHandler(BaseHandler):
   """
   URL - /topologies/metrics
   Parameters:
-   - dc (required)
+   - cluster (required)
    - environ (required)
    - topology (required) name of the requested topology
    - component (required)
@@ -32,19 +32,19 @@ class MetricsHandler(BaseHandler):
   @tornado.gen.coroutine
   def get(self):
     try:
-      dc = self.get_argument_dc()
+      cluster = self.get_argument_cluster()
       environ = self.get_argument_environ()
-      topName = self.get_argument_topology()
+      topology_name = self.get_argument_topology()
       component = self.get_argument_component()
-      metricNames = self.get_required_arguments_metricnames()
+      metric_names = self.get_required_arguments_metricnames()
 
-      topology = self.tracker.getTopologyByDcEnvironAndName(dc, environ, topName)
+      topology = self.tracker.getTopologyByClusterEnvironAndName(cluster, environ, topology_name)
 
       interval = int(self.get_argument(constants.PARAM_INTERVAL, default=-1))
       instances = self.get_arguments(constants.PARAM_INSTANCE)
 
       metrics = yield tornado.gen.Task(self.getComponentMetrics,
-        topology.tmaster, component, metricNames, instances, interval)
+        topology.tmaster, component, metric_names, instances, interval)
 
       self.write_success_response(metrics)
     except Exception as e:

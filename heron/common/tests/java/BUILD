@@ -9,7 +9,7 @@ java_test(
 )
 
 java_test(
-    name = "wakeable_looper_unittest",
+    name = "wakeable-looper_unittest",
     srcs = glob(["**/WakeableLooperTest.java"]),
     deps = [
         "//heron/common/src/java:common-java",
@@ -19,8 +19,8 @@ java_test(
 )
 
 java_test(
-    name = "file_utility_unittest",
-    srcs = glob(["**/FileUtilityTest.java"]),
+    name = "file-utility_unittest",
+    srcs = glob(["**/FileUtilsTest.java"]),
     deps = [
         "//heron/common/src/java:common-java",
         "//3rdparty/powermock:powermock-java",
@@ -34,7 +34,6 @@ java_test(
     name = "echo_unittest",
     srcs = glob(["**/EchoTest.java"]),
     deps = [
-        "//heron/api/src/java:api-java",
         "//heron/common/src/java:common-java",
         "//heron/proto:proto_networktests_java",
         "//3rdparty/protobuf:protobuf-java",
@@ -44,14 +43,54 @@ java_test(
 )
 
 java_test(
-    name = "heron_server_unittest",
+    name = "heron-server_unittest",
     srcs = glob(["**/HeronServerTest.java"]),
     deps = [
-        "//heron/api/src/java:api-java",
         "//heron/common/src/java:common-java",
         "//heron/proto:proto_networktests_java",
         "//3rdparty/protobuf:protobuf-java",
         "@bazel_tools//third_party:junit4",
     ],
+    size = "small",
+)
+
+java_library(
+    name = "config-test-java",
+    srcs = glob(["**/config/Constants.java"]),
+)
+
+java_test(
+    name = "config-reader_unittest",
+    srcs = glob(["**/config/ConfigReaderTest.java"]),
+    deps = [
+        ":config-test-java",
+        "//heron/common/src/java:config-java",
+        "@bazel_tools//third_party:junit4",
+    ],
+    data = glob(["**/config/testdata/**/*.yaml"]),
+    size = "small",
+)
+
+java_test(
+    name = "cluster-config-reader_unittest",
+    srcs = glob(["**/config/ClusterConfigReaderTest.java"]),
+    deps = [
+        ":config-test-java",
+        "//heron/common/src/java:config-java",
+        "@bazel_tools//third_party:junit4",
+    ],
+    data = glob(["**/config/testdata/**/*.yaml"]),
+    size = "small",
+)
+
+java_test(
+    name = "system-config_unittest",
+    srcs = glob(["**/config/SystemConfigTest.java"]),
+    deps = [
+        ":config-test-java",
+        "//heron/common/src/java:config-java",
+        "@bazel_tools//third_party:junit4",
+    ],
+    data = glob(["**/config/testdata/sysconfig.yaml"]),
     size = "small",
 )

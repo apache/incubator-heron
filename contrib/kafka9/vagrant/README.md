@@ -1,4 +1,5 @@
-# Vagrant image for running Heron-Kafka example
+Vagrant image for running Heron-Kafka example
+==============================================
 
 ## Overview
 

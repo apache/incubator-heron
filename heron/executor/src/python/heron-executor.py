@@ -18,7 +18,9 @@ def print_usage():
          " <metricsmgr_classpath> <instance_jvm_opts_in_base64> <classpath> "
          " <port1> <port2> <port3> <heron_internals_config_file> "
          " <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_jar_file>"
-         " <heron_java_home> <shell-port> <log_dir> <heron_shell_binary> <port4> ")
+         " <heron_java_home> <shell-port> <log_dir> <heron_shell_binary> <port4>"
+         " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file> "
+         " <scheduler_classpath> <scheduler_port>")
 
 def do_print(statement):
   timestr = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
@@ -48,6 +50,9 @@ def stmgr_list(count):
 def metricsmgr_list(count):
   return id_list("metricsmgr-", 0, count)
 
+def heron_shell_list(count):
+  return id_list("heron-shell-", 0, count)
+
 def get_heron_executor_process_name(shard_id):
   return 'heron-executor-' + str(shard_id)
 
@@ -76,6 +81,7 @@ def atomic_write_file(path, content):
 
 def log_pid_for_process(process_name, pid):
   filename = get_process_pid_filename(process_name)
+  do_print('Logging pid %d to file %s' %(pid, filename))
   atomic_write_file(filename, str(pid))
 
 class HeronExecutor:
@@ -123,11 +129,19 @@ class HeronExecutor:
     self.topology_jar_file = args[20]
     self.stmgr_ids = stmgr_list(len(self.instance_distribution))
     self.metricsmgr_ids = metricsmgr_list(len(self.instance_distribution))
+    self.heron_shell_ids = heron_shell_list(len(self.instance_distribution))
     self.heron_java_home = args[21]
     self.shell_port = args[22]
     self.log_dir = args[23]
     self.heron_shell_binary = args[24]
     self.port4 = args[25]
+    self.cluster = args[26]
+    self.role = args[27]
+    self.environ = args[28]
+    self.instance_classpath = args[29]
+    self.metrics_sinks_config_file = args[30]
+    self.scheduler_classpath = args[31]
+    self.scheduler_port = args[32]
 
     # Log itself pid
     log_pid_for_process(get_heron_executor_process_name(self.shard), os.getpid())
@@ -168,7 +182,7 @@ class HeronExecutor:
 
   def get_tmaster_processes(self):
     retval = {}
-    tmaster_cmd = ['./' + self.tmaster_binary,
+    tmaster_cmd = [ self.tmaster_binary,
            self.port1,
            self.port2,
            self.port3,
@@ -178,18 +192,38 @@ class HeronExecutor:
            self.zkroot,
            ','.join(self.stmgr_ids),
            self.heron_internals_config_file,
+           self.metrics_sinks_config_file,
            self.port4]
     retval["heron-tmaster"] = tmaster_cmd
 
-    metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
+    # metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
 
     retval[self.metricsmgr_ids[0]] = self.get_metricsmgr_cmd(
       self.metricsmgr_ids[0],
-      metricsmgr_metrics_sink_config_file,
+      self.metrics_sinks_config_file,
       self.port4
     )
 
     return retval
+
+  def get_scheduler_processes(self):
+    retval = {}
+    scheduler_cmd = [
+           'java',
+           '-cp',
+           self.scheduler_classpath,
+           'com.twitter.heron.scheduler.SchedulerMain',
+           self.cluster,
+           self.role,
+           self.environ,
+           self.topology_name,
+           self.topology_jar_file,
+           self.scheduler_port
+           ]
+    retval["heron-tscheduler"] = scheduler_cmd
+
+    return retval
+
 
   def get_regular_processes(self):
     retval = {}
@@ -201,7 +235,7 @@ class HeronExecutor:
       instance_id = "container_" + str(self.shard) + "_" + component_name + "_" + str(global_task_id)
       instance_info.append((instance_id, component_name, global_task_id, component_index))
 
-    stmgr_cmd = ['./' + self.stmgr_binary,
+    stmgr_cmd = [self.stmgr_binary,
            self.topology_name,
            self.topology_id,
            self.topology_defn_file,
@@ -215,19 +249,22 @@ class HeronExecutor:
            self.heron_internals_config_file]
     retval[self.stmgr_ids[self.shard - 1]] = stmgr_cmd
 
-    metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
+    # metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
 
     retval[self.metricsmgr_ids[self.shard]] = self.get_metricsmgr_cmd(
       self.metricsmgr_ids[self.shard],
-      metricsmgr_metrics_sink_config_file,
+      self.metrics_sinks_config_file,
       self.port2
     )
 
+    # TO DO (Karthik) to be moved into keys and defaults files
     code_cache_size_mb = 64
     perm_gen_size_mb = 128
+
     for (instance_id, component_name, global_task_id, component_index) in instance_info:
       total_jvm_size = int(self.component_rammap[component_name] / (1024 * 1024))
       heap_size_mb = total_jvm_size - code_cache_size_mb - perm_gen_size_mb
+      print "%s %d %d %d %d" % (component_name, self.component_rammap[component_name], total_jvm_size, code_cache_size_mb, perm_gen_size_mb)
       xmn_size = int(heap_size_mb / 2)
       instance_cmd = ['%s/bin/java' % self.heron_java_home,
                       '-Xmx%dM' % heap_size_mb,
@@ -258,7 +295,7 @@ class HeronExecutor:
       instance_cmd.extend(['-Djava.util.logging.config.file=aurora_logging.properties',
                            '-Djava.net.preferIPv4Stack=true',
                            '-cp',
-                           'heron-instance.jar:%s' % self.classpath,
+                           '%s:%s' % (self.instance_classpath, self.classpath),
                            'com.twitter.heron.instance.HeronInstance',
                            self.topology_name,
                            self.topology_id,
@@ -279,8 +316,9 @@ class HeronExecutor:
     """
     retval = {}
 
-    retval[self.heron_shell_binary] = ['./%s' % self.heron_shell_binary,
-                             '--port=%s' % self.shell_port]
+    retval[self.heron_shell_ids[self.shard]] = ['%s' % self.heron_shell_binary,
+                                       '--port=%s' % self.shell_port,
+                                       '--log_file_prefix=%s/heron-shell.log' % self.log_dir]
 
     return retval
 
@@ -339,7 +377,7 @@ class HeronExecutor:
 
   def prepareLaunch(self):
     create_folders = 'mkdir -p %s' % self.log_dir
-    chmod_binaries = 'chmod a+rx . && chmod a+x ./%s && chmod +x ./%s && chmod +x ./%s && chmod +x ./%s' % (self.log_dir, self.tmaster_binary, self.stmgr_binary, self.heron_shell_binary)
+    chmod_binaries = 'chmod a+rx . && chmod a+x %s && chmod +x %s && chmod +x %s && chmod +x %s' % (self.log_dir, self.tmaster_binary, self.stmgr_binary, self.heron_shell_binary)
 
     commands = [create_folders, chmod_binaries]
 
@@ -349,7 +387,7 @@ class HeronExecutor:
         sys.exit(1)
 
 def main():
-  if len(sys.argv) != 26:
+  if len(sys.argv) != 33:
     print_usage()
     sys.exit(1)
   executor = HeronExecutor(sys.argv)
@@ -362,6 +400,11 @@ def signal_handler(signal_to_handle, frame):
   sys.exit(signal_to_handle)
 
 def setup():
+  # Redirect stdout and stderr to files in append mode
+  # The filename format is heron-executor.stdxxx
+  sys.stdout = open('heron-executor.stdout', 'a')
+  sys.stderr = open('heron-executor.stderr', 'a')
+
   do_print('Set up process group; executor becomes leader')
   os.setpgrp() # create new process group, become its leader
 
@@ -372,6 +415,10 @@ def setup():
   atexit.register(cleanup)
 
 def cleanup():
+  """Handler to trigger when receiving the SIGTERM signal
+  Do cleanup inside this method, including:
+  1. Terminate all children processes
+  """
   do_print('Executor terminated; exiting all process in executor.')
   # We would not wait or check whether process spawned dead or not
   os.killpg(0, signal.SIGTERM)

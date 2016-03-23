@@ -10,10 +10,10 @@ from heron.tracker.src.python.log import Log as LOG
 
 class MemoryHistogramHandler(BaseHandler):
   """
-  URL - /topologies/histo?dc=<dc>&topology=<topology> \
+  URL - /topologies/histo?cluster=<cluster>&topology=<topology> \
         &environ=<environment>&instance=<instance>
   Parameters:
-   - dc - Name of dc.
+   - cluster - Name of the cluster.
    - environ - Running environment.
    - topology - Name of topology (Note: Case sensitive. Can only
                 include [a-zA-Z0-9-_]+)
@@ -34,22 +34,22 @@ class MemoryHistogramHandler(BaseHandler):
   @tornado.gen.coroutine
   def get(self):
     try:
-      dc = self.get_argument_dc()
+      cluster = self.get_argument_cluster()
       environ = self.get_argument_environ()
-      topology = self.get_argument_topology()
+      topology_name = self.get_argument_topology()
       instance = self.get_argument_instance()
-      topologyInfo = self.tracker.getTopologyInfo(topology, dc, environ)
-      ret = yield self.getInstanceMemoryHistogram(topologyInfo, instance)
+      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, environ)
+      ret = yield self.getInstanceMemoryHistogram(topology_info, instance)
       self.write_success_response(ret)
     except Exception as e:
       self.write_error_response(e)
 
   @tornado.gen.coroutine
-  def getInstanceMemoryHistogram(self, topologyInfo, instance_id):
+  def getInstanceMemoryHistogram(self, topology_info, instance_id):
     """
     Fetches Instance top memory item as histogram.
     """
-    pid_response = yield getInstancePid(topologyInfo, instance_id)
+    pid_response = yield getInstancePid(topology_info, instance_id)
     try:
       http_client = tornado.httpclient.AsyncHTTPClient()
       component_id = instance_id.split('_')[1] # Format: container_<id>_<instance_id>
@@ -57,7 +57,7 @@ class MemoryHistogramHandler(BaseHandler):
       pid = pid_json['stdout'].strip()
       if pid == '':
         raise Exception('Failed to get pid')
-      endpoint = utils.make_shell_endpoint(topologyInfo, instance_id)
+      endpoint = utils.make_shell_endpoint(topology_info, instance_id)
       url = "%s/histo/%s" % (endpoint, pid)
       response = yield http_client.fetch(url)
       LOG.debug("HTTP call for url: %s" % url)

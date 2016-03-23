@@ -10,7 +10,7 @@ API_VERSION = "1.0.0"
 
 # Parameter Names
 
-PARAM_DC = "dc"
+PARAM_CLUSTER = "cluster"
 PARAM_ENVIRON = "environ"
 PARAM_TOPOLOGY = "topology"
 PARAM_COMPONENT = "component"
@@ -39,4 +39,10 @@ RESPONSE_STATUS_FAILURE = "failure"
 # Timeout for HTTP requests.
 
 HTTP_TIMEOUT = 5 #seconds
+
+# default parameter - port for the tracker to listen on
+DEFAULT_PORT = 8888
+
+# default config file to read
+DEFAULT_CONFIG_FILE = "localfilestateconf.yaml"
 

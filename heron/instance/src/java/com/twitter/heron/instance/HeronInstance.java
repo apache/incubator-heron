@@ -11,13 +11,15 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.twitter.heron.common.core.base.Communicator;
-import com.twitter.heron.common.core.base.NIOLooper;
-import com.twitter.heron.common.core.base.SingletonRegistry;
-import com.twitter.heron.common.core.base.SlaveLooper;
-import com.twitter.heron.common.utils.misc.Constants;
-import com.twitter.heron.common.utils.misc.LoggingHelper;
-import com.twitter.heron.common.utils.misc.SystemConfig;
+import com.twitter.heron.common.basics.Communicator;
+import com.twitter.heron.common.basics.Constants;
+import com.twitter.heron.common.basics.NIOLooper;
+import com.twitter.heron.common.basics.SingletonRegistry;
+import com.twitter.heron.common.basics.SlaveLooper;
+import com.twitter.heron.common.config.SystemConfig;
+import com.twitter.heron.common.utils.logging.ErrorReportLoggingHandler;
+import com.twitter.heron.common.utils.logging.LoggingHelper;
+import com.twitter.heron.common.utils.misc.ThreadNames;
 import com.twitter.heron.proto.system.HeronTuples;
 import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.proto.system.PhysicalPlans;
@@ -61,7 +63,7 @@ public class HeronInstance {
   public HeronInstance(String topologyName, String topologyId,
                        PhysicalPlans.Instance instance, int streamPort, int metricsPort)
       throws IOException {
-    systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(Constants.HERON_SYSTEM_CONFIG);
+    systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
     // Two WakeableLooper
     gatewayLooper = new NIOLooper();
@@ -124,7 +126,7 @@ public class HeronInstance {
       exitExecutor.execute(new ForceExitTask(exited, systemConfig.getInstanceForceExitTimeoutMs()));
 
       // Clean up
-      if (thread.getName().equals(Constants.THREAD_SLAVE_NAME)) {
+      if (thread.getName().equals(ThreadNames.THREAD_SLAVE_NAME)) {
         // Run the SlaveExitTask here since the thread throw exceptions
         // and this Task would never be invoked on exit in future
         new SlaveExitTask().run();
@@ -235,7 +237,7 @@ public class HeronInstance {
     SystemConfig systemConfig = new SystemConfig(args[9], true);
 
     // Add the SystemConfig into SingletonRegistry
-    SingletonRegistry.INSTANCE.registerSingleton(Constants.HERON_SYSTEM_CONFIG, systemConfig);
+    SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, systemConfig);
 
     // Create the protobuf Instance
     PhysicalPlans.InstanceInfo instanceInfo = PhysicalPlans.InstanceInfo.newBuilder().
@@ -249,7 +251,13 @@ public class HeronInstance {
     Level loggingLevel = Level.INFO;
     String loggingDir = systemConfig.getHeronLoggingDirectory();
 
-    LoggingHelper.loggerInit(instanceId, loggingLevel, loggingDir);
+    // Log to file and TMaster
+    LoggingHelper.loggerInit(loggingLevel, true);
+    LoggingHelper.addLoggingHandler(
+        LoggingHelper.getFileHandler(instanceId, loggingDir, true,
+            systemConfig.getHeronLoggingMaximumSizeMb() * Constants.MB_TO_BYTES,
+            systemConfig.getHeronLoggingMaximumFiles()));
+    LoggingHelper.addLoggingHandler(new ErrorReportLoggingHandler());
 
     LOG.info("\nStarting instance " + instanceId + " for topology " + topologyName
         + " and topologyId " + topologyId + " for component " + componentName

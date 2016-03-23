@@ -3,8 +3,8 @@ import time
 import unittest2 as unittest
 from mock import call, patch, Mock
 
-from heron.common.src.python.topology import Topology
-from heron.state.src.python import statemanagerfactory
+from heron.statemgrs.src.python import statemanagerfactory
+from heron.tracker.src.python.topology import Topology
 from heron.tracker.src.python.tracker import Tracker
 
 class TrackerTest(unittest.TestCase):
@@ -117,19 +117,19 @@ class TrackerTest(unittest.TestCase):
 
   def fill_tracker_topologies(self):
     self.topology1 = Topology('top_name1', 'mock_name1')
-    self.topology1.dc = 'dc1'
+    self.topology1.cluster = 'cluster1'
     self.topology1.environ = 'env1'
     self.topology2 = Topology('top_name2', 'mock_name1')
-    self.topology2.dc = 'dc1'
+    self.topology2.cluster = 'cluster1'
     self.topology2.environ = 'env1'
     self.topology3 = Topology('top_name3', 'mock_name1')
-    self.topology3.dc = 'dc1'
+    self.topology3.cluster = 'cluster1'
     self.topology3.environ = 'env2'
     self.topology4 = Topology('top_name4', 'mock_name2')
-    self.topology4.dc = 'dc2'
+    self.topology4.cluster = 'cluster2'
     self.topology4.environ = 'env1'
     self.topology5 = Topology('top_name5', 'mock_name2')
-    self.topology5.dc = 'dc2'
+    self.topology5.cluster = 'cluster2'
     self.topology5.environ = 'env2'
     self.tracker.topologies = [self.topology1,
                                self.topology2,
@@ -137,13 +137,13 @@ class TrackerTest(unittest.TestCase):
                                self.topology4,
                                self.topology5]
 
-  def test_get_topology_by_dc_environ_and_name(self):
+  def test_get_topology_by_cluster_environ_and_name(self):
     self.fill_tracker_topologies()
-    self.assertEqual(self.topology1, self.tracker.getTopologyByDcEnvironAndName('dc1', 'env1', 'top_name1'))
-    self.assertEqual(self.topology2, self.tracker.getTopologyByDcEnvironAndName('dc1', 'env1', 'top_name2'))
-    self.assertEqual(self.topology3, self.tracker.getTopologyByDcEnvironAndName('dc1', 'env2', 'top_name3'))
-    self.assertEqual(self.topology4, self.tracker.getTopologyByDcEnvironAndName('dc2', 'env1', 'top_name4'))
-    self.assertEqual(self.topology5, self.tracker.getTopologyByDcEnvironAndName('dc2', 'env2', 'top_name5'))
+    self.assertEqual(self.topology1, self.tracker.getTopologyByClusterEnvironAndName('cluster1', 'env1', 'top_name1'))
+    self.assertEqual(self.topology2, self.tracker.getTopologyByClusterEnvironAndName('cluster1', 'env1', 'top_name2'))
+    self.assertEqual(self.topology3, self.tracker.getTopologyByClusterEnvironAndName('cluster1', 'env2', 'top_name3'))
+    self.assertEqual(self.topology4, self.tracker.getTopologyByClusterEnvironAndName('cluster2', 'env1', 'top_name4'))
+    self.assertEqual(self.topology5, self.tracker.getTopologyByClusterEnvironAndName('cluster2', 'env2', 'top_name5'))
 
   def test_get_topolies_for_state_location(self):
     self.fill_tracker_topologies()

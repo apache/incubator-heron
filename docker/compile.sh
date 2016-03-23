@@ -44,4 +44,3 @@ else
     echo "TOPOLOGY_ONLY is set. Packing only the topology"
     pack_topology
 fi
-

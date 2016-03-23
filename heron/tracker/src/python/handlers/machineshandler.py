@@ -7,15 +7,15 @@ class MachinesHandler(BaseHandler):
   """
   URL - /machines
   Parameters:
-   - dc (optional)
+   - cluster (optional)
    - environ (optional)
    - topology (optional, repeated
-               both 'dc' and 'environ' are required
+               both 'cluster' and 'environ' are required
                if topology is present)
 
   The response JSON is a dict with following format:
   {
-    <dc1>: {
+    <cluster1>: {
       <environ1>: {
         <top1>: [machine1, machine2,..],
         <top2>: [...],
@@ -24,7 +24,7 @@ class MachinesHandler(BaseHandler):
       <environ2>: {...},
       ...
     },
-    <dc2>: {...}
+    <cluster2>: {...}
   }
   """
 
@@ -33,15 +33,15 @@ class MachinesHandler(BaseHandler):
 
   @tornado.gen.coroutine
   def get(self):
-    dcs = self.get_arguments(constants.PARAM_DC)
+    clusters = self.get_arguments(constants.PARAM_CLUSTER)
     environs = self.get_arguments(constants.PARAM_ENVIRON)
-    topNames = self.get_arguments(constants.PARAM_TOPOLOGY)
+    topology_names = self.get_arguments(constants.PARAM_TOPOLOGY)
 
     ret = {}
 
-    if len(topNames) > 1:
-      if not dcs:
-        message = "Missing argument" + constants.PARAM_DC
+    if len(topology_names) > 1:
+      if not clusters:
+        message = "Missing argument" + constants.PARAM_CLUSTER
         self.write_error_response(message)
         return
 
@@ -53,28 +53,28 @@ class MachinesHandler(BaseHandler):
     ret = {}
     topologies = self.tracker.topologies
     for topology in topologies:
-      dc = topology.dc
+      cluster = topology.cluster
       environ = topology.environ
-      topName = topology.name
-      if not dc or not environ:
+      topology_name = topology.name
+      if not cluster or not environ:
         continue
 
-      # This DC is not asked for.
-      if dcs and dc not in dcs:
+      # This cluster is not asked for.
+      if clusters and cluster not in clusters:
         continue
 
       # This environ is not asked for.
       if environs and environ not in environs:
         continue
 
-      if topNames and topName not in topNames:
+      if topology_names and topology_name not in topology_names:
         continue
 
-      if dc not in ret:
-        ret[dc] = {}
-      if environ not in ret[dc]:
-        ret[dc][environ] = {}
-      ret[dc][environ][topName] = topology.get_machines()
+      if cluster not in ret:
+        ret[cluster] = {}
+      if environ not in ret[cluster]:
+        ret[cluster][environ] = {}
+      ret[cluster][environ][topology_name] = topology.get_machines()
 
     self.write_success_response(ret)
 

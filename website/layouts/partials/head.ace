@@ -1,0 +1,3 @@
+{{partial "meta.html" .}}
+title
+  {{.Site.Title}}

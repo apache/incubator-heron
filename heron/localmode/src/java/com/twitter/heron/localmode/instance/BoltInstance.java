@@ -14,14 +14,14 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.metric.GlobalMetrics;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.utils.Utils;
-import com.twitter.heron.common.core.base.Communicator;
-import com.twitter.heron.common.core.base.Constants;
-import com.twitter.heron.common.core.base.SingletonRegistry;
-import com.twitter.heron.common.core.base.SlaveLooper;
+import com.twitter.heron.common.config.SystemConfig;
+import com.twitter.heron.common.basics.Communicator;
+import com.twitter.heron.common.basics.Constants;
+import com.twitter.heron.common.basics.SingletonRegistry;
+import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.utils.metrics.BoltMetrics;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.common.utils.misc.SerializeDeSerializeHelper;
-import com.twitter.heron.common.utils.misc.SystemConfig;
 import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 import com.twitter.heron.common.utils.tuple.TickTuple;
 import com.twitter.heron.common.utils.tuple.TupleImpl;
@@ -59,7 +59,7 @@ public class BoltInstance implements IInstance {
     TopologyContextImpl topologyContext = helper.getTopologyContext();
     serializer = SerializeDeSerializeHelper.getSerializer(topologyContext.getTopologyConfig());
     systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
-        com.twitter.heron.common.utils.misc.Constants.HERON_SYSTEM_CONFIG);
+        SystemConfig.HERON_SYSTEM_CONFIG);
 
     // Get the bolt. Notice, in fact, we will always use the deserialization way to get bolt.
     if (helper.getMyBolt().getComp().hasJavaObject()) {

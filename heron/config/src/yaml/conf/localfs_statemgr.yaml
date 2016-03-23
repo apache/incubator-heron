@@ -1,0 +1,2 @@
+# path of the root address to store the state in a local file system
+heron.statemgr.root.path:          ${HOME}/.herondata/repository/state/${CLUSTER}

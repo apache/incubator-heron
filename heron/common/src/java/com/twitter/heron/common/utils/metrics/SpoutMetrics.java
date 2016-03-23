@@ -8,10 +8,9 @@ import com.twitter.heron.api.metric.MeanReducer;
 import com.twitter.heron.api.metric.MultiCountMetric;
 import com.twitter.heron.api.metric.MultiReducedMetric;
 import com.twitter.heron.api.metric.ReducedMetric;
-import com.twitter.heron.common.core.base.SingletonRegistry;
-import com.twitter.heron.common.utils.misc.Constants;
+import com.twitter.heron.common.config.SystemConfig;
+import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
-import com.twitter.heron.common.utils.misc.SystemConfig;
 import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 
 
@@ -57,7 +56,7 @@ public class SpoutMetrics {
 
   public void registerMetrics(TopologyContextImpl topologyContext) {
     SystemConfig systemConfig =
-        (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(Constants.HERON_SYSTEM_CONFIG);
+        (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
     int interval = systemConfig.getHeronMetricsExportIntervalSec();
 

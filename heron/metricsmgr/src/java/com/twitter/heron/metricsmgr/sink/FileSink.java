@@ -12,12 +12,12 @@ import java.util.logging.Logger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import com.twitter.heron.api.utils.Utils;
-import com.twitter.heron.metricsmgr.api.metrics.ExceptionInfo;
-import com.twitter.heron.metricsmgr.api.metrics.MetricsInfo;
-import com.twitter.heron.metricsmgr.api.metrics.MetricsRecord;
-import com.twitter.heron.metricsmgr.api.sink.IMetricsSink;
-import com.twitter.heron.metricsmgr.api.sink.SinkContext;
+import com.twitter.heron.common.basics.TypeUtils;
+import com.twitter.heron.spi.metricsmgr.metrics.ExceptionInfo;
+import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
+import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
+import com.twitter.heron.spi.metricsmgr.sink.IMetricsSink;
+import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
 
 /**
  * A metrics sink that writes to a file  in json format
@@ -57,7 +57,7 @@ public class FileSink implements IMetricsSink {
   @Override
   public void init(Map<String, Object> conf, SinkContext context) {
     filenamePrefix = (String) conf.get(FILENAME_KEY) + "." + context.getMetricsMgrId();
-    fileMaximum = Utils.getInt(conf.get(MAXIMUM_FILE_COUNT_KEY));
+    fileMaximum = TypeUtils.getInt(conf.get(MAXIMUM_FILE_COUNT_KEY));
     sinkContext = context;
     prettyPrint = Boolean.parseBoolean((String) conf.get(PRETTY_PRINT));
 

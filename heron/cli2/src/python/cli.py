@@ -4,7 +4,11 @@ import argparse
 import atexit
 import base64
 import contextlib
+<<<<<<< HEAD
 import errno
+=======
+import getpass
+>>>>>>> master
 import glob
 import logging
 import logging.handlers
@@ -77,6 +81,17 @@ def get_heron_dir():
   :return: root location for heron-cli.
   """
   return normclasspath("/".join(os.path.realpath( __file__ ).split('/')[:-7]))
+
+def pass_config_overrides(namespace):
+  parts = namespace['config-overrides'].split('/')[:3]
+  if len(parts) == 1:
+    parts.append(getpass.getuser())
+  if len(parts) == 2:
+    parts.append('default')
+  if len(parts[0]) == 0 or len(parts[1]) == 0 or len(parts[2]) == 0:
+    print "Failed to parse config-overrides: %s" % namespace['config-overrides']
+    sys.exit(1)
+  return "dc=%s role=%s environ=%s" % (parts[0], parts[1], parts[2])
 
 def pass_cmdline_override(namespace):
   override = []
@@ -238,7 +253,7 @@ def submitfatjar(namespace):
                    args=args)
 
   try:
-    scheduler_overrides = namespace['config-overrides'] + ' ' + pass_cmdline_override(namespace)
+    scheduler_overrides = pass_config_overrides(namespace) + ' ' + pass_cmdline_override(namespace)
     launch_all_topologies_found(jarfile,
                                 tmpdir,
                                 namespace['config_loader'],
@@ -292,7 +307,7 @@ def submittar(namespace):
 
   exec_heron_tar(klass, tar_name, args, tmpdir)
   try:
-    scheduler_overrides = namespace['config-overrides'] + ' ' + pass_cmdline_override(namespace)
+    scheduler_overrides = pass_config_overrides(namespace) + ' ' + pass_cmdline_override(namespace)
     launch_all_topologies_found(tar_name,
                                 tmpdir,
                                 namespace['config_loader'],
@@ -359,7 +374,7 @@ def runtime_manage(namespace):
   command = namespace['command']
 
   try:
-    config_overrides = namespace['config-overrides'] + ' ' + pass_cmdline_override(namespace)
+    config_overrides = pass_config_overrides(namespace) + ' ' + pass_cmdline_override(namespace)
 
     exec_heron_class('com.twitter.heron.scheduler.service.RuntimeManagerMain',
                      get_heron_libs(SCHEDULER_RUN_JARS),

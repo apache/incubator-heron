@@ -10,10 +10,10 @@ from heron.proto import tmaster_pb2
 
 class ExceptionHandler(BaseHandler):
   """
-  URL - /topologies/exceptions?dc=<dc>&topology=<topology> \
+  URL - /topologies/exceptions?cluster=<cluster>&topology=<topology> \
         &environ=<environment>&component=<component>
   Parameters:
-   - dc - Name of dc.
+   - cluster - Name of cluster.
    - environ - Running environment.
    - topology - Name of topology (Note: Case sensitive. Can only
                 include [a-zA-Z0-9-_]+)
@@ -28,11 +28,11 @@ class ExceptionHandler(BaseHandler):
   @tornado.gen.coroutine
   def get(self):
     try:
-      dc = self.get_argument_dc()
+      cluster = self.get_argument_cluster()
       environ = self.get_argument_environ()
       topName = self.get_argument_topology()
       component = self.get_argument_component()
-      topology = self.tracker.getTopologyByDcEnvironAndName(dc, environ, topName)
+      topology = self.tracker.getTopologyByClusterEnvironAndName(cluster, environ, topName)
       instances = self.get_arguments(constants.PARAM_INSTANCE)
       exceptions_logs = yield tornado.gen.Task(self.getComponentException,
                                                topology.tmaster, component, instances)

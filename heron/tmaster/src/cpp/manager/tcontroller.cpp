@@ -53,19 +53,19 @@ void TController::HandleActivateRequest(IncomingHTTPRequest* request)
     delete request;
     return;
   }
-  if (tmaster_->getTopology() == NULL) {
+  if (tmaster_->getPhysicalPlan() == NULL) {
     LOG(ERROR) << "Tmaster still not initialized";
     http_server_->SendErrorReply(request, 500);
     delete request;
     return;
   }
-  if (id != tmaster_->getTopology()->id()) {
+  if (id != tmaster_->GetTopologyId()) {
     LOG(ERROR) << "Topology id does not match";
     http_server_->SendErrorReply(request, 400);
     delete request;
     return;
   }
-  if (tmaster_->getTopology()->state() != proto::api::PAUSED) {
+  if (tmaster_->GetTopologyState() != proto::api::PAUSED) {
     LOG(ERROR) << "Topology not in paused state";
     http_server_->SendErrorReply(request, 400);
     delete request;
@@ -107,19 +107,19 @@ void TController::HandleDeActivateRequest(IncomingHTTPRequest* request)
     delete request;
     return;
   }
-  if (tmaster_->getTopology() == NULL) {
+  if (tmaster_->getPhysicalPlan() == NULL) {
     LOG(ERROR) << "Tmaster still not initialized";
     http_server_->SendErrorReply(request, 500);
     delete request;
     return;
   }
-  if (id != tmaster_->getTopology()->id()) {
+  if (id != tmaster_->GetTopologyId()) {
     LOG(ERROR) << "Topology id does not match";
     http_server_->SendErrorReply(request, 400);
     delete request;
     return;
   }
-  if (tmaster_->getTopology()->state() != proto::api::RUNNING) {
+  if (tmaster_->GetTopologyState() != proto::api::RUNNING) {
     LOG(ERROR) << "Topology not in running state";
     http_server_->SendErrorReply(request, 400);
     delete request;

@@ -8,7 +8,7 @@ class ExecutionStateHandler(BaseHandler):
   """
   URL - /topologies/executionstate
   Parameters:
-   - dc (required)
+   - cluster (required)
    - environ (required)
    - topology (required) name of the requested topology
 
@@ -22,12 +22,12 @@ class ExecutionStateHandler(BaseHandler):
   @tornado.gen.coroutine
   def get(self):
     try:
-      dc = self.get_argument_dc()
+      cluster = self.get_argument_cluster()
       environ = self.get_argument_environ()
-      topName = self.get_argument_topology()
-      topologyInfo = self.tracker.getTopologyInfo(topName, dc, environ)
-      executionState = topologyInfo["execution_state"]
-      self.write_success_response(executionState)
+      topology_name = self.get_argument_topology()
+      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, environ)
+      execution_state = topology_info["execution_state"]
+      self.write_success_response(execution_state)
     except Exception as e:
       self.write_error_response(e)
 

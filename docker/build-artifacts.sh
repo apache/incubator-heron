@@ -109,7 +109,7 @@ case $# in
     echo "Platforms: ubuntu14.04, centos7"
     echo "  "
     echo "Example:"
-    echo "  ./build.sh ubuntu14.04 0.1.0-SNAPSHOT ."
+    echo "  ./build-artifacts.sh ubuntu14.04 0.12.0 ."
     echo "  "
     echo "NOTE: If running on OSX, the output directory will need to "
     echo "      be under /Users so virtualbox has access to."
