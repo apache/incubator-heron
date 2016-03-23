@@ -1,7 +1,7 @@
 import os
 import argparse
 
-import heron.cli3.src.python.utils as utils
+import heron.cli.src.python.utils as utils
 
 def add_titles(parser):
   parser._positionals.title = "Required arguments"
