@@ -15,11 +15,11 @@ import tarfile
 import tempfile
 
 from heron.proto import topology_pb2
-import heron.cli3.src.python.args as args
-import heron.cli3.src.python.execute as execute
-import heron.cli3.src.python.jars as jars
-import heron.cli3.src.python.opts as opts
-import heron.cli3.src.python.utils as utils
+import heron.cli.src.python.args as args
+import heron.cli.src.python.execute as execute
+import heron.cli.src.python.jars as jars
+import heron.cli.src.python.opts as opts
+import heron.cli.src.python.utils as utils
 
 ################################################################################
 # Create a subparser for the submit command

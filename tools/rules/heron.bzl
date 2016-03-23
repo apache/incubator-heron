@@ -106,7 +106,7 @@ def heron_client_files():
 
 def heron_client_bin_files():
     return [
-        "//heron/cli3/src/python:heron-cli3",
+        "//heron/cli/src/python:heron",
     ]
 
 def heron_client_conf_files():
