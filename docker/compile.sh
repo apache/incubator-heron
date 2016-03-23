@@ -13,18 +13,34 @@ tar -C . -xzf /src.tar.gz
 ./bazel_configure.py
 bazel clean
 
-echo "Creating packages"
-bazel build --config=$TARGET_PLATFORM scripts/packages:tarpkgs
-bazel build --config=$TARGET_PLATFORM scripts/packages:binpkgs
+pack_topology() {
+    echo "Building required topologies and including to /dist"
+    bazel build //contrib/kafka9/examples/src/java:kafka-09-mirror_deploy.jar
+    bazel build //contrib/kafka9/examples/src/java:kafka-08-mirror_deploy.jar
 
-echo "Moving tar files to /dist"
-for file in ./bazel-bin/scripts/packages/*.tar.gz; do
-  filename=$(basename $file)
-  cp $file /dist/${filename/.tar/-$HERON_VERSION.tar}
-done
+    mkdir -p /dist/topologies
 
-echo "Moving self extracting binaries to /dist"
-for file in ./bazel-bin/scripts/packages/*.sh; do
-  filename=$(basename $file)
-  cp $file /dist/${filename/.sh/-$HERON_VERSION.sh}
-done
+    cp ./bazel-bin/contrib/kafka9/examples/src/java/kafka-08-mirror_deploy.jar /dist/topologies
+    cp ./bazel-bin/contrib/kafka9/examples/src/java/kafka-09-mirror_deploy.jar /dist/topologies
+}
+
+pack_release() {
+    echo "Creating release packages"
+    bazel build --config=$TARGET_PLATFORM --define RELEASE=$HERON_VERSION release:packages
+
+    echo "Moving release files to /dist"
+    mkdir -p /dist/$TARGET_PLATFORM
+    for file in ./bazel-bin/release/*.tar.gz; do
+        filename=$(basename $file)
+        cp $file /dist/$TARGET_PLATFORM/${filename/.tar/-$HERON_VERSION.tar}
+    done
+}
+
+if [ -z $TOPOLOGY_ONLY ]
+then
+    pack_release
+    pack_topology
+else
+    echo "TOPOLOGY_ONLY is set. Packing only the topology"
+    pack_topology
+fi

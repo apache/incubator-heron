@@ -53,13 +53,20 @@ public class FrameworkMain {
     LOG.info("Starting server on port: " + schedulerServerPort);
     runServer(jobScheduler, schedulerServerPort);
 
-    // This would return immediately
     jobScheduler.start();
+    jobScheduler.join();
   }
 
   public static FrameworkHttpServer runServer(JobScheduler jobScheduler, int port) throws IOException {
     final FrameworkHttpServer schedulerFrameworkHttpServer = new FrameworkHttpServer(jobScheduler, port, true);
     schedulerFrameworkHttpServer.start();
+
+    Runtime.getRuntime().addShutdownHook(new Thread() {
+      @Override
+      public void run() {
+        schedulerFrameworkHttpServer.stop();
+      }
+    });
 
     return schedulerFrameworkHttpServer;
   }
