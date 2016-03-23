@@ -9,3 +9,6 @@ heron.class.runtime.manager:                 com.twitter.heron.scheduler.aurora.
 
 # location of java - pick it up from shell environment
 heron.directory.sandbox.java.home:           /usr/lib/jvm/java-1.8.0-openjdk-amd64/
+
+# True if no scheduler is running
+heron.runtime.no.scheduler.rest.endpoint:    True
