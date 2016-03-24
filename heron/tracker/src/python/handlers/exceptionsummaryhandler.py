@@ -1,5 +1,6 @@
 import tornado.gen
 import tornado.web
+import traceback
 
 from heron.tracker.src.python import constants
 from heron.tracker.src.python.handlers import BaseHandler
@@ -41,6 +42,7 @@ class ExceptionSummaryHandler(BaseHandler):
       result = self.make_success_response(exceptions_summary)
       self.write_success_response(exceptions_summary)
     except Exception as e:
+      traceback.print_exc()
       self.write_error_response(e)
 
   @tornado.gen.coroutine
