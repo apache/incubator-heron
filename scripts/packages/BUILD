@@ -309,6 +309,11 @@ self_extract_binary(
 )
 
 filegroup(
+    name = "api-template-bin.sh",
+    srcs = ["api_template_bin.sh"],
+)
+
+filegroup(
     name = "client-template-bin.sh",
     srcs = ["client_template_bin.sh"],
 )
