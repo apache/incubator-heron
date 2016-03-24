@@ -14,14 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Heron self-extractable installer for tools package
+# Heron self-extractable installer for api package
 
 # Installation and etc prefix can be overriden from command line
-install_prefix=${1:-"/usr/local/herontools"}
+install_prefix=${1:-"/usr/local/heronapi"}
 
 progname="$0"
 
-echo "Heron Tools installer"
+echo "Heron API installer"
 echo "---------------------"
 echo
 cat <<'EOF'
@@ -33,14 +33,12 @@ function usage() {
   echo "Options are:" >&2
   echo "  --prefix=/some/path set the prefix path (default=/usr/local)." >&2
   echo "  --user configure for user install, expands to" >&2
-  echo '           `--prefix=$HOME/.herontools`.' >&2
+  echo '           `--prefix=$HOME/.heronapi`.' >&2
   exit 1
 }
 
 prefix="/usr/local"
-bin="%prefix%/bin"
-base="%prefix%/herontools"
-conf="%prefix%/herontools/conf"
+base="%prefix%/heronapi"
 
 for opt in "${@}"; do
   case $opt in
@@ -48,8 +46,7 @@ for opt in "${@}"; do
       prefix="$(echo "$opt" | cut -d '=' -f 2-)"
       ;;
     --user)
-      bin="$HOME/bin"
-      base="$HOME/.herontools"
+      base="$HOME/.heronapi"
       ;;
     *)
       usage
@@ -57,7 +54,6 @@ for opt in "${@}"; do
   esac
 done
 
-bin="${bin//%prefix%/${prefix}}"
 base="${base//%prefix%/${prefix}}"
 
 function test_write() {
@@ -119,47 +115,32 @@ if [ ! -x "${JAVA_HOME}/bin/javac" ]; then
 fi
 
 # Test for write access
-test_write "${bin}"
 test_write "${base}"
 
 # Do the actual installation
 echo -n "Uncompressing."
 
 # Cleaning-up, with some guards.
-if [ -f "${bin}/heron-tracker" ]; then
-  rm -f "${bin}/heron-tracker"
-fi
-if [ -f "${bin}/heron-ui" ]; then
-  rm -f "${bin}/heron-ui"
-fi
-if [ -d "${base}" -a -x "${base}/bin/heron-tracker" ]; then
+if [ -d "${base}" -a -x "${base}/lib/heron-api.jar" ]; then
   rm -fr "${base}"
 fi
 
-mkdir -p ${bin} ${base}
+mkdir -p ${base}
 echo -n .
 
 unzip -q -o "${BASH_SOURCE[0]}" -d "${base}"
-tar xfz "${base}/heron-tools.tar.gz" -C "${base}"
-echo -n .
-chmod 0755 ${base}/bin/heron-tracker ${base}/bin/heron-ui
+tar xfz "${base}/heron-api.tar.gz" -C "${base}"
 echo -n .
 chmod -R og-w "${base}"
 chmod -R og+rX "${base}"
 chmod -R u+rwX "${base}"
 echo -n .
 
-ln -s "${base}/bin/heron-tracker" "${bin}/heron-tracker"
-ln -s "${base}/bin/heron-ui"      "${bin}/heron-ui"
-echo -n .
-
-rm "${base}/heron-tools.tar.gz"
+rm "${base}/heron-api.tar.gz"
 
 cat <<EOF
 
-Heron Tools is now installed!
-
-Make sure you have "${bin}" in your path. 
+Heron API is now installed!
 
 See http://heron.github.io/docs/getting-started.html to start a new project!
 EOF
