@@ -31,7 +31,6 @@ def create_parser(subparsers):
 
   args.add_config(parser)
   args.add_verbose(parser)
-  args.add_trace_execution(parser)
 
   parser.set_defaults(subcommand='config')
   return parser

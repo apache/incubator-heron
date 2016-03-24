@@ -45,7 +45,6 @@ def create_parser(subparsers):
       default=False)
 
   args.add_verbose(parser)
-  args.add_trace_execution(parser)
 
   parser.set_defaults(subcommand='submit')
   return parser
