@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Heron self-extractable installer
+# Heron self-extractable installer for client package
 
 # Installation and etc prefix can be overriden from command line
 install_prefix=${1:-"/usr/local/heron"}
@@ -137,8 +137,12 @@ echo -n "Uncompressing."
 # Cleaning-up, with some guards.
 if [ -f "${bin}/heron" ]; then
   rm -f "${bin}/heron"
+fi
+
+if [ -f "${bin}/heron-cli3" ]; then
   rm -f "${bin}/heron-cli3"
 fi
+
 if [ -d "${base}" -a -x "${base}/bin/heron" ]; then
   rm -fr "${base}"
 fi
