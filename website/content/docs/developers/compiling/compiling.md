@@ -4,17 +4,17 @@ title: Compiling Heron
 
 Heron is currently available for Mac OS X 10.10, Ubuntu 12.04, and CentOS 5.
 
-You can build Heron either [as an entirety](#building-all-components), on a
-[component-by-component basis](#building-specific-components), or as a [release
-package](#building-a-full-release-package).
+You can build Heron either [as an entirety]({{< ref "#building-all-components" >}}), on a
+[component-by-component basis]({{< ref "#building-specific-components" >}}), or as a [release
+package]({{< ref "#building-a-full-release-package" >}}).
 
-Instructions on running unit tests for Heron can also be found in [Testing Heron](../contributors/testing.html).
+Instructions on running unit tests for Heron can also be found in [Testing Heron](../../../contributors/testing).
 
 ## Requirements
 
 You must have the following installed to compile Heron:
 
-* [Bazel](http://bazel.io/docs/install.html) >= {{book.bazel_version}}. More on
+* [Bazel](http://bazel.io/docs/install.html) >= {{% bazelVersion %}}. More on
   Bazel in the [section below](#installing-bazel).
 * [Java
   8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
@@ -50,8 +50,8 @@ $ echo $CC $CXX
 ## Installing Bazel
 
 [Bazel](http://bazel.io) is the build tool used by Heron. The releases page for
-Bazel {{book.bazel_version}} can be found
-[here](https://github.com/bazelbuild/bazel/releases/tag/{{book.bazel_version}}),
+Bazel {{% bazelVersion %}} can be found
+[here](https://github.com/bazelbuild/bazel/releases/tag/{{% bazelVersion %}}),
 while installation instructions can be found
 [here](http://bazel.io/docs/install.html).
 
@@ -61,13 +61,13 @@ There is a Python script that you can run to configure Bazel on supported
 platforms:
 
 ```bash
-$ cd /path/to/heron/repo
+$ cd /path/to/heron
 $ ./bazel_configure.py
 ```
 
 To ensure that Bazel has been installed, run `bazel version` and check the
 version (listed next to `Build label` in the script's output) to ensure that you
-have Bazel {{book.bazel_version}} or later.
+have Bazel {{% bazelVersion %}} or later.
 
 ## Building All Components
 
@@ -114,7 +114,7 @@ following when building a release package:
 Here's an example build command:
 
 ```bash
-$ cd /path/to/heron/repo
+$ cd /path/to/heron
 $ bazel build --config=darwin release:packages
 ```
 
@@ -134,4 +134,4 @@ bazel-bin/release/heron-core.tar.gz
 ## Testing Heron
 
 There are a wide variety of unit tests available in Heron's codebase. For more
-information, see [Testing Heron](../contributors/testing.html).
+information, see [Testing Heron](../../../contributors/testing).
