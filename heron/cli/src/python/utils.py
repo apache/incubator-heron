@@ -178,3 +178,22 @@ def parse_cmdline_override(namespace):
     property_value = str(namespace[key])
     override.append('%s="%s"' % (property_key, property_value))
   return ' '.join(override)
+
+################################################################################
+# Check if the java home set
+################################################################################
+def java_home_set():
+
+  # check if environ variable is set
+  if not os.environ.has_key("JAVA_HOME"):
+    print "Please set your JAVA_HOME" 
+    return False
+
+  # check if the value set is correct
+  java_home = os.environ.get("JAVA_HOME")
+  java_path = os.path.join(java_home, BIN_DIR, "java")
+  if os.path.isfile(java_path) and os.access(java_path, os.X_OK):
+    return True
+
+  print "JAVA_HOME/bin/java either does not exist or not an executable"
+  return False
