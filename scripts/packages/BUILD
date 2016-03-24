@@ -3,6 +3,8 @@ package(default_visibility = ["//visibility:public"])
 load("/tools/build_defs/pkg/pkg", "pkg_tar")
 load("/tools/build_defs/pkg/pkg", "pkg_deb")
 
+load("/tools/rules/heron_api", "heron_api_files")
+
 load("/tools/rules/heron_client", "heron_client_files")
 load("/tools/rules/heron_client", "heron_client_bin_files")
 load("/tools/rules/heron_client", "heron_client_conf_files")
@@ -30,6 +32,7 @@ load("/tools/rules/heron_examples", "heron_examples_files")
 filegroup(
     name = "tarpkgs",
     srcs = [
+        ":heron-api",
         ":heron-core",
         ":heron-tools",
         ":heron-client",
@@ -39,6 +42,7 @@ filegroup(
 filegroup(
     name = "binpkgs",
     srcs = [
+        ":heron-api-install.sh",
         ":heron-client-install.sh",
         ":heron-tools-install.sh",
     ],
@@ -211,6 +215,18 @@ pkg_tar(
     ],
 )
 
+################################################################################
+# Heron API packaging
+################################################################################
+pkg_tar(
+    name = "heron-api",
+    extension = "tar.gz",
+    files = heron_api_files(),
+)
+
+################################################################################
+# Heron self installed binaries
+################################################################################
 sh_binary(
     name = "package-info-generator",
     srcs = ["package_info_generator.sh"],
@@ -252,7 +268,29 @@ genrule(
         """,
 )
 
+genrule(
+    name = "generate-api-launcher",
+    srcs = [
+        "api_template_bin.sh",
+        ":README.md",
+    ],
+    outs = ["api_launcher_bin.sh"],
+    cmd = """
+        release_info="$$(cat $(location :README.md))"
+        template="$$(cat $(location api_template_bin.sh))"
+        echo "$${template//%release_info%/$${release_info}}" >$@
+        """,
+)
+
 load("self_extract_binary", "self_extract_binary")
+
+self_extract_binary(
+    name = "heron-api-install.sh",
+    flatten_resources = [
+        ":heron-api",
+    ],
+    launcher = ":api_launcher_bin.sh",
+)
 
 self_extract_binary(
     name = "heron-client-install.sh",
