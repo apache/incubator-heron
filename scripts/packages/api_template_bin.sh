@@ -17,13 +17,12 @@
 # Heron self-extractable installer
 
 # Installation and etc prefix can be overriden from command line
-install_prefix=${1:-"/usr/local/heron"}
-heronrc=${2:-"/usr/local/heron/etc/heron.heronrc"}
+install_prefix=${1:-"/usr/local/heronapi"}
 
 progname="$0"
 
-echo "Heron installer"
-echo "---------------"
+echo "Heron API installer"
+echo "---------------------"
 echo
 cat <<'EOF'
 %release_info%
@@ -33,30 +32,21 @@ function usage() {
   echo "Usage: $progname [options]" >&2
   echo "Options are:" >&2
   echo "  --prefix=/some/path set the prefix path (default=/usr/local)." >&2
-  echo "  --heronrc= set the heronrc path (default=/usr/local/heron/etc/heron.heronrc)." >&2
   echo "  --user configure for user install, expands to" >&2
-  echo '           `--prefix=$HOME/.heron --heronrc=$HOME/.heronrc`.' >&2
+  echo '           `--prefix=$HOME/.heronapi`.' >&2
   exit 1
 }
 
 prefix="/usr/local"
-bin="%prefix%/bin"
-base="%prefix%/heron"
-conf="%prefix%/heron/conf"
-heronrc="%prefix%/heron/etc/heron.heronrc"
+base="%prefix%/heronapi"
 
 for opt in "${@}"; do
   case $opt in
     --prefix=*)
       prefix="$(echo "$opt" | cut -d '=' -f 2-)"
       ;;
-    --heronrc=*)
-      heronrc="$(echo "$opt" | cut -d '=' -f 2-)"
-      ;;
     --user)
-      bin="$HOME/bin"
-      base="$HOME/.heron"
-      heronrc="$HOME/.heronrc"
+      base="$HOME/.heronapi"
       ;;
     *)
       usage
@@ -64,9 +54,7 @@ for opt in "${@}"; do
   esac
 done
 
-bin="${bin//%prefix%/${prefix}}"
 base="${base//%prefix%/${prefix}}"
-heronrc="${heronrc//%prefix%/${prefix}}"
 
 function test_write() {
   local file="$1"
@@ -127,60 +115,32 @@ if [ ! -x "${JAVA_HOME}/bin/javac" ]; then
 fi
 
 # Test for write access
-test_write "${bin}"
 test_write "${base}"
-test_write "${heronrc}"
 
 # Do the actual installation
 echo -n "Uncompressing."
 
 # Cleaning-up, with some guards.
-if [ -f "${bin}/heron" ]; then
-  rm -f "${bin}/heron"
-fi
-
-if [ -f "${bin}/heron-cli3" ]; then
-  rm -f "${bin}/heron-cli3"
-fi
-
-if [ -d "${base}" -a -x "${base}/bin/heron" ]; then
+if [ -d "${base}" -a -x "${base}/lib/heron-api.jar" ]; then
   rm -fr "${base}"
 fi
 
-mkdir -p ${bin} ${base}
+mkdir -p ${base}
 echo -n .
 
 unzip -q -o "${BASH_SOURCE[0]}" -d "${base}"
-tar xfz "${base}/heron-client.tar.gz" -C "${base}"
-echo -n .
-chmod 0755 ${base}/bin/heron
+tar xfz "${base}/heron-api.tar.gz" -C "${base}"
 echo -n .
 chmod -R og-w "${base}"
 chmod -R og+rX "${base}"
 chmod -R u+rwX "${base}"
 echo -n .
 
-ln -s "${base}/bin/heron" "${bin}/heron"
-ln -s "${base}/bin/heron" "${bin}/heron-cli3"
-echo -n .
-
-if [ -f "${heronrc}" ]; then
-  echo
-  echo "${heronrc} already exists, moving it to ${heronrc}.bak."
-  mv "${heronrc}" "${heronrc}.bak"
-fi
-
-touch "${heronrc}"
-if [ "${UID}" -eq 0 ]; then
-  chmod 0644 "${heronrc}"
-fi
-rm "${base}/heron-client.tar.gz"
+rm "${base}/heron-api.tar.gz"
 
 cat <<EOF
 
-Heron is now installed!
-
-Make sure you have "${bin}" in your path. 
+Heron API is now installed!
 
 See http://heron.github.io/docs/getting-started.html to start a new project!
 EOF
