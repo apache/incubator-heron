@@ -15,7 +15,6 @@ pex_library(
         "kill.py",
         "opts.py",
         "restart.py",
-        "sandbox.py",
         "submit.py",
         "utils.py",
         "version.py",
