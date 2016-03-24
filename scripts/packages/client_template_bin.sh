@@ -137,8 +137,12 @@ echo -n "Uncompressing."
 # Cleaning-up, with some guards.
 if [ -f "${bin}/heron" ]; then
   rm -f "${bin}/heron"
+fi
+
+if [ -f "${bin}/heron-cli3" ]; then
   rm -f "${bin}/heron-cli3"
 fi
+
 if [ -d "${base}" -a -x "${base}/bin/heron" ]; then
   rm -fr "${base}"
 fi
