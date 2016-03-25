@@ -13,7 +13,6 @@ import sys
 import subprocess
 import tarfile
 import tempfile
-import pprint
 import time
 
 from heron.common.src.python.color import Log as Log
