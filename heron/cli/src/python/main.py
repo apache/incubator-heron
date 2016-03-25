@@ -115,7 +115,7 @@ def main():
   # if no argument is provided, print help and exit
   if len(sys.argv[1:]) == 0:
     parser.print_help()
-    return
+    return 0
 
   # insert the boolean values for some of the options
   sys.argv = parse.insert_bool_values(sys.argv)
