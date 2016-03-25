@@ -1,5 +1,6 @@
 import tornado.gen
 import tornado.web
+import traceback
 
 from heron.tracker.src.python import constants
 from heron.tracker.src.python import utils
@@ -54,9 +55,10 @@ class PidHandler(BaseHandler):
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
       instance = self.get_argument_instance()
-      topology_info = self.tracker.getTopologyInfo(topology, cluster, environ)
+      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, environ)
       result = yield getInstancePid(topology_info, instance)
       self.write_success_response(result)
     except Exception as e:
+      traceback.print_exc()
       self.write_error_response(e)
 
