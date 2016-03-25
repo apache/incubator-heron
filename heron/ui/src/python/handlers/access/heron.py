@@ -378,12 +378,12 @@ class HeronQueryHandler(QueryHandler):
     for result in results:
       timelines.extend(result["timeline"])
 
-      result = dict(
-          status = "success",
-          starttime = timerange[0],
-          endtime = timerange[1],
-          result = dict(timeline = timelines)
-      )
+    result = dict(
+        status = "success",
+        starttime = timerange[0],
+        endtime = timerange[1],
+        result = dict(timeline = timelines)
+    )
 
     raise tornado.gen.Return(result)
 
