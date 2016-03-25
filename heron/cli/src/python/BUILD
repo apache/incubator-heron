@@ -22,6 +22,7 @@ pex_library(
     ], 
     deps = [
         "//heron/proto:proto-py",
+        "//heron/common/src/python:common",
     ],
 )
 
