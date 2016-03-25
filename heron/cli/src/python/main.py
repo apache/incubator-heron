@@ -24,6 +24,7 @@ import heron.cli.src.python.deactivate as deactivate
 import heron.cli.src.python.kill as kill
 import heron.cli.src.python.restart as restart
 import heron.cli.src.python.submit as submit
+import heron.cli.src.python.utils as utils
 import heron.cli.src.python.version as version
 
 class _HelpAction(argparse._HelpAction):
@@ -58,7 +59,7 @@ class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
 ################################################################################
 def create_parser():
   parser = argparse.ArgumentParser(
-      epilog = 'For detailed documentation, go to http://go/heron', 
+      epilog = 'For detailed documentation, go to http://heron.github.io', 
       formatter_class=SubcommandHelpFormatter,
       add_help = False)
 
@@ -78,7 +79,7 @@ def create_parser():
   return parser
 
 ################################################################################
-# Main execute 
+# Run the command
 ################################################################################
 def run(command, parser, command_args, unknown_args):
   if command == 'activate':
@@ -104,7 +105,20 @@ def run(command, parser, command_args, unknown_args):
 def cleanup():
   pass
 
+################################################################################
+# Check whether the environment variables are set
+################################################################################
+def check_environment():
+  if not utils.check_java_home_set():
+    sys.exit(1)
+
+################################################################################
+# Run the command
+################################################################################
 def main():
+
+  # verify if the environment variables are correctly set
+  check_environment()
 
   # create the argument parser 
   parser = create_parser()
