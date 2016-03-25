@@ -7,7 +7,6 @@ pex_library(
     srcs = [
         "activate.py",
         "args.py",
-        "classpath.py",
         "deactivate.py",
         "execute.py",
         "help.py",
