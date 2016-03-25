@@ -14,7 +14,9 @@ import subprocess
 import tarfile
 import tempfile
 
+from heron.common.src.python.color import Log as Log
 from heron.proto import topology_pb2
+
 import heron.cli.src.python.args as args
 import heron.cli.src.python.execute as execute
 import heron.cli.src.python.jars as jars
@@ -118,14 +120,14 @@ def launch_topologies(cluster_role_env, topology_file, tmp_dir, config_path,
 
       # launch the topology
       try:
-        print "Launching topology \'%s\'" % topology_defn.name
+        Log.info("Launching topology \'%s\'" % topology_defn.name)
         launch_a_topology(cluster_role_env, tmp_dir, topology_file, defn_file,
             config_path, config_overrides)
 
-        print "Topology \'%s\' launched successfully" % topology_defn.name
+        Log.info("Topology \'%s\' launched successfully" % topology_defn.name)
 
       except Exception as ex:
-        print 'Failed to launch topology \'%s\' because %s' % (topology_defn.name, str(ex))
+        Log.error('Failed to launch topology \'%s\' because %s' % (topology_defn.name, str(ex)))
         raise
 
   except:
@@ -158,12 +160,12 @@ def submit_fatjar(command, parser, cl_args, unknown_args):
     # if some of the arguments are not found, print error and exit
     subparser = utils.get_subparser(parser, command)
     print(subparser.format_help())
-    parser.exit()
+    return False
 
   config_path = utils.get_heron_cluster_conf_dir(cluster_role_env, config_path);
   if not os.path.isdir(config_path):
-    print("Config directory does not exist: %s" % config_path);
-    parser.exit();
+    Log.error("Config path directory does not exist: %s" % config_path)
+    return False
 
   # create a temporary directory for topology definition file
   tmp_dir = tempfile.mkdtemp()
@@ -193,8 +195,13 @@ def submit_fatjar(command, parser, cl_args, unknown_args):
     launch_topologies(cluster_role_env, topology_file, tmp_dir, config_path,
         config_overrides)
 
+  except Exception as ex:
+    return False
+
   finally:
     shutil.rmtree(tmp_dir)
+
+  return True
 
 ################################################################################
 # Extract and execute the java files inside the tar and then add topology
@@ -222,12 +229,12 @@ def submit_tar(command, parser, cl_args, unknown_args):
   except KeyError:
     subparser = utils.get_subparser(parser, command)
     print(subparser.format_help())
-    parser.exit()
+    return False
 
   config_path = utils.get_heron_cluster_conf_dir(cluster_role_env, config_path);
   if not os.path.isdir(config_path):
-    print("Config directory does not exist: %s" % config_path);
-    parser.exit();
+    Log.error("Config directory does not exist: %s" % config_path)
+    return False
 
   tmp_dir = tempfile.mkdtemp()
   opts.set_config('cmdline.topologydefn.tmpdirectory', tmp_dir)
@@ -247,8 +254,13 @@ def submit_tar(command, parser, cl_args, unknown_args):
 
     launch_topologies(cluster_role_env, topology_file, tmp_dir, config_path, config_overrides)
 
+  except Exception as ex:
+    return False
+
   finally:
     shutil.rmtree(tmp_dir)
+
+  return True
 
 ################################################################################
 #  Submits the topology to the scheduler
@@ -265,16 +277,15 @@ def run(command, parser, cl_args, unknown_args):
 
   # check to see if the topology file exists
   if not os.path.isfile(topology_file):
-    print "Topology jar/tar %s does not exist" % topology_file
-    sys.exit(1)
+    Log.error("Topology jar|tar file %s does not exist" % topology_file)
+    return True
 
   # check the extension of the file name to see if it is tar/jar file.
   if topology_file.endswith(".jar"):
-    submit_fatjar(command, parser, cl_args, unknown_args)
+    return submit_fatjar(command, parser, cl_args, unknown_args)
 
   elif topology_file.endswith(".tar") or topology_file.endswith(".tar.gz"):
-    submit_tar(command, parser, cl_args, unknown_args)
-  else:
-    print "Unknown file type. Please use .tar or .jar file"
-    sys.exit(1)
+    return submit_tar(command, parser, cl_args, unknown_args)
 
+  Log.error("Unknown file type. Please use .tar or .jar file")
+  return False

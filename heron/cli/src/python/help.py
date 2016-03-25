@@ -28,10 +28,12 @@ def run(command, parser, args, unknown_args):
   # if no command is provided, just print main help
   if command_help == 'help':
     parser.print_help()
-    parser.exit()
+    return False
 
   # get the subparser for the specific command
   subparser = utils.get_subparser(parser, command_help)
   if subparser:
     print(subparser.format_help())
-    parser.exit()
+    return False
+
+  return True
