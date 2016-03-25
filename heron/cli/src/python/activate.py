@@ -14,6 +14,8 @@ import subprocess
 import tarfile
 import tempfile
 
+from heron.common.src.python.color import Log
+
 import heron.cli.src.python.args as args
 import heron.cli.src.python.execute as execute
 import heron.cli.src.python.jars as jars
@@ -49,13 +51,13 @@ def run(command, parser, cl_args, unknown_args):
   except KeyError:
     subparser = utils.get_subparser(parser, command)
     print(subparser.format_help())
-    parser.exit()
+    return False
 
   # check if the config path exists
   config_path = utils.get_heron_cluster_conf_dir(cluster_role_env, config_path);
   if not os.path.isdir(config_path):
-    print("Config directory does not exist: %s" % config_path);
-    parser.exit();
+    Log.error("Config directory does not exist: %s" % config_path);
+    return False
 
   try:
     cluster_role_env = utils.parse_cluster_role_env(cluster_role_env)
@@ -84,8 +86,8 @@ def run(command, parser, cl_args, unknown_args):
 
   except Exception as ex:
     print 'Error: %s' % str(ex)
-    print 'Failed to activate topology \'%s\'' % topology_name
-    sys.exit(1)
+    Log.error('Failed to activate topology \'%s\'' % topology_name)
+    return False
 
-  print 'Successfully activated topology \'%s\'' % topology_name
-  sys.exit(0)
+  Log.info('Successfully activated topology \'%s\'' % topology_name)
+  return True
