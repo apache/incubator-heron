@@ -182,11 +182,11 @@ def parse_cmdline_override(namespace):
 ################################################################################
 # Check if the java home set
 ################################################################################
-def java_home_set():
+def check_java_home_set():
 
   # check if environ variable is set
   if not os.environ.has_key("JAVA_HOME"):
-    print "Please set your JAVA_HOME" 
+    print "JAVA_HOME not set" 
     return False
 
   # check if the value set is correct
