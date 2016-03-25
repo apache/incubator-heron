@@ -14,7 +14,7 @@ import subprocess
 import tarfile
 import tempfile
 
-from heron.common.src.python.color import Log as Log
+from heron.common.src.python.color import Log
 from heron.proto import topology_pb2
 
 import heron.cli.src.python.args as args
