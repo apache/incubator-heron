@@ -14,7 +14,7 @@ import subprocess
 import tarfile
 import tempfile
 
-from heron.common.src.python.color import Log as Log
+from heron.common.src.python.color import Log
 
 import heron.cli.src.python.args as args
 import heron.cli.src.python.execute as execute
@@ -91,5 +91,5 @@ def run(command, parser, cl_args, unknown_args):
     Log.error('Failed to deactivate topology \'%s\'' % topology_name)
     return False
 
-  Log.error('Successfully deactivated topology \'%s\'' % topology_name)
+  Log.info('Successfully deactivated topology \'%s\'' % topology_name)
   return True
