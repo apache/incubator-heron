@@ -44,8 +44,7 @@ class _HelpAction(argparse._HelpAction):
       for choice, subparser in subparsers_action.choices.items():
         print("Subparser '{}'".format(choice))
         print(subparser.format_help())
-
-    # parser.exit()
+        return
 
 class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
   def _format_action(self, action):
