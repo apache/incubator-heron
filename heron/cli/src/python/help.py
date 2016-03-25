@@ -28,7 +28,7 @@ def run(command, parser, args, unknown_args):
   # if no command is provided, just print main help
   if command_help == 'help':
     parser.print_help()
-    return False
+    return True
 
   # get the subparser for the specific command
   subparser = utils.get_subparser(parser, command_help)

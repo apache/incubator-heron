@@ -14,7 +14,7 @@ import subprocess
 import tarfile
 import tempfile
 
-from heron.common.src.python.color import Log as Log
+from heron.common.src.python.color import Log
 
 import heron.cli.src.python.args as args
 import heron.cli.src.python.execute as execute

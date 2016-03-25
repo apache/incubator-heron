@@ -15,7 +15,7 @@ import tarfile
 import tempfile
 import time
 
-from heron.common.src.python.color import Log as Log
+from heron.common.src.python.color import Log
 
 import heron.cli.src.python.help as help
 import heron.cli.src.python.args as parse
