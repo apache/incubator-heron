@@ -109,7 +109,7 @@ def cleanup():
 # Check whether the environment variables are set
 ################################################################################
 def check_environment():
-  if not utils.java_home_set():
+  if not utils.check_java_home_set():
     sys.exit(1)
 
 ################################################################################
