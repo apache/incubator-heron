@@ -21,7 +21,6 @@ import heron.cli.src.python.help as help
 import heron.cli.src.python.args as parse
 import heron.cli.src.python.opts as opts
 import heron.cli.src.python.activate as activate
-import heron.cli.src.python.classpath as classpath
 import heron.cli.src.python.deactivate as deactivate
 import heron.cli.src.python.kill as kill
 import heron.cli.src.python.restart as restart
@@ -69,7 +68,6 @@ def create_parser():
       metavar = '<command> <options>')
 
   activate.create_parser(subparsers)
-  classpath.create_parser(subparsers)
   deactivate.create_parser(subparsers)
   help.create_parser(subparsers)
   kill.create_parser(subparsers)
