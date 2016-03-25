@@ -20,7 +20,7 @@ heron-cl3 heron-tracker heron-ui
 
 ### Step 2 - Launch an example topology
 
-Launch an example topology to **local cluster** using submit:
+Launch an example [topology](../concepts/topologies) to **local cluster** using submit:
 
 ```bash
 $ heron-cli3 submit local ~/.heron/examples/heron-examples.jar com.twitter.heron.examples.AckingTopology AckingTopology
@@ -28,7 +28,7 @@ $ heron-cli3 submit local ~/.heron/examples/heron-examples.jar com.twitter.heron
 
 ### Step 3 - Start Heron Tracker
 
-Open a new terminal window and launch tracker:
+Open a new terminal window and launch [heron-tracker](../operators/heron-tracker):
 ```bash
 $ heron-tracker
 ... Running on port: 8888
@@ -53,8 +53,8 @@ $ heron-cli3 activate local AckingTopology
 $ heron-cli3 deactivate local AckingTopology
 $ heron-cli3 kill local AckingTopology
 ```
-
-Heron-cli3 syntax:
+Explore [managing topologies with Heron CLI](../operators/heron-cli)
+and Heron-cli3 syntax:
 ```bash
 usage: heron-cli3 submit [options] cluster/[role]/[environ] topology-file-name topology-class-name [topology-args]
 
