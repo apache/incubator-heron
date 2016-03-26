@@ -8,6 +8,8 @@ import tarfile
 import contextlib
 import getpass
 
+from heron.common.src.python.color import Log
+
 # default environ tag, if not provided
 ENVIRON = "default"
 
@@ -185,7 +187,7 @@ def check_java_home_set():
 
   # check if environ variable is set
   if not os.environ.has_key("JAVA_HOME"):
-    print "JAVA_HOME not set" 
+    Log.error("JAVA_HOME not set") 
     return False
 
   # check if the value set is correct
@@ -194,5 +196,5 @@ def check_java_home_set():
   if os.path.isfile(java_path) and os.access(java_path, os.X_OK):
     return True
 
-  print "JAVA_HOME/bin/java either does not exist or not an executable"
+  Log.error("JAVA_HOME/bin/java either does not exist or not an executable")
   return False
