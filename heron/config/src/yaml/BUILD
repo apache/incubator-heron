@@ -43,6 +43,11 @@ filegroup(
 )
 
 filegroup(
+    name = "conf-local-client",
+    srcs = ["conf/local/client.yaml"],
+)
+
+filegroup(
     name = "conf-local-packing",
     srcs = ["conf/local/packing.yaml"],
 )
