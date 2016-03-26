@@ -38,5 +38,5 @@ params:
     js:
       - //code.jquery.com/jquery-2.2.1.min.js
       - /js/app.min.js
-  bazelVersion: 0.2.0
+  bazelVersion: 0.1.2
   tagline: Realtime, Distributed, Fault-Tolerant Stream Processing
