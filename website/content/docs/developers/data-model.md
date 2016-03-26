@@ -53,7 +53,7 @@ method.
 
 You use Heron tuples in conjunction with more complex, user-defined types using
 [type casting](http://www.studytonight.com/java/type-casting-in-java), provided
-that you've created and registered a [custom serializer](serialization.html) for the type.
+that you've created and registered a [custom serializer](../serialization) for the type.
 Here's an example (which assumes that a serializer for the type
 `Tweet` has been created and registered):
 
@@ -67,14 +67,14 @@ public void execute(Tuple input) {
 ```
 
 More info on custom serialization can be found in [Creating Custom Tuple
-Serializers](serialization.html).
+Serializers](../serialization).
 
 ### Fields
 
 The `getFields` method returns a
 [`Fields`](http://heronproject.github.io/topology-api/com/twitter/heron/api/tuple/Fields)
 object that contains all of the fields in the tuple. More on fields can be found
-[below](#fields).
+[below]({{< ref "#Fields" >}}).
 
 ### Other Methods
 
