@@ -14,10 +14,7 @@ def pick(dirname, pattern):
 ################################################################################
 def topology_jars():
   jars = [
-      pick(utils.get_heron_lib_dir(), 'protobuf-java-*.jar'),
-      pick(utils.get_heron_lib_dir(), 'log4j-over-slf4j-*.jar'),
-      pick(utils.get_heron_lib_dir(), 'slf4j-api-*.jar'),
-      pick(utils.get_heron_lib_dir(), 'slf4j-jdk*.jar')
+      os.path.join(utils.get_heron_lib_dir(), "3rdparty", "*")
   ]
   return jars
 
