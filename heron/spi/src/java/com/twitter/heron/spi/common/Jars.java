@@ -126,7 +126,6 @@ public class Jars {
    * @return class path of metrics manager jars
    */
   public static String getMetricsManagerClassPath(String directory) {
-    LOG.info(directory);
     return getClassPath(metricsManagerPattern, directory);
   }
 }

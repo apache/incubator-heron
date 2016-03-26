@@ -8,4 +8,7 @@ pex_library(
   deps = [
     '//heron/proto:proto-py',
   ],
+  eggs = [
+    '//3rdparty/eggs:colorlog',
+  ],
 )
