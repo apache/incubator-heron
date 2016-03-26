@@ -58,10 +58,6 @@ public class Context {
     return cfg.getStringValue(Keys.clusterFile());
   }
 
-  public static String clientFile(Config cfg) {
-    return cfg.getStringValue(Keys.clientFile());
-  }
-
   public static String defaultsFile(Config cfg) {
     return cfg.getStringValue(Keys.defaultsFile());
   }

@@ -179,7 +179,8 @@ public class Misc {
         list.set(i, Context.heronLib(config));
 
       } else if (elem.equals("${HERON_DIST}")) {
-        list.set(i, Context.heronDist(config));
+        list.set(i, Context.heronDist(config) != null ? 
+            Context.heronDist(config) : Context.heronSandboxHome(config));
 
       } else if (elem.equals("${HERON_SANDBOX_HOME}")) {
         list.set(i, Context.heronSandboxHome(config));

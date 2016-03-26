@@ -13,7 +13,6 @@ JAVA_HOME:                    ${JAVA_HOME}
 # Default values for config related directories and files
 ################################################################################
 CLUSTER_YAML:                 ${HERON_CONF}/cluster.yaml
-CLIENT_YAML:                  ${HERON_CONF}/client.yaml
 DEFAULTS_YAML:                ${HERON_CONF}/defaults.yaml
 METRICS_YAML:                 ${HERON_CONF}/metrics_sinks.yaml
 PACKING_YAML:                 ${HERON_CONF}/packing.yaml

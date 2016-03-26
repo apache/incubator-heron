@@ -7,5 +7,8 @@ heron.class.launcher:                        com.twitter.heron.scheduler.aurora.
 # runtime class for managing topology
 heron.class.runtime.manager:                 com.twitter.heron.scheduler.aurora.AuroraRuntimeManager
 
-# location of java - pick it up from shell environment
+# location of java
 heron.directory.sandbox.java.home:           /usr/lib/jvm/java-1.8.0-openjdk-amd64/
+
+# location of the core package
+heron.package.core.uri:                      file:///vagrant/.herondata/dist/heron-core-release.tar.gz

@@ -54,10 +54,6 @@ public class Defaults {
     return ConfigDefaults.get("CLUSTER_YAML");
   }
 
-  public static String clientFile() {
-    return ConfigDefaults.get("CLIENT_YAML");
-  }
-
   public static String defaultsFile() {
     return ConfigDefaults.get("DEFAULTS_YAML");
   }
