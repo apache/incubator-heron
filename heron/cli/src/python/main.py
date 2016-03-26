@@ -13,17 +13,19 @@ import sys
 import subprocess
 import tarfile
 import tempfile
-import pprint
+import time
+
+from heron.common.src.python.color import Log
 
 import heron.cli.src.python.help as help
 import heron.cli.src.python.args as parse
 import heron.cli.src.python.opts as opts
 import heron.cli.src.python.activate as activate
-import heron.cli.src.python.classpath as classpath
 import heron.cli.src.python.deactivate as deactivate
 import heron.cli.src.python.kill as kill
 import heron.cli.src.python.restart as restart
 import heron.cli.src.python.submit as submit
+import heron.cli.src.python.utils as utils
 import heron.cli.src.python.version as version
 
 class _HelpAction(argparse._HelpAction):
@@ -42,8 +44,7 @@ class _HelpAction(argparse._HelpAction):
       for choice, subparser in subparsers_action.choices.items():
         print("Subparser '{}'".format(choice))
         print(subparser.format_help())
-
-    parser.exit()
+        return
 
 class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
   def _format_action(self, action):
@@ -58,16 +59,15 @@ class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
 ################################################################################
 def create_parser():
   parser = argparse.ArgumentParser(
-      epilog = 'For detailed documentation, go to http://go/heron', 
+      epilog = 'For detailed documentation, go to http://heron.github.io', 
       formatter_class=SubcommandHelpFormatter,
       add_help = False)
 
   subparsers = parser.add_subparsers(
       title = "Available commands", 
-      metavar = '<command> [command-options]')
+      metavar = '<command> <options>')
 
   activate.create_parser(subparsers)
-  classpath.create_parser(subparsers)
   deactivate.create_parser(subparsers)
   help.create_parser(subparsers)
   kill.create_parser(subparsers)
@@ -78,7 +78,7 @@ def create_parser():
   return parser
 
 ################################################################################
-# Main execute 
+# Run the command
 ################################################################################
 def run(command, parser, command_args, unknown_args):
   if command == 'activate':
@@ -104,7 +104,20 @@ def run(command, parser, command_args, unknown_args):
 def cleanup():
   pass
 
+################################################################################
+# Check whether the environment variables are set
+################################################################################
+def check_environment():
+  if not utils.check_java_home_set():
+    sys.exit(1)
+
+################################################################################
+# Run the command
+################################################################################
 def main():
+
+  # verify if the environment variables are correctly set
+  check_environment()
 
   # create the argument parser 
   parser = create_parser()
@@ -112,7 +125,7 @@ def main():
   # if no argument is provided, print help and exit
   if len(sys.argv[1:]) == 0:
     parser.print_help()
-    parser.exit()
+    return 0
 
   # insert the boolean values for some of the options
   sys.argv = parse.insert_bool_values(sys.argv)
@@ -134,7 +147,16 @@ def main():
 
   # command to be execute
   command = namespace['subcommand']
-  return run(command, parser, namespace, unknown_args)
+
+  start = time.time() 
+  retcode = run(command, parser, namespace, unknown_args)
+  end = time.time()
+
+  if command != 'help':
+    sys.stdout.flush()
+    Log.info('Elapsed time: %.3fs.' % (end-start))
+
+  return 0 if retcode == True else 1
 
 if __name__ == "__main__":
-  main()
+  sys.exit(main())
