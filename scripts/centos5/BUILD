@@ -76,6 +76,7 @@ genrule(
         ":heron-core",
         ":conf-local-heron-internals",
         ":conf-local-metrics-sinks",
+        ":conf-local-client",
         ":conf-local-packing",
         ":conf-local-scheduler",
         ":conf-local-statemgr",
@@ -104,6 +105,7 @@ genrule(
         "--cp $(location hcli)                       bin/heron",
         "--cp $(location conf-local-heron-internals) conf/local/heron_internals.yaml",
         "--cp $(location conf-local-metrics-sinks)   conf/local/metrics_sinks.yaml",
+        "--cp $(location conf-local-client)          conf/local/client.yaml",
         "--cp $(location conf-local-packing)         conf/local/packing.yaml",
         "--cp $(location conf-local-scheduler)       conf/local/scheduler.yaml",
         "--cp $(location conf-local-statemgr)        conf/local/statemgr.yaml",
@@ -183,6 +185,11 @@ filegroup(
 filegroup(
     name = "conf-local-metrics-sinks",
     srcs = ["//heron/config/src/yaml:conf-local-metrics-sinks"],
+)
+
+filegroup(
+    name = "conf-local-client",
+    srcs = ["//heron/config/src/yaml:conf-local-client"],
 )
 
 filegroup(
