@@ -18,10 +18,10 @@ html lang={{.Site.LanguageCode}}
           .row 
             .col-sm-6
               h4 Run Topologies using pre-compiled Heron binaries
-              a.btn.btn-success href=docs/getting-started Get Started
+              a.btn.btn-info href=docs/getting-started Get Started
             .col-sm-6
               h4 Compile Heron from Source (for Heron Developers)
-              a.btn.btn-success href=docs/developers/compiling/compiling/ Get Source
+              a.btn.btn-info href=docs/developers/compiling/compiling/ Get Source
       .landing-feature-1
         .container style="text-align: center;"
           .row
@@ -67,10 +67,10 @@ html lang={{.Site.LanguageCode}}
           .row 
             .col-sm-6
               h4 Run Topologies using pre-compiled Heron binaries
-              a.btn.btn-success href=docs/getting-started Get Started
+              a.btn.btn-info href=docs/getting-started Get Started
             .col-sm-6
               h4 Compile Heron from Source (for Heron Developers)
-              a.btn.btn-success href=docs/developers/compiling/compiling/ Get Source
+              a.btn.btn-info href=docs/developers/compiling/compiling/ Get Source
       .landing-feature-1
         .container style="text-align: center;"
           .row 
