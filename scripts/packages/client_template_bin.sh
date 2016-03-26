@@ -22,8 +22,8 @@ heronrc=${2:-"/usr/local/heron/etc/heron.heronrc"}
 
 progname="$0"
 
-echo "Heron installer"
-echo "---------------"
+echo "Heron client installer"
+echo "----------------------"
 echo
 cat <<'EOF'
 %release_info%
