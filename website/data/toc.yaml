@@ -1,15 +1,14 @@
 sections:
-  - name: Developers
-    subcategories:
-      - name: Compiling
-        sublinks:
-          - name: Compiling Heron
-            url: /docs/developers/compiling/compiling
-          - name: Compiling Using Docker
-            url: /docs/developers/compiling/docker
+  - name: Getting Started
     sublinks:
       - name: Getting Started
         url: /docs/getting-started
+  - name: Concepts
+    sublinks:
+      - name: The Architecture of Heron
+        url: /docs/concepts/architecture
+      - name: Heron Topologies
+        url: /docs/concepts/topologies
       - name: Heron's Data Model
         url: /docs/developers/data-model
       - name: Serialization
@@ -49,12 +48,16 @@ sections:
         url: /docs/operators/heron-cli
       - name: The Heron Tracker REST API
         url: /docs/operators/heron-tracker
-  - name: Concepts
-    sublinks:
-      - name: The Architecture of Heron
-        url: /docs/concepts/architecture
-      - name: Heron Topologies
-        url: /docs/concepts/topologies
+      - name: The Heron User Interface
+        url: /docs/operators/heron-ui
+  - name: Developers
+    subcategories:
+      - name: Compiling
+        sublinks:
+          - name: Compiling Heron
+            url: /docs/developers/compiling/compiling
+          - name: Compiling Using Docker
+            url: /docs/developers/compiling/docker
   - name: Contributors
     sublinks:
       - name: The Heron Codebase
