@@ -41,35 +41,15 @@ def create_parser(subparsers):
 def run(command, parser, cl_args, unknown_args):
 
   try:
-    # check if the required arguments are provided
-    cluster_role_env = cl_args['cluster/[role]/[env]']
     topology_name = cl_args['topology-name']
-
-    # extract the config path
-    config_path = cl_args['config_path']
-
-  except KeyError:
-    # if some of the arguments are not provided, print error and exit
-    subparser = utils.get_subparser(parser, command)
-    print(subparser.format_help())
-    return False
-
-  # check if the config exists
-  config_path = utils.get_heron_cluster_conf_dir(cluster_role_env, config_path);
-  if not os.path.isdir(config_path):
-    Log.error("Config directory does not exist: %s" % config_path);
-    return False
-
-  try:
-    cluster_role_env = utils.parse_cluster_role_env(cluster_role_env)
     config_overrides = utils.parse_cmdline_override(cl_args)
 
     new_args = [
-        "--cluster", cluster_role_env[0],
-        "--role", cluster_role_env[1],
-        "--environment", cluster_role_env[2],
+        "--cluster", cl_args['cluster'],
+        "--role", cl_args['role'],
+        "--environment", cl_args['environ'],
         "--heron_home", utils.get_heron_dir(),
-        "--config_path", config_path,
+        "--config_path", cl_args['config_path'],
         "--config_overrides", base64.b64encode(config_overrides),
         "--topology_name", topology_name,
         "--command", command,
