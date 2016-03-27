@@ -138,7 +138,6 @@ def extract_common_args(command, parser, cl_args):
   new_cl_args['role'] = cluster_tuple[1]
   new_cl_args['environ'] = cluster_tuple[2]
   new_cl_args['config_path'] = config_path
-  print new_cl_args
 
   cl_args.update(new_cl_args)
   return cl_args
@@ -180,10 +179,8 @@ def main():
   # command to be execute
   command = command_line_args['subcommand']
 
-  print command_line_args
   if command != 'help' and command != 'version':
     command_line_args = extract_common_args(command, parser, command_line_args) 
-    print command_line_args
 
   start = time.time() 
   retcode = run(command, parser, command_line_args, unknown_args)
