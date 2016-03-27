@@ -112,12 +112,47 @@ def check_environment():
     sys.exit(1)
 
 ################################################################################
+# Extract all the common args for all commands
+################################################################################
+def extract_common_args(command, parser, cl_args):
+
+  new_cl_args = dict()
+  try:
+    cluster_role_env = cl_args.pop('cluster/[role]/[env]')
+    cluster_tuple = utils.parse_cluster_role_env(cluster_role_env)
+
+    config_path = cl_args['config_path']
+
+  except KeyError:
+    # if some of the arguments are not found, print error and exit
+    subparser = utils.get_subparser(parser, command)
+    print(subparser.format_help())
+    return dict()
+
+  config_path = utils.get_heron_cluster_conf_dir(cluster_role_env, config_path);
+  if not os.path.isdir(config_path):
+    Log.error("Config path directory does not exist: %s" % config_path)
+    return dict()
+
+  new_cl_args['cluster'] = cluster_tuple[0]
+  new_cl_args['role'] = cluster_tuple[1]
+  new_cl_args['environ'] = cluster_tuple[2]
+  new_cl_args['config_path'] = config_path
+  print new_cl_args
+
+  cl_args.update(new_cl_args)
+  return cl_args
+
+################################################################################
 # Run the command
 ################################################################################
 def main():
 
   # verify if the environment variables are correctly set
   check_environment()
+
+  # register cleanup function during exit
+  atexit.register(cleanup)
 
   # create the argument parser 
   parser = create_parser()
@@ -132,24 +167,26 @@ def main():
 
   # parse the args
   args, unknown_args = parser.parse_known_args()
-  namespace = vars(args)
+  command_line_args = vars(args)
 
   try:
-    if namespace['verbose']: 
+    if command_line_args['verbose']: 
       opts.set_verbose()
-    if namespace['trace_execution']:
+    if command_line_args['trace_execution']:
       opts.set_trace_execution()
   except:
     pass
 
-  # register cleanup function during exit
-  atexit.register(cleanup)
-
   # command to be execute
-  command = namespace['subcommand']
+  command = command_line_args['subcommand']
+
+  print command_line_args
+  if command != 'help' and command != 'version':
+    command_line_args = extract_common_args(command, parser, command_line_args) 
+    print command_line_args
 
   start = time.time() 
-  retcode = run(command, parser, namespace, unknown_args)
+  retcode = run(command, parser, command_line_args, unknown_args)
   end = time.time()
 
   if command != 'help':
