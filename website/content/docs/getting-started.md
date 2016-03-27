@@ -35,7 +35,6 @@ $ heron-tracker
 ```
 In local browser, Heron tracker is available on http://localhost:8888
 
-{"status": "success", "executiontime": 2.3126602172851562e-05, "message": "", "version": "1.0.0", "result": {"local": {"default": ["AckingTopology"]}}}
 
 ### Step 4 - Start Heron UI
 

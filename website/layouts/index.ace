@@ -10,8 +10,7 @@ html lang={{.Site.LanguageCode}}
     .container-fluid
       .row
         .jumbotron.text-center
-          img.img-responsive.center-block src={{.Site.Params.assets.logo}} 
-          h1 {{.Site.Title}} 
+          img.img-responsive.center-block src={{.Site.Params.assets.textlogo}} 
           p A realtime stream processing engine from Twitter
       .hero-bar 
         .container style="text-align: center;"
@@ -32,11 +31,13 @@ html lang={{.Site.LanguageCode}}
           .row
             .col-sm-12
               h1 Why Heron?
-              p Here's what makes Heron great
           .row
             .col-sm-4
               h3  Speed and Performance
-              p  Heron is 2x-5x more efficient than Storm. This resulted in significant cost savings for Twitter both in capital and operational expenditure.
+              div Heron is the direct successor of 
+                a href=http://storm.apache.org  Apache Storm 
+              div built with a wide array of architectural improvements to be backwards compatible with Storm's 
+                a href=http://storm.apache.org/about/simple-api.html  topology API 
             .col-sm-4
               h3 Ease of Development and Troubleshooting
               p Easily debug and identify the issues in topologies (aka standing queries), allowing faster iteration during development. User can easily reason about how their topologies work and profile/debug its components in isolation.
