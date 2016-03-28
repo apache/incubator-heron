@@ -76,12 +76,14 @@ genrule(
         ":heron-core",
         ":conf-local-heron-internals",
         ":conf-local-metrics-sinks",
+        ":conf-local-client",
         ":conf-local-packing",
         ":conf-local-scheduler",
         ":conf-local-statemgr",
         ":conf-local-uploader",
         ":hcli",
         ":hexamples",
+        ":hcommands",
         ":hscheduler",
         ":hlscheduler",
         ":hrrpacking",
@@ -104,12 +106,14 @@ genrule(
         "--cp $(location hcli)                       bin/heron",
         "--cp $(location conf-local-heron-internals) conf/local/heron_internals.yaml",
         "--cp $(location conf-local-metrics-sinks)   conf/local/metrics_sinks.yaml",
+        "--cp $(location conf-local-client)          conf/local/client.yaml",
         "--cp $(location conf-local-packing)         conf/local/packing.yaml",
         "--cp $(location conf-local-scheduler)       conf/local/scheduler.yaml",
         "--cp $(location conf-local-statemgr)        conf/local/statemgr.yaml",
         "--cp $(location conf-local-uploader)        conf/local/uploader.yaml",
         "--cp $(location heron-core)                 dist/heron-core.tar.gz",
         "--cp $(location hexamples)                  examples/heron-examples.jar",
+        "--cp $(location hcommands)                  lib/commands/heron-commands.jar",
         "--cp $(location hscheduler)                 lib/scheduler/heron-scheduler.jar",
         "--cp $(location hlscheduler)                lib/scheduler/heron-local-scheduler.jar",
         "--cp $(location hrrpacking)                 lib/packing/heron-roundrobin-packing.jar",
@@ -117,10 +121,10 @@ genrule(
         "--cp $(location hzkstatemgr)                lib/statemgr/heron-zookeeper-statemgr.jar",
         "--cp $(location hnuploader)                 lib/uploader/heron-null-uploader.jar",
         "--cp $(location hlfsuploader)               lib/uploader/heron-localfs-uploader.jar",
-        "--cp $(location protobuf-java)              lib/$$(basename $(location protobuf-java))",
-        "--cp $(location slf4j-api-java)             lib/$$(basename $(location slf4j-api-java))",
-        "--cp $(location slf4j-jdk-java)             lib/$$(basename $(location slf4j-jdk-java))",
-        "--cp $(location log4j-over-slf4j-java)      lib/$$(basename $(location log4j-over-slf4j-java))",
+        "--cp $(location protobuf-java)              lib/3rdparty/$$(basename $(location protobuf-java))",
+        "--cp $(location slf4j-api-java)             lib/3rdparty/$$(basename $(location slf4j-api-java))",
+        "--cp $(location slf4j-jdk-java)             lib/3rdparty/$$(basename $(location slf4j-jdk-java))",
+        "--cp $(location log4j-over-slf4j-java)      lib/3rdparty/$$(basename $(location log4j-over-slf4j-java))",
     ]),
     heuristic_label_expansion = False,
     tags = ["manual"],
@@ -186,6 +190,11 @@ filegroup(
 )
 
 filegroup(
+    name = "conf-local-client",
+    srcs = ["//heron/config/src/yaml:conf-local-client"],
+)
+
+filegroup(
     name = "conf-local-packing",
     srcs = ["//heron/config/src/yaml:conf-local-packing"],
 )
@@ -228,6 +237,11 @@ filegroup(
 filegroup(
     name = "hlogging",
     srcs = ["//heron/instance/src/java:aurora-logging-properties"],
+)
+
+filegroup(
+    name = "hcommands",
+    srcs = ["//heron/commands/src/java:heron-commands"],
 )
 
 filegroup(

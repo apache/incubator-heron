@@ -8,6 +8,8 @@ import tarfile
 import contextlib
 import getpass
 
+from heron.common.src.python.color import Log
+
 # default environ tag, if not provided
 ENVIRON = "default"
 
@@ -139,7 +141,6 @@ def get_heron_sandbox_conf_dir():
 ################################################################################
 def get_heron_libs(local_jars):
   heron_lib_dir = get_heron_lib_dir()
-  print heron_lib_dir
   heron_libs = [os.path.join(heron_lib_dir, f) for f in local_jars]
   return heron_libs
 
@@ -178,3 +179,22 @@ def parse_cmdline_override(namespace):
     property_value = str(namespace[key])
     override.append('%s="%s"' % (property_key, property_value))
   return ' '.join(override)
+
+################################################################################
+# Check if the java home set
+################################################################################
+def check_java_home_set():
+
+  # check if environ variable is set
+  if not os.environ.has_key("JAVA_HOME"):
+    Log.error("JAVA_HOME not set") 
+    return False
+
+  # check if the value set is correct
+  java_home = os.environ.get("JAVA_HOME")
+  java_path = os.path.join(java_home, BIN_DIR, "java")
+  if os.path.isfile(java_path) and os.access(java_path, os.X_OK):
+    return True
+
+  Log.error("JAVA_HOME/bin/java either does not exist or not an executable")
+  return False

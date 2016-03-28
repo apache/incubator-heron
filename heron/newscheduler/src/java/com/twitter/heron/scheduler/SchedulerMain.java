@@ -39,60 +39,15 @@ import com.twitter.heron.spi.utils.TopologyUtils;
 public class SchedulerMain {
   private static final Logger LOG = Logger.getLogger(SchedulerMain.class.getName());
 
-  /**
-   * Load the topology config
-   *
-   * @param topologyJarFile, name of the user submitted topology jar/tar file
-   * @param topologyDefnFile, name of the topology defintion file
-   * @param topology, proto in memory version of topology definition
-   * @return config, the topology config
-   */
-  protected static Config topologyConfigs(
-      String topologyJarFile, String topologyDefnFile, TopologyAPI.Topology topology) {
-
-    String pkgType = FileUtils.isOriginalPackageJar(
-        FileUtils.getBaseName(topologyJarFile)) ? "jar" : "tar";
-
-    Config config = Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
-        .put(Keys.topologyDefinitionFile(), topologyDefnFile)
-        .put(Keys.topologyJarFile(), topologyJarFile)
-        .put(Keys.topologyPackageType(), pkgType)
-        .build();
-
-    return config;
-  }
-
-  /**
-   * Load the defaults config
-   * <p/>
-   * return config, the defaults config
-   */
-  protected static Config defaultConfigs() {
-    Config config = Config.newBuilder()
-        .putAll(ClusterDefaults.getSandboxDefaults())
-        .putAll(ClusterConfig.loadSandboxConfig())
-        .build();
-    return config;
-  }
-
-  /**
-   * Load the config parameters from the command line
-   *
-   * @param cluster, name of the cluster
-   * @param role, user role
-   * @param environ, user provided environment/tag
-   * @return config, the command line config
-   */
-  protected static Config commandLineConfigs(String cluster, String role, String environ) {
-    Config config = Config.newBuilder()
-        .put(Keys.cluster(), cluster)
-        .put(Keys.role(), role)
-        .put(Keys.environ(), environ)
-        .build();
-    return config;
-  }
+  private static String cluster = null;                 // name of the cluster
+  private static String role = null;                    // role to launch the topology
+  private static String environ = null;                 // environ to launch the topology
+  private static String topologyName = null;            // name of the topology
+  private static String topologyJarFile = null;         // name of the topology jar/tar file
+  private static int    schedulerServerPort = 0 ;       // http port where the scheduler is listening
+  
+  private static TopologyAPI.Topology topology = null;  // topology definition
+  private static Config  config;                        // holds all the config read
 
   // Print usage options
   private static void usage(Options options) {
@@ -174,23 +129,52 @@ public class SchedulerMain {
     return options;
   }
 
+  public static void initialize(String iCluster, String iRole, String iEnviron, 
+      String iTopologyName, String iTopologyJarFile, int iSchedulerServerPort) throws IOException {
+
+    // initialize the options
+    cluster = iCluster;
+    role = iRole;
+    environ = iEnviron;
+    topologyName = iTopologyName;
+    topologyJarFile = iTopologyJarFile;
+    schedulerServerPort = iSchedulerServerPort;
+
+    // locate the topology definition file in the sandbox/working directory
+    String topologyDefnFile = TopologyUtils.lookUpTopologyDefnFile(".", topologyName);
+
+    // load the topology definition into topology proto
+    topology = TopologyUtils.getTopology(topologyDefnFile);
+
+    // build the config by expanding all the variables
+    config = SchedulerConfig.loadConfig(cluster, role, environ,
+        topologyJarFile, topologyDefnFile, topology);
+
+    // set up logging with complete Config
+    setupLogging(config);
+
+    LOG.log(Level.INFO, "Loaded scheduler config: {0}", config);
+  }
+
   public static void main(String[] args) throws
       ClassNotFoundException, InstantiationException, IllegalAccessException, IOException, ParseException {
 
+    // construct the options and help options first.
     Options options = constructOptions();
     Options helpOptions = constructHelpOptions();
-    CommandLineParser parser = new DefaultParser();
-    // parse the help options first.
-    CommandLine cmd = parser.parse(helpOptions, args, true);
-    ;
 
+    // parse the options
+    CommandLineParser parser = new DefaultParser();
+    CommandLine cmd = parser.parse(helpOptions, args, true);
+
+    // print help, if we receive wrong set of arguments
     if (cmd.hasOption("h")) {
       usage(options);
       return;
     }
 
+    // Now parse the required options
     try {
-      // Now parse the required options
       cmd = parser.parse(options, args);
     } catch (ParseException e) {
       LOG.severe("Error parsing command line options: " + e.getMessage());
@@ -198,38 +182,20 @@ public class SchedulerMain {
       System.exit(1);
     }
 
-    String cluster = cmd.getOptionValue("cluster");
-    String role = cmd.getOptionValue("role");
-    String environ = cmd.getOptionValue("environment");
-    String topologyName = cmd.getOptionValue("topology_name");
-    String topologyJarFile = cmd.getOptionValue("topology_jar");
-    int schedulerServerPort = Integer.parseInt(cmd.getOptionValue("http_port"));
-
-    // locate the topology definition file in the sandbox/working directory
-    String topologyDefnFile = TopologyUtils.lookUpTopologyDefnFile(".", topologyName);
-
-    // load the topology definition into topology proto
-    TopologyAPI.Topology topology = TopologyUtils.getTopology(topologyDefnFile);
-
-    // build the config by expanding all the variables
-    Config config = Config.expand(
-        Config.newBuilder()
-            .putAll(defaultConfigs())
-            .putAll(commandLineConfigs(cluster, role, environ))
-            .putAll(topologyConfigs(topologyJarFile, topologyDefnFile, topology))
-            .build());
-
-    // Set up logging with complete Config
-    setupLogging(config);
-
-    LOG.log(Level.INFO, "Loaded scheduler config: {0}", config);
+    // initialize the scheduler with the options 
+    SchedulerMain.initialize(cmd.getOptionValue("cluster"), 
+        cmd.getOptionValue("role"),
+        cmd.getOptionValue("environment"),
+        cmd.getOptionValue("topology_name"),
+        cmd.getOptionValue("topology_jar"),
+        Integer.parseInt(cmd.getOptionValue("http_port")));
 
     // run the scheduler
-    runScheduler(config, schedulerServerPort, topology);
+    SchedulerMain.runScheduler();
   }
 
-  // Set up logging basing on the Config
-  public static void setupLogging(Config config) throws IOException {
+  // Set up logging based on the Config
+  protected static void setupLogging(Config config) throws IOException {
     String systemConfigFilename = Context.systemConfigSandboxFile(config);
 
     SystemConfig systemConfig = new SystemConfig(systemConfigFilename, true);
@@ -246,6 +212,7 @@ public class SchedulerMain {
 
     // Log to file
     LoggingHelper.loggerInit(loggingLevel, true);
+
     // TODO(mfu): Pass the scheduler id from cmd
     String processId = String.format("%s-%s-%s", "heron", Context.topologyName(config), "scheduler");
     LoggingHelper.addLoggingHandler(
@@ -256,8 +223,7 @@ public class SchedulerMain {
     LOG.info("Logging setup done.");
   }
 
-  public static void runScheduler(
-      Config config, int schedulerServerPort, TopologyAPI.Topology topology) throws
+  public static void runScheduler() throws
       ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
 
     // create an instance of state manager
@@ -315,11 +281,13 @@ public class SchedulerMain {
       // wait until kill request or some interrupt occurs
       LOG.info("Waiting for termination... ");
       Runtime.schedulerShutdown(ytruntime).await();
+
     } catch (Exception e) {
       // Log and exit the process
       LOG.log(Level.SEVERE, "Exception occurred", e);
       LOG.log(Level.SEVERE, "Failed to run scheduler for topology: {0}. Exiting...", topology.getName());
       System.exit(1);
+
     } finally {
       // Clean the resources
       if (server != null) {

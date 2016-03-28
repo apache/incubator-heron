@@ -5,10 +5,10 @@ load("/tools/build_defs/pkg/pkg", "pkg_deb")
 
 load("/tools/rules/heron_api", "heron_api_files")
 
-load("/tools/rules/heron_client", "heron_client_files")
 load("/tools/rules/heron_client", "heron_client_bin_files")
 load("/tools/rules/heron_client", "heron_client_conf_files")
-load("/tools/rules/heron_client", "heron_client_lib_files")
+load("/tools/rules/heron_client", "heron_client_lib_3rdparty_files")
+load("/tools/rules/heron_client", "heron_client_lib_commands_files")
 load("/tools/rules/heron_client", "heron_client_lib_scheduler_files")
 load("/tools/rules/heron_client", "heron_client_lib_packing_files")
 load("/tools/rules/heron_client", "heron_client_lib_statemgr_files")
@@ -134,9 +134,9 @@ pkg_tar(
 )
 
 pkg_tar(
-    name = "heron-client-lib",
-    package_dir = "lib",
-    files = heron_client_lib_files(),
+    name = "heron-client-lib-commands",
+    package_dir = "lib/commands",
+    files = heron_client_lib_commands_files(),
 )
 
 pkg_tar(
@@ -161,6 +161,12 @@ pkg_tar(
     name = "heron-client-lib-uploader",
     package_dir = "lib/uploader",
     files = heron_client_lib_uploader_files(),
+)
+
+pkg_tar(
+    name = "heron-client-lib-3rdparty",
+    package_dir = "lib/3rdparty",
+    files = heron_client_lib_3rdparty_files(),
 )
 
 pkg_tar(
@@ -207,9 +213,10 @@ pkg_tar(
         ":heron-client-conf-aurora",
         ":heron-client-dist",
         ":heron-client-examples",
-        ":heron-client-lib",
-        ":heron-client-lib-scheduler",
+        ":heron-client-lib-3rdparty",
+        ":heron-client-lib-commands",
         ":heron-client-lib-packing",
+        ":heron-client-lib-scheduler",
         ":heron-client-lib-statemgr",
         ":heron-client-lib-uploader",
     ],
