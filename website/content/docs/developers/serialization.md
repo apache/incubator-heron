@@ -4,7 +4,7 @@ title: Custom Serialization
 
 The tuple is Heron's core data type. Heron's native
 [`Tuple`](.io/topology-api/com/twitter/heron/api/tuple/Tuple) interface supports
-a broad range of [basic data types](data-model.html#using-tuples), such as
+a broad range of [basic data types](../data-model/#using-tuples), such as
 strings, integers, and booleans, out of the box, but tuples can contain values
 of any type. You can use data types beyond the core types by providing a custom
 serializer using the instructions below.
@@ -23,7 +23,7 @@ documentation](https://github.com/EsotericSoftware/kryo#serializers).
 Once you've created a custom Kryo serializer for a type:
 
 1. Make sure that the code for the serializer is on Heron's
-[classpath](compiling.html#classpath).
+[classpath](../compiling/compiling/#classpath).
 2. Register the class with Kryo using the `topology.kryo.register` parameter for
 your topology. Here's an example:
 
@@ -34,4 +34,4 @@ your topology. Here's an example:
   ```
 
 Once your custom serializer is on Heron's classpath and Heron is aware of its
-existence, you must [re-compile](compiling.html) Heron.
+existence, you must [re-compile](../compiling/compiling) Heron.
