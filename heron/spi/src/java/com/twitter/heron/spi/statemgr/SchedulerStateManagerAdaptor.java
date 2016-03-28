@@ -1,5 +1,6 @@
 package com.twitter.heron.spi.statemgr;
 
+import java.util.List;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -159,6 +160,15 @@ public class SchedulerStateManagerAdaptor {
   public ListenableFuture<ExecutionEnvironment.ExecutionState> getExecutionState(
       WatchCallback watcher, String topologyName) {
     return delegate.getExecutionState(null, topologyName);
+  }
+
+  /**
+   * Get the execution states of all topologies
+   *
+   * @return List<ExecutionState>
+   */
+  public ListenableFuture<List<ExecutionEnvironment.ExecutionState>> getAllExecutionStates() {
+    return delegate.getAllExecutionStates();
   }
 
   /**

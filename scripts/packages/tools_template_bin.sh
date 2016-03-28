@@ -21,7 +21,7 @@ install_prefix=${1:-"/usr/local/herontools"}
 
 progname="$0"
 
-echo "Heron Tools installer"
+echo "Heron tools installer"
 echo "---------------------"
 echo
 cat <<'EOF'
@@ -40,7 +40,6 @@ function usage() {
 prefix="/usr/local"
 bin="%prefix%/bin"
 base="%prefix%/herontools"
-conf="%prefix%/herontools/conf"
 
 for opt in "${@}"; do
   case $opt in

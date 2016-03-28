@@ -7,20 +7,20 @@ pex_library(
     srcs = [
         "activate.py",
         "args.py",
-        "classpath.py",
         "deactivate.py",
         "execute.py",
         "help.py",
         "jars.py",
         "kill.py",
         "opts.py",
+        "ps.py",
         "restart.py",
-        "sandbox.py",
         "submit.py",
         "utils.py",
         "version.py",
     ], 
     deps = [
+        "//heron/common/src/python:common",
         "//heron/proto:proto-py",
     ],
 )
