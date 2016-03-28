@@ -1,2 +1,0 @@
-# Heron for Developers
-

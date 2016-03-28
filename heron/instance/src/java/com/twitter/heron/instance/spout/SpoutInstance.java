@@ -12,14 +12,14 @@ import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.spout.ISpout;
 import com.twitter.heron.api.spout.SpoutOutputCollector;
 import com.twitter.heron.api.utils.Utils;
-import com.twitter.heron.common.core.base.Communicator;
-import com.twitter.heron.common.core.base.Constants;
-import com.twitter.heron.common.core.base.SingletonRegistry;
-import com.twitter.heron.common.core.base.SlaveLooper;
+import com.twitter.heron.common.config.SystemConfig;
+import com.twitter.heron.common.basics.Communicator;
+import com.twitter.heron.common.basics.Constants;
+import com.twitter.heron.common.basics.SingletonRegistry;
+import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.utils.metrics.SpoutMetrics;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.common.utils.misc.SerializeDeSerializeHelper;
-import com.twitter.heron.common.utils.misc.SystemConfig;
 import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 import com.twitter.heron.instance.IInstance;
 import com.twitter.heron.proto.system.HeronTuples;
@@ -63,7 +63,7 @@ public class SpoutInstance implements IInstance {
     TopologyContextImpl topologyContext = helper.getTopologyContext();
     config = topologyContext.getTopologyConfig();
     systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
-        com.twitter.heron.common.utils.misc.Constants.HERON_SYSTEM_CONFIG);
+        SystemConfig.HERON_SYSTEM_CONFIG);
     this.ackEnabled = Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_ENABLE_ACKING));
     this.enableMessageTimeouts = Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS));
     LOG.info("Enable Ack: " + this.ackEnabled);

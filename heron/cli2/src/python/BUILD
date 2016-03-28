@@ -4,7 +4,9 @@ load("/tools/rules/pex_rules", "pex_library", "pex_binary")
 
 pex_binary(
     name = "heron-cli2",
-    srcs = ["cli.py"],
+    srcs = [
+        "cli.py",
+    ], 
     deps = [
         "//heron/proto:proto-py",
     ],

@@ -15,11 +15,11 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.grouping.CustomStreamGrouping;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.api.utils.Utils;
-import com.twitter.heron.common.core.base.Communicator;
-import com.twitter.heron.common.core.base.SingletonRegistry;
-import com.twitter.heron.common.core.base.SlaveLooper;
-import com.twitter.heron.common.core.base.WakeableLooper;
+import com.twitter.heron.common.basics.SysUtils;
+import com.twitter.heron.common.basics.Communicator;
+import com.twitter.heron.common.basics.SingletonRegistry;
+import com.twitter.heron.common.basics.SlaveLooper;
+import com.twitter.heron.common.basics.WakeableLooper;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.instance.InstanceControlMsg;
 import com.twitter.heron.instance.Slave;
@@ -141,7 +141,7 @@ public class CustomGroupingTest {
             testLooper.exitLoop();
             break;
           }
-          Utils.sleep(Constants.RETRY_INTERVAL_MS);
+          SysUtils.sleep(Constants.RETRY_INTERVAL_MS);
         }
       }
     };

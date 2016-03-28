@@ -8,7 +8,8 @@ import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
+import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
 import com.twitter.heron.scheduler.util.DefaultConfigLoader;
 
 /**
@@ -17,6 +18,7 @@ import com.twitter.heron.scheduler.util.DefaultConfigLoader;
 public class LocalSchedulerTest {
 
   private static final int shards = 10;
+  private static final String stateMgrClass = "com.twitter.heron.statemgr.NullStateManager";
 
   DefaultConfigLoader createRequiredConfig() throws Exception {
     DefaultConfigLoader schedulerConfig = DefaultConfigLoader.class.newInstance();
@@ -24,6 +26,7 @@ public class LocalSchedulerTest {
     schedulerConfig.properties.setProperty(LocalConfig.WORKING_DIRECTORY,
         LocalConfig.WORKING_DIRECTORY);
     schedulerConfig.properties.put(LocalConfig.NUM_SHARDS, "" + shards);
+    schedulerConfig.properties.setProperty(Constants.STATE_MANAGER_CLASS, stateMgrClass);
     return schedulerConfig;
   }
 
@@ -58,4 +61,4 @@ public class LocalSchedulerTest {
     Mockito.verify(scheduler, Mockito.times(shards)).startExecutor(Matchers.anyInt());
 
   }
-} 
+}

@@ -2,9 +2,9 @@ package com.twitter.heron.scheduler.local;
 
 import java.util.logging.Logger;
 
-import com.twitter.heron.common.core.base.FileUtility;
-import com.twitter.heron.scheduler.api.IUploader;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
+import com.twitter.heron.common.basics.FileUtils;
+import com.twitter.heron.spi.uploader.IUploader;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
 
 public class LocalUploader implements IUploader {
   private static final Logger LOG = Logger.getLogger(LocalUploader.class.getName());
@@ -33,20 +33,20 @@ public class LocalUploader implements IUploader {
         localConfig.getWorkingDirectory());
 
     // If the working directory does not exist, create it.
-    if (!FileUtility.isDirectoryExists(this.localConfig.getWorkingDirectory())) {
+    if (!FileUtils.isDirectoryExists(this.localConfig.getWorkingDirectory())) {
       LOG.info("The working directory does not exist; creating it.");
-      if (!FileUtility.createDirectory(this.localConfig.getWorkingDirectory())) {
+      if (!FileUtils.createDirectory(this.localConfig.getWorkingDirectory())) {
         LOG.severe("Failed to create directory: " + this.localConfig.getWorkingDirectory());
         return false;
       }
     }
 
     targetTopologyPackage = String.format("%s/%s",
-        localConfig.getWorkingDirectory(), FileUtility.getBaseName(topologyPackageLocation));
+        localConfig.getWorkingDirectory(), FileUtils.getBaseName(topologyPackageLocation));
 
 
     // 1. Copy the topology package to target working directory
-    if (!FileUtility.copyFile(topologyPackageLocation, targetTopologyPackage)) {
+    if (!FileUtils.copyFile(topologyPackageLocation, targetTopologyPackage)) {
       return false;
     }
 
@@ -60,6 +60,6 @@ public class LocalUploader implements IUploader {
     // Clean the tmp working directory
     LOG.info("Clean uploaded jar");
 
-    FileUtility.deleteFile(targetTopologyPackage);
+    FileUtils.deleteFile(targetTopologyPackage);
   }
 }

@@ -31,7 +31,7 @@ cc_library(
     copts = [
         "-Iheron",
         "-Iheron/common/src/cpp",
-        "-Iheron/state/src/cpp",
+        "-Iheron/statemgrs/src/cpp",
         "-Iheron/tmaster/src/cpp",
         "-I$(GENDIR)/heron",
         "-I$(GENDIR)/heron/common/src/cpp",
@@ -40,7 +40,7 @@ cc_library(
         "//heron/common/src/cpp/network:network-cxx",
         "//heron/common/src/cpp/zookeeper:zookeeper-cxx",
         "//heron/common/src/cpp/metrics:metrics-cxx",
-        "//heron/state/src/cpp:state-cxx",
+        "//heron/statemgrs/src/cpp:statemgrs-cxx",
         "//heron/proto:proto-cxx",
         "//3rdparty/yaml-cpp:yaml-cxx",
     ],
@@ -55,7 +55,7 @@ cc_binary(
     copts = [
         "-Iheron",
         "-Iheron/common/src/cpp",
-        "-Iheron/state/src/cpp",
+        "-Iheron/statemgrs/src/cpp",
         "-Iheron/tmaster/src/cpp",
         "-I$(GENDIR)/heron",
         "-I$(GENDIR)/heron/common/src/cpp",
@@ -63,7 +63,7 @@ cc_binary(
     deps = [
         ":tmaster-cxx",
         "//heron/common/src/cpp/metrics:metrics-cxx",
-        "//heron/state/src/cpp:state-cxx",
+        "//heron/statemgrs/src/cpp:statemgrs-cxx",
         "//heron/common/src/cpp/config:config-cxx",
         "//heron/proto:proto-cxx",
         "//heron/common/src/cpp/zookeeper:zookeeper-cxx",

@@ -39,12 +39,14 @@ class TMaster
           const std::string& _topology_id,
           const std::string& _topdir, const std::vector<std::string>& _stmgrs,
           sp_int32 _controller_port, sp_int32 _master_port, sp_int32 _stats_port,
-          sp_int32 metricsMgrPort, const std::string& _myhost_name, EventLoop* eventLoop);
+          sp_int32 metricsMgrPort, const std::string& metrics_sinks_yaml,
+          const std::string& _myhost_name, EventLoop* eventLoop);
+
   virtual ~TMaster();
 
-  const std::string& GetTopologyId() const { return topology_->id(); }
-  const std::string& GetTopologyName() const { return topology_->name(); }
-  proto::api::TopologyState GetTopologyState() const { return topology_->state(); }
+  const std::string& GetTopologyId() const { return current_pplan_->topology().id(); }
+  const std::string& GetTopologyName() const { return current_pplan_->topology().name(); }
+  proto::api::TopologyState GetTopologyState() const { return current_pplan_->topology().state(); }
   void ActivateTopology(VCallback<proto::system::StatusCode> cb);
   void DeActivateTopology(VCallback<proto::system::StatusCode> cb);
   proto::system::Status* RegisterStMgr(const proto::system::StMgr& _stmgr,
@@ -60,8 +62,11 @@ class TMaster
   proto::system::StatusCode RemoveStMgrConnection(Connection* _conn);
 
   // Accessors
-  const proto::api::Topology* getTopology() const { return topology_; }
   const proto::system::PhysicalPlan* getPhysicalPlan() const { return current_pplan_; }
+  // TODO(mfu): Should we provide this?
+  // topology_ should only be used to construct physical plan when TMaster first starts
+  // Providing an accessor is bug prone.
+  const proto::api::Topology* getInitialTopology() const { return topology_; }
 
  private:
   // Function to be called that calls MakePhysicalPlan and sends it to all stmgrs
@@ -74,15 +79,19 @@ class TMaster
   proto::system::PhysicalPlan* MakePhysicalPlan();
 
   // Check to see if the topology is of correct format
-  bool ValidateTopology();
+  bool ValidateTopology(proto::api::Topology _topology);
 
   // Check to see if the topology and stmgrs match
   // in terms of workers
-  bool ValidateStMgrsWithTopology();
+  bool ValidateStMgrsWithTopology(proto::api::Topology _topology);
 
   // Check to see if the stmgrs and pplan match
   // in terms of workers
-  bool ValidateStMgrsWithPhysicalPlan();
+  bool ValidateStMgrsWithPhysicalPlan(proto::system::PhysicalPlan _pplan);
+
+  // If the assignment is already done, then:
+  // 1. Distribute physical plan to all active stmgrs
+  bool DistributePhysicalPlan();
 
   // Function called after we set the tmasterlocation
   void SetTMasterLocationDone(proto::system::StatusCode _code);
@@ -97,56 +106,57 @@ class TMaster
   void SetPhysicalPlanDone(proto::system::PhysicalPlan* _pplan,
                            proto::system::StatusCode _code);
 
-  // Function called when we write topology
-  void ActivateTopologyDone(VCallback<proto::system::StatusCode> cb,
-                            proto::system::StatusCode _code);
-  // Function called when we write topology
-  void DeActivateTopologyDone(VCallback<proto::system::StatusCode> cb,
-                              proto::system::StatusCode _code);
-
   // Function called when we want to setup ourselves as tmaster
   void EstablishTMaster(EventLoop::Status);
 
   void UpdateProcessMetrics(EventLoop::Status);
 
   // map of active stmgr id to stmgr state
-  typedef std::map<std::string, StMgrState*>          StMgrMap;
-  typedef StMgrMap::iterator                StMgrMapIter;
-  StMgrMap                                  stmgrs_;
+  typedef std::map<std::string, StMgrState*>    StMgrMap;
+  typedef StMgrMap::iterator                    StMgrMapIter;
+  StMgrMap                                      stmgrs_;
+
   // map of connection to stmgr id
-  std::map<Connection*, sp_string>               connection_to_stmgr_id_;
+  std::map<Connection*, sp_string>              connection_to_stmgr_id_;
+
   // set of nodemanagers that have not yet connected to us
-  std::set<std::string>                               absent_stmgrs_;
+  std::set<std::string>                         absent_stmgrs_;
 
   // The current physical plan
-  proto::system::PhysicalPlan*              current_pplan_;
-  // The topology as submitted by the user
-  proto::api::Topology*                     topology_;
+  proto::system::PhysicalPlan*                  current_pplan_;
+
+  // The topology as first submitted by the user
+  // It shall only be used to construct the physical plan when TMaster first time starts
+  // Any runtime changes shall be made to current_pplan_->topology
+  proto::api::Topology*                         topology_;
+
   // The statemgr where we store/retrieve our state
-  heron::common::HeronStateMgr*             state_mgr_;
+  heron::common::HeronStateMgr*                 state_mgr_;
+
   // Our copy of the tmasterlocation
-  proto::tmaster::TMasterLocation*          tmaster_location_;
+  proto::tmaster::TMasterLocation*              tmaster_location_;
 
   // When we are in the middle of doing assignment
   // we set this to true
-  bool                                      assignment_in_progress_;
-  bool                                      do_reassign_;
+  bool                                          assignment_in_progress_;
+  bool                                          do_reassign_;
 
   // State information
-  std::string                                    zk_hostport_;
-  std::string                                    topdir_;
+  std::string                                   zk_hostport_;
+  std::string                                   topdir_;
 
   // Servers that implement our services
-  TController*                              controller_;
-  sp_int32                                  controller_port_;
-  TMasterServer*                            master_;
-  sp_int32                                  master_port_;
-  StatsInterface*                           stats_;
-  sp_int32                                  stats_port_;
-  std::string                                    myhost_name_;
+  TController*                                  controller_;
+  sp_int32                                      controller_port_;
+  TMasterServer*                                master_;
+  sp_int32                                      master_port_;
+  StatsInterface*                               stats_;
+  sp_int32                                      stats_port_;
+  std::string                                   myhost_name_;
+
   // how many times have we tried to establish
   // ourselves as master
-  sp_int32                                  master_establish_attempts_;
+  sp_int32                                      master_establish_attempts_;
 
   // collector
   TMetricsCollector*                        metrics_collector_;
