@@ -10,14 +10,20 @@ def pick(dirname, pattern):
   return file_list[0] if file_list else None
     
 ################################################################################
-# Get the topology jars - TODO, make the jars independent version free
+# Get the topology jars
 ################################################################################
 def topology_jars():
   jars = [
-      pick(utils.get_heron_lib_dir(), 'protobuf-java-*.jar'),
-      pick(utils.get_heron_lib_dir(), 'log4j-over-slf4j-*.jar'),
-      pick(utils.get_heron_lib_dir(), 'slf4j-api-*.jar'),
-      pick(utils.get_heron_lib_dir(), 'slf4j-jdk*.jar')
+      os.path.join(utils.get_heron_lib_dir(), "3rdparty", "*")
+  ]
+  return jars
+
+################################################################################
+# Get the command jars
+################################################################################
+def command_jars():
+  jars = [
+      os.path.join(utils.get_heron_lib_dir(), "commands", "*")
   ]
   return jars
 

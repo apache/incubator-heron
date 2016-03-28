@@ -1,9 +1,6 @@
 ################################################################################
 # Convenience macros for Heron client files
 ################################################################################
-def heron_client_files():
-    return heron_client_bin_files() + heron_client_lib_files() + heron_client_conf_files()
-
 def heron_client_bin_files():
     return [
         "//heron/cli/src/python:heron",
@@ -22,6 +19,11 @@ def heron_client_local_files():
 def heron_client_aurora_files():
     return [
         "//heron/config/src/yaml:conf-aurora-yaml",
+    ]
+
+def heron_client_lib_commands_files():
+    return [
+        "//heron/commands/src/java:heron-commands",
     ]
 
 def heron_client_lib_scheduler_files():
@@ -49,7 +51,7 @@ def heron_client_lib_uploader_files():
         "//heron/uploaders/src/java:heron-localfs-uploader",
     ]
 
-def heron_client_lib_files():
+def heron_client_lib_3rdparty_files():
     return [
         "//3rdparty/protobuf:protobuf-java",
         "//3rdparty/logging:slf4j-api-java",

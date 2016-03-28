@@ -1,5 +1,6 @@
 import tornado.gen
 import tornado.web
+import traceback
 
 from heron.tracker.src.python import constants
 from heron.tracker.src.python.handlers import BaseHandler
@@ -40,6 +41,7 @@ class MetricsQueryHandler(BaseHandler):
                                        topology.tmaster, query, int(start_time), int(end_time))
       self.write_success_response(metrics)
     except Exception as e:
+      traceback.print_exc()
       self.write_error_response(e)
 
   @tornado.gen.coroutine
@@ -82,9 +84,6 @@ class MetricsQueryHandler(BaseHandler):
     ret["endtime"] = end_time
     ret["timeline"] = []
 
-    if not metrics:
-      raise Exception("No metrics found")
-
     for metric in metrics:
       tl = {
         "data": metric.timeline
@@ -92,9 +91,6 @@ class MetricsQueryHandler(BaseHandler):
       if metric.instance:
         tl["instance"] = metric.instance
       ret["timeline"].append(tl)
-
-    if not ret["timeline"]:
-      raise Exception("No metrics found")
 
     raise tornado.gen.Return(ret)
 
