@@ -117,7 +117,7 @@ public class AuroraLauncher implements ILauncher {
 
     return AuroraUtils.createAuroraJob(topology.getName(), Context.cluster(config),
         Context.role(config),
-        Context.environ(config), getHeronAuroraPath(), auroraProperties);
+        Context.environ(config), getHeronAuroraPath(), auroraProperties, true);
   }
 
   private String getHeronAuroraPath() {

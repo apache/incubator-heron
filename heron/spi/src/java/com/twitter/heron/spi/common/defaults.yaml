@@ -33,7 +33,7 @@ SCHEDULER_JAR:                ${HERON_LIB}/scheduler/heron-scheduler.jar
 CORE_PACKAGE_URI:             ${HERON_DIST}/heron-core.tar.gz
 
 ################################################################################
-# Default classpath for various modules 
+# Default classpath for various modules
 ################################################################################
 INSTANCE_CLASSPATH:           ${HERON_LIB}/instance/*
 METRICSMGR_CLASSPATH:         ${HERON_LIB}/metricsmgr/*
@@ -43,13 +43,13 @@ STATEMGR_CLASSPATH:           ${HERON_LIB}/statemgr/*
 UPLOADER_CLASSPATH:           ${HERON_LIB}/uploader/*
 
 ################################################################################
-# Defaults for config provided values for resources, RAM and disk space are 
+# Defaults for config provided values for resources, RAM and disk space are
 # specified in bytes.
 # CPU is specified in number of cores, fractional cores allowed, (e.g) 1.2
 ################################################################################
-STMGR_RAM:                    1073741824 
+STMGR_RAM:                    1073741824
 INSTANCE_CPU:                 1
-INSTANCE_RAM:                 1073741824 
+INSTANCE_RAM:                 1073741824
 INSTANCE_DISK:                1073741824
 
 ################################################################################
@@ -81,11 +81,11 @@ SANDBOX_STMGR_BINARY:         ${HERON_SANDBOX_BIN}/heron-stmgr
 SANDBOX_TMASTER_BINARY:       ${HERON_SANDBOX_BIN}/heron-tmaster
 SANDBOX_SHELL_BINARY:         ${HERON_SANDBOX_BIN}/heron-shell
 SANDBOX_SCHEDULER_JAR:        ${HERON_SANDBOX_LIB}/scheduler/heron-scheduler.jar
- 
+
 SANDBOX_LOGGING_DIRECTORY:    ./log-files
 
 ################################################################################
-# Default classpath for various modules 
+# Default classpath for various modules
 ################################################################################
 SANDBOX_INSTANCE_CLASSPATH:   ${HERON_SANDBOX_LIB}/instance/*
 SANDBOX_METRICSMGR_CLASSPATH: ${HERON_SANDBOX_LIB}/metricsmgr/*
@@ -93,3 +93,8 @@ SANDBOX_PACKING_CLASSPATH:    ${HERON_SANDBOX_LIB}/packing/*
 SANDBOX_SCHEDULER_CLASSPATH:  ${HERON_SANDBOX_LIB}/scheduler/*
 SANDBOX_STATEMGR_CLASSPATH:   ${HERON_SANDBOX_LIB}/statemgr/*
 SANDBOX_UPLOADER_CLASSPATH:   ${HERON_SANDBOX_LIB}/uploader/*
+
+################################################################################
+# Default value for rest static config
+################################################################################
+NO_SCHEDULER_REST_ENDPOINT:   False

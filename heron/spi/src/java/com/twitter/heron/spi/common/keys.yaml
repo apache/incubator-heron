@@ -122,6 +122,8 @@ HERON_RELEASE_PACKAGE_VERSION:   heron.release.package.version
 HERON_UPLOADER_VERSION:          heron.uploader.version
 
 HERON_AURORA_BIND_PREFIX:        heron.aurora.bind.
+# True if no scheduler is running
+NO_SCHEDULER_REST_ENDPOINT:      heron.runtime.no.scheduler.rest.endpoint
 
 ################################################################################
 # keys for config provided paths

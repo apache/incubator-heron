@@ -37,9 +37,6 @@ import com.twitter.heron.spi.common.Config;
  */
 
 public interface IStateManager {
-
-  public static final String NO_SCHEDULER_REST_ENDPOINT = "no_scheduler_endpoint";
-
   /**
    * Initialize the uploader with the incoming context.
    */
