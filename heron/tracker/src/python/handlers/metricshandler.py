@@ -142,8 +142,5 @@ class MetricsHandler(BaseHandler):
           ret["metrics"][metricname] = {}
         ret["metrics"][metricname][instance] = value
 
-    if not ret["metrics"]:
-      raise Exception("No metrics found")
-
     raise tornado.gen.Return(ret)
 
