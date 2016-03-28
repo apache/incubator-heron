@@ -84,9 +84,6 @@ class MetricsQueryHandler(BaseHandler):
     ret["endtime"] = end_time
     ret["timeline"] = []
 
-    if not metrics:
-      raise Exception("No metrics found")
-
     for metric in metrics:
       tl = {
         "data": metric.timeline
@@ -94,9 +91,6 @@ class MetricsQueryHandler(BaseHandler):
       if metric.instance:
         tl["instance"] = metric.instance
       ret["timeline"].append(tl)
-
-    if not ret["timeline"]:
-      raise Exception("No metrics found")
 
     raise tornado.gen.Return(ret)
 

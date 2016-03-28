@@ -126,8 +126,5 @@ def getMetricsTimeline(tmaster,
       for interval_value in im.interval_values:
         ret["timeline"][metricname][instance][interval_value.interval.start] = interval_value.value
 
-  if not ret["timeline"]:
-    raise Exception("No metrics found")
-
   raise tornado.gen.Return(ret)
 
