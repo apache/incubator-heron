@@ -15,10 +15,6 @@ import com.twitter.heron.spi.utils.Runtime;
 
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 
-import com.twitter.heron.command.tableview.Board;
-import com.twitter.heron.command.tableview.Block;
-import com.twitter.heron.command.tableview.Table;
-
 public class ListTopologiesHandler extends CommandHandler {
   private static final Logger LOG = Logger.getLogger(ListTopologiesHandler.class.getName());
 
