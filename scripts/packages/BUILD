@@ -8,6 +8,7 @@ load("/tools/rules/heron_api", "heron_api_files")
 load("/tools/rules/heron_client", "heron_client_bin_files")
 load("/tools/rules/heron_client", "heron_client_conf_files")
 load("/tools/rules/heron_client", "heron_client_lib_3rdparty_files")
+load("/tools/rules/heron_client", "heron_client_lib_commands_files")
 load("/tools/rules/heron_client", "heron_client_lib_scheduler_files")
 load("/tools/rules/heron_client", "heron_client_lib_packing_files")
 load("/tools/rules/heron_client", "heron_client_lib_statemgr_files")
@@ -133,6 +134,12 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "heron-client-lib-commands",
+    package_dir = "lib/commands",
+    files = heron_client_lib_commands_files(),
+)
+
+pkg_tar(
     name = "heron-client-lib-scheduler",
     package_dir = "lib/scheduler",
     files = heron_client_lib_scheduler_files(),
@@ -207,8 +214,9 @@ pkg_tar(
         ":heron-client-dist",
         ":heron-client-examples",
         ":heron-client-lib-3rdparty",
-        ":heron-client-lib-scheduler",
+        ":heron-client-lib-commands",
         ":heron-client-lib-packing",
+        ":heron-client-lib-scheduler",
         ":heron-client-lib-statemgr",
         ":heron-client-lib-uploader",
     ],
