@@ -501,7 +501,7 @@ void TMetricsCollector::Metric::GetMetrics(bool minutely,
         // Does this time bucket have overlap with needed range
         if (bucket->overlaps(start_time, end_time)) {
           total_count += bucket->aggregate();
-          total_count += bucket->count();
+          total_items += bucket->count();
           if (metric_type_ == TMasterMetrics::LAST) break;
         }
         // The timebuckets are reverse chronologically arranged
