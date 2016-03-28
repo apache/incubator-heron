@@ -1,5 +1,6 @@
 package com.twitter.heron.spi.statemgr;
 
+import java.util.List;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -150,6 +151,13 @@ public interface IStateManager {
    */
   ListenableFuture<ExecutionEnvironment.ExecutionState> getExecutionState(
       WatchCallback watcher, String topologyName);
+
+  /**
+   * Get the execution states of all topologies
+   *
+   * @return List<ExecutionState>
+   */
+  ListenableFuture<List<ExecutionEnvironment.ExecutionState>> getAllExecutionStates();
 
   /**
    * Set the location of Tmaster.
