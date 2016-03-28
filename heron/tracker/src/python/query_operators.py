@@ -342,8 +342,9 @@ class Divide(Operator):
     else:
       met = futureResolvedMetrics.pop(0)
       if not met:
-        raise Exception("No metrics found")
-      if len(met) == 1:
+        pass
+      elif len(met) == 1 and not met[0].instance:
+        # Only one but since it has instance, it is considered multivariate
         metrics[""] = met[0]
       else:
         for m in met:
@@ -362,8 +363,9 @@ class Divide(Operator):
     else:
       met = futureResolvedMetrics.pop(0)
       if not met:
-        raise Exception("No metrics found")
-      if len(met) == 1:
+        pass
+      elif len(met) == 1 and not met[0].instance:
+        # Only one but since it has instance, it is considered multivariate
         metrics2[""] = met[0]
       else:
         for m in met:
@@ -372,7 +374,8 @@ class Divide(Operator):
           metrics2[m.instance] = m
 
     # In case both are multivariate, only equal instances will get operated on.
-    if len(metrics) > 1 and len(metrics2) > 1:
+    if ((len(metrics) > 1 or (len(metrics) == 1 and "" not in metrics))
+        and (len(metrics2) > 1 or (len(metrics2) == 1 and "" not in metrics2))):
       allMetrics = []
       for key in metrics:
         if key not in metrics2:
@@ -386,7 +389,7 @@ class Divide(Operator):
         allMetrics.append(met)
       raise tornado.gen.Return(allMetrics)
     # If first is univariate
-    elif len(metrics) == 1:
+    elif len(metrics) == 1 and "" in metrics:
       allMetrics = []
       for key, metric in metrics2.iteritems():
         # Initialize with first metrics timeline, but second metric's instance
@@ -462,8 +465,9 @@ class Multiply(Operator):
     else:
       met = futureResolvedMetrics.pop(0)
       if not met:
-        raise Exception("No metrics found")
-      if len(met) == 1:
+        pass
+      elif len(met) == 1 and not met[0].instance:
+        # Only one but since it has instance, it is considered multivariate
         metrics[""] = met[0]
       else:
         for m in met:
@@ -480,8 +484,9 @@ class Multiply(Operator):
     else:
       met = futureResolvedMetrics.pop(0)
       if not met:
-        raise Exception("No metrics found")
-      if len(met) == 1:
+        pass
+      elif len(met) == 1 and not met[0].instance:
+        # Only one but since it has instance, it is considered multivariate
         metrics2[""] = met[0]
       else:
         for m in met:
@@ -490,7 +495,8 @@ class Multiply(Operator):
           metrics2[m.instance] = m
 
     # In case both are multivariate, only equal instances will get operated
-    if len(metrics) > 1 and len(metrics2) > 1:
+    if ((len(metrics) > 1 or (len(metrics) == 1 and "" not in metrics))
+        and (len(metrics2) > 1 or (len(metrics2) == 1 and "" not in metrics2))):
       allMetrics = []
       for key in metrics:
         if key not in metrics2:
@@ -504,7 +510,7 @@ class Multiply(Operator):
         allMetrics.append(met)
       raise tornado.gen.Return(allMetrics)
     # If first is univariate
-    elif len(metrics) == 1:
+    elif len(metrics) == 1 and "" in metrics:
       allMetrics = []
       for key, metric in metrics2.iteritems():
         # Initialize with first metrics timeline, but second metric's instance
@@ -580,8 +586,9 @@ class Subtract(Operator):
     else:
       met = futureResolvedMetrics.pop(0)
       if not met:
-        raise Exception("No metrics found")
-      if len(met) == 1:
+        pass
+      elif len(met) == 1 and not met[0].instance:
+        # Only one but since it has instance, it is considered multivariate
         metrics[""] = met[0]
       else:
         for m in met:
@@ -598,8 +605,9 @@ class Subtract(Operator):
     else:
       met = futureResolvedMetrics.pop(0)
       if not met:
-        raise Exception("No metrics found")
-      if len(met) == 1:
+        pass
+      elif len(met) == 1 and not met[0].instance:
+        # Only one but since it has instance, it is considered multivariate
         metrics2[""] = met[0]
       else:
         for m in met:
@@ -622,7 +630,7 @@ class Subtract(Operator):
         allMetrics.append(met)
       raise tornado.gen.Return(allMetrics)
     # If first is univariate
-    elif len(metrics) == 1:
+    elif len(metrics) == 1 and "" in metrics:
       allMetrics = []
       for key, metric in metrics2.iteritems():
         # Initialize with first metrics timeline, but second metric's instance
