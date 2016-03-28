@@ -60,7 +60,7 @@ public class ConfigUtils {
       com.twitter.heron.api.Config.setSerializationClassName(heronConfig,
           "org.apache.storm.serialization.HeronPluggableSerializerDelegate");
       if (!heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_KRYO_FACTORY)) {
-        heronConfig.put(org.apache.storm.Config.TOPOLOGY_KRYO_FACTORY, "backtype.storm.serialization.DefaultKryoFactory");
+        heronConfig.put(org.apache.storm.Config.TOPOLOGY_KRYO_FACTORY, "org.apache.storm.serialization.DefaultKryoFactory");
       } else if (!(heronConfig.get(org.apache.storm.Config.TOPOLOGY_KRYO_FACTORY) instanceof String)) {
         throw new RuntimeException(org.apache.storm.Config.TOPOLOGY_KRYO_FACTORY + " has to be set to a class name");
       }
