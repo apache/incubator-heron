@@ -13,6 +13,7 @@ pex_library(
         "jars.py",
         "kill.py",
         "opts.py",
+        "ps.py",
         "restart.py",
         "submit.py",
         "utils.py",
