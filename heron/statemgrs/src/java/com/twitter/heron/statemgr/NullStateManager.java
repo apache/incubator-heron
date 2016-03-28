@@ -1,5 +1,6 @@
 package com.twitter.heron.statemgr;
 
+import java.util.List;
 import java.util.Map;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -105,6 +106,11 @@ public class NullStateManager implements IStateManager {
   @Override
   public ListenableFuture<ExecutionEnvironment.ExecutionState> getExecutionState(WatchCallback watcher, String
       topologyName) {
+    return nullFuture;
+  }
+
+  @Override
+  public ListenableFuture<List<ExecutionEnvironment.ExecutionState>> getAllExecutionStates() {
     return nullFuture;
   }
 

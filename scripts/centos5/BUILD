@@ -83,6 +83,7 @@ genrule(
         ":conf-local-uploader",
         ":hcli",
         ":hexamples",
+        ":hcommands",
         ":hscheduler",
         ":hlscheduler",
         ":hrrpacking",
@@ -112,6 +113,7 @@ genrule(
         "--cp $(location conf-local-uploader)        conf/local/uploader.yaml",
         "--cp $(location heron-core)                 dist/heron-core.tar.gz",
         "--cp $(location hexamples)                  examples/heron-examples.jar",
+        "--cp $(location hcommands)                  lib/commands/heron-commands.jar",
         "--cp $(location hscheduler)                 lib/scheduler/heron-scheduler.jar",
         "--cp $(location hlscheduler)                lib/scheduler/heron-local-scheduler.jar",
         "--cp $(location hrrpacking)                 lib/packing/heron-roundrobin-packing.jar",
@@ -235,6 +237,11 @@ filegroup(
 filegroup(
     name = "hlogging",
     srcs = ["//heron/instance/src/java:aurora-logging-properties"],
+)
+
+filegroup(
+    name = "hcommands",
+    srcs = ["//heron/commands/src/java:heron-commands"],
 )
 
 filegroup(

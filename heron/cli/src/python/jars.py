@@ -10,11 +10,20 @@ def pick(dirname, pattern):
   return file_list[0] if file_list else None
     
 ################################################################################
-# Get the topology jars - TODO, make the jars independent version free
+# Get the topology jars
 ################################################################################
 def topology_jars():
   jars = [
       os.path.join(utils.get_heron_lib_dir(), "3rdparty", "*")
+  ]
+  return jars
+
+################################################################################
+# Get the command jars
+################################################################################
+def command_jars():
+  jars = [
+      os.path.join(utils.get_heron_lib_dir(), "commands", "*")
   ]
   return jars
 
