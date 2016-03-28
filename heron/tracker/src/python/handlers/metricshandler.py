@@ -38,7 +38,7 @@ class MetricsHandler(BaseHandler):
       component = self.get_argument_component()
       metric_names = self.get_required_arguments_metricnames()
 
-      topology = self.tracker.getTopologyByDcEnvironAndName(cluster, environ, topology_name)
+      topology = self.tracker.getTopologyByClusterEnvironAndName(cluster, environ, topology_name)
 
       interval = int(self.get_argument(constants.PARAM_INTERVAL, default=-1))
       instances = self.get_arguments(constants.PARAM_INSTANCE)

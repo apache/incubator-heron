@@ -17,24 +17,26 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.core.base.FileUtility;
+import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
-import com.twitter.heron.scheduler.api.Constants;
-import com.twitter.heron.scheduler.api.ILauncher;
-import com.twitter.heron.scheduler.api.PackingPlan;
-import com.twitter.heron.scheduler.api.SchedulerStateManagerAdaptor;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
+
+import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.scheduler.ILauncher;
+import com.twitter.heron.spi.scheduler.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
+
 import com.twitter.heron.scheduler.service.SubmitterMain;
 import com.twitter.heron.scheduler.util.NetworkUtility;
 import com.twitter.heron.scheduler.util.TopologyUtility;
-import com.twitter.heron.state.FileSystemStateManager;
+import com.twitter.heron.statemgr.FileSystemStateManager;
 
 public class MesosLauncher implements ILauncher {
   private static final Logger LOG = Logger.getLogger(MesosLauncher.class.getName());
 
   private TopologyAPI.Topology topology;
   private LaunchContext context;
-  private String dc;
+  private String cluster;
   private String environ;
   private String role;
   private SchedulerStateManagerAdaptor stateManager;
@@ -45,9 +47,9 @@ public class MesosLauncher implements ILauncher {
   public void initialize(LaunchContext context) {
     this.topology = context.getTopology();
     this.context = context;
-    dc = context.getProperty(Constants.DC);
-    environ = context.getProperty(Constants.ENVIRON);
-    role = context.getProperty(Constants.ROLE);
+    this.cluster = context.getProperty(Constants.CLUSTER);
+    this.environ = context.getProperty(Constants.ENVIRON);
+    this.role = context.getProperty(Constants.ROLE);
   }
 
   @Override
@@ -71,10 +73,10 @@ public class MesosLauncher implements ILauncher {
         safeEncodeB64(TopologyUtility.getComponentJvmOptions(topology)));
     configOverrides.put("COMPONENT_RAMMAP",
         TopologyUtility.formatRamMap(TopologyUtility.getComponentRamMap(topology)));
-    configOverrides.put("DC", dc);
+    configOverrides.put("CLUSTER", cluster);
     configOverrides.put("ENVIRON", environ);
     configOverrides.put("HERON_INTERNALS_CONFIG_FILENAME",
-        FileUtility.getBaseName(SubmitterMain.getHeronInternalsConfigFile()));
+        FileUtils.getBaseName(SubmitterMain.getHeronInternalsConfigFile()));
     configOverrides.put("HERON_JAVA_HOME",
         context.getProperty("heron.java.home.path", "/usr/lib/jvm/java-1.8.0-twitter"));
     configOverrides.put("INSTANCE_DISTRIBUTION", TopologyUtility.packingToString(packing));
@@ -85,14 +87,14 @@ public class MesosLauncher implements ILauncher {
     configOverrides.put("LOG_DIR", context.getProperty("heron.logging.directory", "log-files"));
     configOverrides.put("METRICS_MGR_CLASSPATH", "metrics-mgr-classpath/*");
     configOverrides.put("NUM_SHARDS", "" + (1 + TopologyUtility.getNumContainer(topology)));
-    configOverrides.put("PKG_TYPE", (FileUtility.isOriginalPackageJar(
-        FileUtility.getBaseName(SubmitterMain.getOriginalPackageFile())) ? "jar" : "tar"));
+    configOverrides.put("PKG_TYPE", (FileUtils.isOriginalPackageJar(
+        FileUtils.getBaseName(SubmitterMain.getOriginalPackageFile())) ? "jar" : "tar"));
     configOverrides.put("STMGR_BINARY", "heron-stmgr");
     configOverrides.put("TMASTER_BINARY", "heron-tmaster");
     configOverrides.put("HERON_SHELL_BINARY", "heron-shell");
     configOverrides.put("TOPOLOGY_DEFN", topology.getName() + ".defn");
     configOverrides.put("TOPOLOGY_ID", topology.getId());
-    configOverrides.put("TOPOLOGY_JAR_FILE", FileUtility.getBaseName(SubmitterMain.getOriginalPackageFile()));
+    configOverrides.put("TOPOLOGY_JAR_FILE", FileUtils.getBaseName(SubmitterMain.getOriginalPackageFile()));
     configOverrides.put("TOPOLOGY_NAME", topology.getName());
     configOverrides.put("ZK_NODE", context.getProperty(Constants.ZK_CONNECTION_STRING));
     configOverrides.put("ZK_ROOT", context.getProperty(FileSystemStateManager.ROOT_ADDRESS));
@@ -180,7 +182,7 @@ public class MesosLauncher implements ILauncher {
     ExecutionEnvironment.ExecutionState.Builder builder =
         ExecutionEnvironment.ExecutionState.newBuilder().mergeFrom(executionState);
 
-    builder.setDc(dc).setRole(role).setEnviron(environ);
+    builder.setDc(cluster).setRole(role).setEnviron(environ);
 
     // Set the HeronReleaseState
     ExecutionEnvironment.HeronReleaseState.Builder releaseBuilder =
@@ -305,7 +307,7 @@ public class MesosLauncher implements ILauncher {
 
 
   private String getMesosMasterUri() {
-    String key = String.format("%s.%s.%s", MesosConfig.MESOS_MASTER_URI_PREFIX, dc, environ);
+    String key = String.format("%s.%s.%s", MesosConfig.MESOS_MASTER_URI_PREFIX, cluster, environ);
     return context.getPropertyWithException(key);
   }
 

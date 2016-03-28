@@ -4,15 +4,14 @@ import java.util.logging.Logger;
 
 import com.google.protobuf.Message;
 
-import com.twitter.heron.common.core.base.Communicator;
-import com.twitter.heron.common.core.base.NIOLooper;
-import com.twitter.heron.common.core.base.SingletonRegistry;
-import com.twitter.heron.common.core.network.HeronClient;
-import com.twitter.heron.common.core.network.HeronSocketOptions;
-import com.twitter.heron.common.core.network.StatusCode;
-import com.twitter.heron.common.utils.misc.Constants;
+import com.twitter.heron.common.config.SystemConfig;
+import com.twitter.heron.common.basics.Communicator;
+import com.twitter.heron.common.basics.NIOLooper;
+import com.twitter.heron.common.basics.SingletonRegistry;
+import com.twitter.heron.common.network.HeronClient;
+import com.twitter.heron.common.network.HeronSocketOptions;
+import com.twitter.heron.common.network.StatusCode;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
-import com.twitter.heron.common.utils.misc.SystemConfig;
 import com.twitter.heron.instance.InstanceControlMsg;
 import com.twitter.heron.metrics.GatewayMetrics;
 import com.twitter.heron.proto.stmgr.StreamManager;
@@ -69,7 +68,7 @@ public class StreamManagerClient extends HeronClient {
     this.outStreamQueue = outStreamQueue;
     this.inControlQueue = inControlQueue;
 
-    this.systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(Constants.HERON_SYSTEM_CONFIG);
+    this.systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
     this.gatewayMetrics = gatewayMetrics;
 

@@ -1,0 +1,4 @@
+.page-header
+  h1 {{.Title}}
+  small {{.Description}}
+{{.Content}}

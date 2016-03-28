@@ -5,6 +5,9 @@ option java_outer_classname = "PhysicalPlans";
 
 import "topology.proto";
 
+// This file defines the physical plan of a topology.
+// It reflects the dynamic running state of a topology.
+
 message StMgr {
   required string id = 1;
   required string host_name = 2;
@@ -33,6 +36,9 @@ message Instance {
 }
 
 message PhysicalPlan {
+  // Note that heron.proto.api.Topology, included in PhysicalPlan,
+  // reflect the actual dynamic running state of the topology.
+  // Query this value guarantees the correct running state of the topology.
   required heron.proto.api.Topology topology = 1;
   repeated StMgr stmgrs = 2;
   repeated Instance instances = 3;

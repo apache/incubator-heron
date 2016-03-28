@@ -13,12 +13,13 @@
 
 int main(int argc, char* argv[])
 {
-  if (argc != 11) {
+  if (argc != 12) {
     std::cout
       << "Usage: " << argv[0] << " "
       << "<controller-port> <master-port> <stats-port> "
       << "<topology_name> <topology_id> <zk_hostportlist> "
-      << "<topdir> <sgmr1,...> <heron_internals_config_filename> <metrics-manager-port>"
+      << "<topdir> <sgmr1,...> <heron_internals_config_filename> "
+      << "<metrics_sinks_filename> <metrics-manager-port>"
       << std::endl;
     std::cout << "If zk_hostportlist is empty please say LOCALMODE\n";
     ::exit(1);
@@ -37,7 +38,8 @@ int main(int argc, char* argv[])
   sp_string topdir = argv[7];
   std::vector<std::string> stmgrs = StrUtils::split(argv[8], ",");
   sp_string heron_internals_config_filename = argv[9];
-  sp_int32 metrics_manager_port = atoi(argv[10]);
+  sp_string metrics_sinks_yaml = argv[10];
+  sp_int32 metrics_manager_port = atoi(argv[11]);
 
   EventLoopImpl ss;
 
@@ -56,7 +58,8 @@ int main(int argc, char* argv[])
   heron::tmaster::TMaster tmaster(zkhostportlist, topology_name,
                                   topology_id, topdir, stmgrs,
                                   controller_port,
-                                  master_port, stats_port, metrics_manager_port, myhost, &ss);
+                                  master_port, stats_port, metrics_manager_port, 
+                                  metrics_sinks_yaml, myhost, &ss);
   ss.loop();
   return 0;
 }

@@ -27,11 +27,12 @@ typedef heron::proto::tmaster::PublishMetrics PublishMetrics;
 }
 namespace heron { namespace tmaster {
 
-TMetricsCollector::TMetricsCollector(sp_int32 _max_interval, EventLoop* eventLoop)
-  : max_interval_(_max_interval),
-  eventLoop_(eventLoop),
-  // TODO(skulkarni):- Make the name of the file to be part of a config
-  tmetrics_info_(new common::TMasterMetrics("metrics_sinks.yaml", eventLoop)),
+TMetricsCollector::TMetricsCollector(
+    sp_int32           _max_interval, 
+    EventLoop*         eventLoop, 
+    const std::string& metrics_sinks_yaml)
+  : max_interval_(_max_interval), eventLoop_(eventLoop), metrics_sinks_yaml_(metrics_sinks_yaml),
+  tmetrics_info_(new common::TMasterMetrics(metrics_sinks_yaml, eventLoop)),
   start_time_(time(NULL))
 {
   interval_ = config::HeronInternalsConfigReader::Instance()->GetHeronTmasterMetricsCollectorPurgeIntervalSec();

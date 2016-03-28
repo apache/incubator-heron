@@ -99,24 +99,28 @@ def heron_api_lib_files():
     ]
 
 ################################################################################
-# Convenience macros for Heron CLI files
+# Convenience macros for Heron client files
 ################################################################################
-def heron_cli_files():
-    return heron_cli_bin_files() + heron_cli_lib_files() + heron_cli_conf_files()
+def heron_client_files():
+    return heron_client_bin_files() + heron_client_lib_files() + heron_client_conf_files()
 
-def heron_cli_bin_files():
+def heron_client_bin_files():
     return [
-        "//heron/cli2/src/python:heron-cli2",
+        "//heron/cli/src/python:heron",
     ]
 
-def heron_cli_conf_files():
+def heron_client_conf_files():
     return [
-        "//heron/config:config-internals-yaml",
+        "//heron/config/src/yaml:config-internals-yaml",
     ]
 
-def heron_cli_lib_files():
+def heron_client_lib_files():
     return [
-        "//heron/scheduler/src/java:heron-scheduler",
+        "//heron/newscheduler/src/java:heron-scheduler",
+        "//heron/schedulers/src/java:heron-local-scheduler",
+        "//heron/uploaders/src/java:heron-localfs-uploader",
+        "//heron/statemgrs/src/java:heron-zookeeper-statemgr",
+        "//heron/statemgrs/src/java:heron-localfs-statemgr",
         "//3rdparty/protobuf:protobuf-java",
         "//3rdparty/logging:slf4j-api-java",
         "//3rdparty/logging:slf4j-jdk-java", 
@@ -141,103 +145,34 @@ def heron_core_bin_files():
 def heron_core_conf_files():
     return [
         "//heron/instance/src/java:aurora-logging-properties",
-        "//heron/config:config-internals-yaml",
-        "//heron/config:metrics-sinks-yaml",
+        "//heron/config/src/yaml:config-internals-yaml",
+        "//heron/config/src/yaml:metrics-sinks-yaml",
     ]
 
 def heron_core_lib_files():
     return [
         "//heron/instance/src/java:heron-instance",
         "//heron/metricsmgr/src/java:heron-metricsmgr",
-        "//heron/scheduler/src/java:heron-scheduler",
+        "//heron/newscheduler/src/java:heron-scheduler",
+        "//heron/statemgrs/src/java:heron-zookeeper-statemgr",
     ]
 
 ################################################################################
-# Convenience macros for Heron Metrics API files
+# Convenience macros for Heron tools files
 ################################################################################
-def heron_metrics_api_files():
-    return heron_metrics_api_bin_files() + heron_metrics_api_conf_files() + heron_metrics_api_lib_files()
+def heron_tools_files():
+    return heron_tools_bin_files() + heron_tools_conf_files() + heron_tools_lib_files()
 
-def heron_metrics_api_bin_files():
-    return []
-
-def heron_metrics_api_conf_files():
-    return []
-
-def heron_metrics_api_lib_files():
-    return [
-        "//heron/metricsmgr-api/src/java:metricsmgr-api-java",
-    ]
-
-################################################################################
-# Convenience macros for Heron Storm Compatibility API files
-################################################################################
-def heron_storm_compat_files():
-    return heron_storm_compat_bin_files() + heron_storm_compat_conf_files() + heron_storm_compat_lib_files()
-
-def heron_storm_compat_bin_files():
-    return []
-
-def heron_storm_compat_conf_files():
-    return []
-
-def heron_storm_compat_lib_files():
-    return [
-        "//heron/storm/src/java:storm-compatibility-java",
-    ]
-
-################################################################################
-# Convenience macros for Heron Tracker files
-################################################################################
-def heron_tracker_files():
-    return heron_tracker_bin_files() + heron_tracker_conf_files() + heron_tracker_lib_files()
-
-def heron_tracker_bin_files():
+def heron_tools_bin_files():
     return [
         "//heron/tracker/src/python:heron-tracker",
     ]
 
-def heron_tracker_conf_files():
+def heron_tools_conf_files():
     return []
 
-def heron_tracker_lib_files():
+def heron_tools_lib_files():
     return []
-
-################################################################################
-# Convenience macros for all Heron files
-################################################################################
-def heron_files():
-    return heron_bin_files() + heron_conf_files() + heron_lib_files()
-
-def heron_bin_files():
-    return list(set( \
-        heron_api_bin_files() + \
-        heron_cli_bin_files() +  \
-        heron_core_bin_files() +  \
-        heron_metrics_api_bin_files() +  \
-        heron_storm_compat_bin_files() +  \
-        heron_tracker_bin_files(),
-    ))
-
-def heron_conf_files():
-    return list(set( \
-        heron_api_conf_files() + \
-        heron_cli_conf_files() +  \
-        heron_core_conf_files() +  \
-        heron_metrics_api_conf_files() +  \
-        heron_storm_compat_conf_files() +  \
-        heron_tracker_conf_files(),
-    ))
-
-def heron_lib_files():
-    return list(set( \
-        heron_api_lib_files() + \
-        heron_cli_lib_files() +  \
-        heron_core_lib_files() +  \
-        heron_metrics_api_lib_files() +  \
-        heron_storm_compat_lib_files() +  \
-        heron_tracker_lib_files(),
-    ))
 
 ################################################################################
 # Macro for running Heron local integration test
@@ -251,12 +186,12 @@ def local_heron_test(name, srcs, main, topology, args=None, data=None, deps=None
     install_heron_files(
         name   = cli_target, 
         dir    = working_dir,
-        bin    = heron_cli_bin_files(), 
-        lib    = heron_cli_lib_files(), 
-        others = heron_cli_conf_files(),
+        bin    = heron_client_bin_files(), 
+        lib    = heron_client_lib_files(), 
+        others = heron_client_conf_files(),
     )
 
-    uheron_core_files = [item for item in heron_core_files() if item not in heron_cli_files()]
+    uheron_core_files = [item for item in heron_core_files() if item not in heron_client_files()]
     install_heron_files(
         name   = core_target, 
         dir    = working_dir,
