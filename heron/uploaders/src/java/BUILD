@@ -1,0 +1,71 @@
+package(default_visibility = ["//visibility:public"])
+
+uploader_spi_files = [
+    "//heron/common/src/java:basics-java",
+    "//heron/spi/src/java:common-spi-java",
+    "//heron/spi/src/java:uploader-spi-java",
+]
+
+packer_deps_files = \
+    uploader_spi_files + [
+        "//3rdparty/fasterxml-jackson:fasterxml-jackson-java",
+    ]
+
+java_library(
+    name = 'null-uploader-java',
+    srcs = glob(["**/NullUploader.java"]),
+    deps = uploader_spi_files,
+)
+
+java_binary(
+    name = 'null-uploader-unshaded',
+    srcs = glob(["**/NullUploader.java"]),
+    deps = uploader_spi_files,
+)
+
+genrule(
+    name = 'heron-null-uploader',
+    srcs = [":null-uploader-unshaded_deploy.jar"],
+    outs = ["heron-null-uploader.jar"],
+    cmd  = "cp $< $@",
+)
+
+java_library(
+    name = 'packer-uploader-java',
+    srcs = glob(["**/packer/**/*.java"]),
+    deps = packer_deps_files,
+)
+
+java_binary(
+    name = 'packer-uploader-unshaded',
+    srcs = glob(["**/packer/**/*.java"]),
+    deps = packer_deps_files,
+)
+
+genrule(
+    name = "heron-packer-uploader",
+    srcs = [":packer-uploader-unshaded_deploy.jar"],
+    outs = ["heron-packer-uploader.jar"],
+    cmd  = "cp $< $@",
+)
+
+java_library(
+    name = 'localfs-uploader-java',
+    srcs = glob(["**/localfs/**/*.java"]),
+    resources = glob(["**/localfs/**/*.yaml"]),
+    deps = uploader_spi_files,
+)
+
+java_binary(
+    name = 'localfs-uploader-unshaded',
+    srcs = glob(["**/localfs/**/*.java"]),
+    resources = glob(["**/localfs/**/*.yaml"]),
+    deps = uploader_spi_files,
+)
+
+genrule(
+    name = "heron-localfs-uploader",
+    srcs = [":localfs-uploader-unshaded_deploy.jar"],
+    outs = ["heron-localfs-uploader.jar"],
+    cmd  = "cp $< $@",
+)

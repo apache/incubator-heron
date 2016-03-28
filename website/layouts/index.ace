@@ -1,0 +1,16 @@
+= doctype html
+html lang={{.Site.LanguageCode}}
+  head
+    {{partial "meta.html" .}}
+    title {{.Site.Title}}
+    {{partial "css.includes.html" .}}
+    {{partial "js.includes.html" .}}
+  body
+    {{partial "navbar.html" .}}
+    .container-fluid
+      .row
+        .jumbotron.text-center
+          h1 {{.Site.Title}}
+          p A realtime stream processing engine from Twitter
+      .row
+        .container

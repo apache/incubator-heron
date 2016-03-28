@@ -12,7 +12,7 @@ import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Values;
-import com.twitter.heron.common.core.base.SingletonRegistry;
+import com.twitter.heron.common.basics.SingletonRegistry;
 
 /**
  * A Spout used for unit test, it will:

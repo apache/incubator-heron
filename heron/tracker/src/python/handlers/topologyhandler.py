@@ -26,7 +26,7 @@ class TopologyHandler(BaseHandler):
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
       topology_info = self.tracker.getTopologyInfo(topology_name, cluster, environ)
-      self.write_success_response(topologyInfo)
+      self.write_success_response(topology_info)
     except Exception as e:
       self.write_error_response(e)
 

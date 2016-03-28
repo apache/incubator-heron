@@ -2,15 +2,15 @@ package com.twitter.heron.examples;
 
 import java.util.Map;
 
-import com.twitter.heron.api.Config;
-import com.twitter.heron.api.HeronSubmitter;
-import com.twitter.heron.api.bolt.BaseRichBolt;
-import com.twitter.heron.api.bolt.OutputCollector;
-import com.twitter.heron.api.metric.GlobalMetrics;
-import com.twitter.heron.api.topology.OutputFieldsDeclarer;
-import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.api.tuple.Tuple;
+import backtype.storm.Config;
+import backtype.storm.StormSubmitter;
+import backtype.storm.metric.api.GlobalMetrics;
+import backtype.storm.task.OutputCollector;
+import backtype.storm.task.TopologyContext;
+import backtype.storm.topology.OutputFieldsDeclarer;
+import backtype.storm.topology.TopologyBuilder;
+import backtype.storm.topology.base.BaseRichBolt;
+import backtype.storm.tuple.Tuple;
 
 // TODO:- implement this
 // import backtype.storm.LocalCluster;
@@ -73,7 +73,7 @@ public class MultiSpoutExclamationTopology {
 
     if (args != null && args.length > 0) {
       conf.setNumStmgrs(1);
-      HeronSubmitter.submitTopology(args[0], conf, builder.createTopology());
+      StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
     } else {
       // TODO:- This is not yet supported
       System.out.println("Local mode not yet supported");

@@ -3,9 +3,9 @@ package com.twitter.heron.scheduler.twitter;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.scheduler.api.Constants;
-import com.twitter.heron.scheduler.api.IUploader;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
+import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.uploader.IUploader;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
 import com.twitter.heron.scheduler.util.ShellUtility;
 
 /**
@@ -15,7 +15,7 @@ public class PackerUploader implements IUploader {
   private static final Logger LOG = Logger.getLogger(PackerUploader.class.getName());
 
   // Note: all protected fields should be initialized in the initialize method
-  protected String dc;
+  protected String cluster;
   protected String role;
   protected TopologyAPI.Topology topology;
 
@@ -34,11 +34,11 @@ public class PackerUploader implements IUploader {
   public void initialize(LaunchContext context) {
     this.topology = context.getTopology();
     this.context = context;
-    this.dc = context.getProperty(Constants.DC);
+    this.cluster = context.getProperty(Constants.CLUSTER);
     this.role = context.getProperty(Constants.ROLE);
 
-    if (dc.isEmpty() || role.isEmpty()) {
-      LOG.severe("dc environ & role not set properly");
+    if (cluster.isEmpty() || role.isEmpty()) {
+      LOG.severe("cluster role & env not set properly");
       throw new RuntimeException("Bad config");
     }
     if (runProcess("which packer", null) != 0) {
@@ -59,7 +59,7 @@ public class PackerUploader implements IUploader {
     LOG.info("Uploading packer package " + getTopologyPackageName());
     String packerUploadCmd = String.format(
         "packer add_version --cluster %s %s %s %s --json",
-        dc, role, getTopologyPackageName(), topologyPackageLocation);
+        cluster, role, getTopologyPackageName(), topologyPackageLocation);
     StringBuilder jsonStrBuilder = new StringBuilder();
 
     if (0 != runProcess(packerUploadCmd, jsonStrBuilder)) {
@@ -74,7 +74,7 @@ public class PackerUploader implements IUploader {
     }
 
     String packerLiveCmd = String.format(
-        "packer set_live --cluster %s %s %s latest", dc, role, getTopologyPackageName());
+        "packer set_live --cluster %s %s %s latest", cluster, role, getTopologyPackageName());
     LOG.info("Setting latest package to live");
     if (0 != runProcess(packerLiveCmd, null)) {
       LOG.severe("Failed to set latest package live. Cmd: " + packerLiveCmd);
@@ -93,7 +93,7 @@ public class PackerUploader implements IUploader {
 
   private boolean deletePackage(String packageName, String version) {
     String deletePkgCmd = String.format(
-        "packer delete_version --cluster %s %s %s %s", dc, role, packageName, version);
+        "packer delete_version --cluster %s %s %s %s", cluster, role, packageName, version);
     if (0 != runProcess(deletePkgCmd, null)) {
       LOG.severe("Failed to delete package " + packageName);
       return false;
@@ -103,7 +103,7 @@ public class PackerUploader implements IUploader {
 
   private boolean unsetLivePackage(String packageName) {
     String deletePkgCmd = String.format(
-        "packer unset_live --cluster %s %s %s", dc, role, packageName);
+        "packer unset_live --cluster %s %s %s", cluster, role, packageName);
     if (0 != runProcess(deletePkgCmd, null)) {
       LOG.severe("Failed to unset live package " + packageName);
       return false;

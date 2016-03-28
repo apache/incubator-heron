@@ -2,10 +2,8 @@ licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/jarjar_rules", "jarjar_binary")
-
 java_library(
-    name = "metricsmgr-lib-java",
+    name = "metricsmgr-java",
     srcs = glob(
         ["**/*.java"],
         exclude = ["**/MetricManager.java"],
@@ -13,7 +11,7 @@ java_library(
     deps = [
         "//heron/api/src/java:api-java",
         "//heron/common/src/java:common-java",
-        "//heron/metricsmgr-api/src/java:metricsmgr-api-java",
+        "//heron/spi/src/java:metricsmgr-spi-java",
         "//heron/proto:proto_common_java",
         "//heron/proto:proto_metrics_java",
         "//heron/proto:proto_tmaster_java",
@@ -30,16 +28,17 @@ java_binary(
     name = "metricsmgr-unshaded",
     srcs = glob(["**/MetricsManager.java"]),
     deps = [
-        ":metricsmgr-lib-java",
+        ":metricsmgr-java",
         "//heron/api/src/java:api-java",
         "//heron/common/src/java:common-java",
-        "//heron/metricsmgr-api/src/java:metricsmgr-api-java",
+        "//heron/spi/src/java:metricsmgr-spi-java",
         "//heron/proto:proto_metrics_java",
     ],
 )
 
-jarjar_binary(
+genrule(
     name = "heron-metricsmgr",
-    src = ":metricsmgr-unshaded_deploy.jar",
-    shade = "shade.conf",
+    srcs = [":metricsmgr-unshaded_deploy.jar"],
+    outs = ["heron-metricsmgr.jar"],
+    cmd  = "cp $< $@",
 )

@@ -1,0 +1,2 @@
+# name of the directory to upload topologies for local file system uploader
+heron.uploader.localfs.file.system.directory:       ${HOME}/.herondata/repository/topologies/${CLUSTER}/${ROLE}/${TOPOLOGY} 

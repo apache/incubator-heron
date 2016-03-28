@@ -4,8 +4,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.twitter.heron.scheduler.api.IScheduler;
-import com.twitter.heron.scheduler.api.context.LaunchContext;
+import com.twitter.heron.spi.scheduler.IScheduler;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
 import com.twitter.heron.scheduler.util.NetworkUtility;
 
 public class SchedulerServerTest {

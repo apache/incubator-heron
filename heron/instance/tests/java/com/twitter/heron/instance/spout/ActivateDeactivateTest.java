@@ -10,11 +10,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.core.base.Communicator;
-import com.twitter.heron.common.core.base.SingletonRegistry;
-import com.twitter.heron.common.core.base.SlaveLooper;
+import com.twitter.heron.common.config.SystemConfig;
+import com.twitter.heron.common.basics.Communicator;
+import com.twitter.heron.common.basics.SingletonRegistry;
+import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
-import com.twitter.heron.common.utils.misc.SystemConfig;
 import com.twitter.heron.instance.InstanceControlMsg;
 import com.twitter.heron.instance.Slave;
 import com.twitter.heron.proto.system.HeronTuples;
@@ -105,7 +105,7 @@ public class ActivateDeactivateTest {
     // We reset the heron.instance.state.check.interval.sec in SystemConfig for faster test
     SystemConfig systemConfig =
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
-            com.twitter.heron.common.utils.misc.Constants.HERON_SYSTEM_CONFIG);
+            SystemConfig.HERON_SYSTEM_CONFIG);
     systemConfig.put("heron.instance.state.check.interval.sec", 1);
 
     // Now the activateCount and deactivateCount should be 0
