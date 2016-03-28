@@ -21,6 +21,11 @@ def heron_client_aurora_files():
         "//heron/config/src/yaml:conf-aurora-yaml",
     ]
 
+def heron_client_lib_commands_files():
+    return [
+        "//heron/commands/src/java:heron-commands",
+    ]
+
 def heron_client_lib_scheduler_files():
     return [
         "//heron/newscheduler/src/java:heron-scheduler",

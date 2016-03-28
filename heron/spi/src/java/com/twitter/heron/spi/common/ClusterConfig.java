@@ -146,6 +146,15 @@ public final class ClusterConfig {
     return cb.build();
   }
 
+  public static Config loadCommandsConfig(String heronHome, String configPath) {
+    Config homeConfig = loadBasicConfig(heronHome, configPath); 
+
+    Config.Builder cb = Config.newBuilder()
+        .putAll(homeConfig)
+        .putAll(loadStateManagerConfig(Context.stateManagerFile(homeConfig)));
+    return cb.build();
+  }
+
   public static Config loadSandboxConfig() {
     Config sandboxConfig = loadBasicSandboxConfig(); 
 
