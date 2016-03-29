@@ -7,6 +7,11 @@ filegroup(
 )
 
 filegroup(
+    name = "colorlog",
+    srcs = ["colorlog-2.6.1-py2.py3-none-any.whl"],
+)
+
+filegroup(
     name = "smmap",
     srcs = ["smmap-0.8.3-py2.py3-none-any.whl"],
 )

@@ -14,14 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Heron self-extractable installer
+# Heron self-extractable installer for tools package
 
 # Installation and etc prefix can be overriden from command line
 install_prefix=${1:-"/usr/local/herontools"}
 
 progname="$0"
 
-echo "Heron Tools installer"
+echo "Heron tools installer"
 echo "---------------------"
 echo
 cat <<'EOF'
@@ -40,7 +40,6 @@ function usage() {
 prefix="/usr/local"
 bin="%prefix%/bin"
 base="%prefix%/herontools"
-conf="%prefix%/herontools/conf"
 
 for opt in "${@}"; do
   case $opt in

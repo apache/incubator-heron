@@ -7,6 +7,7 @@ release_version = "unversioned"
 filegroup(
     name = "tarpkgs",
     srcs = [
+        ":heron-api",
         ":heron-core",
         ":heron-client",
         ":heron-tools",
@@ -16,6 +17,7 @@ filegroup(
 filegroup(
     name = "binpkgs",
     srcs = [
+        ":heron-api-install.sh",
         ":heron-client-install.sh",
         ":heron-tools-install.sh",
     ],
@@ -74,6 +76,7 @@ genrule(
         ":heron-core",
         ":conf-local-heron-internals",
         ":conf-local-metrics-sinks",
+        ":conf-local-client",
         ":conf-local-packing",
         ":conf-local-scheduler",
         ":conf-local-statemgr",
@@ -99,9 +102,10 @@ genrule(
         "export GENDIR=$(GENDIR);",
         "export BINDIR=$(BINDIR);",
         "$(location package_release.sh) $(location heron-client.tar.gz)",
-        "--cp $(location hcli)                       bin/heron-cli3",
+        "--cp $(location hcli)                       bin/heron",
         "--cp $(location conf-local-heron-internals) conf/local/heron_internals.yaml",
         "--cp $(location conf-local-metrics-sinks)   conf/local/metrics_sinks.yaml",
+        "--cp $(location conf-local-client)          conf/local/client.yaml",
         "--cp $(location conf-local-packing)         conf/local/packing.yaml",
         "--cp $(location conf-local-scheduler)       conf/local/scheduler.yaml",
         "--cp $(location conf-local-statemgr)        conf/local/statemgr.yaml",
@@ -115,10 +119,10 @@ genrule(
         "--cp $(location hzkstatemgr)                lib/statemgr/heron-zookeeper-statemgr.jar",
         "--cp $(location hnuploader)                 lib/uploader/heron-null-uploader.jar",
         "--cp $(location hlfsuploader)               lib/uploader/heron-localfs-uploader.jar",
-        "--cp $(location protobuf-java)              lib/$$(basename $(location protobuf-java))",
-        "--cp $(location slf4j-api-java)             lib/$$(basename $(location slf4j-api-java))",
-        "--cp $(location slf4j-jdk-java)             lib/$$(basename $(location slf4j-jdk-java))",
-        "--cp $(location log4j-over-slf4j-java)      lib/$$(basename $(location log4j-over-slf4j-java))",
+        "--cp $(location protobuf-java)              lib/3rdparty/$$(basename $(location protobuf-java))",
+        "--cp $(location slf4j-api-java)             lib/3rdparty/$$(basename $(location slf4j-api-java))",
+        "--cp $(location slf4j-jdk-java)             lib/3rdparty/$$(basename $(location slf4j-jdk-java))",
+        "--cp $(location log4j-over-slf4j-java)      lib/3rdparty/$$(basename $(location log4j-over-slf4j-java))",
     ]),
     heuristic_label_expansion = False,
     tags = ["manual"],
@@ -149,6 +153,30 @@ genrule(
     tools = ["package_release.sh"],
 )
 
+################################################################################
+# Heron api packaging
+################################################################################
+genrule(
+    name = "heron-api",
+    srcs = [
+        ":hapi",
+        ":hstorm",
+    ],
+    outs = [
+        "heron-api.tar.gz",
+    ],
+    cmd = " ".join([
+        "export GENDIR=$(GENDIR);",
+        "export BINDIR=$(BINDIR);",
+        "$(location package_release.sh) $(location heron-api.tar.gz)",
+        "--cp $(location hapi)                   heron-api.jar",
+        "--cp $(location hstorm)                 heron-storm.jar",
+    ]),
+    heuristic_label_expansion = False,
+    tags = ["manual"],
+    tools = ["package_release.sh"],
+)
+
 filegroup(
     name = "conf-local-heron-internals",
     srcs = ["//heron/config/src/yaml:conf-local-heron-internals"],
@@ -157,6 +185,11 @@ filegroup(
 filegroup(
     name = "conf-local-metrics-sinks",
     srcs = ["//heron/config/src/yaml:conf-local-metrics-sinks"],
+)
+
+filegroup(
+    name = "conf-local-client",
+    srcs = ["//heron/config/src/yaml:conf-local-client"],
 )
 
 filegroup(
@@ -241,7 +274,7 @@ filegroup(
 
 filegroup(
     name = "hcli",
-    srcs = ["//heron/cli3/src/python:heron-cli3"],
+    srcs = ["//heron/cli/src/python:heron"],
 )
 
 filegroup(
@@ -316,7 +349,7 @@ filegroup(
 
 filegroup(
     name = "hapi",
-    srcs = ["//heron/api/src/java:api-java"],
+    srcs = ["//heron/api/src/java:heron-api"],
 )
 
 filegroup(
@@ -325,8 +358,8 @@ filegroup(
 )
 
 filegroup(
-    name = "hstorm-compat",
-    srcs = ["//heron/storm/src/java:storm-compatibility-java"],
+    name = "hstorm",
+    srcs = ["//heron/storm/src/java:heron-storm"],
 )
 
 filegroup(
@@ -363,6 +396,20 @@ genrule(
 )
 
 genrule(
+    name = "generate-api-launcher",
+    srcs = [
+        "//scripts/packages:api-template-bin.sh",
+        ":README.md",
+    ],
+    outs = ["api_launcher_bin.sh"],
+    cmd = """
+        release_info="$$(cat $(location :README.md))"
+        template="$$(cat $(location //scripts/packages:api-template-bin.sh))"
+        echo "$${template//%release_info%/$${release_info}}" >$@
+        """,
+)
+
+genrule(
     name = "generate-client-launcher",
     srcs = [
         "//scripts/packages:client-template-bin.sh",
@@ -391,6 +438,14 @@ genrule(
 )
 
 load("/scripts/packages/self_extract_binary", "self_extract_binary")
+
+self_extract_binary(
+    name = "heron-api-install.sh",
+    flatten_resources = [
+        ":heron-api",
+    ],
+    launcher = ":api_launcher_bin.sh",
+)
 
 self_extract_binary(
     name = "heron-client-install.sh",

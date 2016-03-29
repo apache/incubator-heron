@@ -1,5 +1,6 @@
 import tornado.gen
 import tornado.web
+import traceback
 
 from heron.tracker.src.python import constants
 from heron.tracker.src.python.handlers import BaseHandler
@@ -29,5 +30,6 @@ class ExecutionStateHandler(BaseHandler):
       execution_state = topology_info["execution_state"]
       self.write_success_response(execution_state)
     except Exception as e:
+      traceback.print_exc()
       self.write_error_response(e)
 
