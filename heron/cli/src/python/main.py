@@ -23,7 +23,6 @@ import heron.cli.src.python.opts as opts
 import heron.cli.src.python.activate as activate
 import heron.cli.src.python.deactivate as deactivate
 import heron.cli.src.python.kill as kill
-import heron.cli.src.python.ps as ps
 import heron.cli.src.python.restart as restart
 import heron.cli.src.python.submit as submit
 import heron.cli.src.python.utils as utils
@@ -72,7 +71,6 @@ def create_parser():
   deactivate.create_parser(subparsers)
   help.create_parser(subparsers)
   kill.create_parser(subparsers)
-  ps.create_parser(subparsers)
   restart.create_parser(subparsers)
   submit.create_parser(subparsers)
   version.create_parser(subparsers)
@@ -94,9 +92,6 @@ def run(command, parser, command_args, unknown_args):
 
   elif command == 'restart':
     return restart.run(command, parser, command_args, unknown_args)
-  
-  elif command == 'ps':
-    return ps.run(command, parser, command_args, unknown_args)
   
   elif command == 'submit':
     return submit.run(command, parser, command_args, unknown_args)
