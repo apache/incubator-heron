@@ -95,7 +95,8 @@ public class BoltDeclarer extends BaseComponentDeclarer<BoltDeclarer> {
     return localOrShuffleGrouping(componentName, Utils.DEFAULT_STREAM_ID);
   }
   public BoltDeclarer localOrShuffleGrouping(String componentName, String streamId) {
-    // TODO:- revisit this
+    // Heron tasks are process based, thus there's no concept of local(within process)
+    // shuffling. So we map local grouping strategy to shuffleGrouping
     return shuffleGrouping(componentName, streamId);
   }
 
