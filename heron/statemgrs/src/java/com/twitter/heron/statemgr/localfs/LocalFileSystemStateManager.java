@@ -1,9 +1,6 @@
 package com.twitter.heron.statemgr.localfs;
 
-import java.io.File;
-import java.util.List;
 import java.util.Map;
-import java.util.LinkedList;
 import java.util.logging.Logger;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -196,32 +193,9 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
       executionState = ExecutionEnvironment.ExecutionState.parseFrom(data);
       future.set(executionState);
     } catch (InvalidProtocolBufferException e) {
-      future.setException(new RuntimeException("Could not parse ExecutionState", e));
+      future.setException(new RuntimeException("Could not parse SchedulerLocation", e));
     }
 
-    return future;
-  }
-
-  @Override
-  public ListenableFuture<List<ExecutionEnvironment.ExecutionState>> getAllExecutionStates() {
-    SettableFuture<List<ExecutionEnvironment.ExecutionState>> future = SettableFuture.create();
-    ExecutionEnvironment.ExecutionState executionState;
-    List<ExecutionEnvironment.ExecutionState> executionStates = new LinkedList<ExecutionEnvironment.ExecutionState>();
-
-    File folder = new File(getExecutionStateDir());
-    File[] files = folder.listFiles();
-    for (File file: files) {
-      byte[] data = FileUtils.readFromFile(file.getAbsolutePath());
-      try {
-        executionState = ExecutionEnvironment.ExecutionState.parseFrom(data);
-        executionStates.add(executionState);
-      } catch (InvalidProtocolBufferException e) {
-        future.setException(new RuntimeException("Could not parse ExecutionState", e));
-        return future;
-      }
-    }
-
-    future.set(executionStates);
     return future;
   }
 
