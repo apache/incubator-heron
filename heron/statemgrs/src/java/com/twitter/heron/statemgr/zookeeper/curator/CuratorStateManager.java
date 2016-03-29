@@ -1,7 +1,5 @@
 package com.twitter.heron.statemgr.zookeeper.curator;
 
-import java.util.List;
-import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -265,13 +263,6 @@ public class CuratorStateManager extends FileSystemStateManager {
     }
 
     return topologyFuture;
-  }
-
-  @Override
-  public ListenableFuture<List<ExecutionEnvironment.ExecutionState>> getAllExecutionStates() {
-    final SettableFuture<List<ExecutionEnvironment.ExecutionState>> executionStateFuture = SettableFuture.create();
-    executionStateFuture.set(new LinkedList<ExecutionEnvironment.ExecutionState>());
-    return executionStateFuture;
   }
 
   @Override
