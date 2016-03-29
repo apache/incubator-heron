@@ -22,7 +22,7 @@ set -eu
 : ${RELEASE_REPOSITORIES:="git@github.com:twitter/heron"}
 
 # Repositories to push the master branch
-: ${MASTER_REPOSITORIES:="https://github.com/twitter/heron"}
+: ${MASTER_REPOSITORIES:="git@github.com:twitter/heron"}
 
 # Name of the default editor
 : ${EDITOR=vi}

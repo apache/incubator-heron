@@ -243,8 +243,6 @@ public class SubmitterMain {
     String topologyDefnFile = cmd.getOptionValue("topology_defn");;
     String topologyJarFile = cmd.getOptionValue("topology_jar");;
 
-    System.out.println(heronHome + " " + configPath);
-
     // load the topology definition into topology proto
     TopologyAPI.Topology topology = TopologyUtils.getTopology(topologyDefnFile);
 

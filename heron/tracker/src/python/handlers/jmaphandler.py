@@ -1,6 +1,7 @@
 import json
 import tornado.gen
 import tornado.web
+import traceback
 
 from heron.tracker.src.python import constants
 from heron.tracker.src.python import utils
@@ -43,6 +44,7 @@ class JmapHandler(BaseHandler):
       ret = yield self.runInstanceJmap(topology_info, instance)
       self.write_success_response(ret)
     except Exception as e:
+      traceback.print_exc()
       self.write_error_response(e)
 
   @tornado.gen.coroutine

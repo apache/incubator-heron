@@ -3,10 +3,11 @@ package(default_visibility = ["//visibility:public"])
 load("/tools/build_defs/pkg/pkg", "pkg_tar")
 load("/tools/build_defs/pkg/pkg", "pkg_deb")
 
-load("/tools/rules/heron_client", "heron_client_files")
+load("/tools/rules/heron_api", "heron_api_files")
+
 load("/tools/rules/heron_client", "heron_client_bin_files")
 load("/tools/rules/heron_client", "heron_client_conf_files")
-load("/tools/rules/heron_client", "heron_client_lib_files")
+load("/tools/rules/heron_client", "heron_client_lib_3rdparty_files")
 load("/tools/rules/heron_client", "heron_client_lib_scheduler_files")
 load("/tools/rules/heron_client", "heron_client_lib_packing_files")
 load("/tools/rules/heron_client", "heron_client_lib_statemgr_files")
@@ -30,6 +31,7 @@ load("/tools/rules/heron_examples", "heron_examples_files")
 filegroup(
     name = "tarpkgs",
     srcs = [
+        ":heron-api",
         ":heron-core",
         ":heron-tools",
         ":heron-client",
@@ -39,6 +41,7 @@ filegroup(
 filegroup(
     name = "binpkgs",
     srcs = [
+        ":heron-api-install.sh",
         ":heron-client-install.sh",
         ":heron-tools-install.sh",
     ],
@@ -130,12 +133,6 @@ pkg_tar(
 )
 
 pkg_tar(
-    name = "heron-client-lib",
-    package_dir = "lib",
-    files = heron_client_lib_files(),
-)
-
-pkg_tar(
     name = "heron-client-lib-scheduler",
     package_dir = "lib/scheduler",
     files = heron_client_lib_scheduler_files(),
@@ -157,6 +154,12 @@ pkg_tar(
     name = "heron-client-lib-uploader",
     package_dir = "lib/uploader",
     files = heron_client_lib_uploader_files(),
+)
+
+pkg_tar(
+    name = "heron-client-lib-3rdparty",
+    package_dir = "lib/3rdparty",
+    files = heron_client_lib_3rdparty_files(),
 )
 
 pkg_tar(
@@ -203,7 +206,7 @@ pkg_tar(
         ":heron-client-conf-aurora",
         ":heron-client-dist",
         ":heron-client-examples",
-        ":heron-client-lib",
+        ":heron-client-lib-3rdparty",
         ":heron-client-lib-scheduler",
         ":heron-client-lib-packing",
         ":heron-client-lib-statemgr",
@@ -211,6 +214,18 @@ pkg_tar(
     ],
 )
 
+################################################################################
+# Heron API packaging
+################################################################################
+pkg_tar(
+    name = "heron-api",
+    extension = "tar.gz",
+    files = heron_api_files(),
+)
+
+################################################################################
+# Heron self installed binaries
+################################################################################
 sh_binary(
     name = "package-info-generator",
     srcs = ["package_info_generator.sh"],
@@ -252,7 +267,29 @@ genrule(
         """,
 )
 
+genrule(
+    name = "generate-api-launcher",
+    srcs = [
+        "api_template_bin.sh",
+        ":README.md",
+    ],
+    outs = ["api_launcher_bin.sh"],
+    cmd = """
+        release_info="$$(cat $(location :README.md))"
+        template="$$(cat $(location api_template_bin.sh))"
+        echo "$${template//%release_info%/$${release_info}}" >$@
+        """,
+)
+
 load("self_extract_binary", "self_extract_binary")
+
+self_extract_binary(
+    name = "heron-api-install.sh",
+    flatten_resources = [
+        ":heron-api",
+    ],
+    launcher = ":api_launcher_bin.sh",
+)
 
 self_extract_binary(
     name = "heron-client-install.sh",
@@ -268,6 +305,11 @@ self_extract_binary(
         ":heron-tools",
     ],
     launcher = ":tools_launcher_bin.sh",
+)
+
+filegroup(
+    name = "api-template-bin.sh",
+    srcs = ["api_template_bin.sh"],
 )
 
 filegroup(

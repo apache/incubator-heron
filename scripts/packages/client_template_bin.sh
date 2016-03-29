@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Heron self-extractable installer
+# Heron self-extractable installer for client package
 
 # Installation and etc prefix can be overriden from command line
 install_prefix=${1:-"/usr/local/heron"}
@@ -22,8 +22,8 @@ heronrc=${2:-"/usr/local/heron/etc/heron.heronrc"}
 
 progname="$0"
 
-echo "Heron installer"
-echo "---------------"
+echo "Heron client installer"
+echo "----------------------"
 echo
 cat <<'EOF'
 %release_info%
@@ -135,10 +135,15 @@ test_write "${heronrc}"
 echo -n "Uncompressing."
 
 # Cleaning-up, with some guards.
+if [ -f "${bin}/heron" ]; then
+  rm -f "${bin}/heron"
+fi
+
 if [ -f "${bin}/heron-cli3" ]; then
   rm -f "${bin}/heron-cli3"
 fi
-if [ -d "${base}" -a -x "${base}/bin/heron-cli3" ]; then
+
+if [ -d "${base}" -a -x "${base}/bin/heron" ]; then
   rm -fr "${base}"
 fi
 
@@ -148,14 +153,15 @@ echo -n .
 unzip -q -o "${BASH_SOURCE[0]}" -d "${base}"
 tar xfz "${base}/heron-client.tar.gz" -C "${base}"
 echo -n .
-chmod 0755 ${base}/bin/heron-cli3
+chmod 0755 ${base}/bin/heron
 echo -n .
 chmod -R og-w "${base}"
 chmod -R og+rX "${base}"
 chmod -R u+rwX "${base}"
 echo -n .
 
-ln -s "${base}/bin/heron-cli3" "${bin}/heron-cli3"
+ln -s "${base}/bin/heron" "${bin}/heron"
+ln -s "${base}/bin/heron" "${bin}/heron-cli3"
 echo -n .
 
 if [ -f "${heronrc}" ]; then
