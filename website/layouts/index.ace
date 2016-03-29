@@ -1,6 +1,6 @@
 = doctype html
 html lang={{.Site.LanguageCode}}
-  head
+  head 
     {{partial "meta.html" .}}
     title {{.Site.Title}}
     {{partial "css.includes.html" .}}
@@ -10,7 +10,101 @@ html lang={{.Site.LanguageCode}}
     .container-fluid
       .row
         .jumbotron.text-center
-          h1 {{.Site.Title}}
+          img.img-responsive.center-block src={{.Site.Params.assets.textlogo}} 
           p A realtime stream processing engine from Twitter
-      .row
-        .container
+      .hero-bar 
+        .container style="text-align: center;"
+          .row 
+            .col-sm-6
+              h4 Run Topologies using pre-compiled Heron binaries
+              a.btn.btn-info href=docs/getting-started Get Started
+            .col-sm-6
+              h4 Compile Heron from Source (for Heron Developers)
+              a.btn.btn-info href=docs/developers/compiling/compiling/ Get Source
+      .landing-feature-1
+        .container style="text-align: center;"
+          .row
+            .col-sm-12
+              h2 {{.Site.Params.tagline}}
+      .landing-feature-2
+        .container style="text-align: center;"
+          .row
+            .col-sm-12
+              h1 Why Heron?
+          .row
+            .col-sm-4
+              h3  Speed and Performance
+              div Heron is the direct successor of 
+                a href=http://storm.apache.org  Apache Storm 
+              div built with a wide array of architectural improvements to be backwards compatible with Storm's 
+                a href=http://storm.apache.org/about/simple-api.html  topology API 
+            .col-sm-4
+              h3 Ease of Development and Troubleshooting
+              p Easily debug and identify the issues in topologies (aka standing queries), allowing faster iteration during development. User can easily reason about how their topologies work and profile/debug its components in isolation.
+            .col-sm-4
+              h3 Scalability and Reliability
+              p Heron is highly scalable both in the ability to execute large number of com- ponents for each topology and the ability to launch and track large numbers of topologies. Such a large scale is achieved because of the clean separation of topology scheduling and monitoring.
+          .row 
+            .col-sm-4
+              h3 Compatibility with Storm
+              p Heron is API compatible with Storm and hence no code change is required for migration.
+            .col-sm-4
+              h3 Simplified and Responsive UI
+              p Heron UI gives a visual overview of each topology. The UI uses metrics to show at a glance where the hot spots are and provides detailed counters for tracking the progress and troubleshooting.
+            .col-sm-4
+              h3 Capacity Allocation and Management
+              p Users can take a topology from development to production in a shared cluster infrastructure instantly since Heron runs as yet another framework of the scheduler that manages capacity allocation.
+      .landing-feature-1
+        .container style="text-align: center;"
+          .row 
+            .col-sm-12
+              h2 Heron is in Beta
+              p Heron is now the de facto stream data processing engine inside Twitter, and we believe Heron is stable enough for production use.  The Heron team monitors and responds actively to bug reports from users.
+      .landing-feature-1
+        .container style="text-align: center;"
+          .row 
+            .col-sm-12
+              h2 Get Started
+          .row 
+            .col-sm-6
+              h4 Run Topologies using pre-compiled Heron binaries
+              a.btn.btn-info href=docs/getting-started Get Started
+            .col-sm-6
+              h4 Compile Heron from Source (for Heron Developers)
+              a.btn.btn-info href=docs/developers/compiling/compiling/ Get Source
+      .landing-feature-1
+        .container style="text-align: center;"
+          .row 
+            .col-sm-12
+              h2 About Heron
+              a href=docs/contributors/codebase/ Contributing
+          .row 
+            .col-sm-12
+              a href=docs/contributors/codebase/ Governance
+          .row 
+            .col-sm-12
+              a href=docs/contributors/codebase/ Roadmap
+          .row 
+            .col-sm-12
+              a href=docs/contributors/codebase/ Support
+          .row 
+            .col-sm-12
+              a href=docs/contributors/codebase/ Who's using Heron
+    .footer
+      .container
+        .row
+          .col-lg-12
+            .text-muted 
+              p © 2016 Twitter
+    = javascript
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-75737213-1', 'auto');
+      ga('send', 'pageview');
+
+
+
+
