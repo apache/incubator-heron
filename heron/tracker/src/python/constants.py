@@ -46,3 +46,6 @@ DEFAULT_PORT = 8888
 # default config file to read
 DEFAULT_CONFIG_FILE = "localfilestateconf.yaml"
 
+# default cluster name
+DEFAULT_CLUSTER = "localhost"
+
