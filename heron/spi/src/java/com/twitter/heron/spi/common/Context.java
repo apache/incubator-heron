@@ -298,8 +298,4 @@ public class Context {
   public static final String uploaderSandboxClassPath(Config cfg) {
     return cfg.getStringValue(ConfigKeys.get("SANDBOX_UPLOADER_CLASSPATH"));
   }
-
-  public static boolean noSchedulerRestEndpoint(Config cfg) {
-    return cfg.getBooleanValue(ConfigKeys.get("NO_SCHEDULER_REST_ENDPOINT"));
-  }
 }
