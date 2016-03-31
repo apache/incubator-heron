@@ -49,9 +49,7 @@ public class AuroraRuntimeManager implements IRuntimeManager {
 
   @Override
   public boolean postDeactivate() {
-    return Runtime.sendToTMaster("deactivate",
-        Context.topologyName(config),
-        Runtime.schedulerStateManagerAdaptor(runtime));
+    return true;
   }
 
   @Override
@@ -61,9 +59,7 @@ public class AuroraRuntimeManager implements IRuntimeManager {
 
   @Override
   public boolean postActivate() {
-    return Runtime.sendToTMaster("activate",
-        Context.topologyName(config),
-        Runtime.schedulerStateManagerAdaptor(runtime));
+    return true;
   }
 
   @Override

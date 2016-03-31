@@ -211,8 +211,7 @@ public class LocalScheduler implements IScheduler {
    */
   @Override
   public boolean onActivate(Scheduler.ActivateTopologyRequest request) {
-    LOG.info("Command to activate topology: " + LocalContext.topologyName(config));
-    return Runtime.sendToTMaster("activate", LocalContext.topologyName(config), Runtime.schedulerStateManagerAdaptor(runtime));
+    return true;
   }
 
   /**
@@ -220,8 +219,7 @@ public class LocalScheduler implements IScheduler {
    */
   @Override
   public boolean onDeactivate(Scheduler.DeactivateTopologyRequest request) {
-    LOG.info("Command to deactivate topology: " + LocalContext.topologyName(config));
-    return Runtime.sendToTMaster("deactivate", LocalContext.topologyName(config), Runtime.schedulerStateManagerAdaptor(runtime));
+    return true;
   }
 
   /**
