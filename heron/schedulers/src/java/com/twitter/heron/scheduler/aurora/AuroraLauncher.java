@@ -105,7 +105,13 @@ public class AuroraLauncher implements ILauncher {
 
     auroraProperties.put("SANDBOX_INSTANCE_CLASSPATH", Context.instanceSandboxClassPath(config));
     auroraProperties.put("SANDBOX_METRICS_YAML", Context.metricsSinksSandboxFile(config));
-    auroraProperties.put("SANDBOX_SCHEDULER_CLASSPATH", Context.schedulerSandboxClassPath(config));
+
+    String completeSchedulerClassPath = new StringBuilder()
+        .append(Context.schedulerSandboxClassPath(config)).append(":")
+        .append(Context.packingSandboxClassPath(config)).append(":")
+        .append(Context.stateManagerSandboxClassPath(config))
+        .toString();
+    auroraProperties.put("SANDBOX_SCHEDULER_CLASSPATH", completeSchedulerClassPath);
 
     // TODO(mfu): Following configs need customization before using
     // TODO(mfu): Put the constant in Constants.java
