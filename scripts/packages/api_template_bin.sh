@@ -100,18 +100,18 @@ function check_java() {
 
 function install_to_local() {
   # Test for write access
-  test_write "${base}" 
+  test_write "${base}"
 
   # Do the actual installation
-  echo -n "Uncompressing." 
+  echo -n "Uncompressing."
 
   # Cleaning-up, with some guards.
   if [ -d "${base}" -a -x "${base}/lib/heron-api.jar" ]; then
     rm -fr "${base}"
-  fi 
+  fi
 
   mkdir -p ${base}
-  echo -n . 
+  echo -n .
 
   unzip -q -o "${BASH_SOURCE[0]}" -d "${base}"
   tar xfz "${base}/heron-api.tar.gz" -C "${base}"
@@ -119,7 +119,7 @@ function install_to_local() {
   chmod -R og-w "${base}"
   chmod -R og+rX "${base}"
   chmod -R u+rwX "${base}"
-  echo -n . 
+  echo -n .
 
   rm "${base}/heron-api.tar.gz"
 }
@@ -134,10 +134,10 @@ function install_to_maven() {
   tar xfz "tmp/heron-api.tar.gz" -C "${tmp}"
 
   # Install into maven local
-  mvn install:install-file -Dfile="${tmp}/heron-api.jar" -DgroupId="com.twitter.heron" \
+  mvn install:install-file -q -Dfile="${tmp}/heron-api.jar" -DgroupId="com.twitter.heron" \
     -DartifactId="heron-api" -Dversion="SNAPSHOT" -Dpackaging="jar"
 
-  mvn install:install-file -Dfile="${tmp}/heron-storm.jar" -DgroupId="com.twitter.heron" \
+  mvn install:install-file -q -Dfile="${tmp}/heron-storm.jar" -DgroupId="com.twitter.heron" \
     -DartifactId="heron-storm" -Dversion="SNAPSHOT" -Dpackaging="jar"
 
   # clean tmp files
