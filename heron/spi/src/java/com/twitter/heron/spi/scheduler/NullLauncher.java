@@ -1,12 +1,14 @@
 package com.twitter.heron.spi.scheduler;
 
 import com.twitter.heron.proto.system.ExecutionEnvironment;
+import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.PackingPlan;
-import com.twitter.heron.spi.scheduler.context.LaunchContext;
 
 public class NullLauncher implements ILauncher {
+
   @Override
-  public void initialize(LaunchContext context) {
+  public void initialize(Config config, Config runtime) {
+
   }
 
   @Override
@@ -15,7 +17,7 @@ public class NullLauncher implements ILauncher {
   }
 
   @Override
-  public boolean launchTopology(PackingPlan packing) {
+  public boolean launch(PackingPlan packing) {
     return true;
   }
 
@@ -26,11 +28,11 @@ public class NullLauncher implements ILauncher {
 
   @Override
   public void undo() {
+
   }
 
   @Override
-  public ExecutionEnvironment.ExecutionState updateExecutionState(
-      ExecutionEnvironment.ExecutionState executionState) {
+  public ExecutionEnvironment.ExecutionState updateExecutionState(ExecutionEnvironment.ExecutionState executionState) {
     return executionState;
   }
 }
