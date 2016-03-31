@@ -128,20 +128,19 @@ function install_to_maven() {
   echo "Installing jars to local maven repo." >&2
 
   # Uncompress from zip
-  tmp="./tmp"
-  mkdir "$tmp"
-  unzip -q -o "${BASH_SOURCE[0]}" -d "${tmp}"
-  tar xfz "tmp/heron-api.tar.gz" -C "${tmp}"
+  tmp_dir=`mktemp -d -t heron`
+  unzip -q -o "${BASH_SOURCE[0]}" -d "${tmp_dir}"
+  tar xfz "${tmp_dir}/heron-api.tar.gz" -C "${tmp_dir}"
 
   # Install into maven local
-  mvn install:install-file -q -Dfile="${tmp}/heron-api.jar" -DgroupId="com.twitter.heron" \
+  mvn install:install-file -q -Dfile="${tmp_dir}/heron-api.jar" -DgroupId="com.twitter.heron" \
     -DartifactId="heron-api" -Dversion="SNAPSHOT" -Dpackaging="jar"
 
-  mvn install:install-file -q -Dfile="${tmp}/heron-storm.jar" -DgroupId="com.twitter.heron" \
+  mvn install:install-file -q -Dfile="${tmp_dir}/heron-storm.jar" -DgroupId="com.twitter.heron" \
     -DartifactId="heron-storm" -Dversion="SNAPSHOT" -Dpackaging="jar"
 
   # clean tmp files
-  rm -rf tmp
+  rm -rf "${tmp_dir}"
 }
 
 # Installation and etc prefix can be overriden from command line
