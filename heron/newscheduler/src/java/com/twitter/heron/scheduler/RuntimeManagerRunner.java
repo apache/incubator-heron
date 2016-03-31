@@ -128,7 +128,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     }
 
     // create the http connection, if scheduler exists
-    HttpURLConnection connection = createHttpConnection();
+    final HttpURLConnection connection = createHttpConnection();
     if (connection == null) {
       return false;
     }
@@ -200,7 +200,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     }
 
     // create the http connection, if scheduler exists
-    HttpURLConnection connection = createHttpConnection();
+    final HttpURLConnection connection = createHttpConnection();
     if (connection == null) {
       return false;
     }
@@ -261,7 +261,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     }
 
     // create the http connection, if scheduler exists
-    HttpURLConnection connection = createHttpConnection();
+    final HttpURLConnection connection = createHttpConnection();
     if (connection == null) {
       return false;
     }
@@ -326,7 +326,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     }
 
     // create the http connection, if scheduler exists
-    HttpURLConnection connection = createHttpConnection();
+    final HttpURLConnection connection = createHttpConnection();
     if (connection == null) {
       // It is possible that the scheduler has not yet started.
       LOG.info("Scheduler Not exists.");
