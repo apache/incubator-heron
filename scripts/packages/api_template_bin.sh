@@ -15,46 +15,15 @@
 # limitations under the License.
 
 # Heron self-extractable installer for api package
-
-# Installation and etc prefix can be overriden from command line
-install_prefix=${1:-"/usr/local/heronapi"}
-
-progname="$0"
-
-echo "Heron API installer"
-echo "---------------------"
-echo
-cat <<'EOF'
-%release_info%
-EOF
-
 function usage() {
   echo "Usage: $progname [options]" >&2
   echo "Options are:" >&2
   echo "  --prefix=/some/path set the prefix path (default=/usr/local)." >&2
   echo "  --user configure for user install, expands to" >&2
   echo '           `--prefix=$HOME/.heronapi`.' >&2
+  echo "  --maven install jars to maven local repo" >&2
   exit 1
 }
-
-prefix="/usr/local"
-base="%prefix%/heronapi"
-
-for opt in "${@}"; do
-  case $opt in
-    --prefix=*)
-      prefix="$(echo "$opt" | cut -d '=' -f 2-)"
-      ;;
-    --user)
-      base="$HOME/.heronapi"
-      ;;
-    *)
-      usage
-      ;;
-  esac
-done
-
-base="${base//%prefix%/${prefix}}"
 
 function test_write() {
   local file="$1"
@@ -69,74 +38,154 @@ function test_write() {
   }
 }
 
-# Test for dependencies
-# unzip
-if ! which unzip >/dev/null; then
-  echo >&2
-  echo "unzip not found, please install the corresponding package." >&2
-  echo "See http://heron.github.io/docs/install.html for more information on" >&2
-  echo "dependencies of Heron." >&2
-  exit 1
-fi
+# Test for unzip dependencies
+function check_unzip() {
+  if ! which unzip >/dev/null; then
+    echo >&2
+    echo "unzip not found, please install the corresponding package." >&2
+    echo "See http://heron.github.io/docs/install.html for more information on" >&2
+    echo "dependencies of Heron." >&2
+    exit 1
+  fi
+}
 
-# Test for dependencies
-# tar
-if ! which tar >/dev/null; then
-  echo >&2
-  echo "tar not found, please install the corresponding package." >&2
-  echo "See http://heron.github.io/docs/install.html for more information on" >&2
-  echo "dependencies of Heron." >&2
-  exit 1
-fi
+# Test for tar dependencies
+function check_tar() {
+  if ! which tar >/dev/null; then
+    echo >&2
+    echo "tar not found, please install the corresponding package." >&2
+    echo "See http://heron.github.io/docs/install.html for more information on" >&2
+    echo "dependencies of Heron." >&2
+    exit 1
+  fi
+}
 
-# java
-if [ -z "${JAVA_HOME-}" ]; then
-  case "$(uname -s | tr 'A-Z' 'a-z')" in
-    linux)
-      JAVA_HOME="$(readlink -f $(which javac) 2>/dev/null | sed 's_/bin/javac__')" || true
-      BASHRC="~/.bashrc"
+# Test for maven dependencies
+function check_maven() {
+  if ! which mvn >/dev/null; then
+     echo >&2
+     echo "maven not found, please install the corresponding package." >&2
+    echo "See http://heron.github.io/docs/install.html for more information on" >&2
+    echo "dependencies of Heron." >&2
+    exit 1
+  fi
+}
+
+# Test for java dependencies
+function check_java() {
+  if [ -z "${JAVA_HOME-}" ]; then
+    case "$(uname -s | tr 'A-Z' 'a-z')" in
+      linux)
+        JAVA_HOME="$(readlink -f $(which javac) 2>/dev/null | sed 's_/bin/javac__')" || true
+        BASHRC="~/.bashrc"
+        ;;
+      freebsd)
+        JAVA_HOME="/usr/local/openjdk8"
+        BASHRC="~/.bashrc"
+        ;;
+      darwin)
+        JAVA_HOME="$(/usr/libexec/java_home -v ${JAVA_VERSION}+ 2> /dev/null)" || true
+        BASHRC="~/.bash_profile"
+        ;;
+    esac
+  fi
+  if [ ! -x "${JAVA_HOME}/bin/javac" ]; then
+    echo >&2
+    echo "Java not found, please install the corresponding package" >&2
+    echo "See http://heron.github.io/docs/install.html for more information on" >&2
+    echo "dependencies of Heron." >&2
+    exit 1
+  fi
+}
+
+function install_to_local() {
+  # Test for write access
+  test_write "${base}"
+
+  # Do the actual installation
+  echo -n "Uncompressing."
+
+  # Cleaning-up, with some guards.
+  if [ -d "${base}" -a -x "${base}/lib/heron-api.jar" ]; then
+    rm -fr "${base}"
+  fi
+
+  mkdir -p ${base}
+  echo -n .
+
+  unzip -q -o "${BASH_SOURCE[0]}" -d "${base}"
+  tar xfz "${base}/heron-api.tar.gz" -C "${base}"
+  echo -n .
+  chmod -R og-w "${base}"
+  chmod -R og+rX "${base}"
+  chmod -R u+rwX "${base}"
+  echo -n .
+
+  rm "${base}/heron-api.tar.gz"
+}
+
+function install_to_maven() {
+  echo "Installing jars to local maven repo." >&2
+
+  # Uncompress from zip
+  tmp_dir=`mktemp -d -t heron`
+  unzip -q -o "${BASH_SOURCE[0]}" -d "${tmp_dir}"
+  tar xfz "${tmp_dir}/heron-api.tar.gz" -C "${tmp_dir}"
+
+  # Install into maven local
+  mvn install:install-file -q -Dfile="${tmp_dir}/heron-api.jar" -DgroupId="com.twitter.heron" \
+    -DartifactId="heron-api" -Dversion="SNAPSHOT" -Dpackaging="jar"
+
+  mvn install:install-file -q -Dfile="${tmp_dir}/heron-storm.jar" -DgroupId="com.twitter.heron" \
+    -DartifactId="heron-storm" -Dversion="SNAPSHOT" -Dpackaging="jar"
+
+  # clean tmp files
+  rm -rf "${tmp_dir}"
+}
+
+# Installation and etc prefix can be overriden from command line
+install_prefix=${1:-"/usr/local/heronapi"}
+
+progname="$0"
+
+echo "Heron API installer"
+echo "---------------------"
+echo
+cat <<EOF
+%release_info%
+EOF
+
+prefix="/usr/local"
+base="%prefix%/heronapi"
+use_maven=false
+
+for opt in "${@}"; do
+  case $opt in
+    --prefix=*)
+      prefix="$(echo "$opt" | cut -d '=' -f 2-)"
       ;;
-    freebsd)
-      JAVA_HOME="/usr/local/openjdk8"
-      BASHRC="~/.bashrc"
+    --user)
+      base="$HOME/.heronapi"
       ;;
-    darwin)
-      JAVA_HOME="$(/usr/libexec/java_home -v ${JAVA_VERSION}+ 2> /dev/null)" || true
-      BASHRC="~/.bash_profile"
+    --maven)
+      use_maven=true
+      ;;
+    *)
+      usage
       ;;
   esac
+done
+
+base="${base//%prefix%/${prefix}}"
+
+check_unzip; check_tar; check_java
+
+if [ "$use_maven" == true ]; then
+  check_maven
+  install_to_maven
+else
+  install_to_local
 fi
-if [ ! -x "${JAVA_HOME}/bin/javac" ]; then
-  echo >&2
-  echo "Java not found, please install the corresponding package" >&2
-  echo "See http://heron.github.io/docs/install.html for more information on" >&2
-  echo "dependencies of Heron." >&2
-  exit 1
-fi
-
-# Test for write access
-test_write "${base}"
-
-# Do the actual installation
-echo -n "Uncompressing."
-
-# Cleaning-up, with some guards.
-if [ -d "${base}" -a -x "${base}/lib/heron-api.jar" ]; then
-  rm -fr "${base}"
-fi
-
-mkdir -p ${base}
-echo -n .
-
-unzip -q -o "${BASH_SOURCE[0]}" -d "${base}"
-tar xfz "${base}/heron-api.tar.gz" -C "${base}"
-echo -n .
-chmod -R og-w "${base}"
-chmod -R og+rX "${base}"
-chmod -R u+rwX "${base}"
-echo -n .
-
-rm "${base}/heron-api.tar.gz"
 
 cat <<EOF
 
