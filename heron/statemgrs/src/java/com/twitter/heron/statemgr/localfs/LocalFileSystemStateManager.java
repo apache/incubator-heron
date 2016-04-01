@@ -39,11 +39,11 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
 
   protected boolean initTree() {
     // Make necessary directories
-    LOG.info("Topologies directory: " + getTopologyDir()); 
-    LOG.info("Tmaster location directory: " + getTMasterLocationDir());
-    LOG.info("Physical plan directory: " + getPhysicalPlanDir()); 
-    LOG.info("Execution state directory: " + getExecutionStateDir());
-    LOG.info("Scheduler location directory: " + getSchedulerLocationDir());
+    LOG.fine("Topologies directory: " + getTopologyDir());
+    LOG.fine("Tmaster location directory: " + getTMasterLocationDir());
+    LOG.fine("Physical plan directory: " + getPhysicalPlanDir());
+    LOG.fine("Execution state directory: " + getExecutionStateDir());
+    LOG.fine("Scheduler location directory: " + getSchedulerLocationDir());
 
     if ((FileUtils.isDirectoryExists(getTopologyDir()) || FileUtils.createDirectory(getTopologyDir())) &&
         (FileUtils.isDirectoryExists(getTMasterLocationDir()) || FileUtils.createDirectory(getTMasterLocationDir())) &&
