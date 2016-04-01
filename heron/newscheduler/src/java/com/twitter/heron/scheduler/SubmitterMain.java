@@ -212,7 +212,7 @@ public class SubmitterMain {
   // Initialize logger
   public static void initLog(Level level) {
 
-    // Remove all default global
+    // update all root handlers to the required level
     Logger globalLogger = Logger.getLogger("");
     Handler[] handlers = globalLogger.getHandlers();
     for(Handler handler : handlers) {
