@@ -1,9 +1,6 @@
 package com.twitter.heron.scheduler.local;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,21 +8,16 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.xml.bind.DatatypeConverter;
 
-import com.google.common.util.concurrent.ListenableFuture;
-
 import org.apache.commons.io.FilenameUtils;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.HttpUtils;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.common.ShellUtils;
 import com.twitter.heron.spi.scheduler.IScheduler;
@@ -211,19 +203,6 @@ public class LocalScheduler implements IScheduler {
     // clear the mapping between process and container ids
     processToContainer.clear();
 
-    // get the state manager instance
-    SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
-
-    // remove the scheduler location for the topology from state manager
-    LOG.info("Removing scheduler location for topology: " + topologyName);
-    stateManager.deleteSchedulerLocation(topologyName);
-    LOG.info("Cleared scheduler location for topology: " + topologyName);
-
-    // remove the tmaster location for the topology from state manager
-    LOG.info("Removing TMaster location for topology: " + topologyName);
-    stateManager.deleteTMasterLocation(topologyName);
-    LOG.info("Cleared TMaster location for topology: " + topologyName);
-
     return true;
   }
 
@@ -232,8 +211,7 @@ public class LocalScheduler implements IScheduler {
    */
   @Override
   public boolean onActivate(Scheduler.ActivateTopologyRequest request) {
-    LOG.info("Command to activate topology: " + LocalContext.topologyName(config));
-    return sendToTMaster("activate");
+    return true;
   }
 
   /**
@@ -241,8 +219,7 @@ public class LocalScheduler implements IScheduler {
    */
   @Override
   public boolean onDeactivate(Scheduler.DeactivateTopologyRequest request) {
-    LOG.info("Command to deactivate topology: " + LocalContext.topologyName(config));
-    return sendToTMaster("deactivate");
+    return true;
   }
 
   /**
@@ -285,66 +262,5 @@ public class LocalScheduler implements IScheduler {
     }
 
     return true;
-  }
-
-  /**
-   * Communicate with TMaster with command
-   *
-   * @param command the command requested to TMaster, activate or deactivate.
-   * @return true if the requested command is processed successfully by tmaster
-   */
-  protected boolean sendToTMaster(String command) {
-    // get the topology name
-    String topologyName = LocalContext.topologyName(config);
-
-    // get the state manager instance
-    SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
-
-    // fetch the TMasterLocation for the topology
-    LOG.info("Fetching TMaster location for topology: " + topologyName);
-    ListenableFuture<TopologyMaster.TMasterLocation> locationFuture =
-        stateManager.getTMasterLocation(null, LocalContext.topologyName(config));
-
-    TopologyMaster.TMasterLocation location =
-        NetworkUtils.awaitResult(locationFuture, 5, TimeUnit.SECONDS);
-    LOG.info("Fetched TMaster location for topology: " + topologyName);
-
-    // for the url request to be sent to TMaster
-    String endpoint = String.format("http://%s:%d/%s?topologyid=%s",
-        location.getHost(), location.getControllerPort(), command, location.getTopologyId());
-    LOG.info("HTTP URL for TMaster: " + endpoint);
-
-    // create a URL connection
-    HttpURLConnection connection = null;
-    try {
-      connection = (HttpURLConnection) new URL(endpoint).openConnection();
-    } catch (IOException e) {
-      LOG.log(Level.SEVERE, "Failed to get a HTTP connection to TMaster: ", e);
-      return false;
-    }
-    LOG.info("Successfully opened HTTP connection to TMaster");
-
-    // now sent the http request
-    HttpUtils.sendHttpGetRequest(connection);
-    LOG.info("Sent the HTTP payload to TMaster");
-
-    boolean success = false;
-    // get the response and check if it is successful
-    try {
-      int responseCode = connection.getResponseCode();
-      if (responseCode == HttpURLConnection.HTTP_OK) {
-        LOG.info("Successfully got a HTTP response from TMaster for " + command);
-        success = true;
-      } else {
-        LOG.info(String.format("Non OK HTTP response %d from TMaster for command %s",
-          responseCode, command));
-      }
-    } catch (IOException e) {
-      LOG.log(Level.SEVERE, "Failed to receive HTTP response from TMaster for " + command + " :", e);
-    } finally {
-      connection.disconnect();
-    }
-
-    return success;
   }
 }
