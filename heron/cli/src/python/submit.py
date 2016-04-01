@@ -83,6 +83,9 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
       "--topology_jar", topology_file
   ]
 
+  if opts.verbose():
+    args.append("--verbose")
+
   lib_jars = utils.get_heron_libs(
       jars.scheduler_jars() + jars.uploader_jars() + jars.statemgr_jars() + jars.packing_jars()
   )
@@ -184,8 +187,8 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
   topology_file = cl_args['topology-file-name']
   execute.heron_tar(
       cl_args['topology-class-name'],
-      topology_file, 
-      tuple(unknown_args), 
+      topology_file,
+      tuple(unknown_args),
       tmp_dir)
 
   try:

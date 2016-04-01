@@ -2,6 +2,8 @@ package com.twitter.heron.scheduler;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,16 +31,6 @@ import org.apache.commons.cli.HelpFormatter;
 
 /**
  * Calls Uploader to upload topology package, and Launcher to launch Scheduler.
- * TODO(nbhagat): Use commons cli to parse command line.
- * TODO(nbhagat): Make all argument passed to CLI available here.
- * args[0] = Topology Package location. Topology package generated from heron-cli will be a
- * tar file containing topology, topology definition and all dependencies.
- * args[1] = ConfigLoader class.
- * args[2] = Scheduler config file.
- * args[3] = Config override string encoded as base64 string.
- * args[4] = topology definition file.
- * args[5] = Heron internals config file location.
- * args[6] = Original package.
  */
 public class SubmitterMain {
   private static final Logger LOG = Logger.getLogger(SubmitterMain.class.getName());
@@ -167,6 +159,7 @@ public class SubmitterMain {
         .longOpt("topology_package")
         .hasArgs()
         .argName("topology package")
+        .required()
         .build();
 
     Option topologyDefn = Option.builder("f")
@@ -174,6 +167,7 @@ public class SubmitterMain {
         .longOpt("topology_defn")
         .hasArgs()
         .argName("topology definition")
+        .required()
         .build();
 
     Option topologyJar = Option.builder("j")
@@ -181,6 +175,12 @@ public class SubmitterMain {
         .longOpt("topology_jar")
         .hasArgs()
         .argName("topology jar")
+        .required()
+        .build();
+
+    Option verbose = Option.builder("v")
+        .desc("Enable debug logs")
+        .longOpt("verbose")
         .build();
 
     options.addOption(cluster);
@@ -192,6 +192,7 @@ public class SubmitterMain {
     options.addOption(topologyPackage);
     options.addOption(topologyDefn);
     options.addOption(topologyJar);
+    options.addOption(verbose);
 
     return options;
   }
@@ -206,6 +207,19 @@ public class SubmitterMain {
 
     options.addOption(help);
     return options;
+  }
+
+  // Initialize logger
+  public static void initLog(Level level) {
+
+    // Remove all default global
+    Logger globalLogger = Logger.getLogger("");
+    Handler[] handlers = globalLogger.getHandlers();
+    for(Handler handler : handlers) {
+      handler.setLevel(level);
+    }
+
+    globalLogger.setLevel(level);
   }
 
   public static void main(String[] args) throws
@@ -231,6 +245,14 @@ public class SubmitterMain {
       usage(options);
       System.exit(1);
     }
+
+    Level logLevel = Level.INFO;
+    if(cmd.hasOption("v")) {
+      logLevel = Level.ALL;
+    }
+
+    // init log
+    initLog(logLevel);
 
     String cluster = cmd.getOptionValue("cluster");;
     String role = cmd.getOptionValue("role");;
@@ -260,8 +282,8 @@ public class SubmitterMain {
                 topologyPackage, topologyJarFile, topologyDefnFile, topology))
             .build());
 
-    LOG.info("Static config loaded successfully ");
-    LOG.info(config.toString());
+    LOG.fine("Static config loaded successfully ");
+    LOG.fine(config.toString());
 
     // 1. Do prepare work
     // create an instance of state manager

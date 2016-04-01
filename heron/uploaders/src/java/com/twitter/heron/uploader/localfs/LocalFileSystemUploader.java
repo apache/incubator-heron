@@ -25,7 +25,7 @@ public class LocalFileSystemUploader implements IUploader {
   @Override
   public void initialize(Config config) {
     this.config = config;
-    
+
     this.destTopologyDirectory = LocalFileSystemContext.fileSystemDirectory(config);
 
     // name of the destination file is the same as the base name of the topology package file
@@ -41,7 +41,7 @@ public class LocalFileSystemUploader implements IUploader {
     StringBuilder sb = new StringBuilder()
         .append("file://")
         .append(this.destTopologyFile);
- 
+
     return sb.toString();
   }
 
@@ -67,7 +67,7 @@ public class LocalFileSystemUploader implements IUploader {
 
     // if the dest directory does not exist, create it.
     if (!parentDirectory.exists()) {
-      LOG.info("The working directory does not exist; creating it.");
+      LOG.fine("The working directory does not exist; creating it.");
       if (!parentDirectory.mkdirs()) {
         LOG.severe("Failed to create directory: " + parentDirectory.getPath());
         return false;
@@ -77,11 +77,11 @@ public class LocalFileSystemUploader implements IUploader {
     // if the dest file exists, write a log message
     fileExists = new File(filePath.toString()).isFile();
     if (fileExists) {
-      LOG.info("Target topology file " + filePath.toString() + " exists, overwriting...");
+      LOG.fine("Target topology file " + filePath.toString() + " exists, overwriting...");
     }
 
     // copy the topology package to target working directory
-    LOG.info("Copying topology " + topologyPackageLocation + 
+    LOG.fine("Copying topology " + topologyPackageLocation +
         " package to target working directory " + filePath.toString());
 
     Path source = Paths.get(topologyPackageLocation);
@@ -90,7 +90,7 @@ public class LocalFileSystemUploader implements IUploader {
       Files.copy(source, filePath, options);
     } catch (IOException ex) {
       LOG.info("Unable to copy: "  + source.toString() + " " + ex);
-      return false; 
+      return false;
     }
 
     return true;
@@ -113,7 +113,7 @@ public class LocalFileSystemUploader implements IUploader {
   }
 
   /**
-   * Used for unit testing. Get the topology directory where the package 
+   * Used for unit testing. Get the topology directory where the package
    * is uploaded.
    *
    * @return topology directory
