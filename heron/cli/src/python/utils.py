@@ -50,7 +50,7 @@ def get_subparser(parser, command):
   # there will probably only be one subparser_action,
   # but better save than sorry
   for subparsers_action in subparsers_actions:
-    # get all subparsers 
+    # get all subparsers
     for choice, subparser in subparsers_action.choices.items():
       if choice == command:
         return subparser
@@ -181,18 +181,25 @@ def parse_cmdline_override(namespace):
   return ' '.join(override)
 
 ################################################################################
+# Get the path of java executable
+################################################################################
+
+def get_java_path():
+  java_home = os.environ.get("JAVA_HOME")
+  return os.path.join(java_home, BIN_DIR, "java")
+
+################################################################################
 # Check if the java home set
 ################################################################################
 def check_java_home_set():
 
   # check if environ variable is set
   if not os.environ.has_key("JAVA_HOME"):
-    Log.error("JAVA_HOME not set") 
+    Log.error("JAVA_HOME not set")
     return False
 
   # check if the value set is correct
-  java_home = os.environ.get("JAVA_HOME")
-  java_path = os.path.join(java_home, BIN_DIR, "java")
+  java_path = get_java_path()
   if os.path.isfile(java_path) and os.access(java_path, os.X_OK):
     return True
 
