@@ -4,21 +4,15 @@ import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import javax.xml.bind.DatatypeConverter;
-
-import com.google.common.util.concurrent.ListenableFuture;
 
 import org.apache.commons.io.FileUtils;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
-import com.twitter.heron.spi.common.ClusterConfig;
-import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Defaults;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.common.ShellUtils;
 import com.twitter.heron.spi.scheduler.ILauncher;
@@ -105,8 +99,9 @@ public class LocalLauncher implements ILauncher {
         .append(LocalContext.stateManagerSandboxClassPath(config))
         .toString();
 
-    String schedulerCmd = String.format("%s %s %s %s %s %s %s %s %s %s",
-        "java",
+    String schedulerCmd = String.format("%s/%s %s %s %s %s %s %s %s %s %s",
+        LocalContext.javaHome(config),
+        "bin/java",
         "-cp",
         schedulerClassPath,
         "com.twitter.heron.scheduler.SchedulerMain",
@@ -250,18 +245,18 @@ public class LocalLauncher implements ILauncher {
   /**
    * Copy a URL package to a target folder
    *
-   * @param packageName the tar package
-   * @param targetFolder the target folder
-   * @return true if untar successfully
+   * @param corePackageURI the URI to download core release package
+   * @param targetFile the target filename to download the release package to
+   * @return true if successful
    */
-  protected boolean copyPackage(String corePackageUrl, String targetFile) {
+  protected boolean copyPackage(String corePackageURI, String targetFile) {
 
     // get the directory containing the target file
     Path filePath = Paths.get(targetFile);
     File parentDirectory = filePath.getParent().toFile();
 
     // using curl copy the url to the target file
-    String cmd = String.format("curl %s -o %s", corePackageUrl, targetFile);
+    String cmd = String.format("curl %s -o %s", corePackageURI, targetFile);
     int ret = ShellUtils.runSyncProcess(false, true, cmd,
         new StringBuilder(), new StringBuilder(), parentDirectory);
 
