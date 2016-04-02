@@ -10,6 +10,7 @@ java_library(
     deps = [
         "//heron/api/src/java:api-java",
         "//heron/storm/src/java:storm-compatibility-java",
+        "//heron/proto:proto_topology_java",
         "//3rdparty/fasterxml-jackson:fasterxml-jackson-java",
         "//3rdparty/protobuf:protobuf-java",
         "//3rdparty/httpcomponents:http-client",
