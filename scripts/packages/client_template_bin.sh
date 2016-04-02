@@ -147,7 +147,7 @@ if [ -d "${base}" -a -x "${base}/bin/heron" ]; then
   rm -fr "${base}"
 fi
 
-mkdir -p ${bin} ${base}
+mkdir -p ${bin} ${base} ${base}/etc
 echo -n .
 
 unzip -q -o "${BASH_SOURCE[0]}" -d "${base}"
