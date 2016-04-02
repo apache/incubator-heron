@@ -28,12 +28,8 @@ function query() {
 #[ -f "output/bazel" ] || ./compile.sh compile >&2 || exit $?
 
 # Build almost everything.
-# //third_party/ijar/test/... is disabled due to #273.
-# xcode and android tools do not work out of the box.
-bazel build scripts/packages:heron-client-install.sh 
-#-- //heron/... //third_party/... \
-#  -//integration_test/src/{java,python}/... -//contrib/kafka/src/... >&2 \
-#  || exit $?
+#bazel build scripts/packages:heron-client-install.sh 
+bazel build heron/...
 
 # Source roots.
 JAVA_PATHS="$(find heron -name "*.java" | sed "s|/src/java/.*$|/src/java|" |  sed "s|/tests/java/.*$|/tests/java|" | sort -u)"
@@ -43,12 +39,11 @@ fi
 pwd
 THIRD_PARTY_JAR_PATHS="$(find 3rdparty -name "*.jar" | sort -u)"
 
-# Android-SDK-dependent files may need to be excluded from compilation.
-ANDROID_IMPORTING_FILES="$(grep "^import android\." -R -l --include "*.java" heron | sort)"
 
 # All other generated libraries.
 readonly package_list=$(find heron -name "BUILD" | sed "s|/BUILD||" | sed "s|^|//|")
 # Returns the package of file $1
+HERON_GEN_FILES=$(find bazel-bin/heron -type f | grep java.jar$ | grep proto)
 function get_package_of() {
   # look for the longest matching package
   for i in ${package_list}; do

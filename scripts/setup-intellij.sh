@@ -47,9 +47,6 @@ cat > $iml_file <<EOH
 <module type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager">
     <output url="file://\$MODULE_DIR\$/out" />
-    <content url="file://\$MODULE_DIR$/bazel-genfiles/heron">
-      <sourceFolder url="file://\$MODULE_DIR$/bazel-genfiles/heron" isTestSource="false" generated="true" />
-    </content>
     <content url="file://\$MODULE_DIR$/heron">
 EOH
 
@@ -124,6 +121,20 @@ EOF
 # Slight hack to make sure (1) our langtools is picked up before the SDK
 # default, but that (2) SDK is picked up before auto-value, because that
 # apparently causes problems for auto-value otherwise.
+cat >> $iml_file <<EOF
+	<orderEntry type="module-library">
+		<library name="protogenfiles">
+			<CLASSES>
+EOF
+for jar in ${HERON_GEN_FILES}; do
+echo '      		<root url="jar://$MODULE_DIR$/'${jar}'!/" />'>> $iml_file
+done
+cat >> $iml_file <<'EOF'
+			</CLASSES>
+		</library>
+	</orderEntry>
+EOF
+   
 readonly javac_jar="3rdparty/java/jdk/langtools/javac.jar"
 write_jar_entry "$javac_jar"
 
