@@ -17,9 +17,6 @@
 
 set -eu
 
-cd $(dirname "$0")
-cd ../heron
-
 function query() {
     ./output/bazel query "$@"
 }
