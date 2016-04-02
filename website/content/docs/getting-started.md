@@ -3,33 +3,40 @@ date: 2016-02-28T13:10:21-08:00
 title: Getting Started
 ---
 
-Run Topologies Locally using pre-compiled Heron binaries (Mac OSX, Ubuntu >= 14.04, Centos7)
+Run topologies locally using pre-compiled Heron binaries (Mac OSX, Ubuntu >= 14.04, Centos7)
 
 ### Step 1 - Download pre-compiled Heron binaries with install scripts
 
-Navigate to [Twitter Heron Releases](https://github.com/twitter/heron/releases)
+Navigate to [Twitter Heron Releases](https://github.com/twitter/heron/releases) and
+download the following self extracting binary install scripts 
 
-Download heron-client-install and heron-tools-install for your platform:
-Example for Mac OSX (darwin):
+* heron-client-install
+* heron-tools-install
 
-**heron-client-install-0.13.1-darwin.sh**
+for your platform. For example, if you want to download for Mac OSX (darwin), the 
+corresponding binaries will be
 
-**heron-tools-install-0.13.1-darwin.sh**
+* heron-client-install-\<version\>-darwin.sh
+* heron-tools-install-\<version\>-darwin.sh
 
-Run Install scripts
+where \<version\> is the desired heron version.
+
+Run the download self installing binary for heron client as follows
 ```bash
 $ chmod +x heron-client-install-0.13.1-darwin.sh
 $ ./heron-client-install-0.13.1-darwin.sh --user
 Uncompressing......
 Heron is now installed!
 Make sure you have "/Users/USERNAME/bin" in your path.
+```
 
+Run the download self installing binary for heron tools as follows
+```bash
 $ chmod +x heron-tools-install-0.13.1-darwin.sh
 $ ./heron-tools-install-0.13.1-darwin.sh --user
 Uncompressing......
 Heron Tools is now installed!
 Make sure you have "/Users/USERNAME/bin" in your path.
-
 ```
 
 ### Step 2 - Launch an example topology
@@ -46,8 +53,9 @@ Open a new terminal window and launch [heron-tracker](../operators/heron-tracker
 ```bash
 $ heron-tracker
 ... Running on port: 8888
+... Using config file: /Users/USERNAME/.herontools/conf/localfilestateconf.yaml
 ```
-In local browser, Heron tracker is available on http://localhost:8888
+In local browser, Heron tracker can be reached at http://localhost:8888
 
 
 ### Step 4 - Start Heron UI
@@ -56,10 +64,11 @@ Open a new terminal window and launch UI:
 ```bash
 $ heron-ui
 ... Running on port: 8889
+... Using tracker url: http://localhost:8888
 ```
-In local browser, Heron UI is available on http://localhost:8889
+In local browser, Heron UI is available at http://localhost:8889
 
-### Step 5 - Explore activate, deactivate, kill topology commands
+### Step 5 - Explore activate, deactivate, and kill topology commands
 
 ```bash
 $ heron activate local AckingTopology
@@ -67,11 +76,8 @@ $ heron deactivate local AckingTopology
 $ heron kill local AckingTopology
 ```
 Explore [managing topologies with Heron CLI](../operators/heron-cli)
-and Heron-cli3 syntax:
+and heron cli syntax. For example, to list the available commands,
 ```bash
-usage: heron submit [options] cluster/[role]/[environ] topology-file-name topology-class-name [topology-args]
-
-
 usage: heron <command> <options> ...
 
 Available commands:
@@ -79,38 +85,54 @@ Available commands:
     deactivate         Deactivate a topology
     help               Prints help for commands
     kill               Kill a topology
-    ps                 List all topologies
     restart            Restart a topology
     submit             Submit a topology
     version            Print version of heron-cli
 
-For detailed documentation, go to http://heron.github.io
+For detailed documentation, go to http://heronstreaming.io
 ```
-### Step 6 - Explore other example Topologies
 
-AckingTopology.java  | This is a basic example of a Heron topology with acking enable.
+As another example, to invoke the help for submitting a topology
+```bash
+$ heron help submit 
+usage: heron submit [options] cluster/[role]/[environ] topology-file-name topology-class-name [topology-args]
 
-ExclamationTopology.java | This is a basic example of a Heron topology.
+Required arguments:
+  cluster/[role]/[env]  Cluster, role, and environ to run topology
+  topology-file-name    Topology jar/tar/zip file
+  topology-class-name   Topology class name
 
-MultiSpoutExclamationTopology.java | This is a basic example of a Heron topology.
+Optional arguments:
+  --config-path (a string; path to cluster config; default: "/Users/USERNAME/.heron/conf/<cluster>")
+  --config-property (a string; a config property; default: [])
+  --deploy-deactivated (a boolean; default: "false")
+  --verbose (a boolean; default: "false")
+```
 
-MultiStageAckingTopology.java | This is three stage topology. Spout emits to bolt to bolt. 
+### Step 6 - Explore other example topologies
 
-TaskHookTopology.java | This is a basic Task Hook Heron topology.
+**AckingTopology.java**  | This is a basic example of a Heron topology with acking enabled.
 
-CustomGroupingTopology.java | This is a basic example of a Heron topology.
+**ExclamationTopology.java** | This is a basic example of a Heron topology.
 
-ComponentJVMOptionsTopology.java | This is a basic example of a Heron topology.
+**MultiSpoutExclamationTopology.java** | This is a basic example of a Heron topology with multiple spouts.
 
-Example (ExclamationTopology):
+**MultiStageAckingTopology.java** | This is three stage topology. Spout emits to bolt that feeds to another bolt. 
+
+**TaskHookTopology.java** | This is a basic Task Hook Heron topology.
+
+**CustomGroupingTopology.java** | This is a basic example of a Heron topology that implements custom grouping 
+
+**ComponentJVMOptionsTopology.java** | This is a basic example of a Heron topology that supplies JVM options for each component
+
+To submit a topology, for example, ExclamationTopology, do the following:
 ```bash
 $ heron submit local ~/.heron/examples/heron-examples.jar com.twitter.heron.examples.ExclamationTopology ExclamationTopology
 ```
 
-
 ### Next Steps - Deploying or Developing
 
-[Deploying Existing Topologies](../operators/deployment/README) in clustered, scheduler-driven environments (Aurora, Mesos, Local)
+[Deploying Existing topologies](../operators/deployment/README) in clustered, scheduler-driven environments (Aurora, Mesos, Local)
 
 [Developing Topologies](../concepts/architecture) with the Architecture of Heron
 
