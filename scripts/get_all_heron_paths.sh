@@ -38,7 +38,7 @@ if [ "$(uname -s | tr 'A-Z' 'a-z')" != "darwin" ]; then
 fi
 pwd
 THIRD_PARTY_JAR_PATHS="$(find 3rdparty -name "*.jar" | sort -u)"
-
+PYTHON_PATHS="$(find heron -name "*.py" | sed "s|/src/python/.*$||" |sed "s|/tests/python/.*$||" | sort -u)"
 
 # All other generated libraries.
 readonly package_list=$(find heron -name "BUILD" | sed "s|/BUILD||" | sed "s|^|//|")
@@ -87,4 +87,3 @@ function collect_generated_paths() {
 # GENERATED_PATHS stores pairs of jar:source_path as a list of strings, with
 # each pair internally delimited by a colon. Use ${string//:/ } to split one.
 GENERATED_PATHS="$(collect_generated_paths)"
-echo $JAVA_PATHS
