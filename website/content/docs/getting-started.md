@@ -76,7 +76,23 @@ $ heron deactivate local AckingTopology
 $ heron kill local AckingTopology
 ```
 Explore [managing topologies with Heron CLI](../operators/heron-cli)
-and heron cli syntax. For example to invoke the help for submitting a topology
+and heron cli syntax. For example, to list the available commands,
+```bash
+usage: heron <command> <options> ...
+
+Available commands:
+    activate           Activate a topology
+    deactivate         Deactivate a topology
+    help               Prints help for commands
+    kill               Kill a topology
+    restart            Restart a topology
+    submit             Submit a topology
+    version            Print version of heron-cli
+
+For detailed documentation, go to http://heronstreaming.io
+```
+
+As another example, to invoke the help for submitting a topology
 ```bash
 $ heron help submit 
 usage: heron submit [options] cluster/[role]/[environ] topology-file-name topology-class-name [topology-args]
@@ -93,43 +109,26 @@ Optional arguments:
   --verbose (a boolean; default: "false")
 ```
 
-To list the available commands,
-
-```bash
-usage: heron <command> <options> ...
-
-Available commands:
-    activate           Activate a topology
-    deactivate         Deactivate a topology
-    help               Prints help for commands
-    kill               Kill a topology
-    restart            Restart a topology
-    submit             Submit a topology
-    version            Print version of heron-cli
-
-For detailed documentation, go to http://heron.github.io
-```
 ### Step 6 - Explore other example Topologies
 
-AckingTopology.java  | This is a basic example of a Heron topology with acking enable.
+**AckingTopology.java**  | This is a basic example of a Heron topology with acking enabled.
 
-ExclamationTopology.java | This is a basic example of a Heron topology.
+**ExclamationTopology.java** | This is a basic example of a Heron topology.
 
-MultiSpoutExclamationTopology.java | This is a basic example of a Heron topology.
+**MultiSpoutExclamationTopology.java** | This is a basic example of a Heron topology with multiple spouts.
 
-MultiStageAckingTopology.java | This is three stage topology. Spout emits to bolt to bolt. 
+**MultiStageAckingTopology.java** | This is three stage topology. Spout emits to bolt that feeds to another bolt. 
 
-TaskHookTopology.java | This is a basic Task Hook Heron topology.
+**TaskHookTopology.java** | This is a basic Task Hook Heron topology.
 
-CustomGroupingTopology.java | This is a basic example of a Heron topology.
+**CustomGroupingTopology.java** | This is a basic example of a Heron topology that implements custom grouping 
 
-ComponentJVMOptionsTopology.java | This is a basic example of a Heron topology.
+**ComponentJVMOptionsTopology.java** | This is a basic example of a Heron topology that supplies JVM options for each component
 
-Example (ExclamationTopology):
+To submit a topology, for example, ExclamationTopology, do the following:
 ```bash
 $ heron submit local ~/.heron/examples/heron-examples.jar com.twitter.heron.examples.ExclamationTopology ExclamationTopology
 ```
-
 
 ### Next Steps - Deploying or Developing
 
