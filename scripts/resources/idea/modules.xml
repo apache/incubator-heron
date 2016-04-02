@@ -2,8 +2,15 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+<<<<<<< HEAD
       <module fileurl="file://$PROJECT_DIR$/heron-java.iml" filepath="$PROJECT_DIR$/heron-java.iml" group="heron" />
       <module fileurl="file://$PROJECT_DIR$/heron-python.iml" filepath="$PROJECT_DIR$/heron-python.iml" group="heron" />
     </modules>
   </component>
 </project>
+=======
+      <module fileurl="file://$PROJECT_DIR$/heron.iml" filepath="$PROJECT_DIR$/heron.iml" />
+    </modules>
+  </component>
+</project>
+>>>>>>> 29c7225a7d34660e6837761d822c654440c4102d

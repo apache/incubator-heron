@@ -1,4 +1,4 @@
-#!/bin/bash
+i#!/bin/bash
 # Copyright 2015 The Bazel Authors. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,8 +28,12 @@ function query() {
 #[ -f "output/bazel" ] || ./compile.sh compile >&2 || exit $?
 
 # Build almost everything.
-#bazel build scripts/packages:heron-client-install.sh 
-bazel build heron/...
+# //third_party/ijar/test/... is disabled due to #273.
+# xcode and android tools do not work out of the box.
+bazel build scripts/packages:heron-client-install.sh 
+#-- //heron/... //third_party/... \
+#  -//integration_test/src/{java,python}/... -//contrib/kafka/src/... >&2 \
+#  || exit $?
 
 # Source roots.
 JAVA_PATHS="$(find heron -name "*.java" | sed "s|/src/java/.*$|/src/java|" |  sed "s|/tests/java/.*$|/tests/java|" | sort -u)"
@@ -38,12 +42,13 @@ if [ "$(uname -s | tr 'A-Z' 'a-z')" != "darwin" ]; then
 fi
 pwd
 THIRD_PARTY_JAR_PATHS="$(find 3rdparty -name "*.jar" | sort -u)"
-PYTHON_PATHS="$(find heron -name "*.py" | sed "s|/src/python/.*$||" |sed "s|/tests/python/.*$||" | sort -u)"
+
+# Android-SDK-dependent files may need to be excluded from compilation.
+ANDROID_IMPORTING_FILES="$(grep "^import android\." -R -l --include "*.java" heron | sort)"
 
 # All other generated libraries.
 readonly package_list=$(find heron -name "BUILD" | sed "s|/BUILD||" | sed "s|^|//|")
 # Returns the package of file $1
-HERON_GEN_FILES=$(find bazel-bin/heron -type f | grep java.jar$ | grep proto)
 function get_package_of() {
   # look for the longest matching package
   for i in ${package_list}; do
@@ -87,3 +92,4 @@ function collect_generated_paths() {
 # GENERATED_PATHS stores pairs of jar:source_path as a list of strings, with
 # each pair internally delimited by a colon. Use ${string//:/ } to split one.
 GENERATED_PATHS="$(collect_generated_paths)"
+echo $JAVA_PATHS
