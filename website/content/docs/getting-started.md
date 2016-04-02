@@ -21,7 +21,7 @@ corresponding binaries will be
 
 where \<version\> is the desired heron version.
 
-Run the self installing binary for heron client as follows
+Run the download self installing binary for heron client as follows
 ```bash
 $ chmod +x heron-client-install-0.13.1-darwin.sh
 $ ./heron-client-install-0.13.1-darwin.sh --user
@@ -30,7 +30,7 @@ Heron is now installed!
 Make sure you have "/Users/USERNAME/bin" in your path.
 ```
 
-Run the self installing binary for heron tools as follows
+Run the download self installing binary for heron tools as follows
 ```bash
 $ chmod +x heron-tools-install-0.13.1-darwin.sh
 $ ./heron-tools-install-0.13.1-darwin.sh --user
@@ -68,7 +68,7 @@ $ heron-ui
 ```
 In local browser, Heron UI is available at http://localhost:8889
 
-### Step 5 - Explore activate, deactivate, kill topology commands
+### Step 5 - Explore activate, deactivate, and kill topology commands
 
 ```bash
 $ heron activate local AckingTopology
@@ -109,7 +109,7 @@ Optional arguments:
   --verbose (a boolean; default: "false")
 ```
 
-### Step 6 - Explore other example Topologies
+### Step 6 - Explore other example topologies
 
 **AckingTopology.java**  | This is a basic example of a Heron topology with acking enabled.
 
@@ -132,7 +132,7 @@ $ heron submit local ~/.heron/examples/heron-examples.jar com.twitter.heron.exam
 
 ### Next Steps - Deploying or Developing
 
-[Deploying Existing Topologies](../operators/deployment/README) in clustered, scheduler-driven environments (Aurora, Mesos, Local)
+[Deploying Existing topologies](../operators/deployment/README) in clustered, scheduler-driven environments (Aurora, Mesos, Local)
 
 [Developing Topologies](../concepts/architecture) with the Architecture of Heron
 
