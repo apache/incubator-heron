@@ -10,13 +10,8 @@ public class NullUploader implements IUploader {
   }
 
   @Override
-  public boolean uploadPackage() {
-    return true;
-  }
-
-  @Override
-  public String getUri() {
-    return null;
+  public Object uploadPackage() {
+    return "NOT_NULL";
   }
 
   @Override
