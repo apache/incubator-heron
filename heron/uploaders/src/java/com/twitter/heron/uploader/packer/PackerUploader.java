@@ -2,7 +2,6 @@ package com.twitter.heron.uploader.packer;
 
 import java.util.logging.Logger;
 
-import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.ShellUtils;
@@ -62,12 +61,7 @@ public class PackerUploader implements IUploader {
   }
 
   @Override
-  public String getUri() {
-    return topologyURI;
-  }
-
-  @Override
-  public boolean uploadPackage() {
+  public Object uploadPackage() {
     LOG.info("Uploading packer package " + getTopologyPackageName());
     String packerUploadCmd = String.format(
         "packer add_version --cluster %s %s %s %s --json",
@@ -89,10 +83,10 @@ public class PackerUploader implements IUploader {
     LOG.info("Setting latest package to live");
     if (0 != runProcess(packerLiveCmd, null)) {
       LOG.severe("Failed to set latest package live. Cmd: " + packerLiveCmd);
-      return false;
+      return null;
     }
 
-    return true;
+    return topologyURI;
   }
 
   /*

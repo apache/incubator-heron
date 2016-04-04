@@ -5,6 +5,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.spi.common.ClusterConfig;
@@ -16,16 +24,9 @@ import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.uploader.IUploader;
 import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
-
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.HelpFormatter;
 
 /**
  * Calls Uploader to upload topology package, and Launcher to launch Scheduler.
@@ -107,7 +108,7 @@ public class SubmitterMain {
   // Print usage options
   private static void usage(Options options) {
     HelpFormatter formatter = new HelpFormatter();
-    formatter.printHelp( "SubmitterMain", options );
+    formatter.printHelp("SubmitterMain", options);
   }
 
   // Construct all required command line options
@@ -216,9 +217,10 @@ public class SubmitterMain {
     Options helpOptions = constructHelpOptions();
     CommandLineParser parser = new DefaultParser();
     // parse the help options first.
-    CommandLine cmd = parser.parse(helpOptions, args, true);;
+    CommandLine cmd = parser.parse(helpOptions, args, true);
+    ;
 
-    if(cmd.hasOption("h")) {
+    if (cmd.hasOption("h")) {
       usage(options);
       return;
     }
@@ -226,22 +228,21 @@ public class SubmitterMain {
     try {
       // Now parse the required options
       cmd = parser.parse(options, args);
-    } catch(ParseException e) {
+    } catch (ParseException e) {
       LOG.severe("Error parsing command line options: " + e.getMessage());
       usage(options);
       System.exit(1);
     }
 
-    String cluster = cmd.getOptionValue("cluster");;
-    String role = cmd.getOptionValue("role");;
-    String environ = cmd.getOptionValue("environment");;
-    String heronHome = cmd.getOptionValue("heron_home");;
-    String configPath = cmd.getOptionValue("config_path");;
-    String configOverrideEncoded = cmd.getOptionValue("config_overrides");;
-
-    String topologyPackage = cmd.getOptionValue("topology_package");;
-    String topologyDefnFile = cmd.getOptionValue("topology_defn");;
-    String topologyJarFile = cmd.getOptionValue("topology_jar");;
+    String cluster = cmd.getOptionValue("cluster");
+    String role = cmd.getOptionValue("role");
+    String environ = cmd.getOptionValue("environment");
+    String heronHome = cmd.getOptionValue("heron_home");
+    String configPath = cmd.getOptionValue("config_path");
+    String configOverrideEncoded = cmd.getOptionValue("config_overrides");
+    String topologyPackage = cmd.getOptionValue("topology_package");
+    String topologyDefnFile = cmd.getOptionValue("topology_defn");
+    String topologyJarFile = cmd.getOptionValue("topology_jar");
 
     // load the topology definition into topology proto
     TopologyAPI.Topology topology = TopologyUtils.getTopology(topologyDefnFile);
@@ -276,17 +277,18 @@ public class SubmitterMain {
     String packingClass = Context.packingClass(config);
     IPacking packing = (IPacking) Class.forName(packingClass).newInstance();
 
+    // create an instance of the uploader class
+    String uploaderClass = Context.uploaderClass(config);
+    IUploader uploader = (IUploader) Class.forName(uploaderClass).newInstance();
+
     // Local variable for convenient access
     String topologyName = topology.getName();
 
     boolean isSuccessful = false;
-    UploadRunner uploadRunner = null;
     // Put it in a try block so that we can always clean resources
     try {
       // initialize the state manager
       statemgr.initialize(config);
-
-      uploadRunner = new UploadRunner(config);
 
       boolean isValid = validateSubmit(statemgr, topologyName);
 
@@ -295,7 +297,14 @@ public class SubmitterMain {
         // invoke method to submit the topology
         LOG.log(Level.INFO, "Topology {0} to be submitted", topologyName);
 
-        isSuccessful = submitTopology(config, topology, statemgr, launcher, packing, uploadRunner);
+        // First try to upload necessary packages
+        Object uploaderRet = uploadPackage(config, uploader);
+        if (uploaderRet == null) {
+          LOG.severe("Failed to upload package.");
+        } else {
+          // Second try to submit a topology
+          isSuccessful = submitTopology(config, topology, statemgr, launcher, packing, uploaderRet);
+        }
       }
     } finally {
       // 3. Do generic cleaning
@@ -305,9 +314,7 @@ public class SubmitterMain {
       // 4. Do post work basing on the result
       if (!isSuccessful) {
         // Undo if failed to submit
-        if (uploadRunner != null) {
-          uploadRunner.undo();
-        }
+        uploader.undo();
         launcher.undo();
       }
     }
@@ -337,32 +344,34 @@ public class SubmitterMain {
     return true;
   }
 
+  public static Object uploadPackage(Config config, IUploader uploader) {
+    // initialize the uploader
+    uploader.initialize(config);
+
+    // upload the topology package to the storage
+    Object uploaderRet = uploader.uploadPackage();
+
+    return uploaderRet;
+  }
+
   public static boolean submitTopology(Config config, TopologyAPI.Topology topology,
                                        IStateManager statemgr, ILauncher launcher,
-                                       IPacking packing, UploadRunner uploadRunner)
+                                       IPacking packing, Object uploaderRet)
       throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
-    // upload the topology package to the storage
-    boolean result = uploadRunner.call();
-
-    if (!result) {
-      LOG.severe("Failed to upload package.");
-      return false;
-    }
-
     // build the runtime config
     Config runtime = Config.newBuilder()
         .put(Keys.topologyId(), topology.getId())
         .put(Keys.topologyName(), topology.getName())
         .put(Keys.topologyDefinition(), topology)
         .put(Keys.schedulerStateManagerAdaptor(), new SchedulerStateManagerAdaptor(statemgr))
-        .put(Keys.topologyPackageUri(), uploadRunner.getUri())
+        .put(Keys.topologyPackageUri(), uploaderRet)
         .put(Keys.launcherClassInstance(), launcher)
         .put(Keys.packingClassInstance(), packing)
         .build();
 
     // using launch runner, launch the topology
     LaunchRunner launchRunner = new LaunchRunner(config, runtime);
-    result = launchRunner.call();
+    boolean result = launchRunner.call();
 
     // if failed, undo the uploaded package
     if (!result) {
