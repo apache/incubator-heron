@@ -1,9 +1,11 @@
 package com.twitter.heron.uploader.packer;
 
+import java.net.URI;
 import java.util.logging.Logger;
 
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.Convert;
 import com.twitter.heron.spi.common.ShellUtils;
 import com.twitter.heron.spi.uploader.IUploader;
 
@@ -17,7 +19,7 @@ public class PackerUploader implements IUploader {
   protected String cluster;
   protected String role;
   protected String topology;
-  protected String topologyURI;
+
   protected String releaseTag;
   private String topologyPackageLocation;
 
@@ -36,11 +38,10 @@ public class PackerUploader implements IUploader {
   public void initialize(Config config) {
     this.cluster = Context.cluster(config);
     this.role = Context.role(config);
-    this.topology = Context.topologyName(config); 
-    this.verbose = Context.verbose(config); 
+    this.topology = Context.topologyName(config);
+    this.verbose = Context.verbose(config);
 
     this.topologyPackageLocation = Context.topologyJarFile(config);
-    this.topologyURI = null;
 
     // TO DO
     // this.releaseTag = config.getStringValue(Keys.get("HERON_RELEASE_PACKAGE_NAME"), "live");
@@ -61,7 +62,8 @@ public class PackerUploader implements IUploader {
   }
 
   @Override
-  public Object uploadPackage() {
+  public URI uploadPackage() {
+    String topologyURIStr;
     LOG.info("Uploading packer package " + getTopologyPackageName());
     String packerUploadCmd = String.format(
         "packer add_version --cluster %s %s %s %s --json",
@@ -70,12 +72,12 @@ public class PackerUploader implements IUploader {
 
     if (0 != runProcess(packerUploadCmd, jsonStrBuilder)) {
       LOG.severe("Failed to upload package to packer. Cmd: " + packerUploadCmd);
-      return false;
+      return null;
     } else {
       String jsonStr = jsonStrBuilder.toString();
 
       // Add back into the context property
-      topologyURI = getTopologyURI(jsonStr);
+      topologyURIStr = getTopologyURI(jsonStr);
     }
 
     String packerLiveCmd = String.format(
@@ -86,7 +88,7 @@ public class PackerUploader implements IUploader {
       return null;
     }
 
-    return topologyURI;
+    return Convert.getURI(topologyURIStr);
   }
 
   /*
@@ -127,7 +129,7 @@ public class PackerUploader implements IUploader {
     }
     return true;
   }
- 
+
   @Override
   public void close() {
   }

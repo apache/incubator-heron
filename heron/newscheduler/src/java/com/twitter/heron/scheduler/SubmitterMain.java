@@ -1,6 +1,7 @@
 package com.twitter.heron.scheduler;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -297,13 +298,13 @@ public class SubmitterMain {
         // invoke method to submit the topology
         LOG.log(Level.INFO, "Topology {0} to be submitted", topologyName);
 
-        // First try to upload necessary packages
-        Object uploaderRet = uploadPackage(config, uploader);
-        if (uploaderRet == null) {
+        // Firstly, try to upload necessary packages
+        URI packageURI = uploadPackage(config, uploader);
+        if (packageURI == null) {
           LOG.severe("Failed to upload package.");
         } else {
-          // Second try to submit a topology
-          isSuccessful = submitTopology(config, topology, statemgr, launcher, packing, uploaderRet);
+          // Secondly, try to submit a topology
+          isSuccessful = submitTopology(config, topology, statemgr, launcher, packing, packageURI);
         }
       }
     } finally {
@@ -344,19 +345,19 @@ public class SubmitterMain {
     return true;
   }
 
-  public static Object uploadPackage(Config config, IUploader uploader) {
+  public static URI uploadPackage(Config config, IUploader uploader) {
     // initialize the uploader
     uploader.initialize(config);
 
     // upload the topology package to the storage
-    Object uploaderRet = uploader.uploadPackage();
+    URI uploaderRet = uploader.uploadPackage();
 
     return uploaderRet;
   }
 
   public static boolean submitTopology(Config config, TopologyAPI.Topology topology,
                                        IStateManager statemgr, ILauncher launcher,
-                                       IPacking packing, Object uploaderRet)
+                                       IPacking packing, URI packageURI)
       throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
     // build the runtime config
     Config runtime = Config.newBuilder()
@@ -364,7 +365,7 @@ public class SubmitterMain {
         .put(Keys.topologyName(), topology.getName())
         .put(Keys.topologyDefinition(), topology)
         .put(Keys.schedulerStateManagerAdaptor(), new SchedulerStateManagerAdaptor(statemgr))
-        .put(Keys.topologyPackageUri(), uploaderRet)
+        .put(Keys.topologyPackageUri(), packageURI)
         .put(Keys.launcherClassInstance(), launcher)
         .put(Keys.packingClassInstance(), packing)
         .build();
