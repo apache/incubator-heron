@@ -69,7 +69,7 @@ public class LocalFileSystemUploaderTest {
     // create the uploader and load the package
     LocalFileSystemUploader uploader = new LocalFileSystemUploader(); 
     uploader.initialize(newconfig);
-    Assert.assertTrue(uploader.uploadPackage());
+    Assert.assertNotNull(uploader.uploadPackage());
 
     // verify if the file exists
     String destFile = uploader.getTopologyFile();
@@ -90,7 +90,7 @@ public class LocalFileSystemUploaderTest {
     uploader.initialize(newconfig);
 
     // Assert that the file does not exist
-    Assert.assertFalse(uploader.uploadPackage());
+    Assert.assertNull(uploader.uploadPackage());
   }
 
   @Test
@@ -105,7 +105,7 @@ public class LocalFileSystemUploaderTest {
     // create the uploader and load the package
     LocalFileSystemUploader uploader = new LocalFileSystemUploader(); 
     uploader.initialize(newconfig);
-    Assert.assertTrue(uploader.uploadPackage());
+    Assert.assertNotNull(uploader.uploadPackage());
 
     // verify if the file exists
     String destFile = uploader.getTopologyFile();
