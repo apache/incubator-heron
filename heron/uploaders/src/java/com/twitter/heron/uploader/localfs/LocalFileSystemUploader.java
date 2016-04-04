@@ -2,16 +2,16 @@ package com.twitter.heron.uploader.localfs;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.Files;
-import java.nio.file.CopyOption;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.*;
 import java.util.logging.Logger;
 
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.ShellUtils;
+import com.twitter.heron.spi.common.Convert;
 import com.twitter.heron.spi.uploader.IUploader;
 
 public class LocalFileSystemUploader implements IUploader {
@@ -25,7 +25,7 @@ public class LocalFileSystemUploader implements IUploader {
   @Override
   public void initialize(Config config) {
     this.config = config;
-    
+
     this.destTopologyDirectory = LocalFileSystemContext.fileSystemDirectory(config);
 
     // name of the destination file is the same as the base name of the topology package file
@@ -36,28 +36,27 @@ public class LocalFileSystemUploader implements IUploader {
     this.topologyPackageLocation = LocalFileSystemContext.topologyPackageFile(config);
   }
 
-  @Override
-  public String getUri() {
+  protected URI getUri(String filename) {
     StringBuilder sb = new StringBuilder()
         .append("file://")
-        .append(this.destTopologyFile);
- 
-    return sb.toString();
+        .append(filename);
+
+    return Convert.getURI(sb.toString());
   }
 
   /**
    * Upload the topology package to the destined location in local file system
    *
-   * @return true, if successful
+   * @return destination URI of where the topology package has
+   * been uploaded if successful, or {@code null} if failed.
    */
   @Override
-  public boolean uploadPackage() {
-
+  public URI uploadPackage() {
     // first, check if the topology package exists
     boolean fileExists = new File(topologyPackageLocation).isFile();
     if (!fileExists) {
       LOG.info("Topology file " + topologyPackageLocation + " does not exist.");
-      return false;
+      return null;
     }
 
     // get the directory containing the file
@@ -70,7 +69,7 @@ public class LocalFileSystemUploader implements IUploader {
       LOG.info("The working directory does not exist; creating it.");
       if (!parentDirectory.mkdirs()) {
         LOG.severe("Failed to create directory: " + parentDirectory.getPath());
-        return false;
+        return null;
       }
     }
 
@@ -81,19 +80,19 @@ public class LocalFileSystemUploader implements IUploader {
     }
 
     // copy the topology package to target working directory
-    LOG.info("Copying topology " + topologyPackageLocation + 
+    LOG.info("Copying topology " + topologyPackageLocation +
         " package to target working directory " + filePath.toString());
 
     Path source = Paths.get(topologyPackageLocation);
     try {
-      CopyOption[] options = new CopyOption[] { StandardCopyOption.REPLACE_EXISTING };
+      CopyOption[] options = new CopyOption[]{StandardCopyOption.REPLACE_EXISTING};
       Files.copy(source, filePath, options);
     } catch (IOException ex) {
-      LOG.info("Unable to copy: "  + source.toString() + " " + ex);
-      return false; 
+      LOG.info("Unable to copy: " + source.toString() + " " + ex);
+      return null;
     }
 
-    return true;
+    return getUri(destTopologyFile);
   }
 
   /**
@@ -113,7 +112,7 @@ public class LocalFileSystemUploader implements IUploader {
   }
 
   /**
-   * Used for unit testing. Get the topology directory where the package 
+   * Used for unit testing. Get the topology directory where the package
    * is uploaded.
    *
    * @return topology directory

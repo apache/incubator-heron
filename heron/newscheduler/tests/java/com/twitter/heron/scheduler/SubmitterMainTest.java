@@ -130,7 +130,7 @@ public class SubmitterMainTest {
     PowerMockito.doReturn(config).when(Factory.class, "makeConfigLoader", eq(configLoader));
     PowerMockito.doReturn(failUploader).when(Factory.class, "makeUploader", anyString());
     PowerMockito.doReturn(mockLauncher).when(Factory.class, "makeLauncher", anyString());
-    when(failUploader.uploadPackage(anyString())).thenReturn(false);
+    when(failUploader.uploadPackage()).thenReturn(null);
 
     assertTrue(!SubmitterMain.submitTopology(
         topologyPkg, configLoader, submitterConfigFile, configOverride, createTopology(new Config())));
