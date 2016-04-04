@@ -22,32 +22,25 @@ public interface IUploader {
   /**
    * Initialize the uploader with the incoming context.
    */
-  public void initialize(Config config);
+  void initialize(Config config);
 
   /**
    * UploadPackage will upload the topology package to the given location.
    *
-   * @return true if successful.
+   * @return destination URI of where the topology package has
+   * been uploaded if successful, or {@code null} if failed.
    */
-  public boolean uploadPackage();
-
-  /**
-   * getUri will get the destination URI of where the topology package has 
-   * been uploaded
-   *
-   * @return uri
-   */
-  public String getUri();
+  Object uploadPackage();
 
   /**
    * If subsequent stages fail, undo will be called to free resources used by
    * uploading package. Ideally, this should try to remove the uploaded package.
    */
-  public boolean undo();
+  boolean undo();
 
   /**
    * This is to for disposing or cleaning up any internal state accumulated by
    * the uploader
    */
-  public void close();
+  void close();
 }
