@@ -2,6 +2,7 @@ package com.twitter.heron.uploader.localfs;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,6 +11,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.logging.Logger;
 
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Convert;
 import com.twitter.heron.spi.uploader.IUploader;
 
 public class LocalFileSystemUploader implements IUploader {
@@ -34,12 +36,12 @@ public class LocalFileSystemUploader implements IUploader {
     this.topologyPackageLocation = LocalFileSystemContext.topologyPackageFile(config);
   }
 
-  protected String getUri(String filename) {
+  protected URI getUri(String filename) {
     StringBuilder sb = new StringBuilder()
         .append("file://")
-        .append(this.destTopologyFile);
+        .append(filename);
 
-    return sb.toString();
+    return Convert.getURI(sb.toString());
   }
 
   /**
@@ -49,7 +51,7 @@ public class LocalFileSystemUploader implements IUploader {
    * been uploaded if successful, or {@code null} if failed.
    */
   @Override
-  public Object uploadPackage() {
+  public URI uploadPackage() {
     // first, check if the topology package exists
     boolean fileExists = new File(topologyPackageLocation).isFile();
     if (!fileExists) {

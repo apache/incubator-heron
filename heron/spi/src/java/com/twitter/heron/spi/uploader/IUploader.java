@@ -1,22 +1,23 @@
 package com.twitter.heron.spi.uploader;
 
+import java.net.URI;
+
 import com.twitter.heron.spi.common.Config;
 
 /**
  * Uploads topology package to a shared location. This location must be
  * accessible by runtime environment of topology. The uploader will upload
- *
- *   - topology jar,
- *   - topology jar dependencies,
- *   - topology definition, and
- *   - heron core packages and libraries, if required
- *
+ * <p/>
+ * - topology jar,
+ * - topology jar dependencies,
+ * - topology definition, and
+ * - heron core packages and libraries, if required
+ * <p/>
  * Uploader outputs another context containing the necessary information that
  * will be used by next stages of topology submission.
- *
+ * <p/>
  * Implementation of IUploader is required to have a no argument constructor
  * that will be called to create an instance of IUploader.
- *
  */
 public interface IUploader {
   /**
@@ -30,7 +31,7 @@ public interface IUploader {
    * @return destination URI of where the topology package has
    * been uploaded if successful, or {@code null} if failed.
    */
-  Object uploadPackage();
+  URI uploadPackage();
 
   /**
    * If subsequent stages fail, undo will be called to free resources used by
