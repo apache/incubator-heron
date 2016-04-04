@@ -215,8 +215,8 @@ public class LocalLauncher implements ILauncher {
     }
 
     // give warning for overwriting existing topology package
-    String topologyPackage = Runtime.topologyPackageUri(runtime);
-    LOG.info("Fetching topology package " + Runtime.topologyPackageUri(runtime));
+    String topologyPackage = Runtime.topologyPackageUri(runtime).toString();
+    LOG.info("Fetching topology package " + topologyPackage);
     LOG.info("If topology package is already in the working directory");
     LOG.info("the old one will be overwritten");
 
