@@ -24,8 +24,8 @@ public class HdfsUploader implements IUploader {
   public void initialize(Config config) {
     this.config = config;
 
-    this.hadoopConfdir = HdfsContext.getHadoopConfigDirectory(config);
-    this.destTopologyDirectory = HdfsContext.getHdfsTopologiesDirectory(config);
+    this.hadoopConfdir = HdfsContext.hadoopConfigDirectory(config);
+    this.destTopologyDirectory = HdfsContext.hdfsTopologiesDirectory(config);
     // get the original topology package location
     this.topologyPackageLocation = Context.topologyPackageFile(config);
 
