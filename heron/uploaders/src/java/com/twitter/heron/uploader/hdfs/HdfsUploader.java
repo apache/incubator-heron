@@ -15,7 +15,7 @@ public class HdfsUploader implements IUploader {
   private Config config;
   private String hadoopConfdir;
   // get the directory containing the file
-  String destTopologyDirectory;
+  String destTopologyDirectoryURI;
 
   private String topologyPackageLocation;
   private URI packageURI;
@@ -25,13 +25,13 @@ public class HdfsUploader implements IUploader {
     this.config = config;
 
     this.hadoopConfdir = HdfsContext.hadoopConfigDirectory(config);
-    this.destTopologyDirectory = HdfsContext.hdfsTopologiesDirectory(config);
+    this.destTopologyDirectoryURI = HdfsContext.hdfsTopologiesDirectoryURI(config);
     // get the original topology package location
     this.topologyPackageLocation = Context.topologyPackageFile(config);
 
     // name of the destination file is the same as the base name of the topology package file
     String fileName = new File(topologyPackageLocation).getName();
-    packageURI = Convert.getURI(String.format("%s/%s", destTopologyDirectory, fileName));
+    packageURI = Convert.getURI(String.format("%s/%s", destTopologyDirectoryURI, fileName));
   }
 
   @Override
@@ -45,10 +45,10 @@ public class HdfsUploader implements IUploader {
     }
 
     // if the dest directory does not exist, create it.
-    if (!HdfsUtils.isFileExists(hadoopConfdir, destTopologyDirectory, true)) {
+    if (!HdfsUtils.isFileExists(hadoopConfdir, destTopologyDirectoryURI, true)) {
       LOG.info("The destination directory does not exist; creating it.");
-      if (!HdfsUtils.createDir(hadoopConfdir, destTopologyDirectory, true)) {
-        LOG.severe("Failed to create directory: " + destTopologyDirectory);
+      if (!HdfsUtils.createDir(hadoopConfdir, destTopologyDirectoryURI, true)) {
+        LOG.severe("Failed to create directory: " + destTopologyDirectoryURI);
         return null;
       }
     }

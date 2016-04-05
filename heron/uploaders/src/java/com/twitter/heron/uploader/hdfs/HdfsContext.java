@@ -11,7 +11,7 @@ public class HdfsContext extends Context {
     return config.getStringValue(HADOOP_CONFIG_DIRECTORY);
   }
 
-  public static String hdfsTopologiesDirectory(Config config) {
+  public static String hdfsTopologiesDirectoryURI(Config config) {
     return config.getStringValue(HDFS_TOPOLOGIES_DIRECTORY_URI);
   }
 }
