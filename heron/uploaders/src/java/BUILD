@@ -69,3 +69,22 @@ genrule(
     outs = ["heron-localfs-uploader.jar"],
     cmd  = "cp $< $@",
 )
+
+java_library(
+    name = 'hdfs-uploader-java',
+    srcs = glob(["**/hdfs/**/*.java"]),
+    deps = uploader_spi_files,
+)
+
+java_binary(
+    name = 'hdfs-uploader-unshaded',
+    srcs = glob(["**/hdfs/**/*.java"]),
+    deps = uploader_spi_files,
+)
+
+genrule(
+    name = "heron-hdfs-uploader",
+    srcs = [":hdfs-uploader-unshaded_deploy.jar"],
+    outs = ["heron-hdfs-uploader.jar"],
+    cmd  = "cp $< $@",
+)
