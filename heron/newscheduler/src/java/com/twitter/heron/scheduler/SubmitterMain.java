@@ -318,6 +318,8 @@ public class SubmitterMain {
         uploader.undo();
         launcher.undo();
       }
+
+      uploader.close();
     }
 
     // Log the result and exit
