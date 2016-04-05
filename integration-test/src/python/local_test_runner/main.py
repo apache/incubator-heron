@@ -26,7 +26,7 @@ TEST_CASES = [
 ]
 # Retry variables in case the output is different from the input
 RETRY_COUNT = 5
-RETRY_INTERVAL = 15
+RETRY_INTERVAL = 60
 # Topology shard definitions
 TMASTER_SHARD = 0
 NON_TMASTER_SHARD = 1
@@ -74,7 +74,7 @@ def runTest(test, topologyName, params):
     logging.error("Failed to write to temp.txt file")
     return False
   # extra time to start up, write to .pid file, connect to tmaster, etc.
-  time.sleep(2)
+  time.sleep(30)
 
   # execute test case
   if test == 'KILL_TMASTER':
