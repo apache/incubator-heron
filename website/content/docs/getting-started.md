@@ -44,7 +44,7 @@ Make sure you have "/Users/USERNAME/bin" in your path.
 Launch an example [topology](../concepts/topologies) to **local cluster** using submit:
 
 ```bash
-$ heron submit local ~/.heron/examples/heron-examples.jar com.twitter.heron.examples.AckingTopology AckingTopology
+$ heron submit local ~/.heron/examples/heron-examples.jar com.twitter.heron.examples.ExclamationTopology ExclamationTopology
 ```
 
 ### Step 3 - Start Heron Tracker
@@ -71,9 +71,9 @@ In local browser, Heron UI is available at http://localhost:8889
 ### Step 5 - Explore activate, deactivate, and kill topology commands
 
 ```bash
-$ heron activate local AckingTopology
-$ heron deactivate local AckingTopology
-$ heron kill local AckingTopology
+$ heron activate local ExclamationTopology
+$ heron deactivate local ExclamationTopology
+$ heron kill local ExclamationTopology
 ```
 Explore [managing topologies with Heron CLI](../operators/heron-cli)
 and heron cli syntax. For example, to list the available commands,
@@ -111,9 +111,9 @@ Optional arguments:
 
 ### Step 6 - Explore other example topologies
 
-**AckingTopology.java**  | This is a basic example of a Heron topology with acking enabled.
-
 **ExclamationTopology.java** | This is a basic example of a Heron topology.
+
+**AckingTopology.java**  | This is a basic example of a Heron topology with acking enabled.
 
 **MultiSpoutExclamationTopology.java** | This is a basic example of a Heron topology with multiple spouts.
 
@@ -124,11 +124,6 @@ Optional arguments:
 **CustomGroupingTopology.java** | This is a basic example of a Heron topology that implements custom grouping 
 
 **ComponentJVMOptionsTopology.java** | This is a basic example of a Heron topology that supplies JVM options for each component
-
-To submit a topology, for example, ExclamationTopology, do the following:
-```bash
-$ heron submit local ~/.heron/examples/heron-examples.jar com.twitter.heron.examples.ExclamationTopology ExclamationTopology
-```
 
 ### Next Steps - Deploying or Developing
 
