@@ -141,7 +141,6 @@ public class RuntimeManagerMain {
     CommandLineParser parser = new DefaultParser();
     // parse the help options first.
     CommandLine cmd = parser.parse(helpOptions, args, true);
-    ;
 
     if (cmd.hasOption("h")) {
       usage(options);
