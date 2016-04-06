@@ -29,6 +29,13 @@ def insert_bool_values(command_line_args):
   args3 = insert_bool('--trace-execution', args2)
   return args2
 
+def add_classpath(parser):
+  parser.add_argument(
+      '--classpath',
+      metavar='(strings, separated by colon; default: "")',
+      default = "")
+  return parser
+
 def add_verbose(parser):
   parser.add_argument(
       '--verbose',

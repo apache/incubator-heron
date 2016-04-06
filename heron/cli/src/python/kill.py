@@ -33,6 +33,7 @@ def create_parser(subparsers):
   args.add_topology(parser)
 
   args.add_config(parser)
+  args.add_classpath(parser)
   args.add_verbose(parser)
 
   parser.set_defaults(subcommand='kill')
@@ -42,6 +43,7 @@ def run(command, parser, cl_args, unknown_args):
 
   try:
     topology_name = cl_args['topology-name']
+    classpath = cl_args['classpath']
     config_overrides = utils.parse_cmdline_override(cl_args)
 
     new_args = [
@@ -60,6 +62,7 @@ def run(command, parser, cl_args, unknown_args):
     # invoke the runtime manager to kill the topology
     execute.heron_class(
         'com.twitter.heron.scheduler.RuntimeManagerMain',
+        classpath,
         lib_jars,
         extra_jars=[],
         args= new_args

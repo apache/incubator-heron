@@ -40,6 +40,7 @@ def create_parser(subparsers):
   args.add_topology_file(parser)
   args.add_topology_class(parser)
   args.add_config(parser)
+  args.add_classpath(parser)
 
   parser.add_argument(
       '--deploy-deactivated',
@@ -64,6 +65,8 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
 
   # create a tar package with the configuration
   config_path = cl_args['config_path']
+  classpath = cl_args['classpath']
+
   tar_pkg_files = [topology_file, topology_defn_file]
   utils.create_tar(topology_pkg_path, tar_pkg_files, config_path)
 
@@ -90,6 +93,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
   # invoke the submitter to submit and launch the topology
   execute.heron_class(
       'com.twitter.heron.scheduler.SubmitterMain',
+      classpath,
       lib_jars,
       extra_jars=[],
       args = args
@@ -149,6 +153,7 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
   topology_file = cl_args['topology-file-name']
   execute.heron_class(
       cl_args['topology-class-name'],
+      cl_args['classpath'],
       utils.get_heron_libs(jars.topology_jars()),
       extra_jars = [topology_file],
       args = tuple(unknown_args))
@@ -184,6 +189,7 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
   topology_file = cl_args['topology-file-name']
   execute.heron_tar(
       cl_args['topology-class-name'],
+      cl_args['classpath'],
       topology_file, 
       tuple(unknown_args), 
       tmp_dir)
