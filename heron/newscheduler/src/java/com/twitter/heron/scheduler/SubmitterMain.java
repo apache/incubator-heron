@@ -308,16 +308,18 @@ public class SubmitterMain {
         }
       }
     } finally {
-      // 3. Do generic cleaning
-      // close the state manager
-      statemgr.close();
-
-      // 4. Do post work basing on the result
+      // 3. Do post work basing on the result
       if (!isSuccessful) {
         // Undo if failed to submit
         uploader.undo();
         launcher.undo();
       }
+
+      // 4. Do generic cleaning
+      // close the uploader
+      uploader.close();
+      // close the state manager
+      statemgr.close();
     }
 
     // Log the result and exit
