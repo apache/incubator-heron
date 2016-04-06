@@ -131,23 +131,21 @@ def check_classpath(classpath):
     elif not os.path.isfile(cp):
       Log.error('Invalid class path entry: %s' % (cp))
       return False
-
   return True 
 
 ################################################################################
 # Check validity of the parameters
 ################################################################################
 def check_parameters(command_line_args):
-  classpath = command_line_args['classpath']
-  if classpath and not check_classpath(classpath):
-    sys.exit(1)
+  if command_line_args.has_key('classpath'):
+    classpath = command_line_args['classpath']
+    if classpath and not check_classpath(classpath):
+      sys.exit(1)
 
-  try:
-    if command_line_args['verbose']: 
+  if command_line_args.has_key('verbose'):
+    verbose = command_line_args['verbose']
+    if verbose:
       opts.set_verbose()
-  except:
-    pass
-
 
 ################################################################################
 # Extract all the common args for all commands
