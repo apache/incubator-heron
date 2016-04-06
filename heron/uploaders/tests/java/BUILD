@@ -22,7 +22,7 @@ localfs_deps_files = \
 
 java_library(
     name = "local-filesystem-constants-java",
-    srcs = glob(["**/localfs/LocalFileSystemConstants.java"]),
+    srcs = glob(["**/localfs/LocalFileSystemConstantsTest.java"]),
 )
 
 java_test(
