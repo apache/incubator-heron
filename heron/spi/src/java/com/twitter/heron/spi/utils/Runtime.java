@@ -1,5 +1,7 @@
 package com.twitter.heron.spi.utils;
 
+import java.net.URI;
+
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
@@ -25,8 +27,8 @@ public class Runtime {
     return (TopologyAPI.Topology) runtime.get(Keys.topologyDefinition());
   }
 
-  public static String topologyPackageUri(Config cfg) {
-    return cfg.getStringValue(Keys.topologyPackageUri());
+  public static URI topologyPackageUri(Config cfg) {
+    return (URI)cfg.get(Keys.topologyPackageUri());
   }
 
   public static SchedulerStateManagerAdaptor schedulerStateManagerAdaptor(Config runtime) {

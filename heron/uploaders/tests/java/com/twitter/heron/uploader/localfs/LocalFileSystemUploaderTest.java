@@ -40,7 +40,7 @@ public class LocalFileSystemUploaderTest {
 
     // form the test topology directory
     testTopologyDirectory = Paths.get(System.getenv("JAVA_RUNFILES"), 
-        LocalFileSystemConstants.TEST_DATA_PATH).toString();
+        LocalFileSystemConstantsTest.TEST_DATA_PATH).toString();
 
     // Create the minimum config for tests
     config = Config.newBuilder()
@@ -69,7 +69,7 @@ public class LocalFileSystemUploaderTest {
     // create the uploader and load the package
     LocalFileSystemUploader uploader = new LocalFileSystemUploader(); 
     uploader.initialize(newconfig);
-    Assert.assertTrue(uploader.uploadPackage());
+    Assert.assertNotNull(uploader.uploadPackage());
 
     // verify if the file exists
     String destFile = uploader.getTopologyFile();
@@ -90,7 +90,7 @@ public class LocalFileSystemUploaderTest {
     uploader.initialize(newconfig);
 
     // Assert that the file does not exist
-    Assert.assertFalse(uploader.uploadPackage());
+    Assert.assertNull(uploader.uploadPackage());
   }
 
   @Test
@@ -105,7 +105,7 @@ public class LocalFileSystemUploaderTest {
     // create the uploader and load the package
     LocalFileSystemUploader uploader = new LocalFileSystemUploader(); 
     uploader.initialize(newconfig);
-    Assert.assertTrue(uploader.uploadPackage());
+    Assert.assertNotNull(uploader.uploadPackage());
 
     // verify if the file exists
     String destFile = uploader.getTopologyFile();
