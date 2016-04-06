@@ -25,6 +25,12 @@ local_deps_files = \
     spi_deps_files + \
     api_deps_files
 
+reef_deps_files = \
+    local_deps_files + [
+        "//heron/newscheduler/src/java:scheduler-java",
+        "//3rdparty/reef:reef-java",
+    ]
+
 java_library(
     name='local-scheduler-java',
     srcs = glob(["**/local/*.java"]),
@@ -64,5 +70,26 @@ genrule(
     name = "heron-aurora-scheduler",
     srcs = [":aurora-scheduler-unshaded_deploy.jar"],
     outs = ["heron-aurora-scheduler.jar"],
+    cmd  = "cp $< $@",
+)
+
+java_library(
+    name='reef-scheduler-java',
+    srcs = glob(["**/reef/*.java"]),
+    deps = reef_deps_files,
+    resources = glob(["**/reef/*.yaml"]),
+)
+
+java_binary(
+    name='reef-scheduler-unshaded',
+    srcs = glob(["**/reef/*.java"]),
+    deps = reef_deps_files,
+    resources = glob(["**/reef/*.yaml"]),
+)
+
+genrule(
+    name = "heron-reef-scheduler",
+    srcs = [":reef-scheduler-unshaded_deploy.jar"],
+    outs = ["heron-reef-scheduler.jar"],
     cmd  = "cp $< $@",
 )
