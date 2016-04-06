@@ -40,7 +40,7 @@ public class LocalFileSystemUploaderTest {
 
     // form the test topology directory
     testTopologyDirectory = Paths.get(System.getenv("JAVA_RUNFILES"), 
-        LocalFileSystemConstants.TEST_DATA_PATH).toString();
+        LocalFileSystemConstantsTest.TEST_DATA_PATH).toString();
 
     // Create the minimum config for tests
     config = Config.newBuilder()
