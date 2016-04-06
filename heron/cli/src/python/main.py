@@ -112,10 +112,46 @@ def check_environment():
     sys.exit(1)
 
 ################################################################################
+# Check whether the classpath provided is valid
+################################################################################
+def check_classpath(classpath):
+  cpaths = classpath.split(':')
+  if len(cpaths) == 1 and not cpaths[0]:
+    return True
+  for cp in cpaths:
+    if not cp: 
+      Log.error('Invalid class path: %s' % (classpath))
+      sys.exit(1)
+    if cp.endswith('*'):
+      if not os.path.isdir(os.path.dirname(cp)): 
+        Log.error('Class path entry %s not a directory' % (cp))
+        sys.exit(1)
+      else:
+        continue
+
+    if not os.path.isfile(cp):
+      Log.error('Invalid class path entry: %s' % (cp))
+      sys.exit(1)
+
+  return True 
+
+################################################################################
+# Check validity of the parameters
+################################################################################
+def check_parameters(command_line_args):
+  try:
+    if command_line_args['classpath']:
+      check_classpath(command_line_args['classpath'])
+    if command_line_args['verbose']: 
+      opts.set_verbose()
+  except:
+    pass
+
+
+################################################################################
 # Extract all the common args for all commands
 ################################################################################
 def extract_common_args(command, parser, cl_args):
-
   new_cl_args = dict()
   try:
     cluster_role_env = cl_args.pop('cluster/[role]/[env]')
@@ -168,13 +204,8 @@ def main():
   args, unknown_args = parser.parse_known_args()
   command_line_args = vars(args)
 
-  try:
-    if command_line_args['verbose']: 
-      opts.set_verbose()
-    if command_line_args['trace_execution']:
-      opts.set_trace_execution()
-  except:
-    pass
+  # check various parameters and if valid set appropriate options
+  check_parameters(command_line_args)
 
   # command to be execute
   command = command_line_args['subcommand']
