@@ -1,8 +1,11 @@
 package com.twitter.heron.spi.common;
 
-class Convert {
+import java.net.URI;
+import java.net.URISyntaxException;
 
- protected static Integer getInteger(Object o) {
+public class Convert {
+
+ public static Integer getInteger(Object o) {
     if (o instanceof Integer) {
       return ((Integer) o);
     } else if (o instanceof Long) {
@@ -18,7 +21,7 @@ class Convert {
     }
  }
 
- protected static Long getLong(Object o) {
+ public static Long getLong(Object o) {
     if (o instanceof Long) {
       return ((Long) o);
     } else if (o instanceof Integer) {
@@ -34,7 +37,7 @@ class Convert {
     }
   }
 
-  protected static Double getDouble(Object o) {
+  public static Double getDouble(Object o) {
     if (o instanceof Double) {
       return ((Double) o);
     } else if (o instanceof Float) {
@@ -51,6 +54,14 @@ class Convert {
       } catch (NumberFormatException nfe) {
         throw new IllegalArgumentException("Don't know how to convert " + o + " + to double");
       }
+    }
+  }
+
+  public static URI getURI(String spec){
+    try {
+      return new URI(spec);
+    } catch (URISyntaxException e) {
+      throw new IllegalArgumentException("Don't know how to convert " + spec + " + to URI");
     }
   }
 }

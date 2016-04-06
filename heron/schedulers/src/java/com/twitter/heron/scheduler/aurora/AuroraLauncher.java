@@ -116,7 +116,7 @@ public class AuroraLauncher implements ILauncher {
     // TODO(mfu): Following configs need customization before using
     // TODO(mfu): Put the constant in Constants.java
     String heronCoreReleasePkgURI = Context.corePackageUri(config);
-    String topologyPkgURI = Runtime.topologyPackageUri(runtime);
+    String topologyPkgURI = Runtime.topologyPackageUri(runtime).toString();
 
     auroraProperties.put("CORE_PACKAGE_URI", heronCoreReleasePkgURI);
     auroraProperties.put("TOPOLOGY_PACKAGE_URI", topologyPkgURI);
