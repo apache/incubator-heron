@@ -46,6 +46,14 @@ def create_parser(subparsers):
       metavar='(a boolean; default: "false")',
       default=False)
 
+  parser.add_argument(
+      '-D',
+      default=[],
+      action="append",
+      dest="javaDefines",
+      metavar='DEFINE',
+      help='Define a system property to pass to java -D when running main.')
+
   args.add_verbose(parser)
 
   parser.set_defaults(subcommand='submit')
@@ -92,7 +100,8 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
       'com.twitter.heron.scheduler.SubmitterMain',
       lib_jars,
       extra_jars=[],
-      args = args
+      args = args,
+      javaDefines = cl_args['javaDefines']
   )
 
 ################################################################################
@@ -151,7 +160,8 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
       cl_args['topology-class-name'],
       utils.get_heron_libs(jars.topology_jars()),
       extra_jars = [topology_file],
-      args = tuple(unknown_args))
+      args = tuple(unknown_args),
+      javaDefines = cl_args['javaDefines'])
 
   try:
     launch_topologies(cl_args, topology_file, tmp_dir)
@@ -184,9 +194,10 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
   topology_file = cl_args['topology-file-name']
   execute.heron_tar(
       cl_args['topology-class-name'],
-      topology_file, 
-      tuple(unknown_args), 
-      tmp_dir)
+      topology_file,
+      tuple(unknown_args),
+      tmp_dir,
+      cl_args['javaDefines'])
 
   try:
     launch_topologies(cl_args, topology_file, tmp_dir)
