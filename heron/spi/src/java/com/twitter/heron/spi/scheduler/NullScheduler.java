@@ -12,6 +12,11 @@ public class NullScheduler implements IScheduler {
   }
 
   @Override
+  public void close() {
+
+  }
+
+  @Override
   public void schedule(PackingPlan packing) {
 
   }
