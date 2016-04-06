@@ -33,6 +33,11 @@ filegroup(
 )
 
 filegroup(
+    name = "conf-reef-yaml",
+    srcs = glob(["conf/reef/*"]),
+)
+
+filegroup(
     name = "conf-local-heron-internals",
     srcs = ["conf/local/heron_internals.yaml"],
 )

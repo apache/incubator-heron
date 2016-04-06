@@ -1,0 +1,14 @@
+# scheduler class for distributing the topology for execution
+heron.class.scheduler:                       com.twitter.heron.scheduler.reef.ReefScheduler
+
+# launcher class for submitting and launching the topology
+heron.class.launcher:                        com.twitter.heron.scheduler.reef.ReefLauncher
+
+# runtime class for managing topology
+heron.class.runtime.manager:                 com.twitter.heron.scheduler.local.LocalRuntimeManager
+
+# working directory for the topologies
+heron.scheduler.local.working.directory:     ${HOME}/.herondata/topologies/${CLUSTER}/${ROLE}/${TOPOLOGY}
+
+# location of java - pick it up from shell environment
+heron.directory.sandbox.java.home:           ${JAVA_HOME}
