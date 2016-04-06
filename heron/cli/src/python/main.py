@@ -121,17 +121,16 @@ def check_classpath(classpath):
   for cp in cpaths:
     if not cp: 
       Log.error('Invalid class path: %s' % (classpath))
-      sys.exit(1)
-    if cp.endswith('*'):
+      return False
+    elif cp.endswith('*'):
       if not os.path.isdir(os.path.dirname(cp)): 
         Log.error('Class path entry %s not a directory' % (cp))
-        sys.exit(1)
+        return False
       else:
         continue
-
-    if not os.path.isfile(cp):
+    elif not os.path.isfile(cp):
       Log.error('Invalid class path entry: %s' % (cp))
-      sys.exit(1)
+      return False
 
   return True 
 
@@ -139,9 +138,11 @@ def check_classpath(classpath):
 # Check validity of the parameters
 ################################################################################
 def check_parameters(command_line_args):
+  classpath = command_line_args['classpath']
+  if classpath and not check_classpath(classpath):
+    sys.exit(1)
+
   try:
-    if command_line_args['classpath']:
-      check_classpath(command_line_args['classpath'])
     if command_line_args['verbose']: 
       opts.set_verbose()
   except:
