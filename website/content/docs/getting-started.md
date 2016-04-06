@@ -3,19 +3,40 @@ date: 2016-02-28T13:10:21-08:00
 title: Getting Started
 ---
 
-Run Topologies using pre-compiled Heron binaries
+Run topologies locally using pre-compiled Heron binaries (Mac OSX, Ubuntu >= 14.04, Centos7)
 
-### Step 1 - Download pre-compiled Heron binaries
+### Step 1 - Download pre-compiled Heron binaries with install scripts
 
-Navigate to home directory, download Heron tar.gz, untar
-TODO ADD LOCATION 
+Navigate to [Twitter Heron Releases](https://github.com/twitter/heron/releases) and
+download the following self extracting binary install scripts 
+
+* heron-client-install
+* heron-tools-install
+
+for your platform. For example, if you want to download for Mac OSX (darwin), the 
+corresponding binaries will be
+
+* heron-client-install-\<version\>-darwin.sh
+* heron-tools-install-\<version\>-darwin.sh
+
+where \<version\> is the desired heron version.
+
+Run the download self installing binary for heron client as follows
 ```bash
-$ cd ~/bin
-$ wget TODO-LOCATION/heron.tar.gz && wget TODO-LOCATION/heron-tools.tar.gz
-$ tar xzvf heron.tar.gz && tar xzvf heron-tools.tar.gz
-$ ls -al
+$ chmod +x heron-client-install-0.13.1-darwin.sh
+$ ./heron-client-install-0.13.1-darwin.sh --user
+Uncompressing......
+Heron is now installed!
+Make sure you have "/Users/USERNAME/bin" in your path.
+```
 
-heron-cl3 heron-tracker heron-ui
+Run the download self installing binary for heron tools as follows
+```bash
+$ chmod +x heron-tools-install-0.13.1-darwin.sh
+$ ./heron-tools-install-0.13.1-darwin.sh --user
+Uncompressing......
+Heron Tools is now installed!
+Make sure you have "/Users/USERNAME/bin" in your path.
 ```
 
 ### Step 2 - Launch an example topology
@@ -23,7 +44,7 @@ heron-cl3 heron-tracker heron-ui
 Launch an example [topology](../concepts/topologies) to **local cluster** using submit:
 
 ```bash
-$ heron-cli3 submit local ~/.heron/examples/heron-examples.jar com.twitter.heron.examples.AckingTopology AckingTopology
+$ heron submit local ~/.heron/examples/heron-examples.jar com.twitter.heron.examples.ExclamationTopology ExclamationTopology
 ```
 
 ### Step 3 - Start Heron Tracker
@@ -32,8 +53,9 @@ Open a new terminal window and launch [heron-tracker](../operators/heron-tracker
 ```bash
 $ heron-tracker
 ... Running on port: 8888
+... Using config file: /Users/USERNAME/.herontools/conf/localfilestateconf.yaml
 ```
-In local browser, Heron tracker is available on http://localhost:8888
+In local browser, Heron tracker can be reached at http://localhost:8888
 
 
 ### Step 4 - Start Heron UI
@@ -42,31 +64,70 @@ Open a new terminal window and launch UI:
 ```bash
 $ heron-ui
 ... Running on port: 8889
+... Using tracker url: http://localhost:8888
 ```
-In local browser, Heron UI is available on http://localhost:8889
+In local browser, Heron UI is available at http://localhost:8889
 
-### Step 5 - Explore activate, deactivate, kill topology commands
+### Step 5 - Explore activate, deactivate, and kill topology commands
 
 ```bash
-$ heron-cli3 activate local AckingTopology
-$ heron-cli3 deactivate local AckingTopology
-$ heron-cli3 kill local AckingTopology
+$ heron activate local ExclamationTopology
+$ heron deactivate local ExclamationTopology
+$ heron kill local ExclamationTopology
 ```
 Explore [managing topologies with Heron CLI](../operators/heron-cli)
-and Heron-cli3 syntax:
+and heron cli syntax. For example, to list the available commands,
 ```bash
-usage: heron-cli3 submit [options] cluster/[role]/[environ] topology-file-name topology-class-name [topology-args]
+usage: heron <command> <options> ...
 
-
-usage: heron-cli3 <command> [command-options] ...
 Available commands:
-    activate            Activate a topology
-    classpath           Print class path of heron-cli
-    deactivate          Deactivate a topology
-    help                Prints help for commands
-    kill                Kill a topology
-    restart             Restart a topology
-    submit              Submit a topology
-    version             Print version of heron-cli
+    activate           Activate a topology
+    deactivate         Deactivate a topology
+    help               Prints help for commands
+    kill               Kill a topology
+    restart            Restart a topology
+    submit             Submit a topology
+    version            Print version of heron-cli
+
+For detailed documentation, go to http://heronstreaming.io
 ```
+
+As another example, to invoke the help for submitting a topology
+```bash
+$ heron help submit 
+usage: heron submit [options] cluster/[role]/[environ] topology-file-name topology-class-name [topology-args]
+
+Required arguments:
+  cluster/[role]/[env]  Cluster, role, and environ to run topology
+  topology-file-name    Topology jar/tar/zip file
+  topology-class-name   Topology class name
+
+Optional arguments:
+  --config-path (a string; path to cluster config; default: "/Users/USERNAME/.heron/conf/<cluster>")
+  --config-property (a string; a config property; default: [])
+  --deploy-deactivated (a boolean; default: "false")
+  --verbose (a boolean; default: "false")
+```
+
+### Step 6 - Explore other example topologies
+
+**ExclamationTopology.java** | This is a basic example of a Heron topology.
+
+**AckingTopology.java**  | This is a basic example of a Heron topology with acking enabled.
+
+**MultiSpoutExclamationTopology.java** | This is a basic example of a Heron topology with multiple spouts.
+
+**MultiStageAckingTopology.java** | This is three stage topology. Spout emits to bolt that feeds to another bolt. 
+
+**TaskHookTopology.java** | This is a basic Task Hook Heron topology.
+
+**CustomGroupingTopology.java** | This is a basic example of a Heron topology that implements custom grouping 
+
+**ComponentJVMOptionsTopology.java** | This is a basic example of a Heron topology that supplies JVM options for each component
+
+### Next Steps - Deploying or Developing
+
+[Deploying Existing topologies](../operators/deployment/README) in clustered, scheduler-driven environments (Aurora, Mesos, Local)
+
+[Developing Topologies](../concepts/architecture) with the Architecture of Heron
 
