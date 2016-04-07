@@ -48,7 +48,7 @@ cat > $iml_file <<EOH
    -->
     <content url="file://\$MODULE_DIR$/heron">
 EOH
-
+ echo '      <sourceFolder url="file://$MODULE_DIR$/heron/config/src" type="java-resource" />'>> $iml_file
 for source in ${JAVA_PATHS}; do
      if [[ $source == *"javatests" ]]; then
        is_test_source="true"
