@@ -51,11 +51,6 @@ public interface ILauncher extends AutoCloseable {
   boolean postLaunch(PackingPlan packing);
 
   /**
-   * In case launch fails, this is called to clean up state, if any.
-   */
-  void undo();
-
-  /**
    * Add/Modify additional information in execution state. Returns new ExecutionState created using
    * current execution state and adding additional Launch specific information
    * TODO(nbhagat): Don't overload heron's ExecutionState with scheduler specific data.
