@@ -41,7 +41,7 @@ Make sure you have "/Users/$USER/bin" in your path.
 
 ### Step 2 - Launch an example topology
 
-Launch an example [topology](../concepts/topologies) on a **local cluster** using submit:
+Launch an example [topology](../concepts/topologies) on **local cluster** using submit:
 
 ```bash
 $ heron submit local ~/.heron/examples/heron-examples.jar com.twitter.heron.examples.ExclamationTopology ExclamationTopology
