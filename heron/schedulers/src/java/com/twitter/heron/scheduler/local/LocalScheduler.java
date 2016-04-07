@@ -62,6 +62,11 @@ public class LocalScheduler implements IScheduler {
     LOG.info("Executor for each container have been started.");
   }
 
+  @Override
+  public void close() {
+
+  }
+
   /**
    * Encode the JVM options
    *

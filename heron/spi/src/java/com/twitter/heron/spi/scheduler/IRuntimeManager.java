@@ -2,7 +2,7 @@ package com.twitter.heron.spi.scheduler;
 
 import com.twitter.heron.spi.common.Config;
 
-public interface IRuntimeManager {
+public interface IRuntimeManager extends AutoCloseable {
   enum Command {
     KILL,
     ACTIVATE,
@@ -16,7 +16,20 @@ public interface IRuntimeManager {
 
   void initialize(Config config, Config runtime);
 
+  /**
+   * This is to for disposing or cleaning up any internal state accumulated by
+   * the RuntimeManager
+   * <p/>
+   * Closes this stream and releases any system resources associated
+   * with it. If the stream is already closed then invoking this
+   * method has no effect.
+   */
   void close();
+
+  /**
+   * In case launch fails, this is called to clean up state, if any.
+   */
+  void undo();
 
   boolean prepareRestart(Integer containerId);
 
