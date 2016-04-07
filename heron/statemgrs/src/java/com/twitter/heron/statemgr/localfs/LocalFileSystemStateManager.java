@@ -1,6 +1,5 @@
 package com.twitter.heron.statemgr.localfs;
 
-import java.util.Map;
 import java.util.logging.Logger;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -14,8 +13,8 @@ import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.statemgr.FileSystemStateManager;
 import com.twitter.heron.spi.statemgr.WatchCallback;
+import com.twitter.heron.statemgr.FileSystemStateManager;
 
 public class LocalFileSystemStateManager extends FileSystemStateManager {
   private static final Logger LOG = Logger.getLogger(LocalFileSystemStateManager.class.getName());
@@ -156,6 +155,11 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     SettableFuture<Scheduler.SchedulerLocation> future = SettableFuture.create();
     String path = getSchedulerLocationPath(topologyName);
     byte[] data = FileUtils.readFromFile(path);
+    if(data.length == 0){
+      future.set(null);
+      return future;
+    }
+
     Scheduler.SchedulerLocation location;
     try {
       location = Scheduler.SchedulerLocation.parseFrom(data);
@@ -172,6 +176,11 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     SettableFuture<TopologyAPI.Topology> future = SettableFuture.create();
     String path = getTopologyPath(topologyName);
     byte[] data = FileUtils.readFromFile(path);
+    if(data.length == 0){
+      future.set(null);
+      return future;
+    }
+
     TopologyAPI.Topology topology;
     try {
       topology = TopologyAPI.Topology.parseFrom(data);
@@ -188,6 +197,11 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     SettableFuture<ExecutionEnvironment.ExecutionState> future = SettableFuture.create();
     String path = getExecutionStatePath(topologyName);
     byte[] data = FileUtils.readFromFile(path);
+    if(data.length == 0){
+      future.set(null);
+      return future;
+    }
+
     ExecutionEnvironment.ExecutionState executionState;
     try {
       executionState = ExecutionEnvironment.ExecutionState.parseFrom(data);
@@ -204,6 +218,11 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     SettableFuture<PhysicalPlans.PhysicalPlan> future = SettableFuture.create();
     String path = getPhysicalPlanPath(topologyName);
     byte[] data = FileUtils.readFromFile(path);
+    if(data.length == 0){
+      future.set(null);
+      return future;
+    }
+
     PhysicalPlans.PhysicalPlan physicalPlan;
     try {
       physicalPlan = PhysicalPlans.PhysicalPlan.parseFrom(data);
@@ -220,6 +239,11 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     SettableFuture<TopologyMaster.TMasterLocation> future = SettableFuture.create();
     String path = getTMasterLocationPath(topologyName);
     byte[] data = FileUtils.readFromFile(path);
+    if(data.length == 0){
+      future.set(null);
+      return future;
+    }
+
     TopologyMaster.TMasterLocation location;
     try {
       location = TopologyMaster.TMasterLocation.parseFrom(data);
