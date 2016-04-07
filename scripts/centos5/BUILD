@@ -36,6 +36,7 @@ genrule(
         ":htmaster",
         ":hscheduler",
         ":hlscheduler",
+        ":hascheduler",
         ":hrrpacking",
         ":hmetricsmgr",
         ":hlfsstatemgr",
@@ -56,6 +57,7 @@ genrule(
         "--cp $(location htmaster)       heron-core/bin/heron-tmaster",
         "--cp $(location hscheduler)     heron-core/lib/scheduler/heron-scheduler.jar",
         "--cp $(location hlscheduler)    heron-core/lib/scheduler/heron-local-scheduler.jar",
+        "--cp $(location hascheduler)    heron-core/lib/scheduler/heron-aurora-scheduler.jar",
         "--cp $(location hrrpacking)     heron-core/lib/packing/heron-roundrobin-packing.jar",
         "--cp $(location hmetricsmgr)    heron-core/lib/metricsmgr/heron-metricsmgr.jar",
         "--cp $(location hlfsstatemgr)   heron-core/lib/statemgr/heron-localfs-statemgr.jar",
@@ -85,6 +87,7 @@ genrule(
         ":hexamples",
         ":hscheduler",
         ":hlscheduler",
+        ":hascheduler",
         ":hrrpacking",
         ":hlfsstatemgr",
         ":hzkstatemgr",
@@ -114,6 +117,7 @@ genrule(
         "--cp $(location hexamples)                  examples/heron-examples.jar",
         "--cp $(location hscheduler)                 lib/scheduler/heron-scheduler.jar",
         "--cp $(location hlscheduler)                lib/scheduler/heron-local-scheduler.jar",
+        "--cp $(location hascheduler)                lib/scheduler/heron-aurora-scheduler.jar",
         "--cp $(location hrrpacking)                 lib/packing/heron-roundrobin-packing.jar",
         "--cp $(location hlfsstatemgr)               lib/statemgr/heron-localfs-statemgr.jar",
         "--cp $(location hzkstatemgr)                lib/statemgr/heron-zookeeper-statemgr.jar",
@@ -245,6 +249,11 @@ filegroup(
 filegroup(
     name = "hlscheduler",
     srcs = ["//heron/schedulers/src/java:heron-local-scheduler"],
+)
+
+filegroup(
+    name = "hascheduler",
+    srcs = ["//heron/schedulers/src/java:heron-aurora-scheduler"],
 )
 
 filegroup(
