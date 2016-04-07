@@ -19,7 +19,7 @@ import com.twitter.heron.spi.common.Config;
  * Implementation of IUploader is required to have a no argument constructor
  * that will be called to create an instance of IUploader.
  */
-public interface IUploader {
+public interface IUploader extends AutoCloseable {
   /**
    * Initialize the uploader with the incoming context.
    */
@@ -42,6 +42,10 @@ public interface IUploader {
   /**
    * This is to for disposing or cleaning up any internal state accumulated by
    * the uploader
+   * <p/>
+   * Closes this stream and releases any system resources associated
+   * with it. If the stream is already closed then invoking this
+   * method has no effect.
    */
   void close();
 }

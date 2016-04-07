@@ -35,6 +35,11 @@ public class AuroraLauncher implements ILauncher {
   }
 
   @Override
+  public void close() {
+
+  }
+
+  @Override
   public boolean prepareLaunch(PackingPlan packing) {
     return true;
   }
