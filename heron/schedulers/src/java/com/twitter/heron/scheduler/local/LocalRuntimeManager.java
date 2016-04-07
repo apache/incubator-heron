@@ -23,11 +23,6 @@ public class LocalRuntimeManager implements IRuntimeManager {
   }
 
   @Override
-  public void undo() {
-
-  }
-
-  @Override
   public boolean prepareRestart(Integer containerId) {
     return true;
   }

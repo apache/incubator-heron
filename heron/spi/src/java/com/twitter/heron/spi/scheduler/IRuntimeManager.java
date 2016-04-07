@@ -26,11 +26,6 @@ public interface IRuntimeManager extends AutoCloseable {
    */
   void close();
 
-  /**
-   * In case launch fails, this is called to clean up state, if any.
-   */
-  void undo();
-
   boolean prepareRestart(Integer containerId);
 
   boolean postRestart(Integer containerId);

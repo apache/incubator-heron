@@ -32,11 +32,6 @@ public class NullLauncher implements ILauncher {
   }
 
   @Override
-  public void undo() {
-
-  }
-
-  @Override
   public ExecutionEnvironment.ExecutionState updateExecutionState(ExecutionEnvironment.ExecutionState executionState) {
     return executionState;
   }

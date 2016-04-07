@@ -232,10 +232,8 @@ public class RuntimeManagerMain {
       // 3. Do post work basing on the result
       // Currently nothing to do here
 
-      // 4. Do generic cleaning
-      // close the runtime manager
+      // 4. Close the resources
       runtimeManager.close();
-      // close the state manager
       statemgr.close();
     }
 
