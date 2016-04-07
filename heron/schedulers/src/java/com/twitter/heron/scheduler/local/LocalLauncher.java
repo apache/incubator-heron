@@ -55,6 +55,11 @@ public class LocalLauncher implements ILauncher {
         topologyWorkingDirectory, "topology.tar.gz").toString();
   }
 
+  @Override
+  public void close() {
+
+  }
+
   /**
    * Encode the JVM options
    *

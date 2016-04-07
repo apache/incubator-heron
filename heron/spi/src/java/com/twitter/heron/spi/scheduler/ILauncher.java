@@ -1,13 +1,13 @@
 package com.twitter.heron.spi.scheduler;
 
 import com.twitter.heron.proto.system.ExecutionEnvironment;
-import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.PackingPlan;
 
 /**
  * Launches scheduler. heron-cli will create Launcher object using default no argument constructor.
  */
-public interface ILauncher {
+public interface ILauncher extends AutoCloseable {
   /**
    * Initialize Launcher with Config, Uploader and topology. These object
    * will be passed from submitter main. Config will contain information that launcher may use
@@ -15,6 +15,16 @@ public interface ILauncher {
    * services which will launch scheduler.
    */
   void initialize(Config config, Config runtime);
+
+  /**
+   * This is to for disposing or cleaning up any internal state accumulated by
+   * the ILauncher
+   * <p/>
+   * Closes this stream and releases any system resources associated
+   * with it. If the stream is already closed then invoking this
+   * method has no effect.
+   */
+  void close();
 
   /**
    * Will be called locally before trying to launch topology remotely
