@@ -141,11 +141,6 @@ public class LocalLauncher implements ILauncher {
   }
 
   @Override
-  public void undo() {
-    // Currently nothing need to do here
-  }
-
-  @Override
   public ExecutionEnvironment.ExecutionState updateExecutionState(
       ExecutionEnvironment.ExecutionState executionState) {
     String release = "local-live";
