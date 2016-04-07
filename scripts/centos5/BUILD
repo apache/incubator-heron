@@ -91,8 +91,9 @@ genrule(
         ":hrrpacking",
         ":hlfsstatemgr",
         ":hzkstatemgr",
-        ":hnuploader",
-        ":hlfsuploader",
+        ":huploader-localfs",
+        ":huploader-null",
+        ":huploader-packer",
         ":protobuf-java",
         ":slf4j-api-java",
         ":slf4j-jdk-java",
@@ -121,8 +122,9 @@ genrule(
         "--cp $(location hrrpacking)                 lib/packing/heron-roundrobin-packing.jar",
         "--cp $(location hlfsstatemgr)               lib/statemgr/heron-localfs-statemgr.jar",
         "--cp $(location hzkstatemgr)                lib/statemgr/heron-zookeeper-statemgr.jar",
-        "--cp $(location hnuploader)                 lib/uploader/heron-null-uploader.jar",
-        "--cp $(location hlfsuploader)               lib/uploader/heron-localfs-uploader.jar",
+        "--cp $(location huploader-localfs)          lib/uploader/heron-localfs-uploader.jar",
+        "--cp $(location huploader-null)             lib/uploader/heron-null-uploader.jar",
+        "--cp $(location huploader-packer)           lib/uploader/heron-packer-uploader.jar",
         "--cp $(location protobuf-java)              lib/3rdparty/$$(basename $(location protobuf-java))",
         "--cp $(location slf4j-api-java)             lib/3rdparty/$$(basename $(location slf4j-api-java))",
         "--cp $(location slf4j-jdk-java)             lib/3rdparty/$$(basename $(location slf4j-jdk-java))",
@@ -387,13 +389,18 @@ filegroup(
 )
 
 filegroup(
-    name = "hnuploader",
+    name = "huploader-localfs",
+    srcs = ["//heron/uploaders/src/java:heron-localfs-uploader"],
+)
+
+filegroup(
+    name = "huploader-null",
     srcs = ["//heron/uploaders/src/java:heron-null-uploader"],
 )
 
 filegroup(
-    name = "hlfsuploader",
-    srcs = ["//heron/uploaders/src/java:heron-localfs-uploader"],
+    name = "huploader-packer",
+    srcs = ["//heron/uploaders/src/java:heron-packer-uploader"],
 )
 
 genrule(
