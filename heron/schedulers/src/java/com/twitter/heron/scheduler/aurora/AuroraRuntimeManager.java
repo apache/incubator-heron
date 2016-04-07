@@ -26,11 +26,6 @@ public class AuroraRuntimeManager implements IRuntimeManager {
   }
 
   @Override
-  public void undo() {
-
-  }
-
-  @Override
   public boolean prepareRestart(Integer containerId) {
     return true;
   }

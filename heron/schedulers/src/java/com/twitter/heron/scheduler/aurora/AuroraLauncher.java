@@ -141,11 +141,6 @@ public class AuroraLauncher implements ILauncher {
   }
 
   @Override
-  public void undo() {
-    // Currently nothing need to do here
-  }
-
-  @Override
   public ExecutionEnvironment.ExecutionState updateExecutionState(ExecutionEnvironment.ExecutionState executionState) {
     // TODO(mfu): These values should read from config
     String releaseUsername = "heron";

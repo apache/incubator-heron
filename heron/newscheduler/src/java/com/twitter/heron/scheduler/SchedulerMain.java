@@ -19,8 +19,6 @@ import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.server.SchedulerServer;
-import com.twitter.heron.spi.common.ClusterConfig;
-import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
@@ -234,6 +232,10 @@ public class SchedulerMain {
     String packingClass = Context.packingClass(config);
     IPacking packing = (IPacking) Class.forName(packingClass).newInstance();
 
+    // create an instance of scheduler
+    String schedulerClass = Context.schedulerClass(config);
+    IScheduler scheduler = (IScheduler) Class.forName(schedulerClass).newInstance();
+
     // build the runtime config
     Config runtime = Config.newBuilder()
         .put(Keys.topologyId(), topology.getId())
@@ -262,10 +264,6 @@ public class SchedulerMain {
           .put(Keys.schedulerShutdown(), new Shutdown())
           .build();
 
-      // create an instance of scheduler
-      String schedulerClass = Context.schedulerClass(config);
-      IScheduler scheduler = (IScheduler) Class.forName(schedulerClass).newInstance();
-
       // initialize the scheduler
       scheduler.initialize(config, ytruntime);
 
@@ -293,6 +291,10 @@ public class SchedulerMain {
       if (server != null) {
         server.stop();
       }
+
+      // 4. Close the resources
+      scheduler.close();
+      packing.close();
       statemgr.close();
     }
 

@@ -286,6 +286,7 @@ public class SubmitterMain {
     String topologyName = topology.getName();
 
     boolean isSuccessful = false;
+    URI packageURI = null;
     // Put it in a try block so that we can always clean resources
     try {
       // initialize the state manager
@@ -299,7 +300,7 @@ public class SubmitterMain {
         LOG.log(Level.INFO, "Topology {0} to be submitted", topologyName);
 
         // Firstly, try to upload necessary packages
-        URI packageURI = uploadPackage(config, uploader);
+        packageURI = uploadPackage(config, uploader);
         if (packageURI == null) {
           LOG.severe("Failed to upload package.");
         } else {
@@ -310,15 +311,16 @@ public class SubmitterMain {
     } finally {
       // 3. Do post work basing on the result
       if (!isSuccessful) {
-        // Undo if failed to submit
-        uploader.undo();
-        launcher.undo();
+        // Undo the upload if failed to submit && the upload is successful
+        if (packageURI != null) {
+          uploader.undo();
+        }
       }
 
-      // 4. Do generic cleaning
-      // close the uploader
+      // 4. Close the resources
       uploader.close();
-      // close the state manager
+      packing.close();
+      launcher.close();
       statemgr.close();
     }
 
