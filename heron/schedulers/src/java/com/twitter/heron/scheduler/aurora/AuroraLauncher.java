@@ -35,6 +35,11 @@ public class AuroraLauncher implements ILauncher {
   }
 
   @Override
+  public void close() {
+
+  }
+
+  @Override
   public boolean prepareLaunch(PackingPlan packing) {
     return true;
   }
@@ -133,11 +138,6 @@ public class AuroraLauncher implements ILauncher {
   @Override
   public boolean postLaunch(PackingPlan packing) {
     return true;
-  }
-
-  @Override
-  public void undo() {
-    // Currently nothing need to do here
   }
 
   @Override

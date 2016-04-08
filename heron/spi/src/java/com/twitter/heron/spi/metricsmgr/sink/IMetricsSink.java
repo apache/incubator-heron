@@ -11,7 +11,7 @@ import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
  * {@link #processRecord(MetricsRecord)} method.
  * And {@link #flush()} is called at an interval according to the configuration
  */
-public interface IMetricsSink {
+public interface IMetricsSink extends AutoCloseable {
   /**
    * Initialize the MetricsSink
    *
@@ -20,25 +20,25 @@ public interface IMetricsSink {
    * Attempts to modify the returned map,
    * whether direct or via its collection views, result in an UnsupportedOperationException.
    */
-  public void init(Map<String, Object> conf, SinkContext context);
+  void init(Map<String, Object> conf, SinkContext context);
 
   /**
    * Process a metrics record in the sink
    *
    * @param record the record to put
    */
-  public void processRecord(MetricsRecord record);
+  void processRecord(MetricsRecord record);
 
   /**
    * Flush any buffered metrics
    * It would be called at an interval according to the configuration
    */
-  public void flush();
+  void flush();
 
   /**
    * Closes this stream and releases any system resources associated
    * with it. If the stream is already closed then invoking this
    * method has no effect.
    */
-  public void close();
+  void close();
 }
