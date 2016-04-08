@@ -29,7 +29,9 @@ public class LoggingHelper {
 
     if (isRedirectStdOutErr) {
 
-      // Remove ConsoleHandler if present, to avoid infinite loop
+      // Remove ConsoleHandler if present, to avoid StackOverflowError.
+      // ConsoleHandler writes to System.err and since we are redirecting
+      // System.err to Logger, it results in an infinte loop.
       for(Handler handler: rootLogger.getHandlers()) {
         if(handler instanceof ConsoleHandler) {
           rootLogger.removeHandler(handler);

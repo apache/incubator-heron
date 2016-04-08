@@ -245,15 +245,15 @@ public class SubmitterMain {
     // init log
     LoggingHelper.loggerInit(logLevel, false);
 
-    String cluster = cmd.getOptionValue("cluster");;
-    String role = cmd.getOptionValue("role");;
-    String environ = cmd.getOptionValue("environment");;
-    String heronHome = cmd.getOptionValue("heron_home");;
-    String configPath = cmd.getOptionValue("config_path");;
-    String configOverrideEncoded = cmd.getOptionValue("config_overrides");;
-    String topologyPackage = cmd.getOptionValue("topology_package");;
-    String topologyDefnFile = cmd.getOptionValue("topology_defn");;
-    String topologyJarFile = cmd.getOptionValue("topology_jar");;
+    String cluster = cmd.getOptionValue("cluster");
+    String role = cmd.getOptionValue("role");
+    String environ = cmd.getOptionValue("environment");
+    String heronHome = cmd.getOptionValue("heron_home");
+    String configPath = cmd.getOptionValue("config_path");
+    String configOverrideEncoded = cmd.getOptionValue("config_overrides");
+    String topologyPackage = cmd.getOptionValue("topology_package");
+    String topologyDefnFile = cmd.getOptionValue("topology_defn");
+    String topologyJarFile = cmd.getOptionValue("topology_jar");
 
     // load the topology definition into topology proto
     TopologyAPI.Topology topology = TopologyUtils.getTopology(topologyDefnFile);
