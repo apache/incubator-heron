@@ -21,25 +21,24 @@ function query() {
     ./output/bazel query "$@"
 }
 
-# Compile bazel
-#[ -f "output/bazel" ] || ./compile.sh compile >&2 || exit $?
-
 # Build everything
 bazel build heron/...
-
-# Source roots.
-JAVA_PATHS="$(find heron -name "*.java" | sed "s|/src/java/.*$|/src/java|" |  sed "s|/tests/java/.*$|/tests/java|" | sort -u | fgrep -v "heron/scheduler/" | fgrep -v "heron/scheduler/" )"
-if [ "$(uname -s | tr 'A-Z' 'a-z')" != "darwin" ]; then
-  JAVA_PATHS="$(echo "${JAVA_PATHS}" | fgrep -v "/objc_tools/")" 
-fi
 pwd
-THIRD_PARTY_JAR_PATHS="$(find 3rdparty -name "*.jar" | sort -u)"
-PYTHON_PATHS="$(find heron -name "*.py" | sed "s|/src/python/.*$||" |sed "s|/tests/python/.*$||" | sort -u)"
-BAZEL_THIRD_PARTY_BASE=$(bazel info output_base)/external/bazel_tools/third_party/; 
-#BAZEL_EXT_DEPS=`bazel query 'labels("deps", heron/...)'  | egrep -E "3rdparty|bazel_tools"`;  
-BAZEL_EXT_DEPS=`bazel query 'labels("deps", heron/...)'  | egrep -E "bazel_tools"`;  
-HERON_RESOLVED_DEPS=`for dep in $BAZEL_EXT_DEPS; do bazel query "$dep" --output xml | grep "<label" | grep "\.jar" | sed 's/<label value="//' | sed 's/"\/\>//'| sort -u | sed 's/\/\/3rdparty/$MODULE_DIR\/3rdparty/' | sed "s|\@bazel_tools\/\/third_party\:|$BAZEL_THIRD_PARTY_BASE|" ; done`
 
+
+function get_heron_python_paths() {
+	echo "$(find heron -name "*.py" | sed "s|/src/python/.*$||" |sed "s|/tests/python/.*$||" | sort -u)";
+}
+
+function get_heron_thirdparty_dependencies() {
+	echo "$(find 3rdparty -name "*.jar" | sort -u)";
+}
+function get_heron_bazel_deps(){
+	local bazel_third_party_base="$(bazel info output_base)/external/bazel_tools/third_party/"; 
+	local bazel_ext_deps=`bazel query 'labels("deps", heron/...)'  | egrep -E "bazel_tools"`;  
+	local heron_resolved_deps=`for dep in $BAZEL_EXT_DEPS; do bazel query "$dep" --output xml | grep "<label" | grep "\.jar" | sed 's/<label value="//' | sed 's/"\/\>//'| sort -u | sed 's/\/\/3rdparty/$MODULE_DIR\/3rdparty/' | sed "s|\@bazel_tools\/\/third_party\:|$BAZEL_THIRD_PARTY_BASE|" ; done`;
+	echo "${heron_resolved_deps}";
+}
 
 # All other generated libraries.
 readonly package_list=$(find heron -name "BUILD" | sed "s|/BUILD||" | sed "s|^|//|")
@@ -51,6 +50,14 @@ function get_package_of() {
       echo $(echo -n $i | wc -c | xargs echo) $i
     fi
   done | sort -r -n | head -1 | cut -d " " -f 2
+}
+
+function get_heron_java_paths() {
+	local java_paths=$(find heron -name "*.java" | sed "s|/src/java/.*$|/src/java|" |  sed "s|/tests/java/.*$|/tests/java|" | sort -u | fgrep -v "heron/scheduler/" | fgrep -v "heron/scheduler/" )
+	if [ "$(uname -s | tr 'A-Z' 'a-z')" != "darwin" ]; then
+  		java_paths=$(echo "${JAVA_PATHS}" | fgrep -v "/objc_tools/")
+	fi
+	echo "${java_paths}"
 }
 
 # returns the target corresponding to file $1

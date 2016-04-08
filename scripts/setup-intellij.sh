@@ -41,18 +41,14 @@ cat > $iml_file <<EOH
 <module type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager">
     <output url="file://\$MODULE_DIR\$/out" />
-   <!--
-    <content url="file://\$MODULE_DIR$/bazel-genfiles/heron/proto/">
-      <sourceFolder url="file://\$MODULE_DIR$/bazel-genfiles/heron/proto/_javac" isTestSource="false" generated="true" />
-    </content>
-   -->
     <content url="file://\$MODULE_DIR$/heron">
 EOH
- echo '      <sourceFolder url="file://$MODULE_DIR$/heron/config/src" type="java-resource" />'>> $iml_file
-for source in ${JAVA_PATHS}; do
+echo '      <sourceFolder url="file://$MODULE_DIR$/heron/config/src" type="java-resource" />'>> $iml_file
+heron_java_paths="$(get_heron_java_paths)"
+for source in ${heron_java_paths}; do
      if [[ $source == *"javatests" ]]; then
        is_test_source="true"
-     elif [[ $source == *"test/java" ]]; then
+     elif [[ $source == *"tests/java" ]]; then
        is_test_source="true"
      else
        is_test_source="false"
@@ -61,16 +57,8 @@ for source in ${JAVA_PATHS}; do
 done
 cat >> $iml_file <<'EOF'
     </content>
-<!--    <content url="file://$MODULE_DIR$/3rdparty">
-EOF
-
-THIRD_PARTY_JAVA_PATHS="$(ls 3rdparty/java | sort -u | sed -e 's%$%/java%')"
-
-for third_party_java_path in ${THIRD_PARTY_JAVA_PATHS}; do
-  echo '      <sourceFolder url="file://$MODULE_DIR$/3rdparty/java/'${third_party_java_path}'" isTestSource="false" />' >> $iml_file
-done
-cat >> $iml_file <<'EOF'
-    </content>-->
+   <content url="file://$MODULE_DIR$/3rdparty">
+    </content>
     <orderEntry type="sourceFolder" forTests="false" />
 EOF
 
@@ -130,8 +118,8 @@ write_jar_entry "$javac_jar"
 cat >> $iml_file <<'EOF'
     <orderEntry type="inheritedJdk" />
 EOF
-
-for jar in ${THIRD_PARTY_JAR_PATHS}; do
+heron_thirdparty_deps="$(get_heron_thirdparty_dependencies)"
+for jar in ${heron_thirdparty_deps}; do
   if [[ jar != "$javac_jar" ]]; then
     write_jar_entry $jar
   fi
@@ -140,25 +128,15 @@ done
 for path_pair in ${GENERATED_PATHS}; do
   write_jar_entry ${path_pair//:/ }
 done
-for jar in ${HERON_RESOLVED_DEPS}; do
+heron_resolved_deps="$(get_heron_bazel_deps)"
+
+for jar in ${heron_resolved_deps}; do
 	write_jar_entry $jar
 done
 #<orderEntry type="library" name="proto" level="application" />
 
 write_jar_entry "bazel-bin/heron/proto"
 
-#cat >> $iml_file <<'EOF'
-#    <orderEntry type="module-library">
-#      <library name="JUnit4">
-#        <CLASSES>
-#          <root url="jar://$APPLICATION_HOME_DIR$/lib/junit-4.12.jar!/" />
-#          <root url="jar://$APPLICATION_HOME_DIR$/lib/hamcrest-core-1.3.jar!/" />
-#        </CLASSES>
-#        <JAVADOC />
-#        <SOURCES />
-#      </library>
-#    </orderEntry>
-#EOF
 cat >> $iml_file <<'EOF'
   </component>
 </module>
@@ -176,19 +154,14 @@ cat > $piml_file <<EOH
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
 EOH
-#     <sourceFolder url="file://$MODULE_DIR$/heron/cli/src/python" isTestSource="false" />
-#     <sourceFolder url="file://$MODULE_DIR$/heron/cli/tests/python" isTestSource="true" />
-for source in ${PYTHON_PATHS}; do
+heron_python_paths="$(get_heron_python_paths)"
+for source in ${heron_python_paths}; do
      if [ -d ${source}/src/python ]; then
      	echo '      <content url="file://$MODULE_DIR$/'"${source}/src/python\"  />" >> $piml_file
      fi
      if [ -d ${source}/tests/python ]; then
      	echo '      <content url="file://$MODULE_DIR$/'"${source}/tests/python\"  />" >> $piml_file
 	 fi
-    # echo '             <sourceFolder url="file://$MODULE_DIR$/'"${source}/src/python\"  isTestSource=\"false\" />" >> $piml_file
-    # echo '             <sourceFolder url="file://$MODULE_DIR$/'"${source}/tests/python\"  isTestSource=\"true\" />" >> $piml_file
-    # echo '      </content>' >> $piml_file
-
 done
 cat >> $piml_file <<EOH
     <orderEntry type="jdk" jdkName="Python 2.7.10 (/usr/bin/python)" jdkType="Python SDK" />
