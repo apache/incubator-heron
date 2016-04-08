@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/heron-java.iml" filepath="$PROJECT_DIR$/heron-java.iml" group="heron" />
+      <module fileurl="file://$PROJECT_DIR$/heron-python.iml" filepath="$PROJECT_DIR$/heron-python.iml" group="heron" />
+    </modules>
+  </component>
+</project>
