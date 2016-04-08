@@ -56,8 +56,9 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     return false;
   }
 
+  // Make utils class protected for easy unit testing
   protected ListenableFuture<Boolean> setData(String path, byte[] data) {
-    SettableFuture<Boolean> future = SettableFuture.create();
+    final SettableFuture<Boolean> future = SettableFuture.create();
     boolean ret = FileUtils.writeToFile(path, data);
     future.set(ret);
 
@@ -65,7 +66,7 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   }
 
   protected ListenableFuture<Boolean> deleteData(String path) {
-    SettableFuture<Boolean> future = SettableFuture.create();
+    final SettableFuture<Boolean> future = SettableFuture.create();
     boolean ret = FileUtils.deleteFile(path);
     future.set(ret);
 
@@ -73,7 +74,7 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   }
 
   protected <M extends Message> ListenableFuture<M> getData(String path, M.Builder builder) {
-    SettableFuture<M> future = SettableFuture.create();
+    final SettableFuture<M> future = SettableFuture.create();
     byte[] data = FileUtils.readFromFile(path);
     if (data.length == 0) {
       future.set(null);
