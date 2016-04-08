@@ -1,4 +1,4 @@
-package com.twitter.heron.scheduler.service;
+package com.twitter.heron.scheduler;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
