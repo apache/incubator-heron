@@ -1,4 +1,4 @@
-package com.twitter.heron.scheduler.service;
+package com.twitter.heron.scheduler;
 
 import java.nio.charset.Charset;
 import java.util.Map;
