@@ -4,6 +4,7 @@ import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.xml.bind.DatatypeConverter;
@@ -118,7 +119,7 @@ public class LocalLauncher implements ILauncher {
         "--http_port " + NetworkUtils.getFreePort()
     );
 
-    LOG.fine("Scheduler command line: " + schedulerCmd.toString());
+    LOG.log(Level.FINE, "Scheduler command line: {0}", schedulerCmd.toString());
 
     Process p = ShellUtils.runASyncProcess(true, schedulerCmd.toString(),
         new File(topologyWorkingDirectory));
@@ -181,7 +182,7 @@ public class LocalLauncher implements ILauncher {
 
     // log the state manager being used, for visibility and debugging purposes
     SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
-    LOG.fine("State manager used: " + stateManager.getClass().getName());
+    LOG.log(Level.FINE, "State manager used: {0} ", stateManager.getClass().getName());
 
     // if the working directory does not exist, create it.
     File workingDirectory = new File(topologyWorkingDirectory);
@@ -194,7 +195,7 @@ public class LocalLauncher implements ILauncher {
     }
 
     // copy the heron core release package to the working directory and untar it
-    LOG.fine("Fetching heron core release " + coreReleasePackage);
+    LOG.log(Level.FINE, "Fetching heron core release {0}", coreReleasePackage);
     LOG.fine("If release package is already in the working directory");
     LOG.fine("the old one will be overwritten");
     if (!copyPackage(coreReleasePackage, targetCoreReleaseFile)) {
@@ -203,7 +204,7 @@ public class LocalLauncher implements ILauncher {
     }
 
     // untar the heron core release package in the working directory
-    LOG.fine("Untar the heron core release " + coreReleasePackage);
+    LOG.log(Level.FINE, "Untar the heron core release {0}", coreReleasePackage);
     if (!untarPackage(targetCoreReleaseFile, topologyWorkingDirectory)) {
       LOG.severe("Failed to untar heron core release package.");
       return false;
@@ -216,7 +217,7 @@ public class LocalLauncher implements ILauncher {
 
     // give warning for overwriting existing topology package
     String topologyPackage = Runtime.topologyPackageUri(runtime).toString();
-    LOG.fine("Fetching topology package " + Runtime.topologyPackageUri(runtime));
+    LOG.log(Level.FINE, "Fetching topology package {0}", Runtime.topologyPackageUri(runtime));
     LOG.fine("If topology package is already in the working directory");
     LOG.fine("the old one will be overwritten");
 
@@ -227,7 +228,7 @@ public class LocalLauncher implements ILauncher {
     }
 
     // untar the topology package
-    LOG.fine("Untar the topology package: " + topologyPackage);
+    LOG.log(Level.FINE, "Untar the topology package: {0}", topologyPackage);
 
     if (!untarPackage(targetTopologyPackageFile, topologyWorkingDirectory)) {
       LOG.severe("Failed to untar topology package.");
