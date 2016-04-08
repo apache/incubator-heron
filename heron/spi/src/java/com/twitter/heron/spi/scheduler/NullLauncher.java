@@ -12,6 +12,11 @@ public class NullLauncher implements ILauncher {
   }
 
   @Override
+  public void close() {
+
+  }
+
+  @Override
   public boolean prepareLaunch(PackingPlan packing) {
     return true;
   }
@@ -24,11 +29,6 @@ public class NullLauncher implements ILauncher {
   @Override
   public boolean postLaunch(PackingPlan packing) {
     return true;
-  }
-
-  @Override
-  public void undo() {
-
   }
 
   @Override

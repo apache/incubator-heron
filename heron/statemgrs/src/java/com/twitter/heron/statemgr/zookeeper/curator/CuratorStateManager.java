@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import com.google.protobuf.Message;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -23,6 +24,7 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 import com.twitter.heron.statemgr.FileSystemStateManager;
+import com.twitter.heron.statemgr.zookeeper.ZkContext;
 import com.twitter.heron.statemgr.zookeeper.ZkWatcherCallback;
 
 public class CuratorStateManager extends FileSystemStateManager {
@@ -34,18 +36,13 @@ public class CuratorStateManager extends FileSystemStateManager {
   public void initialize(Config config) {
     super.initialize(config);
 
-    int sessionTimeoutMs = 30 * 1000;
-    int connectionTimeoutMs = 30 * 1000;
-
-    int retryCount = 10;
-    int retryIntervalMs = 1000;
-
     connectionString = Context.stateManagerConnectionString(config);
 
     // these are reasonable arguments for the ExponentialBackoffRetry. The first
     // retry will wait 1 second - the second will wait up to 2 seconds - the
     // third will wait up to 4 seconds.
-    ExponentialBackoffRetry retryPolicy = new ExponentialBackoffRetry(retryIntervalMs, retryCount);
+    ExponentialBackoffRetry retryPolicy = new ExponentialBackoffRetry(
+        ZkContext.retryIntervalMs(config), ZkContext.retryCount(config));
 
     // using the CuratorFrameworkFactory.builder() gives fine grained control
     // over creation options. See the CuratorFrameworkFactory.Builder javadoc
@@ -53,8 +50,8 @@ public class CuratorStateManager extends FileSystemStateManager {
     client = CuratorFrameworkFactory.builder()
         .connectString(connectionString)
         .retryPolicy(retryPolicy)
-        .connectionTimeoutMs(connectionTimeoutMs)
-        .sessionTimeoutMs(sessionTimeoutMs)
+        .connectionTimeoutMs(ZkContext.connectionTimeoutMs(config))
+        .sessionTimeoutMs(ZkContext.sessionTimeoutMs(config))
             // etc. etc.
         .build();
 
@@ -64,12 +61,37 @@ public class CuratorStateManager extends FileSystemStateManager {
     client.start();
 
     try {
-      if (!client.blockUntilConnected(connectionTimeoutMs, TimeUnit.MILLISECONDS)) {
+      if (!client.blockUntilConnected(ZkContext.connectionTimeoutMs(config), TimeUnit.MILLISECONDS)) {
         throw new RuntimeException("Failed to initialize CuratorClient");
       }
     } catch (InterruptedException e) {
       throw new RuntimeException("Failed to initialize CuratorClient", e);
     }
+
+    if (ZkContext.isInitializeTree(config)) {
+      try {
+        initTree();
+      } catch (Exception e) {
+        throw new RuntimeException("Failed to initialize tree", e);
+      }
+    }
+  }
+
+  protected void initTree() throws Exception {
+    // Make necessary directories
+    LOG.info("Topologies directory: " + getTopologyDir());
+    LOG.info("Tmaster location directory: " + getTMasterLocationDir());
+    LOG.info("Physical plan directory: " + getPhysicalPlanDir());
+    LOG.info("Execution state directory: " + getExecutionStateDir());
+    LOG.info("Scheduler location directory: " + getSchedulerLocationDir());
+
+    client.createContainers(getTopologyDir());
+    client.createContainers(getTMasterLocationDir());
+    client.createContainers(getPhysicalPlanDir());
+    client.createContainers(getExecutionStateDir());
+    client.createContainers(getSchedulerLocationDir());
+
+    LOG.info("Directory tree initialized.");
   }
 
   @Override
@@ -84,7 +106,8 @@ public class CuratorStateManager extends FileSystemStateManager {
     return connectionString;
   }
 
-  private ListenableFuture<Boolean> existNode(String path) {
+  // Make utils class protected for easy unit testing
+  protected ListenableFuture<Boolean> existNode(String path) {
     final SettableFuture<Boolean> result = SettableFuture.create();
 
     try {
@@ -97,11 +120,11 @@ public class CuratorStateManager extends FileSystemStateManager {
     return result;
   }
 
-  private ListenableFuture<Boolean> createNode(String path, byte[] data, boolean isEphemeral) {
+  protected ListenableFuture<Boolean> createNode(String path, byte[] data, boolean isEphemeral) {
     final SettableFuture<Boolean> result = SettableFuture.create();
 
     try {
-      client.create().creatingParentsIfNeeded().
+      client.create().
           withMode(isEphemeral ? CreateMode.EPHEMERAL : CreateMode.PERSISTENT)
           .forPath(path, data);
       LOG.info("Created node for path: " + path);
@@ -112,7 +135,7 @@ public class CuratorStateManager extends FileSystemStateManager {
     return result;
   }
 
-  private ListenableFuture<Boolean> deleteNode(String path) {
+  protected ListenableFuture<Boolean> deleteNode(String path) {
     final SettableFuture<Boolean> result = SettableFuture.create();
 
     try {
@@ -124,6 +147,34 @@ public class CuratorStateManager extends FileSystemStateManager {
     }
 
     return result;
+  }
+
+  protected <M extends Message> ListenableFuture<M> getNodeData(
+      WatchCallback watcher, String path, final M.Builder builder) {
+    final SettableFuture<M> future = SettableFuture.create();
+
+    Watcher wc = ZkWatcherCallback.makeZkWatcher(watcher);
+
+    BackgroundCallback cb = new BackgroundCallback() {
+      @Override
+      public void processResult(CuratorFramework client, CuratorEvent event) throws Exception {
+        byte[] data;
+        if (event != null & (data = event.getData()) != null) {
+          builder.mergeFrom(data);
+          future.set((M) builder.build());
+        } else {
+          future.setException(new RuntimeException("Failed to fetch data from path: " + event.getPath()));
+        }
+      }
+    };
+
+    try {
+      client.getData().usingWatcher(wc).inBackground(cb).forPath(path);
+    } catch (Exception e) {
+      future.setException(new RuntimeException("Could not getData", e));
+    }
+
+    return future;
   }
 
   @Override
@@ -185,138 +236,27 @@ public class CuratorStateManager extends FileSystemStateManager {
 
   @Override
   public ListenableFuture<TopologyMaster.TMasterLocation> getTMasterLocation(WatchCallback watcher, String topologyName) {
-    final SettableFuture<TopologyMaster.TMasterLocation> tLocationFuture = SettableFuture.create();
-    String path = getTMasterLocationPath(topologyName);
-    Watcher wc = ZkWatcherCallback.makeZkWatcher(watcher);
-
-    BackgroundCallback cb = new BackgroundCallback() {
-      @Override
-      public void processResult(CuratorFramework client, CuratorEvent event) throws Exception {
-        byte[] data;
-        if (event != null & (data = event.getData()) != null) {
-          tLocationFuture.set(TopologyMaster.TMasterLocation.parseFrom(data));
-        } else {
-          tLocationFuture.setException(new RuntimeException("Failed to fetch data from path: " + event.getPath()));
-        }
-      }
-    };
-
-    try {
-      client.getData().usingWatcher(wc).inBackground(cb).forPath(path);
-    } catch (Exception e) {
-      tLocationFuture.setException(new RuntimeException("Could not getData", e));
-    }
-
-    return tLocationFuture;
+    return getNodeData(watcher, getTMasterLocationPath(topologyName), TopologyMaster.TMasterLocation.newBuilder());
   }
 
   @Override
   public ListenableFuture<Scheduler.SchedulerLocation> getSchedulerLocation(WatchCallback watcher, String topologyName) {
-    final SettableFuture<Scheduler.SchedulerLocation> schedulerLocationFuture = SettableFuture.create();
-    String path = getSchedulerLocationPath(topologyName);
-    Watcher wc = ZkWatcherCallback.makeZkWatcher(watcher);
-
-    BackgroundCallback cb = new BackgroundCallback() {
-      @Override
-      public void processResult(CuratorFramework client, CuratorEvent event) throws Exception {
-        byte[] data;
-        if (event != null & (data = event.getData()) != null) {
-          LOG.info("SEE SEE the data: " + new String(data));
-          schedulerLocationFuture.set(Scheduler.SchedulerLocation.parseFrom(data));
-        } else {
-          schedulerLocationFuture.setException(new RuntimeException("Failed to fetch data from path: " + event.getPath()));
-        }
-      }
-    };
-
-    try {
-      client.getData().usingWatcher(wc).inBackground(cb).forPath(path);
-    } catch (Exception e) {
-      schedulerLocationFuture.setException(new RuntimeException("Could not getData", e));
-    }
-
-    return schedulerLocationFuture;
+    return getNodeData(watcher, getSchedulerLocationPath(topologyName), Scheduler.SchedulerLocation.newBuilder());
   }
 
   @Override
   public ListenableFuture<TopologyAPI.Topology> getTopology(WatchCallback watcher, String topologyName) {
-    final SettableFuture<TopologyAPI.Topology> topologyFuture = SettableFuture.create();
-    String path = getTopologyPath(topologyName);
-    Watcher wc = ZkWatcherCallback.makeZkWatcher(watcher);
-
-    BackgroundCallback cb = new BackgroundCallback() {
-      @Override
-      public void processResult(CuratorFramework client, CuratorEvent event) throws Exception {
-        byte[] data;
-        if (event != null & (data = event.getData()) != null) {
-          topologyFuture.set(TopologyAPI.Topology.parseFrom(data));
-        } else {
-          topologyFuture.setException(new RuntimeException("Failed to fetch data from path: " + event.getPath()));
-        }
-      }
-    };
-
-    try {
-      client.getData().usingWatcher(wc).inBackground(cb).forPath(path);
-    } catch (Exception e) {
-      topologyFuture.setException(new RuntimeException("Could not getData", e));
-    }
-
-    return topologyFuture;
+    return getNodeData(watcher, getTopologyPath(topologyName), TopologyAPI.Topology.newBuilder());
   }
 
   @Override
   public ListenableFuture<ExecutionEnvironment.ExecutionState> getExecutionState(WatchCallback watcher, String topologyName) {
-    final SettableFuture<ExecutionEnvironment.ExecutionState> executionStateFuture = SettableFuture.create();
-    String path = getExecutionStatePath(topologyName);
-    Watcher wc = ZkWatcherCallback.makeZkWatcher(watcher);
-
-    BackgroundCallback cb = new BackgroundCallback() {
-      @Override
-      public void processResult(CuratorFramework client, CuratorEvent event) throws Exception {
-        byte[] data;
-        if (event != null & (data = event.getData()) != null) {
-          executionStateFuture.set(ExecutionEnvironment.ExecutionState.parseFrom(data));
-        } else {
-          executionStateFuture.setException(new RuntimeException("Failed to fetch data from path: " + event.getPath()));
-        }
-      }
-    };
-
-    try {
-      client.getData().usingWatcher(wc).inBackground(cb).forPath(path);
-    } catch (Exception e) {
-      executionStateFuture.setException(new RuntimeException("Could not getData", e));
-    }
-
-    return executionStateFuture;
+    return getNodeData(watcher, getExecutionStatePath(topologyName), ExecutionEnvironment.ExecutionState.newBuilder());
   }
 
   @Override
   public ListenableFuture<PhysicalPlans.PhysicalPlan> getPhysicalPlan(WatchCallback watcher, String topologyName) {
-    final SettableFuture<PhysicalPlans.PhysicalPlan> physicalPlanFuture = SettableFuture.create();
-    String path = getPhysicalPlanPath(topologyName);
-    Watcher wc = ZkWatcherCallback.makeZkWatcher(watcher);
-
-    BackgroundCallback cb = new BackgroundCallback() {
-      @Override
-      public void processResult(CuratorFramework client, CuratorEvent event) throws Exception {
-        byte[] data;
-        if (event != null & (data = event.getData()) != null) {
-          physicalPlanFuture.set(PhysicalPlans.PhysicalPlan.parseFrom(data));
-        } else {
-          physicalPlanFuture.setException(new RuntimeException("Failed to fetch data from path: " + event.getPath()));
-        }
-      }
-    };
-
-    try {
-      client.getData().usingWatcher(wc).inBackground(cb).forPath(path);
-    } catch (Exception e) {
-      physicalPlanFuture.setException(new RuntimeException("Could not getData", e));
-    }
-
-    return physicalPlanFuture;
+    return getNodeData(watcher, getPhysicalPlanPath(topologyName), PhysicalPlans.PhysicalPlan.newBuilder());
   }
 
   @Override

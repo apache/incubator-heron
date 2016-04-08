@@ -55,6 +55,11 @@ public class LocalLauncher implements ILauncher {
         topologyWorkingDirectory, "topology.tar.gz").toString();
   }
 
+  @Override
+  public void close() {
+
+  }
+
   /**
    * Encode the JVM options
    *
@@ -133,11 +138,6 @@ public class LocalLauncher implements ILauncher {
   @Override
   public boolean postLaunch(PackingPlan packing) {
     return true;
-  }
-
-  @Override
-  public void undo() {
-    // Currently nothing need to do here
   }
 
   @Override

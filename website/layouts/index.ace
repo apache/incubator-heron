@@ -12,15 +12,6 @@ html lang={{.Site.LanguageCode}}
         .jumbotron.text-center
           img.img-responsive.center-block src={{.Site.Params.assets.textlogo}} 
           p A realtime stream processing engine from Twitter
-      .hero-bar 
-        .container style="text-align: center;"
-          .row 
-            .col-sm-6
-              h4 Run Topologies using pre-compiled Heron binaries
-              a.btn.btn-info href=docs/getting-started Get Started
-            .col-sm-6
-              h4 Compile Heron from Source (for Heron Developers)
-              a.btn.btn-info href=docs/developers/compiling/compiling/ Get Source
       .landing-feature-1
         .container style="text-align: center;"
           .row
