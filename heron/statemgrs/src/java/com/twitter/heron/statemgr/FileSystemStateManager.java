@@ -1,5 +1,6 @@
 package com.twitter.heron.statemgr;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.spi.common.Config;
@@ -15,7 +16,7 @@ public abstract class FileSystemStateManager implements IStateManager {
   @Override
   public void initialize(Config config) {
     this.rootAddress = Context.stateManagerRootPath(config);
-    LOG.fine("File system state manager root address: " + rootAddress);
+    LOG.log(Level.FINE, "File system state manager root address: {0}", rootAddress);
   }
 
   protected String getTMasterLocationDir() {
