@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.io.ObjectStreamException;
 import java.io.PrintStream;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -13,14 +14,28 @@ import java.util.logging.SimpleFormatter;
 
 /**
  * A helper class to init corresponding LOGGER setting
+ * Credits: https://blogs.oracle.com/nickstephen/entry/java_redirecting_system_out_and
  */
 public class LoggingHelper {
   static public void loggerInit(Level level, boolean isRedirectStdOutErr) throws IOException {
-    // The Logger.getLogger("") will get the root Logger, which means, when we create other
-    // Loggers from LoggerFactory, they will follow root Logger's configuration.
-    Logger.getLogger("").setLevel(level);
+    // Configure the root logger and its handlers so that all the
+    // derived loggers will inherit the properties
+    Logger rootLogger = Logger.getLogger("");
+    for(Handler handler: rootLogger.getHandlers()) {
+      handler.setLevel(level);
+    }
+
+    rootLogger.setLevel(level);
 
     if (isRedirectStdOutErr) {
+
+      // Remove ConsoleHandler if present, to avoid infinite loop
+      for(Handler handler: rootLogger.getHandlers()) {
+        if(handler instanceof ConsoleHandler) {
+          rootLogger.removeHandler(handler);
+        }
+      }
+
       // now rebind stdout/stderr to logger
       Logger logger;
       LoggingOutputStream los;
