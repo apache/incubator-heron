@@ -41,11 +41,13 @@ public class PackerUploader implements IUploader {
     this.topology = Context.topologyName(config);
     this.verbose = Context.verbose(config);
 
-    this.topologyPackageLocation = Context.topologyJarFile(config);
+    this.topologyPackageLocation = Context.topologyPackageFile(config);
 
     // TO DO
     // this.releaseTag = config.getStringValue(Keys.get("HERON_RELEASE_PACKAGE_NAME"), "live");
-    this.releaseTag = Context.corePackageUri(config);
+
+    // core pkg uri in form: packer://role/pkg/version, and we need the 'pkg' part
+    this.releaseTag = Context.corePackageUri(config).split("/")[3];
 
     if (cluster.isEmpty() || role.isEmpty()) {
       LOG.severe("cluster, role & env not set properly");
@@ -63,7 +65,6 @@ public class PackerUploader implements IUploader {
 
   @Override
   public URI uploadPackage() {
-    String topologyURIStr;
     LOG.info("Uploading packer package " + getTopologyPackageName());
     String packerUploadCmd = String.format(
         "packer add_version --cluster %s %s %s %s --json",
@@ -73,11 +74,6 @@ public class PackerUploader implements IUploader {
     if (0 != runProcess(packerUploadCmd, jsonStrBuilder)) {
       LOG.severe("Failed to upload package to packer. Cmd: " + packerUploadCmd);
       return null;
-    } else {
-      String jsonStr = jsonStrBuilder.toString();
-
-      // Add back into the context property
-      topologyURIStr = getTopologyURI(jsonStr);
     }
 
     String packerLiveCmd = String.format(
@@ -88,6 +84,7 @@ public class PackerUploader implements IUploader {
       return null;
     }
 
+    String topologyURIStr = String.format("packer://%s/%s/%s", role, getTopologyPackageName(), "live");
     return Convert.getURI(topologyURIStr);
   }
 
