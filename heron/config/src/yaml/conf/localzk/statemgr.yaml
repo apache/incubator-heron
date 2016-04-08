@@ -10,7 +10,7 @@ heron.statemgr.root.path:         "/heron"
 ####################################################################
 # Following are config for Zk State Manager
 ####################################################################
-heron.statemgr.zookeeper.is.initialzie.tree:              True
+heron.statemgr.zookeeper.is.initialize.tree:              True
 
 heron.statemgr.zookeeper.session.timeout.ms:              30000
 
