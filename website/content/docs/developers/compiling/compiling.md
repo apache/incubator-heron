@@ -78,7 +78,7 @@ are supported:
 * `ubuntu` (Ubuntu 12.04)
 * `centos5` (CentOS 5)
 
-Here's an example build command:
+For example the following command will build all packages:
 
 ```bash
 $ bazel build --config=darwin heron/...
