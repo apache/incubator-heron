@@ -66,7 +66,7 @@ public class LocalFileSystemUploader implements IUploader {
 
     // if the dest directory does not exist, create it.
     if (!parentDirectory.exists()) {
-      LOG.info("The working directory does not exist; creating it.");
+      LOG.fine("The working directory does not exist; creating it.");
       if (!parentDirectory.mkdirs()) {
         LOG.severe("Failed to create directory: " + parentDirectory.getPath());
         return null;
@@ -76,11 +76,11 @@ public class LocalFileSystemUploader implements IUploader {
     // if the dest file exists, write a log message
     fileExists = new File(filePath.toString()).isFile();
     if (fileExists) {
-      LOG.info("Target topology file " + filePath.toString() + " exists, overwriting...");
+      LOG.fine("Target topology file " + filePath.toString() + " exists, overwriting...");
     }
 
     // copy the topology package to target working directory
-    LOG.info("Copying topology " + topologyPackageLocation +
+    LOG.fine("Copying topology " + topologyPackageLocation +
         " package to target working directory " + filePath.toString());
 
     Path source = Paths.get(topologyPackageLocation);
