@@ -18,6 +18,7 @@ import org.apache.commons.cli.ParseException;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
+import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
@@ -211,19 +212,6 @@ public class SubmitterMain {
     return options;
   }
 
-  // Initialize logger
-  public static void initLog(Level level) {
-
-    // update all root handlers to the required level
-    Logger globalLogger = Logger.getLogger("");
-    Handler[] handlers = globalLogger.getHandlers();
-    for(Handler handler : handlers) {
-      handler.setLevel(level);
-    }
-
-    globalLogger.setLevel(level);
-  }
-
   public static void main(String[] args) throws
       ClassNotFoundException, InstantiationException,
       IllegalAccessException, IOException, ParseException {
@@ -255,7 +243,7 @@ public class SubmitterMain {
     }
 
     // init log
-    initLog(logLevel);
+    LoggingHelper.loggerInit(logLevel, false);
 
     String cluster = cmd.getOptionValue("cluster");;
     String role = cmd.getOptionValue("role");;
