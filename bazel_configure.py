@@ -139,7 +139,7 @@ def make_executable(path):
 ######################################################################
 # Discover a tool needed to compile Heron
 ######################################################################
-def discover_tool(program, msg, envvar = ""):
+def discover_tool(program, msg, envvar):
   VALUE = discover_program(program, envvar)
   if not VALUE:
     print 'You need to have %s installed to build Heron.' % (program)
@@ -147,7 +147,7 @@ def discover_tool(program, msg, envvar = ""):
     print '(like /usr/bin/%s-4.8). You can set the %s environment' % (program, envvar)
     print 'variable to specify the full path to yours.'
     sys.exit(1)
-  print 'Using %s: \t\t "%s"' % (msg, VALUE)
+  print 'Using %s:\t"%s"' % (msg.ljust(20), VALUE)
   return VALUE
 
 ######################################################################
@@ -164,9 +164,9 @@ def discover_tool_default(program, msg, envvar, defvalue):
   VALUE = discover_program(program, envvar)
   if not VALUE:
     VALUE = defvalue
-    print '%s : \t\t\t not found, but ok' % (program)
+    print '%s:\t not found, but ok' % (program.ljust(26))
   else:
-    print 'Using %s : \t\t\t "%s"' % (msg, VALUE)
+    print 'Using %s:\t"%s"' % (msg.ljust(20), VALUE)
   return VALUE
 
 ######################################################################
@@ -184,6 +184,10 @@ def discover_include_paths(program):
   ])
   return builtin_includes
 
+def export_env_to_file(out_file, env):
+  if env in os.environ:
+    out_file.write('export %s=%s\n' % (env, os.environ[env]))
+
 ######################################################################
 # Generate the shell script that recreates the environment
 ######################################################################
@@ -195,26 +199,19 @@ def write_env_exec_file(platform, environ):
   out_file.write('set -eu \n\n')
 
   # If C environment is set, export them
-  if 'CC' in os.environ:
-    out_file.write('export CC=' + os.environ['CC'] + '\n')
-  if 'CPP' in os.environ:
-    out_file.write('export CPP=' + os.environ['CPP'] + '\n')
-  if 'CFLAGS' in os.environ:
-    out_file.write('export CFLAGS=' + os.environ['CFLAGS'] + '\n')
+  for env in ['CC', 'CPP', 'CFLAGS']:
+    export_env_to_file(out_file, env)
 
   # If CXX environment is set, export them
-  if 'CXX' in os.environ:
-    out_file.write('export CXX=' + os.environ['CXX'] + '\n')
-  if 'CXXCPP' in os.environ:
-    out_file.write('export CXXCPP=' + os.environ['CXXCPP'] + '\n')
-  if 'CXXFLAGS' in os.environ:
-    out_file.write('export CXXFLAGS=' + os.environ['CXXFLAGS'] + '\n')
+  for env in ['CXX', 'CXXCPP', 'CXXFLAGS']:
+    export_env_to_file(out_file, env)
 
   # If linker environment is set, export them
-  if 'LDFLAGS' in os.environ:
-    out_file.write('export LDFLAGS=' + os.environ['LDFLAGS'] + '\n')
-  if 'LIBS' in os.environ:
-    out_file.write('export LIBS=' + os.environ['LIBS'] + '\n')
+  for env in ['LDFLAGS', 'LIBS']:
+    export_env_to_file(out_file, env)
+
+  if 'CMAKE' in os.environ:
+    out_file.write('export PATH=' + os.path.dirname(os.environ['CMAKE']) + ':$PATH\n')
 
   # Invoke the programs
   out_file.write('# Execute the input programs\n')
@@ -258,7 +255,7 @@ def write_heron_config_header(config_file):
   out_file.write(define_string('GIT_BRANCH', discover_git_branch()))
   out_file.write(generate_system_defines())
   out_file.close()
-  print 'Wrote the heron config header file: \t"%s"' % (config_file) 
+  print 'Wrote the heron config header file: \t"%s"' % (config_file)
 
 ######################################################################
 # MAIN program that sets up your workspace for bazel
@@ -270,30 +267,30 @@ def main():
   platform = discover_platform()
 
   # Discover the tools environment
-  env_map['CC'] = discover_tool('gcc',"C compiler", 'CC')
-  env_map['CXX'] = discover_tool('g++',"C++ compiler", 'CXX')
-  env_map['CPP'] = discover_tool('cpp',"C preprocessor", 'CPP')
-  env_map['CXXCPP'] = discover_tool('cpp',"C++ preprocessor", 'CXXCPP')
-  env_map['LD'] =  discover_tool('ld',"linker", 'LD')
+  env_map['CC'] = discover_tool('gcc','C compiler', 'CC')
+  env_map['CXX'] = discover_tool('g++','C++ compiler', 'CXX')
+  env_map['CPP'] = discover_tool('cpp','C preprocessor', 'CPP')
+  env_map['CXXCPP'] = discover_tool('cpp','C++ preprocessor', 'CXXCPP')
+  env_map['LD'] =  discover_tool('ld','linker', 'LD')
   env_map['BLDFLAG'] = discover_linker(env_map)
 
   # Discover the utilities
-  env_map['AUTOMAKE'] = discover_tool('automake', "Automake")
-  env_map['AUTOCONF'] = discover_tool('autoconf', "Autoconf")
-  env_map['MAKE'] = discover_tool('make', "Make")
-  env_map['CMAKE'] = discover_tool('cmake', "CMake")
-  env_map['PYTHON2'] = discover_tool('python2', "Python2")
+  env_map['AUTOMAKE'] = discover_tool('automake', 'Automake', 'AUTOMAKE')
+  env_map['AUTOCONF'] = discover_tool('autoconf', 'Autoconf', 'AUTOCONF')
+  env_map['MAKE'] = discover_tool('make', 'Make', 'MAKE')
+  env_map['CMAKE'] = discover_tool('cmake', 'CMake', 'CMAKE')
+  env_map['PYTHON2'] = discover_tool('python2', 'Python2', 'PYTHON2')
 
-  if platform == "Darwin":
-    env_map['AR'] = discover_tool('libtool', "archiver", 'AR')
+  if platform == 'Darwin':
+    env_map['AR'] = discover_tool('libtool', 'archiver', 'AR')
   else:
-    env_map['AR'] = discover_tool('ar', "archiver", 'AR')
+    env_map['AR'] = discover_tool('ar', 'archiver', 'AR')
 
-  env_map['GCOV']= discover_tool('gcov',"coverage tool", 'GCOV')
-  env_map['DWP'] = discover_tool_default('dwp', "dwp", 'DWP', '/usr/bin/dwp')
-  env_map['NM'] = discover_tool_default('nm', "nm", 'NM', '/usr/bin/nm')
-  env_map['OBJCOPY'] = discover_tool_default('objcopy', "objcopy", 'OBJCOPY', '/usr/bin/objcopy')
-  env_map['OBJDUMP'] = discover_tool_default('objdump', "objdump", 'OBJDUMP', '/usr/bin/objdump')
+  env_map['GCOV']= discover_tool('gcov','coverage tool', 'GCOV')
+  env_map['DWP'] = discover_tool_default('dwp', 'dwp', 'DWP', '/usr/bin/dwp')
+  env_map['NM'] = discover_tool_default('nm', 'nm', 'NM', '/usr/bin/nm')
+  env_map['OBJCOPY'] = discover_tool_default('objcopy', 'objcopy', 'OBJCOPY', '/usr/bin/objcopy')
+  env_map['OBJDUMP'] = discover_tool_default('objdump', 'objdump', 'OBJDUMP', '/usr/bin/objdump')
   env_map['STRIP'] = discover_tool_default('strip', "strip", 'STRIP', '/usr/bin/strip')
 
   # write the environment executable file
