@@ -70,6 +70,38 @@ public class AuroraLauncher implements ILauncher {
         packing.containers.values().iterator().next().resource;
     Map<String, String> auroraProperties = new HashMap<>();
 
+    addAuroraProperties(auroraProperties, topology, containerResource, packing);
+
+    String completeSchedulerClassPath = new StringBuilder()
+        .append(Context.schedulerSandboxClassPath(config)).append(":")
+        .append(Context.packingSandboxClassPath(config)).append(":")
+        .append(Context.stateManagerSandboxClassPath(config))
+        .toString();
+    auroraProperties.put("SANDBOX_SCHEDULER_CLASSPATH", completeSchedulerClassPath);
+
+    // TODO(mfu): Following configs need customization before using
+    // TODO(mfu): Put the constant in Constants.java
+    String heronCoreReleasePkgURI = Context.corePackageUri(config);
+    String topologyPkgURI = Runtime.topologyPackageUri(runtime).toString();
+
+    auroraProperties.put("CORE_PACKAGE_URI", heronCoreReleasePkgURI);
+    auroraProperties.put("TOPOLOGY_PACKAGE_URI", topologyPkgURI);
+
+    return AuroraUtils.createAuroraJob(topology.getName(), Context.cluster(config),
+        Context.role(config),
+        Context.environ(config), getHeronAuroraPath(), auroraProperties, true);
+  }
+
+  private String getHeronAuroraPath() {
+    return new File(Context.heronConf(config), "heron.aurora").getPath();
+  }
+
+  protected void addAuroraProperties(
+      Map<String, String> auroraProperties,
+      TopologyAPI.Topology topology,
+      PackingPlan.Resource containerResource,
+      PackingPlan packing
+  ) {
     auroraProperties.put("SANDBOX_EXECUTOR_BINARY", Context.executorSandboxBinary(config));
     auroraProperties.put("TOPOLOGY_NAME", topology.getName());
     auroraProperties.put("TOPOLOGY_ID", topology.getId());
@@ -111,29 +143,6 @@ public class AuroraLauncher implements ILauncher {
 
     auroraProperties.put("SANDBOX_INSTANCE_CLASSPATH", Context.instanceSandboxClassPath(config));
     auroraProperties.put("SANDBOX_METRICS_YAML", Context.metricsSinksSandboxFile(config));
-
-    String completeSchedulerClassPath = new StringBuilder()
-        .append(Context.schedulerSandboxClassPath(config)).append(":")
-        .append(Context.packingSandboxClassPath(config)).append(":")
-        .append(Context.stateManagerSandboxClassPath(config))
-        .toString();
-    auroraProperties.put("SANDBOX_SCHEDULER_CLASSPATH", completeSchedulerClassPath);
-
-    // TODO(mfu): Following configs need customization before using
-    // TODO(mfu): Put the constant in Constants.java
-    String heronCoreReleasePkgURI = Context.corePackageUri(config);
-    String topologyPkgURI = Runtime.topologyPackageUri(runtime).toString();
-
-    auroraProperties.put("CORE_PACKAGE_URI", heronCoreReleasePkgURI);
-    auroraProperties.put("TOPOLOGY_PACKAGE_URI", topologyPkgURI);
-
-    return AuroraUtils.createAuroraJob(topology.getName(), Context.cluster(config),
-        Context.role(config),
-        Context.environ(config), getHeronAuroraPath(), auroraProperties, true);
-  }
-
-  private String getHeronAuroraPath() {
-    return new File(Context.heronConf(config), "heron.aurora").getPath();
   }
 
   @Override
