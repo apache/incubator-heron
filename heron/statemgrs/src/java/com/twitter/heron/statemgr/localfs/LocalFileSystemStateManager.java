@@ -1,5 +1,6 @@
 package com.twitter.heron.statemgr.localfs;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -39,11 +40,11 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
 
   protected boolean initTree() {
     // Make necessary directories
-    LOG.info("Topologies directory: " + getTopologyDir());
-    LOG.info("Tmaster location directory: " + getTMasterLocationDir());
-    LOG.info("Physical plan directory: " + getPhysicalPlanDir());
-    LOG.info("Execution state directory: " + getExecutionStateDir());
-    LOG.info("Scheduler location directory: " + getSchedulerLocationDir());
+    LOG.log(Level.FINE, "Topologies directory: {0}", getTopologyDir());
+    LOG.log(Level.FINE, "Tmaster location directory: {0}", getTMasterLocationDir());
+    LOG.log(Level.FINE, "Physical plan directory: {0}", getPhysicalPlanDir());
+    LOG.log(Level.FINE, "Execution state directory: {0}", getExecutionStateDir());
+    LOG.log(Level.FINE, "Scheduler location directory: {0}", getSchedulerLocationDir());
 
     if ((FileUtils.isDirectoryExists(getTopologyDir()) || FileUtils.createDirectory(getTopologyDir())) &&
         (FileUtils.isDirectoryExists(getTMasterLocationDir()) || FileUtils.createDirectory(getTMasterLocationDir())) &&
