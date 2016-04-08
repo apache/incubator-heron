@@ -2,24 +2,34 @@ package com.twitter.heron.spi.scheduler;
 
 
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.PackingPlan;
 
 /**
  * Scheduler object responsible for bringing up topology. Will be instantiated using no-arg
  * constructor.
  */
-public interface IScheduler {
+public interface IScheduler extends AutoCloseable {
   /**
    * This will initialize scheduler using config file. Will be called during start.
    */
   void initialize(Config config, Config runtime);
 
   /**
+   * This is to for disposing or cleaning up any internal state accumulated by
+   * the scheduler
+   * <p/>
+   * Closes this stream and releases any system resources associated
+   * with it. If the stream is already closed then invoking this
+   * method has no effect.
+   */
+  void close();
+
+  /**
    * This method will be called after initialize.
    * It is responsible for grabbing resource to launch executor and make sure they
    * get launched.
-   * <p>
+   * <p/>
    *
    * @param packing Initial mapping suggested by running packing algorithm.
    */
