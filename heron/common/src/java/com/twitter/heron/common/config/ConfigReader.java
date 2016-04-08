@@ -54,14 +54,18 @@ public class ConfigReader {
         return props;
       }
 
-      LOG.fine("Reading config file " + fileName);
+      LOG.log(Level.FINE, "Reading config file {0}", fileName);
 
       Map props_yaml = null;
       try {
         FileInputStream fin = new FileInputStream(new File(fileName));
-        Yaml yaml = new Yaml();
-        props_yaml = (Map) yaml.load(fin);
-        LOG.fine("Successfully read config file " + fileName);
+        try {
+          Yaml yaml = new Yaml();
+          props_yaml = (Map) yaml.load(fin);
+          LOG.log(Level.FINE, "Successfully read config file {0}", fileName);
+        } finally {
+          fin.close();
+        }
       } catch (IOException e) {
         LOG.log(Level.SEVERE, "Failed to load config file: " + fileName, e);
       }
