@@ -107,6 +107,7 @@ public class AuroraLauncher implements ILauncher {
     auroraProperties.put("CLUSTER", Context.cluster(config));
     auroraProperties.put("ENVIRON", Context.environ(config));
     auroraProperties.put("ROLE", Context.role(config));
+    auroraProperties.put("ISPRODUCTION", "prod".equals(Context.environ(config)) + "");
 
     auroraProperties.put("SANDBOX_INSTANCE_CLASSPATH", Context.instanceSandboxClassPath(config));
     auroraProperties.put("SANDBOX_METRICS_YAML", Context.metricsSinksSandboxFile(config));
