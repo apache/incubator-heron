@@ -34,10 +34,24 @@ params:
   assets:
     logo: /img/logo54x54.png #logo.png
     textlogo: /img/HeronTextLogo.png #logo.png
+    textLogoSmall: /img/HeronTextLogo-small.png #logo.png
     css:
       - /css/style.min.css
+      - /css/font-awesome.min.css
     js:
       - //code.jquery.com/jquery-2.2.1.min.js
       - /js/app.min.js
+    fonts:
+      - fonts/fontawesome-webfont.eot
+      - fonts/fontawesome-webfont.svg
+      - fonts/fontawesome-webfont.tff
+      - fonts/fontawesome-webfont.woff
+      - fonts/fontawesome-webfont.woff2
+      - fonts/FontAwesome.otf
   bazelVersion: 0.1.2
   tagline: Realtime, Distributed, Fault-Tolerant Stream Processing
+  social:
+    github: https://github.com/twitter/heron
+    twitter: https://twitter.com/heronstreaming
+    slack: https://heronstreaming.slack.com
+    googleGroup: https://groups.google.com/forum/#!forum/heron-users

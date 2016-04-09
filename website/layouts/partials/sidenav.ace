@@ -1,21 +1,21 @@
-.sidebar-nav-container
-  ul.nav.nav-sidebar
+div
+
+  nav
     {{range .Site.Data.toc.sections}}
-    li
-      span {{.name}}
-      ul
+      h4 {{.name}}
+      ul.sidebar-nav
         {{range .sublinks}}
         li
           a href={{.url}} {{.name}}
         {{end}}
-      ul
+      ul.sidebar-nav
         {{range .subcategories}}
         li {{.name}}
-        ul
+        ul.sidebar-nav
           {{range .sublinks}}
           li
             a href={{.url}} {{.name}}
           {{end}}
         {{end}}
-    br
+
     {{end}}
