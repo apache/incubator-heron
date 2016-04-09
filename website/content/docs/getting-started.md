@@ -125,7 +125,8 @@ Optional arguments:
 
 **ComponentJVMOptionsTopology.java** | This is a basic example of a Heron topology that supplies JVM options for each component
 
-### Next Steps - Deploying or Developing
+### Next Steps - Upgrade Existing Storm Topologies, Deploying or Developing
+[Upgrade Existing Storm Topologies](../upgrade-storm-to-heron) with simple POM.xml changes
 
 [Deploying Existing topologies](../operators/deployment/README) in clustered, scheduler-driven environments (Aurora, Mesos, Local)
 
