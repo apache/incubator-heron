@@ -1,7 +1,9 @@
 #!/usr/bin/env python2.7
+
+sys.path.append('tools/python/ext/semver-2.4.1')
+
 import os, sys
 import re, subprocess, shutil
-sys.path.append('tools/python/ext/semver-2.4.1')
 import semver
 
 ######################################################################
