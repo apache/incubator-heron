@@ -17,6 +17,8 @@ nav.navbar.navbar-inverse.navbar-fixed-top role=navigation
       ul.nav.navbar-nav.navbar-right
         li
           a href=/docs/getting-started Getting Started
+        li 
+          a href=/docs/upgrade-storm-to-heron Upgrade Existing Storm Topologies
         li
           a href=/docs/developers/compiling/compiling/ Compiling Heron
         li
