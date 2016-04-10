@@ -23,8 +23,8 @@ where \<version\> is the desired heron version.
 
 Run the download self installing binary for heron client as follows
 ```bash
-$ chmod +x heron-client-install-0.13.1-darwin.sh
-$ ./heron-client-install-0.13.1-darwin.sh --user
+$ chmod +x heron-client-install-0.13.2-darwin.sh
+$ ./heron-client-install-0.13.2-darwin.sh --user
 Uncompressing......
 Heron is now installed!
 Make sure you have "/Users/$USER/bin" in your path.
@@ -32,8 +32,8 @@ Make sure you have "/Users/$USER/bin" in your path.
 
 Run the download self installing binary for heron tools as follows
 ```bash
-$ chmod +x heron-tools-install-0.13.1-darwin.sh
-$ ./heron-tools-install-0.13.1-darwin.sh --user
+$ chmod +x heron-tools-install-0.13.2-darwin.sh
+$ ./heron-tools-install-0.13.2-darwin.sh --user
 Uncompressing......
 Heron Tools is now installed!
 Make sure you have "/Users/$USER/bin" in your path.
