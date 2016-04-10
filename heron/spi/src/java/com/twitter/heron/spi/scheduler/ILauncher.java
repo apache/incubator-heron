@@ -1,6 +1,5 @@
 package com.twitter.heron.spi.scheduler;
 
-import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.PackingPlan;
 
@@ -49,15 +48,4 @@ public interface ILauncher extends AutoCloseable {
    * @return true if successful
    */
   boolean postLaunch(PackingPlan packing);
-
-  /**
-   * Add/Modify additional information in execution state. Returns new ExecutionState created using
-   * current execution state and adding additional Launch specific information
-   * TODO(nbhagat): Don't overload heron's ExecutionState with scheduler specific data.
-   *
-   * @param executionState Default execution state with all required fields set.
-   * @return Updated execution state.
-   */
-  ExecutionEnvironment.ExecutionState updateExecutionState(
-      ExecutionEnvironment.ExecutionState executionState);
 }
