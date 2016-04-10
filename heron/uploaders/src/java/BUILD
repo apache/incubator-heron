@@ -11,6 +11,11 @@ packer_deps_files = \
         "//3rdparty/fasterxml-jackson:fasterxml-jackson-java",
     ]
 
+s3_deps_files = \
+    uploader_spi_files + [
+        "//3rdparty/aws:aws-java-sdk",
+    ]
+
 java_library(
     name = 'null-uploader-java',
     srcs = glob(["**/NullUploader.java"]),
@@ -88,3 +93,22 @@ genrule(
     outs = ["heron-hdfs-uploader.jar"],
     cmd  = "cp $< $@",
 )
+
+java_library(
+    name = 's3-uploader-java',
+    srcs = glob(["**/s3/**/*.java"]),
+    deps = s3_deps_files,
+)
+
+java_binary(
+    name = 's3-uploader-unshaded',
+    srcs = glob(["**/s3/**/*.java"]),
+    deps = s3_deps_files)
+
+genrule(
+    name = "heron-s3-uploader",
+    srcs = [":s3-uploader-unshaded_deploy.jar"],
+    outs = ["heron-s3-uploader.jar"],
+    cmd  = "cp $< $@",
+)
+
