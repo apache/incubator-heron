@@ -12,6 +12,10 @@ html lang={{.Site.LanguageCode}}
         .jumbotron.text-center
           img.img-responsive.center-block src={{.Site.Params.assets.textlogo}} 
           p A realtime stream processing engine from Twitter
+          .center-block
+            a.btn.btn-info.button-wrapper href=docs/getting-started Get Started
+            a.btn.btn-info.button-wrapper href=docs/upgrade Upgrade From Storm
+
       .landing-feature-1
         .container style="text-align: center;"
           .row
