@@ -1,6 +1,8 @@
-#!/usr/bin/env python2.7 
+#!/usr/bin/env python2.7
 import os, sys
-import subprocess, shutil
+import re, subprocess, shutil
+sys.path.append('tools/python/ext/semver-2.4.1')
+import semver
 
 ######################################################################
 # Architecture and system defines
@@ -108,12 +110,42 @@ def real_program_path(program_name):
 def real_path(apath):
   return os.path.realpath(apath)
 
+def fail(message):
+  print("\nFAILED:  %s" % message)
+  sys.exit(-1)
+
+def discover_version(path):
+  if "python" in path:
+    version_flag = "-V"
+  else:
+    version_flag = "--version"
+  command = "%s %s" % (path, version_flag)
+  version_output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
+  version_search = re.search('([\d.]+)$', version_output.split("\n")[0])
+  if not version_search:
+    fail ("Could not determine the version of %s from the following output\n%s\n%s" % (path, command, version_output))
+
+  return version_search.group(0)
+
+def pad_semver(version):
+  if re.search('^[\d]+.[\d]+$', version):
+    return "%s.0" % version
+  else:
+    return version
+
+def assert_min_version(path, min_version):
+  version = discover_version(path)
+  #print ("Checking %s with version %s (%s) is at least version %s (%s)" % (path, version, pad_semver(version), min_version, pad_semver(min_version)))
+  if not semver.match(pad_semver(version), ">=%s" % pad_semver(min_version)):
+    fail("%s is version %s which is less than the required version %s" % (path, version, min_version))
+  return version
+
 ######################################################################
 # Discover the program using env variable/program name 
 ######################################################################
 def discover_program(program_name, env_variable = ""):
   env_value = program_name
-  if len(env_variable) > 0:
+  if env_variable:
     try:
       env_value = os.environ[env_variable]
     except KeyError:
@@ -139,15 +171,20 @@ def make_executable(path):
 ######################################################################
 # Discover a tool needed to compile Heron
 ######################################################################
-def discover_tool(program, msg, envvar):
+def discover_tool(program, msg, envvar, min_version = ''):
   VALUE = discover_program(program, envvar)
   if not VALUE:
-    print 'You need to have %s installed to build Heron.' % (program)
-    print 'Note: Some vendors install %s with a versioned name' % (program)
-    print '(like /usr/bin/%s-4.8). You can set the %s environment' % (program, envvar)
-    print 'variable to specify the full path to yours.'
-    sys.exit(1)
-  print 'Using %s:\t"%s"' % (msg.ljust(20), VALUE)
+    fail("""You need to have %s installed to build Heron.
+Note: Some vendors install %s with a versioned name
+(like /usr/bin/%s-4.8). You can set the %s environment
+variable to specify the full path to yours.'""" % (program, program, program, envvar))
+
+  print_value = VALUE
+  if min_version:
+    version = assert_min_version(VALUE, min_version)
+    print_value = "%s (%s)" % (VALUE, version)
+
+  print 'Using %s:\t%s' % (msg.ljust(20), print_value)
   return VALUE
 
 ######################################################################
@@ -275,11 +312,11 @@ def main():
   env_map['BLDFLAG'] = discover_linker(env_map)
 
   # Discover the utilities
-  env_map['AUTOMAKE'] = discover_tool('automake', 'Automake', 'AUTOMAKE')
-  env_map['AUTOCONF'] = discover_tool('autoconf', 'Autoconf', 'AUTOCONF')
-  env_map['MAKE'] = discover_tool('make', 'Make', 'MAKE')
-  env_map['CMAKE'] = discover_tool('cmake', 'CMake', 'CMAKE')
-  env_map['PYTHON2'] = discover_tool('python2', 'Python2', 'PYTHON2')
+  env_map['AUTOMAKE'] = discover_tool('automake', 'Automake', 'AUTOMAKE', '1.11.1')
+  env_map['AUTOCONF'] = discover_tool('autoconf', 'Autoconf', 'AUTOCONF', '2.6.3')
+  env_map['MAKE'] = discover_tool('make', 'Make', 'MAKE', '3.81')
+  env_map['CMAKE'] = discover_tool('cmake', 'CMake', 'CMAKE', '2.6.4')
+  env_map['PYTHON2'] = discover_tool('python2', 'Python2', 'PYTHON2', '2.7')
 
   if platform == 'Darwin':
     env_map['AR'] = discover_tool('libtool', 'archiver', 'AR')
