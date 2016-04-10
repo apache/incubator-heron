@@ -5,7 +5,43 @@ title: Upgrade Existing Storm Topologies to Heron
 
 Heron is designed to be fully backward compatible with existing [Apache Storm](http://storm.apache.org/index.html) projects, allowing simple [Maven POM.xml](https://maven.apache.org/pom.html) changes to migrate existing Storm [topologies](../concepts/topologies).
 
-### Step 1 - Add Heron Dependencies to POM.xml file
+### Step 1 - Download pre-compiled Heron API binaries with install script
+
+Navigate to [Twitter Heron Releases](https://github.com/twitter/heron/releases) and
+download the following self extracting binary API install script for your platform. 
+
+* heron-api-install
+
+For example, if you want to download for Mac OSX (darwin), the 
+corresponding binaries will be
+
+* heron-api-install-\<version\>-darwin.sh
+
+where \<version\> is the desired heron version.
+
+Run the download self installing binary for heron API as follows (example for version 0.13.2). Note "--user --maven" syntax.  
+```bash
+$ chmod +x heron-api-install-0.13.2-darwin.sh
+$ ./heron-api-install-0.13.2-darwin.sh --user --maven
+Heron API installer
+---------------------
+
+# Binary package at HEAD (@)
+   - [Commit](https://github.com/twitter/heron/commit/)
+Installing jars to local maven repo.
+
+Heron API is now installed!
+
+See http://heron.github.io/docs/getting-started.html to start a new project!
+```
+
+Heron API is now installed in local [Maven .m2 repository](https://maven.apache.org/settings.html):
+```
+~/.m2/repository/com/twitter/heron/heron-api
+~/.m2/repository/com/twitter/heron/heron-storm
+```
+
+### Step 2 - Add Heron Dependencies to POM.xml file
 
 Copy [POM.xml](https://maven.apache.org/pom.html) dependency segments below and paste into your exsiting Storm POM.xml file in [Dependencies block](https://maven.apache.org/pom.html#Dependencies).
 ```
@@ -23,7 +59,7 @@ Copy [POM.xml](https://maven.apache.org/pom.html) dependency segments below and 
     </dependency>
 ```
 
-### Step 2 - Remove Storm Dependencies from POM.xml file
+### Step 3 - Remove Storm Dependencies from POM.xml file
 Delete Storm dependency in POM.xml file.
 ```
     <dependency>
@@ -34,7 +70,7 @@ Delete Storm dependency in POM.xml file.
     </dependency>
 ```
 
-### Step 3 (if needed) - Remove Clojure Plugin from POM.xml file
+### Step 4 (if needed) - Remove Clojure Plugin from POM.xml file
 Delete Clojure [Plugin](https://maven.apache.org/pom.html#Plugins) from POM.xml file
 ```
       <plugin>
@@ -50,7 +86,7 @@ Delete Clojure [Plugin](https://maven.apache.org/pom.html#Plugins) from POM.xml 
       </plugin>
 ```
 
-### Step 4 - Run Maven Clean, Complie, Package commands
+### Step 5 - Run Maven Clean, Complie, Package commands
 [Run Maven Lifecycle](https://maven.apache.org/run.html) commands
 ```
 $ mvn clean
