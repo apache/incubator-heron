@@ -44,6 +44,7 @@ def heron_client_lib_uploader_files():
     return [
         "//heron/uploaders/src/java:heron-null-uploader",
         "//heron/uploaders/src/java:heron-localfs-uploader",
+        "//heron/uploaders/src/java:heron-s3-uploader",
         "//heron/uploaders/src/java:heron-hdfs-uploader",
     ]
 
