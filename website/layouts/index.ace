@@ -14,7 +14,11 @@ html lang={{.Site.LanguageCode}}
           p A realtime stream processing engine from Twitter
           .center-block
             a.btn.btn-info.button-wrapper href=docs/getting-started Get Started
+<<<<<<< HEAD
             a.btn.btn-info.button-wrapper href=docs/upgrade-storm-to-heron Upgrade From Storm
+=======
+            a.btn.btn-info.button-wrapper href=docs/upgrade Upgrade From Storm
+>>>>>>> bca20a2885e9bee3c52eafc5c2ba22c1f0df6dfd
 
       .landing-feature-1
         .container style="text-align: center;"
