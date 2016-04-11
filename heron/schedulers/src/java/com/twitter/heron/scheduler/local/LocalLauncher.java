@@ -141,38 +141,6 @@ public class LocalLauncher implements ILauncher {
     return true;
   }
 
-  @Override
-  public ExecutionEnvironment.ExecutionState updateExecutionState(
-      ExecutionEnvironment.ExecutionState executionState) {
-    String release = "local-live";
-
-    // build the heron release state
-    ExecutionEnvironment.HeronReleaseState.Builder releaseBuilder =
-        ExecutionEnvironment.HeronReleaseState.newBuilder();
-
-    releaseBuilder.setReleaseUsername(LocalContext.role(config));
-    releaseBuilder.setReleaseTag(release);
-    releaseBuilder.setReleaseVersion(release);
-    releaseBuilder.setUploaderVersion(release);
-
-    // build the execution state
-    ExecutionEnvironment.ExecutionState.Builder builder =
-        ExecutionEnvironment.ExecutionState.newBuilder();
-
-    builder.mergeFrom(executionState)
-        .setDc(LocalContext.cluster(config))
-        .setCluster(LocalContext.cluster(config))
-        .setRole(LocalContext.role(config))
-        .setEnviron(LocalContext.environ(config))
-        .setReleaseState(releaseBuilder);
-
-    if (!builder.isInitialized()) {
-      throw new RuntimeException("Failed to create execution state");
-    }
-
-    return builder.build();
-  }
-
   /**
    * Download heron core and the topology packages into topology working directory
    *

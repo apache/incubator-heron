@@ -1,6 +1,5 @@
 package com.twitter.heron.spi.scheduler;
 
-import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.PackingPlan;
 
@@ -29,11 +28,6 @@ public class NullLauncher implements ILauncher {
   @Override
   public boolean postLaunch(PackingPlan packing) {
     return true;
-  }
-
-  @Override
-  public ExecutionEnvironment.ExecutionState updateExecutionState(ExecutionEnvironment.ExecutionState executionState) {
-    return executionState;
   }
 }
 

@@ -10,7 +10,6 @@ import javax.xml.bind.DatatypeConverter;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
-import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.PackingPlan;
@@ -138,37 +137,5 @@ public class AuroraLauncher implements ILauncher {
   @Override
   public boolean postLaunch(PackingPlan packing) {
     return true;
-  }
-
-  @Override
-  public ExecutionEnvironment.ExecutionState updateExecutionState(ExecutionEnvironment.ExecutionState executionState) {
-    // TODO(mfu): These values should read from config
-    String releaseUsername = "heron";
-    String releaseTag = "heron-core-release";
-    String releaseVersion = "releaseVersion";
-    String uploadVersion = "uploadVersion";
-
-    ExecutionEnvironment.ExecutionState.Builder builder =
-        ExecutionEnvironment.ExecutionState.newBuilder().mergeFrom(executionState);
-
-    builder.setCluster(Context.cluster(config))
-        .setRole(Context.role(config))
-        .setEnviron(Context.environ(config));
-
-    // Set the HeronReleaseState
-    ExecutionEnvironment.HeronReleaseState.Builder releaseBuilder =
-        ExecutionEnvironment.HeronReleaseState.newBuilder();
-
-    releaseBuilder.setReleaseUsername(releaseUsername);
-    releaseBuilder.setReleaseTag(releaseTag);
-    releaseBuilder.setReleaseVersion(releaseVersion);
-    releaseBuilder.setUploaderVersion(uploadVersion);
-
-    builder.setReleaseState(releaseBuilder);
-    if (builder.isInitialized()) {
-      return builder.build();
-    } else {
-      throw new RuntimeException("Failed to create execution state");
-    }
   }
 }
