@@ -66,6 +66,14 @@ html lang={{.Site.LanguageCode}}
         .container style="text-align: center;"
           .row 
             .col-sm-12
+              h2 Heron is in Beta
+              div Heron has been in production at Twitter for over 2 years and is in Beta. We believe Heron is stable enough for production use. See our  
+                a href=docs/contributors/codebase/ Support 
+              div page for information about feature status and releases. The Heron team monitors and responds actively to bug reports from users.
+      .landing-feature-1
+        .container style="text-align: center;"
+          .row 
+            .col-sm-12
               h2 About Heron
               a href=docs/contributors/codebase/ Contributing
           .row 
