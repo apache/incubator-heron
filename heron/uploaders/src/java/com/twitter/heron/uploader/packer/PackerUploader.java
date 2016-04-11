@@ -47,7 +47,7 @@ public class PackerUploader implements IUploader {
     // this.releaseTag = config.getStringValue(Keys.get("HERON_RELEASE_PACKAGE_NAME"), "live");
 
     // core pkg uri in form: packer://role/pkg/version, and we need the 'pkg' part
-    this.releaseTag = Context.corePackageUri(config).split("/")[3];
+    this.releaseTag = PackerUtils.getReleasePkgName(Context.corePackageUri(config));
 
     if (cluster.isEmpty() || role.isEmpty()) {
       LOG.severe("cluster, role & env not set properly");
@@ -84,7 +84,7 @@ public class PackerUploader implements IUploader {
       return null;
     }
 
-    String topologyURIStr = String.format("packer://%s/%s/%s", role, getTopologyPackageName(), "live");
+    String topologyURIStr = PackerUtils.getTopologyURIString(role, getTopologyPackageName(), "live");
     return Convert.getURI(topologyURIStr);
   }
 
