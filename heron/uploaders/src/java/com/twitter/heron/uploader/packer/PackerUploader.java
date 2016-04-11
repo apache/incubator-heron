@@ -46,7 +46,6 @@ public class PackerUploader implements IUploader {
     // TO DO
     // this.releaseTag = config.getStringValue(Keys.get("HERON_RELEASE_PACKAGE_NAME"), "live");
 
-    // core pkg uri in form: packer://role/pkg/version, and we need the 'pkg' part
     this.releaseTag = PackerUtils.getReleasePkgName(Context.corePackageUri(config));
 
     if (cluster.isEmpty() || role.isEmpty()) {
