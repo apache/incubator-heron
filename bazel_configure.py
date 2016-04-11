@@ -1,5 +1,17 @@
 #!/usr/bin/env python2.7
-
+#
+# Verifies required libraries and tools exist and are valid versions.
+# Is so creates scripts/compile/env_exec.sh containing environment used
+# by bazel when building.
+#
+# When changing this script, verify that it still works by running locally
+# on a mac. Then verify the other environments by doing this:
+#
+#  cd docker
+#  ./build-artifacts.sh ubuntu15.10 0.12.0 .
+#  ./build-artifacts.sh ubuntu14.04 0.12.0 .
+#  ./build-artifacts.sh centos7 0.12.0 .
+#
 import os, sys
 import re, subprocess, shutil
 
@@ -116,6 +128,12 @@ def fail(message):
   print("\nFAILED:  %s" % message)
   sys.exit(-1)
 
+# Assumes the version is at the end of the first line consisting of digits and dots
+def get_trailing_version(line):
+  version = re.search('([\d.]+)$', line)
+  if version and '.' in version.group(0):
+    return version.group(0)
+
 def discover_version(path):
   if "python" in path:
     version_flag = "-V"
@@ -123,22 +141,52 @@ def discover_version(path):
     version_flag = "--version"
   command = "%s %s" % (path, version_flag)
   version_output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
-  version_search = re.search('([\d.]+)$', version_output.split("\n")[0])
-  if not version_search:
-    fail ("Could not determine the version of %s from the following output\n%s\n%s" % (path, command, version_output))
-
-  return version_search.group(0)
-
-def pad_semver(version):
-  if re.search('^[\d]+.[\d]+$', version):
-    return "%s.0" % version
-  else:
+  first_line = version_output.split("\n")[0]
+  version = get_trailing_version(first_line)
+  if version:
     return version
+
+  # on centos, /usr/bin/gcc --version returns this:
+  #   gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-4)
+  redhat_line = re.search('(.*)\s+[0-9]+\s+\(Red Hat .*\)$', first_line)
+  if redhat_line:
+    version = get_trailing_version(redhat_line.group(1))
+    if version:
+      return version
+
+  # on ubuntu, /usr/bin/gcc --version returns this:
+  #   gcc-5 (Ubuntu 5.2.1-22ubuntu2) 5.2.1 20151010
+  ubuntu_line = re.search('.*\s+\(Ubuntu .*\)\s+([\d\.]+)\s+\d+$', first_line)
+  if ubuntu_line:
+    version = get_trailing_version(ubuntu_line.group(1))
+    if version:
+      return version
+
+  # on mac, /usr/bin/cpp --version returns this:
+  #   Apple LLVM version 6.0 (clang-600.0.56) (based on LLVM 3.5svn)
+  mac_line = re.search('^(Apple LLVM version\s+[\d\.]+)\s+\(clang.*', first_line)
+  if mac_line:
+    version = get_trailing_version(mac_line.group(1))
+    if version:
+      return version
+
+  fail ("Could not determine the version of %s from the following output\n%s\n%s" % (path, command, version_output))
+
+def to_semver(version):
+  # is version too short
+  if re.search('^[\d]+\.[\d]+$', version):
+    return "%s.0" % version
+
+  # is version too long
+  version_search = re.search('^([\d]+\.[\d]+\.[\d]+)\.[\d]+$', version)
+  if version_search:
+    return version_search.group(1)
+
+  return version
 
 def assert_min_version(path, min_version):
   version = discover_version(path)
-  #print ("Checking %s with version %s (%s) is at least version %s (%s)" % (path, version, pad_semver(version), min_version, pad_semver(min_version)))
-  if not semver.match(pad_semver(version), ">=%s" % pad_semver(min_version)):
+  if not semver.match(to_semver(version), ">=%s" % to_semver(min_version)):
     fail("%s is version %s which is less than the required version %s" % (path, version, min_version))
   return version
 
@@ -203,9 +251,9 @@ def discover_tool_default(program, msg, envvar, defvalue):
   VALUE = discover_program(program, envvar)
   if not VALUE:
     VALUE = defvalue
-    print '%s:\t not found, but ok' % (program.ljust(26))
+    print '%s:\tnot found, but ok' % (program.ljust(26))
   else:
-    print 'Using %s:\t"%s"' % (msg.ljust(20), VALUE)
+    print 'Using %s:\t%s' % (msg.ljust(20), VALUE)
   return VALUE
 
 ######################################################################
@@ -257,7 +305,7 @@ def write_env_exec_file(platform, environ):
   out_file.write('$*')
 
   make_executable(env_exec_file)
-  print 'Wrote the environment exec file:  \t"%s"' % (env_exec_file)
+  print 'Wrote the environment exec file %s' % (env_exec_file)
 
 
 ######################################################################
@@ -304,12 +352,21 @@ def main():
 
   # Discover the platform
   platform = discover_platform()
+  print "Platform %s" % platform
+
+  # do differently on mac
+  if platform == "Darwin":
+    c_min = '4.2.1'
+    cpp_min = '6.0' # on mac this will be clang version
+  else:
+    c_min = '4.8.2'
+    cpp_min = c_min
 
   # Discover the tools environment
-  env_map['CC'] = discover_tool('gcc','C compiler', 'CC')
-  env_map['CXX'] = discover_tool('g++','C++ compiler', 'CXX')
-  env_map['CPP'] = discover_tool('cpp','C preprocessor', 'CPP')
-  env_map['CXXCPP'] = discover_tool('cpp','C++ preprocessor', 'CXXCPP')
+  env_map['CC'] = discover_tool('gcc','C compiler', 'CC', c_min)
+  env_map['CXX'] = discover_tool('g++','C++ compiler', 'CXX', c_min)
+  env_map['CPP'] = discover_tool('cpp','C preprocessor', 'CPP', cpp_min)
+  env_map['CXXCPP'] = discover_tool('cpp','C++ preprocessor', 'CXXCPP', cpp_min)
   env_map['LD'] =  discover_tool('ld','linker', 'LD')
   env_map['BLDFLAG'] = discover_linker(env_map)
 
