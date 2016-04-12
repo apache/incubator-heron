@@ -46,6 +46,8 @@ def run(command, parser, cl_args, unknown_args):
     parser.exit()
 
   try:
+    cluster = utils.get_heron_cluster(cluster_role_env)
+    config_path = utils.get_heron_cluster_conf_dir(cluster, cl_args['config_path'])
     config_overrides = \
         utils.parse_cluster_role_env(cluster_role_env) + ' ' + \
         utils.parse_cmdline_override(cl_args)

@@ -3,6 +3,8 @@ sections:
     sublinks:
       - name: Getting Started
         url: /docs/getting-started
+      - name: Upgrade Existing Storm Topologies
+        url: /docs/upgrade-storm-to-heron
   - name: Concepts
     sublinks:
       - name: The Architecture of Heron

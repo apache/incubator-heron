@@ -1,6 +1,19 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.twitter.heron.spi.scheduler;
 
-import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.PackingPlan;
 
@@ -49,15 +62,4 @@ public interface ILauncher extends AutoCloseable {
    * @return true if successful
    */
   boolean postLaunch(PackingPlan packing);
-
-  /**
-   * Add/Modify additional information in execution state. Returns new ExecutionState created using
-   * current execution state and adding additional Launch specific information
-   * TODO(nbhagat): Don't overload heron's ExecutionState with scheduler specific data.
-   *
-   * @param executionState Default execution state with all required fields set.
-   * @return Updated execution state.
-   */
-  ExecutionEnvironment.ExecutionState updateExecutionState(
-      ExecutionEnvironment.ExecutionState executionState);
 }
