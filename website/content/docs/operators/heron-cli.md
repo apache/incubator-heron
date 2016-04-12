@@ -2,20 +2,19 @@
 title: Managing Topologies with Heron CLI
 ---
 
-Heron has a CLI tool called **Heron CLI** that you can use to manage every
-aspect of the [lifecycle of
-topologies](../concepts/topologies.html#topology-lifecycle).
+The **Heron CLI** us used to to manage every aspect of the
+[topology lifecycle](../../concepts/topologies#topology-lifecycle).
 
-## Obtaining the `heron-cli` Executable
+## Deploying the `heron-cli` Executable
 
-In order to use `heron-cli`, you need to generate a full [Heron
-release](release.html) and distribute the resulting `heron-cli` binary to all
-machines that will be used to manage topologies.
+To use `heron-cli`, generate a full [Heron release](../../developers/compiling/compiling) and
+distribute the resulting `heron-cli` binary to all machines used to
+manage topologies.
 
 ## CLI Flags
 
-There are two flags that are available for all topology management commands
-(`submit`, `activate`, `deactivate`, `restart`, and `kill`):
+All topology management commands (`submit`, `activate`, `deactivate`,
+`restart`, and `kill`) take two optional flags:
 
 * `--config-loader` &mdash; Every Heron scheduler must implement a
   default configuration loader that's responsible for providing the topology's
@@ -27,9 +26,9 @@ There are two flags that are available for all topology management commands
   a path for that file.
 
 These flags are especially useful if you're developing a [custom
-scheduler](../contributors/custom-scheduler.html).
+scheduler](../../contributors/custom-scheduler).
 
-Here's an example topology management command that uses both of these flags:
+Below is an example topology management command that uses both of these flags:
 
 ```bash
 $ heron-cli activate "topology.debug:true" \
@@ -42,8 +41,8 @@ $ heron-cli activate "topology.debug:true" \
 
 ## Submitting a Topology
 
-In order to run a topology in a Heron cluster, you need to submit it using the
-`submit` command. Topologies can be submitted in either an activated or
+In order to run a topology in a Heron cluster, submit it using the
+`submit` command. Topologies can be submitted in either an activated (default) or
 deactivated state (more on [activation](#activating-a-topology) and
 [deactivation](#deactivating-a-topology) below).
 
@@ -63,7 +62,8 @@ Arguments of the `submit` command:
 
 * Filepath &mdash; The path of the file in which you've packaged the
   topology's code. For Java topologies this will be a `.jar` file; for
-  topologies in other languages (not yet supported), use a `.tar` file.
+  topologies in other languages (not yet supported), this could be a
+  `.tar` file.
 
   **Example**: `/path/to/topology/my-topology.jar`
 
@@ -97,8 +97,9 @@ Flag | Meaning
 
 ## Activating a Topology
 
-Once a topology has been successfully submitted to your cluster, you can
-activate it using the `activate` command. Here's the basic syntax:
+Topologies are submitted to the cluster in the activated state by default. To
+activate a deactivated topology use the `activate` command. Below is the basic
+syntax:
 
 ```bash
 $ heron-cli activate <activator-overrides> <topology>

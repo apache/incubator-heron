@@ -13,19 +13,19 @@ cluster, see [Building Topologies](../developers/topologies.html) instead.
 The primary programming languages for Heron are C++, Java, and Python.
 
 * **C++ 11** is used for most of Heron's core components, including the
-[Topology Master](../concepts/architecture.html#topology-master), [Stream
-Manager](../concepts/architecture.html#stream-manager), and [Metrics
-Manager](../concepts/architecture.html#metrics-manager).
+[Topology Master](../../concepts/architecture#topology-master), [Stream
+Manager](../../concepts/architecture#stream-manager), and [Metrics
+Manager](../../concepts/architecture#metrics-manager).
 
 * **Java 8** is used primarily for Heron's [topology
-API](../concepts/topologies.html) and is currently the only language in which
+API](../../concepts/topologies) and is currently the only language in which
 topologies can be written. Instructions can be found in [Building
 Topologies](../developers/topologies.html), while API documentation for the Java
 API can be found [here](../api/topology/index.html). Please note that Heron
 topologies do not require Java 8 and can be written in Java 7 or later.
 
 * **Python 2** (specifically 2.7) is used primarily for Heron's [CLI
-interface](../operators/heron-cli.html) and UI components such as [Heron
+interface](../../operators/heron-cli) and UI components such as [Heron
 UI](../operators/heron-ui.html) and the [Heron
 Tracker](../operators/heron-tracker.html).
 
@@ -84,25 +84,25 @@ Heron components.
 ### Topology Master
 
 The C++ code for Heron's [Topology
-Master](../concepts/architecture.html#topology-master) is written in C++ can be
+Master](../../concepts/architecture#topology-master) is written in C++ can be
 found in [`heron/tmaster`]({{book.root_url}}/heron/tmaster).
 
 ### Stream Manager
 
 The C++ code for Heron's [Stream
-Manager](../concepts/architecture.html#stream-manager) can be found in
+Manager](../../concepts/architecture#stream-manager) can be found in
 [`heron/stmgr`]({{book.root_url}}/heron/stmgr).
 
 ### Heron Instance
 
 The Java code for [Heron
-instances](../concepts/architecture.html#heron-instance) can be found in
+instances](../../concepts/architecture#heron-instance) can be found in
 [`heron/instance`]({{book.root_url}}/heron/instance).
 
 ### Metrics Manager
 
 The Java code for Heron's [Metrics
-Manager](../concepts/architecture.html#metrics-manager) can be found in
+Manager](../../concepts/architecture#metrics-manager) can be found in
 [`heron/metricsmgr`]({{book.root_url}}/heron/metricsmgr).
 
 If you'd like to implement your own custom metrics handler (known as a **metrics
@@ -130,7 +130,7 @@ The Java API for local mode can be found in
 ### Example Topologies
 
 Heron's codebase includes a wide variety of example
-[topologies](../concepts/topologies.html) built using Heron's topology API for
+[topologies](../../concepts/topologies) built using Heron's topology API for
 Java. Those examples can be found in
 [`heron/examples`]({{book.root_url}}/heron/examples).
 
@@ -139,7 +139,7 @@ Java. Those examples can be found in
 ### Heron CLI
 
 Heron has a tool called `heron-cli` that is used to both provide a CLI interface
-for [managing topologies](../operators/heron-cli.html) and to perform much of
+for [managing topologies](../../operators/heron-cli) and to perform much of
 the heavy lifting behind assembling physical topologies in your cluster.
 
 The Python code for `heron-cli` can be found in
