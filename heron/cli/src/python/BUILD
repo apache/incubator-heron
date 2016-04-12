@@ -22,6 +22,9 @@ pex_library(
         "//heron/common/src/python:common",
         "//heron/proto:proto-py",
     ],
+    eggs = [
+        "//3rdparty/eggs:pyyaml",
+    ],
 )
 
 pex_binary(

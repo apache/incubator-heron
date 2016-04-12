@@ -1,12 +1,13 @@
 #!/usr/bin/env python2.7
 
 import argparse
-import sys
-import subprocess
-import os
-import tarfile
 import contextlib
 import getpass
+import os
+import sys
+import subprocess
+import tarfile
+import yaml
 
 from heron.common.src.python.color import Log
 
@@ -21,6 +22,13 @@ LIB_DIR  = "lib"
 
 # directories for heron sandbox
 SANDBOX_CONF_DIR = "./heron-conf"
+
+# config file for heron cli
+CLIENT_YAML = "client.yaml"
+
+# cli configs for role and env
+ROLE_REQUIRED = "heron.config.role.required"
+ENV_REQUIRED  = "heron.config.env.required"
 
 ################################################################################
 # Create a tar file with a given set of files
@@ -115,14 +123,13 @@ def get_heron_lib_dir():
   lib_path = os.path.join(get_heron_dir(), LIB_DIR)
   return lib_path
 
-def get_heron_cluster_conf_dir(cluster_role_env, default_config_path):
+def get_heron_cluster_conf_dir(cluster, default_config_path):
   """
   This will provide heron cluster config directory, if config path is default
   :return: absolute path of heron cluster conf directory
   """
-  cluster_role_env = parse_cluster_role_env(cluster_role_env)
   if default_config_path == get_heron_conf_dir():
-    return os.path.join(default_config_path, cluster_role_env[0])
+    return os.path.join(default_config_path, cluster)
 
   return default_config_path
 
@@ -145,18 +152,34 @@ def get_heron_libs(local_jars):
   return heron_libs
 
 ################################################################################
-# Parse the cluster/[role]/[environ], supply defaults, if not provided
+# Get the cluster to which topology is submitted
 ################################################################################
-def parse_cluster_role_env(cluster_role_env):
+def get_heron_cluster(cluster_role_env):
+  return cluster_role_env.split('/')[0]
+
+################################################################################
+# Parse cluster/[role]/[environ], supply default, if not provided, not required
+################################################################################
+def parse_cluster_role_env(cluster_role_env, config_path):
   parts = cluster_role_env.split('/')[:3]
 
-  # if role is not provided, use username instead
-  if len(parts) == 1:
-    parts.append(getpass.getuser())
+  cli_conf_path = os.path.join(config_path, CLIENT_YAML)
+  with open(cli_conf_path, 'r') as conf_file:
+    cli_confs = yaml.load(conf_file)
 
-  # if environ is not provided, use 'default'
-  if len(parts) == 2:
-    parts.append(ENVIRON)
+    # if role is required but not provided, raise exception
+    if len(parts) == 1:
+      if cli_confs[ROLE_REQUIRED] == True:
+        raise Exception("role required but not provided")
+      else:
+        parts.append(getpass.getuser())
+
+    # if environ is required but not provided, raise exception
+    if len(parts) == 2:
+      if cli_confs[ENV_REQUIRED] == True:
+        raise Exception("environ required but not provided")
+      else:
+        parts.append(ENVIRON)
 
   # if cluster or role or environ is empty, print
   if len(parts[0]) == 0 or len(parts[1]) == 0 or len(parts[2]) == 0:
