@@ -2,9 +2,6 @@ package com.twitter.heron.scheduler;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,7 +26,6 @@ import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.uploader.IUploader;
-import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
@@ -238,7 +234,7 @@ public class SubmitterMain {
     }
 
     Level logLevel = Level.INFO;
-    if(cmd.hasOption("v")) {
+    if (cmd.hasOption("v")) {
       logLevel = Level.ALL;
     }
 
@@ -279,6 +275,7 @@ public class SubmitterMain {
     // create an instance of state manager
     String statemgrClass = Context.stateManagerClass(config);
     IStateManager statemgr = (IStateManager) Class.forName(statemgrClass).newInstance();
+    SchedulerStateManagerAdaptor stateManagerAdaptor = new SchedulerStateManagerAdaptor(statemgr);
 
     // Create an instance of the launcher class
     String launcherClass = Context.launcherClass(config);
@@ -302,7 +299,8 @@ public class SubmitterMain {
       // initialize the state manager
       statemgr.initialize(config);
 
-      boolean isValid = validateSubmit(statemgr, topologyName);
+      // 1. Try to acquire the topology lock
+      boolean isValid = TopologyUtils.acquireTopologyLock(stateManagerAdaptor, topology);
 
       // 2. Try to submit topology if valid
       if (isValid) {
@@ -315,7 +313,7 @@ public class SubmitterMain {
           LOG.severe("Failed to upload package.");
         } else {
           // Secondly, try to submit a topology
-          isSuccessful = submitTopology(config, topology, statemgr, launcher, packing, packageURI);
+          isSuccessful = submitTopology(config, topology, stateManagerAdaptor, launcher, packing, packageURI);
         }
       }
     } finally {
@@ -325,6 +323,10 @@ public class SubmitterMain {
         if (packageURI != null) {
           uploader.undo();
         }
+
+        // Release the topology lock since the submission failed
+        // Will not check whether the release is sucessful or not
+        TopologyUtils.releaseTopologyLock(stateManagerAdaptor, topologyName);
       }
 
       // 4. Close the resources
@@ -346,19 +348,6 @@ public class SubmitterMain {
     }
   }
 
-  public static boolean validateSubmit(IStateManager statemgr, String topologyName) {
-    // Check whether the topology has already been running
-    Boolean isTopologyRunning =
-        NetworkUtils.awaitResult(statemgr.isTopologyRunning(topologyName), 5, TimeUnit.SECONDS);
-
-    if (isTopologyRunning != null && isTopologyRunning.equals(Boolean.TRUE)) {
-      LOG.severe("Topology already exists");
-      return false;
-    }
-
-    return true;
-  }
-
   public static URI uploadPackage(Config config, IUploader uploader) {
     // initialize the uploader
     uploader.initialize(config);
@@ -370,7 +359,7 @@ public class SubmitterMain {
   }
 
   public static boolean submitTopology(Config config, TopologyAPI.Topology topology,
-                                       IStateManager statemgr, ILauncher launcher,
+                                       SchedulerStateManagerAdaptor stateManagerAdaptor, ILauncher launcher,
                                        IPacking packing, URI packageURI)
       throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
     // build the runtime config
@@ -378,7 +367,7 @@ public class SubmitterMain {
         .put(Keys.topologyId(), topology.getId())
         .put(Keys.topologyName(), topology.getName())
         .put(Keys.topologyDefinition(), topology)
-        .put(Keys.schedulerStateManagerAdaptor(), new SchedulerStateManagerAdaptor(statemgr))
+        .put(Keys.schedulerStateManagerAdaptor(), stateManagerAdaptor)
         .put(Keys.topologyPackageUri(), packageURI)
         .put(Keys.launcherClassInstance(), launcher)
         .put(Keys.packingClassInstance(), packing)

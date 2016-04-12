@@ -20,6 +20,7 @@ import com.twitter.heron.spi.scheduler.IRuntimeManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.Runtime;
+import com.twitter.heron.spi.utils.TopologyUtils;
 
 public class RuntimeManagerRunner implements Callable<Boolean> {
   private static final Logger LOG = Logger.getLogger(RuntimeManagerRunner.class.getName());
@@ -422,17 +423,14 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     booleanFuture = statemgr.deleteExecutionState(topologyName);
     futureResult = NetworkUtils.awaitResult(booleanFuture, 5, TimeUnit.SECONDS);
     if (futureResult == null || !futureResult) {
+      // We would not return false since it is possible that
+      // people terminate submission before writing execution state
       LOG.severe("Failed to clear execution state");
-      return false;
     }
 
-    // Make sure clean topology after other info,
-    // since we use it to determine whether a topology already exists.
-    booleanFuture = statemgr.deleteTopology(topologyName);
-    futureResult = NetworkUtils.awaitResult(booleanFuture, 5, TimeUnit.SECONDS);
-    if (futureResult == null || !futureResult) {
-      LOG.severe("Failed to clear topology state");
-      return false;
+    // Finally, release the topology lock
+    if (!TopologyUtils.releaseTopologyLock(statemgr, topologyName)) {
+      LOG.severe("Failed to release the topology lock");
     }
 
     LOG.info("Cleaned up Heron State");
