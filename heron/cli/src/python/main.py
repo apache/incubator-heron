@@ -139,6 +139,7 @@ def extract_common_args(command, parser, cl_args):
     new_cl_args['config_path'] = config_path
   except Exception as e:
     Log.error("Argument cluster/[role]/[env] is not correct: %s" % str(e))
+    sys.exit(1)
 
   cl_args.update(new_cl_args)
   return cl_args
