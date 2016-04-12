@@ -359,7 +359,7 @@ def main():
     c_min = '4.2.1'
     cpp_min = '6.0' # on mac this will be clang version
   else:
-    c_min = '4.8.2'
+    c_min = '4.8.1'
     cpp_min = c_min
 
   # Discover the tools environment
