@@ -121,20 +121,22 @@ public class LaunchRunner implements Callable<Boolean> {
       return false;
     }
 
+    // store the trimmed topology definition into the state manager
+    // Make sure we store topology ahead of other info,
+    // since we use it to determine whether a topology already exists.
+    ListenableFuture<Boolean> tFuture = statemgr.setTopology(trimTopology(topology), topologyName);
+    if (!NetworkUtils.awaitResult(tFuture, 5, TimeUnit.SECONDS)) {
+      LOG.severe("Failed to set topology");
+      statemgr.deleteExecutionState(topologyName);
+      return false;
+    }
+
     // store the execution state into the state manager
     ExecutionEnvironment.ExecutionState executionState = createExecutionState();
 
     ListenableFuture<Boolean> sFuture = statemgr.setExecutionState(executionState, topologyName);
     if (!NetworkUtils.awaitResult(sFuture, 5, TimeUnit.SECONDS)) {
       LOG.severe("Failed to set execution state");
-      return false;
-    }
-
-    // store the trimmed topology definition into the state manager
-    ListenableFuture<Boolean> tFuture = statemgr.setTopology(trimTopology(topology), topologyName);
-    if (!NetworkUtils.awaitResult(tFuture, 5, TimeUnit.SECONDS)) {
-      LOG.severe("Failed to set topology");
-      statemgr.deleteExecutionState(topologyName);
       return false;
     }
 

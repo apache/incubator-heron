@@ -396,20 +396,6 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     ListenableFuture<Boolean> booleanFuture;
     Boolean futureResult;
 
-    booleanFuture = statemgr.deleteTopology(topologyName);
-    futureResult = NetworkUtils.awaitResult(booleanFuture, 5, TimeUnit.SECONDS);
-    if (futureResult == null || !futureResult) {
-      LOG.severe("Failed to clear topology state");
-      return false;
-    }
-
-    booleanFuture = statemgr.deleteExecutionState(topologyName);
-    futureResult = NetworkUtils.awaitResult(booleanFuture, 5, TimeUnit.SECONDS);
-    if (futureResult == null || !futureResult) {
-      LOG.severe("Failed to clear execution state");
-      return false;
-    }
-
     // It is possible that  TMasterLocation, PhysicalPlan and SchedulerLocation are not set
     // Just log but don't consider them failure
     booleanFuture = statemgr.deleteTMasterLocation(topologyName);
@@ -431,6 +417,22 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     if (futureResult == null || !futureResult) {
       // We would not return false since it is possible that TMaster didn't write physical plan
       LOG.severe("Failed to clear scheduler location. Check whether Scheduler set it correctly.");
+    }
+
+    booleanFuture = statemgr.deleteExecutionState(topologyName);
+    futureResult = NetworkUtils.awaitResult(booleanFuture, 5, TimeUnit.SECONDS);
+    if (futureResult == null || !futureResult) {
+      LOG.severe("Failed to clear execution state");
+      return false;
+    }
+
+    // Make sure clean topology after other info,
+    // since we use it to determine whether a topology already exists.
+    booleanFuture = statemgr.deleteTopology(topologyName);
+    futureResult = NetworkUtils.awaitResult(booleanFuture, 5, TimeUnit.SECONDS);
+    if (futureResult == null || !futureResult) {
+      LOG.severe("Failed to clear topology state");
+      return false;
     }
 
     LOG.info("Cleaned up Heron State");
