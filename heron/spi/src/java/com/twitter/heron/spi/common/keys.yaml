@@ -72,6 +72,12 @@ TOPOLOGY_PACKAGE_TYPE:           heron.topology.package.type
 TOPOLOGY_CONTAINER_ID:           heron.topology.container.id
 
 ################################################################################
+# keys for proxy config during submission
+################################################################################
+PROXY_CONNECTION_STRING:         heron.proxy.connection.string
+PROXY_CONNECTION_TYPE:           heron.proxy.connection.type
+
+################################################################################
 # keys for storing state
 ################################################################################
 STATEMGR_CONNECTION_STRING:      heron.statemgr.connection.string
