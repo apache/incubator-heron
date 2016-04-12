@@ -1,2 +1,5 @@
 # location of the core package
 heron.package.core.uri:                      file://${HERON_DIST}/heron-core.tar.gz
+
+heron.config.role.required: false
+heron.config.env.required: false
