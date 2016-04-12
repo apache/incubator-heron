@@ -163,23 +163,33 @@ def get_heron_cluster(cluster_role_env):
 def parse_cluster_role_env(cluster_role_env, config_path):
   parts = cluster_role_env.split('/')[:3]
 
-  cli_conf_path = os.path.join(config_path, CLIENT_YAML)
-  with open(cli_conf_path, 'r') as conf_file:
-    cli_confs = yaml.load(conf_file)
+  # if cluster/role/env is not completely provided, check further
+  if len(parts) < 3:
+    cli_conf_file = os.path.join(config_path, CLIENT_YAML)
 
-    # if role is required but not provided, raise exception
-    if len(parts) == 1:
-      if cli_confs[ROLE_REQUIRED] == True:
-        raise Exception("role required but not provided")
-      else:
+    # if client conf doesn't exist, use default value
+    if not os.path.isfile(cli_conf_file):
+      if len(parts) == 1:
         parts.append(getpass.getuser())
-
-    # if environ is required but not provided, raise exception
-    if len(parts) == 2:
-      if cli_confs[ENV_REQUIRED] == True:
-        raise Exception("environ required but not provided")
-      else:
+      if len(parts) == 2:
         parts.append(ENVIRON)
+    else:
+      with open(cli_conf_file, 'r') as conf_file:
+        cli_confs = yaml.load(conf_file)
+
+        # if role is required but not provided, raise exception
+        if len(parts) == 1:
+          if (ROLE_REQUIRED in cli_confs) and (cli_confs[ROLE_REQUIRED] == True):
+            raise Exception("role required but not provided")
+          else:
+            parts.append(getpass.getuser())
+
+        # if environ is required but not provided, raise exception
+        if len(parts) == 2:
+          if (ENV_REQUIRED in cli_confs) and (cli_confs[ENV_REQUIRED] == True):
+            raise Exception("environ required but not provided")
+          else:
+            parts.append(ENVIRON)
 
   # if cluster or role or environ is empty, print
   if len(parts[0]) == 0 or len(parts[1]) == 0 or len(parts[2]) == 0:
