@@ -66,12 +66,12 @@ public class Keys {
     return ConfigKeys.get("SCHEDULER_JAR");
   }
 
-  public static String proxyConnectionString() {
-    return ConfigKeys.get("PROXY_CONNECTION_STRING");
+  public static String schedulerProxyConnectionString() {
+    return ConfigKeys.get("SCHEDULER_PROXY_CONNECTION_STRING");
   }
 
-  public static String proxyConnectionType() {
-    return ConfigKeys.get("PROXY_CONNECTION_TYPE");
+  public static String schedulerProxyConnectionType() {
+    return ConfigKeys.get("SCHEDULER_PROXY_CONNECTION_TYPE");
   }
 
   public static String stateManagerConnectionString() {
