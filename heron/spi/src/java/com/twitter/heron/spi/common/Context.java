@@ -94,6 +94,14 @@ public class Context {
     return cfg.getStringValue(ConfigKeys.get("SCHEDULER_JAR"));
   }
 
+  public static String proxyConnectionString(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("PROXY_CONNECTION_STRING"));
+  }
+
+  public static String proxyConnectionType(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("PROXY_CONNECTION_TYPE"));
+  }
+
   public static String stateManagerConnectionString(Config cfg) {
     return cfg.getStringValue(ConfigKeys.get("STATEMGR_CONNECTION_STRING"));
   }
