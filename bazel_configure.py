@@ -15,7 +15,7 @@
 import os, sys
 import re, subprocess, shutil
 
-sys.path.append('tools/python/ext/semver-2.4.1')
+sys.path.append('3rdparty/semver')
 import semver
 
 ######################################################################
