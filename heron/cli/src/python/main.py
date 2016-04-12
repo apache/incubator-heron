@@ -115,29 +115,30 @@ def check_environment():
 # Extract all the common args for all commands
 ################################################################################
 def extract_common_args(command, parser, cl_args):
-
-  new_cl_args = dict()
   try:
     cluster_role_env = cl_args.pop('cluster/[role]/[env]')
-    cluster_tuple = utils.parse_cluster_role_env(cluster_role_env)
-
     config_path = cl_args['config_path']
-
   except KeyError:
     # if some of the arguments are not found, print error and exit
     subparser = utils.get_subparser(parser, command)
     print(subparser.format_help())
     return dict()
 
-  config_path = utils.get_heron_cluster_conf_dir(cluster_role_env, config_path);
+  cluster = utils.get_heron_cluster(cluster_role_env)
+  config_path = utils.get_heron_cluster_conf_dir(cluster, config_path)
   if not os.path.isdir(config_path):
     Log.error("Config path directory does not exist: %s" % config_path)
     return dict()
 
-  new_cl_args['cluster'] = cluster_tuple[0]
-  new_cl_args['role'] = cluster_tuple[1]
-  new_cl_args['environ'] = cluster_tuple[2]
-  new_cl_args['config_path'] = config_path
+  new_cl_args = dict()
+  try:
+    cluster_tuple = utils.parse_cluster_role_env(cluster_role_env, config_path)
+    new_cl_args['cluster'] = cluster_tuple[0]
+    new_cl_args['role'] = cluster_tuple[1]
+    new_cl_args['environ'] = cluster_tuple[2]
+    new_cl_args['config_path'] = config_path
+  except Exception as e:
+    Log.error("Argument cluster/[role]/[env] is not correct: %s" % str(e))
 
   cl_args.update(new_cl_args)
   return cl_args
