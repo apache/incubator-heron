@@ -180,6 +180,28 @@ a.nav-icon {
   margin-top: 0;
 }
 
+/*
+ * Footer
+ */
+
+  .footer {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    margin-top: 40px;
+    color: #99979c;
+    /*text-align: center;*/
+    background-color: #2a2730;
+  }
+
+  .hn-footer-links {
+    padding-left: 0;
+    margin-bottom: 20px;
+  }
+
+  .hn-footer-links li {
+    display: inline-block;
+  } 
+
 
 /*
  * Placeholder dashboard ideas
