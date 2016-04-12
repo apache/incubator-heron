@@ -26,6 +26,7 @@ import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.uploader.IUploader;
+import com.twitter.heron.spi.utils.TopologyLock;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
@@ -300,7 +301,7 @@ public class SubmitterMain {
       statemgr.initialize(config);
 
       // 1. Try to acquire the topology lock
-      boolean isValid = TopologyUtils.acquireTopologyLock(stateManagerAdaptor, topology);
+      boolean isValid = TopologyLock.acquire(stateManagerAdaptor, topology);
 
       // 2. Try to submit topology if valid
       if (isValid) {
@@ -326,7 +327,7 @@ public class SubmitterMain {
 
         // Release the topology lock since the submission failed
         // Will not check whether the release is sucessful or not
-        TopologyUtils.releaseTopologyLock(stateManagerAdaptor, topologyName);
+        TopologyLock.release(stateManagerAdaptor, topologyName);
       }
 
       // 4. Close the resources

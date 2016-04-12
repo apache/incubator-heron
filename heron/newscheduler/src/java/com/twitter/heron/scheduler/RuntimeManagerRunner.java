@@ -20,7 +20,7 @@ import com.twitter.heron.spi.scheduler.IRuntimeManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.Runtime;
-import com.twitter.heron.spi.utils.TopologyUtils;
+import com.twitter.heron.spi.utils.TopologyLock;
 
 public class RuntimeManagerRunner implements Callable<Boolean> {
   private static final Logger LOG = Logger.getLogger(RuntimeManagerRunner.class.getName());
@@ -429,7 +429,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     }
 
     // Finally, release the topology lock
-    if (!TopologyUtils.releaseTopologyLock(statemgr, topologyName)) {
+    if (!TopologyLock.release(statemgr, topologyName)) {
       LOG.severe("Failed to release the topology lock");
     }
 
