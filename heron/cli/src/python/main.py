@@ -139,7 +139,7 @@ def extract_common_args(command, parser, cl_args):
     new_cl_args['config_path'] = config_path
   except Exception as e:
     Log.error("Argument cluster/[role]/[env] is not correct: %s" % str(e))
-    sys.exit(1)
+    return dict()
 
   cl_args.update(new_cl_args)
   return cl_args
@@ -183,6 +183,10 @@ def main():
 
   if command != 'help' and command != 'version':
     command_line_args = extract_common_args(command, parser, command_line_args) 
+
+  # bail out if args are empty
+  if not command_line_args:
+    return 1
 
   start = time.time() 
   retcode = run(command, parser, command_line_args, unknown_args)
