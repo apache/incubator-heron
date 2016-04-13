@@ -34,17 +34,22 @@ Heron's documentation was built using the following components:
 * [GulpJS](http://gulpjs.com) --- Build tool for static assets
 * [Twitter Bootstrap](http://getbootstrap.com) --- CSS and JavaScript
 
-## Setup
+## Documentation Setup
 
-If you have [Homebrew](http://brew.sh) and [npm](https://www.npmjs.com)
+Running the Heron documentation locally requires that you have the following
 installed:
+
+* [Homebrew](http://brew.sh)
+* [npm](https://www.npmjs.com)
+
+If you have both Homebrew and npm installed:
 
 ```bash
 $ cd website
 $ make setup
 ```
 
-This will install Hugo, Gulp, and all necessary Gulp plugins.
+This will install Hugo, Gulp, and all the necessary Gulp plugins.
 
 ## Running the Docs Locally
 
