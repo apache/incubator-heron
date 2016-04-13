@@ -7,5 +7,5 @@ currently supports three scheduler options out of the box:
 * [Mesos](../mesos)
 * [Local scheduler](../local)
 
-If you'd like to implement a scheduler for a not-yet-supported system, see
+To implement a new scheduler, see
 [Implementing a Custom Scheduler](../../../contributors/custom-scheduler).

@@ -1,5 +1,5 @@
 ---
-title: Heron's Data Model
+title: Heron Data Model
 ---
 
 The [tuple](https://en.wikipedia.org/wiki/Tuple) is Heron's core data type. All
