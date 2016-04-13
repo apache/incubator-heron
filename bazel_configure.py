@@ -370,8 +370,6 @@ def main():
   env_map['LD'] =  discover_tool('ld','linker', 'LD')
   env_map['BLDFLAG'] = discover_linker(env_map)
 
-  sys.exit(1) # TODO: remove this. Including it to force travis CI to fail as a test
-
   # Discover the utilities
   env_map['AUTOMAKE'] = discover_tool('automake', 'Automake', 'AUTOMAKE', '1.11.1')
   env_map['AUTOCONF'] = discover_tool('autoconf', 'Autoconf', 'AUTOCONF', '2.6.3')
