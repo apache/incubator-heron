@@ -53,6 +53,7 @@ filegroup(
 pkg_tar(
     name = "heron-core",
     extension = "tar.gz",
+    files = [":RELEASE"],
     deps = [
         ":heron-core-bin",
         ":heron-core-lib-scheduler",
