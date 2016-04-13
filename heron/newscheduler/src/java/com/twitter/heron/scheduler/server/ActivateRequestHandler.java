@@ -53,7 +53,7 @@ public class ActivateRequestHandler implements HttpHandler {
     boolean isActivatedSuccessfully =
         scheduler.onActivate(activateTopologyRequest) &&
             TMasterUtils.sendToTMaster("activate",
-                com.twitter.heron.spi.utils.Runtime.topologyName(runtime),
+                Runtime.topologyName(runtime),
                 Runtime.schedulerStateManagerAdaptor(runtime));
 
     // prepare the response
