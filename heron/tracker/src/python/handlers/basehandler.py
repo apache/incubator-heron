@@ -179,6 +179,30 @@ class BaseHandler(tornado.web.RequestHandler):
     except tornado.web.MissingArgumentError as e:
       raise Exception(e.log_message)
 
+  def get_argument_offset(self):
+    """
+    Helper function to get offset argument.
+    Raises exception if argument is missing.
+    Returns the offset argument.
+    """
+    try:
+      offset = self.get_argument(constants.PARAM_OFFSET)
+      return offset
+    except tornado.web.MissingArgumentError as e:
+      raise Exception(e.log_message)
+
+  def get_argument_length(self):
+    """
+    Helper function to get length argument.
+    Raises exception if argument is missing.
+    Returns the length argument.
+    """
+    try:
+      length = self.get_argument(constants.PARAM_LENGTH)
+      return length
+    except tornado.web.MissingArgumentError as e:
+      raise Exception(e.log_message)
+
   def get_required_arguments_metricnames(self):
     """
     Helper function to get metricname arguments.
