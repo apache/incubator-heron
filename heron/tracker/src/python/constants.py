@@ -20,6 +20,8 @@ PARAM_INTERVAL = "interval"
 PARAM_STARTTIME = "starttime"
 PARAM_ENDTIME = "endtime"
 PARAM_QUERY = "query"
+PARAM_OFFSET = "offset"
+PARAM_LENGTH = "length"
 
 # These are the keys in the JSON response
 # formed by the handlers.

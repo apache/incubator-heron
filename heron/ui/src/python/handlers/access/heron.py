@@ -26,6 +26,8 @@ JSTACK_URL_FMT            = "%s/jstack"           % TOPOLOGIES_URL_FMT
 JMAP_URL_FMT              = "%s/jmap"             % TOPOLOGIES_URL_FMT
 HISTOGRAM_URL_FMT         = "%s/histo"            % TOPOLOGIES_URL_FMT
 
+LOGFILE_DATA_URL_FMT      = "%s/logfiledata"      % TOPOLOGIES_URL_FMT
+
 capacity = "DIVIDE(" \
         "  DEFAULT(0," \
         "    MULTIPLY(" \
@@ -357,6 +359,20 @@ def run_instance_jmap(cluster, environ, topology, instance):
            environ = environ,
            topology = topology,
            instance = instance)
+  )
+  raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
+
+# Get logfile data
+@tornado.gen.coroutine
+def get_logfile_data(cluster, environ, topology, instance, offset, length):
+  request_url = tornado.httputil.url_concat(
+      create_url(LOGFILE_DATA_URL_FMT),
+      dict(cluster = cluster,
+           environ = environ,
+           topology = topology,
+           instance = instance,
+           offset = offset,
+           length = length)
   )
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
