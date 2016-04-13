@@ -27,7 +27,7 @@ pwd
 
 
 function get_heron_python_paths() {
-	echo "$(find heron -name "*.py" | sed "s|/src/python/.*$||" |sed "s|/tests/python/.*$||" | sort -u)";
+	echo "$(find heron -name "*.py" | sed "s|/src/python/.*$|/src/python/|" |sed "s|/tests/python/.*$|/tests/python/|" | sort -u)";
 }
 
 function get_heron_thirdparty_dependencies() {
@@ -36,7 +36,7 @@ function get_heron_thirdparty_dependencies() {
 function get_heron_bazel_deps(){
 	local bazel_third_party_base="$(bazel info output_base)/external/bazel_tools/third_party/"; 
 	local bazel_ext_deps=`bazel query 'labels("deps", heron/...)'  | egrep -E "bazel_tools"`;  
-	local heron_resolved_deps=`for dep in $BAZEL_EXT_DEPS; do bazel query "$dep" --output xml | grep "<label" | grep "\.jar" | sed 's/<label value="//' | sed 's/"\/\>//'| sort -u | sed 's/\/\/3rdparty/$MODULE_DIR\/3rdparty/' | sed "s|\@bazel_tools\/\/third_party\:|$BAZEL_THIRD_PARTY_BASE|" ; done`;
+	local heron_resolved_deps=`for dep in $bazel_ext_deps; do bazel query "$dep" --output xml | grep "<label" | grep "\.jar" | sed 's/<label value="//' | sed 's/"\/\>//'| sort -u | sed 's/\/\/3rdparty/$MODULE_DIR\/3rdparty/' | sed "s|\@bazel_tools\/\/third_party\:|$bazel_third_party_base|" ; done`;
 	echo "${heron_resolved_deps}";
 }
 
@@ -60,6 +60,11 @@ function get_heron_java_paths() {
 	echo "${java_paths}"
 }
 
+function get_heron_source_paths() {
+	local java_paths=$(get_heron_java_paths)
+	local python_paths=$(get_heron_python_paths)
+	echo "$java_paths $python_paths";
+}
 # returns the target corresponding to file $1
 function get_target_of() {
   local package=$(get_package_of $1)
