@@ -150,5 +150,5 @@ cat >> $iml_file <<'EOF'
 EOF
 
 echo
-echo Done. Project file: $iml_file
+echo Done. Project file : $iml_file
 
