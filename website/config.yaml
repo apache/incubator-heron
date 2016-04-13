@@ -32,9 +32,9 @@ params:
     schedulerapi: 0.1.0
     topologyapi: 0.1.0
   assets:
-    logo: /img/logo54x54.png #logo.png
-    textlogo: /img/HeronTextLogo.png #logo.png
-    textLogoSmall: /img/HeronTextLogo-small.png #logo.png
+    logo: img/logo54x54.png #logo.png
+    textlogo: img/HeronTextLogo.png #logo.png
+    textLogoSmall: img/HeronTextLogo-small.png #logo.png
     css:
       - /css/style.min.css
       - /css/font-awesome.min.css
