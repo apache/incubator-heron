@@ -44,11 +44,11 @@ script:
   - ./bazel_configure.py && \
 
   # build heron
-  - bazel --bazelrc=tools/travis-ci/bazel.rc build heron/...
+  bazel --bazelrc=tools/travis-ci/bazel.rc build heron/...  && \
 
   # run heron unit tests
-  - bazel --bazelrc=tools/travis-ci/bazel.rc test  heron/...
+  bazel --bazelrc=tools/travis-ci/bazel.rc test  heron/...  && \
 
   # build packages
-  - bazel --bazelrc=tools/travis-ci/bazel.rc build scripts/packages:tarpkgs
-  - bazel --bazelrc=tools/travis-ci/bazel.rc build scripts/packages:binpkgs
+  bazel --bazelrc=tools/travis-ci/bazel.rc build scripts/packages:tarpkgs && \
+  bazel --bazelrc=tools/travis-ci/bazel.rc build scripts/packages:binpkgs
