@@ -102,13 +102,18 @@ public class SubmitterMain {
    * @param cluster, name of the cluster
    * @param role, user role
    * @param environ, user provided environment/tag
+   * @param verbose, enable verbose logging
    * @return config, the command line config
    */
-  protected static Config commandLineConfigs(String cluster, String role, String environ) {
+  protected static Config commandLineConfigs(String cluster,
+      String role,
+      String environ,
+      Boolean verbose) {
     Config config = Config.newBuilder()
         .put(Keys.cluster(), cluster)
         .put(Keys.role(), role)
         .put(Keys.environ(), environ)
+        .put(Keys.verbose(), verbose)
         .build();
     return config;
   }
@@ -251,9 +256,11 @@ public class SubmitterMain {
       System.exit(1);
     }
 
+    Boolean verbose = false;
     Level logLevel = Level.INFO;
     if(cmd.hasOption("v")) {
       logLevel = Level.ALL;
+      verbose = true;
     }
 
     // init log
@@ -281,7 +288,7 @@ public class SubmitterMain {
     Config config = Config.expand(
         Config.newBuilder()
             .putAll(defaultConfigs(heronHome, configPath))
-            .putAll(commandLineConfigs(cluster, role, environ))
+            .putAll(commandLineConfigs(cluster, role, environ, verbose))
             .putAll(topologyConfigs(
                 topologyPackage, topologyJarFile, topologyDefnFile, topology))
             .build());
