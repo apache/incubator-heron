@@ -29,6 +29,7 @@ filegroup(
 genrule(
     name = "heron-core",
     srcs = [
+        ":RELEASE",
         ":hcontroller",
         ":hexecutor",
         ":hshell",
@@ -50,6 +51,7 @@ genrule(
         "export GENDIR=$(GENDIR);",
         "export BINDIR=$(BINDIR);",
         "$(location package_release.sh)       $(location heron-core.tar.gz)",
+        "--cp $(location RELEASE)              heron-core/RELEASE",
         "--cp $(location hcontroller)          heron-core/bin/heron-controller",
         "--cp $(location hexecutor)            heron-core/bin/heron-executor",
         "--cp $(location hshell)               heron-core/bin/heron-shell",
@@ -75,6 +77,7 @@ genrule(
 genrule(
     name = "heron-client",
     srcs = [
+        ":RELEASE",
         ":heron-core",
         ":conf-local-heron-internals",
         ":conf-local-metrics-sinks",
@@ -93,7 +96,6 @@ genrule(
         ":hzkstatemgr",
         ":huploader-localfs",
         ":huploader-null",
-        ":huploader-packer",
         ":protobuf-java",
         ":slf4j-api-java",
         ":slf4j-jdk-java",
@@ -106,6 +108,7 @@ genrule(
         "export GENDIR=$(GENDIR);",
         "export BINDIR=$(BINDIR);",
         "$(location package_release.sh) $(location heron-client.tar.gz)",
+        "--cp $(location RELEASE)                    RELEASE",
         "--cp $(location hcli)                       bin/heron",
         "--cp $(location conf-local-heron-internals) conf/local/heron_internals.yaml",
         "--cp $(location conf-local-metrics-sinks)   conf/local/metrics_sinks.yaml",
@@ -124,7 +127,6 @@ genrule(
         "--cp $(location hzkstatemgr)                lib/statemgr/heron-zookeeper-statemgr.jar",
         "--cp $(location huploader-localfs)          lib/uploader/heron-localfs-uploader.jar",
         "--cp $(location huploader-null)             lib/uploader/heron-null-uploader.jar",
-        "--cp $(location huploader-packer)           lib/uploader/heron-packer-uploader.jar",
         "--cp $(location protobuf-java)              lib/3rdparty/$$(basename $(location protobuf-java))",
         "--cp $(location slf4j-api-java)             lib/3rdparty/$$(basename $(location slf4j-api-java))",
         "--cp $(location slf4j-jdk-java)             lib/3rdparty/$$(basename $(location slf4j-jdk-java))",
@@ -141,6 +143,7 @@ genrule(
 genrule(
     name = "heron-tools",
     srcs = [
+        ":RELEASE",
         ":htracker",
         ":hui",
     ],
@@ -151,6 +154,7 @@ genrule(
         "export GENDIR=$(GENDIR);",
         "export BINDIR=$(BINDIR);",
         "$(location package_release.sh) $(location heron-tools.tar.gz)",
+        "--cp $(location RELEASE)                    RELEASE",
         "--cp $(location htracker)                   bin/heron-tracker",
         "--cp $(location hui)                        bin/heron-ui",
     ]),
@@ -165,6 +169,7 @@ genrule(
 genrule(
     name = "heron-api",
     srcs = [
+        ":RELEASE",
         ":hapi",
         ":hstorm",
     ],
@@ -175,6 +180,7 @@ genrule(
         "export GENDIR=$(GENDIR);",
         "export BINDIR=$(BINDIR);",
         "$(location package_release.sh)              $(location heron-api.tar.gz)",
+        "--cp $(location RELEASE)                    RELEASE",
         "--cp $(location hapi)                       heron-api.jar",
         "--cp $(location hstorm)                     heron-storm.jar",
     ]),
@@ -398,14 +404,9 @@ filegroup(
     srcs = ["//heron/uploaders/src/java:heron-null-uploader"],
 )
 
-filegroup(
-    name = "huploader-packer",
-    srcs = ["//heron/uploaders/src/java:heron-packer-uploader"],
-)
-
 genrule(
     name = "generate-package-info",
-    outs = ["README.md"],
+    outs = ["RELEASE"],
     cmd = "$(location //scripts/packages:package-info-generator) $$(find . -name '*status*.txt') >$@",
     stamp = 1,
     tools = ["//scripts/packages:package-info-generator"],
@@ -415,11 +416,11 @@ genrule(
     name = "generate-api-launcher",
     srcs = [
         "//scripts/packages:api-template-bin.sh",
-        ":README.md",
+        ":RELEASE",
     ],
     outs = ["api_launcher_bin.sh"],
     cmd = """
-        release_info="$$(cat $(location :README.md))"
+        release_info="$$(cat $(location :RELEASE))"
         template="$$(cat $(location //scripts/packages:api-template-bin.sh))"
         echo "$${template//%release_info%/$${release_info}}" >$@
         """,
@@ -429,11 +430,11 @@ genrule(
     name = "generate-client-launcher",
     srcs = [
         "//scripts/packages:client-template-bin.sh",
-        ":README.md",
+        ":RELEASE",
     ],
     outs = ["client_launcher_bin.sh"],
     cmd = """
-        release_info="$$(cat $(location :README.md))"
+        release_info="$$(cat $(location :RELEASE))"
         template="$$(cat $(location //scripts/packages:client-template-bin.sh))"
         echo "$${template//%release_info%/$${release_info}}" >$@
         """,
@@ -443,11 +444,11 @@ genrule(
     name = "generate-tools-launcher",
     srcs = [
         "//scripts/packages:tools-template-bin.sh",
-        ":README.md",
+        ":RELEASE",
     ],
     outs = ["tools_launcher_bin.sh"],
     cmd = """
-        release_info="$$(cat $(location :README.md))"
+        release_info="$$(cat $(location :RELEASE))"
         template="$$(cat $(location //scripts/packages:tools-template-bin.sh))"
         echo "$${template//%release_info%/$${release_info}}" >$@
         """,
