@@ -1,6 +1,6 @@
 ---
 date: 2016-02-28T13:10:21-08:00
-title: Upgrade Existing Storm Topologies to Heron
+title: Upgrade Storm Topologies to Heron
 ---
 
 Heron is designed to be fully backward compatible with existing [Apache Storm](http://storm.apache.org/index.html) projects, allowing simple [Maven POM.xml](https://maven.apache.org/pom.html) changes to migrate existing Storm [topologies](../concepts/topologies).

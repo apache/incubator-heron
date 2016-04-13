@@ -3,17 +3,17 @@ sections:
     sublinks:
       - name: Getting Started
         url: /docs/getting-started
-      - name: Upgrade Existing Storm Topologies
+      - name: Upgrade Storm Topologies
         url: /docs/upgrade-storm-to-heron
   - name: Concepts
     sublinks:
-      - name: The Architecture of Heron
+      - name: Heron Architecture
         url: /docs/concepts/architecture
       - name: Heron Topologies
         url: /docs/concepts/topologies
-      - name: Heron's Data Model
+      - name: Heron Data Model
         url: /docs/developers/data-model
-      - name: Serialization
+      - name: Tuple Serialization
         url: /docs/developers/serialization
       - name: Javadoc
         url: /docs/javadoc
