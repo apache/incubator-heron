@@ -20,10 +20,13 @@
 # Store the build status information we care about
 release_name=
 git_hash=
-url=
-built_by=
-build_log=
-commit_msg=
+release_status=
+build_time=
+build_timestamp=
+build_host=
+build_user=
+build_commit_msg=
+build_commit_url=
 
 for i in "${@}"; do
   while read line; do
@@ -40,13 +43,16 @@ for i in "${@}"; do
         release_status="$value"
         ;;
       BUILD_TIME)
-        built_time="$value"
+        build_time="$value"
+        ;;
+      BUILD_TIMESTAMP)
+        build_timestamp="$value"
         ;;
       BUILD_HOST)
-        built_host="$value"
+        build_host="$value"
         ;;
       BUILD_USER)
-        built_user="$value"
+        build_user="$value"
         ;;
       BUILD_COMMIT_MSG)
         commit_msg="$value"
@@ -59,10 +65,10 @@ for i in "${@}"; do
 done
 
 echo "Build label: ${release_name}"
-echo "Build time: ${built_time}"
-echo "Build host: ${built_host}"
-echo "Build user: ${built_user}"
-echo
+echo "Build time: ${build_time}"
+echo "Build timestamp: ${build_timestamp}"
+echo "Build host: ${build_host}"
+echo "Build user: ${build_user}"
 echo "Build git revision: ${git_hash}"
 echo "Build git status: ${release_status}"
 echo "Build git commit msg: $commit_msg"

@@ -14,3 +14,10 @@ sh_library(
     ],
     deps = [":relnotes"],
 )
+
+filegroup(
+    name = "workspace-status",
+    srcs = [ 
+        "status",
+    ],
+)
