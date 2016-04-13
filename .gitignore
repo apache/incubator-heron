@@ -115,5 +115,4 @@ com_crashlytics_export_strings.xml
 # generated for the website
 website/node_modules/
 website/public/
-!website/public/api
 website/static/
