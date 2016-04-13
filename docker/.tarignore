@@ -1,6 +1,8 @@
 .git
 docker
 
+*.pyc
+
 # Bazel generated files #
 #########################
 bazel-*
