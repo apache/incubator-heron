@@ -24,9 +24,6 @@ progname="$0"
 echo "Heron tools installer"
 echo "---------------------"
 echo
-cat <<'EOF'
-%release_info%
-EOF
 
 function usage() {
   echo "Usage: $progname [options]" >&2
@@ -77,7 +74,7 @@ function test_write() {
 if ! which unzip >/dev/null; then
   echo >&2
   echo "unzip not found, please install the corresponding package." >&2
-  echo "See http://heron.github.io/docs/install.html for more information on" >&2
+  echo "See http://heronstreaming.io/docs/install.html for more information on" >&2
   echo "dependencies of Heron." >&2
   exit 1
 fi
@@ -87,7 +84,7 @@ fi
 if ! which tar >/dev/null; then
   echo >&2
   echo "tar not found, please install the corresponding package." >&2
-  echo "See http://heron.github.io/docs/install.html for more information on" >&2
+  echo "See http://heronstreaming.io/docs/install.html for more information on" >&2
   echo "dependencies of Heron." >&2
   exit 1
 fi
@@ -112,7 +109,7 @@ fi
 if [ ! -x "${JAVA_HOME}/bin/javac" ]; then
   echo >&2
   echo "Java not found, please install the corresponding package" >&2
-  echo "See http://heron.github.io/docs/install.html for more information on" >&2
+  echo "See http://heronstreaming.io/docs/install.html for more information on" >&2
   echo "dependencies of Heron." >&2
   exit 1
 fi
@@ -160,6 +157,10 @@ Heron Tools is now installed!
 
 Make sure you have "${bin}" in your path. 
 
-See http://heron.github.io/docs/getting-started.html to start a new project!
+See http://heronstreaming.io/docs/getting-started.html to start a new project!
+EOF
+echo
+cat <<'EOF'
+%release_info%
 EOF
 exit 0
