@@ -14,13 +14,12 @@
 
 package com.twitter.heron.spi.utils;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -40,7 +39,7 @@ import com.twitter.heron.spi.common.PackingPlan;
 public class TopologyUtils {
   private static final Logger LOG = Logger.getLogger(TopologyUtils.class.getName());
 
-   public static TopologyAPI.Topology getTopology(String topologyDefnFile) {
+  public static TopologyAPI.Topology getTopology(String topologyDefnFile) {
     try {
       byte[] topologyDefn = Files.readAllBytes(Paths.get(topologyDefnFile));
       TopologyAPI.Topology topology = TopologyAPI.Topology.parseFrom(topologyDefn);
@@ -274,4 +273,30 @@ public class TopologyUtils {
 
     throw new IllegalStateException("Failed to find topology defn file");
   }
+
+  /**
+   * Trim the topology definition for storing into state manager.
+   * This is because the user generated spouts and bolts
+   * might be huge.
+   *
+   * @return trimmed topology
+   */
+  public static TopologyAPI.Topology trimTopology(TopologyAPI.Topology topology) {
+
+    // create a copy of the topology physical plan
+    TopologyAPI.Topology.Builder builder = topology.newBuilder().mergeFrom(topology);
+
+    // clear the state of user spout java objects - which can be potentially huge
+    for (TopologyAPI.Spout.Builder spout : builder.getSpoutsBuilderList()) {
+      spout.getCompBuilder().clearJavaObject();
+    }
+
+    // clear the state of user spout java objects - which can be potentially huge
+    for (TopologyAPI.Bolt.Builder bolt : builder.getBoltsBuilderList()) {
+      bolt.getCompBuilder().clearJavaObject();
+    }
+
+    return builder.build();
+  }
+
 }

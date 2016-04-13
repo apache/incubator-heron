@@ -34,6 +34,7 @@ import com.twitter.heron.spi.scheduler.IRuntimeManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.Runtime;
+import com.twitter.heron.spi.utils.TopologyLock;
 
 public class RuntimeManagerRunner implements Callable<Boolean> {
   private static final Logger LOG = Logger.getLogger(RuntimeManagerRunner.class.getName());
@@ -410,20 +411,6 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     ListenableFuture<Boolean> booleanFuture;
     Boolean futureResult;
 
-    booleanFuture = statemgr.deleteTopology(topologyName);
-    futureResult = NetworkUtils.awaitResult(booleanFuture, 5, TimeUnit.SECONDS);
-    if (futureResult == null || !futureResult) {
-      LOG.severe("Failed to clear topology state");
-      return false;
-    }
-
-    booleanFuture = statemgr.deleteExecutionState(topologyName);
-    futureResult = NetworkUtils.awaitResult(booleanFuture, 5, TimeUnit.SECONDS);
-    if (futureResult == null || !futureResult) {
-      LOG.severe("Failed to clear execution state");
-      return false;
-    }
-
     // It is possible that  TMasterLocation, PhysicalPlan and SchedulerLocation are not set
     // Just log but don't consider them failure
     booleanFuture = statemgr.deleteTMasterLocation(topologyName);
@@ -445,6 +432,19 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     if (futureResult == null || !futureResult) {
       // We would not return false since it is possible that TMaster didn't write physical plan
       LOG.severe("Failed to clear scheduler location. Check whether Scheduler set it correctly.");
+    }
+
+    booleanFuture = statemgr.deleteExecutionState(topologyName);
+    futureResult = NetworkUtils.awaitResult(booleanFuture, 5, TimeUnit.SECONDS);
+    if (futureResult == null || !futureResult) {
+      // We would not return false since it is possible that
+      // people terminate submission before writing execution state
+      LOG.severe("Failed to clear execution state");
+    }
+
+    // Finally, release the topology lock
+    if (!TopologyLock.release(statemgr, topologyName)) {
+      LOG.severe("Failed to release the topology lock");
     }
 
     LOG.info("Cleaned up Heron State");

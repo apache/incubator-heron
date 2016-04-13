@@ -90,34 +90,8 @@ public class LaunchRunner implements Callable<Boolean> {
     }
   }
 
-  /**
-   * Trim the topology definition for storing into state manager.
-   * This is because the user generated spouts and bolts
-   * might be huge.
-   *
-   * @return trimmed topology
-   */
-  public TopologyAPI.Topology trimTopology(TopologyAPI.Topology topology) {
-
-    // create a copy of the topology physical plan
-    TopologyAPI.Topology.Builder builder = topology.newBuilder().mergeFrom(topology);
-
-    // clear the state of user spout java objects - which can be potentially huge
-    for (TopologyAPI.Spout.Builder spout : builder.getSpoutsBuilderList()) {
-      spout.getCompBuilder().clearJavaObject();
-    }
-
-    // clear the state of user spout java objects - which can be potentially huge
-    for (TopologyAPI.Bolt.Builder bolt : builder.getBoltsBuilderList()) {
-      bolt.getCompBuilder().clearJavaObject();
-    }
-
-    return builder.build();
-  }
-
   public Boolean call() {
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
-    TopologyAPI.Topology topology = Runtime.topology(runtime);
     String topologyName = Context.topologyName(config);
 
     // get the packed plan
@@ -144,14 +118,6 @@ public class LaunchRunner implements Callable<Boolean> {
       return false;
     }
 
-    // store the trimmed topology definition into the state manager
-    ListenableFuture<Boolean> tFuture = statemgr.setTopology(trimTopology(topology), topologyName);
-    if (!NetworkUtils.awaitResult(tFuture, 5, TimeUnit.SECONDS)) {
-      LOG.severe("Failed to set topology");
-      statemgr.deleteExecutionState(topologyName);
-      return false;
-    }
-
     // launch the topology, clear the state if it fails
     try {
       if (!launcher.launch(packedPlan)) {
@@ -159,7 +125,6 @@ public class LaunchRunner implements Callable<Boolean> {
       }
     } catch (RuntimeException e) {
       statemgr.deleteExecutionState(topologyName);
-      statemgr.deleteTopology(topologyName);
       LOG.log(Level.SEVERE, "Failed to launch topology remotely", e);
       return false;
     }
