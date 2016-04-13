@@ -1,1 +1,5 @@
 footer.footer role=contentinfo
+  .container
+    .row
+      .col-lg-12
+        .p © 2016 Twitter
