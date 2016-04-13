@@ -99,7 +99,7 @@ public class SubmitterMain {
         .put(Keys.cluster(), cluster)
         .put(Keys.role(), role)
         .put(Keys.environ(), environ)
-        .put(Keys.verbose(), verbose.toString())
+        .put(Keys.verbose(), verbose)
         .build();
     return config;
   }
