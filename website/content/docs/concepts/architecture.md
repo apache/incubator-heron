@@ -1,5 +1,5 @@
 ---
-title: Architecture of Heron
+title: Heron Architecture
 ---
 
 Heron is the direct successor of [Apache Storm](http://storm.apache.org). From

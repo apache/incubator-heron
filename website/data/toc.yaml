@@ -51,7 +51,7 @@ sections:
         url: /docs/javadoc
   - name: Heron Developers
     sublinks:
-      - name: The Architecture of Heron
+      - name: Heron Architecture
         url: /docs/concepts/architecture
       - name: Compiling Heron
         url: /docs/developers/compiling/compiling
