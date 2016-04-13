@@ -50,7 +50,7 @@ cat > $iml_file <<EOH
 EOH
 echo '      <sourceFolder url="file://$MODULE_DIR$/heron/config/src" type="java-resource" />'>> $iml_file
 heron_java_paths="$(get_heron_source_paths)"
-echo $heron_java_paths
+
 for source in ${heron_java_paths}; do
      if [[ $source == *"javatests" ]]; then
        is_test_source="true"
@@ -59,7 +59,13 @@ for source in ${heron_java_paths}; do
      else
        is_test_source="false"
      fi
-     echo '      <sourceFolder url="file://$MODULE_DIR$/'"${source}\" isTestSource=\"${is_test_source}\" />" >> $iml_file
+     folderType="sourceFolder";
+     if [[ -f "$source/xxBUILD" ]]; then
+     	folderType="excludeFolder"
+     	echo '      <excludeFolder url="file://$MODULE_DIR$/'"${source}\"  />" >> $iml_file
+     else 
+        echo '      <sourceFolder url="file://$MODULE_DIR$/'"${source}\" isTestSource=\"${is_test_source}\" />" >> $iml_file
+     fi
 done
 cat >> $iml_file <<'EOF'
     </content>
@@ -140,8 +146,12 @@ for jar in ${heron_resolved_deps}; do
 	write_jar_entry $jar
 done
 #<orderEntry type="library" name="proto" level="application" />
+heron_binary_paths="$(collect_generated_binary_deps)"
 
-write_jar_entry "bazel-bin/heron/proto"
+for jar in ${heron_binary_paths}; do 
+	write_jar_entry "$jar";
+done
+#write_jar_entry "bazel-bin/heron/metricsmgr/src/thrift"
 
 cat >> $iml_file <<'EOF'
     <orderEntry type="library" name="Python 2.7.10 (/usr/bin/python) interpreter library" level="application" />
