@@ -7,11 +7,13 @@ build:centos --linkopt -lm
 build:centos --linkopt -lpthread
 build:centos --linkopt -lunwind
 build:centos --linkopt -lrt
+build:centos --workspace_status_command scripts/release/status.sh
 
 # For Mac
 # To use it: bazel build --config=darwin
 build:darwin --python2_path /usr/bin/python2.7
 build:darwin --java_toolchain=//tools/java:heron_java_toolchain 
+build:darwin --workspace_status_command scripts/release/status.sh
 
 # For Ubuntu
 # To use it: bazel build --config=ubuntu
@@ -22,3 +24,4 @@ build:ubuntu --linkopt -lm
 build:ubuntu --linkopt -lpthread
 build:ubuntu --linkopt -lunwind
 build:ubuntu --linkopt -lrt
+build:ubuntu --workspace_status_command scripts/release/status.sh
