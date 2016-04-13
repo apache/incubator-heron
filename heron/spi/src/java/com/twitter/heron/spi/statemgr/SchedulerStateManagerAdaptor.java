@@ -14,6 +14,12 @@
 
 package com.twitter.heron.spi.statemgr;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.common.util.concurrent.ListenableFuture;
 
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -29,7 +35,10 @@ import com.twitter.heron.proto.tmaster.TopologyMaster;
  */
 
 public class SchedulerStateManagerAdaptor {
+  private static final Logger LOG = Logger.getLogger(SchedulerStateManagerAdaptor.class.getName());
+
   private final IStateManager delegate;
+  private final int timeout;
 
   /**
    * Construct SchedulerStateManagerAdaptor providing only the
@@ -40,9 +49,31 @@ public class SchedulerStateManagerAdaptor {
    * SchedulerStateManager. Users are restricted from using those interfaces
    * since it is upto the abstract scheduler to decide when to open and close.
    * @param delegate, the instance of IStateManager
+   * @param timeout, the maximum time to wait in milliseconds
    */
-  public SchedulerStateManagerAdaptor(IStateManager delegate) {
+  public SchedulerStateManagerAdaptor(IStateManager delegate, int timeout) {
     this.delegate = delegate;
+    this.timeout = timeout;
+  }
+
+  /**
+   * Waits for ListenableFuture to terminate. Cancels on timeout
+   */
+  protected <V> V awaitResult(ListenableFuture<V> future) {
+    return awaitResult(future, timeout, TimeUnit.MILLISECONDS);
+  }
+
+  /**
+   * Waits for ListenableFuture to terminate. Cancels on timeout
+   */
+  protected  <V> V awaitResult(ListenableFuture<V> future, int time, TimeUnit unit) {
+    try {
+      return future.get(time, unit);
+    } catch (InterruptedException | TimeoutException | ExecutionException e) {
+      LOG.log(Level.SEVERE, "Exception processing future ", e);
+      future.cancel(true);
+      return null;
+    }
   }
 
   /**
@@ -50,8 +81,8 @@ public class SchedulerStateManagerAdaptor {
    *
    * @return Boolean
    */
-  public ListenableFuture<Boolean> isTopologyRunning(String topologyName) {
-    return delegate.isTopologyRunning(topologyName);
+  public Boolean isTopologyRunning(String topologyName) {
+    return awaitResult(delegate.isTopologyRunning(topologyName));
   }
 
   /**
@@ -59,9 +90,9 @@ public class SchedulerStateManagerAdaptor {
    *
    * @return Boolean - Success or Failure
    */
-  public ListenableFuture<Boolean> setExecutionState(
+  public Boolean setExecutionState(
       ExecutionEnvironment.ExecutionState executionState, String topologyName) {
-    return delegate.setExecutionState(executionState, topologyName);
+    return awaitResult(delegate.setExecutionState(executionState, topologyName));
   }
 
   /**
@@ -70,9 +101,8 @@ public class SchedulerStateManagerAdaptor {
    * @param topologyName, the name of the topology
    * @return Boolean - Success or Failure
    */
-  public ListenableFuture<Boolean> setTopology(
-      TopologyAPI.Topology topology, String topologyName) {
-    return delegate.setTopology(topology, topologyName);
+  public Boolean setTopology(TopologyAPI.Topology topology, String topologyName) {
+    return awaitResult(delegate.setTopology(topology, topologyName));
   }
 
   /**
@@ -80,9 +110,8 @@ public class SchedulerStateManagerAdaptor {
    *
    * @return Boolean - Success or Failure
    */
-  public ListenableFuture<Boolean> setSchedulerLocation(
-      Scheduler.SchedulerLocation location, String topologyName) {
-    return delegate.setSchedulerLocation(location, topologyName);
+  public Boolean setSchedulerLocation(Scheduler.SchedulerLocation location, String topologyName) {
+    return awaitResult(delegate.setSchedulerLocation(location, topologyName));
   }
 
   /**
@@ -90,8 +119,8 @@ public class SchedulerStateManagerAdaptor {
    *
    * @return Boolean - Success or Failure
    */
-  public ListenableFuture<Boolean> deleteTMasterLocation(String topologyName) {
-    return delegate.deleteTMasterLocation(topologyName);
+  public Boolean deleteTMasterLocation(String topologyName) {
+    return awaitResult(delegate.deleteTMasterLocation(topologyName));
   }
 
   /**
@@ -99,8 +128,8 @@ public class SchedulerStateManagerAdaptor {
    *
    * @return Boolean - Success or Failure
    */
-  public ListenableFuture<Boolean> deleteExecutionState(String topologyName) {
-    return delegate.deleteExecutionState(topologyName);
+  public Boolean deleteExecutionState(String topologyName) {
+    return awaitResult(delegate.deleteExecutionState(topologyName));
   }
 
   /**
@@ -108,8 +137,8 @@ public class SchedulerStateManagerAdaptor {
    *
    * @return Boolean - Success or Failure
    */
-  public ListenableFuture<Boolean> deleteTopology(String topologyName) {
-    return delegate.deleteTopology(topologyName);
+  public Boolean deleteTopology(String topologyName) {
+    return awaitResult(delegate.deleteTopology(topologyName));
   }
 
   /**
@@ -117,8 +146,8 @@ public class SchedulerStateManagerAdaptor {
    *
    * @return Boolean - Success or Failure
    */
-  public ListenableFuture<Boolean> deletePhysicalPlan(String topologyName) {
-    return delegate.deletePhysicalPlan(topologyName);
+  public Boolean deletePhysicalPlan(String topologyName) {
+    return awaitResult(delegate.deletePhysicalPlan(topologyName));
   }
 
   /**
@@ -126,63 +155,53 @@ public class SchedulerStateManagerAdaptor {
    *
    * @return Boolean - Success or Failure
    */
-  public ListenableFuture<Boolean> deleteSchedulerLocation(
-      String topologyName) {
-    return delegate.deleteSchedulerLocation(topologyName);
+  public Boolean deleteSchedulerLocation(String topologyName) {
+    return awaitResult(delegate.deleteSchedulerLocation(topologyName));
   }
 
   /**
    * Get the tmaster location for the given topology
    *
-   * @param watcher @see com.twitter.heron.spi.statemgr.WatchCallback
    * @return TMasterLocation
    */
-  public ListenableFuture<TopologyMaster.TMasterLocation> getTMasterLocation(
-      WatchCallback watcher, String topologyName) {
-    return delegate.getTMasterLocation(watcher, topologyName);
+  public TopologyMaster.TMasterLocation getTMasterLocation(String topologyName) {
+    return awaitResult(delegate.getTMasterLocation(null, topologyName));
   }
 
   /**
    * Get the scheduler location for the given topology
    *
-   * @param watcher @see com.twitter.heron.spi.statemgr.WatchCallback
    * @return SchedulerLocation
    */
-  public ListenableFuture<Scheduler.SchedulerLocation> getSchedulerLocation(
-      WatchCallback watcher, String topologyName) {
-    return delegate.getSchedulerLocation(watcher, topologyName);
+  public Scheduler.SchedulerLocation getSchedulerLocation(String topologyName) {
+    return awaitResult(delegate.getSchedulerLocation(null, topologyName));
   }
 
-  /**
-   * Get the topology definition for the given topology
-   *
-   * @param watcher @see com.twitter.heron.spi.statemgr.WatchCallback
-   * @return Topology
-   */
-  public ListenableFuture<TopologyAPI.Topology> getTopology(
-      WatchCallback watcher, String topologyName) {
-    return delegate.getTopology(null, topologyName);
-  }
+// TODO(mfu): Currently this one is not used; comment it out.
+// /**
+//   * Get the topology definition for the given topology
+//   *
+//   * @return Topology
+//   */
+//  public TopologyAPI.Topology getTopology(String topologyName) {
+//    return awaitResult(delegate.getTopology(null, topologyName));
+//  }
 
   /**
    * Get the execution state for the given topology
    *
-   * @param watcher @see com.twitter.heron.spi.statemgr.WatchCallback
    * @return ExecutionState
    */
-  public ListenableFuture<ExecutionEnvironment.ExecutionState> getExecutionState(
-      WatchCallback watcher, String topologyName) {
-    return delegate.getExecutionState(null, topologyName);
+  public ExecutionEnvironment.ExecutionState getExecutionState(String topologyName) {
+    return awaitResult(delegate.getExecutionState(null, topologyName));
   }
 
   /**
    * Get the physical plan for the given topology
    *
-   * @param watcher @see com.twitter.heron.spi.statemgr.WatchCallback
    * @return PhysicalPlans.PhysicalPlan
    */
-  public ListenableFuture<PhysicalPlans.PhysicalPlan> getPhysicalPlan(
-      WatchCallback watcher, String topologyName) {
-    return delegate.getPhysicalPlan(null, topologyName);
+  public PhysicalPlans.PhysicalPlan getPhysicalPlan(String topologyName) {
+    return awaitResult(delegate.getPhysicalPlan(null, topologyName));
   }
 }
