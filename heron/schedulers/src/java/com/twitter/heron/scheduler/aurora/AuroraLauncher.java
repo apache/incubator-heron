@@ -1,3 +1,17 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.twitter.heron.scheduler.aurora;
 
 import java.io.File;
@@ -40,6 +54,11 @@ public class AuroraLauncher implements ILauncher {
 
   @Override
   public boolean prepareLaunch(PackingPlan packing) {
+    if (packing == null || packing.containers.isEmpty()) {
+      LOG.severe("No container requested. Can't schedule");
+      return false;
+    }
+
     return true;
   }
 
@@ -59,15 +78,24 @@ public class AuroraLauncher implements ILauncher {
   public boolean launch(PackingPlan packing) {
     LOG.info("Launching topology in aurora");
 
+    Map<String, String> auroraProperties = createAuroraProperties(packing);
+
+    return AuroraUtils.createAuroraJob(Runtime.topologyName(runtime), Context.cluster(config),
+        Context.role(config),
+        Context.environ(config), getHeronAuroraPath(), auroraProperties, true);
+  }
+
+  private String getHeronAuroraPath() {
+    return new File(Context.heronConf(config), "heron.aurora").getPath();
+  }
+
+  protected Map<String, String> createAuroraProperties(PackingPlan packing) {
+    Map<String, String> auroraProperties = new HashMap<>();
+
     TopologyAPI.Topology topology = Runtime.topology(runtime);
 
-    if (packing == null || packing.containers.isEmpty()) {
-      LOG.severe("No container requested. Can't schedule");
-      return false;
-    }
     PackingPlan.Resource containerResource =
         packing.containers.values().iterator().next().resource;
-    Map<String, String> auroraProperties = new HashMap<>();
 
     auroraProperties.put("SANDBOX_EXECUTOR_BINARY", Context.executorSandboxBinary(config));
     auroraProperties.put("TOPOLOGY_NAME", topology.getName());
@@ -106,6 +134,7 @@ public class AuroraLauncher implements ILauncher {
     auroraProperties.put("CLUSTER", Context.cluster(config));
     auroraProperties.put("ENVIRON", Context.environ(config));
     auroraProperties.put("ROLE", Context.role(config));
+    auroraProperties.put("ISPRODUCTION", isProduction() + "");
 
     auroraProperties.put("SANDBOX_INSTANCE_CLASSPATH", Context.instanceSandboxClassPath(config));
     auroraProperties.put("SANDBOX_METRICS_YAML", Context.metricsSinksSandboxFile(config));
@@ -117,21 +146,18 @@ public class AuroraLauncher implements ILauncher {
         .toString();
     auroraProperties.put("SANDBOX_SCHEDULER_CLASSPATH", completeSchedulerClassPath);
 
-    // TODO(mfu): Following configs need customization before using
-    // TODO(mfu): Put the constant in Constants.java
     String heronCoreReleasePkgURI = Context.corePackageUri(config);
     String topologyPkgURI = Runtime.topologyPackageUri(runtime).toString();
 
     auroraProperties.put("CORE_PACKAGE_URI", heronCoreReleasePkgURI);
     auroraProperties.put("TOPOLOGY_PACKAGE_URI", topologyPkgURI);
 
-    return AuroraUtils.createAuroraJob(topology.getName(), Context.cluster(config),
-        Context.role(config),
-        Context.environ(config), getHeronAuroraPath(), auroraProperties, true);
+    return auroraProperties;
   }
 
-  private String getHeronAuroraPath() {
-    return new File(Context.heronConf(config), "heron.aurora").getPath();
+  protected boolean isProduction() {
+    // TODO (nlu): currently enforce environment to be "prod" for a Production job
+    return "prod".equals(Context.environ(config));
   }
 
   @Override
