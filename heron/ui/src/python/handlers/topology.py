@@ -87,3 +87,40 @@ class TopologyPlanHandler(base.BaseHandler):
 
     # send the single topology page
     self.render("topology.html", **options)
+
+################################################################################
+# Handler for displaying the log file for an instance
+################################################################################
+class LogfileHandler(base.BaseHandler):
+  """
+  Responsible for creating the web page for files. The html
+  will in turn call another endpoint to get the file data.
+  """
+
+  @tornado.gen.coroutine
+  def get(self, cluster, environ, topology, instance):
+
+    options = dict(
+        cluster = cluster,
+        environ = environ,
+        topology = topology,
+        instance = instance
+    )
+
+    self.render("file.html", **options)
+
+################################################################################
+# Handler for getting the data for log file for an instance
+################################################################################
+class LogfileDataHandler(base.BaseHandler):
+  """
+  Responsible for getting the data from log file of an instance.
+  """
+
+  @tornado.gen.coroutine
+  def get(self, cluster, environ, topology, instance, offset, length):
+
+    data = yield access.get_logfile_data(cluster, environ, topology, instance, offset, length)
+
+    self.write(data)
+    self.finish()
