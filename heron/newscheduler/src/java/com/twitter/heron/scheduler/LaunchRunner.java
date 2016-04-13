@@ -1,3 +1,17 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.twitter.heron.scheduler;
 
 import java.io.IOException;
@@ -40,24 +54,40 @@ public class LaunchRunner implements Callable<Boolean> {
     this.packing = Runtime.packingClassInstance(runtime);
   }
 
-  public ExecutionEnvironment.ExecutionState createBasicExecutionState() {
-    ExecutionEnvironment.ExecutionState executionState;
+  public ExecutionEnvironment.ExecutionState createExecutionState() {
+    // TODO(mfu): These values should read from config
+    String releaseUsername = "heron";
+    String releaseTag = "heron-core";
+    String releaseVersion = "live";
+
     TopologyAPI.Topology topology = Runtime.topology(runtime);
 
     ExecutionEnvironment.ExecutionState.Builder builder =
         ExecutionEnvironment.ExecutionState.newBuilder();
 
     // set the topology name, id, submitting user and time
-    builder.setTopologyName(topology.getName());
-    builder.setTopologyId(topology.getId());
-    builder.setSubmissionTime(System.currentTimeMillis() / 1000);
-    builder.setSubmissionUser(System.getProperty("user.name"));
+    builder.setTopologyName(topology.getName()).
+        setTopologyId(topology.getId())
+        .setSubmissionTime(System.currentTimeMillis() / 1000)
+        .setSubmissionUser(System.getProperty("user.name"))
+        .setCluster(Context.cluster(config))
+        .setRole(Context.role(config))
+        .setEnviron(Context.environ(config));
 
-    if (!builder.isInitialized()) {
-      return null;
+    // build the heron release state
+    ExecutionEnvironment.HeronReleaseState.Builder releaseBuilder =
+        ExecutionEnvironment.HeronReleaseState.newBuilder();
+
+    releaseBuilder.setReleaseUsername(releaseUsername);
+    releaseBuilder.setReleaseTag(releaseTag);
+    releaseBuilder.setReleaseVersion(releaseVersion);
+
+    builder.setReleaseState(releaseBuilder);
+    if (builder.isInitialized()) {
+      return builder.build();
+    } else {
+      throw new RuntimeException("Failed to create execution state");
     }
-    executionState = builder.build();
-    return executionState;
   }
 
   /**
@@ -106,8 +136,7 @@ public class LaunchRunner implements Callable<Boolean> {
     }
 
     // store the execution state into the state manager
-    ExecutionEnvironment.ExecutionState executionState =
-        launcher.updateExecutionState(createBasicExecutionState());
+    ExecutionEnvironment.ExecutionState executionState = createExecutionState();
 
     ListenableFuture<Boolean> sFuture = statemgr.setExecutionState(executionState, topologyName);
     if (!NetworkUtils.awaitResult(sFuture, 5, TimeUnit.SECONDS)) {

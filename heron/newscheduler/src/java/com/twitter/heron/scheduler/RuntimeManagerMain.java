@@ -1,9 +1,31 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.twitter.heron.scheduler;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
@@ -15,21 +37,13 @@ import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.NetworkUtils;
 
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.HelpFormatter;
-
 public class RuntimeManagerMain {
   private static final Logger LOG = Logger.getLogger(RuntimeManagerMain.class.getName());
 
   // Print usage options
   private static void usage(Options options) {
     HelpFormatter formatter = new HelpFormatter();
-    formatter.printHelp( "RuntimeManagerMain", options );
+    formatter.printHelp("RuntimeManagerMain", options);
   }
 
   // Construct all required command line options
@@ -120,7 +134,7 @@ public class RuntimeManagerMain {
     return options;
   }
 
-   // construct command line help options
+  // construct command line help options
   private static Options constructHelpOptions() {
     Options options = new Options();
     Option help = Option.builder("h")
@@ -140,9 +154,9 @@ public class RuntimeManagerMain {
     Options helpOptions = constructHelpOptions();
     CommandLineParser parser = new DefaultParser();
     // parse the help options first.
-    CommandLine cmd = parser.parse(helpOptions, args, true);;
+    CommandLine cmd = parser.parse(helpOptions, args, true);
 
-    if(cmd.hasOption("h")) {
+    if (cmd.hasOption("h")) {
       usage(options);
       return;
     }
@@ -150,7 +164,7 @@ public class RuntimeManagerMain {
     try {
       // Now parse the required options
       cmd = parser.parse(options, args);
-    } catch(ParseException e) {
+    } catch (ParseException e) {
       LOG.severe("Error parsing command line options: " + e.getMessage());
       usage(options);
       System.exit(1);
@@ -229,13 +243,12 @@ public class RuntimeManagerMain {
         isSuccessful = manageTopology(config, command, statemgr, runtimeManager);
       }
     } finally {
-      // 3. Do generic cleaning
-      // close the state manager
-      statemgr.close();
-      // close the runtime manager
-      runtimeManager.close();
+      // 3. Do post work basing on the result
+      // Currently nothing to do here
 
-      // 4. Do post work basing on the result
+      // 4. Close the resources
+      runtimeManager.close();
+      statemgr.close();
     }
 
     // Log the result and exit
@@ -244,7 +257,7 @@ public class RuntimeManagerMain {
 
       System.exit(1);
     } else {
-      LOG.log(Level.SEVERE, "Topology {0} {1} successfully", new Object[]{topologyName, command});
+      LOG.log(Level.INFO, "Topology {0} {1} successfully", new Object[]{topologyName, command});
 
       System.exit(0);
     }
