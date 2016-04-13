@@ -929,8 +929,8 @@ var InstanceCounters = React.createClass({
               + '/' + instanceInfo.id + '/jmap'
           var histoUrl = '/topologies/' + this.props.info.cluster
               + '/' + this.props.info.environ + '/' + this.props.info.topology
-              + '/' + instanceInfo.id + '/histo'    
-          var links = [['Logs', logfile, "_blank"],
+              + '/' + instanceInfo.id + '/histo'
+          var links = [['Logs', logfileUrl, "_blank"],
                        ['Job', jobUrl, "_blank"],
                        ['Exceptions', exceptionsUrl, "_self"],
                        ['Host', host, "_blank"],
