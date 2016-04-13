@@ -3,3 +3,6 @@ setup:
 	@npm install gulp
 	@npm install
 	@gulp build
+
+serve:
+	@hugo server -w

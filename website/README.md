@@ -21,21 +21,7 @@ This will install Hugo, Gulp, and all necessary Gulp plugins.
 ## Running the Docs Locally
 
 ```bash
-$ hugo server --watch
+$ make serve
 ```
 
-This will the docs locally on `localhost` port 1313.
-
-## Working with Static Assets
-
-To build a full static asset distribution (CSS, JavaScript, fonts, and images):
-
-```bash
-$ gulp build
-```
-
-To work on assets in "watch" mode:
-
-```bash
-$ gulp dev
-```
+This will run the docs locally on `localhost` port 1313.
