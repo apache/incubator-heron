@@ -1,10 +1,9 @@
+import json
+import os
 import tornado.gen
 import traceback
 
-import json
-import os
 from heron.tracker.src.python.handlers import BaseHandler
-from heron.tracker.src.python.log import Log as LOG
 from heron.tracker.src.python import utils
 
 class LogfileDataHandler(BaseHandler):
