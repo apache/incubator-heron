@@ -119,6 +119,9 @@ def run(command, parser, command_args, unknown_args):
   elif command == 'help':
     return help.run(command, parser, command_args, unknown_args)
 
+  elif command == 'version':
+    return version.run(command, parser, command_args, unknown_args)
+
   return 1
 
 def cleanup():
