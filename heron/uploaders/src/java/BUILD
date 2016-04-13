@@ -6,9 +6,9 @@ uploader_spi_files = [
     "//heron/spi/src/java:uploader-spi-java",
 ]
 
-packer_deps_files = \
+s3_deps_files = \
     uploader_spi_files + [
-        "//3rdparty/fasterxml-jackson:fasterxml-jackson-java",
+        "//3rdparty/aws:aws-java-sdk",
     ]
 
 java_library(
@@ -27,25 +27,6 @@ genrule(
     name = 'heron-null-uploader',
     srcs = [":null-uploader-unshaded_deploy.jar"],
     outs = ["heron-null-uploader.jar"],
-    cmd  = "cp $< $@",
-)
-
-java_library(
-    name = 'packer-uploader-java',
-    srcs = glob(["**/packer/**/*.java"]),
-    deps = packer_deps_files,
-)
-
-java_binary(
-    name = 'packer-uploader-unshaded',
-    srcs = glob(["**/packer/**/*.java"]),
-    deps = packer_deps_files,
-)
-
-genrule(
-    name = "heron-packer-uploader",
-    srcs = [":packer-uploader-unshaded_deploy.jar"],
-    outs = ["heron-packer-uploader.jar"],
     cmd  = "cp $< $@",
 )
 
@@ -88,3 +69,22 @@ genrule(
     outs = ["heron-hdfs-uploader.jar"],
     cmd  = "cp $< $@",
 )
+
+java_library(
+    name = 's3-uploader-java',
+    srcs = glob(["**/s3/**/*.java"]),
+    deps = s3_deps_files,
+)
+
+java_binary(
+    name = 's3-uploader-unshaded',
+    srcs = glob(["**/s3/**/*.java"]),
+    deps = s3_deps_files)
+
+genrule(
+    name = "heron-s3-uploader",
+    srcs = [":s3-uploader-unshaded_deploy.jar"],
+    outs = ["heron-s3-uploader.jar"],
+    cmd  = "cp $< $@",
+)
+

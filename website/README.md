@@ -8,6 +8,13 @@ Heron's documentation was built using the following components:
 
 ## Setup
 
+Be sure you have a recent version of Node installed:
+
+```bash
+$ brew install nvm
+$ nvm install node
+```
+
 If you have [Homebrew](http://brew.sh) and [npm](https://www.npmjs.com)
 installed:
 
@@ -24,7 +31,7 @@ This will install Hugo, Gulp, and all necessary Gulp plugins.
 $ hugo server --watch
 ```
 
-This will the docs locally on `localhost` port 1313.
+This will run the doc server locally on [localhost:1313](http://localhost:1313).
 
 ## Working with Static Assets
 
