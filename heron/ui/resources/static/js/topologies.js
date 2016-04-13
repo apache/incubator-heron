@@ -899,7 +899,7 @@ var InstanceCounters = React.createClass({
         row.push(Number(capacity.toFixed(3)) || 0);
       }
       if (pplan) {
-        // Get JobUrl and logfile url from pplan.
+        // Get Job url from pplan.
         var instanceInfo = undefined;
         for (var key in pplan.instances) {
           var instInfo = pplan.instances[key];
@@ -909,10 +909,12 @@ var InstanceCounters = React.createClass({
           }
         }
         if (instanceInfo) {
-          var logfile = instanceInfo.logfile;
           var stmgrId = instanceInfo.stmgrId;
           var jobUrl = pplan.stmgrs[stmgrId].joburl;
           var host = "http://" + pplan.stmgrs[stmgrId].host + ":1338";
+          var logfileUrl = '/topologies/' + this.props.info.cluster
+              + '/' + this.props.info.environ + '/' + this.props.info.topology
+              + '/' + instanceInfo.id + '/logfile'
           var exceptionsUrl = '/topologies/' + this.props.info.cluster
               + '/' + this.props.info.environ + '/' + this.props.info.topology
               + '/' + this.props.info.comp_name + '/' + instance + '/exceptions';
