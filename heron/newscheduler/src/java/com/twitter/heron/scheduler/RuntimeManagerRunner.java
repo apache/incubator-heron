@@ -1,3 +1,17 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.twitter.heron.scheduler;
 
 import java.io.IOException;
@@ -394,49 +408,43 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
 
     ListenableFuture<Boolean> booleanFuture;
+    Boolean futureResult;
 
     booleanFuture = statemgr.deleteTopology(topologyName);
-    if (!NetworkUtils.awaitResult(booleanFuture, 5, TimeUnit.SECONDS)) {
+    futureResult = NetworkUtils.awaitResult(booleanFuture, 5, TimeUnit.SECONDS);
+    if (futureResult == null || !futureResult) {
       LOG.severe("Failed to clear topology state");
       return false;
     }
 
     booleanFuture = statemgr.deleteExecutionState(topologyName);
-    if (!NetworkUtils.awaitResult(booleanFuture, 5, TimeUnit.SECONDS)) {
+    futureResult = NetworkUtils.awaitResult(booleanFuture, 5, TimeUnit.SECONDS);
+    if (futureResult == null || !futureResult) {
       LOG.severe("Failed to clear execution state");
       return false;
     }
 
     // It is possible that  TMasterLocation, PhysicalPlan and SchedulerLocation are not set
     // Just log but don't consider them failure
-    try {
-      booleanFuture = statemgr.deleteTMasterLocation(topologyName);
-      if (!NetworkUtils.awaitResult(booleanFuture, 5, TimeUnit.SECONDS)) {
-        // We would not return false since it is possible that TMaster didn't write physical plan
-        LOG.severe("Failed to clear TMaster location. Check whether TMaster set it correctly.");
-      }
-    } catch (Exception e) {
-      LOG.severe("Failed to clear TMaster location");
+    booleanFuture = statemgr.deleteTMasterLocation(topologyName);
+    futureResult = NetworkUtils.awaitResult(booleanFuture, 5, TimeUnit.SECONDS);
+    if (futureResult == null || !futureResult) {
+      // We would not return false since it is possible that TMaster didn't write physical plan
+      LOG.severe("Failed to clear TMaster location. Check whether TMaster set it correctly.");
     }
 
-    try {
-      booleanFuture = statemgr.deletePhysicalPlan(topologyName);
-      if (!NetworkUtils.awaitResult(booleanFuture, 5, TimeUnit.SECONDS)) {
-        // We would not return false since it is possible that TMaster didn't write physical plan
-        LOG.severe("Failed to clear physical plan. Check whether TMaster set it correctly.");
-      }
-    } catch (Exception e) {
-      LOG.log(Level.SEVERE, "Failed to clear physical plan", e);
+    booleanFuture = statemgr.deletePhysicalPlan(topologyName);
+    futureResult = NetworkUtils.awaitResult(booleanFuture, 5, TimeUnit.SECONDS);
+    if (futureResult == null || !futureResult) {
+      // We would not return false since it is possible that TMaster didn't write physical plan
+      LOG.severe("Failed to clear physical plan. Check whether TMaster set it correctly.");
     }
 
-    try {
-      booleanFuture = statemgr.deleteSchedulerLocation(topologyName);
-      if (!NetworkUtils.awaitResult(booleanFuture, 5, TimeUnit.SECONDS)) {
-        // We would not return false since it is possible that TMaster didn't write physical plan
-        LOG.severe("Failed to clear scheduler location. Check whether Scheduler set it correctly.");
-      }
-    } catch (Exception e) {
-      LOG.severe("Failed to clear scheduler location");
+    booleanFuture = statemgr.deleteSchedulerLocation(topologyName);
+    futureResult = NetworkUtils.awaitResult(booleanFuture, 5, TimeUnit.SECONDS);
+    if (futureResult == null || !futureResult) {
+      // We would not return false since it is possible that TMaster didn't write physical plan
+      LOG.severe("Failed to clear scheduler location. Check whether Scheduler set it correctly.");
     }
 
     LOG.info("Cleaned up Heron State");

@@ -1,3 +1,17 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.twitter.heron.spi.metricsmgr.sink;
 
 import java.util.Map;
@@ -11,7 +25,7 @@ import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
  * {@link #processRecord(MetricsRecord)} method.
  * And {@link #flush()} is called at an interval according to the configuration
  */
-public interface IMetricsSink {
+public interface IMetricsSink extends AutoCloseable {
   /**
    * Initialize the MetricsSink
    *
@@ -20,25 +34,25 @@ public interface IMetricsSink {
    * Attempts to modify the returned map,
    * whether direct or via its collection views, result in an UnsupportedOperationException.
    */
-  public void init(Map<String, Object> conf, SinkContext context);
+  void init(Map<String, Object> conf, SinkContext context);
 
   /**
    * Process a metrics record in the sink
    *
    * @param record the record to put
    */
-  public void processRecord(MetricsRecord record);
+  void processRecord(MetricsRecord record);
 
   /**
    * Flush any buffered metrics
    * It would be called at an interval according to the configuration
    */
-  public void flush();
+  void flush();
 
   /**
    * Closes this stream and releases any system resources associated
    * with it. If the stream is already closed then invoking this
    * method has no effect.
    */
-  public void close();
+  void close();
 }

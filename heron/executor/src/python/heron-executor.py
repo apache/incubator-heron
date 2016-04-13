@@ -349,7 +349,8 @@ class HeronExecutor:
       (old_p, name, nattempts) = process_dict[pid]
       do_print("%s exited with status %d" % (name, status))
       # Just make it world readable
-      os.system("chmod a+r core.%d" % pid)
+      if os.path.isfile("core.%d" % pid):
+        os.system("chmod a+r core.%d" % pid)
       if nattempts > self.max_runs:
         do_print("%s exited too many times" % name)
         sys.exit(1)
