@@ -19,7 +19,7 @@ addons:
       - zlib1g-dev
 
 env:
-  - CC=gcc-4.8 CXX=g++-4.8 CPP=cpp-4
+  - CC=gcc-4.8 CXX=g++-4.8 CPP=cpp-4.8
 
 before_install:
 
