@@ -126,7 +126,7 @@ def real_path(apath):
 
 def fail(message):
   print("\nFAILED:  %s" % message)
-  sys.exit(-1)
+  sys.exit(1)
 
 # Assumes the version is at the end of the first line consisting of digits and dots
 def get_trailing_version(line):
