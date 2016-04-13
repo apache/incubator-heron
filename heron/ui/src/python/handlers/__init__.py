@@ -10,8 +10,8 @@ from heron.ui.src.python.handlers.notfound import NotFoundHandler
 # Handlers for topology related requests
 ################################################################################
 from heron.ui.src.python.handlers.topology import ListTopologiesHandler
-from heron.ui.src.python.handlers.topology import LogfileHandler
 from heron.ui.src.python.handlers.topology import LogfileDataHandler
+from heron.ui.src.python.handlers.topology import LogfileHandler
 from heron.ui.src.python.handlers.topology import TopologyPlanHandler
 from heron.ui.src.python.handlers.topology import TopologyConfigHandler
 from heron.ui.src.python.handlers.topology import TopologyExceptionsPageHandler
