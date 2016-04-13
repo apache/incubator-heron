@@ -28,6 +28,9 @@ class Application(tornado.web.Application):
       (r"/topologies/metrics",                                                   handlers.api.MetricsHandler),
       (r"/topologies/metrics/timeline",                                          handlers.api.MetricsTimelineHandler),
 
+      (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/logfile",               handlers.LogfileHandler),
+      (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/filedata", handlers.LogfileDataHandler),
+
       # Topology list and plan handlers
       (r"/topologies/list.json",                                                 handlers.api.ListTopologiesJsonHandler),
       (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/logicalplan.json",               handlers.api.TopologyLogicalPlanJsonHandler),
