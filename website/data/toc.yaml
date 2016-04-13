@@ -1,14 +1,46 @@
 sections:
   - name: Getting Started
     sublinks:
-      - name: Getting Started
+      - name: Local (Single Node)
         url: /docs/getting-started
       - name: Upgrade Existing Storm Topologies
         url: /docs/upgrade-storm-to-heron
-  - name: Concepts
+  - name: Deployment
     sublinks:
-      - name: The Architecture of Heron
-        url: /docs/concepts/architecture
+      - name: Deploying Heron
+        url: /docs/operators/deployment/README
+      - name: Aurora
+        url: /docs/operators/deployment/aurora
+      - name: Mesos
+        url: /docs/operators/deployment/mesos
+      - name: Local
+        url: /docs/operators/deployment/local
+      - name: Zookeeper
+        url: /docs/operators/deployment/zookeeper
+  - name: Configuration
+    sublinks:
+      - name: Configuration Intro
+        url: /docs/operators/configuration/config-intro
+      - name: Heron Instance
+        url: /docs/operators/configuration/instance
+      - name: Metrics Manager
+        url: /docs/operators/configuration/metrics-manager
+      - name: Stream Manager
+        url: /docs/operators/configuration/stmgr
+      - name: System-Level
+        url: /docs/operators/configuration/system
+      - name: Topology Master
+        url: /docs/operators/configuration/tmaster
+  - name: User Manuals
+    sublinks:
+      - name: Managing Topologies with the Heron CLI
+        url: /docs/operators/heron-cli
+      - name: The Heron Tracker REST API
+        url: /docs/operators/heron-tracker
+      - name: The Heron User Interface
+        url: /docs/operators/heron-ui
+  - name: Topology Developers
+    sublinks:
       - name: Heron Topologies
         url: /docs/concepts/topologies
       - name: Heron's Data Model
@@ -17,51 +49,18 @@ sections:
         url: /docs/developers/serialization
       - name: Javadoc
         url: /docs/javadoc
-  - name: Operators
-    subcategories:
-      - name: Configuration
-        sublinks:
-          - name: Configuration Intro
-            url: /docs/operators/configuration/config-intro
-          - name: Heron Instance
-            url: /docs/operators/configuration/instance
-          - name: Metrics Manager
-            url: /docs/operators/configuration/metrics-manager
-          - name: Stream Manager
-            url: /docs/operators/configuration/stmgr
-          - name: System-Level
-            url: /docs/operators/configuration/system
-          - name: Topology Master
-            url: /docs/operators/configuration/tmaster
-      - name: Deployment
-        sublinks:
-          - name: Deploying Heron
-            url: /docs/operators/deployment/README
-          - name: Aurora
-            url: /docs/operators/deployment/aurora
-          - name: Mesos
-            url: /docs/operators/deployment/mesos
-          - name: Local
-            url: /docs/operators/deployment/local
-          - name: Zookeeper
-            url: /docs/operators/deployment/zookeeper
+  - name: Heron Developers
     sublinks:
-      - name: Managing Topologies with the Heron CLI
-        url: /docs/operators/heron-cli
-      - name: The Heron Tracker REST API
-        url: /docs/operators/heron-tracker
-      - name: The Heron User Interface
-        url: /docs/operators/heron-ui
-  - name: Developers
-    subcategories:
-      - name: Compiling
-        sublinks:
-          - name: Compiling Heron
-            url: /docs/developers/compiling/compiling
-          - name: Compiling Using Docker
-            url: /docs/developers/compiling/docker
+      - name: The Architecture of Heron
+        url: /docs/concepts/architecture
+      - name: Compiling Heron
+        url: /docs/developers/compiling/compiling
+      - name: Compiling Using Docker
+        url: /docs/developers/compiling/docker
   - name: Contributors
     sublinks:
+      - name: Community
+        url: /docs/contributors/community
       - name: The Heron Codebase
         url: /docs/contributors/codebase
       - name: Testing Heron
