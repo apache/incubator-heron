@@ -3,7 +3,7 @@ title: Metrics Manager
 ---
 
 You can configure all of the [Metrics
-Managers](../../concepts/architecture.html#metrics-manager) (MMs) in a topology
+Managers](../../../concepts/architecture#metrics-manager) (MMs) in a topology
 using the parameters below.
 
 ## Network Configuration

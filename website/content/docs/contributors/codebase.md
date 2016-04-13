@@ -25,15 +25,15 @@ API can be found [here](../api/topology/index.html). Please note that Heron
 topologies do not require Java 8 and can be written in Java 7 or later.
 
 * **Python 2** (specifically 2.7) is used primarily for Heron's [CLI
-interface](../operators/heron-cli.html) and UI components such as [Heron
-UI](../operators/heron-ui.html) and the [Heron
-Tracker](../operators/heron-tracker.html).
+interface](../..//operators/heron-cli) and UI components such as [Heron
+UI](../../operators/heron-ui) and the [Heron
+Tracker](../../operators/heron-tracker).
 
 ## Main Tools
 
 * **Build tool** &mdash; Heron uses [Bazel](http://bazel.io/) as its build tool.
 Information on setting up and using Bazel for Heron can be found in [Compiling
-Heron](../developers/compiling.html).
+Heron](../../developers/compiling/compiling).
 
 * **Inter-component communication** &mdash; Heron uses [Protocol
 Buffers](https://developers.google.com/protocol-buffers/?hl=en) for
@@ -41,9 +41,9 @@ communication between components. Most `.proto` definition files can be found in
 [`heron/proto`]({{book.root_url}}/heron/proto).
 
 * **Cluster coordination** &mdash; Heron relies heavily on ZooKeeper for cluster
-coordination, be it for [Mesos/Aurora](../operators/deployment/aurora.html),
-[Mesos alone](../operators/deployment/mesos.html), or for a [custom
-scheduler](custom-scheduler.html) that you build. More information on ZooKeeper
+coordination, be it for [Mesos/Aurora](../../operators/deployment/aurora),
+[Mesos alone](../../operators/deployment/mesos), or for a [custom
+scheduler](../custom-scheduler) that you build. More information on ZooKeeper
 components in the codebase can be found in the [State
 Management](#state-management) section below.
 
@@ -56,18 +56,18 @@ utilities, networking interfaces, and more.
 ## Cluster Scheduling
 
 Heron supports three cluster schedulers out of the box:
-[Mesos](../operators/deployment/mesos.html),
-[Aurora](../operators/deployment/aurora.html), and a [local
-scheduler](../operators/deployment/local.html). The Java code for each of those
+[Mesos](../../operators/deployment/mesos),
+[Aurora](../../operators/deployment/aurora), and a [local
+scheduler](../../operators/deployment/local). The Java code for each of those
 schedulers, as well as for the underlying scheduler API, can be found in
 [`heron/scheduler`]({{book.root_url}}/heron/scheduler).
 
 Info on custom schedulers can be found in [Implementing a Custom
-Scheduler](custom-scheduler.html); info on the currently available schedulers
+Scheduler](../custom-scheduler); info on the currently available schedulers
 can be found in [Deploying Heron on
-Aurora](../operators/deployment/aurora.html), [Deploying Heron on
-Mesos](../operators/deployment/mesos.html), and [Local
-Deployment](../operators/deployment/local.html).
+Aurora](../../operators/deployment/aurora), [Deploying Heron on
+Mesos](../../operators/deployment/mesos), and [Local
+Deployment](../../operators/deployment/local).
 
 ## State Management
 
@@ -106,7 +106,7 @@ Manager](../concepts/architecture.html#metrics-manager) can be found in
 [`heron/metricsmgr`]({{book.root_url}}/heron/metricsmgr).
 
 If you'd like to implement your own custom metrics handler (known as a **metrics
-sink**), see [Implementing a Custom Metrics Sink](custom-metrics-sink.html).
+sink**), see [Implementing a Custom Metrics Sink](../custom-metrics-sink).
 
 ## Developer APIs
 
@@ -149,12 +149,12 @@ contained in [`cli.py`]({{book.root_url}}/heron/cli2/src/python/cli.py).
 The default configuration for Heron schedulers is found in
 [`scheduler.conf`]({{book.root_url}}/heron/cli2/src/python/scheduler.conf),
 while configuration for Heron's [local
-scheduler](../operators/deployment/local.html) can be found in
+scheduler](../../operators/deployment/local) can be found in
 [`local_scheduler.conf`]({{book.root_url}}/heron/cli2/src/python/local_scheduler.conf).
 
 ### Heron UI
 
-The Python code for the [Heron UI](../operators/heron-ui.html) can be found in
+The Python code for the [Heron UI](../../operators/heron-ui) can be found in
 [`heron/web`]({{book.root_url}}/heron/web).
 
 Like Heron Tracker, Heron UI is a web server written in Python that relies on
@@ -166,7 +166,7 @@ directory.
 
 ### Heron Tracker
 
-The Python code for the [Heron Tracker](../operators/heron-tracker.html) can be
+The Python code for the [Heron Tracker](../../operators/heron-tracker) can be
 found in [`heron/tracker`]({{book.root_url}}/heron/tracker).
 
 The Tracker is a web server written in Python. It relies on the
@@ -178,7 +178,7 @@ corresponding handlers in the [`handlers`]({{ book.root_url
 
 ### Heron Shell
 
-The Python code for the [Heron Shell](../operators/heron-shell.html) can be
+The Python code for the [Heron Shell](../../operators/heron-shell) can be
 found in [`heron/shell`]({{book.root_url}}/heron/shell). The HTTP handlers and
 web server are defined in
 [`main.py`]({{book.root_url}}/heron/shell/src/python/main.py) while the HTML,
@@ -188,4 +188,4 @@ JavaScript, CSS, and images for the web UI can be found in the
 ## Tests
 
 There are a wide variety of tests for Heron that are scattered throughout the
-codebase. For more info see [Testing Heron](testing.html).
+codebase. For more info see [Testing Heron](../testing).

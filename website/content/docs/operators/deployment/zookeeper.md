@@ -24,7 +24,7 @@ You can make Heron aware of one or more ZooKeeper clusters by modifying the
 need to specify the following for each cluster:
 
 * `type` &mdash; You should set this to `zookeeper` (the other possibility is
-  `file`, which is used in conjunction with [local deployment](local.html)).
+  `file`, which is used in conjunction with [local deployment](../local)).
 * `name` &mdash; The name you'd like to assign to the cluster. This is
   especially important if you're using more than one cluster.
 * `host`
