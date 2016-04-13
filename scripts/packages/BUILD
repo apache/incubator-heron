@@ -117,6 +117,7 @@ pkg_tar(
 pkg_tar(
     name = "heron-tools",
     extension = "tar.gz",
+    files = [":RELEASE"],
     deps = [
         ":heron-tools-bin",
         ":heron-tools-conf",
@@ -199,6 +200,7 @@ pkg_tar(
 pkg_tar(
     name = "heron-client",
     extension = "tar.gz",
+    files = [":RELEASE"],
     deps = [
         ":heron-client-bin",
         ":heron-client-conf",
@@ -220,7 +222,7 @@ pkg_tar(
 pkg_tar(
     name = "heron-api",
     extension = "tar.gz",
-    files = heron_api_files(),
+    files = [":RELEASE"] + heron_api_files(),
 )
 
 ################################################################################
@@ -233,7 +235,7 @@ sh_binary(
 
 genrule(
     name = "generate-package-info",
-    outs = ["README.md"],
+    outs = ["RELEASE"],
     cmd = "$(location :package-info-generator) $$(find . -name '*status*.txt') >$@",
     stamp = 1,
     tools = [":package-info-generator"],
@@ -243,11 +245,11 @@ genrule(
     name = "generate-client-launcher",
     srcs = [
         "client_template_bin.sh",
-        ":README.md",
+        ":RELEASE",
     ],
     outs = ["client_launcher_bin.sh"],
     cmd = """
-        release_info="$$(cat $(location :README.md))"
+        release_info="$$(cat $(location :RELEASE))"
         template="$$(cat $(location client_template_bin.sh))"
         echo "$${template//%release_info%/$${release_info}}" >$@
         """,
@@ -257,11 +259,11 @@ genrule(
     name = "generate-tools-launcher",
     srcs = [
         "tools_template_bin.sh",
-        ":README.md",
+        ":RELEASE",
     ],
     outs = ["tools_launcher_bin.sh"],
     cmd = """
-        release_info="$$(cat $(location :README.md))"
+        release_info="$$(cat $(location :RELEASE))"
         template="$$(cat $(location tools_template_bin.sh))"
         echo "$${template//%release_info%/$${release_info}}" >$@
         """,
@@ -271,11 +273,11 @@ genrule(
     name = "generate-api-launcher",
     srcs = [
         "api_template_bin.sh",
-        ":README.md",
+        ":RELEASE",
     ],
     outs = ["api_launcher_bin.sh"],
     cmd = """
-        release_info="$$(cat $(location :README.md))"
+        release_info="$$(cat $(location :RELEASE))"
         template="$$(cat $(location api_template_bin.sh))"
         echo "$${template//%release_info%/$${release_info}}" >$@
         """,
