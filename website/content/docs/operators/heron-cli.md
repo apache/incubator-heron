@@ -5,10 +5,10 @@ title: Managing Topologies with Heron CLI
 The **Heron CLI** us used to to manage every aspect of the
 [topology lifecycle](../../concepts/topologies#topology-lifecycle).
 
-## Deploying the `heron-cli` Executable
+## Deploying the `heron` Executable
 
-To use `heron-cli`, generate a full [Heron release](../../developers/compiling/compiling) and
-distribute the resulting `heron-cli` binary to all machines used to
+To use `heron`, generate a full [Heron release](../../developers/compiling/compiling) and
+distribute the resulting `heron` binary to all machines used to
 manage topologies.
 
 ## CLI Flags
@@ -194,7 +194,7 @@ $ heron-cli kill "topology.debug:true" \
 
 ### Version
 
-Run the `version` command at any time to see which version of `heron-cli` you're
+Run the `version` command at any time to see which version of `heron` you're
 using:
 
 ```bash

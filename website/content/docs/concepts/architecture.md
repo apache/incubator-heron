@@ -74,7 +74,7 @@ the sections below:
 ### Topology Master
 
 The Topology Master \(TM) manages a topology throughout its entire lifecycle,
-from the time it's submitted until it's ultimately killed. When `heron-cli` deploys
+from the time it's submitted until it's ultimately killed. When `heron` deploys
 a topology it starts a single TM and multiple [containers]({{< ref "#container" >}}).
 The TM creates an ephemeral [ZooKeeper](http://zookeeper.apache.org) node to
 ensure that there's only one TM for the topology and that the TM is easily
@@ -175,7 +175,7 @@ outside of particular topologies.
 
 ### Heron CLI
 
-Heron has a CLI tool called `heron-cli` that is used to manage topologies.
+Heron has a CLI tool called `heron` that is used to manage topologies.
 Documentation can be found in [Managing
 Topologies](../../operators/heron-cli).
 

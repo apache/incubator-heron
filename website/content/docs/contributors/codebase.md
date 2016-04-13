@@ -138,12 +138,12 @@ Java. Those examples can be found in
 
 ### Heron CLI
 
-Heron has a tool called `heron-cli` that is used to both provide a CLI interface
+Heron has a tool called `heron` that is used to both provide a CLI interface
 for [managing topologies](../../operators/heron-cli) and to perform much of
 the heavy lifting behind assembling physical topologies in your cluster.
 
-The Python code for `heron-cli` can be found in
-[`heron/cli2`]({{book.root_url}}/heron/cli2). The entire logic of `heron-cli` is
+The Python code for `heron` can be found in
+[`heron/cli2`]({{book.root_url}}/heron/cli2). The entire logic of `heron` is
 contained in [`cli.py`]({{book.root_url}}/heron/cli2/src/python/cli.py).
 
 The default configuration for Heron schedulers is found in
