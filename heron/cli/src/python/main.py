@@ -1,3 +1,17 @@
+# Copyright 2016 Twitter. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 #!/usr/bin/python2.7
 
 import argparse
@@ -27,6 +41,11 @@ import heron.cli.src.python.restart as restart
 import heron.cli.src.python.submit as submit
 import heron.cli.src.python.utils as utils
 import heron.cli.src.python.version as version
+
+help_epilog = '''Getting more help: 
+  heron help <command> Prints help and options for <command>
+
+For detailed documentation, go to http://heronstreaming.io'''
 
 class _HelpAction(argparse._HelpAction):
   def __call__(self, parser, namespace, values, option_string=None):
@@ -59,7 +78,8 @@ class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
 ################################################################################
 def create_parser():
   parser = argparse.ArgumentParser(
-      epilog = 'For detailed documentation, go to http://heron.github.io', 
+      prog = 'heron',
+      epilog = help_epilog,
       formatter_class=SubcommandHelpFormatter,
       add_help = False)
 
@@ -115,29 +135,31 @@ def check_environment():
 # Extract all the common args for all commands
 ################################################################################
 def extract_common_args(command, parser, cl_args):
-
-  new_cl_args = dict()
   try:
     cluster_role_env = cl_args.pop('cluster/[role]/[env]')
-    cluster_tuple = utils.parse_cluster_role_env(cluster_role_env)
-
     config_path = cl_args['config_path']
-
   except KeyError:
     # if some of the arguments are not found, print error and exit
     subparser = utils.get_subparser(parser, command)
     print(subparser.format_help())
     return dict()
 
-  config_path = utils.get_heron_cluster_conf_dir(cluster_role_env, config_path);
+  cluster = utils.get_heron_cluster(cluster_role_env)
+  config_path = utils.get_heron_cluster_conf_dir(cluster, config_path)
   if not os.path.isdir(config_path):
     Log.error("Config path directory does not exist: %s" % config_path)
     return dict()
 
-  new_cl_args['cluster'] = cluster_tuple[0]
-  new_cl_args['role'] = cluster_tuple[1]
-  new_cl_args['environ'] = cluster_tuple[2]
-  new_cl_args['config_path'] = config_path
+  new_cl_args = dict()
+  try:
+    cluster_tuple = utils.parse_cluster_role_env(cluster_role_env, config_path)
+    new_cl_args['cluster'] = cluster_tuple[0]
+    new_cl_args['role'] = cluster_tuple[1]
+    new_cl_args['environ'] = cluster_tuple[2]
+    new_cl_args['config_path'] = config_path
+  except Exception as e:
+    Log.error("Argument cluster/[role]/[env] is not correct: %s" % str(e))
+    return dict()
 
   cl_args.update(new_cl_args)
   return cl_args
@@ -181,6 +203,10 @@ def main():
 
   if command != 'help' and command != 'version':
     command_line_args = extract_common_args(command, parser, command_line_args) 
+
+  # bail out if args are empty
+  if not command_line_args:
+    return 1
 
   start = time.time() 
   retcode = run(command, parser, command_line_args, unknown_args)

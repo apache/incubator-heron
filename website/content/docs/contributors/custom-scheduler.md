@@ -83,7 +83,7 @@ Once you've implemented a custom configuration loader, you'll need to specify
 your loader by class using the `--config-loader` flag. If your loader relies on
 a configuration file, specify the path of that file using the `--config-file`
 flag. Here's an example [topology
-submission](../operators/heron-cli.html#submitting-a-topology) command:
+submission](../../operators/heron-cli#submitting-a-topology) command:
 
 ```bash
 $ heron-cli submit "topology.debug:true" \
