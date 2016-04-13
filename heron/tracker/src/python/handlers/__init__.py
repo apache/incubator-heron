@@ -6,6 +6,7 @@ from executionstatehandler import ExecutionStateHandler
 from jmaphandler import JmapHandler
 from jstackhandler import JstackHandler
 from logicalplanhandler import LogicalPlanHandler
+from logfilehandler import LogfileDataHandler
 from machineshandler import MachinesHandler
 from mainhandler import MainHandler
 from memoryhistogramhandler import MemoryHistogramHandler

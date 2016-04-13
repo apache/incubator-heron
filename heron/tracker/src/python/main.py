@@ -26,6 +26,7 @@ class Application(tornado.web.Application):
       (r"/topologies/states", handlers.StatesHandler, {"tracker":tracker}),
       (r"/topologies/info", handlers.TopologyHandler, {"tracker":tracker}),
       (r"/topologies/logicalplan", handlers.LogicalPlanHandler, {"tracker":tracker}),
+      (r"/topologies/logfiledata", handlers.LogfileDataHandler, {"tracker":tracker}),
       (r"/topologies/physicalplan", handlers.PhysicalPlanHandler, {"tracker":tracker}),
       (r"/topologies/executionstate", handlers.ExecutionStateHandler, {"tracker":tracker}),
       (r"/topologies/metrics", handlers.MetricsHandler, {"tracker":tracker}),
