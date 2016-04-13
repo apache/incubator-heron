@@ -26,8 +26,30 @@ For information beyond the documentation:
 Currently, we are working on ensuring that Heron is easy to install and run in a
 Mesos Cluster in AWS, Mesos/Aurora in AWS, and locally on a laptop. We will post updates as we progress.
 
-## Heron Documentation
+# Heron Documentation
 
-Heron's OSS documentation is not yet publicly hosted but you can view the
-documentation locally. For instructions, see the `README` in the `website`
-folder.
+Heron's documentation was built using the following components:
+
+* [Hugo](http://gohugo.io) --- Static site generator
+* [GulpJS](http://gulpjs.com) --- Build tool for static assets
+* [Twitter Bootstrap](http://getbootstrap.com) --- CSS and JavaScript
+
+## Setup
+
+If you have [Homebrew](http://brew.sh) and [npm](https://www.npmjs.com)
+installed:
+
+```bash
+$ cd website
+$ make setup
+```
+
+This will install Hugo, Gulp, and all necessary Gulp plugins.
+
+## Running the Docs Locally
+
+```bash
+$ make serve
+```
+
+This will run the docs locally on `localhost` port 1313.
