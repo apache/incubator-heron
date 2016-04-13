@@ -28,6 +28,11 @@ import heron.cli.src.python.submit as submit
 import heron.cli.src.python.utils as utils
 import heron.cli.src.python.version as version
 
+help_epilog = '''Getting more help: 
+  heron help <command> Prints help and options for <command>
+
+For detailed documentation, go to http://heronstreaming.io'''
+
 class _HelpAction(argparse._HelpAction):
   def __call__(self, parser, namespace, values, option_string=None):
     parser.print_help()
@@ -59,7 +64,8 @@ class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
 ################################################################################
 def create_parser():
   parser = argparse.ArgumentParser(
-      epilog = 'For detailed documentation, go to http://heron.github.io', 
+      prog = 'heron',
+      epilog = help_epilog,
       formatter_class=SubcommandHelpFormatter,
       add_help = False)
 
