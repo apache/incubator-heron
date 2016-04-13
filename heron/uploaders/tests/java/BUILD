@@ -22,7 +22,7 @@ localfs_deps_files = \
 
 java_library(
     name = "local-filesystem-constants-java",
-    srcs = glob(["**/localfs/LocalFileSystemConstants.java"]),
+    srcs = glob(["**/localfs/LocalFileSystemConstantsTest.java"]),
 )
 
 java_test(
@@ -38,4 +38,14 @@ java_test(
     deps = localfs_deps_files,
     size = "small",
     data = glob(["**/localfs/testdata/*.tar"]),
+)
+
+java_test(
+    name = "s3-uploader_unittest",
+    srcs = glob(["**/s3/S3UploaderTest.java"]),
+    size = "small",
+    deps = common_deps_files + spi_deps_files + [
+        "//heron/uploaders/src/java:s3-uploader-java",
+        "//3rdparty/aws:aws-java-sdk"
+    ],
 )

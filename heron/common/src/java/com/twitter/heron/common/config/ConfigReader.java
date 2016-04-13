@@ -1,3 +1,17 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.twitter.heron.common.config;
 
 import java.util.Properties;
@@ -33,7 +47,7 @@ public class ConfigReader {
   public static Map loadFile(String fileName) {
     Map props = new HashMap();
     if (fileName == null) {
-      LOG.warning("Config file name cannot be null\n"); 
+      LOG.warning("Config file name cannot be null\n");
       return props;
     }
     else if (fileName.isEmpty()) {
@@ -48,22 +62,26 @@ public class ConfigReader {
         LOG.warning("Config file " + fileName + " does not exist.\n");
         return props;
       }
-     
+
       if (!Files.isRegularFile(path)) {
         LOG.warning("Config file " + fileName + " might be a directory.\n");
         return props;
       }
-      
-      LOG.info("Reading config file " + fileName);
+
+      LOG.log(Level.FINE, "Reading config file {0}", fileName);
 
       Map props_yaml = null;
       try {
         FileInputStream fin = new FileInputStream(new File(fileName));
-        Yaml yaml = new Yaml();
-        props_yaml = (Map) yaml.load(fin);
-        LOG.info("Successfully read config file " + fileName);
+        try {
+          Yaml yaml = new Yaml();
+          props_yaml = (Map) yaml.load(fin);
+          LOG.log(Level.FINE, "Successfully read config file {0}", fileName);
+        } finally {
+          fin.close();
+        }
       } catch (IOException e) {
-        LOG.log(Level.SEVERE, "Failed to load config file: " + fileName, e); 
+        LOG.log(Level.SEVERE, "Failed to load config file: " + fileName, e);
       }
 
       return props_yaml != null ? props_yaml : props;
@@ -78,12 +96,12 @@ public class ConfigReader {
    * @return Map, contains the key value pairs of config
    */
   public static Map loadStream(InputStream inputStream) {
-    LOG.info("Reading config stream");
+    LOG.fine("Reading config stream");
 
     Map props_yaml = null;
     Yaml yaml = new Yaml();
     props_yaml = (Map) yaml.load(inputStream);
-    LOG.info("Successfully read config");
+    LOG.fine("Successfully read config");
 
     return props_yaml != null ? props_yaml : new HashMap();
   }

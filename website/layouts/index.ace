@@ -39,8 +39,8 @@ html lang={{.Site.LanguageCode}}
               div built with a wide array of architectural improvements to be backwards compatible with Storm's
                 a href=http://storm.apache.org/about/simple-api.html  topology API
             .col-sm-4
-              h3 Ease of Development and Troubleshooting
-              p Easily debug and identify the issues in topologies (aka standing queries), allowing faster iteration during development. User can easily reason about how their topologies work and profile/debug its components in isolation.
+              h3 Proven at Twitter Scale
+              p Heron powers all realtime analytics with varied use cases at Twitter for over 2 years.  Incident reports dropped by an order of magnitude demonstrating proven reliability and scalability
             .col-sm-4
               h3 Scalability and Reliability
               p Heron is highly scalable both in the ability to execute large number of com- ponents for each topology and the ability to launch and track large numbers of topologies. Such a large scale is achieved because of the clean separation of topology scheduling and monitoring.
@@ -48,12 +48,18 @@ html lang={{.Site.LanguageCode}}
             .col-sm-4
               h3 Compatibility with Storm
               p Heron is API compatible with Storm and hence no code change is required for migration.
+          .row 
+            .col-sm-4
+              h3 Ease of Development and Troubleshooting
+              div Easily debug and identify the issues in  
+                a href=docs/concepts/topologies topologies,
+              div allowing faster iteration during development. 
             .col-sm-4
               h3 Simplified and Responsive UI
-              p Heron UI gives a visual overview of each topology. The UI uses metrics to show at a glance where the hot spots are and provides detailed counters for tracking the progress and troubleshooting.
+              p Heron UI gives a visual overview of each topology to visualize hot spot locations and detailed counters for tracking progress and troubleshooting.
             .col-sm-4
-              h3 Capacity Allocation and Management
-              p Users can take a topology from development to production in a shared cluster infrastructure instantly since Heron runs as yet another framework of the scheduler that manages capacity allocation.
+              h3 Scalability and Reliability
+              p Heron is highly scalable both in the ability to execute large number of com- ponents for each topology and the ability to launch and track large numbers of topologies. 
       .landing-feature-1
         .container style="text-align: center;"
           .row
@@ -70,11 +76,19 @@ html lang={{.Site.LanguageCode}}
               h4 Run Topologies using pre-compiled Heron binaries
               a.btn.btn-info href=docs/getting-started Get Started
             .col-sm-6
-              h4 Compile Heron from Source (for Heron Developers)
-              a.btn.btn-info href=docs/developers/compiling/compiling/ Get Source
+              h4 Upgrade Existing Storm Topologies
+              a.btn.btn-info.button-wrapper href=docs/upgrade-storm-to-heron Upgrade From Storm
       .landing-feature-1
         .container style="text-align: center;"
           .row
+            .col-sm-12
+              h2 Heron is in Beta
+              div Heron has been in production at Twitter for over 2 years and is in Beta. We believe Heron is stable enough for production use. See our  
+                a href=docs/contributors/codebase/ Support 
+              div page for information about feature status and releases. The Heron team monitors and responds actively to bug reports from users.
+      .landing-feature-1
+        .container style="text-align: center;"
+          .row 
             .col-sm-12
               h2 About Heron
               a href=docs/contributors/codebase/ Contributing

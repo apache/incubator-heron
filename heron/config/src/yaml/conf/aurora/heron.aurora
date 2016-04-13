@@ -6,7 +6,7 @@ and regular stmgr/metricsmgr/instances (container index > 0).
 
 heron_core_release_uri = '{{CORE_PACKAGE_URI}}'
 heron_topology_jar_uri = '{{TOPOLOGY_PACKAGE_URI}}'
-core_release_file = "heron-core-release.tar.gz"
+core_release_file = "heron-core.tar.gz"
 topology_package_file = "topology.tar.gz"
 
 # --- processes ---

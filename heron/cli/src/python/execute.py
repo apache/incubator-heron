@@ -1,3 +1,17 @@
+# Copyright 2016 Twitter. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import subprocess
 
 import heron.cli.src.python.opts  as opts
@@ -7,12 +21,18 @@ import heron.cli.src.python.utils as jars
 ################################################################################
 # Execute a heron class given the args and the jars needed for class path
 ################################################################################
-def heron_class(class_name, lib_jars, extra_jars=[], args=[]):
+def heron_class(class_name, lib_jars, extra_jars=[], args=[], javaDefines=[]):
+  # Format all java -D options that need to be passed while running
+  # the class locally.
+  javaOpts = map(lambda opt: '-D' + opt, javaDefines)
 
-  # construct the command line for the sub process to run
+  # Construct the command line for the sub process to run
+  # Because of the way Python execute works,
+  # the java opts must be passed as part of the list
   all_args = [
-      utils.get_java_path(), "-client", "-Xmx1g", opts.get_heron_config(),
-      "-cp", utils.get_classpath(lib_jars + extra_jars),
+      utils.get_java_path(), "-client", "-Xmx1g", opts.get_heron_config()] + \
+      javaOpts + \
+      ["-cp", utils.get_classpath(lib_jars + extra_jars),
   ]
 
   all_args += [class_name] + list(args)
@@ -28,7 +48,7 @@ def heron_class(class_name, lib_jars, extra_jars=[], args=[]):
       err_str = "User main failed with status %d. Bailing out..." % status
       raise RuntimeError(err_str)
 
-def heron_tar(class_name, topology_tar, arguments, tmpdir_root):
+def heron_tar(class_name, topology_tar, arguments, tmpdir_root, javaDefines):
   # Extract tar to a tmp folder.
   tmpdir = tempfile.mkdtemp(dir=tmpdir_root, prefix='tmp')
 
@@ -52,4 +72,4 @@ def heron_tar(class_name, topology_tar, arguments, tmpdir_root):
   lib_jars = utils.get_heron_libs(jars.topology_jars())
 
   # Now execute the class
-  heron_class(class_name, lib_jars, extra_jars, arguments)
+  heron_class(class_name, lib_jars, extra_jars, arguments, javaDefines)
