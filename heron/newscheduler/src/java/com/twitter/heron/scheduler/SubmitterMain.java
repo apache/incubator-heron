@@ -242,7 +242,7 @@ public class SubmitterMain {
       System.exit(1);
     }
 
-    Boolean verbose = true;
+    Boolean verbose = false;
     Level logLevel = Level.INFO;
     if(cmd.hasOption("v")) {
       logLevel = Level.ALL;
