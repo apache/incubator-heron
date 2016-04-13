@@ -3,7 +3,7 @@ title: Implementing a Custom Metrics Sink
 ---
 
 Each Heron topology has its own centralized [Metrics
-Manager](../concepts/architecture.html#metrics-manager) (MM), which collects
+Manager](../../concepts/architecture#metrics-manager) (MM), which collects
 metrics from all instances in the topology. You can define how the MM processes
 metrics by implementing a **metrics sink**, which specifies how the MM handles
 incoming
@@ -31,7 +31,7 @@ implementing your own.
   &mdash; Writes each `MetricsRecord` object to a JSON file at a specified path.
 
 More on using those sinks in a Heron cluster can be found in [Metrics
-Manager](../operators/metrics-manager.html).
+Manager](../../operators/configuration/metrics-manager).
 
 ## Java Setup
 
@@ -74,14 +74,14 @@ interface, which requires you to implement the following methods:
   `MetricsRecord` that passes through the sink is processed.
 * `void flush()` &mdash; Flush any buffered metrics; this function is called at
   the interval specified by the `flush-frequency-ms`. More info can be found in
-  the [Stream Manager](../operators/stream-manager.html) document.
+  the [Stream Manager](../../operators/configuration/stmgr) document.
 * `void close()` &mdash; Closes the stream and releases any system resources
   associated with it; if the stream is already closed, invoking `close()` has no
   effect.
 
 Your implementation of those interfaces will need to be packaged into a JAR file
 and distributed to the `metrics-mgr-classpath` folder of your [Heron
-release](../developers/compiling.html).
+release](../../developers/compiling).
 
 ## Example Implementation
 
@@ -169,5 +169,5 @@ print-sink:
 Once you've made a JAR for your custom Java sink, distributed that JAR to
 `metrics-mgr-classpath` folder, and changed the configuration in
 `heron/config/metrics_sink.yaml`, you'll need to [re-compile
-Heron](../developers/compiling.html). Any topology submitted using that compiled
+Heron](../../developers/compiling). Any topology submitted using that compiled
 version of `heron-cli` will include the custom sink.
