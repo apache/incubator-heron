@@ -58,12 +58,12 @@ for i in "${@}"; do
   done <<<"$(cat $i)"
 done
 
-echo "Release name: ${release_name}"
-echo "Release built time: ${built_time}"
-echo "Release built host: ${built_host}"
-echo "Release built user: ${built_user}"
-
-echo "Release git revision: ${git_hash}"
-echo "Release git status: ${release_status}"
-echo "Last commit msg: $commit_msg"
-echo "Last commit url: $commit_url"
+echo "Build label: ${release_name}"
+echo "Build time: ${built_time}"
+echo "Build host: ${built_host}"
+echo "Build user: ${built_user}"
+echo
+echo "Build git revision: ${git_hash}"
+echo "Build git status: ${release_status}"
+echo "Build git commit msg: $commit_msg"
+echo "Build git commit url: $commit_url"
