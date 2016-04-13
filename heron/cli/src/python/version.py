@@ -29,6 +29,8 @@ import tarfile
 import tempfile
 
 import heron.cli.src.python.args as args
+import heron.cli.src.python.utils as utils
+from heron.common.src.python.color import Log
 
 def create_parser(subparsers):
   parser = subparsers.add_parser(
@@ -43,4 +45,15 @@ def create_parser(subparsers):
   return parser
 
 def run(command, parser, args, unknown_args):
-  pass
+
+  release_file = os.path.join(utils.get_heron_dir(), 'RELEASE')
+  if not os.path.isfile(release_file):
+    Log.error("RELEASE file not found: %s" % (utils.get_heron_dir()))
+    return False
+ 
+  with open(release_file) as release_info:
+    for line in release_info:
+      if not "git" in line: 
+        print line,
+
+  return True
