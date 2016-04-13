@@ -108,3 +108,19 @@ class LogfileHandler(base.BaseHandler):
     )
 
     self.render("file.html", **options)
+
+################################################################################
+# Handler for getting the data for log file for an instance
+################################################################################
+class LogfileDataHandler(base.BaseHandler):
+  """
+  Responsible for getting the data from log file of an instance.
+  """
+
+  @tornado.gen.coroutine
+  def get(self, cluster, environ, topology, instance, offset, length):
+
+    data = yield access.get_logfile_data(cluster, environ, topology, instance, offset, length)
+
+    self.write(data)
+    self.finish()
