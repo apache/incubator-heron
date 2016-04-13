@@ -1,3 +1,17 @@
+# Copyright 2016 Twitter. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 #!/usr/bin/python2.7
 
 import argparse
@@ -27,6 +41,11 @@ import heron.cli.src.python.restart as restart
 import heron.cli.src.python.submit as submit
 import heron.cli.src.python.utils as utils
 import heron.cli.src.python.version as version
+
+help_epilog = '''Getting more help: 
+  heron help <command> Prints help and options for <command>
+
+For detailed documentation, go to http://heronstreaming.io'''
 
 class _HelpAction(argparse._HelpAction):
   def __call__(self, parser, namespace, values, option_string=None):
@@ -59,7 +78,8 @@ class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
 ################################################################################
 def create_parser():
   parser = argparse.ArgumentParser(
-      epilog = 'For detailed documentation, go to http://heron.github.io', 
+      prog = 'heron',
+      epilog = help_epilog,
       formatter_class=SubcommandHelpFormatter,
       add_help = False)
 
@@ -98,6 +118,9 @@ def run(command, parser, command_args, unknown_args):
 
   elif command == 'help':
     return help.run(command, parser, command_args, unknown_args)
+
+  elif command == 'version':
+    return version.run(command, parser, command_args, unknown_args)
 
   return 1
 

@@ -108,6 +108,14 @@ public class Context {
     return cfg.getStringValue(ConfigKeys.get("SCHEDULER_JAR"));
   }
 
+  public static String schedulerProxyConnectionString(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("SCHEDULER_PROXY_CONNECTION_STRING"));
+  }
+
+  public static String schedulerProxyConnectionType(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("SCHEDULER_PROXY_CONNECTION_TYPE"));
+  }
+
   public static String stateManagerConnectionString(Config cfg) {
     return cfg.getStringValue(ConfigKeys.get("STATEMGR_CONNECTION_STRING"));
   }

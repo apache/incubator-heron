@@ -6,11 +6,6 @@ uploader_spi_files = [
     "//heron/spi/src/java:uploader-spi-java",
 ]
 
-packer_deps_files = \
-    uploader_spi_files + [
-        "//3rdparty/fasterxml-jackson:fasterxml-jackson-java",
-    ]
-
 s3_deps_files = \
     uploader_spi_files + [
         "//3rdparty/aws:aws-java-sdk",
@@ -32,25 +27,6 @@ genrule(
     name = 'heron-null-uploader',
     srcs = [":null-uploader-unshaded_deploy.jar"],
     outs = ["heron-null-uploader.jar"],
-    cmd  = "cp $< $@",
-)
-
-java_library(
-    name = 'packer-uploader-java',
-    srcs = glob(["**/packer/**/*.java"]),
-    deps = packer_deps_files,
-)
-
-java_binary(
-    name = 'packer-uploader-unshaded',
-    srcs = glob(["**/packer/**/*.java"]),
-    deps = packer_deps_files,
-)
-
-genrule(
-    name = "heron-packer-uploader",
-    srcs = [":packer-uploader-unshaded_deploy.jar"],
-    outs = ["heron-packer-uploader.jar"],
     cmd  = "cp $< $@",
 )
 
