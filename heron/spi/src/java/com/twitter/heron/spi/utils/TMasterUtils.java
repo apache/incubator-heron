@@ -17,11 +17,8 @@ package com.twitter.heron.spi.utils;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.google.common.util.concurrent.ListenableFuture;
 
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.HttpUtils;
@@ -44,11 +41,12 @@ public class TMasterUtils {
                                       SchedulerStateManagerAdaptor stateManager) {
     // fetch the TMasterLocation for the topology
     LOG.info("Fetching TMaster location for topology: " + topologyName);
-    ListenableFuture<TopologyMaster.TMasterLocation> locationFuture =
-        stateManager.getTMasterLocation(null, topologyName);
 
-    TopologyMaster.TMasterLocation location =
-        NetworkUtils.awaitResult(locationFuture, 5, TimeUnit.SECONDS);
+    TopologyMaster.TMasterLocation location = stateManager.getTMasterLocation(topologyName);
+    if (location == null) {
+      LOG.severe("Failed to fetch TMaster Location for topology: " + topologyName);
+      return false;
+    }
     LOG.info("Fetched TMaster location for topology: " + topologyName);
 
     // for the url request to be sent to TMaster
