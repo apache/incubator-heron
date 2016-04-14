@@ -1,4 +1,4 @@
-load("javadoc", "javadoc")
+load("/tools/rules/javadoc", "javadoc")
 
 javadoc(
     name = "javadoc",
