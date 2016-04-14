@@ -86,7 +86,7 @@ if [ -z ${HERON_BUILD_USER+x} ];
 then
   build_user=${USER}
 else
-  build_time=${HERON_BUILD_USER}
+  build_user=${HERON_BUILD_USER}
 fi
 echo "HERON_BUILD_USER ${build_user}"
 
