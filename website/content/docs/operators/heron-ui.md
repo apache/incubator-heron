@@ -4,13 +4,13 @@
 Tracker](../../concepts/architecture#heron-tracker) to display detailed,
 colorful visual representations of topologies, including the
 [logical](../../concepts/topologies/#logical-plan) and [physical
-plan](../concepts/topologies#physical-plan) for each topology.
+plan](../../concepts/topologies#physical-plan) for each topology.
 
 ## Deploying Heron UI
 
 Heron UI can run either on a machine managed by your Heron cluster's
 [scheduler](../deployment) or outside of your cluster. You can
-[compile](../compiling) a `heron-ui` executable to start up Heron UI:
+[compile](../../developers/compiling/compiling) a `heron-ui` executable to start up Heron UI:
 
 ```bash
 $ cd /path/to/heron/binaries
@@ -53,7 +53,7 @@ topology and more (detailed in the sections below).
 #### Logical Plan
 
 The UI for each topology includes an image of the [logical
-plan](../concepts/topologies.html#logical-plan) for the spouts and bolts of the
+plan](../../concepts/topologies#logical-plan) for the spouts and bolts of the
 topology. You can click on each component in the plan to see [metrics](#metrics)
 for that component as well as a
 [containers/instances](#containers-and-instances) map for that component.
