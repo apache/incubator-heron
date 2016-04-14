@@ -7,8 +7,8 @@ sections:
         url: /docs/upgrade-storm-to-heron
   - name: Deployment
     sublinks:
-      - name: Deploying Heron
-        url: /docs/operators/deployment/README
+      - name: Overview
+        url: /docs/operators/deployment
       - name: Aurora
         url: /docs/operators/deployment/aurora
       - name: Mesos
@@ -19,7 +19,7 @@ sections:
         url: /docs/operators/deployment/zookeeper
   - name: Configuration
     sublinks:
-      - name: Configuration Intro
+      - name: Overview
         url: /docs/operators/configuration/config-intro
       - name: Heron Instance
         url: /docs/operators/configuration/instance
@@ -33,16 +33,14 @@ sections:
         url: /docs/operators/configuration/tmaster
   - name: User Manuals
     sublinks:
-      - name: Managing Topologies with the Heron CLI
+      - name: Heron Client
         url: /docs/operators/heron-cli
-      - name: The Heron Tracker REST API
+      - name: Heron Tracker REST API
         url: /docs/operators/heron-tracker
-      - name: The Heron User Interface
+      - name: Heron UI
         url: /docs/operators/heron-ui
   - name: Topology Developers
     sublinks:
-      - name: Heron Architecture
-        url: /docs/concepts/architecture
       - name: Heron Topologies
         url: /docs/concepts/topologies
       - name: Heron Data Model
@@ -55,19 +53,19 @@ sections:
     sublinks:
       - name: Heron Architecture
         url: /docs/concepts/architecture
-      - name: Compiling Heron
-        url: /docs/developers/compiling/compiling
-      - name: Compiling Using Docker
-        url: /docs/developers/compiling/docker
-  - name: Contributors
-    sublinks:
-      - name: Community
-        url: /docs/contributors/community
-      - name: The Heron Codebase
+      - name: Codebase
         url: /docs/contributors/codebase
-      - name: Testing Heron
+      - name: Compiling
+        url: /docs/developers/compiling/compiling
+      - name: Compiling With Docker
+        url: /docs/developers/compiling/docker
+      - name: Testing
         url: /docs/contributors/testing
       - name: Implementing a Custom Scheduler
         url: /docs/contributors/custom-scheduler
       - name: Implementing a Custom Metrics Sink
         url: /docs/contributors/custom-metrics-sink
+  - name: Contributors
+    sublinks:
+      - name: Community
+        url: /docs/contributors/community
