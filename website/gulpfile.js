@@ -83,6 +83,10 @@ gulp.task('images', function() {
     .pipe(gulp.dest(DIST.images));
 });
 
+gulp.task('images:watch', function() {
+  gulp.watch(SRC.images, ['images']);
+});
+
 // One-time build; doesn't watch for changes
 gulp.task('build', ['js', 'sass', 'css', 'javadoc', 'fonts', 'images']);
 
@@ -92,7 +96,7 @@ gulp.task('clean', function() {
 });
 
 // Run in development (i.e. watch) mode
-gulp.task('dev', ['build', 'js:watch', 'sass:watch', 'css:watch']);
+gulp.task('dev', ['build', 'js:watch', 'sass:watch', 'css:watch', 'images:watch']);
 
 // Help => list tasks
 gulp.task('help', $.taskListing.withFilters(null, 'help'));

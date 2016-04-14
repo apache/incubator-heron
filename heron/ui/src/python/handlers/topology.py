@@ -1,3 +1,17 @@
+# Copyright 2016 Twitter. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import json
 import os
 import random
@@ -87,3 +101,40 @@ class TopologyPlanHandler(base.BaseHandler):
 
     # send the single topology page
     self.render("topology.html", **options)
+
+################################################################################
+# Handler for displaying the log file for an instance
+################################################################################
+class LogfileHandler(base.BaseHandler):
+  """
+  Responsible for creating the web page for files. The html
+  will in turn call another endpoint to get the file data.
+  """
+
+  @tornado.gen.coroutine
+  def get(self, cluster, environ, topology, instance):
+
+    options = dict(
+        cluster = cluster,
+        environ = environ,
+        topology = topology,
+        instance = instance
+    )
+
+    self.render("file.html", **options)
+
+################################################################################
+# Handler for getting the data for log file for an instance
+################################################################################
+class LogfileDataHandler(base.BaseHandler):
+  """
+  Responsible for getting the data from log file of an instance.
+  """
+
+  @tornado.gen.coroutine
+  def get(self, cluster, environ, topology, instance, offset, length):
+
+    data = yield access.get_logfile_data(cluster, environ, topology, instance, offset, length)
+
+    self.write(data)
+    self.finish()

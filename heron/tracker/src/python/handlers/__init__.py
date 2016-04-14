@@ -5,6 +5,7 @@ from exceptionsummaryhandler import ExceptionSummaryHandler
 from executionstatehandler import ExecutionStateHandler
 from jmaphandler import JmapHandler
 from jstackhandler import JstackHandler
+from logfilehandler import LogfileDataHandler
 from logicalplanhandler import LogicalPlanHandler
 from machineshandler import MachinesHandler
 from mainhandler import MainHandler

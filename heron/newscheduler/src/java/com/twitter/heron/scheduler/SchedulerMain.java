@@ -250,21 +250,24 @@ public class SchedulerMain {
     String schedulerClass = Context.schedulerClass(config);
     IScheduler scheduler = (IScheduler) Class.forName(schedulerClass).newInstance();
 
-    // build the runtime config
-    Config runtime = Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
-        .put(Keys.topologyDefinition(), topology)
-        .put(Keys.schedulerStateManagerAdaptor(), new SchedulerStateManagerAdaptor(statemgr))
-        .put(Keys.numContainers(), 1 + TopologyUtils.getNumContainers(topology))
-        .build();
-
     SchedulerServer server = null;
 
     // Put it in a try block so that we can always clean resources
     try {
       // initialize the state manager
       statemgr.initialize(config);
+
+      // TODO(mfu): timeout should read from config
+      SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
+
+      // build the runtime config
+      Config runtime = Config.newBuilder()
+          .put(Keys.topologyId(), topology.getId())
+          .put(Keys.topologyName(), topology.getName())
+          .put(Keys.topologyDefinition(), topology)
+          .put(Keys.schedulerStateManagerAdaptor(), adaptor)
+          .put(Keys.numContainers(), 1 + TopologyUtils.getNumContainers(topology))
+          .build();
 
       // get a packed plan and schedule it
       packing.initialize(config, runtime);
@@ -354,7 +357,9 @@ public class SchedulerMain {
 
     LOG.log(Level.INFO, "Setting SchedulerLocation: {0}", location);
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
-    statemgr.setSchedulerLocation(location, Runtime.topologyName(runtime));
-    // TODO - Should we wait on the future here
+    Boolean result = statemgr.setSchedulerLocation(location, Runtime.topologyName(runtime));
+    if (result == null || !result) {
+      throw new RuntimeException("Failed to set Scheduler location");
+    }
   }
 }

@@ -3,6 +3,10 @@ setup:
 	@npm install gulp
 	@npm install
 	@gulp build
+	@make assets
 
 serve:
-	@hugo server -w
+	@hugo server --watch
+
+assets:
+	@gulp build

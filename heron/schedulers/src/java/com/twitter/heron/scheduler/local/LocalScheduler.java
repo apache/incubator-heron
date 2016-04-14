@@ -277,7 +277,12 @@ public class LocalScheduler implements IScheduler {
     // since we could not set it as ephemeral for local file system
     // We would not clean SchedulerLocation since we would not restart the Scheduler
     if (containerId == -1 || containerId == 0) {
-      stateManager.deleteTMasterLocation(LocalContext.topologyName(config));
+      Boolean result = stateManager.deleteTMasterLocation(LocalContext.topologyName(config));
+      if (result == null || !result) {
+        // We would not return false since it is possible that TMaster didn't write physical plan
+        LOG.severe("Failed to clear TMaster location. Check whether TMaster set it correctly.");
+        return false;
+      }
     }
 
     return true;

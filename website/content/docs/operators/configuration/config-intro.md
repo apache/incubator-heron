@@ -8,18 +8,18 @@ Heron can be configured at two levels:
 Heron cluster rather than to any specific topology.
 2. **The topology level** &mdash; Topology configurations apply only to a
 specific topology and can be modified at any stage of the topology's
-[lifecycle](../../concepts/topologies.html#topology-lifecycle).
+[lifecycle](../../../concepts/topologies#topology-lifecycle).
 
 All system-level configs and topology-level defaults are declared in a
 [YAML](http://www.yaml.org/) config file in `heron/config/heron_internals.yaml`
 in the Heron codebase. You can leave that file as is when [compiling
-Heron](../../developers/compiling.html) or modify the values to suit your use
+Heron](../../../developers/compiling) or modify the values to suit your use
 case.
 
 ## The System Level
 
 There are a small handful of system-level configs for Heron. These are detailed
-in [System-level Configuration](system.html).
+in [System-level Configuration](../system).
 
 ## The Topology Level
 
@@ -27,10 +27,10 @@ There is a wide variety of topology-level configurations that you can establish
 as defaults in your Heron cluster. These configurations tend to apply to
 specific components in a topology and are detailed in the docs below:
 
-* [Heron Instance](instance.html)
-* [Heron Metrics Manager](metrics-manager.html)
-* [Heron Topology Master](tmaster.html)
-* [Heron Stream Manager](stmgr.html)
+* [Heron Instance](../instance)
+* [Heron Metrics Manager](../metrics-manager)
+* [Heron Topology Master](../tmaster)
+* [Heron Stream Manager](../stmgr)
 
 ### Overriding Topology-level Defaults
 
@@ -52,4 +52,4 @@ $ heron-cli submit "topology.debug:false heron.local.working.directory:/path/to/
 ```
 
 More on Heron's CLI tool can be found in [Managing Heron
-Topologies](../heron-cli.html).
+Topologies](../../../../heron-cli).

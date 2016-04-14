@@ -16,9 +16,6 @@ package com.twitter.heron.scheduler;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,7 +40,6 @@ import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.uploader.IUploader;
-import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
@@ -102,13 +98,18 @@ public class SubmitterMain {
    * @param cluster, name of the cluster
    * @param role, user role
    * @param environ, user provided environment/tag
+   * @param verbose, enable verbose logging
    * @return config, the command line config
    */
-  protected static Config commandLineConfigs(String cluster, String role, String environ) {
+  protected static Config commandLineConfigs(String cluster,
+      String role,
+      String environ,
+      Boolean verbose) {
     Config config = Config.newBuilder()
         .put(Keys.cluster(), cluster)
         .put(Keys.role(), role)
         .put(Keys.environ(), environ)
+        .put(Keys.verbose(), verbose)
         .build();
     return config;
   }
@@ -251,9 +252,11 @@ public class SubmitterMain {
       System.exit(1);
     }
 
+    Boolean verbose = false;
     Level logLevel = Level.INFO;
-    if(cmd.hasOption("v")) {
+    if (cmd.hasOption("v")) {
       logLevel = Level.ALL;
+      verbose = true;
     }
 
     // init log
@@ -281,7 +284,7 @@ public class SubmitterMain {
     Config config = Config.expand(
         Config.newBuilder()
             .putAll(defaultConfigs(heronHome, configPath))
-            .putAll(commandLineConfigs(cluster, role, environ))
+            .putAll(commandLineConfigs(cluster, role, environ, verbose))
             .putAll(topologyConfigs(
                 topologyPackage, topologyJarFile, topologyDefnFile, topology))
             .build());
@@ -316,7 +319,10 @@ public class SubmitterMain {
       // initialize the state manager
       statemgr.initialize(config);
 
-      boolean isValid = validateSubmit(statemgr, topologyName);
+      // TODO(mfu): timeout should read from config
+      SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
+
+      boolean isValid = validateSubmit(adaptor, topologyName);
 
       // 2. Try to submit topology if valid
       if (isValid) {
@@ -329,7 +335,7 @@ public class SubmitterMain {
           LOG.severe("Failed to upload package.");
         } else {
           // Secondly, try to submit a topology
-          isSuccessful = submitTopology(config, topology, statemgr, launcher, packing, packageURI);
+          isSuccessful = submitTopology(config, topology, adaptor, launcher, packing, packageURI);
         }
       }
     } finally {
@@ -360,10 +366,9 @@ public class SubmitterMain {
     }
   }
 
-  public static boolean validateSubmit(IStateManager statemgr, String topologyName) {
+  public static boolean validateSubmit(SchedulerStateManagerAdaptor adaptor, String topologyName) {
     // Check whether the topology has already been running
-    Boolean isTopologyRunning =
-        NetworkUtils.awaitResult(statemgr.isTopologyRunning(topologyName), 5, TimeUnit.SECONDS);
+    Boolean isTopologyRunning = adaptor.isTopologyRunning(topologyName);
 
     if (isTopologyRunning != null && isTopologyRunning.equals(Boolean.TRUE)) {
       LOG.severe("Topology already exists");
@@ -384,7 +389,7 @@ public class SubmitterMain {
   }
 
   public static boolean submitTopology(Config config, TopologyAPI.Topology topology,
-                                       IStateManager statemgr, ILauncher launcher,
+                                       SchedulerStateManagerAdaptor adaptor, ILauncher launcher,
                                        IPacking packing, URI packageURI)
       throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
     // build the runtime config
@@ -392,7 +397,7 @@ public class SubmitterMain {
         .put(Keys.topologyId(), topology.getId())
         .put(Keys.topologyName(), topology.getName())
         .put(Keys.topologyDefinition(), topology)
-        .put(Keys.schedulerStateManagerAdaptor(), new SchedulerStateManagerAdaptor(statemgr))
+        .put(Keys.schedulerStateManagerAdaptor(), adaptor)
         .put(Keys.topologyPackageUri(), packageURI)
         .put(Keys.launcherClassInstance(), launcher)
         .put(Keys.packingClassInstance(), packing)
