@@ -41,11 +41,8 @@ sections:
         url: /docs/operators/heron-ui
   - name: Topology Developers
     sublinks:
-<<<<<<< HEAD
-=======
       - name: Heron Architecture
         url: /docs/concepts/architecture
->>>>>>> upstream/master
       - name: Heron Topologies
         url: /docs/concepts/topologies
       - name: Heron Data Model

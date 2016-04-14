@@ -70,13 +70,8 @@ html lang={{.Site.LanguageCode}}
           .row 
             .col-sm-12
               h2 About Heron
-<<<<<<< HEAD
               a href=docs/contributors/community Community
           .row 
-=======
-              a href=docs/contributors/codebase/ Contributing
-          .row
->>>>>>> upstream/master
             .col-sm-12
               a href=docs/contributors/codebase/ Governance
           .row
