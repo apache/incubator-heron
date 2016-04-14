@@ -75,8 +75,8 @@ $ heron activate local ExclamationTopology
 $ heron deactivate local ExclamationTopology
 $ heron kill local ExclamationTopology
 ```
-Explore [managing topologies with Heron CLI](../operators/heron-cli)
-and heron cli syntax. For example, to list the available commands:
+Explore the [Heron CLI](../operators/heron-cli)
+and the [topology lifecycle](../concepts/topologies#topology-lifecycle). To list the available CLI commands:
 ```bash
 usage: heron <command> <options> ...
 
@@ -111,24 +111,27 @@ Optional arguments:
 
 ### Step 6 - Explore other example topologies
 
-**ExclamationTopology.java** | This is a basic example of a Heron topology.
+The source code for the example topologies can be found at
+[heron/examples/src/java/com/twitter/heron/examples](https://github.com/twitter/heron/tree/master/heron/examples/src/java/com/twitter/heron/examples).
 
-**AckingTopology.java**  | This is a basic example of a Heron topology with acking enabled.
+```AckingTopology.java``` - a topology with acking enabled.
 
-**MultiSpoutExclamationTopology.java** | This is a basic example of a Heron topology with multiple spouts.
+```ComponentJVMOptionsTopology.java``` - a topology that supplies JVM options for each component.
 
-**MultiStageAckingTopology.java** | This is three stage topology. Spout emits to bolt that feeds to another bolt. 
+```CustomGroupingTopology.java``` - a topology that implements custom grouping. 
 
-**TaskHookTopology.java** | This is a basic Task Hook Heron topology.
+```ExclamationTopology.java``` - a spout emits random words to a bolt that adds an explanation mark.
 
-**CustomGroupingTopology.java** | This is a basic example of a Heron topology that implements custom grouping 
+```MultiSpoutExclamationTopology.java``` - a topology with multiple spouts.
 
-**ComponentJVMOptionsTopology.java** | This is a basic example of a Heron topology that supplies JVM options for each component
+```MultiStageAckingTopology.java``` - a three stage topology. A spout emits to bolt that feeds to another bolt. 
 
-### Next Steps - Upgrade Existing Storm Topologies, Deploying or Developing
-[Upgrade Existing Storm Topologies](../upgrade-storm-to-heron) with simple POM.xml changes
+```TaskHookTopology.java``` - a topology that uses a task hook to subscribe for event notifications.
 
-[Deploying Existing topologies](../operators/deployment/README) in clustered, scheduler-driven environments (Aurora, Mesos, Local)
+### Next Steps
+[Upgrade Storm topologies](../upgrade-storm-to-heron) with simple POM.xml changes
 
-[Developing Topologies](../concepts/architecture) with the Architecture of Heron
+[Deploy topologies](../operators/deployment/README) in clustered, scheduler-driven environments (Aurora, Mesos, Local)
+
+[Develop topologies](../concepts/architecture) for the Heron Architecture
 

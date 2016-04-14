@@ -19,7 +19,7 @@ addons:
       - zlib1g-dev
 
 env:
-  - CC=gcc-4.8 CXX=g++-4.8
+  - CC=gcc-4.8 CXX=g++-4.8 CPP=cpp-4.8 CXXCPP=cpp-4.8
 
 before_install:
 
@@ -38,17 +38,4 @@ script:
   - gcc --version
   - which g++-4.8
   - g++ --version 
-
-  # append the bazel default bazelrc to travis-ci/bazel.rc for using rules provided by bazel
-  - cat ~/.bazelrc >> tools/travis-ci/bazel.rc
-  - ./bazel_configure.py
-
-  # build heron
-  - bazel --bazelrc=tools/travis-ci/bazel.rc build heron/...
-
-  # run heron unit tests
-  - bazel --bazelrc=tools/travis-ci/bazel.rc test  heron/...
-
-  # build packages
-  - bazel --bazelrc=tools/travis-ci/bazel.rc build scripts/packages:tarpkgs
-  - bazel --bazelrc=tools/travis-ci/bazel.rc build scripts/packages:binpkgs
+  - ./build-travis.sh

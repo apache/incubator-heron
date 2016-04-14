@@ -1,3 +1,17 @@
+# Copyright 2016 Twitter. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """
 Contains utility functions used by tracker.
 """
@@ -54,6 +68,13 @@ def make_shell_logfiles_url(host, shell_port, cwd, instance_id=None):
     return "http://%s:%d/browse/log-files" % (host, shell_port)
   else:
     return "http://%s:%d/file/log-files/%s.log.0" % (host, shell_port, instance_id)
+
+def make_shell_logfile_data_url(host, shell_port, instance_id, offset, length):
+  """
+  Make the url for log-file data in heron-shell
+  from the info stored in stmgr.
+  """
+  return "http://%s:%d/filedata/log-files/%s.log.0?offset=%s&length=%s" % (host, shell_port, instance_id, offset, length)
 
 def make_viz_dashboard_url(name, cluster, environ):
   """

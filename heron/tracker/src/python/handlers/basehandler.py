@@ -1,3 +1,17 @@
+# Copyright 2016 Twitter. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import time
 import tornado.escape
 import tornado.web
@@ -176,6 +190,30 @@ class BaseHandler(tornado.web.RequestHandler):
     try:
       query = self.get_argument(constants.PARAM_QUERY)
       return query
+    except tornado.web.MissingArgumentError as e:
+      raise Exception(e.log_message)
+
+  def get_argument_offset(self):
+    """
+    Helper function to get offset argument.
+    Raises exception if argument is missing.
+    Returns the offset argument.
+    """
+    try:
+      offset = self.get_argument(constants.PARAM_OFFSET)
+      return offset
+    except tornado.web.MissingArgumentError as e:
+      raise Exception(e.log_message)
+
+  def get_argument_length(self):
+    """
+    Helper function to get length argument.
+    Raises exception if argument is missing.
+    Returns the length argument.
+    """
+    try:
+      length = self.get_argument(constants.PARAM_LENGTH)
+      return length
     except tornado.web.MissingArgumentError as e:
       raise Exception(e.log_message)
 

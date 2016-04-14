@@ -1,3 +1,17 @@
+# Copyright 2016 Twitter. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import json, time
 import logging
 
@@ -25,6 +39,8 @@ PID_URL_FMT               = "%s/pid"              % TOPOLOGIES_URL_FMT
 JSTACK_URL_FMT            = "%s/jstack"           % TOPOLOGIES_URL_FMT
 JMAP_URL_FMT              = "%s/jmap"             % TOPOLOGIES_URL_FMT
 HISTOGRAM_URL_FMT         = "%s/histo"            % TOPOLOGIES_URL_FMT
+
+LOGFILE_DATA_URL_FMT      = "%s/logfiledata"      % TOPOLOGIES_URL_FMT
 
 capacity = "DIVIDE(" \
         "  DEFAULT(0," \
@@ -357,6 +373,20 @@ def run_instance_jmap(cluster, environ, topology, instance):
            environ = environ,
            topology = topology,
            instance = instance)
+  )
+  raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
+
+# Get logfile data
+@tornado.gen.coroutine
+def get_logfile_data(cluster, environ, topology, instance, offset, length):
+  request_url = tornado.httputil.url_concat(
+      create_url(LOGFILE_DATA_URL_FMT),
+      dict(cluster = cluster,
+           environ = environ,
+           topology = topology,
+           instance = instance,
+           offset = offset,
+           length = length)
   )
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
