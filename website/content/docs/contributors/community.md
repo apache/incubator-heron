@@ -10,8 +10,5 @@ In general, contributions that fix bugs or add features (as opposed to stylistic
 
 Continue to [Heron Architecture](../../concepts/architecture/), [Compiling Heron](../../developers/compiling/compiling/), or [Heron Codebase](../codebase/)
 
-## Heron Committers
-TODO
 
-## Heron Contributors
-TODO
+
