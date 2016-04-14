@@ -104,19 +104,15 @@ public class SubmitterMain {
   protected static Config commandLineConfigs(String cluster,
       String role,
       String environ,
-      String heronCoreUri,
       Boolean verbose) {
-    Config.Builder configBuilder = Config.newBuilder()
+    Config config = Config.newBuilder()
         .put(Keys.cluster(), cluster)
         .put(Keys.role(), role)
         .put(Keys.environ(), environ)
-        .put(Keys.verbose(), verbose);
+        .put(Keys.verbose(), verbose)
+        .build();
 
-    if (!heronCoreUri.isEmpty()) {
-      configBuilder.put(Keys.corePackageUri(), heronCoreUri);
-    }
-
-    return configBuilder.build();
+    return config;
   }
 
   // Print usage options
@@ -150,14 +146,6 @@ public class SubmitterMain {
         .longOpt("environment")
         .hasArgs()
         .argName("environment")
-        .required()
-        .build();
-
-    Option heronCoreUri = Option.builder("hc")
-        .desc("optional URI where heron core release exists")
-        .longOpt("heron_core_uri")
-        .hasArg()
-        .argName("heron core uri")
         .required()
         .build();
 
@@ -217,7 +205,6 @@ public class SubmitterMain {
     options.addOption(cluster);
     options.addOption(role);
     options.addOption(environment);
-    options.addOption(heronCoreUri);
     options.addOption(heronHome);
     options.addOption(configFile);
     options.addOption(configOverrides);
@@ -278,7 +265,6 @@ public class SubmitterMain {
     String cluster = cmd.getOptionValue("cluster");
     String role = cmd.getOptionValue("role");
     String environ = cmd.getOptionValue("environment");
-    String heronCoreUri = cmd.getOptionValue("heron_core_uri");
     String heronHome = cmd.getOptionValue("heron_home");
     String configPath = cmd.getOptionValue("config_path");
     String topologyPackage = cmd.getOptionValue("topology_package");
@@ -297,7 +283,7 @@ public class SubmitterMain {
     Config config = Config.expand(
         Config.newBuilder()
             .putAll(defaultConfigs(heronHome, configPath))
-            .putAll(commandLineConfigs(cluster, role, environ, heronCoreUri, verbose))
+            .putAll(commandLineConfigs(cluster, role, environ, verbose))
             .putAll(topologyConfigs(
                 topologyPackage, topologyJarFile, topologyDefnFile, topology))
             .build());

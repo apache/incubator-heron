@@ -115,10 +115,3 @@ def add_deactive_deploy(parser):
       metavar='(a boolean; default: "false")',
       default=False)
   return parser
-
-def add_heron_core_uri(parser):
-  parser.add_argument(
-      '--heron-core-uri',
-      metavar='(scheme://pkg-role/pkg-name/pkg-version; Heron core release package uri)',
-      default='')
-  return parser
