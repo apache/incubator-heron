@@ -54,20 +54,9 @@ def create_parser(subparsers):
   args.add_topology_file(parser)
   args.add_topology_class(parser)
   args.add_config(parser)
-
-  parser.add_argument(
-      '--deploy-deactivated',
-      metavar='(a boolean; default: "false")',
-      default=False)
-
-  parser.add_argument(
-      '-D',
-      default=[],
-      action="append",
-      dest="javaDefines",
-      metavar='DEFINE',
-      help='Define a system property to pass to java -D when running main.')
-
+  args.add_deactive_deploy(parser)
+  args.add_system_property(parser)
+  args.add_heron_core_uri(parser)
   args.add_verbose(parser)
 
   parser.set_defaults(subcommand='submit')
