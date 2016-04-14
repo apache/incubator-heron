@@ -3,7 +3,7 @@ title: Heron Instance
 ---
 
 You can configure the behavior of the [Heron
-Instances](../../../../concepts/architecture#heron-instance) (HIs) in a
+Instances](../../../concepts/architecture#heron-instance) (HIs) in a
 topology using the parameters below.
 
 ## Internal Configuration

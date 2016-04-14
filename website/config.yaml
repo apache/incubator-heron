@@ -1,7 +1,8 @@
-baseurl: http://docs.sloth.com/
 languageCode: en-us
 title: Heron
 author: Luc Perkins
+canonifyurls: true
+baseurl: http://twitter.github.io/heron
 
 # Site-level config
 MetaDataFormat: yaml
