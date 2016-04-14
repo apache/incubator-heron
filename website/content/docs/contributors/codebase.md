@@ -3,7 +3,8 @@ title: The Heron Codebase
 ---
 
 This document contains information about the Heron codebase intended primarily
-for developers who want to contribute to Heron.
+for developers who want to contribute to Heron. The Heron codebase lives on
+[github]({{% githubMaster %}}).
 
 If you're looking for documentation about developing topologies for a Heron
 cluster, see [Building Topologies](../developers/topologies.html) instead.
