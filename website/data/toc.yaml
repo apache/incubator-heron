@@ -36,7 +36,7 @@ sections:
       - name: Deployment
         sublinks:
           - name: Deploying Heron
-            url: /docs/operators/deployment/README
+            url: /docs/operators/deployment
           - name: Aurora
             url: /docs/operators/deployment/aurora
           - name: Mesos

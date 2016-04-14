@@ -187,7 +187,7 @@ running, being launched, being killed, etc. It relies on the same
 [ZooKeeper](http://zookeeper.apache.org) nodes as the topologies in the cluster
 and exposes that information through a JSON REST API. The Tracker can be
 run within your Heron cluster (on the same set of machines managed by your
-Heron [scheduler](../../operators/deployment/README)) or outside of it.
+Heron [scheduler](../../operators/deployment)) or outside of it.
 
 Instructions on running the tracker including JSON API docs can be found in [Heron
 Tracker](../../operators/heron-tracker).

@@ -117,6 +117,6 @@ $ heron submit local ~/.heron/examples/heron-examples.jar com.twitter.heron.exam
 
 ### Next Steps - Deploying or Developing
 
-[Deploying Existing topologies](../operators/deployment/README) in clustered, scheduler-driven environments (Aurora, Mesos, Local)
+[Deploying Existing topologies](../operators/deployment) in clustered, scheduler-driven environments (Aurora, Mesos, Local)
 
 [Developing Topologies](../concepts/architecture) with the Architecture of Heron

@@ -22,7 +22,7 @@ complex topologies.
 
 ## Topology Lifecycle
 
-Once you've set up a [Heron cluster](../../operators/deployment/README), you
+Once you've set up a [Heron cluster](../../operators/deployment), you
 can use Heron's [CLI tool](../../operators/heron-cli) to manage the entire
 lifecycle of a topology, which typically goes through the following stages:
 
