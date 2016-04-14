@@ -39,7 +39,7 @@ Heron](../../developers/compiling/compiling).
 * **Inter-component communication** &mdash; Heron uses [Protocol
 Buffers](https://developers.google.com/protocol-buffers/?hl=en) for
 communication between components. Most `.proto` definition files can be found in
-[`heron/proto`]({{book.root_url}}/heron/proto).
+[`heron/proto`]({{% githubMaster %}}/heron/proto).
 
 * **Cluster coordination** &mdash; Heron relies heavily on ZooKeeper for cluster
 coordination, be it for [Mesos/Aurora](../../operators/deployment/aurora),
@@ -50,7 +50,7 @@ Management](#state-management) section below.
 
 ## Common Utilities
 
-The [`heron/common`]({{book.root_url}}/heron/common) contains a variety of
+The [`heron/common`]({{% githubMaster %}}/heron/common) contains a variety of
 utilities for each of Heron's languages, including useful constants, file
 utilities, networking interfaces, and more.
 
@@ -61,7 +61,7 @@ Heron supports three cluster schedulers out of the box:
 [Aurora](../../operators/deployment/aurora), and a [local
 scheduler](../../operators/deployment/local). The Java code for each of those
 schedulers, as well as for the underlying scheduler API, can be found in
-[`heron/scheduler`]({{book.root_url}}/heron/scheduler).
+[`heron/scheduler`]({{% githubMaster %}}/heron/scheduler).
 
 Info on custom schedulers can be found in [Implementing a Custom
 Scheduler](../custom-scheduler); info on the currently available schedulers
@@ -74,10 +74,10 @@ Deployment](../../operators/deployment/local).
 
 The parts of Heron's codebase related to
 [ZooKeeper](http://zookeeper.apache.org/) are mostly contained in
-[`heron/state`]({{book.root_url}}/heron/state). There are ZooKeeper-facing
-interfaces for [C++]({{book.root_url}}/heron/state/src/cpp),
-[Java]({{book.root_url}}/heron/state/src/java), and
-[Python]({{book.root_url}}/heron/state/src/python) that are used in a variety of
+[`heron/state`]({{% githubMaster %}}/heron/state). There are ZooKeeper-facing
+interfaces for [C++]({{% githubMaster %}}/heron/state/src/cpp),
+[Java]({{% githubMaster %}}/heron/state/src/java), and
+[Python]({{% githubMaster %}}/heron/state/src/python) that are used in a variety of
 Heron components.
 
 ## Topology Components
@@ -86,25 +86,25 @@ Heron components.
 
 The C++ code for Heron's [Topology
 Master](../../concepts/architecture#topology-master) is written in C++ can be
-found in [`heron/tmaster`]({{book.root_url}}/heron/tmaster).
+found in [`heron/tmaster`]({{% githubMaster %}}/heron/tmaster).
 
 ### Stream Manager
 
 The C++ code for Heron's [Stream
 Manager](../../concepts/architecture#stream-manager) can be found in
-[`heron/stmgr`]({{book.root_url}}/heron/stmgr).
+[`heron/stmgr`]({{% githubMaster %}}/heron/stmgr).
 
 ### Heron Instance
 
 The Java code for [Heron
 instances](../../concepts/architecture#heron-instance) can be found in
-[`heron/instance`]({{book.root_url}}/heron/instance).
+[`heron/instance`]({{% githubMaster %}}/heron/instance).
 
 ### Metrics Manager
 
 The Java code for Heron's [Metrics
 Manager](../../concepts/architecture#metrics-manager) can be found in
-[`heron/metricsmgr`]({{book.root_url}}/heron/metricsmgr).
+[`heron/metricsmgr`]({{% githubMaster %}}/heron/metricsmgr).
 
 If you'd like to implement your own custom metrics handler (known as a **metrics
 sink**), see [Implementing a Custom Metrics Sink](../custom-metrics-sink).
@@ -114,7 +114,7 @@ sink**), see [Implementing a Custom Metrics Sink](../custom-metrics-sink).
 ### Topology API
 
 Heron's API for writing topologies is written in Java. The code for this API can
-be found in [`heron/api`]({{book.root_url}}/heron/api).
+be found in [`heron/api`]({{% githubMaster %}}/heron/api).
 
 Documentation for writing topologies can be found in [Building
 Topologies](../developers/topologies.html), while API documentation can be found
@@ -126,14 +126,14 @@ Heron enables you to run topologies in [local
 mode](../developers/topologies.html#local-mode) for debugging purposes.
 
 The Java API for local mode can be found in
-[`heron/localmode`]({{book.root_url}}/heron/localmode).
+[`heron/localmode`]({{% githubMaster %}}/heron/localmode).
 
 ### Example Topologies
 
 Heron's codebase includes a wide variety of example
 [topologies](../../concepts/topologies) built using Heron's topology API for
 Java. Those examples can be found in
-[`heron/examples`]({{book.root_url}}/heron/examples).
+[`heron/examples`]({{% githubMaster %}}/heron/examples).
 
 ## User Interface Components
 
@@ -144,47 +144,47 @@ for [managing topologies](../../operators/heron-cli) and to perform much of
 the heavy lifting behind assembling physical topologies in your cluster.
 
 The Python code for `heron` can be found in
-[`heron/cli2`]({{book.root_url}}/heron/cli2). The entire logic of `heron` is
-contained in [`cli.py`]({{book.root_url}}/heron/cli2/src/python/cli.py).
+[`heron/cli2`]({{% githubMaster %}}/heron/cli2). The entire logic of `heron` is
+contained in [`cli.py`]({{% githubMaster %}}/heron/cli2/src/python/cli.py).
 
 The default configuration for Heron schedulers is found in
-[`scheduler.conf`]({{book.root_url}}/heron/cli2/src/python/scheduler.conf),
+[`scheduler.conf`]({{% githubMaster %}}/heron/cli2/src/python/scheduler.conf),
 while configuration for Heron's [local
 scheduler](../../operators/deployment/local) can be found in
-[`local_scheduler.conf`]({{book.root_url}}/heron/cli2/src/python/local_scheduler.conf).
+[`local_scheduler.conf`]({{% githubMaster %}}/heron/cli2/src/python/local_scheduler.conf).
 
 ### Heron UI
 
 The Python code for the [Heron UI](../../operators/heron-ui) can be found in
-[`heron/web`]({{book.root_url}}/heron/web).
+[`heron/web`]({{% githubMaster %}}/heron/web).
 
 Like Heron Tracker, Heron UI is a web server written in Python that relies on
 the [Tornado](http://www.tornadoweb.org/en/stable/) framework. You can add new
 HTTP routes to Heron UI in
-[`main.py`]({{book.root_url}}/heron/web/source/python/main.py) and corresponding
-handlers in the [`handlers`]({{root.book_url}}/heron/web/source/python/handlers)
+[`main.py`]({{% githubMaster %}}/heron/web/source/python/main.py) and corresponding
+handlers in the [`handlers`]({{% githubMaster %}}/heron/web/source/python/handlers)
 directory.
 
 ### Heron Tracker
 
 The Python code for the [Heron Tracker](../../operators/heron-tracker) can be
-found in [`heron/tracker`]({{book.root_url}}/heron/tracker).
+found in [`heron/tracker`]({{% githubMaster %}}/heron/tracker).
 
 The Tracker is a web server written in Python. It relies on the
 [Tornado](http://www.tornadoweb.org/en/stable/) framework. You can add new HTTP
 routes to the Tracker in
-[`main.py`]({{book.root_url}}/heron/tracker/src/python/main.py) and
-corresponding handlers in the [`handlers`]({{ book.root_url
-}}/heron/tracker/src/python/handlers) directory.
+[`main.py`]({{% githubMaster %}}/heron/tracker/src/python/main.py) and
+corresponding handlers in the
+[`handlers`]({{% githubMaster %}}/heron/tracker/src/python/handlers) directory.
 
 ### Heron Shell
 
 The Python code for the [Heron Shell](../../operators/heron-shell) can be
-found in [`heron/shell`]({{book.root_url}}/heron/shell). The HTTP handlers and
+found in [`heron/shell`]({{% githubMaster %}}/heron/shell). The HTTP handlers and
 web server are defined in
-[`main.py`]({{book.root_url}}/heron/shell/src/python/main.py) while the HTML,
+[`main.py`]({{% githubMaster %}}/heron/shell/src/python/main.py) while the HTML,
 JavaScript, CSS, and images for the web UI can be found in the
-[`assets`]({{book.root_url}}/heron/shell/assets) directory.
+[`assets`]({{% githubMaster %}}/heron/shell/assets) directory.
 
 ## Tests
 

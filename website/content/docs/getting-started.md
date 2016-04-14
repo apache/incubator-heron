@@ -131,7 +131,7 @@ The source code for the example topologies can be found at
 ### Next Steps
 [Upgrade Storm topologies](../upgrade-storm-to-heron) with simple POM.xml changes
 
-[Deploy topologies](../operators/deployment/README) in clustered, scheduler-driven environments (Aurora, Mesos, Local)
+[Deploy topologies](../operators/deployment) in clustered, scheduler-driven environments (Aurora, Mesos, Local)
 
 [Develop topologies](../concepts/architecture) for the Heron Architecture
 
