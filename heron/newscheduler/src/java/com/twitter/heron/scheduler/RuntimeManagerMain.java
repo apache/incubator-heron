@@ -1,7 +1,20 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.twitter.heron.scheduler;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,7 +34,6 @@ import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.scheduler.IRuntimeManager;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
-import com.twitter.heron.spi.utils.NetworkUtils;
 
 public class RuntimeManagerMain {
   private static final Logger LOG = Logger.getLogger(RuntimeManagerMain.class.getName());
@@ -219,14 +231,17 @@ public class RuntimeManagerMain {
       // initialize the statemgr
       statemgr.initialize(config);
 
-      boolean isValid = validateRuntimeManage(statemgr, topologyName);
+      // TODO(mfu): timeout should read from config
+      SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
+
+      boolean isValid = validateRuntimeManage(adaptor, topologyName);
 
       // 2. Try to manage topology if valid
       if (isValid) {
         // invoke the appropriate command to manage the topology
         LOG.log(Level.INFO, "Topology: {0} to be {1}ed", new Object[]{topologyName, command});
 
-        isSuccessful = manageTopology(config, command, statemgr, runtimeManager);
+        isSuccessful = manageTopology(config, command, adaptor, runtimeManager);
       }
     } finally {
       // 3. Do post work basing on the result
@@ -250,10 +265,9 @@ public class RuntimeManagerMain {
   }
 
 
-  public static boolean validateRuntimeManage(IStateManager statemgr, String topologyName) {
+  public static boolean validateRuntimeManage(SchedulerStateManagerAdaptor adaptor, String topologyName) {
     // Check whether the topology has already been running
-    Boolean isTopologyRunning =
-        NetworkUtils.awaitResult(statemgr.isTopologyRunning(topologyName), 5, TimeUnit.SECONDS);
+    Boolean isTopologyRunning = adaptor.isTopologyRunning(topologyName);
 
     if (isTopologyRunning == null || isTopologyRunning.equals(Boolean.FALSE)) {
       LOG.severe("No such topology exists");
@@ -265,12 +279,12 @@ public class RuntimeManagerMain {
 
   public static boolean manageTopology(
       Config config, IRuntimeManager.Command command,
-      IStateManager statemgr, IRuntimeManager runtimeManager)
+      SchedulerStateManagerAdaptor adaptor, IRuntimeManager runtimeManager)
       throws ClassNotFoundException, IllegalAccessException, InstantiationException, IOException {
     // build the runtime config
     Config runtime = Config.newBuilder()
         .put(Keys.topologyName(), Context.topologyName(config))
-        .put(Keys.schedulerStateManagerAdaptor(), new SchedulerStateManagerAdaptor(statemgr))
+        .put(Keys.schedulerStateManagerAdaptor(), adaptor)
         .put(Keys.runtimeManagerClassInstance(), runtimeManager)
         .build();
 

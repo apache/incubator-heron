@@ -1,12 +1,23 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.twitter.heron.scheduler;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.google.common.util.concurrent.ListenableFuture;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
@@ -16,7 +27,6 @@ import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
-import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.Runtime;
 
 /**
@@ -121,18 +131,19 @@ public class LaunchRunner implements Callable<Boolean> {
       return false;
     }
 
+    Boolean result;
     // store the execution state into the state manager
     ExecutionEnvironment.ExecutionState executionState = createExecutionState();
 
-    ListenableFuture<Boolean> sFuture = statemgr.setExecutionState(executionState, topologyName);
-    if (!NetworkUtils.awaitResult(sFuture, 5, TimeUnit.SECONDS)) {
+    result = statemgr.setExecutionState(executionState, topologyName);
+    if (result == null || !result) {
       LOG.severe("Failed to set execution state");
       return false;
     }
 
     // store the trimmed topology definition into the state manager
-    ListenableFuture<Boolean> tFuture = statemgr.setTopology(trimTopology(topology), topologyName);
-    if (!NetworkUtils.awaitResult(tFuture, 5, TimeUnit.SECONDS)) {
+    result = statemgr.setTopology(trimTopology(topology), topologyName);
+    if (result == null || !result) {
       LOG.severe("Failed to set topology");
       statemgr.deleteExecutionState(topologyName);
       return false;

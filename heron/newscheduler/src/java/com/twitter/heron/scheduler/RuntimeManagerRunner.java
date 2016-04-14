@@ -1,13 +1,24 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.twitter.heron.scheduler;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.google.common.util.concurrent.ListenableFuture;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.scheduler.Scheduler;
@@ -18,7 +29,6 @@ import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.HttpUtils;
 import com.twitter.heron.spi.scheduler.IRuntimeManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
-import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.Runtime;
 
 public class RuntimeManagerRunner implements Callable<Boolean> {
@@ -79,11 +89,8 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     // fetch scheduler location from state manager
     LOG.log(Level.INFO, "Fetching scheduler location from state manager to {0} topology", command);
 
-    ListenableFuture<Scheduler.SchedulerLocation> locationFuture =
-        statemgr.getSchedulerLocation(null, Runtime.topologyName(runtime));
-
     Scheduler.SchedulerLocation schedulerLocation =
-        NetworkUtils.awaitResult(locationFuture, 5, TimeUnit.SECONDS);
+        statemgr.getSchedulerLocation(Runtime.topologyName(runtime));
 
     if (schedulerLocation == null) {
       LOG.log(Level.INFO, "Failed to get scheduler location to {0} topology", command);
@@ -393,42 +400,36 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     // get the instance of the state manager
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
 
-    ListenableFuture<Boolean> booleanFuture;
-    Boolean futureResult;
+    Boolean result;
 
-    booleanFuture = statemgr.deleteTopology(topologyName);
-    futureResult = NetworkUtils.awaitResult(booleanFuture, 5, TimeUnit.SECONDS);
-    if (futureResult == null || !futureResult) {
+    result = statemgr.deleteTopology(topologyName);
+    if (result == null || !result) {
       LOG.severe("Failed to clear topology state");
       return false;
     }
 
-    booleanFuture = statemgr.deleteExecutionState(topologyName);
-    futureResult = NetworkUtils.awaitResult(booleanFuture, 5, TimeUnit.SECONDS);
-    if (futureResult == null || !futureResult) {
+    result = statemgr.deleteExecutionState(topologyName);
+    if (result == null || !result) {
       LOG.severe("Failed to clear execution state");
       return false;
     }
 
     // It is possible that  TMasterLocation, PhysicalPlan and SchedulerLocation are not set
     // Just log but don't consider them failure
-    booleanFuture = statemgr.deleteTMasterLocation(topologyName);
-    futureResult = NetworkUtils.awaitResult(booleanFuture, 5, TimeUnit.SECONDS);
-    if (futureResult == null || !futureResult) {
+    result = statemgr.deleteTMasterLocation(topologyName);
+    if (result == null || !result) {
       // We would not return false since it is possible that TMaster didn't write physical plan
       LOG.severe("Failed to clear TMaster location. Check whether TMaster set it correctly.");
     }
 
-    booleanFuture = statemgr.deletePhysicalPlan(topologyName);
-    futureResult = NetworkUtils.awaitResult(booleanFuture, 5, TimeUnit.SECONDS);
-    if (futureResult == null || !futureResult) {
+    result = statemgr.deletePhysicalPlan(topologyName);
+    if (result == null || !result) {
       // We would not return false since it is possible that TMaster didn't write physical plan
       LOG.severe("Failed to clear physical plan. Check whether TMaster set it correctly.");
     }
 
-    booleanFuture = statemgr.deleteSchedulerLocation(topologyName);
-    futureResult = NetworkUtils.awaitResult(booleanFuture, 5, TimeUnit.SECONDS);
-    if (futureResult == null || !futureResult) {
+    result = statemgr.deleteSchedulerLocation(topologyName);
+    if (result == null || !result) {
       // We would not return false since it is possible that TMaster didn't write physical plan
       LOG.severe("Failed to clear scheduler location. Check whether Scheduler set it correctly.");
     }
@@ -443,9 +444,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
   protected TopologyAPI.TopologyState getRuntimeTopologyState(String topologyName) {
     // get the instance of the state manager
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
-    ListenableFuture<PhysicalPlans.PhysicalPlan> physicalPlanFuture = statemgr.getPhysicalPlan(null, topologyName);
-    PhysicalPlans.PhysicalPlan plan =
-        NetworkUtils.awaitResult(physicalPlanFuture, 5, TimeUnit.SECONDS);
+    PhysicalPlans.PhysicalPlan plan = statemgr.getPhysicalPlan(topologyName);
 
     if (plan == null) {
       LOG.log(Level.SEVERE, "Failed to get physical plan for topology {0}", topologyName);

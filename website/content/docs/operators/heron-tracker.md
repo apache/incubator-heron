@@ -5,17 +5,17 @@ title: The Heron Tracker REST API
 The **Heron Tracker** is a long-running service that continuously gathers a wide
 variety of information about Heron topologies in your cluster(s) and exposes
 that information through a JSON REST API.  More on the role of the Tracker can
-be found [here](../concepts/architecture.html#heron-tracker).
+be found [here](../../concepts/architecture#heron-tracker).
 
 The Tracker can run within your Heron cluster (e.g.
-[Mesos](../deployment/mesos.html) or [Aurora](../deployment/aurora.html)) or
+[Mesos](../../operators/deployment/mesos) or [Aurora](../../operators/deployment/aurora)) or
 outside of it, provided that the machine on which it runs has access to your
 Heron cluster.
 
 ## Starting the Tracker
 
 You can start the Heron Tracker by running the `heron-tracker` executable, which
-you can generate when you [compile Heron](../developers/compiling.html).
+you can generate when you [compile Heron](../../developers/compiling).
 
 ```bash
 $ cd /path/to/heron/binaries
@@ -261,7 +261,7 @@ The value of the `result` field should lists the following:
 ### `/topologies/logicalplan`
 
 Returns a JSON object for the [logical
-plan](../concepts/topologies.html#logical-plan) of a topology.
+plan](../../concepts/topologies#logical-plan) of a topology.
 
 #### Required Parameters
 
@@ -298,7 +298,7 @@ TODO
 ### `/topologies/physicalplan`
 
 Returns a JSON object for the [physical
-plan](../concepts/topologies.html#physical-plan) of a topology.
+plan](../../concepts/topologies#physical-plan) of a topology.
 
 #### Required Parameters
 
