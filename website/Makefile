@@ -18,4 +18,6 @@ site:
 	@make assets
 	@make pages
 	# TODO make javadocs in public/api
+	#   - bazel build --config=darwin heron:javadoc
+	#   - extract bazel-bin/heron/javadoc.zip to website/public/api excluding top-level javadoc dir
 	# TODO run link checker
