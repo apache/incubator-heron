@@ -142,10 +142,7 @@ def get_heron_cluster_conf_dir(cluster, default_config_path):
   This will provide heron cluster config directory, if config path is default
   :return: absolute path of heron cluster conf directory
   """
-  if default_config_path == get_heron_conf_dir():
-    return os.path.join(default_config_path, cluster)
-
-  return default_config_path
+  return os.path.join(default_config_path, cluster)
 
 ################################################################################
 # Get the sandbox directories and config files

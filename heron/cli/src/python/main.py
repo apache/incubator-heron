@@ -150,7 +150,7 @@ def extract_common_args(command, parser, cl_args):
   cluster = utils.get_heron_cluster(cluster_role_env)
   config_path = utils.get_heron_cluster_conf_dir(cluster, config_path)
   if not os.path.isdir(config_path):
-    Log.error("Config path directory does not exist: %s" % config_path)
+    Log.error("Config path cluster directory does not exist: %s" % config_path)
     return dict()
 
   new_cl_args = dict()
