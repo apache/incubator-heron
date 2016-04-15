@@ -302,6 +302,7 @@ public class SubmitterMain {
             .build());
 
     LOG.fine("Static config loaded successfully ");
+    LOG.fine(config.toString());
 
     // 1. Do prepare work
     // create an instance of state manager

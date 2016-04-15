@@ -53,11 +53,9 @@ def create_parser(subparsers):
   return parser
 
 def run(command, parser, cl_args, unknown_args):
-  override_config = ""
   try:
     topology_name = cl_args['topology-name']
     override_config = utils.parse_override_config(cl_args['config_property'])
-    print("NENGNENGNENG: %s" % override_config)
 
     new_args = [
         "--cluster", cl_args['cluster'],
