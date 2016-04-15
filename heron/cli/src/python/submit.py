@@ -16,7 +16,6 @@
 
 import argparse
 import atexit
-import base64
 import contextlib
 import glob
 import logging
@@ -78,11 +77,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
   utils.create_tar(topology_pkg_path, tar_pkg_files, config_path)
 
   # form the config overrides
-  override_config = tempfile.mktemp()
-  with open(override_config, 'w') as f:
-    for config in cl_args['config_property']:
-      print(config.replace('=', ': '))
-      f.write("%s\n" % config.replace('=', ': '))
+  override_config = utils.parse_override_config(cl_args['config_property'])
 
   # pass the args to submitter main
   args = [
@@ -112,6 +107,9 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
       args = args,
       javaDefines = cl_args['javaDefines']
   )
+
+  # clean the override config file
+  os.remove(override_config)
 
 ################################################################################
 # Launch topologies

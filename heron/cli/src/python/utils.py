@@ -21,6 +21,7 @@ import os
 import sys
 import subprocess
 import tarfile
+import tempfile
 import yaml
 
 from heron.common.src.python.color import Log
@@ -215,22 +216,20 @@ def parse_cluster_role_env(cluster_role_env, config_path):
 ################################################################################
 # Parse the command line for overriding the defaults
 ################################################################################
-def parse_cmdline_override(namespace):
-  override = []
-  for key in namespace.keys():
-    # Notice we could not use "if not namespace[key]",
-    # since it would filter out 0 too, rather than just "None"
-    if namespace[key] is None:
-      continue
-    property_key = key.replace('-', '.').replace('_', '.')
-    property_value = str(namespace[key])
-    override.append('%s="%s"' % (property_key, property_value))
-  return ' '.join(override)
+def parse_override_config(namespace):
+  try:
+    fd, override_config_path = tempfile.mkstemp()
+    with open(override_config_path, 'w') as f:
+      for config in namespace:
+        f.write("%s\n" % config.replace('=', ': '))
+
+    return override_config_path
+  except e:
+    raise Exception("Failed to parse override config: %s" % str(e))
 
 ################################################################################
 # Get the path of java executable
 ################################################################################
-
 def get_java_path():
   java_home = os.environ.get("JAVA_HOME")
   return os.path.join(java_home, BIN_DIR, "java")
