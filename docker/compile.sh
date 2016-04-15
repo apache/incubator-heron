@@ -20,11 +20,11 @@ bazel build --config=$TARGET_PLATFORM scripts/packages:binpkgs
 echo "Moving tar files to /dist"
 for file in ./bazel-bin/scripts/packages/*.tar.gz; do
   filename=$(basename $file)
-  cp $file /dist/${filename/.tar/-$HERON_VERSION.tar}
+  cp $file /dist/${filename/.tar/-$HERON_VERSION-$TARGET_PLATFORM.tar}
 done
 
 echo "Moving self extracting binaries to /dist"
 for file in ./bazel-bin/scripts/packages/*.sh; do
   filename=$(basename $file)
-  cp $file /dist/${filename/.sh/-$HERON_VERSION.sh}
+  cp $file /dist/${filename/.sh/-$HERON_VERSION-$TARGET_PLATFORM.sh}
 done
