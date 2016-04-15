@@ -119,7 +119,7 @@ def convert_execution_state(execution_state):
   estate.release_state.release_tag = release_tag
   estate.release_state.release_version = release_version
   estate.release_state.uploader_version = uploader_version
-  estate.dc = dc
+  estate.cluster = dc
   estate.environ = environ
   estate.role = role
   assert estate.IsInitialized()
