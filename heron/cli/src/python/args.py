@@ -89,12 +89,12 @@ def add_config(parser):
 
   parser.add_argument(
       '--config-path',
-      metavar='(a string; path to cluster config; default: "' + default_config_path + '/<cluster>")',
+      metavar='(a string; path to cluster config; default: "' + default_config_path + '")',
       default=os.path.join(utils.get_heron_dir(), default_config_path))
 
   parser.add_argument(
       '--config-property',
-      metavar='(a string; a config property; default: [])',
+      metavar='(key=value; a config key and its value; default: [])',
       action='append',
       default=[])
   return parser

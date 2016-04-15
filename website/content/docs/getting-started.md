@@ -1,6 +1,6 @@
 ---
 date: 2016-02-28T13:10:21-08:00
-title: Getting Started
+title: Getting Started - Local (Single Node)
 ---
 
 Run topologies locally using pre-compiled Heron binaries (Mac OSX, Ubuntu >= 14.04, Centos7)
@@ -131,7 +131,7 @@ The source code for the example topologies can be found at
 ### Next Steps
 [Upgrade Storm topologies](../upgrade-storm-to-heron) with simple POM.xml changes
 
-[Deploy topologies](../operators/deployment/README) in clustered, scheduler-driven environments (Aurora, Mesos, Local)
+[Deploy topologies](../operators/deployment) in clustered, scheduler-driven environments (Aurora, Mesos, Local)
 
 [Develop topologies](../concepts/architecture) for the Heron Architecture
 

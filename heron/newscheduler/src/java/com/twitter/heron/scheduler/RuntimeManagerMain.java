@@ -26,6 +26,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
@@ -119,6 +120,11 @@ public class RuntimeManagerMain {
         .argName("container id")
         .build();
 
+    Option verbose = Option.builder("v")
+        .desc("Enable debug logs")
+        .longOpt("verbose")
+        .build();
+
     options.addOption(cluster);
     options.addOption(role);
     options.addOption(environment);
@@ -128,6 +134,7 @@ public class RuntimeManagerMain {
     options.addOption(command);
     options.addOption(heronHome);
     options.addOption(containerId);
+    options.addOption(verbose);
 
     return options;
   }
@@ -167,6 +174,16 @@ public class RuntimeManagerMain {
       usage(options);
       System.exit(1);
     }
+
+    Boolean verbose = false;
+    Level logLevel = Level.INFO;
+    if (cmd.hasOption("v")) {
+      logLevel = Level.ALL;
+      verbose = true;
+    }
+
+    // init log
+    LoggingHelper.loggerInit(logLevel, false);
 
     String cluster = cmd.getOptionValue("cluster");
     String role = cmd.getOptionValue("role");
@@ -212,8 +229,8 @@ public class RuntimeManagerMain {
             .putAll(topologyConfig.build())
             .build());
 
-    LOG.info("Static config loaded successfully ");
-    LOG.info(config.toString());
+    LOG.fine("Static config loaded successfully ");
+    LOG.fine(config.toString());
 
     // 1. Do prepare work
     // create an instance of state manager
@@ -239,7 +256,7 @@ public class RuntimeManagerMain {
       // 2. Try to manage topology if valid
       if (isValid) {
         // invoke the appropriate command to manage the topology
-        LOG.log(Level.INFO, "Topology: {0} to be {1}ed", new Object[]{topologyName, command});
+        LOG.log(Level.FINE, "Topology: {0} to be {1}ed", new Object[]{topologyName, command});
 
         isSuccessful = manageTopology(config, command, adaptor, runtimeManager);
       }

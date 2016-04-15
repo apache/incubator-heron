@@ -202,6 +202,19 @@ a.nav-icon {
     display: inline-block;
   } 
 
+  .hn-footer-links li+li {
+    margin-left: 15px;
+  }
+
+  footer a {
+    color: #9d9d9d;
+  }
+
+  footer a:hover {
+    color: #fff;
+    text-decoration: none;
+  }
+
 
 /*
  * Placeholder dashboard ideas
@@ -231,3 +244,8 @@ a.nav-icon {
 .button-wrapper {
   margin: 0 2px 0 2px;
 }
+
+div[class^="landing-feature"] { 
+  margin-bottom: 30px;
+}
+

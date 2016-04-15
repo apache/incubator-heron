@@ -173,12 +173,17 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
 
   # execute main of the topology to create the topology definition
   topology_file = cl_args['topology-file-name']
-  execute.heron_class(
+  try:
+    execute.heron_class(
       cl_args['topology-class-name'],
       utils.get_heron_libs(jars.topology_jars()),
       extra_jars = [topology_file],
       args = tuple(unknown_args),
       javaDefines = cl_args['javaDefines'])
+
+  except Exception as ex:
+    Log.error("Unable to execute topology main class")
+    return False
 
   try:
     launch_topologies(cl_args, topology_file, tmp_dir)

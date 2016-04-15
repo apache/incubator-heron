@@ -18,9 +18,9 @@ nav.navbar.navbar-inverse.navbar-fixed-top role=navigation
         li
           a href=/docs/getting-started Getting Started
         li
-          a href=/docs/javadoc API Docs
+          a href=/docs/contributors/community Community
         li
-          a href={{.Site.Params.social.github}} GitHub
+          a href={{.Site.Params.github.home}} GitHub
         li 
           a.nav-icon href={{.Site.Params.social.slack}}
             i.fa.fa-slack
