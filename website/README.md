@@ -46,3 +46,19 @@ To work on assets in "watch" mode:
 ```bash
 $ gulp dev
 ```
+
+To publish website using github pages (requires python pip)
+
+```bash
+$ make publish
+```
+If linkchecker errors are 0, then publish to branch gh-pages
+
+```bash
+$ git checkout -b gh-pages
+$ git push origin gh-pages
+```
+Submit PR to main branch gh-pages (not master)
+
+
+

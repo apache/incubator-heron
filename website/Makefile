@@ -10,3 +10,8 @@ serve:
 
 assets:
 	@gulp build
+
+publish:
+	@hugo
+	@pip install linkchecker
+	@linkchecker public/index.html 
