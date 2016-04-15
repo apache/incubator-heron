@@ -33,31 +33,31 @@ for i in "${@}"; do
     key=$(echo "$line" | cut -d " " -f 1)
     value="$(echo "$line" | cut -d " " -f 2- | tr '\f' '\n')"
     case $key in
-      BUILD_SCM_RELEASE)
+      HERON_BUILD_SCM_RELEASE)
         release_name="$value"
         ;;
-      BUILD_SCM_REVISION)
+      HERON_BUILD_SCM_REVISION)
         git_hash="$value"
         ;;
-      BUILD_RELEASE_STATUS)
+      HERON_BUILD_RELEASE_STATUS)
         release_status="$value"
         ;;
-      BUILD_TIME)
+      HERON_BUILD_TIME)
         build_time="$value"
         ;;
-      BUILD_TIMESTAMP)
+      HERON_BUILD_TIMESTAMP)
         build_timestamp="$value"
         ;;
-      BUILD_HOST)
+      HERON_BUILD_HOST)
         build_host="$value"
         ;;
-      BUILD_USER)
+      HERON_BUILD_USER)
         build_user="$value"
         ;;
-      BUILD_COMMIT_MSG)
+      HERON_BUILD_COMMIT_MSG)
         commit_msg="$value"
         ;;
-      BUILD_COMMIT_URL)
+      HERON_BUILD_COMMIT_URL)
         commit_url="$value"
         ;;
    esac
