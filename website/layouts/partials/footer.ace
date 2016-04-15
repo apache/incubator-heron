@@ -2,4 +2,12 @@ footer.footer role=contentinfo
   .container
     .row
       .col-lg-12
-        .p © 2016 Twitter
+        ul.hn-footer-links
+          li 
+            a href=docs/contributors/codebase/ Governance
+          li 
+            a href=docs/contributors/codebase/ Roadmap
+          li 
+            a href=docs/contributors/codebase/ Support
+
+        p © 2016 Twitter
