@@ -16,7 +16,7 @@ pages:
 	@hugo
 
 linkchecker:
-	linkchecker public/index.html 
+	@linkchecker public/index.html 
 site:
 	@make assets
 	@make pages
