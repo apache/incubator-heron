@@ -50,10 +50,27 @@ are installed:
 
 Now you can run the docs locally. For more info, see the section directly below.
 
+## Building the Docs Locally
+
+To build the docs:
+
+```bash
+$ make site
+```
+
+This will generate a full build of the docs in the `public` folder. To serve
+the docs locally, see the section directly below.
+
 ## Running the Docs Locally
 
 ```bash
 $ make serve
 ```
 
-This will run the docs locally on `localhost` port 1313.
+This will run the docs locally on `localhost` port 1313. Navigate to
+`localhost:1313/heron` in your browser to see the served docs. Or open the
+browser from the command line:
+
+```bash
+$ open http://localhost:1313/heron
+```
