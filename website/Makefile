@@ -4,7 +4,7 @@ setup:
 	@npm install
 	@gulp build
 	@make assets
-    @pip install linkchecker
+	@pip install linkchecker
 
 serve:
 	@hugo server --watch
