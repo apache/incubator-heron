@@ -10,6 +10,73 @@ PROJECT_DIR=$(dirname $DOCKER_DIR )
 SCRATCH_DIR="$HOME/.heron-compile"
 SRC_TAR="$SCRATCH_DIR/src.tar.gz"
 
+heron_git_release() {
+  local git_release=$(git rev-parse --abbrev-ref HEAD)
+  if [[ $? != 0 ]];
+  then
+    exit 1 
+  fi
+  if [ "${git_release}" = "HEAD" ];
+  then
+    git_release=$(git describe --tags)
+    if [[ $? != 0 ]];
+    then
+      exit 1
+    fi
+  fi
+  echo $git_release 
+}
+
+heron_git_rev() {
+  local git_rev=$(git rev-parse HEAD)
+  if [[ $? != 0 ]];
+  then
+    exit 1
+  fi
+  echo $git_rev
+}
+
+heron_commit_msg() {
+  local commit_msg=$(git log -1 --oneline | cut -f 2- -d ' ')
+  if [[ $? != 0 ]];
+  then
+    exit 1
+  fi
+  echo $commit_msg
+}
+
+heron_build_host() {
+  local build_host=$(hostname)
+  echo $build_host
+}
+
+heron_build_user() {
+  local build_user=$USER
+  echo $build_user
+}
+
+heron_build_time() {
+  local build_time=$(date)
+  echo $build_time
+}
+
+heron_build_timestamp() {
+  local build_timestamp=$(date +%s000)
+  echo $build_timestamp
+}
+
+heron_tree_status() {
+  local tree_status=""
+  git diff-index --quiet HEAD --
+  if [[ $? == 0 ]];
+  then
+    tree_status="Clean"
+  else
+    tree_status="Modified"
+  fi
+  echo $tree_status
+}
+
 cleanup() {
   if [ -f $SRC_TAR ]; then
     echo "Cleaning up scratch dir"
@@ -88,6 +155,13 @@ run_build() {
   docker run \
     --rm \
     -e HERON_VERSION=$HERON_VERSION \
+    -e HERON_GIT_RELEASE="$(heron_git_release)" \
+    -e HERON_GIT_REV="$(heron_git_rev)" \
+    -e HERON_GIT_COMMIT_MSG="$(heron_commit_msg)" \
+    -e HERON_BUILD_HOST="$(heron_build_host)" \
+    -e HERON_BUILD_USER="$(heron_build_user)" \
+    -e HERON_BUILD_TIME="$(heron_build_time)" \
+    -e HERON_TREE_STATUS="$(heron_tree_status)" \
     -v "$SOURCE_TARBALL:/src.tar.gz:ro" \
     -v "$OUTPUT_DIRECTORY:/dist" \
     -it heron-compiler:$PLATFORM /compile.sh
