@@ -29,4 +29,4 @@ updates as we progress.
 The official documentation for Heron is currently not publicly available. You
 can, however, build and run the documentation locally. More information can be
 found in the [documentation
-README](https://github.com/twitter/heron/blob/master/website/README.md).
+README](website/README.md).
