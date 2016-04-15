@@ -134,6 +134,9 @@ def check_environment():
   if not utils.check_java_home_set():
     sys.exit(1)
 
+  if not utils.check_release_file_exists():
+    sys.exit(1)
+
 ################################################################################
 # Extract all the common args for all commands
 ################################################################################

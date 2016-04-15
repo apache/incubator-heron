@@ -33,6 +33,7 @@ BIN_DIR  = "bin"
 CONF_DIR = "conf"
 ETC_DIR  = "etc"
 LIB_DIR  = "lib"
+RELEASE_FILE = "release"
 
 # directories for heron sandbox
 SANDBOX_CONF_DIR = "./heron-conf"
@@ -47,7 +48,7 @@ ENV_REQUIRED  = "heron.config.env.required"
 ################################################################################
 # Create a tar file with a given set of files
 ################################################################################
-def create_tar(tar_filename, files, config_dir):
+def create_tar(tar_filename, files, config_dir, config_files):
   with contextlib.closing(tarfile.open(tar_filename, 'w:gz')) as tar:
     for filename in files:
       if os.path.isfile(filename):
@@ -59,6 +60,13 @@ def create_tar(tar_filename, files, config_dir):
       tar.add(config_dir, arcname=get_heron_sandbox_conf_dir())
     else:
       raise Exception("%s is not an existing directory" % config_dir)
+
+    for filename in config_files:
+      if os.path.isfile(filename):
+        arcfile = os.path.join(get_heron_sandbox_conf_dir(), os.path.basename(filename))
+        tar.add(filename, arcname=arcfile)
+      else:
+        raise Exception("%s is not an existing file" % filename)
 
 ################################################################################
 # Retrieve the given subparser from parser
@@ -136,6 +144,13 @@ def get_heron_lib_dir():
   """
   lib_path = os.path.join(get_heron_dir(), LIB_DIR)
   return lib_path
+
+def get_heron_release_file():
+  """
+  This will provide the path to heron RELEASE file 
+  :return: absolute path of heron RELEASE file
+  """
+  return os.path.join(get_heron_dir(), RELEASE_FILE)
 
 def get_heron_cluster_conf_dir(cluster, default_config_path):
   """
@@ -249,3 +264,16 @@ def check_java_home_set():
 
   Log.error("JAVA_HOME/bin/java either does not exist or not an executable")
   return False
+
+################################################################################
+# Check if the RELEASE file exists
+################################################################################
+def check_release_file_exists():
+  release_file = utils.get_heron_release_file()
+
+  # if the file does not exist and is not a file
+  if not os.path.isfile(release_file):
+    Log.error("RELEASE file not found: %s" % release_file)
+    return False
+
+  return True
