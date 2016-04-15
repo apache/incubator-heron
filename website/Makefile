@@ -15,11 +15,13 @@ assets:
 pages:
 	@hugo
 
+linkchecker:
+	linkchecker public/index.html 
 site:
 	@make assets
 	@make pages
 	# TODO make javadocs in public/api
 	#   - bazel build --config=darwin heron:javadoc
 	#   - extract bazel-bin/heron/javadoc.zip to website/public/api excluding top-level javadoc dir
-	@linkchecker public/index.html 
+	@make linkchecker
 
