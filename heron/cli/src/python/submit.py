@@ -56,7 +56,6 @@ def create_parser(subparsers):
   args.add_config(parser)
   args.add_deactive_deploy(parser)
   args.add_system_property(parser)
-  args.add_heron_core_uri(parser)
   args.add_verbose(parser)
 
   parser.set_defaults(subcommand='submit')
@@ -80,7 +79,11 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
   utils.create_tar(topology_pkg_path, tar_pkg_files, config_path, generated_config_files)
 
   # form the config overrides
-  config_overrides = utils.parse_cmdline_override(cl_args)
+  override_config = tempfile.mktemp()
+  with open(override_config, 'w') as f:
+    for config in cl_args['config_property']:
+      print(config.replace('=', ': '))
+      f.write("%s\n" % config.replace('=', ': '))
 
   # pass the args to submitter main
   args = [
@@ -89,7 +92,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
       "--environment", cl_args['environ'],
       "--heron_home", utils.get_heron_dir(),
       "--config_path", config_path,
-      "--config_overrides", base64.b64encode(config_overrides),
+      "--override_config", override_config,
       "--topology_package", topology_pkg_path,
       "--topology_defn", topology_defn_file,
       "--topology_jar", topology_file
