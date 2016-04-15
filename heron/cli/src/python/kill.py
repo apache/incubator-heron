@@ -33,6 +33,7 @@ from heron.common.src.python.color import Log
 import heron.cli.src.python.args as args
 import heron.cli.src.python.execute as execute
 import heron.cli.src.python.jars as jars
+import heron.cli.src.python.opts as opts
 import heron.cli.src.python.utils as utils
 
 def create_parser(subparsers):
@@ -60,7 +61,7 @@ def run(command, parser, cl_args, unknown_args):
 
     new_args = [
         "--cluster", cl_args['cluster'],
-        "--role", cl_args['role'], 
+        "--role", cl_args['role'],
         "--environment", cl_args['environ'],
         "--heron_home", utils.get_heron_dir(),
         "--config_path", cl_args['config_path'],
@@ -68,6 +69,9 @@ def run(command, parser, cl_args, unknown_args):
         "--topology_name", topology_name,
         "--command", command,
     ]
+
+    if opts.verbose():
+      new_args.append("--verbose")
 
     lib_jars = utils.get_heron_libs(jars.scheduler_jars() + jars.statemgr_jars())
 
