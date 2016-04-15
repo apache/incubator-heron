@@ -161,8 +161,14 @@ public class LaunchRunner implements Callable<Boolean> {
       return false;
     }
 
-    // invoke the post launch sequence 
-    if (!launcher.postLaunch(packedPlan)) {
+    // invoke the post launch sequence
+    try {
+      if (!launcher.postLaunch(packedPlan)) {
+        throw new RuntimeException(launcher.getClass().getName() + " failed ");
+      }
+    } catch (RuntimeException e) {
+      statemgr.deleteExecutionState(topologyName);
+      statemgr.deleteTopology(topologyName);
       LOG.log(Level.SEVERE,
           "{0} failed to post launch topology locally",
           launcher.getClass().getName());
