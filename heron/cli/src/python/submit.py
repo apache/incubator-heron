@@ -27,7 +27,6 @@ import sys
 import subprocess
 import tarfile
 import tempfile
-import traceback
 
 from heron.common.src.python.color import Log
 from heron.proto import topology_pb2
@@ -88,8 +87,8 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
   # create a tar package with the cluster configuration and generated config files
   config_path = cl_args['config_path']
   tar_pkg_files = [topology_file, topology_defn_file]
-  config_files = [release_yaml_file]
-  utils.create_tar(topology_pkg_path, tar_pkg_files, config_path, config_files)
+  generated_config_files = [release_yaml_file]
+  utils.create_tar(topology_pkg_path, tar_pkg_files, config_path, generated_config_files)
 
   # form the config overrides
   config_overrides = utils.parse_cmdline_override(cl_args)
