@@ -30,7 +30,6 @@ java_test(
         ["**/util/TopologyUtilityTest.java"]
     ),
     deps = scheduler_deps_files,
-
     size = "small",
 )
 
@@ -38,7 +37,6 @@ java_test(
 #     name = "scheduler-main_unittest",
 #     srcs = glob(["**/SchedulerMainTest.java"]),
 #     deps = scheduler_deps_files,
-#
 #     size = "small",
 # )
 
@@ -46,23 +44,6 @@ java_test(
 #     name = "submitter-main_unittest",
 #     srcs = glob(["**/SubmitterMainTest.java"]),
 #     deps = scheduler_deps_files,
-#
 #     size = "small",
 # )
 
-# java_test(
-#     name = "scheduler-server_unittest",
-#     srcs = glob(
-#         ["**/server/SchedulerServerTest.java"] +
-#         ["**/util/TopologyUtilityTest.java"]
-#     ),
-#     deps = [
-#         "//heron/api/src/java:api-java",
-#         "//heron/spi/src/java:scheduler-spi-java",
-#         "//heron/statemgrs/src/java:statemgrs-java",
-#         "@bazel_tools//third_party:mockito",
-#         "@bazel_tools//third_party:junit4",
-#     ] + heron_java_proto_files(),
-#
-#     size = "small",
-# )

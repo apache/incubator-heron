@@ -44,15 +44,6 @@ import com.twitter.heron.spi.utils.Runtime;
 
 
 public class LaunchRunnerTest {
-  //  private TopologyAPI.Topology topology;
-//  private LaunchRunner launchRunner;
-//  private IUploader uploader;
-//  private ILauncher launcher;
-//  private LaunchContext context;
-//  private IConfigLoader config;
-//  private IPackingAlgorithm packingAlgorithm;
-//  private SchedulerStateManagerAdaptor stateManager;
-//  private Map<String, List<String>> packingInfo;
   private static final String topologyName = "testTopology";
   private static final String cluster = "testCluster";
   private static final String role = "testRole";
@@ -93,17 +84,6 @@ public class LaunchRunnerTest {
         setState(TopologyAPI.TopologyState.RUNNING).
         getTopology();
   }
-//
-//  private IConfigLoader createConfig() {
-//    IConfigLoader config = mock(DefaultConfigLoader.class);
-//    when(config.getUploaderClass()).thenReturn(NullUploader.class.getName());
-//    when(config.getLauncherClass()).thenReturn(NullLauncher.class.getName());
-//    when(config.getSchedulerClass()).thenReturn(NullScheduler.class.getName());
-//    when(config.getPackingAlgorithmClass()).thenReturn(NullPackingAlgorithm.class.getName());
-//    when(config.getStateManagerClass()).thenReturn(NullStateManager.class.getName());
-//    when(config.load(anyString(), anyString())).thenReturn(true);
-//    return config;
-//  }
 
   private static Config createRunnerConfig() {
     Config config = Mockito.mock(Config.class);
@@ -132,33 +112,6 @@ public class LaunchRunnerTest {
 
   @Before
   public void setUp() throws Exception {
-//    uploader = mock(IUploader.class);
-//    config = createConfig();
-//    packingAlgorithm = mock(IPackingAlgorithm.class);
-//    launcher = mock(ILauncher.class);
-//    stateManager = mock(SchedulerStateManagerAdaptor.class);
-//    SettableFuture<Boolean> trueFuture = SettableFuture.create();
-//    trueFuture.set(true);
-//    packingInfo = new HashMap<>();
-//    topology = createTopology(new Config());
-//    Map<String, List<String>> packing = new HashMap<>();
-//    packing.put("1", Arrays.asList("spout-1:1:0", "spout-1:3:1", "bolt-1:2:0"));
-//
-//    context = spy(new LaunchContext(config, topology));
-//
-//    when(packingAlgorithm.pack(eq(context))).thenReturn(
-//        TopologyUtilityTest.generatePacking(packing));
-//    when(stateManager.setExecutionState(any(ExecutionEnvironment.ExecutionState.class)))
-//        .thenReturn(trueFuture);
-//    when(stateManager.setTopology(any(TopologyAPI.Topology.class)))
-//        .thenReturn(trueFuture);
-//    when(stateManager.setTopology(eq(topology))).thenReturn(trueFuture);
-//    when(context.getStateManagerAdaptor()).thenReturn(stateManager);
-//    when(config.getSchedulerClass()).thenReturn(NullScheduler.class.getName());
-//    when(launcher.launchTopology(any(PackingPlan.class))).thenReturn(true);
-//    when(launcher.prepareLaunch(any(PackingPlan.class))).thenReturn(true);
-//    when(launcher.postLaunch(any(PackingPlan.class))).thenReturn(true);
-//    launchRunner = new LaunchRunner(launcher, context, packingAlgorithm);
   }
 
   @Test
