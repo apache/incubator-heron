@@ -75,32 +75,6 @@ def create_parser(subparsers):
   return parser
 
 ################################################################################
-# Read the RELEASE file and generate a release.yaml to pass with topology
-################################################################################
-def generate_release_yaml(release_yaml_file):
-  
-  # get the name and location of the RELEASE file
-  release_file = utils.get_heron_release_file()
-
-  # open the release for reading and release yaml file for writing
-  with open(release_file) as release_info:
-    with open(release_yaml_file, "w") as release_yaml:
-
-      # traverse each line and get the appropriate information
-      for line in release_info:
-        key = line.split(":")[0].strip()
-        value = line.split(":")[1].strip()
-        print "%s %s" % (key, value)
-        if "label" in key.strip():
-          release_yaml.write("heron.build.version: %s\n" % value.strip())
-        elif "timestamp" in key.strip():
-          release_yaml.write("heron.build.timestamp: %s\n" % value.strip())
-        elif "host" in key.strip():
-          release_yaml.write("heron.build.host: %s\n" % value.strip())
-        elif "user" in key.strip():
-          release_yaml.write("heron.build.user: %s\n" % value.strip())
-
-################################################################################
 # Launch a topology given topology jar, its definition file and configurations
 ################################################################################
 def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
@@ -108,9 +82,8 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
   # get the normalized path for topology.tar.gz
   topology_pkg_path = utils.normalized_class_path(os.path.join(tmp_dir, 'topology.tar.gz'))
 
-  # create a release yaml file
-  release_yaml_file = os.path.join(tmp_dir, 'release.yaml')
-  generate_release_yaml(release_yaml_file)
+  # get the release yaml file
+  release_yaml_file = utils.get_heron_release_file()
 
   # create a tar package with the cluster configuration and generated config files
   config_path = cl_args['config_path']

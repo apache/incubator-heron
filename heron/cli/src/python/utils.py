@@ -33,7 +33,7 @@ BIN_DIR  = "bin"
 CONF_DIR = "conf"
 ETC_DIR  = "etc"
 LIB_DIR  = "lib"
-RELEASE_FILE = "release"
+RELEASE_YAML = "release.yaml"
 
 # directories for heron sandbox
 SANDBOX_CONF_DIR = "./heron-conf"
@@ -147,10 +147,10 @@ def get_heron_lib_dir():
 
 def get_heron_release_file():
   """
-  This will provide the path to heron RELEASE file 
-  :return: absolute path of heron RELEASE file
+  This will provide the path to heron release.yaml file 
+  :return: absolute path of heron release.yaml file
   """
-  return os.path.join(get_heron_dir(), RELEASE_FILE)
+  return os.path.join(get_heron_dir(), RELEASE_YAML)
 
 def get_heron_cluster_conf_dir(cluster, default_config_path):
   """
@@ -266,14 +266,14 @@ def check_java_home_set():
   return False
 
 ################################################################################
-# Check if the RELEASE file exists
+# Check if the release.yaml file exists
 ################################################################################
 def check_release_file_exists():
-  release_file = utils.get_heron_release_file()
+  release_file = get_heron_release_file()
 
   # if the file does not exist and is not a file
   if not os.path.isfile(release_file):
-    Log.error("RELEASE file not found: %s" % release_file)
+    Log.error("%s file not found: %s" % release_file)
     return False
 
   return True
