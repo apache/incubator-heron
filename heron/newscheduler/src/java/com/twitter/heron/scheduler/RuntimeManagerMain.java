@@ -97,12 +97,11 @@ public class RuntimeManagerMain {
         .required()
         .build();
 
-    // TODO: Need to figure out the exact format
     Option configOverrides = Option.builder("o")
-        .desc("Command line config overrides")
-        .longOpt("config_overrides")
+        .desc("Command line override config path")
+        .longOpt("override_config")
         .hasArgs()
-        .argName("config overrides")
+        .argName("override config")
         .build();
 
     Option command = Option.builder("m")
@@ -190,8 +189,7 @@ public class RuntimeManagerMain {
     String environ = cmd.getOptionValue("environment");
     String heronHome = cmd.getOptionValue("heron_home");
     String configPath = cmd.getOptionValue("config_path");
-    //TODO: Still not being used. Need to decide upon a format.
-    // String configOverrideEncoded = cmd.getOptionValue("config_overrides");
+    String overrideConfigPath = cmd.getOptionValue("override_config");
     String topologyName = cmd.getOptionValue("topology_name");
     String commandOption = cmd.getOptionValue("command");
 
@@ -219,12 +217,14 @@ public class RuntimeManagerMain {
     Config.Builder topologyConfig = Config.newBuilder()
         .put(Keys.topologyName(), topologyName);
 
-    // TODO(Karthik): override any parameters from the command line
+    Config.Builder overrideConfig = Config.newBuilder()
+        .putAll(ClusterConfig.loadOverrideConfig(overrideConfigPath));
 
     // build the final config by expanding all the variables
     Config config = Config.expand(
         Config.newBuilder()
             .putAll(defaultsConfig.build())
+            .putAll(overrideConfig.build())
             .putAll(commandLineConfig.build())
             .putAll(topologyConfig.build())
             .build());

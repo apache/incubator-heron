@@ -16,7 +16,6 @@
 
 import argparse
 import atexit
-import base64
 import contextlib
 import glob
 import logging
@@ -54,10 +53,11 @@ def create_parser(subparsers):
   return parser
 
 def run(command, parser, cl_args, unknown_args):
-
+  override_config = ""
   try:
     topology_name = cl_args['topology-name']
-    config_overrides = utils.parse_cmdline_override(cl_args)
+    override_config = utils.parse_override_config(cl_args['config_property'])
+    print("NENGNENGNENG: %s" % override_config)
 
     new_args = [
         "--cluster", cl_args['cluster'],
@@ -65,7 +65,7 @@ def run(command, parser, cl_args, unknown_args):
         "--environment", cl_args['environ'],
         "--heron_home", utils.get_heron_dir(),
         "--config_path", cl_args['config_path'],
-        "--config_overrides", base64.b64encode(config_overrides),
+        "--override_config", override_config,
         "--topology_name", topology_name,
         "--command", command,
     ]
@@ -86,6 +86,9 @@ def run(command, parser, cl_args, unknown_args):
   except Exception as ex:
     Log.error('Failed to kill topology \'%s\'' % topology_name)
     return False
+  finally:
+    # clean the override config file
+    os.remove(override_config)
 
   Log.info('Successfully killed topology \'%s\'' % topology_name)
   return True

@@ -178,9 +178,8 @@ public class SubmitterMain {
         .required()
         .build();
 
-    // TODO: Need to figure out the exact format
     Option configOverrides = Option.builder("o")
-        .desc("Command line overrided config path")
+        .desc("Command line override config path")
         .longOpt("override_config")
         .hasArgs()
         .argName("override config")
@@ -303,8 +302,6 @@ public class SubmitterMain {
             .build());
 
     LOG.fine("Static config loaded successfully ");
-
-    System.out.println(config);
 
     // 1. Do prepare work
     // create an instance of state manager
