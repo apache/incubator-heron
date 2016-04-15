@@ -71,7 +71,6 @@ public class SubmitterMain {
         .put(Keys.topologyJarFile(), topologyJarFile)
         .put(Keys.topologyPackageType(), pkgType)
         .build();
-
     return config;
   }
 
@@ -88,6 +87,20 @@ public class SubmitterMain {
         .putAll(ClusterDefaults.getDefaults())
         .putAll(ClusterDefaults.getSandboxDefaults())
         .putAll(ClusterConfig.loadConfig(heronHome, configPath))
+        .build();
+    return config;
+  }
+
+  /**
+   * Load the override config from cli
+   *
+   * @param overrideConfigPath, override config file path
+   * <p/>
+   * @return config, the override config
+   */
+  protected static Config overrideConfigs(String overrideConfigPath) {
+    Config config = Config.newBuilder()
+        .putAll(ClusterConfig.loadOverrideConfig(overrideConfigPath))
         .build();
     return config;
   }
@@ -167,10 +180,10 @@ public class SubmitterMain {
 
     // TODO: Need to figure out the exact format
     Option configOverrides = Option.builder("o")
-        .desc("Command line config overrides")
-        .longOpt("config_overrides")
+        .desc("Command line overrided config path")
+        .longOpt("override_config")
         .hasArgs()
-        .argName("config overrides")
+        .argName("override config")
         .build();
 
     Option topologyPackage = Option.builder("y")
@@ -267,6 +280,7 @@ public class SubmitterMain {
     String environ = cmd.getOptionValue("environment");
     String heronHome = cmd.getOptionValue("heron_home");
     String configPath = cmd.getOptionValue("config_path");
+    String overrideConfigPath = cmd.getOptionValue("override_config");
     String topologyPackage = cmd.getOptionValue("topology_package");
     String topologyDefnFile = cmd.getOptionValue("topology_defn");
     String topologyJarFile = cmd.getOptionValue("topology_jar");
@@ -277,19 +291,20 @@ public class SubmitterMain {
     // first load the defaults, then the config from files to override it
     // next add config parameters from the command line
     // load the topology configs
-    // TODO (Karthik) override any parameters from the command line
 
     // build the final config by expanding all the variables
     Config config = Config.expand(
         Config.newBuilder()
             .putAll(defaultConfigs(heronHome, configPath))
+            .putAll(overrideConfigs(overrideConfigPath))
             .putAll(commandLineConfigs(cluster, role, environ, verbose))
             .putAll(topologyConfigs(
                 topologyPackage, topologyJarFile, topologyDefnFile, topology))
             .build());
 
     LOG.fine("Static config loaded successfully ");
-    LOG.fine(config.toString());
+
+    System.out.println(config);
 
     // 1. Do prepare work
     // create an instance of state manager
