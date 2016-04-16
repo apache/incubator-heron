@@ -134,12 +134,6 @@ def get_trailing_version(line):
   if version and '.' in version.group(0):
     return version.group(0)
 
-# Anaconda format (Python version :: Anaconda version platform)    
-def get_anaconda_version(line):
-  version = line.split(' ')[1]
-  if version:
-    return version
-
 def discover_version(path):
   if "python" in path:
     version_flag = "-V"
@@ -148,12 +142,16 @@ def discover_version(path):
   command = "%s %s" % (path, version_flag)
   version_output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
   first_line = version_output.split("\n")[0]
-  if "anaconda" in path:
-    version = get_anaconda_version(first_line)
-  else:
-    version = get_trailing_version(first_line)
+  version = get_trailing_version(first_line)
   if version:
     return version
+
+  # with python anaconda, --V returns this:
+  # Python 2.7.11 :: Anaconda 2.2.0 (x86_64)
+  if "anaconda" in path:
+    version = first_line.split(' ')[1]
+    if version:
+      return version
 
   # on centos, /usr/bin/gcc --version returns this:
   #   gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-4)
