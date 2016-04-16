@@ -110,7 +110,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
   )
 
   # clean the override config file
-  utils.clean_dir(override_config)
+  shutil.rmtree(os.path.dirname(override_config))
 
 ################################################################################
 # Launch topologies

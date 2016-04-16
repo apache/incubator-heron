@@ -279,10 +279,3 @@ def check_release_file_exists():
     return False
 
   return True
-
-################################################################################
-# Delete the whole dir where the given file exists; Only use it for tmp files
-################################################################################
-def clean_dir(file_path):
-  dir_name = os.path.dirname(file_path)
-  shutil.rmtree(dir_name)

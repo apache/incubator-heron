@@ -93,7 +93,7 @@ def run(command, parser, cl_args, unknown_args):
     return False
   finally:
     # clean the override config file
-    utils.clean_dir(override_config)
+    shutil.rmtree(os.path.dirname(override_config))
 
   Log.info('Successfully restarted topology \'%s\'' % topology_name)
   return True
