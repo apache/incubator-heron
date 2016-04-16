@@ -146,6 +146,13 @@ def discover_version(path):
   if version:
     return version
 
+  # with python anaconda, --V returns this:
+  # Python 2.7.11 :: Anaconda 2.2.0 (x86_64)
+  if "anaconda" in path:
+    version = first_line.split(' ')[1]
+    if version:
+      return version
+
   # on centos, /usr/bin/gcc --version returns this:
   #   gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-4)
   redhat_line = re.search('(.*)\s+[0-9]+\s+\(Red Hat .*\)$', first_line)
