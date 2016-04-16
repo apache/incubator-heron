@@ -55,10 +55,10 @@ for i in "${@}"; do
         build_user="$value"
         ;;
       HERON_BUILD_COMMIT_MSG)
-        commit_msg="$value"
+        build_commit_msg="$value"
         ;;
       HERON_BUILD_COMMIT_URL)
-        commit_url="$value"
+        build_commit_url="$value"
         ;;
    esac
   done <<<"$(cat $i)"
@@ -71,5 +71,5 @@ echo "Build host: ${build_host}"
 echo "Build user: ${build_user}"
 echo "Build git revision: ${git_hash}"
 echo "Build git status: ${release_status}"
-echo "Build git commit msg: $commit_msg"
-echo "Build git commit url: $commit_url"
+echo "Build git commit msg: ${build_commit_msg}"
+echo "Build git commit url: ${build_commit_url}"
