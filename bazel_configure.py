@@ -134,6 +134,12 @@ def get_trailing_version(line):
   if version and '.' in version.group(0):
     return version.group(0)
 
+# Anaconda format (Python version :: Anaconda version platform)    
+def get_anaconda_version(line):
+  version = line.split(' ')[1]
+  if version:
+    return version
+
 def discover_version(path):
   if "python" in path:
     version_flag = "-V"
@@ -142,7 +148,10 @@ def discover_version(path):
   command = "%s %s" % (path, version_flag)
   version_output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
   first_line = version_output.split("\n")[0]
-  version = get_trailing_version(first_line)
+  if "anaconda" in path:
+    version = get_anaconda_version(first_line)
+  else:
+    version = get_trailing_version(first_line)
   if version:
     return version
 
