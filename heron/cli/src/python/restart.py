@@ -65,7 +65,6 @@ def run(command, parser, cl_args, unknown_args):
     container_id = cl_args['container-id']
     override_config = utils.parse_override_config(cl_args['config_property'])
 
-
     new_args = [
         "--cluster", cl_args['cluster'],
         "--role", cl_args['role'],
@@ -94,7 +93,7 @@ def run(command, parser, cl_args, unknown_args):
     return False
   finally:
     # clean the override config file
-    os.remove(override_config)
+    utils.clean_dir(override_config)
 
   Log.info('Successfully restarted topology \'%s\'' % topology_name)
   return True

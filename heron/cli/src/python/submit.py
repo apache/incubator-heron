@@ -71,14 +71,14 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
   # get the release yaml file
   release_yaml_file = utils.get_heron_release_file()
 
+  # form the config overrides
+  override_config = utils.parse_override_config(cl_args['config_property'])
+
   # create a tar package with the cluster configuration and generated config files
   config_path = cl_args['config_path']
   tar_pkg_files = [topology_file, topology_defn_file]
-  generated_config_files = [release_yaml_file]
+  generated_config_files = [release_yaml_file, override_config]
   utils.create_tar(topology_pkg_path, tar_pkg_files, config_path, generated_config_files)
-
-  # form the config overrides
-  override_config = utils.parse_override_config(cl_args['config_property'])
 
   # pass the args to submitter main
   args = [
@@ -110,7 +110,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
   )
 
   # clean the override config file
-  os.remove(override_config)
+  utils.clean_dir(override_config)
 
 ################################################################################
 # Launch topologies

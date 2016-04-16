@@ -18,6 +18,7 @@ import argparse
 import contextlib
 import getpass
 import os
+import shutil
 import sys
 import subprocess
 import tarfile
@@ -35,6 +36,7 @@ CONF_DIR = "conf"
 ETC_DIR  = "etc"
 LIB_DIR  = "lib"
 RELEASE_YAML = "release.yaml"
+OVERRIDE_YAML = "override.yaml"
 
 # directories for heron sandbox
 SANDBOX_CONF_DIR = "./heron-conf"
@@ -230,7 +232,8 @@ def parse_cluster_role_env(cluster_role_env, config_path):
 ################################################################################
 def parse_override_config(namespace):
   try:
-    fd, override_config_path = tempfile.mkstemp()
+    tmp_dir = tempfile.mkdtemp()
+    override_config_path = os.path.join(tmp_dir, OVERRIDE_YAML)
     with open(override_config_path, 'w') as f:
       for config in namespace:
         f.write("%s\n" % config.replace('=', ': '))
@@ -276,3 +279,10 @@ def check_release_file_exists():
     return False
 
   return True
+
+################################################################################
+# Delete the whole dir where the given file exists; Only use it for tmp files
+################################################################################
+def clean_dir(file_path):
+  dir_name = os.path.dirname(file_path)
+  shutil.rmtree(dir_name)
