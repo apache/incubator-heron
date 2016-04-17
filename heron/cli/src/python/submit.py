@@ -117,7 +117,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
       lib_jars,
       extra_jars=[],
       args = args,
-      cl_args['topology_jvm_property']
+      javaDefines = cl_args['topology_jvm_property']
   )
 
 ################################################################################

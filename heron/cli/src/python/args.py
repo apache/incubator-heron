@@ -94,7 +94,7 @@ def add_config(parser):
 
   parser.add_argument(
       '--config-property',
-      metavar='(key=value; a config key and its value; default: [])',
+      metavar='(key=value; a config key and its value for overriding; default: [])',
       action='append',
       default=[])
   return parser
