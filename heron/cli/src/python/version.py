@@ -46,11 +46,7 @@ def create_parser(subparsers):
 
 def run(command, parser, args, unknown_args):
 
-  release_file = os.path.join(utils.get_heron_dir(), 'RELEASE')
-  if not os.path.isfile(release_file):
-    Log.error("RELEASE file not found: %s" % (utils.get_heron_dir()))
-    return False
- 
+  release_file = utils.get_heron_release_file()
   with open(release_file) as release_info:
     for line in release_info:
       if not "git" in line: 

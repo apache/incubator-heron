@@ -81,13 +81,14 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
   # get the normalized path for topology.tar.gz
   topology_pkg_path = utils.normalized_class_path(os.path.join(tmp_dir, 'topology.tar.gz'))
 
-  # TO DO - when you give a config path - the name of the directory might be
-  # different - need to change the name to conf
+  # get the release yaml file
+  release_yaml_file = utils.get_heron_release_file()
 
-  # create a tar package with the configuration
+  # create a tar package with the cluster configuration and generated config files
   config_path = cl_args['config_path']
   tar_pkg_files = [topology_file, topology_defn_file]
-  utils.create_tar(topology_pkg_path, tar_pkg_files, config_path)
+  generated_config_files = [release_yaml_file]
+  utils.create_tar(topology_pkg_path, tar_pkg_files, config_path, generated_config_files)
 
   # form the config overrides
   config_overrides = utils.parse_cmdline_override(cl_args)
@@ -100,6 +101,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
       "--heron_home", utils.get_heron_dir(),
       "--config_path", config_path,
       "--config_overrides", base64.b64encode(config_overrides),
+      "--release_file", release_yaml_file,
       "--topology_package", topology_pkg_path,
       "--topology_defn", topology_defn_file,
       "--topology_jar", topology_file

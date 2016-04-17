@@ -66,6 +66,7 @@ def run(command, parser, cl_args, unknown_args):
         "--heron_home", utils.get_heron_dir(),
         "--config_path", cl_args['config_path'],
         "--config_overrides", base64.b64encode(config_overrides),
+        "--release_file", utils.get_heron_release_file(),       
         "--topology_name", topology_name,
         "--command", command,
     ]
