@@ -164,7 +164,7 @@ public class CuratorStateManager extends FileSystemStateManager {
   }
 
   protected <M extends Message> ListenableFuture<M> getNodeData(
-      WatchCallback watcher, String path, final M.Builder builder) {
+      WatchCallback watcher, String path, final Message.Builder builder) {
     final SettableFuture<M> future = SettableFuture.create();
 
     Watcher wc = ZkWatcherCallback.makeZkWatcher(watcher);
