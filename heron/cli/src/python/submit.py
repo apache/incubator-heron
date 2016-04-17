@@ -61,12 +61,10 @@ def create_parser(subparsers):
       default=False)
 
   parser.add_argument(
-      '-D',
-      default=[],
+      '--topology-jvm-property',
+      metavar='(property=value; JVM system property to pass as -D to topology main; default: [])',
       action="append",
-      dest="javaDefines",
-      metavar='DEFINE',
-      help='Define a system property to pass to java -D when running main.')
+      default=[])
 
   args.add_verbose(parser)
 
@@ -119,7 +117,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
       lib_jars,
       extra_jars=[],
       args = args,
-      javaDefines = cl_args['javaDefines']
+      cl_args['topology_jvm_property']
   )
 
 ################################################################################
