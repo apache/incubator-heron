@@ -40,7 +40,8 @@ class Application(tornado.web.Application):
       (r"/topologies/states", handlers.StatesHandler, {"tracker":tracker}),
       (r"/topologies/info", handlers.TopologyHandler, {"tracker":tracker}),
       (r"/topologies/logicalplan", handlers.LogicalPlanHandler, {"tracker":tracker}),
-      (r"/topologies/logfiledata", handlers.LogfileDataHandler, {"tracker":tracker}),
+      (r"/topologies/containerfiledata", handlers.ContainerFileDataHandler, {"tracker":tracker}),
+      (r"/topologies/containerfilestats", handlers.ContainerFileStatsHandler, {"tracker":tracker}),
       (r"/topologies/physicalplan", handlers.PhysicalPlanHandler, {"tracker":tracker}),
       (r"/topologies/executionstate", handlers.ExecutionStateHandler, {"tracker":tracker}),
       (r"/topologies/metrics", handlers.MetricsHandler, {"tracker":tracker}),
@@ -107,7 +108,7 @@ def add_arguments(parser):
   parser.add_argument(
       '--port',
       metavar='(an integer; port to listen; default: ' + str(constants.DEFAULT_PORT) + ')',
-      type = int, 
+      type = int,
       default=constants.DEFAULT_PORT)
 
   return parser
@@ -128,7 +129,7 @@ def create_parsers():
 
   subparsers = ya_parser.add_subparsers(
       title = "Available commands")
-  
+
   help_parser = subparsers.add_parser(
       'help',
       help='Prints help',
