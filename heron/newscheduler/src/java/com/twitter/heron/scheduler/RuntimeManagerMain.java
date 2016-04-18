@@ -197,7 +197,7 @@ public class RuntimeManagerMain {
     String environ = cmd.getOptionValue("environment");
     String heronHome = cmd.getOptionValue("heron_home");
     String configPath = cmd.getOptionValue("config_path");
-    String overrideConfigPath = cmd.getOptionValue("override_config_file");
+    String overrideConfigFile = cmd.getOptionValue("override_config_file");
     String releaseFile = cmd.getOptionValue("release_file");
     String topologyName = cmd.getOptionValue("topology_name");
     String commandOption = cmd.getOptionValue("command");
@@ -227,7 +227,7 @@ public class RuntimeManagerMain {
         .put(Keys.topologyName(), topologyName);
 
     Config.Builder overrideConfig = Config.newBuilder()
-        .putAll(ClusterConfig.loadOverrideConfig(overrideConfigPath));
+        .putAll(ClusterConfig.loadOverrideConfig(overrideConfigFile));
 
     // build the final config by expanding all the variables
     Config config = Config.expand(

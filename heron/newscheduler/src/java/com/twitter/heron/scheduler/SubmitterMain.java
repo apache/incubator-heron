@@ -288,7 +288,7 @@ public class SubmitterMain {
     String environ = cmd.getOptionValue("environment");
     String heronHome = cmd.getOptionValue("heron_home");
     String configPath = cmd.getOptionValue("config_path");
-    String overrideConfigPath = cmd.getOptionValue("override_config_file");
+    String overrideConfigFile = cmd.getOptionValue("override_config_file");
     String releaseFile = cmd.getOptionValue("release_file");
     String topologyPackage = cmd.getOptionValue("topology_package");
     String topologyDefnFile = cmd.getOptionValue("topology_defn");
@@ -305,7 +305,7 @@ public class SubmitterMain {
     Config config = Config.expand(
         Config.newBuilder()
             .putAll(defaultConfigs(heronHome, configPath, releaseFile))
-            .putAll(overrideConfigs(overrideConfigPath))
+            .putAll(overrideConfigs(overrideConfigFile))
             .putAll(commandLineConfigs(cluster, role, environ, verbose))
             .putAll(topologyConfigs(
                 topologyPackage, topologyJarFile, topologyDefnFile, topology))
