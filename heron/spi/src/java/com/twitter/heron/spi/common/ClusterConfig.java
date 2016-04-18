@@ -128,11 +128,16 @@ public final class ClusterConfig {
     return Config.newBuilder().putAll(readConfig).build();
   }
 
+  public static Config loadOverrideConfig(String overrideConfigFile) {
+    Map readConfig = ConfigReader.loadFile(overrideConfigFile);
+    return Config.newBuilder().putAll(readConfig).build();
+  }
+
   protected static Config loadReleaseConfig(String releaseFile) {
     Map readConfig = ConfigReader.loadFile(releaseFile);
     return Config.newBuilder().putAll(readConfig).build();
   }
-  
+
   public static Config loadBasicConfig(String heronHome, String configPath) {
     Config config = Config.newBuilder()
         .putAll(loadHeronHome(heronHome, configPath))

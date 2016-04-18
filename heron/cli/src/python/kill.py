@@ -16,7 +16,6 @@
 
 import argparse
 import atexit
-import base64
 import contextlib
 import glob
 import logging
@@ -54,10 +53,8 @@ def create_parser(subparsers):
   return parser
 
 def run(command, parser, cl_args, unknown_args):
-
   try:
     topology_name = cl_args['topology-name']
-    config_overrides = utils.parse_cmdline_override(cl_args)
 
     new_args = [
         "--cluster", cl_args['cluster'],
@@ -65,7 +62,7 @@ def run(command, parser, cl_args, unknown_args):
         "--environment", cl_args['environ'],
         "--heron_home", utils.get_heron_dir(),
         "--config_path", cl_args['config_path'],
-        "--config_overrides", base64.b64encode(config_overrides),
+        "--override_config_file", cl_args['override_config_file'],
         "--release_file", utils.get_heron_release_file(),
         "--topology_name", topology_name,
         "--command", command,
