@@ -4,9 +4,10 @@ load("/tools/rules/pex_rules", "pex_binary")
 
 release_version = "unversioned"
 
-generated_release_files = [
-    "release.yaml"
-]
+filegroup(
+    name = "generated_release_files",
+    srcs = ["release.yaml"],
+)
 
 filegroup(
     name = "tarpkgs",
@@ -33,6 +34,7 @@ filegroup(
 genrule(
     name = "heron-core",
     srcs = [
+        ":generated_release_files",
         ":hcontroller",
         ":hexecutor",
         ":hshell",
@@ -46,28 +48,28 @@ genrule(
         ":hlfsstatemgr",
         ":hzkstatemgr",
         ":hinstance",
-    ] + generated_release_files,
+    ],
     outs = [
         "heron-core.tar.gz",
     ],
     cmd = " ".join([
         "export GENDIR=$(GENDIR);",
         "export BINDIR=$(BINDIR);",
-        "$(location package_release.sh)       $(location heron-core.tar.gz)",
-        "--cp $(location release.yaml)         heron-core/release.yaml",
-        "--cp $(location hcontroller)          heron-core/bin/heron-controller",
-        "--cp $(location hexecutor)            heron-core/bin/heron-executor",
-        "--cp $(location hshell)               heron-core/bin/heron-shell",
-        "--cp $(location hstmgr)               heron-core/bin/heron-stmgr",
-        "--cp $(location htmaster)             heron-core/bin/heron-tmaster",
-        "--cp $(location hscheduler)           heron-core/lib/scheduler/heron-scheduler.jar",
-        "--cp $(location hscheduler-aurora)    heron-core/lib/scheduler/heron-aurora-scheduler.jar",
-        "--cp $(location hscheduler-local)     heron-core/lib/scheduler/heron-local-scheduler.jar",
-        "--cp $(location hrrpacking)           heron-core/lib/packing/heron-roundrobin-packing.jar",
-        "--cp $(location hmetricsmgr)          heron-core/lib/metricsmgr/heron-metricsmgr.jar",
-        "--cp $(location hlfsstatemgr)         heron-core/lib/statemgr/heron-localfs-statemgr.jar",
-        "--cp $(location hzkstatemgr)          heron-core/lib/statemgr/heron-zookeeper-statemgr.jar",
-        "--cp $(location hinstance)            heron-core/lib/instance/heron-instance.jar",
+        "$(location package_release.sh)            $(location heron-core.tar.gz)",
+        "--cp $(location generated_release_files)  heron-core/release.yaml",
+        "--cp $(location hcontroller)              heron-core/bin/heron-controller",
+        "--cp $(location hexecutor)                heron-core/bin/heron-executor",
+        "--cp $(location hshell)                   heron-core/bin/heron-shell",
+        "--cp $(location hstmgr)                   heron-core/bin/heron-stmgr",
+        "--cp $(location htmaster)                 heron-core/bin/heron-tmaster",
+        "--cp $(location hscheduler)               heron-core/lib/scheduler/heron-scheduler.jar",
+        "--cp $(location hscheduler-aurora)        heron-core/lib/scheduler/heron-aurora-scheduler.jar",
+        "--cp $(location hscheduler-local)         heron-core/lib/scheduler/heron-local-scheduler.jar",
+        "--cp $(location hrrpacking)               heron-core/lib/packing/heron-roundrobin-packing.jar",
+        "--cp $(location hmetricsmgr)              heron-core/lib/metricsmgr/heron-metricsmgr.jar",
+        "--cp $(location hlfsstatemgr)             heron-core/lib/statemgr/heron-localfs-statemgr.jar",
+        "--cp $(location hzkstatemgr)              heron-core/lib/statemgr/heron-zookeeper-statemgr.jar",
+        "--cp $(location hinstance)                heron-core/lib/instance/heron-instance.jar",
     ]),
     heuristic_label_expansion = False,
     tags = ["manual"],
@@ -80,6 +82,7 @@ genrule(
 genrule(
     name = "heron-client",
     srcs = [
+        ":generated_release_files",
         ":heron-core",
         ":conf-local-heron-internals",
         ":conf-local-metrics-sinks",
@@ -102,7 +105,7 @@ genrule(
         ":slf4j-api-java",
         ":slf4j-jdk-java",
         ":log4j-over-slf4j-java",
-    ] + generated_release_files,
+    ],
     outs = [
         "heron-client.tar.gz",
     ],
@@ -110,7 +113,7 @@ genrule(
         "export GENDIR=$(GENDIR);",
         "export BINDIR=$(BINDIR);",
         "$(location package_release.sh) $(location heron-client.tar.gz)",
-        "--cp $(location release.yaml)               release.yaml",
+        "--cp $(location generated_release_files)    release.yaml",
         "--cp $(location hcli)                       bin/heron",
         "--cp $(location conf-local-heron-internals) conf/local/heron_internals.yaml",
         "--cp $(location conf-local-metrics-sinks)   conf/local/metrics_sinks.yaml",
@@ -145,9 +148,10 @@ genrule(
 genrule(
     name = "heron-tools",
     srcs = [
+        ":generated_release_files",
         ":htracker",
         ":hui",
-    ] + generated_release_files,
+    ],
     outs = [
         "heron-tools.tar.gz",
     ],
@@ -155,7 +159,7 @@ genrule(
         "export GENDIR=$(GENDIR);",
         "export BINDIR=$(BINDIR);",
         "$(location package_release.sh) $(location heron-tools.tar.gz)",
-        "--cp $(location release.yaml)               release.yaml",
+        "--cp $(location generated_release_files)                    release.yaml",
         "--cp $(location htracker)                   bin/heron-tracker",
         "--cp $(location hui)                        bin/heron-ui",
     ]),
@@ -170,9 +174,10 @@ genrule(
 genrule(
     name = "heron-api",
     srcs = [
+        ":generated_release_files",
         ":hapi",
         ":hstorm",
-    ] + generated_release_files,
+    ],
     outs = [
         "heron-api.tar.gz",
     ],
@@ -180,7 +185,7 @@ genrule(
         "export GENDIR=$(GENDIR);",
         "export BINDIR=$(BINDIR);",
         "$(location package_release.sh)              $(location heron-api.tar.gz)",
-        "--cp $(location release.yaml)               release.yaml",
+        "--cp $(location generated_release_files)                    release.yaml",
         "--cp $(location hapi)                       heron-api.jar",
         "--cp $(location hstorm)                     heron-storm.jar",
     ]),
@@ -406,7 +411,7 @@ filegroup(
 
 genrule(
     name = "generate-package-info",
-    outs = generated_release_files,
+    outs = ["release.yaml"],
     cmd = "$(location //scripts/packages:package-info-generator) $$(find . -name '*status*.txt') >$@",
     stamp = 1,
     tools = ["//scripts/packages:package-info-generator"],
@@ -414,10 +419,13 @@ genrule(
 
 genrule(
     name = "generate-api-launcher",
-    srcs = ["//scripts/packages:api-template-bin.sh"] + generated_release_files,
+    srcs = [
+        ":generated_release_files",
+        "//scripts/packages:api-template-bin.sh"
+    ],
     outs = ["api_launcher_bin.sh"],
     cmd = """
-        release_info="$$(cat $(location :release.yaml))"
+        release_info="$$(cat $(location :generated_release_files))"
         template="$$(cat $(location //scripts/packages:api-template-bin.sh))"
         echo "$${template//%release_info%/$${release_info}}" >$@
         """,
@@ -425,10 +433,13 @@ genrule(
 
 genrule(
     name = "generate-client-launcher",
-    srcs = ["//scripts/packages:client-template-bin.sh"] + generated_release_files,
+    srcs = [
+        ":generated_release_files",
+        "//scripts/packages:client-template-bin.sh"
+    ],
     outs = ["client_launcher_bin.sh"],
     cmd = """
-        release_info="$$(cat $(location :release.yaml))"
+        release_info="$$(cat $(location :generated_release_files))"
         template="$$(cat $(location //scripts/packages:client-template-bin.sh))"
         echo "$${template//%release_info%/$${release_info}}" >$@
         """,
@@ -436,10 +447,13 @@ genrule(
 
 genrule(
     name = "generate-tools-launcher",
-    srcs = ["//scripts/packages:tools-template-bin.sh"] + generated_release_files,
+    srcs = [
+        ":generated_release_files",
+        "//scripts/packages:tools-template-bin.sh"
+    ],
     outs = ["tools_launcher_bin.sh"],
     cmd = """
-        release_info="$$(cat $(location :release.yaml))"
+        release_info="$$(cat $(location :generated_release_files))"
         template="$$(cat $(location //scripts/packages:tools-template-bin.sh))"
         echo "$${template//%release_info%/$${release_info}}" >$@
         """,
