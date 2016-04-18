@@ -79,14 +79,15 @@ public class SubmitterMain {
    *
    * @param heronHome, directory of heron home
    * @param configPath, directory containing the config
+   * @param releaseFile, release file containing build information
    * <p/>
    * return config, the defaults config
    */
-  protected static Config defaultConfigs(String heronHome, String configPath) {
+  protected static Config defaultConfigs(String heronHome, String configPath, String releaseFile) {
     Config config = Config.newBuilder()
         .putAll(ClusterDefaults.getDefaults())
         .putAll(ClusterDefaults.getSandboxDefaults())
-        .putAll(ClusterConfig.loadConfig(heronHome, configPath))
+        .putAll(ClusterConfig.loadConfig(heronHome, configPath, releaseFile))
         .build();
     return config;
   }
@@ -185,6 +186,13 @@ public class SubmitterMain {
         .argName("override config")
         .build();
 
+    Option releaseFile = Option.builder("b")
+        .desc("Release file name")
+        .longOpt("release_file")
+        .hasArgs()
+        .argName("release information")
+        .build();
+
     Option topologyPackage = Option.builder("y")
         .desc("tar ball containing user submitted jar/tar, defn and config")
         .longOpt("topology_package")
@@ -220,6 +228,7 @@ public class SubmitterMain {
     options.addOption(heronHome);
     options.addOption(configFile);
     options.addOption(configOverrides);
+    options.addOption(releaseFile);
     options.addOption(topologyPackage);
     options.addOption(topologyDefn);
     options.addOption(topologyJar);
@@ -280,6 +289,7 @@ public class SubmitterMain {
     String heronHome = cmd.getOptionValue("heron_home");
     String configPath = cmd.getOptionValue("config_path");
     String overrideConfigPath = cmd.getOptionValue("override_config");
+    String releaseFile = cmd.getOptionValue("release_file");
     String topologyPackage = cmd.getOptionValue("topology_package");
     String topologyDefnFile = cmd.getOptionValue("topology_defn");
     String topologyJarFile = cmd.getOptionValue("topology_jar");
@@ -294,7 +304,7 @@ public class SubmitterMain {
     // build the final config by expanding all the variables
     Config config = Config.expand(
         Config.newBuilder()
-            .putAll(defaultConfigs(heronHome, configPath))
+            .putAll(defaultConfigs(heronHome, configPath, releaseFile))
             .putAll(overrideConfigs(overrideConfigPath))
             .putAll(commandLineConfigs(cluster, role, environ, verbose))
             .putAll(topologyConfigs(

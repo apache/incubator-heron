@@ -104,6 +104,13 @@ public class RuntimeManagerMain {
         .argName("override config")
         .build();
 
+    Option releaseFile = Option.builder("b")
+        .desc("Release file name")
+        .longOpt("release_file")
+        .hasArgs()
+        .argName("release information")
+        .build();
+
     Option command = Option.builder("m")
         .desc("Command to run")
         .longOpt("command")
@@ -130,6 +137,7 @@ public class RuntimeManagerMain {
     options.addOption(topologyName);
     options.addOption(configFile);
     options.addOption(configOverrides);
+    options.addOption(releaseFile);
     options.addOption(command);
     options.addOption(heronHome);
     options.addOption(containerId);
@@ -190,6 +198,7 @@ public class RuntimeManagerMain {
     String heronHome = cmd.getOptionValue("heron_home");
     String configPath = cmd.getOptionValue("config_path");
     String overrideConfigPath = cmd.getOptionValue("override_config");
+    String releaseFile = cmd.getOptionValue("release_file");
     String topologyName = cmd.getOptionValue("topology_name");
     String commandOption = cmd.getOptionValue("command");
 
@@ -205,7 +214,7 @@ public class RuntimeManagerMain {
     // first load the defaults, then the config from files to override it
     Config.Builder defaultsConfig = Config.newBuilder()
         .putAll(ClusterDefaults.getDefaults())
-        .putAll(ClusterConfig.loadConfig(heronHome, configPath));
+        .putAll(ClusterConfig.loadConfig(heronHome, configPath, releaseFile));
 
     // add config parameters from the command line
     Config.Builder commandLineConfig = Config.newBuilder()

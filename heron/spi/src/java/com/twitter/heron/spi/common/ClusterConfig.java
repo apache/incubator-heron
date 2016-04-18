@@ -133,6 +133,11 @@ public final class ClusterConfig {
     return Config.newBuilder().putAll(readConfig).build();
   }
 
+  protected static Config loadReleaseConfig(String releaseFile) {
+    Map readConfig = ConfigReader.loadFile(releaseFile);
+    return Config.newBuilder().putAll(readConfig).build();
+  }
+
   public static Config loadBasicConfig(String heronHome, String configPath) {
     Config config = Config.newBuilder()
         .putAll(loadHeronHome(heronHome, configPath))
@@ -149,7 +154,7 @@ public final class ClusterConfig {
     return config;
   }
 
-  public static Config loadConfig(String heronHome, String configPath) {
+  public static Config loadConfig(String heronHome, String configPath, String releaseFile) {
     Config homeConfig = loadBasicConfig(heronHome, configPath); 
     Config sandboxConfig = loadBasicSandboxConfig();
 
@@ -161,7 +166,8 @@ public final class ClusterConfig {
         .putAll(loadPackingConfig(Context.packingFile(homeConfig)))
         .putAll(loadSchedulerConfig(Context.schedulerFile(homeConfig)))
         .putAll(loadStateManagerConfig(Context.stateManagerFile(homeConfig)))
-        .putAll(loadUploaderConfig(Context.uploaderFile(homeConfig)));
+        .putAll(loadUploaderConfig(Context.uploaderFile(homeConfig)))
+        .putAll(loadReleaseConfig(releaseFile));
     return cb.build();
   }
 

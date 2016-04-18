@@ -170,6 +170,14 @@ def discover_version(path):
     if version:
       return version
 
+  # with python anaconda, --V returns this:
+  # Python 2.7.11 :: Anaconda 2.2.0 (x86_64)
+  anaconda_line = re.search('.*\s+Anaconda\s+.*\s', first_line)
+  if anaconda_line:
+    version = anaconda_line.group(0).split(' ')[1]
+    if version:
+      return version
+
   fail ("Could not determine the version of %s from the following output\n%s\n%s" % (path, command, version_output))
 
 def to_semver(version):
