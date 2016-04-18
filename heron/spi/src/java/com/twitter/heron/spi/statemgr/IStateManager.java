@@ -51,7 +51,7 @@ import com.twitter.heron.spi.common.Config;
 
 public interface IStateManager extends AutoCloseable {
   /**
-   * Initialize the uploader with the incoming context.
+   * Initialize StateManager with the incoming context.
    */
   void initialize(Config config);
 

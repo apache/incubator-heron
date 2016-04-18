@@ -124,8 +124,9 @@ def run(command, parser, command_args, unknown_args):
 
   return 1
 
-def cleanup():
-  pass
+def cleanup(files):
+  for file in files:
+    shutil.rmtree(os.path.dirname(file))
 
 ################################################################################
 # Check whether the environment variables are set
@@ -144,6 +145,7 @@ def extract_common_args(command, parser, cl_args):
   try:
     cluster_role_env = cl_args.pop('cluster/[role]/[env]')
     config_path = cl_args['config_path']
+    override_config_file = utils.parse_override_config(cl_args['config_property'])
   except KeyError:
     # if some of the arguments are not found, print error and exit
     subparser = utils.get_subparser(parser, command)
@@ -163,6 +165,7 @@ def extract_common_args(command, parser, cl_args):
     new_cl_args['role'] = cluster_tuple[1]
     new_cl_args['environ'] = cluster_tuple[2]
     new_cl_args['config_path'] = config_path
+    new_cl_args['override_config_file'] = override_config_file
   except Exception as e:
     Log.error("Argument cluster/[role]/[env] is not correct: %s" % str(e))
     return dict()
@@ -177,9 +180,6 @@ def main():
 
   # verify if the environment variables are correctly set
   check_environment()
-
-  # register cleanup function during exit
-  atexit.register(cleanup)
 
   # create the argument parser 
   parser = create_parser()
@@ -213,6 +213,10 @@ def main():
   # bail out if args are empty
   if not command_line_args:
     return 1
+
+  # register dirs cleanup function during exit
+  files = [command_line_args['override_config_file']]
+  atexit.register(cleanup, files)
 
   start = time.time() 
   retcode = run(command, parser, command_line_args, unknown_args)
