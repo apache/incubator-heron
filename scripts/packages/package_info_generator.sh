@@ -55,21 +55,21 @@ for i in "${@}"; do
         build_user="$value"
         ;;
       HERON_BUILD_COMMIT_MSG)
-        commit_msg="$value"
+        build_commit_msg="$value"
         ;;
       HERON_BUILD_COMMIT_URL)
-        commit_url="$value"
+        build_commit_url="$value"
         ;;
    esac
   done <<<"$(cat $i)"
 done
 
-echo "Build label: ${release_name}"
-echo "Build time: ${build_time}"
-echo "Build timestamp: ${build_timestamp}"
-echo "Build host: ${build_host}"
-echo "Build user: ${build_user}"
-echo "Build git revision: ${git_hash}"
-echo "Build git status: ${release_status}"
-echo "Build git commit msg: $commit_msg"
-echo "Build git commit url: $commit_url"
+echo "heron.build.version : ${release_name}"
+echo "heron.build.time : ${build_time}"
+echo "heron.build.timestamp : ${build_timestamp}"
+echo "heron.build.host : ${build_host}"
+echo "heron.build.user : ${build_user}"
+echo "heron.build.git.revision : ${git_hash}"
+echo "heron.build.git.status : ${release_status}"
+echo "heron.build.git.commit.message : ${build_commit_msg}"
+echo "heron.build.git.commit.url : ${build_commit_url}"

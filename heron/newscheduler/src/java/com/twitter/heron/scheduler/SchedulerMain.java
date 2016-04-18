@@ -51,15 +51,15 @@ import com.twitter.heron.spi.utils.TopologyUtils;
 public class SchedulerMain {
   private static final Logger LOG = Logger.getLogger(SchedulerMain.class.getName());
 
-  private static String cluster = null;                 // name of the cluster
-  private static String role = null;                    // role to launch the topology
-  private static String environ = null;                 // environ to launch the topology
-  private static String topologyName = null;            // name of the topology
-  private static String topologyJarFile = null;         // name of the topology jar/tar file
-  private static int    schedulerServerPort = 0 ;       // http port where the scheduler is listening
-  
-  private static TopologyAPI.Topology topology = null;  // topology definition
-  private static Config  config;                        // holds all the config read
+  private String cluster = null;                 // name of the cluster
+  private String role = null;                    // role to launch the topology
+  private String environ = null;                 // environ to launch the topology
+  private String topologyName = null;            // name of the topology
+  private String topologyJarFile = null;         // name of the topology jar/tar file
+  private int    schedulerServerPort = 0 ;       // http port where the scheduler is listening
+
+  private TopologyAPI.Topology topology = null;  // topology definition
+  private Config  config;                        // holds all the config read
 
   // Print usage options
   private static void usage(Options options) {
@@ -141,9 +141,8 @@ public class SchedulerMain {
     return options;
   }
 
-  public static void initialize(String iCluster, String iRole, String iEnviron, 
+  public SchedulerMain(String iCluster, String iRole, String iEnviron,
       String iTopologyName, String iTopologyJarFile, int iSchedulerServerPort) throws IOException {
-
     // initialize the options
     cluster = iCluster;
     role = iRole;
@@ -161,11 +160,6 @@ public class SchedulerMain {
     // build the config by expanding all the variables
     config = SchedulerConfig.loadConfig(cluster, role, environ,
         topologyJarFile, topologyDefnFile, topology);
-
-    // set up logging with complete Config
-    setupLogging(config);
-
-    LOG.log(Level.INFO, "Loaded scheduler config: {0}", config);
   }
 
   public static void main(String[] args) throws
@@ -194,20 +188,24 @@ public class SchedulerMain {
       System.exit(1);
     }
 
-    // initialize the scheduler with the options 
-    SchedulerMain.initialize(cmd.getOptionValue("cluster"), 
+    // initialize the scheduler with the options
+    SchedulerMain schedulerMain = new SchedulerMain(cmd.getOptionValue("cluster"),
         cmd.getOptionValue("role"),
         cmd.getOptionValue("environment"),
         cmd.getOptionValue("topology_name"),
         cmd.getOptionValue("topology_jar"),
         Integer.parseInt(cmd.getOptionValue("http_port")));
 
+    // set up logging with complete Config
+    setupLogging(schedulerMain.config);
+    LOG.log(Level.INFO, "Loaded scheduler config: {0}", schedulerMain.config);
+
     // run the scheduler
-    SchedulerMain.runScheduler();
+    schedulerMain.runScheduler();
   }
 
   // Set up logging based on the Config
-  protected static void setupLogging(Config config) throws IOException {
+  private static void setupLogging(Config config) throws IOException {
     String systemConfigFilename = Context.systemConfigSandboxFile(config);
 
     SystemConfig systemConfig = new SystemConfig(systemConfigFilename, true);
@@ -235,7 +233,7 @@ public class SchedulerMain {
     LOG.info("Logging setup done.");
   }
 
-  public static void runScheduler() throws
+  public void runScheduler() throws
       ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
 
     // create an instance of state manager
@@ -329,7 +327,7 @@ public class SchedulerMain {
    * @param port, the port for scheduler to listen on
    * @return an instance of the http server
    */
-  public static SchedulerServer runServer(
+  private static SchedulerServer runServer(
       Config runtime, IScheduler scheduler, int port) throws IOException {
 
     // create an instance of the server using scheduler class and port
@@ -347,7 +345,7 @@ public class SchedulerMain {
    * @param runtime, the runtime configuration
    * @param schedulerServer, the http server that scheduler listens for receives requests
    */
-  public static void setSchedulerLocation(Config runtime, SchedulerServer schedulerServer) {
+  private static void setSchedulerLocation(Config runtime, SchedulerServer schedulerServer) {
 
     // Set scheduler location to host:port by default. Overwrite scheduler location if behind DNS.
     Scheduler.SchedulerLocation location = Scheduler.SchedulerLocation.newBuilder()

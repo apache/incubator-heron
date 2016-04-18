@@ -146,11 +146,8 @@ public class AuroraLauncher implements ILauncher {
         .toString();
     auroraProperties.put("SANDBOX_SCHEDULER_CLASSPATH", completeSchedulerClassPath);
 
-    String heronCoreReleasePkgURI = Context.corePackageUri(config);
-    String topologyPkgURI = Runtime.topologyPackageUri(runtime).toString();
-
-    auroraProperties.put("CORE_PACKAGE_URI", heronCoreReleasePkgURI);
-    auroraProperties.put("TOPOLOGY_PACKAGE_URI", topologyPkgURI);
+    auroraProperties.put("CORE_PACKAGE_URI", Context.corePackageUri(config));
+    auroraProperties.put("TOPOLOGY_PACKAGE_URI", Runtime.topologyPackageUri(runtime).toString());
 
     return auroraProperties;
   }

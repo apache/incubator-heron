@@ -71,7 +71,6 @@ public class SubmitterMain {
         .put(Keys.topologyJarFile(), topologyJarFile)
         .put(Keys.topologyPackageType(), pkgType)
         .build();
-
     return config;
   }
 
@@ -80,14 +79,29 @@ public class SubmitterMain {
    *
    * @param heronHome, directory of heron home
    * @param configPath, directory containing the config
+   * @param releaseFile, release file containing build information
    * <p/>
    * return config, the defaults config
    */
-  protected static Config defaultConfigs(String heronHome, String configPath) {
+  protected static Config defaultConfigs(String heronHome, String configPath, String releaseFile) {
     Config config = Config.newBuilder()
         .putAll(ClusterDefaults.getDefaults())
         .putAll(ClusterDefaults.getSandboxDefaults())
-        .putAll(ClusterConfig.loadConfig(heronHome, configPath))
+        .putAll(ClusterConfig.loadConfig(heronHome, configPath, releaseFile))
+        .build();
+    return config;
+  }
+
+  /**
+   * Load the override config from cli
+   *
+   * @param overrideConfigPath, override config file path
+   * <p/>
+   * @return config, the override config
+   */
+  protected static Config overrideConfigs(String overrideConfigPath) {
+    Config config = Config.newBuilder()
+        .putAll(ClusterConfig.loadOverrideConfig(overrideConfigPath))
         .build();
     return config;
   }
@@ -111,6 +125,7 @@ public class SubmitterMain {
         .put(Keys.environ(), environ)
         .put(Keys.verbose(), verbose)
         .build();
+
     return config;
   }
 
@@ -164,12 +179,18 @@ public class SubmitterMain {
         .required()
         .build();
 
-    // TODO: Need to figure out the exact format
     Option configOverrides = Option.builder("o")
-        .desc("Command line config overrides")
-        .longOpt("config_overrides")
+        .desc("Command line override config path")
+        .longOpt("override_config_file")
         .hasArgs()
-        .argName("config overrides")
+        .argName("override config file")
+        .build();
+
+    Option releaseFile = Option.builder("b")
+        .desc("Release file name")
+        .longOpt("release_file")
+        .hasArgs()
+        .argName("release information")
         .build();
 
     Option topologyPackage = Option.builder("y")
@@ -207,6 +228,7 @@ public class SubmitterMain {
     options.addOption(heronHome);
     options.addOption(configFile);
     options.addOption(configOverrides);
+    options.addOption(releaseFile);
     options.addOption(topologyPackage);
     options.addOption(topologyDefn);
     options.addOption(topologyJar);
@@ -236,7 +258,6 @@ public class SubmitterMain {
     CommandLineParser parser = new DefaultParser();
     // parse the help options first.
     CommandLine cmd = parser.parse(helpOptions, args, true);
-    ;
 
     if (cmd.hasOption("h")) {
       usage(options);
@@ -267,7 +288,8 @@ public class SubmitterMain {
     String environ = cmd.getOptionValue("environment");
     String heronHome = cmd.getOptionValue("heron_home");
     String configPath = cmd.getOptionValue("config_path");
-    String configOverrideEncoded = cmd.getOptionValue("config_overrides");
+    String overrideConfigFile = cmd.getOptionValue("override_config_file");
+    String releaseFile = cmd.getOptionValue("release_file");
     String topologyPackage = cmd.getOptionValue("topology_package");
     String topologyDefnFile = cmd.getOptionValue("topology_defn");
     String topologyJarFile = cmd.getOptionValue("topology_jar");
@@ -278,12 +300,12 @@ public class SubmitterMain {
     // first load the defaults, then the config from files to override it
     // next add config parameters from the command line
     // load the topology configs
-    // TODO (Karthik) override any parameters from the command line
 
     // build the final config by expanding all the variables
     Config config = Config.expand(
         Config.newBuilder()
-            .putAll(defaultConfigs(heronHome, configPath))
+            .putAll(defaultConfigs(heronHome, configPath, releaseFile))
+            .putAll(overrideConfigs(overrideConfigFile))
             .putAll(commandLineConfigs(cluster, role, environ, verbose))
             .putAll(topologyConfigs(
                 topologyPackage, topologyJarFile, topologyDefnFile, topology))
