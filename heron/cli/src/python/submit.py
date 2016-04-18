@@ -16,7 +16,6 @@
 
 import argparse
 import atexit
-import base64
 import contextlib
 import glob
 import logging
@@ -54,20 +53,8 @@ def create_parser(subparsers):
   args.add_topology_file(parser)
   args.add_topology_class(parser)
   args.add_config(parser)
-
-  parser.add_argument(
-      '--deploy-deactivated',
-      metavar='(a boolean; default: "false")',
-      default=False)
-
-  parser.add_argument(
-      '-D',
-      default=[],
-      action="append",
-      dest="javaDefines",
-      metavar='DEFINE',
-      help='Define a system property to pass to java -D when running main.')
-
+  args.add_deactive_deploy(parser)
+  args.add_system_property(parser)
   args.add_verbose(parser)
 
   parser.set_defaults(subcommand='submit')
@@ -87,11 +74,9 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
   # create a tar package with the cluster configuration and generated config files
   config_path = cl_args['config_path']
   tar_pkg_files = [topology_file, topology_defn_file]
-  generated_config_files = [release_yaml_file]
-  utils.create_tar(topology_pkg_path, tar_pkg_files, config_path, generated_config_files)
+  generated_config_files = [release_yaml_file, cl_args['override_config_file']]
 
-  # form the config overrides
-  config_overrides = utils.parse_cmdline_override(cl_args)
+  utils.create_tar(topology_pkg_path, tar_pkg_files, config_path, generated_config_files)
 
   # pass the args to submitter main
   args = [
@@ -100,7 +85,8 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
       "--environment", cl_args['environ'],
       "--heron_home", utils.get_heron_dir(),
       "--config_path", config_path,
-      "--config_overrides", base64.b64encode(config_overrides),
+      "--override_config_file", cl_args['override_config_file'],
+      "--release_file", release_yaml_file,
       "--topology_package", topology_pkg_path,
       "--topology_defn", topology_defn_file,
       "--topology_jar", topology_file
