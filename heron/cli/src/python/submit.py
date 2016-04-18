@@ -74,7 +74,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
   # create a tar package with the cluster configuration and generated config files
   config_path = cl_args['config_path']
   tar_pkg_files = [topology_file, topology_defn_file]
-  generated_config_files = [release_yaml_file, cl_args['override_config']]
+  generated_config_files = [release_yaml_file, cl_args['override_config_file']]
 
   utils.create_tar(topology_pkg_path, tar_pkg_files, config_path, generated_config_files)
 
@@ -85,7 +85,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
       "--environment", cl_args['environ'],
       "--heron_home", utils.get_heron_dir(),
       "--config_path", config_path,
-      "--override_config", cl_args['override_config'],
+      "--override_config_file", cl_args['override_config_file'],
       "--release_file", release_yaml_file,
       "--topology_package", topology_pkg_path,
       "--topology_defn", topology_defn_file,

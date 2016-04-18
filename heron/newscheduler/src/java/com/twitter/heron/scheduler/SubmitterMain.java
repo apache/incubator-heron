@@ -181,9 +181,9 @@ public class SubmitterMain {
 
     Option configOverrides = Option.builder("o")
         .desc("Command line override config path")
-        .longOpt("override_config")
+        .longOpt("override_config_file")
         .hasArgs()
-        .argName("override config")
+        .argName("override config file")
         .build();
 
     Option releaseFile = Option.builder("b")
@@ -288,7 +288,7 @@ public class SubmitterMain {
     String environ = cmd.getOptionValue("environment");
     String heronHome = cmd.getOptionValue("heron_home");
     String configPath = cmd.getOptionValue("config_path");
-    String overrideConfigPath = cmd.getOptionValue("override_config");
+    String overrideConfigPath = cmd.getOptionValue("override_config_file");
     String releaseFile = cmd.getOptionValue("release_file");
     String topologyPackage = cmd.getOptionValue("topology_package");
     String topologyDefnFile = cmd.getOptionValue("topology_defn");

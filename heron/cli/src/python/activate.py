@@ -63,8 +63,8 @@ def run(command, parser, cl_args, unknown_args):
         "--environment", cl_args['environ'],
         "--heron_home", utils.get_heron_dir(),
         "--config_path", cl_args['config_path'],
-        "--override_config", cl_args['override_config'],
-        "--release_file", utils.get_heron_release_file(), 
+        "--override_config_file", cl_args['override_config_file'],
+        "--release_file", utils.get_heron_release_file(),
         "--topology_name", topology_name,
         "--command", command,
     ]

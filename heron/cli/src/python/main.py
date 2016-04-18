@@ -165,7 +165,7 @@ def extract_common_args(command, parser, cl_args):
     new_cl_args['role'] = cluster_tuple[1]
     new_cl_args['environ'] = cluster_tuple[2]
     new_cl_args['config_path'] = config_path
-    new_cl_args['override_config'] = override_config
+    new_cl_args['override_config_file'] = override_config
   except Exception as e:
     Log.error("Argument cluster/[role]/[env] is not correct: %s" % str(e))
     return dict()
@@ -215,7 +215,7 @@ def main():
     return 1
 
   # register dirs cleanup function during exit
-  files = [command_line_args['override_config']]
+  files = [command_line_args['override_config_file']]
   atexit.register(cleanup, files)
 
   start = time.time() 
