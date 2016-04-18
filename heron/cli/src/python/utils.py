@@ -233,12 +233,12 @@ def parse_cluster_role_env(cluster_role_env, config_path):
 def parse_override_config(namespace):
   try:
     tmp_dir = tempfile.mkdtemp()
-    override_config_path = os.path.join(tmp_dir, OVERRIDE_YAML)
-    with open(override_config_path, 'w') as f:
+    override_config_file = os.path.join(tmp_dir, OVERRIDE_YAML)
+    with open(override_config_file, 'w') as f:
       for config in namespace:
         f.write("%s\n" % config.replace('=', ': '))
 
-    return override_config_path
+    return override_config_file
   except e:
     raise Exception("Failed to parse override config: %s" % str(e))
 
