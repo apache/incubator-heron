@@ -4,9 +4,10 @@ import tornado.gen
 import traceback
 
 from heron.tracker.src.python.handlers import BaseHandler
+from heron.tracker.src.python import constants
 from heron.tracker.src.python import utils
 
-class LogfileDataHandler(BaseHandler):
+class ContainerFileDataHandler(BaseHandler):
   """
   URL - /topologies/logfiledata?cluster=<cluster>&topology=<topology> \
         &environ=<environment>&instance=<instance>
@@ -31,19 +32,48 @@ class LogfileDataHandler(BaseHandler):
       cluster = self.get_argument_cluster()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
-      instance = self.get_argument_instance()
+      container = self.get_argument(constants.PARAM_CONTAINER)
+      path = self.get_argument(constants.PARAM_PATH)
       offset = self.get_argument_offset()
       length = self.get_argument_length()
       topology_info = self.tracker.getTopologyInfo(topology_name, cluster, environ)
 
-      stmgr_id = topology_info["physical_plan"]["instances"][instance]["stmgrId"]
+      stmgr_id = "stmgr-" + container
       stmgr = topology_info["physical_plan"]["stmgrs"][stmgr_id]
       host = stmgr["host"]
       shell_port = stmgr["shell_port"]
-      logfile_data_url = utils.make_shell_logfile_data_url(host, shell_port, instance, offset, length)
+      file_data_url = "http://%s:%d/filedata/%s?offset=%s&length=%s" % (host, shell_port, path, offset, length)
 
       http_client = tornado.httpclient.AsyncHTTPClient()
-      response = yield http_client.fetch(logfile_data_url)
+      response = yield http_client.fetch(file_data_url)
+      self.write_success_response(json.loads(response.body))
+      self.finish()
+    except Exception as e:
+      traceback.print_exc()
+      self.write_error_response(e)
+
+class FileStatsHandler(BaseHandler):
+  def initialize(self, tracker):
+    self.tracker = tracker
+
+  @tornado.gen.coroutine
+  def get(self):
+    try:
+      cluster = self.get_argument_cluster()
+      environ = self.get_argument_environ()
+      topology_name = self.get_argument_topology()
+      container = self.get_argument(constants.PARAM_CONTAINER)
+      path = self.get_argument(constants.PARAM_PATH, default=".")
+      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, environ)
+
+      stmgr_id = "stmgr-" + str(container)
+      stmgr = topology_info["physical_plan"]["stmgrs"][stmgr_id]
+      host = stmgr["host"]
+      shell_port = stmgr["shell_port"]
+      filestats_url = utils.make_shell_filestats_url(host, shell_port, path)
+
+      http_client = tornado.httpclient.AsyncHTTPClient()
+      response = yield http_client.fetch(filestats_url)
       self.write_success_response(json.loads(response.body))
       self.finish()
     except Exception as e:

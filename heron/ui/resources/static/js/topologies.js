@@ -14,10 +14,10 @@ var AllExceptions = React.createClass({
         + '/' + this.props.info.environ + '/' + this.props.info.topology
         + '/' + compName + '/exceptionsummary.json'
     console.log('fetching url ' + fetchUrl);
-    $.ajax({ 
+    $.ajax({
         url: fetchUrl,
         dataType:  'json',
-        
+
         success: function(response) {
           this.state.summary = response.result
           console.log('RESPONSE')
@@ -63,8 +63,8 @@ var AllExceptions = React.createClass({
           <thead>
             <tr>
               <th>
-                Exceptions Summary { 
-                  (self.aggregate && self.aggregate.length > 0) 
+                Exceptions Summary {
+                  (self.aggregate && self.aggregate.length > 0)
                   ? <a href={allExceptionsUrl}> <div style={allExceptionsStyle}>Expand</div> </a>
                   : null
                 }
@@ -910,11 +910,14 @@ var InstanceCounters = React.createClass({
         }
         if (instanceInfo) {
           var stmgrId = instanceInfo.stmgrId;
-          var jobUrl = pplan.stmgrs[stmgrId].joburl;
+          var container = stmgrId.split("-")[1]
           var host = "http://" + pplan.stmgrs[stmgrId].host + ":1338";
           var logfileUrl = '/topologies/' + this.props.info.cluster
               + '/' + this.props.info.environ + '/' + this.props.info.topology
-              + '/' + instanceInfo.id + '/logfile'
+              + '/' + container + '/file?path=./log-files/' + instanceInfo.id + '.log.0'
+          var jobUrl = '/topologies/filestats/' + this.props.info.cluster
+              + '/' + this.props.info.environ + '/' + this.props.info.topology
+              + '/' + container;
           var exceptionsUrl = '/topologies/' + this.props.info.cluster
               + '/' + this.props.info.environ + '/' + this.props.info.topology
               + '/' + this.props.info.comp_name + '/' + instance + '/exceptions';

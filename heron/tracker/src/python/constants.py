@@ -36,6 +36,8 @@ PARAM_ENDTIME = "endtime"
 PARAM_QUERY = "query"
 PARAM_OFFSET = "offset"
 PARAM_LENGTH = "length"
+PARAM_CONTAINER = "container"
+PARAM_PATH = "path"
 
 # These are the keys in the JSON response
 # formed by the handlers.
