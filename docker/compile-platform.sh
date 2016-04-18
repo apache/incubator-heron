@@ -17,6 +17,9 @@ elif [[ "$TARGET_PLATFORM" =~ "centos" ]]; then
   CONFIG_PLATFORM=centos
 elif [[ "$TARGET_PLATFORM" =~ "darwin" ]]; then
   CONFIG_PLATFORM=darwin
+else 
+  echo "Unknown platform: $TARGET_PLATFORM"
+  exit 1
 fi
 
 ./bazel_configure.py
