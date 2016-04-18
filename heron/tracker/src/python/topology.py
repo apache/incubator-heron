@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 import traceback
 import urllib2
 import uuid
 
 from heron.common.src.python import constants
-from heron.common.src.python.log import Log as LOG
 
+LOG = logging.getLogger(__name__)
 
 class Topology:
   """
