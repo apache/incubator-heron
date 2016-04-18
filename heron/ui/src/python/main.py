@@ -30,10 +30,13 @@ from heron.ui.src.python.log import Log as LOG
 
 class Application(tornado.web.Application):
   def __init__(self):
+    # TODO: Change these to query sting parameters, since
+    # current format can lead to pattern matching issues.
     callbacks = [
       (r"/",                                                                     handlers.MainHandler),
 
       (r"/topologies",                                                           handlers.ListTopologiesHandler),
+      (r"/topologies/filestats/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)",             handlers.ContainerFileStatsHandler),
       (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/config",                         handlers.TopologyConfigHandler),
       (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/exceptions",   handlers.TopologyExceptionsPageHandler),
       (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)",                                handlers.TopologyPlanHandler),
@@ -42,8 +45,8 @@ class Application(tornado.web.Application):
       (r"/topologies/metrics",                                                   handlers.api.MetricsHandler),
       (r"/topologies/metrics/timeline",                                          handlers.api.MetricsTimelineHandler),
 
-      (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/logfile",               handlers.LogfileHandler),
-      (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/filedata", handlers.LogfileDataHandler),
+      (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/file",                  handlers.ContainerFileHandler),
+      (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/filedata",              handlers.ContainerFileDataHandler),
 
       # Topology list and plan handlers
       (r"/topologies/list.json",                                                 handlers.api.ListTopologiesJsonHandler),
