@@ -30,7 +30,7 @@ import common
 from common.graph import TopologyDAG
 
 ################################################################################
-# Handler for displaying the config for a topology 
+# Handler for displaying the config for a topology
 ################################################################################
 class TopologyConfigHandler(base.BaseHandler):
   def get(self, cluster, environ, topology):
@@ -105,36 +105,67 @@ class TopologyPlanHandler(base.BaseHandler):
 ################################################################################
 # Handler for displaying the log file for an instance
 ################################################################################
-class LogfileHandler(base.BaseHandler):
+class ContainerFileHandler(base.BaseHandler):
   """
   Responsible for creating the web page for files. The html
   will in turn call another endpoint to get the file data.
   """
 
   @tornado.gen.coroutine
-  def get(self, cluster, environ, topology, instance):
+  def get(self, cluster, environ, topology, container):
+
+    path = self.get_argument("path")
 
     options = dict(
         cluster = cluster,
         environ = environ,
         topology = topology,
-        instance = instance
+        container = container,
+        path = path
     )
 
     self.render("file.html", **options)
 
 ################################################################################
-# Handler for getting the data for log file for an instance
+# Handler for getting the data for a file in a container of a topology
 ################################################################################
-class LogfileDataHandler(base.BaseHandler):
+class ContainerFileDataHandler(base.BaseHandler):
   """
-  Responsible for getting the data from log file of an instance.
+  Responsible for getting the data for a file in a container of a topology.
   """
 
   @tornado.gen.coroutine
-  def get(self, cluster, environ, topology, instance, offset, length):
+  def get(self, cluster, environ, topology, container):
 
-    data = yield access.get_logfile_data(cluster, environ, topology, instance, offset, length)
+    offset = self.get_argument("offset")
+    length = self.get_argument("length")
+    path = self.get_argument("path")
+
+    data = yield access.get_container_file_data(cluster, environ, topology, container, path, offset, length)
 
     self.write(data)
     self.finish()
+
+################################################################################
+# Handler for getting the file stats for a container
+################################################################################
+class ContainerFileStatsHandler(base.BaseHandler):
+  """
+  Responsible for getting the file stats for a container.
+  """
+
+  @tornado.gen.coroutine
+  def get(self, cluster, environ, topology, container):
+
+    path = self.get_argument("path", default=".")
+    data = yield access.get_filestats(cluster, environ, topology, container, path)
+
+    options = dict(
+        cluster = cluster,
+        environ = environ,
+        topology = topology,
+        container = container,
+        path = path,
+        filestats = data,
+    )
+    self.render("browse.html", **options)
