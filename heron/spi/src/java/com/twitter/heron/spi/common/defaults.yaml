@@ -28,6 +28,11 @@ UPLOADER_YAML:                ${HERON_CONF}/uploader.yaml
 SCHEDULER_JAR:                ${HERON_LIB}/scheduler/heron-scheduler.jar
 
 ################################################################################
+# Default values for scheduler config
+################################################################################
+SCHEDULER_IS_SERVICE:         True
+
+################################################################################
 # Defaults for config provide files, paths and directories
 ################################################################################
 CORE_PACKAGE_URI:             ${HERON_DIST}/heron-core.tar.gz

@@ -29,7 +29,7 @@ public class Context {
   }
 
   public static Boolean verbose(Config cfg) {
-    return cfg.getBooleanValue(ConfigKeys.get("VERBOSE"), false);
+    return cfg.getBooleanValue(ConfigKeys.get("VERBOSE"));
   }
 
   public static String configPath(Config cfg) {
