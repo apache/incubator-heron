@@ -91,26 +91,11 @@ generate_source() {
   tar --exclude-from=$DOCKER_DIR/.tarignore -C $PROJECT_DIR -czf $SRC_TAR .
 }
 
-verify_dockerfile_exists() {
-  if [ ! -f $1 ]; then
-    echo "The Dockerfiler $1 does not exist"
-    exit 1
-  fi
-}
-
 verify_source_exists() {
   if [ ! -f $1 ]; then
     echo "The source provided $1 does not exist"
     exit 1
   fi
-}
-
-dockerfile_path_for_platform() {
-  echo "$SCRATCH_DIR/Dockerfile.$1"
-}
-
-copy_bazel_rc_to() {
-  cp $PROJECT_DIR/tools/docker/bazel.rc $1
 }
 
 setup_scratch_dir() {
@@ -129,16 +114,13 @@ setup_output_dir() {
 }
 
 run_build() {
-  PLATFORM=$1
+  TARGET_PLATFORM=$1
   HERON_VERSION=$2
   OUTPUT_DIRECTORY=$(realpath $4)
   SOURCE_TARBALL=$3
-  DOCKER_FILE=$(dockerfile_path_for_platform $PLATFORM)
 
   setup_scratch_dir $SCRATCH_DIR
   setup_output_dir $OUTPUT_DIRECTORY
-  verify_dockerfile_exists $DOCKER_FILE
-  copy_bazel_rc_to  $SCRATCH_DIR/bazelrc
 
   if [ -z "$SOURCE_TARBALL" ]; then
     generate_source
@@ -148,23 +130,25 @@ run_build() {
   fi
   verify_source_exists $SOURCE_TARBALL
 
-  echo "Building heron-compiler container"
-  docker build -t heron-compiler:$PLATFORM -f $DOCKER_FILE $SCRATCH_DIR
+  export TARGET_PLATFORM=${TARGET_PLATFORM}
+  export HERON_VERSION=${HERON_VERSION} 
+  export SCRATCH_DIR=${SCRATCH_DIR}
+  export SOURCE_TARBALL=${SOURCE_TARBALL}
+  export OUTPUT_DIRECTORY=${OUTPUT_DIRECTORY}
 
-  echo "Running build in container"
-  docker run \
-    --rm \
-    -e HERON_VERSION=$HERON_VERSION \
-    -e HERON_GIT_RELEASE="$(heron_git_release)" \
-    -e HERON_GIT_REV="$(heron_git_rev)" \
-    -e HERON_GIT_COMMIT_MSG="$(heron_commit_msg)" \
-    -e HERON_BUILD_HOST="$(heron_build_host)" \
-    -e HERON_BUILD_USER="$(heron_build_user)" \
-    -e HERON_BUILD_TIME="$(heron_build_time)" \
-    -e HERON_TREE_STATUS="$(heron_tree_status)" \
-    -v "$SOURCE_TARBALL:/src.tar.gz:ro" \
-    -v "$OUTPUT_DIRECTORY:/dist" \
-    -it heron-compiler:$PLATFORM /compile.sh
+  export HERON_GIT_RELEASE="$(heron_git_release)"
+  export HERON_GIT_REV="$(heron_git_rev)"
+  export HERON_GIT_COMMIT_MSG="$(heron_commit_msg)"
+  export HERON_BUILD_HOST="$(heron_build_host)"
+  export HERON_BUILD_USER="$(heron_build_user)"
+  export HERON_BUILD_TIME="$(heron_build_time)"
+  export HERON_TREE_STATUS="$(heron_tree_status)"
+
+  if [ $TARGET_PLATFORM = "darwin" ]; then
+    docker/compile-platform.sh
+  else
+    docker/compile-docker.sh
+  fi
 }
 
 case $# in
@@ -179,7 +163,7 @@ case $# in
   *)
     echo "Usage: $0 <platform> <version_string> [source-tarball] <output-directory> "
     echo "  "
-    echo "Platforms: ubuntu14.04, centos7"
+    echo "Platforms Supported: darwin, ubuntu14.04, ubuntu15.10, centos7"
     echo "  "
     echo "Example:"
     echo "  ./build-artifacts.sh ubuntu14.04 0.12.0 ."
