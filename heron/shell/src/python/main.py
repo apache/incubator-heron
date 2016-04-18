@@ -158,6 +158,11 @@ class FileStatsHandler(tornado.web.RequestHandler):
     logger = logging.getLogger(__file__)
     if not path:
       path = "."
+
+    # User should not be able to access anything outside
+    # of the dir that heron-shell is running in. This ensures
+    # sandboxing. So we don't allow absolute paths and parent
+    # accessing.
     if path.startswith("/") or ".." in path:
       self.write("Only relative paths inside job dir are allowed")
       self.set_status(403)

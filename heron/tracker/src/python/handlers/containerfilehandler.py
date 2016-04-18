@@ -9,19 +9,20 @@ from heron.tracker.src.python import utils
 
 class ContainerFileDataHandler(BaseHandler):
   """
-  URL - /topologies/logfiledata?cluster=<cluster>&topology=<topology> \
-        &environ=<environment>&instance=<instance>
+  URL - /topologies/containerfiledata?cluster=<cluster>&topology=<topology> \
+        &environ=<environment>&container=<container>
   Parameters:
    - cluster - Name of cluster.
    - environ - Running environment.
    - topology - Name of topology (Note: Case sensitive. Can only
                 include [a-zA-Z0-9-_]+)
-   - instance - Instance Id
+   - container - Container number
+   - path - Relative path to the file
    - offset - From which to read the file
    - length - How much data to read
 
-  Get the data from the logfile for the given topology
-  and instance. The data being read is based on offset and length.
+  Get the data from the file for the given topology, container
+  and path. The data being read is based on offset and length.
   """
   def initialize(self, tracker):
     self.tracker = tracker
@@ -52,7 +53,21 @@ class ContainerFileDataHandler(BaseHandler):
       traceback.print_exc()
       self.write_error_response(e)
 
-class FileStatsHandler(BaseHandler):
+class ContainerFileStatsHandler(BaseHandler):
+  """
+  URL - /topologies/containerfilestats?cluster=<cluster>&topology=<topology> \
+        &environ=<environment>&container=<container>
+  Parameters:
+   - cluster - Name of cluster.
+   - environ - Running environment.
+   - topology - Name of topology (Note: Case sensitive. Can only
+                include [a-zA-Z0-9-_]+)
+   - container - Container number
+   - path - Relative path to the directory
+
+  Get the dir stats for the given topology, container and path.
+  """
+
   def initialize(self, tracker):
     self.tracker = tracker
 

@@ -1,6 +1,6 @@
 from basehandler import BaseHandler
 from containerfilehandler import ContainerFileDataHandler
-from containerfilehandler import FileStatsHandler
+from containerfilehandler import ContainerFileStatsHandler
 from defaulthandler import DefaultHandler
 from exceptionhandler import ExceptionHandler
 from exceptionsummaryhandler import ExceptionSummaryHandler
