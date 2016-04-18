@@ -100,6 +100,10 @@ public class Keys {
     return ConfigKeys.get("SCHEDULER_JAR");
   }
 
+  public static String schedulerService() {
+    return ConfigKeys.get("SCHEDULER_IS_SERVICE");
+  }
+
   public static String schedulerProxyConnectionString() {
     return ConfigKeys.get("SCHEDULER_PROXY_CONNECTION_STRING");
   }

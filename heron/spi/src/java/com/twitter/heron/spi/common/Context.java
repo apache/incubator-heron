@@ -29,7 +29,7 @@ public class Context {
   }
 
   public static Boolean verbose(Config cfg) {
-    return cfg.getBooleanValue(ConfigKeys.get("VERBOSE"));
+    return cfg.getBooleanValue(ConfigKeys.get("VERBOSE"), false);
   }
 
   public static String configPath(Config cfg) {
@@ -86,6 +86,10 @@ public class Context {
 
   public static String stateManagerClass(Config cfg) {
     return cfg.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS"));
+  }
+
+  public static Boolean schedulerService(Config cfg) {
+    return cfg.getBooleanValue("SCHEDULER_IS_SERVICE", true);
   }
 
   public static String clusterFile(Config cfg) {

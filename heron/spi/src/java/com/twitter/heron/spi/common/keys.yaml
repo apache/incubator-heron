@@ -52,6 +52,11 @@ PACKING_CLASS:                       heron.class.packing.algorithm
 STATE_MANAGER_CLASS:                 heron.class.state.manager
 
 ################################################################################
+# keys for scheduler config
+################################################################################
+SCHEDULER_IS_SERVICE:                heron.scheduler.is.service
+
+################################################################################
 # keys for config provided user binaries and jars
 ################################################################################
 SCHEDULER_JAR:                       heron.jars.scheduler
