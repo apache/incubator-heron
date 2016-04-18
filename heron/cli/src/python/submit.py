@@ -71,13 +71,11 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
   # get the release yaml file
   release_yaml_file = utils.get_heron_release_file()
 
-  # form the config overrides
-  override_config = utils.parse_override_config(cl_args['config_property'])
-
   # create a tar package with the cluster configuration and generated config files
   config_path = cl_args['config_path']
   tar_pkg_files = [topology_file, topology_defn_file]
-  generated_config_files = [release_yaml_file, override_config]
+  generated_config_files = [release_yaml_file, cl_args['override_config']]
+
   utils.create_tar(topology_pkg_path, tar_pkg_files, config_path, generated_config_files)
 
   # pass the args to submitter main
@@ -87,7 +85,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
       "--environment", cl_args['environ'],
       "--heron_home", utils.get_heron_dir(),
       "--config_path", config_path,
-      "--override_config", override_config,
+      "--override_config", cl_args['override_config'],
       "--topology_package", topology_pkg_path,
       "--topology_defn", topology_defn_file,
       "--topology_jar", topology_file
@@ -108,9 +106,6 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
       args = args,
       javaDefines = cl_args['javaDefines']
   )
-
-  # clean the override config file
-  shutil.rmtree(os.path.dirname(override_config))
 
 ################################################################################
 # Launch topologies
