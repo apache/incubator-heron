@@ -207,16 +207,19 @@ def main():
   # command to be execute
   command = command_line_args['subcommand']
 
+  # file resources to be cleaned when exit
+  files = []
+
   if command != 'help' and command != 'version':
-    command_line_args = extract_common_args(command, parser, command_line_args) 
+    command_line_args = extract_common_args(command, parser, command_line_args)
+    # register dirs cleanup function during exit
+    files.append(command_line_args['override_config_file'])
+
+  atexit.register(cleanup, files)
 
   # bail out if args are empty
   if not command_line_args:
     return 1
-
-  # register dirs cleanup function during exit
-  files = [command_line_args['override_config_file']]
-  atexit.register(cleanup, files)
 
   start = time.time() 
   retcode = run(command, parser, command_line_args, unknown_args)
