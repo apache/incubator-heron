@@ -5,11 +5,6 @@ load("/tools/rules/pex_rules", "pex_binary")
 release_version = "unversioned"
 
 filegroup(
-    name = "generated_release_files",
-    srcs = ["release.yaml"],
-)
-
-filegroup(
     name = "tarpkgs",
     srcs = [
         ":heron-api",
@@ -34,7 +29,7 @@ filegroup(
 genrule(
     name = "heron-core",
     srcs = [
-        ":generated_release_files",
+        ":release.yaml",
         ":hcontroller",
         ":hexecutor",
         ":hshell",
@@ -56,7 +51,7 @@ genrule(
         "export GENDIR=$(GENDIR);",
         "export BINDIR=$(BINDIR);",
         "$(location package_release.sh)            $(location heron-core.tar.gz)",
-        "--cp $(location generated_release_files)  heron-core/release.yaml",
+        "--cp $(location release.yaml)             heron-core/release.yaml",
         "--cp $(location hcontroller)              heron-core/bin/heron-controller",
         "--cp $(location hexecutor)                heron-core/bin/heron-executor",
         "--cp $(location hshell)                   heron-core/bin/heron-shell",
@@ -82,7 +77,7 @@ genrule(
 genrule(
     name = "heron-client",
     srcs = [
-        ":generated_release_files",
+        ":release.yaml",
         ":heron-core",
         ":conf-local-heron-internals",
         ":conf-local-metrics-sinks",
@@ -113,7 +108,7 @@ genrule(
         "export GENDIR=$(GENDIR);",
         "export BINDIR=$(BINDIR);",
         "$(location package_release.sh) $(location heron-client.tar.gz)",
-        "--cp $(location generated_release_files)    release.yaml",
+        "--cp $(location release.yaml)               release.yaml",
         "--cp $(location hcli)                       bin/heron",
         "--cp $(location conf-local-heron-internals) conf/local/heron_internals.yaml",
         "--cp $(location conf-local-metrics-sinks)   conf/local/metrics_sinks.yaml",
@@ -148,7 +143,7 @@ genrule(
 genrule(
     name = "heron-tools",
     srcs = [
-        ":generated_release_files",
+        ":release.yaml",
         ":htracker",
         ":hui",
     ],
@@ -159,7 +154,7 @@ genrule(
         "export GENDIR=$(GENDIR);",
         "export BINDIR=$(BINDIR);",
         "$(location package_release.sh) $(location heron-tools.tar.gz)",
-        "--cp $(location generated_release_files)                    release.yaml",
+        "--cp $(location release.yaml)               release.yaml",
         "--cp $(location htracker)                   bin/heron-tracker",
         "--cp $(location hui)                        bin/heron-ui",
     ]),
@@ -174,7 +169,7 @@ genrule(
 genrule(
     name = "heron-api",
     srcs = [
-        ":generated_release_files",
+        ":release.yaml",
         ":hapi",
         ":hstorm",
     ],
@@ -185,7 +180,7 @@ genrule(
         "export GENDIR=$(GENDIR);",
         "export BINDIR=$(BINDIR);",
         "$(location package_release.sh)              $(location heron-api.tar.gz)",
-        "--cp $(location generated_release_files)                    release.yaml",
+        "--cp $(location release.yaml)               release.yaml",
         "--cp $(location hapi)                       heron-api.jar",
         "--cp $(location hstorm)                     heron-storm.jar",
     ]),
@@ -420,12 +415,12 @@ genrule(
 genrule(
     name = "generate-api-launcher",
     srcs = [
-        ":generated_release_files",
+        ":release.yaml",
         "//scripts/packages:api-template-bin.sh"
     ],
     outs = ["api_launcher_bin.sh"],
     cmd = """
-        release_info="$$(cat $(location :generated_release_files))"
+        release_info="$$(cat $(location :release.yaml))"
         template="$$(cat $(location //scripts/packages:api-template-bin.sh))"
         echo "$${template//%release_info%/$${release_info}}" >$@
         """,
@@ -434,12 +429,12 @@ genrule(
 genrule(
     name = "generate-client-launcher",
     srcs = [
-        ":generated_release_files",
+        ":release.yaml",
         "//scripts/packages:client-template-bin.sh"
     ],
     outs = ["client_launcher_bin.sh"],
     cmd = """
-        release_info="$$(cat $(location :generated_release_files))"
+        release_info="$$(cat $(location :release.yaml))"
         template="$$(cat $(location //scripts/packages:client-template-bin.sh))"
         echo "$${template//%release_info%/$${release_info}}" >$@
         """,
@@ -448,12 +443,12 @@ genrule(
 genrule(
     name = "generate-tools-launcher",
     srcs = [
-        ":generated_release_files",
+        ":release.yaml",
         "//scripts/packages:tools-template-bin.sh"
     ],
     outs = ["tools_launcher_bin.sh"],
     cmd = """
-        release_info="$$(cat $(location :generated_release_files))"
+        release_info="$$(cat $(location :release.yaml))"
         template="$$(cat $(location //scripts/packages:tools-template-bin.sh))"
         echo "$${template//%release_info%/$${release_info}}" >$@
         """,
