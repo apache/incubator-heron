@@ -911,7 +911,6 @@ var InstanceCounters = React.createClass({
         if (instanceInfo) {
           var stmgrId = instanceInfo.stmgrId;
           var container = stmgrId.split("-")[1]
-          var host = "http://" + pplan.stmgrs[stmgrId].host + ":1338";
           var logfileUrl = '/topologies/' + this.props.info.cluster
               + '/' + this.props.info.environ + '/' + this.props.info.topology
               + '/' + container + '/file?path=./log-files/' + instanceInfo.id + '.log.0'
@@ -936,7 +935,6 @@ var InstanceCounters = React.createClass({
           var links = [['Logs', logfileUrl, "_blank"],
                        ['Job', jobUrl, "_blank"],
                        ['Exceptions', exceptionsUrl, "_self"],
-                       ['Host', host, "_blank"],
                        ['Pid', pidUrl, "_self"],
                        ['Stack', jstackUrl, "_self"],
                        ['MemHistogram', histoUrl, "_self"],
