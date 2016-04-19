@@ -10,7 +10,6 @@ cd $SCRATCH_DIR
 echo "Extracting source"
 tar -C . -xzf $SOURCE_TARBALL
 
-CONFIG_PLATFORM=
 if [[ "$TARGET_PLATFORM" =~ "ubuntu" ]]; then
   CONFIG_PLATFORM=ubuntu
 elif [[ "$TARGET_PLATFORM" =~ "centos" ]]; then
