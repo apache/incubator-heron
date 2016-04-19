@@ -26,7 +26,6 @@ import javax.xml.bind.DatatypeConverter;
 import org.apache.commons.io.FileUtils;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.common.ShellUtils;
@@ -88,17 +87,6 @@ public class LocalLauncher implements ILauncher {
   }
 
   /**
-   * Actions to execute before launch such as check whether the
-   * topology is already running
-   *
-   * @return true, if successful
-   */
-  @Override
-  public boolean prepareLaunch(PackingPlan packing) {
-    return true;
-  }
-
-  /**
    * Launch the topology
    */
   @Override
@@ -147,11 +135,6 @@ public class LocalLauncher implements ILauncher {
         "For checking the status and logs of the topology, use the working directory %s",
         LocalContext.workingDirectory(config)));
 
-    return true;
-  }
-
-  @Override
-  public boolean postLaunch(PackingPlan packing) {
     return true;
   }
 

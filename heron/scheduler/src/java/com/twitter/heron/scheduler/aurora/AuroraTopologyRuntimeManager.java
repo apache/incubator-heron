@@ -27,7 +27,6 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.Constants;
-import com.twitter.heron.spi.scheduler.IRuntimeManager;
 import com.twitter.heron.spi.scheduler.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.scheduler.context.RuntimeManagerContext;
 import com.twitter.heron.scheduler.util.ShellUtility;

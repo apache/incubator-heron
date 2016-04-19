@@ -159,31 +159,10 @@ public class LaunchRunnerTest {
   }
 
   @Test
-  public void testPrepareLaunchFail() throws Exception {
-    Config runtime = createRunnerRuntime();
-    Config config = createRunnerConfig();
-    ILauncher launcher = Runtime.launcherClassInstance(runtime);
-    Mockito.when(launcher.prepareLaunch(Mockito.any(PackingPlan.class))).thenReturn(false);
-
-    LaunchRunner launchRunner = new LaunchRunner(config, runtime);
-
-    Assert.assertFalse(launchRunner.call());
-    Mockito.verify(launcher).initialize(config, runtime);
-    Mockito.verify(launcher, Mockito.never()).launch(Mockito.any(PackingPlan.class));
-
-    SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
-    Mockito.verify(statemgr, Mockito.never()).
-        setExecutionState(Mockito.any(ExecutionEnvironment.ExecutionState.class), Mockito.anyString());
-    Mockito.verify(statemgr, Mockito.never()).
-        setTopology(Mockito.any(TopologyAPI.Topology.class), Mockito.anyString());
-  }
-
-  @Test
   public void testSetExecutionStateFail() throws Exception {
     Config runtime = createRunnerRuntime();
     Config config = createRunnerConfig();
     ILauncher launcher = Runtime.launcherClassInstance(runtime);
-    Mockito.when(launcher.prepareLaunch(Mockito.any(PackingPlan.class))).thenReturn(true);
 
     LaunchRunner launchRunner = new LaunchRunner(config, runtime);
 
@@ -202,7 +181,6 @@ public class LaunchRunnerTest {
     Config runtime = createRunnerRuntime();
     Config config = createRunnerConfig();
     ILauncher launcher = Runtime.launcherClassInstance(runtime);
-    Mockito.when(launcher.prepareLaunch(Mockito.any(PackingPlan.class))).thenReturn(true);
 
     LaunchRunner launchRunner = new LaunchRunner(config, runtime);
 
@@ -221,7 +199,6 @@ public class LaunchRunnerTest {
     Config runtime = createRunnerRuntime();
     Config config = createRunnerConfig();
     ILauncher launcher = Runtime.launcherClassInstance(runtime);
-    Mockito.when(launcher.prepareLaunch(Mockito.any(PackingPlan.class))).thenReturn(true);
 
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
     Mockito.when(
@@ -244,41 +221,11 @@ public class LaunchRunnerTest {
   }
 
   @Test
-  public void testPostLaunchFail() throws Exception {
-    Config runtime = createRunnerRuntime();
-    Config config = createRunnerConfig();
-    ILauncher launcher = Runtime.launcherClassInstance(runtime);
-    Mockito.when(launcher.prepareLaunch(Mockito.any(PackingPlan.class))).thenReturn(true);
-    Mockito.when(launcher.launch(Mockito.any(PackingPlan.class))).thenReturn(true);
-
-    SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
-    Mockito.when(
-        statemgr.setTopology(Mockito.any(TopologyAPI.Topology.class), Mockito.eq(topologyName))).
-        thenReturn(true);
-    Mockito.when(
-        statemgr.setExecutionState(Mockito.any(ExecutionEnvironment.ExecutionState.class), Mockito.eq(topologyName))).
-        thenReturn(true);
-
-    LaunchRunner launchRunner = new LaunchRunner(config, runtime);
-
-    Mockito.when(launcher.postLaunch(Mockito.any(PackingPlan.class))).thenReturn(false);
-    Assert.assertFalse(launchRunner.call());
-
-    // Verify set && clean
-    Mockito.verify(statemgr).setTopology(Mockito.any(TopologyAPI.Topology.class), Mockito.eq(topologyName));
-    Mockito.verify(statemgr).setExecutionState(Mockito.any(ExecutionEnvironment.ExecutionState.class), Mockito.eq(topologyName));
-    Mockito.verify(statemgr).deleteExecutionState(Mockito.eq(topologyName));
-    Mockito.verify(statemgr).deleteTopology(Mockito.eq(topologyName));
-  }
-
-  @Test
   public void testCallSuccess() throws Exception {
     Config runtime = createRunnerRuntime();
     Config config = createRunnerConfig();
     ILauncher launcher = Runtime.launcherClassInstance(runtime);
-    Mockito.when(launcher.prepareLaunch(Mockito.any(PackingPlan.class))).thenReturn(true);
     Mockito.when(launcher.launch(Mockito.any(PackingPlan.class))).thenReturn(true);
-    Mockito.when(launcher.postLaunch(Mockito.any(PackingPlan.class))).thenReturn(true);
 
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
     Mockito.when(

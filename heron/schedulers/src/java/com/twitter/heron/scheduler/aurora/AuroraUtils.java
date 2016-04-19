@@ -14,13 +14,13 @@
 
 package com.twitter.heron.scheduler.aurora;
 
-import com.twitter.heron.spi.common.ShellUtils;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import com.twitter.heron.spi.common.ShellUtils;
 
 /**
  * This file defines Utils methods used by Aurora
@@ -83,10 +83,16 @@ public class AuroraUtils {
   // Static method to append verbose and batching options if needed
   public static void appendAuroraCommandOptions(List<String> auroraCmd,
                                                 boolean isVerbose) {
+    // Append verbose if needed
     if (isVerbose) {
       auroraCmd.add("--verbose");
     }
-    auroraCmd.add("--no-batching");
+
+    // Append batch size.
+    // Note that we can not use "--no-batching" since "restart" command does not accept it.
+    // So we play a small trick here by setting batch size Integer.MAX_VALUE.
+    auroraCmd.add("--batch-size");
+    auroraCmd.add("" + Integer.MAX_VALUE);
 
     return;
   }
