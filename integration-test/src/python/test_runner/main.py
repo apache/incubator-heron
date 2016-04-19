@@ -105,10 +105,10 @@ def getHTTPResponse(serverAddress, serverPort, topologyName):
   raise RuntimeError("Failed to get HTTP response")
 
 # Submit topology using heron-cli
-def submitTopology(heronCliPath, dc, role, env, jarPath, classPath, pkgUri, args = None):
+def submitTopology(heronCliPath, cluster, role, env, jarPath, classPath, pkgUri, args = None):
   logging.info("Submitting topology")
   cmd = ("%s submit %s/%s/%s --config-property heron.package.core.uri=%s %s %s %s --verbose" % (
-    heronCliPath, dc, role, env, pkgUri, jarPath, classPath, args))
+    heronCliPath, cluster, role, env, pkgUri, jarPath, classPath, args))
 
   logging.info("Submitting command: %s" % (cmd))
 
@@ -120,10 +120,10 @@ def submitTopology(heronCliPath, dc, role, env, jarPath, classPath, pkgUri, args
   raise RuntimeError("Unable to submit the topology")
 
 # Kill a topology using heron-cli
-def killTopology(heronCliPath, dc, role, env, topologyName):
+def killTopology(heronCliPath, cluster, role, env, topologyName):
   logging.info("Killing topology")
   cmd = "%s kill %s/%s/%s %s --verbose" % (
-    heronCliPath, dc, role, env, topologyName)
+    heronCliPath, cluster, role, env, topologyName)
 
   logging.info("Submitting command: %s" % (cmd))
   for i in range(0, RETRY_ATTEMPTS):
@@ -169,7 +169,7 @@ def main():
 
   parser.add_argument('-hc', '--heron-cli-path', dest='heronCliPath', default=conf['heronCliPath'])
   parser.add_argument('-tj', '--tests-jar-path', dest='testsJarPath')
-  parser.add_argument('-dc', '--data-center', dest='dataCenter', default=conf['dataCenter'])
+  parser.add_argument('-cl', '--cluster', dest='cluster', default=conf['cluster'])
   parser.add_argument('-ev', '--env', dest='env', default=conf['env'])
   parser.add_argument('-rl', '--role', dest='role', default=conf['role'])
   parser.add_argument('-rh', '--results-server-hostname', dest='resultsServerHostname')
