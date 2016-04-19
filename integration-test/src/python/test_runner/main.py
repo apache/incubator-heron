@@ -107,7 +107,7 @@ def getHTTPResponse(serverAddress, serverPort, topologyName):
 # Submit topology using heron-cli
 def submitTopology(heronCliPath, dc, role, env, jarPath, classPath, pkgUri, args = None):
   logging.info("Submitting topology")
-  cmd = ("%s submit %s/%s/%s --config-property=%s %s %s %s --verbose" % (
+  cmd = ("%s submit %s/%s/%s --config-property heron.package.core.uri=%s %s %s %s --verbose" % (
     heronCliPath, dc, role, env, pkgUri, jarPath, classPath, args))
 
   logging.info("Submitting command: %s" % (cmd))
@@ -153,16 +153,6 @@ def runAllTests(conf, args):
       failures += [topologyName]
   return (successes, failures)
 
-def kinit(interval):
-  cmd = "kinit -k -t /etc/twkeys/jenkins/kerberos/jenkins.keytab jenkins@TWITTER.BIZ"
-  while True:
-    if os.system(cmd) == 0:
-      logging.info("Successfully kinited")
-    else:
-      logging.info("Failed to kinit")
-
-    time.sleep(interval)
-
 def main():
   root = logging.getLogger()
   root.setLevel(logging.DEBUG)
@@ -173,11 +163,6 @@ def main():
   decoder = json.JSONDecoder(strict=False)
   # Convert the conf file to a json format
   conf = decoder.decode(confString)
-
-  # schedule kinit
-  kinit_thread = threading.Thread(target = kinit, name = "cron_kinit", args=(900,))
-  kinit_thread.setDaemon(True)
-  kinit_thread.start()
 
   # Parse the arguments passed via command line
   parser = argparse.ArgumentParser(description='This is the heron integration test framework')
