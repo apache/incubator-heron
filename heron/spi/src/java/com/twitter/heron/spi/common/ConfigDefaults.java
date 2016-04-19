@@ -62,6 +62,6 @@ public class ConfigDefaults {
   }
 
   public static Boolean getBoolean(String key) {
-    return (Boolean)defaults.get(key); 
+    return Convert.getBoolean(defaults.get(key)); 
   }
 }

@@ -30,7 +30,7 @@ public class Convert {
       try {
         return Integer.parseInt(o.toString());
       } catch (NumberFormatException nfe) {
-        throw new IllegalArgumentException("Don't know how to convert " + o + " + to integer");
+        throw new IllegalArgumentException("Failed to convert " + o + " + to integer");
       }
     }
  }
@@ -46,7 +46,7 @@ public class Convert {
       try {
         return Long.parseLong(o.toString());
       } catch (NumberFormatException nfe) {
-        throw new IllegalArgumentException("Don't know how to convert " + o + " + to long");
+        throw new IllegalArgumentException("Failed to convert " + o + " + to long");
       }
     }
   }
@@ -66,8 +66,18 @@ public class Convert {
       try {
         return Double.parseDouble(o.toString());
       } catch (NumberFormatException nfe) {
-        throw new IllegalArgumentException("Don't know how to convert " + o + " + to double");
+        throw new IllegalArgumentException("Failed to convert " + o + " + to double");
       }
+    }
+  }
+
+  public static Boolean getBoolean(Object o) {
+    if (o instanceof Boolean) {
+      return ((Boolean) o);
+    } else if (o instanceof String) {
+      return Boolean.valueOf((String) o);
+    } else {
+      throw new IllegalArgumentException("Failed to convert " + o + " + to boolean");
     }
   }
 
