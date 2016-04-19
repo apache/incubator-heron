@@ -88,6 +88,10 @@ public class Context {
     return cfg.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS"));
   }
 
+  public static Boolean schedulerService(Config cfg) {
+    return cfg.getBooleanValue(ConfigKeys.get("SCHEDULER_IS_SERVICE"));
+  }
+
   public static String clusterFile(Config cfg) {
     return cfg.getStringValue(Keys.clusterFile());
   }
