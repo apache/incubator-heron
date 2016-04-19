@@ -10,13 +10,15 @@ cd $SCRATCH_DIR
 echo "Extracting source"
 tar -C . -xzf $SOURCE_TARBALL
 
-CONFIG_PLATFORM=
 if [[ "$TARGET_PLATFORM" =~ "ubuntu" ]]; then
   CONFIG_PLATFORM=ubuntu
 elif [[ "$TARGET_PLATFORM" =~ "centos" ]]; then
   CONFIG_PLATFORM=centos
 elif [[ "$TARGET_PLATFORM" =~ "darwin" ]]; then
   CONFIG_PLATFORM=darwin
+else 
+  echo "Unknown platform: $TARGET_PLATFORM"
+  exit 1
 fi
 
 ./bazel_configure.py
