@@ -22,21 +22,14 @@ See: http://download.oracle.com/javase/6/docs/platform/serialization/spec/protoc
 """
 
 import StringIO
+import logging
 import struct
 
-try:
-    import logging
-except ImportError:
-    def log_debug(message, ident=0):
-        pass
-    def log_error(message, ident=0):
-        pass
-else:
-    _log = logging.getLogger(__name__)
-    def log_debug(message, ident=0):
-        _log.debug(" " * (ident * 2) + str(message))
-    def log_error(message, ident=0):
-        _log.error(" " * (ident * 2) + str(message))
+LOG = logging.getLogger(__name__)
+def log_debug(message, ident=0):
+    LOG.debug(" " * (ident * 2) + str(message))
+def log_error(message, ident=0):
+    LOG.error(" " * (ident * 2) + str(message))
 
 __version__ = "$Revision: 20 $"
 
