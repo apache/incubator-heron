@@ -28,8 +28,8 @@ public class Defaults {
     return ConfigDefaults.get("ENVIRON");
   }
 
-  public static String verbose() {
-    return ConfigDefaults.get("VERBOSE");
+  public static Boolean verbose() {
+    return ConfigDefaults.getBoolean("VERBOSE");
   }
 
   public static String configPath() {

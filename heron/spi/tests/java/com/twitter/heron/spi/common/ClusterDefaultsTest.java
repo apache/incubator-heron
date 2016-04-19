@@ -77,6 +77,10 @@ public class ClusterDefaultsTest {
   @Test
   public void testDefaultMiscellaneous() throws Exception {
     Assert.assertEquals(
+        Defaults.verbose(),
+        Context.verbose(props)
+    );
+    Assert.assertEquals(
         Defaults.schedulerService(),
         Context.schedulerService(props)
     );
