@@ -13,17 +13,17 @@
 # limitations under the License.
 
 import json
+import logging
 
 from functools import partial
 
+from heron.proto import topology_pb2
+from heron.statemgrs.src.python import statemanagerfactory
+from heron.tracker.src.python.topology import Topology
 from heron.tracker.src.python import javaobj
 from heron.tracker.src.python import utils
-from heron.tracker.src.python.log import Log as LOG
 
-from heron.proto import topology_pb2
-
-from heron.tracker.src.python.topology import Topology
-from heron.statemgrs.src.python import statemanagerfactory
+LOG = logging.getLogger(__name__)
 
 class Tracker:
   """
