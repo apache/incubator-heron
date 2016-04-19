@@ -60,4 +60,8 @@ public class ConfigDefaults {
   public static Double getDouble(String key) {
     return Convert.getDouble(defaults.get(key));
   }
+
+  public static Boolean getBoolean(String key) {
+    return Convert.getBoolean(defaults.get(key)); 
+  }
 }

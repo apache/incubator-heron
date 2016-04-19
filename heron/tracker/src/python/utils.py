@@ -80,6 +80,13 @@ def make_shell_logfile_data_url(host, shell_port, instance_id, offset, length):
   """
   return "http://%s:%d/filedata/log-files/%s.log.0?offset=%s&length=%s" % (host, shell_port, instance_id, offset, length)
 
+def make_shell_filestats_url(host, shell_port, path):
+  """
+  Make the url for filestats data in heron-shell
+  from the info stored in stmgr.
+  """
+  return "http://%s:%d/filestats/%s" % (host, shell_port, path)
+
 def make_viz_dashboard_url(name, cluster, environ):
   """
   Link to the dashboard. Must override to return a valid url.
@@ -131,7 +138,7 @@ def convert_execution_state(execution_state):
 ################################################################################
 def identity(x):
   """
-  This will return the input arg 
+  This will return the input arg
   :return: input argument
   """
   return x

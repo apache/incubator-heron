@@ -36,6 +36,7 @@ public class ClusterDefaultsTest {
     home = ClusterDefaults.getDefaultHome();
     sandbox = ClusterDefaults.getSandboxHome();
     props = Config.newBuilder()
+        .putAll(ClusterDefaults.getDefaultMiscellaneous())
         .putAll(ClusterDefaults.getDefaultJars())
         .putAll(ClusterDefaults.getSandboxBinaries())
         .build();
@@ -70,6 +71,18 @@ public class ClusterDefaultsTest {
     Assert.assertEquals(
         Defaults.schedulerJar(),
         Context.schedulerJar(props)
+    );
+  }
+
+  @Test
+  public void testDefaultMiscellaneous() throws Exception {
+    Assert.assertEquals(
+        Defaults.verbose(),
+        Context.verbose(props)
+    );
+    Assert.assertEquals(
+        Defaults.schedulerService(),
+        Context.schedulerService(props)
     );
   }
 

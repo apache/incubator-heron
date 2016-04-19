@@ -44,9 +44,9 @@ div.tight
 }
 </style>
 
-<title>Instance {{ instance }}</title>
+<title>Path {{ path }}</title>
 <body>
-<div> <strong> Instance </strong> {{ instance }} </div>
+<div> <strong> Path </strong> {{ path }} </div>
   <div style="position: absolute; left: 5px; top: 0px;">
     <p id="indicator" class="log invert"></p>
   </div>
@@ -75,8 +75,10 @@ div.tight
           'length': -1
         }, options);
 
-        var url = "/topologies/{{ cluster }}/{{ environ }}/{{ topology }}/{{ instance }}/" +
-                   settings.offset + "/" + settings.length + "/filedata";
+        var url = "/topologies/{{ cluster }}/{{ environ }}/{{ topology }}/{{ container }}/filedata" +
+                   "?offset=" + settings.offset +
+                   "&length=" + settings.length +
+                   "&path={{ path }}";
         return $.getJSON(url);
       },
       'indicator': $('#indicator')

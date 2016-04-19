@@ -28,8 +28,8 @@ public class Defaults {
     return ConfigDefaults.get("ENVIRON");
   }
 
-  public static String verbose() {
-    return ConfigDefaults.get("VERBOSE");
+  public static Boolean verbose() {
+    return ConfigDefaults.getBoolean("VERBOSE");
   }
 
   public static String configPath() {
@@ -62,6 +62,10 @@ public class Defaults {
 
   public static String stateManagerClass() {
     return ConfigDefaults.get("STATE_MANAGER_CLASS");
+  }
+
+  public static Boolean schedulerService() {
+    return ConfigDefaults.getBoolean("SCHEDULER_IS_SERVICE");
   }
 
   public static String clusterFile() {

@@ -36,6 +36,26 @@ public class Context {
     return cfg.getStringValue(ConfigKeys.get("CONFIG_PATH"));
   }
 
+  public static String buildVersion(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("BUILD_VERSION"));
+  }
+
+  public static String buildTime(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("BUILD_TIME"));
+  }
+
+  public static String buildTimeStamp(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("BUILD_TIMESTAMP"));
+  }
+
+  public static String buildHost(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("BUILD_HOST"));
+  }
+
+  public static String buildUser(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("BUILD_USER"));
+  }
+
   public static String topologyName(Config cfg) {
     return cfg.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"));
   }
@@ -66,6 +86,10 @@ public class Context {
 
   public static String stateManagerClass(Config cfg) {
     return cfg.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS"));
+  }
+
+  public static Boolean schedulerService(Config cfg) {
+    return cfg.getBooleanValue(ConfigKeys.get("SCHEDULER_IS_SERVICE"));
   }
 
   public static String clusterFile(Config cfg) {

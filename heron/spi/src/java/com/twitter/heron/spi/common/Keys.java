@@ -36,6 +36,26 @@ public class Keys {
     return ConfigKeys.get("CONFIG_PATH");
   }
 
+  public static String buildVersion() {
+    return ConfigKeys.get("BUILD_VERSION");
+  }
+
+  public static String buildTime() {
+    return ConfigKeys.get("BUILD_TIME");
+  }
+
+  public static String buildTimeStamp() {
+    return ConfigKeys.get("BUILD_TIMESTAMP");
+  }
+
+  public static String buildHost() {
+    return ConfigKeys.get("BUILD_HOST");
+  }
+
+  public static String buildUser() {
+    return ConfigKeys.get("BUILD_USER");
+  }
+
   public static String topologyId() {
     return ConfigKeys.get("TOPOLOGY_ID");
   }
@@ -78,6 +98,10 @@ public class Keys {
 
   public static String schedulerJar() {
     return ConfigKeys.get("SCHEDULER_JAR");
+  }
+
+  public static String schedulerService() {
+    return ConfigKeys.get("SCHEDULER_IS_SERVICE");
   }
 
   public static String schedulerProxyConnectionString() {

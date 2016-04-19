@@ -98,3 +98,20 @@ def add_config(parser):
       action='append',
       default=[])
   return parser
+
+def add_system_property(parser):
+  parser.add_argument(
+      '-D',
+      default=[],
+      action="append",
+      dest="javaDefines",
+      metavar='DEFINE',
+      help='Define a system property to pass to java -D when running main.')
+  return parser
+
+def add_deactive_deploy(parser):
+  parser.add_argument(
+      '--deploy-deactivated',
+      metavar='(a boolean; default: "false")',
+      default=False)
+  return parser

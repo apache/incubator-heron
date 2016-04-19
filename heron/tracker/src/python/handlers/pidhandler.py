@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 import tornado.gen
 import tornado.web
 import traceback
@@ -19,7 +20,8 @@ import traceback
 from heron.tracker.src.python import constants
 from heron.tracker.src.python import utils
 from heron.tracker.src.python.handlers import BaseHandler
-from heron.tracker.src.python.log import Log as LOG
+
+LOG = logging.getLogger(__name__)
 
 @tornado.gen.coroutine
 def getInstancePid(topology_info, instance_id):

@@ -141,6 +141,14 @@ public final class ClusterDefaults {
     cb.put(Keys.instanceDisk(), Defaults.instanceDisk());
     return cb.build();
   }
+
+  public static Config getDefaultMiscellaneous() {
+    Config.Builder cb = Config.newBuilder();
+
+    cb.put(Keys.verbose(), Defaults.verbose());
+    cb.put(Keys.schedulerService(), Defaults.schedulerService());
+    return cb.build();
+  }
      
   public static Config getDefaults() {
     Config.Builder cb = Config.newBuilder();
@@ -149,6 +157,7 @@ public final class ClusterDefaults {
     cb.putAll(getDefaultJars());
     cb.putAll(getDefaultFilesAndPaths());
     cb.putAll(getDefaultResources());
+    cb.putAll(getDefaultMiscellaneous());
     return cb.build();
   }
 
