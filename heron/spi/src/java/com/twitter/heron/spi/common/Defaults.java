@@ -64,6 +64,10 @@ public class Defaults {
     return ConfigDefaults.get("STATE_MANAGER_CLASS");
   }
 
+  public static Boolean schedulerService() {
+    return ConfigDefaults.getBoolean("SCHEDULER_IS_SERVICE");
+  }
+
   public static String clusterFile() {
     return ConfigDefaults.get("CLUSTER_YAML");
   }
