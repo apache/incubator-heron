@@ -23,6 +23,11 @@ SYSTEM_YAML:                  ${HERON_CONF}/heron_internals.yaml
 UPLOADER_YAML:                ${HERON_CONF}/uploader.yaml
 
 ################################################################################
+# Default values for heron verbose
+################################################################################
+VERBOSE:                      True
+
+################################################################################
 # Default values for heron home binaries and jars
 ################################################################################
 SCHEDULER_JAR:                ${HERON_LIB}/scheduler/heron-scheduler.jar
