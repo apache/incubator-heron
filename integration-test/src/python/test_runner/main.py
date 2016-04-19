@@ -24,7 +24,7 @@ def runTest(topologyName, classPath, expectedResultFilePath, params):
   try:
     args = httpServerUrl + " " + topologyName
     submitTopology(params.heronCliPath, params.dataCenter, params.role, params.env, params.testsJarPath, classPath,
-      params.releasePackageRole, params.releasePackageName, args)
+      params.releasePackageUri, args)
   except Exception as e:
     logging.error("Failed to submit %s topology: %s" %(topologyName, str(e)))
     return "fail"
@@ -105,11 +105,10 @@ def getHTTPResponse(serverAddress, serverPort, topologyName):
   raise RuntimeError("Failed to get HTTP response")
 
 # Submit topology using heron-cli
-def submitTopology(heronCliPath, dc, role, env, jarPath, classPath, pkgRole, pkgName, args = None):
+def submitTopology(heronCliPath, dc, role, env, jarPath, classPath, pkgUri, args = None):
   logging.info("Submitting topology")
-  cmd = ("%s submit %s/%s/%s --heron-release-pkgrole=%s"
-        " --heron-release-pkgname=%s %s %s %s --verbose" % (
-    heronCliPath, dc, role, env, pkgRole, pkgName, jarPath, classPath, args))
+  cmd = ("%s submit %s/%s/%s --config-property=%s %s %s %s --verbose" % (
+    heronCliPath, dc, role, env, pkgUri, jarPath, classPath, args))
 
   logging.info("Submitting command: %s" % (cmd))
 
@@ -191,8 +190,7 @@ def main():
   parser.add_argument('-rh', '--results-server-hostname', dest='resultsServerHostname')
   parser.add_argument('-rp', '--results-server-port', dest='resultsServerPort', default=conf['resultsServerPort'])
   parser.add_argument('-tp', '--topologies-path', dest='topologiesPath')
-  parser.add_argument('-pn', '--release-package-name', dest='releasePackageName', default=conf['releasePackageName'])
-  parser.add_argument('-pr', '--release-package-role', dest='releasePackageRole', default=conf['releasePackageRole'])
+  parser.add_argument('-pi', '--release-package-uri', dest='releasePackageUri', default=conf['releasePackageUri'])
 
   #TODO: Enable this option
   #parser.add_argument('-dt', '--disable-topologies', dest='disabledTopologies', default='',
