@@ -145,6 +145,7 @@ public final class ClusterDefaults {
   public static Config getDefaultMiscellaneous() {
     Config.Builder cb = Config.newBuilder();
 
+    cb.put(Keys.verbose(), Defaults.verbose());
     cb.put(Keys.schedulerService(), Defaults.schedulerService());
     return cb.build();
   }
