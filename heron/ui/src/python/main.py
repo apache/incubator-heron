@@ -47,6 +47,7 @@ class Application(tornado.web.Application):
 
       (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/file",                  handlers.ContainerFileHandler),
       (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/filedata",              handlers.ContainerFileDataHandler),
+      (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/filedownload",          handlers.ContainerFileDownloadHandler),
 
       # Topology list and plan handlers
       (r"/topologies/list.json",                                                 handlers.api.ListTopologiesJsonHandler),
