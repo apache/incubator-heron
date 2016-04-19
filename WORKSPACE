@@ -9,11 +9,6 @@ maven_jar(
   artifact = "com.puppycrawl.tools:checkstyle:6.17",
 )
 
-#maven_jar(
-#  name = "checkstyle-twitter",
-#  artifact = "com.twitter.common:checkstyle:0.0.2",
-#)
-
 maven_jar(
   name = "commons-beanutils",
   artifact = "commons-beanutils:commons-beanutils:1.9.2",
