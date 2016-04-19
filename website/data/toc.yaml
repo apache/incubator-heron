@@ -65,6 +65,10 @@ sections:
         url: /docs/contributors/custom-scheduler
       - name: Implementing a Custom Metrics Sink
         url: /docs/contributors/custom-metrics-sink
+  - name: Heron Resources
+    sublinks:
+      - name: Heron Resources
+        url: /docs/resources
   - name: Contributors
     sublinks:
       - name: Community
