@@ -1,12 +1,15 @@
 package com.twitter.heron.scheduler.client;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.Common;
+import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.HttpUtils;
+import com.twitter.heron.spi.scheduler.Command;
 
 /**
  * This class manages topology by sending request
@@ -16,20 +19,28 @@ import com.twitter.heron.spi.common.HttpUtils;
 public class HttpServiceSchedulerClient implements ISchedulerClient {
   private static final Logger LOG = Logger.getLogger(HttpServiceSchedulerClient.class.getName());
 
-  private final HttpURLConnection connection;
+  private final Config config;
+  private final Config runtime;
+  private final Scheduler.SchedulerLocation schedulerLocation;
 
-  public HttpServiceSchedulerClient(HttpURLConnection connection) {
-    this.connection = connection;
+  public HttpServiceSchedulerClient(Config config, Config runtime,
+                                    Scheduler.SchedulerLocation schedulerLocation) {
+    this.config = config;
+    this.runtime = runtime;
+    this.schedulerLocation = schedulerLocation;
+
+
+    LOG.log(Level.INFO, "Scheduler is listening on location: {0} ", schedulerLocation.toString());
   }
 
   @Override
   public boolean restartTopology(Scheduler.RestartTopologyRequest restartTopologyRequest) {
-    return requestSchedulerService(restartTopologyRequest.toByteArray());
+    return requestSchedulerService(Command.RESTART, restartTopologyRequest.toByteArray());
   }
 
   @Override
   public boolean killTopology(Scheduler.KillTopologyRequest killTopologyRequest) {
-    return requestSchedulerService(killTopologyRequest.toByteArray());
+    return requestSchedulerService(Command.KILL, killTopologyRequest.toByteArray());
   }
 
   /**
@@ -38,7 +49,8 @@ public class HttpServiceSchedulerClient implements ISchedulerClient {
    * @param data the byte[] to send
    * @return true if got OK response successfully
    */
-  protected boolean requestSchedulerService(byte[] data) {
+  protected boolean requestSchedulerService(Command command, byte[] data) {
+    final HttpURLConnection connection = createHttpConnection(command);
     if (connection == null) {
       LOG.severe("Scheduler not found.");
       return false;
@@ -76,5 +88,37 @@ public class HttpServiceSchedulerClient implements ISchedulerClient {
     }
 
     return true;
+  }
+
+  /**
+   * Create a http connection, if the scheduler end point is present
+   */
+  protected HttpURLConnection createHttpConnection(Command command) {
+    // construct the http request for command
+    String endpoint = getCommandEndpoint(schedulerLocation.getHttpEndpoint(), command);
+
+    // construct the http url connection
+    HttpURLConnection connection;
+    try {
+      connection = HttpUtils.getConnection(endpoint);
+    } catch (IOException e) {
+      LOG.log(Level.SEVERE, "Failed to connect to scheduler http endpoint: {0}", endpoint);
+      return null;
+    }
+
+    return connection;
+  }
+
+  /**
+   * Construct the endpoint to send http request for a particular command
+   * Make sure the construction matches server sides.
+   *
+   * @param schedulerEndpoint The scheduler http endpoint
+   * @param command The command to request
+   * @return The http endpoint for particular command
+   */
+  protected String getCommandEndpoint(String schedulerEndpoint, Command command) {
+    // Currently the server side receives command request in lower case
+    return String.format("http://%s/%s", schedulerEndpoint, command.name().toLowerCase());
   }
 }

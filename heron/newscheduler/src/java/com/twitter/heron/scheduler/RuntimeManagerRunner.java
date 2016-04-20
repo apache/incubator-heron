@@ -14,8 +14,6 @@
 
 package com.twitter.heron.scheduler;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,7 +25,6 @@ import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.scheduler.client.LibrarySchedulerClient;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.HttpUtils;
 import com.twitter.heron.spi.scheduler.Command;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
@@ -52,24 +49,9 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     this.command = command;
 
     this.schedulerClient = getSchedulerClient();
-  }
-
-  // TODO(mfu): Make it into Factory pattern if needed
-  protected ISchedulerClient getSchedulerClient()
-      throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-    ISchedulerClient schedulerClient;
-
-    if (Context.schedulerService(config)) {
-      final HttpURLConnection connection = createHttpConnection();
-      schedulerClient = new HttpServiceSchedulerClient(connection);
-    } else {
-      // create an instance of scheduler
-      final String schedulerClass = Context.schedulerClass(config);
-      final IScheduler scheduler = (IScheduler) Class.forName(schedulerClass).newInstance();
-      schedulerClient = new LibrarySchedulerClient(config, runtime, scheduler);
+    if (this.schedulerClient == null) {
+      throw new RuntimeException("Failed to initialize scheduler client");
     }
-
-    return schedulerClient;
   }
 
   @Override
@@ -157,14 +139,11 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     return true;
   }
 
-  /**
-   * Create a http connection, if the scheduler end point is present
-   */
-  protected HttpURLConnection createHttpConnection() {
+  protected Scheduler.SchedulerLocation getSchedulerLocation() {
     // TODO(mfu): Add Proxy support, rather than to connect scheduler directly
 
     // get the instance of the state manager
-    SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
+    SchedulerStateManagerAdaptor statemgr = com.twitter.heron.spi.utils.Runtime.schedulerStateManagerAdaptor(runtime);
 
     // fetch scheduler location from state manager
     LOG.log(Level.INFO, "Fetching scheduler location from state manager to {0} topology", command);
@@ -172,38 +151,29 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     Scheduler.SchedulerLocation schedulerLocation =
         statemgr.getSchedulerLocation(Runtime.topologyName(runtime));
 
-    if (schedulerLocation == null) {
-      LOG.log(Level.INFO, "Failed to get scheduler location to {0} topology", command);
-      return null;
-    }
-
-    LOG.info("Scheduler is listening on location: " + schedulerLocation.toString());
-
-    // construct the http request for command
-    String endpoint = getCommandEndpoint(schedulerLocation.getHttpEndpoint(), command);
-
-    // construct the http url connection
-    HttpURLConnection connection;
-    try {
-      connection = HttpUtils.getConnection(endpoint);
-    } catch (IOException e) {
-      LOG.log(Level.SEVERE, "Failed to connect to scheduler http endpoint: {0}", endpoint);
-      return null;
-    }
-
-    return connection;
+    return schedulerLocation;
   }
 
-  /**
-   * Construct the endpoint to send http request for a particular command
-   * Make sure the construction matches server sides.
-   *
-   * @param schedulerEndpoint The scheduler http endpoint
-   * @param command The command to request
-   * @return The http endpoint for particular command
-   */
-  protected String getCommandEndpoint(String schedulerEndpoint, Command command) {
-    // Currently the server side receives command request in lower case
-    return String.format("http://%s/%s", schedulerEndpoint, command.name().toLowerCase());
+  // TODO(mfu): Make it into Factory pattern if needed
+  protected ISchedulerClient getSchedulerClient()
+      throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+    ISchedulerClient schedulerClient;
+
+    if (Context.schedulerService(config)) {
+      Scheduler.SchedulerLocation schedulerLocation = getSchedulerLocation();
+      if (schedulerLocation == null) {
+        LOG.log(Level.SEVERE, "Failed to get scheduler location to {0} topology", command);
+        return null;
+      }
+
+      schedulerClient = new HttpServiceSchedulerClient(config, runtime, schedulerLocation);
+    } else {
+      // create an instance of scheduler
+      final String schedulerClass = Context.schedulerClass(config);
+      final IScheduler scheduler = (IScheduler) Class.forName(schedulerClass).newInstance();
+      schedulerClient = new LibrarySchedulerClient(config, runtime, scheduler);
+    }
+
+    return schedulerClient;
   }
 }
