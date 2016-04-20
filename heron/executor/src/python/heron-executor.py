@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#!/usr/bin/python2.7
+#!/usr/bin/env python2.7
 
 import atexit
 import datetime
