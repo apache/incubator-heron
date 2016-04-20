@@ -26,5 +26,5 @@ public class HashSetSerializer extends CollectionSerializer {
     @Override
     public Collection create(Kryo kryo, Input input, Class<Collection> type) {
         return new HashSet();
-    }       
+    }
 }

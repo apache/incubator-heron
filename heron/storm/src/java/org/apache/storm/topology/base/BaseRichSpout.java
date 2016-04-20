@@ -15,7 +15,6 @@
 package org.apache.storm.topology.base;
 
 import org.apache.storm.topology.IRichSpout;
-import org.apache.storm.topology.base.BaseComponent;
 
 public abstract class BaseRichSpout extends BaseComponent implements IRichSpout {
     @Override

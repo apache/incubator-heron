@@ -49,315 +49,315 @@ import com.twitter.heron.spi.utils.TopologyUtils;
  * Main class of scheduler.
  */
 public class SchedulerMain {
-  private static final Logger LOG = Logger.getLogger(SchedulerMain.class.getName());
+    private static final Logger LOG = Logger.getLogger(SchedulerMain.class.getName());
 
-  private String cluster = null;                 // name of the cluster
-  private String role = null;                    // role to launch the topology
-  private String environ = null;                 // environ to launch the topology
-  private String topologyName = null;            // name of the topology
-  private String topologyJarFile = null;         // name of the topology jar/tar file
-  private int    schedulerServerPort = 0 ;       // http port where the scheduler is listening
+    private String cluster = null;                 // name of the cluster
+    private String role = null;                    // role to launch the topology
+    private String environ = null;                 // environ to launch the topology
+    private String topologyName = null;            // name of the topology
+    private String topologyJarFile = null;         // name of the topology jar/tar file
+    private int schedulerServerPort = 0;       // http port where the scheduler is listening
 
-  private TopologyAPI.Topology topology = null;  // topology definition
-  private Config  config;                        // holds all the config read
+    private TopologyAPI.Topology topology = null;  // topology definition
+    private Config config;                        // holds all the config read
 
-  // Print usage options
-  private static void usage(Options options) {
-    HelpFormatter formatter = new HelpFormatter();
-    formatter.printHelp("SchedulerMain", options);
-  }
+    public SchedulerMain(String iCluster, String iRole, String iEnviron,
+                         String iTopologyName, String iTopologyJarFile, int iSchedulerServerPort) throws IOException {
+        // initialize the options
+        cluster = iCluster;
+        role = iRole;
+        environ = iEnviron;
+        topologyName = iTopologyName;
+        topologyJarFile = iTopologyJarFile;
+        schedulerServerPort = iSchedulerServerPort;
 
-  // Construct all required command line options
-  private static Options constructOptions() {
-    Options options = new Options();
+        // locate the topology definition file in the sandbox/working directory
+        String topologyDefnFile = TopologyUtils.lookUpTopologyDefnFile(".", topologyName);
 
-    Option cluster = Option.builder("c")
-        .desc("Cluster name in which the topology needs to run on")
-        .longOpt("cluster")
-        .hasArgs()
-        .argName("cluster")
-        .required()
-        .build();
+        // load the topology definition into topology proto
+        topology = TopologyUtils.getTopology(topologyDefnFile);
 
-    Option role = Option.builder("r")
-        .desc("Role under which the topology needs to run")
-        .longOpt("role")
-        .hasArgs()
-        .argName("role")
-        .required()
-        .build();
-
-    Option environment = Option.builder("e")
-        .desc("Environment under which the topology needs to run")
-        .longOpt("environment")
-        .hasArgs()
-        .argName("environment")
-        .required()
-        .build();
-
-    Option topologyName = Option.builder("n")
-        .desc("Name of the topology")
-        .longOpt("topology_name")
-        .hasArgs()
-        .argName("topology name")
-        .required()
-        .build();
-
-    Option topologyJar = Option.builder("f")
-        .desc("Topology jar file path")
-        .longOpt("topology_jar")
-        .hasArgs()
-        .argName("topology jar file")
-        .required()
-        .build();
-
-    Option schedulerHTTPPort = Option.builder("p")
-        .desc("Http Port number on which the scheduler listens for requests")
-        .longOpt("http_port")
-        .hasArgs()
-        .argName("http port")
-        .required()
-        .build();
-
-    options.addOption(cluster);
-    options.addOption(role);
-    options.addOption(environment);
-    options.addOption(topologyName);
-    options.addOption(topologyJar);
-    options.addOption(schedulerHTTPPort);
-
-    return options;
-  }
-
-  // construct command line help options
-  private static Options constructHelpOptions() {
-    Options options = new Options();
-    Option help = Option.builder("h")
-        .desc("List all options and their description")
-        .longOpt("help")
-        .build();
-
-    options.addOption(help);
-    return options;
-  }
-
-  public SchedulerMain(String iCluster, String iRole, String iEnviron,
-      String iTopologyName, String iTopologyJarFile, int iSchedulerServerPort) throws IOException {
-    // initialize the options
-    cluster = iCluster;
-    role = iRole;
-    environ = iEnviron;
-    topologyName = iTopologyName;
-    topologyJarFile = iTopologyJarFile;
-    schedulerServerPort = iSchedulerServerPort;
-
-    // locate the topology definition file in the sandbox/working directory
-    String topologyDefnFile = TopologyUtils.lookUpTopologyDefnFile(".", topologyName);
-
-    // load the topology definition into topology proto
-    topology = TopologyUtils.getTopology(topologyDefnFile);
-
-    // build the config by expanding all the variables
-    config = SchedulerConfig.loadConfig(cluster, role, environ,
-        topologyJarFile, topologyDefnFile, topology);
-  }
-
-  public static void main(String[] args) throws
-      ClassNotFoundException, InstantiationException, IllegalAccessException, IOException, ParseException {
-
-    // construct the options and help options first.
-    Options options = constructOptions();
-    Options helpOptions = constructHelpOptions();
-
-    // parse the options
-    CommandLineParser parser = new DefaultParser();
-    CommandLine cmd = parser.parse(helpOptions, args, true);
-
-    // print help, if we receive wrong set of arguments
-    if (cmd.hasOption("h")) {
-      usage(options);
-      return;
+        // build the config by expanding all the variables
+        config = SchedulerConfig.loadConfig(cluster, role, environ,
+                topologyJarFile, topologyDefnFile, topology);
     }
 
-    // Now parse the required options
-    try {
-      cmd = parser.parse(options, args);
-    } catch (ParseException e) {
-      LOG.severe("Error parsing command line options: " + e.getMessage());
-      usage(options);
-      System.exit(1);
+    // Print usage options
+    private static void usage(Options options) {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printHelp("SchedulerMain", options);
     }
 
-    // initialize the scheduler with the options
-    SchedulerMain schedulerMain = new SchedulerMain(cmd.getOptionValue("cluster"),
-        cmd.getOptionValue("role"),
-        cmd.getOptionValue("environment"),
-        cmd.getOptionValue("topology_name"),
-        cmd.getOptionValue("topology_jar"),
-        Integer.parseInt(cmd.getOptionValue("http_port")));
+    // Construct all required command line options
+    private static Options constructOptions() {
+        Options options = new Options();
 
-    // set up logging with complete Config
-    setupLogging(schedulerMain.config);
-    LOG.log(Level.INFO, "Loaded scheduler config: {0}", schedulerMain.config);
+        Option cluster = Option.builder("c")
+                .desc("Cluster name in which the topology needs to run on")
+                .longOpt("cluster")
+                .hasArgs()
+                .argName("cluster")
+                .required()
+                .build();
 
-    // run the scheduler
-    schedulerMain.runScheduler();
-  }
+        Option role = Option.builder("r")
+                .desc("Role under which the topology needs to run")
+                .longOpt("role")
+                .hasArgs()
+                .argName("role")
+                .required()
+                .build();
 
-  // Set up logging based on the Config
-  private static void setupLogging(Config config) throws IOException {
-    String systemConfigFilename = Context.systemConfigSandboxFile(config);
+        Option environment = Option.builder("e")
+                .desc("Environment under which the topology needs to run")
+                .longOpt("environment")
+                .hasArgs()
+                .argName("environment")
+                .required()
+                .build();
 
-    SystemConfig systemConfig = new SystemConfig(systemConfigFilename, true);
+        Option topologyName = Option.builder("n")
+                .desc("Name of the topology")
+                .longOpt("topology_name")
+                .hasArgs()
+                .argName("topology name")
+                .required()
+                .build();
 
-    // Init the logging setting and redirect the stdout and stderr to logging
-    // For now we just set the logging level as INFO; later we may accept an argument to set it.
-    Level loggingLevel = Level.INFO;
-    // TODO(mfu): The folder creation may be duplicated with heron-executor in future
-    // TODO(mfu): Remove the creation in future if feasible
-    String loggingDir = systemConfig.getHeronLoggingDirectory();
-    if (!FileUtils.isDirectoryExists(loggingDir)) {
-      FileUtils.createDirectory(loggingDir);
+        Option topologyJar = Option.builder("f")
+                .desc("Topology jar file path")
+                .longOpt("topology_jar")
+                .hasArgs()
+                .argName("topology jar file")
+                .required()
+                .build();
+
+        Option schedulerHTTPPort = Option.builder("p")
+                .desc("Http Port number on which the scheduler listens for requests")
+                .longOpt("http_port")
+                .hasArgs()
+                .argName("http port")
+                .required()
+                .build();
+
+        options.addOption(cluster);
+        options.addOption(role);
+        options.addOption(environment);
+        options.addOption(topologyName);
+        options.addOption(topologyJar);
+        options.addOption(schedulerHTTPPort);
+
+        return options;
     }
 
-    // Log to file
-    LoggingHelper.loggerInit(loggingLevel, true);
+    // construct command line help options
+    private static Options constructHelpOptions() {
+        Options options = new Options();
+        Option help = Option.builder("h")
+                .desc("List all options and their description")
+                .longOpt("help")
+                .build();
 
-    // TODO(mfu): Pass the scheduler id from cmd
-    String processId = String.format("%s-%s-%s", "heron", Context.topologyName(config), "scheduler");
-    LoggingHelper.addLoggingHandler(
-        LoggingHelper.getFileHandler(processId, loggingDir, true,
-            systemConfig.getHeronLoggingMaximumSizeMb() * Constants.MB_TO_BYTES,
-            systemConfig.getHeronLoggingMaximumFiles()));
-
-    LOG.info("Logging setup done.");
-  }
-
-  public void runScheduler() throws
-      ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
-
-    // create an instance of state manager
-    String statemgrClass = Context.stateManagerClass(config);
-    IStateManager statemgr = (IStateManager) Class.forName(statemgrClass).newInstance();
-
-    // create an instance of the packing class
-    String packingClass = Context.packingClass(config);
-    IPacking packing = (IPacking) Class.forName(packingClass).newInstance();
-
-    // create an instance of scheduler
-    String schedulerClass = Context.schedulerClass(config);
-    IScheduler scheduler = (IScheduler) Class.forName(schedulerClass).newInstance();
-
-    SchedulerServer server = null;
-
-    // Put it in a try block so that we can always clean resources
-    try {
-      // initialize the state manager
-      statemgr.initialize(config);
-
-      // TODO(mfu): timeout should read from config
-      SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
-
-      // build the runtime config
-      Config runtime = Config.newBuilder()
-          .put(Keys.topologyId(), topology.getId())
-          .put(Keys.topologyName(), topology.getName())
-          .put(Keys.topologyDefinition(), topology)
-          .put(Keys.schedulerStateManagerAdaptor(), adaptor)
-          .put(Keys.numContainers(), 1 + TopologyUtils.getNumContainers(topology))
-          .build();
-
-      // get a packed plan and schedule it
-      packing.initialize(config, runtime);
-      PackingPlan packedPlan = packing.pack();
-
-      // TODO - investigate whether the heron executors can be started
-      // in scheduler.schedule method - rather than in scheduler.initialize method
-      Config ytruntime = Config.newBuilder()
-          .putAll(runtime)
-          .put(Keys.instanceDistribution(), TopologyUtils.packingToString(packedPlan))
-          .put(Keys.schedulerShutdown(), new Shutdown())
-          .build();
-
-      // initialize the scheduler
-      scheduler.initialize(config, ytruntime);
-
-      // start the scheduler REST endpoint for receiving requests
-      server = runServer(ytruntime, scheduler, schedulerServerPort);
-
-      // write the scheduler location to state manager.
-      setSchedulerLocation(runtime, server);
-
-      // schedule the packed plan
-      scheduler.schedule(packedPlan);
-
-      // wait until kill request or some interrupt occurs
-      LOG.info("Waiting for termination... ");
-      Runtime.schedulerShutdown(ytruntime).await();
-
-    } catch (Exception e) {
-      // Log and exit the process
-      LOG.log(Level.SEVERE, "Exception occurred", e);
-      LOG.log(Level.SEVERE, "Failed to run scheduler for topology: {0}. Exiting...", topology.getName());
-      System.exit(1);
-
-    } finally {
-      // Clean the resources
-      if (server != null) {
-        server.stop();
-      }
-
-      // 4. Close the resources
-      scheduler.close();
-      packing.close();
-      statemgr.close();
+        options.addOption(help);
+        return options;
     }
 
-    // stop the server and close the state manager
-    LOG.log(Level.INFO, "Shutting down topology: {0}", topology.getName());
+    public static void main(String[] args) throws
+            ClassNotFoundException, InstantiationException, IllegalAccessException, IOException, ParseException {
 
-    System.exit(0);
-  }
+        // construct the options and help options first.
+        Options options = constructOptions();
+        Options helpOptions = constructHelpOptions();
 
-  /**
-   * Run the http server for receiving scheduler requests
-   *
-   * @param runtime, the runtime configuration
-   * @param scheduler, an instance of the scheduler
-   * @param port, the port for scheduler to listen on
-   * @return an instance of the http server
-   */
-  private static SchedulerServer runServer(
-      Config runtime, IScheduler scheduler, int port) throws IOException {
+        // parse the options
+        CommandLineParser parser = new DefaultParser();
+        CommandLine cmd = parser.parse(helpOptions, args, true);
 
-    // create an instance of the server using scheduler class and port
-    final SchedulerServer schedulerServer = new SchedulerServer(runtime, scheduler, port);
+        // print help, if we receive wrong set of arguments
+        if (cmd.hasOption("h")) {
+            usage(options);
+            return;
+        }
 
-    // start the http server to manage runtime requests
-    schedulerServer.start();
+        // Now parse the required options
+        try {
+            cmd = parser.parse(options, args);
+        } catch (ParseException e) {
+            LOG.severe("Error parsing command line options: " + e.getMessage());
+            usage(options);
+            System.exit(1);
+        }
 
-    return schedulerServer;
-  }
+        // initialize the scheduler with the options
+        SchedulerMain schedulerMain = new SchedulerMain(cmd.getOptionValue("cluster"),
+                cmd.getOptionValue("role"),
+                cmd.getOptionValue("environment"),
+                cmd.getOptionValue("topology_name"),
+                cmd.getOptionValue("topology_jar"),
+                Integer.parseInt(cmd.getOptionValue("http_port")));
 
-  /**
-   * Set the location of scheduler for other processes to discover
-   *
-   * @param runtime, the runtime configuration
-   * @param schedulerServer, the http server that scheduler listens for receives requests
-   */
-  private static void setSchedulerLocation(Config runtime, SchedulerServer schedulerServer) {
+        // set up logging with complete Config
+        setupLogging(schedulerMain.config);
+        LOG.log(Level.INFO, "Loaded scheduler config: {0}", schedulerMain.config);
 
-    // Set scheduler location to host:port by default. Overwrite scheduler location if behind DNS.
-    Scheduler.SchedulerLocation location = Scheduler.SchedulerLocation.newBuilder()
-        .setTopologyName(Runtime.topologyName(runtime))
-        .setHttpEndpoint(String.format("%s:%d", schedulerServer.getHost(), schedulerServer.getPort()))
-        .build();
-
-    LOG.log(Level.INFO, "Setting SchedulerLocation: {0}", location);
-    SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
-    Boolean result = statemgr.setSchedulerLocation(location, Runtime.topologyName(runtime));
-    if (result == null || !result) {
-      throw new RuntimeException("Failed to set Scheduler location");
+        // run the scheduler
+        schedulerMain.runScheduler();
     }
-  }
+
+    // Set up logging based on the Config
+    private static void setupLogging(Config config) throws IOException {
+        String systemConfigFilename = Context.systemConfigSandboxFile(config);
+
+        SystemConfig systemConfig = new SystemConfig(systemConfigFilename, true);
+
+        // Init the logging setting and redirect the stdout and stderr to logging
+        // For now we just set the logging level as INFO; later we may accept an argument to set it.
+        Level loggingLevel = Level.INFO;
+        // TODO(mfu): The folder creation may be duplicated with heron-executor in future
+        // TODO(mfu): Remove the creation in future if feasible
+        String loggingDir = systemConfig.getHeronLoggingDirectory();
+        if (!FileUtils.isDirectoryExists(loggingDir)) {
+            FileUtils.createDirectory(loggingDir);
+        }
+
+        // Log to file
+        LoggingHelper.loggerInit(loggingLevel, true);
+
+        // TODO(mfu): Pass the scheduler id from cmd
+        String processId = String.format("%s-%s-%s", "heron", Context.topologyName(config), "scheduler");
+        LoggingHelper.addLoggingHandler(
+                LoggingHelper.getFileHandler(processId, loggingDir, true,
+                        systemConfig.getHeronLoggingMaximumSizeMb() * Constants.MB_TO_BYTES,
+                        systemConfig.getHeronLoggingMaximumFiles()));
+
+        LOG.info("Logging setup done.");
+    }
+
+    /**
+     * Run the http server for receiving scheduler requests
+     *
+     * @param runtime, the runtime configuration
+     * @param scheduler, an instance of the scheduler
+     * @param port, the port for scheduler to listen on
+     * @return an instance of the http server
+     */
+    private static SchedulerServer runServer(
+            Config runtime, IScheduler scheduler, int port) throws IOException {
+
+        // create an instance of the server using scheduler class and port
+        final SchedulerServer schedulerServer = new SchedulerServer(runtime, scheduler, port);
+
+        // start the http server to manage runtime requests
+        schedulerServer.start();
+
+        return schedulerServer;
+    }
+
+    /**
+     * Set the location of scheduler for other processes to discover
+     *
+     * @param runtime, the runtime configuration
+     * @param schedulerServer, the http server that scheduler listens for receives requests
+     */
+    private static void setSchedulerLocation(Config runtime, SchedulerServer schedulerServer) {
+
+        // Set scheduler location to host:port by default. Overwrite scheduler location if behind DNS.
+        Scheduler.SchedulerLocation location = Scheduler.SchedulerLocation.newBuilder()
+                .setTopologyName(Runtime.topologyName(runtime))
+                .setHttpEndpoint(String.format("%s:%d", schedulerServer.getHost(), schedulerServer.getPort()))
+                .build();
+
+        LOG.log(Level.INFO, "Setting SchedulerLocation: {0}", location);
+        SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
+        Boolean result = statemgr.setSchedulerLocation(location, Runtime.topologyName(runtime));
+        if (result == null || !result) {
+            throw new RuntimeException("Failed to set Scheduler location");
+        }
+    }
+
+    public void runScheduler() throws
+            ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
+
+        // create an instance of state manager
+        String statemgrClass = Context.stateManagerClass(config);
+        IStateManager statemgr = (IStateManager) Class.forName(statemgrClass).newInstance();
+
+        // create an instance of the packing class
+        String packingClass = Context.packingClass(config);
+        IPacking packing = (IPacking) Class.forName(packingClass).newInstance();
+
+        // create an instance of scheduler
+        String schedulerClass = Context.schedulerClass(config);
+        IScheduler scheduler = (IScheduler) Class.forName(schedulerClass).newInstance();
+
+        SchedulerServer server = null;
+
+        // Put it in a try block so that we can always clean resources
+        try {
+            // initialize the state manager
+            statemgr.initialize(config);
+
+            // TODO(mfu): timeout should read from config
+            SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
+
+            // build the runtime config
+            Config runtime = Config.newBuilder()
+                    .put(Keys.topologyId(), topology.getId())
+                    .put(Keys.topologyName(), topology.getName())
+                    .put(Keys.topologyDefinition(), topology)
+                    .put(Keys.schedulerStateManagerAdaptor(), adaptor)
+                    .put(Keys.numContainers(), 1 + TopologyUtils.getNumContainers(topology))
+                    .build();
+
+            // get a packed plan and schedule it
+            packing.initialize(config, runtime);
+            PackingPlan packedPlan = packing.pack();
+
+            // TODO - investigate whether the heron executors can be started
+            // in scheduler.schedule method - rather than in scheduler.initialize method
+            Config ytruntime = Config.newBuilder()
+                    .putAll(runtime)
+                    .put(Keys.instanceDistribution(), TopologyUtils.packingToString(packedPlan))
+                    .put(Keys.schedulerShutdown(), new Shutdown())
+                    .build();
+
+            // initialize the scheduler
+            scheduler.initialize(config, ytruntime);
+
+            // start the scheduler REST endpoint for receiving requests
+            server = runServer(ytruntime, scheduler, schedulerServerPort);
+
+            // write the scheduler location to state manager.
+            setSchedulerLocation(runtime, server);
+
+            // schedule the packed plan
+            scheduler.schedule(packedPlan);
+
+            // wait until kill request or some interrupt occurs
+            LOG.info("Waiting for termination... ");
+            Runtime.schedulerShutdown(ytruntime).await();
+
+        } catch (Exception e) {
+            // Log and exit the process
+            LOG.log(Level.SEVERE, "Exception occurred", e);
+            LOG.log(Level.SEVERE, "Failed to run scheduler for topology: {0}. Exiting...", topology.getName());
+            System.exit(1);
+
+        } finally {
+            // Clean the resources
+            if (server != null) {
+                server.stop();
+            }
+
+            // 4. Close the resources
+            scheduler.close();
+            packing.close();
+            statemgr.close();
+        }
+
+        // stop the server and close the state manager
+        LOG.log(Level.INFO, "Shutting down topology: {0}", topology.getName());
+
+        System.exit(0);
+    }
 }

@@ -46,10 +46,7 @@ public final class JavaCheckstyle {
     public static final Logger LOG = Logger.getLogger(JavaCheckstyle.class.getName());
     private static final String CLASSNAME = JavaCheckstyle.class.getCanonicalName();
 
-    private JavaCheckstyle() { }
-
-    public void foo() {
-        LOG.info("No java class files found by checkstyle");
+    private JavaCheckstyle() {
     }
 
     public static void main(String[] args) throws IOException {

@@ -31,10 +31,10 @@ import org.junit.Test;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.serializer.KryoSerializer;
-import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.basics.WakeableLooper;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.instance.InstanceControlMsg;
@@ -55,157 +55,147 @@ import com.twitter.heron.resource.UnitTestHelper;
  * 6. We will also check some common values, for instance, the stream name.
  */
 public class BoltInstanceTest {
-  static final String boltInstanceId = "bolt-id";
+    static final String boltInstanceId = "bolt-id";
+    static IPluggableSerializer serializer;
+    WakeableLooper testLooper;
+    SlaveLooper slaveLooper;
+    // Singleton to be changed globally for testing
+    AtomicInteger ackCount;
+    AtomicInteger failCount;
+    AtomicInteger tupleExecutedCount;
+    volatile StringBuilder receivedStrings;
+    PhysicalPlans.PhysicalPlan physicalPlan;
+    // Only one outStreamQueue, which is responsible for both control tuples and data tuples
+    private Communicator<HeronTuples.HeronTupleSet> outStreamQueue;
+    // This blocking queue is used to buffer tuples read from socket and ready to be used by instance
+    // For spout, it will buffer Control tuple, while for bolt, it will buffer data tuple.
+    private Communicator<HeronTuples.HeronTupleSet> inStreamQueue;
+    private Communicator<InstanceControlMsg> inControlQueue;
+    private ExecutorService threadsPool;
+    private Communicator<Metrics.MetricPublisherPublishMessage> slaveMetricsOut;
+    private Slave slave;
 
-
-  WakeableLooper testLooper;
-  SlaveLooper slaveLooper;
-
-  // Only one outStreamQueue, which is responsible for both control tuples and data tuples
-  private Communicator<HeronTuples.HeronTupleSet> outStreamQueue;
-
-  // This blocking queue is used to buffer tuples read from socket and ready to be used by instance
-  // For spout, it will buffer Control tuple, while for bolt, it will buffer data tuple.
-  private Communicator<HeronTuples.HeronTupleSet> inStreamQueue;
-
-  private Communicator<InstanceControlMsg> inControlQueue;
-
-  private ExecutorService threadsPool;
-
-  private Communicator<Metrics.MetricPublisherPublishMessage> slaveMetricsOut;
-
-  private Slave slave;
-
-  // Singleton to be changed globally for testing
-  AtomicInteger ackCount;
-  AtomicInteger failCount;
-  AtomicInteger tupleExecutedCount;
-  volatile StringBuilder receivedStrings;
-  PhysicalPlans.PhysicalPlan physicalPlan;
-
-  static IPluggableSerializer serializer;
-
-  @BeforeClass
-  public static void beforeClass() throws Exception {
-    serializer = new KryoSerializer();
-    serializer.initialize(null);
-  }
-
-  @AfterClass
-  public static void afterClass() throws Exception {
-    serializer = null;
-  }
-
-  @Before
-  public void before() throws Exception {
-    UnitTestHelper.addSystemConfigToSingleton();
-
-    ackCount = new AtomicInteger(0);
-    failCount = new AtomicInteger(0);
-    tupleExecutedCount = new AtomicInteger(0);
-    receivedStrings = new StringBuilder();
-
-    testLooper = new SlaveLooper();
-    slaveLooper = new SlaveLooper();
-    outStreamQueue = new Communicator<HeronTuples.HeronTupleSet>(slaveLooper, testLooper);
-    outStreamQueue.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
-    inStreamQueue = new Communicator<HeronTuples.HeronTupleSet>(testLooper, slaveLooper);
-    inStreamQueue.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
-    inControlQueue = new Communicator<InstanceControlMsg>(testLooper, slaveLooper);
-
-    slaveMetricsOut = new Communicator<Metrics.MetricPublisherPublishMessage>(slaveLooper, testLooper);
-    slaveMetricsOut.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
-
-    slave = new Slave(slaveLooper, inStreamQueue, outStreamQueue, inControlQueue, slaveMetricsOut);
-    threadsPool = Executors.newSingleThreadExecutor();
-
-    threadsPool.execute(slave);
-  }
-
-  @After
-  public void after() throws Exception {
-    UnitTestHelper.clearSingletonRegistry();
-
-    ackCount = new AtomicInteger(0);
-    failCount = new AtomicInteger(0);
-    tupleExecutedCount = new AtomicInteger(0);
-    receivedStrings = null;
-
-    testLooper.exitLoop();
-    slaveLooper.exitLoop();
-    threadsPool.shutdownNow();
-
-    physicalPlan = null;
-    testLooper = null;
-    slaveLooper = null;
-    outStreamQueue = null;
-    inStreamQueue = null;
-
-    slave = null;
-    threadsPool = null;
-  }
-
-  @Test
-  public void testReadTupleAndExecute() throws Exception {
-    physicalPlan = UnitTestHelper.getPhysicalPlan(false, -1);
-
-    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, boltInstanceId);
-    InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder().
-        setNewPhysicalPlanHelper(physicalPlanHelper).
-        build();
-
-    inControlQueue.offer(instanceControlMsg);
-
-    SingletonRegistry.INSTANCE.registerSingleton(Constants.ACK_COUNT, ackCount);
-    SingletonRegistry.INSTANCE.registerSingleton(Constants.FAIL_COUNT, failCount);
-    SingletonRegistry.INSTANCE.registerSingleton("execute-count", tupleExecutedCount);
-    SingletonRegistry.INSTANCE.registerSingleton("received-string-list", receivedStrings);
-
-    // Send tuples to bolt instance
-    HeronTuples.HeronTupleSet.Builder heronTupleSet = HeronTuples.HeronTupleSet.newBuilder();
-    HeronTuples.HeronDataTupleSet.Builder dataTupleSet = HeronTuples.HeronDataTupleSet.newBuilder();
-    TopologyAPI.StreamId.Builder streamId = TopologyAPI.StreamId.newBuilder();
-    streamId.setComponentName("test-spout");
-    streamId.setId("default");
-    dataTupleSet.setStream(streamId);
-
-    // We will add 10 tuples to the set
-    for (int i = 0; i < 10; i++) {
-      HeronTuples.HeronDataTuple.Builder dataTuple = HeronTuples.HeronDataTuple.newBuilder();
-      dataTuple.setKey(19901017 + i);
-
-      HeronTuples.RootId.Builder rootId = HeronTuples.RootId.newBuilder();
-      rootId.setKey(19901017 + i);
-      rootId.setTaskid(0);
-      dataTuple.addRoots(rootId);
-
-      String s = "";
-      if ((i & 1) == 0) {
-        s = "A";
-      } else {
-        s = "B";
-      }
-      ByteString byteString = ByteString.copyFrom(serializer.serialize(s));
-      dataTuple.addValues(byteString);
-
-      dataTupleSet.addTuples(dataTuple);
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        serializer = new KryoSerializer();
+        serializer.initialize(null);
     }
 
-    heronTupleSet.setData(dataTupleSet);
-    inStreamQueue.offer(heronTupleSet.build());
-
-    for (int i = 0; i < Constants.RETRY_TIMES; i++) {
-      if (tupleExecutedCount.intValue() == 10) {
-        break;
-      }
-      SysUtils.sleep(Constants.RETRY_INTERVAL_MS);
+    @AfterClass
+    public static void afterClass() throws Exception {
+        serializer = null;
     }
 
-    // Wait the bolt's finishing
-    SysUtils.sleep(Constants.TEST_WAIT_TIME_MS);
-    Assert.assertEquals(10, tupleExecutedCount.intValue());
-    Assert.assertEquals(5, ackCount.intValue());
-    Assert.assertEquals(5, failCount.intValue());
-    Assert.assertEquals("ABABABABAB", receivedStrings.toString());
-  }
+    @Before
+    public void before() throws Exception {
+        UnitTestHelper.addSystemConfigToSingleton();
+
+        ackCount = new AtomicInteger(0);
+        failCount = new AtomicInteger(0);
+        tupleExecutedCount = new AtomicInteger(0);
+        receivedStrings = new StringBuilder();
+
+        testLooper = new SlaveLooper();
+        slaveLooper = new SlaveLooper();
+        outStreamQueue = new Communicator<HeronTuples.HeronTupleSet>(slaveLooper, testLooper);
+        outStreamQueue.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
+        inStreamQueue = new Communicator<HeronTuples.HeronTupleSet>(testLooper, slaveLooper);
+        inStreamQueue.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
+        inControlQueue = new Communicator<InstanceControlMsg>(testLooper, slaveLooper);
+
+        slaveMetricsOut = new Communicator<Metrics.MetricPublisherPublishMessage>(slaveLooper, testLooper);
+        slaveMetricsOut.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
+
+        slave = new Slave(slaveLooper, inStreamQueue, outStreamQueue, inControlQueue, slaveMetricsOut);
+        threadsPool = Executors.newSingleThreadExecutor();
+
+        threadsPool.execute(slave);
+    }
+
+    @After
+    public void after() throws Exception {
+        UnitTestHelper.clearSingletonRegistry();
+
+        ackCount = new AtomicInteger(0);
+        failCount = new AtomicInteger(0);
+        tupleExecutedCount = new AtomicInteger(0);
+        receivedStrings = null;
+
+        testLooper.exitLoop();
+        slaveLooper.exitLoop();
+        threadsPool.shutdownNow();
+
+        physicalPlan = null;
+        testLooper = null;
+        slaveLooper = null;
+        outStreamQueue = null;
+        inStreamQueue = null;
+
+        slave = null;
+        threadsPool = null;
+    }
+
+    @Test
+    public void testReadTupleAndExecute() throws Exception {
+        physicalPlan = UnitTestHelper.getPhysicalPlan(false, -1);
+
+        PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, boltInstanceId);
+        InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder().
+                setNewPhysicalPlanHelper(physicalPlanHelper).
+                build();
+
+        inControlQueue.offer(instanceControlMsg);
+
+        SingletonRegistry.INSTANCE.registerSingleton(Constants.ACK_COUNT, ackCount);
+        SingletonRegistry.INSTANCE.registerSingleton(Constants.FAIL_COUNT, failCount);
+        SingletonRegistry.INSTANCE.registerSingleton("execute-count", tupleExecutedCount);
+        SingletonRegistry.INSTANCE.registerSingleton("received-string-list", receivedStrings);
+
+        // Send tuples to bolt instance
+        HeronTuples.HeronTupleSet.Builder heronTupleSet = HeronTuples.HeronTupleSet.newBuilder();
+        HeronTuples.HeronDataTupleSet.Builder dataTupleSet = HeronTuples.HeronDataTupleSet.newBuilder();
+        TopologyAPI.StreamId.Builder streamId = TopologyAPI.StreamId.newBuilder();
+        streamId.setComponentName("test-spout");
+        streamId.setId("default");
+        dataTupleSet.setStream(streamId);
+
+        // We will add 10 tuples to the set
+        for (int i = 0; i < 10; i++) {
+            HeronTuples.HeronDataTuple.Builder dataTuple = HeronTuples.HeronDataTuple.newBuilder();
+            dataTuple.setKey(19901017 + i);
+
+            HeronTuples.RootId.Builder rootId = HeronTuples.RootId.newBuilder();
+            rootId.setKey(19901017 + i);
+            rootId.setTaskid(0);
+            dataTuple.addRoots(rootId);
+
+            String s = "";
+            if ((i & 1) == 0) {
+                s = "A";
+            } else {
+                s = "B";
+            }
+            ByteString byteString = ByteString.copyFrom(serializer.serialize(s));
+            dataTuple.addValues(byteString);
+
+            dataTupleSet.addTuples(dataTuple);
+        }
+
+        heronTupleSet.setData(dataTupleSet);
+        inStreamQueue.offer(heronTupleSet.build());
+
+        for (int i = 0; i < Constants.RETRY_TIMES; i++) {
+            if (tupleExecutedCount.intValue() == 10) {
+                break;
+            }
+            SysUtils.sleep(Constants.RETRY_INTERVAL_MS);
+        }
+
+        // Wait the bolt's finishing
+        SysUtils.sleep(Constants.TEST_WAIT_TIME_MS);
+        Assert.assertEquals(10, tupleExecutedCount.intValue());
+        Assert.assertEquals(5, ackCount.intValue());
+        Assert.assertEquals(5, failCount.intValue());
+        Assert.assertEquals("ABABABABAB", receivedStrings.toString());
+    }
 }

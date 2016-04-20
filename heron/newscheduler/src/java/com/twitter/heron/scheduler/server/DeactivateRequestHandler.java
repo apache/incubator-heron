@@ -30,40 +30,40 @@ import com.twitter.heron.spi.utils.TMasterUtils;
 
 public class DeactivateRequestHandler implements HttpHandler {
 
-  private IScheduler scheduler;
-  private Config runtime;
+    private IScheduler scheduler;
+    private Config runtime;
 
-  public DeactivateRequestHandler(Config runtime, IScheduler scheduler) {
-    this.scheduler = scheduler;
-    this.runtime = runtime;
-  }
+    public DeactivateRequestHandler(Config runtime, IScheduler scheduler) {
+        this.scheduler = scheduler;
+        this.runtime = runtime;
+    }
 
-  @Override
-  public void handle(HttpExchange exchange) throws IOException {
+    @Override
+    public void handle(HttpExchange exchange) throws IOException {
 
-    // read the http request payload
-    byte[] requestBody = HttpUtils.readHttpRequestBody(exchange);
+        // read the http request payload
+        byte[] requestBody = HttpUtils.readHttpRequestBody(exchange);
 
-    // prepare the deactivate request
-    Scheduler.DeactivateTopologyRequest deactivateTopologyRequest =
-        Scheduler.DeactivateTopologyRequest.newBuilder()
-            .mergeFrom(requestBody)
-            .build();
+        // prepare the deactivate request
+        Scheduler.DeactivateTopologyRequest deactivateTopologyRequest =
+                Scheduler.DeactivateTopologyRequest.newBuilder()
+                        .mergeFrom(requestBody)
+                        .build();
 
-    // deactivate the topology
-    boolean isDeactivatedSuccessfully =
-        scheduler.onDeactivate(deactivateTopologyRequest) &&
-            TMasterUtils.sendToTMaster("deactivate",
-                Runtime.topologyName(runtime),
-                Runtime.schedulerStateManagerAdaptor(runtime));
+        // deactivate the topology
+        boolean isDeactivatedSuccessfully =
+                scheduler.onDeactivate(deactivateTopologyRequest) &&
+                        TMasterUtils.sendToTMaster("deactivate",
+                                Runtime.topologyName(runtime),
+                                Runtime.schedulerStateManagerAdaptor(runtime));
 
-    // prepare the response
-    Scheduler.DeactivateTopologyResponse response =
-        Scheduler.DeactivateTopologyResponse.newBuilder()
-            .setStatus(NetworkUtils.getHeronStatus(isDeactivatedSuccessfully))
-            .build();
+        // prepare the response
+        Scheduler.DeactivateTopologyResponse response =
+                Scheduler.DeactivateTopologyResponse.newBuilder()
+                        .setStatus(NetworkUtils.getHeronStatus(isDeactivatedSuccessfully))
+                        .build();
 
-    // Send the response back
-    HttpUtils.sendHttpResponse(exchange, response.toByteArray());
-  }
+        // Send the response back
+        HttpUtils.sendHttpResponse(exchange, response.toByteArray());
+    }
 }

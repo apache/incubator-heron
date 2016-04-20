@@ -26,33 +26,33 @@ import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
  * And {@link #flush()} is called at an interval according to the configuration
  */
 public interface IMetricsSink extends AutoCloseable {
-  /**
-   * Initialize the MetricsSink
-   *
-   * @param conf An unmodifiableMap containing basic configuration
-   * @param context context objects for Sink to init
-   * Attempts to modify the returned map,
-   * whether direct or via its collection views, result in an UnsupportedOperationException.
-   */
-  void init(Map<String, Object> conf, SinkContext context);
+    /**
+     * Initialize the MetricsSink
+     *
+     * @param conf An unmodifiableMap containing basic configuration
+     * @param context context objects for Sink to init
+     * Attempts to modify the returned map,
+     * whether direct or via its collection views, result in an UnsupportedOperationException.
+     */
+    void init(Map<String, Object> conf, SinkContext context);
 
-  /**
-   * Process a metrics record in the sink
-   *
-   * @param record the record to put
-   */
-  void processRecord(MetricsRecord record);
+    /**
+     * Process a metrics record in the sink
+     *
+     * @param record the record to put
+     */
+    void processRecord(MetricsRecord record);
 
-  /**
-   * Flush any buffered metrics
-   * It would be called at an interval according to the configuration
-   */
-  void flush();
+    /**
+     * Flush any buffered metrics
+     * It would be called at an interval according to the configuration
+     */
+    void flush();
 
-  /**
-   * Closes this stream and releases any system resources associated
-   * with it. If the stream is already closed then invoking this
-   * method has no effect.
-   */
-  void close();
+    /**
+     * Closes this stream and releases any system resources associated
+     * with it. If the stream is already closed then invoking this
+     * method has no effect.
+     */
+    void close();
 }

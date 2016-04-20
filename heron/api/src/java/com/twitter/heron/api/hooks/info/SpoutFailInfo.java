@@ -15,25 +15,25 @@
 package com.twitter.heron.api.hooks.info;
 
 public class SpoutFailInfo {
-  private Object messageId;
-  private int spoutTaskId;
-  private Long failLatencyMs; // null if it wasn't sampled
-    
-  public SpoutFailInfo(Object messageId, int spoutTaskId, Long failLatencyMs) {
-    this.messageId = messageId;
-    this.spoutTaskId = spoutTaskId;
-    this.failLatencyMs = failLatencyMs;
-  }
+    private Object messageId;
+    private int spoutTaskId;
+    private Long failLatencyMs; // null if it wasn't sampled
 
-  public Object getMessageId() {
-    return messageId;
-  }
+    public SpoutFailInfo(Object messageId, int spoutTaskId, Long failLatencyMs) {
+        this.messageId = messageId;
+        this.spoutTaskId = spoutTaskId;
+        this.failLatencyMs = failLatencyMs;
+    }
 
-  public int getSpoutTaskId() {
-    return spoutTaskId;
-  }
+    public Object getMessageId() {
+        return messageId;
+    }
 
-  public Long getFailLatencyMs() {
-    return failLatencyMs;
-  }
+    public int getSpoutTaskId() {
+        return spoutTaskId;
+    }
+
+    public Long getFailLatencyMs() {
+        return failLatencyMs;
+    }
 }

@@ -17,63 +17,63 @@ package com.twitter.heron.scheduler.local;
 import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.FileUtils;
-import com.twitter.heron.spi.uploader.IUploader;
 import com.twitter.heron.spi.scheduler.context.LaunchContext;
+import com.twitter.heron.spi.uploader.IUploader;
 
 public class LocalUploader implements IUploader {
-  private static final Logger LOG = Logger.getLogger(LocalUploader.class.getName());
+    private static final Logger LOG = Logger.getLogger(LocalUploader.class.getName());
 
-  private LocalConfig localConfig;
-  private String targetTopologyPackage;
+    private LocalConfig localConfig;
+    private String targetTopologyPackage;
 
-  @Override
+    @Override
 
-  public void initialize(LaunchContext context) {
-    this.localConfig = new LocalConfig(context);
+    public void initialize(LaunchContext context) {
+        this.localConfig = new LocalConfig(context);
 
-    if (this.localConfig.getWorkingDirectory() == null) {
-      throw new RuntimeException("The working is not set");
+        if (this.localConfig.getWorkingDirectory() == null) {
+            throw new RuntimeException("The working is not set");
+        }
+
+        if (this.localConfig.getHeronCoreReleasePackage() == null) {
+            LOG.info("The heron core release package is not set; " +
+                    "supposing it is already in working directory");
+        }
     }
 
-    if (this.localConfig.getHeronCoreReleasePackage() == null) {
-      LOG.info("The heron core release package is not set; " +
-          "supposing it is already in working directory");
+    @Override
+    public boolean uploadPackage(String topologyPackageLocation) {
+        LOG.info("Copying topology package to target working directory: " +
+                localConfig.getWorkingDirectory());
+
+        // If the working directory does not exist, create it.
+        if (!FileUtils.isDirectoryExists(this.localConfig.getWorkingDirectory())) {
+            LOG.info("The working directory does not exist; creating it.");
+            if (!FileUtils.createDirectory(this.localConfig.getWorkingDirectory())) {
+                LOG.severe("Failed to create directory: " + this.localConfig.getWorkingDirectory());
+                return false;
+            }
+        }
+
+        targetTopologyPackage = String.format("%s/%s",
+                localConfig.getWorkingDirectory(), FileUtils.getBaseName(topologyPackageLocation));
+
+
+        // 1. Copy the topology package to target working directory
+        if (!FileUtils.copyFile(topologyPackageLocation, targetTopologyPackage)) {
+            return false;
+        }
+
+        // We would not untar the topology here; we would untar in the LocalLauncher
+
+        return true;
     }
-  }
 
-  @Override
-  public boolean uploadPackage(String topologyPackageLocation) {
-    LOG.info("Copying topology package to target working directory: " +
-        localConfig.getWorkingDirectory());
+    @Override
+    public void undo() {
+        // Clean the tmp working directory
+        LOG.info("Clean uploaded jar");
 
-    // If the working directory does not exist, create it.
-    if (!FileUtils.isDirectoryExists(this.localConfig.getWorkingDirectory())) {
-      LOG.info("The working directory does not exist; creating it.");
-      if (!FileUtils.createDirectory(this.localConfig.getWorkingDirectory())) {
-        LOG.severe("Failed to create directory: " + this.localConfig.getWorkingDirectory());
-        return false;
-      }
+        FileUtils.deleteFile(targetTopologyPackage);
     }
-
-    targetTopologyPackage = String.format("%s/%s",
-        localConfig.getWorkingDirectory(), FileUtils.getBaseName(topologyPackageLocation));
-
-
-    // 1. Copy the topology package to target working directory
-    if (!FileUtils.copyFile(topologyPackageLocation, targetTopologyPackage)) {
-      return false;
-    }
-
-    // We would not untar the topology here; we would untar in the LocalLauncher
-
-    return true;
-  }
-
-  @Override
-  public void undo() {
-    // Clean the tmp working directory
-    LOG.info("Clean uploaded jar");
-
-    FileUtils.deleteFile(targetTopologyPackage);
-  }
 }

@@ -21,24 +21,24 @@ import java.util.Map;
 // import org.json.simple.JSONValue;
 
 public class Utils {
-  public static final String DEFAULT_STREAM_ID = com.twitter.heron.api.utils.Utils.DEFAULT_STREAM_ID;
+    public static final String DEFAULT_STREAM_ID = com.twitter.heron.api.utils.Utils.DEFAULT_STREAM_ID;
 
-  public static Object newInstance(String klass) {
-    try {
-      Class c = Class.forName(klass);
-      return c.newInstance();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+    public static Object newInstance(String klass) {
+        try {
+            Class c = Class.forName(klass);
+            return c.newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
-  }
 
-  public static List<Object> tuple(Object... values) {
-    return com.twitter.heron.api.utils.Utils.tuple(values);
-  }
+    public static List<Object> tuple(Object... values) {
+        return com.twitter.heron.api.utils.Utils.tuple(values);
+    }
 
-  public static void sleep(long millis) {
-    com.twitter.heron.api.utils.Utils.sleep(millis);
-  }
+    public static void sleep(long millis) {
+        com.twitter.heron.api.utils.Utils.sleep(millis);
+    }
 
     /*
     public static boolean isValidConf(Map<String, Object> stormConf) {
@@ -46,9 +46,9 @@ public class Utils {
     }
     */
 
-  public static Map<String, String> readCommandLineOpts() {
-    return com.twitter.heron.api.utils.Utils.readCommandLineOpts();
-  }
+    public static Map<String, String> readCommandLineOpts() {
+        return com.twitter.heron.api.utils.Utils.readCommandLineOpts();
+    }
 
     /*
     private static Object normalizeConf(Object conf) {
@@ -77,23 +77,23 @@ public class Utils {
     }
     */
 
-  public static byte[] serialize(Object obj) {
-    return com.twitter.heron.api.utils.Utils.serialize(obj);
-  }
+    public static byte[] serialize(Object obj) {
+        return com.twitter.heron.api.utils.Utils.serialize(obj);
+    }
 
-  public static Object deserialize(byte[] serialized) {
-    return com.twitter.heron.api.utils.Utils.deserialize(serialized);
-  }
+    public static Object deserialize(byte[] serialized) {
+        return com.twitter.heron.api.utils.Utils.deserialize(serialized);
+    }
 
-  public static Integer getInt(Object o) {
-    return com.twitter.heron.api.utils.Utils.getInt(o);
-  }
+    public static Integer getInt(Object o) {
+        return com.twitter.heron.api.utils.Utils.getInt(o);
+    }
 
-  public static byte[] toByteArray(ByteBuffer buffer) {
-    return com.twitter.heron.api.utils.Utils.toByteArray(buffer);
-  }
+    public static byte[] toByteArray(ByteBuffer buffer) {
+        return com.twitter.heron.api.utils.Utils.toByteArray(buffer);
+    }
 
-  public static <S, T> T get(Map<S, T> m, S key, T defaultValue) {
-    return com.twitter.heron.api.utils.Utils.get(m, key, defaultValue);
-  }
+    public static <S, T> T get(Map<S, T> m, S key, T defaultValue) {
+        return com.twitter.heron.api.utils.Utils.get(m, key, defaultValue);
+    }
 }

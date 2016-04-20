@@ -14,7 +14,6 @@
 
 package backtype.storm.topology.base;
 
-import backtype.storm.topology.base.BaseComponent;
 import backtype.storm.topology.IRichSpout;
 
 public abstract class BaseRichSpout extends BaseComponent implements IRichSpout {

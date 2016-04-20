@@ -26,56 +26,56 @@ import com.twitter.heron.spi.scheduler.IScheduler;
 
 public class SchedulerServer {
 
-  // initialize the various URL end points
-  public static final String KILL_REQUEST_CONTEXT = "/kill";
-  public static final String ACTIVATE_REQUEST_CONTEXT = "/activate";
-  public static final String DEACTIVATE_REQUEST_CONTEXT = "/deactivate";
-  public static final String RESTART_REQUEST_CONTEXT = "/restart";
+    // initialize the various URL end points
+    public static final String KILL_REQUEST_CONTEXT = "/kill";
+    public static final String ACTIVATE_REQUEST_CONTEXT = "/activate";
+    public static final String DEACTIVATE_REQUEST_CONTEXT = "/deactivate";
+    public static final String RESTART_REQUEST_CONTEXT = "/restart";
 
-  private static final int SERVER_BACK_LOG = 0;
+    private static final int SERVER_BACK_LOG = 0;
 
-  private final HttpServer schedulerServer;
-  private final Config runtime;
+    private final HttpServer schedulerServer;
+    private final Config runtime;
 
-  public SchedulerServer(Config runtime, IScheduler scheduler, int port)
-      throws IOException {
+    public SchedulerServer(Config runtime, IScheduler scheduler, int port)
+            throws IOException {
 
-    this.runtime = runtime;
-    this.schedulerServer = createServer(port);
+        this.runtime = runtime;
+        this.schedulerServer = createServer(port);
 
-    // associate handlers with the URL service end points
-    this.schedulerServer.createContext(KILL_REQUEST_CONTEXT,
-        new KillRequestHandler(runtime, scheduler));
+        // associate handlers with the URL service end points
+        this.schedulerServer.createContext(KILL_REQUEST_CONTEXT,
+                new KillRequestHandler(runtime, scheduler));
 
-    this.schedulerServer.createContext(ACTIVATE_REQUEST_CONTEXT,
-        new ActivateRequestHandler(runtime, scheduler));
+        this.schedulerServer.createContext(ACTIVATE_REQUEST_CONTEXT,
+                new ActivateRequestHandler(runtime, scheduler));
 
-    this.schedulerServer.createContext(DEACTIVATE_REQUEST_CONTEXT,
-        new DeactivateRequestHandler(runtime, scheduler));
+        this.schedulerServer.createContext(DEACTIVATE_REQUEST_CONTEXT,
+                new DeactivateRequestHandler(runtime, scheduler));
 
-    this.schedulerServer.createContext(RESTART_REQUEST_CONTEXT,
-        new RestartRequestHandler(runtime, scheduler));
-  }
+        this.schedulerServer.createContext(RESTART_REQUEST_CONTEXT,
+                new RestartRequestHandler(runtime, scheduler));
+    }
 
-  public void start() {
-    schedulerServer.start();
-  }
+    public void start() {
+        schedulerServer.start();
+    }
 
-  public void stop() {
-    schedulerServer.stop(0);
-  }
+    public void stop() {
+        schedulerServer.stop(0);
+    }
 
-  public String getHost() {
-    return HttpUtils.getHostName();
-  }
+    public String getHost() {
+        return HttpUtils.getHostName();
+    }
 
-  public int getPort() {
-    return schedulerServer.getAddress().getPort();
-  }
+    public int getPort() {
+        return schedulerServer.getAddress().getPort();
+    }
 
-  protected HttpServer createServer(int port) throws IOException {
-    HttpServer schedulerServer = HttpServer.create(new InetSocketAddress(port), SERVER_BACK_LOG);
-    schedulerServer.setExecutor(Executors.newSingleThreadExecutor());
-    return schedulerServer;
-  }
+    protected HttpServer createServer(int port) throws IOException {
+        HttpServer schedulerServer = HttpServer.create(new InetSocketAddress(port), SERVER_BACK_LOG);
+        schedulerServer.setExecutor(Executors.newSingleThreadExecutor());
+        return schedulerServer;
+    }
 }

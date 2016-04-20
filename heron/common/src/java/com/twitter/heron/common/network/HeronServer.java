@@ -40,275 +40,273 @@ import com.twitter.heron.common.basics.NIOLooper;
  * d) onMessage method called when we have a new message
  */
 public abstract class HeronServer implements ISelectHandler {
-  // The socket that we will use for accepting connections
-  private ServerSocketChannel acceptChannel;
-  // Define the address where we need to listen on
-  private InetSocketAddress endpoint;
-  private HeronSocketOptions socketOptions;
-  // Our own looper
-  private NIOLooper nioLooper;
-  // All the clients that we have connected
-  private Map<SocketChannel, SocketChannelHelper> activeConnections;
+    private static final Logger LOG = Logger.getLogger(HeronServer.class.getName());
+    // The socket that we will use for accepting connections
+    private ServerSocketChannel acceptChannel;
+    // Define the address where we need to listen on
+    private InetSocketAddress endpoint;
+    private HeronSocketOptions socketOptions;
+    // Our own looper
+    private NIOLooper nioLooper;
+    // All the clients that we have connected
+    private Map<SocketChannel, SocketChannelHelper> activeConnections;
+    // Map from protobuf message's name to protobuf message's builder
+    private Map<String, Message.Builder> requestMap;
+    private Map<String, Message.Builder> messageMap;
 
-  private static final Logger LOG = Logger.getLogger(HeronServer.class.getName());
-
-  // Map from protobuf message's name to protobuf message's builder
-  private Map<String, Message.Builder> requestMap;
-  private Map<String, Message.Builder> messageMap;
-
-  /**
-   * Constructor
-   *
-   * @param s the NIOLooper bind with this socket server
-   * @param host the host of remote endpoint to communicate with
-   * @param port the port of remote endpoint to communicate with
-   */
-  public HeronServer(NIOLooper s, String host, int port, HeronSocketOptions options) {
-    nioLooper = s;
-    endpoint = new InetSocketAddress(host, port);
-    socketOptions = options;
-    requestMap = new HashMap<String, Message.Builder>();
-    messageMap = new HashMap<String, Message.Builder>();
-    activeConnections = new HashMap<SocketChannel, SocketChannelHelper>();
-  }
-
-  // Register the protobuf Message's name with protobuf Message
-  public void registerOnMessage(Message.Builder builder) {
-    messageMap.put(builder.getDescriptorForType().getFullName(), builder);
-  }
-
-  // Register the protobuf Message's name with protobuf Message
-  public void registerOnRequest(Message.Builder builder) {
-    requestMap.put(builder.getDescriptorForType().getFullName(), builder);
-  }
-
-  public boolean start() {
-    try {
-      acceptChannel = ServerSocketChannel.open();
-      acceptChannel.configureBlocking(false);
-      acceptChannel.socket().bind(endpoint);
-      nioLooper.registerAccept(acceptChannel, this);
-      return true;
-    } catch (Exception e) {
-      LOG.log(Level.SEVERE, "Failed to start server", e);
-      return false;
-    }
-  }
-
-  // Stop the HeronServer and clean relative staff
-  public void stop() {
-    if (acceptChannel == null || !acceptChannel.isOpen()) {
-      LOG.info("Fail to stop server; not yet open.");
-      return;
-    }
-    // Clear all connected socket and related stuff
-    for (Map.Entry<SocketChannel, SocketChannelHelper> connections : activeConnections.entrySet()) {
-      SocketChannel channel = connections.getKey();
-      SocketAddress channelAddress = channel.socket().getRemoteSocketAddress();
-      LOG.info("Closing connected channel from client: " + channelAddress);
-      LOG.info("Removing all interest on channel: " + channelAddress);
-      nioLooper.removeAllInterest(channel);
-
-      // Dispatch the child instance
-      onClose(channel);
-      // Clear the SocketChannelHelper
-      connections.getValue().clear();
+    /**
+     * Constructor
+     *
+     * @param s the NIOLooper bind with this socket server
+     * @param host the host of remote endpoint to communicate with
+     * @param port the port of remote endpoint to communicate with
+     */
+    public HeronServer(NIOLooper s, String host, int port, HeronSocketOptions options) {
+        nioLooper = s;
+        endpoint = new InetSocketAddress(host, port);
+        socketOptions = options;
+        requestMap = new HashMap<String, Message.Builder>();
+        messageMap = new HashMap<String, Message.Builder>();
+        activeConnections = new HashMap<SocketChannel, SocketChannelHelper>();
     }
 
-    // Clear state inside the HeronServer
-    activeConnections.clear();
-    requestMap.clear();
-    messageMap.clear();
-    try {
-      acceptChannel.close();
-    } catch (IOException e) {
-      LOG.log(Level.SEVERE, "Failed to close server", e);
+    // Register the protobuf Message's name with protobuf Message
+    public void registerOnMessage(Message.Builder builder) {
+        messageMap.put(builder.getDescriptorForType().getFullName(), builder);
     }
-  }
 
-  @Override
-  public void handleAccept(SelectableChannel channel) {
-    try {
-      SocketChannel socketChannel = acceptChannel.accept();
-      if (socketChannel != null) {
-        socketChannel.configureBlocking(false);
-        // Set the maximum possible send and receive buffers
-        socketChannel.socket().setSendBufferSize(socketOptions.getSocketSendBufferSizeInBytes());
-        socketChannel.socket().setReceiveBufferSize(socketOptions.getSocketReceivedBufferSizeInBytes());
-        socketChannel.socket().setTcpNoDelay(true);
-        SocketChannelHelper helper = new SocketChannelHelper(nioLooper, this, socketChannel, socketOptions);
-        activeConnections.put(socketChannel, helper);
-        onConnect(socketChannel);
-      }
-    } catch (Exception e) {
-      LOG.log(Level.SEVERE, "Error while accepting a new connection ", e);
-      // Note:- we are not calling onError
+    // Register the protobuf Message's name with protobuf Message
+    public void registerOnRequest(Message.Builder builder) {
+        requestMap.put(builder.getDescriptorForType().getFullName(), builder);
     }
-  }
 
-  @Override
-  public void handleRead(SelectableChannel channel) {
-    SocketChannelHelper helper = activeConnections.get(channel);
-    if (helper == null) {
-      LOG.severe("Unknown connection is ready for read");
-      return;
-    }
-    List<IncomingPacket> packets = helper.read();
-    for (IncomingPacket ipt : packets) {
-      handlePacket(channel, ipt);
-    }
-  }
-
-  @Override
-  public void handleWrite(SelectableChannel channel) {
-    SocketChannelHelper helper = activeConnections.get(channel);
-    if (helper == null) {
-      LOG.severe("Unknown connection is ready for read");
-      return;
-    }
-    helper.write();
-  }
-
-  @Override
-  public void handleConnect(SelectableChannel channel) {
-    throw new RuntimeException("Server cannot have handleConnect");
-  }
-
-  /**
-   * Handle an incomingPacket and invoke either onRequest or
-   * onMessage() to handle it
-   */
-  private void handlePacket(SelectableChannel channel, IncomingPacket incomingPacket) {
-    String typeName = incomingPacket.unpackString();
-    REQID rid = incomingPacket.unpackREQID();
-    Message.Builder bldr = requestMap.get(typeName);
-    boolean isRequest = false;
-    if (bldr != null) {
-      // This is a request
-      isRequest = true;
-    } else {
-      bldr = messageMap.get(typeName);
-    }
-    if (bldr != null) {
-      // Clear the earlier state of Message.Builder
-      // Otherwise it would merge new Message with old state
-      bldr.clear();
-
-      incomingPacket.unpackMessage(bldr);
-      if (bldr.isInitialized()) {
-        Message msg = bldr.build();
-        if (isRequest) {
-          onRequest(rid, (SocketChannel) channel, msg);
-        } else {
-          onMessage((SocketChannel) channel, msg);
+    public boolean start() {
+        try {
+            acceptChannel = ServerSocketChannel.open();
+            acceptChannel.configureBlocking(false);
+            acceptChannel.socket().bind(endpoint);
+            nioLooper.registerAccept(acceptChannel, this);
+            return true;
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Failed to start server", e);
+            return false;
         }
-      } else {
-        // Message failed to be deser
-        LOG.severe("Could not deserialize protobuf of type " + typeName);
-        handleError(channel);
-      }
-      return;
-    } else {
-      LOG.severe("Unexpected protobuf type received " + typeName);
-      handleError(channel);
     }
-  }
 
-  // Clean the stuff when meeting some errors
-  public void handleError(SelectableChannel channel) {
-    SocketAddress channelAddress = ((SocketChannel) channel).socket().getRemoteSocketAddress();
-    LOG.info("Handling error from channel: " + channelAddress);
-    SocketChannelHelper helper = activeConnections.get(channel);
-    if (helper == null) {
-      LOG.severe("Inactive channel had error?");
-      return;
+    // Stop the HeronServer and clean relative staff
+    public void stop() {
+        if (acceptChannel == null || !acceptChannel.isOpen()) {
+            LOG.info("Fail to stop server; not yet open.");
+            return;
+        }
+        // Clear all connected socket and related stuff
+        for (Map.Entry<SocketChannel, SocketChannelHelper> connections : activeConnections.entrySet()) {
+            SocketChannel channel = connections.getKey();
+            SocketAddress channelAddress = channel.socket().getRemoteSocketAddress();
+            LOG.info("Closing connected channel from client: " + channelAddress);
+            LOG.info("Removing all interest on channel: " + channelAddress);
+            nioLooper.removeAllInterest(channel);
+
+            // Dispatch the child instance
+            onClose(channel);
+            // Clear the SocketChannelHelper
+            connections.getValue().clear();
+        }
+
+        // Clear state inside the HeronServer
+        activeConnections.clear();
+        requestMap.clear();
+        messageMap.clear();
+        try {
+            acceptChannel.close();
+        } catch (IOException e) {
+            LOG.log(Level.SEVERE, "Failed to close server", e);
+        }
     }
-    helper.clear();
-    LOG.info("Removing all interest on channel: " + channelAddress);
-    nioLooper.removeAllInterest(channel);
-    try {
-      channel.close();
-    } catch (IOException e) {
-      LOG.severe("Error closing connection in handleError");
+
+    @Override
+    public void handleAccept(SelectableChannel channel) {
+        try {
+            SocketChannel socketChannel = acceptChannel.accept();
+            if (socketChannel != null) {
+                socketChannel.configureBlocking(false);
+                // Set the maximum possible send and receive buffers
+                socketChannel.socket().setSendBufferSize(socketOptions.getSocketSendBufferSizeInBytes());
+                socketChannel.socket().setReceiveBufferSize(socketOptions.getSocketReceivedBufferSizeInBytes());
+                socketChannel.socket().setTcpNoDelay(true);
+                SocketChannelHelper helper = new SocketChannelHelper(nioLooper, this, socketChannel, socketOptions);
+                activeConnections.put(socketChannel, helper);
+                onConnect(socketChannel);
+            }
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Error while accepting a new connection ", e);
+            // Note:- we are not calling onError
+        }
     }
-    activeConnections.remove(channel);
-    onClose((SocketChannel) channel);
-  }
 
-  // Send back the response to the client.
-  // A false return value means that the response could not be sent.
-  // Upon returning true, it does not mean that the response was actually
-  // sent out, merely that the response was queueud to be sent out.
-  // Actual send occurs when the socket becomes writable and all prev
-  // responses/messages are sent.
-  public boolean sendResponse(REQID rid, SocketChannel channel, Message response) {
-    SocketChannelHelper helper = activeConnections.get(channel);
-    if (helper == null) {
-      LOG.severe("Trying to send a response on an unknown connection");
-      return false;
+    @Override
+    public void handleRead(SelectableChannel channel) {
+        SocketChannelHelper helper = activeConnections.get(channel);
+        if (helper == null) {
+            LOG.severe("Unknown connection is ready for read");
+            return;
+        }
+        List<IncomingPacket> packets = helper.read();
+        for (IncomingPacket ipt : packets) {
+            handlePacket(channel, ipt);
+        }
     }
-    OutgoingPacket opk = new OutgoingPacket(rid, response);
-    helper.sendPacket(opk);
-    return true;
-  }
 
-  // This method is used if you want to communicate with the other end
-  // on a non-request-response based communication.
-  public boolean sendMessage(SocketChannel channel, Message message) {
-    return sendResponse(REQID.zeroREQID, channel, message);
-  }
+    @Override
+    public void handleWrite(SelectableChannel channel) {
+        SocketChannelHelper helper = activeConnections.get(channel);
+        if (helper == null) {
+            LOG.severe("Unknown connection is ready for read");
+            return;
+        }
+        helper.write();
+    }
 
-  public NIOLooper getNIOLooper() {
-    return nioLooper;
-  }
+    @Override
+    public void handleConnect(SelectableChannel channel) {
+        throw new RuntimeException("Server cannot have handleConnect");
+    }
 
-  // Add a timer to be invoked after timerInSeconds seconds.
-  public void registerTimerEventInSeconds(long timerInSeconds, Runnable task) {
-    nioLooper.registerTimerEventInSeconds(timerInSeconds, task);
-  }
+    /**
+     * Handle an incomingPacket and invoke either onRequest or
+     * onMessage() to handle it
+     */
+    private void handlePacket(SelectableChannel channel, IncomingPacket incomingPacket) {
+        String typeName = incomingPacket.unpackString();
+        REQID rid = incomingPacket.unpackREQID();
+        Message.Builder bldr = requestMap.get(typeName);
+        boolean isRequest = false;
+        if (bldr != null) {
+            // This is a request
+            isRequest = true;
+        } else {
+            bldr = messageMap.get(typeName);
+        }
+        if (bldr != null) {
+            // Clear the earlier state of Message.Builder
+            // Otherwise it would merge new Message with old state
+            bldr.clear();
 
-  // Add a timer to be invoked after timerInNanoSecnods nano-seconds.
-  public void registerTimerEventInNanoSeconds(long timerInNanoSecnods, Runnable task) {
-    nioLooper.registerTimerEventInNanoSeconds(timerInNanoSecnods, task);
-  }
+            incomingPacket.unpackMessage(bldr);
+            if (bldr.isInitialized()) {
+                Message msg = bldr.build();
+                if (isRequest) {
+                    onRequest(rid, (SocketChannel) channel, msg);
+                } else {
+                    onMessage((SocketChannel) channel, msg);
+                }
+            } else {
+                // Message failed to be deser
+                LOG.severe("Could not deserialize protobuf of type " + typeName);
+                handleError(channel);
+            }
+            return;
+        } else {
+            LOG.severe("Unexpected protobuf type received " + typeName);
+            handleError(channel);
+        }
+    }
 
-  /////////////////////////////////////////////////////////
-  // This is the interface that needs to be implemented by
-  // all Heron Servers.
-  /////////////////////////////////////////////////////////
+    // Clean the stuff when meeting some errors
+    public void handleError(SelectableChannel channel) {
+        SocketAddress channelAddress = ((SocketChannel) channel).socket().getRemoteSocketAddress();
+        LOG.info("Handling error from channel: " + channelAddress);
+        SocketChannelHelper helper = activeConnections.get(channel);
+        if (helper == null) {
+            LOG.severe("Inactive channel had error?");
+            return;
+        }
+        helper.clear();
+        LOG.info("Removing all interest on channel: " + channelAddress);
+        nioLooper.removeAllInterest(channel);
+        try {
+            channel.close();
+        } catch (IOException e) {
+            LOG.severe("Error closing connection in handleError");
+        }
+        activeConnections.remove(channel);
+        onClose((SocketChannel) channel);
+    }
 
-  // What action do you want to take when a new client
-  // connects to you.
-  public abstract void onConnect(SocketChannel channel);
+    // Send back the response to the client.
+    // A false return value means that the response could not be sent.
+    // Upon returning true, it does not mean that the response was actually
+    // sent out, merely that the response was queueud to be sent out.
+    // Actual send occurs when the socket becomes writable and all prev
+    // responses/messages are sent.
+    public boolean sendResponse(REQID rid, SocketChannel channel, Message response) {
+        SocketChannelHelper helper = activeConnections.get(channel);
+        if (helper == null) {
+            LOG.severe("Trying to send a response on an unknown connection");
+            return false;
+        }
+        OutgoingPacket opk = new OutgoingPacket(rid, response);
+        helper.sendPacket(opk);
+        return true;
+    }
 
-  // What action do you want to take when you get a new
-  // request from a particular client
-  public abstract void onRequest(REQID rid, SocketChannel channel, Message request);
+    // This method is used if you want to communicate with the other end
+    // on a non-request-response based communication.
+    public boolean sendMessage(SocketChannel channel, Message message) {
+        return sendResponse(REQID.zeroREQID, channel, message);
+    }
 
-  // What action do you want to take when you get a new
-  // message from a particular client
-  public abstract void onMessage(SocketChannel channel, Message message);
+    public NIOLooper getNIOLooper() {
+        return nioLooper;
+    }
 
-  // What action do you want to take when a client
-  // closes its connection to you.
-  public abstract void onClose(SocketChannel channel);
+    // Add a timer to be invoked after timerInSeconds seconds.
+    public void registerTimerEventInSeconds(long timerInSeconds, Runnable task) {
+        nioLooper.registerTimerEventInSeconds(timerInSeconds, task);
+    }
 
-  /////////////////////////////////////////////////////////
-  // Following protected methods are just used for testing
-  /////////////////////////////////////////////////////////
-  protected Map<String, Message.Builder> getMessageMap() {
-    return messageMap;
-  }
+    // Add a timer to be invoked after timerInNanoSecnods nano-seconds.
+    public void registerTimerEventInNanoSeconds(long timerInNanoSecnods, Runnable task) {
+        nioLooper.registerTimerEventInNanoSeconds(timerInNanoSecnods, task);
+    }
 
-  protected Map<String, Message.Builder> getRequestMap() {
-    return requestMap;
-  }
+    /////////////////////////////////////////////////////////
+    // This is the interface that needs to be implemented by
+    // all Heron Servers.
+    /////////////////////////////////////////////////////////
 
-  protected ServerSocketChannel getAcceptChannel() {
-    return acceptChannel;
-  }
+    // What action do you want to take when a new client
+    // connects to you.
+    public abstract void onConnect(SocketChannel channel);
 
-  protected Map<SocketChannel, SocketChannelHelper> getActiveConnections() {
-    return activeConnections;
-  }
+    // What action do you want to take when you get a new
+    // request from a particular client
+    public abstract void onRequest(REQID rid, SocketChannel channel, Message request);
+
+    // What action do you want to take when you get a new
+    // message from a particular client
+    public abstract void onMessage(SocketChannel channel, Message message);
+
+    // What action do you want to take when a client
+    // closes its connection to you.
+    public abstract void onClose(SocketChannel channel);
+
+    /////////////////////////////////////////////////////////
+    // Following protected methods are just used for testing
+    /////////////////////////////////////////////////////////
+    protected Map<String, Message.Builder> getMessageMap() {
+        return messageMap;
+    }
+
+    protected Map<String, Message.Builder> getRequestMap() {
+        return requestMap;
+    }
+
+    protected ServerSocketChannel getAcceptChannel() {
+        return acceptChannel;
+    }
+
+    protected Map<SocketChannel, SocketChannelHelper> getActiveConnections() {
+        return activeConnections;
+    }
 }

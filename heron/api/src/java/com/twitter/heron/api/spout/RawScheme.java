@@ -14,8 +14,10 @@
 
 package com.twitter.heron.api.spout;
 
-import com.twitter.heron.api.tuple.Fields;
 import java.util.List;
+
+import com.twitter.heron.api.tuple.Fields;
+
 import static com.twitter.heron.api.utils.Utils.tuple;
 
 public class RawScheme implements Scheme {

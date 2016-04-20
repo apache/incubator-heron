@@ -23,9 +23,9 @@ import com.google.protobuf.Message;
 
 /**
  * Defines OutgoingPacket
- * <p/>
+ * <p>
  * TODO -- Sanjeev will add a detailed description of this application level protocol later
- * <p/>
+ * <p>
  * When allocating the ByteBuffer, we have two options:
  * 1. Normal java heap buffer by invoking ByteBuffer.allocate(...),
  * 2. Native heap buffer by invoking ByteBuffer.allocateDirect(...),
@@ -36,7 +36,7 @@ import com.google.protobuf.Message;
  * -- We could not control when to release the resources of direct buffer explicitly;
  * -- It is hard to guarantee direct buffer would not break limitation of native heap,
  * i.e. not throw OutOfMemoryError.
- * <p/>
+ * <p>
  * 2. Experiments are done by using direct buffer and the resources saving is negligible:
  * -- Direct buffer would save, in our scenarios, less than 1% of RAM;
  * -- Direct buffer could save 30%~50% cpu of Gateway thread.
@@ -46,61 +46,61 @@ import com.google.protobuf.Message;
  */
 
 public class OutgoingPacket {
-  private static final Logger LOG = Logger.getLogger(OutgoingPacket.class.getName());
-  private ByteBuffer buffer;
+    private static final Logger LOG = Logger.getLogger(OutgoingPacket.class.getName());
+    private ByteBuffer buffer;
 
-  public OutgoingPacket(REQID _reqid, Message _message) {
-    assert _message.isInitialized();
-    // First calculate the total size of the packet
-    // including the header
-    int headerSize = 4;
-    String typename = _message.getDescriptorForType().getFullName();
-    int dataSize = sizeRequiredToPackString(typename) +
-        REQID.REQIDSize +
-        sizeRequiredToPackMessage(_message);
-    buffer = ByteBuffer.allocate(headerSize + dataSize);
+    public OutgoingPacket(REQID _reqid, Message _message) {
+        assert _message.isInitialized();
+        // First calculate the total size of the packet
+        // including the header
+        int headerSize = 4;
+        String typename = _message.getDescriptorForType().getFullName();
+        int dataSize = sizeRequiredToPackString(typename) +
+                REQID.REQIDSize +
+                sizeRequiredToPackMessage(_message);
+        buffer = ByteBuffer.allocate(headerSize + dataSize);
 
-    // First write out how much data is there as the header
-    buffer.putInt(dataSize);
+        // First write out how much data is there as the header
+        buffer.putInt(dataSize);
 
-    // Next write the type string
-    buffer.putInt(typename.length());
-    buffer.put(typename.getBytes());
+        // Next write the type string
+        buffer.putInt(typename.length());
+        buffer.put(typename.getBytes());
 
-    // now the reqid
-    _reqid.pack(buffer);
+        // now the reqid
+        _reqid.pack(buffer);
 
-    // finally the proto
-    // Double copy but it is designed, see the comments on top
-    buffer.putInt(_message.getSerializedSize());
-    buffer.put(_message.toByteArray());
+        // finally the proto
+        // Double copy but it is designed, see the comments on top
+        buffer.putInt(_message.getSerializedSize());
+        buffer.put(_message.toByteArray());
 
-    // Make the buffer ready for writing out
-    buffer.flip();
-  }
-
-  public static int sizeRequiredToPackString(String str) {
-    return 4 + str.length();
-  }
-
-  public static int sizeRequiredToPackMessage(Message msg) {
-    return 4 + msg.getSerializedSize();
-  }
-
-  public int writeToChannel(SocketChannel channel) {
-    int remaining = buffer.remaining();
-    assert remaining > 0;
-    int wrote = 0;
-    try {
-      wrote = channel.write(buffer);
-    } catch (Exception e) {
-      LOG.log(Level.SEVERE, "Error writing to channel ", e);
-      return -1;
+        // Make the buffer ready for writing out
+        buffer.flip();
     }
-    return remaining - wrote;
-  }
 
-  public int size() {
-    return buffer.capacity();
-  }
+    public static int sizeRequiredToPackString(String str) {
+        return 4 + str.length();
+    }
+
+    public static int sizeRequiredToPackMessage(Message msg) {
+        return 4 + msg.getSerializedSize();
+    }
+
+    public int writeToChannel(SocketChannel channel) {
+        int remaining = buffer.remaining();
+        assert remaining > 0;
+        int wrote = 0;
+        try {
+            wrote = channel.write(buffer);
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Error writing to channel ", e);
+            return -1;
+        }
+        return remaining - wrote;
+    }
+
+    public int size() {
+        return buffer.capacity();
+    }
 }

@@ -19,7 +19,7 @@ import java.util.Map;
 
 /**
  * Common methods for all possible components in a topology. This interface is used
- * when defining topologies using the Java API. 
+ * when defining topologies using the Java API.
  */
 public interface IComponent extends Serializable {
 
@@ -32,9 +32,8 @@ public interface IComponent extends Serializable {
 
     /**
      * Declare configuration specific to this component. Only a subset of the "topology.*" configs can
-     * be overridden. The component configuration can be further overridden when constructing the 
+     * be overridden. The component configuration can be further overridden when constructing the
      * topology using {@link TopologyBuilder}
-     *
      */
     Map<String, Object> getComponentConfiguration();
 

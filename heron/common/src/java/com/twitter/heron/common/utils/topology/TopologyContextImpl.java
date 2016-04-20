@@ -47,256 +47,256 @@ import com.twitter.heron.common.utils.metrics.MetricsCollector;
  * place within the topology, such as task ids, inputs and outputs, etc.
  */
 public class TopologyContextImpl extends GeneralTopologyContextImpl implements TopologyContext {
-  private final int myTaskId;
-  private final Map<String, Object> taskData;
-  private final MetricsCollector metricsCollector;
+    private final int myTaskId;
+    private final Map<String, Object> taskData;
+    private final MetricsCollector metricsCollector;
 
-  // List of task hooks to delegate
-  private final List<ITaskHook> taskHooks;
+    // List of task hooks to delegate
+    private final List<ITaskHook> taskHooks;
 
-  public TopologyContextImpl(Map<String, Object> clusterConfig,
-                             TopologyAPI.Topology topology,
-                             Map<Integer, String> taskToComponentMap,
-                             int _myTaskId, MetricsCollector metricsCollector) {
-    super(clusterConfig, topology, taskToComponentMap);
-    this.metricsCollector = metricsCollector;
-    this.myTaskId = _myTaskId;
-    this.taskData = new HashMap<String, Object>();
+    public TopologyContextImpl(Map<String, Object> clusterConfig,
+                               TopologyAPI.Topology topology,
+                               Map<Integer, String> taskToComponentMap,
+                               int _myTaskId, MetricsCollector metricsCollector) {
+        super(clusterConfig, topology, taskToComponentMap);
+        this.metricsCollector = metricsCollector;
+        this.myTaskId = _myTaskId;
+        this.taskData = new HashMap<String, Object>();
 
-    // Init task hooks
-    this.taskHooks = new LinkedList<ITaskHook>();
-    List<String> taskHooksClassNames =
-        (List<String>) clusterConfig.get(Config.TOPOLOGY_AUTO_TASK_HOOKS);
+        // Init task hooks
+        this.taskHooks = new LinkedList<ITaskHook>();
+        List<String> taskHooksClassNames =
+                (List<String>) clusterConfig.get(Config.TOPOLOGY_AUTO_TASK_HOOKS);
 
-    if (taskHooksClassNames != null) {
-      // task hooks are registered
-      for (String className : taskHooksClassNames) {
-        ITaskHook taskHook;
-        try {
-          taskHook = (ITaskHook) Class.forName(className).newInstance();
-        } catch (ClassNotFoundException ex) {
-          throw new RuntimeException(ex + " ITaskHook class must be in class path.");
-        } catch (InstantiationException ex) {
-          throw new RuntimeException(ex + " ITaskHook class must be concrete.");
-        } catch (IllegalAccessException ex) {
-          throw new RuntimeException(ex + " ITaskHook class must have a no-arg constructor.");
+        if (taskHooksClassNames != null) {
+            // task hooks are registered
+            for (String className : taskHooksClassNames) {
+                ITaskHook taskHook;
+                try {
+                    taskHook = (ITaskHook) Class.forName(className).newInstance();
+                } catch (ClassNotFoundException ex) {
+                    throw new RuntimeException(ex + " ITaskHook class must be in class path.");
+                } catch (InstantiationException ex) {
+                    throw new RuntimeException(ex + " ITaskHook class must be concrete.");
+                } catch (IllegalAccessException ex) {
+                    throw new RuntimeException(ex + " ITaskHook class must have a no-arg constructor.");
+                }
+
+                this.taskHooks.add(taskHook);
+            }
         }
-
-        this.taskHooks.add(taskHook);
-      }
     }
-  }
 
-  /**
-   * Task Hook Called just after the spout/bolt's prepare method is called.
-   */
-  public void invokeHookPrepare() {
-    for (ITaskHook taskHook : taskHooks) {
-      taskHook.prepare(getTopologyConfig(), this);
+    /**
+     * Task Hook Called just after the spout/bolt's prepare method is called.
+     */
+    public void invokeHookPrepare() {
+        for (ITaskHook taskHook : taskHooks) {
+            taskHook.prepare(getTopologyConfig(), this);
+        }
     }
-  }
 
-  /**
-   * Task Hook Called just before the spout/bolt's cleanup method is called.
-   */
-  public void invokeHookCleanup() {
-    for (ITaskHook taskHook : taskHooks) {
-      taskHook.cleanup();
+    /**
+     * Task Hook Called just before the spout/bolt's cleanup method is called.
+     */
+    public void invokeHookCleanup() {
+        for (ITaskHook taskHook : taskHooks) {
+            taskHook.cleanup();
+        }
     }
-  }
 
-  /**
-   * Task hook called every time a tuple is emitted in spout/bolt
-   */
-  public void invokeHookEmit(List<Object> values, String stream, Collection<Integer> outTasks) {
-    if (taskHooks.size() != 0) {
-      EmitInfo emitInfo = new EmitInfo(values, stream, getThisTaskId(), outTasks);
-      for (ITaskHook taskHook : taskHooks) {
-        taskHook.emit(emitInfo);
-      }
+    /**
+     * Task hook called every time a tuple is emitted in spout/bolt
+     */
+    public void invokeHookEmit(List<Object> values, String stream, Collection<Integer> outTasks) {
+        if (taskHooks.size() != 0) {
+            EmitInfo emitInfo = new EmitInfo(values, stream, getThisTaskId(), outTasks);
+            for (ITaskHook taskHook : taskHooks) {
+                taskHook.emit(emitInfo);
+            }
+        }
     }
-  }
 
-  /**
-   * Task hook called in spout every time a tuple gets acked
-   */
-  public void invokeHookSpoutAck(Object messageId, long completeLatencyNs) {
-    if (taskHooks.size() != 0) {
-      SpoutAckInfo ackInfo =
-          new SpoutAckInfo(messageId,
-              getThisTaskId(),
-              completeLatencyNs / Constants.MILLISECONDS_TO_NANOSECONDS);
+    /**
+     * Task hook called in spout every time a tuple gets acked
+     */
+    public void invokeHookSpoutAck(Object messageId, long completeLatencyNs) {
+        if (taskHooks.size() != 0) {
+            SpoutAckInfo ackInfo =
+                    new SpoutAckInfo(messageId,
+                            getThisTaskId(),
+                            completeLatencyNs / Constants.MILLISECONDS_TO_NANOSECONDS);
 
-      for (ITaskHook taskHook : taskHooks) {
-        taskHook.spoutAck(ackInfo);
-      }
+            for (ITaskHook taskHook : taskHooks) {
+                taskHook.spoutAck(ackInfo);
+            }
+        }
     }
-  }
 
-  /**
-   * Task hook called in spout every time a tuple gets failed
-   */
-  public void invokeHookSpoutFail(Object messageId, long failLatencyNs) {
-    if (taskHooks.size() != 0) {
-      SpoutFailInfo failInfo =
-          new SpoutFailInfo(messageId,
-              getThisTaskId(),
-              failLatencyNs / Constants.MILLISECONDS_TO_NANOSECONDS);
+    /**
+     * Task hook called in spout every time a tuple gets failed
+     */
+    public void invokeHookSpoutFail(Object messageId, long failLatencyNs) {
+        if (taskHooks.size() != 0) {
+            SpoutFailInfo failInfo =
+                    new SpoutFailInfo(messageId,
+                            getThisTaskId(),
+                            failLatencyNs / Constants.MILLISECONDS_TO_NANOSECONDS);
 
-      for (ITaskHook taskHook : taskHooks) {
-        taskHook.spoutFail(failInfo);
-      }
+            for (ITaskHook taskHook : taskHooks) {
+                taskHook.spoutFail(failInfo);
+            }
+        }
     }
-  }
 
-  /**
-   * Task hook called in bolt every time a tuple gets executed
-   */
-  public void invokeHookBoltExecute(Tuple tuple, long executeLatencyNs) {
-    if (taskHooks.size() != 0) {
-      BoltExecuteInfo executeInfo =
-          new BoltExecuteInfo(tuple,
-              getThisTaskId(),
-              executeLatencyNs / Constants.MILLISECONDS_TO_NANOSECONDS);
+    /**
+     * Task hook called in bolt every time a tuple gets executed
+     */
+    public void invokeHookBoltExecute(Tuple tuple, long executeLatencyNs) {
+        if (taskHooks.size() != 0) {
+            BoltExecuteInfo executeInfo =
+                    new BoltExecuteInfo(tuple,
+                            getThisTaskId(),
+                            executeLatencyNs / Constants.MILLISECONDS_TO_NANOSECONDS);
 
-      for (ITaskHook taskHook : taskHooks) {
-        taskHook.boltExecute(executeInfo);
-      }
+            for (ITaskHook taskHook : taskHooks) {
+                taskHook.boltExecute(executeInfo);
+            }
+        }
     }
-  }
 
-  /**
-   * Task hook called in bolt every time a tuple gets acked
-   */
-  public void invokeHookBoltAck(Tuple tuple, long processLatencyNs) {
-    if (taskHooks.size() != 0) {
-      BoltAckInfo ackInfo =
-          new BoltAckInfo(tuple,
-              getThisTaskId(),
-              processLatencyNs / Constants.MILLISECONDS_TO_NANOSECONDS);
+    /**
+     * Task hook called in bolt every time a tuple gets acked
+     */
+    public void invokeHookBoltAck(Tuple tuple, long processLatencyNs) {
+        if (taskHooks.size() != 0) {
+            BoltAckInfo ackInfo =
+                    new BoltAckInfo(tuple,
+                            getThisTaskId(),
+                            processLatencyNs / Constants.MILLISECONDS_TO_NANOSECONDS);
 
-      for (ITaskHook taskHook : taskHooks) {
-        taskHook.boltAck(ackInfo);
-      }
+            for (ITaskHook taskHook : taskHooks) {
+                taskHook.boltAck(ackInfo);
+            }
+        }
     }
-  }
 
-  /**
-   * Task hook called in bolt every time a tuple gets failed
-   */
-  public void invokeHookBoltFail(Tuple tuple, long failLatencyNs) {
-    if (taskHooks.size() != 0) {
-      BoltFailInfo failInfo =
-          new BoltFailInfo(tuple,
-              getThisTaskId(),
-              failLatencyNs / Constants.MILLISECONDS_TO_NANOSECONDS);
+    /**
+     * Task hook called in bolt every time a tuple gets failed
+     */
+    public void invokeHookBoltFail(Tuple tuple, long failLatencyNs) {
+        if (taskHooks.size() != 0) {
+            BoltFailInfo failInfo =
+                    new BoltFailInfo(tuple,
+                            getThisTaskId(),
+                            failLatencyNs / Constants.MILLISECONDS_TO_NANOSECONDS);
 
-      for (ITaskHook taskHook : taskHooks) {
-        taskHook.boltFail(failInfo);
-      }
+            for (ITaskHook taskHook : taskHooks) {
+                taskHook.boltFail(failInfo);
+            }
+        }
     }
-  }
 
-  /**
-   * Gets the task id of this task.
-   *
-   * @return the task id
-   */
-  public int getThisTaskId() {
-    return myTaskId;
-  }
-
-  /**
-   * Gets the component id for this task. The component id maps
-   * to a component id specified for a Spout or Bolt in the topology definition.
-   */
-  public String getThisComponentId() {
-    return getComponentId(myTaskId);
-  }
-
-  /**
-   * Gets the declared output fields for the specified stream id for the component
-   * this task is a part of.
-   */
-  public Fields getThisOutputFields(String streamId) {
-    return getComponentOutputFields(getThisComponentId(), streamId);
-  }
-
-  /**
-   * Gets the set of streams declared for the component of this task.
-   */
-  public Set<String> getThisStreams() {
-    return getComponentStreams(getThisComponentId());
-  }
-
-  /**
-   * Gets the index of this task id in getComponentTasks(getThisComponentId()).
-   * An example use case for this method is determining which task
-   * accesses which resource in a distributed resource to ensure an even distribution.
-   */
-  public int getThisTaskIndex() {
-    List<Integer> allTasks = getComponentTasks(getThisComponentId());
-    int retVal = 0;
-    for (Integer tsk : allTasks) {
-      if (tsk.intValue() < myTaskId) retVal++;
+    /**
+     * Gets the task id of this task.
+     *
+     * @return the task id
+     */
+    public int getThisTaskId() {
+        return myTaskId;
     }
-    return retVal;
-  }
 
-  /**
-   * Gets the declared inputs to this component.
-   *
-   * @return A map from subscribed component/stream to the grouping subscribed with.
-   */
-  public Map<TopologyAPI.StreamId, TopologyAPI.Grouping> getThisSources() {
-    return getSources(getThisComponentId());
-  }
+    /**
+     * Gets the component id for this task. The component id maps
+     * to a component id specified for a Spout or Bolt in the topology definition.
+     */
+    public String getThisComponentId() {
+        return getComponentId(myTaskId);
+    }
 
-  /**
-   * Gets information about who is consuming the outputs of this component, and how.
-   *
-   * @return Map from stream id to component id to the Grouping used.
-   */
-  public Map<String, Map<String, TopologyAPI.Grouping>> getThisTargets() {
-    return getTargets(getThisComponentId());
-  }
+    /**
+     * Gets the declared output fields for the specified stream id for the component
+     * this task is a part of.
+     */
+    public Fields getThisOutputFields(String streamId) {
+        return getComponentOutputFields(getThisComponentId(), streamId);
+    }
 
-  public void setTaskData(String name, Object data) {
-    taskData.put(name, data);
-  }
+    /**
+     * Gets the set of streams declared for the component of this task.
+     */
+    public Set<String> getThisStreams() {
+        return getComponentStreams(getThisComponentId());
+    }
 
-  public Object getTaskData(String name) {
-    return taskData.get(name);
-  }
+    /**
+     * Gets the index of this task id in getComponentTasks(getThisComponentId()).
+     * An example use case for this method is determining which task
+     * accesses which resource in a distributed resource to ensure an even distribution.
+     */
+    public int getThisTaskIndex() {
+        List<Integer> allTasks = getComponentTasks(getThisComponentId());
+        int retVal = 0;
+        for (Integer tsk : allTasks) {
+            if (tsk.intValue() < myTaskId) retVal++;
+        }
+        return retVal;
+    }
 
-  /*
-   * Register a IMetric instance.
-   * Heron will then call getValueAndReset on the metric every timeBucketSizeInSecs
-   * and the returned value is sent to all metrics consumers.
-	 * You must call this during IBolt::prepare or ISpout::open.
-   * @return The IMetric argument unchanged.
-   */
-  @Override
-  public <T extends IMetric> T registerMetric(String name, T metric, int timeBucketSizeInSecs) {
-    metricsCollector.registerMetric(name, metric, timeBucketSizeInSecs);
-    return metric;
-  }
+    /**
+     * Gets the declared inputs to this component.
+     *
+     * @return A map from subscribed component/stream to the grouping subscribed with.
+     */
+    public Map<TopologyAPI.StreamId, TopologyAPI.Grouping> getThisSources() {
+        return getSources(getThisComponentId());
+    }
 
-  /*
-   * Convenient method for registering ReducedMetric.
-   */
-  @Override
-  public ReducedMetric registerMetric(String name, IReducer reducer, int timeBucketSizeInSecs) {
-    return registerMetric(name, new ReducedMetric(reducer), timeBucketSizeInSecs);
-  }
+    /**
+     * Gets information about who is consuming the outputs of this component, and how.
+     *
+     * @return Map from stream id to component id to the Grouping used.
+     */
+    public Map<String, Map<String, TopologyAPI.Grouping>> getThisTargets() {
+        return getTargets(getThisComponentId());
+    }
 
-  /*
-   * Convinience method for registering CombinedMetric.
-   */
-  @Override
-  public CombinedMetric registerMetric(String name, ICombiner combiner, int timeBucketSizeInSecs) {
-    return registerMetric(name, new CombinedMetric(combiner), timeBucketSizeInSecs);
-  }
+    public void setTaskData(String name, Object data) {
+        taskData.put(name, data);
+    }
+
+    public Object getTaskData(String name) {
+        return taskData.get(name);
+    }
+
+    /*
+     * Register a IMetric instance.
+     * Heron will then call getValueAndReset on the metric every timeBucketSizeInSecs
+     * and the returned value is sent to all metrics consumers.
+       * You must call this during IBolt::prepare or ISpout::open.
+     * @return The IMetric argument unchanged.
+     */
+    @Override
+    public <T extends IMetric> T registerMetric(String name, T metric, int timeBucketSizeInSecs) {
+        metricsCollector.registerMetric(name, metric, timeBucketSizeInSecs);
+        return metric;
+    }
+
+    /*
+     * Convenient method for registering ReducedMetric.
+     */
+    @Override
+    public ReducedMetric registerMetric(String name, IReducer reducer, int timeBucketSizeInSecs) {
+        return registerMetric(name, new ReducedMetric(reducer), timeBucketSizeInSecs);
+    }
+
+    /*
+     * Convinience method for registering CombinedMetric.
+     */
+    @Override
+    public CombinedMetric registerMetric(String name, ICombiner combiner, int timeBucketSizeInSecs) {
+        return registerMetric(name, new CombinedMetric(combiner), timeBucketSizeInSecs);
+    }
 
     /*
     TODO:- Do we really need this?
@@ -309,13 +309,13 @@ public class TopologyContextImpl extends GeneralTopologyContextImpl implements T
     }
     */
 
-  @Override
-  public void addTaskHook(ITaskHook hook) {
-    taskHooks.add(hook);
-  }
+    @Override
+    public void addTaskHook(ITaskHook hook) {
+        taskHooks.add(hook);
+    }
 
-  @Override
-  public Collection<ITaskHook> getHooks() {
-    return taskHooks;
-  }
+    @Override
+    public Collection<ITaskHook> getHooks() {
+        return taskHooks;
+    }
 }

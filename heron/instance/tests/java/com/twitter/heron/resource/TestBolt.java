@@ -17,6 +17,8 @@ package com.twitter.heron.resource;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.Ignore;
+
 import com.twitter.heron.api.bolt.BaseRichBolt;
 import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
@@ -25,8 +27,6 @@ import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.common.basics.SingletonRegistry;
-
-import org.junit.Ignore;
 
 /**
  * A Bolt used for unit test, it will execute and modify some singletons' value:
@@ -37,45 +37,45 @@ import org.junit.Ignore;
  */
 @Ignore
 public class TestBolt extends BaseRichBolt {
-  OutputCollector outputCollector;
-  int tupleExecuted = 0;
+    OutputCollector outputCollector;
+    int tupleExecuted = 0;
 
-  @Override
-  public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
-    this.outputCollector = outputCollector;
-  }
-
-  @Override
-  public void execute(Tuple tuple) {
-    AtomicInteger ackCount = (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(Constants.ACK_COUNT);
-    AtomicInteger failCount = (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(Constants.FAIL_COUNT);
-    AtomicInteger tupleExecutedCount = (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton("execute-count");
-    StringBuilder receivedStrings = (StringBuilder) SingletonRegistry.INSTANCE.getSingleton("received-string-list");
-
-    if (receivedStrings != null) {
-      receivedStrings.append(tuple.getString(0));
+    @Override
+    public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
+        this.outputCollector = outputCollector;
     }
 
-    if (tupleExecutedCount != null) {
-      tupleExecutedCount.getAndIncrement();
-    }
-    if ((tupleExecuted & 1) == 0) {
-      outputCollector.ack(tuple);
-      if (ackCount != null) {
-        ackCount.getAndIncrement();
-      }
-    } else {
-      outputCollector.fail(tuple);
-      if (failCount != null) {
-        failCount.getAndIncrement();
-      }
-    }
-    tupleExecuted++;
-    outputCollector.emit(new Values(tuple.getString(0)));
-  }
+    @Override
+    public void execute(Tuple tuple) {
+        AtomicInteger ackCount = (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(Constants.ACK_COUNT);
+        AtomicInteger failCount = (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(Constants.FAIL_COUNT);
+        AtomicInteger tupleExecutedCount = (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton("execute-count");
+        StringBuilder receivedStrings = (StringBuilder) SingletonRegistry.INSTANCE.getSingleton("received-string-list");
 
-  @Override
-  public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-    outputFieldsDeclarer.declare(new Fields("word"));
-  }
+        if (receivedStrings != null) {
+            receivedStrings.append(tuple.getString(0));
+        }
+
+        if (tupleExecutedCount != null) {
+            tupleExecutedCount.getAndIncrement();
+        }
+        if ((tupleExecuted & 1) == 0) {
+            outputCollector.ack(tuple);
+            if (ackCount != null) {
+                ackCount.getAndIncrement();
+            }
+        } else {
+            outputCollector.fail(tuple);
+            if (failCount != null) {
+                failCount.getAndIncrement();
+            }
+        }
+        tupleExecuted++;
+        outputCollector.emit(new Values(tuple.getString(0)));
+    }
+
+    @Override
+    public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
+        outputFieldsDeclarer.declare(new Fields("word"));
+    }
 }

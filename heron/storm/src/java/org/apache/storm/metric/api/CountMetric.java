@@ -15,21 +15,21 @@
 package org.apache.storm.metric.api;
 
 public class CountMetric implements IMetric {
-  com.twitter.heron.api.metric.CountMetric delegate;
+    com.twitter.heron.api.metric.CountMetric delegate;
 
-  public CountMetric() {
-    delegate = new com.twitter.heron.api.metric.CountMetric();
-  }
-    
-  public void incr() {
-    delegate.incr();
-  }
+    public CountMetric() {
+        delegate = new com.twitter.heron.api.metric.CountMetric();
+    }
 
-  public void incrBy(long incrementBy) {
-    delegate.incrBy(incrementBy);
-  }
+    public void incr() {
+        delegate.incr();
+    }
 
-  public Object getValueAndReset() {
-    return delegate.getValueAndReset();
-  }
+    public void incrBy(long incrementBy) {
+        delegate.incrBy(incrementBy);
+    }
+
+    public Object getValueAndReset() {
+        return delegate.getValueAndReset();
+    }
 }

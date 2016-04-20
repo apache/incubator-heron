@@ -29,84 +29,85 @@ import backtype.storm.tuple.Fields;
 // import backtype.storm.utils.ThriftTopologyUtils;
 
 public class GeneralTopologyContext implements JSONAware {
-  private com.twitter.heron.api.topology.GeneralTopologyContext delegate;
+    private com.twitter.heron.api.topology.GeneralTopologyContext delegate;
 
-  public GeneralTopologyContext(StormTopology topology, Map stormConf,
-          Map<Integer, String> taskToComponent, Map<String, List<Integer>> componentToSortedTasks,
-          Map<String, Map<String, Fields>> componentToStreamToFields, String stormId) {
-    throw new RuntimeException("GeneralTopologyContext should never be initiated this way");
-  }
+    public GeneralTopologyContext(StormTopology topology, Map stormConf,
+                                  Map<Integer, String> taskToComponent, Map<String, List<Integer>> componentToSortedTasks,
+                                  Map<String, Map<String, Fields>> componentToStreamToFields, String stormId) {
+        throw new RuntimeException("GeneralTopologyContext should never be initiated this way");
+    }
 
-  public GeneralTopologyContext(com.twitter.heron.api.topology.GeneralTopologyContext delegate) {
-    this.delegate = delegate;
-  }
+    public GeneralTopologyContext(com.twitter.heron.api.topology.GeneralTopologyContext delegate) {
+        this.delegate = delegate;
+    }
 
-  /**
-   * Gets the unique id assigned to this topology. The id is the storm name with a
-   * unique nonce appended to it.
-   * @return the storm id
-   */
-  public String getStormId() {
-    return delegate.getTopologyId();
-  }
+    /**
+     * Gets the unique id assigned to this topology. The id is the storm name with a
+     * unique nonce appended to it.
+     *
+     * @return the storm id
+     */
+    public String getStormId() {
+        return delegate.getTopologyId();
+    }
 
-  /**
-   * Gets the Thrift object representing the topology.
-   * 
-   * @return the Thrift definition representing the topology
-   */
+    /**
+     * Gets the Thrift object representing the topology.
+     *
+     * @return the Thrift definition representing the topology
+     */
   /*
   public StormTopology getRawTopology() {
     return null;
   }
   */
 
-  /**
-   * Gets the component id for the specified task id. The component id maps
-   * to a component id specified for a Spout or Bolt in the topology definition.
-   *
-   * @param taskId the task id
-   * @return the component id for the input task id
-   */
-  public String getComponentId(int taskId) {
-    return delegate.getComponentId(taskId);
-  }
+    /**
+     * Gets the component id for the specified task id. The component id maps
+     * to a component id specified for a Spout or Bolt in the topology definition.
+     *
+     * @param taskId the task id
+     * @return the component id for the input task id
+     */
+    public String getComponentId(int taskId) {
+        return delegate.getComponentId(taskId);
+    }
 
-  /**
-   * Gets the set of streams declared for the specified component.
-   */
-  public Set<String> getComponentStreams(String componentId) {
-    return delegate.getComponentStreams(componentId);
-  }
+    /**
+     * Gets the set of streams declared for the specified component.
+     */
+    public Set<String> getComponentStreams(String componentId) {
+        return delegate.getComponentStreams(componentId);
+    }
 
-  /**
-   * Gets the task ids allocated for the given component id. The task ids are
-   * always returned in ascending order.
-   */
-  public List<Integer> getComponentTasks(String componentId) {
-    return delegate.getComponentTasks(componentId);
-  }
+    /**
+     * Gets the task ids allocated for the given component id. The task ids are
+     * always returned in ascending order.
+     */
+    public List<Integer> getComponentTasks(String componentId) {
+        return delegate.getComponentTasks(componentId);
+    }
 
-  /**
-   * Gets the declared output fields for the specified component/stream.
-   */
-  public Fields getComponentOutputFields(String componentId, String streamId) {
-    return new Fields(delegate.getComponentOutputFields(componentId, streamId));
-  }
+    /**
+     * Gets the declared output fields for the specified component/stream.
+     */
+    public Fields getComponentOutputFields(String componentId, String streamId) {
+        return new Fields(delegate.getComponentOutputFields(componentId, streamId));
+    }
 
-  /**
-   * Gets the declared output fields for the specified global stream id.
-   */
+    /**
+     * Gets the declared output fields for the specified global stream id.
+     */
   /*
   public Fields getComponentOutputFields(GlobalStreamId id) {
   }    
   */
-    
-  /**
-   * Gets the declared inputs to the specified component.
-   *
-   * @return A map from subscribed component/stream to the grouping subscribed with.
-   */
+
+    /**
+     * Gets the declared inputs to the specified component.
+     *
+     * @return A map from subscribed component/stream to the grouping subscribed with.
+     */
   /*
   public Map<GlobalStreamId, Grouping> getSources(String componentId) {
     return getComponentCommon(componentId).get_inputs();
@@ -136,25 +137,24 @@ public class GeneralTopologyContext implements JSONAware {
         return ret;
     }
   */
+    @Override
+    public String toJSONString() {
+        throw new RuntimeException("toJSONString not implemented");
+    }
 
-  @Override
-  public String toJSONString() {
-    throw new RuntimeException("toJSONString not implemented");
-  }
+    /**
+     * Gets a map from task id to component id.
+     */
+    public Map<Integer, String> getTaskToComponent() {
+        return delegate.getTaskToComponent();
+    }
 
-  /**
-   * Gets a map from task id to component id.
-   */
-  public Map<Integer, String> getTaskToComponent() {
-    return delegate.getTaskToComponent();
-  }
-    
-  /**
-   * Gets a list of all component ids in this topology
-   */
-  public Set<String> getComponentIds() {
-    return delegate.getComponentIds();
-  }
+    /**
+     * Gets a list of all component ids in this topology
+     */
+    public Set<String> getComponentIds() {
+        return delegate.getComponentIds();
+    }
 
   /*
     public ComponentCommon getComponentCommon(String componentId) {

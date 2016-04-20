@@ -29,40 +29,40 @@ import com.twitter.heron.spi.utils.TMasterUtils;
 
 public class ActivateRequestHandler implements HttpHandler {
 
-  private IScheduler scheduler;
-  private Config runtime;
+    private IScheduler scheduler;
+    private Config runtime;
 
-  public ActivateRequestHandler(Config runtime, IScheduler scheduler) {
-    this.scheduler = scheduler;
-    this.runtime = runtime;
-  }
+    public ActivateRequestHandler(Config runtime, IScheduler scheduler) {
+        this.scheduler = scheduler;
+        this.runtime = runtime;
+    }
 
-  @Override
-  public void handle(HttpExchange exchange) throws IOException {
+    @Override
+    public void handle(HttpExchange exchange) throws IOException {
 
-    // read the http request payload
-    byte[] requestBody = HttpUtils.readHttpRequestBody(exchange);
+        // read the http request payload
+        byte[] requestBody = HttpUtils.readHttpRequestBody(exchange);
 
-    // prepare the activate request
-    Scheduler.ActivateTopologyRequest activateTopologyRequest =
-        Scheduler.ActivateTopologyRequest.newBuilder()
-            .mergeFrom(requestBody)
-            .build();
+        // prepare the activate request
+        Scheduler.ActivateTopologyRequest activateTopologyRequest =
+                Scheduler.ActivateTopologyRequest.newBuilder()
+                        .mergeFrom(requestBody)
+                        .build();
 
-    // activate the topology
-    boolean isActivatedSuccessfully =
-        scheduler.onActivate(activateTopologyRequest) &&
-            TMasterUtils.sendToTMaster("activate",
-                Runtime.topologyName(runtime),
-                Runtime.schedulerStateManagerAdaptor(runtime));
+        // activate the topology
+        boolean isActivatedSuccessfully =
+                scheduler.onActivate(activateTopologyRequest) &&
+                        TMasterUtils.sendToTMaster("activate",
+                                Runtime.topologyName(runtime),
+                                Runtime.schedulerStateManagerAdaptor(runtime));
 
-    // prepare the response
-    Scheduler.ActivateTopologyResponse response =
-        Scheduler.ActivateTopologyResponse.newBuilder()
-            .setStatus(NetworkUtils.getHeronStatus(isActivatedSuccessfully))
-            .build();
+        // prepare the response
+        Scheduler.ActivateTopologyResponse response =
+                Scheduler.ActivateTopologyResponse.newBuilder()
+                        .setStatus(NetworkUtils.getHeronStatus(isActivatedSuccessfully))
+                        .build();
 
-    // send the response back
-    HttpUtils.sendHttpResponse(exchange, response.toByteArray());
-  }
+        // send the response back
+        HttpUtils.sendHttpResponse(exchange, response.toByteArray());
+    }
 }

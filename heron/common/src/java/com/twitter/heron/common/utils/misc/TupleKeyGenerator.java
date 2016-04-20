@@ -21,13 +21,13 @@ import java.util.Random;
  */
 
 public class TupleKeyGenerator {
-  private final Random rand;
+    private final Random rand;
 
-  public TupleKeyGenerator() {
-    rand = new Random();
-  }
+    public TupleKeyGenerator() {
+        rand = new Random();
+    }
 
-  public long next() {
-    return rand.nextLong();
-  }
+    public long next() {
+        return rand.nextLong();
+    }
 }

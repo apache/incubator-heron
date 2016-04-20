@@ -23,8 +23,8 @@ import org.junit.Ignore;
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.topology.TopologyBuilder;
-import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.basics.SingletonRegistry;
+import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.proto.stmgr.StreamManager;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.system.PhysicalPlans;
@@ -39,143 +39,143 @@ import com.twitter.heron.proto.system.PhysicalPlans;
 
 @Ignore
 public class UnitTestHelper {
-  /**
-   * Construct a physical plan with basic setting.
-   *
-   * @param ackEnabled whether the acking system is enabled
-   * @param messageTimeout the seconds for a tuple to be time-out. -1 means the timeout is not enabled.
-   * @param topologyState the Topology State inside this PhysicaPlan, for intance, RUNNING.
-   * @return the corresponding Physical Plan
-   */
-  public static PhysicalPlans.PhysicalPlan getPhysicalPlan(boolean ackEnabled, int messageTimeout,
-                                                           TopologyAPI.TopologyState topologyState) {
-    PhysicalPlans.PhysicalPlan.Builder pPlan = PhysicalPlans.PhysicalPlan.newBuilder();
+    /**
+     * Construct a physical plan with basic setting.
+     *
+     * @param ackEnabled whether the acking system is enabled
+     * @param messageTimeout the seconds for a tuple to be time-out. -1 means the timeout is not enabled.
+     * @param topologyState the Topology State inside this PhysicaPlan, for intance, RUNNING.
+     * @return the corresponding Physical Plan
+     */
+    public static PhysicalPlans.PhysicalPlan getPhysicalPlan(boolean ackEnabled, int messageTimeout,
+                                                             TopologyAPI.TopologyState topologyState) {
+        PhysicalPlans.PhysicalPlan.Builder pPlan = PhysicalPlans.PhysicalPlan.newBuilder();
 
-    setTopology(pPlan, ackEnabled, messageTimeout, topologyState);
+        setTopology(pPlan, ackEnabled, messageTimeout, topologyState);
 
-    setInstances(pPlan);
+        setInstances(pPlan);
 
-    setStMgr(pPlan);
+        setStMgr(pPlan);
 
-    return pPlan.build();
-  }
-
-  public static PhysicalPlans.PhysicalPlan getPhysicalPlan(boolean ackEnabled, int messageTimeout) {
-    return getPhysicalPlan(ackEnabled, messageTimeout, TopologyAPI.TopologyState.RUNNING);
-  }
-
-  private static void setTopology(PhysicalPlans.PhysicalPlan.Builder pPlan, boolean ackEnabled,
-                                  int messageTimeout, TopologyAPI.TopologyState topologyState) {
-    TopologyBuilder topologyBuilder = new TopologyBuilder();
-    topologyBuilder.setSpout("test-spout", new TestSpout(), 1);
-    // Here we need case switch to corresponding grouping
-    topologyBuilder.setBolt("test-bolt", new TestBolt(), 1).shuffleGrouping("test-spout");
-
-    Config conf = new Config();
-    conf.setTeamEmail("streaming-compute@twitter.com");
-    conf.setTeamName("stream-computing");
-    conf.setTopologyProjectName("heron-integration-test");
-    conf.setNumStmgrs(1);
-    conf.setMaxSpoutPending(100);
-    if (ackEnabled) {
-      conf.setEnableAcking(true);
-    } else {
-      conf.setEnableAcking(false);
-    }
-    if (messageTimeout != -1) {
-      conf.setMessageTimeoutSecs(messageTimeout);
-      conf.put("topology.enable.message.timeouts", "true");
+        return pPlan.build();
     }
 
-    TopologyAPI.Topology fTopology =
-        topologyBuilder.createTopology().
-            setName("topology-name").
-            setConfig(conf).
-            setState(topologyState).
-            getTopology();
-
-    pPlan.setTopology(fTopology);
-  }
-
-  private static void setInstances(PhysicalPlans.PhysicalPlan.Builder pPlan) {
-    // Construct the spoutInstance
-    PhysicalPlans.InstanceInfo.Builder spoutInstanceInfo = PhysicalPlans.InstanceInfo.newBuilder();
-    spoutInstanceInfo.setComponentName("test-spout");
-    spoutInstanceInfo.setTaskId(0);
-    spoutInstanceInfo.setComponentIndex(0);
-
-    PhysicalPlans.Instance.Builder spoutInstance = PhysicalPlans.Instance.newBuilder();
-    spoutInstance.setInstanceId("spout-id");
-    spoutInstance.setStmgrId("stream-manager-id");
-    spoutInstance.setInfo(spoutInstanceInfo);
-
-    // Construct the boltInstanceInfo
-    PhysicalPlans.InstanceInfo.Builder boltInstanceInfo = PhysicalPlans.InstanceInfo.newBuilder();
-    boltInstanceInfo.setComponentName("test-bolt");
-    boltInstanceInfo.setTaskId(1);
-    boltInstanceInfo.setComponentIndex(0);
-
-    PhysicalPlans.Instance.Builder boltInstance = PhysicalPlans.Instance.newBuilder();
-    boltInstance.setInstanceId("bolt-id");
-    boltInstance.setStmgrId("stream-manager-id");
-    boltInstance.setInfo(boltInstanceInfo);
-
-    pPlan.addInstances(spoutInstance);
-    pPlan.addInstances(boltInstance);
-  }
-
-  private static void setStMgr(PhysicalPlans.PhysicalPlan.Builder pPlan) {
-    PhysicalPlans.StMgr.Builder stmgr = PhysicalPlans.StMgr.newBuilder();
-    stmgr.setId("stream-manager-id");
-    stmgr.setHostName("127.0.0.1");
-    stmgr.setDataPort(8888);
-    stmgr.setLocalEndpoint("endpoint");
-    pPlan.addStmgrs(stmgr);
-  }
-
-  public static void clearSingletonRegistry() throws Exception {
-    // Remove the Singleton by Reflection
-    Field field = SingletonRegistry.INSTANCE.getClass().getDeclaredField("singletonObjects");
-    field.setAccessible(true);
-    Map<String, Object> singletonObjects = (Map<String, Object>) field.get(SingletonRegistry.INSTANCE);
-    singletonObjects.clear();
-  }
-
-  public static PhysicalPlans.Instance getInstance(String instanceId) {
-    int taskId = 0;
-    int componentIndex = 0;
-    String componentName = "component_name";
-
-    String streamId = "stream_id";
-    // Create the protobuf Instance
-    PhysicalPlans.InstanceInfo instanceInfo = PhysicalPlans.InstanceInfo.newBuilder().
-        setTaskId(taskId).setComponentIndex(componentIndex).setComponentName(componentName).build();
-
-    PhysicalPlans.Instance instance = PhysicalPlans.Instance.newBuilder().
-        setInstanceId(instanceId).setStmgrId(streamId).setInfo(instanceInfo).build();
-
-    return instance;
-  }
-
-  public static void addSystemConfigToSingleton() {
-    String filePath = Constants.DEFAULT_CONFIG_RELATIVE_PATH;
-    String runFiles = System.getenv(Constants.BAZEL_TEST_SRCDIR);
-    if (runFiles != null) {
-      filePath = Paths.get(runFiles, Constants.BAZEL_CONFIG_PATH).toString();
+    public static PhysicalPlans.PhysicalPlan getPhysicalPlan(boolean ackEnabled, int messageTimeout) {
+        return getPhysicalPlan(ackEnabled, messageTimeout, TopologyAPI.TopologyState.RUNNING);
     }
-    SystemConfig systemConfig = new SystemConfig(filePath);
-    SingletonRegistry.INSTANCE.registerSingleton(Constants.HERON_SYSTEM_CONFIG, systemConfig);
-  }
 
-  public static StreamManager.RegisterInstanceResponse getRegisterInstanceResponse() {
-    StreamManager.RegisterInstanceResponse.Builder registerInstanceResponse =
-        StreamManager.RegisterInstanceResponse.newBuilder();
-    registerInstanceResponse.setPplan(getPhysicalPlan(false, -1));
-    Common.Status.Builder status = Common.Status.newBuilder();
-    status.setStatus(Common.StatusCode.OK);
-    registerInstanceResponse.setStatus(status);
+    private static void setTopology(PhysicalPlans.PhysicalPlan.Builder pPlan, boolean ackEnabled,
+                                    int messageTimeout, TopologyAPI.TopologyState topologyState) {
+        TopologyBuilder topologyBuilder = new TopologyBuilder();
+        topologyBuilder.setSpout("test-spout", new TestSpout(), 1);
+        // Here we need case switch to corresponding grouping
+        topologyBuilder.setBolt("test-bolt", new TestBolt(), 1).shuffleGrouping("test-spout");
 
-    return registerInstanceResponse.build();
-  }
+        Config conf = new Config();
+        conf.setTeamEmail("streaming-compute@twitter.com");
+        conf.setTeamName("stream-computing");
+        conf.setTopologyProjectName("heron-integration-test");
+        conf.setNumStmgrs(1);
+        conf.setMaxSpoutPending(100);
+        if (ackEnabled) {
+            conf.setEnableAcking(true);
+        } else {
+            conf.setEnableAcking(false);
+        }
+        if (messageTimeout != -1) {
+            conf.setMessageTimeoutSecs(messageTimeout);
+            conf.put("topology.enable.message.timeouts", "true");
+        }
+
+        TopologyAPI.Topology fTopology =
+                topologyBuilder.createTopology().
+                        setName("topology-name").
+                        setConfig(conf).
+                        setState(topologyState).
+                        getTopology();
+
+        pPlan.setTopology(fTopology);
+    }
+
+    private static void setInstances(PhysicalPlans.PhysicalPlan.Builder pPlan) {
+        // Construct the spoutInstance
+        PhysicalPlans.InstanceInfo.Builder spoutInstanceInfo = PhysicalPlans.InstanceInfo.newBuilder();
+        spoutInstanceInfo.setComponentName("test-spout");
+        spoutInstanceInfo.setTaskId(0);
+        spoutInstanceInfo.setComponentIndex(0);
+
+        PhysicalPlans.Instance.Builder spoutInstance = PhysicalPlans.Instance.newBuilder();
+        spoutInstance.setInstanceId("spout-id");
+        spoutInstance.setStmgrId("stream-manager-id");
+        spoutInstance.setInfo(spoutInstanceInfo);
+
+        // Construct the boltInstanceInfo
+        PhysicalPlans.InstanceInfo.Builder boltInstanceInfo = PhysicalPlans.InstanceInfo.newBuilder();
+        boltInstanceInfo.setComponentName("test-bolt");
+        boltInstanceInfo.setTaskId(1);
+        boltInstanceInfo.setComponentIndex(0);
+
+        PhysicalPlans.Instance.Builder boltInstance = PhysicalPlans.Instance.newBuilder();
+        boltInstance.setInstanceId("bolt-id");
+        boltInstance.setStmgrId("stream-manager-id");
+        boltInstance.setInfo(boltInstanceInfo);
+
+        pPlan.addInstances(spoutInstance);
+        pPlan.addInstances(boltInstance);
+    }
+
+    private static void setStMgr(PhysicalPlans.PhysicalPlan.Builder pPlan) {
+        PhysicalPlans.StMgr.Builder stmgr = PhysicalPlans.StMgr.newBuilder();
+        stmgr.setId("stream-manager-id");
+        stmgr.setHostName("127.0.0.1");
+        stmgr.setDataPort(8888);
+        stmgr.setLocalEndpoint("endpoint");
+        pPlan.addStmgrs(stmgr);
+    }
+
+    public static void clearSingletonRegistry() throws Exception {
+        // Remove the Singleton by Reflection
+        Field field = SingletonRegistry.INSTANCE.getClass().getDeclaredField("singletonObjects");
+        field.setAccessible(true);
+        Map<String, Object> singletonObjects = (Map<String, Object>) field.get(SingletonRegistry.INSTANCE);
+        singletonObjects.clear();
+    }
+
+    public static PhysicalPlans.Instance getInstance(String instanceId) {
+        int taskId = 0;
+        int componentIndex = 0;
+        String componentName = "component_name";
+
+        String streamId = "stream_id";
+        // Create the protobuf Instance
+        PhysicalPlans.InstanceInfo instanceInfo = PhysicalPlans.InstanceInfo.newBuilder().
+                setTaskId(taskId).setComponentIndex(componentIndex).setComponentName(componentName).build();
+
+        PhysicalPlans.Instance instance = PhysicalPlans.Instance.newBuilder().
+                setInstanceId(instanceId).setStmgrId(streamId).setInfo(instanceInfo).build();
+
+        return instance;
+    }
+
+    public static void addSystemConfigToSingleton() {
+        String filePath = Constants.DEFAULT_CONFIG_RELATIVE_PATH;
+        String runFiles = System.getenv(Constants.BAZEL_TEST_SRCDIR);
+        if (runFiles != null) {
+            filePath = Paths.get(runFiles, Constants.BAZEL_CONFIG_PATH).toString();
+        }
+        SystemConfig systemConfig = new SystemConfig(filePath);
+        SingletonRegistry.INSTANCE.registerSingleton(Constants.HERON_SYSTEM_CONFIG, systemConfig);
+    }
+
+    public static StreamManager.RegisterInstanceResponse getRegisterInstanceResponse() {
+        StreamManager.RegisterInstanceResponse.Builder registerInstanceResponse =
+                StreamManager.RegisterInstanceResponse.newBuilder();
+        registerInstanceResponse.setPplan(getPhysicalPlan(false, -1));
+        Common.Status.Builder status = Common.Status.newBuilder();
+        status.setStatus(Common.StatusCode.OK);
+        registerInstanceResponse.setStatus(status);
+
+        return registerInstanceResponse.build();
+    }
 
 }

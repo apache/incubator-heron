@@ -22,33 +22,33 @@ import com.twitter.heron.proto.system.HeronTuples;
  */
 
 public interface IInstance {
-  /**
-   * Do the basic setup for HeronInstance
-   */
-  public void start();
+    /**
+     * Do the basic setup for HeronInstance
+     */
+    public void start();
 
-  /**
-   * Do the basic clean for HeronInstance
-   * Notice: this method is not guaranteed to invoke
-   * TODO: - to avoid confusing, we in fact have never called this method yet
-   * TODO: - need to consider whether or not call this method more carefully
-   */
-  public void stop();
+    /**
+     * Do the basic clean for HeronInstance
+     * Notice: this method is not guaranteed to invoke
+     * TODO: - to avoid confusing, we in fact have never called this method yet
+     * TODO: - need to consider whether or not call this method more carefully
+     */
+    public void stop();
 
-  /**
-   * Read tuples from a queue and process the tuples
-   *
-   * @param inQueue the queue to read tuples from
-   */
-  public void readTuplesAndExecute(Communicator<HeronTuples.HeronTupleSet> inQueue);
+    /**
+     * Read tuples from a queue and process the tuples
+     *
+     * @param inQueue the queue to read tuples from
+     */
+    public void readTuplesAndExecute(Communicator<HeronTuples.HeronTupleSet> inQueue);
 
-  /**
-   * Activate the instance
-   */
-  public void activate();
+    /**
+     * Activate the instance
+     */
+    public void activate();
 
-  /**
-   * Deactivate the instance
-   */
-  public void deactivate();
+    /**
+     * Deactivate the instance
+     */
+    public void deactivate();
 }

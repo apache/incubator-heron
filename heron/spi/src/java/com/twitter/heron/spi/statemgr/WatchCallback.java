@@ -20,17 +20,17 @@ package com.twitter.heron.spi.statemgr;
  * Any event on that node will trigger the callback (processWatch).
  */
 public interface WatchCallback {
-  public enum WatchEventType {
-    None,
-    NodeCreated,
-    NodeDeleted,
-    NodeDataChanged,
-    NodeChildrenChanged;
-  }
+    /**
+     * @param path the node path
+     * @param eventType the WatchEventType
+     */
+    public void processWatch(String path, WatchEventType eventType);
 
-  /**
-   * @param path the node path
-   * @param eventType the WatchEventType
-   */
-  public void processWatch(String path, WatchEventType eventType);
+    public enum WatchEventType {
+        None,
+        NodeCreated,
+        NodeDeleted,
+        NodeDataChanged,
+        NodeChildrenChanged;
+    }
 }

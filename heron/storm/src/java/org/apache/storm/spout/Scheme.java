@@ -21,5 +21,6 @@ import org.apache.storm.tuple.Fields;
 
 public interface Scheme extends Serializable {
     public List<Object> deserialize(byte[] ser);
+
     public Fields getOutputFields();
 }
