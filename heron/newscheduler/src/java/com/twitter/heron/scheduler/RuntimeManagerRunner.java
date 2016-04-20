@@ -151,6 +151,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     Scheduler.SchedulerLocation schedulerLocation =
         statemgr.getSchedulerLocation(Runtime.topologyName(runtime));
 
+
     return schedulerLocation;
   }
 

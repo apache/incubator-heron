@@ -12,16 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 import tornado.gen
 import tornado.web
 import traceback
 
-from heron.tracker.src.python import constants
-from heron.tracker.src.python.handlers import BaseHandler
-from heron.tracker.src.python.log import Log as LOG
-
 from heron.proto import common_pb2
 from heron.proto import tmaster_pb2
+from heron.tracker.src.python import constants
+from heron.tracker.src.python.handlers import BaseHandler
+
+LOG = logging.getLogger(__name__)
 
 class ExceptionHandler(BaseHandler):
   """
@@ -89,7 +90,6 @@ class ExceptionHandler(BaseHandler):
 
     # Check the response code - error if it is in 400s or 500s
     responseCode = result.code
-    print responseCode
     if responseCode >= 400:
       message = "Error in getting exceptions from Tmaster, code: " + responseCode
       LOG.error(message)

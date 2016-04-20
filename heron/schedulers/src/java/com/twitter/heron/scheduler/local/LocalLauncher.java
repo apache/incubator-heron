@@ -123,7 +123,7 @@ public class LocalLauncher implements ILauncher {
 
     LOG.log(Level.FINE, "Scheduler command line: {0}", schedulerCmd.toString());
 
-    Process p = ShellUtils.runASyncProcess(true, schedulerCmd.toString(),
+    Process p = ShellUtils.runASyncProcess(LocalContext.verbose(config), schedulerCmd.toString(),
         new File(topologyWorkingDirectory));
 
     if (p == null) {
@@ -223,8 +223,8 @@ public class LocalLauncher implements ILauncher {
 
     // using curl copy the url to the target file
     String cmd = String.format("curl %s -o %s", corePackageURI, targetFile);
-    int ret = ShellUtils.runSyncProcess(false, true, cmd,
-        new StringBuilder(), new StringBuilder(), parentDirectory);
+    int ret = ShellUtils.runSyncProcess(LocalContext.verbose(config), LocalContext.verbose(config),
+        cmd, new StringBuilder(), new StringBuilder(), parentDirectory);
 
     return ret == 0 ? true : false;
   }
@@ -239,8 +239,8 @@ public class LocalLauncher implements ILauncher {
   protected boolean untarPackage(String packageName, String targetFolder) {
     String cmd = String.format("tar -xvf %s", packageName);
 
-    int ret = ShellUtils.runSyncProcess(false, true, cmd,
-        new StringBuilder(), new StringBuilder(), new File(targetFolder));
+    int ret = ShellUtils.runSyncProcess(LocalContext.verbose(config), LocalContext.verbose(config),
+       cmd, new StringBuilder(), new StringBuilder(), new File(targetFolder));
 
     return ret == 0 ? true : false;
   }
