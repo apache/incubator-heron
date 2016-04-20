@@ -13,12 +13,12 @@ import com.twitter.heron.spi.common.HttpUtils;
  * to appropriate HTTP endpoint of the topology scheduler service.
  */
 
-public class SchedulerAsHttpServiceClient implements ISchedulerClient {
-  private static final Logger LOG = Logger.getLogger(SchedulerAsHttpServiceClient.class.getName());
+public class HttpServiceSchedulerClient implements ISchedulerClient {
+  private static final Logger LOG = Logger.getLogger(HttpServiceSchedulerClient.class.getName());
 
   private final HttpURLConnection connection;
 
-  public SchedulerAsHttpServiceClient(HttpURLConnection connection) {
+  public HttpServiceSchedulerClient(HttpURLConnection connection) {
     this.connection = connection;
   }
 

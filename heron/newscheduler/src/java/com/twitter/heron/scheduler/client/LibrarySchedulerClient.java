@@ -10,14 +10,14 @@ import com.twitter.heron.spi.scheduler.IScheduler;
 /**
  * This class manages topology by invoking IScheduler's interface directly as a library.
  */
-public class SchedulerAsLibraryClient implements ISchedulerClient {
-  private static final Logger LOG = Logger.getLogger(SchedulerAsLibraryClient.class.getName());
+public class LibrarySchedulerClient implements ISchedulerClient {
+  private static final Logger LOG = Logger.getLogger(LibrarySchedulerClient.class.getName());
 
   private final Config config;
   private final Config runtime;
   private final IScheduler scheduler;
 
-  public SchedulerAsLibraryClient(Config config, Config runtime, IScheduler scheduler) {
+  public LibrarySchedulerClient(Config config, Config runtime, IScheduler scheduler) {
     this.config = config;
     this.runtime = runtime;
     this.scheduler = scheduler;

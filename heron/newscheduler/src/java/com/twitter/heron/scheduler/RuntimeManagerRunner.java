@@ -23,8 +23,8 @@ import java.util.logging.Logger;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
-import com.twitter.heron.scheduler.client.SchedulerAsHttpServiceClient;
-import com.twitter.heron.scheduler.client.SchedulerAsLibraryClient;
+import com.twitter.heron.scheduler.client.HttpServiceSchedulerClient;
+import com.twitter.heron.scheduler.client.LibrarySchedulerClient;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.HttpUtils;
@@ -53,12 +53,12 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
 
     if (Context.schedulerService(config)) {
       final HttpURLConnection connection = createHttpConnection();
-      schedulerClient = new SchedulerAsHttpServiceClient(connection);
+      schedulerClient = new HttpServiceSchedulerClient(connection);
     } else {
       // create an instance of scheduler
       String schedulerClass = Context.schedulerClass(config);
       IScheduler scheduler = (IScheduler) Class.forName(schedulerClass).newInstance();
-      schedulerClient = new SchedulerAsLibraryClient(config, runtime, scheduler);
+      schedulerClient = new LibrarySchedulerClient(config, runtime, scheduler);
     }
   }
 
