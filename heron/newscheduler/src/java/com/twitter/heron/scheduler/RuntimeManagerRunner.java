@@ -22,8 +22,8 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.scheduler.client.HttpServiceSchedulerClient;
+import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.scheduler.client.LibrarySchedulerClient;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
@@ -45,21 +45,31 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
 
   public RuntimeManagerRunner(Config config, Config runtime,
                               Command command) throws
-      ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
+      ClassNotFoundException, InstantiationException, IllegalAccessException {
 
     this.config = config;
     this.runtime = runtime;
     this.command = command;
+
+    this.schedulerClient = getSchedulerClient();
+  }
+
+  // TODO(mfu): Make it into Factory pattern if needed
+  protected ISchedulerClient getSchedulerClient()
+      throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+    ISchedulerClient schedulerClient;
 
     if (Context.schedulerService(config)) {
       final HttpURLConnection connection = createHttpConnection();
       schedulerClient = new HttpServiceSchedulerClient(connection);
     } else {
       // create an instance of scheduler
-      String schedulerClass = Context.schedulerClass(config);
-      IScheduler scheduler = (IScheduler) Class.forName(schedulerClass).newInstance();
+      final String schedulerClass = Context.schedulerClass(config);
+      final IScheduler scheduler = (IScheduler) Class.forName(schedulerClass).newInstance();
       schedulerClient = new LibrarySchedulerClient(config, runtime, scheduler);
     }
+
+    return schedulerClient;
   }
 
   @Override
