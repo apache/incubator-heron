@@ -167,7 +167,10 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
         return null;
       }
 
-      schedulerClient = new HttpServiceSchedulerClient(config, runtime, schedulerLocation);
+      LOG.log(Level.FINE, "Scheduler is listening on location: {0} ", schedulerLocation.toString());
+
+      schedulerClient =
+          new HttpServiceSchedulerClient(config, runtime, schedulerLocation.getHttpEndpoint());
     } else {
       // create an instance of scheduler
       final String schedulerClass = Context.schedulerClass(config);
