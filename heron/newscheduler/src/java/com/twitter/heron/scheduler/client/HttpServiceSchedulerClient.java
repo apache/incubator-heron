@@ -21,16 +21,13 @@ public class HttpServiceSchedulerClient implements ISchedulerClient {
 
   private final Config config;
   private final Config runtime;
-  private final Scheduler.SchedulerLocation schedulerLocation;
+  private final String schedulerHttpEndpoint;
 
   public HttpServiceSchedulerClient(Config config, Config runtime,
-                                    Scheduler.SchedulerLocation schedulerLocation) {
+                                    String schedulerHttpEndpoint) {
     this.config = config;
     this.runtime = runtime;
-    this.schedulerLocation = schedulerLocation;
-
-
-    LOG.log(Level.FINE, "Scheduler is listening on location: {0} ", schedulerLocation.toString());
+    this.schedulerHttpEndpoint = schedulerHttpEndpoint;
   }
 
   @Override
@@ -54,37 +51,37 @@ public class HttpServiceSchedulerClient implements ISchedulerClient {
     if (connection == null) {
       LOG.severe("Scheduler not found.");
       return false;
-    } else {
-      // now, we have a valid connection
-      try {
-        // send the actual http request
-        if (!HttpUtils.sendHttpPostRequest(connection, data)) {
-          LOG.log(Level.SEVERE, "Failed to send http request to scheduler");
-          return false;
-        }
+    }
 
-        // receive the response for manage topology
-        Common.StatusCode statusCode;
-        try {
-          LOG.fine("Receiving response from scheduler...");
-          statusCode = Scheduler.SchedulerResponse.newBuilder()
-              .mergeFrom(HttpUtils.readHttpResponse(connection))
-              .build().getStatus().getStatus();
-        } catch (Exception e) {
-          LOG.log(Level.SEVERE, "Failed to parse response from scheduler: ", e);
-          return false;
-        }
-
-        if (!statusCode.equals(Common.StatusCode.OK)) {
-          LOG.severe("Received not OK response from scheduler");
-          return false;
-        }
-      } catch (Exception e) {
-        LOG.log(Level.SEVERE, "Failed to communicate with Scheduler: ", e);
+    // now, we have a valid connection
+    try {
+      // send the actual http request
+      if (!HttpUtils.sendHttpPostRequest(connection, data)) {
+        LOG.log(Level.SEVERE, "Failed to send http request to scheduler");
         return false;
-      } finally {
-        connection.disconnect();
       }
+
+      // receive the response for manage topology
+      Common.StatusCode statusCode;
+      try {
+        LOG.fine("Receiving response from scheduler...");
+        statusCode = Scheduler.SchedulerResponse.newBuilder()
+            .mergeFrom(HttpUtils.readHttpResponse(connection))
+            .build().getStatus().getStatus();
+      } catch (Exception e) {
+        LOG.log(Level.SEVERE, "Failed to parse response from scheduler: ", e);
+        return false;
+      }
+
+      if (!statusCode.equals(Common.StatusCode.OK)) {
+        LOG.severe("Received not OK response from scheduler");
+        return false;
+      }
+    } catch (Exception e) {
+      LOG.log(Level.SEVERE, "Failed to communicate with Scheduler: ", e);
+      return false;
+    } finally {
+      connection.disconnect();
     }
 
     return true;
@@ -95,7 +92,7 @@ public class HttpServiceSchedulerClient implements ISchedulerClient {
    */
   protected HttpURLConnection createHttpConnection(Command command) {
     // construct the http request for command
-    String endpoint = getCommandEndpoint(schedulerLocation.getHttpEndpoint(), command);
+    String endpoint = getCommandEndpoint(schedulerHttpEndpoint, command);
 
     // construct the http url connection
     HttpURLConnection connection;
