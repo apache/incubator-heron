@@ -15,10 +15,8 @@
 package com.twitter.heron.common.config;
 
 import java.nio.file.Paths;
-import java.util.Properties;
-import java.util.logging.Logger;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -35,7 +33,7 @@ public class ConfigReaderTest {
 
     Assert.assertEquals("role", props.get(Constants.ROLE_KEY));
     Assert.assertEquals("environ", props.get(Constants.ENVIRON_KEY));
-    Assert.assertEquals("com.twitter.heron.scheduler.aurora.AuroraLauncher", props.get(Constants.LAUNCHER_CLASS_KEY)); 
+    Assert.assertEquals("com.twitter.heron.scheduler.aurora.AuroraLauncher", props.get(Constants.LAUNCHER_CLASS_KEY));
 
     Assert.assertNull(props.get(Constants.USER_KEY));
   }

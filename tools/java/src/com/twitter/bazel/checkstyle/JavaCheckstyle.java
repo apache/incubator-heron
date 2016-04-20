@@ -43,72 +43,69 @@ import org.apache.commons.lang.ArrayUtils;
  * $ bazel build --config=darwin heron/spi/src/java:heron-spi --experimental_action_listener=tools/java:compile_java
  */
 public final class JavaCheckstyle {
-    public static final Logger LOG = Logger.getLogger(JavaCheckstyle.class.getName());
-    private static final String CLASSNAME = JavaCheckstyle.class.getCanonicalName();
+  public static final Logger LOG = Logger.getLogger(JavaCheckstyle.class.getName());
+  private static final String CLASSNAME = JavaCheckstyle.class.getCanonicalName();
 
-    private JavaCheckstyle() { }
+  private JavaCheckstyle() {
+  }
 
-    public void foo() {
+  public static void main(String[] args) throws IOException {
+    CommandLineParser parser = new DefaultParser();
+
+    // create the Options
+    Options options = new Options();
+    options.addOption(Option.builder("f")
+        .required(true).hasArg()
+        .longOpt("extra_action_file")
+        .desc("bazel extra action protobuf file")
+        .build());
+    options.addOption(Option.builder("c")
+        .required(true).hasArg()
+        .longOpt("checkstyle_config_file")
+        .desc("checkstyle config file")
+        .build());
+
+    try {
+      // parse the command line arguments
+      CommandLine line = parser.parse(options, args);
+
+      String extraActionFile = line.getOptionValue("f");
+      String configFile = line.getOptionValue("c");
+
+      String[] sourceFiles = getSourceFiles(extraActionFile);
+      if (sourceFiles.length == 0) {
         LOG.info("No java class files found by checkstyle");
+        return;
+      }
+
+      String[] checkstyleArgs = (String[]) ArrayUtils.addAll(
+          new String[]{"-c", configFile}, sourceFiles);
+
+      LOG.fine("checkstyle args: " + Joiner.on(" ").join(checkstyleArgs));
+      com.puppycrawl.tools.checkstyle.Main.main(checkstyleArgs);
+    } catch (ParseException exp) {
+      LOG.severe(String.format("Invalid input to %s: %s", CLASSNAME, exp.getMessage()));
+      HelpFormatter formatter = new HelpFormatter();
+      formatter.printHelp("java " + CLASSNAME, options);
+    }
+  }
+
+  private static String[] getSourceFiles(String extraActionFile) {
+    ExtensionRegistry registry = ExtensionRegistry.newInstance();
+    ExtraActionsBase.registerAllExtensions(registry);
+
+    ExtraActionInfo info = null;
+    try (InputStream stream = Files.newInputStream(Paths.get(extraActionFile))) {
+      CodedInputStream coded = CodedInputStream.newInstance(stream);
+      info = ExtraActionInfo.parseFrom(coded, registry);
+    } catch (IOException e) {
+      throw new RuntimeException("ERROR: failed to deserialize extra action file "
+          + extraActionFile + ": " + e.getMessage(), e);
     }
 
-    public static void main(String[] args) throws IOException {
-        CommandLineParser parser = new DefaultParser();
+    JavaCompileInfo jInfo = info.getExtension(JavaCompileInfo.javaCompileInfo);
 
-        // create the Options
-        Options options = new Options();
-        options.addOption(Option.builder("f")
-                .required(true).hasArg()
-                .longOpt("extra_action_file")
-                .desc("bazel extra action protobuf file")
-                .build());
-        options.addOption(Option.builder("c")
-                .required(true).hasArg()
-                .longOpt("checkstyle_config_file")
-                .desc("checkstyle config file")
-                .build());
-
-        try {
-            // parse the command line arguments
-            CommandLine line = parser.parse(options, args);
-
-            String extraActionFile = line.getOptionValue("f");
-            String configFile = line.getOptionValue("c");
-
-            String[] sourceFiles = getSourceFiles(extraActionFile);
-            if (sourceFiles.length == 0) {
-                LOG.info("No java class files found by checkstyle");
-                return;
-            }
-
-            String[] checkstyleArgs = (String[]) ArrayUtils.addAll(
-                    new String[]{"-c", configFile}, sourceFiles);
-
-            LOG.fine("checkstyle args: " + Joiner.on(" ").join(checkstyleArgs));
-            com.puppycrawl.tools.checkstyle.Main.main(checkstyleArgs);
-        } catch (ParseException exp) {
-            LOG.severe(String.format("Invalid input to %s: %s", CLASSNAME, exp.getMessage()));
-            HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("java " + CLASSNAME, options);
-        }
-    }
-
-    private static String[] getSourceFiles(String extraActionFile) {
-        ExtensionRegistry registry = ExtensionRegistry.newInstance();
-        ExtraActionsBase.registerAllExtensions(registry);
-
-        ExtraActionInfo info = null;
-        try (InputStream stream = Files.newInputStream(Paths.get(extraActionFile))) {
-            CodedInputStream coded = CodedInputStream.newInstance(stream);
-            info = ExtraActionInfo.parseFrom(coded, registry);
-        } catch (IOException e) {
-            throw new RuntimeException("ERROR: failed to deserialize extra action file "
-                    + extraActionFile + ": " + e.getMessage(), e);
-        }
-
-        JavaCompileInfo jInfo = info.getExtension(JavaCompileInfo.javaCompileInfo);
-
-        String[] sourceFiles = new String[jInfo.getSourceFileList().size()];
-        return jInfo.getSourceFileList().toArray(sourceFiles);
-    }
+    String[] sourceFiles = new String[jInfo.getSourceFileList().size()];
+    return jInfo.getSourceFileList().toArray(sourceFiles);
+  }
 }

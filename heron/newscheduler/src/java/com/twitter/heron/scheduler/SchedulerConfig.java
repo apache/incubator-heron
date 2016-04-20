@@ -14,18 +14,13 @@
 
 package com.twitter.heron.scheduler;
 
-import java.io.IOException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
-import com.twitter.heron.proto.scheduler.Scheduler;
-
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
 
 /**
@@ -42,8 +37,8 @@ public class SchedulerConfig {
    * @param topology, proto in memory version of topology definition
    * @return config, the topology config
    */
-  protected static Config topologyConfigs(String topologyJarFile, 
-      String topologyDefnFile, TopologyAPI.Topology topology) {
+  protected static Config topologyConfigs(String topologyJarFile,
+                                          String topologyDefnFile, TopologyAPI.Topology topology) {
 
     String pkgType = FileUtils.isOriginalPackageJar(
         FileUtils.getBaseName(topologyJarFile)) ? "jar" : "tar";
@@ -61,7 +56,7 @@ public class SchedulerConfig {
 
   /**
    * Load the defaults config
-   * <p/>
+   * <p>
    * return config, the defaults config
    */
   protected static Config defaultConfigs() {
@@ -91,7 +86,7 @@ public class SchedulerConfig {
 
   // build the config by expanding all the variables
   protected static Config loadConfig(String cluster, String role, String environ,
-      String topologyJarFile, String topologyDefnFile, TopologyAPI.Topology topology) {
+                                     String topologyJarFile, String topologyDefnFile, TopologyAPI.Topology topology) {
 
     Config config = Config.expand(
         Config.newBuilder()

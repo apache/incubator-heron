@@ -240,7 +240,7 @@ public class LocalLauncher implements ILauncher {
     String cmd = String.format("tar -xvf %s", packageName);
 
     int ret = ShellUtils.runSyncProcess(LocalContext.verbose(config), LocalContext.verbose(config),
-       cmd, new StringBuilder(), new StringBuilder(), new File(targetFolder));
+        cmd, new StringBuilder(), new StringBuilder(), new File(targetFolder));
 
     return ret == 0 ? true : false;
   }

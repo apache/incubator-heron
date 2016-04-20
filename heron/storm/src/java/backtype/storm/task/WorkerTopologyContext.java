@@ -14,35 +14,34 @@
 
 package backtype.storm.task;
 
-import backtype.storm.generated.StormTopology;
-import backtype.storm.tuple.Fields;
-import java.io.File;
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
+import backtype.storm.generated.StormTopology;
+import backtype.storm.tuple.Fields;
+
 public class WorkerTopologyContext extends GeneralTopologyContext {
   private com.twitter.heron.api.topology.TopologyContext delegate_;
-    
+
   public WorkerTopologyContext(
-          StormTopology topology,
-          Map stormConf,
-          Map<Integer, String> taskToComponent,
-          Map<String, List<Integer>> componentToSortedTasks,
-          Map<String, Map<String, Fields>> componentToStreamToFields,
-          String stormId,
-          String codeDir,
-          String pidDir,
-          Integer workerPort,
-          List<Integer> workerTasks,
-          Map<String, Object> defaultResources,
-          Map<String, Object> userResources
-          ) {
-      super(topology, stormConf, taskToComponent, componentToSortedTasks, componentToStreamToFields, stormId);
-      throw new RuntimeException("WorkerTopologyContext should never be init this way");
-    }
+      StormTopology topology,
+      Map stormConf,
+      Map<Integer, String> taskToComponent,
+      Map<String, List<Integer>> componentToSortedTasks,
+      Map<String, Map<String, Fields>> componentToStreamToFields,
+      String stormId,
+      String codeDir,
+      String pidDir,
+      Integer workerPort,
+      List<Integer> workerTasks,
+      Map<String, Object> defaultResources,
+      Map<String, Object> userResources
+  ) {
+    super(topology, stormConf, taskToComponent, componentToSortedTasks, componentToStreamToFields, stormId);
+    throw new RuntimeException("WorkerTopologyContext should never be init this way");
+  }
 
   public WorkerTopologyContext(com.twitter.heron.api.topology.TopologyContext _delegate) {
     super(_delegate);
@@ -60,7 +59,7 @@ public class WorkerTopologyContext extends GeneralTopologyContext {
     retval.add(delegate_.getThisTaskId());
     return retval;
   }
-    
+
   /**
    * Return the port that the worker is running on.
    * This was typically done to differentiate workers running
@@ -89,11 +88,11 @@ public class WorkerTopologyContext extends GeneralTopologyContext {
   public String getPIDDir() {
     throw new RuntimeException("Not supported");
   }
-    
+
   public Object getResource(String name) {
     throw new RuntimeException("Not supported");
   }
-    
+
   public ExecutorService getSharedExecutor() {
     throw new RuntimeException("Not supported");
   }

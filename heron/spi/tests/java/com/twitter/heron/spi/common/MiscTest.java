@@ -14,19 +14,11 @@
 
 package com.twitter.heron.spi.common;
 
-import junit.framework.Assert;
+import java.util.logging.Logger;
+
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.lang.String;
-import java.lang.StringBuilder;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import junit.framework.Assert;
 
 public class MiscTest {
 

@@ -14,15 +14,9 @@
 
 package com.twitter.heron.spi.common;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import java.lang.ClassNotFoundException;
 import java.io.InputStream;
-import java.nio.file.Paths;
+import java.util.Map;
+import java.util.logging.Logger;
 
 import com.twitter.heron.common.config.ConfigReader;
 
@@ -53,7 +47,7 @@ public class Resource {
       LOG.severe("Config keys cannot be empty ");
       System.exit(1);
     }
-    
+
     return kvPairs;
   }
 }

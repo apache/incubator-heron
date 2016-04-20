@@ -14,15 +14,8 @@
 
 package com.twitter.heron.spi.common;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-import java.util.HashMap;
 import java.util.Map;
-
-import java.lang.ClassNotFoundException;
-
-import java.io.InputStream;
-import java.nio.file.Paths;
+import java.util.logging.Logger;
 
 public class ConfigKeys {
   private static final Logger LOG = Logger.getLogger(ConfigKeys.class.getName());
@@ -30,13 +23,12 @@ public class ConfigKeys {
   // holds the mapping of keys to their corresponding key strings
   protected static Map keys;
 
-   // load the resource for config keys
+  // load the resource for config keys
   static {
     try {
       keys = Resource.load(
           "com.twitter.heron.spi.common.Keys", Constants.KEYS_YAML);
-    }
-    catch (ClassNotFoundException e) {
+    } catch (ClassNotFoundException e) {
       LOG.severe("Unable to load the config Keys class " + e);
       System.exit(1);
     }
@@ -49,6 +41,6 @@ public class ConfigKeys {
    * @return String, the key string value for the key
    */
   public static String get(String key) {
-    return (String) keys.get(key); 
+    return (String) keys.get(key);
   }
 }

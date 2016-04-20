@@ -40,13 +40,13 @@ import com.twitter.heron.proto.system.HeronTuples;
  * 2. OutgoingTupleCollection outputter.
  * When a tuple is to be emitted, it will serialize it and call OutgoingTupleCollection.admitBoltTuple()
  * to sent it out.
- * <p/>
+ * <p>
  * It will handle the extra work to emit a tuple:
  * For data tuples:
  * 1. Set the anchors for a tuple
  * 2. Pack the tuple and submit the OutgoingTupleCollection's addDataTuple
  * 3. Update the metrics
- * <p/>
+ * <p>
  * For Control tuples (ack&fail):
  * 1. Set the anchors for a tuple
  * 2. Pack the tuple and submit the OutgoingTupleCollection's addDataTuple

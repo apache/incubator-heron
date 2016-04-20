@@ -21,15 +21,13 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-
-import com.twitter.heron.spi.common.Constants;
-import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.TopologyUtils;
-import com.twitter.heron.spi.packing.IPacking;
 
 /**
  * Round-robin packing algorithm
@@ -39,16 +37,16 @@ public class RoundRobinPacking implements IPacking {
   private static final long DEFAULT_DISK_PADDING = 12 * Constants.GB;
 
   protected TopologyAPI.Topology topology;
-  protected long stmgrRamDefault ;
+  protected long stmgrRamDefault;
   protected long instanceRamDefault;
-  protected double instanceCpuDefault; 
-  protected long instanceDiskDefault; 
+  protected double instanceCpuDefault;
+  protected long instanceDiskDefault;
 
   @Override
   public void initialize(Config config, Config runtime) {
     this.stmgrRamDefault = Context.stmgrRam(config);
     this.instanceRamDefault = Context.instanceRam(config);
-    this.instanceCpuDefault = Context.instanceCpu(config).doubleValue(); 
+    this.instanceCpuDefault = Context.instanceCpu(config).doubleValue();
     this.instanceDiskDefault = Context.instanceDisk(config);
     this.topology = Runtime.topology(runtime);
   }

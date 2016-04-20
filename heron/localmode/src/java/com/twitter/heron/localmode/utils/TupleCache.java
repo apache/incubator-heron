@@ -24,6 +24,57 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.HeronTuples;
 
 public class TupleCache {
+  private final Map<Integer, TupleList> cache = new HashMap<>();
+
+  protected TupleList get(int destTaskId) {
+    TupleList list = cache.get(destTaskId);
+    if (list == null) {
+      list = new TupleList();
+      cache.put(destTaskId, list);
+    }
+
+    return list;
+  }
+
+  public long addDataTuple(int destTaskId,
+                           TopologyAPI.StreamId streamId,
+                           HeronTuples.HeronDataTuple tuple,
+                           boolean isAnchored) {
+    return get(destTaskId).addDataTuple(streamId, tuple, isAnchored);
+  }
+
+  public void addAckTuple(int taskId, HeronTuples.AckTuple tuple) {
+    get(taskId).addAckTuple(tuple);
+  }
+
+  public void addFailTuple(int taskId, HeronTuples.AckTuple tuple) {
+    get(taskId).addFailTuple(tuple);
+  }
+
+  public void addEmitTuple(int taskId, HeronTuples.AckTuple tuple) {
+    get(taskId).addEmitTuple(tuple);
+  }
+
+  // Construct a new Map from current cache
+  // Modification on Map would not cahnge values in cache
+  public Map<Integer, List<HeronTuples.HeronTupleSet>> getCache() {
+    Map<Integer, List<HeronTuples.HeronTupleSet>> res =
+        new HashMap<>();
+    for (Map.Entry<Integer, TupleList> entry : cache.entrySet()) {
+      res.put(entry.getKey(), entry.getValue().getTuplesList());
+    }
+
+    return res;
+  }
+
+  public boolean isEmpty() {
+    return cache.isEmpty();
+  }
+
+  public void clear() {
+    cache.clear();
+  }
+
   protected static class TupleList {
     private final List<HeronTuples.HeronTupleSet> tuples;
     private final Random random;
@@ -125,56 +176,5 @@ public class TupleCache {
       current = null;
       tuples.clear();
     }
-  }
-
-  private final Map<Integer, TupleList> cache = new HashMap<>();
-
-  protected TupleList get(int destTaskId) {
-    TupleList list = cache.get(destTaskId);
-    if (list == null) {
-      list = new TupleList();
-      cache.put(destTaskId, list);
-    }
-
-    return list;
-  }
-
-  public long addDataTuple(int destTaskId,
-                           TopologyAPI.StreamId streamId,
-                           HeronTuples.HeronDataTuple tuple,
-                           boolean isAnchored) {
-    return get(destTaskId).addDataTuple(streamId, tuple, isAnchored);
-  }
-
-  public void addAckTuple(int taskId, HeronTuples.AckTuple tuple) {
-    get(taskId).addAckTuple(tuple);
-  }
-
-  public void addFailTuple(int taskId, HeronTuples.AckTuple tuple) {
-    get(taskId).addFailTuple(tuple);
-  }
-
-  public void addEmitTuple(int taskId, HeronTuples.AckTuple tuple) {
-    get(taskId).addEmitTuple(tuple);
-  }
-
-  // Construct a new Map from current cache
-  // Modification on Map would not cahnge values in cache
-  public Map<Integer, List<HeronTuples.HeronTupleSet>> getCache() {
-    Map<Integer, List<HeronTuples.HeronTupleSet>> res =
-        new HashMap<>();
-    for (Map.Entry<Integer, TupleList> entry : cache.entrySet()) {
-      res.put(entry.getKey(), entry.getValue().getTuplesList());
-    }
-
-    return res;
-  }
-
-  public boolean isEmpty() {
-    return cache.isEmpty();
-  }
-
-  public void clear() {
-    cache.clear();
   }
 }

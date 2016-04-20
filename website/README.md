@@ -1,50 +1,78 @@
-# Guide to the Heron Documentation
+# Heron Documentation
 
-Heron's documentation was built using the following components:
+Heron's documentation was primarily built using the following components:
 
 * [Hugo](http://gohugo.io) --- Static site generator
 * [GulpJS](http://gulpjs.com) --- Build tool for static assets
 * [Twitter Bootstrap](http://getbootstrap.com) --- CSS and JavaScript
 
-## Setup
+## Documentation Setup
 
-Be sure you have a recent version of Node installed:
+Running the Heron documentation locally requires that you have the following
+installed:
+
+* [Make](https://www.gnu.org/software/make/)
+* [Node.js](https://nodejs.org/en/)
+* [npm](https://www.npmjs.com/)
+
+### OS X Setup
+
+To install Node.js and npm on Mac OS X, make sure that you have
+[Homebrew](http://brew.sh/) installed and run:
 
 ```bash
 $ brew install nvm
 $ nvm install node
 ```
 
-If you have [Homebrew](http://brew.sh) and [npm](https://www.npmjs.com)
-installed:
+Once this has completed:
 
 ```bash
-$ cd /path/to/heron/website
+# Within the /heron directory
+$ cd website
 $ make setup
 ```
 
-This will install Hugo, Gulp, and all necessary Gulp plugins.
+This will install Hugo, Gulp, and all of the necessary Gulp plugins and build
+the static assets for the site.
+
+### Other Operating Systems
+
+Although the documentation is currently set up to be built and run on OS X, it's
+also possible to do so on other systems. In addition to Node.js and npm you will
+also need to [install Hugo](https://github.com/spf13/hugo/releases). Once those
+are installed:
+
+1. Navigate to the `website` folder
+2. Run `npm install gulp`
+3. Run `gulp build` (this will build all of the necessary static assets, i.e.
+   CSS, Javascript, etc.)
+
+Now you can run the docs locally. For more info, see the section directly below.
+
+## Building the Docs Locally
+
+To build the docs:
+
+```bash
+$ make site
+```
+
+This will generate a full build of the docs in the `public` folder. To serve
+the docs locally, see the section directly below.
 
 ## Running the Docs Locally
 
 ```bash
-$ hugo server --watch
+$ make serve
 ```
 
-This will run the doc server locally on [localhost:1313](http://localhost:1313).
-
-## Working with Static Assets
-
-To build a full static asset distribution (CSS, JavaScript, fonts, and images):
+This will run the docs locally on `localhost` port 1313. Navigate to
+`localhost:1313/heron` in your browser to see the served docs. Or open the
+browser from the command line:
 
 ```bash
-$ gulp build
-```
-
-To work on assets in "watch" mode:
-
-```bash
-$ gulp dev
+$ open http://localhost:1313/heron
 ```
 
 To make site, including linkchecker.  If broken links found by linkchecker, see linkchecker-errors.csv

@@ -25,17 +25,17 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.api.metric.MultiCountMetric;
-import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.NIOLooper;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.network.HeronClient;
 import com.twitter.heron.common.network.HeronSocketOptions;
 import com.twitter.heron.common.network.StatusCode;
+import com.twitter.heron.proto.system.Common;
+import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.spi.metricsmgr.metrics.ExceptionInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
-import com.twitter.heron.proto.system.Common;
-import com.twitter.heron.proto.system.Metrics;
 
 import junit.framework.Assert;
 
@@ -62,93 +62,6 @@ public class MetricsManagerServerTest {
   private NIOLooper serverLooper;
 
   private ExecutorService threadsPool;
-
-  private static class SimpleMetricsClient extends HeronClient {
-    private int maxMessages;
-    private static final Logger LOG = Logger.getLogger(SimpleMetricsClient.class.getName());
-
-    public SimpleMetricsClient(NIOLooper looper, String host, int port, int maxMessages) {
-      super(looper, host, port,
-          new HeronSocketOptions(100 * 1024 * 1024, 100,
-              100 * 1024 * 1024, 100,
-              5 * 1024 * 1024,
-              5 * 1024 * 1024));
-      this.maxMessages = maxMessages;
-    }
-
-    @Override
-    public void onConnect(StatusCode status) {
-      if (status != StatusCode.OK) {
-        org.junit.Assert.fail("Connection with server failed");
-      } else {
-        LOG.info("Connected with Metrics Manager Server");
-        sendRequest();
-      }
-    }
-
-    @Override
-    public void onError() {
-      org.junit.Assert.fail("Error in client while talking to server");
-    }
-
-    @Override
-    public void onClose() {
-
-    }
-
-    private void sendRequest() {
-      Metrics.MetricPublisher publisher = Metrics.MetricPublisher.newBuilder().
-          setHostname("hostname").
-          setPort(0).
-          setComponentName("component").
-          setInstanceId("instance-id").
-          setInstanceIndex(1).
-          build();
-      Metrics.MetricPublisherRegisterRequest request = Metrics.MetricPublisherRegisterRequest.newBuilder().
-          setPublisher(publisher).build();
-
-      sendRequest(request, Metrics.MetricPublisherRegisterResponse.newBuilder());
-
-    }
-
-    private void sendMessage() {
-      Metrics.MetricPublisherPublishMessage.Builder builder =
-          Metrics.MetricPublisherPublishMessage.newBuilder();
-
-      for (int j = 0; j < N; j++) {
-        Metrics.MetricDatum metricDatum = Metrics.MetricDatum.newBuilder().setName(METRIC_NAME).setValue(METRIC_VALUE).build();
-        builder.addMetrics(metricDatum);
-      }
-
-      for (int j = 0; j < N; j++) {
-        Metrics.ExceptionData exceptionData = Metrics.ExceptionData.newBuilder().
-            setStacktrace(STACK_TRACE).setLasttime(LAST_TIME).setFirsttime(FIRST_TIME).
-            setCount(EXCEPTION_COUNT).setLogging(LOGGING).build();
-        builder.addExceptions(exceptionData);
-      }
-      sendMessage(builder.build());
-    }
-
-    @Override
-    public void onResponse(StatusCode status, Object ctx, Message response) {
-      if (response instanceof Metrics.MetricPublisherRegisterResponse) {
-        Assert.assertEquals(Common.StatusCode.OK,
-            ((Metrics.MetricPublisherRegisterResponse) response).getStatus().getStatus());
-
-        for (int i = 0; i < maxMessages; i++) {
-          sendMessage();
-        }
-
-      } else {
-        org.junit.Assert.fail("Unknown type of response received");
-      }
-    }
-
-    @Override
-    public void onIncomingMessage(Message request) {
-      org.junit.Assert.fail("Expected message from client");
-    }
-  }
 
   @Before
   public void before() throws Exception {
@@ -286,5 +199,92 @@ public class MetricsManagerServerTest {
       }
     };
     threadsPool.execute(runClient);
+  }
+
+  private static class SimpleMetricsClient extends HeronClient {
+    private static final Logger LOG = Logger.getLogger(SimpleMetricsClient.class.getName());
+    private int maxMessages;
+
+    public SimpleMetricsClient(NIOLooper looper, String host, int port, int maxMessages) {
+      super(looper, host, port,
+          new HeronSocketOptions(100 * 1024 * 1024, 100,
+              100 * 1024 * 1024, 100,
+              5 * 1024 * 1024,
+              5 * 1024 * 1024));
+      this.maxMessages = maxMessages;
+    }
+
+    @Override
+    public void onConnect(StatusCode status) {
+      if (status != StatusCode.OK) {
+        org.junit.Assert.fail("Connection with server failed");
+      } else {
+        LOG.info("Connected with Metrics Manager Server");
+        sendRequest();
+      }
+    }
+
+    @Override
+    public void onError() {
+      org.junit.Assert.fail("Error in client while talking to server");
+    }
+
+    @Override
+    public void onClose() {
+
+    }
+
+    private void sendRequest() {
+      Metrics.MetricPublisher publisher = Metrics.MetricPublisher.newBuilder().
+          setHostname("hostname").
+          setPort(0).
+          setComponentName("component").
+          setInstanceId("instance-id").
+          setInstanceIndex(1).
+          build();
+      Metrics.MetricPublisherRegisterRequest request = Metrics.MetricPublisherRegisterRequest.newBuilder().
+          setPublisher(publisher).build();
+
+      sendRequest(request, Metrics.MetricPublisherRegisterResponse.newBuilder());
+
+    }
+
+    private void sendMessage() {
+      Metrics.MetricPublisherPublishMessage.Builder builder =
+          Metrics.MetricPublisherPublishMessage.newBuilder();
+
+      for (int j = 0; j < N; j++) {
+        Metrics.MetricDatum metricDatum = Metrics.MetricDatum.newBuilder().setName(METRIC_NAME).setValue(METRIC_VALUE).build();
+        builder.addMetrics(metricDatum);
+      }
+
+      for (int j = 0; j < N; j++) {
+        Metrics.ExceptionData exceptionData = Metrics.ExceptionData.newBuilder().
+            setStacktrace(STACK_TRACE).setLasttime(LAST_TIME).setFirsttime(FIRST_TIME).
+            setCount(EXCEPTION_COUNT).setLogging(LOGGING).build();
+        builder.addExceptions(exceptionData);
+      }
+      sendMessage(builder.build());
+    }
+
+    @Override
+    public void onResponse(StatusCode status, Object ctx, Message response) {
+      if (response instanceof Metrics.MetricPublisherRegisterResponse) {
+        Assert.assertEquals(Common.StatusCode.OK,
+            ((Metrics.MetricPublisherRegisterResponse) response).getStatus().getStatus());
+
+        for (int i = 0; i < maxMessages; i++) {
+          sendMessage();
+        }
+
+      } else {
+        org.junit.Assert.fail("Unknown type of response received");
+      }
+    }
+
+    @Override
+    public void onIncomingMessage(Message request) {
+      org.junit.Assert.fail("Expected message from client");
+    }
   }
 } 

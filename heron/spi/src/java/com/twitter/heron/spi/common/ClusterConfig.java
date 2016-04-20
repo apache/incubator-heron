@@ -14,14 +14,7 @@
 
 package com.twitter.heron.spi.common;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Paths;
-
 import java.util.Map;
-import java.util.HashMap;
-import java.util.logging.Logger;
-import java.util.logging.Level;
 
 import com.twitter.heron.common.config.ConfigReader;
 
@@ -29,23 +22,23 @@ public final class ClusterConfig {
 
   protected static Config loadHeronHome(String heronHome, String configPath) {
     Config.Builder cb = Config.newBuilder()
-        .put(Keys.heronHome(), heronHome) 
-        .put(Keys.heronBin(),  Misc.substitute(heronHome, Defaults.heronBin()))
+        .put(Keys.heronHome(), heronHome)
+        .put(Keys.heronBin(), Misc.substitute(heronHome, Defaults.heronBin()))
         .put(Keys.heronConf(), configPath)
         .put(Keys.heronDist(), Misc.substitute(heronHome, Defaults.heronDist()))
-        .put(Keys.heronEtc(),  Misc.substitute(heronHome, Defaults.heronEtc()))
-        .put(Keys.heronLib(),  Misc.substitute(heronHome, Defaults.heronLib()))
-        .put(Keys.javaHome(),  Misc.substitute(heronHome, Defaults.javaHome()));
+        .put(Keys.heronEtc(), Misc.substitute(heronHome, Defaults.heronEtc()))
+        .put(Keys.heronLib(), Misc.substitute(heronHome, Defaults.heronLib()))
+        .put(Keys.javaHome(), Misc.substitute(heronHome, Defaults.javaHome()));
     return cb.build();
   }
 
   protected static Config loadSandboxHome(String heronSandboxHome, String configPath) {
     Config.Builder cb = Config.newBuilder()
-        .put(Keys.heronSandboxHome(), heronSandboxHome) 
-        .put(Keys.heronSandboxBin(),  Misc.substituteSandbox(heronSandboxHome, Defaults.heronSandboxBin()))
+        .put(Keys.heronSandboxHome(), heronSandboxHome)
+        .put(Keys.heronSandboxBin(), Misc.substituteSandbox(heronSandboxHome, Defaults.heronSandboxBin()))
         .put(Keys.heronSandboxConf(), configPath)
-        .put(Keys.heronSandboxLib(),  Misc.substituteSandbox(heronSandboxHome, Defaults.heronSandboxLib()))
-        .put(Keys.javaSandboxHome(),  Misc.substituteSandbox(heronSandboxHome, Defaults.javaSandboxHome()));
+        .put(Keys.heronSandboxLib(), Misc.substituteSandbox(heronSandboxHome, Defaults.heronSandboxLib()))
+        .put(Keys.javaSandboxHome(), Misc.substituteSandbox(heronSandboxHome, Defaults.javaSandboxHome()));
     return cb.build();
   }
 
@@ -67,7 +60,7 @@ public final class ClusterConfig {
             Misc.substitute(heronHome, configPath, Defaults.stateManagerFile()))
         .put(Keys.systemFile(),
             Misc.substitute(heronHome, configPath, Defaults.systemFile()))
-        .put(Keys.uploaderFile(), 
+        .put(Keys.uploaderFile(),
             Misc.substitute(heronHome, configPath, Defaults.uploaderFile()));
     return cb.build();
   }
@@ -88,7 +81,7 @@ public final class ClusterConfig {
             Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.stateManagerSandboxFile()))
         .put(Keys.systemSandboxFile(),
             Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.systemSandboxFile()))
-        .put(Keys.uploaderSandboxFile(), 
+        .put(Keys.uploaderSandboxFile(),
             Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.uploaderSandboxFile()));
     return cb.build();
   }
@@ -155,7 +148,7 @@ public final class ClusterConfig {
   }
 
   public static Config loadConfig(String heronHome, String configPath, String releaseFile) {
-    Config homeConfig = loadBasicConfig(heronHome, configPath); 
+    Config homeConfig = loadBasicConfig(heronHome, configPath);
     Config sandboxConfig = loadBasicSandboxConfig();
 
     Config.Builder cb = Config.newBuilder()
@@ -172,7 +165,7 @@ public final class ClusterConfig {
   }
 
   public static Config loadSandboxConfig() {
-    Config sandboxConfig = loadBasicSandboxConfig(); 
+    Config sandboxConfig = loadBasicSandboxConfig();
 
     Config.Builder cb = Config.newBuilder()
         .putAll(sandboxConfig)

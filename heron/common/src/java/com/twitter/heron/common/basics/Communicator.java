@@ -22,31 +22,28 @@ import java.util.concurrent.LinkedTransferQueue;
  * This queue will has a soft bound, which mean you could check the remainingCapacity() to decide
  * whether you could continuously offer items. However, the buffer underneath is an unbounded
  * LinkedTransferQueue, so you could still offer items even if remainingCapacity() <= 0.
- * <p/>
+ * <p>
  * We use an unbound queue since for every time user's bolt's executing or spout's emitting tuples,
  * it is possible that unbounded # of tuples could be generated. And we could not stop them since
  * the logic is inside their jars. So in order to avoid enqueue failure, we need an unbound queue.
- * <p/>
+ * <p>
  * However, in order to avoid GC issues and keep high performance, we would have a dynamical tuning
  * Queue's expected capacity, see updateExpectedAvailableCapacity() below.
  */
 
 public class Communicator<E> {
   /**
+   * The buffer queue underneath, an unbound queue.
+   */
+  private final LinkedTransferQueue<E> buffer;
+  /**
    * The producer offers item into the queue, and it will be wake up when consumer polls a item.
    */
   private volatile WakeableLooper producer;
-
   /**
    * The consumer polls item from the queue, and it will be wake up when producer offer a item.
    */
   private volatile WakeableLooper consumer;
-
-  /**
-   * The buffer queue underneath, an unbound queue.
-   */
-  private final LinkedTransferQueue<E> buffer;
-
   /**
    * The soft capacity bound for this queue
    */

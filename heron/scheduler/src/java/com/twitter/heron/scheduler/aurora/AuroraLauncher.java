@@ -28,18 +28,15 @@ import javax.xml.bind.DatatypeConverter;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
-import com.twitter.heron.spi.common.Constants;
-import com.twitter.heron.spi.common.PackingPlan;
-
-import com.twitter.heron.spi.scheduler.ILauncher;
-import com.twitter.heron.spi.scheduler.context.LaunchContext;
-
 import com.twitter.heron.scheduler.service.SubmitterMain;
 import com.twitter.heron.scheduler.twitter.PackerUtility;
-
 import com.twitter.heron.scheduler.util.NetworkUtility;
 import com.twitter.heron.scheduler.util.ShellUtility;
 import com.twitter.heron.scheduler.util.TopologyUtility;
+import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.scheduler.ILauncher;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
 
 /**
  * Launch topology on aurora.
@@ -124,7 +121,7 @@ public class AuroraLauncher implements ILauncher {
   private void addCustomBindProperties(Map<String, String> auroraProperties) {
     String keyPrefix = Constants.HERON_AURORA_BIND_PREFIX;
 
-    for(Object key: context.getConfig().keySet()) {
+    for (Object key : context.getConfig().keySet()) {
       String strKey = key.toString();
       if (strKey.startsWith(keyPrefix)) {
         String bindKey = strKey.substring(keyPrefix.length());
@@ -209,7 +206,7 @@ public class AuroraLauncher implements ILauncher {
     String[] cmdline = auroraCmd.toArray(new String[auroraCmd.size()]);
     LOG.info("cmdline=" + Arrays.toString(cmdline));
 
-    return 0 == ShellUtility.runProcess(true, cmdline,new StringBuilder(), new StringBuilder());
+    return 0 == ShellUtility.runProcess(true, cmdline, new StringBuilder(), new StringBuilder());
   }
 
   @Override

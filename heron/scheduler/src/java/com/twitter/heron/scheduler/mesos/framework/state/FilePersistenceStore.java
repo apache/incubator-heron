@@ -49,6 +49,11 @@ public class FilePersistenceStore implements PersistenceStore {
     this.taskPath = rootPath + "/tasks";
   }
 
+  public static File[] getFilesInDir(String path) {
+    File dir = new File(path);
+    return dir.listFiles();
+  }
+
   @Override
   public boolean persistJob(BaseJob baseJob) {
     try {
@@ -222,10 +227,5 @@ public class FilePersistenceStore implements PersistenceStore {
     LOG.info("Clean done");
 
     return true;
-  }
-
-  public static File[] getFilesInDir(String path) {
-    File dir = new File(path);
-    return dir.listFiles();
   }
 }

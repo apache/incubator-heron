@@ -30,9 +30,9 @@ import org.mockito.InOrder;
 import org.mockito.Mockito;
 
 import com.twitter.heron.api.metric.MultiCountMetric;
-import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.network.HeronClient;
 import com.twitter.heron.common.network.HeronSocketOptions;
 import com.twitter.heron.common.network.StatusCode;
@@ -44,14 +44,14 @@ import junit.framework.Assert;
 
 /**
  * Test whether MetricsManagerServer could handle TMasterLocationRefreshMessage correctly.
- * <p/>
+ * <p>
  * We make a SimpleTMasterLocationPublisher, which would send two TMasterLocationRefreshMessage,
  * (twice each) after connected and registered with
  * MetricsManagerServer, and then we check:
  * 1. Whether onMessage(...) is invoked 4 times, with correct arguments.
- * <p/>
+ * <p>
  * 2. Whether onMessage(...) is invoked 4 times, with correct order.
- * <p/>
+ * <p>
  * 3. Whether eventually the TMasterLocation in SingletonRegistry should be the latest one.
  */
 
@@ -84,87 +84,6 @@ public class HandleTMasterLocationTest {
   private NIOLooper serverLooper;
 
   private ExecutorService threadsPool;
-
-  private static class SimpleTMasterLocationPublisher extends HeronClient {
-    private static final Logger LOG = Logger.getLogger(SimpleTMasterLocationPublisher.class.getName());
-
-    public SimpleTMasterLocationPublisher(NIOLooper looper, String host, int port) {
-      super(looper, host, port,
-          new HeronSocketOptions(100 * 1024 * 1024, 100,
-              100 * 1024 * 1024, 100,
-              5 * 1024 * 1024,
-              5 * 1024 * 1024));
-    }
-
-    @Override
-    public void onConnect(StatusCode status) {
-      if (status != StatusCode.OK) {
-        org.junit.Assert.fail("Connection with server failed");
-      } else {
-        LOG.info("Connected with Metrics Manager Server");
-        sendRequest();
-      }
-    }
-
-    @Override
-    public void onError() {
-      org.junit.Assert.fail("Error in client while talking to server");
-    }
-
-    @Override
-    public void onClose() {
-
-    }
-
-    private void sendRequest() {
-      Metrics.MetricPublisher publisher = Metrics.MetricPublisher.newBuilder().
-          setHostname("hostname").
-          setPort(0).
-          setComponentName("tmaster-location-publisher").
-          setInstanceId("instance-id").
-          setInstanceIndex(1).
-          build();
-
-      Metrics.MetricPublisherRegisterRequest request = Metrics.MetricPublisherRegisterRequest.newBuilder().
-          setPublisher(publisher).build();
-
-      sendRequest(request, Metrics.MetricPublisherRegisterResponse.newBuilder());
-
-    }
-
-    // We send two TMasterLocationRefreshMessage twice each
-    // Then we check:
-    // 1. Whether onMessage(...) is invoked 4 times, with correct arguments.
-    // 2. Finally the TMasterLocation in SingletonRegistry should be the latest one.
-    private void sendMessage() {
-      // First send tmasterLocationRefreshMessage0 twice
-      sendMessage(tmasterLocationRefreshMessage0);
-      sendMessage(tmasterLocationRefreshMessage0);
-
-      // Then send tmasterLocationRefreshMessage1 twice
-      sendMessage(tmasterLocationRefreshMessage1);
-      sendMessage(tmasterLocationRefreshMessage1);
-    }
-
-    @Override
-    public void onResponse(StatusCode status, Object ctx, Message response) {
-      if (response instanceof Metrics.MetricPublisherRegisterResponse) {
-        Assert.assertEquals(Common.StatusCode.OK,
-            ((Metrics.MetricPublisherRegisterResponse) response).getStatus().getStatus());
-
-        // Start sending the TMasterLocation
-        sendMessage();
-
-      } else {
-        org.junit.Assert.fail("Unknown type of response received");
-      }
-    }
-
-    @Override
-    public void onIncomingMessage(Message request) {
-      org.junit.Assert.fail("Expected message from client");
-    }
-  }
 
   @Before
   public void before() throws Exception {
@@ -279,5 +198,86 @@ public class HandleTMasterLocationTest {
       }
     };
     threadsPool.execute(runClient);
+  }
+
+  private static class SimpleTMasterLocationPublisher extends HeronClient {
+    private static final Logger LOG = Logger.getLogger(SimpleTMasterLocationPublisher.class.getName());
+
+    public SimpleTMasterLocationPublisher(NIOLooper looper, String host, int port) {
+      super(looper, host, port,
+          new HeronSocketOptions(100 * 1024 * 1024, 100,
+              100 * 1024 * 1024, 100,
+              5 * 1024 * 1024,
+              5 * 1024 * 1024));
+    }
+
+    @Override
+    public void onConnect(StatusCode status) {
+      if (status != StatusCode.OK) {
+        org.junit.Assert.fail("Connection with server failed");
+      } else {
+        LOG.info("Connected with Metrics Manager Server");
+        sendRequest();
+      }
+    }
+
+    @Override
+    public void onError() {
+      org.junit.Assert.fail("Error in client while talking to server");
+    }
+
+    @Override
+    public void onClose() {
+
+    }
+
+    private void sendRequest() {
+      Metrics.MetricPublisher publisher = Metrics.MetricPublisher.newBuilder().
+          setHostname("hostname").
+          setPort(0).
+          setComponentName("tmaster-location-publisher").
+          setInstanceId("instance-id").
+          setInstanceIndex(1).
+          build();
+
+      Metrics.MetricPublisherRegisterRequest request = Metrics.MetricPublisherRegisterRequest.newBuilder().
+          setPublisher(publisher).build();
+
+      sendRequest(request, Metrics.MetricPublisherRegisterResponse.newBuilder());
+
+    }
+
+    // We send two TMasterLocationRefreshMessage twice each
+    // Then we check:
+    // 1. Whether onMessage(...) is invoked 4 times, with correct arguments.
+    // 2. Finally the TMasterLocation in SingletonRegistry should be the latest one.
+    private void sendMessage() {
+      // First send tmasterLocationRefreshMessage0 twice
+      sendMessage(tmasterLocationRefreshMessage0);
+      sendMessage(tmasterLocationRefreshMessage0);
+
+      // Then send tmasterLocationRefreshMessage1 twice
+      sendMessage(tmasterLocationRefreshMessage1);
+      sendMessage(tmasterLocationRefreshMessage1);
+    }
+
+    @Override
+    public void onResponse(StatusCode status, Object ctx, Message response) {
+      if (response instanceof Metrics.MetricPublisherRegisterResponse) {
+        Assert.assertEquals(Common.StatusCode.OK,
+            ((Metrics.MetricPublisherRegisterResponse) response).getStatus().getStatus());
+
+        // Start sending the TMasterLocation
+        sendMessage();
+
+      } else {
+        org.junit.Assert.fail("Unknown type of response received");
+      }
+    }
+
+    @Override
+    public void onIncomingMessage(Message request) {
+      org.junit.Assert.fail("Expected message from client");
+    }
   }
 }

@@ -62,14 +62,6 @@ public enum GlobalMetrics implements Serializable {
   }
 
   /**
-   * During serialization don't create a copy of this class. 'readResolve' is used by reflection
-   * for java serialization.
-   */
-  protected Object readResolve() {
-    return INSTANCE;
-  }
-
-  /**
    * Thread safe created increment of counterName. (Slow)
    */
   public static void safeIncrBy(String counterName, int N) {
@@ -99,5 +91,13 @@ public enum GlobalMetrics implements Serializable {
    */
   public static MultiCountMetric getUnderlyingCounter() {
     return INSTANCE.metricsContainer;
+  }
+
+  /**
+   * During serialization don't create a copy of this class. 'readResolve' is used by reflection
+   * for java serialization.
+   */
+  protected Object readResolve() {
+    return INSTANCE;
   }
 }

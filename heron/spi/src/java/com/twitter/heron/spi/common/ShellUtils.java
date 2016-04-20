@@ -58,6 +58,7 @@ public class ShellUtils {
       boolean verbose, String cmdline, StringBuilder stdout, StringBuilder stderr) {
     return runSyncProcess(verbose, false, splitTokens(cmdline), stdout, stderr, null);
   }
+
   public static int runSyncProcess(
       boolean verbose, boolean isInheritIO, String cmdline, StringBuilder stdout,
       StringBuilder stderr, File workingDirectory) {
@@ -103,7 +104,7 @@ public class ShellUtils {
   public static Process runASyncProcess(
       boolean verbose, String[] command, File workingDirectory) {
     if (verbose) {
-      LOG.info("$> " +  Arrays.toString(command));
+      LOG.info("$> " + Arrays.toString(command));
     }
 
     // For AsyncProcess, we will never inherit IO, since parent process will not
@@ -154,7 +155,7 @@ public class ShellUtils {
       throw new RuntimeException("Trying to open tunnel to localhost.");
     }
     return ShellUtils.runASyncProcess(verbose,
-        new String[] {
+        new String[]{
             "ssh", String.format("-NL%d:%s:%d", tunnelPort, destHost, destPort), tunnelHost},
         new File(".")
     );

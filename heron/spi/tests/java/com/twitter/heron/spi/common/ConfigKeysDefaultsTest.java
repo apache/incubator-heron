@@ -14,14 +14,10 @@
 
 package com.twitter.heron.spi.common;
 
-import java.nio.file.Paths;
-import java.util.Properties;
-import java.util.logging.Logger;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 public class ConfigKeysDefaultsTest {

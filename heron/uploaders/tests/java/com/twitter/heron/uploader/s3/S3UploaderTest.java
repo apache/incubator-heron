@@ -14,22 +14,21 @@
 
 package com.twitter.heron.uploader.s3;
 
+import java.io.File;
+import java.net.URI;
+
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.ConfigKeys;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.io.File;
-import java.net.URI;
+import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.ConfigKeys;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class S3UploaderTest {
   private S3Uploader uploader;
@@ -41,11 +40,11 @@ public class S3UploaderTest {
     mockS3Client = mock(AmazonS3Client.class);
 
     configBuilder = Config.newBuilder()
-      .put(S3Context.HERON_UPLOADER_S3_BUCKET, "bucket")
-      .put(S3Context.HERON_UPLOADER_S3_ACCESS_KEY, "access_key")
-      .put(S3Context.HERON_UPLOADER_S3_SECRET_KEY, "secret_key")
-      .put(ConfigKeys.get("TOPOLOGY_NAME"), "test-topology")
-      .put(ConfigKeys.get("TOPOLOGY_PACKAGE_FILE"), "topology.tar.gz");
+        .put(S3Context.HERON_UPLOADER_S3_BUCKET, "bucket")
+        .put(S3Context.HERON_UPLOADER_S3_ACCESS_KEY, "access_key")
+        .put(S3Context.HERON_UPLOADER_S3_SECRET_KEY, "secret_key")
+        .put(ConfigKeys.get("TOPOLOGY_NAME"), "test-topology")
+        .put(ConfigKeys.get("TOPOLOGY_PACKAGE_FILE"), "topology.tar.gz");
 
     uploader = new S3Uploader();
     uploader.initialize(configBuilder.build());
@@ -93,7 +92,7 @@ public class S3UploaderTest {
 
     when(mockS3Client.doesObjectExist(expectedBucket, expectedRemotePath)).thenReturn(true);
     when(mockS3Client.putObject(Mockito.eq(expectedBucket), Mockito.eq(expectedRemotePath), Mockito.any(File.class)))
-      .thenThrow(AmazonClientException.class);
+        .thenThrow(AmazonClientException.class);
 
     URI uri = uploader.uploadPackage();
     assertEquals(null, uri);
