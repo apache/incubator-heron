@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script will be run bazel when building process starts to
+# This script will be run when the bazel build process starts to
 # generate key-value information that represents the status of the
 # workspace. The output should be like
 #
