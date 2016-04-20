@@ -31,7 +31,7 @@ def genproto_java_impl(ctx):
       "set -e",
       "rm -rf " + java_srcs,
       "mkdir " + java_srcs,
-      protoc.path + " -I heron/proto --java_out=" + java_srcs + " " + src.path,
+      protoc.path + " -I " + src.dirname + " --java_out=" + java_srcs + " " + src.path,
       "jar cMf " + srcjar.path + " -C " + java_srcs + " .",
       "rm -rf " + java_srcs,
   ])
