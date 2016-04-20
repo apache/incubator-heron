@@ -87,7 +87,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
 
     // fetch scheduler location from state manager
-    LOG.log(Level.INFO, "Fetching scheduler location from state manager to {0} topology", command);
+    LOG.log(Level.FINE, "Fetching scheduler location from state manager to {0} topology", command);
 
     Scheduler.SchedulerLocation schedulerLocation =
         statemgr.getSchedulerLocation(Runtime.topologyName(runtime));
@@ -97,7 +97,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
       return null;
     }
 
-    LOG.info("Scheduler is listening on location: " + schedulerLocation.toString());
+    LOG.log(Level.FINE, "Scheduler is listening on location {0}", schedulerLocation.toString());
 
     // construct the http request for command
     String endpoint = getCommandEndpoint(schedulerLocation.getHttpEndpoint(), command);
@@ -155,7 +155,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
       // receive the response for activate topology
       Common.StatusCode statusCode;
       try {
-        LOG.info("Receiving activate response from scheduler...");
+        LOG.fine("Receiving activate response from scheduler...");
         statusCode = Scheduler.ActivateTopologyResponse.newBuilder()
             .mergeFrom(HttpUtils.readHttpResponse(connection))
             .build().getStatus().getStatus();
@@ -226,7 +226,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
 
       // receive the response for deactivate topology
       Common.StatusCode statusCode;
-      LOG.info("Receiving deactivate response from scheduler...");
+      LOG.fine("Receiving deactivate response from scheduler...");
       statusCode = Scheduler.DeactivateTopologyResponse.newBuilder()
           .mergeFrom(HttpUtils.readHttpResponse(connection))
           .build().getStatus().getStatus();
@@ -290,7 +290,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
       // receive the response for restart topology
       Common.StatusCode statusCode;
       try {
-        LOG.info("Receiving restart response from scheduler...");
+        LOG.fine("Receiving restart response from scheduler...");
         statusCode = Scheduler.RestartTopologyResponse.newBuilder()
             .mergeFrom(HttpUtils.readHttpResponse(connection))
             .build().getStatus().getStatus();
@@ -353,7 +353,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
         // receive the response for kill topology
         Common.StatusCode statusCode;
         try {
-          LOG.info("Receiving kill response from scheduler...");
+          LOG.fine("Receiving kill response from scheduler...");
           statusCode = Scheduler.KillTopologyResponse.newBuilder()
               .mergeFrom(HttpUtils.readHttpResponse(connection))
               .build().getStatus().getStatus();
@@ -395,7 +395,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
    * Clean the various state of heron topology
    */
   protected boolean cleanState(String topologyName) {
-    LOG.info("Cleaning up Heron State");
+    LOG.fine("Cleaning up Heron State");
 
     // get the instance of the state manager
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
@@ -434,7 +434,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
       LOG.severe("Failed to clear scheduler location. Check whether Scheduler set it correctly.");
     }
 
-    LOG.info("Cleaned up Heron State");
+    LOG.fine("Cleaned up Heron State");
     return true;
   }
 
