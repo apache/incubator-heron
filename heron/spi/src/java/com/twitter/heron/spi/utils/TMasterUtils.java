@@ -106,11 +106,11 @@ public class TMasterUtils {
     return plan.getTopology().getState();
   }
 
-  public static boolean controlTopologyState(String topologyName,
-                                             String topologyStateControlCommand,
-                                             SchedulerStateManagerAdaptor statemgr,
-                                             TopologyAPI.TopologyState startState,
-                                             TopologyAPI.TopologyState expectedState) {
+  public static boolean transitionTopologyState(String topologyName,
+                                                String topologyStateControlCommand,
+                                                SchedulerStateManagerAdaptor statemgr,
+                                                TopologyAPI.TopologyState startState,
+                                                TopologyAPI.TopologyState expectedState) {
     TopologyAPI.TopologyState state = TMasterUtils.getRuntimeTopologyState(topologyName, statemgr);
     if (state == null) {
       LOG.severe("Topology still not initialized.");

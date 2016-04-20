@@ -7,5 +7,5 @@ heron.class.launcher:                        com.twitter.heron.scheduler.aurora.
 # location of java - pick it up from shell environment
 heron.directory.sandbox.java.home:           /usr/lib/jvm/java-1.8.0-openjdk-amd64/
 
-# Invoke the IScheduelr as a library directly
+# Invoke the IScheduler as a library directly
 heron.scheduler.is.service:                  False
