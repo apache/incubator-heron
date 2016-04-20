@@ -1,12 +1,29 @@
+# Copyright 2016 Twitter. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 #!/usr/bin/env python2.7
 
 import argparse
-import sys
-import subprocess
-import os
-import tarfile
 import contextlib
 import getpass
+import os
+import shutil
+import sys
+import subprocess
+import tarfile
+import tempfile
+import yaml
 
 from heron.common.src.python.color import Log
 
@@ -18,14 +35,23 @@ BIN_DIR  = "bin"
 CONF_DIR = "conf"
 ETC_DIR  = "etc"
 LIB_DIR  = "lib"
+RELEASE_YAML = "release.yaml"
+OVERRIDE_YAML = "override.yaml"
 
 # directories for heron sandbox
 SANDBOX_CONF_DIR = "./heron-conf"
 
+# config file for heron cli
+CLIENT_YAML = "client.yaml"
+
+# cli configs for role and env
+ROLE_REQUIRED = "heron.config.role.required"
+ENV_REQUIRED  = "heron.config.env.required"
+
 ################################################################################
 # Create a tar file with a given set of files
 ################################################################################
-def create_tar(tar_filename, files, config_dir):
+def create_tar(tar_filename, files, config_dir, config_files):
   with contextlib.closing(tarfile.open(tar_filename, 'w:gz')) as tar:
     for filename in files:
       if os.path.isfile(filename):
@@ -37,6 +63,13 @@ def create_tar(tar_filename, files, config_dir):
       tar.add(config_dir, arcname=get_heron_sandbox_conf_dir())
     else:
       raise Exception("%s is not an existing directory" % config_dir)
+
+    for filename in config_files:
+      if os.path.isfile(filename):
+        arcfile = os.path.join(get_heron_sandbox_conf_dir(), os.path.basename(filename))
+        tar.add(filename, arcname=arcfile)
+      else:
+        raise Exception("%s is not an existing file" % filename)
 
 ################################################################################
 # Retrieve the given subparser from parser
@@ -115,16 +148,19 @@ def get_heron_lib_dir():
   lib_path = os.path.join(get_heron_dir(), LIB_DIR)
   return lib_path
 
-def get_heron_cluster_conf_dir(cluster_role_env, default_config_path):
+def get_heron_release_file():
+  """
+  This will provide the path to heron release.yaml file 
+  :return: absolute path of heron release.yaml file
+  """
+  return os.path.join(get_heron_dir(), RELEASE_YAML)
+
+def get_heron_cluster_conf_dir(cluster, default_config_path):
   """
   This will provide heron cluster config directory, if config path is default
   :return: absolute path of heron cluster conf directory
   """
-  cluster_role_env = parse_cluster_role_env(cluster_role_env)
-  if default_config_path == get_heron_conf_dir():
-    return os.path.join(default_config_path, cluster_role_env[0])
-
-  return default_config_path
+  return os.path.join(default_config_path, cluster)
 
 ################################################################################
 # Get the sandbox directories and config files
@@ -145,18 +181,44 @@ def get_heron_libs(local_jars):
   return heron_libs
 
 ################################################################################
-# Parse the cluster/[role]/[environ], supply defaults, if not provided
+# Get the cluster to which topology is submitted
 ################################################################################
-def parse_cluster_role_env(cluster_role_env):
+def get_heron_cluster(cluster_role_env):
+  return cluster_role_env.split('/')[0]
+
+################################################################################
+# Parse cluster/[role]/[environ], supply default, if not provided, not required
+################################################################################
+def parse_cluster_role_env(cluster_role_env, config_path):
   parts = cluster_role_env.split('/')[:3]
 
-  # if role is not provided, use username instead
-  if len(parts) == 1:
-    parts.append(getpass.getuser())
+  # if cluster/role/env is not completely provided, check further
+  if len(parts) < 3:
+    cli_conf_file = os.path.join(config_path, CLIENT_YAML)
 
-  # if environ is not provided, use 'default'
-  if len(parts) == 2:
-    parts.append(ENVIRON)
+    # if client conf doesn't exist, use default value
+    if not os.path.isfile(cli_conf_file):
+      if len(parts) == 1:
+        parts.append(getpass.getuser())
+      if len(parts) == 2:
+        parts.append(ENVIRON)
+    else:
+      with open(cli_conf_file, 'r') as conf_file:
+        cli_confs = yaml.load(conf_file)
+
+        # if role is required but not provided, raise exception
+        if len(parts) == 1:
+          if (ROLE_REQUIRED in cli_confs) and (cli_confs[ROLE_REQUIRED] == True):
+            raise Exception("role required but not provided")
+          else:
+            parts.append(getpass.getuser())
+
+        # if environ is required but not provided, raise exception
+        if len(parts) == 2:
+          if (ENV_REQUIRED in cli_confs) and (cli_confs[ENV_REQUIRED] == True):
+            raise Exception("environ required but not provided")
+          else:
+            parts.append(ENVIRON)
 
   # if cluster or role or environ is empty, print
   if len(parts[0]) == 0 or len(parts[1]) == 0 or len(parts[2]) == 0:
@@ -168,22 +230,21 @@ def parse_cluster_role_env(cluster_role_env):
 ################################################################################
 # Parse the command line for overriding the defaults
 ################################################################################
-def parse_cmdline_override(namespace):
-  override = []
-  for key in namespace.keys():
-    # Notice we could not use "if not namespace[key]",
-    # since it would filter out 0 too, rather than just "None"
-    if namespace[key] is None:
-      continue
-    property_key = key.replace('-', '.').replace('_', '.')
-    property_value = str(namespace[key])
-    override.append('%s="%s"' % (property_key, property_value))
-  return ' '.join(override)
+def parse_override_config(namespace):
+  try:
+    tmp_dir = tempfile.mkdtemp()
+    override_config_file = os.path.join(tmp_dir, OVERRIDE_YAML)
+    with open(override_config_file, 'w') as f:
+      for config in namespace:
+        f.write("%s\n" % config.replace('=', ': '))
+
+    return override_config_file
+  except e:
+    raise Exception("Failed to parse override config: %s" % str(e))
 
 ################################################################################
 # Get the path of java executable
 ################################################################################
-
 def get_java_path():
   java_home = os.environ.get("JAVA_HOME")
   return os.path.join(java_home, BIN_DIR, "java")
@@ -205,3 +266,38 @@ def check_java_home_set():
 
   Log.error("JAVA_HOME/bin/java either does not exist or not an executable")
   return False
+
+################################################################################
+# Check if the release.yaml file exists
+################################################################################
+def check_release_file_exists():
+  release_file = get_heron_release_file()
+
+  # if the file does not exist and is not a file
+  if not os.path.isfile(release_file):
+    Log.error("%s file not found: %s" % release_file)
+    return False
+
+  return True
+
+################################################################################
+# Check whether the classpath provided is valid
+################################################################################
+def check_classpath(classpath):
+  cpaths = classpath.split(':')
+  if len(cpaths) == 1 and not cpaths[0]:
+    return True
+  for cp in cpaths:
+    if not cp:
+      Log.error('Invalid class path: %s' % (classpath))
+      return False
+    elif cp.endswith('*'):
+      if not os.path.isdir(os.path.dirname(cp)):
+        Log.error('Class path entry %s not a directory' % (cp))
+        return False
+      else:
+        continue
+    elif not os.path.isfile(cp):
+      Log.error('Invalid class path entry: %s' % (cp))
+      return False
+  return True

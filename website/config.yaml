@@ -1,7 +1,8 @@
-baseurl: http://docs.sloth.com/
 languageCode: en-us
 title: Heron
 author: Luc Perkins
+canonifyurls: true
+baseurl: http://twitter.github.io/heron
 
 # Site-level config
 MetaDataFormat: yaml
@@ -32,12 +33,31 @@ params:
     schedulerapi: 0.1.0
     topologyapi: 0.1.0
   assets:
+    favicon:
+      small: /img/favicon-16x16.png
+      large: /img/favicon-32x32.png
     logo: /img/logo54x54.png #logo.png
     textlogo: /img/HeronTextLogo.png #logo.png
+    textLogoSmall: /img/HeronTextLogo-small.png #logo.png
     css:
       - /css/style.min.css
+      - /css/font-awesome.min.css
     js:
-      - //code.jquery.com/jquery-2.2.1.min.js
+      - http://code.jquery.com/jquery-2.2.1.min.js
       - /js/app.min.js
+    fonts:
+      - fonts/fontawesome-webfont.eot
+      - fonts/fontawesome-webfont.svg
+      - fonts/fontawesome-webfont.tff
+      - fonts/fontawesome-webfont.woff
+      - fonts/fontawesome-webfont.woff2
+      - fonts/FontAwesome.otf
   bazelVersion: 0.1.2
   tagline: Realtime, Distributed, Fault-Tolerant Stream Processing
+  github:
+    home: https://github.com/twitter/heron
+    master: https://github.com/twitter/heron/tree/master
+  social:
+    twitter: https://twitter.com/heronstreaming
+    slack: https://heronstreaming.slack.com
+    googleGroup: https://groups.google.com/forum/#!forum/heron-users

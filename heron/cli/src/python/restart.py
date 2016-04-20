@@ -1,8 +1,21 @@
+# Copyright 2016 Twitter. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 #!/usr/bin/python2.7
 
 import argparse
 import atexit
-import base64
 import contextlib
 import glob
 import logging
@@ -40,7 +53,7 @@ def create_parser(subparsers):
       help='Identifier of the container to be restarted')
 
   args.add_config(parser)
-  args.add_classpath(parser)
+  args.add_extra_heron_classpath(parser)
   args.add_verbose(parser)
 
   parser.set_defaults(subcommand='restart')
@@ -50,9 +63,8 @@ def run(command, parser, cl_args, unknown_args):
 
   try:
     topology_name = cl_args['topology-name']
-    classpath = cl_args['classpath']
+    extra_classpath = cl_args['extra_heron_classpath']
     container_id = cl_args['container-id']
-    config_overrides = utils.parse_cmdline_override(cl_args)
 
     new_args = [
         "--cluster", cl_args['cluster'],
@@ -60,7 +72,8 @@ def run(command, parser, cl_args, unknown_args):
         "--environment", cl_args['environ'],
         "--heron_home", utils.get_heron_dir(),
         "--config_path", cl_args['config_path'],
-        "--config_overrides", base64.b64encode(config_overrides),
+        "--override_config_file", cl_args['override_config_file'],
+        "--release_file", utils.get_heron_release_file(),
         "--topology_name", topology_name,
         "--command", command,
         "--container_id", str(container_id)
@@ -71,8 +84,7 @@ def run(command, parser, cl_args, unknown_args):
     # invoke the runtime manager to kill the topology
     execute.heron_class(
         'com.twitter.heron.scheduler.RuntimeManagerMain',
-        classpath,
-        lib_jars,
+        extra_classpath + lib_jars,
         extra_jars=[],
         args= new_args
     )

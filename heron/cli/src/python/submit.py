@@ -1,8 +1,21 @@
+# Copyright 2016 Twitter. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 #!/usr/bin/python2.7
 
 import argparse
 import atexit
-import base64
 import contextlib
 import glob
 import logging
@@ -40,13 +53,9 @@ def create_parser(subparsers):
   args.add_topology_file(parser)
   args.add_topology_class(parser)
   args.add_config(parser)
-  args.add_classpath(parser)
-
-  parser.add_argument(
-      '--deploy-deactivated',
-      metavar='(a boolean; default: "false")',
-      default=False)
-
+  args.add_deactive_deploy(parser)
+  args.add_system_property(parser)
+  args.add_extra_heron_classpath(parser)
   args.add_verbose(parser)
 
   parser.set_defaults(subcommand='submit')
@@ -60,18 +69,17 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
   # get the normalized path for topology.tar.gz
   topology_pkg_path = utils.normalized_class_path(os.path.join(tmp_dir, 'topology.tar.gz'))
 
-  # TO DO - when you give a config path - the name of the directory might be
-  # different - need to change the name to conf
+  # get the release yaml file
+  release_yaml_file = utils.get_heron_release_file()
 
-  # create a tar package with the configuration
+  # create a tar package with the cluster configuration and generated config files
   config_path = cl_args['config_path']
-  classpath = cl_args['classpath']
+  extra_classpath = cl_args['extra_heron_classpath']
 
   tar_pkg_files = [topology_file, topology_defn_file]
-  utils.create_tar(topology_pkg_path, tar_pkg_files, config_path)
+  generated_config_files = [release_yaml_file, cl_args['override_config_file']]
 
-  # form the config overrides
-  config_overrides = utils.parse_cmdline_override(cl_args)
+  utils.create_tar(topology_pkg_path, tar_pkg_files, config_path, generated_config_files)
 
   # pass the args to submitter main
   args = [
@@ -80,11 +88,15 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
       "--environment", cl_args['environ'],
       "--heron_home", utils.get_heron_dir(),
       "--config_path", config_path,
-      "--config_overrides", base64.b64encode(config_overrides),
+      "--override_config_file", cl_args['override_config_file'],
+      "--release_file", release_yaml_file,
       "--topology_package", topology_pkg_path,
       "--topology_defn", topology_defn_file,
       "--topology_jar", topology_file
   ]
+
+  if opts.verbose():
+    args.append("--verbose")
 
   lib_jars = utils.get_heron_libs(
       jars.scheduler_jars() + jars.uploader_jars() + jars.statemgr_jars() + jars.packing_jars()
@@ -93,10 +105,10 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
   # invoke the submitter to submit and launch the topology
   execute.heron_class(
       'com.twitter.heron.scheduler.SubmitterMain',
-      classpath,
-      lib_jars,
+      extra_classpath + lib_jars,
       extra_jars=[],
-      args = args
+      args = args,
+      javaDefines = cl_args['javaDefines']
   )
 
 ################################################################################
@@ -151,12 +163,17 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
 
   # execute main of the topology to create the topology definition
   topology_file = cl_args['topology-file-name']
-  execute.heron_class(
+  try:
+    execute.heron_class(
       cl_args['topology-class-name'],
-      cl_args['classpath'],
       utils.get_heron_libs(jars.topology_jars()),
       extra_jars = [topology_file],
-      args = tuple(unknown_args))
+      args = tuple(unknown_args),
+      javaDefines = cl_args['javaDefines'])
+
+  except Exception as ex:
+    Log.error("Unable to execute topology main class")
+    return False
 
   try:
     launch_topologies(cl_args, topology_file, tmp_dir)
@@ -189,10 +206,10 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
   topology_file = cl_args['topology-file-name']
   execute.heron_tar(
       cl_args['topology-class-name'],
-      cl_args['classpath'],
-      topology_file, 
-      tuple(unknown_args), 
-      tmp_dir)
+      topology_file,
+      tuple(unknown_args),
+      tmp_dir,
+      cl_args['javaDefines'])
 
   try:
     launch_topologies(cl_args, topology_file, tmp_dir)

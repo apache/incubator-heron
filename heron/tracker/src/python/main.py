@@ -1,4 +1,19 @@
+# Copyright 2016 Twitter. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import argparse
+import logging
 import os
 import sys
 import tornado.httpserver
@@ -10,10 +25,10 @@ from tornado.options import define, options
 
 from heron.tracker.src.python import constants
 from heron.tracker.src.python import handlers
-from heron.tracker.src.python import log
-from heron.tracker.src.python.log import Log as LOG
 from heron.tracker.src.python import utils
 from heron.tracker.src.python.tracker import Tracker
+
+LOG = logging.getLogger(__name__)
 
 class Application(tornado.web.Application):
   def __init__(self):
@@ -26,6 +41,8 @@ class Application(tornado.web.Application):
       (r"/topologies/states", handlers.StatesHandler, {"tracker":tracker}),
       (r"/topologies/info", handlers.TopologyHandler, {"tracker":tracker}),
       (r"/topologies/logicalplan", handlers.LogicalPlanHandler, {"tracker":tracker}),
+      (r"/topologies/containerfiledata", handlers.ContainerFileDataHandler, {"tracker":tracker}),
+      (r"/topologies/containerfilestats", handlers.ContainerFileStatsHandler, {"tracker":tracker}),
       (r"/topologies/physicalplan", handlers.PhysicalPlanHandler, {"tracker":tracker}),
       (r"/topologies/executionstate", handlers.ExecutionStateHandler, {"tracker":tracker}),
       (r"/topologies/metrics", handlers.MetricsHandler, {"tracker":tracker}),
@@ -47,6 +64,9 @@ class Application(tornado.web.Application):
       static_path = os.path.dirname(__file__)
     )
     tornado.web.Application.__init__(self, tornadoHandlers, **settings)
+    LOG.info("-" * 100)
+    LOG.info("Tracker started")
+    LOG.info("-" * 100)
 
 
 class _HelpAction(argparse._HelpAction):
@@ -92,8 +112,12 @@ def add_arguments(parser):
   parser.add_argument(
       '--port',
       metavar='(an integer; port to listen; default: ' + str(constants.DEFAULT_PORT) + ')',
-      type = int, 
+      type = int,
       default=constants.DEFAULT_PORT)
+
+  parser.add_argument(
+      '--verbose',
+      action='store_true')
 
   return parser
 
@@ -113,7 +137,7 @@ def create_parsers():
 
   subparsers = ya_parser.add_subparsers(
       title = "Available commands")
-  
+
   help_parser = subparsers.add_parser(
       'help',
       help='Prints help',
@@ -126,8 +150,12 @@ def define_options(port, config_file):
   define("port", default=port)
   define("config_file", default=config_file)
 
+def configure_logging(level):
+  log_format = "%(asctime)s-%(levelname)s:%(filename)s:%(lineno)s: %(message)s"
+  date_format = '%d %b %Y %H:%M:%S'
+  logging.basicConfig(format=log_format, datefmt=date_format, level=level)
+
 def main():
-  log.configure(log.logging.DEBUG)
 
   # create the parser and parse the arguments
   (parser, ya_parser) = create_parsers()
@@ -139,6 +167,12 @@ def main():
     parser.exit()
 
   namespace = vars(args)
+
+  if namespace["verbose"]:
+    configure_logging(logging.DEBUG)
+  else:
+    configure_logging(logging.INFO)
+
   LOG.info("Running on port: %d", namespace['port'])
   LOG.info("Using config file: %s", namespace['config_file'])
 

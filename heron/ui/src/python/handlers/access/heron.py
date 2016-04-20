@@ -1,3 +1,17 @@
+# Copyright 2016 Twitter. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import json, time
 import logging
 
@@ -12,7 +26,7 @@ TOPOLOGIES_URL_FMT        = "%s/topologies"
 EXECUTION_STATE_URL_FMT   = "%s/executionstate"   % TOPOLOGIES_URL_FMT
 lOGICALPLAN_URL_FMT       = "%s/logicalplan"      % TOPOLOGIES_URL_FMT
 PHYSICALPLAN_URL_FMT      = "%s/physicalplan"     % TOPOLOGIES_URL_FMT
- 
+
 METRICS_URL_FMT           = "%s/metrics"          % TOPOLOGIES_URL_FMT
 METRICS_QUERY_URL_FMT     = "%s/metricsquery"     % TOPOLOGIES_URL_FMT
 METRICS_TIMELINE_URL_FMT  = "%s/metricstimeline"  % TOPOLOGIES_URL_FMT
@@ -25,6 +39,9 @@ PID_URL_FMT               = "%s/pid"              % TOPOLOGIES_URL_FMT
 JSTACK_URL_FMT            = "%s/jstack"           % TOPOLOGIES_URL_FMT
 JMAP_URL_FMT              = "%s/jmap"             % TOPOLOGIES_URL_FMT
 HISTOGRAM_URL_FMT         = "%s/histo"            % TOPOLOGIES_URL_FMT
+
+FILE_DATA_URL_FMT         = "%s/containerfiledata"  % TOPOLOGIES_URL_FMT
+FILESTATS_URL_FMT         = "%s/containerfilestats" % TOPOLOGIES_URL_FMT
 
 capacity = "DIVIDE(" \
         "  DEFAULT(0," \
@@ -98,7 +115,7 @@ def get_cluster_topologies(cluster):
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
 ################################################################################
-# Get the execution state of a topology in a cluster 
+# Get the execution state of a topology in a cluster
 ################################################################################
 @tornado.gen.coroutine
 def get_execution_state(cluster, environ, topology):
@@ -109,7 +126,7 @@ def get_execution_state(cluster, environ, topology):
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
 ################################################################################
-# Get the logical plan state of a topology in a cluster 
+# Get the logical plan state of a topology in a cluster
 ################################################################################
 @tornado.gen.coroutine
 def get_logical_plan(cluster, environ, topology):
@@ -248,7 +265,7 @@ def get_comp_metrics(
 
 
 ################################################################################
-# Get the metrics for a topology from tracker 
+# Get the metrics for a topology from tracker
 # metrics    - dict of display name to cuckoo name
 # time_range - 2-tuple consisting of start and end of range
 ################################################################################
@@ -268,7 +285,7 @@ def get_metrics(cluster, environment, topology, timerange, query):
 
 
 ################################################################################
-# Get the minute-by-minute metrics for all instances of a topology from tracker 
+# Get the minute-by-minute metrics for all instances of a topology from tracker
 # metrics    - dict of display name to cuckoo name
 # time_range - 2-tuple consisting of start and end of range
 ################################################################################
@@ -357,6 +374,34 @@ def run_instance_jmap(cluster, environ, topology, instance):
            environ = environ,
            topology = topology,
            instance = instance)
+  )
+  raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
+
+# Get file data from the container
+@tornado.gen.coroutine
+def get_container_file_data(cluster, environ, topology, container, path, offset, length):
+  request_url = tornado.httputil.url_concat(
+      create_url(FILE_DATA_URL_FMT),
+      dict(cluster = cluster,
+           environ = environ,
+           topology = topology,
+           container = container,
+           path = path,
+           offset = offset,
+           length = length)
+  )
+  raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
+
+# Get filestats
+@tornado.gen.coroutine
+def get_filestats(cluster, environ, topology, container, path):
+  request_url = tornado.httputil.url_concat(
+      create_url(FILESTATS_URL_FMT),
+      dict(cluster = cluster,
+           environ = environ,
+           topology = topology,
+           container = container,
+           path = path)
   )
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 

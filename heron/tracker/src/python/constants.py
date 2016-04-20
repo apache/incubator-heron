@@ -1,3 +1,17 @@
+# Copyright 2016 Twitter. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 # This file contains all the constants used
 # across the tracker service.
 
@@ -11,30 +25,34 @@ API_VERSION = "1.0.0"
 # Parameter Names
 
 PARAM_CLUSTER = "cluster"
-PARAM_ENVIRON = "environ"
-PARAM_TOPOLOGY = "topology"
 PARAM_COMPONENT = "component"
-PARAM_METRICNAME = "metricname"
+PARAM_CONTAINER = "container"
+PARAM_ENDTIME = "endtime"
+PARAM_ENVIRON = "environ"
 PARAM_INSTANCE = "instance"
 PARAM_INTERVAL = "interval"
-PARAM_STARTTIME = "starttime"
-PARAM_ENDTIME = "endtime"
+PARAM_LENGTH = "length"
+PARAM_METRICNAME = "metricname"
+PARAM_OFFSET = "offset"
+PARAM_PATH = "path"
 PARAM_QUERY = "query"
+PARAM_STARTTIME = "starttime"
+PARAM_TOPOLOGY = "topology"
 
 # These are the keys in the JSON response
 # formed by the handlers.
 
-RESPONSE_KEY_STATUS = "status"
-RESPONSE_KEY_VERSION = "version"
-RESPONSE_KEY_ECECUTION_TIME = "executiontime"
+RESPONSE_KEY_EXECUTION_TIME = "executiontime"
 RESPONSE_KEY_MESSAGE = "message"
 RESPONSE_KEY_RESULT = "result"
+RESPONSE_KEY_STATUS = "status"
+RESPONSE_KEY_VERSION = "version"
 
 # These are the values of the status
 # in the JSON repsonse.
 
-RESPONSE_STATUS_SUCCESS = "success"
 RESPONSE_STATUS_FAILURE = "failure"
+RESPONSE_STATUS_SUCCESS = "success"
 
 # Timeout for HTTP requests.
 

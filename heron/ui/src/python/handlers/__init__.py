@@ -9,6 +9,9 @@ from heron.ui.src.python.handlers.notfound import NotFoundHandler
 ################################################################################
 # Handlers for topology related requests
 ################################################################################
+from heron.ui.src.python.handlers.topology import ContainerFileDataHandler
+from heron.ui.src.python.handlers.topology import ContainerFileHandler
+from heron.ui.src.python.handlers.topology import ContainerFileStatsHandler
 from heron.ui.src.python.handlers.topology import ListTopologiesHandler
 from heron.ui.src.python.handlers.topology import TopologyPlanHandler
 from heron.ui.src.python.handlers.topology import TopologyConfigHandler

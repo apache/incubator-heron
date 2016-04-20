@@ -1,3 +1,17 @@
+# Copyright 2016 Twitter. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os
 import argparse
 
@@ -29,9 +43,9 @@ def insert_bool_values(command_line_args):
   args3 = insert_bool('--trace-execution', args2)
   return args2
 
-def add_classpath(parser):
+def add_extra_heron_classpath(parser):
   parser.add_argument(
-      '--classpath',
+      '--extra-heron-classpath',
       metavar='(strings, separated by colon; default: "")',
       default = "")
   return parser
@@ -82,12 +96,29 @@ def add_config(parser):
 
   parser.add_argument(
       '--config-path',
-      metavar='(a string; path to cluster config; default: "' + default_config_path + '/<cluster>")',
+      metavar='(a string; path to cluster config; default: "' + default_config_path + '")',
       default=os.path.join(utils.get_heron_dir(), default_config_path))
 
   parser.add_argument(
       '--config-property',
-      metavar='(a string; a config property; default: [])',
+      metavar='(key=value; a config key and its value; default: [])',
       action='append',
       default=[])
+  return parser
+
+def add_system_property(parser):
+  parser.add_argument(
+      '-D',
+      default=[],
+      action="append",
+      dest="javaDefines",
+      metavar='DEFINE',
+      help='Define a system property to pass to java -D when running main.')
+  return parser
+
+def add_deactive_deploy(parser):
+  parser.add_argument(
+      '--deploy-deactivated',
+      metavar='(a boolean; default: "false")',
+      default=False)
   return parser

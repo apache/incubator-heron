@@ -1,3 +1,17 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.twitter.heron.spi.common;
 
 import java.io.FileInputStream;
@@ -113,7 +127,17 @@ public final class ClusterConfig {
     Map readConfig = ConfigReader.loadFile(uploaderFile);
     return Config.newBuilder().putAll(readConfig).build();
   }
-  
+
+  public static Config loadOverrideConfig(String overrideConfigFile) {
+    Map readConfig = ConfigReader.loadFile(overrideConfigFile);
+    return Config.newBuilder().putAll(readConfig).build();
+  }
+
+  protected static Config loadReleaseConfig(String releaseFile) {
+    Map readConfig = ConfigReader.loadFile(releaseFile);
+    return Config.newBuilder().putAll(readConfig).build();
+  }
+
   public static Config loadBasicConfig(String heronHome, String configPath) {
     Config config = Config.newBuilder()
         .putAll(loadHeronHome(heronHome, configPath))
@@ -130,7 +154,7 @@ public final class ClusterConfig {
     return config;
   }
 
-  public static Config loadConfig(String heronHome, String configPath) {
+  public static Config loadConfig(String heronHome, String configPath, String releaseFile) {
     Config homeConfig = loadBasicConfig(heronHome, configPath); 
     Config sandboxConfig = loadBasicSandboxConfig();
 
@@ -142,7 +166,8 @@ public final class ClusterConfig {
         .putAll(loadPackingConfig(Context.packingFile(homeConfig)))
         .putAll(loadSchedulerConfig(Context.schedulerFile(homeConfig)))
         .putAll(loadStateManagerConfig(Context.stateManagerFile(homeConfig)))
-        .putAll(loadUploaderConfig(Context.uploaderFile(homeConfig)));
+        .putAll(loadUploaderConfig(Context.uploaderFile(homeConfig)))
+        .putAll(loadReleaseConfig(releaseFile));
     return cb.build();
   }
 

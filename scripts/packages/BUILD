@@ -28,6 +28,10 @@ load("/tools/rules/heron_tools", "heron_tools_conf_files")
 load("/tools/rules/heron_tools", "heron_tools_lib_files")
 load("/tools/rules/heron_examples", "heron_examples_files")
 
+generated_release_files = [
+    "release.yaml",
+]
+
 filegroup(
     name = "tarpkgs",
     srcs = [
@@ -53,6 +57,7 @@ filegroup(
 pkg_tar(
     name = "heron-core",
     extension = "tar.gz",
+    files = generated_release_files,
     deps = [
         ":heron-core-bin",
         ":heron-core-lib-scheduler",
@@ -117,6 +122,7 @@ pkg_tar(
 pkg_tar(
     name = "heron-tools",
     extension = "tar.gz",
+    files = generated_release_files,
     deps = [
         ":heron-tools-bin",
         ":heron-tools-conf",
@@ -199,6 +205,7 @@ pkg_tar(
 pkg_tar(
     name = "heron-client",
     extension = "tar.gz",
+    files = generated_release_files,
     deps = [
         ":heron-client-bin",
         ":heron-client-conf",
@@ -220,7 +227,7 @@ pkg_tar(
 pkg_tar(
     name = "heron-api",
     extension = "tar.gz",
-    files = heron_api_files(),
+    files = generated_release_files + heron_api_files(),
 )
 
 ################################################################################
@@ -233,7 +240,7 @@ sh_binary(
 
 genrule(
     name = "generate-package-info",
-    outs = ["README.md"],
+    outs = generated_release_files,
     cmd = "$(location :package-info-generator) $$(find . -name '*status*.txt') >$@",
     stamp = 1,
     tools = [":package-info-generator"],
@@ -241,13 +248,10 @@ genrule(
 
 genrule(
     name = "generate-client-launcher",
-    srcs = [
-        "client_template_bin.sh",
-        ":README.md",
-    ],
+    srcs = ["client_template_bin.sh"] + generated_release_files,
     outs = ["client_launcher_bin.sh"],
     cmd = """
-        release_info="$$(cat $(location :README.md))"
+        release_info="$$(cat $(location :release.yaml))"
         template="$$(cat $(location client_template_bin.sh))"
         echo "$${template//%release_info%/$${release_info}}" >$@
         """,
@@ -255,13 +259,10 @@ genrule(
 
 genrule(
     name = "generate-tools-launcher",
-    srcs = [
-        "tools_template_bin.sh",
-        ":README.md",
-    ],
+    srcs = ["tools_template_bin.sh"] + generated_release_files,
     outs = ["tools_launcher_bin.sh"],
     cmd = """
-        release_info="$$(cat $(location :README.md))"
+        release_info="$$(cat $(location :release.yaml))"
         template="$$(cat $(location tools_template_bin.sh))"
         echo "$${template//%release_info%/$${release_info}}" >$@
         """,
@@ -269,13 +270,10 @@ genrule(
 
 genrule(
     name = "generate-api-launcher",
-    srcs = [
-        "api_template_bin.sh",
-        ":README.md",
-    ],
+    srcs = ["api_template_bin.sh"] + generated_release_files,
     outs = ["api_launcher_bin.sh"],
     cmd = """
-        release_info="$$(cat $(location :README.md))"
+        release_info="$$(cat $(location :release.yaml))"
         template="$$(cat $(location api_template_bin.sh))"
         echo "$${template//%release_info%/$${release_info}}" >$@
         """,

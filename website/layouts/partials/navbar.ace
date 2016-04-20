@@ -1,13 +1,34 @@
 nav.navbar.navbar-inverse.navbar-fixed-top role=navigation
   .container-fluid
-    .navbar-header
-      img.img-responsive.pull-left src={{.Site.Params.assets.logo}} 
-      a.navbar-brand href=/ {{.Site.Title}}
-    #navbar.navbar-collapse.collapse
+
+    .navbar-header 
+      {{HTML "<button class=\"navbar-toggle collapsed\" type=button data-toggle=collapse data-target=#hn-navbar aria-controls=hn-navbar aria-expanded=false>"}} 
+        span.sr-only
+          Toggle navigation
+        span.icon-bar
+        span.icon-bar
+        span.icon-bar
+      {{HTML "</button>"}} 
+
+      a.navbar-brand href=/ style="padding: 15px 15px;"
+        img.img-responsive.pull-left src={{.Site.Params.assets.textLogoSmall}} 
+
+    #hn-navbar.navbar-collapse.collapse
       ul.nav.navbar-nav.navbar-right
         li
           a href=/docs/getting-started Getting Started
+        li 
+          a href=/docs/resources Resources
         li
-          a href=/docs/developers/compiling/compiling/ Compiling Heron
+          a href=/docs/contributors/community Community
         li
-          a href=/docs/javadoc API Docs
+          a href={{.Site.Params.github.home}} GitHub
+        li 
+          a.nav-icon href={{.Site.Params.social.slack}}
+            i.fa.fa-slack
+        li 
+          a.nav-icon href={{.Site.Params.social.googleGroup}}
+            i.fa.fa-comments
+        li 
+          a.nav-icon href={{.Site.Params.social.twitter}}
+            i.fa.fa-twitter

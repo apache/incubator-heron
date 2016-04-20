@@ -14,63 +14,62 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Generate a README.md for the package from the information provided
+# Generate a RELEASE file for the package from the information provided
 # by the build status command.
 
 # Store the build status information we care about
 release_name=
 git_hash=
-url=
-built_by=
-build_log=
-commit_msg=
+release_status=
+build_time=
+build_timestamp=
+build_host=
+build_user=
+build_commit_msg=
+build_commit_url=
 
 for i in "${@}"; do
   while read line; do
     key=$(echo "$line" | cut -d " " -f 1)
     value="$(echo "$line" | cut -d " " -f 2- | tr '\f' '\n')"
     case $key in
-      RELEASE_NAME)
+      HERON_BUILD_SCM_RELEASE)
         release_name="$value"
         ;;
-      RELEASE_GIT_HASH)
+      HERON_BUILD_SCM_REVISION)
         git_hash="$value"
         ;;
-      RELEASE_BUILT_BY)
-        built_by="$value"
+      HERON_BUILD_RELEASE_STATUS)
+        release_status="$value"
         ;;
-      RELEASE_BUILD_LOG)
-        build_log="$value"
+      HERON_BUILD_TIME)
+        build_time="$value"
         ;;
-      RELEASE_COMMIT_MSG)
-        commit_msg="$value"
+      HERON_BUILD_TIMESTAMP)
+        build_timestamp="$value"
         ;;
-      RELEASE_COMMIT_URL)
-        commit_url="$value"
+      HERON_BUILD_HOST)
+        build_host="$value"
+        ;;
+      HERON_BUILD_USER)
+        build_user="$value"
+        ;;
+      HERON_BUILD_COMMIT_MSG)
+        build_commit_msg="$value"
+        ;;
+      HERON_BUILD_COMMIT_URL)
+        build_commit_url="$value"
         ;;
    esac
   done <<<"$(cat $i)"
 done
 
-url="${url:-https://github.com/twitter/heron/commit/${git_hash}}"
-
-if [ -z "${release_name}" ]; then
-  # Not a release
-  echo "# Binary package at HEAD (@$git_hash)"
-else
-  echo "# $commit_msg"  # Make the first line the header
-  # Subsection for environment
-  echo
-  echo "## Build informations"
-fi
-if [ -n "${built_by-}" ]; then
-  if [ -n "${build_log}" ]; then
-    echo "   - [Built by ${built_by}](${build_log})"
-  else
-    echo "   - Built by ${built_by}"
-  fi
-elif [ -n "${build_log-}" ]; then
-  echo "   - [Build log](${build_log})"
-fi
-
-echo "   - [Commit](${url})"
+echo "heron.build.version : ${release_name}"
+echo "heron.build.time : ${build_time}"
+echo "heron.build.timestamp : ${build_timestamp}"
+echo "heron.build.host : ${build_host}"
+echo "heron.build.user : ${build_user}"
+echo "heron.build.git.revision : ${git_hash}"
+echo "heron.build.git.status : ${release_status}"
+echo "heron.build.git.commit.message : ${build_commit_msg}"
+echo "heron.build.git.commit.url : ${build_commit_url}"

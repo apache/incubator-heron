@@ -1,3 +1,17 @@
+# Copyright 2016 Twitter. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 #!/usr/bin/python2.7
 
 import argparse
@@ -27,6 +41,11 @@ import heron.cli.src.python.restart as restart
 import heron.cli.src.python.submit as submit
 import heron.cli.src.python.utils as utils
 import heron.cli.src.python.version as version
+
+help_epilog = '''Getting more help: 
+  heron help <command> Prints help and options for <command>
+
+For detailed documentation, go to http://heronstreaming.io'''
 
 class _HelpAction(argparse._HelpAction):
   def __call__(self, parser, namespace, values, option_string=None):
@@ -59,7 +78,8 @@ class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
 ################################################################################
 def create_parser():
   parser = argparse.ArgumentParser(
-      epilog = 'For detailed documentation, go to http://heron.github.io', 
+      prog = 'heron',
+      epilog = help_epilog,
       formatter_class=SubcommandHelpFormatter,
       add_help = False)
 
@@ -99,10 +119,14 @@ def run(command, parser, command_args, unknown_args):
   elif command == 'help':
     return help.run(command, parser, command_args, unknown_args)
 
+  elif command == 'version':
+    return version.run(command, parser, command_args, unknown_args)
+
   return 1
 
-def cleanup():
-  pass
+def cleanup(files):
+  for file in files:
+    shutil.rmtree(os.path.dirname(file))
 
 ################################################################################
 # Check whether the environment variables are set
@@ -111,37 +135,13 @@ def check_environment():
   if not utils.check_java_home_set():
     sys.exit(1)
 
-################################################################################
-# Check whether the classpath provided is valid
-################################################################################
-def check_classpath(classpath):
-  cpaths = classpath.split(':')
-  if len(cpaths) == 1 and not cpaths[0]:
-    return True
-  for cp in cpaths:
-    if not cp: 
-      Log.error('Invalid class path: %s' % (classpath))
-      return False
-    elif cp.endswith('*'):
-      if not os.path.isdir(os.path.dirname(cp)): 
-        Log.error('Class path entry %s not a directory' % (cp))
-        return False
-      else:
-        continue
-    elif not os.path.isfile(cp):
-      Log.error('Invalid class path entry: %s' % (cp))
-      return False
-  return True 
+  if not utils.check_release_file_exists():
+    sys.exit(1)
 
 ################################################################################
 # Check validity of the parameters
 ################################################################################
 def check_parameters(command_line_args):
-  if command_line_args.has_key('classpath'):
-    classpath = command_line_args['classpath']
-    if classpath and not check_classpath(classpath):
-      sys.exit(1)
-
   if command_line_args.has_key('verbose'):
     verbose = command_line_args['verbose']
     if verbose:
@@ -151,28 +151,39 @@ def check_parameters(command_line_args):
 # Extract all the common args for all commands
 ################################################################################
 def extract_common_args(command, parser, cl_args):
-  new_cl_args = dict()
   try:
     cluster_role_env = cl_args.pop('cluster/[role]/[env]')
-    cluster_tuple = utils.parse_cluster_role_env(cluster_role_env)
-
+    extra_classpath = cl_args.pop('extra_heron_classpath')
     config_path = cl_args['config_path']
-
+    override_config_file = utils.parse_override_config(cl_args['config_property'])
   except KeyError:
     # if some of the arguments are not found, print error and exit
     subparser = utils.get_subparser(parser, command)
     print(subparser.format_help())
     return dict()
 
-  config_path = utils.get_heron_cluster_conf_dir(cluster_role_env, config_path);
+  cluster = utils.get_heron_cluster(cluster_role_env)
+  config_path = utils.get_heron_cluster_conf_dir(cluster, config_path)
   if not os.path.isdir(config_path):
-    Log.error("Config path directory does not exist: %s" % config_path)
+    Log.error("Config path cluster directory does not exist: %s" % config_path)
     return dict()
 
-  new_cl_args['cluster'] = cluster_tuple[0]
-  new_cl_args['role'] = cluster_tuple[1]
-  new_cl_args['environ'] = cluster_tuple[2]
-  new_cl_args['config_path'] = config_path
+  # check the class path argument
+  if extra_classpath and not utils.check_classpath(extra_classpath):
+    return dict()
+
+  new_cl_args = dict()
+  try:
+    cluster_tuple = utils.parse_cluster_role_env(cluster_role_env, config_path)
+    new_cl_args['cluster'] = cluster_tuple[0]
+    new_cl_args['role'] = cluster_tuple[1]
+    new_cl_args['environ'] = cluster_tuple[2]
+    new_cl_args['config_path'] = config_path
+    new_cl_args['override_config_file'] = override_config_file
+    new_cl_args['extra_heron_classpath'] = [extra_classpath] if extra_classpath else []
+  except Exception as e:
+    Log.error("Argument cluster/[role]/[env] is not correct: %s" % str(e))
+    return dict()
 
   cl_args.update(new_cl_args)
   return cl_args
@@ -184,9 +195,6 @@ def main():
 
   # verify if the environment variables are correctly set
   check_environment()
-
-  # register cleanup function during exit
-  atexit.register(cleanup)
 
   # create the argument parser 
   parser = create_parser()
@@ -206,12 +214,28 @@ def main():
   # check various parameters and if valid set appropriate options
   check_parameters(command_line_args)
 
+  if opts.verbose():
+    print command_line_args
+
   # command to be execute
   command = command_line_args['subcommand']
 
+  # file resources to be cleaned when exit
+  files = []
   if command != 'help' and command != 'version':
-    command_line_args = extract_common_args(command, parser, command_line_args) 
+    command_line_args = extract_common_args(command, parser, command_line_args)
+    # register dirs cleanup function during exit
+    files.append(command_line_args['override_config_file'])
 
+  # register the cleanup handler
+  atexit.register(cleanup, files)
+
+  # bail out if args are empty
+  if not command_line_args:
+    return 1
+
+  if opts.verbose():
+    print command_line_args
   start = time.time() 
   retcode = run(command, parser, command_line_args, unknown_args)
   end = time.time()

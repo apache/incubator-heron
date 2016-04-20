@@ -1,3 +1,17 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.twitter.heron.spi.statemgr;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -35,25 +49,32 @@ import com.twitter.heron.spi.common.Config;
  * is called with result code upon the completion of the operation.
  */
 
-public interface IStateManager {
+public interface IStateManager extends AutoCloseable {
   /**
-   * Initialize the uploader with the incoming context.
+   * Initialize StateManager with the incoming context.
    */
-  public void initialize(Config config);
+  void initialize(Config config);
 
-  public void close();
+  /**
+   * This is to for disposing or cleaning up any internal state accumulated by
+   * the StateManager
+   * <p/>
+   * Closes this stream and releases any system resources associated
+   * with it. If the stream is already closed then invoking this
+   * method has no effect.
+   */
+  void close();
 
   /**
    * Is the given topology in RUNNING state?
-   * @param topologyName
+   *
    * @return Boolean
    */
   ListenableFuture<Boolean> isTopologyRunning(String topologyName);
 
   /**
    * Set the execution state for the given topology
-   * @param executionState
-   * @param topologyName
+   *
    * @return Boolean - Success or Failure
    */
   ListenableFuture<Boolean> setExecutionState(
@@ -61,8 +82,7 @@ public interface IStateManager {
 
   /**
    * Set the topology definition for the given topology
-   * @param topology
-   * @param topologyName
+   *
    * @return Boolean - Success or Failure
    */
   ListenableFuture<Boolean> setTopology(
@@ -70,8 +90,7 @@ public interface IStateManager {
 
   /**
    * Set the scheduler location for the given top
-   * @param location
-   * @param topologyName
+   *
    * @return Boolean - Success or Failure
    */
   ListenableFuture<Boolean> setSchedulerLocation(
@@ -79,43 +98,43 @@ public interface IStateManager {
 
   /**
    * Delete the tmaster location for the given topology
-   * @param topologyName
+   *
    * @return Boolean - Success or Failure
    */
   ListenableFuture<Boolean> deleteTMasterLocation(String topologyName);
 
   /**
    * Delete the execution state for the given topology
-   * @param topologyName
+   *
    * @return Boolean - Success or Failure
    */
   ListenableFuture<Boolean> deleteExecutionState(String topologyName);
 
   /**
    * Delete the topology definition for the given topology
-   * @param topologyName
+   *
    * @return Boolean - Success or Failure
    */
   ListenableFuture<Boolean> deleteTopology(String topologyName);
 
   /**
    * Delete the physical plan for the given topology
-   * @param topologyName
+   *
    * @return Boolean - Success or Failure
    */
   ListenableFuture<Boolean> deletePhysicalPlan(String topologyName);
 
   /**
    * Delete the scheduler location for the given topology
-   * @param topologyName
+   *
    * @return Boolean - Success or Failure
    */
   ListenableFuture<Boolean> deleteSchedulerLocation(String topologyName);
 
   /**
    * Get the tmaster location for the given topology
+   *
    * @param watcher @see com.twitter.heron.spi.statemgr.WatchCallback
-   * @param topologyName
    * @return TMasterLocation
    */
   ListenableFuture<TopologyMaster.TMasterLocation> getTMasterLocation(
@@ -123,8 +142,8 @@ public interface IStateManager {
 
   /**
    * Get the scheduler location for the given topology
+   *
    * @param watcher @see com.twitter.heron.spi.statemgr.WatchCallback
-   * @param topologyName
    * @return SchedulerLocation
    */
   ListenableFuture<Scheduler.SchedulerLocation> getSchedulerLocation(
@@ -132,8 +151,8 @@ public interface IStateManager {
 
   /**
    * Get the topology definition for the given topology
+   *
    * @param watcher @see com.twitter.heron.spi.statemgr.WatchCallback
-   * @param topologyName
    * @return Topology
    */
   ListenableFuture<TopologyAPI.Topology> getTopology(
@@ -141,8 +160,8 @@ public interface IStateManager {
 
   /**
    * Get the execution state for the given topology
+   *
    * @param watcher @see com.twitter.heron.spi.statemgr.WatchCallback
-   * @param topologyName
    * @return ExecutionState
    */
   ListenableFuture<ExecutionEnvironment.ExecutionState> getExecutionState(
@@ -150,8 +169,7 @@ public interface IStateManager {
 
   /**
    * Set the location of Tmaster.
-   * @param location
-   * @param topologyName
+   *
    * @return Boolean - Success or Failure
    */
   ListenableFuture<Boolean> setTMasterLocation(
@@ -159,8 +177,7 @@ public interface IStateManager {
 
   /**
    * Set the physical plan for the given topology
-   * @param physicalPlan
-   * @param topologyName
+   *
    * @return Boolean - Success or Failure
    */
   ListenableFuture<Boolean> setPhysicalPlan(
@@ -168,8 +185,8 @@ public interface IStateManager {
 
   /**
    * Get the physical plan for the given topology
+   *
    * @param watcher @see com.twitter.heron.spi.statemgr.WatchCallback
-   * @param topologyName
    * @return PhysicalPlan
    */
   ListenableFuture<PhysicalPlans.PhysicalPlan> getPhysicalPlan(

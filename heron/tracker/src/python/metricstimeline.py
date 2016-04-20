@@ -1,9 +1,24 @@
-import tornado.gen
+# Copyright 2016 Twitter. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-from heron.tracker.src.python.log import Log as LOG
+import logging
+import tornado.gen
 
 from heron.proto import common_pb2
 from heron.proto import tmaster_pb2
+
+LOG = logging.getLogger(__name__)
 
 @tornado.gen.coroutine
 def getMetricsTimeline(tmaster,
@@ -85,7 +100,6 @@ def getMetricsTimeline(tmaster,
 
   # Check the response code - error if it is in 400s or 500s
   responseCode = result.code
-  print responseCode
   if responseCode >= 400:
     message = "Error in getting metrics from Tmaster, code: " + responseCode
     LOG.error(message)

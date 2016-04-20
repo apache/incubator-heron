@@ -1,15 +1,29 @@
+# Copyright 2016 Twitter. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import json
+import logging
 
 from functools import partial
 
+from heron.proto import topology_pb2
+from heron.statemgrs.src.python import statemanagerfactory
+from heron.tracker.src.python.topology import Topology
 from heron.tracker.src.python import javaobj
 from heron.tracker.src.python import utils
-from heron.tracker.src.python.log import Log as LOG
 
-from heron.proto import topology_pb2
-
-from heron.tracker.src.python.topology import Topology
-from heron.statemgrs.src.python import statemanagerfactory
+LOG = logging.getLogger(__name__)
 
 class Tracker:
   """

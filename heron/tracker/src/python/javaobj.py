@@ -1,3 +1,17 @@
+# Copyright 2016 Twitter. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """Provides functions for reading and writing (writing is WIP currently) Java objects
 serialized or will be deserialized by ObjectOutputStream. This form of object
 representation is a standard data interchange format in Java world.
@@ -8,21 +22,14 @@ See: http://download.oracle.com/javase/6/docs/platform/serialization/spec/protoc
 """
 
 import StringIO
+import logging
 import struct
 
-try:
-    import logging
-except ImportError:
-    def log_debug(message, ident=0):
-        pass
-    def log_error(message, ident=0):
-        pass
-else:
-    _log = logging.getLogger(__name__)
-    def log_debug(message, ident=0):
-        _log.debug(" " * (ident * 2) + str(message))
-    def log_error(message, ident=0):
-        _log.error(" " * (ident * 2) + str(message))
+LOG = logging.getLogger(__name__)
+def log_debug(message, ident=0):
+    LOG.debug(" " * (ident * 2) + str(message))
+def log_error(message, ident=0):
+    LOG.error(" " * (ident * 2) + str(message))
 
 __version__ = "$Revision: 20 $"
 

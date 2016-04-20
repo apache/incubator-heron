@@ -1,70 +1,75 @@
 sections:
   - name: Getting Started
     sublinks:
-      - name: Getting Started
+      - name: Local (Single Node)
         url: /docs/getting-started
-  - name: Concepts
+      - name: Upgrade Storm Topologies
+        url: /docs/upgrade-storm-to-heron
+  - name: Deployment
     sublinks:
-      - name: The Architecture of Heron
-        url: /docs/concepts/architecture
+      - name: Overview
+        url: /docs/operators/deployment
+      - name: Aurora
+        url: /docs/operators/deployment/aurora
+      - name: Mesos
+        url: /docs/operators/deployment/mesos
+      - name: Local
+        url: /docs/operators/deployment/local
+      - name: Zookeeper
+        url: /docs/operators/deployment/zookeeper
+  - name: Configuration
+    sublinks:
+      - name: Overview
+        url: /docs/operators/configuration/config-intro
+      - name: Heron Instance
+        url: /docs/operators/configuration/instance
+      - name: Metrics Manager
+        url: /docs/operators/configuration/metrics-manager
+      - name: Stream Manager
+        url: /docs/operators/configuration/stmgr
+      - name: System-Level
+        url: /docs/operators/configuration/system
+      - name: Topology Master
+        url: /docs/operators/configuration/tmaster
+  - name: User Manuals
+    sublinks:
+      - name: Heron Client
+        url: /docs/operators/heron-cli
+      - name: Heron Tracker REST API
+        url: /docs/operators/heron-tracker
+      - name: Heron UI
+        url: /docs/operators/heron-ui
+  - name: Topology Developers
+    sublinks:
       - name: Heron Topologies
         url: /docs/concepts/topologies
-      - name: Heron's Data Model
+      - name: Heron Data Model
         url: /docs/developers/data-model
-      - name: Serialization
+      - name: Tuple Serialization
         url: /docs/developers/serialization
       - name: Javadoc
         url: /docs/javadoc
-  - name: Operators
-    subcategories:
-      - name: Configuration
-        sublinks:
-          - name: Configuration Intro
-            url: /docs/operators/configuration/config-intro
-          - name: Heron Instance
-            url: /docs/operators/configuration/instance
-          - name: Metrics Manager
-            url: /docs/operators/configuration/metrics-manager
-          - name: Stream Manager
-            url: /docs/operators/configuration/stmgr
-          - name: System-Level
-            url: /docs/operators/configuration/system
-          - name: Topology Master
-            url: /docs/operators/configuration/tmaster
-      - name: Deployment
-        sublinks:
-          - name: Deploying Heron
-            url: /docs/operators/deployment/README
-          - name: Aurora
-            url: /docs/operators/deployment/aurora
-          - name: Mesos
-            url: /docs/operators/deployment/mesos
-          - name: Local
-            url: /docs/operators/deployment/local
-          - name: Zookeeper
-            url: /docs/operators/deployment/zookeeper
+  - name: Heron Developers
     sublinks:
-      - name: Managing Topologies with the Heron CLI
-        url: /docs/operators/heron-cli
-      - name: The Heron Tracker REST API
-        url: /docs/operators/heron-tracker
-      - name: The Heron User Interface
-        url: /docs/operators/heron-ui
-  - name: Developers
-    subcategories:
-      - name: Compiling
-        sublinks:
-          - name: Compiling Heron
-            url: /docs/developers/compiling/compiling
-          - name: Compiling Using Docker
-            url: /docs/developers/compiling/docker
-  - name: Contributors
-    sublinks:
-      - name: The Heron Codebase
+      - name: Heron Architecture
+        url: /docs/concepts/architecture
+      - name: Codebase
         url: /docs/contributors/codebase
-      - name: Testing Heron
+      - name: Compiling
+        url: /docs/developers/compiling/compiling
+      - name: Compiling With Docker
+        url: /docs/developers/compiling/docker
+      - name: Testing
         url: /docs/contributors/testing
       - name: Implementing a Custom Scheduler
         url: /docs/contributors/custom-scheduler
       - name: Implementing a Custom Metrics Sink
         url: /docs/contributors/custom-metrics-sink
+  - name: Heron Resources
+    sublinks:
+      - name: Heron Resources
+        url: /docs/resources
+  - name: Contributors
+    sublinks:
+      - name: Community
+        url: /docs/contributors/community

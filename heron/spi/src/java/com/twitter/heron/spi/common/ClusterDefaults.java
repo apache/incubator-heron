@@ -1,3 +1,17 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.twitter.heron.spi.common;
 
 import java.io.FileInputStream;
@@ -127,6 +141,14 @@ public final class ClusterDefaults {
     cb.put(Keys.instanceDisk(), Defaults.instanceDisk());
     return cb.build();
   }
+
+  public static Config getDefaultMiscellaneous() {
+    Config.Builder cb = Config.newBuilder();
+
+    cb.put(Keys.verbose(), Defaults.verbose());
+    cb.put(Keys.schedulerService(), Defaults.schedulerService());
+    return cb.build();
+  }
      
   public static Config getDefaults() {
     Config.Builder cb = Config.newBuilder();
@@ -135,6 +157,7 @@ public final class ClusterDefaults {
     cb.putAll(getDefaultJars());
     cb.putAll(getDefaultFilesAndPaths());
     cb.putAll(getDefaultResources());
+    cb.putAll(getDefaultMiscellaneous());
     return cb.build();
   }
 

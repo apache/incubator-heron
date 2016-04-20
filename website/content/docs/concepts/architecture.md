@@ -1,5 +1,5 @@
 ---
-title: The Architecture of Heron
+title: Heron Architecture
 ---
 
 Heron is the direct successor of [Apache Storm](http://storm.apache.org). From
@@ -28,9 +28,8 @@ Heron is the direct successor of [Apache Storm](http://storm.apache.org) but
 built with two goals in mind:
 
 1. Overcoming Storm's performance, reliability, and other shortcomings by
-replacing Storm's thread-based computing model with a process-based model while
-also
-2. retaining full compatibility with Storm's data model and [topology
+replacing Storm's thread-based computing model with a process-based model.
+2. Retaining full compatibility with Storm's data model and [topology
 API](http://storm.apache.org/about/simple-api.html).
 
 For a more in-depth discussion of Heron and Storm, see the [Twitter Heron:
@@ -62,7 +61,7 @@ Stream Processing at Scale](http://dl.acm.org/citation.cfm?id=2742788) paper.
 
 ## Topology Components
 
-The following core components of Heron topologies will be discussed in depth in
+The following core components of Heron topologies are discussed in depth in
 the sections below:
 
 * [Topology Master]({{< ref "#topology-master" >}})
@@ -74,14 +73,14 @@ the sections below:
 
 ### Topology Master
 
-The Topology Master (TM) manages a topology throughout its entire lifecycle,
-from the time it's submitted until it's finally killed. When `heron-cli` starts
-up a new TM, the TM creates an ephemeral
-[ZooKeeper](http://zookeeper.apache.org) node that ensures that there's only one
-TM for the topology and that the TM is easily discoverable for any process in
-the topology. The TM is also responsible for constructing a [physical
-plan](../topologies#physical-plan) for a topology which is then relayed to
-different components.
+The Topology Master \(TM) manages a topology throughout its entire lifecycle,
+from the time it's submitted until it's ultimately killed. When `heron` deploys
+a topology it starts a single TM and multiple [containers]({{< ref "#container" >}}).
+The TM creates an ephemeral [ZooKeeper](http://zookeeper.apache.org) node to
+ensure that there's only one TM for the topology and that the TM is easily
+discoverable by any process in the topology. The TM also constructs the [physical
+plan](../topologies#physical-plan) for a topology which it relays to different
+components.
 
 ![Topology Master](/img/tmaster.png)
 
@@ -107,13 +106,13 @@ section above.
 The **Stream Manager** (SM) manages the routing of tuples between topology
 components. Each [Heron Instance]({{< ref "#heron-instance" >}}) in a topology connects to its
 local SM, while all of the SMs in a given topology connect to one another to
-form a network. Here's a visual illustration of a network of SMs:
+form a network. Below is a visual illustration of a network of SMs:
 
 ![Heron Data Flow](/img/data-flow.png)
 
 In addition to being a routing engine for data streams, SMs are responsible for
 propagating [back pressure](https://en.wikipedia.org/wiki/Back_pressure)
-throughout topologies when necessary. Below is an illustration of back pressure:
+within the topology when necessary. Below is an illustration of back pressure:
 
 ![Back Pressure 1](/img/backpressure1.png)
 
@@ -176,7 +175,7 @@ outside of particular topologies.
 
 ### Heron CLI
 
-Heron has a CLI tool called `heron-cli` that is used to manage topologies.
+Heron has a CLI tool called `heron` that is used to manage topologies.
 Documentation can be found in [Managing
 Topologies](../../operators/heron-cli).
 
@@ -186,9 +185,9 @@ The **Heron Tracker** (or just Tracker) is a centralized gateway for
 cluster-wide information about topologies, including which topologies are
 running, being launched, being killed, etc. It relies on the same
 [ZooKeeper](http://zookeeper.apache.org) nodes as the topologies in the cluster
-and then exposes that information through a JSON REST API. The Tracker can be
-run inside of your Heron cluster (on the same set of machines managed by your
-Heron [scheduler](../../operators/deployment/README)) or outside of it.
+and exposes that information through a JSON REST API. The Tracker can be
+run within your Heron cluster (on the same set of machines managed by your
+Heron [scheduler](../../operators/deployment)) or outside of it.
 
 Instructions on running the tracker including JSON API docs can be found in [Heron
 Tracker](../../operators/heron-tracker).

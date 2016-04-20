@@ -1,7 +1,20 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.twitter.heron.scheduler;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,6 +26,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
@@ -21,7 +35,6 @@ import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.scheduler.IRuntimeManager;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
-import com.twitter.heron.spi.utils.NetworkUtils;
 
 public class RuntimeManagerMain {
   private static final Logger LOG = Logger.getLogger(RuntimeManagerMain.class.getName());
@@ -84,12 +97,18 @@ public class RuntimeManagerMain {
         .required()
         .build();
 
-    // TODO: Need to figure out the exact format
     Option configOverrides = Option.builder("o")
-        .desc("Command line config overrides")
-        .longOpt("config_overrides")
+        .desc("Command line override config path")
+        .longOpt("override_config_file")
         .hasArgs()
-        .argName("config overrides")
+        .argName("override config file")
+        .build();
+
+    Option releaseFile = Option.builder("b")
+        .desc("Release file name")
+        .longOpt("release_file")
+        .hasArgs()
+        .argName("release information")
         .build();
 
     Option command = Option.builder("m")
@@ -107,15 +126,22 @@ public class RuntimeManagerMain {
         .argName("container id")
         .build();
 
+    Option verbose = Option.builder("v")
+        .desc("Enable debug logs")
+        .longOpt("verbose")
+        .build();
+
     options.addOption(cluster);
     options.addOption(role);
     options.addOption(environment);
     options.addOption(topologyName);
     options.addOption(configFile);
     options.addOption(configOverrides);
+    options.addOption(releaseFile);
     options.addOption(command);
     options.addOption(heronHome);
     options.addOption(containerId);
+    options.addOption(verbose);
 
     return options;
   }
@@ -156,13 +182,23 @@ public class RuntimeManagerMain {
       System.exit(1);
     }
 
+    Boolean verbose = false;
+    Level logLevel = Level.INFO;
+    if (cmd.hasOption("v")) {
+      logLevel = Level.ALL;
+      verbose = true;
+    }
+
+    // init log
+    LoggingHelper.loggerInit(logLevel, false);
+
     String cluster = cmd.getOptionValue("cluster");
     String role = cmd.getOptionValue("role");
     String environ = cmd.getOptionValue("environment");
     String heronHome = cmd.getOptionValue("heron_home");
     String configPath = cmd.getOptionValue("config_path");
-    //TODO: Still not being used. Need to decide upon a format.
-    // String configOverrideEncoded = cmd.getOptionValue("config_overrides");
+    String overrideConfigFile = cmd.getOptionValue("override_config_file");
+    String releaseFile = cmd.getOptionValue("release_file");
     String topologyName = cmd.getOptionValue("topology_name");
     String commandOption = cmd.getOptionValue("command");
 
@@ -178,7 +214,7 @@ public class RuntimeManagerMain {
     // first load the defaults, then the config from files to override it
     Config.Builder defaultsConfig = Config.newBuilder()
         .putAll(ClusterDefaults.getDefaults())
-        .putAll(ClusterConfig.loadConfig(heronHome, configPath));
+        .putAll(ClusterConfig.loadConfig(heronHome, configPath, releaseFile));
 
     // add config parameters from the command line
     Config.Builder commandLineConfig = Config.newBuilder()
@@ -190,18 +226,20 @@ public class RuntimeManagerMain {
     Config.Builder topologyConfig = Config.newBuilder()
         .put(Keys.topologyName(), topologyName);
 
-    // TODO(Karthik): override any parameters from the command line
+    Config.Builder overrideConfig = Config.newBuilder()
+        .putAll(ClusterConfig.loadOverrideConfig(overrideConfigFile));
 
     // build the final config by expanding all the variables
     Config config = Config.expand(
         Config.newBuilder()
             .putAll(defaultsConfig.build())
+            .putAll(overrideConfig.build())
             .putAll(commandLineConfig.build())
             .putAll(topologyConfig.build())
             .build());
 
-    LOG.info("Static config loaded successfully ");
-    LOG.info(config.toString());
+    LOG.fine("Static config loaded successfully ");
+    LOG.fine(config.toString());
 
     // 1. Do prepare work
     // create an instance of state manager
@@ -219,23 +257,24 @@ public class RuntimeManagerMain {
       // initialize the statemgr
       statemgr.initialize(config);
 
-      boolean isValid = validateRuntimeManage(statemgr, topologyName);
+      // TODO(mfu): timeout should read from config
+      SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
+
+      boolean isValid = validateRuntimeManage(adaptor, topologyName);
 
       // 2. Try to manage topology if valid
       if (isValid) {
         // invoke the appropriate command to manage the topology
-        LOG.log(Level.INFO, "Topology: {0} to be {1}ed", new Object[]{topologyName, command});
+        LOG.log(Level.FINE, "Topology: {0} to be {1}ed", new Object[]{topologyName, command});
 
-        isSuccessful = manageTopology(config, command, statemgr, runtimeManager);
+        isSuccessful = manageTopology(config, command, adaptor, runtimeManager);
       }
     } finally {
       // 3. Do post work basing on the result
       // Currently nothing to do here
 
-      // 4. Do generic cleaning
-      // close the runtime manager
+      // 4. Close the resources
       runtimeManager.close();
-      // close the state manager
       statemgr.close();
     }
 
@@ -245,17 +284,16 @@ public class RuntimeManagerMain {
 
       System.exit(1);
     } else {
-      LOG.log(Level.SEVERE, "Topology {0} {1} successfully", new Object[]{topologyName, command});
+      LOG.log(Level.INFO, "Topology {0} {1} successfully", new Object[]{topologyName, command});
 
       System.exit(0);
     }
   }
 
 
-  public static boolean validateRuntimeManage(IStateManager statemgr, String topologyName) {
+  public static boolean validateRuntimeManage(SchedulerStateManagerAdaptor adaptor, String topologyName) {
     // Check whether the topology has already been running
-    Boolean isTopologyRunning =
-        NetworkUtils.awaitResult(statemgr.isTopologyRunning(topologyName), 5, TimeUnit.SECONDS);
+    Boolean isTopologyRunning = adaptor.isTopologyRunning(topologyName);
 
     if (isTopologyRunning == null || isTopologyRunning.equals(Boolean.FALSE)) {
       LOG.severe("No such topology exists");
@@ -267,12 +305,12 @@ public class RuntimeManagerMain {
 
   public static boolean manageTopology(
       Config config, IRuntimeManager.Command command,
-      IStateManager statemgr, IRuntimeManager runtimeManager)
+      SchedulerStateManagerAdaptor adaptor, IRuntimeManager runtimeManager)
       throws ClassNotFoundException, IllegalAccessException, InstantiationException, IOException {
     // build the runtime config
     Config runtime = Config.newBuilder()
         .put(Keys.topologyName(), Context.topologyName(config))
-        .put(Keys.schedulerStateManagerAdaptor(), new SchedulerStateManagerAdaptor(statemgr))
+        .put(Keys.schedulerStateManagerAdaptor(), adaptor)
         .put(Keys.runtimeManagerClassInstance(), runtimeManager)
         .build();
 

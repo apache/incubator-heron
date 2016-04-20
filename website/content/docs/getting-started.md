@@ -1,6 +1,6 @@
 ---
 date: 2016-02-28T13:10:21-08:00
-title: Getting Started
+title: Getting Started - Local (Single Node)
 ---
 
 Run topologies locally using pre-compiled Heron binaries (Mac OSX, Ubuntu >= 14.04, Centos7)
@@ -8,12 +8,12 @@ Run topologies locally using pre-compiled Heron binaries (Mac OSX, Ubuntu >= 14.
 ### Step 1 - Download pre-compiled Heron binaries with install scripts
 
 Navigate to [Twitter Heron Releases](https://github.com/twitter/heron/releases) and
-download the following self extracting binary install scripts 
+download the following self extracting binary install scripts for your platform. 
 
 * heron-client-install
 * heron-tools-install
 
-for your platform. For example, if you want to download for Mac OSX (darwin), the 
+For example, if you want to download for Mac OSX (darwin), the 
 corresponding binaries will be
 
 * heron-client-install-\<version\>-darwin.sh
@@ -23,25 +23,25 @@ where \<version\> is the desired heron version.
 
 Run the download self installing binary for heron client as follows
 ```bash
-$ chmod +x heron-client-install-0.13.1-darwin.sh
-$ ./heron-client-install-0.13.1-darwin.sh --user
+$ chmod +x heron-client-install-0.13.2-darwin.sh
+$ ./heron-client-install-0.13.2-darwin.sh --user
 Uncompressing......
 Heron is now installed!
-Make sure you have "/Users/USERNAME/bin" in your path.
+Make sure you have "/Users/$USER/bin" in your path.
 ```
 
 Run the download self installing binary for heron tools as follows
 ```bash
-$ chmod +x heron-tools-install-0.13.1-darwin.sh
-$ ./heron-tools-install-0.13.1-darwin.sh --user
+$ chmod +x heron-tools-install-0.13.2-darwin.sh
+$ ./heron-tools-install-0.13.2-darwin.sh --user
 Uncompressing......
 Heron Tools is now installed!
-Make sure you have "/Users/USERNAME/bin" in your path.
+Make sure you have "/Users/$USER/bin" in your path.
 ```
 
 ### Step 2 - Launch an example topology
 
-Launch an example [topology](../concepts/topologies) to **local cluster** using submit:
+Launch an example [topology](../concepts/topologies) on **local cluster** using submit:
 
 ```bash
 $ heron submit local ~/.heron/examples/heron-examples.jar com.twitter.heron.examples.ExclamationTopology ExclamationTopology
@@ -75,8 +75,8 @@ $ heron activate local ExclamationTopology
 $ heron deactivate local ExclamationTopology
 $ heron kill local ExclamationTopology
 ```
-Explore [managing topologies with Heron CLI](../operators/heron-cli)
-and heron cli syntax. For example, to list the available commands,
+Explore the [Heron CLI](../operators/heron-cli)
+and the [topology lifecycle](../concepts/topologies#topology-lifecycle). To list the available CLI commands:
 ```bash
 usage: heron <command> <options> ...
 
@@ -92,7 +92,7 @@ Available commands:
 For detailed documentation, go to http://heronstreaming.io
 ```
 
-As another example, to invoke the help for submitting a topology
+To invoke the help for submitting a topology:
 ```bash
 $ heron help submit 
 usage: heron submit [options] cluster/[role]/[environ] topology-file-name topology-class-name [topology-args]
@@ -111,23 +111,27 @@ Optional arguments:
 
 ### Step 6 - Explore other example topologies
 
-**ExclamationTopology.java** | This is a basic example of a Heron topology.
+The source code for the example topologies can be found at
+[heron/examples/src/java/com/twitter/heron/examples](https://github.com/twitter/heron/tree/master/heron/examples/src/java/com/twitter/heron/examples).
 
-**AckingTopology.java**  | This is a basic example of a Heron topology with acking enabled.
+```AckingTopology.java``` - a topology with acking enabled.
 
-**MultiSpoutExclamationTopology.java** | This is a basic example of a Heron topology with multiple spouts.
+```ComponentJVMOptionsTopology.java``` - a topology that supplies JVM options for each component.
 
-**MultiStageAckingTopology.java** | This is three stage topology. Spout emits to bolt that feeds to another bolt. 
+```CustomGroupingTopology.java``` - a topology that implements custom grouping. 
 
-**TaskHookTopology.java** | This is a basic Task Hook Heron topology.
+```ExclamationTopology.java``` - a spout emits random words to a bolt that adds an explanation mark.
 
-**CustomGroupingTopology.java** | This is a basic example of a Heron topology that implements custom grouping 
+```MultiSpoutExclamationTopology.java``` - a topology with multiple spouts.
 
-**ComponentJVMOptionsTopology.java** | This is a basic example of a Heron topology that supplies JVM options for each component
+```MultiStageAckingTopology.java``` - a three stage topology. A spout emits to bolt that feeds to another bolt. 
 
-### Next Steps - Deploying or Developing
+```TaskHookTopology.java``` - a topology that uses a task hook to subscribe for event notifications.
 
-[Deploying Existing topologies](../operators/deployment/README) in clustered, scheduler-driven environments (Aurora, Mesos, Local)
+### Next Steps
+[Upgrade Storm topologies](../upgrade-storm-to-heron) with simple POM.xml changes
 
-[Developing Topologies](../concepts/architecture) with the Architecture of Heron
+[Deploy topologies](../operators/deployment) in clustered, scheduler-driven environments (Aurora, Mesos, Local)
+
+[Develop topologies](../concepts/architecture) for the Heron Architecture
 

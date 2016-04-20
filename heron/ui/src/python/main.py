@@ -1,3 +1,17 @@
+# Copyright 2016 Twitter. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os, sys
 import argparse
 
@@ -16,10 +30,13 @@ from heron.ui.src.python.log import Log as LOG
 
 class Application(tornado.web.Application):
   def __init__(self):
+    # TODO: Change these to query sting parameters, since
+    # current format can lead to pattern matching issues.
     callbacks = [
       (r"/",                                                                     handlers.MainHandler),
 
       (r"/topologies",                                                           handlers.ListTopologiesHandler),
+      (r"/topologies/filestats/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)",             handlers.ContainerFileStatsHandler),
       (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/config",                         handlers.TopologyConfigHandler),
       (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/exceptions",   handlers.TopologyExceptionsPageHandler),
       (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)",                                handlers.TopologyPlanHandler),
@@ -27,6 +44,9 @@ class Application(tornado.web.Application):
       # topology metric apis
       (r"/topologies/metrics",                                                   handlers.api.MetricsHandler),
       (r"/topologies/metrics/timeline",                                          handlers.api.MetricsTimelineHandler),
+
+      (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/file",                  handlers.ContainerFileHandler),
+      (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/filedata",              handlers.ContainerFileDataHandler),
 
       # Topology list and plan handlers
       (r"/topologies/list.json",                                                 handlers.api.ListTopologiesJsonHandler),

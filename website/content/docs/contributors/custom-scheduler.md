@@ -5,9 +5,9 @@ title: Implementing a Custom Scheduler
 To run a Heron cluster, you'll need to set up a scheduler that is responsible
 for cluster management. Heron supports three schedulers out of the box:
 
-* [Mesos](../operators/deployment/mesos.html)
-* [Aurora](../operators/deployment/aurora.html)
-* [Local scheduler](../operators/deployment/local.html)
+* [Mesos](../../operators/deployment/mesos)
+* [Aurora](../../operators/deployment/aurora)
+* [Local scheduler](../../operators/deployment/local)
 
 If you'd like to run Heron on a not-yet-supported system, such as
 [YARN](https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-site/YARN.html)
@@ -55,7 +55,7 @@ Interface | Role | Examples
 
 Your implementation of those interfaces will need to be on Heron's
 [classpath](https://docs.oracle.com/javase/tutorial/essential/environment/paths.html)
-when you [compile Heron](../developers/compiling.html).
+when you [compile Heron](../../developers/compiling).
 
 ## Loading Configuration
 
@@ -83,7 +83,7 @@ Once you've implemented a custom configuration loader, you'll need to specify
 your loader by class using the `--config-loader` flag. If your loader relies on
 a configuration file, specify the path of that file using the `--config-file`
 flag. Here's an example [topology
-submission](../operators/heron-cli.html#submitting-a-topology) command:
+submission](../../operators/heron-cli#submitting-a-topology) command:
 
 ```bash
 $ heron-cli submit "topology.debug:true" \
