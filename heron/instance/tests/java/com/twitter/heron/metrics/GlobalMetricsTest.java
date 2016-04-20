@@ -33,15 +33,6 @@ import static org.junit.Assert.assertTrue;
  * Test for CounterFactory
  */
 public class GlobalMetricsTest {
-  // TODO: Use JMock framework for mock. (Needs extra jar)
-  private static class FakeWakeableLooper extends WakeableLooper {
-    protected void doWait() {
-    }
-
-    public void wakeUp() {
-    }
-  }
-
   @Test
   public void testGlobalMetrics() {
     MetricsCollector fakeCollector = new MetricsCollector(new FakeWakeableLooper(), null);
@@ -71,5 +62,14 @@ public class GlobalMetricsTest {
     assertEquals(0L, metricsContent.get("mycounter"));
     assertEquals(1L, metricsContent.get("mycounter2"));
     assertEquals(2L, metricsContent.get("mycounter1"));
+  }
+
+  // TODO: Use JMock framework for mock. (Needs extra jar)
+  private static class FakeWakeableLooper extends WakeableLooper {
+    protected void doWait() {
+    }
+
+    public void wakeUp() {
+    }
   }
 }

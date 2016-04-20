@@ -27,11 +27,11 @@ import com.twitter.heron.spi.common.HttpUtils;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 public class TMasterUtils {
+  private static final Logger LOG = Logger.getLogger(TMasterUtils.class.getName());
+
   private TMasterUtils() {
 
   }
-
-  private static final Logger LOG = Logger.getLogger(TMasterUtils.class.getName());
 
   /**
    * Communicate with TMaster with command

@@ -21,15 +21,15 @@ import com.twitter.heron.spi.common.Config;
 /**
  * Uploads topology package to a shared location. This location must be
  * accessible by runtime environment of topology. The uploader will upload
- * <p/>
+ * <p>
  * - topology jar,
  * - topology jar dependencies,
  * - topology definition, and
  * - heron core packages and libraries, if required
- * <p/>
+ * <p>
  * Uploader outputs another context containing the necessary information that
  * will be used by next stages of topology submission.
- * <p/>
+ * <p>
  * Implementation of IUploader is required to have a no argument constructor
  * that will be called to create an instance of IUploader.
  */
@@ -56,7 +56,7 @@ public interface IUploader extends AutoCloseable {
   /**
    * This is to for disposing or cleaning up any internal state accumulated by
    * the uploader
-   * <p/>
+   * <p>
    * Closes this stream and releases any system resources associated
    * with it. If the stream is already closed then invoking this
    * method has no effect.

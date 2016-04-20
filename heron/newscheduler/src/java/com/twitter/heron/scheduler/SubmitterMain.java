@@ -80,7 +80,7 @@ public class SubmitterMain {
    * @param heronHome, directory of heron home
    * @param configPath, directory containing the config
    * @param releaseFile, release file containing build information
-   * <p/>
+   * <p>
    * return config, the defaults config
    */
   protected static Config defaultConfigs(String heronHome, String configPath, String releaseFile) {
@@ -96,7 +96,7 @@ public class SubmitterMain {
    * Load the override config from cli
    *
    * @param overrideConfigPath, override config file path
-   * <p/>
+   * <p>
    * @return config, the override config
    */
   protected static Config overrideConfigs(String overrideConfigPath) {
@@ -116,9 +116,9 @@ public class SubmitterMain {
    * @return config, the command line config
    */
   protected static Config commandLineConfigs(String cluster,
-      String role,
-      String environ,
-      Boolean verbose) {
+                                             String role,
+                                             String environ,
+                                             Boolean verbose) {
     Config config = Config.newBuilder()
         .put(Keys.cluster(), cluster)
         .put(Keys.role(), role)

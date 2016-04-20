@@ -15,10 +15,8 @@
 package com.twitter.heron.common.config;
 
 import java.nio.file.Paths;
-import java.util.Properties;
-import java.util.logging.Logger;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -37,7 +35,7 @@ public class ClusterConfigReaderTest {
     Assert.assertEquals("role1", props.get(Constants.ROLE_KEY));
     Assert.assertEquals("environ", props.get(Constants.ENVIRON_KEY));
     Assert.assertEquals("user1", props.get(Constants.USER_KEY));
-    Assert.assertEquals("com.twitter.heron.scheduler.local.LocalLauncher", props.get(Constants.LAUNCHER_CLASS_KEY)); 
+    Assert.assertEquals("com.twitter.heron.scheduler.local.LocalLauncher", props.get(Constants.LAUNCHER_CLASS_KEY));
 
     Assert.assertNull(props.get(Constants.VERSION_KEY));
   }
@@ -53,7 +51,7 @@ public class ClusterConfigReaderTest {
     Assert.assertEquals("role", props.get(Constants.ROLE_KEY));
     Assert.assertEquals("environ", props.get(Constants.ENVIRON_KEY));
     Assert.assertEquals("group", props.get(Constants.GROUP_KEY));
-    Assert.assertEquals("com.twitter.heron.scheduler.aurora.AuroraLauncher", props.get(Constants.LAUNCHER_CLASS_KEY)); 
+    Assert.assertEquals("com.twitter.heron.scheduler.aurora.AuroraLauncher", props.get(Constants.LAUNCHER_CLASS_KEY));
 
     Assert.assertNull(props.get(Constants.USER_KEY));
     Assert.assertNull(props.get(Constants.VERSION_KEY));
@@ -69,7 +67,7 @@ public class ClusterConfigReaderTest {
 
     Assert.assertEquals("role1", props.get(Constants.ROLE_KEY));
     Assert.assertEquals("10.1", props.get(Constants.VERSION_KEY).toString());
-    Assert.assertEquals("com.twitter.heron.scheduler.local.LocalLauncher", props.get(Constants.LAUNCHER_CLASS_KEY)); 
+    Assert.assertEquals("com.twitter.heron.scheduler.local.LocalLauncher", props.get(Constants.LAUNCHER_CLASS_KEY));
 
     Assert.assertNull(props.get(Constants.ENVIRON_KEY));
     Assert.assertNull(props.get(Constants.GROUP_KEY));

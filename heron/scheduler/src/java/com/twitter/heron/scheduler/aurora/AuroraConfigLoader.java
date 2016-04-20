@@ -20,10 +20,10 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.scheduler.util.AbstractPropertiesConfigLoader;
 import com.twitter.heron.scheduler.util.ConfigLoaderUtils;
 import com.twitter.heron.scheduler.util.PropertiesFileConfigLoader;
+import com.twitter.heron.spi.common.Constants;
 
 public class AuroraConfigLoader extends AbstractPropertiesConfigLoader {
   public static final String AURORA_SCHEDULER_CONF = "aurora_scheduler.conf";
@@ -75,7 +75,7 @@ public class AuroraConfigLoader extends AbstractPropertiesConfigLoader {
    *     heron.aurora.bind.HERON_PACKAGE: heron-core-release.tar.gz
    */
   private boolean addAuroraBindProperties(Properties target, Properties bindProperties) {
-    for (String bindKey: bindProperties.stringPropertyNames()) {
+    for (String bindKey : bindProperties.stringPropertyNames()) {
       String key = bindProperties.getProperty(bindKey);
       if (target.containsKey(key)) {
         String key2 = Constants.HERON_AURORA_BIND_PREFIX + bindKey;

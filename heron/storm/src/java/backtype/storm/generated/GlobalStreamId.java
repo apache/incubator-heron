@@ -22,9 +22,8 @@ public class GlobalStreamId {
   }
 
   public GlobalStreamId(
-    String componentId,
-    String streamId)
-  {
+      String componentId,
+      String streamId) {
     this.componentId = componentId;
     this.streamId = streamId;
   }

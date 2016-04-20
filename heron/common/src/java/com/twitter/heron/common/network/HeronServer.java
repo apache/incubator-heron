@@ -40,6 +40,7 @@ import com.twitter.heron.common.basics.NIOLooper;
  * d) onMessage method called when we have a new message
  */
 public abstract class HeronServer implements ISelectHandler {
+  private static final Logger LOG = Logger.getLogger(HeronServer.class.getName());
   // The socket that we will use for accepting connections
   private ServerSocketChannel acceptChannel;
   // Define the address where we need to listen on
@@ -49,9 +50,6 @@ public abstract class HeronServer implements ISelectHandler {
   private NIOLooper nioLooper;
   // All the clients that we have connected
   private Map<SocketChannel, SocketChannelHelper> activeConnections;
-
-  private static final Logger LOG = Logger.getLogger(HeronServer.class.getName());
-
   // Map from protobuf message's name to protobuf message's builder
   private Map<String, Message.Builder> requestMap;
   private Map<String, Message.Builder> messageMap;

@@ -31,12 +31,12 @@ import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
 
 /**
  * A metrics sink that writes to a Graphite server
- * <p/>
+ * <p>
  * When exceptions are occurred to access Graphite Server, close(...) would be invoked.
  * And re-connecting would happen automatically in next write(...).
- * <p/>
+ * <p>
  * Only when too many re-connections occurred, we would throw a RuntimeException.
- * <p/>
+ * <p>
  * TODO -- This GraphiteSink is just a template.
  * TODO -- processRecord(MetricsRecord record) needs changes to apply the specific scenarios
  * TODO -- complete integration test is needed.

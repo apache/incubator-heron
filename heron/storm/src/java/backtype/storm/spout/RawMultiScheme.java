@@ -15,10 +15,10 @@
 package backtype.storm.spout;
 
 import java.util.List;
-import static java.util.Arrays.asList;
 
 import backtype.storm.tuple.Fields;
 import static backtype.storm.utils.Utils.tuple;
+import static java.util.Arrays.asList;
 
 public class RawMultiScheme implements MultiScheme {
   @Override

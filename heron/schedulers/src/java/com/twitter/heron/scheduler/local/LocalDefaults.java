@@ -14,15 +14,8 @@
 
 package com.twitter.heron.scheduler.local;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.util.HashMap;
 import java.util.Map;
-
-import java.lang.ClassNotFoundException;
-import java.io.InputStream;
-import java.nio.file.Paths;
+import java.util.logging.Logger;
 
 import com.twitter.heron.spi.common.Resource;
 
@@ -38,8 +31,7 @@ public class LocalDefaults {
       defaults = Resource.load(
           "com.twitter.heron.scheduler.local.LocalDefaults",
           LocalConstants.DEFAULTS_YAML);
-    }
-    catch (ClassNotFoundException e) {
+    } catch (ClassNotFoundException e) {
       LOG.severe("Unable to load the Defaults class " + e);
       System.exit(1);
     }

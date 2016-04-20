@@ -49,15 +49,15 @@ import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
  * Main entry to start the Metrics Manager
  * 1. It would read and parse the sink-configs, and then instantiate new IMetricsSink
  * instance by reflection.
- * <p/>
+ * <p>
  * 2. Every IMetricsSink would be driven by an individual thread; and in fact it is
  * an executor running within a fixed-size thread's ExecutorService.
  * We would set the thread name of running executor driving the IMetricsSink, for restart when
  * uncaught exceptions of that IMetricsSink are caught.
- * <p/>
+ * <p>
  * 3. When one IMetricsSink throws uncaught exceptions, we would try to restart this sink unless
  * we have hit the # of retry attempts.
- * <p/>
+ * <p>
  * 4. When Metrics Manager internal exceptions are caught or we have restart IMetricsSink with
  * too many attempts, Metrics Manager would flush any remain log and exit.
  */
@@ -95,80 +95,6 @@ public class MetricsManager {
   private final int heronMetricsExportIntervalSec;
   private final String topologyName;
   private final String metricsmgrId;
-
-  /**
-   * Handler for catching exceptions thrown by any threads (owned either by topology or heron
-   * infrastructure).
-   * When one IMetricsSink throws uncaught exceptions, we would try to restart this sink unless
-   * we have hit the # of retry attempts.
-   * When Metrics Manager internal exceptions are caught or we have restart IMetricsSink with
-   * too many attempts, Metrics Manager would flush any remain logs and exit.
-   */
-  public class DefaultExceptionHandler implements Thread.UncaughtExceptionHandler {
-    public void uncaughtException(Thread thread, Throwable exception) {
-      String threadName = thread.getName();
-      LOG.log(Level.SEVERE,
-          "Exception caught in thread: " + threadName + " with thread id: " + thread.getId(),
-          exception);
-
-      String sinkId = threadName;
-      int thisSinkRetryAttempts = sinksRetryAttempts.remove(sinkId);
-
-      // Remove the old sink executor
-      SinkExecutor oldSinkExecutor = sinkExecutors.remove(sinkId);
-
-      // Remove the unneeded Communicator bind with Metrics Manager Server
-      metricsManagerServer.removeSinkCommunicator(oldSinkExecutor.getCommunicator());
-
-      // Close the sink
-      oldSinkExecutor.close();
-
-      if (oldSinkExecutor != null && thisSinkRetryAttempts != 0) {
-        LOG.info(String.format("Restarting IMetricsSink: %s with %d available retries",
-            sinkId, thisSinkRetryAttempts));
-
-        // That means it was a sinkExecutor throwing exceptions and threadName is sinkId
-        SinkExecutor newSinkExecutor = initSinkExecutor(sinkId);
-
-        // Update the SinkExecutor in sinkExecutors
-        sinkExecutors.put(sinkId, newSinkExecutor);
-
-        // Update the retry attempts if it is > 0
-        if (thisSinkRetryAttempts > 0) {
-          thisSinkRetryAttempts--;
-        }
-        sinksRetryAttempts.put(sinkId, thisSinkRetryAttempts);
-
-
-        // Update the list of Communicator in Metrics Manager Server
-        metricsManagerServer.addSinkCommunicator(newSinkExecutor.getCommunicator());
-
-        // Restart it
-        executors.execute(newSinkExecutor);
-      } else if (oldSinkExecutor != null &&
-          thisSinkRetryAttempts == 0 &&
-          sinkExecutors.size() > 0) {
-        // If the dead executor is the only one executor and it is removed,
-        // e.g. sinkExecutors.size() == 0, we would exit the process directly
-
-        LOG.severe("Could not recover from exceptions for IMetricsSink: " + sinkId);
-        LOG.info(sinkId + " would close and keep running rest sinks: " + sinkExecutors.keySet());
-      } else {
-        // We met metrics manager itself exceptions or we have retried too many times
-        // So we would do basic cleaning and exit
-        LOG.info("Could not recover from exceptions; Metrics Manager Exiting");
-        for (Handler handler : java.util.logging.Logger.getLogger("").getHandlers()) {
-          handler.close();
-        }
-        // Attempts to shutdown all the thread in threadsPool. This will send Interrupt to every
-        // thread in the pool. Threads may implement a clean Interrupt logic.
-        executors.shutdownNow();
-        // TODO : It is not clear if this signal should be sent to all the threads (including threads
-        // not owned by HeronInstance). To be safe, not sending these interrupts.
-        Runtime.getRuntime().halt(1);
-      }
-    }
-  }
 
   public MetricsManager(String topologyName, String serverHost,
                         int serverPort, String metricsmgrId,
@@ -244,14 +170,6 @@ public class MetricsManager {
     }
   }
 
-  private void setupJVMMetrics(int systemMetricsSampleIntervalSec) {
-    this.jvmMetrics.registerMetrics(metricsCollector);
-
-    // Attach sample Runnable to gatewayMetricsCollector
-    this.metricsCollector.registerMetricSampleRunnable(jvmMetrics.getJVMSampleRunnable(),
-        systemMetricsSampleIntervalSec);
-  }
-
   private static String getLocalHostName() {
     String hostName;
     try {
@@ -262,6 +180,61 @@ public class MetricsManager {
     }
 
     return hostName;
+  }
+
+  public static void main(String[] args) throws IOException {
+    if (args.length != 6) {
+      throw new RuntimeException("Invalid arguments; Usage: java com.twitter.heron.metricsmgr.MetricsManager <id> <port> <topname> <topid> <heron_internals_config_filename> <metrics_sinks_config_filename>");
+    }
+
+    String metricsmgrId = args[0];
+    int metricsPort = Integer.parseInt(args[1]);
+    String topologyName = args[2];
+    String topologyId = args[3];
+    String systemConfigFilename = args[4];
+    String metricsSinksConfigFilename = args[5];
+
+    SystemConfig systemConfig = new SystemConfig(systemConfigFilename, true);
+    // Add the SystemConfig into SingletonRegistry
+    SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, systemConfig);
+
+    // Init the logging setting and redirect the stdout and stderr to logging
+    // For now we just set the logging level as INFO; later we may accept an argument to set it.
+    Level loggingLevel = Level.INFO;
+    String loggingDir = systemConfig.getHeronLoggingDirectory();
+
+    // Log to file and TMaster
+    LoggingHelper.loggerInit(loggingLevel, true);
+    LoggingHelper.addLoggingHandler(
+        LoggingHelper.getFileHandler(metricsmgrId, loggingDir, true,
+            systemConfig.getHeronLoggingMaximumSizeMb() * Constants.MB_TO_BYTES,
+            systemConfig.getHeronLoggingMaximumFiles()));
+    LoggingHelper.addLoggingHandler(new ErrorReportLoggingHandler());
+
+    LOG.info(String.format("Starting Metrics Manager for topology %s with topologyId %s with " +
+            "Metrics Manager Id %s, Merics Manager Port: %d.",
+        topologyName, topologyId, metricsmgrId, metricsPort));
+
+    LOG.info("System Config: " + systemConfig);
+
+    // Populate the config
+    MetricsSinksConfig sinksConfig = new MetricsSinksConfig(metricsSinksConfigFilename);
+
+    LOG.info("Sinks Config:" + sinksConfig.toString());
+
+    MetricsManager metricsManager = new MetricsManager(
+        topologyName, METRICS_MANAGER_HOST, metricsPort, metricsmgrId, systemConfig, sinksConfig);
+    metricsManager.start();
+
+    LOG.info("Loops terminated. Metrics Manager exits.");
+  }
+
+  private void setupJVMMetrics(int systemMetricsSampleIntervalSec) {
+    this.jvmMetrics.registerMetrics(metricsCollector);
+
+    // Attach sample Runnable to gatewayMetricsCollector
+    this.metricsCollector.registerMetricSampleRunnable(jvmMetrics.getJVMSampleRunnable(),
+        systemMetricsSampleIntervalSec);
   }
 
   private void setupInternalMetricsExport() {
@@ -331,50 +304,77 @@ public class MetricsManager {
     metricsManagerServerLoop.loop();
   }
 
-  public static void main(String[] args) throws IOException {
-    if (args.length != 6) {
-      throw new RuntimeException("Invalid arguments; Usage: java com.twitter.heron.metricsmgr.MetricsManager <id> <port> <topname> <topid> <heron_internals_config_filename> <metrics_sinks_config_filename>");
+  /**
+   * Handler for catching exceptions thrown by any threads (owned either by topology or heron
+   * infrastructure).
+   * When one IMetricsSink throws uncaught exceptions, we would try to restart this sink unless
+   * we have hit the # of retry attempts.
+   * When Metrics Manager internal exceptions are caught or we have restart IMetricsSink with
+   * too many attempts, Metrics Manager would flush any remain logs and exit.
+   */
+  public class DefaultExceptionHandler implements Thread.UncaughtExceptionHandler {
+    public void uncaughtException(Thread thread, Throwable exception) {
+      String threadName = thread.getName();
+      LOG.log(Level.SEVERE,
+          "Exception caught in thread: " + threadName + " with thread id: " + thread.getId(),
+          exception);
+
+      String sinkId = threadName;
+      int thisSinkRetryAttempts = sinksRetryAttempts.remove(sinkId);
+
+      // Remove the old sink executor
+      SinkExecutor oldSinkExecutor = sinkExecutors.remove(sinkId);
+
+      // Remove the unneeded Communicator bind with Metrics Manager Server
+      metricsManagerServer.removeSinkCommunicator(oldSinkExecutor.getCommunicator());
+
+      // Close the sink
+      oldSinkExecutor.close();
+
+      if (oldSinkExecutor != null && thisSinkRetryAttempts != 0) {
+        LOG.info(String.format("Restarting IMetricsSink: %s with %d available retries",
+            sinkId, thisSinkRetryAttempts));
+
+        // That means it was a sinkExecutor throwing exceptions and threadName is sinkId
+        SinkExecutor newSinkExecutor = initSinkExecutor(sinkId);
+
+        // Update the SinkExecutor in sinkExecutors
+        sinkExecutors.put(sinkId, newSinkExecutor);
+
+        // Update the retry attempts if it is > 0
+        if (thisSinkRetryAttempts > 0) {
+          thisSinkRetryAttempts--;
+        }
+        sinksRetryAttempts.put(sinkId, thisSinkRetryAttempts);
+
+
+        // Update the list of Communicator in Metrics Manager Server
+        metricsManagerServer.addSinkCommunicator(newSinkExecutor.getCommunicator());
+
+        // Restart it
+        executors.execute(newSinkExecutor);
+      } else if (oldSinkExecutor != null &&
+          thisSinkRetryAttempts == 0 &&
+          sinkExecutors.size() > 0) {
+        // If the dead executor is the only one executor and it is removed,
+        // e.g. sinkExecutors.size() == 0, we would exit the process directly
+
+        LOG.severe("Could not recover from exceptions for IMetricsSink: " + sinkId);
+        LOG.info(sinkId + " would close and keep running rest sinks: " + sinkExecutors.keySet());
+      } else {
+        // We met metrics manager itself exceptions or we have retried too many times
+        // So we would do basic cleaning and exit
+        LOG.info("Could not recover from exceptions; Metrics Manager Exiting");
+        for (Handler handler : java.util.logging.Logger.getLogger("").getHandlers()) {
+          handler.close();
+        }
+        // Attempts to shutdown all the thread in threadsPool. This will send Interrupt to every
+        // thread in the pool. Threads may implement a clean Interrupt logic.
+        executors.shutdownNow();
+        // TODO : It is not clear if this signal should be sent to all the threads (including threads
+        // not owned by HeronInstance). To be safe, not sending these interrupts.
+        Runtime.getRuntime().halt(1);
+      }
     }
-
-    String metricsmgrId = args[0];
-    int metricsPort = Integer.parseInt(args[1]);
-    String topologyName = args[2];
-    String topologyId = args[3];
-    String systemConfigFilename = args[4];
-    String metricsSinksConfigFilename = args[5];
-
-    SystemConfig systemConfig = new SystemConfig(systemConfigFilename, true);
-    // Add the SystemConfig into SingletonRegistry
-    SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, systemConfig);
-
-    // Init the logging setting and redirect the stdout and stderr to logging
-    // For now we just set the logging level as INFO; later we may accept an argument to set it.
-    Level loggingLevel = Level.INFO;
-    String loggingDir = systemConfig.getHeronLoggingDirectory();
-
-    // Log to file and TMaster
-    LoggingHelper.loggerInit(loggingLevel, true);
-    LoggingHelper.addLoggingHandler(
-        LoggingHelper.getFileHandler(metricsmgrId, loggingDir, true,
-            systemConfig.getHeronLoggingMaximumSizeMb() * Constants.MB_TO_BYTES,
-            systemConfig.getHeronLoggingMaximumFiles()));
-    LoggingHelper.addLoggingHandler(new ErrorReportLoggingHandler());
-
-    LOG.info(String.format("Starting Metrics Manager for topology %s with topologyId %s with " +
-            "Metrics Manager Id %s, Merics Manager Port: %d.",
-        topologyName, topologyId, metricsmgrId, metricsPort));
-
-    LOG.info("System Config: " + systemConfig);
-
-    // Populate the config
-    MetricsSinksConfig sinksConfig = new MetricsSinksConfig(metricsSinksConfigFilename);
-
-    LOG.info("Sinks Config:" + sinksConfig.toString());
-
-    MetricsManager metricsManager = new MetricsManager(
-        topologyName, METRICS_MANAGER_HOST, metricsPort, metricsmgrId, systemConfig, sinksConfig);
-    metricsManager.start();
-
-    LOG.info("Loops terminated. Metrics Manager exits.");
   }
 }

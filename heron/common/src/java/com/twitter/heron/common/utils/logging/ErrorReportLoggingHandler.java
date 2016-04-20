@@ -35,6 +35,10 @@ public class ErrorReportLoggingHandler extends Handler {
   public static final String NO_TRACE = "No Trace";
   public static volatile boolean initialized = false;
 
+  public ErrorReportLoggingHandler() {
+    super();
+  }
+
   public static String getExceptionLocation(String trace) {
     if (trace == null) {
       return NO_TRACE;
@@ -62,6 +66,40 @@ public class ErrorReportLoggingHandler extends Handler {
       context.registerMetric("exception_info", ExceptionRepositoryAsMetrics.INSTANCE, interval);
     }
     initialized = true;
+  }
+
+  // All the throwables are logged to in memory ExceptionRepositoryAsMetrics store. This metrics
+  // will flush the exception to metrics manager during getValueAndReset call.
+  @Override
+  public void publish(LogRecord record) {
+    // Convert Log
+    Throwable throwable = record.getThrown();
+    if (throwable != null) {
+      StringWriter sink = new StringWriter();
+      throwable.printStackTrace(new PrintWriter(sink, true));
+      String trace = sink.toString();
+      synchronized (ExceptionRepositoryAsMetrics.INSTANCE) {
+        Metrics.ExceptionData.Builder exceptionDataBuilder =
+            ExceptionRepositoryAsMetrics.INSTANCE.getExceptionInfo(trace);
+
+        exceptionDataBuilder.setCount(exceptionDataBuilder.getCount() + 1);
+        exceptionDataBuilder.setLasttime(new Date().toString());
+        exceptionDataBuilder.setStacktrace(trace);
+        exceptionDataBuilder.setLogging("" + record.getMessage());
+      }
+    }
+  }
+
+  @Override
+  public void close() {
+    flush();
+  }
+
+  @Override
+  public void flush() {
+    // Call getValueAndReset and hope that makes it to metrics manager. Also log to stdout.
+    // Logging to stdout is much more likely to succeed it case of apocalyptic shutdown.
+    System.out.print(ExceptionRepositoryAsMetrics.INSTANCE.getValue().toString());
   }
 
   // Exception will be stroed in this Metrics. Use of metrics simplify exporting the error to
@@ -103,43 +141,5 @@ public class ErrorReportLoggingHandler extends Handler {
       }
       return exceptionDataBuilder;
     }
-  }
-
-  public ErrorReportLoggingHandler() {
-    super();
-  }
-
-  // All the throwables are logged to in memory ExceptionRepositoryAsMetrics store. This metrics
-  // will flush the exception to metrics manager during getValueAndReset call.
-  @Override
-  public void publish(LogRecord record) {
-    // Convert Log
-    Throwable throwable = record.getThrown();
-    if (throwable != null) {
-      StringWriter sink = new StringWriter();
-      throwable.printStackTrace(new PrintWriter(sink, true));
-      String trace = sink.toString();
-      synchronized (ExceptionRepositoryAsMetrics.INSTANCE) {
-        Metrics.ExceptionData.Builder exceptionDataBuilder =
-            ExceptionRepositoryAsMetrics.INSTANCE.getExceptionInfo(trace);
-
-        exceptionDataBuilder.setCount(exceptionDataBuilder.getCount() + 1);
-        exceptionDataBuilder.setLasttime(new Date().toString());
-        exceptionDataBuilder.setStacktrace(trace);
-        exceptionDataBuilder.setLogging("" + record.getMessage());
-      }
-    }
-  }
-
-  @Override
-  public void close() {
-    flush();
-  }
-
-  @Override
-  public void flush() {
-    // Call getValueAndReset and hope that makes it to metrics manager. Also log to stdout.
-    // Logging to stdout is much more likely to succeed it case of apocalyptic shutdown.
-    System.out.print(ExceptionRepositoryAsMetrics.INSTANCE.getValue().toString());
   }
 }

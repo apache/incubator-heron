@@ -18,7 +18,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
-import java.util.Properties;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,6 +32,7 @@ public class DefaultConfigLoaderTest {
     configLoader.applyConfigOverride(override);
     Assert.assertEquals(0, configLoader.properties.entrySet().size());
   }
+
   @Test
   public void testParsingSimpleOverride() {
     String override = "key1= value1  key2 =value2    key3   =    \"value3\"";

@@ -14,14 +14,9 @@
 
 package com.twitter.heron.spi.common;
 
-import java.nio.file.Paths;
-import java.util.Properties;
 import java.util.logging.Logger;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 public class ConfigKeysTest {
@@ -154,23 +149,23 @@ public class ConfigKeysTest {
   @Test
   public void testBinaries() throws Exception {
     Assert.assertEquals(
-        "heron.binaries.sandbox.executor", 
+        "heron.binaries.sandbox.executor",
         ConfigKeys.get("SANDBOX_EXECUTOR_BINARY")
     );
     Assert.assertEquals(
-        "heron.binaries.sandbox.stmgr", 
+        "heron.binaries.sandbox.stmgr",
         ConfigKeys.get("SANDBOX_STMGR_BINARY")
     );
     Assert.assertEquals(
-        "heron.binaries.sandbox.tmaster", 
+        "heron.binaries.sandbox.tmaster",
         ConfigKeys.get("SANDBOX_TMASTER_BINARY")
     );
     Assert.assertEquals(
-        "heron.binaries.sandbox.shell", 
+        "heron.binaries.sandbox.shell",
         ConfigKeys.get("SANDBOX_SHELL_BINARY")
     );
     Assert.assertEquals(
-        "heron.jars.scheduler", 
+        "heron.jars.scheduler",
         ConfigKeys.get("SCHEDULER_JAR")
     );
   }

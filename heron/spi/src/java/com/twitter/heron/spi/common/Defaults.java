@@ -123,7 +123,7 @@ public class Defaults {
   public static String logDirectory() {
     return ConfigDefaults.get("LOGGING_DIRECTORY");
   }
- 
+
   public static String topologyDefinitionFile() {
     return ConfigDefaults.get("TOPOLOGY_DEFINITION_FILE");
   }
@@ -157,13 +157,13 @@ public class Defaults {
   }
 
   public static String heronHome() {
-    return ConfigDefaults.get("HERON_HOME"); 
+    return ConfigDefaults.get("HERON_HOME");
   }
 
   public static String heronBin() {
-    return ConfigDefaults.get("HERON_BIN"); 
+    return ConfigDefaults.get("HERON_BIN");
   }
-  
+
   public static String heronConf() {
     return ConfigDefaults.get("HERON_CONF");
   }

@@ -34,7 +34,6 @@ public class StormSubmitter {
    * Submits a topology to run on the cluster. A topology runs forever or until
    * explicitly killed.
    *
-   *
    * @param name the name of the storm.
    * @param stormConfig the topology-specific configuration. See {@link Config}.
    * @param topology the processing to execute.
@@ -42,7 +41,7 @@ public class StormSubmitter {
    * @throws InvalidTopologyException if an invalid topology was submitted
    */
   public static void submitTopology(String name, Map stormConfig, StormTopology topology)
-          throws AlreadyAliveException, InvalidTopologyException {
+      throws AlreadyAliveException, InvalidTopologyException {
 
     // First do config translation
     com.twitter.heron.api.Config heronConfig = ConfigUtils.translateConfig(stormConfig);

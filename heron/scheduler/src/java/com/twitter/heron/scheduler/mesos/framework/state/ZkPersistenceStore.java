@@ -32,14 +32,12 @@ import com.twitter.heron.scheduler.mesos.framework.jobs.TaskUtils;
 
 public class ZkPersistenceStore implements PersistenceStore {
   private static final Logger LOG = Logger.getLogger(ZkPersistenceStore.class.getName());
-  private CuratorFramework client;
-
   private final String connectionString;
-
   private final String path;
   private final String frameworkIdPath;
   private final String jobPath;
   private final String taskPath;
+  private CuratorFramework client;
 
   public ZkPersistenceStore(String connectionString, int connectionTimeoutMs, int sessionTimeoutMs, String rootPath) {
     // these are reasonable arguments for the ExponentialBackoffRetry. The first

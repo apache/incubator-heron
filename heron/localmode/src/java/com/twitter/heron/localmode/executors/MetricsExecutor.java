@@ -18,10 +18,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.SlaveLooper;
 import com.twitter.heron.common.basics.WakeableLooper;
+import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.metrics.JVMMetrics;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
 import com.twitter.heron.proto.system.Metrics;
@@ -29,7 +29,7 @@ import com.twitter.heron.proto.system.Metrics;
 /**
  * MetricsExecutor would run in a separate thread via WakeableLooper,
  * and block until it is waken up by metrics pushed from other InstanceExecutor.
- * <p/>
+ * <p>
  * Then it would look up all InstanceExecutor added and invoke
  * handleExecutorsMetrics(InstanceExecutor instance) to handle the metrics
  */

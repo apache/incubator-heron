@@ -28,24 +28,22 @@ import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
 import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 import com.twitter.heron.proto.system.PhysicalPlans;
+
 /**
  * PhysicalPlanHelper could use to fetch this instance's info according to workId
  */
 
 public class PhysicalPlanHelper {
   private final PhysicalPlans.PhysicalPlan pplan;
-  private PhysicalPlans.Instance myInstance;
   private final int myTaskId;
   private final String myComponent;
   private final String hostname;
   private final String myInstanceId;
-
   private final TopologyAPI.Component component;
   // Map from streamid to number of fields in that stream's schema
   private final Map<String, Integer> outputSchema;
-
   private final CustomStreamGroupingHelper customGrouper;
-
+  private PhysicalPlans.Instance myInstance;
   private TopologyAPI.Spout mySpout;
   private TopologyAPI.Bolt myBolt;
   private TopologyContextImpl topologyContext;
@@ -132,12 +130,6 @@ public class PhysicalPlanHelper {
     }
   }
 
-  public void setTopologyContext(MetricsCollector metricsCollector) {
-    topologyContext = new TopologyContextImpl(constructConfig(pplan.getTopology().getTopologyConfig(), component),
-        pplan.getTopology(),
-        makeTaskToComponentMap(), myTaskId, metricsCollector);
-  }
-
   public void checkOutputSchema(String streamId, List<Object> tuple) {
     // First do some checking to make sure that the number of fields match
     // whats expected
@@ -158,11 +150,11 @@ public class PhysicalPlanHelper {
     return pplan.getTopology().getState();
   }
 
-  // Accessors
-
   public int getMyTaskId() {
     return myTaskId;
   }
+
+  // Accessors
 
   public String getMyHostname() {
     return hostname;
@@ -190,6 +182,12 @@ public class PhysicalPlanHelper {
 
   public TopologyContextImpl getTopologyContext() {
     return topologyContext;
+  }
+
+  public void setTopologyContext(MetricsCollector metricsCollector) {
+    topologyContext = new TopologyContextImpl(constructConfig(pplan.getTopology().getTopologyConfig(), component),
+        pplan.getTopology(),
+        makeTaskToComponentMap(), myTaskId, metricsCollector);
   }
 
   private Map<String, Object> constructConfig(TopologyAPI.Config config,

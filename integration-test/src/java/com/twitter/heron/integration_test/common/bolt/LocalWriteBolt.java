@@ -15,11 +15,11 @@ import com.twitter.heron.api.tuple.Tuple;
 
 /**
  * Given a local file path, this bolt will emit every line of received in String format, as well as write
- * every line to the local file.  
- *
+ * every line to the local file.
+ * <p>
  * Note: The number of parallelisms for this spout should be equal to the number of files/paths
  * to read.
-*/
+ */
 
 
 public class LocalWriteBolt extends BaseBasicBolt {
@@ -29,7 +29,7 @@ public class LocalWriteBolt extends BaseBasicBolt {
   public LocalWriteBolt(String path) {
     this.path = path;
   }
-  
+
   @Override
   public void prepare(Map map, TopologyContext topologyContext) {
     try {
@@ -38,8 +38,8 @@ public class LocalWriteBolt extends BaseBasicBolt {
         outputFile.createNewFile();
       }
       bw = new BufferedWriter(
-        new FileWriter(outputFile.getAbsoluteFile(), true),
-        1024*1024
+          new FileWriter(outputFile.getAbsoluteFile(), true),
+          1024 * 1024
       );
     } catch (IOException e) {
       // Clean stuff if any exceptions
@@ -53,7 +53,7 @@ public class LocalWriteBolt extends BaseBasicBolt {
     }
   }
 
-// We do not explicitly close the buffered writer in LocalWriteBolt as we cannot guarantee which tuple is the last tuple
+  // We do not explicitly close the buffered writer in LocalWriteBolt as we cannot guarantee which tuple is the last tuple
 // Writer will be closed automatically on process close
   @Override
   public void execute(Tuple input, BasicOutputCollector collector) {

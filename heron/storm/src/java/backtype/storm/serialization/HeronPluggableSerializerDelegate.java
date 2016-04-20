@@ -25,7 +25,8 @@ public class HeronPluggableSerializerDelegate implements com.twitter.heron.api.s
   private Output kryoOut;
   private Input kryoIn;
 
-  public HeronPluggableSerializerDelegate() { }
+  public HeronPluggableSerializerDelegate() {
+  }
 
   @Override
   public void initialize(Map config) {
@@ -50,7 +51,7 @@ public class HeronPluggableSerializerDelegate implements com.twitter.heron.api.s
     try {
       kryoIn.setBuffer(input);
       return kryo.readClassAndObject(kryoIn);
-    } catch(Exception e) {
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }

@@ -31,9 +31,8 @@ import com.twitter.heron.proto.tmaster.TopologyMaster;
  */
 public class TMasterClient extends HeronClient implements Runnable {
   private static final Logger LOG = Logger.getLogger(TMasterClient.class.getName());
-  private long reconnectIntervalSec = -1;
-
   private final Communicator<TopologyMaster.PublishMetrics> publishMetricsCommunicator;
+  private long reconnectIntervalSec = -1;
 
   /**
    * Constructor

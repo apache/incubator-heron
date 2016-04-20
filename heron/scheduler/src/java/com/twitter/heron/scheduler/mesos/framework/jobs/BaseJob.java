@@ -23,63 +23,37 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class BaseJob {
-  public static class EnvironmentVariable {
-    @JsonProperty
-    public String name;
-
-    @JsonProperty
-    public String value;
-  }
-
   @JsonProperty
   public String name;
-
   @JsonProperty
   public String command;
-
   @JsonProperty
   public int retries = 2;
-
   @JsonProperty
   public String owner;
-
   @JsonProperty
   public String runAsUser;
-
   @JsonProperty
   public String description;
-
   @JsonProperty
   public double cpu;
-
   @JsonProperty
   public double disk;
-
   @JsonProperty
   public double mem;
-
   @JsonProperty
   public int ports;
-
   @JsonProperty
   public boolean shell;
-
   @JsonProperty
   public List<String> arguments = new LinkedList<>();
-
   @JsonProperty
   public List<String> uris = new LinkedList<>();
-
   @JsonProperty
   public List<EnvironmentVariable> environmentVariables = new LinkedList<>();
 
-  public BaseJob(){
+  public BaseJob() {
     // This is necessary otherwise we could not construct BaseJob by using JSON
-  }
-
-  @Override
-  public String toString() {
-    return BaseJob.getJobDefinitionInJSON(this);
   }
 
   public static BaseJob getJobFromJSONString(String JobDefinitionInJSON) {
@@ -96,5 +70,18 @@ public class BaseJob {
     } catch (JsonProcessingException e) {
       throw new IllegalArgumentException("Unable to convert to JSON string", e);
     }
+  }
+
+  @Override
+  public String toString() {
+    return BaseJob.getJobDefinitionInJSON(this);
+  }
+
+  public static class EnvironmentVariable {
+    @JsonProperty
+    public String name;
+
+    @JsonProperty
+    public String value;
   }
 }

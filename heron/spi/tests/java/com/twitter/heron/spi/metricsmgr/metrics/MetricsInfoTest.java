@@ -22,8 +22,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
-
 public class MetricsInfoTest {
   private static final int N = 100;
   private static final String NAME = "name";
