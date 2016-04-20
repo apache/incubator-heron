@@ -34,10 +34,11 @@ class Config:
     self.parse_config_file(conf_file)
 
   def parse_config_file(self, conf_file):
-    assert os.path.lexists(os.path.expanduser(conf_file)), "Config file does not exists: %s" % (conf_file)
+    expanded_conf_file_path = os.path.expanduser(conf_file)
+    assert os.path.lexists(expanded_conf_file_path), "Config file does not exists: %s" % (conf_file)
 
     # Read the configuration file
-    with open(conf_file, 'r') as f:
+    with open(expanded_conf_file_path, 'r') as f:
       self.configs = yaml.load(f)
 
     self.load_configs()
