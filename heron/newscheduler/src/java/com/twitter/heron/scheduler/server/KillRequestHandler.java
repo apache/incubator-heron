@@ -55,8 +55,8 @@ public class KillRequestHandler implements HttpHandler {
     boolean isKillSuccessfully = scheduler.onKill(killTopologyRequest);
 
     // prepare the response
-    Scheduler.KillTopologyResponse response =
-        Scheduler.KillTopologyResponse.newBuilder()
+    Scheduler.SchedulerResponse response =
+        Scheduler.SchedulerResponse.newBuilder()
             .setStatus(NetworkUtils.getHeronStatus(isKillSuccessfully))
             .build();
 

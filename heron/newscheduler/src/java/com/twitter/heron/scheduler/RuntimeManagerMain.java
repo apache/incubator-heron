@@ -32,7 +32,7 @@ import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.scheduler.IRuntimeManager;
+import com.twitter.heron.spi.scheduler.Command;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
@@ -209,7 +209,7 @@ public class RuntimeManagerMain {
       containerId = cmd.getOptionValue("container_id");
     }
 
-    IRuntimeManager.Command command = IRuntimeManager.Command.makeCommand(commandOption);
+    Command command = Command.makeCommand(commandOption);
 
     // first load the defaults, then the config from files to override it
     Config.Builder defaultsConfig = Config.newBuilder()
@@ -246,10 +246,6 @@ public class RuntimeManagerMain {
     String statemgrClass = Context.stateManagerClass(config);
     IStateManager statemgr = (IStateManager) Class.forName(statemgrClass).newInstance();
 
-    // create an instance of runtime manager
-    String runtimeManagerClass = Context.runtimeManagerClass(config);
-    IRuntimeManager runtimeManager = (IRuntimeManager) Class.forName(runtimeManagerClass).newInstance();
-
     boolean isSuccessful = false;
 
     // Put it in a try block so that we can always clean resources
@@ -267,14 +263,14 @@ public class RuntimeManagerMain {
         // invoke the appropriate command to manage the topology
         LOG.log(Level.FINE, "Topology: {0} to be {1}ed", new Object[]{topologyName, command});
 
-        isSuccessful = manageTopology(config, command, adaptor, runtimeManager);
+        isSuccessful = manageTopology(config, command, adaptor);
       }
     } finally {
       // 3. Do post work basing on the result
       // Currently nothing to do here
 
       // 4. Close the resources
-      runtimeManager.close();
+//      runtimeManager.close();
       statemgr.close();
     }
 
@@ -304,14 +300,13 @@ public class RuntimeManagerMain {
   }
 
   public static boolean manageTopology(
-      Config config, IRuntimeManager.Command command,
-      SchedulerStateManagerAdaptor adaptor, IRuntimeManager runtimeManager)
+      Config config, Command command,
+      SchedulerStateManagerAdaptor adaptor)
       throws ClassNotFoundException, IllegalAccessException, InstantiationException, IOException {
     // build the runtime config
     Config runtime = Config.newBuilder()
         .put(Keys.topologyName(), Context.topologyName(config))
         .put(Keys.schedulerStateManagerAdaptor(), adaptor)
-        .put(Keys.runtimeManagerClassInstance(), runtimeManager)
         .build();
 
     // create an instance of the runner class

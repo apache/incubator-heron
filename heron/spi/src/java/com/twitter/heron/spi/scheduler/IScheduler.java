@@ -32,7 +32,7 @@ public interface IScheduler extends AutoCloseable {
   /**
    * This is to for disposing or cleaning up any internal state accumulated by
    * the scheduler
-   * <p/>
+   * <p>
    * Closes this stream and releases any system resources associated
    * with it. If the stream is already closed then invoking this
    * method has no effect.
@@ -43,11 +43,11 @@ public interface IScheduler extends AutoCloseable {
    * This method will be called after initialize.
    * It is responsible for grabbing resource to launch executor and make sure they
    * get launched.
-   * <p/>
+   * <p>
    *
    * @param packing Initial mapping suggested by running packing algorithm.
    */
-  void schedule(PackingPlan packing);
+  boolean onSchedule(PackingPlan packing);
 
   /**
    * Called by SchedulerServer when it receives a http request to kill topology,
@@ -60,30 +60,6 @@ public interface IScheduler extends AutoCloseable {
    * send KillTopologyResponse correspondingly according to this method's return value.
    */
   boolean onKill(Scheduler.KillTopologyRequest request);
-
-  /**
-   * Called by SchedulerServer when it receives a http request to activate topology,
-   * while the http request body would be the protobuf Scheduler.ActivateTopologyRequest.
-   * The SchedulerServer would parse the request body and feed with this method.
-   * It would be invoked in the executors of SchedulerServer.
-   *
-   * @param request The ActivateTopologyRequest sent from local heron-cli
-   * @return true if the IScheduler activates the topology successfully. SchedulerServer would
-   * send ActivateTopologyResponse correspondingly according to this method's return value.
-   */
-  boolean onActivate(Scheduler.ActivateTopologyRequest request);
-
-  /**
-   * Called by SchedulerServer when it receives a http request to deactivate topology,
-   * while the http request body would be the protobuf Scheduler.DeactivateTopologyRequest.
-   * The SchedulerServer would parse the request body and feed with this method.
-   * It would be invoked in the executors of SchedulerServer.
-   *
-   * @param request The DeactivateTopologyRequest sent from local heron-cli
-   * @return true if the IScheduler deactivates the topology successfully. SchedulerServer would
-   * send DeactivateTopologyResponse correspondingly according to this method's return value.
-   */
-  boolean onDeactivate(Scheduler.DeactivateTopologyRequest request);
 
   /**
    * Called by SchedulerServer when it receives a http request to restart topology,

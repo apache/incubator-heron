@@ -28,8 +28,6 @@ public class SchedulerServer {
 
   // initialize the various URL end points
   public static final String KILL_REQUEST_CONTEXT = "/kill";
-  public static final String ACTIVATE_REQUEST_CONTEXT = "/activate";
-  public static final String DEACTIVATE_REQUEST_CONTEXT = "/deactivate";
   public static final String RESTART_REQUEST_CONTEXT = "/restart";
 
   private static final int SERVER_BACK_LOG = 0;
@@ -46,12 +44,6 @@ public class SchedulerServer {
     // associate handlers with the URL service end points
     this.schedulerServer.createContext(KILL_REQUEST_CONTEXT,
         new KillRequestHandler(runtime, scheduler));
-
-    this.schedulerServer.createContext(ACTIVATE_REQUEST_CONTEXT,
-        new ActivateRequestHandler(runtime, scheduler));
-
-    this.schedulerServer.createContext(DEACTIVATE_REQUEST_CONTEXT,
-        new DeactivateRequestHandler(runtime, scheduler));
 
     this.schedulerServer.createContext(RESTART_REQUEST_CONTEXT,
         new RestartRequestHandler(runtime, scheduler));

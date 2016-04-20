@@ -191,7 +191,8 @@ public class LocalScheduler implements IScheduler {
    * Schedule the provided packed plan
    */
   @Override
-  public void schedule(PackingPlan packing) {
+  public boolean onSchedule(PackingPlan packing) {
+    return true;
   }
 
   /**
@@ -222,22 +223,6 @@ public class LocalScheduler implements IScheduler {
     // clear the mapping between process and container ids
     processToContainer.clear();
 
-    return true;
-  }
-
-  /**
-   * Handler to activate topology
-   */
-  @Override
-  public boolean onActivate(Scheduler.ActivateTopologyRequest request) {
-    return true;
-  }
-
-  /**
-   * Handler to deactivate topology
-   */
-  @Override
-  public boolean onDeactivate(Scheduler.DeactivateTopologyRequest request) {
     return true;
   }
 
