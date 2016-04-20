@@ -29,7 +29,6 @@ import com.twitter.heron.spi.uploader.NullUploader;
 
 import com.twitter.heron.spi.scheduler.IConfigLoader;
 
-import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.scheduler.NullLauncher;
 
 import com.twitter.heron.spi.scheduler.IScheduler;
@@ -85,7 +84,7 @@ public class SchedulerMainTest {
         any(SchedulerServer.class));
     SchedulerMain.runScheduler(config.getSchedulerClass(), configLoader, "", NetworkUtility.getFreePort(), "", TopologyAPI.Topology.getDefaultInstance());
     verify(scheduler, times(1)).initialize(any(LaunchContext.class));
-    verify(scheduler, atLeastOnce()).schedule(any(PackingPlan.class));
+    verify(scheduler, atLeastOnce()).onSchedule(any(PackingPlan.class));
   }
 }
 

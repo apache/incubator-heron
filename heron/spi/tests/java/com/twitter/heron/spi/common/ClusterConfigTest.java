@@ -15,10 +15,7 @@
 package com.twitter.heron.spi.common;
 
 import java.nio.file.Paths;
-import java.util.Properties;
 import java.util.logging.Logger;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -125,11 +122,6 @@ public class ClusterConfigTest {
     Assert.assertEquals(
         "com.twitter.heron.scheduler.local.LocalLauncher",
         Context.launcherClass(props)
-    );
-
-    Assert.assertEquals(
-        "com.twitter.heron.scheduler.local.LocalRuntimeManager",
-        Context.runtimeManagerClass(props)
     );
   }
 

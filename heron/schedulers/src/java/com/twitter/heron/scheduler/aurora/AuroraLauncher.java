@@ -14,22 +14,12 @@
 
 package com.twitter.heron.scheduler.aurora;
 
-import java.io.File;
-import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 
-import javax.xml.bind.DatatypeConverter;
-
-import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
-import com.twitter.heron.spi.utils.Runtime;
-import com.twitter.heron.spi.utils.TopologyUtils;
+import com.twitter.heron.spi.utils.SchedulerUtils;
 
 /**
  * Launch topology locally to Aurora.
@@ -53,112 +43,7 @@ public class AuroraLauncher implements ILauncher {
   }
 
   @Override
-  public boolean prepareLaunch(PackingPlan packing) {
-    if (packing == null || packing.containers.isEmpty()) {
-      LOG.severe("No container requested. Can't schedule");
-      return false;
-    }
-
-    return true;
-  }
-
-  /**
-   * Encode the JVM options
-   *
-   * @return encoded string
-   */
-  protected String formatJavaOpts(String javaOpts) {
-    String javaOptsBase64 = DatatypeConverter.printBase64Binary(
-        javaOpts.getBytes(Charset.forName("UTF-8")));
-
-    return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
-  }
-
-  @Override
   public boolean launch(PackingPlan packing) {
-    LOG.info("Launching topology in aurora");
-
-    Map<String, String> auroraProperties = createAuroraProperties(packing);
-
-    return AuroraUtils.createAuroraJob(Runtime.topologyName(runtime), Context.cluster(config),
-        Context.role(config),
-        Context.environ(config), getHeronAuroraPath(), auroraProperties, true);
-  }
-
-  private String getHeronAuroraPath() {
-    return new File(Context.heronConf(config), "heron.aurora").getPath();
-  }
-
-  protected Map<String, String> createAuroraProperties(PackingPlan packing) {
-    Map<String, String> auroraProperties = new HashMap<>();
-
-    TopologyAPI.Topology topology = Runtime.topology(runtime);
-
-    PackingPlan.Resource containerResource =
-        packing.containers.values().iterator().next().resource;
-
-    auroraProperties.put("SANDBOX_EXECUTOR_BINARY", Context.executorSandboxBinary(config));
-    auroraProperties.put("TOPOLOGY_NAME", topology.getName());
-    auroraProperties.put("TOPOLOGY_ID", topology.getId());
-    auroraProperties.put("TOPOLOGY_DEFINITION_FILE", FileUtils.getBaseName(Context.topologyDefinitionFile(config)));
-    auroraProperties.put("INSTANCE_DISTRIBUTION", TopologyUtils.packingToString(packing));
-    auroraProperties.put("STATEMGR_CONNECTION_STRING", Context.stateManagerConnectionString(config));
-    auroraProperties.put("STATEMGR_ROOT_PATH", Context.stateManagerRootPath(config));
-    auroraProperties.put("SANDBOX_TMASTER_BINARY", Context.tmasterSandboxBinary(config));
-    auroraProperties.put("SANDBOX_STMGR_BINARY", Context.stmgrSandboxBinary(config));
-    auroraProperties.put("SANDBOX_METRICSMGR_CLASSPATH", Context.metricsManagerSandboxClassPath(config));
-    auroraProperties.put("INSTANCE_JVM_OPTS_IN_BASE64",
-        formatJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)));
-    auroraProperties.put("TOPOLOGY_CLASSPATH", TopologyUtils.makeClassPath(topology, Context.topologyJarFile(config)));
-
-    auroraProperties.put("SANDBOX_SYSTEM_YAML", Context.systemConfigSandboxFile(config));
-    auroraProperties.put("COMPONENT_RAMMAP",
-        TopologyUtils.formatRamMap(
-            TopologyUtils.getComponentRamMap(topology, Context.instanceRam(config))));
-    auroraProperties.put("COMPONENT_JVM_OPTS_IN_BASE64",
-        formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
-    auroraProperties.put("TOPOLOGY_PACKAGE_TYPE", Context.topologyPackageType(config));
-    auroraProperties.put("TOPOLOGY_JAR_FILE",
-        FileUtils.getBaseName(Context.topologyJarFile(config)));
-    auroraProperties.put("HERON_SANDBOX_JAVA_HOME", Context.javaSandboxHome(config));
-
-    auroraProperties.put("SANDBOX_LOGGING_DIRECTORY", Context.logSandboxDirectory(config));
-    auroraProperties.put("SANDBOX_SHELL_BINARY", Context.shellSandboxBinary(config));
-
-    auroraProperties.put("CPUS_PER_CONTAINER", containerResource.cpu + "");
-    auroraProperties.put("DISK_PER_CONTAINER", containerResource.disk + "");
-    auroraProperties.put("RAM_PER_CONTAINER", containerResource.ram + "");
-
-    auroraProperties.put("NUM_CONTAINERS", (1 + TopologyUtils.getNumContainers(topology)) + "");
-
-    auroraProperties.put("CLUSTER", Context.cluster(config));
-    auroraProperties.put("ENVIRON", Context.environ(config));
-    auroraProperties.put("ROLE", Context.role(config));
-    auroraProperties.put("ISPRODUCTION", isProduction() + "");
-
-    auroraProperties.put("SANDBOX_INSTANCE_CLASSPATH", Context.instanceSandboxClassPath(config));
-    auroraProperties.put("SANDBOX_METRICS_YAML", Context.metricsSinksSandboxFile(config));
-
-    String completeSchedulerClassPath = new StringBuilder()
-        .append(Context.schedulerSandboxClassPath(config)).append(":")
-        .append(Context.packingSandboxClassPath(config)).append(":")
-        .append(Context.stateManagerSandboxClassPath(config))
-        .toString();
-    auroraProperties.put("SANDBOX_SCHEDULER_CLASSPATH", completeSchedulerClassPath);
-
-    auroraProperties.put("CORE_PACKAGE_URI", Context.corePackageUri(config));
-    auroraProperties.put("TOPOLOGY_PACKAGE_URI", Runtime.topologyPackageUri(runtime).toString());
-
-    return auroraProperties;
-  }
-
-  protected boolean isProduction() {
-    // TODO (nlu): currently enforce environment to be "prod" for a Production job
-    return "prod".equals(Context.environ(config));
-  }
-
-  @Override
-  public boolean postLaunch(PackingPlan packing) {
-    return true;
+    return SchedulerUtils.onScheduleAsLibrary(config, runtime, new AuroraScheduler(), packing);
   }
 }

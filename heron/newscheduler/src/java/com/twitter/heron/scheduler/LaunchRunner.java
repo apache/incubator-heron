@@ -123,14 +123,6 @@ public class LaunchRunner implements Callable<Boolean> {
     // initialize the launcher 
     launcher.initialize(config, runtime);
 
-    // invoke the prepare launch sequence
-    if (!launcher.prepareLaunch(packedPlan)) {
-      LOG.log(Level.SEVERE,
-          "{0} failed to prepare launch topology locally",
-          launcher.getClass().getName());
-      return false;
-    }
-
     Boolean result;
     // store the execution state into the state manager
     ExecutionEnvironment.ExecutionState executionState = createExecutionState();
@@ -157,21 +149,7 @@ public class LaunchRunner implements Callable<Boolean> {
     } catch (RuntimeException e) {
       statemgr.deleteExecutionState(topologyName);
       statemgr.deleteTopology(topologyName);
-      LOG.log(Level.SEVERE, "Failed to launch topology remotely", e);
-      return false;
-    }
-
-    // invoke the post launch sequence
-    try {
-      if (!launcher.postLaunch(packedPlan)) {
-        throw new RuntimeException(launcher.getClass().getName() + " failed ");
-      }
-    } catch (RuntimeException e) {
-      statemgr.deleteExecutionState(topologyName);
-      statemgr.deleteTopology(topologyName);
-      LOG.log(Level.SEVERE,
-          "{0} failed to post launch topology locally",
-          launcher.getClass().getName());
+      LOG.log(Level.SEVERE, "Failed to launch topology", e);
       return false;
     }
 

@@ -260,10 +260,6 @@ public class Keys {
     return ConfigKeys.get("LAUNCHER_CLASS_INSTANCE");
   }
 
-  public static String runtimeManagerClassInstance() {
-    return ConfigKeys.get("RUNTIME_MANAGER_CLASS_INSTANCE");
-  }
-
   public static String schedulerShutdown() {
     return ConfigKeys.get("SCHEDULER_SHUTDOWN");
   }

@@ -49,8 +49,8 @@ public class RestartRequestHandler implements HttpHandler {
     boolean isRestartSuccessfully = scheduler.onRestart(restartTopologyRequest);
 
     // prepare the response
-    Scheduler.RestartTopologyResponse response =
-        Scheduler.RestartTopologyResponse.newBuilder()
+    Scheduler.SchedulerResponse response =
+        Scheduler.SchedulerResponse.newBuilder()
             .setStatus(NetworkUtils.getHeronStatus(isRestartSuccessfully))
             .build();
 
