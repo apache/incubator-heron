@@ -13,16 +13,7 @@ pages:
 	@hugo
 
 linkchecker:
-	#linkchecker removes previous runs.
-	@pip install linkchecker
-	@rm -f linkchecker-errors.csv && rm -f linkchecker-out.csv
-	-linkchecker public/index.html --no-warnings -F csv 
-	@cut -sd ';' -f 1,2 linkchecker-out.csv | tr ';' ' ' | awk '{ print $$2 " " $$1}' | sort -u >> linkchecker-errors.csv
-	@rm -f linkchecker-out.csv
-	#following fails if linkchecker fails. if pass -> error list is removed, if fail -> error list remains for review. 
-	@linkchecker public/index.html --no-warnings 
-	@echo "linkchecker passes!"
-	@rm -f linkchecker-errors.csv
+	@bash linkchecker.sh
 
 javadocs:
 	@./javadocs.sh
