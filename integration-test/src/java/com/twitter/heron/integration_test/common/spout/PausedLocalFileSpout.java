@@ -3,7 +3,6 @@ package com.twitter.heron.integration_test.common.spout;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.Map;
 
 import com.twitter.heron.api.spout.BaseRichSpout;
@@ -15,11 +14,11 @@ import com.twitter.heron.api.tuple.Values;
 
 /**
  * Given a list of local file paths, the spout will wait for file contents to be added, then
- * emit every line of the file in String format. First, we block in open method until file is created. 
+ * emit every line of the file in String format. First, we block in open method until file is created.
  * If using in integration test, to ensure atomicity, write to a separate file and then rename file to what this class
  * is polling from.
  * When we fetch all items from local file BufferedReader, we do not close the file. Instead, we keep polling for appended lines.
- *
+ * <p>
  * Note: The number of parallelisms for this spout should be equal to the number of files/paths
  * to read.
  */
@@ -46,10 +45,10 @@ public class PausedLocalFileSpout extends BaseRichSpout {
   public void open(Map stormConf, TopologyContext context, SpoutOutputCollector collector) {
     int numTasks = context.getComponentTasks(context.getThisComponentId()).size();
     // Pre-condition: the number of tasks is equal to the number of files to read
-    if(paths.length != numTasks) {
+    if (paths.length != numTasks) {
       throw new RuntimeException(
-        String.format("Number of specified files %d not equal to number of tasks %d",
-          paths.length, numTasks));
+          String.format("Number of specified files %d not equal to number of tasks %d",
+              paths.length, numTasks));
     }
     this.collector = collector;
     int index = context.getThisTaskIndex();
@@ -61,15 +60,15 @@ public class PausedLocalFileSpout extends BaseRichSpout {
     try {
       // read from local file
       br = new BufferedReader(
-        new FileReader(file),
-        1024 * 1024
+          new FileReader(file),
+          1024 * 1024
       );
 
     } catch (Exception e) {
       // Clean stuff if any exceptions
       try {
         // Close the outmost is enough
-        if(br != null) {
+        if (br != null) {
           br.close();
         }
       } catch (Exception e1) {
@@ -102,7 +101,7 @@ public class PausedLocalFileSpout extends BaseRichSpout {
       // emit anything if data is null
       if ((currentLine = br.readLine()) != null) {
         collector.emit(new Values(currentLine), "MESSAGE_ID");
-      } 
+      }
     } catch (Exception e) {
       // Clean stuff if any exceptions
       try {
@@ -116,7 +115,7 @@ public class PausedLocalFileSpout extends BaseRichSpout {
       throw new RuntimeException("Unable to emit tuples normally", e);
     }
   }
-  
+
   public void ack(Object msgId) {
   }
 

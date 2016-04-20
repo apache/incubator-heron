@@ -2,7 +2,6 @@ package com.twitter.heron.integration_test.common.bolt;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.bolt.OutputCollector;
@@ -18,10 +17,9 @@ import com.twitter.heron.integration_test.core.BaseBatchBolt;
  * CounBolt will count the number different words received, and finally output the number
  */
 public class WordCountBolt extends BaseBatchBolt {
+  public static final Logger LOG = Logger.getLogger(WordCountBolt.class.getName());
   OutputCollector collector;
   HashMap<String, Integer> cache = new HashMap<String, Integer>();
-
-  public static final Logger LOG = Logger.getLogger(WordCountBolt.class.getName());
 
   @Override
   public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {

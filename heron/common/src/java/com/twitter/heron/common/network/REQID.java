@@ -26,9 +26,9 @@ import java.util.Random;
 
 public class REQID {
   public static final int REQIDSize = 32;
-  private byte[] bytes;
-  private static Random randomGenerator = new Random(System.nanoTime());
   public static REQID zeroREQID = generateZero();
+  private static Random randomGenerator = new Random(System.nanoTime());
+  private byte[] bytes;
 
   public REQID(byte[] _bytes) {
     assert _bytes.length == REQIDSize;
@@ -41,14 +41,6 @@ public class REQID {
     buffer.get(bytes);
   }
 
-  public void pack(ByteBuffer buffer) {
-    buffer.put(bytes);
-  }
-
-  public byte[] value() {
-    return bytes;
-  }
-
   public static REQID generate() {
     byte[] _bytes = new byte[REQIDSize];
     randomGenerator.nextBytes(_bytes);
@@ -59,6 +51,14 @@ public class REQID {
     byte[] _bytes = new byte[REQIDSize];
     Arrays.fill(_bytes, (byte) 0);
     return new REQID(_bytes);
+  }
+
+  public void pack(ByteBuffer buffer) {
+    buffer.put(bytes);
+  }
+
+  public byte[] value() {
+    return bytes;
   }
 
   public boolean equals(Object other) {

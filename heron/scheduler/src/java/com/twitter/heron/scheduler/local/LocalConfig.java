@@ -19,15 +19,8 @@ import com.twitter.heron.spi.scheduler.context.Context;
 import com.twitter.heron.statemgr.FileSystemStateManager;
 
 public class LocalConfig {
-  private final Context properties;
-
-  public LocalConfig(Context context) {
-    this.properties = context;
-  }
-
   public static final String WORKING_DIRECTORY = "heron.local.working.directory";
   public static final String LOG_DIR = "heron.logging.directory";
-
   public static final String CLASS_PATH = "heron.class.path";
   public static final String COMPONENT_JVM_OPTS_IN_BASE64 = "heron.component.jvm.opts.in.base64";
   public static final String COMPONENT_RAMMAP = "heron.component.rammap";
@@ -43,13 +36,15 @@ public class LocalConfig {
   public static final String STMGR_BINARY = "heron.stmgr.binary";
   public static final String TMASTER_BINARY = "heron.tmaster.binary";
   public static final String HERON_SHELL_BINARY = "heron.shell.binary";
-
   public static final String TOPOLOGY_ID = "heron.topology.id";
   public static final String TOPOLOGY_JAR_FILE = "heron.topology.jar.file";
   public static final String TOPOLOGY_NAME = "heron.topology.name";
-
   public static final String HERON_CORE_RELEASE_PACKAGE = "heron.core.release.package";
+  private final Context properties;
 
+  public LocalConfig(Context context) {
+    this.properties = context;
+  }
 
   public String getWorkingDirectory() {
     return properties.getProperty(WORKING_DIRECTORY);

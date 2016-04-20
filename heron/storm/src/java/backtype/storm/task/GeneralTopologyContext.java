@@ -32,8 +32,8 @@ public class GeneralTopologyContext implements JSONAware {
   private com.twitter.heron.api.topology.GeneralTopologyContext delegate;
 
   public GeneralTopologyContext(StormTopology topology, Map stormConf,
-          Map<Integer, String> taskToComponent, Map<String, List<Integer>> componentToSortedTasks,
-          Map<String, Map<String, Fields>> componentToStreamToFields, String stormId) {
+                                Map<Integer, String> taskToComponent, Map<String, List<Integer>> componentToSortedTasks,
+                                Map<String, Map<String, Fields>> componentToStreamToFields, String stormId) {
     throw new RuntimeException("GeneralTopologyContext should never be initiated this way");
   }
 
@@ -44,6 +44,7 @@ public class GeneralTopologyContext implements JSONAware {
   /**
    * Gets the unique id assigned to this topology. The id is the storm name with a
    * unique nonce appended to it.
+   *
    * @return the storm id
    */
   public String getStormId() {
@@ -52,7 +53,7 @@ public class GeneralTopologyContext implements JSONAware {
 
   /**
    * Gets the Thrift object representing the topology.
-   * 
+   *
    * @return the Thrift definition representing the topology
    */
   /*
@@ -101,7 +102,7 @@ public class GeneralTopologyContext implements JSONAware {
   public Fields getComponentOutputFields(GlobalStreamId id) {
   }    
   */
-    
+
   /**
    * Gets the declared inputs to the specified component.
    *
@@ -113,12 +114,12 @@ public class GeneralTopologyContext implements JSONAware {
   }
   */
 
-    /**
-     * Gets information about who is consuming the outputs of the specified component,
-     * and how.
-     *
-     * @return Map from stream id to component id to the Grouping used.
-     */
+  /**
+   * Gets information about who is consuming the outputs of the specified component,
+   * and how.
+   *
+   * @return Map from stream id to component id to the Grouping used.
+   */
   /*
     public Map<String, Map<String, Grouping>> getTargets(String componentId) {
         Map<String, Map<String, Grouping>> ret = new HashMap<String, Map<String, Grouping>>();
@@ -136,7 +137,6 @@ public class GeneralTopologyContext implements JSONAware {
         return ret;
     }
   */
-
   @Override
   public String toJSONString() {
     throw new RuntimeException("toJSONString not implemented");
@@ -148,7 +148,7 @@ public class GeneralTopologyContext implements JSONAware {
   public Map<Integer, String> getTaskToComponent() {
     return delegate.getTaskToComponent();
   }
-    
+
   /**
    * Gets a list of all component ids in this topology
    */

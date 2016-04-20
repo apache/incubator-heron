@@ -18,7 +18,7 @@ public class SpoutFailInfo {
   private Object messageId;
   private int spoutTaskId;
   private Long failLatencyMs; // null if it wasn't sampled
-    
+
   public SpoutFailInfo(Object messageId, int spoutTaskId, Long failLatencyMs) {
     this.messageId = messageId;
     this.spoutTaskId = spoutTaskId;

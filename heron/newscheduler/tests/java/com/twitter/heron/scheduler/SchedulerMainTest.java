@@ -21,25 +21,20 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.spi.common.PackingPlan;
-
-import com.twitter.heron.spi.packing.IPackingAlgorithm;
-import com.twitter.heron.spi.packing.NullPackingAlgorithm;
-import com.twitter.heron.spi.uploader.NullUploader;
-
-import com.twitter.heron.spi.scheduler.IConfigLoader;
-
-import com.twitter.heron.spi.scheduler.NullLauncher;
-
-import com.twitter.heron.spi.scheduler.IScheduler;
-import com.twitter.heron.spi.scheduler.NullScheduler;
-import com.twitter.heron.spi.scheduler.context.LaunchContext;
-import com.twitter.heron.spi.util.Factory;
-
 import com.twitter.heron.scheduler.service.server.SchedulerServer;
 import com.twitter.heron.scheduler.util.DefaultConfigLoader;
 import com.twitter.heron.scheduler.util.NetworkUtility;
+import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.packing.IPackingAlgorithm;
+import com.twitter.heron.spi.packing.NullPackingAlgorithm;
+import com.twitter.heron.spi.scheduler.IConfigLoader;
+import com.twitter.heron.spi.scheduler.IScheduler;
+import com.twitter.heron.spi.scheduler.NullLauncher;
+import com.twitter.heron.spi.scheduler.NullScheduler;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
 import com.twitter.heron.spi.statemgr.IStateManager;
+import com.twitter.heron.spi.uploader.NullUploader;
+import com.twitter.heron.spi.util.Factory;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;

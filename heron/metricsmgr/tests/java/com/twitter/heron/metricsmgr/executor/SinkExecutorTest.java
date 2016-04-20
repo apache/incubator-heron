@@ -30,13 +30,13 @@ import org.junit.Test;
 import com.twitter.heron.api.metric.MultiCountMetric;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.SlaveLooper;
+import com.twitter.heron.metricsmgr.MetricsSinksConfig;
+import com.twitter.heron.metricsmgr.sink.SinkContextImpl;
 import com.twitter.heron.spi.metricsmgr.metrics.ExceptionInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
 import com.twitter.heron.spi.metricsmgr.sink.IMetricsSink;
 import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
-import com.twitter.heron.metricsmgr.sink.SinkContextImpl;
-import com.twitter.heron.metricsmgr.MetricsSinksConfig;
 
 public class SinkExecutorTest {
   private static final int FLUSH_INTERVAL_MS = 100;
@@ -53,58 +53,6 @@ public class SinkExecutorTest {
   private volatile int processRecordInvoked = 0;
   private volatile int flushInvoked = 0;
   private volatile int initInvoked = 0;
-
-  private class DummyMetricsSink implements IMetricsSink {
-
-    @Override
-    public void init(Map<String, Object> map, SinkContext context) {
-      initInvoked++;
-      Assert.assertEquals(map.get(MetricsSinksConfig.CONFIG_KEY_FLUSH_FREQUENCY_MS), FLUSH_INTERVAL_MS);
-
-      Assert.assertEquals("topology-name", context.getTopologyName());
-      Assert.assertEquals("sink-id", context.getSinkId());
-    }
-
-    @Override
-    public void processRecord(MetricsRecord record) {
-      Assert.assertEquals(record.getContext(), RECORD_CONTEXT);
-      Assert.assertEquals(record.getSource(), RECORD_SOURCE);
-
-      int metrics = 0;
-      for (MetricsInfo metricsInfo : record.getMetrics()) {
-        Assert.assertEquals(metricsInfo.getName(), METRICS_NAME + metrics);
-        Assert.assertEquals(metricsInfo.getValue(), METRICS_VALUE + metrics);
-        metrics++;
-      }
-      // Every time we added N MetricsInfo
-      Assert.assertEquals(metrics, N);
-
-      int exceptions = 0;
-      for (ExceptionInfo exceptionInfo : record.getExceptions()) {
-        Assert.assertEquals(exceptionInfo.getCount(), exceptions);
-        Assert.assertEquals(exceptionInfo.getFirstTime(), EXCEPTION_FIRST_TIME + exceptions);
-        Assert.assertEquals(exceptionInfo.getLastTime(), EXCEPTION_LAST_TIME + exceptions);
-        Assert.assertEquals(exceptionInfo.getLogging(), EXCEPTION_LOGGING + exceptions);
-        Assert.assertEquals(exceptionInfo.getStackTrace(), EXCEPTION_STACK_TRACE + exceptions);
-        exceptions++;
-      }
-      // Every time we added N ExceptionInfo
-      Assert.assertEquals(exceptions, N);
-
-      processRecordInvoked++;
-    }
-
-    @Override
-    public void flush() {
-      flushInvoked++;
-    }
-
-    @Override
-    public void close() {
-
-    }
-  }
-
   private IMetricsSink metricsSink;
   private SlaveLooper slaveLooper;
   private Communicator<MetricsRecord> communicator;
@@ -219,5 +167,56 @@ public class SinkExecutorTest {
     }
 
     return new MetricsRecord(RECORD_SOURCE, metricsInfos, exceptionInfos, RECORD_CONTEXT);
+  }
+
+  private class DummyMetricsSink implements IMetricsSink {
+
+    @Override
+    public void init(Map<String, Object> map, SinkContext context) {
+      initInvoked++;
+      Assert.assertEquals(map.get(MetricsSinksConfig.CONFIG_KEY_FLUSH_FREQUENCY_MS), FLUSH_INTERVAL_MS);
+
+      Assert.assertEquals("topology-name", context.getTopologyName());
+      Assert.assertEquals("sink-id", context.getSinkId());
+    }
+
+    @Override
+    public void processRecord(MetricsRecord record) {
+      Assert.assertEquals(record.getContext(), RECORD_CONTEXT);
+      Assert.assertEquals(record.getSource(), RECORD_SOURCE);
+
+      int metrics = 0;
+      for (MetricsInfo metricsInfo : record.getMetrics()) {
+        Assert.assertEquals(metricsInfo.getName(), METRICS_NAME + metrics);
+        Assert.assertEquals(metricsInfo.getValue(), METRICS_VALUE + metrics);
+        metrics++;
+      }
+      // Every time we added N MetricsInfo
+      Assert.assertEquals(metrics, N);
+
+      int exceptions = 0;
+      for (ExceptionInfo exceptionInfo : record.getExceptions()) {
+        Assert.assertEquals(exceptionInfo.getCount(), exceptions);
+        Assert.assertEquals(exceptionInfo.getFirstTime(), EXCEPTION_FIRST_TIME + exceptions);
+        Assert.assertEquals(exceptionInfo.getLastTime(), EXCEPTION_LAST_TIME + exceptions);
+        Assert.assertEquals(exceptionInfo.getLogging(), EXCEPTION_LOGGING + exceptions);
+        Assert.assertEquals(exceptionInfo.getStackTrace(), EXCEPTION_STACK_TRACE + exceptions);
+        exceptions++;
+      }
+      // Every time we added N ExceptionInfo
+      Assert.assertEquals(exceptions, N);
+
+      processRecordInvoked++;
+    }
+
+    @Override
+    public void flush() {
+      flushInvoked++;
+    }
+
+    @Override
+    public void close() {
+
+    }
   }
 }

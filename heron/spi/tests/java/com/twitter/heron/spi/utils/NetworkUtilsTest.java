@@ -15,13 +15,11 @@
 package com.twitter.heron.spi.utils;
 
 import java.io.IOException;
-import java.net.SocketException;
 import java.net.ServerSocket;
+import java.net.SocketException;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Matchers;
-import org.mockito.Mockito;
 
 import com.twitter.heron.proto.system.Common;
 

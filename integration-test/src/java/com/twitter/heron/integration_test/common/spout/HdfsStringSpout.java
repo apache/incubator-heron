@@ -15,7 +15,7 @@ import com.twitter.heron.integration_test.common.HdfsHelper;
  * Given a list of hdfs path, the spout will emit every line of of the file in String format.
  * When we fetch all items from hdfs BufferedReader, we would set the BufferedReader as null. We
  * would like to check whether (BufferedReader == null) to see whether the data is taken completely.
- *
+ * <p>
  * Note1: The hadoop cluster config should be provided through the classpath
  * Note2: The number of parallelisms for this spout should be equal to the number of files/paths
  * to read.
@@ -44,10 +44,10 @@ public class HdfsStringSpout extends BaseRichSpout {
   public void open(Map stormConf, TopologyContext context, SpoutOutputCollector collector) {
     int numTasks = context.getComponentTasks(context.getThisComponentId()).size();
     // Pre-condition: the number of tasks is equal to the number of files to read
-    if(paths.length != numTasks) {
+    if (paths.length != numTasks) {
       throw new RuntimeException(
-        String.format("Number of hdfs files %d not equal to number of tasks %d",
-          paths.length, numTasks));
+          String.format("Number of hdfs files %d not equal to number of tasks %d",
+              paths.length, numTasks));
     }
 
     this.collector = collector;
@@ -59,15 +59,15 @@ public class HdfsStringSpout extends BaseRichSpout {
 
       // read file from hdfs
       br = new BufferedReader(
-        HdfsHelper.getHdfsStreamReader(path),
-        1024 * 1024
+          HdfsHelper.getHdfsStreamReader(path),
+          1024 * 1024
       );
 
     } catch (Exception e) {
       // Clean stuff if any exceptions
       try {
         // Close the outmost is enough
-        if(br != null) {
+        if (br != null) {
           br.close();
         }
       } catch (Exception e1) {

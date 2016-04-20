@@ -20,7 +20,7 @@ public class CountMetric implements IMetric {
   public CountMetric() {
     delegate = new com.twitter.heron.api.metric.CountMetric();
   }
-    
+
   public void incr() {
     delegate.incr();
   }

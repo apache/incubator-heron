@@ -25,12 +25,10 @@ import com.twitter.heron.spi.uploader.IUploader;
 
 public class HdfsUploader implements IUploader {
   private static final Logger LOG = Logger.getLogger(HdfsUploader.class.getName());
-
-  private Config config;
-  private String hadoopConfdir;
   // get the directory containing the file
   String destTopologyDirectoryURI;
-
+  private Config config;
+  private String hadoopConfdir;
   private String topologyPackageLocation;
   private URI packageURI;
 

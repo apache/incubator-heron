@@ -25,7 +25,8 @@ public class KryoSerializer implements IPluggableSerializer {
   private Output kryoOut;
   private Input kryoIn;
 
-  public KryoSerializer() { }
+  public KryoSerializer() {
+  }
 
   @Override
   public void initialize(Map config) {
@@ -51,7 +52,7 @@ public class KryoSerializer implements IPluggableSerializer {
     try {
       kryoIn.setBuffer(input);
       return kryo.readClassAndObject(kryoIn);
-    } catch(Exception e) {
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }

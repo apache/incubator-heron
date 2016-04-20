@@ -22,10 +22,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.twitter.heron.spi.metricsmgr.metrics.ExceptionInfo;
-import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
-import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
-
 public class MetricsRecordTest {
   private static final int N = 100;
   private static final String SOURCE = "source";
