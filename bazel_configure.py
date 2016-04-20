@@ -170,6 +170,14 @@ def discover_version(path):
     if version:
       return version
 
+  # on some centos versions, cmake --version returns this
+  #   cmake version 2.6-patch 4 
+  centos_line = re.search('^cmake version\s+(\d.\d)-patch\s+(\d)', first_line)
+  if centos_line:
+    version = ".".join([centos_line.group(1), centos_line.group(2)])
+    if version:
+      return version
+
   # with python anaconda, --V returns this:
   # Python 2.7.11 :: Anaconda 2.2.0 (x86_64)
   anaconda_line = re.search('.*\s+Anaconda\s+.*\s', first_line)
@@ -379,11 +387,11 @@ def main():
   env_map['BLDFLAG'] = discover_linker(env_map)
 
   # Discover the utilities
-  env_map['AUTOMAKE'] = discover_tool('automake', 'Automake', 'AUTOMAKE', '1.11.1')
+  env_map['AUTOMAKE'] = discover_tool('automake', 'Automake', 'AUTOMAKE', '1.9.6')
   env_map['AUTOCONF'] = discover_tool('autoconf', 'Autoconf', 'AUTOCONF', '2.6.3')
   env_map['MAKE'] = discover_tool('make', 'Make', 'MAKE', '3.81')
   env_map['CMAKE'] = discover_tool('cmake', 'CMake', 'CMAKE', '2.6.4')
-  env_map['PYTHON2'] = discover_tool('python2', 'Python2', 'PYTHON2', '2.7')
+  env_map['PYTHON2'] = discover_tool('python2.7', 'Python2', 'PYTHON2', '2.7')
 
   if platform == 'Darwin':
     env_map['AR'] = discover_tool('libtool', 'archiver', 'AR')

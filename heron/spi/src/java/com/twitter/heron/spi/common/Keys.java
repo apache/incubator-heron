@@ -100,6 +100,10 @@ public class Keys {
     return ConfigKeys.get("SCHEDULER_JAR");
   }
 
+  public static String schedulerService() {
+    return ConfigKeys.get("SCHEDULER_IS_SERVICE");
+  }
+
   public static String schedulerProxyConnectionString() {
     return ConfigKeys.get("SCHEDULER_PROXY_CONNECTION_STRING");
   }
@@ -254,10 +258,6 @@ public class Keys {
 
   public static String launcherClassInstance() {
     return ConfigKeys.get("LAUNCHER_CLASS_INSTANCE");
-  }
-
-  public static String runtimeManagerClassInstance() {
-    return ConfigKeys.get("RUNTIME_MANAGER_CLASS_INSTANCE");
   }
 
   public static String schedulerShutdown() {

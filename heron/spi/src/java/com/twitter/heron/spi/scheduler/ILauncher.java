@@ -40,13 +40,6 @@ public interface ILauncher extends AutoCloseable {
   void close();
 
   /**
-   * Will be called locally before trying to launch topology remotely
-   *
-   * @return true if successful
-   */
-  boolean prepareLaunch(PackingPlan packing);
-
-  /**
    * Starts scheduler. Once this function returns successfully, heron-cli will terminate and
    * the launch process succeeded.
    *
@@ -55,11 +48,4 @@ public interface ILauncher extends AutoCloseable {
    * @return true if topology launched successfully, false otherwise.
    */
   boolean launch(PackingPlan packing);
-
-  /**
-   * Will be called locally after launching topology remotely
-   *
-   * @return true if successful
-   */
-  boolean postLaunch(PackingPlan packing);
 }

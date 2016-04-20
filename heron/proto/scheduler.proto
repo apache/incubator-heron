@@ -17,23 +17,6 @@ message SchedulerLocation {
 message KillTopologyRequest {
   required string topology_name = 1;
 }
-message KillTopologyResponse {
-  required heron.proto.system.Status status = 1;
-}
-
-message ActivateTopologyRequest {
-  required string topology_name = 1;
-}
-message ActivateTopologyResponse {
-  required heron.proto.system.Status status = 1;
-}
-
-message DeactivateTopologyRequest {
-  required string topology_name = 1;
-}
-message DeactivateTopologyResponse {
-  required heron.proto.system.Status status = 1;
-}
 
 message RestartTopologyRequest {
   required string topology_name = 1;
@@ -41,6 +24,7 @@ message RestartTopologyRequest {
   // That means we would restart all containers.
   required int32 container_index = 2;
 }
-message RestartTopologyResponse {
+
+message SchedulerResponse {
   required heron.proto.system.Status status = 1;
 }

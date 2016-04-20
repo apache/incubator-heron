@@ -30,17 +30,7 @@ public class NullLauncher implements ILauncher {
   }
 
   @Override
-  public boolean prepareLaunch(PackingPlan packing) {
-    return true;
-  }
-
-  @Override
   public boolean launch(PackingPlan packing) {
-    return true;
-  }
-
-  @Override
-  public boolean postLaunch(PackingPlan packing) {
     return true;
   }
 }

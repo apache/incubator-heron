@@ -76,16 +76,16 @@ public class Context {
     return cfg.getStringValue(ConfigKeys.get("SCHEDULER_CLASS"));
   }
 
-  public static String runtimeManagerClass(Config cfg) {
-    return cfg.getStringValue(ConfigKeys.get("RUNTIME_MANAGER_CLASS"));
-  }
-
   public static String packingClass(Config cfg) {
     return cfg.getStringValue(ConfigKeys.get("PACKING_CLASS"));
   }
 
   public static String stateManagerClass(Config cfg) {
     return cfg.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS"));
+  }
+
+  public static Boolean schedulerService(Config cfg) {
+    return cfg.getBooleanValue(ConfigKeys.get("SCHEDULER_IS_SERVICE"));
   }
 
   public static String clusterFile(Config cfg) {

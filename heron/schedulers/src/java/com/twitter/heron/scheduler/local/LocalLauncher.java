@@ -26,7 +26,6 @@ import javax.xml.bind.DatatypeConverter;
 import org.apache.commons.io.FileUtils;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.common.ShellUtils;
@@ -88,17 +87,6 @@ public class LocalLauncher implements ILauncher {
   }
 
   /**
-   * Actions to execute before launch such as check whether the
-   * topology is already running
-   *
-   * @return true, if successful
-   */
-  @Override
-  public boolean prepareLaunch(PackingPlan packing) {
-    return true;
-  }
-
-  /**
    * Launch the topology
    */
   @Override
@@ -135,7 +123,7 @@ public class LocalLauncher implements ILauncher {
 
     LOG.log(Level.FINE, "Scheduler command line: {0}", schedulerCmd.toString());
 
-    Process p = ShellUtils.runASyncProcess(true, schedulerCmd.toString(),
+    Process p = ShellUtils.runASyncProcess(LocalContext.verbose(config), schedulerCmd.toString(),
         new File(topologyWorkingDirectory));
 
     if (p == null) {
@@ -147,11 +135,6 @@ public class LocalLauncher implements ILauncher {
         "For checking the status and logs of the topology, use the working directory %s",
         LocalContext.workingDirectory(config)));
 
-    return true;
-  }
-
-  @Override
-  public boolean postLaunch(PackingPlan packing) {
     return true;
   }
 
@@ -240,8 +223,8 @@ public class LocalLauncher implements ILauncher {
 
     // using curl copy the url to the target file
     String cmd = String.format("curl %s -o %s", corePackageURI, targetFile);
-    int ret = ShellUtils.runSyncProcess(false, true, cmd,
-        new StringBuilder(), new StringBuilder(), parentDirectory);
+    int ret = ShellUtils.runSyncProcess(LocalContext.verbose(config), LocalContext.verbose(config),
+        cmd, new StringBuilder(), new StringBuilder(), parentDirectory);
 
     return ret == 0 ? true : false;
   }
@@ -256,8 +239,8 @@ public class LocalLauncher implements ILauncher {
   protected boolean untarPackage(String packageName, String targetFolder) {
     String cmd = String.format("tar -xvf %s", packageName);
 
-    int ret = ShellUtils.runSyncProcess(false, true, cmd,
-        new StringBuilder(), new StringBuilder(), new File(targetFolder));
+    int ret = ShellUtils.runSyncProcess(LocalContext.verbose(config), LocalContext.verbose(config),
+       cmd, new StringBuilder(), new StringBuilder(), new File(targetFolder));
 
     return ret == 0 ? true : false;
   }

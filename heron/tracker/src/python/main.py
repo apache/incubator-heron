@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+#!/usr/bin/env python2.7
+
 import argparse
+import logging
 import os
 import sys
 import tornado.httpserver
@@ -24,10 +27,10 @@ from tornado.options import define, options
 
 from heron.tracker.src.python import constants
 from heron.tracker.src.python import handlers
-from heron.tracker.src.python import log
-from heron.tracker.src.python.log import Log as LOG
 from heron.tracker.src.python import utils
 from heron.tracker.src.python.tracker import Tracker
+
+LOG = logging.getLogger(__name__)
 
 class Application(tornado.web.Application):
   def __init__(self):
@@ -63,6 +66,9 @@ class Application(tornado.web.Application):
       static_path = os.path.dirname(__file__)
     )
     tornado.web.Application.__init__(self, tornadoHandlers, **settings)
+    LOG.info("-" * 100)
+    LOG.info("Tracker started")
+    LOG.info("-" * 100)
 
 
 class _HelpAction(argparse._HelpAction):
@@ -111,6 +117,10 @@ def add_arguments(parser):
       type = int,
       default=constants.DEFAULT_PORT)
 
+  parser.add_argument(
+      '--verbose',
+      action='store_true')
+
   return parser
 
 def create_parsers():
@@ -142,8 +152,12 @@ def define_options(port, config_file):
   define("port", default=port)
   define("config_file", default=config_file)
 
+def configure_logging(level):
+  log_format = "%(asctime)s-%(levelname)s:%(filename)s:%(lineno)s: %(message)s"
+  date_format = '%d %b %Y %H:%M:%S'
+  logging.basicConfig(format=log_format, datefmt=date_format, level=level)
+
 def main():
-  log.configure(log.logging.DEBUG)
 
   # create the parser and parse the arguments
   (parser, ya_parser) = create_parsers()
@@ -155,6 +169,12 @@ def main():
     parser.exit()
 
   namespace = vars(args)
+
+  if namespace["verbose"]:
+    configure_logging(logging.DEBUG)
+  else:
+    configure_logging(logging.INFO)
+
   LOG.info("Running on port: %d", namespace['port'])
   LOG.info("Using config file: %s", namespace['config_file'])
 
