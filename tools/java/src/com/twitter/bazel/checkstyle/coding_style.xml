@@ -111,6 +111,10 @@ limitations under the License.
 
     <module name="TreeWalker">
       <property name="tabWidth" value="2"/>
+      <module name="Indentation">
+        <property name="basicOffset" value="2"/>
+        <property name="caseIndent" value="2"/>
+      </module>
 
       <!-- needed for SuppressWithNearbyCommentFilter -->
       <module name="FileContentsHolder"/>
