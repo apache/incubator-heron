@@ -146,7 +146,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     SchedulerStateManagerAdaptor statemgr = com.twitter.heron.spi.utils.Runtime.schedulerStateManagerAdaptor(runtime);
 
     // fetch scheduler location from state manager
-    LOG.log(Level.INFO, "Fetching scheduler location from state manager to {0} topology", command);
+    LOG.log(Level.FINE, "Fetching scheduler location from state manager to {0} topology", command);
 
     Scheduler.SchedulerLocation schedulerLocation =
         statemgr.getSchedulerLocation(Runtime.topologyName(runtime));

@@ -47,7 +47,7 @@ public class SchedulerUtils {
    * 2. TMasterLocation, SchedulerLocation and PhysicalPlan may not exist to delete
    */
   public static boolean cleanState(String topologyName, SchedulerStateManagerAdaptor statemgr) {
-    LOG.info("Cleaning up Heron State");
+    LOG.fine("Cleaning up Heron State");
 
     Boolean result;
 
@@ -83,7 +83,7 @@ public class SchedulerUtils {
       LOG.warning("Failed to clear scheduler location. Check whether Scheduler set it correctly.");
     }
 
-    LOG.info("Cleaned up Heron State");
+    LOG.fine("Cleaned up Heron State");
     return true;
   }
 }

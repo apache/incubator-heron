@@ -30,7 +30,7 @@ public class HttpServiceSchedulerClient implements ISchedulerClient {
     this.schedulerLocation = schedulerLocation;
 
 
-    LOG.log(Level.INFO, "Scheduler is listening on location: {0} ", schedulerLocation.toString());
+    LOG.log(Level.FINE, "Scheduler is listening on location: {0} ", schedulerLocation.toString());
   }
 
   @Override
@@ -66,7 +66,7 @@ public class HttpServiceSchedulerClient implements ISchedulerClient {
         // receive the response for manage topology
         Common.StatusCode statusCode;
         try {
-          LOG.info("Receiving response from scheduler...");
+          LOG.fine("Receiving response from scheduler...");
           statusCode = Scheduler.SchedulerResponse.newBuilder()
               .mergeFrom(HttpUtils.readHttpResponse(connection))
               .build().getStatus().getStatus();
