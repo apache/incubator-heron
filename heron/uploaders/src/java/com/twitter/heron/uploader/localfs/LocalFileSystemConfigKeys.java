@@ -14,11 +14,9 @@
 
 package com.twitter.heron.uploader.localfs;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
 import java.util.Map;
+import java.util.logging.Logger;
 
-import java.lang.ClassNotFoundException;
 import com.twitter.heron.spi.common.Resource;
 
 public class LocalFileSystemConfigKeys {
@@ -27,14 +25,13 @@ public class LocalFileSystemConfigKeys {
   // holds the mapping of keys to their corresponding key strings
   private static Map keys;
 
-   // load the resource for config keys
+  // load the resource for config keys
   static {
     try {
       keys = Resource.load(
-          "com.twitter.heron.uploader.localfs.LocalFileSystemConfigKeys", 
+          "com.twitter.heron.uploader.localfs.LocalFileSystemConfigKeys",
           LocalFileSystemConstants.KEYS_YAML);
-    }
-    catch (ClassNotFoundException e) {
+    } catch (ClassNotFoundException e) {
       LOG.severe("Unable to load the local file system uploader keys class " + e);
       System.exit(1);
     }

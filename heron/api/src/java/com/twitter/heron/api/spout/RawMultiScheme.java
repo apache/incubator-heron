@@ -18,7 +18,6 @@ import java.util.List;
 
 import com.twitter.heron.api.tuple.Fields;
 
-
 import static com.twitter.heron.api.utils.Utils.tuple;
 import static java.util.Arrays.asList;
 

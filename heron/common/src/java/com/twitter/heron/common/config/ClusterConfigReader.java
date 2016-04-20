@@ -14,25 +14,20 @@
 
 package com.twitter.heron.common.config;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.nio.file.Paths;
-
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
 /**
- * Loads config file in Yaml properties file format based 
+ * Loads config file in Yaml properties file format based
  * on cluster and config path
- *
  */
 public final class ClusterConfigReader extends ConfigReader {
   private static final Logger LOG = Logger.getLogger(ClusterConfigReader.class.getName());
 
   public static Map load(String cluster, String configPath, String fileName) {
-     Map config = new HashMap<String, Object>();
+    Map config = new HashMap<String, Object>();
 
     // Read the defaults file, first
     String file1 = Paths.get(configPath, fileName).toString();
@@ -41,7 +36,7 @@ public final class ClusterConfigReader extends ConfigReader {
 
     if (props1 == null) {
       LOG.info("props1 is null \n");
-    }  
+    }
 
     if (props1.isEmpty()) {
       LOG.info("Config file " + file1 + " is empty");

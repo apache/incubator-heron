@@ -21,15 +21,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-
-import com.twitter.heron.spi.common.Constants;
-import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.common.ClusterDefaults;
-
-import com.twitter.heron.spi.utils.TopologyUtils;
+import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.utils.TopologyTests;
+import com.twitter.heron.spi.utils.TopologyUtils;
 
 public class RoundRobinPackingTest {
   private int countCompoment(String component, Map<String, PackingPlan.InstancePlan> instances,

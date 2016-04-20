@@ -31,7 +31,7 @@ import com.twitter.heron.proto.system.PhysicalPlans;
 /**
  * InstanceExecutor helps to group all necessary resources for an instance into a class and,
  * provide methods to access these resources externally.
- * <p/>
+ * <p>
  * It helps uniform the ways to access instance resources
  */
 public class InstanceExecutor implements Runnable {

@@ -21,15 +21,13 @@ import java.util.logging.Logger;
 import javax.xml.bind.DatatypeConverter;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-
+import com.twitter.heron.scheduler.util.TopologyUtility;
+import com.twitter.heron.spi.packing.IPackingAlgorithm;
 import com.twitter.heron.spi.scheduler.IConfigLoader;
 import com.twitter.heron.spi.scheduler.ILauncher;
-import com.twitter.heron.spi.packing.IPackingAlgorithm;
-import com.twitter.heron.spi.uploader.IUploader;
 import com.twitter.heron.spi.scheduler.context.LaunchContext;
+import com.twitter.heron.spi.uploader.IUploader;
 import com.twitter.heron.spi.util.Factory;
-
-import com.twitter.heron.scheduler.util.TopologyUtility;
 
 /**
  * Calls Uploader to upload topology package, and Launcher to launch Scheduler.

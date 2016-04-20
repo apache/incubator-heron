@@ -29,10 +29,10 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.grouping.CustomStreamGrouping;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.basics.WakeableLooper;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.instance.InstanceControlMsg;
@@ -51,21 +51,15 @@ public class CustomGroupingTest {
 
   WakeableLooper testLooper;
   SlaveLooper slaveLooper;
-
+  PhysicalPlans.PhysicalPlan physicalPlan;
   private Communicator<HeronTuples.HeronTupleSet> outStreamQueue;
   private Communicator<HeronTuples.HeronTupleSet> inStreamQueue;
   private Communicator<InstanceControlMsg> inControlQueue;
-
   private ExecutorService threadsPool;
-
   private Communicator<Metrics.MetricPublisherPublishMessage> slaveMetricsOut;
-
   private volatile int tupleReceived;
   private volatile StringBuilder customGroupingInfoInPrepare;
-
   private Slave slave;
-
-  PhysicalPlans.PhysicalPlan physicalPlan;
 
   @Before
   public void before() throws Exception {

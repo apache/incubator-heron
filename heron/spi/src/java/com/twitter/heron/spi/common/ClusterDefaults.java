@@ -14,29 +14,18 @@
 
 package com.twitter.heron.spi.common;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Paths;
-
-import java.util.Map;
-import java.util.HashMap;
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.twitter.heron.common.config.ClusterConfigReader;
-
 public final class ClusterDefaults {
 
   public static Config getDefaultHome() {
     Config.Builder cb = Config.newBuilder();
 
     cb.put(Keys.heronHome(), Defaults.heronHome());
-    cb.put(Keys.heronBin(),  Defaults.heronBin());
+    cb.put(Keys.heronBin(), Defaults.heronBin());
     cb.put(Keys.heronConf(), Defaults.heronConf());
     cb.put(Keys.heronDist(), Defaults.heronDist());
-    cb.put(Keys.heronEtc(),  Defaults.heronEtc());
-    cb.put(Keys.heronLib(),  Defaults.heronLib());
-    cb.put(Keys.javaHome(),  Defaults.javaHome());
+    cb.put(Keys.heronEtc(), Defaults.heronEtc());
+    cb.put(Keys.heronLib(), Defaults.heronLib());
+    cb.put(Keys.javaHome(), Defaults.javaHome());
     return cb.build();
   }
 
@@ -44,38 +33,38 @@ public final class ClusterDefaults {
     Config.Builder cb = Config.newBuilder();
 
     cb.put(Keys.heronSandboxHome(), Defaults.heronSandboxHome());
-    cb.put(Keys.heronSandboxBin(),  Defaults.heronSandboxBin());
+    cb.put(Keys.heronSandboxBin(), Defaults.heronSandboxBin());
     cb.put(Keys.heronSandboxConf(), Defaults.heronSandboxConf());
-    cb.put(Keys.heronSandboxLib(),  Defaults.heronSandboxLib());
-    cb.put(Keys.javaSandboxHome(),  Defaults.javaSandboxHome());
+    cb.put(Keys.heronSandboxLib(), Defaults.heronSandboxLib());
+    cb.put(Keys.javaSandboxHome(), Defaults.javaSandboxHome());
     return cb.build();
   }
 
   public static Config getDefaultFiles() {
     Config.Builder cb = Config.newBuilder();
 
-    cb.put(Keys.clusterFile(),      Defaults.clusterFile());
-    cb.put(Keys.defaultsFile(),     Defaults.defaultsFile());
+    cb.put(Keys.clusterFile(), Defaults.clusterFile());
+    cb.put(Keys.defaultsFile(), Defaults.defaultsFile());
     cb.put(Keys.metricsSinksFile(), Defaults.metricsSinksFile());
-    cb.put(Keys.packingFile(),      Defaults.packingFile());
-    cb.put(Keys.schedulerFile(),    Defaults.schedulerFile());
+    cb.put(Keys.packingFile(), Defaults.packingFile());
+    cb.put(Keys.schedulerFile(), Defaults.schedulerFile());
     cb.put(Keys.stateManagerFile(), Defaults.stateManagerFile());
-    cb.put(Keys.systemFile(),       Defaults.systemFile());
-    cb.put(Keys.uploaderFile(),     Defaults.uploaderFile());
+    cb.put(Keys.systemFile(), Defaults.systemFile());
+    cb.put(Keys.uploaderFile(), Defaults.uploaderFile());
     return cb.build();
   }
 
   public static Config getSandboxDefaultFiles() {
     Config.Builder cb = Config.newBuilder();
 
-    cb.put(Keys.clusterSandboxFile(),      Defaults.clusterSandboxFile());
-    cb.put(Keys.defaultsSandboxFile(),     Defaults.defaultsSandboxFile());
+    cb.put(Keys.clusterSandboxFile(), Defaults.clusterSandboxFile());
+    cb.put(Keys.defaultsSandboxFile(), Defaults.defaultsSandboxFile());
     cb.put(Keys.metricsSinksSandboxFile(), Defaults.metricsSinksSandboxFile());
-    cb.put(Keys.packingSandboxFile(),      Defaults.packingSandboxFile());
-    cb.put(Keys.schedulerSandboxFile(),    Defaults.schedulerSandboxFile());
+    cb.put(Keys.packingSandboxFile(), Defaults.packingSandboxFile());
+    cb.put(Keys.schedulerSandboxFile(), Defaults.schedulerSandboxFile());
     cb.put(Keys.stateManagerSandboxFile(), Defaults.stateManagerSandboxFile());
-    cb.put(Keys.systemSandboxFile(),       Defaults.systemSandboxFile());
-    cb.put(Keys.uploaderSandboxFile(),     Defaults.uploaderSandboxFile());
+    cb.put(Keys.systemSandboxFile(), Defaults.systemSandboxFile());
+    cb.put(Keys.uploaderSandboxFile(), Defaults.uploaderSandboxFile());
     return cb.build();
   }
 
@@ -83,23 +72,23 @@ public final class ClusterDefaults {
     Config.Builder cb = Config.newBuilder();
 
     cb.put(Keys.executorSandboxBinary(), Defaults.executorSandboxBinary());
-    cb.put(Keys.stmgrSandboxBinary(),    Defaults.stmgrSandboxBinary());
-    cb.put(Keys.tmasterSandboxBinary(),  Defaults.tmasterSandboxBinary());
-    cb.put(Keys.shellSandboxBinary(),    Defaults.shellSandboxBinary());
+    cb.put(Keys.stmgrSandboxBinary(), Defaults.stmgrSandboxBinary());
+    cb.put(Keys.tmasterSandboxBinary(), Defaults.tmasterSandboxBinary());
+    cb.put(Keys.shellSandboxBinary(), Defaults.shellSandboxBinary());
     return cb.build();
   }
 
   public static Config getDefaultJars() {
     Config.Builder cb = Config.newBuilder();
 
-    cb.put(Keys.schedulerJar(),   Defaults.schedulerJar());
+    cb.put(Keys.schedulerJar(), Defaults.schedulerJar());
     return cb.build();
   }
 
   public static Config getSandboxJars() {
     Config.Builder cb = Config.newBuilder();
 
-    cb.put(Keys.schedulerSandboxJar(),  Defaults.schedulerSandboxJar());
+    cb.put(Keys.schedulerSandboxJar(), Defaults.schedulerSandboxJar());
     return cb.build();
   }
 
@@ -149,10 +138,10 @@ public final class ClusterDefaults {
     cb.put(Keys.schedulerService(), Defaults.schedulerService());
     return cb.build();
   }
-     
+
   public static Config getDefaults() {
     Config.Builder cb = Config.newBuilder();
-   
+
     cb.putAll(getDefaultHome());
     cb.putAll(getDefaultJars());
     cb.putAll(getDefaultFilesAndPaths());
@@ -163,7 +152,7 @@ public final class ClusterDefaults {
 
   public static Config getSandboxDefaults() {
     Config.Builder cb = Config.newBuilder();
-   
+
     cb.putAll(getSandboxHome());
     cb.putAll(getSandboxBinaries());
     cb.putAll(getSandboxJars());

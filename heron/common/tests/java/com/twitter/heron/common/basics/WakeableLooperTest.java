@@ -26,9 +26,9 @@ import org.junit.Test;
  * WakeableLooper Tester.
  */
 public class WakeableLooperTest {
-  WakeableLooper slaveLooper;
   static int globalVale;
   final long SECONDS_TO_NANOSECONDS = 1000 * 1000 * 1000;
+  WakeableLooper slaveLooper;
 
   @Before
   public void before() throws Exception {

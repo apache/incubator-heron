@@ -23,10 +23,10 @@ import org.junit.Test;
  * Communicator Tester.
  */
 public class CommunicatorTest {
+  final int QUEUE_BUFFER_SIZE = 128;
   Communicator<Integer> communicator;
   WakeableLooper producer;
   WakeableLooper consumer;
-  final int QUEUE_BUFFER_SIZE = 128;
 
   @Before
   public void before() throws Exception {

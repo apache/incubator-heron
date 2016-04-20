@@ -17,13 +17,13 @@ package backtype.storm.tuple;
 import java.util.List;
 
 /**
- * The tuple is the main data structure in Storm. A tuple is a named list of values, 
- * where each value can be any type. Tuples are dynamically typed -- the types of the fields 
- * do not need to be declared. Tuples have helper methods like getInteger and getString 
+ * The tuple is the main data structure in Storm. A tuple is a named list of values,
+ * where each value can be any type. Tuples are dynamically typed -- the types of the fields
+ * do not need to be declared. Tuples have helper methods like getInteger and getString
  * to get field values without having to cast the result.
- * 
- * Storm needs to know how to serialize all the values in a tuple. By default, Storm 
- * knows how to serialize the primitive types, strings, and byte arrays. If you want to 
+ * <p>
+ * Storm needs to know how to serialize all the values in a tuple. By default, Storm
+ * knows how to serialize the primitive types, strings, and byte arrays. If you want to
  * use another type, you'll need to implement and register a serializer for that type.
  * See {@link http://github.com/nathanmarz/storm/wiki/Serialization} for more info.
  */
@@ -44,21 +44,21 @@ public class TupleImpl implements Tuple {
   public int size() {
     return delegate.size();
   }
-    
+
   /**
    * Returns the position of the specified field in this tuple.
    */
   public int fieldIndex(String field) {
     return delegate.fieldIndex(field);
   }
-    
+
   /**
    * Returns true if this tuple contains the specified name of the field.
    */
   public boolean contains(String field) {
     return delegate.contains(field);
   }
-    
+
   /**
    * Gets the field at position i in the tuple. Returns object since tuples are dynamically typed.
    */
@@ -67,7 +67,7 @@ public class TupleImpl implements Tuple {
   }
 
   /**
-   * Returns the String at position i in the tuple. If that field is not a String, 
+   * Returns the String at position i in the tuple. If that field is not a String,
    * you will get a runtime error.
    */
   public String getString(int i) {
@@ -75,7 +75,7 @@ public class TupleImpl implements Tuple {
   }
 
   /**
-   * Returns the Integer at position i in the tuple. If that field is not an Integer, 
+   * Returns the Integer at position i in the tuple. If that field is not an Integer,
    * you will get a runtime error.
    */
   public Integer getInteger(int i) {
@@ -83,7 +83,7 @@ public class TupleImpl implements Tuple {
   }
 
   /**
-   * Returns the Long at position i in the tuple. If that field is not a Long, 
+   * Returns the Long at position i in the tuple. If that field is not a Long,
    * you will get a runtime error.
    */
   public Long getLong(int i) {
@@ -91,7 +91,7 @@ public class TupleImpl implements Tuple {
   }
 
   /**
-   * Returns the Boolean at position i in the tuple. If that field is not a Boolean, 
+   * Returns the Boolean at position i in the tuple. If that field is not a Boolean,
    * you will get a runtime error.
    */
   public Boolean getBoolean(int i) {
@@ -99,7 +99,7 @@ public class TupleImpl implements Tuple {
   }
 
   /**
-   * Returns the Short at position i in the tuple. If that field is not a Short, 
+   * Returns the Short at position i in the tuple. If that field is not a Short,
    * you will get a runtime error.
    */
   public Short getShort(int i) {
@@ -107,7 +107,7 @@ public class TupleImpl implements Tuple {
   }
 
   /**
-   * Returns the Byte at position i in the tuple. If that field is not a Byte, 
+   * Returns the Byte at position i in the tuple. If that field is not a Byte,
    * you will get a runtime error.
    */
   public Byte getByte(int i) {
@@ -115,7 +115,7 @@ public class TupleImpl implements Tuple {
   }
 
   /**
-   * Returns the Double at position i in the tuple. If that field is not a Double, 
+   * Returns the Double at position i in the tuple. If that field is not a Double,
    * you will get a runtime error.
    */
   public Double getDouble(int i) {
@@ -123,7 +123,7 @@ public class TupleImpl implements Tuple {
   }
 
   /**
-   * Returns the Float at position i in the tuple. If that field is not a Float, 
+   * Returns the Float at position i in the tuple. If that field is not a Float,
    * you will get a runtime error.
    */
   public Float getFloat(int i) {
@@ -131,14 +131,14 @@ public class TupleImpl implements Tuple {
   }
 
   /**
-   * Returns the byte array at position i in the tuple. If that field is not a byte array, 
+   * Returns the byte array at position i in the tuple. If that field is not a byte array,
    * you will get a runtime error.
    */
   public byte[] getBinary(int i) {
     return delegate.getBinary(i);
   }
-    
-    
+
+
   public Object getValueByField(String field) {
     return delegate.getValueByField(field);
   }
@@ -178,14 +178,14 @@ public class TupleImpl implements Tuple {
   public byte[] getBinaryByField(String field) {
     return delegate.getBinaryByField(field);
   }
-    
+
   /**
    * Gets all the values in this tuple.
    */
   public List<Object> getValues() {
     return delegate.getValues();
   }
-    
+
   /**
    * Gets the names of the fields in this tuple.
    */
@@ -199,7 +199,7 @@ public class TupleImpl implements Tuple {
   public List<Object> select(Fields selector) {
     return delegate.select(selector.getDelegate());
   }
-    
+
   /**
    * Returns the global stream id (component + stream) of this tuple.
    */
@@ -207,28 +207,28 @@ public class TupleImpl implements Tuple {
     TODO:- One can get this using getSourceStreamId and getSourceComponent
     public GlobalStreamId getSourceGlobalStreamid();
    */
-    
+
   /**
    * Gets the id of the component that created this tuple.
    */
   public String getSourceComponent() {
     return delegate.getSourceComponent();
   }
-    
+
   /**
    * Gets the id of the task that created this tuple.
    */
   public int getSourceTask() {
     return delegate.getSourceTask();
   }
-    
+
   /**
    * Gets the id of the stream that this tuple was emitted to.
    */
   public String getSourceStreamId() {
     return delegate.getSourceStreamId();
   }
-    
+
   /**
    * Gets the message id that associated with this tuple.
    */

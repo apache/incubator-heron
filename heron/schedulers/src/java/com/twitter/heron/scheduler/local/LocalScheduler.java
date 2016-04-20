@@ -42,16 +42,12 @@ import com.twitter.heron.spi.utils.TopologyUtils;
 
 public class LocalScheduler implements IScheduler {
   private static final Logger LOG = Logger.getLogger(LocalScheduler.class.getName());
-
-  private Config config;
-  private Config runtime;
-
   // executor service for monitoring all the containers
   private final ExecutorService monitorService = Executors.newCachedThreadPool();
-
   // map to keep track of the process and the shard it is running
   private final Map<Process, Integer> processToContainer = new ConcurrentHashMap<Process, Integer>();
-
+  private Config config;
+  private Config runtime;
   // has the topology been killed?
   private volatile boolean topologyKilled = false;
 

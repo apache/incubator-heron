@@ -32,7 +32,7 @@ public interface ILauncher extends AutoCloseable {
   /**
    * This is to for disposing or cleaning up any internal state accumulated by
    * the ILauncher
-   * <p/>
+   * <p>
    * Closes this stream and releases any system resources associated
    * with it. If the stream is already closed then invoking this
    * method has no effect.

@@ -18,17 +18,14 @@ import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
 
 public class IntegrationTestBolt implements IRichBolt {
+  private static final Logger LOG = Logger.getLogger(IntegrationTestBolt.class.getName());
+  private final IRichBolt delegateBolt;
   private int terminalsToReceive = 0;
   private long tuplesReceived = 0;
   private long tuplesProcessed = 0;
-
   // For ack/fail
   private Tuple currentTupleProcessing = null;
-
   private OutputCollector collector;
-  private final IRichBolt delegateBolt;
-
-  private static final Logger LOG = Logger.getLogger(IntegrationTestBolt.class.getName());
 
   public IntegrationTestBolt(IRichBolt delegate) {
     this.delegateBolt = delegate;

@@ -1,10 +1,9 @@
 package com.twitter.heron.integration_test.common;
 
-import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
@@ -18,6 +17,7 @@ public class HdfsHelper {
 
   /**
    * Provide an InputStreamReader to read from a hdfs file
+   *
    * @param path is the hdfs file location
    */
   public static InputStreamReader getHdfsStreamReader(String path) throws IOException {

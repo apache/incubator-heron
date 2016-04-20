@@ -24,14 +24,20 @@ import com.twitter.heron.common.config.SystemConfig;
 
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * LocalMode Tester
  */
 public class LocalModeTest {
+  private static void clearSingletonRegistry() throws Exception {
+    // Remove the Singleton by Reflection
+    Field field = SingletonRegistry.INSTANCE.getClass().getDeclaredField("singletonObjects");
+    field.setAccessible(true);
+    Map<String, Object> singletonObjects = (Map<String, Object>) field.get(SingletonRegistry.INSTANCE);
+    singletonObjects.clear();
+  }
+
   /**
    * Method: Init()
    */
@@ -65,13 +71,5 @@ public class LocalModeTest {
     } catch (Exception e) {
       fail(String.format("Exception %s thrown while creating two LocalMode", e));
     }
-  }
-
-  private static void clearSingletonRegistry() throws Exception {
-    // Remove the Singleton by Reflection
-    Field field = SingletonRegistry.INSTANCE.getClass().getDeclaredField("singletonObjects");
-    field.setAccessible(true);
-    Map<String, Object> singletonObjects = (Map<String, Object>) field.get(SingletonRegistry.INSTANCE);
-    singletonObjects.clear();
   }
 }

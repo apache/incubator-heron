@@ -17,6 +17,16 @@ package com.twitter.heron.spi.common;
 import java.util.Map;
 
 public class PackingPlan {
+  public final String id;
+  public final Map<String, ContainerPlan> containers;
+  public final Resource resource;
+
+  public PackingPlan(String id, Map<String, ContainerPlan> containers, Resource resource) {
+    this.id = id;
+    this.containers = containers;
+    this.resource = resource;
+  }
+
   /**
    * Type definition of packing structure output.
    */
@@ -56,15 +66,5 @@ public class PackingPlan {
       this.instances = instances;
       this.resource = resource;
     }
-  }
-
-  public final String id;
-  public final Map<String, ContainerPlan> containers;
-  public final Resource resource;
-
-  public PackingPlan(String id, Map<String, ContainerPlan> containers, Resource resource) {
-    this.id = id;
-    this.containers = containers;
-    this.resource = resource;
   }
 }

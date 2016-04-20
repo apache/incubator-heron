@@ -17,8 +17,8 @@ package com.twitter.heron.metrics;
 import com.twitter.heron.api.metric.CountMetric;
 import com.twitter.heron.api.metric.MeanReducer;
 import com.twitter.heron.api.metric.ReducedMetric;
-import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.basics.SingletonRegistry;
+import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
 
 /**

@@ -20,7 +20,7 @@ public class BoltExecuteInfo {
   private Tuple tuple;
   private int executingTaskId;
   private Long executeLatencyMs; // null if it wasn't sampled
-    
+
   public BoltExecuteInfo(Tuple tuple, int executingTaskId, Long executeLatencyMs) {
     this.tuple = tuple;
     this.executingTaskId = executingTaskId;

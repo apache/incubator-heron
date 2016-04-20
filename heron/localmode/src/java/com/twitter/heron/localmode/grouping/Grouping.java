@@ -26,8 +26,6 @@ public abstract class Grouping {
     this.taskIds = taskIds;
   }
 
-  public abstract List<Integer> getListToSend(HeronTuples.HeronDataTuple tuple);
-
   public static Grouping create(TopologyAPI.Grouping grouping,
                                 TopologyAPI.InputStream inputStream,
                                 TopologyAPI.StreamSchema schema,
@@ -67,4 +65,6 @@ public abstract class Grouping {
       }
     }
   }
+
+  public abstract List<Integer> getListToSend(HeronTuples.HeronDataTuple tuple);
 }

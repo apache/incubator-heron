@@ -21,9 +21,8 @@ import java.util.Random;
 import com.twitter.heron.proto.system.HeronTuples;
 
 public class ShuffleGrouping extends Grouping {
-  private int nextTaskIndex;
-
   private final int taskIdsSize;
+  private int nextTaskIndex;
 
   public ShuffleGrouping(List<Integer> taskIds) {
     super(taskIds);

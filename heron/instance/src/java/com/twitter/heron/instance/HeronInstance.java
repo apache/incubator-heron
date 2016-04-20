@@ -122,6 +122,84 @@ public class HeronInstance {
     threadsPool = Executors.newFixedThreadPool(NUM_THREADS);
   }
 
+  public static void main(String[] args) throws IOException {
+    if (args.length < 10) {
+      throw new RuntimeException("Invalid arguments; Usage is java com.twitter.heron.instance.HeronInstance <topology_name> <topology_id> <instance_id> <component_name> <task_id> <component_index> <stmgr_id> <stmgr_port> <metricsmgr_port> <heron_internals_config_filename>");
+    }
+
+    String topologyName = args[0];
+    String topologyId = args[1];
+    String instanceId = args[2];
+    String componentName = args[3];
+    int taskId = Integer.parseInt(args[4]);
+    int componentIndex = Integer.parseInt(args[5]);
+    String streamId = args[6];
+    int streamPort = Integer.parseInt(args[7]);
+    int metricsPort = Integer.parseInt(args[8]);
+    SystemConfig systemConfig = new SystemConfig(args[9], true);
+
+    // Add the SystemConfig into SingletonRegistry
+    SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, systemConfig);
+
+    // Create the protobuf Instance
+    PhysicalPlans.InstanceInfo instanceInfo = PhysicalPlans.InstanceInfo.newBuilder().
+        setTaskId(taskId).setComponentIndex(componentIndex).setComponentName(componentName).build();
+
+    PhysicalPlans.Instance instance = PhysicalPlans.Instance.newBuilder().
+        setInstanceId(instanceId).setStmgrId(streamId).setInfo(instanceInfo).build();
+
+    // Init the logging setting and redirect the stdout and stderr to logging
+    // For now we just set the logging level as INFO; later we may accept an argument to set it.
+    Level loggingLevel = Level.INFO;
+    String loggingDir = systemConfig.getHeronLoggingDirectory();
+
+    // Log to file and TMaster
+    LoggingHelper.loggerInit(loggingLevel, true);
+    LoggingHelper.addLoggingHandler(
+        LoggingHelper.getFileHandler(instanceId, loggingDir, true,
+            systemConfig.getHeronLoggingMaximumSizeMb() * Constants.MB_TO_BYTES,
+            systemConfig.getHeronLoggingMaximumFiles()));
+    LoggingHelper.addLoggingHandler(new ErrorReportLoggingHandler());
+
+    LOG.info("\nStarting instance " + instanceId + " for topology " + topologyName
+        + " and topologyId " + topologyId + " for component " + componentName
+        + " with taskId " + taskId + " and componentIndex " + componentIndex
+        + " and stmgrId " + streamId + " and stmgrPort " + streamPort
+        + " and metricsManagerPort " + metricsPort);
+
+    LOG.info("System Config: " + systemConfig);
+
+    HeronInstance heronInstance =
+        new HeronInstance(topologyName, topologyId, instance, streamPort, metricsPort);
+    heronInstance.start();
+  }
+
+  public void start() {
+    // Add exception handler for any uncaught exception here.
+    Thread.setDefaultUncaughtExceptionHandler(new DefaultExceptionHandler());
+
+    // Get the Thread Pool and run it
+    threadsPool.execute(gateway);
+    threadsPool.execute(slave);
+  }
+
+  public void stop() {
+    synchronized (this) {
+      LOG.severe("Instance Process exiting.\n");
+      for (Handler handler : java.util.logging.Logger.getLogger("").getHandlers()) {
+        handler.close();
+      }
+
+      // Attempts to shutdown all the thread in threadsPool. This will send Interrupt to every
+      // thread in the pool. Threads may implement a clean Interrupt logic.
+      threadsPool.shutdownNow();
+
+      // TODO : It is not clear if this signal should be sent to all the threads (including threads
+      // not owned by HeronInstance). To be safe, not sending these interrupts.
+      Runtime.getRuntime().halt(1);
+    }
+  }
+
   /**
    * Handler for catching exceptions thrown by any threads (owned either by topology or heron
    * infrastructure).
@@ -206,83 +284,5 @@ public class HeronInstance {
         Runtime.getRuntime().halt(1);
       }
     }
-  }
-
-  public void start() {
-    // Add exception handler for any uncaught exception here.
-    Thread.setDefaultUncaughtExceptionHandler(new DefaultExceptionHandler());
-
-    // Get the Thread Pool and run it
-    threadsPool.execute(gateway);
-    threadsPool.execute(slave);
-  }
-
-  public void stop() {
-    synchronized (this) {
-      LOG.severe("Instance Process exiting.\n");
-      for (Handler handler : java.util.logging.Logger.getLogger("").getHandlers()) {
-        handler.close();
-      }
-
-      // Attempts to shutdown all the thread in threadsPool. This will send Interrupt to every
-      // thread in the pool. Threads may implement a clean Interrupt logic.
-      threadsPool.shutdownNow();
-
-      // TODO : It is not clear if this signal should be sent to all the threads (including threads
-      // not owned by HeronInstance). To be safe, not sending these interrupts.
-      Runtime.getRuntime().halt(1);
-    }
-  }
-
-  public static void main(String[] args) throws IOException {
-    if (args.length < 10) {
-      throw new RuntimeException("Invalid arguments; Usage is java com.twitter.heron.instance.HeronInstance <topology_name> <topology_id> <instance_id> <component_name> <task_id> <component_index> <stmgr_id> <stmgr_port> <metricsmgr_port> <heron_internals_config_filename>");
-    }
-
-    String topologyName = args[0];
-    String topologyId = args[1];
-    String instanceId = args[2];
-    String componentName = args[3];
-    int taskId = Integer.parseInt(args[4]);
-    int componentIndex = Integer.parseInt(args[5]);
-    String streamId = args[6];
-    int streamPort = Integer.parseInt(args[7]);
-    int metricsPort = Integer.parseInt(args[8]);
-    SystemConfig systemConfig = new SystemConfig(args[9], true);
-
-    // Add the SystemConfig into SingletonRegistry
-    SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, systemConfig);
-
-    // Create the protobuf Instance
-    PhysicalPlans.InstanceInfo instanceInfo = PhysicalPlans.InstanceInfo.newBuilder().
-        setTaskId(taskId).setComponentIndex(componentIndex).setComponentName(componentName).build();
-
-    PhysicalPlans.Instance instance = PhysicalPlans.Instance.newBuilder().
-        setInstanceId(instanceId).setStmgrId(streamId).setInfo(instanceInfo).build();
-
-    // Init the logging setting and redirect the stdout and stderr to logging
-    // For now we just set the logging level as INFO; later we may accept an argument to set it.
-    Level loggingLevel = Level.INFO;
-    String loggingDir = systemConfig.getHeronLoggingDirectory();
-
-    // Log to file and TMaster
-    LoggingHelper.loggerInit(loggingLevel, true);
-    LoggingHelper.addLoggingHandler(
-        LoggingHelper.getFileHandler(instanceId, loggingDir, true,
-            systemConfig.getHeronLoggingMaximumSizeMb() * Constants.MB_TO_BYTES,
-            systemConfig.getHeronLoggingMaximumFiles()));
-    LoggingHelper.addLoggingHandler(new ErrorReportLoggingHandler());
-
-    LOG.info("\nStarting instance " + instanceId + " for topology " + topologyName
-        + " and topologyId " + topologyId + " for component " + componentName
-        + " with taskId " + taskId + " and componentIndex " + componentIndex
-        + " and stmgrId " + streamId + " and stmgrPort " + streamPort
-        + " and metricsManagerPort " + metricsPort);
-
-    LOG.info("System Config: " + systemConfig);
-
-    HeronInstance heronInstance =
-        new HeronInstance(topologyName, topologyId, instance, streamPort, metricsPort);
-    heronInstance.start();
   }
 }

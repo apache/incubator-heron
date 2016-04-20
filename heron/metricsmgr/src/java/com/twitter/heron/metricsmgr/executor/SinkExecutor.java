@@ -18,10 +18,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.SlaveLooper;
+import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.metricsmgr.MetricsSinksConfig;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
 import com.twitter.heron.spi.metricsmgr.sink.IMetricsSink;
@@ -32,7 +32,7 @@ import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
  * The IMetricsSink does not need to care about thread-safe since:
  * 1. It is always running in the same specific thread
  * 2. All arguments passed to IMetricsSink are immutable
- * <p/>
+ * <p>
  * The thread of SinkExecutor would be blocked to save resources except:
  * 1. New MetricsRecord comes and notify the SinkExecutor to wake up to process it
  * 2. The time interval to invoke flush() is met so SinkExecutor would wake up to invoke flush()
