@@ -22,8 +22,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.twitter.heron.spi.metricsmgr.metrics.ExceptionInfo;
-
 public class ExceptionInfoTest {
   private static final int N = 100;
   private static final String STACK_TRACE = "stackTrace";

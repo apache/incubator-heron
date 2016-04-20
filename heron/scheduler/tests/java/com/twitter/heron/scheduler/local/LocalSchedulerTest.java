@@ -22,9 +22,9 @@ import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.scheduler.util.DefaultConfigLoader;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.scheduler.context.LaunchContext;
-import com.twitter.heron.scheduler.util.DefaultConfigLoader;
 
 /**
  * LocalScheduler Tester.

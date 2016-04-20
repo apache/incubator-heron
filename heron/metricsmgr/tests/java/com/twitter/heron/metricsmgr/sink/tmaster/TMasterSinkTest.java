@@ -25,23 +25,22 @@ import org.junit.Test;
 
 import com.twitter.heron.api.metric.MultiCountMetric;
 import com.twitter.heron.common.basics.SingletonRegistry;
-import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
 import com.twitter.heron.metricsmgr.sink.SinkContextImpl;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
+import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
 
 
 /**
  * TMasterSink Tester.
  */
 public class TMasterSinkTest {
+  // Bean name to register the TMasterLocation object into SingletonRegistry
+  private static final String TMASTER_LOCATION_BEAN_NAME =
+      TopologyMaster.TMasterLocation.newBuilder().getDescriptorForType().getFullName();
   private final int RECONNECT_INTERVAL_SECONDS = 1;
   private final int RESTART_WAIT_INTERVAL_SECONDS = 5;
   private final int TMASTER_LOCATION_CHECK_INTERVAL_SECONDS = 1;
   private final int WAIT_SECONDS = 10;
-
-  // Bean name to register the TMasterLocation object into SingletonRegistry
-  private static final String TMASTER_LOCATION_BEAN_NAME =
-      TopologyMaster.TMasterLocation.newBuilder().getDescriptorForType().getFullName();
 
   @Before
   public void before() throws Exception {

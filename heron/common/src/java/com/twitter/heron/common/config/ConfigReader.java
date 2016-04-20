@@ -38,7 +38,6 @@ public class ConfigReader {
    * Load properties from the given YAML file
    *
    * @param fileName, the name of YAML file to read
-   *
    * @return Map, contains the key value pairs of config
    */
   public static Map loadFile(String fileName) {
@@ -46,8 +45,7 @@ public class ConfigReader {
     if (fileName == null) {
       LOG.warning("Config file name cannot be null");
       return props;
-    }
-    else if (fileName.isEmpty()) {
+    } else if (fileName.isEmpty()) {
       LOG.warning("Config file name is empty");
       return props;
     } else {
@@ -89,7 +87,6 @@ public class ConfigReader {
    * Load config from the given YAML stream
    *
    * @param inputStream, the name of YAML stream to read
-   *
    * @return Map, contains the key value pairs of config
    */
   public static Map loadStream(InputStream inputStream) {

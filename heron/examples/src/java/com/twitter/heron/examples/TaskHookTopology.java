@@ -43,6 +43,33 @@ import backtype.storm.tuple.Values;
 import backtype.storm.utils.Utils;
 
 public class TaskHookTopology {
+  public static void main(String[] args) throws Exception {
+    if (args.length != 1) {
+      throw new RuntimeException("Specify topology name");
+    }
+    TopologyBuilder builder = new TopologyBuilder();
+
+    builder.setSpout("word", new AckingTestWordSpout(), 2);
+    builder.setBolt("count", new CountBolt(), 2)
+        .shuffleGrouping("word");
+
+    Config conf = new Config();
+    conf.setDebug(true);
+    // Put an arbitrary large number here if you don't want to slow the topology down
+    conf.setMaxSpoutPending(1000 * 1000 * 1000);
+    // To enable acking, we need to setEnableAcking true
+    conf.setEnableAcking(true);
+    conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
+
+    // Set the task hook
+    List<String> taskHooks = new LinkedList<String>();
+    taskHooks.add("com.twitter.heron.examples.TaskHookTopology$TestTaskHook");
+    conf.setAutoTaskHooks(taskHooks);
+
+    conf.setNumStmgrs(1);
+    StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
+  }
+
   public static class TestTaskHook implements ITaskHook {
     private static final long N = 10000;
     private long emitted = 0;
@@ -229,32 +256,5 @@ public class TaskHookTopology {
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
     }
-  }
-
-  public static void main(String[] args) throws Exception {
-    if (args.length != 1) {
-      throw new RuntimeException("Specify topology name");
-    }
-    TopologyBuilder builder = new TopologyBuilder();
-
-    builder.setSpout("word", new AckingTestWordSpout(), 2);
-    builder.setBolt("count", new CountBolt(), 2)
-        .shuffleGrouping("word");
-
-    Config conf = new Config();
-    conf.setDebug(true);
-    // Put an arbitrary large number here if you don't want to slow the topology down
-    conf.setMaxSpoutPending(1000 * 1000 * 1000);
-    // To enable acking, we need to setEnableAcking true
-    conf.setEnableAcking(true);
-    conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
-
-    // Set the task hook
-    List<String> taskHooks = new LinkedList<String>();
-    taskHooks.add("com.twitter.heron.examples.TaskHookTopology$TestTaskHook");
-    conf.setAutoTaskHooks(taskHooks);
-
-    conf.setNumStmgrs(1);
-    StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }
 }

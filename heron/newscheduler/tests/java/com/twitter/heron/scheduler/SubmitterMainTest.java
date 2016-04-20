@@ -38,24 +38,18 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
-
+import com.twitter.heron.scheduler.util.DefaultConfigLoader;
+import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.packing.NullPackingAlgorithm;
 import com.twitter.heron.spi.scheduler.IConfigLoader;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.scheduler.NullLauncher;
-
 import com.twitter.heron.spi.scheduler.NullScheduler;
-
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
+import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.uploader.IUploader;
 import com.twitter.heron.spi.uploader.NullUploader;
-
-import com.twitter.heron.spi.common.PackingPlan;
-import com.twitter.heron.spi.packing.NullPackingAlgorithm;
-
-import com.twitter.heron.spi.scheduler.context.LaunchContext;
 import com.twitter.heron.spi.util.Factory;
-
-import com.twitter.heron.scheduler.util.DefaultConfigLoader;
-import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.statemgr.NullStateManager;
 
 import static org.junit.Assert.assertTrue;

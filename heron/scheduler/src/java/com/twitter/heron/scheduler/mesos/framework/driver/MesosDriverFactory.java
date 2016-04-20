@@ -25,11 +25,9 @@ import com.twitter.heron.scheduler.mesos.framework.state.PersistenceStore;
 
 public class MesosDriverFactory {
   private static final Logger LOG = Logger.getLogger(MesosDriverFactory.class.getName());
-
-  SchedulerDriver mesosDriver;
-
-  Scheduler scheduler;
   private final PersistenceStore persistenceStore;
+  SchedulerDriver mesosDriver;
+  Scheduler scheduler;
   FrameworkConfiguration config;
 
   public MesosDriverFactory(Scheduler scheduler,

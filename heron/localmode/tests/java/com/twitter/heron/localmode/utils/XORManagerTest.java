@@ -42,10 +42,10 @@ import junit.framework.Assert;
  * @since <pre>Jul 29, 2015</pre>
  */
 public class XORManagerTest {
+  private static final List<Integer> task_ids = new LinkedList<>();
   private static TopologyAPI.Topology topology;
   private static int timeoutSec = 1;
   private static int nBuckets = 3;
-  private static final List<Integer> task_ids = new LinkedList<>();
 
   @BeforeClass
   public static void beforeClass() throws Exception {

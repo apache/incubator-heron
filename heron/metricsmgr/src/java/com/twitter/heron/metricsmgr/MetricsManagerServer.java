@@ -32,12 +32,12 @@ import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.network.HeronServer;
 import com.twitter.heron.common.network.HeronSocketOptions;
 import com.twitter.heron.common.network.REQID;
-import com.twitter.heron.spi.metricsmgr.metrics.ExceptionInfo;
-import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
-import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
+import com.twitter.heron.spi.metricsmgr.metrics.ExceptionInfo;
+import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
+import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
 
 public class MetricsManagerServer extends HeronServer {
   private static final Logger LOG = Logger.getLogger(MetricsManagerServer.class.getName());

@@ -37,41 +37,6 @@ public class HeronTopology {
     this.topologyBuilder = topologyBuilder;
   }
 
-  public TopologyAPI.Topology getTopology() {
-    if (name == null || state == null || heronConfig == null) {
-      throw new IllegalArgumentException("Failed to build topology; missing necessary info.");
-    }
-
-    String topologyId = name + UUID.randomUUID().toString();
-
-    topologyBuilder.setId(topologyId);
-    topologyBuilder.setName(name);
-    topologyBuilder.setState(state);
-
-    // Add extra config
-    addDefaultTopologyConfig(heronConfig);
-    heronConfig.put(Config.TOPOLOGY_NAME, name);
-
-    topologyBuilder.setTopologyConfig(getConfigBuilder(heronConfig));
-
-    return topologyBuilder.build();
-  }
-
-  public HeronTopology setName(String name) {
-    this.name = name;
-    return this;
-  }
-
-  public HeronTopology setState(TopologyAPI.TopologyState state) {
-    this.state = state;
-    return this;
-  }
-
-  public HeronTopology setConfig(Config heronConfig) {
-    this.heronConfig = heronConfig;
-    return this;
-  }
-
   private static TopologyAPI.Config.Builder getConfigBuilder(Config config) {
     TopologyAPI.Config.Builder cBldr = TopologyAPI.Config.newBuilder();
     Set<String> apiVars = config.getApiVars();
@@ -111,5 +76,40 @@ public class HeronTopology {
     if (!userConfig.containsKey(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS)) {
       userConfig.put(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS, "true");
     }
+  }
+
+  public TopologyAPI.Topology getTopology() {
+    if (name == null || state == null || heronConfig == null) {
+      throw new IllegalArgumentException("Failed to build topology; missing necessary info.");
+    }
+
+    String topologyId = name + UUID.randomUUID().toString();
+
+    topologyBuilder.setId(topologyId);
+    topologyBuilder.setName(name);
+    topologyBuilder.setState(state);
+
+    // Add extra config
+    addDefaultTopologyConfig(heronConfig);
+    heronConfig.put(Config.TOPOLOGY_NAME, name);
+
+    topologyBuilder.setTopologyConfig(getConfigBuilder(heronConfig));
+
+    return topologyBuilder.build();
+  }
+
+  public HeronTopology setName(String name) {
+    this.name = name;
+    return this;
+  }
+
+  public HeronTopology setState(TopologyAPI.TopologyState state) {
+    this.state = state;
+    return this;
+  }
+
+  public HeronTopology setConfig(Config heronConfig) {
+    this.heronConfig = heronConfig;
+    return this;
   }
 }

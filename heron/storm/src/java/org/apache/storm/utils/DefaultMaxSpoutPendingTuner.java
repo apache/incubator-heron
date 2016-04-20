@@ -20,7 +20,9 @@ package org.apache.storm.utils;
 public class DefaultMaxSpoutPendingTuner {
   com.twitter.heron.api.utils.DefaultMaxSpoutPendingTuner delegate;
 
-  /** Conv constructor when initing from a non-set initial value */
+  /**
+   * Conv constructor when initing from a non-set initial value
+   */
   public DefaultMaxSpoutPendingTuner(float autoTuneFactor, double progressBound) {
     this(null, autoTuneFactor, progressBound);
   }
@@ -28,8 +30,8 @@ public class DefaultMaxSpoutPendingTuner {
   public DefaultMaxSpoutPendingTuner(Long maxSpoutPending, float autoTuneFactor,
                                      double progressBound) {
     delegate = new com.twitter.heron.api.utils.DefaultMaxSpoutPendingTuner(maxSpoutPending,
-                                                                           autoTuneFactor,
-                                                                           progressBound);
+        autoTuneFactor,
+        progressBound);
   }
 
   public Long get() {

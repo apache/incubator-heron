@@ -29,6 +29,26 @@ public class Config {
     this.configPath = builder.mConfigPath;
   }
 
+  public String getCluster() {
+    return this.cluster;
+  }
+
+  public String getRole() {
+    return this.role;
+  }
+
+  public String getEnv() {
+    return this.role;
+  }
+
+  public String getTopologyName() {
+    return this.topologyName;
+  }
+
+  public String getConfigPath() {
+    return this.getConfigPath();
+  }
+
   public static class Builder {
     String mCluster;
     String mRole;
@@ -64,25 +84,5 @@ public class Config {
     public Config build() {
       return new Config(this);
     }
-  }
-
-  public String getCluster() {
-    return this.cluster;
-  }
-
-  public String getRole() {
-    return this.role;
-  }
-
-  public String getEnv() {
-    return this.role;
-  }
-
-  public String getTopologyName() {
-    return this.topologyName;
-  }
-
-  public String getConfigPath() {
-    return this.getConfigPath();
   }
 }

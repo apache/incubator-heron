@@ -27,12 +27,9 @@ import com.sun.net.httpserver.HttpServer;
 import com.twitter.heron.scheduler.mesos.framework.jobs.JobScheduler;
 
 public class FrameworkHttpServer {
-  private static final Logger LOG = Logger.getLogger(FrameworkHttpServer.class.getName());
-
   public static final String KILL_REQUEST_CONTEXT = "/kill";
-
   public static final String SUBMIT_REQUEST_CONTEXT = "/submit";
-
+  private static final Logger LOG = Logger.getLogger(FrameworkHttpServer.class.getName());
   private static final int SERVER_BACK_LOG = 0;
 
   private final HttpServer schedulerServer;

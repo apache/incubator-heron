@@ -17,6 +17,8 @@ package com.twitter.heron.resource;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.Ignore;
+
 import com.twitter.heron.api.bolt.BaseRichBolt;
 import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
@@ -25,8 +27,6 @@ import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
 import com.twitter.heron.common.basics.SingletonRegistry;
-
-import org.junit.Ignore;
 
 /**
  * A Bolt used for unit test, it will execute and modify some singletons' value:

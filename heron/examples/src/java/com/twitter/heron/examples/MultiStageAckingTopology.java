@@ -36,6 +36,29 @@ import backtype.storm.utils.Utils;
  * This is three stage topology. Spout emits to bolt to bolt.
  */
 public class MultiStageAckingTopology {
+  public static void main(String[] args) throws Exception {
+    if (args.length != 1) {
+      throw new RuntimeException("Please specify the name of the topology");
+    }
+    TopologyBuilder builder = new TopologyBuilder();
+
+    builder.setSpout("word", new AckingTestWordSpout(), 2);
+    builder.setBolt("exclaim1", new ExclamationBolt(true), 2)
+        .shuffleGrouping("word");
+    builder.setBolt("exclaim2", new ExclamationBolt(false), 2)
+        .shuffleGrouping("exclaim1");
+
+    Config conf = new Config();
+    conf.setDebug(true);
+    // Put an arbitrary large number here if you don't want to slow the topology down
+    conf.setMaxSpoutPending(1000 * 1000 * 1000);
+    // To enable acking, we need to setEnableAcking true
+    conf.setEnableAcking(true);
+    conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
+    conf.setNumStmgrs(1);
+    StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
+  }
+
   public static class AckingTestWordSpout extends BaseRichSpout {
     SpoutOutputCollector _collector;
     String[] words;
@@ -113,28 +136,5 @@ public class MultiStageAckingTopology {
         declarer.declare(new Fields("word"));
       }
     }
-  }
-
-  public static void main(String[] args) throws Exception {
-    if (args.length != 1) {
-      throw new RuntimeException("Please specify the name of the topology");
-    }
-    TopologyBuilder builder = new TopologyBuilder();
-
-    builder.setSpout("word", new AckingTestWordSpout(), 2);
-    builder.setBolt("exclaim1", new ExclamationBolt(true), 2)
-        .shuffleGrouping("word");
-    builder.setBolt("exclaim2", new ExclamationBolt(false), 2)
-        .shuffleGrouping("exclaim1");
-
-    Config conf = new Config();
-    conf.setDebug(true);
-    // Put an arbitrary large number here if you don't want to slow the topology down
-    conf.setMaxSpoutPending(1000 * 1000 * 1000);
-    // To enable acking, we need to setEnableAcking true
-    conf.setEnableAcking(true);
-    conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
-    conf.setNumStmgrs(1);
-    StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }
 }

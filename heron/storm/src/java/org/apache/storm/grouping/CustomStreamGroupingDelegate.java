@@ -34,7 +34,7 @@ public class CustomStreamGroupingDelegate implements com.twitter.heron.api.group
     GlobalStreamId g = new GlobalStreamId(component, streamId);
     delegate.prepare(c, g, targetTasks);
   }
-    
+
   @Override
   public List<Integer> chooseTasks(List<Object> values) {
     return delegate.chooseTasks(-1, values);

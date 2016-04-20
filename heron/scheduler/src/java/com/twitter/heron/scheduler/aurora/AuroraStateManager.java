@@ -24,25 +24,24 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.scheduler.util.NetworkUtility;
 import com.twitter.heron.scheduler.util.ShellUtility;
+import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 import com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager;
 
 /**
  * This StateManager is only used for Twitter Aurora environment.
  * It extends CuratorStateManager but adding more features, given the Twitter environment:
- * <p/>
+ * <p>
  * 1. Tunneling if needed
  * 2. Will not setSchedulerLocation since we would not start the Scheduler
  * 2. getSchedulerLocation return NO SCHEDULER_REST_ENDPOINT directly
  */
 public class AuroraStateManager extends CuratorStateManager {
   private static final Logger LOG = Logger.getLogger(AuroraStateManager.class.getName());
-  private List<Process> processHandles = new ArrayList<>();
   private static final String NO_SCHEDULER_REST_ENDPOINT = "no_scheduler_endpoint";
-
+  private List<Process> processHandles = new ArrayList<>();
 
   @Override
   public void initialize(Map<Object, Object> conf) {

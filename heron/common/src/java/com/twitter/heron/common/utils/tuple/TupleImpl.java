@@ -27,7 +27,7 @@ import com.twitter.heron.proto.system.HeronTuples;
  * where each value can be any type. Tuples are dynamically typed -- the types of the fields
  * do not need to be declared. Tuples have helper methods like getInteger and getString
  * to get field values without having to cast the result.
- * <p/>
+ * <p>
  * Heron needs to know how to serialize all the values in a tuple. By default, Heron
  * knows how to serialize the primitive types, strings, and byte arrays. If you want to
  * use another type, you'll need to implement and register a serializer for that type.

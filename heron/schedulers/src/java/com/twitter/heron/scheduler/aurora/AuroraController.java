@@ -42,6 +42,23 @@ public class AuroraController {
     this.isVerbose = isVerbose;
   }
 
+  // Static method to append verbose and batching options if needed
+  public static void appendAuroraCommandOptions(List<String> auroraCmd,
+                                                boolean isVerbose) {
+    // Append verbose if needed
+    if (isVerbose) {
+      auroraCmd.add("--verbose");
+    }
+
+    // Append batch size.
+    // Note that we can not use "--no-batching" since "restart" command does not accept it.
+    // So we play a small trick here by setting batch size Integer.MAX_VALUE.
+    auroraCmd.add("--batch-size");
+    auroraCmd.add("" + Integer.MAX_VALUE);
+
+    return;
+  }
+
   // Create an aurora job
   public boolean createJob(String auroraFilename, Map<String, String> bindings) {
     List<String> auroraCmd = new ArrayList<>(Arrays.asList("aurora", "job", "create", "--wait-until", "RUNNING"));
@@ -88,22 +105,5 @@ public class AuroraController {
 
     return 0 == ShellUtils.runProcess(
         isVerbose, auroraCmd.toArray(new String[0]), new StringBuilder(), new StringBuilder());
-  }
-
-  // Static method to append verbose and batching options if needed
-  public static void appendAuroraCommandOptions(List<String> auroraCmd,
-                                                boolean isVerbose) {
-    // Append verbose if needed
-    if (isVerbose) {
-      auroraCmd.add("--verbose");
-    }
-
-    // Append batch size.
-    // Note that we can not use "--no-batching" since "restart" command does not accept it.
-    // So we play a small trick here by setting batch size Integer.MAX_VALUE.
-    auroraCmd.add("--batch-size");
-    auroraCmd.add("" + Integer.MAX_VALUE);
-
-    return;
   }
 }

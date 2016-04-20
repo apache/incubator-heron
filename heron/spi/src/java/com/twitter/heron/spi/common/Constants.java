@@ -33,9 +33,9 @@ public class Constants {
   public static final String ZK_CONNECTION_STRING = "zk.connection.string";
   public static final String ZK_CONNECTION_TIMEOUT_MS = "zk.connection.timeout.ms";
 
-  public static final String LOCALFS_STATE_MANAGER_CLASS = 
+  public static final String LOCALFS_STATE_MANAGER_CLASS =
       "com.twitter.heron.statemgr.localfs.LocalFileSystemStateManager";
 
-  public static final String ZK_STATE_MANAGER_CLASS = 
+  public static final String ZK_STATE_MANAGER_CLASS =
       "com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager";
 }

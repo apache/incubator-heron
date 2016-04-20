@@ -26,11 +26,11 @@ import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.spout.ISpout;
 import com.twitter.heron.api.spout.SpoutOutputCollector;
 import com.twitter.heron.api.utils.Utils;
-import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
+import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.metrics.SpoutMetrics;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.common.utils.misc.SerializeDeSerializeHelper;
@@ -206,10 +206,10 @@ public class SpoutInstance implements IInstance {
    * When the topology state is in RUNNING:
    * 1. If the out Queue is not full and ack is not enabled, we could just wake up next time
    * to produce more tuples and push to the out Queue
-   * <p/>
+   * <p>
    * 2. It the out Queue is not full but the ack is enabled, we also need to make sure the
    * tuples waiting smaller than msp
-   * <p/>
+   * <p>
    * 3. If there are more to read, we will wake up itself next time when it doWait()
    *
    * @return true Wake up itself directly in next looper.doWait()

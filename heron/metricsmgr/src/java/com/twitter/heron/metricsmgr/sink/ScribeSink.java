@@ -33,9 +33,9 @@ import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 
-import com.twitter.heron.common.basics.TypeUtils;
-import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.basics.Constants;
+import com.twitter.heron.common.basics.SysUtils;
+import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
 import com.twitter.heron.spi.metricsmgr.sink.IMetricsSink;
@@ -71,23 +71,15 @@ public class ScribeSink implements IMetricsSink {
   private static final String TRY_AGAIN_COUNT = "try-again-count";
   private static final String FAILED_COUNT = "failed-count";
   private static final String ILLEGAL_METRICS_COUNT = "illegal-metrics-count";
-
+  private static final Map<String, Long> counters = new HashMap<String, Long>();
+  private static final ObjectMapper mapper = new ObjectMapper();
   // The SinkConfig for ScribeSink, which is parsed from sink-configs.yaml
   private Map<String, Object> config;
-
-  private static final Map<String, Long> counters = new HashMap<String, Long>();
-
   private TFramedTransport transport;
-
   private scribe.Client client;
-
   private SinkContext sinkContext;
-
   private String topologyName;
-
   private int connectRetryAttempts;
-
-  private static final ObjectMapper mapper = new ObjectMapper();
 
   @Override
   public void init(Map<String, Object> conf, SinkContext context) {
