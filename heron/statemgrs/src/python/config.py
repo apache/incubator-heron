@@ -30,9 +30,11 @@ class Config:
   """
 
   def __init__(self, conf_file):
+    expanded_conf_file_path = os.path.expanduser(conf_file)
+    assert os.path.lexists(expanded_conf_file_path), "File does not exists: %s" % (conf_file)
 
     # Read the configuration file
-    with open(conf_file, 'r') as f:
+    with open(expanded_conf_file_path, 'r') as f:
       self.locations = yaml.load(f)
 
     self.validate_state_locations()

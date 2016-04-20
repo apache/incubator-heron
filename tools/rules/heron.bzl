@@ -14,7 +14,7 @@ def install_heron_files_impl(ctx):
     lib_files    = ctx.files.lib if ctx.files.lib else []
     conf_files   = ctx.files.conf if ctx.files.conf else []
     others_files = ctx.files.others if ctx.files.others else []
-    
+
     mkdir_cmds = []
     cp_cmds = []
     outputs = []
@@ -63,7 +63,7 @@ def install_heron_files_impl(ctx):
 #  - bin, for binary or executable files that go under bin subfolder
 #  - conf, for configuration files that go under conf subfolder
 #  - lib, for library files that go under lib subfolder
-#  - other, for miscellaneous files that go under the directory 
+#  - other, for miscellaneous files that go under the directory
 ################################################################################
 install_heron_files = rule(
     install_heron_files_impl,
@@ -123,7 +123,7 @@ def heron_client_lib_files():
         "//heron/statemgrs/src/java:heron-localfs-statemgr",
         "//3rdparty/protobuf:protobuf-java",
         "//3rdparty/logging:slf4j-api-java",
-        "//3rdparty/logging:slf4j-jdk-java", 
+        "//3rdparty/logging:slf4j-jdk-java",
         "//3rdparty/logging:log4j-over-slf4j-java",
     ]
 
@@ -184,16 +184,16 @@ def local_heron_test(name, srcs, main, topology, args=None, data=None, deps=None
     topology_target = name + "-topology-files"
 
     install_heron_files(
-        name   = cli_target, 
+        name   = cli_target,
         dir    = working_dir,
-        bin    = heron_client_bin_files(), 
-        lib    = heron_client_lib_files(), 
+        bin    = heron_client_bin_files(),
+        lib    = heron_client_lib_files(),
         others = heron_client_conf_files(),
     )
 
     uheron_core_files = [item for item in heron_core_files() if item not in heron_client_files()]
     install_heron_files(
-        name   = core_target, 
+        name   = core_target,
         dir    = working_dir,
         others = uheron_core_files,
     )
@@ -203,7 +203,7 @@ def local_heron_test(name, srcs, main, topology, args=None, data=None, deps=None
         dir    = working_dir,
         others = topology
     )
-      
+
     extra_args = [
         "--heron-working-directory " + working_dir,
     ]

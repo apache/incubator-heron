@@ -1,0 +1,15 @@
+# Configs for heron-tracker
+
+# Path to statemgrs config file
+statemgrs.config.file: "~/.herontools/conf/localfilestateconf.yaml"
+
+# The URL that points to a topology's metrics dashboard.
+# This value can use following parameters to create a valid
+# URL based on the topology. All parameters are self-explanatory.
+# These are found in the execution state of the topology.
+#   {cluster}
+#   {environ}
+#   {jobname} - Same as topology name
+#   {role}
+#   {submission_user}
+viz.url.format: "http://localhost:{cluster}/{environ}/{jobname}/{role}/{submission_user}"
