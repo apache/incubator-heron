@@ -56,10 +56,10 @@ public class SchedulerMain {
   private String environ = null;                 // environ to launch the topology
   private String topologyName = null;            // name of the topology
   private String topologyJarFile = null;         // name of the topology jar/tar file
-  private int    schedulerServerPort = 0 ;       // http port where the scheduler is listening
+  private int schedulerServerPort = 0;       // http port where the scheduler is listening
 
   private TopologyAPI.Topology topology = null;  // topology definition
-  private Config  config;                        // holds all the config read
+  private Config config;                        // holds all the config read
 
   // Print usage options
   private static void usage(Options options) {
@@ -142,7 +142,7 @@ public class SchedulerMain {
   }
 
   public SchedulerMain(String iCluster, String iRole, String iEnviron,
-      String iTopologyName, String iTopologyJarFile, int iSchedulerServerPort) throws IOException {
+                       String iTopologyName, String iTopologyJarFile, int iSchedulerServerPort) throws IOException {
     // initialize the options
     cluster = iCluster;
     role = iRole;
@@ -289,7 +289,9 @@ public class SchedulerMain {
       setSchedulerLocation(runtime, server);
 
       // schedule the packed plan
-      scheduler.schedule(packedPlan);
+      if (!scheduler.onSchedule(packedPlan)) {
+        throw new RuntimeException("Failed to scheduler topology");
+      }
 
       // wait until kill request or some interrupt occurs
       LOG.info("Waiting for termination... ");
