@@ -111,6 +111,10 @@ limitations under the License.
 
     <module name="TreeWalker">
       <property name="tabWidth" value="2"/>
+      <module name="Indentation">
+        <property name="basicOffset" value="2"/>
+        <property name="caseIndent" value="2"/>
+      </module>
 
       <!-- needed for SuppressWithNearbyCommentFilter -->
       <module name="FileContentsHolder"/>
@@ -187,9 +191,10 @@ limitations under the License.
         <property name="ordered" value="true"/>
         <property name="separated" value="true"/>
         <property name="option" value="bottom"/>
+        <property name="sortStaticImportsAlphabetically" value="true"/>
         <message key="import.ordering"
                  value="Wrong order for ''{0}'' import. Order should be: java, javax, scala, com, net, org,
-com.twitter. Each group should be separated by a single blank line." />
+com.twitter. Each group should be separated by a single blank line. Static imports at the bottom." />
       </module>
 
       <!-- Checks for Size Violations.                    -->
