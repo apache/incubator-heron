@@ -14,20 +14,16 @@
 
 package backtype.storm.topology;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.tuple.Tuple;
-import backtype.storm.topology.FailedException;
-import backtype.storm.topology.ReportedFailedException;
 import backtype.storm.task.OutputCollector;
+import backtype.storm.task.TopologyContext;
+import backtype.storm.tuple.Tuple;
 
 public class BasicBoltExecutor implements IRichBolt {
     private IBasicBolt delegate;
     private transient BasicOutputCollector collector;
-    
+
     public BasicBoltExecutor(IBasicBolt bolt) {
         this.delegate = bolt;
     }
@@ -37,7 +33,7 @@ public class BasicBoltExecutor implements IRichBolt {
         delegate.declareOutputFields(declarer);
     }
 
-    
+
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
         delegate.prepare(stormConf, context);
@@ -50,8 +46,8 @@ public class BasicBoltExecutor implements IRichBolt {
         try {
             delegate.execute(input, collector);
             this.collector.getOutputter().ack(input);
-        } catch(FailedException e) {
-            if(e instanceof ReportedFailedException) {
+        } catch (FailedException e) {
+            if (e instanceof ReportedFailedException) {
                 this.collector.reportError(e);
             }
             this.collector.getOutputter().fail(input);

@@ -34,55 +34,55 @@ import backtype.storm.tuple.Tuple;
  * This is a basic example of a Storm topology.
  */
 public class CustomGroupingTopology {
-  public static class MyBolt extends BaseRichBolt {
-    private long nItems;
+    public static void main(String[] args) throws Exception {
+        TopologyBuilder builder = new TopologyBuilder();
 
-    @Override
-    public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
-      nItems = 0;
+        builder.setSpout("word", new TestWordSpout(), 2);
+        builder.setBolt("mybolt", new MyBolt(), 2)
+                .customGrouping("word", new MyCustomStreamGrouping());
+
+        Config conf = new Config();
+
+        conf.setNumStmgrs(1);
+        StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
     }
 
-    @Override
-    public void execute(Tuple tuple) {
-      if (++nItems % 10000 == 0) {
-        System.out.println(tuple.getString(0));
-      }
+    public static class MyBolt extends BaseRichBolt {
+        private long nItems;
+
+        @Override
+        public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
+            nItems = 0;
+        }
+
+        @Override
+        public void execute(Tuple tuple) {
+            if (++nItems % 10000 == 0) {
+                System.out.println(tuple.getString(0));
+            }
+        }
+
+        @Override
+        public void declareOutputFields(OutputFieldsDeclarer declarer) {
+        }
     }
 
-    @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer) {
+    public static class MyCustomStreamGrouping implements CustomStreamGrouping {
+        private List<Integer> taskIds;
+
+        public MyCustomStreamGrouping() {
+        }
+
+        @Override
+        public void prepare(WorkerTopologyContext context, GlobalStreamId stream, List<Integer> targetTasks) {
+            this.taskIds = targetTasks;
+        }
+
+        @Override
+        public List<Integer> chooseTasks(int taskId, List<Object> values) {
+            List<Integer> ret = new ArrayList<Integer>();
+            ret.add(taskIds.get(0));
+            return ret;
+        }
     }
-  }
-
-  public static class MyCustomStreamGrouping implements CustomStreamGrouping {
-    private List<Integer> taskIds;
-
-    public MyCustomStreamGrouping() {
-    }
-
-    @Override
-    public void prepare(WorkerTopologyContext context, GlobalStreamId stream, List<Integer> targetTasks) {
-      this.taskIds = targetTasks;
-    }
-
-    @Override
-    public List<Integer> chooseTasks(int taskId, List<Object> values) {
-      List<Integer> ret = new ArrayList<Integer>();
-      ret.add(taskIds.get(0));
-      return ret;
-    }
-  }
-
-  public static void main(String[] args) throws Exception {
-    TopologyBuilder builder = new TopologyBuilder();
-
-    builder.setSpout("word", new TestWordSpout(), 2);
-    builder.setBolt("mybolt", new MyBolt(), 2)
-        .customGrouping("word", new MyCustomStreamGrouping());
-
-    Config conf = new Config();
-
-    conf.setNumStmgrs(1);
-    StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
-  }
 }

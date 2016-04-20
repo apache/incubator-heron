@@ -19,34 +19,34 @@ package com.twitter.heron.spi.metricsmgr.metrics;
  * The value is in type String, and IMetricsSink would determine how to parse it.
  */
 public class MetricsInfo {
-  private final String name;
-  private final String value;
+    private final String name;
+    private final String value;
 
-  public MetricsInfo(String name, String value) {
-    this.name = name;
-    this.value = value;
-  }
+    public MetricsInfo(String name, String value) {
+        this.name = name;
+        this.value = value;
+    }
 
-  /**
-   * Get the name of the metric
-   *
-   * @return the name of the metric
-   */
-  public String getName() {
-    return name;
-  }
+    /**
+     * Get the name of the metric
+     *
+     * @return the name of the metric
+     */
+    public String getName() {
+        return name;
+    }
 
-  /**
-   * Get the value of the metric
-   *
-   * @return the value of the metric
-   */
-  public String getValue() {
-    return value;
-  }
+    /**
+     * Get the value of the metric
+     *
+     * @return the value of the metric
+     */
+    public String getValue() {
+        return value;
+    }
 
-  @Override
-  public String toString() {
-    return String.format("%s = %s", getName(), getValue());
-  }
+    @Override
+    public String toString() {
+        return String.format("%s = %s", getName(), getValue());
+    }
 }

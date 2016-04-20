@@ -16,10 +16,10 @@ package backtype.storm.topology;
 
 import java.util.List;
 
+import backtype.storm.task.IOutputCollector;
+import backtype.storm.task.OutputCollector;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.utils.Utils;
-import backtype.storm.task.OutputCollector;
-import backtype.storm.task.IOutputCollector;
 
 public class BasicOutputCollector implements IBasicOutputCollector {
     private OutputCollector out;

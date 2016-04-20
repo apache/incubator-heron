@@ -14,8 +14,9 @@
 
 package com.twitter.heron.api.spout;
 
-import com.twitter.heron.api.utils.Utils;
 import java.util.List;
+
+import com.twitter.heron.api.utils.Utils;
 
 /**
  * This output collector exposes the API for emitting tuples from an {@link backtype.heron.topology.IRichSpout}.
@@ -80,7 +81,7 @@ public class SpoutOutputCollector implements ISpoutOutputCollector {
     /**
      * Emits a tuple to the specified task on the specified output stream. This output
      * stream must have been declared as a direct stream, and the specified task must
-     * use a direct grouping on this stream to receive the message. The emitted values must be 
+     * use a direct grouping on this stream to receive the message. The emitted values must be
      * immutable.
      */
     public void emitDirect(int taskId, String streamId, List<Object> tuple, Object messageId) {
@@ -90,19 +91,19 @@ public class SpoutOutputCollector implements ISpoutOutputCollector {
     /**
      * Emits a tuple to the specified task on the default output stream. This output
      * stream must have been declared as a direct stream, and the specified task must
-     * use a direct grouping on this stream to receive the message. The emitted values must be 
+     * use a direct grouping on this stream to receive the message. The emitted values must be
      * immutable.
      */
     public void emitDirect(int taskId, List<Object> tuple, Object messageId) {
         emitDirect(taskId, Utils.DEFAULT_STREAM_ID, tuple, messageId);
     }
-    
+
     /**
      * Emits a tuple to the specified task on the specified output stream. This output
      * stream must have been declared as a direct stream, and the specified task must
-     * use a direct grouping on this stream to receive the message. The emitted values must be 
+     * use a direct grouping on this stream to receive the message. The emitted values must be
      * immutable.
-     *
+     * <p>
      * <p> Because no message id is specified, Heron will not track this message
      * so ack and fail will never be called for this tuple.</p>
      */
@@ -113,9 +114,9 @@ public class SpoutOutputCollector implements ISpoutOutputCollector {
     /**
      * Emits a tuple to the specified task on the default output stream. This output
      * stream must have been declared as a direct stream, and the specified task must
-     * use a direct grouping on this stream to receive the message. The emitted values must be 
+     * use a direct grouping on this stream to receive the message. The emitted values must be
      * immutable.
-     *
+     * <p>
      * <p> Because no message id is specified, Heron will not track this message
      * so ack and fail will never be called for this tuple.</p>
      */

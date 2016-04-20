@@ -35,14 +35,14 @@ public class SerializableSerializer extends Serializer<Object> {
             ObjectOutputStream oos = new ObjectOutputStream(bos);
             oos.writeObject(object);
             oos.flush();
-        } catch(IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
         byte[] ser = bos.toByteArray();
         output.writeInt(ser.length);
         output.writeBytes(ser);
     }
-    
+
     @Override
     public Object read(Kryo kryo, Input input, Class c) {
         int len = input.readInt();
@@ -52,7 +52,7 @@ public class SerializableSerializer extends Serializer<Object> {
         try {
             ObjectInputStream ois = new ObjectInputStream(bis);
             return ois.readObject();
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

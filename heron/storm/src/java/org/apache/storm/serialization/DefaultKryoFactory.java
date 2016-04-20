@@ -24,23 +24,6 @@ import org.apache.storm.Config;
 
 public class DefaultKryoFactory implements IKryoFactory {
 
-    public static class KryoSerializableDefault extends Kryo {
-        boolean _override = false;
-        
-        public void overrideDefault(boolean value) {
-            _override = value;
-        }                
-        
-        @Override
-        public Serializer getDefaultSerializer(Class type) {
-            if(_override) {
-                return new SerializableSerializer();
-            } else {
-                return super.getDefaultSerializer(type);
-            }
-        }        
-    }    
-    
     @Override
     public Kryo getKryo(Map conf) {
         KryoSerializableDefault k = new KryoSerializableDefault();
@@ -52,12 +35,29 @@ public class DefaultKryoFactory implements IKryoFactory {
     @Override
     public void preRegister(Kryo k, Map conf) {
     }
-    
+
     public void postRegister(Kryo k, Map conf) {
-        ((KryoSerializableDefault)k).overrideDefault(true);
+        ((KryoSerializableDefault) k).overrideDefault(true);
     }
 
     @Override
-    public void postDecorate(Kryo k, Map conf) {        
-    }    
+    public void postDecorate(Kryo k, Map conf) {
+    }
+
+    public static class KryoSerializableDefault extends Kryo {
+        boolean _override = false;
+
+        public void overrideDefault(boolean value) {
+            _override = value;
+        }
+
+        @Override
+        public Serializer getDefaultSerializer(Class type) {
+            if (_override) {
+                return new SerializableSerializer();
+            } else {
+                return super.getDefaultSerializer(type);
+            }
+        }
+    }
 }

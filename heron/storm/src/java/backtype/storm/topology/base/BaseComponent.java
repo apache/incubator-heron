@@ -22,5 +22,5 @@ public abstract class BaseComponent implements IComponent {
     @Override
     public Map<String, Object> getComponentConfiguration() {
         return null;
-    }    
+    }
 }

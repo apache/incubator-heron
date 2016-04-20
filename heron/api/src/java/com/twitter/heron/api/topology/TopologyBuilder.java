@@ -29,7 +29,7 @@ import com.twitter.heron.api.spout.IRichSpout;
  * to execute. Topologies are Thrift structures in the end, but since the Thrift API
  * is so verbose, TopologyBuilder greatly eases the process of creating topologies.
  * The template for creating and submitting a topology looks something like:
- *
+ * <p>
  * <pre>
  * TopologyBuilder builder = new TopologyBuilder();
  *
@@ -46,11 +46,11 @@ import com.twitter.heron.api.spout.IRichSpout;
  *
  * HeronSubmitter.submitTopology("mytopology", conf, builder.createTopology());
  * </pre>
- *
+ * <p>
  * Running the exact same topology in local mode (in process), and configuring it to log all tuples
  * emitted, looks like the following. Note that it lets the topology run for 10 seconds
  * before shutting down the local cluster.
- *
+ * <p>
  * <pre>
  * TopologyBuilder builder = new TopologyBuilder();
  *
@@ -71,7 +71,7 @@ import com.twitter.heron.api.spout.IRichSpout;
  * Utils.sleep(10000);
  * cluster.shutdown();
  * </pre>
- *
+ * <p>
  * <p>The pattern for TopologyBuilder is to map component ids to components using the setSpout
  * and setBolt methods. Those methods return objects that are then used to declare
  * the inputs for that component.</p>
@@ -85,11 +85,11 @@ public class TopologyBuilder {
         TopologyAPI.Topology.Builder bldr = TopologyAPI.Topology.newBuilder();
         // First go thru the spouts
         for (Map.Entry<String, SpoutDeclarer> spout : _spouts.entrySet()) {
-          spout.getValue().dump(bldr);
+            spout.getValue().dump(bldr);
         }
         // Then go thru the bolts
         for (Map.Entry<String, BoltDeclarer> bolt : _bolts.entrySet()) {
-          bolt.getValue().dump(bldr);
+            bolt.getValue().dump(bldr);
         }
         return new HeronTopology(bldr);
     }
@@ -176,19 +176,20 @@ public class TopologyBuilder {
     }
 
     private void validateComponentName(String name) {
-      if (name.contains(",")) {
-        throw new IllegalArgumentException("Component name should not contain comma(,)");
-      }
-      if (name.contains(":")) {
-        throw new IllegalArgumentException("Component name should not contain colon(:)");
-      }
-      validateUnusedName(name);
+        if (name.contains(",")) {
+            throw new IllegalArgumentException("Component name should not contain comma(,)");
+        }
+        if (name.contains(":")) {
+            throw new IllegalArgumentException("Component name should not contain colon(:)");
+        }
+        validateUnusedName(name);
     }
+
     private void validateUnusedName(String name) {
-        if(_bolts.containsKey(name)) {
+        if (_bolts.containsKey(name)) {
             throw new IllegalArgumentException("Bolt has already been declared for name " + name);
         }
-        if(_spouts.containsKey(name)) {
+        if (_spouts.containsKey(name)) {
             throw new IllegalArgumentException("Spout has already been declared for name " + name);
         }
     }

@@ -22,11 +22,11 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class Base64ConfigLoaderTest {
-  @Test
-  public void testBase64DecodedOverride() throws Exception {
-    Base64ConfigLoader loader = Base64ConfigLoader.class.newInstance();
-    loader.applyConfigOverride(DatatypeConverter.printBase64Binary(
-        "key=value".getBytes(Charset.forName("UTF-8"))));
-    Assert.assertEquals("value", loader.properties.getProperty("key"));
-  }
+    @Test
+    public void testBase64DecodedOverride() throws Exception {
+        Base64ConfigLoader loader = Base64ConfigLoader.class.newInstance();
+        loader.applyConfigOverride(DatatypeConverter.printBase64Binary(
+                "key=value".getBytes(Charset.forName("UTF-8"))));
+        Assert.assertEquals("value", loader.properties.getProperty("key"));
+    }
 }

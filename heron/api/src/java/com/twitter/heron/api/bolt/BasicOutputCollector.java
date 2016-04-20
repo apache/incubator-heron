@@ -14,9 +14,10 @@
 
 package com.twitter.heron.api.bolt;
 
+import java.util.List;
+
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.utils.Utils;
-import java.util.List;
 
 
 public class BasicOutputCollector implements IBasicOutputCollector {

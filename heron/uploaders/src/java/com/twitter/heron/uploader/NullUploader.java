@@ -22,22 +22,22 @@ import com.twitter.heron.spi.uploader.IUploader;
 
 public class NullUploader implements IUploader {
 
-  @Override
-  public void initialize(Config config) {
-  }
+    @Override
+    public void initialize(Config config) {
+    }
 
-  @Override
-  public URI uploadPackage() {
-    // Construct a URI from valid syntax String
-    return Convert.getURI("null://uploader:9519/w#lanfang");
-  }
+    @Override
+    public URI uploadPackage() {
+        // Construct a URI from valid syntax String
+        return Convert.getURI("null://uploader:9519/w#lanfang");
+    }
 
-  @Override
-  public boolean undo() {
-    return true;
-  }
+    @Override
+    public boolean undo() {
+        return true;
+    }
 
-  @Override
-  public void close() {
-  }
+    @Override
+    public void close() {
+    }
 }

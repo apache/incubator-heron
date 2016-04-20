@@ -21,11 +21,11 @@ import java.util.ListIterator;
 
 public class ListDelegate implements List<Object> {
     private List<Object> _delegate;
-    
+
     public void setDelegate(List<Object> delegate) {
         _delegate = delegate;
     }
-    
+
     @Override
     public int size() {
         return _delegate.size();
@@ -140,5 +140,5 @@ public class ListDelegate implements List<Object> {
     public List<Object> subList(int i, int i1) {
         return _delegate.subList(i, i1);
     }
-    
+
 }

@@ -35,92 +35,92 @@ import junit.framework.Assert;
  * InstanceExecutor Tester.
  */
 public class InstanceExecutorTest {
-  private static PhysicalPlans.PhysicalPlan plan;
-  private static TopologyAPI.Topology topology;
-  private static String instanceId;
-  private static InstanceExecutor instanceExecutor;
+    private static PhysicalPlans.PhysicalPlan plan;
+    private static TopologyAPI.Topology topology;
+    private static String instanceId;
+    private static InstanceExecutor instanceExecutor;
 
-  @BeforeClass
-  public static void beforeClass() throws Exception {
-    topology = PhysicalPlanUtilTest.getTestTopology();
-    plan = PhysicalPlanUtil.getPhysicalPlan(topology);
-    instanceId = plan.getInstances(0).getInstanceId();
-    instanceExecutor = Mockito.spy(new InstanceExecutor(plan, instanceId));
-    Mockito.doReturn(Mockito.mock(IInstance.class)).when(instanceExecutor).createInstance();
-  }
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        topology = PhysicalPlanUtilTest.getTestTopology();
+        plan = PhysicalPlanUtil.getPhysicalPlan(topology);
+        instanceId = plan.getInstances(0).getInstanceId();
+        instanceExecutor = Mockito.spy(new InstanceExecutor(plan, instanceId));
+        Mockito.doReturn(Mockito.mock(IInstance.class)).when(instanceExecutor).createInstance();
+    }
 
-  @AfterClass
-  public static void afterClass() throws Exception {
+    @AfterClass
+    public static void afterClass() throws Exception {
 
-  }
+    }
 
-  @Before
-  public void before() throws Exception {
-  }
+    @Before
+    public void before() throws Exception {
+    }
 
-  @After
-  public void after() throws Exception {
-  }
+    @After
+    public void after() throws Exception {
+    }
 
-  /**
-   * Method: getStreamInQueue()
-   */
-  @Test
-  public void testGetStreamInQueue() throws Exception {
-    Assert.assertNotNull(instanceExecutor.getStreamInQueue());
-    Assert.assertEquals(0, instanceExecutor.getStreamInQueue().size());
-  }
+    /**
+     * Method: getStreamInQueue()
+     */
+    @Test
+    public void testGetStreamInQueue() throws Exception {
+        Assert.assertNotNull(instanceExecutor.getStreamInQueue());
+        Assert.assertEquals(0, instanceExecutor.getStreamInQueue().size());
+    }
 
-  /**
-   * Method: getStreamOutQueue()
-   */
-  @Test
-  public void testGetStreamOutQueue() throws Exception {
-    Assert.assertNotNull(instanceExecutor.getStreamOutQueue());
-    Assert.assertEquals(0, instanceExecutor.getStreamOutQueue().size());
-  }
+    /**
+     * Method: getStreamOutQueue()
+     */
+    @Test
+    public void testGetStreamOutQueue() throws Exception {
+        Assert.assertNotNull(instanceExecutor.getStreamOutQueue());
+        Assert.assertEquals(0, instanceExecutor.getStreamOutQueue().size());
+    }
 
-  /**
-   * Method: getMetricsOutQueue()
-   */
-  @Test
-  public void testGetMetricsOutQueue() throws Exception {
-    Assert.assertNotNull(instanceExecutor.getMetricsOutQueue());
-    Assert.assertEquals(0, instanceExecutor.getMetricsOutQueue().size());
-  }
+    /**
+     * Method: getMetricsOutQueue()
+     */
+    @Test
+    public void testGetMetricsOutQueue() throws Exception {
+        Assert.assertNotNull(instanceExecutor.getMetricsOutQueue());
+        Assert.assertEquals(0, instanceExecutor.getMetricsOutQueue().size());
+    }
 
-  /**
-   * Method: getInstanceId()
-   */
-  @Test
-  public void testGetInstanceId() throws Exception {
-    Assert.assertEquals(instanceId, instanceExecutor.getInstanceId());
-  }
+    /**
+     * Method: getInstanceId()
+     */
+    @Test
+    public void testGetInstanceId() throws Exception {
+        Assert.assertEquals(instanceId, instanceExecutor.getInstanceId());
+    }
 
-  /**
-   * Method: getTaskId()
-   */
-  @Test
-  public void testGetTaskId() throws Exception {
-    Assert.assertEquals(plan.getInstances(0).getInfo().getTaskId(), instanceExecutor.getTaskId());
-  }
+    /**
+     * Method: getTaskId()
+     */
+    @Test
+    public void testGetTaskId() throws Exception {
+        Assert.assertEquals(plan.getInstances(0).getInfo().getTaskId(), instanceExecutor.getTaskId());
+    }
 
-  /**
-   * Method: createInstance()
-   */
-  @Test
-  public void testCreateInstance() throws Exception {
-    Assert.assertNotNull(instanceExecutor.createInstance());
-  }
+    /**
+     * Method: createInstance()
+     */
+    @Test
+    public void testCreateInstance() throws Exception {
+        Assert.assertNotNull(instanceExecutor.createInstance());
+    }
 
-  /**
-   * Method: createPhysicalPlanHelper(PhysicalPlans.PhysicalPlan physicalPlan, String instanceId, MetricsCollector metricsCollector)
-   */
-  @Test
-  public void testCreatePhysicalPlanHelper() throws Exception {
-    PhysicalPlanHelper physicalPlanHelper = instanceExecutor.createPhysicalPlanHelper(plan, instanceId,
-        Mockito.mock(MetricsCollector.class));
+    /**
+     * Method: createPhysicalPlanHelper(PhysicalPlans.PhysicalPlan physicalPlan, String instanceId, MetricsCollector metricsCollector)
+     */
+    @Test
+    public void testCreatePhysicalPlanHelper() throws Exception {
+        PhysicalPlanHelper physicalPlanHelper = instanceExecutor.createPhysicalPlanHelper(plan, instanceId,
+                Mockito.mock(MetricsCollector.class));
 
-    Assert.assertNotNull(physicalPlanHelper.getTopologyContext());
-  }
+        Assert.assertNotNull(physicalPlanHelper.getTopologyContext());
+    }
 }

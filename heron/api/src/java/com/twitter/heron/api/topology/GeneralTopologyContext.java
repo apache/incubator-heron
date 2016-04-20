@@ -25,13 +25,14 @@ public interface GeneralTopologyContext {
     /**
      * Gets the unique id assigned to this topology. The id is the topology name with a
      * unique nonce appended to it.
+     *
      * @return the topology id
      */
     public String getTopologyId();
 
     /**
      * Gets the Thrift object representing the topology.
-     * 
+     *
      * @return the Thrift definition representing the topology
      */
     /*
@@ -73,7 +74,7 @@ public interface GeneralTopologyContext {
     TODO:- Do we really need this? The above function shd cover it
     public Fields getComponentOutputFields(GlobalStreamId id);   
     */
-    
+
     /**
      * Gets the declared inputs to the specified component.
      *
@@ -93,7 +94,7 @@ public interface GeneralTopologyContext {
      * Gets a map from task id to component id.
      */
     public Map<Integer, String> getTaskToComponent();
-    
+
     /**
      * Gets a list of all component ids in this topology
      */
@@ -105,6 +106,6 @@ public interface GeneralTopologyContext {
         return ThriftTopologyUtils.getComponentCommon(getRawTopology(), componentId);
     }
     */
-    
+
     public int maxTopologyMessageTimeout();
 }

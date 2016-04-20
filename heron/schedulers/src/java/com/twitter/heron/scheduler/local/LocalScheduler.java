@@ -41,250 +41,246 @@ import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
 public class LocalScheduler implements IScheduler {
-  private static final Logger LOG = Logger.getLogger(LocalScheduler.class.getName());
+    private static final Logger LOG = Logger.getLogger(LocalScheduler.class.getName());
+    // executor service for monitoring all the containers
+    private final ExecutorService monitorService = Executors.newCachedThreadPool();
+    // map to keep track of the process and the shard it is running
+    private final Map<Process, Integer> processToContainer = new ConcurrentHashMap<Process, Integer>();
+    private Config config;
+    private Config runtime;
+    // has the topology been killed?
+    private volatile boolean topologyKilled = false;
 
-  private Config config;
-  private Config runtime;
+    @Override
+    public void initialize(Config config, Config runtime) {
+        this.config = config;
+        this.runtime = runtime;
 
-  // executor service for monitoring all the containers
-  private final ExecutorService monitorService = Executors.newCachedThreadPool();
+        LOG.info("Starting to deploy topology: " + LocalContext.topologyName(config));
+        LOG.info("# of containers: " + Runtime.numContainers(runtime));
 
-  // map to keep track of the process and the shard it is running
-  private final Map<Process, Integer> processToContainer = new ConcurrentHashMap<Process, Integer>();
+        // first, run the TMaster executor
+        startExecutor(0);
+        LOG.info("TMaster is started.");
 
-  // has the topology been killed?
-  private volatile boolean topologyKilled = false;
-
-  @Override
-  public void initialize(Config config, Config runtime) {
-    this.config = config;
-    this.runtime = runtime;
-
-    LOG.info("Starting to deploy topology: " + LocalContext.topologyName(config));
-    LOG.info("# of containers: " + Runtime.numContainers(runtime));
-
-    // first, run the TMaster executor
-    startExecutor(0);
-    LOG.info("TMaster is started.");
-
-    // for each container, run its own executor
-    long numContainers = Runtime.numContainers(runtime);
-    for (int i = 1; i < numContainers; i++) {
-      startExecutor(i);
-    }
-
-    LOG.info("Executor for each container have been started.");
-  }
-
-  @Override
-  public void close() {
-
-  }
-
-  /**
-   * Encode the JVM options
-   *
-   * @return encoded string
-   */
-  protected String formatJavaOpts(String javaOpts) {
-    String javaOptsBase64 = DatatypeConverter.printBase64Binary(
-        javaOpts.getBytes(Charset.forName("UTF-8")));
-
-    return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
-  }
-
-  /**
-   * Start the executor for the given container
-   */
-  protected void startExecutor(final int container) {
-    LOG.info("Starting a new executor for container: " + container);
-
-    // create a process with the executor command and topology working directory
-    final Process regularExecutor = ShellUtils.runASyncProcess(true,
-        getExecutorCommand(container), new File(LocalContext.workingDirectory(config)));
-
-    // associate the process and its container id
-    processToContainer.put(regularExecutor, container);
-    LOG.info("Started the executor for container: " + container);
-
-    // add the container for monitoring
-    Runnable r = new Runnable() {
-      @Override
-      public void run() {
-        try {
-          LOG.info("Waiting for container " + container + " to finish.");
-          regularExecutor.waitFor();
-
-          LOG.info("Container " + container + " is completed. Exit status: " + regularExecutor.exitValue());
-          if (topologyKilled) {
-            LOG.info("Topology is killed. Not to start new executors.");
-            return;
-          }
-
-          // restart the container
-          startExecutor(processToContainer.remove(regularExecutor));
-        } catch (InterruptedException e) {
-          LOG.log(Level.SEVERE, "Process is interrupted: ", e);
+        // for each container, run its own executor
+        long numContainers = Runtime.numContainers(runtime);
+        for (int i = 1; i < numContainers; i++) {
+            startExecutor(i);
         }
-      }
-    };
 
-    monitorService.submit(r);
-  }
-
-  private String getExecutorCommand(int container) {
-
-    TopologyAPI.Topology topology = Runtime.topology(runtime);
-
-    int port1 = NetworkUtils.getFreePort();
-    int port2 = NetworkUtils.getFreePort();
-    int port3 = NetworkUtils.getFreePort();
-    int shellPort = NetworkUtils.getFreePort();
-    int port4 = NetworkUtils.getFreePort();
-
-    if (port1 == -1 || port2 == -1 || port3 == -1) {
-      throw new RuntimeException("Could not find available ports to start topology");
+        LOG.info("Executor for each container have been started.");
     }
 
-    String executorCmd = String.format("%s %d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %d %s %s %d %s %s %s %s %s %s %d",
-        LocalContext.executorSandboxBinary(config),
-        container,
-        topology.getName(),
-        topology.getId(),
-        FilenameUtils.getName(LocalContext.topologyDefinitionFile(config)),
-        Runtime.instanceDistribution(runtime),
-        LocalContext.stateManagerConnectionString(config),
-        LocalContext.stateManagerRootPath(config),
-        LocalContext.tmasterSandboxBinary(config),
-        LocalContext.stmgrSandboxBinary(config),
-        LocalContext.metricsManagerSandboxClassPath(config),
-        formatJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)),
-        TopologyUtils.makeClassPath(topology, LocalContext.topologyJarFile(config)),
-        port1,
-        port2,
-        port3,
-        LocalContext.systemConfigSandboxFile(config),
-        TopologyUtils.formatRamMap(
-            TopologyUtils.getComponentRamMap(topology, LocalContext.instanceRam(config))),
-        formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)),
-        LocalContext.topologyPackageType(config),
-        LocalContext.topologyJarFile(config),
-        LocalContext.javaSandboxHome(config),
-        shellPort,
-        LocalContext.logSandboxDirectory(config),
-        LocalContext.shellSandboxBinary(config),
-        port4,
-        LocalContext.cluster(config),
-        LocalContext.role(config),
-        LocalContext.environ(config),
-        LocalContext.instanceSandboxClassPath(config),
-        LocalContext.metricsSinksSandboxFile(config),
-        "no_need_since_scheduler_is_started",
-        0
-    );
+    @Override
+    public void close() {
 
-    LOG.info("Executor command line: " + executorCmd.toString());
-    return executorCmd;
-  }
-
-  /**
-   * Schedule the provided packed plan
-   */
-  @Override
-  public void schedule(PackingPlan packing) {
-  }
-
-  /**
-   * Handler to kill topology
-   */
-  @Override
-  public boolean onKill(Scheduler.KillTopologyRequest request) {
-
-    // get the topology name
-    String topologyName = LocalContext.topologyName(config);
-    LOG.info("Command to kill topology: " + topologyName);
-
-    // set the flag that the topology being killed
-    topologyKilled = true;
-
-    // destroy/kill the process for each container
-    for (Process p : processToContainer.keySet()) {
-
-      // get the container index for the process
-      int index = processToContainer.get(p);
-      LOG.info("Killing executor for container: " + index);
-
-      // destroy the process
-      p.destroy();
-      LOG.info("Killed executor for container: " + index);
     }
 
-    // clear the mapping between process and container ids
-    processToContainer.clear();
+    /**
+     * Encode the JVM options
+     *
+     * @return encoded string
+     */
+    protected String formatJavaOpts(String javaOpts) {
+        String javaOptsBase64 = DatatypeConverter.printBase64Binary(
+                javaOpts.getBytes(Charset.forName("UTF-8")));
 
-    return true;
-  }
+        return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
+    }
 
-  /**
-   * Handler to activate topology
-   */
-  @Override
-  public boolean onActivate(Scheduler.ActivateTopologyRequest request) {
-    return true;
-  }
+    /**
+     * Start the executor for the given container
+     */
+    protected void startExecutor(final int container) {
+        LOG.info("Starting a new executor for container: " + container);
 
-  /**
-   * Handler to deactivate topology
-   */
-  @Override
-  public boolean onDeactivate(Scheduler.DeactivateTopologyRequest request) {
-    return true;
-  }
+        // create a process with the executor command and topology working directory
+        final Process regularExecutor = ShellUtils.runASyncProcess(true,
+                getExecutorCommand(container), new File(LocalContext.workingDirectory(config)));
 
-  /**
-   * Handler to restart topology
-   */
-  @Override
-  public boolean onRestart(Scheduler.RestartTopologyRequest request) {
-    // Containers would be restarted automatically once we destroy it
-    int containerId = request.getContainerIndex();
+        // associate the process and its container id
+        processToContainer.put(regularExecutor, container);
+        LOG.info("Started the executor for container: " + container);
 
-    if (containerId == -1) {
-      LOG.info("Command to restart the entire topology: " + LocalContext.topologyName(config));
+        // add the container for monitoring
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    LOG.info("Waiting for container " + container + " to finish.");
+                    regularExecutor.waitFor();
 
-      // create a new tmp list to store all the Process to be killed
-      List<Process> tmpProcessList = new LinkedList<>(processToContainer.keySet());
-      for (Process process : tmpProcessList) {
-        process.destroy();
-      }
-    } else {
-      // restart that particular container
-      LOG.info("Command to restart a container of topology: " + LocalContext.topologyName(config));
-      LOG.info("Restart container requested: " + containerId);
+                    LOG.info("Container " + container + " is completed. Exit status: " + regularExecutor.exitValue());
+                    if (topologyKilled) {
+                        LOG.info("Topology is killed. Not to start new executors.");
+                        return;
+                    }
 
-      // locate the container and destroy it
-      for (Process p : processToContainer.keySet()) {
-        if (containerId == processToContainer.get(p)) {
-          p.destroy();
+                    // restart the container
+                    startExecutor(processToContainer.remove(regularExecutor));
+                } catch (InterruptedException e) {
+                    LOG.log(Level.SEVERE, "Process is interrupted: ", e);
+                }
+            }
+        };
+
+        monitorService.submit(r);
+    }
+
+    private String getExecutorCommand(int container) {
+
+        TopologyAPI.Topology topology = Runtime.topology(runtime);
+
+        int port1 = NetworkUtils.getFreePort();
+        int port2 = NetworkUtils.getFreePort();
+        int port3 = NetworkUtils.getFreePort();
+        int shellPort = NetworkUtils.getFreePort();
+        int port4 = NetworkUtils.getFreePort();
+
+        if (port1 == -1 || port2 == -1 || port3 == -1) {
+            throw new RuntimeException("Could not find available ports to start topology");
         }
-      }
+
+        String executorCmd = String.format("%s %d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %d %s %s %d %s %s %s %s %s %s %d",
+                LocalContext.executorSandboxBinary(config),
+                container,
+                topology.getName(),
+                topology.getId(),
+                FilenameUtils.getName(LocalContext.topologyDefinitionFile(config)),
+                Runtime.instanceDistribution(runtime),
+                LocalContext.stateManagerConnectionString(config),
+                LocalContext.stateManagerRootPath(config),
+                LocalContext.tmasterSandboxBinary(config),
+                LocalContext.stmgrSandboxBinary(config),
+                LocalContext.metricsManagerSandboxClassPath(config),
+                formatJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)),
+                TopologyUtils.makeClassPath(topology, LocalContext.topologyJarFile(config)),
+                port1,
+                port2,
+                port3,
+                LocalContext.systemConfigSandboxFile(config),
+                TopologyUtils.formatRamMap(
+                        TopologyUtils.getComponentRamMap(topology, LocalContext.instanceRam(config))),
+                formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)),
+                LocalContext.topologyPackageType(config),
+                LocalContext.topologyJarFile(config),
+                LocalContext.javaSandboxHome(config),
+                shellPort,
+                LocalContext.logSandboxDirectory(config),
+                LocalContext.shellSandboxBinary(config),
+                port4,
+                LocalContext.cluster(config),
+                LocalContext.role(config),
+                LocalContext.environ(config),
+                LocalContext.instanceSandboxClassPath(config),
+                LocalContext.metricsSinksSandboxFile(config),
+                "no_need_since_scheduler_is_started",
+                0
+        );
+
+        LOG.info("Executor command line: " + executorCmd.toString());
+        return executorCmd;
     }
 
-    // get the instance of state manager to clean state
-    SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
-
-    // If we restart the container including TMaster, wee need to clean TMasterLocation,
-    // since we could not set it as ephemeral for local file system
-    // We would not clean SchedulerLocation since we would not restart the Scheduler
-    if (containerId == -1 || containerId == 0) {
-      Boolean result = stateManager.deleteTMasterLocation(LocalContext.topologyName(config));
-      if (result == null || !result) {
-        // We would not return false since it is possible that TMaster didn't write physical plan
-        LOG.severe("Failed to clear TMaster location. Check whether TMaster set it correctly.");
-        return false;
-      }
+    /**
+     * Schedule the provided packed plan
+     */
+    @Override
+    public void schedule(PackingPlan packing) {
     }
 
-    return true;
-  }
+    /**
+     * Handler to kill topology
+     */
+    @Override
+    public boolean onKill(Scheduler.KillTopologyRequest request) {
+
+        // get the topology name
+        String topologyName = LocalContext.topologyName(config);
+        LOG.info("Command to kill topology: " + topologyName);
+
+        // set the flag that the topology being killed
+        topologyKilled = true;
+
+        // destroy/kill the process for each container
+        for (Process p : processToContainer.keySet()) {
+
+            // get the container index for the process
+            int index = processToContainer.get(p);
+            LOG.info("Killing executor for container: " + index);
+
+            // destroy the process
+            p.destroy();
+            LOG.info("Killed executor for container: " + index);
+        }
+
+        // clear the mapping between process and container ids
+        processToContainer.clear();
+
+        return true;
+    }
+
+    /**
+     * Handler to activate topology
+     */
+    @Override
+    public boolean onActivate(Scheduler.ActivateTopologyRequest request) {
+        return true;
+    }
+
+    /**
+     * Handler to deactivate topology
+     */
+    @Override
+    public boolean onDeactivate(Scheduler.DeactivateTopologyRequest request) {
+        return true;
+    }
+
+    /**
+     * Handler to restart topology
+     */
+    @Override
+    public boolean onRestart(Scheduler.RestartTopologyRequest request) {
+        // Containers would be restarted automatically once we destroy it
+        int containerId = request.getContainerIndex();
+
+        if (containerId == -1) {
+            LOG.info("Command to restart the entire topology: " + LocalContext.topologyName(config));
+
+            // create a new tmp list to store all the Process to be killed
+            List<Process> tmpProcessList = new LinkedList<>(processToContainer.keySet());
+            for (Process process : tmpProcessList) {
+                process.destroy();
+            }
+        } else {
+            // restart that particular container
+            LOG.info("Command to restart a container of topology: " + LocalContext.topologyName(config));
+            LOG.info("Restart container requested: " + containerId);
+
+            // locate the container and destroy it
+            for (Process p : processToContainer.keySet()) {
+                if (containerId == processToContainer.get(p)) {
+                    p.destroy();
+                }
+            }
+        }
+
+        // get the instance of state manager to clean state
+        SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
+
+        // If we restart the container including TMaster, wee need to clean TMasterLocation,
+        // since we could not set it as ephemeral for local file system
+        // We would not clean SchedulerLocation since we would not restart the Scheduler
+        if (containerId == -1 || containerId == 0) {
+            Boolean result = stateManager.deleteTMasterLocation(LocalContext.topologyName(config));
+            if (result == null || !result) {
+                // We would not return false since it is possible that TMaster didn't write physical plan
+                LOG.severe("Failed to clear TMaster location. Check whether TMaster set it correctly.");
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

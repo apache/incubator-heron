@@ -42,239 +42,239 @@ import com.twitter.heron.statemgr.zookeeper.ZkContext;
 import com.twitter.heron.statemgr.zookeeper.ZkWatcherCallback;
 
 public class CuratorStateManager extends FileSystemStateManager {
-  private static final Logger LOG = Logger.getLogger(CuratorStateManager.class.getName());
-  private CuratorFramework client;
-  private String connectionString;
+    private static final Logger LOG = Logger.getLogger(CuratorStateManager.class.getName());
+    private CuratorFramework client;
+    private String connectionString;
 
-  @Override
-  public void initialize(Config config) {
-    super.initialize(config);
+    @Override
+    public void initialize(Config config) {
+        super.initialize(config);
 
-    connectionString = Context.stateManagerConnectionString(config);
+        connectionString = Context.stateManagerConnectionString(config);
 
-    // these are reasonable arguments for the ExponentialBackoffRetry. The first
-    // retry will wait 1 second - the second will wait up to 2 seconds - the
-    // third will wait up to 4 seconds.
-    ExponentialBackoffRetry retryPolicy = new ExponentialBackoffRetry(
-        ZkContext.retryIntervalMs(config), ZkContext.retryCount(config));
+        // these are reasonable arguments for the ExponentialBackoffRetry. The first
+        // retry will wait 1 second - the second will wait up to 2 seconds - the
+        // third will wait up to 4 seconds.
+        ExponentialBackoffRetry retryPolicy = new ExponentialBackoffRetry(
+                ZkContext.retryIntervalMs(config), ZkContext.retryCount(config));
 
-    // using the CuratorFrameworkFactory.builder() gives fine grained control
-    // over creation options. See the CuratorFrameworkFactory.Builder javadoc
-    // details
-    client = CuratorFrameworkFactory.builder()
-        .connectString(connectionString)
-        .retryPolicy(retryPolicy)
-        .connectionTimeoutMs(ZkContext.connectionTimeoutMs(config))
-        .sessionTimeoutMs(ZkContext.sessionTimeoutMs(config))
-            // etc. etc.
-        .build();
+        // using the CuratorFrameworkFactory.builder() gives fine grained control
+        // over creation options. See the CuratorFrameworkFactory.Builder javadoc
+        // details
+        client = CuratorFrameworkFactory.builder()
+                .connectString(connectionString)
+                .retryPolicy(retryPolicy)
+                .connectionTimeoutMs(ZkContext.connectionTimeoutMs(config))
+                .sessionTimeoutMs(ZkContext.sessionTimeoutMs(config))
+                        // etc. etc.
+                .build();
 
-    LOG.info("Starting client to: " + connectionString);
+        LOG.info("Starting client to: " + connectionString);
 
-    // Start it
-    client.start();
+        // Start it
+        client.start();
 
-    try {
-      if (!client.blockUntilConnected(ZkContext.connectionTimeoutMs(config), TimeUnit.MILLISECONDS)) {
-        throw new RuntimeException("Failed to initialize CuratorClient");
-      }
-    } catch (InterruptedException e) {
-      throw new RuntimeException("Failed to initialize CuratorClient", e);
-    }
-
-    if (ZkContext.isInitializeTree(config)) {
-      try {
-        initTree();
-      } catch (Exception e) {
-        throw new RuntimeException("Failed to initialize tree", e);
-      }
-    }
-  }
-
-  protected void initTree() throws Exception {
-    // Make necessary directories
-    LOG.info("Topologies directory: " + getTopologyDir());
-    LOG.info("Tmaster location directory: " + getTMasterLocationDir());
-    LOG.info("Physical plan directory: " + getPhysicalPlanDir());
-    LOG.info("Execution state directory: " + getExecutionStateDir());
-    LOG.info("Scheduler location directory: " + getSchedulerLocationDir());
-
-    client.createContainers(getTopologyDir());
-    client.createContainers(getTMasterLocationDir());
-    client.createContainers(getPhysicalPlanDir());
-    client.createContainers(getExecutionStateDir());
-    client.createContainers(getSchedulerLocationDir());
-
-    LOG.info("Directory tree initialized.");
-  }
-
-  @Override
-  public void close() {
-    if (client != null) {
-      LOG.info("Closing the CuratorClient to: " + connectionString);
-      client.close();
-    }
-  }
-
-  public String getConnectionString() {
-    return connectionString;
-  }
-
-  // Make utils class protected for easy unit testing
-  protected ListenableFuture<Boolean> existNode(String path) {
-    final SettableFuture<Boolean> result = SettableFuture.create();
-
-    try {
-      LOG.info("Checking exists for path: " + path);
-      result.set(client.checkExists().forPath(path) != null);
-    } catch (Exception e) {
-      result.setException(new RuntimeException("Could not check Exist", e));
-    }
-
-    return result;
-  }
-
-  protected ListenableFuture<Boolean> createNode(String path, byte[] data, boolean isEphemeral) {
-    final SettableFuture<Boolean> result = SettableFuture.create();
-
-    try {
-      client.create().
-          withMode(isEphemeral ? CreateMode.EPHEMERAL : CreateMode.PERSISTENT)
-          .forPath(path, data);
-      LOG.info("Created node for path: " + path);
-      result.set(true);
-    } catch (Exception e) {
-      result.setException(new RuntimeException("Could not createNode:", e));
-    }
-    return result;
-  }
-
-  protected ListenableFuture<Boolean> deleteNode(String path) {
-    final SettableFuture<Boolean> result = SettableFuture.create();
-
-    try {
-      client.delete().withVersion(-1).forPath(path);
-      LOG.info("Deleted node for path: " + path);
-      result.set(true);
-    } catch (Exception e) {
-      result.setException(new RuntimeException("Could not deleteNode", e));
-    }
-
-    return result;
-  }
-
-  protected <M extends Message> ListenableFuture<M> getNodeData(
-      WatchCallback watcher, String path, final Message.Builder builder) {
-    final SettableFuture<M> future = SettableFuture.create();
-
-    Watcher wc = ZkWatcherCallback.makeZkWatcher(watcher);
-
-    BackgroundCallback cb = new BackgroundCallback() {
-      @Override
-      public void processResult(CuratorFramework client, CuratorEvent event) throws Exception {
-        byte[] data;
-        if (event != null & (data = event.getData()) != null) {
-          builder.mergeFrom(data);
-          future.set((M) builder.build());
-        } else {
-          future.setException(new RuntimeException("Failed to fetch data from path: " + event.getPath()));
+        try {
+            if (!client.blockUntilConnected(ZkContext.connectionTimeoutMs(config), TimeUnit.MILLISECONDS)) {
+                throw new RuntimeException("Failed to initialize CuratorClient");
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Failed to initialize CuratorClient", e);
         }
-      }
-    };
 
-    try {
-      client.getData().usingWatcher(wc).inBackground(cb).forPath(path);
-    } catch (Exception e) {
-      future.setException(new RuntimeException("Could not getData", e));
+        if (ZkContext.isInitializeTree(config)) {
+            try {
+                initTree();
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to initialize tree", e);
+            }
+        }
     }
 
-    return future;
-  }
+    protected void initTree() throws Exception {
+        // Make necessary directories
+        LOG.info("Topologies directory: " + getTopologyDir());
+        LOG.info("Tmaster location directory: " + getTMasterLocationDir());
+        LOG.info("Physical plan directory: " + getPhysicalPlanDir());
+        LOG.info("Execution state directory: " + getExecutionStateDir());
+        LOG.info("Scheduler location directory: " + getSchedulerLocationDir());
 
-  @Override
-  public ListenableFuture<Boolean> setTMasterLocation(TopologyMaster.TMasterLocation location, String topologyName) {
-    return createNode(getTMasterLocationPath(topologyName), location.toByteArray(), true);
-  }
+        client.createContainers(getTopologyDir());
+        client.createContainers(getTMasterLocationDir());
+        client.createContainers(getPhysicalPlanDir());
+        client.createContainers(getExecutionStateDir());
+        client.createContainers(getSchedulerLocationDir());
 
-  @Override
-  public ListenableFuture<Boolean> setExecutionState(
-      ExecutionEnvironment.ExecutionState executionState, String topologyName) {
-    return createNode(getExecutionStatePath(topologyName), executionState.toByteArray(), false);
-  }
+        LOG.info("Directory tree initialized.");
+    }
 
-  @Override
-  public ListenableFuture<Boolean> setTopology(TopologyAPI.Topology topology, String topologyName) {
-    return createNode(getTopologyPath(topologyName), topology.toByteArray(), false);
-  }
+    @Override
+    public void close() {
+        if (client != null) {
+            LOG.info("Closing the CuratorClient to: " + connectionString);
+            client.close();
+        }
+    }
 
-  @Override
-  public ListenableFuture<Boolean> setPhysicalPlan(PhysicalPlans.PhysicalPlan physicalPlan, String topologyName) {
-    return createNode(getPhysicalPlanPath(topologyName), physicalPlan.toByteArray(), false);
-  }
+    public String getConnectionString() {
+        return connectionString;
+    }
 
-  @Override
-  public ListenableFuture<Boolean> setSchedulerLocation(Scheduler.SchedulerLocation location, String topologyName) {
-    return createNode(getSchedulerLocationPath(topologyName), location.toByteArray(), true);
-  }
+    // Make utils class protected for easy unit testing
+    protected ListenableFuture<Boolean> existNode(String path) {
+        final SettableFuture<Boolean> result = SettableFuture.create();
 
-  @Override
-  public ListenableFuture<Boolean> deleteTMasterLocation(String topologyName) {
-    // It is a EPHEMERAL node and would be removed automatically
-    final SettableFuture<Boolean> result = SettableFuture.create();
-    result.set(true);
-    return result;
-  }
+        try {
+            LOG.info("Checking exists for path: " + path);
+            result.set(client.checkExists().forPath(path) != null);
+        } catch (Exception e) {
+            result.setException(new RuntimeException("Could not check Exist", e));
+        }
 
-  @Override
-  public ListenableFuture<Boolean> deleteExecutionState(String topologyName) {
-    return deleteNode(getExecutionStatePath(topologyName));
-  }
+        return result;
+    }
 
-  @Override
-  public ListenableFuture<Boolean> deleteTopology(String topologyName) {
-    return deleteNode(getTopologyPath(topologyName));
-  }
+    protected ListenableFuture<Boolean> createNode(String path, byte[] data, boolean isEphemeral) {
+        final SettableFuture<Boolean> result = SettableFuture.create();
 
-  @Override
-  public ListenableFuture<Boolean> deletePhysicalPlan(String topologyName) {
-    return deleteNode(getPhysicalPlanPath(topologyName));
-  }
+        try {
+            client.create().
+                    withMode(isEphemeral ? CreateMode.EPHEMERAL : CreateMode.PERSISTENT)
+                    .forPath(path, data);
+            LOG.info("Created node for path: " + path);
+            result.set(true);
+        } catch (Exception e) {
+            result.setException(new RuntimeException("Could not createNode:", e));
+        }
+        return result;
+    }
 
-  @Override
-  public ListenableFuture<Boolean> deleteSchedulerLocation(String topologyName) {
-    // It is a EPHEMERAL node and would be removed automatically
-    final SettableFuture<Boolean> result = SettableFuture.create();
-    result.set(true);
-    return result;
-  }
+    protected ListenableFuture<Boolean> deleteNode(String path) {
+        final SettableFuture<Boolean> result = SettableFuture.create();
 
-  @Override
-  public ListenableFuture<TopologyMaster.TMasterLocation> getTMasterLocation(WatchCallback watcher, String topologyName) {
-    return getNodeData(watcher, getTMasterLocationPath(topologyName), TopologyMaster.TMasterLocation.newBuilder());
-  }
+        try {
+            client.delete().withVersion(-1).forPath(path);
+            LOG.info("Deleted node for path: " + path);
+            result.set(true);
+        } catch (Exception e) {
+            result.setException(new RuntimeException("Could not deleteNode", e));
+        }
 
-  @Override
-  public ListenableFuture<Scheduler.SchedulerLocation> getSchedulerLocation(WatchCallback watcher, String topologyName) {
-    return getNodeData(watcher, getSchedulerLocationPath(topologyName), Scheduler.SchedulerLocation.newBuilder());
-  }
+        return result;
+    }
 
-  @Override
-  public ListenableFuture<TopologyAPI.Topology> getTopology(WatchCallback watcher, String topologyName) {
-    return getNodeData(watcher, getTopologyPath(topologyName), TopologyAPI.Topology.newBuilder());
-  }
+    protected <M extends Message> ListenableFuture<M> getNodeData(
+            WatchCallback watcher, String path, final Message.Builder builder) {
+        final SettableFuture<M> future = SettableFuture.create();
 
-  @Override
-  public ListenableFuture<ExecutionEnvironment.ExecutionState> getExecutionState(WatchCallback watcher, String topologyName) {
-    return getNodeData(watcher, getExecutionStatePath(topologyName), ExecutionEnvironment.ExecutionState.newBuilder());
-  }
+        Watcher wc = ZkWatcherCallback.makeZkWatcher(watcher);
 
-  @Override
-  public ListenableFuture<PhysicalPlans.PhysicalPlan> getPhysicalPlan(WatchCallback watcher, String topologyName) {
-    return getNodeData(watcher, getPhysicalPlanPath(topologyName), PhysicalPlans.PhysicalPlan.newBuilder());
-  }
+        BackgroundCallback cb = new BackgroundCallback() {
+            @Override
+            public void processResult(CuratorFramework client, CuratorEvent event) throws Exception {
+                byte[] data;
+                if (event != null & (data = event.getData()) != null) {
+                    builder.mergeFrom(data);
+                    future.set((M) builder.build());
+                } else {
+                    future.setException(new RuntimeException("Failed to fetch data from path: " + event.getPath()));
+                }
+            }
+        };
 
-  @Override
-  public ListenableFuture<Boolean> isTopologyRunning(String topologyName) {
-    return existNode(getTopologyPath(topologyName));
-  }
+        try {
+            client.getData().usingWatcher(wc).inBackground(cb).forPath(path);
+        } catch (Exception e) {
+            future.setException(new RuntimeException("Could not getData", e));
+        }
+
+        return future;
+    }
+
+    @Override
+    public ListenableFuture<Boolean> setTMasterLocation(TopologyMaster.TMasterLocation location, String topologyName) {
+        return createNode(getTMasterLocationPath(topologyName), location.toByteArray(), true);
+    }
+
+    @Override
+    public ListenableFuture<Boolean> setExecutionState(
+            ExecutionEnvironment.ExecutionState executionState, String topologyName) {
+        return createNode(getExecutionStatePath(topologyName), executionState.toByteArray(), false);
+    }
+
+    @Override
+    public ListenableFuture<Boolean> setTopology(TopologyAPI.Topology topology, String topologyName) {
+        return createNode(getTopologyPath(topologyName), topology.toByteArray(), false);
+    }
+
+    @Override
+    public ListenableFuture<Boolean> setPhysicalPlan(PhysicalPlans.PhysicalPlan physicalPlan, String topologyName) {
+        return createNode(getPhysicalPlanPath(topologyName), physicalPlan.toByteArray(), false);
+    }
+
+    @Override
+    public ListenableFuture<Boolean> setSchedulerLocation(Scheduler.SchedulerLocation location, String topologyName) {
+        return createNode(getSchedulerLocationPath(topologyName), location.toByteArray(), true);
+    }
+
+    @Override
+    public ListenableFuture<Boolean> deleteTMasterLocation(String topologyName) {
+        // It is a EPHEMERAL node and would be removed automatically
+        final SettableFuture<Boolean> result = SettableFuture.create();
+        result.set(true);
+        return result;
+    }
+
+    @Override
+    public ListenableFuture<Boolean> deleteExecutionState(String topologyName) {
+        return deleteNode(getExecutionStatePath(topologyName));
+    }
+
+    @Override
+    public ListenableFuture<Boolean> deleteTopology(String topologyName) {
+        return deleteNode(getTopologyPath(topologyName));
+    }
+
+    @Override
+    public ListenableFuture<Boolean> deletePhysicalPlan(String topologyName) {
+        return deleteNode(getPhysicalPlanPath(topologyName));
+    }
+
+    @Override
+    public ListenableFuture<Boolean> deleteSchedulerLocation(String topologyName) {
+        // It is a EPHEMERAL node and would be removed automatically
+        final SettableFuture<Boolean> result = SettableFuture.create();
+        result.set(true);
+        return result;
+    }
+
+    @Override
+    public ListenableFuture<TopologyMaster.TMasterLocation> getTMasterLocation(WatchCallback watcher, String topologyName) {
+        return getNodeData(watcher, getTMasterLocationPath(topologyName), TopologyMaster.TMasterLocation.newBuilder());
+    }
+
+    @Override
+    public ListenableFuture<Scheduler.SchedulerLocation> getSchedulerLocation(WatchCallback watcher, String topologyName) {
+        return getNodeData(watcher, getSchedulerLocationPath(topologyName), Scheduler.SchedulerLocation.newBuilder());
+    }
+
+    @Override
+    public ListenableFuture<TopologyAPI.Topology> getTopology(WatchCallback watcher, String topologyName) {
+        return getNodeData(watcher, getTopologyPath(topologyName), TopologyAPI.Topology.newBuilder());
+    }
+
+    @Override
+    public ListenableFuture<ExecutionEnvironment.ExecutionState> getExecutionState(WatchCallback watcher, String topologyName) {
+        return getNodeData(watcher, getExecutionStatePath(topologyName), ExecutionEnvironment.ExecutionState.newBuilder());
+    }
+
+    @Override
+    public ListenableFuture<PhysicalPlans.PhysicalPlan> getPhysicalPlan(WatchCallback watcher, String topologyName) {
+        return getNodeData(watcher, getPhysicalPlanPath(topologyName), PhysicalPlans.PhysicalPlan.newBuilder());
+    }
+
+    @Override
+    public ListenableFuture<Boolean> isTopologyRunning(String topologyName) {
+        return existNode(getTopologyPath(topologyName));
+    }
 }

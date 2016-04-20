@@ -14,9 +14,10 @@
 
 package com.twitter.heron.api.spout;
 
-import com.twitter.heron.api.topology.TopologyContext;
-import java.util.Map;
 import java.io.Serializable;
+import java.util.Map;
+
+import com.twitter.heron.api.topology.TopologyContext;
 
 /**
  * ISpout is the core interface for implementing spouts. A Spout is responsible
@@ -24,27 +25,27 @@ import java.io.Serializable;
  * a spout, Heron will track the (potentially very large) DAG of tuples generated
  * based on a tuple emitted by the spout. When Heron detects that every tuple in
  * that DAG has been successfully processed, it will send an ack message to the Spout.
- *
+ * <p>
  * <p>If a tuple fails to be fully process within the configured timeout for the
  * topology (see {@link backtype.heron.Config}), Heron will send a fail message to the spout
  * for the message.</p>
- *
+ * <p>
  * <p> When a Spout emits a tuple, it can tag the tuple with a message id. The message id
  * can be any type. When Heron acks or fails a message, it will pass back to the
  * spout the same message id to identify which tuple it's referring to. If the spout leaves out
  * the message id, or sets it to null, then Heron will not track the message and the spout
  * will not receive any ack or fail callbacks for the message.</p>
- *
+ * <p>
  * <p>Heron executes ack, fail, and nextTuple all on the same thread. This means that an implementor
- * of an ISpout does not need to worry about concurrency issues between those methods. However, it 
- * also means that an implementor must ensure that nextTuple is non-blocking: otherwise 
+ * of an ISpout does not need to worry about concurrency issues between those methods. However, it
+ * also means that an implementor must ensure that nextTuple is non-blocking: otherwise
  * the method could await acks and fails that are pending to be processed.</p>
  */
 public interface ISpout extends Serializable {
     /**
      * Called when a task for this component is initialized within a worker on the cluster.
      * It provides the spout with the environment in which the spout executes.
-     *
+     * <p>
      * <p>This includes the:</p>
      *
      * @param conf The Heron configuration for this spout. This is the configuration provided to the topology merged in with cluster configuration on this machine.
@@ -56,20 +57,20 @@ public interface ISpout extends Serializable {
     /**
      * Called when an ISpout is going to be shutdown. There is no guarentee that close
      * will be called, because the supervisor kill -9's worker processes on the cluster.
-     *
+     * <p>
      * <p>The one context where close is guaranteed to be called is a topology is
      * killed when running Heron in local mode.</p>
      */
     void close();
-    
+
     /**
      * Called when a spout has been activated out of a deactivated mode.
      * nextTuple will be called on this spout soon. A spout can become activated
-     * after having been deactivated when the topology is manipulated using the 
+     * after having been deactivated when the topology is manipulated using the
      * `heron` client.
      */
     void activate();
-    
+
     /**
      * Called when a spout has been deactivated. nextTuple will not be called while
      * a spout is deactivated. The spout may or may not be reactivated in the future.

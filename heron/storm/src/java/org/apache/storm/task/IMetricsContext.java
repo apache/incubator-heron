@@ -23,6 +23,8 @@ import org.apache.storm.metric.api.ReducedMetric;
 
 public interface IMetricsContext {
     <T extends IMetric> T registerMetric(String name, T metric, int timeBucketSizeInSecs);
+
     ReducedMetric registerMetric(String name, IReducer reducer, int timeBucketSizeInSecs);
-    CombinedMetric registerMetric(String name, ICombiner combiner, int timeBucketSizeInSecs);  
+
+    CombinedMetric registerMetric(String name, ICombiner combiner, int timeBucketSizeInSecs);
 }

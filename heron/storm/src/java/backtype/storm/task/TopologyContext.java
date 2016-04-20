@@ -47,39 +47,39 @@ import backtype.storm.tuple.Fields;
  * synchronize state with StateSpouts this object is subscribed to.</p>
  */
 public class TopologyContext extends WorkerTopologyContext implements IMetricsContext {
-  private com.twitter.heron.api.topology.TopologyContext delegate;
+    private com.twitter.heron.api.topology.TopologyContext delegate;
 
-  // Constructor to match the signature of the storm's TopologyContext
-  // Note that here, we fake the clojure.lang.Atom by creating our own class
-  // This is real hacking a hack!
-  public TopologyContext(StormTopology topology, Map stormConf,
-                         Map<Integer, String> taskToComponent, Map<String, List<Integer>> componentToSortedTasks,
-                         Map<String, Map<String, Fields>> componentToStreamToFields,
-                         String stormId, String codeDir, String pidDir, Integer taskId,
-                         Integer workerPort, List<Integer> workerTasks, Map<String, Object> defaultResources,
-                         Map<String, Object> userResources, Map<String, Object> executorData, Map registeredMetrics,
-                         clojure.lang.Atom openOrPrepareWasCalled) {
-    super((com.twitter.heron.api.topology.TopologyContext) null);
-  }
+    // Constructor to match the signature of the storm's TopologyContext
+    // Note that here, we fake the clojure.lang.Atom by creating our own class
+    // This is real hacking a hack!
+    public TopologyContext(StormTopology topology, Map stormConf,
+                           Map<Integer, String> taskToComponent, Map<String, List<Integer>> componentToSortedTasks,
+                           Map<String, Map<String, Fields>> componentToStreamToFields,
+                           String stormId, String codeDir, String pidDir, Integer taskId,
+                           Integer workerPort, List<Integer> workerTasks, Map<String, Object> defaultResources,
+                           Map<String, Object> userResources, Map<String, Object> executorData, Map registeredMetrics,
+                           clojure.lang.Atom openOrPrepareWasCalled) {
+        super((com.twitter.heron.api.topology.TopologyContext) null);
+    }
 
-  public TopologyContext(com.twitter.heron.api.topology.TopologyContext delegate) {
-    super(delegate);
-    this.delegate = delegate;
-  }
+    public TopologyContext(com.twitter.heron.api.topology.TopologyContext delegate) {
+        super(delegate);
+        this.delegate = delegate;
+    }
 
-  /**
-   * All state from all subscribed state spouts streams will be synced with
-   * the provided object.
-   *
-   * <p>It is recommended that your ISubscribedState object is kept as an instance
-   * variable of this object. The recommended usage of this method is as follows:</p>
-   *
-   * <p>
-   * _myState = context.setAllSubscribedState(new MyState());
-   * </p>
-   * @param obj Provided ISubscribedState implementation
-   * @return Returns the ISubscribedState object provided
-   */
+    /**
+     * All state from all subscribed state spouts streams will be synced with
+     * the provided object.
+     *
+     * <p>It is recommended that your ISubscribedState object is kept as an instance
+     * variable of this object. The recommended usage of this method is as follows:</p>
+     *
+     * <p>
+     * _myState = context.setAllSubscribedState(new MyState());
+     * </p>
+     * @param obj Provided ISubscribedState implementation
+     * @return Returns the ISubscribedState object provided
+     */
   /*
     public <T extends ISubscribedState> T setAllSubscribedState(T obj) {
         //check that only subscribed to one component/stream for statespout
@@ -89,114 +89,114 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
   */
 
 
-  /**
-   * Synchronizes the default stream from the specified state spout component
-   * id with the provided ISubscribedState object.
-   *
-   * <p>The recommended usage of this method is as follows:</p>
-   * <p>
-   * _myState = context.setSubscribedState(componentId, new MyState());
-   * </p>
-   *
-   * @param componentId the id of the StateSpout component to subscribe to
-   * @param obj Provided ISubscribedState implementation
-   * @return Returns the ISubscribedState object provided
-   */
+    /**
+     * Synchronizes the default stream from the specified state spout component
+     * id with the provided ISubscribedState object.
+     *
+     * <p>The recommended usage of this method is as follows:</p>
+     * <p>
+     * _myState = context.setSubscribedState(componentId, new MyState());
+     * </p>
+     *
+     * @param componentId the id of the StateSpout component to subscribe to
+     * @param obj Provided ISubscribedState implementation
+     * @return Returns the ISubscribedState object provided
+     */
   /*
     public <T extends ISubscribedState> T setSubscribedState(String componentId, T obj) {
         return setSubscribedState(componentId, Utils.DEFAULT_STREAM_ID, obj);
     }
   */
 
-  /**
-   * Synchronizes the specified stream from the specified state spout component
-   * id with the provided ISubscribedState object.
-   *
-   * <p>The recommended usage of this method is as follows:</p>
-   * <p>
-   * _myState = context.setSubscribedState(componentId, streamId, new MyState());
-   * </p>
-   *
-   * @param componentId the id of the StateSpout component to subscribe to
-   * @param streamId the stream to subscribe to
-   * @param obj Provided ISubscribedState implementation
-   * @return Returns the ISubscribedState object provided
-   */
+    /**
+     * Synchronizes the specified stream from the specified state spout component
+     * id with the provided ISubscribedState object.
+     *
+     * <p>The recommended usage of this method is as follows:</p>
+     * <p>
+     * _myState = context.setSubscribedState(componentId, streamId, new MyState());
+     * </p>
+     *
+     * @param componentId the id of the StateSpout component to subscribe to
+     * @param streamId the stream to subscribe to
+     * @param obj Provided ISubscribedState implementation
+     * @return Returns the ISubscribedState object provided
+     */
   /*
     public <T extends ISubscribedState> T setSubscribedState(String componentId, String streamId, T obj) {
         throw new NotImplementedException();
     }
   */
 
-  /**
-   * Gets the task id of this task.
-   *
-   * @return the task id
-   */
-  public int getThisTaskId() {
-    return delegate.getThisTaskId();
-  }
+    /**
+     * Gets the task id of this task.
+     *
+     * @return the task id
+     */
+    public int getThisTaskId() {
+        return delegate.getThisTaskId();
+    }
 
-  /**
-   * Gets the component id for this task. The component id maps
-   * to a component id specified for a Spout or Bolt in the topology definition.
-   */
-  public String getThisComponentId() {
-    return delegate.getThisComponentId();
-  }
+    /**
+     * Gets the component id for this task. The component id maps
+     * to a component id specified for a Spout or Bolt in the topology definition.
+     */
+    public String getThisComponentId() {
+        return delegate.getThisComponentId();
+    }
 
-  /**
-   * Gets the declared output fields for the specified stream id for the component
-   * this task is a part of.
-   */
-  public Fields getThisOutputFields(String streamId) {
-    return new Fields(delegate.getThisOutputFields(streamId));
-  }
+    /**
+     * Gets the declared output fields for the specified stream id for the component
+     * this task is a part of.
+     */
+    public Fields getThisOutputFields(String streamId) {
+        return new Fields(delegate.getThisOutputFields(streamId));
+    }
 
-  /**
-   * Gets the set of streams declared for the component of this task.
-   */
-  public Set<String> getThisStreams() {
-    return delegate.getThisStreams();
-  }
+    /**
+     * Gets the set of streams declared for the component of this task.
+     */
+    public Set<String> getThisStreams() {
+        return delegate.getThisStreams();
+    }
 
-  /**
-   * Gets the index of this task id in getComponentTasks(getThisComponentId()).
-   * An example use case for this method is determining which task
-   * accesses which resource in a distributed resource to ensure an even distribution.
-   */
-  public int getThisTaskIndex() {
-    return delegate.getThisTaskIndex();
-  }
+    /**
+     * Gets the index of this task id in getComponentTasks(getThisComponentId()).
+     * An example use case for this method is determining which task
+     * accesses which resource in a distributed resource to ensure an even distribution.
+     */
+    public int getThisTaskIndex() {
+        return delegate.getThisTaskIndex();
+    }
 
-  /**
-   * Gets the declared inputs to this component.
-   *
-   * @return A map from subscribed component/stream to the grouping subscribed with.
-   */
+    /**
+     * Gets the declared inputs to this component.
+     *
+     * @return A map from subscribed component/stream to the grouping subscribed with.
+     */
   /*
     public Map<GlobalStreamId, Grouping> getThisSources() {
         return getSources(getThisComponentId());
     }
   */
 
-  /**
-   * Gets information about who is consuming the outputs of this component, and how.
-   *
-   * @return Map from stream id to component id to the Grouping used.
-   */
+    /**
+     * Gets information about who is consuming the outputs of this component, and how.
+     *
+     * @return Map from stream id to component id to the Grouping used.
+     */
   /*
   public Map<String, Map<String, Grouping>> getThisTargets() {
       return getTargets(getThisComponentId());
   }
   */
-  public void setTaskData(String name, Object data) {
-    delegate.setTaskData(name, data);
-  }
+    public void setTaskData(String name, Object data) {
+        delegate.setTaskData(name, data);
+    }
 
-  public Object getTaskData(String name) {
-    return delegate.getTaskData(name);
-  }
+    public Object getTaskData(String name) {
+        return delegate.getTaskData(name);
+    }
 
   /*
     public void setExecutorData(String name, Object data) {
@@ -208,61 +208,61 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
     }    
   */
 
-  public void addTaskHook(ITaskHook newHook) {
-    Collection<com.twitter.heron.api.hooks.ITaskHook> hooks = delegate.getHooks();
-    if (hooks == null) {
-      ITaskHookDelegate delegateHook = new ITaskHookDelegate();
-      delegateHook.addHook(newHook);
+    public void addTaskHook(ITaskHook newHook) {
+        Collection<com.twitter.heron.api.hooks.ITaskHook> hooks = delegate.getHooks();
+        if (hooks == null) {
+            ITaskHookDelegate delegateHook = new ITaskHookDelegate();
+            delegateHook.addHook(newHook);
 
-      delegate.addTaskHook(delegateHook);
-    } else {
-      for (com.twitter.heron.api.hooks.ITaskHook hook : hooks) {
-        if (hook instanceof ITaskHookDelegate) {
-          ITaskHookDelegate delegateHook = (ITaskHookDelegate) hook;
-          delegateHook.addHook(newHook);
-          return;
+            delegate.addTaskHook(delegateHook);
+        } else {
+            for (com.twitter.heron.api.hooks.ITaskHook hook : hooks) {
+                if (hook instanceof ITaskHookDelegate) {
+                    ITaskHookDelegate delegateHook = (ITaskHookDelegate) hook;
+                    delegateHook.addHook(newHook);
+                    return;
+                }
+            }
+            throw new RuntimeException("StormCompat taskHooks not setup properly");
         }
-      }
-      throw new RuntimeException("StormCompat taskHooks not setup properly");
     }
-  }
 
-  public Collection<ITaskHook> getHooks() {
-    Collection<com.twitter.heron.api.hooks.ITaskHook> hooks = delegate.getHooks();
-    if (hooks != null) {
-      for (com.twitter.heron.api.hooks.ITaskHook hook : hooks) {
-        if (hook instanceof ITaskHookDelegate) {
-          return ((ITaskHookDelegate) hook).getHooks();
+    public Collection<ITaskHook> getHooks() {
+        Collection<com.twitter.heron.api.hooks.ITaskHook> hooks = delegate.getHooks();
+        if (hooks != null) {
+            for (com.twitter.heron.api.hooks.ITaskHook hook : hooks) {
+                if (hook instanceof ITaskHookDelegate) {
+                    return ((ITaskHookDelegate) hook).getHooks();
+                }
+            }
         }
-      }
+        return null;
     }
-    return null;
-  }
 
-  /*
-   * Register a IMetric instance. 
-   * Storm will then call getValueAndReset on the metric every timeBucketSizeInSecs
-   * and the returned value is sent to all metrics consumers.
-   * You must call this during IBolt::prepare or ISpout::open.
-   * @return The IMetric argument unchanged.
-   */
-  public <T extends IMetric> T registerMetric(String name, T metric, int timeBucketSizeInSecs) {
-    MetricDelegate d = new MetricDelegate(metric);
-    delegate.registerMetric(name, d, timeBucketSizeInSecs);
-    return metric;
-  }
+    /*
+     * Register a IMetric instance.
+     * Storm will then call getValueAndReset on the metric every timeBucketSizeInSecs
+     * and the returned value is sent to all metrics consumers.
+     * You must call this during IBolt::prepare or ISpout::open.
+     * @return The IMetric argument unchanged.
+     */
+    public <T extends IMetric> T registerMetric(String name, T metric, int timeBucketSizeInSecs) {
+        MetricDelegate d = new MetricDelegate(metric);
+        delegate.registerMetric(name, d, timeBucketSizeInSecs);
+        return metric;
+    }
 
-  /*
-   * Convinience method for registering ReducedMetric.
-   */
-  public ReducedMetric registerMetric(String name, IReducer reducer, int timeBucketSizeInSecs) {
-    return registerMetric(name, new ReducedMetric(reducer), timeBucketSizeInSecs);
-  }
+    /*
+     * Convinience method for registering ReducedMetric.
+     */
+    public ReducedMetric registerMetric(String name, IReducer reducer, int timeBucketSizeInSecs) {
+        return registerMetric(name, new ReducedMetric(reducer), timeBucketSizeInSecs);
+    }
 
-  /*
-   * Convinience method for registering CombinedMetric.
-   */
-  public CombinedMetric registerMetric(String name, ICombiner combiner, int timeBucketSizeInSecs) {
-    return registerMetric(name, new CombinedMetric(combiner), timeBucketSizeInSecs);
-  }
+    /*
+     * Convinience method for registering CombinedMetric.
+     */
+    public CombinedMetric registerMetric(String name, ICombiner combiner, int timeBucketSizeInSecs) {
+        return registerMetric(name, new CombinedMetric(combiner), timeBucketSizeInSecs);
+    }
 }

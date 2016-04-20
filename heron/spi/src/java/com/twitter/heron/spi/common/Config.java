@@ -14,150 +14,150 @@
 
 package com.twitter.heron.spi.common;
 
-import java.util.Map;
 import java.util.HashMap;
-import java.util.TreeMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Config is an Immutable Map of <String, Object>
  */
 public class Config {
-  private final Map<String, Object> cfgMap = new HashMap();
+    private final Map<String, Object> cfgMap = new HashMap();
 
-  public static class Builder {
-    private final Map<String, Object> keyValues = new HashMap();
-
-    private static Config.Builder create() {
-      return new Builder();
+    private Config(Builder build) {
+        cfgMap.putAll(build.keyValues);
     }
 
-    public Builder put(String key, Object value) {
-      this.keyValues.put(key, value);
-      return this;
+    public static Builder newBuilder() {
+        return Builder.create();
     }
 
-    public Builder putAll(Config ctx) {
-      keyValues.putAll(ctx.cfgMap);
-      return this;
+    public static Config expand(Config config) {
+        Config.Builder cb = Config.newBuilder();
+        for (String key : config.getKeySet()) {
+            Object value = config.get(key);
+            if (value instanceof String) {
+                String expanded_value = Misc.substitute(config, (String) value);
+                cb.put(key, expanded_value);
+            } else {
+                cb.put(key, value);
+            }
+        }
+        return cb.build();
     }
 
-    public Builder putAll(Map<String, Object> map) {
-      keyValues.putAll(map);
-      return this;
+    public int size() {
+        return cfgMap.size();
     }
 
-    public Config build() {
-      return new Config(this);
+    public Object get(String key) {
+        return cfgMap.get(key);
     }
-  }
 
-  private Config(Builder build) {
-    cfgMap.putAll(build.keyValues);
-  }
-
-  public static Builder newBuilder() { 
-    return Builder.create(); 
-  }
-
-  public int size() {
-    return cfgMap.size();
-  }
-
-  public Object get(String key) {
-    return cfgMap.get(key);
-  }
-
-  public String getStringValue(String key) {
-    return (String) get(key);
-  }
-
-  public String getStringValue(String key, String defaultValue) {
-    String value = getStringValue(key);
-    return value != null ? value : defaultValue;
-  }
-
-  public Boolean getBooleanValue(String key) {
-    return (Boolean) get(key);
-  }
-
-  public Boolean getBooleanValue(String key, boolean defaultValue) {
-    Boolean value = getBooleanValue(key);
-    return value != null ? value : defaultValue;
-  }
-
-  public Long getLongValue(String key) {
-    Object value = cfgMap.get(key);
-    return Convert.getLong(value);
-  }
-
-  public Long getLongValue(String key, long defaultValue) {
-    Object value = get(key);
-    if (value != null) {
-      return Convert.getLong(value);
+    public String getStringValue(String key) {
+        return (String) get(key);
     }
-    return defaultValue;
-  }
 
-  public Integer getIntegerValue(String key) {
-    Object value = cfgMap.get(key);
-    return Convert.getInteger(value);
-  }
-
-  public Double getDoubleValue(String key) {
-    Object value = cfgMap.get(key);
-    return Convert.getDouble(value);
-  }
-
-  public Double getDoubleValue(String key, double defaultValue) {
-    Object value = get(key);
-    if (value != null) {
-      return Convert.getDouble(value);
+    public String getStringValue(String key, String defaultValue) {
+        String value = getStringValue(key);
+        return value != null ? value : defaultValue;
     }
-    return defaultValue;
-  }
 
-  public boolean containsKey(String key) {
-    return cfgMap.containsKey(key);
-  }
-
-  public Set<String> getKeySet() {
-    return cfgMap.keySet();
-  }
-
-  public static Config expand(Config config) {
-    Config.Builder cb = Config.newBuilder();
-    for (String key : config.getKeySet()) {
-      Object value = config.get(key);
-      if (value instanceof String) {
-        String expanded_value = Misc.substitute(config, (String) value);
-        cb.put(key, expanded_value); 
-      } else {
-        cb.put(key, value); 
-      }
+    public Boolean getBooleanValue(String key) {
+        return (Boolean) get(key);
     }
-    return cb.build();
-  } 
 
-  public String asString() {
-    StringBuilder sb = new StringBuilder();
-    for (Map.Entry<String, Object> kv : cfgMap.entrySet()) {
-      if (kv.getValue() instanceof String) {
-        sb.append(String.format(" %s=\"%s\" ", kv.getKey(), kv.getValue().toString()));
-      }
+    public Boolean getBooleanValue(String key, boolean defaultValue) {
+        Boolean value = getBooleanValue(key);
+        return value != null ? value : defaultValue;
     }
-    return sb.toString();
-  }
 
-  @Override
-  public String toString() {
-    Map<String, Object> treeMap = new TreeMap<String, Object>(cfgMap);
-    StringBuilder sb = new StringBuilder();
-    for (Object obj : treeMap.entrySet()) {
-      Map.Entry<String, Object> entry = (Map.Entry) obj;
-      sb.append("(\"" + entry.getKey() + "\"");
-      sb.append(", " + entry.getValue() + ")\n");
+    public Long getLongValue(String key) {
+        Object value = cfgMap.get(key);
+        return Convert.getLong(value);
     }
-    return sb.toString();
-  }
+
+    public Long getLongValue(String key, long defaultValue) {
+        Object value = get(key);
+        if (value != null) {
+            return Convert.getLong(value);
+        }
+        return defaultValue;
+    }
+
+    public Integer getIntegerValue(String key) {
+        Object value = cfgMap.get(key);
+        return Convert.getInteger(value);
+    }
+
+    public Double getDoubleValue(String key) {
+        Object value = cfgMap.get(key);
+        return Convert.getDouble(value);
+    }
+
+    public Double getDoubleValue(String key, double defaultValue) {
+        Object value = get(key);
+        if (value != null) {
+            return Convert.getDouble(value);
+        }
+        return defaultValue;
+    }
+
+    public boolean containsKey(String key) {
+        return cfgMap.containsKey(key);
+    }
+
+    public Set<String> getKeySet() {
+        return cfgMap.keySet();
+    }
+
+    public String asString() {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, Object> kv : cfgMap.entrySet()) {
+            if (kv.getValue() instanceof String) {
+                sb.append(String.format(" %s=\"%s\" ", kv.getKey(), kv.getValue().toString()));
+            }
+        }
+        return sb.toString();
+    }
+
+    @Override
+    public String toString() {
+        Map<String, Object> treeMap = new TreeMap<String, Object>(cfgMap);
+        StringBuilder sb = new StringBuilder();
+        for (Object obj : treeMap.entrySet()) {
+            Map.Entry<String, Object> entry = (Map.Entry) obj;
+            sb.append("(\"" + entry.getKey() + "\"");
+            sb.append(", " + entry.getValue() + ")\n");
+        }
+        return sb.toString();
+    }
+
+    public static class Builder {
+        private final Map<String, Object> keyValues = new HashMap();
+
+        private static Config.Builder create() {
+            return new Builder();
+        }
+
+        public Builder put(String key, Object value) {
+            this.keyValues.put(key, value);
+            return this;
+        }
+
+        public Builder putAll(Config ctx) {
+            keyValues.putAll(ctx.cfgMap);
+            return this;
+        }
+
+        public Builder putAll(Map<String, Object> map) {
+            keyValues.putAll(map);
+            return this;
+        }
+
+        public Config build() {
+            return new Config(this);
+        }
+    }
 }

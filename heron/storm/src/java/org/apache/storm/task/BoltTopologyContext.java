@@ -20,7 +20,7 @@ package org.apache.storm.task;
  * information in this structure.
  */
 public class BoltTopologyContext extends TopologyContext {
-  public BoltTopologyContext(com.twitter.heron.api.topology.TopologyContext delegate) {
-    super(delegate);
-  }
+    public BoltTopologyContext(com.twitter.heron.api.topology.TopologyContext delegate) {
+        super(delegate);
+    }
 }

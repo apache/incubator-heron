@@ -35,147 +35,147 @@ import com.twitter.heron.proto.tmaster.TopologyMaster;
  */
 
 public class SchedulerStateManagerAdaptor {
-  private static final Logger LOG = Logger.getLogger(SchedulerStateManagerAdaptor.class.getName());
+    private static final Logger LOG = Logger.getLogger(SchedulerStateManagerAdaptor.class.getName());
 
-  private final IStateManager delegate;
-  private final int timeout;
+    private final IStateManager delegate;
+    private final int timeout;
 
-  /**
-   * Construct SchedulerStateManagerAdaptor providing only the
-   * interfaces used by scheduler.
-   *
-   * @param delegate, the IStateManager which is already initialized.
-   * Noticed that the initialize and close of IStateManager is not in the
-   * SchedulerStateManager. Users are restricted from using those interfaces
-   * since it is upto the abstract scheduler to decide when to open and close.
-   * @param delegate, the instance of IStateManager
-   * @param timeout, the maximum time to wait in milliseconds
-   */
-  public SchedulerStateManagerAdaptor(IStateManager delegate, int timeout) {
-    this.delegate = delegate;
-    this.timeout = timeout;
-  }
-
-  /**
-   * Waits for ListenableFuture to terminate. Cancels on timeout
-   */
-  protected <V> V awaitResult(ListenableFuture<V> future) {
-    return awaitResult(future, timeout, TimeUnit.MILLISECONDS);
-  }
-
-  /**
-   * Waits for ListenableFuture to terminate. Cancels on timeout
-   */
-  protected  <V> V awaitResult(ListenableFuture<V> future, int time, TimeUnit unit) {
-    try {
-      return future.get(time, unit);
-    } catch (InterruptedException | TimeoutException | ExecutionException e) {
-      LOG.log(Level.SEVERE, "Exception processing future ", e);
-      future.cancel(true);
-      return null;
+    /**
+     * Construct SchedulerStateManagerAdaptor providing only the
+     * interfaces used by scheduler.
+     *
+     * @param delegate, the IStateManager which is already initialized.
+     * Noticed that the initialize and close of IStateManager is not in the
+     * SchedulerStateManager. Users are restricted from using those interfaces
+     * since it is upto the abstract scheduler to decide when to open and close.
+     * @param delegate, the instance of IStateManager
+     * @param timeout, the maximum time to wait in milliseconds
+     */
+    public SchedulerStateManagerAdaptor(IStateManager delegate, int timeout) {
+        this.delegate = delegate;
+        this.timeout = timeout;
     }
-  }
 
-  /**
-   * Is the given topology in RUNNING state?
-   *
-   * @return Boolean
-   */
-  public Boolean isTopologyRunning(String topologyName) {
-    return awaitResult(delegate.isTopologyRunning(topologyName));
-  }
+    /**
+     * Waits for ListenableFuture to terminate. Cancels on timeout
+     */
+    protected <V> V awaitResult(ListenableFuture<V> future) {
+        return awaitResult(future, timeout, TimeUnit.MILLISECONDS);
+    }
 
-  /**
-   * Set the execution state for the given topology
-   *
-   * @return Boolean - Success or Failure
-   */
-  public Boolean setExecutionState(
-      ExecutionEnvironment.ExecutionState executionState, String topologyName) {
-    return awaitResult(delegate.setExecutionState(executionState, topologyName));
-  }
+    /**
+     * Waits for ListenableFuture to terminate. Cancels on timeout
+     */
+    protected <V> V awaitResult(ListenableFuture<V> future, int time, TimeUnit unit) {
+        try {
+            return future.get(time, unit);
+        } catch (InterruptedException | TimeoutException | ExecutionException e) {
+            LOG.log(Level.SEVERE, "Exception processing future ", e);
+            future.cancel(true);
+            return null;
+        }
+    }
 
-  /**
-   * Set the topology definition for the given topology
-   *
-   * @param topologyName, the name of the topology
-   * @return Boolean - Success or Failure
-   */
-  public Boolean setTopology(TopologyAPI.Topology topology, String topologyName) {
-    return awaitResult(delegate.setTopology(topology, topologyName));
-  }
+    /**
+     * Is the given topology in RUNNING state?
+     *
+     * @return Boolean
+     */
+    public Boolean isTopologyRunning(String topologyName) {
+        return awaitResult(delegate.isTopologyRunning(topologyName));
+    }
 
-  /**
-   * Set the scheduler location for the given topology
-   *
-   * @return Boolean - Success or Failure
-   */
-  public Boolean setSchedulerLocation(Scheduler.SchedulerLocation location, String topologyName) {
-    return awaitResult(delegate.setSchedulerLocation(location, topologyName));
-  }
+    /**
+     * Set the execution state for the given topology
+     *
+     * @return Boolean - Success or Failure
+     */
+    public Boolean setExecutionState(
+            ExecutionEnvironment.ExecutionState executionState, String topologyName) {
+        return awaitResult(delegate.setExecutionState(executionState, topologyName));
+    }
 
-  /**
-   * Delete the tmaster location for the given topology
-   *
-   * @return Boolean - Success or Failure
-   */
-  public Boolean deleteTMasterLocation(String topologyName) {
-    return awaitResult(delegate.deleteTMasterLocation(topologyName));
-  }
+    /**
+     * Set the topology definition for the given topology
+     *
+     * @param topologyName, the name of the topology
+     * @return Boolean - Success or Failure
+     */
+    public Boolean setTopology(TopologyAPI.Topology topology, String topologyName) {
+        return awaitResult(delegate.setTopology(topology, topologyName));
+    }
 
-  /**
-   * Delete the execution state for the given topology
-   *
-   * @return Boolean - Success or Failure
-   */
-  public Boolean deleteExecutionState(String topologyName) {
-    return awaitResult(delegate.deleteExecutionState(topologyName));
-  }
+    /**
+     * Set the scheduler location for the given topology
+     *
+     * @return Boolean - Success or Failure
+     */
+    public Boolean setSchedulerLocation(Scheduler.SchedulerLocation location, String topologyName) {
+        return awaitResult(delegate.setSchedulerLocation(location, topologyName));
+    }
 
-  /**
-   * Delete the topology definition for the given topology
-   *
-   * @return Boolean - Success or Failure
-   */
-  public Boolean deleteTopology(String topologyName) {
-    return awaitResult(delegate.deleteTopology(topologyName));
-  }
+    /**
+     * Delete the tmaster location for the given topology
+     *
+     * @return Boolean - Success or Failure
+     */
+    public Boolean deleteTMasterLocation(String topologyName) {
+        return awaitResult(delegate.deleteTMasterLocation(topologyName));
+    }
 
-  /**
-   * Delete the physical plan for the given topology
-   *
-   * @return Boolean - Success or Failure
-   */
-  public Boolean deletePhysicalPlan(String topologyName) {
-    return awaitResult(delegate.deletePhysicalPlan(topologyName));
-  }
+    /**
+     * Delete the execution state for the given topology
+     *
+     * @return Boolean - Success or Failure
+     */
+    public Boolean deleteExecutionState(String topologyName) {
+        return awaitResult(delegate.deleteExecutionState(topologyName));
+    }
 
-  /**
-   * Delete the scheduler location for the given topology
-   *
-   * @return Boolean - Success or Failure
-   */
-  public Boolean deleteSchedulerLocation(String topologyName) {
-    return awaitResult(delegate.deleteSchedulerLocation(topologyName));
-  }
+    /**
+     * Delete the topology definition for the given topology
+     *
+     * @return Boolean - Success or Failure
+     */
+    public Boolean deleteTopology(String topologyName) {
+        return awaitResult(delegate.deleteTopology(topologyName));
+    }
 
-  /**
-   * Get the tmaster location for the given topology
-   *
-   * @return TMasterLocation
-   */
-  public TopologyMaster.TMasterLocation getTMasterLocation(String topologyName) {
-    return awaitResult(delegate.getTMasterLocation(null, topologyName));
-  }
+    /**
+     * Delete the physical plan for the given topology
+     *
+     * @return Boolean - Success or Failure
+     */
+    public Boolean deletePhysicalPlan(String topologyName) {
+        return awaitResult(delegate.deletePhysicalPlan(topologyName));
+    }
 
-  /**
-   * Get the scheduler location for the given topology
-   *
-   * @return SchedulerLocation
-   */
-  public Scheduler.SchedulerLocation getSchedulerLocation(String topologyName) {
-    return awaitResult(delegate.getSchedulerLocation(null, topologyName));
-  }
+    /**
+     * Delete the scheduler location for the given topology
+     *
+     * @return Boolean - Success or Failure
+     */
+    public Boolean deleteSchedulerLocation(String topologyName) {
+        return awaitResult(delegate.deleteSchedulerLocation(topologyName));
+    }
+
+    /**
+     * Get the tmaster location for the given topology
+     *
+     * @return TMasterLocation
+     */
+    public TopologyMaster.TMasterLocation getTMasterLocation(String topologyName) {
+        return awaitResult(delegate.getTMasterLocation(null, topologyName));
+    }
+
+    /**
+     * Get the scheduler location for the given topology
+     *
+     * @return SchedulerLocation
+     */
+    public Scheduler.SchedulerLocation getSchedulerLocation(String topologyName) {
+        return awaitResult(delegate.getSchedulerLocation(null, topologyName));
+    }
 
 // TODO(mfu): Currently this one is not used; comment it out.
 // /**
@@ -187,21 +187,21 @@ public class SchedulerStateManagerAdaptor {
 //    return awaitResult(delegate.getTopology(null, topologyName));
 //  }
 
-  /**
-   * Get the execution state for the given topology
-   *
-   * @return ExecutionState
-   */
-  public ExecutionEnvironment.ExecutionState getExecutionState(String topologyName) {
-    return awaitResult(delegate.getExecutionState(null, topologyName));
-  }
+    /**
+     * Get the execution state for the given topology
+     *
+     * @return ExecutionState
+     */
+    public ExecutionEnvironment.ExecutionState getExecutionState(String topologyName) {
+        return awaitResult(delegate.getExecutionState(null, topologyName));
+    }
 
-  /**
-   * Get the physical plan for the given topology
-   *
-   * @return PhysicalPlans.PhysicalPlan
-   */
-  public PhysicalPlans.PhysicalPlan getPhysicalPlan(String topologyName) {
-    return awaitResult(delegate.getPhysicalPlan(null, topologyName));
-  }
+    /**
+     * Get the physical plan for the given topology
+     *
+     * @return PhysicalPlans.PhysicalPlan
+     */
+    public PhysicalPlans.PhysicalPlan getPhysicalPlan(String topologyName) {
+        return awaitResult(delegate.getPhysicalPlan(null, topologyName));
+    }
 }

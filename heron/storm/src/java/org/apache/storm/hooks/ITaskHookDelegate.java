@@ -37,108 +37,108 @@ import org.apache.storm.task.TopologyContext;
  * 2. task hook added dynamically by invoking addHook(ITaskHook)
  */
 public class ITaskHookDelegate implements com.twitter.heron.api.hooks.ITaskHook {
-  private List<ITaskHook> hooks_;
-  private Map conf_;
+    private List<ITaskHook> hooks_;
+    private Map conf_;
 
-  // zero arg constructor
-  public ITaskHookDelegate() {
-    hooks_ = new LinkedList<ITaskHook>();
-  }
-
-  public void addHook(ITaskHook hook) {
-    hooks_.add(hook);
-  }
-
-  public List<ITaskHook> getHooks() {
-    return hooks_;
-  }
-
-  public Map getConf() {
-    return conf_;
-  }
-
-  @Override
-  public void prepare(Map conf, com.twitter.heron.api.topology.TopologyContext context) {
-    this.conf_ = conf;
-    if (!conf.containsKey(Config.STORMCOMPAT_TOPOLOGY_AUTO_TASK_HOOKS)) {
-      throw new RuntimeException("StormCompat Translation not done for task hooks");
-    }
-    List<String> hookClassNames = (List<String>) conf.get(Config.STORMCOMPAT_TOPOLOGY_AUTO_TASK_HOOKS);
-
-    for (String className : hookClassNames) {
-      ITaskHook hook;
-      try {
-        hook = (ITaskHook) Class.forName(className).newInstance();
-      } catch (ClassNotFoundException ex) {
-        throw new RuntimeException(ex + " ITaskHook class must be in class path.");
-      } catch (InstantiationException ex) {
-        throw new RuntimeException(ex + " ITaskHook class must be concrete.");
-      } catch (IllegalAccessException ex) {
-        throw new RuntimeException(ex + " ITaskHook class must have a no-arg constructor.");
-      }
-
-      hooks_.add(hook);
+    // zero arg constructor
+    public ITaskHookDelegate() {
+        hooks_ = new LinkedList<ITaskHook>();
     }
 
-    // Invoke the prepare() for all ITaskHooks
-    TopologyContext ctxt = new TopologyContext(context);
-    for (ITaskHook hook : hooks_) {
-      hook.prepare(conf, ctxt);
+    public void addHook(ITaskHook hook) {
+        hooks_.add(hook);
     }
-  }
 
-  @Override
-  public void cleanup() {
-    for (ITaskHook hook : hooks_) {
-      hook.cleanup();
+    public List<ITaskHook> getHooks() {
+        return hooks_;
     }
-  }
 
-  @Override
-  public void emit(com.twitter.heron.api.hooks.info.EmitInfo info) {
-    EmitInfo emit = new EmitInfo(info);
-    for (ITaskHook hook : hooks_) {
-      hook.emit(emit);
+    public Map getConf() {
+        return conf_;
     }
-  }
 
-  @Override
-  public void spoutAck(com.twitter.heron.api.hooks.info.SpoutAckInfo info) {
-    SpoutAckInfo ack = new SpoutAckInfo(info);
-    for (ITaskHook hook : hooks_) {
-      hook.spoutAck(ack);
-    }
-  }
+    @Override
+    public void prepare(Map conf, com.twitter.heron.api.topology.TopologyContext context) {
+        this.conf_ = conf;
+        if (!conf.containsKey(Config.STORMCOMPAT_TOPOLOGY_AUTO_TASK_HOOKS)) {
+            throw new RuntimeException("StormCompat Translation not done for task hooks");
+        }
+        List<String> hookClassNames = (List<String>) conf.get(Config.STORMCOMPAT_TOPOLOGY_AUTO_TASK_HOOKS);
 
-  @Override
-  public void spoutFail(com.twitter.heron.api.hooks.info.SpoutFailInfo info) {
-    SpoutFailInfo fail = new SpoutFailInfo(info);
-    for (ITaskHook hook : hooks_) {
-      hook.spoutFail(fail);
-    }
-  }
+        for (String className : hookClassNames) {
+            ITaskHook hook;
+            try {
+                hook = (ITaskHook) Class.forName(className).newInstance();
+            } catch (ClassNotFoundException ex) {
+                throw new RuntimeException(ex + " ITaskHook class must be in class path.");
+            } catch (InstantiationException ex) {
+                throw new RuntimeException(ex + " ITaskHook class must be concrete.");
+            } catch (IllegalAccessException ex) {
+                throw new RuntimeException(ex + " ITaskHook class must have a no-arg constructor.");
+            }
 
-  @Override
-  public void boltAck(com.twitter.heron.api.hooks.info.BoltAckInfo info) {
-    BoltAckInfo ack = new BoltAckInfo(info);
-    for (ITaskHook hook : hooks_) {
-      hook.boltAck(ack);
-    }
-  }
+            hooks_.add(hook);
+        }
 
-  @Override
-  public void boltFail(com.twitter.heron.api.hooks.info.BoltFailInfo info) {
-    BoltFailInfo fail = new BoltFailInfo(info);
-    for (ITaskHook hook : hooks_) {
-      hook.boltFail(fail);
+        // Invoke the prepare() for all ITaskHooks
+        TopologyContext ctxt = new TopologyContext(context);
+        for (ITaskHook hook : hooks_) {
+            hook.prepare(conf, ctxt);
+        }
     }
-  }
 
-  @Override
-  public void boltExecute(com.twitter.heron.api.hooks.info.BoltExecuteInfo info) {
-    BoltExecuteInfo execute = new BoltExecuteInfo(info);
-    for (ITaskHook hook : hooks_) {
-      hook.boltExecute(execute);
+    @Override
+    public void cleanup() {
+        for (ITaskHook hook : hooks_) {
+            hook.cleanup();
+        }
     }
-  }
+
+    @Override
+    public void emit(com.twitter.heron.api.hooks.info.EmitInfo info) {
+        EmitInfo emit = new EmitInfo(info);
+        for (ITaskHook hook : hooks_) {
+            hook.emit(emit);
+        }
+    }
+
+    @Override
+    public void spoutAck(com.twitter.heron.api.hooks.info.SpoutAckInfo info) {
+        SpoutAckInfo ack = new SpoutAckInfo(info);
+        for (ITaskHook hook : hooks_) {
+            hook.spoutAck(ack);
+        }
+    }
+
+    @Override
+    public void spoutFail(com.twitter.heron.api.hooks.info.SpoutFailInfo info) {
+        SpoutFailInfo fail = new SpoutFailInfo(info);
+        for (ITaskHook hook : hooks_) {
+            hook.spoutFail(fail);
+        }
+    }
+
+    @Override
+    public void boltAck(com.twitter.heron.api.hooks.info.BoltAckInfo info) {
+        BoltAckInfo ack = new BoltAckInfo(info);
+        for (ITaskHook hook : hooks_) {
+            hook.boltAck(ack);
+        }
+    }
+
+    @Override
+    public void boltFail(com.twitter.heron.api.hooks.info.BoltFailInfo info) {
+        BoltFailInfo fail = new BoltFailInfo(info);
+        for (ITaskHook hook : hooks_) {
+            hook.boltFail(fail);
+        }
+    }
+
+    @Override
+    public void boltExecute(com.twitter.heron.api.hooks.info.BoltExecuteInfo info) {
+        BoltExecuteInfo execute = new BoltExecuteInfo(info);
+        for (ITaskHook hook : hooks_) {
+            hook.boltExecute(execute);
+        }
+    }
 }

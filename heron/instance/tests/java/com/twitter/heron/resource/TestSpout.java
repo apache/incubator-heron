@@ -38,76 +38,75 @@ import com.twitter.heron.common.basics.SingletonRegistry;
 
 @Ignore
 public class TestSpout implements IRichSpout {
-  static final int EMIT_COUNT = 10;
-  SpoutOutputCollector outputCollector;
+    static final int EMIT_COUNT = 10;
+    private final String[] toSend = new String[]{"A", "B"};
+    SpoutOutputCollector outputCollector;
+    private String MESSAGE_ID = "MESSAGE_ID";
+    private int emitted = 0;
 
-  private String MESSAGE_ID = "MESSAGE_ID";
-  private int emitted = 0;
-  private final String[] toSend = new String[]{"A", "B"};
-
-  @Override
-  public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-    outputFieldsDeclarer.declare(new Fields("word"));
-  }
-
-  @Override
-  public Map<String, Object> getComponentConfiguration() {
-    return null;
-  }
-
-  @Override
-  public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector spoutOutputCollector) {
-    this.outputCollector = spoutOutputCollector;
-  }
-
-  @Override
-  public void close() {
-
-  }
-
-  @Override
-  public void activate() {
-    AtomicInteger activateCount =
-        (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(Constants.ACTIVATE_COUNT);
-    if (activateCount != null) {
-      activateCount.getAndIncrement();
-    }
-  }
-
-  @Override
-  public void deactivate() {
-    AtomicInteger deactivateCount =
-        (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(Constants.DEACTIVATE_COUNT);
-    if (deactivateCount != null) {
-      deactivateCount.getAndIncrement();
-    }
-  }
-
-  @Override
-  public void nextTuple() {
-    // It will emit A, B, A, B, A, B, A, B, A, B
-    if (emitted < EMIT_COUNT) {
-      String word = toSend[emitted % toSend.length];
-      outputCollector.emit(new Values(word), MESSAGE_ID);
-      emitted++;
-    }
-  }
-
-  @Override
-  public void ack(Object o) {
-    AtomicInteger ackCount = (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(Constants.ACK_COUNT);
-    if (ackCount != null) {
-      ackCount.getAndIncrement();
-    }
-  }
-
-  @Override
-  public void fail(Object o) {
-    AtomicInteger failCount = (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(Constants.FAIL_COUNT);
-    if (failCount != null) {
-      failCount.getAndIncrement();
+    @Override
+    public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
+        outputFieldsDeclarer.declare(new Fields("word"));
     }
 
+    @Override
+    public Map<String, Object> getComponentConfiguration() {
+        return null;
+    }
 
-  }
+    @Override
+    public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector spoutOutputCollector) {
+        this.outputCollector = spoutOutputCollector;
+    }
+
+    @Override
+    public void close() {
+
+    }
+
+    @Override
+    public void activate() {
+        AtomicInteger activateCount =
+                (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(Constants.ACTIVATE_COUNT);
+        if (activateCount != null) {
+            activateCount.getAndIncrement();
+        }
+    }
+
+    @Override
+    public void deactivate() {
+        AtomicInteger deactivateCount =
+                (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(Constants.DEACTIVATE_COUNT);
+        if (deactivateCount != null) {
+            deactivateCount.getAndIncrement();
+        }
+    }
+
+    @Override
+    public void nextTuple() {
+        // It will emit A, B, A, B, A, B, A, B, A, B
+        if (emitted < EMIT_COUNT) {
+            String word = toSend[emitted % toSend.length];
+            outputCollector.emit(new Values(word), MESSAGE_ID);
+            emitted++;
+        }
+    }
+
+    @Override
+    public void ack(Object o) {
+        AtomicInteger ackCount = (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(Constants.ACK_COUNT);
+        if (ackCount != null) {
+            ackCount.getAndIncrement();
+        }
+    }
+
+    @Override
+    public void fail(Object o) {
+        AtomicInteger failCount = (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(Constants.FAIL_COUNT);
+        if (failCount != null) {
+            failCount.getAndIncrement();
+        }
+
+
+    }
 }

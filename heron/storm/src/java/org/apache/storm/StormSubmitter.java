@@ -30,30 +30,29 @@ import com.twitter.heron.api.HeronSubmitter;
  */
 public class StormSubmitter {
 
-  /**
-   * Submits a topology to run on the cluster. A topology runs forever or until
-   * explicitly killed.
-   *
-   *
-   * @param name the name of the storm.
-   * @param stormConfig the topology-specific configuration. See {@link Config}.
-   * @param topology the processing to execute.
-   * @throws AlreadyAliveException if a topology with this name is already running
-   * @throws InvalidTopologyException if an invalid topology was submitted
-   */
-  public static void submitTopology(String name, Map stormConfig, StormTopology topology)
-          throws AlreadyAliveException, InvalidTopologyException {
+    /**
+     * Submits a topology to run on the cluster. A topology runs forever or until
+     * explicitly killed.
+     *
+     * @param name the name of the storm.
+     * @param stormConfig the topology-specific configuration. See {@link Config}.
+     * @param topology the processing to execute.
+     * @throws AlreadyAliveException if a topology with this name is already running
+     * @throws InvalidTopologyException if an invalid topology was submitted
+     */
+    public static void submitTopology(String name, Map stormConfig, StormTopology topology)
+            throws AlreadyAliveException, InvalidTopologyException {
 
-    // First do config translation
-    com.twitter.heron.api.Config heronConfig = ConfigUtils.translateConfig(stormConfig);
+        // First do config translation
+        com.twitter.heron.api.Config heronConfig = ConfigUtils.translateConfig(stormConfig);
 
-    // Now submit a heron topology
-    try {
-      HeronSubmitter.submitTopology(name, heronConfig, topology.getStormTopology());
-    } catch (com.twitter.heron.api.exception.AlreadyAliveException e) {
-      throw new AlreadyAliveException();
-    } catch (com.twitter.heron.api.exception.InvalidTopologyException e) {
-      throw new InvalidTopologyException();
+        // Now submit a heron topology
+        try {
+            HeronSubmitter.submitTopology(name, heronConfig, topology.getStormTopology());
+        } catch (com.twitter.heron.api.exception.AlreadyAliveException e) {
+            throw new AlreadyAliveException();
+        } catch (com.twitter.heron.api.exception.InvalidTopologyException e) {
+            throw new InvalidTopologyException();
+        }
     }
-  }
 }

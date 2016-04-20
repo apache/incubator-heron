@@ -17,38 +17,38 @@ package com.twitter.heron.instance;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 
 public class InstanceControlMsg {
-  public static class Builder {
     private PhysicalPlanHelper newPhysicalPlanHelper;
 
-    private Builder() {
-
+    private InstanceControlMsg(Builder builder) {
+        this.newPhysicalPlanHelper = builder.newPhysicalPlanHelper;
     }
 
-    public Builder setNewPhysicalPlanHelper(PhysicalPlanHelper newPhysicalPlanHelper) {
-      this.newPhysicalPlanHelper = newPhysicalPlanHelper;
-      return this;
+    public static Builder newBuilder() {
+        return new Builder();
     }
 
-    public InstanceControlMsg build() {
-      return new InstanceControlMsg(this);
+    public PhysicalPlanHelper getNewPhysicalPlanHelper() {
+        return newPhysicalPlanHelper;
     }
-  }
 
-  public static Builder newBuilder() {
-    return new Builder();
-  }
+    public boolean isNewPhysicalPlanHelper() {
+        return newPhysicalPlanHelper != null;
+    }
 
-  private InstanceControlMsg(Builder builder) {
-    this.newPhysicalPlanHelper = builder.newPhysicalPlanHelper;
-  }
+    public static class Builder {
+        private PhysicalPlanHelper newPhysicalPlanHelper;
 
-  private PhysicalPlanHelper newPhysicalPlanHelper;
+        private Builder() {
 
-  public PhysicalPlanHelper getNewPhysicalPlanHelper() {
-    return newPhysicalPlanHelper;
-  }
+        }
 
-  public boolean isNewPhysicalPlanHelper() {
-    return newPhysicalPlanHelper != null;
-  }
+        public Builder setNewPhysicalPlanHelper(PhysicalPlanHelper newPhysicalPlanHelper) {
+            this.newPhysicalPlanHelper = newPhysicalPlanHelper;
+            return this;
+        }
+
+        public InstanceControlMsg build() {
+            return new InstanceControlMsg(this);
+        }
+    }
 }

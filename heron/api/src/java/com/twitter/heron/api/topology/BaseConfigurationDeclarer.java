@@ -14,9 +14,10 @@
 
 package com.twitter.heron.api.topology;
 
-import com.twitter.heron.api.Config;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.twitter.heron.api.Config;
 
 public abstract class BaseConfigurationDeclarer<T extends ComponentConfigurationDeclarer> implements ComponentConfigurationDeclarer<T> {
     @Override
@@ -33,7 +34,7 @@ public abstract class BaseConfigurationDeclarer<T extends ComponentConfiguration
 
     @Override
     public T setMaxSpoutPending(Number val) {
-        if(val!=null) val = val.intValue();
+        if (val != null) val = val.intValue();
         return addConfiguration(Config.TOPOLOGY_MAX_SPOUT_PENDING, val);
     }
 }

@@ -31,186 +31,186 @@ import com.twitter.heron.proto.system.PhysicalPlans;
 /**
  * InstanceExecutor helps to group all necessary resources for an instance into a class and,
  * provide methods to access these resources externally.
- * <p/>
+ * <p>
  * It helps uniform the ways to access instance resources
  */
 public class InstanceExecutor implements Runnable {
-  public static final int CAPACITY = 5;
-  public static final double CURRENT_SAMPLE_WEIGHT = 0.5;
+    public static final int CAPACITY = 5;
+    public static final double CURRENT_SAMPLE_WEIGHT = 0.5;
 
-  private static final Logger LOG = Logger.getLogger(InstanceExecutor.class.getName());
+    private static final Logger LOG = Logger.getLogger(InstanceExecutor.class.getName());
 
-  private final PhysicalPlanHelper physicalPlanHelper;
+    private final PhysicalPlanHelper physicalPlanHelper;
 
-  private final SlaveLooper looper;
+    private final SlaveLooper looper;
 
-  private final Communicator<HeronTuples.HeronTupleSet> streamInQueue;
-  private final Communicator<HeronTuples.HeronTupleSet> streamOutQueue;
-  private final Communicator<Metrics.MetricPublisherPublishMessage> metricsOutQueue;
+    private final Communicator<HeronTuples.HeronTupleSet> streamInQueue;
+    private final Communicator<HeronTuples.HeronTupleSet> streamOutQueue;
+    private final Communicator<Metrics.MetricPublisherPublishMessage> metricsOutQueue;
 
-  private IInstance instance;
+    private IInstance instance;
 
-  private volatile boolean toStop = false;
-  private volatile boolean toActivate = false;
-  private volatile boolean toDeactivate = false;
+    private volatile boolean toStop = false;
+    private volatile boolean toActivate = false;
+    private volatile boolean toDeactivate = false;
 
-  private boolean isInstanceStarted = false;
+    private boolean isInstanceStarted = false;
 
-  public InstanceExecutor(PhysicalPlans.PhysicalPlan physicalPlan,
-                          String instanceId) {
-    streamInQueue = new Communicator<>();
-    streamOutQueue = new Communicator<>();
-    metricsOutQueue = new Communicator<>();
-    looper = new SlaveLooper();
+    public InstanceExecutor(PhysicalPlans.PhysicalPlan physicalPlan,
+                            String instanceId) {
+        streamInQueue = new Communicator<>();
+        streamOutQueue = new Communicator<>();
+        metricsOutQueue = new Communicator<>();
+        looper = new SlaveLooper();
 
-    MetricsCollector metricsCollector = new MetricsCollector(looper, metricsOutQueue);
+        MetricsCollector metricsCollector = new MetricsCollector(looper, metricsOutQueue);
 
-    physicalPlanHelper = createPhysicalPlanHelper(physicalPlan, instanceId, metricsCollector);
+        physicalPlanHelper = createPhysicalPlanHelper(physicalPlan, instanceId, metricsCollector);
 
-    initInstanceManager();
+        initInstanceManager();
 
-    LOG.info("Incarnating ourselves as " +
-        physicalPlanHelper.getMyComponent() + " with task id " +
-        physicalPlanHelper.getMyTaskId());
-  }
-
-  public Communicator<HeronTuples.HeronTupleSet> getStreamInQueue() {
-    return streamInQueue;
-  }
-
-  public Communicator<HeronTuples.HeronTupleSet> getStreamOutQueue() {
-    return streamOutQueue;
-  }
-
-  public Communicator<Metrics.MetricPublisherPublishMessage> getMetricsOutQueue() {
-    return metricsOutQueue;
-  }
-
-  public String getInstanceId() {
-    return physicalPlanHelper.getMyInstanceId();
-  }
-
-  public String getComponentName() {
-    return physicalPlanHelper.getMyComponent();
-  }
-
-  public int getTaskId() {
-    return physicalPlanHelper.getMyTaskId();
-  }
-
-  protected IInstance createInstance() {
-    return (physicalPlanHelper.getMySpout() != null) ?
-        new SpoutInstance(physicalPlanHelper,
-            streamInQueue,
-            streamOutQueue,
-            looper) :
-        new BoltInstance(physicalPlanHelper,
-            streamInQueue,
-            streamOutQueue,
-            looper);
-  }
-
-  protected PhysicalPlanHelper createPhysicalPlanHelper(PhysicalPlans.PhysicalPlan physicalPlan,
-                                                        String instanceId,
-                                                        MetricsCollector metricsCollector) {
-    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, instanceId);
-
-    // Bind the MetricsCollector with topologyContext
-    physicalPlanHelper.setTopologyContext(metricsCollector);
-
-    return physicalPlanHelper;
-  }
-
-  protected void initInstanceManager() {
-    streamInQueue.setConsumer(looper);
-    streamInQueue.init(CAPACITY,
-        CAPACITY,
-        CURRENT_SAMPLE_WEIGHT);
-
-    streamOutQueue.setProducer(looper);
-    streamOutQueue.init(CAPACITY,
-        CAPACITY,
-        CURRENT_SAMPLE_WEIGHT);
-
-    metricsOutQueue.setProducer(looper);
-  }
-
-  // Flags would be set in other threads,
-  // But we have to handle these flags inside the WakeableLooper thread
-  protected void handleControlSignal() {
-    if (toActivate) {
-      if (!isInstanceStarted) {
-        startInstance();
-      }
-
-      instance.activate();
-      LOG.info("Activated instance: " + physicalPlanHelper.getMyInstanceId());
-
-      // Reset the flag value
-      toActivate = false;
+        LOG.info("Incarnating ourselves as " +
+                physicalPlanHelper.getMyComponent() + " with task id " +
+                physicalPlanHelper.getMyTaskId());
     }
 
-    if (toDeactivate) {
-      instance.deactivate();
-      LOG.info("Deactivated instance: " + physicalPlanHelper.getMyInstanceId());
-
-      // Reset the flag value
-      toDeactivate = false;
+    public Communicator<HeronTuples.HeronTupleSet> getStreamInQueue() {
+        return streamInQueue;
     }
 
-    if (toStop) {
-      instance.stop();
-      LOG.info("Stopped instance: " + physicalPlanHelper.getMyInstanceId());
-
-      // Reset the flag value
-      toStop = false;
-
-      return;
-    }
-  }
-
-  @Override
-  public void run() {
-    Thread.currentThread().setName(String.format("%s_%s",
-        physicalPlanHelper.getMyComponent(),
-        physicalPlanHelper.getMyInstanceId()));
-
-    instance = createInstance();
-
-    if (physicalPlanHelper.getTopologyState().equals(TopologyAPI.TopologyState.RUNNING)) {
-      startInstance();
+    public Communicator<HeronTuples.HeronTupleSet> getStreamOutQueue() {
+        return streamOutQueue;
     }
 
-    // Handle Control Signal if needed
-    Runnable handleControlTask = new Runnable() {
-      @Override
-      public void run() {
-        handleControlSignal();
-      }
-    };
-    looper.addTasksOnWakeup(handleControlTask);
+    public Communicator<Metrics.MetricPublisherPublishMessage> getMetricsOutQueue() {
+        return metricsOutQueue;
+    }
 
-    looper.loop();
-  }
+    public String getInstanceId() {
+        return physicalPlanHelper.getMyInstanceId();
+    }
 
-  public void stop() {
-    toStop = true;
-    looper.wakeUp();
-  }
+    public String getComponentName() {
+        return physicalPlanHelper.getMyComponent();
+    }
 
-  public void activate() {
-    toActivate = true;
-    looper.wakeUp();
-  }
+    public int getTaskId() {
+        return physicalPlanHelper.getMyTaskId();
+    }
 
-  public void deactivate() {
-    toDeactivate = true;
-    looper.wakeUp();
-  }
+    protected IInstance createInstance() {
+        return (physicalPlanHelper.getMySpout() != null) ?
+                new SpoutInstance(physicalPlanHelper,
+                        streamInQueue,
+                        streamOutQueue,
+                        looper) :
+                new BoltInstance(physicalPlanHelper,
+                        streamInQueue,
+                        streamOutQueue,
+                        looper);
+    }
 
-  private void startInstance() {
-    instance.start();
-    isInstanceStarted = true;
-    LOG.info("Started instance.");
-  }
+    protected PhysicalPlanHelper createPhysicalPlanHelper(PhysicalPlans.PhysicalPlan physicalPlan,
+                                                          String instanceId,
+                                                          MetricsCollector metricsCollector) {
+        PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, instanceId);
+
+        // Bind the MetricsCollector with topologyContext
+        physicalPlanHelper.setTopologyContext(metricsCollector);
+
+        return physicalPlanHelper;
+    }
+
+    protected void initInstanceManager() {
+        streamInQueue.setConsumer(looper);
+        streamInQueue.init(CAPACITY,
+                CAPACITY,
+                CURRENT_SAMPLE_WEIGHT);
+
+        streamOutQueue.setProducer(looper);
+        streamOutQueue.init(CAPACITY,
+                CAPACITY,
+                CURRENT_SAMPLE_WEIGHT);
+
+        metricsOutQueue.setProducer(looper);
+    }
+
+    // Flags would be set in other threads,
+    // But we have to handle these flags inside the WakeableLooper thread
+    protected void handleControlSignal() {
+        if (toActivate) {
+            if (!isInstanceStarted) {
+                startInstance();
+            }
+
+            instance.activate();
+            LOG.info("Activated instance: " + physicalPlanHelper.getMyInstanceId());
+
+            // Reset the flag value
+            toActivate = false;
+        }
+
+        if (toDeactivate) {
+            instance.deactivate();
+            LOG.info("Deactivated instance: " + physicalPlanHelper.getMyInstanceId());
+
+            // Reset the flag value
+            toDeactivate = false;
+        }
+
+        if (toStop) {
+            instance.stop();
+            LOG.info("Stopped instance: " + physicalPlanHelper.getMyInstanceId());
+
+            // Reset the flag value
+            toStop = false;
+
+            return;
+        }
+    }
+
+    @Override
+    public void run() {
+        Thread.currentThread().setName(String.format("%s_%s",
+                physicalPlanHelper.getMyComponent(),
+                physicalPlanHelper.getMyInstanceId()));
+
+        instance = createInstance();
+
+        if (physicalPlanHelper.getTopologyState().equals(TopologyAPI.TopologyState.RUNNING)) {
+            startInstance();
+        }
+
+        // Handle Control Signal if needed
+        Runnable handleControlTask = new Runnable() {
+            @Override
+            public void run() {
+                handleControlSignal();
+            }
+        };
+        looper.addTasksOnWakeup(handleControlTask);
+
+        looper.loop();
+    }
+
+    public void stop() {
+        toStop = true;
+        looper.wakeUp();
+    }
+
+    public void activate() {
+        toActivate = true;
+        looper.wakeUp();
+    }
+
+    public void deactivate() {
+        toDeactivate = true;
+        looper.wakeUp();
+    }
+
+    private void startInstance() {
+        instance.start();
+        isInstanceStarted = true;
+        LOG.info("Started instance.");
+    }
 }
