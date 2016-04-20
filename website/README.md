@@ -47,7 +47,7 @@ To work on assets in "watch" mode:
 $ gulp dev
 ```
 
-To make site, including linkchecker
+To make site, including linkchecker.  If broken links found by linkchecker, see linkchecker-errors.csv
 
 ```bash
 $ make site

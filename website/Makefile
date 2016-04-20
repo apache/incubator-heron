@@ -15,14 +15,16 @@ pages:
 	@hugo
 
 linkchecker:
-	#linkchecker removes previous runs, checks error number.
-	#if pass -> error list is removed, if fail -> error list remains for review.
+	#linkchecker removes previous runs.
 	@pip install linkchecker
 	@rm -f linkchecker-errors.csv && rm -f linkchecker-out.csv
-	@linkchecker public/index.html --no-warnings -F csv 
-	@if [[ $$? == 1 ]]; then echo "error" ; else echo "pass" ; fi 
-	# error check using exit status
-	#@if [[ $$? != 0 ]]; then cut -sd ';' -f 1,2 linkchecker-out.csv | tr ';' ' ' | awk '{ print $$2 " " $$1}' | sort -u >> linkchecker-errors.csv; echo 'Site contains broken links! check linkchecker-errors.csv'; else echo 'Linkchecker Passes!'; fi
+	-linkchecker public/index.html --no-warnings -F csv 
+	@cut -sd ';' -f 1,2 linkchecker-out.csv | tr ';' ' ' | awk '{ print $$2 " " $$1}' | sort -u >> linkchecker-errors.csv
+	@rm -f linkchecker-out.csv
+	#following fails if linkchecker fails. if pass -> error list is removed, if fail -> error list remains for review. 
+	@linkchecker public/index.html --no-warnings 
+	@echo "linkchecker passes!"
+	@rm -f linkchecker-errors.csv
 
 site:
 	@make assets
