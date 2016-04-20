@@ -28,18 +28,18 @@ import org.apache.storm.tuple.TupleImpl;
  */
 public class OutputCollectorImpl extends OutputCollector {
   private com.twitter.heron.api.bolt.OutputCollector delegate;
-    
+
   public OutputCollectorImpl(com.twitter.heron.api.bolt.OutputCollector delegate) {
     super(null);
     this.delegate = delegate;
   }
-    
+
   @Override
   public List<Integer> emit(String streamId, Collection<Tuple> anchors, List<Object> tuple) {
     if (anchors != null) {
       ArrayList<com.twitter.heron.api.tuple.Tuple> l = new ArrayList<com.twitter.heron.api.tuple.Tuple>();
       for (Tuple t : anchors) {
-        TupleImpl i = (TupleImpl)t;
+        TupleImpl i = (TupleImpl) t;
         l.add(i.getDelegate());
       }
       return delegate.emit(streamId, l, tuple);
@@ -53,7 +53,7 @@ public class OutputCollectorImpl extends OutputCollector {
     if (anchors != null) {
       ArrayList<com.twitter.heron.api.tuple.Tuple> l = new ArrayList<com.twitter.heron.api.tuple.Tuple>();
       for (Tuple t : anchors) {
-        TupleImpl i = (TupleImpl)t;
+        TupleImpl i = (TupleImpl) t;
         l.add(i.getDelegate());
       }
       delegate.emitDirect(taskId, streamId, l, tuple);
@@ -64,13 +64,13 @@ public class OutputCollectorImpl extends OutputCollector {
 
   @Override
   public void ack(Tuple input) {
-    TupleImpl i = (TupleImpl)input;
+    TupleImpl i = (TupleImpl) input;
     delegate.ack(i.getDelegate());
   }
 
   @Override
   public void fail(Tuple input) {
-    TupleImpl i = (TupleImpl)input;
+    TupleImpl i = (TupleImpl) input;
     delegate.fail(i.getDelegate());
   }
 

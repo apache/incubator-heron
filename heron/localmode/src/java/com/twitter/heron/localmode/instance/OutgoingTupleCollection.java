@@ -15,9 +15,9 @@
 package com.twitter.heron.localmode.instance;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.SingletonRegistry;
+import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.proto.system.HeronTuples;
 
@@ -26,13 +26,13 @@ import com.twitter.heron.proto.system.HeronTuples;
  * 1. initNewControlTuple or initNewDataTuple
  * 2. addDataTuple, addAckTuple and addFailTuple
  * 3. flushRemaining tuples and sent out the tuples
- * <p/>
+ * <p>
  * In fact, when talking about to send out tuples, we mean we push them to the out queues.
  */
 public class OutgoingTupleCollection {
+  protected final PhysicalPlanHelper helper;
   // We have just one outQueue responsible for both control tuples and data tuples
   private final Communicator<HeronTuples.HeronTupleSet> outQueue;
-  protected final PhysicalPlanHelper helper;
   private final SystemConfig systemConfig;
 
   private HeronTuples.HeronDataTupleSet.Builder currentDataTuple;

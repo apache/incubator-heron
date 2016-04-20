@@ -39,11 +39,10 @@ import com.twitter.heron.common.basics.SingletonRegistry;
 @Ignore
 public class TestSpout implements IRichSpout {
   static final int EMIT_COUNT = 10;
+  private final String[] toSend = new String[]{"A", "B"};
   SpoutOutputCollector outputCollector;
-
   private String MESSAGE_ID = "MESSAGE_ID";
   private int emitted = 0;
-  private final String[] toSend = new String[]{"A", "B"};
 
   @Override
   public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {

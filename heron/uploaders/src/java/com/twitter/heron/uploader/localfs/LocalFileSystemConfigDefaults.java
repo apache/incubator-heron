@@ -14,16 +14,14 @@
 
 package com.twitter.heron.uploader.localfs;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
 import java.util.Map;
+import java.util.logging.Logger;
 
-import java.lang.ClassNotFoundException;
 import com.twitter.heron.spi.common.Resource;
 
 public class LocalFileSystemConfigDefaults {
   private static final Logger LOG = Logger.getLogger(
-     LocalFileSystemDefaults.class.getName());
+      LocalFileSystemDefaults.class.getName());
 
   // holds the mapping between the config keys and their default values
   private static Map defaults;
@@ -34,8 +32,7 @@ public class LocalFileSystemConfigDefaults {
       defaults = Resource.load(
           "com.twitter.heron.uploader.localfs.LocalFileSystemConfigDefaults",
           LocalFileSystemConstants.DEFAULTS_YAML);
-    }
-    catch (ClassNotFoundException e) {
+    } catch (ClassNotFoundException e) {
       LOG.severe("Unable to load the Defaults class " + e);
       System.exit(1);
     }

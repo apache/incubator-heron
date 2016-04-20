@@ -31,10 +31,10 @@ import org.junit.Test;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.serializer.KryoSerializer;
-import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.basics.WakeableLooper;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.instance.InstanceControlMsg;
@@ -56,34 +56,24 @@ import com.twitter.heron.resource.UnitTestHelper;
  */
 public class BoltInstanceTest {
   static final String boltInstanceId = "bolt-id";
-
-
+  static IPluggableSerializer serializer;
   WakeableLooper testLooper;
   SlaveLooper slaveLooper;
-
-  // Only one outStreamQueue, which is responsible for both control tuples and data tuples
-  private Communicator<HeronTuples.HeronTupleSet> outStreamQueue;
-
-  // This blocking queue is used to buffer tuples read from socket and ready to be used by instance
-  // For spout, it will buffer Control tuple, while for bolt, it will buffer data tuple.
-  private Communicator<HeronTuples.HeronTupleSet> inStreamQueue;
-
-  private Communicator<InstanceControlMsg> inControlQueue;
-
-  private ExecutorService threadsPool;
-
-  private Communicator<Metrics.MetricPublisherPublishMessage> slaveMetricsOut;
-
-  private Slave slave;
-
   // Singleton to be changed globally for testing
   AtomicInteger ackCount;
   AtomicInteger failCount;
   AtomicInteger tupleExecutedCount;
   volatile StringBuilder receivedStrings;
   PhysicalPlans.PhysicalPlan physicalPlan;
-
-  static IPluggableSerializer serializer;
+  // Only one outStreamQueue, which is responsible for both control tuples and data tuples
+  private Communicator<HeronTuples.HeronTupleSet> outStreamQueue;
+  // This blocking queue is used to buffer tuples read from socket and ready to be used by instance
+  // For spout, it will buffer Control tuple, while for bolt, it will buffer data tuple.
+  private Communicator<HeronTuples.HeronTupleSet> inStreamQueue;
+  private Communicator<InstanceControlMsg> inControlQueue;
+  private ExecutorService threadsPool;
+  private Communicator<Metrics.MetricPublisherPublishMessage> slaveMetricsOut;
+  private Slave slave;
 
   @BeforeClass
   public static void beforeClass() throws Exception {

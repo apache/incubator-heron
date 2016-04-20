@@ -35,42 +35,35 @@ import com.twitter.heron.common.basics.NIOLooper;
  * It could handle the conditions of closedConnection, normal Reading and partial Reading. When a
  * incomingPacket is read, it will be pass to handlePacket(), which will convert incomingPackets to
  * messages and call onIncomingMessage(message), which should be implemented by its child class.
- * <p/>
+ * <p>
  * 2. handleWrite(SelectableChannel), which will try to get outgoing message by calling getOutgoingMessage(),
  * pack the outgoing message into OutgoingPacket and write to the sockets.
- * <p/>
+ * <p>
  * 3. handleConnect(SelectableChannel), which handles some basic setup when this client connect to
  * remote endpoint.
- * <p/>
+ * <p>
  * 4. handleAccept(SelectableChannel).
- * <p/>
+ * <p>
  * 5. handleError(SelectableChannel).
  * Remember, the socket client will register Read when the socket is connectible. However, it will
  * register Write when having something to write since the socket in most cases is writable.
  * To implement this, we will add the check whether write is needed into persistent tasks.
  */
 public abstract class HeronClient implements ISelectHandler {
-  private SocketChannel socketChannel;
-  // Define the endpoint this socket client will communicate with
-  private InetSocketAddress endpoint;
-
-  private NIOLooper nioLooper;
-
-  private SocketChannelHelper socketChannelHelper;
-
   private static final Logger LOG = Logger.getLogger(HeronClient.class.getName());
-
-  private HeronSocketOptions socketOptions;
-
   // When we send a request, we need to:
   // record the the context for this particular RID, and prepare the response for that RID
   // Then when the response come back, we could handle it
   protected Map<REQID, Object> contextMap;
   protected Map<REQID, Message.Builder> responseMessageMap;
-
   // Map from protobuf message's name to protobuf message
   protected Map<String, Message.Builder> messageMap;
-
+  private SocketChannel socketChannel;
+  // Define the endpoint this socket client will communicate with
+  private InetSocketAddress endpoint;
+  private NIOLooper nioLooper;
+  private SocketChannelHelper socketChannelHelper;
+  private HeronSocketOptions socketOptions;
   // A flag to determine whether the socket is connected or not
   // We could not simply use socketChanel.isConnected() to tell whether the socketChannel is connected
   // or not, since:

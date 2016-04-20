@@ -27,10 +27,6 @@ import java.util.Map;
  * 4. Filter the needed MetricsInfo
  */
 public class MetricsFilter {
-  public enum MetricAggregationType {
-    UNKNOWN, SUM, AVG, LAST;
-  }
-
   private final Map<String, MetricAggregationType> prefixToType =
       new HashMap<String, MetricAggregationType>();
 
@@ -70,5 +66,9 @@ public class MetricsFilter {
       }
     }
     return MetricAggregationType.UNKNOWN;
+  }
+
+  public enum MetricAggregationType {
+    UNKNOWN, SUM, AVG, LAST;
   }
 }

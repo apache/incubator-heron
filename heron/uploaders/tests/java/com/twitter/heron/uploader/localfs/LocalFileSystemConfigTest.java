@@ -15,25 +15,14 @@
 package com.twitter.heron.uploader.localfs;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Properties;
 import java.nio.file.Paths;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Matchers;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.common.Misc;
-import com.twitter.heron.spi.utils.TopologyTests;
 
 import junit.framework.Assert;
 
@@ -48,8 +37,8 @@ public class LocalFileSystemConfigTest {
         .put(Keys.topologyName(), "topology")
         .put(Keys.topologyPackageType(), "tar")
         .put(Keys.topologyPackageFile(), "/tmp/something.tar.gz")
-        .put(LocalFileSystemKeys.fileSystemDirectory(), 
-             LocalFileSystemDefaults.fileSystemDirectory())
+        .put(LocalFileSystemKeys.fileSystemDirectory(),
+            LocalFileSystemDefaults.fileSystemDirectory())
         .build();
     return config;
   }
@@ -86,7 +75,7 @@ public class LocalFileSystemConfigTest {
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();
     uploader.initialize(config);
 
-    String destDirectory = Paths.get(LocalFileSystemContext.fileSystemDirectory(config), 
+    String destDirectory = Paths.get(LocalFileSystemContext.fileSystemDirectory(config),
         Context.cluster(config), Context.role(config), Context.topologyName(config)).toString();
 
     Assert.assertEquals(
@@ -101,7 +90,7 @@ public class LocalFileSystemConfigTest {
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();
     uploader.initialize(config);
 
-    String destFile = Paths.get(LocalFileSystemContext.fileSystemDirectory(config), 
+    String destFile = Paths.get(LocalFileSystemContext.fileSystemDirectory(config),
         new File(topologyPackageFile).getName()).toString();
 
     Assert.assertEquals(
@@ -141,7 +130,7 @@ public class LocalFileSystemConfigTest {
 
     uploader.initialize(config);
 
-    String destFile = Paths.get(LocalFileSystemContext.fileSystemDirectory(config), 
+    String destFile = Paths.get(LocalFileSystemContext.fileSystemDirectory(config),
         new File(topologyPackageFile).getName()).toString();
 
     Assert.assertEquals(

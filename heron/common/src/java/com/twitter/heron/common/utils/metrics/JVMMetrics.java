@@ -29,9 +29,9 @@ import com.twitter.heron.api.metric.AssignableMetric;
 import com.twitter.heron.api.metric.MeanReducer;
 import com.twitter.heron.api.metric.MultiAssignableMetric;
 import com.twitter.heron.api.metric.ReducedMetric;
-import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.SingletonRegistry;
+import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.misc.ThreadNames;
 
 /**
@@ -44,34 +44,29 @@ public class JVMMetrics {
   final OperatingSystemMXBean osMbean = ManagementFactory.getOperatingSystemMXBean();
   final ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
   final List<MemoryPoolMXBean> memoryPoolMXBeanList = ManagementFactory.getMemoryPoolMXBeans();
-
-  // The accumulated time spending on Garbage Collection in MilliSeconds
-  private AssignableMetric jvmGCTimeMs;
-
-  // The accumulated account of JVM Garbage Collection
-  private AssignableMetric jvmGCCount;
-
   // Metric for time spent in GC per generational collection, and the sum total of all collections.
   private final MultiAssignableMetric jvmGCTimeMsPerGCType;
-
   // Metrics for count of GC per generational collection, and the sum total of all collections.
   private final MultiAssignableMetric jvmGCCountPerGCType;
-
-  // The JVM up times
-  private AssignableMetric jvmUpTimeSecs;
-
   // Metric for total live jvm threads
   private final AssignableMetric jvmThreadCount;
-
   // Metric for total live jvm daemon threads
   private final AssignableMetric jvmDaemonThreadCount;
-
+  // Metric for number of open file descriptors
+  private final AssignableMetric fdCount;
+  // Metric for max file descriptors allowed per jvm process
+  private final AssignableMetric fdLimit;
+  // The accumulated time spending on Garbage Collection in MilliSeconds
+  private AssignableMetric jvmGCTimeMs;
+  // The accumulated account of JVM Garbage Collection
+  private AssignableMetric jvmGCCount;
+  // The JVM up times
+  private AssignableMetric jvmUpTimeSecs;
   /*
    * Returns the CPU time used by the process on which the Java virtual machine is running in nanoseconds.
    * The value is of nanoseconds precision but not necessarily nanoseconds accuracy.
    */
   private AssignableMetric processCPUTimeNs;
-
   /*
    * Returns the total CPU time for a thread of the specified ID in nanoseconds.
    * The returned value is of nanoseconds precision but not necessarily nanoseconds accuracy.
@@ -85,10 +80,8 @@ public class JVMMetrics {
    * the Java virtual machine implementation may choose any time up to and including the time that the capability is enabled as the point where CPU time measurement starts.
    */
   private MultiAssignableMetric threadsCPUTimeNs;
-
   // The cpu time used by threads other than SlaveThread and GatewayThread
   private AssignableMetric otherThreadsCPUTimeNs;
-
   /*
    * Returns the CPU time that a thread of the specified ID has executed in user mode in nanoseconds.
    * The returned value is of nanoseconds precision but not necessarily nanoseconds accuracy.
@@ -100,10 +93,8 @@ public class JVMMetrics {
    * the Java virtual machine implementation may choose any time up to and including the time that the capability is enabled as the point where CPU time measurement starts.
    */
   private MultiAssignableMetric threadsUserCPUTimeNs;
-
   // The user cpu time used by threads other than SlaveThread and GatewayThread
   private AssignableMetric otherThreadsUserCPUTimeNs;
-
   /*
    * The "recent cpu usage" for the Java Virtual Machine process.
    * This value is a double in the [0.0,1.0] interval.
@@ -116,13 +107,6 @@ public class JVMMetrics {
    * If the Java Virtual Machine recent CPU usage is not available, the method returns a negative value.
    */
   private ReducedMetric processCPULoad;
-
-  // Metric for number of open file descriptors
-  private final AssignableMetric fdCount;
-
-  // Metric for max file descriptors allowed per jvm process
-  private final AssignableMetric fdLimit;
-
   // Metrics that measure memory, memory's heap and memory's non-heap
   private ReducedMetric jvmMemoryFreeMB;
   private ReducedMetric jvmMemoryUsedMB;
@@ -303,12 +287,11 @@ public class JVMMetrics {
         if (threadInfo != null) {
           String threadName = threadInfo.getThreadName();
 
-          if(threadName.equals(ThreadNames.THREAD_GATEWAY_NAME)
-            || threadName.equals(ThreadNames.THREAD_SLAVE_NAME)) {
+          if (threadName.equals(ThreadNames.THREAD_GATEWAY_NAME)
+              || threadName.equals(ThreadNames.THREAD_SLAVE_NAME)) {
             threadsCPUTimeNs.scope(threadName).setValue(cpuTime);
             threadsUserCPUTimeNs.scope(threadName).setValue(cpuUserTime);
-          }
-          else {
+          } else {
             tmpOtherThreadsCpuTime += cpuTime;
             tmpOtherThreadsUserCpuTime += cpuUserTime;
           }

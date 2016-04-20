@@ -14,31 +14,18 @@
 
 package com.twitter.heron.uploader.localfs;
 
-import java.util.HashMap;
-import java.util.Properties;
+import java.io.File;
+import java.nio.file.Paths;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Matchers;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-import org.apache.commons.io.FileUtils;
+import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Keys;
 
 import junit.framework.Assert;
-
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.Files;
-
-import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Context; 
 
 public class LocalFileSystemUploaderTest {
 
@@ -53,7 +40,7 @@ public class LocalFileSystemUploaderTest {
     fileSystemDirectory = Paths.get(System.getenv("JAVA_RUNFILES"), "topologies").toString();
 
     // form the test topology directory
-    testTopologyDirectory = Paths.get(System.getenv("JAVA_RUNFILES"), 
+    testTopologyDirectory = Paths.get(System.getenv("JAVA_RUNFILES"),
         LocalFileSystemConstantsTest.TEST_DATA_PATH).toString();
 
     // Create the minimum config for tests
@@ -81,7 +68,7 @@ public class LocalFileSystemUploaderTest {
         .putAll(config).put(Keys.topologyPackageFile(), topologyPackage).build();
 
     // create the uploader and load the package
-    LocalFileSystemUploader uploader = new LocalFileSystemUploader(); 
+    LocalFileSystemUploader uploader = new LocalFileSystemUploader();
     uploader.initialize(newconfig);
     Assert.assertNotNull(uploader.uploadPackage());
 
@@ -100,7 +87,7 @@ public class LocalFileSystemUploaderTest {
         .putAll(config).put(Keys.topologyPackageFile(), topologyPackage).build();
 
     // create the uploader and load the package
-    LocalFileSystemUploader uploader = new LocalFileSystemUploader(); 
+    LocalFileSystemUploader uploader = new LocalFileSystemUploader();
     uploader.initialize(newconfig);
 
     // Assert that the file does not exist
@@ -117,7 +104,7 @@ public class LocalFileSystemUploaderTest {
         .putAll(config).put(Keys.topologyPackageFile(), topologyPackage).build();
 
     // create the uploader and load the package
-    LocalFileSystemUploader uploader = new LocalFileSystemUploader(); 
+    LocalFileSystemUploader uploader = new LocalFileSystemUploader();
     uploader.initialize(newconfig);
     Assert.assertNotNull(uploader.uploadPackage());
 

@@ -36,33 +36,6 @@ public class StreamConsumers {
 
   }
 
-  public void newConsumer(TopologyAPI.InputStream inputStream,
-                          TopologyAPI.StreamSchema schema,
-                          List<Integer> taskIds) {
-    consumers.add(Grouping.create(inputStream.getGtype(), inputStream, schema, taskIds));
-  }
-
-  /**
-   * Get all task ids from different components to send for a data tuple
-   *
-   * @param tuple the tuple to send
-   * @return the target task ids to send tuple to
-   */
-  public List<Integer> getListToSend(HeronTuples.HeronDataTuple tuple) {
-    List<Integer> res = new ArrayList<>();
-
-    for (Grouping consumer : consumers) {
-      res.addAll(consumer.getListToSend(tuple));
-    }
-
-    return res;
-  }
-
-  // For unit test
-  protected List<Grouping> getConsumers() {
-    return consumers;
-  }
-
   /**
    * Populate the Stream Consumers for the whole topology given the topology protobuf.
    *
@@ -116,5 +89,32 @@ public class StreamConsumers {
     }
 
     return populatedStreamConsumers;
+  }
+
+  public void newConsumer(TopologyAPI.InputStream inputStream,
+                          TopologyAPI.StreamSchema schema,
+                          List<Integer> taskIds) {
+    consumers.add(Grouping.create(inputStream.getGtype(), inputStream, schema, taskIds));
+  }
+
+  /**
+   * Get all task ids from different components to send for a data tuple
+   *
+   * @param tuple the tuple to send
+   * @return the target task ids to send tuple to
+   */
+  public List<Integer> getListToSend(HeronTuples.HeronDataTuple tuple) {
+    List<Integer> res = new ArrayList<>();
+
+    for (Grouping consumer : consumers) {
+      res.addAll(consumer.getListToSend(tuple));
+    }
+
+    return res;
+  }
+
+  // For unit test
+  protected List<Grouping> getConsumers() {
+    return consumers;
   }
 }

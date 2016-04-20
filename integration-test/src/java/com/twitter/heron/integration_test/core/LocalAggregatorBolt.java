@@ -18,8 +18,8 @@ import com.twitter.heron.api.tuple.Tuple;
  * file specificed by localFilePath
  */
 public class LocalAggregatorBolt extends BaseBatchBolt implements ITerminalBolt {
-  private final String localFilePath;
   private static final Logger LOG = Logger.getLogger(LocalAggregatorBolt.class.getName());
+  private final String localFilePath;
   private BufferedWriter bw = null;
 
   public LocalAggregatorBolt(String localFilePath) {

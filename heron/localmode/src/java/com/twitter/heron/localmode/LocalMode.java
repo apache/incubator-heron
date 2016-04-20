@@ -25,8 +25,8 @@ import java.util.logging.Logger;
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.basics.SingletonRegistry;
+import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.localmode.executors.InstanceExecutor;
 import com.twitter.heron.localmode.executors.MetricsExecutor;
 import com.twitter.heron.localmode.executors.StreamExecutor;
@@ -40,14 +40,10 @@ import com.twitter.heron.proto.system.PhysicalPlans;
  */
 public class LocalMode {
   private static final Logger LOG = Logger.getLogger(LocalMode.class.getName());
-
-  private SystemConfig systemConfig;
-
   private final List<InstanceExecutor> instanceExecutors = new LinkedList<>();
-
   // Thread pool to run StreamExecutor, MetricsExecutor and InstanceExecutor
   private final ExecutorService threadsPool = Executors.newCachedThreadPool();
-
+  private SystemConfig systemConfig;
   private StreamExecutor streamExecutor;
 
   private MetricsExecutor metricsExecutor;
@@ -82,6 +78,7 @@ public class LocalMode {
 
   /**
    * Check if the system config is already registered into the SingleRegistry
+   *
    * @return true if it's registered; false otherwise
    */
   protected boolean isSystemConfigExisted() {
@@ -90,37 +87,9 @@ public class LocalMode {
 
   /**
    * Register the given system config
-   * @param systemConfig
    */
   protected void registerSystemConfig(SystemConfig systemConfig) {
     SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, systemConfig);
-  }
-
-  /**
-   * Handler for catching exceptions thrown by any threads (owned either by topology or heron
-   * infrastructure).
-   * Will flush all attached log handler and close them.
-   * Attempt to flush all the connection.
-   * Terminate the JVM.
-   */
-  public class DefaultExceptionHandler implements Thread.UncaughtExceptionHandler {
-    public void uncaughtException(Thread thread, Throwable exception) {
-      LOG.severe("Local Mode Process exiting.");
-      LOG.log(Level.SEVERE,
-          "Exception caught in thread: " + thread.getName() + " with id: " + thread.getId(),
-          exception);
-      for (Handler handler : java.util.logging.Logger.getLogger("").getHandlers()) {
-        handler.close();
-      }
-
-      // Attempts to shutdown all the thread in threadsPool. This will send Interrupt to every
-      // thread in the pool. Threads may implement a clean Interrupt logic.
-      threadsPool.shutdownNow();
-
-      // TODO : It is not clear if this signal should be sent to all the threads (including threads
-      // not owned by HeronInstance). To be safe, not sending these interrupts.
-      Runtime.getRuntime().halt(1);
-    }
   }
 
   public void submitTopology(String name, Config heronConfig, HeronTopology heronTopology) {
@@ -220,5 +189,32 @@ public class LocalMode {
     systemConfig.put(SystemConfig.INSTANCE_ACKNOWLEDGEMENT_NBUCKETS, 10);
 
     return systemConfig;
+  }
+
+  /**
+   * Handler for catching exceptions thrown by any threads (owned either by topology or heron
+   * infrastructure).
+   * Will flush all attached log handler and close them.
+   * Attempt to flush all the connection.
+   * Terminate the JVM.
+   */
+  public class DefaultExceptionHandler implements Thread.UncaughtExceptionHandler {
+    public void uncaughtException(Thread thread, Throwable exception) {
+      LOG.severe("Local Mode Process exiting.");
+      LOG.log(Level.SEVERE,
+          "Exception caught in thread: " + thread.getName() + " with id: " + thread.getId(),
+          exception);
+      for (Handler handler : java.util.logging.Logger.getLogger("").getHandlers()) {
+        handler.close();
+      }
+
+      // Attempts to shutdown all the thread in threadsPool. This will send Interrupt to every
+      // thread in the pool. Threads may implement a clean Interrupt logic.
+      threadsPool.shutdownNow();
+
+      // TODO : It is not clear if this signal should be sent to all the threads (including threads
+      // not owned by HeronInstance). To be safe, not sending these interrupts.
+      Runtime.getRuntime().halt(1);
+    }
   }
 }

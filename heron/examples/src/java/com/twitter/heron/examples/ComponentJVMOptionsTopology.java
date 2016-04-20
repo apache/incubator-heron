@@ -30,32 +30,6 @@ import backtype.storm.tuple.Tuple;
  * This is a basic example of a Storm topology.
  */
 public class ComponentJVMOptionsTopology {
-  public static class ExclamationBolt extends BaseRichBolt {
-    OutputCollector _collector;
-    long nItems;
-    long startTime;
-
-    @Override
-    public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
-      _collector = collector;
-      nItems = 0;
-      startTime = System.currentTimeMillis();
-    }
-
-    @Override
-    public void execute(Tuple tuple) {
-      if (++nItems % 100000 == 0) {
-        long latency = System.currentTimeMillis() - startTime;
-        System.out.println("Done " + nItems + " in " + latency);
-        GlobalMetrics.incr("selected_items");
-      }
-    }
-
-    @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer) {
-    }
-  }
-
   public static void main(String[] args) throws Exception {
     TopologyBuilder builder = new TopologyBuilder();
 
@@ -82,6 +56,32 @@ public class ComponentJVMOptionsTopology {
       // TODO:- This is not yet supported
       System.out.println("Local mode not yet supported");
       System.exit(1);
+    }
+  }
+
+  public static class ExclamationBolt extends BaseRichBolt {
+    OutputCollector _collector;
+    long nItems;
+    long startTime;
+
+    @Override
+    public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
+      _collector = collector;
+      nItems = 0;
+      startTime = System.currentTimeMillis();
+    }
+
+    @Override
+    public void execute(Tuple tuple) {
+      if (++nItems % 100000 == 0) {
+        long latency = System.currentTimeMillis() - startTime;
+        System.out.println("Done " + nItems + " in " + latency);
+        GlobalMetrics.incr("selected_items");
+      }
+    }
+
+    @Override
+    public void declareOutputFields(OutputFieldsDeclarer declarer) {
     }
   }
 }

@@ -28,139 +28,12 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.basics.NIOLooper;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.testing.Tests;
 
 public class EchoTest {
   private static int serverPort;
-
-  private static class EchoServer extends HeronServer {
-    private int nRequests;
-    private int maxRequests;
-    private static final Logger LOG = Logger.getLogger(EchoServer.class.getName());
-
-    public EchoServer(NIOLooper looper, int port, int maxRequests) {
-      super(looper, "localhost", port,
-          new HeronSocketOptions(100 * 1024 * 1024, 100,
-              100 * 1024 * 1024,
-              100,
-              5 * 1024 * 1024,
-              5 * 1024 * 1024));
-      nRequests = 0;
-      this.maxRequests = maxRequests;
-      registerOnRequest(Tests.EchoServerRequest.newBuilder());
-    }
-
-    @Override
-    public void onConnect(SocketChannel channel) {
-      LOG.info("A new client connected with us");
-    }
-
-    @Override
-    public void onClose(SocketChannel channel) {
-      LOG.info("A client closed connection");
-    }
-
-    @Override
-    public void onRequest(REQID rid, SocketChannel channel, Message request) {
-      if (request instanceof Tests.EchoServerRequest) {
-        Tests.EchoServerResponse.Builder response = Tests.EchoServerResponse.newBuilder();
-        Tests.EchoServerRequest req = (Tests.EchoServerRequest) request;
-        response.setEchoResponse(req.getEchoRequest());
-        sendResponse(rid, channel, response.build());
-        nRequests++;
-        if (nRequests % 10 == 0) {
-          LOG.info("Processed " + nRequests + " requests");
-        }
-        if (nRequests >= maxRequests) {
-          // We wait for 1 second to let client to receive the request and then exit
-          registerTimerEventInSeconds(1,
-              new Runnable() {
-                @Override
-                public void run() {
-                  EchoServer.this.stop();
-                  getNIOLooper().exitLoop();
-                  return;
-                }
-              });
-        }
-      } else {
-        throw new RuntimeException("Unknown type of request received");
-      }
-    }
-
-    @Override
-    public void onMessage(SocketChannel channel, Message request) {
-      throw new RuntimeException("Expected message from client");
-    }
-  }
-
-  private static class EchoClient extends HeronClient {
-    private HeronSocketOptions socketOptions;
-    private int nRequests;
-    private int maxRequests;
-    private static final Logger LOG = Logger.getLogger(EchoClient.class.getName());
-
-    public EchoClient(NIOLooper looper, int port, int maxRequests) {
-      super(looper, "localhost", port,
-          new HeronSocketOptions(100 * 1024 * 1024, 100,
-              100 * 1024 * 1024, 100,
-              5 * 1024 * 1024,
-              5 * 1024 * 1024));
-      nRequests = 0;
-      this.maxRequests = maxRequests;
-    }
-
-    @Override
-    public void onConnect(StatusCode status) {
-      if (status != StatusCode.OK) {
-        Assert.fail("Connection with server failed");
-      } else {
-        LOG.info("Connected with server");
-        sendRequest();
-      }
-    }
-
-    @Override
-    public void onError() {
-      Assert.fail("Error in client while talking to server");
-    }
-
-    @Override
-    public void onClose() {
-
-    }
-
-    private void sendRequest() {
-      if (nRequests > maxRequests) {
-        this.stop();
-        getNIOLooper().exitLoop();
-        return;
-      }
-      Tests.EchoServerRequest.Builder r = Tests.EchoServerRequest.newBuilder();
-      r.setEchoRequest("Dummy");
-      sendRequest(r.build(), Tests.EchoServerResponse.newBuilder());
-      nRequests++;
-    }
-
-    @Override
-    public void onResponse(StatusCode status, Object ctx, Message response) {
-      if (response instanceof Tests.EchoServerResponse) {
-        Tests.EchoServerResponse r = (Tests.EchoServerResponse) response;
-        Assert.assertEquals(r.getEchoResponse(), "Dummy");
-        sendRequest();
-      } else {
-        Assert.fail("Unknown type of response received");
-      }
-    }
-
-    @Override
-    public void onIncomingMessage(Message request) {
-      Assert.fail("Expected message from client");
-    }
-  }
-
   private ExecutorService threadsPool;
 
   @BeforeClass
@@ -227,5 +100,131 @@ public class EchoTest {
     }
 
     looper.loop();
+  }
+
+  private static class EchoServer extends HeronServer {
+    private static final Logger LOG = Logger.getLogger(EchoServer.class.getName());
+    private int nRequests;
+    private int maxRequests;
+
+    public EchoServer(NIOLooper looper, int port, int maxRequests) {
+      super(looper, "localhost", port,
+          new HeronSocketOptions(100 * 1024 * 1024, 100,
+              100 * 1024 * 1024,
+              100,
+              5 * 1024 * 1024,
+              5 * 1024 * 1024));
+      nRequests = 0;
+      this.maxRequests = maxRequests;
+      registerOnRequest(Tests.EchoServerRequest.newBuilder());
+    }
+
+    @Override
+    public void onConnect(SocketChannel channel) {
+      LOG.info("A new client connected with us");
+    }
+
+    @Override
+    public void onClose(SocketChannel channel) {
+      LOG.info("A client closed connection");
+    }
+
+    @Override
+    public void onRequest(REQID rid, SocketChannel channel, Message request) {
+      if (request instanceof Tests.EchoServerRequest) {
+        Tests.EchoServerResponse.Builder response = Tests.EchoServerResponse.newBuilder();
+        Tests.EchoServerRequest req = (Tests.EchoServerRequest) request;
+        response.setEchoResponse(req.getEchoRequest());
+        sendResponse(rid, channel, response.build());
+        nRequests++;
+        if (nRequests % 10 == 0) {
+          LOG.info("Processed " + nRequests + " requests");
+        }
+        if (nRequests >= maxRequests) {
+          // We wait for 1 second to let client to receive the request and then exit
+          registerTimerEventInSeconds(1,
+              new Runnable() {
+                @Override
+                public void run() {
+                  EchoServer.this.stop();
+                  getNIOLooper().exitLoop();
+                  return;
+                }
+              });
+        }
+      } else {
+        throw new RuntimeException("Unknown type of request received");
+      }
+    }
+
+    @Override
+    public void onMessage(SocketChannel channel, Message request) {
+      throw new RuntimeException("Expected message from client");
+    }
+  }
+
+  private static class EchoClient extends HeronClient {
+    private static final Logger LOG = Logger.getLogger(EchoClient.class.getName());
+    private HeronSocketOptions socketOptions;
+    private int nRequests;
+    private int maxRequests;
+
+    public EchoClient(NIOLooper looper, int port, int maxRequests) {
+      super(looper, "localhost", port,
+          new HeronSocketOptions(100 * 1024 * 1024, 100,
+              100 * 1024 * 1024, 100,
+              5 * 1024 * 1024,
+              5 * 1024 * 1024));
+      nRequests = 0;
+      this.maxRequests = maxRequests;
+    }
+
+    @Override
+    public void onConnect(StatusCode status) {
+      if (status != StatusCode.OK) {
+        Assert.fail("Connection with server failed");
+      } else {
+        LOG.info("Connected with server");
+        sendRequest();
+      }
+    }
+
+    @Override
+    public void onError() {
+      Assert.fail("Error in client while talking to server");
+    }
+
+    @Override
+    public void onClose() {
+
+    }
+
+    private void sendRequest() {
+      if (nRequests > maxRequests) {
+        this.stop();
+        getNIOLooper().exitLoop();
+        return;
+      }
+      Tests.EchoServerRequest.Builder r = Tests.EchoServerRequest.newBuilder();
+      r.setEchoRequest("Dummy");
+      sendRequest(r.build(), Tests.EchoServerResponse.newBuilder());
+      nRequests++;
+    }
+
+    @Override
+    public void onResponse(StatusCode status, Object ctx, Message response) {
+      if (response instanceof Tests.EchoServerResponse) {
+        Tests.EchoServerResponse r = (Tests.EchoServerResponse) response;
+        Assert.assertEquals(r.getEchoResponse(), "Dummy");
+        sendRequest();
+      } else {
+        Assert.fail("Unknown type of response received");
+      }
+    }
+
+    @Override
+    public void onIncomingMessage(Message request) {
+      Assert.fail("Expected message from client");
+    }
   }
 }

@@ -33,13 +33,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.basics.SysUtils;
-import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.basics.WakeableLooper;
+import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.network.HeronSocketOptions;
 import com.twitter.heron.common.network.IncomingPacket;
 import com.twitter.heron.common.network.OutgoingPacket;
@@ -90,6 +90,17 @@ public class HandleWriteTest {
   @AfterClass
   public static void afterClass() throws Exception {
 
+  }
+
+  static void close(Closeable sc2) {
+    if (sc2 != null) try {
+      sc2.close();
+    } catch (IOException ignored) {
+    }
+  }
+
+  static void configure(SocketChannel sc) throws SocketException {
+    sc.socket().setTcpNoDelay(true);
   }
 
   @Before
@@ -206,17 +217,6 @@ public class HandleWriteTest {
     } finally {
       close(socketChannel);
     }
-  }
-
-  static void close(Closeable sc2) {
-    if (sc2 != null) try {
-      sc2.close();
-    } catch (IOException ignored) {
-    }
-  }
-
-  static void configure(SocketChannel sc) throws SocketException {
-    sc.socket().setTcpNoDelay(true);
   }
 
   void runStreamManagerClient() {

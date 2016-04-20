@@ -14,14 +14,9 @@
 
 package com.twitter.heron.spi.common;
 
-import java.nio.file.Paths;
-import java.util.Properties;
 import java.util.logging.Logger;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 public class ConfigDefaultsTest {
@@ -98,24 +93,24 @@ public class ConfigDefaultsTest {
   @Test
   public void testBinaries() throws Exception {
     Assert.assertEquals(
-        "${HERON_SANDBOX_BIN}/heron-executor", 
+        "${HERON_SANDBOX_BIN}/heron-executor",
         ConfigDefaults.get("SANDBOX_EXECUTOR_BINARY")
     );
     Assert.assertEquals(
-        "${HERON_SANDBOX_BIN}/heron-stmgr", 
+        "${HERON_SANDBOX_BIN}/heron-stmgr",
         ConfigDefaults.get("SANDBOX_STMGR_BINARY")
     );
     Assert.assertEquals(
-        "${HERON_SANDBOX_BIN}/heron-tmaster", 
+        "${HERON_SANDBOX_BIN}/heron-tmaster",
         ConfigDefaults.get("SANDBOX_TMASTER_BINARY")
     );
     Assert.assertEquals(
-        "${HERON_SANDBOX_BIN}/heron-shell", 
+        "${HERON_SANDBOX_BIN}/heron-shell",
         ConfigDefaults.get("SANDBOX_SHELL_BINARY")
     );
     Assert.assertEquals(
-        "heron.jars.scheduler", 
-        "${HERON_LIB}/scheduler/heron-scheduler.jar", 
+        "heron.jars.scheduler",
+        "${HERON_LIB}/scheduler/heron-scheduler.jar",
         ConfigDefaults.get("SCHEDULER_JAR")
     );
   }
@@ -123,27 +118,27 @@ public class ConfigDefaultsTest {
   @Test
   public void testClassPaths() throws Exception {
     Assert.assertEquals(
-        "${HERON_LIB}/instance/*", 
+        "${HERON_LIB}/instance/*",
         ConfigDefaults.get("INSTANCE_CLASSPATH")
     );
     Assert.assertEquals(
-        "${HERON_LIB}/metricsmgr/*", 
+        "${HERON_LIB}/metricsmgr/*",
         ConfigDefaults.get("METRICSMGR_CLASSPATH")
     );
     Assert.assertEquals(
-        "${HERON_LIB}/packing/*", 
+        "${HERON_LIB}/packing/*",
         ConfigDefaults.get("PACKING_CLASSPATH")
     );
     Assert.assertEquals(
-        "${HERON_LIB}/scheduler/*", 
+        "${HERON_LIB}/scheduler/*",
         ConfigDefaults.get("SCHEDULER_CLASSPATH")
     );
     Assert.assertEquals(
-        "${HERON_LIB}/statemgr/*", 
+        "${HERON_LIB}/statemgr/*",
         ConfigDefaults.get("STATEMGR_CLASSPATH")
     );
     Assert.assertEquals(
-        "${HERON_LIB}/uploader/*", 
+        "${HERON_LIB}/uploader/*",
         ConfigDefaults.get("UPLOADER_CLASSPATH")
     );
   }
@@ -151,20 +146,20 @@ public class ConfigDefaultsTest {
   @Test
   public void testResources() throws Exception {
     Assert.assertEquals(
-        Long.valueOf(Constants.GB), 
+        Long.valueOf(Constants.GB),
         ConfigDefaults.getLong("STMGR_RAM")
     );
     Assert.assertEquals(
-        Double.valueOf(1.0), 
+        Double.valueOf(1.0),
         ConfigDefaults.getDouble("INSTANCE_CPU"),
         0.001
     );
     Assert.assertEquals(
-        Long.valueOf(Constants.GB), 
+        Long.valueOf(Constants.GB),
         ConfigDefaults.getLong("INSTANCE_RAM")
     );
     Assert.assertEquals(
-        Long.valueOf(Constants.GB), 
+        Long.valueOf(Constants.GB),
         ConfigDefaults.getLong("INSTANCE_DISK")
     );
   }

@@ -15,6 +15,7 @@
 package com.twitter.heron.scheduler.util;
 
 import java.nio.charset.Charset;
+
 import javax.xml.bind.DatatypeConverter;
 
 // Converts the config String argument from Base64 Binary back into the original String in UTF-8.

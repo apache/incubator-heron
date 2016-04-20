@@ -24,38 +24,6 @@ import com.twitter.heron.api.grouping.CustomStreamGrouping;
 import com.twitter.heron.api.topology.TopologyContext;
 
 public class CustomStreamGroupingHelper {
-  private static class Target {
-    private final String componentName;
-    private final List<Integer> taskIds;
-    private final CustomStreamGrouping grouping;
-
-    public String getComponentName() {
-      return componentName;
-    }
-
-    public Target(List<Integer> taskIds, CustomStreamGrouping grouping, String componentName) {
-      this.taskIds = taskIds;
-      this.grouping = grouping;
-      this.componentName = componentName;
-    }
-
-    public List<Integer> getTaskIds() {
-      return taskIds;
-    }
-
-    public CustomStreamGrouping getGrouping() {
-      return grouping;
-    }
-
-    public void prepare(TopologyContext context, String streamId) {
-      grouping.prepare(context, componentName, streamId, taskIds);
-    }
-
-    public List<Integer> chooseTasks(List<Object> values) {
-      return grouping.chooseTasks(values);
-    }
-  }
-
   // Mapping from steamid to a List of Targets
   private final Map<String, List<Target>> targets;
 
@@ -91,6 +59,38 @@ public class CustomStreamGroupingHelper {
       return res;
     }
     return null;
+  }
+
+  private static class Target {
+    private final String componentName;
+    private final List<Integer> taskIds;
+    private final CustomStreamGrouping grouping;
+
+    public Target(List<Integer> taskIds, CustomStreamGrouping grouping, String componentName) {
+      this.taskIds = taskIds;
+      this.grouping = grouping;
+      this.componentName = componentName;
+    }
+
+    public String getComponentName() {
+      return componentName;
+    }
+
+    public List<Integer> getTaskIds() {
+      return taskIds;
+    }
+
+    public CustomStreamGrouping getGrouping() {
+      return grouping;
+    }
+
+    public void prepare(TopologyContext context, String streamId) {
+      grouping.prepare(context, componentName, streamId, taskIds);
+    }
+
+    public List<Integer> chooseTasks(List<Object> values) {
+      return grouping.chooseTasks(values);
+    }
   }
 
 }

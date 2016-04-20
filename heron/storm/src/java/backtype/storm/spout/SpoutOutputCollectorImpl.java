@@ -17,6 +17,7 @@ package backtype.storm.spout;
 import java.util.List;
 
 import backtype.storm.utils.Utils;
+
 /**
  * This output collector exposes the API for emitting tuples from an {@link backtype.storm.topology.IRichSpout}.
  * The main difference between this output collector and {@link OutputCollector}

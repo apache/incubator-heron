@@ -30,7 +30,7 @@ public class ClusterConfigTest {
 
   @Before
   public void setUp() {
-    heronHome = Paths.get(System.getenv("JAVA_RUNFILES"), 
+    heronHome = Paths.get(System.getenv("JAVA_RUNFILES"),
         TestConstants.TEST_DATA_PATH).toString();
 
     configPath = Paths.get(heronHome, "local").toString();
@@ -49,7 +49,7 @@ public class ClusterConfigTest {
     Assert.assertEquals(4, props.size());
 
     Assert.assertEquals(
-        "com.twitter.heron.uploader.localfs.FileSystemUploader", 
+        "com.twitter.heron.uploader.localfs.FileSystemUploader",
         Context.uploaderClass(props)
     );
 
@@ -62,12 +62,12 @@ public class ClusterConfigTest {
     Assert.assertEquals(10, props.size());
 
     Assert.assertEquals(
-        "heron-executor", 
+        "heron-executor",
         Context.executorSandboxBinary(props)
     );
 
     Assert.assertEquals(
-        "heron-stmgr", 
+        "heron-stmgr",
         Context.stmgrSandboxBinary(props)
     );
 
@@ -115,7 +115,7 @@ public class ClusterConfigTest {
     Assert.assertEquals(3, props.size());
 
     Assert.assertEquals(
-        "com.twitter.heron.scheduler.local.LocalScheduler", 
+        "com.twitter.heron.scheduler.local.LocalScheduler",
         Context.schedulerClass(props)
     );
 

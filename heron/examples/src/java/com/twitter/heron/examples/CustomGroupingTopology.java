@@ -34,6 +34,19 @@ import backtype.storm.tuple.Tuple;
  * This is a basic example of a Storm topology.
  */
 public class CustomGroupingTopology {
+  public static void main(String[] args) throws Exception {
+    TopologyBuilder builder = new TopologyBuilder();
+
+    builder.setSpout("word", new TestWordSpout(), 2);
+    builder.setBolt("mybolt", new MyBolt(), 2)
+        .customGrouping("word", new MyCustomStreamGrouping());
+
+    Config conf = new Config();
+
+    conf.setNumStmgrs(1);
+    StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
+  }
+
   public static class MyBolt extends BaseRichBolt {
     private long nItems;
 
@@ -71,18 +84,5 @@ public class CustomGroupingTopology {
       ret.add(taskIds.get(0));
       return ret;
     }
-  }
-
-  public static void main(String[] args) throws Exception {
-    TopologyBuilder builder = new TopologyBuilder();
-
-    builder.setSpout("word", new TestWordSpout(), 2);
-    builder.setBolt("mybolt", new MyBolt(), 2)
-        .customGrouping("word", new MyCustomStreamGrouping());
-
-    Config conf = new Config();
-
-    conf.setNumStmgrs(1);
-    StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }
 }

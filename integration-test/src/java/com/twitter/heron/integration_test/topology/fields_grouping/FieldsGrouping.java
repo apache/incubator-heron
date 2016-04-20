@@ -5,18 +5,18 @@ import java.net.URL;
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.HeronSubmitter;
 import com.twitter.heron.api.tuple.Fields;
-import com.twitter.heron.integration_test.core.TestTopologyBuilder;
+import com.twitter.heron.integration_test.common.BasicConfig;
 import com.twitter.heron.integration_test.common.bolt.CountAggregatorBolt;
 import com.twitter.heron.integration_test.common.bolt.WordCountBolt;
-import com.twitter.heron.integration_test.common.BasicConfig;
 import com.twitter.heron.integration_test.common.spout.ABSpout;
+import com.twitter.heron.integration_test.core.TestTopologyBuilder;
 
 /**
  * Topology to test fields grouping
  */
 public class FieldsGrouping {
   public static void main(String[] args) throws Exception {
-    if(args.length < 2) {
+    if (args.length < 2) {
       throw new RuntimeException("HttpServerUrl and TopologyName are needed as command line arguments");
     }
 

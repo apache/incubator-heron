@@ -14,8 +14,6 @@
 
 package com.twitter.heron.statemgr;
 
-import java.util.Map;
-
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 

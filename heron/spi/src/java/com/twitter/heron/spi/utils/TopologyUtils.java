@@ -14,13 +14,12 @@
 
 package com.twitter.heron.spi.utils;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -40,7 +39,7 @@ import com.twitter.heron.spi.common.PackingPlan;
 public class TopologyUtils {
   private static final Logger LOG = Logger.getLogger(TopologyUtils.class.getName());
 
-   public static TopologyAPI.Topology getTopology(String topologyDefnFile) {
+  public static TopologyAPI.Topology getTopology(String topologyDefnFile) {
     try {
       byte[] topologyDefn = Files.readAllBytes(Paths.get(topologyDefnFile));
       TopologyAPI.Topology topology = TopologyAPI.Topology.parseFrom(topologyDefn);

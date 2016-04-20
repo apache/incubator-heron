@@ -23,7 +23,6 @@ public class LocalFileSystemContext extends Context {
    * Get the config specifying whether to initialize file directory hierarchy
    *
    * @param Config, the config map
-   *
    * @return true, if config does not exist, else the specified value
    */
   public static boolean initLocalFileTree(Config config) {

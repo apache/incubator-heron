@@ -13,16 +13,12 @@ import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Values;
 
 public class IntegrationTestSpout implements IRichSpout {
-  private boolean isDone = false;
-  private long tuplesToComplete = 0;
-
-
   // The times of execution
   private static final int DEFAULT_EXECUTION_COUNT = 10;
-
   private static final Logger LOG = Logger.getLogger(IntegrationTestSpout.class.getName());
-
   private final IRichSpout delegateSpout;
+  private boolean isDone = false;
+  private long tuplesToComplete = 0;
   private SpoutOutputCollector spoutOutputCollector;
 
   private int maxExecutions;

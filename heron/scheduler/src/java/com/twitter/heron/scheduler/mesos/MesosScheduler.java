@@ -32,13 +32,6 @@ import java.util.logging.Logger;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
-
-import com.twitter.heron.spi.common.Constants;
-import com.twitter.heron.spi.common.PackingPlan;
-import com.twitter.heron.spi.scheduler.IScheduler;
-import com.twitter.heron.spi.scheduler.SchedulerStateManagerAdaptor;
-import com.twitter.heron.spi.scheduler.context.LaunchContext;
-
 import com.twitter.heron.scheduler.mesos.framework.config.FrameworkConfiguration;
 import com.twitter.heron.scheduler.mesos.framework.driver.MesosDriverFactory;
 import com.twitter.heron.scheduler.mesos.framework.driver.MesosJobFramework;
@@ -47,34 +40,85 @@ import com.twitter.heron.scheduler.mesos.framework.jobs.BaseJob;
 import com.twitter.heron.scheduler.mesos.framework.jobs.JobScheduler;
 import com.twitter.heron.scheduler.mesos.framework.state.PersistenceStore;
 import com.twitter.heron.scheduler.mesos.framework.state.ZkPersistenceStore;
-
 import com.twitter.heron.scheduler.util.NetworkUtility;
 import com.twitter.heron.scheduler.util.ShellUtility;
+import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.scheduler.IScheduler;
+import com.twitter.heron.spi.scheduler.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
 
 public class MesosScheduler implements IScheduler {
   private static final Logger LOG = Logger.getLogger(MesosScheduler.class.getName());
 
   private static final long MAX_WAIT_TIMEOUT_MS = 30 * 1000;
-
+  private final Map<Integer, BaseJob> executorShardToJob = new ConcurrentHashMap<>();
   private LaunchContext context;
   private AtomicBoolean tmasterRestart;
   private Thread tmasterRunThread;
   private Process tmasterProcess;
-
   private TopologyAPI.Topology topology;
   private String topologyName;
   private SchedulerStateManagerAdaptor stateManager;
-
   private JobScheduler jobScheduler;
   private volatile CountDownLatch startLatch;
-
   private String executorCmdTemplate = "";
-
-  private final Map<Integer, BaseJob> executorShardToJob = new ConcurrentHashMap<>();
-
   private PersistenceStore persistenceStore;
 
   private MesosJobFramework mesosJobFramework;
+
+  private static String extractFilenameFromUri(String url) {
+    return url.substring(url.lastIndexOf('/') + 1, url.length());
+  }
+
+  public static String getHeronJobExecutorArguments(LaunchContext context) {
+    return getHeronExecutorArguments(context,
+        "{{task.ports[STMGR_PORT]}}", "{{task.ports[METRICMGR_PORT]}}",
+        "{{task.ports[BACK_UP]}}", "{{task.ports[SHELL]}}",
+        "{{task.ports[BACK_UP_1]}}");
+  }
+
+  public static String getHeronExecutorArguments(
+      LaunchContext context,
+      String sPort1,
+      String sPort2,
+      String sPort3,
+      String sPort4,
+      String sPort5) {
+
+    return String.format(
+        "%s %s %s " +
+            "%s %s %s " +
+            "%s %s %s " +
+            "%s %s %s " +
+            "%s %s %s " +
+            "%s %s %s " +
+            "%s %s %s " +
+            "%s %s %s",
+        context.getProperty("TOPOLOGY_NAME"), context.getProperty("TOPOLOGY_ID"), context.getProperty("TOPOLOGY_DEFN"),
+        context.getProperty("INSTANCE_DISTRIBUTION"), context.getProperty("ZK_NODE"), context.getProperty("ZK_ROOT"),
+        context.getProperty("TMASTER_BINARY"), context.getProperty("STMGR_BINARY"), context.getProperty("METRICS_MGR_CLASSPATH"),
+        context.getProperty("INSTANCE_JVM_OPTS_IN_BASE64"), context.getProperty("CLASSPATH"), sPort1,
+        sPort2, sPort3, context.getProperty("HERON_INTERNALS_CONFIG_FILENAME"),
+        context.getProperty("COMPONENT_RAMMAP"), context.getProperty("COMPONENT_JVM_OPTS_IN_BASE64"), context.getProperty("PKG_TYPE"),
+        context.getProperty("TOPOLOGY_JAR_FILE"), context.getProperty("HERON_JAVA_HOME"),
+        sPort4, context.getProperty("LOG_DIR"), context.getProperty("HERON_SHELL_BINARY"),
+        sPort5);
+
+  }
+
+  public static String getHeronTMasterArguments(
+      LaunchContext context,
+      int port1,  // Port for TMaster Controller and Stream-manager port
+      int port2,  // Port for TMaster and Stream-manager communication amd Stream manager with
+      // metric manager communicaiton.
+      int port3,   // Port for TMaster stats export. Used by tracker.
+      int shellPort,  // Port for heorn-shell
+      int metricsmgrPort      // Port for MetricsMgr in TMasterContainer
+  ) {
+    return getHeronExecutorArguments(context, "" + port1, "" + port2,
+        "" + port3, "" + shellPort, "" + metricsmgrPort);
+  }
 
   @Override
   public void initialize(LaunchContext context) {
@@ -207,10 +251,6 @@ public class MesosScheduler implements IScheduler {
 
 
     return jobDef;
-  }
-
-  private static String extractFilenameFromUri(String url) {
-    return url.substring(url.lastIndexOf('/') + 1, url.length());
   }
 
   private String getExecutorCmdTemplate() {
@@ -391,54 +431,5 @@ public class MesosScheduler implements IScheduler {
     }
 
     return true;
-  }
-
-  public static String getHeronJobExecutorArguments(LaunchContext context) {
-    return getHeronExecutorArguments(context,
-        "{{task.ports[STMGR_PORT]}}", "{{task.ports[METRICMGR_PORT]}}",
-        "{{task.ports[BACK_UP]}}", "{{task.ports[SHELL]}}",
-        "{{task.ports[BACK_UP_1]}}");
-  }
-
-  public static String getHeronExecutorArguments(
-      LaunchContext context,
-      String sPort1,
-      String sPort2,
-      String sPort3,
-      String sPort4,
-      String sPort5) {
-
-    return String.format(
-        "%s %s %s " +
-            "%s %s %s " +
-            "%s %s %s " +
-            "%s %s %s " +
-            "%s %s %s " +
-            "%s %s %s " +
-            "%s %s %s " +
-            "%s %s %s",
-        context.getProperty("TOPOLOGY_NAME"), context.getProperty("TOPOLOGY_ID"), context.getProperty("TOPOLOGY_DEFN"),
-        context.getProperty("INSTANCE_DISTRIBUTION"), context.getProperty("ZK_NODE"), context.getProperty("ZK_ROOT"),
-        context.getProperty("TMASTER_BINARY"), context.getProperty("STMGR_BINARY"), context.getProperty("METRICS_MGR_CLASSPATH"),
-        context.getProperty("INSTANCE_JVM_OPTS_IN_BASE64"), context.getProperty("CLASSPATH"), sPort1,
-        sPort2, sPort3, context.getProperty("HERON_INTERNALS_CONFIG_FILENAME"),
-        context.getProperty("COMPONENT_RAMMAP"), context.getProperty("COMPONENT_JVM_OPTS_IN_BASE64"), context.getProperty("PKG_TYPE"),
-        context.getProperty("TOPOLOGY_JAR_FILE"), context.getProperty("HERON_JAVA_HOME"),
-        sPort4, context.getProperty("LOG_DIR"), context.getProperty("HERON_SHELL_BINARY"),
-        sPort5);
-
-  }
-
-  public static String getHeronTMasterArguments(
-      LaunchContext context,
-      int port1,  // Port for TMaster Controller and Stream-manager port
-      int port2,  // Port for TMaster and Stream-manager communication amd Stream manager with
-      // metric manager communicaiton.
-      int port3,   // Port for TMaster stats export. Used by tracker.
-      int shellPort,  // Port for heorn-shell
-      int metricsmgrPort      // Port for MetricsMgr in TMasterContainer
-  ) {
-    return getHeronExecutorArguments(context, "" + port1, "" + port2,
-        "" + port3, "" + shellPort, "" + metricsmgrPort);
   }
 }

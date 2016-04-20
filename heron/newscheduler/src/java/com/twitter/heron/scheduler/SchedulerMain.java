@@ -61,6 +61,27 @@ public class SchedulerMain {
   private TopologyAPI.Topology topology = null;  // topology definition
   private Config config;                        // holds all the config read
 
+  public SchedulerMain(String iCluster, String iRole, String iEnviron,
+                       String iTopologyName, String iTopologyJarFile, int iSchedulerServerPort) throws IOException {
+    // initialize the options
+    cluster = iCluster;
+    role = iRole;
+    environ = iEnviron;
+    topologyName = iTopologyName;
+    topologyJarFile = iTopologyJarFile;
+    schedulerServerPort = iSchedulerServerPort;
+
+    // locate the topology definition file in the sandbox/working directory
+    String topologyDefnFile = TopologyUtils.lookUpTopologyDefnFile(".", topologyName);
+
+    // load the topology definition into topology proto
+    topology = TopologyUtils.getTopology(topologyDefnFile);
+
+    // build the config by expanding all the variables
+    config = SchedulerConfig.loadConfig(cluster, role, environ,
+        topologyJarFile, topologyDefnFile, topology);
+  }
+
   // Print usage options
   private static void usage(Options options) {
     HelpFormatter formatter = new HelpFormatter();
@@ -141,27 +162,6 @@ public class SchedulerMain {
     return options;
   }
 
-  public SchedulerMain(String iCluster, String iRole, String iEnviron,
-                       String iTopologyName, String iTopologyJarFile, int iSchedulerServerPort) throws IOException {
-    // initialize the options
-    cluster = iCluster;
-    role = iRole;
-    environ = iEnviron;
-    topologyName = iTopologyName;
-    topologyJarFile = iTopologyJarFile;
-    schedulerServerPort = iSchedulerServerPort;
-
-    // locate the topology definition file in the sandbox/working directory
-    String topologyDefnFile = TopologyUtils.lookUpTopologyDefnFile(".", topologyName);
-
-    // load the topology definition into topology proto
-    topology = TopologyUtils.getTopology(topologyDefnFile);
-
-    // build the config by expanding all the variables
-    config = SchedulerConfig.loadConfig(cluster, role, environ,
-        topologyJarFile, topologyDefnFile, topology);
-  }
-
   public static void main(String[] args) throws
       ClassNotFoundException, InstantiationException, IllegalAccessException, IOException, ParseException {
 
@@ -231,6 +231,48 @@ public class SchedulerMain {
             systemConfig.getHeronLoggingMaximumFiles()));
 
     LOG.info("Logging setup done.");
+  }
+
+  /**
+   * Run the http server for receiving scheduler requests
+   *
+   * @param runtime, the runtime configuration
+   * @param scheduler, an instance of the scheduler
+   * @param port, the port for scheduler to listen on
+   * @return an instance of the http server
+   */
+  private static SchedulerServer runServer(
+      Config runtime, IScheduler scheduler, int port) throws IOException {
+
+    // create an instance of the server using scheduler class and port
+    final SchedulerServer schedulerServer = new SchedulerServer(runtime, scheduler, port);
+
+    // start the http server to manage runtime requests
+    schedulerServer.start();
+
+    return schedulerServer;
+  }
+
+  /**
+   * Set the location of scheduler for other processes to discover
+   *
+   * @param runtime, the runtime configuration
+   * @param schedulerServer, the http server that scheduler listens for receives requests
+   */
+  private static void setSchedulerLocation(Config runtime, SchedulerServer schedulerServer) {
+
+    // Set scheduler location to host:port by default. Overwrite scheduler location if behind DNS.
+    Scheduler.SchedulerLocation location = Scheduler.SchedulerLocation.newBuilder()
+        .setTopologyName(Runtime.topologyName(runtime))
+        .setHttpEndpoint(String.format("%s:%d", schedulerServer.getHost(), schedulerServer.getPort()))
+        .build();
+
+    LOG.log(Level.INFO, "Setting SchedulerLocation: {0}", location);
+    SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
+    Boolean result = statemgr.setSchedulerLocation(location, Runtime.topologyName(runtime));
+    if (result == null || !result) {
+      throw new RuntimeException("Failed to set Scheduler location");
+    }
   }
 
   public void runScheduler() throws
@@ -319,47 +361,5 @@ public class SchedulerMain {
     LOG.log(Level.INFO, "Shutting down topology: {0}", topology.getName());
 
     System.exit(0);
-  }
-
-  /**
-   * Run the http server for receiving scheduler requests
-   *
-   * @param runtime, the runtime configuration
-   * @param scheduler, an instance of the scheduler
-   * @param port, the port for scheduler to listen on
-   * @return an instance of the http server
-   */
-  private static SchedulerServer runServer(
-      Config runtime, IScheduler scheduler, int port) throws IOException {
-
-    // create an instance of the server using scheduler class and port
-    final SchedulerServer schedulerServer = new SchedulerServer(runtime, scheduler, port);
-
-    // start the http server to manage runtime requests
-    schedulerServer.start();
-
-    return schedulerServer;
-  }
-
-  /**
-   * Set the location of scheduler for other processes to discover
-   *
-   * @param runtime, the runtime configuration
-   * @param schedulerServer, the http server that scheduler listens for receives requests
-   */
-  private static void setSchedulerLocation(Config runtime, SchedulerServer schedulerServer) {
-
-    // Set scheduler location to host:port by default. Overwrite scheduler location if behind DNS.
-    Scheduler.SchedulerLocation location = Scheduler.SchedulerLocation.newBuilder()
-        .setTopologyName(Runtime.topologyName(runtime))
-        .setHttpEndpoint(String.format("%s:%d", schedulerServer.getHost(), schedulerServer.getPort()))
-        .build();
-
-    LOG.log(Level.INFO, "Setting SchedulerLocation: {0}", location);
-    SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
-    Boolean result = statemgr.setSchedulerLocation(location, Runtime.topologyName(runtime));
-    if (result == null || !result) {
-      throw new RuntimeException("Failed to set Scheduler location");
-    }
   }
 }

@@ -41,7 +41,7 @@ public class Runtime {
   }
 
   public static URI topologyPackageUri(Config cfg) {
-    return (URI)cfg.get(Keys.topologyPackageUri());
+    return (URI) cfg.get(Keys.topologyPackageUri());
   }
 
   public static SchedulerStateManagerAdaptor schedulerStateManagerAdaptor(Config runtime) {

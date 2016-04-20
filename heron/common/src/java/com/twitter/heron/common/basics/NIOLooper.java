@@ -189,7 +189,7 @@ public class NIOLooper extends WakeableLooper {
    * There are two cases when trying to register an interest
    * 1. The whole key does not exist; no interests ever registered for this channel
    * 2. The key exists due to other interests registered but not the one we are adding
-   * <p/>
+   * <p>
    * In 1st case, we just register this channel with operation on the given Selector
    * In 2nd case, we have to make sure the state of NIOLooper is clean:
    * 1. Key has to be valid

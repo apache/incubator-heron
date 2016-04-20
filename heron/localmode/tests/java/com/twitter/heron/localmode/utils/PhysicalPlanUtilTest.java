@@ -63,6 +63,54 @@ public class PhysicalPlanUtilTest implements Serializable {
 
   }
 
+  public static TopologyAPI.Topology getTestTopology() {
+    TopologyBuilder topologyBuilder = new TopologyBuilder();
+
+    topologyBuilder.setSpout("word", new BaseRichSpout() {
+      @Override
+      public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
+        outputFieldsDeclarer.declare(new Fields("word"));
+      }
+
+      @Override
+      public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector spoutOutputCollector) {
+
+      }
+
+      @Override
+      public void nextTuple() {
+
+      }
+    }, 2);
+
+    topologyBuilder.setBolt("exclaim", new BaseBasicBolt() {
+      @Override
+      public void execute(Tuple tuple, BasicOutputCollector basicOutputCollector) {
+
+      }
+
+      @Override
+      public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
+
+      }
+    }, 2)
+        .shuffleGrouping("word");
+
+    Config conf = new Config();
+    conf.setDebug(true);
+    conf.setMaxSpoutPending(10);
+    conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
+    conf.setComponentRam("word", 500 * 1024 * 1024);
+    conf.setComponentRam("exclaim", 1024 * 1024 * 1024);
+    conf.setMessageTimeoutSecs(1);
+
+    return topologyBuilder.createTopology().
+        setName("topology-name").
+        setConfig(conf).
+        setState(TopologyAPI.TopologyState.RUNNING).
+        getTopology();
+  }
+
   @Before
   public void before() throws Exception {
   }
@@ -137,53 +185,5 @@ public class PhysicalPlanUtilTest implements Serializable {
   @Test
   public void testExtractTopologyTimeout() throws Exception {
     Assert.assertEquals(1, PhysicalPlanUtil.extractTopologyTimeout(topology));
-  }
-
-  public static TopologyAPI.Topology getTestTopology() {
-    TopologyBuilder topologyBuilder = new TopologyBuilder();
-
-    topologyBuilder.setSpout("word", new BaseRichSpout() {
-      @Override
-      public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields("word"));
-      }
-
-      @Override
-      public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector spoutOutputCollector) {
-
-      }
-
-      @Override
-      public void nextTuple() {
-
-      }
-    }, 2);
-
-    topologyBuilder.setBolt("exclaim", new BaseBasicBolt() {
-      @Override
-      public void execute(Tuple tuple, BasicOutputCollector basicOutputCollector) {
-
-      }
-
-      @Override
-      public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-
-      }
-    }, 2)
-        .shuffleGrouping("word");
-
-    Config conf = new Config();
-    conf.setDebug(true);
-    conf.setMaxSpoutPending(10);
-    conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
-    conf.setComponentRam("word", 500 * 1024 * 1024);
-    conf.setComponentRam("exclaim", 1024 * 1024 * 1024);
-    conf.setMessageTimeoutSecs(1);
-
-    return topologyBuilder.createTopology().
-        setName("topology-name").
-        setConfig(conf).
-        setState(TopologyAPI.TopologyState.RUNNING).
-        getTopology();
   }
 }

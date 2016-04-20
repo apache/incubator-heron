@@ -15,22 +15,14 @@
 package com.twitter.heron.spi.common;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-
 import java.util.Arrays;
-import java.util.List;
 import java.util.LinkedList;
-import java.util.logging.Level;
+import java.util.List;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
-import java.util.Collections;
-import javax.swing.filechooser.FileSystemView;
-
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.swing.filechooser.FileSystemView;
 
 public class Misc {
 
@@ -45,13 +37,12 @@ public class Misc {
    *
    * @param heronHome, string representing a path to heron home
    * @param pathString, string representing a path including ${HERON_HOME}
-   *
-   * @return String, string that represents the modified path 
+   * @return String, string that represents the modified path
    */
   public static String substitute(String heronHome, String pathString) {
     Config config = Config.newBuilder()
-      .put(Keys.heronHome(), heronHome)
-      .build();
+        .put(Keys.heronHome(), heronHome)
+        .build();
     return substitute(config, pathString);
   }
 
@@ -62,14 +53,13 @@ public class Misc {
    * @param heronHome, string representing a path heron home
    * @param configPath, string representing a path to heron conf
    * @param pathString, string representing a path including ${HERON_HOME}/${HERON_CONF}
-   *
    * @return String, string that represents the modified path
    */
   public static String substitute(String heronHome, String configPath, String pathString) {
     Config config = Config.newBuilder()
-      .put(Keys.heronHome(), heronHome)
-      .put(Keys.heronConf(), configPath)
-      .build();
+        .put(Keys.heronHome(), heronHome)
+        .put(Keys.heronConf(), configPath)
+        .build();
     return substitute(config, pathString);
   }
 
@@ -79,13 +69,12 @@ public class Misc {
    *
    * @param heronSandboxHome, string representing a path to heron sandbox home
    * @param pathString, string representing a path including ${HERON_SANDBOX_HOME}
-   *
-   * @return String, string that represents the modified path 
+   * @return String, string that represents the modified path
    */
   public static String substituteSandbox(String heronSandboxHome, String pathString) {
     Config config = Config.newBuilder()
-      .put(Keys.heronSandboxHome(), heronSandboxHome)
-      .build();
+        .put(Keys.heronSandboxHome(), heronSandboxHome)
+        .build();
     return substitute(config, pathString);
   }
 
@@ -96,14 +85,13 @@ public class Misc {
    * @param heronSandboxHome, string representing a path heron sandbox home
    * @param configPath, string representing a path to heron conf
    * @param pathString, string representing a path including ${HERON_SANDBOX_HOME}/${HERON_SANDBOX_CONF}
-   *
    * @return String, string that represents the modified path
    */
   public static String substituteSandbox(String heronSandboxHome, String configPath, String pathString) {
     Config config = Config.newBuilder()
-      .put(Keys.heronSandboxHome(), heronSandboxHome)
-      .put(Keys.heronSandboxConf(), configPath)
-      .build();
+        .put(Keys.heronSandboxHome(), heronSandboxHome)
+        .put(Keys.heronSandboxConf(), configPath)
+        .build();
     return substitute(config, pathString);
   }
 
@@ -112,7 +100,6 @@ public class Misc {
    * the presence of two consecutive forward slashes //
    *
    * @param pathString, string representing a path
-   *
    * @return true, if the pathString is a URL, else false
    */
   protected static final boolean isURL(String pathString) {
@@ -124,9 +111,8 @@ public class Misc {
    * Given a static config map, substitute occurrences of ${HERON_*} variables
    * in the provided URL
    *
-   * @param config, a static map config object of key value pairs 
+   * @param config, a static map config object of key value pairs
    * @param pathString, string representing a path including ${HERON_*} variables
-   *
    * @return String, string that represents the modified path
    */
   private static String substituteURL(Config config, String pathString) {
@@ -141,11 +127,10 @@ public class Misc {
 
   /**
    * Given a static config map, substitute occurrences of ${HERON_*} variables
-   * in the provided path string 
+   * in the provided path string
    *
-   * @param config, a static map config object of key value pairs 
+   * @param config, a static map config object of key value pairs
    * @param pathString, string representing a path including ${HERON_*} variables
-   *
    * @return String, string that represents the modified path
    */
   public static String substitute(Config config, String pathString) {
@@ -167,7 +152,7 @@ public class Misc {
     String homePath = FileSystemView.getFileSystemView().getHomeDirectory().getAbsolutePath();
 
     // substitute various variables 
-    for (int i = 0 ; i < list.size(); i++) {
+    for (int i = 0; i < list.size(); i++) {
       String elem = list.get(i);
 
       if (elem.equals("${HOME}")) {
@@ -226,13 +211,12 @@ public class Misc {
    * path
    *
    * @param paths, a list of strings to be included in the path
-   *
    * @return String, string that gives the file system path
    */
   protected static String combinePaths(List<String> paths) {
     File file = new File(paths.get(0));
 
-    for (int i = 1; i < paths.size() ; i++) {
+    for (int i = 1; i < paths.size(); i++) {
       file = new File(file, paths.get(i));
     }
 
