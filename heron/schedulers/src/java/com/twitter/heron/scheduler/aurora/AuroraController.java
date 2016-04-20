@@ -25,13 +25,25 @@ import com.twitter.heron.spi.common.ShellUtils;
 /**
  * This file defines Utils methods used by Aurora
  */
-public class AuroraUtils {
-  private static final Logger LOG = Logger.getLogger(AuroraUtils.class.getName());
+public class AuroraController {
+  private static final Logger LOG = Logger.getLogger(AuroraController.class.getName());
+
+  private final String jobName;
+  private final String cluster;
+  private final String role;
+  private final String env;
+  private final boolean isVerbose;
+
+  public AuroraController(String jobName, String cluster, String role, String env, boolean isVerbose) {
+    this.jobName = jobName;
+    this.cluster = cluster;
+    this.role = role;
+    this.env = env;
+    this.isVerbose = isVerbose;
+  }
 
   // Create an aurora job
-  public static boolean createAuroraJob(String jobName, String cluster, String role, String env,
-                                        String auroraFilename, Map<String, String> bindings,
-                                        boolean isVerbose) {
+  public boolean createJob(String auroraFilename, Map<String, String> bindings) {
     List<String> auroraCmd = new ArrayList<>(Arrays.asList("aurora", "job", "create", "--wait-until", "RUNNING"));
 
     for (Map.Entry<String, String> binding : bindings.entrySet()) {
@@ -52,8 +64,7 @@ public class AuroraUtils {
   }
 
   // Kill an aurora job
-  public static boolean killAuroraJob(String jobName, String cluster, String role, String env,
-                                      boolean isVerbose) {
+  public boolean killJob() {
     List<String> auroraCmd = new ArrayList<>(Arrays.asList("aurora", "job", "killall"));
     String jobSpec = String.format("%s/%s/%s/%s", cluster, role, env, jobName);
     auroraCmd.add(jobSpec);
@@ -65,8 +76,7 @@ public class AuroraUtils {
   }
 
   // Restart an aurora job
-  public static boolean restartAuroraJob(String jobName, String cluster, String role, String env,
-                                         int containerId, boolean isVerbose) {
+  public boolean restartJob(int containerId) {
     List<String> auroraCmd = new ArrayList<>(Arrays.asList("aurora", "job", "restart"));
     String jobSpec = String.format("%s/%s/%s/%s", cluster, role, env, jobName);
     if (containerId != -1) {

@@ -23,11 +23,18 @@ public class AuroraScheduler implements IScheduler {
 
   private Config config;
   private Config runtime;
+  private AuroraController controller;
 
   @Override
   public void initialize(Config config, Config runtime) {
     this.config = config;
     this.runtime = runtime;
+    this.controller = new AuroraController(
+        Runtime.topologyName(runtime),
+        Context.cluster(config),
+        Context.role(config),
+        Context.environ(config),
+        Context.verbose(config));
   }
 
   @Override
@@ -46,33 +53,18 @@ public class AuroraScheduler implements IScheduler {
 
     Map<String, String> auroraProperties = createAuroraProperties(packing);
 
-    return AuroraUtils.createAuroraJob(Runtime.topologyName(runtime), Context.cluster(config),
-        Context.role(config),
-        Context.environ(config), getHeronAuroraPath(), auroraProperties, true);
+    return controller.createJob(getHeronAuroraPath(), auroraProperties);
   }
 
   @Override
   public boolean onKill(Scheduler.KillTopologyRequest request) {
-    String topologyName = Runtime.topologyName(runtime);
-    return AuroraUtils.killAuroraJob(
-        topologyName,
-        Context.cluster(config),
-        Context.role(config),
-        Context.environ(config),
-        true);
+    return controller.killJob();
   }
 
   @Override
   public boolean onRestart(Scheduler.RestartTopologyRequest request) {
-    String topologyName = com.twitter.heron.spi.utils.Runtime.topologyName(runtime);
     int containerId = request.getContainerIndex();
-    return AuroraUtils.restartAuroraJob(
-        topologyName,
-        Context.cluster(config),
-        Context.role(config),
-        Context.environ(config),
-        containerId,
-        true);
+    return controller.restartJob(containerId);
   }
 
   /**
