@@ -28,7 +28,6 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,7 +40,7 @@ import java.util.logging.Logger;
 public class HeronMasterDriver {
   public static final String TMASTER_CONTAINER_ID = "0";
   private static final int MB = 1024 * 1024;
-  private static final int TM_MEM_SIZE_MB = 512;
+  private static final int TM_MEM_SIZE_MB = 1024;
   private static final Logger LOG = Logger.getLogger(HeronMasterDriver.class.getName());
 
   /**
@@ -51,24 +50,28 @@ public class HeronMasterDriver {
   private static HeronMasterDriver instance;
 
   private final Map<String, ActiveContext> contexts = new HashMap<>();
-  private EvaluatorRequestor requestor;
-  private REEFFileNames reefFileNames;
-  private String localHeronConfDir;
-  private PackingPlan packing;
-  private String cluster;
-  private String role;
-  private String topologyName;
-  private String env;
-  private String topologyJar;
-  private int httpPort;
+  private final String topologyPackageName;
+  private final String heronCorePackageName;
+  private final EvaluatorRequestor requestor;
+  private final REEFFileNames reefFileNames;
+  private final String localHeronConfDir;
+  private final String cluster;
+  private final String role;
+  private final String topologyName;
+  private final String env;
+  private final String topologyJar;
+  private final int httpPort;
 
-  // TM must start before workers. This lock is used to coordinate this.
-  private CountDownLatch topologyMasterActive = new CountDownLatch(1);
+  private PackingPlan packing;
 
   // Currently yarn does not support mapping container requests to allocation (YARN-4879). As a result it is not
   // possible to concurrently start containers of different sizes. This lock ensures workers are started serially.
-  private CountDownLatch workerActive;
-  private String workerId;
+  private final Object containerAllocationLock = new Object();
+
+  // Container request submission and allocation takes places on different threads. This variable is used to share the
+  // heron executor id for which the container request was submitted
+  private String heronExecutorId;
+
   // This map will be needed to make container requests for a failed heron executor
   private Map<String, String> reefContainerToHeronExecutorMap = new HashMap<>();
 
@@ -80,6 +83,8 @@ public class HeronMasterDriver {
                            @Parameter(TopologyName.class) String topologyName,
                            @Parameter(Environ.class) String env,
                            @Parameter(TopologyJar.class) String topologyJar,
+                           @Parameter(TopologyPackageName.class) String topologyPackageName,
+                           @Parameter(HeronCorePackageName.class) String heronCorePackageName,
                            @Parameter(HttpPort.class) int httpPort) throws IOException {
 
     // REEF related initialization
@@ -91,6 +96,8 @@ public class HeronMasterDriver {
     this.cluster = cluster;
     this.role = role;
     this.topologyName = topologyName;
+    this.topologyPackageName = topologyPackageName;
+    this.heronCorePackageName = heronCorePackageName;
     this.env = env;
     this.topologyJar = topologyJar;
     this.httpPort = httpPort;
@@ -103,18 +110,17 @@ public class HeronMasterDriver {
     return instance;
   }
 
-  public void configureTopology(PackingPlan packing) {
-    this.packing = packing;
-  }
-
-  public void scheduleTopologyMaster() {
-    LOG.info("Scheduling container for TM: " + topologyName);
-    requestor.submit(EvaluatorRequest.newBuilder().setMemory(TM_MEM_SIZE_MB).build());
+  /**
+   * Requests container for TMaster as container/executor id 0.
+   */
+  void scheduleTopologyMaster() {
+    // TODO This method should be invoked only once per topology. Need to add some guards against subsequent
+    // invocations?
+    LOG.log(Level.INFO, "Scheduling container for TM: {0}", topologyName);
     try {
-      LOG.info("Waiting for TM container to be allocated: " + topologyName);
-      topologyMasterActive.await();
-      LOG.info("TM container is allocated: " + topologyName);
+      requestContainerForExecutor(TMASTER_CONTAINER_ID, 1, TM_MEM_SIZE_MB);
     } catch (InterruptedException e) {
+      // Deployment of topology fails if there is a error starting TMaster
       LOG.log(Level.WARNING, "Error while waiting for topology master container allocation", e);
       throw new RuntimeException(e);
     }
@@ -124,56 +130,46 @@ public class HeronMasterDriver {
    * Container allocation is asynchronous. Request containers serially to ensure allocated resources match the required
    * resources
    */
-  public void scheduleWorkers() {
+  void scheduleHeronWorkers(PackingPlan packing) {
+    this.packing = packing;
     for (Entry<String, ContainerPlan> entry : packing.containers.entrySet()) {
-      workerId = entry.getKey();
       Resource reqResource = entry.getValue().resource;
 
-      scheduleWorker(reqResource);
-    }
-  }
-
-  private void scheduleWorker(Resource reqResource) {
-    LOG.info("Scheduling container for worker: " + workerId);
-
 //      TODO fix mem computation int mem = getMemInMB(reqResource.ram);
-    int mem = 512;
-    int cpu = Double.valueOf(reqResource.cpu).intValue();
-
-    workerActive = new CountDownLatch(1);
-    requestor.submit(EvaluatorRequest.newBuilder().setNumber(1).setMemory(mem).setNumberOfCores(cpu).build());
-
-    try {
-      LOG.info("Waiting for worker container to be allocated: " + workerId);
-      workerActive.await();
-      LOG.info("Worker container is allocated: " + workerId);
-    } catch (InterruptedException e) {
-      LOG.log(Level.WARNING, "Error while waiting for worker container allocation", e);
+      int mem = 512;
+      try {
+        requestContainerForExecutor(entry.getKey(), getCpuForExecutor(reqResource), mem);
+      } catch (InterruptedException e) {
+        LOG.log(Level.WARNING, "Error while waiting for container allocation for workers", e);
+        LOG.log(Level.WARNING, "Continue container request for remaining workers", e);
+      }
     }
   }
 
-  /**
-   * Launches executor for TMaster OR worker on the given REEF evaluator
-   */
-  private void launchHeronExecutor(AllocatedEvaluator evaluator, CountDownLatch latch, String containerId) {
-    latch.countDown();
-    reefContainerToHeronExecutorMap.put(evaluator.getId(), workerId);
-    LOG.log(Level.INFO, "Launching evaluator {0} for executor ID: {1}", new Object[]{evaluator.getId(), containerId});
-
-    Configuration contextConfig = ContextConfiguration.CONF.set(ContextConfiguration.IDENTIFIER, containerId).build();
-    evaluator.submitContext(contextConfig);
+  private void requestContainerForExecutor(String executorId, int cpu, int mem) throws InterruptedException {
+    LOG.log(Level.INFO, "Scheduling container for executor, id: {0}", executorId);
+    synchronized (containerAllocationLock) {
+      heronExecutorId = executorId;
+      requestor.submit(EvaluatorRequest.newBuilder().setNumber(1).setMemory(mem).setNumberOfCores(cpu).build());
+      containerAllocationLock.wait();
+    }
+    LOG.log(Level.INFO, "Container is allocated for executor, id: {0}", executorId);
   }
 
   public void killTopology() {
-    LOG.info("Kill topology: " + topologyName);
+    LOG.log(Level.INFO, "Kill topology: {0}", topologyName);
     for (Entry<String, ActiveContext> entry : contexts.entrySet()) {
-      LOG.info("Close context:" + entry.getKey());
+      LOG.log(Level.INFO, "Close context: {0}", entry.getKey());
       entry.getValue().close();
     }
   }
 
-  private int getMemInMB(Long ram) {
-    ram = ram / MB;
+  private int getCpuForExecutor(Resource resource) {
+    return resource.cpu.intValue();
+  }
+
+  private int getMemInMBForExecutor(Resource resource) {
+    Long ram = resource.ram / MB;
     return ram.intValue();
   }
 
@@ -186,9 +182,8 @@ public class HeronMasterDriver {
     public void onNext(StartTime value) {
       String globalFolder = reefFileNames.getGlobalFolder().getPath();
 
-      // TODO pass topology name and core from config
-      extractTopologyPkgInSandbox(globalFolder, localHeronConfDir);
-      extractCorePkgInSandbox(globalFolder, localHeronConfDir);
+      extractPackageInSandbox(globalFolder, topologyPackageName, localHeronConfDir);
+      extractPackageInSandbox(globalFolder, heronCorePackageName, localHeronConfDir);
 
       launchSchedulerServer();
     }
@@ -204,23 +199,14 @@ public class HeronMasterDriver {
       }
     }
 
-    private void extractTopologyPkgInSandbox(String srcFolder, String dstDir) {
-      String topologyPackage = Paths.get(srcFolder, "topology.tar.gz").toString();
-      LOG.log(Level.INFO, "Extracting topology : {0} at: {1}", new Object[]{topologyPackage, dstDir});
-      boolean result = untarPackage(topologyPackage, dstDir);
+    private void extractPackageInSandbox(String srcFolder, String fileName, String dstDir) {
+      String packagePath = Paths.get(srcFolder, fileName).toString();
+      LOG.log(Level.INFO, "Extracting package: {0} at: {1}", new Object[]{packagePath, dstDir});
+      boolean result = untarPackage(packagePath, dstDir);
       if (!result) {
-        LOG.log(Level.INFO, "Failed to extract topology package");
-        throw new RuntimeException("Failed to extract topology package");
-      }
-    }
-
-    private void extractCorePkgInSandbox(String srcFolder, String dstDir) {
-      String corePackage = Paths.get(srcFolder, "heron-core.tar.gz").toString();
-      LOG.log(Level.INFO, "Extracting core: {0} at: {1}", new Object[]{corePackage, dstDir});
-      boolean result = untarPackage(corePackage, dstDir);
-      if (!result) {
-        LOG.log(Level.INFO, "Failed to extract core package");
-        throw new RuntimeException("Failed to extract core package");
+        String msg = "Failed to extract package:" + packagePath + " at: " + dstDir;
+        LOG.log(Level.SEVERE, msg);
+        throw new RuntimeException(msg);
       }
     }
 
@@ -244,35 +230,52 @@ public class HeronMasterDriver {
   /**
    * Initializes worker on the allocated container
    */
-  class HeronWorkerBuilder implements EventHandler<AllocatedEvaluator> {
+  class HeronExecutorContainerBuilder implements EventHandler<AllocatedEvaluator> {
     @Override
     public void onNext(AllocatedEvaluator evaluator) {
-      synchronized (HeronMasterDriver.class) {
-        if (topologyMasterActive.getCount() == 1) {
-          launchHeronExecutor(evaluator, topologyMasterActive, TMASTER_CONTAINER_ID);
-        } else {
-          launchHeronExecutor(evaluator, workerActive, workerId);
-        }
+      String executorId;
+      synchronized (containerAllocationLock) {
+        // create a local copy of executorId so that lock for next allocation can be released
+        executorId = heronExecutorId;
+        containerAllocationLock.notifyAll();
       }
+
+      LOG.log(Level.INFO, "Start {0} for heron executor, id: {1}", new Object[]{evaluator.getId(), executorId});
+      Configuration context = ContextConfiguration.CONF.set(ContextConfiguration.IDENTIFIER, executorId).build();
+      evaluator.submitContext(context);
+      reefContainerToHeronExecutorMap.put(evaluator.getId(), executorId);
     }
   }
 
   /**
    * Initializes worker on the allocated container
    */
-  class HeronWorkerErrorHandler implements EventHandler<FailedEvaluator> {
+  class HeronExecutorContainerErrorHandler implements EventHandler<FailedEvaluator> {
     @Override
     public void onNext(FailedEvaluator evaluator) {
       synchronized (HeronMasterDriver.class) {
-        String heronExecutorId = reefContainerToHeronExecutorMap.get(evaluator.getId());
-        LOG.log(Level.WARNING, "Container:{0} executor:{1} failed", new Object[]{evaluator.getId(), heronExecutorId});
-        if (heronExecutorId.equals(TMASTER_CONTAINER_ID)) {
-          // TODO verify if this thread can be used to submit a new request
-          scheduleTopologyMaster();
-        } else {
-          workerId = heronExecutorId;
-          Resource reqResource = packing.containers.get(workerId).resource;
-          scheduleWorker(reqResource);
+        String executorId = reefContainerToHeronExecutorMap.get(evaluator.getId());
+        LOG.log(Level.WARNING, "Container:{0} executor:{1} failed", new Object[]{evaluator.getId(), executorId});
+        if (executorId == null) {
+          LOG.log(Level.SEVERE, "Unknown executorId for failed container: {0}, skip renew action", evaluator.getId());
+          return;
+        }
+
+        // TODO verify if this thread can be used to submit a new request
+        try {
+          if (executorId.equals(TMASTER_CONTAINER_ID)) {
+            requestContainerForExecutor(TMASTER_CONTAINER_ID, 1, TM_MEM_SIZE_MB);
+          } else {
+            if (packing.containers.get(executorId) == null) {
+              LOG.log(Level.SEVERE, "Missing container {0} in packing, skipping container request", executorId);
+              return;
+            }
+            Resource reqResource = packing.containers.get(executorId).resource;
+            requestContainerForExecutor(executorId, getCpuForExecutor(reqResource), getMemInMBForExecutor(reqResource));
+          }
+        } catch (InterruptedException e) {
+          LOG.log(Level.WARNING, "Error waiting for container allocation for failed executor: " + executorId, e);
+          LOG.log(Level.WARNING, "Assuming request was submitted and continuing", e);
         }
       }
     }
@@ -287,12 +290,14 @@ public class HeronMasterDriver {
     public void onNext(ActiveContext context) {
       String id = context.getId();
       contexts.put(id, context);
-      LOG.info("Submitting evaluator task for id:" + id);
+      LOG.log(Level.INFO, "Submitting evaluator task for id: {0}", id);
 
       final Configuration taskConf = HeronTaskConfiguration.CONF.set(TaskConfiguration.TASK, HeronExecutorTask.class)
               .set(TaskConfiguration.IDENTIFIER, id)
               .set(HeronTaskConfiguration.TOPOLOGY_NAME, topologyName)
               .set(HeronTaskConfiguration.TOPOLOGY_JAR, topologyJar)
+              .set(HeronTaskConfiguration.TOPOLOGY_PACKAGE_NAME, topologyPackageName)
+              .set(HeronTaskConfiguration.HERON_CORE_PACKAGE_NAME, heronCorePackageName)
               .set(HeronTaskConfiguration.ROLE, role)
               .set(HeronTaskConfiguration.ENV, env)
               .set(HeronTaskConfiguration.CLUSTER, cluster)

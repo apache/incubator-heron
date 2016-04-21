@@ -6,6 +6,7 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -24,10 +25,9 @@ public class ReefScheduler implements IScheduler {
 
   @Override
   public boolean onSchedule(PackingPlan packing) {
-    LOG.info("Launching topology master for packing: " + packing.id);
-    driver.configureTopology(packing);
+    LOG.log(Level.INFO, "Launching topology master for packing: {0}", packing.id);
     driver.scheduleTopologyMaster();
-    driver.scheduleWorkers();
+    driver.scheduleHeronWorkers(packing);
     return true;
   }
 

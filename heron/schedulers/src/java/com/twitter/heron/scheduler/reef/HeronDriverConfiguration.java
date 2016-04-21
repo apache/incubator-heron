@@ -12,6 +12,8 @@ import org.apache.reef.tang.formats.RequiredParameter;
 public class HeronDriverConfiguration extends ConfigurationModuleBuilder {
   public static final RequiredParameter<String> TOPOLOGY_NAME = new RequiredParameter<>();
   public static final RequiredParameter<String> TOPOLOGY_JAR = new RequiredParameter<>();
+  public static final RequiredParameter<String> TOPOLOGY_PACKAGE_NAME = new RequiredParameter<>();
+  public static final RequiredParameter<String> HERON_CORE_PACKAGE_NAME = new RequiredParameter<>();
   public static final RequiredParameter<String> CLUSTER = new RequiredParameter<>();
   public static final RequiredParameter<String> ROLE = new RequiredParameter<>();
   public static final RequiredParameter<String> ENV = new RequiredParameter<>();
@@ -20,6 +22,8 @@ public class HeronDriverConfiguration extends ConfigurationModuleBuilder {
   public static final ConfigurationModule CONF = new HeronDriverConfiguration().merge(DriverConfiguration.CONF)
           .bindNamedParameter(TopologyName.class, TOPOLOGY_NAME)
           .bindNamedParameter(TopologyJar.class, TOPOLOGY_JAR)
+          .bindNamedParameter(TopologyPackageName.class, TOPOLOGY_PACKAGE_NAME)
+          .bindNamedParameter(HeronCorePackageName.class, HERON_CORE_PACKAGE_NAME)
           .bindNamedParameter(Cluster.class, CLUSTER)
           .bindNamedParameter(Environ.class, ENV)
           .bindNamedParameter(Role.class, ROLE)
