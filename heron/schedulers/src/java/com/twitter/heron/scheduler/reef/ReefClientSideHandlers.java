@@ -65,8 +65,7 @@ public class ReefClientSideHandlers {
   public final class RuntimeErrorHandler implements EventHandler<FailedRuntime> {
     @Override
     public void onNext(final FailedRuntime error) {
-      LOG.log(Level.SEVERE, "Failed to start topology: " + topologyName);
-      LOG.log(Level.SEVERE, "Error: ", error.getReason());
+      LOG.log(Level.SEVERE, "Failed to start topology: " + topologyName, error.getReason());
       jobStatusWatcher.countDown();
     }
   }

@@ -16,8 +16,16 @@ public class HeronConfigurationOptions {
   public class Role implements Name<String> {
   }
 
-  @NamedParameter(doc = "Topology Jar path")
+  @NamedParameter(doc = "Topology Jar name")
   public class TopologyJar implements Name<String> {
+  }
+
+  @NamedParameter(doc = "Name of topology package file")
+  public class TopologyPackageName implements Name<String> {
+  }
+
+  @NamedParameter(doc = "Name of heron core package file")
+  public class HeronCorePackageName implements Name<String> {
   }
 
   @NamedParameter(doc = "Topology packing plan representation")
@@ -32,7 +40,7 @@ public class HeronConfigurationOptions {
   public class HttpPort implements Name<Integer> {
   }
 
-  @NamedParameter(doc = "Identifies the container, either TM or a worker id", default_value = "0")
-  public class ContainerId implements Name<String> {
+  @NamedParameter(doc = "Identifies the heron executor, either running TM or a worker", default_value = "0")
+  public class HeronExecutorId implements Name<String> {
   }
 }
