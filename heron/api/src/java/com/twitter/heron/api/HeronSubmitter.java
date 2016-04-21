@@ -18,6 +18,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.exception.AlreadyAliveException;
@@ -56,7 +57,7 @@ public class HeronSubmitter {
       initialState = TopologyAPI.TopologyState.RUNNING;
     }
 
-    LOG.fine("To deploy a topology in initial state: " + initialState);
+    LOG.log(Level.FINE, "To deploy a topology in initial state {0}", initialState);
 
     TopologyAPI.Topology fTopology =
         topology.setConfig(heronConfig).
