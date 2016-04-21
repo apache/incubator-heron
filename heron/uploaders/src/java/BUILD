@@ -8,7 +8,7 @@ uploader_spi_files = [
 
 s3_deps_files = \
     uploader_spi_files + [
-        "//3rdparty/aws:aws-java-sdk",
+        "//3rdparty/java:aws-java-sdk",
     ]
 
 java_library(

@@ -158,27 +158,3 @@ filegroup(
     name = "protoc",
     srcs = ["bin/protoc"]
 )
-
-java_import(
-    name = "protobuf-java",
-    jars = ["protobuf-java-2.5.0.jar"],
-)
-
-# This version is needed for depedents that don't want 
-# protobuf to be included in the generated binary
-java_import(
-    name = "protobuf-java-neverlink",
-    jars = ["protobuf-java-2.5.0.jar"],
-    neverlink = 1,
-)
-
-filegroup(
-    name = "protobuf",
-    srcs = [ 
-        ":protobuf-cxx",
-        ":protobuf-cxx-lite",
-        ":protoc-cxx",
-        ":protobuf-java",
-    ],
-)
-

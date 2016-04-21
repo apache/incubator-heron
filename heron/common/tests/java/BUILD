@@ -23,7 +23,7 @@ java_test(
     srcs = glob(["**/FileUtilsTest.java"]),
     deps = [
         "//heron/common/src/java:common-java",
-        "//3rdparty/powermock:powermock-java",
+        "//3rdparty/java:powermock",
         "@bazel_tools//third_party:mockito",
         "@bazel_tools//third_party:junit4",
     ],
@@ -36,7 +36,7 @@ java_test(
     deps = [
         "//heron/common/src/java:common-java",
         "//heron/proto:proto_networktests_java",
-        "//3rdparty/protobuf:protobuf-java",
+        "@protobuf-java//jar",
         "@bazel_tools//third_party:junit4",
     ],
     size = "small",
@@ -48,7 +48,7 @@ java_test(
     deps = [
         "//heron/common/src/java:common-java",
         "//heron/proto:proto_networktests_java",
-        "//3rdparty/protobuf:protobuf-java",
+        "@protobuf-java//jar",
         "@bazel_tools//third_party:junit4",
     ],
     size = "small",

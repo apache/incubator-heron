@@ -4,8 +4,8 @@ load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 common_deps_files = [
     "//heron/common/src/java:basics-java",
-    "//3rdparty/commons:commons-io-java",
-    "//3rdparty/guava:guava-java",
+    "@commons-io//jar",
+    "@guava//jar",
 ]
 
 spi_deps_files = [
