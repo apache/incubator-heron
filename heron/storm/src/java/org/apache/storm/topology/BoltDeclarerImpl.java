@@ -16,10 +16,10 @@ package org.apache.storm.topology;
 
 import java.util.Map;
 
-import org.apache.storm.tuple.Fields;
-import org.apache.storm.utils.Utils;
 import org.apache.storm.grouping.CustomStreamGrouping;
 import org.apache.storm.grouping.CustomStreamGroupingDelegate;
+import org.apache.storm.tuple.Fields;
+import org.apache.storm.utils.Utils;
 
 public class BoltDeclarerImpl implements BoltDeclarer {
   private com.twitter.heron.api.topology.BoltDeclarer delegate;

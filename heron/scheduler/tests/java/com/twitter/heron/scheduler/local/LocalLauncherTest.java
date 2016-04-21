@@ -17,7 +17,6 @@ package com.twitter.heron.scheduler.local;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import org.junit.After;
 import org.junit.Before;
@@ -32,14 +31,13 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
-
-import com.twitter.heron.spi.common.Constants;
-import com.twitter.heron.spi.scheduler.context.LaunchContext;
 import com.twitter.heron.scheduler.util.DefaultConfigLoader;
 import com.twitter.heron.scheduler.util.RoundRobinPacking;
 import com.twitter.heron.scheduler.util.ShellUtility;
 import com.twitter.heron.scheduler.util.TopologyUtility;
 import com.twitter.heron.scheduler.util.TopologyUtilityTest;
+import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
 
 import junit.framework.Assert;
 

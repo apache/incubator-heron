@@ -79,7 +79,7 @@ public final class ConfigLoaderUtils {
 
   /**
    * Load properties from the specified properties file into the target properties.
-   * 
+   *
    * @return <code>true</code> only if the operation succeeds.
    */
   public static boolean loadPropertiesFile(Properties p, String propertiesFile) {
@@ -98,10 +98,10 @@ public final class ConfigLoaderUtils {
 
   /**
    * Update a target Properties using the specified propertyOverride in the format of Java properties file.
-   *
+   * <p>
    * The configOverride is expected to be using the format of Java properties file like.
-   *   "key1:value1 key2=value2 ..."
-   *
+   * "key1:value1 key2=value2 ..."
+   * <p>
    * The properties parsed from configOverride are added to the specified target.
    */
   public static boolean applyPropertyOverride(Properties target, String propertyOverride) {

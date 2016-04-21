@@ -17,8 +17,11 @@ package com.twitter.heron.api.topology;
 import java.util.Map;
 
 public interface ComponentConfigurationDeclarer<T extends ComponentConfigurationDeclarer> {
-    T addConfigurations(Map conf);
-    T addConfiguration(String config, Object value);
-    T setDebug(boolean debug);
-    T setMaxSpoutPending(Number val);
+  T addConfigurations(Map conf);
+
+  T addConfiguration(String config, Object value);
+
+  T setDebug(boolean debug);
+
+  T setMaxSpoutPending(Number val);
 }

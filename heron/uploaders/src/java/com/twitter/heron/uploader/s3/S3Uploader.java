@@ -14,12 +14,6 @@
 
 package com.twitter.heron.uploader.s3;
 
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.CopyObjectResult;
-
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,28 +23,32 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3Client;
+
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.uploader.IUploader;
 
 /**
-* Provides a basic uploader class for uploading topology packages to s3. 
-*
-* By default this uploader will write topology packages to s3://<bucket>/<topologyName>/topology.tar.gz. This is a known
-* location where you can then download the topology package to where it needs to go in order to run the topology.
-*
-* This class also handles the undo action by copying any existing topology.tar.gz package found in the folder to 
-* previous_topology.tar.gz. In the event that the deploy fails and the undo action is triggered the previous_topology.tar.gz
-* file will be renamed to topology.tar.gz effectively rolling back the live code. In the event that the deploy is successful
-* the previous_topology.tar.gz package will be deleted as it is no longer needed.
-*
-* The config values for this uploader are:
-* heron.class.uploader (required) com.twitter.heron.uploader.s3.S3Uploader
-* heron.uploader.s3.bucket (required) The bucket that you have write access to where you want the topologie packages to be stored
-* heron.uploader.s3.path_prefix (optional) Optional prefix for the path to the topology packages
-* heron.uploader.s3.access_key (required) S3 access key that can be used to write to the bucket provided
-* heron.uploader.s3.secret_key (required) S3 access secret that can be used to write to the bucket provided
-*/
+ * Provides a basic uploader class for uploading topology packages to s3.
+ * <p>
+ * By default this uploader will write topology packages to s3://<bucket>/<topologyName>/topology.tar.gz. This is a known
+ * location where you can then download the topology package to where it needs to go in order to run the topology.
+ * <p>
+ * This class also handles the undo action by copying any existing topology.tar.gz package found in the folder to
+ * previous_topology.tar.gz. In the event that the deploy fails and the undo action is triggered the previous_topology.tar.gz
+ * file will be renamed to topology.tar.gz effectively rolling back the live code. In the event that the deploy is successful
+ * the previous_topology.tar.gz package will be deleted as it is no longer needed.
+ * <p>
+ * The config values for this uploader are:
+ * heron.class.uploader (required) com.twitter.heron.uploader.s3.S3Uploader
+ * heron.uploader.s3.bucket (required) The bucket that you have write access to where you want the topologie packages to be stored
+ * heron.uploader.s3.path_prefix (optional) Optional prefix for the path to the topology packages
+ * heron.uploader.s3.access_key (required) S3 access key that can be used to write to the bucket provided
+ * heron.uploader.s3.secret_key (required) S3 access secret that can be used to write to the bucket provided
+ */
 public class S3Uploader implements IUploader {
   private static final Logger LOG = Logger.getLogger(S3Uploader.class.getName());
 
@@ -143,7 +141,7 @@ public class S3Uploader implements IUploader {
    * @param topologyName the name of the topology that we are uploaded
    * @param filename the name of the resulting file that is going to be uploaded
    * @return the full path of the package under the bucket. The bucket is not included in this path as it is a separate
-   *         argument that is passed to the putObject call in the s3 sdk.
+   * argument that is passed to the putObject call in the s3 sdk.
    */
   private String generateS3Path(String pathPrefix, String topologyName, String filename) {
     List<String> pathParts = new ArrayList<>(Arrays.asList(pathPrefix.split("/")));

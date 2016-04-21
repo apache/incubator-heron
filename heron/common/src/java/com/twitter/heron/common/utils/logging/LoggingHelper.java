@@ -35,7 +35,7 @@ public class LoggingHelper {
     // Configure the root logger and its handlers so that all the
     // derived loggers will inherit the properties
     Logger rootLogger = Logger.getLogger("");
-    for(Handler handler: rootLogger.getHandlers()) {
+    for (Handler handler : rootLogger.getHandlers()) {
       handler.setLevel(level);
     }
 
@@ -46,8 +46,8 @@ public class LoggingHelper {
       // Remove ConsoleHandler if present, to avoid StackOverflowError.
       // ConsoleHandler writes to System.err and since we are redirecting
       // System.err to Logger, it results in an infinte loop.
-      for(Handler handler: rootLogger.getHandlers()) {
-        if(handler instanceof ConsoleHandler) {
+      for (Handler handler : rootLogger.getHandlers()) {
+        if (handler instanceof ConsoleHandler) {
           rootLogger.removeHandler(handler);
         }
       }
@@ -76,14 +76,14 @@ public class LoggingHelper {
    * been written to one file, another file will be opened.  The
    * output will cycle through a set of count files.
    * The pattern of file name should be: ${processId}.log.index
-   * <p/>
+   * <p>
    * The <tt>FileHandler</tt> is configured based on <tt>LogManager</tt>
    * properties (or their default values) except that the given pattern
    * argument is used as the filename pattern, the file limit is
    * set to the limit argument, and the file count is set to the
    * given count argument, and the append mode is set to the given
    * <tt>append</tt> argument.
-   * <p/>
+   * <p>
    * The count must be at least 1.
    *
    * @param limit the maximum number of bytes to write to any one file
@@ -113,13 +113,6 @@ public class LoggingHelper {
 
   public static class StdOutErrLevel extends Level {
     /**
-     * Private constructor
-     */
-    private StdOutErrLevel(String name, int value) {
-      super(name, value);
-    }
-
-    /**
      * Level for STDOUT activity.
      */
     public static Level STDOUT =
@@ -129,6 +122,12 @@ public class LoggingHelper {
      */
     public static Level STDERR =
         new StdOutErrLevel("STDERR", Level.INFO.intValue() + 54);
+    /**
+     * Private constructor
+     */
+    private StdOutErrLevel(String name, int value) {
+      super(name, value);
+    }
 
     /**
      * Method to avoid creating duplicate instances when deserializing the

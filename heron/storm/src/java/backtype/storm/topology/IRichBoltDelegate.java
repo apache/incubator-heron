@@ -16,13 +16,13 @@ package backtype.storm.topology;
 
 import java.util.Map;
 
-import backtype.storm.task.TopologyContext;
 import backtype.storm.task.OutputCollectorImpl;
+import backtype.storm.task.TopologyContext;
 import backtype.storm.tuple.TupleImpl;
+
 /**
  * When writing topologies using Java, {@link IRichBolt} and {@link IRichSpout} are the main interfaces
  * to use to implement components of the topology.
- *
  */
 public class IRichBoltDelegate implements com.twitter.heron.api.bolt.IRichBolt {
   private IRichBolt delegate;
@@ -34,8 +34,8 @@ public class IRichBoltDelegate implements com.twitter.heron.api.bolt.IRichBolt {
   }
 
   @Override
-  public void prepare(Map conf, com.twitter.heron.api.topology.TopologyContext context, 
-               com.twitter.heron.api.bolt.OutputCollector collector) {
+  public void prepare(Map conf, com.twitter.heron.api.topology.TopologyContext context,
+                      com.twitter.heron.api.bolt.OutputCollector collector) {
     topologyContextImpl = new TopologyContext(context);
     outputCollectorImpl = new OutputCollectorImpl(collector);
     delegate.prepare(conf, topologyContextImpl, outputCollectorImpl);

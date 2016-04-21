@@ -46,12 +46,10 @@ import com.twitter.heron.scheduler.mesos.framework.jobs.TaskUtils;
 import com.twitter.heron.scheduler.mesos.framework.state.PersistenceStore;
 
 public class MesosJobFramework implements Scheduler {
-  private static final Logger LOG = Logger.getLogger(MesosJobFramework.class.getName());
-
   // The port pattern should be "{{task.ports[...]}}" literally
   public static final String portVariableTemplate = "\\{\\{task\\.ports\\[.*?\\]\\}\\}";
   public static final Pattern portVariablePattern = Pattern.compile(portVariableTemplate);
-
+  private static final Logger LOG = Logger.getLogger(MesosJobFramework.class.getName());
   private final FrameworkConfiguration config;
   private final MesosTaskBuilder taskBuilder;
   private final PersistenceStore persistenceStore;
@@ -62,20 +60,18 @@ public class MesosJobFramework implements Scheduler {
   private final Queue<String> pendingScheduleTasks = new LinkedTransferQueue<>();
 
   private final Map<String, BaseTask> trackingTasks = new HashMap<>();
-
-  // Two CountDownLatch used for notification
-  private volatile CountDownLatch startLatch = new CountDownLatch(1);
-  private volatile CountDownLatch endLatch = null;
-
-  // For failure recovery
-  // ----------------
-  private volatile boolean isRecovered = false;
   // This would be updated by main thread and mesos slave thread, synchronized...
   // From taskId -> TaskStatus
   private final Map<String, Protos.TaskStatus> remaining = new HashMap<>();
   private final ScheduledExecutorService reconcileExecutors = Executors.newScheduledThreadPool(1);
   // Time in seconds since the Epoch. Make it this way to match mesos
   private final double startTime = ((double) System.currentTimeMillis()) / 1000;
+  // Two CountDownLatch used for notification
+  private volatile CountDownLatch startLatch = new CountDownLatch(1);
+  private volatile CountDownLatch endLatch = null;
+  // For failure recovery
+  // ----------------
+  private volatile boolean isRecovered = false;
 
   public MesosJobFramework(MesosTaskBuilder taskBuilder,
                            PersistenceStore persistenceStore,
@@ -83,6 +79,47 @@ public class MesosJobFramework implements Scheduler {
     this.taskBuilder = taskBuilder;
     this.persistenceStore = persistenceStore;
     this.config = config;
+  }
+
+  static double getScalarValue(Protos.Resource resource) {
+    return resource.getScalar().getValue();
+  }
+
+  // TODO(mfu): Make it more efficient
+  static String allocatePortsInCommand(String originalCommand, int portRangeStart, int portRangeEnd) {
+    String result = originalCommand;
+
+    // First figure out all the variables
+    Matcher matcher = portVariablePattern.matcher(result);
+    Set<String> matchedPortNames = new HashSet<>();
+    while (matcher.find()) {
+      matchedPortNames.add(matcher.group(0));
+    }
+
+    LOG.info("The matchedPortNames: \n" + matchedPortNames);
+    LOG.info("The port range: " + portRangeStart + " ~ " + portRangeEnd);
+
+    // Then replace the variable one by once
+    // We do this to recognize the same variable
+    for (String name : matchedPortNames) {
+      if (portRangeStart > portRangeEnd) {
+        throw new RuntimeException("The command requires more ports than expected: " + originalCommand);
+      }
+
+      result = result.replace(name, "" + portRangeStart);
+      portRangeStart++;
+    }
+
+    return result;
+  }
+
+  static int getRequiredPorts(String command) {
+    Matcher matcher = portVariablePattern.matcher(command);
+    Set<String> matchedPortNames = new HashSet<>();
+    while (matcher.find()) {
+      matchedPortNames.add(matcher.group(0));
+    }
+    return matchedPortNames.size();
   }
 
   public void clear() {
@@ -679,22 +716,11 @@ public class MesosJobFramework implements Scheduler {
   }
 
   public static class TaskResources {
-    public static class Range {
-      public long rangeStart;
-      public long rangeEnd;
-
-      public Range(long rangeStart, long rangeEnd) {
-        this.rangeStart = rangeStart;
-        this.rangeEnd = rangeEnd;
-      }
-    }
-
     private double cpu;
     private double mem;
     private double disk;
     // # of ports request
     private int ports;
-
     private List<Range> portsHold = new ArrayList<>();
 
     public TaskResources(double cpu, double mem, double disk, List<Range> portsResources) {
@@ -710,6 +736,35 @@ public class MesosJobFramework implements Scheduler {
       this.mem = job.mem;
       this.disk = job.disk;
       this.ports = getRequiredPorts(job.command);
+    }
+
+    public static TaskResources apply(Protos.Offer offer, String role) {
+      double cpu = 0;
+      double mem = 0;
+      double disk = 0;
+      List<Range> portsResource = new ArrayList<>();
+      for (Protos.Resource r : offer.getResourcesList()) {
+        if (!r.hasRole() || r.getRole().equals("*") || r.getRole().equals(role)) {
+          if (r.getName().equals("cpus")) {
+            cpu = getScalarValue(r);
+          }
+          if (r.getName().equals("mem")) {
+            mem = getScalarValue(r);
+          }
+          if (r.getName().equals("disk")) {
+            disk = getScalarValue(r);
+          }
+
+          if (r.getName().equals("ports")) {
+            Protos.Value.Ranges ranges = r.getRanges();
+            for (Protos.Value.Range range : ranges.getRangeList()) {
+              portsResource.add(new Range(range.getBegin(), range.getEnd()));
+            }
+          }
+        }
+      }
+
+      return new TaskResources(cpu, mem, disk, portsResource);
     }
 
     public boolean canSatisfy(TaskResources needed) {
@@ -752,74 +807,14 @@ public class MesosJobFramework implements Scheduler {
       return String.format("cpu: %s; mem: %s; disk: %s.", this.cpu, this.mem, this.disk);
     }
 
-    public static TaskResources apply(Protos.Offer offer, String role) {
-      double cpu = 0;
-      double mem = 0;
-      double disk = 0;
-      List<Range> portsResource = new ArrayList<>();
-      for (Protos.Resource r : offer.getResourcesList()) {
-        if (!r.hasRole() || r.getRole().equals("*") || r.getRole().equals(role)) {
-          if (r.getName().equals("cpus")) {
-            cpu = getScalarValue(r);
-          }
-          if (r.getName().equals("mem")) {
-            mem = getScalarValue(r);
-          }
-          if (r.getName().equals("disk")) {
-            disk = getScalarValue(r);
-          }
+    public static class Range {
+      public long rangeStart;
+      public long rangeEnd;
 
-          if (r.getName().equals("ports")) {
-            Protos.Value.Ranges ranges = r.getRanges();
-            for (Protos.Value.Range range : ranges.getRangeList()) {
-              portsResource.add(new Range(range.getBegin(), range.getEnd()));
-            }
-          }
-        }
+      public Range(long rangeStart, long rangeEnd) {
+        this.rangeStart = rangeStart;
+        this.rangeEnd = rangeEnd;
       }
-
-      return new TaskResources(cpu, mem, disk, portsResource);
     }
-  }
-
-  static double getScalarValue(Protos.Resource resource) {
-    return resource.getScalar().getValue();
-  }
-
-  // TODO(mfu): Make it more efficient
-  static String allocatePortsInCommand(String originalCommand, int portRangeStart, int portRangeEnd) {
-    String result = originalCommand;
-
-    // First figure out all the variables
-    Matcher matcher = portVariablePattern.matcher(result);
-    Set<String> matchedPortNames = new HashSet<>();
-    while (matcher.find()) {
-      matchedPortNames.add(matcher.group(0));
-    }
-
-    LOG.info("The matchedPortNames: \n" + matchedPortNames);
-    LOG.info("The port range: " + portRangeStart + " ~ " + portRangeEnd);
-
-    // Then replace the variable one by once
-    // We do this to recognize the same variable
-    for (String name : matchedPortNames) {
-      if (portRangeStart > portRangeEnd) {
-        throw new RuntimeException("The command requires more ports than expected: " + originalCommand);
-      }
-
-      result = result.replace(name, "" + portRangeStart);
-      portRangeStart++;
-    }
-
-    return result;
-  }
-
-  static int getRequiredPorts(String command) {
-    Matcher matcher = portVariablePattern.matcher(command);
-    Set<String> matchedPortNames = new HashSet<>();
-    while (matcher.find()) {
-      matchedPortNames.add(matcher.group(0));
-    }
-    return matchedPortNames.size();
   }
 }

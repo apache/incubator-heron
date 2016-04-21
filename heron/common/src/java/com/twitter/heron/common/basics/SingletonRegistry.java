@@ -24,11 +24,11 @@ public enum SingletonRegistry {
    * Cache of singleton objects: bean name --> instance
    * We use HashMap and synchronized all the operations on it.
    * The reasons are:
-   *   1. The register methods need to be atomic, so make these methods synchronized.
-   *   2. We need synchronized to guarantee the thread safe of singletonObjects (HashMap itself
-   *      is not thread safe).
-   *   3. ConcurrentHashMap doesn't support the register atomic operations and thus we didn't use
-   *      it here
+   * 1. The register methods need to be atomic, so make these methods synchronized.
+   * 2. We need synchronized to guarantee the thread safe of singletonObjects (HashMap itself
+   * is not thread safe).
+   * 3. ConcurrentHashMap doesn't support the register atomic operations and thus we didn't use
+   * it here
    */
   private final Map<String, Object> singletonObjects = new HashMap<String, Object>();
 

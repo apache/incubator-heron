@@ -19,11 +19,9 @@ import java.net.HttpURLConnection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.twitter.heron.spi.scheduler.IRuntimeManager;
+import com.twitter.heron.scheduler.util.NetworkUtility;
 import com.twitter.heron.spi.scheduler.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.scheduler.context.RuntimeManagerContext;
-
-import com.twitter.heron.scheduler.util.NetworkUtility;
 
 public class MesosTopologyRuntimeManager implements IRuntimeManager {
   private static final Logger LOG = Logger.getLogger(MesosTopologyRuntimeManager.class.getName());

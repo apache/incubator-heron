@@ -16,29 +16,27 @@ package com.twitter.heron.spi.common;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-
-import java.util.List;
 import java.util.ArrayList;
-import java.util.logging.Level;
+import java.util.List;
 import java.util.logging.Logger;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Jars {
 
   private static final Logger LOG = Logger.getLogger(Jars.class.getName());
-  
-   /**
-   * Given a directory, get the list of jars matching the pattern. 
+  // scheduler jar search pattern
+  private static Pattern schedulerJarPattern =
+      Pattern.compile("heron-.*-scheduler.*.jar|heron-scheduler*.jar");
+  // metrics manager search pattern
+  private static Pattern metricsManagerPattern =
+      Pattern.compile("heron-.*-metricsmgr.*.jar|heron-metricsmgr*.jar");
+
+  /**
+   * Given a directory, get the list of jars matching the pattern.
    *
    * @param pattern, the pattern to match for jar files
    * @param directory, the directory to search
-   *
    * @return list of jars
    */
   public static List<String> getJars(final Pattern pattern, String directory) {
@@ -57,7 +55,7 @@ public class Jars {
 
     // return it is as a list of files
     ArrayList<String> files = new ArrayList<String>();
-    for(File path: paths) {
+    for (File path : paths) {
       files.add(path.toString());
     }
 
@@ -66,28 +64,23 @@ public class Jars {
 
   /**
    * Get the class path from the list of jars that match the pattern
-   * in the given directory 
+   * in the given directory
    *
    * @param pattern, the pattern to match for jar files
    * @param directory, the directory to search
-   *
    * @return class path of jars
    */
   public static String getClassPath(Pattern pattern, String directory) {
     List<String> jars = getJars(pattern, directory);
 
     StringBuilder sb = new StringBuilder();
-    for(String s: jars) {
+    for (String s : jars) {
       sb.append(s).append(':');
     }
     sb.deleteCharAt(sb.length() - 1); // delete last colon
-    
+
     return sb.toString();
   }
-
-  // scheduler jar search pattern
-  private static Pattern schedulerJarPattern =
-      Pattern.compile("heron-.*-scheduler.*.jar|heron-scheduler*.jar");
 
   /**
    * Given a directory, get the list of scheduler jars. A jar belongs to
@@ -95,10 +88,9 @@ public class Jars {
    * "heron-*-scheduler*.jar"
    *
    * @param directory, the directory to search
-   *
    * @return list of scheduler jars
    */
-  public static List getSchedulerJars(String directory)  {
+  public static List getSchedulerJars(String directory) {
     return getJars(schedulerJarPattern, directory);
   }
 
@@ -107,16 +99,11 @@ public class Jars {
    * directory.
    *
    * @param directory, the directory to search
-   *
    * @return class of scheduler jars
    */
   public static String getSchedulerClassPath(String directory) {
     return getClassPath(schedulerJarPattern, directory);
   }
-
-  // metrics manager search pattern
-  private static Pattern metricsManagerPattern =
-      Pattern.compile("heron-.*-metricsmgr.*.jar|heron-metricsmgr*.jar");
 
   /**
    * Given a directory, get the list of metricsmgr jars. A jar belongs to
@@ -124,10 +111,9 @@ public class Jars {
    * "heron-*-metricsmgr*.jar"
    *
    * @param directory, the directory to search
-   *
    * @return list of metrics manager jars
    */
-  public static List getMetricsManagerJars(String directory)  {
+  public static List getMetricsManagerJars(String directory) {
     return getJars(metricsManagerPattern, directory);
   }
 
@@ -136,7 +122,6 @@ public class Jars {
    * directory.
    *
    * @param directory, the directory to search
-   *
    * @return class path of metrics manager jars
    */
   public static String getMetricsManagerClassPath(String directory) {

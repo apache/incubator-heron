@@ -1,12 +1,8 @@
 package com.twitter.heron.local_integration_test.topology.local_readwrite;
 
-import java.util.Map;
-
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.HeronSubmitter;
-import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.api.tuple.Fields;
-
 import com.twitter.heron.integration_test.common.BasicConfig;
 import com.twitter.heron.integration_test.common.bolt.IdentityBolt;
 import com.twitter.heron.integration_test.common.spout.PausedLocalFileSpout;
@@ -27,14 +23,13 @@ public final class LocalReadWriteTopology {
     builder.setTerminalBoltClass(LOCAL_AGGREGATOR_BOLT_CLASS);
     if (args.length == 1) {
       builder.setSpout("paused-local-spout", new PausedLocalFileSpout("testing.txt"), 1);
-    }
-    else {
+    } else {
       int maxEmits = Integer.parseInt(args[1]);
       builder.setSpout("paused-local-spout", new PausedLocalFileSpout("testing.txt"), 1, maxEmits);
     }
-      
+
     builder.setBolt("identity-bolt", new IdentityBolt(new Fields("line")), 1)
-      .shuffleGrouping("paused-local-spout");
+        .shuffleGrouping("paused-local-spout");
 
     Config conf = new BasicConfig();
 

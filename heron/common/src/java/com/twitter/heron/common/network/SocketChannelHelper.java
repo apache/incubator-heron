@@ -32,7 +32,7 @@ import com.twitter.heron.common.basics.NIOLooper;
  * is a a placeholder for all network and io related information about a socket descriptor. It takes
  * care of async read/write of packets. Typical ways of instantiating ChannelHelper are described
  * below in a client and server settings.
- * <p/>
+ * <p>
  * SERVER
  * After an accept event, the server creates a ChannelHelper object giving it a proper option
  * ISelectHandler selectHandler = new Server();
@@ -40,7 +40,7 @@ import com.twitter.heron.common.basics.NIOLooper;
  * SocketChannel socketChannel = ServerSocketChannel.accept();
  * ChannelHelper channelHelper = new ChannelHelper(looper, selectHandler, socketChannel, options);
  * After this point, you could use read()/write() to access socket
- * <p/>
+ * <p>
  * CLIENT
  * After a successful connect, the client creates a ChannelHelper object giving it a proper option
  * ISelectHandler selectHandler = new Client();
@@ -49,39 +49,32 @@ import com.twitter.heron.common.basics.NIOLooper;
  * socketChannel.connect(endpoint);
  * ChannelHelper channelHelper = new ChannelHelper(looper, selectHandler, socketChannel, options);
  * After this point, you could use read()/write() to access socket.
- * <p/>
+ * <p>
  * Notice: The SocketChannelHelper would work only when the socketChannel is connected and opened.
  * Higher level logic needs to guarantee SocketChannelHelper's methods are invoked within proper
  * SocketChannel state.
  */
 
 public class SocketChannelHelper {
+  private static final Logger LOG = Logger.getLogger(SocketChannelHelper.class.getName());
   private NIOLooper looper;
-
   private ISelectHandler selectHandler;
-
   private SocketChannel socketChannel;
-
   // The unbounded queue of outstanding packets that need to be sent
   // Carefully check the size of queue before offering packets into it
   // to avoid the unbounded-growth of queue
   private Queue<OutgoingPacket> outgoingPacketsToWrite;
-
   // Incompletely read next packet
   private IncomingPacket incomingPacket;
-
   private long totalPacketsRead;
   private long totalPacketsWritten;
   private long totalBytesRead;
   private long totalBytesWritten;
-
   // System Config related
   private long writeBatchSizeInBytes;
   private long writeBatchTimeInNs;
   private long readBatchSizeInBytes;
   private long readReadBatchTimeInNs;
-
-  private static final Logger LOG = Logger.getLogger(SocketChannelHelper.class.getName());
 
   public SocketChannelHelper(NIOLooper looper,
                              ISelectHandler selectHandler,

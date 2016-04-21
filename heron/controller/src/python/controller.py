@@ -15,6 +15,8 @@
 # A simple webclient that contacts a given port on the localhost
 # and does activate/deactivate
 
+#!/usr/bin/env python2.7
+
 import httplib
 import sys
 import urllib

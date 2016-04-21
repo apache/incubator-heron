@@ -33,21 +33,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
-
+import com.twitter.heron.scheduler.service.SubmitterMain;
+import com.twitter.heron.scheduler.util.NetworkUtility;
+import com.twitter.heron.scheduler.util.TopologyUtility;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.scheduler.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.scheduler.context.LaunchContext;
-
-import com.twitter.heron.scheduler.service.SubmitterMain;
-import com.twitter.heron.scheduler.util.NetworkUtility;
-import com.twitter.heron.scheduler.util.TopologyUtility;
 import com.twitter.heron.statemgr.FileSystemStateManager;
 
 public class MesosLauncher implements ILauncher {
   private static final Logger LOG = Logger.getLogger(MesosLauncher.class.getName());
-
+  private static final ObjectMapper mapper = new ObjectMapper();
   private TopologyAPI.Topology topology;
   private LaunchContext context;
   private String cluster;
@@ -55,7 +53,9 @@ public class MesosLauncher implements ILauncher {
   private String role;
   private SchedulerStateManagerAdaptor stateManager;
 
-  private static final ObjectMapper mapper = new ObjectMapper();
+  private static String extractFilenameFromUri(String url) {
+    return url.substring(url.lastIndexOf('/') + 1, url.length());
+  }
 
   @Override
   public void initialize(LaunchContext context) {
@@ -314,11 +314,6 @@ public class MesosLauncher implements ILauncher {
     LOG.info("Topology Scheduler start command: " + startCommand);
     return startCommand;
   }
-
-  private static String extractFilenameFromUri(String url) {
-    return url.substring(url.lastIndexOf('/') + 1, url.length());
-  }
-
 
   private String getMesosMasterUri() {
     String key = String.format("%s.%s.%s", MesosConfig.MESOS_MASTER_URI_PREFIX, cluster, environ);

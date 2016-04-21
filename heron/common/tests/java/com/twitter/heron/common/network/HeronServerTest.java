@@ -17,7 +17,6 @@ package com.twitter.heron.common.network;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -30,8 +29,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.basics.NIOLooper;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.testing.Tests;
 
 /**
@@ -42,169 +41,24 @@ public class HeronServerTest {
   private static final int WAIT_TIME_MS = 2 * 1000;
   private static final String MESSAGE = "message";
   private static final Logger LOG = Logger.getLogger(HeronServerTest.class.getName());
-
+  private static final String SERVER_HOST = "127.0.0.1";
+  private static int serverPort;
   // Following are state variable to test correctness
   private volatile boolean isOnConnectedInvoked = false;
   private volatile boolean isOnRequestInvoked = false;
   private volatile boolean isOnMessageInvoked = false;
   private volatile boolean isOnCloseInvoked = false;
-
   private volatile boolean isTimerEventInvoked = false;
   private volatile boolean isClientReceivedResponse = false;
-
   private HeronServer heronServer;
   private NIOLooper serverLooper;
   private HeronClient heronClient;
   private NIOLooper clientLooper;
-
   private ExecutorService threadsPool;
-
-  private static final String SERVER_HOST = "127.0.0.1";
-  private static int serverPort;
-
   // Control whether we need to send request & response
   private volatile boolean isRequestNeed = false;
   private volatile boolean isMessageNeed = false;
   private volatile int messagesReceieved = 0;
-
-
-  private class SimpleHeronServer extends HeronServer {
-
-    public SimpleHeronServer(NIOLooper s, String host, int port) {
-      super(s, host, port, new HeronSocketOptions(100 * 1024 * 1024, 100,
-          100 * 1024 * 1024, 100,
-          5 * 1024 * 1024,
-          5 * 1024 * 1024));
-    }
-
-    @Override
-    public void onConnect(SocketChannel socketChannel) {
-      LOG.info("Server got a new connection from host:port:" +
-          socketChannel.socket().getRemoteSocketAddress());
-      isOnConnectedInvoked = true;
-
-      // We only register request when we need to test on sendResponse or sendMessage
-      if (isRequestNeed) {
-        registerOnRequest(Tests.EchoServerRequest.newBuilder());
-      }
-
-      // If We need to test sendMessage, we would registerOnMessage EchoServerResponse
-      if (isMessageNeed) {
-        registerOnMessage(Tests.EchoServerResponse.newBuilder());
-      }
-    }
-
-    @Override
-    public void onRequest(REQID rid, SocketChannel channel, Message request) {
-      isOnRequestInvoked = true;
-
-      if (request == null) {
-        // We just want to see whether we could invoke onRequest() normally
-        return;
-      }
-
-      if (request instanceof Tests.EchoServerRequest) {
-        Tests.EchoServerResponse.Builder response = Tests.EchoServerResponse.newBuilder();
-        Tests.EchoServerRequest req = (Tests.EchoServerRequest) request;
-        response.setEchoResponse(req.getEchoRequest());
-
-        // We only send back response when we need to test on sendResponse or sendMessage
-        if (isRequestNeed) {
-          sendResponse(rid, channel, response.build());
-        }
-      } else {
-        LOG.info("Type of request: " + request);
-        throw new RuntimeException("Unknown type of request received");
-      }
-    }
-
-    @Override
-    public void onMessage(SocketChannel socketChannel, Message message) {
-      isOnMessageInvoked = true;
-
-      if (message == null) {
-        // We just want to see whether we could invoke onMessage() normally
-        return;
-      }
-
-      if (message instanceof Tests.EchoServerResponse) {
-        messagesReceieved++;
-        Assert.assertEquals(MESSAGE, ((Tests.EchoServerResponse) message).getEchoResponse());
-      } else {
-        Assert.fail("Unknown message received");
-      }
-    }
-
-    @Override
-    public void onClose(SocketChannel socketChannel) {
-      isOnCloseInvoked = true;
-    }
-  }
-
-  private class SimpleHeronClient extends HeronClient {
-    public SimpleHeronClient(NIOLooper looper, String host, int port) {
-      super(looper, host, port,
-          new HeronSocketOptions(100 * 1024 * 1024, 100,
-              100 * 1024 * 1024, 100,
-              5 * 1024 * 1024,
-              5 * 1024 * 1024));
-    }
-
-    @Override
-    public void onError() {
-
-    }
-
-    @Override
-    public void onClose() {
-
-    }
-
-    @Override
-    public void onConnect(StatusCode statusCode) {
-      if (statusCode != StatusCode.OK) {
-        Assert.fail("Connection with server failed");
-      } else {
-        LOG.info("Connected with server");
-
-        // We only send request when we need to test on sendResponse or sendMessage
-        if (isRequestNeed) {
-          sendRequest();
-        }
-      }
-    }
-
-    private void sendRequest() {
-      Tests.EchoServerRequest.Builder r = Tests.EchoServerRequest.newBuilder();
-      r.setEchoRequest("Dummy");
-      sendRequest(r.build(), Tests.EchoServerResponse.newBuilder());
-    }
-
-    @Override
-    public void onResponse(StatusCode statusCode, Object o, Message response) {
-      if (response instanceof Tests.EchoServerResponse) {
-        Tests.EchoServerResponse r = (Tests.EchoServerResponse) response;
-        isClientReceivedResponse = true;
-        Assert.assertEquals(r.getEchoResponse(), "Dummy");
-
-        // If we want to test sendMessage, we would send Message
-        if (isMessageNeed) {
-          Tests.EchoServerResponse.Builder message =
-              Tests.EchoServerResponse.newBuilder().setEchoResponse(MESSAGE);
-          for (int i = 0; i < N; i++) {
-            sendMessage(message.build());
-          }
-        }
-      } else {
-        Assert.fail("Unknown type of response received");
-      }
-    }
-
-    @Override
-    public void onIncomingMessage(Message message) {
-      LOG.info("OnIncoming Message: " + message);
-    }
-  }
 
   @Before
   public void before() throws Exception {
@@ -532,5 +386,143 @@ public class HeronServerTest {
 
     // Should be connected
     Thread.sleep(WAIT_TIME_MS);
+  }
+
+  private class SimpleHeronServer extends HeronServer {
+
+    public SimpleHeronServer(NIOLooper s, String host, int port) {
+      super(s, host, port, new HeronSocketOptions(100 * 1024 * 1024, 100,
+          100 * 1024 * 1024, 100,
+          5 * 1024 * 1024,
+          5 * 1024 * 1024));
+    }
+
+    @Override
+    public void onConnect(SocketChannel socketChannel) {
+      LOG.info("Server got a new connection from host:port:" +
+          socketChannel.socket().getRemoteSocketAddress());
+      isOnConnectedInvoked = true;
+
+      // We only register request when we need to test on sendResponse or sendMessage
+      if (isRequestNeed) {
+        registerOnRequest(Tests.EchoServerRequest.newBuilder());
+      }
+
+      // If We need to test sendMessage, we would registerOnMessage EchoServerResponse
+      if (isMessageNeed) {
+        registerOnMessage(Tests.EchoServerResponse.newBuilder());
+      }
+    }
+
+    @Override
+    public void onRequest(REQID rid, SocketChannel channel, Message request) {
+      isOnRequestInvoked = true;
+
+      if (request == null) {
+        // We just want to see whether we could invoke onRequest() normally
+        return;
+      }
+
+      if (request instanceof Tests.EchoServerRequest) {
+        Tests.EchoServerResponse.Builder response = Tests.EchoServerResponse.newBuilder();
+        Tests.EchoServerRequest req = (Tests.EchoServerRequest) request;
+        response.setEchoResponse(req.getEchoRequest());
+
+        // We only send back response when we need to test on sendResponse or sendMessage
+        if (isRequestNeed) {
+          sendResponse(rid, channel, response.build());
+        }
+      } else {
+        LOG.info("Type of request: " + request);
+        throw new RuntimeException("Unknown type of request received");
+      }
+    }
+
+    @Override
+    public void onMessage(SocketChannel socketChannel, Message message) {
+      isOnMessageInvoked = true;
+
+      if (message == null) {
+        // We just want to see whether we could invoke onMessage() normally
+        return;
+      }
+
+      if (message instanceof Tests.EchoServerResponse) {
+        messagesReceieved++;
+        Assert.assertEquals(MESSAGE, ((Tests.EchoServerResponse) message).getEchoResponse());
+      } else {
+        Assert.fail("Unknown message received");
+      }
+    }
+
+    @Override
+    public void onClose(SocketChannel socketChannel) {
+      isOnCloseInvoked = true;
+    }
+  }
+
+  private class SimpleHeronClient extends HeronClient {
+    public SimpleHeronClient(NIOLooper looper, String host, int port) {
+      super(looper, host, port,
+          new HeronSocketOptions(100 * 1024 * 1024, 100,
+              100 * 1024 * 1024, 100,
+              5 * 1024 * 1024,
+              5 * 1024 * 1024));
+    }
+
+    @Override
+    public void onError() {
+
+    }
+
+    @Override
+    public void onClose() {
+
+    }
+
+    @Override
+    public void onConnect(StatusCode statusCode) {
+      if (statusCode != StatusCode.OK) {
+        Assert.fail("Connection with server failed");
+      } else {
+        LOG.info("Connected with server");
+
+        // We only send request when we need to test on sendResponse or sendMessage
+        if (isRequestNeed) {
+          sendRequest();
+        }
+      }
+    }
+
+    private void sendRequest() {
+      Tests.EchoServerRequest.Builder r = Tests.EchoServerRequest.newBuilder();
+      r.setEchoRequest("Dummy");
+      sendRequest(r.build(), Tests.EchoServerResponse.newBuilder());
+    }
+
+    @Override
+    public void onResponse(StatusCode statusCode, Object o, Message response) {
+      if (response instanceof Tests.EchoServerResponse) {
+        Tests.EchoServerResponse r = (Tests.EchoServerResponse) response;
+        isClientReceivedResponse = true;
+        Assert.assertEquals(r.getEchoResponse(), "Dummy");
+
+        // If we want to test sendMessage, we would send Message
+        if (isMessageNeed) {
+          Tests.EchoServerResponse.Builder message =
+              Tests.EchoServerResponse.newBuilder().setEchoResponse(MESSAGE);
+          for (int i = 0; i < N; i++) {
+            sendMessage(message.build());
+          }
+        }
+      } else {
+        Assert.fail("Unknown type of response received");
+      }
+    }
+
+    @Override
+    public void onIncomingMessage(Message message) {
+      LOG.info("OnIncoming Message: " + message);
+    }
   }
 }

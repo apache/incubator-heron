@@ -20,16 +20,18 @@ import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.HttpUtils;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 public class TMasterUtils {
+  private static final Logger LOG = Logger.getLogger(TMasterUtils.class.getName());
+
   private TMasterUtils() {
 
   }
-
-  private static final Logger LOG = Logger.getLogger(TMasterUtils.class.getName());
 
   /**
    * Communicate with TMaster with command
@@ -86,5 +88,52 @@ public class TMasterUtils {
     }
 
     return success;
+  }
+
+
+  /**
+   * Get current running TopologyState
+   */
+  public static TopologyAPI.TopologyState getRuntimeTopologyState(String topologyName,
+                                                                  SchedulerStateManagerAdaptor statemgr) {
+    PhysicalPlans.PhysicalPlan plan = statemgr.getPhysicalPlan(topologyName);
+
+    if (plan == null) {
+      LOG.log(Level.SEVERE, "Failed to get physical plan for topology {0}", topologyName);
+      return null;
+    }
+
+    return plan.getTopology().getState();
+  }
+
+  public static boolean transitionTopologyState(String topologyName,
+                                                String topologyStateControlCommand,
+                                                SchedulerStateManagerAdaptor statemgr,
+                                                TopologyAPI.TopologyState startState,
+                                                TopologyAPI.TopologyState expectedState) {
+    TopologyAPI.TopologyState state = TMasterUtils.getRuntimeTopologyState(topologyName, statemgr);
+    if (state == null) {
+      LOG.severe("Topology still not initialized.");
+      return false;
+    }
+
+    if (state == expectedState) {
+      LOG.log(Level.SEVERE, "Topology is already {0}ed", topologyStateControlCommand);
+      return true;
+    }
+
+    if (state != startState) {
+      LOG.log(Level.SEVERE, "Topology not in {0} state", startState);
+      return false;
+    }
+
+    if (!TMasterUtils.sendToTMaster(topologyStateControlCommand, topologyName, statemgr)) {
+      LOG.log(Level.SEVERE, "Failed to {0} topology: {1} ",
+          new Object[]{topologyStateControlCommand, topologyName});
+      return false;
+    }
+
+    LOG.log(Level.INFO, "Topology {0}ed successfully.", topologyStateControlCommand);
+    return true;
   }
 }

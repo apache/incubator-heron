@@ -34,14 +34,12 @@ import org.apache.mesos.Protos.Value;
 import com.twitter.heron.scheduler.mesos.framework.jobs.BaseJob;
 
 public class MesosTaskBuilder {
-  private static final Logger LOG = Logger.getLogger(MesosTaskBuilder.class.getName());
-
   public static final String cpusResourceName = "cpus";
   public static final String memResourceName = "mem";
   public static final String diskResourceName = "disk";
   public static final String portResourceName = "ports";
   public static final String taskNameTemplate = "task:%s";
-
+  private static final Logger LOG = Logger.getLogger(MesosTaskBuilder.class.getName());
   //args|command.
   //  e.g. args: -av (async job), verbose mode
   final String executorArgsPattern = "%s|%s";

@@ -15,7 +15,6 @@
 package com.twitter.heron.scheduler.twitter;
 
 import java.util.HashMap;
-import java.util.Properties;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -23,11 +22,10 @@ import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.spi.common.Constants;
-import com.twitter.heron.spi.scheduler.context.LaunchContext;
-
 import com.twitter.heron.scheduler.util.DefaultConfigLoader;
 import com.twitter.heron.scheduler.util.TopologyUtilityTest;
+import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.scheduler.context.LaunchContext;
 
 public class PackerUploaderTest {
   public static final String cluster = "cluster";

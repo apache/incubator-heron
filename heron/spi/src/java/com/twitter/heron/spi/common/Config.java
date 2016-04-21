@@ -14,10 +14,10 @@
 
 package com.twitter.heron.spi.common;
 
-import java.util.Map;
 import java.util.HashMap;
-import java.util.TreeMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Config is an Immutable Map of <String, Object>
@@ -25,39 +25,26 @@ import java.util.Set;
 public class Config {
   private final Map<String, Object> cfgMap = new HashMap();
 
-  public static class Builder {
-    private final Map<String, Object> keyValues = new HashMap();
-
-    private static Config.Builder create() {
-      return new Builder();
-    }
-
-    public Builder put(String key, Object value) {
-      this.keyValues.put(key, value);
-      return this;
-    }
-
-    public Builder putAll(Config ctx) {
-      keyValues.putAll(ctx.cfgMap);
-      return this;
-    }
-
-    public Builder putAll(Map<String, Object> map) {
-      keyValues.putAll(map);
-      return this;
-    }
-
-    public Config build() {
-      return new Config(this);
-    }
-  }
-
   private Config(Builder build) {
     cfgMap.putAll(build.keyValues);
   }
 
-  public static Builder newBuilder() { 
-    return Builder.create(); 
+  public static Builder newBuilder() {
+    return Builder.create();
+  }
+
+  public static Config expand(Config config) {
+    Config.Builder cb = Config.newBuilder();
+    for (String key : config.getKeySet()) {
+      Object value = config.get(key);
+      if (value instanceof String) {
+        String expanded_value = Misc.substitute(config, (String) value);
+        cb.put(key, expanded_value);
+      } else {
+        cb.put(key, value);
+      }
+    }
+    return cb.build();
   }
 
   public int size() {
@@ -125,20 +112,6 @@ public class Config {
     return cfgMap.keySet();
   }
 
-  public static Config expand(Config config) {
-    Config.Builder cb = Config.newBuilder();
-    for (String key : config.getKeySet()) {
-      Object value = config.get(key);
-      if (value instanceof String) {
-        String expanded_value = Misc.substitute(config, (String) value);
-        cb.put(key, expanded_value); 
-      } else {
-        cb.put(key, value); 
-      }
-    }
-    return cb.build();
-  } 
-
   public String asString() {
     StringBuilder sb = new StringBuilder();
     for (Map.Entry<String, Object> kv : cfgMap.entrySet()) {
@@ -159,5 +132,32 @@ public class Config {
       sb.append(", " + entry.getValue() + ")\n");
     }
     return sb.toString();
+  }
+
+  public static class Builder {
+    private final Map<String, Object> keyValues = new HashMap();
+
+    private static Config.Builder create() {
+      return new Builder();
+    }
+
+    public Builder put(String key, Object value) {
+      this.keyValues.put(key, value);
+      return this;
+    }
+
+    public Builder putAll(Config ctx) {
+      keyValues.putAll(ctx.cfgMap);
+      return this;
+    }
+
+    public Builder putAll(Map<String, Object> map) {
+      keyValues.putAll(map);
+      return this;
+    }
+
+    public Config build() {
+      return new Config(this);
+    }
   }
 }

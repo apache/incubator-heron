@@ -26,12 +26,11 @@ import java.util.logging.Logger;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
-import com.twitter.heron.spi.common.Constants;
-import com.twitter.heron.spi.scheduler.IRuntimeManager;
-import com.twitter.heron.spi.scheduler.SchedulerStateManagerAdaptor;
-import com.twitter.heron.spi.scheduler.context.RuntimeManagerContext;
 import com.twitter.heron.scheduler.util.ShellUtility;
 import com.twitter.heron.scheduler.util.TopologyUtility;
+import com.twitter.heron.spi.common.Constants;
+import com.twitter.heron.spi.scheduler.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.scheduler.context.RuntimeManagerContext;
 
 /**
  * Handles Runtime tasks like kill/restart/activate/deactivate for heron topology launched
@@ -194,9 +193,9 @@ public class AuroraTopologyRuntimeManager implements IRuntimeManager {
     String batchSize = context.getProperty(HERON_AURORA_BATCH_SIZE, (1 + TopologyUtility.getNumContainer(topology)) + "");
 
     ArrayList<String> auroraCmd = new ArrayList<>(Arrays.asList(
-            "aurora", "job", "restart", "--batch-size", batchSize,
-            restartShardId == -1 ? String.format("%s/%s/%s/%s", cluster, role, environ, topologyName)
-                : String.format("%s/%s/%s/%s/%s", cluster, role, environ, topologyName, restartShardId)));
+        "aurora", "job", "restart", "--batch-size", batchSize,
+        restartShardId == -1 ? String.format("%s/%s/%s/%s", cluster, role, environ, topologyName)
+            : String.format("%s/%s/%s/%s/%s", cluster, role, environ, topologyName, restartShardId)));
     if (context.isVerbose()) {
       auroraCmd.add("--verbose");
     }
@@ -216,8 +215,8 @@ public class AuroraTopologyRuntimeManager implements IRuntimeManager {
     String batchSize = context.getProperty(HERON_AURORA_BATCH_SIZE, (1 + TopologyUtility.getNumContainer(topology)) + "");
 
     ArrayList<String> auroraCmd = new ArrayList<>(Arrays.asList(
-            "aurora", "job", "killall", "--batch-size", batchSize,
-            String.format("%s/%s/%s/%s", cluster, role, environ, topologyName)));
+        "aurora", "job", "killall", "--batch-size", batchSize,
+        String.format("%s/%s/%s/%s", cluster, role, environ, topologyName)));
     if (context.isVerbose()) {
       auroraCmd.add("--verbose");
     }

@@ -57,6 +57,36 @@ public class XORManager {
     }
   }
 
+  /**
+   * Populate the XORManager for all spouts for the topology.
+   *
+   * @param looper The WakeableLooper to execute timer event
+   * @param topology The given topology protobuf
+   * @param nBuckets number of buckets to divide the message timeout seconds
+   * @param componentToTaskIds the map of componentName to its list of taskIds in the topology
+   * @return the XORManager for all spouts' task for the topology
+   */
+  public static XORManager populateXORManager(WakeableLooper looper,
+                                              TopologyAPI.Topology topology,
+                                              int nBuckets,
+                                              Map<String, List<Integer>> componentToTaskIds) {
+    List<Integer> allSpoutTasks = new LinkedList<>();
+
+    // Only spouts need acking management, i.e. xor maintenance
+    for (TopologyAPI.Spout spout : topology.getSpoutsList()) {
+      for (TopologyAPI.OutputStream outputStream : spout.getOutputsList()) {
+        List<Integer> spoutTaskIds =
+            componentToTaskIds.get(outputStream.getStream().getComponentName());
+        allSpoutTasks.addAll(spoutTaskIds);
+      }
+    }
+
+    return new XORManager(looper,
+        PhysicalPlanUtil.extractTopologyTimeout(topology),
+        allSpoutTasks,
+        nBuckets);
+  }
+
   // Create a new entry for the tuple.
   // taskId is the task id where the tuple
   // originated from.
@@ -105,35 +135,5 @@ public class XORManager {
   // For unit test
   protected Map<Integer, RotatingMap> getSpoutTasksToRotatingMap() {
     return spoutTasksToRotatingMap;
-  }
-
-  /**
-   * Populate the XORManager for all spouts for the topology.
-   *
-   * @param looper The WakeableLooper to execute timer event
-   * @param topology The given topology protobuf
-   * @param nBuckets number of buckets to divide the message timeout seconds
-   * @param componentToTaskIds the map of componentName to its list of taskIds in the topology
-   * @return the XORManager for all spouts' task for the topology
-   */
-  public static XORManager populateXORManager(WakeableLooper looper,
-                                              TopologyAPI.Topology topology,
-                                              int nBuckets,
-                                              Map<String, List<Integer>> componentToTaskIds) {
-    List<Integer> allSpoutTasks = new LinkedList<>();
-
-    // Only spouts need acking management, i.e. xor maintenance
-    for (TopologyAPI.Spout spout : topology.getSpoutsList()) {
-      for (TopologyAPI.OutputStream outputStream : spout.getOutputsList()) {
-        List<Integer> spoutTaskIds =
-            componentToTaskIds.get(outputStream.getStream().getComponentName());
-        allSpoutTasks.addAll(spoutTaskIds);
-      }
-    }
-
-    return new XORManager(looper,
-        PhysicalPlanUtil.extractTopologyTimeout(topology),
-        allSpoutTasks,
-        nBuckets);
   }
 }

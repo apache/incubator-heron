@@ -49,21 +49,15 @@ public class FileSink implements IMetricsSink {
   private static final String EXCEPTIONS_COUNT = "exceptions-count";
   private static final String FLUSH_COUNT = "flush-count";
   private static final String RECORD_PROCESS_COUNT = "record-process-count";
-
-  private PrintStream writer;
-
-  private String filenamePrefix;
-
-  private int fileMaximum = 1;
-  private int currentFileIndex = 0;
-
+  private static final ObjectMapper mapper = new ObjectMapper();
   // We would convert a file's metrics into a JSON object, i.e. array
   // So we need to add "[" at the start and "]" at the end
   private static boolean isFileStart = true;
-
+  private PrintStream writer;
+  private String filenamePrefix;
+  private int fileMaximum = 1;
+  private int currentFileIndex = 0;
   private SinkContext sinkContext;
-
-  private static final ObjectMapper mapper = new ObjectMapper();
 
   @Override
   public void init(Map<String, Object> conf, SinkContext context) {

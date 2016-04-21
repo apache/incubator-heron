@@ -16,7 +16,6 @@ package com.twitter.heron.scheduler.aurora;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -24,10 +23,9 @@ import org.junit.Test;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
-
+import com.twitter.heron.scheduler.util.TopologyUtilityTest;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.scheduler.context.RuntimeManagerContext;
-import com.twitter.heron.scheduler.util.TopologyUtilityTest;
 
 public class AuroraTopologyRuntimeManagerTest {
   private static final String cluster = "cluster";

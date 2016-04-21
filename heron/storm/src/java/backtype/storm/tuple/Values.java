@@ -23,10 +23,10 @@ import java.util.ArrayList;
 public class Values extends ArrayList<Object> {
   public Values() {
   }
-    
+
   public Values(Object... vals) {
     super(vals.length);
-    for(Object o: vals) {
+    for (Object o : vals) {
       add(o);
     }
   }

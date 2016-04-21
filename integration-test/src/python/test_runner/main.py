@@ -23,8 +23,8 @@ def runTest(topologyName, classPath, expectedResultFilePath, params):
   #submit topology
   try:
     args = httpServerUrl + " " + topologyName
-    submitTopology(params.heronCliPath, params.dataCenter, params.role, params.env, params.testsJarPath, classPath,
-      params.releasePackageRole, params.releasePackageName, args)
+    submitTopology(params.heronCliPath, params.cluster, params.role, params.env, params.testsJarPath, classPath,
+      params.releasePackageUri, args)
   except Exception as e:
     logging.error("Failed to submit %s topology: %s" %(topologyName, str(e)))
     return "fail"
@@ -42,7 +42,7 @@ def runTest(topologyName, classPath, expectedResultFilePath, params):
     logging.error("Fetching result failed for %s topology: %s" %(topologyName, str(e)))
     return "fail"
   finally:
-    killTopology(params.heronCliPath, params.dataCenter, params.role, params.env, topologyName)
+    killTopology(params.heronCliPath, params.cluster, params.role, params.env, topologyName)
 
   # Read expected result from the expected result file
   try:
@@ -105,11 +105,10 @@ def getHTTPResponse(serverAddress, serverPort, topologyName):
   raise RuntimeError("Failed to get HTTP response")
 
 # Submit topology using heron-cli
-def submitTopology(heronCliPath, dc, role, env, jarPath, classPath, pkgRole, pkgName, args = None):
+def submitTopology(heronCliPath, cluster, role, env, jarPath, classPath, pkgUri, args = None):
   logging.info("Submitting topology")
-  cmd = ("%s submit %s/%s/%s --heron-release-pkgrole=%s"
-        " --heron-release-pkgname=%s %s %s %s --verbose" % (
-    heronCliPath, dc, role, env, pkgRole, pkgName, jarPath, classPath, args))
+  cmd = ("%s submit %s/%s/%s --config-property heron.package.core.uri=%s %s %s %s --verbose" % (
+    heronCliPath, cluster, role, env, pkgUri, jarPath, classPath, args))
 
   logging.info("Submitting command: %s" % (cmd))
 
@@ -121,10 +120,10 @@ def submitTopology(heronCliPath, dc, role, env, jarPath, classPath, pkgRole, pkg
   raise RuntimeError("Unable to submit the topology")
 
 # Kill a topology using heron-cli
-def killTopology(heronCliPath, dc, role, env, topologyName):
+def killTopology(heronCliPath, cluster, role, env, topologyName):
   logging.info("Killing topology")
   cmd = "%s kill %s/%s/%s %s --verbose" % (
-    heronCliPath, dc, role, env, topologyName)
+    heronCliPath, cluster, role, env, topologyName)
 
   logging.info("Submitting command: %s" % (cmd))
   for i in range(0, RETRY_ATTEMPTS):
@@ -154,16 +153,6 @@ def runAllTests(conf, args):
       failures += [topologyName]
   return (successes, failures)
 
-def kinit(interval):
-  cmd = "kinit -k -t /etc/twkeys/jenkins/kerberos/jenkins.keytab jenkins@TWITTER.BIZ"
-  while True:
-    if os.system(cmd) == 0:
-      logging.info("Successfully kinited")
-    else:
-      logging.info("Failed to kinit")
-
-    time.sleep(interval)
-
 def main():
   root = logging.getLogger()
   root.setLevel(logging.DEBUG)
@@ -175,24 +164,18 @@ def main():
   # Convert the conf file to a json format
   conf = decoder.decode(confString)
 
-  # schedule kinit
-  kinit_thread = threading.Thread(target = kinit, name = "cron_kinit", args=(900,))
-  kinit_thread.setDaemon(True)
-  kinit_thread.start()
-
   # Parse the arguments passed via command line
   parser = argparse.ArgumentParser(description='This is the heron integration test framework')
 
   parser.add_argument('-hc', '--heron-cli-path', dest='heronCliPath', default=conf['heronCliPath'])
   parser.add_argument('-tj', '--tests-jar-path', dest='testsJarPath')
-  parser.add_argument('-dc', '--data-center', dest='dataCenter', default=conf['dataCenter'])
+  parser.add_argument('-cl', '--cluster', dest='cluster', default=conf['cluster'])
   parser.add_argument('-ev', '--env', dest='env', default=conf['env'])
   parser.add_argument('-rl', '--role', dest='role', default=conf['role'])
   parser.add_argument('-rh', '--results-server-hostname', dest='resultsServerHostname')
   parser.add_argument('-rp', '--results-server-port', dest='resultsServerPort', default=conf['resultsServerPort'])
   parser.add_argument('-tp', '--topologies-path', dest='topologiesPath')
-  parser.add_argument('-pn', '--release-package-name', dest='releasePackageName', default=conf['releasePackageName'])
-  parser.add_argument('-pr', '--release-package-role', dest='releasePackageRole', default=conf['releasePackageRole'])
+  parser.add_argument('-pi', '--release-package-uri', dest='releasePackageUri', default=conf['releasePackageUri'])
 
   #TODO: Enable this option
   #parser.add_argument('-dt', '--disable-topologies', dest='disabledTopologies', default='',

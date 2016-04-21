@@ -19,7 +19,7 @@ import java.net.URISyntaxException;
 
 public class Convert {
 
- public static Integer getInteger(Object o) {
+  public static Integer getInteger(Object o) {
     if (o instanceof Integer) {
       return ((Integer) o);
     } else if (o instanceof Long) {
@@ -33,9 +33,9 @@ public class Convert {
         throw new IllegalArgumentException("Failed to convert " + o + " + to integer");
       }
     }
- }
+  }
 
- public static Long getLong(Object o) {
+  public static Long getLong(Object o) {
     if (o instanceof Long) {
       return ((Long) o);
     } else if (o instanceof Integer) {
@@ -81,7 +81,7 @@ public class Convert {
     }
   }
 
-  public static URI getURI(String spec){
+  public static URI getURI(String spec) {
     try {
       return new URI(spec);
     } catch (URISyntaxException e) {

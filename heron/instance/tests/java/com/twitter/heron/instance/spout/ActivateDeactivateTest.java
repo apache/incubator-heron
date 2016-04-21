@@ -24,10 +24,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
+import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.instance.InstanceControlMsg;
 import com.twitter.heron.instance.Slave;
@@ -40,24 +40,17 @@ import com.twitter.heron.resource.UnitTestHelper;
 public class ActivateDeactivateTest {
   static final String spoutInstanceId = "spout-id";
   SlaveLooper slaveLooper;
-
+  // Singleton to be changed globally for testing
+  PhysicalPlans.PhysicalPlan physicalPlan;
   // Only one outStreamQueue, which is responsible for both control tuples and data tuples
   private Communicator<HeronTuples.HeronTupleSet> outStreamQueue;
-
   // This blocking queue is used to buffer tuples read from socket and ready to be used by instance
   // For spout, it will buffer Control tuple, while for bolt, it will buffer data tuple.
   private Communicator<HeronTuples.HeronTupleSet> inStreamQueue;
-
   private Communicator<InstanceControlMsg> inControlQueue;
-
   private ExecutorService threadsPool;
-
   private Communicator<Metrics.MetricPublisherPublishMessage> slaveMetricsOut;
-
   private Slave slave;
-
-  // Singleton to be changed globally for testing
-  PhysicalPlans.PhysicalPlan physicalPlan;
 
   @Before
   public void before() throws Exception {

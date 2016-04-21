@@ -14,20 +14,17 @@
 
 package com.twitter.heron.common.config;
 
-import java.util.Properties;
-import java.util.logging.Logger;
-import java.util.logging.Level;
-import java.util.HashMap;
-import java.util.Map;
-
 import java.io.File;
-import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
-
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.yaml.snakeyaml.Yaml;
 
@@ -41,17 +38,15 @@ public class ConfigReader {
    * Load properties from the given YAML file
    *
    * @param fileName, the name of YAML file to read
-   *
    * @return Map, contains the key value pairs of config
    */
   public static Map loadFile(String fileName) {
     Map props = new HashMap();
     if (fileName == null) {
-      LOG.warning("Config file name cannot be null\n");
+      LOG.warning("Config file name cannot be null");
       return props;
-    }
-    else if (fileName.isEmpty()) {
-      LOG.warning("Config file name is empty\n");
+    } else if (fileName.isEmpty()) {
+      LOG.warning("Config file name is empty");
       return props;
     } else {
 
@@ -59,12 +54,12 @@ public class ConfigReader {
       Path path = Paths.get(fileName);
 
       if (!Files.exists(path)) {
-        LOG.fine("Config file " + fileName + " does not exist.\n");
+        LOG.fine("Config file " + fileName + " does not exist");
         return props;
       }
 
       if (!Files.isRegularFile(path)) {
-        LOG.warning("Config file " + fileName + " might be a directory.\n");
+        LOG.warning("Config file " + fileName + " might be a directory.");
         return props;
       }
 
@@ -92,7 +87,6 @@ public class ConfigReader {
    * Load config from the given YAML stream
    *
    * @param inputStream, the name of YAML stream to read
-   *
    * @return Map, contains the key value pairs of config
    */
   public static Map loadStream(InputStream inputStream) {

@@ -31,22 +31,12 @@ public class NullScheduler implements IScheduler {
   }
 
   @Override
-  public void schedule(PackingPlan packing) {
-
+  public boolean onSchedule(PackingPlan packing) {
+    return true;
   }
 
   @Override
   public boolean onKill(Scheduler.KillTopologyRequest request) {
-    return true;
-  }
-
-  @Override
-  public boolean onActivate(Scheduler.ActivateTopologyRequest request) {
-    return true;
-  }
-
-  @Override
-  public boolean onDeactivate(Scheduler.DeactivateTopologyRequest request) {
     return true;
   }
 

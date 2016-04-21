@@ -23,7 +23,7 @@ import java.util.PriorityQueue;
  * Block the thread when doWait() is called and unblock
  * when the wakeUp() is called or the waiting time exceeds the timeout.
  * It could execute timer event
- * <p/>
+ * <p>
  * The WakeableLooper will execute in a while loop unless the exitLoop() is called. And in every
  * execution, it will execute runOnce(), which will:
  * 1. doWait(), which in fact is implemented by selector.select(timeout), and it will be wake up if other threads
@@ -33,26 +33,22 @@ import java.util.PriorityQueue;
  * Notice: you could just add tasks into it but not remove tasks from it.
  * 3. trigger the timers, which is a priority queue of {@code TimerTask}, the {@code TimerTask}
  * will be removed after execution.
- * <p/>
+ * <p>
  * So to use this class, user could add the persistent tasks, one time tasks and timer tasks as many
  * as they want.
  */
 public abstract class WakeableLooper {
-  private volatile boolean exitLoop;
-
   // The tasks could only be added but not removed
   private final List<Runnable> tasksOnWakeup;
-
   private final PriorityQueue<TimerTask> timers;
-
   // The tasks would be invoked before exit
   private final ArrayList<Runnable> exitTasks;
-
   // For selector since there is bug in selector.select(timeout): we could not
   // use a timeout > 10 * Integer.MAX_VALUE
   // So here we set Integer.MAX_VALUE as the infinite future
   // We will also multiple 1000*1000 to convert mill-seconds to nano-seconds
   private final long INFINITE_FUTURE = Integer.MAX_VALUE;
+  private volatile boolean exitLoop;
 
   public WakeableLooper() {
     exitLoop = false;

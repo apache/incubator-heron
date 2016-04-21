@@ -11,3 +11,21 @@ java_toolchain(
         "-extra_checks:on",
     ],
 )
+
+action_listener(
+    name = "compile_java",
+    mnemonics = ["Javac"],
+    extra_actions = [":checkstyle_java"],
+)
+
+extra_action(
+    name = "checkstyle_java",
+    tools = [
+        "//tools/java/src/com/twitter/bazel/checkstyle",
+    ],
+    requires_action_output = True,
+    cmd = "$(location //tools/java/src/com/twitter/bazel/checkstyle) " +
+          "--extra_action_file $(EXTRA_ACTION_FILE) " +
+          "--checkstyle_config_file tools/java/src/com/twitter/bazel/checkstyle/coding_style.xml"
+)
+

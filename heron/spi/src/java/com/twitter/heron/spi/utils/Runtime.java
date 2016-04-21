@@ -21,7 +21,6 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.scheduler.ILauncher;
-import com.twitter.heron.spi.scheduler.IRuntimeManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 public class Runtime {
@@ -42,7 +41,7 @@ public class Runtime {
   }
 
   public static URI topologyPackageUri(Config cfg) {
-    return (URI)cfg.get(Keys.topologyPackageUri());
+    return (URI) cfg.get(Keys.topologyPackageUri());
   }
 
   public static SchedulerStateManagerAdaptor schedulerStateManagerAdaptor(Config runtime) {
@@ -55,10 +54,6 @@ public class Runtime {
 
   public static ILauncher launcherClassInstance(Config runtime) {
     return (ILauncher) runtime.get(Keys.launcherClassInstance());
-  }
-
-  public static IRuntimeManager runtimeManagerClassInstance(Config runtime) {
-    return (IRuntimeManager) runtime.get(Keys.runtimeManagerClassInstance());
   }
 
   public static Shutdown schedulerShutdown(Config runtime) {

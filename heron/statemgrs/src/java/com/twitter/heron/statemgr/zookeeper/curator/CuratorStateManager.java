@@ -41,6 +41,7 @@ import com.twitter.heron.statemgr.FileSystemStateManager;
 import com.twitter.heron.statemgr.zookeeper.ZkContext;
 import com.twitter.heron.statemgr.zookeeper.ZkWatcherCallback;
 
+// TODO(mfu): Add Proxy or tunnel support, rather than to return the value stored directly
 public class CuratorStateManager extends FileSystemStateManager {
   private static final Logger LOG = Logger.getLogger(CuratorStateManager.class.getName());
   private CuratorFramework client;

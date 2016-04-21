@@ -16,17 +16,16 @@ package backtype.storm.metric.api;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 public class MultiCountMetric implements IMetric {
   Map<String, CountMetric> _value = new HashMap();
 
   public MultiCountMetric() {
   }
-    
+
   public CountMetric scope(String key) {
     CountMetric val = _value.get(key);
-    if(val == null) {
+    if (val == null) {
       _value.put(key, val = new CountMetric());
     }
     return val;
@@ -34,7 +33,7 @@ public class MultiCountMetric implements IMetric {
 
   public Object getValueAndReset() {
     Map ret = new HashMap();
-    for(Map.Entry<String, CountMetric> e : _value.entrySet()) {
+    for (Map.Entry<String, CountMetric> e : _value.entrySet()) {
       ret.put(e.getKey(), e.getValue().getValueAndReset());
     }
     return ret;

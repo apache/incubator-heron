@@ -21,10 +21,10 @@ import java.util.logging.Logger;
 
 import com.google.protobuf.Message;
 
-import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
+import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.network.HeronClient;
 import com.twitter.heron.common.network.HeronSocketOptions;
 import com.twitter.heron.common.network.StatusCode;

@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+#!/usr/bin/env python2.7
+
 import os, sys
 import argparse
 
@@ -47,6 +49,7 @@ class Application(tornado.web.Application):
 
       (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/file",                  handlers.ContainerFileHandler),
       (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/filedata",              handlers.ContainerFileDataHandler),
+      (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/filedownload",          handlers.ContainerFileDownloadHandler),
 
       # Topology list and plan handlers
       (r"/topologies/list.json",                                                 handlers.api.ListTopologiesJsonHandler),

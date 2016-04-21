@@ -26,13 +26,15 @@ public class SchemeAsMultiScheme implements MultiScheme {
     this.scheme = scheme;
   }
 
-  @Override public Iterable<List<Object>> deserialize(final byte[] ser) {
+  @Override
+  public Iterable<List<Object>> deserialize(final byte[] ser) {
     List<Object> o = scheme.deserialize(ser);
-    if(o == null) return null;
+    if (o == null) return null;
     else return Arrays.asList(o);
   }
 
-  @Override public Fields getOutputFields() {
+  @Override
+  public Fields getOutputFields() {
     return scheme.getOutputFields();
   }
 }

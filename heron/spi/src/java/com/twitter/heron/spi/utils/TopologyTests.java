@@ -14,11 +14,8 @@
 
 package com.twitter.heron.spi.utils;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.HeronSubmitter;
@@ -34,9 +31,6 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
-
-import com.twitter.heron.spi.common.Constants;
-import com.twitter.heron.spi.common.PackingPlan;
 
 public class TopologyTests {
   /**

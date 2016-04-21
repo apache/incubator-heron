@@ -1,6 +1,5 @@
 package com.twitter.heron.integration_test.core;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,21 +18,19 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 
 public class TestTopologyBuilder extends TopologyBuilder {
   private static final Logger LOG = Logger.getLogger(TestTopologyBuilder.class.getName());
-  // By default, terminalBoltClass will be AggregatorBolt, which writes to specified HTTP server
-  private String terminalBoltClass = "com.twitter.heron.integration_test.core.AggregatorBolt";
-
   // This variable will be used as input variable for constructor of our aggregator bolt
   // This will determine the location of where our output is directed
   // Could be URL, file location, etc.
   private final String outputLocation;
-
   // The structure of the topologyBlr - a graph directed from children to parents
   private final Map<String, TopologyAPI.Bolt.Builder> bolts =
-    new HashMap<String, TopologyAPI.Bolt.Builder>();
+      new HashMap<String, TopologyAPI.Bolt.Builder>();
   private final Map<String, TopologyAPI.Spout.Builder> spouts =
-    new HashMap<String, TopologyAPI.Spout.Builder>();
+      new HashMap<String, TopologyAPI.Spout.Builder>();
   private final Map<String, HashSet<String>> prev =
-    new HashMap<String, HashSet<String>>();
+      new HashMap<String, HashSet<String>>();
+  // By default, terminalBoltClass will be AggregatorBolt, which writes to specified HTTP server
+  private String terminalBoltClass = "com.twitter.heron.integration_test.core.AggregatorBolt";
 
   public TestTopologyBuilder(String outputLocation) {
     this.outputLocation = outputLocation;
@@ -44,24 +41,24 @@ public class TestTopologyBuilder extends TopologyBuilder {
   }
 
   @Override
-    public BoltDeclarer setBolt(String id, IRichBolt bolt, Number parallelismHint) {
-      // Wrap bolt
-      IntegrationTestBolt itBolt = new IntegrationTestBolt(bolt);
-      // Call super
-      return super.setBolt(id, itBolt, parallelismHint);
-    }
+  public BoltDeclarer setBolt(String id, IRichBolt bolt, Number parallelismHint) {
+    // Wrap bolt
+    IntegrationTestBolt itBolt = new IntegrationTestBolt(bolt);
+    // Call super
+    return super.setBolt(id, itBolt, parallelismHint);
+  }
 
   @Override
-    public SpoutDeclarer setSpout(String id, IRichSpout spout, Number parallelismHint) {
-      // Wrap Spout
-      IntegrationTestSpout itSpout = new IntegrationTestSpout(spout);
-      return setSpout(id, itSpout, parallelismHint);
-    }
+  public SpoutDeclarer setSpout(String id, IRichSpout spout, Number parallelismHint) {
+    // Wrap Spout
+    IntegrationTestSpout itSpout = new IntegrationTestSpout(spout);
+    return setSpout(id, itSpout, parallelismHint);
+  }
 
   // A method allows user to define the maxExecutionCount of the spout
   // To be compatible with earlier Integration Test Framework
   public SpoutDeclarer setSpout(String id, IRichSpout spout,
-      Number parallelismHint, int maxExecutionCount) {
+                                Number parallelismHint, int maxExecutionCount) {
     // Wrap Spout
     IntegrationTestSpout itSpout = new IntegrationTestSpout(spout, maxExecutionCount);
     return setSpout(id, itSpout, parallelismHint);
@@ -85,9 +82,9 @@ public class TestTopologyBuilder extends TopologyBuilder {
     try {
       // Terminal Bolt will be initialized using reflection, based on the value of terminal bolt class
       // class should be built on top of BaseBatchBolt abstract class, and can be changed using setTerminalBolt function
-      aggregatorBolt = 
-        (BaseBatchBolt) Class.forName(terminalBoltClass).getConstructor(String.class)
-        .newInstance(this.outputLocation);
+      aggregatorBolt =
+          (BaseBatchBolt) Class.forName(terminalBoltClass).getConstructor(String.class)
+              .newInstance(this.outputLocation);
     } catch (NoSuchMethodException e) {
       throw new RuntimeException(e + " Terminal Bolt class must have a single String constructor.");
     } catch (InstantiationException e) {
@@ -103,11 +100,11 @@ public class TestTopologyBuilder extends TopologyBuilder {
 
     // We get the user-defined TopologyAPI.Topology.Builder
     TopologyAPI.Topology.Builder topologyBlr =
-      super.createTopology().
-      setConfig(new Config()).
-      setName("").
-      setState(TopologyAPI.TopologyState.RUNNING).
-      getTopology().toBuilder();
+        super.createTopology().
+            setConfig(new Config()).
+            setName("").
+            setState(TopologyAPI.TopologyState.RUNNING).
+            getTopology().toBuilder();
 
     // Clear unnecessary fields to make the state of TopologyAPI.Topology.Builder clean
     topologyBlr.clearTopologyConfig().clearName().clearState();

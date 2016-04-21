@@ -25,7 +25,7 @@ import com.twitter.heron.spi.common.Config;
 
 /**
  * This file defines the IStateManager interface.
- * <p/>
+ * <p>
  * Services across Heron use HeronStateMgr to get/set state information.
  * Currently the primary things kept by state are:
  * 1. Where is the the topology master running.
@@ -34,17 +34,17 @@ import com.twitter.heron.spi.common.Config;
  * who is their topology master. In case they loose connection with
  * the topology master, the stream managers query this again to see
  * if the topology master has changed.
- * <p/>
+ * <p>
  * 2. Topology and the current running state of the topology
  * This information is seeded by the topology submitter.
  * The topology master updates this when the state of the topology
  * changes.
- * <p/>
+ * <p>
  * 3. Current assignment.
  * This information is solely used by topology master. When it
  * creates a new assignment or when the assignment changes, it writes
  * out this information. This is required for topology master failover.
- * <p/>
+ * <p>
  * Clients call the methods of the state passing a callback. The callback
  * is called with result code upon the completion of the operation.
  */
@@ -58,7 +58,7 @@ public interface IStateManager extends AutoCloseable {
   /**
    * This is to for disposing or cleaning up any internal state accumulated by
    * the StateManager
-   * <p/>
+   * <p>
    * Closes this stream and releases any system resources associated
    * with it. If the stream is already closed then invoking this
    * method has no effect.

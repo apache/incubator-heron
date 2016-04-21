@@ -76,10 +76,6 @@ public class Context {
     return cfg.getStringValue(ConfigKeys.get("SCHEDULER_CLASS"));
   }
 
-  public static String runtimeManagerClass(Config cfg) {
-    return cfg.getStringValue(ConfigKeys.get("RUNTIME_MANAGER_CLASS"));
-  }
-
   public static String packingClass(Config cfg) {
     return cfg.getStringValue(ConfigKeys.get("PACKING_CLASS"));
   }

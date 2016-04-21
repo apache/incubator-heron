@@ -20,7 +20,6 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
-
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.HttpUtils;
 import com.twitter.heron.spi.scheduler.IScheduler;
@@ -49,8 +48,8 @@ public class RestartRequestHandler implements HttpHandler {
     boolean isRestartSuccessfully = scheduler.onRestart(restartTopologyRequest);
 
     // prepare the response
-    Scheduler.RestartTopologyResponse response =
-        Scheduler.RestartTopologyResponse.newBuilder()
+    Scheduler.SchedulerResponse response =
+        Scheduler.SchedulerResponse.newBuilder()
             .setStatus(NetworkUtils.getHeronStatus(isRestartSuccessfully))
             .build();
 

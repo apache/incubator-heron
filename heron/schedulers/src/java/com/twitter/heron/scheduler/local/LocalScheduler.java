@@ -35,23 +35,18 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.common.ShellUtils;
 import com.twitter.heron.spi.scheduler.IScheduler;
-import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
 public class LocalScheduler implements IScheduler {
   private static final Logger LOG = Logger.getLogger(LocalScheduler.class.getName());
-
-  private Config config;
-  private Config runtime;
-
   // executor service for monitoring all the containers
   private final ExecutorService monitorService = Executors.newCachedThreadPool();
-
   // map to keep track of the process and the shard it is running
   private final Map<Process, Integer> processToContainer = new ConcurrentHashMap<Process, Integer>();
-
+  private Config config;
+  private Config runtime;
   // has the topology been killed?
   private volatile boolean topologyKilled = false;
 
@@ -191,7 +186,8 @@ public class LocalScheduler implements IScheduler {
    * Schedule the provided packed plan
    */
   @Override
-  public void schedule(PackingPlan packing) {
+  public boolean onSchedule(PackingPlan packing) {
+    return true;
   }
 
   /**
@@ -226,22 +222,6 @@ public class LocalScheduler implements IScheduler {
   }
 
   /**
-   * Handler to activate topology
-   */
-  @Override
-  public boolean onActivate(Scheduler.ActivateTopologyRequest request) {
-    return true;
-  }
-
-  /**
-   * Handler to deactivate topology
-   */
-  @Override
-  public boolean onDeactivate(Scheduler.DeactivateTopologyRequest request) {
-    return true;
-  }
-
-  /**
    * Handler to restart topology
    */
   @Override
@@ -267,21 +247,6 @@ public class LocalScheduler implements IScheduler {
         if (containerId == processToContainer.get(p)) {
           p.destroy();
         }
-      }
-    }
-
-    // get the instance of state manager to clean state
-    SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
-
-    // If we restart the container including TMaster, wee need to clean TMasterLocation,
-    // since we could not set it as ephemeral for local file system
-    // We would not clean SchedulerLocation since we would not restart the Scheduler
-    if (containerId == -1 || containerId == 0) {
-      Boolean result = stateManager.deleteTMasterLocation(LocalContext.topologyName(config));
-      if (result == null || !result) {
-        // We would not return false since it is possible that TMaster didn't write physical plan
-        LOG.severe("Failed to clear TMaster location. Check whether TMaster set it correctly.");
-        return false;
       }
     }
 

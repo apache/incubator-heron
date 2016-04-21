@@ -28,6 +28,7 @@ public abstract class BaseComponentDeclarer<T extends ComponentConfigurationDecl
   private IComponent component;
   private OutputFieldsGetter output;
   private Map<String, Object> componentConfiguration;
+
   public BaseComponentDeclarer(String name, IComponent comp, Number taskParallelism) {
     this.name = name;
     this.component = comp;
@@ -37,23 +38,25 @@ public abstract class BaseComponentDeclarer<T extends ComponentConfigurationDecl
     }
     if (taskParallelism != null) {
       this.componentConfiguration.put(Config.TOPOLOGY_COMPONENT_PARALLELISM,
-                                      taskParallelism.toString());
+          taskParallelism.toString());
     } else {
       this.componentConfiguration.put(Config.TOPOLOGY_COMPONENT_PARALLELISM,
-                                      "1");
+          "1");
     }
   }
 
   public abstract T returnThis();
 
-  protected String getName() { return name; }
+  protected String getName() {
+    return name;
+  }
 
   @Override
   public T addConfigurations(Map conf) {
     componentConfiguration.putAll(conf);
     return returnThis();
   }
-  
+
   public void dump(TopologyAPI.Component.Builder bldr) {
     bldr.setName(name);
     bldr.setJavaObject(ByteString.copyFrom(Utils.serialize(component)));
