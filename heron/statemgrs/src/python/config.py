@@ -29,14 +29,19 @@ class Config:
     }
   """
 
-  def __init__(self, conf_file):
-    expanded_conf_file_path = os.path.expanduser(conf_file)
-    assert os.path.lexists(expanded_conf_file_path), "File does not exists: %s" % (conf_file)
+  def __init__(self):
+    self.location = None
+
+  def parse_confif_file(self, conf_file):
+    extended_conf_file_path = os.path.expanduser(conf_file)
+    assert os.path.lexists(extended_conf_file_path), "File does not exists: %s" % (extended_conf_file_path)
 
     # Read the configuration file
-    with open(expanded_conf_file_path, 'r') as f:
-      self.locations = yaml.load(f)
+    with open(extended_conf_file_path, 'r') as f:
+      self.set_state_locations(yaml.load(f))
 
+  def set_state_locations(self, state_locations):
+    self.locations = state_locations
     self.validate_state_locations()
 
   def validate_state_locations(self):

@@ -17,7 +17,7 @@ import yaml
 
 from heron.statemgrs.src.python.config import Config as StateMgrConfig
 
-STATEMGR_CONFIG_FILE_KEY = "statemgrs.config.file"
+STATEMGRS_KEY = "statemgrs"
 VIZ_URL_FORMAT_KEY = "viz.url.format"
 
 class Config:
@@ -28,7 +28,7 @@ class Config:
 
   def __init__(self, conf_file):
     self.configs = None
-    self.statemgr_config_file = None
+    self.statemgr_config = StateMgrConfig()
     self.viz_url_format = None
 
     self.parse_config_file(conf_file)
@@ -44,7 +44,7 @@ class Config:
     self.load_configs()
 
   def load_configs(self):
-    self.statemgr_config_file = self.configs[STATEMGR_CONFIG_FILE_KEY]
+    self.statemgr_config.set_state_locations(self.configs[STATEMGRS_KEY])
     self.viz_url_format = self.validated_viz_url_format(self.configs[VIZ_URL_FORMAT_KEY])
 
   def validated_viz_url_format(self, viz_url_format):

@@ -1,7 +1,20 @@
 # Configs for heron-tracker
 
-# Path to statemgrs config file
-statemgrs.config.file: "~/.herontools/conf/localfilestateconf.yaml"
+## Contains the sources where the states are stored.
+# Each source has these attributes:
+# 1. type - type of state manager (zookeeper or file, etc.)
+# 2. name - name to be used for this source
+# 3. host - currently only used to connect to zk
+# 4. port - port to connect to
+# 5. rootpath - where all the states are stored
+statemgrs:
+  -
+    type: "file"
+    name: "local"
+    host: "localhost"
+    port: 0
+    rootpath: "~/.herondata/repository/state/local"
+    tunnelhost: "localhost"
 
 # The URL that points to a topology's metrics dashboard.
 # This value can use following parameters to create a valid

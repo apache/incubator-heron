@@ -54,7 +54,7 @@ class Tracker:
     """
     Sync the topologies with the statemgrs.
     """
-    self.state_managers = statemanagerfactory.get_all_state_managers(self.config.statemgr_config_file)
+    self.state_managers = statemanagerfactory.get_all_state_managers(self.config.statemgr_config)
 
     def on_topologies_watch(state_manager, topologies):
       LOG.info("State watch triggered for topologies.")
