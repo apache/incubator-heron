@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.spi.scheduler;
+package com.twitter.heron.scheduler;
 
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.scheduler.ILauncher;
 
 public class NullLauncher implements ILauncher {
 
