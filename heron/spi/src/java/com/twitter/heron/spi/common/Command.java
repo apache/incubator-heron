@@ -1,5 +1,8 @@
-package com.twitter.heron.spi.scheduler;
+package com.twitter.heron.spi.common;
 
+/***
+ * This enum defines Command invoked from heron client
+ */
 public enum Command {
   // TODO(mfu): Move ACTIVATE & DEACTIVATE out? They are non-related to Scheduling
   SUBMIT,
