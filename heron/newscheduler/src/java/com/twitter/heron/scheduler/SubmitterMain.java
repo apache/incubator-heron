@@ -349,7 +349,7 @@ public class SubmitterMain {
       // 2. Try to submit topology if valid
       if (isValid) {
         // invoke method to submit the topology
-        LOG.log(Level.INFO, "Topology {0} to be submitted", topologyName);
+        LOG.log(Level.FINE, "Topology {0} to be submitted", topologyName);
 
         // Firstly, try to upload necessary packages
         packageURI = uploadPackage(config, uploader);
@@ -382,7 +382,7 @@ public class SubmitterMain {
 
       System.exit(1);
     } else {
-      LOG.log(Level.INFO, "Topology {0} submitted successfully", topologyName);
+      LOG.log(Level.FINE, "Topology {0} submitted successfully", topologyName);
 
       System.exit(0);
     }
