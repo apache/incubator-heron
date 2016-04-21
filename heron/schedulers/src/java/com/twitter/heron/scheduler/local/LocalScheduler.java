@@ -35,7 +35,6 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.common.ShellUtils;
 import com.twitter.heron.spi.scheduler.IScheduler;
-import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.TopologyUtils;
@@ -248,21 +247,6 @@ public class LocalScheduler implements IScheduler {
         if (containerId == processToContainer.get(p)) {
           p.destroy();
         }
-      }
-    }
-
-    // get the instance of state manager to clean state
-    SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
-
-    // If we restart the container including TMaster, wee need to clean TMasterLocation,
-    // since we could not set it as ephemeral for local file system
-    // We would not clean SchedulerLocation since we would not restart the Scheduler
-    if (containerId == -1 || containerId == 0) {
-      Boolean result = stateManager.deleteTMasterLocation(LocalContext.topologyName(config));
-      if (result == null || !result) {
-        // We would not return false since it is possible that TMaster didn't write physical plan
-        LOG.severe("Failed to clear TMaster location. Check whether TMaster set it correctly.");
-        return false;
       }
     }
 

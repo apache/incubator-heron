@@ -20,13 +20,10 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.scheduler.client.HttpServiceSchedulerClient;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
-import com.twitter.heron.scheduler.client.LibrarySchedulerClient;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.scheduler.Command;
-import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;
@@ -41,17 +38,13 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
   private final ISchedulerClient schedulerClient;
 
   public RuntimeManagerRunner(Config config, Config runtime,
-                              Command command) throws
-      ClassNotFoundException, InstantiationException, IllegalAccessException {
+                              Command command, ISchedulerClient schedulerClient) {
 
     this.config = config;
     this.runtime = runtime;
     this.command = command;
 
-    this.schedulerClient = getSchedulerClient();
-    if (this.schedulerClient == null) {
-      throw new RuntimeException("Failed to initialize scheduler client");
-    }
+    this.schedulerClient = schedulerClient;
   }
 
   @Override
@@ -107,6 +100,21 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
         .setContainerIndex(containerId)
         .build();
 
+    // If we restart the container including TMaster, wee need to clean TMasterLocation,
+    // since when starting up, TMaster expects no other existing TMaster,
+    // i.e. TMasterLocation does not exist
+    if (containerId == -1 || containerId == 0) {
+      // get the instance of state manager to clean state
+      SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
+
+      Boolean result = stateManager.deleteTMasterLocation(topologyName);
+      if (result == null || !result) {
+        // We would not return false since it is possible that TMaster didn't write physical plan
+        LOG.severe("Failed to clear TMaster location. Check whether TMaster set it correctly.");
+        return false;
+      }
+    }
+
     if (!schedulerClient.restartTopology(restartTopologyRequest)) {
       LOG.log(Level.SEVERE, "Failed to restart with Scheduler: ");
       return false;
@@ -137,47 +145,5 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     // Clean the connection when we are done.
     LOG.info("Scheduler killed topology successfully.");
     return true;
-  }
-
-  protected Scheduler.SchedulerLocation getSchedulerLocation() {
-    // TODO(mfu): Add Proxy support, rather than to connect scheduler directly
-
-    // get the instance of the state manager
-    SchedulerStateManagerAdaptor statemgr = com.twitter.heron.spi.utils.Runtime.schedulerStateManagerAdaptor(runtime);
-
-    // fetch scheduler location from state manager
-    LOG.log(Level.FINE, "Fetching scheduler location from state manager to {0} topology", command);
-
-    Scheduler.SchedulerLocation schedulerLocation =
-        statemgr.getSchedulerLocation(Runtime.topologyName(runtime));
-
-
-    return schedulerLocation;
-  }
-
-  // TODO(mfu): Make it into Factory pattern if needed
-  protected ISchedulerClient getSchedulerClient()
-      throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-    ISchedulerClient schedulerClient;
-
-    if (Context.schedulerService(config)) {
-      Scheduler.SchedulerLocation schedulerLocation = getSchedulerLocation();
-      if (schedulerLocation == null) {
-        LOG.log(Level.SEVERE, "Failed to get scheduler location to {0} topology", command);
-        return null;
-      }
-
-      LOG.log(Level.FINE, "Scheduler is listening on location: {0} ", schedulerLocation.toString());
-
-      schedulerClient =
-          new HttpServiceSchedulerClient(config, runtime, schedulerLocation.getHttpEndpoint());
-    } else {
-      // create an instance of scheduler
-      final String schedulerClass = Context.schedulerClass(config);
-      final IScheduler scheduler = (IScheduler) Class.forName(schedulerClass).newInstance();
-      schedulerClient = new LibrarySchedulerClient(config, runtime, scheduler);
-    }
-
-    return schedulerClient;
   }
 }
