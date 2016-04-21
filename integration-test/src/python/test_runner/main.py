@@ -23,7 +23,7 @@ def runTest(topologyName, classPath, expectedResultFilePath, params):
   #submit topology
   try:
     args = httpServerUrl + " " + topologyName
-    submitTopology(params.heronCliPath, params.dataCenter, params.role, params.env, params.testsJarPath, classPath,
+    submitTopology(params.heronCliPath, params.cluster, params.role, params.env, params.testsJarPath, classPath,
       params.releasePackageUri, args)
   except Exception as e:
     logging.error("Failed to submit %s topology: %s" %(topologyName, str(e)))
@@ -42,7 +42,7 @@ def runTest(topologyName, classPath, expectedResultFilePath, params):
     logging.error("Fetching result failed for %s topology: %s" %(topologyName, str(e)))
     return "fail"
   finally:
-    killTopology(params.heronCliPath, params.dataCenter, params.role, params.env, topologyName)
+    killTopology(params.heronCliPath, params.cluster, params.role, params.env, topologyName)
 
   # Read expected result from the expected result file
   try:
