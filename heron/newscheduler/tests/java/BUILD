@@ -34,6 +34,17 @@ java_test(
   size="small",
 )
 
+java_test(
+  name="runtime-manager-runner_unittest",
+  srcs=glob(
+    ["**/RuntimeManagerRunnerTest.java"] +
+    ["**/util/TopologyUtilityTest.java"]
+  ),
+  deps=scheduler_deps_files,
+  size="small",
+)
+
+
 # Following unit tests are for class under package com.twitter.heron.scheduler.client
 
 java_test(
