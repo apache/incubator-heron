@@ -284,7 +284,7 @@ public class RuntimeManagerMain {
 
       System.exit(1);
     } else {
-      LOG.log(Level.INFO, "Topology {0} {1} successfully", new Object[]{topologyName, command});
+      LOG.log(Level.FINE, "Topology {0} {1} successfully", new Object[]{topologyName, command});
 
       System.exit(0);
     }

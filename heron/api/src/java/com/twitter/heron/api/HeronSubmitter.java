@@ -56,7 +56,7 @@ public class HeronSubmitter {
       initialState = TopologyAPI.TopologyState.RUNNING;
     }
 
-    LOG.info("To deploy a topology in initial state: " + initialState);
+    LOG.fine("To deploy a topology in initial state: " + initialState);
 
     TopologyAPI.Topology fTopology =
         topology.setConfig(heronConfig).

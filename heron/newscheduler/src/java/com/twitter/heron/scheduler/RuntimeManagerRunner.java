@@ -182,7 +182,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     }
 
     // Clean the connection when we are done.
-    LOG.info("Scheduler activated topology successfully.");
+    LOG.fine("Scheduler activated topology successfully.");
     return true;
   }
 
@@ -249,7 +249,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
       return false;
     }
 
-    LOG.info("Scheduler deactivated topology successfully.");
+    LOG.fine("Scheduler deactivated topology successfully.");
     return true;
   }
 
@@ -317,7 +317,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     }
 
     // Clean the connection when we are done.
-    LOG.info("Scheduler restarted topology successfully.");
+    LOG.fine("Scheduler restarted topology successfully.");
     return true;
   }
 
@@ -387,7 +387,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     }
 
     // Clean the connection when we are done.
-    LOG.info("Scheduler killed topology successfully.");
+    LOG.fine("Scheduler killed topology successfully.");
     return true;
   }
 
