@@ -24,13 +24,15 @@ import java.util.logging.Logger;
 public class HeronExecutorTask implements Task {
   private static final Logger LOG = Logger.getLogger(HeronExecutorTask.class.getName());
 
-  private int containerId;
-  private String cluster;
-  private String role;
-  private String topologyName;
-  private String env;
-  private String topologyJar;
-  private String packedPlan;
+  private final String topologyPackageName;
+  private final String heronCorePackageName;
+  private final int heronExecutorId;
+  private final String cluster;
+  private final String role;
+  private final String topologyName;
+  private final String env;
+  private final String topologyJar;
+  private final String packedPlan;
 
   private REEFFileNames reefFileNames;
   private String localHeronConfDir;
@@ -40,17 +42,21 @@ public class HeronExecutorTask implements Task {
 
   @Inject
   public HeronExecutorTask(final REEFFileNames fileNames,
-                           @Parameter(ContainerId.class) String containerId,
+                           @Parameter(HeronExecutorId.class) String heronExecutorId,
                            @Parameter(Cluster.class) String cluster,
                            @Parameter(Role.class) String role,
                            @Parameter(TopologyName.class) String topologyName,
                            @Parameter(Environ.class) String env,
+                           @Parameter(TopologyPackageName.class) String topologyPackageName,
+                           @Parameter(HeronCorePackageName.class) String heronCorePackageName,
                            @Parameter(TopologyJar.class) String topologyJar,
                            @Parameter(PackedPlan.class) String packedPlan) {
-    this.containerId = Integer.valueOf(containerId);
+    this.heronExecutorId = Integer.valueOf(heronExecutorId);
     this.cluster = cluster;
     this.role = role;
     this.topologyName = topologyName;
+    this.topologyPackageName = topologyPackageName;
+    this.heronCorePackageName = heronCorePackageName;
     this.env = env;
     this.topologyJar = topologyJar;
     this.packedPlan = packedPlan;
@@ -63,20 +69,19 @@ public class HeronExecutorTask implements Task {
   public byte[] call(byte[] memento) throws Exception {
     String globalFolder = reefFileNames.getGlobalFolder().getPath();
 
-    // TODO pass topology name and core from config
-    extractTopologyPkgInSandbox(globalFolder, localHeronConfDir);
-    extractCorePkgInSandbox(globalFolder, localHeronConfDir);
+    extractPackageInSandbox(globalFolder, topologyPackageName, localHeronConfDir);
+    extractPackageInSandbox(globalFolder, heronCorePackageName, localHeronConfDir);
 
     String topologyDefnFile = TopologyUtils.lookUpTopologyDefnFile(".", topologyName);
     topology = TopologyUtils.getTopology(topologyDefnFile);
     config = new ConfigLoader().getConfig(cluster, role, env, topologyJar, topologyDefnFile, topology);
 
-    LOG.info("Preparing evaluator for running " + containerId);
+    LOG.log(Level.INFO, "Preparing evaluator for running executor-id: {0}", heronExecutorId);
 
-    String executorCommand = getExecutorCommand(containerId);
+    String executorCommand = getExecutorCommand(heronExecutorId);
 
     final Process regularExecutor = ShellUtils.runASyncProcess(true, executorCommand, new File("."));
-    LOG.info("Started " + containerId);
+    LOG.log(Level.INFO, "Started heron executor-id: {0}", heronExecutorId);
     regularExecutor.waitFor();
     return null;
   }
@@ -128,9 +133,20 @@ public class HeronExecutorTask implements Task {
             "no_need_since_scheduler_is_started",
             0);
 
-    LOG.info("Executor command line: " + executorCmd);
+    LOG.log(Level.INFO, "Executor command line: {0}", executorCmd);
 
     return executorCmd;
+  }
+
+  private void extractPackageInSandbox(String srcFolder, String fileName, String dstDir) {
+    String packagePath = Paths.get(srcFolder, fileName).toString();
+    LOG.log(Level.INFO, "Extracting package: {0} at: {1}", new Object[]{packagePath, dstDir});
+    boolean result = untarPackage(packagePath, dstDir);
+    if (!result) {
+      String msg = "Failed to extract package:" + packagePath + " at: " + dstDir;
+      LOG.log(Level.SEVERE, msg);
+      throw new RuntimeException(msg);
+    }
   }
 
   /**
@@ -140,32 +156,6 @@ public class HeronExecutorTask implements Task {
     String javaOptsBase64 = DatatypeConverter.printBase64Binary(javaOpts.getBytes(Charset.forName("UTF-8")));
 
     return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
-  }
-
-  /*
-   * TODO create util and remove this method
-   */
-  private void extractTopologyPkgInSandbox(String srcFolder, String dstDir) {
-    String topologyPackage = Paths.get(srcFolder, "topology.tar.gz").toString();
-    LOG.log(Level.INFO, "Extracting topology : {0} at: {1}", new Object[]{topologyPackage, dstDir});
-    boolean result = untarPackage(topologyPackage, dstDir);
-    if (!result) {
-      LOG.log(Level.INFO, "Failed to extract topology package");
-      throw new RuntimeException("Failed to extract topology package");
-    }
-  }
-
-  /*
-   * TODO create util and remove this method
-   */
-  private void extractCorePkgInSandbox(String srcFolder, String dstDir) {
-    String corePackage = Paths.get(srcFolder, "heron-core.tar.gz").toString();
-    LOG.log(Level.INFO, "Extracting core: {0} at: {1}", new Object[]{corePackage, dstDir});
-    boolean result = untarPackage(corePackage, dstDir);
-    if (!result) {
-      LOG.log(Level.INFO, "Failed to extract core package");
-      throw new RuntimeException("Failed to extract core package");
-    }
   }
 
   /**

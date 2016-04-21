@@ -2,8 +2,8 @@ package com.twitter.heron.scheduler.reef;
 
 import com.twitter.heron.scheduler.reef.HeronMasterDriver.HeronExecutorLauncher;
 import com.twitter.heron.scheduler.reef.HeronMasterDriver.HeronSchedulerLauncher;
-import com.twitter.heron.scheduler.reef.HeronMasterDriver.HeronWorkerBuilder;
-import com.twitter.heron.scheduler.reef.HeronMasterDriver.HeronWorkerErrorHandler;
+import com.twitter.heron.scheduler.reef.HeronMasterDriver.HeronExecutorContainerBuilder;
+import com.twitter.heron.scheduler.reef.HeronMasterDriver.HeronExecutorContainerErrorHandler;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.PackingPlan;
@@ -18,6 +18,7 @@ import org.apache.reef.tang.Tang;
 import org.apache.reef.tang.annotations.Unit;
 import org.apache.reef.tang.exceptions.InjectionException;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -95,16 +96,20 @@ public class ReefLauncher implements ILauncher {
    * scheduler
    */
   private Configuration getHMDriverConf() {
+    String topologyPackageName = new File(topologyPackageLocation).getName();
+    String corePackageName = new File(coreReleasePackage).getName();
     return HeronDriverConfiguration.CONF.setMultiple(DriverConfiguration.GLOBAL_LIBRARIES, libJars)
             .set(DriverConfiguration.DRIVER_IDENTIFIER, topologyName)
             .set(DriverConfiguration.ON_DRIVER_STARTED, HeronSchedulerLauncher.class)
-            .set(DriverConfiguration.ON_EVALUATOR_ALLOCATED, HeronWorkerBuilder.class)
-            .set(DriverConfiguration.ON_EVALUATOR_FAILED, HeronWorkerErrorHandler.class)
+            .set(DriverConfiguration.ON_EVALUATOR_ALLOCATED, HeronExecutorContainerBuilder.class)
+            .set(DriverConfiguration.ON_EVALUATOR_FAILED, HeronExecutorContainerErrorHandler.class)
             .set(DriverConfiguration.ON_CONTEXT_ACTIVE, HeronExecutorLauncher.class)
             .set(DriverConfiguration.GLOBAL_FILES, topologyPackageLocation)
             .set(DriverConfiguration.GLOBAL_FILES, coreReleasePackage)
             .set(HeronDriverConfiguration.TOPOLOGY_NAME, topologyName)
             .set(HeronDriverConfiguration.TOPOLOGY_JAR, topologyJar)
+            .set(HeronDriverConfiguration.TOPOLOGY_PACKAGE_NAME, topologyPackageName)
+            .set(HeronDriverConfiguration.HERON_CORE_PACKAGE_NAME, corePackageName)
             .set(HeronDriverConfiguration.ROLE, role)
             .set(HeronDriverConfiguration.ENV, env)
             .set(HeronDriverConfiguration.CLUSTER, cluster)
