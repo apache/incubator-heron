@@ -14,6 +14,12 @@
 
 package com.twitter.heron.uploader.localfs;
 
-public class LocalFileSystemConstantsTest {
-  public static final String TEST_DATA_PATH = "/heron/uploaders/tests/java/com/twitter/heron/uploader/localfs/testdata";
+final class LocalFileSystemConstantsTest {
+  public static final String TEST_DATA_PATH =
+      "/heron/uploaders/tests/java/com/twitter/heron/uploader/localfs/testdata";
+
+  private LocalFileSystemConstantsTest() {
+    // Throw an exception if this ever *is* called
+    throw new AssertionError("Instantiating utility class " + this.getClass().getSimpleName());
+  }
 }
