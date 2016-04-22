@@ -44,12 +44,12 @@ public class SchedulerStateManagerAdaptor {
    * Construct SchedulerStateManagerAdaptor providing only the
    * interfaces used by scheduler.
    *
-   * @param delegate, the IStateManager which is already initialized.
+   * @param delegate an instance of IStateManager that is already initialized.
    * Noticed that the initialize and close of IStateManager is not in the
    * SchedulerStateManager. Users are restricted from using those interfaces
    * since it is upto the abstract scheduler to decide when to open and close.
-   * @param delegate, the instance of IStateManager
-   * @param timeout, the maximum time to wait in milliseconds
+   *
+   * @param timeout the maximum time to wait in milliseconds
    */
   public SchedulerStateManagerAdaptor(IStateManager delegate, int timeout) {
     this.delegate = delegate;
@@ -98,7 +98,7 @@ public class SchedulerStateManagerAdaptor {
   /**
    * Set the topology definition for the given topology
    *
-   * @param topologyName, the name of the topology
+   * @param topologyName the name of the topology
    * @return Boolean - Success or Failure
    */
   public Boolean setTopology(TopologyAPI.Topology topology, String topologyName) {

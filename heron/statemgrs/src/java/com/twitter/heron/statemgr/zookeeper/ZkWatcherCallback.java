@@ -19,11 +19,11 @@ import org.apache.zookeeper.Watcher;
 
 import com.twitter.heron.spi.statemgr.WatchCallback;
 
-public class ZkWatcherCallback {
-  static public Watcher makeZkWatcher(final WatchCallback watcher) {
-    return watcher == null ?
-        null :
-        new Watcher() {
+public final class ZkWatcherCallback {
+  public static Watcher makeZkWatcher(final WatchCallback watcher) {
+    return watcher == null
+        ? null
+        : new Watcher() {
           @Override
           public void process(WatchedEvent watchedEvent) {
             WatchCallback.WatchEventType watchEventType;
@@ -50,5 +50,10 @@ public class ZkWatcherCallback {
             watcher.processWatch(watchedEvent.getPath(), watchEventType);
           }
         };
+  }
+
+  private ZkWatcherCallback() {
+    // Throw an exception if this ever *is* called
+    throw new AssertionError("Instantiating utility class " + this.getClass().getSimpleName());
   }
 }

@@ -120,7 +120,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
       return false;
     }
     // Clean the connection when we are done.
-    LOG.info("Scheduler restarted topology successfully.");
+    LOG.fine("Scheduler restarted topology successfully.");
     return true;
   }
 
@@ -143,7 +143,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     }
 
     // Clean the connection when we are done.
-    LOG.info("Scheduler killed topology successfully.");
+    LOG.fine("Scheduler killed topology successfully.");
     return true;
   }
 }
