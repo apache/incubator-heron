@@ -8,6 +8,11 @@ echo "changing to `pwd`/.."
 cd ..
 mkdir -p .idea/
 cp -R scripts/resources/idea/* .idea/
+for directory in `ls -d ~/Library/Preferences/IntelliJIdea*`; do 
+	mkdir -p $directory/codestyles; 
+	rm -rf $directory/codestyles/HeronIDEA.xml
+	ln -s $PWD/tools/java/src/com/twitter/bazel/checkstyle/HeronIDEA.xml $directory/codestyles/HeronIDEA.xml; 
+done
 source scripts/get_all_heron_paths.sh
 #echo "completed sourcing the paths"
 readonly compiler_file=.idea/compiler.xml
