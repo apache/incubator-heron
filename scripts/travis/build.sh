@@ -6,6 +6,8 @@
 
 set -ex
 
+./scripts/release/status.sh
+
 # append the bazel default bazelrc to travis-ci/bazel.rc for using rules provided by bazel
 cat ~/.bazelrc >> tools/travis-ci/bazel.rc
 ./bazel_configure.py
