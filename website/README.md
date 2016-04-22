@@ -74,3 +74,13 @@ browser from the command line:
 ```bash
 $ open http://localhost:1313/heron
 ```
+
+To make site, including linkchecker.  If broken links found by linkchecker, see linkchecker-errors.csv
+
+```bash
+$ make site
+```
+
+
+
+
