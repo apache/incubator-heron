@@ -14,6 +14,8 @@ set -ex
 
 ls -al
 
+cat .git/HEAD
+
 # get the release tag version or the branch name
 if [ -z ${HERON_GIT_RELEASE+x} ];
 then
