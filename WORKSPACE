@@ -6,6 +6,11 @@ jackson_version = "2.6.3"
 powermock_version = "1.6.2"
 slf4j_version = "1.7.7"
 
+maven_server(
+  name = "default",
+  settings_file = "tools/settings.xml",
+)
+
 maven_jar(
   name = "antlr",
   artifact = "antlr:antlr:2.7.7",
@@ -199,7 +204,6 @@ maven_jar(
 maven_jar(
   name = "thrift",
   artifact = "org.apache.thrift:libthrift:0.5.0-1",
-  repository = "http://maven.twttr.com"
 )
 
 maven_jar(
