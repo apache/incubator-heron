@@ -12,14 +12,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.uploader.localfs;
-
-final class LocalFileSystemConstantsTest {
-  public static final String TEST_DATA_PATH =
-      "/heron/uploaders/tests/java/com/twitter/heron/uploader/localfs/testdata";
-
-  private LocalFileSystemConstantsTest() {
-    // Throw an exception if this ever *is* called
-    throw new AssertionError("Instantiating utility class " + this.getClass().getSimpleName());
-  }
-}
+// bazel java_binary rule requires src files
+// Empty.java act as this src file to build the binary

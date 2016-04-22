@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
@@ -44,7 +45,7 @@ import com.twitter.heron.spi.uploader.IUploader;
  * <p>
  * The config values for this uploader are:
  * heron.class.uploader (required) com.twitter.heron.uploader.s3.S3Uploader
- * heron.uploader.s3.bucket (required) The bucket that you have write access to where you want the topologie packages to be stored
+ * heron.uploader.s3.bucket (required) The bucket that you have write access to where you want the topology packages to be stored
  * heron.uploader.s3.path_prefix (optional) Optional prefix for the path to the topology packages
  * heron.uploader.s3.access_key (required) S3 access key that can be used to write to the bucket provided
  * heron.uploader.s3.secret_key (required) S3 access secret that can be used to write to the bucket provided
@@ -52,20 +53,22 @@ import com.twitter.heron.spi.uploader.IUploader;
 public class S3Uploader implements IUploader {
   private static final Logger LOG = Logger.getLogger(S3Uploader.class.getName());
 
-  String bucket;
-  AmazonS3Client s3Client;
-  String remoteFilePath;
+  private String bucket;
+  protected AmazonS3Client s3Client;
+  private String remoteFilePath;
 
-  // The path prefix will be prepended to the path inside the provided bucket. For example if you set bucket=foo and
-  // path_prefix=some/sub/folder then you can expect the final path in s3 to look like: 
+  // The path prefix will be prepended to the path inside the provided bucket.
+  // For example if you set bucket=foo and path_prefix=some/sub/folder then you
+  // can expect the final path in s3 to look like:
   // s3://foo/some/sub/folder/<topologyName>/topology.tar.gz
-  String pathPrefix;
+  private String pathPrefix;
 
-  // Stores the path to the backup version of the topology in case the deploy fails and it needs to be undone. This is
-  // the same as the existing path but prepended with `previous_`. This serves as a simple backup incase we need to revert.
-  String previousVersionFilePath;
+  // Stores the path to the backup version of the topology in case the deploy fails and
+  // it needs to be undone. This is the same as the existing path but prepended with `previous_`.
+  // This serves as a simple backup incase we need to revert.
+  private String previousVersionFilePath;
 
-  File packageFileHandler;
+  private File packageFileHandler;
 
   @Override
   public void initialize(Config config) {
@@ -98,7 +101,8 @@ public class S3Uploader implements IUploader {
     remoteFilePath = generateS3Path(pathPrefix, topologyName, packageFileHandler.getName());
 
     // Generate the location of the backup file incase we need to revert the deploy
-    previousVersionFilePath = generateS3Path(pathPrefix, topologyName, "previous_" + packageFileHandler.getName());
+    previousVersionFilePath = generateS3Path(pathPrefix, topologyName,
+        "previous_" + packageFileHandler.getName());
   }
 
   @Override
@@ -111,7 +115,7 @@ public class S3Uploader implements IUploader {
     // Attempt to write the topology package to s3
     try {
       s3Client.putObject(bucket, remoteFilePath, packageFileHandler);
-    } catch (Exception e) {
+    } catch (AmazonClientException e) {
       LOG.log(Level.SEVERE, "Error writing topology package to " + bucket + " " + remoteFilePath, e);
       return null;
     }
@@ -137,14 +141,14 @@ public class S3Uploader implements IUploader {
   /**
    * Generate the path to a file in s3 given a prefix, topologyName, and filename
    *
-   * @param pathPrefix designates any parent folders that should be prefixed to the resulting path
+   * @param pathPrefixParent designates any parent folders that should be prefixed to the resulting path
    * @param topologyName the name of the topology that we are uploaded
    * @param filename the name of the resulting file that is going to be uploaded
    * @return the full path of the package under the bucket. The bucket is not included in this path as it is a separate
    * argument that is passed to the putObject call in the s3 sdk.
    */
-  private String generateS3Path(String pathPrefix, String topologyName, String filename) {
-    List<String> pathParts = new ArrayList<>(Arrays.asList(pathPrefix.split("/")));
+  private String generateS3Path(String pathPrefixParent, String topologyName, String filename) {
+    List<String> pathParts = new ArrayList<>(Arrays.asList(pathPrefixParent.split("/")));
     pathParts.add(topologyName);
     pathParts.add(filename);
 
@@ -158,7 +162,7 @@ public class S3Uploader implements IUploader {
       try {
         // Restore the previous version of the topology
         s3Client.copyObject(bucket, previousVersionFilePath, bucket, remoteFilePath);
-      } catch (Exception e) {
+      } catch (AmazonClientException e) {
         LOG.log(Level.SEVERE, "Error undoing deploying", e);
         return false;
       }
@@ -169,7 +173,8 @@ public class S3Uploader implements IUploader {
 
   @Override
   public void close() {
-    // Cleanup the backup file if it exists as its not needed anymore. This will succeed whether the file exists or not.
+    // Cleanup the backup file if it exists as its not needed anymore.
+    // This will succeed whether the file exists or not.
     s3Client.deleteObject(bucket, previousVersionFilePath);
   }
 }

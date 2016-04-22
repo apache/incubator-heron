@@ -91,7 +91,8 @@ public class LocalLauncher implements ILauncher {
    */
   @Override
   public boolean launch(PackingPlan packing) {
-    LOG.info("Launching topology for local cluster " + LocalContext.cluster(config));
+    LOG.log(Level.FINE, "Launching topology for local cluster {0}",
+        LocalContext.cluster(config));
 
     TopologyAPI.Topology topology = Runtime.topology(runtime);
 

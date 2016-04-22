@@ -38,17 +38,17 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   private Config config;
 
   @Override
-  public void initialize(Config config) {
+  public void initialize(Config ipconfig) {
 
-    super.initialize(config);
-    this.config = config;
+    super.initialize(ipconfig);
+    this.config = ipconfig;
 
     // By default, we would init the file tree if it is not there
     boolean isInitLocalFileTree = LocalFileSystemContext.initLocalFileTree(config);
 
     if (isInitLocalFileTree && !initTree()) {
-      throw new IllegalArgumentException("Failed to initialize Local State manager. " +
-          "Check rootAddress: " + rootAddress);
+      throw new IllegalArgumentException("Failed to initialize Local State manager. "
+          + "Check rootAddress: " + rootAddress);
     }
   }
 
@@ -60,11 +60,23 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     LOG.log(Level.FINE, "Execution state directory: {0}", getExecutionStateDir());
     LOG.log(Level.FINE, "Scheduler location directory: {0}", getSchedulerLocationDir());
 
-    if ((FileUtils.isDirectoryExists(getTopologyDir()) || FileUtils.createDirectory(getTopologyDir())) &&
-        (FileUtils.isDirectoryExists(getTMasterLocationDir()) || FileUtils.createDirectory(getTMasterLocationDir())) &&
-        (FileUtils.isDirectoryExists(getPhysicalPlanDir()) || FileUtils.createDirectory(getPhysicalPlanDir())) &&
-        (FileUtils.isDirectoryExists(getExecutionStateDir()) || FileUtils.createDirectory(getExecutionStateDir())) &&
-        (FileUtils.isDirectoryExists(getSchedulerLocationDir()) || FileUtils.createDirectory(getSchedulerLocationDir()))) {
+    boolean topologyDir = FileUtils.isDirectoryExists(getTopologyDir())
+        || FileUtils.createDirectory(getTopologyDir());
+
+    boolean tmasterLocationDir = FileUtils.isDirectoryExists(getTMasterLocationDir())
+        || FileUtils.createDirectory(getTMasterLocationDir());
+
+    boolean physicalPlanDir = FileUtils.isDirectoryExists(getPhysicalPlanDir())
+        || FileUtils.createDirectory(getPhysicalPlanDir());
+
+    boolean executionStateDir = FileUtils.isDirectoryExists(getExecutionStateDir())
+        || FileUtils.createDirectory(getExecutionStateDir());
+
+    boolean schedulerLocationDir =  FileUtils.isDirectoryExists(getSchedulerLocationDir())
+        || FileUtils.createDirectory(getSchedulerLocationDir());
+
+    if (topologyDir && tmasterLocationDir && physicalPlanDir && executionStateDir
+        && schedulerLocationDir) {
       return true;
     }
 
@@ -113,7 +125,8 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   }
 
   @Override
-  public ListenableFuture<Boolean> setTMasterLocation(TopologyMaster.TMasterLocation location, String topologyName) {
+  public ListenableFuture<Boolean> setTMasterLocation(
+      TopologyMaster.TMasterLocation location, String topologyName) {
     return setData(getTMasterLocationPath(topologyName), location.toByteArray());
   }
 
@@ -123,12 +136,14 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   }
 
   @Override
-  public ListenableFuture<Boolean> setPhysicalPlan(PhysicalPlans.PhysicalPlan physicalPlan, String topologyName) {
+  public ListenableFuture<Boolean> setPhysicalPlan(
+      PhysicalPlans.PhysicalPlan physicalPlan, String topologyName) {
     return setData(getPhysicalPlanPath(topologyName), physicalPlan.toByteArray());
   }
 
   @Override
-  public ListenableFuture<Boolean> setSchedulerLocation(Scheduler.SchedulerLocation location, String topologyName) {
+  public ListenableFuture<Boolean> setSchedulerLocation(
+      Scheduler.SchedulerLocation location, String topologyName) {
     return setData(getSchedulerLocationPath(topologyName), location.toByteArray());
   }
 
@@ -158,28 +173,37 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   }
 
   @Override
-  public ListenableFuture<Scheduler.SchedulerLocation> getSchedulerLocation(WatchCallback watcher, String topologyName) {
-    return getData(getSchedulerLocationPath(topologyName), Scheduler.SchedulerLocation.newBuilder());
+  public ListenableFuture<Scheduler.SchedulerLocation> getSchedulerLocation(
+      WatchCallback watcher, String topologyName) {
+    return getData(getSchedulerLocationPath(topologyName),
+        Scheduler.SchedulerLocation.newBuilder());
   }
 
   @Override
-  public ListenableFuture<TopologyAPI.Topology> getTopology(WatchCallback watcher, String topologyName) {
+  public ListenableFuture<TopologyAPI.Topology> getTopology(
+      WatchCallback watcher, String topologyName) {
     return getData(getTopologyPath(topologyName), TopologyAPI.Topology.newBuilder());
   }
 
   @Override
-  public ListenableFuture<ExecutionEnvironment.ExecutionState> getExecutionState(WatchCallback watcher, String topologyName) {
-    return getData(getExecutionStatePath(topologyName), ExecutionEnvironment.ExecutionState.newBuilder());
+  public ListenableFuture<ExecutionEnvironment.ExecutionState> getExecutionState(
+      WatchCallback watcher, String topologyName) {
+    return getData(getExecutionStatePath(topologyName),
+        ExecutionEnvironment.ExecutionState.newBuilder());
   }
 
   @Override
-  public ListenableFuture<PhysicalPlans.PhysicalPlan> getPhysicalPlan(WatchCallback watcher, String topologyName) {
-    return getData(getPhysicalPlanPath(topologyName), PhysicalPlans.PhysicalPlan.newBuilder());
+  public ListenableFuture<PhysicalPlans.PhysicalPlan> getPhysicalPlan(
+      WatchCallback watcher, String topologyName) {
+    return getData(getPhysicalPlanPath(topologyName),
+        PhysicalPlans.PhysicalPlan.newBuilder());
   }
 
   @Override
-  public ListenableFuture<TopologyMaster.TMasterLocation> getTMasterLocation(WatchCallback watcher, String topologyName) {
-    return getData(getTMasterLocationPath(topologyName), TopologyMaster.TMasterLocation.newBuilder());
+  public ListenableFuture<TopologyMaster.TMasterLocation> getTMasterLocation(
+      WatchCallback watcher, String topologyName) {
+    return getData(getTMasterLocationPath(topologyName),
+        TopologyMaster.TMasterLocation.newBuilder());
   }
 
   @Override

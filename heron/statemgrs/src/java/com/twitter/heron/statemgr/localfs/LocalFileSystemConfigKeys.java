@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.spi.common.Resource;
 
-public class LocalFileSystemConfigKeys {
+final class LocalFileSystemConfigKeys {
   private static final Logger LOG = Logger.getLogger(LocalFileSystemConfigKeys.class.getName());
 
   // holds the mapping of keys to their corresponding key strings
@@ -32,9 +32,13 @@ public class LocalFileSystemConfigKeys {
           "com.twitter.heron.statemgr.localfs.LocalFileSystemKeys",
           LocalFileSystemConstants.KEYS_YAML);
     } catch (ClassNotFoundException e) {
-      LOG.severe("Unable to load the local file system uploader keys class " + e);
-      System.exit(1);
+      throw new RuntimeException("Unable to load the local file system uploader keys class " + e);
     }
+  }
+
+  private LocalFileSystemConfigKeys() {
+    // Throw an exception if this ever *is* called
+    throw new AssertionError("Instantiating utility class " + this.getClass().getSimpleName());
   }
 
   /*

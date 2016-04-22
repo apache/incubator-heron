@@ -54,7 +54,7 @@ public class ConfigReader {
       Path path = Paths.get(fileName);
 
       if (!Files.exists(path)) {
-        LOG.warning("Config file " + fileName + " does not exist.");
+        LOG.fine("Config file " + fileName + " does not exist");
         return props;
       }
 

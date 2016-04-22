@@ -41,6 +41,7 @@ import com.twitter.heron.statemgr.FileSystemStateManager;
 import com.twitter.heron.statemgr.zookeeper.ZkContext;
 import com.twitter.heron.statemgr.zookeeper.ZkWatcherCallback;
 
+// TODO(mfu): Add Proxy or tunnel support, rather than to return the value stored directly
 public class CuratorStateManager extends FileSystemStateManager {
   private static final Logger LOG = Logger.getLogger(CuratorStateManager.class.getName());
   private CuratorFramework client;
@@ -75,7 +76,8 @@ public class CuratorStateManager extends FileSystemStateManager {
     client.start();
 
     try {
-      if (!client.blockUntilConnected(ZkContext.connectionTimeoutMs(config), TimeUnit.MILLISECONDS)) {
+      if (!client.blockUntilConnected(ZkContext.connectionTimeoutMs(config),
+          TimeUnit.MILLISECONDS)) {
         throw new RuntimeException("Failed to initialize CuratorClient");
       }
     } catch (InterruptedException e) {
@@ -171,13 +173,14 @@ public class CuratorStateManager extends FileSystemStateManager {
 
     BackgroundCallback cb = new BackgroundCallback() {
       @Override
-      public void processResult(CuratorFramework client, CuratorEvent event) throws Exception {
+      public void processResult(CuratorFramework aClient, CuratorEvent event) throws Exception {
         byte[] data;
         if (event != null & (data = event.getData()) != null) {
           builder.mergeFrom(data);
           future.set((M) builder.build());
         } else {
-          future.setException(new RuntimeException("Failed to fetch data from path: " + event.getPath()));
+          future.setException(new RuntimeException("Failed to fetch data from path: "
+              + event.getPath()));
         }
       }
     };
@@ -192,7 +195,8 @@ public class CuratorStateManager extends FileSystemStateManager {
   }
 
   @Override
-  public ListenableFuture<Boolean> setTMasterLocation(TopologyMaster.TMasterLocation location, String topologyName) {
+  public ListenableFuture<Boolean> setTMasterLocation(
+      TopologyMaster.TMasterLocation location, String topologyName) {
     return createNode(getTMasterLocationPath(topologyName), location.toByteArray(), true);
   }
 
@@ -208,12 +212,14 @@ public class CuratorStateManager extends FileSystemStateManager {
   }
 
   @Override
-  public ListenableFuture<Boolean> setPhysicalPlan(PhysicalPlans.PhysicalPlan physicalPlan, String topologyName) {
+  public ListenableFuture<Boolean> setPhysicalPlan(
+      PhysicalPlans.PhysicalPlan physicalPlan, String topologyName) {
     return createNode(getPhysicalPlanPath(topologyName), physicalPlan.toByteArray(), false);
   }
 
   @Override
-  public ListenableFuture<Boolean> setSchedulerLocation(Scheduler.SchedulerLocation location, String topologyName) {
+  public ListenableFuture<Boolean> setSchedulerLocation(
+      Scheduler.SchedulerLocation location, String topologyName) {
     return createNode(getSchedulerLocationPath(topologyName), location.toByteArray(), true);
   }
 
@@ -249,28 +255,38 @@ public class CuratorStateManager extends FileSystemStateManager {
   }
 
   @Override
-  public ListenableFuture<TopologyMaster.TMasterLocation> getTMasterLocation(WatchCallback watcher, String topologyName) {
-    return getNodeData(watcher, getTMasterLocationPath(topologyName), TopologyMaster.TMasterLocation.newBuilder());
+  public ListenableFuture<TopologyMaster.TMasterLocation> getTMasterLocation(
+      WatchCallback watcher, String topologyName) {
+    return getNodeData(watcher, getTMasterLocationPath(topologyName),
+        TopologyMaster.TMasterLocation.newBuilder());
   }
 
   @Override
-  public ListenableFuture<Scheduler.SchedulerLocation> getSchedulerLocation(WatchCallback watcher, String topologyName) {
-    return getNodeData(watcher, getSchedulerLocationPath(topologyName), Scheduler.SchedulerLocation.newBuilder());
+  public ListenableFuture<Scheduler.SchedulerLocation> getSchedulerLocation(
+      WatchCallback watcher, String topologyName) {
+    return getNodeData(watcher, getSchedulerLocationPath(topologyName),
+        Scheduler.SchedulerLocation.newBuilder());
   }
 
   @Override
-  public ListenableFuture<TopologyAPI.Topology> getTopology(WatchCallback watcher, String topologyName) {
-    return getNodeData(watcher, getTopologyPath(topologyName), TopologyAPI.Topology.newBuilder());
+  public ListenableFuture<TopologyAPI.Topology> getTopology(
+      WatchCallback watcher, String topologyName) {
+    return getNodeData(watcher, getTopologyPath(topologyName),
+        TopologyAPI.Topology.newBuilder());
   }
 
   @Override
-  public ListenableFuture<ExecutionEnvironment.ExecutionState> getExecutionState(WatchCallback watcher, String topologyName) {
-    return getNodeData(watcher, getExecutionStatePath(topologyName), ExecutionEnvironment.ExecutionState.newBuilder());
+  public ListenableFuture<ExecutionEnvironment.ExecutionState> getExecutionState(
+      WatchCallback watcher, String topologyName) {
+    return getNodeData(watcher, getExecutionStatePath(topologyName),
+        ExecutionEnvironment.ExecutionState.newBuilder());
   }
 
   @Override
-  public ListenableFuture<PhysicalPlans.PhysicalPlan> getPhysicalPlan(WatchCallback watcher, String topologyName) {
-    return getNodeData(watcher, getPhysicalPlanPath(topologyName), PhysicalPlans.PhysicalPlan.newBuilder());
+  public ListenableFuture<PhysicalPlans.PhysicalPlan> getPhysicalPlan(
+      WatchCallback watcher, String topologyName) {
+    return getNodeData(watcher, getPhysicalPlanPath(topologyName),
+        PhysicalPlans.PhysicalPlan.newBuilder());
   }
 
   @Override
