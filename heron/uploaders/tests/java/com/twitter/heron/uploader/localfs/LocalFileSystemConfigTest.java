@@ -28,7 +28,7 @@ import junit.framework.Assert;
 
 public class LocalFileSystemConfigTest {
 
-  private static final String topologyPackageFile = "/tmp/something.tar.gz";
+  private static final String TOPOLOGY_PACKAGE_FILE = "/tmp/something.tar.gz";
 
   private Config getDefaultConfig() {
     Config config = Config.newBuilder()
@@ -91,7 +91,7 @@ public class LocalFileSystemConfigTest {
     uploader.initialize(config);
 
     String destFile = Paths.get(LocalFileSystemContext.fileSystemDirectory(config),
-        new File(topologyPackageFile).getName()).toString();
+        new File(TOPOLOGY_PACKAGE_FILE).getName()).toString();
 
     Assert.assertEquals(
         uploader.getTopologyFile(),
@@ -131,7 +131,7 @@ public class LocalFileSystemConfigTest {
     uploader.initialize(config);
 
     String destFile = Paths.get(LocalFileSystemContext.fileSystemDirectory(config),
-        new File(topologyPackageFile).getName()).toString();
+        new File(TOPOLOGY_PACKAGE_FILE).getName()).toString();
 
     Assert.assertEquals(
         uploader.getTopologyFile(),

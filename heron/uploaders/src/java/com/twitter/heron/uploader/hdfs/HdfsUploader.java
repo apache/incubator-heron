@@ -26,15 +26,15 @@ import com.twitter.heron.spi.uploader.IUploader;
 public class HdfsUploader implements IUploader {
   private static final Logger LOG = Logger.getLogger(HdfsUploader.class.getName());
   // get the directory containing the file
-  String destTopologyDirectoryURI;
+  private String destTopologyDirectoryURI;
   private Config config;
   private String hadoopConfdir;
   private String topologyPackageLocation;
   private URI packageURI;
 
   @Override
-  public void initialize(Config config) {
-    this.config = config;
+  public void initialize(Config ipconfig) {
+    this.config = ipconfig;
 
     this.hadoopConfdir = HdfsContext.hadoopConfigDirectory(config);
     this.destTopologyDirectoryURI = HdfsContext.hdfsTopologiesDirectoryURI(config);
@@ -71,8 +71,8 @@ public class HdfsUploader implements IUploader {
     }
 
     // copy the topology package to target working directory
-    LOG.info("Uploading topology " + topologyPackageLocation +
-        " package to target hdfs " + packageURI.toString());
+    LOG.info("Uploading topology " + topologyPackageLocation
+        + " package to target hdfs " + packageURI.toString());
 
     if (!HdfsUtils.copyFromLocal(
         hadoopConfdir, topologyPackageLocation, packageURI.toString(), true)) {
