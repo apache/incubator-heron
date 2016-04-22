@@ -12,14 +12,15 @@ assets:
 pages:
 	@hugo
 
+linkchecker:
+	@bash linkchecker.sh
+
 javadocs:
 	@./javadocs.sh
-
-linkchecker:
-	@echo "TODO: linkchecking"
 
 site:
 	@make assets
 	@make pages
 	@make javadocs
 	@make linkchecker
+
