@@ -18,9 +18,9 @@ then
   then
     exit 1
   fi
-  if [ "${git_release}" = "HEAD" ]; 
+  if [ "${git_release}" = "HEAD" ];
   then
-    git_release=$(git describe --tags)
+    git_release=$(git describe --tags --always)
     if [[ $? != 0 ]];
     then
       exit 1
