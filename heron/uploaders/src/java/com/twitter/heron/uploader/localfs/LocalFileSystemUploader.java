@@ -37,8 +37,8 @@ public class LocalFileSystemUploader implements IUploader {
   private String topologyPackageLocation;
 
   @Override
-  public void initialize(Config config) {
-    this.config = config;
+  public void initialize(Config ipconfig) {
+    this.config = ipconfig;
 
     this.destTopologyDirectory = LocalFileSystemContext.fileSystemDirectory(config);
 
@@ -94,8 +94,8 @@ public class LocalFileSystemUploader implements IUploader {
     }
 
     // copy the topology package to target working directory
-    LOG.fine("Copying topology " + topologyPackageLocation +
-        " package to target working directory " + filePath.toString());
+    LOG.fine("Copying topology " + topologyPackageLocation
+        + " package to target working directory " + filePath.toString());
 
     Path source = Paths.get(topologyPackageLocation);
     try {

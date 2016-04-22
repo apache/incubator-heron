@@ -28,7 +28,10 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class S3UploaderTest {
   private S3Uploader uploader;
@@ -61,7 +64,9 @@ public class S3UploaderTest {
 
     URI uri = uploader.uploadPackage();
 
-    verify(mockS3Client).putObject(Mockito.eq(expectedBucket), Mockito.eq(expectedRemotePath), Mockito.any(File.class));
+    verify(mockS3Client).putObject(Mockito.eq(expectedBucket),
+        Mockito.eq(expectedRemotePath), Mockito.any(File.class));
+
     verify(mockS3Client).getResourceUrl(expectedBucket, expectedRemotePath);
 
     assertEquals(new URI("http://url"), uri);
@@ -78,8 +83,12 @@ public class S3UploaderTest {
 
     URI uri = uploader.uploadPackage();
 
-    verify(mockS3Client).copyObject(expectedBucket, expectedRemotePath, expectedBucket, expectedPreviousVersionPath);
-    verify(mockS3Client).putObject(Mockito.eq(expectedBucket), Mockito.eq(expectedRemotePath), Mockito.any(File.class));
+    verify(mockS3Client).copyObject(expectedBucket, expectedRemotePath, expectedBucket,
+        expectedPreviousVersionPath);
+
+    verify(mockS3Client).putObject(Mockito.eq(expectedBucket), Mockito.eq(expectedRemotePath),
+        Mockito.any(File.class));
+
     verify(mockS3Client).getResourceUrl(expectedBucket, expectedRemotePath);
 
     assertEquals(new URI("http://url"), uri);
@@ -91,8 +100,8 @@ public class S3UploaderTest {
     String expectedBucket = "bucket";
 
     when(mockS3Client.doesObjectExist(expectedBucket, expectedRemotePath)).thenReturn(true);
-    when(mockS3Client.putObject(Mockito.eq(expectedBucket), Mockito.eq(expectedRemotePath), Mockito.any(File.class)))
-        .thenThrow(AmazonClientException.class);
+    when(mockS3Client.putObject(Mockito.eq(expectedBucket), Mockito.eq(expectedRemotePath),
+        Mockito.any(File.class))).thenThrow(AmazonClientException.class);
 
     URI uri = uploader.uploadPackage();
     assertEquals(null, uri);
@@ -104,11 +113,13 @@ public class S3UploaderTest {
     String expectedPreviousVersionPath = "test-topology/previous_topology.tar.gz";
     String expectedBucket = "bucket";
 
-    when(mockS3Client.doesObjectExist(expectedBucket, expectedPreviousVersionPath)).thenReturn(true);
+    when(mockS3Client.doesObjectExist(
+        expectedBucket, expectedPreviousVersionPath)).thenReturn(true);
 
     uploader.undo();
 
-    verify(mockS3Client).copyObject(expectedBucket, expectedPreviousVersionPath, expectedBucket, expectedRemotePath);
+    verify(mockS3Client).copyObject(expectedBucket, expectedPreviousVersionPath,
+        expectedBucket, expectedRemotePath);
   }
 
   @Test
@@ -116,11 +127,13 @@ public class S3UploaderTest {
     String expectedPreviousVersionPath = "test-topology/previous_topology.tar.gz";
     String expectedBucket = "bucket";
 
-    when(mockS3Client.doesObjectExist(expectedBucket, expectedPreviousVersionPath)).thenReturn(false);
+    when(mockS3Client.doesObjectExist(expectedBucket, expectedPreviousVersionPath))
+        .thenReturn(false);
 
     uploader.undo();
 
-    verify(mockS3Client, never()).copyObject(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+    verify(mockS3Client, never()).copyObject(Mockito.anyString(),
+        Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
   }
 
   @Test
@@ -146,7 +159,8 @@ public class S3UploaderTest {
 
     uploader.uploadPackage();
 
-    verify(mockS3Client).putObject(Mockito.eq("bucket"), Mockito.eq(expectedRemotePath), Mockito.any(File.class));
+    verify(mockS3Client).putObject(Mockito.eq("bucket"),
+        Mockito.eq(expectedRemotePath), Mockito.any(File.class));
   }
 
 }
