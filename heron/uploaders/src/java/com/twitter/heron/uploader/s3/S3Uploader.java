@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
@@ -44,7 +45,7 @@ import com.twitter.heron.spi.uploader.IUploader;
  * <p>
  * The config values for this uploader are:
  * heron.class.uploader (required) com.twitter.heron.uploader.s3.S3Uploader
- * heron.uploader.s3.bucket (required) The bucket that you have write access to where you want the topologie packages to be stored
+ * heron.uploader.s3.bucket (required) The bucket that you have write access to where you want the topology packages to be stored
  * heron.uploader.s3.path_prefix (optional) Optional prefix for the path to the topology packages
  * heron.uploader.s3.access_key (required) S3 access key that can be used to write to the bucket provided
  * heron.uploader.s3.secret_key (required) S3 access secret that can be used to write to the bucket provided
@@ -114,9 +115,8 @@ public class S3Uploader implements IUploader {
     // Attempt to write the topology package to s3
     try {
       s3Client.putObject(bucket, remoteFilePath, packageFileHandler);
-    } catch (Exception e) {
-      LOG.log(Level.SEVERE, "Error writing topology package to "
-          + bucket + " " + remoteFilePath, e);
+    } catch (AmazonClientException e) {
+      LOG.log(Level.SEVERE, "Error writing topology package to " + bucket + " " + remoteFilePath, e);
       return null;
     }
 
@@ -126,8 +126,7 @@ public class S3Uploader implements IUploader {
 
     // This will happen if the package does not actually exist in the place where we uploaded it to.
     if (resourceUrl == null) {
-      LOG.log(Level.SEVERE, "Resource not found for bucket " + bucket 
-          + " and path " + remoteFilePath);
+      LOG.log(Level.SEVERE, "Resource not found for bucket " + bucket + " and path " + remoteFilePath);
       return null;
     }
 
@@ -163,7 +162,7 @@ public class S3Uploader implements IUploader {
       try {
         // Restore the previous version of the topology
         s3Client.copyObject(bucket, previousVersionFilePath, bucket, remoteFilePath);
-      } catch (Exception e) {
+      } catch (AmazonClientException e) {
         LOG.log(Level.SEVERE, "Error undoing deploying", e);
         return false;
       }
