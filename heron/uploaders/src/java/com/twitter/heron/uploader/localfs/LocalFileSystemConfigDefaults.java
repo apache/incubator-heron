@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.spi.common.Resource;
 
-public class LocalFileSystemConfigDefaults {
+final class LocalFileSystemConfigDefaults {
   private static final Logger LOG = Logger.getLogger(
       LocalFileSystemDefaults.class.getName());
 
@@ -33,9 +33,13 @@ public class LocalFileSystemConfigDefaults {
           "com.twitter.heron.uploader.localfs.LocalFileSystemConfigDefaults",
           LocalFileSystemConstants.DEFAULTS_YAML);
     } catch (ClassNotFoundException e) {
-      LOG.severe("Unable to load the Defaults class " + e);
-      System.exit(1);
+      throw new RuntimeException("Unable to load the defaults class " + e);
     }
+  }
+
+  private LocalFileSystemConfigDefaults() {
+    // Throw an exception if this ever *is* called
+    throw new AssertionError("Instantiating utility class " + this.getClass().getSimpleName());
   }
 
   /*

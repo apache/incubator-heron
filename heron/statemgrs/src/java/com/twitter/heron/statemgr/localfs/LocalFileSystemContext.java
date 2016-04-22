@@ -22,11 +22,11 @@ public class LocalFileSystemContext extends Context {
   /**
    * Get the config specifying whether to initialize file directory hierarchy
    *
-   * @param Config, the config map
-   * @return true, if config does not exist, else the specified value
+   * @param config the config map
+   * @return true if config does not exist, else the specified value
    */
   public static boolean initLocalFileTree(Config config) {
-    return config.get(LocalFileSystemKeys.initializeFileTree()) == null ?
-        true : (Boolean) config.get(LocalFileSystemKeys.initializeFileTree());
+    return config.get(LocalFileSystemKeys.initializeFileTree()) == null
+        ? true : (Boolean) config.get(LocalFileSystemKeys.initializeFileTree());
   }
 }
