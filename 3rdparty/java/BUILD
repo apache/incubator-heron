@@ -40,9 +40,10 @@ java_library(
 java_library(
     name = "jarjar",
     srcs = [ "Empty.java" ],
-    exports = [ "@kryo//jar" ],
+    exports = [ "@jarjar//jar" ],
     deps = [
-        "@kryo//jar",
+        "@asm-all//jar",
+        "@jarjar//jar",
     ],
 )
 

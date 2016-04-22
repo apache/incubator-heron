@@ -39,6 +39,7 @@ jarjar_binary(
     name = "heron-instance",
     src = ":instance-unshaded_deploy.jar",
     shade = "shade.conf",
+    deps = ["@jarjar//jar"]
 )
 
 filegroup(

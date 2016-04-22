@@ -12,6 +12,11 @@ maven_jar(
 )
 
 maven_jar(
+  name = "asm-all",
+  artifact = "org.ow2.asm:asm-all:5.1",
+)
+
+maven_jar(
   name = "aws-java-sdk-core",
   artifact = "com.amazonaws:aws-java-sdk-core:" + aws_version,
 )
@@ -108,7 +113,7 @@ maven_jar(
 
 maven_jar(
   name = "jarjar",
-  artifact = "org.sonatype.plugins:jarjar-maven-plugin:1.6.0",
+  artifact = "org.sonatype.plugins:jarjar-maven-plugin:1.9",
 )
 
 maven_jar(

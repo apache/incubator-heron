@@ -15,13 +15,14 @@
 def jarjar_binary_impl(ctx):
   src_file = ctx.file.src
   shade_file = ctx.file.shade
-  jarjar = ctx.file._jarjar
+  jarjar = ctx.executable._jarjar
 
   class_jar = ctx.outputs.class_jar
   ctx.action(
+      executable = jarjar,
       inputs = [ src_file, shade_file, jarjar ],
       outputs = [ class_jar ],
-      command = "java -Dverbose=true -jar %s process %s %s %s" % (jarjar.path, shade_file.path, src_file.path, class_jar.path))
+      arguments = ["process", shade_file.path, src_file.path, class_jar.path])
 
   return struct(files = set([class_jar]))
 
@@ -40,10 +41,11 @@ jarjar_attrs = {
 jarjar_binary = rule(
     jarjar_binary_impl,
     attrs = jarjar_attrs + {
+        "deps": attr.label_list(),
         "_jarjar": attr.label(
-            default = Label("//3rdparty/java:jarjar"),
+            default = Label("//3rdparty/java/jarjar:jarjar_bin"),
             allow_files = True,
-            single_file = True,
+            executable = True,
         ),
     },
     outputs = {
