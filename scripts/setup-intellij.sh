@@ -8,12 +8,6 @@ echo "changing to `pwd`/.."
 cd ..
 mkdir -p .idea/
 cp -R scripts/resources/idea/* .idea/
-## the below lines may be redundant if we go with project specific codeStyle ####
-for directory in `ls -d ~/Library/Preferences/IntelliJIdea*`; do 
-	mkdir -p $directory/codestyles; 
-	rm -rf $directory/codestyles/HeronIDEA.xml
-	ln -s $PWD/tools/java/src/com/twitter/bazel/checkstyle/HeronIDEA.xml $directory/codestyles/HeronIDEA.xml; 
-done
 ## end ####
 source scripts/get_all_heron_paths.sh
 #echo "completed sourcing the paths"
