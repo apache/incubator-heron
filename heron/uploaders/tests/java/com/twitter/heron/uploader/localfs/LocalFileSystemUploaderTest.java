@@ -81,7 +81,8 @@ public class LocalFileSystemUploaderTest {
   public void testSourceNotExists() throws Exception {
 
     // identify the location of the test topology tar file
-    String topologyPackage = Paths.get(testTopologyDirectory, "doesnot-exist-topology.tar").toString();
+    String topologyPackage = Paths.get(
+        testTopologyDirectory, "doesnot-exist-topology.tar").toString();
 
     Config newconfig = Config.newBuilder()
         .putAll(config).put(Keys.topologyPackageFile(), topologyPackage).build();
