@@ -13,7 +13,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.HttpUtils;
-import com.twitter.heron.spi.scheduler.Command;
+import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.utils.NetworkUtils;
 
 @RunWith(PowerMockRunner.class)
