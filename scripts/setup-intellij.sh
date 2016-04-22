@@ -7,7 +7,7 @@ cd $(dirname "$0")
 echo "changing to `pwd`/.."
 cd ..
 mkdir -p .idea/
-cp -R scripts/resources/idea/*.* .idea/
+cp -R scripts/resources/idea/* .idea/
 source scripts/get_all_heron_paths.sh
 #echo "completed sourcing the paths"
 readonly compiler_file=.idea/compiler.xml
@@ -46,6 +46,7 @@ cat > $iml_file <<EOH
   </component>
   <component name="NewModuleRootManager">
     <output url="file://\$MODULE_DIR\$/out" />
+
     <content url="file://\$MODULE_DIR$/heron">
 EOH
 echo '      <sourceFolder url="file://$MODULE_DIR$/heron/config/src" type="java-resource" />'>> $iml_file
