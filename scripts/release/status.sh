@@ -10,6 +10,8 @@
 # If the script exits with non-zero code, it's considered as a failure
 # and the output will be discarded.
 
+ls -al
+
 # get the release tag version or the branch name
 if [ -z ${HERON_GIT_RELEASE+x} ];
 then
