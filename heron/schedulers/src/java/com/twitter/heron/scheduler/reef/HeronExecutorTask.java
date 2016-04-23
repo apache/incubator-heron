@@ -1,25 +1,35 @@
 package com.twitter.heron.scheduler.reef;
 
-import com.twitter.heron.api.generated.TopologyAPI.Topology;
-import com.twitter.heron.scheduler.SchedulerConfig;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.*;
-import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.ShellUtils;
-import com.twitter.heron.spi.utils.NetworkUtils;
-import com.twitter.heron.spi.utils.TopologyUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.reef.runtime.common.files.REEFFileNames;
-import org.apache.reef.tang.annotations.Parameter;
-import org.apache.reef.task.Task;
-
-import javax.inject.Inject;
-import javax.xml.bind.DatatypeConverter;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.inject.Inject;
+import javax.xml.bind.DatatypeConverter;
+
+import org.apache.commons.io.FilenameUtils;
+import org.apache.reef.runtime.common.files.REEFFileNames;
+import org.apache.reef.tang.annotations.Parameter;
+import org.apache.reef.task.Task;
+
+import com.twitter.heron.api.generated.TopologyAPI.Topology;
+import com.twitter.heron.scheduler.SchedulerConfig;
+import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.Cluster;
+import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.Environ;
+import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.HeronCorePackageName;
+import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.HeronExecutorId;
+import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.PackedPlan;
+import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.Role;
+import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.TopologyJar;
+import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.TopologyName;
+import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.TopologyPackageName;
+import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.ShellUtils;
+import com.twitter.heron.spi.utils.NetworkUtils;
+import com.twitter.heron.spi.utils.TopologyUtils;
 
 public class HeronExecutorTask implements Task {
   private static final Logger LOG = Logger.getLogger(HeronExecutorTask.class.getName());
@@ -87,6 +97,7 @@ public class HeronExecutorTask implements Task {
   }
 
   private String getExecutorCommand(int container) {
+    // TODO(mfu): Not sure whether it works in distributed shared environment. In Twitter, we need to request ports as a kind of resource to guarantee the availability and isolation of ports resource.
     int port1 = NetworkUtils.getFreePort();
     int port2 = NetworkUtils.getFreePort();
     int port3 = NetworkUtils.getFreePort();
@@ -98,46 +109,47 @@ public class HeronExecutorTask implements Task {
     }
 
     String executorCmd = String.format(
-            "%s %d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %d %s %s %d %s %s %s %s %s %s %d",
-            Context.executorSandboxBinary(config),
-            container,
-            topology.getName(),
-            topology.getId(),
-            FilenameUtils.getName(Context.topologyDefinitionFile(config)),
-            packedPlan,
-            Context.stateManagerConnectionString(config),
-            Context.stateManagerRootPath(config),
-            Context.tmasterSandboxBinary(config),
-            Context.stmgrSandboxBinary(config),
-            Context.metricsManagerSandboxClassPath(config),
-            formatJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)),
-            TopologyUtils.makeClassPath(topology, Context.topologyJarFile(config)),
-            port1,
-            port2,
-            port3,
-            Context.systemConfigSandboxFile(config),
-            TopologyUtils.formatRamMap(TopologyUtils.getComponentRamMap(topology, Context.instanceRam(config))),
-            formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)),
-            Context.topologyPackageType(config),
-            Context.topologyJarFile(config),
-            Context.javaSandboxHome(config),
-            shellPort,
-            Context.logSandboxDirectory(config),
-            Context.shellSandboxBinary(config),
-            port4,
-            Context.cluster(config),
-            Context.role(config),
-            Context.environ(config),
-            Context.instanceSandboxClassPath(config),
-            Context.metricsSinksSandboxFile(config),
-            "no_need_since_scheduler_is_started",
-            0);
+        "%s %d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %d %s %s %d %s %s %s %s %s %s %d",
+        Context.executorSandboxBinary(config),
+        container,
+        topology.getName(),
+        topology.getId(),
+        FilenameUtils.getName(Context.topologyDefinitionFile(config)),
+        packedPlan,
+        Context.stateManagerConnectionString(config),
+        Context.stateManagerRootPath(config),
+        Context.tmasterSandboxBinary(config),
+        Context.stmgrSandboxBinary(config),
+        Context.metricsManagerSandboxClassPath(config),
+        formatJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)),
+        TopologyUtils.makeClassPath(topology, Context.topologyJarFile(config)),
+        port1,
+        port2,
+        port3,
+        Context.systemConfigSandboxFile(config),
+        TopologyUtils.formatRamMap(TopologyUtils.getComponentRamMap(topology, Context.instanceRam(config))),
+        formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)),
+        Context.topologyPackageType(config),
+        Context.topologyJarFile(config),
+        Context.javaSandboxHome(config),
+        shellPort,
+        Context.logSandboxDirectory(config),
+        Context.shellSandboxBinary(config),
+        port4,
+        Context.cluster(config),
+        Context.role(config),
+        Context.environ(config),
+        Context.instanceSandboxClassPath(config),
+        Context.metricsSinksSandboxFile(config),
+        "no_need_since_scheduler_is_started",
+        0);
 
     LOG.log(Level.INFO, "Executor command line: {0}", executorCmd);
 
     return executorCmd;
   }
 
+  // TODO(mfu): This method is duplicated in HeronMasterDriver.
   private void extractPackageInSandbox(String srcFolder, String fileName, String dstDir) {
     String packagePath = Paths.get(srcFolder, fileName).toString();
     LOG.log(Level.INFO, "Extracting package: {0} at: {1}", new Object[]{packagePath, dstDir});
@@ -165,11 +177,11 @@ public class HeronExecutorTask implements Task {
     String cmd = String.format("tar -xvf %s", packageName);
 
     int ret = ShellUtils.runSyncProcess(false,
-            true,
-            cmd,
-            new StringBuilder(),
-            new StringBuilder(),
-            new File(targetFolder));
+        true,
+        cmd,
+        new StringBuilder(),
+        new StringBuilder(),
+        new File(targetFolder));
 
     return ret == 0 ? true : false;
   }

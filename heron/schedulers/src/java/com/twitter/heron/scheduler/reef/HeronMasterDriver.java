@@ -1,12 +1,16 @@
 package com.twitter.heron.scheduler.reef;
 
-import com.twitter.heron.scheduler.SchedulerMain;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.*;
-import com.twitter.heron.spi.common.PackingPlan;
-import com.twitter.heron.spi.common.PackingPlan.ContainerPlan;
-import com.twitter.heron.spi.common.PackingPlan.Resource;
-import com.twitter.heron.spi.common.ShellUtils;
-import com.twitter.heron.spi.utils.TopologyUtils;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.inject.Inject;
+
 import org.apache.reef.driver.context.ActiveContext;
 import org.apache.reef.driver.context.ContextConfiguration;
 import org.apache.reef.driver.evaluator.AllocatedEvaluator;
@@ -21,15 +25,20 @@ import org.apache.reef.tang.annotations.Unit;
 import org.apache.reef.wake.EventHandler;
 import org.apache.reef.wake.time.event.StartTime;
 
-import javax.inject.Inject;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.twitter.heron.scheduler.SchedulerMain;
+import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.Cluster;
+import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.Environ;
+import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.HeronCorePackageName;
+import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.HttpPort;
+import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.Role;
+import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.TopologyJar;
+import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.TopologyName;
+import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.TopologyPackageName;
+import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.common.PackingPlan.ContainerPlan;
+import com.twitter.heron.spi.common.PackingPlan.Resource;
+import com.twitter.heron.spi.common.ShellUtils;
+import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
  * {@link HeronMasterDriver} serves Heron Scheduler by managing containers / processes for Heron TMaster and workers
@@ -49,6 +58,9 @@ public class HeronMasterDriver {
    */
   private static HeronMasterDriver instance;
 
+  // TODO(mfu):
+  // TODO(mfu): 1. Have we handled the precise reconstruction of it after scheduler process dies unexpectedly and restarts?
+  // TODO(mfu): 2. Need we make it a thread-safe Map, for instance, ConcurrentHashMap, since I see below it is also used not in synchronized block.
   private final Map<String, ActiveContext> contexts = new HashMap<>();
   private final String topologyPackageName;
   private final String heronCorePackageName;
@@ -66,6 +78,9 @@ public class HeronMasterDriver {
 
   // Currently yarn does not support mapping container requests to allocation (YARN-4879). As a result it is not
   // possible to concurrently start containers of different sizes. This lock ensures workers are started serially.
+  // TODO(mfu): It may not be a good idea to start workers serially, since deployment of job can be super slow, in our experiences in Twitter.
+  // TODO(mfu): An option is let the PackingAlgorithm returns always same size container, which in fact is what we do in Twitter.
+  // TODO(mfu): Even trying to make works starting serially, better to use Semaphore.
   private final Object containerAllocationLock = new Object();
 
   // Container request submission and allocation takes places on different threads. This variable is used to share the
@@ -73,6 +88,9 @@ public class HeronMasterDriver {
   private String heronExecutorId;
 
   // This map will be needed to make container requests for a failed heron executor
+  // TODO(mfu):
+  // TODO(mfu): 1. Have we handled the precise reconstruction of it after scheduler process dies unexpectedly and restarts?
+  // TODO(mfu): 2. Need we make it a thread-safe Map, for instance, ConcurrentHashMap, since I see below it is also used not in synchronized block.
   private Map<String, String> reefContainerToHeronExecutorMap = new HashMap<>();
 
   @Inject
@@ -89,10 +107,10 @@ public class HeronMasterDriver {
 
     // REEF related initialization
     this.requestor = requestor;
-    reefFileNames = fileNames;
+    this.reefFileNames = fileNames;
 
     // Heron related initialization
-    localHeronConfDir = ".";
+    this.localHeronConfDir = ".";
     this.cluster = cluster;
     this.role = role;
     this.topologyName = topologyName;
@@ -118,11 +136,12 @@ public class HeronMasterDriver {
     // invocations?
     LOG.log(Level.INFO, "Scheduling container for TM: {0}", topologyName);
     try {
+      // TODO(mfu): It is designed that TMaster is co-located in the same host with Scheduler. Otherwise, handling of some cases, for instance, network partition can be hard.
+      // TODO(mfu): you may leave it as is, but add an issue to trace it.
       requestContainerForExecutor(TMASTER_CONTAINER_ID, 1, TM_MEM_SIZE_MB);
     } catch (InterruptedException e) {
       // Deployment of topology fails if there is a error starting TMaster
-      LOG.log(Level.WARNING, "Error while waiting for topology master container allocation", e);
-      throw new RuntimeException(e);
+      throw new RuntimeException("Error while waiting for topology master container allocation", e);
     }
   }
 
@@ -136,12 +155,12 @@ public class HeronMasterDriver {
       Resource reqResource = entry.getValue().resource;
 
 //      TODO fix mem computation int mem = getMemInMB(reqResource.ram);
-      int mem = 512;
+      int mem = getMemInMBForExecutor(reqResource);
       try {
         requestContainerForExecutor(entry.getKey(), getCpuForExecutor(reqResource), mem);
       } catch (InterruptedException e) {
-        LOG.log(Level.WARNING, "Error while waiting for container allocation for workers", e);
-        LOG.log(Level.WARNING, "Continue container request for remaining workers", e);
+        LOG.log(Level.WARNING, "Error while waiting for container allocation for workers; Continue container request for remaining workers", e);
+        // TODO(mfu): So just log as WARNING without any actions on it?
       }
     }
   }
@@ -185,17 +204,16 @@ public class HeronMasterDriver {
       extractPackageInSandbox(globalFolder, topologyPackageName, localHeronConfDir);
       extractPackageInSandbox(globalFolder, heronCorePackageName, localHeronConfDir);
 
-      launchSchedulerServer();
+      launchScheduler();
     }
 
-    private void launchSchedulerServer() {
+    private void launchScheduler() {
       try {
         // initialize the scheduler with the options
         SchedulerMain schedulerMain = new SchedulerMain(cluster, role, env, topologyName, topologyJar, httpPort);
         schedulerMain.runScheduler();
       } catch (IOException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-        LOG.log(Level.SEVERE, "Failed to launch Heron Scheduler", e);
-        throw new RuntimeException(e);
+        throw new RuntimeException("Failed to launch Heron Scheduler", e);
       }
     }
 
@@ -205,7 +223,6 @@ public class HeronMasterDriver {
       boolean result = untarPackage(packagePath, dstDir);
       if (!result) {
         String msg = "Failed to extract package:" + packagePath + " at: " + dstDir;
-        LOG.log(Level.SEVERE, msg);
         throw new RuntimeException(msg);
       }
     }
@@ -217,11 +234,11 @@ public class HeronMasterDriver {
       String cmd = String.format("tar -xvf %s", packageName);
 
       int ret = ShellUtils.runSyncProcess(false,
-              true,
-              cmd,
-              new StringBuilder(),
-              new StringBuilder(),
-              new File(targetFolder));
+          true,
+          cmd,
+          new StringBuilder(),
+          new StringBuilder(),
+          new File(targetFolder));
 
       return ret == 0 ? true : false;
     }
@@ -237,12 +254,14 @@ public class HeronMasterDriver {
       synchronized (containerAllocationLock) {
         // create a local copy of executorId so that lock for next allocation can be released
         executorId = heronExecutorId;
+        // TODO(mfu): Even for this case, Semaphore is a better choice. Wait/Notify is error prone.
         containerAllocationLock.notifyAll();
       }
 
       LOG.log(Level.INFO, "Start {0} for heron executor, id: {1}", new Object[]{evaluator.getId(), executorId});
       Configuration context = ContextConfiguration.CONF.set(ContextConfiguration.IDENTIFIER, executorId).build();
       evaluator.submitContext(context);
+
       reefContainerToHeronExecutorMap.put(evaluator.getId(), executorId);
     }
   }
@@ -262,6 +281,10 @@ public class HeronMasterDriver {
         }
 
         // TODO verify if this thread can be used to submit a new request
+        // TODO(mfu): I don't think this implementation works:
+        // TODO(mfu): 1. requestContainerForExecutor(..) is a blocking call
+        // TODO(mfu): 2. invoking it here blocks the ReefEventHandler thread so this thread is no longer able to handle more events
+        // TODO(mfu): 3. the lock.wait() will be no way to notify; eventually the whole scheduling will halt here
         try {
           if (executorId.equals(TMASTER_CONTAINER_ID)) {
             requestContainerForExecutor(TMASTER_CONTAINER_ID, 1, TM_MEM_SIZE_MB);
@@ -274,8 +297,7 @@ public class HeronMasterDriver {
             requestContainerForExecutor(executorId, getCpuForExecutor(reqResource), getMemInMBForExecutor(reqResource));
           }
         } catch (InterruptedException e) {
-          LOG.log(Level.WARNING, "Error waiting for container allocation for failed executor: " + executorId, e);
-          LOG.log(Level.WARNING, "Assuming request was submitted and continuing", e);
+          LOG.log(Level.WARNING, "Error waiting for container allocation for failed executor; Assuming request was submitted and continuing" + executorId, e);
         }
       }
     }
@@ -292,18 +314,21 @@ public class HeronMasterDriver {
       contexts.put(id, context);
       LOG.log(Level.INFO, "Submitting evaluator task for id: {0}", id);
 
-      final Configuration taskConf = HeronTaskConfiguration.CONF.set(TaskConfiguration.TASK, HeronExecutorTask.class)
-              .set(TaskConfiguration.IDENTIFIER, id)
-              .set(HeronTaskConfiguration.TOPOLOGY_NAME, topologyName)
-              .set(HeronTaskConfiguration.TOPOLOGY_JAR, topologyJar)
-              .set(HeronTaskConfiguration.TOPOLOGY_PACKAGE_NAME, topologyPackageName)
-              .set(HeronTaskConfiguration.HERON_CORE_PACKAGE_NAME, heronCorePackageName)
-              .set(HeronTaskConfiguration.ROLE, role)
-              .set(HeronTaskConfiguration.ENV, env)
-              .set(HeronTaskConfiguration.CLUSTER, cluster)
-              .set(HeronTaskConfiguration.PACKED_PLAN, TopologyUtils.packingToString(packing))
-              .set(HeronTaskConfiguration.CONTAINER_ID, id)
-              .build();
+      final Configuration taskConf = HeronTaskConfiguration.CONF
+          .set(TaskConfiguration.TASK, HeronExecutorTask.class)
+          .set(TaskConfiguration.IDENTIFIER, id)
+              // TODO(mfu): The "(Config config, Config runtime)" in IScheduler.initialize(Config config, Config runtime)
+              // TODO(mfu): contains all following info. Is there a way to pass them directly to HeronExecutorTask rather than pass them one by one?
+          .set(HeronTaskConfiguration.TOPOLOGY_NAME, topologyName)
+          .set(HeronTaskConfiguration.TOPOLOGY_JAR, topologyJar)
+          .set(HeronTaskConfiguration.TOPOLOGY_PACKAGE_NAME, topologyPackageName)
+          .set(HeronTaskConfiguration.HERON_CORE_PACKAGE_NAME, heronCorePackageName)
+          .set(HeronTaskConfiguration.ROLE, role)
+          .set(HeronTaskConfiguration.ENV, env)
+          .set(HeronTaskConfiguration.CLUSTER, cluster)
+          .set(HeronTaskConfiguration.PACKED_PLAN, TopologyUtils.packingToString(packing))
+          .set(HeronTaskConfiguration.CONTAINER_ID, id)
+          .build();
       context.submitTask(taskConf);
     }
   }
