@@ -1,13 +1,13 @@
 package com.twitter.heron.scheduler.reef;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.twitter.heron.proto.scheduler.Scheduler.KillTopologyRequest;
 import com.twitter.heron.proto.scheduler.Scheduler.RestartTopologyRequest;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * {@link ReefScheduler} in invoked by Heron Scheduler to perform topology actions on REEF cluster. This instance will
@@ -39,7 +39,7 @@ public class ReefScheduler implements IScheduler {
 
   @Override
   public boolean onRestart(RestartTopologyRequest request) {
-    // TODO Auto-generated method stub
+    // TODO(mfu): Any plans to implement this?
     return false;
   }
 
