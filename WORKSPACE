@@ -8,7 +8,12 @@ slf4j_version = "1.7.7"
 
 maven_server(
   name = "default",
-  settings_file = "tools/settings.xml",
+  url = "http://central.maven.org/maven2/",
+)
+
+maven_server(
+  name = "twitter-maven",
+  url = "http://maven.twttr.com",
 )
 
 maven_jar(
@@ -204,6 +209,7 @@ maven_jar(
 maven_jar(
   name = "thrift",
   artifact = "org.apache.thrift:libthrift:0.5.0-1",
+  server = "twitter-maven",
 )
 
 maven_jar(
