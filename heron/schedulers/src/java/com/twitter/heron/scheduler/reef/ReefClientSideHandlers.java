@@ -1,15 +1,16 @@
 package com.twitter.heron.scheduler.reef;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.inject.Inject;
+
 import org.apache.reef.client.FailedJob;
 import org.apache.reef.client.FailedRuntime;
 import org.apache.reef.client.RunningJob;
 import org.apache.reef.tang.annotations.Unit;
 import org.apache.reef.wake.EventHandler;
-
-import javax.inject.Inject;
-import java.util.concurrent.CountDownLatch;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Contains client-side listeners for REEF scheduler events.
@@ -20,6 +21,9 @@ public class ReefClientSideHandlers {
 
   private CountDownLatch jobStatusWatcher = new CountDownLatch(1);
   private String topologyName;
+
+  // Volatile for thread safety
+  private volatile boolean result;
 
   @Inject
   public ReefClientSideHandlers() {
@@ -32,8 +36,10 @@ public class ReefClientSideHandlers {
   /**
    * Wait indefinitely to receive events from driver
    */
-  public void waitForJobToStart() throws InterruptedException {
+  public boolean waitForJobToStart() throws InterruptedException {
+    result = false;
     jobStatusWatcher.await();
+    return result;
   }
 
   /**
@@ -43,6 +49,7 @@ public class ReefClientSideHandlers {
     @Override
     public void onNext(final RunningJob job) {
       LOG.log(Level.INFO, "Topology {0} is running, jobId {1}.", new Object[]{topologyName, job.getId()});
+      result = true;
       jobStatusWatcher.countDown();
     }
   }
@@ -53,8 +60,8 @@ public class ReefClientSideHandlers {
   public final class FailedJobHandler implements EventHandler<FailedJob> {
     @Override
     public void onNext(final FailedJob job) {
-      LOG.log(Level.SEVERE, "Failed to start topology: " + topologyName);
-      LOG.log(Level.SEVERE, "Error: ", job.getReason());
+      LOG.log(Level.SEVERE, "Failed to start topology: " + topologyName, job.getReason());
+      result = false;
       jobStatusWatcher.countDown();
     }
   }
@@ -66,6 +73,7 @@ public class ReefClientSideHandlers {
     @Override
     public void onNext(final FailedRuntime error) {
       LOG.log(Level.SEVERE, "Failed to start topology: " + topologyName, error.getReason());
+      result = false;
       jobStatusWatcher.countDown();
     }
   }

@@ -1,13 +1,11 @@
 package com.twitter.heron.scheduler.reef;
 
-import com.twitter.heron.scheduler.reef.HeronMasterDriver.HeronExecutorLauncher;
-import com.twitter.heron.scheduler.reef.HeronMasterDriver.HeronSchedulerLauncher;
-import com.twitter.heron.scheduler.reef.HeronMasterDriver.HeronExecutorContainerBuilder;
-import com.twitter.heron.scheduler.reef.HeronMasterDriver.HeronExecutorContainerErrorHandler;
-import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.PackingPlan;
-import com.twitter.heron.spi.scheduler.ILauncher;
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.apache.reef.client.ClientConfiguration;
 import org.apache.reef.client.DriverConfiguration;
 import org.apache.reef.client.REEF;
@@ -18,12 +16,14 @@ import org.apache.reef.tang.Tang;
 import org.apache.reef.tang.annotations.Unit;
 import org.apache.reef.tang.exceptions.InjectionException;
 
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.twitter.heron.scheduler.reef.HeronMasterDriver.HeronExecutorContainerBuilder;
+import com.twitter.heron.scheduler.reef.HeronMasterDriver.HeronExecutorContainerErrorHandler;
+import com.twitter.heron.scheduler.reef.HeronMasterDriver.HeronExecutorLauncher;
+import com.twitter.heron.scheduler.reef.HeronMasterDriver.HeronSchedulerLauncher;
+import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.scheduler.ILauncher;
 
 /**
  * Launches Heron Scheduler on a REEF on YARN cluster. The launcher will start a master (driver/AM) container for each
@@ -40,7 +40,8 @@ public class ReefLauncher implements ILauncher {
   private String cluster;
   private String role;
   private String env;
-  private ArrayList<String> libJars = new ArrayList<>();
+  // TODO(mfu): Currently not needed.
+//  private ArrayList<String> libJars = new ArrayList<>();
 
   @Override
   public void initialize(Config config, Config runtime) {
@@ -52,18 +53,20 @@ public class ReefLauncher implements ILauncher {
     env = Context.environ(config);
 
     try {
-      Class<?> packingClass = Class.forName(Context.packingClass(config));
-      Class<?> stateMgrClass = Class.forName(Context.stateManagerClass(config));
-
-      // In addition to jar for REEF's driver implementation, jar for packing and state manager classes is also needed
-      // on the server classpath. Upload these libraries in the global cache.
-      libJars.add(HeronMasterDriver.class.getProtectionDomain().getCodeSource().getLocation().getFile());
-      libJars.add(packingClass.getProtectionDomain().getCodeSource().getLocation().getFile());
-      libJars.add(stateMgrClass.getProtectionDomain().getCodeSource().getLocation().getFile());
+      // TODO(mfu): No need. CoreReleasePackage contains them already.
+      // TODO(mfu): In sandbox directory: ./heron-core/lib
+//      Class<?> packingClass = Class.forName(Context.packingClass(config));
+//      Class<?> stateMgrClass = Class.forName(Context.stateManagerClass(config));
+//
+//      // In addition to jar for REEF's driver implementation, jar for packing and state manager classes is also needed
+//      // on the server classpath. Upload these libraries in the global cache.
+//      libJars.add(HeronMasterDriver.class.getProtectionDomain().getCodeSource().getLocation().getFile());
+//      libJars.add(packingClass.getProtectionDomain().getCodeSource().getLocation().getFile());
+//      libJars.add(stateMgrClass.getProtectionDomain().getCodeSource().getLocation().getFile());
 
       coreReleasePackage = new URI(Context.corePackageUri(config)).getPath();
-    } catch (URISyntaxException | ClassNotFoundException e) {
-      throw new RuntimeException(e);
+    } catch (URISyntaxException e) {
+      throw new RuntimeException("Core package URI is not valid", e);
     }
 
     LOG.log(Level.INFO, "Initializing topology: {0}, core: {1}", new Object[]{topologyName, coreReleasePackage});
@@ -75,20 +78,24 @@ public class ReefLauncher implements ILauncher {
     Configuration reefDriverConf = getHMDriverConf();
     Configuration reefClientConf = getClientConf();
 
+    boolean ret;
     try {
       final Injector tangInjector = Tang.Factory.getTang().newInjector(runtimeREEFConf, reefClientConf);
       final REEF reef = tangInjector.getInstance(REEF.class);
       final ReefClientSideHandlers client = tangInjector.getInstance(ReefClientSideHandlers.class);
+      // TODO(mfu): Put it inside constructor?
       client.initialize(topologyName);
 
       reef.submit(reefDriverConf);
-      client.waitForJobToStart();
+
+      // TODO(mfu): waitForSchedulingResponse() could be a better name?
+      ret = client.waitForJobToStart();
     } catch (InjectionException | InterruptedException e) {
       LOG.log(Level.WARNING, "Failed to launch REEF app", e);
       return false;
     }
 
-    return true;
+    return ret;
   }
 
   /**
@@ -98,23 +105,26 @@ public class ReefLauncher implements ILauncher {
   private Configuration getHMDriverConf() {
     String topologyPackageName = new File(topologyPackageLocation).getName();
     String corePackageName = new File(coreReleasePackage).getName();
-    return HeronDriverConfiguration.CONF.setMultiple(DriverConfiguration.GLOBAL_LIBRARIES, libJars)
-            .set(DriverConfiguration.DRIVER_IDENTIFIER, topologyName)
-            .set(DriverConfiguration.ON_DRIVER_STARTED, HeronSchedulerLauncher.class)
-            .set(DriverConfiguration.ON_EVALUATOR_ALLOCATED, HeronExecutorContainerBuilder.class)
-            .set(DriverConfiguration.ON_EVALUATOR_FAILED, HeronExecutorContainerErrorHandler.class)
-            .set(DriverConfiguration.ON_CONTEXT_ACTIVE, HeronExecutorLauncher.class)
-            .set(DriverConfiguration.GLOBAL_FILES, topologyPackageLocation)
-            .set(DriverConfiguration.GLOBAL_FILES, coreReleasePackage)
-            .set(HeronDriverConfiguration.TOPOLOGY_NAME, topologyName)
-            .set(HeronDriverConfiguration.TOPOLOGY_JAR, topologyJar)
-            .set(HeronDriverConfiguration.TOPOLOGY_PACKAGE_NAME, topologyPackageName)
-            .set(HeronDriverConfiguration.HERON_CORE_PACKAGE_NAME, corePackageName)
-            .set(HeronDriverConfiguration.ROLE, role)
-            .set(HeronDriverConfiguration.ENV, env)
-            .set(HeronDriverConfiguration.CLUSTER, cluster)
-            .set(HeronDriverConfiguration.HTTP_PORT, 0)
-            .build();
+    return HeronDriverConfiguration
+        .CONF
+//        .setMultiple(DriverConfiguration.GLOBAL_LIBRARIES, libJars)
+            // TODO(mfu): Can we put "(Config config, Config runtime)" from ILauncher.initialize(...) into it directly?
+        .set(DriverConfiguration.DRIVER_IDENTIFIER, topologyName)
+        .set(DriverConfiguration.ON_DRIVER_STARTED, HeronSchedulerLauncher.class)
+        .set(DriverConfiguration.ON_EVALUATOR_ALLOCATED, HeronExecutorContainerBuilder.class)
+        .set(DriverConfiguration.ON_EVALUATOR_FAILED, HeronExecutorContainerErrorHandler.class)
+        .set(DriverConfiguration.ON_CONTEXT_ACTIVE, HeronExecutorLauncher.class)
+        .set(DriverConfiguration.GLOBAL_FILES, topologyPackageLocation)
+        .set(DriverConfiguration.GLOBAL_FILES, coreReleasePackage)
+        .set(HeronDriverConfiguration.TOPOLOGY_NAME, topologyName)
+        .set(HeronDriverConfiguration.TOPOLOGY_JAR, topologyJar)
+        .set(HeronDriverConfiguration.TOPOLOGY_PACKAGE_NAME, topologyPackageName)
+        .set(HeronDriverConfiguration.HERON_CORE_PACKAGE_NAME, corePackageName)
+        .set(HeronDriverConfiguration.ROLE, role)
+        .set(HeronDriverConfiguration.ENV, env)
+        .set(HeronDriverConfiguration.CLUSTER, cluster)
+        .set(HeronDriverConfiguration.HTTP_PORT, 0)
+        .build();
   }
 
   @Override
@@ -134,9 +144,9 @@ public class ReefLauncher implements ILauncher {
    */
   private Configuration getClientConf() {
     return ClientConfiguration.CONF
-            .set(ClientConfiguration.ON_JOB_RUNNING, ReefClientSideHandlers.RunningJobHandler.class)
-            .set(ClientConfiguration.ON_JOB_FAILED, ReefClientSideHandlers.FailedJobHandler.class)
-            .set(ClientConfiguration.ON_RUNTIME_ERROR, ReefClientSideHandlers.RuntimeErrorHandler.class)
-            .build();
+        .set(ClientConfiguration.ON_JOB_RUNNING, ReefClientSideHandlers.RunningJobHandler.class)
+        .set(ClientConfiguration.ON_JOB_FAILED, ReefClientSideHandlers.FailedJobHandler.class)
+        .set(ClientConfiguration.ON_RUNTIME_ERROR, ReefClientSideHandlers.RuntimeErrorHandler.class)
+        .build();
   }
 }
