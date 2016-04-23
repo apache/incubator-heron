@@ -22,7 +22,15 @@ cat > $iml_file <<EOH
     </facet>
   </component>
   <component name="NewModuleRootManager">
+    <orderEntry type="sourceFolder" forTests="false" />
     <output url="file://\$MODULE_DIR\$/out" />
+EOH
+
+for content_dir in `ls -l --time-style="long-iso" . | egrep '^d' | grep -v "out" | awk '{print $8}'`; do 
+
+if [ "$content_dir" == "heron" ] ; then
+
+cat >> $iml_file <<EOH
     <content url="file://\$MODULE_DIR$/heron">
 EOH
 echo '      <sourceFolder url="file://$MODULE_DIR$/heron/config/src" type="java-resource" />'>> $iml_file
@@ -44,13 +52,14 @@ for source in ${heron_java_paths}; do
         echo '      <sourceFolder url="file://$MODULE_DIR$/'"${source}\" isTestSource=\"${is_test_source}\" />" >> $iml_file
      fi
 done
+  
+else 
+    echo "    <content url=\"file://\$MODULE_DIR$/${content_dir}\">"  >> $iml_file
+fi
 cat >> $iml_file <<'EOF'
-    </content>
-   <content url="file://$MODULE_DIR$/3rdparty">
-    </content>
-    <orderEntry type="sourceFolder" forTests="false" />
+    </content>    
 EOF
-
+done 
 # Write a module-library entry, usually a jar file but occasionally a directory.
 function write_jar_entry() {
   local root_file=$1
