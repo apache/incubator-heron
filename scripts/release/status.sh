@@ -10,8 +10,6 @@
 # If the script exits with non-zero code, it's considered as a failure
 # and the output will be discarded.
 
-set -e
-
 function die {
     echo >&2 "$@"
     exit 1
@@ -86,7 +84,7 @@ fi
 echo "HERON_BUILD_USER ${build_user}"
 
 # Check whether there are any uncommited changes
-if [ -z ${HERON_TREE_STATUS} ];
+if [ -z ${HERON_TREE_STATUS+x} ];
 then
   git diff-index --quiet HEAD --
   if [[ $? == 0 ]];
@@ -99,4 +97,3 @@ else
   tree_status=${HERON_TREE_STATUS}
 fi
 echo "HERON_BUILD_RELEASE_STATUS ${tree_status}"
-
