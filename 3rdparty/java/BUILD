@@ -38,6 +38,21 @@ java_library(
 )
 
 java_library(
+    name = "jackson",
+    srcs = [ "Empty.java" ],
+    exports = [
+        "@jackson-annotations//jar",
+        "@jackson-core//jar",
+        "@jackson-databind//jar",
+    ],
+    deps = [
+        "@jackson-annotations//jar",
+        "@jackson-core//jar",
+        "@jackson-databind//jar",
+    ],
+)
+
+java_library(
     name = "jarjar",
     srcs = [ "Empty.java" ],
     exports = [ "@jarjar//jar" ],

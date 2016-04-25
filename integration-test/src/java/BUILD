@@ -11,9 +11,8 @@ java_library(
         "//heron/api/src/java:api-java",
         "//heron/storm/src/java:storm-compatibility-java",
         "//heron/proto:proto_topology_java",
+        "//3rdparty/java:jackson",
         "@protobuf-java//jar",
-        "@jackson-core//jar",
-        "@jackson-databind//jar",
         "@http-client//jar",
         "@http-core//jar",
     ],
@@ -28,7 +27,7 @@ java_library(
         "//heron/api/src/java:api-java",
         "//heron/storm/src/java:storm-compatibility-java",
         "//3rdparty/java:hadoop-core",
-        "@jackson-databind//jar",
+        "//3rdparty/java:jackson",
         ":core"
     ],
 )
