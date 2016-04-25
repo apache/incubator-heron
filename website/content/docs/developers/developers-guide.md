@@ -31,11 +31,27 @@ that (are well documented and) allow the launching, restarting and killing of
 a topology. Developer can specify a particular scheduler (local, aurora, mesos etc.)
 to be picked for deployment.
 
-### Local Scheduler
+#### Local Scheduler
 
 Local scheduler allows the developer to launch all the spouts, bolts and other
 components of the topology as separate processes withing the host machine to allow
 for easier debugging and faster iterations cycles before being rolled out to distributed
 enviroments.
+
+Compile the topology with the heron-storm-compatibility dependency as mentioned above. 
+Use the generated binary jar to deploy using the following command:
+
+        heron-cli submit <options> local <topology binary jar> <topology command-line arguments>
+
+To kill the topology:
+
+        heron-cli kill <options> local <topology name>
+
+The "local" options suggest the cli to pick the Local Scheduler.
+
+#### Aurora Scheduler
+
+TODO
+
 
 
