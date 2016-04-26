@@ -346,22 +346,22 @@ filegroup(
 
 filegroup(
     name = "protobuf-java",
-    srcs = ["//3rdparty/protobuf:protobuf-java"],
+    srcs = ["@protobuf-java//jar"],
 )
 
 filegroup(
     name = "slf4j-api-java",
-    srcs = ["//3rdparty/logging:slf4j-api-java"],
+    srcs = ["@slf4j-api//jar"],
 )
 
 filegroup(
     name = "slf4j-jdk-java",
-    srcs = ["//3rdparty/logging:slf4j-jdk-java"],
+    srcs = ["@slf4j-jdk//jar"],
 )
 
 filegroup(
     name = "log4j-over-slf4j-java",
-    srcs = ["//3rdparty/logging:log4j-over-slf4j-java"],
+    srcs = ["@log4j-over-slf4j//jar"],
 )
 
 filegroup(

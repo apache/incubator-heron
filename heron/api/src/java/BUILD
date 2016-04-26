@@ -6,7 +6,7 @@ load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 api_deps_files =  \
     heron_java_proto_files() + [
-        "//3rdparty/kryo:kryo-java",
+        "//3rdparty/java:kryo",
     ]
 
 java_library(

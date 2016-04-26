@@ -136,7 +136,7 @@ java_library(
         ":proto_tuple_java",
         ":proto_stmgr_java",
         ":proto_networktests_java",
-        "//3rdparty/protobuf:protobuf-java",
+        "@protobuf-java//jar",
     ],
     srcs = [
         "Empty.java",
@@ -162,7 +162,7 @@ java_library(
         ":proto_tuple_java",
         ":proto_stmgr_java",
         ":proto_networktests_java",
-        "//3rdparty/protobuf:protobuf-java-neverlink",
+        "//3rdparty/java:protobuf-java-neverlink",
     ],
 )
 
