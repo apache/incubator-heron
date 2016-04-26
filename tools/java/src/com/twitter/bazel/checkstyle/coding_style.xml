@@ -152,6 +152,7 @@ limitations under the License.
         <property name="allowMissingPropertyJavadoc" value="true" />
         <!-- Allow tags for runtime exceptions that are not explicitly declared -->
         <property name="allowUndeclaredRTE" value="true" />
+        <property name="ignoreMethodNamesRegex" value="^main$" />
       </module>
       <module name="JavadocType">
         <property name="excludeScope" value="private"/>

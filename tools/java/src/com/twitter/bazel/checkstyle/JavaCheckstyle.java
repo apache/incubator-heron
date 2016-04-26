@@ -14,17 +14,11 @@
 package com.twitter.bazel.checkstyle;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.logging.Logger;
 
 import com.google.common.base.Joiner;
 import com.google.devtools.build.lib.actions.extra.ExtraActionInfo;
-import com.google.devtools.build.lib.actions.extra.ExtraActionsBase;
 import com.google.devtools.build.lib.actions.extra.JavaCompileInfo;
-import com.google.protobuf.CodedInputStream;
-import com.google.protobuf.ExtensionRegistry;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -37,7 +31,7 @@ import org.apache.commons.lang.ArrayUtils;
 
 /**
  * Verifies that the java classes styles conform to the styles in the config.
- * Usage: java com.twitter.bazel.checkstyle.JavaCheckstyle -c &lt;checkstyle_config> &lt;source_files>
+ * Usage: java com.twitter.bazel.checkstyle.JavaCheckstyle -f &lt;extra_action_file> -c &lt;checkstyle_config>
  * <p>
  * To test:
  * $ bazel build --config=darwin heron/spi/src/java:heron-spi --experimental_action_listener=tools/java:compile_java
@@ -74,9 +68,11 @@ public final class JavaCheckstyle {
 
       String[] sourceFiles = getSourceFiles(extraActionFile);
       if (sourceFiles.length == 0) {
-        LOG.info("No java class files found by checkstyle");
+        LOG.info("No java files found by checkstyle");
         return;
       }
+
+      LOG.info(sourceFiles.length + " java files found by checkstyle");
 
       String[] checkstyleArgs = (String[]) ArrayUtils.addAll(
           new String[]{"-c", configFile}, sourceFiles);
@@ -91,18 +87,8 @@ public final class JavaCheckstyle {
   }
 
   private static String[] getSourceFiles(String extraActionFile) {
-    ExtensionRegistry registry = ExtensionRegistry.newInstance();
-    ExtraActionsBase.registerAllExtensions(registry);
 
-    ExtraActionInfo info = null;
-    try (InputStream stream = Files.newInputStream(Paths.get(extraActionFile))) {
-      CodedInputStream coded = CodedInputStream.newInstance(stream);
-      info = ExtraActionInfo.parseFrom(coded, registry);
-    } catch (IOException e) {
-      throw new RuntimeException("ERROR: failed to deserialize extra action file "
-          + extraActionFile + ": " + e.getMessage(), e);
-    }
-
+    ExtraActionInfo info = ExtraActionUtils.getExtraActionInfo(extraActionFile);
     JavaCompileInfo jInfo = info.getExtension(JavaCompileInfo.javaCompileInfo);
 
     String[] sourceFiles = new String[jInfo.getSourceFileList().size()];
