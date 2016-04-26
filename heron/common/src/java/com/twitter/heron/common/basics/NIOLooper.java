@@ -55,8 +55,9 @@ public class NIOLooper extends WakeableLooper {
     // The nextTimeoutIntervalMs is in milli-seconds
     long nextTimeoutIntervalMs = getNextTimeoutIntervalMs();
 
-    // doWait(timeout), which in fact is implemented by selector.select(timeout), and it will be wake up if other threads
-    // wake it up, it meets the timeout, one channel is selected, or the current thread is interrupted.
+    // doWait(timeout), which in fact is implemented by selector.select(timeout), and it will
+    // wake up, if other threads wake it up, it meets the timeout, one channel is selected, or
+    // the current thread is interrupted.
     try {
       if (nextTimeoutIntervalMs > 0) {
         // The select will take the timeout in unit of milli-seconds
@@ -93,7 +94,8 @@ public class NIOLooper extends WakeableLooper {
       ISelectHandler callback = (ISelectHandler) key.attachment();
 
       if (!key.isValid()) {
-        // This method key.channel() will continue to return the channel even after the key is cancelled.
+        // This method key.channel() will continue to return the channel even after the
+        // key is cancelled.
         callback.handleError(key.channel());
         continue;
       }
@@ -130,8 +132,8 @@ public class NIOLooper extends WakeableLooper {
    */
   public void registerRead(SelectableChannel channel, ISelectHandler callback)
       throws ClosedChannelException {
-    assert channel.keyFor(selector) == null ||
-        (channel.keyFor(selector).interestOps() & SelectionKey.OP_CONNECT) == 0;
+    assert channel.keyFor(selector) == null
+        || (channel.keyFor(selector).interestOps() & SelectionKey.OP_CONNECT) == 0;
     addInterest(channel, SelectionKey.OP_READ, callback);
   }
 
@@ -211,18 +213,20 @@ public class NIOLooper extends WakeableLooper {
     if (key == null) {
       channel.register(selector, operation, callback);
     } else if (!key.isValid()) {
-      throw new RuntimeException(String.format("Unable to add %d in %s due to key is invalid", operation, channel));
+      throw new RuntimeException(
+          String.format("Unable to add %d in %s due to key is invalid", operation, channel));
     } else {
       // Key is not null and key is valid
       if ((key.interestOps() & operation) != 0) {
-        throw new RuntimeException(String.format("%d has been registered in %s", operation, channel));
+        throw new RuntimeException(
+            String.format("%d has been registered in %s", operation, channel));
       }
       if (key.attachment() == null) {
         key.attach(callback);
       } else {
         if (callback != key.attachment()) {
-          throw new RuntimeException("Unmatched SelectHandler has already been attached" +
-              " for other operation");
+          throw new RuntimeException("Unmatched SelectHandler has already been attached"
+              + " for other operation");
         }
         // If call == key.attachment
         // Just skip

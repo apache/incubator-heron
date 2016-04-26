@@ -17,7 +17,11 @@ package com.twitter.heron.common.basics;
 import java.io.IOException;
 import java.net.ServerSocket;
 
-public class SysUtils {
+public final class SysUtils {
+
+  private SysUtils() {
+  }
+
   public static void sleep(long millis) {
     try {
       Thread.sleep(millis);
