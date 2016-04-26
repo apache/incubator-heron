@@ -70,6 +70,11 @@ limitations under the License.
                value="Line does not match expected header line of ''{0}''. See header template in tools/java/src/com/twitter/bazel/checkstyle/header.txt"/>
     </module>
 
+    <!-- Allows the ability to turn off/on checkstyles for a chunk of code. Better to use the 1 line suppress method
+    shows in SuppressWithNearbyCommentFilter if you can.
+         // CHECKSTYLE:OFF CheckNameHere
+         // CHECKSTYLE:ON CheckNameHere
+    -->
     <module name="SuppressionCommentFilter">
       <property name="offCommentFormat" value="CHECKSTYLE\:OFF ([\w\|]+)"/>
       <property name="onCommentFormat" value="CHECKSTYLE\:ON ([\w\|]+)"/>
@@ -109,6 +114,9 @@ limitations under the License.
       <property name="message" value="Line has trailing spaces."/>
     </module>
 
+    <!-- allows us to use annotations to supress, like this: @SuppressWarnings("checkstyle:methodlength") -->
+    <module name="SuppressWarningsFilter" />
+
     <module name="TreeWalker">
       <property name="tabWidth" value="2"/>
       <module name="Indentation">
@@ -118,6 +126,9 @@ limitations under the License.
 
       <!-- needed for SuppressWithNearbyCommentFilter -->
       <module name="FileContentsHolder"/>
+
+      <!-- allows the use of SuppressWarningsFilter from above -->
+      <module name="SuppressWarningsHolder" />
 
       <!-- Annotations -->
       <module name="AnnotationUseStyle"/>
