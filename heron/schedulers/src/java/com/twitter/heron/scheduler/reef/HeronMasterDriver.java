@@ -1,8 +1,20 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License
+
 package com.twitter.heron.scheduler.reef;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -37,26 +49,19 @@ import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.TopologyPackag
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.common.PackingPlan.ContainerPlan;
 import com.twitter.heron.spi.common.PackingPlan.Resource;
-import com.twitter.heron.spi.common.ShellUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
- * {@link HeronMasterDriver} serves Heron Scheduler by managing containers / processes for Heron TMaster and workers
- * using REEF framework. This includes making container request for topology, providing bits to start Heron components
- * and killing containers.
+ * {@link HeronMasterDriver} serves Heron Scheduler by managing containers / processes for Heron
+ * TMaster and workers using REEF framework. This includes making container request for topology,
+ * providing bits to start Heron components and killing containers.
  */
 @Unit
 public class HeronMasterDriver {
-  public static final String TMASTER_CONTAINER_ID = "0";
+  private static final String TMASTER_CONTAINER_ID = "0";
   private static final int MB = 1024 * 1024;
   private static final int TM_MEM_SIZE_MB = 1024;
   private static final Logger LOG = Logger.getLogger(HeronMasterDriver.class.getName());
-
-  /**
-   * Heron-REEF scheduler is initialized by {@link SchedulerMain}. This instance of {@link HeronMasterDriver} is needed
-   * by the scheduler to use the containers.
-   */
-  private static HeronMasterDriver instance;
 
   // TODO(mfu):
   // TODO(mfu): 1. Have we handled the precise reconstruction of it after scheduler process dies unexpectedly and restarts?
@@ -73,16 +78,13 @@ public class HeronMasterDriver {
   private final String env;
   private final String topologyJar;
   private final int httpPort;
-
-  private PackingPlan packing;
-
   // Currently yarn does not support mapping container requests to allocation (YARN-4879). As a result it is not
   // possible to concurrently start containers of different sizes. This lock ensures workers are started serially.
   // TODO(mfu): It may not be a good idea to start workers serially, since deployment of job can be super slow, in our experiences in Twitter.
   // TODO(mfu): An option is let the PackingAlgorithm returns always same size container, which in fact is what we do in Twitter.
   // TODO(mfu): Even trying to make works starting serially, better to use Semaphore.
   private final Object containerAllocationLock = new Object();
-
+  private PackingPlan packing;
   // Container request submission and allocation takes places on different threads. This variable is used to share the
   // heron executor id for which the container request was submitted
   private String heronExecutorId;
@@ -120,12 +122,8 @@ public class HeronMasterDriver {
     this.topologyJar = topologyJar;
     this.httpPort = httpPort;
 
-    // Driver singleton
-    instance = this;
-  }
-
-  synchronized public static HeronMasterDriver getInstance() {
-    return instance;
+    // This instance of Driver will be used for managing topology containers
+    HeronMasterDriverProvider.setInstance(this);
   }
 
   /**
@@ -146,15 +144,14 @@ public class HeronMasterDriver {
   }
 
   /**
-   * Container allocation is asynchronous. Request containers serially to ensure allocated resources match the required
-   * resources
+   * Container allocation is asynchronous. Request containers serially to ensure allocated resources
+   * match the required resources
    */
   void scheduleHeronWorkers(PackingPlan packing) {
     this.packing = packing;
     for (Entry<String, ContainerPlan> entry : packing.containers.entrySet()) {
       Resource reqResource = entry.getValue().resource;
 
-//      TODO fix mem computation int mem = getMemInMB(reqResource.ram);
       int mem = getMemInMBForExecutor(reqResource);
       try {
         requestContainerForExecutor(entry.getKey(), getCpuForExecutor(reqResource), mem);
@@ -193,16 +190,16 @@ public class HeronMasterDriver {
   }
 
   /**
-   * {@link HeronSchedulerLauncher} is the first class initialized on the server by REEF. This is responsible for
-   * unpacking binaries and launching Heron Scheduler.
+   * {@link HeronSchedulerLauncher} is the first class initialized on the server by REEF. This is
+   * responsible for unpacking binaries and launching Heron Scheduler.
    */
   class HeronSchedulerLauncher implements EventHandler<StartTime> {
     @Override
     public void onNext(StartTime value) {
       String globalFolder = reefFileNames.getGlobalFolder().getPath();
 
-      extractPackageInSandbox(globalFolder, topologyPackageName, localHeronConfDir);
-      extractPackageInSandbox(globalFolder, heronCorePackageName, localHeronConfDir);
+      HeronReefUtils.extractPackageInSandbox(globalFolder, topologyPackageName, localHeronConfDir);
+      HeronReefUtils.extractPackageInSandbox(globalFolder, heronCorePackageName, localHeronConfDir);
 
       launchScheduler();
     }
@@ -215,32 +212,6 @@ public class HeronMasterDriver {
       } catch (IOException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
         throw new RuntimeException("Failed to launch Heron Scheduler", e);
       }
-    }
-
-    private void extractPackageInSandbox(String srcFolder, String fileName, String dstDir) {
-      String packagePath = Paths.get(srcFolder, fileName).toString();
-      LOG.log(Level.INFO, "Extracting package: {0} at: {1}", new Object[]{packagePath, dstDir});
-      boolean result = untarPackage(packagePath, dstDir);
-      if (!result) {
-        String msg = "Failed to extract package:" + packagePath + " at: " + dstDir;
-        throw new RuntimeException(msg);
-      }
-    }
-
-    /**
-     * TODO this method from LocalLauncher could be moved to a utils class
-     */
-    protected boolean untarPackage(String packageName, String targetFolder) {
-      String cmd = String.format("tar -xvf %s", packageName);
-
-      int ret = ShellUtils.runSyncProcess(false,
-          true,
-          cmd,
-          new StringBuilder(),
-          new StringBuilder(),
-          new File(targetFolder));
-
-      return ret == 0 ? true : false;
     }
   }
 
@@ -304,8 +275,8 @@ public class HeronMasterDriver {
   }
 
   /**
-   * Once the container starts, this class starts Heron's executor process. Heron executor is started as a task. This
-   * task can be killed and the container can be reused.
+   * Once the container starts, this class starts Heron's executor process. Heron executor is
+   * started as a task. This task can be killed and the container can be reused.
    */
   public final class HeronExecutorLauncher implements EventHandler<ActiveContext> {
     @Override
@@ -314,11 +285,12 @@ public class HeronMasterDriver {
       contexts.put(id, context);
       LOG.log(Level.INFO, "Submitting evaluator task for id: {0}", id);
 
+      // topologyName and other configurations are required by Heron Executor and Task to load
+      // configuration files. Using REEF configuration model is better than depending on external
+      // persistence.
       final Configuration taskConf = HeronTaskConfiguration.CONF
           .set(TaskConfiguration.TASK, HeronExecutorTask.class)
           .set(TaskConfiguration.IDENTIFIER, id)
-              // TODO(mfu): The "(Config config, Config runtime)" in IScheduler.initialize(Config config, Config runtime)
-              // TODO(mfu): contains all following info. Is there a way to pass them directly to HeronExecutorTask rather than pass them one by one?
           .set(HeronTaskConfiguration.TOPOLOGY_NAME, topologyName)
           .set(HeronTaskConfiguration.TOPOLOGY_JAR, topologyJar)
           .set(HeronTaskConfiguration.TOPOLOGY_PACKAGE_NAME, topologyPackageName)

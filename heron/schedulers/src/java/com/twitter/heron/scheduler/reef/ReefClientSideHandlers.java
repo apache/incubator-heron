@@ -1,3 +1,17 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License
+
 package com.twitter.heron.scheduler.reef;
 
 import java.util.concurrent.CountDownLatch;
@@ -9,6 +23,7 @@ import javax.inject.Inject;
 import org.apache.reef.client.FailedJob;
 import org.apache.reef.client.FailedRuntime;
 import org.apache.reef.client.RunningJob;
+import org.apache.reef.tang.annotations.Parameter;
 import org.apache.reef.tang.annotations.Unit;
 import org.apache.reef.wake.EventHandler;
 
@@ -20,23 +35,21 @@ public class ReefClientSideHandlers {
   private static final Logger LOG = Logger.getLogger(ReefClientSideHandlers.class.getName());
 
   private CountDownLatch jobStatusWatcher = new CountDownLatch(1);
-  private String topologyName;
+  private final String topologyName;
 
   // Volatile for thread safety
   private volatile boolean result;
 
   @Inject
-  public ReefClientSideHandlers() {
-  }
-
-  public void initialize(String topologyName) {
+  public ReefClientSideHandlers(@Parameter(HeronConfigurationOptions.TopologyName.class) String topologyName) {
+    LOG.log(Level.INFO, "Initializing REEF client handlers for Heron, topology: {0}", topologyName);
     this.topologyName = topologyName;
   }
 
   /**
    * Wait indefinitely to receive events from driver
    */
-  public boolean waitForJobToStart() throws InterruptedException {
+  public boolean waitForSchedulerJobResponse() throws InterruptedException {
     result = false;
     jobStatusWatcher.await();
     return result;
