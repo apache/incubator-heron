@@ -4,8 +4,8 @@ load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 common_deps_files = [
     "//heron/common/src/java:basics-java",
-    "//3rdparty/commons:commons-io-java",
-    "//3rdparty/guava:guava-java",
+    "@commons-io//jar",
+    "@guava//jar",
 ]
 
 spi_deps_files = [
@@ -19,7 +19,7 @@ api_deps_files = [
     "//heron/api/src/java:api-java",
 ]
 
-local_deps_files = \
+scheduler_deps_files = \
     heron_java_proto_files() + \
     common_deps_files + \
     spi_deps_files + \
@@ -28,14 +28,14 @@ local_deps_files = \
 java_library(
     name='local-scheduler-java',
     srcs = glob(["**/local/*.java"]),
-    deps = local_deps_files,
+    deps = scheduler_deps_files,
     resources = glob(["**/local/*.yaml"]),
 )
 
 java_binary(
     name='local-scheduler-unshaded',
     srcs = glob(["**/local/*.java"]),
-    deps = local_deps_files,
+    deps = scheduler_deps_files,
     resources = glob(["**/local/*.yaml"]),
 )
 
@@ -49,14 +49,14 @@ genrule(
 java_library(
     name='aurora-scheduler-java',
     srcs = glob(["**/aurora/*.java"]),
-    deps = local_deps_files,
+    deps = scheduler_deps_files,
     resources = glob(["**/aurora/*.aurora"]),
 )
 
 java_binary(
     name='aurora-scheduler-unshaded',
     srcs = glob(["**/aurora/*.java"]),
-    deps = local_deps_files,
+    deps = scheduler_deps_files,
     resources = glob(["**/aurora/*.aurora"]),
 )
 
@@ -64,5 +64,30 @@ genrule(
     name = "heron-aurora-scheduler",
     srcs = [":aurora-scheduler-unshaded_deploy.jar"],
     outs = ["heron-aurora-scheduler.jar"],
+    cmd  = "cp $< $@",
+)
+
+java_library(
+    name='null-scheduler-java',
+    srcs = glob(
+        ["**/NullLauncher.java"] +
+        ["**/NullScheduler.java"]
+    ),
+    deps = scheduler_deps_files,
+)
+
+java_binary(
+    name='null-scheduler-unshaded',
+    srcs = glob(
+        ["**/NullLauncher.java"] +
+        ["**/NullScheduler.java"]
+    ),
+    deps = scheduler_deps_files,
+)
+
+genrule(
+    name = "heron-null-scheduler",
+    srcs = [":null-scheduler-unshaded_deploy.jar"],
+    outs = ["heron-null-scheduler.jar"],
     cmd  = "cp $< $@",
 )
