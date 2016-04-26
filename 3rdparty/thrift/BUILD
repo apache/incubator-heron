@@ -10,11 +10,6 @@ filegroup(
     }),
 )
 
-java_import(
-    name = "thrift-java",
-    jars = ["libthrift-0.5.0-1.jar"],
-)
-
 config_setting(
     name = "darwin",
     values = {"host_cpu": "darwin"},

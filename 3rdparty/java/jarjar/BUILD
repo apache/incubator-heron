@@ -2,13 +2,9 @@ package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])  # Apache 2.0
 
-java_import(
-    name = "jarjar",
-    jars = ["jarjar-1.6.0.jar"],
-)
-
 java_binary(
     name = "jarjar_bin",
-    main_class = "org.pantsbuild.jarjar.Main",
-    runtime_deps = [":jarjar"],
+    main_class = "com.tonicsystems.jarjar.Main",
+    runtime_deps = ["//3rdparty/java:jarjar"],
+    resources = ["src/main/resources/com/tonicsystems/jarjar/help.txt"],
 )
