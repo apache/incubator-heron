@@ -62,5 +62,5 @@ HTTP_TIMEOUT = 5 #seconds
 DEFAULT_PORT = 8888
 
 # default config file to read
-DEFAULT_CONFIG_FILE = "localfilestateconf.yaml"
+DEFAULT_CONFIG_FILE = "heron_tracker.yaml"
 
