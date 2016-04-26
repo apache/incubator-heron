@@ -84,17 +84,3 @@ cc_library(
     ],
     linkstatic = 1,
 )
-
-java_import(
-    name = "zookeeper-java",
-    jars = ["zookeeper-3.4.6.jar"],
-)
-
-filegroup(
-    name = "zookeeper",
-    srcs = [
-        ":zookeeper-cxx",
-        ":zookeeper_st-cxx",
-        ":zookeeper-java",
-    ]
-)

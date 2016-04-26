@@ -28,15 +28,18 @@ from tornado.options import define, options
 from heron.tracker.src.python import constants
 from heron.tracker.src.python import handlers
 from heron.tracker.src.python import utils
+from heron.tracker.src.python.config import Config
 from heron.tracker.src.python.tracker import Tracker
 
 LOG = logging.getLogger(__name__)
 
 class Application(tornado.web.Application):
   def __init__(self):
-    tracker = Tracker()
+
+    config = Config(options.config_file)
+    tracker = Tracker(config)
     self.tracker = tracker
-    tracker.synch_topologies(options.config_file)
+    tracker.synch_topologies()
     tornadoHandlers = [
       (r"/", handlers.MainHandler),
       (r"/topologies", handlers.TopologiesHandler, {"tracker":tracker}),

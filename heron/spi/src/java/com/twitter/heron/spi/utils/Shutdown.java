@@ -28,8 +28,9 @@ public class Shutdown {
   public void await() {
     try {
       lock.lock();
-      while (!terminated)
+      while (!terminated) {
         terminateCondition.await();
+      }
       lock.unlock();
     } catch (InterruptedException e) {
       LOG.info("Process received interruption, terminating...");

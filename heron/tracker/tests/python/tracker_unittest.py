@@ -9,7 +9,9 @@ from heron.tracker.src.python.tracker import Tracker
 
 class TrackerTest(unittest.TestCase):
   def setUp(self):
-    self.tracker = Tracker()
+    mock_config = Mock()
+    mock_config.validate.return_value = True
+    self.tracker = Tracker(mock_config)
 
   @patch.object(Tracker, 'getTopologiesForStateLocation')
   @patch.object(Tracker, 'removeTopology')
@@ -38,7 +40,7 @@ class TrackerTest(unittest.TestCase):
       on_topologies_watch(['top_name3', 'top_name4'])
     mock_state_manager_2.get_topologies = side_effect2
 
-    self.tracker.synch_topologies("test_conf")
+    self.tracker.synch_topologies()
     mock_get_topologies_for_state_location.assert_has_calls([call("mock_name2"),
                                                          call("mock_name1")],
                                                         any_order=True)
@@ -76,7 +78,7 @@ class TrackerTest(unittest.TestCase):
       on_topologies_watch(['top_name3', 'top_name4'])
     mock_state_manager_2.get_topologies = side_effect2
 
-    self.tracker.synch_topologies("test_conf")
+    self.tracker.synch_topologies()
     mock_get_topologies_for_state_location.assert_has_calls([call("mock_name2"),
                                                          call("mock_name1")],
                                                         any_order=True)

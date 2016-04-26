@@ -6,7 +6,7 @@ common_deps_files = \
     heron_java_proto_files() + [
         "//heron/spi/src/java:common-spi-java",
         "//heron/spi/src/java:statemgr-spi-java",
-        "//3rdparty/guava:guava-java",
+        "@guava//jar",
     ]
 
 localfs_deps_files = \
@@ -16,9 +16,10 @@ localfs_deps_files = \
     
 zookeeper_deps_files = \
     localfs_deps_files + [
-        "//3rdparty/curator:curator-java",
-        "//3rdparty/zookeeper:zookeeper-java",
-        "//3rdparty/logging:logging-java"
+        "@curator-client//jar",
+        "@curator-framework//jar",
+        "@zookeeper//jar",
+        "//3rdparty/java:logging"
     ]
 
 java_library(

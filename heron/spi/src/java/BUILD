@@ -22,9 +22,9 @@ java_library(
         "//heron/proto:proto_tmaster_java",
         "//heron/proto:proto_topology_java",
         "//heron/proto:proto_physical_plan_java",
-        "//3rdparty/snakeyaml:snakeyaml-java",
-        "//3rdparty/guava:guava-java",
-        "//3rdparty/protobuf:protobuf-java",
+        "@snakeyaml//jar",
+        "@guava//jar",
+        "@protobuf-java//jar",
     ],
 )
 
@@ -51,14 +51,14 @@ utils_deps_files = \
         ":packing-spi-java",
         "//heron/common/src/java:config-java",
         "//heron/api/src/java:api-java",
-        "//3rdparty/guava:guava-java",
+        "@guava//jar",
     ]
 
 scheduler_deps_files = \
     heron_java_proto_files() + [
         ":common-spi-java",
         "//heron/common/src/java:config-java",
-        "//3rdparty/guava:guava-java",
+        "@guava//jar",
     ]
 
 packing_deps_files = [
@@ -75,7 +75,7 @@ statemgr_deps_files = \
     heron_java_proto_files() + [
         ":common-spi-java",
         "//heron/common/src/java:config-java",
-        "//3rdparty/guava:guava-java",
+        "@guava//jar",
     ]
 
 java_library(
