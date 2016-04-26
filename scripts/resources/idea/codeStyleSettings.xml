@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectCodeStyleSettingsManager">
+    <option name="PER_PROJECT_SETTINGS">
+      <value>
+        <option name="USE_SAME_INDENTS" value="true" />
+        <option name="IGNORE_SAME_INDENTS_FOR_LANGUAGES" value="true" />
+        <option name="OTHER_INDENT_OPTIONS">
+          <value>
+            <option name="INDENT_SIZE" value="2" />
+            <option name="CONTINUATION_INDENT_SIZE" value="4" />
+            <option name="TAB_SIZE" value="2" />
+            <option name="USE_TAB_CHARACTER" value="false" />
+            <option name="SMART_TABS" value="false" />
+            <option name="LABEL_INDENT_SIZE" value="0" />
+            <option name="LABEL_INDENT_ABSOLUTE" value="false" />
+            <option name="USE_RELATIVE_INDENTS" value="true" />
+          </value>
+        </option>
+        <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="999" />
+        <option name="IMPORT_LAYOUT_TABLE">
+          <value>
+            <emptyLine />
+            <package name="java" withSubpackages="true" static="false" />
+            <emptyLine />
+            <package name="javax" withSubpackages="true" static="false" />
+            <emptyLine />
+            <package name="scala" withSubpackages="true" static="false" />
+            <emptyLine />
+            <package name="com" withSubpackages="true" static="false" />
+            <emptyLine />
+            <package name="net" withSubpackages="true" static="false" />
+            <emptyLine />
+            <package name="org" withSubpackages="true" static="false" />
+            <emptyLine />
+            <package name="com.twitter" withSubpackages="true" static="false" />
+            <emptyLine />
+            <package name="" withSubpackages="true" static="false" />
+            <package name="" withSubpackages="true" static="true" />
+          </value>
+        </option>
+        <option name="RIGHT_MARGIN" value="100" />
+        <option name="JD_ALIGN_PARAM_COMMENTS" value="false" />
+        <option name="JD_ALIGN_EXCEPTION_COMMENTS" value="false" />
+        <option name="JD_KEEP_INVALID_TAGS" value="false" />
+        <option name="JD_KEEP_EMPTY_PARAMETER" value="false" />
+        <option name="JD_KEEP_EMPTY_EXCEPTION" value="false" />
+        <option name="JD_KEEP_EMPTY_RETURN" value="false" />
+        <XML>
+          <option name="XML_LEGACY_SETTINGS_IMPORTED" value="true" />
+        </XML>
+        <ADDITIONAL_INDENT_OPTIONS fileType="sass">
+          <option name="INDENT_SIZE" value="2" />
+        </ADDITIONAL_INDENT_OPTIONS>
+        <ADDITIONAL_INDENT_OPTIONS fileType="scala">
+          <option name="INDENT_SIZE" value="2" />
+          <option name="CONTINUATION_INDENT_SIZE" value="2" />
+          <option name="TAB_SIZE" value="2" />
+        </ADDITIONAL_INDENT_OPTIONS>
+        <ADDITIONAL_INDENT_OPTIONS fileType="sql">
+          <option name="INDENT_SIZE" value="2" />
+        </ADDITIONAL_INDENT_OPTIONS>
+        <ADDITIONAL_INDENT_OPTIONS fileType="yml">
+          <option name="INDENT_SIZE" value="2" />
+        </ADDITIONAL_INDENT_OPTIONS>
+        <codeStyleSettings language="JAVA">
+          <indentOptions>
+            <option name="INDENT_SIZE" value="2" />
+            <option name="CONTINUATION_INDENT_SIZE" value="4" />
+            <option name="TAB_SIZE" value="2" />
+          </indentOptions>
+        </codeStyleSettings>
+      </value>
+    </option>
+    <option name="USE_PER_PROJECT_SETTINGS" value="true" />
+    <option name="PREFERRED_PROJECT_CODE_STYLE" value="Heron" />
+  </component>
+</project>

@@ -36,7 +36,7 @@ import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.scheduler.Command;
+import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
@@ -286,7 +286,7 @@ public class RuntimeManagerMain {
 
       System.exit(1);
     } else {
-      LOG.log(Level.INFO, "Topology {0} {1} successfully", new Object[]{topologyName, command});
+      LOG.log(Level.FINE, "Topology {0} {1} successfully", new Object[]{topologyName, command});
 
       System.exit(0);
     }

@@ -12,26 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.spi.scheduler;
+package com.twitter.heron.spi.common;
 
-import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.PackingPlan;
+/***
+ * This enum defines commands invoked from heron client
+ */
+public enum Command {
+  // TODO(mfu): Move ACTIVATE & DEACTIVATE out? They are non-related to Scheduling
+  SUBMIT,
+  KILL,
+  ACTIVATE,
+  DEACTIVATE,
+  RESTART;
 
-public class NullLauncher implements ILauncher {
-
-  @Override
-  public void initialize(Config config, Config runtime) {
-
-  }
-
-  @Override
-  public void close() {
-
-  }
-
-  @Override
-  public boolean launch(PackingPlan packing) {
-    return true;
+  public static Command makeCommand(String commandString) {
+    return Command.valueOf(commandString.toUpperCase());
   }
 }
 

@@ -23,7 +23,7 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.scheduler.Command;
+import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;
@@ -120,7 +120,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
       return false;
     }
     // Clean the connection when we are done.
-    LOG.info("Scheduler restarted topology successfully.");
+    LOG.fine("Scheduler restarted topology successfully.");
     return true;
   }
 
@@ -143,7 +143,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     }
 
     // Clean the connection when we are done.
-    LOG.info("Scheduler killed topology successfully.");
+    LOG.fine("Scheduler killed topology successfully.");
     return true;
   }
 }

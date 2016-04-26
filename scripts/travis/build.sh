@@ -14,6 +14,9 @@ if [ "$JARS" ]; then
   exit 1
 fi
 
+# Run this manually, since if it fails when run as -workspace_status_command we don't get good output
+./scripts/release/status.sh
+
 # append the bazel default bazelrc to travis-ci/bazel.rc for using rules provided by bazel
 cat ~/.bazelrc >> tools/travis-ci/bazel.rc
 ./bazel_configure.py

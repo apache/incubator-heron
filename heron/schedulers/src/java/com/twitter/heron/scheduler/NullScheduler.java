@@ -12,21 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.statemgr.localfs;
+package com.twitter.heron.scheduler;
 
+import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.scheduler.IScheduler;
 
-public class LocalFileSystemContext extends Context {
+public class NullScheduler implements IScheduler {
 
-  /**
-   * Get the config specifying whether to initialize file directory hierarchy
-   *
-   * @param config the config map
-   * @return true if config does not exist, else the specified value
-   */
-  public static boolean initLocalFileTree(Config config) {
-    return config.get(LocalFileSystemKeys.initializeFileTree()) == null
-        ? true : (Boolean) config.get(LocalFileSystemKeys.initializeFileTree());
+  @Override
+  public void initialize(Config config, Config runtime) {
+
+  }
+
+  @Override
+  public void close() {
+
+  }
+
+  @Override
+  public boolean onSchedule(PackingPlan packing) {
+    return true;
+  }
+
+  @Override
+  public boolean onKill(Scheduler.KillTopologyRequest request) {
+    return true;
+  }
+
+  @Override
+  public boolean onRestart(Scheduler.RestartTopologyRequest request) {
+    return true;
   }
 }
+

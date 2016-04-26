@@ -21,9 +21,17 @@ function query() {
     ./output/bazel query "$@"
 }
 
+set +e
 # Build everything
 bazel build heron/...
-pwd
+result=$?
+if [ "${result}" -eq "0" ] ; then
+   echo "Bazel build successful!!"
+else
+    echo "WARNING!!! - bazel build failed - intellij setup may not be consistent"
+fi 
+set -e
+echo "Path is " `pwd`
 
 
 function get_heron_python_paths() {
