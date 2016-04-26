@@ -25,32 +25,32 @@ import java.util.Random;
  */
 
 public class REQID {
-  public static final int REQIDSize = 32;
+  public static final int REQID_SIZE = 32;
   public static REQID zeroREQID = generateZero();
   private static Random randomGenerator = new Random(System.nanoTime());
   private byte[] bytes;
 
-  public REQID(byte[] _bytes) {
-    assert _bytes.length == REQIDSize;
-    bytes = new byte[REQIDSize];
-    System.arraycopy(_bytes, 0, bytes, 0, _bytes.length);
+  public REQID(byte[] dataBytes) {
+    assert dataBytes.length == REQID_SIZE;
+    bytes = new byte[REQID_SIZE];
+    System.arraycopy(dataBytes, 0, bytes, 0, dataBytes.length);
   }
 
   public REQID(ByteBuffer buffer) {
-    bytes = new byte[REQID.REQIDSize];
+    bytes = new byte[REQID.REQID_SIZE];
     buffer.get(bytes);
   }
 
   public static REQID generate() {
-    byte[] _bytes = new byte[REQIDSize];
-    randomGenerator.nextBytes(_bytes);
-    return new REQID(_bytes);
+    byte[] dataBytes = new byte[REQID_SIZE];
+    randomGenerator.nextBytes(dataBytes);
+    return new REQID(dataBytes);
   }
 
   private static REQID generateZero() {
-    byte[] _bytes = new byte[REQIDSize];
-    Arrays.fill(_bytes, (byte) 0);
-    return new REQID(_bytes);
+    byte[] dataBytes = new byte[REQID_SIZE];
+    Arrays.fill(dataBytes, (byte) 0);
+    return new REQID(dataBytes);
   }
 
   public void pack(ByteBuffer buffer) {
@@ -62,13 +62,16 @@ public class REQID {
   }
 
   public boolean equals(Object other) {
-    if (other == null)
+    if (other == null) {
       return false;
-    if (other == this)
+    }
+    if (other == this) {
       return true;
-    if (!(other instanceof REQID))
+    }
+    if (!(other instanceof REQID)) {
       return false;
-    REQID rother = (REQID) (other);
+    }
+    REQID rother = (REQID) other;
     return Arrays.equals(this.bytes, rother.value());
   }
 

@@ -36,14 +36,17 @@ public class Communicator<E> {
    * The buffer queue underneath, an unbound queue.
    */
   private final LinkedTransferQueue<E> buffer;
+
   /**
    * The producer offers item into the queue, and it will be wake up when consumer polls a item.
    */
   private volatile WakeableLooper producer;
+
   /**
    * The consumer polls item from the queue, and it will be wake up when producer offer a item.
    */
   private volatile WakeableLooper consumer;
+
   /**
    * The soft capacity bound for this queue
    */
@@ -111,15 +114,18 @@ public class Communicator<E> {
     this.consumer = consumer;
   }
 
-  public void init(int capacity, int expectedQueueSize, double currentSampleWeight) {
-    this.capacity = capacity;
-    this.expectedQueueSize = expectedQueueSize;
-    this.currentSampleWeight = currentSampleWeight;
+  public void init(int ipcapacity, int ipexpectedQueueSize, double ipcurrentSampleWeight) {
+    this.capacity = ipcapacity;
+    this.expectedQueueSize = ipexpectedQueueSize;
+    this.currentSampleWeight = ipcurrentSampleWeight;
+
     // We set the default expected available capacity half as the capacity
     this.expectedAvailableCapacity = capacity / 2;
   }
 
   /**
+   * Get the number of items in queue
+   *
    * @return the number of items in queue
    */
   public int size() {
@@ -131,6 +137,8 @@ public class Communicator<E> {
   }
 
   /**
+   * Check if there is any item in the queue
+   *
    * @return null if there is no item inside the queue
    */
   public E poll() {

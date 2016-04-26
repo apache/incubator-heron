@@ -132,9 +132,11 @@ public abstract class HeronServer implements ISelectHandler {
         socketChannel.configureBlocking(false);
         // Set the maximum possible send and receive buffers
         socketChannel.socket().setSendBufferSize(socketOptions.getSocketSendBufferSizeInBytes());
-        socketChannel.socket().setReceiveBufferSize(socketOptions.getSocketReceivedBufferSizeInBytes());
+        socketChannel.socket().setReceiveBufferSize(
+            socketOptions.getSocketReceivedBufferSizeInBytes());
         socketChannel.socket().setTcpNoDelay(true);
-        SocketChannelHelper helper = new SocketChannelHelper(nioLooper, this, socketChannel, socketOptions);
+        SocketChannelHelper helper = new SocketChannelHelper(nioLooper, this, socketChannel,
+            socketOptions);
         activeConnections.put(socketChannel, helper);
         onConnect(socketChannel);
       }
