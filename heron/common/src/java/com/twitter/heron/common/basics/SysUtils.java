@@ -17,7 +17,7 @@ package com.twitter.heron.common.basics;
 import java.io.IOException;
 import java.net.ServerSocket;
 
-final class SysUtils {
+public final class SysUtils {
 
   private SysUtils() {
   }

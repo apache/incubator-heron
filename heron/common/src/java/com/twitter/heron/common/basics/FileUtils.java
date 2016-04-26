@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 /**
  * Utilities related to File.
  */
-final class FileUtils {
+public final class FileUtils {
   private static final Logger LOG = Logger.getLogger(FileUtils.class.getName());
 
   private FileUtils() {
