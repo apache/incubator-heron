@@ -69,8 +69,8 @@ public abstract class HeronClient implements ISelectHandler {
   private HeronSocketOptions socketOptions;
 
   // A flag to determine whether the socket is connected or not
-  // We could not simply use socketChanel.isConnected() to tell whether the socketChannel is connected
-  // or not, since:
+  // We could not simply use socketChanel.isConnected() to tell whether the socketChannel
+  // is connected or not, since:
   // SocketChannel.socket().isConnected() and SocketChannel.isConnected()
   // return false before the socket is connected.
   // Once the socket is connected they will return true,
@@ -110,7 +110,8 @@ public abstract class HeronClient implements ISelectHandler {
 
       // Set the maximum possible send and receive buffers
       socketChannel.socket().setSendBufferSize(socketOptions.getSocketSendBufferSizeInBytes());
-      socketChannel.socket().setReceiveBufferSize(socketOptions.getSocketReceivedBufferSizeInBytes());
+      socketChannel.socket().setReceiveBufferSize(
+          socketOptions.getSocketReceivedBufferSizeInBytes());
       socketChannel.socket().setTcpNoDelay(true);
 
       // If the socketChannel has already connect to endpoint, call handleConnect()
@@ -181,7 +182,8 @@ public abstract class HeronClient implements ISelectHandler {
   // The ctx is a user owned piece of context.
   // The response is a MessageBuilder to handle the response from server
   // A negative value of the timeout means no timeout.
-  public void sendRequest(Message request, Object context, Message.Builder responseBuilder, long timeoutInSeconds) {
+  public void sendRequest(Message request, Object context, Message.Builder responseBuilder,
+      long timeoutInSeconds) {
     // Pack it as a no-timeout request and send it!
     final REQID rid = REQID.generate();
     contextMap.put(rid, context);
