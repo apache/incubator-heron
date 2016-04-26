@@ -53,7 +53,5 @@ public final class ZkWatcherCallback {
   }
 
   private ZkWatcherCallback() {
-    // Throw an exception if this ever *is* called
-    throw new AssertionError("Instantiating utility class " + this.getClass().getSimpleName());
   }
 }

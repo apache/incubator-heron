@@ -20,7 +20,5 @@ final class LocalFileSystemConstants {
   public static final String KEYS_YAML = "com/twitter/heron/statemgr/localfs/keys.yaml";
 
   private LocalFileSystemConstants() {
-    // Throw an exception if this ever *is* called
-    throw new AssertionError("Instantiating utility class " + this.getClass().getSimpleName());
   }
 }

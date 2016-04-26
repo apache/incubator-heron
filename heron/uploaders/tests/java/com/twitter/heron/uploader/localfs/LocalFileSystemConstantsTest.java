@@ -19,7 +19,5 @@ final class LocalFileSystemConstantsTest {
       "/heron/uploaders/tests/java/com/twitter/heron/uploader/localfs/testdata";
 
   private LocalFileSystemConstantsTest() {
-    // Throw an exception if this ever *is* called
-    throw new AssertionError("Instantiating utility class " + this.getClass().getSimpleName());
   }
 }
