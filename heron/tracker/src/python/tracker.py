@@ -36,7 +36,8 @@ class Tracker:
   by handlers.
   """
 
-  def __init__(self):
+  def __init__(self, config):
+    self.config = config
     self.topologies = []
     self.state_managers = []
 
@@ -49,11 +50,11 @@ class Tracker:
     # since other info can not be relied upon.
     self.topologyInfos = {}
 
-  def synch_topologies(self, stateconf):
+  def synch_topologies(self):
     """
-    Syncs the topologies with the zookeeper.
+    Sync the topologies with the statemgrs.
     """
-    self.state_managers = statemanagerfactory.get_all_state_managers(stateconf)
+    self.state_managers = statemanagerfactory.get_all_state_managers(self.config.statemgr_config)
 
     def on_topologies_watch(state_manager, topologies):
       LOG.info("State watch triggered for topologies.")
@@ -170,12 +171,12 @@ class Tracker:
       "release_tag": execution_state.release_state.release_tag,
       "release_version": execution_state.release_state.release_version,
       "uploader_version": execution_state.release_state.uploader_version,
-      # TODO: Remove the viz link
-      "viz": utils.make_viz_dashboard_url(topology.name, execution_state.cluster, execution_state.environ),
       "has_physical_plan": None,
       "has_tmaster_location": None,
     }
 
+    viz_url = self.config.get_formatted_viz_url(executionState)
+    executionState["viz"] = viz_url
     return executionState
 
   def extract_tmaster(self, topology):

@@ -13,6 +13,11 @@ filegroup(
 )
 
 filegroup(
+    name = "tracker-yaml",
+    srcs = ["heron_tracker.yaml"],
+)
+
+filegroup(
     name = "test-config-internals-yaml",
     srcs = ["test_heron_internals.yaml"],
 )
