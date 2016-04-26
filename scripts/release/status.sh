@@ -17,6 +17,14 @@ function die {
     exit 1
 }
 
+function disable_e_and_execute {
+  set +e
+  $@
+  ret_status=$?
+  set -e
+  echo $ret_status
+}
+
 # get the release tag version or the branch name
 if [ -z ${HERON_GIT_RELEASE+x} ];
 then
@@ -88,9 +96,8 @@ echo "HERON_BUILD_USER ${build_user}"
 # Check whether there are any uncommited changes
 if [ -z ${HERON_TREE_STATUS+x} ];
 then
-  cmd="git diff-index --quiet HEAD --"
-  status=$($cmd || true)
-  if [[ ${status} == 0 ]];
+  status=$(disable_e_and_execute "git diff-index --quiet HEAD --")
+  if [[ $status == 0 ]];
   then
     tree_status="Clean"
   else
