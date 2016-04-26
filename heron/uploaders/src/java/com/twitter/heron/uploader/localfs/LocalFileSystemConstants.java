@@ -23,7 +23,5 @@ final class LocalFileSystemConstants {
   public static final String DEFAULTS_YAML = "com/twitter/heron/uploader/localfs/defaults.yaml";
 
   private LocalFileSystemConstants() {
-    // Throw an exception if this ever *is* called
-    throw new AssertionError("Instantiating utility class " + this.getClass().getSimpleName());
   }
 }

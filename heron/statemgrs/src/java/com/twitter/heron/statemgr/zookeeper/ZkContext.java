@@ -46,7 +46,5 @@ public final class ZkContext extends Context {
   }
 
   private ZkContext() {
-    // Throw an exception if this ever *is* called
-    throw new AssertionError("Instantiating utility class " + this.getClass().getSimpleName());
   }
 }

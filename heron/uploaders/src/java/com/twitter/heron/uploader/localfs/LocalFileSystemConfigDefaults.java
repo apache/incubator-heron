@@ -38,8 +38,6 @@ final class LocalFileSystemConfigDefaults {
   }
 
   private LocalFileSystemConfigDefaults() {
-    // Throw an exception if this ever *is* called
-    throw new AssertionError("Instantiating utility class " + this.getClass().getSimpleName());
   }
 
   /*
