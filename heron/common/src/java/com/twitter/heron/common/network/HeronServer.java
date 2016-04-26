@@ -87,7 +87,7 @@ public abstract class HeronServer implements ISelectHandler {
       acceptChannel.socket().bind(endpoint);
       nioLooper.registerAccept(acceptChannel, this);
       return true;
-    } catch (Exception e) {
+    } catch (IOException e) {
       LOG.log(Level.SEVERE, "Failed to start server", e);
       return false;
     }
@@ -140,7 +140,7 @@ public abstract class HeronServer implements ISelectHandler {
         activeConnections.put(socketChannel, helper);
         onConnect(socketChannel);
       }
-    } catch (Exception e) {
+    } catch (IOException e) {
       LOG.log(Level.SEVERE, "Error while accepting a new connection ", e);
       // Note:- we are not calling onError
     }
