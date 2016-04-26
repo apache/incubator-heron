@@ -1,12 +1,12 @@
 load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 common_deps_files = [
-  "//3rdparty/guava:guava-java",
-  "//3rdparty/powermock:powermock-java",
-  "//heron/api/src/java:api-java",
-  "//heron/newscheduler/src/java:scheduler-java",
-  "@bazel_tools//third_party:junit4",
-  "@bazel_tools//third_party:mockito",
+    "@guava//jar",
+    "//3rdparty/java:powermock",
+    "//heron/api/src/java:api-java",
+    "//heron/newscheduler/src/java:scheduler-java",
+    "@bazel_tools//third_party:junit4",
+    "@bazel_tools//third_party:mockito",
 ]
 
 spi_deps_files = [
@@ -39,6 +39,16 @@ java_test(
   srcs=glob(
     ["**/RuntimeManagerRunnerTest.java"] +
     ["**/util/TopologyUtilityTest.java"]
+  ),
+  deps=scheduler_deps_files,
+  size="small",
+)
+
+# Following unit tests are for classes under package com.twitter.heron.scheduler.server
+java_test(
+  name="scheduler-server_unittest",
+  srcs=glob(
+    ["**/SchedulerServerTest.java"]
   ),
   deps=scheduler_deps_files,
   size="small",

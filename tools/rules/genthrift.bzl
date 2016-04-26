@@ -70,8 +70,8 @@ def thrift_library(name, src=None, deps=[], visibility=None,
         visibility = ["//visibility:private"],
     )
     java_deps = [
-        "//3rdparty/thrift:thrift-java",
-        "//3rdparty/logging:logging-java",
+        "@thrift//jar",
+        "//3rdparty/java:logging",
     ]
     for dep in deps:
       java_deps += [dep+"_java"]

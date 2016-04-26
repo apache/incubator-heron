@@ -10,11 +10,19 @@
 # If the script exits with non-zero code, it's considered as a failure
 # and the output will be discarded.
 
-set -e
+set -eu
 
 function die {
     echo >&2 "$@"
     exit 1
+}
+
+function disable_e_and_execute {
+  set +e
+  $@
+  ret_status=$?
+  set -e
+  echo $ret_status
 }
 
 # get the release tag version or the branch name
@@ -86,10 +94,10 @@ fi
 echo "HERON_BUILD_USER ${build_user}"
 
 # Check whether there are any uncommited changes
-if [ -z ${HERON_TREE_STATUS} ];
+if [ -z ${HERON_TREE_STATUS+x} ];
 then
-  git diff-index --quiet HEAD --
-  if [[ $? == 0 ]];
+  status=$(disable_e_and_execute "git diff-index --quiet HEAD --")
+  if [[ $status == 0 ]];
   then
     tree_status="Clean"
   else
@@ -99,4 +107,3 @@ else
   tree_status=${HERON_TREE_STATUS}
 fi
 echo "HERON_BUILD_RELEASE_STATUS ${tree_status}"
-

@@ -16,11 +16,11 @@ java_library(
         "//heron/proto:proto_metrics_java",
         "//heron/proto:proto_tmaster_java",
         "//heron/metricsmgr/src/thrift:thrift_scribe_java",
-        "//3rdparty/snakeyaml:snakeyaml-java",
-        "//3rdparty/fasterxml-jackson:fasterxml-jackson-java",
-        "//3rdparty/protobuf:protobuf-java",
-        "//3rdparty/thrift:thrift-java",
-        "//3rdparty/logging:logging-java", # slf4j is only used for thrift in scribe-sink
+        "//3rdparty/java:jackson",
+        "@snakeyaml//jar",
+        "@protobuf-java//jar",
+        "@thrift//jar",
+        "//3rdparty/java:logging", # slf4j is only used for thrift in scribe-sink
     ],
 )
 
