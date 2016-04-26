@@ -1,8 +1,23 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License
+
 package com.twitter.heron.scheduler.reef;
 
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,9 +41,10 @@ import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
 
 /**
- * Launches Heron Scheduler on a REEF on YARN cluster. The launcher will start a master (driver/AM) container for each
- * topology first. The master container will start worker containers subsequently. This launcher is responsible for
- * copying scheduler dependencies, topology package and heron-core libraries in file cache.
+ * Launches Heron Scheduler on a REEF on YARN cluster. The launcher will start a master (driver/AM)
+ * container for each topology first. The master container will start worker containers
+ * subsequently. This launcher is responsible for copying scheduler dependencies, topology package
+ * and heron-core libraries in file cache.
  */
 @Unit
 public class ReefLauncher implements ILauncher {
@@ -40,8 +56,7 @@ public class ReefLauncher implements ILauncher {
   private String cluster;
   private String role;
   private String env;
-  // TODO(mfu): Currently not needed.
-//  private ArrayList<String> libJars = new ArrayList<>();
+  private ArrayList<String> libJars = new ArrayList<>();
 
   @Override
   public void initialize(Config config, Config runtime) {
@@ -53,20 +68,21 @@ public class ReefLauncher implements ILauncher {
     env = Context.environ(config);
 
     try {
-      // TODO(mfu): No need. CoreReleasePackage contains them already.
-      // TODO(mfu): In sandbox directory: ./heron-core/lib
-//      Class<?> packingClass = Class.forName(Context.packingClass(config));
-//      Class<?> stateMgrClass = Class.forName(Context.stateManagerClass(config));
-//
-//      // In addition to jar for REEF's driver implementation, jar for packing and state manager classes is also needed
-//      // on the server classpath. Upload these libraries in the global cache.
-//      libJars.add(HeronMasterDriver.class.getProtectionDomain().getCodeSource().getLocation().getFile());
-//      libJars.add(packingClass.getProtectionDomain().getCodeSource().getLocation().getFile());
-//      libJars.add(stateMgrClass.getProtectionDomain().getCodeSource().getLocation().getFile());
+      Class<?> packingClass = Class.forName(Context.packingClass(config));
+      Class<?> stateMgrClass = Class.forName(Context.stateManagerClass(config));
+
+      // In addition to jar for REEF's driver implementation, jar for packing and state manager
+      // classes is also needed on the server classpath. Upload these libraries in the global cache.
+      // TODO Although these jars will be available in heron-core/lib directory when core package
+      // TODO is extracted. So copying these jars can be skipped if these jars can be put in
+      // TODO classpath of SchedulerMain.
+      libJars.add(HeronMasterDriver.class.getProtectionDomain().getCodeSource().getLocation().getFile());
+      libJars.add(packingClass.getProtectionDomain().getCodeSource().getLocation().getFile());
+      libJars.add(stateMgrClass.getProtectionDomain().getCodeSource().getLocation().getFile());
 
       coreReleasePackage = new URI(Context.corePackageUri(config)).getPath();
-    } catch (URISyntaxException e) {
-      throw new RuntimeException("Core package URI is not valid", e);
+    } catch (URISyntaxException | ClassNotFoundException e) {
+      throw new RuntimeException("Either core package URI is invalid or packing/state manager class is missing", e);
     }
 
     LOG.log(Level.INFO, "Initializing topology: {0}, core: {1}", new Object[]{topologyName, coreReleasePackage});
@@ -74,22 +90,19 @@ public class ReefLauncher implements ILauncher {
 
   @Override
   public boolean launch(PackingPlan packing) {
-    Configuration runtimeREEFConf = getRuntimeConf();
+    Configuration reefRuntimeConf = getRuntimeConf();
     Configuration reefDriverConf = getHMDriverConf();
     Configuration reefClientConf = getClientConf();
 
     boolean ret;
     try {
-      final Injector tangInjector = Tang.Factory.getTang().newInjector(runtimeREEFConf, reefClientConf);
+      final Injector tangInjector = Tang.Factory.getTang().newInjector(reefRuntimeConf, reefClientConf);
       final REEF reef = tangInjector.getInstance(REEF.class);
       final ReefClientSideHandlers client = tangInjector.getInstance(ReefClientSideHandlers.class);
-      // TODO(mfu): Put it inside constructor?
-      client.initialize(topologyName);
 
       reef.submit(reefDriverConf);
 
-      // TODO(mfu): waitForSchedulingResponse() could be a better name?
-      ret = client.waitForJobToStart();
+      ret = client.waitForSchedulerJobResponse();
     } catch (InjectionException | InterruptedException e) {
       LOG.log(Level.WARNING, "Failed to launch REEF app", e);
       return false;
@@ -99,16 +112,18 @@ public class ReefLauncher implements ILauncher {
   }
 
   /**
-   * Creates configuration required by driver code to successfully construct heron's configuration and launch heron's
-   * scheduler
+   * Creates configuration required by driver code to successfully construct heron's configuration
+   * and launch heron's scheduler
    */
   private Configuration getHMDriverConf() {
     String topologyPackageName = new File(topologyPackageLocation).getName();
     String corePackageName = new File(coreReleasePackage).getName();
-    return HeronDriverConfiguration
-        .CONF
-//        .setMultiple(DriverConfiguration.GLOBAL_LIBRARIES, libJars)
-            // TODO(mfu): Can we put "(Config config, Config runtime)" from ILauncher.initialize(...) into it directly?
+
+    // topologyName and other configurations are required by Heron Driver/Scheduler to load
+    // configuration files. Using REEF configuration model is better than depending on external
+    // persistence.
+    return HeronDriverConfiguration.CONF
+        .setMultiple(DriverConfiguration.GLOBAL_LIBRARIES, libJars)
         .set(DriverConfiguration.DRIVER_IDENTIFIER, topologyName)
         .set(DriverConfiguration.ON_DRIVER_STARTED, HeronSchedulerLauncher.class)
         .set(DriverConfiguration.ON_EVALUATOR_ALLOCATED, HeronExecutorContainerBuilder.class)
@@ -133,20 +148,23 @@ public class ReefLauncher implements ILauncher {
   }
 
   /**
-   * Specifies YARN as the runtime for REEF cluster. Override this method to use a different runtime.
+   * Specifies YARN as the runtime for REEF cluster. Override this method to use a different
+   * runtime.
    */
   Configuration getRuntimeConf() {
     return YarnClientConfiguration.CONF.build();
   }
 
   /**
-   * @return Builds and returns configuration needed by REEF client to launch topology as a REEF job and track it.
+   * @return Builds and returns configuration needed by REEF client to launch topology as a REEF job
+   * and track it.
    */
   private Configuration getClientConf() {
-    return ClientConfiguration.CONF
+    return HeronClientConfiguration.CONF
         .set(ClientConfiguration.ON_JOB_RUNNING, ReefClientSideHandlers.RunningJobHandler.class)
         .set(ClientConfiguration.ON_JOB_FAILED, ReefClientSideHandlers.FailedJobHandler.class)
         .set(ClientConfiguration.ON_RUNTIME_ERROR, ReefClientSideHandlers.RuntimeErrorHandler.class)
+        .set(HeronClientConfiguration.TOPOLOGY_NAME, topologyName)
         .build();
   }
 }

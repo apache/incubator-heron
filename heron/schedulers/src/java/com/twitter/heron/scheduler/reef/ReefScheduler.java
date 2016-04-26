@@ -1,3 +1,17 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License
+
 package com.twitter.heron.scheduler.reef;
 
 import java.util.logging.Level;
@@ -10,22 +24,21 @@ import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
 
 /**
- * {@link ReefScheduler} in invoked by Heron Scheduler to perform topology actions on REEF cluster. This instance will
- * delegate all topology management functions to {@link HeronMasterDriver}.
+ * {@link ReefScheduler} in invoked by Heron Scheduler to perform topology actions on REEF
+ * cluster. This instance will delegate all topology management functions to
+ * {@link HeronMasterDriver}.
  */
 public class ReefScheduler implements IScheduler {
   private static final Logger LOG = Logger.getLogger(ReefScheduler.class.getName());
 
-  private HeronMasterDriver driver;
-
   @Override
   public void initialize(Config config, Config runtime) {
-    this.driver = HeronMasterDriver.getInstance();
   }
 
   @Override
   public boolean onSchedule(PackingPlan packing) {
     LOG.log(Level.INFO, "Launching topology master for packing: {0}", packing.id);
+    HeronMasterDriver driver = HeronMasterDriverProvider.getInstance();
     driver.scheduleTopologyMaster();
     driver.scheduleHeronWorkers(packing);
     return true;
@@ -33,7 +46,7 @@ public class ReefScheduler implements IScheduler {
 
   @Override
   public boolean onKill(KillTopologyRequest request) {
-    driver.killTopology();
+    HeronMasterDriverProvider.getInstance().killTopology();
     return true;
   }
 

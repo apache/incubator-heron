@@ -1,8 +1,21 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License
+
 package com.twitter.heron.scheduler.reef;
 
 import java.io.File;
 import java.nio.charset.Charset;
-import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -79,8 +92,8 @@ public class HeronExecutorTask implements Task {
   public byte[] call(byte[] memento) throws Exception {
     String globalFolder = reefFileNames.getGlobalFolder().getPath();
 
-    extractPackageInSandbox(globalFolder, topologyPackageName, localHeronConfDir);
-    extractPackageInSandbox(globalFolder, heronCorePackageName, localHeronConfDir);
+    HeronReefUtils.extractPackageInSandbox(globalFolder, topologyPackageName, localHeronConfDir);
+    HeronReefUtils.extractPackageInSandbox(globalFolder, heronCorePackageName, localHeronConfDir);
 
     String topologyDefnFile = TopologyUtils.lookUpTopologyDefnFile(".", topologyName);
     topology = TopologyUtils.getTopology(topologyDefnFile);
@@ -149,18 +162,6 @@ public class HeronExecutorTask implements Task {
     return executorCmd;
   }
 
-  // TODO(mfu): This method is duplicated in HeronMasterDriver.
-  private void extractPackageInSandbox(String srcFolder, String fileName, String dstDir) {
-    String packagePath = Paths.get(srcFolder, fileName).toString();
-    LOG.log(Level.INFO, "Extracting package: {0} at: {1}", new Object[]{packagePath, dstDir});
-    boolean result = untarPackage(packagePath, dstDir);
-    if (!result) {
-      String msg = "Failed to extract package:" + packagePath + " at: " + dstDir;
-      LOG.log(Level.SEVERE, msg);
-      throw new RuntimeException(msg);
-    }
-  }
-
   /**
    * TODO copied from localScheduler. May be moved to a utils class
    */
@@ -170,28 +171,12 @@ public class HeronExecutorTask implements Task {
     return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
   }
 
-  /**
-   * TODO this method from LocalLauncher could be moved to a utils class
-   */
-  protected boolean untarPackage(String packageName, String targetFolder) {
-    String cmd = String.format("tar -xvf %s", packageName);
-
-    int ret = ShellUtils.runSyncProcess(false,
-        true,
-        cmd,
-        new StringBuilder(),
-        new StringBuilder(),
-        new File(targetFolder));
-
-    return ret == 0 ? true : false;
-  }
-
   /*
    * TODO This class could be removed when a util class is created
    */
   private class ConfigLoader extends SchedulerConfig {
     public Config getConfig(String cluster, String role, String env, String jar, String defn, Topology topology) {
-      return super.loadConfig(cluster, role, env, jar, defn, topology);
+      return loadConfig(cluster, role, env, jar, defn, topology);
     }
   }
 }
