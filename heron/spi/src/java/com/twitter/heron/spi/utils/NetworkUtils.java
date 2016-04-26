@@ -27,8 +27,6 @@ public class NetworkUtils {
   private static final Logger LOG = Logger.getLogger(NetworkUtils.class.getName());
 
   private NetworkUtils() {
-    // Throw an exception if this ever *is* called
-    throw new AssertionError("Instantiating utility class " + this.getClass().getSimpleName());
   }
 
   /**

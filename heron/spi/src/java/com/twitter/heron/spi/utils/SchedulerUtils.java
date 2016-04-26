@@ -26,8 +26,6 @@ public final class SchedulerUtils {
   private static final Logger LOG = Logger.getLogger(SchedulerUtils.class.getName());
 
   private SchedulerUtils() {
-    // Throw an exception if this ever *is* called
-    throw new AssertionError("Instantiating utility class " + this.getClass().getSimpleName());
   }
 
   /**

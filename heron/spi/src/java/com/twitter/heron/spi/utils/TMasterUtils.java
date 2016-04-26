@@ -30,8 +30,6 @@ public final class TMasterUtils {
   private static final Logger LOG = Logger.getLogger(TMasterUtils.class.getName());
 
   private TMasterUtils() {
-    // Throw an exception if this ever *is* called
-    throw new AssertionError("Instantiating utility class " + this.getClass().getSimpleName());
   }
 
   /**
