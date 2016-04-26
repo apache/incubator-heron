@@ -22,20 +22,20 @@ package com.twitter.heron.api.utils;
  * This is a class that helps to auto tune the max spout pending value
  */
 public class DefaultMaxSpoutPendingTuner {
-  final static long CONSERVATIVE_MAX_SPOUT_PENDING = 10;
+  static final long CONSERVATIVE_MAX_SPOUT_PENDING = 10;
+  static final int NOOP_THRESHOLD = 5;
 
-  ;
-  final static int NOOP_THRESHOLD = 5;
-  Long adjustedMaxSpoutPending;
-  Long initialMaxSpoutPending;
-  Long prevProgress;
-  Long restoreAdjustedMaxSpoutPending;
-  Long restoreProgress;
-  int callsInNoop;
-  ACTION lastAction;
-  float autoTuneFactor;
-  double progressBound;
-  ACTION speculativeAction;
+  private Long adjustedMaxSpoutPending;
+  private Long initialMaxSpoutPending;
+  private Long prevProgress;
+  private Long restoreAdjustedMaxSpoutPending;
+  private Long restoreProgress;
+  private int callsInNoop;
+  private ACTION lastAction;
+  private float autoTuneFactor;
+  private double progressBound;
+  private ACTION speculativeAction;
+
   /**
    * Conv constructor when initing from a non-set initial value
    */
@@ -62,17 +62,23 @@ public class DefaultMaxSpoutPendingTuner {
   }
 
   public static boolean similarToNum(Long val, Long prevVal, double bound) {
-    if (((double) (Math.abs(val - prevVal))) / prevVal < bound) return true;
+    if (((double) (Math.abs(val - prevVal))) / prevVal < bound) {
+      return true;
+    }
     return false;
   }
 
   public static boolean moreThanNum(Long val, Long prevVal, double bound) {
-    if (!similarToNum(val, prevVal, bound)) return val > prevVal;
+    if (!similarToNum(val, prevVal, bound)) {
+      return val > prevVal;
+    }
     return false;
   }
 
   public static boolean lessThanNum(Long val, Long prevVal, double bound) {
-    if (!similarToNum(val, prevVal, bound)) return val < prevVal;
+    if (!similarToNum(val, prevVal, bound)) {
+      return val < prevVal;
+    }
     return false;
   }
 
@@ -80,6 +86,9 @@ public class DefaultMaxSpoutPendingTuner {
     return adjustedMaxSpoutPending;
   }
 
+  /**
+   * Tune max default max spout pending based on progress
+   */
   public void autoTune(Long progress) {
     // LOG.info ("Called auto tune with progress " + progress);
 
@@ -94,14 +103,18 @@ public class DefaultMaxSpoutPendingTuner {
         doAction(ACTION.INCREASE, autoTuneFactor, progress);
       } else if (lessThanNum(progress, prevProgress, progressBound)) {
         // We have seen a sudden drop in progress in the steady state try to decrease
-        // the max spout pending proportionately to see if we can introduce an improvement in progress;
-        doAction(ACTION.DECREASE, Math.max((prevProgress - progress) / (float) prevProgress, autoTuneFactor), progress);
+        // the max spout pending proportionately to see if we can introduce an improvement
+        // in progress;
+        doAction(ACTION.DECREASE,
+            Math.max((prevProgress - progress) / (float) prevProgress, autoTuneFactor), progress);
       } else {
         ++callsInNoop;
-        // If the progress remains the same then once in a while try increasing the max spout pending.
+        // If the progress remains the same then once in a while try increasing the
+        // max spout pending.
         if (callsInNoop >= NOOP_THRESHOLD) {
           doAction(speculativeAction, autoTuneFactor, progress);
-          speculativeAction = speculativeAction == ACTION.INCREASE ? ACTION.DECREASE : ACTION.INCREASE;
+          speculativeAction =
+              speculativeAction == ACTION.INCREASE ? ACTION.DECREASE : ACTION.INCREASE;
         }
       }
     } else if (lastAction == ACTION.INCREASE) {
@@ -140,16 +153,21 @@ public class DefaultMaxSpoutPendingTuner {
     if (action == ACTION.INCREASE) {
       restoreAdjustedMaxSpoutPending = adjustedMaxSpoutPending;
       restoreProgress = prevProgress;
-      adjustedMaxSpoutPending += Math.max(1, Math.round((Float) (factor * adjustedMaxSpoutPending)));
+      adjustedMaxSpoutPending += Math.max(1,
+          Math.round((Float) (factor * adjustedMaxSpoutPending)));
       callsInNoop = 0;
       prevProgress = currentProgress;
       // LOG.info("Increased max pending to " + adjustedMaxSpoutPending);
     } else if (action == ACTION.DECREASE) {
       restoreAdjustedMaxSpoutPending = adjustedMaxSpoutPending;
       restoreProgress = prevProgress;
-      adjustedMaxSpoutPending -= Math.max(1, Math.round((Float) (factor * adjustedMaxSpoutPending)));
+      adjustedMaxSpoutPending -= Math.max(1,
+          Math.round((Float) (factor * adjustedMaxSpoutPending)));
+
       // keep a min of CONSERVATIVE_MAX_SPOUT_PENDING or initialMaxSpoutPending tuple outstanding
-      adjustedMaxSpoutPending = Math.max(Math.min(CONSERVATIVE_MAX_SPOUT_PENDING, initialMaxSpoutPending), adjustedMaxSpoutPending);
+      adjustedMaxSpoutPending = Math.max(
+          Math.min(CONSERVATIVE_MAX_SPOUT_PENDING, initialMaxSpoutPending),
+          adjustedMaxSpoutPending);
       callsInNoop = 0;
       prevProgress = currentProgress;
       // LOG.info("Decreased max pending to " + adjustedMaxSpoutPending);

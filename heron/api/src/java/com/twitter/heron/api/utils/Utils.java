@@ -28,8 +28,11 @@ import java.util.Set;
 
 import com.twitter.heron.api.Config;
 
-public class Utils {
+public final class Utils {
   public static final String DEFAULT_STREAM_ID = "default";
+
+  private Utils() {
+  }
 
   public static List<Object> tuple(Object... values) {
     List<Object> ret = new ArrayList<Object>();
@@ -50,8 +53,8 @@ public class Utils {
   public static boolean isValidConf(Config heronConf) {
     Set<String> apiVars = heronConf.getApiVars();
     for (String apiVar : apiVars) {
-      if (heronConf.containsKey(apiVar) &&
-          !(heronConf.get(apiVar) instanceof String)) {
+      if (heronConf.containsKey(apiVar)
+          && !(heronConf.get(apiVar) instanceof String)) {
         return false;
       }
     }

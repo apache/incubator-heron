@@ -15,22 +15,22 @@
 package com.twitter.heron.api.metric;
 
 public class CountMetric implements IMetric {
-  long _value = 0;
+  private long mValue = 0;
 
   public CountMetric() {
   }
 
   public void incr() {
-    _value++;
+    mValue++;
   }
 
   public void incrBy(long incrementBy) {
-    _value += incrementBy;
+    mValue += incrementBy;
   }
 
   public Object getValueAndReset() {
-    long ret = _value;
-    _value = 0;
+    long ret = mValue;
+    mValue = 0;
     return ret;
   }
 }

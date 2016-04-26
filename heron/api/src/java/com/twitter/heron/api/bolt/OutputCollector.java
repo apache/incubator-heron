@@ -27,11 +27,11 @@ import com.twitter.heron.api.utils.Utils;
  * form of stream processing, see IBasicBolt and BasicOutputCollector.
  */
 public class OutputCollector implements IOutputCollector {
-  private IOutputCollector _delegate;
+  private IOutputCollector mDelegate;
 
 
   public OutputCollector(IOutputCollector delegate) {
-    _delegate = delegate;
+    mDelegate = delegate;
   }
 
   /**
@@ -146,7 +146,7 @@ public class OutputCollector implements IOutputCollector {
    * in Java.</p>
    *
    * @param taskId the taskId to send the new tuple to
-   * @param anchosr the tuples to anchor to
+   * @param anchors the tuples to anchor to
    * @param tuple the new output tuple from this bolt
    */
   public void emitDirect(int taskId, Collection<Tuple> anchors, List<Object> tuple) {
@@ -198,26 +198,30 @@ public class OutputCollector implements IOutputCollector {
 
   @Override
   public List<Integer> emit(String streamId, Collection<Tuple> anchors, List<Object> tuple) {
-    return _delegate.emit(streamId, anchors, tuple);
+    return mDelegate.emit(streamId, anchors, tuple);
   }
 
   @Override
-  public void emitDirect(int taskId, String streamId, Collection<Tuple> anchors, List<Object> tuple) {
-    _delegate.emitDirect(taskId, streamId, anchors, tuple);
+  public void emitDirect(
+      int taskId,
+      String streamId,
+      Collection<Tuple> anchors,
+      List<Object> tuple) {
+    mDelegate.emitDirect(taskId, streamId, anchors, tuple);
   }
 
   @Override
   public void ack(Tuple input) {
-    _delegate.ack(input);
+    mDelegate.ack(input);
   }
 
   @Override
   public void fail(Tuple input) {
-    _delegate.fail(input);
+    mDelegate.fail(input);
   }
 
   @Override
   public void reportError(Throwable error) {
-    _delegate.reportError(error);
+    mDelegate.reportError(error);
   }
 }

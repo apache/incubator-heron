@@ -18,26 +18,26 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MultiAssignableMetric implements IMetric {
-  private Map<String, AssignableMetric> _value = new HashMap();
+  private Map<String, AssignableMetric> mValue = new HashMap();
 
   public MultiAssignableMetric() {
 
   }
 
   public AssignableMetric scope(String key) {
-    AssignableMetric val = _value.get(key);
+    AssignableMetric val = mValue.get(key);
     if (val == null) {
-      _value.put(key, val = new AssignableMetric(0));
+      mValue.put(key, val = new AssignableMetric(0));
     }
     return val;
   }
 
   public AssignableMetric safeScope(String key) {
     AssignableMetric val;
-    synchronized (_value) {
-      val = _value.get(key);
+    synchronized (mValue) {
+      val = mValue.get(key);
       if (val == null) {
-        _value.put(key, val = new AssignableMetric(0));
+        mValue.put(key, val = new AssignableMetric(0));
       }
     }
     return val;
@@ -46,8 +46,8 @@ public class MultiAssignableMetric implements IMetric {
   @Override
   public Object getValueAndReset() {
     Map ret = new HashMap();
-    synchronized (_value) {
-      for (Map.Entry<String, AssignableMetric> e : _value.entrySet()) {
+    synchronized (mValue) {
+      for (Map.Entry<String, AssignableMetric> e : mValue.entrySet()) {
         ret.put(e.getKey(), e.getValue().getValueAndReset());
       }
     }

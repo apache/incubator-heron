@@ -23,46 +23,46 @@ import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 
 public class BasicBoltExecutor implements IRichBolt {
-  private IBasicBolt _bolt;
-  private transient BasicOutputCollector _collector;
+  private IBasicBolt mBolt;
+  private transient BasicOutputCollector mCollector;
 
   public BasicBoltExecutor(IBasicBolt bolt) {
-    _bolt = bolt;
+    mBolt = bolt;
   }
 
   @Override
   public void declareOutputFields(OutputFieldsDeclarer declarer) {
-    _bolt.declareOutputFields(declarer);
+    mBolt.declareOutputFields(declarer);
   }
 
 
   @Override
   public void prepare(Map heronConf, TopologyContext context, OutputCollector collector) {
-    _bolt.prepare(heronConf, context);
-    _collector = new BasicOutputCollector(collector);
+    mBolt.prepare(heronConf, context);
+    mCollector = new BasicOutputCollector(collector);
   }
 
   @Override
   public void execute(Tuple input) {
-    _collector.setContext(input);
+    mCollector.setContext(input);
     try {
-      _bolt.execute(input, _collector);
-      _collector.getOutputter().ack(input);
+      mBolt.execute(input, mCollector);
+      mCollector.getOutputter().ack(input);
     } catch (FailedException e) {
       if (e instanceof ReportedFailedException) {
-        _collector.reportError(e);
+        mCollector.reportError(e);
       }
-      _collector.getOutputter().fail(input);
+      mCollector.getOutputter().fail(input);
     }
   }
 
   @Override
   public void cleanup() {
-    _bolt.cleanup();
+    mBolt.cleanup();
   }
 
   @Override
   public Map<String, Object> getComponentConfiguration() {
-    return _bolt.getComponentConfiguration();
+    return mBolt.getComponentConfiguration();
   }
 }

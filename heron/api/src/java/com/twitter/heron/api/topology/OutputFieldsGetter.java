@@ -22,7 +22,7 @@ import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.utils.Utils;
 
 public class OutputFieldsGetter implements OutputFieldsDeclarer {
-  private Map<String, TopologyAPI.StreamSchema.Builder> _fields =
+  private Map<String, TopologyAPI.StreamSchema.Builder> mFields =
       new HashMap<String, TopologyAPI.StreamSchema.Builder>();
 
   public void declare(Fields fields) {
@@ -38,21 +38,22 @@ public class OutputFieldsGetter implements OutputFieldsDeclarer {
   }
 
   public void declareStream(String streamId, boolean direct, Fields fields) {
-    if (_fields.containsKey(streamId)) {
+    if (mFields.containsKey(streamId)) {
       throw new IllegalArgumentException("Fields for " + streamId + " already set");
     }
     TopologyAPI.StreamSchema.Builder bldr = TopologyAPI.StreamSchema.newBuilder();
     for (int i = 0; i < fields.size(); ++i) {
-      TopologyAPI.StreamSchema.KeyType.Builder ktBldr = TopologyAPI.StreamSchema.KeyType.newBuilder();
+      TopologyAPI.StreamSchema.KeyType.Builder ktBldr =
+          TopologyAPI.StreamSchema.KeyType.newBuilder();
       ktBldr.setKey(fields.get(i));
       ktBldr.setType(TopologyAPI.Type.OBJECT);
       bldr.addKeys(ktBldr);
     }
-    _fields.put(streamId, bldr);
+    mFields.put(streamId, bldr);
   }
 
 
   public Map<String, TopologyAPI.StreamSchema.Builder> getFieldsDeclaration() {
-    return _fields;
+    return mFields;
   }
 }

@@ -26,10 +26,10 @@ import com.twitter.heron.api.utils.Utils;
  * guarantee that each message is fully processed at least once.
  */
 public class SpoutOutputCollector implements ISpoutOutputCollector {
-  ISpoutOutputCollector _delegate;
+  private ISpoutOutputCollector mDelegate;
 
   public SpoutOutputCollector(ISpoutOutputCollector delegate) {
-    _delegate = delegate;
+    mDelegate = delegate;
   }
 
   /**
@@ -43,7 +43,7 @@ public class SpoutOutputCollector implements ISpoutOutputCollector {
    * @return the list of task ids that this tuple was sent to
    */
   public List<Integer> emit(String streamId, List<Object> tuple, Object messageId) {
-    return _delegate.emit(streamId, tuple, messageId);
+    return mDelegate.emit(streamId, tuple, messageId);
   }
 
   /**
@@ -85,7 +85,7 @@ public class SpoutOutputCollector implements ISpoutOutputCollector {
    * immutable.
    */
   public void emitDirect(int taskId, String streamId, List<Object> tuple, Object messageId) {
-    _delegate.emitDirect(taskId, streamId, tuple, messageId);
+    mDelegate.emitDirect(taskId, streamId, tuple, messageId);
   }
 
   /**
@@ -126,6 +126,6 @@ public class SpoutOutputCollector implements ISpoutOutputCollector {
 
   @Override
   public void reportError(Throwable error) {
-    _delegate.reportError(error);
+    mDelegate.reportError(error);
   }
 }

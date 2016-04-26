@@ -77,18 +77,18 @@ import com.twitter.heron.api.spout.IRichSpout;
  * the inputs for that component.</p>
  */
 public class TopologyBuilder {
-  private Map<String, BoltDeclarer> _bolts = new HashMap<String, BoltDeclarer>();
-  private Map<String, SpoutDeclarer> _spouts = new HashMap<String, SpoutDeclarer>();
+  private Map<String, BoltDeclarer> mBolts = new HashMap<String, BoltDeclarer>();
+  private Map<String, SpoutDeclarer> mSpouts = new HashMap<String, SpoutDeclarer>();
 
 
   public HeronTopology createTopology() {
     TopologyAPI.Topology.Builder bldr = TopologyAPI.Topology.newBuilder();
     // First go thru the spouts
-    for (Map.Entry<String, SpoutDeclarer> spout : _spouts.entrySet()) {
+    for (Map.Entry<String, SpoutDeclarer> spout : mSpouts.entrySet()) {
       spout.getValue().dump(bldr);
     }
     // Then go thru the bolts
-    for (Map.Entry<String, BoltDeclarer> bolt : _bolts.entrySet()) {
+    for (Map.Entry<String, BoltDeclarer> bolt : mBolts.entrySet()) {
       bolt.getValue().dump(bldr);
     }
     return new HeronTopology(bldr);
@@ -110,13 +110,13 @@ public class TopologyBuilder {
    *
    * @param id the id of this component. This id is referenced by other components that want to consume this bolt's outputs.
    * @param bolt the bolt
-   * @param parallelism_hint the number of tasks that should be assigned to execute this bolt. Each task will run on a thread in a process somewhere around the cluster.
+   * @param parallelismHint the number of tasks that should be assigned to execute this bolt. Each task will run on a thread in a process somewhere around the cluster.
    * @return use the returned object to declare the inputs to this component
    */
-  public BoltDeclarer setBolt(String id, IRichBolt bolt, Number parallelism_hint) {
+  public BoltDeclarer setBolt(String id, IRichBolt bolt, Number parallelismHint) {
     validateComponentName(id);
-    BoltDeclarer b = new BoltDeclarer(id, bolt, parallelism_hint);
-    _bolts.put(id, b);
+    BoltDeclarer b = new BoltDeclarer(id, bolt, parallelismHint);
+    mBolts.put(id, b);
     return b;
   }
 
@@ -142,11 +142,11 @@ public class TopologyBuilder {
    *
    * @param id the id of this component. This id is referenced by other components that want to consume this bolt's outputs.
    * @param bolt the basic bolt
-   * @param parallelism_hint the number of tasks that should be assigned to execute this bolt. Each task will run on a thread in a process somwehere around the cluster.
+   * @param parallelismHint the number of tasks that should be assigned to execute this bolt. Each task will run on a thread in a process somwehere around the cluster.
    * @return use the returned object to declare the inputs to this component
    */
-  public BoltDeclarer setBolt(String id, IBasicBolt bolt, Number parallelism_hint) {
-    return setBolt(id, new BasicBoltExecutor(bolt), parallelism_hint);
+  public BoltDeclarer setBolt(String id, IBasicBolt bolt, Number parallelismHint) {
+    return setBolt(id, new BasicBoltExecutor(bolt), parallelismHint);
   }
 
   /**
@@ -161,17 +161,17 @@ public class TopologyBuilder {
 
   /**
    * Define a new spout in this topology with the specified parallelism. If the spout declares
-   * itself as non-distributed, the parallelism_hint will be ignored and only one task
+   * itself as non-distributed, the parallelismHint will be ignored and only one task
    * will be allocated to this component.
    *
    * @param id the id of this component. This id is referenced by other components that want to consume this spout's outputs.
-   * @param parallelism_hint the number of tasks that should be assigned to execute this spout. Each task will run on a thread in a process somwehere around the cluster.
+   * @param parallelismHint the number of tasks that should be assigned to execute this spout. Each task will run on a thread in a process somwehere around the cluster.
    * @param spout the spout
    */
-  public SpoutDeclarer setSpout(String id, IRichSpout spout, Number parallelism_hint) {
+  public SpoutDeclarer setSpout(String id, IRichSpout spout, Number parallelismHint) {
     validateComponentName(id);
-    SpoutDeclarer s = new SpoutDeclarer(id, spout, parallelism_hint);
-    _spouts.put(id, s);
+    SpoutDeclarer s = new SpoutDeclarer(id, spout, parallelismHint);
+    mSpouts.put(id, s);
     return s;
   }
 
@@ -186,10 +186,10 @@ public class TopologyBuilder {
   }
 
   private void validateUnusedName(String name) {
-    if (_bolts.containsKey(name)) {
+    if (mBolts.containsKey(name)) {
       throw new IllegalArgumentException("Bolt has already been declared for name " + name);
     }
-    if (_spouts.containsKey(name)) {
+    if (mSpouts.containsKey(name)) {
       throw new IllegalArgumentException("Spout has already been declared for name " + name);
     }
   }
