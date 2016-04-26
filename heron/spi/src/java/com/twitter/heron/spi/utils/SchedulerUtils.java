@@ -22,7 +22,7 @@ import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
-final class SchedulerUtils {
+public final class SchedulerUtils {
   private static final Logger LOG = Logger.getLogger(SchedulerUtils.class.getName());
 
   private SchedulerUtils() {
