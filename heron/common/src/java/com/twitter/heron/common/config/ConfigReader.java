@@ -34,7 +34,7 @@ import org.yaml.snakeyaml.Yaml;
 public class ConfigReader {
   private static final Logger LOG = Logger.getLogger(ConfigReader.class.getName());
 
-  public ConfigReader() {
+  protected ConfigReader() {
   }
 
   /**

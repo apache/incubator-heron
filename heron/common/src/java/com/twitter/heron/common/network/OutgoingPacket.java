@@ -49,15 +49,15 @@ public class OutgoingPacket {
   private static final Logger LOG = Logger.getLogger(OutgoingPacket.class.getName());
   private ByteBuffer buffer;
 
-  public OutgoingPacket(REQID _reqid, Message _message) {
-    assert _message.isInitialized();
+  public OutgoingPacket(REQID reqid, Message message) {
+    assert message.isInitialized();
     // First calculate the total size of the packet
     // including the header
     int headerSize = 4;
-    String typename = _message.getDescriptorForType().getFullName();
-    int dataSize = sizeRequiredToPackString(typename) +
-        REQID.REQIDSize +
-        sizeRequiredToPackMessage(_message);
+    String typename = message.getDescriptorForType().getFullName();
+    int dataSize = sizeRequiredToPackString(typename)
+        + REQID.REQID_SIZE
+        + sizeRequiredToPackMessage(message);
     buffer = ByteBuffer.allocate(headerSize + dataSize);
 
     // First write out how much data is there as the header
@@ -68,12 +68,12 @@ public class OutgoingPacket {
     buffer.put(typename.getBytes());
 
     // now the reqid
-    _reqid.pack(buffer);
+    reqid.pack(buffer);
 
     // finally the proto
     // Double copy but it is designed, see the comments on top
-    buffer.putInt(_message.getSerializedSize());
-    buffer.put(_message.toByteArray());
+    buffer.putInt(message.getSerializedSize());
+    buffer.put(message.toByteArray());
 
     // Make the buffer ready for writing out
     buffer.flip();

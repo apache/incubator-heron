@@ -98,18 +98,18 @@ public class HeronTopology {
     return topologyBuilder.build();
   }
 
-  public HeronTopology setName(String name) {
-    this.name = name;
+  public HeronTopology setName(String topologyName) {
+    this.name = topologyName;
     return this;
   }
 
-  public HeronTopology setState(TopologyAPI.TopologyState state) {
-    this.state = state;
+  public HeronTopology setState(TopologyAPI.TopologyState topologyState) {
+    this.state = topologyState;
     return this;
   }
 
-  public HeronTopology setConfig(Config heronConfig) {
-    this.heronConfig = heronConfig;
+  public HeronTopology setConfig(Config hConfig) {
+    this.heronConfig = hConfig;
     return this;
   }
 }

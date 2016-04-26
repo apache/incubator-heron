@@ -41,13 +41,15 @@ public abstract class WakeableLooper {
   // The tasks could only be added but not removed
   private final List<Runnable> tasksOnWakeup;
   private final PriorityQueue<TimerTask> timers;
+
   // The tasks would be invoked before exit
   private final ArrayList<Runnable> exitTasks;
+
   // For selector since there is bug in selector.select(timeout): we could not
   // use a timeout > 10 * Integer.MAX_VALUE
   // So here we set Integer.MAX_VALUE as the infinite future
   // We will also multiple 1000*1000 to convert mill-seconds to nano-seconds
-  private final long INFINITE_FUTURE = Integer.MAX_VALUE;
+  private static final long INFINITE_FUTURE = Integer.MAX_VALUE;
   private volatile boolean exitLoop;
 
   public WakeableLooper() {
@@ -80,9 +82,9 @@ public abstract class WakeableLooper {
     }
   }
 
-  abstract protected void doWait();
+  protected abstract void doWait();
 
-  abstract public void wakeUp();
+  public abstract void wakeUp();
 
   public void addTasksOnWakeup(Runnable task) {
     tasksOnWakeup.add(task);
@@ -124,15 +126,16 @@ public abstract class WakeableLooper {
       // The time recorded in timer is in nano-seconds. We have to convert it to milli-seconds
       // We need to ceil the result to avoid early wake up
       nextTimeoutIntervalMs =
-          (timers.peek().getExpirationNs() - System.nanoTime() + Constants.MILLISECONDS_TO_NANOSECONDS)
-              / Constants.MILLISECONDS_TO_NANOSECONDS;
+          (timers.peek().getExpirationNs() - System.nanoTime()
+          + Constants.MILLISECONDS_TO_NANOSECONDS) / Constants.MILLISECONDS_TO_NANOSECONDS;
     }
     return nextTimeoutIntervalMs;
   }
 
   private void executeTasksOnWakeup() {
     // Be careful here we could not use iterator, since it is possible that we may
-    // add some items into this list during the iteration, which may cause ConcurrentModificationException
+    // add some items into this list during the iteration, which may cause
+    // ConcurrentModificationException
     // We pre-get the size to avoid execute the tasks added during execution
     int s = tasksOnWakeup.size();
     for (int i = 0; i < s; i++) {
@@ -160,7 +163,7 @@ public abstract class WakeableLooper {
     public final long expirationNs;
     public final Runnable handler;
 
-    public TimerTask(long expirationNs, Runnable handler) {
+    TimerTask(long expirationNs, Runnable handler) {
       this.expirationNs = expirationNs;
       this.handler = handler;
     }
@@ -168,8 +171,12 @@ public abstract class WakeableLooper {
     @Override
     public int compareTo(TimerTask other) {
       // We could not use t0 < t1, which may has over-flow issue
-      if (this.expirationNs - other.expirationNs < 0) return -1;
-      if (this.expirationNs - other.expirationNs > 0) return 1;
+      if (this.expirationNs - other.expirationNs < 0) {
+        return -1;
+      }
+      if (this.expirationNs - other.expirationNs > 0) {
+        return 1;
+      }
       return 0;
     }
 
