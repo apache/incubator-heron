@@ -87,9 +87,12 @@ public class SocketChannelHelper {
     this.incomingPacket = new IncomingPacket();
 
     this.writeBatchSizeInBytes = options.getNetworkWriteBatchSizeInBytes();
-    this.writeBatchTimeInNs = options.getNetworkWriteBatchTimeInMs() * Constants.MILLISECONDS_TO_NANOSECONDS;
+    this.writeBatchTimeInNs = options.getNetworkWriteBatchTimeInMs()
+        * Constants.MILLISECONDS_TO_NANOSECONDS;
+
     this.readBatchSizeInBytes = options.getNetworkReadBatchSizeInBytes();
-    this.readReadBatchTimeInNs = options.getNetworkReadBatchTimeInMs() * Constants.MILLISECONDS_TO_NANOSECONDS;
+    this.readReadBatchTimeInNs = options.getNetworkReadBatchTimeInMs()
+        * Constants.MILLISECONDS_TO_NANOSECONDS;
 
     // We will register Read by default when the connection is established
     // However, we will register Write only when we have something to write since
@@ -130,16 +133,16 @@ public class SocketChannelHelper {
     // We would stop reading when:
     // 1. We spent too much time
     // 2. We have read large enough data
-    while ((System.nanoTime() - startOfCycle - readReadBatchTimeInNs) < 0 &&
-        (bytesRead < readBatchSizeInBytes)) {
+    while ((System.nanoTime() - startOfCycle - readReadBatchTimeInNs) < 0
+        && (bytesRead < readBatchSizeInBytes)) {
       int readState = incomingPacket.readFromChannel(socketChannel);
 
       if (readState > 0) {
         // Partial Read, just break, and read next time when the socket is readable
         break;
       } else if (readState < 0) {
-        LOG.severe("Something bad happened while reading from channel: " +
-            socketChannel.socket().getRemoteSocketAddress());
+        LOG.severe("Something bad happened while reading from channel: "
+            + socketChannel.socket().getRemoteSocketAddress());
         selectHandler.handleError(socketChannel);
 
         // Clear the list of Incoming Packet to avoid bad state is used externally
@@ -168,8 +171,8 @@ public class SocketChannelHelper {
 
     long nPacketsWritten = 0;
 
-    while ((System.nanoTime() - startOfCycle - writeBatchTimeInNs) < 0 &&
-        (bytesWritten < writeBatchSizeInBytes)) {
+    while ((System.nanoTime() - startOfCycle - writeBatchTimeInNs) < 0
+        && (bytesWritten < writeBatchSizeInBytes)) {
       OutgoingPacket outgoingPacket = outgoingPacketsToWrite.peek();
       if (outgoingPacket == null) {
         break;

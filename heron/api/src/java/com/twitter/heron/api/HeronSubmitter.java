@@ -31,8 +31,11 @@ import com.twitter.heron.api.utils.Utils;
  * with the "heron jar" command from the command-line, and then use this class to
  * submit your topologies.
  */
-public class HeronSubmitter {
+public final class HeronSubmitter {
   private static final Logger LOG = Logger.getLogger(HeronSubmitter.class.getName());
+
+  private HeronSubmitter() {
+  }
 
   /**
    * Submits a topology to run on the cluster. A topology runs forever or until
