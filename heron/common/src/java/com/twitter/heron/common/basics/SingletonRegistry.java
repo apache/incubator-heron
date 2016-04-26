@@ -58,8 +58,9 @@ public enum SingletonRegistry {
     synchronized (this.singletonObjects) {
       Object oldObject = this.singletonObjects.get(beanName);
       if (oldObject != null) {
-        throw new IllegalStateException("Could not register object [" + singletonObject +
-            "] under bean name '" + beanName + "': there is already object [" + oldObject + "] bound");
+        throw new IllegalStateException("Could not register object [" + singletonObject
+            + "] under bean name '" + beanName + "': there is already object [" + oldObject
+            + "] bound");
       }
       this.singletonObjects.put(beanName, singletonObject);
     }
@@ -73,8 +74,8 @@ public enum SingletonRegistry {
 
     synchronized (this.singletonObjects) {
       if (!this.singletonObjects.containsKey(beanName)) {
-        throw new IllegalStateException("Could not update object [" + singletonObject +
-            "] under bean name '" + beanName + "': it have not been registered yet.");
+        throw new IllegalStateException("Could not update object [" + singletonObject
+            + "] under bean name '" + beanName + "': it have not been registered yet.");
 
       }
       this.singletonObjects.put(beanName, singletonObject);

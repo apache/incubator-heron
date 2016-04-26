@@ -73,7 +73,7 @@ public class SlaveLooper extends WakeableLooper {
     private Object proceedLock;
     private volatile boolean isToProceed;
 
-    public RunnableLock() {
+    RunnableLock() {
       this.proceedLock = new Object();
       isToProceed = false;
     }
