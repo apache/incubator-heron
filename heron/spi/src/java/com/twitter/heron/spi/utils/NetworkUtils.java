@@ -26,6 +26,9 @@ import com.twitter.heron.proto.system.Common;
 public class NetworkUtils {
   private static final Logger LOG = Logger.getLogger(NetworkUtils.class.getName());
 
+  private NetworkUtils() {
+  }
+
   /**
    * Get available port.
    *

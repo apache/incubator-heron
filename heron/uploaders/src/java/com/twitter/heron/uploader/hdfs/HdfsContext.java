@@ -23,8 +23,6 @@ final class HdfsContext extends Context {
       "heron.uploader.hdfs.topologies.directory.uri";
 
   private HdfsContext() {
-    // Throw an exception if this ever *is* called
-    throw new AssertionError("Instantiating utility class " + this.getClass().getSimpleName());
   }
 
   public static String hadoopConfigDirectory(Config config) {
