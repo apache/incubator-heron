@@ -24,6 +24,12 @@ import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 public class Runtime {
+
+  private Runtime() {
+    // Throw an exception if this ever *is* called
+    throw new AssertionError("Instantiating utility class " + this.getClass().getSimpleName());
+  }
+
   public static String topologyId(Config runtime) {
     return runtime.getStringValue(Keys.topologyId());
   }

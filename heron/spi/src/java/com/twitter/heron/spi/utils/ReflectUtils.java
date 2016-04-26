@@ -15,6 +15,12 @@
 package com.twitter.heron.spi.util;
 
 public class ReflectUtils {
+
+  private ReflectUtils() {
+    // Throw an exception if this ever *is* called
+    throw new AssertionError("Instantiating utility class " + this.getClass().getSimpleName());
+  }
+
   public static <T> T createInstance(String className) throws
       ClassNotFoundException, InstantiationException, IllegalAccessException {
     return (T) Class.forName(className).newInstance();

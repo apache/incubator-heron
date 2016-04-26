@@ -26,11 +26,12 @@ import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.HttpUtils;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
-public class TMasterUtils {
+final class TMasterUtils {
   private static final Logger LOG = Logger.getLogger(TMasterUtils.class.getName());
 
   private TMasterUtils() {
-
+    // Throw an exception if this ever *is* called
+    throw new AssertionError("Instantiating utility class " + this.getClass().getSimpleName());
   }
 
   /**

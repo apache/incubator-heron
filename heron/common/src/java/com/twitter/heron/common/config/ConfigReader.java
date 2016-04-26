@@ -34,10 +34,14 @@ import org.yaml.snakeyaml.Yaml;
 public class ConfigReader {
   private static final Logger LOG = Logger.getLogger(ConfigReader.class.getName());
 
+  public ConfigReader() {
+  }
+
   /**
    * Load properties from the given YAML file
    *
-   * @param fileName, the name of YAML file to read
+   * @param fileName the name of YAML file to read
+   *
    * @return Map, contains the key value pairs of config
    */
   public static Map loadFile(String fileName) {
@@ -65,12 +69,12 @@ public class ConfigReader {
 
       LOG.log(Level.FINE, "Reading config file {0}", fileName);
 
-      Map props_yaml = null;
+      Map propsYaml = null;
       try {
         FileInputStream fin = new FileInputStream(new File(fileName));
         try {
           Yaml yaml = new Yaml();
-          props_yaml = (Map) yaml.load(fin);
+          propsYaml = (Map) yaml.load(fin);
           LOG.log(Level.FINE, "Successfully read config file {0}", fileName);
         } finally {
           fin.close();
@@ -79,25 +83,26 @@ public class ConfigReader {
         LOG.log(Level.SEVERE, "Failed to load config file: " + fileName, e);
       }
 
-      return props_yaml != null ? props_yaml : props;
+      return propsYaml != null ? propsYaml : props;
     }
   }
 
   /**
    * Load config from the given YAML stream
    *
-   * @param inputStream, the name of YAML stream to read
+   * @param inputStream the name of YAML stream to read
+   *
    * @return Map, contains the key value pairs of config
    */
   public static Map loadStream(InputStream inputStream) {
     LOG.fine("Reading config stream");
 
-    Map props_yaml = null;
+    Map propsYaml = null;
     Yaml yaml = new Yaml();
-    props_yaml = (Map) yaml.load(inputStream);
+    propsYaml = (Map) yaml.load(inputStream);
     LOG.fine("Successfully read config");
 
-    return props_yaml != null ? props_yaml : new HashMap();
+    return propsYaml != null ? propsYaml : new HashMap();
   }
 
   public static Integer getInt(Object o) {

@@ -14,7 +14,7 @@
 
 package com.twitter.heron.common.config;
 
-public class Config {
+final class Config {
   private final String cluster;
   private final String role;
   private final String env;
@@ -50,11 +50,11 @@ public class Config {
   }
 
   public static class Builder {
-    String mCluster;
-    String mRole;
-    String mEnv;
-    String mTopologyName;
-    String mConfigPath;
+    private String mCluster;
+    private String mRole;
+    private String mEnv;
+    private String mTopologyName;
+    private String mConfigPath;
 
     public Builder setCluster(String cluster) {
       this.mCluster = cluster;

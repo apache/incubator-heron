@@ -116,7 +116,8 @@ public class S3Uploader implements IUploader {
     try {
       s3Client.putObject(bucket, remoteFilePath, packageFileHandler);
     } catch (AmazonClientException e) {
-      LOG.log(Level.SEVERE, "Error writing topology package to " + bucket + " " + remoteFilePath, e);
+      LOG.log(Level.SEVERE, "Error writing topology package to " + bucket + " "
+          + remoteFilePath, e);
       return null;
     }
 
@@ -126,7 +127,8 @@ public class S3Uploader implements IUploader {
 
     // This will happen if the package does not actually exist in the place where we uploaded it to.
     if (resourceUrl == null) {
-      LOG.log(Level.SEVERE, "Resource not found for bucket " + bucket + " and path " + remoteFilePath);
+      LOG.log(Level.SEVERE, "Resource not found for bucket " + bucket + " and path "
+          + remoteFilePath);
       return null;
     }
 
