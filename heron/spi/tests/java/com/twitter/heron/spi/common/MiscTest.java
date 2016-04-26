@@ -21,12 +21,11 @@ import org.junit.Test;
 import junit.framework.Assert;
 
 public class MiscTest {
-
   private static final Logger LOG = Logger.getLogger(MiscTest.class.getName());
 
   @Test
   public void testHeronHome() {
-    // check no occurrence 
+    // check no occurrence
     Assert.assertEquals(
         "./bin",
         Misc.substitute("/usr/local/heron", "./bin")
