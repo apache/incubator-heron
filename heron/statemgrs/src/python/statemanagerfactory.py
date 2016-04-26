@@ -27,7 +27,8 @@ from heron.statemgrs.src.python.zkstatemanager import ZkStateManager
 
 def get_all_state_managers(conf):
   """
-  Reads the config file for requested state managers.
+  @param conf - An instance of Config class
+  Reads the config for requested state managers.
   Instantiates them, start and then return them.
   """
   state_managers = []
@@ -41,7 +42,7 @@ def get_all_zk_state_managers(conf):
   the connected state_managers instances.
   """
   state_managers = []
-  state_locations = Config(conf).get_state_locations_of_type("zookeeper")
+  state_locations = conf.get_state_locations_of_type("zookeeper")
   for location in state_locations:
     name = location['name']
     host = location['host']
@@ -64,7 +65,7 @@ def get_all_file_state_managers(conf):
   Returns all the file state_managers.
   """
   state_managers = []
-  state_locations = Config(conf).get_state_locations_of_type("file")
+  state_locations = conf.get_state_locations_of_type("file")
   for location in state_locations:
     name = location['name']
     rootpath = os.path.expanduser(location['rootpath'])

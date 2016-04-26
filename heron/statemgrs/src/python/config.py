@@ -29,12 +29,11 @@ class Config:
     }
   """
 
-  def __init__(self, conf_file):
+  def __init__(self):
+    self.location = None
 
-    # Read the configuration file
-    with open(conf_file, 'r') as f:
-      self.locations = yaml.load(f)
-
+  def set_state_locations(self, state_locations):
+    self.locations = state_locations
     self.validate_state_locations()
 
   def validate_state_locations(self):

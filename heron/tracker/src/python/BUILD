@@ -25,7 +25,4 @@ pex_binary(
     deps = [
         ":heron-tracker-lib",
     ],
-    resources = [
-        "//heron/statemgrs/conf:stateconfs",
-    ],
 )
