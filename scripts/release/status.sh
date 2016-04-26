@@ -10,21 +10,31 @@
 # If the script exits with non-zero code, it's considered as a failure
 # and the output will be discarded.
 
+set -eu
+
+function die {
+    echo >&2 "$@"
+    exit 1
+}
+
+function disable_e_and_execute {
+  set +e
+  $@
+  ret_status=$?
+  set -e
+  echo $ret_status
+}
+
 # get the release tag version or the branch name
 if [ -z ${HERON_GIT_RELEASE+x} ];
 then
-  git_release=$(git rev-parse --abbrev-ref HEAD)
-  if [[ $? != 0 ]];
+  cmd="git rev-parse --abbrev-ref HEAD"
+  git_release=$($cmd) || die "Failed to run command to check head: $cmd"
+
+  if [ "${git_release}" = "HEAD" ];
   then
-    exit 1
-  fi
-  if [ "${git_release}" = "HEAD" ]; 
-  then
-    git_release=$(git describe --tags)
-    if [[ $? != 0 ]];
-    then
-      exit 1
-    fi
+    cmd="git describe --tags --always"
+    git_release=$($cmd) || die "Failed to run command to get git release: $cmd"
   fi
 else
   git_release=${HERON_GIT_RELEASE}
@@ -34,11 +44,8 @@ echo "HERON_BUILD_SCM_RELEASE ${git_release}"
 # The code below presents an implementation that works for git repository
 if [ -z ${HERON_GIT_REV+x} ];
 then
-  git_rev=$(git rev-parse HEAD)
-  if [[ $? != 0 ]];
-  then
-    exit 1
-  fi
+  cmd="git rev-parse HEAD"
+  git_rev=$($cmd) || die "Failed to get git revision: $cmd"
 else
   git_rev=${HERON_GIT_REV}
 fi
@@ -48,11 +55,7 @@ echo "HERON_BUILD_COMMIT_URL https://github.com/twitter/heron/commit/${git_rev}"
 
 if [ -z ${HERON_GIT_COMMIT_MSG+x} ];
 then
-  commit_msg=$(git log -1 --oneline | cut -f 2- -d ' ')
-  if [[ $? != 0 ]];
-  then
-    exit 1
-  fi
+  commit_msg=$(git log -1 --oneline | cut -f 2- -d ' ') || die "Failed to fetch git log"
 else
   commit_msg=${HERON_GIT_COMMIT_MSG}
 fi
@@ -91,10 +94,10 @@ fi
 echo "HERON_BUILD_USER ${build_user}"
 
 # Check whether there are any uncommited changes
-if [ -z ${HERON_TREE_STATUS} ];
+if [ -z ${HERON_TREE_STATUS+x} ];
 then
-  git diff-index --quiet HEAD --
-  if [[ $? == 0 ]];
+  status=$(disable_e_and_execute "git diff-index --quiet HEAD --")
+  if [[ $status == 0 ]];
   then
     tree_status="Clean"
   else
@@ -104,4 +107,3 @@ else
   tree_status=${HERON_TREE_STATUS}
 fi
 echo "HERON_BUILD_RELEASE_STATUS ${tree_status}"
-
