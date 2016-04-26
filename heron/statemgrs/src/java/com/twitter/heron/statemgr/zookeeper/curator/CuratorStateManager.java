@@ -85,15 +85,11 @@ public class CuratorStateManager extends FileSystemStateManager {
     }
 
     if (ZkContext.isInitializeTree(config)) {
-      try {
-        initTree();
-      } catch (Exception e) {
-        throw new RuntimeException("Failed to initialize tree", e);
-      }
+      initTree();
     }
   }
 
-  protected void initTree() throws Exception {
+  protected void initTree() {
     // Make necessary directories
     LOG.info("Topologies directory: " + getTopologyDir());
     LOG.info("Tmaster location directory: " + getTMasterLocationDir());
@@ -101,11 +97,18 @@ public class CuratorStateManager extends FileSystemStateManager {
     LOG.info("Execution state directory: " + getExecutionStateDir());
     LOG.info("Scheduler location directory: " + getSchedulerLocationDir());
 
-    client.createContainers(getTopologyDir());
-    client.createContainers(getTMasterLocationDir());
-    client.createContainers(getPhysicalPlanDir());
-    client.createContainers(getExecutionStateDir());
-    client.createContainers(getSchedulerLocationDir());
+    try {
+      client.createContainers(getTopologyDir());
+      client.createContainers(getTMasterLocationDir());
+      client.createContainers(getPhysicalPlanDir());
+      client.createContainers(getExecutionStateDir());
+      client.createContainers(getSchedulerLocationDir());
+
+      // Suppress it since createContainers() throws Exception
+      // SUPPRESS CHECKSTYLE IllegalCatch
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to initialize tree", e);
+    }
 
     LOG.info("Directory tree initialized.");
   }
@@ -129,6 +132,9 @@ public class CuratorStateManager extends FileSystemStateManager {
     try {
       LOG.info("Checking exists for path: " + path);
       result.set(client.checkExists().forPath(path) != null);
+
+      // Suppress it since forPath() throws Exception
+      // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (Exception e) {
       result.setException(new RuntimeException("Could not check Exist", e));
     }
@@ -136,7 +142,10 @@ public class CuratorStateManager extends FileSystemStateManager {
     return result;
   }
 
-  protected ListenableFuture<Boolean> createNode(String path, byte[] data, boolean isEphemeral) {
+  protected ListenableFuture<Boolean> createNode(
+      String path,
+      byte[] data,
+      boolean isEphemeral) {
     final SettableFuture<Boolean> result = SettableFuture.create();
 
     try {
@@ -145,6 +154,9 @@ public class CuratorStateManager extends FileSystemStateManager {
           .forPath(path, data);
       LOG.info("Created node for path: " + path);
       result.set(true);
+
+      // Suppress it since forPath() throws Exception
+      // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (Exception e) {
       result.setException(new RuntimeException("Could not createNode:", e));
     }
@@ -158,6 +170,9 @@ public class CuratorStateManager extends FileSystemStateManager {
       client.delete().withVersion(-1).forPath(path);
       LOG.info("Deleted node for path: " + path);
       result.set(true);
+
+      // Suppress it since forPath() throws Exception
+      // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (Exception e) {
       result.setException(new RuntimeException("Could not deleteNode", e));
     }
@@ -166,7 +181,9 @@ public class CuratorStateManager extends FileSystemStateManager {
   }
 
   protected <M extends Message> ListenableFuture<M> getNodeData(
-      WatchCallback watcher, String path, final Message.Builder builder) {
+      WatchCallback watcher,
+      String path,
+      final Message.Builder builder) {
     final SettableFuture<M> future = SettableFuture.create();
 
     Watcher wc = ZkWatcherCallback.makeZkWatcher(watcher);
@@ -187,6 +204,9 @@ public class CuratorStateManager extends FileSystemStateManager {
 
     try {
       client.getData().usingWatcher(wc).inBackground(cb).forPath(path);
+
+      // Suppress it since forPath() throws Exception
+      // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (Exception e) {
       future.setException(new RuntimeException("Could not getData", e));
     }
@@ -196,30 +216,36 @@ public class CuratorStateManager extends FileSystemStateManager {
 
   @Override
   public ListenableFuture<Boolean> setTMasterLocation(
-      TopologyMaster.TMasterLocation location, String topologyName) {
+      TopologyMaster.TMasterLocation location,
+      String topologyName) {
     return createNode(getTMasterLocationPath(topologyName), location.toByteArray(), true);
   }
 
   @Override
   public ListenableFuture<Boolean> setExecutionState(
-      ExecutionEnvironment.ExecutionState executionState, String topologyName) {
+      ExecutionEnvironment.ExecutionState executionState,
+      String topologyName) {
     return createNode(getExecutionStatePath(topologyName), executionState.toByteArray(), false);
   }
 
   @Override
-  public ListenableFuture<Boolean> setTopology(TopologyAPI.Topology topology, String topologyName) {
+  public ListenableFuture<Boolean> setTopology(
+      TopologyAPI.Topology topology,
+      String topologyName) {
     return createNode(getTopologyPath(topologyName), topology.toByteArray(), false);
   }
 
   @Override
   public ListenableFuture<Boolean> setPhysicalPlan(
-      PhysicalPlans.PhysicalPlan physicalPlan, String topologyName) {
+      PhysicalPlans.PhysicalPlan physicalPlan,
+      String topologyName) {
     return createNode(getPhysicalPlanPath(topologyName), physicalPlan.toByteArray(), false);
   }
 
   @Override
   public ListenableFuture<Boolean> setSchedulerLocation(
-      Scheduler.SchedulerLocation location, String topologyName) {
+      Scheduler.SchedulerLocation location,
+      String topologyName) {
     return createNode(getSchedulerLocationPath(topologyName), location.toByteArray(), true);
   }
 
@@ -256,35 +282,40 @@ public class CuratorStateManager extends FileSystemStateManager {
 
   @Override
   public ListenableFuture<TopologyMaster.TMasterLocation> getTMasterLocation(
-      WatchCallback watcher, String topologyName) {
+      WatchCallback watcher,
+      String topologyName) {
     return getNodeData(watcher, getTMasterLocationPath(topologyName),
         TopologyMaster.TMasterLocation.newBuilder());
   }
 
   @Override
   public ListenableFuture<Scheduler.SchedulerLocation> getSchedulerLocation(
-      WatchCallback watcher, String topologyName) {
+      WatchCallback watcher,
+      String topologyName) {
     return getNodeData(watcher, getSchedulerLocationPath(topologyName),
         Scheduler.SchedulerLocation.newBuilder());
   }
 
   @Override
   public ListenableFuture<TopologyAPI.Topology> getTopology(
-      WatchCallback watcher, String topologyName) {
+      WatchCallback watcher,
+      String topologyName) {
     return getNodeData(watcher, getTopologyPath(topologyName),
         TopologyAPI.Topology.newBuilder());
   }
 
   @Override
   public ListenableFuture<ExecutionEnvironment.ExecutionState> getExecutionState(
-      WatchCallback watcher, String topologyName) {
+      WatchCallback watcher,
+      String topologyName) {
     return getNodeData(watcher, getExecutionStatePath(topologyName),
         ExecutionEnvironment.ExecutionState.newBuilder());
   }
 
   @Override
   public ListenableFuture<PhysicalPlans.PhysicalPlan> getPhysicalPlan(
-      WatchCallback watcher, String topologyName) {
+      WatchCallback watcher,
+      String topologyName) {
     return getNodeData(watcher, getPhysicalPlanPath(topologyName),
         PhysicalPlans.PhysicalPlan.newBuilder());
   }
