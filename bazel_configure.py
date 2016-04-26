@@ -15,7 +15,7 @@
 import os, sys
 import re, subprocess, shutil
 
-sys.path.append('3rdparty/semver')
+sys.path.append('3rdparty/python/semver')
 import semver
 
 ######################################################################
