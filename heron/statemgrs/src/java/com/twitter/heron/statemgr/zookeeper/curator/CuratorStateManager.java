@@ -130,7 +130,7 @@ public class CuratorStateManager extends FileSystemStateManager {
     final SettableFuture<Boolean> result = SettableFuture.create();
 
     try {
-      LOG.info("Checking exists for path: " + path);
+      LOG.info("Checking existence of path: " + path);
       result.set(client.checkExists().forPath(path) != null);
 
       // Suppress it since forPath() throws Exception
