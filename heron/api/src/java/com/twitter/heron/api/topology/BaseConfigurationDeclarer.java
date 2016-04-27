@@ -19,7 +19,8 @@ import java.util.Map;
 
 import com.twitter.heron.api.Config;
 
-public abstract class BaseConfigurationDeclarer<T extends ComponentConfigurationDeclarer> implements ComponentConfigurationDeclarer<T> {
+public abstract class BaseConfigurationDeclarer<T extends ComponentConfigurationDeclarer>
+    implements ComponentConfigurationDeclarer<T> {
   @Override
   public T addConfiguration(String config, Object value) {
     Map configMap = new HashMap();
@@ -34,7 +35,10 @@ public abstract class BaseConfigurationDeclarer<T extends ComponentConfiguration
 
   @Override
   public T setMaxSpoutPending(Number val) {
-    if (val != null) val = val.intValue();
-    return addConfiguration(Config.TOPOLOGY_MAX_SPOUT_PENDING, val);
+    Integer intValue = null;
+    if (val != null) {
+      intValue = val.intValue();
+    }
+    return addConfiguration(Config.TOPOLOGY_MAX_SPOUT_PENDING, intValue);
   }
 }

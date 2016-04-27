@@ -27,7 +27,11 @@ public interface CustomStreamGrouping extends Serializable {
    * <p>
    * It also tells the grouping the metadata on the stream this grouping will be used on.
    */
-  void prepare(TopologyContext context, String component, String streamId, List<Integer> targetTasks);
+  void prepare(
+      TopologyContext context,
+      String component,
+      String streamId,
+      List<Integer> targetTasks);
 
   /**
    * This function implements a custom stream grouping. It takes in as input

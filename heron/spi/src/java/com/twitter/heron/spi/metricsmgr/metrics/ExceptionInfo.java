@@ -80,7 +80,8 @@ public class ExceptionInfo {
 
   @Override
   public String toString() {
-    return String.format("{stack trace = %s, last time = %s, first time = %s, count = %d, logging = %s}",
+    return String.format(
+        "{stack trace = %s, last time = %s, first time = %s, count = %d, logging = %s}",
         getStackTrace(), getLastTime(), getFirstTime(), getCount(), getLogging());
   }
 }
