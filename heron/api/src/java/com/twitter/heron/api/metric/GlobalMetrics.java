@@ -67,7 +67,7 @@ public enum GlobalMetrics implements Serializable {
   public static void safeIncrBy(String counterName, int N) {
     synchronized (INSTANCE) {
       if (INSTANCE.registered) {
-        INSTANCE.metricsContainer.scope(counterName);
+        INSTANCE.metricsContainer.scope(counterName).incrBy(N);
       }
     }
   }
