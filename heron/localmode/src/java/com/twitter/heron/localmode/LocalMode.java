@@ -39,8 +39,10 @@ import com.twitter.heron.proto.system.PhysicalPlans;
  * for multiple topologies.
  */
 public class LocalMode {
+
   private static final Logger LOG = Logger.getLogger(LocalMode.class.getName());
   private final List<InstanceExecutor> instanceExecutors = new LinkedList<>();
+
   // Thread pool to run StreamExecutor, MetricsExecutor and InstanceExecutor
   private final ExecutorService threadsPool = Executors.newCachedThreadPool();
   private SystemConfig systemConfig;
