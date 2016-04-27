@@ -16,26 +16,18 @@
 
 #include "errors/spexcept.h"
 
-namespace heron { namespace error {
+namespace heron {
+namespace error {
 
 /*
  * Get the error message for the exception from the global error space
  */
-const char*
-Error_Exception::what() const throw ()
-{
-  return errstr_.c_str();
-}
+const char* Error_Exception::what() const throw() { return errstr_.c_str(); }
 
 // TO DO: Get the stack automatically
-Exception_Auto_Backtrace::Exception_Auto_Backtrace()
-{ }
-
+Exception_Auto_Backtrace::Exception_Auto_Backtrace() {}
 
 // TO DO: depending on how the stack trace is implemented.
-void
-Exception_Auto_Backtrace::print_trace(std::ostream &) const
-{
-}
-
-}} // namespace
+void Exception_Auto_Backtrace::print_trace(std::ostream&) const {}
+}  // namespace error
+}  // namespace heron
