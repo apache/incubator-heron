@@ -14,9 +14,9 @@
 
 package com.twitter.heron.spi.common;
 
-public final class Defaults {
+public class Defaults {
 
-  private Defaults() {
+  protected Defaults() {
   }
 
   public static String cluster() {
