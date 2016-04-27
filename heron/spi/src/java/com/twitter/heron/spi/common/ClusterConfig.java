@@ -38,12 +38,12 @@ public final class ClusterConfig {
   protected static Config loadSandboxHome(String heronSandboxHome, String configPath) {
     Config.Builder cb = Config.newBuilder()
         .put(Keys.heronSandboxHome(), heronSandboxHome)
-        .put(Keys.heronSandboxBin(), 
+        .put(Keys.heronSandboxBin(),
             Misc.substituteSandbox(heronSandboxHome, Defaults.heronSandboxBin()))
         .put(Keys.heronSandboxConf(), configPath)
-        .put(Keys.heronSandboxLib(), 
+        .put(Keys.heronSandboxLib(),
             Misc.substituteSandbox(heronSandboxHome, Defaults.heronSandboxLib()))
-        .put(Keys.javaSandboxHome(), 
+        .put(Keys.javaSandboxHome(),
             Misc.substituteSandbox(heronSandboxHome, Defaults.javaSandboxHome()));
     return cb.build();
   }

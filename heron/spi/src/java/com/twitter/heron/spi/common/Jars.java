@@ -22,21 +22,26 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Jars {
+public final class Jars {
 
   private static final Logger LOG = Logger.getLogger(Jars.class.getName());
+
   // scheduler jar search pattern
   private static Pattern schedulerJarPattern =
       Pattern.compile("heron-.*-scheduler.*.jar|heron-scheduler*.jar");
+
   // metrics manager search pattern
   private static Pattern metricsManagerPattern =
       Pattern.compile("heron-.*-metricsmgr.*.jar|heron-metricsmgr*.jar");
 
+  private Jars() {
+  }
+
   /**
    * Given a directory, get the list of jars matching the pattern.
    *
-   * @param pattern, the pattern to match for jar files
-   * @param directory, the directory to search
+   * @param pattern the pattern to match for jar files
+   * @param directory the directory to search
    * @return list of jars
    */
   public static List<String> getJars(final Pattern pattern, String directory) {
@@ -66,8 +71,8 @@ public class Jars {
    * Get the class path from the list of jars that match the pattern
    * in the given directory
    *
-   * @param pattern, the pattern to match for jar files
-   * @param directory, the directory to search
+   * @param pattern the pattern to match for jar files
+   * @param directory the directory to search
    * @return class path of jars
    */
   public static String getClassPath(Pattern pattern, String directory) {
@@ -87,7 +92,7 @@ public class Jars {
    * scheduler, if it has the either the pattern "heron-scheduler*.jar" or
    * "heron-*-scheduler*.jar"
    *
-   * @param directory, the directory to search
+   * @param directory the directory to search
    * @return list of scheduler jars
    */
   public static List getSchedulerJars(String directory) {
@@ -98,7 +103,7 @@ public class Jars {
    * Get the scheduler class path from the list of scheduler jars in a
    * directory.
    *
-   * @param directory, the directory to search
+   * @param directory the directory to search
    * @return class of scheduler jars
    */
   public static String getSchedulerClassPath(String directory) {
@@ -110,7 +115,7 @@ public class Jars {
    * metrics, if it has the either the pattern "heron-metricsmgr*.jar" or
    * "heron-*-metricsmgr*.jar"
    *
-   * @param directory, the directory to search
+   * @param directory the directory to search
    * @return list of metrics manager jars
    */
   public static List getMetricsManagerJars(String directory) {
@@ -121,7 +126,7 @@ public class Jars {
    * Get the metrics mgr class path from the list of metrics manager jars in a
    * directory.
    *
-   * @param directory, the directory to search
+   * @param directory the directory to search
    * @return class path of metrics manager jars
    */
   public static String getMetricsManagerClassPath(String directory) {

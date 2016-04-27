@@ -34,11 +34,14 @@ import com.sun.net.httpserver.HttpExchange;
 /**
  * Utilities related to network.
  */
-public class HttpUtils {
+public final class HttpUtils {
   public static final String CONTENT_LENGTH = "Content-Length";
   public static final String CONTENT_TYPE = "Content-Type";
 
   private static final Logger LOG = Logger.getLogger(HttpUtils.class.getName());
+
+  private HttpUtils() {
+  }
 
   /**
    * Blocks current thread
@@ -74,8 +77,8 @@ public class HttpUtils {
     try {
       int off = 0;
       int bRead = 0;
-      while (off != (contentLength - 1) &&
-          (bRead = is.read(requestBody, off, contentLength - off)) != -1) {
+      while (off != (contentLength - 1)
+          && (bRead = is.read(requestBody, off, contentLength - off)) != -1) {
         off += bRead;
       }
     } catch (IOException e) {
@@ -101,7 +104,10 @@ public class HttpUtils {
    * @param response the response the sent back in response body
    * @return true if we send the response successfully
    */
-  public static boolean sendHttpResponse(boolean isSuccess, HttpExchange exchange, byte[] response) {
+  public static boolean sendHttpResponse(
+      boolean isSuccess,
+      HttpExchange exchange,
+      byte[] response) {
     int returnCode = isSuccess ? HttpURLConnection.HTTP_OK : HttpURLConnection.HTTP_UNAVAILABLE;
     try {
       exchange.sendResponseHeaders(returnCode, response.length);
@@ -216,8 +222,8 @@ public class HttpUtils {
 
       int off = 0;
       int bRead = 0;
-      while (off != (responseLength - 1) &&
-          (bRead = is.read(res, off, responseLength - off)) != -1) {
+      while (off != (responseLength - 1)
+          && (bRead = is.read(res, off, responseLength - off)) != -1) {
         off += bRead;
       }
 
@@ -264,7 +270,13 @@ public class HttpUtils {
    * @param verbose print verbose results
    * @return true if the network location is reachable
    */
-  public static boolean isLocationReachable(int timeout, int retry, int retryInterval, String host, int port, boolean verbose) {
+  public static boolean isLocationReachable(
+      int timeout,
+      int retry,
+      int retryInterval,
+      String host,
+      int port,
+      boolean verbose) {
     int retryLeft = retry;
     while (retryLeft > 0) {
       try (Socket s = new Socket()) {

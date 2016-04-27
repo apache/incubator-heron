@@ -26,7 +26,7 @@ import java.util.TreeMap;
 public class Config {
   private final Map<String, Object> cfgMap = new HashMap();
 
-  private Config(Builder build) {
+  protected Config(Builder build) {
     cfgMap.putAll(build.keyValues);
   }
 

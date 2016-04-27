@@ -16,6 +16,9 @@ package com.twitter.heron.spi.common;
 
 public final class ClusterDefaults {
 
+  private ClusterDefaults() {
+  }
+
   public static Config getDefaultHome() {
     Config.Builder cb = Config.newBuilder();
 

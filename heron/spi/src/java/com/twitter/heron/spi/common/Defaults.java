@@ -14,7 +14,10 @@
 
 package com.twitter.heron.spi.common;
 
-public class Defaults {
+public final class Defaults {
+
+  private Defaults() {
+  }
 
   public static String cluster() {
     return ConfigDefaults.get("CLUSTER");
