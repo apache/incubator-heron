@@ -20,6 +20,9 @@ import com.twitter.heron.common.config.ConfigReader;
 
 public final class ClusterConfig {
 
+  private ClusterConfig() {
+  }
+
   protected static Config loadHeronHome(String heronHome, String configPath) {
     Config.Builder cb = Config.newBuilder()
         .put(Keys.heronHome(), heronHome)
@@ -35,10 +38,13 @@ public final class ClusterConfig {
   protected static Config loadSandboxHome(String heronSandboxHome, String configPath) {
     Config.Builder cb = Config.newBuilder()
         .put(Keys.heronSandboxHome(), heronSandboxHome)
-        .put(Keys.heronSandboxBin(), Misc.substituteSandbox(heronSandboxHome, Defaults.heronSandboxBin()))
+        .put(Keys.heronSandboxBin(), 
+            Misc.substituteSandbox(heronSandboxHome, Defaults.heronSandboxBin()))
         .put(Keys.heronSandboxConf(), configPath)
-        .put(Keys.heronSandboxLib(), Misc.substituteSandbox(heronSandboxHome, Defaults.heronSandboxLib()))
-        .put(Keys.javaSandboxHome(), Misc.substituteSandbox(heronSandboxHome, Defaults.javaSandboxHome()));
+        .put(Keys.heronSandboxLib(), 
+            Misc.substituteSandbox(heronSandboxHome, Defaults.heronSandboxLib()))
+        .put(Keys.javaSandboxHome(), 
+            Misc.substituteSandbox(heronSandboxHome, Defaults.javaSandboxHome()));
     return cb.build();
   }
 
@@ -72,13 +78,15 @@ public final class ClusterConfig {
         .put(Keys.defaultsSandboxFile(),
             Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.defaultsSandboxFile()))
         .put(Keys.metricsSinksSandboxFile(),
-            Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.metricsSinksSandboxFile()))
+            Misc.substituteSandbox(
+                heronSandboxHome, configPath, Defaults.metricsSinksSandboxFile()))
         .put(Keys.packingSandboxFile(),
             Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.packingSandboxFile()))
         .put(Keys.schedulerSandboxFile(),
             Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.schedulerSandboxFile()))
         .put(Keys.stateManagerSandboxFile(),
-            Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.stateManagerSandboxFile()))
+            Misc.substituteSandbox(
+                heronSandboxHome, configPath, Defaults.stateManagerSandboxFile()))
         .put(Keys.systemSandboxFile(),
             Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.systemSandboxFile()))
         .put(Keys.uploaderSandboxFile(),
