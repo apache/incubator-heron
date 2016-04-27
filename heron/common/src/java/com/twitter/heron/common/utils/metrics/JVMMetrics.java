@@ -14,6 +14,7 @@
 
 package com.twitter.heron.common.utils.metrics;
 
+import java.lang.management.BufferPoolMXBean;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
@@ -44,6 +45,8 @@ public class JVMMetrics {
   final OperatingSystemMXBean osMbean = ManagementFactory.getOperatingSystemMXBean();
   final ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
   final List<MemoryPoolMXBean> memoryPoolMXBeanList = ManagementFactory.getMemoryPoolMXBeans();
+  final List<BufferPoolMXBean> bufferPoolMXBeanList = ManagementFactory.getPlatformMXBeans(BufferPoolMXBean.class);
+
   // Metric for time spent in GC per generational collection, and the sum total of all collections.
   private final MultiAssignableMetric jvmGCTimeMsPerGCType;
   // Metrics for count of GC per generational collection, and the sum total of all collections.
@@ -130,6 +133,11 @@ public class JVMMetrics {
   // An estimate of the memory usage of a memory pool.
   private MultiAssignableMetric jvmEstimatedUsagePerMemoryPool;
 
+  /*
+   * Metrics for mapped and direct buffer pool usage.
+   */
+  private MultiAssignableMetric jvmBufferPoolMemoryUsage;
+
   public JVMMetrics() {
     jvmGCTimeMs = new AssignableMetric(0);
     jvmGCCount = new AssignableMetric(0);
@@ -165,6 +173,8 @@ public class JVMMetrics {
     jvmPeakUsagePerMemoryPool = new MultiAssignableMetric();
     jvmCollectionUsagePerMemoryPool = new MultiAssignableMetric();
     jvmEstimatedUsagePerMemoryPool = new MultiAssignableMetric();
+
+    jvmBufferPoolMemoryUsage = new MultiAssignableMetric();
   }
 
   public void registerMetrics(MetricsCollector metricsCollector) {
@@ -206,6 +216,8 @@ public class JVMMetrics {
     metricsCollector.registerMetric("__jvm-peak-usage", jvmPeakUsagePerMemoryPool, interval);
     metricsCollector.registerMetric("__jvm-collection-usage", jvmCollectionUsagePerMemoryPool, interval);
     metricsCollector.registerMetric("__jvm-estimated-usage", jvmEstimatedUsagePerMemoryPool, interval);
+
+    metricsCollector.registerMetric("__jvm-buffer-pool", jvmBufferPoolMemoryUsage, interval);
   }
 
   public Runnable getJVMSampleRunnable() {
@@ -226,6 +238,7 @@ public class JVMMetrics {
         updateFdMetrics();
 
         updateMemoryPoolMetrics();
+        updateBufferPoolMetrics();
 
         long freeMemory = runtime.freeMemory();
         long totalMemory = runtime.totalMemory();
@@ -241,6 +254,27 @@ public class JVMMetrics {
       }
     };
     return sampleRunnable;
+  }
+
+  // Gather metrics related to both direct and mapped byte buffers in the jvm.
+  // These metrics can be useful for diagnosing native memory usage.
+  private void updateBufferPoolMetrics() {
+    for (BufferPoolMXBean bufferPoolMXBean : bufferPoolMXBeanList) {
+      String normalizedKeyName = bufferPoolMXBean.getName().replaceAll("[^\\w]", "-");
+
+      final long memoryUsedMB = bufferPoolMXBean.getMemoryUsed() / Constants.MB_TO_BYTES;
+      final long totalCapacityMB = bufferPoolMXBean.getTotalCapacity() / Constants.MB_TO_BYTES;
+      final long countMB = bufferPoolMXBean.getCount() / Constants.MB_TO_BYTES;
+
+      // The estimated memory the JVM is using for this buffer pool
+      jvmBufferPoolMemoryUsage.safeScope(normalizedKeyName + "-memory-used").setValue(memoryUsedMB);
+
+      // The estimated total capacity of the buffers in this pool
+      jvmBufferPoolMemoryUsage.safeScope(normalizedKeyName + "-total-capacity").setValue(totalCapacityMB);
+
+      // THe estimated number of buffers in this pool
+      jvmBufferPoolMemoryUsage.safeScope(normalizedKeyName + "-count").setValue(countMB);
+    }
   }
 
   // Gather metrics for different memory pools in heap, for instance:

@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.Config;
@@ -36,8 +35,11 @@ import com.twitter.heron.spi.common.PackingPlan;
 /**
  * Utility to process TopologyAPI.Topology proto
  */
-public class TopologyUtils {
+public final class TopologyUtils {
   private static final Logger LOG = Logger.getLogger(TopologyUtils.class.getName());
+
+  private TopologyUtils() {
+  }
 
   public static TopologyAPI.Topology getTopology(String topologyDefnFile) {
     try {
@@ -111,6 +113,9 @@ public class TopologyUtils {
     return numInstances;
   }
 
+  /**
+   * Verify if the given topology has all the necessary information
+   */
   public static boolean verifyTopology(TopologyAPI.Topology topology) {
     if (!topology.hasName() || topology.getName().isEmpty()) {
       LOG.severe("Missing topology name");
@@ -120,38 +125,35 @@ public class TopologyUtils {
       LOG.severe("Invalid topology name. Topology name shouldn't have . or /");
       return false;
     }
-    try {
-      // Only verify ram map string well-formed.
-      getComponentRamMap(topology, -1);
-      // Verify all bolts input streams exist. First get all output streams.
-      Set<String> outputStreams = new HashSet<>();
-      for (TopologyAPI.Spout spout : topology.getSpoutsList()) {
-        for (TopologyAPI.OutputStream stream : spout.getOutputsList()) {
-          outputStreams.add(
-              stream.getStream().getComponentName() + "/" + stream.getStream().getId());
-        }
+
+    // Only verify ram map string well-formed.
+    getComponentRamMap(topology, -1);
+    // Verify all bolts input streams exist. First get all output streams.
+    Set<String> outputStreams = new HashSet<>();
+    for (TopologyAPI.Spout spout : topology.getSpoutsList()) {
+      for (TopologyAPI.OutputStream stream : spout.getOutputsList()) {
+        outputStreams.add(
+            stream.getStream().getComponentName() + "/" + stream.getStream().getId());
       }
-      for (TopologyAPI.Bolt bolt : topology.getBoltsList()) {
-        for (TopologyAPI.OutputStream stream : bolt.getOutputsList()) {
-          outputStreams.add(
-              stream.getStream().getComponentName() + "/" + stream.getStream().getId());
-        }
-      }
-      // Match output streams with input streams.
-      for (TopologyAPI.Bolt bolt : topology.getBoltsList()) {
-        for (TopologyAPI.InputStream stream : bolt.getInputsList()) {
-          String key = stream.getStream().getComponentName() + "/" + stream.getStream().getId();
-          if (!outputStreams.contains(key)) {
-            LOG.severe("Invalid input stream " + key + " existing streams are " + outputStreams);
-            return false;
-          }
-        }
-      }
-      // TODO(nbhagat): Should we enforce all output stream must be consumed?
-    } catch (RuntimeException e) {
-      LOG.log(Level.SEVERE, "Failed to identify resource requirements from topology", e);
-      return false;
     }
+    for (TopologyAPI.Bolt bolt : topology.getBoltsList()) {
+      for (TopologyAPI.OutputStream stream : bolt.getOutputsList()) {
+        outputStreams.add(
+            stream.getStream().getComponentName() + "/" + stream.getStream().getId());
+      }
+    }
+    // Match output streams with input streams.
+    for (TopologyAPI.Bolt bolt : topology.getBoltsList()) {
+      for (TopologyAPI.InputStream stream : bolt.getInputsList()) {
+        String key = stream.getStream().getComponentName() + "/" + stream.getStream().getId();
+        if (!outputStreams.contains(key)) {
+          LOG.severe("Invalid input stream " + key + " existing streams are " + outputStreams);
+          return false;
+        }
+      }
+    }
+    // TODO(nbhagat): Should we enforce all output stream must be consumed?
+
     return true;
   }
 

@@ -16,6 +16,9 @@ package com.twitter.heron.spi.common;
 
 public class Context {
 
+  protected Context() {
+  }
+
   public static String cluster(Config cfg) {
     return cfg.getStringValue(ConfigKeys.get("CLUSTER"));
   }

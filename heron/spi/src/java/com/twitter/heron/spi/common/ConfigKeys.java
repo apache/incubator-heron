@@ -17,7 +17,7 @@ package com.twitter.heron.spi.common;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class ConfigKeys {
+public final class ConfigKeys {
   private static final Logger LOG = Logger.getLogger(ConfigKeys.class.getName());
 
   // holds the mapping of keys to their corresponding key strings
@@ -30,8 +30,11 @@ public class ConfigKeys {
           "com.twitter.heron.spi.common.Keys", Constants.KEYS_YAML);
     } catch (ClassNotFoundException e) {
       LOG.severe("Unable to load the config Keys class " + e);
-      System.exit(1);
+      throw new RuntimeException("Failed to load ConfigKeys class");
     }
+  }
+
+  private ConfigKeys() {
   }
 
   /*

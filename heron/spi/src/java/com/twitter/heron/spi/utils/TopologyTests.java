@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.twitter.heron.api.Config;
-import com.twitter.heron.api.HeronSubmitter;
 import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.api.bolt.BaseBasicBolt;
 import com.twitter.heron.api.bolt.BasicOutputCollector;
@@ -32,7 +31,11 @@ import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
 
-public class TopologyTests {
+public final class TopologyTests {
+
+  private TopologyTests() {
+  }
+
   /**
    * Create Topology proto object using HeronSubmitter API.
    *
@@ -42,11 +45,12 @@ public class TopologyTests {
    * @param connections connect default stream from value to key.
    * @return topology proto.
    */
-  public static TopologyAPI.Topology createTopologyWithConnection(String topologyName,
-                                                                  Config heronConfig,
-                                                                  Map<String, Integer> spouts,
-                                                                  Map<String, Integer> bolts,
-                                                                  Map<String, String> connections) {
+  public static TopologyAPI.Topology createTopologyWithConnection(
+      String topologyName,
+      Config heronConfig,
+      Map<String, Integer> spouts,
+      Map<String, Integer> bolts,
+      Map<String, String> connections) {
     TopologyBuilder builder = new TopologyBuilder();
     BaseRichSpout baseSpout = new BaseRichSpout() {
       public void declareOutputFields(OutputFieldsDeclarer declarer) {
@@ -79,10 +83,6 @@ public class TopologyTests {
     }
 
     HeronTopology heronTopology = builder.createTopology();
-    try {
-      HeronSubmitter.submitTopology(topologyName, heronConfig, heronTopology);
-    } catch (Exception e) {
-    }
 
     return heronTopology.
         setName(topologyName).
