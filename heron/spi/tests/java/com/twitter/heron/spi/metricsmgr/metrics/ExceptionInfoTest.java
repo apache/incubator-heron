@@ -99,4 +99,4 @@ public class ExceptionInfoTest {
       Assert.assertTrue(exceptionInfos.get(i).getLogging().equals(LOGGING + i));
     }
   }
-} 
+}

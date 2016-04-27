@@ -22,37 +22,38 @@ import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.utils.Utils;
 
 public class OutputFieldsGetter implements OutputFieldsDeclarer {
-  private Map<String, TopologyAPI.StreamSchema.Builder> _fields =
+  private Map<String, TopologyAPI.StreamSchema.Builder> fields =
       new HashMap<String, TopologyAPI.StreamSchema.Builder>();
 
-  public void declare(Fields fields) {
-    declare(false, fields);
+  public void declare(Fields pFields) {
+    declare(false, pFields);
   }
 
-  public void declare(boolean direct, Fields fields) {
-    declareStream(Utils.DEFAULT_STREAM_ID, direct, fields);
+  public void declare(boolean direct, Fields pFields) {
+    declareStream(Utils.DEFAULT_STREAM_ID, direct, pFields);
   }
 
-  public void declareStream(String streamId, Fields fields) {
-    declareStream(streamId, false, fields);
+  public void declareStream(String streamId, Fields pFields) {
+    declareStream(streamId, false, pFields);
   }
 
-  public void declareStream(String streamId, boolean direct, Fields fields) {
-    if (_fields.containsKey(streamId)) {
+  public void declareStream(String streamId, boolean direct, Fields pFields) {
+    if (fields.containsKey(streamId)) {
       throw new IllegalArgumentException("Fields for " + streamId + " already set");
     }
     TopologyAPI.StreamSchema.Builder bldr = TopologyAPI.StreamSchema.newBuilder();
-    for (int i = 0; i < fields.size(); ++i) {
-      TopologyAPI.StreamSchema.KeyType.Builder ktBldr = TopologyAPI.StreamSchema.KeyType.newBuilder();
-      ktBldr.setKey(fields.get(i));
+    for (int i = 0; i < pFields.size(); ++i) {
+      TopologyAPI.StreamSchema.KeyType.Builder ktBldr =
+          TopologyAPI.StreamSchema.KeyType.newBuilder();
+      ktBldr.setKey(pFields.get(i));
       ktBldr.setType(TopologyAPI.Type.OBJECT);
       bldr.addKeys(ktBldr);
     }
-    _fields.put(streamId, bldr);
+    fields.put(streamId, bldr);
   }
 
 
   public Map<String, TopologyAPI.StreamSchema.Builder> getFieldsDeclaration() {
-    return _fields;
+    return fields;
   }
 }

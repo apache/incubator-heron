@@ -80,7 +80,7 @@ public final class HeronSubmitter {
   private static void submitTopologyToFile(TopologyAPI.Topology fTopology,
                                            Map<String, String> heronCmdOptions) {
     String dirName = heronCmdOptions.get("cmdline.topologydefn.tmpdirectory");
-    if (dirName == null || dirName == "") {
+    if (dirName == null || dirName.isEmpty()) {
       throw new RuntimeException("Improper specification of directory");
     }
     String fileName = dirName + "/" + fTopology.getName() + ".defn";
@@ -106,6 +106,5 @@ public final class HeronSubmitter {
   // TODO add submit options
   public static String submitJar(Config config, String localJar) {
     throw new UnsupportedOperationException("submitJar unsupported");
-    //throw new RuntimeException("Must submit topologies using the heron-cli so that HeronSubmitter knows which jar to upload.");
   }
 }

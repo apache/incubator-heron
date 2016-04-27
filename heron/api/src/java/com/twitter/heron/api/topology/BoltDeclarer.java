@@ -73,11 +73,13 @@ public class BoltDeclarer extends BaseComponentDeclarer<BoltDeclarer> {
 
   public BoltDeclarer fieldsGrouping(String componentName, String streamId, Fields fields) {
     TopologyAPI.InputStream.Builder bldr = TopologyAPI.InputStream.newBuilder();
-    bldr.setStream(TopologyAPI.StreamId.newBuilder().setId(streamId).setComponentName(componentName));
+    bldr.setStream(
+        TopologyAPI.StreamId.newBuilder().setId(streamId).setComponentName(componentName));
     bldr.setGtype(TopologyAPI.Grouping.FIELDS);
     TopologyAPI.StreamSchema.Builder gfbldr = TopologyAPI.StreamSchema.newBuilder();
     for (int i = 0; i < fields.size(); ++i) {
-      TopologyAPI.StreamSchema.KeyType.Builder ktBldr = TopologyAPI.StreamSchema.KeyType.newBuilder();
+      TopologyAPI.StreamSchema.KeyType.Builder ktBldr =
+          TopologyAPI.StreamSchema.KeyType.newBuilder();
       ktBldr.setKey(fields.get(i));
       ktBldr.setType(TopologyAPI.Type.OBJECT);
       gfbldr.addKeys(ktBldr);
@@ -92,7 +94,8 @@ public class BoltDeclarer extends BaseComponentDeclarer<BoltDeclarer> {
 
   public BoltDeclarer globalGrouping(String componentName, String streamId) {
     TopologyAPI.InputStream.Builder bldr = TopologyAPI.InputStream.newBuilder();
-    bldr.setStream(TopologyAPI.StreamId.newBuilder().setId(streamId).setComponentName(componentName));
+    bldr.setStream(
+        TopologyAPI.StreamId.newBuilder().setId(streamId).setComponentName(componentName));
     bldr.setGtype(TopologyAPI.Grouping.LOWEST);
     return grouping(bldr);
   }
@@ -103,7 +106,8 @@ public class BoltDeclarer extends BaseComponentDeclarer<BoltDeclarer> {
 
   public BoltDeclarer shuffleGrouping(String componentName, String streamId) {
     TopologyAPI.InputStream.Builder bldr = TopologyAPI.InputStream.newBuilder();
-    bldr.setStream(TopologyAPI.StreamId.newBuilder().setId(streamId).setComponentName(componentName));
+    bldr.setStream(
+        TopologyAPI.StreamId.newBuilder().setId(streamId).setComponentName(componentName));
     bldr.setGtype(TopologyAPI.Grouping.SHUFFLE);
     return grouping(bldr);
   }
@@ -124,7 +128,8 @@ public class BoltDeclarer extends BaseComponentDeclarer<BoltDeclarer> {
 
   public BoltDeclarer noneGrouping(String componentName, String streamId) {
     TopologyAPI.InputStream.Builder bldr = TopologyAPI.InputStream.newBuilder();
-    bldr.setStream(TopologyAPI.StreamId.newBuilder().setId(streamId).setComponentName(componentName));
+    bldr.setStream(
+        TopologyAPI.StreamId.newBuilder().setId(streamId).setComponentName(componentName));
     bldr.setGtype(TopologyAPI.Grouping.NONE);
     return grouping(bldr);
   }
@@ -135,7 +140,8 @@ public class BoltDeclarer extends BaseComponentDeclarer<BoltDeclarer> {
 
   public BoltDeclarer allGrouping(String componentName, String streamId) {
     TopologyAPI.InputStream.Builder bldr = TopologyAPI.InputStream.newBuilder();
-    bldr.setStream(TopologyAPI.StreamId.newBuilder().setId(streamId).setComponentName(componentName));
+    bldr.setStream(
+        TopologyAPI.StreamId.newBuilder().setId(streamId).setComponentName(componentName));
     bldr.setGtype(TopologyAPI.Grouping.ALL);
     return grouping(bldr);
   }
@@ -153,9 +159,13 @@ public class BoltDeclarer extends BaseComponentDeclarer<BoltDeclarer> {
     return customGrouping(componentName, Utils.DEFAULT_STREAM_ID, grouping);
   }
 
-  public BoltDeclarer customGrouping(String componentName, String streamId, CustomStreamGrouping grouping) {
+  public BoltDeclarer customGrouping(
+      String componentName,
+      String streamId,
+      CustomStreamGrouping grouping) {
     TopologyAPI.InputStream.Builder bldr = TopologyAPI.InputStream.newBuilder();
-    bldr.setStream(TopologyAPI.StreamId.newBuilder().setId(streamId).setComponentName(componentName));
+    bldr.setStream(
+        TopologyAPI.StreamId.newBuilder().setId(streamId).setComponentName(componentName));
     bldr.setGtype(TopologyAPI.Grouping.CUSTOM);
     bldr.setCustomGroupingJavaObject(ByteString.copyFrom(Utils.serialize(grouping)));
     return grouping(bldr);
