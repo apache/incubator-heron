@@ -14,7 +14,6 @@
 
 package com.twitter.heron.spi.utils;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.spi.common.Config;
@@ -37,16 +36,16 @@ public final class SchedulerUtils {
    * @param packing The PackingPlan to scheduler for OnSchedule()
    * @return true if scheduling successfully
    */
-  public static boolean onScheduleAsLibrary(Config config, Config runtime,
-      IScheduler scheduler, PackingPlan packing) {
+  public static boolean onScheduleAsLibrary(
+      Config config,
+      Config runtime,
+      IScheduler scheduler,
+      PackingPlan packing) {
     boolean ret = false;
 
     try {
       scheduler.initialize(config, runtime);
       ret = scheduler.onSchedule(packing);
-    } catch (Exception e) {
-      LOG.log(Level.SEVERE, "Failed to invoke schedule method", e);
-      return false;
     } finally {
       scheduler.close();
     }
@@ -60,7 +59,9 @@ public final class SchedulerUtils {
    * 1. Topology def and ExecutionState are required to exist to delete
    * 2. TMasterLocation, SchedulerLocation and PhysicalPlan may not exist to delete
    */
-  public static boolean cleanState(String topologyName, SchedulerStateManagerAdaptor statemgr) {
+  public static boolean cleanState(
+      String topologyName,
+      SchedulerStateManagerAdaptor statemgr) {
     LOG.fine("Cleaning up Heron State");
 
     Boolean result;
