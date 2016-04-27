@@ -26,7 +26,7 @@ cat > $iml_file <<EOH
     <output url="file://\$MODULE_DIR\$/out" />
 EOH
 
-for content_dir in `ls -l --time-style="long-iso" . | egrep '^d' | grep -v "out" | awk '{print $8}'`; do 
+for content_dir in `find . -maxdepth 1 -type d -path './[^.]*' | cut -d '/' -f 2 | grep -v out`; do
 
   if [ "$content_dir" == "heron" ]; then
 
