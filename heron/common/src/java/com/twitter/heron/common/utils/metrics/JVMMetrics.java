@@ -267,13 +267,13 @@ public class JVMMetrics {
       final long countMB = bufferPoolMXBean.getCount() / Constants.MB_TO_BYTES;
 
       // The estimated memory the JVM is using for this buffer pool
-      jvmBufferPoolMemoryUsage.safeScope(normalizedKeyName + "-memory-used").setValue(memoryUsedMB);
+      jvmBufferPoolMemoryUsage.scope(normalizedKeyName + "-memory-used").setValue(memoryUsedMB);
 
       // The estimated total capacity of the buffers in this pool
-      jvmBufferPoolMemoryUsage.safeScope(normalizedKeyName + "-total-capacity").setValue(totalCapacityMB);
+      jvmBufferPoolMemoryUsage.scope(normalizedKeyName + "-total-capacity").setValue(totalCapacityMB);
 
       // THe estimated number of buffers in this pool
-      jvmBufferPoolMemoryUsage.safeScope(normalizedKeyName + "-count").setValue(countMB);
+      jvmBufferPoolMemoryUsage.scope(normalizedKeyName + "-count").setValue(countMB);
     }
   }
 
