@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.twitter.heron.api.Config;
-import com.twitter.heron.api.HeronSubmitter;
 import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.api.bolt.BaseBasicBolt;
 import com.twitter.heron.api.bolt.BasicOutputCollector;
@@ -84,10 +83,6 @@ public final class TopologyTests {
     }
 
     HeronTopology heronTopology = builder.createTopology();
-    try {
-      HeronSubmitter.submitTopology(topologyName, heronConfig, heronTopology);
-    } catch (Exception e) {
-    }
 
     return heronTopology.
         setName(topologyName).
