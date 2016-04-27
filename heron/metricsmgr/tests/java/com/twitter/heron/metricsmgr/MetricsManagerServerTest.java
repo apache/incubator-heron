@@ -120,6 +120,9 @@ public class MetricsManagerServerTest {
     Assert.assertTrue(metricsManagerServer.removeSinkCommunicator(sinkCommunicator));
   }
 
+  /**
+   * Method: addSinkCommunicator(Communicator<MetricsRecord> communicator)
+   */
   @Test
   public void testMetricsManagerServer() throws Exception {
     final Communicator<MetricsRecord> sinkCommunicator = new Communicator<MetricsRecord>();
@@ -205,7 +208,7 @@ public class MetricsManagerServerTest {
     private static final Logger LOG = Logger.getLogger(SimpleMetricsClient.class.getName());
     private int maxMessages;
 
-    public SimpleMetricsClient(NIOLooper looper, String host, int port, int maxMessages) {
+    SimpleMetricsClient(NIOLooper looper, String host, int port, int maxMessages) {
       super(looper, host, port,
           new HeronSocketOptions(100 * 1024 * 1024, 100,
               100 * 1024 * 1024, 100,
@@ -242,8 +245,8 @@ public class MetricsManagerServerTest {
           setInstanceId("instance-id").
           setInstanceIndex(1).
           build();
-      Metrics.MetricPublisherRegisterRequest request = Metrics.MetricPublisherRegisterRequest.newBuilder().
-          setPublisher(publisher).build();
+      Metrics.MetricPublisherRegisterRequest request =
+          Metrics.MetricPublisherRegisterRequest.newBuilder().setPublisher(publisher).build();
 
       sendRequest(request, Metrics.MetricPublisherRegisterResponse.newBuilder());
 
@@ -254,7 +257,8 @@ public class MetricsManagerServerTest {
           Metrics.MetricPublisherPublishMessage.newBuilder();
 
       for (int j = 0; j < N; j++) {
-        Metrics.MetricDatum metricDatum = Metrics.MetricDatum.newBuilder().setName(METRIC_NAME).setValue(METRIC_VALUE).build();
+        Metrics.MetricDatum metricDatum =
+            Metrics.MetricDatum.newBuilder().setName(METRIC_NAME).setValue(METRIC_VALUE).build();
         builder.addMetrics(metricDatum);
       }
 
@@ -287,4 +291,5 @@ public class MetricsManagerServerTest {
       org.junit.Assert.fail("Expected message from client");
     }
   }
-} 
+}
+
