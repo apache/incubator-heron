@@ -55,7 +55,7 @@ public final class CustomGroupingTopology {
     private long nItems;
 
     @Override
-    public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
+    public void prepare(Map conf, TopologyContext context, OutputCollector acollector) {
       nItems = 0;
     }
 

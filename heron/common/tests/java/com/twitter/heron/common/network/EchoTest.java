@@ -107,7 +107,7 @@ public class EchoTest {
     private int nRequests;
     private int maxRequests;
 
-    public EchoServer(NIOLooper looper, int port, int maxRequests) {
+    EchoServer(NIOLooper looper, int port, int maxRequests) {
       super(looper, "localhost", port,
           new HeronSocketOptions(100 * 1024 * 1024, 100,
               100 * 1024 * 1024,
@@ -169,7 +169,7 @@ public class EchoTest {
     private int nRequests;
     private int maxRequests;
 
-    public EchoClient(NIOLooper looper, int port, int maxRequests) {
+    EchoClient(NIOLooper looper, int port, int maxRequests) {
       super(looper, "localhost", port,
           new HeronSocketOptions(100 * 1024 * 1024, 100,
               100 * 1024 * 1024, 100,

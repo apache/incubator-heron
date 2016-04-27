@@ -57,10 +57,10 @@ public class TopologyContextImpl extends GeneralTopologyContextImpl implements T
   public TopologyContextImpl(Map<String, Object> clusterConfig,
                              TopologyAPI.Topology topology,
                              Map<Integer, String> taskToComponentMap,
-                             int taskId, MetricsCollector metricsCollector) {
+                             int myTaskId, MetricsCollector metricsCollector) {
     super(clusterConfig, topology, taskToComponentMap);
     this.metricsCollector = metricsCollector;
-    this.myTaskId = taskId;
+    this.myTaskId = myTaskId;
     this.taskData = new HashMap<String, Object>();
 
     // Init task hooks

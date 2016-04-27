@@ -76,8 +76,8 @@ public final class MultiSpoutExclamationTopology {
     private long startTime;
 
     @Override
-    public void prepare(Map conf, TopologyContext context, OutputCollector aCollector) {
-      collector = aCollector;
+    public void prepare(Map conf, TopologyContext context, OutputCollector acollector) {
+      collector = acollector;
       nItems = 0;
       startTime = System.currentTimeMillis();
     }

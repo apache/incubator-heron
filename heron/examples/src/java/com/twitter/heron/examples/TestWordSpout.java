@@ -39,8 +39,8 @@ public class TestWordSpout extends BaseRichSpout {
     isDistributed = isItDistributed;
   }
 
-  public void open(Map conf, TopologyContext context, SpoutOutputCollector aCollector) {
-    collector = aCollector;
+  public void open(Map conf, TopologyContext context, SpoutOutputCollector acollector) {
+    collector = acollector;
     words = new String[]{"nathan", "mike", "jackson", "golda", "bertels"};
     rand = new Random();
   }
