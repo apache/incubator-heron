@@ -18,12 +18,11 @@
 #define HERON_COMMON_MODULE_INIT_H
 
 class __nifty_basics_modinit {
-public:
-
-  __nifty_basics_modinit() ;
-  ~__nifty_basics_modinit() ;
+ public:
+  __nifty_basics_modinit();
+  ~__nifty_basics_modinit();
 };
 
-static __nifty_basics_modinit       _basics_modinit;
+static __nifty_basics_modinit _basics_modinit;
 
 #endif /* end of header file */

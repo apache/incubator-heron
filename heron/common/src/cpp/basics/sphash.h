@@ -22,37 +22,31 @@
 #define __SP_HASH_H
 
 #include <functional>
+#include <string>
+#include <utility>
 #include "basics/ridgen.h"
 
 namespace std {
 
-template<> 
-struct hash<std::pair<std::string, std::string> >
-{
-  std::size_t operator() (const pair<std::string, std::string> &key) const
-  {
+template <>
+struct hash<std::pair<std::string, std::string> > {
+  std::size_t operator()(const pair<std::string, std::string> &key) const {
     return std::hash<std::string>()(key.first + key.second);
   }
 };
 
-template<> 
-struct hash<std::pair<std::string, sp_int32> >
-{
-  std::size_t operator() (const pair<std::string, sp_int32> &key) const
-  {
+template <>
+struct hash<std::pair<std::string, sp_int32> > {
+  std::size_t operator()(const pair<std::string, sp_int32> &key) const {
     return std::hash<std::string>()(key.first) ^ std::hash<sp_int32>()(key.second);
   }
 };
 
-template<> 
-struct hash<REQID>
-{
-  size_t operator() (const REQID& key) const
-  {
-    return std::hash<std::string>()(key.str());
-  }
+template <>
+struct hash<REQID> {
+  size_t operator()(const REQID &key) const { return std::hash<std::string>()(key.str()); }
 };
 
-} // namespace
+}  // namespace std
 
-#endif // __HASHFN_H
+#endif  // __HASHFN_H

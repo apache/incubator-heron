@@ -20,6 +20,9 @@
 #include <chrono>
 #include <cstddef>
 #include <map>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "glog/logging.h"
 #include "config/heron-config.h"
@@ -27,13 +30,14 @@
 #include "basics/basics.h"
 #include "basics/execmeta.h"
 
-namespace heron { namespace common {
+namespace heron {
+namespace common {
 
 static ExecutableMetadata gExecMeta;
 
 /**
  * Set the execution metadata for the program. Several values are
- * populated including 
+ * populated including
  *
  *   - name and instance of the program, if any
  *   - whether it is a unit test
@@ -45,14 +49,12 @@ static ExecutableMetadata gExecMeta;
  *
  * \param instance
  *      Instance id of the program calling initialize
- * 
+ *
  * \param testing
  *      To indicate whether the program is a unit test
  *
  */
-static void
-SetMetadata(const char* argv0, const char* instance, bool testing)
-{
+static void SetMetadata(const char* argv0, const char* instance, bool testing) {
   // set the name of the program and its instance
   gExecMeta.setName(argv0);
   gExecMeta.setInstance(instance != nullptr ? instance : "0");
@@ -66,9 +68,8 @@ SetMetadata(const char* argv0, const char* instance, bool testing)
   gExecMeta.setCompileTime(PACKAGE_COMPILE_TIME);
 
   // set the start time of compilation
-  using namespace std::chrono;
-  auto start = system_clock::now();
-  gExecMeta.setStartTime(system_clock::to_time_t(start));
+  auto start = std::chrono::system_clock::now();
+  gExecMeta.setStartTime(std::chrono::system_clock::to_time_t(start));
 
   // set the package name and version
   gExecMeta.setPackage(PACKAGE_NAME);
@@ -78,10 +79,8 @@ SetMetadata(const char* argv0, const char* instance, bool testing)
   std::string sversion(PACKAGE_VERSION);
   std::string smajor(sversion, 0, sversion.find_first_of("."));
 
-  std::string sminor(sversion,
-    sversion.find_first_of(".") + 1,
-    sversion.find_last_of(".") - sversion.find_first_of(".")
-  );
+  std::string sminor(sversion, sversion.find_first_of(".") + 1,
+                     sversion.find_last_of(".") - sversion.find_first_of("."));
 
   gExecMeta.setMajorVersion(smajor.c_str());
   gExecMeta.setMinorVersion(sminor.c_str());
@@ -94,21 +93,17 @@ SetMetadata(const char* argv0, const char* instance, bool testing)
 /**
  * Function to initialize logging. It is used by other initialization
  * functions. During initialization, it sets several values such as
- *  
+ *
  *   - test log directory, if the program is a test
- *   - log directory if it is actual Heron program 
+ *   - log directory if it is actual Heron program
  *   - set the log file prefix and log directory
  *   - set the maximum size of the log file
  *   - install signal handler for processing SIGSEGV
- * 
+ *
  */
-static void
-InitLogging()
-{
+static void InitLogging() {
   // set the log directory
-  gExecMeta.setLogDirectory(
-    gExecMeta.unitTest() ? constTestLogsDirectory : constLogsDirectory
-  );
+  gExecMeta.setLogDirectory(gExecMeta.unitTest() ? constTestLogsDirectory : constLogsDirectory);
 
   // get the basename of the file path
   std::string bname = FileUtils::baseName(gExecMeta.name());
@@ -121,7 +116,7 @@ InitLogging()
   gExecMeta.setLogPrefix(log_prefix.c_str());
 
   // configure glog parameters
-  FLAGS_stderrthreshold = 3; // FATAL
+  FLAGS_stderrthreshold = 3;  // FATAL
 
   // set the max log size to 100MB
   FLAGS_max_log_size = 100;
@@ -148,19 +143,17 @@ InitLogging()
 }
 
 /**
- * Helper function to initialize a Heron program. It is used by 
- * It initializes the execution metadata, logs, etc. It is the 
+ * Helper function to initialize a Heron program. It is used by
+ * It initializes the execution metadata, logs, etc. It is the
  * first function to be called in main()
- * 
+ *
  * \param argv0
  *      Name of the program calling initialize
  *
  * \param instance
  *      Instance id of the program calling initialize
  */
-static void
-InitHelper(const char* argv0, const char* instance, bool istest)
-{
+static void InitHelper(const char* argv0, const char* instance, bool istest) {
   CHECK(signal(SIGPIPE, SIG_IGN) != SIG_ERR);
 
   // create execution meta data object
@@ -175,32 +168,26 @@ InitHelper(const char* argv0, const char* instance, bool istest)
 
 /**
  * Function to initialize programs that have multiple instances.
- * It initializes the execution metadata, logging framework, etc. 
+ * It initializes the execution metadata, logging framework, etc.
  * It is the first function to be called in main()
- * 
+ *
  * \param argv0
  *      Name of the program calling initialize
  *
  * \param instance
  *      Instance id of the program calling initialize
  */
-void
-Initialize(const char* argv0, const char* instance)
-{
-  InitHelper(argv0, instance, false);
-}
+void Initialize(const char* argv0, const char* instance) { InitHelper(argv0, instance, false); }
 
 /**
- * Function to initialize singleton programs. It initializes the 
- * execution metadata, logs, etc. It is the first function to be 
+ * Function to initialize singleton programs. It initializes the
+ * execution metadata, logs, etc. It is the first function to be
  * called in main()
- * 
+ *
  * \param argv0
  *      Name of the program calling initialize
  */
-void
-Initialize(const char* argv0)
-{
+void Initialize(const char* argv0) {
   std::string prog(argv0);
 
   // use a different initializer depending on if it a unit test program?
@@ -210,28 +197,18 @@ Initialize(const char* argv0)
     InitHelper(argv0, nullptr, false);
   }
 
-  LOG(INFO)
-    << "Starting " << gExecMeta.name() << " "
-    << gExecMeta.package() << " "
-    << "v" << gExecMeta.version() << " "
-    << gExecMeta.compileUser() << "@"
-    << gExecMeta.compileHost() << " on "
-    << gExecMeta.compileTime() << std::endl;
+  LOG(INFO) << "Starting " << gExecMeta.name() << " " << gExecMeta.package() << " "
+            << "v" << gExecMeta.version() << " " << gExecMeta.compileUser() << "@"
+            << gExecMeta.compileHost() << " on " << gExecMeta.compileTime() << std::endl;
 }
 
-void
-Shutdown()
-{
-  google::ShutdownGoogleLogging();
-}
+void Shutdown() { google::ShutdownGoogleLogging(); }
 
 /**
  * Utility function to prune the log files
  */
-void
-PruneLogs()
-{
-  std::vector<std::string>      files;
+void PruneLogs() {
+  std::vector<std::string> files;
   std::map<time_t, std::string> ordered_files;
 
   // get the log prefix and files in the log directory
@@ -239,17 +216,14 @@ PruneLogs()
   FileUtils::listFiles(gExecMeta.logDirectory(), files);
 
   // find the files that contain the give prefix
-  for (size_t i = 0; i < files.size(); ++i)
-  {
-    if (files[i].find(file_prefix) != std::string::npos)
-    {
+  for (size_t i = 0; i < files.size(); ++i) {
+    if (files[i].find(file_prefix) != std::string::npos) {
       // form the full file path
       std::string filePath(gExecMeta.logDirectory());
       filePath.append("/").append(files[i]);
 
       // ignore if it a sym link file
-      if (FileUtils::is_symlink(filePath))
-        continue;
+      if (FileUtils::is_symlink(filePath)) continue;
 
       // get the last time of modification
       time_t tmodified = FileUtils::getModifiedTime(filePath);
@@ -262,18 +236,13 @@ PruneLogs()
   }
 
   // remove the files that are old
-  while (ordered_files.size() > constMaxNumLogFiles)
-  {
+  while (ordered_files.size() > constMaxNumLogFiles) {
     FileUtils::removeFile(ordered_files.begin()->second);
     LOG(INFO) << "Pruned log file " << ordered_files.begin()->second;
     ordered_files.erase(ordered_files.begin());
   }
 }
 
-void
-FlushLogs()
-{
-  google::FlushLogFiles(google::INFO);
-}
-
-}} // namespace
+void FlushLogs() { google::FlushLogFiles(google::INFO); }
+}  // namespace common
+}  // namespace heron
