@@ -15,21 +15,21 @@
 package com.twitter.heron.api.metric;
 
 public class ReducedMetric implements IMetric {
-  private final IReducer mReducer;
-  private Object mAccumulator;
+  private final IReducer reducer;
+  private Object accumulator;
 
-  public ReducedMetric(IReducer reducer) {
-    mReducer = reducer;
-    mAccumulator = mReducer.init();
+  public ReducedMetric(IReducer aReducer) {
+    reducer = aReducer;
+    accumulator = reducer.init();
   }
 
   public void update(Object value) {
-    mAccumulator = mReducer.reduce(mAccumulator, value);
+    accumulator = reducer.reduce(accumulator, value);
   }
 
   public Object getValueAndReset() {
-    Object ret = mReducer.extractResult(mAccumulator);
-    mAccumulator = mReducer.init();
+    Object ret = reducer.extractResult(accumulator);
+    accumulator = reducer.init();
     return ret;
   }
 }

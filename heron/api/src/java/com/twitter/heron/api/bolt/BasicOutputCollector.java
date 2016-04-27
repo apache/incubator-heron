@@ -21,27 +21,27 @@ import com.twitter.heron.api.utils.Utils;
 
 
 public class BasicOutputCollector implements IBasicOutputCollector {
-  private OutputCollector mOut;
+  private OutputCollector out;
   private Tuple mInputTuple;
 
-  public BasicOutputCollector(OutputCollector out) {
-    this.mOut = out;
+  public BasicOutputCollector(OutputCollector output) {
+    this.out = output;
   }
 
   public List<Integer> emit(String streamId, List<Object> tuple) {
-    return mOut.emit(streamId, mInputTuple, tuple);
+    return out.emit(streamId, mInputTuple, tuple);
   }
 
   public List<Integer> emit(List<Object> tuple) {
     return emit(Utils.DEFAULT_STREAM_ID, tuple);
   }
 
-  public void setContext(Tuple inputTuple) {
-    this.mInputTuple = inputTuple;
+  public void setContext(Tuple anInputTuple) {
+    this.mInputTuple = anInputTuple;
   }
 
   public void emitDirect(int taskId, String streamId, List<Object> tuple) {
-    mOut.emitDirect(taskId, streamId, mInputTuple, tuple);
+    out.emitDirect(taskId, streamId, mInputTuple, tuple);
   }
 
   public void emitDirect(int taskId, List<Object> tuple) {
@@ -49,10 +49,10 @@ public class BasicOutputCollector implements IBasicOutputCollector {
   }
 
   protected IOutputCollector getOutputter() {
-    return mOut;
+    return out;
   }
 
   public void reportError(Throwable t) {
-    mOut.reportError(t);
+    out.reportError(t);
   }
 }

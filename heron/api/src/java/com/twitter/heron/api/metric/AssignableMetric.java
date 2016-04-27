@@ -15,17 +15,17 @@
 package com.twitter.heron.api.metric;
 
 public class AssignableMetric implements IMetric {
-  private Object mValue;
+  private Object value;
 
-  public AssignableMetric(Object value) {
-    mValue = value;
+  public AssignableMetric(Object aValue) {
+    value = aValue;
   }
 
-  public void setValue(Object value) {
-    mValue = value;
+  public void setValue(Object aValue) {
+    value = aValue;
   }
 
   public Object getValueAndReset() {
-    return mValue;
+    return value;
   }
 }

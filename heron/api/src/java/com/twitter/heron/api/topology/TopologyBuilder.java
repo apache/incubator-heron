@@ -77,18 +77,18 @@ import com.twitter.heron.api.spout.IRichSpout;
  * the inputs for that component.</p>
  */
 public class TopologyBuilder {
-  private Map<String, BoltDeclarer> mBolts = new HashMap<String, BoltDeclarer>();
-  private Map<String, SpoutDeclarer> mSpouts = new HashMap<String, SpoutDeclarer>();
+  private Map<String, BoltDeclarer> bolts = new HashMap<String, BoltDeclarer>();
+  private Map<String, SpoutDeclarer> spouts = new HashMap<String, SpoutDeclarer>();
 
 
   public HeronTopology createTopology() {
     TopologyAPI.Topology.Builder bldr = TopologyAPI.Topology.newBuilder();
     // First go thru the spouts
-    for (Map.Entry<String, SpoutDeclarer> spout : mSpouts.entrySet()) {
+    for (Map.Entry<String, SpoutDeclarer> spout : spouts.entrySet()) {
       spout.getValue().dump(bldr);
     }
     // Then go thru the bolts
-    for (Map.Entry<String, BoltDeclarer> bolt : mBolts.entrySet()) {
+    for (Map.Entry<String, BoltDeclarer> bolt : bolts.entrySet()) {
       bolt.getValue().dump(bldr);
     }
     return new HeronTopology(bldr);
@@ -116,7 +116,7 @@ public class TopologyBuilder {
   public BoltDeclarer setBolt(String id, IRichBolt bolt, Number parallelismHint) {
     validateComponentName(id);
     BoltDeclarer b = new BoltDeclarer(id, bolt, parallelismHint);
-    mBolts.put(id, b);
+    bolts.put(id, b);
     return b;
   }
 
@@ -171,7 +171,7 @@ public class TopologyBuilder {
   public SpoutDeclarer setSpout(String id, IRichSpout spout, Number parallelismHint) {
     validateComponentName(id);
     SpoutDeclarer s = new SpoutDeclarer(id, spout, parallelismHint);
-    mSpouts.put(id, s);
+    spouts.put(id, s);
     return s;
   }
 
@@ -186,10 +186,10 @@ public class TopologyBuilder {
   }
 
   private void validateUnusedName(String name) {
-    if (mBolts.containsKey(name)) {
+    if (bolts.containsKey(name)) {
       throw new IllegalArgumentException("Bolt has already been declared for name " + name);
     }
-    if (mSpouts.containsKey(name)) {
+    if (spouts.containsKey(name)) {
       throw new IllegalArgumentException("Spout has already been declared for name " + name);
     }
   }

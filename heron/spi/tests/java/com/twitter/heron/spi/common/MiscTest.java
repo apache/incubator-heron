@@ -23,6 +23,9 @@ import junit.framework.Assert;
 public class MiscTest {
   private static final Logger LOG = Logger.getLogger(MiscTest.class.getName());
 
+  /**
+   * Test if the ${HERON_HOME} variable can be substituted
+   */
   @Test
   public void testHeronHome() {
     // check no occurrence

@@ -18,24 +18,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MultiReducedMetric implements IMetric {
-  private Map<String, ReducedMetric> mValue = new HashMap();
-  private IReducer mReducer;
+  private Map<String, ReducedMetric> value = new HashMap();
+  private IReducer reducer;
 
-  public MultiReducedMetric(IReducer reducer) {
-    mReducer = reducer;
+  public MultiReducedMetric(IReducer aReducer) {
+    reducer = aReducer;
   }
 
   public ReducedMetric scope(String key) {
-    ReducedMetric val = mValue.get(key);
+    ReducedMetric val = value.get(key);
     if (val == null) {
-      mValue.put(key, val = new ReducedMetric(mReducer));
+      value.put(key, val = new ReducedMetric(reducer));
     }
     return val;
   }
 
   public Object getValueAndReset() {
     Map ret = new HashMap();
-    for (Map.Entry<String, ReducedMetric> e : mValue.entrySet()) {
+    for (Map.Entry<String, ReducedMetric> e : value.entrySet()) {
       Object val = e.getValue().getValueAndReset();
       if (val != null) {
         ret.put(e.getKey(), val);

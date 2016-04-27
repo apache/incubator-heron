@@ -23,22 +23,22 @@ import java.util.List;
 import java.util.Map;
 
 public class Fields implements Iterable<String>, Serializable {
-  private List<String> mFields;
+  private List<String> fields;
   private Map<String, Integer> mIndex = new HashMap<String, Integer>();
 
-  public Fields(String... fields) {
-    this(Arrays.asList(fields));
+  public Fields(String... pFields) {
+    this(Arrays.asList(pFields));
   }
 
-  public Fields(List<String> fields) {
-    mFields = new ArrayList<String>(fields.size());
-    for (String field : fields) {
-      if (mFields.contains(field)) {
+  public Fields(List<String> pFields) {
+    fields = new ArrayList<String>(pFields.size());
+    for (String field : pFields) {
+      if (fields.contains(field)) {
         throw new IllegalArgumentException(
             String.format("duplicate field '%s'", field)
         );
       }
-      mFields.add(field);
+      fields.add(field);
     }
     index();
   }
@@ -52,19 +52,19 @@ public class Fields implements Iterable<String>, Serializable {
   }
 
   public List<String> toList() {
-    return new ArrayList<String>(mFields);
+    return new ArrayList<String>(fields);
   }
 
   public int size() {
-    return mFields.size();
+    return fields.size();
   }
 
   public String get(int index) {
-    return mFields.get(index);
+    return fields.get(index);
   }
 
   public Iterator<String> iterator() {
-    return mFields.iterator();
+    return fields.iterator();
   }
 
   /**
@@ -86,13 +86,13 @@ public class Fields implements Iterable<String>, Serializable {
   }
 
   private void index() {
-    for (int i = 0; i < mFields.size(); i++) {
-      mIndex.put(mFields.get(i), i);
+    for (int i = 0; i < fields.size(); i++) {
+      mIndex.put(fields.get(i), i);
     }
   }
 
   @Override
   public String toString() {
-    return mFields.toString();
+    return fields.toString();
   }
 }

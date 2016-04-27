@@ -18,22 +18,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MultiCountMetric implements IMetric {
-  private Map<String, CountMetric> mValue = new HashMap();
+  private Map<String, CountMetric> value = new HashMap();
 
   public MultiCountMetric() {
   }
 
   public CountMetric scope(String key) {
-    CountMetric val = mValue.get(key);
+    CountMetric val = value.get(key);
     if (val == null) {
-      mValue.put(key, val = new CountMetric());
+      value.put(key, val = new CountMetric());
     }
     return val;
   }
 
   public Object getValueAndReset() {
     Map ret = new HashMap();
-    for (Map.Entry<String, CountMetric> e : mValue.entrySet()) {
+    for (Map.Entry<String, CountMetric> e : value.entrySet()) {
       ret.put(e.getKey(), e.getValue().getValueAndReset());
     }
     return ret;

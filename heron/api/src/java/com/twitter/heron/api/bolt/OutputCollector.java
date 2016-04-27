@@ -27,11 +27,11 @@ import com.twitter.heron.api.utils.Utils;
  * form of stream processing, see IBasicBolt and BasicOutputCollector.
  */
 public class OutputCollector implements IOutputCollector {
-  private IOutputCollector mDelegate;
+  private IOutputCollector delegate;
 
 
-  public OutputCollector(IOutputCollector delegate) {
-    mDelegate = delegate;
+  public OutputCollector(IOutputCollector aDelegate) {
+    delegate = aDelegate;
   }
 
   /**
@@ -198,7 +198,7 @@ public class OutputCollector implements IOutputCollector {
 
   @Override
   public List<Integer> emit(String streamId, Collection<Tuple> anchors, List<Object> tuple) {
-    return mDelegate.emit(streamId, anchors, tuple);
+    return delegate.emit(streamId, anchors, tuple);
   }
 
   @Override
@@ -207,21 +207,21 @@ public class OutputCollector implements IOutputCollector {
       String streamId,
       Collection<Tuple> anchors,
       List<Object> tuple) {
-    mDelegate.emitDirect(taskId, streamId, anchors, tuple);
+    delegate.emitDirect(taskId, streamId, anchors, tuple);
   }
 
   @Override
   public void ack(Tuple input) {
-    mDelegate.ack(input);
+    delegate.ack(input);
   }
 
   @Override
   public void fail(Tuple input) {
-    mDelegate.fail(input);
+    delegate.fail(input);
   }
 
   @Override
   public void reportError(Throwable error) {
-    mDelegate.reportError(error);
+    delegate.reportError(error);
   }
 }
