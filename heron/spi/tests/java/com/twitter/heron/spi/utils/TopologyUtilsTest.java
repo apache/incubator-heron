@@ -31,7 +31,8 @@ import com.twitter.heron.spi.common.PackingPlan;
 public class TopologyUtilsTest {
 
   public static PackingPlan generatePacking(Map<String, List<String>> basePacking) {
-    PackingPlan.Resource resource = new PackingPlan.Resource(1.0, 1 * Constants.GB, 10 * Constants.GB);
+    PackingPlan.Resource resource =
+        new PackingPlan.Resource(1.0, 1 * Constants.GB, 10 * Constants.GB);
 
     Map<String, PackingPlan.ContainerPlan> containerPlanMap = new HashMap<>();
 
@@ -66,7 +67,8 @@ public class TopologyUtilsTest {
     spouts.put("spout", componentParallelism);
     Map<String, Integer> bolts = new HashMap<>();
     bolts.put("bolt", componentParallelism);
-    TopologyAPI.Topology topology = TopologyTests.createTopology("testTopology", topologyConfig, spouts, bolts);
+    TopologyAPI.Topology topology =
+        TopologyTests.createTopology("testTopology", topologyConfig, spouts, bolts);
     Map<String, Integer> componentParallelismMap =
         TopologyUtils.getComponentParallelism(topology);
     Assert.assertEquals(componentParallelism, componentParallelismMap.get("spout").intValue());
@@ -81,7 +83,8 @@ public class TopologyUtilsTest {
     spouts.put("spout", componentParallelism);
     Map<String, Integer> bolts = new HashMap<>();
     bolts.put("bolt", componentParallelism);
-    TopologyAPI.Topology topology = TopologyTests.createTopology("testTopology", topologyConfig, spouts, bolts);
+    TopologyAPI.Topology topology =
+        TopologyTests.createTopology("testTopology", topologyConfig, spouts, bolts);
     Assert.assertEquals((spouts.size() + bolts.size()) * componentParallelism,
         TopologyUtils.getTotalInstance(topology));
   }
@@ -122,8 +125,10 @@ public class TopologyUtilsTest {
     Map<String, Integer> bolts = new HashMap<>();
     bolts.put("bolt", componentParallelism);
     long defaultValue = 1 * Constants.GB;
+
+    // for sorting
     Map<String, Long> ramMap = new TreeMap<>(TopologyUtils.getComponentRamMap(
-        TopologyTests.createTopology("test", topologyConfig, spouts, bolts), defaultValue));  // sort it.
+        TopologyTests.createTopology("test", topologyConfig, spouts, bolts), defaultValue));
     Assert.assertArrayEquals(new String[]{"bolt", "spout"}, ramMap.keySet().toArray());
     Assert.assertArrayEquals(new Long[]{defaultValue, defaultValue}, ramMap.values().toArray());
   }
@@ -140,8 +145,10 @@ public class TopologyUtilsTest {
     long spoutRam = 2 * Constants.GB;
     topologyConfig.setComponentRam("spout", spoutRam);
     topologyConfig.setComponentRam("bolt", boltRam);
+
+    // sort the component ram map
     Map<String, Long> ramMap = new TreeMap<>(TopologyUtils.getComponentRamMap(
-        TopologyTests.createTopology("test", topologyConfig, spouts, bolts), 0));  // sort it.
+        TopologyTests.createTopology("test", topologyConfig, spouts, bolts), 0));
     Assert.assertArrayEquals(new String[]{"bolt", "spout"}, ramMap.keySet().toArray());
     Assert.assertArrayEquals(new Long[]{boltRam, spoutRam}, ramMap.values().toArray());
   }
@@ -157,8 +164,10 @@ public class TopologyUtilsTest {
     long defaultValue = 1 * Constants.GB;
     long spoutRam = 2 * Constants.GB;
     topologyConfig.setComponentRam("spout", spoutRam);
+
+    // sort th component ram map
     Map<String, Long> ramMap = new TreeMap<>(TopologyUtils.getComponentRamMap(
-        TopologyTests.createTopology("test", topologyConfig, spouts, bolts), defaultValue));  // sort it.
+        TopologyTests.createTopology("test", topologyConfig, spouts, bolts), defaultValue));
     Assert.assertArrayEquals(new String[]{"bolt", "spout"}, ramMap.keySet().toArray());
     Assert.assertArrayEquals(new Long[]{defaultValue, spoutRam}, ramMap.values().toArray());
 

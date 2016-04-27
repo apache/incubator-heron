@@ -81,7 +81,8 @@ public final class TMasterUtils {
             responseCode, command));
       }
     } catch (IOException e) {
-      LOG.log(Level.SEVERE, "Failed to receive HTTP response from TMaster for " + command + " :", e);
+      LOG.log(Level.SEVERE,
+          "Failed to receive HTTP response from TMaster for " + command + " :", e);
     } finally {
       connection.disconnect();
     }
@@ -93,8 +94,9 @@ public final class TMasterUtils {
   /**
    * Get current running TopologyState
    */
-  public static TopologyAPI.TopologyState getRuntimeTopologyState(String topologyName,
-                                                                  SchedulerStateManagerAdaptor statemgr) {
+  public static TopologyAPI.TopologyState getRuntimeTopologyState(
+      String topologyName,
+      SchedulerStateManagerAdaptor statemgr) {
     PhysicalPlans.PhysicalPlan plan = statemgr.getPhysicalPlan(topologyName);
 
     if (plan == null) {
