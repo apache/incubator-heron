@@ -239,7 +239,9 @@ class HeronExecutor:
     return retval
 
 
-  def get_regular_processes(self):
+  # Returns the processes to handle streams, including the stream-mgr and the user code containing
+  # the stream logic of the topology
+  def get_streaming_processes(self):
     retval = {}
     # First lets make sure that our shard id is a valid one
     assert self.shard in self.instance_distribution
@@ -324,7 +326,8 @@ class HeronExecutor:
       retval[instance_id] = instance_cmd
     return retval
 
-  def get_daemon_processes(self):
+  # Returns the common heron support processes that all containers get, like the heron shell
+  def get_heron_support_processes(self):
     """
     Get a map from all daemon services' name to the command to start them
     """
@@ -382,10 +385,10 @@ class HeronExecutor:
       commands = self.get_tmaster_processes()
     else:
       self.untar_if_tar()
-      commands = self.get_regular_processes()
+      commands = self.get_streaming_processes()
 
     # Attach daemon processes
-    commands.update(self.get_daemon_processes())
+    commands.update(self.get_heron_support_processes())
 
     # Run all processes in background
     self.do_run_and_wait(commands)

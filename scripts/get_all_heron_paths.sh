@@ -38,6 +38,7 @@ function get_heron_python_paths() {
 }
 
 function get_heron_thirdparty_dependencies() {
+  echo "$(find {bazel-genfiles/external,bazel-bin/3rdparty/java/bazel}/. -name "*jar" | sort -u)";
   echo "$(find 3rdparty -name "*.jar" | sort -u)";
 }
 function get_heron_bazel_deps(){
@@ -60,7 +61,7 @@ function get_package_of() {
 }
 
 function get_heron_java_paths() {
-  local java_paths=$(find heron -name "*.java" | sed "s|/src/java/.*$|/src/java|" |  sed "s|/tests/java/.*$|/tests/java|" | sort -u | fgrep -v "heron/scheduler/" | fgrep -v "heron/scheduler/" )
+  local java_paths=$(find {heron,tools} -name "*.java" | sed "s|/src/java/.*$|/src/java|"| sed "s|/java/src/.*$|/java/src|" |  sed "s|/tests/java/.*$|/tests/java|" | sort -u | fgrep -v "heron/scheduler/" | fgrep -v "heron/scheduler/" )
   if [ "$(uname -s | tr 'A-Z' 'a-z')" != "darwin" ]; then
     java_paths=$(echo "${JAVA_PATHS}" | fgrep -v "/objc_tools/")
   fi
