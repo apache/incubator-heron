@@ -22,6 +22,8 @@ import com.twitter.heron.api.HeronSubmitter;
 import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.api.bolt.BaseBasicBolt;
 import com.twitter.heron.api.bolt.BasicOutputCollector;
+import com.twitter.heron.api.exception.AlreadyAliveException;
+import com.twitter.heron.api.exception.InvalidTopologyException;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.spout.BaseRichSpout;
 import com.twitter.heron.api.spout.SpoutOutputCollector;
@@ -79,9 +81,10 @@ public class TopologyTests {
     }
 
     HeronTopology heronTopology = builder.createTopology();
+
     try {
       HeronSubmitter.submitTopology(topologyName, heronConfig, heronTopology);
-    } catch (Exception e) {
+    } catch (AlreadyAliveException | InvalidTopologyException e) {
     }
 
     return heronTopology.
