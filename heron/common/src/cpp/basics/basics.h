@@ -43,4 +43,4 @@
 #include "basics/spfuncs.h"
 #include "basics/sptest.h"
 
-#endif // HERON_BASICS_H_
+#endif  // HERON_BASICS_H_

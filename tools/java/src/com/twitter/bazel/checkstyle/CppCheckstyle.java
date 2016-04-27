@@ -81,6 +81,9 @@ public final class CppCheckstyle {
       List<String> commandBuilder = new ArrayList<>();
       commandBuilder.add(cpplintFile);
       commandBuilder.add("--linelength=100");
+      // TODO: Remove "runtime/references" when we fix all non-const references in our codebase
+      // TODO: Remove "runtime/threadsafe_fn" when we fix all non-threadsafe libc functions
+      commandBuilder.add("--filter=-build/header_guard,-runtime/references,-runtime/threadsafe_fn");
       commandBuilder.addAll(sourceFiles);
       runLinter(commandBuilder);
 

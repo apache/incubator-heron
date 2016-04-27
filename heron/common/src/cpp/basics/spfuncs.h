@@ -23,7 +23,8 @@
 #if !defined(HERON_FUNCS_H_)
 #define HERON_FUNCS_H_
 
-namespace heron { namespace common {
+namespace heron {
+namespace common {
 
 // Heron initialize with instance
 void Initialize(const char* argv0, const char* instance);
@@ -39,7 +40,7 @@ void PruneLogs();
 
 // Heron function for log flushing
 void FlushLogs();
+}  // namespace common
+}  // namespace heron
 
-}} // namespace
-
-#endif // HERON_FUNCS_H_
+#endif  // HERON_FUNCS_H_

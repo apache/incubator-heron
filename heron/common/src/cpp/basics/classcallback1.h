@@ -22,19 +22,16 @@
 /*
  * Defines CallBack1 for class member functions that take no arguments
  */
-template<typename C, typename D>
-class ClassCallBack1_0 : public CallBack1<D>
-{
+template <typename C, typename D>
+class ClassCallBack1_0 : public CallBack1<D> {
  public:
-  ClassCallBack1_0(bool persist, C* c, void(C::*cb)(D)) :
-    CallBack1<D>(persist) {
+  ClassCallBack1_0(bool persist, C* c, void (C::*cb)(D)) : CallBack1<D>(persist) {
     c_ = c;
     cb_ = cb;
   }
-  virtual ~ClassCallBack1_0() { }
-  virtual void RunCallback(D d) {
-    (c_->*cb_)(d);
-  }
+  virtual ~ClassCallBack1_0() {}
+  virtual void RunCallback(D d) { (c_->*cb_)(d); }
+
  private:
   C* c_;
   void (C::*cb_)(D);
@@ -43,20 +40,17 @@ class ClassCallBack1_0 : public CallBack1<D>
 /*
  * Defines CallBack1 for class member functions that take 1 argument
  */
-template<typename C, typename D, typename E>
-class ClassCallBack1_1 : public CallBack1<E>
-{
+template <typename C, typename D, typename E>
+class ClassCallBack1_1 : public CallBack1<E> {
  public:
-  ClassCallBack1_1(bool persist, C* c, void(C::*cb)(D, E), D d) :
-    CallBack1<E>(persist) {
+  ClassCallBack1_1(bool persist, C* c, void (C::*cb)(D, E), D d) : CallBack1<E>(persist) {
     c_ = c;
     cb_ = cb;
     d_ = d;
   }
-  virtual ~ClassCallBack1_1() { }
-  virtual void RunCallback(E e) {
-    (c_->*cb_)(d_, e);
-  }
+  virtual ~ClassCallBack1_1() {}
+  virtual void RunCallback(E e) { (c_->*cb_)(d_, e); }
+
  private:
   C* c_;
   void (C::*cb_)(D, E);
@@ -66,21 +60,18 @@ class ClassCallBack1_1 : public CallBack1<E>
 /*
  * Defines CallBack1 for class member functions that take 2 arguments
  */
-template<typename C, typename D, typename E, typename F>
-class ClassCallBack1_2 : public CallBack1<F>
-{
+template <typename C, typename D, typename E, typename F>
+class ClassCallBack1_2 : public CallBack1<F> {
  public:
-  ClassCallBack1_2(bool persist, C* c, void(C::*cb)(D, E, F), D d, E e) :
-    CallBack1<F>(persist) {
+  ClassCallBack1_2(bool persist, C* c, void (C::*cb)(D, E, F), D d, E e) : CallBack1<F>(persist) {
     c_ = c;
     cb_ = cb;
     d_ = d;
     e_ = e;
   }
-  virtual ~ClassCallBack1_2() { }
-  virtual void RunCallback(F f) {
-    (c_->*cb_)(d_, e_, f);
-  }
+  virtual ~ClassCallBack1_2() {}
+  virtual void RunCallback(F f) { (c_->*cb_)(d_, e_, f); }
+
  private:
   void (C::*cb_)(D, E, F);
   C* c_;
@@ -91,22 +82,20 @@ class ClassCallBack1_2 : public CallBack1<F>
 /*
  * Defines CallBack1 for class member functions that take 3 arguments
  */
-template<typename C, typename D, typename E, typename F, typename G>
-class ClassCallBack1_3 : public CallBack1<G>
-{
+template <typename C, typename D, typename E, typename F, typename G>
+class ClassCallBack1_3 : public CallBack1<G> {
  public:
-  ClassCallBack1_3(bool persist, C* c, void(C::*cb)(D, E, F, G), D d, E e, F f) :
-    CallBack1<G>(persist) {
+  ClassCallBack1_3(bool persist, C* c, void (C::*cb)(D, E, F, G), D d, E e, F f)
+      : CallBack1<G>(persist) {
     c_ = c;
     cb_ = cb;
     d_ = d;
     e_ = e;
     f_ = f;
   }
-  virtual ~ClassCallBack1_3() { }
-  virtual void RunCallback(G g) {
-    (c_->*cb_)(d_, e_, f_, g);
-  }
+  virtual ~ClassCallBack1_3() {}
+  virtual void RunCallback(G g) { (c_->*cb_)(d_, e_, f_, g); }
+
  private:
   void (C::*cb_)(D, E, F, G);
   C* c_;
@@ -118,12 +107,11 @@ class ClassCallBack1_3 : public CallBack1<G>
 /*
  * Defines CallBack1 for class member functions that take 4 arguments
  */
-template<typename C, typename D, typename E, typename F, typename G, typename H>
-class ClassCallBack1_4 : public CallBack1<H>
-{
+template <typename C, typename D, typename E, typename F, typename G, typename H>
+class ClassCallBack1_4 : public CallBack1<H> {
  public:
-  ClassCallBack1_4(bool persist, C* c, void(C::*cb)(D, E, F, G, H), D d, E e, F f, G g) :
-    CallBack1<H>(persist) {
+  ClassCallBack1_4(bool persist, C* c, void (C::*cb)(D, E, F, G, H), D d, E e, F f, G g)
+      : CallBack1<H>(persist) {
     c_ = c;
     cb_ = cb;
     d_ = d;
@@ -131,10 +119,9 @@ class ClassCallBack1_4 : public CallBack1<H>
     f_ = f;
     g_ = g;
   }
-  virtual ~ClassCallBack1_4() { }
-  virtual void RunCallback(H h) {
-    (c_->*cb_)(d_, e_, f_, g_, h);
-  }
+  virtual ~ClassCallBack1_4() {}
+  virtual void RunCallback(H h) { (c_->*cb_)(d_, e_, f_, g_, h); }
+
  private:
   void (C::*cb_)(D, E, F, G, H);
   C* c_;
@@ -148,74 +135,64 @@ class ClassCallBack1_4 : public CallBack1<H>
 // Class CallBack1 specific functions
 //
 
-template<typename C, typename D>
-CallBack1<D>* CreateCallback(C* c, void (C::*cb)(D))
-{
+template <typename C, typename D>
+CallBack1<D>* CreateCallback(C* c, void (C::*cb)(D)) {
   auto cb0 = new ClassCallBack1_0<C, D>(false, c, cb);
   return cb0;
 }
 
-template<typename C, typename D, typename E>
-CallBack1<E>* CreateCallback(C* c, void (C::*cb)(D, E), D d)
-{
+template <typename C, typename D, typename E>
+CallBack1<E>* CreateCallback(C* c, void (C::*cb)(D, E), D d) {
   auto cb1 = new ClassCallBack1_1<C, D, E>(false, c, cb, d);
   return cb1;
 }
 
-template<typename C, typename D, typename E, typename F>
-CallBack1<F>* CreateCallback(C* c, void (C::*cb)(D, E, F), D d, E e)
-{
+template <typename C, typename D, typename E, typename F>
+CallBack1<F>* CreateCallback(C* c, void (C::*cb)(D, E, F), D d, E e) {
   auto cb2 = new ClassCallBack1_2<C, D, E, F>(false, c, cb, d, e);
   return cb2;
 }
 
-template<typename C, typename D, typename E, typename F, typename G>
-CallBack1<G>* CreateCallback(C* c, void (C::*cb)(D, E, F, G), D d, E e, F f)
-{
+template <typename C, typename D, typename E, typename F, typename G>
+CallBack1<G>* CreateCallback(C* c, void (C::*cb)(D, E, F, G), D d, E e, F f) {
   auto cb3 = new ClassCallBack1_3<C, D, E, F, G>(false, c, cb, d, e, f);
   return cb3;
 }
 
-template<typename C, typename D, typename E, typename F, typename G, typename H>
-CallBack1<H>* CreateCallback(C* c, void (C::*cb)(D, E, F, G, H), D d, E e, F f, G g)
-{
+template <typename C, typename D, typename E, typename F, typename G, typename H>
+CallBack1<H>* CreateCallback(C* c, void (C::*cb)(D, E, F, G, H), D d, E e, F f, G g) {
   auto cb4 = new ClassCallBack1_4<C, D, E, F, G, H>(false, c, cb, d, e, f, g);
   return cb4;
 }
 
-template<typename C, typename D>
-CallBack1<D>* CreatePersistentCallback(C* c, void (C::*cb)(D))
-{
+template <typename C, typename D>
+CallBack1<D>* CreatePersistentCallback(C* c, void (C::*cb)(D)) {
   auto cb0 = new ClassCallBack1_0<C, D>(true, c, cb);
   return cb0;
 }
 
-template<typename C, typename D, typename E>
-CallBack1<E>* CreatePersistentCallback(C* c, void (C::*cb)(D, E), D d)
-{
+template <typename C, typename D, typename E>
+CallBack1<E>* CreatePersistentCallback(C* c, void (C::*cb)(D, E), D d) {
   auto cb1 = new ClassCallBack1_1<C, D, E>(true, c, cb, d);
   return cb1;
 }
 
-template<typename C, typename D, typename E, typename F>
-CallBack1<F>* CreatePersistentCallback(C* c, void (C::*cb)(D, E, F), D d, E e)
-{
+template <typename C, typename D, typename E, typename F>
+CallBack1<F>* CreatePersistentCallback(C* c, void (C::*cb)(D, E, F), D d, E e) {
   auto cb2 = new ClassCallBack1_2<C, D, E, F>(true, c, cb, d, e);
   return cb2;
 }
 
-template<typename C, typename D, typename E, typename F, typename G>
-CallBack1<G>* CreatePersistentCallback(C* c, void (C::*cb)(D, E, F, G), D d, E e, F f)
-{
+template <typename C, typename D, typename E, typename F, typename G>
+CallBack1<G>* CreatePersistentCallback(C* c, void (C::*cb)(D, E, F, G), D d, E e, F f) {
   auto cb3 = new ClassCallBack1_3<C, D, E, F, G>(true, c, cb, d, e, f);
   return cb3;
 }
 
-template<typename C, typename D, typename E, typename F, typename G, typename H>
-CallBack1<H>* CreatePersistentCallback(C* c, void (C::*cb)(D, E, F, G, H), D d, E e, F f, G g)
-{
+template <typename C, typename D, typename E, typename F, typename G, typename H>
+CallBack1<H>* CreatePersistentCallback(C* c, void (C::*cb)(D, E, F, G, H), D d, E e, F f, G g) {
   auto cb4 = new ClassCallBack1_4<C, D, E, F, G, H>(true, c, cb, d, e, f, g);
   return cb4;
 }
 
-#endif // HERON_CLASS_CALLBACK1_H_
+#endif  // HERON_CLASS_CALLBACK1_H_

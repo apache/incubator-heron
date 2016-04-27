@@ -20,20 +20,17 @@
 #include <ifaddrs.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <string>
 #include "glog/logging.h"
 #include "basics/sptypes.h"
 #include "basics/sprcodes.h"
 
-bool
-IpUtils::checkIPAddress(const std::string& ip_addr, const IPAddress_Set& aset)
-{
-  auto it =  aset.find(ip_addr);
+bool IpUtils::checkIPAddress(const std::string& ip_addr, const IPAddress_Set& aset) {
+  auto it = aset.find(ip_addr);
   return it != aset.end() ? true : false;
 }
 
-std::string
-IpUtils::getHostName()
-{
+std::string IpUtils::getHostName() {
   char hostname[BUFSIZ];
   struct addrinfo hints, *info;
   int gai_result;
@@ -46,46 +43,38 @@ IpUtils::getHostName()
   hints.ai_flags = AI_CANONNAME;
 
   if ((gai_result = ::getaddrinfo(hostname, nullptr, &hints, &info)) != 0) {
-    LOG(WARNING) 
-      << "getaddrinfo returned non zero result "
-      << gai_strerror(gai_result);
+    LOG(WARNING) << "getaddrinfo returned non zero result " << gai_strerror(gai_result);
     return std::string(hostname);
   }
 
   if (!info) {
     return std::string(hostname);
-  } 
+  }
 
   std::string cannonical_name = info->ai_canonname;
   freeaddrinfo(info);
   return cannonical_name;
 }
 
-sp_int32
-IpUtils::getIPAddressHost(IPAddress_Set& aset)
-{
-  if (!getIPAddress(aset))
-    return SP_NOTOK;
+sp_int32 IpUtils::getIPAddressHost(IPAddress_Set& aset) {
+  if (!getIPAddress(aset)) return SP_NOTOK;
 
   aset.insert(getHostName());
   return SP_OK;
 }
 
-sp_int32
-IpUtils::getIPAddress(IPAddress_Set& aset)
-{
-  struct ifaddrs * ifAddrStruct=nullptr;
-  struct ifaddrs * ifa=nullptr;
-  void * tmpAddrPtr=nullptr;
+sp_int32 IpUtils::getIPAddress(IPAddress_Set& aset) {
+  struct ifaddrs* ifAddrStruct = nullptr;
+  struct ifaddrs* ifa = nullptr;
 
   aset.clear();
   getifaddrs(&ifAddrStruct);
 
   for (ifa = ifAddrStruct; ifa != nullptr; ifa = ifa->ifa_next) {
-    if (ifa ->ifa_addr->sa_family==AF_INET) {
-      tmpAddrPtr=&((struct sockaddr_in *)ifa->ifa_addr)->sin_addr;
+    if (ifa->ifa_addr->sa_family == AF_INET) {
+      struct sockaddr_in* addr_in = (struct sockaddr_in*)ifa->ifa_addr;
       char addressBuffer[INET_ADDRSTRLEN];
-      inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
+      inet_ntop(AF_INET, &addr_in->sin_addr, addressBuffer, INET_ADDRSTRLEN);
 
       // We don't need the loopback address
       if (strcmp("lo", ifa->ifa_name)) aset.insert(std::string(addressBuffer));
@@ -96,21 +85,18 @@ IpUtils::getIPAddress(IPAddress_Set& aset)
   return aset.empty() ? SP_NOTOK : SP_OK;
 }
 
-sp_int32
-IpUtils::getIPV6Address(IPAddress_Set& aset)
-{
-  struct ifaddrs * ifAddrStruct=nullptr;
-  struct ifaddrs * ifa=nullptr;
-  void * tmpAddrPtr=nullptr;
+sp_int32 IpUtils::getIPV6Address(IPAddress_Set& aset) {
+  struct ifaddrs* ifAddrStruct = nullptr;
+  struct ifaddrs* ifa = nullptr;
 
   aset.clear();
   getifaddrs(&ifAddrStruct);
 
   for (ifa = ifAddrStruct; ifa != nullptr; ifa = ifa->ifa_next) {
     if (ifa->ifa_addr->sa_family == AF_INET6) {
-      tmpAddrPtr=&((struct sockaddr_in6 *)ifa->ifa_addr)->sin6_addr;
+      struct sockaddr_in6* addr_in = (struct sockaddr_in6*)ifa->ifa_addr;
       char addressBuffer[INET6_ADDRSTRLEN];
-      inet_ntop(AF_INET6, tmpAddrPtr, addressBuffer, INET6_ADDRSTRLEN);
+      inet_ntop(AF_INET6, &addr_in->sin6_addr, addressBuffer, INET6_ADDRSTRLEN);
 
       // We don't need the loopback address
       if (strcmp("lo", ifa->ifa_name)) aset.insert(std::string(addressBuffer));
@@ -121,13 +107,7 @@ IpUtils::getIPV6Address(IPAddress_Set& aset)
   return aset.empty() ? SP_NOTOK : SP_OK;
 }
 
-sp_int32
-IpUtils::getAddressInfo(
-  struct sockaddr_in& t, 
-  const char*         host, 
-  int                 family, 
-  int                 type)
-{
+sp_int32 IpUtils::getAddressInfo(struct sockaddr_in& t, const char* host, int family, int type) {
   struct addrinfo hints, *res;
 
   memset(&hints, 0, sizeof(hints));
