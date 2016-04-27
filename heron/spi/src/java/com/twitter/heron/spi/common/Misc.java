@@ -83,11 +83,14 @@ public class Misc {
    * ${HERON_SANDBOX_HOME} and ${HERON_SANDBOX_CONF} in the provided path.
    *
    * @param heronSandboxHome, string representing a path heron sandbox home
-   * @param configPath, string representing a path to heron conf
-   * @param pathString, string representing a path including ${HERON_SANDBOX_HOME}/${HERON_SANDBOX_CONF}
-   * @return String, string that represents the modified path
+   * @param configPath string representing a path to heron conf
+   * @param pathString string representing a path including ${HERON_SANDBOX_HOME}/${HERON_SANDBOX_CONF}
+   * @return String string that represents the modified path
    */
-  public static String substituteSandbox(String heronSandboxHome, String configPath, String pathString) {
+  public static String substituteSandbox(
+      String heronSandboxHome,
+      String configPath,
+      String pathString) {
     Config config = Config.newBuilder()
         .put(Keys.heronSandboxHome(), heronSandboxHome)
         .put(Keys.heronSandboxConf(), configPath)
@@ -138,8 +141,9 @@ public class Misc {
     // trim the leading and trailing spaces
     String trimmedPath = pathString.trim();
 
-    if (isURL(trimmedPath))
+    if (isURL(trimmedPath)) {
       return substituteURL(config, trimmedPath);
+    }
 
     // get platform independent file separator
     String fileSeparator = Matcher.quoteReplacement(System.getProperty("file.separator"));
@@ -151,54 +155,55 @@ public class Misc {
     // get the home path
     String homePath = FileSystemView.getFileSystemView().getHomeDirectory().getAbsolutePath();
 
-    // substitute various variables 
+    // substitute various variables
     for (int i = 0; i < list.size(); i++) {
       String elem = list.get(i);
 
-      if (elem.equals("${HOME}")) {
+      if ("${HOME}".equals(elem)) {
         list.set(i, homePath);
 
-      } else if (elem.equals("~")) {
+      } else if ("~".equals(elem)) {
         list.set(i, homePath);
 
-      } else if (elem.equals("${JAVA_HOME}")) {
+      } else if ("${JAVA_HOME}".equals(elem)) {
         String javaPath = System.getenv("JAVA_HOME");
-        if (javaPath != null) list.set(i, javaPath);
-
-      } else if (elem.equals("${HERON_HOME}")) {
+        if (javaPath != null) {
+          list.set(i, javaPath);
+        }
+      } else if ("${HERON_HOME}".equals(elem)) {
         list.set(i, Context.heronHome(config));
 
-      } else if (elem.equals("${HERON_BIN}")) {
+      } else if ("${HERON_BIN}".equals(elem)) {
         list.set(i, Context.heronBin(config));
 
-      } else if (elem.equals("${HERON_CONF}")) {
+      } else if ("${HERON_CONF}".equals(elem)) {
         list.set(i, Context.heronConf(config));
 
-      } else if (elem.equals("${HERON_LIB}")) {
+      } else if ("${HERON_LIB}".equals(elem)) {
         list.set(i, Context.heronLib(config));
 
-      } else if (elem.equals("${HERON_DIST}")) {
+      } else if ("${HERON_DIST}".equals(elem)) {
         list.set(i, Context.heronDist(config));
 
-      } else if (elem.equals("${HERON_SANDBOX_HOME}")) {
+      } else if ("${HERON_SANDBOX_HOME}".equals(elem)) {
         list.set(i, Context.heronSandboxHome(config));
 
-      } else if (elem.equals("${HERON_SANDBOX_BIN}")) {
+      } else if ("${HERON_SANDBOX_BIN}".equals(elem)) {
         list.set(i, Context.heronSandboxBin(config));
 
-      } else if (elem.equals("${HERON_SANDBOX_CONF}")) {
+      } else if ("${HERON_SANDBOX_CONF}".equals(elem)) {
         list.set(i, Context.heronSandboxConf(config));
 
-      } else if (elem.equals("${HERON_SANDBOX_LIB}")) {
+      } else if ("${HERON_SANDBOX_LIB}".equals(elem)) {
         list.set(i, Context.heronSandboxLib(config));
 
-      } else if (elem.equals("${CLUSTER}")) {
+      } else if ("${CLUSTER}".equals(elem)) {
         list.set(i, Context.cluster(config));
 
-      } else if (elem.equals("${ROLE}")) {
+      } else if ("${ROLE}".equals(elem)) {
         list.set(i, Context.role(config));
 
-      } else if (elem.equals("${TOPOLOGY}")) {
+      } else if ("${TOPOLOGY}".equals(elem)) {
         list.set(i, Context.topologyName(config));
       }
     }
