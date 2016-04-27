@@ -9,7 +9,6 @@ java_toolchain(
     target_version = "7",
     misc = [
         "-extra_checks:on",
-        "-Xlint",
     ],
 )
 
