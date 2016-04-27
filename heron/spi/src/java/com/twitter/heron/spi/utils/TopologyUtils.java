@@ -36,8 +36,11 @@ import com.twitter.heron.spi.common.PackingPlan;
 /**
  * Utility to process TopologyAPI.Topology proto
  */
-public class TopologyUtils {
+public final class TopologyUtils {
   private static final Logger LOG = Logger.getLogger(TopologyUtils.class.getName());
+
+  private TopologyUtils() {
+  }
 
   public static TopologyAPI.Topology getTopology(String topologyDefnFile) {
     try {
@@ -111,6 +114,9 @@ public class TopologyUtils {
     return numInstances;
   }
 
+  /**
+   * Verify if the given topology has all the necessary information
+   */
   public static boolean verifyTopology(TopologyAPI.Topology topology) {
     if (!topology.hasName() || topology.getName().isEmpty()) {
       LOG.severe("Missing topology name");
