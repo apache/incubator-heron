@@ -126,7 +126,7 @@ public class TopologyUtilsTest {
     bolts.put("bolt", componentParallelism);
     long defaultValue = 1 * Constants.GB;
 
-    // for sorting
+    // sort the component ram map
     Map<String, Long> ramMap = new TreeMap<>(TopologyUtils.getComponentRamMap(
         TopologyTests.createTopology("test", topologyConfig, spouts, bolts), defaultValue));
     Assert.assertArrayEquals(new String[]{"bolt", "spout"}, ramMap.keySet().toArray());
@@ -165,7 +165,7 @@ public class TopologyUtilsTest {
     long spoutRam = 2 * Constants.GB;
     topologyConfig.setComponentRam("spout", spoutRam);
 
-    // sort th component ram map
+    // sort the component ram map
     Map<String, Long> ramMap = new TreeMap<>(TopologyUtils.getComponentRamMap(
         TopologyTests.createTopology("test", topologyConfig, spouts, bolts), defaultValue));
     Assert.assertArrayEquals(new String[]{"bolt", "spout"}, ramMap.keySet().toArray());
