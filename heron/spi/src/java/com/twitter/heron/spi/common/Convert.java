@@ -17,11 +17,14 @@ package com.twitter.heron.spi.common;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-public class Convert {
+public final class Convert {
+
+  private Convert() {
+  }
 
   public static Integer getInteger(Object o) {
     if (o instanceof Integer) {
-      return ((Integer) o);
+      return (Integer) o;
     } else if (o instanceof Long) {
       return new Integer(((Long) o).intValue());
     } else if (o instanceof Short) {
@@ -37,7 +40,7 @@ public class Convert {
 
   public static Long getLong(Object o) {
     if (o instanceof Long) {
-      return ((Long) o);
+      return (Long) o;
     } else if (o instanceof Integer) {
       return new Long(((Integer) o).longValue());
     } else if (o instanceof Short) {
@@ -53,7 +56,7 @@ public class Convert {
 
   public static Double getDouble(Object o) {
     if (o instanceof Double) {
-      return ((Double) o);
+      return (Double) o;
     } else if (o instanceof Float) {
       return new Double(((Float) o).doubleValue());
     } else if (o instanceof Long) {
@@ -73,7 +76,7 @@ public class Convert {
 
   public static Boolean getBoolean(Object o) {
     if (o instanceof Boolean) {
-      return ((Boolean) o);
+      return (Boolean) o;
     } else if (o instanceof String) {
       return Boolean.valueOf((String) o);
     } else {

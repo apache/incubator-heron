@@ -23,7 +23,7 @@ import com.twitter.heron.proto.system.Common;
 /**
  * Utilities related to network.
  */
-public class NetworkUtils {
+public final class NetworkUtils {
   private static final Logger LOG = Logger.getLogger(NetworkUtils.class.getName());
 
   private NetworkUtils() {

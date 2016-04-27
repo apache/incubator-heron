@@ -23,7 +23,7 @@ import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
-public class Runtime {
+public final class Runtime {
 
   private Runtime() {
   }

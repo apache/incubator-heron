@@ -22,10 +22,11 @@ import java.util.TreeMap;
 /**
  * Config is an Immutable Map of <String, Object>
  */
+// SUPPRESS CHECKSTYLE
 public class Config {
   private final Map<String, Object> cfgMap = new HashMap();
 
-  private Config(Builder build) {
+  protected Config(Builder build) {
     cfgMap.putAll(build.keyValues);
   }
 
@@ -38,8 +39,8 @@ public class Config {
     for (String key : config.getKeySet()) {
       Object value = config.get(key);
       if (value instanceof String) {
-        String expanded_value = Misc.substitute(config, (String) value);
-        cb.put(key, expanded_value);
+        String expandedValue = Misc.substitute(config, (String) value);
+        cb.put(key, expandedValue);
       } else {
         cb.put(key, value);
       }
