@@ -121,6 +121,9 @@ public class StreamExecutor implements Runnable {
     looper.addTasksOnWakeup(streamExecutorsTasks);
   }
 
+  /**
+   *  Handle the execution of the instance
+   */
   public void handleInstanceExecutor() {
     for (InstanceExecutor executor : taskIdToInstanceExecutor.values()) {
       boolean isLocalSpout = spoutSets.contains(executor.getComponentName());
@@ -275,7 +278,8 @@ public class StreamExecutor implements Runnable {
         if (xorManager.remove(taskId, rootId.getKey())) {
           // This tuple tree is failed
 
-          HeronTuples.AckTuple.Builder f = out.getSetBuilder().getControlBuilder().addFailsBuilder();
+          HeronTuples.AckTuple.Builder f =
+              out.getSetBuilder().getControlBuilder().addFailsBuilder();
           HeronTuples.RootId.Builder r = f.addRootsBuilder();
 
           r.setKey(rootId.getKey());

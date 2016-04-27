@@ -90,8 +90,8 @@ public class LocalMode {
   /**
    * Register the given system config
    */
-  protected void registerSystemConfig(SystemConfig systemConfig) {
-    SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, systemConfig);
+  protected void registerSystemConfig(SystemConfig sysConfig) {
+    SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, sysConfig);
   }
 
   public void submitTopology(String name, Config heronConfig, HeronTopology heronTopology) {
@@ -179,18 +179,18 @@ public class LocalMode {
   }
 
   protected SystemConfig getSystemConfig() {
-    SystemConfig systemConfig = new SystemConfig();
-    systemConfig.put(SystemConfig.INSTANCE_SET_DATA_TUPLE_CAPACITY, 256);
-    systemConfig.put(SystemConfig.INSTANCE_SET_CONTROL_TUPLE_CAPACITY, 256);
-    systemConfig.put(SystemConfig.HERON_METRICS_EXPORT_INTERVAL_SEC, 60);
-    systemConfig.put(SystemConfig.INSTANCE_EXECUTE_BATCH_TIME_MS, 16);
-    systemConfig.put(SystemConfig.INSTANCE_EXECUTE_BATCH_SIZE_BYTES, 32768);
-    systemConfig.put(SystemConfig.INSTANCE_EMIT_BATCH_TIME_MS, 16);
-    systemConfig.put(SystemConfig.INSTANCE_EMIT_BATCH_SIZE_BYTES, 32768);
-    systemConfig.put(SystemConfig.INSTANCE_ACK_BATCH_TIME_MS, 128);
-    systemConfig.put(SystemConfig.INSTANCE_ACKNOWLEDGEMENT_NBUCKETS, 10);
+    SystemConfig sysConfig = new SystemConfig();
+    sysConfig.put(SystemConfig.INSTANCE_SET_DATA_TUPLE_CAPACITY, 256);
+    sysConfig.put(SystemConfig.INSTANCE_SET_CONTROL_TUPLE_CAPACITY, 256);
+    sysConfig.put(SystemConfig.HERON_METRICS_EXPORT_INTERVAL_SEC, 60);
+    sysConfig.put(SystemConfig.INSTANCE_EXECUTE_BATCH_TIME_MS, 16);
+    sysConfig.put(SystemConfig.INSTANCE_EXECUTE_BATCH_SIZE_BYTES, 32768);
+    sysConfig.put(SystemConfig.INSTANCE_EMIT_BATCH_TIME_MS, 16);
+    sysConfig.put(SystemConfig.INSTANCE_EMIT_BATCH_SIZE_BYTES, 32768);
+    sysConfig.put(SystemConfig.INSTANCE_ACK_BATCH_TIME_MS, 128);
+    sysConfig.put(SystemConfig.INSTANCE_ACKNOWLEDGEMENT_NBUCKETS, 10);
 
-    return systemConfig;
+    return sysConfig;
   }
 
   /**
