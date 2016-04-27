@@ -62,9 +62,6 @@ public final class MultiSpoutExclamationTopology {
       conf.setNumStmgrs(1);
       StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
     } else {
-      // TODO:- This is not yet supported
-      // System.out.println("Local mode not yet supported");
-      // System.exit(1);
       LocalCluster cluster = new LocalCluster();
       cluster.submitTopology("test", conf, builder.createTopology());
       Utils.sleep(10000);
