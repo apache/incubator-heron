@@ -42,7 +42,11 @@ import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 import backtype.storm.utils.Utils;
 
-public class TaskHookTopology {
+public final class TaskHookTopology {
+
+  private TaskHookTopology() {
+  }
+
   public static void main(String[] args) throws Exception {
     if (args.length != 1) {
       throw new RuntimeException("Specify topology name");
@@ -179,20 +183,21 @@ public class TaskHookTopology {
   }
 
   public static class AckingTestWordSpout extends BaseRichSpout {
-    SpoutOutputCollector _collector;
-    String[] words;
-    Random rand;
+    private SpoutOutputCollector collector;
+    private String[] words;
+    private Random rand;
 
     public AckingTestWordSpout() {
     }
 
-    public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
-      _collector = collector;
+    public void open(Map conf, TopologyContext context, SpoutOutputCollector aCollector) {
+      collector = aCollector;
       words = new String[]{"nathan", "mike", "jackson", "golda", "bertels"};
       rand = new Random();
 
       // Add task hook dynamically
-      context.addTaskHook(new TestTaskHook("This TestTaskHook is constructed by AckingTestWordSpout"));
+      context.addTaskHook(
+          new TestTaskHook("This TestTaskHook is constructed by AckingTestWordSpout"));
     }
 
     public void close() {
@@ -203,7 +208,7 @@ public class TaskHookTopology {
       Utils.sleep(1);
       final String word = words[rand.nextInt(words.length)];
       // To enable acking, we need to emit tuple with MessageId, which is an object
-      _collector.emit(new Values(word), word);
+      collector.emit(new Values(word), word);
     }
 
     public void ack(Object msgId) {
@@ -218,13 +223,13 @@ public class TaskHookTopology {
   }
 
   public static class CountBolt extends BaseRichBolt {
-    OutputCollector _collector;
-    long nItems;
-    long startTime;
+    private OutputCollector collector;
+    private long nItems;
+    private long startTime;
 
     @Override
-    public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
-      _collector = collector;
+    public void prepare(Map conf, TopologyContext context, OutputCollector aCollector) {
+      collector = aCollector;
       nItems = 0;
       startTime = System.currentTimeMillis();
 
@@ -236,9 +241,10 @@ public class TaskHookTopology {
     @Override
     public void execute(Tuple tuple) {
       // We need to ack a tuple when we consider it is done successfully
-      // Or we could fail it by invoking _collector.fail(tuple)
+      // Or we could fail it by invoking collector.fail(tuple)
       // If we do not do the ack or fail explicitly
-      // After the MessageTimeout Seconds, which could be set in Config, the spout will fail this tuple
+      // After the MessageTimeout Seconds, which could be set in Config, the spout will
+      // fail this tuple
       ++nItems;
       if (nItems % 10000 == 0) {
         long latency = System.currentTimeMillis() - startTime;
@@ -247,9 +253,9 @@ public class TaskHookTopology {
         // Here we explicitly forget to do the ack or fail
         // It would trigger fail on this tuple on spout end after MessageTimeout Seconds
       } else if (nItems % 2 == 0) {
-        _collector.fail(tuple);
+        collector.fail(tuple);
       } else {
-        _collector.ack(tuple);
+        collector.ack(tuple);
       }
     }
 

@@ -35,7 +35,11 @@ import backtype.storm.utils.Utils;
 /**
  * This is three stage topology. Spout emits to bolt to bolt.
  */
-public class MultiStageAckingTopology {
+public final class MultiStageAckingTopology {
+
+  private MultiStageAckingTopology() {
+  }
+
   public static void main(String[] args) throws Exception {
     if (args.length != 1) {
       throw new RuntimeException("Please specify the name of the topology");
@@ -50,25 +54,28 @@ public class MultiStageAckingTopology {
 
     Config conf = new Config();
     conf.setDebug(true);
+
     // Put an arbitrary large number here if you don't want to slow the topology down
     conf.setMaxSpoutPending(1000 * 1000 * 1000);
+
     // To enable acking, we need to setEnableAcking true
     conf.setEnableAcking(true);
+
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
     conf.setNumStmgrs(1);
     StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
   }
 
   public static class AckingTestWordSpout extends BaseRichSpout {
-    SpoutOutputCollector _collector;
-    String[] words;
-    Random rand;
+    private SpoutOutputCollector collector;
+    private String[] words;
+    private Random rand;
 
     public AckingTestWordSpout() {
     }
 
-    public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
-      _collector = collector;
+    public void open(Map conf, TopologyContext context, SpoutOutputCollector aCollector) {
+      collector = aCollector;
       words = new String[]{"nathan", "mike", "jackson", "golda", "bertels"};
       rand = new Random();
     }
@@ -81,7 +88,7 @@ public class MultiStageAckingTopology {
       Utils.sleep(1);
       final String word = words[rand.nextInt(words.length)];
       // To enable acking, we need to emit tuple with MessageId, which is an object
-      _collector.emit(new Values(word), "MESSAGE_ID");
+      collector.emit(new Values(word), "MESSAGE_ID");
     }
 
     public void ack(Object msgId) {
@@ -96,18 +103,18 @@ public class MultiStageAckingTopology {
   }
 
   public static class ExclamationBolt extends BaseRichBolt {
-    OutputCollector _collector;
-    long nItems;
-    long startTime;
-    boolean emit;
+    private OutputCollector collector;
+    private long nItems;
+    private long startTime;
+    private boolean emit;
 
     public ExclamationBolt(boolean emit) {
       this.emit = emit;
     }
 
     @Override
-    public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
-      _collector = collector;
+    public void prepare(Map conf, TopologyContext context, OutputCollector aCollector) {
+      collector = aCollector;
       nItems = 0;
       startTime = System.currentTimeMillis();
     }
@@ -115,9 +122,10 @@ public class MultiStageAckingTopology {
     @Override
     public void execute(Tuple tuple) {
       // We need to ack a tuple when we consider it is done successfully
-      // Or we could fail it by invoking _collector.fail(tuple)
+      // Or we could fail it by invoking collector.fail(tuple)
       // If we do not do the ack or fail explicitly
-      // After the MessageTimeout Seconds, which could be set in Config, the spout will fail this tuple
+      // After the MessageTimeout Seconds, which could be set in Config,
+      // the spout will fail this tuple
       ++nItems;
       if (nItems % 10000 == 0) {
         long latency = System.currentTimeMillis() - startTime;
@@ -125,9 +133,9 @@ public class MultiStageAckingTopology {
         GlobalMetrics.incr("selected_items");
       }
       if (emit) {
-        _collector.emit(tuple, new Values(tuple.getString(0) + "!!!"));
+        collector.emit(tuple, new Values(tuple.getString(0) + "!!!"));
       }
-      _collector.ack(tuple);
+      collector.ack(tuple);
     }
 
     @Override

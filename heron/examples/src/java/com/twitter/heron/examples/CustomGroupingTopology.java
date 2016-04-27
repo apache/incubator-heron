@@ -33,7 +33,11 @@ import backtype.storm.tuple.Tuple;
 /**
  * This is a basic example of a Storm topology.
  */
-public class CustomGroupingTopology {
+public final class CustomGroupingTopology {
+
+  private CustomGroupingTopology() {
+  }
+
   public static void main(String[] args) throws Exception {
     TopologyBuilder builder = new TopologyBuilder();
 
@@ -74,7 +78,10 @@ public class CustomGroupingTopology {
     }
 
     @Override
-    public void prepare(WorkerTopologyContext context, GlobalStreamId stream, List<Integer> targetTasks) {
+    public void prepare(
+        WorkerTopologyContext context,
+        GlobalStreamId stream,
+        List<Integer> targetTasks) {
       this.taskIds = targetTasks;
     }
 
