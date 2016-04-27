@@ -39,6 +39,7 @@ function get_heron_python_paths() {
 
 function get_heron_thirdparty_dependencies() {
   echo "$(find {bazel-genfiles/external,bazel-bin/3rdparty/java/bazel}/. -name "*jar" | sort -u)";
+  echo "$(find 3rdparty -name "*.jar" | sort -u)";
 }
 function get_heron_bazel_deps(){
   local bazel_third_party_base="$(bazel info output_base)/external/bazel_tools/third_party/";
