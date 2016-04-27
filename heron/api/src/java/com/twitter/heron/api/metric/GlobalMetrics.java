@@ -63,9 +63,6 @@ public enum GlobalMetrics implements Serializable {
 
   /**
    * Thread safe created increment of counterName. (Slow)
-   *
-   * TODO - this seems to be a bug since incrValue parameter is not being used
-   * Tracking Issue - https://github.com/twitter/heron/issues/459
    */
   public static void safeIncrBy(String counterName, int incrValue) {
     synchronized (INSTANCE) {
