@@ -19,10 +19,8 @@
 
 #include "basics/sptypes.h"
 
-class RandUtils
-{
+class RandUtils {
  public:
-
   //! get a long random number
   static sp_int64 lrand();
 };

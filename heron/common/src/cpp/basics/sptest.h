@@ -23,11 +23,12 @@
 #if !defined(HERON_TEST_H_)
 #define HERON_TEST_H_
 
-namespace heron { namespace common {
+namespace heron {
+namespace common {
 
 // Heron initialize - for unit tests
 void TestInitialize(const char* argv0);
+}  // namespace common
+}  // namespace heron
 
-}} // namespace
-
-#endif // HERON_TEST_H_
+#endif  // HERON_TEST_H_

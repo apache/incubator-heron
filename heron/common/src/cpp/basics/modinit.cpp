@@ -22,10 +22,6 @@
 
 #include "basics/modinit.h"
 
-__nifty_basics_modinit::__nifty_basics_modinit()
-{
-}
+__nifty_basics_modinit::__nifty_basics_modinit() {}
 
-__nifty_basics_modinit::~__nifty_basics_modinit()
-{
-}
+__nifty_basics_modinit::~__nifty_basics_modinit() {}

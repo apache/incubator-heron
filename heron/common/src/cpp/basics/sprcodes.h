@@ -28,8 +28,8 @@
  */
 enum {
   SP_NOTOK = -1,
-  SP_OK    = 0,
-  SP_DONE  = 1,
+  SP_OK = 0,
+  SP_DONE = 1,
 };
 
 #endif

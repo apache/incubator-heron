@@ -15,11 +15,9 @@
  */
 
 #include "basics/randutils.h"
-#include "stdlib.h"
+#include <stdlib.h>
 
-sp_int64
-RandUtils::lrand()
-{
+sp_int64 RandUtils::lrand() {
   sp_int64 retval = static_cast<sp_int64>(rand());
   return retval << (sizeof(int) * 8) | rand();
 }

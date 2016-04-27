@@ -19,21 +19,11 @@
 #include <unistd.h>
 #include <gperftools/malloc_extension.h>
 
-pid_t
-ProcessUtils::getPid()
-{
-  return ::getpid();
-}
+pid_t ProcessUtils::getPid() { return ::getpid(); }
 
-int
-ProcessUtils::getResourceUsage(struct rusage *usage)
-{
-  return ::getrusage(RUSAGE_SELF, usage);
-}
+int ProcessUtils::getResourceUsage(struct rusage *usage) { return ::getrusage(RUSAGE_SELF, usage); }
 
-size_t
-ProcessUtils::getTotalMemoryUsed()
-{
+size_t ProcessUtils::getTotalMemoryUsed() {
   size_t total;
   MallocExtension::instance()->GetNumericProperty("generic.heap_size", &total);
   return total;

@@ -23,19 +23,19 @@
 #if !defined(HERON_CONSTS_H_)
 #define HERON_CONSTS_H_
 
-// constants related to logs 
-constexpr auto  constMaxNumLogFiles         = 5;
-constexpr auto  constLogsDirectory          = "log-files";
-constexpr auto  constTestLogsDirectory      = ".";
+// constants related to logs
+constexpr auto constMaxNumLogFiles = 5;
+constexpr auto constLogsDirectory = "log-files";
+constexpr auto constTestLogsDirectory = ".";
 
 // constants for files and directories
-constexpr auto  constCurrentDirectory       = ".";
-constexpr auto  constParentDirectory        = "..";
-constexpr auto  constPathSeparator          = "/";
+constexpr auto constCurrentDirectory = ".";
+constexpr auto constParentDirectory = "..";
+constexpr auto constPathSeparator = "/";
 
 // constants for socket utilities
-constexpr auto  constTcpKeepAliveSecs = 300; // 5 min
-constexpr auto  constTcpKeepAliveProbeInterval = 10; // 10 seconds
-constexpr auto  constTcpKeepAliveProbes = 5;
+constexpr auto constTcpKeepAliveSecs = 300;          // 5 min
+constexpr auto constTcpKeepAliveProbeInterval = 10;  // 10 seconds
+constexpr auto constTcpKeepAliveProbes = 5;
 
 #endif

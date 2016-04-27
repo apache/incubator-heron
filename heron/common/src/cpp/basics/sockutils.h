@@ -19,10 +19,8 @@
 
 #include "basics/sptypes.h"
 
-class SockUtils
-{
+class SockUtils {
  public:
-
   //! Set socket non blocking
   static sp_int32 setNonBlocking(sp_int32 fd);
 
@@ -50,12 +48,7 @@ class SockUtils
   static sp_int32 setKeepIdleInterval(sp_int32 fd, sp_int32 interval);
 
   //! Set socket keep interval
-  static sp_int32 setKeepIdleParams(
-    sp_int32                  fd,
-    sp_int32                  time,
-    sp_int32                  count,
-    sp_int32                  interval
-  );
+  static sp_int32 setKeepIdleParams(sp_int32 fd, sp_int32 time, sp_int32 count, sp_int32 interval);
 
   //! disable nagle's algo
   static sp_int32 setTcpNoDelay(sp_int32 fd);

@@ -23,13 +23,12 @@
 #if !defined(HERON_FILE_UTILS_H_)
 #define HERON_FILE_UTILS_H_
 
+#include <string>
 #include <vector>
 #include "basics/sptypes.h"
 
-class FileUtils
-{
+class FileUtils {
  public:
-
   //! get the basename of the given file
   static std::string baseName(const std::string& path);
 
@@ -43,10 +42,7 @@ class FileUtils
   static sp_int32 removeRecursive(const std::string& dir, bool delete_self);
 
   //! lists all the files in a directory
-  static sp_int32 listFiles(
-    const std::string&            dir, 
-    std::vector<std::string>&     files
-  );
+  static sp_int32 listFiles(const std::string& dir, std::vector<std::string>& files);
 
   //! reads all contents of the file and return it
   static std::string readAll(const std::string& filename);
@@ -58,11 +54,7 @@ class FileUtils
   static bool is_symlink(const std::string& filepath);
 
   //! write the contents of a string into the file
-  static bool writeAll(
-    const std::string&     filename,
-    const char*            data, 
-    size_t                 len
-  );
+  static bool writeAll(const std::string& filename, const char* data, size_t len);
 
   //! get the current working directory
   static sp_int32 getCwd(std::string& path);
