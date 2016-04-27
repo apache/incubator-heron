@@ -26,6 +26,7 @@ cat > $iml_file <<EOH
     <output url="file://\$MODULE_DIR\$/out" />
 EOH
 
+# Find all top-level dirs that should be parsed for possible source/tests
 for content_dir in `find . -maxdepth 1 -type d -path './[^.]*' | cut -d '/' -f 2 | grep -v out`; do
 
   if [ "$content_dir" == "heron" ]; then
