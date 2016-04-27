@@ -22,7 +22,8 @@ import java.util.TreeMap;
 /**
  * Config is an Immutable Map of <String, Object>
  */
-public final class Config {
+// SUPPRESS CHECKSTYLE
+public class Config {
   private final Map<String, Object> cfgMap = new HashMap();
 
   private Config(Builder build) {
