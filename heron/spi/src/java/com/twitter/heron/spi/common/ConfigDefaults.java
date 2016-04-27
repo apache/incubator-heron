@@ -31,7 +31,7 @@ public final class ConfigDefaults {
           Constants.DEFAULTS_YAML);
     } catch (ClassNotFoundException e) {
       LOG.severe("Unable to load the defaults class " + e);
-      throw RuntimeException("Failed to load the ConfigDefaults class");
+      throw new RuntimeException("Failed to load the ConfigDefaults class");
     }
   }
 
