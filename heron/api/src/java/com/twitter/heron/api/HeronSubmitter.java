@@ -17,6 +17,7 @@ package com.twitter.heron.api;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -94,7 +95,7 @@ public final class HeronSubmitter {
       bos.write(topEncoding);
       bos.flush();
       bos.close();
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new RuntimeException("Error writing topology defn to temp directory " + dirName);
     }
   }
