@@ -23,27 +23,26 @@
 #if !defined(__RID_GEN_H)
 #define __RID_GEN_H
 
+#include <string>
 #include <vector>
 #include "basics/sptypes.h"
 
 const sp_uint32 REQID_size = 32;
 
-class REQID
-{
+class REQID {
  public:
-
   //! Constructors
-  REQID() : id_(REQID_size, 0) { }
+  REQID() : id_(REQID_size, 0) {}
 
   //! Destructors
-  ~REQID() { };
+  ~REQID(){};
 
   //! Overload the assignment operators
-  REQID& operator = (const REQID& _reqid)
-  {
-    id_ = _reqid.id_; return *this;
+  REQID& operator=(const REQID& _reqid) {
+    id_ = _reqid.id_;
+    return *this;
   }
-  void assign (const std::string& _id);
+  void assign(const std::string& _id);
 
   //! Get the underlying string representation
   const std::string& str() const { return id_; }
@@ -58,45 +57,37 @@ class REQID
   static sp_uint32 length() { return REQID_size; }
 
  private:
-
   //! Private constructor used by generator
-  REQID(const std::string& _id) : id_(_id.c_str(), length()) { }
+  explicit REQID(const std::string& _id) : id_(_id.c_str(), length()) {}
 
   //! Underlying representation of request ID
-  std::string          id_;
+  std::string id_;
 
-  friend bool operator == (const REQID& lhs, const REQID& rhs);
-  friend bool operator != (const REQID& lhs, const REQID& rhs);
-  friend std::ostream& operator << (std::ostream& _os, const REQID& _reqid);
+  friend bool operator==(const REQID& lhs, const REQID& rhs);
+  friend bool operator!=(const REQID& lhs, const REQID& rhs);
+  friend std::ostream& operator<<(std::ostream& _os, const REQID& _reqid);
 
   friend class REQID_Generator;
 };
 
-typedef std::vector<REQID>        REQID_Vector;
-typedef REQID_Vector::iterator    REQID_Vector_Iterator;
+typedef std::vector<REQID> REQID_Vector;
+typedef REQID_Vector::iterator REQID_Vector_Iterator;
 
-inline bool 
-operator == (const REQID& lhs, const REQID& rhs)
-{
+inline bool operator==(const REQID& lhs, const REQID& rhs) {
   return lhs.id_ == rhs.id_ ? true : false;
 }
 
-inline bool 
-operator != (const REQID& lhs, const REQID& rhs)
-{
+inline bool operator!=(const REQID& lhs, const REQID& rhs) {
   return lhs.id_ != rhs.id_ ? true : false;
 }
 
-inline std::ostream& 
-operator << (std::ostream& _os, const REQID& _reqid)
-{
-  _os << _reqid.id_ ; return _os;
+inline std::ostream& operator<<(std::ostream& _os, const REQID& _reqid) {
+  _os << _reqid.id_;
+  return _os;
 }
 
-class REQID_Generator
-{
+class REQID_Generator {
  public:
-
   //! Constructor that uses underlying UUID library
   REQID_Generator();
 
@@ -104,14 +95,13 @@ class REQID_Generator
   ~REQID_Generator();
 
   //! Generate a request ID
-  REQID generate() ;
+  REQID generate();
 
   //! Return a zero REQID
   static REQID generate_zero_reqid();
 
  private:
-
-  void*                 rands_;          //! Random stream
+  void* rands_;  //! Random stream
 };
 
 #endif

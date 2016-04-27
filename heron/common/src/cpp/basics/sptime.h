@@ -33,22 +33,15 @@ extern "C" {
 #define USE_POSIX_TIME
 #endif
 
-
-#define	NS_SECOND	1000000000	/* nanoseconds in a second */
-#define	US_SECOND	1000000	        /* microseconds in a second */
-#define	MS_SECOND	1000	        /* millisecs in a second */
+#define NS_SECOND 1000000000 /* nanoseconds in a second */
+#define US_SECOND 1000000    /* microseconds in a second */
+#define MS_SECOND 1000       /* millisecs in a second */
 
 class sp_time {
  public:
-  enum Unit {
-     NOTIMEUNIT,
-     SECOND,
-     MINUTE,
-     HOUR,
-     DAY
-   };
- protected:
+  enum Unit { NOTIMEUNIT, SECOND, MINUTE, HOUR, DAY };
 
+ protected:
 #ifdef USE_POSIX_TIME
   struct timespec time_;
 #else
@@ -63,12 +56,10 @@ class sp_time {
   void normalize();
 
   /* only good INSIDE, since workings exposed if public */
-  sp_time(time_t, sp_int64);		/* time-of-day, hr-secs */
+  sp_time(time_t, sp_int64); /* time-of-day, hr-secs */
 
-public:
-  sp_time() {
-    reset();
-  }
+ public:
+  sp_time() { reset(); }
   void reset() {
     time_.tv_sec = 0;
 #ifdef USE_POSIX_TIME
@@ -78,18 +69,18 @@ public:
 #endif
   }
 
-  sp_time(const struct timeval &tv);
+  explicit sp_time(const struct timeval &tv);
 
 #ifdef USE_POSIX_TIME
-  sp_time(const struct timespec &ts);
+  explicit sp_time(const struct timespec &ts);
 #endif
 
   // an interval in seconds.
-  sp_time(sp_int32);
-  sp_time(sp_int64);
+  explicit sp_time(sp_int32);
+  explicit sp_time(sp_int64);
 
   // an interval in floating point seconds
-  sp_time(sp_double64);
+  explicit sp_time(sp_double64);
 
   /* comparison primitives */
   bool operator==(const sp_time &) const;
@@ -127,10 +118,10 @@ public:
 
   /* XXX really belongs in Time_Interval */
   /* simple output conversions for integers to eliminate fp */
-  sp_int64 secs() const;		/* seconds */
-  sp_int64 msecs() const;		/* milli seconds */
-  sp_int64 usecs() const;		/* micro seconds */
-  sp_int64 nsecs() const;		/* nano seconds */
+  sp_int64 secs() const;  /* seconds */
+  sp_int64 msecs() const; /* milli seconds */
+  sp_int64 usecs() const; /* micro seconds */
+  sp_int64 nsecs() const; /* nano seconds */
 
   /* input conversion operators for integral types */
   static sp_time sec(sp_int32 seconds);
@@ -145,9 +136,8 @@ public:
   static sp_time range(sp_int32 len, Unit unit);
 
   std::ostream &print(std::ostream &s) const;
-  std::ostream &ctime(std::ostream &s) const;
+  std::ostream &ctime_r(std::ostream &s) const;
 };
-
 
 /*
  * Intervals are different, in some ways, from absolute times. For now,
@@ -159,17 +149,17 @@ class sp_time_interval : public sp_time {
   /* XXX why do I duplicate the constructors ???  There
    * is or was a reason for it. */
 
-  sp_time_interval() : sp_time() { }
-  sp_time_interval(const struct timeval &tv) : sp_time(tv) { }
+  sp_time_interval() : sp_time() {}
+  explicit sp_time_interval(const struct timeval &tv) : sp_time(tv) {}
 
 #ifdef USE_POSIX_TIME
-  sp_time_interval(const struct timespec &ts) : sp_time(ts) { }
+  explicit sp_time_interval(const struct timespec &ts) : sp_time(ts) {}
 #endif
 
-  sp_time_interval(const sp_time &time) : sp_time(time) { }
-  sp_time_interval(sp_int32 time) : sp_time(time) { }
-  sp_time_interval(sp_int64 time) : sp_time(time) { }
-  sp_time_interval(sp_double64 time) : sp_time(time) { }
+  explicit sp_time_interval(const sp_time &time) : sp_time(time) {}
+  explicit sp_time_interval(sp_int32 time) : sp_time(time) {}
+  explicit sp_time_interval(sp_int64 time) : sp_time(time) {}
+  explicit sp_time_interval(sp_double64 time) : sp_time(time) {}
 
   std::ostream &print(std::ostream &s) const;
 };
