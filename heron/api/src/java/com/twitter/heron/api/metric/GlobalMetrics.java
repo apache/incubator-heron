@@ -64,10 +64,10 @@ public enum GlobalMetrics implements Serializable {
   /**
    * Thread safe created increment of counterName. (Slow)
    */
-  public static void safeIncrBy(String counterName, int N) {
+  public static void safeIncrBy(String counterName, int incrValue) {
     synchronized (INSTANCE) {
       if (INSTANCE.registered) {
-        INSTANCE.metricsContainer.scope(counterName);
+        INSTANCE.metricsContainer.scope(counterName).incrBy(incrValue);
       }
     }
   }
