@@ -23,7 +23,8 @@ import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.utils.Utils;
 
-public abstract class BaseComponentDeclarer<T extends ComponentConfigurationDeclarer> extends BaseConfigurationDeclarer<T> {
+public abstract class BaseComponentDeclarer<T extends ComponentConfigurationDeclarer>
+    extends BaseConfigurationDeclarer<T> {
   private String name;
   private IComponent component;
   private OutputFieldsGetter output;

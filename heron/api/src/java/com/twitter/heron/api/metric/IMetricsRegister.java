@@ -23,5 +23,5 @@ public interface IMetricsRegister {
  * You must call this during IBolt::prepare or ISpout::open.
  * @return The IMetric argument unchanged.
  */
-  public <T extends IMetric> T registerMetric(String name, T metric, int timeBucketSizeInSecs);
+  <T extends IMetric> T registerMetric(String name, T metric, int timeBucketSizeInSecs);
 }

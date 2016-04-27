@@ -15,7 +15,7 @@
 package com.twitter.heron.api.metric;
 
 public interface ICombiner<T> {
-  public T identity();
+  T identity();
 
-  public T combine(T a, T b);
+  T combine(T a, T b);
 }

@@ -310,7 +310,7 @@ public class Config extends HashMap<String, Object> {
     }
     // Format for TOPOLOGY_COMPONENT_JVMOPTS would be a json map like this:
     //  {
-    //     "componentNameAInBase64": "jvmOptionsInBase64", 
+    //     "componentNameAInBase64": "jvmOptionsInBase64",
     //     "componentNameBInBase64": "jvmOptionsInBase64"
     //  }
     conf.put(Config.TOPOLOGY_COMPONENT_JVMOPTS, newEntry);

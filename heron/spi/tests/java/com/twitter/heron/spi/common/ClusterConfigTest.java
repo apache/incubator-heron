@@ -24,9 +24,9 @@ import org.junit.Test;
 public class ClusterConfigTest {
   private static final Logger LOG = Logger.getLogger(ClusterConfigTest.class.getName());
 
-  String heronHome;
-  String configPath;
-  Config basicConfig;
+  private String heronHome;
+  private String configPath;
+  private Config basicConfig;
 
   @Before
   public void setUp() {
@@ -41,6 +41,9 @@ public class ClusterConfigTest {
         .build();
   }
 
+  /**
+   * Test reading the cluster.yaml file
+   */
   @Test
   public void testClusterFile() throws Exception {
 
@@ -55,6 +58,9 @@ public class ClusterConfigTest {
 
   }
 
+  /**
+   * Test reading the defaults.yaml file
+   */
   @Test
   public void testDefaultsFile() throws Exception {
     Config props = ClusterConfig.loadDefaultsConfig(Context.defaultsFile(basicConfig));

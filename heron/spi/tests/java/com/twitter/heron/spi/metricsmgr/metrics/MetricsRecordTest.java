@@ -104,6 +104,4 @@ public class MetricsRecordTest {
       Assert.assertTrue(records.get(i).getContext().equals(CONTEXT + i));
     }
   }
-
-
-} 
+}

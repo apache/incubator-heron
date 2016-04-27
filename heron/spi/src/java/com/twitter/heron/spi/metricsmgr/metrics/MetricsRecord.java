@@ -94,6 +94,8 @@ public class MetricsRecord {
   }
 
   /**
+   * Get the context of the metrics record
+   *
    * @return the context name of the metrics record
    */
   public String getContext() {
@@ -103,13 +105,13 @@ public class MetricsRecord {
   @Override
   public String toString() {
     // Pack metrics as a map
-    Map<String, String> metrics = new HashMap<String, String>();
+    Map<String, String> metricsMap = new HashMap<String, String>();
     for (MetricsInfo metricsInfo : getMetrics()) {
-      metrics.put(metricsInfo.getName(), metricsInfo.getValue());
+      metricsMap.put(metricsInfo.getName(), metricsInfo.getValue());
     }
 
     // Pack exceptions as a list of map
-    LinkedList<Object> exceptions = new LinkedList<Object>();
+    LinkedList<Object> exceptionsList = new LinkedList<Object>();
     for (ExceptionInfo exceptionInfo : getExceptions()) {
       Map<String, Object> exception = new HashMap<String, Object>();
       exception.put("firstTime", exceptionInfo.getFirstTime());
@@ -117,7 +119,7 @@ public class MetricsRecord {
       exception.put("logging", exceptionInfo.getLogging());
       exception.put("stackTrace", exceptionInfo.getStackTrace());
       exception.put("count", exceptionInfo.getCount());
-      exceptions.add(exception);
+      exceptionsList.add(exception);
     }
 
     // Pack the whole MetricsRecord as a map
@@ -125,8 +127,8 @@ public class MetricsRecord {
     result.put("timestamp", getTimestamp());
     result.put("source", getSource());
     result.put("context", getContext());
-    result.put("metrics", metrics);
-    result.put("exceptions", exceptions);
+    result.put("metrics", metricsMap);
+    result.put("exceptions", exceptionsList);
 
     return result.toString();
   }
