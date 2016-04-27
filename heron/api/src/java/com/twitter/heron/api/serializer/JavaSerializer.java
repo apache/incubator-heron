@@ -46,7 +46,7 @@ public class JavaSerializer implements IPluggableSerializer {
     try {
       ObjectInputStream ois = new ObjectInputStream(bis);
       return ois.readObject();
-    } catch (Exception e) {
+    } catch (IOException | ClassNotFoundException e) {
       throw new RuntimeException(e);
     }
   }

@@ -14,6 +14,7 @@
 
 package com.twitter.heron.api;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -88,7 +89,7 @@ public class Config extends HashMap<String, Object> {
   /**
    * The maximum number of tuples that can be pending on a spout task at any given time.
    * This config applies to individual tasks, not to spouts or topologies as a whole.
-   * <p>
+   * <p/>
    * A pending tuple is one that has been emitted from a spout but has not been acked or failed yet.
    * Note that this config parameter has no effect for unreliable spouts that don't tag
    * their tuples with a message id.
@@ -292,12 +293,11 @@ public class Config extends HashMap<String, Object> {
   public static void setComponentJvmOptions(Map conf, String component, String jvmOptions) {
     String optsBase64;
     String componentBase64;
-    try {
-      optsBase64 = DatatypeConverter.printBase64Binary(jvmOptions.getBytes("UTF-8"));
-      componentBase64 = DatatypeConverter.printBase64Binary(component.getBytes("UTF-8"));
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+
+    optsBase64 = DatatypeConverter.printBase64Binary(
+        jvmOptions.getBytes(StandardCharsets.UTF_8));
+    componentBase64 = DatatypeConverter.printBase64Binary(
+        component.getBytes(StandardCharsets.UTF_8));
 
     String oldEntry = (String) conf.get(Config.TOPOLOGY_COMPONENT_JVMOPTS);
     String newEntry;
