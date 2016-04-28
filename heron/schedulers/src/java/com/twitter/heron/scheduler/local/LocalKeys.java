@@ -19,8 +19,12 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.spi.common.Resource;
 
-public class LocalKeys {
+public final class LocalKeys {
   private static final Logger LOG = Logger.getLogger(LocalKeys.class.getName());
+
+  private LocalKeys() {
+
+  }
 
   // holds the mapping of keys to their corresponding key strings
   private static Map keys;
@@ -31,8 +35,7 @@ public class LocalKeys {
       keys = Resource.load(
           "com.twitter.heron.scheduler.local.LocalKeys", LocalConstants.KEYS_YAML);
     } catch (ClassNotFoundException e) {
-      LOG.severe("Unable to load the config Keys class " + e);
-      System.exit(1);
+      throw new RuntimeException("Failed to load the config Keys class ", e);
     }
   }
 
