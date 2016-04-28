@@ -201,24 +201,29 @@ public class ConnectTest {
     Runnable r = new Runnable() {
       @Override
       public void run() {
-        SystemConfig systemConfig =
-            (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
-                SystemConfig.HERON_SYSTEM_CONFIG);
+        try {
+          SystemConfig systemConfig =
+              (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
+                  SystemConfig.HERON_SYSTEM_CONFIG);
 
-        HeronSocketOptions socketOptions = new HeronSocketOptions(
-            systemConfig.getInstanceNetworkWriteBatchSizeBytes(),
-            systemConfig.getInstanceNetworkWriteBatchTimeMs(),
-            systemConfig.getInstanceNetworkReadBatchSizeBytes(),
-            systemConfig.getInstanceNetworkReadBatchTimeMs(),
-            systemConfig.getInstanceNetworkOptionsSocketSendBufferSizeBytes(),
-            systemConfig.getInstanceNetworkOptionsSocketReceivedBufferSizeBytes()
-        );
+          HeronSocketOptions socketOptions = new HeronSocketOptions(
+              systemConfig.getInstanceNetworkWriteBatchSizeBytes(),
+              systemConfig.getInstanceNetworkWriteBatchTimeMs(),
+              systemConfig.getInstanceNetworkReadBatchSizeBytes(),
+              systemConfig.getInstanceNetworkReadBatchTimeMs(),
+              systemConfig.getInstanceNetworkOptionsSocketSendBufferSizeBytes(),
+              systemConfig.getInstanceNetworkOptionsSocketReceivedBufferSizeBytes()
+          );
 
-        streamManagerClient = new StreamManagerClient(nioLooper, HOST, serverPort,
-            "topology-name", "topologyId", UnitTestHelper.getInstance("bolt-id"),
-            inStreamQueue, outStreamQueue, inControlQueue, socketOptions, gatewayMetrics);
-        streamManagerClient.start();
-        nioLooper.loop();
+          streamManagerClient = new StreamManagerClient(nioLooper, HOST, serverPort,
+              "topology-name", "topologyId", UnitTestHelper.getInstance("bolt-id"),
+              inStreamQueue, outStreamQueue, inControlQueue, socketOptions, gatewayMetrics);
+          streamManagerClient.start();
+          nioLooper.loop();
+        } finally {
+          streamManagerClient.stop();
+          nioLooper.exitLoop();
+        }
       }
     };
     threadsPool.execute(r);
