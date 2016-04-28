@@ -88,9 +88,10 @@ public class SpoutOutputCollectorImpl implements ISpoutOutputCollector {
     inFlightTuples = new LinkedHashMap<Long, RootTupleInfo>();
 
     Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
-    if (config.containsKey(Config.TOPOLOGY_ENABLE_ACKING) &&
-        config.get(Config.TOPOLOGY_ENABLE_ACKING) != null) {
-      this.ackingEnabled = Boolean.parseBoolean(config.get(Config.TOPOLOGY_ENABLE_ACKING).toString());
+    if (config.containsKey(Config.TOPOLOGY_ENABLE_ACKING)
+        && config.get(Config.TOPOLOGY_ENABLE_ACKING) != null) {
+      this.ackingEnabled =
+          Boolean.parseBoolean(config.get(Config.TOPOLOGY_ENABLE_ACKING).toString());
     } else {
       this.ackingEnabled = false;
     }

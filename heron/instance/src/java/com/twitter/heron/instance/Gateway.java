@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.Communicator;
+import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.config.SystemConfig;
@@ -43,8 +44,8 @@ public class Gateway implements Runnable {
   private static final Logger LOG = Logger.getLogger(Gateway.class.getName());
 
   // Some pre-defined value
-  private static final String streamMgrHost = "127.0.0.1";
-  private static final String metricsMgrHost = "127.0.0.1";
+  private static final String STREAM_MGR_HOST = "127.0.0.1";
+  private static final String METRICS_MGR_HOST = "127.0.0.1";
 
   // MetricsManagerClient will communicate with Metrics Manager
   private final MetricsManagerClient metricsManagerClient;
@@ -60,6 +61,9 @@ public class Gateway implements Runnable {
 
   private final SystemConfig systemConfig;
 
+  /**
+   * Construct a Gateway basing on given arguments
+   */
   public Gateway(String topologyName, String topologyId, PhysicalPlans.Instance instance,
                  int streamPort, int metricsPort, final NIOLooper gatewayLooper,
                  final Communicator<HeronTuples.HeronTupleSet> inStreamQueue,
@@ -98,11 +102,11 @@ public class Gateway implements Runnable {
         systemConfig.getInstanceNetworkOptionsSocketReceivedBufferSizeBytes()
     );
     this.streamManagerClient =
-        new StreamManagerClient(gatewayLooper, streamMgrHost, streamPort,
+        new StreamManagerClient(gatewayLooper, STREAM_MGR_HOST, streamPort,
             topologyName, topologyId, instance,
             inStreamQueue, outStreamQueue, inControlQueue,
             socketOptions, gatewayMetrics);
-    this.metricsManagerClient = new MetricsManagerClient(gatewayLooper, metricsMgrHost,
+    this.metricsManagerClient = new MetricsManagerClient(gatewayLooper, METRICS_MGR_HOST,
         metricsPort, instance, outMetricsQueues, socketOptions, gatewayMetrics);
 
     // Attach sample Runnable to gatewayMetricsCollector
@@ -113,15 +117,17 @@ public class Gateway implements Runnable {
       public void run() {
         gatewayMetrics.setInStreamQueueSize(inStreamQueue.size());
         gatewayMetrics.setOutStreamQueueSize(outStreamQueue.size());
-        gatewayMetrics.setInStreamQueueExpectedCapacity(inStreamQueue.getExpectedAvailableCapacity());
-        gatewayMetrics.setOutStreamQueueExpectedCapacity(outStreamQueue.getExpectedAvailableCapacity());
+        gatewayMetrics.setInStreamQueueExpectedCapacity(
+            inStreamQueue.getExpectedAvailableCapacity());
+        gatewayMetrics.setOutStreamQueueExpectedCapacity(
+            outStreamQueue.getExpectedAvailableCapacity());
       }
     };
     gatewayMetricsCollector.registerMetricSampleRunnable(sampleStreamQueuesSize,
         systemConfig.getInstanceMetricsSystemSampleIntervalSec());
 
-    final long instanceTuningIntervalMs = systemConfig.getInstanceTuningIntervalMs() *
-        com.twitter.heron.common.basics.Constants.MILLISECONDS_TO_NANOSECONDS;
+    final long instanceTuningIntervalMs = systemConfig.getInstanceTuningIntervalMs()
+        * Constants.MILLISECONDS_TO_NANOSECONDS;
 
     // Attache Runnable to update the expected stream's expected available capacity
     Runnable tuningStreamQueueSize = new Runnable() {
@@ -134,7 +140,8 @@ public class Gateway implements Runnable {
         gatewayLooper.registerTimerEventInNanoSeconds(instanceTuningIntervalMs, this);
       }
     };
-    gatewayLooper.registerTimerEventInSeconds(systemConfig.getInstanceMetricsSystemSampleIntervalSec(),
+    gatewayLooper.registerTimerEventInSeconds(
+        systemConfig.getInstanceMetricsSystemSampleIntervalSec(),
         tuningStreamQueueSize);
   }
 

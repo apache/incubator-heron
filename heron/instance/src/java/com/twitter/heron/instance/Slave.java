@@ -14,6 +14,7 @@
 
 package com.twitter.heron.instance;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -116,14 +117,15 @@ public class Slave implements Runnable {
   }
 
   private void handleNewAssignment(PhysicalPlanHelper newHelper) {
-    LOG.info("Incarnating ourselves as " +
-        newHelper.getMyComponent() + " with task id " +
-        newHelper.getMyTaskId());
+    LOG.log(Level.INFO,
+        "Incarnating ourselves as {0} with task id {1}",
+        new Object[]{newHelper.getMyComponent(), newHelper.getMyTaskId()});
 
     // Bind the MetricsCollector with topologyContext
     newHelper.setTopologyContext(metricsCollector);
 
-    // During the initiation of instance, we would add a bunch of tasks to slaveLooper's tasksOnWakeup
+    // During the initiation of instance,
+    // we would add a bunch of tasks to slaveLooper's tasksOnWakeup
     if (newHelper.getMySpout() != null) {
       instance =
           new SpoutInstance(newHelper,
