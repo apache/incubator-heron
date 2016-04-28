@@ -215,6 +215,9 @@ public class SpoutInstanceTest {
     Assert.assertEquals(tupleReceived, 10);
   }
 
+  /**
+   * Test the gathering of metrics
+   */
   @Test
   public void testGatherMetrics() throws Exception {
     physicalPlan = UnitTestHelper.getPhysicalPlan(false, -1);

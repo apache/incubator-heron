@@ -146,7 +146,7 @@ public class ConnectTest {
 
   /**
    * Test connection
-   */ 
+   */
   @Test
   public void testStart() throws Exception {
     ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
