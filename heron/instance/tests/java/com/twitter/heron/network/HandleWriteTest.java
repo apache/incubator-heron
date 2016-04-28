@@ -33,6 +33,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
@@ -93,9 +94,11 @@ public class HandleWriteTest {
   }
 
   static void close(Closeable sc2) {
-    if (sc2 != null) try {
-      sc2.close();
-    } catch (IOException ignored) {
+    if (sc2 != null) {
+      try {
+        sc2.close();
+      } catch (IOException ignored) {
+      }
     }
   }
 
@@ -142,6 +145,9 @@ public class HandleWriteTest {
     threadsPool = null;
   }
 
+  /**
+   * Test write into network
+   */
   @Test
   public void testHandleWrite() throws Exception {
     ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
@@ -159,7 +165,7 @@ public class HandleWriteTest {
       // Receive request
       IncomingPacket incomingPacket = new IncomingPacket();
       while (incomingPacket.readFromChannel(socketChannel) != 0) {
-
+        Utils.sleep(1);
       }
 
       // Send back response
@@ -189,7 +195,7 @@ public class HandleWriteTest {
       for (int i = 0; i < 10; i++) {
         incomingPacket = new IncomingPacket();
         while (incomingPacket.readFromChannel(socketChannel) != 0) {
-
+          Utils.sleep(1);
         }
         typeName = incomingPacket.unpackString();
         rid = incomingPacket.unpackREQID();
@@ -205,7 +211,8 @@ public class HandleWriteTest {
         Assert.assertEquals(2, response.getPplan().getInstancesCount());
         Assert.assertEquals(1, response.getPplan().getTopology().getBoltsCount());
         Assert.assertEquals(1, response.getPplan().getTopology().getSpoutsCount());
-        Assert.assertEquals(TopologyAPI.TopologyState.RUNNING, response.getPplan().getTopology().getState());
+        Assert.assertEquals(TopologyAPI.TopologyState.RUNNING,
+            response.getPplan().getTopology().getState());
       }
 
       nioLooper.exitLoop();

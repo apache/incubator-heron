@@ -36,6 +36,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
@@ -95,9 +96,11 @@ public class HandleReadTest {
   }
 
   static void close(Closeable sc2) {
-    if (sc2 != null) try {
-      sc2.close();
-    } catch (IOException ignored) {
+    if (sc2 != null) {
+      try {
+        sc2.close();
+      } catch (IOException ignored) {
+      }
     }
   }
 
@@ -144,6 +147,9 @@ public class HandleReadTest {
     threadsPool = null;
   }
 
+  /**
+   * Test reading from network
+   */
   @Test
   public void testHandleRead() throws Exception {
     ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
@@ -161,7 +167,7 @@ public class HandleReadTest {
       // Receive request
       IncomingPacket incomingPacket = new IncomingPacket();
       while (incomingPacket.readFromChannel(socketChannel) != 0) {
-
+        Utils.sleep(1);
       }
 
       // Send back response

@@ -74,10 +74,14 @@ public class HeronInstance {
 
   private final SystemConfig systemConfig;
 
+  /**
+   * Heron instance constructor
+   */
   public HeronInstance(String topologyName, String topologyId,
                        PhysicalPlans.Instance instance, int streamPort, int metricsPort)
       throws IOException {
-    systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
+    systemConfig =
+        (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
     // Two WakeableLooper
     gatewayLooper = new NIOLooper();
@@ -124,7 +128,11 @@ public class HeronInstance {
 
   public static void main(String[] args) throws IOException {
     if (args.length < 10) {
-      throw new RuntimeException("Invalid arguments; Usage is java com.twitter.heron.instance.HeronInstance <topology_name> <topology_id> <instance_id> <component_name> <task_id> <component_index> <stmgr_id> <stmgr_port> <metricsmgr_port> <heron_internals_config_filename>");
+      throw new RuntimeException(
+          "Invalid arguments; Usage is java com.twitter.heron.instance.HeronInstance "
+          + "<topology_name> <topology_id> <instance_id> <component_name> <task_id> "
+          + "<component_index> <stmgr_id> <stmgr_port> <metricsmgr_port> "
+          + "<heron_internals_config_filename>");
     }
 
     String topologyName = args[0];
@@ -210,8 +218,9 @@ public class HeronInstance {
    */
   public class DefaultExceptionHandler implements Thread.UncaughtExceptionHandler {
     public void uncaughtException(Thread thread, Throwable exception) {
-      LOG.log(Level.SEVERE, "Exception caught in thread: " + thread.getName() + " with id: " + thread.getId(),
-          exception);
+      LOG.log(Level.SEVERE, "Exception caught in thread: {0} with id: {1} {2}",
+          new Object[] {thread.getName(), thread.getId(), exception});
+
       // CountDownLatch to notify ForceExitTask whether exit is done
       final CountDownLatch exited = new CountDownLatch(1);
       final ExecutorService exitExecutor = Executors.newSingleThreadExecutor();
@@ -231,7 +240,8 @@ public class HeronInstance {
         new GatewayExitTask().run();
       }
 
-      // This notifies the ForceExitTask that the task is finished so that it is not halted forcibly.
+      // This notifies the ForceExitTask that the task is finished so that
+      // it is not halted forcibly.
       exited.countDown();
     }
   }

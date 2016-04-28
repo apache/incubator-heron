@@ -20,7 +20,7 @@ import org.junit.Ignore;
  * Some casual pre-defined constants used for testing
  */
 @Ignore
-public class Constants {
+public final class Constants {
   public static final int RETRY_TIMES = 10;
   public static final int RETRY_INTERVAL_MS = 1000;
   public static final int TEST_WAIT_TIME_MS = 2000;
@@ -38,9 +38,13 @@ public class Constants {
 
   public static final String HERON_SYSTEM_CONFIG = "com.twitter.heron.common.config.SystemConfig";
 
-  public static final String DEFAULT_CONFIG_RELATIVE_PATH = "../heron/config/src/yaml/heron_internals.yaml";
+  public static final String DEFAULT_CONFIG_RELATIVE_PATH =
+      "../heron/config/src/yaml/heron_internals.yaml";
 
   // For bazel, we use the env var to get the path of heron internals config file
   public static final String BAZEL_TEST_SRCDIR = "TEST_SRCDIR";
   public static final String BAZEL_CONFIG_PATH = "/heron/config/src/yaml/heron_internals.yaml";
+
+  private Constants() {
+  }
 }

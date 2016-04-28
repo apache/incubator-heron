@@ -38,10 +38,11 @@ import com.twitter.heron.common.basics.SingletonRegistry;
 
 @Ignore
 public class TestSpout implements IRichSpout {
-  static final int EMIT_COUNT = 10;
+  private static final int EMIT_COUNT = 10;
+  private static final String MESSAGE_ID = "MESSAGE_ID";
+
   private final String[] toSend = new String[]{"A", "B"};
-  SpoutOutputCollector outputCollector;
-  private String MESSAGE_ID = "MESSAGE_ID";
+  private SpoutOutputCollector outputCollector;
   private int emitted = 0;
 
   @Override
@@ -55,7 +56,10 @@ public class TestSpout implements IRichSpout {
   }
 
   @Override
-  public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector spoutOutputCollector) {
+  public void open(
+      Map map,
+      TopologyContext topologyContext,
+      SpoutOutputCollector spoutOutputCollector) {
     this.outputCollector = spoutOutputCollector;
   }
 
@@ -94,7 +98,8 @@ public class TestSpout implements IRichSpout {
 
   @Override
   public void ack(Object o) {
-    AtomicInteger ackCount = (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(Constants.ACK_COUNT);
+    AtomicInteger ackCount =
+        (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(Constants.ACK_COUNT);
     if (ackCount != null) {
       ackCount.getAndIncrement();
     }
@@ -102,11 +107,11 @@ public class TestSpout implements IRichSpout {
 
   @Override
   public void fail(Object o) {
-    AtomicInteger failCount = (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(Constants.FAIL_COUNT);
+    AtomicInteger failCount =
+        (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(Constants.FAIL_COUNT);
     if (failCount != null) {
       failCount.getAndIncrement();
     }
-
-
   }
 }
+
