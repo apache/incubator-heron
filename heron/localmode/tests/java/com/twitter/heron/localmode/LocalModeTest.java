@@ -22,11 +22,8 @@ import org.junit.Test;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.config.SystemConfig;
 
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * LocalMode Tester
@@ -63,18 +60,15 @@ public class LocalModeTest {
   @Test
   public void testTwoLocaMode() throws Exception {
     clearSingletonRegistry();
-    try {
-      LocalMode spyLocalMode1 = spy(new LocalMode(false));
-      spyLocalMode1.init();
-      verify(spyLocalMode1, times(1)).isSystemConfigExisted();
-      verify(spyLocalMode1, times(1)).registerSystemConfig(any(SystemConfig.class));
 
-      LocalMode spyLocalMode2 = spy(new LocalMode(false));
-      spyLocalMode2.init();
-      verify(spyLocalMode2, times(1)).isSystemConfigExisted();
-      verify(spyLocalMode2, times(0)).registerSystemConfig(any(SystemConfig.class));
-    } catch (Exception e) {
-      fail(String.format("Exception %s thrown while creating two LocalMode", e));
-    }
+    LocalMode spyLocalMode1 = spy(new LocalMode(false));
+    spyLocalMode1.init();
+    verify(spyLocalMode1, times(1)).isSystemConfigExisted();
+    verify(spyLocalMode1, times(1)).registerSystemConfig(any(SystemConfig.class));
+
+    LocalMode spyLocalMode2 = spy(new LocalMode(false));
+    spyLocalMode2.init();
+    verify(spyLocalMode2, times(1)).isSystemConfigExisted();
+    verify(spyLocalMode2, times(0)).registerSystemConfig(any(SystemConfig.class));
   }
 }

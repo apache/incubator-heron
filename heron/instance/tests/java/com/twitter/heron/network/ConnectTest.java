@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
-import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
@@ -192,10 +191,7 @@ public class ConnectTest {
         }
       }
 
-    } catch (ClosedByInterruptException ignored) {
     } catch (ClosedChannelException ignored) {
-    } catch (Exception e) {
-      e.printStackTrace();
     } finally {
       close(socketChannel);
     }
@@ -205,28 +201,24 @@ public class ConnectTest {
     Runnable r = new Runnable() {
       @Override
       public void run() {
-        try {
-          SystemConfig systemConfig =
-              (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
-                  SystemConfig.HERON_SYSTEM_CONFIG);
+        SystemConfig systemConfig =
+            (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
+                SystemConfig.HERON_SYSTEM_CONFIG);
 
-          HeronSocketOptions socketOptions = new HeronSocketOptions(
-              systemConfig.getInstanceNetworkWriteBatchSizeBytes(),
-              systemConfig.getInstanceNetworkWriteBatchTimeMs(),
-              systemConfig.getInstanceNetworkReadBatchSizeBytes(),
-              systemConfig.getInstanceNetworkReadBatchTimeMs(),
-              systemConfig.getInstanceNetworkOptionsSocketSendBufferSizeBytes(),
-              systemConfig.getInstanceNetworkOptionsSocketReceivedBufferSizeBytes()
-          );
+        HeronSocketOptions socketOptions = new HeronSocketOptions(
+            systemConfig.getInstanceNetworkWriteBatchSizeBytes(),
+            systemConfig.getInstanceNetworkWriteBatchTimeMs(),
+            systemConfig.getInstanceNetworkReadBatchSizeBytes(),
+            systemConfig.getInstanceNetworkReadBatchTimeMs(),
+            systemConfig.getInstanceNetworkOptionsSocketSendBufferSizeBytes(),
+            systemConfig.getInstanceNetworkOptionsSocketReceivedBufferSizeBytes()
+        );
 
-          streamManagerClient = new StreamManagerClient(nioLooper, HOST, serverPort,
-              "topology-name", "topologyId", UnitTestHelper.getInstance("bolt-id"),
-              inStreamQueue, outStreamQueue, inControlQueue, socketOptions, gatewayMetrics);
-          streamManagerClient.start();
-          nioLooper.loop();
-        } catch (Exception ignored) {
-
-        }
+        streamManagerClient = new StreamManagerClient(nioLooper, HOST, serverPort,
+            "topology-name", "topologyId", UnitTestHelper.getInstance("bolt-id"),
+            inStreamQueue, outStreamQueue, inControlQueue, socketOptions, gatewayMetrics);
+        streamManagerClient.start();
+        nioLooper.loop();
       }
     };
     threadsPool.execute(r);
