@@ -219,8 +219,8 @@ public class HeronInstance {
   public class DefaultExceptionHandler implements Thread.UncaughtExceptionHandler {
     public void uncaughtException(Thread thread, Throwable exception) {
       LOG.log(Level.SEVERE,
-          String.format("Exception caught in thread: %s with id: %d", thread.getName(), thread.getId()),
-          exception);
+          String.format("Exception caught in thread: %s with id: %d",
+              thread.getName(), thread.getId()), exception);
 
       // CountDownLatch to notify ForceExitTask whether exit is done
       final CountDownLatch exited = new CountDownLatch(1);
