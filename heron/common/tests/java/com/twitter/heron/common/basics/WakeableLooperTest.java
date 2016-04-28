@@ -246,7 +246,8 @@ public class WakeableLooperTest {
 
     try {
       Method method =
-          slaveLooper.getClass().getSuperclass().getDeclaredMethod("triggerExpiredTimers", long.class);
+          slaveLooper.getClass().getSuperclass().getDeclaredMethod(
+              "triggerExpiredTimers", long.class);
       long current = System.nanoTime();
       method.setAccessible(true);
       method.invoke(slaveLooper, current);
