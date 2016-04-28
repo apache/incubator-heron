@@ -28,28 +28,22 @@
 
 class MockZKClient : public ZKClient {
  public:
-  MOCK_METHOD3(Exists, void(const std::string& _node, VCallback<> _watcher,
-                            VCallback<sp_int32> _cb));
-  MOCK_METHOD2(Exists,
-               void(const std::string& _node, VCallback<sp_int32> _cb));
-  MOCK_METHOD4(CreateNode,
-               void(const std::string& _node, const std::string& _value,
-                    bool _is_ephimeral, VCallback<sp_int32> _cb));
-  MOCK_METHOD2(DeleteNode,
-               void(const std::string& _node, VCallback<sp_int32> _cb));
-  MOCK_METHOD5(Get, void(const std::string& _node, std::string* _data,
-                         sp_int32* _version, VCallback<> _watcher,
+  MOCK_METHOD3(Exists,
+               void(const std::string& _node, VCallback<> _watcher, VCallback<sp_int32> _cb));
+  MOCK_METHOD2(Exists, void(const std::string& _node, VCallback<sp_int32> _cb));
+  MOCK_METHOD4(CreateNode, void(const std::string& _node, const std::string& _value,
+                                bool _is_ephimeral, VCallback<sp_int32> _cb));
+  MOCK_METHOD2(DeleteNode, void(const std::string& _node, VCallback<sp_int32> _cb));
+  MOCK_METHOD5(Get, void(const std::string& _node, std::string* _data, sp_int32* _version,
+                         VCallback<> _watcher, VCallback<sp_int32> _cb));
+  MOCK_METHOD4(Get, void(const std::string& _node, std::string* _data, sp_int32* _version,
                          VCallback<sp_int32> _cb));
-  MOCK_METHOD4(Get, void(const std::string& _node, std::string* _data,
-                         sp_int32* _version, VCallback<sp_int32> _cb));
-  MOCK_METHOD3(Get, void(const std::string& _node, std::string* _data,
+  MOCK_METHOD3(Get, void(const std::string& _node, std::string* _data, VCallback<sp_int32> _cb));
+  MOCK_METHOD4(Set, void(const std::string& _node, const std::string& _data, sp_int32 _version,
                          VCallback<sp_int32> _cb));
-  MOCK_METHOD4(Set, void(const std::string& _node, const std::string& _data,
-                         sp_int32 _version, VCallback<sp_int32> _cb));
-  MOCK_METHOD3(Set, void(const std::string& _node, const std::string& _data,
-                         VCallback<sp_int32> _cb));
-  MOCK_METHOD3(GetChildren, void(const std::string& _node,
-                                 std::vector<std::string>* _children,
+  MOCK_METHOD3(Set,
+               void(const std::string& _node, const std::string& _data, VCallback<sp_int32> _cb));
+  MOCK_METHOD3(GetChildren, void(const std::string& _node, std::vector<std::string>* _children,
                                  VCallback<sp_int32> _cb));
   MOCK_METHOD0(Die, void());
   virtual ~MockZKClient() { Die(); }
