@@ -16,18 +16,12 @@
 
 #include "threads/spcountdownlatch.h"
 
-CountDownLatch::CountDownLatch(sp_uint32 count): count_(count) 
-{
-}
+CountDownLatch::CountDownLatch(sp_uint32 count) : count_(count) {}
 
-CountDownLatch::~CountDownLatch() 
-{
-}
+CountDownLatch::~CountDownLatch() {}
 
-void 
-CountDownLatch::wait() 
-{
-  std::unique_lock<std::mutex>   m(mutex_);
+void CountDownLatch::wait() {
+  std::unique_lock<std::mutex> m(mutex_);
   // If count is greater than 0, then wait until it is 0.
   // Else return immediately.
   while (count_ > 0) {
@@ -35,24 +29,19 @@ CountDownLatch::wait()
   }
 }
 
-void 
-CountDownLatch::countDown() 
-{
+void CountDownLatch::countDown() {
   std::unique_lock<std::mutex> m(mutex_);
 
   // Nothing to do if count is already 0
-  if(count_ == 0)
-    return;
+  if (count_ == 0) return;
 
   // Decrement count. If it is 0 after that, notify all blocked threads.
-  if(--count_ == 0) {
+  if (--count_ == 0) {
     cond_.notify_all();
   }
 }
 
-sp_uint32 
-CountDownLatch::getCount() 
-{
+sp_uint32 CountDownLatch::getCount() {
   std::unique_lock<std::mutex> m(mutex_);
   return count_;
 }

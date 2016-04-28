@@ -18,10 +18,6 @@
 
 sp_int32 __nifty_thread_modinit::count_ = 0;
 
-__nifty_thread_modinit::__nifty_thread_modinit()
-{
-}
+__nifty_thread_modinit::__nifty_thread_modinit() {}
 
-__nifty_thread_modinit::~__nifty_thread_modinit()
-{
-}
+__nifty_thread_modinit::~__nifty_thread_modinit() {}

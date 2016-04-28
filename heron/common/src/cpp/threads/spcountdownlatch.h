@@ -38,7 +38,7 @@ class CountDownLatch {
   virtual ~CountDownLatch();
 
   CountDownLatch(const CountDownLatch& latch) = delete;
-  CountDownLatch& operator = (const CountDownLatch& latch) = delete;
+  CountDownLatch& operator=(const CountDownLatch& latch) = delete;
 
   // Causes the current thread to wait until the latch has counted down to zero
   void wait();
@@ -51,9 +51,9 @@ class CountDownLatch {
   sp_uint32 getCount();
 
  private:
-  std::mutex              mutex_;
+  std::mutex mutex_;
   std::condition_variable cond_;
-  sp_uint32               count_;
+  sp_uint32 count_;
 };
 
 #endif  // SRC_CPP_CORE_THREADS_PUBLIC_SPCOUNTDOWNLATCH_H_
