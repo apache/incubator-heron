@@ -44,26 +44,26 @@ public class LocalScheduler implements IScheduler {
   // executor service for monitoring all the containers
   private final ExecutorService monitorService = Executors.newCachedThreadPool();
   // map to keep track of the process and the shard it is running
-  private final Map<Process, Integer> processToContainer = new ConcurrentHashMap<Process, Integer>();
+  private final Map<Process, Integer> processToContainer = new ConcurrentHashMap<>();
   private Config config;
   private Config runtime;
   // has the topology been killed?
   private volatile boolean topologyKilled = false;
 
   @Override
-  public void initialize(Config config, Config runtime) {
-    this.config = config;
-    this.runtime = runtime;
+  public void initialize(Config mConfig, Config mRuntime) {
+    this.config = mConfig;
+    this.runtime = mRuntime;
 
-    LOG.info("Starting to deploy topology: " + LocalContext.topologyName(config));
-    LOG.info("# of containers: " + Runtime.numContainers(runtime));
+    LOG.info("Starting to deploy topology: " + LocalContext.topologyName(mConfig));
+    LOG.info("# of containers: " + Runtime.numContainers(mRuntime));
 
     // first, run the TMaster executor
     startExecutor(0);
     LOG.info("TMaster is started.");
 
     // for each container, run its own executor
-    long numContainers = Runtime.numContainers(runtime);
+    long numContainers = Runtime.numContainers(mRuntime);
     for (int i = 1; i < numContainers; i++) {
       startExecutor(i);
     }
@@ -110,7 +110,9 @@ public class LocalScheduler implements IScheduler {
           LOG.info("Waiting for container " + container + " to finish.");
           regularExecutor.waitFor();
 
-          LOG.info("Container " + container + " is completed. Exit status: " + regularExecutor.exitValue());
+          LOG.log(Level.INFO,
+              "Container {0} is completed. Exit status: {1}",
+              new Object[]{container, regularExecutor.exitValue()});
           if (topologyKilled) {
             LOG.info("Topology is killed. Not to start new executors.");
             return;
@@ -141,7 +143,9 @@ public class LocalScheduler implements IScheduler {
       throw new RuntimeException("Could not find available ports to start topology");
     }
 
-    String executorCmd = String.format("%s %d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %d %s %s %d %s %s %s %s %s %s %d",
+    String executorCmd = String.format(
+        "%s %d %s %s %s %s %s %s %s %s %s %s %s %s %s %s "
+            + "%s %s %s %s %s %s %d %s %s %d %s %s %s %s %s %s %d",
         LocalContext.executorSandboxBinary(config),
         container,
         topology.getName(),
