@@ -17,6 +17,7 @@
 #if !defined(__SP_ERROR_H)
 #define __SP_ERROR_H
 
+#include <string>
 #include "basics/sptypes.h"
 
 /**
@@ -43,24 +44,22 @@
  *
  */
 
-namespace heron { namespace error {
+namespace heron {
+namespace error {
 
 struct error_info_t;
 
 class Error {
-public:
-
-   //! Initialize the error module
+ public:
+  //! Initialize the error module
   static bool initialize(void);
 
   //! Shutdown the error module
   static bool shutdown(void);
 
-   //! Load the errors of the given module into the global error space
-  static bool load_module_errors(const std::string&   _modname,
-                                 error_info_t*        _errs,
-                                 error_info_t*        _errnostrs,
-                                 sp_int32             _errcnt);
+  //! Load the errors of the given module into the global error space
+  static bool load_module_errors(const std::string& _modname, error_info_t* _errs,
+                                 error_info_t* _errnostrs, sp_int32 _errcnt);
 
   //! Unload the errors of the given module from the global error space
   static bool unload_module_errors(const std::string& _modname);
@@ -75,18 +74,18 @@ public:
   static std::string get_errno_str(sp_uint32 _errno);
 
   //! Get the module name for the given error code
-  static std::string get_error_module(sp_uint32 _errno) ;
+  static std::string get_error_module(sp_uint32 _errno);
 
   //! Get the error message for the error code in the format <errorno:errormsg>
-  static std::string get_errno_msg(sp_uint32 _errno) ;
+  static std::string get_errno_msg(sp_uint32 _errno);
 
   //! Get the error message for error code in format <modname:errorno:errormsg>
-  static std::string get_module_errno_msg(sp_uint32 _errno) ;
+  static std::string get_module_errno_msg(sp_uint32 _errno);
 
   //! Get the error message for the error code in the format <modname:errormsg>
-  static std::string get_module_error_msg(sp_uint32 _errno) ;
-} ;
-
-}} // namespace
+  static std::string get_module_error_msg(sp_uint32 _errno);
+};
+}  // namespace error
+}  // namespace heron
 
 #endif /* end of header file */
