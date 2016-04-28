@@ -31,38 +31,30 @@ public abstract class Grouping {
                                 TopologyAPI.StreamSchema schema,
                                 List<Integer> taskIds) {
     switch (grouping) {
-      case SHUFFLE: {
+      case SHUFFLE:
         return new ShuffleGrouping(taskIds);
-      }
 
-      case FIELDS: {
+      case FIELDS:
         return new FieldsGrouping(inputStream, schema, taskIds);
-      }
 
-      case ALL: {
+      case ALL:
         return new AllGrouping(taskIds);
-      }
 
-      case LOWEST: {
+      case LOWEST:
         return new LowestGrouping(taskIds);
-      }
 
-      case NONE: {
+      case NONE:
         // This is what we are doing in production right now
         return new ShuffleGrouping(taskIds);
-      }
 
-      case CUSTOM: {
+      case CUSTOM:
         return new CustomGrouping(taskIds);
-      }
 
-      case DIRECT: {
+      case DIRECT:
         throw new IllegalArgumentException("Direct Grouping not supported");
-      }
 
-      default: {
+      default:
         throw new IllegalArgumentException("Unknown Grouping");
-      }
     }
   }
 

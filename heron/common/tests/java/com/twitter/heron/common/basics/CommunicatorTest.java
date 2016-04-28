@@ -23,10 +23,10 @@ import org.junit.Test;
  * Communicator Tester.
  */
 public class CommunicatorTest {
-  final int QUEUE_BUFFER_SIZE = 128;
-  Communicator<Integer> communicator;
-  WakeableLooper producer;
-  WakeableLooper consumer;
+  private static final int QUEUE_BUFFER_SIZE = 128;
+  private Communicator<Integer> communicator;
+  private WakeableLooper producer;
+  private WakeableLooper consumer;
 
   @Before
   public void before() throws Exception {
@@ -137,4 +137,5 @@ public class CommunicatorTest {
   public void testGetCapacity() throws Exception {
     Assert.assertEquals(QUEUE_BUFFER_SIZE, communicator.getCapacity());
   }
-} 
+}
+

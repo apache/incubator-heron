@@ -390,7 +390,7 @@ public class HeronServerTest {
 
   private class SimpleHeronServer extends HeronServer {
 
-    public SimpleHeronServer(NIOLooper s, String host, int port) {
+    SimpleHeronServer(NIOLooper s, String host, int port) {
       super(s, host, port, new HeronSocketOptions(100 * 1024 * 1024, 100,
           100 * 1024 * 1024, 100,
           5 * 1024 * 1024,
@@ -399,8 +399,8 @@ public class HeronServerTest {
 
     @Override
     public void onConnect(SocketChannel socketChannel) {
-      LOG.info("Server got a new connection from host:port:" +
-          socketChannel.socket().getRemoteSocketAddress());
+      LOG.info("Server got a new connection from host:port:"
+          + socketChannel.socket().getRemoteSocketAddress());
       isOnConnectedInvoked = true;
 
       // We only register request when we need to test on sendResponse or sendMessage
@@ -462,7 +462,7 @@ public class HeronServerTest {
   }
 
   private class SimpleHeronClient extends HeronClient {
-    public SimpleHeronClient(NIOLooper looper, String host, int port) {
+    SimpleHeronClient(NIOLooper looper, String host, int port) {
       super(looper, host, port,
           new HeronSocketOptions(100 * 1024 * 1024, 100,
               100 * 1024 * 1024, 100,

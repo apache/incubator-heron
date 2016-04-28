@@ -40,13 +40,13 @@ public class CustomGroupingTest {
    */
   @Test
   public void testGetListToSend() throws Exception {
-    List<Integer> task_ids = new LinkedList<>();
-    task_ids.add(0);
-    task_ids.add(2);
-    task_ids.add(4);
-    task_ids.add(8);
+    List<Integer> taskIds = new LinkedList<>();
+    taskIds.add(0);
+    taskIds.add(2);
+    taskIds.add(4);
+    taskIds.add(8);
 
-    CustomGrouping g = new CustomGrouping(task_ids);
+    CustomGrouping g = new CustomGrouping(taskIds);
     HeronTuples.HeronDataTuple tuple = HeronTuples.HeronDataTuple.getDefaultInstance();
 
     for (int i = 0; i < 1000; ++i) {

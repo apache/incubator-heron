@@ -34,7 +34,7 @@ import junit.framework.Assert;
  * FileUtils Tester.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({FileUtils.class})
+@PrepareForTest(FileUtils.class)
 public class FileUtilsTest {
 
   @Before

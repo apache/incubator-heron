@@ -40,14 +40,15 @@ import junit.framework.Assert;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(FileUtils.class)
 public class LocalFileSystemStateManagerTest {
-  private static final String topologyName = "topologyName";
-  private static final String rootAddr = "/";
+
+  private static final String TOPOLOGY_NAME = "topologyName";
+  private static final String ROOT_ADDR = "/";
   private Config config;
 
   @Before
   public void before() throws Exception {
     config = Config.newBuilder()
-        .put(Keys.stateManagerRootPath(), rootAddr)
+        .put(Keys.stateManagerRootPath(), ROOT_ADDR)
         .put(LocalFileSystemKeys.initializeFileTree(), false)
         .build();
   }
@@ -87,14 +88,14 @@ public class LocalFileSystemStateManagerTest {
 
     Scheduler.SchedulerLocation location = Scheduler.SchedulerLocation.newBuilder().
         setHttpEndpoint("host:1").
-        setTopologyName(topologyName).
+        setTopologyName(TOPOLOGY_NAME).
         build();
     PowerMockito.spy(FileUtils.class);
     PowerMockito.doReturn(location.toByteArray()).
         when(FileUtils.class, "readFromFile", Matchers.anyString());
 
     Scheduler.SchedulerLocation locationFetched =
-        manager.getSchedulerLocation(null, topologyName).get();
+        manager.getSchedulerLocation(null, TOPOLOGY_NAME).get();
 
     Assert.assertEquals(location, locationFetched);
   }
@@ -124,7 +125,7 @@ public class LocalFileSystemStateManagerTest {
 
     PowerMockito.verifyStatic();
     FileUtils.writeToFile(Matchers.eq(String.format("%s/%s/%s",
-            rootAddr, "executionstate", defaultState.getTopologyName())),
+            ROOT_ADDR, "executionstate", defaultState.getTopologyName())),
         Matchers.eq(defaultState.toByteArray()));
   }
 
@@ -147,12 +148,12 @@ public class LocalFileSystemStateManagerTest {
     PowerMockito.doReturn(true).
         when(FileUtils.class, "writeToFile", Matchers.anyString(), Matchers.any(byte[].class));
 
-    Assert.assertTrue(manager.setTopology(topology, topologyName).get());
+    Assert.assertTrue(manager.setTopology(topology, TOPOLOGY_NAME).get());
 
     PowerMockito.verifyStatic();
     FileUtils.writeToFile(
         Matchers.eq(String.format("%s/%s/%s",
-            rootAddr, "topologies", topologyName)),
+            ROOT_ADDR, "topologies", TOPOLOGY_NAME)),
         Matchers.eq(topology.toByteArray()));
   }
 
@@ -174,11 +175,11 @@ public class LocalFileSystemStateManagerTest {
     PowerMockito.doReturn(true).
         when(FileUtils.class, "deleteFile", Matchers.anyString());
 
-    Assert.assertTrue(manager.deleteExecutionState(topologyName).get());
+    Assert.assertTrue(manager.deleteExecutionState(TOPOLOGY_NAME).get());
 
     PowerMockito.verifyStatic();
     FileUtils.deleteFile(Matchers.eq(String.format("%s/%s/%s",
-        rootAddr, "executionstate", topologyName)));
+        ROOT_ADDR, "executionstate", TOPOLOGY_NAME)));
   }
 
   /**
@@ -199,9 +200,9 @@ public class LocalFileSystemStateManagerTest {
     PowerMockito.doReturn(true).
         when(FileUtils.class, "deleteFile", Matchers.anyString());
 
-    Assert.assertTrue(manager.deleteTopology(topologyName).get());
+    Assert.assertTrue(manager.deleteTopology(TOPOLOGY_NAME).get());
 
     FileUtils.deleteFile(Matchers.eq(String.format("%s/%s/%s",
-        rootAddr, "topologies", topologyName)));
+        ROOT_ADDR, "topologies", TOPOLOGY_NAME)));
   }
 }
