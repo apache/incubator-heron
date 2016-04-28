@@ -57,9 +57,9 @@ public class TupleImpl implements Tuple {
 
     if (values.size() != schema.size()) {
       throw new IllegalArgumentException(
-          "Tuple created with wrong number of fields. " +
-              "Expected " + schema.size() + " fields but got " +
-              values.size() + " fields"
+          "Tuple created with wrong number of fields. "
+              + "Expected " + schema.size() + " fields but got "
+              + values.size() + " fields"
       );
     }
   }
@@ -227,7 +227,8 @@ public class TupleImpl implements Tuple {
 
   @Override
   public String toString() {
-    return "source: " + getSourceComponent() + ", stream: " + getSourceStreamId() + ", " + values.toString();
+    return "source: " + getSourceComponent() + ", stream: " + getSourceStreamId()
+        + ", " + values.toString();
   }
 
   @Override
@@ -249,3 +250,4 @@ public class TupleImpl implements Tuple {
     return creationTime;
   }
 }
+

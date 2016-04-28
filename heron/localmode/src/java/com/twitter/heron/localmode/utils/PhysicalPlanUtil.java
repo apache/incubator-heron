@@ -23,7 +23,11 @@ import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.PhysicalPlans;
 
-public class PhysicalPlanUtil {
+public final class PhysicalPlanUtil {
+
+  private PhysicalPlanUtil() {
+  }
+
   /**
    * Want get a PhysicalPlan basing the topology given.
    * It would contain one fake stream mgr/container info. And all instances would be belong to
@@ -45,7 +49,8 @@ public class PhysicalPlanUtil {
 
     // Add instances
     int globalTaskIndex = 1;
-    for (Map.Entry<String, Integer> componentParallelism : getComponentParallelism(topology).entrySet()) {
+    for (Map.Entry<String, Integer> componentParallelism
+        : getComponentParallelism(topology).entrySet()) {
       String componentName = componentParallelism.getKey();
       int parallelism = componentParallelism.getValue();
 

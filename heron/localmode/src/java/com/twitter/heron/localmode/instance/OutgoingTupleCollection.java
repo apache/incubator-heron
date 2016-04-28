@@ -22,7 +22,8 @@ import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 import com.twitter.heron.proto.system.HeronTuples;
 
 /**
- * Implements OutgoingTupleCollection will be able to handle some basic methods for send out tuples
+ * Implements OutgoingTupleCollection will be able to handle some basic methods for
+ * sending out tuples
  * 1. initNewControlTuple or initNewDataTuple
  * 2. addDataTuple, addAckTuple and addFailTuple
  * 3. flushRemaining tuples and sent out the tuples
@@ -44,10 +45,13 @@ public class OutgoingTupleCollection {
   private int dataTupleSetCapacity;
   private int controlTupleSetCapacity;
 
-  public OutgoingTupleCollection(PhysicalPlanHelper helper, Communicator<HeronTuples.HeronTupleSet> outQueue) {
+  public OutgoingTupleCollection(
+      PhysicalPlanHelper helper,
+      Communicator<HeronTuples.HeronTupleSet> outQueue) {
     this.outQueue = outQueue;
     this.helper = helper;
-    this.systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
+    this.systemConfig =
+        (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
     this.dataTupleSetCapacity = systemConfig.getInstanceSetDataTupleCapacity();
     this.controlTupleSetCapacity = systemConfig.getInstanceSetControlTupleCapacity();
   }
@@ -56,10 +60,13 @@ public class OutgoingTupleCollection {
     flushRemaining();
   }
 
-  public void addDataTuple(String streamId, HeronTuples.HeronDataTuple.Builder newTuple, long tupleSizeInBytes) {
-    if (currentDataTuple == null ||
-        !currentDataTuple.getStream().getId().equals(streamId) ||
-        currentDataTuple.getTuplesCount() > dataTupleSetCapacity) {
+  public void addDataTuple(
+      String streamId,
+      HeronTuples.HeronDataTuple.Builder newTuple,
+      long tupleSizeInBytes) {
+    if (currentDataTuple == null
+        || !currentDataTuple.getStream().getId().equals(streamId)
+        || currentDataTuple.getTuplesCount() > dataTupleSetCapacity) {
       initNewDataTuple(streamId);
     }
     currentDataTuple.addTuples(newTuple);

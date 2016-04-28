@@ -15,6 +15,7 @@
 package com.twitter.heron.localmode.executors;
 
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.Communicator;
@@ -69,9 +70,8 @@ public class InstanceExecutor implements Runnable {
 
     initInstanceManager();
 
-    LOG.info("Incarnating ourselves as " +
-        physicalPlanHelper.getMyComponent() + " with task id " +
-        physicalPlanHelper.getMyTaskId());
+    LOG.log(Level.INFO, "Incarnating ourselves as {0} with task id {1}",
+        new Object[] {physicalPlanHelper.getMyComponent(), physicalPlanHelper.getMyTaskId()});
   }
 
   public Communicator<HeronTuples.HeronTupleSet> getStreamInQueue() {
@@ -99,12 +99,12 @@ public class InstanceExecutor implements Runnable {
   }
 
   protected IInstance createInstance() {
-    return (physicalPlanHelper.getMySpout() != null) ?
-        new SpoutInstance(physicalPlanHelper,
+    return (physicalPlanHelper.getMySpout() != null)
+        ? new SpoutInstance(physicalPlanHelper,
             streamInQueue,
             streamOutQueue,
-            looper) :
-        new BoltInstance(physicalPlanHelper,
+            looper)
+        : new BoltInstance(physicalPlanHelper,
             streamInQueue,
             streamOutQueue,
             looper);
@@ -113,12 +113,12 @@ public class InstanceExecutor implements Runnable {
   protected PhysicalPlanHelper createPhysicalPlanHelper(PhysicalPlans.PhysicalPlan physicalPlan,
                                                         String instanceId,
                                                         MetricsCollector metricsCollector) {
-    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, instanceId);
+    PhysicalPlanHelper localPhysicalPlanHelper = new PhysicalPlanHelper(physicalPlan, instanceId);
 
     // Bind the MetricsCollector with topologyContext
-    physicalPlanHelper.setTopologyContext(metricsCollector);
+    localPhysicalPlanHelper.setTopologyContext(metricsCollector);
 
-    return physicalPlanHelper;
+    return localPhysicalPlanHelper;
   }
 
   protected void initInstanceManager() {

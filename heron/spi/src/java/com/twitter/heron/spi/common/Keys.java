@@ -16,6 +16,9 @@ package com.twitter.heron.spi.common;
 
 public class Keys {
 
+  protected Keys() {
+  }
+
   public static String cluster() {
     return ConfigKeys.get("CLUSTER");
   }
