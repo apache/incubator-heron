@@ -17,6 +17,7 @@ package com.twitter.heron.network;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.protobuf.Message;
@@ -51,12 +52,12 @@ public class MetricsManagerClient extends HeronClient {
 
   private final GatewayMetrics gatewayMetrics;
 
-  public MetricsManagerClient(NIOLooper s, String MetricsHost, int MetricsPort,
+  public MetricsManagerClient(NIOLooper s, String metricsHost, int metricsPort,
                               PhysicalPlans.Instance instance,
                               List<Communicator<Metrics.MetricPublisherPublishMessage>> outs,
                               HeronSocketOptions options,
                               GatewayMetrics gatewayMetrics) {
-    super(s, MetricsHost, MetricsPort, options);
+    super(s, metricsHost, metricsPort, options);
 
     this.instance = instance;
     this.outMetricsQueues = outs;
@@ -122,13 +123,15 @@ public class MetricsManagerClient extends HeronClient {
     // We will not send registerRequest when we are onConnect
     // We will send when we receive the PhysicalPlan sent by slave
     if (status != StatusCode.OK) {
-      LOG.severe(String.format("Cannot connect to the metrics port with status: %s, Will Retry..", status));
+      LOG.log(Level.WARNING,
+          "Cannot connect to the metrics port with status: {0}, Will Retry..", status);
       Runnable r = new Runnable() {
         public void run() {
           start();
         }
       };
-      getNIOLooper().registerTimerEventInSeconds(systemConfig.getInstanceReconnectMetricsmgrIntervalSec(), r);
+      getNIOLooper().registerTimerEventInSeconds(
+          systemConfig.getInstanceReconnectMetricsmgrIntervalSec(), r);
       return;
     }
 
@@ -152,8 +155,10 @@ public class MetricsManagerClient extends HeronClient {
         setInstanceId(instance.getInstanceId()).
         setInstanceIndex(instance.getInfo().getComponentIndex()).
         build();
-    Metrics.MetricPublisherRegisterRequest request = Metrics.MetricPublisherRegisterRequest.newBuilder().
-        setPublisher(publisher).build();
+    Metrics.MetricPublisherRegisterRequest request =
+        Metrics.MetricPublisherRegisterRequest.newBuilder().
+            setPublisher(publisher).
+            build();
 
     // The timeout would be the reconnect-interval-seconds
     sendRequest(request, null,
