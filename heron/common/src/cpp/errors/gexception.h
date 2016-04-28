@@ -38,33 +38,30 @@
  *
  */
 
-namespace heron { namespace error {
+namespace heron {
+namespace error {
 
 class Global_Exception_Handler {
-
-public:
-
+ public:
   //! Create a singleton global exception handler to handle termination.
   Global_Exception_Handler();
 
-  ~Global_Exception_Handler() { };
+  ~Global_Exception_Handler() {}
 
   //! Print out information about the current exception. Should be used in a catch block.
   static void print_backtrace();
 
-private:
-
+ private:
   class Singleton_Exception_Handler {
-  public:
+   public:
+    Singleton_Exception_Handler();
 
-    Singleton_Exception_Handler ();
-
-    ~Singleton_Exception_Handler() { } ;
+    ~Singleton_Exception_Handler() {}
 
     static void terminate(void);
   };
 };
-
-}} // namespace
+}  // namespace error
+}  // namespace heron
 
 #endif /* end of header file */

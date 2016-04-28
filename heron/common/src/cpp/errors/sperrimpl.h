@@ -17,12 +17,14 @@
 #if !defined(__SP_ERRIMPL_H)
 #define __SP_ERRIMPL_H
 
-#include <vector>
 #include <map>
+#include <string>
+#include <vector>
 #include "basics/sptypes.h"
 #include "errors/sperrmod.h"
 
-namespace heron { namespace error {
+namespace heron {
+namespace error {
 
 /**
  * Error_Info class describes the information about an error. It contains
@@ -30,20 +32,15 @@ namespace heron { namespace error {
  * methods to access these members.
  */
 class Error_Info {
-
-public:
-
+ public:
   //! Constructor
-  Error_Info() { } ;
+  Error_Info() {}
 
-  Error_Info(sp_uint32                  _err,
-             const std::string&         _estr,
-             const std::string&         _enostr) :
-      errno_(_err), errstr_(_estr), errnostr_(_enostr)
-  { };
+  Error_Info(sp_uint32 _err, const std::string& _estr, const std::string& _enostr)
+      : errno_(_err), errstr_(_estr), errnostr_(_enostr) {}
 
   //! Destructor
-  ~Error_Info(){ } ;
+  ~Error_Info() {}
 
   //! Get the error number
   sp_uint32 get_errno() const { return errno_; }
@@ -55,13 +52,12 @@ public:
   const std::string& get_errno_str() const { return errnostr_; }
 
   //! Define a collection type for holding several errors
-  typedef std::vector<Error_Info>      Vector;
+  typedef std::vector<Error_Info> Vector;
 
-protected:
-
-  sp_uint32      errno_;         //! for storing the error number
-  std::string    errstr_;        //! for storing the error string
-  std::string    errnostr_;      //! for storing the error number string
+ protected:
+  sp_uint32 errno_;       //! for storing the error number
+  std::string errstr_;    //! for storing the error string
+  std::string errnostr_;  //! for storing the error number string
 };
 
 /**
@@ -69,17 +65,13 @@ protected:
  * occur in a module.
  */
 class Module_Errors {
-
-public:
-
+ public:
   //! Constructor
-  Module_Errors() { };
+  Module_Errors() {}
 
   //! Constructor that loads the module errors during creation
-  Module_Errors(const std::string&       _modname,
-                error_info_t*            _errs,
-                error_info_t*            _errstrs,
-                sp_int32                 _errcnt);
+  Module_Errors(const std::string& _modname, error_info_t* _errs, error_info_t* _errstrs,
+                sp_int32 _errcnt);
 
   //! Destructor
   ~Module_Errors();
@@ -94,26 +86,24 @@ public:
   const std::string& get_module_name() { return mod_name_; }
 
   //! Given an error no, check if it is in the module range
-  bool is_in_range(sp_uint32 _errno) ;
+  bool is_in_range(sp_uint32 _errno);
 
   //! Given an error no, get the error message
-  const std::string& get_error_msg(sp_uint32 _errno) ;
+  const std::string& get_error_msg(sp_uint32 _errno);
 
   //! Given an error no, get the errno message
-  const std::string& get_errno_msg(sp_uint32 _errno) ;
+  const std::string& get_errno_msg(sp_uint32 _errno);
 
   //! Define a map type for holding several modules and their errors
-  typedef std::map<std::string, Module_Errors*>     Map;
+  typedef std::map<std::string, Module_Errors*> Map;
 
-protected:
+ protected:
+  sp_uint32 errno_base_;  //! error base number for this module
+  sp_int32 errno_count_;  //! number of errors for this module
 
-  sp_uint32                        errno_base_;     //! error base number for this module
-  sp_int32                         errno_count_;    //! number of errors for this module
-
-  std::string                      mod_name_;       //! name of the module
-  Error_Info::Vector               mod_errors_;     //! actual errors of the module
-
-} ;
+  std::string mod_name_;           //! name of the module
+  Error_Info::Vector mod_errors_;  //! actual errors of the module
+};
 
 //! Forward declaration for error_info_t that contains the generated errors and messages
 struct error_info_t;
@@ -124,18 +114,14 @@ struct error_info_t;
  * system errors.
  */
 class Error_Store {
-
-public:
-
+ public:
   //! Constructor and Destructors
-  Error_Store() { };
-  ~Error_Store(){ };
+  Error_Store() {}
+  ~Error_Store() {}
 
   //! Load the errors of the given module into the global error space
-  bool load_module_errors(const std::string&   _modname,
-                          error_info_t*        _errs,
-                          error_info_t*        _errnostrs,
-                          sp_int32             _errcnt);
+  bool load_module_errors(const std::string& _modname, error_info_t* _errs,
+                          error_info_t* _errnostrs, sp_int32 _errcnt);
 
   //! Unload the errors of the given module from the global error space
   bool unload_module_errors(const std::string& _modname);
@@ -152,14 +138,13 @@ public:
   //! Get the error no string
   std::string get_errno_str(sp_uint32 _errno);
 
-protected:
-
+ protected:
   //! Get OS system error string
   std::string get_syserr_str(sp_uint32 _errno);
 
-  Module_Errors::Map               moderrs_;        //! the global error space for a process
-} ;
-
-}} // namespace
+  Module_Errors::Map moderrs_;  //! the global error space for a process
+};
+}  // namespace error
+}  // namespace heron
 
 #endif /* end of header file */
