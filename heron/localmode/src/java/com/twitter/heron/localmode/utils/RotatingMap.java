@@ -62,7 +62,7 @@ public class RotatingMap {
         long newValue = currentValue ^ value;
         m.put(key, newValue);
 
-        return (newValue == 0);
+        return newValue == 0;
       }
     }
     return false;

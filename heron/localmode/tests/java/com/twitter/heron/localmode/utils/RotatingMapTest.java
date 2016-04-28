@@ -114,52 +114,52 @@ public class RotatingMapTest {
     }
 
     // layered anchoring
-    List<Long> things_added = new ArrayList<>();
-    long first_key = new Random().nextLong();
-    g.create(1, first_key);
-    things_added.add(first_key);
+    List<Long> thingsAdded = new ArrayList<>();
+    long firstKey = new Random().nextLong();
+    g.create(1, firstKey);
+    thingsAdded.add(firstKey);
     for (int j = 1; j < 100; ++j) {
       long key = new Random().nextLong();
-      things_added.add(key);
+      thingsAdded.add(key);
       Assert.assertEquals(g.anchor(1, key), false);
     }
 
     // xor ing works
     for (int j = 0; j < 99; ++j) {
-      Assert.assertEquals(g.anchor(1, things_added.get(j)), false);
+      Assert.assertEquals(g.anchor(1, thingsAdded.get(j)), false);
     }
 
-    Assert.assertEquals(g.anchor(1, things_added.get(99)), true);
+    Assert.assertEquals(g.anchor(1, thingsAdded.get(99)), true);
     Assert.assertEquals(g.remove(1), true);
 
     // Same test with some rotation
-    things_added.clear();
-    first_key = new Random().nextLong();
-    g.create(1, first_key);
-    things_added.add(first_key);
+    thingsAdded.clear();
+    firstKey = new Random().nextLong();
+    g.create(1, firstKey);
+    thingsAdded.add(firstKey);
     for (int j = 1; j < 100; ++j) {
       long key = new Random().nextLong();
-      things_added.add(key);
+      thingsAdded.add(key);
       Assert.assertEquals(g.anchor(1, key), false);
     }
 
     g.rotate();
 
     for (int j = 0; j < 99; ++j) {
-      Assert.assertEquals(g.anchor(1, things_added.get(j)), false);
+      Assert.assertEquals(g.anchor(1, thingsAdded.get(j)), false);
     }
 
-    Assert.assertEquals(g.anchor(1, things_added.get(99)), true);
+    Assert.assertEquals(g.anchor(1, thingsAdded.get(99)), true);
     Assert.assertEquals(g.remove(1), true);
 
     // Too much rotation
-    things_added.clear();
-    first_key = new Random().nextLong();
-    g.create(1, first_key);
-    things_added.add(first_key);
+    thingsAdded.clear();
+    firstKey = new Random().nextLong();
+    g.create(1, firstKey);
+    thingsAdded.add(firstKey);
     for (int j = 1; j < 100; ++j) {
       long key = new Random().nextLong();
-      things_added.add(key);
+      thingsAdded.add(key);
       Assert.assertEquals(g.anchor(1, key), false);
     }
 
@@ -168,9 +168,9 @@ public class RotatingMapTest {
     }
 
     for (int j = 0; j < 100; ++j) {
-      Assert.assertEquals(g.anchor(1, things_added.get(j)), false);
+      Assert.assertEquals(g.anchor(1, thingsAdded.get(j)), false);
     }
 
     Assert.assertEquals(g.remove(1), false);
   }
-} 
+}

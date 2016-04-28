@@ -25,7 +25,9 @@ public class SystemConfigTest {
 
   @Test
   public void testReadConfig() throws Exception {
-    String file = Paths.get(System.getenv("JAVA_RUNFILES"), Constants.TEST_DATA_PATH, "sysconfig.yaml").toString();
+    String file = Paths.get(System.getenv("JAVA_RUNFILES"),
+        Constants.TEST_DATA_PATH, "sysconfig.yaml").toString();
+
     SystemConfig sysconfig = new SystemConfig(file);
 
     Assert.assertEquals("log-files", sysconfig.getHeronLoggingDirectory());

@@ -63,6 +63,9 @@ public class PhysicalPlanUtilTest implements Serializable {
 
   }
 
+  /**
+   * Construct the test topology
+   */
   public static TopologyAPI.Topology getTestTopology() {
     TopologyBuilder topologyBuilder = new TopologyBuilder();
 
@@ -73,8 +76,10 @@ public class PhysicalPlanUtilTest implements Serializable {
       }
 
       @Override
-      public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector spoutOutputCollector) {
-
+      public void open(
+          Map map,
+          TopologyContext topologyContext,
+          SpoutOutputCollector spoutOutputCollector) {
       }
 
       @Override

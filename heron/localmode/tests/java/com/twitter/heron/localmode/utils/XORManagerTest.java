@@ -36,13 +36,10 @@ import junit.framework.Assert;
 
 /**
  * XORManager Tester.
- *
- * @author <Authors name>
- * @version 1.0
- * @since <pre>Jul 29, 2015</pre>
  */
 public class XORManagerTest {
-  private static final List<Integer> task_ids = new LinkedList<>();
+
+  private static final List<Integer> taskIds = new LinkedList<>();
   private static TopologyAPI.Topology topology;
   private static int timeoutSec = 1;
   private static int nBuckets = 3;
@@ -50,8 +47,8 @@ public class XORManagerTest {
   @BeforeClass
   public static void beforeClass() throws Exception {
     topology = PhysicalPlanUtilTest.getTestTopology();
-    task_ids.add(1);
-    task_ids.add(2);
+    taskIds.add(1);
+    taskIds.add(2);
   }
 
   @AfterClass
@@ -77,7 +74,7 @@ public class XORManagerTest {
 
     WakeableLooper looper = Mockito.mock(WakeableLooper.class);
 
-    XORManager g = new XORManager(looper, timeoutSec, task_ids, nBuckets);
+    XORManager g = new XORManager(looper, timeoutSec, taskIds, nBuckets);
 
     Mockito.verify(looper).registerTimerEventInNanoSeconds(
         Mockito.eq(Constants.SECONDS_TO_NANOSECONDS * timeoutSec), Mockito.any(Runnable.class));
@@ -170,14 +167,14 @@ public class XORManagerTest {
         new HashMap<>();
     WakeableLooper looper = Mockito.mock(WakeableLooper.class);
 
-    componentToTaskIds.put("word", task_ids);
+    componentToTaskIds.put("word", taskIds);
     XORManager manager = XORManager.populateXORManager(looper,
         topology,
         3,
         componentToTaskIds);
 
     Map<Integer, RotatingMap> spoutTasksToRotatingMap = manager.getSpoutTasksToRotatingMap();
-    Assert.assertEquals(task_ids.size(), spoutTasksToRotatingMap.size());
-    Assert.assertEquals(new HashSet<>(task_ids), spoutTasksToRotatingMap.keySet());
+    Assert.assertEquals(taskIds.size(), spoutTasksToRotatingMap.size());
+    Assert.assertEquals(new HashSet<>(taskIds), spoutTasksToRotatingMap.keySet());
   }
 } 

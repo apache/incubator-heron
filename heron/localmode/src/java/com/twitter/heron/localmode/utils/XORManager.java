@@ -49,8 +49,8 @@ public class XORManager {
     };
     looper.registerTimerEventInNanoSeconds(timeoutSec * Constants.SECONDS_TO_NANOSECONDS, r);
 
-    this.rotateIntervalNs = Constants.SECONDS_TO_NANOSECONDS * timeoutSec / nBuckets +
-        (Constants.SECONDS_TO_NANOSECONDS * timeoutSec) % nBuckets;
+    this.rotateIntervalNs = Constants.SECONDS_TO_NANOSECONDS * timeoutSec / nBuckets
+        + (Constants.SECONDS_TO_NANOSECONDS * timeoutSec) % nBuckets;
 
     for (Integer taskId : taskIds) {
       spoutTasksToRotatingMap.put(taskId, new RotatingMap(nBuckets));
