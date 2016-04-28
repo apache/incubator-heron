@@ -15,4 +15,5 @@
 package backtype.storm.generated;
 
 public class InvalidTopologyException extends Exception {
+  private static final long serialVersionUID = 5434760981811196755L;
 }

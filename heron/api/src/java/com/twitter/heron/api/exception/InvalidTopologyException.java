@@ -15,4 +15,5 @@
 package com.twitter.heron.api.exception;
 
 public class InvalidTopologyException extends Exception {
+  private static final long serialVersionUID = 569757985177991157L;
 }

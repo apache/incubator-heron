@@ -56,6 +56,8 @@ public class LaunchRunnerTest {
   public static TopologyAPI.Topology createTopology(com.twitter.heron.api.Config heronConfig) {
     TopologyBuilder builder = new TopologyBuilder();
     builder.setSpout("spout-1", new BaseRichSpout() {
+      private static final long serialVersionUID = -762965195665496156L;
+
       public void declareOutputFields(OutputFieldsDeclarer declarer) {
       }
 
@@ -66,6 +68,8 @@ public class LaunchRunnerTest {
       }
     }, 2);
     builder.setBolt("bolt-1", new BaseBasicBolt() {
+      private static final long serialVersionUID = -5738458486388778812L;
+
       public void execute(Tuple input, BasicOutputCollector collector) {
       }
 

@@ -21,6 +21,8 @@ import com.twitter.heron.api.tuple.Fields;
 import static com.twitter.heron.api.utils.Utils.tuple;
 
 public class RawScheme implements Scheme {
+  private static final long serialVersionUID = 4975778817451590776L;
+
   public List<Object> deserialize(byte[] ser) {
     return tuple(ser);
   }

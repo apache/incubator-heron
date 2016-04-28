@@ -15,4 +15,5 @@
 package backtype.storm.generated;
 
 public class NotAliveException extends Exception {
+  private static final long serialVersionUID = -6138719666490739879L;
 }

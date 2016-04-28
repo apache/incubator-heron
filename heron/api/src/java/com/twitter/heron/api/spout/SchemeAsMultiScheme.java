@@ -20,6 +20,7 @@ import java.util.List;
 import com.twitter.heron.api.tuple.Fields;
 
 public class SchemeAsMultiScheme implements MultiScheme {
+  private static final long serialVersionUID = -7993224027057349150L;
   public final Scheme scheme;
 
   public SchemeAsMultiScheme(Scheme scheme) {

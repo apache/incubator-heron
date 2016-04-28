@@ -15,4 +15,5 @@
 package backtype.storm.generated;
 
 public class AlreadyAliveException extends Exception {
+  private static final long serialVersionUID = 1333504033150091277L;
 }

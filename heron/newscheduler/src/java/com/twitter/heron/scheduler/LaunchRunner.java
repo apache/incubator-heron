@@ -96,7 +96,7 @@ public class LaunchRunner implements Callable<Boolean> {
   public TopologyAPI.Topology trimTopology(TopologyAPI.Topology topology) {
 
     // create a copy of the topology physical plan
-    TopologyAPI.Topology.Builder builder = topology.newBuilder().mergeFrom(topology);
+    TopologyAPI.Topology.Builder builder = TopologyAPI.Topology.newBuilder().mergeFrom(topology);
 
     // clear the state of user spout java objects - which can be potentially huge
     for (TopologyAPI.Spout.Builder spout : builder.getSpoutsBuilderList()) {

@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class Fields implements Iterable<String>, Serializable {
+  private static final long serialVersionUID = -7503973062110993975L;
   private com.twitter.heron.api.tuple.Fields delegate;
 
   public Fields(String... fields) {
