@@ -23,21 +23,26 @@
 #if !defined(__ASSIGNABLE_METRIC_H_)
 #define __ASSIGNABLE_METRIC_H_
 
-namespace heron { namespace common {
+#include "metrics/imetric.h"
+#include "proto/messages.h"
+#include "basics/basics.h"
 
-class AssignableMetric : public IMetric
-{
+namespace heron {
+namespace common {
+
+class AssignableMetric : public IMetric {
  public:
-  AssignableMetric(sp_int64 _value);
+  explicit AssignableMetric(sp_int64 _value);
   virtual ~AssignableMetric();
 
   virtual void SetValue(sp_int64 _value);
   virtual void GetAndReset(const sp_string& _prefix,
                            proto::system::MetricPublisherPublishMessage* _message);
+
  private:
   sp_int64 value_;
 };
-
-}} // end namespace
+}  // namespace common
+}  // namespace heron
 
 #endif

@@ -20,36 +20,29 @@
 //
 // Please see mean-metric.cpp for details
 //////////////////////////////////////////////////////////////////////////////
+#include "metrics/mean-metric.h"
+#include <sstream>
+#include "metrics/imetric.h"
 #include "proto/messages.h"
 #include "basics/basics.h"
 #include "errors/errors.h"
 #include "threads/threads.h"
 #include "network/network.h"
 
-#include "metrics/imetric.h"
-#include "metrics/mean-metric.h"
+namespace heron {
+namespace common {
 
-#include <sstream>
+MeanMetric::MeanMetric() : numerator_(0.0), denominator_(0) {}
 
-namespace heron { namespace common {
+MeanMetric::~MeanMetric() {}
 
-MeanMetric::MeanMetric()
- : numerator_(0.0), denominator_(0)
-{
-}
-
-MeanMetric::~MeanMetric()
-{
-}
-
-void MeanMetric::record(sp_double64 _value)
-{
+void MeanMetric::record(sp_double64 _value) {
   numerator_ += _value;
   denominator_++;
 }
 
 void MeanMetric::GetAndReset(const sp_string& _prefix,
-                      proto::system::MetricPublisherPublishMessage* _message) {
+                             proto::system::MetricPublisherPublishMessage* _message) {
   sp_double64 result = 0.0;
   if (denominator_ > 0) {
     result = numerator_ / denominator_;
@@ -64,5 +57,5 @@ void MeanMetric::GetAndReset(const sp_string& _prefix,
   denominator_ = 0;
   numerator_ = 0.0;
 }
-
-}} // end namespace
+}  // namespace common
+}  // namespace heron

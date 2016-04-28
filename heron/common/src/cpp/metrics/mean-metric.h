@@ -23,22 +23,26 @@
 #ifndef __MEAN_METRIC_H_
 #define __MEAN_METRIC_H_
 
-namespace heron { namespace common {
+#include "metrics/imetric.h"
+#include "proto/messages.h"
+#include "basics/basics.h"
 
-class MeanMetric : public IMetric
-{
+namespace heron {
+namespace common {
+
+class MeanMetric : public IMetric {
  public:
   MeanMetric();
   virtual ~MeanMetric();
   void record(sp_double64 _value);
   virtual void GetAndReset(const sp_string& _prefix,
-                      proto::system::MetricPublisherPublishMessage* _message);
+                           proto::system::MetricPublisherPublishMessage* _message);
 
  private:
   sp_double64 numerator_;
   sp_int64 denominator_;
 };
-
-}} // end namespace
+}  // namespace common
+}  // namespace heron
 
 #endif

@@ -24,22 +24,26 @@
 #define __MULTI_COUNT_METRIC_H_
 
 #include <map>
+#include "metrics/count-metric.h"
+#include "metrics/imetric.h"
+#include "proto/messages.h"
+#include "basics/basics.h"
 
-namespace heron { namespace common {
+namespace heron {
+namespace common {
 
-class MultiCountMetric : public IMetric
-{
+class MultiCountMetric : public IMetric {
  public:
   MultiCountMetric();
   virtual ~MultiCountMetric();
   CountMetric* scope(const sp_string& _key);
   virtual void GetAndReset(const sp_string& _prefix,
-                      proto::system::MetricPublisherPublishMessage* _message);
+                           proto::system::MetricPublisherPublishMessage* _message);
 
  private:
   std::map<sp_string, CountMetric*> value_;
 };
-
-}} // end namespace
+}  // namespace common
+}  // namespace heron
 
 #endif

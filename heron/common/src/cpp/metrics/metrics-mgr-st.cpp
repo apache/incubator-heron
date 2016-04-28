@@ -20,41 +20,35 @@
 //
 // Please see metrics-mgr-st.h for details.
 //////////////////////////////////////////////////////
+#include "metrics/metrics-mgr-st.h"
+#include <map>
+#include "metrics/imetric.h"
+#include "metrics/metricsmgr-client.h"
 #include "proto/messages.h"
 #include "basics/basics.h"
 #include "errors/errors.h"
 #include "threads/threads.h"
 #include "network/network.h"
 
-#include "metrics/imetric.h"
-#include "metrics/metricsmgr-client.h"
-#include "metrics/metrics-mgr-st.h"
+namespace heron {
+namespace common {
 
-namespace heron { namespace common {
-
-MetricsMgrSt::MetricsMgrSt(const sp_string& _my_hostname,
-                           sp_int32 _my_port,
-                           sp_int32 _metricsmgr_port,
-                           const sp_string& _component,
-                           const sp_string& _task_id,
-                           sp_int32 _interval,
-                           EventLoop* eventLoop)
-{
+MetricsMgrSt::MetricsMgrSt(const sp_string& _my_hostname, sp_int32 _my_port,
+                           sp_int32 _metricsmgr_port, const sp_string& _component,
+                           const sp_string& _task_id, sp_int32 _interval, EventLoop* eventLoop) {
   NetworkOptions options;
   options.set_host("localhost");
   options.set_port(_metricsmgr_port);
   options.set_max_packet_size(1024 * 1024);
   options.set_socket_family(PF_INET);
-  client_ = new MetricsMgrClient(_my_hostname, _my_port, _component,
-                                 _task_id, eventLoop, options);
-  timer_cb_ = [this] (EventLoop::Status status) { this->gather_metrics(status); };
+  client_ = new MetricsMgrClient(_my_hostname, _my_port, _component, _task_id, eventLoop, options);
+  timer_cb_ = [this](EventLoop::Status status) { this->gather_metrics(status); };
   timerid_ = eventLoop->registerTimer(timer_cb_, true, _interval * 1000000);
-  CHECK(timerid_ >= 0);
+  CHECK_GE(timerid_, 0);
 }
 
-MetricsMgrSt::~MetricsMgrSt()
-{
-  CHECK(client_->getEventLoop()->unRegisterTimer(timerid_) == 0);
+MetricsMgrSt::~MetricsMgrSt() {
+  CHECK_EQ(client_->getEventLoop()->unRegisterTimer(timerid_), 0);
   delete client_;
   std::map<sp_string, IMetric*>::iterator iter;
   for (iter = metrics_.begin(); iter != metrics_.end(); ++iter) {
@@ -62,25 +56,20 @@ MetricsMgrSt::~MetricsMgrSt()
   }
 }
 
-void MetricsMgrSt::RefreshTMasterLocation(
-    const proto::tmaster::TMasterLocation& location) {
+void MetricsMgrSt::RefreshTMasterLocation(const proto::tmaster::TMasterLocation& location) {
   client_->SendTMasterLocation(location);
 }
 
-void MetricsMgrSt::register_metric(const sp_string& _metric_name,
-                                   IMetric* _metric)
-{
+void MetricsMgrSt::register_metric(const sp_string& _metric_name, IMetric* _metric) {
   metrics_[_metric_name] = _metric;
 }
 
-void MetricsMgrSt::unregister_metric(const sp_string& _metric_name)
-{
+void MetricsMgrSt::unregister_metric(const sp_string& _metric_name) {
   metrics_.erase(_metric_name);
 }
 
-void MetricsMgrSt::gather_metrics(EventLoop::Status)
-{
-  using namespace heron::proto::system;
+void MetricsMgrSt::gather_metrics(EventLoop::Status) {
+  using heron::proto::system::MetricPublisherPublishMessage;
 
   if (metrics_.empty()) return;
   MetricPublisherPublishMessage* message = new MetricPublisherPublishMessage();
@@ -90,5 +79,5 @@ void MetricsMgrSt::gather_metrics(EventLoop::Status)
   }
   client_->SendMetrics(message);
 }
-
-}} // end namespace
+}  // namespace common
+}  // namespace heron
