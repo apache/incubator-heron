@@ -35,8 +35,8 @@ public class TestWordSpout extends BaseRichSpout {
     this(true);
   }
 
-  public TestWordSpout(boolean isItDistributed) {
-    isDistributed = isItDistributed;
+  public TestWordSpout(boolean isDistributed) {
+    this.isDistributed = isDistributed;
   }
 
   public void open(Map conf, TopologyContext context, SpoutOutputCollector acollector) {
