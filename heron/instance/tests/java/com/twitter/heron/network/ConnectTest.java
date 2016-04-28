@@ -33,7 +33,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
@@ -166,7 +165,8 @@ public class ConnectTest {
       // Receive request
       IncomingPacket incomingPacket = new IncomingPacket();
       while (incomingPacket.readFromChannel(socketChannel) != 0) {
-        Utils.sleep(1);
+        // 1ms sleep to mitigate busy looping
+        SysUtils.sleep(1);
       }
 
       // Send back response

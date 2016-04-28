@@ -33,7 +33,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
@@ -165,7 +164,8 @@ public class HandleWriteTest {
       // Receive request
       IncomingPacket incomingPacket = new IncomingPacket();
       while (incomingPacket.readFromChannel(socketChannel) != 0) {
-        Utils.sleep(1);
+        // 1ms sleep to mitigate busy looping
+        SysUtils.sleep(1);
       }
 
       // Send back response
@@ -195,7 +195,8 @@ public class HandleWriteTest {
       for (int i = 0; i < 10; i++) {
         incomingPacket = new IncomingPacket();
         while (incomingPacket.readFromChannel(socketChannel) != 0) {
-          Utils.sleep(1);
+          // 1ms sleep to mitigate busy looping
+          SysUtils.sleep(1);
         }
         typeName = incomingPacket.unpackString();
         rid = incomingPacket.unpackREQID();
