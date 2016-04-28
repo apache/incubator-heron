@@ -52,6 +52,7 @@ public final class CustomGroupingTopology {
   }
 
   public static class MyBolt extends BaseRichBolt {
+    private static final long serialVersionUID = 1913733461146490337L;
     private long nItems;
 
     @Override
@@ -72,6 +73,7 @@ public final class CustomGroupingTopology {
   }
 
   public static class MyCustomStreamGrouping implements CustomStreamGrouping {
+    private static final long serialVersionUID = 5987557161936201860L;
     private List<Integer> taskIds;
 
     public MyCustomStreamGrouping() {
@@ -87,7 +89,7 @@ public final class CustomGroupingTopology {
 
     @Override
     public List<Integer> chooseTasks(int taskId, List<Object> values) {
-      List<Integer> ret = new ArrayList<Integer>();
+      List<Integer> ret = new ArrayList<>();
       ret.add(taskIds.get(0));
       return ret;
     }

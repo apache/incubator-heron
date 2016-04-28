@@ -70,13 +70,12 @@ public final class ComponentJVMOptionsTopology {
   }
 
   public static class ExclamationBolt extends BaseRichBolt {
-    private OutputCollector collector;
+    private static final long serialVersionUID = 2165326630789117557L;
     private long nItems;
     private long startTime;
 
     @Override
-    public void prepare(Map conf, TopologyContext context, OutputCollector acollector) {
-      collector = acollector;
+    public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
       nItems = 0;
       startTime = System.currentTimeMillis();
     }

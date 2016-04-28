@@ -20,6 +20,7 @@ import java.util.List;
 import backtype.storm.tuple.Fields;
 
 public class SchemeAsMultiScheme implements MultiScheme {
+  private static final long serialVersionUID = 5989937394124019502L;
   public final Scheme scheme;
 
   public SchemeAsMultiScheme(Scheme scheme) {

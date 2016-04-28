@@ -53,6 +53,8 @@ public final class TopologyTests {
       Map<String, String> connections) {
     TopologyBuilder builder = new TopologyBuilder();
     BaseRichSpout baseSpout = new BaseRichSpout() {
+      private static final long serialVersionUID = -719523487475322625L;
+
       public void declareOutputFields(OutputFieldsDeclarer declarer) {
         declarer.declare(new Fields("field1"));
       }
@@ -64,6 +66,8 @@ public final class TopologyTests {
       }
     };
     BaseBasicBolt basicBolt = new BaseBasicBolt() {
+      private static final long serialVersionUID = 2544765902130713628L;
+
       public void execute(Tuple input, BasicOutputCollector collector) {
       }
 

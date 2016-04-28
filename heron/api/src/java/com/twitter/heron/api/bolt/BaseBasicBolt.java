@@ -21,6 +21,8 @@ import com.twitter.heron.api.topology.TopologyContext;
 
 public abstract class BaseBasicBolt extends BaseComponent implements IBasicBolt {
 
+  private static final long serialVersionUID = 6585146860997305058L;
+
   @Override
   public void prepare(Map heronConf, TopologyContext context) {
   }

@@ -21,6 +21,8 @@ import backtype.storm.topology.IBasicBolt;
 
 public abstract class BaseBasicBolt extends BaseComponent implements IBasicBolt {
 
+  private static final long serialVersionUID = -1818037075120434390L;
+
   @Override
   public void prepare(Map stormConf, TopologyContext context) {
   }

@@ -228,6 +228,7 @@ public class CustomGroupingTest {
   }
 
   private static class MyCustomGrouping implements CustomStreamGrouping {
+    private static final long serialVersionUID = -4141962710451507976L;
     private volatile int emitted = 0;
 
     @Override
