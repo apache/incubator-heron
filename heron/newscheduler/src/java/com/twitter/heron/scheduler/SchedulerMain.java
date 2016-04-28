@@ -189,10 +189,11 @@ public class SchedulerMain {
     }
 
     // initialize the scheduler with the options
+    String topologyName = cmd.getOptionValue("topology_name");
     SchedulerMain schedulerMain = new SchedulerMain(cmd.getOptionValue("cluster"),
         cmd.getOptionValue("role"),
         cmd.getOptionValue("environment"),
-        cmd.getOptionValue("topology_name"),
+        topologyName,
         cmd.getOptionValue("topology_jar"),
         Integer.parseInt(cmd.getOptionValue("http_port")));
 
@@ -201,7 +202,15 @@ public class SchedulerMain {
     LOG.log(Level.INFO, "Loaded scheduler config: {0}", schedulerMain.config);
 
     // run the scheduler
-    schedulerMain.runScheduler();
+    boolean ret = schedulerMain.runScheduler();
+
+    // Log the result and exit
+    if (!ret) {
+      throw new RuntimeException("Failed to schedule topology: " + topologyName);
+    } else {
+      // stop the server and close the state manager
+      LOG.log(Level.INFO, "Shutting down topology: {0}", topologyName);
+    }
   }
 
   // Set up logging based on the Config
@@ -259,7 +268,7 @@ public class SchedulerMain {
    * @param runtime, the runtime configuration
    * @param schedulerServer, the http server that scheduler listens for receives requests
    */
-  private static void setSchedulerLocation(Config runtime, SchedulerServer schedulerServer) {
+  private boolean setSchedulerLocation(Config runtime, SchedulerServer schedulerServer) {
 
     // Set scheduler location to host:port by default. Overwrite scheduler location if behind DNS.
     Scheduler.SchedulerLocation location = Scheduler.SchedulerLocation.newBuilder()
@@ -270,27 +279,40 @@ public class SchedulerMain {
     LOG.log(Level.INFO, "Setting SchedulerLocation: {0}", location);
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
     Boolean result = statemgr.setSchedulerLocation(location, Runtime.topologyName(runtime));
+
     if (result == null || !result) {
-      throw new RuntimeException("Failed to set Scheduler location");
+      LOG.severe("Failed to set Scheduler location");
+      return false;
     }
+
+    return true;
   }
 
-  public void runScheduler() throws
-      ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
-
-    // create an instance of state manager
+  public boolean runScheduler() {
     String statemgrClass = Context.stateManagerClass(config);
-    IStateManager statemgr = (IStateManager) Class.forName(statemgrClass).newInstance();
+    IStateManager statemgr;
 
-    // create an instance of the packing class
     String packingClass = Context.packingClass(config);
-    IPacking packing = (IPacking) Class.forName(packingClass).newInstance();
+    IPacking packing;
 
-    // create an instance of scheduler
     String schedulerClass = Context.schedulerClass(config);
-    IScheduler scheduler = (IScheduler) Class.forName(schedulerClass).newInstance();
+    IScheduler scheduler;
+    try {
+      // create an instance of state manager
+      statemgr = (IStateManager) Class.forName(statemgrClass).newInstance();
+
+      // create an instance of the packing class
+      packing = (IPacking) Class.forName(packingClass).newInstance();
+
+      // create an instance of scheduler
+      scheduler = (IScheduler) Class.forName(schedulerClass).newInstance();
+    } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+      LOG.log(Level.SEVERE, "Failed to instantiate instances", e);
+      return false;
+    }
 
     SchedulerServer server = null;
+    boolean isSuccessful = false;
 
     // Put it in a try block so that we can always clean resources
     try {
@@ -327,24 +349,19 @@ public class SchedulerMain {
       // start the scheduler REST endpoint for receiving requests
       server = runServer(ytruntime, scheduler, schedulerServerPort);
 
-      // write the scheduler location to state manager.
-      setSchedulerLocation(runtime, server);
+      // write the scheduler location to state manager
+      isSuccessful = setSchedulerLocation(runtime, server);
 
       // schedule the packed plan
-      if (!scheduler.onSchedule(packedPlan)) {
-        throw new RuntimeException("Failed to scheduler topology");
-      }
+      isSuccessful = isSuccessful && scheduler.onSchedule(packedPlan);
 
       // wait until kill request or some interrupt occurs
       LOG.info("Waiting for termination... ");
       Runtime.schedulerShutdown(ytruntime).await();
 
-    } catch (Exception e) {
-      // Log and exit the process
-      LOG.log(Level.SEVERE, "Exception occurred", e);
-      LOG.log(Level.SEVERE, "Failed to run scheduler for topology: {0}. Exiting...", topology.getName());
-      System.exit(1);
-
+    } catch (IOException e) {
+      LOG.log(Level.SEVERE, "Failed to start server", e);
+      return false;
     } finally {
       // Clean the resources
       if (server != null) {
@@ -357,9 +374,6 @@ public class SchedulerMain {
       statemgr.close();
     }
 
-    // stop the server and close the state manager
-    LOG.log(Level.INFO, "Shutting down topology: {0}", topology.getName());
-
-    System.exit(0);
+    return isSuccessful;
   }
 }
