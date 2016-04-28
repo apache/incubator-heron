@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 
 import org.junit.Test;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class MiscTest {
   private static final Logger LOG = Logger.getLogger(MiscTest.class.getName());

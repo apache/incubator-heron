@@ -24,7 +24,7 @@ import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.common.Misc;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class LocalFileSystemConfigTest {
 

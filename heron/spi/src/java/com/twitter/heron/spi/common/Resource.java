@@ -34,6 +34,7 @@ public final class Resource {
    *
    * @return Map, a map of key value pairs
    */
+  @SuppressWarnings("rawtypes")
   public static Map load(String className, String resName) throws ClassNotFoundException {
     // get the current class
     Class cls = Class.forName(className);

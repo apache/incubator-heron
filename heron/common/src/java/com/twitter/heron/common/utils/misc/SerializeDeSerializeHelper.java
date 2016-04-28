@@ -28,7 +28,7 @@ public final class SerializeDeSerializeHelper {
   private SerializeDeSerializeHelper() {
   }
 
-  public static IPluggableSerializer getSerializer(Map config) {
+  public static IPluggableSerializer getSerializer(Map<String, Object> config) {
     IPluggableSerializer serializer;
     try {
       String serializerClassName = (String) config.get(Config.TOPOLOGY_SERIALIZER_CLASSNAME);

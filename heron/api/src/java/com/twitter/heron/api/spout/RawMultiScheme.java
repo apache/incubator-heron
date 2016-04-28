@@ -22,6 +22,8 @@ import static com.twitter.heron.api.utils.Utils.tuple;
 import static java.util.Arrays.asList;
 
 public class RawMultiScheme implements MultiScheme {
+  private static final long serialVersionUID = 1540454777373652254L;
+
   @Override
   public Iterable<List<Object>> deserialize(byte[] ser) {
     return asList(tuple(ser));

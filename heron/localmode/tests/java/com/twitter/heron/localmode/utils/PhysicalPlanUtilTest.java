@@ -40,7 +40,7 @@ import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.proto.system.PhysicalPlans;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 /**
  * PhysicalPlanGenerator Tester.
