@@ -54,6 +54,7 @@ public class TopologyContextImpl extends GeneralTopologyContextImpl implements T
   // List of task hooks to delegate
   private final List<ITaskHook> taskHooks;
 
+  @SuppressWarnings("unchecked")
   public TopologyContextImpl(Map<String, Object> clusterConfig,
                              TopologyAPI.Topology topology,
                              Map<Integer, String> taskToComponentMap,
@@ -61,10 +62,10 @@ public class TopologyContextImpl extends GeneralTopologyContextImpl implements T
     super(clusterConfig, topology, taskToComponentMap);
     this.metricsCollector = metricsCollector;
     this.myTaskId = myTaskId;
-    this.taskData = new HashMap<String, Object>();
+    this.taskData = new HashMap<>();
 
     // Init task hooks
-    this.taskHooks = new LinkedList<ITaskHook>();
+    this.taskHooks = new LinkedList<>();
     List<String> taskHooksClassNames =
         (List<String>) clusterConfig.get(Config.TOPOLOGY_AUTO_TASK_HOOKS);
 
@@ -288,6 +289,7 @@ public class TopologyContextImpl extends GeneralTopologyContextImpl implements T
    * Convenient method for registering ReducedMetric.
    */
   @Override
+  @SuppressWarnings("rawtypes")
   public ReducedMetric registerMetric(String name, IReducer reducer, int timeBucketSizeInSecs) {
     return registerMetric(name, new ReducedMetric(reducer), timeBucketSizeInSecs);
   }
@@ -296,11 +298,12 @@ public class TopologyContextImpl extends GeneralTopologyContextImpl implements T
    * Convinience method for registering CombinedMetric.
    */
   @Override
+  @SuppressWarnings("rawtypes")
   public CombinedMetric registerMetric(String name, ICombiner combiner, int timeBucketSizeInSecs) {
     return registerMetric(name, new CombinedMetric(combiner), timeBucketSizeInSecs);
   }
 
-    /*
+  /*
     TODO:- Do we really need this?
     public void setExecutorData(String name, Object data) {
         _executorData.put(name, data);

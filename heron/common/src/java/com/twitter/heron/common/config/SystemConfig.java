@@ -15,8 +15,6 @@
 package com.twitter.heron.common.config;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -307,7 +305,7 @@ public class SystemConfig {
   public static final String METRICSMGR_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE_BYTES
       = "heron.metricsmgr.network.options.socket.send.buffer.size.bytes";
 
-  private Map config = new HashMap<String, Object>();
+  private Map<String, Object> config = new HashMap<>();
 
   public SystemConfig() {
   }
@@ -316,21 +314,17 @@ public class SystemConfig {
     this(configFile, true);
   }
 
-  @SuppressWarnings("unchecked")
   public SystemConfig(String configFile, boolean mustExist) {
     super();
     this.config = findAndReadLocalFile(configFile, mustExist);
   }
 
-  @SuppressWarnings("unchecked")
-  public static Map findAndReadLocalFile(String name, boolean mustExist) {
-    try {
-      FileInputStream fin = new FileInputStream(new File(name));
-    } catch (IOException ioe) {
-      if (mustExist) {
-        throw new RuntimeException(ioe);
-      }
+  public static Map<String, Object> findAndReadLocalFile(String name, boolean mustExist) {
+    File file = new File(name);
+    if (!file.exists() && mustExist) {
+      throw new RuntimeException(String.format("Config file %s does not exist", name));
     }
+
     return ConfigReader.loadFile(name);
   }
 

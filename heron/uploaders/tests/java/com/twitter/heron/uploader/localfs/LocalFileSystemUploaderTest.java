@@ -25,7 +25,7 @@ import org.junit.Test;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 public class LocalFileSystemUploaderTest {
 

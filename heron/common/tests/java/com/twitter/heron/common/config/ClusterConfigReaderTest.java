@@ -26,12 +26,9 @@ public class ClusterConfigReaderTest {
 
   @Test
   public void testLoadClusterAndDefaultFiles() throws Exception {
-    ClusterConfigReader configReader = ClusterConfigReader.class.newInstance();
-
     String configPath = Paths.get(System.getenv("JAVA_RUNFILES"),
         Constants.TEST_DATA_PATH).toString();
-
-    Map props = configReader.load("cluster", configPath, "defaults.yaml");
+    Map<String, Object> props = ClusterConfigReader.load("cluster", configPath, "defaults.yaml");
     Assert.assertTrue(!props.isEmpty());
 
     Assert.assertEquals("role1", props.get(Constants.ROLE_KEY));
@@ -45,11 +42,9 @@ public class ClusterConfigReaderTest {
 
   @Test
   public void testLoadDefaultFile() throws Exception {
-    ClusterConfigReader configReader = ClusterConfigReader.class.newInstance();
-
     String configPath = Paths.get(System.getenv("JAVA_RUNFILES"),
         Constants.TEST_DATA_PATH).toString();
-    Map props = configReader.load("cluster", configPath, "defaults1.yaml");
+    Map<String, Object> props = ClusterConfigReader.load("cluster", configPath, "defaults1.yaml");
     Assert.assertTrue(!props.isEmpty());
 
     Assert.assertEquals("role", props.get(Constants.ROLE_KEY));
@@ -64,12 +59,9 @@ public class ClusterConfigReaderTest {
 
   @Test
   public void testLoadClusterFile() throws Exception {
-    ClusterConfigReader configReader = ClusterConfigReader.class.newInstance();
-
     String configPath = Paths.get(System.getenv("JAVA_RUNFILES"),
         Constants.TEST_DATA_PATH).toString();
-
-    Map props = configReader.load("cluster", configPath, "defaults2.yaml");
+    Map<String, Object> props = ClusterConfigReader.load("cluster", configPath, "defaults2.yaml");
     Assert.assertTrue(!props.isEmpty());
 
     Assert.assertEquals("role1", props.get(Constants.ROLE_KEY));
