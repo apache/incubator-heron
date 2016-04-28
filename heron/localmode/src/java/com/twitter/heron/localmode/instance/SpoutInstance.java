@@ -16,7 +16,6 @@ package com.twitter.heron.localmode.instance;
 
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.Config;
@@ -115,12 +114,10 @@ public class SpoutInstance implements IInstance {
   @Override
   public void start() {
     TopologyContextImpl topologyContext = helper.getTopologyContext();
-    try {
-      GlobalMetrics.init(topologyContext, systemConfig.getHeronMetricsExportIntervalSec());
-    } catch (RuntimeException e) {
-      LOG.log(Level.SEVERE, "Failed to initialize GlobalMetrics. Global Metrics will be lost."
-          + "Check the version of heron-api used.", e);
-    }
+
+    // Initialize the GlobalMetrics
+    GlobalMetrics.init(topologyContext, systemConfig.getHeronMetricsExportIntervalSec());
+
     spoutMetrics.registerMetrics(topologyContext);
 
     spout.open(topologyContext.getTopologyConfig(), topologyContext,
@@ -224,9 +221,9 @@ public class SpoutInstance implements IInstance {
     long maxSpoutPending = Utils.getLong(config.get(Config.TOPOLOGY_MAX_SPOUT_PENDING));
     return topologyState.equals(TopologyAPI.TopologyState.RUNNING)
         && ((!ackEnabled && collector.isOutQueuesAvailable())
-            || (ackEnabled && collector.isOutQueuesAvailable()
-                && collector.numInFlight() < maxSpoutPending)
-            || (ackEnabled && !streamInQueue.isEmpty()));
+        || (ackEnabled && collector.isOutQueuesAvailable()
+        && collector.numInFlight() < maxSpoutPending)
+        || (ackEnabled && !streamInQueue.isEmpty()));
   }
 
   /**
