@@ -18,7 +18,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
-import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
@@ -220,10 +219,7 @@ public class HandleReadTest {
       }
 
       Assert.assertEquals("ABABABABAB", res);
-    } catch (ClosedByInterruptException ignored) {
     } catch (ClosedChannelException ignored) {
-    } catch (Exception e) {
-      e.printStackTrace();
     } finally {
       close(socketChannel);
     }
@@ -289,8 +285,9 @@ public class HandleReadTest {
               inStreamQueue, outStreamQueue, inControlQueue, socketOptions, gatewayMetrics);
           streamManagerClient.start();
           nioLooper.loop();
-        } catch (Exception ignored) {
-
+        } finally {
+          streamManagerClient.stop();
+          nioLooper.exitLoop();
         }
       }
     };
