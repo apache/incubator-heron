@@ -20,40 +20,29 @@
 //
 // Please see count-metric.h for details
 //////////////////////////////////////////////////////////////////////////////
+
+#include "metrics/count-metric.h"
+#include <sstream>
+#include "metrics/imetric.h"
 #include "proto/messages.h"
 #include "basics/basics.h"
 #include "errors/errors.h"
 #include "threads/threads.h"
 #include "network/network.h"
 
-#include "metrics/imetric.h"
-#include "metrics/count-metric.h"
+namespace heron {
+namespace common {
 
-#include <sstream>
+CountMetric::CountMetric() : value_(0) {}
 
-namespace heron { namespace common {
+CountMetric::~CountMetric() {}
 
-CountMetric::CountMetric()
-  : value_(0)
-{
-}
+void CountMetric::incr() { value_++; }
 
-CountMetric::~CountMetric()
-{
-}
-
-void CountMetric::incr()
-{
-  value_++;
-}
-
-void CountMetric::incr_by(sp_int64 _by)
-{
-  value_ += _by;
-}
+void CountMetric::incr_by(sp_int64 _by) { value_ += _by; }
 
 void CountMetric::GetAndReset(const sp_string& _prefix,
-                      proto::system::MetricPublisherPublishMessage* _message) {
+                              proto::system::MetricPublisherPublishMessage* _message) {
   std::ostringstream o;
   o << value_;
   value_ = 0;
@@ -61,5 +50,5 @@ void CountMetric::GetAndReset(const sp_string& _prefix,
   d->set_name(_prefix);
   d->set_value(o.str());
 }
-
-}} // end namespace
+}  // namespace common
+}  // namespace heron

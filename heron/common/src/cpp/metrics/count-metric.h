@@ -23,10 +23,14 @@
 #ifndef __COUNT_METRIC_H_
 #define __COUNT_METRIC_H_
 
-namespace heron { namespace common {
+#include "metrics/imetric.h"
+#include "proto/messages.h"
+#include "basics/basics.h"
 
-class CountMetric : public IMetric
-{
+namespace heron {
+namespace common {
+
+class CountMetric : public IMetric {
  public:
   CountMetric();
   virtual ~CountMetric();
@@ -34,10 +38,11 @@ class CountMetric : public IMetric
   void incr_by(sp_int64 _by);
   virtual void GetAndReset(const sp_string& _prefix,
                            proto::system::MetricPublisherPublishMessage* _message);
+
  private:
   sp_int64 value_;
 };
-
-}} // end namespace
+}  // namespace common
+}  // namespace heron
 
 #endif
