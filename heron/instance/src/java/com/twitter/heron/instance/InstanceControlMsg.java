@@ -16,7 +16,7 @@ package com.twitter.heron.instance;
 
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
 
-public class InstanceControlMsg {
+public final class InstanceControlMsg {
   private PhysicalPlanHelper newPhysicalPlanHelper;
 
   private InstanceControlMsg(Builder builder) {
@@ -35,15 +35,15 @@ public class InstanceControlMsg {
     return newPhysicalPlanHelper != null;
   }
 
-  public static class Builder {
+  public static final class Builder {
     private PhysicalPlanHelper newPhysicalPlanHelper;
 
     private Builder() {
 
     }
 
-    public Builder setNewPhysicalPlanHelper(PhysicalPlanHelper newPhysicalPlanHelper) {
-      this.newPhysicalPlanHelper = newPhysicalPlanHelper;
+    public Builder setNewPhysicalPlanHelper(PhysicalPlanHelper physicalPlanHelper) {
+      this.newPhysicalPlanHelper = physicalPlanHelper;
       return this;
     }
 
