@@ -28,7 +28,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SysUtils;
@@ -201,10 +200,13 @@ public class HeronServerTest {
    */
   @Test
   public void testHandleConnect() throws Exception {
-    ExpectedException exception = ExpectedException.none();
-
-    exception.expect(RuntimeException.class);
-    heronServer.handleConnect(null);
+    boolean throwException = false;
+    try {
+      heronServer.handleConnect(null);
+    } catch (RuntimeException re) {
+      throwException = true;
+    }
+    Assert.assertTrue(throwException);
   }
 
   /**
@@ -388,7 +390,7 @@ public class HeronServerTest {
 
   private class SimpleHeronServer extends HeronServer {
 
-    SimpleHeronServer(NIOLooper s, String host, int port) {
+    public SimpleHeronServer(NIOLooper s, String host, int port) {
       super(s, host, port, new HeronSocketOptions(100 * 1024 * 1024, 100,
           100 * 1024 * 1024, 100,
           5 * 1024 * 1024,
@@ -397,8 +399,8 @@ public class HeronServerTest {
 
     @Override
     public void onConnect(SocketChannel socketChannel) {
-      LOG.info("Server got a new connection from host:port:"
-          + socketChannel.socket().getRemoteSocketAddress());
+      LOG.info("Server got a new connection from host:port:" +
+          socketChannel.socket().getRemoteSocketAddress());
       isOnConnectedInvoked = true;
 
       // We only register request when we need to test on sendResponse or sendMessage
@@ -460,7 +462,7 @@ public class HeronServerTest {
   }
 
   private class SimpleHeronClient extends HeronClient {
-    SimpleHeronClient(NIOLooper looper, String host, int port) {
+    public SimpleHeronClient(NIOLooper looper, String host, int port) {
       super(looper, host, port,
           new HeronSocketOptions(100 * 1024 * 1024, 100,
               100 * 1024 * 1024, 100,
