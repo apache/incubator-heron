@@ -34,7 +34,12 @@ public class AuroraController {
   private final String env;
   private final boolean isVerbose;
 
-  public AuroraController(String jobName, String cluster, String role, String env, boolean isVerbose) {
+  public AuroraController(
+      String jobName,
+      String cluster,
+      String role,
+      String env,
+      boolean isVerbose) {
     this.jobName = jobName;
     this.cluster = cluster;
     this.role = role;
@@ -43,8 +48,9 @@ public class AuroraController {
   }
 
   // Static method to append verbose and batching options if needed
-  public static void appendAuroraCommandOptions(List<String> auroraCmd,
-                                                boolean isVerbose) {
+  public static void appendAuroraCommandOptions(
+      List<String> auroraCmd,
+      boolean isVerbose) {
     // Append verbose if needed
     if (isVerbose) {
       auroraCmd.add("--verbose");
@@ -60,8 +66,11 @@ public class AuroraController {
   }
 
   // Create an aurora job
-  public boolean createJob(String auroraFilename, Map<String, String> bindings) {
-    List<String> auroraCmd = new ArrayList<>(Arrays.asList("aurora", "job", "create", "--wait-until", "RUNNING"));
+  public boolean createJob(
+      String auroraFilename,
+      Map<String, String> bindings) {
+    List<String> auroraCmd =
+        new ArrayList<>(Arrays.asList("aurora", "job", "create", "--wait-until", "RUNNING"));
 
     for (Map.Entry<String, String> binding : bindings.entrySet()) {
       auroraCmd.add("--bind");

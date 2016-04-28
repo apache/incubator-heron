@@ -1,3 +1,17 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.twitter.heron.scheduler.aurora;
 
 import java.io.File;
@@ -26,10 +40,19 @@ public class AuroraScheduler implements IScheduler {
   private AuroraController controller;
 
   @Override
-  public void initialize(Config config, Config runtime) {
-    this.config = config;
-    this.runtime = runtime;
-    this.controller = new AuroraController(
+  public void initialize(Config mConfig, Config mRuntime) {
+    this.config = mConfig;
+    this.runtime = mRuntime;
+    this.controller = getController();
+  }
+
+  /**
+   * Get an AuroraControl basing on the config and runtime
+   *
+   * @return AuroraControl
+   */
+  protected AuroraController getController() {
+    return new AuroraController(
         Runtime.topologyName(runtime),
         Context.cluster(config),
         Context.role(config),
@@ -94,16 +117,20 @@ public class AuroraScheduler implements IScheduler {
     auroraProperties.put("SANDBOX_EXECUTOR_BINARY", Context.executorSandboxBinary(config));
     auroraProperties.put("TOPOLOGY_NAME", topology.getName());
     auroraProperties.put("TOPOLOGY_ID", topology.getId());
-    auroraProperties.put("TOPOLOGY_DEFINITION_FILE", FileUtils.getBaseName(Context.topologyDefinitionFile(config)));
+    auroraProperties.put("TOPOLOGY_DEFINITION_FILE",
+        FileUtils.getBaseName(Context.topologyDefinitionFile(config)));
     auroraProperties.put("INSTANCE_DISTRIBUTION", TopologyUtils.packingToString(packing));
-    auroraProperties.put("STATEMGR_CONNECTION_STRING", Context.stateManagerConnectionString(config));
+    auroraProperties.put("STATEMGR_CONNECTION_STRING",
+        Context.stateManagerConnectionString(config));
     auroraProperties.put("STATEMGR_ROOT_PATH", Context.stateManagerRootPath(config));
     auroraProperties.put("SANDBOX_TMASTER_BINARY", Context.tmasterSandboxBinary(config));
     auroraProperties.put("SANDBOX_STMGR_BINARY", Context.stmgrSandboxBinary(config));
-    auroraProperties.put("SANDBOX_METRICSMGR_CLASSPATH", Context.metricsManagerSandboxClassPath(config));
+    auroraProperties.put("SANDBOX_METRICSMGR_CLASSPATH",
+        Context.metricsManagerSandboxClassPath(config));
     auroraProperties.put("INSTANCE_JVM_OPTS_IN_BASE64",
         formatJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)));
-    auroraProperties.put("TOPOLOGY_CLASSPATH", TopologyUtils.makeClassPath(topology, Context.topologyJarFile(config)));
+    auroraProperties.put("TOPOLOGY_CLASSPATH",
+        TopologyUtils.makeClassPath(topology, Context.topologyJarFile(config)));
 
     auroraProperties.put("SANDBOX_SYSTEM_YAML", Context.systemConfigSandboxFile(config));
     auroraProperties.put("COMPONENT_RAMMAP",
