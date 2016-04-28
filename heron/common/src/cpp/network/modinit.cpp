@@ -23,11 +23,6 @@
 
 sp_int32 __nifty_network_modinit::count_ = 0;
 
-__nifty_network_modinit::__nifty_network_modinit()
-{
-  event_init();
-}
+__nifty_network_modinit::__nifty_network_modinit() { event_init(); }
 
-__nifty_network_modinit::~__nifty_network_modinit()
-{
-}
+__nifty_network_modinit::~__nifty_network_modinit() {}

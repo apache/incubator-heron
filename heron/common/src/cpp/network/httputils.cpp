@@ -15,7 +15,7 @@
  */
 
 ////////////////////////////////////////////////////////////////////////////////
-// Implements the HTTPRequest and HTTPResponse functions and some utility 
+// Implements the HTTPRequest and HTTPResponse functions and some utility
 // functions
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -23,10 +23,11 @@
 #include <stdlib.h>
 #include <sys/queue.h>
 #include <evhttp.h>
+#include <string>
+#include <vector>
 #include "glog/logging.h"
 
-std::unordered_map<char, sp_string> PopulateEncodeMap()
-{
+std::unordered_map<char, sp_string> PopulateEncodeMap() {
   std::unordered_map<char, sp_string> retval;
   retval[' '] = "%20";
   retval['<'] = "%3C";
@@ -56,8 +57,7 @@ std::unordered_map<char, sp_string> PopulateEncodeMap()
 
 std::unordered_map<char, sp_string> BaseHTTPRequest::httpencodemap_ = PopulateEncodeMap();
 
-static sp_string ExtractHostAndPort(const sp_string& _host, sp_int32& _port)
-{
+static sp_string ExtractHostAndPort(const sp_string& _host, sp_int32& _port) {
   size_t sz = _host.find(":");
   if (sz == std::string::npos) {
     _port = 80;
@@ -73,18 +73,12 @@ static sp_string ExtractHostAndPort(const sp_string& _host, sp_int32& _port)
   }
 }
 
-BaseHTTPRequest::BaseHTTPRequest(HTTPRequestType _type)
-{
-  type_ = _type;
-}
+BaseHTTPRequest::BaseHTTPRequest(HTTPRequestType _type) { type_ = _type; }
 
-BaseHTTPRequest::~BaseHTTPRequest()
-{
-}
+BaseHTTPRequest::~BaseHTTPRequest() {}
 
-BaseHTTPRequest::HTTPRequestType GetRequestType(evhttp_cmd_type _type)
-{
-  switch(_type) {
+BaseHTTPRequest::HTTPRequestType GetRequestType(evhttp_cmd_type _type) {
+  switch (_type) {
     case EVHTTP_REQ_GET:
       return BaseHTTPRequest::GET;
     case EVHTTP_REQ_POST:
@@ -103,8 +97,7 @@ BaseHTTPRequest::HTTPRequestType GetRequestType(evhttp_cmd_type _type)
 // decode a possibly encoded value passed via http.  Based loosely on
 // evhttp_decode_uri from libevent but is modified because of several
 // bugs in the libevent code.
-sp_string BaseHTTPRequest::http_decode(const sp_string& value)
-{
+sp_string BaseHTTPRequest::http_decode(const sp_string& value) {
   char c;
   sp_string retval;
 
@@ -112,20 +105,18 @@ sp_string BaseHTTPRequest::http_decode(const sp_string& value)
     c = value[i];
     if (c == '+') {
       retval.push_back(' ');
-    }
-    else if (c == '%') {
-      if ((i+2)<value.size() &&
-          isxdigit((unsigned char)value[i + 1]) && isxdigit((unsigned char)value[i + 2])) {
-       char tmp[] = { value[i + 1], value[i + 2], '\0' };
-       retval.push_back((char)strtol(tmp, NULL, 16));
-       i += 2;
+    } else if (c == '%') {
+      if ((i + 2) < value.size() && isxdigit((unsigned char)value[i + 1]) &&
+          isxdigit((unsigned char)value[i + 2])) {
+        char tmp[] = {value[i + 1], value[i + 2], '\0'};
+        retval.push_back(static_cast<char>(strtol(tmp, NULL, 16)));
+        i += 2;
       } else {
-      	// if we got a '%' but there is not enough chars left in the string
-      	// or it is not a encoded value
-      	retval.push_back(c);
+        // if we got a '%' but there is not enough chars left in the string
+        // or it is not a encoded value
+        retval.push_back(c);
       }
-    }
-    else {
+    } else {
       retval.push_back(c);
     }
   }
@@ -133,8 +124,7 @@ sp_string BaseHTTPRequest::http_decode(const sp_string& value)
   return std::string(retval);
 }
 
-sp_string BaseHTTPRequest::http_encode(const sp_string& _value)
-{
+sp_string BaseHTTPRequest::http_encode(const sp_string& _value) {
   sp_string retval;
   for (size_t i = 0; i < _value.size(); ++i) {
     if (httpencodemap_.find(_value[i]) == httpencodemap_.end()) {
@@ -150,19 +140,16 @@ sp_string BaseHTTPRequest::http_encode(const sp_string& _value)
 // checks for invalid line feeds... which stops us from handling 'textarea'
 // form entries that are multi-line.  So we will use our own.  Based on the
 // code in libevent/http.c but customised.
-sp_string BaseHTTPRequest::parse_query(const char* _uri)
-{
+sp_string BaseHTTPRequest::parse_query(const char* _uri) {
   std::string parsed_uri;
   if (strchr(_uri, '?') == NULL)
     parsed_uri = http_decode(std::string(_uri));
   else
-    parsed_uri = http_decode(std::string(_uri, strchr(_uri,'?') - _uri));
+    parsed_uri = http_decode(std::string(_uri, strchr(_uri, '?') - _uri));
   return parsed_uri;
 }
 
-void BaseHTTPRequest::parse_keyvalues(HTTPKeyValuePairs& _params,
-                                      const char* _data)
-{
+void BaseHTTPRequest::parse_keyvalues(HTTPKeyValuePairs& _params, const char* _data) {
   const char* argument = _data;
 
   while (argument != NULL && *argument != '\0') {
@@ -170,7 +157,7 @@ void BaseHTTPRequest::parse_keyvalues(HTTPKeyValuePairs& _params,
     if (!value) return;
     sp_string key = std::string(argument, value - argument);
     key = http_decode(key);
-    value++;   // move past =
+    value++;  // move past =
     if (!value || *value == '\0') {
       _params.push_back(make_pair(key, ""));
       return;
@@ -188,25 +175,22 @@ void BaseHTTPRequest::parse_keyvalues(HTTPKeyValuePairs& _params,
   return;
 }
 
-sp_string BaseHTTPRequest::encode_keyvalues(std::unordered_map<sp_string, sp_string>& _kv)
-{
+sp_string BaseHTTPRequest::encode_keyvalues(std::unordered_map<sp_string, sp_string>& _kv) {
   std::ostringstream encoded;
   std::unordered_map<sp_string, sp_string>::iterator kvpair;
 
   kvpair = _kv.begin();
   encoded << http_encode(kvpair->first) << "=" << http_encode(kvpair->second);
 
-  for ( ; kvpair != _kv.end(); kvpair++) {
+  for (; kvpair != _kv.end(); kvpair++) {
     encoded << "&" << http_encode(kvpair->first) << "=" << http_encode(kvpair->second);
   }
 
   return encoded.str();
 }
 
-bool BaseHTTPRequest::ExtractHostNameAndQuery(const sp_string& _url,
-                                              sp_string& _host, sp_int32& _port,
-                                              sp_string& _uri)
-{
+bool BaseHTTPRequest::ExtractHostNameAndQuery(const sp_string& _url, sp_string& _host,
+                                              sp_int32& _port, sp_string& _uri) {
   const sp_string prefix = "http://";
   size_t sz = _url.find(prefix);
   if (sz != 0) return false;
@@ -228,15 +212,13 @@ bool BaseHTTPRequest::ExtractHostNameAndQuery(const sp_string& _url,
 }
 
 IncomingHTTPRequest::IncomingHTTPRequest(struct evhttp_request* _request)
-  : BaseHTTPRequest(GetRequestType(_request->type))
-{
+    : BaseHTTPRequest(GetRequestType(_request->type)) {
   request_ = _request;
   query_ = parse_query(request_->uri);
   if (request_->type == EVHTTP_REQ_POST || request_->type == EVHTTP_REQ_PUT) {
     const char* content_type = evhttp_find_header(_request->input_headers, "Content-Type");
-    if (!content_type ||
-        strcmp(content_type, "application/x-www-form-urlencoded") == 0) {
-      char* bufdata = (char*) EVBUFFER_DATA(request_->input_buffer);
+    if (!content_type || strcmp(content_type, "application/x-www-form-urlencoded") == 0) {
+      char* bufdata =  reinterpret_cast<char*>(EVBUFFER_DATA(request_->input_buffer));
       size_t buflen = EVBUFFER_LENGTH(request_->input_buffer);
       std::string body = std::string(bufdata, buflen);
       parse_keyvalues(kv_, body.c_str());
@@ -253,17 +235,11 @@ IncomingHTTPRequest::IncomingHTTPRequest(struct evhttp_request* _request)
   }
 }
 
-IncomingHTTPRequest::~IncomingHTTPRequest()
-{
-}
+IncomingHTTPRequest::~IncomingHTTPRequest() {}
 
-const sp_string& IncomingHTTPRequest::GetQuery() const
-{
-  return query_;
-}
+const sp_string& IncomingHTTPRequest::GetQuery() const { return query_; }
 
-const sp_string& IncomingHTTPRequest::GetValue(const sp_string& _key) const
-{
+const sp_string& IncomingHTTPRequest::GetValue(const sp_string& _key) const {
   for (size_t i = 0; i < kv_.size(); ++i) {
     if (kv_[i].first == _key) {
       return kv_[i].second;
@@ -273,8 +249,7 @@ const sp_string& IncomingHTTPRequest::GetValue(const sp_string& _key) const
 }
 
 bool IncomingHTTPRequest::GetAllValues(const sp_string& _key,
-                                       std::vector<sp_string>& _values) const
-{
+                                       std::vector<sp_string>& _values) const {
   bool retval = false;
   for (size_t i = 0; i < kv_.size(); ++i) {
     if (kv_[i].first == _key) {
@@ -285,16 +260,13 @@ bool IncomingHTTPRequest::GetAllValues(const sp_string& _key,
   return retval;
 }
 
-void IncomingHTTPRequest::AddValue(const sp_string& _key,
-                                   const sp_string& _value)
-{
+void IncomingHTTPRequest::AddValue(const sp_string& _key, const sp_string& _value) {
   kv_.push_back(make_pair(_key, _value));
 }
 
 // returns the value of the given header attribute
 const sp_string IncomingHTTPRequest::GetHeader(const sp_string& _key) {
-  const char* header =
-                 evhttp_find_header(request_->input_headers, _key.c_str());
+  const char* header = evhttp_find_header(request_->input_headers, _key.c_str());
   if (header) {
     return header;
   } else {
@@ -302,37 +274,30 @@ const sp_string IncomingHTTPRequest::GetHeader(const sp_string& _key) {
   }
 }
 
-unsigned char* IncomingHTTPRequest::ExtractFromPostData(sp_int32 _start,
-                                               sp_uint32 _len)
-{
+unsigned char* IncomingHTTPRequest::ExtractFromPostData(sp_int32 _start, sp_uint32 _len) {
   unsigned char* contig_buffer = evbuffer_pullup(request_->input_buffer, _start + _len);
   return contig_buffer + _start;
 }
 
 // IP address of the source endpoint of this request
-sp_string IncomingHTTPRequest::GetRemoteHost()
-{
+sp_string IncomingHTTPRequest::GetRemoteHost() {
   sp_string x_forwarded_for = GetHeader("X-Forwarded-For");
   if (x_forwarded_for.empty()) {
     return request_->remote_host;
   } else {
     if (x_forwarded_for.find(',') == std::string::npos) {
       return x_forwarded_for;
-    } else{
+    } else {
       return std::string(x_forwarded_for, 0, x_forwarded_for.find(','));
     }
   }
 }
 
 // Port of the source endpoint of this request
-sp_int32 IncomingHTTPRequest::GetRemotePort()
-{
-  return request_->remote_port;
-}
+sp_int32 IncomingHTTPRequest::GetRemotePort() { return request_->remote_port; }
 
 // Calculate the total payload size for the request
-sp_int32 IncomingHTTPRequest::GetRequestSize()
-{
+sp_int32 IncomingHTTPRequest::GetRequestSize() {
   std::string uri = request_->uri;
   sp_int32 uri_size = uri.length() * sizeof(char);
 
@@ -349,76 +314,55 @@ sp_int32 IncomingHTTPRequest::GetRequestSize()
   return uri_size + headers_size + EVBUFFER_LENGTH(request_->input_buffer);
 }
 
-sp_int32 IncomingHTTPRequest::GetPayloadSize()
-{
-  return EVBUFFER_LENGTH(request_->input_buffer);
-}
+sp_int32 IncomingHTTPRequest::GetPayloadSize() { return EVBUFFER_LENGTH(request_->input_buffer); }
 
-OutgoingHTTPRequest::OutgoingHTTPRequest(const sp_string& _host,
-                            sp_int32 _port,
-                            const sp_string& _uri,
-                            BaseHTTPRequest::HTTPRequestType _type,
-                            const HTTPKeyValuePairs& _kvs)
-  : BaseHTTPRequest(_type)
-{
+OutgoingHTTPRequest::OutgoingHTTPRequest(const sp_string& _host, sp_int32 _port,
+                                         const sp_string& _uri,
+                                         BaseHTTPRequest::HTTPRequestType _type,
+                                         const HTTPKeyValuePairs& _kvs)
+    : BaseHTTPRequest(_type) {
   host_ = _host;
   port_ = _port;
   query_ = _uri;
   kv_ = _kvs;
 }
 
-OutgoingHTTPRequest::~OutgoingHTTPRequest()
-{
-}
+OutgoingHTTPRequest::~OutgoingHTTPRequest() {}
 
-void OutgoingHTTPRequest::AddValue(const sp_string& _key, const sp_string& _value)
-{
+void OutgoingHTTPRequest::AddValue(const sp_string& _key, const sp_string& _value) {
   kv_.push_back(make_pair(_key, _value));
 }
 
-void OutgoingHTTPRequest::SetHeader(const sp_string& _key, const sp_string& _value)
-{
+void OutgoingHTTPRequest::SetHeader(const sp_string& _key, const sp_string& _value) {
   header_[_key] = _value;
 }
 
-void OutgoingHTTPRequest::ExtendQuery(const sp_string& _body)
-{
-  query_ += "?" + _body;
-}
+void OutgoingHTTPRequest::ExtendQuery(const sp_string& _body) { query_ += "?" + _body; }
 
 OutgoingHTTPResponse::OutgoingHTTPResponse(IncomingHTTPRequest* _request)
-  : response_(_request->request_)
-{
+    : response_(_request->request_) {}
+
+OutgoingHTTPResponse::~OutgoingHTTPResponse() {}
+
+void OutgoingHTTPResponse::AddResponse(const sp_string& _str) {
+  CHECK_GE(evbuffer_add_printf(response_->output_buffer, "%s", _str.c_str()), 0);
 }
 
-OutgoingHTTPResponse::~OutgoingHTTPResponse()
-{
+void OutgoingHTTPResponse::AddHeader(const sp_string& _key, const sp_string& _value) {
+  CHECK_EQ(evhttp_add_header(response_->output_headers, _key.c_str(), _value.c_str()), 0);
 }
 
-void OutgoingHTTPResponse::AddResponse(const sp_string& _str)
-{
-  CHECK(evbuffer_add_printf(response_->output_buffer, "%s", _str.c_str()) >= 0);
-}
-
-void OutgoingHTTPResponse::AddHeader(const sp_string& _key,
-                                     const sp_string& _value)
-{
-  CHECK(evhttp_add_header(response_->output_headers,
-                              _key.c_str(), _value.c_str()) == 0);
-}
-
-IncomingHTTPResponse::IncomingHTTPResponse(struct evhttp_request* _response)
-{
+IncomingHTTPResponse::IncomingHTTPResponse(struct evhttp_request* _response) {
   response_code_ = -1;
   if (_response) {
     response_code_ = _response->response_code;
-    char* bufdata = (char*) EVBUFFER_DATA(_response->input_buffer);
+    char* bufdata = reinterpret_cast<char*>(EVBUFFER_DATA(_response->input_buffer));
     size_t buflen = EVBUFFER_LENGTH(_response->input_buffer);
     body_ = std::string(bufdata, buflen);
     struct evkeyval* header;
     TAILQ_FOREACH(header, _response->input_headers, next) {
       sp_string hdr = header->key;
-      for (size_t i = 0 ; i < hdr.size(); ++i) {
+      for (size_t i = 0; i < hdr.size(); ++i) {
         hdr[i] = tolower(hdr[i]);
       }
       headers_[hdr] = header->value;
@@ -426,12 +370,9 @@ IncomingHTTPResponse::IncomingHTTPResponse(struct evhttp_request* _response)
   }
 }
 
-IncomingHTTPResponse::~IncomingHTTPResponse()
-{
-}
+IncomingHTTPResponse::~IncomingHTTPResponse() {}
 
-sp_string IncomingHTTPResponse::header(const sp_string& _key)
-{
+sp_string IncomingHTTPResponse::header(const sp_string& _key) {
   sp_string key;
   for (size_t i = 0; i < _key.size(); ++i) {
     key.push_back(tolower(_key[i]));

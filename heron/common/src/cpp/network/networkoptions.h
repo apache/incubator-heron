@@ -24,8 +24,7 @@
  * One can specify things like which host/port to bind on.
  * whats the maximum packet length allowed and so on.
  */
-class NetworkOptions
-{
+class NetworkOptions {
  public:
   NetworkOptions();
   NetworkOptions(const NetworkOptions& _copyFrom);
@@ -79,6 +78,4 @@ class NetworkOptions
   std::string sin_path_;
 };
 
-
-#endif // NETWORKOPTIONS_H_
-
+#endif  // NETWORKOPTIONS_H_

@@ -26,11 +26,10 @@
 #ifndef ASYNCDNS_H_
 #define ASYNCDNS_H_
 
-#include <vector>
 #include <functional>
+#include <vector>
 #include "network/event_loop.h"
 #include "basics/basics.h"
-
 
 // Forward declaration
 struct evdns_base;
@@ -38,8 +37,7 @@ struct evdns_base;
 /*
  * AsyncDNS class definition
  */
-class AsyncDNS
-{
+class AsyncDNS {
  public:
   // User supplied callbacks are supplied with a status upon invokation.
   enum Status {
@@ -55,7 +53,7 @@ class AsyncDNS
   };
 
   // Constructor/Destructor
-  AsyncDNS(EventLoop* eventLoop);
+  explicit AsyncDNS(EventLoop* eventLoop);
   ~AsyncDNS();
 
   // The main interface function.
@@ -63,12 +61,13 @@ class AsyncDNS
   sp_int32 Resolve(const sp_string& _address, VCallback<Result> _cb);
 
   //! Accessor function
-  struct evdns_base* dns() { return dns_; }
+  struct evdns_base* dns() {
+    return dns_;
+  }
 
  private:
-
   // The underlying dispatcher that we wrap around.
   struct evdns_base* dns_;
 };
 
-#endif // ASYNCDNS_H_
+#endif  // ASYNCDNS_H_

@@ -34,10 +34,8 @@
 class IncomingHTTPRequest;
 class OutgoingHTTPResponse;
 
-class HTTPServer
-{
+class HTTPServer {
  public:
-
   // Constructor
   // The Constructor simply inits the member variable.
   // Users must call Start method to start sending/receiving packets.
@@ -69,7 +67,7 @@ class HTTPServer
 
   // The underlying http server from libevent
   struct evhttp* http_;
-  std::vector<std::pair<sp_string, sp_int32> > hostports_;
+  std::vector<std::pair<sp_string, sp_int32>> hostports_;
   std::unordered_map<sp_string, VCallback<IncomingHTTPRequest*>> cbs_;
   VCallback<IncomingHTTPRequest*> generic_cb_;
   NetworkOptions options_;
@@ -79,4 +77,4 @@ class HTTPServer
   friend void HTTPServerRequestCallback(struct evhttp_request*, void*);
 };
 
-#endif // HTTPSERVER_H_
+#endif  // HTTPSERVER_H_
