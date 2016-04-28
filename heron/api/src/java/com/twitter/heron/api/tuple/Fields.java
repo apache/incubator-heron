@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 public class Fields implements Iterable<String>, Serializable {
+  private static final long serialVersionUID = -1045737418722082345L;
+
   private List<String> fields;
   private Map<String, Integer> mIndex = new HashMap<String, Integer>();
 

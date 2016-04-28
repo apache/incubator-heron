@@ -46,6 +46,7 @@ import org.junit.Assert;
  * PhysicalPlanGenerator Tester.
  */
 public class PhysicalPlanUtilTest implements Serializable {
+  private static final long serialVersionUID = -8532695494712446731L;
   public static final String TOPOLOGY_NAME = "topology-name";
   public static final String TOPOLOGY_ID = "topology-id";
 
@@ -70,6 +71,8 @@ public class PhysicalPlanUtilTest implements Serializable {
     TopologyBuilder topologyBuilder = new TopologyBuilder();
 
     topologyBuilder.setSpout("word", new BaseRichSpout() {
+      private static final long serialVersionUID = 5406114907377311020L;
+
       @Override
       public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
         outputFieldsDeclarer.declare(new Fields("word"));
@@ -89,6 +92,8 @@ public class PhysicalPlanUtilTest implements Serializable {
     }, 2);
 
     topologyBuilder.setBolt("exclaim", new BaseBasicBolt() {
+      private static final long serialVersionUID = 4398578755681473899L;
+
       @Override
       public void execute(Tuple tuple, BasicOutputCollector basicOutputCollector) {
 

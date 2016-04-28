@@ -21,6 +21,8 @@ import java.util.ArrayList;
  * syntax.
  */
 public class Values extends ArrayList<Object> {
+  private static final long serialVersionUID = 1863659070473283575L;
+
   public Values() {
   }
 

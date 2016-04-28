@@ -66,7 +66,7 @@ public final class TaskHookTopology {
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
 
     // Set the task hook
-    List<String> taskHooks = new LinkedList<String>();
+    List<String> taskHooks = new LinkedList<>();
     taskHooks.add("com.twitter.heron.examples.TaskHookTopology$TestTaskHook");
     conf.setAutoTaskHooks(taskHooks);
 
@@ -183,6 +183,7 @@ public final class TaskHookTopology {
   }
 
   public static class AckingTestWordSpout extends BaseRichSpout {
+    private static final long serialVersionUID = 6702214894823377325L;
     private SpoutOutputCollector collector;
     private String[] words;
     private Random rand;
@@ -223,6 +224,7 @@ public final class TaskHookTopology {
   }
 
   public static class CountBolt extends BaseRichBolt {
+    private static final long serialVersionUID = 851874677718634075L;
     private OutputCollector collector;
     private long nItems;
     private long startTime;
