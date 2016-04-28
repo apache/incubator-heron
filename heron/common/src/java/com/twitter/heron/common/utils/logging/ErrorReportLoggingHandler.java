@@ -102,13 +102,13 @@ public class ErrorReportLoggingHandler extends Handler {
     System.out.print(ExceptionRepositoryAsMetrics.INSTANCE.getValue().toString());
   }
 
-  // Exception will be stroed in this Metrics. Use of metrics simplify exporting the error to
+  // Exception will be stored in this Metrics. Use of metrics simplify exporting the error to
   // metrics manager.
-  public static enum ExceptionRepositoryAsMetrics implements IMetric {
+  public enum ExceptionRepositoryAsMetrics implements IMetric {
     INSTANCE;
     private HashMap<String, Metrics.ExceptionData.Builder> exceptionStore;
 
-    private ExceptionRepositoryAsMetrics() {
+    ExceptionRepositoryAsMetrics() {
       exceptionStore = new HashMap<String, Metrics.ExceptionData.Builder>();
     }
 
@@ -131,7 +131,8 @@ public class ErrorReportLoggingHandler extends Handler {
 
     // Returns ExceptionData.Builder object for the trace.
     public Metrics.ExceptionData.Builder getExceptionInfo(String trace) {
-      Metrics.ExceptionData.Builder exceptionDataBuilder = exceptionStore.get(getExceptionLocation(trace));
+      Metrics.ExceptionData.Builder exceptionDataBuilder =
+          exceptionStore.get(getExceptionLocation(trace));
       if (exceptionDataBuilder == null) {
         exceptionDataBuilder = Metrics.ExceptionData.newBuilder();
         exceptionDataBuilder.setFirsttime(new Date().toString());

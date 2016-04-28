@@ -30,8 +30,12 @@ import java.util.logging.SimpleFormatter;
  * A helper class to init corresponding LOGGER setting
  * Credits: https://blogs.oracle.com/nickstephen/entry/java_redirecting_system_out_and
  */
-public class LoggingHelper {
-  static public void loggerInit(Level level, boolean isRedirectStdOutErr) throws IOException {
+public final class LoggingHelper {
+
+  private LoggingHelper() {
+  }
+
+  public static void loggerInit(Level level, boolean isRedirectStdOutErr) throws IOException {
     // Configure the root logger and its handlers so that all the
     // derived loggers will inherit the properties
     Logger rootLogger = Logger.getLogger("");
@@ -66,7 +70,7 @@ public class LoggingHelper {
     }
   }
 
-  static public void addLoggingHandler(Handler handler) {
+  public static void addLoggingHandler(Handler handler) {
     Logger.getLogger("").addHandler(handler);
   }
 
@@ -95,7 +99,7 @@ public class LoggingHelper {
    * @throws IllegalArgumentException if {@code limit < 0}, or {@code count < 1}.
    * @throws IllegalArgumentException if pattern is an empty string
    */
-  static public FileHandler getFileHandler(String processId,
+  public static FileHandler getFileHandler(String processId,
                                            String loggingDir,
                                            boolean append,
                                            int limit,
@@ -111,16 +115,16 @@ public class LoggingHelper {
     return fileHandler;
   }
 
-  public static class StdOutErrLevel extends Level {
+  public static final class StdOutErrLevel extends Level {
     /**
      * Level for STDOUT activity.
      */
-    public static Level STDOUT =
+    public static final Level STDOUT =
         new StdOutErrLevel("STDOUT", Level.INFO.intValue() + 53);
     /**
      * Level for STDERR activity
      */
-    public static Level STDERR =
+    public static final Level STDERR =
         new StdOutErrLevel("STDERR", Level.INFO.intValue() + 54);
     /**
      * Private constructor
@@ -139,10 +143,12 @@ public class LoggingHelper {
      */
     protected Object readResolve()
         throws ObjectStreamException {
-      if (this.intValue() == STDOUT.intValue())
+      if (this.intValue() == STDOUT.intValue()) {
         return STDOUT;
-      if (this.intValue() == STDERR.intValue())
+      }
+      if (this.intValue() == STDERR.intValue()) {
         return STDERR;
+      }
       throw new InvalidObjectException("Unknown instance :" + this);
     }
   }

@@ -23,7 +23,11 @@ import com.twitter.heron.api.serializer.KryoSerializer;
 /**
  * Get the serializer according to the serializerClassName
  */
-public class SerializeDeSerializeHelper {
+public final class SerializeDeSerializeHelper {
+
+  private SerializeDeSerializeHelper() {
+  }
+
   public static IPluggableSerializer getSerializer(Map config) {
     IPluggableSerializer serializer;
     try {
@@ -36,11 +40,12 @@ public class SerializeDeSerializeHelper {
       serializer.initialize(config);
       return serializer;
     } catch (ClassNotFoundException ex) {
-      throw new RuntimeException(ex + " Serializer class must be in class path.");
+      throw new RuntimeException("Serializer class must be in class path " + ex);
     } catch (InstantiationException ex) {
-      throw new RuntimeException(ex + " Serializer class must be concrete and have a nullary constructor");
+      throw new RuntimeException(
+          "Serializer class must be concrete and have a nullary constructor " + ex);
     } catch (IllegalAccessException ex) {
-      throw new RuntimeException(ex + " Serializer class constructor must be public");
+      throw new RuntimeException("Serializer class constructor must be public " + ex);
     }
   }
 }

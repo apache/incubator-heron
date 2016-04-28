@@ -40,6 +40,7 @@ public class PhysicalPlanHelper {
   private final String hostname;
   private final String myInstanceId;
   private final TopologyAPI.Component component;
+
   // Map from streamid to number of fields in that stream's schema
   private final Map<String, Integer> outputSchema;
   private final CustomStreamGroupingHelper customGrouper;
@@ -48,6 +49,9 @@ public class PhysicalPlanHelper {
   private TopologyAPI.Bolt myBolt;
   private TopologyContextImpl topologyContext;
 
+  /**
+   * Constructor for physical plan helper
+   */
   public PhysicalPlanHelper(
       PhysicalPlans.PhysicalPlan pplan,
       String instanceId) {
@@ -121,7 +125,8 @@ public class PhysicalPlanHelper {
             && inputStream.getGtype() == TopologyAPI.Grouping.CUSTOM) {
           // This dude takes my output in custom grouping manner
           CustomStreamGrouping customStreamGrouping =
-              (CustomStreamGrouping) Utils.deserialize(inputStream.getCustomGroupingJavaObject().toByteArray());
+              (CustomStreamGrouping) Utils.deserialize(
+                  inputStream.getCustomGroupingJavaObject().toByteArray());
           customGrouper.add(inputStream.getStream().getId(),
               GetTaskIdsAsListForComponent(topo.getBolts(i).getComp().getName()),
               customStreamGrouping, myComponent);
@@ -185,13 +190,13 @@ public class PhysicalPlanHelper {
   }
 
   public void setTopologyContext(MetricsCollector metricsCollector) {
-    topologyContext = new TopologyContextImpl(constructConfig(pplan.getTopology().getTopologyConfig(), component),
-        pplan.getTopology(),
-        makeTaskToComponentMap(), myTaskId, metricsCollector);
+    topologyContext =
+        new TopologyContextImpl(constructConfig(pplan.getTopology().getTopologyConfig(), component),
+            pplan.getTopology(), makeTaskToComponentMap(), myTaskId, metricsCollector);
   }
 
   private Map<String, Object> constructConfig(TopologyAPI.Config config,
-                                              TopologyAPI.Component component) {
+                                              TopologyAPI.Component acomponent) {
     Map<String, Object> retval = new HashMap<String, Object>();
     for (TopologyAPI.Config.KeyValue kv : config.getKvsList()) {
       if (kv.hasValue()) {
@@ -201,7 +206,7 @@ public class PhysicalPlanHelper {
       }
     }
     // Override any component specific configs
-    for (TopologyAPI.Config.KeyValue kv : component.getConfig().getKvsList()) {
+    for (TopologyAPI.Config.KeyValue kv : acomponent.getConfig().getKvsList()) {
       if (kv.hasValue()) {
         retval.put(kv.getKey(), kv.getValue());
       } else {
@@ -238,3 +243,4 @@ public class PhysicalPlanHelper {
     return customGrouper.chooseTasks(streamId, values);
   }
 }
+
