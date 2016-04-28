@@ -18,7 +18,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
-import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
@@ -93,9 +92,11 @@ public class HandleWriteTest {
   }
 
   static void close(Closeable sc2) {
-    if (sc2 != null) try {
-      sc2.close();
-    } catch (IOException ignored) {
+    if (sc2 != null) {
+      try {
+        sc2.close();
+      } catch (IOException ignored) {
+      }
     }
   }
 
@@ -142,6 +143,9 @@ public class HandleWriteTest {
     threadsPool = null;
   }
 
+  /**
+   * Test write into network
+   */
   @Test
   public void testHandleWrite() throws Exception {
     ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
@@ -159,7 +163,8 @@ public class HandleWriteTest {
       // Receive request
       IncomingPacket incomingPacket = new IncomingPacket();
       while (incomingPacket.readFromChannel(socketChannel) != 0) {
-
+        // 1ms sleep to mitigate busy looping
+        SysUtils.sleep(1);
       }
 
       // Send back response
@@ -189,7 +194,8 @@ public class HandleWriteTest {
       for (int i = 0; i < 10; i++) {
         incomingPacket = new IncomingPacket();
         while (incomingPacket.readFromChannel(socketChannel) != 0) {
-
+          // 1ms sleep to mitigate busy looping
+          SysUtils.sleep(1);
         }
         typeName = incomingPacket.unpackString();
         rid = incomingPacket.unpackREQID();
@@ -205,15 +211,13 @@ public class HandleWriteTest {
         Assert.assertEquals(2, response.getPplan().getInstancesCount());
         Assert.assertEquals(1, response.getPplan().getTopology().getBoltsCount());
         Assert.assertEquals(1, response.getPplan().getTopology().getSpoutsCount());
-        Assert.assertEquals(TopologyAPI.TopologyState.RUNNING, response.getPplan().getTopology().getState());
+        Assert.assertEquals(TopologyAPI.TopologyState.RUNNING,
+            response.getPplan().getTopology().getState());
       }
 
       nioLooper.exitLoop();
 
-    } catch (ClosedByInterruptException ignored) {
     } catch (ClosedChannelException ignored) {
-    } catch (Exception e) {
-      e.printStackTrace();
     } finally {
       close(socketChannel);
     }
@@ -242,8 +246,9 @@ public class HandleWriteTest {
               inStreamQueue, outStreamQueue, inControlQueue, socketOptions, gatewayMetrics);
           streamManagerClient.start();
           nioLooper.loop();
-        } catch (Exception ignored) {
-
+        } finally {
+          streamManagerClient.stop();
+          nioLooper.exitLoop();
         }
       }
     };

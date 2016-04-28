@@ -38,12 +38,15 @@ import com.twitter.heron.resource.Constants;
 import com.twitter.heron.resource.UnitTestHelper;
 
 public class ActivateDeactivateTest {
-  static final String spoutInstanceId = "spout-id";
-  SlaveLooper slaveLooper;
+  private static final String SPOUT_INSTANCE_ID = "spout-id";
+  private SlaveLooper slaveLooper;
+
   // Singleton to be changed globally for testing
-  PhysicalPlans.PhysicalPlan physicalPlan;
+  private PhysicalPlans.PhysicalPlan physicalPlan;
+
   // Only one outStreamQueue, which is responsible for both control tuples and data tuples
   private Communicator<HeronTuples.HeronTupleSet> outStreamQueue;
+
   // This blocking queue is used to buffer tuples read from socket and ready to be used by instance
   // For spout, it will buffer Control tuple, while for bolt, it will buffer data tuple.
   private Communicator<HeronTuples.HeronTupleSet> inStreamQueue;
@@ -97,7 +100,7 @@ public class ActivateDeactivateTest {
   public void testActivateAndDeactivate() throws Exception {
     physicalPlan = UnitTestHelper.getPhysicalPlan(true, -1, TopologyAPI.TopologyState.RUNNING);
 
-    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, spoutInstanceId);
+    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, SPOUT_INSTANCE_ID);
     InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder().
         setNewPhysicalPlanHelper(physicalPlanHelper).
         build();
@@ -118,7 +121,7 @@ public class ActivateDeactivateTest {
     // Now the activateCount and deactivateCount should be 0
     // And we start the test
     physicalPlan = UnitTestHelper.getPhysicalPlan(true, -1, TopologyAPI.TopologyState.PAUSED);
-    physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, spoutInstanceId);
+    physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, SPOUT_INSTANCE_ID);
     instanceControlMsg = InstanceControlMsg.newBuilder().
         setNewPhysicalPlanHelper(physicalPlanHelper).
         build();
@@ -130,7 +133,7 @@ public class ActivateDeactivateTest {
     Assert.assertEquals(1, deactivateCount.get());
 
     physicalPlan = UnitTestHelper.getPhysicalPlan(true, -1, TopologyAPI.TopologyState.RUNNING);
-    physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, spoutInstanceId);
+    physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, SPOUT_INSTANCE_ID);
     instanceControlMsg = InstanceControlMsg.newBuilder().
         setNewPhysicalPlanHelper(physicalPlanHelper).
         build();
