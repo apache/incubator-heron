@@ -24,7 +24,7 @@ import com.twitter.heron.api.serializer.KryoSerializer;
  * Get the serializer according to the serializerClassName
  */
 public class SerializeDeSerializeHelper {
-  public static IPluggableSerializer getSerializer(Map config) {
+  public static IPluggableSerializer getSerializer(Map<String, Object> config) {
     IPluggableSerializer serializer;
     try {
       String serializerClassName = (String) config.get(Config.TOPOLOGY_SERIALIZER_CLASSNAME);

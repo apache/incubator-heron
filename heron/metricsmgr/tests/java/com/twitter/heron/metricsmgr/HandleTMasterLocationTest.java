@@ -40,7 +40,7 @@ import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 /**
  * Test whether MetricsManagerServer could handle TMasterLocationRefreshMessage correctly.

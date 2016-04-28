@@ -24,7 +24,7 @@ import org.junit.Test;
 
 import com.twitter.heron.proto.system.HeronTuples;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 /**
  * AllGrouping Tester.

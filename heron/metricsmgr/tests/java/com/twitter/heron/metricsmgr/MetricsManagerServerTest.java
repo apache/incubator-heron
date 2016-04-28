@@ -37,7 +37,7 @@ import com.twitter.heron.spi.metricsmgr.metrics.ExceptionInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 /**
  * MetricsManagerServer Tester.

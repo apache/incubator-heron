@@ -31,7 +31,7 @@ import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 
 /**

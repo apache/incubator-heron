@@ -281,7 +281,6 @@ public final class HttpUtils {
     while (retryLeft > 0) {
       try (Socket s = new Socket()) {
         s.connect(new InetSocketAddress(host, port), timeout);
-        s.close();
         return true;
       } catch (SocketTimeoutException se) {
         if (verbose) {

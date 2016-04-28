@@ -28,7 +28,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 /**
  * FileUtils Tester.

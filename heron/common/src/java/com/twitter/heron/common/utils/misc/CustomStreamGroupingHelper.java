@@ -28,7 +28,7 @@ public class CustomStreamGroupingHelper {
   private final Map<String, List<Target>> targets;
 
   public CustomStreamGroupingHelper() {
-    targets = new HashMap<String, List<Target>>();
+    targets = new HashMap<>();
   }
 
   public void add(String streamId, List<Integer> taskIds, CustomStreamGrouping grouping, String sourceComponentName) {
@@ -39,9 +39,9 @@ public class CustomStreamGroupingHelper {
   }
 
   public void prepare(TopologyContext context) {
-    Iterator iterator = targets.entrySet().iterator();
+    Iterator<Map.Entry<String, List<Target>>> iterator = targets.entrySet().iterator();
     while (iterator.hasNext()) {
-      Map.Entry<String, List<Target>> entry = (Map.Entry<String, List<Target>>) iterator.next();
+      Map.Entry<String, List<Target>> entry = iterator.next();
       for (Target target : entry.getValue()) {
         target.prepare(context, entry.getKey());
       }
@@ -51,7 +51,7 @@ public class CustomStreamGroupingHelper {
   public List<Integer> chooseTasks(String streamId, List<Object> values) {
     List<Target> targetList = targets.get(streamId);
     if (targetList != null) {
-      List<Integer> res = new ArrayList<Integer>();
+      List<Integer> res = new ArrayList<>();
       for (Target target : targetList) {
         res.addAll(target.chooseTasks(values));
       }

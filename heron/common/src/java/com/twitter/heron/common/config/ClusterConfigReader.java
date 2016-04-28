@@ -26,13 +26,13 @@ import java.util.logging.Logger;
 public final class ClusterConfigReader extends ConfigReader {
   private static final Logger LOG = Logger.getLogger(ClusterConfigReader.class.getName());
 
-  public static Map load(String cluster, String configPath, String fileName) {
-    Map config = new HashMap<String, Object>();
+  public static Map<String, Object> load(String cluster, String configPath, String fileName) {
+    Map<String, Object> config = new HashMap<>();
 
     // Read the defaults file, first
     String file1 = Paths.get(configPath, fileName).toString();
     LOG.info("Cluster " + cluster + " config file " + file1 + "\n");
-    Map props1 = loadFile(file1);
+    Map<String, Object> props1 = loadFile(file1);
 
     if (props1 == null) {
       LOG.info("props1 is null \n");
@@ -44,7 +44,7 @@ public final class ClusterConfigReader extends ConfigReader {
 
     // Read the cluster specific file and override
     String file2 = Paths.get(configPath, cluster, fileName).toString();
-    Map props2 = loadFile(file2);
+    Map<String, Object> props2 = loadFile(file2);
     if (props2.isEmpty()) {
       LOG.info("Config file " + file2 + " is empty");
     }
