@@ -25,13 +25,15 @@
 #ifndef TOPOLOGY_CONFIG_READER_H_
 #define TOPOLOGY_CONFIG_READER_H_
 
-namespace heron { namespace config {
+#include "config/yaml-file-reader.h"
+#include "proto/messages.h"
 
-class TopologyConfigReader : public YamlFileReader
-{
+namespace heron {
+namespace config {
+
+class TopologyConfigReader : public YamlFileReader {
  public:
-  TopologyConfigReader(EventLoop* eventLoop,
-                       const sp_string& _defaults_file);
+  TopologyConfigReader(EventLoop* eventLoop, const sp_string& _defaults_file);
   virtual ~TopologyConfigReader();
 
   // Fill topology config with default values in case
@@ -40,7 +42,7 @@ class TopologyConfigReader : public YamlFileReader
 
   virtual void OnConfigFileLoad();
 };
-
-}} // end namespace
+}  // namespace config
+}  // namespace heron
 
 #endif

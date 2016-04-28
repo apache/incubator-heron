@@ -24,13 +24,12 @@
 #ifndef OPERATIONAL_CONFIG_READER_H_
 #define OPERATIONAL_CONFIG_READER_H_
 
-namespace heron { namespace config {
+namespace heron {
+namespace config {
 
-class OperationalConfigReader : public YamlFileReader
-{
+class OperationalConfigReader : public YamlFileReader {
  public:
-  OperationalConfigReader(EventLoop* eventLoop,
-                          const sp_string& _defaults_file);
+  OperationalConfigReader(EventLoop* eventLoop, const sp_string& _defaults_file);
   virtual ~OperationalConfigReader();
 
   // Gets release override for this topology name
@@ -39,7 +38,7 @@ class OperationalConfigReader : public YamlFileReader
 
   virtual void OnConfigFileLoad();
 };
-
-}} // end namespace
+}  // namespace config
+}  // namespace heron
 
 #endif

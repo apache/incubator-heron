@@ -17,22 +17,22 @@
 ////////////////////////////////////////////////////////////////
 //
 // metrics-sinks-vars.h
-// 
+//
 // This is the metrics sinks configuration parameter names
-// 
+//
 ///////////////////////////////////////////////////////////////
 #ifndef METRICS_SINKS_VARS_H_
 #define METRICS_SINKS_VARS_H_
 
-namespace heron { namespace config {
+namespace heron {
+namespace config {
 
-class MetricsSinksVars
-{
+class MetricsSinksVars {
  public:
   static const sp_string METRICS_SINKS_TMASTER_SINK;
   static const sp_string METRICS_SINKS_TMASTER_METRICS;
 };
-
-}} // end namespace
+}  // namespace config
+}  // namespace heron
 
 #endif

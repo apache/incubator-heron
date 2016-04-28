@@ -1,32 +1,42 @@
-#include "yaml-cpp/yaml.h"
-#include "proto/messages.h"
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
+#include "config/topology-config-reader.h"
+#include <set>
 #include "basics/basics.h"
-#include "errors/errors.h"
-#include "threads/threads.h"
-#include "network/network.h"
-
 #include "config/yaml-file-reader.h"
 #include "config/topology-config-vars.h"
-#include "config/topology-config-reader.h"
+#include "errors/errors.h"
+#include "network/network.h"
+#include "proto/messages.h"
+#include "threads/threads.h"
+#include "yaml-cpp/yaml.h"
 
-#include <set>
 
-namespace heron { namespace config {
+namespace heron {
+namespace config {
 
-TopologyConfigReader::TopologyConfigReader(EventLoop* eventLoop,
-                                           const sp_string& _defaults_file)
-  : YamlFileReader(eventLoop, _defaults_file)
-{
+TopologyConfigReader::TopologyConfigReader(EventLoop* eventLoop, const sp_string& _defaults_file)
+    : YamlFileReader(eventLoop, _defaults_file) {
   LoadConfig();
 }
 
-TopologyConfigReader::~TopologyConfigReader()
-{
-}
+TopologyConfigReader::~TopologyConfigReader() {}
 
-void TopologyConfigReader::BackFillTopologyConfig(proto::api::Topology* _topology)
-{
+void TopologyConfigReader::BackFillTopologyConfig(proto::api::Topology* _topology) {
   // Construct a temporary set
   std::set<sp_string> topology_config;
   if (_topology->has_topology_config()) {
@@ -37,8 +47,7 @@ void TopologyConfigReader::BackFillTopologyConfig(proto::api::Topology* _topolog
   }
 
   // Fill in the user variables
-  for (YAML::const_iterator iter = config_.begin();
-       iter != config_.end(); ++iter) {
+  for (YAML::const_iterator iter = config_.begin(); iter != config_.end(); ++iter) {
     if (topology_config.find(iter->first.as<sp_string>()) == topology_config.end()) {
       // We need to backfill this variable
       proto::api::Config::KeyValue* kv = _topology->mutable_topology_config()->add_kvs();
@@ -48,8 +57,7 @@ void TopologyConfigReader::BackFillTopologyConfig(proto::api::Topology* _topolog
   }
 }
 
-void TopologyConfigReader::OnConfigFileLoad()
-{
+void TopologyConfigReader::OnConfigFileLoad() {
   AddIfMissing(TopologyConfigVars::TOPOLOGY_DEBUG, "false");
   AddIfMissing(TopologyConfigVars::TOPOLOGY_STMGRS, "1");
   AddIfMissing(TopologyConfigVars::TOPOLOGY_MESSAGE_TIMEOUT_SECS, "30");
@@ -58,5 +66,5 @@ void TopologyConfigReader::OnConfigFileLoad()
   AddIfMissing(TopologyConfigVars::TOPOLOGY_ENABLE_ACKING, "false");
   AddIfMissing(TopologyConfigVars::TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS, "true");
 }
-
-}} // end namespace
+}  // namespace config
+}  // namespace heron
