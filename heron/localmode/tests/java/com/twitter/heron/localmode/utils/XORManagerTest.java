@@ -39,7 +39,7 @@ import junit.framework.Assert;
  */
 public class XORManagerTest {
 
-  private static final List<Integer> taskIds = new LinkedList<>();
+  private static List<Integer> taskIds = new LinkedList<>();
   private static TopologyAPI.Topology topology;
   private static int timeoutSec = 1;
   private static int nBuckets = 3;
@@ -69,8 +69,8 @@ public class XORManagerTest {
    */
   @Test
   public void testXORManagerMethods() throws Exception {
-    long rotateIntervalNs = Constants.SECONDS_TO_NANOSECONDS * timeoutSec / nBuckets +
-        (Constants.SECONDS_TO_NANOSECONDS * timeoutSec) % nBuckets;
+    long rotateIntervalNs = Constants.SECONDS_TO_NANOSECONDS * timeoutSec / nBuckets
+        + (Constants.SECONDS_TO_NANOSECONDS * timeoutSec) % nBuckets;
 
     WakeableLooper looper = Mockito.mock(WakeableLooper.class);
 
@@ -91,33 +91,33 @@ public class XORManagerTest {
     }
 
     // layered anchoring
-    List<Long> things_added = new LinkedList<>();
+    List<Long> thingsAdded = new LinkedList<>();
     Random random = new Random();
-    Long first_key = random.nextLong();
-    g.create(1, 1, first_key);
-    things_added.add(first_key);
+    Long firstKey = random.nextLong();
+    g.create(1, 1, firstKey);
+    thingsAdded.add(firstKey);
     for (int j = 1; j < 100; ++j) {
       long key = random.nextLong();
-      things_added.add(key);
+      thingsAdded.add(key);
       Assert.assertEquals(g.anchor(1, 1, key), false);
     }
 
     // xor ing works
     for (int j = 0; j < 99; ++j) {
-      Assert.assertEquals(g.anchor(1, 1, things_added.get(j)), false);
+      Assert.assertEquals(g.anchor(1, 1, thingsAdded.get(j)), false);
     }
 
-    Assert.assertEquals(g.anchor(1, 1, things_added.get(99)), true);
+    Assert.assertEquals(g.anchor(1, 1, thingsAdded.get(99)), true);
     Assert.assertEquals(g.remove(1, 1), true);
 
     // Same test with some rotation
-    List<Long> one_added = new LinkedList<>();
-    first_key = random.nextLong();
-    g.create(1, 1, first_key);
-    one_added.add(first_key);
+    List<Long> oneAdded = new LinkedList<>();
+    firstKey = random.nextLong();
+    g.create(1, 1, firstKey);
+    oneAdded.add(firstKey);
     for (int j = 1; j < 100; ++j) {
       long key = random.nextLong();
-      one_added.add(key);
+      oneAdded.add(key);
       Assert.assertEquals(g.anchor(1, 1, key), false);
     }
 
@@ -125,21 +125,21 @@ public class XORManagerTest {
     Mockito.verify(looper).registerTimerEventInNanoSeconds(Mockito.eq(rotateIntervalNs),
         Mockito.any(Runnable.class));
     for (int j = 0; j < 99; ++j) {
-      Assert.assertEquals(g.anchor(1, 1, one_added.get(j)), false);
+      Assert.assertEquals(g.anchor(1, 1, oneAdded.get(j)), false);
     }
 
-    Assert.assertEquals(g.anchor(1, 1, one_added.get(99)), true);
+    Assert.assertEquals(g.anchor(1, 1, oneAdded.get(99)), true);
     Assert.assertEquals(g.remove(1, 1), true);
 
 
     // Same test with too much rotation
-    List<Long> two_added = new LinkedList<>();
-    first_key = random.nextLong();
-    g.create(2, 1, first_key);
-    two_added.add(first_key);
+    List<Long> twoAdded = new LinkedList<>();
+    firstKey = random.nextLong();
+    g.create(2, 1, firstKey);
+    twoAdded.add(firstKey);
     for (int j = 1; j < 100; ++j) {
       long key = random.nextLong();
-      two_added.add(key);
+      twoAdded.add(key);
       Assert.assertEquals(g.anchor(2, 1, key), false);
     }
 
@@ -148,11 +148,11 @@ public class XORManagerTest {
       g.rotate();
     }
     // We expected (nBuckets+1) since we have done one rotate earlier
-    Mockito.verify(looper, Mockito.times(nBuckets + 1)).registerTimerEventInNanoSeconds(Mockito.eq(rotateIntervalNs),
-        Mockito.any(Runnable.class));
+    Mockito.verify(looper, Mockito.times(nBuckets + 1)).registerTimerEventInNanoSeconds(
+        Mockito.eq(rotateIntervalNs), Mockito.any(Runnable.class));
 
     for (int j = 0; j < 100; ++j) {
-      Assert.assertEquals(g.anchor(2, 1, two_added.get(j)), false);
+      Assert.assertEquals(g.anchor(2, 1, twoAdded.get(j)), false);
     }
 
     Assert.assertEquals(g.remove(2, 1), false);
@@ -177,4 +177,5 @@ public class XORManagerTest {
     Assert.assertEquals(taskIds.size(), spoutTasksToRotatingMap.size());
     Assert.assertEquals(new HashSet<>(taskIds), spoutTasksToRotatingMap.keySet());
   }
-} 
+}
+
