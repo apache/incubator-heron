@@ -48,7 +48,8 @@ public class SpoutMetrics {
   private final CountMetric nextTupleCount;
   private final MultiCountMetric serializationTimeNs;
 
-  // The # of times back-pressure happens on outStreamQueue so instance could not produce more tuples
+  // The # of times back-pressure happens on outStreamQueue so instance could not
+  // produce more tuples
   private final CountMetric outQueueFullCount;
 
   // The mean # of pending-to-be-acked tuples in spout if acking is enabled
