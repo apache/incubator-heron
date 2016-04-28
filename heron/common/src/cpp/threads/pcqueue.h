@@ -21,7 +21,7 @@
 /////////////////////////////////////////////////////////////////////
 
 #if !defined(__PC_QUEUE_H)
-#define	__PC_QUEUE_H
+#define __PC_QUEUE_H
 
 #include <queue>
 #include <vector>
@@ -29,31 +29,28 @@
 #include <condition_variable>
 #include "basics/sptypes.h"
 
-class PCQueue
-{
-public:
-
-  PCQueue() { }
-  virtual ~PCQueue() throw() { };
+class PCQueue {
+ public:
+  PCQueue() {}
+  virtual ~PCQueue() throw() {}
 
   PCQueue(const PCQueue& pcqueue) = delete;
-  PCQueue& operator = (const PCQueue& pcqueue) = delete;
+  PCQueue& operator=(const PCQueue& pcqueue) = delete;
 
-  void enqueue(void* _item) ;
+  void enqueue(void* _item);
   void enqueue_all(void* _item, sp_int32 _ntimes);
 
-  void* dequeue(void) ;
+  void* dequeue(void);
   void* trydequeue(bool&);
   sp_uint32 trydequeuen(sp_uint32 _n, std::vector<void*>& _queue);
 
   sp_int32 size(void);
 
-protected:
+ protected:
+  std::queue<void*> queue_;
 
-  std::queue<void *> 	    queue_ ;
-
-  std::condition_variable   cond_ ;
-  std::mutex                mutex_ ;
-} ;
+  std::condition_variable cond_;
+  std::mutex mutex_;
+};
 
 #endif

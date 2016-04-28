@@ -1,5 +1,0 @@
-thr = 0x00020000 "Thread Errors" {
-MUTEX_BUSY           Mutex has been locked by another thread
-SPIN_BUSY            Spin lock has been acquired by another thread 
-COND_TIMEDOUT        Timed out while acquiring the condition variable 
-}
