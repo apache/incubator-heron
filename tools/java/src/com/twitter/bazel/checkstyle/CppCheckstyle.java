@@ -131,7 +131,7 @@ public final class CppCheckstyle {
             cppInfo.getSourcesAndHeadersList(),
             Predicates.and(
                     Predicates.not(Predicates.containsPattern("3rdparty/")),
-                    Predicates.not(Predicates.containsPattern("config/")),
+                    Predicates.not(Predicates.containsPattern("config/heron-config.h")),
                     Predicates.not(Predicates.containsPattern("heron/proto/"))
             )
     );

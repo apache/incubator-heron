@@ -17,24 +17,24 @@
 ////////////////////////////////////////////////////////////////
 //
 // operational-config-vars.h
-// 
+//
 // This is the operational configuration parameter names
-// 
-// This file should be used for things like 
-// CAP tickets to machine mappings, 
+//
+// This file should be used for things like
+// CAP tickets to machine mappings,
 // topology_release_overrides, etc
 ///////////////////////////////////////////////////////////////
 #ifndef OPERATIONAL_CONFIG_VARS_H_
 #define OPERATIONAL_CONFIG_VARS_H_
 
-namespace heron { namespace config {
+namespace heron {
+namespace config {
 
-class OperationalConfigVars
-{
+class OperationalConfigVars {
  public:
   static const sp_string TOPOLOGY_RELEASE_OVERRIDES;
 };
-
-}} // end namespace
+}  // namespace config
+}  // namespace heron
 
 #endif

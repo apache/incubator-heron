@@ -24,16 +24,16 @@
 #ifndef METIRCS_SINKS_READER_H_
 #define METIRCS_SINKS_READER_H_
 
-#include "config/yaml-file-reader.h"
 #include <list>
+#include <utility>
+#include "config/yaml-file-reader.h"
 
-namespace heron { namespace config {
+namespace heron {
+namespace config {
 
-class MetricsSinksReader : public YamlFileReader
-{
+class MetricsSinksReader : public YamlFileReader {
  public:
-  MetricsSinksReader(EventLoop* eventLoop,
-                           const sp_string& _defaults_file);
+  MetricsSinksReader(EventLoop* eventLoop, const sp_string& _defaults_file);
   virtual ~MetricsSinksReader();
 
   // Get the list of metrics whitelisted for tmaster along
@@ -42,7 +42,7 @@ class MetricsSinksReader : public YamlFileReader
 
   virtual void OnConfigFileLoad();
 };
-
-}} // end namespace
+}  // namespace config
+}  // namespace heron
 
 #endif

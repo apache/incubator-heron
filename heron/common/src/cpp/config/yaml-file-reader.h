@@ -30,13 +30,12 @@
 #include "basics/sptypes.h"
 #include "network/event_loop.h"
 
-namespace heron { namespace config {
+namespace heron {
+namespace config {
 
-class YamlFileReader
-{
+class YamlFileReader {
  public:
-  YamlFileReader(EventLoop* eventLoop,
-                 const sp_string& _config_file);
+  YamlFileReader(EventLoop* eventLoop, const sp_string& _config_file);
   virtual ~YamlFileReader();
 
  protected:
@@ -44,16 +43,16 @@ class YamlFileReader
   void LoadConfig();
   void AddIfMissing(const sp_string& _var, const sp_string& _default);
 
-  YAML::Node                              config_;
+  YAML::Node config_;
 
  private:
   void CheckForChange(EventLoop::Status);
 
-  VCallback<EventLoop::Status>    reload_cb_;
-  sp_string                               config_file_;
-  time_t                                  last_reload_;
+  VCallback<EventLoop::Status> reload_cb_;
+  sp_string config_file_;
+  time_t last_reload_;
 };
-
-}} // end namespace
+}  // namespace config
+}  // namespace heron
 
 #endif
