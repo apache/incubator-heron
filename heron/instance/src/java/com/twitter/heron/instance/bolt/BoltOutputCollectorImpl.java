@@ -79,8 +79,8 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
     this.boltMetrics = boltMetrics;
 
     Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
-    if (config.containsKey(Config.TOPOLOGY_ENABLE_ACKING) &&
-        config.get(Config.TOPOLOGY_ENABLE_ACKING) != null) {
+    if (config.containsKey(Config.TOPOLOGY_ENABLE_ACKING)
+        && config.get(Config.TOPOLOGY_ENABLE_ACKING) != null) {
       this.ackEnabled = Boolean.parseBoolean(config.get(Config.TOPOLOGY_ENABLE_ACKING).toString());
     } else {
       this.ackEnabled = false;
@@ -99,7 +99,11 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
   }
 
   @Override
-  public void emitDirect(int taskId, String streamId, Collection<Tuple> anchors, List<Object> tuple) {
+  public void emitDirect(
+      int taskId,
+      String streamId,
+      Collection<Tuple> anchors,
+      List<Object> tuple) {
     admitBoltTuple(taskId, streamId, anchors, tuple);
   }
 
@@ -148,7 +152,10 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
   // Following private methods are internal implementations
   /////////////////////////////////////////////////////////
 
-  private List<Integer> admitBoltTuple(String streamId, Collection<Tuple> anchors, List<Object> tuple) {
+  private List<Integer> admitBoltTuple(
+      String streamId,
+      Collection<Tuple> anchors,
+      List<Object> tuple) {
     // First check whether this tuple is sane
     helper.checkOutputSchema(streamId, tuple);
 
@@ -212,7 +219,8 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
     return null;
   }
 
-  private void admitBoltTuple(int taskId, String streamId, Collection<Tuple> anchors, List<Object> tuple) {
+  private void admitBoltTuple(
+      int taskId, String streamId, Collection<Tuple> anchors, List<Object> tuple) {
     throw new RuntimeException("emitDirect not supported");
   }
 

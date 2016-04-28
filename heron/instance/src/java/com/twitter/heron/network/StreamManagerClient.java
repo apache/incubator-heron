@@ -14,6 +14,7 @@
 
 package com.twitter.heron.network;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.protobuf.Message;
@@ -82,7 +83,8 @@ public class StreamManagerClient extends HeronClient {
     this.outStreamQueue = outStreamQueue;
     this.inControlQueue = inControlQueue;
 
-    this.systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
+    this.systemConfig =
+        (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
     this.gatewayMetrics = gatewayMetrics;
 
@@ -123,13 +125,15 @@ public class StreamManagerClient extends HeronClient {
   @Override
   public void onConnect(StatusCode status) {
     if (status != StatusCode.OK) {
-      LOG.severe(String.format("Error connecting to Stream Manager with status: %s, Retrying...", status));
+      LOG.log(Level.WARNING,
+          "Error connecting to Stream Manager with status: {0}, Retrying...", status);
       Runnable r = new Runnable() {
         public void run() {
           start();
         }
       };
-      getNIOLooper().registerTimerEventInSeconds(systemConfig.getInstanceReconnectStreammgrIntervalSec(), r);
+      getNIOLooper().registerTimerEventInSeconds(
+          systemConfig.getInstanceReconnectStreammgrIntervalSec(), r);
       return;
     }
 
