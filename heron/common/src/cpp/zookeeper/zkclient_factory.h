@@ -24,19 +24,17 @@
 
 class ZKClientFactory {
  public:
-  virtual ZKClient* create(
-      const std::string& hostportlist, EventLoop* eventLoop,
-      VCallback<ZKClient::ZkWatchEvent> global_watcher_cb) = 0;
+  virtual ZKClient* create(const std::string& hostportlist, EventLoop* eventLoop,
+                           VCallback<ZKClient::ZkWatchEvent> global_watcher_cb) = 0;
 
   virtual ~ZKClientFactory() {}
 };
 
 class DefaultZKClientFactory : public ZKClientFactory {
  public:
-  virtual ZKClient* create(
-      const std::string& hostportlist, EventLoop* eventLoop,
-      VCallback<ZKClient::ZkWatchEvent> global_watcher_cb) {
-    if(global_watcher_cb == NULL) {
+  virtual ZKClient* create(const std::string& hostportlist, EventLoop* eventLoop,
+                           VCallback<ZKClient::ZkWatchEvent> global_watcher_cb) {
+    if (global_watcher_cb == NULL) {
       return new ZKClient(hostportlist, eventLoop);
     } else {
       return new ZKClient(hostportlist, eventLoop, global_watcher_cb);

@@ -25,13 +25,13 @@
 #ifndef ZKCLIENT_H_
 #define ZKCLIENT_H_
 
+#include <zookeeper/proto.h>
+#include <zookeeper/zookeeper.h>
 #include <string>
 #include <vector>
-#include <zookeeper/zookeeper.h>
-#include <zookeeper/proto.h>
 #include "basics/basics.h"
-#include "threads/threads.h"
 #include "network/network.h"
+#include "threads/threads.h"
 
 /*
  * ZKClient class definition
@@ -52,7 +52,7 @@ class ZKClient {
   // Right now only SessionExpired event is notified, but could have others
   // in the future. global_watcher_cb should be a PermanentCallback.
   ZKClient(const std::string& hostportlist, EventLoop* eventLoop,
-      VCallback<ZkWatchEvent> global_watcher_cb);
+           VCallback<ZkWatchEvent> global_watcher_cb);
 
   virtual ~ZKClient();
 
@@ -68,8 +68,8 @@ class ZKClient {
   // creates a node. The node is created at _node. If _is_ephemeral is set,
   // then the node is created as a ephimeral node. _cb is called with
   // the status code after the Create completes.
-  virtual void CreateNode(const std::string& _node, const std::string& _value,
-                  bool _is_ephimeral, VCallback<sp_int32> _cb);
+  virtual void CreateNode(const std::string& _node, const std::string& _value, bool _is_ephimeral,
+                          VCallback<sp_int32> _cb);
 
   // deletes a node. _cb is called with the status code after Delete completes
   virtual void DeleteNode(const std::string& _node, VCallback<sp_int32> _cb);
@@ -79,38 +79,33 @@ class ZKClient {
   // If _watcher is not null, we set a watch on this node and call the _watcher
   // function when the node changes.
   // _cb is called with the result code after get completes.
-  virtual void Get(const std::string& _node, std::string* _data,
-           sp_int32* _version, VCallback<> _watcher,
-           VCallback<sp_int32> _cb);
-  virtual void Get(const std::string& _node, std::string* _data,
-           sp_int32* _version, VCallback<sp_int32> _cb);
+  virtual void Get(const std::string& _node, std::string* _data, sp_int32* _version,
+                   VCallback<> _watcher, VCallback<sp_int32> _cb);
+  virtual void Get(const std::string& _node, std::string* _data, sp_int32* _version,
+                   VCallback<sp_int32> _cb);
   // Same as above except we dont care about the version
   virtual void Get(const std::string& _node, std::string* _data, VCallback<sp_int32> _cb);
 
   // Sets the data at a node.
-  virtual void Set(const std::string& _node, const std::string& _data,
-           sp_int32 _version, VCallback<sp_int32> _cb);
+  virtual void Set(const std::string& _node, const std::string& _data, sp_int32 _version,
+                   VCallback<sp_int32> _cb);
   // Same as above except brute force the write
   virtual void Set(const std::string& _node, const std::string& _data, VCallback<sp_int32> _cb);
 
   // lists all the children. The children will be filled at _children list created
   // by the caller.
   virtual void GetChildren(const std::string& _node, std::vector<std::string>* _children,
-    VCallback<sp_int32> _cb);
+                           VCallback<sp_int32> _cb);
 
   // friend functions
-  friend void CallGlobalWatcher(zhandle_t* _zh, sp_int32 _type,
-                                sp_int32 _state, const char* _path, void* _context);
-  friend void StringCompletionWatcher(sp_int32 _rc, const char* _name,
-                                      const void* _data);
+  friend void CallGlobalWatcher(zhandle_t* _zh, sp_int32 _type, sp_int32 _state, const char* _path,
+                                void* _context);
+  friend void StringCompletionWatcher(sp_int32 _rc, const char* _name, const void* _data);
   friend void VoidCompletionWatcher(sp_int32 _rc, const void* _data);
-  friend void GetCompletionWatcher(sp_int32 _rc, const char* _value,
-                                   int _value_len, const struct Stat* _stat,
-                                   const void* _data);
-  friend void SetCompletionWatcher(sp_int32 _rc, const struct Stat* _stat,
-                                   const void* _data);
-  friend void GetChildrenCompletionWatcher(sp_int32 _rc,
-                                           const struct String_vector* _strings,
+  friend void GetCompletionWatcher(sp_int32 _rc, const char* _value, int _value_len,
+                                   const struct Stat* _stat, const void* _data);
+  friend void SetCompletionWatcher(sp_int32 _rc, const struct Stat* _stat, const void* _data);
+  friend void GetChildrenCompletionWatcher(sp_int32 _rc, const struct String_vector* _strings,
                                            const void* _data);
 
   // Util functions to convert from the codes to strings
@@ -120,8 +115,11 @@ class ZKClient {
  protected:
   // A empty constructor for test purposes ONLY. Enables us to create a
   // MockZkClient without worrying about the actual private member variables.
-  ZKClient() : zk_handle_(NULL), eventLoop_(NULL), zkaction_responses_(NULL),
-      client_global_watcher_cb_(VCallback<ZkWatchEvent>()) { };
+  ZKClient()
+      : zk_handle_(NULL),
+        eventLoop_(NULL),
+        zkaction_responses_(NULL),
+        client_global_watcher_cb_(VCallback<ZkWatchEvent>()) {}
 
  private:
   // the global watcher
@@ -152,10 +150,10 @@ class ZKClient {
   // Sends events to clients, if client global watcher is set.
   void SendWatchEvent(const ZkWatchEvent& event);
 
-  clientid_t    zk_clientid_;
-  zhandle_t*    zk_handle_;
+  clientid_t zk_clientid_;
+  zhandle_t* zk_handle_;
   EventLoop* eventLoop_;
-  std::string        hostportlist_;
+  std::string hostportlist_;
 
   // We use libzookeeper_mt as our zk library. This means that
   // zk callbacks are all executed in the context of a zk thread.
@@ -166,4 +164,4 @@ class ZKClient {
   VCallback<ZkWatchEvent> client_global_watcher_cb_;
 };
 
-#endif // ZKCLIENT_H_
+#endif  // ZKCLIENT_H_
