@@ -19,21 +19,18 @@
 #include <iostream>
 #include "errors/spexcept.h"
 
-namespace heron { namespace error {
+namespace heron {
+namespace error {
 
-Global_Exception_Handler::Global_Exception_Handler()
-{
-  static Singleton_Exception_Handler  a_handler;
+Global_Exception_Handler::Global_Exception_Handler() {
+  static Singleton_Exception_Handler a_handler;
 }
 
-Global_Exception_Handler::Singleton_Exception_Handler::Singleton_Exception_Handler()
-{
+Global_Exception_Handler::Singleton_Exception_Handler::Singleton_Exception_Handler() {
   std::set_terminate(terminate);
 }
 
-void
-Global_Exception_Handler::Singleton_Exception_Handler::terminate()
-{
+void Global_Exception_Handler::Singleton_Exception_Handler::terminate() {
   try {
     throw;
   }
@@ -49,5 +46,5 @@ Global_Exception_Handler::Singleton_Exception_Handler::terminate()
 
   abort();
 }
-
-}} // namespace
+}  // namespace error
+}  // namespace heron
