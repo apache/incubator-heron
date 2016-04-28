@@ -26,8 +26,12 @@ import com.twitter.heron.spi.common.Keys;
 /**
  * For loading scheduler config
  */
-public class SchedulerConfig {
+public final class SchedulerConfig {
   private static final Logger LOG = Logger.getLogger(SchedulerConfig.class.getName());
+
+  private SchedulerConfig() {
+
+  }
 
   /**
    * Load the topology config
@@ -85,8 +89,13 @@ public class SchedulerConfig {
   }
 
   // build the config by expanding all the variables
-  protected static Config loadConfig(String cluster, String role, String environ,
-                                     String topologyJarFile, String topologyDefnFile, TopologyAPI.Topology topology) {
+  protected static Config loadConfig(
+      String cluster,
+      String role,
+      String environ,
+      String topologyJarFile,
+      String topologyDefnFile,
+      TopologyAPI.Topology topology) {
 
     Config config = Config.expand(
         Config.newBuilder()

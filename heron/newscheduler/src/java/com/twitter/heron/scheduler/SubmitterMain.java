@@ -45,8 +45,12 @@ import com.twitter.heron.spi.utils.TopologyUtils;
 /**
  * Calls Uploader to upload topology package, and Launcher to launch Scheduler.
  */
-public class SubmitterMain {
+public final class SubmitterMain {
   private static final Logger LOG = Logger.getLogger(SubmitterMain.class.getName());
+
+  private SubmitterMain() {
+
+  }
 
   /**
    * Load the topology config
@@ -268,9 +272,8 @@ public class SubmitterMain {
       // Now parse the required options
       cmd = parser.parse(options, args);
     } catch (ParseException e) {
-      LOG.severe("Error parsing command line options: " + e.getMessage());
       usage(options);
-      System.exit(1);
+      throw new RuntimeException("Error parsing command line options: ", e);
     }
 
     Boolean verbose = false;
@@ -378,13 +381,9 @@ public class SubmitterMain {
 
     // Log the result and exit
     if (!isSuccessful) {
-      LOG.log(Level.SEVERE, "Failed to submit topology {0}. Exiting", topologyName);
-
-      System.exit(1);
+      throw new RuntimeException(String.format("Failed to submit topology %s", topologyName));
     } else {
       LOG.log(Level.FINE, "Topology {0} submitted successfully", topologyName);
-
-      System.exit(0);
     }
   }
 
