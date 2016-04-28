@@ -23,21 +23,21 @@
 #include "network/regevent.h"
 
 // 'C' style callback for libevent on read events
-void EventLoopImpl::eventLoopImplReadCallback(int fd, short event, void* arg) {
+void EventLoopImpl::eventLoopImplReadCallback(sp_int32 fd, sp_int16 event, void* arg) {
   auto* el = reinterpret_cast<EventLoopImpl*>(arg);
   el->handleReadCallback(fd, event);
 }
 
 // 'C' style callback for libevent on write events
-void EventLoopImpl::eventLoopImplWriteCallback(int fd, short event, void* arg) {
+void EventLoopImpl::eventLoopImplWriteCallback(sp_int32 fd, sp_int16 event, void* arg) {
   auto* el = reinterpret_cast<EventLoopImpl*>(arg);
   el->handleWriteCallback(fd, event);
 }
 
 // 'C' style callback for libevent on timer events
-void EventLoopImpl::eventLoopImplTimerCallback(int, short event, void* arg) {
+void EventLoopImpl::eventLoopImplTimerCallback(sp_int32, sp_int16 event, void* arg) {
   // TODO(vikasr): this needs to change to VCallback
-  auto* cb = (CallBack1<short>*)arg;
+  auto* cb = (CallBack1<sp_int16>*)arg;
   cb->Run(event);
 }
 
@@ -93,7 +93,7 @@ int EventLoopImpl::registerForRead(int fd, VCallback<EventLoop::Status> cb, bool
   }
   // Create the appropriate structures and init them.
   auto* event = new SS_RegisteredEvent<sp_int32>(fd, persistent, std::move(cb), mSecs);
-  short ev_mask = EV_READ;
+  sp_int16 ev_mask = EV_READ;
   if (persistent) {
     ev_mask |= EV_PERSIST;
   }
@@ -152,7 +152,7 @@ int EventLoopImpl::registerForWrite(int fd, VCallback<EventLoop::Status> cb, boo
 
   // Create and init appropriate data structures.
   auto* event = new SS_RegisteredEvent<sp_int32>(fd, persistent, std::move(cb), mSecs);
-  short ev_mask = EV_WRITE;
+  sp_int16 ev_mask = EV_WRITE;
   if (persistent) {
     ev_mask |= EV_PERSIST;
   }
@@ -210,7 +210,7 @@ sp_int64 EventLoopImpl::registerTimer(VCallback<EventLoop::Status> cb, bool pers
   // Create and init the appropriate data structures
   auto* event = new SS_RegisteredEvent<sp_int64>(timerId, persistent, std::move(cb), mSecs);
 
-  CallBack1<short>* cbS = NULL;
+  CallBack1<sp_int16>* cbS = NULL;
   // TODO(vikasr): this needs to change to VCallback
   if (!persistent) {
     cbS = CreateCallback(this, &EventLoopImpl::handleTimerCallback, timerId);
@@ -267,7 +267,7 @@ void EventLoopImpl::registerInstantCallback(VCallback<> cb) {
         new SS_RegisteredEvent<sp_int64>(mInstantZeroTimerId, false, std::move(instant_cb), 0);
 
     // TODO(vikasr): Convert this to VCallback
-    CallBack1<short>* cbS =
+    CallBack1<sp_int16>* cbS =
         CreateCallback(this, &EventLoopImpl::handleTimerCallback, mInstantZeroTimerId);
 
     evtimer_set(event->event(), &eventLoopImplTimerCallback, cbS);
@@ -302,7 +302,7 @@ void EventLoopImpl::handleInstantCallback(Status) {
   mListInstantCallbacks.erase(mListInstantCallbacks.begin(), ++enditr);
 }
 
-void EventLoopImpl::handleReadCallback(int fd, short event) {
+void EventLoopImpl::handleReadCallback(sp_int32 fd, sp_int16 event) {
   if (mReadEvents.find(fd) == mReadEvents.end()) {
     // This is possible when UnRegisterEvent has been called before we handle this event
     // Just ignore this event.
@@ -324,7 +324,7 @@ void EventLoopImpl::handleReadCallback(int fd, short event) {
   }
 }
 
-void EventLoopImpl::handleWriteCallback(int fd, short event) {
+void EventLoopImpl::handleWriteCallback(sp_int32 fd, sp_int16 event) {
   if (mWriteEvents.find(fd) == mWriteEvents.end()) {
     // This is possible when UnRegisterEvent has been called before we handle this event
     // Just ignore this event.
@@ -346,7 +346,7 @@ void EventLoopImpl::handleWriteCallback(int fd, short event) {
   }
 }
 
-void EventLoopImpl::handleTimerCallback(sp_int64 timerId, short event) {
+void EventLoopImpl::handleTimerCallback(sp_int64 timerId, sp_int16 event) {
   if (mTimerEvents.find(timerId) == mTimerEvents.end()) {
     // This is possible when unRegisterTimer has been called before we handle this timer
     // Just ignore this event.
@@ -370,7 +370,7 @@ void EventLoopImpl::handleTimerCallback(sp_int64 timerId, short event) {
   }
 }
 
-EventLoop::Status EventLoopImpl::mapStatusCode(short event) {
+EventLoop::Status EventLoopImpl::mapStatusCode(sp_int16 event) {
   switch (event) {
     case EV_READ:
       return READ_EVENT;

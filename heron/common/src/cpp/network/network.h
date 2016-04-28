@@ -23,8 +23,8 @@
 #if !defined(__SP_NETWORK_H)
 #define __SP_NETWORK_H
 
-#include <functional>
 #include <google/protobuf/message.h>
+#include <functional>
 #include "network/networkoptions.h"
 #include "network/event_loop.h"
 #include "network/event_loop_impl.h"
@@ -40,4 +40,4 @@
 #include "network/httpclient.h"
 #include "network/httpserver.h"
 
-#endif // __SP_NETWORK_H
+#endif  // __SP_NETWORK_H

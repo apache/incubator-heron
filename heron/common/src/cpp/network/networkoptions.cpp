@@ -16,9 +16,9 @@
 
 #include "network/networkoptions.h"
 #include <arpa/inet.h>
+#include <string>
 
-NetworkOptions::NetworkOptions()
-{
+NetworkOptions::NetworkOptions() {
   host_ = "localhost";
   port_ = 8080;
   max_packet_size_ = 1024;
@@ -26,8 +26,7 @@ NetworkOptions::NetworkOptions()
   sin_path_ = "";
 }
 
-NetworkOptions::NetworkOptions(const NetworkOptions& _copyFrom)
-{
+NetworkOptions::NetworkOptions(const NetworkOptions& _copyFrom) {
   host_ = _copyFrom.get_host();
   port_ = _copyFrom.get_port();
   max_packet_size_ = _copyFrom.get_max_packet_size();
@@ -35,62 +34,33 @@ NetworkOptions::NetworkOptions(const NetworkOptions& _copyFrom)
   sin_path_ = _copyFrom.get_sin_path();
 }
 
-NetworkOptions::~NetworkOptions()
-{
-}
+NetworkOptions::~NetworkOptions() {}
 
-void NetworkOptions::set_host(const std::string& _host)
-{
-  host_ = _host;
-}
+void NetworkOptions::set_host(const std::string& _host) { host_ = _host; }
 
-std::string NetworkOptions::get_host() const
-{
-  return host_;
-}
+std::string NetworkOptions::get_host() const { return host_; }
 
-void NetworkOptions::set_port(sp_int32 _port)
-{
-  port_ = _port;
-}
+void NetworkOptions::set_port(sp_int32 _port) { port_ = _port; }
 
-sp_int32 NetworkOptions::get_port() const
-{
-  return port_;
-}
+sp_int32 NetworkOptions::get_port() const { return port_; }
 
-void NetworkOptions::set_max_packet_size(sp_uint32 _max_packet_size)
-{
+void NetworkOptions::set_max_packet_size(sp_uint32 _max_packet_size) {
   max_packet_size_ = _max_packet_size;
 }
 
-sp_uint32 NetworkOptions::get_max_packet_size() const
-{
-  return max_packet_size_;
+sp_uint32 NetworkOptions::get_max_packet_size() const { return max_packet_size_; }
+
+void NetworkOptions::set_socket_family(sp_int32 _socket_family) { socket_family_ = _socket_family; }
+
+sp_int32 NetworkOptions::get_socket_family() const { return socket_family_; }
+
+sp_int32 NetworkOptions::get_sin_family() const {
+  if (socket_family_ == PF_INET)
+    return AF_INET;
+  else
+    return AF_UNIX;
 }
 
-void NetworkOptions::set_socket_family(sp_int32 _socket_family)
-{
-  socket_family_ = _socket_family;
-}
+void NetworkOptions::set_sin_path(const std::string& _sin_path) { sin_path_ = _sin_path; }
 
-sp_int32 NetworkOptions::get_socket_family() const
-{
-  return socket_family_;
-}
-
-sp_int32 NetworkOptions::get_sin_family() const
-{
-  if (socket_family_ == PF_INET) return AF_INET;
-  else return AF_UNIX;
-}
-
-void NetworkOptions::set_sin_path(const std::string& _sin_path)
-{
-  sin_path_ = _sin_path;
-}
-
-const std::string& NetworkOptions::get_sin_path() const
-{
-  return sin_path_;
-}
+const std::string& NetworkOptions::get_sin_path() const { return sin_path_; }

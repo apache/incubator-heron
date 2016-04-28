@@ -18,114 +18,76 @@
 // Implements the Client class. See client.h for details on the API
 ////////////////////////////////////////////////////////////////////////////////
 #include "network/client.h"
+#include <string>
 #include "basics/basics.h"
 
 Client::Client(EventLoop* eventLoop, const NetworkOptions& _options)
-  : BaseClient(eventLoop, _options)
-{
+    : BaseClient(eventLoop, _options) {
   Init();
 }
 
-Client::~Client()
-{
-  delete message_rid_gen_;
-}
+Client::~Client() { delete message_rid_gen_; }
 
-void Client::Start()
-{
-  Start_Base();
-}
+void Client::Start() { Start_Base(); }
 
-void Client::Stop()
-{
-  Stop_Base();
-}
+void Client::Stop() { Stop_Base(); }
 
-void Client::SendRequest(google::protobuf::Message* _request, void* _ctx)
-{
+void Client::SendRequest(google::protobuf::Message* _request, void* _ctx) {
   SendRequest(_request, _ctx, -1);
 }
 
-void Client::SendRequest(google::protobuf::Message* _request,
-                         void* _ctx, sp_int64 _msecs)
-{
+void Client::SendRequest(google::protobuf::Message* _request, void* _ctx, sp_int64 _msecs) {
   InternalSendRequest(_request, _ctx, _msecs);
 }
 
-void
-Client::SendResponse(REQID _id, const google::protobuf::Message& _response)
-{
+void Client::SendResponse(REQID _id, const google::protobuf::Message& _response) {
   sp_int32 byte_size = _response.ByteSize();
   sp_uint32 data_size = OutgoingPacket::SizeRequiredToPackString(_response.GetTypeName()) +
-                        REQID_size +
-                        OutgoingPacket::SizeRequiredToPackProtocolBuffer(byte_size);
+                        REQID_size + OutgoingPacket::SizeRequiredToPackProtocolBuffer(byte_size);
   OutgoingPacket* opkt = new OutgoingPacket(data_size);
-  CHECK(opkt->PackString(_response.GetTypeName()) == 0);
-  CHECK(opkt->PackREQID(_id) == 0);
-  CHECK(opkt->PackProtocolBuffer(_response, byte_size) == 0);
+  CHECK_EQ(opkt->PackString(_response.GetTypeName()), 0);
+  CHECK_EQ(opkt->PackREQID(_id), 0);
+  CHECK_EQ(opkt->PackProtocolBuffer(_response, byte_size), 0);
   InternalSendResponse(opkt);
   return;
 }
 
-void Client::SendMessage(google::protobuf::Message* _message)
-{
-  InternalSendMessage(_message);
-}
+void Client::SendMessage(google::protobuf::Message* _message) { InternalSendMessage(_message); }
 
-sp_int64 Client::AddTimer(VCallback<> cb, sp_int64 _msecs)
-{
+sp_int64 Client::AddTimer(VCallback<> cb, sp_int64 _msecs) {
   return AddTimer_Base(std::move(cb), _msecs);
 }
 
-sp_int32 Client::RemoveTimer(sp_int64 timer_id) {
-  return RemoveTimer_Base(timer_id);
-}
+sp_int32 Client::RemoveTimer(sp_int64 timer_id) { return RemoveTimer_Base(timer_id); }
 
-BaseConnection* Client::CreateConnection(ConnectionEndPoint* _endpoint,
-                                         ConnectionOptions* _options,
-                                         EventLoop* eventLoop)
-{
+BaseConnection* Client::CreateConnection(ConnectionEndPoint* _endpoint, ConnectionOptions* _options,
+                                         EventLoop* eventLoop) {
   Connection* conn = new Connection(_endpoint, _options, eventLoop);
 
-  conn->registerForNewPacket([this] (IncomingPacket* pkt) { this->OnNewPacket(pkt); });
+  conn->registerForNewPacket([this](IncomingPacket* pkt) { this->OnNewPacket(pkt); });
   // Backpressure reliever - will point to the inheritor of this class in case the virtual function
   // is implemented in the inheritor
-  auto backpressure_reliever_ = [this] (Connection* conn) {
+  auto backpressure_reliever_ = [this](Connection* conn) {
     this->StopBackPressureConnectionCb(conn);
   };
 
-  auto backpressure_starter_ = [this] (Connection* conn) {
+  auto backpressure_starter_ = [this](Connection* conn) {
     this->StartBackPressureConnectionCb(conn);
   };
 
-  conn->registerForBackPressure(
-    std::move(backpressure_starter_),
-    std::move(backpressure_reliever_)
-  );
+  conn->registerForBackPressure(std::move(backpressure_starter_),
+                                std::move(backpressure_reliever_));
   return conn;
 }
 
-void Client::HandleConnect_Base(NetworkErrorCode _status)
-{
-  HandleConnect(_status);
-}
+void Client::HandleConnect_Base(NetworkErrorCode _status) { HandleConnect(_status); }
 
-void Client::HandleClose_Base(NetworkErrorCode _status)
-{
-  HandleClose(_status);
-}
+void Client::HandleClose_Base(NetworkErrorCode _status) { HandleClose(_status); }
 
-void
-Client::Init()
-{
-  message_rid_gen_ = new REQID_Generator();
-}
+void Client::Init() { message_rid_gen_ = new REQID_Generator(); }
 
-void Client::InternalSendRequest(google::protobuf::Message* _request,
-                                 void* _ctx, sp_int64 _msecs)
-{
-  CHECK(requestResponseMap_.find(_request->GetTypeName()) !=
-            requestResponseMap_.end());
+void Client::InternalSendRequest(google::protobuf::Message* _request, void* _ctx, sp_int64 _msecs) {
+  CHECK(requestResponseMap_.find(_request->GetTypeName()) != requestResponseMap_.end());
   const sp_string& _expected_response_type = requestResponseMap_[_request->GetTypeName()];
   if (state_ != CONNECTED) {
     delete _request;
@@ -141,13 +103,12 @@ void Client::InternalSendRequest(google::protobuf::Message* _request,
 
   // Make the outgoing packet
   sp_int32 byte_size = _request->ByteSize();
-  sp_uint32 sop = OutgoingPacket::SizeRequiredToPackString(_request->GetTypeName()) +
-                  REQID_size +
+  sp_uint32 sop = OutgoingPacket::SizeRequiredToPackString(_request->GetTypeName()) + REQID_size +
                   OutgoingPacket::SizeRequiredToPackProtocolBuffer(byte_size);
   OutgoingPacket* opkt = new OutgoingPacket(sop);
-  CHECK(opkt->PackString(_request->GetTypeName()) == 0);
-  CHECK(opkt->PackREQID(rid) == 0);
-  CHECK(opkt->PackProtocolBuffer(*_request, byte_size) == 0);
+  CHECK_EQ(opkt->PackString(_request->GetTypeName()), 0);
+  CHECK_EQ(opkt->PackREQID(rid), 0);
+  CHECK_EQ(opkt->PackProtocolBuffer(*_request, byte_size), 0);
 
   // delete the request
   delete _request;
@@ -160,14 +121,13 @@ void Client::InternalSendRequest(google::protobuf::Message* _request,
     return;
   }
   if (_msecs > 0) {
-    auto cb = [rid, this] (EventLoop::Status s) { this->OnPacketTimer(rid, s); };
-    CHECK(eventLoop_->registerTimer(std::move(cb), false, _msecs) > 0);
+    auto cb = [rid, this](EventLoop::Status s) { this->OnPacketTimer(rid, s); };
+    CHECK_GT(eventLoop_->registerTimer(std::move(cb), false, _msecs), 0);
   }
   return;
 }
 
-void Client::InternalSendMessage(google::protobuf::Message* _message)
-{
+void Client::InternalSendMessage(google::protobuf::Message* _message) {
   if (state_ != CONNECTED) {
     LOG(ERROR) << "Client is not connected. Dropping message" << std::endl;
     delete _message;
@@ -179,13 +139,12 @@ void Client::InternalSendMessage(google::protobuf::Message* _message)
 
   // Make the outgoing packet
   sp_int32 byte_size = _message->ByteSize();
-  sp_uint32 sop = OutgoingPacket::SizeRequiredToPackString(_message->GetTypeName()) +
-                  REQID_size +
+  sp_uint32 sop = OutgoingPacket::SizeRequiredToPackString(_message->GetTypeName()) + REQID_size +
                   OutgoingPacket::SizeRequiredToPackProtocolBuffer(byte_size);
   OutgoingPacket* opkt = new OutgoingPacket(sop);
-  CHECK(opkt->PackString(_message->GetTypeName()) == 0);
-  CHECK(opkt->PackREQID(rid) == 0);
-  CHECK(opkt->PackProtocolBuffer(*_message, byte_size) == 0);
+  CHECK_EQ(opkt->PackString(_message->GetTypeName()), 0);
+  CHECK_EQ(opkt->PackREQID(rid), 0);
+  CHECK_EQ(opkt->PackProtocolBuffer(*_message, byte_size), 0);
 
   // delete the message
   delete _message;
@@ -199,9 +158,7 @@ void Client::InternalSendMessage(google::protobuf::Message* _message)
   return;
 }
 
-void
-Client::InternalSendResponse(OutgoingPacket* _packet)
-{
+void Client::InternalSendResponse(OutgoingPacket* _packet) {
   if (state_ != CONNECTED) {
     LOG(ERROR) << "Client is not connected. Dropping response" << std::endl;
     delete _packet;
@@ -217,16 +174,13 @@ Client::InternalSendResponse(OutgoingPacket* _packet)
   return;
 }
 
-void Client::OnNewPacket(IncomingPacket* _ipkt)
-{
+void Client::OnNewPacket(IncomingPacket* _ipkt) {
   std::string typname;
 
-  if(_ipkt->UnPackString(&typname) != 0) {
+  if (_ipkt->UnPackString(&typname) != 0) {
     Connection* conn = static_cast<Connection*>(conn_);
-    LOG(FATAL) << "UnPackString failed from connection "
-               << conn << " from hostport "
-               << conn->getIPAddress() << ":"
-               << conn->getPort();
+    LOG(FATAL) << "UnPackString failed from connection " << conn << " from hostport "
+               << conn->getIPAddress() << ":" << conn->getPort();
   }
 
   if (requestHandlers.count(typname) > 0) {
@@ -236,7 +190,7 @@ void Client::OnNewPacket(IncomingPacket* _ipkt)
     // This is a message
     // We just ignore the reqid
     REQID rid;
-    CHECK(_ipkt->UnPackREQID(&rid) == 0);
+    CHECK_EQ(_ipkt->UnPackREQID(&rid), 0);
     // This is a message
     messageHandlers[typname](_ipkt);
   } else if (responseHandlers.count(typname) > 0) {
@@ -246,8 +200,7 @@ void Client::OnNewPacket(IncomingPacket* _ipkt)
   delete _ipkt;
 }
 
-void Client::OnPacketTimer(REQID _id, EventLoop::Status)
-{
+void Client::OnPacketTimer(REQID _id, EventLoop::Status) {
   if (context_map_.find(_id) == context_map_.end()) {
     // most likely this was due to the requests being retired before the timer.
     return;
@@ -257,12 +210,10 @@ void Client::OnPacketTimer(REQID _id, EventLoop::Status)
   responseHandlers[expected_response_type](NULL, TIMEOUT);
 }
 
-void Client::StartBackPressureConnectionCb(Connection*)
-{
+void Client::StartBackPressureConnectionCb(Connection* conn) {
   // Nothing to be done here. Should be handled by inheritors if they care about backpressure
 }
 
-void Client::StopBackPressureConnectionCb(Connection*)
-{
+void Client::StopBackPressureConnectionCb(Connection* conn) {
   // Nothing to be done here. Should be handled by inheritors if they care about backpressure
 }
