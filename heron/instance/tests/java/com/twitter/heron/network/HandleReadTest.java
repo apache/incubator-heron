@@ -18,7 +18,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
-import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
@@ -95,9 +94,11 @@ public class HandleReadTest {
   }
 
   static void close(Closeable sc2) {
-    if (sc2 != null) try {
-      sc2.close();
-    } catch (IOException ignored) {
+    if (sc2 != null) {
+      try {
+        sc2.close();
+      } catch (IOException ignored) {
+      }
     }
   }
 
@@ -144,6 +145,9 @@ public class HandleReadTest {
     threadsPool = null;
   }
 
+  /**
+   * Test reading from network
+   */
   @Test
   public void testHandleRead() throws Exception {
     ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
@@ -161,7 +165,8 @@ public class HandleReadTest {
       // Receive request
       IncomingPacket incomingPacket = new IncomingPacket();
       while (incomingPacket.readFromChannel(socketChannel) != 0) {
-
+        // 1ms sleep to mitigate busy looping
+        SysUtils.sleep(1);
       }
 
       // Send back response
@@ -214,10 +219,7 @@ public class HandleReadTest {
       }
 
       Assert.assertEquals("ABABABABAB", res);
-    } catch (ClosedByInterruptException ignored) {
     } catch (ClosedChannelException ignored) {
-    } catch (Exception e) {
-      e.printStackTrace();
     } finally {
       close(socketChannel);
     }
@@ -283,8 +285,9 @@ public class HandleReadTest {
               inStreamQueue, outStreamQueue, inControlQueue, socketOptions, gatewayMetrics);
           streamManagerClient.start();
           nioLooper.loop();
-        } catch (Exception ignored) {
-
+        } finally {
+          streamManagerClient.stop();
+          nioLooper.exitLoop();
         }
       }
     };

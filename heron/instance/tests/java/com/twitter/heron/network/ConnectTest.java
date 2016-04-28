@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
-import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
@@ -94,9 +93,11 @@ public class ConnectTest {
   }
 
   static void close(Closeable sc2) {
-    if (sc2 != null) try {
-      sc2.close();
-    } catch (IOException ignored) {
+    if (sc2 != null) {
+      try {
+        sc2.close();
+      } catch (IOException ignored) {
+      }
     }
   }
 
@@ -143,6 +144,9 @@ public class ConnectTest {
     threadsPool = null;
   }
 
+  /**
+   * Test connection
+   */
   @Test
   public void testStart() throws Exception {
     ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
@@ -160,7 +164,8 @@ public class ConnectTest {
       // Receive request
       IncomingPacket incomingPacket = new IncomingPacket();
       while (incomingPacket.readFromChannel(socketChannel) != 0) {
-
+        // 1ms sleep to mitigate busy looping
+        SysUtils.sleep(1);
       }
 
       // Send back response
@@ -182,7 +187,8 @@ public class ConnectTest {
           PhysicalPlanHelper physicalPlanHelper = instanceControlMsg.getNewPhysicalPlanHelper();
 
           Assert.assertEquals("test-bolt", physicalPlanHelper.getMyComponent());
-          Assert.assertEquals(InetAddress.getLocalHost().getHostName(), physicalPlanHelper.getMyHostname());
+          Assert.assertEquals(InetAddress.getLocalHost().getHostName(),
+              physicalPlanHelper.getMyHostname());
           Assert.assertEquals(0, physicalPlanHelper.getMyInstanceIndex());
           Assert.assertEquals(1, physicalPlanHelper.getMyTaskId());
 
@@ -192,10 +198,7 @@ public class ConnectTest {
         }
       }
 
-    } catch (ClosedByInterruptException ignored) {
     } catch (ClosedChannelException ignored) {
-    } catch (Exception e) {
-      e.printStackTrace();
     } finally {
       close(socketChannel);
     }
@@ -224,8 +227,9 @@ public class ConnectTest {
               inStreamQueue, outStreamQueue, inControlQueue, socketOptions, gatewayMetrics);
           streamManagerClient.start();
           nioLooper.loop();
-        } catch (Exception ignored) {
-
+        } finally {
+          streamManagerClient.stop();
+          nioLooper.exitLoop();
         }
       }
     };

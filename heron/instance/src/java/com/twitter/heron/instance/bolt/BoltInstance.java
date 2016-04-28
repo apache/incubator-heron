@@ -16,7 +16,6 @@ package com.twitter.heron.instance.bolt;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.protobuf.ByteString;
@@ -99,12 +98,10 @@ public class BoltInstance implements IInstance {
   @Override
   public void start() {
     TopologyContextImpl topologyContext = helper.getTopologyContext();
-    try {
-      GlobalMetrics.init(topologyContext, systemConfig.getHeronMetricsExportIntervalSec());
-    } catch (RuntimeException e) {
-      LOG.log(Level.SEVERE, "Failed to initialize GlobalMetrics. Global Metrics will be lost."
-          + "Check the version of heron-api used.", e);
-    }
+
+    // Initialize the GlobalMetrics
+    GlobalMetrics.init(topologyContext, systemConfig.getHeronMetricsExportIntervalSec());
+
     boltMetrics.registerMetrics(topologyContext);
 
     // Delegate
