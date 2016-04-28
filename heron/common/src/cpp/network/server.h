@@ -59,14 +59,15 @@
 #ifndef SERVER_H_
 #define SERVER_H_
 
-#include <functional>
-#include <unordered_map>
-#include <string>
-#include <utility>
-#include <iostream>
-#include "glog/logging.h"
 #include <google/protobuf/message.h>
 #include <google/protobuf/repeated_field.h>
+#include <functional>
+#include <iostream>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include "basics/basics.h"
+#include "glog/logging.h"
 #include "network/connection.h"
 #include "network/baseserver.h"
 #include "network/baseconnection.h"
@@ -74,7 +75,6 @@
 #include "network/networkoptions.h"
 #include "network/network_error.h"
 #include "network/packet.h"
-#include "basics/basics.h"
 
 /*
  * Server class definition
@@ -94,8 +94,7 @@
  * Note that during this method, the Server will call the
  * HandleConnectionClose as well.
  */
-class Server : public BaseServer
-{
+class Server : public BaseServer {
  public:
   // Constructor
   // The Constructor simply inits the member variable.
@@ -123,13 +122,11 @@ class Server : public BaseServer
   // communicating with the client.
   // When the method returns it doesn't mean that the packet was sent out.
   // but that it was merely queued up. Server now owns the response object
-  void SendResponse(REQID id, Connection* connection,
-                    const google::protobuf::Message& response);
+  void SendResponse(REQID id, Connection* connection, const google::protobuf::Message& response);
 
   // Send a message to initiate a non request-response style communication
   // message is now owned by the Server class
-  void SendMessage(Connection* connection,
-                   const google::protobuf::Message& message);
+  void SendMessage(Connection* connection, const google::protobuf::Message& message);
 
   // Close a connection. This function doesn't return anything.
   // When the connection is attempted to be closed(which can happen
@@ -145,10 +142,8 @@ class Server : public BaseServer
   void InstallRequestHandler(void (T::*method)(REQID id, Connection* conn, M*)) {
     google::protobuf::Message* m = new M();
     T* t = static_cast<T*>(this);
-    requestHandlers[m->GetTypeName()] =
-        std::bind(&Server::dispatchRequest<T, M>, this, t, method,
-                       std::placeholders::_1,
-                       std::placeholders::_2);
+    requestHandlers[m->GetTypeName()] = std::bind(&Server::dispatchRequest<T, M>, this, t, method,
+                                                  std::placeholders::_1, std::placeholders::_2);
     delete m;
   }
 
@@ -157,19 +152,16 @@ class Server : public BaseServer
   void InstallMessageHandler(void (T::*method)(Connection* conn, M*)) {
     google::protobuf::Message* m = new M();
     T* t = static_cast<T*>(this);
-    messageHandlers[m->GetTypeName()] =
-        std::bind(&Server::dispatchMessage<T, M>, this, t, method,
-                       std::placeholders::_1,
-                       std::placeholders::_2);
+    messageHandlers[m->GetTypeName()] = std::bind(&Server::dispatchMessage<T, M>, this, t, method,
+                                                  std::placeholders::_1, std::placeholders::_2);
     delete m;
   }
 
   // One can also send requests to the client
-  void SendRequest(Connection* _conn, google::protobuf::Message* _request,
-                   void* _ctx, google::protobuf::Message* _response_placeholder);
-  void SendRequest(Connection* _conn, google::protobuf::Message* _request,
-                   void* _ctx, sp_int64 _msecs,
+  void SendRequest(Connection* _conn, google::protobuf::Message* _request, void* _ctx,
                    google::protobuf::Message* _response_placeholder);
+  void SendRequest(Connection* _conn, google::protobuf::Message* _request, void* _ctx,
+                   sp_int64 _msecs, google::protobuf::Message* _response_placeholder);
 
   // Backpressure handler
   virtual void StartBackPressureConnectionCb(Connection* connection);
@@ -189,16 +181,15 @@ class Server : public BaseServer
 
   // Handle the responses for any sent requests
   // We provide a basic handler that just deletes the response
-  virtual void HandleResponse(google::protobuf::Message* _response,
-                              void* _ctx, NetworkErrorCode _status);
+  virtual void HandleResponse(google::protobuf::Message* _response, void* _ctx,
+                              NetworkErrorCode _status);
 
  public:
   // The interfaces implemented of the BaseServer
 
   // Create the connection
-  BaseConnection* CreateConnection(ConnectionEndPoint* endpoint,
-                                   ConnectionOptions*  options,
-                                   EventLoop*       ss);
+  BaseConnection* CreateConnection(ConnectionEndPoint* endpoint, ConnectionOptions* options,
+                                   EventLoop* ss);
 
   // Called when connection is accepted
   virtual void HandleNewConnection_Base(BaseConnection* newConnection);
@@ -213,9 +204,8 @@ class Server : public BaseServer
   void InternalSendResponse(Connection* _connection, OutgoingPacket* _packet);
 
   template <typename T, typename M>
-  void dispatchRequest(T* _t,
-                       void (T::*method)(REQID id, Connection* conn, M*),
-                       Connection* _conn, IncomingPacket* _ipkt) {
+  void dispatchRequest(T* _t, void (T::*method)(REQID id, Connection* conn, M*), Connection* _conn,
+                       IncomingPacket* _ipkt) {
     REQID rid;
     CHECK(_ipkt->UnPackREQID(&rid) == 0) << "REQID unpacking failed";
     M* m = new M();
@@ -234,9 +224,8 @@ class Server : public BaseServer
   }
 
   template <typename T, typename M>
-  void dispatchMessage(T* _t,
-                       void (T::*method)(Connection* conn, M*),
-                       Connection* _conn, IncomingPacket* _ipkt) {
+  void dispatchMessage(T* _t, void (T::*method)(Connection* conn, M*), Connection* _conn,
+                       IncomingPacket* _ipkt) {
     REQID rid;
     CHECK(_ipkt->UnPackREQID(&rid) == 0) << "REQID unpacking failed";
     M* m = new M();
@@ -254,11 +243,8 @@ class Server : public BaseServer
     cb();
   }
 
-  void InternalSendRequest(Connection* _conn,
-                           google::protobuf::Message* _request,
-                           sp_int64 _msecs,
-                           google::protobuf::Message* _response_placeholder,
-                           void* _ctx);
+  void InternalSendRequest(Connection* _conn, google::protobuf::Message* _request, sp_int64 _msecs,
+                           google::protobuf::Message* _response_placeholder, void* _ctx);
   void OnPacketTimer(REQID _id, EventLoop::Status status);
 
   typedef std::function<void(Connection*, IncomingPacket*)> handler;
@@ -267,7 +253,7 @@ class Server : public BaseServer
 
   // For acting like a client
   std::unordered_map<REQID, std::pair<google::protobuf::Message*, void*> > context_map_;
-  REQID_Generator*            request_rid_gen_;
+  REQID_Generator* request_rid_gen_;
 };
 
-#endif // SERVER_H_
+#endif  // SERVER_H_

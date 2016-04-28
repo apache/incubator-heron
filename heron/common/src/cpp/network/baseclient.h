@@ -45,11 +45,7 @@
  */
 class BaseClient {
  public:
-  enum State {
-    DISCONNECTED = 0,
-    CONNECTING,
-    CONNECTED
-  };
+  enum State { DISCONNECTED = 0, CONNECTING, CONNECTED };
 
   // Constructor/Destructor
   // Note that constructor doesn't do much beyond initializing some members.
@@ -84,8 +80,7 @@ class BaseClient {
 
  protected:
   // Instantiate a new connection
-  virtual BaseConnection* CreateConnection(ConnectionEndPoint* endpoint,
-                                           ConnectionOptions* options,
+  virtual BaseConnection* CreateConnection(ConnectionEndPoint* endpoint, ConnectionOptions* options,
                                            EventLoop* eventLoop) = 0;
 
   // Derived class should implement this method to handle Connection
@@ -117,7 +112,6 @@ class BaseClient {
   EventLoop* eventLoop_;
 
  private:
-
   // Helper function that inits various objects
   void Init(EventLoop* eventLoop, const NetworkOptions& _options);
 
@@ -135,4 +129,4 @@ class BaseClient {
   ConnectionOptions connection_options_;
 };
 
-#endif // BASECLIENT_H_
+#endif  // BASECLIENT_H_

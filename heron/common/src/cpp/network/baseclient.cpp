@@ -22,13 +22,11 @@
 #include "glog/logging.h"
 #include "basics/basics.h"
 
-BaseClient::BaseClient(EventLoop* eventLoop, const NetworkOptions& _options)
-{
+BaseClient::BaseClient(EventLoop* eventLoop, const NetworkOptions& _options) {
   Init(eventLoop, _options);
 }
 
-void BaseClient::Init(EventLoop* eventLoop, const NetworkOptions& _options)
-{
+void BaseClient::Init(EventLoop* eventLoop, const NetworkOptions& _options) {
   eventLoop_ = eventLoop;
   options_ = _options;
   conn_ = NULL;
@@ -36,15 +34,11 @@ void BaseClient::Init(EventLoop* eventLoop, const NetworkOptions& _options)
   state_ = DISCONNECTED;
 }
 
-BaseClient::~BaseClient()
-{
-}
+BaseClient::~BaseClient() {}
 
-void BaseClient::Start_Base()
-{
+void BaseClient::Start_Base() {
   if (state_ != DISCONNECTED) {
-    LOG(ERROR) << "Attempting to start a client which is already in state_ "
-         << state_ << "\n";
+    LOG(ERROR) << "Attempting to start a client which is already in state_ " << state_ << "\n";
     HandleConnect_Base(DUPLICATE_START);
     return;
   }
@@ -67,15 +61,14 @@ void BaseClient::Start_Base()
   // construct an endpoint to store the connection information
   ConnectionEndPoint* endpoint = new ConnectionEndPoint(options_.get_socket_family() != PF_INET);
   endpoint->set_fd(fd);
-  bzero((char *) endpoint->addr(), endpoint->addrlen());
+  bzero(reinterpret_cast<char*>(endpoint->addr()), endpoint->addrlen());
   // Set the address
   if (options_.get_socket_family() == PF_INET) {
-    struct sockaddr_in* addr = (struct sockaddr_in *)endpoint->addr();
+    struct sockaddr_in* addr = (struct sockaddr_in*)endpoint->addr();
     addr->sin_family = AF_INET;
     addr->sin_port = htons(options_.get_port());
     struct sockaddr_in t;
-    int error = IpUtils::getAddressInfo(t, options_.get_host().c_str(),
-                                       PF_INET, SOCK_STREAM);
+    int error = IpUtils::getAddressInfo(t, options_.get_host().c_str(), PF_INET, SOCK_STREAM);
     if (error) {
       LOG(ERROR) << "getaddrinfo failed in Client " << errno << "\n";
       close(fd);
@@ -83,24 +76,22 @@ void BaseClient::Start_Base()
       HandleConnect_Base(CONNECT_ERROR);
       return;
     }
-    memcpy(&(addr->sin_addr), &(t.sin_addr),  sizeof(addr->sin_addr));
+    memcpy(&(addr->sin_addr), &(t.sin_addr), sizeof(addr->sin_addr));
   } else {
-    struct sockaddr_un* addr = (struct sockaddr_un *)endpoint->addr();
+    struct sockaddr_un* addr = (struct sockaddr_un*)endpoint->addr();
     addr->sun_family = options_.get_sin_family();
-    strcpy(addr->sun_path, options_.get_sin_path().c_str());
+    snprintf(addr->sun_path, sizeof(addr->sun_path), "%s", options_.get_sin_path().c_str());
   }
 
   // connect to the address
   errno = 0;
-  if (connect(endpoint->get_fd(), endpoint->addr(),
-              endpoint->addrlen()) == 0 || errno == EINPROGRESS) {
+  if (connect(endpoint->get_fd(), endpoint->addr(), endpoint->addrlen()) == 0 ||
+      errno == EINPROGRESS) {
     state_ = CONNECTING;
     // Either connect succeeded or it woud block
-    auto cb = [endpoint, this] (EventLoop::Status status) {
-      this->OnConnect(endpoint, status);
-    };
+    auto cb = [endpoint, this](EventLoop::Status status) { this->OnConnect(endpoint, status); };
 
-    CHECK(eventLoop_->registerForWrite(endpoint->get_fd(), std::move(cb), false) == 0);
+    CHECK_EQ(eventLoop_->registerForWrite(endpoint->get_fd(), std::move(cb), false), 0);
     return;
   } else {
     // connect failed. Bail out saying that the start failed.
@@ -112,16 +103,15 @@ void BaseClient::Start_Base()
   }
 }
 
-void BaseClient::OnConnect(ConnectionEndPoint* _endpoint,
-                           EventLoop::Status _status)
-{
+void BaseClient::OnConnect(ConnectionEndPoint* _endpoint, EventLoop::Status _status) {
   sp_int32 error = 0;
   socklen_t len = sizeof(error);
 
   // If either we got an event other that write event or the connect didnt succeed
   // we need to close shop.
   if (_status != EventLoop::WRITE_EVENT ||
-      getsockopt(_endpoint->get_fd(), SOL_SOCKET, SO_ERROR, (void *)&error, &len) < 0 ||
+      getsockopt(_endpoint->get_fd(), SOL_SOCKET, SO_ERROR, reinterpret_cast<void*>(&error), &len) <
+          0 ||
       error != 0) {
     // we asked for a write event but select server delivered something else.
     // or for some reason the connect failed
@@ -144,13 +134,12 @@ void BaseClient::OnConnect(ConnectionEndPoint* _endpoint,
   }
 
   state_ = CONNECTED;
-  conn_->registerForClose( [this] (NetworkErrorCode s) { this->OnClose(s); });
+  conn_->registerForClose([this](NetworkErrorCode s) { this->OnClose(s); });
   HandleConnect_Base(OK);
   return;
 }
 
-void BaseClient::Stop_Base()
-{
+void BaseClient::Stop_Base() {
   if (state_ == DISCONNECTED || state_ == CONNECTING) {
     // This is a noop
     return;
@@ -159,22 +148,17 @@ void BaseClient::Stop_Base()
   conn_->closeConnection();
 }
 
-void BaseClient::OnClose(NetworkErrorCode _status)
-{
+void BaseClient::OnClose(NetworkErrorCode _status) {
   delete conn_;
   conn_ = NULL;
   state_ = DISCONNECTED;
   HandleClose_Base(_status);
 }
 
-sp_int64 BaseClient::AddTimer_Base(VCallback<> cb, sp_int64 _msecs)
-{
-  auto eventCb = [cb, this] (EventLoop::Status status) {
-    this->OnTimer(std::move(cb), status);
-  };
+sp_int64 BaseClient::AddTimer_Base(VCallback<> cb, sp_int64 _msecs) {
+  auto eventCb = [cb, this](EventLoop::Status status) { this->OnTimer(std::move(cb), status); };
 
-  sp_int64 timer_id = eventLoop_->registerTimer(std::move(eventCb),
-                           false, _msecs);
+  sp_int64 timer_id = eventLoop_->registerTimer(std::move(eventCb), false, _msecs);
   CHECK_GT(timer_id, 0);
   return timer_id;
 }
@@ -183,7 +167,4 @@ sp_int32 BaseClient::RemoveTimer_Base(sp_int64 timer_id) {
   return eventLoop_->unRegisterTimer(timer_id);
 }
 
-void BaseClient::OnTimer(VCallback<> cb, EventLoop::Status)
-{
-  cb();
-}
+void BaseClient::OnTimer(VCallback<> cb, EventLoop::Status) { cb(); }
