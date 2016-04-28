@@ -24,22 +24,26 @@
 #define __MULTI_MEAN_METRIC_H_
 
 #include <map>
+#include "metrics/mean-metric.h"
+#include "metrics/imetric.h"
+#include "proto/messages.h"
+#include "basics/basics.h"
 
-namespace heron { namespace common {
+namespace heron {
+namespace common {
 
-class MultiMeanMetric : public IMetric
-{
+class MultiMeanMetric : public IMetric {
  public:
   MultiMeanMetric();
   virtual ~MultiMeanMetric();
   MeanMetric* scope(const sp_string& _key);
   virtual void GetAndReset(const sp_string& _prefix,
-                      proto::system::MetricPublisherPublishMessage* _message);
+                           proto::system::MetricPublisherPublishMessage* _message);
 
  private:
   std::map<sp_string, MeanMetric*> value_;
 };
-
-}} // end namespace
+}  // namespace common
+}  // namespace heron
 
 #endif

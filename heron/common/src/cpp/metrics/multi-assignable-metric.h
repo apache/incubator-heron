@@ -24,22 +24,26 @@
 #define __MULTI_ASSIGNABLE_METRIC_H_
 
 #include <map>
+#include "metrics/assignable-metric.h"
+#include "metrics/imetric.h"
+#include "proto/messages.h"
+#include "basics/basics.h"
 
-namespace heron { namespace common {
+namespace heron {
+namespace common {
 
-class MultiAssignableMetric : public IMetric
-{
+class MultiAssignableMetric : public IMetric {
  public:
   MultiAssignableMetric();
   virtual ~MultiAssignableMetric();
   AssignableMetric* scope(const sp_string& _key);
   virtual void GetAndReset(const sp_string& _prefix,
-                      proto::system::MetricPublisherPublishMessage* _message);
+                           proto::system::MetricPublisherPublishMessage* _message);
 
  private:
   std::map<sp_string, AssignableMetric*> value_;
 };
-
-}} // end namespace
+}  // namespace common
+}  // namespace heron
 
 #endif

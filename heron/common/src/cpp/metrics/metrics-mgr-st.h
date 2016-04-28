@@ -25,33 +25,33 @@
 #define __METRICS_MGR_ST_H_
 
 #include <map>
+#include "metrics/imetric.h"
+#include "network/network.h"
+#include "proto/messages.h"
+#include "basics/basics.h"
 
 namespace heron {
-  namespace proto {
-    namespace tmaster {
-      class TMasterLocation;
-    }
-  }
+namespace proto {
+namespace tmaster {
+class TMasterLocation;
+}
+}
 }
 
-namespace heron { namespace common {
+namespace heron {
+namespace common {
 
 class MetricsMgrClient;
 class IMetric;
 
-class MetricsMgrSt
-{
+class MetricsMgrSt {
  public:
-  MetricsMgrSt(const sp_string& _my_hostname,
-               sp_int32 _my_port,
-               sp_int32 _metricsmgr_port,
-               const sp_string& _component,
-               const sp_string& _task_id,
-               sp_int32 _interval, EventLoop* eventLoop);
+  MetricsMgrSt(const sp_string& _my_hostname, sp_int32 _my_port, sp_int32 _metricsmgr_port,
+               const sp_string& _component, const sp_string& _task_id, sp_int32 _interval,
+               EventLoop* eventLoop);
   virtual ~MetricsMgrSt();
 
-  void register_metric(const sp_string& _metric_name,
-                       IMetric* _metric);
+  void register_metric(const sp_string& _metric_name, IMetric* _metric);
   void unregister_metric(const sp_string& _metric_name);
   void RefreshTMasterLocation(const proto::tmaster::TMasterLocation& location);
 
@@ -59,11 +59,11 @@ class MetricsMgrSt
   void gather_metrics(EventLoop::Status);
 
   VCallback<EventLoop::Status> timer_cb_;
-  std::map<sp_string, IMetric*>         metrics_;
-  MetricsMgrClient*                client_;
-  sp_int64                         timerid_;
+  std::map<sp_string, IMetric*> metrics_;
+  MetricsMgrClient* client_;
+  sp_int64 timerid_;
 };
-
-}} // end namespace
+}  // namespace common
+}  // namespace heron
 
 #endif

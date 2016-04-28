@@ -23,26 +23,28 @@
 #ifndef __TMASTER_METRICS_H_
 #define __TMASTER_METRICS_H_
 
-#include "basics/sptypes.h"
 #include <map>
+#include "metrics/imetric.h"
+#include "network/network.h"
+#include "proto/messages.h"
+#include "basics/basics.h"
 
 namespace heron {
-  namespace config {
-    class MetricsSinksReader;
-  }
+namespace config {
+class MetricsSinksReader;
+}
 }
 
-namespace heron { namespace common {
+namespace heron {
+namespace common {
 
-
-class TMasterMetrics
-{
+class TMasterMetrics {
  public:
   enum MetricAggregationType {
     UNKNOWN = -1,
     SUM = 0,
     AVG,
-    LAST // We only care about the last value
+    LAST  // We only care about the last value
   };
   TMasterMetrics(const sp_string& metrics_sinks, EventLoop* eventLoop);
   ~TMasterMetrics();
@@ -53,10 +55,10 @@ class TMasterMetrics
  private:
   MetricAggregationType TranslateFromString(const sp_string& _type);
   // map from metric prefix to its aggregation form
-  std::map<sp_string, MetricAggregationType>   metrics_prefixes_;
-  config::MetricsSinksReader*                  sinks_reader_;
+  std::map<sp_string, MetricAggregationType> metrics_prefixes_;
+  config::MetricsSinksReader* sinks_reader_;
 };
-
-}} // end namespace
+}  // namespace common
+}  // namespace heron
 
 #endif

@@ -20,32 +20,27 @@
 //
 // Please see time-spent-metric.h for details
 //////////////////////////////////////////////////////////////////////////////
-#include "proto/messages.h"
+#include "metrics/time-spent-metric.h"
+#include <sstream>
 #include "basics/basics.h"
 #include "errors/errors.h"
-#include "threads/threads.h"
-#include "network/network.h"
-
 #include "metrics/imetric.h"
-#include "metrics/time-spent-metric.h"
+#include "network/network.h"
+#include "proto/messages.h"
+#include "threads/threads.h"
 
-#include <sstream>
+namespace heron {
+namespace common {
 
-namespace heron { namespace common {
+TimeSpentMetric::TimeSpentMetric() : total_time_msecs_(0), started_(false) {}
 
-TimeSpentMetric::TimeSpentMetric()
-  : total_time_msecs_(0), started_(false)
-{
-}
+TimeSpentMetric::~TimeSpentMetric() {}
 
-TimeSpentMetric::~TimeSpentMetric()
-{
-}
+using std::chrono::high_resolution_clock;
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
 
-void TimeSpentMetric::Start()
-{
-  using namespace std::chrono;
-
+void TimeSpentMetric::Start() {
   if (!started_) {
     start_time_ = high_resolution_clock::now();
     started_ = true;
@@ -53,10 +48,7 @@ void TimeSpentMetric::Start()
   // If it is already started, just ignore.
 }
 
-void TimeSpentMetric::Stop()
-{
-  using namespace std::chrono;
-
+void TimeSpentMetric::Stop() {
   if (started_) {
     auto end_time = high_resolution_clock::now();
     total_time_msecs_ += duration_cast<milliseconds>(end_time - start_time_).count();
@@ -66,13 +58,8 @@ void TimeSpentMetric::Stop()
   // If it is already stopped, just ignore.
 }
 
-void 
-TimeSpentMetric::GetAndReset(
-  const sp_string&                              _prefix,
-  proto::system::MetricPublisherPublishMessage* _message) 
-{
-  using namespace std::chrono;
-
+void TimeSpentMetric::GetAndReset(const sp_string& _prefix,
+                                  proto::system::MetricPublisherPublishMessage* _message) {
   if (started_) {
     auto now = high_resolution_clock::now();
     total_time_msecs_ += duration_cast<milliseconds>(now - start_time_).count();
@@ -85,5 +72,5 @@ TimeSpentMetric::GetAndReset(
   d->set_name(_prefix);
   d->set_value(o.str());
 }
-
-}} // end namespace
+}  // namespace common
+}  // namespace heron

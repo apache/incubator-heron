@@ -23,16 +23,19 @@
 #ifndef __IMETRIC_H_
 #define __IMETRIC_H_
 
-namespace heron { namespace common {
+#include "basics/basics.h"
+#include "proto/messages.h"
 
-class IMetric
-{
+namespace heron {
+namespace common {
+
+class IMetric {
  public:
-  virtual ~IMetric() { }
+  virtual ~IMetric() {}
   virtual void GetAndReset(const sp_string& _prefix,
                            proto::system::MetricPublisherPublishMessage* _message) = 0;
 };
-
-}} // end namespace
+}  // namespace common
+}  // namespace heron
 
 #endif
