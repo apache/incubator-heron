@@ -80,4 +80,11 @@ def thrift_library(name, src=None, deps=[], visibility=None,
         srcs = [name+"_java_src"],
         deps = java_deps,
         visibility = visibility,
+        javacopts = [
+          "-Xlint:-cast",
+          "-Xlint:-rawtypes",
+          "-Xlint:-serial",
+          "-Xlint:-static",
+          "-Xlint:-unchecked",
+        ],
     )
