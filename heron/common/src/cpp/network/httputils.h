@@ -33,19 +33,11 @@ class OutgoingHTTPResponse;
 
 typedef std::vector<std::pair<sp_string, sp_string> > HTTPKeyValuePairs;
 
-class BaseHTTPRequest
-{
+class BaseHTTPRequest {
  public:
-  enum HTTPRequestType {
-    GET = 0,
-    POST,
-    HEAD,
-    PUT,
-    DELETE,
-    UNKNOWN
-  };
+  enum HTTPRequestType { GET = 0, POST, HEAD, PUT, DELETE, UNKNOWN };
 
-  BaseHTTPRequest(HTTPRequestType _type);
+  explicit BaseHTTPRequest(HTTPRequestType _type);
   virtual ~BaseHTTPRequest();
 
   HTTPRequestType type() const { return type_; }
@@ -58,27 +50,24 @@ class BaseHTTPRequest
   static void parse_keyvalues(HTTPKeyValuePairs& _kv, const char* _data);
   static sp_string encode_keyvalues(std::unordered_map<sp_string, sp_string>& _kv);
 
-  static bool ExtractHostNameAndQuery(const sp_string& _url, sp_string& _host,
-                                      sp_int32& _port, sp_string& _query);
+  static bool ExtractHostNameAndQuery(const sp_string& _url, sp_string& _host, sp_int32& _port,
+                                      sp_string& _query);
 
  private:
   HTTPRequestType type_;
   static std::unordered_map<char, sp_string> httpencodemap_;
 };
 
-class IncomingHTTPRequest : public BaseHTTPRequest
-{
+class IncomingHTTPRequest : public BaseHTTPRequest {
  public:
-  IncomingHTTPRequest(struct evhttp_request* _request);
+  explicit IncomingHTTPRequest(struct evhttp_request* _request);
   virtual ~IncomingHTTPRequest();
 
   //! Get the uri
   const sp_string& GetQuery() const;
 
   //! Get the key value pairs
-  const HTTPKeyValuePairs& keyvalues() const {
-    return kv_;
-  }
+  const HTTPKeyValuePairs& keyvalues() const { return kv_; }
 
   //! Get the value of a particular key
   const sp_string& GetValue(const sp_string& _key) const;
@@ -109,8 +98,7 @@ class IncomingHTTPRequest : public BaseHTTPRequest
   // Calculate just the size of the payload
   sp_int32 GetPayloadSize();
 
-private:
-
+ private:
   friend class OutgoingHTTPResponse;
 
   //! The parsed query
@@ -122,13 +110,10 @@ private:
   struct evhttp_request* request_;
 };
 
-class OutgoingHTTPRequest : public BaseHTTPRequest
-{
+class OutgoingHTTPRequest : public BaseHTTPRequest {
  public:
-  OutgoingHTTPRequest(const sp_string& _host, sp_int32 _port,
-                      const sp_string& _uri,
-                      BaseHTTPRequest::HTTPRequestType _type,
-                      const HTTPKeyValuePairs& _kvs);
+  OutgoingHTTPRequest(const sp_string& _host, sp_int32 _port, const sp_string& _uri,
+                      BaseHTTPRequest::HTTPRequestType _type, const HTTPKeyValuePairs& _kvs);
   virtual ~OutgoingHTTPRequest();
 
   //! Sets the value of the key
@@ -147,7 +132,7 @@ class OutgoingHTTPRequest : public BaseHTTPRequest
   const std::unordered_map<sp_string, sp_string>& header() const { return header_; }
   const HTTPKeyValuePairs& kv() const { return kv_; }
 
-private:
+ private:
   sp_string host_;
   sp_int32 port_;
   sp_string query_;
@@ -156,11 +141,10 @@ private:
   std::unordered_map<sp_string, sp_string> header_;
 };
 
-class OutgoingHTTPResponse
-{
+class OutgoingHTTPResponse {
  public:
   //! Constructors/Destructors
-  OutgoingHTTPResponse(IncomingHTTPRequest* _request);
+  explicit OutgoingHTTPResponse(IncomingHTTPRequest* _request);
   virtual ~OutgoingHTTPResponse();
 
   //! Adds string to the response body
@@ -178,10 +162,9 @@ class OutgoingHTTPResponse
   struct evhttp_request* response_;
 };
 
-class IncomingHTTPResponse
-{
+class IncomingHTTPResponse {
  public:
-  IncomingHTTPResponse(struct evhttp_request* _response);
+  explicit IncomingHTTPResponse(struct evhttp_request* _response);
   virtual ~IncomingHTTPResponse();
 
   //! get the value of a particular header key
@@ -194,9 +177,9 @@ class IncomingHTTPResponse
   sp_int32 response_code() const { return response_code_; }
 
  private:
-  sp_int32                                  response_code_;
-  std::unordered_map<sp_string, sp_string>  headers_;
-  sp_string                                 body_;
+  sp_int32 response_code_;
+  std::unordered_map<sp_string, sp_string> headers_;
+  sp_string body_;
 };
 
-#endif // HTTPUTILS_H_
+#endif  // HTTPUTILS_H_

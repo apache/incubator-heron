@@ -38,9 +38,9 @@
 #include "basics/basics.h"
 
 namespace google {
-  namespace protobuf {
-    class Message;
-  }
+namespace protobuf {
+class Message;
+}
 }
 
 /*
@@ -50,7 +50,7 @@ namespace google {
  * header instead of directly accessing the buffer.
  */
 
-const sp_uint32 __sp_packet_size__ = sizeof(sp_uint32);
+const sp_uint32 kSPPacketSize = sizeof(sp_uint32);
 
 class PacketHeader {
  public:
@@ -75,10 +75,10 @@ class IncomingPacket {
   //! Constructor
   // We will read a packet of maximum max_packet_size len. A value of zero
   // implies no limit
-  IncomingPacket(sp_uint32 max_packet_size);
+  explicit IncomingPacket(sp_uint32 max_packet_size);
 
   // Form an incoming packet with raw data buffer - used for tests only
-  IncomingPacket(char* _data);
+  explicit IncomingPacket(char* _data);
 
   //! Destructor
   ~IncomingPacket();
@@ -131,7 +131,7 @@ class IncomingPacket {
   sp_uint32 position_;
 
   // The pointer to the header.
-  char header_[__sp_packet_size__];
+  char header_[kSPPacketSize];
 
   // The pointer to the data.
   char* data_;
@@ -149,7 +149,7 @@ class OutgoingPacket {
   // Constructor/Destructors.
   // Constructor takes in a packet size parameter. The packet data
   // size must be exactly equal to the size specified.
-  OutgoingPacket(sp_uint32 packet_size);
+  explicit OutgoingPacket(sp_uint32 packet_size);
   ~OutgoingPacket();
 
   // Packing functions
@@ -167,15 +167,10 @@ class OutgoingPacket {
 
   // helper function to determine how much space is needed to encode a protobuf
   // The paramter byte_size is the whats reported by the ByteSize
-  static sp_uint32 SizeRequiredToPackProtocolBuffer(
-    sp_int32 _byte_size
-  );
+  static sp_uint32 SizeRequiredToPackProtocolBuffer(sp_int32 _byte_size);
 
   // pack a proto buffer
-  sp_int32 PackProtocolBuffer(
-    const google::protobuf::Message& _proto,
-    sp_int32                         _byte_size
-  );
+  sp_int32 PackProtocolBuffer(const google::protobuf::Message& _proto, sp_int32 _byte_size);
 
   // pack a request id
   sp_int32 PackREQID(const REQID& _rid);
@@ -220,4 +215,4 @@ class OutgoingPacket {
   sp_uint32 total_packet_size_;
 };
 
-#endif // PACKET_H_
+#endif  // PACKET_H_
