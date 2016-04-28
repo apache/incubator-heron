@@ -61,8 +61,13 @@ public class SchedulerMain {
   private TopologyAPI.Topology topology = null;  // topology definition
   private Config config;                        // holds all the config read
 
-  public SchedulerMain(String iCluster, String iRole, String iEnviron,
-                       String iTopologyName, String iTopologyJarFile, int iSchedulerServerPort) throws IOException {
+  public SchedulerMain(
+      String iCluster,
+      String iRole,
+      String iEnviron,
+      String iTopologyName,
+      String iTopologyJarFile,
+      int iSchedulerServerPort) throws IOException {
     // initialize the options
     cluster = iCluster;
     role = iRole;
@@ -162,8 +167,7 @@ public class SchedulerMain {
     return options;
   }
 
-  public static void main(String[] args) throws
-      ClassNotFoundException, InstantiationException, IllegalAccessException, IOException, ParseException {
+  public static void main(String[] args) throws Exception {
 
     // construct the options and help options first.
     Options options = constructOptions();
@@ -183,9 +187,8 @@ public class SchedulerMain {
     try {
       cmd = parser.parse(options, args);
     } catch (ParseException e) {
-      LOG.severe("Error parsing command line options: " + e.getMessage());
       usage(options);
-      System.exit(1);
+      throw new RuntimeException("Error parsing command line options: ", e);
     }
 
     // initialize the scheduler with the options
@@ -233,7 +236,8 @@ public class SchedulerMain {
     LoggingHelper.loggerInit(loggingLevel, true);
 
     // TODO(mfu): Pass the scheduler id from cmd
-    String processId = String.format("%s-%s-%s", "heron", Context.topologyName(config), "scheduler");
+    String processId =
+        String.format("%s-%s-%s", "heron", Context.topologyName(config), "scheduler");
     LoggingHelper.addLoggingHandler(
         LoggingHelper.getFileHandler(processId, loggingDir, true,
             systemConfig.getHeronLoggingMaximumSizeMb() * Constants.MB_TO_BYTES,
@@ -243,21 +247,18 @@ public class SchedulerMain {
   }
 
   /**
-   * Run the http server for receiving scheduler requests
+   * Get the http server for receiving scheduler requests
    *
    * @param runtime, the runtime configuration
    * @param scheduler, an instance of the scheduler
    * @param port, the port for scheduler to listen on
    * @return an instance of the http server
    */
-  private static SchedulerServer runServer(
+  private static SchedulerServer getServer(
       Config runtime, IScheduler scheduler, int port) throws IOException {
 
     // create an instance of the server using scheduler class and port
     final SchedulerServer schedulerServer = new SchedulerServer(runtime, scheduler, port);
-
-    // start the http server to manage runtime requests
-    schedulerServer.start();
 
     return schedulerServer;
   }
@@ -273,7 +274,8 @@ public class SchedulerMain {
     // Set scheduler location to host:port by default. Overwrite scheduler location if behind DNS.
     Scheduler.SchedulerLocation location = Scheduler.SchedulerLocation.newBuilder()
         .setTopologyName(Runtime.topologyName(runtime))
-        .setHttpEndpoint(String.format("%s:%d", schedulerServer.getHost(), schedulerServer.getPort()))
+        .setHttpEndpoint(
+            String.format("%s:%d", schedulerServer.getHost(), schedulerServer.getPort()))
         .build();
 
     LOG.log(Level.INFO, "Setting SchedulerLocation: {0}", location);
@@ -288,6 +290,14 @@ public class SchedulerMain {
     return true;
   }
 
+  /**
+   * Run the scheduler.
+   * It is a blocking call, and it will return in 2 cases:
+   * 1. The topology is requested to kill
+   * 2. Unexpected exceptions happen
+   *
+   * @return true if scheduled successfully
+   */
   public boolean runScheduler() {
     String statemgrClass = Context.stateManagerClass(config);
     IStateManager statemgr;
@@ -346,8 +356,10 @@ public class SchedulerMain {
       // initialize the scheduler
       scheduler.initialize(config, ytruntime);
 
-      // start the scheduler REST endpoint for receiving requests
-      server = runServer(ytruntime, scheduler, schedulerServerPort);
+      // get the scheduler server endpoint for receiving requests
+      server = getServer(ytruntime, scheduler, schedulerServerPort);
+      // start the server to manage runtime requests
+      server.start();
 
       // write the scheduler location to state manager
       isSuccessful = setSchedulerLocation(runtime, server);

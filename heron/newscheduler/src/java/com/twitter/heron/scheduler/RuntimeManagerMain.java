@@ -33,16 +33,20 @@ import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.scheduler.client.LibrarySchedulerClient;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
+import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.Runtime;
 
-public class RuntimeManagerMain {
+public final class RuntimeManagerMain {
+  private RuntimeManagerMain() {
+
+  }
+
   private static final Logger LOG = Logger.getLogger(RuntimeManagerMain.class.getName());
 
   // Print usage options
@@ -183,9 +187,8 @@ public class RuntimeManagerMain {
       // Now parse the required options
       cmd = parser.parse(options, args);
     } catch (ParseException e) {
-      LOG.severe("Error parsing command line options: " + e.getMessage());
       usage(options);
-      System.exit(1);
+      throw new RuntimeException("Error parsing command line options: ", e);
     }
 
     Boolean verbose = false;
@@ -282,18 +285,16 @@ public class RuntimeManagerMain {
 
     // Log the result and exit
     if (!isSuccessful) {
-      LOG.log(Level.SEVERE, "Failed to {0} topology {1}", new Object[]{command, topologyName});
-
-      System.exit(1);
+      throw new RuntimeException(String.format("Failed to %s topology %s", command, topologyName));
     } else {
       LOG.log(Level.FINE, "Topology {0} {1} successfully", new Object[]{topologyName, command});
-
-      System.exit(0);
     }
   }
 
 
-  public static boolean validateRuntimeManage(SchedulerStateManagerAdaptor adaptor, String topologyName) {
+  public static boolean validateRuntimeManage(
+      SchedulerStateManagerAdaptor adaptor,
+      String topologyName) {
     // Check whether the topology has already been running
     Boolean isTopologyRunning = adaptor.isTopologyRunning(topologyName);
 
@@ -340,7 +341,7 @@ public class RuntimeManagerMain {
 
     if (Context.schedulerService(config)) {
       // get the instance of the state manager
-      SchedulerStateManagerAdaptor statemgr = com.twitter.heron.spi.utils.Runtime.schedulerStateManagerAdaptor(runtime);
+      SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
 
       Scheduler.SchedulerLocation schedulerLocation =
           statemgr.getSchedulerLocation(Runtime.topologyName(runtime));

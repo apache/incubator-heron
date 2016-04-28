@@ -66,8 +66,8 @@ public class SchedulerServer {
   }
 
   protected HttpServer createServer(int port) throws IOException {
-    HttpServer schedulerServer = HttpServer.create(new InetSocketAddress(port), SERVER_BACK_LOG);
-    schedulerServer.setExecutor(Executors.newSingleThreadExecutor());
-    return schedulerServer;
+    HttpServer server = HttpServer.create(new InetSocketAddress(port), SERVER_BACK_LOG);
+    server.setExecutor(Executors.newSingleThreadExecutor());
+    return server;
   }
 }

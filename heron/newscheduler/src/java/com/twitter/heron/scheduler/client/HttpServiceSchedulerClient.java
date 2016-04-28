@@ -1,3 +1,17 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.twitter.heron.scheduler.client;
 
 import java.io.IOException;
@@ -5,11 +19,13 @@ import java.net.HttpURLConnection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.Common;
+import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.HttpUtils;
-import com.twitter.heron.spi.common.Command;
 
 /**
  * This class manages topology by sending request
@@ -63,13 +79,14 @@ public class HttpServiceSchedulerClient implements ISchedulerClient {
 
       // receive the response for manage topology
       Common.StatusCode statusCode;
+
+      LOG.fine("Receiving response from scheduler...");
       try {
-        LOG.fine("Receiving response from scheduler...");
         statusCode = Scheduler.SchedulerResponse.newBuilder()
             .mergeFrom(HttpUtils.readHttpResponse(connection))
             .build().getStatus().getStatus();
-      } catch (Exception e) {
-        LOG.log(Level.SEVERE, "Failed to parse response from scheduler: ", e);
+      } catch (InvalidProtocolBufferException e) {
+        LOG.log(Level.SEVERE, "Failed to parse response", e);
         return false;
       }
 
@@ -77,9 +94,6 @@ public class HttpServiceSchedulerClient implements ISchedulerClient {
         LOG.severe("Received not OK response from scheduler");
         return false;
       }
-    } catch (Exception e) {
-      LOG.log(Level.SEVERE, "Failed to communicate with Scheduler: ", e);
-      return false;
     } finally {
       connection.disconnect();
     }
