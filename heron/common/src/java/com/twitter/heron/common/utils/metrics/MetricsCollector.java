@@ -44,8 +44,8 @@ public class MetricsCollector implements IMetricsRegister {
 
   public MetricsCollector(WakeableLooper runnableToGatherMetrics,
                           Communicator<Metrics.MetricPublisherPublishMessage> queue) {
-    metrics = new HashMap<String, IMetric>();
-    timeBucketToMetricNames = new HashMap<Integer, List<String>>();
+    metrics = new HashMap<>();
+    timeBucketToMetricNames = new HashMap<>();
     this.queue = queue;
     this.runnableToGatherMetrics = runnableToGatherMetrics;
   }
@@ -156,6 +156,7 @@ public class MetricsCollector implements IMetricsRegister {
 
   // Gather the value of given metricName, convert it  into protobuf,
   // and add it to MetricPublisherPublishMessage builder given.
+  @SuppressWarnings("unchecked")
   private void gatherOneMetric(
       String metricName,
       Metrics.MetricPublisherPublishMessage.Builder builder) {

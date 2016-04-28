@@ -27,7 +27,7 @@ import org.junit.Test;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.HeronTuples;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 /**
  * TupleCache Tester.

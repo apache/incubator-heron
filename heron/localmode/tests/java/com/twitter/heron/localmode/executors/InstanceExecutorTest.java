@@ -29,7 +29,7 @@ import com.twitter.heron.localmode.utils.PhysicalPlanUtil;
 import com.twitter.heron.localmode.utils.PhysicalPlanUtilTest;
 import com.twitter.heron.proto.system.PhysicalPlans;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 /**
  * InstanceExecutor Tester.

@@ -116,6 +116,8 @@ public final class LoggingHelper {
   }
 
   public static final class StdOutErrLevel extends Level {
+    private static final long serialVersionUID = -3442332825945855738L;
+
     /**
      * Level for STDOUT activity.
      */

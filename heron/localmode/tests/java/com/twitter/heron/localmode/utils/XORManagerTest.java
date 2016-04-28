@@ -32,7 +32,7 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.WakeableLooper;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 /**
  * XORManager Tester.
