@@ -14,7 +14,10 @@
 
 package com.twitter.heron.scheduler.local;
 
-public class LocalConstants {
+public final class LocalConstants {
+  private LocalConstants() {
+
+  }
 
   // name of the resource file that holds the config keys
   public static final String KEYS_YAML = "com/twitter/heron/scheduler/local/keys.yaml";

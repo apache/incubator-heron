@@ -32,9 +32,9 @@ public class AuroraLauncher implements ILauncher {
   private Config runtime;
 
   @Override
-  public void initialize(Config config, Config runtime) {
-    this.config = config;
-    this.runtime = runtime;
+  public void initialize(Config mConfig, Config mRuntime) {
+    this.config = mConfig;
+    this.runtime = mRuntime;
   }
 
   @Override
