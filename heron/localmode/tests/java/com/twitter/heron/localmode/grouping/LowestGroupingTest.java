@@ -40,12 +40,12 @@ public class LowestGroupingTest {
    */
   @Test
   public void testGetListToSend() throws Exception {
-    List<Integer> task_ids = new LinkedList<>();
+    List<Integer> taskIds = new LinkedList<>();
     for (int i = 0; i < 100; ++i) {
-      task_ids.add(i);
+      taskIds.add(i);
     }
 
-    LowestGrouping g = new LowestGrouping(task_ids);
+    LowestGrouping g = new LowestGrouping(taskIds);
     for (int i = 0; i < 1000; ++i) {
       HeronTuples.HeronDataTuple dummy = HeronTuples.HeronDataTuple.getDefaultInstance();
       List<Integer> dest = g.getListToSend(dummy);

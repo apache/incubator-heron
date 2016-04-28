@@ -33,14 +33,19 @@ import com.twitter.heron.api.utils.Utils;
  */
 
 public class GeneralTopologyContextImpl implements GeneralTopologyContext {
+
   private final TopologyAPI.Topology topology;
+
   // The topology as supplied by the cluster overloaded by any
   // component specific config
   private final Map<String, Object> topologyConfig;
+
   // Map from taskid to Component Id.
   private final Map<Integer, String> taskToComponentMap;
+
   // Map from component id to list of its inputs
   private final Map<String, List<TopologyAPI.InputStream>> inputs;
+
   // Map from component id to list of its outputs
   private final Map<String, List<TopologyAPI.OutputStream>> outputs;
 
@@ -268,3 +273,4 @@ public class GeneralTopologyContextImpl implements GeneralTopologyContext {
     return a.getId().equals(b.getId()) && a.getComponentName().equals(b.getComponentName());
   }
 }
+

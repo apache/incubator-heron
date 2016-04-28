@@ -107,7 +107,8 @@ public class BoltInstance implements IInstance {
     boltMetrics.registerMetrics(topologyContext);
 
     // Delegate
-    bolt.prepare(topologyContext.getTopologyConfig(), topologyContext, new OutputCollector(collector));
+    bolt.prepare(topologyContext.getTopologyConfig(), topologyContext,
+        new OutputCollector(collector));
 
     // Invoke user-defined prepare task hook
     topologyContext.invokeHookPrepare();
@@ -223,8 +224,8 @@ public class BoltInstance implements IInstance {
       }
 
       // To avoid emitting too much data
-      if (collector.getTotalDataEmittedInBytes() - totalDataEmittedInBytesBeforeCycle >
-          instanceExecuteBatchSize) {
+      if (collector.getTotalDataEmittedInBytes() - totalDataEmittedInBytesBeforeCycle
+          > instanceExecuteBatchSize) {
         break;
       }
     }

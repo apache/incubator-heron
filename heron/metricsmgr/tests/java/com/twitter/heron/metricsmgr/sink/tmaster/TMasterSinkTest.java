@@ -34,13 +34,15 @@ import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
  * TMasterSink Tester.
  */
 public class TMasterSinkTest {
+
   // Bean name to register the TMasterLocation object into SingletonRegistry
   private static final String TMASTER_LOCATION_BEAN_NAME =
       TopologyMaster.TMasterLocation.newBuilder().getDescriptorForType().getFullName();
-  private final int RECONNECT_INTERVAL_SECONDS = 1;
-  private final int RESTART_WAIT_INTERVAL_SECONDS = 5;
-  private final int TMASTER_LOCATION_CHECK_INTERVAL_SECONDS = 1;
-  private final int WAIT_SECONDS = 10;
+
+  private static final int RECONNECT_INTERVAL_SECONDS = 1;
+  private static final int RESTART_WAIT_INTERVAL_SECONDS = 5;
+  private static final int TMASTER_LOCATION_CHECK_INTERVAL_SECONDS = 1;
+  private static final int WAIT_SECONDS = 10;
 
   @Before
   public void before() throws Exception {
@@ -51,7 +53,8 @@ public class TMasterSinkTest {
     // Remove the Singleton by Reflection
     Field field = SingletonRegistry.INSTANCE.getClass().getDeclaredField("singletonObjects");
     field.setAccessible(true);
-    Map<String, Object> singletonObjects = (Map<String, Object>) field.get(SingletonRegistry.INSTANCE);
+    Map<String, Object> singletonObjects =
+        (Map<String, Object>) field.get(SingletonRegistry.INSTANCE);
     singletonObjects.clear();
   }
 
@@ -88,8 +91,8 @@ public class TMasterSinkTest {
     // Then we check whether the TMasterService has restarted the TMasterClient for several times
     // Take other factors into account, we would check whether the TMasterClient has restarted
     // at least half the RESTART_WAIT_INTERVAL_SECONDS/RECONNECT_INTERVAL_SECONDS
-    Assert.assertTrue(tMasterSink.getTMasterStartedAttempts() >
-        (RESTART_WAIT_INTERVAL_SECONDS / RECONNECT_INTERVAL_SECONDS / 2));
+    Assert.assertTrue(tMasterSink.getTMasterStartedAttempts()
+        > (RESTART_WAIT_INTERVAL_SECONDS / RECONNECT_INTERVAL_SECONDS / 2));
     tMasterSink.close();
   }
 
@@ -158,5 +161,5 @@ public class TMasterSinkTest {
 
     tMasterSink.close();
   }
+}
 
-} 

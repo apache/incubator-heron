@@ -25,7 +25,7 @@ public interface IInstance {
   /**
    * Do the basic setup for HeronInstance
    */
-  public void start();
+  void start();
 
   /**
    * Do the basic clean for HeronInstance
@@ -33,22 +33,23 @@ public interface IInstance {
    * TODO: - to avoid confusing, we in fact have never called this method yet
    * TODO: - need to consider whether or not call this method more carefully
    */
-  public void stop();
+  void stop();
 
   /**
    * Read tuples from a queue and process the tuples
    *
    * @param inQueue the queue to read tuples from
    */
-  public void readTuplesAndExecute(Communicator<HeronTuples.HeronTupleSet> inQueue);
+  void readTuplesAndExecute(Communicator<HeronTuples.HeronTupleSet> inQueue);
 
   /**
    * Activate the instance
    */
-  public void activate();
+  void activate();
 
   /**
    * Deactivate the instance
    */
-  public void deactivate();
+  void deactivate();
 }
+

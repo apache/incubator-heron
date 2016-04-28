@@ -62,8 +62,9 @@ public class StreamConsumersTest {
    */
   @Test
   public void testPopulateStreamConsumers() throws Exception {
-    Map<TopologyAPI.StreamId, StreamConsumers> map = com.twitter.heron.localmode.utils.StreamConsumers.populateStreamConsumers(
-        topology, PhysicalPlanUtil.getComponentToTaskIds(plan));
+    Map<TopologyAPI.StreamId, StreamConsumers> map =
+        com.twitter.heron.localmode.utils.StreamConsumers.populateStreamConsumers(
+            topology, PhysicalPlanUtil.getComponentToTaskIds(plan));
     Assert.assertEquals(1, map.size());
 
     for (Map.Entry<TopologyAPI.StreamId, StreamConsumers> entry : map.entrySet()) {
@@ -85,4 +86,4 @@ public class StreamConsumersTest {
       Assert.assertTrue(boltTasksId.contains(targetId));
     }
   }
-} 
+}

@@ -52,3 +52,4 @@ public class RootTupleInfo implements Comparable<RootTupleInfo> {
     }
   }
 }
+

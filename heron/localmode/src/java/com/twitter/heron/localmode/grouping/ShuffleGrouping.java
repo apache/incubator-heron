@@ -42,12 +42,12 @@ public class ShuffleGrouping extends Grouping {
   }
 
   private int getNextTaskIndex(int index) {
-    index++;
+    int dupIndex = index + 1;
 
-    if (index == taskIdsSize) {
-      index = 0;
+    if (dupIndex == taskIdsSize) {
+      dupIndex = 0;
     }
 
-    return index;
+    return dupIndex;
   }
 }
