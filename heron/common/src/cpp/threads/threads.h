@@ -27,6 +27,5 @@
 
 #include "basics/callback.h"
 #include "threads/pcqueue.h"
-#include "threads/thr-error-enum-gen.h"
 
-#endif
+#endif  // __SP_THREADS_H

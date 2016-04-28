@@ -58,10 +58,10 @@ public class TopologyContextImpl extends GeneralTopologyContextImpl implements T
   public TopologyContextImpl(Map<String, Object> clusterConfig,
                              TopologyAPI.Topology topology,
                              Map<Integer, String> taskToComponentMap,
-                             int _myTaskId, MetricsCollector metricsCollector) {
+                             int myTaskId, MetricsCollector metricsCollector) {
     super(clusterConfig, topology, taskToComponentMap);
     this.metricsCollector = metricsCollector;
-    this.myTaskId = _myTaskId;
+    this.myTaskId = myTaskId;
     this.taskData = new HashMap<>();
 
     // Init task hooks
@@ -239,7 +239,9 @@ public class TopologyContextImpl extends GeneralTopologyContextImpl implements T
     List<Integer> allTasks = getComponentTasks(getThisComponentId());
     int retVal = 0;
     for (Integer tsk : allTasks) {
-      if (tsk.intValue() < myTaskId) retVal++;
+      if (tsk.intValue() < myTaskId) {
+        retVal++;
+      }
     }
     return retVal;
   }
@@ -274,7 +276,7 @@ public class TopologyContextImpl extends GeneralTopologyContextImpl implements T
    * Register a IMetric instance.
    * Heron will then call getValueAndReset on the metric every timeBucketSizeInSecs
    * and the returned value is sent to all metrics consumers.
-	 * You must call this during IBolt::prepare or ISpout::open.
+   * You must call this during IBolt::prepare or ISpout::open.
    * @return The IMetric argument unchanged.
    */
   @Override

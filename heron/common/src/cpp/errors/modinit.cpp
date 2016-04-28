@@ -18,12 +18,11 @@
 #include "errors/gexception.h"
 #include "errors/sperror.h"
 
-static heron::error::Global_Exception_Handler*   g_exception = NULL;
+static heron::error::Global_Exception_Handler* g_exception = NULL;
 
 sp_int32 __nifty_error_modinit::count_ = 0;
 
-__nifty_error_modinit::__nifty_error_modinit()
-{
+__nifty_error_modinit::__nifty_error_modinit() {
   if (count_ == 0) {
     g_exception = new heron::error::Global_Exception_Handler;
     heron::error::Error::initialize();
@@ -31,11 +30,10 @@ __nifty_error_modinit::__nifty_error_modinit()
   }
 }
 
-__nifty_error_modinit::~__nifty_error_modinit()
-{
+__nifty_error_modinit::~__nifty_error_modinit() {
   count_--;
   if (count_ == 0) {
-     delete g_exception;
-     heron::error::Error::shutdown();
+    delete g_exception;
+    heron::error::Error::shutdown();
   }
 }

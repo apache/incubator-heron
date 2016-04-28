@@ -118,8 +118,9 @@ public class InstanceExecutorTest {
    */
   @Test
   public void testCreatePhysicalPlanHelper() throws Exception {
-    PhysicalPlanHelper physicalPlanHelper = instanceExecutor.createPhysicalPlanHelper(plan, instanceId,
-        Mockito.mock(MetricsCollector.class));
+    PhysicalPlanHelper physicalPlanHelper =
+        instanceExecutor.createPhysicalPlanHelper(plan, instanceId,
+            Mockito.mock(MetricsCollector.class));
 
     Assert.assertNotNull(physicalPlanHelper.getTopologyContext());
   }

@@ -17,6 +17,7 @@ package com.twitter.heron.examples;
 import java.util.Map;
 
 import backtype.storm.Config;
+import backtype.storm.LocalCluster;
 import backtype.storm.StormSubmitter;
 import backtype.storm.metric.api.GlobalMetrics;
 import backtype.storm.task.OutputCollector;
@@ -25,11 +26,16 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.TopologyBuilder;
 import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Tuple;
+import backtype.storm.utils.Utils;
 
 /**
  * This is a basic example of a Storm topology.
  */
-public class ComponentJVMOptionsTopology {
+public final class ComponentJVMOptionsTopology {
+
+  private ComponentJVMOptionsTopology() {
+  }
+
   public static void main(String[] args) throws Exception {
     TopologyBuilder builder = new TopologyBuilder();
 
@@ -42,8 +48,10 @@ public class ComponentJVMOptionsTopology {
     conf.setMaxSpoutPending(10);
     conf.setComponentRam("word", 500 * 1024 * 1024);
     conf.setComponentRam("exclaim1", 1024 * 1024 * 1024);
+
     // TOPOLOGY_WORKER_CHILDOPTS will be a global one
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
+
     // For each component, both the global and if any the component one will be appended.
     // And the component one will take precedence
     conf.setComponentJvmOptions("word", "-XX:NewSize=300m");
@@ -53,20 +61,22 @@ public class ComponentJVMOptionsTopology {
       conf.setNumStmgrs(1);
       StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
     } else {
-      // TODO:- This is not yet supported
-      System.out.println("Local mode not yet supported");
-      System.exit(1);
+      LocalCluster cluster = new LocalCluster();
+      cluster.submitTopology("test", conf, builder.createTopology());
+      Utils.sleep(10000);
+      cluster.killTopology("test");
+      cluster.shutdown();
     }
   }
 
   public static class ExclamationBolt extends BaseRichBolt {
-    OutputCollector _collector;
-    long nItems;
-    long startTime;
+    private OutputCollector collector;
+    private long nItems;
+    private long startTime;
 
     @Override
-    public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
-      _collector = collector;
+    public void prepare(Map conf, TopologyContext context, OutputCollector acollector) {
+      collector = acollector;
       nItems = 0;
       startTime = System.currentTimeMillis();
     }

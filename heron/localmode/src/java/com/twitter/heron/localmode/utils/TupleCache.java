@@ -90,10 +90,11 @@ public class TupleCache {
     public long addDataTuple(TopologyAPI.StreamId streamId,
                              HeronTuples.HeronDataTuple tuple,
                              boolean isAnchored) {
-      if (current == null ||
-          current.hasControl() ||
-          !current.getDataBuilder().getStream().getComponentName().equals(streamId.getComponentName()) ||
-          !current.getDataBuilder().getStream().getId().equals(streamId.getId())) {
+      if (current == null
+          || current.hasControl()
+          || !current.getDataBuilder().getStream().getComponentName().equals(
+              streamId.getComponentName())
+          || !current.getDataBuilder().getStream().getId().equals(streamId.getId())) {
         if (current != null) {
           tuples.add(current.build());
         }
@@ -116,10 +117,10 @@ public class TupleCache {
     }
 
     public void addAckTuple(HeronTuples.AckTuple tuple) {
-      if (current == null ||
-          current.hasData() ||
-          current.getControlBuilder().getFailsCount() > 0 ||
-          current.getControlBuilder().getEmitsCount() > 0) {
+      if (current == null
+          || current.hasData()
+          || current.getControlBuilder().getFailsCount() > 0
+          || current.getControlBuilder().getEmitsCount() > 0) {
         if (current != null) {
           tuples.add(current.build());
         }
@@ -131,10 +132,10 @@ public class TupleCache {
     }
 
     public void addFailTuple(HeronTuples.AckTuple tuple) {
-      if (current == null ||
-          current.hasData() ||
-          current.getControlBuilder().getAcksCount() > 0 ||
-          current.getControlBuilder().getEmitsCount() > 0) {
+      if (current == null
+          || current.hasData()
+          || current.getControlBuilder().getAcksCount() > 0
+          || current.getControlBuilder().getEmitsCount() > 0) {
         if (current != null) {
           tuples.add(current.build());
         }
@@ -146,10 +147,10 @@ public class TupleCache {
     }
 
     public void addEmitTuple(HeronTuples.AckTuple tuple) {
-      if (current == null ||
-          current.hasData() ||
-          current.getControlBuilder().getAcksCount() > 0 ||
-          current.getControlBuilder().getFailsCount() > 0) {
+      if (current == null
+          || current.hasData()
+          || current.getControlBuilder().getAcksCount() > 0
+          || current.getControlBuilder().getFailsCount() > 0) {
         if (current != null) {
           tuples.add(current.build());
         }

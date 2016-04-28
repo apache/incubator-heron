@@ -70,16 +70,19 @@ import com.twitter.heron.resource.UnitTestHelper;
  * We will check whether the singleton Constants.ACK_COUNT and "fail count" match the expected value.
  */
 public class SpoutInstanceTest {
-  static final String spoutInstanceId = "spout-id";
-  static IPluggableSerializer serializer;
-  WakeableLooper testLooper;
-  SlaveLooper slaveLooper;
+  private static final String SPOUT_INSTANCE_ID = "spout-id";
+  private static IPluggableSerializer serializer;
+  private WakeableLooper testLooper;
+  private SlaveLooper slaveLooper;
+
   // Singleton to be changed globally for testing
-  AtomicInteger ackCount;
-  AtomicInteger failCount;
-  PhysicalPlans.PhysicalPlan physicalPlan;
+  private AtomicInteger ackCount;
+  private AtomicInteger failCount;
+  private PhysicalPlans.PhysicalPlan physicalPlan;
+
   // Only one outStreamQueue, which is responsible for both control tuples and data tuples
   private Communicator<HeronTuples.HeronTupleSet> outStreamQueue;
+
   // This blocking queue is used to buffer tuples read from socket and ready to be used by instance
   // For spout, it will buffer Control tuple, while for bolt, it will buffer data tuple.
   private Communicator<HeronTuples.HeronTupleSet> inStreamQueue;
@@ -87,7 +90,7 @@ public class SpoutInstanceTest {
   private ExecutorService threadsPool;
   private Communicator<Metrics.MetricPublisherPublishMessage> slaveMetricsOut;
   private Slave slave;
-  //
+
   private int tupleReceived;
   private List<HeronTuples.HeronDataTuple> heronDataTupleList;
 
@@ -117,7 +120,8 @@ public class SpoutInstanceTest {
     outStreamQueue.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
     inStreamQueue = new Communicator<HeronTuples.HeronTupleSet>(testLooper, slaveLooper);
     inStreamQueue.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
-    slaveMetricsOut = new Communicator<Metrics.MetricPublisherPublishMessage>(slaveLooper, testLooper);
+    slaveMetricsOut =
+        new Communicator<Metrics.MetricPublisherPublishMessage>(slaveLooper, testLooper);
     slaveMetricsOut.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
     inControlQueue = new Communicator<InstanceControlMsg>(testLooper, slaveLooper);
 
@@ -150,11 +154,14 @@ public class SpoutInstanceTest {
     threadsPool = null;
   }
 
+  /**
+   * Test the fetching of next tuple
+   */
   @Test
   public void testNextTuple() throws Exception {
     physicalPlan = UnitTestHelper.getPhysicalPlan(false, -1);
 
-    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, spoutInstanceId);
+    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, SPOUT_INSTANCE_ID);
     InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder().
         setNewPhysicalPlanHelper(physicalPlanHelper).
         build();
@@ -162,9 +169,9 @@ public class SpoutInstanceTest {
     inControlQueue.offer(instanceControlMsg);
 
     Runnable task = new Runnable() {
-      String streamId = "";
-      String componentName = "";
-      String receivedTupleStrings = "";
+      private String streamId = "";
+      private String componentName = "";
+      private String receivedTupleStrings = "";
 
       @Override
       public void run() {
@@ -208,15 +215,19 @@ public class SpoutInstanceTest {
     Assert.assertEquals(tupleReceived, 10);
   }
 
+  /**
+   * Test the gathering of metrics
+   */
   @Test
   public void testGatherMetrics() throws Exception {
     physicalPlan = UnitTestHelper.getPhysicalPlan(false, -1);
     // Set the metrics export interval a small value
-    SystemConfig systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(Constants.HERON_SYSTEM_CONFIG);
+    SystemConfig systemConfig =
+        (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(Constants.HERON_SYSTEM_CONFIG);
 
     systemConfig.put(SystemConfig.HERON_METRICS_EXPORT_INTERVAL_SEC, 1);
 
-    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, spoutInstanceId);
+    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, SPOUT_INSTANCE_ID);
     InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder().
         setNewPhysicalPlanHelper(physicalPlanHelper).
         build();
@@ -252,11 +263,14 @@ public class SpoutInstanceTest {
     testLooper.loop();
   }
 
+  /**
+   * Test with the acking immediately
+   */
   @Test
   public void testDoImmediateAcks() throws Exception {
     physicalPlan = UnitTestHelper.getPhysicalPlan(false, -1);
 
-    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, spoutInstanceId);
+    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, SPOUT_INSTANCE_ID);
     InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder().
         setNewPhysicalPlanHelper(physicalPlanHelper).
         build();
@@ -304,7 +318,7 @@ public class SpoutInstanceTest {
   public void testLookForTimeouts() throws Exception {
     physicalPlan = UnitTestHelper.getPhysicalPlan(true, 1);
 
-    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, spoutInstanceId);
+    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, SPOUT_INSTANCE_ID);
     InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder().
         setNewPhysicalPlanHelper(physicalPlanHelper).
         build();
@@ -342,7 +356,7 @@ public class SpoutInstanceTest {
   public void testAckAndFail() throws Exception {
     physicalPlan = UnitTestHelper.getPhysicalPlan(true, -1);
 
-    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, spoutInstanceId);
+    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, SPOUT_INSTANCE_ID);
     InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder().
         setNewPhysicalPlanHelper(physicalPlanHelper).
         build();

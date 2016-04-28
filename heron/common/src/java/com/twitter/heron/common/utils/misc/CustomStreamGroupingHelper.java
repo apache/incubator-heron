@@ -31,7 +31,11 @@ public class CustomStreamGroupingHelper {
     targets = new HashMap<>();
   }
 
-  public void add(String streamId, List<Integer> taskIds, CustomStreamGrouping grouping, String sourceComponentName) {
+  public void add(
+      String streamId,
+      List<Integer> taskIds,
+      CustomStreamGrouping grouping,
+      String sourceComponentName) {
     if (!targets.containsKey(streamId)) {
       targets.put(streamId, new ArrayList<Target>());
     }
@@ -66,7 +70,7 @@ public class CustomStreamGroupingHelper {
     private final List<Integer> taskIds;
     private final CustomStreamGrouping grouping;
 
-    public Target(List<Integer> taskIds, CustomStreamGrouping grouping, String componentName) {
+    Target(List<Integer> taskIds, CustomStreamGrouping grouping, String componentName) {
       this.taskIds = taskIds;
       this.grouping = grouping;
       this.componentName = componentName;
@@ -92,5 +96,5 @@ public class CustomStreamGroupingHelper {
       return grouping.chooseTasks(values);
     }
   }
-
 }
+

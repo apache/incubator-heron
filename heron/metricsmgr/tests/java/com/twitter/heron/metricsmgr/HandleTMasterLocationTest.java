@@ -58,14 +58,14 @@ import org.junit.Assert;
 public class HandleTMasterLocationTest {
 
   // Two TMasterLocationRefreshMessage to verify
-  private static final Metrics.TMasterLocationRefreshMessage tmasterLocationRefreshMessage0 =
+  private static final Metrics.TMasterLocationRefreshMessage TMASTERLOCATIONREFRESHMESSAGE0 =
       Metrics.TMasterLocationRefreshMessage.newBuilder().setTmaster(
           TopologyMaster.TMasterLocation.newBuilder().
               setTopologyName("topology-name").setTopologyId("topology-id").
               setHost("host").setControllerPort(0).setMasterPort(0)).
           build();
 
-  private static final Metrics.TMasterLocationRefreshMessage tmasterLocationRefreshMessage1 =
+  private static final Metrics.TMasterLocationRefreshMessage TMASTERLOCATIONREFRESHMESSAGE1 =
       Metrics.TMasterLocationRefreshMessage.newBuilder().setTmaster(
           TopologyMaster.TMasterLocation.newBuilder().
               setTopologyName("topology-name").setTopologyId("topology-id").
@@ -124,7 +124,8 @@ public class HandleTMasterLocationTest {
     // Remove the Singleton by Reflection
     Field field = SingletonRegistry.INSTANCE.getClass().getDeclaredField("singletonObjects");
     field.setAccessible(true);
-    Map<String, Object> singletonObjects = (Map<String, Object>) field.get(SingletonRegistry.INSTANCE);
+    Map<String, Object> singletonObjects =
+        (Map<String, Object>) field.get(SingletonRegistry.INSTANCE);
     singletonObjects.clear();
   }
 
@@ -144,22 +145,22 @@ public class HandleTMasterLocationTest {
     Thread.sleep(10 * 1000);
 
     // Verification
-    TopologyMaster.TMasterLocation tMasterLocation =
-        (TopologyMaster.TMasterLocation) SingletonRegistry.INSTANCE.getSingleton(TMASTER_LOCATION_BEAN_NAME);
+    TopologyMaster.TMasterLocation tMasterLocation = (TopologyMaster.TMasterLocation)
+        SingletonRegistry.INSTANCE.getSingleton(TMASTER_LOCATION_BEAN_NAME);
 
     // Verify we received these message
     Mockito.verify(metricsManagerServer, Mockito.times(2)).
-        onMessage(Mockito.any(SocketChannel.class), Mockito.eq(tmasterLocationRefreshMessage0));
+        onMessage(Mockito.any(SocketChannel.class), Mockito.eq(TMASTERLOCATIONREFRESHMESSAGE0));
     Mockito.verify(metricsManagerServer, Mockito.times(2)).
-        onMessage(Mockito.any(SocketChannel.class), Mockito.eq(tmasterLocationRefreshMessage1));
+        onMessage(Mockito.any(SocketChannel.class), Mockito.eq(TMASTERLOCATIONREFRESHMESSAGE1));
 
     // Verify we received message in order
     InOrder inOrder = Mockito.inOrder(metricsManagerServer);
 
     inOrder.verify(metricsManagerServer, Mockito.times(2)).
-        onMessage(Mockito.any(SocketChannel.class), Mockito.eq(tmasterLocationRefreshMessage0));
+        onMessage(Mockito.any(SocketChannel.class), Mockito.eq(TMASTERLOCATIONREFRESHMESSAGE0));
     inOrder.verify(metricsManagerServer, Mockito.times(2)).
-        onMessage(Mockito.any(SocketChannel.class), Mockito.eq(tmasterLocationRefreshMessage1));
+        onMessage(Mockito.any(SocketChannel.class), Mockito.eq(TMASTERLOCATIONREFRESHMESSAGE1));
 
     Assert.assertEquals("topology-name", tMasterLocation.getTopologyName());
     Assert.assertEquals("topology-id", tMasterLocation.getTopologyId());
@@ -201,9 +202,10 @@ public class HandleTMasterLocationTest {
   }
 
   private static class SimpleTMasterLocationPublisher extends HeronClient {
-    private static final Logger LOG = Logger.getLogger(SimpleTMasterLocationPublisher.class.getName());
+    private static final Logger LOG = Logger.getLogger(
+        SimpleTMasterLocationPublisher.class.getName());
 
-    public SimpleTMasterLocationPublisher(NIOLooper looper, String host, int port) {
+    SimpleTMasterLocationPublisher(NIOLooper looper, String host, int port) {
       super(looper, host, port,
           new HeronSocketOptions(100 * 1024 * 1024, 100,
               100 * 1024 * 1024, 100,
@@ -240,11 +242,10 @@ public class HandleTMasterLocationTest {
           setInstanceIndex(1).
           build();
 
-      Metrics.MetricPublisherRegisterRequest request = Metrics.MetricPublisherRegisterRequest.newBuilder().
-          setPublisher(publisher).build();
+      Metrics.MetricPublisherRegisterRequest request =
+          Metrics.MetricPublisherRegisterRequest.newBuilder().setPublisher(publisher).build();
 
       sendRequest(request, Metrics.MetricPublisherRegisterResponse.newBuilder());
-
     }
 
     // We send two TMasterLocationRefreshMessage twice each
@@ -252,13 +253,13 @@ public class HandleTMasterLocationTest {
     // 1. Whether onMessage(...) is invoked 4 times, with correct arguments.
     // 2. Finally the TMasterLocation in SingletonRegistry should be the latest one.
     private void sendMessage() {
-      // First send tmasterLocationRefreshMessage0 twice
-      sendMessage(tmasterLocationRefreshMessage0);
-      sendMessage(tmasterLocationRefreshMessage0);
+      // First send TMASTERLOCATIONREFRESHMESSAGE0 twice
+      sendMessage(TMASTERLOCATIONREFRESHMESSAGE0);
+      sendMessage(TMASTERLOCATIONREFRESHMESSAGE0);
 
-      // Then send tmasterLocationRefreshMessage1 twice
-      sendMessage(tmasterLocationRefreshMessage1);
-      sendMessage(tmasterLocationRefreshMessage1);
+      // Then send TMASTERLOCATIONREFRESHMESSAGE1 twice
+      sendMessage(TMASTERLOCATIONREFRESHMESSAGE1);
+      sendMessage(TMASTERLOCATIONREFRESHMESSAGE1);
     }
 
     @Override

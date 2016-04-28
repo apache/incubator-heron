@@ -68,7 +68,8 @@ public class SinkExecutorTest {
     SinkContext sinkContext =
         new SinkContextImpl("topology-name", "metricsmgr-id", "sink-id", new MultiCountMetric());
 
-    sinkExecutor = new SinkExecutor("testSinkId", metricsSink, slaveLooper, communicator, sinkContext);
+    sinkExecutor =
+        new SinkExecutor("testSinkId", metricsSink, slaveLooper, communicator, sinkContext);
   }
 
   @After
@@ -174,7 +175,8 @@ public class SinkExecutorTest {
     @Override
     public void init(Map<String, Object> map, SinkContext context) {
       initInvoked++;
-      Assert.assertEquals(map.get(MetricsSinksConfig.CONFIG_KEY_FLUSH_FREQUENCY_MS), FLUSH_INTERVAL_MS);
+      Assert.assertEquals(
+          map.get(MetricsSinksConfig.CONFIG_KEY_FLUSH_FREQUENCY_MS), FLUSH_INTERVAL_MS);
 
       Assert.assertEquals("topology-name", context.getTopologyName());
       Assert.assertEquals("sink-id", context.getSinkId());
