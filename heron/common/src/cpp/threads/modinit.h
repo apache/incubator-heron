@@ -20,16 +20,14 @@
 #include "basics/sptypes.h"
 
 class __nifty_thread_modinit {
-public:
+ public:
+  __nifty_thread_modinit();
+  ~__nifty_thread_modinit();
 
-  __nifty_thread_modinit() ;
-  ~__nifty_thread_modinit() ;
-
-private:
-
+ private:
   static sp_int32 count_;
 };
 
-static __nifty_thread_modinit             _thread_modinit;
+static __nifty_thread_modinit _thread_modinit;
 
 #endif /* end of header file */
