@@ -38,6 +38,7 @@ import com.twitter.heron.common.basics.SingletonRegistry;
 
 @Ignore
 public class TestSpout implements IRichSpout {
+  private static final long serialVersionUID = 1174512139916708531L;
   private static final int EMIT_COUNT = 10;
   private static final String MESSAGE_ID = "MESSAGE_ID";
 
