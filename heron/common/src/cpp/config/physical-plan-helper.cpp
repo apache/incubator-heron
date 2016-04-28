@@ -1,19 +1,35 @@
-#include "proto/messages.h"
-
-#include "basics/basics.h"
-#include "errors/errors.h"
-#include "threads/threads.h"
-#include "network/network.h"
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include "config/physical-plan-helper.h"
+#include <map>
+#include <set>
+#include "basics/basics.h"
+#include "errors/errors.h"
+#include "proto/messages.h"
+#include "network/network.h"
+#include "threads/threads.h"
 
-namespace heron { namespace config {
 
-void PhysicalPlanHelper::GetLocalTasks(
-              const proto::system::PhysicalPlan& _pplan,
-              const sp_string& _stmgr,
-              std::map<sp_string, TaskData>& _return)
-{
+namespace heron {
+namespace config {
+
+void PhysicalPlanHelper::GetLocalTasks(const proto::system::PhysicalPlan& _pplan,
+                                       const sp_string& _stmgr,
+                                       std::map<sp_string, TaskData>& _return) {
   for (sp_int32 i = 0; i < _pplan.instances_size(); ++i) {
     const proto::system::Instance& instance = _pplan.instances(i);
     if (instance.stmgr_id() == _stmgr) {
@@ -26,11 +42,8 @@ void PhysicalPlanHelper::GetLocalTasks(
   return;
 }
 
-void PhysicalPlanHelper::GetLocalSpouts(
-                const proto::system::PhysicalPlan& _pplan,
-                const sp_string& _stmgr,
-                std::set<sp_int32>& _return)
-{
+void PhysicalPlanHelper::GetLocalSpouts(const proto::system::PhysicalPlan& _pplan,
+                                        const sp_string& _stmgr, std::set<sp_int32>& _return) {
   std::set<sp_string> spouts;
   for (sp_int32 i = 0; i < _pplan.topology().spouts_size(); ++i) {
     spouts.insert(_pplan.topology().spouts(i).comp().name());
@@ -45,9 +58,7 @@ void PhysicalPlanHelper::GetLocalSpouts(
   return;
 }
 
-void PhysicalPlanHelper::LogPhysicalPlan(
-                const proto::system::PhysicalPlan& _pplan)
-{
+void PhysicalPlanHelper::LogPhysicalPlan(const proto::system::PhysicalPlan& _pplan) {
   LOG(INFO) << "Printing Physical Plan" << std::endl;
   LOG(INFO) << "Topology Name: " << _pplan.topology().name();
   LOG(INFO) << "Topology Id: " << _pplan.topology().id();
@@ -73,5 +84,5 @@ void PhysicalPlanHelper::LogPhysicalPlan(
 
   LOG(INFO) << "Topology State: " << _pplan.topology().state();
 }
-
-}} // end namespace
+}  // namespace config
+}  // namespace heron

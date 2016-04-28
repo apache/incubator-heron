@@ -17,20 +17,20 @@
 ////////////////////////////////////////////////////////////////
 //
 // topology_config_vars.h
-// 
+//
 // This mirrors the api/Config.java. Please update them together
-// TODO:- Can we do some autogeneration of both C++ and Java together
-// 
+// TODO(kramasamy): Can we do some autogeneration of both C++ and Java together
+//
 // Essentially this file defines as the config variables users
 // can set as part of their topology config
 ///////////////////////////////////////////////////////////////
 #ifndef TOPOLOGY_CONFIG_VARS_H_
 #define TOPOLOGY_CONFIG_VARS_H_
 
-namespace heron { namespace config {
+namespace heron {
+namespace config {
 
-class TopologyConfigVars
-{
+class TopologyConfigVars {
  public:
   static const sp_string TOPOLOGY_DEBUG;
   static const sp_string TOPOLOGY_STMGRS;
@@ -50,7 +50,7 @@ class TopologyConfigVars
   static const sp_string TOPOLOGY_CAP_TICKET;
   static const sp_string TOPOLOGY_PROJECT_NAME;
 };
-
-}} // end namespace
+}  // namespace config
+}  // namespace heron
 
 #endif
