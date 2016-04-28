@@ -23,6 +23,8 @@ import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 
 public class BasicBoltExecutor implements IRichBolt {
+  private static final long serialVersionUID = 7021447981762957626L;
+
   private IBasicBolt bolt;
   private transient BasicOutputCollector collector;
 

@@ -35,6 +35,8 @@ import javax.xml.bind.DatatypeConverter;
  * Spouts. .</p>
  */
 public class Config extends HashMap<String, Object> {
+  private static final long serialVersionUID = 2550967708478837032L;
+
   /**
    * Topology-specific options for the worker child process. This is used in addition to WORKER_CHILDOPTS.
    */
@@ -173,7 +175,7 @@ public class Config extends HashMap<String, Object> {
   public static final String TOPOLOGY_ADDITIONAL_CLASSPATH = "topology.additional.classpath";
 
   // We maintain a list of all user exposed vars
-  private static Set<String> apiVars = new HashSet<String>();
+  private static Set<String> apiVars = new HashSet<>();
 
   static {
     apiVars.add(TOPOLOGY_DEBUG);
