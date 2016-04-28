@@ -71,13 +71,12 @@ public final class MultiSpoutExclamationTopology {
   }
 
   public static class ExclamationBolt extends BaseRichBolt {
-    private OutputCollector collector;
+    private static final long serialVersionUID = 6945654705222426596L;
     private long nItems;
     private long startTime;
 
     @Override
-    public void prepare(Map conf, TopologyContext context, OutputCollector acollector) {
-      collector = acollector;
+    public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
       nItems = 0;
       startTime = System.currentTimeMillis();
     }

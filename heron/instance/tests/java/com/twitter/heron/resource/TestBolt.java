@@ -37,6 +37,7 @@ import com.twitter.heron.common.basics.SingletonRegistry;
  */
 @Ignore
 public class TestBolt extends BaseRichBolt {
+  private static final long serialVersionUID = -5160420613503624743L;
   private OutputCollector outputCollector;
   private int tupleExecuted = 0;
 

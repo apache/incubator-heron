@@ -17,6 +17,8 @@ package com.twitter.heron.api.topology;
 import java.util.Map;
 
 public abstract class BaseComponent implements IComponent {
+  private static final long serialVersionUID = 4922360537045442614L;
+
   @Override
   public Map<String, Object> getComponentConfiguration() {
     return null;

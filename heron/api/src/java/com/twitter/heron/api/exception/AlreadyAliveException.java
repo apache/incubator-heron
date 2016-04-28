@@ -15,4 +15,5 @@
 package com.twitter.heron.api.exception;
 
 public class AlreadyAliveException extends Exception {
+  private static final long serialVersionUID = -6584762522175817526L;
 }

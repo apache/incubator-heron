@@ -26,18 +26,10 @@ import backtype.storm.tuple.Values;
 
 public class TestWordSpout extends BaseRichSpout {
 
-  private boolean isDistributed;
+  private static final long serialVersionUID = -3217886193225455451L;
   private SpoutOutputCollector collector;
   private String[] words;
   private Random rand;
-
-  public TestWordSpout() {
-    this(true);
-  }
-
-  public TestWordSpout(boolean isDistributed) {
-    this.isDistributed = isDistributed;
-  }
 
   public void open(Map conf, TopologyContext context, SpoutOutputCollector acollector) {
     collector = acollector;

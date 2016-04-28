@@ -67,6 +67,7 @@ public final class MultiStageAckingTopology {
   }
 
   public static class AckingTestWordSpout extends BaseRichSpout {
+    private static final long serialVersionUID = -5972291205871728684L;
     private SpoutOutputCollector collector;
     private String[] words;
     private Random rand;
@@ -103,6 +104,7 @@ public final class MultiStageAckingTopology {
   }
 
   public static class ExclamationBolt extends BaseRichBolt {
+    private static final long serialVersionUID = -3226618846531432832L;
     private OutputCollector collector;
     private long nItems;
     private long startTime;
