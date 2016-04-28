@@ -206,16 +206,11 @@ public class SchedulerMain {
 
     // Log the result and exit
     if (!ret) {
-      LOG.log(Level.SEVERE, "Failed to schedule topology {0}", topologyName);
-
-      System.exit(1);
+      throw new RuntimeException("Failed to schedule topology: " + topologyName);
     } else {
       // stop the server and close the state manager
       LOG.log(Level.INFO, "Shutting down topology: {0}", topologyName);
-
-      System.exit(0);
     }
-
   }
 
   // Set up logging based on the Config
