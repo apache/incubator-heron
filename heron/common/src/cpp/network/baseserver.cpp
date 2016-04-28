@@ -23,31 +23,26 @@
 #include "basics/basics.h"
 
 void CallHandleConnectionCloseAndDelete(BaseServer* _server, BaseConnection* _connection,
-                                        NetworkErrorCode _status)
-{
+                                        NetworkErrorCode _status) {
   _server->HandleConnectionClose_Base(_connection, _status);
   delete _connection;
 }
 
-BaseServer::BaseServer(EventLoop* eventLoop, const NetworkOptions& _options)
-{
+BaseServer::BaseServer(EventLoop* eventLoop, const NetworkOptions& _options) {
   Init(eventLoop, _options);
 }
 
-void BaseServer::Init(EventLoop* eventLoop, const NetworkOptions& _options)
-{
+void BaseServer::Init(EventLoop* eventLoop, const NetworkOptions& _options) {
   eventLoop_ = eventLoop;
   options_ = _options;
   listen_fd_ = -1;
   connection_options_.max_packet_size_ = options_.get_max_packet_size();
-  on_new_connection_callback_ =
-    [this] (EventLoop::Status status) { this->OnNewConnection(status); };
+  on_new_connection_callback_ = [this](EventLoop::Status status) { this->OnNewConnection(status); };
 }
 
-BaseServer::~BaseServer() { }
+BaseServer::~BaseServer() {}
 
-sp_int32 BaseServer::Start_Base()
-{
+sp_int32 BaseServer::Start_Base() {
   // open a socket
   errno = 0;
   listen_fd_ = socket(options_.get_socket_family(), SOCK_STREAM, 0);
@@ -65,7 +60,7 @@ sp_int32 BaseServer::Start_Base()
   if (SockUtils::setReuseAddress(listen_fd_) < 0) {
     LOG(ERROR) << "setsockopt of a socket failed in server " << errno << "\n";
     close(listen_fd_);
-    return -1 ;
+    return -1;
   }
 
   // Set the address
@@ -74,17 +69,17 @@ sp_int32 BaseServer::Start_Base()
   struct sockaddr* serv_addr = NULL;
   socklen_t sockaddr_len = 0;
   if (options_.get_sin_family() == AF_INET) {
-    bzero((char *) &in_addr, sizeof(in_addr));
+    bzero(reinterpret_cast<char*>(&in_addr), sizeof(in_addr));
     in_addr.sin_family = options_.get_sin_family();
     in_addr.sin_port = htons(options_.get_port());
     in_addr.sin_addr.s_addr = INADDR_ANY;
-    serv_addr = (struct sockaddr *)&in_addr;
+    serv_addr = (struct sockaddr*)&in_addr;
     sockaddr_len = sizeof(in_addr);
   } else {
-    bzero((char *) &unix_addr, sizeof(unix_addr));
+    bzero(reinterpret_cast<char*>(&unix_addr), sizeof(unix_addr));
     unix_addr.sun_family = options_.get_sin_family();
-    strcpy(unix_addr.sun_path, options_.get_sin_path().c_str());
-    serv_addr = (struct sockaddr *)&unix_addr;
+    snprintf(unix_addr.sun_path, sizeof(unix_addr.sun_path), "%s", options_.get_sin_path().c_str());
+    serv_addr = (struct sockaddr*)&unix_addr;
     sockaddr_len = sizeof(unix_addr);
   }
 
@@ -112,10 +107,9 @@ sp_int32 BaseServer::Start_Base()
   return 0;
 }
 
-sp_int32 BaseServer::Stop_Base()
-{
+sp_int32 BaseServer::Stop_Base() {
   // Stop accepting new connections
-  CHECK(eventLoop_->unRegisterForRead(listen_fd_) == 0);
+  CHECK_EQ(eventLoop_->unRegisterForRead(listen_fd_), 0);
   // Close the listen socket.
   close(listen_fd_);
 
@@ -131,8 +125,7 @@ sp_int32 BaseServer::Stop_Base()
   return 0;
 }
 
-void BaseServer::OnNewConnection(EventLoop::Status _status)
-{
+void BaseServer::OnNewConnection(EventLoop::Status _status) {
   if (_status == EventLoop::READ_EVENT) {
     // The EventLoop indicated that the socket is writable.
     // Which means that a new client has connected to it.
@@ -153,9 +146,7 @@ void BaseServer::OnNewConnection(EventLoop::Status _status)
 
       // Create the connection object and register our callbacks on various events.
       BaseConnection* conn = CreateConnection(endPoint, &connection_options_, eventLoop_);
-      auto ccb = [conn, this] (NetworkErrorCode ec) {
-        this->OnConnectionClose(conn, ec);
-      };
+      auto ccb = [conn, this](NetworkErrorCode ec) { this->OnConnectionClose(conn, ec); };
       conn->registerForClose(std::move(ccb));
 
       if (conn->start() != 0) {
@@ -189,8 +180,7 @@ void BaseServer::OnNewConnection(EventLoop::Status _status)
   }
 }
 
-void BaseServer::OnConnectionClose(BaseConnection* _connection, NetworkErrorCode _status)
-{
+void BaseServer::OnConnectionClose(BaseConnection* _connection, NetworkErrorCode _status) {
   if (active_connections_.find(_connection) == active_connections_.end()) {
     LOG(ERROR) << "Connection closed for an unknown connection";
     _status = INVALID_CONNECTION;
@@ -201,14 +191,12 @@ void BaseServer::OnConnectionClose(BaseConnection* _connection, NetworkErrorCode
   delete _connection;
 }
 
-void BaseServer::CloseConnection_Base(BaseConnection* _connection)
-{
+void BaseServer::CloseConnection_Base(BaseConnection* _connection) {
   InternalCloseConnection(_connection);
   return;
 }
 
-void BaseServer::InternalCloseConnection(BaseConnection* _connection)
-{
+void BaseServer::InternalCloseConnection(BaseConnection* _connection) {
   if (active_connections_.find(_connection) == active_connections_.end()) {
     LOG(ERROR) << "Got the request close an unknown connection " << _connection << "\n";
     return;
@@ -217,21 +205,14 @@ void BaseServer::InternalCloseConnection(BaseConnection* _connection)
   return;
 }
 
-void BaseServer::AddTimer_Base(VCallback<> cb, sp_int64 _msecs)
-{
+void BaseServer::AddTimer_Base(VCallback<> cb, sp_int64 _msecs) {
   InternalAddTimer(std::move(cb), _msecs);
 }
 
-void BaseServer::InternalAddTimer(VCallback<> cb, sp_int64 _msecs)
-{
-  auto eCb = [cb, this] (EventLoop::Status status) {
-    this->OnTimer(std::move(cb), status);
-  };
+void BaseServer::InternalAddTimer(VCallback<> cb, sp_int64 _msecs) {
+  auto eCb = [cb, this](EventLoop::Status status) { this->OnTimer(std::move(cb), status); };
 
-  CHECK(eventLoop_->registerTimer(eCb, false, _msecs) > 0);
+  CHECK_GT(eventLoop_->registerTimer(eCb, false, _msecs), 0);
 }
 
-void BaseServer::OnTimer(VCallback<> cb, EventLoop::Status)
-{
-  cb();
-}
+void BaseServer::OnTimer(VCallback<> cb, EventLoop::Status) { cb(); }

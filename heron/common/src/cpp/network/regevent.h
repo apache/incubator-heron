@@ -21,12 +21,12 @@
 #ifndef SELECTSERVER_INTERNAL_H_
 #define SELECTSERVER_INTERNAL_H_
 
-#include <functional>
-#include <sys/time.h>
 #include <event.h>
-#include "network/event_loop.h"
+#include <sys/time.h>
+#include <functional>
 #include "basics/sptypes.h"
 #include "basics/spconsts.h"
+#include "network/event_loop.h"
 
 #define MICROSECS_PER_SEC (1000000)
 
@@ -34,24 +34,26 @@
  * SS_RegisteredEvent is nothing but a structure holding all associated information with the
  * registration of a particular read/write/timer event
  */
-template<typename T>
+template <typename T>
 class SS_RegisteredEvent {
  public:
-  SS_RegisteredEvent(const T& fd, bool persistent,
-                     VCallback<EventLoop::Status> cb, sp_int64 mSecs) :
-    fd_(fd), persistent_(persistent), cb_(std::move(cb))
-  {
+  SS_RegisteredEvent(const T& fd, bool persistent, VCallback<EventLoop::Status> cb, sp_int64 mSecs)
+      : fd_(fd), persistent_(persistent), cb_(std::move(cb)) {
     timer_.tv_sec = mSecs / MICROSECS_PER_SEC;
     timer_.tv_usec = mSecs % MICROSECS_PER_SEC;
   }
 
-  ~SS_RegisteredEvent() { }
+  ~SS_RegisteredEvent() {}
 
   // Simple accessor functions
-  struct event* event() { return &ev_; }
-  struct timeval* timer() { return &timer_; }
+  struct event* event() {
+    return &ev_;
+  }
+  struct timeval* timer() {
+    return &timer_;
+  }
   T get_fd() const { return fd_; }
-  // TODO (vikasr): Returning reference to a member variable is not a good practice.
+  // TODO(kramasamy): Returning reference to a member variable is not a good practice.
   // Need to change this to a 'run' method instead of returing the callback
   const VCallback<EventLoop::Status>& get_callback() const { return cb_; }
   bool isPersistent() { return persistent_; }
@@ -69,5 +71,4 @@ class SS_RegisteredEvent {
   struct timeval timer_;
 };
 
-#endif // SELECTSERVER_INTERNAL_H_
-
+#endif  // SELECTSERVER_INTERNAL_H_

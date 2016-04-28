@@ -43,23 +43,20 @@
 #include "basics/basics.h"
 
 namespace std {
-  template<> struct hash<BaseConnection *>
-  {
-    size_t operator() (BaseConnection* const& x) const
-    {
-      hash<void*> h;
-      return  h((void *)x);
-    }
-  };
+template <>
+struct hash<BaseConnection*> {
+  size_t operator()(BaseConnection* const& x) const {
+    hash<void*> h;
+    return h(reinterpret_cast<void*>(x));
+  }
+};
 }
 
 class PCThread_Group;
 class PCQueue;
 
-class BaseServer
-{
+class BaseServer {
  public:
-
   // Constructor
   // The Constructor simply inits the member variable.
   // Users must call Start method to start sending/receiving packets.
@@ -98,7 +95,8 @@ class BaseServer
 
  protected:
   // Instantiate a new Connection
-  virtual BaseConnection* CreateConnection(ConnectionEndPoint* endpoint, ConnectionOptions* options, EventLoop* eventLoop) = 0;
+  virtual BaseConnection* CreateConnection(ConnectionEndPoint* endpoint, ConnectionOptions* options,
+                                           EventLoop* eventLoop) = 0;
 
   // Called when a new connection is accepted.
   virtual void HandleNewConnection_Base(BaseConnection* newConnection) = 0;
@@ -145,4 +143,4 @@ class BaseServer
   VCallback<EventLoop::Status> on_new_connection_callback_;
 };
 
-#endif // BASESERVER_H_
+#endif  // BASESERVER_H_

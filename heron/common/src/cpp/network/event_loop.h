@@ -73,7 +73,7 @@ class EventLoop {
    * Exit the loop. The method returns immediately but the loop exits
    * after it has processed the current event.
    */
-  virtual int loopExit() = 0;
+  virtual sp_int32 loopExit() = 0;
 
   /**
    * Register a callback `cb` to be called when the given file descriptor `fd`
@@ -92,11 +92,11 @@ class EventLoop {
    * - negative indicates that the registration failed
    * TODO(Vikasr): Define error return codes for different cases.
    */
-  virtual int registerForRead(int fd, VCallback<Status> cb, bool persistent,
-                              sp_int64 timeoutMicroSecs) = 0;
+  virtual sp_int32 registerForRead(sp_int32 fd, VCallback<Status> cb, bool persistent,
+                                   sp_int64 timeoutMicroSecs) = 0;
 
   // This is the same as registerForRead(fd, cb, persistent, -1)
-  virtual int registerForRead(int fd, VCallback<Status> cb, bool persistent) = 0;
+  virtual sp_int32 registerForRead(sp_int32 fd, VCallback<Status> cb, bool persistent) = 0;
 
   /**
    * Unregisters a previously registered file descriptor fd for reading.
@@ -106,7 +106,7 @@ class EventLoop {
    * - 0 indicates successful unregistration
    * - negative indicates that this fd wans't registered at all.
    */
-  virtual int unRegisterForRead(int fd) = 0;
+  virtual sp_int32 unRegisterForRead(sp_int32 fd) = 0;
 
   /**
    * Register a callback `cb` to be called when the given file descriptor `fd`
@@ -125,11 +125,11 @@ class EventLoop {
    * - negative indicates that the registration failed
    * TODO(Vikasr): Define error return codes for different cases.
    */
-  virtual int registerForWrite(int fd, VCallback<Status> cb, bool persistent,
-                               sp_int64 timeoutMicroSecs) = 0;
+  virtual sp_int32 registerForWrite(sp_int32 fd, VCallback<Status> cb, bool persistent,
+                                    sp_int64 timeoutMicroSecs) = 0;
 
   // This is the same as registerForWrite(fd, cb, persistent, -1)
-  virtual int registerForWrite(int fd, VCallback<Status> cb, bool persistent) = 0;
+  virtual sp_int32 registerForWrite(sp_int32 fd, VCallback<Status> cb, bool persistent) = 0;
 
   /**
    * Unregisters a previously registered file descriptor fd for writing.
@@ -139,7 +139,7 @@ class EventLoop {
    * - 0 indicates successful unregistration
    * - negative indicates that this fd wans't registered at all.
    */
-  virtual int unRegisterForWrite(int fd) = 0;
+  virtual sp_int32 unRegisterForWrite(sp_int32 fd) = 0;
 
   /**
    * Register the callback `cb` to be called after `tMicroSecs` micro seconds.
