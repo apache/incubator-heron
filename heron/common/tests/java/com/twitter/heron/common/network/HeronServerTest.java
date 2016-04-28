@@ -27,7 +27,9 @@ import com.google.protobuf.Message;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SysUtils;
@@ -59,6 +61,12 @@ public class HeronServerTest {
   private volatile boolean isRequestNeed = false;
   private volatile boolean isMessageNeed = false;
   private volatile int messagesReceieved = 0;
+
+  /**
+   * JUnit rule for expected exception
+   */
+  @Rule
+  public final ExpectedException exception = ExpectedException.none();
 
   @Before
   public void before() throws Exception {
@@ -200,13 +208,8 @@ public class HeronServerTest {
    */
   @Test
   public void testHandleConnect() throws Exception {
-    boolean throwException = false;
-    try {
-      heronServer.handleConnect(null);
-    } catch (RuntimeException re) {
-      throwException = true;
-    }
-    Assert.assertTrue(throwException);
+    exception.expect(RuntimeException.class);
+    heronServer.handleConnect(null);
   }
 
   /**
