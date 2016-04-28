@@ -55,18 +55,22 @@ import com.twitter.heron.resource.UnitTestHelper;
  * 6. We will also check some common values, for instance, the stream name.
  */
 public class BoltInstanceTest {
-  static final String boltInstanceId = "bolt-id";
-  static IPluggableSerializer serializer;
-  WakeableLooper testLooper;
-  SlaveLooper slaveLooper;
+  private static final String BOLT_INSTANCE_ID = "bolt-id";
+  private static IPluggableSerializer serializer;
+
+  private WakeableLooper testLooper;
+  private SlaveLooper slaveLooper;
+
   // Singleton to be changed globally for testing
-  AtomicInteger ackCount;
-  AtomicInteger failCount;
-  AtomicInteger tupleExecutedCount;
-  volatile StringBuilder receivedStrings;
-  PhysicalPlans.PhysicalPlan physicalPlan;
+  private AtomicInteger ackCount;
+  private AtomicInteger failCount;
+  private AtomicInteger tupleExecutedCount;
+  private volatile StringBuilder receivedStrings;
+  private PhysicalPlans.PhysicalPlan physicalPlan;
+
   // Only one outStreamQueue, which is responsible for both control tuples and data tuples
   private Communicator<HeronTuples.HeronTupleSet> outStreamQueue;
+
   // This blocking queue is used to buffer tuples read from socket and ready to be used by instance
   // For spout, it will buffer Control tuple, while for bolt, it will buffer data tuple.
   private Communicator<HeronTuples.HeronTupleSet> inStreamQueue;
@@ -103,7 +107,8 @@ public class BoltInstanceTest {
     inStreamQueue.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
     inControlQueue = new Communicator<InstanceControlMsg>(testLooper, slaveLooper);
 
-    slaveMetricsOut = new Communicator<Metrics.MetricPublisherPublishMessage>(slaveLooper, testLooper);
+    slaveMetricsOut =
+        new Communicator<Metrics.MetricPublisherPublishMessage>(slaveLooper, testLooper);
     slaveMetricsOut.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
 
     slave = new Slave(slaveLooper, inStreamQueue, outStreamQueue, inControlQueue, slaveMetricsOut);
@@ -135,11 +140,14 @@ public class BoltInstanceTest {
     threadsPool = null;
   }
 
+  /**
+   * Test the reading of a tuple and apply execute on that tuple
+   */
   @Test
   public void testReadTupleAndExecute() throws Exception {
     physicalPlan = UnitTestHelper.getPhysicalPlan(false, -1);
 
-    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, boltInstanceId);
+    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, BOLT_INSTANCE_ID);
     InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder().
         setNewPhysicalPlanHelper(physicalPlanHelper).
         build();

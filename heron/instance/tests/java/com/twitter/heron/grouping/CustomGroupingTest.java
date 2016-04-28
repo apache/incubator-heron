@@ -46,12 +46,12 @@ import com.twitter.heron.resource.TestSpout;
 import com.twitter.heron.resource.UnitTestHelper;
 
 public class CustomGroupingTest {
-  static final String spoutInstanceId = "spout-id";
-  static final String customGroupingInfo = "custom-grouping-info-in-prepare";
+  private static final String SPOUT_INSTANCE_ID = "spout-id";
+  private static final String CUSTOM_GROUPING_INFO = "custom-grouping-info-in-prepare";
 
-  WakeableLooper testLooper;
-  SlaveLooper slaveLooper;
-  PhysicalPlans.PhysicalPlan physicalPlan;
+  private WakeableLooper testLooper;
+  private SlaveLooper slaveLooper;
+  private PhysicalPlans.PhysicalPlan physicalPlan;
   private Communicator<HeronTuples.HeronTupleSet> outStreamQueue;
   private Communicator<HeronTuples.HeronTupleSet> inStreamQueue;
   private Communicator<InstanceControlMsg> inControlQueue;
@@ -76,7 +76,8 @@ public class CustomGroupingTest {
     inStreamQueue.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
     inControlQueue = new Communicator<InstanceControlMsg>(testLooper, slaveLooper);
 
-    slaveMetricsOut = new Communicator<Metrics.MetricPublisherPublishMessage>(slaveLooper, testLooper);
+    slaveMetricsOut =
+        new Communicator<Metrics.MetricPublisherPublishMessage>(slaveLooper, testLooper);
     slaveMetricsOut.init(Constants.QUEUE_BUFFER_SIZE, Constants.QUEUE_BUFFER_SIZE, 0.5);
 
     slave = new Slave(slaveLooper, inStreamQueue, outStreamQueue, inControlQueue, slaveMetricsOut);
@@ -106,6 +107,9 @@ public class CustomGroupingTest {
     threadsPool = null;
   }
 
+  /**
+   * Test custom grouping
+   */
   @Test
   public void testCustomGrouping() throws Exception {
     final MyCustomGrouping myCustomGrouping = new MyCustomGrouping();
@@ -113,14 +117,14 @@ public class CustomGroupingTest {
 
     physicalPlan = constructPhysicalPlan(myCustomGrouping);
 
-    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, spoutInstanceId);
+    PhysicalPlanHelper physicalPlanHelper = new PhysicalPlanHelper(physicalPlan, SPOUT_INSTANCE_ID);
     InstanceControlMsg instanceControlMsg = InstanceControlMsg.newBuilder().
         setNewPhysicalPlanHelper(physicalPlanHelper).
         build();
 
     inControlQueue.offer(instanceControlMsg);
 
-    SingletonRegistry.INSTANCE.registerSingleton(customGroupingInfo, customGroupingInfoInPrepare);
+    SingletonRegistry.INSTANCE.registerSingleton(CUSTOM_GROUPING_INFO, customGroupingInfoInPrepare);
 
     Runnable task = new Runnable() {
       @Override
@@ -145,7 +149,8 @@ public class CustomGroupingTest {
             }
           }
           if (tupleReceived == 10) {
-            Assert.assertEquals(expectedCustomGroupingStringInPrepare, customGroupingInfoInPrepare.toString());
+            Assert.assertEquals(expectedCustomGroupingStringInPrepare,
+                customGroupingInfoInPrepare.toString());
             testLooper.exitLoop();
             break;
           }
@@ -226,9 +231,16 @@ public class CustomGroupingTest {
     private volatile int emitted = 0;
 
     @Override
-    public void prepare(TopologyContext context, String component, String streamId, List<Integer> targetTasks) {
-      StringBuilder customGroupingInfoInPrepare = (StringBuilder) SingletonRegistry.INSTANCE.getSingleton(customGroupingInfo);
-      customGroupingInfoInPrepare.append(context.getThisComponentId() + "+" + component + "+" + streamId + "+" + targetTasks.toString());
+    public void prepare(
+        TopologyContext context,
+        String component,
+        String streamId,
+        List<Integer> targetTasks) {
+
+      StringBuilder customGroupingInfoInPrepare =
+          (StringBuilder) SingletonRegistry.INSTANCE.getSingleton(CUSTOM_GROUPING_INFO);
+      customGroupingInfoInPrepare.append(context.getThisComponentId() + "+" + component
+          + "+" + streamId + "+" + targetTasks.toString());
     }
 
     @Override

@@ -48,11 +48,13 @@ public class LocalModeTest {
 
     spyLocalMode.init();
     Mockito.verify(spyLocalMode, Mockito.times(1)).isSystemConfigExisted();
-    Mockito.verify(spyLocalMode, Mockito.times(1)).registerSystemConfig(Mockito.any(SystemConfig.class));
+    Mockito.verify(
+        spyLocalMode, Mockito.times(1)).registerSystemConfig(Mockito.any(SystemConfig.class));
 
     spyLocalMode.init();
     Mockito.verify(spyLocalMode, Mockito.times(2)).isSystemConfigExisted();
-    Mockito.verify(spyLocalMode, Mockito.times(1)).registerSystemConfig(Mockito.any(SystemConfig.class));
+    Mockito.verify(
+        spyLocalMode, Mockito.times(1)).registerSystemConfig(Mockito.any(SystemConfig.class));
   }
 
   @Test
@@ -62,11 +64,13 @@ public class LocalModeTest {
     LocalMode spyLocalMode1 = Mockito.spy(new LocalMode(false));
     spyLocalMode1.init();
     Mockito.verify(spyLocalMode1, Mockito.times(1)).isSystemConfigExisted();
-    Mockito.verify(spyLocalMode1, Mockito.times(1)).registerSystemConfig(Mockito.any(SystemConfig.class));
+    Mockito.verify(
+        spyLocalMode1, Mockito.times(1)).registerSystemConfig(Mockito.any(SystemConfig.class));
 
     LocalMode spyLocalMode2 = Mockito.spy(new LocalMode(false));
     spyLocalMode2.init();
     Mockito.verify(spyLocalMode2, Mockito.times(1)).isSystemConfigExisted();
-    Mockito.verify(spyLocalMode2, Mockito.times(0)).registerSystemConfig(Mockito.any(SystemConfig.class));
+    Mockito.verify(
+        spyLocalMode2, Mockito.times(0)).registerSystemConfig(Mockito.any(SystemConfig.class));
   }
 }

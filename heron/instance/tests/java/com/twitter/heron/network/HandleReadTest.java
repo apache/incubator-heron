@@ -95,9 +95,11 @@ public class HandleReadTest {
   }
 
   static void close(Closeable sc2) {
-    if (sc2 != null) try {
-      sc2.close();
-    } catch (IOException ignored) {
+    if (sc2 != null) {
+      try {
+        sc2.close();
+      } catch (IOException ignored) {
+      }
     }
   }
 
@@ -144,6 +146,9 @@ public class HandleReadTest {
     threadsPool = null;
   }
 
+  /**
+   * Test reading from network
+   */
   @Test
   public void testHandleRead() throws Exception {
     ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
@@ -161,7 +166,8 @@ public class HandleReadTest {
       // Receive request
       IncomingPacket incomingPacket = new IncomingPacket();
       while (incomingPacket.readFromChannel(socketChannel) != 0) {
-
+        // 1ms sleep to mitigate busy looping
+        SysUtils.sleep(1);
       }
 
       // Send back response
