@@ -21,9 +21,9 @@ import java.util.logging.Logger;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
+import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;
@@ -95,10 +95,11 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
    */
   protected boolean restartTopologyHandler(String topologyName) {
     Integer containerId = Context.topologyContainerId(config);
-    Scheduler.RestartTopologyRequest restartTopologyRequest = Scheduler.RestartTopologyRequest.newBuilder()
-        .setTopologyName(topologyName)
-        .setContainerIndex(containerId)
-        .build();
+    Scheduler.RestartTopologyRequest restartTopologyRequest =
+        Scheduler.RestartTopologyRequest.newBuilder()
+            .setTopologyName(topologyName)
+            .setContainerIndex(containerId)
+            .build();
 
     // If we restart the container including TMaster, wee need to clean TMasterLocation,
     // since when starting up, TMaster expects no other existing TMaster,
