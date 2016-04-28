@@ -26,6 +26,7 @@ import backtype.storm.tuple.Values;
 
 public class TestWordSpout extends BaseRichSpout {
 
+  private static final long serialVersionUID = -3217886193225455451L;
   private SpoutOutputCollector collector;
   private String[] words;
   private Random rand;

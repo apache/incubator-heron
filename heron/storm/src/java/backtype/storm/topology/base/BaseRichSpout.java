@@ -17,6 +17,8 @@ package backtype.storm.topology.base;
 import backtype.storm.topology.IRichSpout;
 
 public abstract class BaseRichSpout extends BaseComponent implements IRichSpout {
+  private static final long serialVersionUID = -4408729095010972293L;
+
   @Override
   public void close() {
   }

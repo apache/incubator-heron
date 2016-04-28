@@ -19,6 +19,8 @@ import java.util.Map;
 import org.apache.storm.topology.IComponent;
 
 public abstract class BaseComponent implements IComponent {
+  private static final long serialVersionUID = -892888971805729161L;
+
   @Override
   public Map<String, Object> getComponentConfiguration() {
     return null;

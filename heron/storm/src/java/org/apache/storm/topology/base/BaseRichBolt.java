@@ -17,6 +17,8 @@ package org.apache.storm.topology.base;
 import org.apache.storm.topology.IRichBolt;
 
 public abstract class BaseRichBolt extends BaseComponent implements IRichBolt {
+  private static final long serialVersionUID = 5749013017107995933L;
+
   @Override
   public void cleanup() {
   }

@@ -40,6 +40,7 @@ import backtype.storm.serialization.IKryoFactory;
  * Spouts. .</p>
  */
 public class Config extends com.twitter.heron.api.Config {
+  private static final long serialVersionUID = 2282398261811468412L;
 
   /**
    * True if Storm should timeout messages or not. Defaults to true. This is meant to be used
@@ -141,6 +142,7 @@ public class Config extends com.twitter.heron.api.Config {
    * This is not supported in Heron
    */
   public static final String TOPOLOGY_MAX_ERROR_REPORT_PER_INTERVAL = "topology.max.error.report.per.interval";
+
   /**
    * When set to true, Storm will log every message that's emitted.
    */

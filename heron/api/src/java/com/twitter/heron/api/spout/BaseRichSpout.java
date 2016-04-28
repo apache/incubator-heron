@@ -17,6 +17,8 @@ package com.twitter.heron.api.spout;
 import com.twitter.heron.api.topology.BaseComponent;
 
 public abstract class BaseRichSpout extends BaseComponent implements IRichSpout {
+  private static final long serialVersionUID = 743568889496601081L;
+
   @Override
   public void close() {
   }

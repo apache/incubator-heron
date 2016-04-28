@@ -17,6 +17,8 @@ package com.twitter.heron.api.bolt;
 import com.twitter.heron.api.topology.BaseComponent;
 
 public abstract class BaseRichBolt extends BaseComponent implements IRichBolt {
+  private static final long serialVersionUID = -2269376231370074742L;
+
   @Override
   public void cleanup() {
   }

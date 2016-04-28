@@ -17,6 +17,8 @@ package org.apache.storm.topology.base;
 import org.apache.storm.topology.IRichSpout;
 
 public abstract class BaseRichSpout extends BaseComponent implements IRichSpout {
+  private static final long serialVersionUID = 7053278702425063125L;
+
   @Override
   public void close() {
   }

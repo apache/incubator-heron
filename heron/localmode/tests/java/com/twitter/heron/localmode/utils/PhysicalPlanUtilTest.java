@@ -46,6 +46,7 @@ import org.junit.Assert;
  * PhysicalPlanGenerator Tester.
  */
 public class PhysicalPlanUtilTest implements Serializable {
+  private static final long serialVersionUID = -8532695494712446731L;
   public static final String TOPOLOGY_NAME = "topology-name";
   public static final String TOPOLOGY_ID = "topology-id";
 

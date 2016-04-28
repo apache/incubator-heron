@@ -20,6 +20,7 @@ import backtype.storm.generated.GlobalStreamId;
 import backtype.storm.task.TopologyContext;
 
 public class CustomStreamGroupingDelegate implements com.twitter.heron.api.grouping.CustomStreamGrouping {
+  private static final long serialVersionUID = 2286979042095596191L;
   private CustomStreamGrouping delegate;
 
   public CustomStreamGroupingDelegate(CustomStreamGrouping delegate) {
