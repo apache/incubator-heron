@@ -23,13 +23,12 @@ import java.util.Set;
 import com.google.protobuf.ByteString;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.HeronTuples;
-
-import org.junit.Assert;
 
 public class FieldsGroupingTest {
 
