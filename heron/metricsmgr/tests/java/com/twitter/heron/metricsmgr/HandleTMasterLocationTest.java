@@ -14,6 +14,7 @@
 
 package com.twitter.heron.metricsmgr;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.channels.SocketChannel;
 import java.util.Map;
@@ -183,17 +184,24 @@ public class HandleTMasterLocationTest {
   private void runClient() {
 
     Runnable runClient = new Runnable() {
+      NIOLooper looper;
+
       @Override
       public void run() {
         try {
-          NIOLooper looper = new NIOLooper();
+          looper = new NIOLooper();
           simpleLocationPublisher =
               new SimpleTMasterLocationPublisher(looper, SERVER_HOST, serverPort);
           simpleLocationPublisher.start();
           looper.loop();
 
-        } catch (Exception e) {
+        } catch (IOException e) {
           throw new RuntimeException("Some error instantiating client");
+        } finally {
+          simpleLocationPublisher.stop();
+          if (looper != null) {
+            looper.exitLoop();
+          }
         }
       }
     };
