@@ -184,7 +184,7 @@ public class HandleTMasterLocationTest {
   private void runClient() {
 
     Runnable runClient = new Runnable() {
-      NIOLooper looper;
+      private NIOLooper looper;
 
       @Override
       public void run() {
