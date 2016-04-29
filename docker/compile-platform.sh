@@ -35,8 +35,8 @@ fi
 bazel clean
 
 echo "Creating packages"
-bazel build --config=$CONFIG_PLATFORM scripts/packages:tarpkgs
-bazel build --config=$CONFIG_PLATFORM scripts/packages:binpkgs
+bazel build -c opt --config=$CONFIG_PLATFORM scripts/packages:tarpkgs
+bazel build -c opt --config=$CONFIG_PLATFORM scripts/packages:binpkgs
 
 echo "Moving packages to /$OUTPUT_DIRECTORY"
 for file in ./bazel-bin/scripts/packages/*.tar.gz; do
