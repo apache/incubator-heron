@@ -168,14 +168,10 @@ public class MetricsManagerServer extends HeronServer {
     if (request == null) {
       LOG.severe("Unknown connection closed");
     } else {
-      LOG.severe(String.format("Un-register publish from hostname: %s,"
-              + " component_name: %s, port: %d,"
-              + " instance_id: %s, instance_index: %d",
-          request.getHostname(),
-          request.getComponentName(),
-          request.getPort(),
-          request.getInstanceId(),
-          request.getInstanceIndex()));
+      LOG.log(Level.SEVERE, "Un-register publish from hostname: {0},"
+          + " component_name: {1}, port: {2}," + " instance_id: {3}, instance_index: {4}",
+          new Object[] {request.getHostname(), request.getComponentName(), request.getPort(),
+          request.getInstanceId(), request.getInstanceIndex()});
     }
 
     // Update Metrics
