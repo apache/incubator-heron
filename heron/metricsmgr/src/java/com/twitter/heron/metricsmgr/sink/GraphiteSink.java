@@ -114,9 +114,8 @@ public class GraphiteSink implements IMetricsSink {
 
     try {
       graphite.write(lines.toString());
-    } catch (Exception e) {
-      LOG.log(Level.SEVERE, "Error sending metrics to Graphite", e);
-      LOG.severe("Dropping messages.");
+    } catch (IOException e) {
+      LOG.log(Level.SEVERE, "Error sending metrics to Graphite. Dropping messages...", e);
 
       // Here we do not invoke GraphiteSink.close(), since:
       // 1. We just want to close the connection to GraphiteServer
@@ -133,7 +132,7 @@ public class GraphiteSink implements IMetricsSink {
   public void flush() {
     try {
       graphite.flush();
-    } catch (Exception e) {
+    } catch (IOException e) {
       LOG.log(Level.SEVERE, "Error flushing metrics to Graphite", e);
       LOG.severe("Dropping messages.");
 
@@ -186,14 +185,15 @@ public class GraphiteSink implements IMetricsSink {
         // Open a connection to Graphite server.
         socket = new Socket(serverHost, serverPort);
         writer = new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8);
-      } catch (Exception e) {
+      } catch (IOException e) {
         connectionFailures++;
         if (tooManyConnectionFailures()) {
           // first time when connection limit reached, report to logs
           LOG.severe("Too many connection failures, would not try to connect again.");
         }
-        LOG.log(Level.SEVERE, "Error creating connection, "
-            + serverHost + ":" + serverPort, e);
+        LOG.log(Level.SEVERE,
+            String.format("Error creating connection, %s:%d", serverHost, serverPort),
+            e);
       }
     }
 
