@@ -11,7 +11,7 @@
 #include "network/network.h"
 #include "zookeeper/mock_zkclient.h"
 #include "zookeeper/zkclient_factory.h"
-#include "heron-zkstatemgr.h"
+#include "statemgr/heron-zkstatemgr.h"
 
 using ::testing::_;
 using ::testing::AtLeast;

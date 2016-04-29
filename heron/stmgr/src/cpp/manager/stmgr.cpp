@@ -12,7 +12,7 @@
 #include "network/network.h"
 
 #include "config/heron-internals-config-reader.h"
-#include "heron-statemgr.h"
+#include "statemgr/heron-statemgr.h"
 #include "metrics/metrics.h"
 #include "metrics/metrics-mgr-st.h"
 #include "manager/stmgr-clientmgr.h"
