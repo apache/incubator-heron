@@ -40,6 +40,9 @@ public class RoundRobinPackingTest {
     return count;
   }
 
+  /**
+   * test even packing of instances
+   */
   @Test
   public void testEvenPacking() throws Exception {
     int numContainers = 2;
@@ -49,11 +52,11 @@ public class RoundRobinPackingTest {
     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
     topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
 
-    // Setup the spout parallelism 
+    // Setup the spout parallelism
     Map<String, Integer> spouts = new HashMap<>();
     spouts.put("spout", componentParallelism);
 
-    // Setup the bolt parallelism 
+    // Setup the bolt parallelism
     Map<String, Integer> bolts = new HashMap<>();
     bolts.put("bolt", componentParallelism);
 

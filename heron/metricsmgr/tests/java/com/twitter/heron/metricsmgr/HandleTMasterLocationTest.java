@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import com.google.protobuf.Message;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -39,8 +40,6 @@ import com.twitter.heron.common.network.StatusCode;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
-
-import org.junit.Assert;
 
 /**
  * Test whether MetricsManagerServer could handle TMasterLocationRefreshMessage correctly.

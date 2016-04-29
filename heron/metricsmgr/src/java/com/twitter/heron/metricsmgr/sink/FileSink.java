@@ -49,7 +49,8 @@ public class FileSink implements IMetricsSink {
   private static final String EXCEPTIONS_COUNT = "exceptions-count";
   private static final String FLUSH_COUNT = "flush-count";
   private static final String RECORD_PROCESS_COUNT = "record-process-count";
-  private static final ObjectMapper mapper = new ObjectMapper();
+  private static final ObjectMapper MAPPER = new ObjectMapper();
+
   // We would convert a file's metrics into a JSON object, i.e. array
   // So we need to add "[" at the start and "]" at the end
   private static boolean isFileStart = true;
@@ -125,7 +126,7 @@ public class FileSink implements IMetricsSink {
 
     String result = "";
     try {
-      result = mapper.writeValueAsString(jsonToWrite);
+      result = MAPPER.writeValueAsString(jsonToWrite);
     } catch (JsonProcessingException e) {
       LOG.log(Level.SEVERE, "Could not convert map to JSONString: " + jsonToWrite.toString(), e);
     }
