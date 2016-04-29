@@ -1,3 +1,19 @@
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #ifndef SRC_CPP_SVCS_STMGR_SRC_MANAGER_STMGR_H_
 #define SRC_CPP_SVCS_STMGR_SRC_MANAGER_STMGR_H_
 
@@ -7,6 +23,8 @@
 #include <vector>
 #include <chrono>
 #include "proto/messages.h"
+#include "network/network.h"
+#include "basics/basics.h"
 
 namespace heron {
 namespace common {
@@ -29,10 +47,9 @@ class TupleCache;
 class StMgr {
  public:
   StMgr(EventLoop* eventLoop, sp_int32 _myport, const sp_string& _topology_name,
-        const sp_string& _topology_id, proto::api::Topology* _topology,
-        const sp_string& _stmgr_id, const std::vector<sp_string>& _instances,
-        const sp_string& _zkhostport, const sp_string& _zkroot,
-        sp_int32 _metricsmgr_port, sp_int32 _shell_port);
+        const sp_string& _topology_id, proto::api::Topology* _topology, const sp_string& _stmgr_id,
+        const std::vector<sp_string>& _instances, const sp_string& _zkhostport,
+        const sp_string& _zkroot, sp_int32 _metricsmgr_port, sp_int32 _shell_port);
   virtual ~StMgr();
 
   // All kinds of initialization like starting servers and clients
@@ -44,8 +61,7 @@ class StMgr {
                                proto::stmgr::TupleStreamMessage* _message);
   void HandleInstanceData(sp_int32 _task_id, bool _local_spout,
                           proto::stmgr::TupleMessage* _message);
-  void DrainInstanceData(sp_int32 _task_id,
-                         proto::system::HeronTupleSet* _tuple);
+  void DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet* _tuple);
   const proto::system::PhysicalPlan* GetPhysicalPlan() const;
 
   // Forward the call to the StmgrServer
@@ -60,8 +76,7 @@ class StMgr {
   bool DidAnnounceBackPressure();
 
  private:
-  void OnTMasterLocationFetch(proto::tmaster::TMasterLocation* _tmaster,
-                              proto::system::StatusCode);
+  void OnTMasterLocationFetch(proto::tmaster::TMasterLocation* _tmaster, proto::system::StatusCode);
   void FetchTMasterLocation();
   // A wrapper that calls FetchTMasterLocation. Needed for RegisterTimer
   void CheckTMasterLocation(EventLoop::Status);
@@ -77,14 +92,12 @@ class StMgr {
   void CleanupXorManagers();
 
   void SendInBound(sp_int32 _task_id, proto::system::HeronTupleSet* _message);
-  void ProcessAcksAndFails(sp_int32 _task_id,
-                           const proto::system::HeronControlTupleSet& _control);
+  void ProcessAcksAndFails(sp_int32 _task_id, const proto::system::HeronControlTupleSet& _control);
   void CopyDataOutBound(sp_int32 _src_task_id, bool _local_spout,
                         const proto::api::StreamId& _streamid,
                         const proto::system::HeronDataTuple& _tuple,
                         const std::list<sp_int32>& _out_tasks);
-  void CopyControlOutBound(const proto::system::AckTuple& _control,
-                           bool _is_fail);
+  void CopyControlOutBound(const proto::system::AckTuple& _control, bool _is_fail);
 
   sp_int32 ExtractTopologyTimeout(const proto::api::Topology& _topology);
 
@@ -132,11 +145,11 @@ class StMgr {
   heron::common::MultiAssignableMetric* stmgr_process_metrics_;
 
   // The time at which the stmgr was started up
-  std::chrono::high_resolution_clock::time_point    start_time_;
-  sp_string                                         zkhostport_;
-  sp_string                                         zkroot_;
-  sp_int32                                          metricsmgr_port_;
-  sp_int32                                          shell_port_;
+  std::chrono::high_resolution_clock::time_point start_time_;
+  sp_string zkhostport_;
+  sp_string zkroot_;
+  sp_int32 metricsmgr_port_;
+  sp_int32 shell_port_;
 };
 
 }  // namespace stmgr

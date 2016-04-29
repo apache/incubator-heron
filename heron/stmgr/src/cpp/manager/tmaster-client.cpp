@@ -1,28 +1,39 @@
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "manager/tmaster-client.h"
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-
+#include <vector>
 #include <iostream>
-
+#include "manager/stmgr.h"
 #include "proto/messages.h"
-
 #include "basics/basics.h"
 #include "errors/errors.h"
 #include "threads/threads.h"
 #include "network/network.h"
-
 #include "config/heron-internals-config-reader.h"
-
-#include "manager/stmgr.h"
-#include "manager/tmaster-client.h"
 
 namespace heron {
 namespace stmgr {
 
-TMasterClient::TMasterClient(
-    EventLoop* eventLoop, const NetworkOptions& _options,
-    const sp_string& _stmgr_id, sp_int32 _stmgr_port, sp_int32 _shell_port,
-    VCallback<proto::system::PhysicalPlan*> _pplan_watch)
+TMasterClient::TMasterClient(EventLoop* eventLoop, const NetworkOptions& _options,
+                             const sp_string& _stmgr_id, sp_int32 _stmgr_port, sp_int32 _shell_port,
+                             VCallback<proto::system::PhysicalPlan*> _pplan_watch)
     : Client(eventLoop, _options),
       stmgr_id_(_stmgr_id),
       stmgr_port_(_stmgr_port),
@@ -31,15 +42,13 @@ TMasterClient::TMasterClient(
       pplan_watch_(std::move(_pplan_watch)),
       reconnect_timer_id(0),
       heartbeat_timer_id(0) {
-  reconnect_tmaster_interval_sec_ =
-      config::HeronInternalsConfigReader::Instance()
-          ->GetHeronStreammgrClientReconnectTmasterIntervalSec();
-  stream_to_tmaster_heartbeat_interval_sec_ =
-      config::HeronInternalsConfigReader::Instance()
-          ->GetHeronStreammgrTmasterHeartbeatIntervalSec();
+  reconnect_tmaster_interval_sec_ = config::HeronInternalsConfigReader::Instance()
+                                        ->GetHeronStreammgrClientReconnectTmasterIntervalSec();
+  stream_to_tmaster_heartbeat_interval_sec_ = config::HeronInternalsConfigReader::Instance()
+                                                  ->GetHeronStreammgrTmasterHeartbeatIntervalSec();
 
-  reconnect_timer_cb = [this] () { this->OnReConnectTimer(); };
-  heartbeat_timer_cb = [this] () { this->OnHeartbeatTimer(); };
+  reconnect_timer_cb = [this]() { this->OnReConnectTimer(); };
+  heartbeat_timer_cb = [this]() { this->OnHeartbeatTimer(); };
 
   char hostname[1024];
   CHECK_EQ(gethostname(hostname, 1023), 0);
@@ -58,17 +67,16 @@ void TMasterClient::Die() {
   to_die_ = true;
   Stop();
   // Unregister the timers
-  if(reconnect_timer_id > 0) {
+  if (reconnect_timer_id > 0) {
     RemoveTimer(reconnect_timer_id);
   }
 
-  if(heartbeat_timer_id > 0) {
+  if (heartbeat_timer_id > 0) {
     RemoveTimer(heartbeat_timer_id);
   }
 }
 
-sp_string
-TMasterClient::getTmasterHostPort() {
+sp_string TMasterClient::getTmasterHostPort() {
   return options_.get_host() + ":" + std::to_string(options_.get_port());
 }
 
@@ -78,8 +86,7 @@ void TMasterClient::HandleConnect(NetworkErrorCode _status) {
       Stop();
       return;
     }
-    LOG(INFO) << "Connected to tmaster running at "
-              << get_clientoptions().get_host() << ":"
+    LOG(INFO) << "Connected to tmaster running at " << get_clientoptions().get_host() << ":"
               << get_clientoptions().get_port() << std::endl;
     SendRegisterRequest();
   } else {
@@ -87,14 +94,12 @@ void TMasterClient::HandleConnect(NetworkErrorCode _status) {
       delete this;
       return;
     }
-    LOG(ERROR) << "Could not connect to tmaster at "
-               << get_clientoptions().get_host() << ":"
+    LOG(ERROR) << "Could not connect to tmaster at " << get_clientoptions().get_host() << ":"
                << get_clientoptions().get_port() << std::endl;
     LOG(INFO) << "Will retry again..." << std::endl;
     // Shouldn't be in a state where a previous timer is not cleared yet.
     CHECK_EQ(reconnect_timer_id, 0);
-    reconnect_timer_id = AddTimer(reconnect_timer_cb,
-             reconnect_tmaster_interval_sec_ * 1000000);
+    reconnect_timer_id = AddTimer(reconnect_timer_cb, reconnect_tmaster_interval_sec_ * 1000000);
   }
 }
 
@@ -104,27 +109,24 @@ void TMasterClient::HandleClose(NetworkErrorCode _code) {
     return;
   }
   LOG(INFO) << "TMaster connection closed with code " << _code << std::endl;
-  LOG(INFO) << "Will try to reconnect again after "
-            << reconnect_tmaster_interval_sec_ << "seconds" << std::endl;
+  LOG(INFO) << "Will try to reconnect again after " << reconnect_tmaster_interval_sec_ << "seconds"
+            << std::endl;
   // Shouldn't be in a state where a previous timer is not cleared yet.
   CHECK_EQ(reconnect_timer_id, 0);
 
   // Remove the heartbeat timer since we have disconnected
-  if(heartbeat_timer_id > 0) {
+  if (heartbeat_timer_id > 0) {
     RemoveTimer(heartbeat_timer_id);
     heartbeat_timer_id = 0;
   }
 
-  reconnect_timer_id = AddTimer(reconnect_timer_cb,
-           reconnect_tmaster_interval_sec_ * 1000000);
+  reconnect_timer_id = AddTimer(reconnect_timer_cb, reconnect_tmaster_interval_sec_ * 1000000);
 }
 
-void TMasterClient::HandleRegisterResponse(
-    void*, proto::tmaster::StMgrRegisterResponse* _response,
-    NetworkErrorCode _status) {
+void TMasterClient::HandleRegisterResponse(void*, proto::tmaster::StMgrRegisterResponse* _response,
+                                           NetworkErrorCode _status) {
   if (_status != OK) {
-    LOG(ERROR) << "non ok network stack code for Register Response from Tmaster"
-               << std::endl;
+    LOG(ERROR) << "non ok network stack code for Register Response from Tmaster" << std::endl;
     delete _response;
     Stop();
     return;
@@ -140,15 +142,15 @@ void TMasterClient::HandleRegisterResponse(
     }
     // Shouldn't be in a state where a previous timer is not cleared yet.
     CHECK_EQ(heartbeat_timer_id, 0);
-    heartbeat_timer_id = AddTimer(heartbeat_timer_cb,
-             stream_to_tmaster_heartbeat_interval_sec_ * 1000000);
+    heartbeat_timer_id =
+        AddTimer(heartbeat_timer_cb, stream_to_tmaster_heartbeat_interval_sec_ * 1000000);
   }
   delete _response;
 }
 
-void TMasterClient::HandleHeartbeatResponse(
-    void*, proto::tmaster::StMgrHeartbeatResponse* _response,
-    NetworkErrorCode _status) {
+void TMasterClient::HandleHeartbeatResponse(void*,
+                                            proto::tmaster::StMgrHeartbeatResponse* _response,
+                                            NetworkErrorCode _status) {
   if (_status != OK) {
     LOG(ERROR) << "NonOK response message for heartbeat Response" << std::endl;
     delete _response;
@@ -162,14 +164,13 @@ void TMasterClient::HandleHeartbeatResponse(
   } else {
     // Shouldn't be in a state where a previous timer is not cleared yet.
     CHECK_EQ(heartbeat_timer_id, 0);
-    heartbeat_timer_id = AddTimer(heartbeat_timer_cb,
-             stream_to_tmaster_heartbeat_interval_sec_ * 1000000);
+    heartbeat_timer_id =
+        AddTimer(heartbeat_timer_cb, stream_to_tmaster_heartbeat_interval_sec_ * 1000000);
   }
   delete _response;
 }
 
-void TMasterClient::HandleNewAssignmentMessage(
-    proto::stmgr::NewPhysicalPlanMessage* _message) {
+void TMasterClient::HandleNewAssignmentMessage(proto::stmgr::NewPhysicalPlanMessage* _message) {
   LOG(INFO) << "Got a new assignment" << std::endl;
   pplan_watch_(_message->release_new_pplan());
   delete _message;
@@ -189,8 +190,7 @@ void TMasterClient::OnHeartbeatTimer() {
 }
 
 void TMasterClient::SendRegisterRequest() {
-  proto::tmaster::StMgrRegisterRequest* request =
-      new proto::tmaster::StMgrRegisterRequest();
+  proto::tmaster::StMgrRegisterRequest* request = new proto::tmaster::StMgrRegisterRequest();
 
   sp_string cwd;
   FileUtils::getCwd(cwd);
@@ -211,8 +211,7 @@ void TMasterClient::SendRegisterRequest() {
 }
 
 void TMasterClient::SendHeartbeatRequest() {
-  proto::tmaster::StMgrHeartbeatRequest* request =
-      new proto::tmaster::StMgrHeartbeatRequest();
+  proto::tmaster::StMgrHeartbeatRequest* request = new proto::tmaster::StMgrHeartbeatRequest();
   request->set_heartbeat_time(time(NULL));
   // TODO(vikasr) Send actual stats
   request->mutable_stats();
