@@ -117,7 +117,8 @@ public class MetricsManager {
             setInstanceIndex(METRICS_MANAGER_INSTANCE_ID).build();
     this.jvmMetrics = new JVMMetrics();
     this.metricsQueue =
-        new Communicator<Metrics.MetricPublisherPublishMessage>(null, this.metricsManagerServerLoop);
+        new Communicator<Metrics.MetricPublisherPublishMessage>(null,
+            this.metricsManagerServerLoop);
     this.metricsCollector = new MetricsCollector(metricsManagerServerLoop, metricsQueue);
     this.heronMetricsExportIntervalSec = systemConfig.getHeronMetricsExportIntervalSec();
 
@@ -322,6 +323,9 @@ public class MetricsManager {
    */
   public class DefaultExceptionHandler implements Thread.UncaughtExceptionHandler {
 
+    /**
+     * Handler for uncaughtException
+     */
     public void uncaughtException(Thread thread, Throwable exception) {
       String threadName = thread.getName();
       LOG.log(Level.SEVERE,
