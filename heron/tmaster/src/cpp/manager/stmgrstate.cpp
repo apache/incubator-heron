@@ -1,23 +1,36 @@
-#include <iostream>
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
+#include "manager/stmgrstate.h"
+#include <iostream>
+#include <vector>
+#include "manager/tmasterserver.h"
 #include "proto/messages.h"
 #include "basics/basics.h"
 #include "errors/errors.h"
 #include "threads/threads.h"
 #include "network/network.h"
-
-#include "manager/tmasterserver.h"
-#include "manager/stmgrstate.h"
-
 #include "config/heron-internals-config-reader.h"
 
-namespace heron { namespace tmaster {
+namespace heron {
+namespace tmaster {
 
-StMgrState::StMgrState(Connection* _conn,
-                       const proto::system::StMgr& _stmgr,
+StMgrState::StMgrState(Connection* _conn, const proto::system::StMgr& _stmgr,
                        const std::vector<proto::system::Instance*>& _instances,
-                       TMasterServer* _server)
-{
+                       TMasterServer* _server) {
   last_heartbeat_ = time(NULL);
   last_stats_ = NULL;
   instances_ = _instances;
@@ -26,8 +39,7 @@ StMgrState::StMgrState(Connection* _conn,
   server_ = _server;
 }
 
-StMgrState::~StMgrState()
-{
+StMgrState::~StMgrState() {
   delete stmgr_;
   for (size_t i = 0; i < instances_.size(); ++i) {
     delete instances_[i];
@@ -37,8 +49,7 @@ StMgrState::~StMgrState()
 
 void StMgrState::UpdateWithNewStMgr(const proto::system::StMgr& _stmgr,
                                     const std::vector<proto::system::Instance*>& _instances,
-                                    Connection* _conn)
-{
+                                    Connection* _conn) {
   delete last_stats_;
   last_stats_ = NULL;
   delete stmgr_;
@@ -50,8 +61,7 @@ void StMgrState::UpdateWithNewStMgr(const proto::system::StMgr& _stmgr,
   connection_ = _conn;
 }
 
-bool StMgrState::VerifyInstances(const std::vector<proto::system::Instance*>& _instances)
-{
+bool StMgrState::VerifyInstances(const std::vector<proto::system::Instance*>& _instances) {
   if (instances_.size() != _instances.size()) return false;
   for (size_t i = 0; i < instances_.size(); ++i) {
     bool found = false;
@@ -59,8 +69,10 @@ bool StMgrState::VerifyInstances(const std::vector<proto::system::Instance*>& _i
       if (instances_[i]->instance_id() != _instances[j]->instance_id()) continue;
       if (instances_[i]->stmgr_id() != _instances[j]->stmgr_id()) continue;
       if (instances_[i]->info().task_id() != _instances[j]->info().task_id()) continue;
-      if (instances_[i]->info().component_index() != _instances[j]->info().component_index()) continue;
-      if (instances_[i]->info().component_name() != _instances[j]->info().component_name()) continue;
+      if (instances_[i]->info().component_index() != _instances[j]->info().component_index())
+        continue;
+      if (instances_[i]->info().component_name() != _instances[j]->info().component_name())
+        continue;
       found = true;
       break;
     }
@@ -69,18 +81,15 @@ bool StMgrState::VerifyInstances(const std::vector<proto::system::Instance*>& _i
   return true;
 }
 
-void StMgrState::heartbeat(sp_int64,
-                           proto::system::StMgrStats* _stats)
-{
+void StMgrState::heartbeat(sp_int64, proto::system::StMgrStats* _stats) {
   // Right now we ignore the time supplied by the stmgr.
-  // TODO:- Figure out the right way here
+  // TODO(kramasamy): Figure out the right way here
   last_heartbeat_ = time(NULL);
   delete last_stats_;
   last_stats_ = _stats;
 }
 
-void StMgrState::NewPhysicalPlan(const proto::system::PhysicalPlan& _pplan)
-{
+void StMgrState::NewPhysicalPlan(const proto::system::PhysicalPlan& _pplan) {
   LOG(INFO) << "Sending a new physical plan to stmgr " << stmgr_->id();
   proto::stmgr::NewPhysicalPlanMessage message;
   message.mutable_new_pplan()->CopyFrom(_pplan);
@@ -108,12 +117,10 @@ StMgrState::AddAssignment(const std::vector<pair<string, sp_int32> >& _assignmen
 }
 */
 
-bool
-StMgrState::TimedOut() const
-{
+bool StMgrState::TimedOut() const {
   sp_int32 timeout =
-    config::HeronInternalsConfigReader::Instance()->GetHeronTmasterStmgrStateTimeoutSec();
+      config::HeronInternalsConfigReader::Instance()->GetHeronTmasterStmgrStateTimeoutSec();
   return (time(NULL) - last_heartbeat_) > timeout;
 }
-
-}} // end of namespace
+}  // namespace tmaster
+}  // namespace heron
