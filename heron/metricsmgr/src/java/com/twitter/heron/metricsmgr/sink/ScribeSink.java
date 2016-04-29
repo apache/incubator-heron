@@ -171,9 +171,6 @@ public class ScribeSink implements IMetricsSink {
     } catch (TException tx) {
       LOG.log(Level.SEVERE, "Failed to open connection to scribe server " + connectionString(), tx);
       return false;
-    } catch (Exception e) {
-      LOG.log(Level.SEVERE, "Failed to open connection to scribe server " + connectionString(), e);
-      return false;
     }
 
     LOG.info("Opened connection to scribe server " + connectionString());
@@ -207,8 +204,6 @@ public class ScribeSink implements IMetricsSink {
       }
     } catch (TException te) {
       LOG.log(Level.SEVERE, "Message sending failed due to TransportException: ", te);
-    } catch (Exception e) {
-      LOG.log(Level.SEVERE, "Message sending failed due to exception: ", e);
     }
 
     COUNTERS.put(FAILED, COUNTERS.get(FAILED) + 1);

@@ -15,8 +15,10 @@
 package com.twitter.heron.metricsmgr.sink;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -81,7 +83,7 @@ public class FileSink implements IMetricsSink {
       writer = filename == null ? System.out
           : new PrintStream(new FileOutputStream(filename, false),
           true, "UTF-8");
-    } catch (Exception e) {
+    } catch (FileNotFoundException | UnsupportedEncodingException e) {
       throw new RuntimeException("Error creating " + filename, e);
     }
   }
