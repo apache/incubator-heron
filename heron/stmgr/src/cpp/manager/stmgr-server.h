@@ -1,3 +1,19 @@
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #ifndef SRC_CPP_SVCS_STMGR_SRC_MANAGER_STMGR_SERVER_H_
 #define SRC_CPP_SVCS_STMGR_SRC_MANAGER_STMGR_SERVER_H_
 
@@ -5,6 +21,9 @@
 #include <set>
 #include <vector>
 #include "network/network_error.h"
+#include "proto/messages.h"
+#include "network/network.h"
+#include "basics/basics.h"
 
 namespace heron {
 namespace common {
@@ -21,15 +40,13 @@ class StMgr;
 
 class StMgrServer : public Server {
  public:
-  StMgrServer(EventLoop* eventLoop, const NetworkOptions& options,
-              const sp_string& _topology_name, const sp_string& _topology_id,
-              const sp_string& _stmgr_id,
+  StMgrServer(EventLoop* eventLoop, const NetworkOptions& options, const sp_string& _topology_name,
+              const sp_string& _topology_id, const sp_string& _stmgr_id,
               const std::vector<sp_string>& _expected_instances, StMgr* _stmgr,
               heron::common::MetricsMgrSt* _metrics_manager_client);
   virtual ~StMgrServer();
 
-  void SendToInstance(sp_int32 _task_id,
-                      const proto::stmgr::TupleMessage& _message);
+  void SendToInstance(sp_int32 _task_id, const proto::stmgr::TupleMessage& _message);
 
   void BroadcastNewPhysicalPlan(const proto::system::PhysicalPlan& _pplan);
 
@@ -45,14 +62,11 @@ class StMgrServer : public Server {
   // Gets all the Instance information
   void GetInstanceInfo(std::vector<proto::system::Instance*>& _return);
 
-  bool DidAnnounceBackPressure() {
-    return !remote_ends_who_caused_back_pressure_.empty();
-  }
+  bool DidAnnounceBackPressure() { return !remote_ends_who_caused_back_pressure_.empty(); }
 
  protected:
   virtual void HandleNewConnection(Connection* newConnection);
-  virtual void HandleConnectionClose(Connection* connection,
-                                     NetworkErrorCode status);
+  virtual void HandleConnectionClose(Connection* connection, NetworkErrorCode status);
 
  private:
   sp_string MakeBackPressureCompIdMetricName(const sp_string& instanceid);
@@ -63,21 +77,18 @@ class StMgrServer : public Server {
   // First from other stream managers
   void HandleStMgrHelloRequest(REQID _id, Connection* _conn,
                                proto::stmgr::StrMgrHelloRequest* _request);
-  void HandleTupleStreamMessage(Connection* _conn,
-                                proto::stmgr::TupleStreamMessage* _message);
+  void HandleTupleStreamMessage(Connection* _conn, proto::stmgr::TupleStreamMessage* _message);
 
   // Next from local instances
-  void HandleRegisterInstanceRequest(
-      REQID _id, Connection* _conn,
-      proto::stmgr::RegisterInstanceRequest* _request);
-  void HandleTupleSetMessage(Connection* _conn,
-                             proto::stmgr::TupleMessage* _message);
+  void HandleRegisterInstanceRequest(REQID _id, Connection* _conn,
+                                     proto::stmgr::RegisterInstanceRequest* _request);
+  void HandleTupleSetMessage(Connection* _conn, proto::stmgr::TupleMessage* _message);
 
   // Backpressure message from and to other stream managers
-  void HandleStartBackPressureMessage(
-      Connection* _conn, proto::stmgr::StartBackPressureMessage* _message);
-  void HandleStopBackPressureMessage(
-      Connection* _conn, proto::stmgr::StopBackPressureMessage* _message);
+  void HandleStartBackPressureMessage(Connection* _conn,
+                                      proto::stmgr::StartBackPressureMessage* _message);
+  void HandleStopBackPressureMessage(Connection* _conn,
+                                     proto::stmgr::StopBackPressureMessage* _message);
   void SendStartBackPressureToOtherStMgrs();
   void SendStopBackPressureToOtherStMgrs();
 
