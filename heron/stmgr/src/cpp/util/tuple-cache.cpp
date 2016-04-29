@@ -1,28 +1,41 @@
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "util/tuple-cache.h"
 #include <iostream>
-
+#include <map>
 #include "proto/messages.h"
-
 #include "basics/basics.h"
 #include "errors/errors.h"
 #include "threads/threads.h"
 #include "network/network.h"
-
 #include "config/heron-internals-config-reader.h"
-#include "util/tuple-cache.h"
 
 namespace heron {
 namespace stmgr {
 
 TupleCache::TupleCache(EventLoop* eventLoop, sp_uint32 _drain_threshold)
     : eventLoop_(eventLoop), drain_threshold_bytes_(_drain_threshold) {
-  cache_drain_frequency_ms_ = config::HeronInternalsConfigReader::Instance()
-                                  ->GetHeronStreammgrCacheDrainFrequencyMs();
+  cache_drain_frequency_ms_ =
+      config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrCacheDrainFrequencyMs();
   tuples_cache_max_tuple_size_ =
-      config::HeronInternalsConfigReader::Instance()
-          ->GetHeronStreammgrPacketMaximumSizeBytes();
+      config::HeronInternalsConfigReader::Instance()->GetHeronStreammgrPacketMaximumSizeBytes();
 
   total_size_ = 0;
-  auto drain_cb = [this] (EventLoop::Status status) { this->drain(status); };
+  auto drain_cb = [this](EventLoop::Status status) { this->drain(status); };
   eventLoop_->registerTimer(std::move(drain_cb), true, cache_drain_frequency_ms_ * 1000);
 }
 
@@ -36,31 +49,26 @@ TupleCache::~TupleCache() {
   }
 }
 
-sp_int64 TupleCache::add_data_tuple(
-    sp_int32 _task_id, const proto::api::StreamId& _streamid,
-    const proto::system::HeronDataTuple& _tuple) {
+sp_int64 TupleCache::add_data_tuple(sp_int32 _task_id, const proto::api::StreamId& _streamid,
+                                    const proto::system::HeronDataTuple& _tuple) {
   if (total_size_ >= drain_threshold_bytes_) drain_impl();
   TupleList* l = get(_task_id);
-  return l->add_data_tuple(_streamid, _tuple, &total_size_,
-                           &tuples_cache_max_tuple_size_);
+  return l->add_data_tuple(_streamid, _tuple, &total_size_, &tuples_cache_max_tuple_size_);
 }
 
-void TupleCache::add_ack_tuple(sp_int32 _task_id,
-                               const proto::system::AckTuple& _tuple) {
+void TupleCache::add_ack_tuple(sp_int32 _task_id, const proto::system::AckTuple& _tuple) {
   if (total_size_ >= drain_threshold_bytes_) drain_impl();
   TupleList* l = get(_task_id);
   return l->add_ack_tuple(_tuple, &total_size_);
 }
 
-void TupleCache::add_fail_tuple(sp_int32 _task_id,
-                                const proto::system::AckTuple& _tuple) {
+void TupleCache::add_fail_tuple(sp_int32 _task_id, const proto::system::AckTuple& _tuple) {
   if (total_size_ >= drain_threshold_bytes_) drain_impl();
   TupleList* l = get(_task_id);
   return l->add_fail_tuple(_tuple, &total_size_);
 }
 
-void TupleCache::add_emit_tuple(sp_int32 _task_id,
-                                const proto::system::AckTuple& _tuple) {
+void TupleCache::add_emit_tuple(sp_int32 _task_id, const proto::system::AckTuple& _tuple) {
   if (total_size_ >= drain_threshold_bytes_) drain_impl();
   TupleList* l = get(_task_id);
   return l->add_emit_tuple(_tuple, &total_size_);
@@ -96,14 +104,12 @@ TupleCache::TupleList::TupleList() {
 
 TupleCache::TupleList::~TupleList() { CHECK(tuples_.empty()); }
 
-sp_int64 TupleCache::TupleList::add_data_tuple(
-    const proto::api::StreamId& _streamid,
-    const proto::system::HeronDataTuple& _tuple, sp_uint64* _total_size,
-    sp_uint64* _tuples_cache_max_tuple_size) {
-  if (!current_ || current_->has_control() ||
-      current_->data().stream().id() != _streamid.id() ||
-      current_->data().stream().component_name() !=
-          _streamid.component_name() ||
+sp_int64 TupleCache::TupleList::add_data_tuple(const proto::api::StreamId& _streamid,
+                                               const proto::system::HeronDataTuple& _tuple,
+                                               sp_uint64* _total_size,
+                                               sp_uint64* _tuples_cache_max_tuple_size) {
+  if (!current_ || current_->has_control() || current_->data().stream().id() != _streamid.id() ||
+      current_->data().stream().component_name() != _streamid.component_name() ||
       current_size_ > *_tuples_cache_max_tuple_size) {
     if (current_) {
       tuples_.push_front(current_);
@@ -125,8 +131,7 @@ sp_int64 TupleCache::TupleList::add_data_tuple(
 
 void TupleCache::TupleList::add_ack_tuple(const proto::system::AckTuple& _tuple,
                                           sp_uint64* _total_size) {
-  if (!current_ || current_->has_data() ||
-      current_->control().emits_size() > 0) {
+  if (!current_ || current_->has_data() || current_->control().emits_size() > 0) {
     if (current_) {
       tuples_.push_front(current_);
     }
@@ -139,10 +144,9 @@ void TupleCache::TupleList::add_ack_tuple(const proto::system::AckTuple& _tuple,
   current_->mutable_control()->add_acks()->CopyFrom(_tuple);
 }
 
-void TupleCache::TupleList::add_fail_tuple(
-    const proto::system::AckTuple& _tuple, sp_uint64* _total_size) {
-  if (!current_ || current_->has_data() ||
-      current_->control().emits_size() > 0) {
+void TupleCache::TupleList::add_fail_tuple(const proto::system::AckTuple& _tuple,
+                                           sp_uint64* _total_size) {
+  if (!current_ || current_->has_data() || current_->control().emits_size() > 0) {
     if (current_) {
       tuples_.push_front(current_);
     }
@@ -155,10 +159,9 @@ void TupleCache::TupleList::add_fail_tuple(
   current_->mutable_control()->add_fails()->CopyFrom(_tuple);
 }
 
-void TupleCache::TupleList::add_emit_tuple(
-    const proto::system::AckTuple& _tuple, sp_uint64* _total_size) {
-  if (!current_ || current_->has_data() ||
-      current_->control().acks_size() > 0 ||
+void TupleCache::TupleList::add_emit_tuple(const proto::system::AckTuple& _tuple,
+                                           sp_uint64* _total_size) {
+  if (!current_ || current_->has_data() || current_->control().acks_size() > 0 ||
       current_->control().fails_size() > 0) {
     if (current_) {
       tuples_.push_front(current_);
@@ -173,9 +176,7 @@ void TupleCache::TupleList::add_emit_tuple(
 }
 
 void TupleCache::TupleList::drain(
-    sp_int32 _task_id,
-    std::function<void(sp_int32, proto::system::HeronTupleSet*)>
-        _drainer) {
+    sp_int32 _task_id, std::function<void(sp_int32, proto::system::HeronTupleSet*)> _drainer) {
   sp_int32 drained = 0;
   // we have to drain from back
   while (!tuples_.empty()) {

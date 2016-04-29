@@ -1,3 +1,19 @@
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <iostream>
 #include <string>
 
@@ -14,8 +30,7 @@
 heron::common::HeronStateMgr* state_mgr = NULL;
 
 void GeneratePhysicalPlan(heron::proto::system::PhysicalPlan& _pplan,
-                          heron::proto::api::Topology* _topology)
-{
+                          heron::proto::api::Topology* _topology) {
   // Copy the topology verbatim
   _pplan.mutable_topology()->CopyFrom(*_topology);
 
@@ -44,9 +59,7 @@ void GeneratePhysicalPlan(heron::proto::system::PhysicalPlan& _pplan,
   instance2->set_component_name("exclaim1");
 }
 
-void OnCreatePlan(EventLoop* eventLoop,
-                  heron::proto::system::StatusCode _code)
-{
+void OnCreatePlan(EventLoop* eventLoop, heron::proto::system::StatusCode _code) {
   if (_code != heron::proto::system::OK) {
     LOG(ERROR) << "Error creating pplan " << _code << std::endl;
     ::exit(1);
@@ -54,25 +67,23 @@ void OnCreatePlan(EventLoop* eventLoop,
   _ss->loopExit();
 }
 
-void OnGetTopology(heron::proto::api::Topology* _topology,
-                   EventLoop* eventLoop,
-                   heron::proto::system::StatusCode _code)
-{
+void OnGetTopology(heron::proto::api::Topology* _topology, EventLoop* eventLoop,
+                   heron::proto::system::StatusCode _code) {
   if (_code != heron::proto::system::OK) {
     LOG(ERROR) << "Error getting topology " << _code << std::endl;
     ::exit(1);
   }
   heron::proto::system::PhysicalPlan pplan;
   GeneratePhysicalPlan(pplan, _topology);
-  state_mgr->CreatePhysicalPlan(pplan,
-                                 CreateCallback(&OnCreatePlan, eventLoop));
+  state_mgr->CreatePhysicalPlan(pplan, CreateCallback(&OnCreatePlan, eventLoop));
 }
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
   if (argc != 4) {
-    std::cout << "Usage: " << argv[0] << " <zkhostportlist> <topleveldir> <topologyname>" << std::endl;
-    std::cout << "If you want to use local filesystem and not zk, please substibute LOCALMODE for zkhostportlist\n";
+    std::cout << "Usage: " << argv[0] << " <zkhostportlist> <topleveldir> <topologyname>"
+              << std::endl;
+    std::cout << "If you want to use local filesystem and not zk, please substibute LOCALMODE for "
+                 "zkhostportlist\n";
     ::exit(1);
   }
 
