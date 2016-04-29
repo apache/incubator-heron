@@ -21,7 +21,7 @@ import com.twitter.heron.api.tuple.Fields;
 
 
 public interface Scheme extends Serializable {
-  public List<Object> deserialize(byte[] ser);
+  List<Object> deserialize(byte[] ser);
 
-  public Fields getOutputFields();
+  Fields getOutputFields();
 }

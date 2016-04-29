@@ -96,6 +96,9 @@ public class MetricsManager {
   private final String topologyName;
   private final String metricsmgrId;
 
+  /**
+   * Metrics manager constructor
+   */
   public MetricsManager(String topologyName, String serverHost,
                         int serverPort, String metricsmgrId,
                         SystemConfig systemConfig, MetricsSinksConfig config)
@@ -114,7 +117,8 @@ public class MetricsManager {
             setInstanceIndex(METRICS_MANAGER_INSTANCE_ID).build();
     this.jvmMetrics = new JVMMetrics();
     this.metricsQueue =
-        new Communicator<Metrics.MetricPublisherPublishMessage>(null, this.metricsManagerServerLoop);
+        new Communicator<Metrics.MetricPublisherPublishMessage>(null,
+            this.metricsManagerServerLoop);
     this.metricsCollector = new MetricsCollector(metricsManagerServerLoop, metricsQueue);
     this.heronMetricsExportIntervalSec = systemConfig.getHeronMetricsExportIntervalSec();
 
@@ -162,8 +166,9 @@ public class MetricsManager {
           get(MetricsSinksConfig.CONFIG_KEY_SINK_RESTART_ATTEMPTS);
       // Supply with default value is config is null
       sinksRetryAttempts.put(sinkId,
-          restartAttempts == null ?
-              MetricsSinksConfig.DEFAULT_SINK_RESTART_ATTEMPTS : TypeUtils.getInt(restartAttempts));
+          restartAttempts == null
+              ? MetricsSinksConfig.DEFAULT_SINK_RESTART_ATTEMPTS
+              : TypeUtils.getInt(restartAttempts));
 
       // Update the list of Communicator in Metrics Manager Server
       metricsManagerServer.addSinkCommunicator(sinkExecutor.getCommunicator());
@@ -184,7 +189,10 @@ public class MetricsManager {
 
   public static void main(String[] args) throws IOException {
     if (args.length != 6) {
-      throw new RuntimeException("Invalid arguments; Usage: java com.twitter.heron.metricsmgr.MetricsManager <id> <port> <topname> <topid> <heron_internals_config_filename> <metrics_sinks_config_filename>");
+      throw new RuntimeException(
+          "Invalid arguments; Usage: java com.twitter.heron.metricsmgr.MetricsManager "
+          + "<id> <port> <topname> <topid> <heron_internals_config_filename> "
+          + "<metrics_sinks_config_filename>");
     }
 
     String metricsmgrId = args[0];
@@ -211,8 +219,8 @@ public class MetricsManager {
             systemConfig.getHeronLoggingMaximumFiles()));
     LoggingHelper.addLoggingHandler(new ErrorReportLoggingHandler());
 
-    LOG.info(String.format("Starting Metrics Manager for topology %s with topologyId %s with " +
-            "Metrics Manager Id %s, Merics Manager Port: %d.",
+    LOG.info(String.format("Starting Metrics Manager for topology %s with topologyId %s with "
+        + "Metrics Manager Id %s, Merics Manager Port: %d.",
         topologyName, topologyId, metricsmgrId, metricsPort));
 
     LOG.info("System Config: " + systemConfig);
@@ -281,7 +289,8 @@ public class MetricsManager {
     sinkMetricsCollector.registerMetric(sinkId, internalCounters, heronMetricsExportIntervalSec);
 
     // Set up the SinkContext
-    SinkContext sinkContext = new SinkContextImpl(topologyName, metricsmgrId, sinkId, internalCounters);
+    SinkContext sinkContext =
+        new SinkContextImpl(topologyName, metricsmgrId, sinkId, internalCounters);
 
     SinkExecutor sinkExecutor =
         new SinkExecutor(sinkId, sink, sinkExecutorLoop, executorInMetricsQueue, sinkContext);
@@ -313,6 +322,10 @@ public class MetricsManager {
    * too many attempts, Metrics Manager would flush any remain logs and exit.
    */
   public class DefaultExceptionHandler implements Thread.UncaughtExceptionHandler {
+
+    /**
+     * Handler for uncaughtException
+     */
     public void uncaughtException(Thread thread, Throwable exception) {
       String threadName = thread.getName();
       LOG.log(Level.SEVERE,
@@ -353,9 +366,9 @@ public class MetricsManager {
 
         // Restart it
         executors.execute(newSinkExecutor);
-      } else if (oldSinkExecutor != null &&
-          thisSinkRetryAttempts == 0 &&
-          sinkExecutors.size() > 0) {
+      } else if (oldSinkExecutor != null
+          && thisSinkRetryAttempts == 0
+          && sinkExecutors.size() > 0) {
         // If the dead executor is the only one executor and it is removed,
         // e.g. sinkExecutors.size() == 0, we would exit the process directly
 
@@ -371,8 +384,10 @@ public class MetricsManager {
         // Attempts to shutdown all the thread in threadsPool. This will send Interrupt to every
         // thread in the pool. Threads may implement a clean Interrupt logic.
         executors.shutdownNow();
-        // TODO : It is not clear if this signal should be sent to all the threads (including threads
-        // not owned by HeronInstance). To be safe, not sending these interrupts.
+
+        // TODO : It is not clear if this signal should be sent to all the threads
+        // (including threads not owned by HeronInstance). To be safe, not sending these
+        // interrupts.
         Runtime.getRuntime().halt(1);
       }
     }

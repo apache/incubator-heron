@@ -14,6 +14,7 @@
 
 package com.twitter.heron.common.network;
 
+import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -62,10 +63,8 @@ public class EchoTest {
   public void testStart() throws Exception {
     runServer();
     // We'll sleep to give the server a chance to bind and start listening
-    try {
-      Thread.sleep(1000);
-    } catch (Exception e) {
-    }
+    Thread.sleep(1000);
+
     runClient();
   }
 
@@ -78,8 +77,7 @@ public class EchoTest {
           looper = new NIOLooper();
           EchoServer s = new EchoServer(looper, serverPort, 1000);
           s.start();
-
-        } catch (Exception e) {
+        } catch (IOException e) {
           throw new RuntimeException("Some error instantiating server");
         }
 
@@ -95,7 +93,7 @@ public class EchoTest {
       looper = new NIOLooper();
       EchoClient c = new EchoClient(looper, serverPort, 1000);
       c.start();
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new RuntimeException("Some error instantiating client");
     }
 
@@ -107,7 +105,7 @@ public class EchoTest {
     private int nRequests;
     private int maxRequests;
 
-    public EchoServer(NIOLooper looper, int port, int maxRequests) {
+    EchoServer(NIOLooper looper, int port, int maxRequests) {
       super(looper, "localhost", port,
           new HeronSocketOptions(100 * 1024 * 1024, 100,
               100 * 1024 * 1024,
@@ -169,7 +167,7 @@ public class EchoTest {
     private int nRequests;
     private int maxRequests;
 
-    public EchoClient(NIOLooper looper, int port, int maxRequests) {
+    EchoClient(NIOLooper looper, int port, int maxRequests) {
       super(looper, "localhost", port,
           new HeronSocketOptions(100 * 1024 * 1024, 100,
               100 * 1024 * 1024, 100,

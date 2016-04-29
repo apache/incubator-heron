@@ -20,8 +20,11 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.common.config.ConfigReader;
 
-public class Resource {
+public final class Resource {
   private static final Logger LOG = Logger.getLogger(Resource.class.getName());
+
+  private Resource() {
+  }
 
   /*
    * Loads the YAML file specified as a resource
@@ -31,6 +34,7 @@ public class Resource {
    *
    * @return Map, a map of key value pairs
    */
+  @SuppressWarnings("rawtypes")
   public static Map load(String className, String resName) throws ClassNotFoundException {
     // get the current class
     Class cls = Class.forName(className);
@@ -45,7 +49,7 @@ public class Resource {
     // if nothing there exit, since this config is mandatory
     if (kvPairs.isEmpty()) {
       LOG.severe("Config keys cannot be empty ");
-      System.exit(1);
+      throw new RuntimeException("Config keys file cannot be empty");
     }
 
     return kvPairs;

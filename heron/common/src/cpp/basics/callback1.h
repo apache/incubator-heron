@@ -32,18 +32,14 @@
 // CallBack1<int> cb = CreateCallback(void (*func)(char, int), 'c');
 // Routine(arg, arg2, cb);
 
-template<typename C>
-class CallBack1
-{
+template <typename C>
+class CallBack1 {
  public:
-
   // Constructor. Users should use the CreateCallback functions detailed below.
-  CallBack1(bool persist) {
-    persistent_ = persist;
-  }
+  explicit CallBack1(bool persist) { persistent_ = persist; }
 
   // Virtual destructor.
-  virtual ~CallBack1() { }
+  virtual ~CallBack1() {}
 
   // The main exported function
   void Run(C c) {
@@ -52,16 +48,15 @@ class CallBack1
     // the class member persistent_. So make a copy now.
     bool persist = persistent_;
     RunCallback(c);
-    if (!persist) { delete this; }
+    if (!persist) {
+      delete this;
+    }
   }
 
   // Return whether the callback is temporary or permanent.
-  bool isPersistent() const {
-    return persistent_;
-  }
+  bool isPersistent() const { return persistent_; }
 
  protected:
-
   virtual void RunCallback(C) = 0;
 
  private:
@@ -71,60 +66,49 @@ class CallBack1
 /*
  * Defines CallBack1 for functions that take no arguments
  */
-template<typename C>
-class CallBack1_0 : public CallBack1<C>
-{
+template <typename C>
+class CallBack1_0 : public CallBack1<C> {
  public:
-  CallBack1_0(bool persist, void(*cb)(C)) :
-    CallBack1<C>(persist) {
-    cb_ = cb;
-  }
-  virtual ~CallBack1_0() { }
-  virtual void RunCallback(C c) {
-    cb_(c);
-  }
+  CallBack1_0(bool persist, void (*cb)(C)) : CallBack1<C>(persist) { cb_ = cb; }
+  virtual ~CallBack1_0() {}
+  virtual void RunCallback(C c) { cb_(c); }
+
  private:
-  void(*cb_)(C);
+  void (*cb_)(C);
 };
 
 /*
  * Defines CallBack1 for functions that take 1 argument
  */
-template<typename C, typename D>
-class CallBack1_1 : public CallBack1<D>
-{
+template <typename C, typename D>
+class CallBack1_1 : public CallBack1<D> {
  public:
-  CallBack1_1(bool persist, void(*cb)(C, D), C c) :
-    CallBack1<D>(persist) {
+  CallBack1_1(bool persist, void (*cb)(C, D), C c) : CallBack1<D>(persist) {
     cb_ = cb;
     c_ = c;
   }
-  virtual ~CallBack1_1() { }
-  virtual void RunCallback(D d) {
-    cb_(c_, d);
-  }
+  virtual ~CallBack1_1() {}
+  virtual void RunCallback(D d) { cb_(c_, d); }
+
  private:
-  void(*cb_)(C, D);
+  void (*cb_)(C, D);
   C c_;
 };
 
 /*
  * Defines CallBack1 for functions that take 2 arguments
  */
-template<typename C, typename D, typename E>
-class CallBack1_2 : public CallBack1<E>
-{
+template <typename C, typename D, typename E>
+class CallBack1_2 : public CallBack1<E> {
  public:
-  CallBack1_2(bool persist, void(*cb)(C, D, E), C c, D d) :
-    CallBack1<E>(persist) {
+  CallBack1_2(bool persist, void (*cb)(C, D, E), C c, D d) : CallBack1<E>(persist) {
     cb_ = cb;
     c_ = c;
     d_ = d;
   }
-  virtual ~CallBack1_2() { }
-  virtual void RunCallback(E e) {
-    cb_(c_, d_, e);
-  }
+  virtual ~CallBack1_2() {}
+  virtual void RunCallback(E e) { cb_(c_, d_, e); }
+
  private:
   void (*cb_)(C, D, E);
   C c_;
@@ -134,21 +118,18 @@ class CallBack1_2 : public CallBack1<E>
 /*
  * Defines CallBack1 for functions that take 3 arguments
  */
-template<typename C, typename D, typename E, typename F>
-class CallBack1_3 : public CallBack1<F>
-{
+template <typename C, typename D, typename E, typename F>
+class CallBack1_3 : public CallBack1<F> {
  public:
-  CallBack1_3(bool persist, void(*cb)(C, D, E, F), C c, D d, E e) :
-    CallBack1<F>(persist) {
+  CallBack1_3(bool persist, void (*cb)(C, D, E, F), C c, D d, E e) : CallBack1<F>(persist) {
     cb_ = cb;
     c_ = c;
     d_ = d;
     e_ = e;
   }
-  virtual ~CallBack1_3() { }
-  virtual void RunCallback(F f) {
-    cb_(c_, d_, e_, f);
-  }
+  virtual ~CallBack1_3() {}
+  virtual void RunCallback(F f) { cb_(c_, d_, e_, f); }
+
  private:
   void (*cb_)(C, D, E, F);
   C c_;
@@ -160,60 +141,52 @@ class CallBack1_3 : public CallBack1<F>
 // CallBack1 specific functions
 //
 
-template<typename C>
-CallBack1<C>* CreateCallback(void (*cb)(C))
-{
+template <typename C>
+CallBack1<C>* CreateCallback(void (*cb)(C)) {
   auto cb0 = new CallBack1_0<C>(false, cb);
   return cb0;
 }
 
-template<typename C, typename D>
-CallBack1<D>* CreateCallback(void (*cb)(C, D), C c)
-{
+template <typename C, typename D>
+CallBack1<D>* CreateCallback(void (*cb)(C, D), C c) {
   auto cb1 = new CallBack1_1<C, D>(false, cb, c);
   return cb1;
 }
 
-template<typename C, typename D, typename E>
-CallBack1<E>* CreateCallback(void (*cb)(C, D, E), C c, D d)
-{
+template <typename C, typename D, typename E>
+CallBack1<E>* CreateCallback(void (*cb)(C, D, E), C c, D d) {
   auto cb2 = new CallBack1_2<C, D, E>(false, cb, c, d);
   return cb2;
 }
 
-template<typename C, typename D, typename E, typename F>
-CallBack1<F>* CreateCallback(void (*cb)(C, D, E, F), C c, D d, E e)
-{
+template <typename C, typename D, typename E, typename F>
+CallBack1<F>* CreateCallback(void (*cb)(C, D, E, F), C c, D d, E e) {
   auto cb3 = new CallBack1_3<C, D, E, F>(false, cb, c, d, e);
   return cb3;
 }
 
-template<typename C>
-CallBack1<C>* CreatePersistentCallback(void (*cb)(C))
-{
+template <typename C>
+CallBack1<C>* CreatePersistentCallback(void (*cb)(C)) {
   auto cb0 = new CallBack1_0<C>(true, cb);
   return cb0;
 }
 
-template<typename C, typename D>
-CallBack1<D>* CreatePersistentCallback(void (*cb)(C, D), C c)
-{
+template <typename C, typename D>
+CallBack1<D>* CreatePersistentCallback(void (*cb)(C, D), C c) {
   auto cb1 = new CallBack1_1<C, D>(true, cb, c);
   return cb1;
 }
 
-template<typename C, typename D, typename E>
-CallBack1<E>* CreatePersistentCallback(void (*cb)(C, D, E), C c, D d)
-{
+template <typename C, typename D, typename E>
+CallBack1<E>* CreatePersistentCallback(void (*cb)(C, D, E), C c, D d) {
   auto cb2 = new CallBack1_2<C, D, E>(true, cb, c, d);
   return cb2;
 }
 
-template<typename C, typename D, typename E, typename F>
-CallBack1<F>* CreatePersistentCallback(void (*cb)(C, D, E, F), C c, D d, E e)
-{
+template <typename C, typename D, typename E, typename F>
+CallBack1<F>* CreatePersistentCallback(void (*cb)(C, D, E, F), C c, D d, E e) {
   auto cb3 = new CallBack1_3<C, D, E, F>(true, cb, c, d, e);
   return cb3;
 }
 
-#endif // HERON_CLASS_CALLBACK1_H_
+#endif  // HERON_CLASS_CALLBACK1_H_

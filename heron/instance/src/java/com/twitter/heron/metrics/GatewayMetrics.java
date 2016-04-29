@@ -73,8 +73,14 @@ public class GatewayMetrics {
     inQueueFullCount = new CountMetric();
   }
 
+  /**
+   * Register default Gateway Metrics to given MetricsCollector
+   *
+   * @param metricsCollector the MetricsCollector to register Metrics on
+   */
   public void registerMetrics(MetricsCollector metricsCollector) {
-    SystemConfig systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
+    SystemConfig systemConfig =
+        (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
 
     int interval = systemConfig.getHeronMetricsExportIntervalSec();
 

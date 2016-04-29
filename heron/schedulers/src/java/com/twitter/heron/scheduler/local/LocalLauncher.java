@@ -49,16 +49,16 @@ public class LocalLauncher implements ILauncher {
   private String targetTopologyPackageFile;
 
   @Override
-  public void initialize(Config config, Config runtime) {
+  public void initialize(Config mConfig, Config mRuntime) {
 
-    this.config = config;
-    this.runtime = runtime;
+    this.config = mConfig;
+    this.runtime = mRuntime;
 
     // get the topology working directory
-    this.topologyWorkingDirectory = LocalContext.workingDirectory(config);
+    this.topologyWorkingDirectory = LocalContext.workingDirectory(mConfig);
 
     // get the path of core release URI
-    this.coreReleasePackage = LocalContext.corePackageUri(config);
+    this.coreReleasePackage = LocalContext.corePackageUri(mConfig);
 
     // form the target dest core release file name
     this.targetCoreReleaseFile = Paths.get(

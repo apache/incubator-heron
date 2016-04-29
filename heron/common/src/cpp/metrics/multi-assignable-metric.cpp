@@ -20,32 +20,28 @@
 //
 // Please see multi-assignable-metric.h for details
 //////////////////////////////////////////////////////////////////////////////
+#include "metrics/multi-assignable-metric.h"
+#include <map>
+#include "metrics/assignable-metric.h"
 #include "proto/messages.h"
 #include "basics/basics.h"
 #include "errors/errors.h"
 #include "threads/threads.h"
 #include "network/network.h"
 
-#include "metrics/imetric.h"
-#include "metrics/assignable-metric.h"
-#include "metrics/multi-assignable-metric.h"
+namespace heron {
+namespace common {
 
-namespace heron { namespace common {
+MultiAssignableMetric::MultiAssignableMetric() {}
 
-MultiAssignableMetric::MultiAssignableMetric()
-{
-}
-
-MultiAssignableMetric::~MultiAssignableMetric()
-{
+MultiAssignableMetric::~MultiAssignableMetric() {
   std::map<sp_string, AssignableMetric*>::iterator iter;
   for (iter = value_.begin(); iter != value_.end(); ++iter) {
     delete iter->second;
   }
 }
 
-AssignableMetric* MultiAssignableMetric::scope(const sp_string& _key)
-{
+AssignableMetric* MultiAssignableMetric::scope(const sp_string& _key) {
   std::map<sp_string, AssignableMetric*>::iterator iter;
   iter = value_.find(_key);
   if (iter == value_.end()) {
@@ -58,12 +54,11 @@ AssignableMetric* MultiAssignableMetric::scope(const sp_string& _key)
 }
 
 void MultiAssignableMetric::GetAndReset(const sp_string& _prefix,
-                      proto::system::MetricPublisherPublishMessage* _message)
-{
+                                        proto::system::MetricPublisherPublishMessage* _message) {
   std::map<sp_string, AssignableMetric*>::iterator iter;
   for (iter = value_.begin(); iter != value_.end(); ++iter) {
     iter->second->GetAndReset(_prefix + "/" + iter->first, _message);
   }
 }
-
-}} // end namespace
+}  // namespace common
+}  // namespace heron

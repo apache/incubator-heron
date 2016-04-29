@@ -28,14 +28,15 @@
 #ifndef CLIENT_H_
 #define CLIENT_H_
 
-#include <functional>
-#include <unordered_map>
-#include <string>
-#include <utility>
-#include <iostream>
-#include "glog/logging.h"
 #include <google/protobuf/message.h>
 #include <google/protobuf/repeated_field.h>
+#include <functional>
+#include <iostream>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include "basics/basics.h"
+#include "glog/logging.h"
 #include "network/connection.h"
 #include "network/baseclient.h"
 #include "network/baseconnection.h"
@@ -43,7 +44,6 @@
 #include "network/networkoptions.h"
 #include "network/network_error.h"
 #include "network/packet.h"
-#include "basics/basics.h"
 
 /*
  * Client class definition
@@ -62,8 +62,7 @@
  * Derived classes can use the SendRequest method to send a request to the
  * server. They can use the Stop to explicitly close a connection.
  */
-class Client : public BaseClient
-{
+class Client : public BaseClient {
  public:
   // Constructor/Destructor
   // Note that constructor doesn't do much beyond initializing some members.
@@ -100,8 +99,7 @@ class Client : public BaseClient
   // a user owned piece of context that is not interpreted by the
   // client which is passed on to the HandleResponse
   // A negative value of the msecs means no timeout.
-  void SendRequest(google::protobuf::Message* _request,
-                   void* ctx, sp_int64 msecs);
+  void SendRequest(google::protobuf::Message* _request, void* ctx, sp_int64 msecs);
 
   // Convinience method of the above function with no timeout
   void SendRequest(google::protobuf::Message* _request, void* ctx);
@@ -123,13 +121,12 @@ class Client : public BaseClient
 
   // Register a handler for a particular response type
   template <typename S, typename T, typename M>
-  void InstallResponseHandler(S* _request, void (T::*method)(void* _ctx, M*, NetworkErrorCode status)) {
+  void InstallResponseHandler(S* _request,
+                              void (T::*method)(void* _ctx, M*, NetworkErrorCode status)) {
     google::protobuf::Message* m = new M();
     T* t = static_cast<T*>(this);
-    responseHandlers[m->GetTypeName()] =
-        std::bind(&Client::dispatchResponse<T, M>, this, t, method,
-                       std::placeholders::_1,
-                       std::placeholders::_2);
+    responseHandlers[m->GetTypeName()] = std::bind(&Client::dispatchResponse<T, M>, this, t, method,
+                                                   std::placeholders::_1, std::placeholders::_2);
     requestResponseMap_[_request->GetTypeName()] = m->GetTypeName();
     delete m;
     delete _request;
@@ -141,8 +138,7 @@ class Client : public BaseClient
     google::protobuf::Message* m = new M();
     T* t = static_cast<T*>(this);
     requestHandlers[m->GetTypeName()] =
-        std::bind(&Client::dispatchRequest<T, M>, this, t, method,
-                       std::placeholders::_1);
+        std::bind(&Client::dispatchRequest<T, M>, this, t, method, std::placeholders::_1);
     delete m;
   }
 
@@ -152,14 +148,13 @@ class Client : public BaseClient
     google::protobuf::Message* m = new M();
     T* t = static_cast<T*>(this);
     messageHandlers[m->GetTypeName()] =
-          std::bind(&Client::dispatchMessage<T, M>, this, t, method,
-                         std::placeholders::_1);
+        std::bind(&Client::dispatchMessage<T, M>, this, t, method, std::placeholders::_1);
     delete m;
   }
 
   sp_int64 getOutstandingPackets() const {
     if (conn_) {
-      return ((Connection*)conn_)->getOutstandingPackets();
+      return (reinterpret_cast<Connection*>(conn_))->getOutstandingPackets();
     } else {
       return 0;
     }
@@ -167,7 +162,7 @@ class Client : public BaseClient
 
   sp_int64 getOutstandingBytes() const {
     if (conn_) {
-      return ((Connection*)conn_)->getOutstandingBytes();
+      return (reinterpret_cast<Connection*>(conn_))->getOutstandingBytes();
     } else {
       return 0;
     }
@@ -195,9 +190,8 @@ class Client : public BaseClient
   virtual void HandleClose(NetworkErrorCode status) = 0;
 
   // friend classes that can access the protected functions
-  friend void CallHandleSentRequestAndDelete(Client*,
-                                             google::protobuf::Message*,
-                                             void* ctx, NetworkErrorCode);
+  friend void CallHandleSentRequestAndDelete(Client*, google::protobuf::Message*, void* ctx,
+                                             NetworkErrorCode);
   // Backpressure handler
   virtual void StartBackPressureConnectionCb(Connection* connection);
   // Backpressure Reliever
@@ -205,8 +199,7 @@ class Client : public BaseClient
 
  private:
   //! Imlement methods of BaseClient
-  virtual BaseConnection* CreateConnection(ConnectionEndPoint* endpoint,
-                                           ConnectionOptions* options,
+  virtual BaseConnection* CreateConnection(ConnectionEndPoint* endpoint, ConnectionOptions* options,
                                            EventLoop* eventLoop);
   virtual void HandleConnect_Base(NetworkErrorCode status);
   virtual void HandleClose_Base(NetworkErrorCode status);
@@ -214,8 +207,7 @@ class Client : public BaseClient
   //! Handle most of the init stuff
   void Init();
 
-  void InternalSendRequest(google::protobuf::Message* _request,
-                           void* _ctx, sp_int64 _msecs);
+  void InternalSendRequest(google::protobuf::Message* _request, void* _ctx, sp_int64 _msecs);
   void InternalSendMessage(google::protobuf::Message* _request);
   void InternalSendResponse(OutgoingPacket* _packet);
 
@@ -228,10 +220,8 @@ class Client : public BaseClient
   void OnPacketTimer(REQID _id, EventLoop::Status status);
 
   template <typename T, typename M>
-  void dispatchResponse(T* _t,
-                       void (T::*method)(void* _ctx, M*, NetworkErrorCode),
-                       IncomingPacket* _ipkt,
-                       NetworkErrorCode _code) {
+  void dispatchResponse(T* _t, void (T::*method)(void* _ctx, M*, NetworkErrorCode),
+                        IncomingPacket* _ipkt, NetworkErrorCode _code) {
     void* ctx = NULL;
     M* m = NULL;
     NetworkErrorCode status = _code;
@@ -248,7 +238,7 @@ class Client : public BaseClient
         // This is either some unknown message type or the response of an
         // already timed out request
         std::cerr << "Dropping an incoming packet because either the message type is unknown "
-             << " or it was a response for an already timed out request" << std::endl;
+                  << " or it was a response for an already timed out request" << std::endl;
         return;
       }
     }
@@ -259,9 +249,7 @@ class Client : public BaseClient
   }
 
   template <typename T, typename M>
-  void dispatchRequest(T* _t,
-                       void (T::*method)(REQID id, M*),
-                       IncomingPacket* _ipkt) {
+  void dispatchRequest(T* _t, void (T::*method)(REQID id, M*), IncomingPacket* _ipkt) {
     REQID rid;
     CHECK(_ipkt->UnPackREQID(&rid) == 0) << "REQID unpacking failed";
     M* m = new M();
@@ -279,9 +267,7 @@ class Client : public BaseClient
   }
 
   template <typename T, typename M>
-  void dispatchMessage(T* _t,
-                       void (T::*method)(M*),
-                       IncomingPacket* _ipkt) {
+  void dispatchMessage(T* _t, void (T::*method)(M*), IncomingPacket* _ipkt) {
     M* m = new M();
     if (_ipkt->UnPackProtocolBuffer(m) != 0) {
       // We could not decode the pb properly
@@ -307,7 +293,7 @@ class Client : public BaseClient
   std::unordered_map<std::string, std::string> requestResponseMap_;
 
   // REQID generator
-  REQID_Generator*        message_rid_gen_;
+  REQID_Generator* message_rid_gen_;
 };
 
-#endif // CLIENT_H_
+#endif  // CLIENT_H_

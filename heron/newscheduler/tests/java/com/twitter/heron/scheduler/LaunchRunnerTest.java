@@ -21,7 +21,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.twitter.heron.api.HeronSubmitter;
 import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.api.bolt.BaseBasicBolt;
 import com.twitter.heron.api.bolt.BasicOutputCollector;
@@ -44,10 +43,10 @@ import com.twitter.heron.spi.utils.Runtime;
 
 
 public class LaunchRunnerTest {
-  private static final String topologyName = "testTopology";
-  private static final String cluster = "testCluster";
-  private static final String role = "testRole";
-  private static final String environ = "testEnviron";
+  private static final String TOPOLOGY_NAME = "testTopology";
+  private static final String CLUSTER = "testCluster";
+  private static final String ROLE = "testRole";
+  private static final String ENVIRON = "testEnviron";
 
   private static TopologyAPI.Config.KeyValue getConfig(String key, String value) {
     return TopologyAPI.Config.KeyValue.newBuilder().setKey(key).setValue(value).build();
@@ -56,6 +55,8 @@ public class LaunchRunnerTest {
   public static TopologyAPI.Topology createTopology(com.twitter.heron.api.Config heronConfig) {
     TopologyBuilder builder = new TopologyBuilder();
     builder.setSpout("spout-1", new BaseRichSpout() {
+      private static final long serialVersionUID = -762965195665496156L;
+
       public void declareOutputFields(OutputFieldsDeclarer declarer) {
       }
 
@@ -66,6 +67,8 @@ public class LaunchRunnerTest {
       }
     }, 2);
     builder.setBolt("bolt-1", new BaseBasicBolt() {
+      private static final long serialVersionUID = -5738458486388778812L;
+
       public void execute(Tuple input, BasicOutputCollector collector) {
       }
 
@@ -73,13 +76,9 @@ public class LaunchRunnerTest {
       }
     }, 1);
     HeronTopology heronTopology = builder.createTopology();
-    try {
-      HeronSubmitter.submitTopology(topologyName, heronConfig, heronTopology);
-    } catch (Exception e) {
-    }
 
     return heronTopology.
-        setName(topologyName).
+        setName(TOPOLOGY_NAME).
         setConfig(heronConfig).
         setState(TopologyAPI.TopologyState.RUNNING).
         getTopology();
@@ -87,10 +86,10 @@ public class LaunchRunnerTest {
 
   private static Config createRunnerConfig() {
     Config config = Mockito.mock(Config.class);
-    Mockito.when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(topologyName);
-    Mockito.when(config.getStringValue(ConfigKeys.get("CLUSTER"))).thenReturn(cluster);
-    Mockito.when(config.getStringValue(ConfigKeys.get("ROLE"))).thenReturn(role);
-    Mockito.when(config.getStringValue(ConfigKeys.get("ENVIRON"))).thenReturn(environ);
+    Mockito.when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
+    Mockito.when(config.getStringValue(ConfigKeys.get("CLUSTER"))).thenReturn(CLUSTER);
+    Mockito.when(config.getStringValue(ConfigKeys.get("ROLE"))).thenReturn(ROLE);
+    Mockito.when(config.getStringValue(ConfigKeys.get("ENVIRON"))).thenReturn(ENVIRON);
 
     return config;
   }
@@ -144,10 +143,10 @@ public class LaunchRunnerTest {
 
     Assert.assertTrue(executionState.isInitialized());
 
-    Assert.assertEquals(topologyName, executionState.getTopologyName());
-    Assert.assertEquals(cluster, executionState.getCluster());
-    Assert.assertEquals(role, executionState.getRole());
-    Assert.assertEquals(environ, executionState.getEnviron());
+    Assert.assertEquals(TOPOLOGY_NAME, executionState.getTopologyName());
+    Assert.assertEquals(CLUSTER, executionState.getCluster());
+    Assert.assertEquals(ROLE, executionState.getRole());
+    Assert.assertEquals(ENVIRON, executionState.getEnviron());
     Assert.assertEquals(System.getProperty("user.name"), executionState.getSubmissionUser());
 
     Assert.assertNotNull(executionState.getTopologyId());
@@ -168,7 +167,8 @@ public class LaunchRunnerTest {
 
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
     Mockito.when(
-        statemgr.setExecutionState(Mockito.any(ExecutionEnvironment.ExecutionState.class), Mockito.eq(topologyName))).
+        statemgr.setExecutionState(
+            Mockito.any(ExecutionEnvironment.ExecutionState.class), Mockito.eq(TOPOLOGY_NAME))).
         thenReturn(false);
 
     Assert.assertFalse(launchRunner.call());
@@ -186,7 +186,7 @@ public class LaunchRunnerTest {
 
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
     Mockito.when(
-        statemgr.setTopology(Mockito.any(TopologyAPI.Topology.class), Mockito.eq(topologyName))).
+        statemgr.setTopology(Mockito.any(TopologyAPI.Topology.class), Mockito.eq(TOPOLOGY_NAME))).
         thenReturn(false);
 
     Assert.assertFalse(launchRunner.call());
@@ -202,10 +202,11 @@ public class LaunchRunnerTest {
 
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
     Mockito.when(
-        statemgr.setTopology(Mockito.any(TopologyAPI.Topology.class), Mockito.eq(topologyName))).
+        statemgr.setTopology(Mockito.any(TopologyAPI.Topology.class), Mockito.eq(TOPOLOGY_NAME))).
         thenReturn(true);
     Mockito.when(
-        statemgr.setExecutionState(Mockito.any(ExecutionEnvironment.ExecutionState.class), Mockito.eq(topologyName))).
+        statemgr.setExecutionState(
+            Mockito.any(ExecutionEnvironment.ExecutionState.class), Mockito.eq(TOPOLOGY_NAME))).
         thenReturn(true);
 
     LaunchRunner launchRunner = new LaunchRunner(config, runtime);
@@ -214,10 +215,12 @@ public class LaunchRunnerTest {
     Assert.assertFalse(launchRunner.call());
 
     // Verify set && clean
-    Mockito.verify(statemgr).setTopology(Mockito.any(TopologyAPI.Topology.class), Mockito.eq(topologyName));
-    Mockito.verify(statemgr).setExecutionState(Mockito.any(ExecutionEnvironment.ExecutionState.class), Mockito.eq(topologyName));
-    Mockito.verify(statemgr).deleteExecutionState(Mockito.eq(topologyName));
-    Mockito.verify(statemgr).deleteTopology(Mockito.eq(topologyName));
+    Mockito.verify(statemgr).setTopology(
+        Mockito.any(TopologyAPI.Topology.class), Mockito.eq(TOPOLOGY_NAME));
+    Mockito.verify(statemgr).setExecutionState(
+        Mockito.any(ExecutionEnvironment.ExecutionState.class), Mockito.eq(TOPOLOGY_NAME));
+    Mockito.verify(statemgr).deleteExecutionState(Mockito.eq(TOPOLOGY_NAME));
+    Mockito.verify(statemgr).deleteTopology(Mockito.eq(TOPOLOGY_NAME));
   }
 
   @Test
@@ -229,10 +232,11 @@ public class LaunchRunnerTest {
 
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
     Mockito.when(
-        statemgr.setTopology(Mockito.any(TopologyAPI.Topology.class), Mockito.eq(topologyName))).
+        statemgr.setTopology(Mockito.any(TopologyAPI.Topology.class), Mockito.eq(TOPOLOGY_NAME))).
         thenReturn(true);
     Mockito.when(
-        statemgr.setExecutionState(Mockito.any(ExecutionEnvironment.ExecutionState.class), Mockito.eq(topologyName))).
+        statemgr.setExecutionState(
+            Mockito.any(ExecutionEnvironment.ExecutionState.class), Mockito.eq(TOPOLOGY_NAME))).
         thenReturn(true);
 
     LaunchRunner launchRunner = new LaunchRunner(config, runtime);
@@ -240,9 +244,11 @@ public class LaunchRunnerTest {
     Assert.assertTrue(launchRunner.call());
 
     // Verify set && clean
-    Mockito.verify(statemgr).setTopology(Mockito.any(TopologyAPI.Topology.class), Mockito.eq(topologyName));
-    Mockito.verify(statemgr).setExecutionState(Mockito.any(ExecutionEnvironment.ExecutionState.class), Mockito.eq(topologyName));
-    Mockito.verify(statemgr, Mockito.never()).deleteExecutionState(Mockito.eq(topologyName));
-    Mockito.verify(statemgr, Mockito.never()).deleteTopology(Mockito.eq(topologyName));
+    Mockito.verify(statemgr).setTopology(
+        Mockito.any(TopologyAPI.Topology.class), Mockito.eq(TOPOLOGY_NAME));
+    Mockito.verify(statemgr).setExecutionState(
+        Mockito.any(ExecutionEnvironment.ExecutionState.class), Mockito.eq(TOPOLOGY_NAME));
+    Mockito.verify(statemgr, Mockito.never()).deleteExecutionState(Mockito.eq(TOPOLOGY_NAME));
+    Mockito.verify(statemgr, Mockito.never()).deleteTopology(Mockito.eq(TOPOLOGY_NAME));
   }
 }

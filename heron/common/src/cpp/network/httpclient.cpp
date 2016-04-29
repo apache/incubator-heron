@@ -20,14 +20,14 @@
 
 #include "network/httpclient.h"
 #include <evhttp.h>
+#include <utility>
 #include "glog/logging.h"
 #include "basics/basics.h"
 
 const sp_int32 HTTPClientTimeoutInSecs = 3600;
 
-evhttp_cmd_type GetRequestType(BaseHTTPRequest::HTTPRequestType _type)
-{
-  switch(_type) {
+evhttp_cmd_type GetRequestType(BaseHTTPRequest::HTTPRequestType _type) {
+  switch (_type) {
     case BaseHTTPRequest::GET:
       return EVHTTP_REQ_GET;
     case BaseHTTPRequest::POST:
@@ -45,8 +45,7 @@ evhttp_cmd_type GetRequestType(BaseHTTPRequest::HTTPRequestType _type)
 }
 
 // 'C' style callbacks for the libevent
-void httpdonecb(struct evhttp_request* _request, void* _arg)
-{
+void httpdonecb(struct evhttp_request* _request, void* _arg) {
   HTTPClient::Combo* combo = static_cast<HTTPClient::Combo*>(_arg);
   HTTPClient* client = combo->client_;
   OutgoingHTTPRequest* request = combo->request_;
@@ -57,19 +56,14 @@ void httpdonecb(struct evhttp_request* _request, void* _arg)
   }
 }
 
-void httpconnectionclose(struct evhttp_connection* _connection, void* _arg)
-{
+void httpconnectionclose(struct evhttp_connection* _connection, void* _arg) {
   HTTPClient* client = static_cast<HTTPClient*>(_arg);
   client->HandleConnectionClose(_connection);
 }
 
-HTTPClient::HTTPClient(EventLoop* eventLoop, AsyncDNS* _dns)
-  : eventLoop_(eventLoop), dns_(_dns)
-{
-}
+HTTPClient::HTTPClient(EventLoop* eventLoop, AsyncDNS* _dns) : eventLoop_(eventLoop), dns_(_dns) {}
 
-HTTPClient::~HTTPClient()
-{
+HTTPClient::~HTTPClient() {
   std::unordered_map<std::pair<sp_string, sp_int32>, struct evhttp_connection*>::iterator iter;
   for (iter = connections_.begin(); iter != connections_.end(); ++iter) {
     evhttp_connection_set_closecb(iter->second, NULL, NULL);
@@ -78,8 +72,7 @@ HTTPClient::~HTTPClient()
 }
 
 sp_int32 HTTPClient::SendRequest(OutgoingHTTPRequest* _request,
-                                 VCallback<IncomingHTTPResponse*> cb)
-{
+                                 VCallback<IncomingHTTPResponse*> cb) {
   struct evhttp_connection* connection = NULL;
   std::pair<sp_string, sp_int32> pr = make_pair(_request->host(), _request->port());
   if (connections_.find(pr) == connections_.end()) {
@@ -109,9 +102,7 @@ sp_int32 HTTPClient::SendRequest(OutgoingHTTPRequest* _request,
   return SP_OK;
 }
 
-void HTTPClient::HandleRequestDone(OutgoingHTTPRequest* _request,
-                                   IncomingHTTPResponse* _response)
-{
+void HTTPClient::HandleRequestDone(OutgoingHTTPRequest* _request, IncomingHTTPResponse* _response) {
   if (inflight_urls_.find(_request) == inflight_urls_.end()) {
     // This is strange! We dont have any account for this url.
     LOG(ERROR) << "Unknown HTTPrequest completed\n";
@@ -123,8 +114,7 @@ void HTTPClient::HandleRequestDone(OutgoingHTTPRequest* _request,
   cb(_response);
 }
 
-void HTTPClient::HandleConnectionClose(struct evhttp_connection* _connection)
-{
+void HTTPClient::HandleConnectionClose(struct evhttp_connection* _connection) {
   if (rconnections_.find(_connection) == rconnections_.end()) {
     LOG(ERROR) << "Unknown connection closed on us!\n";
     return;
@@ -134,23 +124,18 @@ void HTTPClient::HandleConnectionClose(struct evhttp_connection* _connection)
   rconnections_.erase(_connection);
 }
 
-struct evhttp_connection* HTTPClient::CreateConnection(const sp_string& _host,
-                                                       sp_int32 _port)
-{
+struct evhttp_connection* HTTPClient::CreateConnection(const sp_string& _host, sp_int32 _port) {
   unsigned short port = _port;
-  struct evhttp_connection* connection = evhttp_connection_base_new(eventLoop_->dispatcher(),
-                                                                    dns_->dns(),
-                                                                    _host.c_str(), port);
+  struct evhttp_connection* connection =
+      evhttp_connection_base_new(eventLoop_->dispatcher(), dns_->dns(), _host.c_str(), port);
   if (!connection) return NULL;
   evhttp_connection_set_closecb(connection, httpconnectionclose, this);
   evhttp_connection_set_timeout(connection, HTTPClientTimeoutInSecs);
   return connection;
 }
 
-struct evhttp_request* HTTPClient::CreateUnderlyingRequest(
-                                   OutgoingHTTPRequest* _request,
-                                   HTTPClient::Combo* _combo)
-{
+struct evhttp_request* HTTPClient::CreateUnderlyingRequest(OutgoingHTTPRequest* _request,
+                                                           HTTPClient::Combo* _combo) {
   // First create the libevent structure
   struct evhttp_request* request = evhttp_request_new(httpdonecb, _combo);
   if (!request) {
@@ -161,8 +146,8 @@ struct evhttp_request* HTTPClient::CreateUnderlyingRequest(
   const std::unordered_map<sp_string, sp_string>& header = _request->header();
   for (std::unordered_map<sp_string, sp_string>::const_iterator iter = header.begin();
        iter != header.end(); ++iter) {
-    if (evhttp_add_header(request->output_headers, iter->first.c_str(),
-                          iter->second.c_str()) != 0) {
+    if (evhttp_add_header(request->output_headers, iter->first.c_str(), iter->second.c_str()) !=
+        0) {
       evhttp_request_free(request);
       return NULL;
     }
@@ -179,18 +164,19 @@ struct evhttp_request* HTTPClient::CreateUnderlyingRequest(
   const HTTPKeyValuePairs& kv = _request->kv();
   for (size_t i = 0; i < kv.size(); ++i) {
     if (first) {
-      body += BaseHTTPRequest::http_encode(kv[i].first) + "=" + BaseHTTPRequest::http_encode(kv[i].second);
+      body += BaseHTTPRequest::http_encode(kv[i].first) + "=" +
+              BaseHTTPRequest::http_encode(kv[i].second);
       first = false;
     } else {
-      body += "&" + BaseHTTPRequest::http_encode(kv[i].first) + "=" + BaseHTTPRequest::http_encode(kv[i].second);
+      body += "&" + BaseHTTPRequest::http_encode(kv[i].first) + "=" +
+              BaseHTTPRequest::http_encode(kv[i].second);
     }
   }
-  if (_request->type() == BaseHTTPRequest::POST ||
-      _request->type() == BaseHTTPRequest::PUT) {
+  if (_request->type() == BaseHTTPRequest::POST || _request->type() == BaseHTTPRequest::PUT) {
     std::ostringstream o;
     o << body.size();
     evhttp_add_header(request->output_headers, "Content-Length", o.str().c_str());
-    CHECK(evbuffer_add_printf(request->output_buffer, "%s", body.c_str()) >= 0);
+    CHECK_GE(evbuffer_add_printf(request->output_buffer, "%s", body.c_str()), 0);
   } else {
     _request->ExtendQuery(body);
   }

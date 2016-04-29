@@ -17,6 +17,7 @@ package com.twitter.heron.examples;
 import java.util.Map;
 
 import backtype.storm.Config;
+import backtype.storm.LocalCluster;
 import backtype.storm.StormSubmitter;
 import backtype.storm.metric.api.GlobalMetrics;
 import backtype.storm.task.OutputCollector;
@@ -25,14 +26,16 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.TopologyBuilder;
 import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Tuple;
-
-// TODO:- implement this
-// import backtype.storm.LocalCluster;
+import backtype.storm.utils.Utils;
 
 /**
  * This is a basic example of a Storm topology.
  */
-public class ExclamationTopology {
+public final class ExclamationTopology {
+
+  private ExclamationTopology() {
+  }
+
   public static void main(String[] args) throws Exception {
     TopologyBuilder builder = new TopologyBuilder();
 
@@ -53,26 +56,22 @@ public class ExclamationTopology {
       conf.setNumStmgrs(1);
       StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
     } else {
-      System.out.println("Local mode not yet supported");
-      System.exit(1);
-      /*
       LocalCluster cluster = new LocalCluster();
       cluster.submitTopology("test", conf, builder.createTopology());
       Utils.sleep(10000);
       cluster.killTopology("test");
       cluster.shutdown();
-      */
     }
   }
 
   public static class ExclamationBolt extends BaseRichBolt {
-    OutputCollector _collector;
-    long nItems;
-    long startTime;
+
+    private static final long serialVersionUID = 1184860508880121352L;
+    private long nItems;
+    private long startTime;
 
     @Override
     public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
-      _collector = collector;
       nItems = 0;
       startTime = System.currentTimeMillis();
     }
@@ -80,8 +79,8 @@ public class ExclamationTopology {
     @Override
     public void execute(Tuple tuple) {
       // System.out.println(tuple.getString(0));
-      // _collector.emit(tuple, new Values(tuple.getString(0) + "!!!"));
-      // _collector.ack(tuple);
+      // collector.emit(tuple, new Values(tuple.getString(0) + "!!!"));
+      // collector.ack(tuple);
       if (++nItems % 100000 == 0) {
         long latency = System.currentTimeMillis() - startTime;
         System.out.println("Done " + nItems + " in " + latency);

@@ -20,32 +20,24 @@
 //
 // Please see assignable-metric.h for details
 //////////////////////////////////////////////////////////////////////////////
-#include "proto/messages.h"
+
+#include "metrics/assignable-metric.h"
+#include <sstream>
+#include "metrics/imetric.h"
 #include "basics/basics.h"
 #include "errors/errors.h"
-#include "threads/threads.h"
+#include "proto/messages.h"
 #include "network/network.h"
+#include "threads/threads.h"
 
-#include "metrics/imetric.h"
-#include "metrics/assignable-metric.h"
+namespace heron {
+namespace common {
 
-#include <sstream>
+AssignableMetric::AssignableMetric(sp_int64 _value) { value_ = _value; }
 
-namespace heron { namespace common {
+AssignableMetric::~AssignableMetric() {}
 
-AssignableMetric::AssignableMetric(sp_int64 _value)
-{
-  value_ = _value;
-}
-
-AssignableMetric::~AssignableMetric()
-{
-}
-
-void AssignableMetric::SetValue(sp_int64 _value)
-{
-  value_ = _value;
-}
+void AssignableMetric::SetValue(sp_int64 _value) { value_ = _value; }
 void AssignableMetric::GetAndReset(const sp_string& _prefix,
                                    proto::system::MetricPublisherPublishMessage* _message) {
   std::ostringstream o;
@@ -54,5 +46,5 @@ void AssignableMetric::GetAndReset(const sp_string& _prefix,
   d->set_name(_prefix);
   d->set_value(o.str());
 }
-
-}} // end namespace
+}  // namespace common
+}  // namespace heron

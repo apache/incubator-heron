@@ -44,14 +44,17 @@ public class MetricsCollector implements IMetricsRegister {
 
   public MetricsCollector(WakeableLooper runnableToGatherMetrics,
                           Communicator<Metrics.MetricPublisherPublishMessage> queue) {
-    metrics = new HashMap<String, IMetric>();
-    timeBucketToMetricNames = new HashMap<Integer, List<String>>();
+    metrics = new HashMap<>();
+    timeBucketToMetricNames = new HashMap<>();
     this.queue = queue;
     this.runnableToGatherMetrics = runnableToGatherMetrics;
   }
 
   @Override
-  public <T extends IMetric> T registerMetric(String name, T metric, final int timeBucketSizeInSecs) {
+  public <T extends IMetric> T registerMetric(
+      String name,
+      T metric,
+      final int timeBucketSizeInSecs) {
     if (metrics.containsKey(name)) {
       throw new RuntimeException("Another metric has already been registered with name: " + name);
     }
@@ -74,7 +77,9 @@ public class MetricsCollector implements IMetricsRegister {
     return metric;
   }
 
-  public void registerMetricSampleRunnable(final Runnable sampleRunnable, final long sampleInterval) {
+  public void registerMetricSampleRunnable(
+      final Runnable sampleRunnable,
+      final long sampleInterval) {
     Runnable sampleTimer = new Runnable() {
       @Override
       public void run() {
@@ -124,7 +129,8 @@ public class MetricsCollector implements IMetricsRegister {
   private void gatherMetrics(final int timeBucketSizeInSecs) {
     // Gather the metrics in Map<String, IMetric> metrics
     // We will get the correct metrics by:
-    // 1. Find the name in Map<Integer, List<String>> timeBucketToMetricNames by timeBucketSizeInSecs
+    // 1. Find the name in Map<Integer, List<String>> timeBucketToMetricNames
+    //    by timeBucketSizeInSecs
     // 2. Find the IMetric in Map<String, IMetric> metrics by the name
     if (timeBucketToMetricNames.containsKey(timeBucketSizeInSecs)) {
       Metrics.MetricPublisherPublishMessage.Builder builder =
@@ -150,7 +156,10 @@ public class MetricsCollector implements IMetricsRegister {
 
   // Gather the value of given metricName, convert it  into protobuf,
   // and add it to MetricPublisherPublishMessage builder given.
-  private void gatherOneMetric(String metricName, Metrics.MetricPublisherPublishMessage.Builder builder) {
+  @SuppressWarnings("unchecked")
+  private void gatherOneMetric(
+      String metricName,
+      Metrics.MetricPublisherPublishMessage.Builder builder) {
     Object metricValue = metrics.get(metricName).getValueAndReset();
     // Decide how to handle the metric based on type
     if (metricValue == null) {

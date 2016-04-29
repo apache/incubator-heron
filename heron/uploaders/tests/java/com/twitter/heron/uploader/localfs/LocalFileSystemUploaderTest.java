@@ -19,13 +19,12 @@ import java.nio.file.Paths;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
-
-import junit.framework.Assert;
 
 public class LocalFileSystemUploaderTest {
 

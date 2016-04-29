@@ -27,9 +27,12 @@ import java.util.logging.Logger;
 /**
  * Handle shell process.
  */
-public class ShellUtils {
+public final class ShellUtils {
 
   private static final Logger LOG = Logger.getLogger(ShellUtils.class.getName());
+
+  private ShellUtils() {
+  }
 
   public static String inputstreamToString(InputStream is) {
     char[] buffer = new char[2048];
@@ -70,6 +73,9 @@ public class ShellUtils {
       boolean verbose, boolean isInheritIO, String[] cmdline, StringBuilder stdout,
       StringBuilder stderr, File workingDirectory) {
     // TODO(nbhagat): Update stdout and stderr
+
+    StringBuilder pStdOut = stdout;
+    StringBuilder pStdErr = stderr;
     try {
       if (verbose) {
         LOG.info("$> " + Arrays.toString(cmdline));
@@ -77,17 +83,17 @@ public class ShellUtils {
       Process process = getProcessBuilder(isInheritIO, cmdline, workingDirectory).start();
 
       int exitValue = process.waitFor();
-      if (stdout == null) {
-        stdout = new StringBuilder();
+      if (pStdOut == null) {
+        pStdOut = new StringBuilder();
       }
-      if (stderr == null) {
-        stderr = new StringBuilder();
+      if (pStdErr == null) {
+        pStdErr = new StringBuilder();
       }
-      stdout.append(inputstreamToString(process.getInputStream()));
-      stderr.append(inputstreamToString(process.getErrorStream()));
+      pStdOut.append(inputstreamToString(process.getInputStream()));
+      pStdErr.append(inputstreamToString(process.getErrorStream()));
       if (verbose) {
-        LOG.info(stdout.toString());
-        LOG.info(stderr.toString());
+        LOG.info(pStdOut.toString());
+        LOG.info(pStdErr.toString());
       }
       return exitValue;
     } catch (IOException | InterruptedException e) {
@@ -124,8 +130,9 @@ public class ShellUtils {
   // TODO(nbhagat): Tokenize using DefaultConfig configOverride parser to handle case when
   // argument contains space.
   protected static String[] splitTokens(String command) {
-    if (command.length() == 0)
+    if (command.length() == 0) {
       throw new IllegalArgumentException("Empty command");
+    }
 
     StringTokenizer st = new StringTokenizer(command);
     String[] cmdarray = new String[st.countTokens()];
@@ -150,8 +157,8 @@ public class ShellUtils {
       boolean verbose, String tunnelHost, int tunnelPort, String destHost, int destPort) {
     if (destHost == null
         || destHost.isEmpty()
-        || destHost.equals("localhost")
-        || destHost.equals("127.0.0.1")) {
+        || "localhost".equals(destHost)
+        || "127.0.0.1".equals(destHost)) {
       throw new RuntimeException("Trying to open tunnel to localhost.");
     }
     return ShellUtils.runASyncProcess(verbose,

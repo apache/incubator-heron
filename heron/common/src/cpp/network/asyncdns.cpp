@@ -25,21 +25,12 @@
 #include "basics/basics.h"
 
 // Constructor. We create a new event_base.
-AsyncDNS::AsyncDNS(EventLoop* eventLoop)
-{
-  dns_ = evdns_base_new(eventLoop->dispatcher(), 1);
-}
+AsyncDNS::AsyncDNS(EventLoop* eventLoop) { dns_ = evdns_base_new(eventLoop->dispatcher(), 1); }
 
 // Destructor.
-AsyncDNS::~AsyncDNS()
-{
-  evdns_base_free(dns_, 1);
-}
+AsyncDNS::~AsyncDNS() { evdns_base_free(dns_, 1); }
 
-sp_int32 AsyncDNS::Resolve(const sp_string&,
-                           VCallback<AsyncDNS::Result>)
-{
+sp_int32 AsyncDNS::Resolve(const sp_string&, VCallback<AsyncDNS::Result>) {
   CHECK(false) << "DNS resolve not implemented";
   return SP_NOTOK;
 }
-

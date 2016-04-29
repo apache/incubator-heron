@@ -20,32 +20,29 @@
 //
 // Please see multi-count-metric.h for details
 //////////////////////////////////////////////////////////////////////////////
+#include "metrics/multi-count-metric.h"
+#include <map>
+#include "metrics/imetric.h"
+#include "metrics/count-metric.h"
 #include "proto/messages.h"
 #include "basics/basics.h"
 #include "errors/errors.h"
 #include "threads/threads.h"
 #include "network/network.h"
 
-#include "metrics/imetric.h"
-#include "metrics/count-metric.h"
-#include "metrics/multi-count-metric.h"
+namespace heron {
+namespace common {
 
-namespace heron { namespace common {
+MultiCountMetric::MultiCountMetric() {}
 
-MultiCountMetric::MultiCountMetric()
-{
-}
-
-MultiCountMetric::~MultiCountMetric()
-{
+MultiCountMetric::~MultiCountMetric() {
   std::map<sp_string, CountMetric*>::iterator iter;
   for (iter = value_.begin(); iter != value_.end(); ++iter) {
     delete iter->second;
   }
 }
 
-CountMetric* MultiCountMetric::scope(const sp_string& _key)
-{
+CountMetric* MultiCountMetric::scope(const sp_string& _key) {
   std::map<sp_string, CountMetric*>::iterator iter;
   iter = value_.find(_key);
   if (iter == value_.end()) {
@@ -58,12 +55,11 @@ CountMetric* MultiCountMetric::scope(const sp_string& _key)
 }
 
 void MultiCountMetric::GetAndReset(const sp_string& _prefix,
-                      proto::system::MetricPublisherPublishMessage* _message)
-{
+                                   proto::system::MetricPublisherPublishMessage* _message) {
   std::map<sp_string, CountMetric*>::iterator iter;
   for (iter = value_.begin(); iter != value_.end(); ++iter) {
     iter->second->GetAndReset(_prefix + "/" + iter->first, _message);
   }
 }
-
-}} // end namespace
+}  // namespace common
+}  // namespace heron

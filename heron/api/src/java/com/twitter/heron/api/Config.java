@@ -14,6 +14,7 @@
 
 package com.twitter.heron.api;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -34,10 +35,13 @@ import javax.xml.bind.DatatypeConverter;
  * Spouts. .</p>
  */
 public class Config extends HashMap<String, Object> {
+  private static final long serialVersionUID = 2550967708478837032L;
+
   /**
    * Topology-specific options for the worker child process. This is used in addition to WORKER_CHILDOPTS.
    */
   public static final String TOPOLOGY_WORKER_CHILDOPTS = "topology.worker.childopts";
+
   /**
    * Per component jvm options.  The format of this flag is something like
    * spout0:jvmopt_for_spout0,spout1:jvmopt_for_spout1. Mostly should be used
@@ -46,111 +50,132 @@ public class Config extends HashMap<String, Object> {
    * all components, this is per component
    */
   public static final String TOPOLOGY_COMPONENT_JVMOPTS = "topology.component.jvmopts";
+
   /**
    * How often a tick tuple from the "__system" component and "__tick" stream should be sent
    * to tasks. Meant to be used as a component-specific configuration.
    */
   public static final String TOPOLOGY_TICK_TUPLE_FREQ_SECS = "topology.tick.tuple.freq.secs";
+
   /**
    * True if Heron should timeout messages or not. Defaults to true. This is meant to be used
    * in unit tests to prevent tuples from being accidentally timed out during the test.
    */
   public static final String TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS = "topology.enable.message.timeouts";
+
   /**
    * When set to true, Heron will log every message that's emitted.
    */
-  public static String TOPOLOGY_DEBUG = "topology.debug";
+  public static final String TOPOLOGY_DEBUG = "topology.debug";
+
   /**
    * The number of stmgr instances that should spin up to service this
    * topology. All the executors will be evenly shared by these stmgrs.
    */
-  public static String TOPOLOGY_STMGRS = "topology.stmgrs";
+  public static final String TOPOLOGY_STMGRS = "topology.stmgrs";
+
   /**
    * The maximum amount of time given to the topology to fully process a message
    * emitted by a spout. If the message is not acked within this time frame, Heron
    * will fail the message on the spout. Some spouts implementations will then replay
    * the message at a later time.
    */
-  public static String TOPOLOGY_MESSAGE_TIMEOUT_SECS = "topology.message.timeout.secs";
+  public static final String TOPOLOGY_MESSAGE_TIMEOUT_SECS = "topology.message.timeout.secs";
+
   /**
    * The per componentparallelism for a component in this topology.
    * Note:- If you are changing this, please change the utils.h as well
    */
-  public static String TOPOLOGY_COMPONENT_PARALLELISM = "topology.component.parallelism";
+  public static final String TOPOLOGY_COMPONENT_PARALLELISM = "topology.component.parallelism";
+
   /**
    * The maximum number of tuples that can be pending on a spout task at any given time.
    * This config applies to individual tasks, not to spouts or topologies as a whole.
-   * <p>
+   * <p/>
    * A pending tuple is one that has been emitted from a spout but has not been acked or failed yet.
    * Note that this config parameter has no effect for unreliable spouts that don't tag
    * their tuples with a message id.
    */
-  public static String TOPOLOGY_MAX_SPOUT_PENDING = "topology.max.spout.pending";
+  public static final String TOPOLOGY_MAX_SPOUT_PENDING = "topology.max.spout.pending";
+
   /**
    * A list of task hooks that are automatically added to every spout and bolt in the topology. An example
    * of when you'd do this is to add a hook that integrates with your internal
    * monitoring system. These hooks are instantiated using the zero-arg constructor.
    */
-  public static String TOPOLOGY_AUTO_TASK_HOOKS = "topology.auto.task.hooks";
+  public static final String TOPOLOGY_AUTO_TASK_HOOKS = "topology.auto.task.hooks";
+
   /**
    * The serialization class that is used to serialize/deserialize tuples
    */
-  public static String TOPOLOGY_SERIALIZER_CLASSNAME = "topology.serializer.classname";
+  public static final String TOPOLOGY_SERIALIZER_CLASSNAME = "topology.serializer.classname";
+
   /**
    * How many executors to spawn for ackers.
    * <p/>
    * <p>If this is set to 0, then Heron will immediately ack tuples as soon
    * as they come off the spout, effectively disabling reliability.</p>
    */
-  public static String TOPOLOGY_ENABLE_ACKING = "topology.acking";
+  public static final String TOPOLOGY_ENABLE_ACKING = "topology.acking";
+
   /**
    * Number of cpu cores per container to be reserved for this topology
    */
-  public static String TOPOLOGY_CONTAINER_CPU_REQUESTED = "topology.container.cpu";
+  public static final String TOPOLOGY_CONTAINER_CPU_REQUESTED = "topology.container.cpu";
+
   /**
    * Amount of ram per container to be reserved for this topology.
    * In bytes.
    */
-  public static String TOPOLOGY_CONTAINER_RAM_REQUESTED = "topology.container.ram";
+  public static final String TOPOLOGY_CONTAINER_RAM_REQUESTED = "topology.container.ram";
+
   /**
    * Amount of disk per container to be reserved for this topology.
    * In bytes.
    */
-  public static String TOPOLOGY_CONTAINER_DISK_REQUESTED = "topology.container.disk";
+  public static final String TOPOLOGY_CONTAINER_DISK_REQUESTED = "topology.container.disk";
+
   /**
    * Per component ram requirement.  The format of this flag is something like
    * spout0:12434,spout1:345353,bolt1:545356.
    */
-  public static String TOPOLOGY_COMPONENT_RAMMAP = "topology.component.rammap";
+  public static final String TOPOLOGY_COMPONENT_RAMMAP = "topology.component.rammap";
+
   /**
    * Name of the topology. This config is automatically set by Heron when the topology is submitted.
    */
-  public static String TOPOLOGY_NAME = "topology.name";
+  public static final String TOPOLOGY_NAME = "topology.name";
+
   /**
    * Name of the team which owns this topology.
    */
-  public static String TOPOLOGY_TEAM_NAME = "topology.team.name";
+  public static final String TOPOLOGY_TEAM_NAME = "topology.team.name";
+
   /**
    * Email of the team which owns this topology.
    */
-  public static String TOPOLOGY_TEAM_EMAIL = "topology.team.email";
+  public static final String TOPOLOGY_TEAM_EMAIL = "topology.team.email";
+
   /**
    * Cap ticket (if filed) for the topology. If the topology is in prod this has to be set or it
    * cannot be deployed.
    */
-  public static String TOPOLOGY_CAP_TICKET = "topology.cap.ticket";
+  public static final String TOPOLOGY_CAP_TICKET = "topology.cap.ticket";
+
   /**
    * Project name of the topology, to help us with tagging which topologies are part of which project. For example, if topology A and
    * Topology B are part of the same project, we will like to aggregate them as part of the same project. This is required by Cap team.
    */
-  public static String TOPOLOGY_PROJECT_NAME = "topology.project.name";
+  public static final String TOPOLOGY_PROJECT_NAME = "topology.project.name";
+
   /**
    * Any user defined classpath that needs to be passed to instances should be set in to config
    * through this key. The value will be of the format "cp1:cp2:cp3..."
    */
-  public static String TOPOLOGY_ADDITIONAL_CLASSPATH = "topology.additional.classpath";
+  public static final String TOPOLOGY_ADDITIONAL_CLASSPATH = "topology.additional.classpath";
+
   // We maintain a list of all user exposed vars
-  private static Set<String> apiVars = new HashSet<String>();
+  private static Set<String> apiVars = new HashSet<>();
 
   static {
     apiVars.add(TOPOLOGY_DEBUG);
@@ -188,12 +213,12 @@ public class Config extends HashMap<String, Object> {
     conf.put(Config.TOPOLOGY_DEBUG, String.valueOf(isOn));
   }
 
-  public static void setTeamName(Map conf, String team_name) {
-    conf.put(Config.TOPOLOGY_TEAM_NAME, team_name);
+  public static void setTeamName(Map conf, String teamName) {
+    conf.put(Config.TOPOLOGY_TEAM_NAME, teamName);
   }
 
-  public static void setTeamEmail(Map conf, String team_email) {
-    conf.put(Config.TOPOLOGY_TEAM_EMAIL, team_email);
+  public static void setTeamEmail(Map conf, String teamEmail) {
+    conf.put(Config.TOPOLOGY_TEAM_EMAIL, teamEmail);
   }
 
   public static void setTopologyCapTicket(Map conf, String ticket) {
@@ -258,24 +283,23 @@ public class Config extends HashMap<String, Object> {
 
   public static void setComponentRam(Map conf, String component, long ramInBytes) {
     if (conf.containsKey(Config.TOPOLOGY_COMPONENT_RAMMAP)) {
-      String old_entry = (String) conf.get(Config.TOPOLOGY_COMPONENT_RAMMAP);
-      String new_entry = String.format("%s,%s:%d", old_entry, component, ramInBytes);
-      conf.put(Config.TOPOLOGY_COMPONENT_RAMMAP, new_entry);
+      String oldEntry = (String) conf.get(Config.TOPOLOGY_COMPONENT_RAMMAP);
+      String newEntry = String.format("%s,%s:%d", oldEntry, component, ramInBytes);
+      conf.put(Config.TOPOLOGY_COMPONENT_RAMMAP, newEntry);
     } else {
-      String new_entry = String.format("%s:%d", component, ramInBytes);
-      conf.put(Config.TOPOLOGY_COMPONENT_RAMMAP, new_entry);
+      String newEntry = String.format("%s:%d", component, ramInBytes);
+      conf.put(Config.TOPOLOGY_COMPONENT_RAMMAP, newEntry);
     }
   }
 
   public static void setComponentJvmOptions(Map conf, String component, String jvmOptions) {
     String optsBase64;
     String componentBase64;
-    try {
-      optsBase64 = DatatypeConverter.printBase64Binary(jvmOptions.getBytes("UTF-8"));
-      componentBase64 = DatatypeConverter.printBase64Binary(component.getBytes("UTF-8"));
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+
+    optsBase64 = DatatypeConverter.printBase64Binary(
+        jvmOptions.getBytes(StandardCharsets.UTF_8));
+    componentBase64 = DatatypeConverter.printBase64Binary(
+        component.getBytes(StandardCharsets.UTF_8));
 
     String oldEntry = (String) conf.get(Config.TOPOLOGY_COMPONENT_JVMOPTS);
     String newEntry;
@@ -287,7 +311,10 @@ public class Config extends HashMap<String, Object> {
       newEntry = String.format("{%s,\"%s\":\"%s\"}", oldEntry, componentBase64, optsBase64);
     }
     // Format for TOPOLOGY_COMPONENT_JVMOPTS would be a json map like this:
-    //  {"componentNameAInBase64": "jvmOptionsInBase64", "componentNameBInBase64": "jvmOptionsInBase64"}
+    //  {
+    //     "componentNameAInBase64": "jvmOptionsInBase64",
+    //     "componentNameBInBase64": "jvmOptionsInBase64"
+    //  }
     conf.put(Config.TOPOLOGY_COMPONENT_JVMOPTS, newEntry);
 
   }
@@ -296,12 +323,12 @@ public class Config extends HashMap<String, Object> {
     setDebug(this, isOn);
   }
 
-  public void setTeamName(String team_name) {
-    setTeamName(this, team_name);
+  public void setTeamName(String teamName) {
+    setTeamName(this, teamName);
   }
 
-  public void setTeamEmail(String team_email) {
-    setTeamEmail(this, team_email);
+  public void setTeamEmail(String teamEmail) {
+    setTeamEmail(this, teamEmail);
   }
 
   public void setTopologyCapTicket(String ticket) {

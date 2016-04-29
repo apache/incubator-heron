@@ -59,10 +59,8 @@ struct evhttp_connection;
 class IncomingHTTPResponse;
 class IncomingHTTPResponse;
 
-class HTTPClient
-{
+class HTTPClient {
  public:
-
   // Constructor
   HTTPClient(EventLoop* eventLoop, AsyncDNS* _dns);
 
@@ -78,56 +76,50 @@ class HTTPClient
   // A return value of LX_OK means the request was queued for sending.
   // It doesnt mean that the request was sent. When the request completes
   // and the response arrives, the callback _cb will be called.
-  sp_int32 SendRequest(OutgoingHTTPRequest* _request,
-                       VCallback<IncomingHTTPResponse*> _cb);
+  sp_int32 SendRequest(OutgoingHTTPRequest* _request, VCallback<IncomingHTTPResponse*> _cb);
 
   // get the underlying select server
-  EventLoop* getEventLoop() { return eventLoop_ ; }
+  EventLoop* getEventLoop() { return eventLoop_; }
 
  private:
-
   //! A structure used for internal purposes
   struct Combo {
     Combo(OutgoingHTTPRequest* _request, HTTPClient* _client) {
       request_ = _request;
       client_ = _client;
     }
-    ~Combo() { }
-    OutgoingHTTPRequest*   request_;
-    HTTPClient*            client_;
+    ~Combo() {}
+    OutgoingHTTPRequest* request_;
+    HTTPClient* client_;
   };
 
   //! A Callback called when the http request gets done
-  void HandleRequestDone(OutgoingHTTPRequest* _req,
-                         IncomingHTTPResponse* _response);
+  void HandleRequestDone(OutgoingHTTPRequest* _req, IncomingHTTPResponse* _response);
 
   //! A Callback called when a http connection closes
   void HandleConnectionClose(struct evhttp_connection* _connection);
 
   //! Utility function to create the connection
-  struct evhttp_connection* CreateConnection(const sp_string& _host,
-                                             sp_int32 _port);
+  struct evhttp_connection* CreateConnection(const sp_string& _host, sp_int32 _port);
 
   //! Utility function to fill the request
-  struct evhttp_request* CreateUnderlyingRequest(OutgoingHTTPRequest* _req,
-                                                 Combo* _combo);
+  struct evhttp_request* CreateUnderlyingRequest(OutgoingHTTPRequest* _req, Combo* _combo);
 
   // Map from the host/port pair to the connections
-  std::unordered_map<std::pair<sp_string, sp_int32>,
-                      struct evhttp_connection*>               connections_;
+  std::unordered_map<std::pair<sp_string, sp_int32>, struct evhttp_connection*> connections_;
   // Map from the connections to host/port pair
-  std::unordered_map<void*, std::pair<sp_string, sp_int32> >        rconnections_;
+  std::unordered_map<void*, std::pair<sp_string, sp_int32>> rconnections_;
 
   // Map from the OutgoingHTTPRequest to the callback
   std::unordered_map<void*, VCallback<IncomingHTTPResponse*>> inflight_urls_;
 
   //! the EventLoop and the aysnc dns pointers
-  EventLoop*                                                 eventLoop_;
-  AsyncDNS*                                                     dns_;
+  EventLoop* eventLoop_;
+  AsyncDNS* dns_;
 
   //! friend functions
   friend void httpdonecb(struct evhttp_request*, void*);
   friend void httpconnectionclose(struct evhttp_connection*, void*);
 };
 
-#endif // HTTPCLIENT_H_
+#endif  // HTTPCLIENT_H_

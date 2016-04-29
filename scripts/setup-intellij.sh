@@ -26,40 +26,42 @@ cat > $iml_file <<EOH
     <output url="file://\$MODULE_DIR\$/out" />
 EOH
 
-for content_dir in `ls -l --time-style="long-iso" . | egrep '^d' | grep -v "out" | awk '{print $8}'`; do 
+# Find all top-level dirs that should be parsed for possible source/tests
+for content_dir in `find . -maxdepth 1 -type d -path './[^.]*' | cut -d '/' -f 2 | grep -v out`; do
 
-if [ "$content_dir" == "heron" ] ; then
+  if [ "$content_dir" == "heron" ]; then
 
-cat >> $iml_file <<EOH
+  cat >> $iml_file <<EOH
     <content url="file://\$MODULE_DIR$/heron">
 EOH
-echo '      <sourceFolder url="file://$MODULE_DIR$/heron/config/src" type="java-resource" />'>> $iml_file
-heron_java_paths="$(get_heron_source_paths)"
+  echo '      <sourceFolder url="file://$MODULE_DIR$/heron/config/src" type="java-resource" />'>> $iml_file
+  heron_java_paths="$(get_heron_source_paths)"
 
-for source in ${heron_java_paths}; do
-     if [[ $source == *"javatests" ]]; then
-       is_test_source="true"
-     elif [[ $source == *"tests/"* ]]; then
-       is_test_source="true"
-     else
-       is_test_source="false"
-     fi
-     folderType="sourceFolder";
-     if [[ -f "$source/xxBUILD" ]]; then
-     	folderType="excludeFolder"
-     	echo '      <excludeFolder url="file://$MODULE_DIR$/'"${source}\"  />" >> $iml_file
-     else 
-        echo '      <sourceFolder url="file://$MODULE_DIR$/'"${source}\" isTestSource=\"${is_test_source}\" />" >> $iml_file
-     fi
-done
-  
-else 
+  for source in ${heron_java_paths}; do
+    if [[ $source == *"javatests" ]]; then
+      is_test_source="true"
+    elif [[ $source == *"tests/"* ]]; then
+      is_test_source="true"
+    else
+      is_test_source="false"
+    fi
+    folderType="sourceFolder";
+    if [[ -f "$source/xxBUILD" ]]; then
+      folderType="excludeFolder"
+      echo '      <excludeFolder url="file://$MODULE_DIR$/'"${source}\"  />" >> $iml_file
+    else
+      echo '      <sourceFolder url="file://$MODULE_DIR$/'"${source}\" isTestSource=\"${is_test_source}\" />" >> $iml_file
+    fi
+  done
+
+  else
     echo "    <content url=\"file://\$MODULE_DIR$/${content_dir}\">"  >> $iml_file
-fi
-cat >> $iml_file <<'EOF'
+  fi
+  cat >> $iml_file <<'EOF'
     </content>    
 EOF
-done 
+done
+
 # Write a module-library entry, usually a jar file but occasionally a directory.
 function write_jar_entry() {
   local root_file=$1
@@ -76,7 +78,7 @@ function write_jar_entry() {
   fi
   local  libfile="\$MODULE_DIR\$/${root_file}"
   if [[ "$root_file" = /* ]]; then 
-  	libfile="${root_file}"
+    libfile="${root_file}"
   fi
   local readonly basename=${root_file##*/}
     cat >> $iml_file <<EOF
@@ -129,13 +131,13 @@ done
 heron_resolved_deps="$(get_heron_bazel_deps)"
 
 for jar in ${heron_resolved_deps}; do
-	write_jar_entry $jar
+  write_jar_entry $jar
 done
 #<orderEntry type="library" name="proto" level="application" />
 heron_binary_paths="$(collect_generated_binary_deps)"
 
 for jar in ${heron_binary_paths}; do 
-	write_jar_entry "$jar";
+  write_jar_entry "$jar";
 done
 #write_jar_entry "bazel-bin/heron/metricsmgr/src/thrift"
 
@@ -147,4 +149,3 @@ EOF
 
 echo
 echo Done. Project file : $iml_file
-

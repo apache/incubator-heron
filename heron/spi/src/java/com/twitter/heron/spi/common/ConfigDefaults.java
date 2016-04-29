@@ -17,7 +17,7 @@ package com.twitter.heron.spi.common;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class ConfigDefaults {
+public final class ConfigDefaults {
   private static final Logger LOG = Logger.getLogger(ConfigDefaults.class.getName());
 
   // holds the mapping between the config keys and their default values
@@ -30,13 +30,16 @@ public class ConfigDefaults {
           "com.twitter.heron.spi.common.Defaults",
           Constants.DEFAULTS_YAML);
     } catch (ClassNotFoundException e) {
-      LOG.severe("Unable to load the Defaults class " + e);
-      System.exit(1);
+      LOG.severe("Unable to load the defaults class " + e);
+      throw new RuntimeException("Failed to load the ConfigDefaults class");
     }
   }
 
+  private ConfigDefaults() {
+  }
+
   /*
-   * Get the default value for the given config key 
+   * Get the default value for the given config key
    *
    * @param key, the config key
    * @return String, the default value for the config key

@@ -25,21 +25,14 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 
 public class TestWordSpout extends BaseRichSpout {
-  boolean _isDistributed;
-  SpoutOutputCollector _collector;
-  String[] words;
-  Random rand;
 
-  public TestWordSpout() {
-    this(true);
-  }
+  private static final long serialVersionUID = -3217886193225455451L;
+  private SpoutOutputCollector collector;
+  private String[] words;
+  private Random rand;
 
-  public TestWordSpout(boolean isDistributed) {
-    _isDistributed = isDistributed;
-  }
-
-  public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
-    _collector = collector;
+  public void open(Map conf, TopologyContext context, SpoutOutputCollector acollector) {
+    collector = acollector;
     words = new String[]{"nathan", "mike", "jackson", "golda", "bertels"};
     rand = new Random();
   }
@@ -49,7 +42,7 @@ public class TestWordSpout extends BaseRichSpout {
 
   public void nextTuple() {
     final String word = words[rand.nextInt(words.length)];
-    _collector.emit(new Values(word));
+    collector.emit(new Values(word));
   }
 
   public void ack(Object msgId) {

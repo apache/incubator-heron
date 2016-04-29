@@ -23,21 +23,24 @@
 #if !defined(__ERROR_SPIN_H)
 #define __ERROR_SPIN_H
 
-namespace heron { namespace error {
+namespace heron {
+namespace error {
 
 class __Spinlock {
  public:
-  __Spinlock() : lock_(0) { }
-  ~__Spinlock()       {};
+  __Spinlock() : lock_(0) {}
+  ~__Spinlock() {}
 
-  void acquire() {while (__sync_lock_test_and_set(&lock_, 1)) ; }
+  void acquire() {
+    while (__sync_lock_test_and_set(&lock_, 1)) {}
+  }
 
-  void release() { __sync_lock_release (&lock_); }
+  void release() { __sync_lock_release(&lock_); }
 
  private:
-  sp_int32		lock_;
+  sp_int32 lock_;
 };
+}  // namespace error
+}  // namespace heron
 
-}} // namespace
-
-#endif         // end of header file 
+#endif  // end of header file

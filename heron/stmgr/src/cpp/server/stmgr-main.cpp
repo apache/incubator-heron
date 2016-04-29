@@ -1,17 +1,30 @@
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <iostream>
 #include <string>
 #include <vector>
-
+#include "manager/stmgr.h"
+#include "statemgr/heron-statemgr.h"
 #include "proto/messages.h"
-
 #include "basics/basics.h"
 #include "errors/errors.h"
 #include "threads/threads.h"
 #include "network/network.h"
-
 #include "config/heron-internals-config-reader.h"
-#include "heron-statemgr.h"
-#include "manager/stmgr.h"
 
 int main(int argc, char* argv[]) {
   if (argc != 12) {
@@ -19,7 +32,8 @@ int main(int argc, char* argv[]) {
               << "<topname> <topid> <topdefnfile> "
               << "<zknode> <zkroot> <stmgrid> "
               << "<instanceids> <myport> <metricsmgrport> <shellport> "
-                 "<heron_internals_config_filename>" << std::endl;
+                 "<heron_internals_config_filename>"
+              << std::endl;
     std::cout << "If zknode is empty please say LOCALMODE\n";
     ::exit(1);
   }
@@ -44,8 +58,7 @@ int main(int argc, char* argv[]) {
 
   // Read heron internals config from local file
   // Create the heron-internals-config-reader to read the heron internals config
-  heron::config::HeronInternalsConfigReader::Create(
-      &ss, heron_internals_config_filename);
+  heron::config::HeronInternalsConfigReader::Create(&ss, heron_internals_config_filename);
 
   heron::common::Initialize(argv[0], myid.c_str());
 
@@ -57,9 +70,8 @@ int main(int argc, char* argv[]) {
     LOG(FATAL) << "Corrupt topology defn file" << std::endl;
   }
 
-  heron::stmgr::StMgr mgr(&ss, myport, topology_name, topology_id, topology,
-                          myid, instances, zkhostportlist, topdir,
-                          metricsmgr_port, shell_port);
+  heron::stmgr::StMgr mgr(&ss, myport, topology_name, topology_id, topology, myid, instances,
+                          zkhostportlist, topdir, metricsmgr_port, shell_port);
   mgr.Init();
   ss.loop();
   return 0;

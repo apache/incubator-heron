@@ -18,12 +18,12 @@
 #include <cstring>
 #include <string>
 #include <sstream>
+#include <vector>
 
 std::vector<std::string>
 StrUtils::split(
   const std::string&         input,
-  const std::string&         delim)
-{
+  const std::string&         delim) {
   size_t                    start_pos = 0, pos = 0;
   std::string               atoken;
   std::vector<std::string>  tokens;

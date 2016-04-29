@@ -17,6 +17,7 @@ package com.twitter.heron.api;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,8 +32,11 @@ import com.twitter.heron.api.utils.Utils;
  * with the "heron jar" command from the command-line, and then use this class to
  * submit your topologies.
  */
-public class HeronSubmitter {
+public final class HeronSubmitter {
   private static final Logger LOG = Logger.getLogger(HeronSubmitter.class.getName());
+
+  private HeronSubmitter() {
+  }
 
   /**
    * Submits a topology to run on the cluster. A topology runs forever or until
@@ -77,7 +81,7 @@ public class HeronSubmitter {
   private static void submitTopologyToFile(TopologyAPI.Topology fTopology,
                                            Map<String, String> heronCmdOptions) {
     String dirName = heronCmdOptions.get("cmdline.topologydefn.tmpdirectory");
-    if (dirName == null || dirName == "") {
+    if (dirName == null || dirName.isEmpty()) {
       throw new RuntimeException("Improper specification of directory");
     }
     String fileName = dirName + "/" + fTopology.getName() + ".defn";
@@ -91,7 +95,7 @@ public class HeronSubmitter {
       bos.write(topEncoding);
       bos.flush();
       bos.close();
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new RuntimeException("Error writing topology defn to temp directory " + dirName);
     }
   }
@@ -103,6 +107,5 @@ public class HeronSubmitter {
   // TODO add submit options
   public static String submitJar(Config config, String localJar) {
     throw new UnsupportedOperationException("submitJar unsupported");
-    //throw new RuntimeException("Must submit topologies using the heron-cli so that HeronSubmitter knows which jar to upload.");
   }
 }

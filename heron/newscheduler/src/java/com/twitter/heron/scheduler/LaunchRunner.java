@@ -96,7 +96,7 @@ public class LaunchRunner implements Callable<Boolean> {
   public TopologyAPI.Topology trimTopology(TopologyAPI.Topology topology) {
 
     // create a copy of the topology physical plan
-    TopologyAPI.Topology.Builder builder = topology.newBuilder().mergeFrom(topology);
+    TopologyAPI.Topology.Builder builder = TopologyAPI.Topology.newBuilder().mergeFrom(topology);
 
     // clear the state of user spout java objects - which can be potentially huge
     for (TopologyAPI.Spout.Builder spout : builder.getSpoutsBuilderList()) {
@@ -111,6 +111,7 @@ public class LaunchRunner implements Callable<Boolean> {
     return builder.build();
   }
 
+  @Override
   public Boolean call() {
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
     TopologyAPI.Topology topology = Runtime.topology(runtime);
@@ -120,7 +121,7 @@ public class LaunchRunner implements Callable<Boolean> {
     packing.initialize(config, runtime);
     PackingPlan packedPlan = packing.pack();
 
-    // initialize the launcher 
+    // initialize the launcher
     launcher.initialize(config, runtime);
 
     Boolean result;
@@ -142,14 +143,10 @@ public class LaunchRunner implements Callable<Boolean> {
     }
 
     // launch the topology, clear the state if it fails
-    try {
-      if (!launcher.launch(packedPlan)) {
-        throw new RuntimeException(launcher.getClass().getName() + " failed ");
-      }
-    } catch (RuntimeException e) {
+    if (!launcher.launch(packedPlan)) {
       statemgr.deleteExecutionState(topologyName);
       statemgr.deleteTopology(topologyName);
-      LOG.log(Level.SEVERE, "Failed to launch topology", e);
+      LOG.log(Level.SEVERE, "Failed to launch topology");
       return false;
     }
 

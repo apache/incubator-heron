@@ -27,32 +27,32 @@
 
 #include <map>
 #include <set>
+#include "basics/basics.h"
+#include "proto/messages.h"
 
-namespace heron { namespace config {
+namespace heron {
+namespace config {
 
-class PhysicalPlanHelper
-{
+class PhysicalPlanHelper {
  public:
   class TaskData {
-  public:
+   public:
     sp_int32 task_id_;
     sp_string component_name_;
   };
   // Returns the map of <worker_id, task_id> that belong
   // to _stmgr
-  static void GetLocalTasks(const proto::system::PhysicalPlan& _pplan,
-                            const sp_string& _stmgr,
+  static void GetLocalTasks(const proto::system::PhysicalPlan& _pplan, const sp_string& _stmgr,
                             std::map<sp_string, TaskData>& _return);
 
   // Returns the map of <worker_id, task_id> of the spouts
   // that belong to the _stmgr
-  static void GetLocalSpouts(const proto::system::PhysicalPlan& _pplan,
-                             const sp_string& _stmgr,
+  static void GetLocalSpouts(const proto::system::PhysicalPlan& _pplan, const sp_string& _stmgr,
                              std::set<sp_int32>& _return);
 
   static void LogPhysicalPlan(const proto::system::PhysicalPlan& _pplan);
 };
-
-}} // end namespace
+}  // namespace config
+}  // namespace heron
 
 #endif

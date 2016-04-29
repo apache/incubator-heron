@@ -113,11 +113,14 @@ public class MetricsExecutor implements Runnable {
   protected void handleExecutorsMetrics(InstanceExecutor instance) {
     // TODO(mfu): We might also need to handle the instance's info
     while (!instance.getMetricsOutQueue().isEmpty()) {
-      handleMetricPublisherPublishMessage(instance.getInstanceId(), instance.getMetricsOutQueue().poll());
+      handleMetricPublisherPublishMessage(
+          instance.getInstanceId(), instance.getMetricsOutQueue().poll());
     }
   }
 
-  protected void handleMetricPublisherPublishMessage(String instanceId, Metrics.MetricPublisherPublishMessage message) {
+  protected void handleMetricPublisherPublishMessage(
+      String instanceId,
+      Metrics.MetricPublisherPublishMessage message) {
     // TODO(mfu): Currently we just log the metrics; would add more handling in future
     LOG.info(
         String.format("Metrics from %s at time %s:\n%s",

@@ -15,21 +15,21 @@
 package com.twitter.heron.api.metric;
 
 public class CombinedMetric implements IMetric {
-  private final ICombiner _combiner;
-  private Object _value;
+  private final ICombiner combiner;
+  private Object value;
 
-  public CombinedMetric(ICombiner combiner) {
-    _combiner = combiner;
-    _value = _combiner.identity();
+  public CombinedMetric(ICombiner aCombiner) {
+    combiner = aCombiner;
+    value = combiner.identity();
   }
 
-  public void update(Object value) {
-    _value = _combiner.combine(_value, value);
+  public void update(Object aValue) {
+    value = combiner.combine(value, aValue);
   }
 
   public Object getValueAndReset() {
-    Object ret = _value;
-    _value = _combiner.identity();
+    Object ret = value;
+    value = combiner.identity();
     return ret;
   }
 }

@@ -14,6 +14,7 @@
 
 package com.twitter.heron.metricsmgr;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
@@ -21,6 +22,7 @@ import java.util.logging.Logger;
 import com.google.protobuf.Message;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,8 +38,6 @@ import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.spi.metricsmgr.metrics.ExceptionInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
-
-import junit.framework.Assert;
 
 /**
  * MetricsManagerServer Tester.
@@ -120,6 +120,9 @@ public class MetricsManagerServerTest {
     Assert.assertTrue(metricsManagerServer.removeSinkCommunicator(sinkCommunicator));
   }
 
+  /**
+   * Method: addSinkCommunicator(Communicator<MetricsRecord> communicator)
+   */
   @Test
   public void testMetricsManagerServer() throws Exception {
     final Communicator<MetricsRecord> sinkCommunicator = new Communicator<MetricsRecord>();
@@ -192,9 +195,10 @@ public class MetricsManagerServerTest {
               new SimpleMetricsClient(looper, SERVER_HOST, serverPort, MESSAGE_SIZE);
           simpleMetricsClient.start();
           looper.loop();
-
-        } catch (Exception e) {
+        } catch (IOException e) {
           throw new RuntimeException("Some error instantiating client");
+        } finally {
+          simpleMetricsClient.stop();
         }
       }
     };
@@ -205,7 +209,7 @@ public class MetricsManagerServerTest {
     private static final Logger LOG = Logger.getLogger(SimpleMetricsClient.class.getName());
     private int maxMessages;
 
-    public SimpleMetricsClient(NIOLooper looper, String host, int port, int maxMessages) {
+    SimpleMetricsClient(NIOLooper looper, String host, int port, int maxMessages) {
       super(looper, host, port,
           new HeronSocketOptions(100 * 1024 * 1024, 100,
               100 * 1024 * 1024, 100,
@@ -242,8 +246,8 @@ public class MetricsManagerServerTest {
           setInstanceId("instance-id").
           setInstanceIndex(1).
           build();
-      Metrics.MetricPublisherRegisterRequest request = Metrics.MetricPublisherRegisterRequest.newBuilder().
-          setPublisher(publisher).build();
+      Metrics.MetricPublisherRegisterRequest request =
+          Metrics.MetricPublisherRegisterRequest.newBuilder().setPublisher(publisher).build();
 
       sendRequest(request, Metrics.MetricPublisherRegisterResponse.newBuilder());
 
@@ -254,7 +258,8 @@ public class MetricsManagerServerTest {
           Metrics.MetricPublisherPublishMessage.newBuilder();
 
       for (int j = 0; j < N; j++) {
-        Metrics.MetricDatum metricDatum = Metrics.MetricDatum.newBuilder().setName(METRIC_NAME).setValue(METRIC_VALUE).build();
+        Metrics.MetricDatum metricDatum =
+            Metrics.MetricDatum.newBuilder().setName(METRIC_NAME).setValue(METRIC_VALUE).build();
         builder.addMetrics(metricDatum);
       }
 
@@ -287,4 +292,5 @@ public class MetricsManagerServerTest {
       org.junit.Assert.fail("Expected message from client");
     }
   }
-} 
+}
+

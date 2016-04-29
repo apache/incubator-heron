@@ -79,7 +79,8 @@ public class BoltMetrics {
     topologyContext.registerMetric("__execute-latency", executeLatency, interval);
     topologyContext.registerMetric("__emit-count", emitCount, interval);
     topologyContext.registerMetric("__out-queue-full-count", outQueueFullCount, interval);
-    topologyContext.registerMetric("__tuple-deserialization-time-ns", deserializationTimeNs, interval);
+    topologyContext.registerMetric(
+        "__tuple-deserialization-time-ns", deserializationTimeNs, interval);
     topologyContext.registerMetric("__tuple-serialization-time-ns", serializationTimeNs, interval);
   }
 

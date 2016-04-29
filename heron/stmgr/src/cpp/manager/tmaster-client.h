@@ -1,16 +1,35 @@
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #ifndef SRC_CPP_SVCS_STMGR_SRC_MANAGER_TMASTER_CLIENT_H_
 #define SRC_CPP_SVCS_STMGR_SRC_MANAGER_TMASTER_CLIENT_H_
 
 #include <vector>
 #include "network/network_error.h"
+#include "proto/messages.h"
+#include "network/network.h"
+#include "basics/basics.h"
 
 namespace heron {
 namespace stmgr {
 
 class TMasterClient : public Client {
  public:
-  TMasterClient(EventLoop* eventLoop, const NetworkOptions& _options,
-                const sp_string& _stmgr_id, sp_int32 _stmgr_port, sp_int32 _shell_port,
+  TMasterClient(EventLoop* eventLoop, const NetworkOptions& _options, const sp_string& _stmgr_id,
+                sp_int32 _stmgr_port, sp_int32 _shell_port,
                 VCallback<proto::system::PhysicalPlan*> _pplan_watch);
   virtual ~TMasterClient();
 
@@ -30,15 +49,12 @@ class TMasterClient : public Client {
   virtual void HandleClose(NetworkErrorCode status);
 
  private:
-  void HandleRegisterResponse(void*,
-                              proto::tmaster::StMgrRegisterResponse* _response,
+  void HandleRegisterResponse(void*, proto::tmaster::StMgrRegisterResponse* _response,
                               NetworkErrorCode);
-  void HandleHeartbeatResponse(void*,
-                               proto::tmaster::StMgrHeartbeatResponse* response,
+  void HandleHeartbeatResponse(void*, proto::tmaster::StMgrHeartbeatResponse* response,
                                NetworkErrorCode);
 
-  void HandleNewAssignmentMessage(
-      proto::stmgr::NewPhysicalPlanMessage* _message);
+  void HandleNewAssignmentMessage(proto::stmgr::NewPhysicalPlanMessage* _message);
 
   void OnReConnectTimer();
   void OnHeartbeatTimer();

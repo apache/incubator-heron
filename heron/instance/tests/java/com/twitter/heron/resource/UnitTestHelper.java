@@ -38,7 +38,11 @@ import com.twitter.heron.proto.system.PhysicalPlans;
  */
 
 @Ignore
-public class UnitTestHelper {
+public final class UnitTestHelper {
+
+  private UnitTestHelper() {
+  }
+
   /**
    * Construct a physical plan with basic setting.
    *
@@ -47,8 +51,10 @@ public class UnitTestHelper {
    * @param topologyState the Topology State inside this PhysicaPlan, for intance, RUNNING.
    * @return the corresponding Physical Plan
    */
-  public static PhysicalPlans.PhysicalPlan getPhysicalPlan(boolean ackEnabled, int messageTimeout,
-                                                           TopologyAPI.TopologyState topologyState) {
+  public static PhysicalPlans.PhysicalPlan getPhysicalPlan(
+      boolean ackEnabled,
+      int messageTimeout,
+      TopologyAPI.TopologyState topologyState) {
     PhysicalPlans.PhysicalPlan.Builder pPlan = PhysicalPlans.PhysicalPlan.newBuilder();
 
     setTopology(pPlan, ackEnabled, messageTimeout, topologyState);
@@ -137,7 +143,8 @@ public class UnitTestHelper {
     // Remove the Singleton by Reflection
     Field field = SingletonRegistry.INSTANCE.getClass().getDeclaredField("singletonObjects");
     field.setAccessible(true);
-    Map<String, Object> singletonObjects = (Map<String, Object>) field.get(SingletonRegistry.INSTANCE);
+    Map<String, Object> singletonObjects =
+        (Map<String, Object>) field.get(SingletonRegistry.INSTANCE);
     singletonObjects.clear();
   }
 

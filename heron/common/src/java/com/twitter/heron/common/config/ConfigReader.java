@@ -34,7 +34,7 @@ import org.yaml.snakeyaml.Yaml;
 public class ConfigReader {
   private static final Logger LOG = Logger.getLogger(ConfigReader.class.getName());
 
-  public ConfigReader() {
+  protected ConfigReader() {
   }
 
   /**
@@ -44,8 +44,9 @@ public class ConfigReader {
    *
    * @return Map, contains the key value pairs of config
    */
-  public static Map loadFile(String fileName) {
-    Map props = new HashMap();
+  @SuppressWarnings("unchecked") // when we cast yaml.load(fin)
+  public static Map<String, Object> loadFile(String fileName) {
+    Map<String, Object> props = new HashMap<>();
     if (fileName == null) {
       LOG.warning("Config file name cannot be null");
       return props;
@@ -69,12 +70,12 @@ public class ConfigReader {
 
       LOG.log(Level.FINE, "Reading config file {0}", fileName);
 
-      Map propsYaml = null;
+      Map<String, Object> propsYaml = null;
       try {
         FileInputStream fin = new FileInputStream(new File(fileName));
         try {
           Yaml yaml = new Yaml();
-          propsYaml = (Map) yaml.load(fin);
+          propsYaml = (Map<String, Object>) yaml.load(fin);
           LOG.log(Level.FINE, "Successfully read config file {0}", fileName);
         } finally {
           fin.close();
@@ -94,10 +95,11 @@ public class ConfigReader {
    *
    * @return Map, contains the key value pairs of config
    */
+  @SuppressWarnings("rawtypes")
   public static Map loadStream(InputStream inputStream) {
     LOG.fine("Reading config stream");
 
-    Map propsYaml = null;
+    Map propsYaml;
     Yaml yaml = new Yaml();
     propsYaml = (Map) yaml.load(inputStream);
     LOG.fine("Successfully read config");

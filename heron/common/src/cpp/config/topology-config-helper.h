@@ -27,11 +27,13 @@
 
 #include <map>
 #include <string>
+#include "basics/basics.h"
+#include "proto/messages.h"
 
-namespace heron { namespace config {
+namespace heron {
+namespace config {
 
-class TopologyConfigHelper
-{
+class TopologyConfigHelper {
  public:
   // This returns the value of TOPOLOGY_STMGRS from the config
   static sp_int32 GetNumStMgrs(const proto::api::Topology& _topology);
@@ -48,8 +50,7 @@ class TopologyConfigHelper
                                          std::map<std::string, sp_int32>& pmap);
 
   // This writes TOPOLOGY_COMPONENT_PARALLELISM to the value specified
-  static void SetComponentParallelism(proto::api::Config* _config,
-                                      sp_int32 _parallelism);
+  static void SetComponentParallelism(proto::api::Config* _config, sp_int32 _parallelism);
 
   // Gets the topology specific JVM childopts if any
   static sp_string GetWorkerChildOpts(const proto::api::Topology& _topology);
@@ -72,7 +73,7 @@ class TopologyConfigHelper
   // Gets the per container ram requested by this topology
   static sp_int64 GetContainerRamRequested(const proto::api::Topology& _topology);
 };
-
-}} // end namespace
+}  // namespace config
+}  // namespace heron
 
 #endif

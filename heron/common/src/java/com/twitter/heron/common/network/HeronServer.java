@@ -87,7 +87,7 @@ public abstract class HeronServer implements ISelectHandler {
       acceptChannel.socket().bind(endpoint);
       nioLooper.registerAccept(acceptChannel, this);
       return true;
-    } catch (Exception e) {
+    } catch (IOException e) {
       LOG.log(Level.SEVERE, "Failed to start server", e);
       return false;
     }
@@ -132,13 +132,15 @@ public abstract class HeronServer implements ISelectHandler {
         socketChannel.configureBlocking(false);
         // Set the maximum possible send and receive buffers
         socketChannel.socket().setSendBufferSize(socketOptions.getSocketSendBufferSizeInBytes());
-        socketChannel.socket().setReceiveBufferSize(socketOptions.getSocketReceivedBufferSizeInBytes());
+        socketChannel.socket().setReceiveBufferSize(
+            socketOptions.getSocketReceivedBufferSizeInBytes());
         socketChannel.socket().setTcpNoDelay(true);
-        SocketChannelHelper helper = new SocketChannelHelper(nioLooper, this, socketChannel, socketOptions);
+        SocketChannelHelper helper = new SocketChannelHelper(nioLooper, this, socketChannel,
+            socketOptions);
         activeConnections.put(socketChannel, helper);
         onConnect(socketChannel);
       }
-    } catch (Exception e) {
+    } catch (IOException e) {
       LOG.log(Level.SEVERE, "Error while accepting a new connection ", e);
       // Note:- we are not calling onError
     }

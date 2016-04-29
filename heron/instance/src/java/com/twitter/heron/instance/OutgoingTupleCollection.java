@@ -44,10 +44,13 @@ public class OutgoingTupleCollection {
   private int dataTupleSetCapacity;
   private int controlTupleSetCapacity;
 
-  public OutgoingTupleCollection(PhysicalPlanHelper helper, Communicator<HeronTuples.HeronTupleSet> outQueue) {
+  public OutgoingTupleCollection(
+      PhysicalPlanHelper helper,
+      Communicator<HeronTuples.HeronTupleSet> outQueue) {
     this.outQueue = outQueue;
     this.helper = helper;
-    this.systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
+    this.systemConfig =
+        (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
     this.dataTupleSetCapacity = systemConfig.getInstanceSetDataTupleCapacity();
     this.controlTupleSetCapacity = systemConfig.getInstanceSetControlTupleCapacity();
   }
@@ -56,10 +59,13 @@ public class OutgoingTupleCollection {
     flushRemaining();
   }
 
-  public void addDataTuple(String streamId, HeronTuples.HeronDataTuple.Builder newTuple, long tupleSizeInBytes) {
-    if (currentDataTuple == null ||
-        !currentDataTuple.getStream().getId().equals(streamId) ||
-        currentDataTuple.getTuplesCount() > dataTupleSetCapacity) {
+  public void addDataTuple(
+      String streamId,
+      HeronTuples.HeronDataTuple.Builder newTuple,
+      long tupleSizeInBytes) {
+    if (currentDataTuple == null
+        || !currentDataTuple.getStream().getId().equals(streamId)
+        || currentDataTuple.getTuplesCount() > dataTupleSetCapacity) {
       initNewDataTuple(streamId);
     }
     currentDataTuple.addTuples(newTuple);

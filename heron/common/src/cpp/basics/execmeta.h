@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-
 #if !defined(HERON_EXEC_META_H)
 #define HERON_EXEC_META_H
 
 #include <chrono>
+#include <string>
 #include "basics/sptypes.h"
 
-namespace heron { namespace common {
+namespace heron {
+namespace common {
 
 /**
- * This class contains several meta data of the program. Metadata includes 
- *  name of the program 
+ * This class contains several meta data of the program. Metadata includes
+ *  name of the program
  *  instance id of the program
  *  name of the package
  *  major, minor and path version of the program
@@ -36,10 +37,9 @@ namespace heron { namespace common {
  *
  */
 
-class ExecutableMetadata
-{
+class ExecutableMetadata {
  public:
-  ExecutableMetadata() { }
+  ExecutableMetadata() {}
 
   // get & set the name of the program
   const std::string& name() const;
@@ -106,57 +106,56 @@ class ExecutableMetadata
   ExecutableMetadata& setUnitTest(const bool unittest);
 
  private:
-
   /// Name of the program.
-  std::string        name_;
+  std::string name_;
 
   /// Instance of the program. Will be empty for singleton
   /// programs and tests.
-  std::string        instance_;
+  std::string instance_;
 
   /// Package name.
-  std::string        package_;
+  std::string package_;
 
   /// Version string of the package.
-  std::string        version_;
+  std::string version_;
 
   /// Major version string of the package.
-  std::string        major_;
+  std::string major_;
 
   /// Minor version string of the package.
-  std::string        minor_;
+  std::string minor_;
 
   /// Patch number of the package.
-  std::string        patch_;
+  std::string patch_;
 
   /// Unix user name who compiled the program.
-  std::string        compile_user_;
+  std::string compile_user_;
 
   /// Name of the host on which it is compiled.
-  std::string        compile_host_;
+  std::string compile_host_;
 
   /// Time of compilation.
-  std::string        compile_time_;
+  std::string compile_time_;
 
   /// Name of the git branch.
-  std::string        git_branch_;
+  std::string git_branch_;
 
   /// Git SHA of the branch.
-  std::string        git_sha_;
+  std::string git_sha_;
 
   /// Start time of the program during execution.
-  std::time_t        start_time_;
+  std::time_t start_time_;
 
   /// Prefix to use for log files.
-  std::string        log_prefix_;
+  std::string log_prefix_;
 
   /// Directory name used for log files.
-  std::string        log_directory_;
+  std::string log_directory_;
 
-  /// Flag to indicate whether the program is a test 
-  bool               unit_test_;
+  /// Flag to indicate whether the program is a test
+  bool unit_test_;
 };
+}  // namespace common
+}  // namespace heron
 
-}} // namespace
-
-#endif // execmeta.h
+#endif  // execmeta.h

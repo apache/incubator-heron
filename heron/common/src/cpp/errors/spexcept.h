@@ -17,22 +17,22 @@
 #if !defined(__SP_EXCEPTION_H)
 #define __SP_EXCEPTION_H
 
+#include <string>
 #include "basics/sptypes.h"
 #include "errors/sperror.h"
 
-namespace heron { namespace error {
+namespace heron {
+namespace error {
 
 /**
  * Abstract base class for any type of exception in Stream processing
  */
 class Exception : public std::exception {
-public:
+ public:
+  Exception() {}
 
-  Exception() { } ;
-
-  virtual ~Exception() throw() { } ;
-
-} ;
+  virtual ~Exception() throw() {}
+};
 
 /**
  * Abstract base class for an exception that should kill the application.
@@ -46,11 +46,10 @@ public:
  *
  */
 class Fatal_Exception : public Exception {
-public:
+ public:
+  Fatal_Exception() {}
 
-   Fatal_Exception() { };
-
-   virtual ~Fatal_Exception() throw () { };
+  virtual ~Fatal_Exception() throw() {}
 };
 
 /**
@@ -62,11 +61,10 @@ public:
  *
  */
 class Exception_Backtrace : public Exception {
-public:
+ public:
+  Exception_Backtrace() {}
 
-  Exception_Backtrace() { } ;
-
-  virtual ~Exception_Backtrace() throw() { };
+  virtual ~Exception_Backtrace() throw() {}
 
   //! Print the trace of this exception to an ostream
   virtual void print_trace(std::ostream& to) const = 0;
@@ -78,19 +76,17 @@ public:
  *
  * The backtrace will be generated to the spot where the exception was thrown.
  */
-class Exception_Auto_Backtrace: public Exception_Backtrace {
-public:
+class Exception_Auto_Backtrace : public Exception_Backtrace {
+ public:
+  Exception_Auto_Backtrace();
 
-  Exception_Auto_Backtrace() ;
-
-  virtual ~Exception_Auto_Backtrace() throw () { };
+  virtual ~Exception_Auto_Backtrace() throw() {}
 
   //! Print the trace of this exception to an ostream
   virtual void print_trace(std::ostream& to) const;
 
-private:
-
-  const static int MAX_BT_FRAMES_ = 200;    //! Max number of stack frames
+ private:
+  static const int MAX_BT_FRAMES_ = 200;  //! Max number of stack frames
 };
 
 /**
@@ -98,29 +94,26 @@ private:
  * for handling errors up in the function call chain.
  */
 class Error_Exception : public Exception_Auto_Backtrace {
-public:
-
+ public:
   //! Create a new error exception with the given error
-  Error_Exception(const sp_uint32 _errno)
-  {
-    errno_ = _errno ;
+  explicit Error_Exception(const sp_uint32 _errno) {
+    errno_ = _errno;
     errstr_ = Error::get_error_msg(errno_);
   }
 
-  virtual ~Error_Exception() throw () { };
+  virtual ~Error_Exception() throw() {}
 
   //! Get the error message corresponding to the error
-  virtual const char* what() const throw () ;
+  virtual const char* what() const throw();
 
   //! Get the errno for this exception
   sp_uint32 get_errno() const { return errno_; }
 
-private:
-
-  sp_uint32        errno_;
-  std::string      errstr_;
+ private:
+  sp_uint32 errno_;
+  std::string errstr_;
 };
-
-}} // namespace
+}  // namespace error
+}  // namespace heron
 
 #endif /* end of header file */

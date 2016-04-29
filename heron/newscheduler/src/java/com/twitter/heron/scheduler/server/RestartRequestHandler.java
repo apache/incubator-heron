@@ -38,7 +38,7 @@ public class RestartRequestHandler implements HttpHandler {
     // read the http request payload
     byte[] requestBody = HttpUtils.readHttpRequestBody(exchange);
 
-    // prepare the request 
+    // prepare the request
     Scheduler.RestartTopologyRequest restartTopologyRequest =
         Scheduler.RestartTopologyRequest.newBuilder()
             .mergeFrom(requestBody)
@@ -53,7 +53,7 @@ public class RestartRequestHandler implements HttpHandler {
             .setStatus(NetworkUtils.getHeronStatus(isRestartSuccessfully))
             .build();
 
-    // send the response back 
+    // send the response back
     HttpUtils.sendHttpResponse(exchange, response.toByteArray());
   }
 }

@@ -19,6 +19,7 @@ import java.util.Map;
 
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -26,9 +27,6 @@ import org.junit.Test;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.localmode.grouping.Grouping;
 import com.twitter.heron.proto.system.PhysicalPlans;
-
-import junit.framework.Assert;
-
 
 /**
  * StreamConsumers Tester.
@@ -62,8 +60,9 @@ public class StreamConsumersTest {
    */
   @Test
   public void testPopulateStreamConsumers() throws Exception {
-    Map<TopologyAPI.StreamId, StreamConsumers> map = com.twitter.heron.localmode.utils.StreamConsumers.populateStreamConsumers(
-        topology, PhysicalPlanUtil.getComponentToTaskIds(plan));
+    Map<TopologyAPI.StreamId, StreamConsumers> map =
+        com.twitter.heron.localmode.utils.StreamConsumers.populateStreamConsumers(
+            topology, PhysicalPlanUtil.getComponentToTaskIds(plan));
     Assert.assertEquals(1, map.size());
 
     for (Map.Entry<TopologyAPI.StreamId, StreamConsumers> entry : map.entrySet()) {
@@ -85,4 +84,4 @@ public class StreamConsumersTest {
       Assert.assertTrue(boltTasksId.contains(targetId));
     }
   }
-} 
+}

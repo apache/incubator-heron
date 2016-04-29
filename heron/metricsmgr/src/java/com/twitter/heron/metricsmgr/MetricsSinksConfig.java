@@ -31,7 +31,8 @@ public class MetricsSinksConfig {
   public static final String CONFIG_KEY_SINK_RESTART_ATTEMPTS = "sink-restart-attempts";
   public static final int DEFAULT_SINK_RESTART_ATTEMPTS = 0;
 
-  private final Map<String, Map<String, Object>> sinksConfigs = new HashMap<String, Map<String, Object>>();
+  private final Map<String, Map<String, Object>> sinksConfigs =
+      new HashMap<String, Map<String, Object>>();
 
   public MetricsSinksConfig(String filename) throws FileNotFoundException {
     FileInputStream fin = new FileInputStream(new File(filename));

@@ -19,7 +19,11 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.spi.common.Resource;
 
-public class LocalDefaults {
+public final class LocalDefaults {
+  private LocalDefaults() {
+
+  }
+
   private static final Logger LOG = Logger.getLogger(LocalDefaults.class.getName());
 
   // holds the mapping between the config keys and their default values
@@ -32,8 +36,7 @@ public class LocalDefaults {
           "com.twitter.heron.scheduler.local.LocalDefaults",
           LocalConstants.DEFAULTS_YAML);
     } catch (ClassNotFoundException e) {
-      LOG.severe("Unable to load the Defaults class " + e);
-      System.exit(1);
+      throw new RuntimeException("Failed to load the Defaults class ", e);
     }
   }
 

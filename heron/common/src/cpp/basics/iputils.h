@@ -16,7 +16,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Utility functions for IPaddress 
+// Utility functions for IPaddress
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -24,39 +24,30 @@
 #define HERON_IP_UTILS_H_
 
 #include <set>
+#include <string>
 #include "basics/sptypes.h"
 
-typedef std::set<std::string>     IPAddress_Set;
+typedef std::set<std::string> IPAddress_Set;
 
-class IpUtils
-{
+class IpUtils {
  public:
-
   // get the ip address and host name
-  static sp_int32 getIPAddressHost(IPAddress_Set& aset) ;
+  static sp_int32 getIPAddressHost(IPAddress_Set& aset);
 
   // get the hostname
   static std::string getHostName();
 
   // get the ip v4 address of the host
-  static sp_int32 getIPAddress(IPAddress_Set& aset) ;
+  static sp_int32 getIPAddress(IPAddress_Set& aset);
 
   // get the ip v6 address of the host
-  static sp_int32 getIPV6Address(IPAddress_Set& aset) ;
+  static sp_int32 getIPV6Address(IPAddress_Set& aset);
 
   // check the ip address
-  static bool checkIPAddress(
-    const std::string&      ip_address, 
-    const IPAddress_Set&    aset
-  );
+  static bool checkIPAddress(const std::string& ip_address, const IPAddress_Set& aset);
 
   // get the ip address associated with host
-  static sp_int32 getAddressInfo(
-    struct sockaddr_in&     t, 
-    const char*             host, 
-    int                     family, 
-    int                     type
-  );
+  static sp_int32 getAddressInfo(struct sockaddr_in& t, const char* host, int family, int type);
 };
 
-#endif // HERON_IP_UTILS_H_
+#endif  // HERON_IP_UTILS_H_

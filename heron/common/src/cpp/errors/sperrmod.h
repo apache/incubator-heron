@@ -19,15 +19,16 @@
 
 #include "basics/sptypes.h"
 
-namespace heron { namespace error {
+namespace heron {
+namespace error {
 
 /**
  * error_info_t is the structure used for generating the error headers from an
  * error description file using tools/errors.pl.
  */
 struct error_info_t {
-  sp_uint32         errnum_;      //! error number provided by the module author
-  const char*       errstr_;      //! error description by the module author
+  sp_uint32 errnum_;    //! error number provided by the module author
+  const char* errstr_;  //! error description by the module author
 };
 
 /**
@@ -35,10 +36,10 @@ struct error_info_t {
  * errmsg
  */
 struct errno_impl_t {
-  sp_uint32        errnum_;       //! for storing the last occurred error
-  const char*      errstr_;       //! temporary storage for the error msg
+  sp_uint32 errnum_;    //! for storing the last occurred error
+  const char* errstr_;  //! temporary storage for the error msg
 };
-
-}} // namespace
+}  // namespace error
+}  // namespace heron
 
 #endif /* end of header file */

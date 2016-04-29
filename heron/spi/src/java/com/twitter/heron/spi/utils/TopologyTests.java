@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.twitter.heron.api.Config;
-import com.twitter.heron.api.HeronSubmitter;
 import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.api.bolt.BaseBasicBolt;
 import com.twitter.heron.api.bolt.BasicOutputCollector;
@@ -32,7 +31,11 @@ import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
 
-public class TopologyTests {
+public final class TopologyTests {
+
+  private TopologyTests() {
+  }
+
   /**
    * Create Topology proto object using HeronSubmitter API.
    *
@@ -42,13 +45,16 @@ public class TopologyTests {
    * @param connections connect default stream from value to key.
    * @return topology proto.
    */
-  public static TopologyAPI.Topology createTopologyWithConnection(String topologyName,
-                                                                  Config heronConfig,
-                                                                  Map<String, Integer> spouts,
-                                                                  Map<String, Integer> bolts,
-                                                                  Map<String, String> connections) {
+  public static TopologyAPI.Topology createTopologyWithConnection(
+      String topologyName,
+      Config heronConfig,
+      Map<String, Integer> spouts,
+      Map<String, Integer> bolts,
+      Map<String, String> connections) {
     TopologyBuilder builder = new TopologyBuilder();
     BaseRichSpout baseSpout = new BaseRichSpout() {
+      private static final long serialVersionUID = -719523487475322625L;
+
       public void declareOutputFields(OutputFieldsDeclarer declarer) {
         declarer.declare(new Fields("field1"));
       }
@@ -60,6 +66,8 @@ public class TopologyTests {
       }
     };
     BaseBasicBolt basicBolt = new BaseBasicBolt() {
+      private static final long serialVersionUID = 2544765902130713628L;
+
       public void execute(Tuple input, BasicOutputCollector collector) {
       }
 
@@ -79,10 +87,6 @@ public class TopologyTests {
     }
 
     HeronTopology heronTopology = builder.createTopology();
-    try {
-      HeronSubmitter.submitTopology(topologyName, heronConfig, heronTopology);
-    } catch (Exception e) {
-    }
 
     return heronTopology.
         setName(topologyName).

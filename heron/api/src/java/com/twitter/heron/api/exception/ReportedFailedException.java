@@ -15,6 +15,8 @@
 package com.twitter.heron.api.exception;
 
 public class ReportedFailedException extends FailedException {
+  private static final long serialVersionUID = 4669648860978454563L;
+
   public ReportedFailedException() {
     super();
   }

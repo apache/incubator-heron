@@ -46,28 +46,37 @@ public class NullStateManager implements IStateManager {
   }
 
   @Override
-  public ListenableFuture<Boolean> setTMasterLocation(TopologyMaster.TMasterLocation location, String topologyName) {
+  public ListenableFuture<Boolean> setTMasterLocation(
+      TopologyMaster.TMasterLocation location,
+      String topologyName) {
     return nullFuture;
   }
 
   @Override
-  public ListenableFuture<Boolean> setExecutionState(ExecutionEnvironment.ExecutionState executionState, String
-      topologyName) {
+  public ListenableFuture<Boolean> setExecutionState(
+      ExecutionEnvironment.ExecutionState executionState,
+      String topologyName) {
     return nullFuture;
   }
 
   @Override
-  public ListenableFuture<Boolean> setTopology(TopologyAPI.Topology topology, String topologyName) {
+  public ListenableFuture<Boolean> setTopology(
+      TopologyAPI.Topology topology,
+      String topologyName) {
     return nullFuture;
   }
 
   @Override
-  public ListenableFuture<Boolean> setPhysicalPlan(PhysicalPlans.PhysicalPlan physicalPlan, String topologyName) {
+  public ListenableFuture<Boolean> setPhysicalPlan(
+      PhysicalPlans.PhysicalPlan physicalPlan,
+      String topologyName) {
     return nullFuture;
   }
 
   @Override
-  public ListenableFuture<Boolean> setSchedulerLocation(Scheduler.SchedulerLocation location, String topologyName) {
+  public ListenableFuture<Boolean> setSchedulerLocation(
+      Scheduler.SchedulerLocation location,
+      String topologyName) {
     return nullFuture;
   }
 
@@ -97,31 +106,37 @@ public class NullStateManager implements IStateManager {
   }
 
   @Override
-  public ListenableFuture<TopologyMaster.TMasterLocation> getTMasterLocation(WatchCallback watcher, String
-      topologyName) {
-
+  public ListenableFuture<TopologyMaster.TMasterLocation> getTMasterLocation(
+      WatchCallback watcher,
+      String topologyName) {
     return nullFuture;
   }
 
   @Override
-  public ListenableFuture<Scheduler.SchedulerLocation> getSchedulerLocation(WatchCallback watcher, String
-      topologyName) {
+  public ListenableFuture<Scheduler.SchedulerLocation> getSchedulerLocation(
+      WatchCallback watcher,
+      String topologyName) {
     return nullFuture;
   }
 
   @Override
-  public ListenableFuture<TopologyAPI.Topology> getTopology(WatchCallback watcher, String topologyName) {
+  public ListenableFuture<TopologyAPI.Topology> getTopology(
+      WatchCallback watcher,
+      String topologyName) {
     return nullFuture;
   }
 
   @Override
-  public ListenableFuture<ExecutionEnvironment.ExecutionState> getExecutionState(WatchCallback watcher, String
-      topologyName) {
+  public ListenableFuture<ExecutionEnvironment.ExecutionState> getExecutionState(
+      WatchCallback watcher,
+      String topologyName) {
     return nullFuture;
   }
 
   @Override
-  public ListenableFuture<PhysicalPlans.PhysicalPlan> getPhysicalPlan(WatchCallback watcher, String topologyName) {
+  public ListenableFuture<PhysicalPlans.PhysicalPlan> getPhysicalPlan(
+      WatchCallback watcher,
+      String topologyName) {
     return nullFuture;
   }
 }

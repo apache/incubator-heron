@@ -14,7 +14,7 @@
 
 package com.twitter.heron.spi.common;
 
-public class Constants {
+public final class Constants {
 
   // name of the resource file that holds the config keys
   public static final String KEYS_YAML = "com/twitter/heron/spi/common/keys.yaml";
@@ -38,4 +38,7 @@ public class Constants {
 
   public static final String ZK_STATE_MANAGER_CLASS =
       "com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager";
+
+  private Constants() {
+  }
 }

@@ -27,10 +27,8 @@
 
 struct rusage;
 
-class ProcessUtils
-{
+class ProcessUtils {
  public:
-
   // get the PID of the process
   static pid_t getPid();
 

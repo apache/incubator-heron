@@ -14,7 +14,7 @@
 
 package com.twitter.heron.spi.util;
 
-public class ReflectUtils {
+public final class ReflectUtils {
 
   private ReflectUtils() {
   }

@@ -19,12 +19,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.proto.system.HeronTuples;
-
-import junit.framework.Assert;
 
 /**
  * AllGrouping Tester.
@@ -44,20 +43,20 @@ public class AllGroupingTest {
    */
   @Test
   public void testGetListToSend() throws Exception {
-    List<Integer> task_ids = new LinkedList<>();
+    List<Integer> taskIds = new LinkedList<>();
     for (int i = 0; i < 100; ++i) {
-      task_ids.add(i);
+      taskIds.add(i);
     }
 
-    AllGrouping g = new AllGrouping(task_ids);
+    AllGrouping g = new AllGrouping(taskIds);
     for (int i = 0; i < 1000; ++i) {
       HeronTuples.HeronDataTuple dummy = HeronTuples.HeronDataTuple.getDefaultInstance();
       List<Integer> dest = g.getListToSend(dummy);
-      Assert.assertEquals(dest.size(), task_ids.size());
+      Assert.assertEquals(dest.size(), taskIds.size());
       Collections.sort(dest);
-      for (int j = 0; j < task_ids.size(); ++j) {
-        Assert.assertEquals(task_ids.get(j), dest.get(j));
+      for (int j = 0; j < taskIds.size(); ++j) {
+        Assert.assertEquals(taskIds.get(j), dest.get(j));
       }
     }
   }
-} 
+}

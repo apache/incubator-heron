@@ -1,3 +1,19 @@
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 ////////////////////////////////////////////////////////////////
 //
 // topology_config_vars.h
@@ -11,12 +27,11 @@
 #define HERON_INTERNALS_COFNIG_VARS_H_
 #include "basics/basics.h"
 
-namespace heron { namespace config {
+namespace heron {
+namespace config {
 
-class HeronInternalsConfigVars
-{
+class HeronInternalsConfigVars {
  public:
-
   /**
   * HERON_ configs are general configurations over all componenets
   **/
@@ -76,7 +91,6 @@ class HeronInternalsConfigVars
 
   // The maximum packet size in MB of metrics manager's network options
   static const sp_string HERON_METRICSMGR_NETWORK_OPTIONS_MAXIMUM_PACKET_MB;
-
 
   /**
   * HERON_TMASTER_* configs are for the metrics manager
@@ -147,7 +161,8 @@ class HeronInternalsConfigVars
   // Maximum batch size in MB to write by stream manager to socket
   static const sp_string HERON_STREAMMGR_CONNECTION_WRITE_BATCH_SIZE_MB;
 
-  // Number of times we should wait to see a buffer full while enqueueing data before declaring start of back pressure
+  // Number of times we should wait to see a buffer full while enqueueing data before declaring
+  // start of back pressure
   static const sp_string HERON_STREAMMGR_NETWORK_BACKPRESSURE_THRESHOLD;
 
   // High water mark on the num in MB that can be left outstanding on a connection
@@ -156,7 +171,7 @@ class HeronInternalsConfigVars
   // Low water mark on the num in MB that can be left outstanding on a connection
   static const sp_string HERON_STREAMMGR_NETWORK_BACKPRESSURE_LOWWATERMARK_MB;
 };
-
-}} // end namespace
+}  // namespace config
+}  // namespace heron
 
 #endif

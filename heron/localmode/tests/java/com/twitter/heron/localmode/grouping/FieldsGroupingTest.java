@@ -23,13 +23,12 @@ import java.util.Set;
 import com.google.protobuf.ByteString;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.HeronTuples;
-
-import junit.framework.Assert;
 
 public class FieldsGroupingTest {
 
@@ -47,11 +46,11 @@ public class FieldsGroupingTest {
    */
   @Test
   public void testSameTupleToSameTask() throws Exception {
-    List<Integer> task_ids = new LinkedList<>();
-    task_ids.add(2);
-    task_ids.add(4);
-    task_ids.add(6);
-    task_ids.add(8);
+    List<Integer> taskIds = new LinkedList<>();
+    taskIds.add(2);
+    taskIds.add(4);
+    taskIds.add(6);
+    taskIds.add(8);
 
     TopologyAPI.StreamSchema.KeyType kt =
         TopologyAPI.StreamSchema.KeyType.newBuilder().
@@ -69,7 +68,7 @@ public class FieldsGroupingTest {
             setId("id"))
         .build();
 
-    FieldsGrouping g = new FieldsGrouping(is, schema, task_ids);
+    FieldsGrouping g = new FieldsGrouping(is, schema, taskIds);
     HeronTuples.HeronDataTuple tuple =
         HeronTuples.HeronDataTuple.newBuilder().
             setKey(-1).
@@ -85,7 +84,7 @@ public class FieldsGroupingTest {
     }
 
     Assert.assertEquals(1, allDests.size());
-    Assert.assertTrue(task_ids.contains(new ArrayList<>(allDests).get(0)));
+    Assert.assertTrue(taskIds.contains(new ArrayList<>(allDests).get(0)));
   }
 
   /**
@@ -93,9 +92,9 @@ public class FieldsGroupingTest {
    */
   @Test
   public void testHashOnlyRelevantFields() throws Exception {
-    List<Integer> task_ids = new LinkedList<>();
+    List<Integer> taskIds = new LinkedList<>();
     for (int i = 0; i < 100; i++) {
-      task_ids.add(i);
+      taskIds.add(i);
     }
 
     TopologyAPI.StreamSchema.KeyType kt =
@@ -131,7 +130,7 @@ public class FieldsGroupingTest {
             addKeys(kt2).
             build();
 
-    FieldsGrouping g = new FieldsGrouping(is, schema, task_ids);
+    FieldsGrouping g = new FieldsGrouping(is, schema, taskIds);
     Set<Integer> allDests = new HashSet<>();
     for (int i = 0; i < 1000; i++) {
       HeronTuples.HeronDataTuple tuple =
@@ -161,7 +160,7 @@ public class FieldsGroupingTest {
       Assert.assertEquals(1, dests.size());
       allDests.add(dests.get(0));
     }
-    Assert.assertEquals(task_ids.size(), allDests.size());
+    Assert.assertEquals(taskIds.size(), allDests.size());
 
   }
 }

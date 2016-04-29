@@ -37,20 +37,25 @@ import com.twitter.heron.common.basics.SingletonRegistry;
  */
 @Ignore
 public class TestBolt extends BaseRichBolt {
-  OutputCollector outputCollector;
-  int tupleExecuted = 0;
+  private static final long serialVersionUID = -5160420613503624743L;
+  private OutputCollector outputCollector;
+  private int tupleExecuted = 0;
 
   @Override
-  public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
-    this.outputCollector = outputCollector;
+  public void prepare(Map map, TopologyContext topologyContext, OutputCollector collector) {
+    this.outputCollector = collector;
   }
 
   @Override
   public void execute(Tuple tuple) {
-    AtomicInteger ackCount = (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(Constants.ACK_COUNT);
-    AtomicInteger failCount = (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(Constants.FAIL_COUNT);
-    AtomicInteger tupleExecutedCount = (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton("execute-count");
-    StringBuilder receivedStrings = (StringBuilder) SingletonRegistry.INSTANCE.getSingleton("received-string-list");
+    AtomicInteger ackCount =
+        (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(Constants.ACK_COUNT);
+    AtomicInteger failCount =
+        (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton(Constants.FAIL_COUNT);
+    AtomicInteger tupleExecutedCount =
+        (AtomicInteger) SingletonRegistry.INSTANCE.getSingleton("execute-count");
+    StringBuilder receivedStrings =
+        (StringBuilder) SingletonRegistry.INSTANCE.getSingleton("received-string-list");
 
     if (receivedStrings != null) {
       receivedStrings.append(tuple.getString(0));

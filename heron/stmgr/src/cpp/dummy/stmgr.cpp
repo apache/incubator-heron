@@ -1,3 +1,19 @@
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <iostream>
 #include <map>
 
@@ -11,25 +27,19 @@
 #include "state/heron-statemgr.h"
 #include "dummy/stmgr.h"
 
-namespace heron { namespace stmgr {
+namespace heron {
+namespace stmgr {
 
-sp_int64 lrand()
-{
+sp_int64 lrand() {
   sp_int64 retval = static_cast<sp_int64>(rand());
   return retval << (sizeof(int) * 8) | rand();
 }
 
-StMgr::StMgr(EventLoop* eventLoop,
-             const NetworkOptions& _options,
-             const sp_string& _topology_name,
-             const sp_string& _stmgr_id,
-             const std::vector<sp_string>& _spout_instances,
-             const std::vector<sp_string>& _bolt_instances,
-             const sp_string& _zkhostport,
+StMgr::StMgr(EventLoop* eventLoop, const NetworkOptions& _options, const sp_string& _topology_name,
+             const sp_string& _stmgr_id, const std::vector<sp_string>& _spout_instances,
+             const std::vector<sp_string>& _bolt_instances, const sp_string& _zkhostport,
              const sp_string& _zkroot)
-  : Server(eventLoop, _options), stmgr_id_(_stmgr_id),
-    spout_index_(0), bolt_index_(0)
-{
+    : Server(eventLoop, _options), stmgr_id_(_stmgr_id), spout_index_(0), bolt_index_(0) {
   stmgr_port_ = _options.get_port();
   state_mgr_ = heron::common::HeronStateMgr::MakeStateMgr(_zkhostport, _zkroot, eventLoop);
   pplan_ = NULL;
@@ -41,14 +51,11 @@ StMgr::StMgr(EventLoop* eventLoop,
   for (size_t i = 0; i < _bolt_instances.size(); ++i) {
     bolt_instances_.insert(_bolt_instances[i]);
   }
-  state_mgr_->GetTopology(_topology_name, topo, CreateCallback(this,
-                          &StMgr::OnTopologyFetch, topo));
+  state_mgr_->GetTopology(_topology_name, topo,
+                          CreateCallback(this, &StMgr::OnTopologyFetch, topo));
 }
 
-void
-StMgr::OnTopologyFetch(proto::api::Topology* _topology,
-                       proto::system::StatusCode _status)
-{
+void StMgr::OnTopologyFetch(proto::api::Topology* _topology, proto::system::StatusCode _status) {
   CHECK(_status == proto::system::OK);
   pplan_ = GeneratePhysicalPlan(_topology);
   delete _topology;
@@ -59,9 +66,8 @@ StMgr::OnTopologyFetch(proto::api::Topology* _topology,
   Start();
 }
 
-heron::proto::system::PhysicalPlan*
-StMgr::GeneratePhysicalPlan(heron::proto::api::Topology* _topology)
-{
+heron::proto::system::PhysicalPlan* StMgr::GeneratePhysicalPlan(
+    heron::proto::api::Topology* _topology) {
   heron::proto::system::PhysicalPlan* pplan = new heron::proto::system::PhysicalPlan();
   // Copy the topology verbatim
   pplan->mutable_topology()->CopyFrom(*_topology);
@@ -89,8 +95,8 @@ StMgr::GeneratePhysicalPlan(heron::proto::api::Topology* _topology)
 
   instance_index = 0;
   // Loop over bolts
-  for (std::set<sp_string>::iterator iter = bolt_instances_.begin();
-       iter != bolt_instances_.end(); ++iter) {
+  for (std::set<sp_string>::iterator iter = bolt_instances_.begin(); iter != bolt_instances_.end();
+       ++iter) {
     heron::proto::system::Instance* wrkr = pplan->add_instances();
     wrkr->set_instance_id(*iter);
     wrkr->set_stmgr_id(stmgr_id_);
@@ -103,30 +109,26 @@ StMgr::GeneratePhysicalPlan(heron::proto::api::Topology* _topology)
   return pplan;
 }
 
-StMgr::~StMgr()
-{
+StMgr::~StMgr() {
   delete pplan_;
   delete state_mgr_;
 }
 
-void StMgr::HandleNewConnection(Connection*)
-{
+void StMgr::HandleNewConnection(Connection*) {
   // There is nothing to be done here. Instead we wait
   // for the register
 }
 
-void StMgr::HandleConnectionClose(Connection* _conn,
-                                  NetworkErrorCode)
-{
-  for(std::vector<Connection*>::iterator iter = spout_connections_.begin();
-      iter != spout_connections_.end(); ++iter) {
+void StMgr::HandleConnectionClose(Connection* _conn, NetworkErrorCode) {
+  for (std::vector<Connection*>::iterator iter = spout_connections_.begin();
+       iter != spout_connections_.end(); ++iter) {
     if (*iter == _conn) {
       spout_connections_.erase(iter);
       return;
     }
   }
-  for(std::vector<Connection*>::iterator iter = bolt_connections_.begin();
-      iter != bolt_connections_.end(); ++iter) {
+  for (std::vector<Connection*>::iterator iter = bolt_connections_.begin();
+       iter != bolt_connections_.end(); ++iter) {
     if (*iter == _conn) {
       bolt_connections_.erase(iter);
       return;
@@ -134,10 +136,8 @@ void StMgr::HandleConnectionClose(Connection* _conn,
   }
 }
 
-void StMgr::HandleRegisterInstanceRequest(REQID _reqid,
-                                        Connection* _conn,
-                                        proto::stmgr::RegisterInstanceRequest* _request)
-{
+void StMgr::HandleRegisterInstanceRequest(REQID _reqid, Connection* _conn,
+                                          proto::stmgr::RegisterInstanceRequest* _request) {
   if (spout_instances_.find(_request->topology_id()) != spout_instances_.end()) {
     spout_connections_.push_back(_conn);
   } else if (bolt_instances_.find(_request->topology_id()) != bolt_instances_.end()) {
@@ -154,9 +154,7 @@ void StMgr::HandleRegisterInstanceRequest(REQID _reqid,
   delete _request;
 }
 
-void StMgr::HandleTupleSetMessage(Connection* _conn,
-                                  proto::stmgr::TupleMessage* _message)
-{
+void StMgr::HandleTupleSetMessage(Connection* _conn, proto::stmgr::TupleMessage* _message) {
   bool is_spout = false;
   bool is_bolt = false;
   for (size_t i = 0; i < spout_connections_.size(); ++i) {
@@ -191,8 +189,7 @@ void StMgr::HandleTupleSetMessage(Connection* _conn,
   delete _message;
 }
 
-void StMgr::SendSpoutMessageToBolt(proto::stmgr::TupleMessage* _message)
-{
+void StMgr::SendSpoutMessageToBolt(proto::stmgr::TupleMessage* _message) {
   std::map<Connection*, proto::stmgr::TupleMessage*> mymap;
   bolt_index_ = (bolt_index_ + 1) % bolt_connections_.size();
   Connection* to_be_sent_on = bolt_connections_[bolt_index_];
@@ -219,5 +216,5 @@ void StMgr::SendSpoutMessageToBolt(proto::stmgr::TupleMessage* _message)
     delete iter->second;
   }
 }
-
-}} // end of namespace
+}
+}  // end of namespace

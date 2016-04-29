@@ -21,10 +21,10 @@ action_listener(
 extra_action(
     name = "checkstyle_java",
     tools = [
-        "//tools/java/src/com/twitter/bazel/checkstyle",
+        "//tools/java/src/com/twitter/bazel/checkstyle:checkstyle_java",
     ],
     requires_action_output = True,
-    cmd = "$(location //tools/java/src/com/twitter/bazel/checkstyle) " +
+    cmd = "$(location //tools/java/src/com/twitter/bazel/checkstyle:checkstyle_java) " +
           "--extra_action_file $(EXTRA_ACTION_FILE) " +
           "--checkstyle_config_file tools/java/src/com/twitter/bazel/checkstyle/coding_style.xml"
 )

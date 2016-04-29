@@ -27,11 +27,11 @@ import java.io.Serializable;
  */
 public enum GlobalMetrics implements Serializable {
   INSTANCE;
-  public static String ROOT_NAME = "__auto__";
+  public static final String ROOT_NAME = "__auto__";
   private MultiCountMetric metricsContainer;
   private boolean registered;
 
-  private GlobalMetrics() {
+  GlobalMetrics() {
     metricsContainer = new MultiCountMetric();
     registered = false;
   }
@@ -46,8 +46,8 @@ public enum GlobalMetrics implements Serializable {
   /**
    * Not thread safe 'incrementing by' of counterName. Counter doesn't exist unless incremented once
    */
-  public static void incrBy(String counterName, int N) {
-    INSTANCE.metricsContainer.scope(counterName).incrBy(N);
+  public static void incrBy(String counterName, int incrValue) {
+    INSTANCE.metricsContainer.scope(counterName).incrBy(incrValue);
   }
 
   /**
@@ -64,10 +64,10 @@ public enum GlobalMetrics implements Serializable {
   /**
    * Thread safe created increment of counterName. (Slow)
    */
-  public static void safeIncrBy(String counterName, int N) {
+  public static void safeIncrBy(String counterName, int incrValue) {
     synchronized (INSTANCE) {
       if (INSTANCE.registered) {
-        INSTANCE.metricsContainer.scope(counterName);
+        INSTANCE.metricsContainer.scope(counterName).incrBy(incrValue);
       }
     }
   }

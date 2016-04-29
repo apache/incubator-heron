@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -27,14 +28,12 @@ import org.junit.Test;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.HeronTuples;
 
-import junit.framework.Assert;
-
 /**
  * TupleCache Tester.
  */
 public class TupleCacheTest {
-  public static int N = 10;
-  public static int REPEAT = 10;
+  public static final int N = 10;
+  public static final int REPEAT = 10;
 
   private static List<Integer> destTaskIds;
   private static HeronTuples.HeronDataTuple dataTuple;
@@ -180,4 +179,4 @@ public class TupleCacheTest {
       Assert.assertEquals(3, tuples.size());
     }
   }
-} 
+}

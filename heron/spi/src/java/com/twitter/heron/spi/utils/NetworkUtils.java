@@ -23,7 +23,7 @@ import com.twitter.heron.proto.system.Common;
 /**
  * Utilities related to network.
  */
-public class NetworkUtils {
+public final class NetworkUtils {
   private static final Logger LOG = Logger.getLogger(NetworkUtils.class.getName());
 
   private NetworkUtils() {
@@ -36,9 +36,7 @@ public class NetworkUtils {
    */
   public static int getFreePort() {
     try (ServerSocket socket = new ServerSocket(0)) {
-      int port = socket.getLocalPort();
-      socket.close();
-      return port;
+      return socket.getLocalPort();
     } catch (IOException ioe) {
       return -1;
     }

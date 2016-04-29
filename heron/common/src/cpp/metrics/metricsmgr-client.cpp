@@ -1,65 +1,68 @@
-#include <iostream>
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "metrics/metricsmgr-client.h"
 #include <stdio.h>
-#include <string.h>
-
+#include <iostream>
+#include <string>
 #include "proto/messages.h"
-
 #include "basics/basics.h"
 #include "errors/errors.h"
 #include "threads/threads.h"
 #include "network/network.h"
 
-#include "metrics/metricsmgr-client.h"
+namespace heron {
+namespace common {
 
-namespace heron { namespace common {
-
-MetricsMgrClient::MetricsMgrClient(const sp_string& _hostname,
-                                   sp_int32 _port,
-                                   const sp_string& _component_id,
-                                   const sp_string& _task_id,
-                                   EventLoop* eventLoop,
-                                   const NetworkOptions& _options)
-  : Client(eventLoop, _options),
-    hostname_(_hostname), port_(_port),
-    component_id_(_component_id), task_id_(_task_id),
-    tmaster_location_(NULL),
-    registered_(false)
-{
+MetricsMgrClient::MetricsMgrClient(const sp_string& _hostname, sp_int32 _port,
+                                   const sp_string& _component_id, const sp_string& _task_id,
+                                   EventLoop* eventLoop, const NetworkOptions& _options)
+    : Client(eventLoop, _options),
+      hostname_(_hostname),
+      port_(_port),
+      component_id_(_component_id),
+      task_id_(_task_id),
+      tmaster_location_(NULL),
+      registered_(false) {
   InstallResponseHandler(new proto::system::MetricPublisherRegisterRequest(),
                          &MetricsMgrClient::HandleRegisterResponse);
   Start();
 }
 
-MetricsMgrClient::~MetricsMgrClient()
-{
-  delete tmaster_location_;
-}
+MetricsMgrClient::~MetricsMgrClient() { delete tmaster_location_; }
 
-void MetricsMgrClient::HandleConnect(NetworkErrorCode _status)
-{
+void MetricsMgrClient::HandleConnect(NetworkErrorCode _status) {
   if (_status == OK) {
     LOG(INFO) << "Connected to metrics manager" << std::endl;
     SendRegisterRequest();
   } else {
     LOG(ERROR) << "Could not connect to metrics mgr. Will Retry in 1 second\n";
-    AddTimer([this] () { this->ReConnect(); }, 1000000);
+    AddTimer([this]() { this->ReConnect(); }, 1000000);
   }
 }
 
-void MetricsMgrClient::HandleClose(NetworkErrorCode)
-{
+void MetricsMgrClient::HandleClose(NetworkErrorCode) {
   LOG(ERROR) << "Metrics Mgr closed connection on us. Will Retry in 1 second\n";
-  AddTimer([this] () { this->ReConnect(); }, 1000000);
+  AddTimer([this]() { this->ReConnect(); }, 1000000);
   registered_ = false;
 }
 
-void MetricsMgrClient::ReConnect()
-{
-  Start();
-}
+void MetricsMgrClient::ReConnect() { Start(); }
 
-void MetricsMgrClient::SendRegisterRequest()
-{
+void MetricsMgrClient::SendRegisterRequest() {
   proto::system::MetricPublisherRegisterRequest* request;
   request = new proto::system::MetricPublisherRegisterRequest();
 
@@ -73,10 +76,8 @@ void MetricsMgrClient::SendRegisterRequest()
   SendRequest(request, NULL);
 }
 
-void MetricsMgrClient::HandleRegisterResponse(void*,
-             proto::system::MetricPublisherRegisterResponse* _response,
-             NetworkErrorCode _status)
-{
+void MetricsMgrClient::HandleRegisterResponse(
+    void*, proto::system::MetricPublisherRegisterResponse* _response, NetworkErrorCode _status) {
   if (_status == OK && _response->status().status() != proto::system::OK) {
     // What the heck we explicitly got a non ok response
     LOG(ERROR) << "Recieved a non-ok status from metrics mgr" << std::endl;
@@ -95,8 +96,7 @@ void MetricsMgrClient::HandleRegisterResponse(void*,
   }
 }
 
-void MetricsMgrClient::SendTMasterLocation(
-    const proto::tmaster::TMasterLocation& location) {
+void MetricsMgrClient::SendTMasterLocation(const proto::tmaster::TMasterLocation& location) {
   if (tmaster_location_) {
     delete tmaster_location_;
   }
@@ -110,17 +110,16 @@ void MetricsMgrClient::SendTMasterLocation(
   }
 }
 
-void MetricsMgrClient::SendMetrics(proto::system::MetricPublisherPublishMessage* _message)
-{
+void MetricsMgrClient::SendMetrics(proto::system::MetricPublisherPublishMessage* _message) {
   SendMessage(_message);
 }
 
 void MetricsMgrClient::InternalSendTMasterLocation() {
   CHECK(tmaster_location_);
   proto::system::TMasterLocationRefreshMessage* m =
-    new proto::system::TMasterLocationRefreshMessage();
+      new proto::system::TMasterLocationRefreshMessage();
   m->mutable_tmaster()->CopyFrom(*tmaster_location_);
   SendMessage(m);
 }
-
-}} // end namespace
+}  // namespace common
+}  // namespace heron

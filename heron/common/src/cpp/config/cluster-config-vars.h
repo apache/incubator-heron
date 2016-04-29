@@ -17,25 +17,25 @@
 ////////////////////////////////////////////////////////////////
 //
 // cluster-config-vars.h
-// 
+//
 // This is the cluster configuration parameter names
 // This is the replica of worker/SystemConfig.java
-// TODO:- Can we autogenerate both C++/Java
-// 
+// TODO(karamasamy): Can we autogenerate both C++/Java
+//
 // Essentially this file defines as the config variables cluster
 // admin can set as part of their heron installation
 ///////////////////////////////////////////////////////////////
 #ifndef CLUSTER_CONFIG_VARS_H_
 #define CLUSTER_CONFIG_VARS_H_
 
-namespace heron { namespace config {
+namespace heron {
+namespace config {
 
-class ClusterConfigVars
-{
+class ClusterConfigVars {
  public:
   static const sp_string CLUSTER_METRICS_INTERVAL;
 };
-
-}} // end namespace
+}  // namespace config
+}  // namespace heron
 
 #endif

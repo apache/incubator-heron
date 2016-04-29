@@ -54,17 +54,18 @@ public class TopologyContextImpl extends GeneralTopologyContextImpl implements T
   // List of task hooks to delegate
   private final List<ITaskHook> taskHooks;
 
+  @SuppressWarnings("unchecked")
   public TopologyContextImpl(Map<String, Object> clusterConfig,
                              TopologyAPI.Topology topology,
                              Map<Integer, String> taskToComponentMap,
-                             int _myTaskId, MetricsCollector metricsCollector) {
+                             int myTaskId, MetricsCollector metricsCollector) {
     super(clusterConfig, topology, taskToComponentMap);
     this.metricsCollector = metricsCollector;
-    this.myTaskId = _myTaskId;
-    this.taskData = new HashMap<String, Object>();
+    this.myTaskId = myTaskId;
+    this.taskData = new HashMap<>();
 
     // Init task hooks
-    this.taskHooks = new LinkedList<ITaskHook>();
+    this.taskHooks = new LinkedList<>();
     List<String> taskHooksClassNames =
         (List<String>) clusterConfig.get(Config.TOPOLOGY_AUTO_TASK_HOOKS);
 
@@ -238,7 +239,9 @@ public class TopologyContextImpl extends GeneralTopologyContextImpl implements T
     List<Integer> allTasks = getComponentTasks(getThisComponentId());
     int retVal = 0;
     for (Integer tsk : allTasks) {
-      if (tsk.intValue() < myTaskId) retVal++;
+      if (tsk.intValue() < myTaskId) {
+        retVal++;
+      }
     }
     return retVal;
   }
@@ -273,7 +276,7 @@ public class TopologyContextImpl extends GeneralTopologyContextImpl implements T
    * Register a IMetric instance.
    * Heron will then call getValueAndReset on the metric every timeBucketSizeInSecs
    * and the returned value is sent to all metrics consumers.
-	 * You must call this during IBolt::prepare or ISpout::open.
+   * You must call this during IBolt::prepare or ISpout::open.
    * @return The IMetric argument unchanged.
    */
   @Override
@@ -286,6 +289,7 @@ public class TopologyContextImpl extends GeneralTopologyContextImpl implements T
    * Convenient method for registering ReducedMetric.
    */
   @Override
+  @SuppressWarnings("rawtypes")
   public ReducedMetric registerMetric(String name, IReducer reducer, int timeBucketSizeInSecs) {
     return registerMetric(name, new ReducedMetric(reducer), timeBucketSizeInSecs);
   }
@@ -294,11 +298,12 @@ public class TopologyContextImpl extends GeneralTopologyContextImpl implements T
    * Convinience method for registering CombinedMetric.
    */
   @Override
+  @SuppressWarnings("rawtypes")
   public CombinedMetric registerMetric(String name, ICombiner combiner, int timeBucketSizeInSecs) {
     return registerMetric(name, new CombinedMetric(combiner), timeBucketSizeInSecs);
   }
 
-    /*
+  /*
     TODO:- Do we really need this?
     public void setExecutorData(String name, Object data) {
         _executorData.put(name, data);

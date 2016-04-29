@@ -27,15 +27,10 @@
 #include <vector>
 #include "basics/sptypes.h"
 
-class StrUtils
-{
+class StrUtils {
  public:
-
   //! Given a string and a delim, split it
-  static std::vector<std::string> split(
-    const std::string&            _input,
-    const std::string&            _delim
-  );
+  static std::vector<std::string> split(const std::string& _input, const std::string& _delim);
 };
 
 #endif

@@ -14,7 +14,11 @@
 
 package com.twitter.heron.common.basics;
 
-public class TypeUtils {
+public final class TypeUtils {
+
+  private TypeUtils() {
+  }
+
   public static Integer getInt(Object o) {
     if (o instanceof Long) {
       return ((Long) o).intValue();

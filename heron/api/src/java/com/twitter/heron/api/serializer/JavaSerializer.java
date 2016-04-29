@@ -41,12 +41,12 @@ public class JavaSerializer implements IPluggableSerializer {
   }
 
   @Override
-  public Object deserialize(byte[] _input) {
-    ByteArrayInputStream bis = new ByteArrayInputStream(_input);
+  public Object deserialize(byte[] input) {
+    ByteArrayInputStream bis = new ByteArrayInputStream(input);
     try {
       ObjectInputStream ois = new ObjectInputStream(bis);
       return ois.readObject();
-    } catch (Exception e) {
+    } catch (IOException | ClassNotFoundException e) {
       throw new RuntimeException(e);
     }
   }

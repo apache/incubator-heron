@@ -22,8 +22,8 @@
 // creates the various directories needed for heron usage.
 //////////////////////////////////////////////////////////////////////////////
 
+#include <string>
 #include "proto/messages.h"
-
 #include "basics/basics.h"
 #include "errors/errors.h"
 #include "threads/threads.h"
@@ -34,13 +34,11 @@ ZKClient* zkclient = NULL;
 sp_string clustername;
 sp_string zkroot;
 
-void usage()
-{
+void usage() {
   std::cout << "zk-setup <clustername> <zkserverhostportlist> <zkrootdir>" << std::endl;
 }
 
-void AllDone(sp_int32 _status)
-{
+void AllDone(sp_int32 _status) {
   if (_status == ZNODEEXISTS || _status == ZOK) {
     LOG(INFO) << "Successfully set zk" << std::endl;
     delete zkclient;
@@ -51,52 +49,47 @@ void AllDone(sp_int32 _status)
   }
 }
 
-void TMastersDone(sp_int32 _status)
-{
+void TMastersDone(sp_int32 _status) {
   if (_status == ZNODEEXISTS || _status == ZOK) {
-    zkclient->CreateNode(zkroot + "/executionstate", "Heron Cluster " + clustername,
-                         false, [] (sp_int32 status) { AllDone(status); });
+    zkclient->CreateNode(zkroot + "/executionstate", "Heron Cluster " + clustername, false,
+                         [](sp_int32 status) { AllDone(status); });
   } else {
     LOG(ERROR) << "Error creating node in zk " << _status << std::endl;
     ::exit(1);
   }
 }
 
-void PplansDone(sp_int32 _status)
-{
+void PplansDone(sp_int32 _status) {
   if (_status == ZNODEEXISTS || _status == ZOK) {
-    zkclient->CreateNode(zkroot + "/tmasters", "Heron Cluster " + clustername,
-                         false, [] (sp_int32 status) { TMastersDone(status); });
+    zkclient->CreateNode(zkroot + "/tmasters", "Heron Cluster " + clustername, false,
+                         [](sp_int32 status) { TMastersDone(status); });
   } else {
     LOG(ERROR) << "Error creating node in zk " << _status << std::endl;
     ::exit(1);
   }
 }
 
-void TopologyDone(sp_int32 _status)
-{
+void TopologyDone(sp_int32 _status) {
   if (_status == ZNODEEXISTS || _status == ZOK) {
-    zkclient->CreateNode(zkroot + "/pplans", "Heron Cluster " + clustername,
-                         false, [] (sp_int32 status) { PplansDone(status); });
+    zkclient->CreateNode(zkroot + "/pplans", "Heron Cluster " + clustername, false,
+                         [](sp_int32 status) { PplansDone(status); });
   } else {
     LOG(ERROR) << "Error creating node in zk " << _status << std::endl;
     ::exit(1);
   }
 }
 
-void ZkRootDone(sp_int32 _status)
-{
+void ZkRootDone(sp_int32 _status) {
   if (_status == ZNODEEXISTS || _status == ZOK) {
-    zkclient->CreateNode(zkroot + "/topologies", "Heron Cluster " + clustername,
-                         false, [] (sp_int32 status) { TopologyDone(status); });
+    zkclient->CreateNode(zkroot + "/topologies", "Heron Cluster " + clustername, false,
+                         [](sp_int32 status) { TopologyDone(status); });
   } else {
     LOG(ERROR) << "Error creating node in zk " << _status << std::endl;
     ::exit(1);
   }
 }
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
   if (argc != 4) {
     usage();
     exit(1);
@@ -118,7 +111,7 @@ int main(int argc, char* argv[])
   EventLoopImpl ss;
   zkclient = new ZKClient(zkhostport, &ss);
 
-  zkclient->CreateNode(zkroot, "Heron Cluster " + clustername,
-                       false, [] (sp_int32 status) { ZkRootDone(status); });
+  zkclient->CreateNode(zkroot, "Heron Cluster " + clustername, false,
+                       [](sp_int32 status) { ZkRootDone(status); });
   ss.loop();
 }

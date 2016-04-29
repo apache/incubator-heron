@@ -18,7 +18,7 @@
 set -eu
 
 function query() {
-    ./output/bazel query "$@"
+  ./output/bazel query "$@"
 }
 
 set +e
@@ -26,26 +26,25 @@ set +e
 bazel build heron/...
 result=$?
 if [ "${result}" -eq "0" ] ; then
-   echo "Bazel build successful!!"
+  echo "Bazel build successful!!"
 else
-    echo "WARNING!!! - bazel build failed - intellij setup may not be consistent"
+  echo "WARNING!!! - bazel build failed - intellij setup may not be consistent"
 fi 
 set -e
 echo "Path is " `pwd`
 
-
 function get_heron_python_paths() {
-	echo "$(find heron -name "*.py" | sed "s|/src/python/.*$|/src/python/|" |sed "s|/tests/python/.*$|/tests/python/|" | sort -u)";
+  echo "$(find heron -name "*.py" | sed "s|/src/python/.*$|/src/python/|" |sed "s|/tests/python/.*$|/tests/python/|" | sort -u)";
 }
 
 function get_heron_thirdparty_dependencies() {
-	echo "$(find 3rdparty -name "*.jar" | sort -u)";
+  echo "$(find {bazel-genfiles/external,bazel-bin/3rdparty/java/bazel}/. -name "*jar" -type f | sort -u)";
 }
 function get_heron_bazel_deps(){
-	local bazel_third_party_base="$(bazel info output_base)/external/bazel_tools/third_party/"; 
-	local bazel_ext_deps=`bazel query 'labels("deps", heron/...)'  | egrep -E "bazel_tools"`;  
-	local heron_resolved_deps=`for dep in $bazel_ext_deps; do bazel query "$dep" --output xml | grep "<label" | grep "\.jar" | sed 's/<label value="//' | sed 's/"\/\>//'| sort -u | sed 's/\/\/3rdparty/$MODULE_DIR\/3rdparty/' | sed "s|\@bazel_tools\/\/third_party\:|$bazel_third_party_base|" ; done`;
-	echo "${heron_resolved_deps}";
+  local bazel_third_party_base="$(bazel info output_base)/external/bazel_tools/third_party/";
+  local bazel_ext_deps=`bazel query 'labels("deps", heron/...)'  | egrep -E "bazel_tools"`;
+  local heron_resolved_deps=`for dep in $bazel_ext_deps; do bazel query "$dep" --output xml | grep "<label" | grep "\.jar" | sed 's/<label value="//' | sed 's/"\/\>//'| sort -u | sed 's/\/\/3rdparty/$MODULE_DIR\/3rdparty/' | sed "s|\@bazel_tools\/\/third_party\:|$bazel_third_party_base|" ; done`;
+  echo "${heron_resolved_deps}";
 }
 
 # All other generated libraries.
@@ -61,18 +60,19 @@ function get_package_of() {
 }
 
 function get_heron_java_paths() {
-	local java_paths=$(find heron -name "*.java" | sed "s|/src/java/.*$|/src/java|" |  sed "s|/tests/java/.*$|/tests/java|" | sort -u | fgrep -v "heron/scheduler/" | fgrep -v "heron/scheduler/" )
-	if [ "$(uname -s | tr 'A-Z' 'a-z')" != "darwin" ]; then
-  		java_paths=$(echo "${JAVA_PATHS}" | fgrep -v "/objc_tools/")
-	fi
-	echo "${java_paths}"
+  local java_paths=$(find {heron,tools} -name "*.java" | sed "s|/src/java/.*$|/src/java|"| sed "s|/java/src/.*$|/java/src|" |  sed "s|/tests/java/.*$|/tests/java|" | sort -u | fgrep -v "heron/scheduler/" | fgrep -v "heron/scheduler/" )
+  if [ "$(uname -s | tr 'A-Z' 'a-z')" != "darwin" ]; then
+    java_paths=$(echo "${JAVA_PATHS}" | fgrep -v "/objc_tools/")
+  fi
+  echo "${java_paths}"
 }
 
 function get_heron_source_paths() {
-	local java_paths=$(get_heron_java_paths)
-	local python_paths=$(get_heron_python_paths)
-	echo "$java_paths $python_paths";
+  local java_paths=$(get_heron_java_paths)
+  local python_paths=$(get_heron_python_paths)
+  echo "$java_paths $python_paths";
 }
+
 # returns the target corresponding to file $1
 function get_target_of() {
   local package=$(get_package_of $1)
@@ -95,11 +95,11 @@ function get_consuming_target() {
 function get_containing_library() {
   get_consuming_target $1 | sed 's|:|/lib|' | sed 's|^//|bazel-bin/|' | sed 's|$|.jar|'
 }
-function collect_generated_binary_deps() {
 
-	local proto_deps=$(find bazel-bin/heron/proto -type f | grep "jar$");
-	local thrift_deps=$(find bazel-bin/heron/metricsmgr/src/thrift -type f | grep "jar$");
-	echo "${proto_deps} ${thrift_deps}" | sort | uniq
+function collect_generated_binary_deps() {
+  local proto_deps=$(find bazel-bin/heron/proto -type f | grep "jar$");
+  local thrift_deps=$(find bazel-bin/heron/metricsmgr/src/thrift -type f | grep "jar$");
+  echo "${proto_deps} ${thrift_deps}" | sort | uniq
 }
 
 function collect_generated_paths() {

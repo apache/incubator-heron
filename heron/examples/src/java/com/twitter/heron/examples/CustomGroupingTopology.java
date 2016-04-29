@@ -33,7 +33,11 @@ import backtype.storm.tuple.Tuple;
 /**
  * This is a basic example of a Storm topology.
  */
-public class CustomGroupingTopology {
+public final class CustomGroupingTopology {
+
+  private CustomGroupingTopology() {
+  }
+
   public static void main(String[] args) throws Exception {
     TopologyBuilder builder = new TopologyBuilder();
 
@@ -48,10 +52,11 @@ public class CustomGroupingTopology {
   }
 
   public static class MyBolt extends BaseRichBolt {
+    private static final long serialVersionUID = 1913733461146490337L;
     private long nItems;
 
     @Override
-    public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
+    public void prepare(Map conf, TopologyContext context, OutputCollector acollector) {
       nItems = 0;
     }
 
@@ -68,19 +73,23 @@ public class CustomGroupingTopology {
   }
 
   public static class MyCustomStreamGrouping implements CustomStreamGrouping {
+    private static final long serialVersionUID = 5987557161936201860L;
     private List<Integer> taskIds;
 
     public MyCustomStreamGrouping() {
     }
 
     @Override
-    public void prepare(WorkerTopologyContext context, GlobalStreamId stream, List<Integer> targetTasks) {
+    public void prepare(
+        WorkerTopologyContext context,
+        GlobalStreamId stream,
+        List<Integer> targetTasks) {
       this.taskIds = targetTasks;
     }
 
     @Override
     public List<Integer> chooseTasks(int taskId, List<Object> values) {
-      List<Integer> ret = new ArrayList<Integer>();
+      List<Integer> ret = new ArrayList<>();
       ret.add(taskIds.get(0));
       return ret;
     }

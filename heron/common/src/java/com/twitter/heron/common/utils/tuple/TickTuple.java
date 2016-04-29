@@ -206,3 +206,4 @@ public class TickTuple implements Tuple {
   public void resetValues() {
   }
 }
+

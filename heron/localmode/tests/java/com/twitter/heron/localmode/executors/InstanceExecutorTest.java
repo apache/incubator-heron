@@ -16,6 +16,7 @@ package com.twitter.heron.localmode.executors;
 
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -28,8 +29,6 @@ import com.twitter.heron.localmode.instance.IInstance;
 import com.twitter.heron.localmode.utils.PhysicalPlanUtil;
 import com.twitter.heron.localmode.utils.PhysicalPlanUtilTest;
 import com.twitter.heron.proto.system.PhysicalPlans;
-
-import junit.framework.Assert;
 
 /**
  * InstanceExecutor Tester.
@@ -118,8 +117,9 @@ public class InstanceExecutorTest {
    */
   @Test
   public void testCreatePhysicalPlanHelper() throws Exception {
-    PhysicalPlanHelper physicalPlanHelper = instanceExecutor.createPhysicalPlanHelper(plan, instanceId,
-        Mockito.mock(MetricsCollector.class));
+    PhysicalPlanHelper physicalPlanHelper =
+        instanceExecutor.createPhysicalPlanHelper(plan, instanceId,
+            Mockito.mock(MetricsCollector.class));
 
     Assert.assertNotNull(physicalPlanHelper.getTopologyContext());
   }

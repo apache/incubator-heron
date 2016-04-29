@@ -21,16 +21,14 @@
 #include "basics/sptypes.h"
 
 class __nifty_network_modinit {
-public:
+ public:
+  __nifty_network_modinit();
+  ~__nifty_network_modinit();
 
-  __nifty_network_modinit() ;
-  ~__nifty_network_modinit() ;
-
-private:
-
+ private:
   static sp_int32 count_;
 };
 
-static __nifty_network_modinit             _network_modinit;
+static __nifty_network_modinit _network_modinit;
 
 #endif /* end of header file */

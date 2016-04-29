@@ -18,12 +18,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.heron.proto.system.HeronTuples;
-
-import junit.framework.Assert;
 
 public class ShuffleGroupingTest {
 
@@ -40,21 +39,21 @@ public class ShuffleGroupingTest {
    */
   @Test
   public void testRoundRobin() throws Exception {
-    List<Integer> task_ids = new LinkedList<>();
-    task_ids.add(0);
-    task_ids.add(2);
-    task_ids.add(4);
-    task_ids.add(8);
+    List<Integer> taskIds = new LinkedList<>();
+    taskIds.add(0);
+    taskIds.add(2);
+    taskIds.add(4);
+    taskIds.add(8);
 
-    ShuffleGrouping g = new ShuffleGrouping(task_ids);
+    ShuffleGrouping g = new ShuffleGrouping(taskIds);
     HeronTuples.HeronDataTuple dummy = HeronTuples.HeronDataTuple.getDefaultInstance();
     List<Integer> dest = g.getListToSend(dummy);
 
     Assert.assertEquals(dest.size(), 1);
     int first = dest.get(0);
     int index = -1;
-    for (int i = 0; i < task_ids.size(); ++i) {
-      if (task_ids.get(i) == first) {
+    for (int i = 0; i < taskIds.size(); ++i) {
+      if (taskIds.get(i) == first) {
         index = i;
         break;
       }
@@ -66,8 +65,8 @@ public class ShuffleGroupingTest {
 
       Assert.assertEquals(dest.size(), 1);
       int d = dest.get(0);
-      index = (index + 1) % task_ids.size();
-      Assert.assertEquals((Integer) d, task_ids.get(index));
+      index = (index + 1) % taskIds.size();
+      Assert.assertEquals((Integer) d, taskIds.get(index));
       dest.clear();
     }
   }
@@ -77,16 +76,16 @@ public class ShuffleGroupingTest {
    */
   @Test
   public void testRandomStart() throws Exception {
-    List<Integer> task_ids = new LinkedList<>();
-    task_ids.add(0);
-    task_ids.add(1);
+    List<Integer> taskIds = new LinkedList<>();
+    taskIds.add(0);
+    taskIds.add(1);
 
     int zeros = 0;
     int ones = 0;
     int count = 1000;
 
     for (int i = 0; i < count; ++i) {
-      ShuffleGrouping g = new ShuffleGrouping(task_ids);
+      ShuffleGrouping g = new ShuffleGrouping(taskIds);
       HeronTuples.HeronDataTuple dummy = HeronTuples.HeronDataTuple.getDefaultInstance();
       List<Integer> dest = g.getListToSend(dummy);
 

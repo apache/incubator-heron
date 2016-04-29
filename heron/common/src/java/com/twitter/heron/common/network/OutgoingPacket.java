@@ -14,6 +14,7 @@
 
 package com.twitter.heron.common.network;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
@@ -23,9 +24,9 @@ import com.google.protobuf.Message;
 
 /**
  * Defines OutgoingPacket
- * <p>
+ * <p/>
  * TODO -- Sanjeev will add a detailed description of this application level protocol later
- * <p>
+ * <p/>
  * When allocating the ByteBuffer, we have two options:
  * 1. Normal java heap buffer by invoking ByteBuffer.allocate(...),
  * 2. Native heap buffer by invoking ByteBuffer.allocateDirect(...),
@@ -36,7 +37,7 @@ import com.google.protobuf.Message;
  * -- We could not control when to release the resources of direct buffer explicitly;
  * -- It is hard to guarantee direct buffer would not break limitation of native heap,
  * i.e. not throw OutOfMemoryError.
- * <p>
+ * <p/>
  * 2. Experiments are done by using direct buffer and the resources saving is negligible:
  * -- Direct buffer would save, in our scenarios, less than 1% of RAM;
  * -- Direct buffer could save 30%~50% cpu of Gateway thread.
@@ -49,15 +50,15 @@ public class OutgoingPacket {
   private static final Logger LOG = Logger.getLogger(OutgoingPacket.class.getName());
   private ByteBuffer buffer;
 
-  public OutgoingPacket(REQID _reqid, Message _message) {
-    assert _message.isInitialized();
+  public OutgoingPacket(REQID reqid, Message message) {
+    assert message.isInitialized();
     // First calculate the total size of the packet
     // including the header
     int headerSize = 4;
-    String typename = _message.getDescriptorForType().getFullName();
-    int dataSize = sizeRequiredToPackString(typename) +
-        REQID.REQIDSize +
-        sizeRequiredToPackMessage(_message);
+    String typename = message.getDescriptorForType().getFullName();
+    int dataSize = sizeRequiredToPackString(typename)
+        + REQID.REQID_SIZE
+        + sizeRequiredToPackMessage(message);
     buffer = ByteBuffer.allocate(headerSize + dataSize);
 
     // First write out how much data is there as the header
@@ -68,12 +69,12 @@ public class OutgoingPacket {
     buffer.put(typename.getBytes());
 
     // now the reqid
-    _reqid.pack(buffer);
+    reqid.pack(buffer);
 
     // finally the proto
     // Double copy but it is designed, see the comments on top
-    buffer.putInt(_message.getSerializedSize());
-    buffer.put(_message.toByteArray());
+    buffer.putInt(message.getSerializedSize());
+    buffer.put(message.toByteArray());
 
     // Make the buffer ready for writing out
     buffer.flip();
@@ -93,7 +94,7 @@ public class OutgoingPacket {
     int wrote = 0;
     try {
       wrote = channel.write(buffer);
-    } catch (Exception e) {
+    } catch (IOException e) {
       LOG.log(Level.SEVERE, "Error writing to channel ", e);
       return -1;
     }

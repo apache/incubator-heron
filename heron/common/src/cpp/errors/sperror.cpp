@@ -15,6 +15,7 @@
  */
 
 #include "errors/sperror.h"
+#include <string>
 #include "errors/syserr.h"
 #include "errors/spin.h"
 #include "errors/sperrimpl.h"
@@ -22,22 +23,21 @@
 #include "errors/sys-einfo-bakw-gen.h"
 #include "glog/logging.h"
 
-namespace heron { namespace error {
+namespace heron {
+namespace error {
 
 const char COLON = ':';
 
-// 
+//
 // Thread safety is not ensured yet. The idea is that the error modules will be
 // loaded before the start of the program - will address this later
 //
 
-static Error_Store*  g_error_store = NULL;
+static Error_Store* g_error_store = NULL;
 
-bool
-Error::initialize(void)
-{
+bool Error::initialize(void) {
   if (!g_error_store) {
-     g_error_store = new Error_Store;
+    g_error_store = new Error_Store;
   }
 
   // Load the system module errors right away
@@ -48,9 +48,7 @@ Error::initialize(void)
   return g_error_store ? true : false;
 }
 
-bool
-Error::shutdown(void)
-{
+bool Error::shutdown(void) {
   if (g_error_store) {
     unload_module_errors_all();
     delete g_error_store;
@@ -60,23 +58,16 @@ Error::shutdown(void)
   return !g_error_store ? true : false;
 }
 
-bool
-Error::load_module_errors(const std::string&   _modname,
-                          error_info_t*        _errs,
-                          error_info_t*        _errnostrs,
-                          sp_int32             _errcnt)
-{
+bool Error::load_module_errors(const std::string& _modname, error_info_t* _errs,
+                               error_info_t* _errnostrs, sp_int32 _errcnt) {
   if (g_error_store) {
-    return g_error_store->load_module_errors(
-             _modname, _errs, _errnostrs, _errcnt);
+    return g_error_store->load_module_errors(_modname, _errs, _errnostrs, _errcnt);
   }
 
   return false;
 }
 
-bool
-Error::unload_module_errors(const std::string& _modname)
-{
+bool Error::unload_module_errors(const std::string& _modname) {
   if (g_error_store) {
     return g_error_store->unload_module_errors(_modname);
   }
@@ -84,9 +75,7 @@ Error::unload_module_errors(const std::string& _modname)
   return false;
 }
 
-bool
-Error::unload_module_errors_all(void)
-{
+bool Error::unload_module_errors_all(void) {
   if (g_error_store) {
     return g_error_store->unload_module_errors_all();
   }
@@ -94,9 +83,7 @@ Error::unload_module_errors_all(void)
   return false;
 }
 
-std::string
-Error::get_error_msg(sp_uint32 _errno)
-{
+std::string Error::get_error_msg(sp_uint32 _errno) {
   Error_Store* store = g_error_store;
 
   CHECK_NOTNULL(store);
@@ -109,9 +96,7 @@ Error::get_error_msg(sp_uint32 _errno)
   return msg;
 }
 
-std::string 
-Error::get_errno_str(sp_uint32 _errno)
-{
+std::string Error::get_errno_str(sp_uint32 _errno) {
   Error_Store* store = g_error_store;
 
   CHECK_NOTNULL(store);
@@ -124,9 +109,7 @@ Error::get_errno_str(sp_uint32 _errno)
   return msg;
 }
 
-std::string
-Error::get_errno_msg(sp_uint32 _errno)
-{
+std::string Error::get_errno_msg(sp_uint32 _errno) {
   Error_Store* store = g_error_store;
 
   CHECK_NOTNULL(store);
@@ -141,9 +124,7 @@ Error::get_errno_msg(sp_uint32 _errno)
   return (msg += store->get_error_msg(_errno));
 }
 
-std::string
-Error::get_module_errno_msg(sp_uint32 _errno)
-{
+std::string Error::get_module_errno_msg(sp_uint32 _errno) {
   Error_Store* store = g_error_store;
 
   CHECK_NOTNULL(store);
@@ -161,9 +142,7 @@ Error::get_module_errno_msg(sp_uint32 _errno)
   return (msg += store->get_error_msg(_errno));
 }
 
-std::string
-Error::get_module_error_msg(sp_uint32 _errno)
-{
+std::string Error::get_module_error_msg(sp_uint32 _errno) {
   Error_Store* store = g_error_store;
 
   CHECK_NOTNULL(store);
@@ -178,9 +157,7 @@ Error::get_module_error_msg(sp_uint32 _errno)
   return (msg += store->get_error_msg(_errno));
 }
 
-std::string
-Error::get_error_module(sp_uint32 _errno)
-{
+std::string Error::get_error_module(sp_uint32 _errno) {
   Error_Store* store = g_error_store;
 
   CHECK_NOTNULL(store);
@@ -192,5 +169,5 @@ Error::get_error_module(sp_uint32 _errno)
 
   return msg;
 }
-
-}} // namespace
+}  // namespace error
+}  // namespace heron

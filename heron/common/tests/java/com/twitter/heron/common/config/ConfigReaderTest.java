@@ -26,14 +26,14 @@ public class ConfigReaderTest {
 
   @Test
   public void testLoadFile() throws Exception {
-    ConfigReader configReader = ConfigReader.class.newInstance();
-
-    String file = Paths.get(System.getenv("JAVA_RUNFILES"), Constants.TEST_DATA_PATH, "defaults.yaml").toString();
-    Map props = configReader.loadFile(file);
+    String file = Paths.get(System.getenv("JAVA_RUNFILES"),
+        Constants.TEST_DATA_PATH, "defaults.yaml").toString();
+    Map<String, Object> props = ConfigReader.loadFile(file);
 
     Assert.assertEquals("role", props.get(Constants.ROLE_KEY));
     Assert.assertEquals("environ", props.get(Constants.ENVIRON_KEY));
-    Assert.assertEquals("com.twitter.heron.scheduler.aurora.AuroraLauncher", props.get(Constants.LAUNCHER_CLASS_KEY));
+    Assert.assertEquals("com.twitter.heron.scheduler.aurora.AuroraLauncher",
+        props.get(Constants.LAUNCHER_CLASS_KEY));
 
     Assert.assertNull(props.get(Constants.USER_KEY));
   }
