@@ -10,7 +10,7 @@
 
 #include "config/helper.h"
 #include "config/heron-internals-config-reader.h"
-#include "heron-statemgr.h"
+#include "statemgr/heron-statemgr.h"
 #include "metrics/tmaster-metrics.h"
 
 #include "processor/processor.h"

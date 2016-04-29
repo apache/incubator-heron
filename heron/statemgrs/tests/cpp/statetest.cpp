@@ -4,7 +4,7 @@
 #include "errors/errors.h"
 #include "threads/threads.h"
 #include "network/network.h"
-#include "heron-zkstatemgr.h"
+#include "statemgr/heron-zkstatemgr.h"
 #include <string>
 
 using heron::common::HeronStateMgr;
