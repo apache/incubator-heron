@@ -21,6 +21,8 @@ import org.apache.storm.tuple.Fields;
 import static org.apache.storm.utils.Utils.tuple;
 
 public class RawScheme implements Scheme {
+  private static final long serialVersionUID = 6098042939916415521L;
+
   public List<Object> deserialize(byte[] ser) {
     return tuple(ser);
   }
