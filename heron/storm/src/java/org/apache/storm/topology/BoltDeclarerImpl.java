@@ -147,7 +147,8 @@ public class BoltDeclarerImpl implements BoltDeclarer {
   }
 
   @Override
-  public BoltDeclarer customGrouping(String componentId, String streamId, CustomStreamGrouping grouping) {
+  public BoltDeclarer customGrouping(
+      String componentId, String streamId, CustomStreamGrouping grouping) {
     delegate.customGrouping(componentId, streamId, new CustomStreamGroupingDelegate(grouping));
     return this;
   }

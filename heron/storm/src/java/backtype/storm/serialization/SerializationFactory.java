@@ -35,11 +35,20 @@ import backtype.storm.tuple.Values;
 import backtype.storm.utils.ListDelegate;
 import backtype.storm.utils.Utils;
 
-public class SerializationFactory {
+public final class SerializationFactory {
   public static final Logger LOG = Logger.getLogger(SerializationFactory.class.getName());
 
+  private SerializationFactory() {
+  }
+
+  /**
+   * Get kryo based on conf
+   * @param conf the config
+   * @return Kryo
+   */
   public static Kryo getKryo(Map conf) {
-    IKryoFactory kryoFactory = (IKryoFactory) Utils.newInstance((String) conf.get(Config.TOPOLOGY_KRYO_FACTORY));
+    IKryoFactory kryoFactory =
+        (IKryoFactory) Utils.newInstance((String) conf.get(Config.TOPOLOGY_KRYO_FACTORY));
     Kryo k = kryoFactory.getKryo(conf);
     k.register(byte[].class);
     k.register(ListDelegate.class);
@@ -70,8 +79,9 @@ public class SerializationFactory {
       try {
         Class klass = Class.forName(klassName);
         Class serializerClass = null;
-        if (serializerClassName != null)
+        if (serializerClassName != null) {
           serializerClass = Class.forName(serializerClassName);
+        }
         LOG.info("Doing kryo.register for class " + klass);
         if (serializerClass == null) {
           k.register(klass);
@@ -81,7 +91,8 @@ public class SerializationFactory {
 
       } catch (ClassNotFoundException e) {
         if (skipMissing) {
-          LOG.info("Could not find serialization or class for " + serializerClassName + ". Skipping registration...");
+          LOG.info("Could not find serialization or class for "
+              + serializerClassName + ". Skipping registration...");
         } else {
           throw new RuntimeException(e);
         }
@@ -98,7 +109,8 @@ public class SerializationFactory {
           decorator.decorate(k);
         } catch (ClassNotFoundException e) {
           if (skipMissing) {
-            LOG.info("Could not find kryo decorator named " + klassName + ". Skipping registration...");
+            LOG.info("Could not find kryo decorator named "
+                + klassName + ". Skipping registration...");
           } else {
             throw new RuntimeException(e);
           }
@@ -115,7 +127,8 @@ public class SerializationFactory {
     return k;
   }
 
-  private static Serializer resolveSerializerInstance(Kryo k, Class superClass, Class<? extends Serializer> serializerClass) {
+  private static Serializer resolveSerializerInstance(
+      Kryo k, Class superClass, Class<? extends Serializer> serializerClass) {
     try {
       try {
         return serializerClass.getConstructor(Kryo.class, Class.class).newInstance(k, superClass);
@@ -141,7 +154,9 @@ public class SerializationFactory {
   private static Map<String, String> normalizeKryoRegister(Map conf) {
     // TODO: de-duplicate this logic with the code in nimbus
     Object res = conf.get(Config.TOPOLOGY_KRYO_REGISTER);
-    if (res == null) return new TreeMap<String, String>();
+    if (res == null) {
+      return new TreeMap<String, String>();
+    }
     Map<String, String> ret = new HashMap<String, String>();
     if (res instanceof Map) {
       ret = (Map<String, String>) res;

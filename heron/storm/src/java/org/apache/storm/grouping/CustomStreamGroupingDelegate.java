@@ -19,7 +19,8 @@ import java.util.List;
 import org.apache.storm.generated.GlobalStreamId;
 import org.apache.storm.task.TopologyContext;
 
-public class CustomStreamGroupingDelegate implements com.twitter.heron.api.grouping.CustomStreamGrouping {
+public class CustomStreamGroupingDelegate implements
+    com.twitter.heron.api.grouping.CustomStreamGrouping {
   private CustomStreamGrouping delegate;
 
   public CustomStreamGroupingDelegate(CustomStreamGrouping delegate) {

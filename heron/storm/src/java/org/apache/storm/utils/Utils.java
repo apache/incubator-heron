@@ -20,8 +20,12 @@ import java.util.Map;
 
 // import org.json.simple.JSONValue;
 
-public class Utils {
-  public static final String DEFAULT_STREAM_ID = com.twitter.heron.api.utils.Utils.DEFAULT_STREAM_ID;
+public final class Utils {
+  public static final String DEFAULT_STREAM_ID =
+      com.twitter.heron.api.utils.Utils.DEFAULT_STREAM_ID;
+
+  private Utils() {
+  }
 
   public static Object newInstance(String klass) {
     try {
@@ -42,7 +46,8 @@ public class Utils {
 
     /*
     public static boolean isValidConf(Map<String, Object> stormConf) {
-        return normalizeConf(stormConf).equals(normalizeConf((Map) JSONValue.parse(JSONValue.toJSONString(stormConf))));
+        return normalizeConf(stormConf).equals(
+          normalizeConf((Map) JSONValue.parse(JSONValue.toJSONString(stormConf))));
     }
     */
 

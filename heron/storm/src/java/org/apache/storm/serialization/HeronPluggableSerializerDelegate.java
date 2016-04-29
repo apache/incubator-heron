@@ -20,7 +20,8 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
-public class HeronPluggableSerializerDelegate implements com.twitter.heron.api.serializer.IPluggableSerializer {
+public class HeronPluggableSerializerDelegate implements
+    com.twitter.heron.api.serializer.IPluggableSerializer {
   private Kryo kryo;
   private Output kryoOut;
   private Input kryoIn;

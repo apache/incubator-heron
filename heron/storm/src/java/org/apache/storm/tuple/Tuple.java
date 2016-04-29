@@ -32,112 +32,112 @@ public interface Tuple {
   /**
    * Returns the number of fields in this tuple.
    */
-  public int size();
+  int size();
 
   /**
    * Returns the position of the specified field in this tuple.
    */
-  public int fieldIndex(String field);
+  int fieldIndex(String field);
 
   /**
    * Returns true if this tuple contains the specified name of the field.
    */
-  public boolean contains(String field);
+  boolean contains(String field);
 
   /**
    * Gets the field at position i in the tuple. Returns object since tuples are dynamically typed.
    */
-  public Object getValue(int i);
+  Object getValue(int i);
 
   /**
    * Returns the String at position i in the tuple. If that field is not a String,
    * you will get a runtime error.
    */
-  public String getString(int i);
+  String getString(int i);
 
   /**
    * Returns the Integer at position i in the tuple. If that field is not an Integer,
    * you will get a runtime error.
    */
-  public Integer getInteger(int i);
+  Integer getInteger(int i);
 
   /**
    * Returns the Long at position i in the tuple. If that field is not a Long,
    * you will get a runtime error.
    */
-  public Long getLong(int i);
+  Long getLong(int i);
 
   /**
    * Returns the Boolean at position i in the tuple. If that field is not a Boolean,
    * you will get a runtime error.
    */
-  public Boolean getBoolean(int i);
+  Boolean getBoolean(int i);
 
   /**
    * Returns the Short at position i in the tuple. If that field is not a Short,
    * you will get a runtime error.
    */
-  public Short getShort(int i);
+  Short getShort(int i);
 
   /**
    * Returns the Byte at position i in the tuple. If that field is not a Byte,
    * you will get a runtime error.
    */
-  public Byte getByte(int i);
+  Byte getByte(int i);
 
   /**
    * Returns the Double at position i in the tuple. If that field is not a Double,
    * you will get a runtime error.
    */
-  public Double getDouble(int i);
+  Double getDouble(int i);
 
   /**
    * Returns the Float at position i in the tuple. If that field is not a Float,
    * you will get a runtime error.
    */
-  public Float getFloat(int i);
+  Float getFloat(int i);
 
   /**
    * Returns the byte array at position i in the tuple. If that field is not a byte array,
    * you will get a runtime error.
    */
-  public byte[] getBinary(int i);
+  byte[] getBinary(int i);
 
 
-  public Object getValueByField(String field);
+  Object getValueByField(String field);
 
-  public String getStringByField(String field);
+  String getStringByField(String field);
 
-  public Integer getIntegerByField(String field);
+  Integer getIntegerByField(String field);
 
-  public Long getLongByField(String field);
+  Long getLongByField(String field);
 
-  public Boolean getBooleanByField(String field);
+  Boolean getBooleanByField(String field);
 
-  public Short getShortByField(String field);
+  Short getShortByField(String field);
 
-  public Byte getByteByField(String field);
+  Byte getByteByField(String field);
 
-  public Double getDoubleByField(String field);
+  Double getDoubleByField(String field);
 
-  public Float getFloatByField(String field);
+  Float getFloatByField(String field);
 
-  public byte[] getBinaryByField(String field);
+  byte[] getBinaryByField(String field);
 
   /**
    * Gets all the values in this tuple.
    */
-  public List<Object> getValues();
+  List<Object> getValues();
 
   /**
    * Gets the names of the fields in this tuple.
    */
-  public Fields getFields();
+  Fields getFields();
 
   /**
    * Returns a subset of the tuple based on the fields selector.
    */
-  public List<Object> select(Fields selector);
+  List<Object> select(Fields selector);
 
 
   /**
@@ -145,35 +145,35 @@ public interface Tuple {
    */
     /*
     TODO:- One can get this using getSourceStreamId and getSourceComponent
-    public GlobalStreamId getSourceGlobalStreamid();
+     GlobalStreamId getSourceGlobalStreamid();
     */
 
   /**
    * Gets the id of the component that created this tuple.
    */
-  public String getSourceComponent();
+  String getSourceComponent();
 
   /**
    * Gets the id of the task that created this tuple.
    */
-  public int getSourceTask();
+  int getSourceTask();
 
   /**
    * Gets the id of the stream that this tuple was emitted to.
    */
-  public String getSourceStreamId();
+  String getSourceStreamId();
 
   /**
    * Gets the message id that associated with this tuple.
    */
     /*
     TODO:- does anyone use this
-    public MessageId getMessageId();
+     MessageId getMessageId();
     */
 
   /**
    * Resets the tuple values to null
    * TODO:- Is this needed
    */
-  public void resetValues();
+  void resetValues();
 }
