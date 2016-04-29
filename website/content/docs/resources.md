@@ -12,6 +12,7 @@ Heron Resources outside this documentation:
 * [Storm@Twitter - SIGMOD'14](http://dl.acm.org/citation.cfm?id=2595641) (Jun, 2014)
 
 ## Videos
+* [Twitter Heron on Apache Aurora - #compute event @Twitter](https://m.youtube.com/watch?v=ua0ufmr9sQI&feature=youtu.be) (Apr, 2016)
 * [Flying Faster with Heron - InfoQ](http://www.infoq.com/presentations/twitter-heron) (Apr, 2016)
 * [Twitter Heron: Stream Processing at
   Scale - @Scale](https://www.youtube.com/watch?v=pUaFOuGgmco) (Sep, 2015)
