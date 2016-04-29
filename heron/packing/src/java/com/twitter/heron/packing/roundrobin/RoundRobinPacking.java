@@ -160,7 +160,7 @@ public class RoundRobinPacking implements IPacking {
         topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED,
         "" + defaultRequest));
     if (defaultRequest > containerRamRequested) {
-      LOG.log(Level.SEVERE, 
+      LOG.log(Level.SEVERE,
           "Container is set to value lower than computed defaults. This could be due"
           + " to incorrect RAM map provided for components.");
     }
