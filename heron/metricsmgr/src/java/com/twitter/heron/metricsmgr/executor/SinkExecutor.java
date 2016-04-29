@@ -123,7 +123,8 @@ public class SinkExecutor implements Runnable {
 
     // If the config is not set, we consider the flush() would never be invoked
     if (flushIntervalObj != null) {
-      final long flushIntervalNs = TypeUtils.getLong(flushIntervalObj) * Constants.MILLISECONDS_TO_NANOSECONDS;
+      final long flushIntervalNs =
+          TypeUtils.getLong(flushIntervalObj) * Constants.MILLISECONDS_TO_NANOSECONDS;
 
       Runnable flushSink = new Runnable() {
         @Override

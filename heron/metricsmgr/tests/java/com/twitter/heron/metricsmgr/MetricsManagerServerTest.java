@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 import com.google.protobuf.Message;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,8 +37,6 @@ import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.spi.metricsmgr.metrics.ExceptionInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
-
-import org.junit.Assert;
 
 /**
  * MetricsManagerServer Tester.

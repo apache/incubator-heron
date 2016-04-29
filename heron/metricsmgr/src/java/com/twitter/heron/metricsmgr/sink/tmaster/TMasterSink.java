@@ -82,7 +82,8 @@ public class TMasterSink implements IMetricsSink {
   private static final String KEY_NETWORK_READ_BATCH_SIZE_BYTES = "network-read-batch-size-bytes";
   private static final String KEY_NETWORK_READ_BATCH_TIME_MS = "network-read-batch-time-ms";
   private static final String KEY_SOCKET_SEND_BUFFER_BYTES = "socket-send-buffer-size-bytes";
-  private static final String KEY_SOCKET_RECEIVED_BUFFER_BYTES = "socket-received-buffer-size-bytes";
+  private static final String KEY_SOCKET_RECEIVED_BUFFER_BYTES =
+      "socket-received-buffer-size-bytes";
   private static final String KEY_TMASTER_METRICS_TYPE = "tmaster-metrics-type";
 
   // Bean name to fetch the TMasterLocation object from SingletonRegistry
@@ -117,16 +118,17 @@ public class TMasterSink implements IMetricsSink {
     sinkContext = context;
 
     // Fill the tMasterMetricsFilter according to metrics-sink-configs.yaml
-    Map<String, String> tmasterMetricsType = (Map<String, String>) sinkConfig.get(KEY_TMASTER_METRICS_TYPE);
+    Map<String, String> tmasterMetricsType =
+        (Map<String, String>) sinkConfig.get(KEY_TMASTER_METRICS_TYPE);
     if (tmasterMetricsType != null) {
       for (Map.Entry<String, String> metricToType : tmasterMetricsType.entrySet()) {
         String value = metricToType.getValue();
         MetricsFilter.MetricAggregationType type;
-        if (value.equals("SUM")) {
+        if ("SUM".equals(value)) {
           type = MetricsFilter.MetricAggregationType.SUM;
-        } else if (value.equals("AVG")) {
+        } else if ("AVG".equals(value)) {
           type = MetricsFilter.MetricAggregationType.AVG;
-        } else if (value.equals("LAST")) {
+        } else if ("LAST".equals(value)) {
           type = MetricsFilter.MetricAggregationType.LAST;
         } else {
           type = MetricsFilter.MetricAggregationType.UNKNOWN;
@@ -137,13 +139,15 @@ public class TMasterSink implements IMetricsSink {
 
     // Construct the long-live TMasterClientService
     tMasterClientService =
-        new TMasterClientService((Map<String, Object>) sinkConfig.get(KEY_TMASTER), metricsCommunicator);
+        new TMasterClientService((Map<String, Object>)
+            sinkConfig.get(KEY_TMASTER), metricsCommunicator);
 
     // Start the tMasterLocationStarter
     startTMasterChecker();
   }
 
-  // Start the TMasterCheck, which would check whether the TMasterLocation is changed at an interval.
+  // Start the TMasterCheck, which would check whether the TMasterLocation is changed
+  // at an interval.
   // If so, restart the TMasterClientService with the new TMasterLocation
   private void startTMasterChecker() {
     final int checkIntervalSec =
@@ -153,7 +157,8 @@ public class TMasterSink implements IMetricsSink {
       @Override
       public void run() {
         TopologyMaster.TMasterLocation location =
-            (TopologyMaster.TMasterLocation) SingletonRegistry.INSTANCE.getSingleton(TMASTER_LOCATION_BEAN_NAME);
+            (TopologyMaster.TMasterLocation) SingletonRegistry.INSTANCE.getSingleton(
+                 TMASTER_LOCATION_BEAN_NAME);
 
         if (location != null) {
           if (currentTMasterLocation == null || !location.equals(currentTMasterLocation)) {
@@ -181,13 +186,16 @@ public class TMasterSink implements IMetricsSink {
     // Format it into TopologyMaster.PublishMetrics
 
     // The format of source is "host:port/componentName/instanceId"
-    // So source.split("/") would be an array with 3 elements: ["host:port", componentName, instanceId]
+    // So source.split("/") would be an array with 3 elements:
+    // ["host:port", componentName, instanceId]
     String[] sources = record.getSource().split("/");
     String hostPort = sources[0];
     String componentName = sources[1];
     String instanceId = sources[2];
 
-    TopologyMaster.PublishMetrics.Builder publishMetrics = TopologyMaster.PublishMetrics.newBuilder();
+    TopologyMaster.PublishMetrics.Builder publishMetrics =
+        TopologyMaster.PublishMetrics.newBuilder();
+
     for (MetricsInfo metricsInfo : tMasterMetricsFilter.filter(record.getMetrics())) {
       // We would filter out unneeded metrics
       TopologyMaster.MetricDatum metricDatum = TopologyMaster.MetricDatum.newBuilder().
@@ -197,11 +205,16 @@ public class TMasterSink implements IMetricsSink {
     }
 
     for (ExceptionInfo exceptionInfo : record.getExceptions()) {
-      TopologyMaster.TmasterExceptionLog exceptionLog = TopologyMaster.TmasterExceptionLog.newBuilder().
-          setComponentName(componentName).setHostname(hostPort).setInstanceId(instanceId).
-          setStacktrace(exceptionInfo.getStackTrace()).setLasttime(exceptionInfo.getLastTime()).
-          setFirsttime(exceptionInfo.getFirstTime()).setCount(exceptionInfo.getCount()).
-          setLogging(exceptionInfo.getLogging()).build();
+      TopologyMaster.TmasterExceptionLog exceptionLog =
+          TopologyMaster.TmasterExceptionLog.newBuilder()
+              .setComponentName(componentName)
+              .setHostname(hostPort)
+              .setInstanceId(instanceId)
+              .setStacktrace(exceptionInfo.getStackTrace())
+              .setLasttime(exceptionInfo.getLastTime())
+              .setFirsttime(exceptionInfo.getFirstTime())
+              .setCount(exceptionInfo.getCount())
+              .setLogging(exceptionInfo.getLogging()).build();
       publishMetrics.addExceptions(exceptionLog);
     }
 
@@ -271,7 +284,7 @@ public class TMasterSink implements IMetricsSink {
    * 1. The old one threw exceptions and died.
    * 2. startNewMasterClient() is invoked externally with TMasterLocation.
    */
-  private static class TMasterClientService {
+  private static final class TMasterClientService {
     private final AtomicInteger startedAttempts = new AtomicInteger(0);
     private final Map<String, Object> tmasterClientConfig;
     private final Communicator<TopologyMaster.PublishMetrics> metricsCommunicator;
@@ -303,7 +316,8 @@ public class TMasterSink implements IMetricsSink {
     // Make it synchronized to guarantee thread-safe
     public synchronized void startNewMasterClient() {
 
-      // Exit any running tMasterClient if there is any to release the thread in tmasterClientExecutor
+      // Exit any running tMasterClient if there is any to release
+      // the thread in tmasterClientExecutor
       if (tMasterClient != null) {
         tMasterClient.stop();
         tMasterClient.getNIOLooper().exitLoop();
@@ -335,7 +349,8 @@ public class TMasterSink implements IMetricsSink {
               currentTMasterLocation.getMasterPort(),
               socketOptions, metricsCommunicator);
       tMasterClient.
-          setReconnectIntervalSec(TypeUtils.getLong(tmasterClientConfig.get(KEY_TMASTER_RECONNECT_INTERVAL_SEC)));
+          setReconnectIntervalSec(
+              TypeUtils.getLong(tmasterClientConfig.get(KEY_TMASTER_RECONNECT_INTERVAL_SEC)));
 
       LOG.severe(String.format("Starting TMasterClient for the %d time.",
           startedAttempts.incrementAndGet()));
@@ -364,7 +379,8 @@ public class TMasterSink implements IMetricsSink {
       return currentTMasterLocation;
     }
 
-    // An UncaughtExceptionHandler, which would restart TMasterLocation with current TMasterLocation.
+    // An UncaughtExceptionHandler, which would restart TMasterLocation with
+    // current TMasterLocation.
     private class TMasterClientThreadFactory implements ThreadFactory {
       @Override
       public Thread newThread(Runnable r) {

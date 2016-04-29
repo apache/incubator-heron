@@ -16,9 +16,8 @@ package com.twitter.heron.spi.common;
 
 import java.util.logging.Logger;
 
-import org.junit.Test;
-
 import org.junit.Assert;
+import org.junit.Test;
 
 public class MiscTest {
   private static final Logger LOG = Logger.getLogger(MiscTest.class.getName());
