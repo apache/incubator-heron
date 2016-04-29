@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.protobuf.Message;
@@ -158,8 +159,8 @@ public class MetricsManagerServer extends HeronServer {
 
   @Override
   public void onClose(SocketChannel channel) {
-    LOG.severe("Got a connection close from remote socket address: "
-        + channel.socket().getRemoteSocketAddress());
+    LOG.log(Level.SEVERE, "Got a connection close from remote socket address: {0}",
+        new Object[] {channel.socket().getRemoteSocketAddress()});
 
     // Unregister the Publisher
     Metrics.MetricPublisher request =
