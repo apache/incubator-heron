@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
+#include "statemgr/heron-zkstatemgr.h"
 #include <iostream>
-
+#include <string>
+#include <vector>
 #include "proto/messages.h"
-
 #include "basics/basics.h"
 #include "errors/errors.h"
 #include "threads/threads.h"
 #include "network/network.h"
 #include "zookeeper/zkclient.h"
-
-#include "statemgr/heron-zkstatemgr.h"
 
 namespace heron {
 namespace common {
@@ -249,7 +248,7 @@ void HeronZKStateMgr::GlobalWatchEventHandler(const ZKClient::ZkWatchEvent event
             << ", State: " << ZKClient::state2String(event.state);
 
   if (event.type == ZOO_SESSION_EVENT && event.state == ZOO_EXPIRED_SESSION_STATE) {
-    // TODO (vikasr): The session expired event is only triggered after the client
+    // TODO(kramasamy): The session expired event is only triggered after the client
     // is able to connect back to the zk server after a connection loss. But the
     // duration of the connection loss is indeterminate, so it is pointless to
     // wait for the entire duration. A better approach here is to timeout after

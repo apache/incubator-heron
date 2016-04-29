@@ -20,6 +20,8 @@
 #include <errno.h>
 #include <iostream>
 #include <fstream>
+#include <string>
+#include <vector>
 #include "proto/messages.h"
 #include "basics/basics.h"
 #include "errors/errors.h"
@@ -65,7 +67,7 @@ void HeronLocalFileStateMgr::SetTMasterLocationWatch(const std::string& topology
     this->CheckTMasterLocation(topology_name, tmaster_last_change, std::move(watcher), status);
   };
 
-  CHECK(eventLoop_->registerTimer(std::move(cb), false, 1000000) > 0);
+  CHECK_GT(eventLoop_->registerTimer(std::move(cb), false, 1000000), 0);
 }
 
 void HeronLocalFileStateMgr::GetTMasterLocation(const std::string& _topology_name,
@@ -81,7 +83,7 @@ void HeronLocalFileStateMgr::GetTMasterLocation(const std::string& _topology_nam
   }
 
   auto wCb = [cb, status](EventLoop::Status) { cb(status); };
-  CHECK(eventLoop_->registerTimer(std::move(wCb), false, 0) > 0);
+  CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
 }
 
 void HeronLocalFileStateMgr::SetTMasterLocation(const proto::tmaster::TMasterLocation& _location,
@@ -94,7 +96,7 @@ void HeronLocalFileStateMgr::SetTMasterLocation(const proto::tmaster::TMasterLoc
   _location.SerializeToString(&contents);
   proto::system::StatusCode status = WriteToFile(fname, contents);
   auto wCb = [cb, status](EventLoop::Status) { cb(status); };
-  CHECK(eventLoop_->registerTimer(std::move(wCb), false, 0) > 0);
+  CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
 }
 
 void HeronLocalFileStateMgr::CreateTopology(const proto::api::Topology& _topology,
@@ -103,7 +105,7 @@ void HeronLocalFileStateMgr::CreateTopology(const proto::api::Topology& _topolog
   // First check to see if location exists.
   if (MakeSureFileDoesNotExist(fname) != proto::system::OK) {
     auto wCb = [cb](EventLoop::Status) { cb(proto::system::PATH_ALREADY_EXISTS); };
-    CHECK(eventLoop_->registerTimer(std::move(wCb), false, 0) > 0);
+    CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
     return;
   }
 
@@ -111,14 +113,14 @@ void HeronLocalFileStateMgr::CreateTopology(const proto::api::Topology& _topolog
   _topology.SerializeToString(&contents);
   proto::system::StatusCode status = WriteToFile(fname, contents);
   auto wCb = [cb, status](EventLoop::Status) { cb(status); };
-  CHECK(eventLoop_->registerTimer(std::move(wCb), false, 0) > 0);
+  CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
 }
 
 void HeronLocalFileStateMgr::DeleteTopology(const sp_string& _topology_name,
                                             VCallback<proto::system::StatusCode> cb) {
   proto::system::StatusCode status = DeleteFile(GetTopologyPath(_topology_name));
   auto wCb = [cb, status](EventLoop::Status) { cb(status); };
-  CHECK(eventLoop_->registerTimer(std::move(wCb), false, 0) > 0);
+  CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
 }
 
 void HeronLocalFileStateMgr::SetTopology(const proto::api::Topology& _topology,
@@ -128,7 +130,7 @@ void HeronLocalFileStateMgr::SetTopology(const proto::api::Topology& _topology,
   _topology.SerializeToString(&contents);
   proto::system::StatusCode status = WriteToFile(fname, contents);
   auto wCb = [cb, status](EventLoop::Status) { cb(status); };
-  CHECK(eventLoop_->registerTimer(std::move(wCb), false, 0) > 0);
+  CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
 }
 
 void HeronLocalFileStateMgr::GetTopology(const std::string& _topology_name,
@@ -142,7 +144,7 @@ void HeronLocalFileStateMgr::GetTopology(const std::string& _topology_name,
     }
   }
   auto wCb = [cb, status](EventLoop::Status) { cb(status); };
-  CHECK(eventLoop_->registerTimer(std::move(wCb), false, 0) > 0);
+  CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
 }
 
 void HeronLocalFileStateMgr::CreatePhysicalPlan(const proto::system::PhysicalPlan& _pplan,
@@ -151,7 +153,7 @@ void HeronLocalFileStateMgr::CreatePhysicalPlan(const proto::system::PhysicalPla
   // First check to see if location exists.
   if (MakeSureFileDoesNotExist(fname) != proto::system::OK) {
     auto wCb = [cb](EventLoop::Status) { cb(proto::system::PATH_ALREADY_EXISTS); };
-    CHECK(eventLoop_->registerTimer(std::move(wCb), false, 0) > 0);
+    CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
     return;
   }
 
@@ -159,14 +161,14 @@ void HeronLocalFileStateMgr::CreatePhysicalPlan(const proto::system::PhysicalPla
   _pplan.SerializeToString(&contents);
   proto::system::StatusCode status = WriteToFile(fname, contents);
   auto wCb = [cb, status](EventLoop::Status) { cb(status); };
-  CHECK(eventLoop_->registerTimer(std::move(wCb), false, 0) > 0);
+  CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
 }
 
 void HeronLocalFileStateMgr::DeletePhysicalPlan(const sp_string& _topology_name,
                                                 VCallback<proto::system::StatusCode> cb) {
   proto::system::StatusCode status = DeleteFile(GetPhysicalPlanPath(_topology_name));
   auto wCb = [cb, status](EventLoop::Status) { cb(status); };
-  CHECK(eventLoop_->registerTimer(std::move(wCb), false, 0) > 0);
+  CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
 }
 
 void HeronLocalFileStateMgr::SetPhysicalPlan(const proto::system::PhysicalPlan& _pplan,
@@ -176,7 +178,7 @@ void HeronLocalFileStateMgr::SetPhysicalPlan(const proto::system::PhysicalPlan& 
   proto::system::StatusCode status =
       WriteToFile(GetPhysicalPlanPath(_pplan.topology().name()), contents);
   auto wCb = [cb, status](EventLoop::Status) { cb(status); };
-  CHECK(eventLoop_->registerTimer(std::move(wCb), false, 0) > 0);
+  CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
 }
 
 void HeronLocalFileStateMgr::GetPhysicalPlan(const std::string& _topology_name,
@@ -191,7 +193,7 @@ void HeronLocalFileStateMgr::GetPhysicalPlan(const std::string& _topology_name,
     }
   }
   auto wCb = [cb, status](EventLoop::Status) { cb(status); };
-  CHECK(eventLoop_->registerTimer(std::move(wCb), false, 0) > 0);
+  CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
 }
 
 void HeronLocalFileStateMgr::CreateExecutionState(const proto::system::ExecutionState& _st,
@@ -200,7 +202,7 @@ void HeronLocalFileStateMgr::CreateExecutionState(const proto::system::Execution
   // First check to see if location exists.
   if (MakeSureFileDoesNotExist(fname) != proto::system::OK) {
     auto wCb = [cb](EventLoop::Status) { cb(proto::system::PATH_ALREADY_EXISTS); };
-    CHECK(eventLoop_->registerTimer(std::move(wCb), false, 0) > 0);
+    CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
     return;
   }
 
@@ -208,14 +210,14 @@ void HeronLocalFileStateMgr::CreateExecutionState(const proto::system::Execution
   _st.SerializeToString(&contents);
   proto::system::StatusCode status = WriteToFile(fname, contents);
   auto wCb = [cb, status](EventLoop::Status) { cb(status); };
-  CHECK(eventLoop_->registerTimer(std::move(wCb), false, 0) > 0);
+  CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
 }
 
 void HeronLocalFileStateMgr::DeleteExecutionState(const std::string& _topology_name,
                                                   VCallback<proto::system::StatusCode> cb) {
   proto::system::StatusCode status = DeleteFile(GetExecutionStatePath(_topology_name));
   auto wCb = [cb, status](EventLoop::Status) { cb(status); };
-  CHECK(eventLoop_->registerTimer(std::move(wCb), false, 0) > 0);
+  CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
 }
 
 void HeronLocalFileStateMgr::GetExecutionState(const std::string& _topology_name,
@@ -230,7 +232,7 @@ void HeronLocalFileStateMgr::GetExecutionState(const std::string& _topology_name
     }
   }
   auto wCb = [cb, status](EventLoop::Status) { cb(status); };
-  CHECK(eventLoop_->registerTimer(std::move(wCb), false, 0) > 0);
+  CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
 }
 
 void HeronLocalFileStateMgr::SetExecutionState(const proto::system::ExecutionState& _st,
@@ -240,7 +242,7 @@ void HeronLocalFileStateMgr::SetExecutionState(const proto::system::ExecutionSta
   _st.SerializeToString(&contents);
   proto::system::StatusCode status = WriteToFile(fname, contents);
   auto wCb = [cb, status](EventLoop::Status) { cb(status); };
-  CHECK(eventLoop_->registerTimer(std::move(wCb), false, 0) > 0);
+  CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
 }
 
 void HeronLocalFileStateMgr::ListExecutionStateTopologies(std::vector<sp_string>* _return,
@@ -250,7 +252,7 @@ void HeronLocalFileStateMgr::ListExecutionStateTopologies(std::vector<sp_string>
     status = proto::system::NOTOK;
   }
   auto wCb = [cb, status](EventLoop::Status) { cb(status); };
-  CHECK(eventLoop_->registerTimer(std::move(wCb), false, 0) > 0);
+  CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
 }
 
 void HeronLocalFileStateMgr::ListTopologies(std::vector<sp_string>* _return,
@@ -260,7 +262,7 @@ void HeronLocalFileStateMgr::ListTopologies(std::vector<sp_string>* _return,
     status = proto::system::NOTOK;
   }
   auto wCb = [cb, status](EventLoop::Status) { cb(status); };
-  CHECK(eventLoop_->registerTimer(std::move(wCb), false, 0) > 0);
+  CHECK_GT(eventLoop_->registerTimer(std::move(wCb), false, 0), 0);
 }
 
 proto::system::StatusCode HeronLocalFileStateMgr::ReadAllFileContents(const std::string& _filename,
@@ -333,7 +335,7 @@ void HeronLocalFileStateMgr::CheckTMasterLocation(std::string topology_name, tim
     this->CheckTMasterLocation(topology_name, nlast_change, std::move(watcher), status);
   };
 
-  CHECK(eventLoop_->registerTimer(std::move(cb), false, 1000000) > 0);
+  CHECK_GT(eventLoop_->registerTimer(std::move(cb), false, 1000000), 0);
 }
 }  // namespace common
 }  // namespace heron

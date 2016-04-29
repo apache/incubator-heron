@@ -17,8 +17,8 @@
 #include "config/topology-config-vars.h"
 #include "config/topology-config-helper.h"
 #include "config/physical-plan-helper.h"
-#include "heron-statemgr.h"
-#include "heron-localfilestatemgr.h"
+#include "statemgr/heron-statemgr.h"
+#include "statemgr/heron-localfilestatemgr.h"
 
 #include "manager/tmaster.h"
 #include "manager/stmgr.h"
@@ -183,7 +183,7 @@ void StartTMaster(EventLoopImpl*& ss, heron::tmaster::TMaster*& tmaster,
   tmaster =
     new heron::tmaster::TMaster(zkhostportlist, topology_name, topology_id,
                                 dpath, stmgrs_id_list, tmaster_controller_port, tmaster_port,
-                                tmaster_stats_port, metrics_mgr_port, 
+                                tmaster_stats_port, metrics_mgr_port,
                                 metrics_sinks_config_filename, LOCALHOST, ss);
   tmaster_thread = new std::thread(StartServer, ss);
 }

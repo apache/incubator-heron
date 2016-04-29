@@ -16,6 +16,8 @@
 
 #include "statemgr/heron-statemgr.h"
 #include <iostream>
+#include <string>
+#include <vector>
 #include "statemgr/heron-localfilestatemgr.h"
 #include "statemgr/heron-zkstatemgr.h"
 #include "proto/messages.h"

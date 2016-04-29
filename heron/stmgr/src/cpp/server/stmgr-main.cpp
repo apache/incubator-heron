@@ -10,7 +10,7 @@
 #include "network/network.h"
 
 #include "config/heron-internals-config-reader.h"
-#include "heron-statemgr.h"
+#include "statemgr/heron-statemgr.h"
 #include "manager/stmgr.h"
 
 int main(int argc, char* argv[]) {

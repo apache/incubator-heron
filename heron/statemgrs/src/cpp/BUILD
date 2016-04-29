@@ -15,6 +15,7 @@ cc_library(
     copts = [
         "-Iheron",
         "-Iheron/common/src/cpp",
+        "-Iheron/statemgrs/src/cpp",
         "-I$(GENDIR)/heron",
         "-I$(GENDIR)/heron/common/src/cpp",
     ],
