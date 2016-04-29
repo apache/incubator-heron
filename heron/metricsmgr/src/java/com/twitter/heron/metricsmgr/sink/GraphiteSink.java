@@ -44,7 +44,7 @@ import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
 public class GraphiteSink implements IMetricsSink {
   private static final Logger LOG = Logger.getLogger(GraphiteSink.class.getName());
 
-  private final static int DEFAULT_MAX_CONNECTION_FAILURES = 5;
+  private static final int DEFAULT_MAX_CONNECTION_FAILURES = 5;
 
   // These configs would be read from sink-configs.yaml
   private static final String SERVER_HOST_KEY = "graphite_host";
@@ -65,13 +65,14 @@ public class GraphiteSink implements IMetricsSink {
     final int serverPort = TypeUtils.getInt(conf.get(SERVER_PORT_KEY));
 
     // Safe check
-    if (conf.get(SERVER_HOST_KEY) == null ||
-        conf.get(SERVER_PORT_KEY) == null) {
+    if (conf.get(SERVER_HOST_KEY) == null
+        || conf.get(SERVER_PORT_KEY) == null) {
       throw new IllegalArgumentException("Server's host or port could not fetch from config");
     }
 
-    int maxServerReconnectAttempts = conf.get(SERVER_HOST_KEY) == null ?
-        DEFAULT_MAX_CONNECTION_FAILURES : TypeUtils.getInt(conf.get(SERVER_MAX_RECONNECT_ATTEMPTS));
+    int maxServerReconnectAttempts = conf.get(SERVER_HOST_KEY) == null
+        ? DEFAULT_MAX_CONNECTION_FAILURES
+        : TypeUtils.getInt(conf.get(SERVER_MAX_RECONNECT_ATTEMPTS));
 
     // Get Graphite metrics graph prefix.
     metricsPrefix = (String) conf.get(METRICS_PREFIX);
@@ -101,7 +102,8 @@ public class GraphiteSink implements IMetricsSink {
 
     // Collect data points.
     // Every data point would look like:
-    // {metricsPrefix}.{topologyName}.{host:port/componentName/instanceId}.{metricName} {metricValue} {timestamp} \n
+    // {metricsPrefix}.{topologyName}.{host:port/componentName/instanceId}.{metricName}
+    //    {metricValue} {timestamp} \n
     for (MetricsInfo metricsInfo : record.getMetrics()) {
       lines.append(
           metricsPathPrefix.toString() + "."

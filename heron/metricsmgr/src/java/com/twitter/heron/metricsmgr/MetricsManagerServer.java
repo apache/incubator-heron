@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.protobuf.Message;
@@ -122,8 +123,8 @@ public class MetricsManagerServer extends HeronServer {
 
   @Override
   public void onConnect(SocketChannel channel) {
-    LOG.info("Metrics Manager got a new connection from host:port " +
-        channel.socket().getRemoteSocketAddress());
+    LOG.info("Metrics Manager got a new connection from host:port "
+        + channel.socket().getRemoteSocketAddress());
     // Nothing here. Everything happens in the register
   }
 
@@ -158,22 +159,19 @@ public class MetricsManagerServer extends HeronServer {
 
   @Override
   public void onClose(SocketChannel channel) {
-    LOG.severe("Got a connection close from remote socket address: " +
-        channel.socket().getRemoteSocketAddress());
+    LOG.log(Level.SEVERE, "Got a connection close from remote socket address: {0}",
+        new Object[] {channel.socket().getRemoteSocketAddress()});
 
     // Unregister the Publisher
-    Metrics.MetricPublisher request = publisherMap.remove(channel.socket().getRemoteSocketAddress());
+    Metrics.MetricPublisher request =
+        publisherMap.remove(channel.socket().getRemoteSocketAddress());
     if (request == null) {
       LOG.severe("Unknown connection closed");
     } else {
-      LOG.severe(String.format("Un-register publish from hostname: %s," +
-              " component_name: %s, port: %d," +
-              " instance_id: %s, instance_index: %d",
-          request.getHostname(),
-          request.getComponentName(),
-          request.getPort(),
-          request.getInstanceId(),
-          request.getInstanceIndex()));
+      LOG.log(Level.SEVERE, "Un-register publish from hostname: {0},"
+          + " component_name: {1}, port: {2}, instance_id: {3}, instance_index: {4}",
+          new Object[] {request.getHostname(), request.getComponentName(), request.getPort(),
+          request.getInstanceId(), request.getInstanceIndex()});
     }
 
     // Update Metrics
@@ -187,30 +185,25 @@ public class MetricsManagerServer extends HeronServer {
     handlePublisherPublishMessage(request, message);
   }
 
-  private void handleRegisterRequest(REQID rid, SocketChannel channel, Metrics.MetricPublisherRegisterRequest request) {
+  private void handleRegisterRequest(
+        REQID rid,
+        SocketChannel channel,
+        Metrics.MetricPublisherRegisterRequest request) {
     Metrics.MetricPublisher publisher = request.getPublisher();
-    LOG.info(String.format("Got a new register publisher from hostname: %s," +
-            " component_name: %s, port: %d," +
-            " instance_id: %s, instance_index: %d from %s",
-        publisher.getHostname(),
-        publisher.getComponentName(),
-        publisher.getPort(),
-        publisher.getInstanceId(),
-        publisher.getInstanceIndex(),
-        channel.socket().getRemoteSocketAddress()));
+    LOG.log(Level.SEVERE, "Got a new register publisher from hostname: {0},"
+        + " component_name: {1}, port: {2}, instance_id: {3}, instance_index: {4} from {5}",
+        new Object[] {publisher.getHostname(), publisher.getComponentName(), publisher.getPort(),
+            publisher.getInstanceId(), publisher.getInstanceIndex(),
+            channel.socket().getRemoteSocketAddress()});
 
     // Check whether publisher has already been registered
     Common.StatusCode responseStatusCode = Common.StatusCode.NOTOK;
 
     if (publisherMap.containsKey(channel.socket().getRemoteSocketAddress())) {
-      LOG.severe(String.format("Metrics publisher already exists for hostname: %s," +
-              " component_name: %s, port: %d," +
-              " instance_id: %s, instance_index: %d",
-          publisher.getHostname(),
-          publisher.getComponentName(),
-          publisher.getPort(),
-          publisher.getInstanceId(),
-          publisher.getInstanceIndex()));
+      LOG.log(Level.SEVERE, "Metrics publisher already exists for hostname: {0},"
+          + " component_name: {1}, port: {2}, instance_id: {3}, instance_index: {4}",
+          new Object[] {publisher.getHostname(), publisher.getComponentName(), publisher.getPort(),
+              publisher.getInstanceId(), publisher.getInstanceIndex()});
     } else {
       publisherMap.put(channel.socket().getRemoteSocketAddress(), publisher);
       // Add it to the map
@@ -231,15 +224,11 @@ public class MetricsManagerServer extends HeronServer {
   private void handlePublisherPublishMessage(Metrics.MetricPublisher request,
                                              Metrics.MetricPublisherPublishMessage message) {
     if (message.getMetricsCount() <= 0 && message.getExceptionsCount() <= 0) {
-      LOG.severe(
-          String.format("Publish message has no metrics nor exceptions for message from hostname: %s," +
-                  " component_name: %s, port: %d," +
-                  " instance_id: %s, instance_index: %d",
-              request.getHostname(),
-              request.getComponentName(),
-              request.getPort(),
-              request.getInstanceId(),
-              request.getInstanceIndex()));
+      LOG.log(Level.SEVERE,
+          "Publish message has no metrics nor exceptions for message from hostname: {0},"
+          + " component_name: {1}, port: {2}, instance_id: {3}, instance_index: {4}",
+          new Object[] {request.getHostname(), request.getComponentName(), request.getPort(),
+              request.getInstanceId(), request.getInstanceIndex()});
       return;
     }
 
@@ -286,7 +275,8 @@ public class MetricsManagerServer extends HeronServer {
       Metrics.MetricPublisher request,
       Metrics.TMasterLocationRefreshMessage tMasterLocationRefreshMessage) {
     TopologyMaster.TMasterLocation oldLocation =
-        (TopologyMaster.TMasterLocation) SingletonRegistry.INSTANCE.getSingleton(TMASTER_LOCATION_BEAN_NAME);
+        (TopologyMaster.TMasterLocation)
+            SingletonRegistry.INSTANCE.getSingleton(TMASTER_LOCATION_BEAN_NAME);
 
     TopologyMaster.TMasterLocation newLocation = tMasterLocationRefreshMessage.getTmaster();
 
