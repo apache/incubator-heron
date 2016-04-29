@@ -1,3 +1,19 @@
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 //////////////////////////////////////////////////////////////////////////////
 //
 // heron-zkstatemgr.h
@@ -28,19 +44,17 @@
 
 #include "zookeeper/zkclient.h"
 #include "zookeeper/zkclient_factory.h"
-#include "heron-statemgr.h"
+#include "statemgr/heron-statemgr.h"
 
 class ZKClient;
 
-namespace heron { namespace common {
+namespace heron {
+namespace common {
 
-class HeronZKStateMgr : public HeronStateMgr
-{
+class HeronZKStateMgr : public HeronStateMgr {
  public:
-  HeronZKStateMgr(const std::string& zkhostport,
-                  const std::string& topleveldir,
-                  EventLoop* eventLoop,
-                  bool exitOnSessionExpiry);
+  HeronZKStateMgr(const std::string& zkhostport, const std::string& topleveldir,
+                  EventLoop* eventLoop, bool exitOnSessionExpiry);
   virtual ~HeronZKStateMgr();
 
   //
@@ -50,8 +64,7 @@ class HeronZKStateMgr : public HeronStateMgr
   void InitTree();
 
   // Sets up a watch on tmaster location change
-  void SetTMasterLocationWatch(const std::string& _topology_name,
-                               VCallback<> _watcher);
+  void SetTMasterLocationWatch(const std::string& _topology_name, VCallback<> _watcher);
 
   // Sets the Tmaster
   void SetTMasterLocation(const proto::tmaster::TMasterLocation& _location,
@@ -61,14 +74,10 @@ class HeronZKStateMgr : public HeronStateMgr
                           VCallback<proto::system::StatusCode> _cb);
 
   // Gets/Sets the Topology
-  void CreateTopology(const proto::api::Topology& _top,
-                      VCallback<proto::system::StatusCode> _cb);
-  void DeleteTopology(const std::string& _topology_name,
-                      VCallback<proto::system::StatusCode> _cb);
-  void SetTopology(const proto::api::Topology& _top,
-                   VCallback<proto::system::StatusCode> _cb);
-  void GetTopology(const std::string& _topology_name,
-                   proto::api::Topology* _return,
+  void CreateTopology(const proto::api::Topology& _top, VCallback<proto::system::StatusCode> _cb);
+  void DeleteTopology(const std::string& _topology_name, VCallback<proto::system::StatusCode> _cb);
+  void SetTopology(const proto::api::Topology& _top, VCallback<proto::system::StatusCode> _cb);
+  void GetTopology(const std::string& _topology_name, proto::api::Topology* _return,
                    VCallback<proto::system::StatusCode> _cb);
 
   // Gets/Sets physical plan
@@ -78,8 +87,7 @@ class HeronZKStateMgr : public HeronStateMgr
                           VCallback<proto::system::StatusCode> _cb);
   void SetPhysicalPlan(const proto::system::PhysicalPlan& _pplan,
                        VCallback<proto::system::StatusCode> _cb);
-  void GetPhysicalPlan(const std::string& _topology_name,
-                       proto::system::PhysicalPlan* _return,
+  void GetPhysicalPlan(const std::string& _topology_name, proto::system::PhysicalPlan* _return,
                        VCallback<proto::system::StatusCode> _cb);
 
   // Gets/Sets execution state
@@ -87,65 +95,50 @@ class HeronZKStateMgr : public HeronStateMgr
                             VCallback<proto::system::StatusCode> _cb);
   void DeleteExecutionState(const std::string& _topology_name,
                             VCallback<proto::system::StatusCode> _cb);
-  void GetExecutionState(const std::string& _topology_name,
-                         proto::system::ExecutionState* _return,
+  void GetExecutionState(const std::string& _topology_name, proto::system::ExecutionState* _return,
                          VCallback<proto::system::StatusCode> _cb);
   void SetExecutionState(const proto::system::ExecutionState& _state,
                          VCallback<proto::system::StatusCode> _cb);
 
-  void ListTopologies(std::vector<sp_string>* _return,
-                      VCallback<proto::system::StatusCode> _cb);
+  void ListTopologies(std::vector<sp_string>* _return, VCallback<proto::system::StatusCode> _cb);
   void ListExecutionStateTopologies(std::vector<sp_string>* _return,
-                   VCallback<proto::system::StatusCode> _cb);
+                                    VCallback<proto::system::StatusCode> _cb);
 
   virtual std::string GetStateLocation() { return zkhostport_; }
 
  protected:
   // A test ONLY constructor used to pass a ZKClientFactory which could
   // return a MockZKClient
-  HeronZKStateMgr(const std::string& zkhostport,
-                  const std::string& topleveldir,
-                  EventLoop* eventLoop,
-                  ZKClientFactory* zkclient_factory,
+  HeronZKStateMgr(const std::string& zkhostport, const std::string& topleveldir,
+                  EventLoop* eventLoop, ZKClientFactory* zkclient_factory,
                   bool exitOnSessionExpiry = false);
 
  private:
   // Done methods
-  void SetTMasterLocationDone(VCallback<proto::system::StatusCode> _cb,
-                              sp_int32 _rc);
-  void GetTMasterLocationDone(std::string* _contents,
-                              proto::tmaster::TMasterLocation* _return,
-                              VCallback<proto::system::StatusCode> _cb,
-                              sp_int32 _rc);
+  void SetTMasterLocationDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
+  void GetTMasterLocationDone(std::string* _contents, proto::tmaster::TMasterLocation* _return,
+                              VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
 
   void CreateTopologyDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
   void DeleteTopologyDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
   void SetTopologyDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
-  void GetTopologyDone(std::string* _contents,
-                       proto::api::Topology* _return,
-                       VCallback<proto::system::StatusCode> _cb,
-                       sp_int32 _rc);
+  void GetTopologyDone(std::string* _contents, proto::api::Topology* _return,
+                       VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
 
   void CreatePhysicalPlanDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
   void DeletePhysicalPlanDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
   void SetPhysicalPlanDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
-  void GetPhysicalPlanDone(std::string* _contents,
-                           proto::system::PhysicalPlan* _return,
-                           VCallback<proto::system::StatusCode> _cb,
-                           sp_int32 _rc);
+  void GetPhysicalPlanDone(std::string* _contents, proto::system::PhysicalPlan* _return,
+                           VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
 
   void CreateExecutionStateDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
   void DeleteExecutionStateDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
   void SetExecutionStateDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
-  void GetExecutionStateDone(std::string* _contents,
-                             proto::system::ExecutionState* _return,
-                             VCallback<proto::system::StatusCode> _cb,
-                             sp_int32 _rc);
+  void GetExecutionStateDone(std::string* _contents, proto::system::ExecutionState* _return,
+                             VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
 
-  void ListTopologiesDone(VCallback<proto::system::StatusCode> _cb,
-                          sp_int32 _rc);
-  void ListExecutionStateTopologiesDone(VCallback<proto::system::StatusCode> _cb,
-                                        sp_int32 _rc);
+  void ListTopologiesDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
+  void ListExecutionStateTopologiesDone(VCallback<proto::system::StatusCode> _cb, sp_int32 _rc);
 
   // This is the callback passed to ZkClient, to handle tmaster location
   // changes. It inturn calls the tmaster_location_watcher to notify the
@@ -194,8 +187,8 @@ class HeronZKStateMgr : public HeronStateMgr
     VCallback<> watcher_cb;
     std::string topology_name;
 
-    TMasterLocationWatchInfo(VCallback<> watcher, std::string name) :
-      watcher_cb(std::move(watcher)), topology_name(name) { }
+    TMasterLocationWatchInfo(VCallback<> watcher, std::string name)
+        : watcher_cb(std::move(watcher)), topology_name(name) {}
   };
 
   const TMasterLocationWatchInfo* tmaster_location_watcher_info_;
@@ -206,7 +199,7 @@ class HeronZKStateMgr : public HeronStateMgr
   // For easier unit testing, to allow access to private methods.
   friend class HeronZKStateMgrTest;
 };
-
-}} // end namespace
+}  // namespace common
+}  // namespace heron
 
 #endif

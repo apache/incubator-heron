@@ -1,3 +1,19 @@
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 //////////////////////////////////////////////////////////////////////////////
 //
 // heron-statemgr.h
@@ -29,20 +45,21 @@
 
 #include <string>
 #include <vector>
+#include "basics/basics.h"
+#include "network/network.h"
 #include "proto/messages.h"
 
-namespace heron { namespace common {
+namespace heron {
+namespace common {
 
-class HeronStateMgr
-{
+class HeronStateMgr {
  public:
-  HeronStateMgr(const std::string& _topleveldir);
+  explicit HeronStateMgr(const std::string& _topleveldir);
   virtual ~HeronStateMgr();
 
   // Factory method to create
   static HeronStateMgr* MakeStateMgr(const std::string& _zk_hostport,
-                                     const std::string& _topleveldir,
-                                     EventLoop* eventLoop,
+                                     const std::string& _topleveldir, EventLoop* eventLoop,
                                      bool exitOnSessionExpiry = true);
 
   //
@@ -56,26 +73,24 @@ class HeronStateMgr
   // Everytime there is a change in tmaster location, _watcher
   // will be called. Users dont need to be bothered about
   // registering the watcher again as that will be done by us.
-  virtual void SetTMasterLocationWatch(const std::string& _topology_name,
-                                       VCallback<> _watcher) = 0;
+  virtual void SetTMasterLocationWatch(const std::string& _topology_name, VCallback<> _watcher) = 0;
 
   // Sets/Gets the Tmaster
   virtual void GetTMasterLocation(const std::string& _topology_name,
-                          proto::tmaster::TMasterLocation* _return,
-                          VCallback<proto::system::StatusCode> _cb) = 0;
+                                  proto::tmaster::TMasterLocation* _return,
+                                  VCallback<proto::system::StatusCode> _cb) = 0;
   virtual void SetTMasterLocation(const proto::tmaster::TMasterLocation& _location,
-                          VCallback<proto::system::StatusCode> _cb) = 0;
+                                  VCallback<proto::system::StatusCode> _cb) = 0;
 
   // Gets/Sets the Topology
   virtual void CreateTopology(const proto::api::Topology& _top,
-                   VCallback<proto::system::StatusCode> _cb) = 0;
+                              VCallback<proto::system::StatusCode> _cb) = 0;
   virtual void DeleteTopology(const std::string& _topology_name,
                               VCallback<proto::system::StatusCode> _cb) = 0;
   virtual void SetTopology(const proto::api::Topology& _top,
                            VCallback<proto::system::StatusCode> _cb) = 0;
-  virtual void GetTopology(const std::string& _topology_name,
-                   proto::api::Topology* _return,
-                   VCallback<proto::system::StatusCode> _cb) = 0;
+  virtual void GetTopology(const std::string& _topology_name, proto::api::Topology* _return,
+                           VCallback<proto::system::StatusCode> _cb) = 0;
 
   // Gets/Sets PhysicalPlan
   virtual void CreatePhysicalPlan(const proto::system::PhysicalPlan& _plan,
@@ -83,32 +98,31 @@ class HeronStateMgr
   virtual void DeletePhysicalPlan(const std::string& _topology_name,
                                   VCallback<proto::system::StatusCode> _cb) = 0;
   virtual void SetPhysicalPlan(const proto::system::PhysicalPlan& _plan,
-                   VCallback<proto::system::StatusCode> _cb) = 0;
+                               VCallback<proto::system::StatusCode> _cb) = 0;
   virtual void GetPhysicalPlan(const std::string& _topology_name,
-                   proto::system::PhysicalPlan* _return,
-                   VCallback<proto::system::StatusCode> _cb) = 0;
-
+                               proto::system::PhysicalPlan* _return,
+                               VCallback<proto::system::StatusCode> _cb) = 0;
 
   // Gets/Sets ExecutionState
   virtual void CreateExecutionState(const proto::system::ExecutionState& _st,
-                   VCallback<proto::system::StatusCode> _cb) = 0;
+                                    VCallback<proto::system::StatusCode> _cb) = 0;
   virtual void DeleteExecutionState(const std::string& _topology_name,
-                   VCallback<proto::system::StatusCode> _cb) = 0;
+                                    VCallback<proto::system::StatusCode> _cb) = 0;
   virtual void GetExecutionState(const std::string& _topology_name,
-                   proto::system::ExecutionState* _return,
-                   VCallback<proto::system::StatusCode> _cb) = 0;
+                                 proto::system::ExecutionState* _return,
+                                 VCallback<proto::system::StatusCode> _cb) = 0;
   virtual void SetExecutionState(const proto::system::ExecutionState& _st,
-                   VCallback<proto::system::StatusCode> _cb) = 0;
+                                 VCallback<proto::system::StatusCode> _cb) = 0;
   virtual void ListExecutionState(const std::vector<sp_string>& _topologies,
-                   std::vector<proto::system::ExecutionState*>* _return,
-                   VCallback<proto::system::StatusCode> _cb);
+                                  std::vector<proto::system::ExecutionState*>* _return,
+                                  VCallback<proto::system::StatusCode> _cb);
 
   // Calls to list the topologies and physical plans
   virtual void ListTopologies(std::vector<sp_string>* _return,
-                   VCallback<proto::system::StatusCode> _cb) = 0;
+                              VCallback<proto::system::StatusCode> _cb) = 0;
   // Calls to list the topology names that have execution state
   virtual void ListExecutionStateTopologies(std::vector<sp_string>* _return,
-                   VCallback<proto::system::StatusCode> _cb) = 0;
+                                            VCallback<proto::system::StatusCode> _cb) = 0;
 
   virtual std::string GetStateLocation() = 0;
   std::string GetTopLevelDir() { return topleveldir_; }
@@ -129,12 +143,12 @@ class HeronStateMgr
 
  private:
   void ListExecutionStateDone(std::vector<proto::system::ExecutionState*>* _return,
-                               size_t _required_size, proto::system::ExecutionState* _s,
-                               VCallback<proto::system::StatusCode> _cb,
-                               proto::system::StatusCode _status);
-  std::string         topleveldir_;
+                              size_t _required_size, proto::system::ExecutionState* _s,
+                              VCallback<proto::system::StatusCode> _cb,
+                              proto::system::StatusCode _status);
+  std::string topleveldir_;
 };
-
-}} // end namespace
+}  // namespace common
+}  // namespace heron
 
 #endif
