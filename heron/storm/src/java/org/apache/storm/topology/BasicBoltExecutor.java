@@ -21,6 +21,7 @@ import org.apache.storm.task.TopologyContext;
 import org.apache.storm.tuple.Tuple;
 
 public class BasicBoltExecutor implements IRichBolt {
+  private static final long serialVersionUID = 235217339000923019L;
   private IBasicBolt delegate;
   private transient BasicOutputCollector collector;
 
@@ -35,7 +36,7 @@ public class BasicBoltExecutor implements IRichBolt {
 
 
   @Override
-  public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+  public void prepare(Map<String, Object> stormConf, TopologyContext context, OutputCollector collector) {
     delegate.prepare(stormConf, context);
     this.collector = new BasicOutputCollector(collector);
   }

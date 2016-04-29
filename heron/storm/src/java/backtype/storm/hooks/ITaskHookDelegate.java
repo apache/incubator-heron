@@ -38,11 +38,11 @@ import backtype.storm.task.TopologyContext;
  */
 public class ITaskHookDelegate implements com.twitter.heron.api.hooks.ITaskHook {
   private List<ITaskHook> hooks_;
-  private Map conf_;
+  private Map<String, Object> conf_;
 
   // zero arg constructor
   public ITaskHookDelegate() {
-    hooks_ = new LinkedList<ITaskHook>();
+    hooks_ = new LinkedList<>();
   }
 
   public void addHook(ITaskHook hook) {
@@ -53,12 +53,12 @@ public class ITaskHookDelegate implements com.twitter.heron.api.hooks.ITaskHook 
     return hooks_;
   }
 
-  public Map getConf() {
+  public Map<String, Object> getConf() {
     return conf_;
   }
 
   @Override
-  public void prepare(Map conf, com.twitter.heron.api.topology.TopologyContext context) {
+  public void prepare(Map<String, Object> conf, com.twitter.heron.api.topology.TopologyContext context) {
     this.conf_ = conf;
     if (!conf.containsKey(Config.STORMCOMPAT_TOPOLOGY_AUTO_TASK_HOOKS)) {
       throw new RuntimeException("StormCompat Translation not done for task hooks");

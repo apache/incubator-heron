@@ -30,7 +30,7 @@ import org.json.simple.JSONAware;
 public class GeneralTopologyContext implements JSONAware {
   private com.twitter.heron.api.topology.GeneralTopologyContext delegate;
 
-  public GeneralTopologyContext(StormTopology topology, Map stormConf,
+  public GeneralTopologyContext(StormTopology topology, Map<String, Object> stormConf,
                                 Map<Integer, String> taskToComponent, Map<String, List<Integer>> componentToSortedTasks,
                                 Map<String, Map<String, Fields>> componentToStreamToFields, String stormId) {
     throw new RuntimeException("GeneralTopologyContext should never be initiated this way");

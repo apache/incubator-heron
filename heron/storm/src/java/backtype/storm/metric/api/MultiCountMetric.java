@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MultiCountMetric implements IMetric {
-  Map<String, CountMetric> _value = new HashMap();
+  Map<String, CountMetric> _value = new HashMap<>();
 
   public MultiCountMetric() {
   }
@@ -32,7 +32,7 @@ public class MultiCountMetric implements IMetric {
   }
 
   public Object getValueAndReset() {
-    Map ret = new HashMap();
+    Map<String, Object> ret = new HashMap<>();
     for (Map.Entry<String, CountMetric> e : _value.entrySet()) {
       ret.put(e.getKey(), e.getValue().getValueAndReset());
     }

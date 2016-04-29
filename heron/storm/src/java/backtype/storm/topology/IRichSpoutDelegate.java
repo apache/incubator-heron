@@ -16,6 +16,8 @@ package backtype.storm.topology;
 
 import java.util.Map;
 
+import com.twitter.heron.api.spout.SpoutOutputCollector;
+
 import backtype.storm.spout.SpoutOutputCollectorImpl;
 import backtype.storm.task.TopologyContext;
 
@@ -24,6 +26,7 @@ import backtype.storm.task.TopologyContext;
  * to use to implement components of the topology.
  */
 public class IRichSpoutDelegate implements com.twitter.heron.api.spout.IRichSpout {
+  private static final long serialVersionUID = -4310232227720592316L;
   private IRichSpout delegate;
   private TopologyContext topologyContextImpl;
   private SpoutOutputCollectorImpl spoutOutputCollectorImpl;
@@ -33,8 +36,8 @@ public class IRichSpoutDelegate implements com.twitter.heron.api.spout.IRichSpou
   }
 
   @Override
-  public void open(Map conf, com.twitter.heron.api.topology.TopologyContext context,
-                   com.twitter.heron.api.spout.SpoutOutputCollector collector) {
+  public void open(Map<String, Object> conf, com.twitter.heron.api.topology.TopologyContext context,
+                   SpoutOutputCollector collector) {
     topologyContextImpl = new TopologyContext(context);
     spoutOutputCollectorImpl = new SpoutOutputCollectorImpl(collector);
     delegate.open(conf, topologyContextImpl, spoutOutputCollectorImpl);

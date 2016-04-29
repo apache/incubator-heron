@@ -23,7 +23,7 @@ import com.twitter.heron.api.Config;
 import backtype.storm.hooks.ITaskHookDelegate;
 
 public class ConfigUtils {
-  public static Config translateConfig(Map stormConfig) {
+  public static Config translateConfig(Map<String, Object> stormConfig) {
     Config heronConfig = new Config(stormConfig);
     // Look at serialization stuff first
     doSerializationTranslation(heronConfig);
@@ -96,7 +96,7 @@ public class ConfigUtils {
     List<String> hooks = heronConfig.getAutoTaskHooks();
     if (hooks != null) {
       heronConfig.put(backtype.storm.Config.STORMCOMPAT_TOPOLOGY_AUTO_TASK_HOOKS, hooks);
-      List<String> translationHooks = new LinkedList<String>();
+      List<String> translationHooks = new LinkedList<>();
       translationHooks.add(ITaskHookDelegate.class.getName());
       heronConfig.setAutoTaskHooks(translationHooks);
     }

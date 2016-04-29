@@ -19,6 +19,8 @@ import java.util.Map;
 import org.apache.storm.spout.SpoutOutputCollectorImpl;
 import org.apache.storm.task.TopologyContext;
 
+import com.twitter.heron.api.spout.SpoutOutputCollector;
+
 /**
  * When writing topologies using Java, {@link IRichBolt} and {@link IRichSpout} are the main interfaces
  * to use to implement components of the topology.
@@ -33,8 +35,8 @@ public class IRichSpoutDelegate implements com.twitter.heron.api.spout.IRichSpou
   }
 
   @Override
-  public void open(Map conf, com.twitter.heron.api.topology.TopologyContext context,
-                   com.twitter.heron.api.spout.SpoutOutputCollector collector) {
+  public void open(Map<String, Object> conf, com.twitter.heron.api.topology.TopologyContext context,
+                   SpoutOutputCollector collector) {
     topologyContextImpl = new TopologyContext(context);
     spoutOutputCollectorImpl = new SpoutOutputCollectorImpl(collector);
     delegate.open(conf, topologyContextImpl, spoutOutputCollectorImpl);

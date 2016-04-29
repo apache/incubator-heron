@@ -24,7 +24,7 @@ import java.util.Map;
 public class JavaSerializer implements IPluggableSerializer {
 
   @Override
-  public void initialize(Map config) {
+  public void initialize(Map<String, Object> config) {
   }
 
   @Override

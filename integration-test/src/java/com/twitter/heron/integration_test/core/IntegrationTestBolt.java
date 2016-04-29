@@ -33,7 +33,7 @@ public class IntegrationTestBolt implements IRichBolt {
 
 
   @Override
-  public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
+  public void prepare(Map<String, Object> map, TopologyContext topologyContext, OutputCollector outputCollector) {
     // Set the # of terminal Signal to receive, = the # number all instance of upstream components
     HashSet<String> upstreamComponents = new HashSet<String>();
     for (TopologyAPI.StreamId streamId : topologyContext.getThisSources().keySet()) {

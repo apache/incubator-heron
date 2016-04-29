@@ -29,7 +29,7 @@ import backtype.storm.generated.StormTopology;
 
 
 public interface ILocalCluster {
-  void submitTopology(String topologyName, Map conf, StormTopology topology) throws AlreadyAliveException, InvalidTopologyException;
+  void submitTopology(String topologyName, Map<String, Object> conf, StormTopology topology) throws AlreadyAliveException, InvalidTopologyException;
 
   // void submitTopologyWithOpts(String topologyName, Map conf, StormTopology topology, SubmitOptions submitOpts) throws AlreadyAliveException, InvalidTopologyException;
   void killTopology(String topologyName) throws NotAliveException;
@@ -48,5 +48,6 @@ public interface ILocalCluster {
 
   // ClusterSummary getClusterInfo();
   // TopologyInfo getTopologyInfo(String id);
+  @SuppressWarnings("rawtypes")
   Map getState();
 }

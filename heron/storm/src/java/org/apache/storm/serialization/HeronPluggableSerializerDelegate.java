@@ -29,7 +29,7 @@ public class HeronPluggableSerializerDelegate implements com.twitter.heron.api.s
   }
 
   @Override
-  public void initialize(Map config) {
+  public void initialize(Map<String, Object> config) {
     kryo = SerializationFactory.getKryo(config);
     kryoOut = new Output(2000, 2000000000);
     kryoIn = new Input(1);

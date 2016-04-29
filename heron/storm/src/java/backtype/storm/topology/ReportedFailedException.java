@@ -15,6 +15,8 @@
 package backtype.storm.topology;
 
 public class ReportedFailedException extends FailedException {
+  private static final long serialVersionUID = -7244058034931081665L;
+
   public ReportedFailedException() {
     super();
   }

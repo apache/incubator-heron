@@ -27,7 +27,7 @@ public class WorkerTopologyContext extends GeneralTopologyContext {
 
   public WorkerTopologyContext(
       StormTopology topology,
-      Map stormConf,
+      Map<String, Object> stormConf,
       Map<Integer, String> taskToComponent,
       Map<String, List<Integer>> componentToSortedTasks,
       Map<String, Map<String, Fields>> componentToStreamToFields,
@@ -55,7 +55,7 @@ public class WorkerTopologyContext extends GeneralTopologyContext {
    * this will just return the current instance's taskId
    */
   public List<Integer> getThisWorkerTasks() {
-    List<Integer> retval = new LinkedList<Integer>();
+    List<Integer> retval = new LinkedList<>();
     retval.add(delegate_.getThisTaskId());
     return retval;
   }

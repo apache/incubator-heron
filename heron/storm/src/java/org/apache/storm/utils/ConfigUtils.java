@@ -23,7 +23,7 @@ import org.apache.storm.hooks.ITaskHookDelegate;
 import com.twitter.heron.api.Config;
 
 public class ConfigUtils {
-  public static Config translateConfig(Map stormConfig) {
+  public static Config translateConfig(Map<String, Object> stormConfig) {
     Config heronConfig = new Config(stormConfig);
     // Look at serialization stuff first
     doSerializationTranslation(heronConfig);

@@ -26,7 +26,7 @@ import com.twitter.heron.api.topology.TopologyContext;
 
 public class BaseTaskHook implements ITaskHook {
   @Override
-  public void prepare(Map conf, TopologyContext context) {
+  public void prepare(Map<String, Object> conf, TopologyContext context) {
   }
 
   @Override

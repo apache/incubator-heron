@@ -24,7 +24,7 @@ public class SpoutDeclarerImpl implements SpoutDeclarer {
   }
 
   @Override
-  public SpoutDeclarer addConfigurations(Map conf) {
+  public SpoutDeclarer addConfigurations(Map<String, Object> conf) {
     delegate.addConfigurations(conf);
     return this;
   }
