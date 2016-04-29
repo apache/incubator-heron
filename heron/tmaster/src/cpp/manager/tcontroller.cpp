@@ -1,50 +1,52 @@
-#include <iostream>
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
+#include "manager/tcontroller.h"
+#include <iostream>
+#include "manager/tmaster.h"
 #include "proto/messages.h"
 #include "basics/basics.h"
 #include "errors/errors.h"
 #include "threads/threads.h"
 #include "network/network.h"
 
-#include "manager/tmaster.h"
-#include "manager/tcontroller.h"
+namespace heron {
+namespace tmaster {
 
-namespace heron { namespace tmaster {
-
-TController::TController(EventLoop* eventLoop,
-                         const NetworkOptions& options,
-                         TMaster* tmaster)
-  : tmaster_(tmaster)
-{
+TController::TController(EventLoop* eventLoop, const NetworkOptions& options, TMaster* tmaster)
+    : tmaster_(tmaster) {
   http_server_ = new HTTPServer(eventLoop, options);
   // Install the handlers
-  auto cbActivate = [this] (IncomingHTTPRequest* request) {
-    this->HandleActivateRequest(request);
-  };
+  auto cbActivate = [this](IncomingHTTPRequest* request) { this->HandleActivateRequest(request); };
 
   http_server_->InstallCallBack("/activate", std::move(cbActivate));
 
-  auto cbDeActivate = [this] (IncomingHTTPRequest* request) {
+  auto cbDeActivate = [this](IncomingHTTPRequest* request) {
     this->HandleDeActivateRequest(request);
   };
 
   http_server_->InstallCallBack("/deactivate", std::move(cbDeActivate));
 }
 
-TController::~TController()
-{
-  delete http_server_;
-}
+TController::~TController() { delete http_server_; }
 
-sp_int32 TController::Start()
-{
-  return http_server_->Start();
-}
+sp_int32 TController::Start() { return http_server_->Start(); }
 
-void TController::HandleActivateRequest(IncomingHTTPRequest* request)
-{
-  LOG(INFO) << "Got a activate topology request from "
-            << request->GetRemoteHost() << ":"
+void TController::HandleActivateRequest(IncomingHTTPRequest* request) {
+  LOG(INFO) << "Got a activate topology request from " << request->GetRemoteHost() << ":"
             << request->GetRemotePort();
   const sp_string& id = request->GetValue("topologyid");
   if (id == "") {
@@ -72,7 +74,7 @@ void TController::HandleActivateRequest(IncomingHTTPRequest* request)
     return;
   }
 
-  auto cb = [request, this] (proto::system::StatusCode status) {
+  auto cb = [request, this](proto::system::StatusCode status) {
     this->HandleActivateRequestDone(request, status);
   };
 
@@ -80,8 +82,7 @@ void TController::HandleActivateRequest(IncomingHTTPRequest* request)
 }
 
 void TController::HandleActivateRequestDone(IncomingHTTPRequest* request,
-                                            proto::system::StatusCode _status)
-{
+                                            proto::system::StatusCode _status) {
   if (_status != proto::system::OK) {
     LOG(ERROR) << "Unable to Activate topology " << _status;
     http_server_->SendErrorReply(request, 500);
@@ -95,10 +96,8 @@ void TController::HandleActivateRequestDone(IncomingHTTPRequest* request,
   delete request;
 }
 
-void TController::HandleDeActivateRequest(IncomingHTTPRequest* request)
-{
-  LOG(INFO) << "Got a deactivate topology request from "
-            << request->GetRemoteHost() << ":"
+void TController::HandleDeActivateRequest(IncomingHTTPRequest* request) {
+  LOG(INFO) << "Got a deactivate topology request from " << request->GetRemoteHost() << ":"
             << request->GetRemotePort();
   const sp_string& id = request->GetValue("topologyid");
   if (id == "") {
@@ -126,7 +125,7 @@ void TController::HandleDeActivateRequest(IncomingHTTPRequest* request)
     return;
   }
 
-  auto cb = [request, this] (proto::system::StatusCode status) {
+  auto cb = [request, this](proto::system::StatusCode status) {
     this->HandleDeActivateRequestDone(request, status);
   };
 
@@ -134,8 +133,7 @@ void TController::HandleDeActivateRequest(IncomingHTTPRequest* request)
 }
 
 void TController::HandleDeActivateRequestDone(IncomingHTTPRequest* request,
-                                              proto::system::StatusCode _status)
-{
+                                              proto::system::StatusCode _status) {
   if (_status != proto::system::OK) {
     LOG(ERROR) << "Unable to DeActivate topology " << _status;
     http_server_->SendErrorReply(request, 500);
@@ -148,5 +146,5 @@ void TController::HandleDeActivateRequestDone(IncomingHTTPRequest* request,
   }
   delete request;
 }
-
-}} // end of namespace
+}  // namespace tmaster
+}  // namespace heron
