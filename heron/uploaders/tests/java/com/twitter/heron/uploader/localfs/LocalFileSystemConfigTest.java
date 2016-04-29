@@ -17,14 +17,13 @@ package com.twitter.heron.uploader.localfs;
 import java.io.File;
 import java.nio.file.Paths;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.common.Misc;
-
-import org.junit.Assert;
 
 public class LocalFileSystemConfigTest {
 
