@@ -136,3 +136,87 @@ getting launched.
    `containerRAM` may starve off these instances.
 
 #### 4. I do not see any metrics for a component
+
+*Symptom* - The upstream component is emitting data, but this component is not
+executing any, and no metrics are being reported.
+
+*Possible Cause* - The component might be stuck in a deadlock. Since one
+instance is a single JVM process and user code is called from the main thread,
+it is possible that execution is stuck in `execute` method.
+
+#### 5. There is backpressure from internal bolt
+
+We call a bolt internal if it does not talk to anything external to topology.
+For example, the last bolt might be talking to some database to write its
+results, and would not be called an internal bolt.
+
+This is invariably due to lack of resources given to this bolt. Increasing
+parallelism or RAM (based on code logic), the issue can be solved.
+
+#### 6. There is backpressure from external bolt
+
+By the same definition as above, an external bolt is the one which is writing
+data to external databases. It might still be emitting data downstream.
+
+*Possible Cause 1* - External service is slowing down this bolt.
+
+*What to do* - Apart from handling resource logistics for external services,
+changing bolt logic to tune caching vs write rate can make a difference.
+
+*Possible Cause 2* - Resource crunch for this bolt, just like an internal bolt
+above.
+
+### How to tune a topology
+
+This section briefly outlines some of the basic steps to tune a topology. Note
+that tuning is hard and can take multiple iterations.
+
+Although there are tons of configurations and parameters that can increase the
+efficiency of topology in terms of throughput and latency, this section does not
+cover all of them. The parameters being considered here are:
+
+1. Container RAM
+2. Container CPU
+3. Component RAMs
+4. Component Parallelisms
+5. Number of Containers
+
+#### Steps:
+
+1. Launch the topology with an initial estimate of resources. These can be based
+   on input data size, component logic, or experience from another working
+   topology.
+
+2. Resolve any backpressure issues by increasing the parallelism or container
+   RAM, or CPU, or appropriately if backpressure is due to an external service.
+
+3. Make sure there is no spout lag. In steady state, the topology should be able
+   to read the whole of data.
+
+4. Repeat steps 2 and 3 until there is no backpressure and no spout lag.
+
+5. By now, the CPU usage and RAM usage are stable. Based on daily of weekly data
+   trends, leave appropriate room for usage spikes, and cut down the rest of the
+   unused resources allocated to topology.
+
+While these steps seem simple, it might take some time to get the topology to
+its optimal usage. Below are some of the tips that can be helpful during tuning
+or in general.
+
+#### Tips:
+
+1. If component RAMs for all the components is provided, that will the RAM
+   assigned to those instances. Use this configuration according to their
+   functionality to save of resources. By default, every instance is assigned
+   1GB of RAM, which can be higher that what it requires. Note that if container
+   RAM is specified, after setting aside some RAM for internal components of
+   Heron, rest of it is equally divided among all the instances present in the
+   container.
+
+2. A memory intensive operation in bolts can result in GC issues. Be aware of
+   objects that might enter old generation, and cause memory starvation.
+
+3. You can use `Scheme`s in spouts to sample down the data. This can helpful
+   when dealing with issues if writing to external services, or just trying to
+   get an early estimate of usage without utilizing much resources. Note that
+   this would still require 100% resource usage in spouts.
