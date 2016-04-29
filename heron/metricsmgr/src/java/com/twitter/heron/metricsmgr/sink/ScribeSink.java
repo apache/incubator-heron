@@ -71,8 +71,9 @@ public class ScribeSink implements IMetricsSink {
   private static final String TRY_AGAIN_COUNT = "try-again-count";
   private static final String FAILED_COUNT = "failed-count";
   private static final String ILLEGAL_METRICS_COUNT = "illegal-metrics-count";
-  private static final Map<String, Long> counters = new HashMap<String, Long>();
-  private static final ObjectMapper mapper = new ObjectMapper();
+  private static final Map<String, Long> COUNTERS = new HashMap<String, Long>();
+  private static final ObjectMapper MAPPER = new ObjectMapper();
+
   // The SinkConfig for ScribeSink, which is parsed from sink-configs.yaml
   private Map<String, Object> config;
   private TFramedTransport transport;
@@ -83,11 +84,11 @@ public class ScribeSink implements IMetricsSink {
 
   @Override
   public void init(Map<String, Object> conf, SinkContext context) {
-    // Init the counters
-    counters.put(MESSAGE, 0L);
-    counters.put(OK, 0L);
-    counters.put(TRY_AGAIN, 0L);
-    counters.put(FAILED, 0L);
+    // Init the COUNTERS
+    COUNTERS.put(MESSAGE, 0L);
+    COUNTERS.put(OK, 0L);
+    COUNTERS.put(TRY_AGAIN, 0L);
+    COUNTERS.put(FAILED, 0L);
 
     config = conf;
 
@@ -104,17 +105,17 @@ public class ScribeSink implements IMetricsSink {
   @Override
   public void processRecord(MetricsRecord record) {
     // increase the processed counters
-    counters.put(MESSAGE, counters.get(MESSAGE) + 1);
+    COUNTERS.put(MESSAGE, COUNTERS.get(MESSAGE) + 1);
 
     // Check whether the TSocket is already open
     // If not, try to open the TSocket again
     if (!transport.isOpen() && !open()) {
-      counters.put(FAILED, counters.get(FAILED) + 1);
+      COUNTERS.put(FAILED, COUNTERS.get(FAILED) + 1);
       LOG.severe("Failed due to TTransport is not open");
 
-      if (counters.get(FAILED) >= connectRetryAttempts) {
-        throw new RuntimeException("The scribe sink failed to connect to server; exceeds " +
-            connectRetryAttempts + " attempts");
+      if (COUNTERS.get(FAILED) >= connectRetryAttempts) {
+        throw new RuntimeException("The scribe sink failed to connect to server; exceeds "
+            + connectRetryAttempts + " attempts");
       }
 
       return;
@@ -144,10 +145,10 @@ public class ScribeSink implements IMetricsSink {
 
     // Update the Metrics
     sinkContext.exportCountMetric(FLUSH_COUNT, 1);
-    sinkContext.exportCountMetric(MESSAGE_COUNT, counters.get(MESSAGE).intValue());
-    sinkContext.exportCountMetric(OK_COUNT, counters.get(OK).intValue());
-    sinkContext.exportCountMetric(TRY_AGAIN_COUNT, counters.get(TRY_AGAIN).intValue());
-    sinkContext.exportCountMetric(FAILED_COUNT, counters.get(FAILED).intValue());
+    sinkContext.exportCountMetric(MESSAGE_COUNT, COUNTERS.get(MESSAGE).intValue());
+    sinkContext.exportCountMetric(OK_COUNT, COUNTERS.get(OK).intValue());
+    sinkContext.exportCountMetric(TRY_AGAIN_COUNT, COUNTERS.get(TRY_AGAIN).intValue());
+    sinkContext.exportCountMetric(FAILED_COUNT, COUNTERS.get(FAILED).intValue());
   }
 
   @Override
@@ -170,9 +171,6 @@ public class ScribeSink implements IMetricsSink {
     } catch (TException tx) {
       LOG.log(Level.SEVERE, "Failed to open connection to scribe server " + connectionString(), tx);
       return false;
-    } catch (Exception e) {
-      LOG.log(Level.SEVERE, "Failed to open connection to scribe server " + connectionString(), e);
-      return false;
     }
 
     LOG.info("Opened connection to scribe server " + connectionString());
@@ -192,13 +190,13 @@ public class ScribeSink implements IMetricsSink {
 
         // If successfully, we are done
         if (result.equals(ResultCode.OK)) {
-          counters.put(OK, counters.get(OK) + pendingEntries.size());
+          COUNTERS.put(OK, COUNTERS.get(OK) + pendingEntries.size());
           return;
         }
 
         // otherwise, try once more
         if (result.equals(ResultCode.TRY_LATER)) {
-          counters.put(TRY_AGAIN, counters.get(TRY_AGAIN) + 1);
+          COUNTERS.put(TRY_AGAIN, COUNTERS.get(TRY_AGAIN) + 1);
         }
 
         // Sleep a while to avoid to hit scribe server heavily
@@ -206,11 +204,9 @@ public class ScribeSink implements IMetricsSink {
       }
     } catch (TException te) {
       LOG.log(Level.SEVERE, "Message sending failed due to TransportException: ", te);
-    } catch (Exception e) {
-      LOG.log(Level.SEVERE, "Message sending failed due to exception: ", e);
     }
 
-    counters.put(FAILED, counters.get(FAILED) + 1);
+    COUNTERS.put(FAILED, COUNTERS.get(FAILED) + 1);
     close();
   }
 
@@ -258,7 +254,7 @@ public class ScribeSink implements IMetricsSink {
 
     String result = "";
     try {
-      result = mapper.writeValueAsString(json);
+      result = MAPPER.writeValueAsString(json);
     } catch (JsonProcessingException e) {
       LOG.log(Level.SEVERE, "Could not convert map to JSONString: " + json.toString(), e);
     }
@@ -271,6 +267,6 @@ public class ScribeSink implements IMetricsSink {
   }
 
   private void flushCounters() {
-    LOG.info(counters.toString());
+    LOG.info(COUNTERS.toString());
   }
 }

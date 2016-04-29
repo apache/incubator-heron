@@ -23,6 +23,7 @@ import java.util.Random;
 
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -31,8 +32,6 @@ import org.mockito.Mockito;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.WakeableLooper;
-
-import org.junit.Assert;
 
 /**
  * XORManager Tester.

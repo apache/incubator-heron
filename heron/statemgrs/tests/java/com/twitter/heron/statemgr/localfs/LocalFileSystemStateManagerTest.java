@@ -15,6 +15,7 @@
 package com.twitter.heron.statemgr.localfs;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,9 +31,6 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
-
-import org.junit.Assert;
-
 
 /**
  * LocalFileSystemStateManager Tester.

@@ -14,6 +14,7 @@
 
 package com.twitter.heron.metricsmgr;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
@@ -21,6 +22,7 @@ import java.util.logging.Logger;
 import com.google.protobuf.Message;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,8 +38,6 @@ import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.spi.metricsmgr.metrics.ExceptionInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsInfo;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
-
-import org.junit.Assert;
 
 /**
  * MetricsManagerServer Tester.
@@ -195,9 +195,10 @@ public class MetricsManagerServerTest {
               new SimpleMetricsClient(looper, SERVER_HOST, serverPort, MESSAGE_SIZE);
           simpleMetricsClient.start();
           looper.loop();
-
-        } catch (Exception e) {
+        } catch (IOException e) {
           throw new RuntimeException("Some error instantiating client");
+        } finally {
+          simpleMetricsClient.stop();
         }
       }
     };

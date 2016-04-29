@@ -14,6 +14,7 @@
 
 package com.twitter.heron.metricsmgr;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.channels.SocketChannel;
 import java.util.Map;
@@ -24,6 +25,7 @@ import java.util.logging.Logger;
 import com.google.protobuf.Message;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -39,8 +41,6 @@ import com.twitter.heron.common.network.StatusCode;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.proto.system.Metrics;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
-
-import org.junit.Assert;
 
 /**
  * Test whether MetricsManagerServer could handle TMasterLocationRefreshMessage correctly.
@@ -184,17 +184,24 @@ public class HandleTMasterLocationTest {
   private void runClient() {
 
     Runnable runClient = new Runnable() {
+      private NIOLooper looper;
+
       @Override
       public void run() {
         try {
-          NIOLooper looper = new NIOLooper();
+          looper = new NIOLooper();
           simpleLocationPublisher =
               new SimpleTMasterLocationPublisher(looper, SERVER_HOST, serverPort);
           simpleLocationPublisher.start();
           looper.loop();
 
-        } catch (Exception e) {
+        } catch (IOException e) {
           throw new RuntimeException("Some error instantiating client");
+        } finally {
+          simpleLocationPublisher.stop();
+          if (looper != null) {
+            looper.exitLoop();
+          }
         }
       }
     };
