@@ -133,8 +133,7 @@ public class GraphiteSink implements IMetricsSink {
     try {
       graphite.flush();
     } catch (IOException e) {
-      LOG.log(Level.SEVERE, "Error flushing metrics to Graphite", e);
-      LOG.severe("Dropping messages.");
+      LOG.log(Level.SEVERE, "Error flushing metrics to Graphite. Dropping messages...", e);
 
       // Here we do not invoke GraphiteSink.close(), since:
       // 1. We just want to close the connection to GraphiteServer
