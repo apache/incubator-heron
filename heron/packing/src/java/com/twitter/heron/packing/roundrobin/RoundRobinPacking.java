@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -159,8 +160,9 @@ public class RoundRobinPacking implements IPacking {
         topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED,
         "" + defaultRequest));
     if (defaultRequest > containerRamRequested) {
-      LOG.severe("Container is set to value lower than computed defaults. This could be due"
-          + "to incorrect RAM map provided for components.");
+      LOG.log(Level.SEVERE, 
+          "Container is set to value lower than computed defaults. This could be due"
+          + " to incorrect RAM map provided for components.");
     }
     return containerRamRequested;
   }
@@ -271,14 +273,14 @@ public class RoundRobinPacking implements IPacking {
    * @return default ram in bytes.
    */
   public long getDefaultInstanceRam(Map<String, List<String>> packing,
-                                    TopologyAPI.Topology atopology,
+                                    TopologyAPI.Topology aTopology,
                                     long instanceRamDefaultValue,
                                     long stmgrRam,
                                     long containerRamRequested) {
     long defaultInstanceRam = instanceRamDefaultValue;
 
     if (containerRamRequested != -1) {
-      Map<String, Long> ramMap = TopologyUtils.getComponentRamMap(atopology, -1);
+      Map<String, Long> ramMap = TopologyUtils.getComponentRamMap(aTopology, -1);
       // Find the minimum possible ram that can be fit in this packing.
       long minInstanceRam = Long.MAX_VALUE;
       for (List<String> instances : packing.values()) {

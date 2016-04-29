@@ -169,7 +169,7 @@ public class MetricsManagerServer extends HeronServer {
       LOG.severe("Unknown connection closed");
     } else {
       LOG.log(Level.SEVERE, "Un-register publish from hostname: {0},"
-          + " component_name: {1}, port: {2}," + " instance_id: {3}, instance_index: {4}",
+          + " component_name: {1}, port: {2}, instance_id: {3}, instance_index: {4}",
           new Object[] {request.getHostname(), request.getComponentName(), request.getPort(),
           request.getInstanceId(), request.getInstanceIndex()});
     }
@@ -190,28 +190,20 @@ public class MetricsManagerServer extends HeronServer {
         SocketChannel channel,
         Metrics.MetricPublisherRegisterRequest request) {
     Metrics.MetricPublisher publisher = request.getPublisher();
-    LOG.info(String.format("Got a new register publisher from hostname: %s,"
-            + " component_name: %s, port: %d,"
-            + " instance_id: %s, instance_index: %d from %s",
-        publisher.getHostname(),
-        publisher.getComponentName(),
-        publisher.getPort(),
-        publisher.getInstanceId(),
-        publisher.getInstanceIndex(),
-        channel.socket().getRemoteSocketAddress()));
+    LOG.log(Level.SEVERE, "Got a new register publisher from hostname: {0},"
+        + " component_name: {1}, port: {2}, instance_id: {3}, instance_index: {4} from {5}",
+        new Object[] {publisher.getHostname(), publisher.getComponentName(), publisher.getPort(),
+            publisher.getInstanceId(), publisher.getInstanceIndex(),
+            channel.socket().getRemoteSocketAddress()});
 
     // Check whether publisher has already been registered
     Common.StatusCode responseStatusCode = Common.StatusCode.NOTOK;
 
     if (publisherMap.containsKey(channel.socket().getRemoteSocketAddress())) {
-      LOG.severe(String.format("Metrics publisher already exists for hostname: %s,"
-              + " component_name: %s, port: %d,"
-              + " instance_id: %s, instance_index: %d",
-          publisher.getHostname(),
-          publisher.getComponentName(),
-          publisher.getPort(),
-          publisher.getInstanceId(),
-          publisher.getInstanceIndex()));
+      LOG.log(Level.SEVERE, "Metrics publisher already exists for hostname: {0},"
+          + " component_name: {1}, port: {2}, instance_id: {3}, instance_index: {4}",
+          new Object[] {publisher.getHostname(), publisher.getComponentName(), publisher.getPort(),
+              publisher.getInstanceId(), publisher.getInstanceIndex()});
     } else {
       publisherMap.put(channel.socket().getRemoteSocketAddress(), publisher);
       // Add it to the map
@@ -232,16 +224,11 @@ public class MetricsManagerServer extends HeronServer {
   private void handlePublisherPublishMessage(Metrics.MetricPublisher request,
                                              Metrics.MetricPublisherPublishMessage message) {
     if (message.getMetricsCount() <= 0 && message.getExceptionsCount() <= 0) {
-      LOG.severe(
-          String.format(
-              "Publish message has no metrics nor exceptions for message from hostname: %s,"
-                  + " component_name: %s, port: %d,"
-                  + " instance_id: %s, instance_index: %d",
-              request.getHostname(),
-              request.getComponentName(),
-              request.getPort(),
-              request.getInstanceId(),
-              request.getInstanceIndex()));
+      LOG.log(Level.SEVERE,
+          "Publish message has no metrics nor exceptions for message from hostname: {0},"
+          + " component_name: {1}, port: {2}, instance_id: {3}, instance_index: {4}",
+          new Object[] {request.getHostname(), request.getComponentName(), request.getPort(),
+              request.getInstanceId(), request.getInstanceIndex()});
       return;
     }
 
