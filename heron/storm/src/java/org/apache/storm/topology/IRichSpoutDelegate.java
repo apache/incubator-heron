@@ -26,6 +26,7 @@ import com.twitter.heron.api.spout.SpoutOutputCollector;
  * to use to implement components of the topology.
  */
 public class IRichSpoutDelegate implements com.twitter.heron.api.spout.IRichSpout {
+  private static final long serialVersionUID = -1543996045558101339L;
   private IRichSpout delegate;
   private TopologyContext topologyContextImpl;
   private SpoutOutputCollectorImpl spoutOutputCollectorImpl;
