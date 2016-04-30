@@ -26,9 +26,9 @@ public class MultiReducedMetric<T> implements IMetric {
   }
 
   public ReducedMetric<T> scope(String key) {
-    ReducedMetric val = value.get(key);
+    ReducedMetric<T> val = value.get(key);
     if (val == null) {
-      value.put(key, val = new ReducedMetric(reducer));
+      value.put(key, val = new ReducedMetric<T>(reducer));
     }
     return val;
   }
