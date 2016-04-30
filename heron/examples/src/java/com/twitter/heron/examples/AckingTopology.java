@@ -75,7 +75,9 @@ public final class AckingTopology {
     public AckingTestWordSpout() {
     }
 
-    public void open(Map<String, Object> conf, TopologyContext context,
+    public void open(
+        Map<String, Object> conf,
+        TopologyContext context,
         SpoutOutputCollector acollector) {
       collector = acollector;
       words = new String[]{"nathan", "mike", "jackson", "golda", "bertels"};

@@ -75,7 +75,9 @@ public final class MultiStageAckingTopology {
     public AckingTestWordSpout() {
     }
 
-    public void open(Map<String, Object> conf, TopologyContext context,
+    public void open(
+        Map<String, Object> conf,
+        TopologyContext context,
         SpoutOutputCollector acollector) {
       collector = acollector;
       words = new String[]{"nathan", "mike", "jackson", "golda", "bertels"};
@@ -116,7 +118,9 @@ public final class MultiStageAckingTopology {
     }
 
     @Override
-    public void prepare(Map<String, Object> conf, TopologyContext context,
+    public void prepare(
+        Map<String, Object> conf,
+        TopologyContext context,
         OutputCollector acollector) {
       collector = acollector;
       nItems = 0;

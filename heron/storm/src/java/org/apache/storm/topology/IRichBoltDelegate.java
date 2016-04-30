@@ -35,7 +35,8 @@ public class IRichBoltDelegate implements com.twitter.heron.api.bolt.IRichBolt {
   }
 
   @Override
-  public void prepare(Map<String, Object> conf,
+  public void prepare(
+      Map<String, Object> conf,
       com.twitter.heron.api.topology.TopologyContext context,
       com.twitter.heron.api.bolt.OutputCollector collector) {
     topologyContextImpl = new TopologyContext(context);
