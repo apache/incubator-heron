@@ -29,7 +29,7 @@ import org.apache.storm.generated.StormTopology;
 
 
 public interface ILocalCluster {
-  void submitTopology(String topologyName, Map conf, StormTopology topology) throws
+  void submitTopology(String topologyName, Map<String, Object> conf, StormTopology topology) throws
       AlreadyAliveException, InvalidTopologyException;
 
   // void submitTopologyWithOpts(
@@ -51,5 +51,6 @@ public interface ILocalCluster {
 
   // ClusterSummary getClusterInfo();
   // TopologyInfo getTopologyInfo(String id);
+  @SuppressWarnings("rawtypes")
   Map getState();
 }

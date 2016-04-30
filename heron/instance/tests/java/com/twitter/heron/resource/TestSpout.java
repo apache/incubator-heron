@@ -58,7 +58,7 @@ public class TestSpout implements IRichSpout {
 
   @Override
   public void open(
-      Map map,
+      Map<String, Object> map,
       TopologyContext topologyContext,
       SpoutOutputCollector spoutOutputCollector) {
     this.outputCollector = spoutOutputCollector;

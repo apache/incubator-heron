@@ -27,7 +27,7 @@ import backtype.storm.utils.ConfigUtils;
 public class LocalCluster implements ILocalCluster {
   private final LocalMode localMode;
   private String topologyName;
-  private Map conf;
+  private Map<String, Object> conf;
   private StormTopology topology;
 
   public LocalCluster() {
@@ -37,7 +37,7 @@ public class LocalCluster implements ILocalCluster {
 
   @Override
   public void submitTopology(String topoName,
-                             Map config,
+                             Map<String, Object> config,
                              StormTopology stormTopology)
       throws AlreadyAliveException, InvalidTopologyException {
     assertNotAlive();
@@ -97,6 +97,7 @@ public class LocalCluster implements ILocalCluster {
   }
 
   @Override
+  @SuppressWarnings("rawtypes")
   public Map getState() {
     throw new RuntimeException("Heron does not support LocalCluster yet...");
   }

@@ -15,4 +15,5 @@
 package org.apache.storm.generated;
 
 public class InvalidTopologyException extends Exception {
+  private static final long serialVersionUID = 8232369763475884914L;
 }

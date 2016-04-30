@@ -95,16 +95,19 @@ public class ConfigReader {
    *
    * @return Map, contains the key value pairs of config
    */
-  @SuppressWarnings("rawtypes")
-  public static Map loadStream(InputStream inputStream) {
+  public static Map<String, Object> loadStream(InputStream inputStream) {
     LOG.fine("Reading config stream");
 
-    Map propsYaml;
     Yaml yaml = new Yaml();
-    propsYaml = (Map) yaml.load(inputStream);
+    Map<Object, Object> propsYaml = (Map<Object, Object>) yaml.load(inputStream);
     LOG.fine("Successfully read config");
 
-    return propsYaml != null ? propsYaml : new HashMap();
+    Map<String, Object> typedMap = new HashMap<>();
+    for (Object key: propsYaml.keySet()) {
+      typedMap.put(key.toString(), propsYaml.get(key));
+    }
+
+    return typedMap;
   }
 
   public static Integer getInt(Object o) {

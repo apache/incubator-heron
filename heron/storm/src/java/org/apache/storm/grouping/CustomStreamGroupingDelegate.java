@@ -21,6 +21,7 @@ import org.apache.storm.task.TopologyContext;
 
 public class CustomStreamGroupingDelegate implements
     com.twitter.heron.api.grouping.CustomStreamGrouping {
+  private static final long serialVersionUID = -7310525506102399193L;
   private CustomStreamGrouping delegate;
 
   public CustomStreamGroupingDelegate(CustomStreamGrouping delegate) {

@@ -80,7 +80,7 @@ public class PhysicalPlanUtilTest implements Serializable {
 
       @Override
       public void open(
-          Map map,
+          Map<String, Object> map,
           TopologyContext topologyContext,
           SpoutOutputCollector spoutOutputCollector) {
       }

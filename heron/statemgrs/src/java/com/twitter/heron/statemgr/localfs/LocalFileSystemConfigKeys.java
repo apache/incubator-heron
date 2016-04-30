@@ -15,15 +15,13 @@
 package com.twitter.heron.statemgr.localfs;
 
 import java.util.Map;
-import java.util.logging.Logger;
 
 import com.twitter.heron.spi.common.Resource;
 
 final class LocalFileSystemConfigKeys {
-  private static final Logger LOG = Logger.getLogger(LocalFileSystemConfigKeys.class.getName());
 
   // holds the mapping of keys to their corresponding key strings
-  private static Map keys;
+  private static Map<String, Object> keys;
 
   // load the resource for config keys
   static {

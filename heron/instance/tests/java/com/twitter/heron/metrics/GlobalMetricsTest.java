@@ -45,7 +45,7 @@ public class GlobalMetricsTest {
     GlobalMetrics.incr("mycounter");
     Object value = GlobalMetrics.getUnderlyingCounter().getValueAndReset();
     assertTrue(value instanceof Map);
-    Map metricsContent = (Map) value;
+    Map<String, Object> metricsContent = (Map<String, Object>) value;
     assertTrue(metricsContent.containsKey("mycounter"));
     assertEquals(1, metricsContent.size());
     assertEquals(1L, metricsContent.get("mycounter"));
@@ -54,7 +54,7 @@ public class GlobalMetricsTest {
     GlobalMetrics.incr("mycounter1");
     GlobalMetrics.incr("mycounter2");
     GlobalMetrics.incr("mycounter1");
-    metricsContent = (Map) GlobalMetrics.getUnderlyingCounter().getValueAndReset();
+    metricsContent = (Map<String, Object>) GlobalMetrics.getUnderlyingCounter().getValueAndReset();
     assertTrue(metricsContent.containsKey("mycounter"));
     assertTrue(metricsContent.containsKey("mycounter1"));
     assertTrue(metricsContent.containsKey("mycounter2"));

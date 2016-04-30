@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MultiReducedMetric implements IMetric {
-  private Map<String, ReducedMetric> value = new HashMap();
+  private Map<String, ReducedMetric> value = new HashMap<>();
   private IReducer reducer;
 
   public MultiReducedMetric(IReducer reducer) {
@@ -34,7 +34,7 @@ public class MultiReducedMetric implements IMetric {
   }
 
   public Object getValueAndReset() {
-    Map ret = new HashMap();
+    Map<String, Object> ret = new HashMap<>();
     for (Map.Entry<String, ReducedMetric> e : value.entrySet()) {
       Object val = e.getValue().getValueAndReset();
       if (val != null) {
