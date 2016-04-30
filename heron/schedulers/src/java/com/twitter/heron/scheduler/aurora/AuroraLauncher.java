@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
+import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.SchedulerUtils;
 
 /**
@@ -44,6 +45,11 @@ public class AuroraLauncher implements ILauncher {
 
   @Override
   public boolean launch(PackingPlan packing) {
-    return SchedulerUtils.onScheduleAsLibrary(config, runtime, new AuroraScheduler(), packing);
+    return SchedulerUtils.onScheduleAsLibrary(config, runtime, getScheduler(), packing);
+  }
+
+  // Get AuroraScheduler
+  protected IScheduler getScheduler() {
+    return new AuroraScheduler();
   }
 }
