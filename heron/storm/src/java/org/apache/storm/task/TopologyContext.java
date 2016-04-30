@@ -53,11 +53,14 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
   // Note that here, we fake the clojure.lang.Atom by creating our own class
   // This is real hacking a hack!
   public TopologyContext(StormTopology topology, Map stormConf,
-                         Map<Integer, String> taskToComponent, Map<String, List<Integer>> componentToSortedTasks,
+                         Map<Integer, String> taskToComponent,
+                         Map<String, List<Integer>> componentToSortedTasks,
                          Map<String, Map<String, Fields>> componentToStreamToFields,
                          String stormId, String codeDir, String pidDir, Integer taskId,
-                         Integer workerPort, List<Integer> workerTasks, Map<String, Object> defaultResources,
-                         Map<String, Object> userResources, Map<String, Object> executorData, Map registeredMetrics,
+                         Integer workerPort, List<Integer> workerTasks,
+                         Map<String, Object> defaultResources,
+                         Map<String, Object> userResources,
+                         Map<String, Object> executorData, Map registeredMetrics,
                          org.apache.storm.clojure.Atom openOrPrepareWasCalled) {
     super((com.twitter.heron.api.topology.TopologyContext) null);
   }
@@ -123,7 +126,8 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
    * @return Returns the ISubscribedState object provided
    */
   /*
-    public <T extends ISubscribedState> T setSubscribedState(String componentId, String streamId, T obj) {
+    public <T extends ISubscribedState> T setSubscribedState(
+      String componentId, String streamId, T obj) {
         throw new NotImplementedException();
     }
   */
@@ -202,10 +206,10 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
     public void setExecutorData(String name, Object data) {
         _executorData.put(name, data);
     }
-    
+
     public Object getExecutorData(String name) {
         return _executorData.get(name);
-    }    
+    }
   */
 
   public void addTaskHook(ITaskHook newHook) {
@@ -240,7 +244,7 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
   }
 
   /*
-   * Register a IMetric instance. 
+   * Register a IMetric instance.
    * Storm will then call getValueAndReset on the metric every timeBucketSizeInSecs
    * and the returned value is sent to all metrics consumers.
    * You must call this during IBolt::prepare or ISpout::open.

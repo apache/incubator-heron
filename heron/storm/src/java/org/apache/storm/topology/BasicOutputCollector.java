@@ -37,8 +37,8 @@ public class BasicOutputCollector implements IBasicOutputCollector {
     return emit(Utils.DEFAULT_STREAM_ID, tuple);
   }
 
-  public void setContext(Tuple inputTuple) {
-    this.inputTuple = inputTuple;
+  public void setContext(Tuple anInputTuple) {
+    this.inputTuple = anInputTuple;
   }
 
   public void emitDirect(int taskId, String streamId, List<Object> tuple) {

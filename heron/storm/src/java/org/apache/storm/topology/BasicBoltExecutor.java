@@ -33,11 +33,10 @@ public class BasicBoltExecutor implements IRichBolt {
     delegate.declareOutputFields(declarer);
   }
 
-
   @Override
-  public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+  public void prepare(Map stormConf, TopologyContext context, OutputCollector newCollector) {
     delegate.prepare(stormConf, context);
-    this.collector = new BasicOutputCollector(collector);
+    this.collector = new BasicOutputCollector(newCollector);
   }
 
   @Override
