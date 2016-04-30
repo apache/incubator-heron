@@ -15,4 +15,5 @@
 package org.apache.storm.generated;
 
 public class AlreadyAliveException extends Exception {
+  private static final long serialVersionUID = 3328511628150069047L;
 }

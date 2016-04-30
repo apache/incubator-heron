@@ -21,7 +21,7 @@ import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 
 public interface IBasicBolt extends IComponent {
-  void prepare(Map heronConf, TopologyContext context);
+  void prepare(Map<String, Object> heronConf, TopologyContext context);
 
   /**
    * Process the input tuple and optionally emit new tuples based on the input tuple.

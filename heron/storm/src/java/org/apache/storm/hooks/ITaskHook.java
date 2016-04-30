@@ -25,7 +25,7 @@ import org.apache.storm.hooks.info.SpoutFailInfo;
 import org.apache.storm.task.TopologyContext;
 
 public interface ITaskHook {
-  void prepare(Map conf, TopologyContext context);
+  void prepare(Map<String, Object> conf, TopologyContext context);
 
   void cleanup();
 

@@ -24,7 +24,8 @@ import com.esotericsoftware.kryo.serializers.MapSerializer;
 
 public class HashMapSerializer extends MapSerializer {
   @Override
-  public Map create(Kryo kryo, Input input, Class<Map> type) {
-    return new HashMap();
+  @SuppressWarnings("rawtypes") // extending kryo class signature that takes Map
+  public Map<String, Object> create(Kryo kryo, Input input, Class<Map> type) {
+    return new HashMap<String, Object>();
   }
 }

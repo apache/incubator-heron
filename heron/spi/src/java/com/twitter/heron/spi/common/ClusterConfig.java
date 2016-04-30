@@ -95,64 +95,62 @@ public final class ClusterConfig {
   }
 
   protected static Config loadClusterConfig(String clusterFile) {
-    Map readConfig = ConfigReader.loadFile(clusterFile);
+    Map<String, Object> readConfig = ConfigReader.loadFile(clusterFile);
     return Config.newBuilder().putAll(readConfig).build();
   }
 
   protected static Config loadClientConfig(String clientFile) {
-    Map readConfig = ConfigReader.loadFile(clientFile);
+    Map<String, Object> readConfig = ConfigReader.loadFile(clientFile);
     return Config.newBuilder().putAll(readConfig).build();
   }
 
   protected static Config loadDefaultsConfig(String defaultsFile) {
-    Map readConfig = ConfigReader.loadFile(defaultsFile);
+    Map<String, Object> readConfig = ConfigReader.loadFile(defaultsFile);
     return Config.newBuilder().putAll(readConfig).build();
   }
 
   protected static Config loadPackingConfig(String packingFile) {
-    Map readConfig = ConfigReader.loadFile(packingFile);
+    Map<String, Object> readConfig = ConfigReader.loadFile(packingFile);
     return Config.newBuilder().putAll(readConfig).build();
   }
 
   protected static Config loadSchedulerConfig(String schedulerFile) {
-    Map readConfig = ConfigReader.loadFile(schedulerFile);
+    Map<String, Object> readConfig = ConfigReader.loadFile(schedulerFile);
     return Config.newBuilder().putAll(readConfig).build();
   }
 
   protected static Config loadStateManagerConfig(String stateMgrFile) {
-    Map readConfig = ConfigReader.loadFile(stateMgrFile);
+    Map<String, Object> readConfig = ConfigReader.loadFile(stateMgrFile);
     return Config.newBuilder().putAll(readConfig).build();
   }
 
   protected static Config loadUploaderConfig(String uploaderFile) {
-    Map readConfig = ConfigReader.loadFile(uploaderFile);
+    Map<String, Object> readConfig = ConfigReader.loadFile(uploaderFile);
     return Config.newBuilder().putAll(readConfig).build();
   }
 
   public static Config loadOverrideConfig(String overrideConfigFile) {
-    Map readConfig = ConfigReader.loadFile(overrideConfigFile);
+    Map<String, Object> readConfig = ConfigReader.loadFile(overrideConfigFile);
     return Config.newBuilder().putAll(readConfig).build();
   }
 
   protected static Config loadReleaseConfig(String releaseFile) {
-    Map readConfig = ConfigReader.loadFile(releaseFile);
+    Map<String, Object> readConfig = ConfigReader.loadFile(releaseFile);
     return Config.newBuilder().putAll(readConfig).build();
   }
 
   public static Config loadBasicConfig(String heronHome, String configPath) {
-    Config config = Config.newBuilder()
+    return Config.newBuilder()
         .putAll(loadHeronHome(heronHome, configPath))
         .putAll(loadConfigHome(heronHome, configPath))
         .build();
-    return config;
   }
 
   public static Config loadBasicSandboxConfig() {
-    Config config = Config.newBuilder()
+    return Config.newBuilder()
         .putAll(loadSandboxHome(Defaults.heronSandboxHome(), Defaults.heronSandboxConf()))
         .putAll(loadSandboxConfigHome(Defaults.heronSandboxHome(), Defaults.heronSandboxConf()))
         .build();
-    return config;
   }
 
   public static Config loadConfig(String heronHome, String configPath, String releaseFile) {

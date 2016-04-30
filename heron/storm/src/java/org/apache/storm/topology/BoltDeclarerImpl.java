@@ -29,7 +29,7 @@ public class BoltDeclarerImpl implements BoltDeclarer {
   }
 
   @Override
-  public BoltDeclarer addConfigurations(Map conf) {
+  public BoltDeclarer addConfigurations(Map<String, Object> conf) {
     delegate.addConfigurations(conf);
     return this;
   }

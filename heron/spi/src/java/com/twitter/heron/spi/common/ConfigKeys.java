@@ -21,7 +21,7 @@ public final class ConfigKeys {
   private static final Logger LOG = Logger.getLogger(ConfigKeys.class.getName());
 
   // holds the mapping of keys to their corresponding key strings
-  protected static Map keys;
+  protected static Map<String, Object> keys;
 
   // load the resource for config keys
   static {

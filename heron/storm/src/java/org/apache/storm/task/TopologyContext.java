@@ -52,7 +52,7 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
   // Constructor to match the signature of the storm's TopologyContext
   // Note that here, we fake the clojure.lang.Atom by creating our own class
   // This is real hacking a hack!
-  public TopologyContext(StormTopology topology, Map stormConf,
+  public TopologyContext(StormTopology topology, Map<String, Object> stormConf,
                          Map<Integer, String> taskToComponent,
                          Map<String, List<Integer>> componentToSortedTasks,
                          Map<String, Map<String, Fields>> componentToStreamToFields,
@@ -60,7 +60,7 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
                          Integer workerPort, List<Integer> workerTasks,
                          Map<String, Object> defaultResources,
                          Map<String, Object> userResources,
-                         Map<String, Object> executorData, Map registeredMetrics,
+                         Map<String, Object> executorData, Map<String, Object> registeredMetrics,
                          org.apache.storm.clojure.Atom openOrPrepareWasCalled) {
     super((com.twitter.heron.api.topology.TopologyContext) null);
   }

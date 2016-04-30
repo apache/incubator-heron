@@ -49,7 +49,7 @@ public final class SerializationFactory {
    * @param conf the config
    * @return Kryo
    */
-  public static Kryo getKryo(Map conf) {
+  public static Kryo getKryo(Map<String, Object> conf) {
     IKryoFactory kryoFactory =
         (IKryoFactory) Utils.newInstance((String) conf.get(Config.TOPOLOGY_KRYO_FACTORY));
     Kryo k = kryoFactory.getKryo(conf);
@@ -163,7 +163,7 @@ public final class SerializationFactory {
             serializerClass.getName(), superClass.getName()));
   }
 
-  private static Map<String, String> normalizeKryoRegister(Map conf) {
+  private static Map<String, String> normalizeKryoRegister(Map<String, Object> conf) {
     // TODO: de-duplicate this logic with the code in nimbus
     Object res = conf.get(Config.TOPOLOGY_KRYO_REGISTER);
     if (res == null) {

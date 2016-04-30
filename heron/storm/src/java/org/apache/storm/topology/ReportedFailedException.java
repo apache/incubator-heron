@@ -15,6 +15,8 @@
 package org.apache.storm.topology;
 
 public class ReportedFailedException extends FailedException {
+  private static final long serialVersionUID = 165228267264978890L;
+
   public ReportedFailedException() {
     super();
   }

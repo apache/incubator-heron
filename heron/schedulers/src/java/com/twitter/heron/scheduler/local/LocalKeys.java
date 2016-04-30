@@ -27,7 +27,7 @@ public final class LocalKeys {
   }
 
   // holds the mapping of keys to their corresponding key strings
-  private static Map keys;
+  private static Map<String, Object> keys;
 
   // load the resource for config keys
   static {
