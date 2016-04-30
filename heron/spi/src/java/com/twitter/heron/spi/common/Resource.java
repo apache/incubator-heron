@@ -34,7 +34,9 @@ public final class Resource {
    *
    * @return Map, a map of key value pairs
    */
-  public static Map<String, Object> load(String className, String resName) throws ClassNotFoundException {
+  public static Map<String, Object> load(String className, String resName)
+      throws ClassNotFoundException {
+
     // get the class loader for current class
     ClassLoader cLoader = Class.forName(className).getClassLoader();
 
