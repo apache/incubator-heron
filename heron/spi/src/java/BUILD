@@ -49,6 +49,7 @@ utils_deps_files = \
         ":statemgr-spi-java",
         ":scheduler-spi-java",
         ":packing-spi-java",
+        "//heron/common/src/java:basics-java",
         "//heron/common/src/java:config-java",
         "//heron/api/src/java:api-java",
         "@guava//jar",
