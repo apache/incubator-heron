@@ -305,7 +305,8 @@ public class Config extends com.twitter.heron.api.Config {
     getRegisteredSerializations(conf).add(register);
   }
 
-  public static void registerDecorator(Map<String, Object> conf, Class<? extends IKryoDecorator> klass) {
+  public static void registerDecorator(Map<String, Object> conf,
+      Class<? extends IKryoDecorator> klass) {
     getRegisteredDecorators(conf).add(klass.getName());
   }
 
