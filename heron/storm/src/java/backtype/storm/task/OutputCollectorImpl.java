@@ -37,7 +37,8 @@ public class OutputCollectorImpl extends OutputCollector {
   @Override
   public List<Integer> emit(String streamId, Collection<Tuple> anchors, List<Object> tuple) {
     if (anchors != null) {
-      ArrayList<com.twitter.heron.api.tuple.Tuple> l = new ArrayList<com.twitter.heron.api.tuple.Tuple>();
+      ArrayList<com.twitter.heron.api.tuple.Tuple> l =
+          new ArrayList<com.twitter.heron.api.tuple.Tuple>();
       for (Tuple t : anchors) {
         TupleImpl i = (TupleImpl) t;
         l.add(i.getDelegate());
@@ -49,16 +50,19 @@ public class OutputCollectorImpl extends OutputCollector {
   }
 
   @Override
-  public void emitDirect(int taskId, String streamId, Collection<Tuple> anchors, List<Object> tuple) {
+  public void emitDirect(
+      int taskId, String streamId, Collection<Tuple> anchors, List<Object> tuple) {
     if (anchors != null) {
-      ArrayList<com.twitter.heron.api.tuple.Tuple> l = new ArrayList<com.twitter.heron.api.tuple.Tuple>();
+      ArrayList<com.twitter.heron.api.tuple.Tuple> l =
+          new ArrayList<com.twitter.heron.api.tuple.Tuple>();
       for (Tuple t : anchors) {
         TupleImpl i = (TupleImpl) t;
         l.add(i.getDelegate());
       }
       delegate.emitDirect(taskId, streamId, l, tuple);
     } else {
-      delegate.emitDirect(taskId, streamId, (Collection<com.twitter.heron.api.tuple.Tuple>) null, tuple);
+      delegate.emitDirect(
+          taskId, streamId, (Collection<com.twitter.heron.api.tuple.Tuple>) null, tuple);
     }
   }
 

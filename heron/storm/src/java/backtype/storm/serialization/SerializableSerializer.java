@@ -48,11 +48,11 @@ public class SerializableSerializer extends Serializer<Object> {
     int len = input.readInt();
     byte[] ser = new byte[len];
     input.readBytes(ser);
-    ByteArrayInputStream bis = new ByteArrayInputStream(ser);
-    try {
-      ObjectInputStream ois = new ObjectInputStream(bis);
+
+    try (ByteArrayInputStream bis = new ByteArrayInputStream(ser);
+         ObjectInputStream ois = new ObjectInputStream(bis)) {
       return ois.readObject();
-    } catch (Exception e) {
+    } catch (IOException | ClassNotFoundException e) {
       throw new RuntimeException(e);
     }
   }

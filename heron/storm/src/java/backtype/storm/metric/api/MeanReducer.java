@@ -14,10 +14,7 @@
 
 package backtype.storm.metric.api;
 
-class MeanReducerState {
-  public int count = 0;
-  public double sum = 0.0;
-}
+import com.twitter.heron.api.metric.MeanReducerState;
 
 public class MeanReducer implements IReducer<MeanReducerState> {
   public MeanReducerState init() {
