@@ -27,7 +27,6 @@ public abstract class BaseComponentDeclarer<T extends ComponentConfigurationDecl
     extends BaseConfigurationDeclarer<T> {
   private String name;
   private IComponent component;
-  private OutputFieldsGetter output;
   private Map<String, Object> componentConfiguration;
 
   public BaseComponentDeclarer(String name, IComponent comp, Number taskParallelism) {
@@ -35,7 +34,7 @@ public abstract class BaseComponentDeclarer<T extends ComponentConfigurationDecl
     this.component = comp;
     this.componentConfiguration = comp.getComponentConfiguration();
     if (this.componentConfiguration == null) {
-      this.componentConfiguration = new HashMap<String, Object>();
+      this.componentConfiguration = new HashMap<>();
     }
     if (taskParallelism != null) {
       this.componentConfiguration.put(Config.TOPOLOGY_COMPONENT_PARALLELISM,
@@ -53,7 +52,7 @@ public abstract class BaseComponentDeclarer<T extends ComponentConfigurationDecl
   }
 
   @Override
-  public T addConfigurations(Map conf) {
+  public T addConfigurations(Map<String, Object> conf) {
     componentConfiguration.putAll(conf);
     return returnThis();
   }

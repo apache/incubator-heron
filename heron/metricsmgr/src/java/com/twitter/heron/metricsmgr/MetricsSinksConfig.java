@@ -37,7 +37,7 @@ public class MetricsSinksConfig {
   public MetricsSinksConfig(String filename) throws FileNotFoundException {
     FileInputStream fin = new FileInputStream(new File(filename));
     Yaml yaml = new Yaml();
-    Map ret = (Map) yaml.load(fin);
+    Map<Object, Object> ret = (Map<Object, Object>) yaml.load(fin);
 
     if (ret == null) {
       throw new RuntimeException("Could not parse metrics-sinks config file");
@@ -68,6 +68,6 @@ public class MetricsSinksConfig {
   }
 
   public List<String> getSinkIds() {
-    return new ArrayList<String>(sinksConfigs.keySet());
+    return new ArrayList<>(sinksConfigs.keySet());
   }
 }

@@ -29,7 +29,7 @@ public class KryoSerializer implements IPluggableSerializer {
   }
 
   @Override
-  public void initialize(Map config) {
+  public void initialize(Map<String, Object> config) {
     kryo = new Kryo();
     kryo.setReferences(false);
     kryoOut = new Output(2000, 2000000000);

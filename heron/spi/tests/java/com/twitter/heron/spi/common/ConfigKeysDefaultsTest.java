@@ -28,7 +28,7 @@ public class ConfigKeysDefaultsTest {
    */
   @Test
   public void testConfigKeysDefaults() throws Exception {
-    Map<String, String> keys = ConfigKeys.keys;
+    Map<String, Object> keys = ConfigKeys.keys;
     Map<String, Object> defaults = ConfigDefaults.defaults;
 
     for (Map.Entry<String, Object> entry : defaults.entrySet()) {

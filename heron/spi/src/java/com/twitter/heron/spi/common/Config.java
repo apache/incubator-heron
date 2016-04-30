@@ -24,7 +24,7 @@ import java.util.TreeMap;
  */
 // SUPPRESS CHECKSTYLE
 public class Config {
-  private final Map<String, Object> cfgMap = new HashMap();
+  private final Map<String, Object> cfgMap = new HashMap<>();
 
   protected Config(Builder build) {
     cfgMap.putAll(build.keyValues);
@@ -136,7 +136,7 @@ public class Config {
   }
 
   public static class Builder {
-    private final Map<String, Object> keyValues = new HashMap();
+    private final Map<String, Object> keyValues = new HashMap<>();
 
     private static Config.Builder create() {
       return new Builder();

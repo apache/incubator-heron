@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MultiAssignableMetric implements IMetric {
-  private Map<String, AssignableMetric> value = new HashMap();
+  private final Map<String, AssignableMetric> value = new HashMap<>();
 
   public MultiAssignableMetric() {
 
@@ -45,7 +45,7 @@ public class MultiAssignableMetric implements IMetric {
 
   @Override
   public Object getValueAndReset() {
-    Map ret = new HashMap();
+    Map<String, Object> ret = new HashMap<>();
     synchronized (value) {
       for (Map.Entry<String, AssignableMetric> e : value.entrySet()) {
         ret.put(e.getKey(), e.getValue().getValueAndReset());

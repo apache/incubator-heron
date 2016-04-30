@@ -15,6 +15,8 @@
 package org.apache.storm.topology;
 
 public class FailedException extends RuntimeException {
+  private static final long serialVersionUID = 5407551070339208673L;
+
   public FailedException() {
     super();
   }

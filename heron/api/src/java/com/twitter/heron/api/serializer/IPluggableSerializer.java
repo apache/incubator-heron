@@ -17,7 +17,7 @@ package com.twitter.heron.api.serializer;
 import java.util.Map;
 
 public interface IPluggableSerializer {
-  void initialize(Map config);
+  void initialize(Map<String, Object> config);
 
   byte[] serialize(Object object);
 

@@ -163,7 +163,7 @@ public class BoltInstance implements IInstance {
                                TopologyAPI.StreamId stream) {
     long startTime = System.nanoTime();
 
-    List<Object> values = new ArrayList<Object>();
+    List<Object> values = new ArrayList<>();
     for (ByteString b : dataTuple.getValuesList()) {
       values.add(serializer.deserialize(b.toByteArray()));
     }
