@@ -15,7 +15,7 @@
 package backtype.storm.metric.api;
 
 public interface ICombiner<T> {
-  public T identity();
+  T identity();
 
-  public T combine(T a, T b);
+  T combine(T a, T b);
 }

@@ -18,7 +18,7 @@ package org.apache.storm.utils;
  * This is a class that helps to auto tune the max spout pending value
  */
 public class DefaultMaxSpoutPendingTuner {
-  com.twitter.heron.api.utils.DefaultMaxSpoutPendingTuner delegate;
+  private com.twitter.heron.api.utils.DefaultMaxSpoutPendingTuner delegate;
 
   /**
    * Conv constructor when initing from a non-set initial value
