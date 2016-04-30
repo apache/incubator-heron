@@ -14,21 +14,21 @@
 
 package org.apache.storm.metric.api;
 
-public class CombinedMetric implements IMetric {
-  private final ICombiner combiner;
-  private Object value;
+public class CombinedMetric<T> implements IMetric {
+  private final ICombiner<T> combiner;
+  private T value;
 
-  public CombinedMetric(ICombiner combiner) {
+  public CombinedMetric(ICombiner<T> combiner) {
     this.combiner = combiner;
     this.value = this.combiner.identity();
   }
 
-  public void update(Object newValue) {
+  public void update(T newValue) {
     value = combiner.combine(value, newValue);
   }
 
-  public Object getValueAndReset() {
-    Object ret = value;
+  public T getValueAndReset() {
+    T ret = value;
     value = combiner.identity();
     return ret;
   }

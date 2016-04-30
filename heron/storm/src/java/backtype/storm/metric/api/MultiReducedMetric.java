@@ -17,15 +17,15 @@ package backtype.storm.metric.api;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MultiReducedMetric implements IMetric {
-  private Map<String, ReducedMetric> value = new HashMap<>();
-  private IReducer reducer;
+public class MultiReducedMetric<T> implements IMetric {
+  private Map<String, ReducedMetric<T>> value = new HashMap<>();
+  private IReducer<T> reducer;
 
-  public MultiReducedMetric(IReducer reducer) {
+  public MultiReducedMetric(IReducer<T> reducer) {
     this.reducer = reducer;
   }
 
-  public ReducedMetric scope(String key) {
+  public ReducedMetric<T> scope(String key) {
     ReducedMetric val = value.get(key);
     if (val == null) {
       value.put(key, val = new ReducedMetric(reducer));
@@ -35,7 +35,7 @@ public class MultiReducedMetric implements IMetric {
 
   public Object getValueAndReset() {
     Map<String, Object> ret = new HashMap<>();
-    for (Map.Entry<String, ReducedMetric> e : value.entrySet()) {
+    for (Map.Entry<String, ReducedMetric<T>> e : value.entrySet()) {
       Object val = e.getValue().getValueAndReset();
       if (val != null) {
         ret.put(e.getKey(), val);

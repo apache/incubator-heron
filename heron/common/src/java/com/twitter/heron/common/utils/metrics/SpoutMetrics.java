@@ -19,6 +19,7 @@ import java.util.List;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.metric.CountMetric;
 import com.twitter.heron.api.metric.MeanReducer;
+import com.twitter.heron.api.metric.MeanReducerState;
 import com.twitter.heron.api.metric.MultiCountMetric;
 import com.twitter.heron.api.metric.MultiReducedMetric;
 import com.twitter.heron.api.metric.ReducedMetric;
@@ -39,12 +40,12 @@ import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 
 public class SpoutMetrics {
   private final MultiCountMetric ackCount;
-  private final MultiReducedMetric completeLatency;
-  private final MultiReducedMetric failLatency;
+  private final MultiReducedMetric<MeanReducerState> completeLatency;
+  private final MultiReducedMetric<MeanReducerState> failLatency;
   private final MultiCountMetric failCount;
   private final MultiCountMetric timeoutCount;
   private final MultiCountMetric emitCount;
-  private final ReducedMetric nextTupleLatency;
+  private final ReducedMetric<MeanReducerState> nextTupleLatency;
   private final CountMetric nextTupleCount;
   private final MultiCountMetric serializationTimeNs;
 
@@ -53,19 +54,19 @@ public class SpoutMetrics {
   private final CountMetric outQueueFullCount;
 
   // The mean # of pending-to-be-acked tuples in spout if acking is enabled
-  private final ReducedMetric pendingTuplesCount;
+  private final ReducedMetric<MeanReducerState> pendingTuplesCount;
 
   public SpoutMetrics() {
     ackCount = new MultiCountMetric();
-    completeLatency = new MultiReducedMetric(new MeanReducer());
-    failLatency = new MultiReducedMetric(new MeanReducer());
+    completeLatency = new MultiReducedMetric<>(new MeanReducer());
+    failLatency = new MultiReducedMetric<>(new MeanReducer());
     failCount = new MultiCountMetric();
     timeoutCount = new MultiCountMetric();
     emitCount = new MultiCountMetric();
-    nextTupleLatency = new ReducedMetric(new MeanReducer());
+    nextTupleLatency = new ReducedMetric<>(new MeanReducer());
     nextTupleCount = new CountMetric();
     outQueueFullCount = new CountMetric();
-    pendingTuplesCount = new ReducedMetric(new MeanReducer());
+    pendingTuplesCount = new ReducedMetric<>(new MeanReducer());
     serializationTimeNs = new MultiCountMetric();
   }
 

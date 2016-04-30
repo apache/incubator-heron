@@ -16,6 +16,7 @@ package com.twitter.heron.metrics;
 
 import com.twitter.heron.api.metric.CountMetric;
 import com.twitter.heron.api.metric.MeanReducer;
+import com.twitter.heron.api.metric.MeanReducerState;
 import com.twitter.heron.api.metric.ReducedMetric;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.config.SystemConfig;
@@ -42,13 +43,13 @@ public class GatewayMetrics {
   private final CountMetric sentExceptionsCount;
 
   // The # of items in inStreamQueue
-  private final ReducedMetric inStreamQueueSize;
+  private final ReducedMetric<MeanReducerState> inStreamQueueSize;
   // The # of items in outStreamQueue
-  private final ReducedMetric outStreamQueueSize;
+  private final ReducedMetric<MeanReducerState> outStreamQueueSize;
 
-  private final ReducedMetric inStreamQueueExpectedCapacity;
+  private final ReducedMetric<MeanReducerState> inStreamQueueExpectedCapacity;
 
-  private final ReducedMetric outStreamQueueExpectedCapacity;
+  private final ReducedMetric<MeanReducerState> outStreamQueueExpectedCapacity;
 
   // The # of times back-pressure happens on inStreamQueue or outMetricQueue so instance could not
   // receive more tuples from stream manager
@@ -65,10 +66,10 @@ public class GatewayMetrics {
     sentMetricsCount = new CountMetric();
     sentExceptionsCount = new CountMetric();
 
-    inStreamQueueSize = new ReducedMetric(new MeanReducer());
-    outStreamQueueSize = new ReducedMetric(new MeanReducer());
-    inStreamQueueExpectedCapacity = new ReducedMetric(new MeanReducer());
-    outStreamQueueExpectedCapacity = new ReducedMetric(new MeanReducer());
+    inStreamQueueSize = new ReducedMetric<>(new MeanReducer());
+    outStreamQueueSize = new ReducedMetric<>(new MeanReducer());
+    inStreamQueueExpectedCapacity = new ReducedMetric<>(new MeanReducer());
+    outStreamQueueExpectedCapacity = new ReducedMetric<>(new MeanReducer());
 
     inQueueFullCount = new CountMetric();
   }
