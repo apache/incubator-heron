@@ -60,7 +60,10 @@ public class LaunchRunnerTest {
       public void declareOutputFields(OutputFieldsDeclarer declarer) {
       }
 
-      public void open(Map<String, Object> conf, TopologyContext context, SpoutOutputCollector collector) {
+      public void open(
+          Map<String, Object> conf,
+          TopologyContext context,
+          SpoutOutputCollector collector) {
       }
 
       public void nextTuple() {

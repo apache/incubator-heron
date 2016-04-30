@@ -75,7 +75,10 @@ public final class AckingTopology {
     public AckingTestWordSpout() {
     }
 
-    public void open(Map<String, Object> conf, TopologyContext context, SpoutOutputCollector acollector) {
+    public void open(
+        Map<String, Object> conf,
+        TopologyContext context,
+        SpoutOutputCollector acollector) {
       collector = acollector;
       words = new String[]{"nathan", "mike", "jackson", "golda", "bertels"};
       rand = new Random();
@@ -112,7 +115,8 @@ public final class AckingTopology {
     private long startTime;
 
     @Override
-    public void prepare(Map<String, Object> conf, TopologyContext context, OutputCollector acollector) {
+    public void prepare(Map<String, Object> conf, TopologyContext context,
+        OutputCollector acollector) {
       collector = acollector;
       nItems = 0;
       startTime = System.currentTimeMillis();

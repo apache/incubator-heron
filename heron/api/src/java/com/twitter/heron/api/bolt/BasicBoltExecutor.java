@@ -39,7 +39,10 @@ public class BasicBoltExecutor implements IRichBolt {
 
 
   @Override
-  public void prepare(Map<String, Object> heronConf, TopologyContext context, OutputCollector aCollector) {
+  public void prepare(
+      Map<String, Object> heronConf,
+      TopologyContext context,
+      OutputCollector aCollector) {
     bolt.prepare(heronConf, context);
     collector = new BasicOutputCollector(aCollector);
   }
