@@ -22,19 +22,27 @@ heronrc=${2:-"/usr/local/heron/etc/heron.heronrc"}
 
 progname="$0"
 
-echo "Heron client installer"
-echo "----------------------"
-echo
-
 function usage() {
   echo "Usage: $progname [options]" >&2
   echo "Options are:" >&2
   echo "  --prefix=/some/path set the prefix path (default=/usr/local)." >&2
   echo "  --heronrc= set the heronrc path (default=/usr/local/heron/etc/heron.heronrc)." >&2
+  echo "  --system configure for system install, expands to" >&2
+  echo '           `--prefix=/usr/local/heron --heronrc=$HOME/.heronrc`.' >&2
   echo "  --user configure for user install, expands to" >&2
   echo '           `--prefix=$HOME/.heron --heronrc=$HOME/.heronrc`.' >&2
   exit 1
 }
+
+if [ $# -eq 0 ]; then
+  usage
+  exit 1
+fi
+
+echo "Heron client installer"
+echo "----------------------"
+echo
+
 
 prefix="/usr/local"
 bin="%prefix%/bin"
@@ -49,6 +57,11 @@ for opt in "${@}"; do
       ;;
     --heronrc=*)
       heronrc="$(echo "$opt" | cut -d '=' -f 2-)"
+      ;;
+    --system)
+      bin="/usr/local/bin"
+      base="/usr/local/heron"
+      heronrc="$HOME/.heronrc"
       ;;
     --user)
       bin="$HOME/bin"

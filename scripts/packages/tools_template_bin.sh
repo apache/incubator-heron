@@ -21,18 +21,25 @@ install_prefix=${1:-"/usr/local/herontools"}
 
 progname="$0"
 
-echo "Heron tools installer"
-echo "---------------------"
-echo
-
 function usage() {
   echo "Usage: $progname [options]" >&2
   echo "Options are:" >&2
   echo "  --prefix=/some/path set the prefix path (default=/usr/local)." >&2
+  echo "  --system configure for system install, expands to" >&2
+  echo '           `--prefix=/usr/local/herontools`.' >&2
   echo "  --user configure for user install, expands to" >&2
   echo '           `--prefix=$HOME/.herontools`.' >&2
   exit 1
 }
+
+echo "Heron tools installer"
+echo "---------------------"
+echo
+
+if [ $# -eq 0 ]; then
+  usage
+  exit 1
+fi
 
 prefix="/usr/local"
 bin="%prefix%/bin"
@@ -42,6 +49,10 @@ for opt in "${@}"; do
   case $opt in
     --prefix=*)
       prefix="$(echo "$opt" | cut -d '=' -f 2-)"
+      ;;
+    --system)
+      bin="/usr/local/bin"
+      base="/usr/local/herontools"
       ;;
     --user)
       bin="$HOME/bin"

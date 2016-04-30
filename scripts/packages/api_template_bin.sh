@@ -18,7 +18,9 @@
 function usage() {
   echo "Usage: $progname [options]" >&2
   echo "Options are:" >&2
-  echo "  --prefix=/some/path set the prefix path (default=/usr/local)." >&2
+  echo "  --prefix=/some/path set the prefix path to install." >&2
+  echo "  --system configure for system install, expands to" >&2
+  echo '           `--prefix=/usr/local`.' >&2
   echo "  --user configure for user install, expands to" >&2
   echo '           `--prefix=$HOME/.heronapi`.' >&2
   echo "  --maven install jars to maven local repo" >&2
@@ -148,6 +150,11 @@ install_prefix=${1:-"/usr/local/heronapi"}
 
 progname="$0"
 
+if [ $# -eq 0 ]; then
+  usage
+  exit 1
+fi
+
 echo "Heron API installer"
 echo "---------------------"
 echo
@@ -160,6 +167,9 @@ for opt in "${@}"; do
   case $opt in
     --prefix=*)
       prefix="$(echo "$opt" | cut -d '=' -f 2-)"
+      ;;
+    --system)
+      base="/usr/local/heronapi"
       ;;
     --user)
       base="$HOME/.heronapi"
