@@ -59,7 +59,10 @@ public final class TopologyTests {
         declarer.declare(new Fields("field1"));
       }
 
-      public void open(Map<String, Object> conf, TopologyContext context, SpoutOutputCollector collector) {
+      public void open(
+          Map<String, Object> conf,
+          TopologyContext context,
+          SpoutOutputCollector collector) {
       }
 
       public void nextTuple() {
