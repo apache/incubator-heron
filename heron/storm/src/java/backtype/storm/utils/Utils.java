@@ -31,7 +31,7 @@ public final class Utils {
     try {
       Class c = Class.forName(klass);
       return c.newInstance();
-    } catch (Exception e) {
+    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
       throw new RuntimeException(e);
     }
   }

@@ -14,6 +14,8 @@
 
 package backtype.storm.serialization;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -129,26 +131,35 @@ public final class SerializationFactory {
 
   private static Serializer resolveSerializerInstance(
       Kryo k, Class superClass, Class<? extends Serializer> serializerClass) {
+    Constructor<? extends Serializer> ctor;
+
     try {
-      try {
-        return serializerClass.getConstructor(Kryo.class, Class.class).newInstance(k, superClass);
-      } catch (Exception ex1) {
-        try {
-          return serializerClass.getConstructor(Kryo.class).newInstance(k);
-        } catch (Exception ex2) {
-          try {
-            return serializerClass.getConstructor(Class.class).newInstance(superClass);
-          } catch (Exception ex3) {
-            return serializerClass.newInstance();
-          }
-        }
-      }
-    } catch (Exception ex) {
-      throw new IllegalArgumentException("Unable to create serializer \""
-          + serializerClass.getName()
-          + "\" for class: "
-          + superClass.getName(), ex);
+      ctor = serializerClass.getConstructor(Kryo.class, Class.class);
+      return ctor.newInstance(k, superClass);
+    } catch (NoSuchMethodException | InvocationTargetException
+        | InstantiationException | IllegalAccessException ex) {
+      // do nothing
     }
+
+    try {
+      ctor = serializerClass.getConstructor(Kryo.class);
+      return ctor.newInstance(k);
+    } catch (NoSuchMethodException | InvocationTargetException
+        | InstantiationException | IllegalAccessException ex) {
+      // do nothing
+    }
+
+    try {
+      ctor = serializerClass.getConstructor(Class.class);
+      return ctor.newInstance(k);
+    } catch (NoSuchMethodException | InvocationTargetException
+        | InstantiationException | IllegalAccessException ex) {
+      // do nothing
+    }
+
+    throw new IllegalArgumentException(
+        String.format("Unable to create serializer \"%s\" for class: %s",
+            serializerClass.getName(), superClass.getName()));
   }
 
   private static Map<String, String> normalizeKryoRegister(Map conf) {

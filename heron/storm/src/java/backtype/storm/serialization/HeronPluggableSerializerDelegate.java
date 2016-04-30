@@ -38,22 +38,14 @@ public class HeronPluggableSerializerDelegate implements
 
   @Override
   public byte[] serialize(Object object) {
-    try {
-      kryoOut.clear();
-      kryo.writeClassAndObject(kryoOut, object);
-      return kryoOut.toBytes();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    kryoOut.clear();
+    kryo.writeClassAndObject(kryoOut, object);
+    return kryoOut.toBytes();
   }
 
   @Override
   public Object deserialize(byte[] input) {
-    try {
-      kryoIn.setBuffer(input);
-      return kryo.readClassAndObject(kryoIn);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    kryoIn.setBuffer(input);
+    return kryo.readClassAndObject(kryoIn);
   }
 }
