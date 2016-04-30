@@ -42,7 +42,10 @@ public class TestBolt extends BaseRichBolt {
   private int tupleExecuted = 0;
 
   @Override
-  public void prepare(Map<String, Object> map, TopologyContext topologyContext, OutputCollector collector) {
+  public void prepare(
+      Map<String, Object> map,
+      TopologyContext topologyContext,
+      OutputCollector collector) {
     this.outputCollector = collector;
   }
 

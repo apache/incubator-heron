@@ -23,6 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class Jars {
+  private static final Logger LOG = Logger.getLogger(Jars.class.getName());
 
   // scheduler jar search pattern
   private static Pattern schedulerJarPattern =

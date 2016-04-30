@@ -71,7 +71,10 @@ public final class ExclamationTopology {
     private long startTime;
 
     @Override
-    public void prepare(Map<String, Object> conf, TopologyContext context, OutputCollector collector) {
+    public void prepare(
+        Map<String, Object> conf,
+        TopologyContext context,
+        OutputCollector collector) {
       nItems = 0;
       startTime = System.currentTimeMillis();
     }

@@ -56,7 +56,10 @@ public final class CustomGroupingTopology {
     private long nItems;
 
     @Override
-    public void prepare(Map<String, Object> conf, TopologyContext context, OutputCollector acollector) {
+    public void prepare(
+        Map<String, Object> conf,
+        TopologyContext context,
+        OutputCollector acollector) {
       nItems = 0;
     }
 

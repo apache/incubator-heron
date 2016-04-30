@@ -43,8 +43,10 @@ public final class StormSubmitter {
    * @throws AlreadyAliveException if a topology with this name is already running
    * @throws InvalidTopologyException if an invalid topology was submitted
    */
-  public static void submitTopology(String name, Map<String, Object> stormConfig, StormTopology topology)
-      throws AlreadyAliveException, InvalidTopologyException {
+  public static void submitTopology(
+      String name,
+      Map<String, Object> stormConfig,
+      StormTopology topology) throws AlreadyAliveException, InvalidTopologyException {
 
     // First do config translation
     com.twitter.heron.api.Config heronConfig = ConfigUtils.translateConfig(stormConfig);

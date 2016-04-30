@@ -31,7 +31,10 @@ public class TestWordSpout extends BaseRichSpout {
   private String[] words;
   private Random rand;
 
-  public void open(Map<String, Object> conf, TopologyContext context, SpoutOutputCollector acollector) {
+  public void open(
+      Map<String, Object> conf,
+      TopologyContext context,
+      SpoutOutputCollector acollector) {
     collector = acollector;
     words = new String[]{"nathan", "mike", "jackson", "golda", "bertels"};
     rand = new Random();

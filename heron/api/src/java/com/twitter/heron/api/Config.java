@@ -292,7 +292,10 @@ public class Config extends HashMap<String, Object> {
     }
   }
 
-  public static void setComponentJvmOptions(Map<String, Object> conf, String component, String jvmOptions) {
+  public static void setComponentJvmOptions(
+      Map<String, Object> conf,
+      String component,
+      String jvmOptions) {
     String optsBase64;
     String componentBase64;
 
