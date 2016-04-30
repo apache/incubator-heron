@@ -102,7 +102,7 @@ public class AuroraScheduler implements IScheduler {
     return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
   }
 
-  private String getHeronAuroraPath() {
+  protected String getHeronAuroraPath() {
     return new File(Context.heronConf(config), "heron.aurora").getPath();
   }
 
