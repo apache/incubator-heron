@@ -27,7 +27,8 @@ public class DefaultKryoFactory implements IKryoFactory {
   @Override
   public Kryo getKryo(Map<String, Object> conf) {
     KryoSerializableDefault k = new KryoSerializableDefault();
-    k.setRegistrationRequired(!((Boolean) conf.get(Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION)));
+    k.setRegistrationRequired(
+        !((Boolean) conf.get(Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION)));
     k.setReferences(false);
     return k;
   }
@@ -45,15 +46,15 @@ public class DefaultKryoFactory implements IKryoFactory {
   }
 
   public static class KryoSerializableDefault extends Kryo {
-    boolean _override = false;
+    private boolean override = false;
 
     public void overrideDefault(boolean value) {
-      _override = value;
+      override = value;
     }
 
     @Override
     public Serializer getDefaultSerializer(Class type) {
-      if (_override) {
+      if (override) {
         return new SerializableSerializer();
       } else {
         return super.getDefaultSerializer(type);

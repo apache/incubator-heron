@@ -22,7 +22,16 @@ import org.apache.storm.hooks.ITaskHookDelegate;
 
 import com.twitter.heron.api.Config;
 
-public class ConfigUtils {
+public final class ConfigUtils {
+
+  private ConfigUtils() {
+  }
+
+  /**
+   * Translate storm config to heron config
+   * @param stormConfig the storm config
+   * @return a heron config
+   */
   public static Config translateConfig(Map<String, Object> stormConfig) {
     Config heronConfig = new Config(stormConfig);
     // Look at serialization stuff first
@@ -38,23 +47,30 @@ public class ConfigUtils {
       com.twitter.heron.api.Config.setNumStmgrs(heronConfig, nWorkers);
     }
     if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_ACKER_EXECUTORS)) {
-      Integer nAckers = (Integer) heronConfig.get(org.apache.storm.Config.TOPOLOGY_ACKER_EXECUTORS);
+      Integer nAckers =
+          (Integer) heronConfig.get(org.apache.storm.Config.TOPOLOGY_ACKER_EXECUTORS);
       com.twitter.heron.api.Config.setEnableAcking(heronConfig, nAckers > 0);
     }
     if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS)) {
-      Integer nSecs = (Integer) heronConfig.get(org.apache.storm.Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS);
+      Integer nSecs =
+          (Integer) heronConfig.get(org.apache.storm.Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS);
       com.twitter.heron.api.Config.setMessageTimeoutSecs(heronConfig, nSecs);
     }
     if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_MAX_SPOUT_PENDING)) {
-      Integer nPending = Integer.parseInt(heronConfig.get(org.apache.storm.Config.TOPOLOGY_MAX_SPOUT_PENDING).toString());
+      Integer nPending =
+          Integer.parseInt(
+              heronConfig.get(org.apache.storm.Config.TOPOLOGY_MAX_SPOUT_PENDING).toString());
       com.twitter.heron.api.Config.setMaxSpoutPending(heronConfig, nPending);
     }
     if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS)) {
-      Integer tSecs = Integer.parseInt(heronConfig.get(org.apache.storm.Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS).toString());
+      Integer tSecs =
+          Integer.parseInt(
+              heronConfig.get(org.apache.storm.Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS).toString());
       com.twitter.heron.api.Config.setTickTupleFrequency(heronConfig, tSecs);
     }
     if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_DEBUG)) {
-      Boolean dBg = Boolean.parseBoolean(heronConfig.get(org.apache.storm.Config.TOPOLOGY_DEBUG).toString());
+      Boolean dBg =
+          Boolean.parseBoolean(heronConfig.get(org.apache.storm.Config.TOPOLOGY_DEBUG).toString());
       com.twitter.heron.api.Config.setDebug(heronConfig, dBg);
     }
 
@@ -64,9 +80,11 @@ public class ConfigUtils {
   }
 
   private static void doSerializationTranslation(Config heronConfig) {
-    if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION) &&
-        (heronConfig.get(org.apache.storm.Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION) instanceof Boolean) &&
-        ((Boolean) heronConfig.get(org.apache.storm.Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION))) {
+    if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION)
+        && (heronConfig.get(org.apache.storm.Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION)
+          instanceof Boolean)
+        && ((Boolean)
+          heronConfig.get(org.apache.storm.Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION))) {
       com.twitter.heron.api.Config.setSerializationClassName(heronConfig,
           "com.twitter.heron.api.serializer.JavaSerializer");
     } else {
@@ -74,14 +92,21 @@ public class ConfigUtils {
       com.twitter.heron.api.Config.setSerializationClassName(heronConfig,
           "org.apache.storm.serialization.HeronPluggableSerializerDelegate");
       if (!heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_KRYO_FACTORY)) {
-        heronConfig.put(org.apache.storm.Config.TOPOLOGY_KRYO_FACTORY, "org.apache.storm.serialization.DefaultKryoFactory");
-      } else if (!(heronConfig.get(org.apache.storm.Config.TOPOLOGY_KRYO_FACTORY) instanceof String)) {
-        throw new RuntimeException(org.apache.storm.Config.TOPOLOGY_KRYO_FACTORY + " has to be set to a class name");
+        heronConfig.put(org.apache.storm.Config.TOPOLOGY_KRYO_FACTORY,
+            "org.apache.storm.serialization.DefaultKryoFactory");
+      } else if (!(heronConfig.get(org.apache.storm.Config.TOPOLOGY_KRYO_FACTORY)
+          instanceof String)) {
+        throw new RuntimeException(
+            org.apache.storm.Config.TOPOLOGY_KRYO_FACTORY + " has to be set to a class name");
       }
-      if (!heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_SKIP_MISSING_KRYO_REGISTRATIONS)) {
+      if (!heronConfig.containsKey(
+            org.apache.storm.Config.TOPOLOGY_SKIP_MISSING_KRYO_REGISTRATIONS)) {
         heronConfig.put(org.apache.storm.Config.TOPOLOGY_SKIP_MISSING_KRYO_REGISTRATIONS, false);
-      } else if (!(heronConfig.get(org.apache.storm.Config.TOPOLOGY_SKIP_MISSING_KRYO_REGISTRATIONS) instanceof Boolean)) {
-        throw new RuntimeException(org.apache.storm.Config.TOPOLOGY_SKIP_MISSING_KRYO_REGISTRATIONS + " has to be boolean");
+      } else if (!(heronConfig.get(org.apache.storm.Config.TOPOLOGY_SKIP_MISSING_KRYO_REGISTRATIONS)
+          instanceof Boolean)) {
+        throw new RuntimeException(
+            org.apache.storm.Config.TOPOLOGY_SKIP_MISSING_KRYO_REGISTRATIONS
+                + " has to be boolean");
       }
     }
   }

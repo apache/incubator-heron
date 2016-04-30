@@ -15,7 +15,7 @@
 package backtype.storm.metric.api;
 
 public class CountMetric implements IMetric {
-  com.twitter.heron.api.metric.CountMetric delegate;
+  private com.twitter.heron.api.metric.CountMetric delegate;
 
   public CountMetric() {
     delegate = new com.twitter.heron.api.metric.CountMetric();

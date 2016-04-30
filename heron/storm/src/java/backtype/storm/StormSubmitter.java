@@ -28,7 +28,10 @@ import backtype.storm.utils.ConfigUtils;
  * with the "storm jar" command from the command-line, and then use this class to
  * submit your topologies.
  */
-public class StormSubmitter {
+public final class StormSubmitter {
+
+  private StormSubmitter() {
+  }
 
   /**
    * Submits a topology to run on the cluster. A topology runs forever or until

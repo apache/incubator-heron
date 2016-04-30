@@ -146,7 +146,7 @@ public class OutputCollector implements IOutputCollector {
    * in Java.</p>
    *
    * @param taskId the taskId to send the new tuple to
-   * @param anchosr the tuples to anchor to
+   * @param anchors the tuples to anchor to
    * @param tuple the new output tuple from this bolt
    */
   public void emitDirect(int taskId, Collection<Tuple> anchors, List<Object> tuple) {
@@ -202,7 +202,8 @@ public class OutputCollector implements IOutputCollector {
   }
 
   @Override
-  public void emitDirect(int taskId, String streamId, Collection<Tuple> anchors, List<Object> tuple) {
+  public void emitDirect(
+      int taskId, String streamId, Collection<Tuple> anchors, List<Object> tuple) {
     delegate.emitDirect(taskId, streamId, anchors, tuple);
   }
 

@@ -1,38 +1,49 @@
-#include "tmaster/src/cpp/manager/stats-interface.h"
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
+#include "tmaster/src/cpp/manager/stats-interface.h"
 #include <iostream>
 #include <sstream>
-
+#include "manager/tmetrics-collector.h"
+#include "metrics/tmaster-metrics.h"
 #include "basics/basics.h"
 #include "errors/errors.h"
 #include "threads/threads.h"
 #include "network/network.h"
 #include "proto/tmaster.pb.h"
-#include "metrics/tmaster-metrics.h"
-#include "manager/tmetrics-collector.h"
 
-namespace heron { namespace tmaster {
+namespace heron {
+namespace tmaster {
 
-StatsInterface::StatsInterface(EventLoop* eventLoop,
-			       const NetworkOptions& _options,
-			       TMetricsCollector* _collector)
-  : metrics_collector_(_collector)
-{
+StatsInterface::StatsInterface(EventLoop* eventLoop, const NetworkOptions& _options,
+                               TMetricsCollector* _collector)
+    : metrics_collector_(_collector) {
   http_server_ = new HTTPServer(eventLoop, _options);
   // Install the handlers
-  auto cbHandleStats = [this] (IncomingHTTPRequest* request) {
-    this->HandleStatsRequest(request);
-  };
+  auto cbHandleStats = [this](IncomingHTTPRequest* request) { this->HandleStatsRequest(request); };
 
-  auto cbHandleException =  [this] (IncomingHTTPRequest* request) {
+  auto cbHandleException = [this](IncomingHTTPRequest* request) {
     this->HandleExceptionRequest(request);
   };
 
-  auto cbHandleExceptionSummary = [this] (IncomingHTTPRequest* request) {
+  auto cbHandleExceptionSummary = [this](IncomingHTTPRequest* request) {
     this->HandleExceptionSummaryRequest(request);
   };
 
-  auto cbHandleUnknown = [this] (IncomingHTTPRequest* request) {
+  auto cbHandleUnknown = [this](IncomingHTTPRequest* request) {
     this->HandleUnknownRequest(request);
   };
 
@@ -43,13 +54,9 @@ StatsInterface::StatsInterface(EventLoop* eventLoop,
   CHECK(http_server_->Start() == SP_OK);
 }
 
-StatsInterface::~StatsInterface()
-{
-  delete http_server_;
-}
+StatsInterface::~StatsInterface() { delete http_server_; }
 
-void StatsInterface::HandleStatsRequest(IncomingHTTPRequest* _request)
-{
+void StatsInterface::HandleStatsRequest(IncomingHTTPRequest* _request) {
   LOG(INFO) << "Got a stats request " << _request->GetQuery();
   // get the entire stuff
   unsigned char* pb = _request->ExtractFromPostData(0, _request->GetPayloadSize());
@@ -65,7 +72,8 @@ void StatsInterface::HandleStatsRequest(IncomingHTTPRequest* _request)
   CHECK(res->SerializeToString(&response_string));
   OutgoingHTTPResponse* response = new OutgoingHTTPResponse(_request);
   response->AddHeader("Content-Type", "application/octet-stream");
-  std::ostringstream content_length; content_length << response_string.size();
+  std::ostringstream content_length;
+  content_length << response_string.size();
   response->AddHeader("Content-Length", content_length.str());
   response->AddResponse(response_string);
   http_server_->SendReply(_request, 200, response);
@@ -127,11 +135,10 @@ void StatsInterface::HandleExceptionSummaryRequest(IncomingHTTPRequest* _request
   LOG(INFO) << "Returned exceptions response";
 }
 
-void StatsInterface::HandleUnknownRequest(IncomingHTTPRequest* _request)
-{
+void StatsInterface::HandleUnknownRequest(IncomingHTTPRequest* _request) {
   LOG(WARNING) << "Got an unknown request " << _request->GetQuery();
   http_server_->SendErrorReply(_request, 400);
   delete _request;
 }
-
-}} // end of namespace
+}  // namespace tmaster
+}  // namespace heron

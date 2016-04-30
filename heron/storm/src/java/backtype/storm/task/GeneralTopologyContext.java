@@ -32,8 +32,10 @@ public class GeneralTopologyContext implements JSONAware {
   private com.twitter.heron.api.topology.GeneralTopologyContext delegate;
 
   public GeneralTopologyContext(StormTopology topology, Map<String, Object> stormConf,
-                                Map<Integer, String> taskToComponent, Map<String, List<Integer>> componentToSortedTasks,
-                                Map<String, Map<String, Fields>> componentToStreamToFields, String stormId) {
+                                Map<Integer, String> taskToComponent,
+                                Map<String, List<Integer>> componentToSortedTasks,
+                                Map<String, Map<String, Fields>> componentToStreamToFields,
+                                String stormId) {
     throw new RuntimeException("GeneralTopologyContext should never be initiated this way");
   }
 
@@ -100,7 +102,7 @@ public class GeneralTopologyContext implements JSONAware {
    */
   /*
   public Fields getComponentOutputFields(GlobalStreamId id) {
-  }    
+  }
   */
 
   /**
@@ -124,7 +126,8 @@ public class GeneralTopologyContext implements JSONAware {
     public Map<String, Map<String, Grouping>> getTargets(String componentId) {
         Map<String, Map<String, Grouping>> ret = new HashMap<String, Map<String, Grouping>>();
         for(String otherComponentId: getComponentIds()) {
-            Map<GlobalStreamId, Grouping> inputs = getComponentCommon(otherComponentId).get_inputs();
+            Map<GlobalStreamId, Grouping> inputs =
+              getComponentCommon(otherComponentId).get_inputs();
             for(GlobalStreamId id: inputs.keySet()) {
                 if(id.get_componentId().equals(componentId)) {
                     Map<String, Grouping> curr = ret.get(id.get_streamId());
@@ -161,7 +164,7 @@ public class GeneralTopologyContext implements JSONAware {
         return ThriftTopologyUtils.getComponentCommon(getRawTopology(), componentId);
     }
   */
-    
+
   /*
     public int maxTopologyMessageTimeout() {
         Integer max = Utils.getInt(_stormConf.get(Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS));
@@ -178,6 +181,5 @@ public class GeneralTopologyContext implements JSONAware {
         }
         return max;
     }
-
   */
 }
