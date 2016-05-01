@@ -42,6 +42,7 @@ class Application(tornado.web.Application):
     tracker.synch_topologies()
     tornadoHandlers = [
       (r"/", handlers.MainHandler),
+      (r"/clusters", handlers.ClustersHandler, {"tracker":tracker}),
       (r"/topologies", handlers.TopologiesHandler, {"tracker":tracker}),
       (r"/topologies/states", handlers.StatesHandler, {"tracker":tracker}),
       (r"/topologies/info", handlers.TopologyHandler, {"tracker":tracker}),
