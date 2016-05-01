@@ -16,6 +16,8 @@ package com.twitter.heron.scheduler.server;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.sun.net.httpserver.HttpServer;
@@ -34,12 +36,13 @@ public class SchedulerServer {
 
   private final HttpServer schedulerServer;
   private final Config runtime;
+  private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
   public SchedulerServer(Config runtime, IScheduler scheduler, int port)
       throws IOException {
 
     this.runtime = runtime;
-    this.schedulerServer = createServer(port);
+    this.schedulerServer = createServer(port, executorService);
 
     // associate handlers with the URL service end points
     this.schedulerServer.createContext(KILL_REQUEST_CONTEXT,
@@ -55,6 +58,10 @@ public class SchedulerServer {
 
   public void stop() {
     schedulerServer.stop(0);
+
+    // Stopping the server will not shut down the Executor
+    // We have to shut it down explicitly
+    executorService.shutdownNow();
   }
 
   public String getHost() {
@@ -65,9 +72,9 @@ public class SchedulerServer {
     return schedulerServer.getAddress().getPort();
   }
 
-  protected HttpServer createServer(int port) throws IOException {
+  protected HttpServer createServer(int port, Executor executor) throws IOException {
     HttpServer server = HttpServer.create(new InetSocketAddress(port), SERVER_BACK_LOG);
-    server.setExecutor(Executors.newSingleThreadExecutor());
+    server.setExecutor(executor);
     return server;
   }
 }

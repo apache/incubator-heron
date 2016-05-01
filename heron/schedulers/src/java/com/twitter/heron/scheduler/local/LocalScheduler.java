@@ -73,7 +73,7 @@ public class LocalScheduler implements IScheduler {
 
   @Override
   public void close() {
-
+    monitorService.shutdownNow();
   }
 
   /**
