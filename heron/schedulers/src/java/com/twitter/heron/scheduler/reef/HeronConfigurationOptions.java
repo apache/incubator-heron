@@ -4,13 +4,13 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+//    http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
-// limitations under the License
+// limitations under the License.
 
 package com.twitter.heron.scheduler.reef;
 
@@ -54,7 +54,7 @@ public class HeronConfigurationOptions {
   public class HttpPort implements Name<Integer> {
   }
 
-  @NamedParameter(doc = "Identifies the heron executor, either running TM or a worker", default_value = "0")
+  @NamedParameter(doc = "Heron Executors Id, 0 = TM, 1 <= worker", default_value = "0")
   public class HeronExecutorId implements Name<String> {
   }
 }

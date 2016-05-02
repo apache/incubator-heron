@@ -4,18 +4,18 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+//    http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
-// limitations under the License
+// limitations under the License.
 
 package com.twitter.heron.scheduler.reef;
 
 import java.io.File;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -95,15 +95,15 @@ public class HeronExecutorTask implements Task {
     HeronReefUtils.extractPackageInSandbox(globalFolder, topologyPackageName, localHeronConfDir);
     HeronReefUtils.extractPackageInSandbox(globalFolder, heronCorePackageName, localHeronConfDir);
 
-    String topologyDefnFile = TopologyUtils.lookUpTopologyDefnFile(".", topologyName);
-    topology = TopologyUtils.getTopology(topologyDefnFile);
-    config = SchedulerConfig.loadConfig(cluster, role, env, topologyJar, topologyDefnFile, topology);
+    String topologyDefFile = TopologyUtils.lookUpTopologyDefnFile(".", topologyName);
+    topology = TopologyUtils.getTopology(topologyDefFile);
+    config = SchedulerConfig.loadConfig(cluster, role, env, topologyJar, topologyDefFile, topology);
 
     LOG.log(Level.INFO, "Preparing evaluator for running executor-id: {0}", heronExecutorId);
 
-    String executorCommand = getExecutorCommand(heronExecutorId);
+    String executorCmd = getExecutorCommand(heronExecutorId);
 
-    final Process regularExecutor = ShellUtils.runASyncProcess(true, executorCommand, new File("."));
+    final Process regularExecutor = ShellUtils.runASyncProcess(true, executorCmd, new File("."));
     LOG.log(Level.INFO, "Started heron executor-id: {0}", heronExecutorId);
     regularExecutor.waitFor();
     return null;
@@ -122,8 +122,10 @@ public class HeronExecutorTask implements Task {
       throw new RuntimeException("Could not find available ports to start topology");
     }
 
+    Long instanceRam = Context.instanceRam(config);
     String executorCmd = String.format(
-        "%s %d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %d %s %s %d %s %s %s %s %s %s %d",
+        "%s %d %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s "
+            + "%s %s %s %s %s %d %s %s %d %s %s %s %s %s %s %d",
         Context.executorSandboxBinary(config),
         container,
         topology.getName(),
@@ -141,7 +143,7 @@ public class HeronExecutorTask implements Task {
         port2,
         port3,
         Context.systemConfigSandboxFile(config),
-        TopologyUtils.formatRamMap(TopologyUtils.getComponentRamMap(topology, Context.instanceRam(config))),
+        TopologyUtils.formatRamMap(TopologyUtils.getComponentRamMap(topology, instanceRam)),
         formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)),
         Context.topologyPackageType(config),
         Context.topologyJarFile(config),
@@ -167,7 +169,8 @@ public class HeronExecutorTask implements Task {
    * TODO copied from localScheduler. May be moved to a utils class
    */
   protected String formatJavaOpts(String javaOpts) {
-    String javaOptsBase64 = DatatypeConverter.printBase64Binary(javaOpts.getBytes(Charset.forName("UTF-8")));
+    byte[] javaOptsBytes = javaOpts.getBytes(StandardCharsets.UTF_8);
+    String javaOptsBase64 = DatatypeConverter.printBase64Binary(javaOptsBytes);
 
     return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
   }
