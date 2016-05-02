@@ -93,46 +93,6 @@ def make_viz_dashboard_url(name, cluster, environ):
   """
   return ""
 
-def convert_execution_state(execution_state):
-  """
-  Old version of execution state was specific to aurora.
-  This method is for backward compatibility.
-  Converts the old execution state to new one
-  and returns it.
-  If execution_state is the new one, simply returns it.
-  """
-  if not execution_state.HasField("aurora"):
-    # "dc" field is deprecated, so convert that to "cluster" if present.
-    if execution_state.HasField("dc"):
-      execution_state.cluster = execution_state.dc
-    return execution_state
-
-  aurora = execution_state.aurora
-  job = aurora.jobs[0]
-  dc = job.dc
-  environ = job.environ
-  role = job.user
-  release_username = aurora.release_username
-  release_tag = aurora.release_tag
-  release_version = aurora.release_version
-  uploader_version = aurora.packer_version
-
-  estate = ExecutionState()
-  estate.topology_name = execution_state.topology_name
-  estate.topology_id = execution_state.topology_id
-  estate.submission_time = execution_state.submission_time
-  estate.submission_user = execution_state.submission_user
-  estate.release_state.release_username = release_username
-  estate.release_state.release_tag = release_tag
-  estate.release_state.release_version = release_version
-  estate.release_state.uploader_version = uploader_version
-  estate.cluster = dc
-  estate.environ = environ
-  estate.role = role
-  assert estate.IsInitialized()
-  return estate
-
-
 ################################################################################
 # Get normalized class path depending on platform
 ################################################################################

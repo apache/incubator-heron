@@ -156,9 +156,7 @@ class Tracker:
     Returns the repesentation of execution state that will
     be returned from Tracker.
     """
-    # Convert this execution state if this is old
-    # TODO: Remove handling of the old version of execution state
-    execution_state = utils.convert_execution_state(topology.execution_state)
+    execution_state = topology.execution_state
 
     executionState = {
       "cluster": execution_state.cluster,
