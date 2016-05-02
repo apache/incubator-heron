@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.scheduler;
+package com.twitter.heron.spi.utils;
 
 import java.util.logging.Logger;
 
@@ -63,7 +63,7 @@ public final class SchedulerConfig {
    * <p>
    * return config, the defaults config
    */
-  protected static Config defaultConfigs() {
+  protected static Config sandboxConfigs() {
     Config config = Config.newBuilder()
         .putAll(ClusterDefaults.getSandboxDefaults())
         .putAll(ClusterConfig.loadSandboxConfig())
@@ -89,7 +89,7 @@ public final class SchedulerConfig {
   }
 
   // build the config by expanding all the variables
-  protected static Config loadConfig(
+  public static Config loadConfig(
       String cluster,
       String role,
       String environ,
@@ -99,7 +99,7 @@ public final class SchedulerConfig {
 
     Config config = Config.expand(
         Config.newBuilder()
-            .putAll(defaultConfigs())
+            .putAll(sandboxConfigs())
             .putAll(commandLineConfigs(cluster, role, environ))
             .putAll(topologyConfigs(topologyJarFile, topologyDefnFile, topology))
             .build());

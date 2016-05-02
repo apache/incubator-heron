@@ -42,6 +42,7 @@ import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.Runtime;
+import com.twitter.heron.spi.utils.SchedulerConfig;
 import com.twitter.heron.spi.utils.Shutdown;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
