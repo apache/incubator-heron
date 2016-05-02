@@ -52,7 +52,7 @@ public class ReefScheduler implements IScheduler {
 
   @Override
   public boolean onRestart(RestartTopologyRequest request) {
-    // TODO(mfu): Any plans to implement this?
+    // TODO: Need to provide this implementation
     return false;
   }
 

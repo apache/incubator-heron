@@ -28,7 +28,6 @@ import org.apache.reef.tang.annotations.Parameter;
 import org.apache.reef.task.Task;
 
 import com.twitter.heron.api.generated.TopologyAPI.Topology;
-import com.twitter.heron.scheduler.SchedulerConfig;
 import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.Cluster;
 import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.Environ;
 import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.HeronCorePackageName;
@@ -42,6 +41,7 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.ShellUtils;
 import com.twitter.heron.spi.utils.NetworkUtils;
+import com.twitter.heron.spi.utils.SchedulerConfig;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
 public class HeronExecutorTask implements Task {
@@ -97,7 +97,7 @@ public class HeronExecutorTask implements Task {
 
     String topologyDefnFile = TopologyUtils.lookUpTopologyDefnFile(".", topologyName);
     topology = TopologyUtils.getTopology(topologyDefnFile);
-    config = new ConfigLoader().getConfig(cluster, role, env, topologyJar, topologyDefnFile, topology);
+    config = SchedulerConfig.loadConfig(cluster, role, env, topologyJar, topologyDefnFile, topology);
 
     LOG.log(Level.INFO, "Preparing evaluator for running executor-id: {0}", heronExecutorId);
 
@@ -110,7 +110,8 @@ public class HeronExecutorTask implements Task {
   }
 
   private String getExecutorCommand(int container) {
-    // TODO(mfu): Not sure whether it works in distributed shared environment. In Twitter, we need to request ports as a kind of resource to guarantee the availability and isolation of ports resource.
+    // TODO: Verify if this approach to get free network port will work with REEF on YARN and Mesos.
+    // TODO: Alternatively check if RM could allocate ports as a resource
     int port1 = NetworkUtils.getFreePort();
     int port2 = NetworkUtils.getFreePort();
     int port3 = NetworkUtils.getFreePort();
@@ -169,14 +170,5 @@ public class HeronExecutorTask implements Task {
     String javaOptsBase64 = DatatypeConverter.printBase64Binary(javaOpts.getBytes(Charset.forName("UTF-8")));
 
     return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
-  }
-
-  /*
-   * TODO This class could be removed when a util class is created
-   */
-  private class ConfigLoader extends SchedulerConfig {
-    public Config getConfig(String cluster, String role, String env, String jar, String defn, Topology topology) {
-      return loadConfig(cluster, role, env, jar, defn, topology);
-    }
   }
 }
