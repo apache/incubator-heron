@@ -3,23 +3,6 @@ package heron.proto.system;
 option java_package = "com.twitter.heron.proto.system";
 option java_outer_classname = "ExecutionEnvironment";
 
-message AuroraJob {
-  required string dc = 1;
-  required string environ = 2;
-  required string user = 3;
-  required string jobname = 4;
-}
-
-message AuroraExecutionState {
-  optional string release_username = 1;
-  optional string release_tag = 2;
-  // This is the user facing release version
-  optional string release_version = 4;
-  // This is the packer version
-  optional string packer_version = 5;
-  repeated AuroraJob jobs = 3;
-}
-
 message HeronReleaseState {
   optional string release_username = 1;
   optional string release_tag = 2;
@@ -38,11 +21,6 @@ message ExecutionState {
   // The username who launched the topology
   optional string submission_user = 5;
 
-  // Currently only aurora is supported.
-  // TODO: Remove this completely.
-  optional AuroraExecutionState aurora = 3;
-
-  optional string dc = 6;
   optional string environ = 7;
   optional string role = 8;
   optional HeronReleaseState release_state = 9;
