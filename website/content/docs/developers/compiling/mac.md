@@ -55,14 +55,14 @@ brew can be used to install the dependencies.
 Build the project
 
 ```bash
-bazel build --config=ubuntu heron/...  
+bazel build --config=darwin heron/...  
 ```
 
 Build the packages
 
 ```bash
-bazel build --config=ubuntu scripts/packages:binpkgs  
-bazel build --config=ubuntu scripts/packages:tarpkgs  
+bazel build --config=darwin scripts/packages:binpkgs  
+bazel build --config=darwin scripts/packages:tarpkgs  
 ```
 
 This will build the packages below the `bazel-bin/scripts/packages/` directory. 
