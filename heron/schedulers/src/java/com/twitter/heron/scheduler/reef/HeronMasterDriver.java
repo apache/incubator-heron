@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -63,10 +64,14 @@ public class HeronMasterDriver {
   private static final int TM_MEM_SIZE_MB = 1024;
   private static final Logger LOG = Logger.getLogger(HeronMasterDriver.class.getName());
 
-  // TODO(mfu):
-  // TODO(mfu): 1. Have we handled the precise reconstruction of it after scheduler process dies unexpectedly and restarts?
-  // TODO(mfu): 2. Need we make it a thread-safe Map, for instance, ConcurrentHashMap, since I see below it is also used not in synchronized block.
+  // TODO: Currently REEF does not support YARN AM HA (REEF-345). In absence of this, YARN will kill
+  // TODO: all containers if AM container is lost. Subsequently handle precise reconstruction of it
+  // TODO: after AM is restarted?
+  // TODO: Ensure Kill operation stops creation of new contexts in flight.
   private final Map<String, ActiveContext> contexts = new HashMap<>();
+  // This map will be needed to make container requests for a failed heron executor
+  private Map<String, String> reefContainerToHeronExecutorMap = new ConcurrentHashMap<>();
+
   private final String topologyPackageName;
   private final String heronCorePackageName;
   private final EvaluatorRequestor requestor;
@@ -77,23 +82,19 @@ public class HeronMasterDriver {
   private final String topologyName;
   private final String env;
   private final String topologyJar;
-  private final int httpPort;
-  // Currently yarn does not support mapping container requests to allocation (YARN-4879). As a result it is not
-  // possible to concurrently start containers of different sizes. This lock ensures workers are started serially.
-  // TODO(mfu): It may not be a good idea to start workers serially, since deployment of job can be super slow, in our experiences in Twitter.
-  // TODO(mfu): An option is let the PackingAlgorithm returns always same size container, which in fact is what we do in Twitter.
-  // TODO(mfu): Even trying to make works starting serially, better to use Semaphore.
+  private
+  final int httpPort;
+  // Currently yarn does not support mapping container requests to allocation (YARN-4879). As a
+  // result it is not possible to concurrently start containers of different sizes. This lock
+  // ensures workers are started serially.
+  // TODO: Let the PackingAlgorithm return homogeneous containers to avoid allocation latencies.
+  // TODO: Get rid of this lock. Add a request queue for new and failed contexts. Avoid blocking any
+  // TODO: event thread.
   private final Object containerAllocationLock = new Object();
   private PackingPlan packing;
   // Container request submission and allocation takes places on different threads. This variable is used to share the
   // heron executor id for which the container request was submitted
   private String heronExecutorId;
-
-  // This map will be needed to make container requests for a failed heron executor
-  // TODO(mfu):
-  // TODO(mfu): 1. Have we handled the precise reconstruction of it after scheduler process dies unexpectedly and restarts?
-  // TODO(mfu): 2. Need we make it a thread-safe Map, for instance, ConcurrentHashMap, since I see below it is also used not in synchronized block.
-  private Map<String, String> reefContainerToHeronExecutorMap = new HashMap<>();
 
   @Inject
   public HeronMasterDriver(EvaluatorRequestor requestor,
@@ -130,12 +131,11 @@ public class HeronMasterDriver {
    * Requests container for TMaster as container/executor id 0.
    */
   void scheduleTopologyMaster() {
-    // TODO This method should be invoked only once per topology. Need to add some guards against subsequent
-    // invocations?
+    // TODO: This method should be invoked only once per topology. Need to add some guards against
+    // TODO: subsequent invocations?
     LOG.log(Level.INFO, "Scheduling container for TM: {0}", topologyName);
     try {
-      // TODO(mfu): It is designed that TMaster is co-located in the same host with Scheduler. Otherwise, handling of some cases, for instance, network partition can be hard.
-      // TODO(mfu): you may leave it as is, but add an issue to trace it.
+      // TODO: Co-locate TMaster and Scheduler to avoid issues caused by network partitioning.
       requestContainerForExecutor(TMASTER_CONTAINER_ID, 1, TM_MEM_SIZE_MB);
     } catch (InterruptedException e) {
       // Deployment of topology fails if there is a error starting TMaster
@@ -157,7 +157,8 @@ public class HeronMasterDriver {
         requestContainerForExecutor(entry.getKey(), getCpuForExecutor(reqResource), mem);
       } catch (InterruptedException e) {
         LOG.log(Level.WARNING, "Error while waiting for container allocation for workers; Continue container request for remaining workers", e);
-        // TODO(mfu): So just log as WARNING without any actions on it?
+        // TODO: Just log a WARNING without any actions for now. Need to resubmit failed requests
+        // TODO: and track number of retries
       }
     }
   }
@@ -209,7 +210,7 @@ public class HeronMasterDriver {
         // initialize the scheduler with the options
         SchedulerMain schedulerMain = new SchedulerMain(cluster, role, env, topologyName, topologyJar, httpPort);
         schedulerMain.runScheduler();
-      } catch (IOException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+      } catch (IOException e) {
         throw new RuntimeException("Failed to launch Heron Scheduler", e);
       }
     }
@@ -225,7 +226,6 @@ public class HeronMasterDriver {
       synchronized (containerAllocationLock) {
         // create a local copy of executorId so that lock for next allocation can be released
         executorId = heronExecutorId;
-        // TODO(mfu): Even for this case, Semaphore is a better choice. Wait/Notify is error prone.
         containerAllocationLock.notifyAll();
       }
 
@@ -252,10 +252,6 @@ public class HeronMasterDriver {
         }
 
         // TODO verify if this thread can be used to submit a new request
-        // TODO(mfu): I don't think this implementation works:
-        // TODO(mfu): 1. requestContainerForExecutor(..) is a blocking call
-        // TODO(mfu): 2. invoking it here blocks the ReefEventHandler thread so this thread is no longer able to handle more events
-        // TODO(mfu): 3. the lock.wait() will be no way to notify; eventually the whole scheduling will halt here
         try {
           if (executorId.equals(TMASTER_CONTAINER_ID)) {
             requestContainerForExecutor(TMASTER_CONTAINER_ID, 1, TM_MEM_SIZE_MB);
