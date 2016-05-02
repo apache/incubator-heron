@@ -122,10 +122,10 @@ test_write "${base}"
 echo -n "Uncompressing."
 
 # Cleaning-up, with some guards.
-if [ -f "${bin}/heron-tracker" ]; then
+if [ -L "${bin}/heron-tracker" ]; then
   rm -f "${bin}/heron-tracker"
 fi
-if [ -f "${bin}/heron-ui" ]; then
+if [ -L "${bin}/heron-ui" ]; then
   rm -f "${bin}/heron-ui"
 fi
 if [ -d "${base}" -a -x "${base}/bin/heron-tracker" ]; then
