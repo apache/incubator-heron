@@ -1,3 +1,19 @@
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "gtest/gtest.h"
 
 #include "proto/messages.h"
@@ -13,42 +29,32 @@
 
 #include "metrics/metrics.h"
 
-using namespace heron::common;
+namespace heron {
+namespace common {
 
-class MultiMeanMetricTest : public ::testing::Test
-{
+class MultiMeanMetricTest : public ::testing::Test {
  public:
-  MultiMeanMetricTest() { }
-  ~MultiMeanMetricTest() { }
+  MultiMeanMetricTest() {}
+  ~MultiMeanMetricTest() {}
 
-  void SetUp()
-  {
-    multi_mean_metric_ = new MultiMeanMetric();
-  }
+  void SetUp() { multi_mean_metric_ = new MultiMeanMetric(); }
 
-  void TearDown()
-  {
-    delete multi_mean_metric_;
-  }
+  void TearDown() { delete multi_mean_metric_; }
 
-  heron::proto::system::MetricPublisherPublishMessage*
-  CreateEmptyPublishMessage()
-  {
+  heron::proto::system::MetricPublisherPublishMessage* CreateEmptyPublishMessage() {
     return new heron::proto::system::MetricPublisherPublishMessage();
   }
 
  protected:
-  MultiMeanMetric*      multi_mean_metric_;
+  MultiMeanMetric* multi_mean_metric_;
 };
 
-TEST_F(MultiMeanMetricTest, testOneMeanMetric)
-{
+TEST_F(MultiMeanMetricTest, testOneMeanMetric) {
   sp_string scope1 = "testscope1";
   MeanMetric* mean_metric = multi_mean_metric_->scope(scope1);
   mean_metric->record(5);
 
-  heron::proto::system::MetricPublisherPublishMessage* message =
-    CreateEmptyPublishMessage();
+  heron::proto::system::MetricPublisherPublishMessage* message = CreateEmptyPublishMessage();
 
   sp_string prefix = "TestPrefix";
   double expectedMean = 5.0;
@@ -70,8 +76,7 @@ TEST_F(MultiMeanMetricTest, testOneMeanMetric)
   delete message;
 }
 
-TEST_F(MultiMeanMetricTest, testMultipleMeanMetrics)
-{
+TEST_F(MultiMeanMetricTest, testMultipleMeanMetrics) {
   sp_string scope1 = "testscope1";
   MeanMetric* mean_metric1 = multi_mean_metric_->scope(scope1);
   mean_metric1->record(5);
@@ -83,8 +88,7 @@ TEST_F(MultiMeanMetricTest, testMultipleMeanMetrics)
   mean_metric2->record(8);
   mean_metric2->record(2);
 
-  heron::proto::system::MetricPublisherPublishMessage* message =
-    CreateEmptyPublishMessage();
+  heron::proto::system::MetricPublisherPublishMessage* message = CreateEmptyPublishMessage();
 
   sp_string prefix = "TestPrefix";
   double expectedMean1 = 3.5;
@@ -111,15 +115,13 @@ TEST_F(MultiMeanMetricTest, testMultipleMeanMetrics)
   delete message;
 }
 
-TEST_F(MultiMeanMetricTest, testGetAndReset)
-{
+TEST_F(MultiMeanMetricTest, testGetAndReset) {
   sp_string scope1 = "testscope1";
   MeanMetric* mean_metric1 = multi_mean_metric_->scope(scope1);
   mean_metric1->record(2);
   mean_metric1->record(4);
 
-  heron::proto::system::MetricPublisherPublishMessage* message =
-    CreateEmptyPublishMessage();
+  heron::proto::system::MetricPublisherPublishMessage* message = CreateEmptyPublishMessage();
 
   sp_string prefix = "TestPrefix";
   double expectedMean = 3.0;
@@ -158,8 +160,7 @@ TEST_F(MultiMeanMetricTest, testGetAndReset)
   delete message;
 }
 
-TEST_F(MultiMeanMetricTest, testSameScope)
-{
+TEST_F(MultiMeanMetricTest, testSameScope) {
   sp_string scope1 = "testscope1";
   MeanMetric* mean_metric1 = multi_mean_metric_->scope(scope1);
   mean_metric1->record(4);
@@ -170,8 +171,7 @@ TEST_F(MultiMeanMetricTest, testSameScope)
   MeanMetric* mean_metric2 = multi_mean_metric_->scope(scope2);
   mean_metric2->record(9);
 
-  heron::proto::system::MetricPublisherPublishMessage* message =
-    CreateEmptyPublishMessage();
+  heron::proto::system::MetricPublisherPublishMessage* message = CreateEmptyPublishMessage();
 
   sp_string prefix = "TestPrefix";
 
@@ -192,10 +192,10 @@ TEST_F(MultiMeanMetricTest, testSameScope)
   // Clean up.
   delete message;
 }
+}  // namespace common
+}  // namespace heron
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char** argv) {
   heron::common::Initialize(argv[0]);
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "gtest/gtest.h"
 
 #include "proto/messages.h"
@@ -13,42 +29,32 @@
 
 #include "metrics/metrics.h"
 
-using namespace heron::common;
+namespace heron {
+namespace common {
 
-class MultiCountMetricTest : public ::testing::Test
-{
+class MultiCountMetricTest : public ::testing::Test {
  public:
-  MultiCountMetricTest() { }
-  ~MultiCountMetricTest() { }
+  MultiCountMetricTest() {}
+  ~MultiCountMetricTest() {}
 
-  void SetUp()
-  {
-    multi_count_metric_ = new MultiCountMetric();
-  }
+  void SetUp() { multi_count_metric_ = new MultiCountMetric(); }
 
-  void TearDown()
-  {
-    delete multi_count_metric_;
-  }
+  void TearDown() { delete multi_count_metric_; }
 
-  heron::proto::system::MetricPublisherPublishMessage*
-  CreateEmptyPublishMessage()
-  {
+  heron::proto::system::MetricPublisherPublishMessage* CreateEmptyPublishMessage() {
     return new heron::proto::system::MetricPublisherPublishMessage();
   }
 
  protected:
-  MultiCountMetric*      multi_count_metric_;
+  MultiCountMetric* multi_count_metric_;
 };
 
-TEST_F(MultiCountMetricTest, testOneCountMetric)
-{
+TEST_F(MultiCountMetricTest, testOneCountMetric) {
   sp_string scope1 = "testscope1";
   CountMetric* count_metric = multi_count_metric_->scope(scope1);
   count_metric->incr();
 
-  heron::proto::system::MetricPublisherPublishMessage* message =
-    CreateEmptyPublishMessage();
+  heron::proto::system::MetricPublisherPublishMessage* message = CreateEmptyPublishMessage();
 
   sp_string prefix = "TestPrefix";
   int expectedCount = 1;
@@ -70,8 +76,7 @@ TEST_F(MultiCountMetricTest, testOneCountMetric)
   delete message;
 }
 
-TEST_F(MultiCountMetricTest, testMultipleCountMetrics)
-{
+TEST_F(MultiCountMetricTest, testMultipleCountMetrics) {
   sp_string scope1 = "testscope1";
   CountMetric* count_metric1 = multi_count_metric_->scope(scope1);
   count_metric1->incr();
@@ -81,8 +86,7 @@ TEST_F(MultiCountMetricTest, testMultipleCountMetrics)
   CountMetric* count_metric2 = multi_count_metric_->scope(scope2);
   count_metric2->incr_by(3);
 
-  heron::proto::system::MetricPublisherPublishMessage* message =
-    CreateEmptyPublishMessage();
+  heron::proto::system::MetricPublisherPublishMessage* message = CreateEmptyPublishMessage();
 
   sp_string prefix = "TestPrefix";
   int expectedCount1 = 2;
@@ -109,14 +113,12 @@ TEST_F(MultiCountMetricTest, testMultipleCountMetrics)
   delete message;
 }
 
-TEST_F(MultiCountMetricTest, testGetAndReset)
-{
+TEST_F(MultiCountMetricTest, testGetAndReset) {
   sp_string scope1 = "testscope1";
   CountMetric* count_metric1 = multi_count_metric_->scope(scope1);
   count_metric1->incr_by(2);
 
-  heron::proto::system::MetricPublisherPublishMessage* message =
-    CreateEmptyPublishMessage();
+  heron::proto::system::MetricPublisherPublishMessage* message = CreateEmptyPublishMessage();
 
   sp_string prefix = "TestPrefix";
   int expectedCount = 2;
@@ -155,8 +157,7 @@ TEST_F(MultiCountMetricTest, testGetAndReset)
   delete message;
 }
 
-TEST_F(MultiCountMetricTest, testSameScope)
-{
+TEST_F(MultiCountMetricTest, testSameScope) {
   sp_string scope1 = "testscope1";
   CountMetric* count_metric1 = multi_count_metric_->scope(scope1);
   count_metric1->incr();
@@ -167,8 +168,7 @@ TEST_F(MultiCountMetricTest, testSameScope)
   CountMetric* count_metric2 = multi_count_metric_->scope(scope2);
   count_metric2->incr_by(3);
 
-  heron::proto::system::MetricPublisherPublishMessage* message =
-    CreateEmptyPublishMessage();
+  heron::proto::system::MetricPublisherPublishMessage* message = CreateEmptyPublishMessage();
 
   sp_string prefix = "TestPrefix";
 
@@ -188,10 +188,10 @@ TEST_F(MultiCountMetricTest, testSameScope)
 
   delete message;
 }
+}  // namespace common
+}  // namespace heron
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char** argv) {
   heron::common::Initialize(argv[0]);
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
