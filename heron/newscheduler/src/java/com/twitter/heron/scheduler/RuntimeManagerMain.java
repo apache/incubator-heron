@@ -28,6 +28,7 @@ import org.apache.commons.cli.ParseException;
 
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.proto.scheduler.Scheduler;
+import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.scheduler.client.HttpServiceSchedulerClient;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.scheduler.client.LibrarySchedulerClient;
@@ -265,7 +266,7 @@ public final class RuntimeManagerMain {
       // TODO(mfu): timeout should read from config
       SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
-      boolean isValid = validateRuntimeManage(adaptor, topologyName);
+      boolean isValid = validateRuntimeManage(config, adaptor, topologyName);
 
       // 2. Try to manage topology if valid
       if (isValid) {
@@ -293,6 +294,7 @@ public final class RuntimeManagerMain {
 
 
   public static boolean validateRuntimeManage(
+      Config config,
       SchedulerStateManagerAdaptor adaptor,
       String topologyName) {
     // Check whether the topology has already been running
@@ -300,6 +302,16 @@ public final class RuntimeManagerMain {
 
     if (isTopologyRunning == null || isTopologyRunning.equals(Boolean.FALSE)) {
       LOG.severe("No such topology exists");
+      return false;
+    }
+
+    // Check whether cluster/role/environ matched
+    ExecutionEnvironment.ExecutionState executionState = adaptor.getExecutionState(topologyName);
+    if (executionState == null
+        || !executionState.getCluster().equals(Context.cluster(config))
+        || !executionState.getRole().equals(Context.role(config))
+        || !executionState.getEnviron().equals(Context.environ(config))) {
+      LOG.severe("cluster/role/environ not matched");
       return false;
     }
 
