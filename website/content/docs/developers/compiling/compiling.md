@@ -2,7 +2,13 @@
 title: Compiling Heron
 ---
 
-Heron is currently available for Mac OS X 10.10, Ubuntu 12.04, and CentOS 5.
+Heron is currently available for [Mac OS X 10.10](../../../developers/compiling/mac), 
+[Ubuntu 12.04, Ubuntu 14.04](../../../developers/compiling/linux), and CentOS 5. 
+This guide describes the basics of Heron build system. For step by step build instructions 
+on a specific platform refer the following guides.
+
+* [Build on Linux](../../../developers/compiling/linux)
+* [Build on Mac OS X](../../../developers/compiling/mac)
 
 Heron can be built either [in it's entirety]({{< ref "#building-all-components" >}}), as
 [individual components]({{< ref "#building-specific-components" >}}), or as a [release
@@ -34,15 +40,8 @@ You must have the following installed to compile Heron:
 Export CC and CXX variables with path specific to your machine:
 
 ```bash
-$ export CC=/your-path-to/bin/clang
-$ export CXX=/your-path-to/bin/clang++
-$ echo $CC $CXX
-```
-
-Example path for Mac OS X:
-```bash
-$ export CC=/usr/bin/clang
-$ export CXX=/usr/bin/clang++
+$ export CC=/your-path-to/bin/c_compiler
+$ export CXX=/your-path-to/bin/c++_compiler
 $ echo $CC $CXX
 ```
 
@@ -75,7 +74,7 @@ OS-specific configuration using the `--config` flag. The following OS values
 are supported:
 
 * `darwin` (Mac OS X)
-* `ubuntu` (Ubuntu 12.04)
+* `ubuntu` (Ubuntu 14.04)
 * `centos5` (CentOS 5)
 
 For example the following command will build all packages:
@@ -112,3 +111,4 @@ $ bazel build --config=darwin heron/tracker/src/python:heron-tracker
 ## Testing Heron
 
 Instructions for running Heron unit tests can be found at [Testing Heron](../../../contributors/testing).
+
