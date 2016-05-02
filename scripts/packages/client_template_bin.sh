@@ -132,11 +132,11 @@ test_write "${heronrc}"
 echo -n "Uncompressing."
 
 # Cleaning-up, with some guards.
-if [ -f "${bin}/heron" ]; then
+if [ -L "${bin}/heron" ]; then
   rm -f "${bin}/heron"
 fi
 
-if [ -f "${bin}/heron-cli3" ]; then
+if [ -L "${bin}/heron-cli3" ]; then
   rm -f "${bin}/heron-cli3"
 fi
 
