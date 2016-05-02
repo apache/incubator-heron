@@ -29,7 +29,7 @@ public interface ITaskHook {
    * Called after the spout/bolt's open/prepare method is called
    * conf is the Config thats passed to the topology
    */
-  void prepare(Map conf, TopologyContext context);
+  void prepare(Map<String, Object> conf, TopologyContext context);
 
   /**
    * Called just before the spout/bolt's cleanup method is called.

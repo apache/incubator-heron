@@ -56,11 +56,11 @@ public class GeneralTopologyContextImpl implements GeneralTopologyContext {
                                     TopologyAPI.Topology topology,
                                     Map<Integer, String> taskToComponentMap) {
     this.topology = topology;
-    this.topologyConfig = new HashMap<String, Object>(clusterConfig);
+    this.topologyConfig = new HashMap<>(clusterConfig);
     this.taskToComponentMap = taskToComponentMap;
-    this.inputs = new HashMap<String, List<TopologyAPI.InputStream>>();
-    this.outputs = new HashMap<String, List<TopologyAPI.OutputStream>>();
-    this.componentsOutputFields = new HashMap<String, Map<String, Fields>>();
+    this.inputs = new HashMap<>();
+    this.outputs = new HashMap<>();
+    this.componentsOutputFields = new HashMap<>();
 
     for (int i = 0; i < this.topology.getSpoutsCount(); ++i) {
       TopologyAPI.Spout spout = this.topology.getSpouts(i);
@@ -81,18 +81,18 @@ public class GeneralTopologyContextImpl implements GeneralTopologyContext {
 
   public static Map<String, Map<String, Fields>> getOutputToComponentsFields(
       List<TopologyAPI.OutputStream> outputs) {
-    Map<String, Map<String, Fields>> outputFields = new HashMap<String, Map<String, Fields>>();
+    Map<String, Map<String, Fields>> outputFields = new HashMap<>();
     for (TopologyAPI.OutputStream outputStream : outputs) {
       String componentName = outputStream.getStream().getComponentName();
       String streamId = outputStream.getStream().getId();
 
       Map<String, Fields> componentFields = outputFields.get(componentName);
       if (componentFields == null) {
-        componentFields = new HashMap<String, Fields>();
+        componentFields = new HashMap<>();
       }
 
       // Get the fields of a particular OutputStream
-      List<String> retval = new ArrayList<String>();
+      List<String> retval = new ArrayList<>();
       for (TopologyAPI.StreamSchema.KeyType kt : outputStream.getSchema().getKeysList()) {
         retval.add(kt.getKey());
       }
@@ -152,7 +152,7 @@ public class GeneralTopologyContextImpl implements GeneralTopologyContext {
    */
   public Set<String> getComponentStreams(String componentId) {
     if (outputs.containsKey(componentId)) {
-      Set<String> streams = new HashSet<String>();
+      Set<String> streams = new HashSet<>();
       List<TopologyAPI.OutputStream> olist = outputs.get(componentId);
       for (TopologyAPI.OutputStream ostream : olist) {
         streams.add(ostream.getStream().getId());
@@ -168,7 +168,7 @@ public class GeneralTopologyContextImpl implements GeneralTopologyContext {
    * always returned in ascending order.
    */
   public List<Integer> getComponentTasks(String componentId) {
-    List<Integer> retVal = new LinkedList<Integer>();
+    List<Integer> retVal = new LinkedList<>();
     for (Map.Entry<Integer, String> entry : taskToComponentMap.entrySet()) {
       if (entry.getValue().equals(componentId)) {
         retVal.add(entry.getKey());
@@ -205,7 +205,7 @@ public class GeneralTopologyContextImpl implements GeneralTopologyContext {
   public Map<TopologyAPI.StreamId, TopologyAPI.Grouping> getSources(String componentId) {
     if (inputs.containsKey(componentId)) {
       Map<TopologyAPI.StreamId, TopologyAPI.Grouping> retVal =
-          new HashMap<TopologyAPI.StreamId, TopologyAPI.Grouping>();
+          new HashMap<>();
       for (TopologyAPI.InputStream istream : inputs.get(componentId)) {
         retVal.put(istream.getStream(), istream.getGtype());
       }
@@ -223,13 +223,13 @@ public class GeneralTopologyContextImpl implements GeneralTopologyContext {
    */
   public Map<String, Map<String, TopologyAPI.Grouping>> getTargets(String componentId) {
     Map<String, Map<String, TopologyAPI.Grouping>> retVal =
-        new HashMap<String, Map<String, TopologyAPI.Grouping>>();
+        new HashMap<>();
     if (!outputs.containsKey(componentId)) {
       return retVal;
     }
     for (TopologyAPI.OutputStream ostream : outputs.get(componentId)) {
       Map<String, TopologyAPI.Grouping> targetMap =
-          new HashMap<String, TopologyAPI.Grouping>();
+          new HashMap<>();
       for (Map.Entry<String, List<TopologyAPI.InputStream>> e : inputs.entrySet()) {
         String targetComponentId = e.getKey();
         for (TopologyAPI.InputStream is : e.getValue()) {

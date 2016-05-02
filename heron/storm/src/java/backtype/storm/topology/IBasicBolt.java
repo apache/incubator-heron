@@ -20,7 +20,7 @@ import backtype.storm.task.TopologyContext;
 import backtype.storm.tuple.Tuple;
 
 public interface IBasicBolt extends IComponent {
-  void prepare(Map stormConf, TopologyContext context);
+  void prepare(Map<String, Object> stormConf, TopologyContext context);
 
   /**
    * Process the input tuple and optionally emit new tuples based on the input tuple.

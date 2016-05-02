@@ -15,4 +15,5 @@
 package org.apache.storm.generated;
 
 public class NotAliveException extends Exception {
+  private static final long serialVersionUID = 5498494009831492747L;
 }

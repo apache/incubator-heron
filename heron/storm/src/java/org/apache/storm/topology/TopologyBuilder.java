@@ -34,9 +34,10 @@ public class TopologyBuilder {
     return setBolt(id, bolt, null);
   }
 
-  public BoltDeclarer setBolt(String id, IRichBolt bolt, Number parallelism_hint) {
+  public BoltDeclarer setBolt(String id, IRichBolt bolt, Number parallelismHint) {
     IRichBoltDelegate boltImpl = new IRichBoltDelegate(bolt);
-    com.twitter.heron.api.topology.BoltDeclarer declarer = delegate.setBolt(id, boltImpl, parallelism_hint);
+    com.twitter.heron.api.topology.BoltDeclarer declarer =
+        delegate.setBolt(id, boltImpl, parallelismHint);
     return new BoltDeclarerImpl(declarer);
   }
 
@@ -44,17 +45,18 @@ public class TopologyBuilder {
     return setBolt(id, bolt, null);
   }
 
-  public BoltDeclarer setBolt(String id, IBasicBolt bolt, Number parallelism_hint) {
-    return setBolt(id, new BasicBoltExecutor(bolt), parallelism_hint);
+  public BoltDeclarer setBolt(String id, IBasicBolt bolt, Number parallelismHint) {
+    return setBolt(id, new BasicBoltExecutor(bolt), parallelismHint);
   }
 
   public SpoutDeclarer setSpout(String id, IRichSpout spout) {
     return setSpout(id, spout, null);
   }
 
-  public SpoutDeclarer setSpout(String id, IRichSpout spout, Number parallelism_hint) {
+  public SpoutDeclarer setSpout(String id, IRichSpout spout, Number parallelismHint) {
     IRichSpoutDelegate spoutImpl = new IRichSpoutDelegate(spout);
-    com.twitter.heron.api.topology.SpoutDeclarer declarer = delegate.setSpout(id, spoutImpl, parallelism_hint);
+    com.twitter.heron.api.topology.SpoutDeclarer declarer =
+        delegate.setSpout(id, spoutImpl, parallelismHint);
     return new SpoutDeclarerImpl(declarer);
   }
 }

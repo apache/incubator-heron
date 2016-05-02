@@ -31,7 +31,7 @@ public class MultiAssignableMetricTest {
     multiAssignableMetric.scope("metric_a").setValue(100);
     multiAssignableMetric.scope("metric_b").setValue(200);
 
-    Map ret = (Map) multiAssignableMetric.getValueAndReset();
+    Map<String, Object> ret = (Map<String, Object>) multiAssignableMetric.getValueAndReset();
     Assert.assertEquals(ret.get("metric_a"), 100);
     Assert.assertEquals(ret.get("metric_b"), 200);
 
@@ -39,7 +39,7 @@ public class MultiAssignableMetricTest {
     multiAssignableMetric.safeScope("metric_a").setValue(300);
     multiAssignableMetric.safeScope("metric_b").setValue(400);
 
-    ret = (Map) multiAssignableMetric.getValueAndReset();
+    ret = (Map<String, Object>) multiAssignableMetric.getValueAndReset();
     Assert.assertEquals(ret.get("metric_a"), 300);
     Assert.assertEquals(ret.get("metric_b"), 400);
   }

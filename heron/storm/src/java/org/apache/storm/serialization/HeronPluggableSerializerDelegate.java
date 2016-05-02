@@ -20,7 +20,8 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
-public class HeronPluggableSerializerDelegate implements com.twitter.heron.api.serializer.IPluggableSerializer {
+public class HeronPluggableSerializerDelegate implements
+    com.twitter.heron.api.serializer.IPluggableSerializer {
   private Kryo kryo;
   private Output kryoOut;
   private Input kryoIn;
@@ -29,7 +30,7 @@ public class HeronPluggableSerializerDelegate implements com.twitter.heron.api.s
   }
 
   @Override
-  public void initialize(Map config) {
+  public void initialize(Map<String, Object> config) {
     kryo = SerializationFactory.getKryo(config);
     kryoOut = new Output(2000, 2000000000);
     kryoIn = new Input(1);
@@ -37,22 +38,14 @@ public class HeronPluggableSerializerDelegate implements com.twitter.heron.api.s
 
   @Override
   public byte[] serialize(Object object) {
-    try {
-      kryoOut.clear();
-      kryo.writeClassAndObject(kryoOut, object);
-      return kryoOut.toBytes();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    kryoOut.clear();
+    kryo.writeClassAndObject(kryoOut, object);
+    return kryoOut.toBytes();
   }
 
   @Override
   public Object deserialize(byte[] input) {
-    try {
-      kryoIn.setBuffer(input);
-      return kryo.readClassAndObject(kryoIn);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    kryoIn.setBuffer(input);
+    return kryo.readClassAndObject(kryoIn);
   }
 }

@@ -205,83 +205,83 @@ public class Config extends HashMap<String, Object> {
     super();
   }
 
-  public Config(Map map) {
+  public Config(Map<String, Object> map) {
     super(map);
   }
 
-  public static void setDebug(Map conf, boolean isOn) {
+  public static void setDebug(Map<String, Object> conf, boolean isOn) {
     conf.put(Config.TOPOLOGY_DEBUG, String.valueOf(isOn));
   }
 
-  public static void setTeamName(Map conf, String teamName) {
+  public static void setTeamName(Map<String, Object> conf, String teamName) {
     conf.put(Config.TOPOLOGY_TEAM_NAME, teamName);
   }
 
-  public static void setTeamEmail(Map conf, String teamEmail) {
+  public static void setTeamEmail(Map<String, Object> conf, String teamEmail) {
     conf.put(Config.TOPOLOGY_TEAM_EMAIL, teamEmail);
   }
 
-  public static void setTopologyCapTicket(Map conf, String ticket) {
+  public static void setTopologyCapTicket(Map<String, Object> conf, String ticket) {
     conf.put(Config.TOPOLOGY_CAP_TICKET, ticket);
   }
 
-  public static void setTopologyProjectName(Map conf, String project) {
+  public static void setTopologyProjectName(Map<String, Object> conf, String project) {
     conf.put(Config.TOPOLOGY_PROJECT_NAME, project);
   }
 
-  public static void setNumStmgrs(Map conf, int stmgrs) {
+  public static void setNumStmgrs(Map<String, Object> conf, int stmgrs) {
     conf.put(Config.TOPOLOGY_STMGRS, Integer.toString(stmgrs));
   }
 
-  public static void setSerializationClassName(Map conf, String className) {
+  public static void setSerializationClassName(Map<String, Object> conf, String className) {
     conf.put(Config.TOPOLOGY_SERIALIZER_CLASSNAME, className);
   }
 
-  public static void setEnableAcking(Map conf, boolean acking) {
+  public static void setEnableAcking(Map<String, Object> conf, boolean acking) {
     conf.put(Config.TOPOLOGY_ENABLE_ACKING, String.valueOf(acking));
   }
 
-  public static void setMessageTimeoutSecs(Map conf, int secs) {
+  public static void setMessageTimeoutSecs(Map<String, Object> conf, int secs) {
     conf.put(Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS, Integer.toString(secs));
   }
 
-  public static void setComponentParallelism(Map conf, int parallelism) {
+  public static void setComponentParallelism(Map<String, Object> conf, int parallelism) {
     conf.put(Config.TOPOLOGY_COMPONENT_PARALLELISM, Integer.toString(parallelism));
   }
 
-  public static void setMaxSpoutPending(Map conf, int max) {
+  public static void setMaxSpoutPending(Map<String, Object> conf, int max) {
     conf.put(Config.TOPOLOGY_MAX_SPOUT_PENDING, Integer.toString(max));
   }
 
-  public static void setTickTupleFrequency(Map conf, int seconds) {
+  public static void setTickTupleFrequency(Map<String, Object> conf, int seconds) {
     conf.put(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS, Integer.toString(seconds));
   }
 
-  public static void setContainerCpuRequested(Map conf, float ncpus) {
+  public static void setContainerCpuRequested(Map<String, Object> conf, float ncpus) {
     conf.put(Config.TOPOLOGY_CONTAINER_CPU_REQUESTED, Float.toString(ncpus));
   }
 
-  public static void setContainerDiskRequested(Map conf, long nbytes) {
+  public static void setContainerDiskRequested(Map<String, Object> conf, long nbytes) {
     conf.put(Config.TOPOLOGY_CONTAINER_DISK_REQUESTED, Long.toString(nbytes));
   }
 
-  public static void setContainerRamRequested(Map conf, long nbytes) {
+  public static void setContainerRamRequested(Map<String, Object> conf, long nbytes) {
     conf.put(Config.TOPOLOGY_CONTAINER_RAM_REQUESTED, Long.toString(nbytes));
   }
 
-  public static void setComponentRamMap(Map conf, String ramMap) {
+  public static void setComponentRamMap(Map<String, Object> conf, String ramMap) {
     conf.put(Config.TOPOLOGY_COMPONENT_RAMMAP, ramMap);
   }
 
-  public static void setAutoTaskHooks(Map conf, List<String> hooks) {
+  public static void setAutoTaskHooks(Map<String, Object> conf, List<String> hooks) {
     conf.put(Config.TOPOLOGY_AUTO_TASK_HOOKS, hooks);
   }
 
-  public static List<String> getAutoTaskHooks(Map conf) {
+  public static List<String> getAutoTaskHooks(Map<String, Object> conf) {
     return (List<String>) conf.get(Config.TOPOLOGY_AUTO_TASK_HOOKS);
   }
 
-  public static void setComponentRam(Map conf, String component, long ramInBytes) {
+  public static void setComponentRam(Map<String, Object> conf, String component, long ramInBytes) {
     if (conf.containsKey(Config.TOPOLOGY_COMPONENT_RAMMAP)) {
       String oldEntry = (String) conf.get(Config.TOPOLOGY_COMPONENT_RAMMAP);
       String newEntry = String.format("%s,%s:%d", oldEntry, component, ramInBytes);
@@ -292,7 +292,10 @@ public class Config extends HashMap<String, Object> {
     }
   }
 
-  public static void setComponentJvmOptions(Map conf, String component, String jvmOptions) {
+  public static void setComponentJvmOptions(
+      Map<String, Object> conf,
+      String component,
+      String jvmOptions) {
     String optsBase64;
     String componentBase64;
 
@@ -398,7 +401,7 @@ public class Config extends HashMap<String, Object> {
   /*
    * Appends the given classpath to the additional classpath config
    */
-  public void addClasspath(Map conf, String classpath) {
+  public void addClasspath(Map<String, Object> conf, String classpath) {
     String cpKey = Config.TOPOLOGY_ADDITIONAL_CLASSPATH;
 
     if (conf.containsKey(cpKey)) {

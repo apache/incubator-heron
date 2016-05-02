@@ -1,4 +1,5 @@
 from basehandler import BaseHandler
+from clustershandler import ClustersHandler
 from containerfilehandler import ContainerFileDataHandler
 from containerfilehandler import ContainerFileStatsHandler
 from defaulthandler import DefaultHandler

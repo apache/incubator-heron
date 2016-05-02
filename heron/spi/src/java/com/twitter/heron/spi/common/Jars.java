@@ -23,7 +23,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class Jars {
-
   private static final Logger LOG = Logger.getLogger(Jars.class.getName());
 
   // scheduler jar search pattern
@@ -51,7 +50,7 @@ public final class Jars {
       @Override
       public boolean accept(File dir, String name) {
         Matcher m = pattern.matcher(name);
-        return m.matches() ? true : false;
+        return m.matches();
       }
     };
 
@@ -59,7 +58,7 @@ public final class Jars {
     File[] paths = new File(directory).listFiles(fileNameFilter);
 
     // return it is as a list of files
-    ArrayList<String> files = new ArrayList<String>();
+    ArrayList<String> files = new ArrayList<>();
     for (File path : paths) {
       files.add(path.toString());
     }
@@ -95,7 +94,7 @@ public final class Jars {
    * @param directory the directory to search
    * @return list of scheduler jars
    */
-  public static List getSchedulerJars(String directory) {
+  public static List<String> getSchedulerJars(String directory) {
     return getJars(schedulerJarPattern, directory);
   }
 
@@ -118,7 +117,7 @@ public final class Jars {
    * @param directory the directory to search
    * @return list of metrics manager jars
    */
-  public static List getMetricsManagerJars(String directory) {
+  public static List<String> getMetricsManagerJars(String directory) {
     return getJars(metricsManagerPattern, directory);
   }
 

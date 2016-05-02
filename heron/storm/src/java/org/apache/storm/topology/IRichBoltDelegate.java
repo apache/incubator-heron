@@ -25,6 +25,7 @@ import org.apache.storm.tuple.TupleImpl;
  * to use to implement components of the topology.
  */
 public class IRichBoltDelegate implements com.twitter.heron.api.bolt.IRichBolt {
+  private static final long serialVersionUID = 8350418148268852902L;
   private IRichBolt delegate;
   private TopologyContext topologyContextImpl;
   private OutputCollectorImpl outputCollectorImpl;
@@ -34,8 +35,10 @@ public class IRichBoltDelegate implements com.twitter.heron.api.bolt.IRichBolt {
   }
 
   @Override
-  public void prepare(Map conf, com.twitter.heron.api.topology.TopologyContext context,
-                      com.twitter.heron.api.bolt.OutputCollector collector) {
+  public void prepare(
+      Map<String, Object> conf,
+      com.twitter.heron.api.topology.TopologyContext context,
+      com.twitter.heron.api.bolt.OutputCollector collector) {
     topologyContextImpl = new TopologyContext(context);
     outputCollectorImpl = new OutputCollectorImpl(collector);
     delegate.prepare(conf, topologyContextImpl, outputCollectorImpl);

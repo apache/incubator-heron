@@ -21,7 +21,7 @@ public final class ConfigDefaults {
   private static final Logger LOG = Logger.getLogger(ConfigDefaults.class.getName());
 
   // holds the mapping between the config keys and their default values
-  protected static Map defaults;
+  protected static Map<String, Object> defaults;
 
   // load the resource for default config key values
   static {

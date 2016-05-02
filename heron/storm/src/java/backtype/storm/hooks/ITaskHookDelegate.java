@@ -37,33 +37,35 @@ import backtype.storm.task.TopologyContext;
  * 2. task hook added dynamically by invoking addHook(ITaskHook)
  */
 public class ITaskHookDelegate implements com.twitter.heron.api.hooks.ITaskHook {
-  private List<ITaskHook> hooks_;
-  private Map conf_;
+  private List<ITaskHook> hooks;
+  private Map<String, Object> conf;
 
   // zero arg constructor
   public ITaskHookDelegate() {
-    hooks_ = new LinkedList<ITaskHook>();
+    hooks = new LinkedList<>();
   }
 
   public void addHook(ITaskHook hook) {
-    hooks_.add(hook);
+    hooks.add(hook);
   }
 
   public List<ITaskHook> getHooks() {
-    return hooks_;
+    return hooks;
   }
 
-  public Map getConf() {
-    return conf_;
+  public Map<String, Object> getConf() {
+    return conf;
   }
 
   @Override
-  public void prepare(Map conf, com.twitter.heron.api.topology.TopologyContext context) {
-    this.conf_ = conf;
-    if (!conf.containsKey(Config.STORMCOMPAT_TOPOLOGY_AUTO_TASK_HOOKS)) {
+  public void prepare(Map<String, Object> newConf,
+                      com.twitter.heron.api.topology.TopologyContext context) {
+    this.conf = newConf;
+    if (!newConf.containsKey(Config.STORMCOMPAT_TOPOLOGY_AUTO_TASK_HOOKS)) {
       throw new RuntimeException("StormCompat Translation not done for task hooks");
     }
-    List<String> hookClassNames = (List<String>) conf.get(Config.STORMCOMPAT_TOPOLOGY_AUTO_TASK_HOOKS);
+    List<String> hookClassNames =
+        (List<String>) newConf.get(Config.STORMCOMPAT_TOPOLOGY_AUTO_TASK_HOOKS);
 
     for (String className : hookClassNames) {
       ITaskHook hook;
@@ -77,19 +79,19 @@ public class ITaskHookDelegate implements com.twitter.heron.api.hooks.ITaskHook 
         throw new RuntimeException(ex + " ITaskHook class must have a no-arg constructor.");
       }
 
-      hooks_.add(hook);
+      hooks.add(hook);
     }
 
     // Invoke the prepare() for all ITaskHooks
     TopologyContext ctxt = new TopologyContext(context);
-    for (ITaskHook hook : hooks_) {
-      hook.prepare(conf, ctxt);
+    for (ITaskHook hook : hooks) {
+      hook.prepare(newConf, ctxt);
     }
   }
 
   @Override
   public void cleanup() {
-    for (ITaskHook hook : hooks_) {
+    for (ITaskHook hook : hooks) {
       hook.cleanup();
     }
   }
@@ -97,7 +99,7 @@ public class ITaskHookDelegate implements com.twitter.heron.api.hooks.ITaskHook 
   @Override
   public void emit(com.twitter.heron.api.hooks.info.EmitInfo info) {
     EmitInfo emit = new EmitInfo(info);
-    for (ITaskHook hook : hooks_) {
+    for (ITaskHook hook : hooks) {
       hook.emit(emit);
     }
   }
@@ -105,7 +107,7 @@ public class ITaskHookDelegate implements com.twitter.heron.api.hooks.ITaskHook 
   @Override
   public void spoutAck(com.twitter.heron.api.hooks.info.SpoutAckInfo info) {
     SpoutAckInfo ack = new SpoutAckInfo(info);
-    for (ITaskHook hook : hooks_) {
+    for (ITaskHook hook : hooks) {
       hook.spoutAck(ack);
     }
   }
@@ -113,7 +115,7 @@ public class ITaskHookDelegate implements com.twitter.heron.api.hooks.ITaskHook 
   @Override
   public void spoutFail(com.twitter.heron.api.hooks.info.SpoutFailInfo info) {
     SpoutFailInfo fail = new SpoutFailInfo(info);
-    for (ITaskHook hook : hooks_) {
+    for (ITaskHook hook : hooks) {
       hook.spoutFail(fail);
     }
   }
@@ -121,7 +123,7 @@ public class ITaskHookDelegate implements com.twitter.heron.api.hooks.ITaskHook 
   @Override
   public void boltAck(com.twitter.heron.api.hooks.info.BoltAckInfo info) {
     BoltAckInfo ack = new BoltAckInfo(info);
-    for (ITaskHook hook : hooks_) {
+    for (ITaskHook hook : hooks) {
       hook.boltAck(ack);
     }
   }
@@ -129,7 +131,7 @@ public class ITaskHookDelegate implements com.twitter.heron.api.hooks.ITaskHook 
   @Override
   public void boltFail(com.twitter.heron.api.hooks.info.BoltFailInfo info) {
     BoltFailInfo fail = new BoltFailInfo(info);
-    for (ITaskHook hook : hooks_) {
+    for (ITaskHook hook : hooks) {
       hook.boltFail(fail);
     }
   }
@@ -137,7 +139,7 @@ public class ITaskHookDelegate implements com.twitter.heron.api.hooks.ITaskHook 
   @Override
   public void boltExecute(com.twitter.heron.api.hooks.info.BoltExecuteInfo info) {
     BoltExecuteInfo execute = new BoltExecuteInfo(info);
-    for (ITaskHook hook : hooks_) {
+    for (ITaskHook hook : hooks) {
       hook.boltExecute(execute);
     }
   }

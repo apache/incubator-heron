@@ -27,7 +27,7 @@ import com.twitter.heron.localmode.LocalMode;
 public class LocalCluster implements ILocalCluster {
   private final LocalMode localMode;
   private String topologyName;
-  private Map conf;
+  private Map<String, Object> conf;
   private StormTopology topology;
 
   public LocalCluster() {
@@ -36,38 +36,38 @@ public class LocalCluster implements ILocalCluster {
   }
 
   @Override
-  public void submitTopology(String topologyName,
-                             Map conf,
-                             StormTopology topology)
+  public void submitTopology(String topoName,
+                             Map<String, Object> config,
+                             StormTopology stormTopology)
       throws AlreadyAliveException, InvalidTopologyException {
     assertNotAlive();
 
-    this.topologyName = topologyName;
-    this.conf = conf;
-    this.topology = topology;
+    this.topologyName = topoName;
+    this.conf = config;
+    this.topology = stormTopology;
 
-    localMode.submitTopology(topologyName,
-        ConfigUtils.translateConfig(conf),
-        topology.getStormTopology());
+    localMode.submitTopology(topoName,
+        ConfigUtils.translateConfig(config),
+        stormTopology.getStormTopology());
   }
 
   @Override
-  public void killTopology(String topologyName) throws NotAliveException {
-    assertAlive(topologyName);
-    localMode.killTopology(topologyName);
+  public void killTopology(String topoName) throws NotAliveException {
+    assertAlive(topoName);
+    localMode.killTopology(topoName);
     resetFields();
   }
 
   @Override
-  public void activate(String topologyName) throws NotAliveException {
-    assertAlive(topologyName);
-    localMode.activate(topologyName);
+  public void activate(String topoName) throws NotAliveException {
+    assertAlive(topoName);
+    localMode.activate(topoName);
   }
 
   @Override
-  public void deactivate(String topologyName) throws NotAliveException {
-    assertAlive(topologyName);
-    localMode.deactivate(topologyName);
+  public void deactivate(String topoName) throws NotAliveException {
+    assertAlive(topoName);
+    localMode.deactivate(topoName);
   }
 
   @Override
@@ -77,9 +77,9 @@ public class LocalCluster implements ILocalCluster {
   }
 
   @Override
-  public String getTopologyConf(String topologyName) {
+  public String getTopologyConf(String topoName) {
     try {
-      assertAlive(topologyName);
+      assertAlive(topoName);
       return this.topologyName;
     } catch (NotAliveException ex) {
       return null;
@@ -87,9 +87,9 @@ public class LocalCluster implements ILocalCluster {
   }
 
   @Override
-  public StormTopology getTopology(String topologyName) {
+  public StormTopology getTopology(String topoName) {
     try {
-      assertAlive(topologyName);
+      assertAlive(topoName);
       return this.topology;
     } catch (NotAliveException ex) {
       return null;
@@ -97,6 +97,7 @@ public class LocalCluster implements ILocalCluster {
   }
 
   @Override
+  @SuppressWarnings("rawtypes")
   public Map getState() {
     throw new RuntimeException("Heron does not support LocalCluster yet...");
   }
@@ -107,8 +108,8 @@ public class LocalCluster implements ILocalCluster {
     this.conf = null;
   }
 
-  private void assertAlive(String topologyName) throws NotAliveException {
-    if (this.topologyName == null || !this.topologyName.equals(topologyName)) {
+  private void assertAlive(String topoName) throws NotAliveException {
+    if (this.topologyName == null || !this.topologyName.equals(topoName)) {
       throw new NotAliveException();
     }
   }

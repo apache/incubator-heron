@@ -20,6 +20,7 @@ import java.util.List;
 import org.apache.storm.tuple.Fields;
 
 public class SchemeAsMultiScheme implements MultiScheme {
+  private static final long serialVersionUID = 6575013093104910887L;
   public final Scheme scheme;
 
   public SchemeAsMultiScheme(Scheme scheme) {
@@ -29,8 +30,11 @@ public class SchemeAsMultiScheme implements MultiScheme {
   @Override
   public Iterable<List<Object>> deserialize(final byte[] ser) {
     List<Object> o = scheme.deserialize(ser);
-    if (o == null) return null;
-    else return Arrays.asList(o);
+    if (o == null) {
+      return null;
+    } else {
+      return Arrays.asList(o);
+    }
   }
 
   @Override

@@ -23,11 +23,11 @@ import backtype.storm.generated.StormTopology;
 import backtype.storm.tuple.Fields;
 
 public class WorkerTopologyContext extends GeneralTopologyContext {
-  private com.twitter.heron.api.topology.TopologyContext delegate_;
+  private com.twitter.heron.api.topology.TopologyContext delegate;
 
   public WorkerTopologyContext(
       StormTopology topology,
-      Map stormConf,
+      Map<String, Object> stormConf,
       Map<Integer, String> taskToComponent,
       Map<String, List<Integer>> componentToSortedTasks,
       Map<String, Map<String, Fields>> componentToStreamToFields,
@@ -39,13 +39,14 @@ public class WorkerTopologyContext extends GeneralTopologyContext {
       Map<String, Object> defaultResources,
       Map<String, Object> userResources
   ) {
-    super(topology, stormConf, taskToComponent, componentToSortedTasks, componentToStreamToFields, stormId);
+    super(topology, stormConf, taskToComponent,
+        componentToSortedTasks, componentToStreamToFields, stormId);
     throw new RuntimeException("WorkerTopologyContext should never be init this way");
   }
 
-  public WorkerTopologyContext(com.twitter.heron.api.topology.TopologyContext _delegate) {
-    super(_delegate);
-    this.delegate_ = _delegate;
+  public WorkerTopologyContext(com.twitter.heron.api.topology.TopologyContext newDelegate) {
+    super(newDelegate);
+    this.delegate = newDelegate;
   }
 
   /**
@@ -55,8 +56,8 @@ public class WorkerTopologyContext extends GeneralTopologyContext {
    * this will just return the current instance's taskId
    */
   public List<Integer> getThisWorkerTasks() {
-    List<Integer> retval = new LinkedList<Integer>();
-    retval.add(delegate_.getThisTaskId());
+    List<Integer> retval = new LinkedList<>();
+    retval.add(delegate.getThisTaskId());
     return retval;
   }
 
@@ -68,7 +69,7 @@ public class WorkerTopologyContext extends GeneralTopologyContext {
    * should be unique
    */
   public Integer getThisWorkerPort() {
-    return delegate_.getThisTaskId();
+    return delegate.getThisTaskId();
   }
 
   /**

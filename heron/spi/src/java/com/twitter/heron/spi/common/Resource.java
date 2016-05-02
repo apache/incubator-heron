@@ -34,17 +34,15 @@ public final class Resource {
    *
    * @return Map, a map of key value pairs
    */
-  @SuppressWarnings("rawtypes")
-  public static Map load(String className, String resName) throws ClassNotFoundException {
-    // get the current class
-    Class cls = Class.forName(className);
+  public static Map<String, Object> load(String className, String resName)
+      throws ClassNotFoundException {
 
     // get the class loader for current class
-    ClassLoader cLoader = cls.getClassLoader();
+    ClassLoader cLoader = Class.forName(className).getClassLoader();
 
     // open the resource file and parse the yaml
     InputStream fileStream = cLoader.getResourceAsStream(resName);
-    Map kvPairs = ConfigReader.loadStream(fileStream);
+    Map<String, Object> kvPairs = ConfigReader.loadStream(fileStream);
 
     // if nothing there exit, since this config is mandatory
     if (kvPairs.isEmpty()) {

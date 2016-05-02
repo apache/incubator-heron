@@ -85,8 +85,7 @@ public class AuroraController {
       auroraCmd.add("--verbose");
     }
 
-    return 0 == ShellUtils.runProcess(
-        isVerbose, auroraCmd.toArray(new String[0]), new StringBuilder(), new StringBuilder());
+    return runProcess(auroraCmd);
   }
 
   // Kill an aurora job
@@ -97,8 +96,7 @@ public class AuroraController {
 
     appendAuroraCommandOptions(auroraCmd, isVerbose);
 
-    return 0 == ShellUtils.runProcess(
-        isVerbose, auroraCmd.toArray(new String[0]), new StringBuilder(), new StringBuilder());
+    return runProcess(auroraCmd);
   }
 
   // Restart an aurora job
@@ -112,6 +110,11 @@ public class AuroraController {
 
     appendAuroraCommandOptions(auroraCmd, isVerbose);
 
+    return runProcess(auroraCmd);
+  }
+
+  // Utils method for unit tests
+  protected boolean runProcess(List<String> auroraCmd) {
     return 0 == ShellUtils.runProcess(
         isVerbose, auroraCmd.toArray(new String[0]), new StringBuilder(), new StringBuilder());
   }

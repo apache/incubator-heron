@@ -22,6 +22,8 @@ import static java.util.Arrays.asList;
 import static org.apache.storm.utils.Utils.tuple;
 
 public class RawMultiScheme implements MultiScheme {
+  private static final long serialVersionUID = 4272415692741188347L;
+
   @Override
   public Iterable<List<Object>> deserialize(byte[] ser) {
     return asList(tuple(ser));

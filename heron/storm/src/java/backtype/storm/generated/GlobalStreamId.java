@@ -37,8 +37,8 @@ public class GlobalStreamId {
     return this.componentId;
   }
 
-  public void set_componentId(String componentId) {
-    this.componentId = componentId;
+  public void set_componentId(String newComponentId) {
+    this.componentId = newComponentId;
   }
 
   public void unset_componentId() {
@@ -49,8 +49,8 @@ public class GlobalStreamId {
     return this.streamId;
   }
 
-  public void set_streamId(String streamId) {
-    this.streamId = streamId;
+  public void set_streamId(String newStreamId) {
+    this.streamId = newStreamId;
   }
 
   public void unset_streamId() {

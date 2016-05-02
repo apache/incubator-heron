@@ -28,7 +28,10 @@ import com.twitter.heron.api.HeronSubmitter;
  * with the "storm jar" command from the command-line, and then use this class to
  * submit your topologies.
  */
-public class StormSubmitter {
+public final class StormSubmitter {
+
+  private StormSubmitter() {
+  }
 
   /**
    * Submits a topology to run on the cluster. A topology runs forever or until
@@ -40,8 +43,10 @@ public class StormSubmitter {
    * @throws AlreadyAliveException if a topology with this name is already running
    * @throws InvalidTopologyException if an invalid topology was submitted
    */
-  public static void submitTopology(String name, Map stormConfig, StormTopology topology)
-      throws AlreadyAliveException, InvalidTopologyException {
+  public static void submitTopology(
+      String name,
+      Map<String, Object> stormConfig,
+      StormTopology topology) throws AlreadyAliveException, InvalidTopologyException {
 
     // First do config translation
     com.twitter.heron.api.Config heronConfig = ConfigUtils.translateConfig(stormConfig);
