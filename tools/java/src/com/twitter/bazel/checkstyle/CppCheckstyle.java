@@ -132,7 +132,8 @@ public final class CppCheckstyle {
             Predicates.and(
                     Predicates.not(Predicates.containsPattern("3rdparty/")),
                     Predicates.not(Predicates.containsPattern("config/heron-config.h")),
-                    Predicates.not(Predicates.containsPattern("heron/proto/"))
+                    Predicates.not(Predicates.containsPattern(".*pb.h$")),
+                    Predicates.not(Predicates.containsPattern(".*pb.cc$"))
             )
     );
   }
