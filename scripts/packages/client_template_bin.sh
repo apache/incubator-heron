@@ -22,6 +22,14 @@ heronrc=${2:-"/usr/local/heron/etc/heron.heronrc"}
 
 progname="$0"
 
+
+
+VERSION=$(cat << EOF | grep heron.build.version | awk -F: '{print $2}' | xargs echo
+%release_info%
+EOF
+)
+version_dir=$(echo $VERSION | sed 's/\//_/')
+
 echo "Heron client installer"
 echo "----------------------"
 echo
@@ -38,8 +46,8 @@ function usage() {
 
 prefix="/usr/local"
 bin="%prefix%/bin"
-base="%prefix%/heron"
-conf="%prefix%/heron/conf"
+base="%prefix%/heron/client/${version_dir}"
+conf="%prefix%/heron//client/${version_dir}/conf"
 heronrc="%prefix%/heron/etc/heron.heronrc"
 
 for opt in "${@}"; do
@@ -52,7 +60,7 @@ for opt in "${@}"; do
       ;;
     --user)
       bin="$HOME/bin"
-      base="$HOME/.heron"
+      base="$HOME/heron/client/${version_dir}"
       heronrc="$HOME/.heronrc"
       ;;
     *)
