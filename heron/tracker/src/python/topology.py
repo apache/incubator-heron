@@ -126,16 +126,7 @@ class Topology:
     Helper function to extract dc and environ from execution_state.
     Returns a tuple (cluster, environ).
     """
-    # TODO: This should be removed when old version of execution_state is no
-    # longer in use.
-    if execution_state.HasField('aurora'):
-      return (execution_state.aurora.jobs[0].dc, execution_state.aurora.jobs[0].environ)
-    else:
-      # TODO: remove dc altogether - later
-      if execution_state.HasField('cluster'):
-        return (execution_state.cluster, execution_state.environ)
-      else:
-        return (execution_state.dc, execution_state.environ)
+    return (execution_state.cluster, execution_state.environ)
 
   def set_execution_state(self, execution_state):
     if not execution_state:
