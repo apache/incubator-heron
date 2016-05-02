@@ -4,13 +4,13 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+//    http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
-// limitations under the License
+// limitations under the License.
 
 package com.twitter.heron.scheduler.reef;
 
@@ -69,9 +69,6 @@ public class HeronMasterDriver {
   // TODO: after AM is restarted?
   // TODO: Ensure Kill operation stops creation of new contexts in flight.
   private final Map<String, ActiveContext> contexts = new HashMap<>();
-  // This map will be needed to make container requests for a failed heron executor
-  private Map<String, String> reefContainerToHeronExecutorMap = new ConcurrentHashMap<>();
-
   private final String topologyPackageName;
   private final String heronCorePackageName;
   private final EvaluatorRequestor requestor;
@@ -82,8 +79,7 @@ public class HeronMasterDriver {
   private final String topologyName;
   private final String env;
   private final String topologyJar;
-  private
-  final int httpPort;
+  private final int httpPort;
   // Currently yarn does not support mapping container requests to allocation (YARN-4879). As a
   // result it is not possible to concurrently start containers of different sizes. This lock
   // ensures workers are started serially.
@@ -91,9 +87,11 @@ public class HeronMasterDriver {
   // TODO: Get rid of this lock. Add a request queue for new and failed contexts. Avoid blocking any
   // TODO: event thread.
   private final Object containerAllocationLock = new Object();
+  // This map will be needed to make container requests for a failed heron executor
+  private Map<String, String> reefContainerToHeronExecutorMap = new ConcurrentHashMap<>();
   private PackingPlan packing;
-  // Container request submission and allocation takes places on different threads. This variable is used to share the
-  // heron executor id for which the container request was submitted
+  // Container request submission and allocation takes places on different threads. This variable is
+  // used to share the heron executor id for which the container request was submitted
   private String heronExecutorId;
 
   @Inject
@@ -147,27 +145,35 @@ public class HeronMasterDriver {
    * Container allocation is asynchronous. Request containers serially to ensure allocated resources
    * match the required resources
    */
-  void scheduleHeronWorkers(PackingPlan packing) {
-    this.packing = packing;
-    for (Entry<String, ContainerPlan> entry : packing.containers.entrySet()) {
+  void scheduleHeronWorkers(PackingPlan topologyPacking) {
+    this.packing = topologyPacking;
+    for (Entry<String, ContainerPlan> entry : topologyPacking.containers.entrySet()) {
       Resource reqResource = entry.getValue().resource;
 
       int mem = getMemInMBForExecutor(reqResource);
       try {
         requestContainerForExecutor(entry.getKey(), getCpuForExecutor(reqResource), mem);
       } catch (InterruptedException e) {
-        LOG.log(Level.WARNING, "Error while waiting for container allocation for workers; Continue container request for remaining workers", e);
+        LOG.log(Level.WARNING, "Error while waiting for container allocation for workers; "
+            + "Continue container request for remaining workers", e);
         // TODO: Just log a WARNING without any actions for now. Need to resubmit failed requests
         // TODO: and track number of retries
       }
     }
   }
 
-  private void requestContainerForExecutor(String executorId, int cpu, int mem) throws InterruptedException {
+  private void requestContainerForExecutor(String executorId, int cpu, int mem)
+      throws InterruptedException {
     LOG.log(Level.INFO, "Scheduling container for executor, id: {0}", executorId);
     synchronized (containerAllocationLock) {
       heronExecutorId = executorId;
-      requestor.submit(EvaluatorRequest.newBuilder().setNumber(1).setMemory(mem).setNumberOfCores(cpu).build());
+      EvaluatorRequest evaluatorRequest = EvaluatorRequest
+          .newBuilder()
+          .setNumber(1)
+          .setMemory(mem)
+          .setNumberOfCores(cpu)
+          .build();
+      requestor.submit(evaluatorRequest);
       containerAllocationLock.wait();
     }
     LOG.log(Level.INFO, "Container is allocated for executor, id: {0}", executorId);
@@ -208,7 +214,12 @@ public class HeronMasterDriver {
     private void launchScheduler() {
       try {
         // initialize the scheduler with the options
-        SchedulerMain schedulerMain = new SchedulerMain(cluster, role, env, topologyName, topologyJar, httpPort);
+        SchedulerMain schedulerMain = new SchedulerMain(cluster,
+            role,
+            env,
+            topologyName,
+            topologyJar,
+            httpPort);
         schedulerMain.runScheduler();
       } catch (IOException e) {
         throw new RuntimeException("Failed to launch Heron Scheduler", e);
@@ -229,8 +240,12 @@ public class HeronMasterDriver {
         containerAllocationLock.notifyAll();
       }
 
-      LOG.log(Level.INFO, "Start {0} for heron executor, id: {1}", new Object[]{evaluator.getId(), executorId});
-      Configuration context = ContextConfiguration.CONF.set(ContextConfiguration.IDENTIFIER, executorId).build();
+      LOG.log(Level.INFO,
+          "Start {0} for heron executor, id: {1}",
+          new Object[]{evaluator.getId(), executorId});
+      Configuration context = ContextConfiguration.CONF
+          .set(ContextConfiguration.IDENTIFIER, executorId)
+          .build();
       evaluator.submitContext(context);
 
       reefContainerToHeronExecutorMap.put(evaluator.getId(), executorId);
@@ -245,9 +260,13 @@ public class HeronMasterDriver {
     public void onNext(FailedEvaluator evaluator) {
       synchronized (HeronMasterDriver.class) {
         String executorId = reefContainerToHeronExecutorMap.get(evaluator.getId());
-        LOG.log(Level.WARNING, "Container:{0} executor:{1} failed", new Object[]{evaluator.getId(), executorId});
+        LOG.log(Level.WARNING,
+            "Container:{0} executor:{1} failed",
+            new Object[]{evaluator.getId(), executorId});
         if (executorId == null) {
-          LOG.log(Level.SEVERE, "Unknown executorId for failed container: {0}, skip renew action", evaluator.getId());
+          LOG.log(Level.SEVERE,
+              "Unknown executorId for failed container: {0}, skip renew action",
+              evaluator.getId());
           return;
         }
 
@@ -257,14 +276,19 @@ public class HeronMasterDriver {
             requestContainerForExecutor(TMASTER_CONTAINER_ID, 1, TM_MEM_SIZE_MB);
           } else {
             if (packing.containers.get(executorId) == null) {
-              LOG.log(Level.SEVERE, "Missing container {0} in packing, skipping container request", executorId);
+              LOG.log(Level.SEVERE,
+                  "Missing container {0} in packing, skipping container request",
+                  executorId);
               return;
             }
             Resource reqResource = packing.containers.get(executorId).resource;
-            requestContainerForExecutor(executorId, getCpuForExecutor(reqResource), getMemInMBForExecutor(reqResource));
+            requestContainerForExecutor(executorId,
+                getCpuForExecutor(reqResource),
+                getMemInMBForExecutor(reqResource));
           }
         } catch (InterruptedException e) {
-          LOG.log(Level.WARNING, "Error waiting for container allocation for failed executor; Assuming request was submitted and continuing" + executorId, e);
+          LOG.log(Level.WARNING, "Error waiting for container allocation for failed executor; "
+              + "Assuming request was submitted and continuing" + executorId, e);
         }
       }
     }

@@ -4,13 +4,13 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+//    http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
-// limitations under the License
+// limitations under the License.
 
 package com.twitter.heron.scheduler.reef;
 
@@ -76,16 +76,18 @@ public class ReefLauncher implements ILauncher {
       // TODO Although these jars will be available in heron-core/lib directory when core package
       // TODO is extracted. So copying these jars can be skipped if these jars can be put in
       // TODO classpath of SchedulerMain.
-      libJars.add(HeronMasterDriver.class.getProtectionDomain().getCodeSource().getLocation().getFile());
+      libJars.add(this.getClass().getProtectionDomain().getCodeSource().getLocation().getFile());
       libJars.add(packingClass.getProtectionDomain().getCodeSource().getLocation().getFile());
       libJars.add(stateMgrClass.getProtectionDomain().getCodeSource().getLocation().getFile());
 
       coreReleasePackage = new URI(Context.corePackageUri(config)).getPath();
     } catch (URISyntaxException | ClassNotFoundException e) {
-      throw new RuntimeException("Either core package URI is invalid or packing/state manager class is missing", e);
+      throw new RuntimeException("Core package URI is OR packing/state manager is missing", e);
     }
 
-    LOG.log(Level.INFO, "Initializing topology: {0}, core: {1}", new Object[]{topologyName, coreReleasePackage});
+    LOG.log(Level.INFO,
+        "Initializing topology: {0}, core: {1}",
+        new Object[]{topologyName, coreReleasePackage});
   }
 
   @Override
@@ -96,9 +98,9 @@ public class ReefLauncher implements ILauncher {
 
     boolean ret;
     try {
-      final Injector tangInjector = Tang.Factory.getTang().newInjector(reefRuntimeConf, reefClientConf);
-      final REEF reef = tangInjector.getInstance(REEF.class);
-      final ReefClientSideHandlers client = tangInjector.getInstance(ReefClientSideHandlers.class);
+      final Injector injector = Tang.Factory.getTang().newInjector(reefRuntimeConf, reefClientConf);
+      final REEF reef = injector.getInstance(REEF.class);
+      final ReefClientSideHandlers client = injector.getInstance(ReefClientSideHandlers.class);
 
       reef.submit(reefDriverConf);
 
@@ -156,8 +158,8 @@ public class ReefLauncher implements ILauncher {
   }
 
   /**
-   * @return Builds and returns configuration needed by REEF client to launch topology as a REEF job
-   * and track it.
+   * Builds and returns configuration needed by REEF client to launch topology as a REEF job and
+   * track it.
    */
   private Configuration getClientConf() {
     return HeronClientConfiguration.CONF
