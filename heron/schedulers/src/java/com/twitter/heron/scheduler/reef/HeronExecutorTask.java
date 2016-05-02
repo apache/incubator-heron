@@ -118,7 +118,7 @@ public class HeronExecutorTask implements Task {
     int shellPort = NetworkUtils.getFreePort();
     int port4 = NetworkUtils.getFreePort();
 
-    if (port1 == -1 || port2 == -1 || port3 == -1) {
+    if (port1 <= 0 || port2 <= 0 || port3 <= 0) {
       throw new RuntimeException("Could not find available ports to start topology");
     }
 
