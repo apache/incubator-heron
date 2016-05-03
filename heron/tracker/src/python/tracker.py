@@ -168,7 +168,6 @@ class Tracker:
       "release_username": execution_state.release_state.release_username,
       "release_tag": execution_state.release_state.release_tag,
       "release_version": execution_state.release_state.release_version,
-      "uploader_version": execution_state.release_state.uploader_version,
       "has_physical_plan": None,
       "has_tmaster_location": None,
     }
