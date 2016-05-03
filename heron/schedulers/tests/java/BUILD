@@ -65,3 +65,12 @@ java_test(
   deps=scheduler_deps_files + local_deps_files,
   size="small",
 )
+
+java_test(
+  name="local-scheduler_unittest",
+  srcs=glob(
+    ["**/LocalSchedulerTest.java"]
+  ),
+  deps=scheduler_deps_files + local_deps_files,
+  size="small",
+)
