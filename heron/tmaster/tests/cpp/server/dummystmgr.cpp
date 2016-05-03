@@ -1,24 +1,42 @@
-#include <iostream>
-#include <stdio.h>
-#include <string.h>
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
+#include "server/dummystmgr.h"
+#include <stdio.h>
+#include <iostream>
+#include <string>
+#include <vector>
 #include "proto/messages.h"
 #include "basics/basics.h"
 #include "errors/errors.h"
 #include "threads/threads.h"
 #include "network/network.h"
 
-#include "dummystmgr.h"
-
-namespace heron { namespace testing {
+namespace heron {
+namespace testing {
 
 DummyStMgr::DummyStMgr(EventLoop* eventLoop, const NetworkOptions& options,
-                       const sp_string& stmgr_id, const sp_string& myhost,
-                       sp_int32 myport,
+                       const sp_string& stmgr_id, const sp_string& myhost, sp_int32 myport,
                        const std::vector<proto::system::Instance*>& instances)
-  : Client(eventLoop, options), my_id_(stmgr_id), my_host_(myhost),
-    my_port_(myport), instances_(instances), pplan_(NULL)
-{
+    : Client(eventLoop, options),
+      my_id_(stmgr_id),
+      my_host_(myhost),
+      my_port_(myport),
+      instances_(instances),
+      pplan_(NULL) {
   InstallResponseHandler(new proto::tmaster::StMgrRegisterRequest(),
                          &DummyStMgr::HandleRegisterResponse);
   InstallResponseHandler(new proto::tmaster::StMgrHeartbeatRequest(),
@@ -26,38 +44,32 @@ DummyStMgr::DummyStMgr(EventLoop* eventLoop, const NetworkOptions& options,
   InstallMessageHandler(&DummyStMgr::HandleNewAssignmentMessage);
 }
 
-DummyStMgr::~DummyStMgr()
-{
-}
+DummyStMgr::~DummyStMgr() {}
 
-void DummyStMgr::HandleConnect(NetworkErrorCode status)
-{
+void DummyStMgr::HandleConnect(NetworkErrorCode status) {
   if (status == OK) {
-    LOG(INFO) << "Connected to " << get_clientoptions().get_host()
-              << ":" << get_clientoptions().get_port();
+    LOG(INFO) << "Connected to " << get_clientoptions().get_host() << ":"
+              << get_clientoptions().get_port();
     SendRegisterRequest();
   } else {
-    LOG(ERROR) << "Could not connect to " << get_clientoptions().get_host()
-               << ":" << get_clientoptions().get_port();
-    AddTimer([this] () { this->OnReConnectTimer(); }, 10000000);
+    LOG(ERROR) << "Could not connect to " << get_clientoptions().get_host() << ":"
+               << get_clientoptions().get_port();
+    AddTimer([this]() { this->OnReConnectTimer(); }, 10000000);
   }
 }
 
-void DummyStMgr::HandleClose(NetworkErrorCode code)
-{
+void DummyStMgr::HandleClose(NetworkErrorCode code) {
   if (code == OK) {
     eventLoop_->loopExit();
   } else {
     LOG(ERROR) << "Server connection closed with code " << code;
     LOG(ERROR) << "Will try to reconnect again after 10 seconds";
-    AddTimer([this] () { this->OnReConnectTimer(); }, 10000000);
+    AddTimer([this]() { this->OnReConnectTimer(); }, 10000000);
   }
 }
 
-void DummyStMgr::HandleRegisterResponse(void*,
-                                        proto::tmaster::StMgrRegisterResponse* response,
-                                        NetworkErrorCode status)
-{
+void DummyStMgr::HandleRegisterResponse(void*, proto::tmaster::StMgrRegisterResponse* response,
+                                        NetworkErrorCode status) {
   if (status != OK) {
     LOG(ERROR) << "NonOK response message for Register Response";
     delete response;
@@ -79,14 +91,12 @@ void DummyStMgr::HandleRegisterResponse(void*,
     } else {
       LOG(INFO) << "Register returned with no existing pplan";
     }
-    AddTimer([this] () { this->OnHeartbeatTimer(); }, 10000000);
+    AddTimer([this]() { this->OnHeartbeatTimer(); }, 10000000);
   }
 }
 
-void DummyStMgr::HandleHeartbeatResponse(void*,
-                                         proto::tmaster::StMgrHeartbeatResponse* response,
-                                         NetworkErrorCode status)
-{
+void DummyStMgr::HandleHeartbeatResponse(void*, proto::tmaster::StMgrHeartbeatResponse* response,
+                                         NetworkErrorCode status) {
   if (status != OK) {
     LOG(ERROR) << "NonOK response message for Register Response";
     delete response;
@@ -99,38 +109,30 @@ void DummyStMgr::HandleHeartbeatResponse(void*,
     LOG(ERROR) << "Heartbeat failed with status " << st;
     return Stop();
   } else {
-    AddTimer([this] () { this->OnHeartbeatTimer(); }, 10000000);
+    AddTimer([this]() { this->OnHeartbeatTimer(); }, 10000000);
   }
 }
 
-void DummyStMgr::HandleNewAssignmentMessage(proto::stmgr::NewPhysicalPlanMessage* message)
-{
+void DummyStMgr::HandleNewAssignmentMessage(proto::stmgr::NewPhysicalPlanMessage* message) {
   LOG(INFO) << "Got a new assignment";
   HandleNewPhysicalPlan(message->new_pplan());
   delete message;
 }
 
-void DummyStMgr::HandleNewPhysicalPlan(const proto::system::PhysicalPlan& pplan)
-{
+void DummyStMgr::HandleNewPhysicalPlan(const proto::system::PhysicalPlan& pplan) {
   delete pplan_;
   pplan_ = new proto::system::PhysicalPlan(pplan);
 }
 
-void DummyStMgr::OnReConnectTimer()
-{
-  Start();
-}
+void DummyStMgr::OnReConnectTimer() { Start(); }
 
-void DummyStMgr::OnHeartbeatTimer()
-{
+void DummyStMgr::OnHeartbeatTimer() {
   LOG(INFO) << "Sending heartbeat";
   SendHeartbeatRequest();
 }
 
-void DummyStMgr::SendRegisterRequest()
-{
-  proto::tmaster::StMgrRegisterRequest* request =
-          new proto::tmaster::StMgrRegisterRequest();
+void DummyStMgr::SendRegisterRequest() {
+  proto::tmaster::StMgrRegisterRequest* request = new proto::tmaster::StMgrRegisterRequest();
   proto::system::StMgr* stmgr = request->mutable_stmgr();
   stmgr->set_id(my_id_);
   stmgr->set_host_name(my_host_);
@@ -144,19 +146,14 @@ void DummyStMgr::SendRegisterRequest()
   return;
 }
 
-void DummyStMgr::SendHeartbeatRequest()
-{
-  proto::tmaster::StMgrHeartbeatRequest* request =
-          new proto::tmaster::StMgrHeartbeatRequest();
+void DummyStMgr::SendHeartbeatRequest() {
+  proto::tmaster::StMgrHeartbeatRequest* request = new proto::tmaster::StMgrHeartbeatRequest();
   request->set_heartbeat_time(time(NULL));
   request->mutable_stats();
   SendRequest(request, NULL);
   return;
 }
 
-proto::system::PhysicalPlan* DummyStMgr::GetPhysicalPlan()
-{
-  return pplan_;
-}
-
-}} // end namespace
+proto::system::PhysicalPlan* DummyStMgr::GetPhysicalPlan() { return pplan_; }
+}  // namespace testing
+}  // namespace heron
