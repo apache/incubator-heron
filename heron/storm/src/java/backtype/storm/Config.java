@@ -408,7 +408,8 @@ public class Config extends com.twitter.heron.api.Config {
     registerSerialization(this, klass);
   }
 
-  public void registerSerialization(Class<?> klass, Class<? extends Serializer<?>> serializerClass) {
+  public void registerSerialization(Class<?> klass,
+                                    Class<? extends Serializer<?>> serializerClass) {
     registerSerialization(this, klass, serializerClass);
   }
 

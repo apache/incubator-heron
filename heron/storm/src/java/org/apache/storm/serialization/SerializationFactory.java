@@ -83,7 +83,7 @@ public final class SerializationFactory {
         Class<?> klass = Class.forName(klassName);
         Class<? extends Serializer<?>> serializerClass = null;
         if (serializerClassName != null) {
-          serializerClass = (Class<? extends Serializer<?>>)Class.forName(serializerClassName);
+          serializerClass = (Class<? extends Serializer<?>>) Class.forName(serializerClassName);
         }
         LOG.info("Doing kryo.register for class " + klass);
         if (serializerClass == null) {
