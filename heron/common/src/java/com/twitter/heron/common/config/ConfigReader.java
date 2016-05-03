@@ -95,6 +95,7 @@ public class ConfigReader {
    *
    * @return Map, contains the key value pairs of config
    */
+  @SuppressWarnings("unchecked") // yaml.load API returns raw Map
   public static Map<String, Object> loadStream(InputStream inputStream) {
     LOG.fine("Reading config stream");
 
