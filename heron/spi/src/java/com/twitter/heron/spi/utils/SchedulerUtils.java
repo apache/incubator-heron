@@ -14,9 +14,12 @@
 
 package com.twitter.heron.spi.utils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
@@ -100,5 +103,33 @@ public final class SchedulerUtils {
 
     LOG.fine("Cleaned up Heron State");
     return true;
+  }
+
+  public static String[] schedulerCommand(Config config, String javaBinary, int httpPort) {
+    String schedulerClassPath = new StringBuilder()
+        .append(Context.schedulerSandboxClassPath(config)).append(":")
+        .append(Context.packingSandboxClassPath(config)).append(":")
+        .append(Context.stateManagerSandboxClassPath(config))
+        .toString();
+
+    List<String> commands = new ArrayList<>();
+    commands.add(javaBinary);
+    commands.add("-cp");
+    commands.add(schedulerClassPath);
+    commands.add("com.twitter.heron.scheduler.SchedulerMain");
+    commands.add("--cluster");
+    commands.add(Context.cluster(config));
+    commands.add("--role");
+    commands.add(Context.role(config));
+    commands.add("--environment");
+    commands.add(Context.environ(config));
+    commands.add("--topology_name");
+    commands.add(Context.topologyName(config));
+    commands.add("--topology_jar");
+    commands.add(Context.topologyJarFile(config));
+    commands.add("--http_port");
+    commands.add(Integer.toString(httpPort));
+
+    return commands.toArray(new String[0]);
   }
 }
