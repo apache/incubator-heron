@@ -8,8 +8,6 @@ message HeronReleaseState {
   optional string release_tag = 2;
   // This is the user facing release version
   optional string release_version = 3;
-  // This is the uploader version
-  optional string uploader_version = 4;
 }
 
 message ExecutionState {
@@ -17,12 +15,12 @@ message ExecutionState {
   required string topology_id = 2;
   // The time the topology was submitted
   // Unix time
-  optional int64 submission_time = 4;
+  optional int64 submission_time = 3;
   // The username who launched the topology
-  optional string submission_user = 5;
+  optional string submission_user = 4;
 
-  optional string environ = 7;
-  optional string role = 8;
-  optional HeronReleaseState release_state = 9;
-  optional string cluster = 10;
+  required string cluster = 5;
+  required string environ = 6;
+  required string role = 7;
+  optional HeronReleaseState release_state = 8;
 }
