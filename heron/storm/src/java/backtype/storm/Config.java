@@ -298,12 +298,12 @@ public class Config extends com.twitter.heron.api.Config {
     conf.put(Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS, secs);
   }
 
-  public static void registerSerialization(Map<String, Object> conf, Class klass) {
+  public static void registerSerialization(Map<String, Object> conf, Class<?> klass) {
     getRegisteredSerializations(conf).add(klass.getName());
   }
 
   public static void registerSerialization(
-      Map<String, Object> conf, Class klass, Class<? extends Serializer> serializerClass) {
+      Map<String, Object> conf, Class<?> klass, Class<? extends Serializer<?>> serializerClass) {
     Map<String, String> register = new HashMap<>();
     register.put(klass.getName(), serializerClass.getName());
     getRegisteredSerializations(conf).add(register);
@@ -404,15 +404,15 @@ public class Config extends com.twitter.heron.api.Config {
     setMessageTimeoutSecs(this, secs);
   }
 
-  public void registerSerialization(Class klass) {
+  public void registerSerialization(Class<?> klass) {
     registerSerialization(this, klass);
   }
 
-  public void registerSerialization(Class klass, Class<? extends Serializer> serializerClass) {
+  public void registerSerialization(Class<?> klass, Class<? extends Serializer<?>> serializerClass) {
     registerSerialization(this, klass, serializerClass);
   }
 
-  public void registerMetricsConsumer(Class klass, Object argument, long parallelismHint) {
+  public void registerMetricsConsumer(Class<?> klass, Object argument, long parallelismHint) {
     HashMap<String, Object> m = new HashMap<>();
     m.put("class", klass.getCanonicalName());
     m.put("parallelism.hint", parallelismHint);
@@ -427,11 +427,11 @@ public class Config extends com.twitter.heron.api.Config {
     this.put(TOPOLOGY_METRICS_CONSUMER_REGISTER, l);
   }
 
-  public void registerMetricsConsumer(Class klass, long parallelismHint) {
+  public void registerMetricsConsumer(Class<?> klass, long parallelismHint) {
     registerMetricsConsumer(klass, null, parallelismHint);
   }
 
-  public void registerMetricsConsumer(Class klass) {
+  public void registerMetricsConsumer(Class<?> klass) {
     registerMetricsConsumer(klass, null, 1L);
   }
 
