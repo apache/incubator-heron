@@ -76,5 +76,7 @@ public class LocalLauncherTest {
         when(localLauncher).startScheduler(Mockito.any(String[].class));
     Assert.assertTrue(localLauncher.launch(packingPlan));
     Mockito.verify(localLauncher, Mockito.times(2)).startScheduler(expectedSchedulerCommand);
+
+    localLauncher.close();
   }
 }
