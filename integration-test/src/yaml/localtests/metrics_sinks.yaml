@@ -53,27 +53,3 @@ tmaster-sink:
     "__jvm-memory-used-mb": LAST
     "__jvm-memory-mb-total": LAST
     "__jvm-gc-collection-time-ms": LAST
-
-### Config for scribe-sink
-# scribe-sink:
-#   class: "com.twitter.heron.metricsmgr.sink.ScribeSink"
-#   flush-frequency-ms: 60000
-#   sink-restart-attempts: -1 # Forever
-#   scribe-host: "127.0.0.1" # The host of scribe to be exported metrics to
-#   scribe-port: 1463 # The port of scribe to be exported metrics to
-#   scribe-category: "scribe-category" # The category of the scribe to be exported metrics to
-#   service-namespace: "heron" # The service name of the metrics in scribe-category
-#   scribe-timeout-ms: 200 # The timeout in seconds for metrics manager to write metrics to scribe
-#   scribe-connect-server-attempts: 2 # The maximum retry attempts to connect to scribe server
-#   scribe-retry-attempts: 5 # The maximum retry attempts to write metrics to scribe
-#   scribe-retry-interval-ms: 100 # The interval to retry to write metrics to scribe
-
-### Config for graphite-sink
-### Currently the graphite-sink is disabled
-# graphite-sink:
-#   class: "com.twitter.heron.metricsmgr.sink.GraphiteSink"
-#   flush-frequency-ms: 60000
-#   graphite_host: "127.0.0.1" # The host of graphite to be exported metrics to
-#   graphite_port: 2004 # The port of graphite to be exported metrics to
-#   metrics_prefix: "heron" # The prefix of every metrics
-#   server_max_reconnect-attempts: 20 # The max reconnect attempts when failing to connect to graphite server

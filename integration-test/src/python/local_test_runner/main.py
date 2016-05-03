@@ -47,7 +47,6 @@ def runTest(test, topologyName, params):
   try:
     submitTopology(
         params['cliPath'], 
-        params['configPath'],
         params['cluster'],
         params['testJarPath'], 
         params['topologyClassPath'],
@@ -79,7 +78,7 @@ def runTest(test, topologyName, params):
   # execute test case
   if test == 'KILL_TMASTER':
     print "Executing kill tmaster"
-    restartShard(params['cliPath'], params['configPath'], params['cluster'], params['topologyName'], TMASTER_SHARD)
+    restartShard(params['cliPath'], params['cluster'], params['topologyName'], TMASTER_SHARD)
   elif test == 'KILL_STMGR':
     print "Executing kill stmgr"
     stmgrPid = getPid('%s-%d' % (HERON_STMGR, NON_TMASTER_SHARD), params['workingDirectory'])
@@ -138,7 +137,7 @@ def runTest(test, topologyName, params):
 
   # kill topology
   try:
-    killTopology(params['cliPath'], params['configPath'], params['cluster'], params['topologyName'])
+    killTopology(params['cliPath'], params['cluster'], params['topologyName'])
   except Exception as e:
     logging.error("Failed to kill %s topology: %s" %(topologyName, str(e)))
     return False
@@ -165,13 +164,12 @@ def runTest(test, topologyName, params):
     return False
 
 # Submit topology using heron-cli
-def submitTopology(heronCliPath, configPath, testCluster, testJarPath, topologyClassPath, topologyName):
+def submitTopology(heronCliPath, testCluster, testJarPath, topologyClassPath, topologyName):
   logging.info("Submitting topology")
   # unicode string messes up subprocess.call quotations, must change into string type
   splitcmd = [
       '%s' % (heronCliPath),
       'submit',
-      '--config-path=%s' % (configPath),
       '--verbose', 
       '--',
       '%s' % (testCluster),
@@ -187,12 +185,11 @@ def submitTopology(heronCliPath, configPath, testCluster, testJarPath, topologyC
   logging.info("Submitted topology")
 
 # Kill a topology using heron-cli
-def killTopology(heronCliPath, configPath, testCluster, topologyName):
+def killTopology(heronCliPath, testCluster, topologyName):
   logging.info("Killing topology")
   splitcmd = [
       '%s' % (heronCliPath),
       'kill',
-      '--config-path=%s' % (configPath),
       '--verbose',
       '%s' % (testCluster),
       '%s' % (topologyName),
@@ -215,12 +212,11 @@ def runAllTests(args):
       failures += [test]
   return (successes, failures)
 
-def restartShard(heronCliPath, configPath, testCluster, topologyName, shardNum):
+def restartShard(heronCliPath, testCluster, topologyName, shardNum):
   logging.info("Killing topology TMaster")
   splitcmd = [
       '%s' % (heronCliPath),
       'restart',
-      '--config-path=%s' % (configPath),
       '--verbose',
       '%s' % (testCluster),
       '%s' % (topologyName),
@@ -300,18 +296,17 @@ def main():
 
   args = dict()
   homeDirectory = os.path.expanduser("~")
-  args['cluster'] = "localtests"
+  args['cluster'] = conf['cluster']
   args['topologyName'] = conf['topology']['topologyName']
   args['topologyClassPath'] = conf['topology']['topologyClassPath']
   args['workingDirectory'] = os.path.join(
       homeDirectory, 
       ".herondata", 
       "topologies", 
-      "localtests", 
+      conf['cluster'], 
       args['topologyName']
   )
-  args['cliPath'] = conf['heronCliPath']
-  args['configPath'] = conf['configPath']
+  args['cliPath'] = os.path.expanduser(conf['heronCliPath'])
   args['outputFile'] = os.path.join(args['workingDirectory'], conf['topology']['outputFile'])
   args['readFile'] = os.path.join(args['workingDirectory'], conf['topology']['readFile'])
   args['testJarPath'] = os.path.join(heronRepoDirectory, conf['testJarPath'])
