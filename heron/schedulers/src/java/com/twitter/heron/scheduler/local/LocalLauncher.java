@@ -15,24 +15,23 @@
 package com.twitter.heron.scheduler.local;
 
 import java.io.File;
-import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.xml.bind.DatatypeConverter;
-
 import org.apache.commons.io.FileUtils;
 
-import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.common.ShellUtils;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.Runtime;
+import com.twitter.heron.spi.utils.SchedulerUtils;
 
 /**
  * Launch topology locally to a working directory.
@@ -75,18 +74,6 @@ public class LocalLauncher implements ILauncher {
   }
 
   /**
-   * Encode the JVM options
-   *
-   * @return encoded string
-   */
-  protected String formatJavaOpts(String javaOpts) {
-    String javaOptsBase64 = DatatypeConverter.printBase64Binary(
-        javaOpts.getBytes(Charset.forName("UTF-8")));
-
-    return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
-  }
-
-  /**
    * Launch the topology
    */
   @Override
@@ -94,41 +81,18 @@ public class LocalLauncher implements ILauncher {
     LOG.log(Level.FINE, "Launching topology for local cluster {0}",
         LocalContext.cluster(config));
 
-    TopologyAPI.Topology topology = Runtime.topology(runtime);
-
     // download the core and topology packages into the working directory
     if (!downloadAndExtractPackages()) {
       LOG.severe("Failed to download the core and topology packages");
       return false;
     }
 
-    String schedulerClassPath = new StringBuilder()
-        .append(LocalContext.schedulerSandboxClassPath(config)).append(":")
-        .append(LocalContext.packingSandboxClassPath(config)).append(":")
-        .append(LocalContext.stateManagerSandboxClassPath(config))
-        .toString();
+    String[] schedulerCmd = getSchedulerCommand();
 
-    String schedulerCmd = String.format("%s/%s %s %s %s %s %s %s %s %s %s",
-        LocalContext.javaHome(config),
-        "bin/java",
-        "-cp",
-        schedulerClassPath,
-        "com.twitter.heron.scheduler.SchedulerMain",
-        "--cluster " + LocalContext.cluster(config),
-        "--role " + LocalContext.role(config),
-        "--environment " + LocalContext.environ(config),
-        "--topology_name " + topology.getName(),
-        "--topology_jar " + LocalContext.topologyJarFile(config),
-        "--http_port " + NetworkUtils.getFreePort()
-    );
-
-    LOG.log(Level.FINE, "Scheduler command line: {0}", schedulerCmd.toString());
-
-    Process p = ShellUtils.runASyncProcess(LocalContext.verbose(config), schedulerCmd.toString(),
-        new File(topologyWorkingDirectory));
+    Process p = startScheduler(schedulerCmd);
 
     if (p == null) {
-      LOG.severe("Failed to start SchedulerMain using: " + schedulerCmd);
+      LOG.severe("Failed to start SchedulerMain using: " + Arrays.toString(schedulerCmd));
       return false;
     }
 
@@ -164,7 +128,7 @@ public class LocalLauncher implements ILauncher {
     LOG.log(Level.FINE, "Fetching heron core release {0}", coreReleasePackage);
     LOG.fine("If release package is already in the working directory");
     LOG.fine("the old one will be overwritten");
-    if (!copyPackage(coreReleasePackage, targetCoreReleaseFile)) {
+    if (!curlPackage(coreReleasePackage, targetCoreReleaseFile)) {
       LOG.severe("Failed to fetch the heron core release package.");
       return false;
     }
@@ -188,7 +152,7 @@ public class LocalLauncher implements ILauncher {
     LOG.fine("the old one will be overwritten");
 
     // fetch the topology package
-    if (!copyPackage(topologyPackage, targetTopologyPackageFile)) {
+    if (!curlPackage(topologyPackage, targetTopologyPackageFile)) {
       LOG.severe("Failed to fetch the heron core release package.");
       return false;
     }
@@ -216,7 +180,7 @@ public class LocalLauncher implements ILauncher {
    * @param targetFile the target filename to download the release package to
    * @return true if successful
    */
-  protected boolean copyPackage(String corePackageURI, String targetFile) {
+  protected boolean curlPackage(String corePackageURI, String targetFile) {
 
     // get the directory containing the target file
     Path filePath = Paths.get(targetFile);
@@ -244,5 +208,18 @@ public class LocalLauncher implements ILauncher {
         cmd, new StringBuilder(), new StringBuilder(), new File(targetFolder));
 
     return ret == 0 ? true : false;
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////
+  // Utils methods for unit tests
+  ///////////////////////////////////////////////////////////////////////////////
+  protected String[] getSchedulerCommand() {
+    String javaBinary = String.format("%s/%s", Context.javaHome(config), "bin/java");
+    return SchedulerUtils.schedulerCommand(config, javaBinary, NetworkUtils.getFreePort());
+  }
+
+  protected Process startScheduler(String[] schedulerCmd) {
+    return ShellUtils.runASyncProcess(LocalContext.verbose(config), schedulerCmd,
+        new File(topologyWorkingDirectory));
   }
 }
