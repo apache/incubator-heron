@@ -19,6 +19,7 @@ import java.util.List;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.metric.CountMetric;
 import com.twitter.heron.api.metric.MeanReducer;
+import com.twitter.heron.api.metric.MeanReducerState;
 import com.twitter.heron.api.metric.MultiCountMetric;
 import com.twitter.heron.api.metric.MultiReducedMetric;
 import com.twitter.heron.common.basics.SingletonRegistry;
@@ -37,11 +38,11 @@ import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 
 public class BoltMetrics {
   private final MultiCountMetric ackCount;
-  private final MultiReducedMetric processLatency;
-  private final MultiReducedMetric failLatency;
+  private final MultiReducedMetric<MeanReducerState> processLatency;
+  private final MultiReducedMetric<MeanReducerState> failLatency;
   private final MultiCountMetric failCount;
   private final MultiCountMetric executeCount;
-  private final MultiReducedMetric executeLatency;
+  private final MultiReducedMetric<MeanReducerState> executeLatency;
   private final MultiCountMetric emitCount;
   private final MultiCountMetric deserializationTimeNs;
   private final MultiCountMetric serializationTimeNs;
@@ -53,11 +54,11 @@ public class BoltMetrics {
 
   public BoltMetrics() {
     ackCount = new MultiCountMetric();
-    processLatency = new MultiReducedMetric(new MeanReducer());
-    failLatency = new MultiReducedMetric(new MeanReducer());
+    processLatency = new MultiReducedMetric<>(new MeanReducer());
+    failLatency = new MultiReducedMetric<>(new MeanReducer());
     failCount = new MultiCountMetric();
     executeCount = new MultiCountMetric();
-    executeLatency = new MultiReducedMetric(new MeanReducer());
+    executeLatency = new MultiReducedMetric<>(new MeanReducer());
     emitCount = new MultiCountMetric();
     outQueueFullCount = new CountMetric();
 
