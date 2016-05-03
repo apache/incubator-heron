@@ -13,6 +13,7 @@ Install the required libraries
 ```bash
 brew install automake
 brew install cmake
+brew install libtool
 ```
 
 Set the following environment variables

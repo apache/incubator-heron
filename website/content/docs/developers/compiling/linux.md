@@ -48,20 +48,6 @@ Make sure Bazel bin is in the PATH
 export PATH="$PATH:$HOME/bin"
 ```
 
-Install gperftools
-
-https://github.com/gperftools/gperftools/releases
-
-```bash
-cd /home/ubuntu
-wget https://github.com/gperftools/gperftools/releases/download/gperftools-2.5/gperftools-2.5.tar.gz
-tar -xvf gperftools-2.5.tar.gz
-cd gperftools-2.5
-./configure
-make
-sudo make install
-```
-
 Get the latest version of heron
 
 ```bash
@@ -94,7 +80,7 @@ bazel build --config=ubuntu scripts/packages:tarpkgs  --verbose_failures  \
 
 This will build the packages below the `bazel-bin/scripts/packages/` directory. 
 
-If you encounter errors with libunwind or libtool, install them manually
+If you encounter errors with libunwind or libtool, you can always install them manually
 
 Libtool https://www.gnu.org/software/libtool/
 ```bash
