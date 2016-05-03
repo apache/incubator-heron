@@ -56,8 +56,8 @@ public class AuroraSchedulerTest {
 
   @AfterClass
   public static void afterClass() throws Exception {
+    scheduler.close();
   }
-
 
   @Test
   public void testOnSchedule() throws Exception {
