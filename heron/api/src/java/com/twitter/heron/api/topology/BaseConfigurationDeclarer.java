@@ -19,7 +19,7 @@ import java.util.Map;
 
 import com.twitter.heron.api.Config;
 
-public abstract class BaseConfigurationDeclarer<T extends ComponentConfigurationDeclarer>
+public abstract class BaseConfigurationDeclarer<T extends ComponentConfigurationDeclarer<?>>
     implements ComponentConfigurationDeclarer<T> {
   @Override
   public T addConfiguration(String config, Object value) {
