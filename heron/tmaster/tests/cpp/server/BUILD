@@ -22,6 +22,7 @@ cc_test(
         "-Iheron/statemgrs/src/cpp",
         "-Iheron/stmgr/src/cpp",
         "-Iheron/tmaster/src/cpp",
+        "-Iheron/tmaster/tests/cpp",
         "-I$(GENDIR)/heron",
         "-I$(GENDIR)/heron/common/src/cpp",
     ],

@@ -1,33 +1,47 @@
-#include "gtest/gtest.h"
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
+#include <algorithm>
+#include <map>
+#include "gtest/gtest.h"
 #include "proto/messages.h"
 #include "basics/basics.h"
 #include "errors/errors.h"
 #include "threads/threads.h"
 #include "network/network.h"
-
 #include "basics/modinit.h"
 #include "errors/modinit.h"
 #include "threads/modinit.h"
 #include "network/modinit.h"
-
 #include "config/heron-internals-config-reader.h"
-
 #include "util/tuple-cache.h"
 
-sp_string heron_internals_config_filename = "../../../../../../../../heron/config/heron_internals.yaml";
+sp_string heron_internals_config_filename =
+    "../../../../../../../../heron/config/heron_internals.yaml";
 
-class Drainer
-{
+class Drainer {
  public:
   Drainer(const std::map<sp_int32, sp_int32>& _num_data_tuples_expected,
           const std::map<sp_int32, sp_int32>& _num_ack_tuples_expected,
           const std::map<sp_int32, sp_int32>& _num_fail_tuples_expected)
-   : num_data_tuples_expected_(_num_data_tuples_expected),
-     num_ack_tuples_expected_(_num_ack_tuples_expected),
-     num_fail_tuples_expected_(_num_fail_tuples_expected) { }
+      : num_data_tuples_expected_(_num_data_tuples_expected),
+        num_ack_tuples_expected_(_num_ack_tuples_expected),
+        num_fail_tuples_expected_(_num_fail_tuples_expected) {}
 
-  ~Drainer() { }
+  ~Drainer() {}
 
   void Drain(sp_int32 _task_id, heron::proto::system::HeronTupleSet* _t) {
     if (_t->has_data()) {
@@ -42,9 +56,9 @@ class Drainer
   }
 
   bool Verify() {
-    return verify(num_data_tuples_expected_, num_data_tuples_actual_)
-           && verify(num_ack_tuples_expected_, num_ack_tuples_actual_)
-           && verify(num_fail_tuples_expected_, num_fail_tuples_actual_);
+    return verify(num_data_tuples_expected_, num_data_tuples_actual_) &&
+           verify(num_ack_tuples_expected_, num_ack_tuples_actual_) &&
+           verify(num_fail_tuples_expected_, num_fail_tuples_actual_);
   }
 
  private:
@@ -60,8 +74,8 @@ class Drainer
   bool verify(const std::map<sp_int32, sp_int32>& _first,
               const std::map<sp_int32, sp_int32>& _second) {
     if (_first.size() != _second.size()) return false;
-    for (std::map<sp_int32, sp_int32>::const_iterator iter = _first.begin();
-         iter != _first.end(); ++iter) {
+    for (std::map<sp_int32, sp_int32>::const_iterator iter = _first.begin(); iter != _first.end();
+         ++iter) {
       if (_second.find(iter->first) == _second.end()) return false;
       if (_second.find(iter->first)->second != iter->second) return false;
     }
@@ -76,14 +90,10 @@ class Drainer
   std::map<sp_int32, sp_int32> num_fail_tuples_actual_;
 };
 
-void DoneHandler(EventLoopImpl *_ss, EventLoopImpl::Status)
-{
-  _ss->loopExit();
-}
+void DoneHandler(EventLoopImpl* _ss, EventLoopImpl::Status) { _ss->loopExit(); }
 
 // Test simple data tuples drain
-TEST(TupleCache, test_simple_data_drain)
-{
+TEST(TupleCache, test_simple_data_drain) {
   sp_int32 data_tuples_count = 23354;
   EventLoopImpl ss;
   sp_uint32 drain_threshold = 1024 * 1024;
@@ -105,7 +115,7 @@ TEST(TupleCache, test_simple_data_drain)
   }
 
   // 300 milliseconds second
-  auto cb = [&ss] (EventLoopImpl::Status status) { DoneHandler(&ss, status); };
+  auto cb = [&ss](EventLoopImpl::Status status) { DoneHandler(&ss, status); };
   ss.registerTimer(std::move(cb), false, 300000);
 
   ss.loop();
@@ -116,8 +126,7 @@ TEST(TupleCache, test_simple_data_drain)
 }
 
 // Test data/ack/fail mix
-TEST(TupleCache, test_data_ack_fail_mix)
-{
+TEST(TupleCache, test_data_ack_fail_mix) {
   sp_int32 data_tuples_count = 23354;
   sp_int32 ack_tuples_count = 3543;
   sp_int32 fail_tuples_count = 6564;
@@ -156,7 +165,7 @@ TEST(TupleCache, test_data_ack_fail_mix)
   }
 
   // 300 milliseconds second
-  auto cb = [&ss] (EventLoopImpl::Status status) { DoneHandler(&ss, status); };
+  auto cb = [&ss](EventLoopImpl::Status status) { DoneHandler(&ss, status); };
   ss.registerTimer(std::move(cb), false, 300000);
 
   ss.loop();
@@ -167,11 +176,10 @@ TEST(TupleCache, test_data_ack_fail_mix)
 }
 
 // Test different stream mix
-TEST(TupleCache, test_different_stream_mix)
-{
-  sp_int32 data_tuples_count = 23354; // make sure this is even
-  sp_int32 ack_tuples_count = 3544; // make sure this is even
-  sp_int32 fail_tuples_count = 6564; // make sure this is even
+TEST(TupleCache, test_different_stream_mix) {
+  sp_int32 data_tuples_count = 23354;  // make sure this is even
+  sp_int32 ack_tuples_count = 3544;    // make sure this is even
+  sp_int32 fail_tuples_count = 6564;   // make sure this is even
   EventLoopImpl ss;
   sp_uint32 drain_threshold = 1024 * 1024;
   heron::stmgr::TupleCache* g = new heron::stmgr::TupleCache(&ss, drain_threshold);
@@ -225,7 +233,7 @@ TEST(TupleCache, test_different_stream_mix)
   }
 
   // 400 milliseconds second
-  auto cb = [&ss] (EventLoopImpl::Status status) { DoneHandler(&ss, status); };
+  auto cb = [&ss](EventLoopImpl::Status status) { DoneHandler(&ss, status); };
   ss.registerTimer(std::move(cb), false, 300000);
 
   ss.loop();
@@ -235,9 +243,7 @@ TEST(TupleCache, test_different_stream_mix)
   delete g;
 }
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char** argv) {
   heron::common::Initialize(argv[0]);
   testing::InitGoogleTest(&argc, argv);
   if (argc > 1) {
