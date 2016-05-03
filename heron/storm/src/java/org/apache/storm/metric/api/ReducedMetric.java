@@ -14,16 +14,16 @@
 
 package org.apache.storm.metric.api;
 
-public class ReducedMetric implements IMetric {
-  private final IReducer reducer;
-  private Object accumulator;
+public class ReducedMetric<T> implements IMetric {
+  private final IReducer<T> reducer;
+  private T accumulator;
 
-  public ReducedMetric(IReducer reducer) {
+  public ReducedMetric(IReducer<T> reducer) {
     this.reducer = reducer;
     this.accumulator = this.reducer.init();
   }
 
-  public void update(Object value) {
+  public void update(T value) {
     accumulator = reducer.reduce(accumulator, value);
   }
 

@@ -14,11 +14,11 @@
 
 package com.twitter.heron.api.metric;
 
-public class ReducedMetric implements IMetric {
-  private final IReducer reducer;
-  private Object accumulator;
+public class ReducedMetric<T> implements IMetric {
+  private final IReducer<T> reducer;
+  private T accumulator;
 
-  public ReducedMetric(IReducer aReducer) {
+  public ReducedMetric(IReducer<T> aReducer) {
     reducer = aReducer;
     accumulator = reducer.init();
   }
