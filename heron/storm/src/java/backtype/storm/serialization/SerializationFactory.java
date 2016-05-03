@@ -79,10 +79,10 @@ public final class SerializationFactory {
     for (String klassName : registrations.keySet()) {
       String serializerClassName = registrations.get(klassName);
       try {
-        Class klass = Class.forName(klassName);
-        Class serializerClass = null;
+        Class<?> klass = Class.forName(klassName);
+        Class<? extends Serializer<?>> serializerClass = null;
         if (serializerClassName != null) {
-          serializerClass = Class.forName(serializerClassName);
+          serializerClass = (Class<? extends Serializer<?>>) Class.forName(serializerClassName);
         }
         LOG.info("Doing kryo.register for class " + klass);
         if (serializerClass == null) {
@@ -106,7 +106,7 @@ public final class SerializationFactory {
     if (conf.get(Config.TOPOLOGY_KRYO_DECORATORS) != null) {
       for (String klassName : (List<String>) conf.get(Config.TOPOLOGY_KRYO_DECORATORS)) {
         try {
-          Class klass = Class.forName(klassName);
+          Class<?> klass = Class.forName(klassName);
           IKryoDecorator decorator = (IKryoDecorator) klass.newInstance();
           decorator.decorate(k);
         } catch (ClassNotFoundException e) {
@@ -129,9 +129,9 @@ public final class SerializationFactory {
     return k;
   }
 
-  private static Serializer resolveSerializerInstance(
-      Kryo k, Class superClass, Class<? extends Serializer> serializerClass) {
-    Constructor<? extends Serializer> ctor;
+  private static Serializer<?> resolveSerializerInstance(
+      Kryo k, Class<?> superClass, Class<? extends Serializer<?>> serializerClass) {
+    Constructor<? extends Serializer<?>> ctor;
 
     try {
       ctor = serializerClass.getConstructor(Kryo.class, Class.class);

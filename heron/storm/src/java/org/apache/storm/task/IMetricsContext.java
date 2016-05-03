@@ -26,5 +26,7 @@ public interface IMetricsContext {
 
   <T> ReducedMetric<T> registerMetric(String name, IReducer<T> reducer, int timeBucketSizeInSecs);
 
-  <T> CombinedMetric<T> registerMetric(String name, ICombiner<T> combiner, int timeBucketSizeInSecs);
+  <T> CombinedMetric<T> registerMetric(String name,
+                                       ICombiner<T> combiner,
+                                       int timeBucketSizeInSecs);
 }

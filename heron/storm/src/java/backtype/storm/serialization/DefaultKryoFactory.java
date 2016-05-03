@@ -53,6 +53,7 @@ public class DefaultKryoFactory implements IKryoFactory {
     }
 
     @Override
+    @SuppressWarnings("rawtypes") // superclass doesn't use types
     public Serializer getDefaultSerializer(Class type) {
       if (override) {
         return new SerializableSerializer();

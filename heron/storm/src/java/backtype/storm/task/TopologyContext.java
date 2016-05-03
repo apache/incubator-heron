@@ -259,14 +259,18 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
   /*
    * Convenience method for registering ReducedMetric.
    */
-  public <T> ReducedMetric<T> registerMetric(String name, IReducer<T> reducer, int timeBucketSizeInSecs) {
+  public <T> ReducedMetric<T> registerMetric(String name,
+                                             IReducer<T> reducer,
+                                             int timeBucketSizeInSecs) {
     return registerMetric(name, new ReducedMetric<T>(reducer), timeBucketSizeInSecs);
   }
 
   /*
    * Convenience method for registering CombinedMetric.
    */
-  public <T> CombinedMetric<T> registerMetric(String name, ICombiner<T> combiner, int timeBucketSizeInSecs) {
+  public <T> CombinedMetric<T> registerMetric(String name,
+                                              ICombiner<T> combiner,
+                                              int timeBucketSizeInSecs) {
     return registerMetric(name, new CombinedMetric<T>(combiner), timeBucketSizeInSecs);
   }
 }
