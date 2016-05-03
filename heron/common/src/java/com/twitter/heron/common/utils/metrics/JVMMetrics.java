@@ -28,6 +28,7 @@ import java.util.List;
 
 import com.twitter.heron.api.metric.AssignableMetric;
 import com.twitter.heron.api.metric.MeanReducer;
+import com.twitter.heron.api.metric.MeanReducerState;
 import com.twitter.heron.api.metric.MultiAssignableMetric;
 import com.twitter.heron.api.metric.ReducedMetric;
 import com.twitter.heron.common.basics.Constants;
@@ -129,18 +130,18 @@ public class JVMMetrics {
    * the JVM process and the whole system. If the Java Virtual Machine recent CPU usage is
    * not available, the method returns a negative value.
    */
-  private ReducedMetric processCPULoad;
+  private ReducedMetric<MeanReducerState> processCPULoad;
 
   // Metrics that measure memory, memory's heap and memory's non-heap
-  private ReducedMetric jvmMemoryFreeMB;
-  private ReducedMetric jvmMemoryUsedMB;
-  private ReducedMetric jvmMemoryTotalMB;
-  private ReducedMetric jvmMemoryHeapUsedMB;
-  private ReducedMetric jvmMemoryHeapCommittedMB;
-  private ReducedMetric jvmMemoryHeapMaxMB;
-  private ReducedMetric jvmMemoryNonHeapUsedMB;
-  private ReducedMetric jvmMemoryNonHeapCommittedMB;
-  private ReducedMetric jvmMemoryNonHeapMaxMB;
+  private ReducedMetric<MeanReducerState> jvmMemoryFreeMB;
+  private ReducedMetric<MeanReducerState> jvmMemoryUsedMB;
+  private ReducedMetric<MeanReducerState> jvmMemoryTotalMB;
+  private ReducedMetric<MeanReducerState> jvmMemoryHeapUsedMB;
+  private ReducedMetric<MeanReducerState> jvmMemoryHeapCommittedMB;
+  private ReducedMetric<MeanReducerState> jvmMemoryHeapMaxMB;
+  private ReducedMetric<MeanReducerState> jvmMemoryNonHeapUsedMB;
+  private ReducedMetric<MeanReducerState> jvmMemoryNonHeapCommittedMB;
+  private ReducedMetric<MeanReducerState> jvmMemoryNonHeapMaxMB;
 
   // Gather metrics for different memory pools in heap, for instance:
   // Par Eden Space, Par Survivor Space, CMS Old Gen, CMS Perm Gen
@@ -178,20 +179,20 @@ public class JVMMetrics {
     threadsUserCPUTimeNs = new MultiAssignableMetric();
     otherThreadsUserCPUTimeNs = new AssignableMetric(0);
 
-    processCPULoad = new ReducedMetric(new MeanReducer());
+    processCPULoad = new ReducedMetric<>(new MeanReducer());
 
     fdCount = new AssignableMetric(0);
     fdLimit = new AssignableMetric(0);
 
-    jvmMemoryFreeMB = new ReducedMetric(new MeanReducer());
-    jvmMemoryUsedMB = new ReducedMetric(new MeanReducer());
-    jvmMemoryTotalMB = new ReducedMetric(new MeanReducer());
-    jvmMemoryHeapUsedMB = new ReducedMetric(new MeanReducer());
-    jvmMemoryHeapCommittedMB = new ReducedMetric(new MeanReducer());
-    jvmMemoryHeapMaxMB = new ReducedMetric(new MeanReducer());
-    jvmMemoryNonHeapUsedMB = new ReducedMetric(new MeanReducer());
-    jvmMemoryNonHeapCommittedMB = new ReducedMetric(new MeanReducer());
-    jvmMemoryNonHeapMaxMB = new ReducedMetric(new MeanReducer());
+    jvmMemoryFreeMB = new ReducedMetric<>(new MeanReducer());
+    jvmMemoryUsedMB = new ReducedMetric<>(new MeanReducer());
+    jvmMemoryTotalMB = new ReducedMetric<>(new MeanReducer());
+    jvmMemoryHeapUsedMB = new ReducedMetric<>(new MeanReducer());
+    jvmMemoryHeapCommittedMB = new ReducedMetric<>(new MeanReducer());
+    jvmMemoryHeapMaxMB = new ReducedMetric<>(new MeanReducer());
+    jvmMemoryNonHeapUsedMB = new ReducedMetric<>(new MeanReducer());
+    jvmMemoryNonHeapCommittedMB = new ReducedMetric<>(new MeanReducer());
+    jvmMemoryNonHeapMaxMB = new ReducedMetric<>(new MeanReducer());
 
     jvmPeakUsagePerMemoryPool = new MultiAssignableMetric();
     jvmCollectionUsagePerMemoryPool = new MultiAssignableMetric();

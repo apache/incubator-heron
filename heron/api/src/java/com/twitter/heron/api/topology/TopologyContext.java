@@ -106,10 +106,10 @@ public interface TopologyContext extends GeneralTopologyContext, IMetricsRegiste
   /*
    * Convenience method for registering ReducedMetric.
    */
-  ReducedMetric registerMetric(String name, IReducer reducer, int timeBucketSizeInSecs);
+  <T> ReducedMetric<T> registerMetric(String name, IReducer<T> reducer, int timeBucketSizeInSecs);
 
   /*
    * Convenience method for registering CombinedMetric.
    */
-  CombinedMetric registerMetric(String name, ICombiner combiner, int timeBucketSizeInSecs);
+  <T> CombinedMetric<T> registerMetric(String name, ICombiner<T> combiner, int timeBucketSizeInSecs);
 }
