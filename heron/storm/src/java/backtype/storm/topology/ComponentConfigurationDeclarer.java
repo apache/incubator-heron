@@ -16,7 +16,7 @@ package backtype.storm.topology;
 
 import java.util.Map;
 
-public interface ComponentConfigurationDeclarer<T extends ComponentConfigurationDeclarer> {
+public interface ComponentConfigurationDeclarer<T extends ComponentConfigurationDeclarer<?>> {
   T addConfigurations(Map<String, Object> conf);
 
   T addConfiguration(String config, Object value);
