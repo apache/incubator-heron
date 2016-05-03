@@ -54,14 +54,14 @@ public class LocalSchedulerTest {
 
   @Test
   public void testClose() throws Exception {
-    LocalScheduler scheduler = new LocalScheduler();
+    LocalScheduler localScheduler = new LocalScheduler();
     // The MonitorService should started
-    ExecutorService monitorService = scheduler.getMonitorService();
+    ExecutorService monitorService = localScheduler.getMonitorService();
     Assert.assertFalse(monitorService.isShutdown());
-    Assert.assertEquals(0, scheduler.getProcessToContainer().size());
+    Assert.assertEquals(0, localScheduler.getProcessToContainer().size());
 
     // The MonitorService should shutdown
-    scheduler.close();
+    localScheduler.close();
     Assert.assertTrue(monitorService.isShutdown());
   }
 
