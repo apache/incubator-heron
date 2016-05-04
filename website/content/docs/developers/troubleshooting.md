@@ -25,7 +25,7 @@ minute) of each spout should match the data rate for the corresponding data
 stream. If spouts are not consuming and emitting the data at the same rate as it
 is produced, we call this scenario `spout lag`.
 
-Some spouts, like `Kafka Spout (TODO: Add link)` have a lag metric that can be
+Some spouts, like `Kafka Spout` have a lag metric that can be
 directly used to measure health. It is recommended to have some kind of lag
 metric if you have a custom spout, so that its easier to check, as well as can
 be used to set up monitoring alerts.
@@ -55,9 +55,8 @@ this can result in data loss, without adding spout lag.
 #### 1. Look at the instance under backpressure
 
 The metric directly shows which instances have been under backpressure. You can
-jump directly to the logs (TODO: insert UI image for accessing logs) of that
-instance to see what is going wrong with the instance. Some of the known causes
-of backpressure are being discussed below.
+jump directly to the logs of that instance to see what is going wrong with the
+instance. Some of the known causes of backpressure are being discussed below.
 
 #### 2. Look at items pending to be acked
 
