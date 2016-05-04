@@ -15,8 +15,8 @@ not limited to the following.
 5. Number of Containers
 
 Note that tuning a topology is hard and can take multiple iterations. Before
-proceeding, please make sure you understand concepts (TODO: add link) to
-understand the terminology, as well as the reasoning behind taking these steps.
+proceeding, please make sure you understand concepts to understand the
+terminology, as well as the reasoning behind taking these steps.
 
 ### Steps to Tune a Topology
 
