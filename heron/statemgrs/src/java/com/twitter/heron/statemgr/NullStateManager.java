@@ -26,9 +26,8 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 
-@SuppressWarnings("unchecked")
 public class NullStateManager implements IStateManager {
-  public SettableFuture nullFuture = SettableFuture.create();
+  public SettableFuture<Boolean> nullFuture = SettableFuture.create();
 
   @Override
   public void initialize(Config config) {
@@ -109,34 +108,34 @@ public class NullStateManager implements IStateManager {
   public ListenableFuture<TopologyMaster.TMasterLocation> getTMasterLocation(
       WatchCallback watcher,
       String topologyName) {
-    return nullFuture;
+    return SettableFuture.create();
   }
 
   @Override
   public ListenableFuture<Scheduler.SchedulerLocation> getSchedulerLocation(
       WatchCallback watcher,
       String topologyName) {
-    return nullFuture;
+    return SettableFuture.create();
   }
 
   @Override
   public ListenableFuture<TopologyAPI.Topology> getTopology(
       WatchCallback watcher,
       String topologyName) {
-    return nullFuture;
+    return SettableFuture.create();
   }
 
   @Override
   public ListenableFuture<ExecutionEnvironment.ExecutionState> getExecutionState(
       WatchCallback watcher,
       String topologyName) {
-    return nullFuture;
+    return SettableFuture.create();
   }
 
   @Override
   public ListenableFuture<PhysicalPlans.PhysicalPlan> getPhysicalPlan(
       WatchCallback watcher,
       String topologyName) {
-    return nullFuture;
+    return SettableFuture.create();
   }
 }
