@@ -15,17 +15,19 @@ public final class LocalReadWriteTopology {
   private static final String LOCAL_AGGREGATOR_BOLT_CLASS = "com.twitter.heron.integration_test.core.LocalAggregatorBolt";
 
   public static void main(String[] args) throws Exception {
-    if (args.length < 1 || args.length > 2) {
-      throw new RuntimeException("Expects 1 or 2 arguments, topology name and max emit count (optional)");
+    if (args.length < 3 || args.length > 4) {
+      throw new RuntimeException("Expects 3 or 4 arguments, topology name, inputFile, outputFile and max emit count (optional)");
     }
     String topologyName = args[0];
-    TestTopologyBuilder builder = new TestTopologyBuilder("testing2.txt");
+    String inputFile = args[1];
+    String outputFile= args[2];
+    TestTopologyBuilder builder = new TestTopologyBuilder(outputFile);
     builder.setTerminalBoltClass(LOCAL_AGGREGATOR_BOLT_CLASS);
-    if (args.length == 1) {
-      builder.setSpout("paused-local-spout", new PausedLocalFileSpout("testing.txt"), 1);
+    if (args.length == 3) {
+      builder.setSpout("paused-local-spout", new PausedLocalFileSpout(inputFile), 1);
     } else {
-      int maxEmits = Integer.parseInt(args[1]);
-      builder.setSpout("paused-local-spout", new PausedLocalFileSpout("testing.txt"), 1, maxEmits);
+      int maxEmits = Integer.parseInt(args[3]);
+      builder.setSpout("paused-local-spout", new PausedLocalFileSpout(inputFile), 1, maxEmits);
     }
 
     builder.setBolt("identity-bolt", new IdentityBolt(new Fields("line")), 1)
