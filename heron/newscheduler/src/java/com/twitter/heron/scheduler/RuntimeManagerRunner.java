@@ -155,7 +155,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
   protected boolean cleanState(
       String topologyName,
       SchedulerStateManagerAdaptor statemgr) {
-    LOG.fine("Cleaning up topology states");
+    LOG.fine("Cleaning up topology state");
 
     Boolean result;
 
