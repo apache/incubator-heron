@@ -26,9 +26,9 @@ public class FieldsGrouping {
     TestTopologyBuilder builder = new TestTopologyBuilder(topologyName, httpServerUrl.toString());
 
     builder.setSpout("ab-spout", new ABSpout(), 1, 400);
-    builder.setBolt("count-bolt", new WordCountBolt(), 2)
+    builder.setBolt("count-bolt", new WordCountBolt<>(), 2)
         .fieldsGrouping("ab-spout", new Fields("word"));
-    builder.setBolt("sum-bolt", new CountAggregatorBolt(), 1)
+    builder.setBolt("sum-bolt", new CountAggregatorBolt<>(), 1)
         .noneGrouping("count-bolt");
 
     // Conf

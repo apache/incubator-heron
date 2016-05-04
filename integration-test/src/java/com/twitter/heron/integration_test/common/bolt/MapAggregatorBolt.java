@@ -17,12 +17,15 @@ import com.twitter.heron.integration_test.core.BaseBatchBolt;
  * and emit this buffer map when it receives all the maps (in finishBatch()).
  */
 
-public class MapAggregatorBolt extends BaseBatchBolt {
+public class MapAggregatorBolt<T> extends BaseBatchBolt<T> {
+  private static final long serialVersionUID = -3500154155463300293L;
   OutputCollector collector;
-  HashMap<String, Integer> buffer = new HashMap<String, Integer>();
+  HashMap<String, Integer> buffer = new HashMap<>();
 
   @Override
-  public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
+  public void prepare(Map<String, Object> map,
+                      TopologyContext topologyContext,
+                      OutputCollector outputCollector) {
     collector = outputCollector;
   }
 

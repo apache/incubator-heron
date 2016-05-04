@@ -24,7 +24,7 @@ public class GlobalGrouping {
     TestTopologyBuilder builder = new TestTopologyBuilder(topologyName, httpServerUrl.toString());
 
     builder.setSpout("ab-spout", new ABSpout(), 1);
-    builder.setBolt("count-bolt", new WordCountBolt(), 3)
+    builder.setBolt("count-bolt", new WordCountBolt<>(), 3)
         .globalGrouping("ab-spout");
 
     // Conf

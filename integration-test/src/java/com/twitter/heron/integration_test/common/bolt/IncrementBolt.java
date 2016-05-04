@@ -15,12 +15,15 @@ import com.twitter.heron.integration_test.core.BaseBatchBolt;
  * A bolt will increase the field "received" when executes once.
  * And it finally will emit the number of received tuples
  */
-public class IncrementBolt extends BaseBatchBolt {
+public class IncrementBolt<T> extends BaseBatchBolt<T> {
+  private static final long serialVersionUID = 1094032885033452863L;
   OutputCollector collector;
   int received = 0;
 
   @Override
-  public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
+  public void prepare(Map<String, Object> map,
+                      TopologyContext topologyContext,
+                      OutputCollector outputCollector) {
     collector = outputCollector;
   }
 
