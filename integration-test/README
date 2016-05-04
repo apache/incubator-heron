@@ -20,8 +20,9 @@ The main components are,
    - a simple http server (launched as an aurora job) to host the integration test results
      Test topologies `post` the result, and test runner `get`s the result.
 
- * Test launcher (scripts/test_launcher.sh)
-   - this scripts is a helper to launch and kill the above components.
+ * Local test runner (src/python/local_test_runner)
+   - Local test runner launches topology locally, and polls for the actual results (from local file
+     system).
 
 To run the local integration tests on your mac, at heron repo's top dir:
 
