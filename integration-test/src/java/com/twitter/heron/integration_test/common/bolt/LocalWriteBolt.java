@@ -23,6 +23,7 @@ import com.twitter.heron.api.tuple.Tuple;
 
 
 public class LocalWriteBolt extends BaseBasicBolt {
+  private static final long serialVersionUID = 2320175828567970635L;
   private String path;
   private BufferedWriter bw = null;
 
@@ -31,7 +32,7 @@ public class LocalWriteBolt extends BaseBasicBolt {
   }
 
   @Override
-  public void prepare(Map map, TopologyContext topologyContext) {
+  public void prepare(Map<String, Object> map, TopologyContext topologyContext) {
     try {
       File outputFile = new File(path);
       if (!outputFile.exists()) {

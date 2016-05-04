@@ -23,6 +23,7 @@ import com.twitter.heron.api.tuple.Values;
  * to read.
  */
 public class PausedLocalFileSpout extends BaseRichSpout {
+  private static final long serialVersionUID = 7233454257997083024L;
   private BufferedReader br = null;
   private SpoutOutputCollector collector;
   private String[] paths;
@@ -42,7 +43,9 @@ public class PausedLocalFileSpout extends BaseRichSpout {
 
   // Here, the spout will block until the file at the path exists
   @Override
-  public void open(Map stormConf, TopologyContext context, SpoutOutputCollector collector) {
+  public void open(Map<String, Object> stormConf,
+                   TopologyContext context,
+                   SpoutOutputCollector collector) {
     int numTasks = context.getComponentTasks(context.getThisComponentId()).size();
     // Pre-condition: the number of tasks is equal to the number of files to read
     if (paths.length != numTasks) {

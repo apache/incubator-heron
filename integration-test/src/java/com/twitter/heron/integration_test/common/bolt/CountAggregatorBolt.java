@@ -15,11 +15,14 @@ import com.twitter.heron.integration_test.core.BaseBatchBolt;
  */
 
 public class CountAggregatorBolt extends BaseBatchBolt {
+  private static final long serialVersionUID = 590728128451229945L;
   OutputCollector collector;
   int sum = 0;
 
   @Override
-  public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
+  public void prepare(Map<String, Object> map,
+                      TopologyContext topologyContext,
+                      OutputCollector outputCollector) {
     collector = outputCollector;
   }
 

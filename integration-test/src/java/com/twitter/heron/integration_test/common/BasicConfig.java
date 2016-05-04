@@ -6,6 +6,7 @@ import com.twitter.heron.api.Config;
  * A basic configuration for heron topology
  */
 public class BasicConfig extends Config {
+  private static final long serialVersionUID = -3583884076092048052L;
   final static int DEFAULT_NUM_STMGRS = 1;
 
   public BasicConfig() {

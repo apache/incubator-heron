@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
@@ -26,6 +27,7 @@ import com.twitter.heron.api.tuple.Tuple;
  * and posts the json into the given http server.
  */
 public class AggregatorBolt extends BaseBatchBolt implements ITerminalBolt {
+  private static final long serialVersionUID = -2994625720418843748L;
   private static final Logger LOG = Logger.getLogger(AggregatorBolt.class.getName());
   private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -46,7 +48,9 @@ public class AggregatorBolt extends BaseBatchBolt implements ITerminalBolt {
   }
 
   @Override
-  public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
+  public void prepare(Map<String, Object> map,
+                      TopologyContext topologyContext,
+                      OutputCollector outputCollector) {
   }
 
   @Override
@@ -71,11 +75,7 @@ public class AggregatorBolt extends BaseBatchBolt implements ITerminalBolt {
     HttpClient client = HttpClientBuilder.create().build();
     HttpPost post = new HttpPost(httpPostUrl);
 
-    StringEntity requestEntity = new StringEntity(
-        resultJson,
-        "application/json",
-        "UTF-8"
-    );
+    StringEntity requestEntity = new StringEntity(resultJson, ContentType.APPLICATION_JSON);
 
     post.setEntity(requestEntity);
     HttpResponse response = client.execute(post);

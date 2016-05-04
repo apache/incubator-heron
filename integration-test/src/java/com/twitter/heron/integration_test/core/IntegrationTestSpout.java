@@ -13,6 +13,7 @@ import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Values;
 
 public class IntegrationTestSpout implements IRichSpout {
+  private static final long serialVersionUID = 6068686695658877942L;
   // The times of execution
   private static final int DEFAULT_EXECUTION_COUNT = 10;
   private static final Logger LOG = Logger.getLogger(IntegrationTestSpout.class.getName());
@@ -62,7 +63,9 @@ public class IntegrationTestSpout implements IRichSpout {
   }
 
   @Override
-  public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector outputCollector) {
+  public void open(Map<String, Object> map,
+                   TopologyContext topologyContext,
+                   SpoutOutputCollector outputCollector) {
     // Here the spoutOutputCollector should be a default one
     // to emit tuples without adding MessageId
     this.spoutOutputCollector = outputCollector;

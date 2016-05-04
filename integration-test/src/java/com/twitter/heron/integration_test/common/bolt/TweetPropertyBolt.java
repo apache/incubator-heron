@@ -27,6 +27,7 @@ import com.twitter.heron.api.tuple.Values;
  */
 
 public class TweetPropertyBolt extends BaseBasicBolt {
+  private static final long serialVersionUID = -3049021294446207050L;
   private static final Logger LOG = Logger.getLogger(TweetPropertyBolt.class.getName());
   private static final ObjectMapper mapper = new ObjectMapper();
 
