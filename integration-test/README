@@ -23,15 +23,10 @@ The main components are,
  * Test launcher (scripts/test_launcher.sh)
    - this scripts is a helper to launch and kill the above components.
 
-To run the tests on jenkins,
-  Go to "https://ci.twitter.biz/job/heron-staging-integration_tests/"
-  Select 'Build With Parameters'
-  Enter the branch your want to test against, and click 'Build'
+To run the local integration tests on your mac, at heron repo's top dir:
 
-Jenkins job will make an E release with pkgrole='jenkins', and pkgname='heron-integration-test',
-and then launch the tests with this release.
+  bazel build --config=dawrin integration-test/src/java:local-integration-tests_deploy.jar
 
-To run the tests locally (although not that useful),
-  make
-  cd build/integration-test
-  ./scripts/test_launcher.sh local
+  bazel run --config=darwin -- scripts/packages:heron-client-install.sh --user
+
+  python integration-test/src/python/local_test_runner/main.py
