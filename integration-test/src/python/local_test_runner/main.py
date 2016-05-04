@@ -1,4 +1,5 @@
 import argparse
+import getpass
 import json
 import logging
 import os
@@ -50,7 +51,9 @@ def runTest(test, topologyName, params):
         params['cluster'],
         params['testJarPath'], 
         params['topologyClassPath'],
-        params['topologyName']
+        params['topologyName'],
+        params['readFile'],
+        params['outputFile']
     )
   except Exception as e:
     logging.error("Failed to submit %s topology: %s" %(topologyName, str(e)))
@@ -61,8 +64,6 @@ def runTest(test, topologyName, params):
   processList = getProcesses()
   while not processExists(processList, './heron-core/bin/heron-stmgr'):
     processList = getProcesses()
-
-  outputFile = params['outputFile']
 
   # insert lines into temp file and then move to read file
   try:
@@ -123,7 +124,7 @@ def runTest(test, topologyName, params):
     try:
       with open(params['readFile'], 'r') as f:
         expectedResult = f.read()
-      with open(outputFile, 'r') as g:
+      with open(params['outputFile'], 'r') as g:
         actualResult = g.read()
     except Exception as e:
       logging.error("Failed to get expected and actual results")
@@ -164,7 +165,7 @@ def runTest(test, topologyName, params):
     return False
 
 # Submit topology using heron-cli
-def submitTopology(heronCliPath, testCluster, testJarPath, topologyClassPath, topologyName):
+def submitTopology(heronCliPath, testCluster, testJarPath, topologyClassPath, topologyName, inputFile, outputFile):
   logging.info("Submitting topology")
   # unicode string messes up subprocess.call quotations, must change into string type
   splitcmd = [
@@ -176,6 +177,8 @@ def submitTopology(heronCliPath, testCluster, testJarPath, topologyClassPath, to
       '%s' % (testJarPath),
       '%s' % (topologyClassPath),
       '%s' % (topologyName),
+      '%s' % (inputFile),
+      '%s' % (outputFile),
       '%d' % (len(TEST_INPUT))
   ]
   logging.info("Submitting topology: ")
@@ -303,7 +306,8 @@ def main():
       homeDirectory, 
       ".herondata", 
       "topologies", 
-      conf['cluster'], 
+      conf['cluster'],
+      getpass.getuser(),
       args['topologyName']
   )
   args['cliPath'] = os.path.expanduser(conf['heronCliPath'])
