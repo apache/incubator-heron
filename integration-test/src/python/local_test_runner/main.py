@@ -32,13 +32,17 @@ RETRY_INTERVAL = 60
 TMASTER_SHARD = 0
 NON_TMASTER_SHARD = 1
 # Topology process name definitions
-HERON_STMGR = 'stmgr'
-HERON_METRICSMGR = 'metricsmgr'
-HERON_TMASTER = 'heron-tmaster'
-HERON_EXECUTOR = 'heron-executor'
+STMGR = 'stmgr'
+HERON_BIN = "bin"
 HERON_BOLT = 'local-write-bolt_2'
+HERON_CORE = "heron-core"
+HERON_EXECUTOR = 'heron-executor'
+HERON_METRICSMGR = 'metricsmgr'
+HERON_SANDBOX_HOME = "."
 HERON_SPOUT = 'paused-local-spout_1'
-
+HERON_STMGR = "heron-stmgr"
+HERON_STMGR_CMD = os.path.join(HERON_SANDBOX_HOME, HERON_CORE, HERON_BIN, HERON_STMGR)
+HERON_TMASTER = 'heron-tmaster'
 
 ProcessTuple = namedtuple('ProcessTuple','pid cmd')
 
@@ -62,7 +66,7 @@ def runTest(test, topologyName, params):
 
   # block until ./heron-stmgr exists
   processList = getProcesses()
-  while not processExists(processList, './heron-core/bin/heron-stmgr'):
+  while not processExists(processList, HERON_STMGR_CMD):
     processList = getProcesses()
 
   # insert lines into temp file and then move to read file
@@ -82,7 +86,7 @@ def runTest(test, topologyName, params):
     restartShard(params['cliPath'], params['cluster'], params['topologyName'], TMASTER_SHARD)
   elif test == 'KILL_STMGR':
     print "Executing kill stmgr"
-    stmgrPid = getPid('%s-%d' % (HERON_STMGR, NON_TMASTER_SHARD), params['workingDirectory'])
+    stmgrPid = getPid('%s-%d' % (STMGR, NON_TMASTER_SHARD), params['workingDirectory'])
     killProcess(stmgrPid)
   elif test == 'KILL_METRICSMGR':
     print "Executing kill metrics manager"
@@ -90,7 +94,7 @@ def runTest(test, topologyName, params):
     killProcess(metricsmgrPid)
   elif test == 'KILL_STMGR_METRICSMGR':
     print "Executing kill stmgr metrics manager"
-    stmgrPid = getPid('%s-%d' % (HERON_STMGR, NON_TMASTER_SHARD), params['workingDirectory'])
+    stmgrPid = getPid('%s-%d' % (STMGR, NON_TMASTER_SHARD), params['workingDirectory'])
     killProcess(stmgrPid)
 
     metricsmgrPid = getPid('%s-%d' % (HERON_METRICSMGR, NON_TMASTER_SHARD), params['workingDirectory'])
@@ -102,7 +106,7 @@ def runTest(test, topologyName, params):
 
   # block until ./heron-stmgr exists
   processList = getProcesses()
-  while not processExists(processList, './heron-core/bin/heron-stmgr'):
+  while not processExists(processList, HERON_STMGR_CMD):
     processList = getProcesses()
 
   # move to read file. This guarantees contents will be put into the file the spout is reading from atomically
