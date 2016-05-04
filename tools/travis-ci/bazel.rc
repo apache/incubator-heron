@@ -16,6 +16,7 @@ build --linkopt -lpthread
 build --linkopt -lunwind
 build --linkopt -lrt
 build --experimental_action_listener=tools/java:compile_java
+build --experimental_action_listener=tools/cpp:compile_cpp
 build --workspace_status_command scripts/release/status.sh
 
 # This is so we use a recent enough GCC when building.
