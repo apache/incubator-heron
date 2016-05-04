@@ -1,4 +1,5 @@
 import argparse
+import getpass
 import json
 import logging
 import os
@@ -26,18 +27,22 @@ TEST_CASES = [
 ]
 # Retry variables in case the output is different from the input
 RETRY_COUNT = 5
-RETRY_INTERVAL = 15
+RETRY_INTERVAL = 60
 # Topology shard definitions
 TMASTER_SHARD = 0
 NON_TMASTER_SHARD = 1
 # Topology process name definitions
-HERON_STMGR = 'stmgr'
-HERON_METRICSMGR = 'metricsmgr'
-HERON_TMASTER = 'heron-tmaster'
-HERON_EXECUTOR = 'heron-executor'
+STMGR = 'stmgr'
+HERON_BIN = "bin"
 HERON_BOLT = 'local-write-bolt_2'
+HERON_CORE = "heron-core"
+HERON_EXECUTOR = 'heron-executor'
+HERON_METRICSMGR = 'metricsmgr'
+HERON_SANDBOX_HOME = "."
 HERON_SPOUT = 'paused-local-spout_1'
-
+HERON_STMGR = "heron-stmgr"
+HERON_STMGR_CMD = os.path.join(HERON_SANDBOX_HOME, HERON_CORE, HERON_BIN, HERON_STMGR)
+HERON_TMASTER = 'heron-tmaster'
 
 ProcessTuple = namedtuple('ProcessTuple','pid cmd')
 
@@ -45,9 +50,15 @@ ProcessTuple = namedtuple('ProcessTuple','pid cmd')
 def runTest(test, topologyName, params):
   #submit topology
   try:
-    submitTopology(params.heronCliPath, params.heronWorkingDirectory, params.heronCorePath,
-        params.testJarPath, params.topologyPath,
-        topologyName, params.schedulerConfigPath, params.configLoaderClasspath)
+    submitTopology(
+        params['cliPath'], 
+        params['cluster'],
+        params['testJarPath'], 
+        params['topologyClassPath'],
+        params['topologyName'],
+        params['readFile'],
+        params['outputFile']
+    )
   except Exception as e:
     logging.error("Failed to submit %s topology: %s" %(topologyName, str(e)))
     return False
@@ -55,10 +66,9 @@ def runTest(test, topologyName, params):
 
   # block until ./heron-stmgr exists
   processList = getProcesses()
-  while not processExists(processList, './heron-stmgr'):
+  while not processExists(processList, HERON_STMGR_CMD):
     processList = getProcesses()
 
-  outputFile = params.outputFile
   # insert lines into temp file and then move to read file
   try:
     with open('temp.txt', 'w') as f:
@@ -68,36 +78,40 @@ def runTest(test, topologyName, params):
     logging.error("Failed to write to temp.txt file")
     return False
   # extra time to start up, write to .pid file, connect to tmaster, etc.
-  time.sleep(2)
+  time.sleep(30)
 
   # execute test case
   if test == 'KILL_TMASTER':
-    restartShard(params.heronCliPath, params.heronWorkingDirectory, topologyName,
-        params.schedulerConfigPath, params.configLoaderClasspath, TMASTER_SHARD)
+    print "Executing kill tmaster"
+    restartShard(params['cliPath'], params['cluster'], params['topologyName'], TMASTER_SHARD)
   elif test == 'KILL_STMGR':
-    stmgrPid = getPid('%s-%d' % (HERON_STMGR, NON_TMASTER_SHARD), params.heronWorkingDirectory)
+    print "Executing kill stmgr"
+    stmgrPid = getPid('%s-%d' % (STMGR, NON_TMASTER_SHARD), params['workingDirectory'])
     killProcess(stmgrPid)
   elif test == 'KILL_METRICSMGR':
-    metricsmgrPid = getPid('%s-%d' % (HERON_METRICSMGR, NON_TMASTER_SHARD), params.heronWorkingDirectory)
+    print "Executing kill metrics manager"
+    metricsmgrPid = getPid('%s-%d' % (HERON_METRICSMGR, NON_TMASTER_SHARD), params['workingDirectory'])
     killProcess(metricsmgrPid)
   elif test == 'KILL_STMGR_METRICSMGR':
-    stmgrPid = getPid('%s-%d' % (HERON_STMGR, NON_TMASTER_SHARD), params.heronWorkingDirectory)
+    print "Executing kill stmgr metrics manager"
+    stmgrPid = getPid('%s-%d' % (STMGR, NON_TMASTER_SHARD), params['workingDirectory'])
     killProcess(stmgrPid)
 
-    metricsmgrPid = getPid('%s-%d' % (HERON_METRICSMGR, NON_TMASTER_SHARD), params.heronWorkingDirectory)
+    metricsmgrPid = getPid('%s-%d' % (HERON_METRICSMGR, NON_TMASTER_SHARD), params['workingDirectory'])
     killProcess(metricsmgrPid)
   elif test == 'KILL_BOLT':
-    boltPid = getPid('container_%d_%s' % (NON_TMASTER_SHARD, HERON_BOLT), params.heronWorkingDirectory)
+    print "Executing kill bolt"
+    boltPid = getPid('container_%d_%s' % (NON_TMASTER_SHARD, HERON_BOLT), params['workingDirectory'])
     killProcess(boltPid)
 
   # block until ./heron-stmgr exists
   processList = getProcesses()
-  while not processExists(processList, './heron-stmgr'):
+  while not processExists(processList, HERON_STMGR_CMD):
     processList = getProcesses()
 
   # move to read file. This guarantees contents will be put into the file the spout is reading from atomically
   # which increases the determinism
-  os.rename('temp.txt', params.readFile)
+  os.rename('temp.txt', params['readFile'])
 
   # sleep for 15 seconds before attempting to get results
   time.sleep(15)
@@ -112,9 +126,9 @@ def runTest(test, topologyName, params):
     expectedResult = ""
     actualResult = ""
     try:
-      with open(params.readFile, 'r') as f:
+      with open(params['readFile'], 'r') as f:
         expectedResult = f.read()
-      with open(outputFile, 'r') as g:
+      with open(params['outputFile'], 'r') as g:
         actualResult = g.read()
     except Exception as e:
       logging.error("Failed to get expected and actual results")
@@ -128,15 +142,16 @@ def runTest(test, topologyName, params):
 
   # kill topology
   try:
-    killTopology(params.heronCliPath, params.heronWorkingDirectory, topologyName, params.schedulerConfigPath, params.configLoaderClasspath)
+    killTopology(params['cliPath'], params['cluster'], params['topologyName'])
   except Exception as e:
     logging.error("Failed to kill %s topology: %s" %(topologyName, str(e)))
     return False
   logging.info("Successfully killed %s topology" % (topologyName))
+
   # delete test files
   try:
-    os.remove(params.readFile)
-    os.remove(params.outputFile)
+    os.remove(params['readFile'])
+    os.remove(params['outputFile'])
   except Exception as e:
     logging.error("Failed to delete test files")
     return False
@@ -154,35 +169,38 @@ def runTest(test, topologyName, params):
     return False
 
 # Submit topology using heron-cli
-def submitTopology(heronCliPath, heronWorkingDirectory, heronCorePath, testJarPath, topologyPath, topologyName, schedulerConfigPath, configLoaderClasspath):
+def submitTopology(heronCliPath, testCluster, testJarPath, topologyClassPath, topologyName, inputFile, outputFile):
   logging.info("Submitting topology")
   # unicode string messes up subprocess.call quotations, must change into string type
   splitcmd = [
       '%s' % (heronCliPath),
       'submit',
-      'heron.local.working.directory=%s heron.core.release.package=%s' % (heronWorkingDirectory, heronCorePath),
+      '--verbose', 
+      '--',
+      '%s' % (testCluster),
       '%s' % (testJarPath),
-      '%s' % (topologyPath),
+      '%s' % (topologyClassPath),
       '%s' % (topologyName),
-      '%d' % (len(TEST_INPUT)),
-      '--config-file=%s' % (schedulerConfigPath),
-      '--config-loader=%s' % (configLoaderClasspath),
-      '--verbose']
+      '%s' % (inputFile),
+      '%s' % (outputFile),
+      '%d' % (len(TEST_INPUT))
+  ]
   logging.info("Submitting topology: ")
   logging.info(splitcmd)
-  subprocess.Popen(splitcmd)
+  p = subprocess.Popen(splitcmd)
+  p.wait()
   logging.info("Submitted topology")
 
 # Kill a topology using heron-cli
-def killTopology(heronCliPath, heronLocalDirectory, topologyName, schedulerConfigPath, configLoaderClasspath):
+def killTopology(heronCliPath, testCluster, topologyName):
   logging.info("Killing topology")
   splitcmd = [
       '%s' % (heronCliPath),
-      'kill', 'heron.local.working.directory=%s' % (heronLocalDirectory),
+      'kill',
+      '--verbose',
+      '%s' % (testCluster),
       '%s' % (topologyName),
-      '--config-file=%s' % (schedulerConfigPath),
-      '--config-loader=%s' % (configLoaderClasspath),
-      '--verbose']
+  ]
   logging.info("Killing topology:")
   logging.info(splitcmd)
   # this call can be blocking, no need for subprocess
@@ -191,7 +209,7 @@ def killTopology(heronCliPath, heronLocalDirectory, topologyName, schedulerConfi
   logging.info("Successfully killed topology")
 
 # Run the test for each topology specified in the conf file
-def runAllTests(conf, args):
+def runAllTests(args):
   successes = []
   failures = []
   for test in TEST_CASES:
@@ -201,17 +219,16 @@ def runAllTests(conf, args):
       failures += [test]
   return (successes, failures)
 
-def restartShard(heronCliPath, heronLocalDirectory, topologyName, schedulerConfigPath, configLoaderClasspath, shardNum):
+def restartShard(heronCliPath, testCluster, topologyName, shardNum):
   logging.info("Killing topology TMaster")
   splitcmd = [
       '%s' % (heronCliPath),
       'restart',
-      'heron.local.working.directory=%s' % (heronLocalDirectory),
+      '--verbose',
+      '%s' % (testCluster),
       '%s' % (topologyName),
-      '%d' % shardNum,
-      '--config-file=%s' % (schedulerConfigPath),
-      '--config-loader=%s' % (configLoaderClasspath),
-      '--verbose']
+      '%d' % shardNum
+  ]
   logging.info("Killing TMaster command:")
   logging.info(splitcmd)
   if (subprocess.call(splitcmd) != 0):
@@ -237,12 +254,13 @@ def getProcesses():
 # opens .pid file of process and reads the first and only line, which should be the process pid
 # if fail, return -1
 def getPid(processName, heronWorkingDirectory):
-  processPidFile = heronWorkingDirectory + processName + '.pid'
+  processPidFile = os.path.join(heronWorkingDirectory, processName + '.pid')
   try:
     with open(processPidFile, 'r') as f:
       pid = f.readline()
       return pid
   except Exception as e:
+    print("Unable to open file %s" % processPidFile)
     logging.error("Unable to open file %s" % processPidFile)
     return -1
 
@@ -272,33 +290,42 @@ def main():
   root = logging.getLogger()
   root.setLevel(logging.DEBUG)
 
-  conf_file = DEFAULT_TEST_CONF_FILE
   # Read the configuration file from package
+  conf_file = DEFAULT_TEST_CONF_FILE
   confString = pkgutil.get_data(__name__, conf_file)
   decoder = json.JSONDecoder(strict=False)
+
   # Convert the conf file to a json format
   conf = decoder.decode(confString)
 
   # Get the directory of the heron root, which should be the directory that the script is run from
-  heronRepoDirectory = os.getcwd() + '/'
+  heronRepoDirectory = os.getcwd()
 
-  # Parse the arguments passed via command line
-  parser = argparse.ArgumentParser(description='This is the heron integration test framework')
-  parser.add_argument('-cl', '--congif-loader-classpath', dest='configLoaderClasspath', default=conf['configLoaderClasspath'])
-  parser.add_argument('-hc', '--heron-cli-path', dest='heronCliPath', default=conf['heronCliPath'])
-  parser.add_argument('-of', '--output-file', dest='outputFile', default=conf['heronLocalWorkingDirectory']+conf['topology']['outputFile'])
-  parser.add_argument('-rf', '--read-file', dest='readFile', default=conf['heronLocalWorkingDirectory']+conf['topology']['readFile'])
-  parser.add_argument('-rp', '--heron-core-path', dest='heronCorePath', default=heronRepoDirectory+conf['heronCorePath'])
-  parser.add_argument('-sc', '--scheduler-config-path', dest='schedulerConfigPath', default=heronRepoDirectory+conf['schedulerConfigPath'])
-  parser.add_argument('-tj', '--test-jar-path', dest='testJarPath', default=heronRepoDirectory+conf['testJarPath'])
-  parser.add_argument('-tn', '--topology-name', dest='topologyName', default=conf['topology']['topologyName'])
-  parser.add_argument('-tp', '--topology-path', dest='topologyPath', default=conf['topology']['topologyClasspath'])
-  parser.add_argument('-wd', '--heron-working-directory', dest='heronWorkingDirectory', default=heronRepoDirectory+conf['heronLocalWorkingDirectory'])
-  args = parser.parse_args()
-  (successes, failures) = runAllTests(conf, args)
+  args = dict()
+  homeDirectory = os.path.expanduser("~")
+  args['cluster'] = conf['cluster']
+  args['topologyName'] = conf['topology']['topologyName']
+  args['topologyClassPath'] = conf['topology']['topologyClassPath']
+  args['workingDirectory'] = os.path.join(
+      homeDirectory, 
+      ".herondata", 
+      "topologies", 
+      conf['cluster'],
+      getpass.getuser(),
+      args['topologyName']
+  )
+  args['cliPath'] = os.path.expanduser(conf['heronCliPath'])
+  args['outputFile'] = os.path.join(args['workingDirectory'], conf['topology']['outputFile'])
+  args['readFile'] = os.path.join(args['workingDirectory'], conf['topology']['readFile'])
+  args['testJarPath'] = os.path.join(heronRepoDirectory, conf['testJarPath'])
+
+  start_time = time.time()
+  (successes, failures) = runAllTests(args)
+  elapsed_time = time.time() - start_time
 
   if not failures:
     logging.info("Success: %s (all) tests passed" % len(successes))
+    logging.info("Elapsed time: %s" % elapsed_time)
     sys.exit(0)
   else:
     logging.error("Fail: %s test failed" %len(failures))
