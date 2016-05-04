@@ -2,6 +2,8 @@
 # To use it: bazel build --config=centos
 build:centos --java_toolchain=//tools/java:heron_java_toolchain
 build:centos --ignore_unsupported_sandboxing
+build:centos --genrule_strategy=standalone
+build:centos --spawn_strategy=standalone
 build:centos --python2_path /usr/bin/python2.7
 build:centos --linkopt -lm
 build:centos --linkopt -lpthread
@@ -23,6 +25,8 @@ build:darwin --experimental_action_listener=tools/java:compile_java
 # To use it: bazel build --config=ubuntu
 build:ubuntu --java_toolchain=//tools/java:heron_java_toolchain
 build:ubuntu --ignore_unsupported_sandboxing
+build:ubuntu --genrule_strategy=standalone
+build:ubuntu --spawn_strategy=standalone
 build:ubuntu --python2_path /usr/bin/python2.7
 build:ubuntu --linkopt -lm
 build:ubuntu --linkopt -lpthread
