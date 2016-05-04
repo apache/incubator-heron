@@ -38,7 +38,7 @@ final class Config {
   }
 
   public String getEnv() {
-    return this.role;
+    return this.env;
   }
 
   public String getTopologyName() {
@@ -46,7 +46,7 @@ final class Config {
   }
 
   public String getConfigPath() {
-    return this.getConfigPath();
+    return this.configPath;
   }
 
   public static class Builder {
