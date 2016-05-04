@@ -37,6 +37,11 @@ public class NullScheduler implements IScheduler {
   }
 
   @Override
+  public String getJobLink() {
+    return null;
+  }
+
+  @Override
   public boolean onKill(Scheduler.KillTopologyRequest request) {
     return true;
   }

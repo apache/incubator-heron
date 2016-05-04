@@ -80,6 +80,11 @@ public class AuroraScheduler implements IScheduler {
   }
 
   @Override
+  public String getJobLink() {
+    return null;
+  }
+
+  @Override
   public boolean onKill(Scheduler.KillTopologyRequest request) {
     return controller.killJob();
   }

@@ -209,6 +209,11 @@ public class LocalScheduler implements IScheduler {
     return true;
   }
 
+  @Override
+  public String getJobLink() {
+    return null;
+  }
+
   /**
    * Handler to kill topology
    */

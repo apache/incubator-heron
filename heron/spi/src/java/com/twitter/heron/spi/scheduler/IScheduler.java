@@ -50,6 +50,15 @@ public interface IScheduler extends AutoCloseable {
   boolean onSchedule(PackingPlan packing);
 
   /**
+   * This method will be called after onScheduler
+   * It is responsible to return link to topology's customized ui page.
+   * Example: link to the Mesos Slave UI page displaying all scheduled containers
+   *
+   * @return the link if any customized page. otherwise it returns null.
+   */
+  String getJobLink();
+
+  /**
    * Called by SchedulerServer when it receives a http request to kill topology,
    * while the http request body would be the protobuf Scheduler.KillTopologyRequest.
    * The SchedulerServer would parse the request body and feed with this method.
