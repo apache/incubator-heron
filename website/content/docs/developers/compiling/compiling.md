@@ -77,10 +77,15 @@ are supported:
 * `ubuntu` (Ubuntu 14.04)
 * `centos5` (CentOS 5)
 
-For example the following command will build all packages:
+For example, on Darwin, the following command will build all packages:
 
 ```bash
 $ bazel build --config=darwin heron/...
+```
+Note: compiling on Linux (Ubuntu, CentOS) requires the following flags:
+```bash
+bazel build --config=ubuntu heron/...  --genrule_strategy=standalone \
+                                       --sandbox_debug --spawn_strategy=standalone
 ```
 
 ### Building All Components
@@ -93,6 +98,13 @@ use the following `bazel build` commands, respectively.
 $ bazel build --config=darwin scripts/packages:binpkgs
 $ bazel build --config=darwin scripts/packages:tarpkgs
 ```
+Note: compiling on Linux (Ubuntu, CentOS) requires the following flags:
+```bash
+bazel build --config=ubuntu scripts/packages:binpkgs  --genrule_strategy=standalone \
+                             --sandbox_debug --spawn_strategy=standalone
+bazel build --config=ubuntu scripts/packages:tarpkgs  --genrule_strategy=standalone \ 
+                             --sandbox_debug --spawn_strategy=standalone
+```
 
 Resulting artifacts can be found in subdirectories below the `bazel-bin`
 directory. The `heron-tracker` executable, for example, can be found at
@@ -102,7 +114,7 @@ directory. The `heron-tracker` executable, for example, can be found at
 
 As an alternative to building a full release, you can build Heron executables for
 a single component by passing a target to the `bazel build` command. For example
-the following command will build the [Heron Tracker](../../../operators/heron-tracker):
+the following command will build the [Heron Tracker](../../../operators/heron-tracker) (Note: Ubuntu, CentOS) require the additional flags as above):
 
 ```bash
 $ bazel build --config=darwin heron/tracker/src/python:heron-tracker

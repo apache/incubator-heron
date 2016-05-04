@@ -47,21 +47,6 @@ Make sure Bazel bin is in the PATH
 ```bash
 export PATH="$PATH:$HOME/bin"
 ```
-
-Install gperftools
-
-https://github.com/gperftools/gperftools/releases
-
-```bash
-cd /home/ubuntu
-wget https://github.com/gperftools/gperftools/releases/download/gperftools-2.5/gperftools-2.5.tar.gz
-tar -xvf gperftools-2.5.tar.gz
-cd gperftools-2.5
-./configure
-make
-sudo make install
-```
-
 Get the latest version of heron
 
 ```bash
@@ -77,24 +62,22 @@ Configure Heron for build
 Build the project
 
 ```bash
-bazel build --config=ubuntu heron/...  --verbose_failures  --genrule_strategy=standalone \
-                 --ignore_unsupported_sandboxing --sandbox_debug --spawn_strategy=standalone
+bazel build --config=ubuntu heron/...  --genrule_strategy=standalone \
+                                       --sandbox_debug --spawn_strategy=standalone
 ```
 
 Build the packages
 
 ```bash
-bazel build --config=ubuntu scripts/packages:binpkgs  --verbose_failures  \
-        --genrule_strategy=standalone --ignore_unsupported_sandboxing \
-        --sandbox_debug --spawn_strategy=standalone
-bazel build --config=ubuntu scripts/packages:tarpkgs  --verbose_failures  \
-        --genrule_strategy=standalone --ignore_unsupported_sandboxing \
-        --sandbox_debug --spawn_strategy=standalone
+bazel build --config=ubuntu scripts/packages:binpkgs  --genrule_strategy=standalone \
+                             --sandbox_debug --spawn_strategy=standalone
+bazel build --config=ubuntu scripts/packages:tarpkgs  --genrule_strategy=standalone \ 
+                             --sandbox_debug --spawn_strategy=standalone
 ```
 
 This will build the packages below the `bazel-bin/scripts/packages/` directory. 
 
-If you encounter errors with libunwind or libtool, install them manually
+If you encounter errors with libunwind, libtool, or gperftools install them manually
 
 Libtool https://www.gnu.org/software/libtool/
 ```bash
@@ -111,6 +94,19 @@ cd /home/ubuntu
 wget http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz
 tar -xvf libunwind-1.1.tar.gz
 cd libunwind-1.1
+./configure
+make
+sudo make install
+```
+Install gperftools
+
+https://github.com/gperftools/gperftools/releases
+
+```bash
+cd /home/ubuntu
+wget https://github.com/gperftools/gperftools/releases/download/gperftools-2.5/gperftools-2.5.tar.gz
+tar -xvf gperftools-2.5.tar.gz
+cd gperftools-2.5
 ./configure
 make
 sudo make install
