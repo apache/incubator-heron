@@ -17,6 +17,8 @@ package com.twitter.heron.spi.common;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import com.twitter.heron.common.basics.TypeUtils;
+
 public final class ConfigDefaults {
   private static final Logger LOG = Logger.getLogger(ConfigDefaults.class.getName());
 
@@ -49,14 +51,14 @@ public final class ConfigDefaults {
   }
 
   public static Long getLong(String key) {
-    return Convert.getLong(defaults.get(key));
+    return TypeUtils.getLong(defaults.get(key));
   }
 
   public static Double getDouble(String key) {
-    return Convert.getDouble(defaults.get(key));
+    return TypeUtils.getDouble(defaults.get(key));
   }
 
   public static Boolean getBoolean(String key) {
-    return Convert.getBoolean(defaults.get(key));
+    return TypeUtils.getBoolean(defaults.get(key));
   }
 }

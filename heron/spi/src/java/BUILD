@@ -86,6 +86,7 @@ java_library(
         "**/spi/common/**/*.java",
     ]),
     deps = [
+        "//heron/common/src/java:basics-java",
         "//heron/common/src/java:config-java",
     ],
     resources = common_resource_files, 

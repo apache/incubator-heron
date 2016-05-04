@@ -10,7 +10,7 @@ sinks:
 
 ########### option class is required as we need to instantiate a new instance by reflection
 ########### option flush-frequency-ms is required to invoke flush() at interval
-########### option sink-restart-attempts, representsing # of times to restart a sink when it throws exceptions and dies.
+########### option sink-restart-attempts, representing # of times to restart a sink when it throws exceptions and dies.
 ###########   If this option is missed, default value 0 would be supplied; negative value represents to restart it forever.
 
 ########### Other options would be constructed as an immutable map passed to IMetricsSink's init(Map conf) as argument,
