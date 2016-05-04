@@ -131,7 +131,7 @@ public class LaunchRunner implements Callable<Boolean> {
     // store the trimmed topology definition into the state manager
     result = statemgr.setTopology(trimTopology(topology), topologyName);
     if (result == null || !result) {
-      LOG.severe("Failed to set topology");
+      LOG.severe("Failed to set topology definition");
       return false;
     }
 

@@ -138,7 +138,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
 
     // clean up the state of the topology in state manager
     if (!cleanState(topologyName, Runtime.schedulerStateManagerAdaptor(runtime))) {
-      LOG.severe("Failed to clean state");
+      LOG.severe("Failed to clean topology state");
       return false;
     }
 
@@ -155,7 +155,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
   protected boolean cleanState(
       String topologyName,
       SchedulerStateManagerAdaptor statemgr) {
-    LOG.fine("Cleaning up Heron State");
+    LOG.fine("Cleaning up topology states");
 
     Boolean result;
 
@@ -189,11 +189,11 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     // by checking the existence of topology def
     result = statemgr.deleteTopology(topologyName);
     if (result == null || !result) {
-      LOG.severe("Failed to clear topology state");
+      LOG.severe("Failed to clear topology definition");
       return false;
     }
 
-    LOG.fine("Cleaned up Heron State");
+    LOG.fine("Cleaned up topology state");
     return true;
   }
 }
