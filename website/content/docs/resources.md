@@ -16,7 +16,14 @@ Heron Resources outside this documentation:
 * [Flying Faster with Heron - InfoQ](http://www.infoq.com/presentations/twitter-heron) (Apr, 2016)
 * [Twitter Heron: Stream Processing at
   Scale - @Scale](https://www.youtube.com/watch?v=pUaFOuGgmco) (Sep, 2015)
+* [Stream Processing and Anomoly Detection - Velocity O'Reilly - Note: requires O'Reilly login ](
+https://player.oreilly.com/videos/9781491927977?login=true)(Jun, 2015)
 
 ## Blog Posts
 * [Flying Faster with Twitter
   Heron](https://blog.twitter.com/2015/flying-faster-with-twitter-heron) (June, 2015)
+
+## Slides
+* [Real-Time Analytics: Algorithms and Systems - Twitter University ](
+http://www.slideshare.net/arunkejariwal/real-time-analytics-algorithms-and-systems) (May, 2016)
+* [Stream Processing and Anomoly Detection - Velocity O'Reilly ](http://www.slideshare.net/arunkejariwal/velocity-2015final)(Jun, 2015)
