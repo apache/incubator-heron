@@ -47,6 +47,10 @@ sections:
         url: /docs/developers/data-model
       - name: Tuple Serialization
         url: /docs/developers/serialization
+      - name: Troubleshooting Guide
+        url: /docs/developers/troubleshooting
+      - name: Tuning Guide
+        url: /docs/developers/tuning
       - name: Javadoc
         url: /docs/javadoc
   - name: Heron Developers
