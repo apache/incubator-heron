@@ -62,17 +62,14 @@ Configure Heron for build
 Build the project
 
 ```bash
-bazel build --config=ubuntu heron/...  --genrule_strategy=standalone \
-                                       --sandbox_debug --spawn_strategy=standalone
+bazel build --config=ubuntu heron/...  
 ```
 
 Build the packages
 
 ```bash
-bazel build --config=ubuntu scripts/packages:binpkgs  --genrule_strategy=standalone \
-                             --sandbox_debug --spawn_strategy=standalone
-bazel build --config=ubuntu scripts/packages:tarpkgs  --genrule_strategy=standalone \ 
-                             --sandbox_debug --spawn_strategy=standalone
+bazel build --config=ubuntu scripts/packages:binpkgs  
+bazel build --config=ubuntu scripts/packages:tarpkgs
 ```
 
 This will build the packages below the `bazel-bin/scripts/packages/` directory. 
