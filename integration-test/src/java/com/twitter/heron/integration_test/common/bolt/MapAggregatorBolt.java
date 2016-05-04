@@ -18,11 +18,14 @@ import com.twitter.heron.integration_test.core.BaseBatchBolt;
  */
 
 public class MapAggregatorBolt extends BaseBatchBolt {
+  private static final long serialVersionUID = -3500154155463300293L;
   OutputCollector collector;
-  HashMap<String, Integer> buffer = new HashMap<String, Integer>();
+  HashMap<String, Integer> buffer = new HashMap<>();
 
   @Override
-  public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
+  public void prepare(Map<String, Object> map,
+                      TopologyContext topologyContext,
+                      OutputCollector outputCollector) {
     collector = outputCollector;
   }
 

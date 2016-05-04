@@ -21,6 +21,7 @@ import com.twitter.heron.integration_test.common.HdfsHelper;
  * to read.
  */
 public class HdfsStringSpout extends BaseRichSpout {
+  private static final long serialVersionUID = 5452173269208083710L;
   // Hadoop file related
   private BufferedReader br = null;
   // Topology related
@@ -41,7 +42,9 @@ public class HdfsStringSpout extends BaseRichSpout {
   }
 
   @Override
-  public void open(Map stormConf, TopologyContext context, SpoutOutputCollector collector) {
+  public void open(Map<String, Object> stormConf,
+                   TopologyContext context,
+                   SpoutOutputCollector collector) {
     int numTasks = context.getComponentTasks(context.getThisComponentId()).size();
     // Pre-condition: the number of tasks is equal to the number of files to read
     if (paths.length != numTasks) {
