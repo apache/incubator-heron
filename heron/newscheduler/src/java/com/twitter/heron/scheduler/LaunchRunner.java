@@ -125,20 +125,23 @@ public class LaunchRunner implements Callable<Boolean> {
     launcher.initialize(config, runtime);
 
     Boolean result;
+
+    // Set topology def first since we determine whether a topology is running
+    // by checking the existence of topology def
+    // store the trimmed topology definition into the state manager
+    result = statemgr.setTopology(trimTopology(topology), topologyName);
+    if (result == null || !result) {
+      LOG.severe("Failed to set topology");
+      return false;
+    }
+
     // store the execution state into the state manager
     ExecutionEnvironment.ExecutionState executionState = createExecutionState();
 
     result = statemgr.setExecutionState(executionState, topologyName);
     if (result == null || !result) {
       LOG.severe("Failed to set execution state");
-      return false;
-    }
-
-    // store the trimmed topology definition into the state manager
-    result = statemgr.setTopology(trimTopology(topology), topologyName);
-    if (result == null || !result) {
-      LOG.severe("Failed to set topology");
-      statemgr.deleteExecutionState(topologyName);
+      statemgr.deleteTopology(topologyName);
       return false;
     }
 

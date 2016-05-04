@@ -19,8 +19,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
@@ -30,10 +28,8 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
-import com.twitter.heron.spi.utils.SchedulerUtils;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(SchedulerUtils.class)
 public class RuntimeManagerRunnerTest {
   private static final String TOPOLOGY_NAME = "testTopology";
   private final Config config = Mockito.mock(Config.class);
@@ -102,7 +98,8 @@ public class RuntimeManagerRunnerTest {
     Scheduler.KillTopologyRequest killTopologyRequest = Scheduler.KillTopologyRequest.newBuilder()
         .setTopologyName(TOPOLOGY_NAME).build();
     ISchedulerClient client = Mockito.mock(ISchedulerClient.class);
-    RuntimeManagerRunner runner = new RuntimeManagerRunner(config, runtime, Command.KILL, client);
+    RuntimeManagerRunner runner =
+        Mockito.spy(new RuntimeManagerRunner(config, runtime, Command.KILL, client));
 
     // Failed to invoke client's killTopology
     Mockito.when(client.killTopology(killTopologyRequest)).thenReturn(false);
@@ -111,15 +108,14 @@ public class RuntimeManagerRunnerTest {
 
     // Failed to clean states
     Mockito.when(client.killTopology(killTopologyRequest)).thenReturn(true);
-    PowerMockito.spy(SchedulerUtils.class);
-    PowerMockito.doReturn(false).when(SchedulerUtils.class, "cleanState", Mockito.eq(TOPOLOGY_NAME),
-        Mockito.any(SchedulerStateManagerAdaptor.class));
+    Mockito.doReturn(false).when(runner).cleanState(
+        Mockito.eq(TOPOLOGY_NAME), Mockito.any(SchedulerStateManagerAdaptor.class));
     Assert.assertFalse(runner.killTopologyHandler(TOPOLOGY_NAME));
     Mockito.verify(client, Mockito.times(2)).killTopology(killTopologyRequest);
 
     // Success case
-    PowerMockito.doReturn(true).when(SchedulerUtils.class, "cleanState", Mockito.eq(TOPOLOGY_NAME),
-        Mockito.any(SchedulerStateManagerAdaptor.class));
+    Mockito.doReturn(true).when(runner).cleanState(
+        Mockito.eq(TOPOLOGY_NAME), Mockito.any(SchedulerStateManagerAdaptor.class));
     Assert.assertTrue(runner.killTopologyHandler(TOPOLOGY_NAME));
     Mockito.verify(client, Mockito.times(3)).killTopology(killTopologyRequest);
   }
