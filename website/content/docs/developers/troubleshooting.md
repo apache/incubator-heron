@@ -6,17 +6,13 @@ This guide aims to provide some basic steps at troubleshooting your topology.
 These server as the starting steps to troubleshoot any issues with the topology,
 and leave you in a position to identify the root cause easily.
 
-In the end, there is a small section on how to tune your topology to make the
-best use of resources.
-
 This guide is organized into following broad sections:
 
 * How to tell if my topology is running fine
 * Where is the problem in my topology
 * Frequently seen issues
-* How to tune the topology
 
-This guide is useful for topology writers. The issues related to Heron set up or
+This guide is useful for topology writers. The issues related to Heron setup or
 its internals, like `schedulers`, etc, are not discussed here.
 
 ### How to tell if my topology is running fine
@@ -83,7 +79,8 @@ that:
 
 1. All spouts and bolts are serializable.
 2. Don't instantiate a non-serializable attribute in constructor. Leave those to
-   `prepare` method, which gets called during start time of the instances.
+   a bolt's `prepare` or a spout's `open` method, which gets called during start
+   time of the instances.
 3. The `main` method should not try to access anything that your local machine
    may not have access to.
 
@@ -144,79 +141,44 @@ executing any, and no metrics are being reported.
 instance is a single JVM process and user code is called from the main thread,
 it is possible that execution is stuck in `execute` method.
 
+*What to do* -
+
+1. Check logs for one of the concerned instances. If `open` (in a spout) or
+   `prepare` (in a bolt) method is not completed, check the code logic to see
+   why the method is not completed.
+
+2. Check the code logic if there is any deadlock in a bolt's `execute` or a
+   spout's `nextTuple`, `ack` or `fail` methods. These methods should be
+   non-blocking.
+
 #### 5. There is backpressure from internal bolt
 
-We call a bolt internal if it does not talk to anything external to topology.
-For example, the last bolt might be talking to some database to write its
-results, and would not be called an internal bolt.
+We call a bolt internal if it does not talk to any external servive. For example,
+the last bolt might be talking to some database to write its results, and would
+not be called an internal bolt.
 
 This is invariably due to lack of resources given to this bolt. Increasing
-parallelism or RAM (based on code logic), the issue can be solved.
+parallelism or RAM (based on code logic) can solve the issue.
 
 #### 6. There is backpressure from external bolt
 
-By the same definition as above, an external bolt is the one which is writing
-data to external databases. It might still be emitting data downstream.
+By the same definition as above, an external bolt is the one which is accessing
+an external service. It might still be emitting data downstream.
 
 *Possible Cause 1* - External service is slowing down this bolt.
 
-*What to do* - Apart from handling resource logistics for external services,
-changing bolt logic to tune caching vs write rate can make a difference.
+*What to do* -
+
+1. Check if the external service is the bottleneck, and see if adding resources
+   to it can solve it.
+
+2. Sometimes, changing bolt logic to tune caching vs write rate can make a
+   difference.
 
 *Possible Cause 2* - Resource crunch for this bolt, just like an internal bolt
 above.
 
-### How to tune a topology
+*What to do* -
 
-This section briefly outlines some of the basic steps to tune a topology. Note
-that tuning is hard and can take multiple iterations.
-
-Although there are tons of configurations and parameters that can increase the
-efficiency of topology in terms of throughput and latency, this section does not
-cover all of them. The parameters being considered here are:
-
-1. Container RAM
-2. Container CPU
-3. Component RAMs
-4. Component Parallelisms
-5. Number of Containers
-
-#### Steps:
-
-1. Launch the topology with an initial estimate of resources. These can be based
-   on input data size, component logic, or experience from another working
-   topology.
-
-2. Resolve any backpressure issues by increasing the parallelism or container
-   RAM, or CPU, or appropriately if backpressure is due to an external service.
-
-3. Make sure there is no spout lag. In steady state, the topology should be able
-   to read the whole of data.
-
-4. Repeat steps 2 and 3 until there is no backpressure and no spout lag.
-
-5. By now, the CPU usage and RAM usage are stable. Based on daily of weekly data
-   trends, leave appropriate room for usage spikes, and cut down the rest of the
-   unused resources allocated to topology.
-
-While these steps seem simple, it might take some time to get the topology to
-its optimal usage. Below are some of the tips that can be helpful during tuning
-or in general.
-
-#### Tips:
-
-1. If component RAMs for all the components is provided, that will the RAM
-   assigned to those instances. Use this configuration according to their
-   functionality to save of resources. By default, every instance is assigned
-   1GB of RAM, which can be higher that what it requires. Note that if container
-   RAM is specified, after setting aside some RAM for internal components of
-   Heron, rest of it is equally divided among all the instances present in the
-   container.
-
-2. A memory intensive operation in bolts can result in GC issues. Be aware of
-   objects that might enter old generation, and cause memory starvation.
-
-3. You can use `Scheme`s in spouts to sample down the data. This can helpful
-   when dealing with issues if writing to external services, or just trying to
-   get an early estimate of usage without utilizing much resources. Note that
-   this would still require 100% resource usage in spouts.
+1. This should be handled in the same was as internal bolt - by increasing the
+   parallelism or RAM for the component.

@@ -49,6 +49,8 @@ sections:
         url: /docs/developers/serialization
       - name: Troubleshooting Guide
         url: /docs/developers/troubleshooting
+      - name: Tuning Guide
+        url: /docs/developers/tuning
       - name: Javadoc
         url: /docs/javadoc
   - name: Heron Developers
