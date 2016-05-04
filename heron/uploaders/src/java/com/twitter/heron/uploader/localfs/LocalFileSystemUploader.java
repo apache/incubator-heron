@@ -24,8 +24,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.logging.Logger;
 
+import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Convert;
 import com.twitter.heron.spi.uploader.IUploader;
 
 public class LocalFileSystemUploader implements IUploader {
@@ -55,7 +55,7 @@ public class LocalFileSystemUploader implements IUploader {
         .append("file://")
         .append(filename);
 
-    return Convert.getURI(sb.toString());
+    return TypeUtils.getURI(sb.toString());
   }
 
   /**

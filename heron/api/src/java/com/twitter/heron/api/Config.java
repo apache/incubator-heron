@@ -23,6 +23,8 @@ import java.util.Set;
 
 import javax.xml.bind.DatatypeConverter;
 
+import com.twitter.heron.common.basics.TypeUtils;
+
 /**
  * Topology configs are specified as a plain old map. This class provides a
  * convenient way to create a topology config map by providing setter methods for
@@ -278,7 +280,7 @@ public class Config extends HashMap<String, Object> {
   }
 
   public static List<String> getAutoTaskHooks(Map<String, Object> conf) {
-    return (List<String>) conf.get(Config.TOPOLOGY_AUTO_TASK_HOOKS);
+    return TypeUtils.getListOfStrings(conf.get(Config.TOPOLOGY_AUTO_TASK_HOOKS));
   }
 
   public static void setComponentRam(Map<String, Object> conf, String component, long ramInBytes) {

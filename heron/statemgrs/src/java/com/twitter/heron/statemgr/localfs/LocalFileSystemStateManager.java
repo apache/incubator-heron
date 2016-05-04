@@ -100,6 +100,7 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     return future;
   }
 
+  @SuppressWarnings("unchecked") // we don't know what M is until runtime
   protected <M extends Message> ListenableFuture<M> getData(String path, Message.Builder builder) {
     final SettableFuture<M> future = SettableFuture.create();
     byte[] data = FileUtils.readFromFile(path);

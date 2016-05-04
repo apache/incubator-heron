@@ -29,6 +29,7 @@ import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
+import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.metrics.SpoutMetrics;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
@@ -218,7 +219,7 @@ public class SpoutInstance implements IInstance {
    * @return true Wake up itself directly in next looper.doWait()
    */
   private boolean isContinueWork() {
-    long maxSpoutPending = Utils.getLong(config.get(Config.TOPOLOGY_MAX_SPOUT_PENDING));
+    long maxSpoutPending = TypeUtils.getLong(config.get(Config.TOPOLOGY_MAX_SPOUT_PENDING));
     return topologyState.equals(TopologyAPI.TopologyState.RUNNING)
         && ((!ackEnabled && collector.isOutQueuesAvailable())
         || (ackEnabled && collector.isOutQueuesAvailable()
@@ -240,7 +241,7 @@ public class SpoutInstance implements IInstance {
   }
 
   private void produceTuple() {
-    int maxSpoutPending = Utils.getInt(config.get(Config.TOPOLOGY_MAX_SPOUT_PENDING));
+    int maxSpoutPending = TypeUtils.getInt(config.get(Config.TOPOLOGY_MAX_SPOUT_PENDING));
 
     long totalTuplesEmitted = collector.getTotalTuplesEmitted();
 
@@ -308,7 +309,7 @@ public class SpoutInstance implements IInstance {
   }
 
   private void lookForTimeouts() {
-    long timeoutInSeconds = Utils.getLong(config.get(Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS));
+    long timeoutInSeconds = TypeUtils.getLong(config.get(Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS));
     long timeoutInNs = timeoutInSeconds * Constants.SECONDS_TO_NANOSECONDS;
     int nBucket = systemConfig.getInstanceAcknowledgementNbuckets();
     List<RootTupleInfo> expiredObjects = collector.retireExpired(timeoutInNs);

@@ -18,9 +18,9 @@ import java.io.File;
 import java.net.URI;
 import java.util.logging.Logger;
 
+import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Convert;
 import com.twitter.heron.spi.uploader.IUploader;
 
 public class HdfsUploader implements IUploader {
@@ -43,7 +43,7 @@ public class HdfsUploader implements IUploader {
 
     // name of the destination file is the same as the base name of the topology package file
     String fileName = new File(topologyPackageLocation).getName();
-    packageURI = Convert.getURI(String.format("%s/%s", destTopologyDirectoryURI, fileName));
+    packageURI = TypeUtils.getURI(String.format("%s/%s", destTopologyDirectoryURI, fileName));
   }
 
   @Override

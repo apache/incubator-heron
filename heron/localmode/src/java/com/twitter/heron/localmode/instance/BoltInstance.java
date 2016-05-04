@@ -31,6 +31,7 @@ import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
+import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.metrics.BoltMetrics;
 import com.twitter.heron.common.utils.misc.PhysicalPlanHelper;
@@ -243,7 +244,7 @@ public class BoltInstance implements IInstance {
         helper.getTopologyContext().getTopologyConfig().get(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS);
 
     if (tickTupleFreqSecs != null) {
-      int freq = Utils.getInt(tickTupleFreqSecs);
+      int freq = TypeUtils.getInt(tickTupleFreqSecs);
 
       Runnable r = new Runnable() {
         public void run() {

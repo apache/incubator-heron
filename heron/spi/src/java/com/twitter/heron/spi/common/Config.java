@@ -19,10 +19,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import com.twitter.heron.common.basics.TypeUtils;
+
 /**
  * Config is an Immutable Map of <String, Object>
  */
-// SUPPRESS CHECKSTYLE
 public class Config {
   private final Map<String, Object> cfgMap = new HashMap<>();
 
@@ -75,32 +76,32 @@ public class Config {
   }
 
   public Long getLongValue(String key) {
-    Object value = cfgMap.get(key);
-    return Convert.getLong(value);
+    Object value = get(key);
+    return TypeUtils.getLong(value);
   }
 
   public Long getLongValue(String key, long defaultValue) {
     Object value = get(key);
     if (value != null) {
-      return Convert.getLong(value);
+      return TypeUtils.getLong(value);
     }
     return defaultValue;
   }
 
   public Integer getIntegerValue(String key) {
-    Object value = cfgMap.get(key);
-    return Convert.getInteger(value);
+    Object value = get(key);
+    return TypeUtils.getInt(value);
   }
 
   public Double getDoubleValue(String key) {
-    Object value = cfgMap.get(key);
-    return Convert.getDouble(value);
+    Object value = get(key);
+    return TypeUtils.getDouble(value);
   }
 
   public Double getDoubleValue(String key, double defaultValue) {
     Object value = get(key);
     if (value != null) {
-      return Convert.getDouble(value);
+      return TypeUtils.getDouble(value);
     }
     return defaultValue;
   }
@@ -111,16 +112,6 @@ public class Config {
 
   public Set<String> getKeySet() {
     return cfgMap.keySet();
-  }
-
-  public String asString() {
-    StringBuilder sb = new StringBuilder();
-    for (Map.Entry<String, Object> kv : cfgMap.entrySet()) {
-      if (kv.getValue() instanceof String) {
-        sb.append(String.format(" %s=\"%s\" ", kv.getKey(), kv.getValue().toString()));
-      }
-    }
-    return sb.toString();
   }
 
   @Override
