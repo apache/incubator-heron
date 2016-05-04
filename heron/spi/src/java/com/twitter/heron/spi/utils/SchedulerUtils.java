@@ -52,10 +52,12 @@ public final class SchedulerUtils {
       scheduler.initialize(config, runtime);
       ret = scheduler.onSchedule(packing);
 
-      // Set the SchedulerLocation at last step,
-      // since some methods in IScheduler will provide correct values
-      // only after IScheduler.onSchedule is invoked correctly
-      ret = ret && setSchedulerLocation(runtime, scheduler);
+      if (ret) {
+        // Set the SchedulerLocation at last step,
+        // since some methods in IScheduler will provide correct values
+        // only after IScheduler.onSchedule is invoked correctly
+        ret = setSchedulerLocation(runtime, scheduler);
+      }
     } finally {
       scheduler.close();
     }

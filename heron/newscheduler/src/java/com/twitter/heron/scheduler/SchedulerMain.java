@@ -333,16 +333,17 @@ public class SchedulerMain {
       // schedule the packed plan
       isSuccessful = scheduler.onSchedule(packedPlan);
 
-      // get the scheduler server endpoint for receiving requests
-      server = getServer(ytruntime, scheduler, schedulerServerPort);
-      // start the server to manage runtime requests
-      server.start();
+      if (isSuccessful) {
+        // get the scheduler server endpoint for receiving requests
+        server = getServer(ytruntime, scheduler, schedulerServerPort);
+        // start the server to manage runtime requests
+        server.start();
 
-      // write the scheduler location to state manager
-      // Make sure it happens after IScheduler.onScheduler
-      isSuccessful = isSuccessful &&
-          SchedulerUtils.setSchedulerLocation(
-              runtime, server.getHost(), server.getPort(), scheduler);
+        // write the scheduler location to state manager
+        // Make sure it happens after IScheduler.onScheduler
+        isSuccessful = SchedulerUtils.setSchedulerLocation(
+            runtime, server.getHost(), server.getPort(), scheduler);
+      }
 
       // wait until kill request or some interrupt occurs
       LOG.info("Waiting for termination... ");
