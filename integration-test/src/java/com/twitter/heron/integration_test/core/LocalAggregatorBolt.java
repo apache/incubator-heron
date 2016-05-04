@@ -17,7 +17,7 @@ import com.twitter.heron.api.tuple.Tuple;
  * and on terminal, writes the lines in the buffer to the local
  * file specificed by localFilePath
  */
-public class LocalAggregatorBolt<T> extends BaseBatchBolt<T> implements ITerminalBolt<T> {
+public class LocalAggregatorBolt extends BaseBatchBolt implements ITerminalBolt {
   private static final long serialVersionUID = 7363942149997565188L;
   private static final Logger LOG = Logger.getLogger(LocalAggregatorBolt.class.getName());
   private final String localFilePath;

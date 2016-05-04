@@ -26,7 +26,7 @@ import com.twitter.heron.api.tuple.Tuple;
  * A Bolt which collects the tuples, converts them into json,
  * and posts the json into the given http server.
  */
-public class AggregatorBolt<T> extends BaseBatchBolt<T> implements ITerminalBolt<T> {
+public class AggregatorBolt extends BaseBatchBolt implements ITerminalBolt {
   private static final long serialVersionUID = -2994625720418843748L;
   private static final Logger LOG = Logger.getLogger(AggregatorBolt.class.getName());
   private static final ObjectMapper mapper = new ObjectMapper();

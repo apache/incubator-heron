@@ -16,7 +16,7 @@ import com.twitter.heron.integration_test.core.BaseBatchBolt;
 /**
  * CounBolt will count the number different words received, and finally output the number
  */
-public class WordCountBolt<T> extends BaseBatchBolt<T> {
+public class WordCountBolt extends BaseBatchBolt {
   public static final Logger LOG = Logger.getLogger(WordCountBolt.class.getName());
   private static final long serialVersionUID = -7592911369781228601L;
   OutputCollector collector;

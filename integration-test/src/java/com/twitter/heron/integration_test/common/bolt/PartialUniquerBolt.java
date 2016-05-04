@@ -17,7 +17,7 @@ import com.twitter.heron.integration_test.core.BaseBatchBolt;
  * It will emit the map when all words are received.
  */
 
-public class PartialUniquerBolt<T> extends BaseBatchBolt<T> {
+public class PartialUniquerBolt extends BaseBatchBolt {
   private static final long serialVersionUID = 6662874569586264236L;
   OutputCollector collector;
   HashMap<String, Integer> cache = new HashMap<>();

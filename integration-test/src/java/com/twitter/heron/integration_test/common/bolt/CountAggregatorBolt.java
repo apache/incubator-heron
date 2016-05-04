@@ -14,7 +14,7 @@ import com.twitter.heron.integration_test.core.BaseBatchBolt;
  * A bolt to count how many different words
  */
 
-public class CountAggregatorBolt<T> extends BaseBatchBolt<T> {
+public class CountAggregatorBolt extends BaseBatchBolt {
   private static final long serialVersionUID = 590728128451229945L;
   OutputCollector collector;
   int sum = 0;

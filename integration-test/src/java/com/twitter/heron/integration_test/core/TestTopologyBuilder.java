@@ -75,12 +75,12 @@ public class TestTopologyBuilder extends TopologyBuilder {
   public HeronTopology createTopology() {
     // We will add the aggregation_bolt to be serialized
     final String AGGREGATOR_BOLT = "__integration_test_aggregator_bolt";
-    BaseBatchBolt<?> aggregatorBolt;
+    BaseBatchBolt aggregatorBolt;
     try {
       // Terminal Bolt will be initialized using reflection, based on the value of terminal bolt class
       // class should be built on top of BaseBatchBolt abstract class, and can be changed using setTerminalBolt function
       aggregatorBolt =
-          (BaseBatchBolt<?>) Class.forName(terminalBoltClass).getConstructor(String.class)
+          (BaseBatchBolt) Class.forName(terminalBoltClass).getConstructor(String.class)
               .newInstance(this.outputLocation);
     } catch (NoSuchMethodException e) {
       throw new RuntimeException(e + " Terminal Bolt class must have a single String constructor.");
