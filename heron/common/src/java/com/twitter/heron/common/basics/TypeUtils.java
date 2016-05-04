@@ -16,6 +16,7 @@ package com.twitter.heron.common.basics;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 
 public final class TypeUtils {
@@ -34,7 +35,7 @@ public final class TypeUtils {
       try {
         return Integer.parseInt(o.toString());
       } catch (NumberFormatException nfe) {
-        throw new IllegalArgumentException("Don't know how to convert " + o + " + to int");
+        throw new IllegalArgumentException("Don't know how to convert " + o + " to int");
       }
     }
   }
@@ -50,7 +51,7 @@ public final class TypeUtils {
       try {
         return Long.parseLong(o.toString());
       } catch (NumberFormatException nfe) {
-        throw new IllegalArgumentException("Don't know how to convert " + o + " + to long");
+        throw new IllegalArgumentException("Don't know how to convert " + o + " to long");
       }
     }
   }
@@ -70,7 +71,7 @@ public final class TypeUtils {
       try {
         return Double.parseDouble(o.toString());
       } catch (NumberFormatException nfe) {
-        throw new IllegalArgumentException("Failed to convert " + o + " + to double");
+        throw new IllegalArgumentException("Failed to convert " + o + " to double");
       }
     }
   }
@@ -81,7 +82,7 @@ public final class TypeUtils {
     } else if (o instanceof String) {
       return Boolean.valueOf((String) o);
     } else {
-      throw new IllegalArgumentException("Failed to convert " + o + " + to boolean");
+      throw new IllegalArgumentException("Failed to convert " + o + " to boolean");
     }
   }
 
@@ -89,16 +90,18 @@ public final class TypeUtils {
     try {
       return new URI(spec);
     } catch (URISyntaxException e) {
-      throw new IllegalArgumentException("Don't know how to convert " + spec + " + to URI");
+      throw new IllegalArgumentException("Don't know how to convert " + spec + " to URI");
     }
   }
 
   @SuppressWarnings("unchecked")
   public static List<String> getListOfStrings(Object o) {
-    if (o instanceof List) {
+    if (o == null) {
+      return new ArrayList<>();
+    } else if (o instanceof List) {
       return (List<String>) o;
     } else {
-      throw new IllegalArgumentException("Failed to convert " + o + " + to List<String");
+      throw new IllegalArgumentException("Failed to convert " + o + " to List<String>");
     }
   }
 }
