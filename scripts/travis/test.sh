@@ -8,7 +8,7 @@ set -ex
 bazel --bazelrc=tools/travis-ci/bazel.rc build integration-test/src/java:local-integration-tests_deploy.jar
 
 # install client
-bazel run --bazelrc=tools/travis-ci/bazel.rc -- scripts/packages:heron-client-install.sh --user
+bazel run -- scripts/packages:heron-client-install.sh --user
 
 # run the local integration test
 python integration-test/src/python/local_test_runner/main.py
