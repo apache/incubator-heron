@@ -12,6 +12,7 @@ import com.twitter.heron.api.tuple.Tuple;
  */
 
 public class DoubleTuplesBolt extends BaseBasicBolt {
+  private static final long serialVersionUID = -3453913602865161439L;
   Fields _fields;
 
   public DoubleTuplesBolt(Fields fields) {

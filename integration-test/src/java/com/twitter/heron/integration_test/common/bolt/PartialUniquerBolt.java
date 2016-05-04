@@ -18,11 +18,14 @@ import com.twitter.heron.integration_test.core.BaseBatchBolt;
  */
 
 public class PartialUniquerBolt extends BaseBatchBolt {
+  private static final long serialVersionUID = 6662874569586264236L;
   OutputCollector collector;
-  HashMap<String, Integer> cache = new HashMap<String, Integer>();
+  HashMap<String, Integer> cache = new HashMap<>();
 
   @Override
-  public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
+  public void prepare(Map<String, Object> map,
+                      TopologyContext topologyContext,
+                      OutputCollector outputCollector) {
     collector = outputCollector;
   }
 

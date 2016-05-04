@@ -18,6 +18,7 @@ import com.twitter.heron.api.tuple.Tuple;
  * file specificed by localFilePath
  */
 public class LocalAggregatorBolt extends BaseBatchBolt implements ITerminalBolt {
+  private static final long serialVersionUID = 7363942149997565188L;
   private static final Logger LOG = Logger.getLogger(LocalAggregatorBolt.class.getName());
   private final String localFilePath;
   private BufferedWriter bw = null;
@@ -33,7 +34,9 @@ public class LocalAggregatorBolt extends BaseBatchBolt implements ITerminalBolt 
   }
 
   @Override
-  public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
+  public void prepare(Map<String, Object> map,
+                      TopologyContext topologyContext,
+                      OutputCollector outputCollector) {
     try {
       File outputFile = new File(localFilePath);
       if (!outputFile.exists()) {

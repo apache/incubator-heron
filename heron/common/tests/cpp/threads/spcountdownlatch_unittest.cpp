@@ -1,3 +1,19 @@
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "threads/spcountdownlatch.h"
 
 #include <iostream>
@@ -11,20 +27,11 @@
 #include "basics/modinit.h"
 #include "errors/modinit.h"
 
-void 
-testCountDownFunc(CountDownLatch& latch) 
-{
-  latch.countDown();
-}
+void testCountDownFunc(CountDownLatch& latch) { latch.countDown(); }
 
-void 
-testWaitFunc(CountDownLatch& latch) 
-{
-  latch.wait();
-}
+void testWaitFunc(CountDownLatch& latch) { latch.wait(); }
 
-TEST(CountDownLatchTest, testCountDownMethod) 
-{
+TEST(CountDownLatchTest, testCountDownMethod) {
   CountDownLatch latch(2);
   latch.countDown();
 
@@ -32,8 +39,7 @@ TEST(CountDownLatchTest, testCountDownMethod)
   EXPECT_EQ(latch.getCount(), static_cast<sp_uint32>(1));
 }
 
-TEST(CountDownLatchTest, testWaitMethod) 
-{
+TEST(CountDownLatchTest, testWaitMethod) {
   CountDownLatch latch(1);
 
   std::thread t1(testWaitFunc, std::ref(latch));
@@ -44,8 +50,7 @@ TEST(CountDownLatchTest, testWaitMethod)
   EXPECT_EQ(latch.getCount(), static_cast<sp_uint32>(0));
 }
 
-TEST(CountDownLatchTest, testWaitNotifyWithTwoThreads) 
-{
+TEST(CountDownLatchTest, testWaitNotifyWithTwoThreads) {
   CountDownLatch latch(1);
 
   std::thread t1(testWaitFunc, std::ref(latch));
@@ -59,8 +64,7 @@ TEST(CountDownLatchTest, testWaitNotifyWithTwoThreads)
 }
 
 // Same test as above, but coundDown is called before wait
-TEST(CountDownLatchTest, testWaitNotifyWithTwoThreads2) 
-{
+TEST(CountDownLatchTest, testWaitNotifyWithTwoThreads2) {
   CountDownLatch latch(1);
   std::thread t2(testCountDownFunc, std::ref(latch));
 
@@ -75,8 +79,7 @@ TEST(CountDownLatchTest, testWaitNotifyWithTwoThreads2)
   EXPECT_EQ(latch.getCount(), static_cast<sp_uint32>(0));
 }
 
-TEST(CountDownLatchTest, testWithMultipleThreads) 
-{
+TEST(CountDownLatchTest, testWithMultipleThreads) {
   CountDownLatch latch(2);
 
   std::thread t1(testWaitFunc, std::ref(latch));
@@ -97,9 +100,7 @@ TEST(CountDownLatchTest, testWithMultipleThreads)
   EXPECT_EQ(latch.getCount(), static_cast<sp_uint32>(0));
 }
 
-int 
-main(int argc, char** argv) 
-{
+int main(int argc, char** argv) {
   heron::common::Initialize(argv[0]);
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

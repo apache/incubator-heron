@@ -59,6 +59,10 @@ sections:
         url: /docs/contributors/codebase
       - name: Compiling
         url: /docs/developers/compiling/compiling
+      - name: Compiling on Linux
+        url: /docs/developers/compiling/linux
+      - name: Compiling on Mac OS X
+        url: /docs/developers/compiling/mac
       - name: Compiling With Docker
         url: /docs/developers/compiling/docker
       - name: Testing

@@ -20,6 +20,7 @@ import com.twitter.heron.api.tuple.Values;
  * to read.
  */
 public class LocalFileSpout extends BaseRichSpout {
+  private static final long serialVersionUID = 8536862528794112057L;
   // Hadoop file related
   private BufferedReader br = null;
   // Topology related
@@ -40,7 +41,9 @@ public class LocalFileSpout extends BaseRichSpout {
   }
 
   @Override
-  public void open(Map stormConf, TopologyContext context, SpoutOutputCollector collector) {
+  public void open(Map<String, Object> stormConf,
+                   TopologyContext context,
+                   SpoutOutputCollector collector) {
     int numTasks = context.getComponentTasks(context.getThisComponentId()).size();
     // Pre-condition: the number of tasks is equal to the number of files to read
     if (paths.length != numTasks) {

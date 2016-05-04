@@ -18,11 +18,14 @@ import com.twitter.heron.integration_test.core.BaseBatchBolt;
  */
 public class WordCountBolt extends BaseBatchBolt {
   public static final Logger LOG = Logger.getLogger(WordCountBolt.class.getName());
+  private static final long serialVersionUID = -7592911369781228601L;
   OutputCollector collector;
   HashMap<String, Integer> cache = new HashMap<String, Integer>();
 
   @Override
-  public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
+  public void prepare(Map<String, Object> map,
+                      TopologyContext topologyContext,
+                      OutputCollector outputCollector) {
     collector = outputCollector;
   }
 

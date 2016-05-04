@@ -23,12 +23,9 @@ public class TestTopologyBuilder extends TopologyBuilder {
   // Could be URL, file location, etc.
   private final String outputLocation;
   // The structure of the topologyBlr - a graph directed from children to parents
-  private final Map<String, TopologyAPI.Bolt.Builder> bolts =
-      new HashMap<String, TopologyAPI.Bolt.Builder>();
-  private final Map<String, TopologyAPI.Spout.Builder> spouts =
-      new HashMap<String, TopologyAPI.Spout.Builder>();
-  private final Map<String, HashSet<String>> prev =
-      new HashMap<String, HashSet<String>>();
+  private final Map<String, TopologyAPI.Bolt.Builder> bolts = new HashMap<>();
+  private final Map<String, TopologyAPI.Spout.Builder> spouts = new HashMap<>();
+  private final Map<String, HashSet<String>> prev = new HashMap<>();
   // By default, terminalBoltClass will be AggregatorBolt, which writes to specified HTTP server
   private String terminalBoltClass = "com.twitter.heron.integration_test.core.AggregatorBolt";
 
@@ -78,7 +75,7 @@ public class TestTopologyBuilder extends TopologyBuilder {
   public HeronTopology createTopology() {
     // We will add the aggregation_bolt to be serialized
     final String AGGREGATOR_BOLT = "__integration_test_aggregator_bolt";
-    BaseBatchBolt aggregatorBolt = null;
+    BaseBatchBolt aggregatorBolt;
     try {
       // Terminal Bolt will be initialized using reflection, based on the value of terminal bolt class
       // class should be built on top of BaseBatchBolt abstract class, and can be changed using setTerminalBolt function
@@ -141,9 +138,9 @@ public class TestTopologyBuilder extends TopologyBuilder {
 
     // To find the terminal bolts defined by users and link them with "AggregatorBolt"
     // First, "it" of course needs upstream component, we don't want the isolated bolt
-    HashSet<String> terminals = new HashSet<String>();
+    HashSet<String> terminals = new HashSet<>();
     // Second, "it" should not exists in the prev.valueSet, which means, it has no downstream
-    HashSet<String> nonTerminals = new HashSet<String>();
+    HashSet<String> nonTerminals = new HashSet<>();
     for (HashSet<String> set : prev.values()) {
       nonTerminals.addAll(set);
     }

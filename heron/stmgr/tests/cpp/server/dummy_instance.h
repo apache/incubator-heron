@@ -1,17 +1,31 @@
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #ifndef __DUMMY_INSTANCE_H
 #define __DUMMY_INSTANCE_H
 
 #include "proto/messages.h"
 #include "network/network_error.h"
 
-class DummyInstance : public Client
-{
+class DummyInstance : public Client {
  public:
   DummyInstance(EventLoopImpl* eventLoop, const NetworkOptions& _options,
                 const sp_string& _topology_name, const sp_string& _topology_id,
-                const sp_string& _instance_id, const sp_string& _component_name,
-                sp_int32 _task_id, sp_int32 _component_index,
-                const sp_string& _stmgr_id);
+                const sp_string& _instance_id, const sp_string& _component_name, sp_int32 _task_id,
+                sp_int32 _component_index, const sp_string& _stmgr_id);
 
   virtual ~DummyInstance();
 
@@ -37,6 +51,7 @@ class DummyInstance : public Client
   sp_int32 task_id_;
   sp_int32 component_index_;
   sp_string stmgr_id_;
+
  private:
   // Handle incoming connections
   virtual void HandleConnect(NetworkErrorCode _status);
@@ -50,21 +65,22 @@ class DummyInstance : public Client
   heron::proto::system::StatusCode register_response_status;
 };
 
-
-class DummySpoutInstance: public DummyInstance {
+class DummySpoutInstance : public DummyInstance {
  public:
   DummySpoutInstance(EventLoopImpl* eventLoop, const NetworkOptions& _options,
                      const sp_string& _topology_name, const sp_string& _topology_id,
                      const sp_string& _instance_id, const sp_string& _component_name,
-                     sp_int32 _task_id, sp_int32 _component_index,
-                     const sp_string& _stmgr_id, const sp_string& _stream_id,
-                     sp_int32 _max_msgs_to_send, bool _do_custom_grouping);
+                     sp_int32 _task_id, sp_int32 _component_index, const sp_string& _stmgr_id,
+                     const sp_string& _stream_id, sp_int32 _max_msgs_to_send,
+                     bool _do_custom_grouping);
 
  protected:
   // Handle incoming message
   virtual void HandleInstanceResponse(heron::proto::stmgr::RegisterInstanceResponse* _message);
-  virtual void HandleNewInstanceAssignmentMsg(heron::proto::stmgr::NewInstanceAssignmentMessage* _msg);
+  virtual void HandleNewInstanceAssignmentMsg(
+      heron::proto::stmgr::NewInstanceAssignmentMessage* _msg);
   virtual void CreateAndSendTupleMessages();
+
  private:
   sp_string stream_id_;
   sp_int32 max_msgs_to_send_;
@@ -75,21 +91,24 @@ class DummySpoutInstance: public DummyInstance {
   sp_int32 custom_grouping_dest_task_;
 };
 
-class DummyBoltInstance: public DummyInstance {
+class DummyBoltInstance : public DummyInstance {
  public:
   DummyBoltInstance(EventLoopImpl* eventLoop, const NetworkOptions& _options,
                     const sp_string& _topology_name, const sp_string& _topology_id,
                     const sp_string& _instance_id, const sp_string& _component_name,
-                    sp_int32 _task_id, sp_int32 _component_index,
-                    const sp_string& _stmgr_id, sp_int32 _expected_msgs_to_recv);
+                    sp_int32 _task_id, sp_int32 _component_index, const sp_string& _stmgr_id,
+                    sp_int32 _expected_msgs_to_recv);
 
   sp_int32 MsgsRecvd() { return msgs_recvd_; }
+
  protected:
   // Handle incoming message
   virtual void HandleInstanceResponse(heron::proto::stmgr::RegisterInstanceResponse* _message);
   // Handle incoming tuples
   virtual void HandleTupleMessage(heron::proto::stmgr::TupleMessage* _message);
-  virtual void HandleNewInstanceAssignmentMsg(heron::proto::stmgr::NewInstanceAssignmentMessage* _msg);
+  virtual void HandleNewInstanceAssignmentMsg(
+      heron::proto::stmgr::NewInstanceAssignmentMessage* _msg);
+
  private:
   sp_int32 expected_msgs_to_recv_;
   sp_int32 msgs_recvd_;

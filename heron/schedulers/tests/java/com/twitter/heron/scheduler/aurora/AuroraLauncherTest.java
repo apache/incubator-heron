@@ -65,5 +65,7 @@ public class AuroraLauncherTest {
         Mockito.any(Config.class),
         Mockito.any(IScheduler.class),
         Mockito.any(PackingPlan.class));
+
+    launcher.close();
   }
 }

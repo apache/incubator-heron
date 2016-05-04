@@ -18,6 +18,7 @@ import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.api.tuple.Values;
 
 public class IntegrationTestBolt implements IRichBolt {
+  private static final long serialVersionUID = 6304554167838679097L;
   private static final Logger LOG = Logger.getLogger(IntegrationTestBolt.class.getName());
   private final IRichBolt delegateBolt;
   private int terminalsToReceive = 0;

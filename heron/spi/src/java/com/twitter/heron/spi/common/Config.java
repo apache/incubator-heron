@@ -125,12 +125,11 @@ public class Config {
 
   @Override
   public String toString() {
-    Map<String, Object> treeMap = new TreeMap<String, Object>(cfgMap);
+    Map<String, Object> treeMap = new TreeMap<>(cfgMap);
     StringBuilder sb = new StringBuilder();
-    for (Object obj : treeMap.entrySet()) {
-      Map.Entry<String, Object> entry = (Map.Entry) obj;
-      sb.append("(\"" + entry.getKey() + "\"");
-      sb.append(", " + entry.getValue() + ")\n");
+    for (Map.Entry<String, Object> entry : treeMap.entrySet()) {
+      sb.append("(\"").append(entry.getKey()).append("\"");
+      sb.append(", ").append(entry.getValue()).append(")\n");
     }
     return sb.toString();
   }

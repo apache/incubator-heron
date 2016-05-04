@@ -29,7 +29,7 @@ public final class Utils {
 
   public static Object newInstance(String klass) {
     try {
-      Class c = Class.forName(klass);
+      Class<?> c = Class.forName(klass);
       return c.newInstance();
     } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
       throw new RuntimeException(e);
