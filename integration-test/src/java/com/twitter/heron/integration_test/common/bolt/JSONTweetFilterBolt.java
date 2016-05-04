@@ -23,6 +23,7 @@ import com.twitter.heron.api.tuple.Values;
  */
 
 public class JSONTweetFilterBolt extends BaseBasicBolt {
+  private static final long serialVersionUID = -7159267336583563993L;
   private static final Logger LOG = Logger.getLogger(JSONTweetFilterBolt.class.getName());
   private static final ObjectMapper mapper = new ObjectMapper();
 
