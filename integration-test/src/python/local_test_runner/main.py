@@ -319,10 +319,13 @@ def main():
   args['readFile'] = os.path.join(args['workingDirectory'], conf['topology']['readFile'])
   args['testJarPath'] = os.path.join(heronRepoDirectory, conf['testJarPath'])
 
+  start_time = time.time()
   (successes, failures) = runAllTests(args)
+  elapsed_time = time.time() - start_time
 
   if not failures:
     logging.info("Success: %s (all) tests passed" % len(successes))
+    logging.info("Elapsed time: %s" % elapsed_time)
     sys.exit(0)
   else:
     logging.error("Fail: %s test failed" %len(failures))
