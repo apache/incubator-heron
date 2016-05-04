@@ -16,7 +16,9 @@ package com.twitter.heron.scheduler.aurora;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -80,8 +82,8 @@ public class AuroraScheduler implements IScheduler {
   }
 
   @Override
-  public String getJobLink() {
-    return null;
+  public List<String> getJobLinks() {
+    return new ArrayList<>();
   }
 
   @Override

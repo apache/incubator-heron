@@ -57,6 +57,8 @@ public final class SchedulerUtils {
         // since some methods in IScheduler will provide correct values
         // only after IScheduler.onSchedule is invoked correctly
         ret = setSchedulerLocation(runtime, scheduler);
+      } else {
+        LOG.severe("Failed to invoke IScheduler as library");
       }
     } finally {
       scheduler.close();
@@ -97,8 +99,8 @@ public final class SchedulerUtils {
    * Set the location of scheduler for other processes to discover,
    * when invoke IScheduler as a library on client side
    *
-   * @param runtime, the runtime configuration
-   * @param scheduler, the IScheduler to provide more info
+   * @param runtime the runtime configuration
+   * @param scheduler the IScheduler to provide more info
    */
   public static boolean setSchedulerLocation(
       Config runtime,
@@ -113,10 +115,10 @@ public final class SchedulerUtils {
   /**
    * Set the location of scheduler for other processes to discover
    *
-   * @param runtime, the runtime configuration
-   * @param schedulerServerHost, the http server host that scheduler listens for receives requests
-   * @param schedulerServerPort, the http server port that scheduler listens for receives requests
-   * @param scheduler, the IScheduler to provide more info
+   * @param runtime the runtime configuration
+   * @param schedulerServerHost the http server host that scheduler listens for receives requests
+   * @param schedulerServerPort the http server port that scheduler listens for receives requests
+   * @param scheduler the IScheduler to provide more info
    */
   public static boolean setSchedulerLocation(
       Config runtime,
@@ -131,10 +133,10 @@ public final class SchedulerUtils {
             String.format("%s:%d", schedulerServerHost, schedulerServerPort));
 
     // Set the job link in SchedulerLocation if any
-    String jobLink = scheduler.getJobLink();
+    List<String> jobLinks = scheduler.getJobLinks();
     // Check whether IScheduler provides valid job link
-    if (jobLink != null && !jobLink.equals("")) {
-      builder.setJobPageLink(jobLink);
+    if (jobLinks != null) {
+      builder.addAllJobPageLink(jobLinks);
     }
 
     Scheduler.SchedulerLocation location = builder.build();

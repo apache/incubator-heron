@@ -332,23 +332,27 @@ public class SchedulerMain {
 
       // schedule the packed plan
       isSuccessful = scheduler.onSchedule(packedPlan);
-
-      if (isSuccessful) {
-        // get the scheduler server endpoint for receiving requests
-        server = getServer(ytruntime, scheduler, schedulerServerPort);
-        // start the server to manage runtime requests
-        server.start();
-
-        // write the scheduler location to state manager
-        // Make sure it happens after IScheduler.onScheduler
-        isSuccessful = SchedulerUtils.setSchedulerLocation(
-            runtime, server.getHost(), server.getPort(), scheduler);
+      if (!isSuccessful) {
+        LOG.severe("Failed to schedule topology");
+        return false;
       }
 
-      // wait until kill request or some interrupt occurs
-      LOG.info("Waiting for termination... ");
-      Runtime.schedulerShutdown(ytruntime).await();
+      // Failures in server initialization throw exceptions
+      // get the scheduler server endpoint for receiving requests
+      server = getServer(ytruntime, scheduler, schedulerServerPort);
+      // start the server to manage runtime requests
+      server.start();
 
+      // write the scheduler location to state manager
+      // Make sure it happens after IScheduler.onScheduler
+      isSuccessful = SchedulerUtils.setSchedulerLocation(
+          runtime, server.getHost(), server.getPort(), scheduler);
+
+      if (isSuccessful) {
+        // wait until kill request or some interrupt occurs if the scheduler starts successfully
+        LOG.info("Waiting for termination... ");
+        Runtime.schedulerShutdown(ytruntime).await();
+      }
     } catch (IOException e) {
       LOG.log(Level.SEVERE, "Failed to start server", e);
       return false;

@@ -9,9 +9,9 @@ message SchedulerLocation {
   required string topology_name = 1;
   // host:port or DNS address of scheduler which can be reached for runtime management.
   required string http_endpoint = 2;
-  // Optional link to topology's customized ui page
+  // Optional links to topology's customized ui page
   // Example: link to the Mesos Slave UI page displaying all scheduled containers
-  optional string job_page_link = 3;
+  repeated string job_page_link = 3;
 }
 
 //

@@ -14,6 +14,9 @@
 
 package com.twitter.heron.scheduler;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.PackingPlan;
@@ -37,8 +40,8 @@ public class NullScheduler implements IScheduler {
   }
 
   @Override
-  public String getJobLink() {
-    return null;
+  public List<String> getJobLinks() {
+    return new ArrayList<>();
   }
 
   @Override

@@ -16,6 +16,7 @@ package com.twitter.heron.scheduler.local;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -210,8 +211,8 @@ public class LocalScheduler implements IScheduler {
   }
 
   @Override
-  public String getJobLink() {
-    return null;
+  public List<String> getJobLinks() {
+    return new ArrayList<>();
   }
 
   /**
