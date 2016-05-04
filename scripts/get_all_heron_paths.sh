@@ -23,7 +23,12 @@ function query() {
 
 set +e
 # Build everything
-bazel build heron/...
+if [ "$(uname -s | tr 'A-Z' 'a-z')" != "darwin" ]; then
+  bazel build --config=ubuntu heron/...  --verbose_failures  --genrule_strategy=standalone --ignore_unsupported_sandboxing --sandbox_debug --spawn_strategy=standalone
+else
+  bazel build --config=darwin heron/...
+fi
+
 result=$?
 if [ "${result}" -eq "0" ] ; then
   echo "Bazel build successful!!"

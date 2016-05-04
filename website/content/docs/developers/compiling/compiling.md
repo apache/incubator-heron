@@ -3,7 +3,7 @@ title: Compiling Heron
 ---
 
 Heron is currently available for [Mac OS X 10.10](../../../developers/compiling/mac), 
-[Ubuntu 12.04, Ubuntu 14.04](../../../developers/compiling/linux), and CentOS 5. 
+[Ubuntu 14.04](../../../developers/compiling/linux), and CentOS. 
 This guide describes the basics of Heron build system. For step by step build instructions 
 on a specific platform refer the following guides.
 
@@ -75,7 +75,7 @@ are supported:
 
 * `darwin` (Mac OS X)
 * `ubuntu` (Ubuntu 14.04)
-* `centos5` (CentOS 5)
+* `centos5` (CentOS)
 
 For example the following command will build all packages:
 
