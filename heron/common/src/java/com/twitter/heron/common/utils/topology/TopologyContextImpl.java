@@ -39,6 +39,7 @@ import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.common.basics.Constants;
+import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
 
 /**
@@ -54,7 +55,6 @@ public class TopologyContextImpl extends GeneralTopologyContextImpl implements T
   // List of task hooks to delegate
   private final List<ITaskHook> taskHooks;
 
-  @SuppressWarnings("unchecked")
   public TopologyContextImpl(Map<String, Object> clusterConfig,
                              TopologyAPI.Topology topology,
                              Map<Integer, String> taskToComponentMap,
@@ -67,7 +67,7 @@ public class TopologyContextImpl extends GeneralTopologyContextImpl implements T
     // Init task hooks
     this.taskHooks = new LinkedList<>();
     List<String> taskHooksClassNames =
-        (List<String>) clusterConfig.get(Config.TOPOLOGY_AUTO_TASK_HOOKS);
+        TypeUtils.getListOfStrings(clusterConfig.get(Config.TOPOLOGY_AUTO_TASK_HOOKS));
 
     if (taskHooksClassNames != null) {
       // task hooks are registered
@@ -239,7 +239,7 @@ public class TopologyContextImpl extends GeneralTopologyContextImpl implements T
     List<Integer> allTasks = getComponentTasks(getThisComponentId());
     int retVal = 0;
     for (Integer tsk : allTasks) {
-      if (tsk.intValue() < myTaskId) {
+      if (tsk < myTaskId) {
         retVal++;
       }
     }
@@ -286,33 +286,24 @@ public class TopologyContextImpl extends GeneralTopologyContextImpl implements T
   }
 
   /*
-   * Convenient method for registering ReducedMetric.
+   * Convenience method for registering ReducedMetric.
    */
   @Override
-  @SuppressWarnings("rawtypes")
-  public ReducedMetric registerMetric(String name, IReducer reducer, int timeBucketSizeInSecs) {
-    return registerMetric(name, new ReducedMetric(reducer), timeBucketSizeInSecs);
+  public <T> ReducedMetric<T> registerMetric(String name,
+                                             IReducer<T> reducer,
+                                             int timeBucketSizeInSecs) {
+    return registerMetric(name, new ReducedMetric<>(reducer), timeBucketSizeInSecs);
   }
 
   /*
-   * Convinience method for registering CombinedMetric.
+   * Convenience method for registering CombinedMetric.
    */
   @Override
-  @SuppressWarnings("rawtypes")
-  public CombinedMetric registerMetric(String name, ICombiner combiner, int timeBucketSizeInSecs) {
-    return registerMetric(name, new CombinedMetric(combiner), timeBucketSizeInSecs);
+  public <T> CombinedMetric<T> registerMetric(String name,
+                                              ICombiner<T> combiner,
+                                              int timeBucketSizeInSecs) {
+    return registerMetric(name, new CombinedMetric<>(combiner), timeBucketSizeInSecs);
   }
-
-  /*
-    TODO:- Do we really need this?
-    public void setExecutorData(String name, Object data) {
-        _executorData.put(name, data);
-    }
-
-    public Object getExecutorData(String name) {
-        return _executorData.get(name);
-    }
-    */
 
   @Override
   public void addTaskHook(ITaskHook hook) {
