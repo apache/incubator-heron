@@ -9,3 +9,4 @@ heron.directory.sandbox.java.home:           /usr/lib/jvm/java-1.8.0-openjdk-amd
 
 # Invoke the IScheduler as a library directly
 heron.scheduler.is.service:                  False
+
