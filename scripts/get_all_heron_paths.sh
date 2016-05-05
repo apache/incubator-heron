@@ -23,7 +23,7 @@ function query() {
 
 set +e
 # Build everything
-echo bazel build {heron,integration-test,tools/java}/...
+bazel build {heron,integration-test,tools/java}/...
 result=$?
 if [ "${result}" -eq "0" ] ; then
   echo "Bazel build successful!!"
