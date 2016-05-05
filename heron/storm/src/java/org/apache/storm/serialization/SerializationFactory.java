@@ -108,8 +108,8 @@ public final class SerializationFactory {
     kryoFactory.postRegister(k, conf);
 
     if (conf.get(Config.TOPOLOGY_KRYO_DECORATORS) != null) {
-      for (String klassName :
-          TypeUtils.getListOfStrings(conf.get(Config.TOPOLOGY_KRYO_DECORATORS))) {
+      for (String klassName
+          : TypeUtils.getListOfStrings(conf.get(Config.TOPOLOGY_KRYO_DECORATORS))) {
         try {
           Class<?> klass = Class.forName(klassName);
           IKryoDecorator decorator = (IKryoDecorator) klass.newInstance();
