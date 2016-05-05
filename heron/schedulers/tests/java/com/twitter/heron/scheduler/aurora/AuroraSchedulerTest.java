@@ -23,6 +23,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
@@ -85,16 +86,18 @@ public class AuroraSchedulerTest {
 
     // Failed to create job via controller
     Mockito.doReturn(false).when(
-        controller).createJob(Mockito.anyString(), Mockito.any(Map.class));
+        controller).createJob(Mockito.anyString(), Matchers.anyMapOf(String.class, String.class));
     Assert.assertFalse(scheduler.onSchedule(validPlan));
-    Mockito.verify(controller).createJob(Mockito.eq(AURORA_PATH), Mockito.any(Map.class));
+    Mockito.verify(controller).createJob(Mockito.eq(AURORA_PATH),
+        Matchers.anyMapOf(String.class, String.class));
 
     // Happy path
     Mockito.doReturn(true).when(
-        controller).createJob(Mockito.anyString(), Mockito.any(Map.class));
+        controller).createJob(Mockito.anyString(), Matchers.anyMapOf(String.class, String.class));
     Assert.assertTrue(scheduler.onSchedule(validPlan));
     Mockito.verify(
-        controller, Mockito.times(2)).createJob(Mockito.eq(AURORA_PATH), Mockito.any(Map.class));
+        controller, Mockito.times(2)).createJob(Mockito.eq(AURORA_PATH),
+        Matchers.anyMapOf(String.class, String.class));
   }
 
   @Test

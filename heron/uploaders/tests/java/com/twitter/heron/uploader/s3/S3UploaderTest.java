@@ -95,6 +95,7 @@ public class S3UploaderTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void handlePutObjectExceptionOnUpload() throws Exception {
     String expectedRemotePath = "test-topology/topology.tar.gz";
     String expectedBucket = "bucket";

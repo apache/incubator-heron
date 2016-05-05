@@ -112,6 +112,7 @@ public class TMasterSink implements IMetricsSink {
   private SinkContext sinkContext;
 
   @Override
+  @SuppressWarnings("unchecked")
   public void init(Map<String, Object> conf, SinkContext context) {
     sinkConfig.putAll(conf);
 

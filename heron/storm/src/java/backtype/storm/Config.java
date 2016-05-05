@@ -21,6 +21,8 @@ import java.util.Map;
 
 import com.esotericsoftware.kryo.Serializer;
 
+import com.twitter.heron.common.basics.TypeUtils;
+
 import backtype.storm.serialization.IKryoDecorator;
 import backtype.storm.serialization.IKryoFactory;
 
@@ -339,13 +341,13 @@ public class Config extends com.twitter.heron.api.Config {
     conf.put(Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION, fallback);
   }
 
-  @SuppressWarnings("rawtypes") // List can contain strings or maps
-  private static List getRegisteredSerializations(Map<String, Object> conf) {
-    List ret;
+  @SuppressWarnings("unchecked")
+  private static List<Object> getRegisteredSerializations(Map<String, Object> conf) {
+    List<Object> ret;
     if (!conf.containsKey(Config.TOPOLOGY_KRYO_REGISTER)) {
-      ret = new ArrayList();
+      ret = new ArrayList<>();
     } else {
-      ret = new ArrayList((List) conf.get(Config.TOPOLOGY_KRYO_REGISTER));
+      ret = new ArrayList<>((List<Object>) conf.get(Config.TOPOLOGY_KRYO_REGISTER));
     }
     conf.put(Config.TOPOLOGY_KRYO_REGISTER, ret);
     return ret;
@@ -356,7 +358,7 @@ public class Config extends com.twitter.heron.api.Config {
     if (!conf.containsKey(Config.TOPOLOGY_KRYO_DECORATORS)) {
       ret = new ArrayList<>();
     } else {
-      ret = new ArrayList<>((List) conf.get(Config.TOPOLOGY_KRYO_DECORATORS));
+      ret = new ArrayList<>(TypeUtils.getListOfStrings(conf.get(Config.TOPOLOGY_KRYO_DECORATORS)));
     }
     conf.put(Config.TOPOLOGY_KRYO_DECORATORS, ret);
     return ret;
@@ -413,6 +415,7 @@ public class Config extends com.twitter.heron.api.Config {
     registerSerialization(this, klass, serializerClass);
   }
 
+  @SuppressWarnings("unchecked")
   public void registerMetricsConsumer(Class<?> klass, Object argument, long parallelismHint) {
     HashMap<String, Object> m = new HashMap<>();
     m.put("class", klass.getCanonicalName());
