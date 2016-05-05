@@ -97,7 +97,7 @@ public final class CppCheckstyle {
   }
 
   private static void runLinter(List<String> command) throws IOException {
-    LOG.info("checkstyle command: " + command);
+    LOG.fine("checkstyle command: " + command);
 
     ProcessBuilder processBuilder = new ProcessBuilder(command);
     processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
@@ -122,6 +122,7 @@ public final class CppCheckstyle {
     }
   }
 
+  @SuppressWarnings("unchecked")
   private static Collection<String> getSourceFiles(String extraActionFile) {
 
     ExtraActionInfo info = ExtraActionUtils.getExtraActionInfo(extraActionFile);
