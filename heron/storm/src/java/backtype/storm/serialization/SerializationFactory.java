@@ -29,6 +29,8 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.serializers.DefaultSerializers.BigIntegerSerializer;
 
+import com.twitter.heron.common.basics.TypeUtils;
+
 import backtype.storm.Config;
 import backtype.storm.serialization.types.ArrayListSerializer;
 import backtype.storm.serialization.types.HashMapSerializer;
@@ -48,6 +50,7 @@ public final class SerializationFactory {
    * @param conf the config
    * @return Kryo
    */
+  @SuppressWarnings("unchecked")
   public static Kryo getKryo(Map<String, Object> conf) {
     IKryoFactory kryoFactory =
         (IKryoFactory) Utils.newInstance((String) conf.get(Config.TOPOLOGY_KRYO_FACTORY));
@@ -104,7 +107,8 @@ public final class SerializationFactory {
     kryoFactory.postRegister(k, conf);
 
     if (conf.get(Config.TOPOLOGY_KRYO_DECORATORS) != null) {
-      for (String klassName : (List<String>) conf.get(Config.TOPOLOGY_KRYO_DECORATORS)) {
+      for (String klassName :
+          TypeUtils.getListOfStrings(conf.get(Config.TOPOLOGY_KRYO_DECORATORS))) {
         try {
           Class<?> klass = Class.forName(klassName);
           IKryoDecorator decorator = (IKryoDecorator) klass.newInstance();
@@ -162,6 +166,7 @@ public final class SerializationFactory {
             serializerClass.getName(), superClass.getName()));
   }
 
+  @SuppressWarnings("unchecked")
   private static Map<String, String> normalizeKryoRegister(Map<String, Object> conf) {
     // TODO: de-duplicate this logic with the code in nimbus
     Object res = conf.get(Config.TOPOLOGY_KRYO_REGISTER);

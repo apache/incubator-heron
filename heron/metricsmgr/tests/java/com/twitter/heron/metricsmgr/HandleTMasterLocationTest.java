@@ -107,6 +107,7 @@ public class HandleTMasterLocationTest {
   }
 
   @After
+  @SuppressWarnings("unchecked")
   public void after() throws Exception {
     threadsPool.shutdownNow();
 

@@ -37,6 +37,8 @@ import org.apache.storm.tuple.Values;
 import org.apache.storm.utils.ListDelegate;
 import org.apache.storm.utils.Utils;
 
+import com.twitter.heron.common.basics.TypeUtils;
+
 public final class SerializationFactory {
   public static final Logger LOG = Logger.getLogger(SerializationFactory.class.getName());
 
@@ -49,6 +51,7 @@ public final class SerializationFactory {
    * @param conf the config
    * @return Kryo
    */
+  @SuppressWarnings("unchecked")
   public static Kryo getKryo(Map<String, Object> conf) {
     IKryoFactory kryoFactory =
         (IKryoFactory) Utils.newInstance((String) conf.get(Config.TOPOLOGY_KRYO_FACTORY));
@@ -105,7 +108,8 @@ public final class SerializationFactory {
     kryoFactory.postRegister(k, conf);
 
     if (conf.get(Config.TOPOLOGY_KRYO_DECORATORS) != null) {
-      for (String klassName : (List<String>) conf.get(Config.TOPOLOGY_KRYO_DECORATORS)) {
+      for (String klassName :
+          TypeUtils.getListOfStrings(conf.get(Config.TOPOLOGY_KRYO_DECORATORS))) {
         try {
           Class<?> klass = Class.forName(klassName);
           IKryoDecorator decorator = (IKryoDecorator) klass.newInstance();
@@ -163,6 +167,7 @@ public final class SerializationFactory {
             serializerClass.getName(), superClass.getName()));
   }
 
+  @SuppressWarnings("unchecked")
   private static Map<String, String> normalizeKryoRegister(Map<String, Object> conf) {
     // TODO: de-duplicate this logic with the code in nimbus
     Object res = conf.get(Config.TOPOLOGY_KRYO_REGISTER);
