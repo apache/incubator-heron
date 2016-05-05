@@ -13,6 +13,7 @@
 // limitations under the License.
 package com.twitter.heron.integration_test.common.bolt;
 
+import java.lang.SuppressWarnings;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,6 +44,7 @@ public class MapAggregatorBolt extends BaseBatchBolt {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public void execute(Tuple tuple) {
     buffer.putAll((Map<String, Integer>) tuple.getValue(0));
   }
