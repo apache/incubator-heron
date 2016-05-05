@@ -27,6 +27,12 @@ aurora_deps_files = [
     "//heron/schedulers/src/java:aurora-scheduler-java",
 ]
 
+reef_deps_files = [
+    "//heron/schedulers/src/java:reef-scheduler-java",
+    "@reef-common//jar",
+    "@tang//jar",
+]
+
 local_deps_files = [
     "//heron/schedulers/src/java:local-scheduler-java",
 ]
@@ -59,6 +65,17 @@ java_test(
     ["**/AuroraControllerTest.java"]
   ),
   deps=scheduler_deps_files + aurora_deps_files,
+  size="small",
+)
+
+java_test(
+  name="reef-scheduler_unittest",
+  srcs=glob([
+      "**/ReefSchedulerTest.java",
+      "**/HeronMasterDriverTest.java",
+    ]
+  ),
+  deps=scheduler_deps_files + reef_deps_files,
   size="small",
 )
 

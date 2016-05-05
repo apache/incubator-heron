@@ -41,10 +41,6 @@ public final class HeronMasterDriverProvider {
   }
 
   static void setInstance(HeronMasterDriver instance) {
-    if (HeronMasterDriverProvider.instance != null) {
-      throw new RuntimeException("Resetting Heron Driver instance is not allowed");
-    }
-
     HeronMasterDriverProvider.instance = Optional.of(instance);
   }
 }

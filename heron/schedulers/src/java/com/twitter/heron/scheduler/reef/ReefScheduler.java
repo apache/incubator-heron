@@ -14,6 +14,7 @@
 
 package com.twitter.heron.scheduler.reef;
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,9 +40,15 @@ public class ReefScheduler implements IScheduler {
   public boolean onSchedule(PackingPlan packing) {
     LOG.log(Level.INFO, "Launching topology master for packing: {0}", packing.id);
     HeronMasterDriver driver = HeronMasterDriverProvider.getInstance();
-    driver.scheduleTopologyMaster();
+    driver.scheduleTMasterContainer();
     driver.scheduleHeronWorkers(packing);
     return true;
+  }
+
+  @Override
+  public List<String> getJobLinks() {
+    // TODO need to add this implementation
+    return null;
   }
 
   @Override
