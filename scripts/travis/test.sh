@@ -14,7 +14,7 @@ bazel --bazelrc=tools/travis-ci/bazel.rc run -- scripts/packages:heron-client-in
 python integration-test/src/python/local_test_runner/main.py
 
 # build integration test tools
-bazel --bazelrc=tools/travis-ci/bazel.rc build integration-test/src/python/...
+bazel --bazelrc=tools/travis-ci/bazel.rc build integration-test/src/{python,java}/...
 bazel --bazelrc=tools/travis-ci/bazel.rc build integration-test/src/java:integration-tests_deploy.jar
 
 # run integration test
