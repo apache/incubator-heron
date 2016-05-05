@@ -139,6 +139,7 @@ public final class UnitTestHelper {
     pPlan.addStmgrs(stmgr);
   }
 
+  @SuppressWarnings("unchecked")
   public static void clearSingletonRegistry() throws Exception {
     // Remove the Singleton by Reflection
     Field field = SingletonRegistry.INSTANCE.getClass().getDeclaredField("singletonObjects");

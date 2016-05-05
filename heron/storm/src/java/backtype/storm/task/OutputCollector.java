@@ -58,7 +58,7 @@ public class OutputCollector implements IOutputCollector {
    * @return the list of task ids that this new tuple was sent to
    */
   public List<Integer> emit(String streamId, List<Object> tuple) {
-    return emit(streamId, (List) null, tuple);
+    return emit(streamId, (Collection<Tuple>) null, tuple);
   }
 
   /**
@@ -130,7 +130,7 @@ public class OutputCollector implements IOutputCollector {
    * @param tuple the new output tuple from this bolt
    */
   public void emitDirect(int taskId, String streamId, List<Object> tuple) {
-    emitDirect(taskId, streamId, (List) null, tuple);
+    emitDirect(taskId, streamId, (Collection<Tuple>) null, tuple);
   }
 
   /**
