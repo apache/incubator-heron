@@ -2,77 +2,80 @@
 
 ### Overview
 
-This guide aims to provide some basic steps at troubleshooting your topology.
-These server as the starting steps to troubleshoot any issues with the topology,
-and leave you in a position to identify the root cause easily.
+This guide provides basic steps to troubleshoot a topology.
+These are starting steps to troubleshoot potential issues and identify root causes easily.
 
 This guide is organized into following broad sections:
 
-* How to tell if my topology is running fine
-* Where is the problem in my topology
-* Frequently seen issues
+* [Determine topology running status and health](#running)
+* [Identify topology problems](#problem)
+* [Frequently seen issues](#frequent)
 
-This guide is useful for topology writers. The issues related to Heron setup or
-its internals, like `schedulers`, etc, are not discussed here.
+This guide is useful for topology developers. Issues related to Heron [configuration setup](../../../docs/operators/configuration/config-intro) or
+its [internal architecture](../../../docs/concepts/architecture), like `schedulers`, etc, are discussed in Configuration and Heron Developers respectively, and not discussed here.
 
-### How to tell if my topology is running fine
+<a name="running"></a>
 
-#### 1. Know your data rate
+### Determine topology running status and health
 
-It is expected that you know how much data your topology is expected to consume.
-Try to estimate it in terms of items per minute. The emit count (tuples per
-minute) of each spout should match the data rate for the corresponding data
+#### 1. Estimate your data rate
+
+It is important to estimate how much data a topology is expected to consume.
+A useful approach is to begin by estimating a data rate in terms of items per minute. The emit count (tuples per minute) of each spout should match the data rate for the corresponding data
 stream. If spouts are not consuming and emitting the data at the same rate as it
-is produced, we call this scenario `spout lag`.
+is produced, this is called `spout lag`.
 
 Some spouts, like `Kafka Spout` have a lag metric that can be
 directly used to measure health. It is recommended to have some kind of lag
-metric if you have a custom spout, so that its easier to check, as well as can
-be used to set up monitoring alerts.
+metric for a custom spout, so that it's easier to check and create monitoring alerts.
 
-#### 2. No Backpressure
+#### 2. Absent Backpressure
 
-Backpressure initated by an instance means that the concerned instance is not
+Backpressure initiated by an instance means that the concerned instance is not
 able to consume data at the same rate at which it is being receiving. This
 results in all spouts getting clamped (they will not consume any more data)
-until the backpressure is releived by the instance.
+until the backpressure is relieved by the instance.
 
-It is measured in milliseconds per minute, an instance was under backpressure.
-A value of 60,000 means an instance was under backpressure for the whole minute.
+Backpressure is measured in milliseconds per minute, the time an instance was under backpressure.  For example, a value of 60,000 means an instance was under backpressure for the whole minute (60 seconds).
 
-A healthy topology should not have backpressure. This usually results in the
+A healthy topology should not have backpressure. Backpressure usually results in the
 spout lag build up since spouts get clamped, but it should not be considered as
-a cause, only a symptom.
+a cause, only a symptom.  
 
-#### 3. No failures
+Therefore, adjust and iterate Topology until backpressure is absent.
 
-Failed tuples are considered bad for a topology, unless its a feature. If
+#### 3. Absent failures
+
+Failed tuples are generally considered bad for a topology, unless it is a required feature (for instance, lowest possible latency is needed at the expense of possible dropped tuples). If
 `acking` is disabled, or even when enabled and not handled properly in spouts,
 this can result in data loss, without adding spout lag.
 
-### Where is the problem in my topology
 
-#### 1. Look at the instance under backpressure
+<a name="problem"></a>
+### Identify topology problems
 
-The metric directly shows which instances have been under backpressure. You can
-jump directly to the logs of that instance to see what is going wrong with the
-instance. Some of the known causes of backpressure are being discussed below.
+#### 1. Look at instances under backpressure
+
+Backpressure metrics identifies which instances have been under backpressure. Therefore, jump directly to the logs of that instance to see what is going wrong with the
+instance. Some of the known causes of backpressure are discussed in the [frequently seen issues](#frequent) section below.
 
 #### 2. Look at items pending to be acked
 
-The spouts export a metric which is a sampled value of the number of tuples
+Spouts export a metric which is a sampled value of the number of tuples
 still in flight in the topology. Sometimes, `max-spout-pending` config limits
 the consumption rate of the topology. Increasing that spout's parallelism
 generally solves the issue.
 
+<a name="frequent"></a>
+
 ### Frequently seen issues
 
-#### 1. I can not launch the topology
+#### 1. Topology does not launch
 
 *Symptom* - Heron client fails to launch the topology.
 
-Note that heron client will execute the topology's `main` method on your local
-system, which means spouts and bolts get instantiated here, serialized, and then
+Note that heron client will execute the topology's `main` method on the local
+system, which means spouts and bolts get instantiated locally, serialized, and then
 sent over to schedulers as part of `topology.defn`. It is important to make sure
 that:
 
@@ -83,7 +86,7 @@ that:
 3. The `main` method should not try to access anything that your local machine
    may not have access to.
 
-#### 2. My topology does not start
+#### 2. Topology does not start
 
 We assume here that heron client has successfully launched the topology.
 
@@ -109,8 +112,7 @@ Tmaster.
 
 #### 3. Instances are not starting up
 
-A topology would not start until all the instances are running. So you may see
-this as a cause of topology not getting started.
+A topology would not start until all the instances are running. This may be a cause of a topology not starting.
 
 *Symptom* - The stream manager logs for that instance never showed that the
 instance connected to it.
@@ -131,7 +133,7 @@ getting launched.
    manager and metrics manager, having a large number of instances and low
    `containerRAM` may starve off these instances.
 
-#### 4. I do not see any metrics for a component
+#### 4. Metrics for a component are missing/absent
 
 *Symptom* - The upstream component is emitting data, but this component is not
 executing any, and no metrics are being reported.
@@ -152,7 +154,7 @@ it is possible that execution is stuck in `execute` method.
 
 #### 5. There is backpressure from internal bolt
 
-We call a bolt internal if it does not talk to any external servive. For example,
+Bolts are called internal if it does not talk to any external service. For example,
 the last bolt might be talking to some database to write its results, and would
 not be called an internal bolt.
 
