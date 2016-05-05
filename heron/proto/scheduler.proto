@@ -8,7 +8,10 @@ import "common.proto";
 message SchedulerLocation {
   required string topology_name = 1;
   // host:port or DNS address of scheduler which can be reached for runtime management.
-  required string http_endpoint = 3;
+  required string http_endpoint = 2;
+  // Optional links to topology's customized ui page
+  // Example: link to the Mesos Slave UI page displaying all scheduled containers
+  repeated string job_page_link = 3;
 }
 
 //

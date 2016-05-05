@@ -16,12 +16,15 @@ package com.twitter.heron.spi.utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
+import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 public final class SchedulerUtils {
   private static final Logger LOG = Logger.getLogger(SchedulerUtils.class.getName());
@@ -48,6 +51,15 @@ public final class SchedulerUtils {
     try {
       scheduler.initialize(config, runtime);
       ret = scheduler.onSchedule(packing);
+
+      if (ret) {
+        // Set the SchedulerLocation at last step,
+        // since some methods in IScheduler will provide correct values
+        // only after IScheduler.onSchedule is invoked correctly
+        ret = setSchedulerLocation(runtime, scheduler);
+      } else {
+        LOG.severe("Failed to invoke IScheduler as library");
+      }
     } finally {
       scheduler.close();
     }
@@ -81,5 +93,63 @@ public final class SchedulerUtils {
     commands.add(Integer.toString(httpPort));
 
     return commands.toArray(new String[0]);
+  }
+
+  /**
+   * Set the location of scheduler for other processes to discover,
+   * when invoke IScheduler as a library on client side
+   *
+   * @param runtime the runtime configuration
+   * @param scheduler the IScheduler to provide more info
+   */
+  public static boolean setSchedulerLocation(
+      Config runtime,
+      IScheduler scheduler) {
+    // Dummy values since there is no running scheduler server
+    final String serverHost = "scheduling_as_library";
+    final int serverPort = -1;
+
+    return setSchedulerLocation(runtime, serverHost, serverPort, scheduler);
+  }
+
+  /**
+   * Set the location of scheduler for other processes to discover
+   *
+   * @param runtime the runtime configuration
+   * @param schedulerServerHost the http server host that scheduler listens for receives requests
+   * @param schedulerServerPort the http server port that scheduler listens for receives requests
+   * @param scheduler the IScheduler to provide more info
+   */
+  public static boolean setSchedulerLocation(
+      Config runtime,
+      String schedulerServerHost,
+      int schedulerServerPort,
+      IScheduler scheduler) {
+
+    // Set scheduler location to host:port by default. Overwrite scheduler location if behind DNS.
+    Scheduler.SchedulerLocation.Builder builder = Scheduler.SchedulerLocation.newBuilder()
+        .setTopologyName(Runtime.topologyName(runtime))
+        .setHttpEndpoint(
+            String.format("%s:%d", schedulerServerHost, schedulerServerPort));
+
+    // Set the job link in SchedulerLocation if any
+    List<String> jobLinks = scheduler.getJobLinks();
+    // Check whether IScheduler provides valid job link
+    if (jobLinks != null) {
+      builder.addAllJobPageLink(jobLinks);
+    }
+
+    Scheduler.SchedulerLocation location = builder.build();
+
+    LOG.log(Level.INFO, "Setting SchedulerLocation: {0}", location);
+    SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
+    Boolean result = statemgr.setSchedulerLocation(location, Runtime.topologyName(runtime));
+
+    if (result == null || !result) {
+      LOG.severe("Failed to set Scheduler location");
+      return false;
+    }
+
+    return true;
   }
 }
