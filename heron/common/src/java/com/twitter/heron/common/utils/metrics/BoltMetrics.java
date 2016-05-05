@@ -43,6 +43,7 @@ public class BoltMetrics {
   private final MultiCountMetric failCount;
   private final MultiCountMetric executeCount;
   private final MultiReducedMetric<MeanReducerState> executeLatency;
+
   // Time in nano-seconds spending in execute() at every interval
   private final MultiCountMetric executeTimeNs;
   private final MultiCountMetric emitCount;
