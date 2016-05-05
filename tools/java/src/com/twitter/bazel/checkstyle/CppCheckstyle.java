@@ -71,11 +71,11 @@ public final class CppCheckstyle {
 
       Collection<String> sourceFiles = getSourceFiles(extraActionFile);
       if (sourceFiles.size() == 0) {
-        LOG.info("No cpp files found by checkstyle");
+        LOG.fine("No cpp files found by checkstyle");
         return;
       }
 
-      LOG.info(sourceFiles.size() + " cpp files found by checkstyle");
+      LOG.fine(sourceFiles.size() + " cpp files found by checkstyle");
 
       // Create and run the command
       List<String> commandBuilder = new ArrayList<>();
