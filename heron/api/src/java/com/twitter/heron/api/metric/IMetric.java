@@ -14,6 +14,10 @@
 
 package com.twitter.heron.api.metric;
 
-public interface IMetric {
-  Object getValueAndReset();
+/**
+ * Interface for a metric that can be tracked
+ * @param <T> the type of the metric value being tracked
+ */
+public interface IMetric<T> {
+  T getValueAndReset();
 }

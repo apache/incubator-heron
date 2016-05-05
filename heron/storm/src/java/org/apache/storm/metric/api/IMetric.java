@@ -14,6 +14,6 @@
 
 package org.apache.storm.metric.api;
 
-public interface IMetric {
-  Object getValueAndReset();
+public interface IMetric<T> {
+  T getValueAndReset();
 }

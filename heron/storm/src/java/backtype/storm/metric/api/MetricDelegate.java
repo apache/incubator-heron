@@ -14,15 +14,16 @@
 
 package backtype.storm.metric.api;
 
-public class MetricDelegate implements com.twitter.heron.api.metric.IMetric {
-  private IMetric delegate;
+public class MetricDelegate<U extends IMetric<T>, T>
+    implements com.twitter.heron.api.metric.IMetric<T> {
+  private U delegate;
 
-  public MetricDelegate(IMetric delegate) {
+  public MetricDelegate(U delegate) {
     this.delegate = delegate;
   }
 
   @Override
-  public Object getValueAndReset() {
+  public T getValueAndReset() {
     return delegate.getValueAndReset();
   }
 }

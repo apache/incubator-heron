@@ -38,11 +38,11 @@ import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 
 public class BoltMetrics {
   private final MultiCountMetric ackCount;
-  private final MultiReducedMetric<MeanReducerState> processLatency;
-  private final MultiReducedMetric<MeanReducerState> failLatency;
+  private final MultiReducedMetric<MeanReducerState, Number, Double> processLatency;
+  private final MultiReducedMetric<MeanReducerState, Number, Double> failLatency;
   private final MultiCountMetric failCount;
   private final MultiCountMetric executeCount;
-  private final MultiReducedMetric<MeanReducerState> executeLatency;
+  private final MultiReducedMetric<MeanReducerState, Number, Double> executeLatency;
 
   // Time in nano-seconds spending in execute() at every interval
   private final MultiCountMetric executeTimeNs;
