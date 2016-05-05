@@ -150,7 +150,7 @@ EOF
 
 echo Done. IDEA module file: $iml_file
 
-IDEA=`ls -1d /Applications/IntelliJ\ * | tail -n1`
+IDEA=`ls -1d /Applications/IntelliJ\ * 2> /dev/null| tail -n1`
 if [ -n "$IDEA" ]; then
   echo "Opening Heron project in IDEA..."
   open -a "/Applications/IntelliJ IDEA 14.app" .
