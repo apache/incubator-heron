@@ -15,10 +15,11 @@
 package com.twitter.heron.scheduler.reef;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -59,16 +60,10 @@ import com.twitter.heron.spi.utils.TopologyUtils;
  */
 @Unit
 public class HeronMasterDriver {
-  private static final String TMASTER_CONTAINER_ID = "0";
-  private static final int MB = 1024 * 1024;
-  private static final int TM_MEM_SIZE_MB = 1024;
+  static final int TM_MEM_SIZE_MB = 1024;
+  static final String TMASTER_CONTAINER_ID = "0";
+  static final int MB = 1024 * 1024;
   private static final Logger LOG = Logger.getLogger(HeronMasterDriver.class.getName());
-
-  // TODO: Currently REEF does not support YARN AM HA (REEF-345). In absence of this, YARN will kill
-  // TODO: all containers if AM container is lost. Subsequently handle precise reconstruction of it
-  // TODO: after AM is restarted?
-  // TODO: Ensure Kill operation stops creation of new contexts in flight.
-  private final Map<String, ActiveContext> contexts = new HashMap<>();
   private final String topologyPackageName;
   private final String heronCorePackageName;
   private final EvaluatorRequestor requestor;
@@ -80,19 +75,24 @@ public class HeronMasterDriver {
   private final String env;
   private final String topologyJar;
   private final int httpPort;
-  // Currently yarn does not support mapping container requests to allocation (YARN-4879). As a
-  // result it is not possible to concurrently start containers of different sizes. This lock
-  // ensures workers are started serially.
+  // TODO: Currently REEF does not support YARN AM HA (REEF-345). In absence of this, YARN will kill
+  // TODO: all containers if AM container is lost. Subsequently handle precise reconstruction of it
+  // TODO: after AM is restarted?
+  // Once topology is killed, no more activeContexts should be allowed. This could happen when
+  // container allocation is happening and topology is killed concurrently.
+  private Map<String, ActiveContext> activeContexts = new ConcurrentHashMap<>();
   // TODO: Let the PackingAlgorithm return homogeneous containers to avoid allocation latencies.
-  // TODO: Get rid of this lock. Add a request queue for new and failed contexts. Avoid blocking any
+  // TODO: Get rid of this lock. Add a request queue for new and failed Contexts. Avoid blocking any
   // TODO: event thread.
-  private final Object containerAllocationLock = new Object();
+  // Currently yarn does not support mapping container requests to allocation (YARN-4879). As a
+  // result it is not possible to concurrently start containers of different sizes. This Queue will
+  // ensures containers are started serially. Since one container is allocated at a time, the
+  // capacity of this queue is 1. The capacity can be increased once the jira above is fixed.
+  private BlockingQueue<AllocatedEvaluator> allocatedContainerQ = new LinkedBlockingDeque<>(1);
+
   // This map will be needed to make container requests for a failed heron executor
   private Map<String, String> reefContainerToHeronExecutorMap = new ConcurrentHashMap<>();
   private PackingPlan packing;
-  // Container request submission and allocation takes places on different threads. This variable is
-  // used to share the heron executor id for which the container request was submitted
-  private String heronExecutorId;
 
   @Inject
   public HeronMasterDriver(EvaluatorRequestor requestor,
@@ -128,13 +128,11 @@ public class HeronMasterDriver {
   /**
    * Requests container for TMaster as container/executor id 0.
    */
-  void scheduleTopologyMaster() {
-    // TODO: This method should be invoked only once per topology. Need to add some guards against
-    // TODO: subsequent invocations?
+  void scheduleTMasterContainer() {
     LOG.log(Level.INFO, "Scheduling container for TM: {0}", topologyName);
     try {
       // TODO: Co-locate TMaster and Scheduler to avoid issues caused by network partitioning.
-      requestContainerForExecutor(TMASTER_CONTAINER_ID, 1, TM_MEM_SIZE_MB);
+      launchContainerForExecutor(TMASTER_CONTAINER_ID, 1, TM_MEM_SIZE_MB);
     } catch (InterruptedException e) {
       // Deployment of topology fails if there is a error starting TMaster
       throw new RuntimeException("Error while waiting for topology master container allocation", e);
@@ -152,7 +150,7 @@ public class HeronMasterDriver {
 
       int mem = getMemInMBForExecutor(reqResource);
       try {
-        requestContainerForExecutor(entry.getKey(), getCpuForExecutor(reqResource), mem);
+        launchContainerForExecutor(entry.getKey(), getCpuForExecutor(reqResource), mem);
       } catch (InterruptedException e) {
         LOG.log(Level.WARNING, "Error while waiting for container allocation for workers; "
             + "Continue container request for remaining workers", e);
@@ -162,29 +160,56 @@ public class HeronMasterDriver {
     }
   }
 
-  private void requestContainerForExecutor(String executorId, int cpu, int mem)
-      throws InterruptedException {
-    LOG.log(Level.INFO, "Scheduling container for executor, id: {0}", executorId);
-    synchronized (containerAllocationLock) {
-      heronExecutorId = executorId;
-      EvaluatorRequest evaluatorRequest = EvaluatorRequest
-          .newBuilder()
-          .setNumber(1)
-          .setMemory(mem)
-          .setNumberOfCores(cpu)
-          .build();
-      requestor.submit(evaluatorRequest);
-      containerAllocationLock.wait();
-    }
-    LOG.log(Level.INFO, "Container is allocated for executor, id: {0}", executorId);
-  }
-
   public void killTopology() {
     LOG.log(Level.INFO, "Kill topology: {0}", topologyName);
+    Map<String, ActiveContext> contexts = clearActiveContexts();
+
     for (Entry<String, ActiveContext> entry : contexts.entrySet()) {
       LOG.log(Level.INFO, "Close context: {0}", entry.getKey());
       entry.getValue().close();
     }
+  }
+
+  private void launchContainerForExecutor(String executorId, int cpu, int mem)
+      throws InterruptedException {
+    AllocatedEvaluator evaluator = allocateContainer(executorId, cpu, mem);
+
+    Configuration context = createContextConfig(executorId);
+
+    LOG.log(Level.INFO,
+        "Activating container {0} for heron executor, id: {1}",
+        new Object[]{evaluator.getId(), executorId});
+    evaluator.submitContext(context);
+    reefContainerToHeronExecutorMap.put(evaluator.getId(), executorId);
+  }
+
+  synchronized AllocatedEvaluator allocateContainer(String id, int cpu, int mem)
+      throws InterruptedException {
+    EvaluatorRequest evaluatorRequest = createEvaluatorRequest(cpu, mem);
+
+    LOG.log(Level.INFO, "Requesting container for executor, id: {0}", id);
+    requestor.submit(evaluatorRequest);
+
+    AllocatedEvaluator evaluator = allocatedContainerQ.take();
+    LOG.log(Level.INFO,
+        "Container {0} is allocated for executor, id: {1}",
+        new Object[]{evaluator.getId(), id});
+    return evaluator;
+  }
+
+  Configuration createContextConfig(String executorId) {
+    return ContextConfiguration.CONF
+        .set(ContextConfiguration.IDENTIFIER, executorId)
+        .build();
+  }
+
+  EvaluatorRequest createEvaluatorRequest(int cpu, int mem) {
+    return EvaluatorRequest
+        .newBuilder()
+        .setNumber(1)
+        .setMemory(mem)
+        .setNumberOfCores(cpu)
+        .build();
   }
 
   private int getCpuForExecutor(Resource resource) {
@@ -194,6 +219,34 @@ public class HeronMasterDriver {
   private int getMemInMBForExecutor(Resource resource) {
     Long ram = resource.ram / MB;
     return ram.intValue();
+  }
+
+  String getPackingAsString() {
+    return TopologyUtils.packingToString(packing);
+  }
+
+  synchronized boolean addActiveContext(ActiveContext context) {
+    if (activeContexts == null) {
+      LOG.log(Level.WARNING, "Topology has been killed, new context ignored and closed.");
+      context.close();
+      return false;
+    }
+
+    String key = context.getId();
+    ActiveContext orphanedContext = activeContexts.get(key);
+    if (orphanedContext != null) {
+      LOG.log(Level.WARNING, "Found orphaned context for id: {0}, will close it", key);
+      orphanedContext.close();
+    }
+
+    activeContexts.put(key, context);
+    return true;
+  }
+
+  synchronized Map<String, ActiveContext> clearActiveContexts() {
+    Map<String, ActiveContext> result = activeContexts;
+    activeContexts = null;
+    return result;
   }
 
   /**
@@ -230,25 +283,18 @@ public class HeronMasterDriver {
   /**
    * Initializes worker on the allocated container
    */
-  class HeronExecutorContainerBuilder implements EventHandler<AllocatedEvaluator> {
+  class HeronContainerAllocationHandler implements EventHandler<AllocatedEvaluator> {
     @Override
     public void onNext(AllocatedEvaluator evaluator) {
-      String executorId;
-      synchronized (containerAllocationLock) {
-        // create a local copy of executorId so that lock for next allocation can be released
-        executorId = heronExecutorId;
-        containerAllocationLock.notifyAll();
+      try {
+        allocatedContainerQ.put(evaluator);
+      } catch (InterruptedException e) {
+        LOG.log(Level.WARNING, "Unexpected error while waiting for consumer to use allocated"
+            + " container. Evaluator will be destroyed " + evaluator.getId(), e);
+        evaluator.close();
+        // TODO: Just log a WARNING without any actions for now. This should not happen as only one
+        // TODO: container request is created at a time.
       }
-
-      LOG.log(Level.INFO,
-          "Start {0} for heron executor, id: {1}",
-          new Object[]{evaluator.getId(), executorId});
-      Configuration context = ContextConfiguration.CONF
-          .set(ContextConfiguration.IDENTIFIER, executorId)
-          .build();
-      evaluator.submitContext(context);
-
-      reefContainerToHeronExecutorMap.put(evaluator.getId(), executorId);
     }
   }
 
@@ -273,7 +319,7 @@ public class HeronMasterDriver {
         // TODO verify if this thread can be used to submit a new request
         try {
           if (executorId.equals(TMASTER_CONTAINER_ID)) {
-            requestContainerForExecutor(TMASTER_CONTAINER_ID, 1, TM_MEM_SIZE_MB);
+            launchContainerForExecutor(TMASTER_CONTAINER_ID, 1, TM_MEM_SIZE_MB);
           } else {
             if (packing.containers.get(executorId) == null) {
               LOG.log(Level.SEVERE,
@@ -282,7 +328,7 @@ public class HeronMasterDriver {
               return;
             }
             Resource reqResource = packing.containers.get(executorId).resource;
-            requestContainerForExecutor(executorId,
+            launchContainerForExecutor(executorId,
                 getCpuForExecutor(reqResource),
                 getMemInMBForExecutor(reqResource));
           }
@@ -301,8 +347,12 @@ public class HeronMasterDriver {
   public final class HeronExecutorLauncher implements EventHandler<ActiveContext> {
     @Override
     public void onNext(ActiveContext context) {
+      boolean result = addActiveContext(context);
+      if (!result) {
+        return;
+      }
+
       String id = context.getId();
-      contexts.put(id, context);
       LOG.log(Level.INFO, "Submitting evaluator task for id: {0}", id);
 
       // topologyName and other configurations are required by Heron Executor and Task to load
@@ -318,7 +368,7 @@ public class HeronMasterDriver {
           .set(HeronTaskConfiguration.ROLE, role)
           .set(HeronTaskConfiguration.ENV, env)
           .set(HeronTaskConfiguration.CLUSTER, cluster)
-          .set(HeronTaskConfiguration.PACKED_PLAN, TopologyUtils.packingToString(packing))
+          .set(HeronTaskConfiguration.PACKED_PLAN, getPackingAsString())
           .set(HeronTaskConfiguration.CONTAINER_ID, id)
           .build();
       context.submitTask(taskConf);
