@@ -57,6 +57,7 @@ class Application(tornado.web.Application):
       (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/logicalplan.json",               handlers.api.TopologyLogicalPlanJsonHandler),
       (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/physicalplan.json",              handlers.api.TopologyPhysicalPlanJsonHandler),
       (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/executionstate.json",            handlers.api.TopologyExecutionStateJsonHandler),
+      (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/schedulerlocation.json",         handlers.api.TopologySchedulerLocationJsonHandler),
 
       # Counter Handlers
       (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/exceptions.json",       handlers.api.TopologyExceptionsJsonHandler),
