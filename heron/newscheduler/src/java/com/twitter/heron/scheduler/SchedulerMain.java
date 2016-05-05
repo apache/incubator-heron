@@ -31,7 +31,6 @@ import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
-import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.server.SchedulerServer;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
@@ -43,6 +42,7 @@ import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerConfig;
+import com.twitter.heron.spi.utils.SchedulerUtils;
 import com.twitter.heron.spi.utils.Shutdown;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
@@ -265,33 +265,6 @@ public class SchedulerMain {
   }
 
   /**
-   * Set the location of scheduler for other processes to discover
-   *
-   * @param runtime, the runtime configuration
-   * @param schedulerServer, the http server that scheduler listens for receives requests
-   */
-  private boolean setSchedulerLocation(Config runtime, SchedulerServer schedulerServer) {
-
-    // Set scheduler location to host:port by default. Overwrite scheduler location if behind DNS.
-    Scheduler.SchedulerLocation location = Scheduler.SchedulerLocation.newBuilder()
-        .setTopologyName(Runtime.topologyName(runtime))
-        .setHttpEndpoint(
-            String.format("%s:%d", schedulerServer.getHost(), schedulerServer.getPort()))
-        .build();
-
-    LOG.log(Level.INFO, "Setting SchedulerLocation: {0}", location);
-    SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
-    Boolean result = statemgr.setSchedulerLocation(location, Runtime.topologyName(runtime));
-
-    if (result == null || !result) {
-      LOG.severe("Failed to set Scheduler location");
-      return false;
-    }
-
-    return true;
-  }
-
-  /**
    * Run the scheduler.
    * It is a blocking call, and it will return in 2 cases:
    * 1. The topology is requested to kill
@@ -357,21 +330,29 @@ public class SchedulerMain {
       // initialize the scheduler
       scheduler.initialize(config, ytruntime);
 
+      // schedule the packed plan
+      isSuccessful = scheduler.onSchedule(packedPlan);
+      if (!isSuccessful) {
+        LOG.severe("Failed to schedule topology");
+        return false;
+      }
+
+      // Failures in server initialization throw exceptions
       // get the scheduler server endpoint for receiving requests
       server = getServer(ytruntime, scheduler, schedulerServerPort);
       // start the server to manage runtime requests
       server.start();
 
       // write the scheduler location to state manager
-      isSuccessful = setSchedulerLocation(runtime, server);
+      // Make sure it happens after IScheduler.onScheduler
+      isSuccessful = SchedulerUtils.setSchedulerLocation(
+          runtime, server.getHost(), server.getPort(), scheduler);
 
-      // schedule the packed plan
-      isSuccessful = isSuccessful && scheduler.onSchedule(packedPlan);
-
-      // wait until kill request or some interrupt occurs
-      LOG.info("Waiting for termination... ");
-      Runtime.schedulerShutdown(ytruntime).await();
-
+      if (isSuccessful) {
+        // wait until kill request or some interrupt occurs if the scheduler starts successfully
+        LOG.info("Waiting for termination... ");
+        Runtime.schedulerShutdown(ytruntime).await();
+      }
     } catch (IOException e) {
       LOG.log(Level.SEVERE, "Failed to start server", e);
       return false;
