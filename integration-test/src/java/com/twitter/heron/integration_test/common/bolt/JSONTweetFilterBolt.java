@@ -70,7 +70,7 @@ public class JSONTweetFilterBolt extends BaseBasicBolt {
     // Parse JSON entry
     Map<String, Object> tweetJson = null;
     try {
-      tweetJson = MAPPER.readValue(tweet, Map.class);
+      tweetJson = MAPPER.readValue(tweet, new TypeReference<Map<String, Object>>() {});
     } catch (IOException e) {
       LOG.log(Level.SEVERE, "Failed to parse the String into map: " + tweet, e);
     }
