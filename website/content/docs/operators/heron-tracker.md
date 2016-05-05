@@ -2,7 +2,7 @@
 title: The Heron Tracker REST API
 ---
 
-The **Heron Tracker** is a long-running service that continuously gathers a wide
+The **Heron Tracker** is a web service that continuously gathers a wide
 variety of information about Heron topologies in your cluster(s) and exposes
 that information through a JSON REST API.  More on the role of the Tracker can
 be found [here](../../concepts/architecture#heron-tracker).
