@@ -63,7 +63,7 @@ public class SinkExecutorTest {
   public void before() throws Exception {
     metricsSink = new DummyMetricsSink();
     slaveLooper = new SlaveLooper();
-    communicator = new Communicator<MetricsRecord>(null, slaveLooper);
+    communicator = new Communicator<>(null, slaveLooper);
 
     SinkContext sinkContext =
         new SinkContextImpl("topology-name", "metricsmgr-id", "sink-id", new MultiCountMetric());
@@ -84,6 +84,7 @@ public class SinkExecutorTest {
    * Method: setProperty(String key, Object value)
    */
   @Test
+  @SuppressWarnings("unchecked")
   public void testSetProperty() throws Exception {
     String key = "key";
     String value = "value";
@@ -100,10 +101,11 @@ public class SinkExecutorTest {
    * Method: setPropertyMap(Map<? extends String, Object> configMap)
    */
   @Test
+  @SuppressWarnings("unchecked")
   public void testSetPropertyMap() throws Exception {
     String key = "key";
     String value = "value";
-    Map<String, Object> propertyMap = new HashMap<String, Object>();
+    Map<String, Object> propertyMap = new HashMap<>();
     propertyMap.put(key, value);
     sinkExecutor.setPropertyMap(propertyMap);
 
@@ -148,7 +150,7 @@ public class SinkExecutorTest {
   }
 
   private MetricsRecord constructMetricsRecord() {
-    List<MetricsInfo> metricsInfos = new ArrayList<MetricsInfo>();
+    List<MetricsInfo> metricsInfos = new ArrayList<>();
     // We add N MetricsInfo into a MetricsRecord
     for (int i = 0; i < N; i++) {
       MetricsInfo metricsInfo = new MetricsInfo(METRICS_NAME + i, METRICS_VALUE + i);
@@ -156,14 +158,13 @@ public class SinkExecutorTest {
     }
 
     // We add N ExceptionInfo into a MetricsRecord
-    List<ExceptionInfo> exceptionInfos = new ArrayList<ExceptionInfo>();
+    List<ExceptionInfo> exceptionInfos = new ArrayList<>();
     for (int i = 0; i < N; i++) {
       String stackTrace = EXCEPTION_STACK_TRACE + i;
       String lastTime = EXCEPTION_LAST_TIME + i;
       String firstTime = EXCEPTION_FIRST_TIME + i;
-      int count = i;
       String logging = EXCEPTION_LOGGING + i;
-      ExceptionInfo info = new ExceptionInfo(stackTrace, lastTime, firstTime, count, logging);
+      ExceptionInfo info = new ExceptionInfo(stackTrace, lastTime, firstTime, i, logging);
       exceptionInfos.add(info);
     }
 

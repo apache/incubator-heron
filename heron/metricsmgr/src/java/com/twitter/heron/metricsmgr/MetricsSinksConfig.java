@@ -35,6 +35,7 @@ public class MetricsSinksConfig {
 
   private final Map<String, Map<String, Object>> sinksConfigs = new HashMap<>();
 
+  @SuppressWarnings("unchecked")
   public MetricsSinksConfig(String filename) throws FileNotFoundException {
     FileInputStream fin = new FileInputStream(new File(filename));
     Yaml yaml = new Yaml();

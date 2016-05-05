@@ -27,6 +27,8 @@ import org.apache.storm.hooks.info.SpoutAckInfo;
 import org.apache.storm.hooks.info.SpoutFailInfo;
 import org.apache.storm.task.TopologyContext;
 
+import com.twitter.heron.common.basics.TypeUtils;
+
 /**
  * There would be types of task hooks inside ITaskHookDelegate:
  * 1. task hook's classes specified in config statically.
@@ -65,7 +67,7 @@ public class ITaskHookDelegate implements com.twitter.heron.api.hooks.ITaskHook 
       throw new RuntimeException("StormCompat Translation not done for task hooks");
     }
     List<String> hookClassNames =
-        (List<String>) newConf.get(Config.STORMCOMPAT_TOPOLOGY_AUTO_TASK_HOOKS);
+        TypeUtils.getListOfStrings(newConf.get(Config.STORMCOMPAT_TOPOLOGY_AUTO_TASK_HOOKS));
 
     for (String className : hookClassNames) {
       ITaskHook hook;
