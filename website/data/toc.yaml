@@ -51,6 +51,8 @@ sections:
         url: /docs/developers/troubleshooting
       - name: Tuning Guide
         url: /docs/developers/tuning
+      - name: Heron UI Guide
+        url: /docs/developers/ui-guide
       - name: Javadoc
         url: /docs/javadoc
   - name: Heron Developers
