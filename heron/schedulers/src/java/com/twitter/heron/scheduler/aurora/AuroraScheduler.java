@@ -16,7 +16,9 @@ package com.twitter.heron.scheduler.aurora;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -77,6 +79,11 @@ public class AuroraScheduler implements IScheduler {
     Map<String, String> auroraProperties = createAuroraProperties(packing);
 
     return controller.createJob(getHeronAuroraPath(), auroraProperties);
+  }
+
+  @Override
+  public List<String> getJobLinks() {
+    return new ArrayList<>();
   }
 
   @Override
