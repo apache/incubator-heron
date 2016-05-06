@@ -72,8 +72,15 @@ java_binary(
     ],
 )
 
+genrule(
+    name = "integration-tests",
+    srcs = [":integration-tests-unshaded_deploy.jar"],
+    outs = ["integration-tests.jar"],
+    cmd = "cp $< $@",
+)
+
 java_binary(
-    name = "local-integration-tests",
+    name = "local-integration-tests-unshaded",
     srcs = glob(
        ["com/twitter/heron/local_integration_test/**/*.java"],
     ),
@@ -86,8 +93,8 @@ java_binary(
 )
 
 genrule(
-    name = "integration-tests",
-    srcs = [":integration-tests-unshaded_deploy.jar"],
-    outs = ["integration-tests.jar"],
+    name = "local-integration-test",
+    srcs = [":local-integration-tests-unshaded_deploy.jar"],
+    outs = ["local-integration-tests.jar"],
     cmd = "cp $< $@",
 )

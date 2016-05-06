@@ -5,16 +5,13 @@
 set -ex
 
 # build test related jar
-bazel --bazelrc=tools/travis-ci/bazel.rc build integration-test/src/java:local-integration-tests_deploy.jar
+bazel --bazelrc=tools/travis-ci/bazel.rc build integration-test/src/...
 
 # install client
 bazel --bazelrc=tools/travis-ci/bazel.rc run -- scripts/packages:heron-client-install.sh --user
 
-# run the local integration test
+# run local integration test
 python integration-test/src/python/local_test_runner/main.py
-
-# build integration test tools
-bazel --bazelrc=tools/travis-ci/bazel.rc build integration-test/src/...
 
 # run integration test
 ./bazel-bin/integration-test/src/python/http_server/http-server 8080 &
