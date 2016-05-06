@@ -23,12 +23,19 @@
 
     console.log("React render component...");
   };
+
+  console.log("clusters....");
+  
+  console.log({% raw clusters %})
+  //console.log({{clusters}});
+
 </script>
 
 <script type="text/jsx">
+  
   /** @jsx React.DOM */
   React.renderComponent(
-      <FilterableTopologyTable/>,
+      <FilterableTopologyTable clusters={ {% raw clusters %}  } />,
       document.getElementById('topotable-container')
   );
 </script>
