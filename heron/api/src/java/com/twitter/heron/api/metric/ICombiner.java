@@ -14,6 +14,10 @@
 
 package com.twitter.heron.api.metric;
 
+/**
+ * Interface for classes that are able to combine multiple objects into one result.
+ * @param <T> the type of the input values and the combined value.
+ */
 public interface ICombiner<T> {
   T identity();
 

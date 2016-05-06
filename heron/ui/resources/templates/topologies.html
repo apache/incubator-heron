@@ -26,9 +26,10 @@
 </script>
 
 <script type="text/jsx">
+  
   /** @jsx React.DOM */
   React.renderComponent(
-      <FilterableTopologyTable/>,
+      <FilterableTopologyTable clusters={ {% raw clusters %}  } />,
       document.getElementById('topotable-container')
   );
 </script>

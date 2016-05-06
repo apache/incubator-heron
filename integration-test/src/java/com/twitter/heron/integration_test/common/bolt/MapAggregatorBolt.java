@@ -43,6 +43,7 @@ public class MapAggregatorBolt extends BaseBatchBolt {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public void execute(Tuple tuple) {
     buffer.putAll((Map<String, Integer>) tuple.getValue(0));
   }

@@ -17,7 +17,7 @@ package com.twitter.heron.api.metric;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MultiCountMetric implements IMetric {
+public class MultiCountMetric implements IMetric<Map<String, Long>> {
   private Map<String, CountMetric> value = new HashMap<>();
 
   public MultiCountMetric() {
@@ -31,10 +31,11 @@ public class MultiCountMetric implements IMetric {
     return val;
   }
 
-  public Object getValueAndReset() {
-    Map<String, Object> ret = new HashMap<>();
-    for (Map.Entry<String, CountMetric> e : value.entrySet()) {
-      ret.put(e.getKey(), e.getValue().getValueAndReset());
+  @Override
+  public Map<String, Long> getValueAndReset() {
+    Map<String, Long> ret = new HashMap<>();
+    for (String key : value.keySet()) {
+      ret.put(key, value.get(key).getValueAndReset());
     }
     return ret;
   }

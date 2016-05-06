@@ -17,6 +17,7 @@ from metricsqueryhandler import MetricsQueryHandler
 from metricstimelinehandler import MetricsTimelineHandler
 from physicalplanhandler import PhysicalPlanHandler
 from pidhandler import PidHandler
+from schedulerlocationhandler import SchedulerLocationHandler
 from stateshandler import StatesHandler
 from topologieshandler import TopologiesHandler
 from topologyhandler import TopologyHandler

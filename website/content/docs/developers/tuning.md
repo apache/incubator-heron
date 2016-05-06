@@ -1,12 +1,10 @@
-## Topology Tuning Guide
+---
+title: Topology Tuning Guide
+---
 
 ### Overview
 
-This guide provides some basic steps at tuning your topology to make the best
-use of resources. Currently, the resources are primarily measured in terms of
-CPU cores and RAM. There are a lot of ways to optimize resource utilization, but
-in Heron, some of the basic parameters that allow us to tune a topology are, but
-not limited to the following.
+This guide provides basic steps at tuning a topology to utilize resources efficiently. Currently, resources are primarily measured in terms of CPU cores and RAM. In Heron, some of the basic parameters that are available to tune a topology are, but not limited to, the following:
 
 1. Container RAM
 2. Container CPU
@@ -14,7 +12,7 @@ not limited to the following.
 4. Component Parallelisms
 5. Number of Containers
 
-Note that tuning a topology is hard and can take multiple iterations. Before
+Note that tuning a topology may be difficult and may take multiple iterations. Before
 proceeding, please make sure you understand concepts to understand the
 terminology, as well as the reasoning behind taking these steps.
 

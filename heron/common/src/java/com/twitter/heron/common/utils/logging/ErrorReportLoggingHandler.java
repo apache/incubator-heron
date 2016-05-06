@@ -104,7 +104,8 @@ public class ErrorReportLoggingHandler extends Handler {
 
   // Exception will be stored in this Metrics. Use of metrics simplify exporting the error to
   // metrics manager.
-  public enum ExceptionRepositoryAsMetrics implements IMetric {
+  public enum ExceptionRepositoryAsMetrics
+      implements IMetric<Collection<Metrics.ExceptionData.Builder>> {
     INSTANCE;
     private HashMap<String, Metrics.ExceptionData.Builder> exceptionStore;
 
@@ -113,7 +114,7 @@ public class ErrorReportLoggingHandler extends Handler {
     }
 
     @Override
-    public Object getValueAndReset() {
+    public Collection<Metrics.ExceptionData.Builder> getValueAndReset() {
       synchronized (ExceptionRepositoryAsMetrics.INSTANCE) {
         Collection<Metrics.ExceptionData.Builder> metricsValue = exceptionStore.values();
         exceptionStore = new HashMap<String, Metrics.ExceptionData.Builder>();

@@ -180,6 +180,23 @@ class TopologyExecutionStateJsonHandler(base.BaseHandler):
 
         self.write(result_map)
 
+class TopologySchedulerLocationJsonHandler(base.BaseHandler):
+    @tornado.gen.coroutine
+    def get(self, cluster, environ, topology):
+
+        start_time = time.time()
+        scheduler_location = yield access.get_scheduler_location(cluster, environ, topology)
+
+        result_map = dict(
+            status = "success",
+            message = "",
+            version = common.VERSION,
+            executiontime = time.time() - start_time,
+            result = estate
+        )
+
+        self.write(result_map)
+
 
 # Handler for getting exceptions
 class TopologyExceptionsJsonHandler(base.BaseHandler):
