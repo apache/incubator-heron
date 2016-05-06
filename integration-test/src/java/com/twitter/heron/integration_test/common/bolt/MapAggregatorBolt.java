@@ -13,7 +13,6 @@
 // limitations under the License.
 package com.twitter.heron.integration_test.common.bolt;
 
-import java.lang.SuppressWarnings;
 import java.util.HashMap;
 import java.util.Map;
 
