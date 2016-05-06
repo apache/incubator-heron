@@ -43,13 +43,13 @@ public class GatewayMetrics {
   private final CountMetric sentExceptionsCount;
 
   // The # of items in inStreamQueue
-  private final ReducedMetric<MeanReducerState> inStreamQueueSize;
+  private final ReducedMetric<MeanReducerState, Number, Double> inStreamQueueSize;
   // The # of items in outStreamQueue
-  private final ReducedMetric<MeanReducerState> outStreamQueueSize;
+  private final ReducedMetric<MeanReducerState, Number, Double> outStreamQueueSize;
 
-  private final ReducedMetric<MeanReducerState> inStreamQueueExpectedCapacity;
+  private final ReducedMetric<MeanReducerState, Number, Double> inStreamQueueExpectedCapacity;
 
-  private final ReducedMetric<MeanReducerState> outStreamQueueExpectedCapacity;
+  private final ReducedMetric<MeanReducerState, Number, Double> outStreamQueueExpectedCapacity;
 
   // The # of times back-pressure happens on inStreamQueue or outMetricQueue so instance could not
   // receive more tuples from stream manager

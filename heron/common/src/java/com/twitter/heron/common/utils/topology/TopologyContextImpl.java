@@ -280,7 +280,9 @@ public class TopologyContextImpl extends GeneralTopologyContextImpl implements T
    * @return The IMetric argument unchanged.
    */
   @Override
-  public <T extends IMetric> T registerMetric(String name, T metric, int timeBucketSizeInSecs) {
+  public <T extends IMetric<U>, U> T registerMetric(String name,
+                                                    T metric,
+                                                    int timeBucketSizeInSecs) {
     metricsCollector.registerMetric(name, metric, timeBucketSizeInSecs);
     return metric;
   }
@@ -289,9 +291,9 @@ public class TopologyContextImpl extends GeneralTopologyContextImpl implements T
    * Convenience method for registering ReducedMetric.
    */
   @Override
-  public <T> ReducedMetric<T> registerMetric(String name,
-                                             IReducer<T> reducer,
-                                             int timeBucketSizeInSecs) {
+  public <T, U, V> ReducedMetric<T, U, V> registerMetric(String name,
+                                                         IReducer<T, U, V> reducer,
+                                                         int timeBucketSizeInSecs) {
     return registerMetric(name, new ReducedMetric<>(reducer), timeBucketSizeInSecs);
   }
 
