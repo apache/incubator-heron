@@ -59,7 +59,7 @@ java_library(
 )
 
 java_binary(
-    name = "integration-tests",
+    name = "integration-tests-unshaded",
     srcs = glob(
        ["com/twitter/heron/integration_test/topology/**/*.java"],
     ),
@@ -83,4 +83,11 @@ java_binary(
         ":common",
         ":core"
     ],
+)
+
+genrule(
+    name = "integration-tests",
+    srcs = [":integration-tests-unshaded_deploy.jar"],
+    outs = ["integration-tests.jar"],
+    cmd = "cp $< $@",
 )
