@@ -45,6 +45,14 @@ filegroup(
 )
 
 filegroup(
+    name = 'lazy-object-proxy',
+    srcs = [
+        'lazy_object_proxy-1.2.2-py2.7-linux-x86_64.egg',
+        'lazy_object_proxy-1.2.2-py2.7-macosx-10.10-x86_64.egg',
+    ],
+)
+
+filegroup(
     name = 'protobuf',
     srcs = ['protobuf-2.5.0-py2-none-any.whl'],
 )
@@ -52,14 +60,6 @@ filegroup(
 filegroup(
     name = 'py',
     srcs = ['py-1.4.27-py2.py3-none-any.whl']
-)
-
-filegroup(
-    name = 'lazy-object-proxy',
-    srcs = [
-        'lazy_object_proxy-1.2.2-py2.7-linux-x86_64.egg',
-        'lazy_object_proxy-1.2.2-py2.7-macosx-10.10-x86_64.egg',
-    ],
 )
 
 filegroup(
