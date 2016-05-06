@@ -17,6 +17,16 @@ filegroup(
 )
 
 filegroup(
+    name = "astroid",
+    srcs = ["astroid-1.4.5-py2.py3-none-any.whl"],
+)
+
+filegroup(
+    name = "colorama",
+    srcs = ["colorama-0.3.7-py2.py3-none-any.whl"],
+)
+
+filegroup(
     name = "colorlog",
     srcs = ["colorlog-2.6.1-py2.py3-none-any.whl"],
 )
@@ -32,6 +42,14 @@ filegroup(
 filegroup(
     name = 'kazoo',
     srcs = ['kazoo-1.3.1-py2-none-any.whl'],
+)
+
+filegroup(
+    name = 'lazy-object-proxy',
+    srcs = [
+        'lazy_object_proxy-1.2.2-py2.7-linux-x86_64.egg',
+        'lazy_object_proxy-1.2.2-py2.7-macosx-10.10-x86_64.egg',
+    ],
 )
 
 filegroup(
@@ -55,6 +73,11 @@ filegroup(
 filegroup(
     name = "pygit",
     srcs = ["GitPython-0.3.2.RC1-py2-none-any.whl"],
+)
+
+filegroup(
+    name = 'pylint',
+    srcs = ["pylint-1.5.2-py2.py3-none-any.whl"],
 )
 
 filegroup(
@@ -83,6 +106,11 @@ filegroup(
 filegroup(
     name = 'setuptools',
     srcs = ['setuptools-18.0.1-py2.py3-none-any.whl'],
+)
+
+filegroup(
+    name = 'six',
+    srcs = ['six-1.10.0-py2.py3-none-any.whl'],
 )
 
 filegroup(
@@ -116,6 +144,14 @@ filegroup(
 filegroup(
     name = 'wheel',
     srcs = ['wheel-0.23.0-py2.7.egg'],
+)
+
+filegroup(
+    name = 'wrapt',
+    srcs = [
+        'wrapt-1.10.8-py2.7-linux-x86_64.egg',
+        'wrapt-1.10.8-py2.7-macosx-10.10-x86_64.egg',
+    ]
 )
 
 filegroup(
