@@ -10,7 +10,8 @@ java_toolchain(
     misc = [
         "-extra_checks:on",
         "-Xlint:all",
-        #"-Werror",
+        "-Xlint:-unchecked", # TODO: fix these and remove this (Issue #471)
+        "-Werror",
     ],
 )
 
