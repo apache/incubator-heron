@@ -36,7 +36,7 @@ import com.twitter.heron.proto.system.Metrics;
 public class MetricsCollector implements IMetricsRegister {
   private static final Logger LOG = Logger.getLogger(MetricsCollector.class.getName());
 
-  private Map<String, IMetric> metrics;
+  private Map<String, IMetric<?>> metrics;
   private Map<Integer, List<String>> timeBucketToMetricNames;
   private WakeableLooper runnableToGatherMetrics;
 
@@ -51,7 +51,7 @@ public class MetricsCollector implements IMetricsRegister {
   }
 
   @Override
-  public <T extends IMetric> T registerMetric(
+  public <T extends IMetric<U>, U> T registerMetric(
       String name,
       T metric,
       final int timeBucketSizeInSecs) {

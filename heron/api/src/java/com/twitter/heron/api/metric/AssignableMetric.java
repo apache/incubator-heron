@@ -14,18 +14,19 @@
 
 package com.twitter.heron.api.metric;
 
-public class AssignableMetric implements IMetric {
-  private Object value;
+public class AssignableMetric<T> implements IMetric<T> {
+  private T value;
 
-  public AssignableMetric(Object aValue) {
-    value = aValue;
+  public AssignableMetric(T value) {
+    this.value = value;
   }
 
-  public void setValue(Object aValue) {
-    value = aValue;
+  public void setValue(T value) {
+    this.value = value;
   }
 
-  public Object getValueAndReset() {
+  @Override
+  public T getValueAndReset() {
     return value;
   }
 }
