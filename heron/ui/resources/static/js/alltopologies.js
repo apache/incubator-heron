@@ -41,7 +41,6 @@ var TopologyItem = React.createClass({
          <td className="col-md-2 toposubmittedat no-break">{display_time}</td>
          <td className="col-md-2 topobutton no-break">
            <a className="btn btn-primary btn-sm" href={"/topologies/" + [topology.cluster, topology.environ, topology.name, "config"].join("/")} target="_self">Config</a>
-           <a className="btn btn-primary btn-sm" href={"http://go/" + [topology.cluster, topology.role, topology.environ, topology.name].join("/")} target="_blank">Aurora</a>
          </td>
        </tr>
     );
