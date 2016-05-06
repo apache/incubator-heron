@@ -160,7 +160,7 @@ var TopologyTable = React.createClass({
                 Name
               </th>
               <th onClick={sortBy("cluster")} className={sortClass("cluster")}>
-                DC
+                Cluster
               </th>
               <th onClick={sortBy("environ")} className={sortClass("environ")}>
                 Environ
@@ -277,6 +277,11 @@ var FilterableTopologyTable = React.createClass({
       'padding-left':  '15px',
     };
 
+    var clusters = [];
+    this.props.clusters.forEach(function(cluster) {
+      clusters.push(<li className=""> <a href="#" id={cluster} className={this.state.cluster == {cluster} ? 'active' : ''} onClick={this.handleDataCenterClick}>{cluster.toUpperCase()}</a></li>)
+    }.bind(this));
+
   return (
    <div>
      <div className="row spacer">
@@ -293,35 +298,14 @@ var FilterableTopologyTable = React.createClass({
 
            <div className="navbar-collapse collapse navbar-responsive-collapse">
              <ul className="nav navbar-nav">
-               <li className=""> <a href="#" id="all" className={this.state.cluster == "all" ? 'active' : ''} onClick={this.handleDataCenterClick}>ALL</a></li>
-               <li className=""> <a href="#" id="local" className={this.state.cluster == "local" ? 'active' : ''} onClick={this.handleDataCenterClick}>LOCAL</a></li>
-               <li className=""> <a href="#" id="localzk" className={this.state.cluster == "localzk" ? 'active' : ''} onClick={this.handleDataCenterClick}>LOCALZK</a></li>
+                <li className=""> <a href="#" id="all" className={this.state.cluster == "all" ? 'active' : ''} onClick={this.handleDataCenterClick}>ALL</a></li>
+                {clusters}
              </ul>
            </div>
          </div>
        </div>
 
-       <div className="col-md-6" style={environStyle}>
-         <div className="navbar-custom">
-           <div className="navbar-header">
-             <button type="button" className="navbar-toggle" data-toggle="collapse" data-target=".navbar-responsive-collapse">
-               <span className="icon-bar"></span>
-               <span className="icon-bar"></span>
-               <span className="icon-bar"></span>
-             </button>
-             <a className="navbar-brand" style={brandStyle}>environment</a>
-           </div>
-           <div className="navbar-collapse collapse navbar-responsive-collapse">
-             <ul className="nav navbar-nav">
-               <button type="button" className="navbar-toggle" data-toggle="collapse" data-target=".navbar-responsive-collapse">
-               </button>
-               <li className=""> <a href="#" id="all" className={this.state.environ == "all" ? 'active' : ''} onClick={this.handleEnvClick}>ALL</a></li>
-               <li className=""> <a href="#" id="prod" className={this.state.environ == "prod" ? 'active' : ''} onClick={this.handleEnvClick}>PRODUCTION</a></li>
-               <li className=""> <a href="#" id="devel" className={this.state.environ == "devel" ? 'active' : ''} onClick={this.handleEnvClick}>DEVELOPMENT</a></li>
-             </ul>
-           </div>
-         </div>
-       </div>
+       
      </div>
      <input id="search-box" placeholder="Search for a topology" type="text" className="form-control col-md-7" style={divStyle} autoFocus={true} onChange={this.handleFilterChange} defaultValue={this.state.filter}/>
      <TopologyTable  env={this.state.environ} cluster={this.state.cluster} filter={this.state.filter}/>
