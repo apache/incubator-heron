@@ -18,6 +18,7 @@ import subprocess
 
 HERON_EXECUTION_STATE_PREFIX = "{0}/executionstate/"
 HERON_PPLANS_PREFIX = "{0}/pplans/"
+HERON_SCHEDULER_LOCATION_PREFIX = "{0}/schedulers/"
 HERON_TMASTER_PREFIX = "{0}/tmasters/"
 HERON_TOPOLOGIES_KEY = "{0}/topologies"
 
@@ -210,6 +211,13 @@ class StateManager:
     path = HERON_TMASTER_PREFIX.format(self.rootpath) + topologyName
     return path
 
+  def get_scheduler_location_path(self, topologyName):
+    """
+    Create the path using rootpath and topology name.
+    """
+    path = HERON_SCHEDULER_LOCATION_PREFIX.format(self.rootpath) + topologyName
+    return path
+
   @abc.abstractmethod
   def get_topologies(self, callback=None):
     """
@@ -296,6 +304,16 @@ class StateManager:
   def get_tmaster(self, topologyName, callback=None):
     """
     Gets the tmaster for the topology.
+    If the callback is provided,
+    sets watch on the path and calls the callback
+    with the new pplan.
+    """
+    pass
+
+  @abc.abstractmethod
+  def get_scheduler_location(self, topologyName, callback=None):
+    """
+    Gets the scheduler location for the topology.
     If the callback is provided,
     sets watch on the path and calls the callback
     with the new pplan.
