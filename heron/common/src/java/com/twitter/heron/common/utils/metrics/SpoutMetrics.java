@@ -40,12 +40,12 @@ import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 
 public class SpoutMetrics {
   private final MultiCountMetric ackCount;
-  private final MultiReducedMetric<MeanReducerState> completeLatency;
-  private final MultiReducedMetric<MeanReducerState> failLatency;
+  private final MultiReducedMetric<MeanReducerState, Number, Double> completeLatency;
+  private final MultiReducedMetric<MeanReducerState, Number, Double> failLatency;
   private final MultiCountMetric failCount;
   private final MultiCountMetric timeoutCount;
   private final MultiCountMetric emitCount;
-  private final ReducedMetric<MeanReducerState> nextTupleLatency;
+  private final ReducedMetric<MeanReducerState, Number, Double> nextTupleLatency;
   private final CountMetric nextTupleCount;
   private final MultiCountMetric serializationTimeNs;
 
@@ -54,7 +54,7 @@ public class SpoutMetrics {
   private final CountMetric outQueueFullCount;
 
   // The mean # of pending-to-be-acked tuples in spout if acking is enabled
-  private final ReducedMetric<MeanReducerState> pendingTuplesCount;
+  private final ReducedMetric<MeanReducerState, Number, Double> pendingTuplesCount;
 
   public SpoutMetrics() {
     ackCount = new MultiCountMetric();

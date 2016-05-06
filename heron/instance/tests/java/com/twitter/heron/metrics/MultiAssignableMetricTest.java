@@ -27,21 +27,21 @@ import com.twitter.heron.api.metric.MultiAssignableMetric;
 public class MultiAssignableMetricTest {
   @Test
   public void testMultiAssignableMetrics() {
-    MultiAssignableMetric multiAssignableMetric = new MultiAssignableMetric();
+    MultiAssignableMetric<Integer> multiAssignableMetric = new MultiAssignableMetric<>(0);
     multiAssignableMetric.scope("metric_a").setValue(100);
     multiAssignableMetric.scope("metric_b").setValue(200);
 
-    Map<String, Object> ret = (Map<String, Object>) multiAssignableMetric.getValueAndReset();
-    Assert.assertEquals(ret.get("metric_a"), 100);
-    Assert.assertEquals(ret.get("metric_b"), 200);
+    Map<String, Integer> ret = multiAssignableMetric.getValueAndReset();
+    Assert.assertEquals(ret.get("metric_a"), new Integer(100));
+    Assert.assertEquals(ret.get("metric_b"), new Integer(200));
 
     // Re-assign by synchronized safeScope
     multiAssignableMetric.safeScope("metric_a").setValue(300);
     multiAssignableMetric.safeScope("metric_b").setValue(400);
 
-    ret = (Map<String, Object>) multiAssignableMetric.getValueAndReset();
-    Assert.assertEquals(ret.get("metric_a"), 300);
-    Assert.assertEquals(ret.get("metric_b"), 400);
+    ret = multiAssignableMetric.getValueAndReset();
+    Assert.assertEquals(ret.get("metric_a"), new Integer(300));
+    Assert.assertEquals(ret.get("metric_b"), new Integer(400));
   }
 
 

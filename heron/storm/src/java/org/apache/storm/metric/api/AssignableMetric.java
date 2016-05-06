@@ -14,18 +14,18 @@
 
 package org.apache.storm.metric.api;
 
-public class AssignableMetric implements IMetric {
-  private com.twitter.heron.api.metric.AssignableMetric delegate;
+public class AssignableMetric<T> implements IMetric<T> {
+  private com.twitter.heron.api.metric.AssignableMetric<T> delegate;
 
-  public AssignableMetric(Object value) {
-    delegate = new com.twitter.heron.api.metric.AssignableMetric(value);
+  public AssignableMetric(T value) {
+    delegate = new com.twitter.heron.api.metric.AssignableMetric<>(value);
   }
 
-  public void setValue(Object value) {
+  public void setValue(T value) {
     delegate.setValue(value);
   }
 
-  public Object getValueAndReset() {
+  public T getValueAndReset() {
     return delegate.getValueAndReset();
   }
 }
