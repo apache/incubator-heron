@@ -29,6 +29,7 @@ import base
 import common
 from common.graph import TopologyDAG
 
+
 ################################################################################
 # Handler for displaying the config for a topology
 ################################################################################
@@ -63,10 +64,14 @@ class TopologyExceptionsPageHandler(base.BaseHandler):
 # TO DO: get the list of clusters from tracker and fetch the topologies
 ################################################################################
 class ListTopologiesHandler(base.BaseHandler):
+  @tornado.gen.coroutine
   def get(self):
+    clusters = yield access.get_clusters()
+    clusters = [str(c["name"]) for c in clusters["clusters"]]
+
     options = dict(
         topologies = [],               # no topologies
-        cluster = 'local',             # default cluster
+        clusters = clusters,           
         active = "topologies",         # active icon the nav bar
         function = common.className
     )
