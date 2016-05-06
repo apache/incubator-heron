@@ -81,3 +81,9 @@ sections:
     sublinks:
       - name: Community
         url: /docs/contributors/community
+      - name: Roadmap
+        url: /docs/contributors/roadmap
+      - name: Governance
+        url: /docs/contributors/governance
+      - name: Support
+        url: /docs/contributors/support
