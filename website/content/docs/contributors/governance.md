@@ -39,7 +39,7 @@ We hope the open source process is complete.  We currently have all code reviews
 ### Are there parts of Heron that will never be open sourced?
 No - all components of Heron will be fully open sourced and able to be supported by open source tools.  Twitter will use the open source releases in production.  As with others who may implement and contribute to the Heron project, Twitter may use Heron with  some functionality, or employ technology complementing Heron, that is not currently planned to become open sourced.  
 ### Core Contributors
-Contact the core team at: heron-core@googlegroups.com.
+Contact the core team at: heron-dev@googlegroups.com.
 
 The current group is:
 
