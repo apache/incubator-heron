@@ -41,6 +41,7 @@ import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.ReflectionUtils;
 import com.twitter.heron.spi.utils.Runtime;
 
 public final class RuntimeManagerMain {
@@ -254,7 +255,7 @@ public final class RuntimeManagerMain {
     // 1. Do prepare work
     // create an instance of state manager
     String statemgrClass = Context.stateManagerClass(config);
-    IStateManager statemgr = (IStateManager) Class.forName(statemgrClass).newInstance();
+    IStateManager statemgr = ReflectionUtils.newInstance(statemgrClass);
 
     boolean isSuccessful = false;
 
@@ -370,7 +371,7 @@ public final class RuntimeManagerMain {
     } else {
       // create an instance of scheduler
       final String schedulerClass = Context.schedulerClass(config);
-      final IScheduler scheduler = (IScheduler) Class.forName(schedulerClass).newInstance();
+      final IScheduler scheduler = ReflectionUtils.newInstance(schedulerClass);
       LOG.fine("Invoke scheduler as a library");
 
       schedulerClient = new LibrarySchedulerClient(config, runtime, scheduler);
