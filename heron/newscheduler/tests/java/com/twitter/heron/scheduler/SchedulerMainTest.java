@@ -49,9 +49,9 @@ public class SchedulerMainTest {
   @Rule
   public final ExpectedException exception = ExpectedException.none();
 
-  private final String STATE_MANAGER_CLASS = "STATE_MANAGER_CLASS";
-  private final String PACKING_CLASS = "PACKING_CLASS";
-  private final String SCHEDULER_CLASS = "SCHEDULER_CLASS";
+  private static final String STATE_MANAGER_CLASS = "STATE_MANAGER_CLASS";
+  private static final String PACKING_CLASS = "PACKING_CLASS";
+  private static final String SCHEDULER_CLASS = "SCHEDULER_CLASS";
 
   private IStateManager stateManager;
   private IPacking packing;
@@ -59,6 +59,10 @@ public class SchedulerMainTest {
   private SchedulerMain schedulerMain;
   private SchedulerServer schedulerServer;
 
+  /**
+   * Basic setup before executing a test case
+   * @throws Exception
+   */
   @Before
   public void setUp() throws Exception {
     Config config = Mockito.mock(Config.class);
@@ -82,8 +86,9 @@ public class SchedulerMainTest {
     String topologyDefFile = "topologyDefFile";
     TopologyAPI.Topology topology =
         TopologyTests.createTopology(
-            iTopologyName, new com.twitter.heron.api.Config(), new HashMap<>(), new HashMap<>());
-    String packingString = "";
+            iTopologyName, new com.twitter.heron.api.Config(),
+            new HashMap<String, Integer>(), new HashMap<String, Integer>());
+    String packingString = "dummyPackingString";
 
     PowerMockito.spy(SchedulerConfig.class);
 
