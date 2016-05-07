@@ -26,7 +26,7 @@ The main components are,
 
 To run the local integration tests on your mac, at heron repo's top dir:
 
-  bazel build --config=dawrin integration-test/src/java:local-integration-tests_deploy.jar
+  bazel build --config=dawrin integration-test/src/...
 
   bazel run --config=darwin -- scripts/packages:heron-client-install.sh --user
 
