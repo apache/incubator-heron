@@ -14,7 +14,6 @@
 
 package com.twitter.heron.scheduler;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,6 +39,7 @@ import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.uploader.IUploader;
+import com.twitter.heron.spi.utils.ReflectionUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
@@ -253,10 +253,7 @@ public final class SubmitterMain {
     return options;
   }
 
-  public static void main(String[] args) throws
-      ClassNotFoundException, InstantiationException,
-      IllegalAccessException, IOException, ParseException {
-
+  public static void main(String[] args) throws Exception {
     Options options = constructOptions();
     Options helpOptions = constructHelpOptions();
     CommandLineParser parser = new DefaultParser();
@@ -320,19 +317,19 @@ public final class SubmitterMain {
     // 1. Do prepare work
     // create an instance of state manager
     String statemgrClass = Context.stateManagerClass(config);
-    IStateManager statemgr = (IStateManager) Class.forName(statemgrClass).newInstance();
+    IStateManager statemgr = ReflectionUtils.newInstance(statemgrClass);
 
     // Create an instance of the launcher class
     String launcherClass = Context.launcherClass(config);
-    ILauncher launcher = (ILauncher) Class.forName(launcherClass).newInstance();
+    ILauncher launcher = ReflectionUtils.newInstance(launcherClass);
 
     // Create an instance of the packing class
     String packingClass = Context.packingClass(config);
-    IPacking packing = (IPacking) Class.forName(packingClass).newInstance();
+    IPacking packing = ReflectionUtils.newInstance(packingClass);
 
     // create an instance of the uploader class
     String uploaderClass = Context.uploaderClass(config);
-    IUploader uploader = (IUploader) Class.forName(uploaderClass).newInstance();
+    IUploader uploader = ReflectionUtils.newInstance(uploaderClass);
 
     // Local variable for convenient access
     String topologyName = topology.getName();
@@ -411,8 +408,7 @@ public final class SubmitterMain {
 
   public static boolean submitTopology(Config config, TopologyAPI.Topology topology,
                                        SchedulerStateManagerAdaptor adaptor, ILauncher launcher,
-                                       IPacking packing, URI packageURI)
-      throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
+                                       IPacking packing, URI packageURI) {
     // build the runtime config
     Config runtime = Config.newBuilder()
         .put(Keys.topologyId(), topology.getId())
