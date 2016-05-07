@@ -21,13 +21,13 @@ public final class ReflectionUtils {
 
   @SuppressWarnings("unchecked") // we don't know what T is until runtime
   public static <T> T newInstance(String className)
-      throws ClassNotFoundException {
+      throws ClassNotFoundException, InstantiationException, IllegalAccessException {
     return newInstance(ClassLoader.getSystemClassLoader(), className);
   }
 
   @SuppressWarnings("unchecked") // we don't know what T is until runtime
   public static <T> T newInstance(ClassLoader classLoader, String className)
-      throws ClassNotFoundException {
-    return (T) classLoader.loadClass(className);
+      throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+    return (T) classLoader.loadClass(className).newInstance();
   }
 }

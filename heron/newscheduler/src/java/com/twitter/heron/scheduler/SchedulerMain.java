@@ -289,7 +289,7 @@ public class SchedulerMain {
 
       // create an instance of scheduler
       scheduler = ReflectionUtils.newInstance(schedulerClass);
-    } catch (ClassNotFoundException e) {
+    } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
       LOG.log(Level.SEVERE, "Failed to instantiate instances", e);
       return false;
     }

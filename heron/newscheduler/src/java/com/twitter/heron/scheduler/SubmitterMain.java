@@ -14,7 +14,6 @@
 
 package com.twitter.heron.scheduler;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -254,9 +253,7 @@ public final class SubmitterMain {
     return options;
   }
 
-  public static void main(String[] args) throws
-      ClassNotFoundException, IOException, ParseException {
-
+  public static void main(String[] args) throws Exception {
     Options options = constructOptions();
     Options helpOptions = constructHelpOptions();
     CommandLineParser parser = new DefaultParser();
