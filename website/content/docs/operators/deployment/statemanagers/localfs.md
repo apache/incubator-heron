@@ -1,5 +1,5 @@
 ---
-title: Setting Up Local File System
+title: Setting Up Local File System State Manager
 ---
 
 Heron can use the local file system as a state manager for storing various book 
@@ -8,7 +8,7 @@ node server and laptop. This configuration is ideal for deploying in edge device
 Heron developers can use this setting for developing and debugging various heron 
 components in their laptop or server.
 
-## Local File System Configuration
+### Local File System State Manager Configuration
 
 You can make Heron aware of the ZooKeeper cluster by modifying the
 `statemgr.yaml` config file specific for the Heron cluster. You'll
@@ -27,7 +27,7 @@ set this to `com.twitter.heron.statemgr.localfs.LocalFileSystemStateManager`
 `True`, if you could like Heron to create those directories. If those directories are already there, set it to `False`. The absence of this
 configuration implies `False`.
 
-## Example Local File System Configuration
+### Example Local File System State Manager Configuration
 
 Below is an example configuration (in `statemgr.yaml`) for a local file system running in `localhost`:
 
