@@ -6112,10 +6112,11 @@ def ProcessConfigOverrides(filename):
               (name, cfg_file))
 
     except IOError:
-      file_handle.close()
       sys.stderr.write(
           "Skipping config file '%s': Can't open for reading\n" % cfg_file)
       keep_looking = False
+    finally:
+      file_handle.close()
 
   # Apply all the accumulated filters in reverse order (top-level directory
   # config options having the least priority).
