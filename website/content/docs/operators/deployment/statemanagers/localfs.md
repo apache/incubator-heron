@@ -35,13 +35,13 @@ Below is an example configuration (in `statemgr.yaml`) for a local file system r
 
 <pre><code>
 # local state manager class for managing state in a persistent fashion
-heron.class.state.manager:                      com.twitter.heron.statemgr.localfs.LocalFileSystemStateManager
+heron.class.state.manager: com.twitter.heron.statemgr.localfs.LocalFileSystemStateManager
 
 # local state manager connection string
-heron.statemgr.connection.string:               LOCALMODE
+heron.statemgr.connection.string: LOCALMODE
 
 # path of the root address to store the state in a local file system
-heron.statemgr.root.path:                       ${HOME}/.herondata/repository/state/${CLUSTER}
+heron.statemgr.root.path: ${HOME}/.herondata/repository/state/${CLUSTER}
 
 # create the sub directories, if needed
 heron.statemgr.localfs.is.initialize.file.tree: True

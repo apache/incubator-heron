@@ -55,26 +55,26 @@ Below is an example configuration (in `statemgr.yaml`) for a ZooKeeper running i
 
 <pre><code>
 # local state manager class for managing state in a persistent fashion
-heron.class.state.manager:                               com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager
+heron.class.state.manager: com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager
 
 # local state manager connection string
-heron.statemgr.connection.string:                        "127.0.0.1:2181"
+heron.statemgr.connection.string:  "127.0.0.1:2181"
 
 # path of the root address to store the state in a local file system
-heron.statemgr.root.path:                                "/heron"
+heron.statemgr.root.path: "/heron"
 
 # create the zookeeper nodes, if they do not exist
-heron.statemgr.zookeeper.is.initialize.tree:             True
+heron.statemgr.zookeeper.is.initialize.tree: True
 
 # timeout in ms to wait before considering zookeeper session is dead
-heron.statemgr.zookeeper.session.timeout.ms:             30000
+heron.statemgr.zookeeper.session.timeout.ms: 30000
 
 # timeout in ms to wait before considering zookeeper connection is dead
-heron.statemgr.zookeeper.connection.timeout.ms:          30000
+heron.statemgr.zookeeper.connection.timeout.ms: 30000
 
 # timeout in ms to wait before considering zookeeper connection is dead
-heron.statemgr.zookeeper.retry.count:                    10
+heron.statemgr.zookeeper.retry.count: 10
 
 # duration of time to wait until 
-heron.statemgr.zookeeper.retry.interval.ms:              10000
+heron.statemgr.zookeeper.retry.interval.ms: 10000
 </code></pre>
