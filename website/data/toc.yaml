@@ -13,8 +13,10 @@ sections:
     sublinks:
       - name: Overview
         url: /docs/operators/deployment/statemanagers
-      - name: Setting Up Zookeeper
+      - name: Setup Zookeeper
         url: /docs/operators/deployment/statemanagers/zookeeper
+      - name: Setup Local FS
+        url: /docs/operators/deployment/statemanagers/localfs
   - name: Uploaders
     sublinks:
       - name: Overview
