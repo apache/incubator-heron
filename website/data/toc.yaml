@@ -9,14 +9,28 @@ sections:
     sublinks:
       - name: Overview
         url: /docs/operators/deployment
-      - name: Aurora
-        url: /docs/operators/deployment/aurora
-      - name: Mesos
-        url: /docs/operators/deployment/mesos
-      - name: Local
-        url: /docs/operators/deployment/local
-      - name: Zookeeper
-        url: /docs/operators/deployment/zookeeper
+  - name: State Managers
+    sublinks:
+      - name: Overview
+        url: /docs/operators/deployment/statemanagers
+      - name: Setting Up Zookeeper
+        url: /docs/operators/deployment/statemanagers/zookeeper
+  - name: Uploaders
+    sublinks:
+      - name: Overview
+        url: /docs/operators/deployment/uploaders
+      - name: HDFS Uploader
+        url: /docs/operators/deployment/uploaders/hdfs
+      - name: S3 Uploader
+        url: /docs/operators/deployment/uploaders/s3
+  - name: Schedulers
+    sublinks:
+      - name: Local Cluster
+        url: /docs/operators/deployment/schedulers/local
+      - name: Aurora Cluster
+        url: /docs/operators/deployment/schedulers/aurora
+      - name: Mesos Cluster
+        url: /docs/operators/deployment/schedulers/mesos
   - name: Configuration
     sublinks:
       - name: Overview
