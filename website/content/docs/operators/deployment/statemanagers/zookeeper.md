@@ -1,5 +1,5 @@
 ---
-title: Setting Up ZooKeeper
+title: Setting Up ZooKeeper State Manager
 ---
 
 Heron relies on ZooKeeper for a wide variety of cluster coordination tasks. You
@@ -17,7 +17,7 @@ There are a few things you should be aware of regarding Heron and ZooKeeper:
 * We strongly recommend running ZooKeeper [under
   supervision](http://zookeeper.apache.org/doc/r3.3.3/zookeeperAdmin.html#sc_supervision).
 
-### ZooKeeper Configuration
+### ZooKeeper State Manager Configuration
 
 You can make Heron aware of the ZooKeeper cluster by modifying the
 `statemgr.yaml` config file specific for the Heron cluster. You'll
@@ -50,7 +50,7 @@ to ZooKeeper
 
 * `heron.statemgr.zookeeper.retry.interval.ms`: Time in milliseconds to wait between each retry
 
-### Example ZooKeeper Configuration
+### Example ZooKeeper State Manager Configuration
 
 Below is an example configuration (in `statemgr.yaml`) for a ZooKeeper running in `localhost`:
 
@@ -76,6 +76,6 @@ heron.statemgr.zookeeper.connection.timeout.ms: 30000
 # timeout in ms to wait before considering zookeeper connection is dead
 heron.statemgr.zookeeper.retry.count: 10
 
-# duration of time to wait until 
+# duration of time to wait until the next retry
 heron.statemgr.zookeeper.retry.interval.ms: 10000
 </code></pre>
