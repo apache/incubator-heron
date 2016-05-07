@@ -40,6 +40,7 @@ import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.ReflectionUtils;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerConfig;
 import com.twitter.heron.spi.utils.SchedulerUtils;
@@ -255,13 +256,11 @@ public class SchedulerMain {
    * @param port, the port for scheduler to listen on
    * @return an instance of the http server
    */
-  private static SchedulerServer getServer(
+  protected SchedulerServer getServer(
       Config runtime, IScheduler scheduler, int port) throws IOException {
 
     // create an instance of the server using scheduler class and port
-    final SchedulerServer schedulerServer = new SchedulerServer(runtime, scheduler, port);
-
-    return schedulerServer;
+    return new SchedulerServer(runtime, scheduler, port);
   }
 
   /**
@@ -283,14 +282,14 @@ public class SchedulerMain {
     IScheduler scheduler;
     try {
       // create an instance of state manager
-      statemgr = (IStateManager) Class.forName(statemgrClass).newInstance();
+      statemgr = ReflectionUtils.newInstance(statemgrClass);
 
       // create an instance of the packing class
-      packing = (IPacking) Class.forName(packingClass).newInstance();
+      packing = ReflectionUtils.newInstance(packingClass);
 
       // create an instance of scheduler
-      scheduler = (IScheduler) Class.forName(schedulerClass).newInstance();
-    } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+      scheduler = ReflectionUtils.newInstance(schedulerClass);
+    } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
       LOG.log(Level.SEVERE, "Failed to instantiate instances", e);
       return false;
     }
@@ -324,7 +323,7 @@ public class SchedulerMain {
       Config ytruntime = Config.newBuilder()
           .putAll(runtime)
           .put(Keys.instanceDistribution(), TopologyUtils.packingToString(packedPlan))
-          .put(Keys.schedulerShutdown(), new Shutdown())
+          .put(Keys.schedulerShutdown(), getShutdown())
           .build();
 
       // initialize the scheduler
@@ -369,5 +368,10 @@ public class SchedulerMain {
     }
 
     return isSuccessful;
+  }
+
+  // Utils method
+  protected Shutdown getShutdown() {
+    return new Shutdown();
   }
 }
