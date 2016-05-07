@@ -18,7 +18,7 @@ Continue to [Heron Architecture](../../concepts/architecture/),
 ### Patch Acceptance Process
 1.  Please read the Heron [governance plan](../governance).
 
-2. Discuss your plan and design, and get agreement on our heron-core@googlegroups.com mailing list.
+2. Discuss your plan and design, and get agreement on our heron-dev@googlegroups.com mailing list.
 
 3. Prepare a GitHub commit that implements the feature. Don't forget to add tests.
 
@@ -26,7 +26,7 @@ Continue to [Heron Architecture](../../concepts/architecture/),
 4. TODO - pre commit process (travis-ci)
 --> 
 
-4. Complete a code review with a core contributor using the heron-core@googlegroups.com mailing list. Amend your existing commit and re-push to make changes to your patch.
+4. Complete a code review with a core contributor using the heron-dev@googlegroups.com mailing list. Amend your existing commit and re-push to make changes to your patch.
 
 5. An engineer at Twitter applies the patch to our internal version control system.
 
