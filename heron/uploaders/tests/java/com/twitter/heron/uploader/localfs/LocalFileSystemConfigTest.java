@@ -14,7 +14,6 @@
 
 package com.twitter.heron.uploader.localfs;
 
-import java.io.File;
 import java.nio.file.Paths;
 
 import org.junit.Assert;
@@ -89,12 +88,9 @@ public class LocalFileSystemConfigTest {
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();
     uploader.initialize(config);
 
-    String destFile = Paths.get(LocalFileSystemContext.fileSystemDirectory(config),
-        new File(TOPOLOGY_PACKAGE_FILE).getName()).toString();
-
     Assert.assertEquals(
-        uploader.getTopologyFile(),
-        destFile
+        Paths.get(uploader.getTopologyFile()).getParent().toString(),
+        LocalFileSystemContext.fileSystemDirectory(config)
     );
   }
 
@@ -129,12 +125,9 @@ public class LocalFileSystemConfigTest {
 
     uploader.initialize(config);
 
-    String destFile = Paths.get(LocalFileSystemContext.fileSystemDirectory(config),
-        new File(TOPOLOGY_PACKAGE_FILE).getName()).toString();
-
     Assert.assertEquals(
-        uploader.getTopologyFile(),
-        destFile
+        Paths.get(uploader.getTopologyFile()).getParent().toString(),
+        overrideDirectory
     );
   }
 }
