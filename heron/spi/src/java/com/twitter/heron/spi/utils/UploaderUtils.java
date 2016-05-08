@@ -34,7 +34,8 @@ public final class UploaderUtils {
   public static String generateFilename(
       String topologyName,
       String role) {
-    return generateFilename(topologyName, role, "", -1);
+    // By default, we have empty tag info and version 0
+    return generateFilename(topologyName, role, "tag", 0);
   }
 
   /**
@@ -42,7 +43,7 @@ public final class UploaderUtils {
    *
    * @param topologyName topology name
    * @param role role owns the topology
-   * @param version version of the job, put -1 if not needed
+   * @param version version of the job, put 0 if not needed
    * @param tag extra info to tag the file
    * @return a unique filename
    */
