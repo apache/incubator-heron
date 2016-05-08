@@ -5,7 +5,7 @@ title: Upgrade Storm Topologies to Heron
 
 Heron is designed to be fully backward compatible with existing [Apache Storm](http://storm.apache.org/index.html) projects, allowing simple [Maven POM.xml](https://maven.apache.org/pom.html) changes to migrate existing Storm [topologies](../concepts/topologies).
 
-### Step 1 - Download pre-compiled Heron API binaries with install script
+### Step 1 - Download Heron API binaries with install script
 
 Navigate to [Twitter Heron Releases](https://github.com/twitter/heron/releases) and
 download the following self extracting binary API install script for your platform. 

@@ -1,21 +1,23 @@
 ---
-title: Max OS X (10.10)
+title: Building on Mac OS X
 ---
 
-Install brew
+This is a step by step guide for building Heron on Mac OS (10.10 and 10.11).
+
+#### Step 1 - Install brew, if already not installed
 
 ```bash
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 ```
 
-Install the required libraries
+#### Step 2 - Install the required libraries
 
 ```bash
 brew install automake
 brew install cmake
 ```
 
-Set the following environment variables
+#### Step 3 - Set the following environment variables
 
 ```bash
 $ export CC=/usr/bin/clang
@@ -23,7 +25,7 @@ $ export CXX=/usr/bin/clang++
 $ echo $CC $CXX
 ```
 
-Install Bazel
+#### Step 4 - Install Bazel
 
 ```bash
 curl -O -L https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-darwin-x86_64.sh
@@ -31,34 +33,33 @@ chmod +x bazel-0.1.2-installer-linux-x86_64.sh
 ./bazel-0.1.2-installer-linux-x86_64.sh --user
 ```
 
-Make sure Bazel bin is in the PATH
+#### Step 5 - Make sure Bazel bin is in the PATH
 
 ```bash
 export PATH="$PATH:$HOME/bin"
 ```
 
-Get the latest version of heron
+#### Step 6 - Get the latest version of heron
 
 ```bash
 git clone https://github.com/twitter/heron.git && cd heron
 ```
 
-Configure Heron for build
+#### Step 7 - Configure Heron for build
 
 ```bash
 ./bazel_configure.py
 ```
 
-If the configure scripts fails with missing dependencies, 
-brew can be used to install the dependencies.
+If the configure scripts fails with missing dependencies, brew can be used to install the dependencies.
 
-Build the project
+#### Step 8 - Build the project
 
 ```bash
 bazel build --config=darwin heron/...  
 ```
 
-Build the packages
+#### Step 9 - Build the packages
 
 ```bash
 bazel build --config=darwin scripts/packages:binpkgs  
