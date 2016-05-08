@@ -10,7 +10,7 @@ run.
 
 There are a few things you should be aware of HDFS uploader:
 
-* It requires hadoop client be installed in the machine where the topology is submitted
+* It requires hadoop client be installed in the machine where the topology is being submitted
 
 ### HDFS Uploader Configuration
 
