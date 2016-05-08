@@ -21,9 +21,11 @@ sections:
     sublinks:
       - name: Overview
         url: /docs/operators/deployment/uploaders
-      - name: HDFS Uploader
+      - name: Setup Local FS
+        url: /docs/operators/deployment/uploaders/localfs
+      - name: Setup HDFS
         url: /docs/operators/deployment/uploaders/hdfs
-      - name: S3 Uploader
+      - name: Setup S3
         url: /docs/operators/deployment/uploaders/s3
   - name: Schedulers
     sublinks:
