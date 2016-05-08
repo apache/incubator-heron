@@ -28,8 +28,8 @@ to `com.twitter.heron.uploader.localfs.LocalFileSystemUploader`
 the topology jar should be uploaded. The name of the directory should be unique per topology since
 the user provided jar is augmented with various other files and uploaded as a single tar file named
 `topology.tar.gz`. If each topology does not have a unique directory of its own, one will overwrite 
-the other. You could use some of the Heron environment variables such as `${CLUSTER}`, `${ROLE}' and 
-`${TOPOLOGY}' which will be substituted by cluster name, name of the role  and name of the topology
+the other. You could use some of the Heron environment variables such as `${CLUSTER}`, `${ROLE}` and 
+`${TOPOLOGY}` which will be substituted by cluster name, name of the role  and name of the topology
 respectively.
 
 ### Example Local File System Uploader Configuration
