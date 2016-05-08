@@ -57,7 +57,7 @@ sections:
         url: /docs/operators/heron-tracker
       - name: Heron UI
         url: /docs/operators/heron-ui
-  - name: Topology Developers
+  - name: Topology Writers
     sublinks:
       - name: Heron Topologies
         url: /docs/concepts/topologies
@@ -73,10 +73,6 @@ sections:
         url: /docs/javadoc
   - name: Heron Developers
     sublinks:
-      - name: Heron Architecture
-        url: /docs/concepts/architecture
-      - name: Codebase
-        url: /docs/contributors/codebase
       - name: Compiling
         url: /docs/developers/compiling/compiling
       - name: Compiling on Linux
@@ -85,11 +81,19 @@ sections:
         url: /docs/developers/compiling/mac
       - name: Compiling With Docker
         url: /docs/developers/compiling/docker
-      - name: Testing
+      - name: Running Tests
         url: /docs/contributors/testing
-      - name: Implementing a Custom Scheduler
+      - name: Code Organization
+        url: /docs/contributors/codebase
+  - name: Heron Concepts
+    sublinks:
+      - name: Heron Architecture
+        url: /docs/concepts/architecture
+  - name: Extending Heron
+    sublinks:
+      - name: Custom Scheduler
         url: /docs/contributors/custom-scheduler
-      - name: Implementing a Custom Metrics Sink
+      - name: Custom Metrics Sink
         url: /docs/contributors/custom-metrics-sink
   - name: Heron Resources
     sublinks:
