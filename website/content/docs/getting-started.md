@@ -5,7 +5,7 @@ title: Getting Started - Local (Single Node)
 
 Run topologies locally using pre-compiled Heron binaries (Mac OSX, Ubuntu >= 14.04, Centos7)
 
-### Step 1 - Download pre-compiled Heron binaries with install scripts
+### Step 1 - Download Heron binaries with install scripts
 
 Navigate to [Twitter Heron Releases](https://github.com/twitter/heron/releases) and
 download the following self extracting binary install scripts for your platform. 
@@ -68,7 +68,7 @@ $ heron-ui
 ```
 In local browser, Heron UI is available at http://localhost:8889
 
-### Step 5 - Explore activate, deactivate, and kill topology commands
+### Step 5 - Explore topology management commands
 
 ```bash
 $ heron activate local ExclamationTopology
