@@ -125,6 +125,14 @@ java_library(
 )
 
 java_library(
+    name='uploader-utils-java',
+    srcs = glob([
+        "**/spi/utils/UploaderUtils.java",
+    ]),
+    deps = uploader_deps_files,
+)
+
+java_library(
     name='metricsmgr-spi-java',
     srcs = glob(
         ["**/spi/metricsmgr/**/*.java"],
@@ -138,3 +146,5 @@ java_library(
     ),
     deps = statemgr_deps_files,
 )
+
+
