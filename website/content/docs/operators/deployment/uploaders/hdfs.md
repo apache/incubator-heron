@@ -24,11 +24,9 @@ to `com.twitter.heron.uploader.hdfs.HdfsUploader`
 for hadoop. This is used by hadoop client to upload the topology jar 
 
 * `heron.uploader.hdfs.topologies.directory.uri` &mdash; URI of the directory name for uploading
-topology jars. The name of the directory should be unique per topology since the user provided 
-jar is augmented with various other files and uploaded as a single tar file named `topology.tar.gz`.
-If each topology does not have a unique directory of its own, one will overwrite the other. You 
-could use some of the Heron environment variables such as `${CLUSTER}`, `${ROLE}` and `${TOPOLOGY}`
-which will be substituted by cluster name, name of the role  and name of the topology respectively.
+topology jars. The name of the directory should be unique per cluster, if they are sharing the 
+storage. In those cases, you could use the Heron environment variable `${CLUSTER}` that will be 
+substituted by cluster name for distinction.
 
 ### Example HDFS Uploader Configuration
 
@@ -42,6 +40,6 @@ heron.class.uploader: com.twitter.heron.uploader.hdfs.HdfsUploader
 heron.uploader.hdfs.config.directory: /home/hadoop/hadoop
 
 # name of the directory to upload topologies for HDFS uploader
-heron.uploader.hdfs.topologies.directory.uri: hdfs://heron/topologies/${CLUSTER}/${TOPOLOGY}
+heron.uploader.hdfs.topologies.directory.uri: hdfs://heron/topologies/${CLUSTER}
 </code></pre>
 
