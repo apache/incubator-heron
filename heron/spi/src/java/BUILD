@@ -146,5 +146,3 @@ java_library(
     ),
     deps = statemgr_deps_files,
 )
-
-
