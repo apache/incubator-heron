@@ -14,10 +14,10 @@
 
 package backtype.storm.metric.api;
 
-public interface IReducer<T> {
+public interface IReducer<T, U, V> {
   T init();
 
-  T reduce(T accumulator, Object input);
+  T reduce(T accumulator, U input);
 
-  Object extractResult(T accumulator);
+  V extractResult(T accumulator);
 }

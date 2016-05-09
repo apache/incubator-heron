@@ -190,6 +190,7 @@ public class CuratorStateManager extends FileSystemStateManager {
 
     BackgroundCallback cb = new BackgroundCallback() {
       @Override
+      @SuppressWarnings("unchecked") // we don't know what M is until runtime
       public void processResult(CuratorFramework aClient, CuratorEvent event) throws Exception {
         byte[] data;
         if (event != null & (data = event.getData()) != null) {

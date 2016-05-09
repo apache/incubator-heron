@@ -21,11 +21,12 @@ from tornado.options import options
 from fetch import fetch_url_as_json
 from query import QueryHandler
 
-CLUSTER_URL_FMT           = "%s/cluster"
+CLUSTER_URL_FMT           = "%s/clusters"
 TOPOLOGIES_URL_FMT        = "%s/topologies"
 EXECUTION_STATE_URL_FMT   = "%s/executionstate"   % TOPOLOGIES_URL_FMT
 lOGICALPLAN_URL_FMT       = "%s/logicalplan"      % TOPOLOGIES_URL_FMT
 PHYSICALPLAN_URL_FMT      = "%s/physicalplan"     % TOPOLOGIES_URL_FMT
+SCHEDULER_LOCATION_URL_FMT= "%s/schedulerlocation"% TOPOLOGIES_URL_FMT
 
 METRICS_URL_FMT           = "%s/metrics"          % TOPOLOGIES_URL_FMT
 METRICS_QUERY_URL_FMT     = "%s/metricsquery"     % TOPOLOGIES_URL_FMT
@@ -88,6 +89,12 @@ def get_tracker_endpoint():
 # Given an URL format, substitute with tracker service endpoint
 def create_url(fmt):
     return fmt % get_tracker_endpoint()
+
+@tornado.gen.coroutine
+def get_clusters():
+  request_url = create_url(CLUSTER_URL_FMT)
+  raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
+  
 
 ################################################################################
 # Get the list of topologies given a data center from heron tracker
@@ -156,6 +163,17 @@ def get_comps(cluster, environ, topology):
 def get_physical_plan(cluster, environ, topology):
   request_url = tornado.httputil.url_concat(
       create_url(PHYSICALPLAN_URL_FMT),
+      dict(cluster = cluster, environ = environ, topology = topology)
+  )
+  raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
+
+################################################################################
+# Get the scheduler location of a topology in a cluster from tracker
+################################################################################
+@tornado.gen.coroutine
+def get_scheduler_location(cluster, environ, topology):
+  request_url = tornado.httputil.url_concat(
+      create_url(SCHEDULER_LOCATION_URL_FMT),
       dict(cluster = cluster, environ = environ, topology = topology)
   )
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))

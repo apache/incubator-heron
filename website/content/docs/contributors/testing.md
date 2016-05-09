@@ -6,7 +6,7 @@ Heron uses [Bazel](../../developers/compiling#installing-bazel) for building
 and running unit tests. Before running tests, first set up your build environment
 as described in [Compiling Heron](../../developers/compiling/compiling).
 
-## Running Tests
+### Running Unit Tests
 
 The following command will run all tests:
 
@@ -21,7 +21,7 @@ target](http://bazel.io/docs/test-encyclopedia.html), pass the test target name.
 $ bazel test --config=darwin heron/statemgrs/tests/java:localfs-statemgr_unittest
 ```
 
-## Discovering Test Targets
+### Discovering Unit Test Targets
 
 To see a full listing of all Bazel test targets:
 
@@ -46,3 +46,21 @@ For **Python** targets:
 ```bash
 $ bazel query 'kind("pex_test rule", ...)'
 ```
+
+### Running Integration Tests
+
+Integration tests are divided into two categories
+
+* Functional integration tests 
+* Failure integration tests
+
+To run the failure integration tests on your Mac OS X, do the following:
+
+```
+bazel run --config=darwin -- scripts/packages:heron-client-install.sh --user
+
+bazel build --config=dawrin integration-test/src/...
+
+python integration-test/src/python/local_test_runner/main.py
+```
+

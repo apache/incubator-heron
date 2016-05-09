@@ -130,10 +130,17 @@ class Tracker:
       if not data:
         LOG.debug("No data to be set")
 
-    # Set watches on the pplan, execution_state, and tmaster.
+    def on_topology_scheduler_location(data):
+      LOG.info("Watch triggered for topology scheduler location: " + topologyName)
+      topology.set_scheduler_location(data)
+      if not data:
+        LOG.debug("No data to be set")
+
+    # Set watches on the pplan, execution_state, tmaster and scheduler_location.
     state_manager.get_pplan(topologyName, on_topology_pplan)
     state_manager.get_execution_state(topologyName, on_topology_execution_state)
     state_manager.get_tmaster(topologyName, on_topology_tmaster)
+    state_manager.get_scheduler_location(topologyName, on_topology_scheduler_location)
 
   def removeTopology(self, topology_name, state_manager_name):
     """
@@ -170,11 +177,32 @@ class Tracker:
       "release_version": execution_state.release_state.release_version,
       "has_physical_plan": None,
       "has_tmaster_location": None,
+      "has_scheduler_location": None,
     }
 
     viz_url = self.config.get_formatted_viz_url(executionState)
     executionState["viz"] = viz_url
     return executionState
+
+  def extract_scheduler_location(self, topology):
+    """
+    Returns the representation of scheduler location that will
+    be returned from Tracker.
+    """
+    schedulerLocation = {
+      "name": None,
+      "http_endpoint": None,
+      "job_page_link": None,
+    }
+
+    if topology.scheduler_location:
+      schedulerLocation["name"] = topology.scheduler_location.topology_name
+      schedulerLocation["http_endpoint"] = topology.scheduler_location.http_endpoint
+      schedulerLocation["job_page_link"] = \
+          topology.scheduler_location.job_page_link[0] \
+          if len(topology.scheduler_location.job_page_link) > 0 else ""
+
+    return schedulerLocation
 
   def extract_tmaster(self, topology):
     """
@@ -376,6 +404,10 @@ class Tracker:
     if not topology.tmaster:
       has_tmaster_location = False
 
+    has_scheduler_location = True
+    if not topology.scheduler_location:
+      has_scheduler_location = False
+
     top = {
       "name": topology.name,
       "id": topology.id,
@@ -383,16 +415,19 @@ class Tracker:
       "physical_plan": None,
       "execution_state": None,
       "tmaster_location": None,
+      "scheduler_location": None,
     }
 
     executionState = self.extract_execution_state(topology)
     executionState["has_physical_plan"] = has_physical_plan
     executionState["has_tmaster_location"] = has_tmaster_location
+    executionState["has_scheduler_location"] = has_scheduler_location
 
     top["execution_state"] = executionState
     top["logical_plan"] = self.extract_logical_plan(topology)
     top["physical_plan"] = self.extract_physical_plan(topology)
     top["tmaster_location"] = self.extract_tmaster(topology)
+    top["scheduler_location"] = self.extract_scheduler_location(topology)
 
     self.topologyInfos[(topology.name, topology.state_manager_name)] = top
 

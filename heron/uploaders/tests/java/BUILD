@@ -20,6 +20,12 @@ localfs_deps_files = \
         "//heron/uploaders/src/java:localfs-uploader-java",
     ]
 
+hdfs_deps_files = \
+    common_deps_files + \
+    spi_deps_files + [
+        "//heron/uploaders/src/java:hdfs-uploader-java",
+    ]
+
 java_library(
     name = "local-filesystem-constants-java",
     srcs = glob(["**/localfs/LocalFileSystemConstantsTest.java"]),
@@ -48,4 +54,11 @@ java_test(
         "//heron/uploaders/src/java:s3-uploader-java",
         "//3rdparty/java:aws-java-sdk"
     ],
+)
+
+java_test(
+    name = "hadoop-uploader_unittest",
+    srcs = glob(["**/hdfs/HdfsUploaderTest.java"]),
+    deps = hdfs_deps_files,
+    size = "small",
 )

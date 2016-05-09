@@ -43,25 +43,23 @@ public class GlobalMetricsTest {
         fakeCollector);
     GlobalMetrics.init(fakeContext, 5);
     GlobalMetrics.incr("mycounter");
-    Object value = GlobalMetrics.getUnderlyingCounter().getValueAndReset();
-    assertTrue(value instanceof Map);
-    Map<String, Object> metricsContent = (Map<String, Object>) value;
+    Map<String, Long> metricsContent = GlobalMetrics.getUnderlyingCounter().getValueAndReset();
     assertTrue(metricsContent.containsKey("mycounter"));
     assertEquals(1, metricsContent.size());
-    assertEquals(1L, metricsContent.get("mycounter"));
+    assertEquals(new Long(1), metricsContent.get("mycounter"));
 
     // Increment two different counters
     GlobalMetrics.incr("mycounter1");
     GlobalMetrics.incr("mycounter2");
     GlobalMetrics.incr("mycounter1");
-    metricsContent = (Map<String, Object>) GlobalMetrics.getUnderlyingCounter().getValueAndReset();
+    metricsContent = GlobalMetrics.getUnderlyingCounter().getValueAndReset();
     assertTrue(metricsContent.containsKey("mycounter"));
     assertTrue(metricsContent.containsKey("mycounter1"));
     assertTrue(metricsContent.containsKey("mycounter2"));
     assertEquals(3L, metricsContent.size());
-    assertEquals(0L, metricsContent.get("mycounter"));
-    assertEquals(1L, metricsContent.get("mycounter2"));
-    assertEquals(2L, metricsContent.get("mycounter1"));
+    assertEquals(new Long(0), metricsContent.get("mycounter"));
+    assertEquals(new Long(1), metricsContent.get("mycounter2"));
+    assertEquals(new Long(2), metricsContent.get("mycounter1"));
   }
 
   // TODO: Use JMock framework for mock. (Needs extra jar)

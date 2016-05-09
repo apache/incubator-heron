@@ -26,6 +26,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 public class AuroraControllerTest {
@@ -67,12 +68,12 @@ public class AuroraControllerTest {
             auroraFilename, VERBOSE_CONFIG));
 
     // Failed
-    Mockito.doReturn(false).when(controller).runProcess(Mockito.anyList());
+    Mockito.doReturn(false).when(controller).runProcess(Matchers.anyListOf(String.class));
     Assert.assertFalse(controller.createJob(auroraFilename, bindings));
     Mockito.verify(controller).runProcess(Mockito.eq(expectedCommand));
 
     // Happy path
-    Mockito.doReturn(true).when(controller).runProcess(Mockito.anyList());
+    Mockito.doReturn(true).when(controller).runProcess(Matchers.anyListOf(String.class));
     Assert.assertTrue(controller.createJob(auroraFilename, bindings));
     Mockito.verify(controller, Mockito.times(2)).runProcess(expectedCommand);
   }
@@ -85,12 +86,12 @@ public class AuroraControllerTest {
             VERBOSE_CONFIG, BATCH_CONFIG, "" + Integer.MAX_VALUE));
 
     // Failed
-    Mockito.doReturn(false).when(controller).runProcess(Mockito.anyList());
+    Mockito.doReturn(false).when(controller).runProcess(Matchers.anyListOf(String.class));
     Assert.assertFalse(controller.killJob());
     Mockito.verify(controller).runProcess(Mockito.eq(expectedCommand));
 
     // Happy path
-    Mockito.doReturn(true).when(controller).runProcess(Mockito.anyList());
+    Mockito.doReturn(true).when(controller).runProcess(Matchers.anyListOf(String.class));
     Assert.assertTrue(controller.killJob());
     Mockito.verify(controller, Mockito.times(2)).runProcess(expectedCommand);
   }
@@ -104,12 +105,12 @@ public class AuroraControllerTest {
             VERBOSE_CONFIG, BATCH_CONFIG, "" + Integer.MAX_VALUE));
 
     // Failed
-    Mockito.doReturn(false).when(controller).runProcess(Mockito.anyList());
+    Mockito.doReturn(false).when(controller).runProcess(Matchers.anyListOf(String.class));
     Assert.assertFalse(controller.restartJob(containerId));
     Mockito.verify(controller).runProcess(Mockito.eq(expectedCommand));
 
     // Happy path
-    Mockito.doReturn(true).when(controller).runProcess(Mockito.anyList());
+    Mockito.doReturn(true).when(controller).runProcess(Matchers.anyListOf(String.class));
     Assert.assertTrue(controller.restartJob(containerId));
     Mockito.verify(controller, Mockito.times(2)).runProcess(expectedCommand);
   }

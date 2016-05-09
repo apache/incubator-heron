@@ -96,9 +96,9 @@ public class TMasterSink implements IMetricsSink {
   private static final String TMASTER_RESTART_COUNT = "tmaster-restart-count";
   private static final String TMASTER_LOCATION_UPDATE_COUNT = "tmaster-location-update-count";
   private final Communicator<TopologyMaster.PublishMetrics> metricsCommunicator =
-      new Communicator<TopologyMaster.PublishMetrics>();
+      new Communicator<>();
   private final MetricsFilter tMasterMetricsFilter = new MetricsFilter();
-  private final Map<String, Object> sinkConfig = new HashMap<String, Object>();
+  private final Map<String, Object> sinkConfig = new HashMap<>();
   // A scheduled executor service to check whether the TMasterLocation has changed
   // If so, restart the TMasterClientService with the new TMasterLocation
   // Start of TMasterClientService will also be in this thread
@@ -112,6 +112,7 @@ public class TMasterSink implements IMetricsSink {
   private SinkContext sinkContext;
 
   @Override
+  @SuppressWarnings("unchecked")
   public void init(Map<String, Object> conf, SinkContext context) {
     sinkConfig.putAll(conf);
 

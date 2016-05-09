@@ -51,37 +51,37 @@ public class JVMMetrics {
       ManagementFactory.getPlatformMXBeans(BufferPoolMXBean.class);
 
   // Metric for time spent in GC per generational collection, and the sum total of all collections.
-  private final MultiAssignableMetric jvmGCTimeMsPerGCType;
+  private final MultiAssignableMetric<Long> jvmGCTimeMsPerGCType;
 
   // Metrics for count of GC per generational collection, and the sum total of all collections.
-  private final MultiAssignableMetric jvmGCCountPerGCType;
+  private final MultiAssignableMetric<Long> jvmGCCountPerGCType;
 
   // Metric for total live jvm threads
-  private final AssignableMetric jvmThreadCount;
+  private final AssignableMetric<Integer> jvmThreadCount;
 
   // Metric for total live jvm daemon threads
-  private final AssignableMetric jvmDaemonThreadCount;
+  private final AssignableMetric<Integer> jvmDaemonThreadCount;
 
   // Metric for number of open file descriptors
-  private final AssignableMetric fdCount;
+  private final AssignableMetric<Long> fdCount;
 
   // Metric for max file descriptors allowed per jvm process
-  private final AssignableMetric fdLimit;
+  private final AssignableMetric<Long> fdLimit;
 
   // The accumulated time spending on Garbage Collection in MilliSeconds
-  private AssignableMetric jvmGCTimeMs;
+  private AssignableMetric<Long> jvmGCTimeMs;
 
   // The accumulated account of JVM Garbage Collection
-  private AssignableMetric jvmGCCount;
+  private AssignableMetric<Long> jvmGCCount;
 
   // The JVM up times
-  private AssignableMetric jvmUpTimeSecs;
+  private AssignableMetric<Long> jvmUpTimeSecs;
 
   /*
    * Returns the CPU time used by the process on which the Java virtual machine is running in nanoseconds.
    * The value is of nanoseconds precision but not necessarily nanoseconds accuracy.
    */
-  private AssignableMetric processCPUTimeNs;
+  private AssignableMetric<Long> processCPUTimeNs;
 
   /*
    * Returns the total CPU time for a thread of the specified ID in nanoseconds.
@@ -97,10 +97,10 @@ public class JVMMetrics {
    * the Java virtual machine implementation may choose any time up to and including the
    * time that the capability is enabled as the point where CPU time measurement starts.
    */
-  private MultiAssignableMetric threadsCPUTimeNs;
+  private MultiAssignableMetric<Long> threadsCPUTimeNs;
 
   // The cpu time used by threads other than SlaveThread and GatewayThread
-  private AssignableMetric otherThreadsCPUTimeNs;
+  private AssignableMetric<Long> otherThreadsCPUTimeNs;
 
   /*
    * Returns the CPU time that a thread of the specified ID has executed in user mode in nanosecs.
@@ -113,10 +113,10 @@ public class JVMMetrics {
    * the Java virtual machine implementation may choose any time up to and including the
    * time that the capability is enabled as the point where CPU time measurement starts.
    */
-  private MultiAssignableMetric threadsUserCPUTimeNs;
+  private MultiAssignableMetric<Long> threadsUserCPUTimeNs;
 
   // The user cpu time used by threads other than SlaveThread and GatewayThread
-  private AssignableMetric otherThreadsUserCPUTimeNs;
+  private AssignableMetric<Long> otherThreadsUserCPUTimeNs;
 
   /*
    * The "recent cpu usage" for the Java Virtual Machine process.
@@ -130,59 +130,59 @@ public class JVMMetrics {
    * the JVM process and the whole system. If the Java Virtual Machine recent CPU usage is
    * not available, the method returns a negative value.
    */
-  private ReducedMetric<MeanReducerState> processCPULoad;
+  private ReducedMetric<MeanReducerState, Number, Double> processCPULoad;
 
   // Metrics that measure memory, memory's heap and memory's non-heap
-  private ReducedMetric<MeanReducerState> jvmMemoryFreeMB;
-  private ReducedMetric<MeanReducerState> jvmMemoryUsedMB;
-  private ReducedMetric<MeanReducerState> jvmMemoryTotalMB;
-  private ReducedMetric<MeanReducerState> jvmMemoryHeapUsedMB;
-  private ReducedMetric<MeanReducerState> jvmMemoryHeapCommittedMB;
-  private ReducedMetric<MeanReducerState> jvmMemoryHeapMaxMB;
-  private ReducedMetric<MeanReducerState> jvmMemoryNonHeapUsedMB;
-  private ReducedMetric<MeanReducerState> jvmMemoryNonHeapCommittedMB;
-  private ReducedMetric<MeanReducerState> jvmMemoryNonHeapMaxMB;
+  private ReducedMetric<MeanReducerState, Number, Double> jvmMemoryFreeMB;
+  private ReducedMetric<MeanReducerState, Number, Double> jvmMemoryUsedMB;
+  private ReducedMetric<MeanReducerState, Number, Double> jvmMemoryTotalMB;
+  private ReducedMetric<MeanReducerState, Number, Double> jvmMemoryHeapUsedMB;
+  private ReducedMetric<MeanReducerState, Number, Double> jvmMemoryHeapCommittedMB;
+  private ReducedMetric<MeanReducerState, Number, Double> jvmMemoryHeapMaxMB;
+  private ReducedMetric<MeanReducerState, Number, Double> jvmMemoryNonHeapUsedMB;
+  private ReducedMetric<MeanReducerState, Number, Double> jvmMemoryNonHeapCommittedMB;
+  private ReducedMetric<MeanReducerState, Number, Double> jvmMemoryNonHeapMaxMB;
 
   // Gather metrics for different memory pools in heap, for instance:
   // Par Eden Space, Par Survivor Space, CMS Old Gen, CMS Perm Gen
 
   // The peak memory usage of a memory pool since the Java virtual machine was started
   // or since the peak was reset.
-  private MultiAssignableMetric jvmPeakUsagePerMemoryPool;
+  private MultiAssignableMetric<Long> jvmPeakUsagePerMemoryPool;
 
   // The memory usage after the Java virtual machine most recently expended effort in recycling
   // unused objects in a memory pool.
-  private MultiAssignableMetric jvmCollectionUsagePerMemoryPool;
+  private MultiAssignableMetric<Long> jvmCollectionUsagePerMemoryPool;
 
   // An estimate of the memory usage of a memory pool.
-  private MultiAssignableMetric jvmEstimatedUsagePerMemoryPool;
+  private MultiAssignableMetric<Long> jvmEstimatedUsagePerMemoryPool;
 
   /*
    * Metrics for mapped and direct buffer pool usage.
    */
-  private MultiAssignableMetric jvmBufferPoolMemoryUsage;
+  private MultiAssignableMetric<Long> jvmBufferPoolMemoryUsage;
 
   public JVMMetrics() {
-    jvmGCTimeMs = new AssignableMetric(0);
-    jvmGCCount = new AssignableMetric(0);
+    jvmGCTimeMs = new AssignableMetric<>(0L);
+    jvmGCCount = new AssignableMetric<>(0L);
 
-    jvmGCCountPerGCType = new MultiAssignableMetric();
-    jvmGCTimeMsPerGCType = new MultiAssignableMetric();
+    jvmGCCountPerGCType = new MultiAssignableMetric<>(0L);
+    jvmGCTimeMsPerGCType = new MultiAssignableMetric<>(0L);
 
-    jvmUpTimeSecs = new AssignableMetric(0);
+    jvmUpTimeSecs = new AssignableMetric<>(0L);
 
-    jvmThreadCount = new AssignableMetric(0);
-    jvmDaemonThreadCount = new AssignableMetric(0);
-    processCPUTimeNs = new AssignableMetric(0);
-    threadsCPUTimeNs = new MultiAssignableMetric();
-    otherThreadsCPUTimeNs = new AssignableMetric(0);
-    threadsUserCPUTimeNs = new MultiAssignableMetric();
-    otherThreadsUserCPUTimeNs = new AssignableMetric(0);
+    jvmThreadCount = new AssignableMetric<>(0);
+    jvmDaemonThreadCount = new AssignableMetric<>(0);
+    processCPUTimeNs = new AssignableMetric<>(0L);
+    threadsCPUTimeNs = new MultiAssignableMetric<>(0L);
+    otherThreadsCPUTimeNs = new AssignableMetric<>(0L);
+    threadsUserCPUTimeNs = new MultiAssignableMetric<>(0L);
+    otherThreadsUserCPUTimeNs = new AssignableMetric<>(0L);
 
     processCPULoad = new ReducedMetric<>(new MeanReducer());
 
-    fdCount = new AssignableMetric(0);
-    fdLimit = new AssignableMetric(0);
+    fdCount = new AssignableMetric<>(0L);
+    fdLimit = new AssignableMetric<>(0L);
 
     jvmMemoryFreeMB = new ReducedMetric<>(new MeanReducer());
     jvmMemoryUsedMB = new ReducedMetric<>(new MeanReducer());
@@ -194,11 +194,11 @@ public class JVMMetrics {
     jvmMemoryNonHeapCommittedMB = new ReducedMetric<>(new MeanReducer());
     jvmMemoryNonHeapMaxMB = new ReducedMetric<>(new MeanReducer());
 
-    jvmPeakUsagePerMemoryPool = new MultiAssignableMetric();
-    jvmCollectionUsagePerMemoryPool = new MultiAssignableMetric();
-    jvmEstimatedUsagePerMemoryPool = new MultiAssignableMetric();
+    jvmPeakUsagePerMemoryPool = new MultiAssignableMetric<>(0L);
+    jvmCollectionUsagePerMemoryPool = new MultiAssignableMetric<>(0L);
+    jvmEstimatedUsagePerMemoryPool = new MultiAssignableMetric<>(0L);
 
-    jvmBufferPoolMemoryUsage = new MultiAssignableMetric();
+    jvmBufferPoolMemoryUsage = new MultiAssignableMetric<>(0L);
   }
 
   /**
