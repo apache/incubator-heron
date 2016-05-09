@@ -166,13 +166,13 @@ public final class UnitTestHelper {
   }
 
   public static void addSystemConfigToSingleton() {
-    String runFiles = System.getenv(Constants.BAZEL_TEST_SRCDIR);
+    String runFiles = System.getenv(Constants.BUILD_TEST_SRCDIR);
     if (runFiles == null) {
-      throw new RuntimeException("Failed to fetch bazel src directory");
+      throw new RuntimeException("Failed to fetch run files resources from built jar");
     }
 
     String filePath =
-        Paths.get(runFiles, Constants.BAZEL_TEST_HERON_INTERNALS_CONFIG_PATH).toString();
+        Paths.get(runFiles, Constants.BUILD_TEST_HERON_INTERNALS_CONFIG_PATH).toString();
     SystemConfig systemConfig = new SystemConfig(filePath);
     SingletonRegistry.INSTANCE.registerSingleton(Constants.HERON_SYSTEM_CONFIG, systemConfig);
   }
