@@ -4,7 +4,7 @@ package(default_visibility = ["//visibility:public"])
 
 filegroup(
     name = "tracker-yaml",
-    srcs = ["heron_tracker.yaml"],
+    srcs = ["tracker/heron_tracker.yaml"],
 )
 
 filegroup(
