@@ -38,12 +38,36 @@ We hope the open source process is complete.  We currently have all code reviews
 
 ### Are there parts of Heron that will never be open sourced?
 No - all components of Heron will be fully open sourced and able to be supported by open source tools.  Twitter will use the open source releases in production.  As with others who may implement and contribute to the Heron project, Twitter may use Heron with  some functionality, or employ technology complementing Heron, that is not currently planned to become open sourced.  
-### Core Contributors
+### Core Committers
 Contact the core team at: heron-dev@googlegroups.com.
 
 The current group is:
 
-[Karthik Ramasamy (Twitter)](https://github.com/kramasamy)
+[Karthik Ramasamy (Twitter)](https://github.com/kramasamy) <br/>
+[Maosong Fu (Twitter)] (https://github.com/maosongfu) <br/>
+[Bill Graham (Twitter)] (https://github.com/billonahill) <br/>
+[Neng Lu (Twitter)] (https://github.com/nlu90) <br/>
+[Vikas R. Kedigehalli (Twitter)](https://github.com/vikkyrk) <br/>
+[Sailesh Mittal (Twitter)] (https://github.com/saileshmittal) <br/>
+[Jingwei Wu (Twitter)] (https://github.com/jingwei) <br/>
+[Christopher Kellogg (Twitter)] (https://github.com/cckellogg) <br/>
+[Andrew Jorgensen (Twitter)] (https://github.com/ajorgensen) <br/>
+Brian Hatfield (Twitter) <br/>
+Michael Barry (Twitter) (https://github.com/msbarry) <br/>
+[Luc Perkins (Twitter)] (https://github.com/lucperkins) <br/>
 
+### Collaborators and Contributors
 
-#### Contributors
+[Sanjeev Kulkarni (Peer Nova)] (https://github.com/srkukarni) <br/>
+[Nikunj Bhagat (Google)] (https://github.com/nikunjbhagat) <br/>
+[Siddarth Taneja (Google)] (https://github.com/kernelsid) <br/>
+[Lewis Kaneshiro (Stanford University)] (https://github.com/lewiskan) <br/>
+[Ashvin Agarwal (Microsoft)] (https://github.com/ashvina) <br/>
+[Sriram Rao (Microsoft)] (https://github.com/sriramsrao) <br/>
+[Andrew Montalenti (Paresly)] (https://github.com/amontalenti) <br/>
+Arun Kejariwal (Machine Zone) <br/>
+Mengdie Hu (Facebook) <br/>
+Zuyu Zhang (Pivotal) <br/>
+[Joe Stein (Elodina)] (https://github.com/joestein) <br/>
+[Prabhu Inbarajan (Cisco)] (https://github.com/prabhuinbarajan) <br/>
+[Supun Kamburugamuve (Indiana University)] (https://github.com/supunkamburugamuve) <br/>
