@@ -128,3 +128,10 @@ java_test(
     data = glob(["**/testdata/**/*.yaml"]),
     size = "small",
 )
+
+java_test(
+    name = "uploader-utils_unittest",
+    srcs = glob(["**/utils/UploaderUtilsTest.java"]),
+    deps = util_deps_files,
+    size = "small",
+)

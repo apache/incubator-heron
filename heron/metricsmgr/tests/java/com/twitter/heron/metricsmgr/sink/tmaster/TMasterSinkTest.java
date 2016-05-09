@@ -49,6 +49,7 @@ public class TMasterSinkTest {
   }
 
   @After
+  @SuppressWarnings("unchecked")
   public void after() throws Exception {
     // Remove the Singleton by Reflection
     Field field = SingletonRegistry.INSTANCE.getClass().getDeclaredField("singletonObjects");

@@ -86,6 +86,7 @@ java_library(
         "**/spi/common/**/*.java",
     ]),
     deps = [
+        "//heron/common/src/java:basics-java",
         "//heron/common/src/java:config-java",
     ],
     resources = common_resource_files, 
@@ -119,6 +120,14 @@ java_library(
     name='uploader-spi-java',
     srcs = glob([
         "**/spi/uploader/**/*.java",
+    ]),
+    deps = uploader_deps_files,
+)
+
+java_library(
+    name='uploader-utils-java',
+    srcs = glob([
+        "**/spi/utils/UploaderUtils.java",
     ]),
     deps = uploader_deps_files,
 )

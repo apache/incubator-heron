@@ -51,6 +51,7 @@ class Application(tornado.web.Application):
       (r"/topologies/containerfilestats", handlers.ContainerFileStatsHandler, {"tracker":tracker}),
       (r"/topologies/physicalplan", handlers.PhysicalPlanHandler, {"tracker":tracker}),
       (r"/topologies/executionstate", handlers.ExecutionStateHandler, {"tracker":tracker}),
+      (r"/topologies/schedulerlocation", handlers.SchedulerLocationHandler, {"tracker":tracker}),
       (r"/topologies/metrics", handlers.MetricsHandler, {"tracker":tracker}),
       (r"/topologies/metricstimeline", handlers.MetricsTimelineHandler, {"tracker":tracker}),
       (r"/topologies/metricsquery", handlers.MetricsQueryHandler, {"tracker":tracker}),

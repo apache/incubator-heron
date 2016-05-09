@@ -25,6 +25,7 @@ from heron.statemgrs.src.python.stateexceptions import StateException
 
 from heron.proto.execution_state_pb2 import ExecutionState
 from heron.proto.physical_plan_pb2 import PhysicalPlan
+from heron.proto.scheduler_pb2 import SchedulerLocation
 from heron.proto.tmaster_pb2 import TMasterLocation
 from heron.proto.topology_pb2 import Topology
 
@@ -44,6 +45,7 @@ class FileStateManager(StateManager):
     self.execution_state_directory = {}
     self.pplan_directory = {}
     self.tmaster_directory = {}
+    self.scheduler_location_directory = {}
 
     # The watches are triggered when there
     # is a corresponding change.
@@ -57,6 +59,7 @@ class FileStateManager(StateManager):
     self.execution_state_watchers = defaultdict(lambda: [])
     self.pplan_watchers = defaultdict(lambda: [])
     self.tmaster_watchers = defaultdict(lambda: [])
+    self.scheduler_location_watchers = defaultdict(lambda: [])
 
     # Instantiate the monitoring thread.
     self.monitoring_thread = threading.Thread(target=self.monitor)
@@ -116,6 +119,10 @@ class FileStateManager(StateManager):
       # Get the directory name for tmaster
       tmaster_path = os.path.dirname(self.get_tmaster_path(""))
       trigger_watches_based_on_files(self.tmaster_watchers, tmaster_path, self.tmaster_directory, TMasterLocation)
+
+      # Get the directory name for scheduler location
+      scheduler_location_path = os.path.dirname(self.get_scheduler_location_path(""))
+      trigger_watches_based_on_files(self.scheduler_location_watchers, scheduler_location_path, self.scheduler_location_directory, SchedulerLocation)
 
       # Sleep for some time
       time.sleep(5)
@@ -206,4 +213,15 @@ class FileStateManager(StateManager):
         tmaster = TMasterLocation()
         tmaster.ParseFromString(data)
         return tmaster
+
+  def get_scheduler_location(self, topologyName, callback=None):
+    if callback:
+      self.scheduler_location_watchers[topologyName].append(callback)
+    else:
+      scheduler_location_path = self.get_scheduler_location_path(topologyName)
+      with open(scheduler_location_path) as f:
+        data = f.read()
+        scheduler_location = SchedulerLocation()
+        scheduler_location.ParseFromString(data)
+        return scheduler_location
 

@@ -38,4 +38,4 @@ script:
   - gcc --version
   - which g++-4.8
   - g++ --version 
-  - scripts/travis/build.sh
+  - scripts/travis/build.sh && scripts/travis/test.sh

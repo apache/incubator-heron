@@ -15,6 +15,8 @@
 package com.twitter.heron.spi.scheduler;
 
 
+import java.util.List;
+
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.PackingPlan;
@@ -48,6 +50,15 @@ public interface IScheduler extends AutoCloseable {
    * @param packing Initial mapping suggested by running packing algorithm.
    */
   boolean onSchedule(PackingPlan packing);
+
+  /**
+   * This method will be called after onScheduler
+   * It is responsible to return links to topology's customized ui pages.
+   * Example: link to the Mesos Slave UI page displaying all scheduled containers
+   *
+   * @return the links if any customized page. It returns an empty list if no any links
+   */
+  List<String> getJobLinks();
 
   /**
    * Called by SchedulerServer when it receives a http request to kill topology,

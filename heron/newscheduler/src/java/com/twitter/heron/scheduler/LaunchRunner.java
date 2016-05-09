@@ -14,7 +14,6 @@
 
 package com.twitter.heron.scheduler;
 
-import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,8 +40,7 @@ public class LaunchRunner implements Callable<Boolean> {
   private ILauncher launcher;
   private IPacking packing;
 
-  public LaunchRunner(Config config, Config runtime) throws
-      ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
+  public LaunchRunner(Config config, Config runtime) {
 
     this.config = config;
     this.runtime = runtime;

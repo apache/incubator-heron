@@ -28,6 +28,7 @@ from kazoo.exceptions import ZookeeperError
 
 from heron.proto.execution_state_pb2 import ExecutionState
 from heron.proto.physical_plan_pb2 import PhysicalPlan
+from heron.proto.scheduler_pb2 import SchedulerLocation
 from heron.proto.tmaster_pb2 import TMasterLocation
 from heron.proto.topology_pb2 import Topology
 
@@ -407,6 +408,50 @@ class ZkStateManager(StateManager):
         tmaster = TMasterLocation()
         tmaster.ParseFromString(data)
         callback(tmaster)
+      else:
+        callback(None)
+
+      # Returning False will result in no future watches
+      # being triggered. If isWatching is True, then
+      # the future watches will be triggered.
+      return isWatching
+
+  def get_scheduler_location(self, topologyName, callback=None):
+    isWatching = False
+
+    # Temp dict used to return result
+    # if callback is not provided.
+    ret = {
+      "result": None
+    }
+    if callback:
+      isWatching = True
+    else:
+      # Custom callback to get the scheduler location
+      # right now.
+      def callback(data):
+        ret["result"] = data
+
+    self._get_scheduler_location_with_watch(topologyName, callback, isWatching)
+
+    return ret["result"]
+
+  def _get_scheduler_location_with_watch(self, topologyName, callback, isWatching):
+    """
+    Helper function to get scheduler location with
+    a callback. The future watch is placed
+    only if isWatching is True.
+    """
+    path = self.get_scheduler_location_path(topologyName)
+    if isWatching:
+      LOG.info("Adding data watch for path: " + path)
+
+    @self.client.DataWatch(path)
+    def watch_scheduler_location(data, stats):
+      if data:
+        scheduler_location = SchedulerLocation()
+        scheduler_location.ParseFromString(data)
+        callback(scheduler_location)
       else:
         callback(None)
 

@@ -28,6 +28,7 @@ import com.twitter.heron.common.config.SystemConfig;
  */
 public class LocalModeTest {
 
+  @SuppressWarnings("unchecked")
   private static void clearSingletonRegistry() throws Exception {
     // Remove the Singleton by Reflection
     Field field = SingletonRegistry.INSTANCE.getClass().getDeclaredField("singletonObjects");

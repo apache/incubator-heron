@@ -24,6 +24,8 @@ import java.util.Map;
 
 import org.yaml.snakeyaml.Yaml;
 
+import com.twitter.heron.common.basics.TypeUtils;
+
 public class MetricsSinksConfig {
   public static final String CONFIG_KEY_METRICS_SINKS = "sinks";
   public static final String CONFIG_KEY_CLASSNAME = "class";
@@ -31,9 +33,9 @@ public class MetricsSinksConfig {
   public static final String CONFIG_KEY_SINK_RESTART_ATTEMPTS = "sink-restart-attempts";
   public static final int DEFAULT_SINK_RESTART_ATTEMPTS = 0;
 
-  private final Map<String, Map<String, Object>> sinksConfigs =
-      new HashMap<String, Map<String, Object>>();
+  private final Map<String, Map<String, Object>> sinksConfigs = new HashMap<>();
 
+  @SuppressWarnings("unchecked")
   public MetricsSinksConfig(String filename) throws FileNotFoundException {
     FileInputStream fin = new FileInputStream(new File(filename));
     Yaml yaml = new Yaml();
@@ -42,7 +44,7 @@ public class MetricsSinksConfig {
     if (ret == null) {
       throw new RuntimeException("Could not parse metrics-sinks config file");
     } else {
-      for (String sinkId : (List<String>) ret.get(CONFIG_KEY_METRICS_SINKS)) {
+      for (String sinkId : TypeUtils.getListOfStrings(ret.get(CONFIG_KEY_METRICS_SINKS))) {
         sinksConfigs.put(sinkId, (Map<String, Object>) ret.get(sinkId));
       }
     }

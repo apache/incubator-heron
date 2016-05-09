@@ -148,8 +148,8 @@ public class MetricsManager {
         serverPort, serverSocketOptions, serverCounters);
 
     executors = Executors.newFixedThreadPool(config.getNumberOfSinks());
-    sinkExecutors = new ConcurrentHashMap<String, SinkExecutor>(config.getNumberOfSinks());
-    sinksRetryAttempts = new ConcurrentHashMap<String, Integer>(config.getNumberOfSinks());
+    sinkExecutors = new ConcurrentHashMap<>(config.getNumberOfSinks());
+    sinksRetryAttempts = new ConcurrentHashMap<>(config.getNumberOfSinks());
     // Add exception handler for any uncaught exception here.
     Thread.setDefaultUncaughtExceptionHandler(new DefaultExceptionHandler());
 

@@ -44,6 +44,16 @@ java_test(
   size="small",
 )
 
+java_test(
+  name="scheduler-main_unittest",
+  srcs=glob(
+    ["**/SchedulerMainTest.java"] +
+    ["**/util/TopologyUtilityTest.java"]
+  ),
+  deps=scheduler_deps_files,
+  size="small",
+)
+
 # Following unit tests are for classes under package com.twitter.heron.scheduler.server
 java_test(
   name="scheduler-server_unittest",
