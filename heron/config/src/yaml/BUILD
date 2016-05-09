@@ -3,23 +3,13 @@ licenses(["notice"])
 package(default_visibility = ["//visibility:public"])
 
 filegroup(
-    name = "config-internals-yaml",
-    srcs = ["heron_internals.yaml"],
-)
-
-filegroup(
-    name = "metrics-sinks-yaml",
-    srcs = ["metrics_sinks.yaml"],
-)
-
-filegroup(
     name = "tracker-yaml",
     srcs = ["heron_tracker.yaml"],
 )
 
 filegroup(
     name = "test-config-internals-yaml",
-    srcs = ["test_heron_internals.yaml"],
+    srcs = ["conf/test/test_heron_internals.yaml"],
 )
 
 filegroup(
