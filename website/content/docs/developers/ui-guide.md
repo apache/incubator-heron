@@ -17,5 +17,11 @@ sections.
 4. Links to get logs, memory histogram, jstack, heapdump and exceptions of
    a particular instance
 
-and other useful links and information, that is explained below.
+and other useful links and information, that are explained below.
 
+#### Topologies Page
+
+`TODO: Add home page image`
+
+This is the home page of Heron UI. It lists all the topologies that are
+currently running.
