@@ -6,7 +6,6 @@ def heron_core_files():
 
 def heron_core_bin_files():
     return [
-        "//heron/controller/src/python:heron-controller",
         "//heron/executor/src/python:heron-executor",
         "//heron/shell/src/python:heron-shell",
         "//heron/stmgr/src/cpp:heron-stmgr",
