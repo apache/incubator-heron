@@ -60,7 +60,7 @@ The current group is:
 [Sanjeev Kulkarni (Peer Nova)] (https://github.com/srkukarni) <br/>
 [Nikunj Bhagat (Google)] (https://github.com/nikunjbhagat) <br/>
 [Siddarth Taneja (Google)] (https://github.com/kernelsid) <br/>
-Brian Hatfield (Twitter) <br/>
+[Brian Hatfield (Twitter)] (https://github.com/bmhatfield) <br/>
 [Luc Perkins (Twitter)] (https://github.com/lucperkins) <br/>
 [Lewis Kaneshiro (Stanford University)] (https://github.com/lewiskan) <br/>
 [Joe Stein (Elodina)] (https://github.com/joestein) <br/>
@@ -70,5 +70,4 @@ Brian Hatfield (Twitter) <br/>
 [Sriram Rao (Microsoft)] (https://github.com/sriramsrao) <br/>
 [Avrilla Floratou (Microsoft)] (https://github.com/avflor) <br/>
 [Andrew Montalenti (Parsely)] (https://github.com/amontalenti) <br/>
-Mengdie Hu (Facebook) <br/>
-Zuyu Zhang (Pivotal) <br/>
+[Zuyu Zhang (Pivotal)] (https://github.com/zuyu) <br/>
