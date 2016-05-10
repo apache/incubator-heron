@@ -249,7 +249,7 @@ filegroup(
 
 filegroup(
     name = "hscheduler",
-    srcs = ["//heron/newscheduler/src/java:heron-scheduler"],
+    srcs = ["//heron/scheduler-core/src/java:heron-scheduler"],
 )
 
 filegroup(

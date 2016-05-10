@@ -28,7 +28,7 @@ def heron_core_lib_files():
 
 def heron_core_lib_scheduler_files():
     return [
-        "//heron/newscheduler/src/java:heron-scheduler",
+        "//heron/scheduler-core/src/java:heron-scheduler",
         "//heron/schedulers/src/java:heron-local-scheduler",
     ]
 
