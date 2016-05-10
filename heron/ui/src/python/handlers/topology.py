@@ -67,11 +67,10 @@ class ListTopologiesHandler(base.BaseHandler):
   @tornado.gen.coroutine
   def get(self):
     clusters = yield access.get_clusters()
-    clusters = [str(c["name"]) for c in clusters["clusters"]]
 
     options = dict(
         topologies = [],               # no topologies
-        clusters = clusters,           
+        clusters = map(str, clusters),
         active = "topologies",         # active icon the nav bar
         function = common.className
     )
