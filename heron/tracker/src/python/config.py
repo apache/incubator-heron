@@ -45,7 +45,10 @@ class Config:
 
   def load_configs(self):
     self.statemgr_config.set_state_locations(self.configs[STATEMGRS_KEY])
-    self.viz_url_format = self.validated_viz_url_format(self.configs[VIZ_URL_FORMAT_KEY])
+    if VIZ_URL_FORMAT_KEY in self.configs:
+      self.viz_url_format = self.validated_viz_url_format(self.configs[VIZ_URL_FORMAT_KEY])
+    else:
+      self.viz_url_format = ""
 
   def validated_viz_url_format(self, viz_url_format):
     # We try to create a string by substituting all known
