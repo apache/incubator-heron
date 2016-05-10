@@ -23,5 +23,26 @@ and other useful links and information, that are explained below.
 
 `TODO: Add home page image`
 
-This is the home page of Heron UI. It lists all the topologies that are
-currently running.
+This is the home page of Heron UI.
+
+Following information can be found on this page.
+
+1. List of all topologies
+2. Number of topologies fitered after search (total by default)
+2. A topology's overview
+3. Link to a topology's configuration
+
+Following actions can be taken on this page.
+
+1. Filter the topologies using `cluster`
+2. Filter the topologies using string matching in names, clusters, environs,
+   roles, versions, or submitters
+3. Sort the topologies based on a particular column
+4. Click on the topology name to find more info about the topology
+5. Click on the `Config` button to look at the configurations for the topology
+
+#### Topology Page
+
+`TODO: Add topology page image`
+
+This is the main page to monitor a topology.
