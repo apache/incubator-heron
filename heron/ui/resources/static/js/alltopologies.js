@@ -39,9 +39,6 @@ var TopologyItem = React.createClass({
          <td className="col-md-1 toporeleaseversion">{topology.release_version}</td>
          <td className="col-md-1 toposubmittedby break-all">{topology.submission_user}</td>
          <td className="col-md-2 toposubmittedat no-break">{display_time}</td>
-         <td className="col-md-2 topobutton no-break">
-           <a className="btn btn-primary btn-sm" href={"/topologies/" + [topology.cluster, topology.environ, topology.name, "config"].join("/")} target="_self">Config</a>
-         </td>
        </tr>
     );
   }
@@ -176,7 +173,6 @@ var TopologyTable = React.createClass({
               <th onClick={sortBy("submission_time")} className={sortClass("submission_time")}>
                 Launched at
               </th>
-              <th style={linkHeaderStyle}></th>
             </thead>
 
             <tbody className="list">{items}</tbody>
@@ -304,7 +300,7 @@ var FilterableTopologyTable = React.createClass({
          </div>
        </div>
 
-       
+
      </div>
      <input id="search-box" placeholder="Search for a topology" type="text" className="form-control col-md-7" style={divStyle} autoFocus={true} onChange={this.handleFilterChange} defaultValue={this.state.filter}/>
      <TopologyTable  env={this.state.environ} cluster={this.state.cluster} filter={this.state.filter}/>

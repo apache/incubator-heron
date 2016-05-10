@@ -126,6 +126,7 @@
           <td>
             <a class="btn btn-primary btn-xs" href="/topologies/{{cluster}}/{{environ}}/{{topology}}/config" target="_blank">Config</a>
             <a id="jobPageLink" class="btn btn-primary btn-xs" href={{job_page_link}} target="_blank">Job</a>
+            <a id="vizLink" class="btn btn-primary btn-xs" href="{{estate['viz']}}" target="_blank">Viz</a>
           </td>
         </tr>
       </tbody>
@@ -175,6 +176,11 @@
     // hide Job link if it is not there
     if ("{{job_page_link}}" === "") {
       document.getElementById("jobPageLink").style.display = "none";
+    }
+
+    // hide viz link if it is not there
+    if ("{{estate['viz']}}" === "") {
+      document.getElementById("vizLink").style.display = "none";
     }
 
     // display the topology name as the title
