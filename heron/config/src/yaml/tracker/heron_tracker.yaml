@@ -23,10 +23,10 @@ statemgrs:
 #
 #   ${CLUSTER}
 #   ${ENVIRON}
-#   ${TOPOLOGY_NAME}
+#   ${TOPOLOGY}
 #   ${ROLE}
-#   ${SUBMISSION_USER}
+#   ${USER}
 #
 # This is a sample, and should be changed to point to corresponding dashboard.
 #
-# viz.url.format: "http://localhost/${CLUSTER}/${ENVIRON}/${TOPOLOGY_NAME}/${ROLE}/${SUBMISSION_USER}"
+# viz.url.format: "http://localhost/${CLUSTER}/${ENVIRON}/${TOPOLOGY}/${ROLE}/${USER}"

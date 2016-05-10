@@ -55,11 +55,11 @@ class Config:
     # parameters. If an unknown parameter is present, an error
     # will be thrown
     valid_parameters = {
-      "${CLUSTER}": "dummy",
-      "${ENVIRON}": "dummy",
-      "${TOPOLOGY_NAME}": "dummy",
-      "${ROLE}": "dummy",
-      "${SUBMISSION_USER}": "dummy",
+      "${CLUSTER}": "cluster",
+      "${ENVIRON}": "environ",
+      "${TOPOLOGY}": "topology",
+      "${ROLE}": "role",
+      "${USER}": "user",
     }
     dummy_formatted_viz_url = viz_url_format
     for key, value in valid_parameters.iteritems():
@@ -82,9 +82,9 @@ class Config:
     valid_parameters = {
       "${CLUSTER}": execution_state["cluster"],
       "${ENVIRON}": execution_state["environ"],
-      "${TOPOLOGY_NAME}": execution_state["jobname"],
+      "${TOPOLOGY}": execution_state["jobname"],
       "${ROLE}": execution_state["role"],
-      "${SUBMISSION_USER}": execution_state["submission_user"],
+      "${USER}": execution_state["submission_user"],
     }
 
     formatted_viz_url = self.viz_url_format
