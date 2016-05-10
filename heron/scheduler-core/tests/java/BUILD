@@ -4,7 +4,7 @@ common_deps_files = [
     "@guava//jar",
     "//3rdparty/java:powermock",
     "//heron/api/src/java:api-java",
-    "//heron/newscheduler/src/java:scheduler-java",
+    "//heron/scheduler-core/src/java:scheduler-java",
     "@bazel_tools//third_party:junit4",
     "@bazel_tools//third_party:mockito",
 ]

@@ -23,7 +23,7 @@ def heron_client_aurora_files():
 
 def heron_client_lib_scheduler_files():
     return [
-        "//heron/newscheduler/src/java:heron-scheduler",
+        "//heron/scheduler-core/src/java:heron-scheduler",
         "//heron/schedulers/src/java:heron-local-scheduler",
         "//heron/schedulers/src/java:heron-aurora-scheduler",
         "//heron/packing/src/java:heron-roundrobin-packing",
