@@ -45,20 +45,29 @@ class Config:
 
   def load_configs(self):
     self.statemgr_config.set_state_locations(self.configs[STATEMGRS_KEY])
-    self.viz_url_format = self.validated_viz_url_format(self.configs[VIZ_URL_FORMAT_KEY])
+    if VIZ_URL_FORMAT_KEY in self.configs:
+      self.viz_url_format = self.validated_viz_url_format(self.configs[VIZ_URL_FORMAT_KEY])
+    else:
+      self.viz_url_format = ""
 
   def validated_viz_url_format(self, viz_url_format):
     # We try to create a string by substituting all known
     # parameters. If an unknown parameter is present, an error
     # will be thrown
     valid_parameters = {
-      "cluster": "dummy",
-      "environ": "dummy",
-      "jobname": "dummy",
-      "role": "dummy",
-      "submission_user": "dummy",
+      "${CLUSTER}": "cluster",
+      "${ENVIRON}": "environ",
+      "${TOPOLOGY}": "topology",
+      "${ROLE}": "role",
+      "${USER}": "user",
     }
-    dummy_formatted_viz_url = viz_url_format.format(**valid_parameters)
+    dummy_formatted_viz_url = viz_url_format
+    for key, value in valid_parameters.iteritems():
+      dummy_formatted_viz_url = dummy_formatted_viz_url.replace(key, value)
+
+    # All $ signs must have been replaced
+    if '$' in dummy_formatted_viz_url:
+      raise Exception("Invalid viz.url.format: %s" % (viz_url_format))
 
     # No error is thrown, so the format is valid.
     return viz_url_format
@@ -69,5 +78,18 @@ class Config:
     @return Formatted viz url
     """
 
-    # We can directly use the whole execution state dict to format the viz_url
-    return self.viz_url_format.format(**execution_state)
+    # Create the parameters based on execution state
+    valid_parameters = {
+      "${CLUSTER}": execution_state["cluster"],
+      "${ENVIRON}": execution_state["environ"],
+      "${TOPOLOGY}": execution_state["jobname"],
+      "${ROLE}": execution_state["role"],
+      "${USER}": execution_state["submission_user"],
+    }
+
+    formatted_viz_url = self.viz_url_format
+
+    for key, value in valid_parameters.iteritems():
+      formatted_viz_url = formatted_viz_url.replace(key, value)
+
+    return formatted_viz_url
