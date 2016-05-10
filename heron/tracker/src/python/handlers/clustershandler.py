@@ -21,19 +21,7 @@ class ClustersHandler(BaseHandler):
   """
   URL - /clusters
 
-  The response JSON is a dict with following format:
-  {
-    "clusters": [
-      {
-        "name": "cluster1",
-        "tags": ["tag1", "tag2"]
-      },
-      {
-        "name": "cluster2",
-        "tags": ["tag1", "tag2"]
-      }
-    ]
-  }
+  The response JSON is a list of clusters
   """
 
   def initialize(self, tracker):
@@ -41,17 +29,6 @@ class ClustersHandler(BaseHandler):
 
   @tornado.gen.coroutine
   def get(self):
-    clusters = dict()
-    for tp in self.tracker.topologies:
-      name = tp.cluster
-      if name:
-        cluster = clusters.get(name, dict(name="", tags=set()))
-        cluster["name"] = name
-        if tp.environ:
-          cluster["tags"].add(tp.environ)
+    clusters = [statemgr.name for statemgr in self.tracker.state_managers]
 
-        clusters[name] = cluster
-
-
-    clusters = list(dict(name=v["name"], tags=list(v["tags"])) for k, v in clusters.iteritems())
-    self.write_success_response(dict(clusters=clusters))
+    self.write_success_response(clusters)
