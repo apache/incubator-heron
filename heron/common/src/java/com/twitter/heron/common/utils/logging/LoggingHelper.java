@@ -28,14 +28,39 @@ import java.util.logging.SimpleFormatter;
 
 /**
  * A helper class to init corresponding LOGGER setting
+ * loggerInit() is required to invoke before any logging
+ * <p>
  * Credits: https://blogs.oracle.com/nickstephen/entry/java_redirecting_system_out_and
  */
 public final class LoggingHelper {
+  public static final String FORMAT_PROP_KEY = "java.util.logging.SimpleFormatter.format";
+  public static final String DEFAULT_FORMAT = "[%1$tF %1$tT %1$tz] %3$s %4$s:  %5$s %6$s %n";
 
   private LoggingHelper() {
   }
 
+  /**
+   * Init java util logging with default format
+   *
+   * @param level the Level of message to log
+   * @param isRedirectStdOutErr whether we redirect std out&err
+   */
   public static void loggerInit(Level level, boolean isRedirectStdOutErr) throws IOException {
+    loggerInit(level, isRedirectStdOutErr, DEFAULT_FORMAT);
+  }
+
+  /**
+   * Init java util logging
+   *
+   * @param level the Level of message to log
+   * @param isRedirectStdOutErr whether we redirect std out&err
+   * @param format the format to log
+   */
+  public static void loggerInit(Level level, boolean isRedirectStdOutErr, String format)
+      throws IOException {
+    // Set the java util logging format
+    setLoggingFormat(format);
+
     // Configure the root logger and its handlers so that all the
     // derived loggers will inherit the properties
     Logger rootLogger = Logger.getLogger("");
@@ -68,6 +93,10 @@ public final class LoggingHelper {
       los = new LoggingOutputStream(logger, StdOutErrLevel.STDERR);
       System.setErr(new PrintStream(los, true));
     }
+  }
+
+  protected static void setLoggingFormat(String format) {
+    System.setProperty(FORMAT_PROP_KEY, format);
   }
 
   public static void addLoggingHandler(Handler handler) {
@@ -128,6 +157,7 @@ public final class LoggingHelper {
      */
     public static final Level STDERR =
         new StdOutErrLevel("STDERR", Level.INFO.intValue() + 54);
+
     /**
      * Private constructor
      */
