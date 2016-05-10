@@ -20,10 +20,13 @@ statemgrs:
 # This value can use following parameters to create a valid
 # URL based on the topology. All parameters are self-explanatory.
 # These are found in the execution state of the topology.
-#   {cluster}
-#   {environ}
-#   {jobname} - Same as topology name
-#   {role}
-#   {submission_user}
+#
+#   ${CLUSTER}
+#   ${ENVIRON}
+#   ${TOPOLOGY}
+#   ${ROLE}
+#   ${USER}
+#
 # This is a sample, and should be changed to point to corresponding dashboard.
-viz.url.format: "http://localhost/{cluster}/{environ}/{jobname}/{role}/{submission_user}"
+#
+# viz.url.format: "http://localhost/${CLUSTER}/${ENVIRON}/${TOPOLOGY}/${ROLE}/${USER}"
