@@ -180,7 +180,6 @@ class HeronExecutor:
                       '-XX:+UseConcMarkSweepGC',
                       '-XX:+PrintCommandLineFlags',
                       '-Xloggc:log-files/gc.metricsmgr.log',
-                      '-Djava.util.logging.config.file=aurora_logging.properties',
                       '-Djava.net.preferIPv4Stack=true',
                       '-cp',
                       self.metricsmgr_classpath,
@@ -308,8 +307,7 @@ class HeronExecutor:
       instance_cmd = instance_cmd + self.instance_jvm_opts.split()
       if component_name in self.component_jvm_opts:
         instance_cmd = instance_cmd + self.component_jvm_opts[component_name].split()
-      instance_cmd.extend(['-Djava.util.logging.config.file=aurora_logging.properties',
-                           '-Djava.net.preferIPv4Stack=true',
+      instance_cmd.extend(['-Djava.net.preferIPv4Stack=true',
                            '-cp',
                            '%s:%s' % (self.instance_classpath, self.classpath),
                            'com.twitter.heron.instance.HeronInstance',
