@@ -16,7 +16,7 @@ java_test(
         ["**/resource/*.java"]
     ),
     deps = test_deps_files,
-    data = ["//heron/config/src/yaml:config-internals-yaml"],
+    data = ["//heron/config/src/yaml:test-config-internals-yaml"],
     size = "small",
 )
 
@@ -25,9 +25,9 @@ java_test(
     srcs = glob(
         ["**/BoltInstanceTest.java"] +
         ["**/resource/*.java"]
-    ), 
+    ),
     deps = test_deps_files,
-    data = ["//heron/config/src/yaml:config-internals-yaml"],
+    data = ["//heron/config/src/yaml:test-config-internals-yaml"],
     size = "small",
 )
 
@@ -38,7 +38,7 @@ java_test(
         ["**/resource/*.java"]
     ),
     deps = test_deps_files,
-    data = ["//heron/config/src/yaml:config-internals-yaml"],
+    data = ["//heron/config/src/yaml:test-config-internals-yaml"],
     size = "small",
 )
 
@@ -49,7 +49,7 @@ java_test(
         ["**/resource/*.java"]
     ),
     deps = test_deps_files,
-    data = ["//heron/config/src/yaml:config-internals-yaml"],
+    data = ["//heron/config/src/yaml:test-config-internals-yaml"],
     size = "small",
 )
 
@@ -60,7 +60,7 @@ java_test(
         ["**/resource/*.java"]
     ),
     deps = test_deps_files,
-    data = ["//heron/config/src/yaml:config-internals-yaml"],
+    data = ["//heron/config/src/yaml:test-config-internals-yaml"],
     size = "small",
 )
 
@@ -71,7 +71,7 @@ java_test(
         ["**/resource/*.java"]
     ),
     deps = test_deps_files,
-    data = ["//heron/config/src/yaml:config-internals-yaml"],
+    data = ["//heron/config/src/yaml:test-config-internals-yaml"],
     size = "small",
 )
 
@@ -82,7 +82,7 @@ java_test(
         ["**/resource/*.java"]
     ),
     deps = test_deps_files,
-    data = ["//heron/config/src/yaml:config-internals-yaml"],
+    data = ["//heron/config/src/yaml:test-config-internals-yaml"],
     size = "small",
 )
 
@@ -93,7 +93,7 @@ java_test(
         ["**/resource/*.java"]
     ),
     deps = test_deps_files,
-    data = ["//heron/config/src/yaml:config-internals-yaml"],
+    data = ["//heron/config/src/yaml:test-config-internals-yaml"],
     size = "small",
 )
 
@@ -104,6 +104,6 @@ java_test(
         ["**/resource/*.java"]
     ),
     deps = test_deps_files,
-    data = ["//heron/config/src/yaml:config-internals-yaml"],
+    data = ["//heron/config/src/yaml:test-config-internals-yaml"],
     size = "small",
 )
