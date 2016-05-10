@@ -27,7 +27,7 @@ scheduler_deps_files = \
 
 reef_deps_files = \
     scheduler_deps_files + [
-        "//heron/newscheduler/src/java:scheduler-java",
+        "//heron/scheduler-core/src/java:scheduler-java",
         "//3rdparty/java:reef",
     ]
 

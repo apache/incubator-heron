@@ -64,7 +64,7 @@ public class HeronMasterDriverTest {
     Mockito.doReturn(mockConfig).when(spyDriver).createContextConfig("0");
 
     spyDriver.scheduleTMasterContainer();
-    Mockito.verify(mockEvaluator).submitContext(mockConfig);
+    Mockito.verify(mockEvaluator, Mockito.timeout(1000).times(1)).submitContext(mockConfig);
   }
 
   @Test
@@ -87,8 +87,8 @@ public class HeronMasterDriverTest {
 
     PackingPlan packing = new PackingPlan("packingId", containers, null);
     spyDriver.scheduleHeronWorkers(packing);
-    Mockito.verify(mockEvaluator2).submitContext(mockConfig);
-    Mockito.verify(mockEvaluator2).submitContext(mockConfig);
+    Mockito.verify(mockEvaluator1, Mockito.timeout(1000).times(1)).submitContext(mockConfig);
+    Mockito.verify(mockEvaluator2, Mockito.timeout(1000).times(1)).submitContext(mockConfig);
   }
 
   private void addContainer(String id,
@@ -126,12 +126,13 @@ public class HeronMasterDriverTest {
     Mockito.doReturn(mockTMasterEvaluator).when(spyDriver).allocateContainer("0", 1, 1024);
 
     spyDriver.scheduleTMasterContainer();
+    Mockito.verify(spyDriver, Mockito.timeout(1000).times(1)).allocateContainer("0", 1, 1024);
 
     FailedEvaluator mockFailedContainer = Mockito.mock(FailedEvaluator.class);
     Mockito.when(mockFailedContainer.getId()).thenReturn("tMaster");
     spyDriver.new HeronExecutorContainerErrorHandler().onNext(mockFailedContainer);
 
-    Mockito.verify(spyDriver, Mockito.times(2)).allocateContainer("0", 1, 1024);
+    Mockito.verify(spyDriver, Mockito.timeout(1000).times(2)).allocateContainer("0", 1, 1024);
   }
 
   @Test
@@ -144,12 +145,13 @@ public class HeronMasterDriverTest {
     addContainer("1", 1.0, 1024L, containers);
     PackingPlan packing = new PackingPlan("packingId", containers, null);
     spyDriver.scheduleHeronWorkers(packing);
+    Mockito.verify(spyDriver, Mockito.timeout(1000).times(1)).allocateContainer("1", 1, 1024);
 
     FailedEvaluator mockFailedContainer = Mockito.mock(FailedEvaluator.class);
     Mockito.when(mockFailedContainer.getId()).thenReturn("worker");
     spyDriver.new HeronExecutorContainerErrorHandler().onNext(mockFailedContainer);
 
-    Mockito.verify(spyDriver, Mockito.times(2)).allocateContainer("1", 1, 1024);
+    Mockito.verify(spyDriver, Mockito.timeout(1000).times(2)).allocateContainer("1", 1, 1024);
   }
 
   @Test
