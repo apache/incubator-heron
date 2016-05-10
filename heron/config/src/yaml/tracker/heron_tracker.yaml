@@ -20,6 +20,7 @@ statemgrs:
 # This value can use following parameters to create a valid
 # URL based on the topology. All parameters are self-explanatory.
 # These are found in the execution state of the topology.
+#
 #   ${CLUSTER}
 #   ${ENVIRON}
 #   ${TOPOLOGY_NAME}
