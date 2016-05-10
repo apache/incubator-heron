@@ -123,6 +123,16 @@ maven_jar(
 )
 
 maven_jar(
+  name = "jackson-core-asl",
+  artifact = "org.codehaus.jackson:jackson-core-asl:1.9.13",
+)
+
+maven_jar(
+  name = "jackson-mapper-asl",
+  artifact = "org.codehaus.jackson:jackson-mapper-asl:1.9.13",
+)
+
+maven_jar(
   name = "javassist",
   artifact = "org.javassist:javassist:3.18.1-GA",
 )
@@ -225,6 +235,21 @@ maven_jar(
 maven_jar(
   name = "wake",
   artifact = "org.apache.reef:wake:" + reef_version
+)
+
+maven_jar(
+  name = "reef-runtime-local",
+  artifact = "org.apache.reef:reef-runtime-local:" + reef_version
+)
+
+maven_jar(
+  name = "avro",
+  artifact = "org.apache.avro:avro:1.7.4"
+)
+
+maven_jar(
+  name = "netty-all",
+  artifact = "io.netty:netty-all:4.0.21.Final"
 )
 
 maven_jar(

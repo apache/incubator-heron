@@ -14,8 +14,6 @@
 
 package com.twitter.heron.scheduler.reef;
 
-import java.util.Optional;
-
 import com.twitter.heron.scheduler.SchedulerMain;
 
 /**
@@ -28,7 +26,7 @@ public final class HeronMasterDriverProvider {
    * Heron-REEF scheduler is initialized by {@link SchedulerMain}. This instance of
    * {@link HeronMasterDriver} is needed by the scheduler to manage the containers.
    */
-  private static Optional<HeronMasterDriver> instance;
+  private static HeronMasterDriver instance;
 
   /**
    * This is a utility class and should not be instantiated.
@@ -36,11 +34,14 @@ public final class HeronMasterDriverProvider {
   private HeronMasterDriverProvider() {
   }
 
-  public static HeronMasterDriver getInstance() {
-    return instance.get();
+  static synchronized HeronMasterDriver getInstance() {
+    if (instance == null) {
+      throw new IllegalStateException("Heron Master Driver is not initialized yet");
+    }
+    return instance;
   }
 
-  static void setInstance(HeronMasterDriver instance) {
-    HeronMasterDriverProvider.instance = Optional.of(instance);
+  static synchronized void setInstance(HeronMasterDriver instance) {
+    HeronMasterDriverProvider.instance = instance;
   }
 }

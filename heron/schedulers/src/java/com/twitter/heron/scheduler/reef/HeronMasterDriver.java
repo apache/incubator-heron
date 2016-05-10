@@ -18,7 +18,10 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -85,10 +88,10 @@ public class HeronMasterDriver {
   // TODO: Get rid of this lock. Add a request queue for new and failed Contexts. Avoid blocking any
   // TODO: event thread.
   // Currently yarn does not support mapping container requests to allocation (YARN-4879). As a
-  // result it is not possible to concurrently start containers of different sizes. This Queue will
-  // ensures containers are started serially. Since one container is allocated at a time, the
-  // capacity of this queue is 1. The capacity can be increased once the jira above is fixed.
-  private BlockingQueue<AllocatedEvaluator> allocatedContainerQ = new LinkedBlockingDeque<>(1);
+  // result it is not possible to concurrently start containers of different sizes. This Executor
+  // and Queue will ensures containers are started serially.
+  private ExecutorService executor = Executors.newSingleThreadExecutor();
+  private BlockingQueue<AllocatedEvaluator> allocatedContainerQ = new LinkedBlockingDeque<>();
 
   // This map will be needed to make container requests for a failed heron executor
   private Map<String, String> reefContainerToHeronExecutorMap = new ConcurrentHashMap<>();
@@ -170,24 +173,30 @@ public class HeronMasterDriver {
     }
   }
 
-  private void launchContainerForExecutor(String executorId, int cpu, int mem)
+  private void launchContainerForExecutor(final String executorId, final int cpu, final int mem)
       throws InterruptedException {
-    AllocatedEvaluator evaluator = allocateContainer(executorId, cpu, mem);
+    executor.submit(new Callable<AllocatedEvaluator>() {
+      @Override
+      public AllocatedEvaluator call() throws Exception {
+        AllocatedEvaluator evaluator = allocateContainer(executorId, cpu, mem);
 
-    Configuration context = createContextConfig(executorId);
+        Configuration context = createContextConfig(executorId);
 
-    LOG.log(Level.INFO,
-        "Activating container {0} for heron executor, id: {1}",
-        new Object[]{evaluator.getId(), executorId});
-    evaluator.submitContext(context);
-    reefContainerToHeronExecutorMap.put(evaluator.getId(), executorId);
+        LOG.log(Level.INFO,
+            "Activating container {0} for heron executor, id: {1}",
+            new Object[]{evaluator.getId(), executorId});
+        evaluator.submitContext(context);
+        reefContainerToHeronExecutorMap.put(evaluator.getId(), executorId);
+        return evaluator;
+      }
+    });
   }
 
-  synchronized AllocatedEvaluator allocateContainer(String id, int cpu, int mem)
-      throws InterruptedException {
+  AllocatedEvaluator allocateContainer(String id, int cpu, int mem) throws InterruptedException {
     EvaluatorRequest evaluatorRequest = createEvaluatorRequest(cpu, mem);
 
-    LOG.log(Level.INFO, "Requesting container for executor, id: {0}", id);
+    LOG.log(Level.INFO, "Requesting container for executor, id: {0}, mem: {1}, cpu: {2}",
+        new Object[]{id, mem, cpu});
     requestor.submit(evaluatorRequest);
 
     AllocatedEvaluator evaluator = allocatedContainerQ.take();
@@ -225,7 +234,7 @@ public class HeronMasterDriver {
     return TopologyUtils.packingToString(packing);
   }
 
-  synchronized boolean addActiveContext(ActiveContext context) {
+  boolean addActiveContext(ActiveContext context) {
     if (activeContexts == null) {
       LOG.log(Level.WARNING, "Topology has been killed, new context ignored and closed.");
       context.close();
@@ -243,7 +252,7 @@ public class HeronMasterDriver {
     return true;
   }
 
-  synchronized Map<String, ActiveContext> clearActiveContexts() {
+  Map<String, ActiveContext> clearActiveContexts() {
     Map<String, ActiveContext> result = activeContexts;
     activeContexts = null;
     return result;
@@ -266,12 +275,12 @@ public class HeronMasterDriver {
 
     private void launchScheduler() {
       try {
-        // initialize the scheduler with the options
-        SchedulerMain schedulerMain = new SchedulerMain(cluster,
+        LOG.log(Level.INFO, "Launching Heron scheduler");
+        SchedulerMain schedulerMain = SchedulerMain.createInstance(cluster,
             role,
             env,
-            topologyName,
             topologyJar,
+            topologyName,
             httpPort);
         schedulerMain.runScheduler();
       } catch (IOException e) {
@@ -286,8 +295,10 @@ public class HeronMasterDriver {
   class HeronContainerAllocationHandler implements EventHandler<AllocatedEvaluator> {
     @Override
     public void onNext(AllocatedEvaluator evaluator) {
+      LOG.log(Level.INFO, "New container received, id: {0}", evaluator.getId());
       try {
         allocatedContainerQ.put(evaluator);
+        LOG.log(Level.INFO, "{0} containers waiting for activation", allocatedContainerQ.size());
       } catch (InterruptedException e) {
         LOG.log(Level.WARNING, "Unexpected error while waiting for consumer to use allocated"
             + " container. Evaluator will be destroyed " + evaluator.getId(), e);
@@ -304,38 +315,35 @@ public class HeronMasterDriver {
   class HeronExecutorContainerErrorHandler implements EventHandler<FailedEvaluator> {
     @Override
     public void onNext(FailedEvaluator evaluator) {
-      synchronized (HeronMasterDriver.class) {
-        String executorId = reefContainerToHeronExecutorMap.get(evaluator.getId());
-        LOG.log(Level.WARNING,
-            "Container:{0} executor:{1} failed",
-            new Object[]{evaluator.getId(), executorId});
-        if (executorId == null) {
-          LOG.log(Level.SEVERE,
-              "Unknown executorId for failed container: {0}, skip renew action",
-              evaluator.getId());
-          return;
-        }
+      String executorId = reefContainerToHeronExecutorMap.get(evaluator.getId());
+      LOG.log(Level.WARNING,
+          "Container:{0} executor:{1} failed",
+          new Object[]{evaluator.getId(), executorId});
+      if (executorId == null) {
+        LOG.log(Level.SEVERE,
+            "Unknown executorId for failed container: {0}, skip renew action",
+            evaluator.getId());
+        return;
+      }
 
-        // TODO verify if this thread can be used to submit a new request
-        try {
-          if (executorId.equals(TMASTER_CONTAINER_ID)) {
-            launchContainerForExecutor(TMASTER_CONTAINER_ID, 1, TM_MEM_SIZE_MB);
-          } else {
-            if (packing.containers.get(executorId) == null) {
-              LOG.log(Level.SEVERE,
-                  "Missing container {0} in packing, skipping container request",
-                  executorId);
-              return;
-            }
-            Resource reqResource = packing.containers.get(executorId).resource;
-            launchContainerForExecutor(executorId,
-                getCpuForExecutor(reqResource),
-                getMemInMBForExecutor(reqResource));
+      try {
+        if (executorId.equals(TMASTER_CONTAINER_ID)) {
+          launchContainerForExecutor(TMASTER_CONTAINER_ID, 1, TM_MEM_SIZE_MB);
+        } else {
+          if (packing.containers.get(executorId) == null) {
+            LOG.log(Level.SEVERE,
+                "Missing container {0} in packing, skipping container request",
+                executorId);
+            return;
           }
-        } catch (InterruptedException e) {
-          LOG.log(Level.WARNING, "Error waiting for container allocation for failed executor; "
-              + "Assuming request was submitted and continuing" + executorId, e);
+          Resource reqResource = packing.containers.get(executorId).resource;
+          launchContainerForExecutor(executorId,
+              getCpuForExecutor(reqResource),
+              getMemInMBForExecutor(reqResource));
         }
+      } catch (InterruptedException e) {
+        LOG.log(Level.WARNING, "Error waiting for container allocation for failed executor; "
+            + "Assuming request was submitted and continuing" + executorId, e);
       }
     }
   }
