@@ -30,7 +30,6 @@ genrule(
     name = "heron-core",
     srcs = [
         ":release.yaml",
-        ":hcontroller",
         ":hexecutor",
         ":hshell",
         ":hstmgr",
@@ -52,7 +51,6 @@ genrule(
         "export BINDIR=$(BINDIR);",
         "$(location package_release.sh)            $(location heron-core.tar.gz)",
         "--cp $(location release.yaml)             heron-core/release.yaml",
-        "--cp $(location hcontroller)              heron-core/bin/heron-controller",
         "--cp $(location hexecutor)                heron-core/bin/heron-executor",
         "--cp $(location hshell)                   heron-core/bin/heron-shell",
         "--cp $(location hstmgr)                   heron-core/bin/heron-stmgr",
@@ -219,7 +217,7 @@ filegroup(
     srcs = ["//heron/config/src/yaml:conf-local-statemgr"],
 )
 
-filegroup( 
+filegroup(
     name = "conf-local-uploader",
     srcs = ["//heron/config/src/yaml:conf-local-uploader"],
 )
@@ -285,11 +283,6 @@ filegroup(
 )
 
 filegroup(
-    name = "hcontroller",
-    srcs = ["//heron/controller/src/python:heron-controller"],
-)
-
-filegroup(
     name = "hcli",
     srcs = ["//heron/cli/src/python:heron"],
 )
@@ -297,11 +290,6 @@ filegroup(
 filegroup(
     name = "haurora-job",
     srcs = ["//heron/cli/src/python:heron-aurora"],
-)
-
-filegroup(
-    name = "hcontroller-job",
-    srcs = ["//heron/cli/src/python:heron-controller-aurora"],
 )
 
 filegroup(
