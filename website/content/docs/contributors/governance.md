@@ -64,10 +64,12 @@ The current group is:
 [Luc Perkins (Twitter)] (https://github.com/lucperkins) <br/>
 [Lewis Kaneshiro (Stanford University)] (https://github.com/lewiskan) <br/>
 [Joe Stein (Elodina)] (https://github.com/joestein) <br/>
+[Darren Braynard (Elodina)] (https://github.com/dbraynard) <br/>
 [Prabhu Inbarajan (Cisco)] (https://github.com/prabhuinbarajan) <br/>
 [Supun Kamburugamuve (Indiana University)] (https://github.com/supunkamburugamuve) <br/>
 [Ashvin Agarwal (Microsoft)] (https://github.com/ashvina) <br/>
 [Sriram Rao (Microsoft)] (https://github.com/sriramsrao) <br/>
 [Avrilla Floratou (Microsoft)] (https://github.com/avflor) <br/>
+[Darin Johnson] (https://github.com/DarinJ) <br/>
 [Andrew Montalenti (Parsely)] (https://github.com/amontalenti) <br/>
 [Zuyu Zhang (Pivotal)] (https://github.com/zuyu) <br/>
