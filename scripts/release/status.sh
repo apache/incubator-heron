@@ -59,7 +59,7 @@ then
 else
   commit_msg=${HERON_GIT_COMMIT_MSG}
 fi
-echo "HERON_BUILD_COMMIT_MSG ${commit_msg}"
+echo "HERON_BUILD_COMMIT_MSG \"${commit_msg}\""
 
 if [ -z ${HERON_BUILD_HOST+x} ];
 then
