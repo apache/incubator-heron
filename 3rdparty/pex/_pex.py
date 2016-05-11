@@ -108,7 +108,8 @@ def main():
         # Ideally, we would let pex.bin.pex.interpreter_from_options determine the interpreter
         # when pex.bin.pex.build_pex is called, but the Translator class has a static default loader
         # that initializes the translator differently, which fails.
-        os.environ["PATH"] = "/usr/bin/python2.7"
+        python = "/usr/bin/python2.7"
+        os.environ["PATH"] = python
 
         import pex.bin.pex
         parser, resolver_options_builder = pex.bin.pex.configure_clp()
@@ -116,6 +117,7 @@ def main():
         poptions.entry_point = options.entry_point
         poptions.find_links = options.find_links
         poptions.pypi = options.pypi
+        poptions.python = python
         poptions.zip_safe = options.zip_safe
         poptions.verbosity = 3
 
