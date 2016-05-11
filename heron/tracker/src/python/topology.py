@@ -46,7 +46,6 @@ class Topology:
     self.cluster = None
     self.environ = None
     self.tmaster = None
-    self.job_page_links = None
     self.scheduler_location = None
 
     # A map from UUIDs to the callback
@@ -149,7 +148,6 @@ class Topology:
 
   def set_scheduler_location(self, scheduler_location):
     self.scheduler_location = scheduler_location
-    self.job_page_links = scheduler_location.job_page_link
     self.trigger_watches()
 
   def num_instances(self):
