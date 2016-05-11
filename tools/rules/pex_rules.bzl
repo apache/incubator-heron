@@ -31,12 +31,22 @@ def collect_transitive_eggs(ctx):
   transitive_eggs += egg_file_types.filter(ctx.files.eggs)
   return transitive_eggs
 
+def collect_transitive_reqs(ctx):
+  transitive_reqs = set(order="compile")
+  for dep in ctx.attr.deps:
+    transitive_reqs += dep.transitive_reqs
+  transitive_reqs += [ ctx.attr.reqs ] if ctx.attr.reqs else []
+
+  return transitive_reqs
+
 def pex_library_impl(ctx):
   transitive_sources = collect_transitive_sources(ctx)
   transitive_eggs = collect_transitive_eggs(ctx)
+  transitive_reqs = collect_transitive_reqs(ctx)
   return struct(
       files = set(),
       transitive_py_files = transitive_sources,
+      transitive_reqs = transitive_reqs,
       transitive_egg_files = transitive_eggs)
 
 def get_package_from_path(pkg_path):
@@ -62,6 +72,7 @@ def get_module_path(ctx, pkg_path):
 
 def make_manifest(ctx, output):
   transitive_sources = collect_transitive_sources(ctx)
+  transitive_reqs = collect_transitive_reqs(ctx) # TODO: add these to manifest
   transitive_eggs = collect_transitive_eggs(ctx)
   transitive_resources = ctx.files.resources
   pex_modules = {}
@@ -100,12 +111,18 @@ def pex_binary_impl(ctx):
 
   transitive_sources = collect_transitive_sources(ctx)
   transitive_eggs = collect_transitive_eggs(ctx)
+  transitive_reqs = collect_transitive_reqs(ctx)
   transitive_resources = ctx.files.resources
   pexbuilder = ctx.executable._pexbuilder
 
   # form the arguments to pex builder
   arguments =  [] if ctx.attr.zip_safe else ["--no-zip-safe"]
   arguments += ['--entry-point', main_pkg]
+  if transitive_reqs:
+    for req in list(transitive_reqs):
+      arguments += ['--reqs'] + [req]
+  arguments += ['--no-pypi',
+                '--repo', 'https://pypi.python.org/simple/']
   arguments += [deploy_pex.path]
   arguments += [manifest_file.path]
 
@@ -168,7 +185,7 @@ pex_srcs_attr = attr.label_list(
 )
 
 pex_deps_attr = attr.label_list(
-    providers = ["transitive_py_files", "transitive_egg_files"],
+    providers = ["transitive_py_files", "transitive_egg_files", "transitive_reqs"],
     allow_files = False)
 
 eggs_attr = attr.label_list(
@@ -182,6 +199,7 @@ pex_attrs = {
     "srcs": pex_srcs_attr,
     "deps": pex_deps_attr,
     "eggs": eggs_attr,
+    "reqs": attr.string(),
     "resources": resource_attr,
     "main": attr.label(allow_files=True, single_file=True)
 }

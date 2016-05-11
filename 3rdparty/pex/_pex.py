@@ -75,8 +75,10 @@ def parse_manifest(manifest_text):
 def main():
     parser = optparse.OptionParser(usage="usage: %prog [options] output")
     parser.add_option('--entry-point', default='__main__')
+    parser.add_option('--no-pypi', action='store_false', dest='pypi', default=True)
     parser.add_option('--no-zip-safe', action='store_false', dest='zip_safe', default=True)
-    parser.add_option('--python', default=sys.executable)
+    parser.add_option('--repo', dest='repos', default='')
+    parser.add_option('--reqs', dest='reqs', default='')
     options, args = parser.parse_args()
 
     if len(args) == 2:
@@ -102,22 +104,24 @@ def main():
     tmp_dir = tempfile.mkdtemp()
     try:
 
-        # The version of pkg_resources.py (from setuptools) on some distros is
-        # too old for PEX.  So we keep a recent version in the buck repo and
-        # force it into the process by constructing a custom PythonInterpreter
-        # instance using it.
-        interpreter = PythonInterpreter(
-            options.python,
-            PythonInterpreter.from_binary(options.python).identity,
-            extras={
-            # TODO: Fix this to resolve automatically
-            ('setuptools', '>1.0'): '3rdparty/eggs/setuptools-18.0.1-py2.py3-none-any.whl'
-            })
+        # This is a hack that we need to do to get the correct Python interpreter for the translator.
+        # Ideally, we would let pex.bin.pex.interpreter_from_options determine the interpreter
+        # when pex.bin.pex.build_pex is called, but the Translator class has a static default loader
+        # that initializes the translator differently, which fails.
+        os.environ["PATH"] = "/usr/bin/python"
 
-        pex_builder = PEXBuilder(
-            path=tmp_dir,
-            interpreter=interpreter,
-        )
+        import pex.bin.pex
+        parser, resolver_options_builder = pex.bin.pex.configure_clp()
+        poptions, preqs = parser.parse_args(args)
+        poptions.entry_point = options.entry_point
+        poptions.repos = options.repos
+        poptions.pypi = options.pypi
+        poptions.zip_safe = options.zip_safe
+        poptions.verbosity = 0
+
+        reqs = options.reqs.split()
+        #print("options: %s" % poptions)
+        pex_builder = pex.bin.pex.build_pex(reqs, poptions, resolver_options_builder)
 
         # Set whether this PEX as zip-safe, meaning everything will stayed zipped up
         # and we'll rely on python's zip-import mechanism to load modules from
