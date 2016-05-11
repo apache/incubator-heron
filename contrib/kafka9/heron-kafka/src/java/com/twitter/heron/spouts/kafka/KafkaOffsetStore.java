@@ -1,14 +1,11 @@
-package com.twitter.heron.spouts.kafka.old;
+package com.twitter.heron.spouts.kafka;
 
 import com.google.common.collect.Maps;
 import com.twitter.heron.spouts.kafka.common.GlobalPartitionId;
 import com.twitter.heron.storage.MetadataStore;
 import com.twitter.heron.storage.StoreSerializer;
-import kafka.api.ConsumerMetadataRequest;
-import kafka.common.ErrorMapping;
-import kafka.common.OffsetAndMetadata;
-import kafka.common.OffsetMetadataAndError;
-import kafka.common.TopicAndPartition;
+import kafka.cluster.BrokerEndPoint;
+import kafka.common.*;
 import kafka.javaapi.*;
 import kafka.network.BlockingChannel;
 import org.json.simple.JSONValue;
@@ -19,7 +16,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 
 public class KafkaOffsetStore extends MetadataStore {
 
@@ -108,11 +104,11 @@ public class KafkaOffsetStore extends MetadataStore {
             BlockingChannel channel = new BlockingChannel(_id.host, _id.port,
                     BlockingChannel.UseDefaultBufferSize(),
                     BlockingChannel.UseDefaultBufferSize(),
-                    1000000 /* read timeout in millis */
-            );
+                    1000000 // read timeout in millis
+);
             channel.connect();
 
-            ConsumerMetadataResponse metadataResponse = null;
+            GroupCoordinatorResponse groupCoordinatorResponse = null;
             long backoffMillis = 3000L;
             int maxRetry = 3;
             int retryCount = 0;
@@ -121,11 +117,11 @@ public class KafkaOffsetStore extends MetadataStore {
 
             // one scenario when this could happen is during unit test.
             while (retryCount < maxRetry) {
-                channel.send(new ConsumerMetadataRequest(_consumerGroupId, ConsumerMetadataRequest.CurrentVersion(),
+                channel.send(new kafka.api.GroupCoordinatorRequest(_consumerGroupId, kafka.api.GroupCoordinatorRequest.CurrentVersion(),
                         _correlationId++, _consumerClientId));
-                metadataResponse = ConsumerMetadataResponse.readFrom(channel.receive().buffer());
-                if (metadataResponse.errorCode() == ErrorMapping.ConsumerCoordinatorNotAvailableCode()) {
-                    LOG.warn("Failed to get coordinator: " + metadataResponse.errorCode());
+                groupCoordinatorResponse = GroupCoordinatorResponse.readFrom(channel.receive().payload());
+                if (groupCoordinatorResponse.errorCode() == ErrorMapping.ConsumerCoordinatorNotAvailableCode()) {
+                    LOG.warn("Failed to get coordinator: " + groupCoordinatorResponse.errorCode());
                     retryCount++;
                     try {
                         Thread.sleep(backoffMillis);
@@ -137,8 +133,8 @@ public class KafkaOffsetStore extends MetadataStore {
                 }
             }
 
-            if (metadataResponse.errorCode() == ErrorMapping.NoError()) {
-                kafka.cluster.Broker offsetManager = metadataResponse.coordinator();
+            if (groupCoordinatorResponse.errorCode() == ErrorMapping.NoError()) {
+                BrokerEndPoint offsetManager = groupCoordinatorResponse.coordinator();
                 if (!offsetManager.host().equals(_id.host)
                         || !(offsetManager.port() == _id.port)) {
                     // if the coordinator is different, from the above channel's host then reconnect
@@ -146,12 +142,12 @@ public class KafkaOffsetStore extends MetadataStore {
                     channel = new BlockingChannel(offsetManager.host(), offsetManager.port(),
                             BlockingChannel.UseDefaultBufferSize(),
                             BlockingChannel.UseDefaultBufferSize(),
-                            _stateOpTimeout /* read timeout in millis */
-                    );
+                            _stateOpTimeout // read timeout in millis
+);
                     channel.connect();
                 }
             } else {
-                throw new RuntimeException("Kafka metadata fetch error: " + metadataResponse.errorCode());
+                throw new RuntimeException("Kafka metadata fetch error: " + groupCoordinatorResponse.errorCode());
             }
             _offsetManager = channel;
         }
@@ -159,7 +155,7 @@ public class KafkaOffsetStore extends MetadataStore {
     }
 
     private String attemptToRead() {
-        List<TopicAndPartition> partitions = new ArrayList<TopicAndPartition>();
+        List<TopicAndPartition> partitions = new ArrayList<>();
         TopicAndPartition thisTopicPartition = new TopicAndPartition(_spoutConfig.topic, _id.partition);
         partitions.add(thisTopicPartition);
         OffsetFetchRequest fetchRequest = new OffsetFetchRequest(
@@ -171,7 +167,7 @@ public class KafkaOffsetStore extends MetadataStore {
 
         BlockingChannel offsetManager = locateOffsetManager();
         offsetManager.send(fetchRequest.underlying());
-        OffsetFetchResponse fetchResponse = OffsetFetchResponse.readFrom(offsetManager.receive().buffer());
+        OffsetFetchResponse fetchResponse = OffsetFetchResponse.readFrom(offsetManager.receive().payload());
         OffsetMetadataAndError result = fetchResponse.offsets().get(thisTopicPartition);
         if (result.error() == ErrorMapping.NoError()) {
             String retrievedMetadata = result.metadata();
@@ -212,9 +208,9 @@ public class KafkaOffsetStore extends MetadataStore {
         Map<TopicAndPartition, OffsetAndMetadata> offsets = Maps.newLinkedHashMap();
         TopicAndPartition thisTopicPartition = new TopicAndPartition(_spoutConfig.topic, _id.partition);
         offsets.put(thisTopicPartition, new OffsetAndMetadata(
-                offsetOfPartition,
-                data,
-                now));
+                new OffsetMetadata(offsetOfPartition, data),
+                now,
+                Long.MAX_VALUE));
         OffsetCommitRequest commitRequest = new OffsetCommitRequest(
                 _consumerGroupId,
                 offsets,
@@ -224,7 +220,7 @@ public class KafkaOffsetStore extends MetadataStore {
 
         BlockingChannel offsetManager = locateOffsetManager();
         offsetManager.send(commitRequest.underlying());
-        OffsetCommitResponse commitResponse = OffsetCommitResponse.readFrom(offsetManager.receive().buffer());
+        OffsetCommitResponse commitResponse = OffsetCommitResponse.readFrom(offsetManager.receive().payload());
         if (commitResponse.hasError()) {
             // note: here we should have only 1 error for the partition in request
             for (Object partitionErrorCode : commitResponse.errors().values()) {
@@ -245,7 +241,7 @@ public class KafkaOffsetStore extends MetadataStore {
                 attemptToWrite(offsetOfPartition, data);
                 return;
 
-            } catch (RuntimeException re) {
+            } catch(RuntimeException re) {
                 if (++attemptCount > _stateOpMaxRetry) {
                     _offsetManager = null;
                     throw re;

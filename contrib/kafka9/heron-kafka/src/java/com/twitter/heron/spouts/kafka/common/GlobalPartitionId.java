@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.twitter.heron.spouts.kafka.old;
+package com.twitter.heron.spouts.kafka.common;
 
 import java.io.Serializable;
 

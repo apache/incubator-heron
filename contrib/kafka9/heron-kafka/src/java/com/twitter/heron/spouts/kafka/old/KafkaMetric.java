@@ -52,7 +52,7 @@ public final class KafkaMetric {
 
   // PartitionManager metrics map will be connected to this
   public static class PartitionMetric implements IMetric {
-    public static final Logger LOG = LoggerFactory.getLogger(PartitionMetric.class);
+    public static final Logger LOG = LoggerFactory.getLogger(KafkaMetric.PartitionMetric.class);
     private PartitionCoordinator coordinator;
     public PartitionMetric(PartitionCoordinator coordinator) {
       this.coordinator = coordinator;
@@ -76,7 +76,7 @@ public final class KafkaMetric {
 
   // OffsetMetric is used for storing kafka partition offset related data.
   public static class OffsetMetric implements IMetric {
-    public static final Logger LOG = LoggerFactory.getLogger(OffsetMetric.class);
+    public static final Logger LOG = LoggerFactory.getLogger(KafkaMetric.OffsetMetric.class);
     private long lastCalculatedTotalSpoutLag = 0;
     private PartitionCoordinator coordinator;
 

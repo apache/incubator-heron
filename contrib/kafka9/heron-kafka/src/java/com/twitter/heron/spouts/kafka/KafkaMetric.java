@@ -111,7 +111,7 @@ public final class KafkaMetric {
                     //totalLatestTimeOffset += latestTimeOffset;
                     totalLatestEmittedOffset += latestEmittedOffset;
                     totalLatestCommittedOffset += latestCommittedOffset;
-                    String strPartitionId = Integer.toString(partitionManager.getPartitionId());
+                    String strPartitionId = partitionManager.getPartitionId().toString();
                     //ret.put(String.format("%s/spoutLag", strPartitionId), spoutLag);
                     //ret.put(String.format("%s/latestTime", strPartitionId), latestTimeOffset);
                     ret.put(String.format("%s/latestEmittedOffset", strPartitionId), latestEmittedOffset);

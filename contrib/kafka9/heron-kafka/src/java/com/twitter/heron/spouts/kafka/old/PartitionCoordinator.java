@@ -17,7 +17,9 @@
 package com.twitter.heron.spouts.kafka.old;
 
 import com.twitter.heron.api.Config;
+import com.twitter.heron.spouts.kafka.common.GlobalPartitionId;
 import com.twitter.heron.spouts.kafka.common.GlobalPartitionInformation;
+import com.twitter.heron.spouts.kafka.common.IOffsetStoreManager;
 import com.twitter.heron.spouts.kafka.common.Partition;
 import com.twitter.heron.storage.MetadataStore;
 import com.twitter.heron.storage.StoreSerializer;

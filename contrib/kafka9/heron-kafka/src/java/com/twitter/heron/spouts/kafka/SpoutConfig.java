@@ -34,6 +34,15 @@ public class SpoutConfig implements Serializable {
 
     public String id; // Required
 
+    public String clientId = "heron";
+
+    // offset state information storage. validate options are storm and kafka
+    public String offsetStore = OffsetStoreManagerFactory.KAFKA_STORE;
+    // timeout in millis for state read/write operations
+    public int stateOpTimeout = 5000;
+    // max retries allowed for state read/write operations
+    public int stateOpMaxRetry = 3;
+
     public int storeUpdateMsec = 10 * 1000;
 
     public int zookeeperStoreUpdateMsec = -1; // We do not write offsets to zk anymore
@@ -75,12 +84,6 @@ public class SpoutConfig implements Serializable {
      * Indicates whether to start from earliest or latest offset in case if there was no previous run and offset couldn't be restored.
      */
     public boolean startFromLatestOffset = true;
-
-    /**
-     * In case if Kafka used as a storage, when this flag is set to true, Kafka will store offsets for each topology run,
-     * otherwise it will store offset per topology name.
-     */
-    public boolean storeOffsetsPerTopologyInstance = true;
 
     public int socketTimeoutMs = 1 * 60 * 1000;  // 1 min
 
