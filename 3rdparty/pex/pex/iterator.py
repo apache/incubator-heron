@@ -28,6 +28,8 @@ class Iterator(IteratorInterface):
     self.__follow_links = follow_links
 
   def _iter_requirement_urls(self, req):
+    for fetcher in self._fetchers:
+      print("Iterator._iter_requirement_urls() - fetcher %s" % fetcher)
     return itertools.chain.from_iterable(fetcher.urls(req) for fetcher in self._fetchers)
 
   def iter(self, req):
