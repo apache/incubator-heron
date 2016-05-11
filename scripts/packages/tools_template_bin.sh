@@ -21,6 +21,12 @@ install_prefix=${1:-"/usr/local/herontools"}
 
 progname="$0"
 
+VERSION=$(cat << EOF | grep heron.build.version | awk -F: '{print $2}' | xargs echo
+%release_info%
+EOF
+)
+version_dir=heron-$(echo $VERSION | sed 's/\//_/')
+
 echo "Heron tools installer"
 echo "---------------------"
 echo
@@ -28,7 +34,7 @@ echo
 function usage() {
   echo "Usage: $progname [options]" >&2
   echo "Options are:" >&2
-  echo "  --prefix=/some/path set the prefix path (default=/usr/local)." >&2
+  echo "  --prefix=/some/path set the prefix path (default=/usr/local/heron/tools)." >&2
   echo "  --user configure for user install, expands to" >&2
   echo '           `--prefix=$HOME/.herontools`.' >&2
   exit 1
@@ -36,7 +42,7 @@ function usage() {
 
 prefix="/usr/local"
 bin="%prefix%/bin"
-base="%prefix%/herontools"
+base="%prefix%/heron/${version_dir}/tools"
 
 for opt in "${@}"; do
   case $opt in
@@ -45,7 +51,7 @@ for opt in "${@}"; do
       ;;
     --user)
       bin="$HOME/bin"
-      base="$HOME/.herontools"
+      base="$HOME/.heron/${version_dir}/tools"
       ;;
     *)
       usage

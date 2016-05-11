@@ -35,7 +35,7 @@ echo
 function usage() {
   echo "Usage: $progname [options]" >&2
   echo "Options are:" >&2
-  echo "  --prefix=/some/path set the prefix path." >&2
+  echo "  --prefix=/some/path set the prefix path (default=/usr/local/heron)." >&2
   echo "  --heronrc= set the heronrc path (default=/usr/local/heron/etc/heron.heronrc)." >&2
   echo "  --user configure for user install, expands to" >&2
   echo '           `--prefix=$HOME/.heron --heronrc=$HOME/.heronrc`.' >&2
