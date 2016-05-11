@@ -22,12 +22,6 @@ heronrc=${2:-"/usr/local/heron/etc/heron.heronrc"}
 
 progname="$0"
 
-VERSION=$(cat << EOF | grep heron.build.version | awk -F: '{print $2}' | xargs echo
-%release_info%
-EOF
-)
-version_dir=heron-$(echo $VERSION | sed 's/\//_/')
-
 echo "Heron client installer"
 echo "----------------------"
 echo
@@ -35,7 +29,7 @@ echo
 function usage() {
   echo "Usage: $progname [options]" >&2
   echo "Options are:" >&2
-  echo "  --prefix=/some/path set the prefix path." >&2
+  echo "  --prefix=/some/path set the prefix path (default=/usr/local)." >&2
   echo "  --heronrc= set the heronrc path (default=/usr/local/heron/etc/heron.heronrc)." >&2
   echo "  --user configure for user install, expands to" >&2
   echo '           `--prefix=$HOME/.heron --heronrc=$HOME/.heronrc`.' >&2
@@ -44,8 +38,8 @@ function usage() {
 
 prefix="/usr/local"
 bin="%prefix%/bin"
-base="%prefix%/heron/${version_dir}/client"
-conf="%prefix%/heron/${version_dir}/client/conf"
+base="%prefix%/heron"
+conf="%prefix%/heron/conf"
 heronrc="%prefix%/heron/etc/heron.heronrc"
 
 for opt in "${@}"; do
@@ -58,7 +52,7 @@ for opt in "${@}"; do
       ;;
     --user)
       bin="$HOME/bin"
-      base="$HOME/.heron/${version_dir}/client"
+      base="$HOME/.heron"
       heronrc="$HOME/.heronrc"
       ;;
     *)
