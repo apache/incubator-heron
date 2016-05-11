@@ -389,9 +389,11 @@ def resolve_interpreter(cache, fetchers, interpreter, requirement):
      interpreter with the capability of resolving that requirement or
      ``None`` if it's not possible to install a suitable requirement."""
   requirement = maybe_requirement(requirement)
+  print("bin/pex.resolve_interpreter() requirement %s" % requirement)
 
   # short circuit
   if interpreter.satisfies([requirement]):
+    print("bin/pex.resolve_interpreter() requirement %s satisfied" % requirement)
     return interpreter
 
   def installer_provider(sdist):
@@ -410,6 +412,7 @@ def resolve_interpreter(cache, fetchers, interpreter, requirement):
       installer_provider)
 
   if egg:
+    print("bin/pex.resolve_interpreter() egg %s" % egg)
     return interpreter.with_extra(egg.name, egg.raw_version, egg.path)
 
 
@@ -429,15 +432,20 @@ def interpreter_from_options(options):
     print ("bin/pex.interpreter_from_options() from default")
     interpreter = PythonInterpreter.get()
 
+  print ("bin/pex.interpreter found: %s" % interpreter)
+
   with TRACER.timed('Setting up interpreter %s' % interpreter.binary, V=2):
     resolve = functools.partial(resolve_interpreter, options.interpreter_cache_dir, options.repos)
+    print ("bin/pex.interpreter resolve: %s" % resolve)
 
     # resolve setuptools
     interpreter = resolve(interpreter, SETUPTOOLS_REQUIREMENT)
+    print ("bin/pex.interpreter interpreter0: %s" % interpreter)
 
     # possibly resolve wheel
     if interpreter and options.use_wheel:
       interpreter = resolve(interpreter, WHEEL_REQUIREMENT)
+      print ("bin/pex.interpreter interpreter1: %s" % interpreter)
 
     return interpreter
 
