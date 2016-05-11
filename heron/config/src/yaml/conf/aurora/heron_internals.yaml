@@ -12,9 +12,6 @@
 # System level configs
 ################################################################################
 
-# JAVA_HOME path on host's environment
-heron.java.home.path: "/usr/lib/jvm/java-1.8.0-openjdk-amd64/"
-
 ### heron.* configs are general configurations over all componenets
 
 # The relative path to the logging directory
