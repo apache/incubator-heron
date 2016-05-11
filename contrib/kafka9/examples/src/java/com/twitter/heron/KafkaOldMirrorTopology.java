@@ -27,8 +27,14 @@ public class KafkaOldMirrorTopology {
             consumerTopic = args[2];
             producerTopic = args[3];
         }
+        String zkURL = "master:2181";
+        String zkRoot = "/brokers";
+        if (args.length > 5) {
+            zkURL = args[4];
+            zkRoot = args[5] + zkRoot;
+        }
         TopologyBuilder builder = new TopologyBuilder();
-        SpoutConfig config = new SpoutConfig(new SpoutConfig.ZkHosts("master:2181", "/kafka-08/brokers"), consumerTopic, null, "spoutId");
+        SpoutConfig config = new SpoutConfig(new SpoutConfig.ZkHosts(zkURL, zkRoot), consumerTopic, null, "spoutId");
         config.scheme = new KeyValueSchemeAsMultiScheme(new ByteArrayKeyValueScheme());
         config.bufferSizeBytes = 100; // Don't need buffer to be too big for showcase purposes
         builder.setSpout("spout", new KafkaSpout(config), 1);
