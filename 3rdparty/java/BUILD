@@ -74,6 +74,13 @@ java_library(
 )
 
 java_library(
+    name = "kafka-clients-09-java-nl",
+    visibility = ["//visibility:public"],
+    exports = [ "@kafka-clients-09-java//jar" ],
+    neverlink = 1,
+)
+
+java_library(
     name = "kryo",
     srcs = [ "Empty.java" ],
     exports = [ "@kryo//jar" ],
@@ -139,14 +146,5 @@ java_library(
     name = "protobuf-java-nl",
     visibility = ["//visibility:public"],
     exports = [ "@protobuf-java//jar" ],
-    neverlink = 1,
-)
-
-java_library(
-    name = "zookeeper-java-nl",
-    visibility = ["//visibility:public"],
-    exports = [
-        "@zookeeper//jar",
-    ],
     neverlink = 1,
 )

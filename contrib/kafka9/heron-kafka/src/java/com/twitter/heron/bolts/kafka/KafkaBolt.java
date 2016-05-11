@@ -59,7 +59,7 @@ public class KafkaBolt<K,V> extends BaseRichBolt {
 
     @Override
     public void execute(final Tuple input) {
-        LOG.info("Got new tuple input, processing..");
+        LOG.debug("Got new tuple input, processing..");
         if (isTick(input)) {
             collector.ack(input);
             return; // Do not try to send ticks to Kafka
