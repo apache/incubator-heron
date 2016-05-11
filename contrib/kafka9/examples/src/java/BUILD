@@ -9,7 +9,6 @@ java_binary(
     deps = [
         "//heron/api/src/java:api-java-nl",
         "//contrib/kafka9/heron-kafka/src/java:heron-kafka-09-java",
-        "//contrib/kafka9/heron-kafka/src/java:heron-kafka-common-java",
     ],
 )
 
@@ -20,7 +19,6 @@ java_binary(
     deps = [
         "//heron/api/src/java:api-java-nl",
         "//contrib/kafka9/heron-kafka/src/java:heron-kafka-08-java",
-        "//contrib/kafka9/heron-kafka/src/java:heron-kafka-common-java",
     ],
 )
 
