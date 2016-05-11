@@ -75,7 +75,7 @@
       // green/red
       'default': ['#1a9850', '#fdae61', '#d73027'],
       // blue/red
-      'leonid': ['#2166ac', '#f7f7f7', '#b2182b']
+      'colorblind': ['#2166ac', '#f7f7f7', '#b2182b']
     };
 
     rowData.forEach(function (d) {
@@ -125,10 +125,14 @@
         d3.event.stopPropagation();
       });
 
-    var topLevelStatus = links.append('span')
+    var topLevelStatus = links.append('svg')
         .attr('class', 'status-circle')
-        .style('visibility', 'hidden')
-        .html('&#11044;');
+        .attr('width', 20)
+        .attr('height', 15)
+      .append('circle')
+        .attr('cx', 8)
+        .attr('cy', 8)
+        .attr('r', 7);
 
     links.append('span')
         .text(function (d) { return d.time.name; });

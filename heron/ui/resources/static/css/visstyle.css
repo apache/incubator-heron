@@ -190,11 +190,16 @@ circle.background {
 .status-circle {
   padding: 2px 3px;
   color: #f0f5fa;
-  -webkit-text-stroke: 0.5px #aaa;
+  fill: currentColor;
+  stroke-width: 0.5px;
+  stroke: #aaa;
+  margin: 0;
+  padding: 0;
+  vertical-align: text-bottom;
 }
 
 a:hover .status-circle {
-  -webkit-text-stroke: 0.5px #000;
+  stroke: #000;
 }
 
 .toplevel-stat {
