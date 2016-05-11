@@ -415,15 +415,18 @@ def resolve_interpreter(cache, fetchers, interpreter, requirement):
 
 def interpreter_from_options(options):
   interpreter = None
-
+  print ("bin/pex.interpreter_from_options() options: %s" % options)
   if options.python:
     if os.path.exists(options.python):
+      print ("bin/pex.interpreter_from_options() from binary")
       interpreter = PythonInterpreter.from_binary(options.python)
     else:
+      print ("bin/pex.interpreter_from_options() from env")
       interpreter = PythonInterpreter.from_env(options.python)
     if interpreter is None:
       die('Failed to find interpreter: %s' % options.python)
   else:
+    print ("bin/pex.interpreter_from_options() from default")
     interpreter = PythonInterpreter.get()
 
   with TRACER.timed('Setting up interpreter %s' % interpreter.binary, V=2):

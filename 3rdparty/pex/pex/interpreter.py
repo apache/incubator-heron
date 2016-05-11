@@ -275,6 +275,7 @@ class PythonInterpreter(object):
   def from_binary(cls, binary, path_extras=None):
     path_extras = path_extras or ()
     if binary not in cls.CACHE:
+      print("Interepter.fron_binary binary=%s sys.executable=%s path_extras=%s" % (binary, sys.executable, path_extras))
       if binary == sys.executable:
         cls.CACHE[binary] = cls._from_binary_internal(path_extras)
       else:

@@ -120,7 +120,7 @@ def main():
         poptions.verbosity = 3
 
         reqs = options.reqs.split()
-        #print("options: %s" % poptions)
+        print("options: %s" % poptions)
         pex_builder = pex.bin.pex.build_pex(reqs, poptions, resolver_options_builder)
 
         # Set whether this PEX as zip-safe, meaning everything will stayed zipped up
