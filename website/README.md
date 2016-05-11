@@ -44,8 +44,8 @@ also need to [install Hugo](https://github.com/spf13/hugo/releases). Once those
 are installed:
 
 1. Navigate to the `website` folder
-2. Run `npm install gulp`
-3. Run `gulp build` (this will build all of the necessary static assets, i.e.
+2. Run `npm install`
+3. Run `npm run build` (this will build all of the necessary static assets, i.e.
    CSS, Javascript, etc.)
 
 Now you can run the docs locally. For more info, see the section directly below.

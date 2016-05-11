@@ -1,13 +1,12 @@
 setup:
 	@brew list hugo || brew install hugo
-	@npm install gulp
 	@npm install
 
 serve:
 	@hugo server --watch
 
 assets:
-	@gulp build
+	@npm run build
 
 pages:
 	@hugo
