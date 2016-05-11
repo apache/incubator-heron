@@ -58,6 +58,7 @@ public class KafkaOldMirrorTopology {
         conf.setNumStmgrs(1);
         conf.setContainerCpuRequested(0.2f);
         conf.setContainerRamRequested(1024L * 1024 * 512);
+        conf.setContainerDiskRequested(1024L * 1024 * 1024);
 
         HeronSubmitter.submitTopology(args[0], conf, builder.createTopology());
     }
