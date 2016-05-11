@@ -1,7 +1,21 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 package com.twitter.heron.integration_test.common.spout;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.Map;
 
 import com.twitter.heron.api.spout.BaseRichSpout;
@@ -20,6 +34,7 @@ import com.twitter.heron.api.tuple.Values;
  * to read.
  */
 public class LocalFileSpout extends BaseRichSpout {
+  private static final long serialVersionUID = 8536862528794112057L;
   // Hadoop file related
   private BufferedReader br = null;
   // Topology related
@@ -40,7 +55,9 @@ public class LocalFileSpout extends BaseRichSpout {
   }
 
   @Override
-  public void open(Map stormConf, TopologyContext context, SpoutOutputCollector collector) {
+  public void open(Map<String, Object> stormConf,
+                   TopologyContext context,
+                   SpoutOutputCollector newCollector) {
     int numTasks = context.getComponentTasks(context.getThisComponentId()).size();
     // Pre-condition: the number of tasks is equal to the number of files to read
     if (paths.length != numTasks) {
@@ -49,7 +66,7 @@ public class LocalFileSpout extends BaseRichSpout {
               paths.length, numTasks));
     }
     try {
-      this.collector = collector;
+      this.collector = newCollector;
       int index = context.getThisTaskIndex();
       String path = paths[index];
       // read from local file
@@ -58,14 +75,14 @@ public class LocalFileSpout extends BaseRichSpout {
           1024 * 1024
       );
 
-    } catch (Exception e) {
+    } catch (IOException e) {
       // Clean stuff if any exceptions
       try {
         // Close the outmost is enough
         if (br != null) {
           br.close();
         }
-      } catch (Exception e1) {
+      } catch (IOException e1) {
         throw new RuntimeException("Unable to close file reader", e1);
       }
 
@@ -79,8 +96,8 @@ public class LocalFileSpout extends BaseRichSpout {
     }
   }
 
-  // We do not explicitly close the buffered reader, even on EoF. This is in case more content is added
-// to file, we will read that content as well
+  // We do not explicitly close the buffered reader, even on EoF. This is in case more content is
+  // added to file, we will read that content as well
   @Override
   public void nextTuple() {
     if (br == null) {
@@ -95,15 +112,14 @@ public class LocalFileSpout extends BaseRichSpout {
         br.close();
         br = null;
       }
-
-    } catch (Exception e) {
+    } catch (IOException e) {
       // Clean stuff if any exceptions
       try {
         // Close the outmost is enough
         if (br != null) {
           br.close();
         }
-      } catch (Exception e1) {
+      } catch (IOException e1) {
         throw new RuntimeException("Unable to close stream reader", e1);
       }
       throw new RuntimeException("Unable to emit tuples normally", e);

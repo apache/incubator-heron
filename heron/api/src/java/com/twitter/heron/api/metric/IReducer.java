@@ -14,10 +14,16 @@
 
 package com.twitter.heron.api.metric;
 
-public interface IReducer<T> {
+/**
+ * Apply an update to an accumulator for which a result can be extracted.
+ * @param <T> accumulator to hold and update state
+ * @param <U> type of input that can be handled
+ * @param <V> type of reduced value from the accumulator
+ */
+public interface IReducer<T, U, V> {
   T init();
 
-  T reduce(T accumulator, Object input);
+  T reduce(T accumulator, U input);
 
-  Object extractResult(T accumulator);
+  V extractResult(T accumulator);
 }

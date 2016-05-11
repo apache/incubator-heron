@@ -68,11 +68,11 @@ public final class JavaCheckstyle {
 
       String[] sourceFiles = getSourceFiles(extraActionFile);
       if (sourceFiles.length == 0) {
-        LOG.info("No java files found by checkstyle");
+        LOG.fine("No java files found by checkstyle");
         return;
       }
 
-      LOG.info(sourceFiles.length + " java files found by checkstyle");
+      LOG.fine(sourceFiles.length + " java files found by checkstyle");
 
       String[] checkstyleArgs = (String[]) ArrayUtils.addAll(
           new String[]{"-c", configFile}, sourceFiles);

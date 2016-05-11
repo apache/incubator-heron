@@ -1,3 +1,16 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 package com.twitter.heron.integration_test.core;
 
 import java.util.List;
@@ -13,6 +26,7 @@ import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.api.tuple.Values;
 
 public class IntegrationTestSpout implements IRichSpout {
+  private static final long serialVersionUID = 6068686695658877942L;
   // The times of execution
   private static final int DEFAULT_EXECUTION_COUNT = 10;
   private static final Logger LOG = Logger.getLogger(IntegrationTestSpout.class.getName());
@@ -62,7 +76,9 @@ public class IntegrationTestSpout implements IRichSpout {
   }
 
   @Override
-  public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector outputCollector) {
+  public void open(Map<String, Object> map,
+                   TopologyContext topologyContext,
+                   SpoutOutputCollector outputCollector) {
     // Here the spoutOutputCollector should be a default one
     // to emit tuples without adding MessageId
     this.spoutOutputCollector = outputCollector;
@@ -129,7 +145,7 @@ public class IntegrationTestSpout implements IRichSpout {
   private class IntegrationTestSpoutCollector implements ISpoutOutputCollector {
     private final ISpoutOutputCollector delegate;
 
-    public IntegrationTestSpoutCollector(ISpoutOutputCollector delegate) {
+    IntegrationTestSpoutCollector(ISpoutOutputCollector delegate) {
       this.delegate = delegate;
     }
 

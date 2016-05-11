@@ -21,12 +21,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import com.twitter.heron.api.Config;
 
 public final class Utils {
   public static final String DEFAULT_STREAM_ID = "default";
@@ -35,10 +34,8 @@ public final class Utils {
   }
 
   public static List<Object> tuple(Object... values) {
-    List<Object> ret = new ArrayList<Object>();
-    for (Object v : values) {
-      ret.add(v);
-    }
+    List<Object> ret = new ArrayList<>();
+    Collections.addAll(ret, Arrays.asList(values));
     return ret;
   }
 
@@ -50,19 +47,8 @@ public final class Utils {
     }
   }
 
-  public static boolean isValidConf(Config heronConf) {
-    Set<String> apiVars = heronConf.getApiVars();
-    for (String apiVar : apiVars) {
-      if (heronConf.containsKey(apiVar)
-          && !(heronConf.get(apiVar) instanceof String)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
   public static Map<String, String> readCommandLineOpts() {
-    Map<String, String> ret = new HashMap<String, String>();
+    Map<String, String> ret = new HashMap<>();
     String commandOptions = System.getProperty("heron.options");
     if (commandOptions != null) {
       commandOptions = commandOptions.replaceAll("%%%%", " ");
@@ -76,33 +62,6 @@ public final class Utils {
     }
     return ret;
   }
-
-    /*
-    private static Object normalizeConf(Object conf) {
-        if(conf==null) return new HashMap();
-        if(conf instanceof Map) {
-            Map confMap = new HashMap((Map) conf);
-            for(Object key: confMap.keySet()) {
-                Object val = confMap.get(key);
-                confMap.put(key, normalizeConf(val));
-            }
-            return confMap;
-        } else if(conf instanceof List) {
-            List confList =  new ArrayList((List) conf);
-            for(int i=0; i<confList.size(); i++) {
-                Object val = confList.get(i);
-                confList.set(i, normalizeConf(val));
-            }
-            return confList;
-        } else if (conf instanceof Integer) {
-            return ((Integer) conf).longValue();
-        } else if(conf instanceof Float) {
-            return ((Float) conf).doubleValue();
-        } else {
-            return conf;
-        }
-    }
-    */
 
   public static byte[] serialize(Object obj) {
     try {
@@ -127,38 +86,6 @@ public final class Utils {
       throw new RuntimeException(ioe);
     } catch (ClassNotFoundException e) {
       throw new RuntimeException(e);
-    }
-  }
-
-  public static Integer getInt(Object o) {
-    if (o instanceof Long) {
-      return ((Long) o).intValue();
-    } else if (o instanceof Integer) {
-      return (Integer) o;
-    } else if (o instanceof Short) {
-      return ((Short) o).intValue();
-    } else {
-      try {
-        return Integer.parseInt(o.toString());
-      } catch (NumberFormatException nfe) {
-        throw new IllegalArgumentException("Don't know how to convert " + o + " + to int");
-      }
-    }
-  }
-
-  public static Long getLong(Object o) {
-    if (o instanceof Long) {
-      return (Long) o;
-    } else if (o instanceof Integer) {
-      return ((Integer) o).longValue();
-    } else if (o instanceof Short) {
-      return ((Short) o).longValue();
-    } else {
-      try {
-        return Long.parseLong(o.toString());
-      } catch (NumberFormatException nfe) {
-        throw new IllegalArgumentException("Don't know how to convert " + o + " + to long");
-      }
     }
   }
 

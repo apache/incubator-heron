@@ -16,6 +16,7 @@ package com.twitter.heron.scheduler.local;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -48,32 +49,21 @@ public class LocalScheduler implements IScheduler {
   private Config config;
   private Config runtime;
   // has the topology been killed?
-  private volatile boolean topologyKilled = false;
+  private volatile boolean isTopologyKilled = false;
 
   @Override
   public void initialize(Config mConfig, Config mRuntime) {
     this.config = mConfig;
     this.runtime = mRuntime;
-
-    LOG.info("Starting to deploy topology: " + LocalContext.topologyName(mConfig));
-    LOG.info("# of containers: " + Runtime.numContainers(mRuntime));
-
-    // first, run the TMaster executor
-    startExecutor(0);
-    LOG.info("TMaster is started.");
-
-    // for each container, run its own executor
-    long numContainers = Runtime.numContainers(mRuntime);
-    for (int i = 1; i < numContainers; i++) {
-      startExecutor(i);
-    }
-
-    LOG.info("Executor for each container have been started.");
   }
 
   @Override
   public void close() {
+    // Shut down the ExecutorService for monitoring
     monitorService.shutdownNow();
+
+    // Clear the map
+    processToContainer.clear();
   }
 
   /**
@@ -89,37 +79,52 @@ public class LocalScheduler implements IScheduler {
   }
 
   /**
+   * Start executor process via running an async shell process
+   */
+  protected Process startExecutorProcess(int container) {
+    return ShellUtils.runASyncProcess(true,
+        getExecutorCommand(container), new File(LocalContext.workingDirectory(config)));
+  }
+
+  /**
    * Start the executor for the given container
    */
   protected void startExecutor(final int container) {
     LOG.info("Starting a new executor for container: " + container);
 
     // create a process with the executor command and topology working directory
-    final Process regularExecutor = ShellUtils.runASyncProcess(true,
-        getExecutorCommand(container), new File(LocalContext.workingDirectory(config)));
+    final Process containerExecutor = startExecutorProcess(container);
 
     // associate the process and its container id
-    processToContainer.put(regularExecutor, container);
+    processToContainer.put(containerExecutor, container);
     LOG.info("Started the executor for container: " + container);
 
+    // add the container for monitoring
+    startExecutorMonitor(container, containerExecutor);
+  }
+
+  /**
+   * Start the monitor of a given executor
+   */
+  protected void startExecutorMonitor(final int container, final Process containerExecutor) {
     // add the container for monitoring
     Runnable r = new Runnable() {
       @Override
       public void run() {
         try {
           LOG.info("Waiting for container " + container + " to finish.");
-          regularExecutor.waitFor();
+          containerExecutor.waitFor();
 
           LOG.log(Level.INFO,
               "Container {0} is completed. Exit status: {1}",
-              new Object[]{container, regularExecutor.exitValue()});
-          if (topologyKilled) {
+              new Object[]{container, containerExecutor.exitValue()});
+          if (isTopologyKilled) {
             LOG.info("Topology is killed. Not to start new executors.");
             return;
           }
-
+          LOG.log(Level.INFO, "Trying to restart container {0}", container);
           // restart the container
-          startExecutor(processToContainer.remove(regularExecutor));
+          startExecutor(processToContainer.remove(containerExecutor));
         } catch (InterruptedException e) {
           LOG.log(Level.SEVERE, "Process is interrupted: ", e);
         }
@@ -129,8 +134,7 @@ public class LocalScheduler implements IScheduler {
     monitorService.submit(r);
   }
 
-  private String getExecutorCommand(int container) {
-
+  protected String getExecutorCommand(int container) {
     TopologyAPI.Topology topology = Runtime.topology(runtime);
 
     int port1 = NetworkUtils.getFreePort();
@@ -139,8 +143,8 @@ public class LocalScheduler implements IScheduler {
     int shellPort = NetworkUtils.getFreePort();
     int port4 = NetworkUtils.getFreePort();
 
-    if (port1 == -1 || port2 == -1 || port3 == -1) {
-      throw new RuntimeException("Could not find available ports to start topology");
+    if (port1 == -1 || port2 == -1 || port3 == -1 || shellPort == -1 || port4 == -1) {
+      throw new RuntimeException("Failed to find available ports to start topology");
     }
 
     String executorCmd = String.format(
@@ -191,7 +195,24 @@ public class LocalScheduler implements IScheduler {
    */
   @Override
   public boolean onSchedule(PackingPlan packing) {
+    long numContainers = Runtime.numContainers(runtime);
+
+    LOG.info("Starting to deploy topology: " + LocalContext.topologyName(config));
+    LOG.info("# of containers: " + numContainers);
+
+    // for each container, run its own executor
+    for (int i = 0; i < numContainers; i++) {
+      startExecutor(i);
+    }
+
+    LOG.info("Executor for each container have been started.");
+
     return true;
+  }
+
+  @Override
+  public List<String> getJobLinks() {
+    return new ArrayList<>();
   }
 
   /**
@@ -205,7 +226,7 @@ public class LocalScheduler implements IScheduler {
     LOG.info("Command to kill topology: " + topologyName);
 
     // set the flag that the topology being killed
-    topologyKilled = true;
+    isTopologyKilled = true;
 
     // destroy/kill the process for each container
     for (Process p : processToContainer.keySet()) {
@@ -233,14 +254,11 @@ public class LocalScheduler implements IScheduler {
     // Containers would be restarted automatically once we destroy it
     int containerId = request.getContainerIndex();
 
+    List<Process> processesToRestart = new LinkedList<>();
+
     if (containerId == -1) {
       LOG.info("Command to restart the entire topology: " + LocalContext.topologyName(config));
-
-      // create a new tmp list to store all the Process to be killed
-      List<Process> tmpProcessList = new LinkedList<>(processToContainer.keySet());
-      for (Process process : tmpProcessList) {
-        process.destroy();
-      }
+      processesToRestart.addAll(processToContainer.keySet());
     } else {
       // restart that particular container
       LOG.info("Command to restart a container of topology: " + LocalContext.topologyName(config));
@@ -249,11 +267,34 @@ public class LocalScheduler implements IScheduler {
       // locate the container and destroy it
       for (Process p : processToContainer.keySet()) {
         if (containerId == processToContainer.get(p)) {
-          p.destroy();
+          processesToRestart.add(p);
         }
       }
     }
 
+    if (processesToRestart.isEmpty()) {
+      LOG.severe("Container not exist.");
+      return false;
+    }
+
+    for (Process process : processesToRestart) {
+      process.destroy();
+    }
+
     return true;
+  }
+
+  public boolean isTopologyKilled() {
+    return isTopologyKilled;
+  }
+
+  // This method shall be used only for unit test
+  protected ExecutorService getMonitorService() {
+    return monitorService;
+  }
+
+  // This method shall be used only for unit test
+  protected Map<Process, Integer> getProcessToContainer() {
+    return processToContainer;
   }
 }

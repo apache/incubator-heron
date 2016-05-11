@@ -26,6 +26,10 @@ aurora_deps_files = [
     "//heron/schedulers/src/java:aurora-scheduler-java",
 ]
 
+local_deps_files = [
+    "//heron/schedulers/src/java:local-scheduler-java",
+]
+
 java_test(
   name="aurora-scheduler_unittest",
   srcs=glob(
@@ -50,5 +54,23 @@ java_test(
     ["**/AuroraControllerTest.java"]
   ),
   deps=scheduler_deps_files + aurora_deps_files,
+  size="small",
+)
+
+java_test(
+  name="local-launcher_unittest",
+  srcs=glob(
+    ["**/LocalLauncherTest.java"]
+  ),
+  deps=scheduler_deps_files + local_deps_files,
+  size="small",
+)
+
+java_test(
+  name="local-scheduler_unittest",
+  srcs=glob(
+    ["**/LocalSchedulerTest.java"]
+  ),
+  deps=scheduler_deps_files + local_deps_files,
   size="small",
 )

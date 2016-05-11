@@ -71,11 +71,11 @@ public final class CppCheckstyle {
 
       Collection<String> sourceFiles = getSourceFiles(extraActionFile);
       if (sourceFiles.size() == 0) {
-        LOG.info("No cpp files found by checkstyle");
+        LOG.fine("No cpp files found by checkstyle");
         return;
       }
 
-      LOG.info(sourceFiles.size() + " cpp files found by checkstyle");
+      LOG.fine(sourceFiles.size() + " cpp files found by checkstyle");
 
       // Create and run the command
       List<String> commandBuilder = new ArrayList<>();
@@ -97,7 +97,7 @@ public final class CppCheckstyle {
   }
 
   private static void runLinter(List<String> command) throws IOException {
-    LOG.info("checkstyle command: " + command);
+    LOG.fine("checkstyle command: " + command);
 
     ProcessBuilder processBuilder = new ProcessBuilder(command);
     processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
@@ -122,6 +122,7 @@ public final class CppCheckstyle {
     }
   }
 
+  @SuppressWarnings("unchecked")
   private static Collection<String> getSourceFiles(String extraActionFile) {
 
     ExtraActionInfo info = ExtraActionUtils.getExtraActionInfo(extraActionFile);
@@ -132,7 +133,8 @@ public final class CppCheckstyle {
             Predicates.and(
                     Predicates.not(Predicates.containsPattern("3rdparty/")),
                     Predicates.not(Predicates.containsPattern("config/heron-config.h")),
-                    Predicates.not(Predicates.containsPattern("heron/proto/"))
+                    Predicates.not(Predicates.containsPattern(".*pb.h$")),
+                    Predicates.not(Predicates.containsPattern(".*pb.cc$"))
             )
     );
   }

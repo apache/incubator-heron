@@ -1,3 +1,16 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 package com.twitter.heron.integration_test.common.bolt;
 
 import java.io.BufferedWriter;
@@ -20,9 +33,8 @@ import com.twitter.heron.api.tuple.Tuple;
  * Note: The number of parallelisms for this spout should be equal to the number of files/paths
  * to read.
  */
-
-
 public class LocalWriteBolt extends BaseBasicBolt {
+  private static final long serialVersionUID = 2320175828567970635L;
   private String path;
   private BufferedWriter bw = null;
 
@@ -31,7 +43,7 @@ public class LocalWriteBolt extends BaseBasicBolt {
   }
 
   @Override
-  public void prepare(Map map, TopologyContext topologyContext) {
+  public void prepare(Map<String, Object> map, TopologyContext topologyContext) {
     try {
       File outputFile = new File(path);
       if (!outputFile.exists()) {
@@ -44,17 +56,18 @@ public class LocalWriteBolt extends BaseBasicBolt {
     } catch (IOException e) {
       // Clean stuff if any exceptions
       try {
-        if (bw != null)
+        if (bw != null) {
           bw.close();
-      } catch (Exception e1) {
+        }
+      } catch (IOException e1) {
         throw new RuntimeException("Unable to close file writer", e1);
       }
       throw new RuntimeException("Failed to create BufferedWriter from file path", e);
     }
   }
 
-  // We do not explicitly close the buffered writer in LocalWriteBolt as we cannot guarantee which tuple is the last tuple
-// Writer will be closed automatically on process close
+  // We do not explicitly close the buffered writer in LocalWriteBolt as we cannot guarantee which
+  // tuple is the last tuple. Writer will be closed automatically on process close
   @Override
   public void execute(Tuple input, BasicOutputCollector collector) {
     try {
@@ -62,14 +75,14 @@ public class LocalWriteBolt extends BaseBasicBolt {
       bw.write(data);
       bw.newLine();
       bw.flush();
-    } catch (Exception e) {
+    } catch (IOException e) {
       // Clean stuff if any exceptions
       try {
         // Close the outmost is enough
         if (bw != null) {
           bw.close();
         }
-      } catch (Exception e1) {
+      } catch (IOException e1) {
         throw new RuntimeException("Unable to close stream writer", e1);
       }
       throw new RuntimeException("Unable to write to file or emit tuples", e);

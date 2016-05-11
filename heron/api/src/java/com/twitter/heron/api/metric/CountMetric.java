@@ -14,7 +14,7 @@
 
 package com.twitter.heron.api.metric;
 
-public class CountMetric implements IMetric {
+public class CountMetric implements IMetric<Long> {
   private long value = 0;
 
   public CountMetric() {
@@ -28,7 +28,8 @@ public class CountMetric implements IMetric {
     value += incrementBy;
   }
 
-  public Object getValueAndReset() {
+  @Override
+  public Long getValueAndReset() {
     long ret = value;
     value = 0;
     return ret;

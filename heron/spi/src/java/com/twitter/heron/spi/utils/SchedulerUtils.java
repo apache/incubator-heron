@@ -14,9 +14,14 @@
 
 package com.twitter.heron.spi.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
@@ -46,6 +51,15 @@ public final class SchedulerUtils {
     try {
       scheduler.initialize(config, runtime);
       ret = scheduler.onSchedule(packing);
+
+      if (ret) {
+        // Set the SchedulerLocation at last step,
+        // since some methods in IScheduler will provide correct values
+        // only after IScheduler.onSchedule is invoked correctly
+        ret = setSchedulerLocation(runtime, scheduler);
+      } else {
+        LOG.severe("Failed to invoke IScheduler as library");
+      }
     } finally {
       scheduler.close();
     }
@@ -53,52 +67,89 @@ public final class SchedulerUtils {
     return ret;
   }
 
+  public static String[] schedulerCommand(Config config, String javaBinary, int httpPort) {
+    String schedulerClassPath = new StringBuilder()
+        .append(Context.schedulerSandboxClassPath(config)).append(":")
+        .append(Context.packingSandboxClassPath(config)).append(":")
+        .append(Context.stateManagerSandboxClassPath(config))
+        .toString();
+
+    List<String> commands = new ArrayList<>();
+    commands.add(javaBinary);
+    commands.add("-cp");
+    commands.add(schedulerClassPath);
+    commands.add("com.twitter.heron.scheduler.SchedulerMain");
+    commands.add("--cluster");
+    commands.add(Context.cluster(config));
+    commands.add("--role");
+    commands.add(Context.role(config));
+    commands.add("--environment");
+    commands.add(Context.environ(config));
+    commands.add("--topology_name");
+    commands.add(Context.topologyName(config));
+    commands.add("--topology_jar");
+    commands.add(Context.topologyJarFile(config));
+    commands.add("--http_port");
+    commands.add(Integer.toString(httpPort));
+
+    return commands.toArray(new String[0]);
+  }
 
   /**
-   * Clean all states of a heron topology
-   * 1. Topology def and ExecutionState are required to exist to delete
-   * 2. TMasterLocation, SchedulerLocation and PhysicalPlan may not exist to delete
+   * Set the location of scheduler for other processes to discover,
+   * when invoke IScheduler as a library on client side
+   *
+   * @param runtime the runtime configuration
+   * @param scheduler the IScheduler to provide more info
    */
-  public static boolean cleanState(
-      String topologyName,
-      SchedulerStateManagerAdaptor statemgr) {
-    LOG.fine("Cleaning up Heron State");
+  public static boolean setSchedulerLocation(
+      Config runtime,
+      IScheduler scheduler) {
+    // Dummy values since there is no running scheduler server
+    final String serverHost = "scheduling_as_library";
+    final int serverPort = -1;
 
-    Boolean result;
+    return setSchedulerLocation(runtime, serverHost, serverPort, scheduler);
+  }
 
-    result = statemgr.deleteTopology(topologyName);
+  /**
+   * Set the location of scheduler for other processes to discover
+   *
+   * @param runtime the runtime configuration
+   * @param schedulerServerHost the http server host that scheduler listens for receives requests
+   * @param schedulerServerPort the http server port that scheduler listens for receives requests
+   * @param scheduler the IScheduler to provide more info
+   */
+  public static boolean setSchedulerLocation(
+      Config runtime,
+      String schedulerServerHost,
+      int schedulerServerPort,
+      IScheduler scheduler) {
+
+    // Set scheduler location to host:port by default. Overwrite scheduler location if behind DNS.
+    Scheduler.SchedulerLocation.Builder builder = Scheduler.SchedulerLocation.newBuilder()
+        .setTopologyName(Runtime.topologyName(runtime))
+        .setHttpEndpoint(
+            String.format("%s:%d", schedulerServerHost, schedulerServerPort));
+
+    // Set the job link in SchedulerLocation if any
+    List<String> jobLinks = scheduler.getJobLinks();
+    // Check whether IScheduler provides valid job link
+    if (jobLinks != null) {
+      builder.addAllJobPageLink(jobLinks);
+    }
+
+    Scheduler.SchedulerLocation location = builder.build();
+
+    LOG.log(Level.INFO, "Setting SchedulerLocation: {0}", location);
+    SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
+    Boolean result = statemgr.setSchedulerLocation(location, Runtime.topologyName(runtime));
+
     if (result == null || !result) {
-      LOG.severe("Failed to clear topology state");
+      LOG.severe("Failed to set Scheduler location");
       return false;
     }
 
-    result = statemgr.deleteExecutionState(topologyName);
-    if (result == null || !result) {
-      LOG.severe("Failed to clear execution state");
-      return false;
-    }
-
-    // It is possible that  TMasterLocation, PhysicalPlan and SchedulerLocation are not set
-    // Just log but don't consider them failure
-    result = statemgr.deleteTMasterLocation(topologyName);
-    if (result == null || !result) {
-      // We would not return false since it is possible that TMaster didn't write physical plan
-      LOG.warning("Failed to clear TMaster location. Check whether TMaster set it correctly.");
-    }
-
-    result = statemgr.deletePhysicalPlan(topologyName);
-    if (result == null || !result) {
-      // We would not return false since it is possible that TMaster didn't write physical plan
-      LOG.warning("Failed to clear physical plan. Check whether TMaster set it correctly.");
-    }
-
-    result = statemgr.deleteSchedulerLocation(topologyName);
-    if (result == null || !result) {
-      // We would not return false since it is possible that TMaster didn't write physical plan
-      LOG.warning("Failed to clear scheduler location. Check whether Scheduler set it correctly.");
-    }
-
-    LOG.fine("Cleaned up Heron State");
     return true;
   }
 }

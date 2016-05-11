@@ -14,21 +14,28 @@
 
 package com.twitter.heron.api.metric;
 
-public class ReducedMetric implements IMetric {
-  private final IReducer reducer;
-  private Object accumulator;
+/**
+ * Apply an update to an metric using an IReducer for which a result can be extracted.
+ * @param <T> accumulator to hold and update state
+ * @param <U> type of input that can be handled
+ * @param <V> type of reduced value
+ */
+public class ReducedMetric<T, U, V> implements IMetric<V> {
+  private final IReducer<T, U, V> reducer;
+  private T accumulator;
 
-  public ReducedMetric(IReducer aReducer) {
+  public ReducedMetric(IReducer<T, U, V> aReducer) {
     reducer = aReducer;
     accumulator = reducer.init();
   }
 
-  public void update(Object value) {
+  public void update(U value) {
     accumulator = reducer.reduce(accumulator, value);
   }
 
-  public Object getValueAndReset() {
-    Object ret = reducer.extractResult(accumulator);
+  @Override
+  public V getValueAndReset() {
+    V ret = reducer.extractResult(accumulator);
     accumulator = reducer.init();
     return ret;
   }

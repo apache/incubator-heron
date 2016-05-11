@@ -1,4 +1,5 @@
 from basehandler import BaseHandler
+from clustershandler import ClustersHandler
 from containerfilehandler import ContainerFileDataHandler
 from containerfilehandler import ContainerFileStatsHandler
 from defaulthandler import DefaultHandler
@@ -16,6 +17,7 @@ from metricsqueryhandler import MetricsQueryHandler
 from metricstimelinehandler import MetricsTimelineHandler
 from physicalplanhandler import PhysicalPlanHandler
 from pidhandler import PidHandler
+from schedulerlocationhandler import SchedulerLocationHandler
 from stateshandler import StatesHandler
 from topologieshandler import TopologiesHandler
 from topologyhandler import TopologyHandler

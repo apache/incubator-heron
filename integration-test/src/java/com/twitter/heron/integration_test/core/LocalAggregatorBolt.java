@@ -1,3 +1,16 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 package com.twitter.heron.integration_test.core;
 
 import java.io.BufferedWriter;
@@ -18,6 +31,7 @@ import com.twitter.heron.api.tuple.Tuple;
  * file specificed by localFilePath
  */
 public class LocalAggregatorBolt extends BaseBatchBolt implements ITerminalBolt {
+  private static final long serialVersionUID = 7363942149997565188L;
   private static final Logger LOG = Logger.getLogger(LocalAggregatorBolt.class.getName());
   private final String localFilePath;
   private BufferedWriter bw = null;
@@ -33,7 +47,9 @@ public class LocalAggregatorBolt extends BaseBatchBolt implements ITerminalBolt 
   }
 
   @Override
-  public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
+  public void prepare(Map<String, Object> map,
+                      TopologyContext topologyContext,
+                      OutputCollector outputCollector) {
     try {
       File outputFile = new File(localFilePath);
       if (!outputFile.exists()) {
@@ -46,9 +62,10 @@ public class LocalAggregatorBolt extends BaseBatchBolt implements ITerminalBolt 
     } catch (IOException e) {
       // Clean stuff if any exceptions
       try {
-        if (bw != null)
+        if (bw != null) {
           bw.close();
-      } catch (Exception e1) {
+        }
+      } catch (IOException e1) {
         throw new RuntimeException("Unable to close file writer", e1);
       }
       throw new RuntimeException("Failed to create BufferedWriter from file path", e);
@@ -61,14 +78,14 @@ public class LocalAggregatorBolt extends BaseBatchBolt implements ITerminalBolt 
       String data = tuple.getString(0);
       bw.write(data);
       bw.newLine();
-    } catch (Exception e) {
+    } catch (IOException e) {
       // Clean stuff if any exceptions
       try {
         // Close the outmost is enough
         if (bw != null) {
           bw.close();
         }
-      } catch (Exception e1) {
+      } catch (IOException e1) {
         throw new RuntimeException("Unable to close stream writer", e1);
       }
       throw new RuntimeException("Unable to write to file or emit tuples", e);
@@ -84,7 +101,7 @@ public class LocalAggregatorBolt extends BaseBatchBolt implements ITerminalBolt 
   public void writeFinishedData() {
     try {
       bw.flush();
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new RuntimeException("Unable to write to file", e);
     }
   }

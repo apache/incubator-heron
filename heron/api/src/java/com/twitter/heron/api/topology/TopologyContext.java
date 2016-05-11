@@ -82,17 +82,6 @@ public interface TopologyContext extends GeneralTopologyContext, IMetricsRegiste
 
   Object getTaskData(String name);
 
-    /*
-    TODO:- Do we really need this?
-    public void setExecutorData(String name, Object data) {
-        _executorData.put(name, data);
-    }
-
-    public Object getExecutorData(String name) {
-        return _executorData.get(name);
-    }
-    */
-
   /**
    * Add a Task Hook for this instance
    */
@@ -106,10 +95,14 @@ public interface TopologyContext extends GeneralTopologyContext, IMetricsRegiste
   /*
    * Convenience method for registering ReducedMetric.
    */
-  ReducedMetric registerMetric(String name, IReducer reducer, int timeBucketSizeInSecs);
+  <T, U, V> ReducedMetric<T, U, V> registerMetric(String name,
+                                                  IReducer<T, U, V> reducer,
+                                                  int timeBucketSizeInSecs);
 
   /*
    * Convenience method for registering CombinedMetric.
    */
-  CombinedMetric registerMetric(String name, ICombiner combiner, int timeBucketSizeInSecs);
+  <T> CombinedMetric<T> registerMetric(String name,
+                                       ICombiner<T> combiner,
+                                       int timeBucketSizeInSecs);
 }

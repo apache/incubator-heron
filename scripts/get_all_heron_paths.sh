@@ -23,7 +23,7 @@ function query() {
 
 set +e
 # Build everything
-bazel build heron/...
+bazel build {heron,integration-test,tools/java}/...
 result=$?
 if [ "${result}" -eq "0" ] ; then
   echo "Bazel build successful!!"
@@ -31,15 +31,20 @@ else
   echo "WARNING!!! - bazel build failed - intellij setup may not be consistent"
 fi 
 set -e
-echo "Path is " `pwd`
+echo "Path is `pwd`"
 
 function get_heron_python_paths() {
   echo "$(find heron -name "*.py" | sed "s|/src/python/.*$|/src/python/|" |sed "s|/tests/python/.*$|/tests/python/|" | sort -u)";
 }
 
 function get_heron_thirdparty_dependencies() {
-  echo "$(find {bazel-genfiles/external,bazel-bin/3rdparty/java/bazel}/. -name "*jar" -type f | sort -u)";
+  # bazel-bin/heron/proto for heron proto jars from heron/proto
+  # bazel-genfiles/external for 3rdparty deps
+  # bazel-heron/bazel-out/host/bin/3rdparty for extra_action proto jars in 3rdparty
+  # bazel-heron/bazel-out/host/genfiles/external more 3rdparty deps
+  echo "$(find {bazel-bin/heron/proto,bazel-genfiles/external,bazel-heron/bazel-out/host/bin/3rdparty,bazel-heron/bazel-out/host/genfiles/external}/. -name "*jar" -type f | sort -u)";
 }
+
 function get_heron_bazel_deps(){
   local bazel_third_party_base="$(bazel info output_base)/external/bazel_tools/third_party/";
   local bazel_ext_deps=`bazel query 'labels("deps", heron/...)'  | egrep -E "bazel_tools"`;
@@ -60,7 +65,7 @@ function get_package_of() {
 }
 
 function get_heron_java_paths() {
-  local java_paths=$(find {heron,tools} -name "*.java" | sed "s|/src/java/.*$|/src/java|"| sed "s|/java/src/.*$|/java/src|" |  sed "s|/tests/java/.*$|/tests/java|" | sort -u | fgrep -v "heron/scheduler/" | fgrep -v "heron/scheduler/" )
+  local java_paths=$(find {heron,tools,integration-test} -name "*.java" | sed "s|/src/java/.*$|/src/java|"| sed "s|/java/src/.*$|/java/src|" |  sed "s|/tests/java/.*$|/tests/java|" | sort -u | fgrep -v "heron/scheduler/" | fgrep -v "heron/scheduler/" )
   if [ "$(uname -s | tr 'A-Z' 'a-z')" != "darwin" ]; then
     java_paths=$(echo "${JAVA_PATHS}" | fgrep -v "/objc_tools/")
   fi

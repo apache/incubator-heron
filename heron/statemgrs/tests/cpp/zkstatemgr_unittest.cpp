@@ -1,3 +1,19 @@
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <iostream>
 #include <string>
 
@@ -23,9 +39,8 @@ namespace common {
 
 class MockZKClientFactory : public ZKClientFactory {
  public:
-  MOCK_METHOD3(create,
-               ZKClient*(const std::string& hostportlist, EventLoop* eventLoop,
-                         VCallback<ZKClient::ZkWatchEvent> global_watcher_cb));
+  MOCK_METHOD3(create, ZKClient*(const std::string& hostportlist, EventLoop* eventLoop,
+                                 VCallback<ZKClient::ZkWatchEvent> global_watcher_cb));
   MOCK_METHOD0(Die, void());
   virtual ~MockZKClientFactory() { Die(); }
 };
@@ -34,9 +49,8 @@ class MockZKClientFactory : public ZKClientFactory {
 // can be passed
 class HeronZKStateMgrWithMock : public heron::common::HeronZKStateMgr {
  public:
-  HeronZKStateMgrWithMock(const std::string& zkhostport,
-                          const std::string& topleveldir, EventLoop* eventLoop,
-                          ZKClientFactory* zkclient_factory)
+  HeronZKStateMgrWithMock(const std::string& zkhostport, const std::string& topleveldir,
+                          EventLoop* eventLoop, ZKClientFactory* zkclient_factory)
       : HeronZKStateMgr(zkhostport, topleveldir, eventLoop, zkclient_factory) {}
 
   virtual ~HeronZKStateMgrWithMock() {}
@@ -53,8 +67,7 @@ class HeronZKStateMgrTest : public ::testing::Test {
 
     // mock zkclient factory, on create call returns a mock zkclient
     ON_CALL(*mock_zkclient_factory, create(_, _, _))
-        .WillByDefault(
-            InvokeWithoutArgs(this, &HeronZKStateMgrTest::makeNewMockClient));
+        .WillByDefault(InvokeWithoutArgs(this, &HeronZKStateMgrTest::makeNewMockClient));
   }
 
  protected:
@@ -64,15 +77,14 @@ class HeronZKStateMgrTest : public ::testing::Test {
   }
   // a proxy for the call since the tests cannot call directly
   // (friendship inheritance is not supported)
-  static void CallTMasterLocationWatch(
-      HeronZKStateMgr* heron_zkstatemgr) {
+  static void CallTMasterLocationWatch(HeronZKStateMgr* heron_zkstatemgr) {
     heron_zkstatemgr->TMasterLocationWatch();
   }
 
   // a proxy for the call since the tests cannot call directly
   // (friendship inheritance is not supported)
-  static void CallGlobalWatchEventHandler(
-      HeronZKStateMgr* heron_zkstatemgr, ZKClient::ZkWatchEvent event) {
+  static void CallGlobalWatchEventHandler(HeronZKStateMgr* heron_zkstatemgr,
+                                          ZKClient::ZkWatchEvent event) {
     heron_zkstatemgr->GlobalWatchEventHandler(event);
   }
 
@@ -96,8 +108,7 @@ TEST_F(HeronZKStateMgrTest, testCreateDelete) {
   EXPECT_CALL(*mock_zkclient_factory, create(hostportlist, &ss, _)).Times(1);
 
   HeronZKStateMgr* heron_zkstatemgr =
-      new HeronZKStateMgrWithMock(hostportlist, topleveldir, &ss,
-                                  mock_zkclient_factory);
+      new HeronZKStateMgrWithMock(hostportlist, topleveldir, &ss, mock_zkclient_factory);
 
   // Ensure zkclient is deleted
   EXPECT_CALL(*mock_zkclient, Die()).Times(1);
@@ -115,14 +126,12 @@ TEST_F(HeronZKStateMgrTest, testSetTMasterLocationWatch) {
   EXPECT_CALL(*mock_zkclient_factory, create(hostportlist, &ss, _)).Times(1);
 
   HeronZKStateMgr* heron_zkstatemgr =
-      new HeronZKStateMgrWithMock(hostportlist, topleveldir, &ss,
-                                  mock_zkclient_factory);
+      new HeronZKStateMgrWithMock(hostportlist, topleveldir, &ss, mock_zkclient_factory);
 
   // Ensure that it sets a watch to the tmaster location
   EXPECT_CALL(*mock_zkclient, Exists(expected_path, _, _)).Times(1);
 
-  heron_zkstatemgr->SetTMasterLocationWatch(
-      topology_name, [] () { TmasterLocationWatchHandler(); });
+  heron_zkstatemgr->SetTMasterLocationWatch(topology_name, []() { TmasterLocationWatchHandler(); });
 
   EXPECT_CALL(*mock_zkclient, Die()).Times(1);
   EXPECT_CALL(*mock_zkclient_factory, Die()).Times(1);
@@ -135,11 +144,9 @@ TEST_F(HeronZKStateMgrTest, testTMasterLocationWatch) {
   const std::string expected_path = topleveldir + "/tmasters/" + topology_name;
 
   HeronZKStateMgr* heron_zkstatemgr =
-      new HeronZKStateMgrWithMock(hostportlist, topleveldir, &ss,
-                                  mock_zkclient_factory);
+      new HeronZKStateMgrWithMock(hostportlist, topleveldir, &ss, mock_zkclient_factory);
 
-  heron_zkstatemgr->SetTMasterLocationWatch(
-      topology_name, [] () { TmasterLocationWatchHandler(); });
+  heron_zkstatemgr->SetTMasterLocationWatch(topology_name, []() { TmasterLocationWatchHandler(); });
 
   // ensure TmasterLocationWatch resets the watch
   EXPECT_CALL(*mock_zkclient, Exists(expected_path, _, _)).Times(1);
@@ -160,15 +167,13 @@ TEST_F(HeronZKStateMgrTest, testGlobalWatchEventHandler) {
   const std::string expected_path = topleveldir + "/tmasters/" + topology_name;
 
   heron::common::HeronZKStateMgr* heron_zkstatemgr =
-      new HeronZKStateMgrWithMock(hostportlist, topleveldir, &ss,
-                                  mock_zkclient_factory);
+      new HeronZKStateMgrWithMock(hostportlist, topleveldir, &ss, mock_zkclient_factory);
 
-  heron_zkstatemgr->SetTMasterLocationWatch(
-      topology_name, [] () { TmasterLocationWatchHandler(); });
+  heron_zkstatemgr->SetTMasterLocationWatch(topology_name, []() { TmasterLocationWatchHandler(); });
 
   tmaster_watch_handler_count = 0;
-  const ZKClient::ZkWatchEvent session_expired_event = {
-      ZOO_SESSION_EVENT, ZOO_EXPIRED_SESSION_STATE, ""};
+  const ZKClient::ZkWatchEvent session_expired_event = {ZOO_SESSION_EVENT,
+                                                        ZOO_EXPIRED_SESSION_STATE, ""};
 
   // Ensure current ZkClient is destroyed
   EXPECT_CALL(*mock_zkclient, Die()).Times(1);

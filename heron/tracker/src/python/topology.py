@@ -32,7 +32,7 @@ class Topology:
     The watches are the callbacks that are called
     when there is any change in the topology
     instance using set_physical_plan, set_execution_state,
-    and set_tmaster. Any other means of changing will
+    set_tmaster, and set_scheduler_location. Any other means of changing will
     not call the watches.
   """
 
@@ -46,6 +46,8 @@ class Topology:
     self.cluster = None
     self.environ = None
     self.tmaster = None
+    self.job_page_links = None
+    self.scheduler_location = None
 
     # A map from UUIDs to the callback
     # functions.
@@ -126,16 +128,7 @@ class Topology:
     Helper function to extract dc and environ from execution_state.
     Returns a tuple (cluster, environ).
     """
-    # TODO: This should be removed when old version of execution_state is no
-    # longer in use.
-    if execution_state.HasField('aurora'):
-      return (execution_state.aurora.jobs[0].dc, execution_state.aurora.jobs[0].environ)
-    else:
-      # TODO: remove dc altogether - later
-      if execution_state.HasField('cluster'):
-        return (execution_state.cluster, execution_state.environ)
-      else:
-        return (execution_state.dc, execution_state.environ)
+    return (execution_state.cluster, execution_state.environ)
 
   def set_execution_state(self, execution_state):
     if not execution_state:
@@ -152,6 +145,11 @@ class Topology:
 
   def set_tmaster(self, tmaster):
     self.tmaster = tmaster
+    self.trigger_watches()
+
+  def set_scheduler_location(self, scheduler_location):
+    self.scheduler_location = scheduler_location
+    self.job_page_links = scheduler_location.job_page_link
     self.trigger_watches()
 
   def num_instances(self):

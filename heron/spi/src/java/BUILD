@@ -15,6 +15,7 @@ java_library(
     ]),
     deps = [
         "//heron/api/src/java:api-java",
+        "//heron/common/src/java:basics-java",
         "//heron/common/src/java:config-java",
         "//heron/proto:proto_common_java",
         "//heron/proto:proto_execution_state_java",
@@ -49,6 +50,7 @@ utils_deps_files = \
         ":statemgr-spi-java",
         ":scheduler-spi-java",
         ":packing-spi-java",
+        "//heron/common/src/java:basics-java",
         "//heron/common/src/java:config-java",
         "//heron/api/src/java:api-java",
         "@guava//jar",
@@ -84,6 +86,7 @@ java_library(
         "**/spi/common/**/*.java",
     ]),
     deps = [
+        "//heron/common/src/java:basics-java",
         "//heron/common/src/java:config-java",
     ],
     resources = common_resource_files, 
@@ -117,6 +120,14 @@ java_library(
     name='uploader-spi-java',
     srcs = glob([
         "**/spi/uploader/**/*.java",
+    ]),
+    deps = uploader_deps_files,
+)
+
+java_library(
+    name='uploader-utils-java',
+    srcs = glob([
+        "**/spi/utils/UploaderUtils.java",
     ]),
     deps = uploader_deps_files,
 )

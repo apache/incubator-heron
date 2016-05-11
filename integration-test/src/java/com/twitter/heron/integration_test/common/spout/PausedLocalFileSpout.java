@@ -1,8 +1,22 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 package com.twitter.heron.integration_test.common.spout;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.Map;
 
 import com.twitter.heron.api.spout.BaseRichSpout;
@@ -23,6 +37,7 @@ import com.twitter.heron.api.tuple.Values;
  * to read.
  */
 public class PausedLocalFileSpout extends BaseRichSpout {
+  private static final long serialVersionUID = 7233454257997083024L;
   private BufferedReader br = null;
   private SpoutOutputCollector collector;
   private String[] paths;
@@ -42,7 +57,9 @@ public class PausedLocalFileSpout extends BaseRichSpout {
 
   // Here, the spout will block until the file at the path exists
   @Override
-  public void open(Map stormConf, TopologyContext context, SpoutOutputCollector collector) {
+  public void open(Map<String, Object> stormConf,
+                   TopologyContext context,
+                   SpoutOutputCollector newCollector) {
     int numTasks = context.getComponentTasks(context.getThisComponentId()).size();
     // Pre-condition: the number of tasks is equal to the number of files to read
     if (paths.length != numTasks) {
@@ -50,7 +67,7 @@ public class PausedLocalFileSpout extends BaseRichSpout {
           String.format("Number of specified files %d not equal to number of tasks %d",
               paths.length, numTasks));
     }
-    this.collector = collector;
+    this.collector = newCollector;
     int index = context.getThisTaskIndex();
     String path = paths[index];
     File file = new File(path);
@@ -64,14 +81,14 @@ public class PausedLocalFileSpout extends BaseRichSpout {
           1024 * 1024
       );
 
-    } catch (Exception e) {
+    } catch (IOException e) {
       // Clean stuff if any exceptions
       try {
         // Close the outmost is enough
         if (br != null) {
           br.close();
         }
-      } catch (Exception e1) {
+      } catch (IOException e1) {
         throw new RuntimeException("Unable to close file reader", e1);
       }
 
@@ -97,19 +114,19 @@ public class PausedLocalFileSpout extends BaseRichSpout {
 
     try {
       String currentLine;
-      // if at EoF, do not close buffered reader. Instead, keep polling from file until there is more content, and do not
-      // emit anything if data is null
+      // if at EoF, do not close buffered reader. Instead, keep polling from file until there is
+      // more content, and do not emit anything if data is null
       if ((currentLine = br.readLine()) != null) {
         collector.emit(new Values(currentLine), "MESSAGE_ID");
       }
-    } catch (Exception e) {
+    } catch (IOException e) {
       // Clean stuff if any exceptions
       try {
         // Close the outmost is enough
         if (br != null) {
           br.close();
         }
-      } catch (Exception e1) {
+      } catch (IOException e1) {
         throw new RuntimeException("Unable to close stream reader", e1);
       }
       throw new RuntimeException("Unable to emit tuples normally", e);

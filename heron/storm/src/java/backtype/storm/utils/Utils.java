@@ -18,6 +18,8 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 
+import com.twitter.heron.common.basics.TypeUtils;
+
 // import org.json.simple.JSONValue;
 
 public final class Utils {
@@ -29,7 +31,7 @@ public final class Utils {
 
   public static Object newInstance(String klass) {
     try {
-      Class c = Class.forName(klass);
+      Class<?> c = Class.forName(klass);
       return c.newInstance();
     } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
       throw new RuntimeException(e);
@@ -91,7 +93,7 @@ public final class Utils {
   }
 
   public static Integer getInt(Object o) {
-    return com.twitter.heron.api.utils.Utils.getInt(o);
+    return TypeUtils.getInt(o);
   }
 
   public static byte[] toByteArray(ByteBuffer buffer) {

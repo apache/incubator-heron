@@ -1,3 +1,19 @@
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "gtest/gtest.h"
 
 #include "proto/messages.h"
@@ -13,47 +29,43 @@
 
 #include "metrics/metrics.h"
 
-using namespace std::chrono;
-using namespace heron::common;
-using namespace heron::proto::system;
+namespace heron {
+namespace common {
 
-class TimeSpentMetricTest : public ::testing::Test
-{
+using proto::system::MetricPublisherPublishMessage;
+using proto::system::MetricDatum;
+using std::chrono::high_resolution_clock;
+using std::chrono::duration;
+using std::chrono::milliseconds;
+
+class TimeSpentMetricTest : public ::testing::Test {
  public:
-  TimeSpentMetricTest() { }
-  ~TimeSpentMetricTest() { }
+  TimeSpentMetricTest() {}
+  ~TimeSpentMetricTest() {}
 
-  void SetUp()
-  {
-    time_spent_metric_ = new TimeSpentMetric();
-  }
+  void SetUp() { time_spent_metric_ = new TimeSpentMetric(); }
 
-  void TearDown()
-  {
-    delete time_spent_metric_;
-  }
+  void TearDown() { delete time_spent_metric_; }
 
   // It is hard to test the time in milliseconds.
   // So we use EXPECT_NEAR, which take the error margin
   // as a parameter.
   // This function returns the absolute error expected
   // for the given expected time.
-  sp_lint32 ExpectedError(sp_lint32 expectedTime)
-  {
+  sp_lint32 ExpectedError(sp_lint32 expectedTime) {
     // We expect only 5% of the expected value as error.
-    sp_lint32 error = (sp_lint32) (5.0 / 100.0 * expectedTime);
+    sp_lint32 error = (sp_lint32)(5.0 / 100.0 * expectedTime);
     return error;
   }
 
  protected:
-  TimeSpentMetric*      time_spent_metric_;
+  TimeSpentMetric* time_spent_metric_;
 };
 
-TEST_F(TimeSpentMetricTest, testStart)
-{
+TEST_F(TimeSpentMetricTest, testStart) {
   sp_lint32 sleepTime = 100000;  // microseconds
 
-  auto start = high_resolution_clock::now();
+  auto start = std::chrono::high_resolution_clock::now();
   time_spent_metric_->Start();
 
   MetricPublisherPublishMessage* message = new MetricPublisherPublishMessage();
@@ -63,10 +75,11 @@ TEST_F(TimeSpentMetricTest, testStart)
   // Sleep for some time
   ::usleep(sleepTime);
 
-  auto end = high_resolution_clock::now();
+  auto end = std::chrono::high_resolution_clock::now();
   time_spent_metric_->GetAndReset(prefix, message);
 
-  sp_lint32 expectedTime = duration_cast<milliseconds>(end - start).count();
+  sp_lint32 expectedTime =
+      std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
   // Only one metric datum should be present.
   EXPECT_EQ(1, message->metrics_size());
@@ -83,15 +96,13 @@ TEST_F(TimeSpentMetricTest, testStart)
   delete message;
 }
 
-TEST_F(TimeSpentMetricTest, testStartWithoutStop)
-{
+TEST_F(TimeSpentMetricTest, testStartWithoutStop) {
   sp_lint32 sleepTime = 100000;  // microseconds
 
-  auto start = high_resolution_clock::now();
+  auto start = std::chrono::high_resolution_clock::now();
   time_spent_metric_->Start();
 
-  MetricPublisherPublishMessage* message =
-    new MetricPublisherPublishMessage();
+  MetricPublisherPublishMessage* message = new MetricPublisherPublishMessage();
 
   sp_string prefix = "TestPrefix";
 
@@ -104,10 +115,11 @@ TEST_F(TimeSpentMetricTest, testStartWithoutStop)
   // It will just add up in the current recorded time.
   ::usleep(sleepTime);
 
-  auto end = high_resolution_clock::now();
+  auto end = std::chrono::high_resolution_clock::now();
   time_spent_metric_->GetAndReset(prefix, message);
 
-  sp_lint32 expectedTime = duration_cast<milliseconds>(end - start).count();
+  sp_lint32 expectedTime =
+      std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
   // Only one metric datum should be present.
   EXPECT_EQ(1, message->metrics_size());
@@ -124,12 +136,10 @@ TEST_F(TimeSpentMetricTest, testStartWithoutStop)
   delete message;
 }
 
-TEST_F(TimeSpentMetricTest, testStopWithouStart)
-{
+TEST_F(TimeSpentMetricTest, testStopWithouStart) {
   sp_lint32 sleepTime = 100000;  // microseconds
 
-  MetricPublisherPublishMessage* message =
-    new MetricPublisherPublishMessage();
+  MetricPublisherPublishMessage* message = new MetricPublisherPublishMessage();
 
   sp_string prefix = "TestPrefix";
 
@@ -158,15 +168,13 @@ TEST_F(TimeSpentMetricTest, testStopWithouStart)
   delete message;
 }
 
-TEST_F(TimeSpentMetricTest, testStopAfterStop)
-{
+TEST_F(TimeSpentMetricTest, testStopAfterStop) {
   sp_lint32 sleepTime = 100000;  // microseconds
 
-  auto start = high_resolution_clock::now();
+  auto start = std::chrono::high_resolution_clock::now();
   time_spent_metric_->Start();
 
-  MetricPublisherPublishMessage* message =
-    new MetricPublisherPublishMessage();
+  MetricPublisherPublishMessage* message = new MetricPublisherPublishMessage();
 
   sp_string prefix = "TestPrefix";
 
@@ -183,7 +191,8 @@ TEST_F(TimeSpentMetricTest, testStopAfterStop)
   time_spent_metric_->Stop();
 
   time_spent_metric_->GetAndReset(prefix, message);
-  sp_lint32 expectedTime = duration_cast<milliseconds>(end - start).count();
+  sp_lint32 expectedTime =
+      std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
   // Only one metric datum should be present.
   EXPECT_EQ(1, message->metrics_size());
@@ -200,8 +209,7 @@ TEST_F(TimeSpentMetricTest, testStopAfterStop)
   delete message;
 }
 
-TEST_F(TimeSpentMetricTest, testStartStopStart)
-{
+TEST_F(TimeSpentMetricTest, testStartStopStart) {
   sp_lint32 sleepTime = 100000;  // microseconds
 
   auto start = high_resolution_clock::now();
@@ -210,27 +218,27 @@ TEST_F(TimeSpentMetricTest, testStartStopStart)
   // Sleep for some time
   ::usleep(sleepTime);
 
-  auto end = high_resolution_clock::now();
+  auto end = std::chrono::high_resolution_clock::now();
   time_spent_metric_->Stop();
 
-  sp_lint32 expectedTime = duration_cast<milliseconds>(end - start).count();
+  sp_lint32 expectedTime =
+      std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
   // Start again
-  start = high_resolution_clock::now();
+  start = std::chrono::high_resolution_clock::now();
   time_spent_metric_->Start();
 
-  MetricPublisherPublishMessage* message =
-    new MetricPublisherPublishMessage();
+  MetricPublisherPublishMessage* message = new MetricPublisherPublishMessage();
 
   sp_string prefix = "TestPrefix";
 
   // Sleep for some time
   ::usleep(sleepTime);
 
-  end = high_resolution_clock::now();
+  end = std::chrono::high_resolution_clock::now();
   time_spent_metric_->GetAndReset(prefix, message);
 
-  expectedTime += duration_cast<milliseconds>(end - start).count();
+  expectedTime += std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
   // Only one metric datum should be present.
   EXPECT_EQ(1, message->metrics_size());
@@ -247,35 +255,34 @@ TEST_F(TimeSpentMetricTest, testStartStopStart)
   delete message;
 }
 
-TEST_F(TimeSpentMetricTest, testMultipleStartStops)
-{
+TEST_F(TimeSpentMetricTest, testMultipleStartStops) {
   sp_lint32 sleepTime = 100000;  // microseconds
 
-  auto start = high_resolution_clock::now();
+  auto start = std::chrono::high_resolution_clock::now();
   time_spent_metric_->Start();
 
   // Sleep for some time
   ::usleep(sleepTime);
 
-  auto end = high_resolution_clock::now();
+  auto end = std::chrono::high_resolution_clock::now();
   time_spent_metric_->Stop();
 
-  sp_lint32 expectedTime = duration_cast<milliseconds>(end - start).count();
+  sp_lint32 expectedTime =
+      std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
   // Do it again.
-  start = high_resolution_clock::now();
+  start = std::chrono::high_resolution_clock::now();
   time_spent_metric_->Start();
 
   // Sleep for some time
   ::usleep(sleepTime);
 
-  end = high_resolution_clock::now();
+  end = std::chrono::high_resolution_clock::now();
   time_spent_metric_->Stop();
 
-  expectedTime += duration_cast<milliseconds>(end - start).count();
+  expectedTime += std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
-  MetricPublisherPublishMessage* message =
-    new MetricPublisherPublishMessage();
+  MetricPublisherPublishMessage* message = new MetricPublisherPublishMessage();
 
   sp_string prefix = "TestPrefix";
 
@@ -296,23 +303,22 @@ TEST_F(TimeSpentMetricTest, testMultipleStartStops)
   delete message;
 }
 
-TEST_F(TimeSpentMetricTest, testGetAndReset)
-{
+TEST_F(TimeSpentMetricTest, testGetAndReset) {
   sp_lint32 sleepTime = 100000;  // microseconds
 
-  auto start = high_resolution_clock::now();
+  auto start = std::chrono::high_resolution_clock::now();
   time_spent_metric_->Start();
 
   // Sleep for some time
   ::usleep(sleepTime);
 
-  auto end = high_resolution_clock::now();
+  auto end = std::chrono::high_resolution_clock::now();
   time_spent_metric_->Stop();
 
-  sp_lint32 expectedTime = duration_cast<milliseconds>(end - start).count();
+  sp_lint32 expectedTime =
+      std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
-  MetricPublisherPublishMessage* message =
-    new MetricPublisherPublishMessage();
+  MetricPublisherPublishMessage* message = new MetricPublisherPublishMessage();
 
   sp_string prefix = "TestPrefix";
 
@@ -354,8 +360,7 @@ TEST_F(TimeSpentMetricTest, testGetAndReset)
   delete message;
 }
 
-TEST_F(TimeSpentMetricTest, testMultipleDatum)
-{
+TEST_F(TimeSpentMetricTest, testMultipleDatum) {
   sp_lint32 sleepTime = 100000;  // microseconds
 
   auto start = high_resolution_clock::now();
@@ -364,13 +369,13 @@ TEST_F(TimeSpentMetricTest, testMultipleDatum)
   // Sleep for some time
   ::usleep(sleepTime);
 
-  auto end = high_resolution_clock::now();
+  auto end = std::chrono::high_resolution_clock::now();
   time_spent_metric_->Stop();
 
-  sp_lint32 expectedTime1 = duration_cast<milliseconds>(end - start).count();
+  sp_lint32 expectedTime1 =
+      std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
-  MetricPublisherPublishMessage* message =
-    new MetricPublisherPublishMessage();
+  MetricPublisherPublishMessage* message = new MetricPublisherPublishMessage();
 
   sp_string prefix = "TestPrefix";
 
@@ -389,16 +394,17 @@ TEST_F(TimeSpentMetricTest, testMultipleDatum)
 
   // Next metrics
   // Do it again.
-  start = high_resolution_clock::now();
+  start = std::chrono::high_resolution_clock::now();
   time_spent_metric_->Start();
 
   // Sleep for some time
   ::usleep(sleepTime);
 
-  end= high_resolution_clock::now();
+  end = std::chrono::high_resolution_clock::now();
   time_spent_metric_->Stop();
 
-  sp_lint32 expectedTime2 = duration_cast<milliseconds>(end - start).count();
+  sp_lint32 expectedTime2 =
+      std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
   // Send the same message object.
   time_spent_metric_->GetAndReset(prefix, message);
@@ -425,10 +431,10 @@ TEST_F(TimeSpentMetricTest, testMultipleDatum)
   // Clean up.
   delete message;
 }
+}  // namespace common
+}  // namespace heron
 
-sp_int32
-main(sp_int32 argc, char **argv)
-{
+sp_int32 main(sp_int32 argc, char** argv) {
   heron::common::Initialize(argv[0]);
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2015 Twitter, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "gtest/gtest.h"
 
 #include "proto/messages.h"
@@ -13,39 +29,29 @@
 
 #include "metrics/metrics.h"
 
-using namespace heron::common;
+namespace heron {
+namespace common {
 
-class CountMetricTest : public ::testing::Test
-{
+class CountMetricTest : public ::testing::Test {
  public:
-  CountMetricTest() { }
-  ~CountMetricTest() { }
+  CountMetricTest() {}
+  ~CountMetricTest() {}
 
-  void SetUp()
-  {
-    count_metric_ = new CountMetric();
-  }
+  void SetUp() { count_metric_ = new CountMetric(); }
 
-  void TearDown()
-  {
-    delete count_metric_;
-  }
+  void TearDown() { delete count_metric_; }
 
-  heron::proto::system::MetricPublisherPublishMessage*
-  CreateEmptyPublishMessage()
-  {
+  heron::proto::system::MetricPublisherPublishMessage* CreateEmptyPublishMessage() {
     return new heron::proto::system::MetricPublisherPublishMessage();
   }
 
  protected:
-  CountMetric*      count_metric_;
+  CountMetric* count_metric_;
 };
 
-TEST_F(CountMetricTest, testIncr)
-{
+TEST_F(CountMetricTest, testIncr) {
   count_metric_->incr();
-  heron::proto::system::MetricPublisherPublishMessage* message =
-    CreateEmptyPublishMessage();
+  heron::proto::system::MetricPublisherPublishMessage* message = CreateEmptyPublishMessage();
 
   sp_string prefix = "TestPrefix";
   int expectedCount = 1;
@@ -63,13 +69,11 @@ TEST_F(CountMetricTest, testIncr)
   delete message;
 }
 
-TEST_F(CountMetricTest, testMultipleIncr)
-{
+TEST_F(CountMetricTest, testMultipleIncr) {
   count_metric_->incr();
   count_metric_->incr();
   count_metric_->incr();
-  heron::proto::system::MetricPublisherPublishMessage* message =
-    CreateEmptyPublishMessage();
+  heron::proto::system::MetricPublisherPublishMessage* message = CreateEmptyPublishMessage();
 
   sp_string prefix = "TestPrefix";
   int expectedCount = 3;
@@ -87,11 +91,9 @@ TEST_F(CountMetricTest, testMultipleIncr)
   delete message;
 }
 
-TEST_F(CountMetricTest, testIncrBy)
-{
+TEST_F(CountMetricTest, testIncrBy) {
   count_metric_->incr_by(2);
-  heron::proto::system::MetricPublisherPublishMessage* message =
-    CreateEmptyPublishMessage();
+  heron::proto::system::MetricPublisherPublishMessage* message = CreateEmptyPublishMessage();
 
   sp_string prefix = "TestPrefix";
   int expectedCount = 2;
@@ -109,13 +111,11 @@ TEST_F(CountMetricTest, testIncrBy)
   delete message;
 }
 
-TEST_F(CountMetricTest, testIncrByAndIncr)
-{
+TEST_F(CountMetricTest, testIncrByAndIncr) {
   count_metric_->incr_by(2);
   count_metric_->incr_by(3);
   count_metric_->incr();
-  heron::proto::system::MetricPublisherPublishMessage* message =
-    CreateEmptyPublishMessage();
+  heron::proto::system::MetricPublisherPublishMessage* message = CreateEmptyPublishMessage();
 
   sp_string prefix = "TestPrefix";
   int expectedCount = 6;
@@ -133,11 +133,9 @@ TEST_F(CountMetricTest, testIncrByAndIncr)
   delete message;
 }
 
-TEST_F(CountMetricTest, testGetAndReset)
-{
+TEST_F(CountMetricTest, testGetAndReset) {
   count_metric_->incr();
-  heron::proto::system::MetricPublisherPublishMessage* message =
-    CreateEmptyPublishMessage();
+  heron::proto::system::MetricPublisherPublishMessage* message = CreateEmptyPublishMessage();
 
   sp_string prefix = "TestPrefix";
   int expectedCount = 1;
@@ -174,11 +172,9 @@ TEST_F(CountMetricTest, testGetAndReset)
   delete message;
 }
 
-TEST_F(CountMetricTest, testMultipleDatum)
-{
+TEST_F(CountMetricTest, testMultipleDatum) {
   count_metric_->incr();
-  heron::proto::system::MetricPublisherPublishMessage* message =
-    CreateEmptyPublishMessage();
+  heron::proto::system::MetricPublisherPublishMessage* message = CreateEmptyPublishMessage();
 
   sp_string prefix = "TestPrefix";
   int expectedCount = 1;
@@ -215,10 +211,10 @@ TEST_F(CountMetricTest, testMultipleDatum)
   // Clean up.
   delete message;
 }
+}  // namespace common
+}  // namespace heron
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char** argv) {
   heron::common::Initialize(argv[0]);
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
