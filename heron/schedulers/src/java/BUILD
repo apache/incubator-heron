@@ -91,3 +91,25 @@ genrule(
     outs = ["heron-null-scheduler.jar"],
     cmd  = "cp $< $@",
 )
+
+java_library(
+    name = "heron-mesos-scheduler-lib",
+    srcs = glob(
+        ["**/mesos/**/*.java"],
+    ),
+    deps = [
+        ":scheduler-lib-java",
+        ":scheduler-twitter-lib-java",
+        "//heron/common/src/java:base-lib-java",
+        "//heron/state/src/java:state-java",
+        "//heron/api/src/java:api-java",
+        "//heron/proto:proto_execution_state_java",
+        "//heron/proto:proto_scheduler_java",
+        "//heron/proto:proto_tmaster_java",
+        "//3rdparty/mesos:mesos-java",
+        "//3rdparty/fasterxml-jackson:fasterxml-jackson-java",
+        "//3rdparty/curator:curator-java",
+        "//3rdparty/protobuf:protobuf-java",
+    ],
+)
+
