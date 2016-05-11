@@ -363,7 +363,6 @@ def _resolve_and_link_interpreter(requirement, fetchers, target_link, installer_
       return egg
 
   context = Context.get()
-  print("pex.py._resolve_and_link_interpreter() - fetchers %s" % fetchers)
   iterator = Iterator(fetchers=fetchers, crawler=Crawler(context))
   links = [link for link in iterator.iter(requirement) if isinstance(link, SourcePackage)]
 
