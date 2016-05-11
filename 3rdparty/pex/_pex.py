@@ -117,7 +117,7 @@ def main():
         poptions.repos = options.repos
         poptions.pypi = options.pypi
         poptions.zip_safe = options.zip_safe
-        poptions.verbosity = 0
+        poptions.verbosity = 3
 
         reqs = options.reqs.split()
         #print("options: %s" % poptions)
