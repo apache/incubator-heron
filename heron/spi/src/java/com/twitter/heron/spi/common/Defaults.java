@@ -55,10 +55,6 @@ public class Defaults {
     return ConfigDefaults.get("SCHEDULER_CLASS");
   }
 
-  public static String runtimeManagerClass() {
-    return ConfigDefaults.get("RUNTIME_MANAGER_CLASS");
-  }
-
   public static String packingClass() {
     return ConfigDefaults.get("PACKING_CLASS");
   }
