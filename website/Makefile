@@ -7,7 +7,7 @@ serve:
 	@hugo server --watch
 
 assets:
-	@gulp build
+	@node_modules/.bin/gulp build
 
 pages:
 	@hugo
