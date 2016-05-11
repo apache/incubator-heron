@@ -25,24 +25,33 @@ and other useful links and information, that are explained below.
 
 This is the home page of Heron UI.
 
-Following information can be found on this page.
+Following information or actions can be found on this page.
 
 1. List of all topologies
 2. Number of topologies fitered after search (total by default)
-2. A topology's overview
-3. Link to a topology's configuration
-
-Following actions can be taken on this page.
-
-1. Filter the topologies using `cluster`
-2. Filter the topologies using string matching in names, clusters, environs,
+3. A topology's overview
+4. Filter the topologies using `cluster`
+5. Filter the topologies using string matching in names, clusters, environs,
    roles, versions, or submitters
-3. Sort the topologies based on a particular column
-4. Click on the topology name to find more info about the topology
-5. Click on the `Config` button to look at the configurations for the topology
+6. Sort the topologies based on a particular column
+7. Click on the topology name to find more info about the topology
 
 #### Topology Page
 
 `TODO: Add topology page image`
 
-This is the main page to monitor a topology.
+This is the main page to monitor a topology. There are some basic metrics that
+can be found here, and some generic info. A complete list of information and
+actions is described below.
+
+1. Name of the topology
+2. Logical plan `(TODO: Link to what is logical plan)` of the topology
+3. Physical plan `(TODO: Link to what is physical plan)` of the topology
+4. Health metrics for the topology
+5. General Info about the topology
+6. General metrics for the topology
+
+Each node in logical plan can be clicked for more specific info about that 
+component. `TODO: Add topology page with component clicked`
+
+
