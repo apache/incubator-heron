@@ -87,10 +87,6 @@ public class Keys {
     return ConfigKeys.get("SCHEDULER_CLASS");
   }
 
-  public static String runtimeManagerClass() {
-    return ConfigKeys.get("RUNTIME_MANAGER_CLASS");
-  }
-
   public static String packingClass() {
     return ConfigKeys.get("PACKING_CLASS");
   }
