@@ -77,7 +77,7 @@ def main():
     parser.add_option('--entry-point', default='__main__')
     parser.add_option('--no-pypi', action='store_false', dest='pypi', default=True)
     parser.add_option('--no-zip-safe', action='store_false', dest='zip_safe', default=True)
-    parser.add_option('--repo', dest='repos', default='')
+    parser.add_option('--find-links', dest='find_links', default='')
     parser.add_option('--reqs', dest='reqs', default='')
     options, args = parser.parse_args()
 
@@ -114,7 +114,7 @@ def main():
         parser, resolver_options_builder = pex.bin.pex.configure_clp()
         poptions, preqs = parser.parse_args(args)
         poptions.entry_point = options.entry_point
-        poptions.repos = options.repos
+        poptions.find_links = options.find_links
         poptions.pypi = options.pypi
         poptions.zip_safe = options.zip_safe
         poptions.verbosity = 3

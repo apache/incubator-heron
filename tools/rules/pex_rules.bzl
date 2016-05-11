@@ -122,7 +122,7 @@ def pex_binary_impl(ctx):
     for req in list(transitive_reqs):
       arguments += ['--reqs'] + [req]
   arguments += ['--no-pypi',
-                '--repo', 'https://pypi.python.org/simple/']
+                '--find-links', 'https://pypi.python.org/simple/']
   arguments += [deploy_pex.path]
   arguments += [manifest_file.path]
 
