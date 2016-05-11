@@ -24,7 +24,14 @@ class Iterator(IteratorInterface):
 
   def __init__(self, fetchers=None, crawler=None, follow_links=False):
     self._crawler = crawler or Crawler()
-    self._fetchers = fetchers if fetchers is not None else [PyPIFetcher()]
+    if fetchers is not None:
+      for fetcher in fetchers:
+        if not isinstance(fetcher, Fetcher):
+          raise ValueError('fetcher %s not an instance of Fetcher' % fetcher)
+        print ("Valid fetcher found %s" + fetcher)
+      self._fetchers = fetchers
+    else:
+      self._fetchers = [PyPIFetcher()]
     self.__follow_links = follow_links
 
   def _iter_requirement_urls(self, req):
