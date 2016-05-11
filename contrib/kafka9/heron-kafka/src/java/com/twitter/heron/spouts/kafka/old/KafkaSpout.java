@@ -22,6 +22,7 @@ import com.twitter.heron.api.spout.SpoutOutputCollector;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.spouts.kafka.common.FilterOperator;
+import com.twitter.heron.spouts.kafka.common.GlobalPartitionId;
 import com.twitter.heron.spouts.kafka.common.IOExecutorService;
 import com.twitter.heron.spouts.kafka.common.TransferCollector;
 import com.twitter.heron.storage.MetadataStore;

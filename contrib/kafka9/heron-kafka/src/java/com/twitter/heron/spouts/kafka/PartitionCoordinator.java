@@ -1,15 +1,16 @@
 package com.twitter.heron.spouts.kafka;
 
 import com.twitter.heron.api.Config;
+import com.twitter.heron.spouts.kafka.common.GlobalPartitionId;
 import com.twitter.heron.spouts.kafka.common.GlobalPartitionInformation;
+import com.twitter.heron.spouts.kafka.common.IOffsetStoreManager;
 import com.twitter.heron.spouts.kafka.common.Partition;
 import com.twitter.heron.storage.MetadataStore;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
+import com.twitter.heron.storage.StoreSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -22,23 +23,21 @@ public class PartitionCoordinator {
     private final int totalTasks;
     private final String topologyInstanceId;
     private final Map stormConf;
-    private final String topic;
     private final int refreshFreqMSecs;
 
-    private MetadataStore storage;
+    private IOffsetStoreManager offsetStoreManager;
+
     private KafkaMetric.OffsetMetric kafkaOffsets;
     private DynamicKafkaBrokerReader dynamicBrokersReader;
 
     // Make it volatile since it would be accessed by multiple threads.
     // Notice: it is HashMap rather than any thread-safe map since every time when we update the Map,
     // we would replace it with a new reference rather than update an entry inside the map
-    private volatile Map<Integer, PartitionManager> managers = new HashMap<>();
-    private volatile Set<Integer> allPartitionIds = new TreeSet<Integer>();
+    private volatile Map<GlobalPartitionId, PartitionManager> managers = new HashMap<>();
+    private volatile Set<GlobalPartitionId> allPartitionIds = new TreeSet<>();
 
     private ScheduledExecutorService executor;
-
-    private Properties kafkaProps;
-    public final KafkaConsumer<byte[], byte[]> commitOffsetConsumer;
+    private String componentId;
 
     /** Creates a dynamic Zookeeper which reads data from zookeeper. */
     public PartitionCoordinator(
@@ -47,7 +46,7 @@ public class PartitionCoordinator {
             int taskIndex,
             int totalTasks,
             String topologyInstanceId,
-            MetadataStore storage,
+            IOffsetStoreManager offsetStoreManager,
             KafkaMetric.OffsetMetric kafkaOffsetMetric,
             String componentId) {
         this.spoutConfig = spoutConfig;
@@ -56,38 +55,20 @@ public class PartitionCoordinator {
         this.topologyInstanceId = topologyInstanceId;
         this.stormConf = stormConf;
         this.kafkaOffsets = kafkaOffsetMetric;
-        this.storage = storage;
-
-        this.kafkaProps = new Properties();
-        kafkaProps.put("bootstrap.servers", spoutConfig.bootstrapBrokers);
-        kafkaProps.put("group.id", composeConsumerGroupId(componentId));
-        kafkaProps.put("enable.auto.commit", "false");
-        kafkaProps.put("session.timeout.ms", "30000");
-        kafkaProps.put("key.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");
-        kafkaProps.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");
-
-        this.commitOffsetConsumer = new KafkaConsumer<>(kafkaProps);
+        this.offsetStoreManager = offsetStoreManager;
+        this.componentId = componentId;
 
         this.refreshFreqMSecs = spoutConfig.refreshFreqMSecs;
-        this.topic = spoutConfig.topic;
-        dynamicBrokersReader = new DynamicKafkaBrokerReader(topic, spoutConfig.bootstrapBrokers);
+        dynamicBrokersReader = new DynamicKafkaBrokerReader(spoutConfig.topic, spoutConfig.bootstrapBrokers);
         this.executor = Executors.newSingleThreadScheduledExecutor();
         scheduleConnectionRefresh();
         kafkaOffsetMetric.setCoordinator(this);
     }
 
-    private String composeConsumerGroupId(String componentId) {
-        String consumerGroupId = String.format("%s_%s_%s", stormConf.get(Config.TOPOLOGY_NAME).toString(), spoutConfig.id, componentId);
-        if (spoutConfig.storeOffsetsPerTopologyInstance) {
-            consumerGroupId = consumerGroupId + "_" + topologyInstanceId;
-        }
-
-        return consumerGroupId;
-    }
-
     /** Closes cnxn to zookeeper */
     protected void finalizer() {
         dynamicBrokersReader.close();
+        offsetStoreManager.close();
     }
 
     /**
@@ -103,7 +84,7 @@ public class PartitionCoordinator {
      *
      * @return The IDs of all partitions associated with the Kafka topic managed by this coordinator.
      */
-    public Set<Integer> getAllPartitionIds() {
+    public Set<GlobalPartitionId> getAllPartitionIds() {
         return allPartitionIds;
     }
 
@@ -113,15 +94,15 @@ public class PartitionCoordinator {
      * @return If this instance is managing id, it will return the corresponding PartitionManager.
      * Otherwise will return null.
      */
-    public PartitionManager getManagerForId(int id) {
+    public PartitionManager getManagerForId(GlobalPartitionId id) {
         return managers.get(id);
     }
 
-    private Set<Integer> getAllPartitionsIdsFromBroker() throws Exception {
+    private Set<GlobalPartitionId> getAllPartitionsIdsFromBroker() throws Exception {
         GlobalPartitionInformation partitions = dynamicBrokersReader.getBrokerInfo();
-        Set<Integer> partitionIds = new HashSet<>();
+        Set<GlobalPartitionId> partitionIds = new HashSet<>();
         for (Partition partition : partitions) {
-            partitionIds.add(partition.partition);
+            partitionIds.add(new GlobalPartitionId(partition.host.host, partition.host.port, partition.partition));
         }
         return partitionIds;
     }
@@ -129,21 +110,26 @@ public class PartitionCoordinator {
     /** Refreshes Partition Managers in case the brokers data changed in zookeeper */
     private void refresh() throws Exception {
         LOG.info("Refreshing partition manager: " + taskIndex + " & total tasks: " + totalTasks);
-        Set<Integer> newAllPartitionIds = getAllPartitionsIdsFromBroker();
+        Set<GlobalPartitionId> newAllPartitionIds = getAllPartitionsIdsFromBroker();
         LOG.info("All partitions: " + newAllPartitionIds);
 
-        Map<Integer, PartitionManager> newManagers =
+        Map<GlobalPartitionId, PartitionManager> newManagers =
                 new HashMap<>();
         int index = 0;
-        for (Integer id : newAllPartitionIds) {
+        for (GlobalPartitionId id : newAllPartitionIds) {
             if (index % totalTasks == taskIndex) {
                 if (managers.containsKey(id)) {
                     newManagers.put(id, managers.get(id));
                     LOG.debug("Old partition manager continued: " + id);
                 } else {
                     LOG.info("Adding partition manager for " + id);
+                    MetadataStore offsetStore = offsetStoreManager.getStore(id);
+                    // We may consider calling "initialize" from within store managers
+                    offsetStore.initialize("offset_" + spoutConfig.id, stormConf.get(Config.TOPOLOGY_NAME).toString(),
+                            componentId,
+                            new StoreSerializer.DefaultSerializer<Map<Object, Object>>());
                     PartitionManager partitionManager = new PartitionManager(
-                            topologyInstanceId, stormConf, spoutConfig, id, storage, kafkaOffsets, kafkaProps);
+                            topologyInstanceId, stormConf, spoutConfig, id, offsetStore, kafkaOffsets, componentId);
                     newManagers.put(id, partitionManager);
                     LOG.info("New partition manager added: " + id);
                 }
@@ -152,9 +138,10 @@ public class PartitionCoordinator {
         }
 
         // Close partition managers no longer needed.
-        for (Integer id: managers.keySet()) {
+        for (GlobalPartitionId id: managers.keySet()) {
             if (!newManagers.containsKey(id)) {
                 managers.get(id).close();
+                offsetStoreManager.close(managers.get(id).getStore());
                 LOG.info("Unused partition manager closed: " + id);
             }
         }

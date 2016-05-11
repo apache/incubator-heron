@@ -27,6 +27,7 @@ import com.twitter.heron.api.metric.MeanReducer;
 import com.twitter.heron.api.metric.ReducedMetric;
 import com.twitter.heron.api.spout.ISpoutOutputCollector;
 import com.twitter.heron.api.utils.Utils;
+import com.twitter.heron.spouts.kafka.common.GlobalPartitionId;
 import com.twitter.heron.spouts.kafka.common.KeyValueSchemeAsMultiScheme;
 import com.twitter.heron.spouts.kafka.common.StringMultiSchemeWithTopic;
 import com.twitter.heron.storage.MetadataStore;

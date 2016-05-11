@@ -10,6 +10,7 @@ import com.twitter.heron.api.metric.MeanReducer;
 import com.twitter.heron.api.metric.ReducedMetric;
 import com.twitter.heron.api.spout.ISpoutOutputCollector;
 import com.twitter.heron.api.utils.Utils;
+import com.twitter.heron.spouts.kafka.common.GlobalPartitionId;
 import com.twitter.heron.spouts.kafka.common.KeyValueSchemeAsMultiScheme;
 import com.twitter.heron.spouts.kafka.common.StringMultiSchemeWithTopic;
 import com.twitter.heron.storage.MetadataStore;
@@ -27,17 +28,17 @@ public class PartitionManager {
     public static final Logger LOG = LoggerFactory.getLogger(PartitionManager.class);
 
     public static class KafkaMessageId {
-        public int partition;
+        public GlobalPartitionId partition;
         public long offset;
 
-        public KafkaMessageId(int partition, long offset) {
+        public KafkaMessageId(GlobalPartitionId partition, long offset) {
             this.partition = partition;
             this.offset = offset;
         }
 
         @Override
         public String toString() {
-            return String.format("{ \"partition\": %s, \"offset\": %s}", Integer.toString(partition), offset);
+            return String.format("{ \"partition\": %s, \"offset\": %s}", Integer.toString(partition.partition), offset);
         }
     }
 
@@ -60,7 +61,7 @@ public class PartitionManager {
     private final CountMetric nsInNext;
     private final CountMetric nsInFail;
 
-    private final int partition;
+    private final GlobalPartitionId partition;
     private final SpoutConfig spoutConfig;
     private final String topologyInstanceId;
     private final Map stormConf;
@@ -81,18 +82,27 @@ public class PartitionManager {
             String topologyInstanceId,
             Map stormConf,
             SpoutConfig spoutConfig,
-            Integer id,
+            GlobalPartitionId id,
             MetadataStore storage,
             KafkaMetric.OffsetMetric kafkaOffsetMetric,
-            Properties kafkaProps) {
+            String componentId) {
         this.partition = id;
         this.spoutConfig = spoutConfig;
         this.topologyInstanceId = topologyInstanceId;
         this.stormConf = stormConf;
         this.storage = storage;
 
+        Properties kafkaProps = new Properties();
+        kafkaProps.put("bootstrap.servers", spoutConfig.bootstrapBrokers);
+        kafkaProps.put("group.id", String.format("%s_%s_%s", spoutConfig.id, stormConf.get(Config.TOPOLOGY_NAME).toString(),
+                componentId));
+        kafkaProps.put("enable.auto.commit", "false");
+        kafkaProps.put("session.timeout.ms", "30000");
+        kafkaProps.put("key.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");
+        kafkaProps.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");
+
         this.consumer = new KafkaConsumer<>(kafkaProps);
-        consumer.assign(Collections.singletonList(new TopicPartition(spoutConfig.topic, partition)));
+        consumer.assign(Collections.singletonList(new TopicPartition(spoutConfig.topic, partition.partition)));
 
         /** Add counters */
         this.fetchAPILatencyMax = new CombinedMetric(new KafkaMetric.MaxMetric());
@@ -125,7 +135,7 @@ public class PartitionManager {
      *
      * @return The ID of the Kafka partition managed by this manager.
      */
-    public int getPartitionId() {
+    public GlobalPartitionId getPartitionId() {
         return partition;
     }
 
@@ -177,7 +187,7 @@ public class PartitionManager {
      * Returns the latest offset from which we should start reading this partition if we want to
      * capture all events that were published to this partition at time {@code timestamp}.
      * (visible for testing)
-     *
+     * <p>
      * NOTE: no such functionality in 0.9 consumer, left for legacy reasons
      *
      * @param timestamp The timestamp at which the events were added to this partition.
@@ -304,7 +314,7 @@ public class PartitionManager {
      * |  0         |     1
      * {id} |  offset1   |     offset2
      */
-    public void commit(KafkaConsumer offsetCommitConsumer) {
+    public void commit() {
         long committedOffset;
         synchronized (pendingOffsets) {
             committedOffset = pendingOffsets.isEmpty()
@@ -312,18 +322,12 @@ public class PartitionManager {
                     : pendingOffsets.firstEntry().getElement();
         }
         if (committedOffset != committedTo) {
-            if (storage != null) {
-                ImmutableMap data = ImmutableMap.builder()
-                        .put("topic", spoutConfig.topic)
-                        .put("topology", ImmutableMap.of("id", topologyInstanceId,
-                                "name", stormConf.get(Config.TOPOLOGY_NAME)))
-                        .put("offset", committedOffset).build();
-                storage.setPKey(Integer.toString(partition), data);
-            } else {
-                Map<TopicPartition, OffsetAndMetadata> commitData = new HashMap<>();
-                commitData.put(new TopicPartition(spoutConfig.topic, partition), new OffsetAndMetadata(committedOffset));
-                offsetCommitConsumer.commitSync(commitData);
-            }
+            ImmutableMap data = ImmutableMap.builder()
+                    .put("topic", spoutConfig.topic)
+                    .put("topology", ImmutableMap.of("id", topologyInstanceId,
+                            "name", stormConf.get(Config.TOPOLOGY_NAME)))
+                    .put("offset", committedOffset).build();
+            storage.setPKey(partition.toString(), data);
             committedTo = committedOffset;
             committedToStore.incr();
         }
@@ -476,7 +480,7 @@ public class PartitionManager {
             tups = ((KeyValueSchemeAsMultiScheme) spoutConfig.scheme).deserializeKeyAndValue(record.key(), record.value());
         } else {
             if (spoutConfig.scheme instanceof StringMultiSchemeWithTopic) {
-                tups = ((StringMultiSchemeWithTopic)spoutConfig.scheme).deserializeWithTopic(spoutConfig.topic, record.value());
+                tups = ((StringMultiSchemeWithTopic) spoutConfig.scheme).deserializeWithTopic(spoutConfig.topic, record.value());
             } else {
                 tups = spoutConfig.scheme.deserialize(record.value());
             }
@@ -490,37 +494,12 @@ public class PartitionManager {
      * @return Offset to start partition from.
      */
     private long setCommitedToOffsetFromStore() {
-        long offset;
-        if (storage != null) {
-            offset = restoreOffsetFromStorage();
-        } else {
-            offset = restoreOffsetFromKafka();
-        }
-
-        LOG.info("Starting reading from Kafka partition " + partition + " at offset " + offset);
-        return offset;
-    }
-
-    private long restoreOffsetFromKafka() {
-        long offsetToReturn;
-        OffsetAndMetadata lastCommitted = consumer.committed(new TopicPartition(spoutConfig.topic, partition));
-        if (lastCommitted != null) {
-            offsetToReturn = checkRecoveredOffset(lastCommitted.offset());
-        } else {
-            offsetToReturn = getLimitOffset(spoutConfig.startFromLatestOffset);
-        }
-
-        return offsetToReturn;
-    }
-
-    private long restoreOffsetFromStorage() {
         String topologyId = null;
         long offset = 0;
-        long offsetToReturn = 0;
+        long offsetToReturn;
 
         // Try to read the offset value for previous run of topology.
         try {
-
             Map<Object, Object> json = readStore();
             if (json != null) {
                 topologyId = ((Map<Object, Object>) json.get("topology")).get("id").toString();
@@ -543,6 +522,8 @@ public class PartitionManager {
         } else {
             offsetToReturn = checkRecoveredOffset(offset);
         }
+
+        LOG.info("Starting reading from Kafka partition " + partition + " at offset " + offsetToReturn);
         return offsetToReturn;
     }
 
@@ -550,7 +531,7 @@ public class PartitionManager {
      * @return latest or earliest offset
      */
     private long getLimitOffset(boolean latest) {
-        TopicPartition tp = new TopicPartition(spoutConfig.topic, partition);
+        TopicPartition tp = new TopicPartition(spoutConfig.topic, partition.partition);
         if (latest) {
             consumer.seekToEnd(tp);
         } else {
@@ -623,7 +604,7 @@ public class PartitionManager {
 
     private Map<Object, Object> readStore() {
         try {
-            byte[] data = storage.readPKey(Integer.toString(partition));
+            byte[] data = storage.readPKey(partition.toString());
             if (data != null && data.length > 0) {
                 return (Map<Object, Object>) JSONValue.parse(new String(data, "UTF-8"));
             }
@@ -653,7 +634,7 @@ public class PartitionManager {
 
         long start = System.nanoTime();
         // currentKafkaOffset will be update in next method which iterates on returned messages.
-        consumer.seek(new TopicPartition(spoutConfig.topic, partition), fromOffset);
+        consumer.seek(new TopicPartition(spoutConfig.topic, partition.partition), fromOffset);
         try {
             synchronized (PartitionManager.class) {
                 // Simple consumer can't request fetch in parallel.
@@ -678,8 +659,8 @@ public class PartitionManager {
             timestampOfLatestEmittedTuple = kafka.api.OffsetRequest.LatestTime();
         } else {
             LOG.debug("Non-empty fetch from Kafka, current consumer position for partition " + partition + ":" +
-                    consumer.position(new TopicPartition(spoutConfig.topic, partition)));
-       }
+                    consumer.position(new TopicPartition(spoutConfig.topic, partition.partition)));
+        }
 
         return msgs;
     }
@@ -693,5 +674,9 @@ public class PartitionManager {
 
     public SortedMultiset<Long> getPendingOffsets() {
         return pendingOffsets;
+    }
+
+    public MetadataStore getStore() {
+        return storage;
     }
 }

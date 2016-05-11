@@ -1,4 +1,4 @@
-package com.twitter.heron.spouts.kafka.old;
+package com.twitter.heron.spouts.kafka;
 
 import com.twitter.heron.spouts.kafka.common.IOffsetStoreManager;
 

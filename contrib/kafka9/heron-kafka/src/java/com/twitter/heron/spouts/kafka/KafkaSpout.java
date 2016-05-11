@@ -1,28 +1,25 @@
 package com.twitter.heron.spouts.kafka;
 
-import java.lang.reflect.Constructor;
-import java.util.*;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
-import com.twitter.heron.api.Config;
 import com.twitter.heron.api.metric.MultiCountMetric;
 import com.twitter.heron.api.spout.BaseRichSpout;
 import com.twitter.heron.api.spout.SpoutOutputCollector;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.spouts.kafka.common.FilterOperator;
+import com.twitter.heron.spouts.kafka.common.GlobalPartitionId;
 import com.twitter.heron.spouts.kafka.common.IOExecutorService;
 import com.twitter.heron.spouts.kafka.common.TransferCollector;
-
-import com.twitter.heron.storage.MetadataStore;
-import com.twitter.heron.storage.StoreSerializer;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Constructor;
+import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * KafkaSpout is a regular spout implementation that reads from a Kafka cluster.
@@ -36,7 +33,6 @@ public class KafkaSpout extends BaseRichSpout {
     protected SpoutOutputCollector collector;
     protected TransferCollector transferCollector;
     protected PartitionCoordinator coordinator;
-    protected MetadataStore storage;
     protected MultiCountMetric spoutMetrics;
     protected IOExecutorService.SingleThreadIOExecutorService executor;
 
@@ -71,18 +67,18 @@ public class KafkaSpout extends BaseRichSpout {
 
         int totalTasks = context.getComponentTasks(context.getThisComponentId()).size();
         applyStormConf(conf);
-        initializeStorage(conf, context);
+        startCommitThread(conf);
+        OffsetStoreManagerFactory offsetStoreManagerFactory = new OffsetStoreManagerFactory(spoutConfig);
         addFilterOperator(conf, context.getThisComponentId(), spoutConfig.topic);
         KafkaMetric.OffsetMetric kafkaOffsetMetric = new KafkaMetric.OffsetMetric();
 
         this.coordinator = new PartitionCoordinator(
-                conf, spoutConfig, context.getThisTaskIndex(), totalTasks, uuid, storage,
+                conf, spoutConfig, context.getThisTaskIndex(), totalTasks, uuid, offsetStoreManagerFactory.get(),
                 kafkaOffsetMetric, context.getThisComponentId());
 
         spoutMetrics = new MultiCountMetric();
 
         transferCollector = new TransferCollector(spoutConfig.emitQueueMaxSize);
-
 
         context.registerMetric("kafkaSpout", spoutMetrics, 60);
         context.registerMetric("kafkaOffset", kafkaOffsetMetric, 60);
@@ -97,7 +93,7 @@ public class KafkaSpout extends BaseRichSpout {
     public void nextTuple() {
         long startTime = System.nanoTime();
         spoutMetrics.scope("nextTupleCalls").incr();
-        TransferCollector.EmitData emitData = transferCollector.getEmitItems(1, TimeUnit.MILLISECONDS);
+        com.twitter.heron.spouts.kafka.common.TransferCollector.EmitData emitData = transferCollector.getEmitItems(1, TimeUnit.MILLISECONDS);
         if (emitData != null) {
             collector.emit(emitData.streamId, emitData.tuple, emitData.messageId);
             LOG.info("Just emitted a new message");
@@ -168,7 +164,7 @@ public class KafkaSpout extends BaseRichSpout {
      *
      * @return The IDs of all partitions associated with the Kafka topic managed by this spout.
      */
-    public Set<Integer> getAllPartitionIds() {
+    public Set<GlobalPartitionId> getAllPartitionIds() {
         return coordinator.getAllPartitionIds();
     }
 
@@ -258,20 +254,10 @@ public class KafkaSpout extends BaseRichSpout {
     /**
      * Initializes storage and starts Thread which will commit offsets with given frequency.
      */
-    private void initializeStorage(Map conf, TopologyContext topologyContext) {
-
-        // TODO: Add an implementation of StormMetadataStore. Even better if the spout takes
-        // a factory.
-        // storage = < An Implemenation of a StormMetadataStore >
+    private void startCommitThread(Map conf) {
 
         int updateMsec = getWithDefault(conf, SpoutConfig.TOPOLOGY_STORE_UPDATE_MSEC, spoutConfig.storeUpdateMsec);
 
-        if (storage != null) {
-            storage.initialize(
-                    "offset_" + spoutConfig.id, conf.get(Config.TOPOLOGY_NAME).toString(),
-                    topologyContext.getThisComponentId(),
-                    new StoreSerializer.DefaultSerializer<Map<Object, Object>>());
-        }
         // Start commit thread.
         Runnable refreshTask = new Runnable() {
             @Override
@@ -304,7 +290,7 @@ public class KafkaSpout extends BaseRichSpout {
         if (coordinator != null) {
             for (PartitionManager manager : coordinator.getMyManagedPartitions()) {
                 if (manager != null) {
-                    manager.commit(coordinator.commitOffsetConsumer);
+                    manager.commit();
                 }
             }
         }

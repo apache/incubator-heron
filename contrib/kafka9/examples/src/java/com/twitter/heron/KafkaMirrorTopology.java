@@ -29,7 +29,6 @@ public class KafkaMirrorTopology {
         }
         TopologyBuilder builder = new TopologyBuilder();
         SpoutConfig config = new SpoutConfig(consumerTopic, bootstrapKafkaServers, "spoutId");
-        config.storeOffsetsPerTopologyInstance = false; // we want next launch of the topology to pick up after the finished one
         config.scheme = new KeyValueSchemeAsMultiScheme(new ByteArrayKeyValueScheme());
         builder.setSpout("spout", new KafkaSpout(config), 1);
         Properties kafkaBoltProps = new Properties();
