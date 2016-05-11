@@ -1,5 +1,7 @@
 package com.twitter.heron.spouts.kafka;
 
+import com.twitter.heron.spouts.kafka.common.Broker;
+import com.twitter.heron.spouts.kafka.common.GlobalPartitionInformation;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.Node;
 import org.apache.kafka.common.PartitionInfo;

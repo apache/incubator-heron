@@ -7,12 +7,12 @@ import com.twitter.heron.bolts.kafka.KafkaBolt;
 import com.twitter.heron.bolts.kafka.mapper.KafkaMirrorMapper;
 import com.twitter.heron.spouts.kafka.common.ByteArrayKeyValueScheme;
 import com.twitter.heron.spouts.kafka.common.KeyValueSchemeAsMultiScheme;
-import com.twitter.heron.spouts.kafka.KafkaSpout;
-import com.twitter.heron.spouts.kafka.SpoutConfig;
+import com.twitter.heron.spouts.kafka.old.KafkaSpout;
+import com.twitter.heron.spouts.kafka.old.SpoutConfig;
 
 import java.util.Properties;
 
-public class KafkaMirrorTopology {
+public class KafkaOldMirrorTopology {
 
     public static void main(String[] args) throws Exception {
 
@@ -28,9 +28,9 @@ public class KafkaMirrorTopology {
             producerTopic = args[3];
         }
         TopologyBuilder builder = new TopologyBuilder();
-        SpoutConfig config = new SpoutConfig(consumerTopic, bootstrapKafkaServers, "spoutId");
-        config.storeOffsetsPerTopologyInstance = false; // we want next launch of the topology to pick up after the finished one
+        SpoutConfig config = new SpoutConfig(new SpoutConfig.ZkHosts("master:2181", "/kafka-08/brokers"), consumerTopic, null, "spoutId");
         config.scheme = new KeyValueSchemeAsMultiScheme(new ByteArrayKeyValueScheme());
+        config.bufferSizeBytes = 100; // Don't need buffer to be too big for showcase purposes
         builder.setSpout("spout", new KafkaSpout(config), 1);
         Properties kafkaBoltProps = new Properties();
         kafkaBoltProps.put("acks", "1");
