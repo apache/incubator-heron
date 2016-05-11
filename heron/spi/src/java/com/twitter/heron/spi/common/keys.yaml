@@ -47,7 +47,6 @@ BUILD_USER:                          heron.build.user
 UPLOADER_CLASS:                      heron.class.uploader
 LAUNCHER_CLASS:                      heron.class.launcher
 SCHEDULER_CLASS:                     heron.class.scheduler
-RUNTIME_MANAGER_CLASS:               heron.class.runtime.manager
 PACKING_CLASS:                       heron.class.packing.algorithm
 STATE_MANAGER_CLASS:                 heron.class.state.manager
 
@@ -123,7 +122,6 @@ SCHEDULER_STATE_MANAGER_ADAPTOR:     heron.runtime.scheduler.state.manager.adapt
 SCHEDULER_SHUTDOWN:                  heron.runtime.scheduler.shutdown
 PACKING_CLASS_INSTANCE:              heron.runtime.packing.class.instance
 LAUNCHER_CLASS_INSTANCE:             heron.runtime.launcher.class.instance
-RUNTIME_MANAGER_CLASS_INSTANCE:      heron.runtime.runtime.manager.class.instance
 
 COMPONENT_RAMMAP:                    heron.runtime.component.rammap
 COMPONENT_JVM_OPTS_IN_BASE64:        heron.runtime.component.jvm.opts.in.base64
