@@ -136,7 +136,10 @@ class ZkStateManager(StateManager):
     def watch_topology(data, stats):
       if data:
         topology = Topology()
-        topology.ParseFromString(data)
+        try:
+          topology.ParseFromString(data)
+        except:
+          traceback.print_exc()
         callback(topology)
       else:
         callback(None)
@@ -226,7 +229,10 @@ class ZkStateManager(StateManager):
     def watch_pplan(data, stats):
       if data:
         pplan = PhysicalPlan()
-        pplan.ParseFromString(data)
+        try:
+          pplan.ParseFromString(data)
+        except:
+          traceback.print_exc()
         callback(pplan)
       else:
         callback(None)
@@ -316,7 +322,10 @@ class ZkStateManager(StateManager):
     def watch_execution_state(data, stats):
       if data:
         executionState = ExecutionState()
-        executionState.ParseFromString(data)
+        try:
+          executionState.ParseFromString(data)
+        except:
+          traceback.print_exc()
         callback(executionState)
       else:
         callback(None)
@@ -406,7 +415,10 @@ class ZkStateManager(StateManager):
     def watch_tmaster(data, stats):
       if data:
         tmaster = TMasterLocation()
-        tmaster.ParseFromString(data)
+        try:
+          tmaster.ParseFromString(data)
+        except:
+          traceback.print_exc()
         callback(tmaster)
       else:
         callback(None)
@@ -450,7 +462,10 @@ class ZkStateManager(StateManager):
     def watch_scheduler_location(data, stats):
       if data:
         scheduler_location = SchedulerLocation()
-        scheduler_location.ParseFromString(data)
+        try:
+          scheduler_location.ParseFromString(data)
+        except:
+          traceback.print_exc()
         callback(scheduler_location)
       else:
         callback(None)
