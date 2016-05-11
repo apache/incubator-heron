@@ -87,6 +87,11 @@ maven_jar(
 )
 
 maven_jar(
+  name = "gson-java",
+  artifact = "com.google.code.gson:gson:2.5",
+)
+
+maven_jar(
   name = "hadoop-core",
   artifact = "org.apache.hadoop:hadoop-core:0.20.2",
 )
@@ -129,6 +134,11 @@ maven_jar(
 maven_jar(
   name = "json-simple",
   artifact = "com.googlecode.json-simple:json-simple:1.1",
+)
+
+maven_jar(
+  name = "kafka-clients-java",
+  artifact = "org.apache.kafka:kafka-clients:0.9.0.0",
 )
 
 maven_jar(
