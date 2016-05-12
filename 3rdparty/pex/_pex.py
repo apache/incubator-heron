@@ -130,22 +130,23 @@ def main():
         # force it into the process by constructing a custom PythonInterpreter
         # instance using it.
         interpreter = PythonInterpreter.from_binary(
-            poptions.python
+            poptions.python,
+            path_extras='3rdparty/eggs/setuptools-18.0.1-py2.py3-none-any.whl'
         )
-        interpreter = interpreter.with_extra('setuptools', '>1.0', '3rdparty/eggs/setuptools-18.0.1-py2.py3-none-any.whl')
+        # interpreter = interpreter.with_extra('setuptools', '>1.0', '3rdparty/eggs/setuptools-18.0.1-py2.py3-none-any.whl')
         import functools
         from pex.version import SETUPTOOLS_REQUIREMENT, WHEEL_REQUIREMENT, __version__
         resolve = functools.partial(pex.bin.pex.resolve_interpreter, poptions.interpreter_cache_dir, poptions.repos)
-        print ("bin/pex.interpreter resolve: %s" % resolve)
+        print ("_pex.interpreter resolve: %s" % resolve)
 
         # resolve setuptools
         interpreter = resolve(interpreter, SETUPTOOLS_REQUIREMENT)
-        print ("bin/pex.interpreter interpreter0: %s" % interpreter)
+        print ("_pex.interpreter interpreter0: %s" % interpreter)
 
         # possibly resolve wheel
         if interpreter and poptions.use_wheel:
           interpreter = resolve(interpreter, WHEEL_REQUIREMENT)
-          print ("bin/pex.interpreter interpreter1: %s" % interpreter)
+          print ("_pex.interpreter interpreter1: %s" % interpreter)
 
         # interpreter = interpreter.with_extra('setuptools', '>1.0', '3rdparty/eggs/setuptools-18.0.1-py2.py3-none-any.whl')
         # interpreter = PythonInterpreter(
