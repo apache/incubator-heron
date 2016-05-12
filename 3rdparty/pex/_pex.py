@@ -125,6 +125,7 @@ def main():
         poptions.zip_safe = options.zip_safe
 
         print("pex options: %s" % poptions)
+        os.environ["PATH"] = poptions.python
 
         # The version of pkg_resources.py (from setuptools) on some distros is too old for PEX. So
         # we keep a recent version in and force it into the process by constructing a custom
