@@ -113,8 +113,6 @@ public final class ClusterDefaults {
   public static Config getSandboxFilesAndPaths() {
     Config.Builder cb = Config.newBuilder();
 
-    cb.put(Keys.logSandboxDirectory(), Defaults.logSandboxDirectory());
-
     cb.put(Keys.instanceSandboxClassPath(), Defaults.instanceSandboxClassPath());
     cb.put(Keys.metricsManagerSandboxClassPath(), Defaults.metricsManagerSandboxClassPath());
     cb.put(Keys.packingSandboxClassPath(), Defaults.packingSandboxClassPath());

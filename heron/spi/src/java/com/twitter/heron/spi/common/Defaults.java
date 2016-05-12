@@ -119,10 +119,6 @@ public class Defaults {
     return ConfigDefaults.get("CORE_PACKAGE_URI");
   }
 
-  public static String logDirectory() {
-    return ConfigDefaults.get("LOGGING_DIRECTORY");
-  }
-
   public static String topologyDefinitionFile() {
     return ConfigDefaults.get("TOPOLOGY_DEFINITION_FILE");
   }
@@ -277,10 +273,6 @@ public class Defaults {
 
   public static String schedulerSandboxJar() {
     return ConfigDefaults.get("SANDBOX_SCHEDULER_JAR");
-  }
-
-  public static String logSandboxDirectory() {
-    return ConfigDefaults.get("SANDBOX_LOGGING_DIRECTORY");
   }
 
   public static String instanceSandboxClassPath() {

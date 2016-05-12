@@ -149,7 +149,7 @@ public class LocalScheduler implements IScheduler {
 
     String executorCmd = String.format(
         "%s %d %s %s %s %s %s %s %s %s %s %s %s %s %s %s "
-            + "%s %s %s %s %s %s %d %s %s %d %s %s %s %s %s %s %d",
+            + "%s %s %s %s %s %s %d %s %d %s %s %s %s %s %s %d",
         LocalContext.executorSandboxBinary(config),
         container,
         topology.getName(),
@@ -174,7 +174,6 @@ public class LocalScheduler implements IScheduler {
         LocalContext.topologyJarFile(config),
         LocalContext.javaSandboxHome(config),
         shellPort,
-        LocalContext.logSandboxDirectory(config),
         LocalContext.shellSandboxBinary(config),
         port4,
         LocalContext.cluster(config),
