@@ -8,10 +8,9 @@ The **Heron CLI** us used to to manage every aspect of the
 ## Deploying the `heron` CLI Executable
 
 To use `heron` CLI, download the `heron-client-install` for your platfrom from 
-[release binaries](https://github.com/twitter/heron/releases) in github. Once you 
-download a particular version of `heron-client-install`, run the installation script. 
-For example, if you have downloaded the version `0.13.5`, you need to invoke the 
-installation script as follows:
+[release binaries](https://github.com/twitter/heron/releases) and  run the 
+installation script. For example, if you have downloaded the version `0.13.5`, 
+you invoke the installation script as follows:
 
 ```bash
 $ chmod +x heron-client-install-0.13.5-darwin.sh
@@ -27,29 +26,30 @@ Make sure you have "/Users/$USER/bin" in your path.
 
 See http://heronstreaming.io/docs/getting-started.html on how to use Heron!
 
-heron.build.version : 0.13.5
-heron.build.time : Wed May 11 23:49:00 PDT 2016
-heron.build.timestamp : 1463035740000
-heron.build.host : mbp-machine
-heron.build.user : userwhobuilt
 ....
 ```
 
 Alternatively, generate a full [Heron release](../../developers/compiling/compiling) and
-distribute the resulting `heron` binary to all machines used to manage topologies.
+distribute the resulting `heron` CLI to all machines used to manage topologies.
 
 ### Common CLI Args
 
 All topology management commands (`submit`, `activate`, `deactivate`,
 `restart`, and `kill`) take the following required arguments:
 
-* `cluster/[role]/[env]` &mdash; A single argument that contains three parameters: 
-`cluster`, `role`, and `env`. `cluster` provides the name of the cluster where
-the command needs to be executed. `role` could represent the user or a group depending 
-on the deployment. If not provided, it defaults to the unix user. `environ` could 
-be a tag that contain any additional information, (e.g), a topology can be tagged 
-a PROD or DEVEL to indicate whether it is in production or development. If `environ` 
-is not provided, it is given a value of `default`.
+* `cluster` &mdash; The name of the cluster where the command needs to be executed. 
+
+* `role` &mdash; This represents the user or the group depending on deployment.
+  If not provided, it defaults to the unix user.
+
+* `env` &mdash; This is a tag for including additional information (e.g) a 
+   topology can be tagged as PROD or DEVEL to indicate whether it is in production 
+   or development. If `env` is not provided, it is given a value `default`
+
+`cluster`, `role` and `env` are specified as a single argument in the form of
+`cluster/role/env` (e.g) `local/ads/PROD` to refer the cluster `local` with
+role `ads` and the environment `PROD`. If you just want to specify `cluster`, the 
+argument will be simply `local`.
 
 ### Optional CLI Flags
 
@@ -76,7 +76,7 @@ $ heron activate --config-path ~/heronclusters devcluster/ads/PROD AckingTopolog
 
 ## Submitting a Topology
 
-In order to run a topology in a Heron cluster, submit it using the `submit` command. 
+To run a topology in a Heron cluster, submit it using the `submit` command. 
 Topologies can be submitted in either an activated (default) or deactivated state 
 (more on [activation](#activating-a-topology) and [deactivation](#deactivating-a-topology) 
 below).
@@ -85,10 +85,10 @@ Here's the basic syntax:
 
 ```bash
 $ heron help submit
-usage: heron submit [options] cluster/[role]/[environ] topology-file-name topology-class-name [topology-args]
+usage: heron submit [options] cluster/[role]/[env] topology-file-name topology-class-name [topology-args]
 
 Required arguments:
-  cluster/[role]/[env]  Cluster, role, and environ to run topology
+  cluster/[role]/[env]  Cluster, role, and env to run topology
   topology-file-name    Topology jar/tar/zip file
   topology-class-name   Topology class name
 
@@ -102,7 +102,7 @@ Optional arguments:
 
 Arguments of the `submit` command:
 
-* **cluster/[role]/[environ]** &mdash; The cluster where topology needs to be submitted, 
+* **cluster/[role]/[env]** &mdash; The cluster where topology needs to be submitted, 
   optionally taking the role and environment. For example,`local/ads/PROD` or just `local`
 
 * **topology-file-name** &mdash; The path of the file in which you've packaged the
@@ -144,10 +144,10 @@ syntax:
 
 ```bash
 $ heron help activate
-usage: heron activate [options] cluster/[role]/[environ] topology-name
+usage: heron activate [options] cluster/[role]/[env] topology-name
 
 Required arguments:
-  cluster/[role]/[env]  Cluster, role, and environ to run topology
+  cluster/[role]/[env]  Cluster, role, and env to run topology
   topology-name         Name of the topology
 
 Optional arguments:
@@ -157,7 +157,7 @@ Optional arguments:
 
 Arguments of the `activate` command:
 
-* **cluster/[role]/[environ]** &mdash; The cluster where topology needs to be submitted,
+* **cluster/[role]/[env]** &mdash; The cluster where topology needs to be submitted,
   optionally taking the role and environment. For exampple, `local/ads/PROD` or just `local`
 
 * **topology-name**  &mdash; The name of the already-submitted topology that you'd
@@ -179,7 +179,7 @@ $ heron help deactivate
 usage: heron deactivate [options] cluster/[role]/[env] topology-name
 
 Required arguments:
-  cluster/[role]/[env]  Cluster, role, and environ to run topology
+  cluster/[role]/[env]  Cluster, role, and env to run topology
   topology-name         Name of the topology
 
 Optional arguments:
@@ -191,7 +191,7 @@ Optional arguments:
 
 Arguments of the `deactivate` command:
 
-* **cluster/[role]/[environ]** &mdash; The cluster where topology needs to be submitted,
+* **cluster/[role]/[env]** &mdash; The cluster where topology needs to be submitted,
   optionally taking the role and environment. For example, `local/ads/PROD` or just `local`
 
 * **topology-name** &mdash; The name of the topology that you'd like to deactivate.
@@ -206,7 +206,7 @@ $ heron help restart
 usage: heron restart [options] cluster/[role]/[env] topology-name [container-id]
 
 Required arguments:
-  cluster/[role]/[env]  Cluster, role, and environ to run topology
+  cluster/[role]/[env]  Cluster, role, and env to run topology
   topology-name         Name of the topology
   container-id          Identifier of the container to be restarted
 
@@ -218,7 +218,7 @@ Optional arguments:
 
 Arguments of the `restart` command:
 
-* **cluster/[role]/[environ]** &mdash; The cluster where topology needs to be submitted,
+* **cluster/[role]/[env]** &mdash; The cluster where topology needs to be submitted,
   optionally taking the role and environment. For example, `local/ads/PROD` or just `local`
 
 * **topology-name** &mdash; The name of the topology that you'd like to restart.
@@ -244,7 +244,7 @@ $ heron kill <killer-overrides> <topology>
 
 Arguments of the `kill` command:
 
-* **cluster/[role]/[environ]** &mdash; The cluster where topology needs to be submitted,
+* **cluster/[role]/[env]** &mdash; The cluster where topology needs to be submitted,
   optionally taking the role and environment.  For example, `local/ads/PROD` or just 
   `local`
 

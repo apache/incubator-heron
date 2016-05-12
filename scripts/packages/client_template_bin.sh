@@ -179,7 +179,7 @@ Heron is now installed!
 
 Make sure you have "${bin}" in your path. 
 
-See http://heronstreaming.io/docs/getting-started.html on how to use Heron!
+See http://heronstreaming.io/docs/getting-started.html for how to use Heron.
 EOF
 echo
 cat <<'EOF'
