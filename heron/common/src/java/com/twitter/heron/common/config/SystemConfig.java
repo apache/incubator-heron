@@ -482,7 +482,8 @@ public class SystemConfig {
   }
 
   public int getInstanceSlaveFetchPplanIntervalSec() {
-    return TypeUtils.getInteger(this.config.get(SystemConfig.INSTANCE_SLAVE_FETCH_PPLAN_INTERVAL_SEC));
+    return TypeUtils.getInteger(
+        this.config.get(SystemConfig.INSTANCE_SLAVE_FETCH_PPLAN_INTERVAL_SEC));
   }
 
   public long getInstanceTuningIntervalMs() {
