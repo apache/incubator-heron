@@ -18,15 +18,15 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.HttpUtils;
 import com.twitter.heron.spi.scheduler.IScheduler;
-import com.twitter.heron.spi.utils.NetworkUtils;
 
 public class SchedulerServerTest {
   @Test
   public void testSchedulerServer() throws Exception {
-    int freePort = NetworkUtils.getFreePort();
+    int freePort = SysUtils.getFreePort();
     IScheduler scheduler = Mockito.mock(IScheduler.class);
     Config runtime = Mockito.mock(Config.class);
 

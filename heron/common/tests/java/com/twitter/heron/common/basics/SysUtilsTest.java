@@ -14,33 +14,32 @@
 
 package com.twitter.heron.common.basics;
 
-import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.Random;
 
-public final class SysUtils {
+import org.junit.Assert;
+import org.junit.Test;
 
-  private SysUtils() {
-  }
 
-  public static void sleep(long millis) {
-    try {
-      Thread.sleep(millis);
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
+public class SysUtilsTest {
+  @Test
+  public void testFreePort() throws Exception {
+    int numAttempts = 100;
+    // Randomized test
+    for (int i = 0; i < numAttempts; ++i) {
+      int port = SysUtils.getFreePort();
+
+      // verify that port is free
+      new ServerSocket(port).close();
     }
   }
 
-  /**
-   * Get available port.
-   *
-   * @return available port. -1 if no available ports exist
-   */
-  public static int getFreePort() {
-    try (ServerSocket socket = new ServerSocket(0)) {
-      int port = socket.getLocalPort();
-      return port;
-    } catch (IOException ioe) {
-      return -1;
-    }
+  @Test
+  public void testSleep() throws Exception {
+    long expectedSleepTimeMs = new Random().nextLong() % 1000;
+    long start = System.currentTimeMillis();
+    SysUtils.sleep(expectedSleepTimeMs);
+    long end = System.currentTimeMillis();
+    Assert.assertTrue((end - start) >= expectedSleepTimeMs);
   }
 }
