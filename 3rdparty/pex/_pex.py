@@ -77,6 +77,7 @@ def main():
     parser.add_option('--entry-point', default='__main__')
     parser.add_option('--no-pypi', action='store_false', dest='pypi', default=True)
     parser.add_option('--no-zip-safe', action='store_false', dest='zip_safe', default=True)
+    parser.add_option('--python', default="/usr/bin/python2.7")
     parser.add_option('--find-links', dest='find_links', default='')
     parser.add_option('--reqs', dest='reqs', default='')
     options, args = parser.parse_args()
@@ -108,8 +109,8 @@ def main():
         # Ideally, we would let pex.bin.pex.interpreter_from_options determine the interpreter
         # when pex.bin.pex.build_pex is called, but the Translator class has a static default loader
         # that initializes the translator differently, which fails.
-        python = "/usr/bin/python2.7"
-        os.environ["PATH"] = python
+        #python = "/usr/bin/python2.7"
+        os.environ["PATH"] = options.python
 
         import pex.bin.pex
         parser, resolver_options_builder = pex.bin.pex.configure_clp()
@@ -117,13 +118,14 @@ def main():
         poptions.entry_point = options.entry_point
         poptions.find_links = options.find_links
         poptions.pypi = options.pypi
-        poptions.python = python
+        poptions.python = options.python
         poptions.zip_safe = options.zip_safe
         poptions.verbosity = 3
 
         reqs = options.reqs.split()
         print("options: %s" % poptions)
-        pex_builder = pex.bin.pex.build_pex(reqs, poptions, resolver_options_builder)
+        interpreter = pex.bin.pex.interpreter_from_options(poptions)
+        pex_builder = pex.bin.pex.build_pex(reqs, poptions, resolver_options_builder, interpreter=interpreter)
 
         # Set whether this PEX as zip-safe, meaning everything will stayed zipped up
         # and we'll rely on python's zip-import mechanism to load modules from

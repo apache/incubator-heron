@@ -274,7 +274,7 @@ class PythonInterpreter(object):
   @classmethod
   def from_binary(cls, binary, path_extras=None):
     path_extras = path_extras or ()
-    print("Interepter.fron_binary binary=%s cls.CACHE=%s path_extras=%s" % (binary, cls.CACHE, path_extras))
+    print("Interepter.fron_binary binary=%s path_extras=%s" % (binary, path_extras))
     if binary not in cls.CACHE:
       print("Interepter.fron_binary binary=%s sys.executable=%s path_extras=%s" % (binary, sys.executable, path_extras))
       if binary == sys.executable:
@@ -405,8 +405,8 @@ class PythonInterpreter(object):
     print("interpreter.get_location() req %s req.key %s" % (req, req.key))
     for dist, location in self.extras.items():
       dist_name, dist_version = dist
-      print("interpreter.get_location() dist_name %s dist_version %s location %s" % (dist_name, dist_version, location))
       if req.key == dist_name and dist_version in req:
+        print("interpreter.get_location() dist_name %s dist_version %s location %s" % (dist_name, dist_version, location))
         return location
 
   def __hash__(self):
