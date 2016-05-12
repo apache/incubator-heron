@@ -87,10 +87,6 @@ public class Keys {
     return ConfigKeys.get("SCHEDULER_CLASS");
   }
 
-  public static String runtimeManagerClass() {
-    return ConfigKeys.get("RUNTIME_MANAGER_CLASS");
-  }
-
   public static String packingClass() {
     return ConfigKeys.get("PACKING_CLASS");
   }
@@ -361,10 +357,6 @@ public class Keys {
 
   public static String schedulerSandboxJar() {
     return ConfigKeys.get("SANDBOX_SCHEDULER_JAR");
-  }
-
-  public static String logSandboxDirectory() {
-    return ConfigKeys.get("SANDBOX_LOGGING_DIRECTORY");
   }
 
   public static String instanceSandboxClassPath() {

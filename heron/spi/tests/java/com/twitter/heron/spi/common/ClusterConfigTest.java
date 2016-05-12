@@ -118,7 +118,7 @@ public class ClusterConfigTest {
   public void testSchedulerFile() throws Exception {
     Config props = ClusterConfig.loadSchedulerConfig(Context.schedulerFile(basicConfig));
 
-    Assert.assertEquals(3, props.size());
+    Assert.assertEquals(2, props.size());
 
     Assert.assertEquals(
         "com.twitter.heron.scheduler.local.LocalScheduler",
