@@ -134,8 +134,8 @@ def main():
             PythonInterpreter.from_binary(options.python).identity,
             extras={
             # TODO: Fix this to resolve automatically
-            ('setuptools', '>1.0'): '3rdparty/eggs/setuptools-18.0.1-py2.py3-none-any.whl',
-            ('wheel', '>0.1.0'): '3rdparty/eggs/wheel-0.23.0-py2.7.egg'
+            ('setuptools', '18.0.1'): '3rdparty/eggs/setuptools-18.0.1-py2.py3-none-any.whl',
+            ('wheel', '0.23.0'): '3rdparty/eggs/wheel-0.23.0-py2.7.egg'
             })
         # interpreter = PythonInterpreter.from_binary(
         #     poptions.python,
