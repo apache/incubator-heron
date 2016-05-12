@@ -73,6 +73,7 @@ def parse_manifest(manifest_text):
     return manifest
 
 def main():
+    # These are the options that this class will accept from the rule
     parser = optparse.OptionParser(usage="usage: %prog [options] output")
     parser.add_option('--entry-point', default='__main__')
     parser.add_option('--no-pypi', action='store_false', dest='pypi', default=True)
@@ -104,44 +105,40 @@ def main():
     # Setup a temp dir that the PEX builder will use as its scratch dir.
     tmp_dir = tempfile.mkdtemp()
     try:
-
-        # This is a hack that we need to do to get the correct Python interpreter for the translator.
-        # Ideally, we would let pex.bin.pex.interpreter_from_options determine the interpreter
-        # when pex.bin.pex.build_pex is called, but the Translator class has a static default loader
-        # that initializes the translator differently, which fails.
-        #python = "/usr/bin/python2.7"
         os.environ["PATH"] = options.python
 
         import pex.bin.pex
-        parser, resolver_options_builder = pex.bin.pex.configure_clp()
-        poptions, preqs = parser.parse_args(args)
+        import functools
+        from pex.version import SETUPTOOLS_REQUIREMENT, WHEEL_REQUIREMENT, __version__
+
+        # These are the options that pex will use
+        pparser, resolver_options_builder = pex.bin.pex.configure_clp()
+        pparser.add_option('--reqs', dest='reqs', default='')
+        poptions, preqs = pparser.parse_args(sys.argv)
         poptions.entry_point = options.entry_point
         poptions.find_links = options.find_links
         poptions.pypi = options.pypi
         poptions.python = options.python
         poptions.zip_safe = options.zip_safe
+        poptions.cache_dir = None
         poptions.verbosity = 3
 
-        reqs = options.reqs.split()
         print("options: %s" % poptions)
-        # interpreter = pex.bin.pex.interpreter_from_options(poptions)
-        # The version of pkg_resources.py (from setuptools) on some distros is
-        # too old for PEX.  So we keep a recent version in the buck repo and
-        # force it into the process by constructing a custom PythonInterpreter
-        # instance using it.
+
+        # The version of pkg_resources.py (from setuptools) on some distros is too old for PEX. So
+        # we keep a recent version in and force it into the process by constructing a custom
+        # PythonInterpreter instance using it.
         interpreter = PythonInterpreter(
             poptions.python,
             PythonInterpreter.from_binary(options.python).identity,
             extras={
-            # TODO: Fix this to resolve automatically
-            ('setuptools', '18.0.1'): '3rdparty/eggs/setuptools-18.0.1-py2.py3-none-any.whl',
-            ('wheel', '0.23.0'): '3rdparty/eggs/wheel-0.23.0-py2.7.egg'
+                # TODO: Fix this to resolve automatically
+                ('setuptools', '18.0.1'): '3rdparty/eggs/setuptools-18.0.1-py2.py3-none-any.whl',
+                ('wheel', '0.23.0'): '3rdparty/eggs/wheel-0.23.0-py2.7.egg'
             })
 
         for k, v in interpreter.extras.items():
           print("interpreter.extras: %s -> %s" % (k, v))
-        import functools
-        from pex.version import SETUPTOOLS_REQUIREMENT, WHEEL_REQUIREMENT, __version__
         resolve = functools.partial(pex.bin.pex.resolve_interpreter, poptions.interpreter_cache_dir, poptions.repos)
         print ("_pex.interpreter resolve: %s" % resolve)
 
@@ -154,7 +151,10 @@ def main():
           interpreter = resolve(interpreter, WHEEL_REQUIREMENT)
           print ("_pex.interpreter interpreter1: %s" % interpreter)
 
-        pex_builder = pex.bin.pex.build_pex(reqs, poptions, resolver_options_builder, interpreter=interpreter)
+        pex_builder = pex.bin.pex.build_pex(options.reqs.split(),
+                                            poptions,
+                                            resolver_options_builder,
+                                            interpreter=interpreter)
 
         # Set whether this PEX as zip-safe, meaning everything will stayed zipped up
         # and we'll rely on python's zip-import mechanism to load modules from

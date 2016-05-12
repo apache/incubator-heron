@@ -121,7 +121,8 @@ def pex_binary_impl(ctx):
   if transitive_reqs:
     for req in list(transitive_reqs):
       arguments += ['--reqs'] + [req]
-  arguments += ['--find-links', 'https://pypi.python.org/simple/']
+  arguments += ['--no-pypi',
+                '--find-links', 'http://science-binaries.local.twitter.com/home/third_party/python/dist/']
   arguments += [deploy_pex.path]
   arguments += [manifest_file.path]
 
