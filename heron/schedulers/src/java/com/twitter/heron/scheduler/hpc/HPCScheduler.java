@@ -155,7 +155,7 @@ public class HPCScheduler implements IScheduler {
     command.add(HPCContext.topologyJarFile(config));
     command.add(HPCContext.javaSandboxHome(config));
     command.add(Integer.toString(shellPort));
-    //command.add(HPCContext.logSandboxDirectory(config));
+    // command.add(HPCContext.logSandboxDirectory(config));
     command.add(HPCContext.shellSandboxBinary(config));
     command.add(Integer.toString(port4));
     command.add(HPCContext.cluster(config));
