@@ -116,7 +116,7 @@ def pex_binary_impl(ctx):
   pexbuilder = ctx.executable._pexbuilder
 
   # form the arguments to pex builder
-  arguments =  [] if ctx.attr.zip_safe else ["--no-zip-safe"]
+  arguments =  [] if ctx.attr.zip_safe else ["--not-zip-safe"]
   arguments += ['--entry-point', main_pkg]
   if transitive_reqs:
     for req in list(transitive_reqs):

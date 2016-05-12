@@ -77,7 +77,7 @@ def main():
     parser = optparse.OptionParser(usage="usage: %prog [options] output")
     parser.add_option('--entry-point', default='__main__')
     parser.add_option('--no-pypi', action='store_false', dest='pypi', default=True)
-    parser.add_option('--no-zip-safe', action='store_false', dest='zip_safe', default=True)
+    parser.add_option('--not-zip-safe', action='store_false', dest='zip_safe', default=True)
     parser.add_option('--python', default="/usr/bin/python2.7")
     parser.add_option('--find-links', dest='find_links', default='')
     parser.add_option('--reqs', dest='reqs', default='')
@@ -105,8 +105,6 @@ def main():
     # Setup a temp dir that the PEX builder will use as its scratch dir.
     tmp_dir = tempfile.mkdtemp()
     try:
-        os.environ["PATH"] = options.python
-
         import pex.bin.pex
         import functools
         from pex.version import SETUPTOOLS_REQUIREMENT, WHEEL_REQUIREMENT, __version__
@@ -124,6 +122,7 @@ def main():
         poptions.verbosity = 3
 
         print("options: %s" % poptions)
+        os.environ["PATH"] = poptions.python
 
         # The version of pkg_resources.py (from setuptools) on some distros is too old for PEX. So
         # we keep a recent version in and force it into the process by constructing a custom
