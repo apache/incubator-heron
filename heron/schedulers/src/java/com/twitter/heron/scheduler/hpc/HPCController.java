@@ -65,7 +65,7 @@ public class HPCController {
   // Kill an HPC job
   public boolean killJob(String jobIdFile) {
     List<String> jobIdFileContent = readFromFile(jobIdFile);
-    if (jobIdFileContent.size() >= 0) {
+    if (jobIdFileContent.size() > 0) {
       List<String> hpcCmd = new ArrayList<>(Arrays.asList("scancel", jobIdFileContent.get(0)));
       return 0 == ShellUtils.runProcess(
           isVerbose, hpcCmd.toArray(new String[0]), new StringBuilder(), new StringBuilder());
