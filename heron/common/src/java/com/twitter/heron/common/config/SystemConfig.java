@@ -495,7 +495,8 @@ public class SystemConfig {
   }
 
   public long getMetricsMgrNetworkReadBatchTimeMs() {
-    return TypeUtils.getLong(this.config.get(SystemConfig.METRICSMGR_NETWORK_READ_BATCH_TIME_MS));
+    return TypeUtils.getLong(
+        this.config.get(SystemConfig.METRICSMGR_NETWORK_READ_BATCH_TIME_MS));
   }
 
   public long getMetricsMgrNetworkReadBatchSizeBytes() {
