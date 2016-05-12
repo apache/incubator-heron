@@ -168,7 +168,7 @@ public class MetricsManager {
       sinksRetryAttempts.put(sinkId,
           restartAttempts == null
               ? MetricsSinksConfig.DEFAULT_SINK_RESTART_ATTEMPTS
-              : TypeUtils.getInt(restartAttempts));
+              : TypeUtils.getInteger(restartAttempts));
 
       // Update the list of Communicator in Metrics Manager Server
       metricsManagerServer.addSinkCommunicator(sinkExecutor.getCommunicator());
