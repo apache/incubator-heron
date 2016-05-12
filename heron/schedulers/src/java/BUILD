@@ -91,3 +91,24 @@ genrule(
     outs = ["heron-null-scheduler.jar"],
     cmd  = "cp $< $@",
 )
+
+java_library(
+    name='hpc-scheduler-java',
+    srcs = glob(["**/hpc/*.java"]),
+    deps = scheduler_deps_files,
+    resources = glob(["**/hpc/*.sh","**/hpc/*.yaml"]),
+)
+
+java_binary(
+    name='hpc-scheduler-unshaded',
+    srcs = glob(["**/hpc/*.java"]),
+    deps = scheduler_deps_files,
+    resources = glob(["**/hpc/*.sh","**/hpc/*.yaml"]),
+)
+
+genrule(
+    name = "heron-hpc-scheduler",
+    srcs = [":hpc-scheduler-unshaded_deploy.jar"],
+    outs = ["heron-hpc-scheduler.jar"],
+    cmd  = "cp $< $@",
+)

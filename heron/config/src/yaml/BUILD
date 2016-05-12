@@ -28,6 +28,11 @@ filegroup(
 )
 
 filegroup(
+    name = "conf-hpc-yaml",
+    srcs = glob(["conf/hpc/*"]),
+)
+
+filegroup(
     name = "conf-local-heron-internals",
     srcs = ["conf/local/heron_internals.yaml"],
 )
