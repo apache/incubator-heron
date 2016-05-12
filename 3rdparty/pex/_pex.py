@@ -132,6 +132,7 @@ def main():
         interpreter = PythonInterpreter.from_binary(
             poptions.python
         )
+        interpreter = interpreter.with_extra('setuptools', '>1.0', '3rdparty/eggs/setuptools-18.0.1-py2.py3-none-any.whl')
         import functools
         from pex.version import SETUPTOOLS_REQUIREMENT, WHEEL_REQUIREMENT, __version__
         resolve = functools.partial(pex.bin.pex.resolve_interpreter, poptions.interpreter_cache_dir, poptions.repos)
