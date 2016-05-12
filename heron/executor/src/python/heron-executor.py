@@ -31,9 +31,9 @@ def print_usage():
   print ("./heron-executor <shardid> <topname> <topid> <topdefnfile> "
          " <instance_distribution> <zknode> <zkroot> <tmaster_binary> <stmgr_binary> "
          " <metricsmgr_classpath> <instance_jvm_opts_in_base64> <classpath> "
-         " <port1> <port2> <port3> <heron_internals_config_file> "
+         " <master_port> <tmaster_controller_port> <tmaster_stats_port> <heron_internals_config_file> "
          " <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_jar_file>"
-         " <heron_java_home> <shell-port> <heron_shell_binary> <port4>"
+         " <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>"
          " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file> "
          " <scheduler_classpath> <scheduler_port>")
 
@@ -122,9 +122,9 @@ class HeronExecutor:
     self.metricsmgr_classpath = args[10]
     self.instance_jvm_opts = base64.b64decode(args[11].lstrip('"').rstrip('"').replace('&equals;', '='))
     self.classpath = args[12]
-    self.port1 = args[13]
-    self.port2 = args[14]
-    self.port3 = args[15]
+    self.master_port = args[13]
+    self.tmaster_controller_port = args[14]
+    self.tmaster_stats_port = args[15]
     self.heron_internals_config_file = args[16]
     self.component_rammap = map(lambda x: {x.split(':')[0]: int(x.split(':')[1])}, args[17].split(','))
     self.component_rammap = reduce(lambda x, y: dict(x.items() + y.items()), self.component_rammap)
@@ -148,7 +148,7 @@ class HeronExecutor:
     self.heron_java_home = args[21]
     self.shell_port = args[22]
     self.heron_shell_binary = args[23]
-    self.port4 = args[24]
+    self.metricsmgr_port = args[24]
     self.cluster = args[25]
     self.role = args[26]
     self.environ = args[27]
@@ -202,9 +202,9 @@ class HeronExecutor:
   def get_tmaster_processes(self):
     retval = {}
     tmaster_cmd = [ self.tmaster_binary,
-           self.port1,
-           self.port2,
-           self.port3,
+           self.master_port,
+           self.tmaster_controller_port,
+           self.tmaster_stats_port,
            self.topology_name,
            self.topology_id,
            self.zknode,
@@ -212,7 +212,7 @@ class HeronExecutor:
            ','.join(self.stmgr_ids),
            self.heron_internals_config_file,
            self.metrics_sinks_config_file,
-           self.port4]
+           self.metricsmgr_port]
     retval["heron-tmaster"] = tmaster_cmd
 
     # metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
@@ -220,7 +220,7 @@ class HeronExecutor:
     retval[self.metricsmgr_ids[0]] = self.get_metricsmgr_cmd(
       self.metricsmgr_ids[0],
       self.metrics_sinks_config_file,
-      self.port4
+      self.metricsmgr_port
     )
 
     return retval
@@ -264,8 +264,8 @@ class HeronExecutor:
            self.zkroot,
            self.stmgr_ids[self.shard - 1],
            ','.join(map(lambda x: x[0], instance_info)),
-           self.port1,
-           self.port2,
+           self.master_port,
+           self.metricsmgr_port,
            self.shell_port,
            self.heron_internals_config_file]
     retval[self.stmgr_ids[self.shard - 1]] = stmgr_cmd
@@ -275,7 +275,7 @@ class HeronExecutor:
     retval[self.metricsmgr_ids[self.shard]] = self.get_metricsmgr_cmd(
       self.metricsmgr_ids[self.shard],
       self.metrics_sinks_config_file,
-      self.port2
+      self.metricsmgr_port
     )
 
     # TO DO (Karthik) to be moved into keys and defaults files
@@ -324,8 +324,8 @@ class HeronExecutor:
                            global_task_id,
                            component_index,
                            self.stmgr_ids[self.shard - 1],
-                           self.port1,
-                           self.port2,
+                           self.master_port,
+                           self.metricsmgr_port,
                            self.heron_internals_config_file])
       retval[instance_id] = instance_cmd
     return retval
