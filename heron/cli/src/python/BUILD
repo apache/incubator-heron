@@ -22,7 +22,7 @@ pex_library(
         "//heron/common/src/python:common",
         "//heron/proto:proto-py",
     ],
-    reqs = "pyyaml==3.10 wheel",
+    reqs = "pyyaml==3.10 wheel==0.24.0",
 )
 
 pex_binary(
