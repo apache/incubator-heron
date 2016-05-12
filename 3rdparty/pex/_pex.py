@@ -3,11 +3,12 @@
 from __future__ import print_function
 import os
 import sys
-import json
+import functools
 import shutil
 import tempfile
 import optparse
 import zipfile
+
 
 # Try to detect if we're running from source via the repo.  Add appropriate
 # deps to our python path, so we can find the twitter libs and
@@ -39,8 +40,10 @@ else:
     pkg_resources_py_tmp.flush()
     pkg_resources_py = pkg_resources_py_tmp.name
 
-from pex.pex_builder import PEXBuilder
+from pex.bin.pex import build_pex, configure_clp, resolve_interpreter, CANNOT_SETUP_INTERPRETER
+from pex.common import die
 from pex.interpreter import PythonInterpreter
+from pex.version import SETUPTOOLS_REQUIREMENT, WHEEL_REQUIREMENT
 
 
 def dereference_symlinks(src):
@@ -71,6 +74,14 @@ def parse_manifest(manifest_text):
            # line is of form <tab>key:value
            manifest[curr_key][tokens[0][1:]] = tokens[1]
     return manifest
+
+def resolve_or_die(interpreter, requirement, options):
+    resolve = functools.partial(resolve_interpreter, options.interpreter_cache_dir, options.repos)
+
+    interpreter = resolve(interpreter, requirement)
+    if interpreter is None:
+      die('Could not find compatible interpreter that meets requirement %s' % requirement, CANNOT_SETUP_INTERPRETER)
+    return interpreter
 
 def main():
     # These are the options that this class will accept from the rule
@@ -105,12 +116,8 @@ def main():
     # Setup a temp dir that the PEX builder will use as its scratch dir.
     tmp_dir = tempfile.mkdtemp()
     try:
-        import pex.bin.pex
-        import functools
-        from pex.version import SETUPTOOLS_REQUIREMENT, WHEEL_REQUIREMENT, __version__
-
         # These are the options that pex will use
-        pparser, resolver_options_builder = pex.bin.pex.configure_clp()
+        pparser, resolver_options_builder = configure_clp()
         pparser.add_option('--reqs', dest='reqs', default='')
         poptions, preqs = pparser.parse_args(sys.argv)
         poptions.entry_point = options.entry_point
@@ -118,10 +125,8 @@ def main():
         poptions.pypi = options.pypi
         poptions.python = options.python
         poptions.zip_safe = options.zip_safe
-        poptions.cache_dir = None
-        poptions.verbosity = 3
 
-        print("options: %s" % poptions)
+        print("pex options: %s" % poptions)
         os.environ["PATH"] = poptions.python
 
         # The version of pkg_resources.py (from setuptools) on some distros is too old for PEX. So
@@ -136,24 +141,15 @@ def main():
                 ('wheel', '0.23.0'): '3rdparty/eggs/wheel-0.23.0-py2.7.egg'
             })
 
-        for k, v in interpreter.extras.items():
-          print("interpreter.extras: %s -> %s" % (k, v))
-        resolve = functools.partial(pex.bin.pex.resolve_interpreter, poptions.interpreter_cache_dir, poptions.repos)
-        print ("_pex.interpreter resolve: %s" % resolve)
-
         # resolve setuptools
-        interpreter = resolve(interpreter, SETUPTOOLS_REQUIREMENT)
-        print ("_pex.interpreter interpreter0: %s" % interpreter)
+        interpreter = resolve_or_die(interpreter, SETUPTOOLS_REQUIREMENT, poptions)
 
         # possibly resolve wheel
         if interpreter and poptions.use_wheel:
-          interpreter = resolve(interpreter, WHEEL_REQUIREMENT)
-          print ("_pex.interpreter interpreter1: %s" % interpreter)
+          interpreter = resolve_or_die(interpreter, WHEEL_REQUIREMENT, poptions)
 
-        pex_builder = pex.bin.pex.build_pex(options.reqs.split(),
-                                            poptions,
-                                            resolver_options_builder,
-                                            interpreter=interpreter)
+        pex_builder = build_pex(options.reqs.split(), poptions,
+                                resolver_options_builder, interpreter=interpreter)
 
         # Set whether this PEX as zip-safe, meaning everything will stayed zipped up
         # and we'll rely on python's zip-import mechanism to load modules from

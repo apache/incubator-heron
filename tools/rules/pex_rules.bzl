@@ -121,8 +121,10 @@ def pex_binary_impl(ctx):
   if transitive_reqs:
     for req in list(transitive_reqs):
       arguments += ['--reqs'] + [req]
-  arguments += ['--no-pypi',
-                '--find-links', 'http://science-binaries.local.twitter.com/home/third_party/python/dist/']
+
+  # Our internal build environment requires extra args injected and this is a brutal hack. Ideally
+  # bazel would provide a mechanism to swap in env-specific global params here
+  #EXTRA_PEX_ARGS#
   arguments += [deploy_pex.path]
   arguments += [manifest_file.path]
 
