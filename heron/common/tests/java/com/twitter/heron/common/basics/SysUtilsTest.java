@@ -22,11 +22,12 @@ import org.junit.Test;
 
 
 public class SysUtilsTest {
+  public static final int NUM_ATTEMPTS = 100;
+
   @Test
   public void testFreePort() throws Exception {
-    int numAttempts = 100;
     // Randomized test
-    for (int i = 0; i < numAttempts; ++i) {
+    for (int i = 0; i < NUM_ATTEMPTS; ++i) {
       int port = SysUtils.getFreePort();
 
       // verify that port is free
@@ -36,10 +37,13 @@ public class SysUtilsTest {
 
   @Test
   public void testSleep() throws Exception {
-    long expectedSleepTimeMs = new Random().nextLong() % 1000;
-    long start = System.currentTimeMillis();
-    SysUtils.sleep(expectedSleepTimeMs);
-    long end = System.currentTimeMillis();
-    Assert.assertTrue((end - start) >= expectedSleepTimeMs);
+    for (int i = 0; i < NUM_ATTEMPTS; i++) {
+      // The value can not be negative
+      long expectedSleepTimeMs = new Random().nextInt(100);
+      long start = System.currentTimeMillis();
+      SysUtils.sleep(expectedSleepTimeMs);
+      long end = System.currentTimeMillis();
+      Assert.assertTrue((end - start) >= expectedSleepTimeMs);
+    }
   }
 }
