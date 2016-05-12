@@ -57,9 +57,12 @@ def textify_pex_input(input_map):
   kv_pairs = ['\t%s:%s' % (pkg, input_map[pkg]) for pkg in input_map.keys()]
   return '\n'.join(kv_pairs)
 
-def write_pex_manifest_text(modules, prebuilt_libs, resources):
-  return ('modules:\n%s\nresources:\n%s\nnativeLibraries:\nprebuiltLibraries:\n%s' % (
-      textify_pex_input(modules), textify_pex_input(resources), textify_pex_input(prebuilt_libs)))
+def write_pex_manifest_text(modules, prebuilt_libs, resources, requirements):
+  return ('modules:\n%s\nrequirements:\n%s\nresources:\n%s\nnativeLibraries:\nprebuiltLibraries:\n%s' % (
+      textify_pex_input(modules),
+      textify_pex_input(dict(zip(requirements,requirements))),
+      textify_pex_input(resources),
+      textify_pex_input(prebuilt_libs)))
 
 def get_module_path(ctx, pkg_path):
   genfiles_dir = ctx.configuration.genfiles_dir.path
@@ -72,22 +75,26 @@ def get_module_path(ctx, pkg_path):
 
 def make_manifest(ctx, output):
   transitive_sources = collect_transitive_sources(ctx)
-  transitive_reqs = collect_transitive_reqs(ctx) # TODO: add these to manifest
+  transitive_reqs = collect_transitive_reqs(ctx)
   transitive_eggs = collect_transitive_eggs(ctx)
   transitive_resources = ctx.files.resources
   pex_modules = {}
   pex_prebuilt_libs = {}
   pex_resources = {}
+  pex_requirements = []
   for f in transitive_sources:
     pex_modules[get_module_path(ctx, f.path)] = f.path
 
   for f in transitive_eggs:
     pex_prebuilt_libs[get_module_path(ctx, f.path)] = f.path
 
+  for r in transitive_reqs:
+    pex_requirements += r.split(' ')
+
   for f in transitive_resources:
     pex_resources[get_module_path(ctx, f.path)] = f.path
 
-  manifest_text = write_pex_manifest_text(pex_modules, pex_prebuilt_libs, pex_resources)
+  manifest_text = write_pex_manifest_text(pex_modules, pex_prebuilt_libs, pex_resources, pex_requirements)
   ctx.action(
     inputs = list(transitive_sources) + list(transitive_eggs) + list(transitive_resources),
     outputs = [ output ],
@@ -118,9 +125,6 @@ def pex_binary_impl(ctx):
   # form the arguments to pex builder
   arguments =  [] if ctx.attr.zip_safe else ["--not-zip-safe"]
   arguments += ['--entry-point', main_pkg]
-  if transitive_reqs:
-    for req in list(transitive_reqs):
-      arguments += ['--reqs'] + [req]
 
   # Our internal build environment requires extra args injected and this is a brutal hack. Ideally
   # bazel would provide a mechanism to swap in env-specific global params here
