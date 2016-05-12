@@ -124,7 +124,37 @@ def main():
 
         reqs = options.reqs.split()
         print("options: %s" % poptions)
-        interpreter = pex.bin.pex.interpreter_from_options(poptions)
+        # interpreter = pex.bin.pex.interpreter_from_options(poptions)
+        # The version of pkg_resources.py (from setuptools) on some distros is
+        # too old for PEX.  So we keep a recent version in the buck repo and
+        # force it into the process by constructing a custom PythonInterpreter
+        # instance using it.
+        interpreter = PythonInterpreter.from_binary(
+            poptions.python
+        )
+        import functools
+        from pex.version import SETUPTOOLS_REQUIREMENT, WHEEL_REQUIREMENT, __version__
+        resolve = functools.partial(pex.bin.pex.resolve_interpreter, poptions.interpreter_cache_dir, poptions.repos)
+        print ("bin/pex.interpreter resolve: %s" % resolve)
+
+        # resolve setuptools
+        interpreter = resolve(interpreter, SETUPTOOLS_REQUIREMENT)
+        print ("bin/pex.interpreter interpreter0: %s" % interpreter)
+
+        # possibly resolve wheel
+        if interpreter and poptions.use_wheel:
+          interpreter = resolve(interpreter, WHEEL_REQUIREMENT)
+          print ("bin/pex.interpreter interpreter1: %s" % interpreter)
+
+        # interpreter = interpreter.with_extra('setuptools', '>1.0', '3rdparty/eggs/setuptools-18.0.1-py2.py3-none-any.whl')
+        # interpreter = PythonInterpreter(
+        #     poptions.python,
+        #     interpreter.identity,
+        #     extras={
+        #     # TODO: Fix this to resolve automatically
+        #     ('setuptools', '>1.0'): '3rdparty/eggs/setuptools-18.0.1-py2.py3-none-any.whl'
+        #     })
+
         pex_builder = pex.bin.pex.build_pex(reqs, poptions, resolver_options_builder, interpreter=interpreter)
 
         # Set whether this PEX as zip-safe, meaning everything will stayed zipped up
