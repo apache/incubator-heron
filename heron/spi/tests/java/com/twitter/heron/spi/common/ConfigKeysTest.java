@@ -133,10 +133,6 @@ public class ConfigKeysTest {
         ConfigKeys.get("SCHEDULER_CLASS")
     );
     Assert.assertEquals(
-        "heron.class.runtime.manager",
-        ConfigKeys.get("RUNTIME_MANAGER_CLASS")
-    );
-    Assert.assertEquals(
         "heron.class.packing.algorithm",
         ConfigKeys.get("PACKING_CLASS")
     );

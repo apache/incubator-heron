@@ -49,6 +49,10 @@ sections:
         url: /docs/operators/configuration/system
       - name: Topology Master
         url: /docs/operators/configuration/tmaster
+  - name: Observability
+    sublinks:
+      - name: Graphite
+        url: /docs/operators/observability/graphite
   - name: User Manuals
     sublinks:
       - name: Heron Client

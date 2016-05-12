@@ -52,22 +52,24 @@ The current group is:
 [Jingwei Wu (Twitter)] (https://github.com/jingwei) <br/>
 [Christopher Kellogg (Twitter)] (https://github.com/cckellogg) <br/>
 [Andrew Jorgensen (Twitter)] (https://github.com/ajorgensen) <br/>
-Brian Hatfield (Twitter) <br/>
-Michael Barry (Twitter) (https://github.com/msbarry) <br/>
-[Luc Perkins (Twitter)] (https://github.com/lucperkins) <br/>
+[Michael Barry (Twitter)] (https://github.com/msbarry) <br/>
+[Runhang Li (Twitter)] (https://github.com/objmagic) <br/>
 
 ### Collaborators and Contributors
 
 [Sanjeev Kulkarni (Peer Nova)] (https://github.com/srkukarni) <br/>
 [Nikunj Bhagat (Google)] (https://github.com/nikunjbhagat) <br/>
 [Siddarth Taneja (Google)] (https://github.com/kernelsid) <br/>
+[Brian Hatfield (Twitter)] (https://github.com/bmhatfield) <br/>
+[Luc Perkins (Twitter)] (https://github.com/lucperkins) <br/>
 [Lewis Kaneshiro (Stanford University)] (https://github.com/lewiskan) <br/>
-[Ashvin Agarwal (Microsoft)] (https://github.com/ashvina) <br/>
-[Sriram Rao (Microsoft)] (https://github.com/sriramsrao) <br/>
-[Andrew Montalenti (Paresly)] (https://github.com/amontalenti) <br/>
-Arun Kejariwal (Machine Zone) <br/>
-Mengdie Hu (Facebook) <br/>
-Zuyu Zhang (Pivotal) <br/>
 [Joe Stein (Elodina)] (https://github.com/joestein) <br/>
+[Darren Braynard (Elodina)] (https://github.com/dbraynard) <br/>
 [Prabhu Inbarajan (Cisco)] (https://github.com/prabhuinbarajan) <br/>
 [Supun Kamburugamuve (Indiana University)] (https://github.com/supunkamburugamuve) <br/>
+[Ashvin Agarwal (Microsoft)] (https://github.com/ashvina) <br/>
+[Sriram Rao (Microsoft)] (https://github.com/sriramsrao) <br/>
+[Avrilla Floratou (Microsoft)] (https://github.com/avflor) <br/>
+[Darin Johnson] (https://github.com/DarinJ) <br/>
+[Andrew Montalenti (Parsely)] (https://github.com/amontalenti) <br/>
+[Zuyu Zhang (Pivotal)] (https://github.com/zuyu) <br/>

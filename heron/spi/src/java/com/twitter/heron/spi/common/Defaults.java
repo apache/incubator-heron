@@ -55,10 +55,6 @@ public class Defaults {
     return ConfigDefaults.get("SCHEDULER_CLASS");
   }
 
-  public static String runtimeManagerClass() {
-    return ConfigDefaults.get("RUNTIME_MANAGER_CLASS");
-  }
-
   public static String packingClass() {
     return ConfigDefaults.get("PACKING_CLASS");
   }
@@ -121,10 +117,6 @@ public class Defaults {
 
   public static String corePackageUri() {
     return ConfigDefaults.get("CORE_PACKAGE_URI");
-  }
-
-  public static String logDirectory() {
-    return ConfigDefaults.get("LOGGING_DIRECTORY");
   }
 
   public static String topologyDefinitionFile() {
@@ -281,10 +273,6 @@ public class Defaults {
 
   public static String schedulerSandboxJar() {
     return ConfigDefaults.get("SANDBOX_SCHEDULER_JAR");
-  }
-
-  public static String logSandboxDirectory() {
-    return ConfigDefaults.get("SANDBOX_LOGGING_DIRECTORY");
   }
 
   public static String instanceSandboxClassPath() {

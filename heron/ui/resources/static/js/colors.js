@@ -4,7 +4,7 @@
 
 (function () {
   function toggleColors () {
-    localStorage.colors = localStorage.colors === 'leonid' ? 'default' : 'leonid';
+    localStorage.colors = localStorage.colors === 'colorblind' ? 'default' : 'colorblind';
     window.location.reload();
   }
 

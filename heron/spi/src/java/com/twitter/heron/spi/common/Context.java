@@ -316,10 +316,6 @@ public class Context {
     return cfg.getStringValue(ConfigKeys.get("SANDBOX_SCHEDULER_JAR"));
   }
 
-  public static String logSandboxDirectory(Config cfg) {
-    return cfg.getStringValue(ConfigKeys.get("SANDBOX_LOGGING_DIRECTORY"));
-  }
-
   public static final String instanceSandboxClassPath(Config cfg) {
     return cfg.getStringValue(ConfigKeys.get("SANDBOX_INSTANCE_CLASSPATH"));
   }
