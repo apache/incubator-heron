@@ -3,10 +3,6 @@
 # arg1: the heron executable
 # arg2: arguments to executable
 
-#SBATCH -A skamburu
-#SBATCH -N 4
-#SBATCH --ntasks-per-node=1
-#SBATCH --ntasks=4
 #SBATCH --ntasks-per-node=1
 #SBATCH --time=00:30:00
 

@@ -35,11 +35,10 @@ public class HPCController {
     this.isVerbose = isVerbose;
   }
 
-  // Create an aurora job
+  // Create an hpc job
   public boolean createJob(String hpcScript, String heronExec, List<String> commandArgs, String topologyWorkingDirectory, int containers) {
     String nTasks = "--ntasks=" + containers;
-//    List<String> hpcCmd = new ArrayList<>(Arrays.asList("sbatch", "-N", Integer.toString(containers), nTasks, hpcScript, heronExec));
-    List<String> hpcCmd = new ArrayList<>(Arrays.asList("sbatch", hpcScript, heronExec));
+    List<String> hpcCmd = new ArrayList<>(Arrays.asList("sbatch", "-N", Integer.toString(containers), nTasks, hpcScript, heronExec));
 
     for (int i = 0; i < commandArgs.size(); i++) {
       String arg = commandArgs.get(i);
@@ -65,25 +64,32 @@ public class HPCController {
 
   // Kill an HPC job
   public boolean killJob(String jobIdFile) {
-    String jobId = readFromFile(jobIdFile);
-    List<String> hpcCmd = new ArrayList<>(Arrays.asList("scancel", jobId));
-    return 0 == ShellUtils.runProcess(
-        isVerbose, hpcCmd.toArray(new String[0]), new StringBuilder(), new StringBuilder());
+    List<String> jobIdFileContent = readFromFile(jobIdFile);
+    if (jobIdFileContent.size() >= 0) {
+      List<String> hpcCmd = new ArrayList<>(Arrays.asList("scancel", jobIdFileContent.get(0)));
+      return 0 == ShellUtils.runProcess(
+          isVerbose, hpcCmd.toArray(new String[0]), new StringBuilder(), new StringBuilder());
+    } else {
+      LOG.log(Level.SEVERE, "Failed to read the HPC Job id from file:" + jobIdFile);
+      return false;
+    }
   }
 
-
-  public static String readFromFile(String filename) {
+  /**
+   * Read the data from a text file
+   * For now lets keep this util function here. We need to move it to a util location
+   */
+  public static List<String> readFromFile(String filename) {
     Path path = new File(filename).toPath();
-    List<String> res;
+    List<String> result = new ArrayList<>();
     try {
-      res = Files.readAllLines(path);
+      List<String> tempResult = Files.readAllLines(path);
+      if (tempResult != null) {
+        result.addAll(tempResult);
+      }
     } catch (IOException e) {
       LOG.log(Level.SEVERE, "Failed to read from file. ", e);
-      return null;
     }
-    if (res != null && res.size() >= 1) {
-      return res.get(0).trim();
-    }
-    return null;
+    return result;
   }
 }
