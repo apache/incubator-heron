@@ -137,12 +137,7 @@ def main():
             ('setuptools', '18.0.1'): '3rdparty/eggs/setuptools-18.0.1-py2.py3-none-any.whl',
             ('wheel', '0.23.0'): '3rdparty/eggs/wheel-0.23.0-py2.7.egg'
             })
-        # interpreter = PythonInterpreter.from_binary(
-        #     poptions.python,
-        #     path_extras=['3rdparty/eggs/setuptools-18.0.1-py2.py3-none-any.whl',
-        #                  '3rdparty/eggs/wheel-0.23.0-py2.7.egg']
-        # )
-        # interpreter.with_extra('setuptools', '>1.0', '3rdparty/eggs/setuptools-18.0.1-py2.py3-none-any.whl')
+
         for k, v in interpreter.extras.items():
           print("interpreter.extras: %s -> %s" % (k, v))
         import functools
@@ -158,15 +153,6 @@ def main():
         if interpreter and poptions.use_wheel:
           interpreter = resolve(interpreter, WHEEL_REQUIREMENT)
           print ("_pex.interpreter interpreter1: %s" % interpreter)
-
-        # interpreter = interpreter.with_extra('setuptools', '>1.0', '3rdparty/eggs/setuptools-18.0.1-py2.py3-none-any.whl')
-        # interpreter = PythonInterpreter(
-        #     poptions.python,
-        #     interpreter.identity,
-        #     extras={
-        #     # TODO: Fix this to resolve automatically
-        #     ('setuptools', '>1.0'): '3rdparty/eggs/setuptools-18.0.1-py2.py3-none-any.whl'
-        #     })
 
         pex_builder = pex.bin.pex.build_pex(reqs, poptions, resolver_options_builder, interpreter=interpreter)
 
