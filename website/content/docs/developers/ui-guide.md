@@ -13,8 +13,8 @@ sections.
 1. See logical plan of a topology
 2. See physical plan of a topology
 3. Configs of a topology
-3. See some basic metrics for each of the instances and components
-4. Links to get logs, memory histogram, jstack, heapdump and exceptions of
+4. See some basic metrics for each of the instances and components
+5. Links to get logs, memory histogram, jstack, heapdump and exceptions of
    a particular instance
 
 and other useful links and information, that are explained below.
@@ -50,8 +50,25 @@ actions is described below.
 4. Health metrics for the topology
 5. General Info about the topology
 6. General metrics for the topology
+7. Click components for more details
+8. Click instances for more details
 
-Each node in logical plan can be clicked for more specific info about that 
+Each node in logical plan can be clicked for more specific info about that
 component. `TODO: Add topology page with component clicked`
 
+1. Link to topology level configs
+2. Link to Job page  only if the scheduler provides a link
+   `(TODO: Link to this configuration)`
+3. Link to Viz dashboard for this topology only if Tracker is configured with
+   one. `(TODO: Link to this configuration)`
+4. Averaged or Max metrics for all instances of this component
+5. Aggregated metrics for all instances of this component
+6. List of all instances and their aggregated metrics
+7. Instance level operations, which are described in more details below
 
+Clicking on an instance will highlight that instance in the list.
+`TODO: Add topology page with instance clicked`
+
+1. Aggregated metrics are only for this instance
+2. Component counters are still aggregated for all instances
+3. The selected instance is highlighted
