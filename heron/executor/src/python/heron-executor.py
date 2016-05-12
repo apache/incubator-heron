@@ -25,6 +25,7 @@ import base64
 import signal
 import string
 import random
+import yaml
 
 def print_usage():
   print ("./heron-executor <shardid> <topname> <topid> <topdefnfile> "
@@ -32,7 +33,7 @@ def print_usage():
          " <metricsmgr_classpath> <instance_jvm_opts_in_base64> <classpath> "
          " <port1> <port2> <port3> <heron_internals_config_file> "
          " <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_jar_file>"
-         " <heron_java_home> <shell-port> <log_dir> <heron_shell_binary> <port4>"
+         " <heron_java_home> <shell-port> <heron_shell_binary> <port4>"
          " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file> "
          " <scheduler_classpath> <scheduler_port>")
 
@@ -146,16 +147,21 @@ class HeronExecutor:
     self.heron_shell_ids = heron_shell_list(len(self.instance_distribution))
     self.heron_java_home = args[21]
     self.shell_port = args[22]
-    self.log_dir = args[23]
-    self.heron_shell_binary = args[24]
-    self.port4 = args[25]
-    self.cluster = args[26]
-    self.role = args[27]
-    self.environ = args[28]
-    self.instance_classpath = args[29]
-    self.metrics_sinks_config_file = args[30]
-    self.scheduler_classpath = args[31]
-    self.scheduler_port = args[32]
+    self.heron_shell_binary = args[23]
+    self.port4 = args[24]
+    self.cluster = args[25]
+    self.role = args[26]
+    self.environ = args[27]
+    self.instance_classpath = args[28]
+    self.metrics_sinks_config_file = args[29]
+    self.scheduler_classpath = args[30]
+    self.scheduler_port = args[31]
+
+    # Read the heron_internals.yaml for cluster internal config
+    self.heron_internals_config = {}
+    with open(self.heron_internals_config_file,'r') as stream:
+      self.heron_internals_config = yaml.load(stream)
+    self.log_dir = self.heron_internals_config['heron.logging.directory']
 
     # Log itself pid
     log_pid_for_process(get_heron_executor_process_name(self.shard), os.getpid())
@@ -403,7 +409,7 @@ class HeronExecutor:
         sys.exit(1)
 
 def main():
-  if len(sys.argv) != 33:
+  if len(sys.argv) != 32:
     print_usage()
     sys.exit(1)
   executor = HeronExecutor(sys.argv)
