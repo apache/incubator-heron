@@ -183,6 +183,14 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "heron-client-conf-hpc",
+    package_dir = "conf/hpc",
+    files = [
+        "//heron/config/src/yaml:conf-hpc-yaml",
+    ],
+)
+
+pkg_tar(
     name = "heron-client-conf-aurora",
     package_dir = "conf/aurora",
     files = [
@@ -211,6 +219,7 @@ pkg_tar(
         ":heron-client-conf",
         ":heron-client-conf-local",
         ":heron-client-conf-aurora",
+        ":heron-client-conf-hpc",
         ":heron-client-dist",
         ":heron-client-examples",
         ":heron-client-lib-3rdparty",
