@@ -36,7 +36,6 @@ import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.utils.ReflectionUtils;
-import com.twitter.heron.spi.utils.SchedulerConfig;
 import com.twitter.heron.spi.utils.SchedulerUtils;
 import com.twitter.heron.spi.utils.Shutdown;
 import com.twitter.heron.spi.utils.TopologyTests;
@@ -44,7 +43,7 @@ import com.twitter.heron.spi.utils.TopologyUtils;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
-    TopologyUtils.class, ReflectionUtils.class, SchedulerConfig.class, SchedulerUtils.class})
+    TopologyUtils.class, ReflectionUtils.class, SchedulerUtils.class})
 public class SchedulerMainTest {
   @Rule
   public final ExpectedException exception = ExpectedException.none();
@@ -61,7 +60,6 @@ public class SchedulerMainTest {
 
   /**
    * Basic setup before executing a test case
-   * @throws Exception
    */
   @Before
   public void setUp() throws Exception {
@@ -76,36 +74,17 @@ public class SchedulerMainTest {
         when(config.getStringValue(ConfigKeys.get("SCHEDULER_CLASS"))).
         thenReturn(SCHEDULER_CLASS);
 
-    String iCluster = "cluster";
-    String iRole = "role";
-    String iEnviron = "env";
     String iTopologyName = "topologyName";
-    String iTopologyJarFile = "topologyJarFile";
     int iSchedulerServerPort = 0;
 
-    String topologyDefFile = "topologyDefFile";
     TopologyAPI.Topology topology =
         TopologyTests.createTopology(
             iTopologyName, new com.twitter.heron.api.Config(),
             new HashMap<String, Integer>(), new HashMap<String, Integer>());
     String packingString = "dummyPackingString";
 
-    PowerMockito.spy(SchedulerConfig.class);
-
-    // Mock SchedulerConfig stuff
-    PowerMockito.doReturn(config).when(
-        SchedulerConfig.class, "loadConfig",
-        Mockito.anyString(), Mockito.anyString(),
-        Mockito.anyString(), Mockito.anyString(),
-        Mockito.anyString(), Mockito.any(TopologyAPI.Topology.class));
-
     // Mock TopologyUtils stuff
     PowerMockito.spy(TopologyUtils.class);
-    PowerMockito.doReturn(topologyDefFile).
-        when(TopologyUtils.class, "lookUpTopologyDefnFile",
-            Mockito.anyString(), Mockito.eq(iTopologyName));
-    PowerMockito.doReturn(topology).
-        when(TopologyUtils.class, "getTopology", Mockito.eq(topologyDefFile));
     PowerMockito.doReturn(packingString).
         when(TopologyUtils.class, "packingToString", Mockito.any(PackingPlan.class));
 
@@ -126,8 +105,7 @@ public class SchedulerMainTest {
     // Mock objects to be verified
     schedulerMain =
         Mockito.spy(
-            new SchedulerMain(
-                iCluster, iRole, iEnviron, iTopologyName, iTopologyJarFile, iSchedulerServerPort));
+            new SchedulerMain(config, topology, iSchedulerServerPort));
     schedulerServer = Mockito.mock(SchedulerServer.class);
     Mockito.doReturn(schedulerServer).when(schedulerMain).getServer(
         Mockito.any(Config.class), Mockito.eq(scheduler), Mockito.eq(iSchedulerServerPort));
