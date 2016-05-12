@@ -405,8 +405,9 @@ class PythonInterpreter(object):
     print("interpreter.get_location() req %s req.key %s" % (req, req.key))
     for dist, location in self.extras.items():
       dist_name, dist_version = dist
+      print("interpreter.get_location() self.extras.items() dist_name %s dist_version %s location %s" % (dist_name, dist_version, location))
       if req.key == dist_name and dist_version in req:
-        print("interpreter.get_location() dist_name %s dist_version %s location %s" % (dist_name, dist_version, location))
+        print("interpreter.get_location() found it dist_name %s dist_version %s location %s" % (dist_name, dist_version, location))
         return location
 
   def __hash__(self):
