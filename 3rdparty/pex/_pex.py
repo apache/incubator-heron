@@ -131,7 +131,8 @@ def main():
         # instance using it.
         interpreter = PythonInterpreter.from_binary(
             poptions.python,
-            path_extras='3rdparty/eggs/setuptools-18.0.1-py2.py3-none-any.whl'
+            path_extras=['3rdparty/eggs/setuptools-18.0.1-py2.py3-none-any.whl',
+                         '3rdparty/eggs/wheel-0.23.0-py2.7.egg']
         )
         # interpreter = interpreter.with_extra('setuptools', '>1.0', '3rdparty/eggs/setuptools-18.0.1-py2.py3-none-any.whl')
         import functools
