@@ -359,10 +359,6 @@ public class Keys {
     return ConfigKeys.get("SANDBOX_SCHEDULER_JAR");
   }
 
-  public static String logSandboxDirectory() {
-    return ConfigKeys.get("SANDBOX_LOGGING_DIRECTORY");
-  }
-
   public static String instanceSandboxClassPath() {
     return ConfigKeys.get("SANDBOX_INSTANCE_CLASSPATH");
   }
