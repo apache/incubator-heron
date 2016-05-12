@@ -402,8 +402,10 @@ class PythonInterpreter(object):
 
   def get_location(self, req):
     req = maybe_requirement(req)
+    print("interpreter.get_location() req %s req.key %s" % (req, req.key))
     for dist, location in self.extras.items():
       dist_name, dist_version = dist
+      print("interpreter.get_location() dist_name %s dist_version %s location %s" % (dist_name, dist_version, location))
       if req.key == dist_name and dist_version in req:
         return location
 
