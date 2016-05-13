@@ -29,6 +29,10 @@ Uncompressing......
 Heron is now installed!
 Make sure you have "/Users/$USER/bin" in your path.
 ```
+To add ```/Users/$USER/bin``` to your path, run:
+```bash
+$ export PATH="$PATH:$HOME/bin"
+```
 
 Run the download self installing binary for heron tools as follows
 ```bash
@@ -44,7 +48,7 @@ Make sure you have "/Users/$USER/bin" in your path.
 Example topologies are installed by default in ```/usr/local/heron/examples```.  Launch an example [topology](../concepts/topologies) on **local cluster** using submit:
 
 ```bash
-$ heron submit local /usr/local/heron/examples/heron-examples.jar com.twitter.heron.examples.ExclamationTopology ExclamationTopology
+$ heron submit local ~/.heron/examples/heron-examples.jar com.twitter.heron.examples.ExclamationTopology ExclamationTopology
 ```
 
 ### Step 3 - Start Heron Tracker
@@ -103,7 +107,7 @@ Required arguments:
   topology-class-name   Topology class name
 
 Optional arguments:
-  --config-path (a string; path to cluster config; default: "/usr/local/heron/conf")
+  --config-path (a string; path to cluster config; default: "/Users/$USER/.heron/conf")
   --config-property (key=value; a config key and its value; default: [])
   --deploy-deactivated (a boolean; default: "false")
   -D DEFINE             Define a system property to pass to java -D when
