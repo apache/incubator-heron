@@ -17,28 +17,34 @@ package com.twitter.heron.api.metric;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MultiReducedMetric<T> implements IMetric {
-  private Map<String, ReducedMetric<T>> value = new HashMap<>();
-  private IReducer<T> reducer;
+/*
+ * A reduce metric that can hold multiple scoped values.
+ * @param <T> accumulator to hold and update state
+ * @param <U> type of input that can be handled
+ * @param <V> type of reduced value
+ */
+public class MultiReducedMetric<T, U, V> implements IMetric<Map<String, V>> {
+  private Map<String, ReducedMetric<T, U, V>> value = new HashMap<>();
+  private IReducer<T, U, V> reducer;
 
-  public MultiReducedMetric(IReducer<T> aReducer) {
-    reducer = aReducer;
+  public MultiReducedMetric(IReducer<T, U, V> reducer) {
+    this.reducer = reducer;
   }
 
-  public ReducedMetric<T> scope(String key) {
-    ReducedMetric<T> val = value.get(key);
-    if (val == null) {
-      value.put(key, val = new ReducedMetric<T>(reducer));
+  public ReducedMetric<T, U, V> scope(String key) {
+    if (value.get(key) == null) {
+      value.put(key, new ReducedMetric<>(reducer));
     }
-    return val;
+    return value.get(key);
   }
 
-  public Object getValueAndReset() {
-    Map<String, Object> ret = new HashMap<>();
-    for (Map.Entry<String, ReducedMetric<T>> e : value.entrySet()) {
-      Object val = e.getValue().getValueAndReset();
+  @Override
+  public Map<String, V> getValueAndReset() {
+    Map<String, V> ret = new HashMap<>();
+    for (String key : value.keySet()) {
+      V val = value.get(key).getValueAndReset();
       if (val != null) {
-        ret.put(e.getKey(), val);
+        ret.put(key, val);
       }
     }
     return ret;

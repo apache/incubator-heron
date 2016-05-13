@@ -14,12 +14,17 @@
 
 package com.twitter.heron.common.basics;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+
 public final class TypeUtils {
 
   private TypeUtils() {
   }
 
-  public static Integer getInt(Object o) {
+  public static Integer getInteger(Object o) {
     if (o instanceof Long) {
       return ((Long) o).intValue();
     } else if (o instanceof Integer) {
@@ -30,7 +35,7 @@ public final class TypeUtils {
       try {
         return Integer.parseInt(o.toString());
       } catch (NumberFormatException nfe) {
-        throw new IllegalArgumentException("Don't know how to convert " + o + " + to int");
+        throw new IllegalArgumentException("Don't know how to convert " + o + " to int");
       }
     }
   }
@@ -46,8 +51,57 @@ public final class TypeUtils {
       try {
         return Long.parseLong(o.toString());
       } catch (NumberFormatException nfe) {
-        throw new IllegalArgumentException("Don't know how to convert " + o + " + to long");
+        throw new IllegalArgumentException("Don't know how to convert " + o + " to long");
       }
+    }
+  }
+
+  public static Double getDouble(Object o) {
+    if (o instanceof Double) {
+      return (Double) o;
+    } else if (o instanceof Float) {
+      return ((Float) o).doubleValue();
+    } else if (o instanceof Long) {
+      return ((Long) o).doubleValue();
+    } else if (o instanceof Integer) {
+      return ((Integer) o).doubleValue();
+    } else if (o instanceof Short) {
+      return ((Short) o).doubleValue();
+    } else {
+      try {
+        return Double.parseDouble(o.toString());
+      } catch (NumberFormatException nfe) {
+        throw new IllegalArgumentException("Failed to convert " + o + " to double");
+      }
+    }
+  }
+
+  public static Boolean getBoolean(Object o) {
+    if (o instanceof Boolean) {
+      return (Boolean) o;
+    } else if (o instanceof String) {
+      return Boolean.valueOf((String) o);
+    } else {
+      throw new IllegalArgumentException("Failed to convert " + o + " to boolean");
+    }
+  }
+
+  public static URI getURI(String spec) {
+    try {
+      return new URI(spec);
+    } catch (URISyntaxException e) {
+      throw new IllegalArgumentException("Don't know how to convert " + spec + " to URI");
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  public static List<String> getListOfStrings(Object o) {
+    if (o == null) {
+      return new ArrayList<>();
+    } else if (o instanceof List) {
+      return (List<String>) o;
+    } else {
+      throw new IllegalArgumentException("Failed to convert " + o + " to List<String>");
     }
   }
 }

@@ -28,7 +28,7 @@
 int main(int argc, char* argv[]) {
   if (argc != 12) {
     std::cout << "Usage: " << argv[0] << " "
-              << "<controller-port> <master-port> <stats-port> "
+              << "<master-port> <controller-port> <stats-port> "
               << "<topology_name> <topology_id> <zk_hostportlist> "
               << "<topdir> <sgmr1,...> <heron_internals_config_filename> "
               << "<metrics_sinks_filename> <metrics-manager-port>" << std::endl;
@@ -37,8 +37,8 @@ int main(int argc, char* argv[]) {
   }
 
   sp_string myhost = IpUtils::getHostName();
-  sp_int32 controller_port = atoi(argv[1]);
-  sp_int32 master_port = atoi(argv[2]);
+  sp_int32 master_port = atoi(argv[1]);
+  sp_int32 controller_port = atoi(argv[2]);
   sp_int32 stats_port = atoi(argv[3]);
   sp_string topology_name = argv[4];
   sp_string topology_id = argv[5];

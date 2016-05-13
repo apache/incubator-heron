@@ -3,6 +3,3 @@ heron.class.scheduler:          com.twitter.heron.scheduler.local.LocalScheduler
 
 # launcher class for submitting the topology to the scheduler
 heron.class.launcher:          com.twitter.heron.scheduler.local.LocalLauncher
-
-# runtime manager class for managing the life cycle of the topologies
-heron.class.runtime.manager:   com.twitter.heron.scheduler.local.LocalRuntimeManager

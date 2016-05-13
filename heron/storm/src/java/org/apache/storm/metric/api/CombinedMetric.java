@@ -14,7 +14,7 @@
 
 package org.apache.storm.metric.api;
 
-public class CombinedMetric<T> implements IMetric {
+public class CombinedMetric<T> implements IMetric<T> {
   private final ICombiner<T> combiner;
   private T value;
 
@@ -27,6 +27,7 @@ public class CombinedMetric<T> implements IMetric {
     value = combiner.combine(value, newValue);
   }
 
+  @Override
   public T getValueAndReset() {
     T ret = value;
     value = combiner.identity();

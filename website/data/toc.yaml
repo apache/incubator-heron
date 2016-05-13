@@ -9,14 +9,32 @@ sections:
     sublinks:
       - name: Overview
         url: /docs/operators/deployment
-      - name: Aurora
-        url: /docs/operators/deployment/aurora
-      - name: Mesos
-        url: /docs/operators/deployment/mesos
-      - name: Local
-        url: /docs/operators/deployment/local
-      - name: Zookeeper
-        url: /docs/operators/deployment/zookeeper
+  - name: State Managers
+    sublinks:
+      - name: Overview
+        url: /docs/operators/deployment/statemanagers
+      - name: Setup Zookeeper
+        url: /docs/operators/deployment/statemanagers/zookeeper
+      - name: Setup Local FS
+        url: /docs/operators/deployment/statemanagers/localfs
+  - name: Uploaders
+    sublinks:
+      - name: Overview
+        url: /docs/operators/deployment/uploaders
+      - name: Setup Local FS
+        url: /docs/operators/deployment/uploaders/localfs
+      - name: Setup HDFS
+        url: /docs/operators/deployment/uploaders/hdfs
+      - name: Setup S3
+        url: /docs/operators/deployment/uploaders/s3
+  - name: Schedulers
+    sublinks:
+      - name: Local Cluster
+        url: /docs/operators/deployment/schedulers/local
+      - name: Aurora Cluster
+        url: /docs/operators/deployment/schedulers/aurora
+      - name: Mesos Cluster
+        url: /docs/operators/deployment/schedulers/mesos
   - name: Configuration
     sublinks:
       - name: Overview
@@ -31,6 +49,10 @@ sections:
         url: /docs/operators/configuration/system
       - name: Topology Master
         url: /docs/operators/configuration/tmaster
+  - name: Observability
+    sublinks:
+      - name: Graphite
+        url: /docs/operators/observability/graphite
   - name: User Manuals
     sublinks:
       - name: Heron Client
@@ -39,7 +61,7 @@ sections:
         url: /docs/operators/heron-tracker
       - name: Heron UI
         url: /docs/operators/heron-ui
-  - name: Topology Developers
+  - name: Topology Writers
     sublinks:
       - name: Heron Topologies
         url: /docs/concepts/topologies
@@ -47,18 +69,14 @@ sections:
         url: /docs/developers/data-model
       - name: Tuple Serialization
         url: /docs/developers/serialization
-      - name: Troubleshooting Guide
-        url: /docs/developers/troubleshooting
       - name: Tuning Guide
         url: /docs/developers/tuning
+      - name: Troubleshooting Guide
+        url: /docs/developers/troubleshooting
       - name: Javadoc
         url: /docs/javadoc
   - name: Heron Developers
     sublinks:
-      - name: Heron Architecture
-        url: /docs/concepts/architecture
-      - name: Codebase
-        url: /docs/contributors/codebase
       - name: Compiling
         url: /docs/developers/compiling/compiling
       - name: Compiling on Linux
@@ -67,11 +85,19 @@ sections:
         url: /docs/developers/compiling/mac
       - name: Compiling With Docker
         url: /docs/developers/compiling/docker
-      - name: Testing
+      - name: Running Tests
         url: /docs/contributors/testing
-      - name: Implementing a Custom Scheduler
+      - name: Code Organization
+        url: /docs/contributors/codebase
+  - name: Heron Concepts
+    sublinks:
+      - name: Heron Architecture
+        url: /docs/concepts/architecture
+  - name: Extending Heron
+    sublinks:
+      - name: Custom Scheduler
         url: /docs/contributors/custom-scheduler
-      - name: Implementing a Custom Metrics Sink
+      - name: Custom Metrics Sink
         url: /docs/contributors/custom-metrics-sink
   - name: Heron Resources
     sublinks:
@@ -81,3 +107,9 @@ sections:
     sublinks:
       - name: Community
         url: /docs/contributors/community
+      - name: Roadmap
+        url: /docs/contributors/roadmap
+      - name: Governance
+        url: /docs/contributors/governance
+      - name: Support
+        url: /docs/contributors/support

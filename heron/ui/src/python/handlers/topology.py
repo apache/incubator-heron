@@ -29,6 +29,7 @@ import base
 import common
 from common.graph import TopologyDAG
 
+
 ################################################################################
 # Handler for displaying the config for a topology
 ################################################################################
@@ -63,10 +64,13 @@ class TopologyExceptionsPageHandler(base.BaseHandler):
 # TO DO: get the list of clusters from tracker and fetch the topologies
 ################################################################################
 class ListTopologiesHandler(base.BaseHandler):
+  @tornado.gen.coroutine
   def get(self):
+    clusters = yield access.get_clusters()
+
     options = dict(
         topologies = [],               # no topologies
-        cluster = 'local',             # default cluster
+        clusters = map(str, clusters),
         active = "topologies",         # active icon the nav bar
         function = common.className
     )
@@ -84,6 +88,11 @@ class TopologyPlanHandler(base.BaseHandler):
     # fetch the execution of the topology asynchronously
     estate = yield access.get_execution_state(cluster, environ, topology)
 
+    # fetch scheduler location of the topology
+    scheduler_location = yield access.get_scheduler_location(cluster, environ, topology)
+
+    job_page_link = scheduler_location["job_page_link"]
+
     # convert the topology launch time to display format
     launched_at = datetime.utcfromtimestamp(estate['submission_time'])
     launched_time = launched_at.strftime('%Y-%m-%d %H:%M:%S UTC')
@@ -96,6 +105,7 @@ class TopologyPlanHandler(base.BaseHandler):
         launched = launched_time,
         status = "running" if random.randint(0,1) else "errors",
         active = "topologies",
+        job_page_link = job_page_link,
         function = common.className
     )
 

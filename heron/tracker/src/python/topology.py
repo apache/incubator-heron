@@ -32,7 +32,7 @@ class Topology:
     The watches are the callbacks that are called
     when there is any change in the topology
     instance using set_physical_plan, set_execution_state,
-    and set_tmaster. Any other means of changing will
+    set_tmaster, and set_scheduler_location. Any other means of changing will
     not call the watches.
   """
 
@@ -46,6 +46,7 @@ class Topology:
     self.cluster = None
     self.environ = None
     self.tmaster = None
+    self.scheduler_location = None
 
     # A map from UUIDs to the callback
     # functions.
@@ -143,6 +144,10 @@ class Topology:
 
   def set_tmaster(self, tmaster):
     self.tmaster = tmaster
+    self.trigger_watches()
+
+  def set_scheduler_location(self, scheduler_location):
+    self.scheduler_location = scheduler_location
     self.trigger_watches()
 
   def num_instances(self):

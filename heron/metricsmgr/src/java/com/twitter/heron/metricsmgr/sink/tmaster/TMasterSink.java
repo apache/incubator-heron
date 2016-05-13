@@ -96,9 +96,9 @@ public class TMasterSink implements IMetricsSink {
   private static final String TMASTER_RESTART_COUNT = "tmaster-restart-count";
   private static final String TMASTER_LOCATION_UPDATE_COUNT = "tmaster-location-update-count";
   private final Communicator<TopologyMaster.PublishMetrics> metricsCommunicator =
-      new Communicator<TopologyMaster.PublishMetrics>();
+      new Communicator<>();
   private final MetricsFilter tMasterMetricsFilter = new MetricsFilter();
-  private final Map<String, Object> sinkConfig = new HashMap<String, Object>();
+  private final Map<String, Object> sinkConfig = new HashMap<>();
   // A scheduled executor service to check whether the TMasterLocation has changed
   // If so, restart the TMasterClientService with the new TMasterLocation
   // Start of TMasterClientService will also be in this thread
@@ -112,6 +112,7 @@ public class TMasterSink implements IMetricsSink {
   private SinkContext sinkContext;
 
   @Override
+  @SuppressWarnings("unchecked")
   public void init(Map<String, Object> conf, SinkContext context) {
     sinkConfig.putAll(conf);
 
@@ -151,7 +152,7 @@ public class TMasterSink implements IMetricsSink {
   // If so, restart the TMasterClientService with the new TMasterLocation
   private void startTMasterChecker() {
     final int checkIntervalSec =
-        TypeUtils.getInt(sinkConfig.get(KEY_TMASTER_LOCATION_CHECK_INTERVAL_SEC));
+        TypeUtils.getInteger(sinkConfig.get(KEY_TMASTER_LOCATION_CHECK_INTERVAL_SEC));
 
     Runnable runnable = new Runnable() {
       @Override
@@ -337,8 +338,8 @@ public class TMasterSink implements IMetricsSink {
               TypeUtils.getLong(tmasterClientConfig.get(KEY_NETWORK_WRITE_BATCH_TIME_MS)),
               TypeUtils.getLong(tmasterClientConfig.get(KEY_NETWORK_READ_BATCH_SIZE_BYTES)),
               TypeUtils.getLong(tmasterClientConfig.get(KEY_NETWORK_READ_BATCH_TIME_MS)),
-              TypeUtils.getInt(tmasterClientConfig.get(KEY_SOCKET_SEND_BUFFER_BYTES)),
-              TypeUtils.getInt(tmasterClientConfig.get(KEY_SOCKET_RECEIVED_BUFFER_BYTES)));
+              TypeUtils.getInteger(tmasterClientConfig.get(KEY_SOCKET_SEND_BUFFER_BYTES)),
+              TypeUtils.getInteger(tmasterClientConfig.get(KEY_SOCKET_RECEIVED_BUFFER_BYTES)));
 
       // Reset the Consumer
       metricsCommunicator.setConsumer(looper);

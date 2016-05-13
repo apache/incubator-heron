@@ -1,5 +1,20 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 package com.twitter.heron.integration_test.core;
 
+import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +44,7 @@ import com.twitter.heron.api.tuple.Tuple;
 public class AggregatorBolt extends BaseBatchBolt implements ITerminalBolt {
   private static final long serialVersionUID = -2994625720418843748L;
   private static final Logger LOG = Logger.getLogger(AggregatorBolt.class.getName());
-  private static final ObjectMapper mapper = new ObjectMapper();
+  private static final ObjectMapper MAPPER = new ObjectMapper();
 
   private final String httpPostUrl;
 
@@ -58,7 +73,7 @@ public class AggregatorBolt extends BaseBatchBolt implements ITerminalBolt {
     // Once we get something, convert to JSON String
     String tupleInJSON = "";
     try {
-      tupleInJSON = mapper.writeValueAsString(tuple.getValue(0));
+      tupleInJSON = MAPPER.writeValueAsString(tuple.getValue(0));
     } catch (JsonProcessingException e) {
       LOG.log(Level.SEVERE,
           "Could not convert map to JSONString: " + tuple.getValue(0).toString(), e);
@@ -71,9 +86,10 @@ public class AggregatorBolt extends BaseBatchBolt implements ITerminalBolt {
     // The last bolt we append, nothing to emit.
   }
 
-  private int postResultToHttpServer(String httpPostUrl, String resultJson) throws Exception {
+  private int postResultToHttpServer(String newHttpPostUrl, String resultJson) throws
+      IOException, ParseException {
     HttpClient client = HttpClientBuilder.create().build();
-    HttpPost post = new HttpPost(httpPostUrl);
+    HttpPost post = new HttpPost(newHttpPostUrl);
 
     StringEntity requestEntity = new StringEntity(resultJson, ContentType.APPLICATION_JSON);
 
@@ -106,7 +122,7 @@ public class AggregatorBolt extends BaseBatchBolt implements ITerminalBolt {
           throw new RuntimeException(" ResponseCode " + responseCode);
         }
       }
-    } catch (Exception e) {
+    } catch (IOException | ParseException e) {
       throw new RuntimeException("Posting result to server failed with : " + e.getMessage(), e);
     }
   }

@@ -6,7 +6,6 @@ def heron_core_files():
 
 def heron_core_bin_files():
     return [
-        "//heron/controller/src/python:heron-controller",
         "//heron/executor/src/python:heron-executor",
         "//heron/shell/src/python:heron-shell",
         "//heron/stmgr/src/cpp:heron-stmgr",
@@ -29,7 +28,7 @@ def heron_core_lib_files():
 
 def heron_core_lib_scheduler_files():
     return [
-        "//heron/newscheduler/src/java:heron-scheduler",
+        "//heron/scheduler-core/src/java:heron-scheduler",
         "//heron/schedulers/src/java:heron-local-scheduler",
     ]
 

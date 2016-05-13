@@ -26,7 +26,7 @@ import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.topology.GeneralTopologyContext;
 import com.twitter.heron.api.tuple.Fields;
-import com.twitter.heron.api.utils.Utils;
+import com.twitter.heron.common.basics.TypeUtils;
 
 /**
  * From Heron. To get the topology info.
@@ -266,7 +266,7 @@ public class GeneralTopologyContextImpl implements GeneralTopologyContext {
 
   public int maxTopologyMessageTimeout() {
     // TODO:- get the per component overrides implemented
-    return Utils.getInt(topologyConfig.get(Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS));
+    return TypeUtils.getInteger(topologyConfig.get(Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS));
   }
 
   private boolean areStreamsEqual(TopologyAPI.StreamId a, TopologyAPI.StreamId b) {

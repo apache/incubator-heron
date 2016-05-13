@@ -38,11 +38,14 @@ import com.twitter.heron.common.utils.topology.TopologyContextImpl;
 
 public class BoltMetrics {
   private final MultiCountMetric ackCount;
-  private final MultiReducedMetric<MeanReducerState> processLatency;
-  private final MultiReducedMetric<MeanReducerState> failLatency;
+  private final MultiReducedMetric<MeanReducerState, Number, Double> processLatency;
+  private final MultiReducedMetric<MeanReducerState, Number, Double> failLatency;
   private final MultiCountMetric failCount;
   private final MultiCountMetric executeCount;
-  private final MultiReducedMetric<MeanReducerState> executeLatency;
+  private final MultiReducedMetric<MeanReducerState, Number, Double> executeLatency;
+
+  // Time in nano-seconds spending in execute() at every interval
+  private final MultiCountMetric executeTimeNs;
   private final MultiCountMetric emitCount;
   private final MultiCountMetric deserializationTimeNs;
   private final MultiCountMetric serializationTimeNs;
@@ -59,6 +62,7 @@ public class BoltMetrics {
     failCount = new MultiCountMetric();
     executeCount = new MultiCountMetric();
     executeLatency = new MultiReducedMetric<>(new MeanReducer());
+    executeTimeNs = new MultiCountMetric();
     emitCount = new MultiCountMetric();
     outQueueFullCount = new CountMetric();
 
@@ -78,6 +82,7 @@ public class BoltMetrics {
     topologyContext.registerMetric("__fail-count", failCount, interval);
     topologyContext.registerMetric("__execute-count", executeCount, interval);
     topologyContext.registerMetric("__execute-latency", executeLatency, interval);
+    topologyContext.registerMetric("__execute-time-ns", executeTimeNs, interval);
     topologyContext.registerMetric("__emit-count", emitCount, interval);
     topologyContext.registerMetric("__out-queue-full-count", outQueueFullCount, interval);
     topologyContext.registerMetric(
@@ -103,10 +108,12 @@ public class BoltMetrics {
       ackCount.scope(streamId);
       failCount.scope(streamId);
       executeCount.scope(streamId);
+      executeTimeNs.scope(streamId);
 
       ackCount.scope(globalStreamId);
       failCount.scope(globalStreamId);
       executeCount.scope(globalStreamId);
+      executeTimeNs.scope(globalStreamId);
     }
     List<TopologyAPI.OutputStream> outputs = helper.getMyBolt().getOutputsList();
     for (TopologyAPI.OutputStream outputStream : outputs) {
@@ -142,6 +149,7 @@ public class BoltMetrics {
   public void executeTuple(String streamId, String sourceComponent, long latency) {
     executeCount.scope(streamId).incr();
     executeLatency.scope(streamId).update(latency);
+    executeTimeNs.scope(streamId).incrBy(latency);
 
     // Consider there are cases that different streams with the same streamId,
     // but with different source component. We need to distinguish them too.
@@ -149,6 +157,7 @@ public class BoltMetrics {
         new StringBuilder(sourceComponent).append("/").append(streamId).toString();
     executeCount.scope(globalStreamId).incr();
     executeLatency.scope(globalStreamId).update(latency);
+    executeTimeNs.scope(globalStreamId).incrBy(latency);
   }
 
   public void emittedTuple(String streamId) {

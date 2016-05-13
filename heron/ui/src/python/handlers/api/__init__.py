@@ -9,6 +9,7 @@ from .topology import (
     ListTopologiesJsonHandler,
     TopologyLogicalPlanJsonHandler,
     TopologyPhysicalPlanJsonHandler,
+    TopologySchedulerLocationJsonHandler,
     TopologyExecutionStateJsonHandler,
     TopologyExceptionsJsonHandler,
     PidHandler,

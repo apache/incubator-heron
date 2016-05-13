@@ -23,13 +23,13 @@ import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
 
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.common.ShellUtils;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
-import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;
 
@@ -215,7 +215,7 @@ public class LocalLauncher implements ILauncher {
   ///////////////////////////////////////////////////////////////////////////////
   protected String[] getSchedulerCommand() {
     String javaBinary = String.format("%s/%s", Context.javaHome(config), "bin/java");
-    return SchedulerUtils.schedulerCommand(config, javaBinary, NetworkUtils.getFreePort());
+    return SchedulerUtils.schedulerCommand(config, javaBinary, SysUtils.getFreePort());
   }
 
   protected Process startScheduler(String[] schedulerCmd) {

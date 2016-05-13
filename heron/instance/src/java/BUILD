@@ -41,8 +41,3 @@ jarjar_binary(
     shade = "shade.conf",
     deps = ["@jarjar//jar"]
 )
-
-filegroup(
-    name = "aurora-logging-properties",
-    srcs = ["aurora_logging.properties"],
-)

@@ -17,37 +17,38 @@ package com.twitter.heron.api.metric;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MultiAssignableMetric implements IMetric {
-  private final Map<String, AssignableMetric> value = new HashMap<>();
+public class MultiAssignableMetric<T extends Number> implements IMetric<Map<String, T>> {
+  private final Map<String, AssignableMetric<T>> value = new HashMap<>();
+  private T initialValue;
 
-  public MultiAssignableMetric() {
-
+  public MultiAssignableMetric(T initialValue) {
+    this.initialValue = initialValue;
   }
 
-  public AssignableMetric scope(String key) {
-    AssignableMetric val = value.get(key);
+  public AssignableMetric<T> scope(String key) {
+    AssignableMetric<T> val = value.get(key);
     if (val == null) {
-      value.put(key, val = new AssignableMetric(0));
+      value.put(key, val = new AssignableMetric<>(this.initialValue));
     }
     return val;
   }
 
-  public AssignableMetric safeScope(String key) {
-    AssignableMetric val;
+  public AssignableMetric<T> safeScope(String key) {
+    AssignableMetric<T> val;
     synchronized (value) {
       val = value.get(key);
       if (val == null) {
-        value.put(key, val = new AssignableMetric(0));
+        value.put(key, val = new AssignableMetric<>(this.initialValue));
       }
     }
     return val;
   }
 
   @Override
-  public Object getValueAndReset() {
-    Map<String, Object> ret = new HashMap<>();
+  public Map<String, T> getValueAndReset() {
+    Map<String, T> ret = new HashMap<>();
     synchronized (value) {
-      for (Map.Entry<String, AssignableMetric> e : value.entrySet()) {
+      for (Map.Entry<String, AssignableMetric<T>> e : value.entrySet()) {
         ret.put(e.getKey(), e.getValue().getValueAndReset());
       }
     }

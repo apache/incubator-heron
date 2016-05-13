@@ -68,7 +68,7 @@ public class IncomingPacket {
       // We read the header fully
       headerRead = true;
       header.flip();
-      // TODO:- sanitize header.getInt()
+      // TODO:- sanitize header.getInteger()
       data = ByteBuffer.allocate(header.getInt());
     }
     int retval = readFromChannel(channel, data);

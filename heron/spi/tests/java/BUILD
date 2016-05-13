@@ -43,8 +43,8 @@ java_test(
 )
 
 java_test(
-    name = "network-utils_unittest",
-    srcs = glob(["**/utils/NetworkUtilsTest.java"]),
+    name = "scheduler-utils_unittest",
+    srcs = glob(["**/utils/SchedulerUtilsTest.java"]),
     deps = proto_deps_files, 
     size = "small",
 )
@@ -126,5 +126,12 @@ java_test(
     srcs = glob(["**/ClusterConfigTest.java"]),
     deps = [":test-utils-java"] + common_deps_files,
     data = glob(["**/testdata/**/*.yaml"]),
+    size = "small",
+)
+
+java_test(
+    name = "uploader-utils_unittest",
+    srcs = glob(["**/utils/UploaderUtilsTest.java"]),
+    deps = util_deps_files,
     size = "small",
 )

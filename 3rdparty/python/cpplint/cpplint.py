@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 #
 # Copyright (c) 2009 Google Inc. All rights reserved.
 #
@@ -843,7 +843,8 @@ class _CppLintState(object):
     for category, count in self.errors_by_category.iteritems():
       sys.stderr.write('Category \'%s\' errors found: %d\n' %
                        (category, count))
-    sys.stderr.write('Total errors found: %d\n' % self.error_count)
+    if self.error_count > 0:
+      sys.stderr.write('Total errors found: %d\n' % self.error_count)
 
 _cpplint_state = _CppLintState()
 
@@ -6069,14 +6070,15 @@ def ProcessConfigOverrides(filename):
     abs_filename = abs_path
     if not os.path.isfile(cfg_file):
       continue
-
+    
+    file_handle = open(cfg_file)
     try:
-      with open(cfg_file) as file_handle:
+      try:
         for line in file_handle:
           line, _, _ = line.partition('#')  # Remove comments.
           if not line.strip():
             continue
-
+    
           name, _, val = line.partition('=')
           name = name.strip()
           val = val.strip()
@@ -6109,11 +6111,13 @@ def ProcessConfigOverrides(filename):
             sys.stderr.write(
                 'Invalid configuration option (%s) in file %s\n' %
                 (name, cfg_file))
-
-    except IOError:
-      sys.stderr.write(
+    
+      except IOError:
+        sys.stderr.write(
           "Skipping config file '%s': Can't open for reading\n" % cfg_file)
-      keep_looking = False
+        keep_looking = False
+    finally:
+      file_handle.close()
 
   # Apply all the accumulated filters in reverse order (top-level directory
   # config options having the least priority).
@@ -6207,7 +6211,8 @@ def ProcessFile(filename, vlevel, extra_check_functions=[]):
         Error(filename, linenum, 'whitespace/newline', 1,
               'Unexpected \\r (^M) found; better to use only \\n')
 
-  sys.stderr.write('Done processing %s\n' % filename)
+  # The following print out is commented out to reduce the amount of log
+  # sys.stderr.write('Done processing %s\n' % filename)
   _RestoreFilters()
 
 
