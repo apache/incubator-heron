@@ -34,7 +34,7 @@ before_install:
   - ./bazel-0.1.2-installer-linux-x86_64.sh --user
 
 install:
-  - pip install wheel
+  - pip install --user wheel
 
 script:
   - python -c "import wheel"
