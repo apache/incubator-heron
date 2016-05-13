@@ -8,20 +8,23 @@ class IncomingPacket:
   TODO: The current name is consistent with C++/Java, but maybe we need to
   have a better name for this class
   """
+
+  intSizeInBytes = 4
+
   def __init__(self, data):
     self.data = data
     self.position = 0
 
   def unpackInt(self, pos):
     # Unpack int from bytes represented in newtork order (big-endian)
-    return struct.unpack(">I", self.data[pos: pos+4])[0]
+    return struct.unpack(">I", self.data[pos: pos + self.intSizeInBytes])[0]
 
   def unpackTypename(self):
     """
     Get the fully qualified type name of the protobuf message
     """
     size = self.unpackInt(self.position)
-    self.position += 4
+    self.position += self.intSizeInBytes
     typename = self.data[self.position: self.position + size]
     self.position += size
     return typename
@@ -39,7 +42,7 @@ class IncomingPacket:
     Deserialize the protobuf message
     """
     messageSize = self.unpackInt(self.position)
-    self.position += 4
+    self.position += self.intSizeInBytes
     message.ParseFromString(self.data[self.position : self.position + messageSize])
     return message
 
@@ -49,8 +52,9 @@ def pack(reqId, message):
   <overall data size> <typename size> <typename> <reqid> <proto byte size> <serialized proto>
   """
 
+  intSizeInBytes = 4
   typename = message.DESCRIPTOR.full_name
-  dataSize = 4 + len(typename) + ReqId.size + 4 + message.ByteSize()
+  dataSize = intSizeInBytes + len(typename) + ReqId.size + intSizeInBytes + message.ByteSize()
   data = struct.pack(">I", dataSize)
   data = data + struct.pack(">I", len(typename))
   data = data + typename
