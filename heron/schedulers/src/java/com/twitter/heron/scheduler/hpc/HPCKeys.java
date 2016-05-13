@@ -14,13 +14,17 @@
 
 package com.twitter.heron.scheduler.hpc;
 
-import com.twitter.heron.spi.common.Resource;
-
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class HPCKeys {
+import com.twitter.heron.spi.common.Resource;
+
+public final class HPCKeys {
   private static final Logger LOG = Logger.getLogger(HPCKeys.class.getName());
+
+  private HPCKeys() {
+  }
+
   // holds the mapping of keys to their corresponding key strings
   private static Map<String, Object> keys;
 
@@ -31,10 +35,9 @@ public class HPCKeys {
   static {
     try {
       keys = Resource.load(
-          "com.twitter.heron.scheduler.local.LocalKeys", KEYS_YAML);
+          "com.twitter.heron.scheduler.hpc.HPCKeys", KEYS_YAML);
     } catch (ClassNotFoundException e) {
-      LOG.severe("Unable to load the config Keys class " + e);
-      System.exit(1);
+      throw new RuntimeException("Unable to load the config Keys class", e);
     }
   }
 

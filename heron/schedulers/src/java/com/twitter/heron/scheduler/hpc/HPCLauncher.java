@@ -14,6 +14,14 @@
 
 package com.twitter.heron.scheduler.hpc;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.apache.commons.io.FileUtils;
+
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.common.ShellUtils;
@@ -22,16 +30,8 @@ import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;
 
-import org.apache.commons.io.FileUtils;
-
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 public class HPCLauncher implements ILauncher {
-  private static Logger LOG = Logger.getLogger(HPCLauncher.class.getName());
+  private static final Logger LOG = Logger.getLogger(HPCLauncher.class.getName());
 
   private Config config;
   private Config runtime;
@@ -42,15 +42,15 @@ public class HPCLauncher implements ILauncher {
   private String targetTopologyPackageFile;
 
   @Override
-  public void initialize(Config config, Config runtime) {
-    this.config = config;
-    this.runtime = runtime;
+  public void initialize(Config mConfig, Config mRuntime) {
+    this.config = mConfig;
+    this.runtime = mRuntime;
 
     // get the topology working directory
-    this.topologyWorkingDirectory = HPCContext.workingDirectory(config);
+    this.topologyWorkingDirectory = HPCContext.workingDirectory(mConfig);
 
     // get the path of core release URI
-    this.coreReleasePackage = HPCContext.corePackageUri(config);
+    this.coreReleasePackage = HPCContext.corePackageUri(mConfig);
 
     // form the target dest core release file name
     this.targetCoreReleaseFile = Paths.get(
@@ -69,7 +69,7 @@ public class HPCLauncher implements ILauncher {
   @Override
   public boolean launch(PackingPlan packing) {
     LOG.log(Level.FINE, "Launching topology for local cluster {0}",
-    HPCContext.cluster(config));
+        HPCContext.cluster(config));
 
     // download the core and topology packages into the working directory
     if (!downloadAndExtractPackages()) {
@@ -77,7 +77,8 @@ public class HPCLauncher implements ILauncher {
       return false;
     }
 
-    return SchedulerUtils.onScheduleAsLibrary(config, runtime, new HPCScheduler(topologyWorkingDirectory), packing);
+    return SchedulerUtils.onScheduleAsLibrary(config, runtime,
+        new HPCScheduler(topologyWorkingDirectory), packing);
   }
 
   /**

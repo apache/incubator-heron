@@ -14,8 +14,6 @@
 
 package com.twitter.heron.scheduler.hpc;
 
-import com.twitter.heron.spi.common.ShellUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,8 +24,10 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.twitter.heron.spi.common.ShellUtils;
+
 public class HPCController {
-  private static Logger LOG = Logger.getLogger(HPCController.class.getName());
+  private static final Logger LOG = Logger.getLogger(HPCController.class.getName());
 
   private final boolean isVerbose;
 
@@ -36,9 +36,12 @@ public class HPCController {
   }
 
   // Create an hpc job
-  public boolean createJob(String hpcScript, String heronExec, List<String> commandArgs, String topologyWorkingDirectory, int containers) {
+  public boolean createJob(String hpcScript, String heronExec,
+                           List<String> commandArgs, String topologyWorkingDirectory,
+                           int containers) {
     String nTasks = "--ntasks=" + containers;
-    List<String> hpcCmd = new ArrayList<>(Arrays.asList("sbatch", "-N", Integer.toString(containers), nTasks, hpcScript, heronExec));
+    List<String> hpcCmd = new ArrayList<>(Arrays.asList("sbatch", "-N",
+        Integer.toString(containers), nTasks, hpcScript, heronExec));
 
     for (int i = 0; i < commandArgs.size(); i++) {
       String arg = commandArgs.get(i);
@@ -56,7 +59,8 @@ public class HPCController {
     StringBuilder stdout = new StringBuilder();
     StringBuilder stderr = new StringBuilder();
     ShellUtils.runSyncProcess(
-        true, false, hpcCmd.toArray(new String[0]), stdout, stderr, new File(topologyWorkingDirectory));
+        true, false, hpcCmd.toArray(new String[0]), stdout, stderr,
+        new File(topologyWorkingDirectory));
     LOG.info("Stdout for HPC script: " + stdout);
     LOG.info("Stderror for HPC script: " + stderr);
     return true;
