@@ -117,7 +117,7 @@ def main():
     try:
         # These are the options that pex will use
         pparser, resolver_options_builder = configure_clp()
-        poptions, preqs = pparser.parse_args(sys.argv)
+        poptions, preqs = pparser.parse_args(['--no-use-wheel'] + sys.argv)
         poptions.entry_point = options.entry_point
         poptions.find_links = options.find_links
         poptions.pypi = options.pypi
@@ -148,7 +148,8 @@ def main():
 
         # Add prebuilt libraries listed in the manifest.
         reqs = manifest.get('requirements', {}).keys()
-        print("pex requirements: %s" % reqs)
+        if len(reqs) > 0:
+          print("pex requirements: %s" % reqs)
         pex_builder = build_pex(reqs, poptions,
                                 resolver_options_builder, interpreter=interpreter)
 
