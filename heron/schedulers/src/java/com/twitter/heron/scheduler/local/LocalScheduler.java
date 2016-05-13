@@ -31,12 +31,12 @@ import javax.xml.bind.DatatypeConverter;
 import org.apache.commons.io.FilenameUtils;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.common.ShellUtils;
 import com.twitter.heron.spi.scheduler.IScheduler;
-import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
@@ -137,11 +137,11 @@ public class LocalScheduler implements IScheduler {
   protected String getExecutorCommand(int container) {
     TopologyAPI.Topology topology = Runtime.topology(runtime);
 
-    int port1 = NetworkUtils.getFreePort();
-    int port2 = NetworkUtils.getFreePort();
-    int port3 = NetworkUtils.getFreePort();
-    int shellPort = NetworkUtils.getFreePort();
-    int port4 = NetworkUtils.getFreePort();
+    int port1 = SysUtils.getFreePort();
+    int port2 = SysUtils.getFreePort();
+    int port3 = SysUtils.getFreePort();
+    int shellPort = SysUtils.getFreePort();
+    int port4 = SysUtils.getFreePort();
 
     if (port1 == -1 || port2 == -1 || port3 == -1 || shellPort == -1 || port4 == -1) {
       throw new RuntimeException("Failed to find available ports to start topology");

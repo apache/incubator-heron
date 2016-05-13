@@ -28,7 +28,7 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.HttpUtils;
-import com.twitter.heron.spi.utils.NetworkUtils;
+import com.twitter.heron.spi.utils.SchedulerUtils;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(HttpUtils.class)
@@ -119,10 +119,7 @@ public class HttpServiceSchedulerClientTest {
     PowerMockito.doReturn(true).
         when(HttpUtils.class, "sendHttpPostRequest",
             Mockito.eq(connection), Mockito.any(byte[].class));
-    Scheduler.SchedulerResponse notOKResponse =
-        Scheduler.SchedulerResponse.newBuilder().
-            setStatus(NetworkUtils.getHeronStatus(false)).
-            build();
+    Scheduler.SchedulerResponse notOKResponse = SchedulerUtils.constructSchedulerResponse(false);
     PowerMockito.doReturn(notOKResponse.toByteArray()).
         when(HttpUtils.class, "readHttpResponse", Mockito.eq(connection));
     Assert.assertFalse(
@@ -131,10 +128,7 @@ public class HttpServiceSchedulerClientTest {
     Mockito.verify(connection, Mockito.times(2)).disconnect();
 
     // Received ok response -- success case
-    Scheduler.SchedulerResponse oKResponse =
-        Scheduler.SchedulerResponse.newBuilder().
-            setStatus(NetworkUtils.getHeronStatus(true)).
-            build();
+    Scheduler.SchedulerResponse oKResponse = SchedulerUtils.constructSchedulerResponse(true);
     PowerMockito.doReturn(oKResponse.toByteArray()).
         when(HttpUtils.class, "readHttpResponse", Mockito.eq(connection));
     Assert.assertTrue(
