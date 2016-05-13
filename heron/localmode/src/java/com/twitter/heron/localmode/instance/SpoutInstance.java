@@ -241,7 +241,7 @@ public class SpoutInstance implements IInstance {
   }
 
   private void produceTuple() {
-    int maxSpoutPending = TypeUtils.getInt(config.get(Config.TOPOLOGY_MAX_SPOUT_PENDING));
+    int maxSpoutPending = TypeUtils.getInteger(config.get(Config.TOPOLOGY_MAX_SPOUT_PENDING));
 
     long totalTuplesEmitted = collector.getTotalTuplesEmitted();
 

@@ -30,19 +30,19 @@ public final class ZkContext extends Context {
   }
 
   public static int sessionTimeoutMs(Config config) {
-    return config.getIntegerValue(SESSION_TIMEOUT_MS);
+    return config.getIntegerValue(SESSION_TIMEOUT_MS, 30000);
   }
 
   public static int connectionTimeoutMs(Config config) {
-    return config.getIntegerValue(CONNECTION_TIMEOUT_MS);
+    return config.getIntegerValue(CONNECTION_TIMEOUT_MS, 30000);
   }
 
   public static int retryCount(Config config) {
-    return config.getIntegerValue(RETRY_COUNT);
+    return config.getIntegerValue(RETRY_COUNT, 10);
   }
 
   public static int retryIntervalMs(Config config) {
-    return config.getIntegerValue(RETRY_INTERVAL_MS);
+    return config.getIntegerValue(RETRY_INTERVAL_MS, 10000);
   }
 
   private ZkContext() {

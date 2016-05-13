@@ -96,7 +96,7 @@ public class ScribeSink implements IMetricsSink {
 
     topologyName = context.getTopologyName();
 
-    connectRetryAttempts = TypeUtils.getInt(config.get(KEY_SCRIBE_CONNECT_SERVER_ATTEMPTS));
+    connectRetryAttempts = TypeUtils.getInteger(config.get(KEY_SCRIBE_CONNECT_SERVER_ATTEMPTS));
 
     // Open the TTransport connection and client to scribe server
     open();
@@ -163,8 +163,8 @@ public class ScribeSink implements IMetricsSink {
   private boolean open() {
     try {
       TSocket socket = new TSocket((String) config.get(KEY_SCRIBE_HOST),
-          TypeUtils.getInt(config.get(KEY_SCRIBE_PORT)),
-          TypeUtils.getInt(config.get(KEY_SCRIBE_TIMEOUT_MS)));
+          TypeUtils.getInteger(config.get(KEY_SCRIBE_PORT)),
+          TypeUtils.getInteger(config.get(KEY_SCRIBE_TIMEOUT_MS)));
 
       transport = new TFramedTransport(socket);
       transport.open();
@@ -182,7 +182,7 @@ public class ScribeSink implements IMetricsSink {
 
   // Log the message to scribe, optionally retrying
   private void logToScribe(List<LogEntry> pendingEntries) {
-    int retryAttempts = TypeUtils.getInt(config.get(KEY_SCRIBE_RETRY_ATTEMPTS));
+    int retryAttempts = TypeUtils.getInteger(config.get(KEY_SCRIBE_RETRY_ATTEMPTS));
     long retryIntervalMs = TypeUtils.getLong(config.get(KEY_SCRIBE_RETRY_INTERVAL_MS));
     try {
       for (int attempt = 0; attempt < retryAttempts; attempt++) {
