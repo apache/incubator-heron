@@ -34,6 +34,7 @@ import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 public final class SchedulerUtils {
   public static final int PORTS_REQUIRED_FOR_EXECUTOR = 6;
+  public static final int PORTS_REQUIRED_FOR_SCHEDULER = 1;
 
   private static final Logger LOG = Logger.getLogger(SchedulerUtils.class.getName());
 
@@ -79,21 +80,44 @@ public final class SchedulerUtils {
    * Utils method to construct the command to start heron-scheduler
    *
    * @param config The static Config
-   * @param javaBinary the path of java executable
-   * @param httpPort the free port to be used by scheduler starting the http server
+   * @param runtime The runtime Config
+   * @param freePorts list of free ports
    * @return String[] representing the command to start heron-scheduler
    */
-  public static String[] schedulerCommand(Config config, String javaBinary, int httpPort) {
-    String schedulerClassPath = new StringBuilder()
+  public static String[] schedulerCommand(
+      Config config,
+      Config runtime,
+      List<Integer> freePorts) {
+    // First let us have some safe checks
+    if (freePorts.size() < PORTS_REQUIRED_FOR_SCHEDULER) {
+      throw new RuntimeException("Failed to find enough ports for executor");
+    }
+    for (int port : freePorts) {
+      if (port == -1) {
+        throw new RuntimeException("Failed to find available ports for executor");
+      }
+    }
+
+    int httpPort = freePorts.get(0);
+
+
+
+
+    List<String> commands = new ArrayList<>();
+
+    // The java executable should be "{JAVA_HOME}/bin/java"
+    String javaExecutable = String.format("%s/%s", Context.javaSandboxHome(config), "bin/java");
+    commands.add(javaExecutable);
+    commands.add("-cp");
+
+    // Construct the complete classpath to start scheduler
+    String completeSchedulerProcessClassPath = new StringBuilder()
         .append(Context.schedulerSandboxClassPath(config)).append(":")
         .append(Context.packingSandboxClassPath(config)).append(":")
         .append(Context.stateManagerSandboxClassPath(config))
         .toString();
+    commands.add(completeSchedulerProcessClassPath);
 
-    List<String> commands = new ArrayList<>();
-    commands.add(javaBinary);
-    commands.add("-cp");
-    commands.add(schedulerClassPath);
     commands.add("com.twitter.heron.scheduler.SchedulerMain");
     commands.add("--cluster");
     commands.add(Context.cluster(config));
@@ -178,12 +202,14 @@ public final class SchedulerUtils {
     commands.add(Context.instanceSandboxClassPath(config));
     commands.add(Context.metricsSinksSandboxFile(config));
 
+    // Construct the complete classpath to start scheduler
     String completeSchedulerProcessClassPath = new StringBuilder()
         .append(Context.schedulerSandboxClassPath(config)).append(":")
         .append(Context.packingSandboxClassPath(config)).append(":")
         .append(Context.stateManagerSandboxClassPath(config))
         .toString();
     commands.add(completeSchedulerProcessClassPath);
+
     commands.add(Integer.toString(schedulerPort));
 
     return commands.toArray(new String[0]);
