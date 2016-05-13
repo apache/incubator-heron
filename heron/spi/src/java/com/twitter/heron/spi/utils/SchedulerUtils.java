@@ -33,6 +33,8 @@ import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 public final class SchedulerUtils {
+  public static final int PORTS_REQUIRED_FOR_EXECUTOR = 6;
+
   private static final Logger LOG = Logger.getLogger(SchedulerUtils.class.getName());
 
   private SchedulerUtils() {
@@ -124,7 +126,7 @@ public final class SchedulerUtils {
       int containerIndex,
       List<Integer> freePorts) {
     // First let us have some safe checks
-    if (freePorts.size() < 6) {
+    if (freePorts.size() < PORTS_REQUIRED_FOR_EXECUTOR) {
       throw new RuntimeException("Failed to find enough ports for executor");
     }
     for (int port : freePorts) {
@@ -155,7 +157,7 @@ public final class SchedulerUtils {
     commands.add(Context.tmasterSandboxBinary(config));
     commands.add(Context.stmgrSandboxBinary(config));
     commands.add(Context.metricsManagerSandboxClassPath(config));
-    commands.add(formatJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)));
+    commands.add(encodeJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)));
     commands.add(TopologyUtils.makeClassPath(topology, Context.topologyJarFile(config)));
     commands.add(Integer.toString(masterPort));
     commands.add(Integer.toString(tmasterControllerPort));
@@ -163,7 +165,7 @@ public final class SchedulerUtils {
     commands.add(Context.systemConfigSandboxFile(config));
     commands.add(TopologyUtils.formatRamMap(
         TopologyUtils.getComponentRamMap(topology, Context.instanceRam(config))));
-    commands.add(formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
+    commands.add(encodeJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
     commands.add(Context.topologyPackageType(config));
     commands.add(Context.topologyJarFile(config));
     commands.add(Context.javaSandboxHome(config));
@@ -265,13 +267,35 @@ public final class SchedulerUtils {
 
   /**
    * Encode the JVM options
+   * 1. Convert it into Base64 format
+   * 2. Add \" at the start and at the end
+   * 3. replace "=" with "&equals;"
    *
    * @return encoded string
    */
-  public static String formatJavaOpts(String javaOpts) {
+  public static String encodeJavaOpts(String javaOpts) {
     String javaOptsBase64 = DatatypeConverter.printBase64Binary(
         javaOpts.getBytes(Charset.forName("UTF-8")));
 
     return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
+  }
+
+  /**
+   * Decode the JVM options
+   * 1. strip \" at the start and at the end
+   * 2. replace "&equals;" with "="
+   * 3. Revert from Base64 format
+   *
+   * @return decoded string
+   */
+  public static String decodeJavaOpts(String encodedJavaOpts) {
+    String javaOptsBase64 =
+        encodedJavaOpts.
+            replaceAll("^\"+", "").
+            replaceAll("\\s+$", "").
+            replace("&equals;", "=");
+
+    return new String(
+        DatatypeConverter.parseBase64Binary(javaOptsBase64), Charset.forName("UTF-8"));
   }
 }

@@ -37,7 +37,6 @@ import com.twitter.heron.spi.utils.SchedulerUtils;
 
 public class LocalScheduler implements IScheduler {
   private static final Logger LOG = Logger.getLogger(LocalScheduler.class.getName());
-  private static final int PORTS_REQUIRED_FOR_EXECUTOR = 6;
   // executor service for monitoring all the containers
   private final ExecutorService monitorService = Executors.newCachedThreadPool();
   // map to keep track of the process and the shard it is running
@@ -119,8 +118,8 @@ public class LocalScheduler implements IScheduler {
   }
 
   protected String[] getExecutorCommand(int container) {
-    List<Integer> freePorts = new ArrayList<>(PORTS_REQUIRED_FOR_EXECUTOR);
-    for (int i = 0; i < PORTS_REQUIRED_FOR_EXECUTOR; i++) {
+    List<Integer> freePorts = new ArrayList<>(SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR);
+    for (int i = 0; i < SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR; i++) {
       freePorts.add(SysUtils.getFreePort());
     }
 
