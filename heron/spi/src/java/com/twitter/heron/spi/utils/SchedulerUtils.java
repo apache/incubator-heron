@@ -14,11 +14,16 @@
 
 package com.twitter.heron.spi.utils;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.xml.bind.DatatypeConverter;
+
+import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.spi.common.Config;
@@ -68,6 +73,14 @@ public final class SchedulerUtils {
     return ret;
   }
 
+  /**
+   * Utils method to construct the command to start heron-scheduler
+   *
+   * @param config The static Config
+   * @param javaBinary the path of java executable
+   * @param httpPort the free port to be used by scheduler starting the http server
+   * @return String[] representing the command to start heron-scheduler
+   */
   public static String[] schedulerCommand(Config config, String javaBinary, int httpPort) {
     String schedulerClassPath = new StringBuilder()
         .append(Context.schedulerSandboxClassPath(config)).append(":")
@@ -92,6 +105,84 @@ public final class SchedulerUtils {
     commands.add(Context.topologyJarFile(config));
     commands.add("--http_port");
     commands.add(Integer.toString(httpPort));
+
+    return commands.toArray(new String[0]);
+  }
+
+  /**
+   * Utils method to construct the command to start heron-executor
+   *
+   * @param config The static Config
+   * @param runtime The runtime Config
+   * @param containerIndex the executor/container index
+   * @param freePorts list of free ports
+   * @return String[] representing the command to start heron-executor
+   */
+  public static String[] executorCommand(
+      Config config,
+      Config runtime,
+      int containerIndex,
+      List<Integer> freePorts) {
+    // First let us have some safe checks
+    if (freePorts.size() < 6) {
+      throw new RuntimeException("Failed to find enough ports for executor");
+    }
+    for (int port : freePorts) {
+      if (port == -1) {
+        throw new RuntimeException("Failed to find available ports for executor");
+      }
+    }
+
+    int masterPort = freePorts.get(0);
+    int tmasterControllerPort = freePorts.get(1);
+    int tmasterStatsPort = freePorts.get(2);
+    int shellPort = freePorts.get(3);
+    int metricsmgrPort = freePorts.get(4);
+    int schedulerPort = freePorts.get(5);
+
+    TopologyAPI.Topology topology = Runtime.topology(runtime);
+
+    // To construct the command aligning to executor interfaces
+    List<String> commands = new ArrayList<>();
+    commands.add(Context.executorSandboxBinary(config));
+    commands.add(Integer.toString(containerIndex));
+    commands.add(topology.getName());
+    commands.add(topology.getId());
+    commands.add(FileUtils.getBaseName(Context.topologyDefinitionFile(config)));
+    commands.add(Runtime.instanceDistribution(runtime));
+    commands.add(Context.stateManagerConnectionString(config));
+    commands.add(Context.stateManagerRootPath(config));
+    commands.add(Context.tmasterSandboxBinary(config));
+    commands.add(Context.stmgrSandboxBinary(config));
+    commands.add(Context.metricsManagerSandboxClassPath(config));
+    commands.add(formatJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)));
+    commands.add(TopologyUtils.makeClassPath(topology, Context.topologyJarFile(config)));
+    commands.add(Integer.toString(masterPort));
+    commands.add(Integer.toString(tmasterControllerPort));
+    commands.add(Integer.toString(tmasterStatsPort));
+    commands.add(Context.systemConfigSandboxFile(config));
+    commands.add(TopologyUtils.formatRamMap(
+        TopologyUtils.getComponentRamMap(topology, Context.instanceRam(config))));
+    commands.add(formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
+    commands.add(Context.topologyPackageType(config));
+    commands.add(Context.topologyJarFile(config));
+    commands.add(Context.javaSandboxHome(config));
+    commands.add(Integer.toString(shellPort));
+    commands.add(Context.shellSandboxBinary(config));
+    commands.add(Integer.toString(metricsmgrPort));
+    commands.add(Context.cluster(config));
+    commands.add(Context.role(config));
+    commands.add(Context.environ(config));
+    commands.add(Context.instanceSandboxClassPath(config));
+    commands.add(Context.metricsSinksSandboxFile(config));
+
+    String completeSchedulerProcessClassPath = new StringBuilder()
+        .append(Context.schedulerSandboxClassPath(config)).append(":")
+        .append(Context.packingSandboxClassPath(config)).append(":")
+        .append(Context.stateManagerSandboxClassPath(config))
+        .toString();
+    commands.add(completeSchedulerProcessClassPath);
+    commands.add(Integer.toString(schedulerPort));
 
     return commands.toArray(new String[0]);
   }
@@ -170,5 +261,17 @@ public final class SchedulerUtils {
     return Scheduler.SchedulerResponse.newBuilder().
         setStatus(status).
         build();
+  }
+
+  /**
+   * Encode the JVM options
+   *
+   * @return encoded string
+   */
+  public static String formatJavaOpts(String javaOpts) {
+    String javaOptsBase64 = DatatypeConverter.printBase64Binary(
+        javaOpts.getBytes(Charset.forName("UTF-8")));
+
+    return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
   }
 }
