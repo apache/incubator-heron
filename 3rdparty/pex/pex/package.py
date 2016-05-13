@@ -219,6 +219,8 @@ class WheelPackage(Package):
             yield (py, abi, real_arch)
 
   def compatible(self, identity, platform=Platform.current()):
+    print("WheelPackage.compatible() - name=[%s] version=[%s] identity=[%s] platform=[%s]" % (self._name, self._raw_version, identity, platform))
+    print("WheelPackage.compatible() - self._supported_tags=%s" % self._supported_tags)
     for tag in PEP425.iter_supported_tags(identity, platform):
       if tag in self._supported_tags:
         return True
