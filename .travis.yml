@@ -12,7 +12,7 @@ addons:
     packages:
       - gcc-4.8
       - g++-4.8
-      - python2.7.10
+      - python2.7
       - wget
       - pkg-config
       - zip
