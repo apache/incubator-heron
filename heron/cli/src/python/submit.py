@@ -41,7 +41,7 @@ def create_parser(subparsers):
   parser = subparsers.add_parser(
       'submit',
       help='Submit a topology',
-      usage = "%(prog)s [options] cluster/[role]/[environ] " + \
+      usage = "%(prog)s [options] cluster/[role]/[env] " + \
               "topology-file-name topology-class-name [topology-args]",
       add_help = False
   )
