@@ -65,7 +65,7 @@ public class FileSink implements IMetricsSink {
   @Override
   public void init(Map<String, Object> conf, SinkContext context) {
     filenamePrefix = (String) conf.get(FILENAME_KEY) + "." + context.getMetricsMgrId();
-    fileMaximum = TypeUtils.getInt(conf.get(MAXIMUM_FILE_COUNT_KEY));
+    fileMaximum = TypeUtils.getInteger(conf.get(MAXIMUM_FILE_COUNT_KEY));
     sinkContext = context;
 
     // We set System.out as writer's default value here to avoid null object

@@ -244,7 +244,7 @@ public class BoltInstance implements IInstance {
         helper.getTopologyContext().getTopologyConfig().get(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS);
 
     if (tickTupleFreqSecs != null) {
-      int freq = TypeUtils.getInt(tickTupleFreqSecs);
+      int freq = TypeUtils.getInteger(tickTupleFreqSecs);
 
       Runnable r = new Runnable() {
         public void run() {

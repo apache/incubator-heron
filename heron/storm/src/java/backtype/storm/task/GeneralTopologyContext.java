@@ -167,7 +167,7 @@ public class GeneralTopologyContext implements JSONAware {
 
   /*
     public int maxTopologyMessageTimeout() {
-        Integer max = Utils.getInt(_stormConf.get(Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS));
+        Integer max = Utils.getInteger(_stormConf.get(Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS));
         for(String spout: getRawTopology().get_spouts().keySet()) {
             ComponentCommon common = getComponentCommon(spout);
             String jsonConf = common.get_json_conf();
@@ -175,7 +175,7 @@ public class GeneralTopologyContext implements JSONAware {
                 Map conf = (Map) JSONValue.parse(jsonConf);
                 Object comp = conf.get(Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS);
                 if(comp!=null) {
-                    max = Math.max(Utils.getInt(comp), max);
+                    max = Math.max(Utils.getInteger(comp), max);
                 }
             }
         }
