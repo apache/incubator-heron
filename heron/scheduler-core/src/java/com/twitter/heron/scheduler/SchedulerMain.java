@@ -174,28 +174,12 @@ public class SchedulerMain {
 
     // initialize the scheduler with the options
     String topologyName = cmd.getOptionValue("topology_name");
-
-    // Look up the topology def file location
-    String topologyDefnFile = TopologyUtils.lookUpTopologyDefnFile(".", topologyName);
-
-    // load the topology definition into topology proto
-    TopologyAPI.Topology topology = TopologyUtils.getTopology(topologyDefnFile);
-
-    // build the config by expanding all the variables
-    Config schedulerConfig = SchedulerConfig.loadConfig(
-        cmd.getOptionValue("cluster"),
+    SchedulerMain schedulerMain = createInstance(cmd.getOptionValue("cluster"),
         cmd.getOptionValue("role"),
         cmd.getOptionValue("environment"),
-        cmd.getOptionValue("topology_jar"), topologyDefnFile, topology);
-
-    // set up logging with complete Config
-    setupLogging(schedulerConfig);
-
-    // Create a new instance
-    SchedulerMain schedulerMain = new SchedulerMain(
-        schedulerConfig, topology, Integer.parseInt(cmd.getOptionValue("http_port")));
-
-    LOG.log(Level.INFO, "Loaded scheduler config: {0}", schedulerMain.config);
+        cmd.getOptionValue("topology_jar"),
+        topologyName,
+        Integer.parseInt(cmd.getOptionValue("http_port")));
 
     // run the scheduler
     boolean ret = schedulerMain.runScheduler();
@@ -207,6 +191,37 @@ public class SchedulerMain {
       // stop the server and close the state manager
       LOG.log(Level.INFO, "Shutting down topology: {0}", topologyName);
     }
+  }
+
+  public static SchedulerMain createInstance(String cluster,
+                                             String role,
+                                             String env,
+                                             String topologyJar,
+                                             String topologyName,
+                                             int httpPort) throws IOException {
+    // Look up the topology def file location
+    String topologyDefnFile = TopologyUtils.lookUpTopologyDefnFile(".", topologyName);
+
+    // load the topology definition into topology proto
+    TopologyAPI.Topology topology = TopologyUtils.getTopology(topologyDefnFile);
+
+    // build the config by expanding all the variables
+    Config schedulerConfig = SchedulerConfig.loadConfig(
+        cluster,
+        role,
+        env,
+        topologyJar,
+        topologyDefnFile,
+        topology);
+
+    // set up logging with complete Config
+    setupLogging(schedulerConfig);
+
+    // Create a new instance
+    SchedulerMain schedulerMain = new SchedulerMain(schedulerConfig, topology, httpPort);
+
+    LOG.log(Level.INFO, "Loaded scheduler config: {0}", schedulerMain.config);
+    return schedulerMain;
   }
 
   // Set up logging based on the Config
