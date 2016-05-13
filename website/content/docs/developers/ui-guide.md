@@ -2,13 +2,12 @@
 
 ### Overview
 
-This guide helps in understanding how to make best use of Heron UI for
-monitoring and debugging your topologies.
+This guide describes how to make best use of Heron UI for monitoring and
+debugging topologies.
 
-The UI enables a user to get a lot of information about a topology or a part of
-topology quickly, thus reducing the debugging time considerably. Some of these
-features are listed below. Complete set of features can be found in next few
-sections.
+The UI provides a lot of information about a topology or a part of topology
+quickly, thus reducing the debugging time considerably. Some of these features
+are listed below. A Complete set of features can be found in follwing sections.
 
 1. See logical plan of a topology
 2. See physical plan of a topology
@@ -17,13 +16,11 @@ sections.
 5. Links to get logs, memory histogram, jstack, heapdump and exceptions of
    a particular instance
 
-and other useful links and information, that are explained below.
-
 #### Topologies Page
 
-This is the home page of Heron UI.
+Below is the home page of Heron UI.
 
-Following information or actions can be found on this page.
+The following information or actions can be found on this page.
 
 1. List of all topologies
 2. Number of topologies fitered after search (total by default)
@@ -38,24 +35,22 @@ Following information or actions can be found on this page.
 
 #### Topology Page
 
-This is the main page to monitor a topology. There are some basic metrics that
-can be found here, and some generic info. A complete list of information and
-actions is described below.
+Below is the main page to monitor a topology.
 
 1. Name of the topology
 2. [Logical plan](../../concepts/topologies#logical-plan) of the topology
 3. [Physical plan](../../concepts/topologies#physical-plan) of the topology
 4. Health metrics for the topology
-5. General Info about the topology
+5. General info about the topology
 6. General metrics for the topology
 7. Click components for more details
 8. Click instances for more details
-9. Click on Aggregated Metrics to color instances by metrics
+9. Click on aggregated metrics to color instances by metrics
 10. Link to topology level configs
-11. Link to Job page  only if the scheduler provides a link
-   `(TODO: Link to this guide)`
-12. Link to Viz dashboard for this topology only if Tracker is configured with
-   one. `(TODO: Link to this configuration)`
+11. Link to job page  only if the scheduler provides a link
+   <!-- (TODO: Link to this guide) -->
+12. Link to viz dashboard for this topology only if Tracker is configured with
+   one. <!-- (TODO: Link to this configuration) -->
 
 ![Topology1] (/img/ui-guide/topology1.png)
 
@@ -64,17 +59,17 @@ actions is described below.
 Each node in logical plan can be clicked for more specific info about that
 component.
 
-1. Averaged or Max metrics for all instances of this component
+1. Averaged or max metrics for all instances of this component
 2. Aggregated metrics for all instances of this component
 3. List of all instances and their aggregated metrics
-4. Instance level operations, which are described in more details below
+4. [Instance level operations](#instance-actions-pages), which are described in more details below
 
 ![Topology Component] (/img/ui-guide/topology-component.png)
 
 Clicking on an instance will highlight that instance in the list.
 
 1. Aggregated metrics are only for this instance
-2. Quick access to Logs, Exceptions and Job pages for this instance
+2. Quick access to logs, exceptions and job pages for this instance
 3. Component counters are still aggregated for all instances
 4. The selected instance is highlighted
 
@@ -91,16 +86,16 @@ metrics. This is quick way to find out which instances are having issues.
 
 #### Config Page
 
-These are the Topology Configurations `(TODO: Add link to Topology
-Configurations)` that your topology is configured with. Note that spout and bolt
-level configurations are not part of topology config.
+These are the topology configurations <!-- (TODO: Add link to Topology
+Configurations) --> that your topology is configured with. Note that spout and
+bolt level configurations are not part of topology config.
 
 ![Config] (/img/ui-guide/config.png)
 
-#### Instance Action Pages
+#### <a name="instance-actions-pages">Instance Action Pages</a>
 
-These actions are available for all the instances. They are described in more
-detail below.
+These actions are available for all the instances. They are described in the
+next sections.
 
 ![Instance Links] (/img/ui-guide/topology-instance-links.png)
 
@@ -113,12 +108,12 @@ also be downloaded.
 
 #### Job Page
 
-This is the directory view of the container. All instances from a container will
-point to the same job page. Following informaion is available on this page,
-among other things.
+Below is the directory view of the container. All instances from a container
+will point to the same job page. Following information is available on this page,
+amongst other things.
 
 1. The jar or tar file associated with this topology
-2. Logs for heron-executor `TODO: Link heron-executor`
+2. Logs for heron-executor <!-- TODO: Link heron-executor -->
 3. `log-files` folder which has instance logs, as well as `stream manager` or
    `tmaster` logs.
 
@@ -136,31 +131,32 @@ exception occurred, the latest and the oldest occurance times.
 
 #### PID Page
 
-This is a quick way to know the process ID for an instance. Since each instance
-runs in its own JVM process, this will be unique for a host. The PID is
-internally used for other tasks, such as getting jstack or heap dump for an
-instance.
+This link can be used to find the process ID for an instance. Since each instance
+runs in its own JVM process, this will be unique for a host. The PID is also
+used for other tasks, such as getting jstack or heap dump for an instance.
 
 ![PID] (/img/ui-guide/pid.png)
 
 #### Jstack Page
 
-This runs the `jstack` command on the host against the PID for the instance, and
-prints the output on this page.
+Click on this link to run the `jstack` command on the host against the PID for
+the instance. The output of the command is printed on the page in the browser
+itself.
 
 ![Jstack] (/img/ui-guide/jstack.png)
 
 #### Memory Histogram Page
 
-This runs the `jmap -histo` command on the host against the PID for the
-instance, and prints the output on this page.
+Click on this link to run the `jmap -histo` command on the host against the PID
+for the instance. The output of the command is printed on the page in the
+browser itself.
 
 ![Histo] (/img/ui-guide/histo.png)
 
 #### Memory Dump page
 
-This runs the `jmap -dump:format=b,file=/tmp/heap.bin` command agaist the PID
-for the instance, and prints the output on this page. Follow the instructions on
-the page to download the heap dump file. This link does not download the file.
+Click on this link to run the `jmap -dump:format=b,file=/tmp/heap.bin` command
+agaist the PID for the instance. Follow the instructions on the page to download
+the heap dump file. This link does not download the file.
 
 ![Memory Dump] (/img/ui-guide/dump.png)
