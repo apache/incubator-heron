@@ -21,7 +21,7 @@ corresponding binaries will be
 
 where \<version\> is the desired heron version. For example, \<version\>=0.14.0
 
-Run the download self installing binary for heron client as follows
+Run the download self installing binary for heron client using ```--user``` as follows
 ```bash
 $ chmod +x heron-client-install-<version>-darwin.sh
 $ ./heron-client-install-<version>-darwin.sh --user
@@ -34,7 +34,7 @@ To add ```/Users/$USER/bin``` to your path, run:
 $ export PATH="$PATH:$HOME/bin"
 ```
 
-Run the download self installing binary for heron tools as follows
+Run the download self installing binary for heron tools using ```--user``` as follows
 ```bash
 $ chmod +x heron-tools-install-<version>-darwin.sh
 $ ./heron-tools-install-<version>-darwin.sh --user
@@ -45,7 +45,7 @@ Make sure you have "/Users/$USER/bin" in your path.
 
 ### Step 2 - Launch an example topology
 
-Example topologies are installed by default in ```/usr/local/heron/examples```.  Launch an example [topology](../concepts/topologies) on **local cluster** using submit:
+Example topologies are installed by default in ```~/.heron/examples```.  Launch an example [topology](../concepts/topologies) on **local cluster** using submit:
 
 ```bash
 $ heron submit local ~/.heron/examples/heron-examples.jar com.twitter.heron.examples.ExclamationTopology ExclamationTopology
