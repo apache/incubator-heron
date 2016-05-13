@@ -11,5 +11,5 @@ pex_binary(
     resources = [
         "resources/test.conf",
     ],
-    reqs = ["argparse==1.2.1"],
+    reqs = ["argparse==1.4.0"],
 )
