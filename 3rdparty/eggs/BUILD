@@ -54,6 +54,16 @@ filegroup(
 )
 
 filegroup(
+    name = "gevent",
+    srcs = [
+        "gevent-1.1.1-py2.7-macosx-10.10-x86_64.egg",
+        "gevent-1.1.1-py2.7-linux-x86_64.egg",
+        "greenlet-0.4.9-py2.7-macosx-10.10-x86_64.egg",
+        "greenlet-0.4.9-py2.7-linux-x86_64.egg",
+    ]
+)
+
+filegroup(
     name = 'setuptools',
     srcs = ['setuptools-18.0.1-py2.py3-none-any.whl'],
 )
