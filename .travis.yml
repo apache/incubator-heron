@@ -24,12 +24,12 @@ env:
 before_install:
 
   # download and install libunwind
-  - wget http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz
+  - wget -q http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz
   - tar xfz libunwind-1.1.tar.gz
   - cd libunwind-1.1 && ./configure --prefix=/usr && sudo make --silent install && cd ..
 
   # download and install bazel
-  - wget 'https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh'
+  - wget -q 'https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh'
   - chmod +x bazel-0.1.2-installer-linux-x86_64.sh
   - ./bazel-0.1.2-installer-linux-x86_64.sh --user
 
@@ -38,7 +38,6 @@ install:
   - pip install --user --quiet wheel
 
 script:
-  - python -c "import wheel"
   - which gcc-4.8
   - gcc --version
   - which g++-4.8
