@@ -33,10 +33,6 @@ before_install:
   - chmod +x bazel-0.1.2-installer-linux-x86_64.sh
   - ./bazel-0.1.2-installer-linux-x86_64.sh --user
 
-install:
-  - pip install --user --quiet --upgrade pip
-  - pip install --user --quiet wheel
-
 script:
   - python -V
   - which gcc-4.8

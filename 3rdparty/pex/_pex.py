@@ -117,6 +117,11 @@ def main():
     try:
         # These are the options that pex will use
         pparser, resolver_options_builder = configure_clp()
+
+        # Disabling wheels since the PyYAML wheel is incompatible with the Travis CI linux host.
+        # Enabling Trace logging in pex/tracer.py shows this upon failure:
+        #  pex: Target package WheelPackage('file:///tmp/tmpR_gDlG/PyYAML-3.11-cp27-cp27mu-linux_x86_64.whl')
+        #  is not compatible with CPython-2.7.3 / linux-x86_64
         poptions, preqs = pparser.parse_args(['--no-use-wheel'] + sys.argv)
         poptions.entry_point = options.entry_point
         poptions.find_links = options.find_links
