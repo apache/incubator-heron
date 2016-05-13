@@ -188,7 +188,7 @@ cat <<EOF
 
 Heron API is now installed!
 
-See http://heronstreaming.io/docs/getting-started.html to start a new project!
+See http://heronstreaming.io/docs/getting-started.html for how to use Heron.
 EOF
 echo
 cat <<'EOF'
