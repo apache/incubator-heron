@@ -14,14 +14,14 @@ pex_library(
 )
 
 pex_library(
-    name = "heron-network-lib",
-    srcs = glob(
-        ["network/*.py"],
-    ),
-    deps = [
-      "//heron/proto:proto-py",
-    ],
-    eggs = [
-        "//3rdparty/eggs:gevent",
-    ]
+  name = "heron-network-lib",
+  srcs = glob(
+    ["network/*.py"],
+  ),
+  deps = [
+    "//heron/proto:proto-py",
+  ],
+  eggs = [
+    "//3rdparty/eggs:gevent",
+  ]
 )
