@@ -21,6 +21,9 @@ fi
 cat ~/.bazelrc >> tools/travis-ci/bazel.rc
 ./bazel_configure.py
 
+# TODO: remove after testing
+bazel --bazelrc=tools/travis-ci/bazel.rc build heron/cli/src/python
+
 # build heron
 bazel --bazelrc=tools/travis-ci/bazel.rc build heron/...
 
