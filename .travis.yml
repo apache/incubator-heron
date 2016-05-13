@@ -33,7 +33,11 @@ before_install:
   - chmod +x bazel-0.1.2-installer-linux-x86_64.sh
   - ./bazel-0.1.2-installer-linux-x86_64.sh --user
 
-script: 
+install:
+  - pip install wheel
+
+script:
+  - python -c "import wheel"
   - which gcc-4.8
   - gcc --version
   - which g++-4.8
