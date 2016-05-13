@@ -45,7 +45,7 @@ Make sure you have "/Users/$USER/bin" in your path.
 
 ### Step 2 - Launch an example topology
 
-Example topologies are installed by default in ```~/.heron/examples```.  Launch an example [topology](../concepts/topologies) on **local cluster** using submit:
+Example topologies are installed by with ```--user``` flag in ```~/.heron/examples```.  Launch an example [topology](../concepts/topologies) on **local cluster** using submit:
 
 ```bash
 $ heron submit local ~/.heron/examples/heron-examples.jar com.twitter.heron.examples.ExclamationTopology ExclamationTopology
