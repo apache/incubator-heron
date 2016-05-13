@@ -415,6 +415,7 @@ def resolve_interpreter(cache, fetchers, interpreter, requirement):
 
 def interpreter_from_options(options):
   interpreter = None
+
   if options.python:
     if os.path.exists(options.python):
       interpreter = PythonInterpreter.from_binary(options.python)
