@@ -62,7 +62,7 @@ public class GraphiteSink implements IMetricsSink {
 
     // Get Graphite host configurations.
     final String serverHost = (String) conf.get(SERVER_HOST_KEY);
-    final int serverPort = TypeUtils.getInt(conf.get(SERVER_PORT_KEY));
+    final int serverPort = TypeUtils.getInteger(conf.get(SERVER_PORT_KEY));
 
     // Safe check
     if (conf.get(SERVER_HOST_KEY) == null
@@ -72,7 +72,7 @@ public class GraphiteSink implements IMetricsSink {
 
     int maxServerReconnectAttempts = conf.get(SERVER_HOST_KEY) == null
         ? DEFAULT_MAX_CONNECTION_FAILURES
-        : TypeUtils.getInt(conf.get(SERVER_MAX_RECONNECT_ATTEMPTS));
+        : TypeUtils.getInteger(conf.get(SERVER_MAX_RECONNECT_ATTEMPTS));
 
     // Get Graphite metrics graph prefix.
     metricsPrefix = (String) conf.get(METRICS_PREFIX);

@@ -90,7 +90,15 @@ public class Config {
 
   public Integer getIntegerValue(String key) {
     Object value = get(key);
-    return TypeUtils.getInt(value);
+    return TypeUtils.getInteger(value);
+  }
+
+  public Integer getIntegerValue(String key, int defaultValue) {
+    Object value = get(key);
+    if (value != null) {
+      return TypeUtils.getInteger(value);
+    }
+    return defaultValue;
   }
 
   public Double getDoubleValue(String key) {
