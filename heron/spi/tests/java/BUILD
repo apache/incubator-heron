@@ -43,8 +43,8 @@ java_test(
 )
 
 java_test(
-    name = "network-utils_unittest",
-    srcs = glob(["**/utils/NetworkUtilsTest.java"]),
+    name = "scheduler-utils_unittest",
+    srcs = glob(["**/utils/SchedulerUtilsTest.java"]),
     deps = proto_deps_files, 
     size = "small",
 )

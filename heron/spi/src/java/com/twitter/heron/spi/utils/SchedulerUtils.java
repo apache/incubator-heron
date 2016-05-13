@@ -20,6 +20,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
+import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.PackingPlan;
@@ -151,5 +152,23 @@ public final class SchedulerUtils {
     }
 
     return true;
+  }
+
+  /**
+   * construct heron scheduler response basing on the given result
+   *
+   * @param isOK whether the request successful
+   */
+  public static Scheduler.SchedulerResponse constructSchedulerResponse(boolean isOK) {
+    Common.Status.Builder status = Common.Status.newBuilder();
+    if (isOK) {
+      status.setStatus(Common.StatusCode.OK);
+    } else {
+      status.setStatus(Common.StatusCode.NOTOK);
+    }
+
+    return Scheduler.SchedulerResponse.newBuilder().
+        setStatus(status).
+        build();
   }
 }
