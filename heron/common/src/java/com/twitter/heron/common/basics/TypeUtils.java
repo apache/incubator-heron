@@ -24,7 +24,7 @@ public final class TypeUtils {
   private TypeUtils() {
   }
 
-  public static Integer getInt(Object o) {
+  public static Integer getInteger(Object o) {
     if (o instanceof Long) {
       return ((Long) o).intValue();
     } else if (o instanceof Integer) {

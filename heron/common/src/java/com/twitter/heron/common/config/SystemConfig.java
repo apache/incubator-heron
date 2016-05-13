@@ -329,22 +329,22 @@ public class SystemConfig {
   }
 
   public int getInstanceInternalMetricsWriteQueueCapacity() {
-    return TypeUtils.getInt(this.config.get(
+    return TypeUtils.getInteger(this.config.get(
         SystemConfig.INSTANCE_INTERNAL_METRICS_WRITE_QUEUE_CAPACITY));
   }
 
   public int getInstanceTuningExpectedMetricsWriteQueueSize() {
-    return TypeUtils.getInt(this.config.get(
+    return TypeUtils.getInteger(this.config.get(
         SystemConfig.INSTANCE_TUNING_EXPECTED_METRICS_WRITE_QUEUE_SIZE));
   }
 
   public int getInstanceSetDataTupleCapacity() {
-    return TypeUtils.getInt(this.config.get(
+    return TypeUtils.getInteger(this.config.get(
         SystemConfig.INSTANCE_SET_DATA_TUPLE_CAPACITY));
   }
 
   public int getInstanceSetControlTupleCapacity() {
-    return TypeUtils.getInt(this.config.get(
+    return TypeUtils.getInteger(this.config.get(
         SystemConfig.INSTANCE_SET_CONTROL_TUPLE_CAPACITY));
   }
 
@@ -354,27 +354,27 @@ public class SystemConfig {
   }
 
   public int getInstanceStateCheckIntervalSec() {
-    return TypeUtils.getInt(this.config.get(
+    return TypeUtils.getInteger(this.config.get(
         SystemConfig.INSTANCE_STATE_CHECK_INTERVAL_SEC));
   }
 
   public int getInstanceInternalBoltReadQueueCapacity() {
-    return TypeUtils.getInt(this.config.get(
+    return TypeUtils.getInteger(this.config.get(
         SystemConfig.INSTANCE_INTERNAL_BOLT_READ_QUEUE_CAPACITY));
   }
 
   public int getInstanceInternalBoltWriteQueueCapacity() {
-    return TypeUtils.getInt(this.config.get(
+    return TypeUtils.getInteger(this.config.get(
         SystemConfig.INSTANCE_INTERNAL_BOLT_WRITE_QUEUE_CAPACITY));
   }
 
   public int getInstanceInternalSpoutReadQueueCapacity() {
-    return TypeUtils.getInt(this.config.get(
+    return TypeUtils.getInteger(this.config.get(
         SystemConfig.INSTANCE_INTERNAL_SPOUT_READ_QUEUE_CAPACITY));
   }
 
   public int getInstanceInternalSpoutWriteQueueCapacity() {
-    return TypeUtils.getInt(this.config.get(
+    return TypeUtils.getInteger(this.config.get(
         SystemConfig.INSTANCE_INTERNAL_SPOUT_WRITE_QUEUE_CAPACITY));
   }
 
@@ -383,22 +383,22 @@ public class SystemConfig {
   }
 
   public int getInstanceTuningExpectedBoltReadQueueSize() {
-    return TypeUtils.getInt(this.config.get(
+    return TypeUtils.getInteger(this.config.get(
         SystemConfig.INSTANCE_TUNING_EXPECTED_BOLT_READ_QUEUE_SIZE));
   }
 
   public int getInstanceTuningExpectedBoltWriteQueueSize() {
-    return TypeUtils.getInt(this.config.get(
+    return TypeUtils.getInteger(this.config.get(
         SystemConfig.INSTANCE_TUNING_EXPECTED_BOLT_WRITE_QUEUE_SIZE));
   }
 
   public int getInstanceTuningExpectedSpoutReadQueueSize() {
-    return TypeUtils.getInt(this.config.get(
+    return TypeUtils.getInteger(this.config.get(
         SystemConfig.INSTANCE_TUNING_EXPECTED_SPOUT_READ_QUEUE_SIZE));
   }
 
   public int getInstanceTuningExpectedSpoutWriteQueueSize() {
-    return TypeUtils.getInt(this.config.get(
+    return TypeUtils.getInteger(this.config.get(
         SystemConfig.INSTANCE_TUNING_EXPECTED_SPOUT_WRITE_QUEUE_SIZE));
   }
 
@@ -407,15 +407,15 @@ public class SystemConfig {
   }
 
   public int getHeronLoggingMaximumSizeMb() {
-    return TypeUtils.getInt(this.config.get(SystemConfig.HERON_LOGGING_MAXIMUM_SIZE_MB));
+    return TypeUtils.getInteger(this.config.get(SystemConfig.HERON_LOGGING_MAXIMUM_SIZE_MB));
   }
 
   public int getHeronLoggingMaximumFiles() {
-    return TypeUtils.getInt(this.config.get(SystemConfig.HERON_LOGGING_MAXIMUM_FILES));
+    return TypeUtils.getInteger(this.config.get(SystemConfig.HERON_LOGGING_MAXIMUM_FILES));
   }
 
   public int getHeronMetricsExportIntervalSec() {
-    return TypeUtils.getInt(this.config.get(SystemConfig.HERON_METRICS_EXPORT_INTERVAL_SEC));
+    return TypeUtils.getInteger(this.config.get(SystemConfig.HERON_METRICS_EXPORT_INTERVAL_SEC));
   }
 
   public long getInstanceNetworkReadBatchTimeMs() {
@@ -436,13 +436,13 @@ public class SystemConfig {
 
   public int getInstanceNetworkOptionsSocketReceivedBufferSizeBytes() {
     return TypeUtils.
-        getInt(this.config.get(
+        getInteger(this.config.get(
             SystemConfig.INSTANCE_NETWORK_OPTIONS_SOCKET_RECEIVED_BUFFER_SIZE_BYTES));
   }
 
   public int getInstanceNetworkOptionsSocketSendBufferSizeBytes() {
     return TypeUtils.
-        getInt(this.config.get(
+        getInteger(this.config.get(
             SystemConfig.INSTANCE_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE_BYTES));
   }
 
@@ -464,25 +464,26 @@ public class SystemConfig {
 
   public int getInstanceReconnectStreammgrIntervalSec() {
     return TypeUtils.
-        getInt(this.config.get(SystemConfig.INSTANCE_RECONNECT_STREAMMGR_INTERVAL_SEC));
+        getInteger(this.config.get(SystemConfig.INSTANCE_RECONNECT_STREAMMGR_INTERVAL_SEC));
   }
 
   public int getInstanceReconnectMetricsmgrIntervalSec() {
     return TypeUtils.
-        getInt(this.config.get(SystemConfig.INSTANCE_RECONNECT_METRICSMGR_INTERVAL_SEC));
+        getInteger(this.config.get(SystemConfig.INSTANCE_RECONNECT_METRICSMGR_INTERVAL_SEC));
   }
 
   public int getInstanceMetricsSystemSampleIntervalSec() {
-    return TypeUtils.getInt(this.config.get(
+    return TypeUtils.getInteger(this.config.get(
         SystemConfig.INSTANCE_METRICS_SYSTEM_SAMPLE_INTERVAL_SEC));
   }
 
   public int getInstanceAcknowledgementNbuckets() {
-    return TypeUtils.getInt(this.config.get(SystemConfig.INSTANCE_ACKNOWLEDGEMENT_NBUCKETS));
+    return TypeUtils.getInteger(this.config.get(SystemConfig.INSTANCE_ACKNOWLEDGEMENT_NBUCKETS));
   }
 
   public int getInstanceSlaveFetchPplanIntervalSec() {
-    return TypeUtils.getInt(this.config.get(SystemConfig.INSTANCE_SLAVE_FETCH_PPLAN_INTERVAL_SEC));
+    return TypeUtils.getInteger(
+        this.config.get(SystemConfig.INSTANCE_SLAVE_FETCH_PPLAN_INTERVAL_SEC));
   }
 
   public long getInstanceTuningIntervalMs() {
@@ -495,7 +496,8 @@ public class SystemConfig {
   }
 
   public long getMetricsMgrNetworkReadBatchTimeMs() {
-    return TypeUtils.getLong(this.config.get(SystemConfig.METRICSMGR_NETWORK_READ_BATCH_TIME_MS));
+    return TypeUtils.getLong(
+        this.config.get(SystemConfig.METRICSMGR_NETWORK_READ_BATCH_TIME_MS));
   }
 
   public long getMetricsMgrNetworkReadBatchSizeBytes() {
@@ -514,13 +516,13 @@ public class SystemConfig {
 
   public int getMetricsMgrNetworkOptionsSocketReceivedBufferSizeBytes() {
     return TypeUtils.
-        getInt(this.config.get(
+        getInteger(this.config.get(
             SystemConfig.METRICSMGR_NETWORK_OPTIONS_SOCKET_RECEIVED_BUFFER_SIZE_BYTES));
   }
 
   public int getMetricsMgrNetworkOptionsSocketSendBufferSizeBytes() {
     return TypeUtils.
-        getInt(this.config.get(
+        getInteger(this.config.get(
             SystemConfig.METRICSMGR_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE_BYTES));
   }
 
