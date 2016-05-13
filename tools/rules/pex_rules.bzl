@@ -88,13 +88,10 @@ def make_manifest(ctx, output):
   for f in transitive_eggs:
     pex_prebuilt_libs[get_module_path(ctx, f.path)] = f.path
 
-  for r in transitive_reqs:
-    pex_requirements += r.split(' ')
-
   for f in transitive_resources:
     pex_resources[get_module_path(ctx, f.path)] = f.path
 
-  manifest_text = write_pex_manifest_text(pex_modules, pex_prebuilt_libs, pex_resources, pex_requirements)
+  manifest_text = write_pex_manifest_text(pex_modules, pex_prebuilt_libs, pex_resources, transitive_reqs)
   ctx.action(
     inputs = list(transitive_sources) + list(transitive_eggs) + list(transitive_resources),
     outputs = [ output ],
