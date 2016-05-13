@@ -14,17 +14,6 @@
 
 package com.twitter.heron.scheduler.hpc;
 
-import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.PackingPlan;
-import com.twitter.heron.spi.scheduler.IScheduler;
-import com.twitter.heron.spi.utils.*;
-import com.twitter.heron.spi.utils.Runtime;
-import org.apache.commons.io.FilenameUtils;
-
-import javax.xml.bind.DatatypeConverter;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
@@ -32,6 +21,20 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+
+import javax.xml.bind.DatatypeConverter;
+
+import org.apache.commons.io.FilenameUtils;
+
+import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.proto.scheduler.Scheduler;
+import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.scheduler.IScheduler;
+import com.twitter.heron.spi.utils.NetworkUtils;
+import com.twitter.heron.spi.utils.Runtime;
+import com.twitter.heron.spi.utils.TopologyUtils;
 
 public class HPCScheduler implements IScheduler {
   private static final Logger LOG = Logger.getLogger(HPCScheduler.class.getName());
@@ -48,9 +51,9 @@ public class HPCScheduler implements IScheduler {
   }
 
   @Override
-  public void initialize(Config config, Config runtime) {
-    this.config = config;
-    this.runtime = runtime;
+  public void initialize(Config mConfig, Config mRuntime) {
+    this.config = mConfig;
+    this.runtime = mRuntime;
     this.controller = new HPCController(Context.verbose(config));
 
     // get the topology working directory

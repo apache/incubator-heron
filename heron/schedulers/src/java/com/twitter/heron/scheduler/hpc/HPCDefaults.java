@@ -14,13 +14,17 @@
 
 package com.twitter.heron.scheduler.hpc;
 
-import com.twitter.heron.spi.common.Resource;
-
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class HPCDefaults {
+import com.twitter.heron.spi.common.Resource;
+
+public final class HPCDefaults {
   private static final Logger LOG = Logger.getLogger(HPCDefaults.class.getName());
+
+  private HPCDefaults() {
+
+  }
 
   // holds the mapping between the config keys and their default values
   private static Map<String, Object> defaults;
@@ -34,8 +38,7 @@ public class HPCDefaults {
       defaults = Resource.load(
           "com.twitter.heron.scheduler.hpc.HPCDefaults", DEFAULTS_YAML);
     } catch (ClassNotFoundException e) {
-      LOG.severe("Unable to load the Defaults class " + e);
-      System.exit(1);
+      throw new RuntimeException("Unable to load the Defaults class", e);
     }
   }
 

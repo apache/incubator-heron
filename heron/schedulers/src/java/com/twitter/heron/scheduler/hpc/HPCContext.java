@@ -20,8 +20,8 @@ import com.twitter.heron.spi.common.Misc;
 
 public class HPCContext extends Context {
   public static String workingDirectory(Config config) {
-    String workingDirectory = config.getStringValue(
-        HPCKeys.get("WORKING_DIRECTORY"), HPCDefaults.get("WORKING_DIRECTORY"));
+    String workingDirectory = config.getStringValue(HPCKeys.get("WORKING_DIRECTORY"),
+        HPCDefaults.get("WORKING_DIRECTORY"));
     return Misc.substitute(config, workingDirectory);
   }
 
