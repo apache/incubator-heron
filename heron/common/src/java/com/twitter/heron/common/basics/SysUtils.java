@@ -22,6 +22,15 @@ public final class SysUtils {
   private SysUtils() {
   }
 
+  /**
+   * Causes the currently executing thread to sleep (temporarily cease
+   * execution) for the specified number of milliseconds, subject to
+   * the precision and accuracy of system timers and schedulers. The thread
+   * does not lose ownership of any monitors.
+   *
+   * @param millis the length of time to sleep in milliseconds
+   * @throws IllegalArgumentException if the value of {@code millis} is negative
+   */
   public static void sleep(long millis) {
     try {
       Thread.sleep(millis);
@@ -33,7 +42,7 @@ public final class SysUtils {
   /**
    * Get available port.
    *
-   * @return available port.
+   * @return available port. -1 if no available ports exist
    */
   public static int getFreePort() {
     try (ServerSocket socket = new ServerSocket(0)) {

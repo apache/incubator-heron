@@ -59,7 +59,7 @@ EOH
     echo "    <content url=\"file://\$MODULE_DIR$/${content_dir}\">"  >> $iml_file
   fi
   cat >> $iml_file <<'EOF'
-    </content>    
+    </content>
 EOF
 done
 
@@ -78,7 +78,7 @@ function write_jar_entry() {
     file_end="!"
   fi
   local  libfile="\$MODULE_DIR\$/${root_file}"
-  if [[ "$root_file" = /* ]]; then 
+  if [[ "$root_file" = /* ]]; then
     libfile="${root_file}"
   fi
   local readonly basename=${root_file##*/}
@@ -137,7 +137,7 @@ done
 #<orderEntry type="library" name="proto" level="application" />
 heron_binary_paths="$(collect_generated_binary_deps)"
 
-for jar in ${heron_binary_paths}; do 
+for jar in ${heron_binary_paths}; do
   write_jar_entry "$jar";
 done
 #write_jar_entry "bazel-bin/heron/metricsmgr/src/thrift"
@@ -153,7 +153,7 @@ echo Done. IDEA module file: $iml_file
 IDEA=`ls -1d /Applications/IntelliJ\ * 2> /dev/null| tail -n1`
 if [ -n "$IDEA" ]; then
   echo "Opening Heron project in IDEA..."
-  open -a "/Applications/IntelliJ IDEA 14.app" .
+  open -a "$IDEA" .
   echo "Done."
 else
   echo

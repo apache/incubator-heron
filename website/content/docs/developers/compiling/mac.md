@@ -29,8 +29,8 @@ $ echo $CC $CXX
 
 ```bash
 curl -O -L https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-darwin-x86_64.sh
-chmod +x bazel-0.1.2-installer-linux-x86_64.sh
-./bazel-0.1.2-installer-linux-x86_64.sh --user
+chmod +x bazel-0.1.2-installer-darwin-x86_64.sh
+./bazel-0.1.2-installer-darwin-x86_64.sh --user
 ```
 
 #### Step 5 - Make sure Bazel bin is in the PATH
@@ -56,14 +56,14 @@ If the configure scripts fails with missing dependencies, brew can be used to in
 #### Step 8 - Build the project
 
 ```bash
-bazel build --config=darwin heron/...  
+bazel build --config=darwin heron/...
 ```
 
 #### Step 9 - Build the packages
 
 ```bash
-bazel build --config=darwin scripts/packages:binpkgs  
-bazel build --config=darwin scripts/packages:tarpkgs  
+bazel build --config=darwin scripts/packages:binpkgs
+bazel build --config=darwin scripts/packages:tarpkgs
 ```
 
 This will build the packages below the `bazel-bin/scripts/packages/` directory. 
