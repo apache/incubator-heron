@@ -23,7 +23,7 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.HttpUtils;
 import com.twitter.heron.spi.scheduler.IScheduler;
-import com.twitter.heron.spi.utils.NetworkUtils;
+import com.twitter.heron.spi.utils.SchedulerUtils;
 
 public class RestartRequestHandler implements HttpHandler {
   private IScheduler scheduler;
@@ -49,9 +49,7 @@ public class RestartRequestHandler implements HttpHandler {
 
     // prepare the response
     Scheduler.SchedulerResponse response =
-        Scheduler.SchedulerResponse.newBuilder()
-            .setStatus(NetworkUtils.getHeronStatus(isRestartSuccessfully))
-            .build();
+        SchedulerUtils.constructSchedulerResponse(isRestartSuccessfully);
 
     // send the response back
     HttpUtils.sendHttpResponse(exchange, response.toByteArray());
