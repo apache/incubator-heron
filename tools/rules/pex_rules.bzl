@@ -35,7 +35,7 @@ def collect_transitive_reqs(ctx):
   transitive_reqs = set(order="compile")
   for dep in ctx.attr.deps:
     transitive_reqs += dep.transitive_reqs
-  transitive_reqs += [ ctx.attr.reqs ] if ctx.attr.reqs else []
+  transitive_reqs += ctx.attr.reqs
 
   return transitive_reqs
 
@@ -205,7 +205,7 @@ pex_attrs = {
     "srcs": pex_srcs_attr,
     "deps": pex_deps_attr,
     "eggs": eggs_attr,
-    "reqs": attr.string(),
+    "reqs": attr.string_list(),
     "resources": resource_attr,
     "main": attr.label(allow_files=True, single_file=True)
 }
