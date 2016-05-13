@@ -26,8 +26,14 @@ public class HPCContext extends Context {
   }
 
   public static String jobIdFile(Config config) {
-    String workingDirectory = config.getStringValue(
+    String jobIdFile = config.getStringValue(
         HPCKeys.get("HPC_JOB_ID"), HPCDefaults.get("HPC_JOB_ID"));
-    return Misc.substitute(config, workingDirectory);
+    return Misc.substitute(config, jobIdFile);
+  }
+
+  public static String hpcShellScript(Config config) {
+    String hpcShellScript = config.getStringValue(HPCKeys.get("HPC_SHELL_SCRIPT"),
+        HPCDefaults.get("HPC_SHELL_SCRIPT"));
+    return Misc.substitute(config, hpcShellScript);
   }
 }

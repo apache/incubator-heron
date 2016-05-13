@@ -1,3 +1,4 @@
 # config key for specifying the working directory of a topology
 WORKING_DIRECTORY:        heron.scheduler.local.working.directory
 HPC_JOB_ID:               heron.scheduler.hpc.job.id
+HPC_SHELL_SCRIPT:         heron.scheduler.hpc.shell.script

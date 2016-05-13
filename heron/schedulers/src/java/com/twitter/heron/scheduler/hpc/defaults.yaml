@@ -1,3 +1,4 @@
 # default value for the config key that specifies the working directory
 WORKING_DIRECTORY:       ${HOME}/.herondata/topologies/${CLUSTER}/${ROLE}/${TOPOLOGY}
 HPC_JOB_ID:              hpc-job.pid
+HPC_SHELL_SCRIPT:        slurm.sh
