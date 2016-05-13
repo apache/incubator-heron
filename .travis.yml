@@ -12,7 +12,7 @@ addons:
     packages:
       - gcc-4.8
       - g++-4.8
-      - python2.7
+      - python2.7.10
       - wget
       - pkg-config
       - zip
@@ -38,6 +38,7 @@ install:
   - pip install --user --quiet wheel
 
 script:
+  - python -V
   - which gcc-4.8
   - gcc --version
   - which g++-4.8
