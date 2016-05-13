@@ -35,7 +35,7 @@ def collect_transitive_reqs(ctx):
   transitive_reqs = set(order="compile")
   for dep in ctx.attr.deps:
     transitive_reqs += dep.transitive_reqs
-  transitive_reqs += [ ctx.attr.reqs ] if ctx.attr.reqs else []
+  transitive_reqs += ctx.attr.reqs
 
   return transitive_reqs
 
@@ -88,13 +88,10 @@ def make_manifest(ctx, output):
   for f in transitive_eggs:
     pex_prebuilt_libs[get_module_path(ctx, f.path)] = f.path
 
-  for r in transitive_reqs:
-    pex_requirements += r.split(' ')
-
   for f in transitive_resources:
     pex_resources[get_module_path(ctx, f.path)] = f.path
 
-  manifest_text = write_pex_manifest_text(pex_modules, pex_prebuilt_libs, pex_resources, pex_requirements)
+  manifest_text = write_pex_manifest_text(pex_modules, pex_prebuilt_libs, pex_resources, transitive_reqs)
   ctx.action(
     inputs = list(transitive_sources) + list(transitive_eggs) + list(transitive_resources),
     outputs = [ output ],
@@ -205,7 +202,7 @@ pex_attrs = {
     "srcs": pex_srcs_attr,
     "deps": pex_deps_attr,
     "eggs": eggs_attr,
-    "reqs": attr.string(),
+    "reqs": attr.string_list(),
     "resources": resource_attr,
     "main": attr.label(allow_files=True, single_file=True)
 }
