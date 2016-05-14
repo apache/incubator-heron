@@ -61,8 +61,7 @@ class TraceLogger(object):
     self._prefix = prefix
 
   def should_log(self, V):
-    #return self._predicate(V)  # TODO: do not commit
-    return True
+    return self._predicate(V)
 
   def log(self, msg, V=1, end='\n'):
     if not self.should_log(V):
