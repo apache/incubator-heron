@@ -30,6 +30,12 @@ import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;
 
+/**
+ * Launches the HPC Scheduler. The launcher assumes a shared directory between the nodes.
+ * It first copies the heron distribution to the shared location every node can access.
+ * Then it launches the scheduler. The scheduler runs the heron-executor on each of the
+ * allocated nodes to start the topology components. The scheduler uses a node as a container.
+ */
 public class HPCLauncher implements ILauncher {
   private static final Logger LOG = Logger.getLogger(HPCLauncher.class.getName());
 

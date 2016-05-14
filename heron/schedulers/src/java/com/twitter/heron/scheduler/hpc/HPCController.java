@@ -35,7 +35,11 @@ public class HPCController {
     this.isVerbose = isVerbose;
   }
 
-  // Create an hpc job
+  /**
+   * Create a hpc job. Use the slurm schedule'r sbatch command to submit the job.
+   * sbatch allocates the nodes and runs the script specified by hpcScript.
+   * This script runs the heron executor on each of the nodes allocated.
+   */
   public boolean createJob(String hpcScript, String heronExec,
                            List<String> commandArgs, String topologyWorkingDirectory,
                            int containers) {
@@ -66,7 +70,12 @@ public class HPCController {
     return true;
   }
 
-  // Kill an HPC job
+  /**
+   * Cancel the HPC job by reading the jobid from the jobIdFile. Uses scancel
+   * command to cancel the job.
+   * @param jobIdFile the jobId file
+   * @return true if the job is cancelled successfully
+   */
   public boolean killJob(String jobIdFile) {
     List<String> jobIdFileContent = readFromFile(jobIdFile);
     if (jobIdFileContent.size() > 0) {

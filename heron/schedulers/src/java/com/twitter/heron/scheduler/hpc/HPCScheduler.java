@@ -32,6 +32,11 @@ import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
+/**
+ * Schedules a Heron topology in a HPC cluster.
+ * Uses sbatch command to allocate the resources and srun to run the heron processes.
+ * Then uses scancel to cancel the running job.s
+ */
 public class HPCScheduler implements IScheduler {
   private static final Logger LOG = Logger.getLogger(HPCScheduler.class.getName());
   private Config config;
@@ -124,7 +129,7 @@ public class HPCScheduler implements IScheduler {
     List<String> command = new ArrayList<>();
     command.add(topology.getName());
     command.add(topology.getId());
-    command.add(FilenameUtils.getBaseName(HPCContext.topologyDefinitionFile(config)));
+    command.add(FilenameUtils.getName(HPCContext.topologyDefinitionFile(config)));
     command.add(TopologyUtils.packingToString(packing));
     command.add(HPCContext.stateManagerConnectionString(config));
     command.add(HPCContext.stateManagerRootPath(config));
