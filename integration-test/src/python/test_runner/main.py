@@ -107,8 +107,12 @@ def getHTTPResponse(serverAddress, serverPort, topologyName):
 # Submit topology using heron-cli
 def submitTopology(heronCliPath, cluster, role, env, jarPath, classPath, pkgUri, args = None):
   logging.info("Submitting topology")
-  cmd = ("%s submit %s/%s/%s --config-property heron.package.core.uri=%s %s %s %s --verbose" % (
-    heronCliPath, cluster, role, env, pkgUri, jarPath, classPath, args))
+
+  # Form the command to submit a topology.
+  # Note the single quote around the arg for heron.package.core.uri.
+  # This is needed to prevent shell expansion.
+  cmd = "%s submit %s/%s/%s --config-property heron.package.core.uri='%s' %s %s %s --verbose" % (
+    heronCliPath, cluster, role, env, pkgUri, jarPath, classPath, args)
 
   logging.info("Submitting command: %s" % (cmd))
 
