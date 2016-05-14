@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
-import com.twitter.heron.spi.common.HttpUtils;
+import com.twitter.heron.spi.common.NetworkUtils;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 public final class TMasterUtils {
@@ -66,7 +66,7 @@ public final class TMasterUtils {
     LOG.info("Successfully opened HTTP connection to TMaster");
 
     // now sent the http request
-    HttpUtils.sendHttpGetRequest(connection);
+    NetworkUtils.sendHttpGetRequest(connection);
     LOG.info("Sent the HTTP payload to TMaster");
 
     boolean success = false;
