@@ -34,6 +34,7 @@ before_install:
   - ./bazel-0.1.2-installer-linux-x86_64.sh --user
 
 script:
+  - which chmod
   - which gcc-4.8
   - gcc --version
   - which g++-4.8
