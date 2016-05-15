@@ -14,6 +14,8 @@
 
 package com.twitter.heron.statemgr.zookeeper.curator;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -30,6 +32,7 @@ import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.Watcher;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PhysicalPlans;
@@ -39,19 +42,35 @@ import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 import com.twitter.heron.statemgr.FileSystemStateManager;
 import com.twitter.heron.statemgr.zookeeper.ZkContext;
+import com.twitter.heron.statemgr.zookeeper.ZkUtils;
 import com.twitter.heron.statemgr.zookeeper.ZkWatcherCallback;
 
-// TODO(mfu): Add Proxy or tunnel support, rather than to return the value stored directly
 public class CuratorStateManager extends FileSystemStateManager {
   private static final Logger LOG = Logger.getLogger(CuratorStateManager.class.getName());
   private CuratorFramework client;
   private String connectionString;
+  private List<Process> tunnelProcesses;
 
   @Override
   public void initialize(Config config) {
     super.initialize(config);
 
-    connectionString = Context.stateManagerConnectionString(config);
+    this.connectionString = Context.stateManagerConnectionString(config);
+    this.tunnelProcesses = new ArrayList<>();
+
+    boolean isTunnelWhenNeeded = ZkContext.isTunnelNeeded(config);
+    if (isTunnelWhenNeeded) {
+      Pair<String, List<Process>> tunneledResults = setupZkTunnel(config);
+
+      String newConnectionString = tunneledResults.first;
+      if (newConnectionString.isEmpty()) {
+        throw new IllegalArgumentException("Bad connectionString: " + connectionString);
+      }
+
+      // Use the new one
+      connectionString = newConnectionString;
+      tunnelProcesses.addAll(tunneledResults.second);
+    }
 
     // these are reasonable arguments for the ExponentialBackoffRetry. The first
     // retry will wait 1 second - the second will wait up to 2 seconds - the
@@ -89,6 +108,10 @@ public class CuratorStateManager extends FileSystemStateManager {
     }
   }
 
+  protected Pair<String, List<Process>> setupZkTunnel(Config config) {
+    return ZkUtils.setupZkTunnel(config);
+  }
+
   protected void initTree() {
     // Make necessary directories
     LOG.info("Topologies directory: " + getTopologyDir());
@@ -118,6 +141,12 @@ public class CuratorStateManager extends FileSystemStateManager {
     if (client != null) {
       LOG.info("Closing the CuratorClient to: " + connectionString);
       client.close();
+    }
+
+    // Close the tunneling
+    LOG.info("Closing the tunnel processes");
+    for (Process process : tunnelProcesses) {
+      process.destroy();
     }
   }
 

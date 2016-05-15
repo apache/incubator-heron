@@ -20,7 +20,7 @@ import org.mockito.Mockito;
 
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.HttpUtils;
+import com.twitter.heron.spi.common.NetworkUtils;
 import com.twitter.heron.spi.scheduler.IScheduler;
 
 public class SchedulerServerTest {
@@ -33,7 +33,7 @@ public class SchedulerServerTest {
     SchedulerServer schedulerServer =
         Mockito.spy(new SchedulerServer(runtime, scheduler, freePort));
 
-    Assert.assertEquals(HttpUtils.getHostName(), schedulerServer.getHost());
+    Assert.assertEquals(NetworkUtils.getHostName(), schedulerServer.getHost());
     Assert.assertEquals(freePort, schedulerServer.getPort());
   }
 }

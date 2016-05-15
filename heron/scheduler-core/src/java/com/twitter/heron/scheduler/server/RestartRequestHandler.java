@@ -21,7 +21,7 @@ import com.sun.net.httpserver.HttpHandler;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.HttpUtils;
+import com.twitter.heron.spi.common.NetworkUtils;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.SchedulerUtils;
 
@@ -36,7 +36,7 @@ public class RestartRequestHandler implements HttpHandler {
   public void handle(HttpExchange exchange) throws IOException {
 
     // read the http request payload
-    byte[] requestBody = HttpUtils.readHttpRequestBody(exchange);
+    byte[] requestBody = NetworkUtils.readHttpRequestBody(exchange);
 
     // prepare the request
     Scheduler.RestartTopologyRequest restartTopologyRequest =
@@ -52,6 +52,6 @@ public class RestartRequestHandler implements HttpHandler {
         SchedulerUtils.constructSchedulerResponse(isRestartSuccessfully);
 
     // send the response back
-    HttpUtils.sendHttpResponse(exchange, response.toByteArray());
+    NetworkUtils.sendHttpResponse(exchange, response.toByteArray());
   }
 }
