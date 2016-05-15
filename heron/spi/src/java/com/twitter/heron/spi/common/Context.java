@@ -32,7 +32,7 @@ public class Context {
   }
 
   public static Boolean verbose(Config cfg) {
-    return cfg.getBooleanValue(ConfigKeys.get("VERBOSE"));
+    return cfg.getBooleanValue(ConfigKeys.get("VERBOSE"), true);
   }
 
   public static String configPath(Config cfg) {
