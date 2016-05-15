@@ -73,4 +73,21 @@ public class Pair<F, S> {
   public int hashCode() {
     return (first == null ? 0 : first.hashCode()) ^ (second == null ? 0 : second.hashCode());
   }
+
+  /**
+   * Returns a string representation of this pair.
+   *
+   * @return format in "<first, second>"
+   */
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("<");
+    sb.append(this.first == null ? "null" : this.first.toString());
+    sb.append(", ");
+    sb.append(this.second == null ? "null" : this.second.toString());
+    sb.append(">");
+
+    return sb.toString();
+  }
 }

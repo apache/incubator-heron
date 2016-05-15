@@ -25,7 +25,7 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.HttpUtils;
+import com.twitter.heron.spi.common.NetworkUtils;
 
 /**
  * This class manages topology by sending request
@@ -72,7 +72,7 @@ public class HttpServiceSchedulerClient implements ISchedulerClient {
     // now, we have a valid connection
     try {
       // send the actual http request
-      if (!HttpUtils.sendHttpPostRequest(connection, data)) {
+      if (!NetworkUtils.sendHttpPostRequest(connection, data)) {
         LOG.log(Level.SEVERE, "Failed to send http request to scheduler");
         return false;
       }
@@ -83,7 +83,7 @@ public class HttpServiceSchedulerClient implements ISchedulerClient {
       LOG.fine("Receiving response from scheduler...");
       try {
         statusCode = Scheduler.SchedulerResponse.newBuilder()
-            .mergeFrom(HttpUtils.readHttpResponse(connection))
+            .mergeFrom(NetworkUtils.readHttpResponse(connection))
             .build().getStatus().getStatus();
       } catch (InvalidProtocolBufferException e) {
         LOG.log(Level.SEVERE, "Failed to parse response", e);
@@ -111,7 +111,7 @@ public class HttpServiceSchedulerClient implements ISchedulerClient {
     // construct the http url connection
     HttpURLConnection connection;
     try {
-      connection = HttpUtils.getConnection(endpoint);
+      connection = NetworkUtils.getConnection(endpoint);
     } catch (IOException e) {
       LOG.log(Level.SEVERE, "Failed to connect to scheduler http endpoint: {0}", endpoint);
       return null;
