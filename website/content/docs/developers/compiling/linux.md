@@ -117,7 +117,6 @@ sudo make install
 ## Building on CentOS 7
 
 This is a step by step guide for building Heron on a fresh CentOS 7 installation.
-User needs to build the bazel build tool, because bazel doesn't provide the binaries for CentOS.
 
 #### Step 1 - Install the required dependencies
 
@@ -179,33 +178,10 @@ export PATH=$PATH:/opt/jdk1.8.0_91/bin:/opt/jdk1.8.0_91/jre/bin
 
 #### Step 5 - Install Bazel 0.1.2
 
-First compile bazel from source
-
 ```bash
-cd
-wget https://github.com/bazelbuild/bazel/archive/0.1.2.tar.gz
-tar xvf 0.1.2.tar.gz
-cd bazel-0.1.2
-./compile.sh
-```
-
-Install the compiled bazel
-
-```bash
-cd output
-./bazel
-```
-
-Now add the output directory to the PATH environment variable. Here is an example
-
-```bash
-export PATH=$PATH:$HOME/bazel-0.1.2/output
-```
-
-Now check weather bazel is installed properly
-
-```bash
-bazel version
+wget https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh
+chmod +x bazel-0.1.2-installer-linux-x86_64.sh
+./bazel-0.1.2-installer-linux-x86_64.sh --user
 ```
 
 #### Step 6 - Download heron and compile it
