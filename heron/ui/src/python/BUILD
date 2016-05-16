@@ -11,7 +11,7 @@ pex_library(
     reqs = [
         "pycrypto==2.6.1",
         "requests==2.3.0",
-        "tornado==4.0.2",
+        "tornado==3.1.0",
     ],
 )
 

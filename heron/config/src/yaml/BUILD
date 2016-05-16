@@ -3,7 +3,7 @@ licenses(["notice"])
 package(default_visibility = ["//visibility:public"])
 
 filegroup(
-    name = "tracker-yaml",
+    name = "conf-tracker",
     srcs = ["tracker/heron_tracker.yaml"],
 )
 

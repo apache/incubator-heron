@@ -144,6 +144,7 @@ genrule(
         ":release.yaml",
         ":htracker",
         ":hui",
+        ":conf-tracker",
     ],
     outs = [
         "heron-tools.tar.gz",
@@ -155,6 +156,7 @@ genrule(
         "--cp $(location release.yaml)               release.yaml",
         "--cp $(location htracker)                   bin/heron-tracker",
         "--cp $(location hui)                        bin/heron-ui",
+        "--cp $(location conf-tracker)               conf/heron_tracker.yaml",
     ]),
     heuristic_label_expansion = False,
     tags = ["manual"],
@@ -220,6 +222,11 @@ filegroup(
 filegroup(
     name = "conf-local-uploader",
     srcs = ["//heron/config/src/yaml:conf-local-uploader"],
+)
+
+filegroup(
+    name = "conf-tracker",
+    srcs = ["//heron/config/src/yaml:conf-tracker"],
 )
 
 filegroup(
