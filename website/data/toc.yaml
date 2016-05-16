@@ -69,6 +69,8 @@ sections:
         url: /docs/developers/data-model
       - name: Tuple Serialization
         url: /docs/developers/serialization
+      - name: Heron UI Guide
+        url: /docs/developers/ui-guide
       - name: Tuning Guide
         url: /docs/developers/tuning
       - name: Troubleshooting Guide
