@@ -31,6 +31,10 @@ local_deps_files = [
     "//heron/schedulers/src/java:local-scheduler-java",
 ]
 
+hpc_deps_files = [
+    "//heron/schedulers/src/java:hpc-scheduler-java",
+]
+
 java_test(
   name="aurora-scheduler_unittest",
   srcs=glob(
@@ -73,5 +77,32 @@ java_test(
     ["**/LocalSchedulerTest.java"]
   ),
   deps=scheduler_deps_files + local_deps_files,
+  size="small",
+)
+
+java_test(
+  name="hpc-launcher_unittest",
+  srcs=glob(
+    ["**/HPCLauncherTest.java"]
+  ),
+  deps=scheduler_deps_files + hpc_deps_files,
+  size="small",
+)
+
+java_test(
+  name="hpc-scheduler_unittest",
+  srcs=glob(
+    ["**/HPCSchedulerTest.java"]
+  ),
+  deps=scheduler_deps_files + hpc_deps_files,
+  size="small",
+)
+
+java_test(
+  name="hpc-controller_unittest",
+  srcs=glob(
+    ["**/HPCControllerTest.java"]
+  ),
+  deps=scheduler_deps_files + hpc_deps_files,
   size="small",
 )

@@ -92,7 +92,7 @@ public class HPCLauncher implements ILauncher {
    *
    * @return true if successful
    */
-  private boolean downloadAndExtractPackages() {
+  public boolean downloadAndExtractPackages() {
     // log the state manager being used, for visibility and debugging purposes
     SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
     LOG.log(Level.FINE, "State manager used: {0} ", stateManager.getClass().getName());

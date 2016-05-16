@@ -55,10 +55,19 @@ public class HPCScheduler implements IScheduler {
   public void initialize(Config mConfig, Config mRuntime) {
     this.config = mConfig;
     this.runtime = mRuntime;
-    this.controller = new HPCController(Context.verbose(config));
+    this.controller = getController();
 
     // get the topology working directory
     this.workingDirectory = HPCContext.workingDirectory(config);
+  }
+
+  /**
+   * Get a HPCControl basing on the config and runtime
+   *
+   * @return HPCControler
+   */
+  protected HPCController getController() {
+    return new HPCController(Context.verbose(config));
   }
 
   @Override
@@ -103,15 +112,15 @@ public class HPCScheduler implements IScheduler {
     return true;
   }
 
-  private String getJobIdFilePath() {
+  protected String getJobIdFilePath() {
     return new File(workingDirectory, HPCContext.jobIdFile(config)).getPath();
   }
 
-  private String getHeronHPCPath() {
+  protected String getHeronHPCPath() {
     return new File(Context.heronConf(config), HPCContext.hpcShellScript(config)).getPath();
   }
 
-  private List<String> getExecutorCommand(PackingPlan packing) {
+  protected List<String> getExecutorCommand(PackingPlan packing) {
     TopologyAPI.Topology topology = Runtime.topology(runtime);
 
     List<Integer> freePorts = new ArrayList<>(SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR);

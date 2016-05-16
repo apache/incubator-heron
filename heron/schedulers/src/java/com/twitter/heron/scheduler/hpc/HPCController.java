@@ -62,12 +62,17 @@ public class HPCController {
     LOG.info("Executing job [" + topologyWorkingDirectory + "]: " + command);
     StringBuilder stdout = new StringBuilder();
     StringBuilder stderr = new StringBuilder();
-    ShellUtils.runSyncProcess(
-        true, false, hpcCmd.toArray(new String[0]), stdout, stderr,
-        new File(topologyWorkingDirectory));
+    boolean ret = runProcess(topologyWorkingDirectory, hpcCmd, stdout, stderr);
     LOG.info("Stdout for HPC script: " + stdout);
     LOG.info("Stderror for HPC script: " + stderr);
-    return true;
+    return ret;
+  }
+
+  protected boolean runProcess(String topologyWorkingDirectory, List<String> hpcCmd,
+                         StringBuilder stdout, StringBuilder stderr) {
+    return 0 == ShellUtils.runSyncProcess(
+        true, false, hpcCmd.toArray(new String[0]), stdout, stderr,
+        new File(topologyWorkingDirectory));
   }
 
   /**
@@ -80,19 +85,23 @@ public class HPCController {
     List<String> jobIdFileContent = readFromFile(jobIdFile);
     if (jobIdFileContent.size() > 0) {
       List<String> hpcCmd = new ArrayList<>(Arrays.asList("scancel", jobIdFileContent.get(0)));
-      return 0 == ShellUtils.runProcess(
-          isVerbose, hpcCmd.toArray(new String[0]), new StringBuilder(), new StringBuilder());
+      return runProcess(hpcCmd);
     } else {
       LOG.log(Level.SEVERE, "Failed to read the HPC Job id from file:" + jobIdFile);
       return false;
     }
   }
 
+  public boolean runProcess(List<String> hpcCmd) {
+    return 0 == ShellUtils.runProcess(
+        isVerbose, hpcCmd.toArray(new String[0]), new StringBuilder(), new StringBuilder());
+  }
+
   /**
    * Read the data from a text file
    * For now lets keep this util function here. We need to move it to a util location
    */
-  public static List<String> readFromFile(String filename) {
+  public List<String> readFromFile(String filename) {
     Path path = new File(filename).toPath();
     List<String> result = new ArrayList<>();
     try {
