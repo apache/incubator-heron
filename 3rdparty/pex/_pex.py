@@ -130,7 +130,7 @@ def main():
         poptions.zip_safe = options.zip_safe
 
         print("pex options: %s" % poptions)
-        os.environ["PATH"] = poptions.python
+        os.environ["PATH"] = ".:%s:/bin:/usr/bin" % poptions.python
 
         # The version of pkg_resources.py (from setuptools) on some distros is too old for PEX. So
         # we keep a recent version in and force it into the process by constructing a custom
@@ -140,8 +140,8 @@ def main():
             PythonInterpreter.from_binary(options.python).identity,
             extras={
                 # TODO: Fix this to resolve automatically
-                ('setuptools', '18.0.1'): '3rdparty/eggs/setuptools-18.0.1-py2.py3-none-any.whl',
-                ('wheel', '0.23.0'): '3rdparty/eggs/wheel-0.23.0-py2.7.egg'
+                ('setuptools', '18.0.1'): '3rdparty/pex/setuptools-18.0.1-py2.py3-none-any.whl',
+                ('wheel', '0.23.0'): '3rdparty/pex/wheel-0.23.0-py2.7.egg'
             })
 
         # resolve setuptools

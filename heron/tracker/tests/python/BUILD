@@ -15,11 +15,11 @@ pex_test(
     deps = [
         "//heron/tracker/src/python:heron-tracker-lib",
     ],
-    eggs = [
-        "//3rdparty/eggs:pytest",
-        "//3rdparty/eggs:py",
-        "//3rdparty/eggs:unittest2",
-        "//3rdparty/eggs:pymock",
+    reqs = [
+        "mock==1.0.1",
+        "py==1.4.27",
+        "pytest==2.6.4",
+        "unittest2==0.5.1",
     ],
     size = "small",
 )
@@ -30,11 +30,11 @@ pex_test(
     deps = [
         "//heron/tracker/src/python:heron-tracker-lib",
     ],
-    eggs = [
-        "//3rdparty/eggs:pytest",
-        "//3rdparty/eggs:py",
-        "//3rdparty/eggs:unittest2",
-        "//3rdparty/eggs:pymock",
+    reqs = [
+        "mock==1.0.1",
+        "py==1.4.27",
+        "pytest==2.6.4",
+        "unittest2==0.5.1",
     ],
     size = "small",
 )
@@ -45,11 +45,11 @@ pex_test(
     deps = [
         "//heron/tracker/src/python:heron-tracker-lib",
     ],
-    eggs = [
-        "//3rdparty/eggs:pytest",
-        "//3rdparty/eggs:py",
-        "//3rdparty/eggs:unittest2",
-        "//3rdparty/eggs:pymock",
+    reqs = [
+        "mock==1.0.1",
+        "py==1.4.27",
+        "pytest==2.6.4",
+        "unittest2==0.5.1",
     ],
     size = "small",
 )
@@ -60,11 +60,11 @@ pex_test(
     deps = [
         "//heron/tracker/src/python:heron-tracker-lib",
     ],
-    eggs = [
-        "//3rdparty/eggs:pytest",
-        "//3rdparty/eggs:py",
-        "//3rdparty/eggs:unittest2",
-        "//3rdparty/eggs:pymock",
+    reqs = [
+        "mock==1.0.1",
+        "py==1.4.27",
+        "pytest==2.6.4",
+        "unittest2==0.5.1",
     ],
     size = "small",
 )
@@ -75,11 +75,11 @@ pex_test(
     deps = [
         "//heron/tracker/src/python:heron-tracker-lib",
     ],
-    eggs = [
-        "//3rdparty/eggs:pytest",
-        "//3rdparty/eggs:py",
-        "//3rdparty/eggs:unittest2",
-        "//3rdparty/eggs:pymock",
+    reqs = [
+        "mock==1.0.1",
+        "py==1.4.27",
+        "pytest==2.6.4",
+        "unittest2==0.5.1",
     ],
     size = "small",
 )
