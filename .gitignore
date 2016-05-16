@@ -17,7 +17,6 @@ makeflags
 # Bazel generated files #
 #########################
 /bazel-*
-bazel
 scripts/compile/env_exec.sh
 config/heron-config.h
 tools/cpp/osx_gcc_wrapper.sh
