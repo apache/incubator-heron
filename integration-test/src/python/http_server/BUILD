@@ -8,7 +8,7 @@ pex_binary(
         "main.py"
     ],
     main = "main.py",
-    eggs = [
-        "//3rdparty/eggs:tornado",
+    reqs = [
+        "tornado==4.0.2",
     ],
 )

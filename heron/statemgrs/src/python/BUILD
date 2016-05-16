@@ -8,9 +8,9 @@ pex_library(
   deps = [
     '//heron/proto:proto-py',
   ],
-  eggs = [
-    '//3rdparty/eggs:kazoo',
-    '//3rdparty/eggs:pyyaml',
-    '//3rdparty/eggs:zope'
-  ]
+  reqs = [
+    'pyyaml==3.10',
+    'kazoo==1.3.1',
+    'zope.interface==4.0.5'
+  ],
 )

@@ -22,39 +22,27 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ProtocolException;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sun.net.httpserver.HttpExchange;
 
+import com.twitter.heron.common.basics.Pair;
+import com.twitter.heron.common.basics.SysUtils;
+
 /**
  * Utilities related to network.
  */
-public final class HttpUtils {
+public final class NetworkUtils {
   public static final String CONTENT_LENGTH = "Content-Length";
   public static final String CONTENT_TYPE = "Content-Type";
+  public static final String LOCAL_HOST = "localhost";
 
-  private static final Logger LOG = Logger.getLogger(HttpUtils.class.getName());
+  private static final Logger LOG = Logger.getLogger(NetworkUtils.class.getName());
 
-  private HttpUtils() {
-  }
-
-  /**
-   * Blocks current thread
-   *
-   * @param time Time
-   * @param unit Unit
-   */
-  public static void await(int time, TimeUnit unit) {
-    try {
-      Thread.sleep(unit.toMillis(time));
-    } catch (InterruptedException e) {
-      LOG.log(Level.SEVERE, "Sleep interrupted ", e);
-    }
+  private NetworkUtils() {
   }
 
   /**
@@ -262,40 +250,98 @@ public final class HttpUtils {
    * Tests if a network location is reachable. This is best effort and may give false
    * not reachable.
    *
+   * @param endpoint the endpoint to connect to
    * @param timeout Open connection will wait for this timeout in ms.
-   * @param retry In case of connection timeout try retry times.
-   * @param retryInterval the interval in ms to retry
-   * @param host host to connect.
-   * @param port port on which to connect.
-   * @param verbose print verbose results
+   * @param retryCount In case of connection timeout try retry times.
+   * @param retryIntervalMs the interval in ms to retry
    * @return true if the network location is reachable
    */
   public static boolean isLocationReachable(
+      InetSocketAddress endpoint,
       int timeout,
-      int retry,
-      int retryInterval,
-      String host,
-      int port,
-      boolean verbose) {
-    int retryLeft = retry;
+      int retryCount,
+      int retryIntervalMs) {
+    int retryLeft = retryCount;
     while (retryLeft > 0) {
       try (Socket s = new Socket()) {
-        s.connect(new InetSocketAddress(host, port), timeout);
+        s.connect(endpoint, timeout);
         return true;
-      } catch (SocketTimeoutException se) {
-        if (verbose) {
-          LOG.log(Level.INFO, "Couldn't connect to host. Will use tunnelling " + host + ":" + port);
-        }
-      } catch (IOException ioe) {
-        if (verbose) {
-          LOG.log(Level.INFO, "Connection not available yet: " + host + ":" + port, ioe);
-        }
+      } catch (IOException e) {
       } finally {
-        await(retryInterval, TimeUnit.MILLISECONDS);
+        SysUtils.sleep(retryIntervalMs);
         retryLeft--;
       }
     }
-    LOG.log(Level.SEVERE, "Failed to connect to: " + host + " : " + port);
+    LOG.log(Level.FINE, "Failed to connect to: {0}", endpoint.toString());
     return false;
+  }
+
+  /**
+   * Tests if a network location is reachable. This is best effort and may give false
+   * not reachable.
+   *
+   * @param endpoint the endpoint to connect to
+   * @param timeout Open connection will wait for this timeout in ms.
+   * @param retryCount In case of connection timeout try retry times.
+   * @param retryIntervalMs the interval in ms to retry
+   * @param tunnelHost the host used to tunnel
+   * @param verifyCount In case of longer tunnel setup, try verify times to wait
+   * @param isVerbose prints verbose info or not
+   * @return a <new_reachable_endpoint, tunnelProcess> pair.
+   * If the endpoint already reachable, then new_reachable_endpoint equals to original endpoint, and
+   * tunnelProcess is null.
+   * If no way to reach even through ssh tunneling,
+   * then both new_reachable_endpoint and tunnelProcess are null.
+   */
+  public static Pair<InetSocketAddress, Process> establishSSHTunnelIfNeeded(
+      InetSocketAddress endpoint,
+      String tunnelHost,
+      int timeout,
+      int retryCount,
+      int retryIntervalMs,
+      int verifyCount,
+      boolean isVerbose) {
+    if (NetworkUtils.isLocationReachable(endpoint, timeout, retryCount, retryIntervalMs)) {
+
+      // Already reachable, return original endpoint directly
+      return new Pair<InetSocketAddress, Process>(endpoint, null);
+    } else {
+      // Can not reach directly, trying to do ssh tunnel
+      int localFreePort = SysUtils.getFreePort();
+      InetSocketAddress newEndpoint = new InetSocketAddress(LOCAL_HOST, localFreePort);
+
+      LOG.log(Level.FINE, "Trying to opening up tunnel to {0} from {1}",
+          new Object[]{endpoint.toString(), newEndpoint.toString()});
+
+      // Set up the tunnel process
+      Process tunnelProcess = ShellUtils.establishSSHTunnelProcess(
+          tunnelHost, localFreePort, endpoint.getHostString(), endpoint.getPort(), isVerbose);
+
+      // Tunnel can take time to setup.
+      // Verify whether the tunnel process is working fine.
+      if (tunnelProcess != null && tunnelProcess.isAlive()
+          && NetworkUtils.isLocationReachable(newEndpoint, timeout, verifyCount, retryIntervalMs)) {
+
+        // Can reach the destination via ssh tunnel
+        return new Pair<InetSocketAddress, Process>(newEndpoint, tunnelProcess);
+      }
+      LOG.log(Level.FINE, "Failed to opening up tunnel to {0} from {1}. Releasing process..",
+          new Object[]{endpoint, newEndpoint});
+      tunnelProcess.destroy();
+    }
+
+    // No way to reach the destination. Return null.
+    return new Pair<InetSocketAddress, Process>(null, null);
+  }
+
+  /**
+   * Convert an endpoint from String (host:port) to InetSocketAddress
+   *
+   * @param endpoint a String in (host:port) format
+   * @return an InetSocketAddress representing the endpoint
+   */
+  public static InetSocketAddress getInetSocketAddress(String endpoint) {
+    String[] array = endpoint.split(":");
+    return new InetSocketAddress(array[0], Integer.parseInt(array[1]));
   }
 }

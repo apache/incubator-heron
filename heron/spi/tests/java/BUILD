@@ -2,8 +2,10 @@
 load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 common_deps_files = [
+    "//heron/common/src/java:basics-java",
     "//heron/common/src/java:config-java",
-    "//heron/spi/src/java:common-spi-java", 
+    "//heron/spi/src/java:common-spi-java",
+    "//3rdparty/java:powermock",
     "@bazel_tools//third_party:junit4",
     "@bazel_tools//third_party:mockito",
 ]
@@ -36,15 +38,15 @@ java_test(
 )
 
 java_test(
-    name = "http-utils_unittest",
-    srcs = glob(["**/common/HttpUtilsTest.java"]),
+    name = "network-utils_unittest",
+    srcs = glob(["**/common/NetworkUtilsTest.java"]),
     deps = common_deps_files,
     size = "small",
 )
 
 java_test(
-    name = "network-utils_unittest",
-    srcs = glob(["**/utils/NetworkUtilsTest.java"]),
+    name = "scheduler-utils_unittest",
+    srcs = glob(["**/utils/SchedulerUtilsTest.java"]),
     deps = proto_deps_files, 
     size = "small",
 )

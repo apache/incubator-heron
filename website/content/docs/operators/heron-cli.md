@@ -5,95 +5,136 @@ title: Managing Topologies with Heron CLI
 The **Heron CLI** us used to to manage every aspect of the
 [topology lifecycle](../../concepts/topologies#topology-lifecycle).
 
-## Deploying the `heron` Executable
+## Deploying the `heron` CLI Executable
 
-To use `heron`, generate a full [Heron release](../../developers/compiling/compiling) and
-distribute the resulting `heron` binary to all machines used to
-manage topologies.
-
-## CLI Flags
-
-All topology management commands (`submit`, `activate`, `deactivate`,
-`restart`, and `kill`) take two optional flags:
-
-* `--config-loader` &mdash; Every Heron scheduler must implement a
-  default configuration loader that's responsible for providing the topology's
-  configuration from a file or other source. This flag enables you to specify a
-  non-default loader.
-* `--config-file` &mdash; If you specify a configuration loader using the
-  `--config-loader` flag and that loader draws its configuration from a file
-  (rather than another source), you can use the `--config-file` flag to provide
-  a path for that file.
-
-These flags are especially useful if you're developing a [custom
-scheduler](../../contributors/custom-scheduler).
-
-Below is an example topology management command that uses both of these flags:
+To use `heron` CLI, download the `heron-client-install` for your platfrom from 
+[release binaries](https://github.com/twitter/heron/releases) and  run the 
+installation script. For example, if you have downloaded the version `0.13.5`, 
+you invoke the installation script as follows:
 
 ```bash
-$ heron-cli activate "topology.debug:true" \
-    /path/to/topology/my-topology.jar \
-    biz.acme.topologies.MyTopology \
-    my-topology /
-    --config-loader=biz.acme.config.MyConfigLoader \
-    --config-file=/path/to/config/scheduler.conf
+$ chmod +x heron-client-install-0.13.5-darwin.sh
+$ ./heron-client-install-0.13.5-darwin.sh --user
+Heron client installer
+----------------------
+
+Uncompressing......
+
+Heron is now installed!
+
+Make sure you have "/Users/$USER/bin" in your path. 
+
+See http://heronstreaming.io/docs/getting-started.html on how to use Heron!
+
+....
+```
+
+Alternatively, generate a full [Heron release](../../developers/compiling/compiling) and
+distribute the resulting `heron` CLI to all machines used to manage topologies.
+
+### Common CLI Args
+
+All topology management commands (`submit`, `activate`, `deactivate`,
+`restart`, and `kill`) take the following required arguments:
+
+* `cluster` &mdash; The name of the cluster where the command needs to be executed. 
+
+* `role` &mdash; This represents the user or the group depending on deployment.
+  If not provided, it defaults to the unix user.
+
+* `env` &mdash; This is a tag for including additional information (e.g) a 
+   topology can be tagged as PROD or DEVEL to indicate whether it is in production 
+   or development. If `env` is not provided, it is given a value `default`
+
+`cluster`, `role` and `env` are specified as a single argument in the form of
+`cluster/role/env` (e.g) `local/ads/PROD` to refer the cluster `local` with
+role `ads` and the environment `PROD`. If you just want to specify `cluster`, the 
+argument will be simply `local`.
+
+### Optional CLI Flags
+
+CLI supports a common set of optional flags for all topology management commands 
+(`submit`, `activate`, `deactivate`, `restart`, and `kill`):
+
+* `--config-path` &mdash; Every heron cluster must provide a few configuration
+  files that are kept under a directory named after the cluster. By default, 
+  when a cluster is provided in the command, it searches the `conf` directory
+  for a directory with the cluster name. This flag enables you to specify a
+  non standard directory to search for the cluster directory.
+
+* `--config-property` &mdash; Heron supports several configuration parameters
+  that be overridden. These parameters are specified in the form of `key=value`.
+
+* `--verbose` &mdash; When this flag is provided, `heron` CLI prints logs
+  that provide detailed information about the execution. 
+
+Below is an example topology management command that uses one of these flags:
+
+```bash
+$ heron activate --config-path ~/heronclusters devcluster/ads/PROD AckingTopology
 ```
 
 ## Submitting a Topology
 
-In order to run a topology in a Heron cluster, submit it using the
-`submit` command. Topologies can be submitted in either an activated (default) or
-deactivated state (more on [activation](#activating-a-topology) and
-[deactivation](#deactivating-a-topology) below).
+To run a topology in a Heron cluster, submit it using the `submit` command. 
+Topologies can be submitted in either an activated (default) or deactivated state 
+(more on [activation](#activating-a-topology) and [deactivation](#deactivating-a-topology) 
+below).
 
 Here's the basic syntax:
 
 ```bash
-$ heron-cli submit <scheduler overrides> <filepath> <class name> [topology args]
+$ heron help submit
+usage: heron submit [options] cluster/[role]/[env] topology-file-name topology-class-name [topology-args]
+
+Required arguments:
+  cluster/[role]/[env]  Cluster, role, and env to run topology
+  topology-file-name    Topology jar/tar/zip file
+  topology-class-name   Topology class name
+
+Optional arguments:
+  --config-path (a string; path to cluster config; default: "/Users/$USER/.heron/conf")
+  --config-property (key=value; a config key and its value; default: [])
+  --deploy-deactivated (a boolean; default: "false")
+  --topology-main-jvm-property Define a system property to pass to java -D when running main.
+  --verbose (a boolean; default: "false")
 ```
 
 Arguments of the `submit` command:
 
-* Scheduler overrides &mdash; Default parameters that you'd like to override.
-  The syntax is `"param1:value1 param2:value2 param3:value3"`.
+* **cluster/[role]/[env]** &mdash; The cluster where topology needs to be submitted, 
+  optionally taking the role and environment. For example,`local/ads/PROD` or just `local`
 
-  **Example**: `"heron.local.working.directory:/path/to/dir
-  topology.debug:true"`
-
-* Filepath &mdash; The path of the file in which you've packaged the
+* **topology-file-name** &mdash; The path of the file in which you've packaged the
   topology's code. For Java topologies this will be a `.jar` file; for
   topologies in other languages (not yet supported), this could be a
-  `.tar` file.
+  `.tar` file. For example, `/path/to/topology/my-topology.jar`
 
-  **Example**: `/path/to/topology/my-topology.jar`
+* **topology-class-name** &mdash; The name of the class containing the `main` function
+  for the topology. For example, `com.example.topologies.MyTopology`
 
-* Class name &mdash; The name of the class containing the `main` function
-  for the topology.
-
-  **Example**: `com.example.topologies.MyTopology`
-
-* Topology args (**optional**) &mdash; Arguments specific to the topology.
+* **topology-args** (optional) &mdash; Arguments specific to the topology.
   You will need to supply additional args only if the `main` function for your
   topology requires them.
 
 ### Example Topology Submission Command
 
-Below is an example command that would run a topology with a main class named
-`com.example.topologies.MyTopology` packaged in `my-topology.jar`, along with
-some scheduler overrides:
+Below is an example command that submits a topology to a cluster named `devcluster` 
+with a main class named `com.example.topologies.MyTopology` packaged in `my-topology.jar`, 
+along with the optional `--config-path` where the config for `devcluster` can be found:
 
 ```bash
-$ heron-cli submit "heron.local.working.directory:/path/to/dir topology.debug:true" \
-    /path/to/topology/my-topology.jar \
-    com.example.topologies.MyTopology \
-    my-topology
+$ heron submit --config-path ~/heronclusters devcluster /path/to/topology/my-topology.jar \
+    com.example.topologies.MyTopology my-topology
 ```
 
 ### Other Topology Submission Options
 
-Flag | Meaning
-:--- | :------
-`--deactivated` | If set, the topology is deployed in a deactivated state.
+| Flag                           | Meaning                                                                 |
+|:-------------------------------|:------------------------------------------------------------------------|
+| `--deploy-deactivated`         | If set, the topology is deployed in a deactivated state.                |
+| `--topology-main-jvm-property` | Defines a system property to pass to java -D when running topology main |
+
 
 ## Activating a Topology
 
@@ -102,24 +143,30 @@ activate a deactivated topology use the `activate` command. Below is the basic
 syntax:
 
 ```bash
-$ heron-cli activate <activator-overrides> <topology>
+$ heron help activate
+usage: heron activate [options] cluster/[role]/[env] topology-name
+
+Required arguments:
+  cluster/[role]/[env]  Cluster, role, and env to run topology
+  topology-name         Name of the topology
+
+Optional arguments:
+  --config-path (a string; path to cluster config; default: "/Users/$USER/.heron/conf")
+  --config-property (key=value; a config key and its value; default: [])
 ```
 
 Arguments of the `activate` command:
 
-* Activator overrides &mdash; Default activator parameters that you'd like to
-  override. The syntax is `"param1:value1 param2:value2 param3:value3"`.
+* **cluster/[role]/[env]** &mdash; The cluster where topology needs to be submitted,
+  optionally taking the role and environment. For exampple, `local/ads/PROD` or just `local`
 
-  **Example**: `heron.local.working.directory:/path/to/dir topology.debug:true`
-
-* Topology name  &mdash; The name of the already-submitted topology that you'd
+* **topology-name**  &mdash; The name of the already-submitted topology that you'd
   like to activate.
 
 ### Example Topology Activation Command
 
 ```bash
-$ heron-cli activate "heron.local.working.directory:/path/to/dir topology.debug:true"  \
-    my-topology
+$ heron activate local/ads/PROD my-topology
 ```
 
 ## Deactivating a Topology
@@ -128,17 +175,26 @@ You can deactivate a running topology at any time using the `deactivate`
 command. Here's the basic syntax:
 
 ```bash
-$ heron-cli deactivate <deactivator-overrides> <topology>
+$ heron help deactivate
+usage: heron deactivate [options] cluster/[role]/[env] topology-name
+
+Required arguments:
+  cluster/[role]/[env]  Cluster, role, and env to run topology
+  topology-name         Name of the topology
+
+Optional arguments:
+  --config-path (a string; path to cluster config; default: "/Users/kramasamy/.heron/conf")
+  --config-property (key=value; a config key and its value; default: [])
+  --verbose (a boolean; default: "false")
+
 ```
 
 Arguments of the `deactivate` command:
 
-* Deactivator overrides &mdash; Deactivation parameters that you'd like to
-  override. The syntax is `"param1:value1 param2:value2 param3:value3"`.
+* **cluster/[role]/[env]** &mdash; The cluster where topology needs to be submitted,
+  optionally taking the role and environment. For example, `local/ads/PROD` or just `local`
 
-  **Example**: `heron.local.working.directory:/path/to/dir topology.debug:true`
-
-* Topology name &mdash; The name of the topology that you'd like to deactivate.
+* **topology-name** &mdash; The name of the topology that you'd like to deactivate.
 
 ## Restarting a Topology
 
@@ -146,25 +202,34 @@ You can restart a deactivated topology using the `restart` command (assuming
 that the topology has not yet been killed, i.e. removed from the cluster).
 
 ```bash
-$ heron-cli restart <restarter-overrides> <topology> [shard]
+$ heron help restart
+usage: heron restart [options] cluster/[role]/[env] topology-name [container-id]
+
+Required arguments:
+  cluster/[role]/[env]  Cluster, role, and env to run topology
+  topology-name         Name of the topology
+  container-id          Identifier of the container to be restarted
+
+Optional arguments:
+  --config-path (a string; path to cluster config; default: "/Users/kramasamy/.heron/conf")
+  --config-property (key=value; a config key and its value; default: [])
+  --verbose (a boolean; default: "false")
 ```
 
 Arguments of the `restart` command:
 
-* Restarter overrides &mdash; Restart parameters that you'd like to override.
-  The syntax is `"param1:value1 param2:value2 param3:value3"`.
+* **cluster/[role]/[env]** &mdash; The cluster where topology needs to be submitted,
+  optionally taking the role and environment. For example, `local/ads/PROD` or just `local`
 
-  **Example**: `heron.local.working.directory:/path/to/dir topology.debug:true`
+* **topology-name** &mdash; The name of the topology that you'd like to restart.
 
-* Topology name &mdash; The name of the topology that you'd like to restart.
-* Shard ID (**optional**) &mdash; This enables you to specify the shard ID to be
-  restarted if you want to restart only a specific shard of the topology.
+* **container-id** (optional) &mdash; This enables you to specify the container ID to be
+  restarted if you want to restart only a specific container of the topology.
 
 ### Example Topology Restart Command
 
 ```bash
-$ heron-cli restart "topology.debug:true" \
-    my-topology
+$ heron restart local/ads/PROD my-topology
 ```
 
 ## Killing a Topology
@@ -174,20 +239,21 @@ knowledge of the topology entirely, you can remove it using the `kill` command.
 Here's the basic syntax:
 
 ```bash
-$ heron-cli kill <killer-overrides> <topology>
+$ heron kill <killer-overrides> <topology>
 ```
 
 Arguments of the `kill` command:
 
-* Killer overrides &dash; Default scheduler parameters that you'd like to
-  override. The syntax is `"param1:value1 param2:value2 param3:value3"`.
-* Topology name &mdash; The name of the topology that you'd like to kill.
+* **cluster/[role]/[env]** &mdash; The cluster where topology needs to be submitted,
+  optionally taking the role and environment.  For example, `local/ads/PROD` or just 
+  `local`
+
+* **topology-name** &mdash; The name of the topology that you'd like to kill.
 
 ### Example Topology Kill Command
 
 ```bash
-$ heron-cli kill "topology.debug:true" \
-    my-topology
+$ heron kill local my-topology
 ```
 
 ## Other Commands
@@ -198,14 +264,11 @@ Run the `version` command at any time to see which version of `heron` you're
 using:
 
 ```bash
-$ heron-cli version
-```
-
-### Classpath
-
-At any time you can display the classpath used by the Heron CLI client when
-running commands.
-
-```bash
-$ heron-cli classpath
+$ heron version
+heron.build.version : 0.13.5
+heron.build.time : Wed May 11 23:49:00 PDT 2016
+heron.build.timestamp : 1463035740000
+heron.build.host : mbp-machine
+heron.build.user : userwhobuilt
+INFO: Elapsed time: 0.000s.
 ```
