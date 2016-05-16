@@ -40,7 +40,7 @@ import com.twitter.heron.proto.system.PhysicalPlans;
  * It will new the streamManagerClient and metricsManagerClient in constructor and
  * ask them to connect with corresponding socket endpoint in run().
  */
-public class Gateway implements Runnable {
+public class Gateway implements Runnable, AutoCloseable {
   private static final Logger LOG = Logger.getLogger(Gateway.class.getName());
 
   // Some pre-defined value

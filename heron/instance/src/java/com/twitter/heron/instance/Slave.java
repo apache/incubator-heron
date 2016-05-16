@@ -37,7 +37,7 @@ import com.twitter.heron.proto.system.Metrics;
  * It is a Runnable so it could be executed in a Thread. During run(), it will begin the SlaveLooper's loop().
  */
 
-public class Slave implements Runnable {
+public class Slave implements Runnable, AutoCloseable {
   private static final Logger LOG = Logger.getLogger(Slave.class.getName());
 
   private final SlaveLooper slaveLooper;

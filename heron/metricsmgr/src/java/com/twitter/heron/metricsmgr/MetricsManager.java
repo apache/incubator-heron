@@ -31,6 +31,7 @@ import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.network.HeronSocketOptions;
@@ -342,7 +343,7 @@ public class MetricsManager {
       metricsManagerServer.removeSinkCommunicator(oldSinkExecutor.getCommunicator());
 
       // Close the sink
-      oldSinkExecutor.close();
+      SysUtils.closeIgnoringExceptions(oldSinkExecutor);
 
       if (oldSinkExecutor != null && thisSinkRetryAttempts != 0) {
         LOG.info(String.format("Restarting IMetricsSink: %s with %d available retries",
