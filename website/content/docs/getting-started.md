@@ -19,21 +19,25 @@ corresponding binaries will be
 * heron-client-install-\<version\>-darwin.sh
 * heron-tools-install-\<version\>-darwin.sh
 
-where \<version\> is the desired heron version.
+where \<version\> is the desired heron version. For example, \<version\>=0.14.0
 
-Run the download self installing binary for heron client as follows
+Run the download self installing binary for heron client using ```--user``` as follows
 ```bash
-$ chmod +x heron-client-install-0.13.2-darwin.sh
-$ ./heron-client-install-0.13.2-darwin.sh --user
+$ chmod +x heron-client-install-<version>-darwin.sh
+$ ./heron-client-install-<version>-darwin.sh --user
 Uncompressing......
 Heron is now installed!
 Make sure you have "/Users/$USER/bin" in your path.
 ```
-
-Run the download self installing binary for heron tools as follows
+To add ```/Users/$USER/bin``` to your path, run:
 ```bash
-$ chmod +x heron-tools-install-0.13.2-darwin.sh
-$ ./heron-tools-install-0.13.2-darwin.sh --user
+$ export PATH="$PATH:$HOME/bin"
+```
+
+Run the download self installing binary for heron tools using ```--user``` as follows
+```bash
+$ chmod +x heron-tools-install-<version>-darwin.sh
+$ ./heron-tools-install-<version>-darwin.sh --user
 Uncompressing......
 Heron Tools is now installed!
 Make sure you have "/Users/$USER/bin" in your path.
@@ -41,7 +45,7 @@ Make sure you have "/Users/$USER/bin" in your path.
 
 ### Step 2 - Launch an example topology
 
-Launch an example [topology](../concepts/topologies) on **local cluster** using submit:
+Example topologies are installed with ```--user``` flag in ```~/.heron/examples```.  Launch an example [topology](../concepts/topologies) on **local cluster** using submit:
 
 ```bash
 $ heron submit local ~/.heron/examples/heron-examples.jar com.twitter.heron.examples.ExclamationTopology ExclamationTopology
@@ -94,7 +98,7 @@ For detailed documentation, go to http://heronstreaming.io
 
 To invoke the help for submitting a topology:
 ```bash
-$ heron help submit 
+$ heron help submit
 usage: heron submit [options] cluster/[role]/[environ] topology-file-name topology-class-name [topology-args]
 
 Required arguments:
@@ -103,9 +107,11 @@ Required arguments:
   topology-class-name   Topology class name
 
 Optional arguments:
-  --config-path (a string; path to cluster config; default: "/Users/USERNAME/.heron/conf/<cluster>")
-  --config-property (a string; a config property; default: [])
+  --config-path (a string; path to cluster config; default: "/Users/$USER/.heron/conf")
+  --config-property (key=value; a config key and its value; default: [])
   --deploy-deactivated (a boolean; default: "false")
+  -D DEFINE             Define a system property to pass to java -D when
+                        running main.
   --verbose (a boolean; default: "false")
 ```
 
