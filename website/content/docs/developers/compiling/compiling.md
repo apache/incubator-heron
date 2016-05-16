@@ -3,8 +3,9 @@ title: Compiling Heron
 ---
 
 Heron is currently available for [Mac OS X 10.10](../../../developers/compiling/mac), 
-[Ubuntu 12.04, Ubuntu 14.04](../../../developers/compiling/linux), and CentOS 5. 
-This guide describes the basics of Heron build system. For step by step build instructions 
+[Ubuntu 12.04, Ubuntu 14.04](../../../developers/compiling/linux),
+and [CentOS 7](../../../developers/compiling/linux).
+This guide describes the basics of Heron build system. For step by step build instructions
 on a specific platform refer the following guides.
 
 * [Build on Linux](../../../developers/compiling/linux)
