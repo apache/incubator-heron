@@ -189,9 +189,9 @@ pex_library(
         ":proto_tuple_py",
         ":proto_stmgr_py",
     ],
-    eggs = [
-        "//3rdparty/eggs:setuptools",
-        "//3rdparty/eggs:protobuf",
+    reqs = [
+        "protobuf==2.5.0",
+        "setuptools==18.0.1",
     ],
 )
 

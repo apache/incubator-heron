@@ -97,6 +97,16 @@ def make_manifest(ctx, output):
     outputs = [ output ],
     command = ('touch %s && echo "%s" > %s' % (output.path, manifest_text, output.path)))
 
+def common_pex_arguments(entry_point, deploy_pex_path, manifest_file_path):
+  arguments = ['--entry-point', entry_point]
+
+  # Our internal build environment requires extra args injected and this is a brutal hack. Ideally
+  # bazel would provide a mechanism to swap in env-specific global params here
+  #EXTRA_PEX_ARGS#
+  arguments += [deploy_pex_path]
+  arguments += [manifest_file_path]
+  return arguments
+
 def pex_binary_impl(ctx):
   if not ctx.file.main:
     main_file = pex_file_types.filter(ctx.files.srcs)[0]
@@ -115,19 +125,12 @@ def pex_binary_impl(ctx):
 
   transitive_sources = collect_transitive_sources(ctx)
   transitive_eggs = collect_transitive_eggs(ctx)
-  transitive_reqs = collect_transitive_reqs(ctx)
   transitive_resources = ctx.files.resources
   pexbuilder = ctx.executable._pexbuilder
 
   # form the arguments to pex builder
   arguments =  [] if ctx.attr.zip_safe else ["--not-zip-safe"]
-  arguments += ['--entry-point', main_pkg]
-
-  # Our internal build environment requires extra args injected and this is a brutal hack. Ideally
-  # bazel would provide a mechanism to swap in env-specific global params here
-  #EXTRA_PEX_ARGS#
-  arguments += [deploy_pex.path]
-  arguments += [manifest_file.path]
+  arguments += common_pex_arguments(main_pkg, deploy_pex.path, manifest_file.path)
 
   # form the inputs to pex builder
   inputs =  [main_file, manifest_file]
@@ -171,7 +174,7 @@ def pex_test_impl(ctx):
       executable = pexbuilder,
       outputs = [ deploy_pex ],
       mnemonic = "PexPython",
-      arguments = ['--entry-point', 'pytest', deploy_pex.path, manifest_file.path])
+      arguments = common_pex_arguments('pytest', deploy_pex.path, manifest_file.path))
 
   executable = ctx.outputs.executable
   ctx.action(

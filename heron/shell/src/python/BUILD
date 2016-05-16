@@ -8,9 +8,9 @@ pex_library(
         ["**/*.py"],
         exclude = ["main.py"]
     ),
-    eggs = [
-        "//3rdparty/eggs:tornado",
-        "//3rdparty/eggs:requests"
+    reqs = [
+        "requests==2.3.0",
+        "tornado==4.0.2",
     ],
 )
 
