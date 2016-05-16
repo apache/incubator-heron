@@ -5,9 +5,9 @@
 This guide describes how to make best use of Heron UI for monitoring and
 debugging topologies.
 
-The UI provides a lot of information about a topology or a part of topology
-quickly, thus reducing the debugging time considerably. Some of these features
-are listed below. A Complete set of features can be found in follwing sections.
+The UI provides a lot of information about a topology or a part of it quickly,
+thus reducing debugging time considerably. Some of these features are
+listed below. A complete set of features can be found in following sections.
 
 1. See logical plan of a topology
 2. See physical plan of a topology
