@@ -29,6 +29,7 @@ import org.apache.commons.cli.ParseException;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.FileUtils;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.scheduler.server.SchedulerServer;
@@ -368,9 +369,9 @@ public class SchedulerMain {
       }
 
       // 4. Close the resources
-      scheduler.close();
-      packing.close();
-      statemgr.close();
+      SysUtils.closeIgnoringExceptions(scheduler);
+      SysUtils.closeIgnoringExceptions(packing);
+      SysUtils.closeIgnoringExceptions(statemgr);
     }
 
     return isSuccessful;

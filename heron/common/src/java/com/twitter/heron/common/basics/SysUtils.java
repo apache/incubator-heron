@@ -16,8 +16,11 @@ package com.twitter.heron.common.basics;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public final class SysUtils {
+  private static final Logger LOG = Logger.getLogger(SysUtils.class.getName());
 
   private SysUtils() {
   }
@@ -50,6 +53,26 @@ public final class SysUtils {
       return port;
     } catch (IOException ioe) {
       return -1;
+    }
+  }
+
+  /**
+   * Close a closable ignoring any exceptions.
+   * This method is used during cleanup, or in a finally block.
+   *
+   * @param closeable source or destination of data can be closed
+   */
+  public static void closeIgnoringExceptions(AutoCloseable closeable) {
+    if (closeable != null) {
+      try {
+        closeable.close();
+
+        // Suppress it since we ignore any exceptions
+        // SUPPRESS CHECKSTYLE IllegalCatch
+      } catch (Exception e) {
+        // Still log the Exception for issue tracing
+        LOG.log(Level.WARNING, String.format("Failed to close %s", closeable), e);
+      }
     }
   }
 }

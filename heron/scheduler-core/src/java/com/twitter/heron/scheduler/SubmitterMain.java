@@ -28,6 +28,7 @@ import org.apache.commons.cli.ParseException;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
@@ -370,10 +371,10 @@ public final class SubmitterMain {
       }
 
       // 4. Close the resources
-      uploader.close();
-      packing.close();
-      launcher.close();
-      statemgr.close();
+      SysUtils.closeIgnoringExceptions(uploader);
+      SysUtils.closeIgnoringExceptions(packing);
+      SysUtils.closeIgnoringExceptions(launcher);
+      SysUtils.closeIgnoringExceptions(statemgr);
     }
 
     // Log the result and exit
