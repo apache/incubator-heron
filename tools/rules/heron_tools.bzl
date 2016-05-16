@@ -12,7 +12,7 @@ def heron_tools_bin_files():
 
 def heron_tools_conf_files():
     return [
-        "//heron/config/src/yaml:tracker-yaml",
+        "//heron/config/src/yaml:conf-tracker",
     ]
 
 def heron_tools_lib_files():
