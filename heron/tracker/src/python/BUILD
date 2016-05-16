@@ -13,10 +13,10 @@ pex_library(
         "//heron/statemgrs/src/python:zk-statemgr-py",
         "//heron/proto:proto-py",
     ],
-    eggs = [
-        "//3rdparty/eggs:protobuf",
-        "//3rdparty/eggs:tornado",
-    ]
+    reqs = [
+        "protobuf==2.5.0",
+        "tornado==4.0.2",
+    ],
 )
 
 pex_binary(

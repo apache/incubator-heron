@@ -5,7 +5,5 @@ load("/tools/rules/pex_rules", "pex_library", "pex_binary")
 pex_binary(
     name = "heron-executor",
     srcs = ["heron-executor.py"],
-    eggs = [
-        "//3rdparty/eggs:pyyaml",
-    ],
+    reqs = ["pyyaml==3.10"],
 )
