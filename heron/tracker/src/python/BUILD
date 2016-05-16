@@ -15,7 +15,7 @@ pex_library(
     ],
     reqs = [
         "protobuf==2.5.0",
-        "tornado==4.3",
+        "tornado==3.2",
     ],
 )
 

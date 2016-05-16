@@ -9,6 +9,6 @@ pex_binary(
     ],
     main = "main.py",
     reqs = [
-        "tornado==4.3",
+        "tornado==3.2",
     ],
 )
