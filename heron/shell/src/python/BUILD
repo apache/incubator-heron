@@ -10,7 +10,7 @@ pex_library(
     ),
     reqs = [
         "requests==2.3.0",
-        "tornado==3.1.0",
+        "tornado==4.3",
     ],
 )
 
