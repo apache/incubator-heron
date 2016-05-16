@@ -6,12 +6,5 @@ pex_binary(
     name = "pylint",
     main = "main.py",
     srcs = ["main.py"],
-    eggs = [
-        "//3rdparty/eggs:astroid",
-        "//3rdparty/eggs:colorama",
-        "//3rdparty/eggs:lazy-object-proxy",
-        "//3rdparty/eggs:pylint",
-        "//3rdparty/eggs:six",
-        "//3rdparty/eggs:wrapt",
-    ],
+    reqs = ["pylint==1.5.5"],
 )

@@ -152,7 +152,7 @@ public class TMasterSink implements IMetricsSink {
   // If so, restart the TMasterClientService with the new TMasterLocation
   private void startTMasterChecker() {
     final int checkIntervalSec =
-        TypeUtils.getInt(sinkConfig.get(KEY_TMASTER_LOCATION_CHECK_INTERVAL_SEC));
+        TypeUtils.getInteger(sinkConfig.get(KEY_TMASTER_LOCATION_CHECK_INTERVAL_SEC));
 
     Runnable runnable = new Runnable() {
       @Override
@@ -338,8 +338,8 @@ public class TMasterSink implements IMetricsSink {
               TypeUtils.getLong(tmasterClientConfig.get(KEY_NETWORK_WRITE_BATCH_TIME_MS)),
               TypeUtils.getLong(tmasterClientConfig.get(KEY_NETWORK_READ_BATCH_SIZE_BYTES)),
               TypeUtils.getLong(tmasterClientConfig.get(KEY_NETWORK_READ_BATCH_TIME_MS)),
-              TypeUtils.getInt(tmasterClientConfig.get(KEY_SOCKET_SEND_BUFFER_BYTES)),
-              TypeUtils.getInt(tmasterClientConfig.get(KEY_SOCKET_RECEIVED_BUFFER_BYTES)));
+              TypeUtils.getInteger(tmasterClientConfig.get(KEY_SOCKET_SEND_BUFFER_BYTES)),
+              TypeUtils.getInteger(tmasterClientConfig.get(KEY_SOCKET_RECEIVED_BUFFER_BYTES)));
 
       // Reset the Consumer
       metricsCommunicator.setConsumer(looper);

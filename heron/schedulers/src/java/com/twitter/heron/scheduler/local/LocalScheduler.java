@@ -15,8 +15,8 @@
 package com.twitter.heron.scheduler.local;
 
 import java.io.File;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -26,19 +26,14 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.xml.bind.DatatypeConverter;
-
-import org.apache.commons.io.FilenameUtils;
-
-import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.common.ShellUtils;
 import com.twitter.heron.spi.scheduler.IScheduler;
-import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.Runtime;
-import com.twitter.heron.spi.utils.TopologyUtils;
+import com.twitter.heron.spi.utils.SchedulerUtils;
 
 public class LocalScheduler implements IScheduler {
   private static final Logger LOG = Logger.getLogger(LocalScheduler.class.getName());
@@ -64,18 +59,6 @@ public class LocalScheduler implements IScheduler {
 
     // Clear the map
     processToContainer.clear();
-  }
-
-  /**
-   * Encode the JVM options
-   *
-   * @return encoded string
-   */
-  protected String formatJavaOpts(String javaOpts) {
-    String javaOptsBase64 = DatatypeConverter.printBase64Binary(
-        javaOpts.getBytes(Charset.forName("UTF-8")));
-
-    return String.format("\"%s\"", javaOptsBase64.replace("=", "&equals;"));
   }
 
   /**
@@ -134,58 +117,15 @@ public class LocalScheduler implements IScheduler {
     monitorService.submit(r);
   }
 
-  protected String getExecutorCommand(int container) {
-    TopologyAPI.Topology topology = Runtime.topology(runtime);
-
-    int port1 = NetworkUtils.getFreePort();
-    int port2 = NetworkUtils.getFreePort();
-    int port3 = NetworkUtils.getFreePort();
-    int shellPort = NetworkUtils.getFreePort();
-    int port4 = NetworkUtils.getFreePort();
-
-    if (port1 == -1 || port2 == -1 || port3 == -1 || shellPort == -1 || port4 == -1) {
-      throw new RuntimeException("Failed to find available ports to start topology");
+  protected String[] getExecutorCommand(int container) {
+    List<Integer> freePorts = new ArrayList<>(SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR);
+    for (int i = 0; i < SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR; i++) {
+      freePorts.add(SysUtils.getFreePort());
     }
 
-    String executorCmd = String.format(
-        "%s %d %s %s %s %s %s %s %s %s %s %s %s %s %s %s "
-            + "%s %s %s %s %s %s %d %s %d %s %s %s %s %s %s %d",
-        LocalContext.executorSandboxBinary(config),
-        container,
-        topology.getName(),
-        topology.getId(),
-        FilenameUtils.getName(LocalContext.topologyDefinitionFile(config)),
-        Runtime.instanceDistribution(runtime),
-        LocalContext.stateManagerConnectionString(config),
-        LocalContext.stateManagerRootPath(config),
-        LocalContext.tmasterSandboxBinary(config),
-        LocalContext.stmgrSandboxBinary(config),
-        LocalContext.metricsManagerSandboxClassPath(config),
-        formatJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)),
-        TopologyUtils.makeClassPath(topology, LocalContext.topologyJarFile(config)),
-        port1,
-        port2,
-        port3,
-        LocalContext.systemConfigSandboxFile(config),
-        TopologyUtils.formatRamMap(
-            TopologyUtils.getComponentRamMap(topology, LocalContext.instanceRam(config))),
-        formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)),
-        LocalContext.topologyPackageType(config),
-        LocalContext.topologyJarFile(config),
-        LocalContext.javaSandboxHome(config),
-        shellPort,
-        LocalContext.shellSandboxBinary(config),
-        port4,
-        LocalContext.cluster(config),
-        LocalContext.role(config),
-        LocalContext.environ(config),
-        LocalContext.instanceSandboxClassPath(config),
-        LocalContext.metricsSinksSandboxFile(config),
-        "no_need_since_scheduler_is_started",
-        0
-    );
+    String[] executorCmd = SchedulerUtils.executorCommand(config, runtime, container, freePorts);
 
-    LOG.info("Executor command line: " + executorCmd.toString());
+    LOG.info("Executor command line: " + Arrays.toString(executorCmd));
     return executorCmd;
   }
 

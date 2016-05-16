@@ -30,6 +30,7 @@ import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.NIOLooper;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.basics.SlaveLooper;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.logging.ErrorReportLoggingHandler;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
@@ -130,9 +131,9 @@ public class HeronInstance {
     if (args.length < 10) {
       throw new RuntimeException(
           "Invalid arguments; Usage is java com.twitter.heron.instance.HeronInstance "
-          + "<topology_name> <topology_id> <instance_id> <component_name> <task_id> "
-          + "<component_index> <stmgr_id> <stmgr_port> <metricsmgr_port> "
-          + "<heron_internals_config_filename>");
+              + "<topology_name> <topology_id> <instance_id> <component_name> <task_id> "
+              + "<component_index> <stmgr_id> <stmgr_port> <metricsmgr_port> "
+              + "<heron_internals_config_filename>");
     }
 
     String topologyName = args[0];
@@ -252,7 +253,7 @@ public class HeronInstance {
 
     @Override
     public void run() {
-      gateway.close();
+      SysUtils.closeIgnoringExceptions(gateway);
 
       stop();
     }
@@ -263,7 +264,7 @@ public class HeronInstance {
 
     @Override
     public void run() {
-      slave.close();
+      SysUtils.closeIgnoringExceptions(slave);
     }
   }
 

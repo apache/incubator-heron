@@ -93,7 +93,7 @@ public final class Utils {
   }
 
   public static Integer getInt(Object o) {
-    return TypeUtils.getInt(o);
+    return TypeUtils.getInteger(o);
   }
 
   public static byte[] toByteArray(ByteBuffer buffer) {

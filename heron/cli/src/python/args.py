@@ -78,7 +78,7 @@ def add_topology_class(parser):
 def add_cluster_role_env(parser):
   parser.add_argument(
       'cluster/[role]/[env]',
-       help='Cluster, role, and environ to run topology'
+       help='Cluster, role, and environment to run topology'
   )
   return parser
 

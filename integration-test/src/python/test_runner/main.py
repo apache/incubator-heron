@@ -107,8 +107,12 @@ def getHTTPResponse(serverAddress, serverPort, topologyName):
 # Submit topology using heron-cli
 def submitTopology(heronCliPath, cluster, role, env, jarPath, classPath, pkgUri, args = None):
   logging.info("Submitting topology")
-  cmd = ("%s submit %s/%s/%s --config-property heron.package.core.uri=%s %s %s %s --verbose" % (
-    heronCliPath, cluster, role, env, pkgUri, jarPath, classPath, args))
+
+  # Form the command to submit a topology.
+  # Note the single quote around the arg for heron.package.core.uri.
+  # This is needed to prevent shell expansion.
+  cmd = "%s submit %s/%s/%s --config-property heron.package.core.uri='%s' %s %s %s --verbose" % (
+    heronCliPath, cluster, role, env, pkgUri, jarPath, classPath, args)
 
   logging.info("Submitting command: %s" % (cmd))
 
@@ -142,15 +146,20 @@ def runAllTests(conf, args):
   successes = []
   failures = []
   timestamp = str(int(time.time()))
+  total = len(conf["topologies"])
+  current = 1;
   for topologyConf in conf["topologies"]:
     topologyName = ("%s_%s_%s") % (timestamp, topologyConf["topologyName"], str(uuid.uuid4()))
     classPath = conf["topologyClasspathPrefix"] + topologyConf["classPath"]
     expectedResultFilePath = args.topologiesPath + "/" + topologyConf["expectedResultRelativePath"]
 
+    logging.info("==== Starting test %s of %s: %s ====" % (current, total, topologyName))
+    start_secs = int(time.time())
     if (runTest(topologyName, classPath, expectedResultFilePath, args) == "success"):
-      successes += [topologyName]
+      successes += [(topologyName, int(time.time()) - start_secs)]
     else:
-      failures += [topologyName]
+      failures += [(topologyName, int(time.time()) - start_secs)]
+    current += 1
   return (successes, failures)
 
 def main():
@@ -186,14 +195,17 @@ def main():
   args = parser.parse_args()
 
   (successes, failures) = runAllTests(conf, args)
+  total = len(failures) + len(successes)
 
   if not failures:
-    logging.info("Success: %s (all) tests passed" % len(successes))
+    logging.info("SUCCESS: %s (all) tests passed:" % len(successes))
+    for test in successes:
+      logging.info("  - %s: %s" % (("[%ss]" % test[1]).ljust(8), test[0]))
     sys.exit(0)
   else:
-    logging.error("Fail: %s test failed" %len(failures))
-    logging.info("Failed Tests: ")
-    logging.info("\n".join(failures))
+    logging.error("FAILURE: %s/%s tests failed:" % (len(failures), total))
+    for test in failures:
+      logging.error("  - %s: %s" % (("[%ss]" % test[1]).ljust(8), test[0]))
     sys.exit(1)
 
 if __name__ == '__main__':

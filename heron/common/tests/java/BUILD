@@ -9,6 +9,16 @@ java_test(
 )
 
 java_test(
+    name = "sys_utils_unittest",
+    srcs = glob(["**/SysUtilsTest.java"]),
+    deps = [
+        "//heron/common/src/java:common-java",
+        "@bazel_tools//third_party:junit4",
+    ],
+    size = "small",
+)
+
+java_test(
     name = "wakeable-looper_unittest",
     srcs = glob(["**/WakeableLooperTest.java"]),
     deps = [
