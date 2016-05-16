@@ -26,6 +26,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
@@ -281,8 +282,7 @@ public final class RuntimeManagerMain {
       // Currently nothing to do here
 
       // 4. Close the resources
-//      runtimeManager.close();
-      statemgr.close();
+      SysUtils.closeIgnoringExceptions(statemgr);
     }
 
     // Log the result and exit

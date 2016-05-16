@@ -14,6 +14,8 @@
 
 package com.twitter.heron.common.basics;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Random;
 
@@ -45,5 +47,20 @@ public class SysUtilsTest {
       long end = System.currentTimeMillis();
       Assert.assertTrue((end - start) >= expectedSleepTimeMs);
     }
+  }
+
+  @Test
+  public void testCloseIgnoringException() throws Exception {
+    Closeable closeable = new Closeable() {
+      @Override
+      public void close() throws IOException {
+        throw new RuntimeException("Deliberate exception to be ignored.");
+      }
+    };
+
+    // This invocation should not throw any exceptions
+    // Otherwise, the test will automatically fail
+    SysUtils.closeIgnoringExceptions(closeable);
+    Assert.assertTrue(true);
   }
 }
