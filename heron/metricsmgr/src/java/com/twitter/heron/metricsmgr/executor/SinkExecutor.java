@@ -21,6 +21,7 @@ import java.util.Map;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.Constants;
 import com.twitter.heron.common.basics.SlaveLooper;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.basics.TypeUtils;
 import com.twitter.heron.metricsmgr.MetricsSinksConfig;
 import com.twitter.heron.spi.metricsmgr.metrics.MetricsRecord;
@@ -37,7 +38,7 @@ import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
  * 1. New MetricsRecord comes and notify the SinkExecutor to wake up to process it
  * 2. The time interval to invoke flush() is met so SinkExecutor would wake up to invoke flush()
  */
-public class SinkExecutor implements Runnable {
+public class SinkExecutor implements Runnable, AutoCloseable {
   private final IMetricsSink metricsSink;
   private final SlaveLooper slaveLooper;
 
@@ -84,8 +85,9 @@ public class SinkExecutor implements Runnable {
     return metricsInSinkQueue;
   }
 
+  @Override
   public void close() {
-    metricsSink.close();
+    SysUtils.closeIgnoringExceptions(metricsSink);
   }
 
   @Override
