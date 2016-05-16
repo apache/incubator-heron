@@ -304,10 +304,7 @@ public class CuratorStateManager extends FileSystemStateManager {
 
   @Override
   public ListenableFuture<Boolean> deleteSchedulerLocation(String topologyName) {
-    // It is a EPHEMERAL node and would be removed automatically
-    final SettableFuture<Boolean> result = SettableFuture.create();
-    result.set(true);
-    return result;
+    return deleteNode(getSchedulerLocationPath(topologyName));
   }
 
   @Override
