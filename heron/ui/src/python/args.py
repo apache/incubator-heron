@@ -64,7 +64,7 @@ def add_arguments(parser):
 
 def create_parsers():
   parser = argparse.ArgumentParser(
-      epilog = 'For detailed documentation, go to http://go/heron',
+      epilog = 'For detailed documentation, go to http://heronstreaming.io',
       usage = "%(prog)s [options] [help]",
       add_help = False)
 
