@@ -75,10 +75,11 @@ Clicking on an instance will highlight that instance in the list.
 
 ![Topology Instance] (/img/ui-guide/topology-instance.png)
 
-#### Color by Metrics
+#### Aggregate Topology Metrics
 
-Click on the circles for metrics to color components and instances by these
-metrics. This is quick way to find out which instances are having issues.
+Selecting a metric will highlight the components and instances based on their
+health with respect to the metric, green being healthy, red indicating a problem.
+This is quick way to find out which instances are having issues.
 
 ![Topology Capacity] (/img/ui-guide/topology-capacity.png)
 
