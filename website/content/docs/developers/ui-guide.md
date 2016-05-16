@@ -79,7 +79,7 @@ Clicking on an instance will highlight that instance in the list.
 
 Selecting a metric will highlight the components and instances based on their
 health with respect to the metric, green being healthy, red indicating a problem.
-This is quick way to find out which instances are having issues.
+This is a quick way to find out which instances are having issues.
 
 ![Topology Capacity] (/img/ui-guide/topology-capacity.png)
 
