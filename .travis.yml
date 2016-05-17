@@ -34,7 +34,7 @@ before_install:
   #- ./bazel-0.1.2-installer-linux-x86_64.sh --user
 
 before_script:
- - npm install -g gulp
+ - npm install gulp
 
 script:
   - which gcc-4.8
