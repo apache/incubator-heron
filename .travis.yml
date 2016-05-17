@@ -43,5 +43,5 @@ script:
   - g++ --version
   - which gulp
   - pwd
-  - (cd website && make site)
+  - (cd website && make setup && make site)
   #- scripts/travis/build.sh && scripts/travis/test.sh
