@@ -46,6 +46,17 @@ java_test(
 )
 
 java_test(
+  name="runtime-manager-main_unittest",
+  srcs=glob(
+    ["**/RuntimeManagerMainTest.java"] +
+    ["**/util/TopologyUtilityTest.java"]
+  ),
+  deps=scheduler_deps_files  +
+    ["//heron/statemgrs/src/java:null-statemgr-java"],
+  size="small",
+)
+
+java_test(
   name="scheduler-main_unittest",
   srcs=glob(
     ["**/SchedulerMainTest.java"] +
