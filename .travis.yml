@@ -24,18 +24,19 @@ env:
 before_install:
 
   # download and install libunwind
-  - wget -q http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz
-  - tar xfz libunwind-1.1.tar.gz
-  - cd libunwind-1.1 && ./configure --prefix=/usr && sudo make --silent install && cd ..
+  #- wget -q http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz
+  #- tar xfz libunwind-1.1.tar.gz
+  #- cd libunwind-1.1 && ./configure --prefix=/usr && sudo make --silent install && cd ..
 
   # download and install bazel
-  - wget -q 'https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh'
-  - chmod +x bazel-0.1.2-installer-linux-x86_64.sh
-  - ./bazel-0.1.2-installer-linux-x86_64.sh --user
+  #- wget -q 'https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh'
+  #- chmod +x bazel-0.1.2-installer-linux-x86_64.sh
+  #- ./bazel-0.1.2-installer-linux-x86_64.sh --user
 
 script:
   - which gcc-4.8
   - gcc --version
   - which g++-4.8
-  - g++ --version 
-  - scripts/travis/build.sh && scripts/travis/test.sh
+  - g++ --version
+  - cd website && make site
+  #- scripts/travis/build.sh && scripts/travis/test.sh
