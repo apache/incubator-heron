@@ -238,6 +238,7 @@ public final class SchedulerUtils {
    * @param schedulerServerHost the http server host that scheduler listens for receives requests
    * @param schedulerServerPort the http server port that scheduler listens for receives requests
    * @param scheduler the IScheduler to provide more info
+   * @param isService true if the scheduler runs as a service; false otherwise
    */
   public static boolean setSchedulerLocation(
       Config runtime,

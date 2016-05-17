@@ -349,10 +349,13 @@ public class SchedulerMain {
       // start the server to manage runtime requests
       server.start();
 
+      // get isService value from config, default is true
+      boolean isService = Context.schedulerService(config);
+
       // write the scheduler location to state manager
       // Make sure it happens after IScheduler.onScheduler
       isSuccessful = SchedulerUtils.setSchedulerLocation(
-          runtime, server.getHost(), server.getPort(), scheduler, Context.schedulerService(config));
+          runtime, server.getHost(), server.getPort(), scheduler, isService);
 
       if (isSuccessful) {
         // wait until kill request or some interrupt occurs if the scheduler starts successfully
