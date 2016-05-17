@@ -144,7 +144,7 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
 
   @Override
   public ListenableFuture<Boolean> setSchedulerLocation(
-      Scheduler.SchedulerLocation location, String topologyName) {
+      Scheduler.SchedulerLocation location, String topologyName, boolean isService) {
     return setData(getSchedulerLocationPath(topologyName), location.toByteArray());
   }
 

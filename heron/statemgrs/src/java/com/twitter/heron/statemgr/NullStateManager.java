@@ -75,7 +75,8 @@ public class NullStateManager implements IStateManager {
   @Override
   public ListenableFuture<Boolean> setSchedulerLocation(
       Scheduler.SchedulerLocation location,
-      String topologyName) {
+      String topologyName,
+      boolean isService) {
     return nullFuture;
   }
 

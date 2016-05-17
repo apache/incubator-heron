@@ -246,8 +246,10 @@ public class CuratorStateManager extends FileSystemStateManager {
   @Override
   public ListenableFuture<Boolean> setSchedulerLocation(
       Scheduler.SchedulerLocation location,
-      String topologyName) {
-    return createNode(getSchedulerLocationPath(topologyName), location.toByteArray(), false);
+      String topologyName,
+      boolean isService) {
+    // if isService, set the node as ephemeral node; set as persistent node otherwise
+    return createNode(getSchedulerLocationPath(topologyName), location.toByteArray(), isService);
   }
 
   @Override
