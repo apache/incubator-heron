@@ -5,9 +5,9 @@ title: Implementing a Custom Scheduler
 To run a Heron cluster, you'll need to set up a scheduler that is responsible
 for cluster management. Heron supports three schedulers out of the box:
 
-* [Mesos](../../operators/deployment/mesos)
-* [Aurora](../../operators/deployment/aurora)
-* [Local scheduler](../../operators/deployment/local)
+* [Mesos](../../operators/deployment/schedulers/mesos)
+* [Aurora](../../operators/deployment/schedulers/aurora)
+* [Local scheduler](../../operators/deployment/schedulers/local)
 
 If you'd like to run Heron on a not-yet-supported system, such as
 [YARN](https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-site/YARN.html)
