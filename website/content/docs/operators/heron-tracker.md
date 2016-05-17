@@ -8,7 +8,7 @@ that information through a JSON REST API.  More on the role of the Tracker can
 be found [here](../../concepts/architecture#heron-tracker).
 
 The Tracker can run within your Heron cluster (e.g.
-[Mesos](../../operators/deployment/mesos) or [Aurora](../../operators/deployment/aurora)) or
+[Mesos](../../operators/deployment/schedulers/mesos) or [Aurora](../../operators/deployment/schedulers/aurora)) or
 outside of it, provided that the machine on which it runs has access to your
 Heron cluster.
 

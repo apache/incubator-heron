@@ -7,7 +7,7 @@ Manager](../../concepts/architecture#metrics-manager) (MM), which collects
 metrics from all instances in the topology. You can define how the MM processes
 metrics by implementing a **metrics sink**, which specifies how the MM handles
 incoming
-[`MetricsRecord`](../api/metrics/com/twitter/heron/metricsmgr/api/metrics/MetricsRecord.html)
+[`MetricsRecord`](/api/com/twitter/heron/spi/metricsmgr/metrics/MetricsRecord.html)
 objects.
 
 Java is currently the only supported language for custom metrics sinks. This may
@@ -19,15 +19,15 @@ Heron comes equipped out of the box with three metrics sinks that you can apply
 for a specific topology. The code for these sinks may prove helpful for
 implementing your own.
 
-* [`GraphiteSink`](../api/metrics/com/twitter/heron/metricsmgr/sink/GraphiteSink.html)
+* [`GraphiteSink`](/api/metrics/com/twitter/heron/metricsmgr/sink/GraphiteSink.html)
   &mdash; Sends each `MetricsRecord` object to a
   [Graphite](http://graphite.wikidot.com/) instance according to a Graphite
   prefix.
-* [`ScribeSink`](../api/metrics/com/twitter/heron/metricsmgr/sink/ScribeSink.html)
+* [`ScribeSink`](/api/metrics/com/twitter/heron/metricsmgr/sink/ScribeSink.html)
   &mdash; Sends each `MetricsRecord` object to a
   [Scribe](https://github.com/facebookarchive/scribe) instance according to a
   Scribe category and namespace.
-* [`FileSink`](../api/metrics/com/twitter/heron/metricsmgr/sink/FileSink.html)
+* [`FileSink`](/api/metrics/com/twitter/heron/metricsmgr/sink/FileSink.html)
   &mdash; Writes each `MetricsRecord` object to a JSON file at a specified path.
 
 More on using those sinks in a Heron cluster can be found in [Metrics
@@ -66,7 +66,7 @@ interface, which requires you to implement the following methods:
   initialization behavior of the sink. The `conf` map is the configuration that
   is passed to the sink by the `.yaml` configuration file at
   `heron/config/metrics_sink.yaml`; the
-  [`SinkContext`](../api/metrics/com/twitter/heron/metricsmgr/api/sink/SinkContext.html)
+  [`SinkContext`](/api/com/twitter/heron/spi/metricsmgr/sink/SinkContext.html)
   object enables you to access values from the sink's runtime context
   (the ID of the metrics manager, the ID of the sink, and the name of the
   topology).
