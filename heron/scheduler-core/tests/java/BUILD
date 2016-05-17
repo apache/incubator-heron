@@ -85,3 +85,13 @@ java_test(
   deps=scheduler_deps_files,
   size="small",
 )
+
+java_test(
+  name="scheduler_client_factory_unittest",
+  srcs=glob(
+    ["**/SchedulerClientFactoryTest.java"]
+  ),
+  deps=scheduler_deps_files +
+    ["//heron/schedulers/src/java:null-scheduler-java"],
+  size="small",
+)

@@ -28,22 +28,18 @@ import org.apache.commons.cli.ParseException;
 
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
-import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
-import com.twitter.heron.scheduler.client.HttpServiceSchedulerClient;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
-import com.twitter.heron.scheduler.client.LibrarySchedulerClient;
+import com.twitter.heron.scheduler.client.SchedulerClientFactory;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.ReflectionUtils;
-import com.twitter.heron.spi.utils.Runtime;
 
 public final class RuntimeManagerMain {
   private RuntimeManagerMain() {
@@ -293,7 +289,6 @@ public final class RuntimeManagerMain {
     }
   }
 
-
   public static boolean validateRuntimeManage(
       Config config,
       SchedulerStateManagerAdaptor adaptor,
@@ -330,7 +325,8 @@ public final class RuntimeManagerMain {
         .build();
 
     // Create a ISchedulerClient basing on the config
-    ISchedulerClient schedulerClient = getSchedulerClient(config, runtime);
+    ISchedulerClient schedulerClient =
+        new SchedulerClientFactory(config, runtime).getSchedulerClient();
     if (schedulerClient == null) {
       throw new IllegalArgumentException("Failed to initialize scheduler client");
     }
@@ -344,39 +340,5 @@ public final class RuntimeManagerMain {
     boolean ret = runtimeManagerRunner.call();
 
     return ret;
-  }
-
-  // TODO(mfu): Make it into Factory pattern if needed
-  public static ISchedulerClient getSchedulerClient(Config config, Config runtime)
-      throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-    LOG.fine("Creating scheduler client");
-    ISchedulerClient schedulerClient;
-
-    if (Context.schedulerService(config)) {
-      // get the instance of the state manager
-      SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
-
-      Scheduler.SchedulerLocation schedulerLocation =
-          statemgr.getSchedulerLocation(Runtime.topologyName(runtime));
-
-      if (schedulerLocation == null) {
-        LOG.log(Level.SEVERE, "Failed to get scheduler location");
-        return null;
-      }
-
-      LOG.log(Level.FINE, "Scheduler is listening on location: {0} ", schedulerLocation.toString());
-
-      schedulerClient =
-          new HttpServiceSchedulerClient(config, runtime, schedulerLocation.getHttpEndpoint());
-    } else {
-      // create an instance of scheduler
-      final String schedulerClass = Context.schedulerClass(config);
-      final IScheduler scheduler = ReflectionUtils.newInstance(schedulerClass);
-      LOG.fine("Invoke scheduler as a library");
-
-      schedulerClient = new LibrarySchedulerClient(config, runtime, scheduler);
-    }
-
-    return schedulerClient;
   }
 }
