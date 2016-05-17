@@ -66,9 +66,9 @@ public final class FileUtils {
     return true;
   }
 
-  public static boolean writeToFile(String filename, byte[] contents, boolean isOverwritten) {
+  public static boolean writeToFile(String filename, byte[] contents, boolean overwrite) {
     File f = new File(filename);
-    if (!isOverwritten && f.exists()) {
+    if (!overwrite && f.exists()) {
       LOG.severe("File exists. Topology exists: " + filename);
       return false;
     }
