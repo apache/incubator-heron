@@ -192,7 +192,7 @@ public class LocalLauncher implements ILauncher {
     int ret = ShellUtils.runSyncProcess(LocalContext.verbose(config), LocalContext.verbose(config),
         cmd, new StringBuilder(), new StringBuilder(), parentDirectory);
 
-    return ret == 0 ? true : false;
+    return ret == 0;
   }
 
   /**
@@ -208,7 +208,7 @@ public class LocalLauncher implements ILauncher {
     int ret = ShellUtils.runSyncProcess(LocalContext.verbose(config), LocalContext.verbose(config),
         cmd, new StringBuilder(), new StringBuilder(), new File(targetFolder));
 
-    return ret == 0 ? true : false;
+    return ret == 0;
   }
 
   ///////////////////////////////////////////////////////////////////////////////
