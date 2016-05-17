@@ -21,7 +21,7 @@ The primary programming languages for Heron are C++, Java, and Python.
 API](../../concepts/topologies), and [Heron Instance](../../concepts/architecture#heron-instance).
 It is currently the only language in which topologies can be written. Instructions can be found 
 in [Building Topologies](../developers/topologies.html), while API documentation for the Java
-API can be found [here](../api/topology/index.html). Please note that Heron topologies do not 
+API can be found [here](/api/topology/index.html). Please note that Heron topologies do not 
 require Java 8 and can be written in Java 7 or later.
 
 * **Python 2** (specifically 2.7) is used primarily for Heron's [CLI
@@ -117,7 +117,7 @@ be found in [`heron/api`]({{% githubMaster %}}/heron/api).
 
 Documentation for writing topologies can be found in [Building
 Topologies](../developers/topologies.html), while API documentation can be found
-[here](../api/topology/index.html).
+[here](/api/topology/index.html).
 
 ### Local Mode
 
