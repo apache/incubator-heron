@@ -5,6 +5,7 @@ test_deps_files = [
     "//3rdparty/java:powermock",
     "@bazel_tools//third_party:mockito",
     "@bazel_tools//third_party:junit4",
+    "@guava//jar",
 ]
 
 spi_deps_files = [
