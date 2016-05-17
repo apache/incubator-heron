@@ -41,8 +41,8 @@ communication between components. Most `.proto` definition files can be found in
 [`heron/proto`]({{% githubMaster %}}/heron/proto).
 
 * **Cluster coordination** &mdash; Heron relies heavily on ZooKeeper for cluster
-coordination for distributed deployment, be it for [Mesos/Aurora](../../operators/deployment/aurora),
-[Mesos alone](../../operators/deployment/mesos), or for a [custom
+coordination for distributed deployment, be it for [Mesos/Aurora](../../operators/deployment/schedulers/aurora),
+[Mesos alone](../../operators/deployment/schedulers/mesos), or for a [custom
 scheduler](../custom-scheduler) that you build. More information on ZooKeeper
 components in the codebase can be found in the [State
 Management](#state-management) section below.
@@ -56,18 +56,18 @@ utilities, networking interfaces, and more.
 ## Cluster Scheduling
 
 Heron supports three cluster schedulers out of the box:
-[Mesos](../../operators/deployment/mesos),
-[Aurora](../../operators/deployment/aurora), and a [local
-scheduler](../../operators/deployment/local). The Java code for each of those
+[Mesos](../../operators/deployment/schedulers/mesos),
+[Aurora](../../operators/deployment/schedulers/aurora), and a [local
+scheduler](../../operators/deployment/schedulers/local). The Java code for each of those
 schedulers, as well as for the underlying scheduler API, can be found in
 [`heron/schedulers`]({{% githubMaster %}}/heron/schedulers).
 
 Info on custom schedulers can be found in [Implementing a Custom
 Scheduler](../custom-scheduler); info on the currently available schedulers
 can be found in [Deploying Heron on
-Aurora](../../operators/deployment/aurora), [Deploying Heron on
-Mesos](../../operators/deployment/mesos), and [Local
-Deployment](../../operators/deployment/local).
+Aurora](../../operators/deployment/schedulers/aurora), [Deploying Heron on
+Mesos](../../operators/deployment/schedulers/mesos), and [Local
+Deployment](../../operators/deployment/schedulers/local).
 
 ## State Management
 
@@ -146,8 +146,8 @@ The Python code for `heron` can be found in
 
 Sample configurations for different Heron schedulers 
 
-* [Local scheduler](../../operators/deployment/local) config can be found in [`heron/config/src/yaml/conf/local`]({{% githubMaster %}}/heron/config/src/yaml/conf/local),
-* [Aurora scheduler](../../operators/deployment/aurora) config can be found [`heron/config/src/yaml/conf/aurora`]({{% githubMaster %}}/heron/config/src/yaml/conf/aurora).
+* [Local scheduler](../../operators/deployment/schedulers/local) config can be found in [`heron/config/src/yaml/conf/local`]({{% githubMaster %}}/heron/config/src/yaml/conf/local),
+* [Aurora scheduler](../../operators/deployment/schedulers/aurora) config can be found [`heron/config/src/yaml/conf/aurora`]({{% githubMaster %}}/heron/config/src/yaml/conf/aurora).
 
 ### Heron Tracker
 
