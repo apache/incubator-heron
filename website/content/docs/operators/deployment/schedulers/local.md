@@ -12,7 +12,7 @@ When deploying locally, you can use one of two coordination mechanisms:
 2. [The local filesystem](#local-filesystem)
 
 **Note**: Deploying a Heron cluster locally is not to be confused with Heron's
-[local mode](../developers/java/local-mode.html). Local mode enables you to run
+[local mode](../../developers/java/local-mode.html). Local mode enables you to run
 topologies in a cluster-agnostic JVM process for the purpose of development and
 debugging, while the local scheduler stands up a Heron cluster on a single
 machine.
@@ -20,10 +20,10 @@ machine.
 ## How Local Deployment Works
 
 Using the local scheduler is similar to deploying Heron on other systems in
-that you use the [Heron CLI](../../heron-cli) to manage topologies. The
+that you use the [Heron CLI](../../../heron-cli) to manage topologies. The
 difference is in the configuration and [scheduler
-overrides](../../heron-cli#submitting-a-topology) that you provide when
-you [submit a topology](../../heron-cli#submitting-a-topology).
+overrides](../../../heron-cli#submitting-a-topology) that you provide when
+you [submit a topology](../../../heron-cli#submitting-a-topology).
 
 ### Required Scheduler Overrides
 
@@ -37,13 +37,13 @@ overrides:
   coordination.
 
 For info on scheduler overrides, see the documentation on using the [Heron
-CLI](../../heron-cli).
+CLI](../../../heron-cli).
 
 ### Optional Scheduler Overrides
 
 The `heron.core.release.package` parameter is optional. It specifies the path to
 a local TAR file for the `core` component of the desired Heron release. Assuming
-that you've built a full [Heron release](../../../developers/compiling#building-a-full-release-package), this TAR will be
+that you've built a full [Heron release](../../../../developers/compiling#building-a-full-release-package), this TAR will be
 located by default at `bazel-genfiles/release/heron-core-unversioned.tar`,
 relative to the root of your Heron repository. If you set
 `heron.core.release.package`, Heron will update all local binaries in Heron's
@@ -53,7 +53,7 @@ the binaries already contained in Heron's working directory.
 ### CLI Flags
 
 In addition to setting scheduler overrides, you'll need to set the following
-[CLI flags](../../heron-cli):
+[CLI flags](../../../heron-cli):
 
 * `--config-file` &mdash; This flag needs to point to the `local_scheduler.conf`
   file in `heron/cli/src/python/local_scheduler.conf`.
