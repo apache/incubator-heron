@@ -262,12 +262,12 @@ public class RuntimeManagerMain {
   private final Config config;
   // holds all runtime Config
   private Config runtime;
-  // command to manange a topology
+  // command to manage a topology
   private final Command command;
 
   public RuntimeManagerMain(
       Config config,
-      Command command) throws IOException {
+      Command command) {
     // initialize the options
     this.config = config;
     this.command = command;
