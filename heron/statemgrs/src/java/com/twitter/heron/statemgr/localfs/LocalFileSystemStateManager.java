@@ -72,7 +72,7 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     boolean executionStateDir = FileUtils.isDirectoryExists(getExecutionStateDir())
         || FileUtils.createDirectory(getExecutionStateDir());
 
-    boolean schedulerLocationDir =  FileUtils.isDirectoryExists(getSchedulerLocationDir())
+    boolean schedulerLocationDir = FileUtils.isDirectoryExists(getSchedulerLocationDir())
         || FileUtils.createDirectory(getSchedulerLocationDir());
 
     if (topologyDir && tmasterLocationDir && physicalPlanDir && executionStateDir
@@ -84,9 +84,9 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   }
 
   // Make utils class protected for easy unit testing
-  protected ListenableFuture<Boolean> setData(String path, byte[] data) {
+  protected ListenableFuture<Boolean> setData(String path, byte[] data, boolean overwrite) {
     final SettableFuture<Boolean> future = SettableFuture.create();
-    boolean ret = FileUtils.writeToFile(path, data);
+    boolean ret = FileUtils.writeToFile(path, data, overwrite);
     future.set(ret);
 
     return future;
@@ -122,30 +122,36 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   @Override
   public ListenableFuture<Boolean> setExecutionState(
       ExecutionEnvironment.ExecutionState executionState, String topologyName) {
-    return setData(getExecutionStatePath(topologyName), executionState.toByteArray());
+    return setData(getExecutionStatePath(topologyName), executionState.toByteArray(), false);
   }
 
   @Override
   public ListenableFuture<Boolean> setTMasterLocation(
       TopologyMaster.TMasterLocation location, String topologyName) {
-    return setData(getTMasterLocationPath(topologyName), location.toByteArray());
+    // Note: Unlike Zk statemgr, we overwrite the location even if there is already one.
+    // This is because when running in local mode we control when a tmaster dies and
+    // comes up deterministically.
+    return setData(getTMasterLocationPath(topologyName), location.toByteArray(), true);
   }
 
   @Override
   public ListenableFuture<Boolean> setTopology(TopologyAPI.Topology topology, String topologyName) {
-    return setData(getTopologyPath(topologyName), topology.toByteArray());
+    return setData(getTopologyPath(topologyName), topology.toByteArray(), false);
   }
 
   @Override
   public ListenableFuture<Boolean> setPhysicalPlan(
       PhysicalPlans.PhysicalPlan physicalPlan, String topologyName) {
-    return setData(getPhysicalPlanPath(topologyName), physicalPlan.toByteArray());
+    return setData(getPhysicalPlanPath(topologyName), physicalPlan.toByteArray(), false);
   }
 
   @Override
   public ListenableFuture<Boolean> setSchedulerLocation(
       Scheduler.SchedulerLocation location, String topologyName) {
-    return setData(getSchedulerLocationPath(topologyName), location.toByteArray());
+    // Note: Unlike Zk statemgr, we overwrite the location even if there is already one.
+    // This is because when running in local mode we control when a scheduler dies and
+    // comes up deterministically.
+    return setData(getSchedulerLocationPath(topologyName), location.toByteArray(), true);
   }
 
   @Override

@@ -70,11 +70,14 @@ public class FileUtilsTest {
   @Test
   public void testWriteToFile() throws Exception {
     String currentWorkingDir = Paths.get("").toAbsolutePath().normalize().toString();
-    Assert.assertFalse(FileUtils.writeToFile(currentWorkingDir, null));
+    Assert.assertFalse(FileUtils.writeToFile(currentWorkingDir, null, false));
 
     PowerMockito.mockStatic(Files.class);
     String randomString = UUID.randomUUID().toString();
-    Assert.assertTrue(FileUtils.writeToFile(randomString, null));
+    Assert.assertTrue(FileUtils.writeToFile(randomString, null, false));
+
+    // We can overwrite it
+    Assert.assertTrue(FileUtils.writeToFile(randomString, null, true));
   }
 
   /**
