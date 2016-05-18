@@ -31,7 +31,6 @@ import org.apache.curator.framework.api.CuratorEvent;
 import org.apache.curator.framework.api.DeleteBuilder;
 import org.apache.curator.framework.api.ExistsBuilder;
 import org.apache.curator.framework.api.GetDataBuilder;
-import org.apache.curator.framework.api.Pathable;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.data.Stat;
@@ -90,7 +89,7 @@ public class CuratorStateManagerTest {
 
     Mockito.doReturn(mockClient)
         .when(spyStateManager).getCuratorClient();
-    Mockito.doReturn(new Pair<String, List<Process>>(TUNNEL_STRING, new ArrayList<>()))
+    Mockito.doReturn(new Pair<String, List<Process>>(TUNNEL_STRING, new ArrayList<Process>()))
         .when(spyStateManager).setupZkTunnel();
     Mockito.doReturn(true)
         .when(mockClient).blockUntilConnected(Mockito.anyInt(), Mockito.any(TimeUnit.class));
@@ -142,8 +141,8 @@ public class CuratorStateManagerTest {
     CuratorFramework mockClient = Mockito.mock(CuratorFramework.class);
     ExistsBuilder mockExistsBuilder = Mockito.mock(ExistsBuilder.class);
 
-    final String correct_path = "correct_path";
-    final String wrong_path = "wrong_path";
+    final String correctPath = "correct_path";
+    final String wrongPath = "wrong_path";
 
     Mockito.doReturn(mockClient)
         .when(spyStateManager).getCuratorClient();
@@ -152,20 +151,20 @@ public class CuratorStateManagerTest {
     Mockito.doReturn(mockExistsBuilder)
         .when(mockClient).checkExists();
     Mockito.doReturn(new Stat())
-        .when(mockExistsBuilder).forPath(correct_path);
+        .when(mockExistsBuilder).forPath(correctPath);
     Mockito.doReturn(null)
-        .when(mockExistsBuilder).forPath(wrong_path);
+        .when(mockExistsBuilder).forPath(wrongPath);
 
     spyStateManager.initialize(config);
 
     // Verify the result is true when path is correct
-    ListenableFuture<Boolean> result1 = spyStateManager.existNode(correct_path);
-    Mockito.verify(mockExistsBuilder).forPath(correct_path);
+    ListenableFuture<Boolean> result1 = spyStateManager.existNode(correctPath);
+    Mockito.verify(mockExistsBuilder).forPath(correctPath);
     Assert.assertTrue(result1.get());
 
     // Verify the result is false when path is wrong
-    ListenableFuture<Boolean> result2 = spyStateManager.existNode(wrong_path);
-    Mockito.verify(mockExistsBuilder).forPath(wrong_path);
+    ListenableFuture<Boolean> result2 = spyStateManager.existNode(wrongPath);
+    Mockito.verify(mockExistsBuilder).forPath(wrongPath);
     Assert.assertFalse(result2.get());
   }
 
@@ -174,7 +173,8 @@ public class CuratorStateManagerTest {
     CuratorStateManager spyStateManager = Mockito.spy(new CuratorStateManager());
     CuratorFramework mockClient = Mockito.mock(CuratorFramework.class);
     CreateBuilder mockCreateBuilder = Mockito.mock(CreateBuilder.class);
-    ACLBackgroundPathAndBytesable mockPath = Mockito.mock(ACLBackgroundPathAndBytesable.class);
+    @SuppressWarnings("rawtypes")
+    ACLBackgroundPathAndBytesable mockPath = Mockito.spy(ACLBackgroundPathAndBytesable.class);
 
     final String path = "nlu90_path";
     final byte[] data = new byte[10];
@@ -183,7 +183,6 @@ public class CuratorStateManagerTest {
         .when(spyStateManager).getCuratorClient();
     Mockito.doReturn(true)
         .when(mockClient).blockUntilConnected(Mockito.anyInt(), Mockito.any(TimeUnit.class));
-
     Mockito.doReturn(mockCreateBuilder)
         .when(mockClient).create();
     Mockito.doReturn(mockPath)
@@ -202,6 +201,7 @@ public class CuratorStateManagerTest {
     CuratorStateManager spyStateManager = Mockito.spy(new CuratorStateManager());
     CuratorFramework mockClient = Mockito.mock(CuratorFramework.class);
     DeleteBuilder mockDeleteBuilder = Mockito.mock(DeleteBuilder.class);
+    @SuppressWarnings("rawtypes")
     BackgroundPathable mockBackPathable = Mockito.mock(BackgroundPathable.class);
 
     final String path = "nlu90_path";
@@ -226,10 +226,11 @@ public class CuratorStateManagerTest {
   @Test
   public void testGetNodeData() throws Exception {
     CuratorStateManager spyStateManager = Mockito.spy(new CuratorStateManager());
-    CuratorFramework mockClient = Mockito.mock(CuratorFramework.class);
+    final CuratorFramework mockClient = Mockito.mock(CuratorFramework.class);
     GetDataBuilder mockGetBuilder = Mockito.mock(GetDataBuilder.class);
+    @SuppressWarnings("rawtypes")
     BackgroundPathable mockBackPathable = Mockito.mock(BackgroundPathable.class);
-    CuratorEvent mockEvent = Mockito.mock(CuratorEvent.class);
+    final CuratorEvent mockEvent = Mockito.mock(CuratorEvent.class);
     Message.Builder mockBuilder = Mockito.mock(Message.Builder.class);
     Message mockMessage = Mockito.mock(Message.class);
 
@@ -250,7 +251,7 @@ public class CuratorStateManagerTest {
         .when(mockClient).getData();
     Mockito.doReturn(mockBackPathable)
         .when(mockGetBuilder).usingWatcher(Mockito.any(Watcher.class));
-    Mockito.doAnswer(new Answer() {
+    Mockito.doAnswer(new Answer<Object>() {
       @Override
       public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
         Object[] objests = invocationOnMock.getArguments();
