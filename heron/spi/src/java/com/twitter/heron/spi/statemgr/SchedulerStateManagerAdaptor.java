@@ -112,9 +112,8 @@ public class SchedulerStateManagerAdaptor {
    */
   public Boolean setSchedulerLocation(
       Scheduler.SchedulerLocation location,
-      String topologyName,
-      boolean isService) {
-    return awaitResult(delegate.setSchedulerLocation(location, topologyName, isService));
+      String topologyName) {
+    return awaitResult(delegate.setSchedulerLocation(location, topologyName));
   }
 
   /**

@@ -50,17 +50,19 @@ public class CuratorStateManager extends FileSystemStateManager {
   private CuratorFramework client;
   private String connectionString;
   private List<Process> tunnelProcesses;
+  private Config config;
 
   @Override
-  public void initialize(Config config) {
-    super.initialize(config);
+  public void initialize(Config newConfig) {
+    super.initialize(newConfig);
 
-    this.connectionString = Context.stateManagerConnectionString(config);
+    this.config = newConfig;
+    this.connectionString = Context.stateManagerConnectionString(newConfig);
     this.tunnelProcesses = new ArrayList<>();
 
-    boolean isTunnelWhenNeeded = ZkContext.isTunnelNeeded(config);
+    boolean isTunnelWhenNeeded = ZkContext.isTunnelNeeded(newConfig);
     if (isTunnelWhenNeeded) {
-      Pair<String, List<Process>> tunneledResults = setupZkTunnel(config);
+      Pair<String, List<Process>> tunneledResults = setupZkTunnel();
 
       String newConnectionString = tunneledResults.first;
       if (newConnectionString.isEmpty()) {
@@ -76,7 +78,7 @@ public class CuratorStateManager extends FileSystemStateManager {
     // retry will wait 1 second - the second will wait up to 2 seconds - the
     // third will wait up to 4 seconds.
     ExponentialBackoffRetry retryPolicy = new ExponentialBackoffRetry(
-        ZkContext.retryIntervalMs(config), ZkContext.retryCount(config));
+        ZkContext.retryIntervalMs(newConfig), ZkContext.retryCount(newConfig));
 
     // using the CuratorFrameworkFactory.builder() gives fine grained control
     // over creation options. See the CuratorFrameworkFactory.Builder javadoc
@@ -84,8 +86,8 @@ public class CuratorStateManager extends FileSystemStateManager {
     client = CuratorFrameworkFactory.builder()
         .connectString(connectionString)
         .retryPolicy(retryPolicy)
-        .connectionTimeoutMs(ZkContext.connectionTimeoutMs(config))
-        .sessionTimeoutMs(ZkContext.sessionTimeoutMs(config))
+        .connectionTimeoutMs(ZkContext.connectionTimeoutMs(newConfig))
+        .sessionTimeoutMs(ZkContext.sessionTimeoutMs(newConfig))
             // etc. etc.
         .build();
 
@@ -95,7 +97,7 @@ public class CuratorStateManager extends FileSystemStateManager {
     client.start();
 
     try {
-      if (!client.blockUntilConnected(ZkContext.connectionTimeoutMs(config),
+      if (!client.blockUntilConnected(ZkContext.connectionTimeoutMs(newConfig),
           TimeUnit.MILLISECONDS)) {
         throw new RuntimeException("Failed to initialize CuratorClient");
       }
@@ -103,12 +105,12 @@ public class CuratorStateManager extends FileSystemStateManager {
       throw new RuntimeException("Failed to initialize CuratorClient", e);
     }
 
-    if (ZkContext.isInitializeTree(config)) {
+    if (ZkContext.isInitializeTree(newConfig)) {
       initTree();
     }
   }
 
-  protected Pair<String, List<Process>> setupZkTunnel(Config config) {
+  protected Pair<String, List<Process>> setupZkTunnel() {
     return ZkUtils.setupZkTunnel(config);
   }
 
@@ -275,9 +277,9 @@ public class CuratorStateManager extends FileSystemStateManager {
   @Override
   public ListenableFuture<Boolean> setSchedulerLocation(
       Scheduler.SchedulerLocation location,
-      String topologyName,
-      boolean isService) {
+      String topologyName) {
     // if isService, set the node as ephemeral node; set as persistent node otherwise
+    boolean isService = Context.schedulerService(config);
     return createNode(getSchedulerLocationPath(topologyName), location.toByteArray(), isService);
   }
 
@@ -306,7 +308,15 @@ public class CuratorStateManager extends FileSystemStateManager {
 
   @Override
   public ListenableFuture<Boolean> deleteSchedulerLocation(String topologyName) {
-    return deleteNode(getSchedulerLocationPath(topologyName));
+    boolean isService = Context.schedulerService(config);
+
+    if (isService) {
+      final SettableFuture<Boolean> result = SettableFuture.create();
+      result.set(true);
+      return result;
+    } else {
+      return deleteNode(getSchedulerLocationPath(topologyName));
+    }
   }
 
   @Override

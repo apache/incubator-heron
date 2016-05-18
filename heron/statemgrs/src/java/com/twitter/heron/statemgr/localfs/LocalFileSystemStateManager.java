@@ -147,7 +147,7 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
 
   @Override
   public ListenableFuture<Boolean> setSchedulerLocation(
-      Scheduler.SchedulerLocation location, String topologyName, boolean isService) {
+      Scheduler.SchedulerLocation location, String topologyName) {
     // Note: Unlike Zk statemgr, we overwrite the location even if there is already one.
     // This is because when running in local mode we control when a scheduler dies and
     // comes up deterministically.

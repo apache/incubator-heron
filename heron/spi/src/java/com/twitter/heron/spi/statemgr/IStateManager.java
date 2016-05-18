@@ -94,7 +94,7 @@ public interface IStateManager extends AutoCloseable {
    * @return Boolean - Success or Failure
    */
   ListenableFuture<Boolean> setSchedulerLocation(
-      Scheduler.SchedulerLocation location, String topologyName, boolean isService);
+      Scheduler.SchedulerLocation location, String topologyName);
 
   /**
    * Delete the tmaster location for the given topology

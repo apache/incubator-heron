@@ -228,7 +228,7 @@ public final class SchedulerUtils {
     final String serverHost = "scheduling_as_library";
     final int serverPort = -1;
 
-    return setSchedulerLocation(runtime, serverHost, serverPort, scheduler, isService);
+    return setSchedulerLocation(runtime, serverHost, serverPort, scheduler);
   }
 
   /**
@@ -238,14 +238,12 @@ public final class SchedulerUtils {
    * @param schedulerServerHost the http server host that scheduler listens for receives requests
    * @param schedulerServerPort the http server port that scheduler listens for receives requests
    * @param scheduler the IScheduler to provide more info
-   * @param isService true if the scheduler runs as a service; false otherwise
    */
   public static boolean setSchedulerLocation(
       Config runtime,
       String schedulerServerHost,
       int schedulerServerPort,
-      IScheduler scheduler,
-      boolean isService) {
+      IScheduler scheduler) {
 
     // Set scheduler location to host:port by default. Overwrite scheduler location if behind DNS.
     Scheduler.SchedulerLocation.Builder builder = Scheduler.SchedulerLocation.newBuilder()
@@ -265,7 +263,7 @@ public final class SchedulerUtils {
     LOG.log(Level.INFO, "Setting SchedulerLocation: {0}", location);
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
     Boolean result =
-        statemgr.setSchedulerLocation(location, Runtime.topologyName(runtime), isService);
+        statemgr.setSchedulerLocation(location, Runtime.topologyName(runtime));
 
     if (result == null || !result) {
       LOG.severe("Failed to set Scheduler location");
