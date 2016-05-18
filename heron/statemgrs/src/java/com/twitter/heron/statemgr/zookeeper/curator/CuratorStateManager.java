@@ -69,31 +69,14 @@ public class CuratorStateManager extends FileSystemStateManager {
         throw new IllegalArgumentException("Bad connectionString: " + connectionString);
       }
 
-      // Use the new one
+      // Use the new connection string
       connectionString = newConnectionString;
       tunnelProcesses.addAll(tunneledResults.second);
     }
 
-    // these are reasonable arguments for the ExponentialBackoffRetry. The first
-    // retry will wait 1 second - the second will wait up to 2 seconds - the
-    // third will wait up to 4 seconds.
-    ExponentialBackoffRetry retryPolicy = new ExponentialBackoffRetry(
-        ZkContext.retryIntervalMs(newConfig), ZkContext.retryCount(newConfig));
-
-    // using the CuratorFrameworkFactory.builder() gives fine grained control
-    // over creation options. See the CuratorFrameworkFactory.Builder javadoc
-    // details
-    client = CuratorFrameworkFactory.builder()
-        .connectString(connectionString)
-        .retryPolicy(retryPolicy)
-        .connectionTimeoutMs(ZkContext.connectionTimeoutMs(newConfig))
-        .sessionTimeoutMs(ZkContext.sessionTimeoutMs(newConfig))
-            // etc. etc.
-        .build();
-
-    LOG.info("Starting client to: " + connectionString);
-
     // Start it
+    client = getCuratorClient();
+    LOG.info("Starting client to: " + connectionString);
     client.start();
 
     try {
@@ -108,6 +91,25 @@ public class CuratorStateManager extends FileSystemStateManager {
     if (ZkContext.isInitializeTree(newConfig)) {
       initTree();
     }
+  }
+
+  protected CuratorFramework getCuratorClient() {
+    // these are reasonable arguments for the ExponentialBackoffRetry. The first
+    // retry will wait 1 second - the second will wait up to 2 seconds - the
+    // third will wait up to 4 seconds.
+    ExponentialBackoffRetry retryPolicy = new ExponentialBackoffRetry(
+        ZkContext.retryIntervalMs(config), ZkContext.retryCount(config));
+
+    // using the CuratorFrameworkFactory.builder() gives fine grained control
+    // over creation options. See the CuratorFrameworkFactory.Builder javadoc
+    // details
+    return CuratorFrameworkFactory.builder()
+        .connectString(connectionString)
+        .retryPolicy(retryPolicy)
+        .connectionTimeoutMs(ZkContext.connectionTimeoutMs(config))
+        .sessionTimeoutMs(ZkContext.sessionTimeoutMs(config))
+            // etc. etc.
+        .build();
   }
 
   protected Pair<String, List<Process>> setupZkTunnel() {
