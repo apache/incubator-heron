@@ -106,19 +106,23 @@ public class RuntimeManagerMainTest {
             Mockito.eq(TOPOLOGY_NAME));
 
     // Failed to get ISchedulerClient
-    Mockito.doReturn(null).when(runtimeManagerMain).getSchedulerClient();
+    Mockito.doReturn(null).when(runtimeManagerMain).
+        getSchedulerClient(Mockito.any(Config.class));
     Assert.assertFalse(runtimeManagerMain.manageTopology());
 
     // Successfully get ISchedulerClient
     ISchedulerClient client = Mockito.mock(ISchedulerClient.class);
-    Mockito.doReturn(client).when(runtimeManagerMain).getSchedulerClient();
+    Mockito.doReturn(client).when(runtimeManagerMain).
+        getSchedulerClient(Mockito.any(Config.class));
 
     // Failed to callRuntimeManagerRunner
-    Mockito.doReturn(false).when(runtimeManagerMain).callRuntimeManagerRunner(client);
+    Mockito.doReturn(false).when(runtimeManagerMain).
+        callRuntimeManagerRunner(Mockito.any(Config.class), Mockito.eq(client));
     Assert.assertFalse(runtimeManagerMain.manageTopology());
 
     // Happy path
-    Mockito.doReturn(true).when(runtimeManagerMain).callRuntimeManagerRunner(client);
+    Mockito.doReturn(true).when(runtimeManagerMain).
+        callRuntimeManagerRunner(Mockito.any(Config.class), Mockito.eq(client));
     Assert.assertTrue(runtimeManagerMain.manageTopology());
   }
 }
