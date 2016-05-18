@@ -15,9 +15,7 @@
 package com.twitter.heron.scheduler.client;
 
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
@@ -29,12 +27,6 @@ import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 public class SchedulerClientFactoryTest {
   private static final String TOPOLOGY_NAME = "shiwei_0924_jiayou";
-
-  /**
-   * JUnit rule for expected exception
-   */
-  @Rule
-  public final ExpectedException exception = ExpectedException.none();
 
   @Test
   public void testGetServiceSchedulerClient() throws Exception {
@@ -79,11 +71,6 @@ public class SchedulerClientFactoryTest {
     final String SCHEDULER_CLASS_NOT_EXIST = "class_not_exist";
     Mockito.when(config.getStringValue(ConfigKeys.get("SCHEDULER_CLASS"))).
         thenReturn(SCHEDULER_CLASS_NOT_EXIST);
-    // Expect exceptions
-    exception.expect(ClassNotFoundException.class);
-    new SchedulerClientFactory(config, runtime).getSchedulerClient();
-
-    // Should not be invoked
-    Assert.assertFalse(false);
+    Assert.assertNull(new SchedulerClientFactory(config, runtime).getSchedulerClient());
   }
 }

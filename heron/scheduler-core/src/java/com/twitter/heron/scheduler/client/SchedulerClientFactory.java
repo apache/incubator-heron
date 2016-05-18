@@ -41,10 +41,9 @@ public class SchedulerClientFactory {
    * Implementation of getSchedulerClient - Used to create objects
    * Currently it creates either HttpServiceSchedulerClient or LibrarySchedulerClient
    *
-   * @return getSchedulerClient created
+   * @return getSchedulerClient created. return null if failed to create ISchedulerClient instance
    */
-  public ISchedulerClient getSchedulerClient()
-      throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+  public ISchedulerClient getSchedulerClient() {
     LOG.fine("Creating scheduler client");
     ISchedulerClient schedulerClient;
 
@@ -67,7 +66,13 @@ public class SchedulerClientFactory {
     } else {
       // create an instance of scheduler
       final String schedulerClass = Context.schedulerClass(config);
-      final IScheduler scheduler = ReflectionUtils.newInstance(schedulerClass);
+      final IScheduler scheduler;
+      try {
+        scheduler = ReflectionUtils.newInstance(schedulerClass);
+      } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+        LOG.log(Level.SEVERE, "Failed to reflect new instance", e);
+        return null;
+      }
       LOG.fine("Invoke scheduler as a library");
 
       schedulerClient = new LibrarySchedulerClient(config, runtime, scheduler);
