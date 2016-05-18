@@ -57,6 +57,16 @@ java_test(
 )
 
 java_test(
+  name="submitter-main_unittest",
+  srcs=glob(
+    ["**/SubmitterMainTest.java"] +
+    ["**/util/TopologyUtilityTest.java"]
+  ),
+  deps=scheduler_deps_files,
+  size="small",
+)
+
+java_test(
   name="scheduler-main_unittest",
   srcs=glob(
     ["**/SchedulerMainTest.java"] +

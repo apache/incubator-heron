@@ -260,8 +260,7 @@ public class RuntimeManagerMain {
 
   // holds all the config read
   private final Config config;
-  // holds all runtime Config
-  private Config runtime;
+
   // command to manage a topology
   private final Command command;
 
@@ -312,19 +311,19 @@ public class RuntimeManagerMain {
         LOG.log(Level.FINE, "Topology: {0} to be {1}ed", new Object[]{topologyName, command});
 
         // build the runtime config
-        runtime = Config.newBuilder()
+        Config runtime = Config.newBuilder()
             .put(Keys.topologyName(), Context.topologyName(config))
             .put(Keys.schedulerStateManagerAdaptor(), adaptor)
             .build();
 
         // Create a ISchedulerClient basing on the config
-        ISchedulerClient schedulerClient = getSchedulerClient();
+        ISchedulerClient schedulerClient = getSchedulerClient(runtime);
         if (schedulerClient == null) {
           LOG.severe("Failed to initialize scheduler client");
           return false;
         }
 
-        isSuccessful = callRuntimeManagerRunner(schedulerClient);
+        isSuccessful = callRuntimeManagerRunner(runtime, schedulerClient);
       }
     } finally {
       // 3. Do post work basing on the result
@@ -361,7 +360,7 @@ public class RuntimeManagerMain {
     return true;
   }
 
-  protected boolean callRuntimeManagerRunner(ISchedulerClient schedulerClient) {
+  protected boolean callRuntimeManagerRunner(Config runtime, ISchedulerClient schedulerClient) {
     // create an instance of the runner class
     RuntimeManagerRunner runtimeManagerRunner =
         new RuntimeManagerRunner(config, runtime, command, schedulerClient);
@@ -372,7 +371,7 @@ public class RuntimeManagerMain {
     return ret;
   }
 
-  protected ISchedulerClient getSchedulerClient() {
+  protected ISchedulerClient getSchedulerClient(Config runtime) {
     return new SchedulerClientFactory(config, runtime).getSchedulerClient();
   }
 }
