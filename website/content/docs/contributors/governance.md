@@ -43,34 +43,35 @@ Contact the core team at: heron-dev@googlegroups.com.
 
 The current group is:
 
-[Karthik Ramasamy (Twitter)](https://github.com/kramasamy) <br/>
+[Michael Barry (Twitter)] (https://github.com/msbarry) <br/>
 [Maosong Fu (Twitter)] (https://github.com/maosongfu) <br/>
 [Bill Graham (Twitter)] (https://github.com/billonahill) <br/>
-[Neng Lu (Twitter)] (https://github.com/nlu90) <br/>
-[Vikas R. Kedigehalli (Twitter)](https://github.com/vikkyrk) <br/>
-[Sailesh Mittal (Twitter)] (https://github.com/saileshmittal) <br/>
-[Jingwei Wu (Twitter)] (https://github.com/jingwei) <br/>
-[Christopher Kellogg (Twitter)] (https://github.com/cckellogg) <br/>
 [Andrew Jorgensen (Twitter)] (https://github.com/ajorgensen) <br/>
-[Michael Barry (Twitter)] (https://github.com/msbarry) <br/>
+[Vikas R. Kedigehalli (Twitter)](https://github.com/vikkyrk) <br/>
+[Christopher Kellogg (Twitter)] (https://github.com/cckellogg) <br/>
 [Runhang Li (Twitter)] (https://github.com/objmagic) <br/>
+[Neng Lu (Twitter)] (https://github.com/nlu90) <br/>
+[Sailesh Mittal (Twitter)] (https://github.com/saileshmittal) <br/>
+[Karthik Ramasamy (Twitter)](https://github.com/kramasamy) <br/>
+[Jingwei Wu (Twitter)] (https://github.com/jingwei) <br/>
 
 ### Collaborators and Contributors
 
-[Sanjeev Kulkarni (Peer Nova)] (https://github.com/srkukarni) <br/>
-[Nikunj Bhagat (Google)] (https://github.com/nikunjbhagat) <br/>
-[Siddarth Taneja (Google)] (https://github.com/kernelsid) <br/>
-[Brian Hatfield (Twitter)] (https://github.com/bmhatfield) <br/>
-[Luc Perkins (Twitter)] (https://github.com/lucperkins) <br/>
-[Lewis Kaneshiro (Stanford University)] (https://github.com/lewiskan) <br/>
-[Joe Stein (Elodina)] (https://github.com/joestein) <br/>
-[Darren Braynard (Elodina)] (https://github.com/dbraynard) <br/>
-[Prabhu Inbarajan (Cisco)] (https://github.com/prabhuinbarajan) <br/>
-[Supun Kamburugamuve (Indiana University)] (https://github.com/supunkamburugamuve) <br/>
 [Ashvin Agarwal (Microsoft)] (https://github.com/ashvina) <br/>
-[Sriram Rao (Microsoft)] (https://github.com/sriramsrao) <br/>
 [Avrilla Floratou (Microsoft)] (https://github.com/avflor) <br/>
+[Daniel Blanchard (Parsely)] (https://github.com/dan-blanchard) <br/>
+[Darren Braynard (Elodina)] (https://github.com/dbraynard) <br/>
+[Nikunj Bhagat (Google)] (https://github.com/nikunjbhagat) <br/>
+[Brian Hatfield (Twitter)] (https://github.com/bmhatfield) <br/>
+[Prabhu Inbarajan (Cisco)] (https://github.com/prabhuinbarajan) <br/>
 [Darin Johnson] (https://github.com/DarinJ) <br/>
-[Sandeep Nayak (Adobe)] (https://github.com/osgigeek) <br/>
+[Supun Kamburugamuve (Indiana University)] (https://github.com/supunkamburugamuve) <br/>
+[Lewis Kaneshiro (Stanford University)] (https://github.com/lewiskan) <br/>
+[Sanjeev Kulkarni (Peer Nova)] (https://github.com/srkukarni) <br/>
 [Andrew Montalenti (Parsely)] (https://github.com/amontalenti) <br/>
+[Sandeep Nayak (Adobe)] (https://github.com/osgigeek) <br/>
+[Luc Perkins (Twitter)] (https://github.com/lucperkins) <br/>
+[Sriram Rao (Microsoft)] (https://github.com/sriramsrao) <br/>
+[Joe Stein (Elodina)] (https://github.com/joestein) <br/>
+[Siddarth Taneja (Google)] (https://github.com/kernelsid) <br/>
 [Zuyu Zhang (Pivotal)] (https://github.com/zuyu) <br/>
