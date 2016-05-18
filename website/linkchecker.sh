@@ -1,4 +1,4 @@
-#! bin/bash
+#!/bin/bash
 
 #linkchecker removes previous runs.
 pip install linkchecker
