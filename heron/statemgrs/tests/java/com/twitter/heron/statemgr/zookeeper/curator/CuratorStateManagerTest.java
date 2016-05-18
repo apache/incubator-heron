@@ -83,6 +83,10 @@ public class CuratorStateManagerTest {
   public void after() throws Exception {
   }
 
+  /**
+   * Test initialize method
+   * @throws Exception
+   */
   @Test
   public void testInitialize() throws Exception {
     CuratorStateManager spyStateManager = Mockito.spy(new CuratorStateManager());
@@ -109,6 +113,10 @@ public class CuratorStateManagerTest {
     Mockito.verify(spyStateManager).initTree();
   }
 
+  /**
+   * Test close method
+   * @throws Exception
+   */
   @Test
   public void testClose() throws Exception {
     CuratorStateManager spyStateManager = Mockito.spy(new CuratorStateManager());
@@ -136,6 +144,10 @@ public class CuratorStateManagerTest {
     Mockito.verify(mockProcess2).destroy();
   }
 
+  /**
+   * Test existNode method
+   * @throws Exception
+   */
   @Test
   public void testExistNode() throws Exception {
     CuratorStateManager spyStateManager = Mockito.spy(new CuratorStateManager());
@@ -169,6 +181,10 @@ public class CuratorStateManagerTest {
     Assert.assertFalse(result2.get());
   }
 
+  /**
+   * test createNode method
+   * @throws Exception
+   */
   @Test
   public void testCreateNode() throws Exception {
     CuratorStateManager spyStateManager = Mockito.spy(new CuratorStateManager());
@@ -198,6 +214,10 @@ public class CuratorStateManagerTest {
     Assert.assertTrue(result.get());
   }
 
+  /**
+   * Test deleteNode method
+   * @throws Exception
+   */
   @Test
   public void testDeleteNode() throws Exception {
     CuratorStateManager spyStateManager = Mockito.spy(new CuratorStateManager());
@@ -225,6 +245,10 @@ public class CuratorStateManagerTest {
     Assert.assertTrue(result.get());
   }
 
+  /**
+   * Test getNodeData method
+   * @throws Exception
+   */
   @Test
   public void testGetNodeData() throws Exception {
     CuratorStateManager spyStateManager = Mockito.spy(new CuratorStateManager());
@@ -270,6 +294,10 @@ public class CuratorStateManagerTest {
     Assert.assertTrue(result.get().equals(mockMessage));
   }
 
+  /**
+   * Test deleteSchedulerLocation method
+   * @throws Exception
+   */
   @Test
   public void testDeleteSchedulerLocation() throws Exception {
     CuratorStateManager spyStateManager = Mockito.spy(new CuratorStateManager());
