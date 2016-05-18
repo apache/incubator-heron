@@ -38,7 +38,7 @@ before_install:
   - hugo version
   - sudo pip install --upgrade pip # TODO: might not need this
   - pip -V
-  #- pip --user install requests>=2.2.1
+  - pip install --user requests>=2.2.0
   - pip install --user linkchecker
   - linkchecker --version
 
