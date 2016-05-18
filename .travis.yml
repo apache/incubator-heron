@@ -39,7 +39,7 @@ before_install:
   - sudo pip install --upgrade pip # TODO: might not need this
   - pip -V
   - pip install --user requests>=2.2.0
-  - pip install --user linkchecker
+  - pip install --user linkchecker==0.9.1
   - linkchecker --version
 
 
