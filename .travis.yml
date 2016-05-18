@@ -40,8 +40,9 @@ before_install:
   - pip -V
   - pip install --user requests>=2.2.0
   - pip list | grep requests
+  - python -c 'import sys; print("\n".join(sys.path))'
   # 0.9.3 fails with "This program requires Python requests 2.2.0 or later." even when that's installed
-  - pip install --user linkchecker==9.2
+  - pip install --user LinkChecker==9.2
   - linkchecker --version
 
 
