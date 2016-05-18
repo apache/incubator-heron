@@ -125,20 +125,20 @@ public class HPCSchedulerTest {
     // Failed to create job via controller
     Mockito.doReturn(false).when(
         controller).createJob(Mockito.anyString(), Mockito.anyString(),
-        Matchers.anyListOf(String.class), Mockito.anyString(), Mockito.anyInt());
+        Matchers.any(String[].class), Mockito.anyString(), Mockito.anyInt());
     Assert.assertFalse(scheduler.onSchedule(validPlan));
     Mockito.verify(controller).createJob(Mockito.eq(HPC_PATH),
-        Mockito.anyString(), Matchers.anyListOf(String.class),
+        Mockito.anyString(), Matchers.any(String[].class),
         Mockito.anyString(), Mockito.anyInt());
 
     // Happy path
     Mockito.doReturn(true).when(
         controller).createJob(Mockito.anyString(), Mockito.anyString(),
-        Matchers.anyListOf(String.class), Mockito.anyString(), Mockito.anyInt());
+        Matchers.any(String[].class), Mockito.anyString(), Mockito.anyInt());
     Assert.assertTrue(scheduler.onSchedule(validPlan));
     Mockito.verify(
         controller, Mockito.times(2)).createJob(Mockito.anyString(), Mockito.anyString(),
-        Matchers.anyListOf(String.class), Mockito.anyString(), Mockito.anyInt());
+        Matchers.any(String[].class), Mockito.anyString(), Mockito.anyInt());
   }
 
   @Test

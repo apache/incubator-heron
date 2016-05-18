@@ -15,13 +15,10 @@
 package com.twitter.heron.scheduler.hpc;
 
 import java.util.Map;
-import java.util.logging.Logger;
 
 import com.twitter.heron.spi.common.Resource;
 
 public final class HPCDefaults {
-  private static final Logger LOG = Logger.getLogger(HPCDefaults.class.getName());
-
   private HPCDefaults() {
 
   }

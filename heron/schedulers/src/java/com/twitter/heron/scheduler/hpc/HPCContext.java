@@ -19,6 +19,11 @@ import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Misc;
 
 public class HPCContext extends Context {
+  public static final String WORKING_DIRECTORY = "heron.scheduler.local.working.directory";
+  public static final String HPC_JOB_ID = "heron.scheduler.hpc.job.id";
+  public static final String HPC_SHELL_SCRIPT = "heron.scheduler.hpc.shell.script";
+  public static final String HPC_PARTITION = "heron.scheduler.hpc.partition";
+
   public static String workingDirectory(Config config) {
     String workingDirectory = config.getStringValue(HPCKeys.get("WORKING_DIRECTORY"),
         HPCDefaults.get("WORKING_DIRECTORY"));

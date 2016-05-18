@@ -61,19 +61,18 @@ public class HPCControllerTest {
   @Test
   public void testCreateJob() throws Exception {
     String hpcFileName = "file.hpc";
-    List<String> expectedCommand =
-        new ArrayList<>(Arrays.asList("sbatch", "-N", "1", "--ntasks=1", "hpc", "heron"));
+    String[] expectedCommand = new String[]{"sbatch", "-N", "1", "--ntasks=1", "hpc", "heron"};
 
     // Failed
     Mockito.doReturn(false).when(controller).runProcess(Matchers.anyString(),
-        Matchers.anyListOf(String.class), Matchers.any(StringBuilder.class),
+        Matchers.any(String[].class), Matchers.any(StringBuilder.class),
         Matchers.any(StringBuilder.class));
     Assert.assertFalse(controller.createJob(hpcFileName, "hpc",
         expectedCommand, WORKING_DIRECTORY, 1));
 
     // Happy path
     Mockito.doReturn(true).when(controller).runProcess(Matchers.anyString(),
-        Matchers.anyListOf(String.class), Matchers.any(StringBuilder.class),
+        Matchers.any(String[].class), Matchers.any(StringBuilder.class),
         Matchers.any(StringBuilder.class));
     Assert.assertTrue(controller.createJob(hpcFileName, "hpc",
         expectedCommand, WORKING_DIRECTORY, 1));
@@ -87,11 +86,15 @@ public class HPCControllerTest {
     Mockito.doReturn(new ArrayList<>()).when(controller).readFromFile(Matchers.anyString());
     Assert.assertFalse(controller.killJob(jobIdFile));
     // fail if process creation fails
-    Mockito.doReturn(false).when(controller).runProcess(Matchers.anyListOf(String.class));
+    Mockito.doReturn(false).when(controller).runProcess(Matchers.anyString(),
+        Matchers.any(String[].class), Matchers.any(StringBuilder.class),
+        Matchers.any(StringBuilder.class));
     Mockito.doReturn(jobIds).when(controller).readFromFile(jobIdFile);
     Assert.assertFalse(controller.killJob(jobIdFile));
     // happy path
-    Mockito.doReturn(true).when(controller).runProcess(Matchers.anyListOf(String.class));
+    Mockito.doReturn(true).when(controller).runProcess(Matchers.anyString(),
+        Matchers.any(String[].class), Matchers.any(StringBuilder.class),
+        Matchers.any(StringBuilder.class));
     Mockito.doReturn(jobIds).when(controller).readFromFile(jobIdFile);
     Assert.assertTrue(controller.killJob(jobIdFile));
   }

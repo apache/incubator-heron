@@ -16,12 +16,11 @@ package com.twitter.heron.scheduler.hpc;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.io.FilenameUtils;
-
-import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
@@ -30,7 +29,6 @@ import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;
-import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
  * Schedules a Heron topology in a HPC cluster.
@@ -78,19 +76,20 @@ public class HPCScheduler implements IScheduler {
   @Override
   public boolean onSchedule(PackingPlan packing) {
     if (packing == null || packing.containers.isEmpty()) {
-      LOG.severe("No container requested. Can't schedule");
+      LOG.log(Level.SEVERE, "No container requested. Can't schedule");
       return false;
     }
     LOG.info("Launching topology in HPC scheduler");
     // 1 additional for the tmaster
-    int containers = packing.containers.size() + 1;
+    long containers = Runtime.numContainers(runtime) + 1;
     boolean jobCreated = controller.createJob(getHeronHPCPath(),
-        HPCContext.executorSandboxBinary(config),
-        getExecutorCommand(packing), this.workingDirectory, containers);
+        HPCContext.executorSandboxBinary(this.config),
+        getExecutorCommand(packing),
+        this.workingDirectory, containers);
     if (!jobCreated) {
-      LOG.severe("Failed to create job");
+      LOG.log(Level.SEVERE, "Failed to create job");
     } else {
-      LOG.info("Job created successfully");
+      LOG.log(Level.FINE, "Job created successfully");
     }
     return jobCreated;
   }
@@ -120,61 +119,16 @@ public class HPCScheduler implements IScheduler {
     return new File(Context.heronConf(config), HPCContext.hpcShellScript(config)).getPath();
   }
 
-  protected List<String> getExecutorCommand(PackingPlan packing) {
-    TopologyAPI.Topology topology = Runtime.topology(runtime);
-
+  protected String[] getExecutorCommand(PackingPlan packing) {
     List<Integer> freePorts = new ArrayList<>(SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR);
     for (int i = 0; i < SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR; i++) {
       freePorts.add(SysUtils.getFreePort());
     }
 
-    int masterPort = freePorts.get(0);
-    int tmasterControllerPort = freePorts.get(1);
-    int tmasterStatsPort = freePorts.get(2);
-    int shellPort = freePorts.get(3);
-    int metricsmgrPort = freePorts.get(4);
-    int schedulerPort = freePorts.get(5);
+    String[] executorCmd = SchedulerUtils.executorCommandArgs(
+        packing, this.config, this.runtime, freePorts);
 
-    List<String> command = new ArrayList<>();
-    command.add(topology.getName());
-    command.add(topology.getId());
-    command.add(FilenameUtils.getName(HPCContext.topologyDefinitionFile(config)));
-    command.add(TopologyUtils.packingToString(packing));
-    command.add(HPCContext.stateManagerConnectionString(config));
-    command.add(HPCContext.stateManagerRootPath(config));
-    command.add(HPCContext.tmasterSandboxBinary(config));
-    command.add(HPCContext.stmgrSandboxBinary(config));
-    command.add(HPCContext.metricsManagerSandboxClassPath(config));
-    command.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)));
-    command.add(TopologyUtils.makeClassPath(topology, HPCContext.topologyJarFile(config)));
-    command.add(Integer.toString(masterPort));
-    command.add(Integer.toString(tmasterControllerPort));
-    command.add(Integer.toString(tmasterStatsPort));
-    command.add(HPCContext.systemConfigSandboxFile(config));
-    command.add(TopologyUtils.formatRamMap(
-        TopologyUtils.getComponentRamMap(topology, HPCContext.instanceRam(config))));
-    command.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
-    command.add(HPCContext.topologyPackageType(config));
-    command.add(HPCContext.topologyJarFile(config));
-    command.add(HPCContext.javaSandboxHome(config));
-    command.add(Integer.toString(shellPort));
-    command.add(HPCContext.shellSandboxBinary(config));
-    command.add(Integer.toString(metricsmgrPort));
-    command.add(HPCContext.cluster(config));
-    command.add(HPCContext.role(config));
-    command.add(HPCContext.environ(config));
-    command.add(HPCContext.instanceSandboxClassPath(config));
-    command.add(HPCContext.metricsSinksSandboxFile(config));
-
-    String completeSchedulerProcessClassPath = new StringBuilder()
-        .append(Context.schedulerSandboxClassPath(config)).append(":")
-        .append(Context.packingSandboxClassPath(config)).append(":")
-        .append(Context.stateManagerSandboxClassPath(config))
-        .toString();
-
-    command.add(completeSchedulerProcessClassPath);
-    command.add(Integer.toString(schedulerPort));
-
-    return command;
+    LOG.info("Executor command line: " + Arrays.toString(executorCmd));
+    return executorCmd;
   }
 }
