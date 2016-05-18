@@ -9,7 +9,7 @@ assets:
 	@npm run build
 
 pages:
-	@hugo --serve
+	@hugo
 
 linkchecker:
 	@bash linkchecker.sh
