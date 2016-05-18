@@ -23,6 +23,7 @@ env:
 
 before_install:
 
+  - brew update
   # download and install libunwind
   #- wget -q http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz
   #- tar xfz libunwind-1.1.tar.gz
