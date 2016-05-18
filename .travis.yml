@@ -33,6 +33,10 @@ before_install:
   #- chmod +x bazel-0.1.2-installer-linux-x86_64.sh
   #- ./bazel-0.1.2-installer-linux-x86_64.sh --user
 
+  - wget https://github.com/spf13/hugo/releases/download/v0.15/hugo_0.15_amd64.deb
+  - sudo dpkg -i hugo*.deb
+  - hugo version
+
 before_script:
  - (cd website && npm install && npm install gulp && which gulp)
 
@@ -43,5 +47,5 @@ script:
   - g++ --version
   - which gulp
   - pwd
-  - (cd website && npm run build)
+  - (cd website && npm run build && hugo)
   #- scripts/travis/build.sh && scripts/travis/test.sh
