@@ -49,6 +49,7 @@ public class CuratorStateManager extends FileSystemStateManager {
   private static final Logger LOG = Logger.getLogger(CuratorStateManager.class.getName());
   private CuratorFramework client;
   private String connectionString;
+  private boolean isSchedulerService;
   private List<Process> tunnelProcesses;
   private Config config;
 
@@ -58,6 +59,7 @@ public class CuratorStateManager extends FileSystemStateManager {
 
     this.config = newConfig;
     this.connectionString = Context.stateManagerConnectionString(newConfig);
+    this.isSchedulerService = Context.schedulerService(newConfig);
     this.tunnelProcesses = new ArrayList<>();
 
     boolean isTunnelWhenNeeded = ZkContext.isTunnelNeeded(newConfig);
@@ -281,8 +283,9 @@ public class CuratorStateManager extends FileSystemStateManager {
       Scheduler.SchedulerLocation location,
       String topologyName) {
     // if isService, set the node as ephemeral node; set as persistent node otherwise
-    boolean isService = Context.schedulerService(config);
-    return createNode(getSchedulerLocationPath(topologyName), location.toByteArray(), isService);
+    return createNode(getSchedulerLocationPath(topologyName),
+        location.toByteArray(),
+        isSchedulerService);
   }
 
   @Override
@@ -310,9 +313,8 @@ public class CuratorStateManager extends FileSystemStateManager {
 
   @Override
   public ListenableFuture<Boolean> deleteSchedulerLocation(String topologyName) {
-    boolean isService = Context.schedulerService(config);
-
-    if (isService) {
+    // if scheduler is service, the znode is ephemeral and it's deleted automatically
+    if (isSchedulerService) {
       final SettableFuture<Boolean> result = SettableFuture.create();
       result.set(true);
       return result;

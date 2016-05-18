@@ -53,8 +53,9 @@ import com.twitter.heron.statemgr.zookeeper.ZkContext;
 public class CuratorStateManagerTest {
 
   private static final String CONNECTION_STRING = "connectionString";
+  private static final String PATH = "/heron/n90/path";
   private static final String ROOT_ADDR = "/";
-  private static final String TOPOLOGY_NAME = "nluTopology";
+  private static final String TOPOLOGY_NAME = "topology";
   private static final String TUNNEL_STRING = "tunnelConnectionString";
 
   private Config tunnelingConfig;
@@ -141,8 +142,8 @@ public class CuratorStateManagerTest {
     CuratorFramework mockClient = Mockito.mock(CuratorFramework.class);
     ExistsBuilder mockExistsBuilder = Mockito.mock(ExistsBuilder.class);
 
-    final String correctPath = "correct_path";
-    final String wrongPath = "wrong_path";
+    final String correctPath = "/correct/path";
+    final String wrongPath = "/wrong/path";
 
     Mockito.doReturn(mockClient)
         .when(spyStateManager).getCuratorClient();
@@ -173,10 +174,10 @@ public class CuratorStateManagerTest {
     CuratorStateManager spyStateManager = Mockito.spy(new CuratorStateManager());
     CuratorFramework mockClient = Mockito.mock(CuratorFramework.class);
     CreateBuilder mockCreateBuilder = Mockito.mock(CreateBuilder.class);
+    // Mockito doesn't support mock type-parametrized class, thus suppress the warning
     @SuppressWarnings("rawtypes")
     ACLBackgroundPathAndBytesable mockPath = Mockito.spy(ACLBackgroundPathAndBytesable.class);
 
-    final String path = "nlu90_path";
     final byte[] data = new byte[10];
 
     Mockito.doReturn(mockClient)
@@ -190,9 +191,10 @@ public class CuratorStateManagerTest {
 
     spyStateManager.initialize(config);
 
-    ListenableFuture<Boolean> result = spyStateManager.createNode(path, data, false);
+    // Verify the node is created successfully
+    ListenableFuture<Boolean> result = spyStateManager.createNode(PATH, data, false);
     Mockito.verify(mockCreateBuilder).withMode(Mockito.any(CreateMode.class));
-    Mockito.verify(mockPath).forPath(path, data);
+    Mockito.verify(mockPath).forPath(PATH, data);
     Assert.assertTrue(result.get());
   }
 
@@ -201,10 +203,9 @@ public class CuratorStateManagerTest {
     CuratorStateManager spyStateManager = Mockito.spy(new CuratorStateManager());
     CuratorFramework mockClient = Mockito.mock(CuratorFramework.class);
     DeleteBuilder mockDeleteBuilder = Mockito.mock(DeleteBuilder.class);
+    // Mockito doesn't support mock type-parametrized class, thus suppress the warning
     @SuppressWarnings("rawtypes")
     BackgroundPathable mockBackPathable = Mockito.mock(BackgroundPathable.class);
-
-    final String path = "nlu90_path";
 
     Mockito.doReturn(mockClient)
         .when(spyStateManager).getCuratorClient();
@@ -217,8 +218,9 @@ public class CuratorStateManagerTest {
 
     spyStateManager.initialize(config);
 
-    ListenableFuture<Boolean> result = spyStateManager.deleteExecutionState(path);
+    ListenableFuture<Boolean> result = spyStateManager.deleteExecutionState(PATH);
 
+    // Verify the node is deleted correctly
     Mockito.verify(mockDeleteBuilder).withVersion(-1);
     Assert.assertTrue(result.get());
   }
@@ -228,20 +230,20 @@ public class CuratorStateManagerTest {
     CuratorStateManager spyStateManager = Mockito.spy(new CuratorStateManager());
     final CuratorFramework mockClient = Mockito.mock(CuratorFramework.class);
     GetDataBuilder mockGetBuilder = Mockito.mock(GetDataBuilder.class);
+    // Mockito doesn't support mock type-parametrized class, thus suppress the warning
     @SuppressWarnings("rawtypes")
     BackgroundPathable mockBackPathable = Mockito.mock(BackgroundPathable.class);
     final CuratorEvent mockEvent = Mockito.mock(CuratorEvent.class);
     Message.Builder mockBuilder = Mockito.mock(Message.Builder.class);
     Message mockMessage = Mockito.mock(Message.class);
 
-    final String path = "nlu90_path";
     final byte[] data = "wy_1989".getBytes();
 
     Mockito.doReturn(mockMessage)
         .when(mockBuilder).build();
     Mockito.doReturn(data)
         .when(mockEvent).getData();
-    Mockito.doReturn(path)
+    Mockito.doReturn(PATH)
         .when(mockEvent).getPath();
     Mockito.doReturn(mockClient)
         .when(spyStateManager).getCuratorClient();
@@ -263,7 +265,8 @@ public class CuratorStateManagerTest {
 
     spyStateManager.initialize(config);
 
-    ListenableFuture<Message> result = spyStateManager.getNodeData(null, path, mockBuilder);
+    // Verify the data on node is fetched correctly
+    ListenableFuture<Message> result = spyStateManager.getNodeData(null, PATH, mockBuilder);
     Assert.assertTrue(result.get().equals(mockMessage));
   }
 
@@ -271,8 +274,6 @@ public class CuratorStateManagerTest {
   public void testDeleteSchedulerLocation() throws Exception {
     CuratorStateManager spyStateManager = Mockito.spy(new CuratorStateManager());
     CuratorFramework mockClient = Mockito.mock(CuratorFramework.class);
-
-    final String path = "nlu90_path";
 
     Mockito.doReturn(mockClient)
         .when(spyStateManager).getCuratorClient();
