@@ -71,5 +71,6 @@ The current group is:
 [Sriram Rao (Microsoft)] (https://github.com/sriramsrao) <br/>
 [Avrilla Floratou (Microsoft)] (https://github.com/avflor) <br/>
 [Darin Johnson] (https://github.com/DarinJ) <br/>
+[Sandeep Nayak (Adobe)] (https://github.com/osgigeek) <br/>
 [Andrew Montalenti (Parsely)] (https://github.com/amontalenti) <br/>
 [Zuyu Zhang (Pivotal)] (https://github.com/zuyu) <br/>
