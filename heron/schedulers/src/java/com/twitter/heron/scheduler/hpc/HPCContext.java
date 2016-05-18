@@ -22,7 +22,6 @@ public class HPCContext extends Context {
   public static final String WORKING_DIRECTORY = "heron.scheduler.local.working.directory";
   public static final String HPC_JOB_ID = "heron.scheduler.hpc.job.id";
   public static final String HPC_SHELL_SCRIPT = "heron.scheduler.hpc.shell.script";
-  public static final String HPC_PARTITION = "heron.scheduler.hpc.partition";
 
   public static String workingDirectory(Config config) {
     String workingDirectory = config.getStringValue(WORKING_DIRECTORY,
