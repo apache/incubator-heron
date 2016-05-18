@@ -110,7 +110,9 @@ public class SchedulerStateManagerAdaptor {
    *
    * @return Boolean - Success or Failure
    */
-  public Boolean setSchedulerLocation(Scheduler.SchedulerLocation location, String topologyName) {
+  public Boolean setSchedulerLocation(
+      Scheduler.SchedulerLocation location,
+      String topologyName) {
     return awaitResult(delegate.setSchedulerLocation(location, topologyName));
   }
 
