@@ -65,7 +65,7 @@ public final class SchedulerUtils {
         // Set the SchedulerLocation at last step,
         // since some methods in IScheduler will provide correct values
         // only after IScheduler.onSchedule is invoked correctly
-        ret = setSchedulerLocation(runtime, scheduler);
+        ret = setLibSchedulerLocation(runtime, scheduler, false);
       } else {
         LOG.severe("Failed to invoke IScheduler as library");
       }
@@ -99,9 +99,6 @@ public final class SchedulerUtils {
     }
 
     int httpPort = freePorts.get(0);
-
-
-
 
     List<String> commands = new ArrayList<>();
 
@@ -221,10 +218,12 @@ public final class SchedulerUtils {
    *
    * @param runtime the runtime configuration
    * @param scheduler the IScheduler to provide more info
+   * @param isService true if the scheduler is a service; false otherwise
    */
-  public static boolean setSchedulerLocation(
+  public static boolean setLibSchedulerLocation(
       Config runtime,
-      IScheduler scheduler) {
+      IScheduler scheduler,
+      boolean isService) {
     // Dummy values since there is no running scheduler server
     final String serverHost = "scheduling_as_library";
     final int serverPort = -1;
@@ -263,7 +262,8 @@ public final class SchedulerUtils {
 
     LOG.log(Level.INFO, "Setting SchedulerLocation: {0}", location);
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
-    Boolean result = statemgr.setSchedulerLocation(location, Runtime.topologyName(runtime));
+    Boolean result =
+        statemgr.setSchedulerLocation(location, Runtime.topologyName(runtime));
 
     if (result == null || !result) {
       LOG.severe("Failed to set Scheduler location");
