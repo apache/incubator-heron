@@ -44,7 +44,6 @@ before_install:
   - find /usr/lib/python2.7/. -name "*request*"
   - find /usr/lib/python2.7/plat-linux2/. -name "*request*"
   - find /usr/lib/python2.7/lib-tk/. -name "*request*"
-  - find /usr/lib/python2.7/lib-old/. -name "*request*"
   - find /usr/lib/python2.7/lib-dynload/. -name "*request*"
   - find /home/travis/.local/lib/python2.7/site-packages/. -name "*request*"
   - find /usr/local/lib/python2.7/dist-packages/. -name "*request*"
