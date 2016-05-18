@@ -39,7 +39,8 @@ before_install:
   - sudo pip install --upgrade pip # TODO: might not need this
   - pip -V
   - pip install --user requests>=2.2.0
-  - pip install --user linkchecker==0.9.1
+  # 0.9.3 fails with "This program requires Python requests 2.2.0 or later." even when that's installed
+  - pip install --user linkchecker==0.9.2
   - linkchecker --version
 
 
