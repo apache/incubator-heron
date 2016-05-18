@@ -62,7 +62,7 @@ public class SchedulerMain {
   public SchedulerMain(
       Config config,
       TopologyAPI.Topology topology,
-      int schedulerServerPort) throws IOException {
+      int schedulerServerPort) {
     // initialize the options
     this.config = config;
     this.topology = topology;
