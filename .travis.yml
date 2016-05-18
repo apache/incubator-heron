@@ -47,5 +47,5 @@ script:
   - g++ --version
   - which gulp
   - pwd
-  - (cd website && npm run build && hugo)
+  - (cd website && npm run build && hugo && ./linkchecker.sh)
   #- scripts/travis/build.sh && scripts/travis/test.sh
