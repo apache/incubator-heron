@@ -25,20 +25,16 @@ public class HPCContext extends Context {
   public static final String HPC_PARTITION = "heron.scheduler.hpc.partition";
 
   public static String workingDirectory(Config config) {
-    String workingDirectory = config.getStringValue(HPCKeys.get("WORKING_DIRECTORY"),
-        HPCDefaults.get("WORKING_DIRECTORY"));
+    String workingDirectory = config.getStringValue(WORKING_DIRECTORY,
+        "${HOME}/.herondata/topologies/${CLUSTER}/${ROLE}/${TOPOLOGY}");
     return Misc.substitute(config, workingDirectory);
   }
 
   public static String jobIdFile(Config config) {
-    String jobIdFile = config.getStringValue(
-        HPCKeys.get("HPC_JOB_ID"), HPCDefaults.get("HPC_JOB_ID"));
-    return Misc.substitute(config, jobIdFile);
+    return config.getStringValue(HPC_JOB_ID, "hpc-job.pid");
   }
 
   public static String hpcShellScript(Config config) {
-    String hpcShellScript = config.getStringValue(HPCKeys.get("HPC_SHELL_SCRIPT"),
-        HPCDefaults.get("HPC_SHELL_SCRIPT"));
-    return Misc.substitute(config, hpcShellScript);
+    return config.getStringValue(HPC_SHELL_SCRIPT, "slurm.sh");
   }
 }
