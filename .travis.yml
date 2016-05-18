@@ -37,8 +37,8 @@ before_install:
   - sudo dpkg -i hugo*.deb
   - hugo version
   - command -v pip
-  - pip install requests>=2.2.1
-  - pip install linkchecker
+  - sudo pip install requests>=2.2.1
+  - sudo pip install linkchecker
 #  - wget -q http://ftp.debian.org/debian/pool/main/l/linkchecker/linkchecker_9.3-1_amd64.deb
 #  - sudo apt-get -qq update
 #  - sudo apt-cache policy python-requests
