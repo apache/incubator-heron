@@ -36,6 +36,8 @@ before_install:
   - wget -q https://github.com/spf13/hugo/releases/download/v0.15/hugo_0.15_amd64.deb
   - sudo dpkg -i hugo*.deb
   - hugo version
+  - pip install --upgrade pip
+  - pip -V
   #- pip --user install requests>=2.2.1
   - pip --user install linkchecker
   - linkchecker --version
