@@ -17,7 +17,6 @@ addons:
       - pkg-config
       - zip
       - zlib1g-dev
-      - python-requests
 
 env:
   - CC=gcc-4.8 CXX=g++-4.8 CPP=cpp-4.8 CXXCPP=cpp-4.8
@@ -38,6 +37,8 @@ before_install:
   - sudo dpkg -i hugo*.deb
   - hugo version
   - wget -q http://ftp.debian.org/debian/pool/main/l/linkchecker/linkchecker_9.3-1_amd64.deb
+  - sudo apt-get -qq update
+  - sudo apt-get install -y python-requests=2.2.1
   - sudo dpkg -i linkchecker*.deb
   - linkchecker --version
 
