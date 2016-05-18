@@ -27,7 +27,6 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
-import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;
 
 /**
@@ -81,7 +80,7 @@ public class HPCScheduler implements IScheduler {
     }
     LOG.info("Launching topology in HPC scheduler");
     // 1 additional for the tmaster
-    long containers = Runtime.numContainers(runtime) + 1;
+    long containers = packing.containers.size() + 1;
     boolean jobCreated = controller.createJob(getHeronHPCPath(),
         HPCContext.executorSandboxBinary(this.config),
         getExecutorCommand(packing),
