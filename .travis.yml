@@ -48,8 +48,8 @@ before_install:
   - find /usr/lib/python2.7/lib-dynload/. -name "*request*"
   - find /home/travis/.local/lib/python2.7/site-packages/. -name "*request*"
   - find /usr/local/lib/python2.7/dist-packages/. -name "*request*"
+  - find /usr/lib/python2.7/dist-packages/. -name "*request*"
 
-  /usr/lib/python2.7/dist-packages
   # 0.9.3 fails with "This program requires Python requests 2.2.0 or later." even when that's installed
   - pip install --user LinkChecker==9.2
   - linkchecker --version
