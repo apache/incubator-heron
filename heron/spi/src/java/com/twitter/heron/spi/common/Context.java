@@ -88,7 +88,7 @@ public class Context {
   }
 
   public static Boolean schedulerService(Config cfg) {
-    return cfg.getBooleanValue(ConfigKeys.get("SCHEDULER_IS_SERVICE"));
+    return cfg.getBooleanValue(ConfigKeys.get("SCHEDULER_IS_SERVICE"), true);
   }
 
   public static String clusterFile(Config cfg) {
