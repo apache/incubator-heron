@@ -33,9 +33,13 @@ before_install:
   #- chmod +x bazel-0.1.2-installer-linux-x86_64.sh
   #- ./bazel-0.1.2-installer-linux-x86_64.sh --user
 
-  - wget https://github.com/spf13/hugo/releases/download/v0.15/hugo_0.15_amd64.deb
+  - wget -q https://github.com/spf13/hugo/releases/download/v0.15/hugo_0.15_amd64.deb
   - sudo dpkg -i hugo*.deb
   - hugo version
+  - wget -q http://ftp.debian.org/debian/pool/main/l/linkchecker/linkchecker_9.3-1_amd64.deb
+  - sudo dpkg -i linkchecker*.deb
+  - linkchecker --version
+
 
 before_script:
  - (cd website && npm install && npm install gulp && which gulp)

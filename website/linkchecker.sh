@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #linkchecker removes previous runs.
-pip install linkchecker
+which linkchecker || pip install linkchecker
 rm -f linkchecker-errors.csv && rm -f linkchecker-out.csv
 linkchecker public/index.html --no-warnings -F csv 
 #uses error code: on fail, write linkchecker-errors.csv for debugging
