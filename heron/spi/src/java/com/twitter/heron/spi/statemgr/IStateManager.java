@@ -89,7 +89,7 @@ public interface IStateManager extends AutoCloseable {
       TopologyAPI.Topology topology, String topologyName);
 
   /**
-   * Set the scheduler location for the given top
+   * Set the scheduler location for the given topology
    *
    * @return Boolean - Success or Failure
    */

@@ -20,6 +20,8 @@ local_statemgr_deps_files = [
 
 zookeeper_statemgr_deps_files = [
     "//heron/statemgrs/src/java:zookeeper-statemgr-java",
+    "@curator-framework//jar",
+    "@zookeeper//jar",
 ]
 
 localfs_deps_files = \
@@ -44,6 +46,13 @@ java_test(
 java_test(
     name = "zk_utils_unittest",
     srcs = glob(["**/zookeeper/ZkUtilsTest.java"]),
+    deps = zookeeper_deps_files,
+    size = "small",
+)
+
+java_test(
+    name = "zk-statemgr_unittest",
+    srcs = glob(["**/zookeeper/curator/CuratorStateManagerTest.java"]),
     deps = zookeeper_deps_files,
     size = "small",
 )

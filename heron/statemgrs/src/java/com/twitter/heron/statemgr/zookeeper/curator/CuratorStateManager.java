@@ -49,29 +49,53 @@ public class CuratorStateManager extends FileSystemStateManager {
   private static final Logger LOG = Logger.getLogger(CuratorStateManager.class.getName());
   private CuratorFramework client;
   private String connectionString;
+  private boolean isSchedulerService;
   private List<Process> tunnelProcesses;
+  private Config config;
 
   @Override
-  public void initialize(Config config) {
-    super.initialize(config);
+  public void initialize(Config newConfig) {
+    super.initialize(newConfig);
 
-    this.connectionString = Context.stateManagerConnectionString(config);
+    this.config = newConfig;
+    this.connectionString = Context.stateManagerConnectionString(newConfig);
+    this.isSchedulerService = Context.schedulerService(newConfig);
     this.tunnelProcesses = new ArrayList<>();
 
-    boolean isTunnelWhenNeeded = ZkContext.isTunnelNeeded(config);
+    boolean isTunnelWhenNeeded = ZkContext.isTunnelNeeded(newConfig);
     if (isTunnelWhenNeeded) {
-      Pair<String, List<Process>> tunneledResults = setupZkTunnel(config);
+      Pair<String, List<Process>> tunneledResults = setupZkTunnel();
 
       String newConnectionString = tunneledResults.first;
       if (newConnectionString.isEmpty()) {
         throw new IllegalArgumentException("Bad connectionString: " + connectionString);
       }
 
-      // Use the new one
+      // Use the new connection string
       connectionString = newConnectionString;
       tunnelProcesses.addAll(tunneledResults.second);
     }
 
+    // Start it
+    client = getCuratorClient();
+    LOG.info("Starting client to: " + connectionString);
+    client.start();
+
+    try {
+      if (!client.blockUntilConnected(ZkContext.connectionTimeoutMs(newConfig),
+          TimeUnit.MILLISECONDS)) {
+        throw new RuntimeException("Failed to initialize CuratorClient");
+      }
+    } catch (InterruptedException e) {
+      throw new RuntimeException("Failed to initialize CuratorClient", e);
+    }
+
+    if (ZkContext.isInitializeTree(newConfig)) {
+      initTree();
+    }
+  }
+
+  protected CuratorFramework getCuratorClient() {
     // these are reasonable arguments for the ExponentialBackoffRetry. The first
     // retry will wait 1 second - the second will wait up to 2 seconds - the
     // third will wait up to 4 seconds.
@@ -81,34 +105,16 @@ public class CuratorStateManager extends FileSystemStateManager {
     // using the CuratorFrameworkFactory.builder() gives fine grained control
     // over creation options. See the CuratorFrameworkFactory.Builder javadoc
     // details
-    client = CuratorFrameworkFactory.builder()
+    return CuratorFrameworkFactory.builder()
         .connectString(connectionString)
         .retryPolicy(retryPolicy)
         .connectionTimeoutMs(ZkContext.connectionTimeoutMs(config))
         .sessionTimeoutMs(ZkContext.sessionTimeoutMs(config))
             // etc. etc.
         .build();
-
-    LOG.info("Starting client to: " + connectionString);
-
-    // Start it
-    client.start();
-
-    try {
-      if (!client.blockUntilConnected(ZkContext.connectionTimeoutMs(config),
-          TimeUnit.MILLISECONDS)) {
-        throw new RuntimeException("Failed to initialize CuratorClient");
-      }
-    } catch (InterruptedException e) {
-      throw new RuntimeException("Failed to initialize CuratorClient", e);
-    }
-
-    if (ZkContext.isInitializeTree(config)) {
-      initTree();
-    }
   }
 
-  protected Pair<String, List<Process>> setupZkTunnel(Config config) {
+  protected Pair<String, List<Process>> setupZkTunnel() {
     return ZkUtils.setupZkTunnel(config);
   }
 
@@ -276,7 +282,10 @@ public class CuratorStateManager extends FileSystemStateManager {
   public ListenableFuture<Boolean> setSchedulerLocation(
       Scheduler.SchedulerLocation location,
       String topologyName) {
-    return createNode(getSchedulerLocationPath(topologyName), location.toByteArray(), true);
+    // if isService, set the node as ephemeral node; set as persistent node otherwise
+    return createNode(getSchedulerLocationPath(topologyName),
+        location.toByteArray(),
+        isSchedulerService);
   }
 
   @Override
@@ -304,10 +313,14 @@ public class CuratorStateManager extends FileSystemStateManager {
 
   @Override
   public ListenableFuture<Boolean> deleteSchedulerLocation(String topologyName) {
-    // It is a EPHEMERAL node and would be removed automatically
-    final SettableFuture<Boolean> result = SettableFuture.create();
-    result.set(true);
-    return result;
+    // if scheduler is service, the znode is ephemeral and it's deleted automatically
+    if (isSchedulerService) {
+      final SettableFuture<Boolean> result = SettableFuture.create();
+      result.set(true);
+      return result;
+    } else {
+      return deleteNode(getSchedulerLocationPath(topologyName));
+    }
   }
 
   @Override
