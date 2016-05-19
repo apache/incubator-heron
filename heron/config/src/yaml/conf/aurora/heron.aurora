@@ -1,0 +1,55 @@
+"""
+Launch the topology as a single aurora job with multiple instances.
+The heron-executor is responsible for starting a tmaster (container 0)
+and regular stmgr/metricsmgr/instances (container index > 0).
+"""
+
+heron_core_release_uri = '{{CORE_PACKAGE_URI}}'
+heron_topology_jar_uri = '{{TOPOLOGY_PACKAGE_URI}}'
+core_release_file = "heron-core.tar.gz"
+topology_package_file = "topology.tar.gz"
+
+# --- processes ---
+fetch_heron_system = Process(
+  name = 'fetch_heron_system',
+  cmdline = 'curl %s -o %s && tar zxf %s' % (heron_core_release_uri, core_release_file, core_release_file)
+)
+
+fetch_user_package = Process(
+  name = 'fetch_user_package',
+  cmdline = 'curl %s -o %s && tar zxf %s' % (heron_topology_jar_uri, topology_package_file, topology_package_file)
+)
+
+command_to_start_executor = '{{SANDBOX_EXECUTOR_BINARY}} {{mesos.instance}} {{TOPOLOGY_NAME}} {{TOPOLOGY_ID}} {{TOPOLOGY_DEFINITION_FILE}} {{INSTANCE_DISTRIBUTION}} {{STATEMGR_CONNECTION_STRING}} {{STATEMGR_ROOT_PATH}} {{SANDBOX_TMASTER_BINARY}} {{SANDBOX_STMGR_BINARY}} "{{SANDBOX_METRICSMGR_CLASSPATH}}" {{INSTANCE_JVM_OPTS_IN_BASE64}} "{{TOPOLOGY_CLASSPATH}}" {{thermos.ports[port1]}} {{thermos.ports[port2]}} {{thermos.ports[port3]}} {{SANDBOX_SYSTEM_YAML}} {{COMPONENT_RAMMAP}} {{COMPONENT_JVM_OPTS_IN_BASE64}} {{TOPOLOGY_PACKAGE_TYPE}} {{TOPOLOGY_JAR_FILE}} {{HERON_SANDBOX_JAVA_HOME}} {{thermos.ports[http]}} {{SANDBOX_SHELL_BINARY}} {{thermos.ports[port4]}} {{CLUSTER}} {{ROLE}} {{ENVIRON}} "{{SANDBOX_INSTANCE_CLASSPATH}}" {{SANDBOX_METRICS_YAML}} "{{SANDBOX_SCHEDULER_CLASSPATH}}" "{{thermos.ports[scheduler]}}"'
+
+launch_heron_executor = Process(
+  name = 'launch_heron_executor',
+  cmdline = command_to_start_executor,
+  max_failures = 1
+)
+
+discover_profiler_port = Process(
+  name = 'discover_profiler_port',
+  cmdline = 'echo {{thermos.ports[yourkit]}} > yourkit.port'
+)
+
+# --- tasks ---
+heron_task = SequentialTask(
+  name = 'setup_and_run',
+  processes = [fetch_heron_system, fetch_user_package, launch_heron_executor, discover_profiler_port],
+  resources = Resources(cpu = '{{CPUS_PER_CONTAINER}}', ram = '{{RAM_PER_CONTAINER}}', disk = '{{DISK_PER_CONTAINER}}')
+)
+
+# -- jobs ---
+jobs = [
+  Job(
+    name = '{{TOPOLOGY_NAME}}',
+    cluster = '{{CLUSTER}}',
+    role = '{{ROLE}}',
+    environment = '{{ENVIRON}}',
+    service = True,
+    task = heron_task,
+    instances = '{{NUM_CONTAINERS}}',
+    announce = Announcer(primary_port = 'http')
+  )
+]
