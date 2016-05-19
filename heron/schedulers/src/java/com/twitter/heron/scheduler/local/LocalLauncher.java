@@ -64,7 +64,8 @@ public class LocalLauncher implements ILauncher {
     LOG.log(Level.FINE, "Launching topology for local cluster {0}",
         LocalContext.cluster(config));
 
-    // download the core and topology packages into the working directory
+    // setup the working directory
+    // mainly it downloads and extracts the heron-core-release and topology package
     if (!setupWorkingDirectory()) {
       LOG.severe("Failed to setup working directory");
       return false;
