@@ -3,9 +3,8 @@ title: Slurm
 ---
 
 In addition to out-of-the-box schedulers for [Mesos](../mesos) and
-[Aurora](../aurora), Heron can also be deployed in a HPC environment with the Slurm Scheduler.
-This allows a researcher to deploy Heron on a shared environment for executing streaming 
-scientific work-flows.
+[Aurora](../aurora), Heron can also be deployed in a HPC cluster with the Slurm Scheduler.
+This allows a researcher to deploy Heron and execute streaming scientific work-flows.
 
 ## How Slurm Deployment Works
 
