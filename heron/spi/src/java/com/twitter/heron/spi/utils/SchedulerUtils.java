@@ -31,6 +31,7 @@ import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.common.ShellUtils;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
@@ -388,5 +389,88 @@ public final class SchedulerUtils {
 
     return new String(
         DatatypeConverter.parseBase64Binary(javaOptsBase64), Charset.forName("UTF-8"));
+  }
+
+  /**
+   * Setup the working directory:
+   * 1. Download heron core and the topology packages into topology working directory,
+   * 2. Extract heron core and the topology packages
+   * 3. Remove the downloaded heron core and the topology packages
+   *
+   * @param workingDirectory the working directory to setup
+   * @param coreReleasePackageURL the URL of core release package
+   * @param coreReleaseDestination the destination of the core release package fetched
+   * @param topologyPackageURL the URL of heron topology release package
+   * @param topologyPackageDestination the destination of heron topology release package fetched
+   * @param isVerbose display verbose output or not
+   * @return true if successful
+   */
+  public static boolean setupWorkingDirectory(
+      String workingDirectory,
+      String coreReleasePackageURL,
+      String coreReleaseDestination,
+      String topologyPackageURL,
+      String topologyPackageDestination,
+      boolean isVerbose) {
+    // if the working directory does not exist, create it.
+    if (!FileUtils.isDirectoryExists(workingDirectory)) {
+      LOG.fine("The working directory does not exist; creating it.");
+      if (!FileUtils.createDirectory(workingDirectory)) {
+        LOG.severe("Failed to create directory: " + workingDirectory);
+        return false;
+      }
+    }
+
+    // Curl and extract heron core release package and topology package
+    // And then delete the downloaded release package
+    boolean ret =
+        curlAndExtractPackage(
+            workingDirectory, coreReleasePackageURL, coreReleaseDestination, true, isVerbose)
+            &&
+            curlAndExtractPackage(
+                workingDirectory, topologyPackageURL, topologyPackageDestination, true, isVerbose);
+
+    return ret;
+  }
+
+  /**
+   * Curl a package, extract it to working directory
+   *
+   * @param workingDirectory the working directory to setup
+   * @param packageURI the URL of core release package
+   * @param packageDestination the destination of the core release package fetched
+   * @param isDeletePackage delete the package curled or not
+   * @param isVerbose display verbose output or not
+   * @return true if successful
+   */
+  public static boolean curlAndExtractPackage(
+      String workingDirectory,
+      String packageURI,
+      String packageDestination,
+      boolean isDeletePackage,
+      boolean isVerbose) {
+    // curl the package to the working directory and extract it
+    LOG.log(Level.FINE, "Fetching package {0}", packageURI);
+    LOG.fine("Fetched package can overwrite old one.");
+    if (!ShellUtils.curlPackage(
+        packageURI, packageDestination, isVerbose, true)) {
+      LOG.severe("Failed to fetch package.");
+      return false;
+    }
+
+    // untar the heron core release package in the working directory
+    LOG.log(Level.FINE, "Extracting the package {0}", packageURI);
+    if (!ShellUtils.extractPackage(
+        packageDestination, workingDirectory, isVerbose, true)) {
+      LOG.severe("Failed to extract package.");
+      return false;
+    }
+
+    // remove the core release package
+    if (isDeletePackage && !FileUtils.deleteFile(packageDestination)) {
+      LOG.warning("Failed to delete the package: " + packageDestination);
+    }
+
+    return true;
   }
 }
