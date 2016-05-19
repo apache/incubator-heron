@@ -16,16 +16,9 @@
 
 import argparse
 import atexit
-import base64
-import contextlib
-import glob
-import logging
-import logging.handlers
 import os
 import shutil
 import sys
-import subprocess
-import tarfile
 import time
 
 from heron.common.src.python.color import Log
