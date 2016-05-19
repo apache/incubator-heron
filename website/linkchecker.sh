@@ -7,8 +7,7 @@ which linkchecker || pip install linkchecker
 rm -f linkchecker-errors.csv && rm -f linkchecker-out.csv
 
 set +e
-linkchecker public/docs/resources/index.html --no-warnings -F csv
-#linkchecker public/index.html --no-warnings -F csv
+linkchecker public/index.html --no-warnings -F csv
 STATUS=$?
 set -e
 
