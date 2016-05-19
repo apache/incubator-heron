@@ -38,9 +38,9 @@ before_install:
   - hugo version
   - sudo pip install --upgrade pip # TODO: might not need this
   - pip -V
-  - pip install --user -v requests>=2.2.0 --upgrade
+  - pip install --user -v requests==2.9.0
   # 0.9.3 fails with "This program requires Python requests 2.2.0 or later." even when that's installed
-  - pip install --user -v LinkChecker==9.2 --upgrade
+  - pip install --user -v LinkChecker==9.2
   - python -c 'import sys; print("\n".join(sys.path))'
   - find /usr/lib/python2.7/. -name "*request*"
   - find /usr/lib/python2.7/plat-linux2/. -name "*request*"
@@ -50,6 +50,7 @@ before_install:
   - find /usr/local/lib/python2.7/dist-packages/. -name "*request*"
   - find /usr/lib/python2.7/dist-packages/. -name "*request*"
 
+  - which linkchecker
   - linkchecker --version
 
 
