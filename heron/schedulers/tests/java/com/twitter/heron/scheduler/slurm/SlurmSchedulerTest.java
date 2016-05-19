@@ -63,7 +63,7 @@ public class SlurmSchedulerTest {
   @BeforeClass
   public static void beforeClass() throws Exception {
     scheduler = Mockito.spy(SlurmScheduler.class);
-    Mockito.doReturn(new ArrayList<String>()).when(
+    Mockito.doReturn(new String[]{}).when(
         scheduler).getExecutorCommand(
         Mockito.any(PackingPlan.class));
     Mockito.doReturn(SLURM_PATH).when(scheduler).getHeronSlurmPath();

@@ -70,7 +70,7 @@ public class SlurmLauncherTest {
     PowerMockito.doReturn(true).when(slurmScheduler).onSchedule(plan);
 
     // Failed to download
-    Mockito.doReturn(true).when(slurmLauncher).setupWorkingDirectory();
+    Mockito.doReturn(false).when(slurmLauncher).setupWorkingDirectory();
     Assert.assertFalse(slurmLauncher.launch(packingPlan));
     Mockito.verify(slurmLauncher).setupWorkingDirectory();
 

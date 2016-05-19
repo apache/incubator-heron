@@ -69,13 +69,12 @@ public class SlurmController {
     // add the args to the command
     slurmCmd.addAll(transformedArgs);
     String[] slurmCmdArray = slurmCmd.toArray(new String[0]);
-    LOG.log(Level.INFO, "Executing job [" + topologyWorkingDirectory + "]: "
-        + Arrays.toString(slurmCmdArray));
+    LOG.log(Level.INFO, "Executing job [" + topologyWorkingDirectory + "]:", slurmCmdArray);
     StringBuilder stdout = new StringBuilder();
     StringBuilder stderr = new StringBuilder();
     boolean ret = runProcess(topologyWorkingDirectory, slurmCmdArray, stdout, stderr);
-    LOG.log(Level.FINE, "Stdout for Slurm script: " + stdout);
-    LOG.log(Level.FINE, "Stderror for Slurm script: " + stderr);
+    LOG.log(Level.FINE, "Stdout for Slurm script: ", stdout);
+    LOG.log(Level.FINE, "Stderror for Slurm script: ", stderr);
     return ret;
   }
 
@@ -89,7 +88,7 @@ public class SlurmController {
    */
   private List<String> slurmCommand(String slurmScript, String heronExec,
                                     long containers, String partition) {
-    String nTasks = "--ntasks=" + containers;
+    String nTasks = String.format("--ntasks=%d", containers);
     List<String> slurmCmd;
     if (partition != null) {
       slurmCmd = new ArrayList<>(Arrays.asList("sbatch", "-N",
@@ -125,14 +124,8 @@ public class SlurmController {
    */
   protected boolean runProcess(String topologyWorkingDirectory, String[] slurmCmd,
                          StringBuilder stdout, StringBuilder stderr) {
-    if (topologyWorkingDirectory != null) {
-      return 0 == ShellUtils.runSyncProcess(
-          isVerbose, false, slurmCmd, stdout, stderr,
-          new File(topologyWorkingDirectory));
-    } else {
-      return 0 == ShellUtils.runSyncProcess(
-          isVerbose, false, slurmCmd, stdout, stderr, null);
-    }
+    File file = topologyWorkingDirectory == null ? null : new File(topologyWorkingDirectory);
+    return 0 == ShellUtils.runSyncProcess(isVerbose, false, slurmCmd, stdout, stderr, file);
   }
 
   /**
