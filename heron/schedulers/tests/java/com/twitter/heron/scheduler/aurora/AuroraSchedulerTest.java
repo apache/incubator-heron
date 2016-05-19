@@ -15,6 +15,7 @@
 package com.twitter.heron.scheduler.aurora;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
@@ -23,13 +24,20 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Misc;
 import com.twitter.heron.spi.common.PackingPlan;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(Misc.class)
 public class AuroraSchedulerTest {
   private static final String AURORA_PATH = "path.aurora";
   private static final String PACKING_PLAN_ID = "packing.plan.id";
@@ -143,5 +151,26 @@ public class AuroraSchedulerTest {
         controller).restartJob(containerToRestart);
     Assert.assertTrue(scheduler.onRestart(restartTopologyRequest));
     Mockito.verify(controller, Mockito.times(2)).restartJob(containerToRestart);
+  }
+
+  @Test
+  public void testGetJobLinks() throws Exception {
+    final String JOB_LINK_FORMAT = "http://go/${CLUSTER}/${ROLE}/${ENVIRON}/${TOPOLOGY}";
+    final String SUBSTITUTED_JOB_LINK = "http://go/local/heron/test/test_topology";
+
+    Config mockConfig = Mockito.mock(Config.class);
+    Mockito.when(mockConfig.getStringValue(AuroraContext.JOB_LINK_TEMPLATE))
+        .thenReturn(JOB_LINK_FORMAT);
+
+    scheduler.initialize(mockConfig, Mockito.mock(Config.class));
+
+    PowerMockito.spy(Misc.class);
+    PowerMockito.doReturn(SUBSTITUTED_JOB_LINK)
+        .when(Misc.class, "substitute", mockConfig, JOB_LINK_FORMAT);
+
+    List<String> result = scheduler.getJobLinks();
+
+    Assert.assertEquals(1, result.size());
+    Assert.assertTrue(result.get(0).equals(SUBSTITUTED_JOB_LINK));
   }
 }
