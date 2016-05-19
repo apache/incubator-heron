@@ -49,6 +49,4 @@ script:
   - which g++-4.8
   - g++ --version
   - which gulp
-  - (cd website && make site)
-  - echo "Foo"
-  #- scripts/travis/build.sh && scripts/travis/test.sh
+  - (cd website && make site || echo 'FAILED: build of website docs failed.') && scripts/travis/build.sh && scripts/travis/test.sh
