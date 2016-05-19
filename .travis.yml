@@ -24,14 +24,14 @@ env:
 before_install:
 
   # download and install libunwind
-  - wget -q http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz
-  - tar xfz libunwind-1.1.tar.gz
-  - cd libunwind-1.1 && ./configure --prefix=/usr && sudo make --silent install && cd ..
+#  - wget -q http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz
+#  - tar xfz libunwind-1.1.tar.gz
+#  - cd libunwind-1.1 && ./configure --prefix=/usr && sudo make --silent install && cd ..
 
   # download and install bazel
-  - wget -q 'https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh'
-  - chmod +x bazel-0.1.2-installer-linux-x86_64.sh
-  - ./bazel-0.1.2-installer-linux-x86_64.sh --user
+#  - wget -q 'https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh'
+#  - chmod +x bazel-0.1.2-installer-linux-x86_64.sh
+#  - ./bazel-0.1.2-installer-linux-x86_64.sh --user
 
   # required for building the website docs
   - wget -q https://github.com/spf13/hugo/releases/download/v0.15/hugo_0.15_amd64.deb
@@ -49,5 +49,5 @@ script:
   - gcc --version
   - which g++-4.8
   - g++ --version
-  - (cd website && make site) || echo 'FAILED: build of website docs failed.'
-  - scripts/travis/build.sh && scripts/travis/test.sh
+  - (cd website && make site) || echo 'FAILED\: build of website docs failed.'
+  #- scripts/travis/build.sh && scripts/travis/test.sh
