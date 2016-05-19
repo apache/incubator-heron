@@ -17,7 +17,6 @@ package com.twitter.heron.spi.common;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -72,7 +71,7 @@ public class ShellUtilsTest {
 
   @Test
   public void testInputstreamToString() {
-    String testString = generateRandomLongString(1024 * 1024);  // 1 MB
+    String testString = generateRandomLongString(1024);
     ByteArrayInputStream is = new ByteArrayInputStream(testString.getBytes());
     Assert.assertEquals(testString, ShellUtils.inputstreamToString(is));
   }
