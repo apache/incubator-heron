@@ -74,6 +74,18 @@ browser from the command line:
 $ open http://localhost:1313/heron
 ```
 
+## Checking Links
+
+To verify that the links in the docs are all valid, run `make linkchecker`, which will produce a
+report of broken links. If `linkchecker` fails to install or run properly, you can install it manually.
+Note that `linkchecker` versions 9.2 and 9.3 require the python `requests` >= 2.2.0 and < 2.10.0.
+
+```bash
+$ pip uninstall requests
+$ pip install requests==2.9.0
+$ pip install linkchecker
+```
+
 ## Publishing the Site
 
 The content on the [twitter.github.io/heron](http://twitter.github.io/heron) website is what is
