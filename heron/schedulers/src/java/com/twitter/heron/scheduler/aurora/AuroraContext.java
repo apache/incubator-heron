@@ -18,7 +18,7 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 
 public final class AuroraContext extends Context {
-  public static final String JOB_LINK_TEMPLATE = "heron.schduler.job.link";
+  public static final String JOB_LINK_TEMPLATE = "heron.schduler.job.link.template";
 
   private AuroraContext(){
   }
