@@ -24,7 +24,6 @@ import shutil
 import sys
 import subprocess
 import tarfile
-import tempfile
 
 import heron.cli.src.python.args as args
 import heron.cli.src.python.utils as utils

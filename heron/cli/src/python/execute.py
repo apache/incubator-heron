@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import subprocess
+import tempfile
 
 import heron.cli.src.python.opts  as opts
 import heron.cli.src.python.utils as utils

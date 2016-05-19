@@ -26,7 +26,6 @@ import shutil
 import sys
 import subprocess
 import tarfile
-import tempfile
 import time
 
 from heron.common.src.python.color import Log
