@@ -127,7 +127,7 @@ public class HPCScheduler implements IScheduler {
     String[] executorCmd = SchedulerUtils.executorCommandArgs(
         packing, this.config, this.runtime, freePorts);
 
-    LOG.info("Executor command line: " + Arrays.toString(executorCmd));
+    LOG.log(Level.FINE, "Executor command line: " + Arrays.toString(executorCmd));
     return executorCmd;
   }
 }

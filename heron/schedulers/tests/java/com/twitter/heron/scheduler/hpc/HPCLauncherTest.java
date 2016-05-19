@@ -70,9 +70,9 @@ public class HPCLauncherTest {
     PowerMockito.doReturn(true).when(hpcScheduler).onSchedule(plan);
 
     // Failed to download
-    Mockito.doReturn(false).when(hpcLauncher).downloadAndExtractPackages();
+    Mockito.doReturn(true).when(hpcLauncher).setupWorkingDirectory();
     Assert.assertFalse(hpcLauncher.launch(packingPlan));
-    Mockito.verify(hpcLauncher).downloadAndExtractPackages();
+    Mockito.verify(hpcLauncher).setupWorkingDirectory();
 
     // Failed to schedule
     PowerMockito.spy(SchedulerUtils.class);
@@ -84,7 +84,7 @@ public class HPCLauncherTest {
     Assert.assertFalse(hpcLauncher.launch(Mockito.mock(PackingPlan.class)));
 
     // happy path
-    PowerMockito.doReturn(true).when(hpcLauncher).downloadAndExtractPackages();
+    PowerMockito.doReturn(true).when(hpcLauncher).setupWorkingDirectory();
     PowerMockito.mockStatic(SchedulerUtils.class);
     PowerMockito.doReturn(true).when(SchedulerUtils.class, "onScheduleAsLibrary",
         Mockito.any(Config.class), Mockito.any(Config.class),
