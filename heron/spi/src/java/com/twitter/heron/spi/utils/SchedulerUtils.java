@@ -22,6 +22,8 @@ import java.util.logging.Logger;
 
 import javax.xml.bind.DatatypeConverter;
 
+import org.apache.commons.io.FilenameUtils;
+
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
@@ -208,6 +210,69 @@ public final class SchedulerUtils {
         .toString();
     commands.add(completeSchedulerProcessClassPath);
 
+    commands.add(Integer.toString(schedulerPort));
+
+    return commands.toArray(new String[0]);
+  }
+
+  /**
+   * Util method to get the arguments to the heron executor. This method creates the arguments
+   * without the container index, which is the first argument to the executor
+   * @param config The static Config
+   * @param runtime The runtime Config
+   * @param freePorts list of free ports
+   * @return String[] representing the arguments to start heron-executor
+   */
+  public static String[] executorCommandArgs(
+      PackingPlan packing, Config config,
+      Config runtime, List<Integer> freePorts) {
+    TopologyAPI.Topology topology = Runtime.topology(runtime);
+
+    int masterPort = freePorts.get(0);
+    int tmasterControllerPort = freePorts.get(1);
+    int tmasterStatsPort = freePorts.get(2);
+    int shellPort = freePorts.get(3);
+    int metricsmgrPort = freePorts.get(4);
+    int schedulerPort = freePorts.get(5);
+
+    List<String> commands = new ArrayList<>();
+    commands.add(topology.getName());
+    commands.add(topology.getId());
+    commands.add(FilenameUtils.getName(Context.topologyDefinitionFile(config)));
+    commands.add(TopologyUtils.packingToString(packing));
+    commands.add(Context.stateManagerConnectionString(config));
+    commands.add(Context.stateManagerRootPath(config));
+    commands.add(Context.tmasterSandboxBinary(config));
+    commands.add(Context.stmgrSandboxBinary(config));
+    commands.add(Context.metricsManagerSandboxClassPath(config));
+    commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)));
+    commands.add(TopologyUtils.makeClassPath(topology, Context.topologyJarFile(config)));
+    commands.add(Integer.toString(masterPort));
+    commands.add(Integer.toString(tmasterControllerPort));
+    commands.add(Integer.toString(tmasterStatsPort));
+    commands.add(Context.systemConfigSandboxFile(config));
+    commands.add(TopologyUtils.formatRamMap(
+        TopologyUtils.getComponentRamMap(topology, Context.instanceRam(config))));
+    commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
+    commands.add(Context.topologyPackageType(config));
+    commands.add(Context.topologyJarFile(config));
+    commands.add(Context.javaSandboxHome(config));
+    commands.add(Integer.toString(shellPort));
+    commands.add(Context.shellSandboxBinary(config));
+    commands.add(Integer.toString(metricsmgrPort));
+    commands.add(Context.cluster(config));
+    commands.add(Context.role(config));
+    commands.add(Context.environ(config));
+    commands.add(Context.instanceSandboxClassPath(config));
+    commands.add(Context.metricsSinksSandboxFile(config));
+
+    String completeSchedulerProcessClassPath = new StringBuilder()
+        .append(Context.schedulerSandboxClassPath(config)).append(":")
+        .append(Context.packingSandboxClassPath(config)).append(":")
+        .append(Context.stateManagerSandboxClassPath(config))
+        .toString();
+
+    commands.add(completeSchedulerProcessClassPath);
     commands.add(Integer.toString(schedulerPort));
 
     return commands.toArray(new String[0]);
