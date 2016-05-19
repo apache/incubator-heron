@@ -26,12 +26,12 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.spi.common.ShellUtils;
 
-public class SlrumController {
-  private static final Logger LOG = Logger.getLogger(SlrumController.class.getName());
+public class SlurmController {
+  private static final Logger LOG = Logger.getLogger(SlurmController.class.getName());
 
   private final boolean isVerbose;
 
-  SlrumController(boolean isVerbose) {
+  SlurmController(boolean isVerbose) {
     this.isVerbose = isVerbose;
   }
 

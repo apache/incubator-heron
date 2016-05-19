@@ -38,7 +38,7 @@ public class SlurmScheduler implements IScheduler {
   private static final Logger LOG = Logger.getLogger(SlurmScheduler.class.getName());
   private Config config;
   private Config runtime;
-  private SlrumController controller;
+  private SlurmController controller;
   private String workingDirectory;
 
   public SlurmScheduler() {
@@ -63,8 +63,8 @@ public class SlurmScheduler implements IScheduler {
    *
    * @return SlurmController
    */
-  protected SlrumController getController() {
-    return new SlrumController(Context.verbose(config));
+  protected SlurmController getController() {
+    return new SlurmController(Context.verbose(config));
   }
 
   @Override
