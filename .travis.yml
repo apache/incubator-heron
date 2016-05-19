@@ -36,13 +36,9 @@ before_install:
   - wget -q https://github.com/spf13/hugo/releases/download/v0.15/hugo_0.15_amd64.deb
   - sudo dpkg -i hugo*.deb
   - hugo version
-#  - sudo pip install --upgrade pip # TODO: might not need this
-  - pip -V
-#  - pip install --user -v requests==2.9.0
-  # 0.9.3 fails with "This program requires Python requests 2.2.0 or later." even when that's installed
-  - pip install --user -v LinkChecker==9.2
+  - pip install --user requests==2.9.0
+  - pip install --user LinkChecker
   - linkchecker --version
-
 
 before_script:
  - (cd website && npm install && npm install gulp && which gulp)
@@ -53,6 +49,5 @@ script:
   - which g++-4.8
   - g++ --version
   - which gulp
-  - pwd
-  - (cd website && npm run build && hugo && ./linkchecker.sh)
+  - (cd website && make site)
   #- scripts/travis/build.sh && scripts/travis/test.sh
