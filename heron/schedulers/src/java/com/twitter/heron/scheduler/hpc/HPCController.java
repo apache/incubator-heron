@@ -125,9 +125,14 @@ public class HPCController {
    */
   protected boolean runProcess(String topologyWorkingDirectory, String[] hpcCmd,
                          StringBuilder stdout, StringBuilder stderr) {
-    return 0 == ShellUtils.runSyncProcess(
-        isVerbose, false, hpcCmd, stdout, stderr,
-        new File(topologyWorkingDirectory));
+    if (topologyWorkingDirectory != null) {
+      return 0 == ShellUtils.runSyncProcess(
+          isVerbose, false, hpcCmd, stdout, stderr,
+          new File(topologyWorkingDirectory));
+    } else {
+      return 0 == ShellUtils.runSyncProcess(
+          isVerbose, false, hpcCmd, stdout, stderr, null);
+    }
   }
 
   /**
