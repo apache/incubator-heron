@@ -33,7 +33,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Misc;
 import com.twitter.heron.spi.common.PackingPlan;
 
@@ -160,7 +159,7 @@ public class AuroraSchedulerTest {
     final String SUBSTITUTED_JOB_LINK = "http://go/local/heron/test/test_topology";
 
     Config mockConfig = Mockito.mock(Config.class);
-    Mockito.when(mockConfig.getStringValue(ConfigKeys.get("SCHEDULER_JOB_LINK")))
+    Mockito.when(mockConfig.getStringValue(AuroraContext.JOB_LINK_TEMPLATE))
         .thenReturn(JOB_LINK_FORMAT);
 
     scheduler.initialize(mockConfig, Mockito.mock(Config.class));
