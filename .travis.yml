@@ -41,7 +41,7 @@ before_install:
   - linkchecker --version
 
 before_script:
- - (cd website && npm install && npm install gulp && which gulp)
+ - (cd website $$ npm install gulp && which gulp)
 
 script:
   - which gcc-4.8
@@ -50,4 +50,5 @@ script:
   - g++ --version
   - which gulp
   - (cd website && make site)
+  - echo "Foo"
   #- scripts/travis/build.sh && scripts/travis/test.sh
