@@ -1,0 +1,4 @@
+[submodule "website/public"]
+	path = website/public
+	url = git@github.com:twitter/heron.git
+	branch = gh-pages

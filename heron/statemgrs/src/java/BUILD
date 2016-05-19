@@ -31,6 +31,25 @@ java_library(
 )
 
 java_library(
+    name = "null-statemgr-java",
+    srcs = glob(["**/NullStateManager.java"]),
+    deps = common_deps_files,
+)
+
+java_binary(
+    name = "null-statemgr-unshaded",
+    srcs = glob(["**/NullStateManager.java"]),
+    deps = common_deps_files,
+)
+
+genrule(
+    name = "heron-null-statemgr",
+    srcs = [":null-statemgr-unshaded_deploy.jar"],
+    outs = ["heron-null-statemgr.jar"],
+    cmd  = "cp $< $@",
+)
+
+java_library(
     name = "localfs-statemgr-java",
     srcs = glob(["**/FileSystemStateManager.java"]) + glob(["**/localfs/**/*.java"]),
     resources = glob(["**/localfs/**/*.yaml"]),

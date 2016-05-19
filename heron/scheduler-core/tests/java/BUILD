@@ -46,6 +46,27 @@ java_test(
 )
 
 java_test(
+  name="runtime-manager-main_unittest",
+  srcs=glob(
+    ["**/RuntimeManagerMainTest.java"] +
+    ["**/util/TopologyUtilityTest.java"]
+  ),
+  deps=scheduler_deps_files  +
+    ["//heron/statemgrs/src/java:null-statemgr-java"],
+  size="small",
+)
+
+java_test(
+  name="submitter-main_unittest",
+  srcs=glob(
+    ["**/SubmitterMainTest.java"] +
+    ["**/util/TopologyUtilityTest.java"]
+  ),
+  deps=scheduler_deps_files,
+  size="small",
+)
+
+java_test(
   name="scheduler-main_unittest",
   srcs=glob(
     ["**/SchedulerMainTest.java"] +
@@ -83,5 +104,15 @@ java_test(
     ["**/HttpServiceSchedulerClientTest.java"]
   ),
   deps=scheduler_deps_files,
+  size="small",
+)
+
+java_test(
+  name="scheduler_client_factory_unittest",
+  srcs=glob(
+    ["**/SchedulerClientFactoryTest.java"]
+  ),
+  deps=scheduler_deps_files +
+    ["//heron/schedulers/src/java:null-scheduler-java"],
   size="small",
 )

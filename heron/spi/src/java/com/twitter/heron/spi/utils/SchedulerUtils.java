@@ -36,6 +36,7 @@ import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 public final class SchedulerUtils {
   public static final int PORTS_REQUIRED_FOR_EXECUTOR = 6;
+  public static final int PORTS_REQUIRED_FOR_SCHEDULER = 1;
 
   private static final Logger LOG = Logger.getLogger(SchedulerUtils.class.getName());
 
@@ -66,7 +67,7 @@ public final class SchedulerUtils {
         // Set the SchedulerLocation at last step,
         // since some methods in IScheduler will provide correct values
         // only after IScheduler.onSchedule is invoked correctly
-        ret = setSchedulerLocation(runtime, scheduler);
+        ret = setLibSchedulerLocation(runtime, scheduler, false);
       } else {
         LOG.severe("Failed to invoke IScheduler as library");
       }
@@ -81,21 +82,41 @@ public final class SchedulerUtils {
    * Utils method to construct the command to start heron-scheduler
    *
    * @param config The static Config
-   * @param javaBinary the path of java executable
-   * @param httpPort the free port to be used by scheduler starting the http server
+   * @param runtime The runtime Config
+   * @param freePorts list of free ports
    * @return String[] representing the command to start heron-scheduler
    */
-  public static String[] schedulerCommand(Config config, String javaBinary, int httpPort) {
-    String schedulerClassPath = new StringBuilder()
+  public static String[] schedulerCommand(
+      Config config,
+      Config runtime,
+      List<Integer> freePorts) {
+    // First let us have some safe checks
+    if (freePorts.size() < PORTS_REQUIRED_FOR_SCHEDULER) {
+      throw new RuntimeException("Failed to find enough ports for executor");
+    }
+    for (int port : freePorts) {
+      if (port == -1) {
+        throw new RuntimeException("Failed to find available ports for executor");
+      }
+    }
+
+    int httpPort = freePorts.get(0);
+
+    List<String> commands = new ArrayList<>();
+
+    // The java executable should be "{JAVA_HOME}/bin/java"
+    String javaExecutable = String.format("%s/%s", Context.javaSandboxHome(config), "bin/java");
+    commands.add(javaExecutable);
+    commands.add("-cp");
+
+    // Construct the complete classpath to start scheduler
+    String completeSchedulerProcessClassPath = new StringBuilder()
         .append(Context.schedulerSandboxClassPath(config)).append(":")
         .append(Context.packingSandboxClassPath(config)).append(":")
         .append(Context.stateManagerSandboxClassPath(config))
         .toString();
+    commands.add(completeSchedulerProcessClassPath);
 
-    List<String> commands = new ArrayList<>();
-    commands.add(javaBinary);
-    commands.add("-cp");
-    commands.add(schedulerClassPath);
     commands.add("com.twitter.heron.scheduler.SchedulerMain");
     commands.add("--cluster");
     commands.add(Context.cluster(config));
@@ -180,12 +201,14 @@ public final class SchedulerUtils {
     commands.add(Context.instanceSandboxClassPath(config));
     commands.add(Context.metricsSinksSandboxFile(config));
 
+    // Construct the complete classpath to start scheduler
     String completeSchedulerProcessClassPath = new StringBuilder()
         .append(Context.schedulerSandboxClassPath(config)).append(":")
         .append(Context.packingSandboxClassPath(config)).append(":")
         .append(Context.stateManagerSandboxClassPath(config))
         .toString();
     commands.add(completeSchedulerProcessClassPath);
+
     commands.add(Integer.toString(schedulerPort));
 
     return commands.toArray(new String[0]);
@@ -260,10 +283,12 @@ public final class SchedulerUtils {
    *
    * @param runtime the runtime configuration
    * @param scheduler the IScheduler to provide more info
+   * @param isService true if the scheduler is a service; false otherwise
    */
-  public static boolean setSchedulerLocation(
+  public static boolean setLibSchedulerLocation(
       Config runtime,
-      IScheduler scheduler) {
+      IScheduler scheduler,
+      boolean isService) {
     // Dummy values since there is no running scheduler server
     final String serverHost = "scheduling_as_library";
     final int serverPort = -1;
@@ -302,7 +327,8 @@ public final class SchedulerUtils {
 
     LOG.log(Level.INFO, "Setting SchedulerLocation: {0}", location);
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
-    Boolean result = statemgr.setSchedulerLocation(location, Runtime.topologyName(runtime));
+    Boolean result =
+        statemgr.setSchedulerLocation(location, Runtime.topologyName(runtime));
 
     if (result == null || !result) {
       LOG.severe("Failed to set Scheduler location");

@@ -14,6 +14,8 @@
 
 package com.twitter.heron.statemgr.localfs;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -99,6 +101,23 @@ public class LocalFileSystemStateManagerTest {
   }
 
   /**
+   * Method: setSchedulerLocation(Scheduler.SchedulerLocation location, String topologyName)
+   */
+  @Test
+  public void testSetSchedulerLocation() throws Exception {
+    LocalFileSystemStateManager manager =
+        Mockito.spy(new LocalFileSystemStateManager());
+    manager.initialize(getConfig());
+
+    Mockito.doReturn(Mockito.mock(ListenableFuture.class)).when(manager).
+        setData(Mockito.anyString(), Mockito.any(byte[].class), Mockito.anyBoolean());
+
+    manager.setSchedulerLocation(Scheduler.SchedulerLocation.getDefaultInstance(), "");
+    Mockito.verify(manager).
+        setData(Mockito.anyString(), Mockito.any(byte[].class), Mockito.eq(true));
+  }
+
+  /**
    * Method: setExecutionState(ExecutionEnvironment.ExecutionState executionState)
    */
   @Test
@@ -117,14 +136,15 @@ public class LocalFileSystemStateManagerTest {
         ExecutionEnvironment.ExecutionState.getDefaultInstance();
 
     PowerMockito.doReturn(true).
-        when(FileUtils.class, "writeToFile", Matchers.anyString(), Matchers.any(byte[].class));
+        when(FileUtils.class, "writeToFile", Mockito.anyString(), Mockito.any(byte[].class),
+            Mockito.anyBoolean());
 
     Assert.assertTrue(manager.setExecutionState(defaultState, "").get());
 
     PowerMockito.verifyStatic();
     FileUtils.writeToFile(Matchers.eq(String.format("%s/%s/%s",
             ROOT_ADDR, "executionstate", defaultState.getTopologyName())),
-        Matchers.eq(defaultState.toByteArray()));
+        Matchers.eq(defaultState.toByteArray()), Mockito.eq(false));
   }
 
   /**
@@ -144,7 +164,8 @@ public class LocalFileSystemStateManagerTest {
     Assert.assertTrue(manager.initTree());
 
     PowerMockito.doReturn(true).
-        when(FileUtils.class, "writeToFile", Matchers.anyString(), Matchers.any(byte[].class));
+        when(FileUtils.class, "writeToFile", Mockito.anyString(), Mockito.any(byte[].class),
+            Mockito.anyBoolean());
 
     Assert.assertTrue(manager.setTopology(topology, TOPOLOGY_NAME).get());
 
@@ -152,7 +173,7 @@ public class LocalFileSystemStateManagerTest {
     FileUtils.writeToFile(
         Matchers.eq(String.format("%s/%s/%s",
             ROOT_ADDR, "topologies", TOPOLOGY_NAME)),
-        Matchers.eq(topology.toByteArray()));
+        Matchers.eq(topology.toByteArray()), Mockito.eq(false));
   }
 
   /**

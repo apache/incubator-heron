@@ -35,7 +35,7 @@ def collect_transitive_reqs(ctx):
   transitive_reqs = set(order="compile")
   for dep in ctx.attr.deps:
     transitive_reqs += dep.transitive_reqs
-  transitive_reqs += [ ctx.attr.reqs ] if ctx.attr.reqs else []
+  transitive_reqs += ctx.attr.reqs
 
   return transitive_reqs
 
@@ -88,17 +88,24 @@ def make_manifest(ctx, output):
   for f in transitive_eggs:
     pex_prebuilt_libs[get_module_path(ctx, f.path)] = f.path
 
-  for r in transitive_reqs:
-    pex_requirements += r.split(' ')
-
   for f in transitive_resources:
     pex_resources[get_module_path(ctx, f.path)] = f.path
 
-  manifest_text = write_pex_manifest_text(pex_modules, pex_prebuilt_libs, pex_resources, pex_requirements)
+  manifest_text = write_pex_manifest_text(pex_modules, pex_prebuilt_libs, pex_resources, transitive_reqs)
   ctx.action(
     inputs = list(transitive_sources) + list(transitive_eggs) + list(transitive_resources),
     outputs = [ output ],
     command = ('touch %s && echo "%s" > %s' % (output.path, manifest_text, output.path)))
+
+def common_pex_arguments(entry_point, deploy_pex_path, manifest_file_path):
+  arguments = ['--entry-point', entry_point]
+
+  # Our internal build environment requires extra args injected and this is a brutal hack. Ideally
+  # bazel would provide a mechanism to swap in env-specific global params here
+  #EXTRA_PEX_ARGS#
+  arguments += [deploy_pex_path]
+  arguments += [manifest_file_path]
+  return arguments
 
 def pex_binary_impl(ctx):
   if not ctx.file.main:
@@ -118,19 +125,12 @@ def pex_binary_impl(ctx):
 
   transitive_sources = collect_transitive_sources(ctx)
   transitive_eggs = collect_transitive_eggs(ctx)
-  transitive_reqs = collect_transitive_reqs(ctx)
   transitive_resources = ctx.files.resources
   pexbuilder = ctx.executable._pexbuilder
 
   # form the arguments to pex builder
   arguments =  [] if ctx.attr.zip_safe else ["--not-zip-safe"]
-  arguments += ['--entry-point', main_pkg]
-
-  # Our internal build environment requires extra args injected and this is a brutal hack. Ideally
-  # bazel would provide a mechanism to swap in env-specific global params here
-  #EXTRA_PEX_ARGS#
-  arguments += [deploy_pex.path]
-  arguments += [manifest_file.path]
+  arguments += common_pex_arguments(main_pkg, deploy_pex.path, manifest_file.path)
 
   # form the inputs to pex builder
   inputs =  [main_file, manifest_file]
@@ -174,7 +174,7 @@ def pex_test_impl(ctx):
       executable = pexbuilder,
       outputs = [ deploy_pex ],
       mnemonic = "PexPython",
-      arguments = ['--entry-point', 'pytest', deploy_pex.path, manifest_file.path])
+      arguments = common_pex_arguments('pytest', deploy_pex.path, manifest_file.path))
 
   executable = ctx.outputs.executable
   ctx.action(
@@ -205,7 +205,7 @@ pex_attrs = {
     "srcs": pex_srcs_attr,
     "deps": pex_deps_attr,
     "eggs": eggs_attr,
-    "reqs": attr.string(),
+    "reqs": attr.string_list(),
     "resources": resource_attr,
     "main": attr.label(allow_files=True, single_file=True)
 }

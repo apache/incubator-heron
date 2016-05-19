@@ -17,7 +17,9 @@ package com.twitter.heron.scheduler.local;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,7 +27,6 @@ import org.apache.commons.io.FileUtils;
 
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.common.ShellUtils;
 import com.twitter.heron.spi.scheduler.ILauncher;
@@ -191,7 +192,7 @@ public class LocalLauncher implements ILauncher {
     int ret = ShellUtils.runSyncProcess(LocalContext.verbose(config), LocalContext.verbose(config),
         cmd, new StringBuilder(), new StringBuilder(), parentDirectory);
 
-    return ret == 0 ? true : false;
+    return ret == 0;
   }
 
   /**
@@ -207,15 +208,19 @@ public class LocalLauncher implements ILauncher {
     int ret = ShellUtils.runSyncProcess(LocalContext.verbose(config), LocalContext.verbose(config),
         cmd, new StringBuilder(), new StringBuilder(), new File(targetFolder));
 
-    return ret == 0 ? true : false;
+    return ret == 0;
   }
 
   ///////////////////////////////////////////////////////////////////////////////
   // Utils methods for unit tests
   ///////////////////////////////////////////////////////////////////////////////
   protected String[] getSchedulerCommand() {
-    String javaBinary = String.format("%s/%s", Context.javaHome(config), "bin/java");
-    return SchedulerUtils.schedulerCommand(config, javaBinary, SysUtils.getFreePort());
+    List<Integer> freePorts = new ArrayList<>(SchedulerUtils.PORTS_REQUIRED_FOR_SCHEDULER);
+    for (int i = 0; i < SchedulerUtils.PORTS_REQUIRED_FOR_SCHEDULER; i++) {
+      freePorts.add(SysUtils.getFreePort());
+    }
+
+    return SchedulerUtils.schedulerCommand(config, runtime, freePorts);
   }
 
   protected Process startScheduler(String[] schedulerCmd) {

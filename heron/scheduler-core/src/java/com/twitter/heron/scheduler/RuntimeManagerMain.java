@@ -26,29 +26,22 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
-import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
-import com.twitter.heron.scheduler.client.HttpServiceSchedulerClient;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
-import com.twitter.heron.scheduler.client.LibrarySchedulerClient;
+import com.twitter.heron.scheduler.client.SchedulerClientFactory;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.ReflectionUtils;
-import com.twitter.heron.spi.utils.Runtime;
 
-public final class RuntimeManagerMain {
-  private RuntimeManagerMain() {
-
-  }
-
+public class RuntimeManagerMain {
   private static final Logger LOG = Logger.getLogger(RuntimeManagerMain.class.getName());
 
   // Print usage options
@@ -232,6 +225,7 @@ public final class RuntimeManagerMain {
         .put(Keys.cluster(), cluster)
         .put(Keys.role(), role)
         .put(Keys.environ(), environ)
+        .put(Keys.verbose(), verbose)
         .put(Keys.topologyContainerId(), containerId);
 
     Config.Builder topologyConfig = Config.newBuilder()
@@ -252,10 +246,52 @@ public final class RuntimeManagerMain {
     LOG.fine("Static config loaded successfully ");
     LOG.fine(config.toString());
 
+    // Create a new instance of RuntimeManagerMain
+    RuntimeManagerMain runtimeManagerMain = new RuntimeManagerMain(config, command);
+    boolean isSuccessful = runtimeManagerMain.manageTopology();
+
+    // Log the result and exit
+    if (!isSuccessful) {
+      throw new RuntimeException(String.format("Failed to %s topology %s", command, topologyName));
+    } else {
+      LOG.log(Level.FINE, "Topology {0} {1} successfully", new Object[]{topologyName, command});
+    }
+  }
+
+  // holds all the config read
+  private final Config config;
+
+  // command to manage a topology
+  private final Command command;
+
+  public RuntimeManagerMain(
+      Config config,
+      Command command) {
+    // initialize the options
+    this.config = config;
+    this.command = command;
+  }
+
+  /**
+   * Manager a topology
+   * 1. Instantiate necessary resources
+   * 2. Valid whether the runtime management is legal
+   * 3. Complete the runtime management for a specific command
+   *
+   * @return true if run runtimeManager successfully
+   */
+  public boolean manageTopology() {
+    String topologyName = Context.topologyName(config);
     // 1. Do prepare work
     // create an instance of state manager
     String statemgrClass = Context.stateManagerClass(config);
-    IStateManager statemgr = ReflectionUtils.newInstance(statemgrClass);
+    IStateManager statemgr;
+    try {
+      statemgr = ReflectionUtils.newInstance(statemgrClass);
+    } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
+      LOG.log(Level.SEVERE, "Failed to instantiate instances", e);
+      return false;
+    }
 
     boolean isSuccessful = false;
 
@@ -267,35 +303,40 @@ public final class RuntimeManagerMain {
       // TODO(mfu): timeout should read from config
       SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
-      boolean isValid = validateRuntimeManage(config, adaptor, topologyName);
+      boolean isValid = validateRuntimeManage(adaptor, topologyName);
 
       // 2. Try to manage topology if valid
       if (isValid) {
         // invoke the appropriate command to manage the topology
         LOG.log(Level.FINE, "Topology: {0} to be {1}ed", new Object[]{topologyName, command});
 
-        isSuccessful = manageTopology(config, command, adaptor);
+        // build the runtime config
+        Config runtime = Config.newBuilder()
+            .put(Keys.topologyName(), Context.topologyName(config))
+            .put(Keys.schedulerStateManagerAdaptor(), adaptor)
+            .build();
+
+        // Create a ISchedulerClient basing on the config
+        ISchedulerClient schedulerClient = getSchedulerClient(runtime);
+        if (schedulerClient == null) {
+          LOG.severe("Failed to initialize scheduler client");
+          return false;
+        }
+
+        isSuccessful = callRuntimeManagerRunner(runtime, schedulerClient);
       }
     } finally {
       // 3. Do post work basing on the result
       // Currently nothing to do here
 
       // 4. Close the resources
-//      runtimeManager.close();
-      statemgr.close();
+      SysUtils.closeIgnoringExceptions(statemgr);
     }
 
-    // Log the result and exit
-    if (!isSuccessful) {
-      throw new RuntimeException(String.format("Failed to %s topology %s", command, topologyName));
-    } else {
-      LOG.log(Level.FINE, "Topology {0} {1} successfully", new Object[]{topologyName, command});
-    }
+    return isSuccessful;
   }
 
-
-  public static boolean validateRuntimeManage(
-      Config config,
+  protected boolean validateRuntimeManage(
       SchedulerStateManagerAdaptor adaptor,
       String topologyName) {
     // Check whether the topology has already been running
@@ -319,26 +360,10 @@ public final class RuntimeManagerMain {
     return true;
   }
 
-  public static boolean manageTopology(
-      Config config, Command command,
-      SchedulerStateManagerAdaptor adaptor)
-      throws ClassNotFoundException, IllegalAccessException, InstantiationException, IOException {
-    // build the runtime config
-    Config runtime = Config.newBuilder()
-        .put(Keys.topologyName(), Context.topologyName(config))
-        .put(Keys.schedulerStateManagerAdaptor(), adaptor)
-        .build();
-
-    // Create a ISchedulerClient basing on the config
-    ISchedulerClient schedulerClient = getSchedulerClient(config, runtime);
-    if (schedulerClient == null) {
-      throw new IllegalArgumentException("Failed to initialize scheduler client");
-    }
-
+  protected boolean callRuntimeManagerRunner(Config runtime, ISchedulerClient schedulerClient) {
     // create an instance of the runner class
     RuntimeManagerRunner runtimeManagerRunner =
         new RuntimeManagerRunner(config, runtime, command, schedulerClient);
-
 
     // invoke the appropriate handlers based on command
     boolean ret = runtimeManagerRunner.call();
@@ -346,37 +371,7 @@ public final class RuntimeManagerMain {
     return ret;
   }
 
-  // TODO(mfu): Make it into Factory pattern if needed
-  public static ISchedulerClient getSchedulerClient(Config config, Config runtime)
-      throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-    LOG.fine("Creating scheduler client");
-    ISchedulerClient schedulerClient;
-
-    if (Context.schedulerService(config)) {
-      // get the instance of the state manager
-      SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
-
-      Scheduler.SchedulerLocation schedulerLocation =
-          statemgr.getSchedulerLocation(Runtime.topologyName(runtime));
-
-      if (schedulerLocation == null) {
-        LOG.log(Level.SEVERE, "Failed to get scheduler location");
-        return null;
-      }
-
-      LOG.log(Level.FINE, "Scheduler is listening on location: {0} ", schedulerLocation.toString());
-
-      schedulerClient =
-          new HttpServiceSchedulerClient(config, runtime, schedulerLocation.getHttpEndpoint());
-    } else {
-      // create an instance of scheduler
-      final String schedulerClass = Context.schedulerClass(config);
-      final IScheduler scheduler = ReflectionUtils.newInstance(schedulerClass);
-      LOG.fine("Invoke scheduler as a library");
-
-      schedulerClient = new LibrarySchedulerClient(config, runtime, scheduler);
-    }
-
-    return schedulerClient;
+  protected ISchedulerClient getSchedulerClient(Config runtime) {
+    return new SchedulerClientFactory(config, runtime).getSchedulerClient();
   }
 }

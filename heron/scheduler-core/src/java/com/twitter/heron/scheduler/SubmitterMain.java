@@ -28,6 +28,7 @@ import org.apache.commons.cli.ParseException;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
@@ -45,12 +46,8 @@ import com.twitter.heron.spi.utils.TopologyUtils;
 /**
  * Calls Uploader to upload topology package, and Launcher to launch Scheduler.
  */
-public final class SubmitterMain {
+public class SubmitterMain {
   private static final Logger LOG = Logger.getLogger(SubmitterMain.class.getName());
-
-  private SubmitterMain() {
-
-  }
 
   /**
    * Load the topology config
@@ -314,25 +311,73 @@ public final class SubmitterMain {
     LOG.fine("Static config loaded successfully ");
     LOG.fine(config.toString());
 
+    SubmitterMain submitterMain = new SubmitterMain(config, topology);
+    boolean isSuccessful = submitterMain.submitTopology();
+
+    // Log the result and exit
+    if (!isSuccessful) {
+      throw new RuntimeException(String.format("Failed to submit topology %s", topology.getName()));
+    } else {
+      LOG.log(Level.FINE, "Topology {0} submitted successfully", topology.getName());
+    }
+  }
+
+  // holds all the config read
+  private final Config config;
+
+  // topology definition
+  private final TopologyAPI.Topology topology;
+
+  public SubmitterMain(
+      Config config,
+      TopologyAPI.Topology topology) {
+    // initialize the options
+    this.config = config;
+    this.topology = topology;
+  }
+
+  /**
+   * Submit a topology
+   * 1. Instantiate necessary resources
+   * 2. Valid whether it is legal to submit a topology
+   * 3. Call LauncherRunner
+   *
+   * @return true if the topology is submitted successfully
+   */
+  public boolean submitTopology() {
     // 1. Do prepare work
     // create an instance of state manager
     String statemgrClass = Context.stateManagerClass(config);
-    IStateManager statemgr = ReflectionUtils.newInstance(statemgrClass);
+    IStateManager statemgr;
 
     // Create an instance of the launcher class
     String launcherClass = Context.launcherClass(config);
-    ILauncher launcher = ReflectionUtils.newInstance(launcherClass);
+    ILauncher launcher;
 
     // Create an instance of the packing class
     String packingClass = Context.packingClass(config);
-    IPacking packing = ReflectionUtils.newInstance(packingClass);
+    IPacking packing;
 
     // create an instance of the uploader class
     String uploaderClass = Context.uploaderClass(config);
-    IUploader uploader = ReflectionUtils.newInstance(uploaderClass);
+    IUploader uploader;
 
-    // Local variable for convenient access
-    String topologyName = topology.getName();
+    try {
+      // create an instance of state manager
+      statemgr = ReflectionUtils.newInstance(statemgrClass);
+
+      // create an instance of launcher
+      launcher = ReflectionUtils.newInstance(launcherClass);
+
+      // create an instance of the packing class
+      packing = ReflectionUtils.newInstance(packingClass);
+
+      // create an instance of uploader
+      uploader = ReflectionUtils.newInstance(uploaderClass);
+    } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
+      LOG.log(Level.SEVERE, "Failed to instantiate instances", e);
+      return false;
+    }
 
     boolean isSuccessful = false;
     URI packageURI = null;
@@ -344,20 +389,32 @@ public final class SubmitterMain {
       // TODO(mfu): timeout should read from config
       SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
-      boolean isValid = validateSubmit(adaptor, topologyName);
+      boolean isValid = validateSubmit(adaptor, topology.getName());
 
       // 2. Try to submit topology if valid
       if (isValid) {
         // invoke method to submit the topology
-        LOG.log(Level.FINE, "Topology {0} to be submitted", topologyName);
+        LOG.log(Level.FINE, "Topology {0} to be submitted", topology.getName());
 
         // Firstly, try to upload necessary packages
-        packageURI = uploadPackage(config, uploader);
+        packageURI = uploadPackage(uploader);
         if (packageURI == null) {
           LOG.severe("Failed to upload package.");
+          return false;
         } else {
           // Secondly, try to submit a topology
-          isSuccessful = submitTopology(config, topology, adaptor, launcher, packing, packageURI);
+          // build the runtime config
+          Config runtime = Config.newBuilder()
+              .put(Keys.topologyId(), topology.getId())
+              .put(Keys.topologyName(), topology.getName())
+              .put(Keys.topologyDefinition(), topology)
+              .put(Keys.schedulerStateManagerAdaptor(), adaptor)
+              .put(Keys.topologyPackageUri(), packageURI)
+              .put(Keys.launcherClassInstance(), launcher)
+              .put(Keys.packingClassInstance(), packing)
+              .build();
+
+          isSuccessful = callLauncherRunner(runtime);
         }
       }
     } finally {
@@ -370,21 +427,16 @@ public final class SubmitterMain {
       }
 
       // 4. Close the resources
-      uploader.close();
-      packing.close();
-      launcher.close();
-      statemgr.close();
+      SysUtils.closeIgnoringExceptions(uploader);
+      SysUtils.closeIgnoringExceptions(packing);
+      SysUtils.closeIgnoringExceptions(launcher);
+      SysUtils.closeIgnoringExceptions(statemgr);
     }
 
-    // Log the result and exit
-    if (!isSuccessful) {
-      throw new RuntimeException(String.format("Failed to submit topology %s", topologyName));
-    } else {
-      LOG.log(Level.FINE, "Topology {0} submitted successfully", topologyName);
-    }
+    return isSuccessful;
   }
 
-  public static boolean validateSubmit(SchedulerStateManagerAdaptor adaptor, String topologyName) {
+  protected boolean validateSubmit(SchedulerStateManagerAdaptor adaptor, String topologyName) {
     // Check whether the topology has already been running
     Boolean isTopologyRunning = adaptor.isTopologyRunning(topologyName);
 
@@ -396,7 +448,7 @@ public final class SubmitterMain {
     return true;
   }
 
-  public static URI uploadPackage(Config config, IUploader uploader) {
+  protected URI uploadPackage(IUploader uploader) {
     // initialize the uploader
     uploader.initialize(config);
 
@@ -406,20 +458,7 @@ public final class SubmitterMain {
     return uploaderRet;
   }
 
-  public static boolean submitTopology(Config config, TopologyAPI.Topology topology,
-                                       SchedulerStateManagerAdaptor adaptor, ILauncher launcher,
-                                       IPacking packing, URI packageURI) {
-    // build the runtime config
-    Config runtime = Config.newBuilder()
-        .put(Keys.topologyId(), topology.getId())
-        .put(Keys.topologyName(), topology.getName())
-        .put(Keys.topologyDefinition(), topology)
-        .put(Keys.schedulerStateManagerAdaptor(), adaptor)
-        .put(Keys.topologyPackageUri(), packageURI)
-        .put(Keys.launcherClassInstance(), launcher)
-        .put(Keys.packingClassInstance(), packing)
-        .build();
-
+  protected boolean callLauncherRunner(Config runtime) {
     // using launch runner, launch the topology
     LaunchRunner launchRunner = new LaunchRunner(config, runtime);
     boolean result = launchRunner.call();

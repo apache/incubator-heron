@@ -22,7 +22,7 @@ import com.sun.net.httpserver.HttpHandler;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.HttpUtils;
+import com.twitter.heron.spi.common.NetworkUtils;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;
@@ -42,7 +42,7 @@ public class KillRequestHandler implements HttpHandler {
   public void handle(HttpExchange exchange) throws IOException {
 
     // read the http request payload
-    byte[] requestBody = HttpUtils.readHttpRequestBody(exchange);
+    byte[] requestBody = NetworkUtils.readHttpRequestBody(exchange);
 
     // prepare the kill topology request
     Scheduler.KillTopologyRequest killTopologyRequest =
@@ -58,7 +58,7 @@ public class KillRequestHandler implements HttpHandler {
         SchedulerUtils.constructSchedulerResponse(isKillSuccessfully);
 
     // Send the response back
-    HttpUtils.sendHttpResponse(exchange, response.toByteArray());
+    NetworkUtils.sendHttpResponse(exchange, response.toByteArray());
 
     // tell the scheduler to shutdown
     LOG.info("Kill request handler issuing a terminate request to scheduler");

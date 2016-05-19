@@ -153,8 +153,8 @@ public final class ShellUtils {
     return pb;
   }
 
-  public static Process setupTunnel(
-      boolean verbose, String tunnelHost, int tunnelPort, String destHost, int destPort) {
+  public static Process establishSSHTunnelProcess(
+      String tunnelHost, int tunnelPort, String destHost, int destPort, boolean verbose) {
     if (destHost == null
         || destHost.isEmpty()
         || "localhost".equals(destHost)

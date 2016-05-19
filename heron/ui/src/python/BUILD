@@ -8,11 +8,11 @@ pex_library(
         ["**/*.py"],
         exclude = ["main.py"],
     ),
-    eggs = [
-        "//3rdparty/eggs:tornado",
-        "//3rdparty/eggs:pycrypto",
-        "//3rdparty/eggs:requests",
-    ]
+    reqs = [
+        "pycrypto==2.6.1",
+        "requests==2.3.0",
+        "tornado==4.0.2",
+    ],
 )
 
 pex_binary(

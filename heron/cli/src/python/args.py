@@ -40,7 +40,6 @@ def insert_bool(param, command_args):
 def insert_bool_values(command_line_args):
   args1 = insert_bool('--verbose', command_line_args)
   args2 = insert_bool('--deploy-deactivated', args1)
-  args3 = insert_bool('--trace-execution', args2)
   return args2
 
 def add_verbose(parser):
