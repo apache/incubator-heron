@@ -14,6 +14,8 @@
 
 package com.twitter.heron.scheduler.local;
 
+import java.net.URI;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,6 +26,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
+import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.common.PackingPlan;
 
 @RunWith(PowerMockRunner.class)
@@ -49,6 +52,8 @@ public class LocalLauncherTest {
   public void testLaunch() throws Exception {
     Config config = createRunnerConfig();
     Config runtime = Mockito.mock(Config.class);
+    URI mockURI = new URI("h:a");
+    Mockito.doReturn(mockURI).when(runtime).get(Keys.topologyPackageUri());
     PackingPlan packingPlan = Mockito.mock(PackingPlan.class);
 
     PowerMockito.spy(LocalContext.class);
@@ -57,12 +62,12 @@ public class LocalLauncherTest {
     LocalLauncher localLauncher = Mockito.spy(new LocalLauncher());
     localLauncher.initialize(config, runtime);
 
-    // Failed to download
-    Mockito.doReturn(false).when(localLauncher).downloadAndExtractPackages();
+    // Failed to setup working directory
+    Mockito.doReturn(false).when(localLauncher).setupWorkingDirectory();
     Assert.assertFalse(localLauncher.launch(packingPlan));
-    Mockito.verify(localLauncher).downloadAndExtractPackages();
 
-    Mockito.doReturn(true).when(localLauncher).downloadAndExtractPackages();
+    // setup successfully
+    Mockito.doReturn(true).when(localLauncher).setupWorkingDirectory();
     String[] expectedSchedulerCommand = {"expected", "scheduler", "command"};
     Mockito.doReturn(expectedSchedulerCommand).when(localLauncher).getSchedulerCommand();
 

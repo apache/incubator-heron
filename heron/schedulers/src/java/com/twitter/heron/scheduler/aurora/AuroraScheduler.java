@@ -29,6 +29,7 @@ import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.Misc;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.Runtime;
@@ -83,7 +84,16 @@ public class AuroraScheduler implements IScheduler {
 
   @Override
   public List<String> getJobLinks() {
-    return new ArrayList<>();
+    List<String> jobLinks = new ArrayList<>();
+
+    //Only the aurora job page is returned
+    String jobLinkFormat = AuroraContext.getJobLinkTemplate(config);
+    if (jobLinkFormat != null && !jobLinkFormat.isEmpty()) {
+      String jobLink = Misc.substitute(config, jobLinkFormat);
+      jobLinks.add(jobLink);
+    }
+
+    return jobLinks;
   }
 
   @Override

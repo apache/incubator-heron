@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
@@ -167,4 +168,45 @@ public final class ShellUtils {
         new File(".")
     );
   }
+
+  /**
+   * Copy a URL package to a target folder
+   *
+   * @param uri the URI to download core release package
+   * @param destination the target filename to download the release package to
+   * @param isVerbose display verbose output or not
+   * @return true if successful
+   */
+  public static boolean curlPackage(
+      String uri, String destination, boolean isVerbose, boolean isInheritIO) {
+
+    // get the directory containing the target file
+    File parentDirectory = Paths.get(destination).getParent().toFile();
+
+    // using curl copy the url to the target file
+    String cmd = String.format("curl %s -o %s", uri, destination);
+    int ret = runSyncProcess(isVerbose, isInheritIO,
+        cmd, new StringBuilder(), new StringBuilder(), parentDirectory);
+
+    return ret == 0;
+  }
+
+  /**
+   * Extract a tar package to a target folder
+   *
+   * @param packageName the tar package
+   * @param targetFolder the target folder
+   * @param isVerbose display verbose output or not
+   * @return true if untar successfully
+   */
+  public static boolean extractPackage(
+      String packageName, String targetFolder, boolean isVerbose, boolean isInheritIO) {
+    String cmd = String.format("tar -xvf %s", packageName);
+
+    int ret = runSyncProcess(isVerbose, isInheritIO,
+        cmd, new StringBuilder(), new StringBuilder(), new File(targetFolder));
+
+    return ret == 0;
+  }
+
 }
