@@ -13,6 +13,7 @@ Running the Heron documentation locally requires that you have the following ins
 * [Make](https://www.gnu.org/software/make/)
 * [Node.js](https://nodejs.org/en/)
 * [npm](https://www.npmjs.com/)
+* [pip](https://pypi.python.org/pypi/pip)
 
 ### OS X Setup
 

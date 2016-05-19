@@ -2,6 +2,7 @@ setup:
 	@brew list hugo || brew install hugo
 	@npm install
 	@which gulp || npm install gulp
+	@pip install linkchecker
 
 serve:
 	@hugo server --watch

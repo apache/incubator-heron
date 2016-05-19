@@ -2,8 +2,12 @@
 
 set -e
 
+function die {
+  echo $1 && exit 1
+}
+
 #linkchecker removes previous runs.
-which linkchecker || pip install linkchecker
+which linkchecker || die 'Linkchecker must be installed to run this script. Exiting'
 rm -f linkchecker-errors.csv && rm -f linkchecker-out.csv
 
 set +e
