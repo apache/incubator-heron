@@ -65,7 +65,9 @@ Note that topologies from all the state managers would be read.
 #### 2. Viz URL Format
 
 This is an optional config. If it is present, then it will show up for each
-topology as the viz link as shown below.
+topology as the viz link as shown below. For each topology, these parameters
+will be filled appropriately. This parameter can be used to link your metrics
+dashboards with topology UI page.
 
 ![Viz Link](/img/viz-link.png)
 
