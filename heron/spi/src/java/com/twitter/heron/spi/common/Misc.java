@@ -208,6 +208,10 @@ public final class Misc {
 
       } else if ("${TOPOLOGY}".equals(elem)) {
         list.set(i, Context.topologyName(config));
+
+      } else if ("${ENVIRON}".equals(elem)) {
+        list.set(i, Context.environ(config));
+
       }
     }
 
