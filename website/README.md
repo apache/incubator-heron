@@ -79,7 +79,8 @@ $ open http://localhost:1313/heron
 
 To verify that the links in the docs are all valid, run `make linkchecker`, which will produce a
 report of broken links. If `linkchecker` fails to install or run properly, you can install it manually.
-Note that `linkchecker` versions 9.2 and 9.3 require the python `requests` >= 2.2.0 and < 2.10.0.
+Note that due to this [https://github.com/wummel/linkchecker/pull/657](issue), `linkchecker`
+versions 9.2 and 9.3 require the python `requests` >= 2.2.0 and < 2.10.0.
 
 ```bash
 $ pip uninstall requests
