@@ -54,7 +54,6 @@ import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.TopologyPackag
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.common.PackingPlan.ContainerPlan;
 import com.twitter.heron.spi.common.PackingPlan.Resource;
-import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
  * {@link HeronMasterDriver} serves Heron Scheduler by managing containers / processes for Heron
@@ -231,7 +230,7 @@ public class HeronMasterDriver {
   }
 
   String getPackingAsString() {
-    return TopologyUtils.packingToString(packing);
+    return packing.getInstanceDistribution();
   }
 
   boolean addActiveContext(ActiveContext context) {
