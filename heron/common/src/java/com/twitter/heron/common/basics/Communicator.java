@@ -21,7 +21,7 @@ import java.util.concurrent.LinkedTransferQueue;
  * An soft bounded unblocking queue based on LinkedTransferQueue.
  * This queue will has a soft bound, which mean you could check the remainingCapacity() to decide
  * whether you could continuously offer items. However, the buffer underneath is an unbounded
- * LinkedTransferQueue, so you could still offer items even if remainingCapacity() <= 0.
+ * LinkedTransferQueue, so you could still offer items even if remainingCapacity() &lt;= 0.
  * <p>
  * We use an unbound queue since for every time user's bolt's executing or spout's emitting tuples,
  * it is possible that unbounded # of tuples could be generated. And we could not stop them since
@@ -37,7 +37,7 @@ public class Communicator<E> {
    */
   private final LinkedTransferQueue<E> buffer;
 
-  /**
+  /*
    * The producer offers item into the queue, and it will be wake up when consumer polls a item.
    */
   private volatile WakeableLooper producer;

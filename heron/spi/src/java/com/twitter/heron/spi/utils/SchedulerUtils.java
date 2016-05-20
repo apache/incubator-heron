@@ -294,9 +294,9 @@ public final class SchedulerUtils {
 
   /**
    * Encode the JVM options
-   * 1. Convert it into Base64 format
-   * 2. Add \" at the start and at the end
-   * 3. replace "=" with "&equals;"
+   * <br> 1. Convert it into Base64 format
+   * <br> 2. Add \" at the start and at the end
+   * <br> 3. replace "=" with "&amp;equals;"
    *
    * @return encoded string
    */
@@ -309,9 +309,9 @@ public final class SchedulerUtils {
 
   /**
    * Decode the JVM options
-   * 1. strip \" at the start and at the end
-   * 2. replace "&equals;" with "="
-   * 3. Revert from Base64 format
+   * <br> 1. strip \" at the start and at the end
+   * <br> 2. replace "&amp;equals;" with "="
+   * <br> 3. Revert from Base64 format
    *
    * @return decoded string
    */
@@ -328,9 +328,9 @@ public final class SchedulerUtils {
 
   /**
    * Setup the working directory:
-   * 1. Download heron core and the topology packages into topology working directory,
-   * 2. Extract heron core and the topology packages
-   * 3. Remove the downloaded heron core and the topology packages
+   * <br> 1. Download heron core and the topology packages into topology working directory,
+   * <br> 2. Extract heron core and the topology packages
+   * <br> 3. Remove the downloaded heron core and the topology packages
    *
    * @param workingDirectory the working directory to setup
    * @param coreReleasePackageURL the URL of core release package

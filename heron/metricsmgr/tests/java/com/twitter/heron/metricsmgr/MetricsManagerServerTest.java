@@ -101,7 +101,7 @@ public class MetricsManagerServerTest {
   }
 
   /**
-   * Method: addSinkCommunicator(Communicator<MetricsRecord> communicator)
+   * Method: addSinkCommunicator(Communicator&lt;MetricsRecord&gt; communicator)
    */
   @Test
   public void testAddSinkCommunicator() throws Exception {
@@ -111,7 +111,7 @@ public class MetricsManagerServerTest {
   }
 
   /**
-   * Method: removeSinkCommunicator(Communicator<MetricsRecord> communicator)
+   * Method: removeSinkCommunicator(Communicator&lt;MetricsRecord&gt; communicator)
    */
   @Test
   public void testRemoveSinkCommunicator() throws Exception {
@@ -121,7 +121,7 @@ public class MetricsManagerServerTest {
   }
 
   /**
-   * Method: addSinkCommunicator(Communicator<MetricsRecord> communicator)
+   * Method: addSinkCommunicator(Communicator&lt;MetricsRecord&gt; communicator)
    */
   @Test
   public void testMetricsManagerServer() throws Exception {

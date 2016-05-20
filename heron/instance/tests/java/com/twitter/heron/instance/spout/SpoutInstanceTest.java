@@ -349,7 +349,7 @@ public class SpoutInstanceTest {
   }
 
   /**
-   * We will receive tuples and then send back the corresponding ack&fail tuples
+   * We will receive tuples and then send back the corresponding ack&amp;fail tuples
    */
 
   @Test
