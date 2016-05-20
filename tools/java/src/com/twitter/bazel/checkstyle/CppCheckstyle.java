@@ -34,7 +34,7 @@ import org.apache.commons.cli.ParseException;
 
 /**
  * Verifies that the c, cpp and header source styles conform to the google styles in cpplint.
- * Usage: java com.twitter.bazel.checkstyle.CppCheckstyle -f &lt;extra_action_file> -c &lt;cpplint_file>
+ * Usage: java com.twitter.bazel.checkstyle.CppCheckstyle -f &lt;extra_action_file&gt; -c &lt;cpplint_file&gt;
  * <p>
  * To test:
  * $ bazel build --config=darwin --experimental_action_listener=tools/cpp:compile_cpp heron/stmgr/src/cpp:grouping-cxx

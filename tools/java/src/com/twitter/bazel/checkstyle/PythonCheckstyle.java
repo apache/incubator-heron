@@ -1,18 +1,16 @@
-/*
- * // Copyright 2016 Twitter. All rights reserved.
- * //
- * // Licensed under the Apache License, Version 2.0 (the "License");
- * // you may not use this file except in compliance with the License.
- * // You may obtain a copy of the License at
- * //
- * // http://www.apache.org/licenses/LICENSE-2.0
- * //
- * // Unless required by applicable law or agreed to in writing, software
- * // distributed under the License is distributed on an "AS IS" BASIS,
- * // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * // See the License for the specific language governing permissions and
- * // limitations under the License
- */
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 package com.twitter.bazel.checkstyle;
 
 import java.io.IOException;
@@ -36,7 +34,7 @@ import org.apache.commons.cli.ParseException;
 
 /**
  * Verifies that the python source styles conform to the python styles in pylint.
- * Usage: java com.twitter.bazel.checkstyle.PythonCheckstyle -f &lt;extra_action_file> -p &lt;pylint_file>
+ * Usage: java com.twitter.bazel.checkstyle.PythonCheckstyle -f &lt;extra_action_file&gt; -p &lt;pylint_file&gt;
  * <p>
  * To test:
  * $ bazel build --config=darwin --experimental_action_listener=tools/python:compile_python heron/cli/src/python/...

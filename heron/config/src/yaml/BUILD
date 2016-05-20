@@ -33,6 +33,11 @@ filegroup(
 )
 
 filegroup(
+    name = "conf-slurm-yaml",
+    srcs = glob(["conf/slurm/*"]),
+)
+
+filegroup(
     name = "conf-local-heron-internals",
     srcs = ["conf/local/heron_internals.yaml"],
 )

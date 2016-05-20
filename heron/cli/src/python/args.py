@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import os
-import argparse
 
 import heron.cli.src.python.utils as utils
 

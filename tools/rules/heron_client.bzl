@@ -32,6 +32,7 @@ def heron_client_lib_scheduler_files():
         "//heron/schedulers/src/java:heron-local-scheduler",
         "//heron/schedulers/src/java:heron-aurora-scheduler",
         "//heron/schedulers/src/java:heron-reef-scheduler",
+        "//heron/schedulers/src/java:heron-slurm-scheduler",
         "//heron/packing/src/java:heron-roundrobin-packing",
     ]
 

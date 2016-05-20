@@ -23,7 +23,7 @@ import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.metrics.MetricsCollector;
 
 /**
- * Gateway's metrics to be collected, mainly the status of the in & out stream queues.
+ * Gateway's metrics to be collected, mainly the status of the in &amp; out stream queues.
  */
 public class GatewayMetrics {
   // # of packets received from stream manager

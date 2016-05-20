@@ -45,6 +45,10 @@ local_deps_files = [
     "//heron/schedulers/src/java:local-scheduler-java",
 ]
 
+slurm_deps_files = [
+    "//heron/schedulers/src/java:slurm-scheduler-java",
+]
+
 java_test(
   name="aurora-scheduler_unittest",
   srcs=glob(
@@ -100,5 +104,32 @@ java_test(
     ["**/LocalSchedulerTest.java"]
   ),
   deps=scheduler_deps_files + local_deps_files,
+  size="small",
+)
+
+java_test(
+  name="slurm-launcher_unittest",
+  srcs=glob(
+    ["**/SlurmLauncherTest.java"]
+  ),
+  deps=scheduler_deps_files + slurm_deps_files,
+  size="small",
+)
+
+java_test(
+  name="slurm-scheduler_unittest",
+  srcs=glob(
+    ["**/SlurmSchedulerTest.java"]
+  ),
+  deps=scheduler_deps_files + slurm_deps_files,
+  size="small",
+)
+
+java_test(
+  name="slurm-controller_unittest",
+  srcs=glob(
+    ["**/SlurmControllerTest.java"]
+  ),
+  deps=scheduler_deps_files + slurm_deps_files,
   size="small",
 )

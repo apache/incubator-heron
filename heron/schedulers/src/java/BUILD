@@ -118,3 +118,24 @@ genrule(
     outs = ["heron-reef-scheduler.jar"],
     cmd  = "cp $< $@",
 )
+
+java_library(
+    name='slurm-scheduler-java',
+    srcs = glob(["**/slurm/*.java"]),
+    deps = scheduler_deps_files,
+    resources = glob(["**/slurm/*.sh","**/slurm/*.yaml"]),
+)
+
+java_binary(
+    name='slurm-scheduler-unshaded',
+    srcs = glob(["**/slurm/*.java"]),
+    deps = scheduler_deps_files,
+    resources = glob(["**/slurm/*.sh","**/slurm/*.yaml"]),
+)
+
+genrule(
+    name = "heron-slurm-scheduler",
+    srcs = [":slurm-scheduler-unshaded_deploy.jar"],
+    outs = ["heron-slurm-scheduler.jar"],
+    cmd  = "cp $< $@",
+)

@@ -48,7 +48,7 @@ import com.twitter.heron.proto.system.HeronTuples;
  * 2. Pack the tuple and submit the OutgoingTupleCollection's addDataTuple
  * 3. Update the metrics
  * <p>
- * For Control tuples (ack&fail):
+ * For Control tuples (ack &amp; fail):
  * 1. Set the anchors for a tuple
  * 2. Pack the tuple and submit the OutgoingTupleCollection's addDataTuple
  * 3. Update the metrics

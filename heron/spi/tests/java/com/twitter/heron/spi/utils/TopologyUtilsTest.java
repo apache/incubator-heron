@@ -14,9 +14,7 @@
 
 package com.twitter.heron.spi.utils;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -26,39 +24,8 @@ import org.junit.Test;
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.Constants;
-import com.twitter.heron.spi.common.PackingPlan;
 
 public class TopologyUtilsTest {
-
-  public static PackingPlan generatePacking(Map<String, List<String>> basePacking) {
-    PackingPlan.Resource resource =
-        new PackingPlan.Resource(1.0, 1 * Constants.GB, 10 * Constants.GB);
-
-    Map<String, PackingPlan.ContainerPlan> containerPlanMap = new HashMap<>();
-
-    for (Map.Entry<String, List<String>> entry : basePacking.entrySet()) {
-      String containerId = entry.getKey();
-      List<String> instanceList = entry.getValue();
-
-      Map<String, PackingPlan.InstancePlan> instancePlanMap = new HashMap<>();
-
-      for (String instanceId : instanceList) {
-        String componentName = instanceId.split(":")[1];
-        PackingPlan.InstancePlan instancePlan =
-            new PackingPlan.InstancePlan(instanceId, componentName, resource);
-        instancePlanMap.put(instanceId, instancePlan);
-      }
-
-      PackingPlan.ContainerPlan containerPlan =
-          new PackingPlan.ContainerPlan(containerId, instancePlanMap, resource);
-
-      containerPlanMap.put(containerId, containerPlan);
-    }
-
-    return new PackingPlan("", containerPlanMap, resource);
-
-  }
-
   @Test
   public void testGetComponentParallelism() {
     int componentParallelism = 4;
@@ -87,33 +54,6 @@ public class TopologyUtilsTest {
         TopologyTests.createTopology("testTopology", topologyConfig, spouts, bolts);
     Assert.assertEquals((spouts.size() + bolts.size()) * componentParallelism,
         TopologyUtils.getTotalInstance(topology));
-  }
-
-  @Test
-  public void testPackingToString() {
-    Map<String, List<String>> packing = new HashMap<>();
-    packing.put("1", Arrays.asList("1:spout:1:0", "1:bolt:3:0"));
-    String packingStr = TopologyUtils.packingToString(generatePacking(packing));
-    String expectedStr0 = "1:spout:1:0:bolt:3:0";
-    String expectedStr1 = "1:bolt:3:0:spout:1:0";
-
-    Assert.assertTrue(packingStr.equals(expectedStr0) || packingStr.equals(expectedStr1));
-
-    packing.put("2", Arrays.asList("2:spout:2:1"));
-    packingStr = TopologyUtils.packingToString(generatePacking(packing));
-
-    for (String str : packingStr.split(",")) {
-      if (str.startsWith("1:")) {
-        // This is the packing str for container 1
-        Assert.assertTrue(str.equals(expectedStr0) || str.equals(expectedStr1));
-      } else if (str.startsWith("2:")) {
-        // This is the packing str for container 2
-        Assert.assertEquals("2:spout:2:1", str);
-      } else {
-        // Unexpected container string
-        throw new RuntimeException("Unexpected results");
-      }
-    }
   }
 
   @Test

@@ -24,7 +24,7 @@ import com.twitter.heron.integration_test.common.spout.ABSpout;
 import com.twitter.heron.integration_test.core.TestTopologyBuilder;
 
 /**
- * Topology to test basic structure, single thread spout & bolt, shuffleGrouping
+ * Topology to test basic structure, single thread spout and bolt, shuffleGrouping
  */
 public final class BoltDoubleEmitTuples {
 

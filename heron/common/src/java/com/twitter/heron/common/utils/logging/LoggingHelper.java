@@ -43,7 +43,7 @@ public final class LoggingHelper {
    * Init java util logging with default format
    *
    * @param level the Level of message to log
-   * @param isRedirectStdOutErr whether we redirect std out&err
+   * @param isRedirectStdOutErr whether we redirect std out&amp;err
    */
   public static void loggerInit(Level level, boolean isRedirectStdOutErr) throws IOException {
     loggerInit(level, isRedirectStdOutErr, DEFAULT_FORMAT);
@@ -53,7 +53,7 @@ public final class LoggingHelper {
    * Init java util logging
    *
    * @param level the Level of message to log
-   * @param isRedirectStdOutErr whether we redirect std out&err
+   * @param isRedirectStdOutErr whether we redirect std out&amp;err
    * @param format the format to log
    */
   public static void loggerInit(Level level, boolean isRedirectStdOutErr, String format)
