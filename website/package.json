@@ -11,6 +11,7 @@
     "gulp-uglify": "^1.5.3"
   },
   "scripts": {
-    "build": "gulp build"
+    "build": "gulp build",
+    "dev-assets": "gulp dev"
   }
 }

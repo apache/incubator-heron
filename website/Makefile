@@ -10,14 +10,17 @@ serve:
 assets:
 	@npm run build
 
+dev-assets:
+	@npm run dev-assets
+
 pages:
 	@hugo
 
 linkchecker:
-	@./scripts/linkchecker.sh
+	@scripts/linkchecker.sh
 
 javadocs:
-	@./scripts/javadocs.sh
+	@scripts/javadocs.sh
 
 site:
 	@make assets
