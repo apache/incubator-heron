@@ -51,8 +51,8 @@ public class LaunchRunner implements Callable<Boolean> {
 
   public ExecutionEnvironment.ExecutionState createExecutionState() {
     String releaseUsername = Context.buildUser(config);
-    // TODO(mfu): Currently we put build time in tag
-    String releaseTag = Context.buildTime(config);
+    // TODO(mfu): Currently we leave release tag empty
+    String releaseTag = "";
     String releaseVersion = Context.buildVersion(config);
 
     TopologyAPI.Topology topology = Runtime.topology(runtime);
