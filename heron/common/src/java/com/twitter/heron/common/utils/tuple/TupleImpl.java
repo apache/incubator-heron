@@ -31,7 +31,7 @@ import com.twitter.heron.proto.system.HeronTuples;
  * Heron needs to know how to serialize all the values in a tuple. By default, Heron
  * knows how to serialize the primitive types, strings, and byte arrays. If you want to
  * use another type, you'll need to implement and register a serializer for that type.
- * See {@link https://storm.apache.org/documentation/Serialization.html} for more info.
+ * @see <a href="https://storm.apache.org/documentation/Serialization.html">Storm serialization</a>
  */
 public class TupleImpl implements Tuple {
   private final TopologyContext context;

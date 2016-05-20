@@ -40,8 +40,8 @@ public final class TopologyTests {
    * Create Topology proto object using HeronSubmitter API.
    *
    * @param heronConfig desired config params.
-   * @param spouts spoutName -> parallelism
-   * @param bolts boltName -> parallelism
+   * @param spouts spoutName -&gt; parallelism
+   * @param bolts boltName -&gt; parallelism
    * @param connections connect default stream from value to key.
    * @return topology proto.
    */

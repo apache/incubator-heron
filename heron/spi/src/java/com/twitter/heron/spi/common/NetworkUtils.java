@@ -287,7 +287,7 @@ public final class NetworkUtils {
    * @param tunnelHost the host used to tunnel
    * @param verifyCount In case of longer tunnel setup, try verify times to wait
    * @param isVerbose prints verbose info or not
-   * @return a <new_reachable_endpoint, tunnelProcess> pair.
+   * @return a &lt;new_reachable_endpoint, tunnelProcess&gt; pair.
    * If the endpoint already reachable, then new_reachable_endpoint equals to original endpoint, and
    * tunnelProcess is null.
    * If no way to reach even through ssh tunneling,
