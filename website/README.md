@@ -59,8 +59,8 @@ $ make site
 ```
 
 This will generate a full build of the docs in the `public` folder and check all
-links. If broken links are found, see `linkchecker-errors.csv` (but make sure to
-remove this file so that you don't accidentally commit it to Git).
+links. If broken links are found, see `linkchecker-errors.csv` (you can safely
+leave this file in your directory, as it is ignored by Git).
 
 ## Running the Site Locally
 
