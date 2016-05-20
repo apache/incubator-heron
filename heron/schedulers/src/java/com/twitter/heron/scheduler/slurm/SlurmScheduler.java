@@ -79,8 +79,7 @@ public class SlurmScheduler implements IScheduler {
       return false;
     }
     LOG.info("Launching topology in Slurm scheduler");
-    // 1 additional for the tmaster
-    long containers = Runtime.numContainers(runtime) + 1;
+    long containers = Runtime.numContainers(runtime);
     boolean jobCreated = controller.createJob(getHeronSlurmPath(),
         SlurmContext.executorSandboxBinary(this.config),
         getExecutorCommand(packing),
