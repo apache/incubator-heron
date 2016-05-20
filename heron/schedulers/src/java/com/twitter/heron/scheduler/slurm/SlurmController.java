@@ -69,7 +69,8 @@ public class SlurmController {
     // add the args to the command
     slurmCmd.addAll(transformedArgs);
     String[] slurmCmdArray = slurmCmd.toArray(new String[0]);
-    LOG.log(Level.INFO, "Executing job [" + topologyWorkingDirectory + "]:", slurmCmdArray);
+    LOG.log(Level.INFO, "Executing job [" + topologyWorkingDirectory + "]:",
+        Arrays.toString(slurmCmdArray));
     StringBuilder stdout = new StringBuilder();
     StringBuilder stderr = new StringBuilder();
     boolean ret = runProcess(topologyWorkingDirectory, slurmCmdArray, stdout, stderr);
@@ -141,7 +142,7 @@ public class SlurmController {
       String[] slurmCmd = new String[]{"scancel", jobIdFileContent.get(0)};
       return runProcess(null, slurmCmd, new StringBuilder(), new StringBuilder());
     } else {
-      LOG.log(Level.SEVERE, "Failed to read the Slurm Job id from file:" + jobIdFile);
+      LOG.log(Level.SEVERE, "Failed to read the Slurm Job id from file: {0}", jobIdFile);
       return false;
     }
   }

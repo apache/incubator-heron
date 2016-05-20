@@ -16,6 +16,7 @@ package com.twitter.heron.scheduler.slurm;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -125,7 +126,7 @@ public class SlurmScheduler implements IScheduler {
 
     String[] executorCmd = SchedulerUtils.executorCommandArgs(this.config, this.runtime, freePorts);
 
-    LOG.log(Level.FINE, "Executor command line: ", executorCmd);
+    LOG.log(Level.FINE, "Executor command line: ", Arrays.toString(executorCmd));
     return executorCmd;
   }
 }
