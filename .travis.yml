@@ -48,5 +48,5 @@ script:
   - gcc --version
   - which g++-4.8
   - g++ --version
-  # TODO: change below from || to && once all links are fixed so we fail build on bad ones
-  - (cd website && make site) || scripts/travis/build.sh && scripts/travis/test.sh
+  # TODO: change below from ; to && once all links are fixed so we fail build on bad ones
+  - (cd website && make site); scripts/travis/build.sh && scripts/travis/test.sh
