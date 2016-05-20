@@ -46,21 +46,6 @@ cc_test(
 )
 
 cc_test(
-    name = "time_now_unittest",
-    srcs = ["time_now_unittest.cpp"],
-    deps = [
-        "//heron/common/src/cpp/basics:basics-cxx",
-        "//3rdparty/gtest:gtest-cxx",
-    ],
-    copts = [
-        "-I.",
-        "-Iheron/common/src/cpp",
-    ],
-    size = "small",
-    linkstatic = 1,
-)
-
-cc_test(
     name = "utils_unittest",
     srcs = ["utils_unittest.cpp"],
     deps = [
