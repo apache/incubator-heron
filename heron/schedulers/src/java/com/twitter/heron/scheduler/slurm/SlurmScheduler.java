@@ -123,8 +123,7 @@ public class SlurmScheduler implements IScheduler {
       freePorts.add(SysUtils.getFreePort());
     }
 
-    String[] executorCmd = SchedulerUtils.executorCommandArgs(
-        packing, this.config, this.runtime, freePorts);
+    String[] executorCmd = SchedulerUtils.executorCommandArgs(this.config, this.runtime, freePorts);
 
     LOG.log(Level.FINE, "Executor command line: ", executorCmd);
     return executorCmd;
