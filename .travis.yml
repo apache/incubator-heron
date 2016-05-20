@@ -33,9 +33,20 @@ before_install:
   - chmod +x bazel-0.1.2-installer-linux-x86_64.sh
   - ./bazel-0.1.2-installer-linux-x86_64.sh --user
 
+before_script:
+  # required for building the website docs
+  - (cd website && npm install && npm install gulp && which gulp)
+  - wget -q https://github.com/spf13/hugo/releases/download/v0.15/hugo_0.15_amd64.deb
+  - sudo dpkg -i hugo*.deb
+  - hugo version
+  - pip install --user requests==2.9.0
+  - pip install --user LinkChecker
+  - linkchecker --version
+
 script:
   - which gcc-4.8
   - gcc --version
   - which g++-4.8
-  - g++ --version 
-  - scripts/travis/build.sh && scripts/travis/test.sh
+  - g++ --version
+  # TODO: change below from ; to && once all links are fixed so we fail build on bad ones
+  - (cd website && make site); scripts/travis/build.sh && scripts/travis/test.sh

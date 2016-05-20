@@ -12,20 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import argparse
-import atexit
-import base64
-import contextlib
-import glob
-import logging
-import logging.handlers
-import os
-import shutil
-import sys
-import subprocess
-import tarfile
-import tempfile
-
 import heron.cli.src.python.args as args
 import heron.cli.src.python.utils as utils
 from heron.common.src.python.color import Log

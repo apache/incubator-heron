@@ -13,6 +13,7 @@ Running the Heron documentation locally requires that you have the following ins
 * [Make](https://www.gnu.org/software/make/)
 * [Node.js](https://nodejs.org/en/)
 * [npm](https://www.npmjs.com/)
+* [pip](https://pypi.python.org/pypi/pip)
 
 ### OS X Setup
 
@@ -72,6 +73,19 @@ browser from the command line:
 
 ```bash
 $ open http://localhost:1313/heron
+```
+
+## Checking Links
+
+To verify that the links in the docs are all valid, run `make linkchecker`, which will produce a
+report of broken links. If `linkchecker` fails to install or run properly, you can install it manually.
+Note that due to this [https://github.com/wummel/linkchecker/pull/657](issue), `linkchecker`
+versions 9.2 and 9.3 require the python `requests` >= 2.2.0 and < 2.10.0.
+
+```bash
+$ pip uninstall requests
+$ pip install requests==2.9.0
+$ pip install linkchecker
 ```
 
 ## Publishing the Site

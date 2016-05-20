@@ -12,17 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import argparse
-import atexit
-import contextlib
 import glob
-import logging
-import logging.handlers
 import os
 import shutil
 import sys
-import subprocess
-import tarfile
 import tempfile
 
 from heron.common.src.python.color import Log
