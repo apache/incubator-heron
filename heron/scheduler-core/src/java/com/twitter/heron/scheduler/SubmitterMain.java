@@ -409,6 +409,7 @@ public class SubmitterMain {
               .put(Keys.topologyName(), topology.getName())
               .put(Keys.topologyDefinition(), topology)
               .put(Keys.schedulerStateManagerAdaptor(), adaptor)
+              .put(Keys.numContainers(), 1 + TopologyUtils.getNumContainers(topology))
               .put(Keys.topologyPackageUri(), packageURI)
               .put(Keys.launcherClassInstance(), launcher)
               .put(Keys.packingClassInstance(), packing)
