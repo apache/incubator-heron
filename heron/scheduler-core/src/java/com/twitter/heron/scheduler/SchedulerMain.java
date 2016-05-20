@@ -351,7 +351,7 @@ public class SchedulerMain {
       // write the scheduler location to state manager
       // Make sure it happens after IScheduler.onScheduler
       isSuccessful = SchedulerUtils.setSchedulerLocation(
-          runtime, server.getHost(), server.getPort(), scheduler);
+          runtime, String.format("%s:%d", server.getHost(), server.getPort()), scheduler);
 
       if (isSuccessful) {
         // wait until kill request or some interrupt occurs if the scheduler starts successfully
