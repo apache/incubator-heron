@@ -26,7 +26,6 @@ java_library(
         "@snakeyaml//jar",
         "@guava//jar",
         "@protobuf-java//jar",
-        "@commons-io//jar",
     ],
 )
 
@@ -55,7 +54,6 @@ utils_deps_files = \
         "//heron/common/src/java:config-java",
         "//heron/api/src/java:api-java",
         "@guava//jar",
-        "@commons-io//jar",
     ]
 
 scheduler_deps_files = \
@@ -63,7 +61,6 @@ scheduler_deps_files = \
         ":common-spi-java",
         "//heron/common/src/java:config-java",
         "@guava//jar",
-        "@commons-io//jar",
     ]
 
 packing_deps_files = [

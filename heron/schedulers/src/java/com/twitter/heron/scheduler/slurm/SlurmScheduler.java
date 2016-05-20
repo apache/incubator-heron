@@ -26,6 +26,7 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
+import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;
 
 /**
@@ -79,7 +80,7 @@ public class SlurmScheduler implements IScheduler {
     }
     LOG.info("Launching topology in Slurm scheduler");
     // 1 additional for the tmaster
-    long containers = packing.containers.size() + 1;
+    long containers = Runtime.numContainers(runtime) + 1;
     boolean jobCreated = controller.createJob(getHeronSlurmPath(),
         SlurmContext.executorSandboxBinary(this.config),
         getExecutorCommand(packing),
