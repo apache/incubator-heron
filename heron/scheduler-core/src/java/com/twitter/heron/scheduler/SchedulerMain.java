@@ -319,18 +319,17 @@ public class SchedulerMain {
           .put(Keys.topologyDefinition(), topology)
           .put(Keys.schedulerStateManagerAdaptor(), adaptor)
           .put(Keys.numContainers(), 1 + TopologyUtils.getNumContainers(topology))
+          .put(Keys.schedulerShutdown(), getShutdown())
           .build();
 
       // get a packed plan and schedule it
       packing.initialize(config, runtime);
       PackingPlan packedPlan = packing.pack();
 
-      // TODO - investigate whether the heron executors can be started
-      // in scheduler.schedule method - rather than in scheduler.initialize method
+      // Add the instanceDistribution to the runtime
       Config ytruntime = Config.newBuilder()
           .putAll(runtime)
-          .put(Keys.instanceDistribution(), TopologyUtils.packingToString(packedPlan))
-          .put(Keys.schedulerShutdown(), getShutdown())
+          .put(Keys.instanceDistribution(), packedPlan.getInstanceDistribution())
           .build();
 
       // initialize the scheduler

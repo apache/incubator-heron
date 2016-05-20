@@ -38,6 +38,13 @@ java_test(
 )
 
 java_test(
+    name = "packing-plan_unittest",
+    srcs = glob(["**/common/PackingPlanTest.java"]),
+    deps = common_deps_files,
+    size = "small",
+)
+
+java_test(
     name = "network-utils_unittest",
     srcs = glob(["**/common/NetworkUtilsTest.java"]),
     deps = common_deps_files,

@@ -28,6 +28,35 @@ public class PackingPlan {
   }
 
   /**
+   * Pack the packing plan into a String describing instance distribution, used by executor
+   *
+   * @return String describing instance distribution
+   */
+  public String getInstanceDistribution() {
+    StringBuilder[] containerBuilder = new StringBuilder[this.containers.size()];
+    for (PackingPlan.ContainerPlan container : this.containers.values()) {
+      int index = Integer.parseInt(container.id);
+      containerBuilder[index - 1] = new StringBuilder();
+
+      for (PackingPlan.InstancePlan instance : container.instances.values()) {
+        String[] tokens = instance.id.split(":");
+        containerBuilder[index - 1].append(
+            String.format("%s:%s:%s:", tokens[1], tokens[2], tokens[3]));
+      }
+      containerBuilder[index - 1].deleteCharAt(containerBuilder[index - 1].length() - 1);
+    }
+
+    StringBuilder packingBuilder = new StringBuilder();
+    for (int i = 0; i < containerBuilder.length; ++i) {
+      StringBuilder builder = containerBuilder[i];
+      packingBuilder.append(String.format("%d:%s,", i + 1, builder.toString()));
+    }
+    packingBuilder.deleteCharAt(packingBuilder.length() - 1);
+
+    return packingBuilder.toString();
+  }
+
+  /**
    * Type definition of packing structure output.
    */
   public static class Resource {
