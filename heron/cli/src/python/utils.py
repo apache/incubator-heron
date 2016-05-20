@@ -16,7 +16,6 @@ import argparse
 import contextlib
 import getpass
 import os
-import shutil
 import sys
 import subprocess
 import tarfile
