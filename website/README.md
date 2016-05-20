@@ -4,11 +4,12 @@ Heron's documentation was primarily built using the following components:
 
 * [Hugo](http://gohugo.io) --- Static site generator
 * [GulpJS](http://gulpjs.com) --- Build tool for static assets
-* [Twitter Bootstrap](http://getbootstrap.com) --- CSS and JavaScript
+* [Twitter Bootstrap](http://getbootstrap.com) --- Sass/CSS and JavaScript
 
 ## Documentation Setup
 
-Running the Heron documentation locally requires that you have the following installed:
+Running the Heron documentation locally requires that you have the following
+installed:
 
 * [Make](https://www.gnu.org/software/make/)
 * [Node.js](https://nodejs.org/en/)
@@ -17,11 +18,11 @@ Running the Heron documentation locally requires that you have the following ins
 
 ### OS X Setup
 
-To install Node.js and npm on Mac OS X, make sure that you have [Homebrew](http://brew.sh/)
-installed and run:
+To install Node.js and npm on Mac OS X, make sure that you have
+[Homebrew](http://brew.sh/) installed and run:
 
 ```bash
-$ brew install nvm
+$ brew update && brew install nvm && source $(brew --prefix nvm)/nvm.sh
 $ nvm install node
 $ curl -L https://www.npmjs.com/install.sh | sh
 ```
@@ -31,6 +32,7 @@ Once this has completed:
 ```bash
 $ cd website
 $ make setup
+$ make assets
 ```
 
 This will install Hugo, Gulp, and all of the necessary Gulp plugins and build
@@ -56,8 +58,9 @@ To build the docs locally:
 $ make site
 ```
 
-This will generate a full build of the docs in the `public` folder, checking all links. If broken
-links are found, see `linkchecker-errors.csv`.
+This will generate a full build of the docs in the `public` folder and check all
+links. If broken links are found, see `linkchecker-errors.csv` (but make sure to
+remove this file so that you don't accidentally commit it to Git).
 
 ## Running the Site Locally
 
@@ -68,19 +71,33 @@ $ make serve
 ```
 
 This will run the docs locally on `localhost:1313`. Navigate to
-[localhost:1313/heron](http://localhost:1313/heron) to see the served docs. Or open the
-browser from the command line:
+[localhost:1313/heron](http://localhost:1313/heron) to see the served docs. Or
+open the browser from the command line:
 
 ```bash
 $ open http://localhost:1313/heron
 ```
 
+## Working on Static Assets
+
+If you'd like to work on the site's static assets (Sass/CSS, JavaScript, etc.),
+you can run `make dev-assets`. This will build all of the static assets in the
+`assets` folder, store the build artifacts in the `static` folder, and then
+watch the `assets` folder for changes, rebuilding when changes are made.
+
+The easiest way to develop static assets is to run `make dev-assets` and `make
+serve` at the same time. If you do this, any time you make changes to files in
+`assets`, the assets will be re-built, and Hugo will both detect changes to the
+`static` folder and automatically refresh the browser.
+
 ## Checking Links
 
-To verify that the links in the docs are all valid, run `make linkchecker`, which will produce a
-report of broken links. If `linkchecker` fails to install or run properly, you can install it manually.
-Note that due to this [https://github.com/wummel/linkchecker/pull/657](issue), `linkchecker`
-versions 9.2 and 9.3 require the python `requests` >= 2.2.0 and < 2.10.0.
+To verify that the links in the docs are all valid, run `make linkchecker`,
+which will produce a report of broken links. If `linkchecker` fails to install
+or run properly, you can install it manually. Note that due to [this
+issue](https://github.com/wummel/linkchecker/pull/657) `linkchecker` versions
+9.2 and 9.3 require Python `requests` >= 2.2.0 and < 2.10.0. To ensure that you
+have the right version:
 
 ```bash
 $ pip uninstall requests
@@ -90,12 +107,15 @@ $ pip install linkchecker
 
 ## Publishing the Site
 
-The content on the [twitter.github.io/heron](http://twitter.github.io/heron) website is what is
-committed on the [gh-pages branch](https://github.com/twitter/heron/tree/gh-pages) of the heron repo.
-To simplify publishing docs generated from `master` onto the `gh-pages` branch, the output directory
-of the site build process (i.e., `website/public`) is a submodule that points to the `gh-pages` branch
-of the heron repo. As a result you will notice that when you cd into gh-pages and run `git status`
-or `git remote -v`, it appears as another heron repo based of the `gh-pages` branch.
+The content on the [twitter.github.io/heron](http://twitter.github.io/heron)
+website is what is committed on the [gh-pages
+branch](https://github.com/twitter/heron/tree/gh-pages) of the Heron repo. To
+simplify publishing docs generated from `master` onto the `gh-pages` branch, the
+output directory of the site build process (i.e. `website/public`) is a
+submodule that points to the `gh-pages` branch of the heron repo. As a result,
+you will notice that when you `cd` into `website/public` and run `git status`
+or `git remote -v`, it appears as another heron repo based off of the `gh-pages`
+branch.
 
 ```bash
 $ git status
@@ -110,4 +130,5 @@ Your branch is up-to-date with 'origin/gh-pages'.
 To publish the site docs:
 
 1. Make the site as described in the above section. Verify all links are valid.
-2. Change to the `website/public` directory, commit and push to the `gh-pages` branch.
+2. Change to the `website/public` directory, commit, and push to the `gh-pages`
+   branch.

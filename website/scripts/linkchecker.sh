@@ -24,8 +24,9 @@ if [[ $STATUS != 0 ]]; then
   cut -sd ';' -f 1,2 $OUT_FILE | tr ';' ' ' | \
     awk '{ print $2 " " $1}' | sort -u >> $ERRORS_FILE;
   echo "linkchecker failed - check linkchecker-errors.csv";
-  rm -f $OUT_FILE $ERRORS_FILE
   exit $STATUS
 else
   echo "linkchecker passes";
 fi
+
+rm -f $OUT_FILE

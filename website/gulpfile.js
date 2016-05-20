@@ -7,7 +7,7 @@ var gulp = require('gulp'),
     del = require('del');
 
 // Define the source and distribution directories
-var srcDir = './src';
+var srcDir = './assets';
 var distDir = './static';
 
 // Define asset sources
