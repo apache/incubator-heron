@@ -124,7 +124,12 @@ a:hover {
     margin-top: 0;
   }
 
-  p {
+  code {
+    padding: 2px;
+    border-radius: 2px;
+  }
+
+  p, li {
     font-size: 0.8em;
   }
 
@@ -145,9 +150,11 @@ a:hover {
   }
 
   .highlight {
+    border-radius: 5px;
+
     pre {
-      border: 1px solid $light-gray;
-      background-color: lighten($light-gray, 35%);
+      border: 1px solid darken(#fafafa, 20%);
+      background-color: #fafafa;
     }
   }
 
