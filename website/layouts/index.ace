@@ -21,9 +21,7 @@ html lang={{.Site.LanguageCode}}
         .row
           .col-xs-12.col-sm-9.col-md-9.col-lg-9
             .landing-feature-2.text-left
-              .row
-                h2 Why Heron?
-              br
+              h2 Why Heron?
               .row
                 .col-sm-6
                   .panel.panel-primary

@@ -4,9 +4,8 @@
 @import url(https://fonts.googleapis.com/css?family=Open+Sans);
 
 // Variables
-$sidebar-width: 15em;
 $light-gray: #9d9d9d;
-$dark-gray: #2a2730;
+$heron-blue-gray: #263238;
 $heron-blue-green: #4F8992;
 
 // Helpers
@@ -33,7 +32,7 @@ a:hover {
 // Top navbar
 .hn-top-navbar {
   border: 0;
-  background-color: $dark-gray;
+  background-color: $heron-blue-gray;
 
   .hn-navbar-container {
     padding: 0px 25px;
@@ -59,7 +58,7 @@ a:hover {
 // Jumbotron on the index page
 .hn-jumbotron {
   border-radius: 0 !important;
-  background-color: $dark-gray;
+  background-color: $heron-blue-gray;
 
   img.hn-jumbotron-logo {
     margin-bottom: 20px;
@@ -85,6 +84,7 @@ a:hover {
 
       li {
         a {
+          overflow: hidden;
           padding: 4px 0;
           display: block;
 
@@ -119,61 +119,64 @@ a:hover {
   font-size: 18px;
   max-width: 66%;
   padding: 30px;
+  position: relative;
 
-  .page-header {
+  header.hn-docs-header {
     margin-top: 0;
   }
 
-  code {
-    padding: 2px;
-    border-radius: 2px;
-  }
-
-  p, li {
-    font-size: 0.8em;
-  }
-
-  h1 {
-    font-size: 1.8em;
-  }
-
-  h2 {
-    font-size: 1.5em;
-  }
-
-  h3 {
-    font-size: 1.3em;
-  }
-
-  h4 {
-    font-size: 1.2em;
-  }
-
-  .highlight {
-    border-radius: 5px;
-
-    pre {
-      border: 1px solid darken(#fafafa, 20%);
-      background-color: #fafafa;
-    }
-  }
-
-  img {
-    max-width: 90%;
-  }
-
-  table {
-    thead {
-      font-size: 16px;
-      border-bottom: 1px solid gray;
+  article.hn-docs-content {
+    code {
+      padding: 2px;
+      border-radius: 2px;
     }
 
-    tr {
-      margin-right: 5px;
+    p, li p, ol p {
+      font-size: 0.8em;
     }
 
-    tbody {
-      font-size: 12px;
+    h1 {
+      font-size: 1.8em;
+    }
+
+    h2 {
+      font-size: 1.5em;
+    }
+
+    h3 {
+      font-size: 1.3em;
+    }
+
+    h4 {
+      font-size: 1.2em;
+    }
+
+    .highlight {
+      border-radius: 5px;
+
+      pre {
+        border: 1px solid darken(#fafafa, 20%);
+        background-color: #fafafa;
+      }
+    }
+
+    img {
+      max-width: 90%;
+    }
+
+    table {
+      thead {
+        font-size: 16px;
+        border-bottom: 1px solid gray;
+      }
+
+      tr {
+        margin-right: 5px;
+      }
+
+      tbody {
+        font-size: 12px;
+      }
     }
   }
 }
@@ -200,7 +203,7 @@ a:hover {
   padding-bottom: 20px;
   margin-top: 40px;
   color: $light-gray;
-  background-color: $dark-gray;
+  background-color: $heron-blue-gray;
 
   .hn-footer-links {
     padding-left: 0;

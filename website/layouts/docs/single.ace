@@ -9,7 +9,8 @@ html lang={{.Site.LanguageCode}}
     {{partial "navbar.html" .}}
     .hn-main
       .row
-        .hn-sidebar.col-sm-3.col-md-2.col-lg-3.collapse
+        .hn-sidebar.hidden-xs.col-sm-3.col-md-2.col-lg-2.collapse
           {{partial "sidenav.html" .}}
-        .hn-docs-main.col-sm-9.col-md-10.col-lg-9.col-sm-offset-3.col-md-offset-2.col-lg-offset-9
-          {{partial "docs/main.html" .}}
+        .row
+          .hn-docs-main.col-sm-9.col-sm-offset-3.col-md-10.col-lg-10.col-md-offset-2.col-lg-offset-2
+            {{partial "docs/main.html" .}}

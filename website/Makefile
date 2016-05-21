@@ -24,4 +24,3 @@ site:
 	@make pages
 	@make javadocs
 	@make linkchecker
-
