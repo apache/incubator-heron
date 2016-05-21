@@ -44,7 +44,7 @@ public interface ILauncher extends AutoCloseable {
    * the launch process succeeded.
    *
    * @param packing Initial mapping suggested by running packing algorithm.
-   * container_id->List of instance_id to be launched on this container.
+   * container_id-&gt;List of instance_id to be launched on this container.
    * @return true if topology launched successfully, false otherwise.
    */
   boolean launch(PackingPlan packing);

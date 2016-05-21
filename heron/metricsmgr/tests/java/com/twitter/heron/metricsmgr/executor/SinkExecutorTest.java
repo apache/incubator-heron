@@ -98,7 +98,7 @@ public class SinkExecutorTest {
   }
 
   /**
-   * Method: setPropertyMap(Map<? extends String, Object> configMap)
+   * Method: setPropertyMap(Map&lt;? extends String, Object&gt; configMap)
    */
   @Test
   @SuppressWarnings("unchecked")

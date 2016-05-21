@@ -183,6 +183,14 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "heron-client-conf-slurm",
+    package_dir = "conf/slurm",
+    files = [
+        "//heron/config/src/yaml:conf-slurm-yaml",
+    ],
+)
+
+pkg_tar(
     name = "heron-client-conf-aurora",
     package_dir = "conf/aurora",
     files = [
@@ -211,6 +219,7 @@ pkg_tar(
         ":heron-client-conf",
         ":heron-client-conf-local",
         ":heron-client-conf-aurora",
+        ":heron-client-conf-slurm",
         ":heron-client-dist",
         ":heron-client-examples",
         ":heron-client-lib-3rdparty",

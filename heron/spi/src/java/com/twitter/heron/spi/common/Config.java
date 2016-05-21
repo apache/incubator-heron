@@ -22,7 +22,7 @@ import java.util.TreeMap;
 import com.twitter.heron.common.basics.TypeUtils;
 
 /**
- * Config is an Immutable Map of <String, Object>
+ * Config is an Immutable Map of &lt;String, Object&gt;
  */
 public class Config {
   private final Map<String, Object> cfgMap = new HashMap<>();

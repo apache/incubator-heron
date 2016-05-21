@@ -80,7 +80,7 @@ public final class PhysicalPlanUtil {
   }
 
   /**
-   * Get the map <componentId -> taskIds> from the Physical Plan given
+   * Get the map &lt;componentId -&gt; taskIds&gt; from the Physical Plan given
    *
    * @param physicalPlan the given Physical Plan
    * @return the map from componentId to its task ids

@@ -33,7 +33,6 @@ def run(command, parser, args, unknown_args):
   release_file = utils.get_heron_release_file()
   with open(release_file) as release_info:
     for line in release_info:
-      if not "git" in line: 
         print line,
 
   return True

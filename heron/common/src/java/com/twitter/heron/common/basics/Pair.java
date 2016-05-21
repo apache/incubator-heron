@@ -77,7 +77,7 @@ public class Pair<F, S> {
   /**
    * Returns a string representation of this pair.
    *
-   * @return format in "<first, second>"
+   * @return format in "&lt;first, second&gt;"
    */
   @Override
   public String toString() {

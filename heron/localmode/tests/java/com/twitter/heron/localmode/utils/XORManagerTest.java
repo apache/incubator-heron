@@ -158,7 +158,7 @@ public class XORManagerTest {
   }
 
   /**
-   * Method: populateXORManager(WakeableLooper looper, TopologyAPI.Topology topology, int nBuckets, Map<String, List<Integer>> componentToTaskIds)
+   * Method: populateXORManager(WakeableLooper looper, TopologyAPI.Topology topology, int nBuckets, Map&lt;String, List&lt;Integer&gt;&gt; componentToTaskIds)
    */
   @Test
   public void testPopulateXORManager() throws Exception {

@@ -35,7 +35,7 @@ import com.twitter.heron.spi.uploader.IUploader;
 /**
  * Provides a basic uploader class for uploading topology packages to s3.
  * <p>
- * By default this uploader will write topology packages to s3://<bucket>/<topologyName>/topology.tar.gz. This is a known
+ * By default this uploader will write topology packages to s3://&lt;bucket&gt;/&lt;topologyName&gt;/topology.tar.gz. This is a known
  * location where you can then download the topology package to where it needs to go in order to run the topology.
  * <p>
  * This class also handles the undo action by copying any existing topology.tar.gz package found in the folder to

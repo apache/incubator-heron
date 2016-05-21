@@ -44,7 +44,7 @@ import com.twitter.heron.proto.system.HeronTuples;
  * When a tuple is to be emitted, it will serialize it and call OutgoingTupleCollection.admitSpoutTuple()
  * to sent it out.
  * <p>
- * It will only emit data tuples; it will not send control tuples (ack&fail)
+ * It will only emit data tuples; it will not send control tuples (ack&amp;fail)
  * 1. Whether some tuples are expired; should be considered as failed automatically
  * 2. The pending tuples to be acked
  * 3. Maintain some statistics, for instance, total tuples emitted.
