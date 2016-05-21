@@ -116,7 +116,7 @@ public class SchedulerMainTest {
     PowerMockito.doReturn(true).
         when(SchedulerUtils.class, "setSchedulerLocation",
             Mockito.any(Config.class),
-            Mockito.anyString(), Mockito.anyInt(), Mockito.eq(scheduler));
+            Mockito.anyString(), Mockito.eq(scheduler));
 
     // Avoid infinite waiting
     Shutdown shutdown = Mockito.mock(Shutdown.class);
@@ -192,7 +192,7 @@ public class SchedulerMainTest {
     PowerMockito.doReturn(false).
         when(SchedulerUtils.class, "setSchedulerLocation",
             Mockito.any(Config.class),
-            Mockito.anyString(), Mockito.anyInt(), Mockito.eq(scheduler));
+            Mockito.anyString(), Mockito.eq(scheduler));
     Assert.assertFalse(schedulerMain.runScheduler());
 
     Mockito.verify(stateManager).close();
