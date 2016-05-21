@@ -22,6 +22,7 @@ html lang={{.Site.LanguageCode}}
           .col-xs-12.col-sm-9.col-md-9.col-lg-9
             .landing-feature-2.text-left
               h2 Why Heron?
+              br
               .row
                 .col-sm-6
                   .panel.panel-primary
@@ -30,7 +31,7 @@ html lang={{.Site.LanguageCode}}
                 .col-sm-6
                   .panel.panel-primary
                     .panel-heading Proven at Twitter Scale
-                    .panel-body Heron powers all realtime analytics with varied use cases at Twitter for over 2 years.  Incident reports dropped by an order of magnitude demonstrating proven reliability and scalability
+                    .panel-body Heron powers all realtime analytics with varied use cases at Twitter for over 2 years. Incident reports dropped by an order of magnitude demonstrating proven reliability and scalability
               .row
                 .col-sm-6
                   .panel.panel-primary
@@ -52,7 +53,7 @@ html lang={{.Site.LanguageCode}}
             hr
             .landing-feature-1.text-left
               h2 Heron is in Beta
-              p Heron is now the de facto stream data processing engine inside Twitter, and we believe Heron is stable enough for production use.  The Heron team monitors and responds actively to bug reports from users.
+              p Heron is now the de facto stream data processing engine inside Twitter, and we believe Heron is stable enough for production use. The Heron team monitors and responds actively to <a href="{{.Site.Params.github.issues}}">bug reports</a>s from users.
             hr
             .landing-feature-2.text-left
               h2 Get Started
