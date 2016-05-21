@@ -1,5 +1,4 @@
 div
-
   nav
     {{range .Site.Data.toc.sections}}
       h4 {{.name}}
@@ -17,5 +16,4 @@ div
             a href={{.url}} {{.name}}
           {{end}}
         {{end}}
-
     {{end}}
