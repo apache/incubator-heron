@@ -14,54 +14,50 @@ html lang={{.Site.LanguageCode}}
             .row
               img.hn-jumbotron-logo.center-block src={{.Site.Params.assets.textlogo}}
             .row
-              p {{.Site.Params.tagline}}
+              p.hn-tagline {{.Site.Params.tagline}}
             .hn-button-row.row
               a.btn.btn-default href=docs/getting-started Get Started
               a.btn.btn-default href=docs/upgrade-storm-to-heron Upgrade From Storm
-
         .row
-          .col-sm-9
+          .col-xs-12.col-sm-9.col-md-9.col-lg-9
             .landing-feature-2.text-left
-              h1 Why Heron?
+              .row
+                h2 Why Heron?
+              br
               .row
                 .col-sm-6
-                  h3  Speed and Performance
-                  div Heron is the direct successor of
-                    a href=http://storm.apache.org  Apache Storm
-                  div built with a wide array of architectural improvements to be backwards compatible with Storm's
-                    a href=http://storm.apache.org/about/simple-api.html  topology API
-
+                  .panel.panel-primary
+                    .panel-heading Speed and Performance
+                    .panel-body Heron is the direct successor of <a href="http://storm.apache.org">Apache Storm</a>, built with a wide array of architectural improvements to be backwards compatible with Storm's <a href="http://storm.apache.org/about/simple-api.html">topology API</a>.
                 .col-sm-6
-                  h3 Proven at Twitter Scale
-                  p Heron powers all realtime analytics with varied use cases at Twitter for over 2 years.  Incident reports dropped by an order of magnitude demonstrating proven reliability and scalability
-
+                  .panel.panel-primary
+                    .panel-heading Proven at Twitter Scale
+                    .panel-body Heron powers all realtime analytics with varied use cases at Twitter for over 2 years.  Incident reports dropped by an order of magnitude demonstrating proven reliability and scalability
               .row
                 .col-sm-6
-                  h3 Compatibility with Storm
-                  p Heron is API compatible with Storm and hence no code change is required for migration.
-
+                  .panel.panel-primary
+                    .panel-heading Compatibility with Storm
+                    .panel-body Heron is API compatible with Storm and hence no code change is required for migration.
                 .col-sm-6
-                  h3 Ease of Development and Troubleshooting
-                  div Easily debug and identify the issues in
-                    a href=docs/concepts/topologies topologies,
-                  div allowing faster iteration during development.
-
+                  .panel.panel-primary
+                    .panel-heading Ease of Development and Troubleshooting
+                    .panel-body Easily debug and identify the issues in <a href="/docs/concepts/topologies">topologies</a>, allowing faster iteration during development.
               .row
                 .col-sm-6
-                  h3 Simplified and Responsive UI
-                  p Heron UI gives a visual overview of each topology to visualize hot spot locations and detailed counters for tracking progress and troubleshooting.
+                  .panel.panel-primary
+                    .panel-heading Simplified and Responsive UI
+                    .panel-body Heron UI gives a visual overview of each topology to visualize hot spot locations and detailed counters for tracking progress and troubleshooting.
                 .col-sm-6
-                  h3 Scalability and Reliability
-                  p Heron is highly scalable both in the ability to execute large number of components for each topology and the ability to launch and track large numbers of topologies.
-
+                  .panel.panel-primary
+                    .panel-heading Scalability and Reliability
+                    .panel-body Heron is highly scalable both in the ability to execute large number of components for each topology and the ability to launch and track large numbers of topologies.
+            hr
             .landing-feature-1.text-left
               h2 Heron is in Beta
               p Heron is now the de facto stream data processing engine inside Twitter, and we believe Heron is stable enough for production use.  The Heron team monitors and responds actively to bug reports from users.
-
-
+            hr
             .landing-feature-2.text-left
               h2 Get Started
-
               .row
                 .col-sm-6
                   h4 Run Topologies using pre-compiled Heron binaries
@@ -70,7 +66,7 @@ html lang={{.Site.LanguageCode}}
                   h4 Upgrade Existing Storm Topologies
                   a.btn.btn-default href=docs/upgrade-storm-to-heron Upgrade From Storm
 
-          .col-sm-3 style="margin-top: 15px;"
+          .hidden-xs.col-sm-3.col-md-3.col-lg-3 style="margin-top: 15px;"
             {{partial "index/feed.html" .}}
 
       {{partial "footer.html" .}}

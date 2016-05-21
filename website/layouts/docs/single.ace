@@ -6,10 +6,10 @@ html lang={{.Site.LanguageCode}}
     {{partial "css.includes.html" .}}
     {{partial "js.includes.html" .}}
   body
+    {{partial "navbar.html" .}}
     .hn-main
-      {{partial "navbar.html" .}}
       .row
-        .col-sm-3.col-md-2.col-lg-3.sidebar.collapse
+        .hn-sidebar.col-sm-3.col-md-2.col-lg-3.collapse
           {{partial "sidenav.html" .}}
-        .hn-docs-main.col-sm-9.col-md-10.col-lg-9.col-sm-offset-3.col-md-offset-2.col-lg-offset-9.main
+        .hn-docs-main.col-sm-9.col-md-10.col-lg-9.col-sm-offset-3.col-md-offset-2.col-lg-offset-9
           {{partial "docs/main.html" .}}
