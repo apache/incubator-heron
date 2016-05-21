@@ -19,9 +19,12 @@ import java.util.List;
 import com.twitter.heron.api.utils.Utils;
 
 /**
- * This output collector exposes the API for emitting tuples from an {@link backtype.heron.topology.IRichSpout}.
- * The main difference between this output collector and {@link OutputCollector}
- * for {@link backtype.heron.topology.IRichBolt} is that spouts can tag messages with ids so that they can be
+ * This output collector exposes the API for emitting tuples from an
+ * {@link com.twitter.heron.api.spout.IRichSpout}.
+ * The main difference between this output collector and
+ * {@link com.twitter.heron.api.bolt.OutputCollector}
+ * for {@link com.twitter.heron.api.bolt.IRichBolt} is that spouts
+ * can tag messages with ids so that they can be
  * acked or failed later on. This is the Spout portion of Heron's API to
  * guarantee that each message is fully processed at least once.
  */

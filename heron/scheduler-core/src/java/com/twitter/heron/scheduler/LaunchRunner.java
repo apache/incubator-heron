@@ -50,10 +50,10 @@ public class LaunchRunner implements Callable<Boolean> {
   }
 
   public ExecutionEnvironment.ExecutionState createExecutionState() {
-    // TODO(mfu): These values should read from config
-    String releaseUsername = "heron";
-    String releaseTag = "heron-core";
-    String releaseVersion = "live";
+    String releaseUsername = Context.buildUser(config);
+    // TODO(mfu): Currently we leave release tag empty
+    String releaseTag = "";
+    String releaseVersion = Context.buildVersion(config);
 
     TopologyAPI.Topology topology = Runtime.topology(runtime);
 

@@ -259,7 +259,7 @@ public class SystemConfig {
       = "heron.instance.tuning.current.sample.weight";
 
   /**
-   * Interval in ms to tune the size of in & out data queue in instance
+   * Interval in ms to tune the size of in &amp; out data queue in instance
    */
   public static final String INSTANCE_TUNING_INTERVAL_MS = "heron.instance.tuning.interval.ms";
 

@@ -48,6 +48,8 @@ public class LaunchRunnerTest {
   private static final String ROLE = "testRole";
   private static final String ENVIRON = "testEnviron";
   private static final String MOCK_PACKING_STRING = "mockPackString";
+  private static final String BUILD_VERSION = "live";
+  private static final String BUILD_USER = "user";
 
   private static TopologyAPI.Config.KeyValue getConfig(String key, String value) {
     return TopologyAPI.Config.KeyValue.newBuilder().setKey(key).setValue(value).build();
@@ -94,6 +96,8 @@ public class LaunchRunnerTest {
     Mockito.when(config.getStringValue(ConfigKeys.get("CLUSTER"))).thenReturn(CLUSTER);
     Mockito.when(config.getStringValue(ConfigKeys.get("ROLE"))).thenReturn(ROLE);
     Mockito.when(config.getStringValue(ConfigKeys.get("ENVIRON"))).thenReturn(ENVIRON);
+    Mockito.when(config.getStringValue(ConfigKeys.get("BUILD_VERSION"))).thenReturn(BUILD_VERSION);
+    Mockito.when(config.getStringValue(ConfigKeys.get("BUILD_USER"))).thenReturn(BUILD_USER);
 
     return config;
   }
