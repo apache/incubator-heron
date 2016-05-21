@@ -36,15 +36,6 @@ heron_git_rev() {
   echo $git_rev
 }
 
-heron_commit_msg() {
-  local commit_msg=$(git log -1 --oneline | cut -f 2- -d ' ')
-  if [[ $? != 0 ]];
-  then
-    exit 1
-  fi
-  echo $commit_msg
-}
-
 heron_build_host() {
   local build_host=$(hostname)
   echo $build_host
@@ -138,7 +129,6 @@ run_build() {
 
   export HERON_GIT_RELEASE="$(heron_git_release)"
   export HERON_GIT_REV="$(heron_git_rev)"
-  export HERON_GIT_COMMIT_MSG="$(heron_commit_msg)"
   export HERON_BUILD_HOST="$(heron_build_host)"
   export HERON_BUILD_USER="$(heron_build_user)"
   export HERON_BUILD_TIME="$(heron_build_time)"

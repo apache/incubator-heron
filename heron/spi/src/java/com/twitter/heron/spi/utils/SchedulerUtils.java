@@ -243,32 +243,26 @@ public final class SchedulerUtils {
       Config runtime,
       IScheduler scheduler,
       boolean isService) {
-    // Dummy values since there is no running scheduler server
-    final String serverHost = "scheduling_as_library";
-    final int serverPort = -1;
-
-    return setSchedulerLocation(runtime, serverHost, serverPort, scheduler);
+    // Dummy value since there is no scheduler running as service
+    final String endpoint = "scheduler_as_lib_no_endpoint";
+    return setSchedulerLocation(runtime, endpoint, scheduler);
   }
 
   /**
    * Set the location of scheduler for other processes to discover
-   *
    * @param runtime the runtime configuration
-   * @param schedulerServerHost the http server host that scheduler listens for receives requests
-   * @param schedulerServerPort the http server port that scheduler listens for receives requests
+   * @param schedulerEndpoint the endpoint that scheduler listens for receives requests
    * @param scheduler the IScheduler to provide more info
    */
   public static boolean setSchedulerLocation(
       Config runtime,
-      String schedulerServerHost,
-      int schedulerServerPort,
+      String schedulerEndpoint,
       IScheduler scheduler) {
 
     // Set scheduler location to host:port by default. Overwrite scheduler location if behind DNS.
     Scheduler.SchedulerLocation.Builder builder = Scheduler.SchedulerLocation.newBuilder()
         .setTopologyName(Runtime.topologyName(runtime))
-        .setHttpEndpoint(
-            String.format("%s:%d", schedulerServerHost, schedulerServerPort));
+        .setHttpEndpoint(schedulerEndpoint);
 
     // Set the job link in SchedulerLocation if any
     List<String> jobLinks = scheduler.getJobLinks();
