@@ -1,16 +1,16 @@
 div
-  nav
+  nav.hn-sidebar-nav
     {{range .Site.Data.toc.sections}}
       h4 {{.name}}
-      ul.sidebar-nav
+      ul
         {{range .sublinks}}
         li
           a href={{.url}} {{.name}}
         {{end}}
-      ul.sidebar-nav
+      ul
         {{range .subcategories}}
         li {{.name}}
-        ul.sidebar-nav
+        ul
           {{range .sublinks}}
           li
             a href={{.url}} {{.name}}
