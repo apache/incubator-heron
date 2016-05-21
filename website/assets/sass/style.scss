@@ -1,13 +1,13 @@
 @import "bootstrap";
-@import "sloth/sloth";
 
 // Variables
 $sidebar-width: 15em;
+$light-gray: #9d9d9d;
 
-$font-name: "Helvetica Neue";
-
-html, body {
-  font-family: $font-name, sans-serif;
+@mixin vertical-center {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 @-webkit-viewport { width: device-width; }
@@ -21,35 +21,43 @@ html, body {
  */
 
 /* Move down content because we have a fixed navbar */
-body {
+.hn-main {
   padding-top: $navbar-height;
+}
+
+/* Top navbar */
+.hn-top-navbar {
+  border: 0;
+
+  .hn-navbar-container {
+    padding: 0px 25px;
+  }
+
+  a.hn-navbar-logo {
+    line-height: 0;
+    @include vertical-center();
+  }
+
+  a.nav-icon {
+    font-size: 18px;
+  }
+
+  ul li {
+    font-size: 16px;
+  }
+
+  i.hn-toggle-bars {
+    color: $light-gray;
+  }
 }
 
 /*
  * Global add-ons
  */
-
 .sub-header {
   padding-bottom: 10px;
   border-bottom: 1px solid #eee;
 }
-
-/*
- * Top navigation
- * Hide default border to remove 1px line.
- */
-.navbar-fixed-top {
-  border: 0;
-}
-
-a.navbar-brand {
-  font-size: 30px;
-}
-
-a.nav-icon {
-  font-size: 18px;
-}
-
 
 /*
  * Sidebar
@@ -72,6 +80,7 @@ a.nav-icon {
     }
   }
 }
+
 @media (min-width: 768px) {
   .sidebar {
     position: fixed;
@@ -160,6 +169,7 @@ a.nav-icon {
     }
   }
 }
+
 @media (min-width: 768px) {
   .main {
     padding-right: 40px;
@@ -184,37 +194,36 @@ a.nav-icon {
  * Footer
  */
 
-  .footer {
-    padding-top: 20px;
-    padding-bottom: 20px;
-    margin-top: 40px;
-    color: #99979c;
-    /*text-align: center;*/
-    background-color: #2a2730;
-  }
+.footer {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  margin-top: 40px;
+  color: #99979c;
+  /*text-align: center;*/
+  background-color: #2a2730;
+}
 
-  .hn-footer-links {
-    padding-left: 0;
-    margin-bottom: 20px;
-  }
+.hn-footer-links {
+  padding-left: 0;
+  margin-bottom: 20px;
+}
 
-  .hn-footer-links li {
-    display: inline-block;
-  } 
+.hn-footer-links li {
+  display: inline-block;
+}
 
-  .hn-footer-links li+li {
-    margin-left: 15px;
-  }
+.hn-footer-links li+li {
+  margin-left: 15px;
+}
 
-  footer a {
-    color: #9d9d9d;
-  }
+footer a {
+  color: #9d9d9d;
 
-  footer a:hover {
+  &:hover {
     color: #fff;
     text-decoration: none;
   }
-
+}
 
 /*
  * Placeholder dashboard ideas
@@ -245,19 +254,8 @@ a.nav-icon {
   margin: 0 2px 0 2px;
 }
 
-div[class^="landing-feature"] { 
+div[class^="landing-feature"] {
   margin-bottom: 50px;
-  margin-left:20px; 
+  margin-left:20px;
   margin-right:20px;
 }
-
-.text-center {
-  text-align: center;
-}
-
-.text-left {
-  text-align: left;
-}
-
-
-
