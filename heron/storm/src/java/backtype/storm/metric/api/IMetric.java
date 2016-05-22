@@ -14,6 +14,6 @@
 
 package backtype.storm.metric.api;
 
-public interface IMetric<T> {
-  T getValueAndReset();
+public interface IMetric {
+  Object getValueAndReset();
 }

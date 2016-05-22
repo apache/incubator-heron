@@ -36,8 +36,9 @@ public class LocalCluster implements ILocalCluster {
   }
 
   @Override
+  @SuppressWarnings({"rawtypes", "unchecked"})
   public void submitTopology(String topoName,
-                             Map<String, Object> config,
+                             Map config,
                              StormTopology stormTopology)
       throws AlreadyAliveException, InvalidTopologyException {
     assertNotAlive();
