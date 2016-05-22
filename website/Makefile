@@ -7,7 +7,8 @@ setup:
 serve:
 	@hugo server --watch
 
-assets:
+static-assets:
+	@npm run clean
 	@npm run build
 
 pages:
@@ -20,7 +21,7 @@ javadocs:
 	@./javadocs.sh
 
 site:
-	@make assets
+	@make static-assets
 	@make pages
 	@make javadocs
 	@make linkchecker
