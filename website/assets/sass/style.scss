@@ -235,3 +235,22 @@ a:hover {
     }
   }
 }
+
+// 404 not found page
+.not-found {
+  img {
+    height: 100px;
+    margin-bottom: 150px;
+  }
+
+  p {
+    font-size: 18px;
+  }
+
+  ul li {
+    font-size: 16px;
+    list-style-type: none;
+  }
+
+  padding: 50px;
+}
