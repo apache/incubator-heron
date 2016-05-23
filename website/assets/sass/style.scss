@@ -83,7 +83,7 @@ a:hover {
 }
 
 // Sidebar for navigating the docs
-.hn-sidebar {
+aside.hn-sidebar {
   .hn-sidebar-nav {
     ul {
       list-style-type: none;
@@ -123,14 +123,13 @@ a:hover {
 }
 
 // Main content on docs pages
-.hn-docs-main {
-  font-size: 18px;
+section.hn-docs-main {
   max-width: 66%;
-  padding: 30px;
-  position: relative;
 
   header.hn-docs-header {
-    margin-top: 0;
+    .hn-docs-description {
+      font-style: italic;
+    }
   }
 
   article.hn-docs-content {
@@ -139,27 +138,36 @@ a:hover {
       border-radius: 2px;
     }
 
-    p, li p, ol p {
+    p {
+      font-size: 1.1em;
+    }
+
+    ul li, ul li p, ol p {
       font-size: 0.8em;
     }
 
     h1 {
       font-size: 1.8em;
+      padding-bottom: 5px;
     }
 
     h2 {
       font-size: 1.5em;
+      padding-bottom: 5px;
     }
 
     h3 {
       font-size: 1.3em;
+      padding-bottom: 5px;
     }
 
     h4 {
       font-size: 1.2em;
+      padding-bottom: 3px;
     }
 
     .highlight {
+      margin: 5px 0px;
       border-radius: 5px;
 
       pre {
