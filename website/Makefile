@@ -11,14 +11,17 @@ static-assets:
 	@npm run clean
 	@npm run build
 
+dev-assets:
+	@npm run dev-assets
+
 pages:
 	@hugo
 
 linkchecker:
-	@bash linkchecker.sh
+	@scripts/linkchecker.sh
 
 javadocs:
-	@./javadocs.sh
+	@scripts/javadocs.sh
 
 site:
 	@make static-assets
