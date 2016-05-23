@@ -83,15 +83,14 @@ public class SchedulerMainTest {
             new HashMap<String, Integer>(), new HashMap<String, Integer>());
     String packingString = "dummyPackingString";
 
-    // Mock TopologyUtils stuff
-    PowerMockito.spy(TopologyUtils.class);
-    PowerMockito.doReturn(packingString).
-        when(TopologyUtils.class, "packingToString", Mockito.any(PackingPlan.class));
-
     // Mock objects to be verified
     stateManager = Mockito.mock(IStateManager.class);
     packing = Mockito.mock(IPacking.class);
     scheduler = Mockito.mock(IScheduler.class);
+
+    PackingPlan packingPlan = Mockito.mock(PackingPlan.class);
+    Mockito.when(packing.pack()).thenReturn(packingPlan);
+    Mockito.when(packingPlan.getInstanceDistribution()).thenReturn(packingString);
 
     // Mock ReflectionUtils stuff
     PowerMockito.spy(ReflectionUtils.class);
@@ -117,7 +116,7 @@ public class SchedulerMainTest {
     PowerMockito.doReturn(true).
         when(SchedulerUtils.class, "setSchedulerLocation",
             Mockito.any(Config.class),
-            Mockito.anyString(), Mockito.anyInt(), Mockito.eq(scheduler));
+            Mockito.anyString(), Mockito.eq(scheduler));
 
     // Avoid infinite waiting
     Shutdown shutdown = Mockito.mock(Shutdown.class);
@@ -193,7 +192,7 @@ public class SchedulerMainTest {
     PowerMockito.doReturn(false).
         when(SchedulerUtils.class, "setSchedulerLocation",
             Mockito.any(Config.class),
-            Mockito.anyString(), Mockito.anyInt(), Mockito.eq(scheduler));
+            Mockito.anyString(), Mockito.eq(scheduler));
     Assert.assertFalse(schedulerMain.runScheduler());
 
     Mockito.verify(stateManager).close();

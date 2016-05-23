@@ -12,20 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import argparse
-import atexit
-import base64
-import contextlib
-import glob
-import logging
-import logging.handlers
-import os
-import shutil
-import sys
-import subprocess
-import tarfile
-import tempfile
-
 import heron.cli.src.python.args as args
 import heron.cli.src.python.utils as utils
 from heron.common.src.python.color import Log
@@ -47,7 +33,6 @@ def run(command, parser, args, unknown_args):
   release_file = utils.get_heron_release_file()
   with open(release_file) as release_info:
     for line in release_info:
-      if not "git" in line: 
         print line,
 
   return True

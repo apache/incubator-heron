@@ -30,11 +30,11 @@ import com.twitter.heron.common.basics.TypeUtils;
  * convenient way to create a topology config map by providing setter methods for
  * all the configs that can be set. It also makes it easier to do things like add
  * serializations.
- * <p/>
+ * <p>
  * <p>Note that you may put other configurations in any of the configs. Heron
  * will ignore anything it doesn't recognize, but your topologies are free to make
  * use of them by reading them in the prepare method of Bolts or the open method of
- * Spouts. .</p>
+ * Spouts.
  */
 public class Config extends HashMap<String, Object> {
   private static final long serialVersionUID = 2550967708478837032L;
@@ -93,7 +93,7 @@ public class Config extends HashMap<String, Object> {
   /**
    * The maximum number of tuples that can be pending on a spout task at any given time.
    * This config applies to individual tasks, not to spouts or topologies as a whole.
-   * <p/>
+   * <p>
    * A pending tuple is one that has been emitted from a spout but has not been acked or failed yet.
    * Note that this config parameter has no effect for unreliable spouts that don't tag
    * their tuples with a message id.
@@ -114,7 +114,7 @@ public class Config extends HashMap<String, Object> {
 
   /**
    * How many executors to spawn for ackers.
-   * <p/>
+   * <p>
    * <p>If this is set to 0, then Heron will immediately ack tuples as soon
    * as they come off the spout, effectively disabling reliability.</p>
    */

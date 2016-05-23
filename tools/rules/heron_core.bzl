@@ -30,6 +30,7 @@ def heron_core_lib_scheduler_files():
     return [
         "//heron/scheduler-core/src/java:heron-scheduler",
         "//heron/schedulers/src/java:heron-local-scheduler",
+        "//heron/schedulers/src/java:heron-slurm-scheduler",
     ]
 
 def heron_core_lib_packing_files():
