@@ -32,7 +32,7 @@ Once this has completed:
 ```bash
 $ cd website
 $ make setup
-$ make assets
+$ make build-static-assets
 ```
 
 This will install Hugo, Gulp, and all of the necessary Gulp plugins and build
@@ -47,8 +47,8 @@ are installed:
 
 1. Navigate to the `website` folder
 2. Run `npm install`
-3. Run `npm run build` (this will build all of the necessary static assets, i.e.
-   CSS, Javascript, etc.)
+3. Run `make build-static-assets` (this will build all of the necessary static
+   assets, i.e. CSS, Javascript, etc.)
 
 ## Building the Docs Locally
 
@@ -58,9 +58,10 @@ To build the docs locally:
 $ make site
 ```
 
-This will generate a full build of the docs in the `public` folder and check all
-links. If broken links are found, see `linkchecker-errors.csv` (you can safely
-leave this file in your directory, as it is ignored by Git).
+This will generate a full build of the docs in the `public` folder, a full build
+of the static assets in the `static` folder, and check all links. If broken
+links are found, see `linkchecker-errors.csv` (you can safely leave this file in
+your directory, as it is ignored by Git).
 
 ## Running the Site Locally
 
@@ -81,14 +82,10 @@ $ open http://localhost:1313/heron
 ## Working on Static Assets
 
 If you'd like to work on the site's static assets (Sass/CSS, JavaScript, etc.),
-you can run `make dev-assets`. This will build all of the static assets in the
-`assets` folder, store the build artifacts in the `static` folder, and then
-watch the `assets` folder for changes, rebuilding when changes are made.
-
-The easiest way to develop static assets is to run `make dev-assets` and `make
-serve` at the same time. If you do this, any time you make changes to files in
-`assets`, the assets will be re-built, and Hugo will both detect changes to the
-`static` folder and automatically refresh the browser.
+you can run `make develop-static-assets`. This will build all of the static
+assets in the `assets` folder, store the build artifacts in the `static`
+folder, and then watch the `assets` folder for changes, rebuilding when changes
+are made.
 
 ## Checking Links
 
@@ -96,14 +93,11 @@ To verify that the links in the docs are all valid, run `make linkchecker`,
 which will produce a report of broken links. If `linkchecker` fails to install
 or run properly, you can install it manually. Note that due to [this
 issue](https://github.com/wummel/linkchecker/pull/657) `linkchecker` versions
-9.2 and 9.3 require Python `requests` >= 2.2.0 and < 2.10.0. To ensure that you
-have the right version:
+9.2 and 9.3 require Python `requests` >= 2.2.0 and < 2.10.0.
 
-```bash
-$ pip uninstall requests
-$ pip install requests==2.9.0
-$ pip install linkchecker
-```
+If you run `make setup` you should have all of these tools available. Be warned,
+though, that `make setup` will uninstall whichever version of `requests` you
+currently have installed and replace it with version 2.9.0.
 
 ## Publishing the Site
 

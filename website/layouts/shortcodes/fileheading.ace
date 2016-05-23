@@ -1,2 +1,0 @@
-.fileheading
-  span {{.Get "name"}}

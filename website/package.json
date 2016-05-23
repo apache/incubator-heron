@@ -12,6 +12,7 @@
   },
   "scripts": {
     "build": "gulp build",
-    "dev-assets": "gulp dev"
+    "clean": "gulp clean",
+    "develop": "gulp dev"
   }
 }
