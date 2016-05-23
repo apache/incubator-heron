@@ -3,7 +3,7 @@ date: 2016-02-28T13:10:21-08:00
 title: Getting Started - Local (Single Node)
 ---
 
-Run topologies locally using pre-compiled Heron binaries (Mac OSX, Ubuntu >= 14.04, Centos7)
+Run topologies locally using pre-compiled Heron binaries (Mac OSX, Ubuntu >= 14.04, CentOS 7)
 
 ### Step 1 - Download Heron binaries with install scripts
 

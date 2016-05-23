@@ -71,6 +71,8 @@ sections:
         url: /docs/developers/ui-guide
       - name: Tuning Guide
         url: /docs/developers/tuning
+      - name: Local mode (Simulator)
+        url: /docs/developers/local-mode
       - name: Troubleshooting Guide
         url: /docs/developers/troubleshooting
       - name: Javadoc
