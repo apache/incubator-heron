@@ -7,7 +7,7 @@ for developers who want to contribute to Heron. The Heron codebase lives on
 [github]({{% githubMaster %}}).
 
 If you're looking for documentation about developing topologies for a Heron
-cluster, see [Building Topologies](../developers/topologies.html) instead.
+cluster, see [Building Topologies](../../concepts/topologies) instead.
 
 ## Languages
 
