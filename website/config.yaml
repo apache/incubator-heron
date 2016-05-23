@@ -11,10 +11,10 @@ taxonomies:
   tag: tags
 
 # Pygments syntax highlighting
-pygmentsstyle: trac
+pygmentsstyle: manni
 pygmentsuseclasses: false
 pygmentscodefencesguesssyntax: false
-pygmentscodefences: true
+PygmentsCodeFences: true
 
 # Site-level parameters available through .Site.Params.{key}
 params:
@@ -31,6 +31,7 @@ params:
     css:
       - /css/style.min.css
       - /css/font-awesome.min.css
+      - /css/pygments.css
     js:
       - http://code.jquery.com/jquery-2.2.1.min.js
       - /js/app.min.js
