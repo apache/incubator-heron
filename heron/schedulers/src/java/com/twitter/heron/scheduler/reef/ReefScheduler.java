@@ -14,6 +14,7 @@
 
 package com.twitter.heron.scheduler.reef;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -48,7 +49,7 @@ public class ReefScheduler implements IScheduler {
   @Override
   public List<String> getJobLinks() {
     // TODO need to add this implementation
-    return null;
+    return new ArrayList<>();
   }
 
   @Override
