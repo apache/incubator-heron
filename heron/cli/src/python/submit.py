@@ -11,11 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' submit.py '''
 import glob
 import os
 import shutil
-import sys
 import tempfile
 
 from heron.common.src.python.color import Log
@@ -27,114 +26,134 @@ import heron.cli.src.python.jars as jars
 import heron.cli.src.python.opts as opts
 import heron.cli.src.python.utils as utils
 
+
 ################################################################################
 # Create a subparser for the submit command
 ################################################################################
 def create_parser(subparsers):
-  parser = subparsers.add_parser(
-      'submit',
-      help='Submit a topology',
-      usage = "%(prog)s [options] cluster/[role]/[env] " + \
+    '''
+    :param subparsers:
+    :return:
+    '''
+    parser = subparsers.add_parser(
+        'submit',
+        help='Submit a topology',
+        usage="%(prog)s [options] cluster/[role]/[env] " + \
               "topology-file-name topology-class-name [topology-args]",
-      add_help = False
-  )
+        add_help=False
+    )
 
-  args.add_titles(parser)
-  args.add_cluster_role_env(parser)
-  args.add_topology_file(parser)
-  args.add_topology_class(parser)
-  args.add_config(parser)
-  args.add_deactive_deploy(parser)
-  args.add_system_property(parser)
-  args.add_verbose(parser)
+    args.add_titles(parser)
+    args.add_cluster_role_env(parser)
+    args.add_topology_file(parser)
+    args.add_topology_class(parser)
+    args.add_config(parser)
+    args.add_deactive_deploy(parser)
+    args.add_system_property(parser)
+    args.add_verbose(parser)
 
-  parser.set_defaults(subcommand='submit')
-  return parser
+    parser.set_defaults(subcommand='submit')
+    return parser
+
 
 ################################################################################
 # Launch a topology given topology jar, its definition file and configurations
 ################################################################################
 def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
+    '''
+    :param cl_args:
+    :param tmp_dir:
+    :param topology_file:
+    :param topology_defn_file:
+    :return:
+    '''
+    # get the normalized path for topology.tar.gz
+    topology_pkg_path = utils.normalized_class_path(os.path.join(tmp_dir, 'topology.tar.gz'))
 
-  # get the normalized path for topology.tar.gz
-  topology_pkg_path = utils.normalized_class_path(os.path.join(tmp_dir, 'topology.tar.gz'))
+    # get the release yaml file
+    release_yaml_file = utils.get_heron_release_file()
 
-  # get the release yaml file
-  release_yaml_file = utils.get_heron_release_file()
+    # create a tar package with the cluster configuration and generated config files
+    config_path = cl_args['config_path']
+    tar_pkg_files = [topology_file, topology_defn_file]
+    generated_config_files = [release_yaml_file, cl_args['override_config_file']]
 
-  # create a tar package with the cluster configuration and generated config files
-  config_path = cl_args['config_path']
-  tar_pkg_files = [topology_file, topology_defn_file]
-  generated_config_files = [release_yaml_file, cl_args['override_config_file']]
+    utils.create_tar(topology_pkg_path, tar_pkg_files, config_path, generated_config_files)
 
-  utils.create_tar(topology_pkg_path, tar_pkg_files, config_path, generated_config_files)
+    # pass the args to submitter main
+    local_args = [
+        "--cluster", cl_args['cluster'],
+        "--role", cl_args['role'],
+        "--environment", cl_args['environ'],
+        "--heron_home", utils.get_heron_dir(),
+        "--config_path", config_path,
+        "--override_config_file", cl_args['override_config_file'],
+        "--release_file", release_yaml_file,
+        "--topology_package", topology_pkg_path,
+        "--topology_defn", topology_defn_file,
+        "--topology_jar", topology_file
+    ]
 
-  # pass the args to submitter main
-  args = [
-      "--cluster", cl_args['cluster'],
-      "--role", cl_args['role'],
-      "--environment", cl_args['environ'],
-      "--heron_home", utils.get_heron_dir(),
-      "--config_path", config_path,
-      "--override_config_file", cl_args['override_config_file'],
-      "--release_file", release_yaml_file,
-      "--topology_package", topology_pkg_path,
-      "--topology_defn", topology_defn_file,
-      "--topology_jar", topology_file
-  ]
+    if opts.verbose():
+        local_args.append("--verbose")
 
-  if opts.verbose():
-    args.append("--verbose")
+    lib_jars = utils.get_heron_libs(
+        jars.scheduler_jars() + jars.uploader_jars() + jars.statemgr_jars() + jars.packing_jars()
+    )
 
-  lib_jars = utils.get_heron_libs(
-      jars.scheduler_jars() + jars.uploader_jars() + jars.statemgr_jars() + jars.packing_jars()
-  )
+    # invoke the submitter to submit and launch the topology
+    execute.heron_class(
+        'com.twitter.heron.scheduler.SubmitterMain',
+        lib_jars,
+        extra_jars=[],
+        args=local_args,
+        javaDefines=cl_args['javaDefines']
+    )
 
-  # invoke the submitter to submit and launch the topology
-  execute.heron_class(
-      'com.twitter.heron.scheduler.SubmitterMain',
-      lib_jars,
-      extra_jars=[],
-      args = args,
-      javaDefines = cl_args['javaDefines']
-  )
 
 ################################################################################
 # Launch topologies
 ################################################################################
 def launch_topologies(cl_args, topology_file, tmp_dir):
+    '''
+    :param cl_args:
+    :param topology_file:
+    :param tmp_dir:
+    :return:
+    '''
+    # the submitter would have written the .defn file to the tmp_dir
+    defn_files = glob.glob(tmp_dir + '/*.defn')
 
-  # the submitter would have written the .defn file to the tmp_dir
-  defn_files = glob.glob(tmp_dir + '/*.defn')
+    if len(defn_files) == 0:
+        raise Exception("No topologies found")
 
-  if len(defn_files) == 0:
-    raise Exception("No topologies found")
+    try:
+        for defn_file in defn_files:
 
-  try:
-    for defn_file in defn_files:
+            # load the topology definition from the file
+            topology_defn = topology_pb2.Topology()
+            try:
+                handle = open(defn_file, "rb")
+                topology_defn.ParseFromString(handle.read())
+                handle.close()
 
-      # load the topology definition from the file
-      topology_defn = topology_pb2.Topology()
-      try:
-        f = open(defn_file, "rb")
-        topology_defn.ParseFromString(f.read())
-        f.close()
+            except:
+                raise Exception("Could not open and parse topology defn file %s" % defn_file)
 
-      except:
-        raise Exception("Could not open and parse topology defn file %s" % defn_file)
+            # launch the topology
+            try:
+                Log.info("Launching topology \'%s\'" % topology_defn.name)
+                launch_a_topology(cl_args, tmp_dir, topology_file, defn_file)
+                Log.info("Topology \'%s\' launched successfully" % topology_defn.name)
 
-      # launch the topology
-      try:
-        Log.info("Launching topology \'%s\'" % topology_defn.name)
-        launch_a_topology(cl_args, tmp_dir, topology_file, defn_file)
-        Log.info("Topology \'%s\' launched successfully" % topology_defn.name)
+            except Exception as ex:
+                Log.error('Failed to launch topology \'%s\' because %s' %
+                          (topology_defn.name, str(ex)))
+                raise
 
-      except Exception as ex:
-        Log.error('Failed to launch topology \'%s\' because %s' % (topology_defn.name, str(ex)))
+    except:
         raise
 
-  except:
-    raise
 
 ################################################################################
 # We use the packer to make a package for the jar and dump it
@@ -148,31 +167,37 @@ def launch_topologies(cl_args, topology_file, tmp_dir):
 # and launch the scheduler jobs
 ################################################################################
 def submit_fatjar(cl_args, unknown_args, tmp_dir):
+    '''
+    :param cl_args:
+    :param unknown_args:
+    :param tmp_dir:
+    :return:
+    '''
+    # execute main of the topology to create the topology definition
+    topology_file = cl_args['topology-file-name']
+    try:
+        execute.heron_class(
+            cl_args['topology-class-name'],
+            utils.get_heron_libs(jars.topology_jars()),
+            extra_jars=[topology_file],
+            args=tuple(unknown_args),
+            javaDefines=cl_args['javaDefines'])
 
-  # execute main of the topology to create the topology definition
-  topology_file = cl_args['topology-file-name']
-  try:
-    execute.heron_class(
-      cl_args['topology-class-name'],
-      utils.get_heron_libs(jars.topology_jars()),
-      extra_jars = [topology_file],
-      args = tuple(unknown_args),
-      javaDefines = cl_args['javaDefines'])
+    except Exception:
+        Log.error("Unable to execute topology main class")
+        return False
 
-  except Exception as ex:
-    Log.error("Unable to execute topology main class")
-    return False
+    try:
+        launch_topologies(cl_args, topology_file, tmp_dir)
 
-  try:
-    launch_topologies(cl_args, topology_file, tmp_dir)
+    except Exception:
+        return False
 
-  except Exception as ex:
-    return False
+    finally:
+        shutil.rmtree(tmp_dir)
 
-  finally:
-    shutil.rmtree(tmp_dir)
+    return True
 
-  return True
 
 ################################################################################
 # Extract and execute the java files inside the tar and then add topology
@@ -189,26 +214,32 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
 # and launch the aurora jobs
 ################################################################################
 def submit_tar(cl_args, unknown_args, tmp_dir):
+    '''
+    :param cl_args:
+    :param unknown_args:
+    :param tmp_dir:
+    :return:
+    '''
+    # execute main of the topology to create the topology definition
+    topology_file = cl_args['topology-file-name']
+    execute.heron_tar(
+        cl_args['topology-class-name'],
+        topology_file,
+        tuple(unknown_args),
+        tmp_dir,
+        cl_args['javaDefines'])
 
-  # execute main of the topology to create the topology definition
-  topology_file = cl_args['topology-file-name']
-  execute.heron_tar(
-      cl_args['topology-class-name'],
-      topology_file,
-      tuple(unknown_args),
-      tmp_dir,
-      cl_args['javaDefines'])
+    try:
+        launch_topologies(cl_args, topology_file, tmp_dir)
 
-  try:
-    launch_topologies(cl_args, topology_file, tmp_dir)
+    except Exception:
+        return False
 
-  except Exception as ex:
-    return False
+    finally:
+        shutil.rmtree(tmp_dir)
 
-  finally:
-    shutil.rmtree(tmp_dir)
+    return True
 
-  return True
 
 ################################################################################
 #  Submits the topology to the scheduler
@@ -219,40 +250,46 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
 #  * You can see your topology in Heron UI
 ################################################################################
 def run(command, parser, cl_args, unknown_args):
+    '''
+    :param command:
+    :param parser:
+    :param cl_args:
+    :param unknown_args:
+    :return:
+    '''
+    # get the topology file name
+    topology_file = cl_args['topology-file-name']
 
-  # get the topology file name
-  topology_file = cl_args['topology-file-name']
+    # check to see if the topology file exists
+    if not os.path.isfile(topology_file):
+        Log.error("Topology jar|tar file %s does not exist" % topology_file)
+        return False
 
-  # check to see if the topology file exists
-  if not os.path.isfile(topology_file):
-    Log.error("Topology jar|tar file %s does not exist" % topology_file)
+    # check if it is a valid file type
+    jar_type = topology_file.endswith(".jar")
+    tar_type = topology_file.endswith(".tar") or topology_file.endswith(".tar.gz")
+    if not jar_type and not tar_type:
+        Log.error("Unknown file type. Please use .tar or .tar.gz or .jar file")
+        return False
+
+    # create a temporary directory for topology definition file
+    tmp_dir = tempfile.mkdtemp()
+
+    # if topology needs to be launched in deactivated state, do it so
+    if cl_args['deploy_deactivated']:
+        initial_state = topology_pb2.TopologyState.Name(topology_pb2.PAUSED)
+    else:
+        initial_state = topology_pb2.TopologyState.Name(topology_pb2.RUNNING)
+
+    # set the tmp dir and deactivated state in global options
+    opts.set_config('cmdline.topologydefn.tmpdirectory', tmp_dir)
+    opts.set_config('cmdline.topology.initial.state', initial_state)
+
+    # check the extension of the file name to see if it is tar/jar file.
+    if jar_type:
+        return submit_fatjar(cl_args, unknown_args, tmp_dir)
+
+    elif tar_type:
+        return submit_tar(cl_args, unknown_args, tmp_dir)
+
     return False
-
-  # check if it is a valid file type
-  jar_type = topology_file.endswith(".jar")
-  tar_type = topology_file.endswith(".tar") or topology_file.endswith(".tar.gz")
-  if not jar_type and not tar_type:
-    Log.error("Unknown file type. Please use .tar or .tar.gz or .jar file")
-    return False
-
-  # create a temporary directory for topology definition file
-  tmp_dir = tempfile.mkdtemp()
-
-  # if topology needs to be launched in deactivated state, do it so
-  if cl_args['deploy_deactivated']:
-    initial_state = topology_pb2.TopologyState.Name(topology_pb2.PAUSED)
-  else:
-    initial_state = topology_pb2.TopologyState.Name(topology_pb2.RUNNING)
-
-  # set the tmp dir and deactivated state in global options
-  opts.set_config('cmdline.topologydefn.tmpdirectory', tmp_dir)
-  opts.set_config('cmdline.topology.initial.state', initial_state)
-
-  # check the extension of the file name to see if it is tar/jar file.
-  if jar_type:
-    return submit_fatjar(cl_args, unknown_args, tmp_dir)
-
-  elif tar_type:
-    return submit_tar(cl_args, unknown_args, tmp_dir)
-
-  return False

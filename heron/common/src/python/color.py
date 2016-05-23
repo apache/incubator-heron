@@ -11,16 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' color.py '''
 import logging
 import colorlog
 
 # formatter = colorlog.ColoredFormatter('%(log_color)s%(levelname)s:%(name)s:%(message)s')
-formatter = colorlog.ColoredFormatter('%(log_color)s%(levelname)s:%(reset)s %(message)s')
-stream = logging.StreamHandler()
-stream.setLevel(logging.DEBUG)
-stream.setFormatter(formatter)
+FORMATTER = colorlog.ColoredFormatter('%(log_color)s%(levelname)s:%(reset)s %(message)s')
+STREAM = logging.StreamHandler()
+STREAM.setLevel(logging.DEBUG)
+STREAM.setFormatter(FORMATTER)
 
-Log = logging.getLogger()
-Log.setLevel(logging.DEBUG)
-Log.addHandler(stream)
+LOG = logging.getLogger()
+LOG.setLevel(logging.DEBUG)
+LOG.addHandler(STREAM)
