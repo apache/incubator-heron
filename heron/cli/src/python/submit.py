@@ -96,7 +96,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
       lib_jars,
       extra_jars=[],
       args = args,
-      javaDefines = cl_args['javaDefines']
+      javaDefines = []
   )
 
 ################################################################################
@@ -192,12 +192,13 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
 
   # execute main of the topology to create the topology definition
   topology_file = cl_args['topology-file-name']
+  javaDefines = cl_args['topology_main_jvm_property']
   execute.heron_tar(
       cl_args['topology-class-name'],
       topology_file,
       tuple(unknown_args),
       tmp_dir,
-      cl_args['javaDefines'])
+      javaDefines)
 
   try:
     launch_topologies(cl_args, topology_file, tmp_dir)
