@@ -125,12 +125,13 @@ a:hover {
 // Main content on docs pages
 .hn-docs-main {
   font-size: 18px;
-  max-width: 66%;
-  padding: 30px;
-  position: relative;
+  width: 66%;
+  padding: 20px;
 
   header.hn-docs-header {
-    margin-top: 0;
+    .hn-docs-description {
+      font-style: italic;
+    }
   }
 
   article.hn-docs-content {
@@ -139,24 +140,32 @@ a:hover {
       border-radius: 2px;
     }
 
-    p, li p, ol p {
-      font-size: 0.8em;
+    p {
+      font-size: 0.9em;
+    }
+
+    ul li, li p, ol p {
+      font-size: 0.9em;
     }
 
     h1 {
       font-size: 1.8em;
+      padding-bottom: 5px;
     }
 
     h2 {
       font-size: 1.5em;
+      padding-bottom: 5px;
     }
 
     h3 {
       font-size: 1.3em;
+      padding-bottom: 4px;
     }
 
     h4 {
       font-size: 1.2em;
+      padding-bottom: 3px;
     }
 
     .highlight {
@@ -164,7 +173,7 @@ a:hover {
 
       pre {
         border: 1px solid darken(#fafafa, 20%);
-        background-color: #fafafa;
+        //background-color: $heron-blue-gray;
       }
     }
 
@@ -203,6 +212,11 @@ a:hover {
     max-width: 100%;
     margin-left: 0;
   }
+}
+
+.hn-twitter-feed {
+   margin-top: 15px;
+   height: 800px;
 }
 
 // Footer on the index page
@@ -247,9 +261,13 @@ a:hover {
     font-size: 18px;
   }
 
-  ul li {
-    font-size: 16px;
-    list-style-type: none;
+  ul {
+    padding: 0;
+
+    li {
+      font-size: 16px;
+      list-style-type: none;
+    }
   }
 
   padding: 50px;

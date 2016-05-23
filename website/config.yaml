@@ -11,9 +11,10 @@ taxonomies:
   tag: tags
 
 # Pygments syntax highlighting
-pygmentsstyle: manni
+pygmentsstyle: trac
 pygmentsuseclasses: false
-Pygmentscodefences: true
+pygmentscodefencesguesssyntax: false
+pygmentscodefences: true
 
 # Site-level parameters available through .Site.Params.{key}
 params:
