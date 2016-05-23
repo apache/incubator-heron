@@ -83,7 +83,7 @@ a:hover {
 }
 
 // Sidebar for navigating the docs
-.hn-sidebar {
+aside.hn-sidebar {
   .hn-sidebar-nav {
     ul {
       list-style-type: none;
@@ -123,10 +123,8 @@ a:hover {
 }
 
 // Main content on docs pages
-.hn-docs-main {
-  font-size: 18px;
-  width: 66%;
-  padding: 20px;
+section.hn-docs-main {
+  max-width: 66%;
 
   header.hn-docs-header {
     .hn-docs-description {
@@ -141,7 +139,11 @@ a:hover {
     }
 
     p {
-      font-size: 0.9em;
+      font-size: 1.1em;
+    }
+
+    ul li, ul li p, ol p {
+      font-size: 0.8em;
     }
 
     ul li, li p, ol p {
@@ -160,7 +162,7 @@ a:hover {
 
     h3 {
       font-size: 1.3em;
-      padding-bottom: 4px;
+      padding-bottom: 5px;
     }
 
     h4 {
@@ -169,6 +171,7 @@ a:hover {
     }
 
     .highlight {
+      margin: 5px 0px;
       border-radius: 5px;
 
       pre {
