@@ -72,7 +72,7 @@ sections:
       - name: Tuning Guide
         url: /docs/developers/tuning
       - name: Topology Development mode (Simulator)
-        url: /docs/developers/top-dev-mode
+        url: /docs/developers/topo-dev-mode
       - name: Troubleshooting Guide
         url: /docs/developers/troubleshooting
       - name: Javadoc
