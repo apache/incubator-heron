@@ -21,8 +21,7 @@ import com.twitter.heron.api.topology.{TopologyContext, OutputFieldsDeclarer}
 import com.twitter.heron.api.tuple.Tuple
 
 /**
- *
- * This bolt is the same as SomeStormBolt, but modified to use the Heron metrics API that uses generics
+ * This bolt is the same as SomeStormBolt, but modified to use the Heron APIs that uses generics
  */
 class SomeHeronBolt extends BaseBasicBolt {
 

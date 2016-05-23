@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# Compiles the scala classes below with Heron and Storm jars to verify compile compatibility. Once
-# We have scala/bazel support we should remote this script and replace with bazel targets.
+# Compiles the scala classes below with Heron and Storm APIs to verify compile compatibility. Once
+# We have scala/bazel support we should remove this script and replace with bazel targets.
 #
 
 set -ex

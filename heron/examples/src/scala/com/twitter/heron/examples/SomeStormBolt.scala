@@ -21,9 +21,8 @@ import backtype.storm.topology.base.BaseBasicBolt
 import backtype.storm.tuple.Tuple
 
 /**
- *
- * This is an example of a bolt that has some patterns that might be in use in scala that works
- * with the Storm API. It will run with both storm and heron.
+ * This is an example of a bolt that has some patterns that might be in use in scala that is
+ * compatible with the Storm API. It will run on both Storm and Heron.
  */
 class SomeStormBolt extends BaseBasicBolt {
 
