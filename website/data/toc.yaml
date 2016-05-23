@@ -71,7 +71,7 @@ sections:
         url: /docs/developers/ui-guide
       - name: Tuning Guide
         url: /docs/developers/tuning
-      - name: Topology Development mode (Simulator)
+      - name: Simulator Mode
         url: /docs/developers/topo-dev-mode
       - name: Troubleshooting Guide
         url: /docs/developers/troubleshooting

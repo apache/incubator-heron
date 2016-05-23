@@ -12,7 +12,7 @@ When deploying locally, you can use one of two coordination mechanisms:
 2. [The local filesystem](#local-filesystem)
 
 **Note**: Deploying a Heron cluster locally is not to be confused with Heron's
-[local mode](../../../../developers/topo-dev-mode). Local mode enables you to run
+[simulator mode](../../../../developers/simulator-mode). Simulator mode enables you to run
 topologies in a cluster-agnostic JVM process for the purpose of development and
 debugging, while the local scheduler stands up a Heron cluster on a single
 machine.
