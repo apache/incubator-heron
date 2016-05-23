@@ -8,12 +8,12 @@ Run topologies locally using pre-compiled Heron binaries (Mac OSX, Ubuntu >= 14.
 ### Step 1 - Download Heron binaries with install scripts
 
 Navigate to [Twitter Heron Releases](https://github.com/twitter/heron/releases) and
-download the following self extracting binary install scripts for your platform. 
+download the following self extracting binary install scripts for your platform.
 
 * heron-client-install
 * heron-tools-install
 
-For example, if you want to download for Mac OSX (darwin), the 
+For example, if you want to download for Mac OSX (darwin), the
 corresponding binaries will be
 
 * heron-client-install-\<version\>-darwin.sh
@@ -124,13 +124,13 @@ The source code for the example topologies can be found at
 
 ```ComponentJVMOptionsTopology.java``` - a topology that supplies JVM options for each component.
 
-```CustomGroupingTopology.java``` - a topology that implements custom grouping. 
+```CustomGroupingTopology.java``` - a topology that implements custom grouping.
 
 ```ExclamationTopology.java``` - a spout emits random words to a bolt that adds an explanation mark.
 
 ```MultiSpoutExclamationTopology.java``` - a topology with multiple spouts.
 
-```MultiStageAckingTopology.java``` - a three stage topology. A spout emits to bolt that feeds to another bolt. 
+```MultiStageAckingTopology.java``` - a three stage topology. A spout emits to bolt that feeds to another bolt.
 
 ```TaskHookTopology.java``` - a topology that uses a task hook to subscribe for event notifications.
 
@@ -140,4 +140,3 @@ The source code for the example topologies can be found at
 [Deploy topologies](../operators/deployment) in clustered, scheduler-driven environments (Aurora, Mesos, Local)
 
 [Develop topologies](../concepts/architecture) for the Heron Architecture
-

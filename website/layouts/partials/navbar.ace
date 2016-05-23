@@ -1,31 +1,27 @@
-nav.navbar.navbar-inverse.navbar-fixed-top role=navigation
-  .container-fluid
-
-    .navbar-header 
-      {{HTML "<button class=\"navbar-toggle collapsed\" type=button data-toggle=collapse data-target=#hn-navbar aria-controls=hn-navbar aria-expanded=false>"}} 
+nav.hn-top-navbar.navbar.navbar-inverse.navbar-fixed-top role=navigation
+  .hn-navbar-container.container-fluid
+    .navbar-header
+      button.navbar-toggle.collapsed type=button data-toggle=collapse data-target=#hn-navbar aria-controls=hn-navbar aria-expanded=false
         span.sr-only
           Toggle navigation
-        span.icon-bar
-        span.icon-bar
-        span.icon-bar
-      {{HTML "</button>"}} 
+        i.hn-toggle-button.fa.fa-bars
 
-      a.navbar-brand href=/ style="padding: 15px 15px;"
-        img.img-responsive.pull-left src={{.Site.Params.assets.textLogoSmall}} 
+      a.hn-navbar-logo.navbar-brand href=/
+        img.pull-left src={{.Site.Params.assets.textLogoSmall}}
 
     #hn-navbar.navbar-collapse.collapse
       ul.nav.navbar-nav.navbar-right
         li
           a href=/docs/getting-started Docs
-        li 
+        li
           a href=/docs/resources Resources
         li
           a href=/docs/contributors/community Community
         li
           a href={{.Site.Params.github.home}} GitHub
-        li 
+        li
           a.nav-icon href={{.Site.Params.social.googleGroup}}
             i.fa.fa-comments
-        li 
+        li
           a.nav-icon href={{.Site.Params.social.twitter}}
             i.fa.fa-twitter

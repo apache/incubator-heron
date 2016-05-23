@@ -1,79 +1,113 @@
 @import "bootstrap";
-@import "sloth/sloth";
+
+// Import Open Sans font
+@import url(https://fonts.googleapis.com/css?family=Open+Sans);
 
 // Variables
-$sidebar-width: 15em;
+$light-gray: #9d9d9d;
+$heron-blue-gray: #263238;
 
-$font-name: "Helvetica Neue";
+// Helpers
+div[class^="landing-feature"] {
+  margin-bottom: 50px;
+  margin-left:20px;
+  margin-right:20px;
 
-html, body {
-  font-family: $font-name, sans-serif;
+  .panel {
+    min-height: 150px;
+    max-height: 200px;
+
+    .panel-heading {
+      font-size: 16px;
+    }
+  }
 }
 
-@-webkit-viewport { width: device-width; }
-@-moz-viewport    { width: device-width; }
-@-ms-viewport     { width: device-width; }
-@-o-viewport      { width: device-width; }
-@viewport         { width: device-width; }
+// Set global attributes
+html, body {
+  font-family: "Open Sans", sans-serif;
+}
 
-/*
- * Base structure
- */
+a:hover {
+  text-decoration: none;
+}
 
-/* Move down content because we have a fixed navbar */
-body {
+// Move down content because we have a fixed navbar
+.hn-main {
   padding-top: $navbar-height;
 }
 
-/*
- * Global add-ons
- */
-
-.sub-header {
-  padding-bottom: 10px;
-  border-bottom: 1px solid #eee;
-}
-
-/*
- * Top navigation
- * Hide default border to remove 1px line.
- */
-.navbar-fixed-top {
+// Top navbar
+.hn-top-navbar {
   border: 0;
+  background-color: $heron-blue-gray;
+
+  .hn-navbar-container {
+    padding: 0px 25px;
+  }
+
+  a.hn-navbar-logo {
+    padding: 15px;
+  }
+
+  a.nav-icon {
+    font-size: 18px;
+  }
+
+  ul li {
+    font-size: 16px;
+  }
+
+  i.hn-toggle-button {
+    color: $light-gray;
+  }
 }
 
-a.navbar-brand {
-  font-size: 30px;
+// Jumbotron on the index page
+.hn-jumbotron {
+  border-radius: 0 !important;
+  background-color: $heron-blue-gray;
+
+  img.hn-jumbotron-logo {
+    margin-bottom: 20px;
+  }
+
+  p.hn-tagline {
+    font-size: 20px;
+    color: $light-gray;
+  }
+
+  .hn-button-row .btn {
+    margin: 5px;
+  }
 }
 
-a.nav-icon {
-  font-size: 18px;
-}
-
-
-/*
- * Sidebar
- */
-
-/* Hide for mobile, show later */
-.sidebar {
-  width: $sidebar-width;
-  .sidebar-nav-container {
+// Sidebar for navigating the docs
+aside.hn-sidebar {
+  .hn-sidebar-nav {
     ul {
       list-style-type: none;
+      padding: 0;
+      margin-bottom: 20px;
 
       li {
-        span {
-          font-size: 24px;
-          padding-left: 1em;
-          padding-bottom: 0.3em;
+        a {
+          overflow: hidden;
+          padding: 4px 0;
+          display: block;
+
+          &:hover {
+            background-color: transparent;
+          }
         }
       }
     }
   }
 }
+
+// Hide sidebar for mobile, show later
 @media (min-width: 768px) {
-  .sidebar {
+  .hn-sidebar {
     position: fixed;
     top: $navbar-height;
     bottom: 0;
@@ -88,176 +122,145 @@ a.nav-icon {
   }
 }
 
-/* Sidebar navigation */
-.nav-sidebar {
-  margin-right: -21px; /* 20px padding + 1px border */
-  margin-bottom: 20px;
-  margin-left: -20px;
+// Main content on docs pages
+section.hn-docs-main {
+  padding-bottom: 20px;
+  padding-left: 20px;
+  padding-top: 0;
 
-  & > li > a {
-    padding-right: 20px;
-    padding-left: 20px;
+  header.hn-docs-header {
+    .hn-docs-description {
+      font-style: italic;
+    }
+  }
+
+  article.hn-docs-content {
+    code {
+      padding: 2px;
+      border-radius: 2px;
+    }
+
+    p {
+      font-size: 1.2em;
+    }
+
+    ul li, ul li p, ol p {
+      font-size: 1.1em;
+    }
+
+    h1 {
+      font-size: 1.8em;
+      padding-bottom: 5px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      padding-bottom: 5px;
+    }
+
+    h3 {
+      font-size: 1.3em;
+      padding-bottom: 5px;
+    }
+
+    h4 {
+      font-size: 1.2em;
+      padding-bottom: 3px;
+    }
+
+    .highlight {
+      margin: 5px 0px;
+      border-radius: 5px;
+
+      pre {
+        border: 1px solid darken(#fafafa, 20%);
+        background-color: #fafafa;
+      }
+    }
+
+    img {
+      max-width: 90%;
+    }
+
+    table {
+      thead {
+        font-size: 16px;
+        border-bottom: 1px solid gray;
+      }
+
+      tr {
+        margin-right: 5px;
+      }
+
+      tbody {
+        font-size: 12px;
+      }
+    }
   }
 }
 
-.nav-sidebar > .active > a,
-.nav-sidebar > .active > a:hover,
-.nav-sidebar > .active > a:focus {
-  color: #fff;
-  background-color: #428bca;
-}
-
-.sidebar ul.sidebar-nav {
-    list-style-type: none;
-    padding: 0;
-    margin-bottom: 20px;
-}
-
-.sidebar ul.sidebar-nav li a {
-    padding: 4px 0;
-    display: block;
-}
-
-.sidebar ul.sidebar-nav li a:hover {
-  background-color: transparent;
-}
-
-.sidebar ul.sidebar-nav ul.sidebar-nav {
-    padding-left: 10px;
-}
-
-.sidebar ul.sidebar-nav {
-    list-style-type: none;
-    padding: 0;
-}
-
-/*
- * Main content
- */
-
-.main {
-  font-size: 18px;
-  max-width: 66%;
-  padding: 40px;
-  margin-left: $sidebar-width;
-
-  img {
-    max-width: 90%;
-  }
-
-  table {
-    thead {
-      font-size: 16px;
-      border-bottom: 1px solid gray;
-    }
-
-    tr {
-      margin-right: 5px;
-    }
-
-    tbody {
-      font-size: 12px;
-    }
-  }
-}
 @media (min-width: 768px) {
-  .main {
+  .hn-docs-main {
+    max-width: 70%;
     padding-right: 40px;
     padding-left: 40px;
   }
 }
 
 @media (max-width: 768px) {
-  .main {
-    padding-right: 40px;
-    padding-left: 40px;
+  .hn-docs-main {
+    padding: 40px;
     max-width: 100%;
     margin-left: 0;
   }
 }
 
-.main .page-header {
-  margin-top: 0;
-}
-
-/*
- * Footer
- */
-
-  .footer {
-    padding-top: 20px;
-    padding-bottom: 20px;
-    margin-top: 40px;
-    color: #99979c;
-    /*text-align: center;*/
-    background-color: #2a2730;
-  }
+// Footer on the index page
+.hn-footer {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  margin-top: 40px;
+  color: $light-gray;
+  background-color: $heron-blue-gray;
 
   .hn-footer-links {
     padding-left: 0;
     margin-bottom: 20px;
-  }
 
-  .hn-footer-links li {
-    display: inline-block;
-  } 
+    li {
+      display: inline-block;
 
-  .hn-footer-links li+li {
-    margin-left: 15px;
-  }
+      & + li {
+        margin-left: 15px;
+      }
 
-  footer a {
-    color: #9d9d9d;
-  }
+      a {
+        color: #9d9d9d;
 
-  footer a:hover {
-    color: #fff;
-    text-decoration: none;
-  }
-
-
-/*
- * Placeholder dashboard ideas
- */
-
-.placeholders {
-  margin-bottom: 30px;
-  text-align: center;
-
-  h4 {
-    margin-bottom: 0;
+        &:hover {
+          color: #fff;
+          text-decoration: none;
+        }
+      }
+    }
   }
 }
 
-.placeholder {
-  margin-bottom: 20px;
-
+// 404 not found page
+.not-found {
   img {
-    display: inline-block;
-    border-radius: 50%;
+    height: 100px;
+    margin-bottom: 150px;
   }
+
+  p {
+    font-size: 18px;
+  }
+
+  ul li {
+    font-size: 16px;
+    list-style-type: none;
+  }
+
+  padding: 50px;
 }
-
-/*
- * helpers
- */
-.button-wrapper {
-  margin: 0 2px 0 2px;
-}
-
-div[class^="landing-feature"] { 
-  margin-bottom: 50px;
-  margin-left:20px; 
-  margin-right:20px;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.text-left {
-  text-align: left;
-}
-
-
-

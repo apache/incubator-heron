@@ -2,16 +2,18 @@ setup:
 	@brew list hugo || brew install hugo
 	@npm install
 	@which gulp || npm install gulp
-	@pip install linkchecker
+	@pip uninstall requests
+	@pip install linkchecker pygments requests==2.9.0
 
 serve:
 	@hugo server --watch
 
-assets:
-	@npm run build
+develop-static-assets:
+	@npm run develop
 
-dev-assets:
-	@npm run dev-assets
+build-static-assets:
+	@npm run clean
+	@npm run build
 
 pages:
 	@hugo
@@ -23,7 +25,7 @@ javadocs:
 	@scripts/javadocs.sh
 
 site:
-	@make assets
+	@make build-static-assets
 	@make pages
 	@make javadocs
 	@make linkchecker
