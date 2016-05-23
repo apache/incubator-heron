@@ -124,7 +124,9 @@ aside.hn-sidebar {
 
 // Main content on docs pages
 section.hn-docs-main {
-  max-width: 66%;
+  padding-bottom: 20px;
+  padding-left: 20px;
+  padding-top: 0;
 
   header.hn-docs-header {
     .hn-docs-description {
@@ -139,11 +141,11 @@ section.hn-docs-main {
     }
 
     p {
-      font-size: 1.1em;
+      font-size: 1.2em;
     }
 
     ul li, ul li p, ol p {
-      font-size: 0.8em;
+      font-size: 1.1em;
     }
 
     h1 {
@@ -199,6 +201,7 @@ section.hn-docs-main {
 
 @media (min-width: 768px) {
   .hn-docs-main {
+    max-width: 70%;
     padding-right: 40px;
     padding-left: 40px;
   }
@@ -206,8 +209,7 @@ section.hn-docs-main {
 
 @media (max-width: 768px) {
   .hn-docs-main {
-    padding-right: 40px;
-    padding-left: 40px;
+    padding: 40px;
     max-width: 100%;
     margin-left: 0;
   }
