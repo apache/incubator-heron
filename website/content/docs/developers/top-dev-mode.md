@@ -1,18 +1,21 @@
 ---
-title: Local mode
+title: Topology Development Mode (Simulator)
 ---
 
-The page explains how to run a topology in local mode.
+The page explains how to develop a topology on your local machine.
 
-Local mode is designed for topology developers to better debug or optimize their topologies.
+Topology development mode is specifically designed for topology developers to better debug or optimize their topologies.
 
-Local mode simulates a heron cluster in a single JVM process and is useful for developing and testing topologies. Running topologies in local mode is similar to running topologies on a cluster.
-With the whole topology running in a single process, you could enjoy all free benefits it brings. For example, one can run program in IDE and set breakpoints to examine the states of a topology, or profile your program to optimize topology.
+Topology development mode simulates a heron cluster in a single JVM process. This is useful for developing and testing topologies.
+Running topologies under topology development mode is similar to running topologies on a cluster.
 
-To use local mode, simply use the ``LocalMode`` class, which is in ``storm-compatibility-unshaded_deploy.jar``  (currently under ``bazel-bin/heron/storm/src/java``).
+With a whole topology running in a single process, you could enjoy all free benefits it brings.
+For example, one can run program in IDE and set breakpoints to examine the states of a topology, or profile your program to optimize it.
+
+To use topology development mode, simply use the ``LocalMode`` class, which is
+in ``storm-compatibility-unshaded_deploy.jar``  (currently under ``bazel-bin/heron/storm/src/java``).
 
 For example:
-
 
 ```java
 import com.twitter.heron.localmode.LocalMode;
