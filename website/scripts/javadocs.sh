@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-
-# TODO: turn this back on once all the javadoc errors are fixed
-#set -e
+set -e
 
 HERON_ROOT_DIR=$(git rev-parse --show-toplevel)
 JAVADOC_OUTPUT_DIR=$HERON_ROOT_DIR/website/public/api
