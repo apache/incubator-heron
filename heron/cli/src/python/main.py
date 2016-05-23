@@ -212,6 +212,10 @@ def main():
 
   atexit.register(cleanup, files)
 
+  # print the input parameters, if verbose is enabled
+  if opts.verbose():
+    print command_line_args
+
   start = time.time() 
   retcode = run(command, parser, command_line_args, unknown_args)
   end = time.time()
