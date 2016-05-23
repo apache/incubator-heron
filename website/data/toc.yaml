@@ -9,6 +9,8 @@ sections:
     sublinks:
       - name: Overview
         url: /docs/operators/deployment
+      - name: Configuration
+        url: /docs/operators/deployment/configuration
   - name: State Managers
     sublinks:
       - name: Setup Zookeeper
@@ -25,10 +27,10 @@ sections:
         url: /docs/operators/deployment/uploaders/s3
   - name: Schedulers
     sublinks:
-      - name: Local Cluster
-        url: /docs/operators/deployment/schedulers/local
       - name: Aurora Cluster
         url: /docs/operators/deployment/schedulers/aurora
+      - name: Local Cluster
+        url: /docs/operators/deployment/schedulers/local
       - name: Mesos Cluster
         url: /docs/operators/deployment/schedulers/mesos
       - name: Slurm Cluster
