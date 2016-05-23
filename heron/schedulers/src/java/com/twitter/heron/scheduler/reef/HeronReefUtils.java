@@ -14,7 +14,6 @@
 
 package com.twitter.heron.scheduler.reef;
 
-import java.io.File;
 import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,26 +32,10 @@ final class HeronReefUtils {
   static void extractPackageInSandbox(String srcFolder, String fileName, String dstDir) {
     String packagePath = Paths.get(srcFolder, fileName).toString();
     LOG.log(Level.INFO, "Extracting package: {0} at: {1}", new Object[]{packagePath, dstDir});
-    boolean result = untarPackage(packagePath, dstDir);
+    boolean result = ShellUtils.extractPackage(packagePath, dstDir, false, true);
     if (!result) {
       String msg = "Failed to extract package:" + packagePath + " at: " + dstDir;
       throw new RuntimeException(msg);
     }
-  }
-
-  /**
-   * TODO this method from LocalLauncher could be moved to a utils class
-   */
-  private static boolean untarPackage(String packageName, String targetFolder) {
-    String cmd = String.format("tar -xvf %s", packageName);
-
-    int ret = ShellUtils.runSyncProcess(false,
-        true,
-        cmd,
-        new StringBuilder(),
-        new StringBuilder(),
-        new File(targetFolder));
-
-    return ret == 0;
   }
 }
