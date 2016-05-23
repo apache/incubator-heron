@@ -118,8 +118,9 @@ public final class MultiStageAckingTopology {
     }
 
     @Override
+    @SuppressWarnings("rawtypes")
     public void prepare(
-        Map<String, Object> conf,
+        Map conf,
         TopologyContext context,
         OutputCollector acollector) {
       collector = acollector;

@@ -14,22 +14,22 @@
 
 package backtype.storm.metric.api;
 
-public class ReducedMetric<T, U, V> implements IMetric<V> {
-  private final IReducer<T, U, V> reducer;
-  private T accumulator;
+@SuppressWarnings({"rawtypes", "unchecked"})
+public class ReducedMetric implements IMetric {
+  private final IReducer reducer;
+  private Object accumulator;
 
-  public ReducedMetric(IReducer<T, U, V> reducer) {
+  public ReducedMetric(IReducer reducer) {
     this.reducer = reducer;
     this.accumulator = this.reducer.init();
   }
 
-  public void update(U value) {
+  public void update(Object value) {
     accumulator = reducer.reduce(accumulator, value);
   }
 
-  @Override
-  public V getValueAndReset() {
-    V ret = reducer.extractResult(accumulator);
+  public Object getValueAndReset() {
+    Object ret = reducer.extractResult(accumulator);
     accumulator = reducer.init();
     return ret;
   }

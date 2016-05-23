@@ -14,22 +14,22 @@
 
 package backtype.storm.metric.api;
 
-public class CombinedMetric<T> implements IMetric<T> {
-  private final ICombiner<T> combiner;
-  private T value;
+@SuppressWarnings({"rawtypes", "unchecked"})
+public class CombinedMetric implements IMetric {
+  private final ICombiner combiner;
+  private Object value;
 
-  public CombinedMetric(ICombiner<T> combiner) {
+  public CombinedMetric(ICombiner combiner) {
     this.combiner = combiner;
     this.value = this.combiner.identity();
   }
 
-  public void update(T newValue) {
+  public void update(Object newValue) {
     value = combiner.combine(value, newValue);
   }
 
-  @Override
-  public T getValueAndReset() {
-    T ret = value;
+  public Object getValueAndReset() {
+    Object ret = value;
     value = combiner.identity();
     return ret;
   }

@@ -16,7 +16,8 @@ package org.apache.storm.topology;
 
 import java.util.Map;
 
-public interface ComponentConfigurationDeclarer<T extends ComponentConfigurationDeclarer<?>> {
+@SuppressWarnings("rawtypes")
+public interface ComponentConfigurationDeclarer<T extends ComponentConfigurationDeclarer> {
   T addConfigurations(Map<String, Object> conf);
 
   T addConfiguration(String config, Object value);

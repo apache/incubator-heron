@@ -44,7 +44,8 @@ public class SerializableSerializer extends Serializer<Object> {
   }
 
   @Override
-  public Object read(Kryo kryo, Input input, Class<Object> c) {
+  @SuppressWarnings("rawtypes")
+  public Object read(Kryo kryo, Input input, Class c) {
     int len = input.readInt();
     byte[] ser = new byte[len];
     input.readBytes(ser);
