@@ -27,7 +27,7 @@ html lang={{.Site.LanguageCode}}
                 .col-sm-6
                   .panel.panel-primary
                     .panel-heading Speed and Performance
-                    .panel-body Heron is built with a wide array of architectural improvements that deliver <a href="http://dl.acm.org/citation.cfm?id=2742788">2-5x improvement in efficiency</a> over <a href="http://storm.apache.org">Apache Storm</a>.
+                    .panel-body Heron is built with a wide array of architectural improvements that deliver a <a href="http://dl.acm.org/citation.cfm?id=2742788">2-5x efficiency gain</a> over <a href="http://storm.apache.org">Apache Storm</a>.
                 .col-sm-6
                   .panel.panel-primary
                     .panel-heading Proven at Twitter Scale
