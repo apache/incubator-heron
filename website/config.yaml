@@ -20,7 +20,7 @@ PygmentsCodeFences: true
 params:
   author: Luc Perkins
   versions:
-    heron: 0.13.5
+    heron: 0.13.7
     bazel: 0.1.2
   assets:
     favicon:
