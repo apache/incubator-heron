@@ -1,4 +1,6 @@
-## Heron UI Usage Guide
+---
+title: Heron UI Usage Guide
+---
 
 ### Overview
 

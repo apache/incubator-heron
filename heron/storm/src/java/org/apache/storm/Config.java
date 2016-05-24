@@ -160,8 +160,8 @@ public class Config extends com.twitter.heron.api.Config {
   /**
    * How many executors to spawn for ackers.
    * <p>If this is set to 0, then Storm will immediately ack tuples as soon
-   * as they come off the spout, effectively disabling reliability.</p>
-   * In Heron any values of > 0 means to enable acking.
+   * as they come off the spout, effectively disabling reliability.
+   * In Heron any values of &gt; 0 means to enable acking.
    */
   public static final String TOPOLOGY_ACKER_EXECUTORS = "topology.acker.executors";
   /**

@@ -1,4 +1,6 @@
-## Heron UI
+---
+title: Heron UI
+---
 
 **Heron UI** is a user interface that uses the [Heron
 Tracker](../../concepts/architecture#heron-tracker) to display detailed,

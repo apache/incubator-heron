@@ -1,7 +1,9 @@
 ---
 title: Community
 ---
+
 ### Contributing to Heron
+
 Community is a critical factor to the success of Heron.  Contributions are welcome! After reviewing
 the [Heron Architecture](../../concepts/architecture/), [Compiling Heron](../../developers/compiling/compiling/),
 and the [Heron Codebase](../codebase/), this page covers how to contribute and, when you've made a
@@ -48,4 +50,3 @@ TODO: links to sourcecode and dev and user groups
 
 
 Next: Review the [Heron Codebase](../codebase)
-

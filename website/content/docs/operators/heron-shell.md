@@ -1,5 +1,6 @@
-Heron Shell
-===========
+---
+title: Heron Shell
+---
 
 Heron shell helps debugging a heron topology. It is an HTTP server that runs as a
 separate process in every container.  It exposes many utilities through REST APIs.
@@ -9,8 +10,7 @@ The port to connect to heron shell for each container is stored in the physical
 plan. Heron tracker picks up this port and connects to shell. See the next
 section for more details.
 
-Shell Utilities
----------------
+## Shell Utilities
 
 ### Log files
 
@@ -52,4 +52,3 @@ the "browse" utility.
 This utility runs `jmap` with `-histo` option, to output the memory
 histogram for the jvm process of an instance. The resulting histogram is passed
 back as part of the response, and can be viewed directly in the browser.
-

@@ -51,7 +51,7 @@ $ bazel query 'kind("pex_test rule", ...)'
 
 Integration tests are divided into two categories
 
-* Functional integration tests 
+* Functional integration tests
 * Failure integration tests
 
 To run the failure integration tests on your Mac OS X, do the following:
@@ -63,4 +63,3 @@ bazel build --config=dawrin integration-test/src/...
 
 python integration-test/src/python/local_test_runner/main.py
 ```
-

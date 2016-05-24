@@ -78,7 +78,7 @@ sections:
       - name: Troubleshooting Guide
         url: /docs/developers/troubleshooting
       - name: Javadoc
-        url: /docs/javadoc
+        url: /api
   - name: Heron Developers
     sublinks:
       - name: Compiling

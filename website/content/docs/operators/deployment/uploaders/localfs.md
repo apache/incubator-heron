@@ -4,7 +4,7 @@ title: Setting Up Local File System Uploader
 
 When you submit a topology to Heron, the topology jars will be uploaded to a
 stable location. The submitter will provide this location to the scheduler and
-it will pass it to the executor each container. Heron can use a local file 
+it will pass it to the executor each container. Heron can use a local file
 system as a stable storage for topology jar distribution.
 
 There are a few things you should be aware of local file system uploader:
@@ -33,11 +33,10 @@ name.
 
 Below is an example configuration (in `uploader.yaml`) for a local file system uploader:
 
-<pre><code>
+```yaml
 # uploader class for transferring the topology jar/tar files to storage
 heron.class.uploader: com.twitter.heron.uploader.localfs.LocalFileSystemUploader
 
 # name of the directory to upload topologies for local file system uploader
 heron.uploader.localfs.file.system.directory: ${HOME}/.herondata/topologies/${CLUSTER}
-</code></pre>
-
+```

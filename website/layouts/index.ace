@@ -27,7 +27,7 @@ html lang={{.Site.LanguageCode}}
                 .col-sm-6
                   .panel.panel-primary
                     .panel-heading Speed and Performance
-                    .panel-body Heron is the direct successor of <a href="http://storm.apache.org">Apache Storm</a>, built with a wide array of architectural improvements to be backwards compatible with Storm's <a href="http://storm.apache.org/about/simple-api.html">topology API</a>.
+                    .panel-body Heron is built with a wide array of architectural improvements that contribute to high efficiency gains.
                 .col-sm-6
                   .panel.panel-primary
                     .panel-heading Proven at Twitter Scale
@@ -36,7 +36,7 @@ html lang={{.Site.LanguageCode}}
                 .col-sm-6
                   .panel.panel-primary
                     .panel-heading Compatibility with Storm
-                    .panel-body Heron is API compatible with Storm and hence no code change is required for migration.
+                    .panel-body Heron is API compatible with <a href="http://storm.apache.org">Apache Storm</a> and hence no code change is required for migration.
                 .col-sm-6
                   .panel.panel-primary
                     .panel-heading Ease of Development and Troubleshooting
@@ -53,7 +53,7 @@ html lang={{.Site.LanguageCode}}
             hr
             .landing-feature-1.text-left
               h2 Heron is in Beta
-              p Heron is now the de facto stream data processing engine inside Twitter, and we believe Heron is stable enough for production use. The Heron team monitors and responds actively to <a href="{{.Site.Params.github.issues}}">bug reports</a>s from users.
+              p Heron is now the de facto stream data processing engine inside Twitter, and we believe Heron is stable enough for production use. The Heron team monitors and responds actively to <a href="{{.Site.Params.github.issues}}">bug reports</a> from users.
             hr
             .landing-feature-2.text-left
               h2 Get Started

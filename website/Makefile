@@ -1,7 +1,6 @@
 setup:
 	@brew list hugo || brew install hugo
 	@npm install
-	@which gulp || npm install gulp
 	@pip uninstall requests
 	@pip install linkchecker pygments requests==2.9.0
 
