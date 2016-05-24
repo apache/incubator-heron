@@ -9,7 +9,7 @@ but with a wide array of architectural improvements.
 
 For more information:
 
-* [The official Heron documentation](#Documentation)
+* Official Heron documentation located at [heronstreaming.io](http://heronstreaming.io)
 * [Twitter Heron: Stream Processing at
   Scale](http://dl.acm.org/citation.cfm?id=2742788) (academic paper)
 * [Twitter Heron: Stream Processing at
