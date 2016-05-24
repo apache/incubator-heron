@@ -2,7 +2,7 @@
 set +e # TODO: fix errors and warnings and re-enable
 
 HERON_ROOT_DIR=$(git rev-parse --show-toplevel)
-JAVADOC_OUTPUT_DIR=$HERON_ROOT_DIR/website/public/api
+JAVADOC_OUTPUT_DIR=$HERON_ROOT_DIR/website/static/api
 GEN_PROTO_DIR=$HERON_ROOT_DIR/bazel-bin/heron/proto/_javac
 
 (cd $HERON_ROOT_DIR && bazel build \
