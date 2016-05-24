@@ -1,6 +1,6 @@
 ## Implementing a Spout
 
-Spout must implement the  [`ISpout`](https://github.com/twitter/heron/blob/master/heron/api/src/java/com/twitter/heron/api/spout/ISpout.java) interface.
+Spout must implement the [`ISpout`](https://github.com/twitter/heron/blob/master/heron/api/src/java/com/twitter/heron/api/spout/ISpout.java) interface.
 
 ```java
 public interface ISpout extends Serializable {
@@ -28,6 +28,6 @@ public interface ISpout extends Serializable {
 
 * The `fail` method is called when the `Tuple` with the `msgId` emitted by this spout is not processed successfully.
 
-A simple spout example is: [`TestWordSpout`](https://github.com/twitter/heron/blob/master/heron/examples/src/java/com/twitter/heron/examples/TestWordSpout.java).
+See  [`TestWordSpout`](https://github.com/twitter/heron/blob/master/heron/examples/src/java/com/twitter/heron/examples/TestWordSpout.java) for a simple spout example.
 
 Instead of implementing the [`ISpout`](https://github.com/twitter/heron/blob/master/heron/api/src/java/com/twitter/heron/api/spout/ISpout.java) interface directly, you can implement [`IRichSpout`](https://github.com/twitter/heron/blob/master/heron/api/src/java/com/twitter/heron/api/spout/IRichSpout.java).
