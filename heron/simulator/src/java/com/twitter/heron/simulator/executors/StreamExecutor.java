@@ -81,7 +81,7 @@ public class StreamExecutor implements Runnable {
 
   @Override
   public void run() {
-    Thread.currentThread().setName("SIMULATOR_Stream_Executor");
+    Thread.currentThread().setName("Simulator_Stream_Executor");
 
     LOG.info("Stream_Executor starts");
 

@@ -47,7 +47,7 @@ public class MetricsExecutor implements Runnable {
 
   private final SystemConfig systemConfig;
 
-  private final String executorId = "SIMULATOR_Metrics_Executor";
+  private final String executorId = "Simulator_Metrics_Executor";
 
   public MetricsExecutor(SystemConfig systemConfig) {
     instanceExecutors = new LinkedList<>();
