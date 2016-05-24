@@ -1,4 +1,6 @@
-## Heron Tracker
+---
+title: Heron Tracker
+---
 
 **Heron Tracker** is a web service that continuously gathers a wide
 variety of information about Heron topologies and exposes

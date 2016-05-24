@@ -1,4 +1,6 @@
-## Heron Tracker REST API
+---
+title: Heron Tracker REST API
+---
 
 ### JSON Interface
 
@@ -7,7 +9,7 @@ All Heron Tracker endpoints return a JSON object with the following information:
 * `status` -- One of the following: `success`, `failure`.
 * `executiontime` -- The time it took to return the HTTP result, in seconds.
 * `message` -- Some endpoints return special messages in this field for certain
-  requests. Often, this field will be an empty string. A `fualure` status will
+  requests. Often, this field will be an empty string. A `failure` status will
   always have a message.
 * `result` -- The result payload of the request. The contents will depend on
   the endpoint.
