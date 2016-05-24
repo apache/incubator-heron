@@ -1,4 +1,6 @@
-## Implementing a Spout
+---
+title: Implementing a Spout
+---
 
 Spout must implement the [`ISpout`](https://github.com/twitter/heron/blob/master/heron/api/src/java/com/twitter/heron/api/spout/ISpout.java) interface.
 

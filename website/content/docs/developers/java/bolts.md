@@ -1,4 +1,6 @@
-## Implementing a Bolt
+---
+title: Implementing a Bolt
+---
 
 Bolt must implement the [`IBolt`](https://github.com/twitter/heron/blob/master/heron/api/src/java/com/twitter/heron/api/bolt/IBolt.java) interface.
 
