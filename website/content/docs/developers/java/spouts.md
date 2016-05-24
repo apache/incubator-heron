@@ -1,6 +1,6 @@
-## Building Spouts
+## Implementing a Spout
 
-To implement a spout, you need to implement the `ISpout` interface to tell what the spout should do.
+To implement a spout, you need to implement the [`ISpout`](https://github.com/twitter/heron/blob/master/heron/api/src/java/com/twitter/heron/api/spout/ISpout.java) interface.
 
 ```java
 public interface ISpout extends Serializable {
@@ -28,43 +28,6 @@ The `ack` method is called when the `Tuple` with the `msgId` emitted by this spo
 
 The `fail` method is called when the `Tuple` with the `msgId` emitted by this spout is not processed successfully.
 
-A simple Spout example is the `TestWordSpout`
-```java
-public class TestWordSpout extends BaseRichSpout {
+A simple spout example is: [`TestWordSpout`](https://github.com/twitter/heron/blob/master/heron/examples/src/java/com/twitter/heron/examples/TestWordSpout.java).
 
-  private static final long serialVersionUID = -6923231632469169744L;
-  private SpoutOutputCollector collector;
-  private String[] words;
-  private Random rand;
-
-  public void open(
-      Map<String, Object> conf,
-      TopologyContext context,
-      SpoutOutputCollector aCollector) {
-    collector = aCollector;
-    words = new String[]{"Africa", "Europe", "Asia", "America", "Antarctica", "Australia"};
-    rand = new Random();
-  }
-
-  public void close() {
-  }
-
-  public void nextTuple() {
-    final String word = words[rand.nextInt(words.length)];
-    collector.emit(new Values(word));
-  }
-
-  public void ack(Object msgId) {
-  }
-
-  public void fail(Object msgId) {
-  }
-
-  public void declareOutputFields(OutputFieldsDeclarer declarer) {
-    declarer.declare(new Fields("word"));
-  }
-}
-
-```
-
-And when you actually develop topology in Java, the `IRichSpout` should be used as the main interface.
+Instead of implementing the [`ISpout`](https://github.com/twitter/heron/blob/master/heron/api/src/java/com/twitter/heron/api/spout/ISpout.java) interface directly, you can implement `IRichSpout`.
