@@ -21,12 +21,19 @@ def heron_client_aurora_files():
         "//heron/config/src/yaml:conf-aurora-yaml",
     ]
 
+def heron_client_mesos_files():
+    return [
+        "//heron/config/src/yaml:conf-mesos-yaml",
+    ]
+
+
 def heron_client_lib_scheduler_files():
     return [
         "//heron/scheduler-core/src/java:heron-scheduler",
         "//heron/schedulers/src/java:heron-local-scheduler",
         "//heron/schedulers/src/java:heron-aurora-scheduler",
         "//heron/schedulers/src/java:heron-slurm-scheduler",
+        "//heron/schedulers/src/java:heron-mesos-scheduler",
         "//heron/packing/src/java:heron-roundrobin-packing",
     ]
 
