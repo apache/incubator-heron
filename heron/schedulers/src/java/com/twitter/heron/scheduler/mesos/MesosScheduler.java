@@ -14,7 +14,6 @@ import com.twitter.heron.scheduler.mesos.framework.state.PersistenceStore;
 import com.twitter.heron.scheduler.mesos.framework.state.ZkPersistenceStore;
 import com.twitter.heron.spi.common.*;
 import com.twitter.heron.spi.scheduler.IScheduler;
-import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
@@ -336,7 +335,7 @@ public class MesosScheduler implements IScheduler {
             "\"%s\" \"%s\" \"%s\" " +
             "\"%s\" \"%s\" \"%s\"",
         Runtime.topologyName(runtime), Runtime.topologyId(runtime), FileUtils.getBaseName(Context.topologyDefinitionFile(config)),
-        TopologyUtils.packingToString(packing), MesosContext.stateManagerConnectionString(config), MesosContext.stateManagerRootPath(config),
+        packing.getInstanceDistribution(), MesosContext.stateManagerConnectionString(config), MesosContext.stateManagerRootPath(config),
         Context.tmasterSandboxBinary(config), Context.stmgrSandboxBinary(config), Context.metricsManagerSandboxClassPath(config),
         formatJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)), TopologyUtils.makeClassPath(topology, Context.topologyJarFile(config)), sPort1,
         sPort2, sPort3, Context.systemConfigSandboxFile(config), TopologyUtils.formatRamMap(
