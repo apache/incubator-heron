@@ -47,7 +47,7 @@ import com.twitter.heron.api.spout.IRichSpout;
  * HeronSubmitter.submitTopology("mytopology", conf, builder.createTopology());
  * </pre>
  * <p>
- * Running the exact same topology in local mode (in process), and configuring it to log all tuples
+ * Running the exact same topology in simulator (in process), and configuring it to log all tuples
  * emitted, looks like the following. Note that it lets the topology run for 10 seconds
  * before shutting down the local cluster.
  * <p>

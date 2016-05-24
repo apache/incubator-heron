@@ -182,7 +182,7 @@ public class Config extends com.twitter.heron.api.Config {
       "topology.metrics.consumer.register";
   /**
    * The maximum parallelism allowed for a component in this topology. This configuration is
-   * typically used in testing to limit the number of threads spawned in local mode.
+   * typically used in testing to limit the number of threads spawned in simulator.
    * This does not have any impact in Heron
    */
   public static final String TOPOLOGY_MAX_TASK_PARALLELISM = "topology.max.task.parallelism";

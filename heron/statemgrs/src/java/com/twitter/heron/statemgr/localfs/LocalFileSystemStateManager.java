@@ -129,7 +129,7 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   public ListenableFuture<Boolean> setTMasterLocation(
       TopologyMaster.TMasterLocation location, String topologyName) {
     // Note: Unlike Zk statemgr, we overwrite the location even if there is already one.
-    // This is because when running in local mode we control when a tmaster dies and
+    // This is because when running in simulator we control when a tmaster dies and
     // comes up deterministically.
     return setData(getTMasterLocationPath(topologyName), location.toByteArray(), true);
   }
@@ -149,7 +149,7 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   public ListenableFuture<Boolean> setSchedulerLocation(
       Scheduler.SchedulerLocation location, String topologyName) {
     // Note: Unlike Zk statemgr, we overwrite the location even if there is already one.
-    // This is because when running in local mode we control when a scheduler dies and
+    // This is because when running in simulator we control when a scheduler dies and
     // comes up deterministically.
     return setData(getSchedulerLocationPath(topologyName), location.toByteArray(), true);
   }

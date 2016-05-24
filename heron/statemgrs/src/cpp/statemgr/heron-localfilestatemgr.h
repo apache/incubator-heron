@@ -20,12 +20,12 @@
 // Author:- Sanjeev Kulkarni(skulkarni@twitter.com)
 //
 // This file implements the HeronStateMgr interface using local file system
-// as the storage device. This is useful when running heron in local mode
+// as the storage device. This is useful when running heron in simulator
 // or for testing purposes.
 // Currently every different piece of state is stored in different files
 // as a dump of the proto structure.
 // NOTE:- The implementation is blocking. We dont to async file operations
-// for reading/writing state information. This is ok for local mode.
+// for reading/writing state information. This is ok for simulator.
 //////////////////////////////////////////////////////////////////////////////
 #ifndef __HERON_LOCALFILESTATEMGR_H
 #define __HERON_LOCALFILESTATEMGR_H
