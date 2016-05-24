@@ -12,31 +12,31 @@ Running topologies under simulator mode is similar to running topologies on a cl
 With a whole topology running in a single process, you could enjoy all free benefits it brings.
 For example, one can run program in IDE and set breakpoints to examine the states of a topology, or profile your program to optimize it.
 
-To use simulator mode, simply use the ``LocalMode`` class, which is
+To use simulator mode, simply use the ``SimulatorMode`` class, which is
 in ``storm-compatibility-unshaded_deploy.jar``  (currently under ``bazel-bin/heron/storm/src/java``).
 
 For example:
 
 ```java
-import com.twitter.heron.localmode.LocalMode;
-LocalMode localMode = new LocalMode();
+import com.twitter.heron.simulator.Simulator;
+Simulator simulator = new Simulator();
 ```
 
-You can then submit topologies using the ``submitTopology`` method on the ``LocalMode`` object. Just like the corresponding method on ``StormSubmitter``, ``submitTopology`` takes a name, a topology configuration, and a topology object.
+You can then submit topologies using the ``submitTopology`` method on the ``Simulator`` object. Just like the corresponding method on ``StormSubmitter``, ``submitTopology`` takes a name, a topology configuration, and a topology object.
 
 For example:
 
 ```java
-localMode.submitTopology("test", conf, builder.createTopology());
+simulator.submitTopology("test", conf, builder.createTopology());
 ```
 
-Other interfaces for local mode are:
+Other interfaces for simulator mode are:
 
 ```java
-localMode.killTopology("test");
-localMode.activate("test");
-localMode.deactivate("test");
-localMode.shutdown();
+simulator.killTopology("test");
+simulator.activate("test");
+simulator.deactivate("test");
+simulator.shutdown();
 ```
 
 To kill a topology, you could also simply terminate this process.
