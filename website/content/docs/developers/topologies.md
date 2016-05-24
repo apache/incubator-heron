@@ -9,15 +9,15 @@ between components and proper configurations.
 spouts and bolts, respectively.
 
 After defining the spouts and bolts, a topology can be composed using
-[`TopologyBuilder`](/api/link/to/TopologyBuilder). The `TopologyBuilder` has
-two major methods to specify the components:
+[`TopologyBuilder`](/api/com/twitter/heron/api/TopologyBuilder). The
+`TopologyBuilder` has two major methods to specify the components:
 
-* setBolt(String id, IRichBolt bolt, Number parallelismHint): `id` is the
+* `setBolt(String id, IRichBolt bolt, Number parallelismHint)`: `id` is the
 unique identifier that assigned to a bolt, `bolt` is the one previously
 composed, and `parallelismHint` is a number that specifying the number of
 instances of this bolt.
 
-* setSpout(String id, IRichSpout spout, Number parallelismHint): `id` is the
+* `setSpout(String id, IRichSpout spout, Number parallelismHint)`: `id` is the
 unique identifier that assigned to a spout, `spout` is the one previously
 composed, and `parallelismHint` is a number that specifying the number of
 instances of this spout.
@@ -42,7 +42,7 @@ with the same field will always go to the same bolt.
 with the lowest task id.
 * Shuffle Grouping: Tuples are randomly transmitted to different instances of
 a bolt.
-* None Grouping: The grouping strategy is unspecified.
+* None Grouping: Currently, it equals to shuffle grouping.
 * All Grouping: All Tuples are transmitted to all instances of a bolt.
 * Custom Grouping: User-defined grouping strategy.
 
