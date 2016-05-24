@@ -1,9 +1,9 @@
 ---
-title: Mesos (In Progress)
+title: Mesos (Experimental)
 ---
 
-Heron supports deployment on [Apache Mesos](http://mesos.apache.org/) out of
-the box. You can also run Heron on Mesos using [Apache Aurora](../aurora) as
+Heron supports deployment on [Apache Mesos](http://mesos.apache.org/). 
+Heron can also run on Mesos using [Apache Aurora](../aurora) as
 a scheduler or using a [local scheduler](../local).
 
 ## How Heron on Mesos Works

@@ -46,7 +46,7 @@ Currently, Heron supports the following sinks
 It exposes a REST API for exploring logical plan, physical plan of the topologies and
 also for fetching metrics from them.
 
-* **Heron UI** &mdash; UI allows to explore topologies visually. It allows you to search
-for specific topologies from a list of topologies. UI displays the DAG of the topology
-and how this DAG is mapped to physical containers running in clusters. Furthermore, it
-allows you to view logs, take heap dump, memory histograms, show metrics, etc 
+* **Heron UI** &mdash; The UI provides the ability to find and explore topologies visually.
+UI displays the DAG of the topology and how the DAG is mapped to physical containers 
+running in clusters. Furthermore, it allows the ability to view logs, take heap dump, memory 
+histograms, show metrics, etc. 

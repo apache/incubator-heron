@@ -8,9 +8,9 @@ This allows a researcher to deploy Heron and execute streaming scientific work-f
 
 ## How Slurm Deployment Works
 
-Using the Slurm scheduler is similar to deploying Heron on other systems in
-that you use the [Heron](../../heron-cli) cli to manage topologies. Again the
-difference is in the configuration. 
+Using the Slurm scheduler is similar to deploying Heron on other systems. The Heron 
+(../../heron-cli) cli is used to deploy and manage topologies similar to other 
+schedulers. But the main difference is in the configuration.
 
 A set of default configuration files are provided with Heron in the [conf/slurm]
 (https://github.com/twitter/heron/tree/master/heron/config/src/yaml/conf/slurm) directory. 
@@ -24,13 +24,13 @@ directory to submit the topoloy as a batch job to the slurm scheduler.
 
 ## Slurm Scheduler Configuration
 
-You can instruct Heron to use slurm scheduler by modifying the `scheduler.yaml`
-config file. You'll need to specify the following:
+To configure Heron to use slurm scheduler, specify the following in `scheduler.yaml`
+config file:
 
 * `heron.class.scheduler` --- Indicates the class to be loaded for slurm scheduler.
 You should set this to `com.twitter.heron.scheduler.slurm.SlurmScheduler`
 
-* `heron.class.launcher` --- This specifies the class to be loaded for launching
+* `heron.class.launcher` --- Specifies the class to be loaded for launching
 topologies. You should set this to `com.twitter.heron.scheduler.slurm.SlurmLauncher`
 
 * `heron.scheduler.local.working.directory` --- The shared directory to be used as
@@ -40,10 +40,10 @@ Heron sandbox directory.
 The local scheduler uses this URI to download the core package to the working directory.
 
 * `heron.directory.sandbox.java.home` --- This is used to specify the java home to
-be used when running topologies in the containers. You could use `${JAVA_HOME}` which
-means pick up the value set in the bash environment variable $JAVA_HOME.
+be used when running topologies in the containers. Set to `${JAVA_HOME}` to use
+the value set in the bash environment variable $JAVA_HOME.
 
-* `heron.scheduler.is.service` --- This config is used to indicate whether the scheduler
+* `heron.scheduler.is.service` --- Indicate whether the scheduler
 is a service. In the case of Slurm, it should be set to `False`.
 
 ### Example Slurm Scheduler Configuration
@@ -68,6 +68,5 @@ heron.scheduler.is.service: False
 ## Slurm Script `slurm.sh`
    
 The script `slurm.sh` is used by the scheduler to submit the Heron job to the Slurm scheduler. 
-You can change this file for specific slurm settings like time, account. You need a copy of 
-this script to reside along with `scheduler.yaml` and other configuration files in the cluster
-configuration.
+Edit this file to set specific slurm settings like time, account. The script and `scheduler.yaml`
+must be included with other cluster configuration files. 

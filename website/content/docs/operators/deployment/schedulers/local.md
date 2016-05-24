@@ -8,16 +8,16 @@ stands up a mock Heron cluster on a single machine. This can be useful for
 experimenting with Heron's features, testing a wide variety of possible cluster
 events, and so on.
 
-When deploying locally, you can use one of two state managers for coordination:
+One of two state managers can be used for coordination when deploying locally:
 
 * [ZooKeeper](../../statemanagers/zookeeper)
 * [Local File System](../../statemanagers/localfs)
 
 **Note**: Deploying a Heron cluster locally is not to be confused with Heron's
-[simulator mode](../../../../developers/simulator-mode). Simulator mode enables you to run
-topologies in a cluster-agnostic JVM process for the purpose of development and
-debugging, while the local scheduler stands up a Heron cluster on a single
-machine.
+[simulator mode](../../../../developers/simulator-mode). Simulator mode enables 
+you to run topologies in a cluster-agnostic JVM process for the purpose of 
+development and debugging, while the local scheduler stands up a Heron cluster 
+on a single machine.
 
 ## How Local Deployment Works
 
@@ -27,25 +27,25 @@ difference is in the configuration.
 
 ## Local Scheduler Configuration
 
-You can instruct Heron to use local scheduler by modifying the `scheduler.yaml`
-config file. You'll need to specify the following:
+To configure Heron to use local scheduler, specify the following in `scheduler.yaml`
+config file.
 
 * `heron.class.scheduler` --- Indicates the class to be loaded for local scheduler.
-You should set this to `com.twitter.heron.scheduler.local.LocalScheduler`
+Set this to `com.twitter.heron.scheduler.local.LocalScheduler`
 
-* `heron.class.launcher` --- This specifies the class to be loaded for launching 
-topologies. You should set this to `com.twitter.heron.scheduler.local.LocalLauncher`
+* `heron.class.launcher` --- Specifies the class to be loaded for launching 
+topologies. Set this to `com.twitter.heron.scheduler.local.LocalLauncher`
 
-* `heron.scheduler.local.working.directory` --- This config provides the working 
+* `heron.scheduler.local.working.directory` --- Provides the working 
 directory for topology. The working directory is essentially a scratch pad where 
 topology jars, heron core release binaries, topology logs, etc are generated and kept.
 
 * `heron.package.core.uri` --- Indicates the location of the heron core binary package.
 The local scheduler uses this URI to download the core package to the working directory.
 
-* `heron.directory.sandbox.java.home` --- This is used to specify the java home to
-be used when running topologies in the containers. You could use `${JAVA_HOME}` which
-means pick up the value set in the bash environment variable $JAVA_HOME.
+* `heron.directory.sandbox.java.home` --- Specifies the java home to
+be used when running topologies in the containers. Set to `${JAVA_HOME}` to
+use the value set in the bash environment variable $JAVA_HOME.
 
 ### Example Local Scheduler Configuration
 

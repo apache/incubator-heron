@@ -33,23 +33,24 @@ should run tests to ensure that Aurora can successfully fetch them.
 
 ## Aurora Scheduler Configuration
 
-To instruct Heron to use Aurora scheduler, modify the `scheduler.yaml` 
+To configure Heron to use Aurora scheduler, modify the `scheduler.yaml` 
 config file specific for the Heron cluster. The following must be specified
 for each cluster:
 
 * `heron.class.scheduler` --- Indicates the class to be loaded for Aurora scheduler. 
 You should set this to `com.twitter.heron.scheduler.aurora.AuroraScheduler`
 
-* `heron.class.launcher` --- This specifies the class to be loaded for launching and
-submitting topologies. You should set this to `com.twitter.heron.scheduler.aurora.AuroraLauncher`
+* `heron.class.launcher` --- Specifies the class to be loaded for launching and
+submitting topologies. To configure the Aurora launcher, set this to 
+`com.twitter.heron.scheduler.aurora.AuroraLauncher`
 
 * `heron.package.core.uri` --- Indicates the location of the heron core binary package.
 The local scheduler uses this URI to download the core package to the working directory.
 
-* `heron.directory.sandbox.java.home` --- This is used to specify the java home to 
+* `heron.directory.sandbox.java.home` --- Specifies the java home to 
 be used when running topologies in the containers.
 
-* `heron.scheduler.is.service` --- This config is used to indicate whether the scheduler
+* `heron.scheduler.is.service` --- This config indicates whether the scheduler
 is a service. In the case of Aurora, it should be set to `False`. 
 
 ### Example Aurora Scheduler Configuration
@@ -73,11 +74,11 @@ heron.scheduler.is.service: False
 
 ## Working with Topologies
 
-Once you've set up ZooKeeper and generated an Aurora-accessible Heron core binary 
+After setting up ZooKeeper and generating an Aurora-accessible Heron core binary 
 release, any machine that has the `heron` cli tool can be used to manage Heron 
 topologies (i.e. can submit topologies, activate and deactivate them, etc.).
 
 The most important thing at this stage is to ensure that `heron` cli is available
 across all machines that will be [working with topologies](../../../heron-cli).
-Once that has been ensured, you can use Aurora as a scheduler by specifying the
+Once the cli is available, you can use Aurora as a scheduler by specifying the
 proper configuration when managing topologies.
