@@ -42,8 +42,8 @@ SANDBOX_CONF_DIR = "./heron-conf"
 CLIENT_YAML = "client.yaml"
 
 # cli configs for role and env
-ROLE_REQUIRED = "heron.config.role.required"
-ENV_REQUIRED  = "heron.config.env.required"
+IS_ROLE_REQUIRED = "heron.config.is.role.required"
+IS_ENV_REQUIRED  = "heron.config.is.env.required"
 
 ################################################################################
 # Create a tar file with a given set of files
@@ -211,14 +211,14 @@ def parse_cluster_role_env(cluster_role_env, config_path):
 
       # if role is required but not provided, raise exception
       if len(parts) == 1:
-        if (ROLE_REQUIRED in cli_confs) and (cli_confs[ROLE_REQUIRED] == True):
+        if (IS_ROLE_REQUIRED in cli_confs) and (cli_confs[IS_ROLE_REQUIRED] == True):
           raise Exception("role required but not provided")
         else:
           parts.append(getpass.getuser())
 
       # if environ is required but not provided, raise exception
       if len(parts) == 2:
-        if (ENV_REQUIRED in cli_confs) and (cli_confs[ENV_REQUIRED] == True):
+        if (IS_ENV_REQUIRED in cli_confs) and (cli_confs[IS_ENV_REQUIRED] == True):
           raise Exception("environ required but not provided")
         else:
           parts.append(ENVIRON)
