@@ -89,7 +89,7 @@ void HeronLocalFileStateMgr::GetTMasterLocation(const std::string& _topology_nam
 void HeronLocalFileStateMgr::SetTMasterLocation(const proto::tmaster::TMasterLocation& _location,
                                                 VCallback<proto::system::StatusCode> cb) {
   // Note: Unlike Zk statemgr, we overwrite the location even if there is already one.
-  // This is because when running in local mode we control when a tmaster dies and
+  // This is because when running in simulator we control when a tmaster dies and
   // comes up deterministically.
   std::string fname = GetTMasterLocationPath(_location.topology_name());
   std::string contents;

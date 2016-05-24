@@ -14,10 +14,10 @@ When deploying locally, you can use one of two state managers for coordination:
 * [Local File System](../../statemanagers/localfs)
 
 **Note**: Deploying a Heron cluster locally is not to be confused with Heron's
-[simulated mode](../../developers/java/local-mode.html). Simulated mode enables 
-you to run topologies in a cluster-agnostic JVM process for the purpose of 
-development and debugging, while the local scheduler stands up a Heron cluster 
-on a single machine.
+[simulator mode](../../../../developers/simulator-mode). Simulator mode enables you to run
+topologies in a cluster-agnostic JVM process for the purpose of development and
+debugging, while the local scheduler stands up a Heron cluster on a single
+machine.
 
 ## How Local Deployment Works
 

@@ -77,7 +77,7 @@ public interface IBolt extends Serializable {
    * will be called, because the supervisor kill -9's worker processes on the cluster.
    * <p>
    * <p>The one context where cleanup is guaranteed to be called is when a topology
-   * is killed when running Heron in local mode.</p>
+   * is killed when running Heron in simulator.</p>
    */
   void cleanup();
 }
