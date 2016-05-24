@@ -1,4 +1,6 @@
-# Local Deployment
+---
+title: Local Cluster
+---
 
 In addition to out-of-the-box schedulers for [Mesos](../mesos) and
 [Aurora](../aurora), Heron can also be deployed in a local environment, which
@@ -6,103 +8,60 @@ stands up a mock Heron cluster on a single machine. This can be useful for
 experimenting with Heron's features, testing a wide variety of possible cluster
 events, and so on.
 
-When deploying locally, you can use one of two coordination mechanisms:
+When deploying locally, you can use one of two state managers for coordination:
 
-1. A locally-running [ZooKeeper](#zookeeper)
-2. [The local filesystem](#local-filesystem)
+* [ZooKeeper](../../statemanagers/zookeeper)
+* [Local File System](../../statemanagers/localfs)
 
 **Note**: Deploying a Heron cluster locally is not to be confused with Heron's
-[local mode](../../developers/java/local-mode.html). Local mode enables you to run
-topologies in a cluster-agnostic JVM process for the purpose of development and
-debugging, while the local scheduler stands up a Heron cluster on a single
-machine.
+[simulated mode](../../developers/java/local-mode.html). Simulated mode enables 
+you to run topologies in a cluster-agnostic JVM process for the purpose of 
+development and debugging, while the local scheduler stands up a Heron cluster 
+on a single machine.
 
 ## How Local Deployment Works
 
 Using the local scheduler is similar to deploying Heron on other systems in
-that you use the [Heron CLI](../../../heron-cli) to manage topologies. The
-difference is in the configuration and [scheduler
-overrides](../../../heron-cli#submitting-a-topology) that you provide when
-you [submit a topology](../../../heron-cli#submitting-a-topology).
+that you use the [Heron](../../../heron-cli) cli to manage topologies. The
+difference is in the configuration. 
 
-### Required Scheduler Overrides
+## Local Scheduler Configuration
 
-For the local scheduler, you'll need to provide the following scheduler
-overrides:
+You can instruct Heron to use local scheduler by modifying the `scheduler.yaml`
+config file. You'll need to specify the following:
 
-* `heron.local.working.directory` &mdash; The local directory to be used as
-  Heron's sandbox directory.
-* `state.manager.class` &mdash; This will depend on whether you want to use
-  [ZooKeeper](#zookeeper) or the [local filesystem](#local-filesystem) for
-  coordination.
+* `heron.class.scheduler` --- Indicates the class to be loaded for local scheduler.
+You should set this to `com.twitter.heron.scheduler.local.LocalScheduler`
 
-For info on scheduler overrides, see the documentation on using the [Heron
-CLI](../../../heron-cli).
+* `heron.class.launcher` --- This specifies the class to be loaded for launching 
+topologies. You should set this to `com.twitter.heron.scheduler.local.LocalLauncher`
 
-### Optional Scheduler Overrides
+* `heron.scheduler.local.working.directory` --- This config provides the working 
+directory for topology. The working directory is essentially a scratch pad where 
+topology jars, heron core release binaries, topology logs, etc are generated and kept.
 
-The `heron.core.release.package` parameter is optional. It specifies the path to
-a local TAR file for the `core` component of the desired Heron release. Assuming
-that you've built a full [Heron release](../../../../developers/compiling#building-a-full-release-package), this TAR will be
-located by default at `bazel-genfiles/release/heron-core-unversioned.tar`,
-relative to the root of your Heron repository. If you set
-`heron.core.release.package`, Heron will update all local binaries in Heron's
-working directory; if you don't set `heron.core.release.package`, Heron will use
-the binaries already contained in Heron's working directory.
+* `heron.package.core.uri` --- Indicates the location of the heron core binary package.
+The local scheduler uses this URI to download the core package to the working directory.
 
-### CLI Flags
+* `heron.directory.sandbox.java.home` --- This is used to specify the java home to
+be used when running topologies in the containers. You could use `${JAVA_HOME}` which
+means pick up the value set in the bash environment variable $JAVA_HOME.
 
-In addition to setting scheduler overrides, you'll need to set the following
-[CLI flags](../../../heron-cli):
+### Example Local Scheduler Configuration
 
-* `--config-file` &mdash; This flag needs to point to the `local_scheduler.conf`
-  file in `heron/cli/src/python/local_scheduler.conf`.
-* `--config-loader` &mdash; You should set this to
-  `com.twitter.heron.scheduler.util.DefaultConfigLoader`.
+```yaml
+# scheduler class for distributing the topology for execution
+heron.class.scheduler: com.twitter.heron.scheduler.local.LocalScheduler
 
-## ZooKeeper
+# launcher class for submitting and launching the topology
+heron.class.launcher: com.twitter.heron.scheduler.local.LocalLauncher
 
-To run the local scheduler using ZooKeeper for coordination, you'll need to set
-the following scheduler overrides:
+# working directory for the topologies
+heron.scheduler.local.working.directory: ${HOME}/.herondata/topologies/${CLUSTER}/${TOPOLOGY}
 
-* `state.manager.class` should be set to
-  `com.twitter.heron.state.curator.CuratorStateManager`
-* `zk.connection.string` should specify a ZooKeeper connection string, such as
-  `localhost:2818`.
-* `state.root.address` should specify a root
-  [ZooKeeper node](https://zookeeper.apache.org/doc/trunk/zookeeperOver.html#Nodes+and+ephemeral+nodes)
-  for Heron, such as `/heron`.
+# location of the core package
+heron.package.core.uri: file://${HERON_DIST}/heron-core.tar.gz
 
-### Example Submission Command for ZooKeeper
-
-```bash
-$ heron-cli submit \
-    "heron.local.working.directory=/Users/janedoe/heron-sandbox \
-    state.manager.class=com.twitter.heron.state.curator.CuratorStateManager \
-    zk.connection.string=localhost:2181 \
-    state.root.address=/heron" \
-    /Users/janedoe/topologies/topology1.jar \
-    biz.acme.topologies.TestTopology \
-    --config-file=/Users/janedoe/heron/cli/src/python/local_scheduler.conf \
-    --config-loader=com.twitter.heron.scheduler.util.DefaultConfigLoader     
-```
-
-## Local Filesystem
-
-To run the local scheduler using your machine's filesystem for coordination,
-you'll need to set the following scheduler override:
-
-* `state.manager.class` should be set to
-  `com.twitter.heron.state.localfile.LocalFileStateManager`.
-
-### Example Submission Command for Local Filesystem
-
-```bash
-$ heron-cli submit \
-    "heron.local.working.directory=/Users/janedoe/heron-sandbox \
-    state.manager.class=com.twitter.heron.state.localfile.LocalFileStateManager" \
-    /Users/janedoe/topologies/topology1.jar \
-    biz.acme.topologies.TestTopology \
-    --config-file=/Users/janedoe/heron/cli/src/python/local_scheduler.conf \
-    --config-loader=com.twitter.heron.scheduler.util.DefaultConfigLoader    
+# location of java - pick it up from shell environment
+heron.directory.sandbox.java.home: ${JAVA_HOME}
 ```
