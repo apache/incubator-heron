@@ -26,7 +26,6 @@ updates as we progress.
 
 ## Documentation
 
-The official documentation for Heron is currently not publicly available. You
-can, however, build and run the documentation locally. More information can be
+The official documentation for Heron is located at [heronstreaming.io](http://heronstreaming.io). To contribute to documentation, build and run the documentation locally. More information can be
 found in the [documentation
 README](website/README.md).
