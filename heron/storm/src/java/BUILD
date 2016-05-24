@@ -3,7 +3,7 @@ package(default_visibility = ["//visibility:public"])
 storm_deps_files = [
     "//heron/api/src/java:api-java",
     "//heron/common/src/java:basics-java",
-    "//heron/localmode/src/java:localmode-java",
+    "//heron/simulator/src/java:simulator-java",
     "@json-simple//jar",
     "//3rdparty/java:kryo",
 ]
