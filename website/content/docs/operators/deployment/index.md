@@ -28,8 +28,8 @@ physical plan, and execution state. Heron supports the following state managers:
   * [Local File System] (statemanagers/localfs)
   * [Zookeeper] (statemanagers/zookeeper) 
 
-* **Uploader** &mdash; Heron uses an uploader to distribute the topology jars across
-servers that actually run them. Heron supports several uploaders 
+* **Uploader** &mdash; The Heron uploader distributes the topology jars to the 
+servers that run them. Heron supports several uploaders 
   * [HDFS] (uploaders/hdfs)
   * [Local File System] (uploaders/localfs)
   * [Amazon S3] (uploaders/s3)

@@ -21,9 +21,10 @@ on a single machine.
 
 ## How Local Deployment Works
 
-Using the local scheduler is similar to deploying Heron on other systems in
-that you use the [Heron](../../../heron-cli) cli to manage topologies. The
-difference is in the configuration. 
+Using the local scheduler is similar to deploying Heron on other schedulers.
+The [Heron] (../../../heron-cli) cli is used to deploy and manage topologies 
+as would be done using a distributed scheduler. But the main difference is in
+the configuration.
 
 ## Local Scheduler Configuration
 
