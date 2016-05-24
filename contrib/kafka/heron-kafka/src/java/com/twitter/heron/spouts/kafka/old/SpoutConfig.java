@@ -25,6 +25,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings({"serial"})
 public class SpoutConfig implements Serializable {
   private static final long DEFAULT_TUPLE_IN_THE_PAST_THRESHOLD = 30000; // 30s
 

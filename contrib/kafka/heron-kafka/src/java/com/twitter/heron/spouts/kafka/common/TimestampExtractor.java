@@ -20,14 +20,14 @@ package com.twitter.heron.spouts.kafka.common;
  * An interface that allows us to extract the timestamp associated with an emitted tuple.
  */
 public interface TimestampExtractor {
-    /**
-     * Returns the timestamp associated with the given tuple.
-     *
-     * @param tuple The tuple.
-     * @return The timestamp associated with the given tuple.
-     * @throw ClassCastException If the tuple cannot be converted to a class that this timestamp
-     * extractor can operate on.
-     * @throw IllegalArgumentException If the timestamp cannot be extracted from the given tuple.
-     */
-    long getTimestamp(Object tuple) throws ClassCastException, IllegalArgumentException;
+  /**
+   * Returns the timestamp associated with the given tuple.
+   *
+   * @param tuple The tuple.
+   * @return The timestamp associated with the given tuple.
+   * @throw ClassCastException If the tuple cannot be converted to a class that this timestamp
+   * extractor can operate on.
+   * @throw IllegalArgumentException If the timestamp cannot be extracted from the given tuple.
+   */
+  long getTimestamp(Object tuple) throws ClassCastException, IllegalArgumentException;
 }

@@ -4,9 +4,9 @@ import com.twitter.heron.storage.MetadataStore;
 
 public interface IOffsetStoreManager<T extends MetadataStore> {
 
-    T getStore(GlobalPartitionId id);
+  T getStore(GlobalPartitionId id);
 
-    void close(T store);
+  void close(T store);
 
-    void close();
+  void close();
 }

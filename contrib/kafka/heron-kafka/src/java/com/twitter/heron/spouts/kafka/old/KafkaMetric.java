@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings({"unchecked", "rawtypes"})
 public final class KafkaMetric {
   // Utility class. Not to be instantiated.
   private KafkaMetric() {
@@ -54,6 +55,7 @@ public final class KafkaMetric {
   public static class PartitionMetric implements IMetric {
     public static final Logger LOG = LoggerFactory.getLogger(KafkaMetric.PartitionMetric.class);
     private PartitionCoordinator coordinator;
+
     public PartitionMetric(PartitionCoordinator coordinator) {
       this.coordinator = coordinator;
     }
@@ -80,7 +82,9 @@ public final class KafkaMetric {
     private long lastCalculatedTotalSpoutLag = 0;
     private PartitionCoordinator coordinator;
 
-    /** Ctor */
+    /**
+     * Ctor
+     */
     public void setCoordinator(PartitionCoordinator zkCoordinator) {
       coordinator = zkCoordinator;
     }
@@ -98,7 +102,7 @@ public final class KafkaMetric {
       HashMap ret = new HashMap();
       try {
         List<PartitionManager> managedPartitions = coordinator.getMyManagedPartitions();
-        for (PartitionManager partitionManager: managedPartitions) {
+        for (PartitionManager partitionManager : managedPartitions) {
           long latestTimeOffset =
               partitionManager.getOffsetForTimestamp(kafka.api.OffsetRequest.LatestTime());
           long latestEmittedOffset = partitionManager.lastCompletedOffset();

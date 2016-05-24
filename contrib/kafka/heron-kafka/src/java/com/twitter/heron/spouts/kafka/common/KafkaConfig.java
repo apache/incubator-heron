@@ -22,7 +22,8 @@ import java.io.Serializable;
  * Wrapper class holding types KafkaConfig.ZkHosts. Kept for legacy reasons.
  * Do not modify.
  */
+@SuppressWarnings({"serial"})
 public class KafkaConfig implements Serializable {
-    public interface BrokerHosts extends Serializable {
-    }
+  public interface BrokerHosts extends Serializable {
+  }
 }

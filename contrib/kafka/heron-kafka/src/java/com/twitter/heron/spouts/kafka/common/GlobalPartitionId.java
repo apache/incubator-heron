@@ -23,6 +23,7 @@ import java.io.Serializable;
  * Partitions are uniformly distributed to all spout executors.
  * Id behave as a string "host:port:partitonNumber"
  */
+@SuppressWarnings({"serial"})
 public class GlobalPartitionId implements Comparable<GlobalPartitionId>, Serializable {
   /** host address */
   public final String host;

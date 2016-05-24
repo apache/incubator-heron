@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
+ * <p/>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,44 +21,44 @@ import com.google.common.base.Objects;
 
 public class Partition {
 
-    public Broker host;
-    public int partition;
-    public String topic;
+  public Broker host;
+  public int partition;
+  public String topic;
 
-    // for kryo compatibility
-    private Partition() {
-	
-    }
+  // for kryo compatibility
+  private Partition() {
 
-    public Partition(Broker host, String topic, int partition) {
-        this.topic = topic;
-        this.host = host;
-        this.partition = partition;
-    }
+  }
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(host, topic, partition);
-    }
+  public Partition(Broker host, String topic, int partition) {
+    this.topic = topic;
+    this.host = host;
+    this.partition = partition;
+  }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        final Partition other = (Partition) obj;
-        return Objects.equal(this.host, other.host) && Objects.equal(this.topic, other.topic) && Objects.equal(this.partition, other.partition);
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(host, topic, partition);
+  }
 
-    @Override
-    public String toString() {
-        return "Partition{" +
-                "host=" + host +
-                ", topic=" + topic +
-                ", partition=" + partition +
-                '}';
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
     }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    final Partition other = (Partition) obj;
+    return Objects.equal(this.host, other.host) && Objects.equal(this.topic, other.topic) && Objects.equal(this.partition, other.partition);
+  }
+
+  @Override
+  public String toString() {
+    return "Partition{" +
+        "host=" + host +
+        ", topic=" + topic +
+        ", partition=" + partition +
+        '}';
+  }
 }

@@ -24,31 +24,32 @@ import java.util.Random;
 /* This is a simple filter operator that samples with uniformly random probability of
  * sampleFreq.
  */
+@SuppressWarnings({"serial"})
 public class SimpleFilterOperator extends FilterOperator {
-    private static final Logger LOG = LoggerFactory.getLogger(SimpleFilterOperator.class);
+  private static final Logger LOG = LoggerFactory.getLogger(SimpleFilterOperator.class);
 
-    private double sampleFreq;
-    private Random random;
+  private double sampleFreq;
+  private Random random;
 
-    /**
-     * Ctor
-     */
-    public SimpleFilterOperator(String sampleFreq) {
-        super(sampleFreq);
-        try {
-            this.sampleFreq = Double.parseDouble(sampleFreq);
-        } catch (NumberFormatException e) {
-            LOG.error("Invalid sample frequency " + sampleFreq, e);
-        }
-        if (this.sampleFreq > 1) {
-            // Deprecated. Present for legacy reason, to provide one out of N message.
-            this.sampleFreq = 1 / (this.sampleFreq);
-        }
-        random = new Random();
+  /**
+   * Ctor
+   */
+  public SimpleFilterOperator(String sampleFreq) {
+    super(sampleFreq);
+    try {
+      this.sampleFreq = Double.parseDouble(sampleFreq);
+    } catch (NumberFormatException e) {
+      LOG.error("Invalid sample frequency " + sampleFreq, e);
     }
-
-    @Override
-    public boolean filter(byte[] tuple, Long kafkaLag) {
-        return random.nextDouble() > sampleFreq;
+    if (this.sampleFreq > 1) {
+      // Deprecated. Present for legacy reason, to provide one out of N message.
+      this.sampleFreq = 1 / (this.sampleFreq);
     }
+    random = new Random();
+  }
+
+  @Override
+  public boolean filter(byte[] tuple, Long kafkaLag) {
+    return random.nextDouble() > sampleFreq;
+  }
 }

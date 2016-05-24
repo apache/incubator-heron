@@ -27,36 +27,37 @@ import java.util.Random;
  * will be filtered. Instead if only maxLag and a sampleRate is defined, then once lag increases
  * beyond maxLag, then tuples are filtered uniformly by sampleRate.
  */
+@SuppressWarnings({"serial"})
 public class LagAvoidanceFilterOperator extends FilterOperator {
-    private long maxLag;
-    private long minLag;
-    private final Random random;
+  private long maxLag;
+  private long minLag;
+  private final Random random;
 
-    /**
-     * Sets adaptive sampling rate
-     *
-     * @param parameter JSon encoded value of maxLag and sampleRate or minLag.
-     */
-    public LagAvoidanceFilterOperator(String parameter) {
-        super(parameter);
-        JSONObject json = (JSONObject) JSONValue.parse(parameter);
-        this.maxLag = Integer.parseInt(json.get("maxLag").toString());
-        this.minLag = Integer.parseInt(json.get("minLag").toString());
-        random = new Random();
-    }
+  /**
+   * Sets adaptive sampling rate
+   *
+   * @param parameter JSon encoded value of maxLag and sampleRate or minLag.
+   */
+  public LagAvoidanceFilterOperator(String parameter) {
+    super(parameter);
+    JSONObject json = (JSONObject) JSONValue.parse(parameter);
+    this.maxLag = Integer.parseInt(json.get("maxLag").toString());
+    this.minLag = Integer.parseInt(json.get("minLag").toString());
+    random = new Random();
+  }
 
-    @Override
-    public boolean filter(byte[] tuple, Long kafkaLag) {
-        double rate = 0;
-        if (kafkaLag == null) {
-            return false;
-        }
-        if (minLag != maxLag) {
-            rate = (kafkaLag - minLag) / (double) (maxLag - minLag);
-        } else {
-            // If minLag and maxLag are equal, It implies everything is to be filtered.
-            rate = 1.0;
-        }
-        return (kafkaLag > minLag) && (random.nextDouble() < rate);
+  @Override
+  public boolean filter(byte[] tuple, Long kafkaLag) {
+    double rate = 0;
+    if (kafkaLag == null) {
+      return false;
     }
+    if (minLag != maxLag) {
+      rate = (kafkaLag - minLag) / (double) (maxLag - minLag);
+    } else {
+      // If minLag and maxLag are equal, It implies everything is to be filtered.
+      rate = 1.0;
+    }
+    return (kafkaLag > minLag) && (random.nextDouble() < rate);
+  }
 }

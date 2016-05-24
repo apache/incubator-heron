@@ -27,26 +27,27 @@ import java.util.List;
 /**
  * Basic implementation of scheme. May override instead of Scheme to get default behaviour
  */
+@SuppressWarnings({"serial"})
 public class StringScheme implements Scheme {
 
-    /**
-     * Returns value as String
-     */
-    public static String deserializeString(byte[] string) {
-        return new String(string, StandardCharsets.UTF_8);
-    }
+  /**
+   * Returns value as String
+   */
+  public static String deserializeString(byte[] string) {
+    return new String(string, StandardCharsets.UTF_8);
+  }
 
-    @Override
-    public List<Object> deserialize(byte[] bytes) {
-        try {
-            return new Values(new String(bytes, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+  @Override
+  public List<Object> deserialize(byte[] bytes) {
+    try {
+      return new Values(new String(bytes, "UTF-8"));
+    } catch (UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
     }
+  }
 
-    @Override
-    public Fields getOutputFields() {
-        return new Fields("str");
-    }
+  @Override
+  public Fields getOutputFields() {
+    return new Fields("str");
+  }
 }

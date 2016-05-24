@@ -21,6 +21,7 @@ import org.json.simple.JSONObject;
 import java.io.Serializable;
 import java.util.List;
 
+@SuppressWarnings({"unchecked", "serial"})
 public abstract class FilterOperator implements Serializable {
   /** Config for Filter operator. It will be passed as storm config. The filter will be applied
    * to the spout 'spoutname'. Typically your topology has many kafka spouts, so set the value
