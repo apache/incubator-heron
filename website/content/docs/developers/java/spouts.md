@@ -1,16 +1,16 @@
 ## Implementing a Spout
 
-To implement a spout, you need to implement the [`ISpout`](https://github.com/twitter/heron/blob/master/heron/api/src/java/com/twitter/heron/api/spout/ISpout.java) interface.
+Spout must implement the  [`ISpout`](https://github.com/twitter/heron/blob/master/heron/api/src/java/com/twitter/heron/api/spout/ISpout.java) interface.
 
 ```java
 public interface ISpout extends Serializable {
-	void open(Map<String, Object> conf, TopologyContext context, SpoutOutputCollector collector);
-	void close();
-	void activate();
-	void deactivate();
-	void nextTuple();
-	void ack(Object msgId);
-	void fail(Object msgId);
+  void open(Map<String, Object> conf, TopologyContext context, SpoutOutputCollector collector);
+  void close();
+  void activate();
+  void deactivate();
+  void nextTuple();
+  void ack(Object msgId);
+  void fail(Object msgId);
 }
 ```
 
@@ -30,4 +30,4 @@ public interface ISpout extends Serializable {
 
 A simple spout example is: [`TestWordSpout`](https://github.com/twitter/heron/blob/master/heron/examples/src/java/com/twitter/heron/examples/TestWordSpout.java).
 
-Instead of implementing the [`ISpout`](https://github.com/twitter/heron/blob/master/heron/api/src/java/com/twitter/heron/api/spout/ISpout.java) interface directly, you can implement `IRichSpout`.
+Instead of implementing the [`ISpout`](https://github.com/twitter/heron/blob/master/heron/api/src/java/com/twitter/heron/api/spout/ISpout.java) interface directly, you can implement [`IRichSpout`](https://github.com/twitter/heron/blob/master/heron/api/src/java/com/twitter/heron/api/spout/IRichSpout.java).

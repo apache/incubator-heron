@@ -1,12 +1,12 @@
 ## Implementing a Bolt
 
-To implement a bolt, you need to implement the [`IBolt`](https://github.com/twitter/heron/blob/master/heron/api/src/java/com/twitter/heron/api/bolt/IBolt.java) interface.
+Bolt must implement the [`IBolt`](https://github.com/twitter/heron/blob/master/heron/api/src/java/com/twitter/heron/api/bolt/IBolt.java) interface.
 
 ```java
 public interface IBolt extends Serializable {
-	void prepare(Map<String, Object> heronConf, TopologyContext context, OutputCollector collector);
-	void execute(Tuple input);
-	void cleanup();
+  void prepare(Map<String, Object> heronConf, TopologyContext context, OutputCollector collector);
+  void execute(Tuple input);
+  void cleanup();
 }
 ```
 
@@ -16,6 +16,6 @@ public interface IBolt extends Serializable {
 
 * The `cleanup` method is called before the bolt is shutdown. There's no guarantee that this method is called due to how the instance is killed.
 
-A simple bolt example is: [`ExclamationBolt`](https://github.com/twitter/heron/blob/master/heron/examples/src/java/com/twitter/heron/examples/ExclamationTopology.java#L67).
+See [`ExclamationBolt`](https://github.com/twitter/heron/blob/master/heron/examples/src/java/com/twitter/heron/examples/ExclamationTopology.java#L67) for a simple bolt example.
 
-Instead of implementing the [`IBolt`](https://github.com/twitter/heron/blob/master/heron/api/src/java/com/twitter/heron/api/bolt/IBolt.java) interface directly, you can implement `IRichBolt`.
+Instead of implementing the [`IBolt`](https://github.com/twitter/heron/blob/master/heron/api/src/java/com/twitter/heron/api/bolt/IBolt.java) interface directly, you can implement [`IRichBolt`](https://github.com/twitter/heron/blob/master/heron/api/src/java/com/twitter/heron/api/bolt/IRichBolt.java).
