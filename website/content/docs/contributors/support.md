@@ -11,7 +11,7 @@ Before a major change happens, you can reasonably expect that advanced notice wi
 
 All undocumented features are subject to change at any time without prior notice. Features that are documented but marked *experimental* are also subject to change at any time without prior notice.
 
-Heron relies on the Google [Bazel](http://bazel.io) build tool which is also in Beta.  Therefore, the Bazel Skylark macro and rules language (anything written in a .bzl file) is still subject to change. The Bazel Google group is in the process of migrating Google to Skylark, and expect the macro language to stabilize as part of that process. 
+Heron relies on the Google [Bazel](http://bazel.io) build tool which is also in Beta.  Therefore, the Bazel Skylark macro and rules language (anything written in a .bzl file) is still subject to change. The Bazel Google group is in the process of migrating Google to Skylark, and expect the macro language to stabilize as part of that process.
 
 Please help keep discover issues: report bugs and regressions in the [GitHub bugtracker](https://github.com/twitter/heron/issues). Heron core contributors will make an effort to triage all reported issues within 2 business days.
 

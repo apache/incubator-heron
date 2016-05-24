@@ -1,7 +1,10 @@
-# Observability With Graphite
+---
+title: Observability With Graphite
+---
 
 To observe Heron's runtime metrics, you can integrate Heron and the Heron UI with
-[Graphite](http://graphite.readthedocs.io/en/latest/overview.html) and [Grafana](http://grafana.org/).
+[Graphite](http://graphite.readthedocs.io/en/latest/overview.html) and
+[Grafana](http://grafana.org/).
 
 To accomplish this, you need to do the following:
 
@@ -44,28 +47,37 @@ Suggested targets for the scripted dashboard include:
 
 **Component Backpressure**:
 
-`'aliasByNode(sortByMaxima(highestAverage(heron.' + topology_name + '.stmgr.stmgr-*.
-time_spent_back_pressure_by_compid.*, 5)), 5)'`
+```python
+'aliasByNode(sortByMaxima(highestAverage(heron.' + topology_name + '.stmgr.stmgr-*.
+time_spent_back_pressure_by_compid.*, 5)), 5)'
+```
 
 **Fail Count by Component**:
 
-`'sumSeriesWithWildcards(aliasByNode(heron.' + topology_name + '.*.*.fail-count.default,2),3)'`
+```python
+'sumSeriesWithWildcards(aliasByNode(heron.' + topology_name + '.*.*.fail-count.default,2),3)'`
+```
 
 **CPU Throttling periods**:
 
-`aliasByNode(nonNegativeDerivative(mesos.tasks.prod.*.' + topology_name + '.*.cpu.
-nr_throttled), 4,5)`
+```python
+aliasByNode(nonNegativeDerivative(mesos.tasks.prod.*.' + topology_name + '.*.cpu.
+nr_throttled), 4,5)
+```
 
 **JVM Deaths**:
 
-`'aliasByNode(drawAsInfinite(maximumAbove(removeAboveValue(heron.' + topology_name + '.*.*.jvm.
-uptime-secs, 60),1)),2,3)'`
+```python
+'aliasByNode(drawAsInfinite(maximumAbove(removeAboveValue(heron.' + topology_name + '.*.*.jvm.
+uptime-secs, 60),1)),2,3)'
+```
 
 **Top 5 worst GC components**:
 
-`'aliasByNode(highestMax(nonNegativeDerivative(heron.' + topology_name + '.*.*.jvm.gc-time-ms.
-PS-*),5), 2,3,6)'`
-
+```python
+'aliasByNode(highestMax(nonNegativeDerivative(heron.' + topology_name + '.*.*.jvm.gc-time-ms.
+PS-*),5), 2,3,6)'
+```
 
 ### Configuring The Heron UI Link To Grafana
 

@@ -1,4 +1,6 @@
-# Local Deployment
+---
+title: Local Deployment
+---
 
 In addition to out-of-the-box schedulers for [Mesos](../mesos) and
 [Aurora](../aurora), Heron can also be deployed in a local environment, which

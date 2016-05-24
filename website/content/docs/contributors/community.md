@@ -1,7 +1,9 @@
 ---
 title: Community
 ---
+
 ### Contributing to Heron
+
 Community is a critical factor to the success of Heron.  Contributions are welcome! After reviewing
 the [Heron Architecture](../../concepts/architecture/), [Compiling Heron](../../developers/compiling/compiling/),
 and the [Heron Codebase](../codebase/), this page covers how to contribute and, when you've made a
@@ -24,7 +26,7 @@ Continue to [Heron Architecture](../../concepts/architecture/),
 
 <!--
 4. TODO - pre commit process (travis-ci)
---> 
+-->
 
 4. Complete a code review with a core contributor using the heron-dev@googlegroups.com mailing list. Amend your existing commit and re-push to make changes to your patch.
 
@@ -42,4 +44,3 @@ TODO: how to get running in intellij
 
 
 Next: Review the [Heron Codebase](../codebase)
-
