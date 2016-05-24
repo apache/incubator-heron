@@ -31,7 +31,7 @@ import org.apache.commons.lang.ArrayUtils;
 
 /**
  * Verifies that the java classes styles conform to the styles in the config.
- * Usage: java com.twitter.bazel.checkstyle.JavaCheckstyle -f &lt;extra_action_file> -c &lt;checkstyle_config>
+ * Usage: java com.twitter.bazel.checkstyle.JavaCheckstyle -f &lt;extra_action_file&gt; -c &lt;checkstyle_config&gt;
  * <p>
  * To test:
  * $ bazel build --config=darwin heron/spi/src/java:heron-spi --experimental_action_listener=tools/java:compile_java

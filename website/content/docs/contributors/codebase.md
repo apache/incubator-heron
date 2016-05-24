@@ -14,14 +14,14 @@ cluster, see [Building Topologies](../developers/topologies.html) instead.
 The primary programming languages for Heron are C++, Java, and Python.
 
 * **C++ 11** is used for most of Heron's core components, including the
-[Topology Master](../../concepts/architecture#topology-master), and 
+[Topology Master](../../concepts/architecture#topology-master), and
 [Stream Manager](../../concepts/architecture#stream-manager).
 
 * **Java 8** is used primarily for Heron's [topology
 API](../../concepts/topologies), and [Heron Instance](../../concepts/architecture#heron-instance).
-It is currently the only language in which topologies can be written. Instructions can be found 
+It is currently the only language in which topologies can be written. Instructions can be found
 in [Building Topologies](../developers/topologies.html), while API documentation for the Java
-API can be found [here](/api/topology/index.html). Please note that Heron topologies do not 
+API can be found [here](/api/topology/index.html). Please note that Heron topologies do not
 require Java 8 and can be written in Java 7 or later.
 
 * **Python 2** (specifically 2.7) is used primarily for Heron's [CLI
@@ -142,9 +142,9 @@ Heron has a tool called `heron` that is used to both provide a CLI interface
 for [managing topologies](../../operators/heron-cli) and to perform much of
 the heavy lifting behind assembling physical topologies in your cluster.
 The Python code for `heron` can be found in
-[`heron/cli`]({{% githubMaster %}}/heron/cli). 
+[`heron/cli`]({{% githubMaster %}}/heron/cli).
 
-Sample configurations for different Heron schedulers 
+Sample configurations for different Heron schedulers
 
 * [Local scheduler](../../operators/deployment/schedulers/local) config can be found in [`heron/config/src/yaml/conf/local`]({{% githubMaster %}}/heron/config/src/yaml/conf/local),
 * [Aurora scheduler](../../operators/deployment/schedulers/aurora) config can be found [`heron/config/src/yaml/conf/aurora`]({{% githubMaster %}}/heron/config/src/yaml/conf/aurora).

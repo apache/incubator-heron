@@ -12,17 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import argparse
-import atexit
-import contextlib
 import glob
-import logging
-import logging.handlers
 import os
 import shutil
 import sys
-import subprocess
-import tarfile
 import tempfile
 
 from heron.common.src.python.color import Log
@@ -103,7 +96,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
       lib_jars,
       extra_jars=[],
       args = args,
-      javaDefines = cl_args['javaDefines']
+      javaDefines = []
   )
 
 ################################################################################
@@ -164,7 +157,7 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
       utils.get_heron_libs(jars.topology_jars()),
       extra_jars = [topology_file],
       args = tuple(unknown_args),
-      javaDefines = cl_args['javaDefines'])
+      javaDefines = cl_args['topology_main_jvm_property'])
 
   except Exception as ex:
     Log.error("Unable to execute topology main class")
@@ -199,12 +192,13 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
 
   # execute main of the topology to create the topology definition
   topology_file = cl_args['topology-file-name']
+  javaDefines = cl_args['topology_main_jvm_property']
   execute.heron_tar(
       cl_args['topology-class-name'],
       topology_file,
       tuple(unknown_args),
       tmp_dir,
-      cl_args['javaDefines'])
+      javaDefines)
 
   try:
     launch_topologies(cl_args, topology_file, tmp_dir)

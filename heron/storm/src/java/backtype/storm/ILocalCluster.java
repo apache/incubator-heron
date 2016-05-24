@@ -29,7 +29,8 @@ import backtype.storm.generated.StormTopology;
 
 
 public interface ILocalCluster {
-  void submitTopology(String topologyName, Map<String, Object> conf, StormTopology topology) throws
+  @SuppressWarnings("rawtypes")
+  void submitTopology(String topologyName, Map conf, StormTopology topology) throws
       AlreadyAliveException, InvalidTopologyException;
 
   // void submitTopologyWithOpts(

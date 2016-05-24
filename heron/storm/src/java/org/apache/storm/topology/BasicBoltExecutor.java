@@ -35,7 +35,8 @@ public class BasicBoltExecutor implements IRichBolt {
   }
 
   @Override
-  public void prepare(Map<String, Object> stormConf,
+  @SuppressWarnings("rawtypes")
+  public void prepare(Map stormConf,
                       TopologyContext context,
                       OutputCollector newCollector) {
     delegate.prepare(stormConf, context);

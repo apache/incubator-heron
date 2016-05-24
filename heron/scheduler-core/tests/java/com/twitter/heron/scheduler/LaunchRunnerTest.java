@@ -47,6 +47,9 @@ public class LaunchRunnerTest {
   private static final String CLUSTER = "testCluster";
   private static final String ROLE = "testRole";
   private static final String ENVIRON = "testEnviron";
+  private static final String MOCK_PACKING_STRING = "mockPackString";
+  private static final String BUILD_VERSION = "live";
+  private static final String BUILD_USER = "user";
 
   private static TopologyAPI.Config.KeyValue getConfig(String key, String value) {
     return TopologyAPI.Config.KeyValue.newBuilder().setKey(key).setValue(value).build();
@@ -93,21 +96,27 @@ public class LaunchRunnerTest {
     Mockito.when(config.getStringValue(ConfigKeys.get("CLUSTER"))).thenReturn(CLUSTER);
     Mockito.when(config.getStringValue(ConfigKeys.get("ROLE"))).thenReturn(ROLE);
     Mockito.when(config.getStringValue(ConfigKeys.get("ENVIRON"))).thenReturn(ENVIRON);
+    Mockito.when(config.getStringValue(ConfigKeys.get("BUILD_VERSION"))).thenReturn(BUILD_VERSION);
+    Mockito.when(config.getStringValue(ConfigKeys.get("BUILD_USER"))).thenReturn(BUILD_USER);
 
     return config;
   }
 
   private static Config createRunnerRuntime() {
-    Config runtime = Mockito.mock(Config.class);
+    Config runtime = Mockito.spy(Config.newBuilder().build());
     ILauncher launcher = Mockito.mock(ILauncher.class);
     IPacking packing = Mockito.mock(IPacking.class);
     SchedulerStateManagerAdaptor adaptor = Mockito.mock(SchedulerStateManagerAdaptor.class);
     TopologyAPI.Topology topology = createTopology(new com.twitter.heron.api.Config());
 
-    Mockito.when(runtime.get(Keys.launcherClassInstance())).thenReturn(launcher);
-    Mockito.when(runtime.get(Keys.packingClassInstance())).thenReturn(packing);
-    Mockito.when(runtime.get(Keys.schedulerStateManagerAdaptor())).thenReturn(adaptor);
-    Mockito.when(runtime.get(Keys.topologyDefinition())).thenReturn(topology);
+    Mockito.doReturn(launcher).when(runtime).get(Keys.launcherClassInstance());
+    Mockito.doReturn(packing).when(runtime).get(Keys.packingClassInstance());
+    Mockito.doReturn(adaptor).when(runtime).get(Keys.schedulerStateManagerAdaptor());
+    Mockito.doReturn(topology).when(runtime).get(Keys.topologyDefinition());
+
+    PackingPlan packingPlan = Mockito.mock(PackingPlan.class);
+    Mockito.when(packing.pack()).thenReturn(packingPlan);
+    Mockito.when(packingPlan.getInstanceDistribution()).thenReturn(MOCK_PACKING_STRING);
 
     return runtime;
   }

@@ -1,1 +1,1 @@
-{{.Page.Site.Params.bazelVersion}}
+{{.Page.Site.Params.versions.bazel}}

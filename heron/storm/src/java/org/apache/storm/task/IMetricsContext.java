@@ -22,13 +22,11 @@ import org.apache.storm.metric.api.ReducedMetric;
 
 
 public interface IMetricsContext {
-  <T extends IMetric<U>, U> T registerMetric(String name, T metric, int timeBucketSizeInSecs);
+  <T extends IMetric> T registerMetric(String name, T metric, int timeBucketSizeInSecs);
 
-  <T, U, V> ReducedMetric<T, U, V> registerMetric(String name,
-                                                  IReducer<T, U, V> reducer,
-                                                  int timeBucketSizeInSecs);
+  @SuppressWarnings("rawtypes")
+  ReducedMetric registerMetric(String name, IReducer reducer, int timeBucketSizeInSecs);
 
-  <T> CombinedMetric<T> registerMetric(String name,
-                                       ICombiner<T> combiner,
-                                       int timeBucketSizeInSecs);
+  @SuppressWarnings("rawtypes")
+  CombinedMetric registerMetric(String name, ICombiner combiner, int timeBucketSizeInSecs);
 }

@@ -16,17 +16,9 @@
 
 import argparse
 import atexit
-import base64
-import contextlib
-import glob
-import logging
-import logging.handlers
 import os
 import shutil
 import sys
-import subprocess
-import tarfile
-import tempfile
 import time
 
 from heron.common.src.python.color import Log
@@ -219,6 +211,10 @@ def main():
     files.append(command_line_args['override_config_file'])
 
   atexit.register(cleanup, files)
+
+  # print the input parameters, if verbose is enabled
+  if opts.verbose():
+    print command_line_args
 
   start = time.time() 
   retcode = run(command, parser, command_line_args, unknown_args)

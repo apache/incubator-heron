@@ -280,7 +280,7 @@ var FilterableTopologyTable = React.createClass({
   return (
    <div>
      <div className="row spacer">
-       <div className="col-md-6" style={clusterStyle}>
+       <div className="col-md-12" style={clusterStyle}>
          <div className="navbar-custom">
            <div className="navbar-header">
              <button type="button" className="navbar-toggle" data-toggle="collapse" data-target=".navbar-responsive-collapse">

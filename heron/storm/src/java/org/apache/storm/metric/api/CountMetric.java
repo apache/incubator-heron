@@ -14,7 +14,7 @@
 
 package org.apache.storm.metric.api;
 
-public class CountMetric implements IMetric<Long> {
+public class CountMetric implements IMetric {
   private com.twitter.heron.api.metric.CountMetric delegate;
 
   public CountMetric() {
@@ -29,7 +29,7 @@ public class CountMetric implements IMetric<Long> {
     delegate.incrBy(incrementBy);
   }
 
-  public Long getValueAndReset() {
+  public Object getValueAndReset() {
     return delegate.getValueAndReset();
   }
 }
