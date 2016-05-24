@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 set -e
 
 HERON_ROOT_DIR=$(git rev-parse --show-toplevel)
