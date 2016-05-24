@@ -1,6 +1,7 @@
 ## Implementing a Bolt
 
 To implement a bolt, you need to implement the [`IBolt`](https://github.com/twitter/heron/blob/master/heron/api/src/java/com/twitter/heron/api/bolt/IBolt.java) interface.
+
 ```java
 public interface IBolt extends Serializable {
 	void prepare(Map<String, Object> heronConf, TopologyContext context, OutputCollector collector);
@@ -8,11 +9,12 @@ public interface IBolt extends Serializable {
 	void cleanup();
 }
 ```
-The `prepare` method is called when the bolt is first initialized and provides the bolt with the executing environment.
 
-The `execute` method is called to process a single input `Tuple`. The `Tuple` contains metadata about component/stream/task it comes from. And `OutputCollector` is used to emit the result.
+* The `prepare` method is called when the bolt is first initialized and provides the bolt with the executing environment.
 
-The `cleanup` method is called before the bolt is shutdown. There's no guarantee that this method is called due to how the instance is killed.
+* The `execute` method is called to process a single input `Tuple`. The `Tuple` contains metadata about component/stream/task it comes from. And `OutputCollector` is used to emit the result.
+
+* The `cleanup` method is called before the bolt is shutdown. There's no guarantee that this method is called due to how the instance is killed.
 
 A simple bolt example is: [`ExclamationBolt`](https://github.com/twitter/heron/blob/master/heron/examples/src/java/com/twitter/heron/examples/ExclamationTopology.java#L67).
 

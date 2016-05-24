@@ -14,19 +14,19 @@ public interface ISpout extends Serializable {
 }
 ```
 
-The `open` method is called when the spout is initialized and provides the spout with the executing environment.
+* The `open` method is called when the spout is initialized and provides the spout with the executing environment.
 
-The `close` method is called when the spout is shutdown. But there's no guarantee that this method is called due to how the instance is killed.
+* The `close` method is called when the spout is shutdown. There's no guarantee that this method is called due to how the instance is killed.
 
-The `activate` method is called when the spout is asked to back into active state.
+* The `activate` method is called when the spout is asked to back into active state.
 
-The `deactivate` method is called when the spout is asked to enter deactive state.
+* The `deactivate` method is called when the spout is asked to enter deactive state.
 
-The `nextTuple` method is used to fetch tuples from input source and emit it to `OutputCollector`.
+* The `nextTuple` method is used to fetch tuples from input source and emit it to `OutputCollector`.
 
-The `ack` method is called when the `Tuple` with the `msgId` emitted by this spout is successfully processed.
+* The `ack` method is called when the `Tuple` with the `msgId` emitted by this spout is successfully processed.
 
-The `fail` method is called when the `Tuple` with the `msgId` emitted by this spout is not processed successfully.
+* The `fail` method is called when the `Tuple` with the `msgId` emitted by this spout is not processed successfully.
 
 A simple spout example is: [`TestWordSpout`](https://github.com/twitter/heron/blob/master/heron/examples/src/java/com/twitter/heron/examples/TestWordSpout.java).
 
