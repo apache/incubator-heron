@@ -56,7 +56,7 @@ builder.setBolt("exclaim", new ExclamationBolt(), 4)
 
 ```
 
-Once the the components and the grouping are specified, the topology can be built.
+Once the components and the grouping are specified, the topology can be built.
 
 ```java
 HeronTopology topology = builder.createTopology();
