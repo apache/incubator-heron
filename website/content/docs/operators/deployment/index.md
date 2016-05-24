@@ -3,40 +3,50 @@
 Heron is designed to be run in clustered, scheduler-driven environments. It can
 be run in a `multi-tenant` or `dedicated` clusters. Furthermore, Heron supports 
 `multiple clusters` and a user can submit topologies to any of these clusters. Each
-of the cluster can use `different scheduler`. 
+of the cluster can use `different scheduler`. A typical Heron deployment is shown 
+in the following figure.
 
-In order to deploy Heron in a cluster, you need the following 
+<br />
+![Heron Deployment](/img/heron-deployment.png)
+<br/>
 
-* `Scheduler` &mdash; Heron requires a scheduler to run its topologies. It can 
+A Heron deployment requires several components working together. To run Heron 
+topologies in a cluster, you need the following 
+
+* **Scheduler** &mdash; Heron requires a scheduler to run its topologies. It can 
 be deployed on an existing cluster running alongside other big data frameworks. 
 Alternatively, it can be deployed on a cluster of its own. Heron currently 
-supports several scheduler options out of the box:
+supports several scheduler options:
   * [Aurora](schedulers/aurora)
   * [Local](schedulers/local)
   * [Mesos](schedulers/mesos)
   * [Slurm](schedulers/slurm)
 
-* `State Manager` &mdash; Heron needs a centralized mechanism for keeping track of
-the state for each of the topologies. A topology state includes its logical plan, 
-physical plan, and execution state. Heron supports the following for state managers:
+* **State Manager** &mdash; Heron state manager tracks the state of all deployed
+topologies. The topology state includes its logical plan, 
+physical plan, and execution state. Heron supports the following state managers:
   * [Local File System] (statemanagers/localfs)
   * [Zookeeper] (statemanagers/zookeeper) 
 
-* `Uploader` &mdash; Heron uses an uploader to distribute the topology jars across
-servers that actually run them. Heron supports several uploaders such as 
+* **Uploader** &mdash; Heron uses an uploader to distribute the topology jars across
+servers that actually run them. Heron supports several uploaders 
   * [HDFS] (uploaders/hdfs)
   * [Local File System] (uploaders/localfs)
   * [Amazon S3] (uploaders/s3)
 
-* `Metrics Sinks` &mdash; Heron collects several metrics during topology execution.
-These metrics can be routed to appropriate sink for storage and offline analysis.
-Currently, Heron supports multiple sinks
+* **Metrics Sinks** &mdash; Heron collects several metrics during topology execution.
+These metrics can be routed to a sink for storage and offline analysis.
+Currently, Heron supports the following sinks
 
   * `File Sink`
   * `Graphite Sink`
   * `Scribe Sink`
 
-To implement a new scheduler, see
-[Implementing a Custom Scheduler](../../contributors/custom-scheduler).
+* **Heron Tracker** &mdash; Tracker serves as the gateway to explore the topologies.
+It exposes a REST API for exploring logical plan, physical plan of the topologies and
+also for fetching metrics from them.
 
-
+* **Heron UI** &mdash; UI allows to explore topologies visually. It allows you to search
+for specific topologies from a list of topologies. UI displays the DAG of the topology
+and how this DAG is mapped to physical containers running in clusters. Furthermore, it
+allows you to view logs, take heap dump, memory histograms, show metrics, etc 

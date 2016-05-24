@@ -9,7 +9,7 @@ a [local scheduler](../local).
 ## How Heron on Aurora Works
 
 Aurora doesn't have a Heron scheduler *per se*. Instead, when a topology is
-submitted to Heron, `heron` cli interacts with Aurora to automatically stand up
+submitted to Heron, `heron` cli interacts with Aurora to automatically deploy
 all the [components](../../../../concepts/architecture) necessary to [manage
 topologies](../../../heron-cli).
 
@@ -21,7 +21,7 @@ ZooKeeper](../../statemanagers/zookeeper).
 
 ## Hosting Binaries
 
-In order to deploy Heron, your Aurora cluster will need to have access to 
+To deploy Heron, the Aurora cluster needs access to the
 Heron core binary, which can be hosted wherever you'd like, so long as
 it's accessible to Aurora (for example in [Amazon
 S3](https://aws.amazon.com/s3/) or using a local blob storage solution). You 
@@ -33,9 +33,9 @@ should run tests to ensure that Aurora can successfully fetch them.
 
 ## Aurora Scheduler Configuration
 
-You can instruct Heron to use Aurora scheduler by modifying the `scheduler.yaml` 
-config file specific for the Heron cluster. You'll need to specify the following for 
-each cluster:
+To instruct Heron to use Aurora scheduler, modify the `scheduler.yaml` 
+config file specific for the Heron cluster. The following must be specified
+for each cluster:
 
 * `heron.class.scheduler` --- Indicates the class to be loaded for Aurora scheduler. 
 You should set this to `com.twitter.heron.scheduler.aurora.AuroraScheduler`

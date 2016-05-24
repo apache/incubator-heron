@@ -35,7 +35,7 @@ sections:
         url: /docs/operators/deployment/schedulers/mesos
       - name: Slurm Cluster
         url: /docs/operators/deployment/schedulers/slurm
-  - name: Configuration
+  - name: System Configuration
     sublinks:
       - name: Overview
         url: /docs/operators/configuration/config-intro
