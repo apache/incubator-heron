@@ -50,7 +50,8 @@ public interface IBolt extends Serializable {
    * @param context This object can be used to get information about this task's place within the topology, including the task id and component id of this task, input and output information, etc.
    * @param collector The collector is used to emit tuples from this bolt. Tuples can be emitted at any time, including the prepare and cleanup methods. The collector is thread-safe and should be saved as an instance variable of this bolt object.
    */
-  void prepare(Map<String, Object> stormConf, TopologyContext context, OutputCollector collector);
+  @SuppressWarnings("rawtypes")
+  void prepare(Map stormConf, TopologyContext context, OutputCollector collector);
 
   /**
    * Process a single tuple of input. The Tuple object contains metadata on it
@@ -76,7 +77,7 @@ public interface IBolt extends Serializable {
    * will be called, because the supervisor kill -9's worker processes on the cluster.
    * <p>
    * <p>The one context where cleanup is guaranteed to be called is when a topology
-   * is killed when running Storm in local mode.</p>
+   * is killed when running Storm in simulator.</p>
    */
   void cleanup();
 }

@@ -19,7 +19,8 @@ import backtype.storm.tuple.Fields;
 
 //import backtype.storm.generated.Grouping;
 
-public interface InputDeclarer<T extends InputDeclarer<?>> {
+@SuppressWarnings("rawtypes")
+public interface InputDeclarer<T extends InputDeclarer> {
   T fieldsGrouping(String componentId, Fields fields);
 
   T fieldsGrouping(String componentId, String streamId, Fields fields);

@@ -17,29 +17,29 @@ package org.apache.storm.metric.api;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("rawtypes")
+public class MultiReducedMetric implements IMetric {
+  private Map<String, ReducedMetric> value = new HashMap<>();
+  private IReducer reducer;
 
-public class MultiReducedMetric<T, U, V> implements IMetric<Map<String, V>> {
-  private Map<String, ReducedMetric<T, U, V>> value = new HashMap<>();
-  private IReducer<T, U, V> reducer;
-
-  public MultiReducedMetric(IReducer<T, U, V> reducer) {
+  public MultiReducedMetric(IReducer reducer) {
     this.reducer = reducer;
   }
 
-  public ReducedMetric<T, U, V> scope(String key) {
-    if (value.get(key) == null) {
-      value.put(key, new ReducedMetric<>(reducer));
+  public ReducedMetric scope(String key) {
+    ReducedMetric val = value.get(key);
+    if (val == null) {
+      value.put(key, val = new ReducedMetric(reducer));
     }
-    return value.get(key);
+    return val;
   }
 
-  @Override
-  public Map<String, V> getValueAndReset() {
-    Map<String, V> ret = new HashMap<>();
-    for (String key : value.keySet()) {
-      V val = value.get(key).getValueAndReset();
+  public Object getValueAndReset() {
+    Map<String, Object> ret = new HashMap<>();
+    for (Map.Entry<String, ReducedMetric> e : value.entrySet()) {
+      Object val = e.getValue().getValueAndReset();
       if (val != null) {
-        ret.put(key, val);
+        ret.put(e.getKey(), val);
       }
     }
     return ret;

@@ -29,8 +29,6 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.serializers.DefaultSerializers.BigIntegerSerializer;
 
-import com.twitter.heron.common.basics.TypeUtils;
-
 import backtype.storm.Config;
 import backtype.storm.serialization.types.ArrayListSerializer;
 import backtype.storm.serialization.types.HashMapSerializer;
@@ -50,7 +48,7 @@ public final class SerializationFactory {
    * @param conf the config
    * @return Kryo
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"rawtypes", "unchecked"})
   public static Kryo getKryo(Map<String, Object> conf) {
     IKryoFactory kryoFactory =
         (IKryoFactory) Utils.newInstance((String) conf.get(Config.TOPOLOGY_KRYO_FACTORY));
@@ -82,10 +80,10 @@ public final class SerializationFactory {
     for (String klassName : registrations.keySet()) {
       String serializerClassName = registrations.get(klassName);
       try {
-        Class<?> klass = Class.forName(klassName);
-        Class<? extends Serializer<?>> serializerClass = null;
+        Class klass = Class.forName(klassName);
+        Class serializerClass = null;
         if (serializerClassName != null) {
-          serializerClass = (Class<? extends Serializer<?>>) Class.forName(serializerClassName);
+          serializerClass = Class.forName(serializerClassName);
         }
         LOG.info("Doing kryo.register for class " + klass);
         if (serializerClass == null) {
@@ -107,10 +105,9 @@ public final class SerializationFactory {
     kryoFactory.postRegister(k, conf);
 
     if (conf.get(Config.TOPOLOGY_KRYO_DECORATORS) != null) {
-      for (String klassName
-          : TypeUtils.getListOfStrings(conf.get(Config.TOPOLOGY_KRYO_DECORATORS))) {
+      for (String klassName : (List<String>) conf.get(Config.TOPOLOGY_KRYO_DECORATORS)) {
         try {
-          Class<?> klass = Class.forName(klassName);
+          Class klass = Class.forName(klassName);
           IKryoDecorator decorator = (IKryoDecorator) klass.newInstance();
           decorator.decorate(k);
         } catch (ClassNotFoundException e) {
@@ -133,9 +130,10 @@ public final class SerializationFactory {
     return k;
   }
 
-  private static Serializer<?> resolveSerializerInstance(
-      Kryo k, Class<?> superClass, Class<? extends Serializer<?>> serializerClass) {
-    Constructor<? extends Serializer<?>> ctor;
+  @SuppressWarnings("rawtypes")
+  private static Serializer resolveSerializerInstance(
+      Kryo k, Class superClass, Class<? extends Serializer> serializerClass) {
+    Constructor<? extends Serializer> ctor;
 
     try {
       ctor = serializerClass.getConstructor(Kryo.class, Class.class);
@@ -166,7 +164,7 @@ public final class SerializationFactory {
             serializerClass.getName(), superClass.getName()));
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"rawtypes", "unchecked"})
   private static Map<String, String> normalizeKryoRegister(Map<String, Object> conf) {
     // TODO: de-duplicate this logic with the code in nimbus
     Object res = conf.get(Config.TOPOLOGY_KRYO_REGISTER);
