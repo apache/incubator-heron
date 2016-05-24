@@ -1,7 +1,7 @@
 ## Heron Tracker
 
 **Heron Tracker** is a web service that continuously gathers a wide
-variety of information about Heron topologies in your cluster(s) and exposes
+variety of information about Heron topologies and exposes
 that information through a [JSON REST API](heron-tracker-api).
 More on the role of the Tracker can be found
 [here](../../concepts/architecture#heron-tracker).
@@ -31,7 +31,7 @@ The config file is a `yaml` file that should contain the following information.
 
 #### 1. State Manager locations
 
-This is a list of locations where your topology writes its states. An example of
+This is a list of locations where topology writes its states. An example of
 [zookeeper state manager](deployment/statemanagers/zookeeper) and
 [local file state manager](deployment/statemanagers/locafs) look like this:
 
@@ -66,7 +66,7 @@ Note that topologies from all the state managers would be read.
 
 This is an optional config. If it is present, then it will show up for each
 topology as the viz link as shown below. For each topology, these parameters
-will be filled appropriately. This parameter can be used to link your metrics
+will be filled appropriately. This parameter can be used to link metrics
 dashboards with topology UI page.
 
 ![Viz Link](/img/viz-link.png)

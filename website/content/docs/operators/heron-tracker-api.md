@@ -389,9 +389,7 @@ Returns histogram for the instance jvm process.
 
 ### /machines
 
-Returns JSON describing all currently available machines, sorted by (1) cluster
-(if you're running Heron in multiple clusters), (2) environment, and
-(3) topology.
+Returns JSON describing all currently machines that a topology is running on.
 
 ```bash
 $ curl "http://heron-tracker-url/machines?topology=mytopology1&cluster=cluster1&environ=prod"
