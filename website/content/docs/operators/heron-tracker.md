@@ -4,7 +4,7 @@ title: Heron Tracker
 
 **Heron Tracker** is a web service that continuously gathers a wide
 variety of information about Heron topologies and exposes
-that information through a [JSON REST API](heron-tracker-api).
+that information through a [JSON REST API](../heron-tracker-api).
 More on the role of the Tracker can be found
 [here](../../concepts/architecture#heron-tracker).
 
@@ -34,8 +34,8 @@ The config file is a `yaml` file that should contain the following information.
 #### 1. State Manager locations
 
 This is a list of locations where topology writes its states. An example of
-[zookeeper state manager](deployment/statemanagers/zookeeper) and
-[local file state manager](deployment/statemanagers/localfs) look like this:
+[zookeeper state manager](../deployment/statemanagers/zookeeper) and
+[local file state manager](../deployment/statemanagers/localfs) look like this:
 
 ```yaml
 ## Contains the sources where the states are stored.
