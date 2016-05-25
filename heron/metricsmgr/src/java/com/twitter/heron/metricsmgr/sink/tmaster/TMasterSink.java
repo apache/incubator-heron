@@ -43,7 +43,7 @@ import com.twitter.heron.spi.metricsmgr.sink.SinkContext;
 
 /**
  * An IMetricsSink sends Metrics to TMaster.
- * 1. It used StateManager to get the TMasterLocation
+ * 1. It gets the TMasterLocation
  * <p>
  * 2. Then it would construct a long-live Service running TMasterClient, which could automatically
  * recover from uncaught exceptions, i.e. close the old one and start a new one.
