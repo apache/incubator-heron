@@ -5,7 +5,7 @@ JAVADOC=javadoc
 FLAGS="-quiet"
 
 HERON_ROOT_DIR=$(git rev-parse --show-toplevel)
-JAVADOC_OUTPUT_DIR=$HERON_ROOT_DIR/website/static/api
+JAVADOC_OUTPUT_DIR=$HERON_ROOT_DIR/website/public/api
 GEN_PROTO_DIR=$HERON_ROOT_DIR/bazel-bin/heron/proto/_javac
 
 (cd $HERON_ROOT_DIR && bazel build \
