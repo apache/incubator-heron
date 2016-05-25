@@ -1,0 +1,743 @@
+<!DOCTYPE html><html lang="en-us"><head><link rel="shortcut icon" type="image/png" sizes="16x16" href="http://localhost:1313/heron/img/favicon-16x16.png"><link rel="shortcut icon" type="image/png" sizes="32x32" href="http://localhost:1313/heron/img/favicon-32x32.png"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="Hugo 0.14"><title>Heron Documentation - Heron Tracker REST API</title><link rel="stylesheet" href="http://localhost:1313/heron/css/style.min.css"><link rel="stylesheet" href="http://localhost:1313/heron/css/font-awesome.min.css"><link rel="stylesheet" href="http://localhost:1313/heron/css/pygments.css"><script defer src="http://code.jquery.com/jquery-2.2.1.min.js"></script><script defer src="http://localhost:1313/heron/js/app.min.js"></script></head><body><nav class="hn-top-navbar navbar navbar-inverse navbar-fixed-top" role="navigation"><div class="hn-navbar-container container-fluid"><div class="navbar-header"><button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#hn-navbar" aria-controls="hn-navbar" aria-expanded="false"><span class="sr-only"><Toggle>navigation</Toggle></span><i class="hn-toggle-button fa fa-bars"></i></button><a class="hn-navbar-logo navbar-brand" href="http://localhost:1313/heron/"><img class="pull-left" src="http://localhost:1313/heron/img/HeronTextLogo-small.png"></a></div><div id="hn-navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav navbar-right"><li><a href="http://localhost:1313/heron/docs/getting-started">Docs</a></li><li><a href="http://localhost:1313/heron/docs/resources">Resources</a></li><li><a href="http://localhost:1313/heron/docs/contributors/community">Community</a></li><li><a href="https://github.com/twitter/heron">GitHub</a></li><li><a class="nav-icon" href="https://groups.google.com/forum/#!forum/heron-users"><i class="fa fa-comments"></i></a></li><li><a class="nav-icon" href="https://twitter.com/heronstreaming"><i class="fa fa-twitter"></i></a></li></ul></div></div></nav><div class="hn-main"><div class="container"><div class="row"><aside class="hn-sidebar hidden-xs col-sm-3 col-md-3 col-lg-2 collapse"><div><nav class="hn-sidebar-nav"><h4>Getting Started</h4><ul><li><a href="http://localhost:1313/heron/docs/getting-started">Local (Single Node)</a></li><li><a href="http://localhost:1313/heron/docs/upgrade-storm-to-heron">Upgrade Storm Topologies</a></li></ul><ul></ul><h4>Heron Concepts</h4><ul><li><a href="http://localhost:1313/heron/docs/concepts/architecture">Heron Architecture</a></li><li><a href="http://localhost:1313/heron/docs/concepts/topologies">Heron Topology</a></li></ul><ul></ul><h4>Deployment</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment">Overview</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/configuration">Configuration</a></li></ul><ul></ul><h4>State Managers</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment/statemanagers/zookeeper">Zookeeper</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/statemanagers/localfs">Local FS</a></li></ul><ul></ul><h4>Uploaders</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment/uploaders/localfs">Local FS</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/uploaders/hdfs">HDFS</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/uploaders/s3">S3</a></li></ul><ul></ul><h4>Schedulers</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/aurora">Aurora Cluster</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/local">Local Cluster</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/mesos">Mesos Cluster</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/slurm">Slurm Cluster</a></li></ul><ul></ul><h4>System Configuration</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/configuration/config-intro">Overview</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/instance">Heron Instance</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/metrics-manager">Metrics Manager</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/stmgr">Stream Manager</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/system">System-Level</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/tmaster">Topology Master</a></li></ul><ul></ul><h4>Observability</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/observability/graphite">Graphite</a></li></ul><ul></ul><h4>User Manuals</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/heron-cli">Heron Client</a></li><li><a href="http://localhost:1313/heron/docs/operators/heron-tracker-api">Heron Tracker REST API</a></li><li><a href="http://localhost:1313/heron/docs/operators/heron-tracker">Heron Tracker Runbook</a></li><li><a href="http://localhost:1313/heron/docs/operators/heron-ui">Heron UI Runbook</a></li></ul><ul></ul><h4>Topology Writers</h4><ul><li><a href="http://localhost:1313/heron/docs/developers/topologies">Writing Topologies</a></li><li><a href="http://localhost:1313/heron/docs/developers/data-model">Heron Data Model</a></li><li><a href="http://localhost:1313/heron/docs/developers/serialization">Tuple Serialization</a></li><li><a href="http://localhost:1313/heron/docs/developers/ui-guide">Heron UI Guide</a></li><li><a href="http://localhost:1313/heron/docs/developers/tuning">Tuning Guide</a></li><li><a href="http://localhost:1313/heron/docs/developers/simulator-mode">Simulator Mode</a></li><li><a href="http://localhost:1313/heron/docs/developers/troubleshooting">Troubleshooting Guide</a></li><li><a href="http://localhost:1313/heron/api">Javadoc</a></li></ul><ul></ul><h4>Heron Developers</h4><ul><li><a href="http://localhost:1313/heron/docs/developers/compiling/compiling">Compiling</a></li><li><a href="http://localhost:1313/heron/docs/developers/compiling/linux">Compiling on Linux</a></li><li><a href="http://localhost:1313/heron/docs/developers/compiling/mac">Compiling on Mac OS X</a></li><li><a href="http://localhost:1313/heron/docs/developers/compiling/docker">Compiling With Docker</a></li><li><a href="http://localhost:1313/heron/docs/contributors/testing">Running Tests</a></li><li><a href="http://localhost:1313/heron/docs/contributors/codebase">Code Organization</a></li></ul><ul></ul><h4>Extending Heron</h4><ul><li><a href="http://localhost:1313/heron/docs/contributors/custom-scheduler">Custom Scheduler</a></li><li><a href="http://localhost:1313/heron/docs/contributors/custom-metrics-sink">Custom Metrics Sink</a></li></ul><ul></ul><h4>Heron Resources</h4><ul><li><a href="http://localhost:1313/heron/docs/resources">Heron Resources</a></li></ul><ul></ul><h4>Contributors</h4><ul><li><a href="http://localhost:1313/heron/docs/contributors/community">Community</a></li><li><a href="http://localhost:1313/heron/docs/contributors/governance">Governance</a></li></ul><ul></ul></nav></div></aside><section class="hn-docs-main col-sm-9 col-md-9 col-lg-10 col-sm-offset-3 col-md-offset-3 col-lg-offset-2"><header class="hn-docs-header page-header"><h1>Heron Tracker REST API</h1><div class="hn-docs-description"></div></header><article class="hn-docs-content">
+
+<h3 id="json-interface:a835b0b91c76de6fe740dc315fd5529d">JSON Interface</h3>
+
+<p>All Heron Tracker endpoints return a JSON object with the following information:</p>
+
+<ul>
+<li><code>status</code> &mdash; One of the following: <code>success</code>, <code>failure</code>.</li>
+<li><code>executiontime</code> &mdash; The time taken to return the HTTP result, in seconds.</li>
+<li><code>message</code> &mdash; Some endpoints return special messages in this field for certain
+requests. Often, this field will be an empty string. A <code>failure</code> status will
+always have a message.</li>
+<li><code>result</code> &mdash; The result payload of the request. The contents will depend on
+the endpoint.</li>
+<li><code>version</code> &mdash; The Tracker API version.</li>
+</ul>
+
+<h3 id="endpoints:a835b0b91c76de6fe740dc315fd5529d">Endpoints</h3>
+
+<ul>
+<li><code>/</code> (redirects to <code>/topologies</code>)</li>
+<li><a href="#clusters"><code>/clusters</code></a></li>
+<li><a href="#topologies"><code>/topologies</code></a></li>
+<li><a href="#topologies_states"><code>/topologies/states</code></a></li>
+<li><a href="#topologies_info"><code>/topologies/info</code></a></li>
+<li><a href="#topologies_logicalplan"><code>/topologies/logicalplan</code></a></li>
+<li><a href="#topologies_physicalplan"><code>/topologies/physicalplan</code></a></li>
+<li><a href="#topologies_executionstate"><code>/topologies/executionstate</code></a></li>
+<li><a href="#topologies_schedulerlocation"><code>/topologies/schedulerlocation</code></a></li>
+<li><a href="#topologies_metrics"><code>/topologies/metrics</code></a></li>
+<li><a href="#topologies_metricstimeline"><code>/topologies/metricstimeline</code></a></li>
+<li><a href="#topologies_metricsquery"><code>/topologies/metricsquery</code></a></li>
+<li><a href="#topologies_containerfiledata"><code>/topologies/containerfiledata</code></a></li>
+<li><a href="#topologies_containerfilestats"><code>/topologies/containerfilestats</code></a></li>
+<li><a href="#topologies_exceptions"><code>/topologies/exceptions</code></a></li>
+<li><a href="#topologies_exceptionsummary"><code>/topologies/exceptionsummary</code></a></li>
+<li><a href="#topologies_pid"><code>/topologies/pid</code></a></li>
+<li><a href="#topologies_jstack"><code>/topologies/jstack</code></a></li>
+<li><a href="#topologies_jmap"><code>/topologies/jmap</code></a></li>
+<li><a href="#topologies_histo"><code>/topologies/histo</code></a></li>
+<li><a href="#machines"><code>/machines</code></a></li>
+</ul>
+
+<p>All of these endpoints are documented in the sections below.</p>
+
+<hr />
+
+<h3 id="a-name-clusters-clusters-a:a835b0b91c76de6fe740dc315fd5529d"><a name="clusters">/clusters</a></h3>
+
+<p>Returns JSON list of all the clusters.</p>
+
+<hr />
+
+<h3 id="a-name-topologies-topologies-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies">/topologies</a></h3>
+
+<p>Returns JSON describing all currently available topologies</p>
+
+<pre><code class="language-bash">$ curl &quot;http://heron-tracker-url/topologies?cluster=cluster1&amp;environ=devel&quot;
+</code></pre>
+
+<h4 id="parameters:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+
+<ul>
+<li><code>cluster</code> (optional) &mdash; The cluster parameter can be used to filter
+topologies that are running in this cluster.</li>
+<li><code>environ</code> (optional) &mdash; The environment parameter can be used to filter
+topologies that are running in this environment.</li>
+</ul>
+
+<hr />
+
+<h3 id="a-name-topologies-logicalplan-topologies-logicalplan-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_logicalplan">/topologies/logicalplan</a></h3>
+
+<p>Returns a JSON representation of the <a href="../../concepts/topologies#logical-plan">logical plan</a> of a topology.</p>
+
+<pre><code class="language-bash">$ curl &quot;http://heron-tracker-url/topologies/logicalplan?cluster=cluster1&amp;environ=devel&amp;topology=topologyName&quot;
+</code></pre>
+
+<h4 id="parameters-1:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+
+<ul>
+<li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
+<li><code>environ</code> (required) &mdash; The environment in which the topology is running</li>
+<li><code>topology</code> (required) &mdash; The name of the topology</li>
+</ul>
+
+<p>The resulting JSON contains the following</p>
+
+<ul>
+<li><code>spouts</code> &mdash; A set of JSON objects representing each spout in the topology.
+The following information is listed for each spout:
+
+<ul>
+<li><code>source</code> &mdash; The source of tuples for the spout.</li>
+<li><code>type</code> &mdash; The type of the spout, e.g. <code>kafka</code>, <code>kestrel</code>, etc.</li>
+<li><code>outputs</code> &mdash; A list of streams to which the spout outputs tuples.</li>
+</ul></li>
+<li><code>bolts</code> &mdash; A set of JSON objects representing each bolt in the topology.
+
+<ul>
+<li><code>outputs</code> &mdash; A list of streams to which the bolt outputs tuples.</li>
+<li><code>inputs</code> &mdash; A list of inputs for the bolt. An input is represented by
+JSON dictionary containing following information.
+
+<ul>
+<li><code>component_name</code> &mdash; Name of the component this bolt is receiving tuples from.</li>
+<li><code>stream_name</code> &mdash; Name of the stream from which the tuples are received.</li>
+<li><code>grouping</code> &mdash; Type of grouping used to receive tuples, example <code>SHUFFLE</code> or <code>FIELDS</code>.</li>
+</ul></li>
+</ul></li>
+</ul>
+
+<hr />
+
+<h3 id="a-name-topologies-physicalplan-topologies-physicalplan-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_physicalplan">/topologies/physicalplan</a></h3>
+
+<p>Returns a JSON representation of the <a href="../../concepts/topologies#physical-plan">physical plan</a> of a topology.</p>
+
+<pre><code class="language-bash">$ curl &quot;http://heron-tracker-url/topologies/physicalplan?cluster=datacenter1&amp;environ=prod&amp;topology=topologyName&quot;
+</code></pre>
+
+<h4 id="parameters-2:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+
+<ul>
+<li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
+<li><code>environ</code> (required) &mdash; The environment in which the topology is running</li>
+<li><code>topology</code> (required) &mdash; The name of the topology</li>
+</ul>
+
+<p>The resulting JSON contains following information</p>
+
+<ul>
+<li>All spout and bolt components, with lists of their instances.</li>
+<li><code>stmgrs</code> &mdash; A list of JSON dictionary, containing following information of each stream manager.
+
+<ul>
+<li><code>host</code> &mdash; Hostname of the machine this container is running on.</li>
+<li><code>pid</code> &mdash; Process ID of the stream manager.</li>
+<li><code>cwd</code> &mdash; Absolute path to the directory from where container was launched.</li>
+<li><code>joburl</code> &mdash; URL to browse the <code>cwd</code> through <code>heron-shell</code>.</li>
+<li><code>shell_port</code> &mdash; Port to access <code>heron-shell</code>.</li>
+<li><code>logfiles</code> &mdash; URL to browse instance log files through <code>heron-shell</code>.</li>
+<li><code>id</code> &mdash; ID for this stream manager.</li>
+<li><code>port</code> &mdash; Port at which this stream manager accepts connections from other stream managers.</li>
+<li><code>instance_ids</code> &mdash; List of instance IDs that constitute this container.</li>
+</ul></li>
+<li><code>instances</code> &mdash; A list of JSON dictionaries containing following information for each instance
+
+<ul>
+<li><code>id</code> &mdash; Instance ID.</li>
+<li><code>name</code> &mdash; Component name of this instance.</li>
+<li><code>logfile</code> &mdash; Link to log file for this instance, that can be read through <code>heron-shell</code>.</li>
+<li><code>stmgrId</code> &mdash; Its stream manager&rsquo;s ID.</li>
+</ul></li>
+<li><code>config</code> &mdash; Various topology configs. Some of the examples are:
+
+<ul>
+<li><code>topology.message.timeout.secs</code> &mdash; Time after which a tuple should be considered as failed.</li>
+<li><code>topology.acking</code> &mdash; Whether acking is enabled or not.</li>
+</ul></li>
+</ul>
+
+<hr />
+
+<h3 id="a-name-topologies-schedulerlocation-topologies-schedulerlocation-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_schedulerlocation">/topologies/schedulerlocation</a></h3>
+
+<p>Returns a JSON representation of the scheduler location of the topology.</p>
+
+<pre><code class="language-bash">$ curl &quot;http://heron-tracker-url/topologies/schedulerlocation?cluster=datacenter1&amp;environ=prod&amp;topology=topologyName&quot;
+</code></pre>
+
+<h4 id="parameters-3:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+
+<ul>
+<li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
+<li><code>environ</code> (required) &mdash; The environment in which the topology is running</li>
+<li><code>topology</code> (required) &mdash; The name of the topology</li>
+</ul>
+
+<p>The <code>SchedulerLocation</code> mainly contains the link to the job on the scheduler,
+for example, the Aurora page for the job.</p>
+
+<hr />
+
+<h3 id="a-name-topologies-executionstate-topologies-executionstate-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_executionstate">/topologies/executionstate</a></h3>
+
+<p>Returns a JSON representation of the execution state of the topology.</p>
+
+<pre><code class="language-bash">$ curl &quot;http://heron-tracker-url/topologies/executionstate?cluster=datacenter1&amp;environ=prod&amp;topology=topologyName&quot;
+</code></pre>
+
+<h4 id="parameters-4:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+
+<ul>
+<li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
+<li><code>environ</code> (required) &mdash; The environment in which the topology is running</li>
+<li><code>topology</code> (required) &mdash; The name of the topology</li>
+</ul>
+
+<p>Each execution state object lists the following:</p>
+
+<ul>
+<li><code>cluster</code> &mdash; The cluster in which the topology is running</li>
+<li><code>environ</code> &mdash; The environment in which the topology is running</li>
+<li><code>role</code> &mdash; The role with which the topology was launched</li>
+<li><code>jobname</code> &mdash; Same as topology name</li>
+<li><code>submission_time</code> &mdash; The time at which the topology was submitted</li>
+<li><code>submission_user</code> &mdash; The user that submitted the topology (can be same as <code>role</code>)</li>
+<li><code>release_username</code> &mdash; The user that generated the Heron release for the
+topology</li>
+<li><code>release_version</code> &mdash; Release version</li>
+<li><code>has_physical_plan</code> &mdash; Whether the topology has a physical plan</li>
+<li><code>has_tmaster_location</code> &mdash; Whether the topology has a Topology Master Location</li>
+<li><code>has_scheduler_location</code> &mdash; Whether the topology has a Scheduler Location</li>
+<li><code>viz</code> &mdash; Metric visualization UI URL for the topology if it was <a href="../heron-tracker">configured</a></li>
+</ul>
+
+<hr />
+
+<h3 id="a-name-topologies-states-topologies-states-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_states">/topologies/states</a></h3>
+
+<p>Returns a JSON list of execution states of topologies in all the cluster.</p>
+
+<pre><code class="language-bash">$ curl &quot;http://heron-tracker-url/topologies/states?cluster=cluster1&amp;environ=devel&quot;
+</code></pre>
+
+<h4 id="parameters-5:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+
+<ul>
+<li><code>cluster</code> (optional) &mdash; The cluster parameter can be used to filter
+topologies that are running in this cluster.</li>
+<li><code>environ</code> (optional) &mdash; The environment parameter can be used to filter
+topologies that are running in this environment.</li>
+</ul>
+
+<hr />
+
+<h3 id="a-name-topologies-info-topologies-info-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_info">/topologies/info</a></h3>
+
+<p>Returns a JSON representation of a dictionary containing logical plan, physical plan,
+execution state, scheduler location and TMaster location for a topology, as described above.
+<code>TMasterLocation</code> is the location of the TMaster, including its host,
+port, and the heron-shell port that it exposes.</p>
+
+<h4 id="parameters-6:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+
+<ul>
+<li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
+<li><code>environ</code> (required) &mdash; The environment in which the topology is running</li>
+<li><code>topology</code> (required) &mdash; The name of the topology</li>
+</ul>
+
+<hr />
+
+<h3 id="a-name-topologies-containerfilestats-topologies-containerfilestats-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_containerfilestats">/topologies/containerfilestats</a></h3>
+
+<p>Returns the file stats for a container. This is the output of the command <code>ls -lh</code> when run
+in the directory where the heron-controller launched all the processes.</p>
+
+<p>This endpoint is mainly used by ui for exploring files in a container.</p>
+
+<h4 id="parameters-7:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+
+<ul>
+<li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
+<li><code>environ</code> (required) &mdash; The environment in which the topology is running</li>
+<li><code>topology</code> (required) &mdash; The name of the topology</li>
+<li><code>container</code> (required) &mdash; Container ID</li>
+<li><code>path</code> (optional) &mdash; Path relative to the directory where heron-controller is launched.
+Paths are not allowed to start with a <code>/</code> or contain a <code>..</code>.</li>
+</ul>
+
+<hr />
+
+<h3 id="a-name-topologies-containerfiledata-topologies-containerfiledata-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_containerfiledata">/topologies/containerfiledata</a></h3>
+
+<p>Returns the file data for a file of a container.</p>
+
+<p>This endpoint is mainly used by ui for exploring files in a container.</p>
+
+<h4 id="parameters-8:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+
+<ul>
+<li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
+<li><code>environ</code> (required) &mdash; The environment in which the topology is running</li>
+<li><code>topology</code> (required) &mdash; The name of the topology</li>
+<li><code>container</code> (required) &mdash; Container ID</li>
+<li><code>path</code> (required) &mdash; Path to the file relative to the directory where heron-controller is launched.
+Paths are not allowed to start with a <code>/</code> or contain a <code>..</code>.</li>
+<li><code>offset</code> (required) &mdash; Offset from the beggining of the file.</li>
+<li><code>length</code> (required) &mdash; Number of bytes to be returned.</li>
+</ul>
+
+<hr />
+
+<h3 id="a-name-topologies-metrics-topologies-metrics-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_metrics">/topologies/metrics</a></h3>
+
+<p>Returns a JSON map of instances of the topology to their respective metrics.
+To filter instances returned use the <code>instance</code> parameter discussed below.</p>
+
+<p>Note that these metrics come from TMaster, which only holds metrics
+for last 3 hours minutely data, as well as cumulative values. If the <code>interval</code>
+is greater than <code>10800</code> seconds, the values will be for all-time metrics.</p>
+
+<h4 id="parameters-9:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+
+<ul>
+<li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
+<li><code>environ</code> (required) &mdash; The environment in which the topology is running</li>
+<li><code>topology</code> (required) &mdash; The name of the topology</li>
+<li><code>component</code> (required) &mdash; Component name</li>
+<li><code>metricname</code> (required, repeated) &mdash; Names of metrics to fetch</li>
+<li><code>interval</code> (optional) &mdash; For how many seconds, the metrics should be fetched for (max 10800 seconds)</li>
+<li><code>instance</code> (optional) &mdash; IDs of the instances. If not present, return for all the instances.</li>
+</ul>
+
+<hr />
+
+<h3 id="a-name-topologies-metricstimeline-topologies-metricstimeline-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_metricstimeline">/topologies/metricstimeline</a></h3>
+
+<p>Returns a JSON map of instances of the topology to their respective metrics timeline.
+To filter instances returned use the <code>instance</code> parameter discussed below.</p>
+
+<p>The difference between this and <code>/metrics</code> endpoint above, is that <code>/metrics</code> will report
+cumulative value over the period of <code>interval</code> provided. On the other hand, <code>/metricstimeline</code>
+endpoint will report minutely values for each metricname for each instance.</p>
+
+<p>Note that these metrics come from TMaster, which only holds metrics
+for last 3 hours minutely data, as well as cumulative all-time values. If the starttime
+is older than 3 hours ago, those minutes would not be part of the response.</p>
+
+<h4 id="parameters-10:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+
+<ul>
+<li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
+<li><code>environ</code> (required) &mdash; The environment in which the topology is running</li>
+<li><code>topology</code> (required) &mdash; The name of the topology</li>
+<li><code>component</code> (required) &mdash; Component name</li>
+<li><code>metricname</code> (required, repeated) &mdash; Names of metrics to fetch</li>
+<li><code>starttime</code> (required) &mdash; Start time for the metrics (must be within last 3 hours)</li>
+<li><code>endtime</code> (required) &mdash; End time for the metrics (must be within last 3 hours,
+and greater than <code>starttime</code>)</li>
+<li><code>instance</code> (optional) &mdash; IDs of the instances. If not present, return for all the instances.</li>
+</ul>
+
+<h3 id="a-name-topologies-metricsquery-topologies-metricsquery-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_metricsquery">/topologies/metricsquery</a></h3>
+
+<p>Executes the metrics query for the topology and returns the result in form of minutely timeseries.
+A detailed description of query language is given <a href="#metricsquery">below</a>.</p>
+
+<p>Note that these metrics come from TMaster, which only holds metrics
+for last 3 hours minutely data, as well as cumulative all-time values. If the starttime
+is older than 3 hours ago, those minutes would not be part of the response.</p>
+
+<h4 id="parameters-11:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+
+<ul>
+<li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
+<li><code>environ</code> (required) &mdash; The environment in which the topology is running</li>
+<li><code>topology</code> (required) &mdash; The name of the topology</li>
+<li><code>starttime</code> (required) &mdash; Start time for the metrics (must be within last 3 hours)</li>
+<li><code>endtime</code> (required) &mdash; End time for the metrics (must be within last 3 hours,
+and greater than <code>starttime</code>)</li>
+<li><code>query</code> (required) &mdash; Query to be executed</li>
+</ul>
+
+<hr />
+
+<h3 id="a-name-topologies-exceptionsummary-topologies-exceptionsummary-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_exceptionsummary">/topologies/exceptionsummary</a></h3>
+
+<p>Returns summary of the exceptions for the component of the topology.
+Duplicated exceptions are combined together and includes the number of
+occurances, first occurance time and latest occurance time.</p>
+
+<h4 id="parameters-12:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+
+<ul>
+<li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
+<li><code>environ</code> (required) &mdash; The environment in which the topology is running</li>
+<li><code>topology</code> (required) &mdash; The name of the topology</li>
+<li><code>component</code> (required) &mdash; Component name</li>
+<li><code>instance</code> (optional) &mdash; IDs of the instances. If not present, return for all the instances.</li>
+</ul>
+
+<hr />
+
+<h3 id="a-name-topologies-exceptions-topologies-exceptions-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_exceptions">/topologies/exceptions</a></h3>
+
+<p>Returns all exceptions for the component of the topology.</p>
+
+<h4 id="parameters-13:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+
+<ul>
+<li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
+<li><code>environ</code> (required) &mdash; The environment in which the topology is running</li>
+<li><code>topology</code> (required) &mdash; The name of the topology</li>
+<li><code>component</code> (required) &mdash; Component name</li>
+<li><code>instance</code> (optional) &mdash; IDs of the instances. If not present, return for all the instances.</li>
+</ul>
+
+<hr />
+
+<h3 id="a-name-topologies-pid-topologies-pid-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_pid">/topologies/pid</a></h3>
+
+<p>Returns the PID of the instance jvm process.</p>
+
+<h4 id="parameters-14:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+
+<ul>
+<li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
+<li><code>environ</code> (required) &mdash; The environment in which the topology is running</li>
+<li><code>topology</code> (required) &mdash; The name of the topology</li>
+<li><code>instance</code> (required) &mdash; Instance ID</li>
+</ul>
+
+<hr />
+
+<h3 id="a-name-topologies-jstack-topologies-jstack-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_jstack">/topologies/jstack</a></h3>
+
+<p>Returns the thread dump of the instance jvm process.</p>
+
+<h4 id="parameters-15:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+
+<ul>
+<li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
+<li><code>environ</code> (required) &mdash; The environment in which the topology is running</li>
+<li><code>topology</code> (required) &mdash; The name of the topology</li>
+<li><code>instance</code> (required) &mdash; Instance ID</li>
+</ul>
+
+<hr />
+
+<h3 id="a-name-topologies-jmap-topologies-jmap-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_jmap">/topologies/jmap</a></h3>
+
+<p>Issues the <code>jmap</code> command for the instance, and saves the result in a file.
+Returns the path to the file that can be downloaded externally.</p>
+
+<h4 id="parameters-16:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+
+<ul>
+<li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
+<li><code>environ</code> (required) &mdash; The environment in which the topology is running</li>
+<li><code>topology</code> (required) &mdash; The name of the topology</li>
+<li><code>instance</code> (required) &mdash; Instance ID</li>
+</ul>
+
+<hr />
+
+<h3 id="a-name-topologies-histo-topologies-histo-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_histo">/topologies/histo</a></h3>
+
+<p>Returns histogram for the instance jvm process.</p>
+
+<h4 id="parameters-17:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+
+<ul>
+<li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
+<li><code>environ</code> (required) &mdash; The environment in which the topology is running</li>
+<li><code>topology</code> (required) &mdash; The name of the topology</li>
+<li><code>instance</code> (required) &mdash; Instance ID</li>
+</ul>
+
+<hr />
+
+<h3 id="a-name-machines-machines-a:a835b0b91c76de6fe740dc315fd5529d"><a name="machines">/machines</a></h3>
+
+<p>Returns JSON describing all machines that topologies are running on.</p>
+
+<pre><code class="language-bash">$ curl &quot;http://heron-tracker-url/machines?topology=mytopology1&amp;cluster=cluster1&amp;environ=prod&quot;
+</code></pre>
+
+<h4 id="parameters-18:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+
+<ul>
+<li><code>cluster</code> (optional) &mdash; The cluster parameter can be used to filter
+machines that are running the topologies in this cluster only.</li>
+<li><code>environ</code> (optional) &mdash; The environment parameter can be used to filter
+machines that are running the topologies in this environment only.</li>
+<li><code>topology</code> (optional, repeated) &mdash; Name of the topology. Both <code>cluster</code>
+and <code>environ</code> are required if the <code>topology</code> parameter is present</li>
+</ul>
+
+<hr />
+
+<h3 id="a-name-metricsquery-metrics-query-language-a:a835b0b91c76de6fe740dc315fd5529d"><a name="metricsquery">Metrics Query Language</a></h3>
+
+<p>Metrics queries are useful when some kind of aggregated values are required. For example,
+to find the total number of tuples emitted by a spout, <code>SUM</code> operator can be used, instead
+of fetching metrics for all the instances of the corresponding component, and then summing them.</p>
+
+<h4 id="terminology:a835b0b91c76de6fe740dc315fd5529d">Terminology</h4>
+
+<ol>
+<li>Univariate Timeseries &mdash; A timeseries is called univariate if there is only one set
+of minutely data. For example, a timeseries representing the sums of a number of timeseries
+would be a univariate timeseries.</li>
+<li>Multivariate Timeseries &mdash; A set of multiple timeseries is collectively called multivariate.
+Note that these timeseries are associated with their instances.</li>
+</ol>
+
+<h4 id="operators:a835b0b91c76de6fe740dc315fd5529d">Operators</h4>
+
+<h5 id="ts:a835b0b91c76de6fe740dc315fd5529d">TS</h5>
+
+<pre><code>TS(componentName, instance, metricName)
+</code></pre>
+
+<p>Example:</p>
+
+<pre><code>TS(component1, *, __emit-count/stream1)
+</code></pre>
+
+<p>Time Series Operator. This is the basic operator that is responsible for getting metrics from TMaster.
+Accepts a list of 3 elements:</p>
+
+<ol>
+<li>componentName</li>
+<li>instance - can be &ldquo;*&rdquo; for all instances, or a single instance ID</li>
+<li>metricName - Full metric name with stream id if applicable</li>
+</ol>
+
+<p>Returns a univariate time series in case of a single instance id given, otherwise returns
+a multivariate time series.</p>
+
+<hr />
+
+<h5 id="default:a835b0b91c76de6fe740dc315fd5529d">DEFAULT</h5>
+
+<pre><code>DEFAULT(0, TS(component1, *, __emit-count/stream1))      &lt;-- If the second operator returns more than one timeline, so will the DEFAULT operator.
+
+DEFAULT(100.0, SUM(TS(component2, *, __emit-count/default)))     &lt;-- Second operator can be any operator
+</code></pre>
+
+<p>Default Operator. This operator is responsible for filling missing values in the metrics timeline.
+Must have 2 arguments</p>
+
+<ol>
+<li>First argument is a numeric constant representing the number to fill the missing values with</li>
+<li>Second one must be one of the operators, that return the metrics timeline</li>
+</ol>
+
+<p>Returns a univariate or multivariate time series, based on what the second operator is.</p>
+
+<hr />
+
+<h5 id="sum:a835b0b91c76de6fe740dc315fd5529d">SUM</h5>
+
+<pre><code>SUM(TS(component1, instance1, metric1), DEFAULT(0, TS(component1, *, metric2)))
+</code></pre>
+
+<p>Sum Operator. This operator is used to take sum of all argument time series. It can have any number of arguments,
+each of which must be one of the following two types:</p>
+
+<ol>
+<li>Numeric constants, which will fill in the missing values as well, or</li>
+<li>Operator, which returns one or more timelines</li>
+</ol>
+
+<p>Returns only a single timeline representing the sum of all time series for each timestamp.
+Note that &ldquo;instance&rdquo; attribute is not there in the result.</p>
+
+<hr />
+
+<h5 id="max:a835b0b91c76de6fe740dc315fd5529d">MAX</h5>
+
+<pre><code>MAX(100, TS(component1, *, metric1))
+</code></pre>
+
+<p>Max Operator. This operator is used to find max of all argument operators for each individual timestamp.
+Each argument must be one of the following types:</p>
+
+<ol>
+<li>Numeric constants, which will fill in the missing values as well, or</li>
+<li>Operator, which returns one or more timelines</li>
+</ol>
+
+<p>Returns only a single timeline representing the max of all the time series for each timestamp.
+Note that &ldquo;instance&rdquo; attribute is not included in the result.</p>
+
+<hr />
+
+<h5 id="percentile:a835b0b91c76de6fe740dc315fd5529d">PERCENTILE</h5>
+
+<pre><code>PERCENTILE(99, TS(component1, *, metric1))
+</code></pre>
+
+<p>Percentile Operator. This operator is used to find a quantile of all timelines retuned by the arguments, for each timestamp.
+This is a more general type of query similar to MAX. Note that <code>PERCENTILE(100, TS...)</code> is equivalent to <code>Max(TS...)</code>.
+Each argument must be either constant or Operators.
+First argument must always be the required Quantile.</p>
+
+<ol>
+<li>Quantile (first argument) - Required quantile. 100 percentile = max, 0 percentile = min.</li>
+<li>Numeric constants will fill in the missing values as well,</li>
+<li>Operator - which returns one or more timelines</li>
+</ol>
+
+<p>Returns only a single timeline representing the quantile of all the time series
+for each timestamp. Note that &ldquo;instance&rdquo; attribute is not there in the result.</p>
+
+<hr />
+
+<h5 id="divide:a835b0b91c76de6fe740dc315fd5529d">DIVIDE</h5>
+
+<pre><code>DIVIDE(TS(component1, *, metrics1), 100)
+</code></pre>
+
+<p>Divide Operator. Accepts two arguments, both can be univariate or multivariate.
+Each can be of one of the following types:</p>
+
+<ol>
+<li>Numeric constant will be considered as a constant time series for all applicable timestamps, they will not fill the missing values</li>
+<li>Operator - returns one or more timelines</li>
+</ol>
+
+<p>Three main cases are:</p>
+
+<ol>
+<li>When both operands are multivariate
+
+<ol>
+<li>Divide operation will be done on matching data, that is, with same instance id.</li>
+<li>If the instances in both the operands do not match, error is thrown.</li>
+<li>Returns multivariate time series, each representing the result of division on the two corresponding time series.</li>
+</ol></li>
+<li>When one operand is univariate, and other is multivariate
+
+<ol>
+<li>This includes division by constants as well.</li>
+<li>The univariate operand will participate with all time series in multivariate.</li>
+<li>The instance information of the multivariate time series will be preserved in the result.</li>
+<li>Returns multivariate time series.</li>
+</ol></li>
+<li>When both operands are univariate
+
+<ol>
+<li>Instance information is ignored in this case</li>
+<li>Returns univariate time series which is the result of division operation.</li>
+</ol></li>
+</ol>
+
+<hr />
+
+<h5 id="multiply:a835b0b91c76de6fe740dc315fd5529d">MULTIPLY</h5>
+
+<pre><code>MULTIPLY(10, TS(component1, *, metrics1))
+</code></pre>
+
+<p>Multiply Operator. Has same conditions as division operator. This is to keep the API simple.
+Accepts two arguments, both can be univariate or multivariate. Each can be of one of the following types:</p>
+
+<ol>
+<li>Numeric constant will be considered as a constant time series for all applicable timestamps, they will not fill the missing values</li>
+<li>Operator - returns one or more timelines</li>
+</ol>
+
+<p>Three main cases are:</p>
+
+<ol>
+<li>When both operands are multivariate
+
+<ol>
+<li>Multiply operation will be done on matching data, that is, with same instance id.</li>
+<li>If the instances in both the operands do not match, error is thrown.</li>
+<li>Returns multivariate time series, each representing the result of multiplication
+on the two corresponding time series.</li>
+</ol></li>
+<li>When one operand is univariate, and other is multivariate
+
+<ol>
+<li>This includes multiplication by constants as well.</li>
+<li>The univariate operand will participate with all time series in multivariate.</li>
+<li>The instance information of the multivariate time series will be preserved in the result.</li>
+<li>Returns multivariate timeseries.</li>
+</ol></li>
+<li>When both operands are univariate
+
+<ol>
+<li>Instance information is ignored in this case</li>
+<li>Returns univariate timeseries which is the result of multiplication operation.</li>
+</ol></li>
+</ol>
+
+<hr />
+
+<h5 id="subtract:a835b0b91c76de6fe740dc315fd5529d">SUBTRACT</h5>
+
+<pre><code>SUBTRACT(TS(component1, instance1, metrics1), TS(componet1, instance1, metrics2))
+
+SUBTRACT(TS(component1, instance1, metrics1), 100)
+</code></pre>
+
+<p>Subtract Operator. Has same conditions as division operator. This is to keep the API simple.
+Accepts two arguments, both can be univariate or multivariate. Each can be of one of the following types:</p>
+
+<ol>
+<li>Numeric constant will be considered as a constant time series for all applicable timestamps, they will not fill the missing values</li>
+<li>Operator - returns one or more timelines</li>
+</ol>
+
+<p>Three main cases are:</p>
+
+<ol>
+<li>When both operands are multivariate
+
+<ol>
+<li>Subtract operation will be done on matching data, that is, with same instance id.</li>
+<li>If the instances in both the operands do not match, error is thrown.</li>
+<li>Returns multivariate time series, each representing the result of subtraction
+on the two corresponding time series.</li>
+</ol></li>
+<li>When one operand is univariate, and other is multivariate
+
+<ol>
+<li>This includes subtraction by constants as well.</li>
+<li>The univariate operand will participate with all time series in multivariate.</li>
+<li>The instance information of the multivariate time series will be preserved in the result.</li>
+<li>Returns multivariate time series.</li>
+</ol></li>
+<li>When both operands are univariate
+
+<ol>
+<li>Instance information is ignored in this case</li>
+<li>Returns univariate time series which is the result of subtraction operation.</li>
+</ol></li>
+</ol>
+
+<hr />
+
+<h5 id="rate:a835b0b91c76de6fe740dc315fd5529d">RATE</h5>
+
+<pre><code>RATE(SUM(TS(component1, *, metrics1)))
+
+RATE(TS(component1, *, metrics2))
+</code></pre>
+
+<p>Rate Operator. This operator is used to find rate of change for all timeseries.
+Accepts a only a single argument, which must be an Operators which returns univariate or multivariate time series.
+Returns univariate or multivariate time series based on the argument, with each timestamp value
+corresponding to the rate of change for that timestamp.</p>
+</article></section></div></div></div><script data-no-instant>document.write('<script src="http://'
+        + (location.host || 'localhost').split(':')[0]
+		+ ':1313/livereload.js?mindelay=10"></'
+        + 'script>')</script></body></html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html><html lang="en-us"><head><link rel="shortcut icon" type="image/png" sizes="16x16" href="http://localhost:1313/heron/img/favicon-16x16.png"><link rel="shortcut icon" type="image/png" sizes="32x32" href="http://localhost:1313/heron/img/favicon-32x32.png"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="Hugo 0.14"><title>Heron Documentation - Compiling With Docker</title><link rel="stylesheet" href="http://localhost:1313/heron/css/style.min.css"><link rel="stylesheet" href="http://localhost:1313/heron/css/font-awesome.min.css"><link rel="stylesheet" href="http://localhost:1313/heron/css/pygments.css"><script defer src="http://code.jquery.com/jquery-2.2.1.min.js"></script><script defer src="http://localhost:1313/heron/js/app.min.js"></script></head><body><nav class="hn-top-navbar navbar navbar-inverse navbar-fixed-top" role="navigation"><div class="hn-navbar-container container-fluid"><div class="navbar-header"><button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#hn-navbar" aria-controls="hn-navbar" aria-expanded="false"><span class="sr-only"><Toggle>navigation</Toggle></span><i class="hn-toggle-button fa fa-bars"></i></button><a class="hn-navbar-logo navbar-brand" href="http://localhost:1313/heron/"><img class="pull-left" src="http://localhost:1313/heron/img/HeronTextLogo-small.png"></a></div><div id="hn-navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav navbar-right"><li><a href="http://localhost:1313/heron/docs/getting-started">Docs</a></li><li><a href="http://localhost:1313/heron/docs/resources">Resources</a></li><li><a href="http://localhost:1313/heron/docs/contributors/community">Community</a></li><li><a href="https://github.com/twitter/heron">GitHub</a></li><li><a class="nav-icon" href="https://groups.google.com/forum/#!forum/heron-users"><i class="fa fa-comments"></i></a></li><li><a class="nav-icon" href="https://twitter.com/heronstreaming"><i class="fa fa-twitter"></i></a></li></ul></div></div></nav><div class="hn-main"><div class="container"><div class="row"><aside class="hn-sidebar hidden-xs col-sm-3 col-md-3 col-lg-2 collapse"><div><nav class="hn-sidebar-nav"><h4>Getting Started</h4><ul><li><a href="http://localhost:1313/heron/docs/getting-started">Local (Single Node)</a></li><li><a href="http://localhost:1313/heron/docs/upgrade-storm-to-heron">Upgrade Storm Topologies</a></li></ul><ul></ul><h4>Heron Concepts</h4><ul><li><a href="http://localhost:1313/heron/docs/concepts/architecture">Heron Architecture</a></li><li><a href="http://localhost:1313/heron/docs/concepts/topologies">Heron Topology</a></li></ul><ul></ul><h4>Deployment</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment">Overview</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/configuration">Configuration</a></li></ul><ul></ul><h4>State Managers</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment/statemanagers/zookeeper">Zookeeper</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/statemanagers/localfs">Local FS</a></li></ul><ul></ul><h4>Uploaders</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment/uploaders/localfs">Local FS</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/uploaders/hdfs">HDFS</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/uploaders/s3">S3</a></li></ul><ul></ul><h4>Schedulers</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/aurora">Aurora Cluster</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/local">Local Cluster</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/mesos">Mesos Cluster</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/slurm">Slurm Cluster</a></li></ul><ul></ul><h4>System Configuration</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/configuration/config-intro">Overview</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/instance">Heron Instance</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/metrics-manager">Metrics Manager</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/stmgr">Stream Manager</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/system">System-Level</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/tmaster">Topology Master</a></li></ul><ul></ul><h4>Observability</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/observability/graphite">Graphite</a></li></ul><ul></ul><h4>User Manuals</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/heron-cli">Heron Client</a></li><li><a href="http://localhost:1313/heron/docs/operators/heron-tracker-api">Heron Tracker REST API</a></li><li><a href="http://localhost:1313/heron/docs/operators/heron-tracker">Heron Tracker Runbook</a></li><li><a href="http://localhost:1313/heron/docs/operators/heron-ui">Heron UI Runbook</a></li></ul><ul></ul><h4>Topology Writers</h4><ul><li><a href="http://localhost:1313/heron/docs/developers/topologies">Writing Topologies</a></li><li><a href="http://localhost:1313/heron/docs/developers/data-model">Heron Data Model</a></li><li><a href="http://localhost:1313/heron/docs/developers/serialization">Tuple Serialization</a></li><li><a href="http://localhost:1313/heron/docs/developers/ui-guide">Heron UI Guide</a></li><li><a href="http://localhost:1313/heron/docs/developers/tuning">Tuning Guide</a></li><li><a href="http://localhost:1313/heron/docs/developers/simulator-mode">Simulator Mode</a></li><li><a href="http://localhost:1313/heron/docs/developers/troubleshooting">Troubleshooting Guide</a></li><li><a href="http://localhost:1313/heron/api">Javadoc</a></li></ul><ul></ul><h4>Heron Developers</h4><ul><li><a href="http://localhost:1313/heron/docs/developers/compiling/compiling">Compiling</a></li><li><a href="http://localhost:1313/heron/docs/developers/compiling/linux">Compiling on Linux</a></li><li><a href="http://localhost:1313/heron/docs/developers/compiling/mac">Compiling on Mac OS X</a></li><li><a href="http://localhost:1313/heron/docs/developers/compiling/docker">Compiling With Docker</a></li><li><a href="http://localhost:1313/heron/docs/contributors/testing">Running Tests</a></li><li><a href="http://localhost:1313/heron/docs/contributors/codebase">Code Organization</a></li></ul><ul></ul><h4>Extending Heron</h4><ul><li><a href="http://localhost:1313/heron/docs/contributors/custom-scheduler">Custom Scheduler</a></li><li><a href="http://localhost:1313/heron/docs/contributors/custom-metrics-sink">Custom Metrics Sink</a></li></ul><ul></ul><h4>Heron Resources</h4><ul><li><a href="http://localhost:1313/heron/docs/resources">Heron Resources</a></li></ul><ul></ul><h4>Contributors</h4><ul><li><a href="http://localhost:1313/heron/docs/contributors/community">Community</a></li><li><a href="http://localhost:1313/heron/docs/contributors/governance">Governance</a></li></ul><ul></ul></nav></div></aside><section class="hn-docs-main col-sm-9 col-md-9 col-lg-10 col-sm-offset-3 col-md-offset-3 col-lg-offset-2"><header class="hn-docs-header page-header"><h1>Compiling With Docker</h1><div class="hn-docs-description"></div></header><article class="hn-docs-content">
+
+<p>For developing Heron, you will need to compile it for the environment that you
+want to use it in. If you&rsquo;d like to use Docker to create that build environment,
+Heron provides a convenient script to make that process easier.</p>
+
+<p>Currently, only Ubuntu 14.04, Ubuntu 15.10, and CentOS 7 are supported, but if you
+need another platform there are instructions for adding new ones
+<a href="#contributing-new-environments">below</a>.</p>
+
+<h3 id="requirements:69e60651f42783a7df723575c4088b5b">Requirements</h3>
+
+<ul>
+<li><a href="https://docs.docker.com">Docker</a></li>
+</ul>
+
+<h3 id="running-docker-in-a-virtual-machine:69e60651f42783a7df723575c4088b5b">Running Docker in a Virtual Machine</h3>
+
+<p>If you are running Docker in a virtual machine (VM), it is recommended that you
+adjust your settings to help speed up the build. To do this, open
+<a href="https://www.virtualbox.org/wiki/Downloads">VirtualBox</a> and go to the container
+in which Docker is running (usually &ldquo;default&rdquo; or whatever name you used to
+create the VM), click on the VM, and then click on <strong>Settings</strong>.</p>
+
+<p><strong>Note</strong>: You will need to stop the VM before modifying these settings.</p>
+
+<p><img src="http://localhost:1313/heron/img/virtual-box-processors.png" alt="VirtualBox Processors" />
+<img src="http://localhost:1313/heron/img/virtual-box-memory.png" alt="VirtualBox Memory" /></p>
+
+<h2 id="building-heron:69e60651f42783a7df723575c4088b5b">Building Heron</h2>
+
+<p>Heron provides a <code>build-arfifacts.sh</code> script for Docker located in the
+<code>docker</code> folder. To run that script:</p>
+
+<pre><code class="language-bash">$ cd /path/to/heron/repo
+$ docker/build-artifacts.sh
+</code></pre>
+
+<p>Running the script by itself will display usage information:</p>
+
+<pre><code>Usage: docker/build-artifacts.sh &lt;platform&gt; &lt;version_string&gt; [source-tarball] &lt;output-directory&gt; 
+  
+Platforms Supported: darwin, ubuntu14.04, ubuntu15.10, centos7
+  
+Example:
+  ./build-artifacts.sh ubuntu14.04 0.12.0 .
+  
+NOTE: If running on OSX, the output directory will need to 
+      be under /Users so virtualbox has access to.
+</code></pre>
+
+<p>The following arguments are required:</p>
+
+<ul>
+<li><code>platform</code> &mdash; Currently, this can be one of: <code>ubuntu14.04</code>, <code>centos7</code>. You
+can add other platforms using the <a href="#contributing-new-environments">instructions
+below</a>.</li>
+<li><code>version-string</code> &mdash; The Heron release for which you&rsquo;d like to build
+artifacts.</li>
+<li><code>output-directory</code> &mdash; The directory in which you&rsquo;d like the release to be
+built.</li>
+</ul>
+
+<p>Here&rsquo;s an example usage:</p>
+
+<pre><code class="language-bash">$ docker/build-artifacts.sh ubuntu14.04 0.12.0 ~/heron-release
+</code></pre>
+
+<p>This will build a Docker container specific to Ubuntu 14.04, create a source
+tarball of the Heron repository, run a full release build of Heron, and then
+copy the artifacts into the <code>~/heron-release</code> directory.</p>
+
+<p>Optionally, you can also include a tarball of the Heron source if you have one.
+By default, the script will create a tarball of the current source in the Heron
+repo and use that to build the artifacts.</p>
+
+<p><strong>Note</strong>: If you are running on Mac OS X, Docker must be run inside a VM.
+Therefore, you must make sure that both the source tarball and destination
+directory are somewhere under your home directory. For example, you cannot
+output the Heron artifacts to <code>/tmp</code> because <code>/tmp</code> refers to the directory
+inside the VM, not on the host machine. Your home directory, however, is
+automatically linked in to the VM and can be accessed normally.</p>
+
+<p>After the build has completed, you can go to your output directory and see all
+of the generated artifacts:</p>
+
+<pre><code class="language-bash">$ ls ~/heron-release
+heron-api-0.12.0-ubuntu14.04.tar.gz
+heron-client-0.12.0-ubuntu14.04.tar.gz 
+heron-tools-0.12.0-ubuntu14.04.tar.gz
+heron-client-install-0.12.0-ubuntu.sh  
+heron-tools-install-0.12.0-ubuntu.sh
+heron-api-install-0.12.0-ubuntu.sh     
+heron-core-0.12.0-ubuntu.tar.gz
+</code></pre>
+
+<h2 id="contributing-new-environments:69e60651f42783a7df723575c4088b5b">Contributing New Environments</h2>
+
+<p>You&rsquo;ll notice that there are multiple
+<a href="https://docs.docker.com/engine/reference/builder/">Dockerfiles</a> in the <code>docker</code>
+directory of Heron&rsquo;s source code, one for each of the currently supported
+platforms.</p>
+
+<p>To add support for a new platform, add a new <code>Dockerfile</code> to that directory and
+append the name of the platform to the name of the file. If you&rsquo;d like to add
+support for Debian 8, for example, add a file named <code>Dockerfile.debian8</code>. Once
+you&rsquo;ve done that, follow the instructions in the <a href="https://docs.docker.com/engine/articles/dockerfile_best-practices/">Docker
+documentation</a>.</p>
+
+<p>You should make sure that your <code>Dockerfile</code> specifies <em>at least</em> all of the
+following:</p>
+
+<h4 id="step-1-the-os-being-used-in-a-from-https-docs-docker-com-engine-reference-builder-from-statement:69e60651f42783a7df723575c4088b5b">Step 1 - The OS being used in a <a href="https://docs.docker.com/engine/reference/builder/#from"><code>FROM</code></a> statement.</h4>
+
+<p>Here&rsquo;s an example:</p>
+
+<pre><code class="language-dockerfile">FROM centos:centos7
+</code></pre>
+
+<h4 id="step-2-a-target-platform-environment-variable-using-the-env-https-docs-docker-com-engine-reference-builder-env-instruction:69e60651f42783a7df723575c4088b5b">Step 2 - A <code>TARGET_PLATFORM</code> environment variable using the <a href="https://docs.docker.com/engine/reference/builder/#env"><code>ENV</code></a> instruction.</h4>
+
+<p>Here&rsquo;s an example:</p>
+
+<pre><code class="language-dockerfile">ENV TARGET_PLATFORM centos
+</code></pre>
+
+<h4 id="step-3-a-general-dependency-installation-script-using-a-run-https-docs-docker-com-engine-reference-builder-run-instruction:69e60651f42783a7df723575c4088b5b">Step 3 - A general dependency installation script using a <a href="https://docs.docker.com/engine/reference/builder/#run"><code>RUN</code></a> instruction.</h4>
+
+<p>Here&rsquo;s an example:</p>
+
+<pre><code class="language-dockerfile">RUN apt-get update &amp;&amp; apt-get -y install \
+         automake \
+         build-essential \
+         cmake \
+         curl \
+         libssl-dev \
+         git \
+         libtool \
+         libunwind8 \
+         libunwind-setjmp0-dev \
+         python \
+         python2.7-dev \
+         python-software-properties \
+         software-properties-common \
+         python-setuptools \
+         unzip \
+         wget
+</code></pre>
+
+<h4 id="step-4-an-installation-script-for-java-8-and-a-java-home-environment-variable:69e60651f42783a7df723575c4088b5b">Step 4 - An installation script for Java 8 and a <code>JAVA_HOME</code> environment variable.</h4>
+
+<p>Here&rsquo;s an example:</p>
+
+<pre><code class="language-dockerfile">RUN \
+     echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections &amp;&amp; \
+     add-apt-repository -y ppa:webupd8team/java &amp;&amp; \
+     apt-get update &amp;&amp; \
+     apt-get install -y oracle-java8-installer &amp;&amp; \
+     rm -rf /var/lib/apt/lists/* &amp;&amp; \
+     rm -rf /var/cache/oracle-jdk8-installer
+
+ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
+</code></pre>
+
+<h4 id="step-5-an-installation-script-for-bazel-http-bazel-io-version-0-1-2-or-above:69e60651f42783a7df723575c4088b5b">Step 5 - An installation script for <a href="http://bazel.io/">Bazel</a> version 0.1.2 or above.</h4>
+
+<p>Here&rsquo;s an example:</p>
+
+<pre><code class="language-dockerfile">RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh \
+         &amp;&amp; chmod +x /tmp/bazel.sh \
+         &amp;&amp; /tmp/bazel.sh
+</code></pre>
+
+<h4 id="step-6-add-the-bazelrc-configuration-file-for-bazel-and-the-compile-sh:69e60651f42783a7df723575c4088b5b">Step 6 - Add the <code>bazelrc</code> configuration file for Bazel and the <code>compile.sh</code></h4>
+
+<p>script (from the <code>docker</code> folder) that compiles Heron:</p>
+
+<pre><code class="language-dockerfile">ADD bazelrc /root/.bazelrc
+ADD compile.sh /compile.sh
+</code></pre>
+</article></section></div></div></div><script data-no-instant>document.write('<script src="http://'
+        + (location.host || 'localhost').split(':')[0]
+		+ ':1313/livereload.js?mindelay=10"></'
+        + 'script>')</script></body></html>

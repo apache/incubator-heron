@@ -1,0 +1,293 @@
+<!DOCTYPE html><html lang="en-us"><head><link rel="shortcut icon" type="image/png" sizes="16x16" href="http://localhost:1313/heron/img/favicon-16x16.png"><link rel="shortcut icon" type="image/png" sizes="32x32" href="http://localhost:1313/heron/img/favicon-32x32.png"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="Hugo 0.14"><title>Heron Documentation - Managing Topologies with Heron CLI</title><link rel="stylesheet" href="http://localhost:1313/heron/css/style.min.css"><link rel="stylesheet" href="http://localhost:1313/heron/css/font-awesome.min.css"><link rel="stylesheet" href="http://localhost:1313/heron/css/pygments.css"><script defer src="http://code.jquery.com/jquery-2.2.1.min.js"></script><script defer src="http://localhost:1313/heron/js/app.min.js"></script></head><body><nav class="hn-top-navbar navbar navbar-inverse navbar-fixed-top" role="navigation"><div class="hn-navbar-container container-fluid"><div class="navbar-header"><button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#hn-navbar" aria-controls="hn-navbar" aria-expanded="false"><span class="sr-only"><Toggle>navigation</Toggle></span><i class="hn-toggle-button fa fa-bars"></i></button><a class="hn-navbar-logo navbar-brand" href="http://localhost:1313/heron/"><img class="pull-left" src="http://localhost:1313/heron/img/HeronTextLogo-small.png"></a></div><div id="hn-navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav navbar-right"><li><a href="http://localhost:1313/heron/docs/getting-started">Docs</a></li><li><a href="http://localhost:1313/heron/docs/resources">Resources</a></li><li><a href="http://localhost:1313/heron/docs/contributors/community">Community</a></li><li><a href="https://github.com/twitter/heron">GitHub</a></li><li><a class="nav-icon" href="https://groups.google.com/forum/#!forum/heron-users"><i class="fa fa-comments"></i></a></li><li><a class="nav-icon" href="https://twitter.com/heronstreaming"><i class="fa fa-twitter"></i></a></li></ul></div></div></nav><div class="hn-main"><div class="container"><div class="row"><aside class="hn-sidebar hidden-xs col-sm-3 col-md-3 col-lg-2 collapse"><div><nav class="hn-sidebar-nav"><h4>Getting Started</h4><ul><li><a href="http://localhost:1313/heron/docs/getting-started">Local (Single Node)</a></li><li><a href="http://localhost:1313/heron/docs/upgrade-storm-to-heron">Upgrade Storm Topologies</a></li></ul><ul></ul><h4>Heron Concepts</h4><ul><li><a href="http://localhost:1313/heron/docs/concepts/architecture">Heron Architecture</a></li><li><a href="http://localhost:1313/heron/docs/concepts/topologies">Heron Topology</a></li></ul><ul></ul><h4>Deployment</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment">Overview</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/configuration">Configuration</a></li></ul><ul></ul><h4>State Managers</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment/statemanagers/zookeeper">Zookeeper</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/statemanagers/localfs">Local FS</a></li></ul><ul></ul><h4>Uploaders</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment/uploaders/localfs">Local FS</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/uploaders/hdfs">HDFS</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/uploaders/s3">S3</a></li></ul><ul></ul><h4>Schedulers</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/aurora">Aurora Cluster</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/local">Local Cluster</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/mesos">Mesos Cluster</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/slurm">Slurm Cluster</a></li></ul><ul></ul><h4>System Configuration</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/configuration/config-intro">Overview</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/instance">Heron Instance</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/metrics-manager">Metrics Manager</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/stmgr">Stream Manager</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/system">System-Level</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/tmaster">Topology Master</a></li></ul><ul></ul><h4>Observability</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/observability/graphite">Graphite</a></li></ul><ul></ul><h4>User Manuals</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/heron-cli">Heron Client</a></li><li><a href="http://localhost:1313/heron/docs/operators/heron-tracker-api">Heron Tracker REST API</a></li><li><a href="http://localhost:1313/heron/docs/operators/heron-tracker">Heron Tracker Runbook</a></li><li><a href="http://localhost:1313/heron/docs/operators/heron-ui">Heron UI Runbook</a></li></ul><ul></ul><h4>Topology Writers</h4><ul><li><a href="http://localhost:1313/heron/docs/developers/topologies">Writing Topologies</a></li><li><a href="http://localhost:1313/heron/docs/developers/data-model">Heron Data Model</a></li><li><a href="http://localhost:1313/heron/docs/developers/serialization">Tuple Serialization</a></li><li><a href="http://localhost:1313/heron/docs/developers/ui-guide">Heron UI Guide</a></li><li><a href="http://localhost:1313/heron/docs/developers/tuning">Tuning Guide</a></li><li><a href="http://localhost:1313/heron/docs/developers/simulator-mode">Simulator Mode</a></li><li><a href="http://localhost:1313/heron/docs/developers/troubleshooting">Troubleshooting Guide</a></li><li><a href="http://localhost:1313/heron/api">Javadoc</a></li></ul><ul></ul><h4>Heron Developers</h4><ul><li><a href="http://localhost:1313/heron/docs/developers/compiling/compiling">Compiling</a></li><li><a href="http://localhost:1313/heron/docs/developers/compiling/linux">Compiling on Linux</a></li><li><a href="http://localhost:1313/heron/docs/developers/compiling/mac">Compiling on Mac OS X</a></li><li><a href="http://localhost:1313/heron/docs/developers/compiling/docker">Compiling With Docker</a></li><li><a href="http://localhost:1313/heron/docs/contributors/testing">Running Tests</a></li><li><a href="http://localhost:1313/heron/docs/contributors/codebase">Code Organization</a></li></ul><ul></ul><h4>Extending Heron</h4><ul><li><a href="http://localhost:1313/heron/docs/contributors/custom-scheduler">Custom Scheduler</a></li><li><a href="http://localhost:1313/heron/docs/contributors/custom-metrics-sink">Custom Metrics Sink</a></li></ul><ul></ul><h4>Heron Resources</h4><ul><li><a href="http://localhost:1313/heron/docs/resources">Heron Resources</a></li></ul><ul></ul><h4>Contributors</h4><ul><li><a href="http://localhost:1313/heron/docs/contributors/community">Community</a></li><li><a href="http://localhost:1313/heron/docs/contributors/governance">Governance</a></li></ul><ul></ul></nav></div></aside><section class="hn-docs-main col-sm-9 col-md-9 col-lg-10 col-sm-offset-3 col-md-offset-3 col-lg-offset-2"><header class="hn-docs-header page-header"><h1>Managing Topologies with Heron CLI</h1><div class="hn-docs-description"></div></header><article class="hn-docs-content">
+
+<p>The <strong>Heron CLI</strong> us used to to manage every aspect of the
+<a href="../../concepts/topologies#topology-lifecycle">topology lifecycle</a>.</p>
+
+<h2 id="deploying-the-heron-cli-executable:93ec29cd3d9550d53ecc0d2998ab04fe">Deploying the <code>heron</code> CLI Executable</h2>
+
+<p>To use <code>heron</code> CLI, download the <code>heron-client-install</code> for your platfrom from
+<a href="https://github.com/twitter/heron/releases">release binaries</a> and  run the
+installation script. For example, if you have downloaded the version <code>0.13.5</code>,
+you invoke the installation script as follows:</p>
+
+<pre><code class="language-bash">$ chmod +x heron-client-install-0.13.5-darwin.sh
+$ ./heron-client-install-0.13.5-darwin.sh --user
+Heron client installer
+----------------------
+
+Uncompressing......
+
+Heron is now installed!
+
+Make sure you have &quot;/Users/$USER/bin&quot; in your path.
+
+See http://heronstreaming.io/docs/getting-started.html on how to use Heron!
+
+....
+</code></pre>
+
+<p>Alternatively, generate a full <a href="../../developers/compiling/compiling">Heron release</a> and
+distribute the resulting <code>heron</code> CLI to all machines used to manage topologies.</p>
+
+<h3 id="common-cli-args:93ec29cd3d9550d53ecc0d2998ab04fe">Common CLI Args</h3>
+
+<p>All topology management commands (<code>submit</code>, <code>activate</code>, <code>deactivate</code>,
+<code>restart</code>, and <code>kill</code>) take the following required arguments:</p>
+
+<ul>
+<li><p><code>cluster</code> &mdash; The name of the cluster where the command needs to be executed.</p></li>
+
+<li><p><code>role</code> &mdash; This represents the user or the group depending on deployment.
+If not provided, it defaults to the unix user.</p></li>
+
+<li><p><code>env</code> &mdash; This is a tag for including additional information (e.g) a
+topology can be tagged as PROD or DEVEL to indicate whether it is in production
+or development. If <code>env</code> is not provided, it is given a value <code>default</code></p></li>
+</ul>
+
+<p><code>cluster</code>, <code>role</code> and <code>env</code> are specified as a single argument in the form of
+<code>cluster/role/env</code> (e.g) <code>local/ads/PROD</code> to refer the cluster <code>local</code> with
+role <code>ads</code> and the environment <code>PROD</code>. If you just want to specify <code>cluster</code>, the
+argument will be simply <code>local</code>.</p>
+
+<h3 id="optional-cli-flags:93ec29cd3d9550d53ecc0d2998ab04fe">Optional CLI Flags</h3>
+
+<p>CLI supports a common set of optional flags for all topology management commands
+(<code>submit</code>, <code>activate</code>, <code>deactivate</code>, <code>restart</code>, and <code>kill</code>):</p>
+
+<ul>
+<li><p><code>--config-path</code> &mdash; Every heron cluster must provide a few configuration
+files that are kept under a directory named after the cluster. By default,
+when a cluster is provided in the command, it searches the <code>conf</code> directory
+for a directory with the cluster name. This flag enables you to specify a
+non standard directory to search for the cluster directory.</p></li>
+
+<li><p><code>--config-property</code> &mdash; Heron supports several configuration parameters
+that be overridden. These parameters are specified in the form of <code>key=value</code>.</p></li>
+
+<li><p><code>--verbose</code> &mdash; When this flag is provided, <code>heron</code> CLI prints logs
+that provide detailed information about the execution.</p></li>
+</ul>
+
+<p>Below is an example topology management command that uses one of these flags:</p>
+
+<pre><code class="language-bash">$ heron activate --config-path ~/heronclusters devcluster/ads/PROD AckingTopology
+</code></pre>
+
+<h2 id="submitting-a-topology:93ec29cd3d9550d53ecc0d2998ab04fe">Submitting a Topology</h2>
+
+<p>To run a topology in a Heron cluster, submit it using the <code>submit</code> command.
+Topologies can be submitted in either an activated (default) or deactivated state
+(more on <a href="#activating-a-topology">activation</a> and <a href="#deactivating-a-topology">deactivation</a>
+below).</p>
+
+<p>Here&rsquo;s the basic syntax:</p>
+
+<pre><code class="language-bash">$ heron help submit
+usage: heron submit [options] cluster/[role]/[env] topology-file-name topology-class-name [topology-args]
+
+Required arguments:
+  cluster/[role]/[env]  Cluster, role, and env to run topology
+  topology-file-name    Topology jar/tar/zip file
+  topology-class-name   Topology class name
+
+Optional arguments:
+  --config-path (a string; path to cluster config; default: &quot;/Users/$USER/.heron/conf&quot;)
+  --config-property (key=value; a config key and its value; default: [])
+  --deploy-deactivated (a boolean; default: &quot;false&quot;)
+  --topology-main-jvm-property Define a system property to pass to java -D when running main.
+  --verbose (a boolean; default: &quot;false&quot;)
+</code></pre>
+
+<p>Arguments of the <code>submit</code> command:</p>
+
+<ul>
+<li><p><strong>cluster/[role]/[env]</strong> &mdash; The cluster where topology needs to be submitted,
+optionally taking the role and environment. For example,<code>local/ads/PROD</code> or just <code>local</code></p></li>
+
+<li><p><strong>topology-file-name</strong> &mdash; The path of the file in which you&rsquo;ve packaged the
+topology&rsquo;s code. For Java topologies this will be a <code>.jar</code> file; for
+topologies in other languages (not yet supported), this could be a
+<code>.tar</code> file. For example, <code>/path/to/topology/my-topology.jar</code></p></li>
+
+<li><p><strong>topology-class-name</strong> &mdash; The name of the class containing the <code>main</code> function
+for the topology. For example, <code>com.example.topologies.MyTopology</code></p></li>
+
+<li><p><strong>topology-args</strong> (optional) &mdash; Arguments specific to the topology.
+You will need to supply additional args only if the <code>main</code> function for your
+topology requires them.</p></li>
+</ul>
+
+<h3 id="example-topology-submission-command:93ec29cd3d9550d53ecc0d2998ab04fe">Example Topology Submission Command</h3>
+
+<p>Below is an example command that submits a topology to a cluster named <code>devcluster</code>
+with a main class named <code>com.example.topologies.MyTopology</code> packaged in <code>my-topology.jar</code>,
+along with the optional <code>--config-path</code> where the config for <code>devcluster</code> can be found:</p>
+
+<pre><code class="language-bash">$ heron submit --config-path ~/heronclusters devcluster /path/to/topology/my-topology.jar \
+    com.example.topologies.MyTopology my-topology
+</code></pre>
+
+<h3 id="other-topology-submission-options:93ec29cd3d9550d53ecc0d2998ab04fe">Other Topology Submission Options</h3>
+
+<table>
+<thead>
+<tr>
+<th align="left">Flag</th>
+<th align="left">Meaning</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left"><code>--deploy-deactivated</code></td>
+<td align="left">If set, the topology is deployed in a deactivated state.</td>
+</tr>
+
+<tr>
+<td align="left"><code>--topology-main-jvm-property</code></td>
+<td align="left">Defines a system property to pass to java -D when running topology main</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="activating-a-topology:93ec29cd3d9550d53ecc0d2998ab04fe">Activating a Topology</h2>
+
+<p>Topologies are submitted to the cluster in the activated state by default. To
+activate a deactivated topology use the <code>activate</code> command. Below is the basic
+syntax:</p>
+
+<pre><code class="language-bash">$ heron help activate
+usage: heron activate [options] cluster/[role]/[env] topology-name
+
+Required arguments:
+  cluster/[role]/[env]  Cluster, role, and env to run topology
+  topology-name         Name of the topology
+
+Optional arguments:
+  --config-path (a string; path to cluster config; default: &quot;/Users/$USER/.heron/conf&quot;)
+  --config-property (key=value; a config key and its value; default: [])
+</code></pre>
+
+<p>Arguments of the <code>activate</code> command:</p>
+
+<ul>
+<li><p><strong>cluster/[role]/[env]</strong> &mdash; The cluster where topology needs to be submitted,
+optionally taking the role and environment. For exampple, <code>local/ads/PROD</code> or just <code>local</code></p></li>
+
+<li><p><strong>topology-name</strong>  &mdash; The name of the already-submitted topology that you&rsquo;d
+like to activate.</p></li>
+</ul>
+
+<h3 id="example-topology-activation-command:93ec29cd3d9550d53ecc0d2998ab04fe">Example Topology Activation Command</h3>
+
+<pre><code class="language-bash">$ heron activate local/ads/PROD my-topology
+</code></pre>
+
+<h2 id="deactivating-a-topology:93ec29cd3d9550d53ecc0d2998ab04fe">Deactivating a Topology</h2>
+
+<p>You can deactivate a running topology at any time using the <code>deactivate</code>
+command. Here&rsquo;s the basic syntax:</p>
+
+<pre><code class="language-bash">$ heron help deactivate
+usage: heron deactivate [options] cluster/[role]/[env] topology-name
+
+Required arguments:
+  cluster/[role]/[env]  Cluster, role, and env to run topology
+  topology-name         Name of the topology
+
+Optional arguments:
+  --config-path (a string; path to cluster config; default: &quot;/Users/kramasamy/.heron/conf&quot;)
+  --config-property (key=value; a config key and its value; default: [])
+  --verbose (a boolean; default: &quot;false&quot;)
+
+</code></pre>
+
+<p>Arguments of the <code>deactivate</code> command:</p>
+
+<ul>
+<li><p><strong>cluster/[role]/[env]</strong> &mdash; The cluster where topology needs to be submitted,
+optionally taking the role and environment. For example, <code>local/ads/PROD</code> or just <code>local</code></p></li>
+
+<li><p><strong>topology-name</strong> &mdash; The name of the topology that you&rsquo;d like to deactivate.</p></li>
+</ul>
+
+<h2 id="restarting-a-topology:93ec29cd3d9550d53ecc0d2998ab04fe">Restarting a Topology</h2>
+
+<p>You can restart a deactivated topology using the <code>restart</code> command (assuming
+that the topology has not yet been killed, i.e. removed from the cluster).</p>
+
+<pre><code class="language-bash">$ heron help restart
+usage: heron restart [options] cluster/[role]/[env] topology-name [container-id]
+
+Required arguments:
+  cluster/[role]/[env]  Cluster, role, and env to run topology
+  topology-name         Name of the topology
+  container-id          Identifier of the container to be restarted
+
+Optional arguments:
+  --config-path (a string; path to cluster config; default: &quot;/Users/kramasamy/.heron/conf&quot;)
+  --config-property (key=value; a config key and its value; default: [])
+  --verbose (a boolean; default: &quot;false&quot;)
+</code></pre>
+
+<p>Arguments of the <code>restart</code> command:</p>
+
+<ul>
+<li><p><strong>cluster/[role]/[env]</strong> &mdash; The cluster where topology needs to be submitted,
+optionally taking the role and environment. For example, <code>local/ads/PROD</code> or just <code>local</code></p></li>
+
+<li><p><strong>topology-name</strong> &mdash; The name of the topology that you&rsquo;d like to restart.</p></li>
+
+<li><p><strong>container-id</strong> (optional) &mdash; This enables you to specify the container ID to be
+restarted if you want to restart only a specific container of the topology.</p></li>
+</ul>
+
+<h3 id="example-topology-restart-command:93ec29cd3d9550d53ecc0d2998ab04fe">Example Topology Restart Command</h3>
+
+<pre><code class="language-bash">$ heron restart local/ads/PROD my-topology
+</code></pre>
+
+<h2 id="killing-a-topology:93ec29cd3d9550d53ecc0d2998ab04fe">Killing a Topology</h2>
+
+<p>If you&rsquo;ve submitted a topology to your Heron cluster and would like to remove
+knowledge of the topology entirely, you can remove it using the <code>kill</code> command.
+Here&rsquo;s the basic syntax:</p>
+
+<pre><code class="language-bash">$ heron kill &lt;killer-overrides&gt; &lt;topology&gt;
+</code></pre>
+
+<p>Arguments of the <code>kill</code> command:</p>
+
+<ul>
+<li><p><strong>cluster/[role]/[env]</strong> &mdash; The cluster where topology needs to be submitted,
+optionally taking the role and environment.  For example, <code>local/ads/PROD</code> or just
+<code>local</code></p></li>
+
+<li><p><strong>topology-name</strong> &mdash; The name of the topology that you&rsquo;d like to kill.</p></li>
+</ul>
+
+<h3 id="example-topology-kill-command:93ec29cd3d9550d53ecc0d2998ab04fe">Example Topology Kill Command</h3>
+
+<pre><code class="language-bash">$ heron kill local my-topology
+</code></pre>
+
+<h2 id="other-commands:93ec29cd3d9550d53ecc0d2998ab04fe">Other Commands</h2>
+
+<h3 id="version:93ec29cd3d9550d53ecc0d2998ab04fe">Version</h3>
+
+<p>Run the <code>version</code> command at any time to see which version of <code>heron</code> you&rsquo;re
+using:</p>
+
+<pre><code class="language-bash">$ heron version
+heron.build.version : 0.13.5
+heron.build.time : Wed May 11 23:49:00 PDT 2016
+heron.build.timestamp : 1463035740000
+heron.build.host : mbp-machine
+heron.build.user : userwhobuilt
+INFO: Elapsed time: 0.000s.
+</code></pre>
+</article></section></div></div></div><script data-no-instant>document.write('<script src="http://'
+        + (location.host || 'localhost').split(':')[0]
+		+ ':1313/livereload.js?mindelay=10"></'
+        + 'script>')</script></body></html>

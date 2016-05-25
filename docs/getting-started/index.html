@@ -1,0 +1,184 @@
+<!DOCTYPE html><html lang="en-us"><head><link rel="shortcut icon" type="image/png" sizes="16x16" href="http://localhost:1313/heron/img/favicon-16x16.png"><link rel="shortcut icon" type="image/png" sizes="32x32" href="http://localhost:1313/heron/img/favicon-32x32.png"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="Hugo 0.14"><title>Heron Documentation - Quick Start Guide</title><link rel="stylesheet" href="http://localhost:1313/heron/css/style.min.css"><link rel="stylesheet" href="http://localhost:1313/heron/css/font-awesome.min.css"><link rel="stylesheet" href="http://localhost:1313/heron/css/pygments.css"><script defer src="http://code.jquery.com/jquery-2.2.1.min.js"></script><script defer src="http://localhost:1313/heron/js/app.min.js"></script></head><body><nav class="hn-top-navbar navbar navbar-inverse navbar-fixed-top" role="navigation"><div class="hn-navbar-container container-fluid"><div class="navbar-header"><button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#hn-navbar" aria-controls="hn-navbar" aria-expanded="false"><span class="sr-only"><Toggle>navigation</Toggle></span><i class="hn-toggle-button fa fa-bars"></i></button><a class="hn-navbar-logo navbar-brand" href="http://localhost:1313/heron/"><img class="pull-left" src="http://localhost:1313/heron/img/HeronTextLogo-small.png"></a></div><div id="hn-navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav navbar-right"><li><a href="http://localhost:1313/heron/docs/getting-started">Docs</a></li><li><a href="http://localhost:1313/heron/docs/resources">Resources</a></li><li><a href="http://localhost:1313/heron/docs/contributors/community">Community</a></li><li><a href="https://github.com/twitter/heron">GitHub</a></li><li><a class="nav-icon" href="https://groups.google.com/forum/#!forum/heron-users"><i class="fa fa-comments"></i></a></li><li><a class="nav-icon" href="https://twitter.com/heronstreaming"><i class="fa fa-twitter"></i></a></li></ul></div></div></nav><div class="hn-main"><div class="container"><div class="row"><aside class="hn-sidebar hidden-xs col-sm-3 col-md-3 col-lg-2 collapse"><div><nav class="hn-sidebar-nav"><h4>Getting Started</h4><ul><li><a href="http://localhost:1313/heron/docs/getting-started">Local (Single Node)</a></li><li><a href="http://localhost:1313/heron/docs/upgrade-storm-to-heron">Upgrade Storm Topologies</a></li></ul><ul></ul><h4>Heron Concepts</h4><ul><li><a href="http://localhost:1313/heron/docs/concepts/architecture">Heron Architecture</a></li><li><a href="http://localhost:1313/heron/docs/concepts/topologies">Heron Topology</a></li></ul><ul></ul><h4>Deployment</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment">Overview</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/configuration">Configuration</a></li></ul><ul></ul><h4>State Managers</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment/statemanagers/zookeeper">Zookeeper</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/statemanagers/localfs">Local FS</a></li></ul><ul></ul><h4>Uploaders</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment/uploaders/localfs">Local FS</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/uploaders/hdfs">HDFS</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/uploaders/s3">S3</a></li></ul><ul></ul><h4>Schedulers</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/aurora">Aurora Cluster</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/local">Local Cluster</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/mesos">Mesos Cluster</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/slurm">Slurm Cluster</a></li></ul><ul></ul><h4>System Configuration</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/configuration/config-intro">Overview</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/instance">Heron Instance</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/metrics-manager">Metrics Manager</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/stmgr">Stream Manager</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/system">System-Level</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/tmaster">Topology Master</a></li></ul><ul></ul><h4>Observability</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/observability/graphite">Graphite</a></li></ul><ul></ul><h4>User Manuals</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/heron-cli">Heron Client</a></li><li><a href="http://localhost:1313/heron/docs/operators/heron-tracker-api">Heron Tracker REST API</a></li><li><a href="http://localhost:1313/heron/docs/operators/heron-tracker">Heron Tracker Runbook</a></li><li><a href="http://localhost:1313/heron/docs/operators/heron-ui">Heron UI Runbook</a></li></ul><ul></ul><h4>Topology Writers</h4><ul><li><a href="http://localhost:1313/heron/docs/developers/topologies">Writing Topologies</a></li><li><a href="http://localhost:1313/heron/docs/developers/data-model">Heron Data Model</a></li><li><a href="http://localhost:1313/heron/docs/developers/serialization">Tuple Serialization</a></li><li><a href="http://localhost:1313/heron/docs/developers/ui-guide">Heron UI Guide</a></li><li><a href="http://localhost:1313/heron/docs/developers/tuning">Tuning Guide</a></li><li><a href="http://localhost:1313/heron/docs/developers/simulator-mode">Simulator Mode</a></li><li><a href="http://localhost:1313/heron/docs/developers/troubleshooting">Troubleshooting Guide</a></li><li><a href="http://localhost:1313/heron/api">Javadoc</a></li></ul><ul></ul><h4>Heron Developers</h4><ul><li><a href="http://localhost:1313/heron/docs/developers/compiling/compiling">Compiling</a></li><li><a href="http://localhost:1313/heron/docs/developers/compiling/linux">Compiling on Linux</a></li><li><a href="http://localhost:1313/heron/docs/developers/compiling/mac">Compiling on Mac OS X</a></li><li><a href="http://localhost:1313/heron/docs/developers/compiling/docker">Compiling With Docker</a></li><li><a href="http://localhost:1313/heron/docs/contributors/testing">Running Tests</a></li><li><a href="http://localhost:1313/heron/docs/contributors/codebase">Code Organization</a></li></ul><ul></ul><h4>Extending Heron</h4><ul><li><a href="http://localhost:1313/heron/docs/contributors/custom-scheduler">Custom Scheduler</a></li><li><a href="http://localhost:1313/heron/docs/contributors/custom-metrics-sink">Custom Metrics Sink</a></li></ul><ul></ul><h4>Heron Resources</h4><ul><li><a href="http://localhost:1313/heron/docs/resources">Heron Resources</a></li></ul><ul></ul><h4>Contributors</h4><ul><li><a href="http://localhost:1313/heron/docs/contributors/community">Community</a></li><li><a href="http://localhost:1313/heron/docs/contributors/governance">Governance</a></li></ul><ul></ul></nav></div></aside><section class="hn-docs-main col-sm-9 col-md-9 col-lg-10 col-sm-offset-3 col-md-offset-3 col-lg-offset-2"><header class="hn-docs-header page-header"><h1>Quick Start Guide</h1><div class="hn-docs-description">Run a single-node Heron cluster on your laptop</div></header><article class="hn-docs-content">
+
+<p>The easiest way to get started learning Heron is to install and run pre-compiled
+Heron binaries, which are currently available for:</p>
+
+<ul>
+<li>Mac OS X</li>
+<li>Ubuntu &gt;= 14.04</li>
+</ul>
+
+<h2 id="step-1-download-heron-binaries-using-installation-scripts:b6885e1f85551f51a4707c402f8200a3">Step 1 &mdash; Download Heron binaries using installation scripts</h2>
+
+<p>Go to the <a href="https://github.com/twitter/heron/releases">releases page</a> for Heron
+and download two installation scripts for your platform. The names of the
+scripts have this form:</p>
+
+<ul>
+<li><code>heron-client-install-0.13.7-PLATFORM.sh</code></li>
+<li><code>heron-tools-install-0.13.7-PLATFORM.sh</code></li>
+</ul>
+
+<p>The installation scripts for Mac OS X (<code>darwin</code>), for example, would be named
+<code>heron-client-install-0.13.7-darwin.sh</code> and
+<code>heron-tools-install-0.13.7-darwin.sh</code>.</p>
+
+<p>Once you&rsquo;ve downloaded the scripts, run the Heron client script with the
+<code>--user</code> flag set:</p>
+
+<pre><code class="language-bash">$ chmod +x heron-client-install-VERSION-PLATFORM.sh
+$ ./heron-client-install-VERSION-PLATFORM.sh --user
+Heron client installer
+----------------------
+
+Uncompressing......
+Heron is now installed!
+
+Make sure you have &quot;/usr/local/bin&quot; in your path.
+# etc
+</code></pre>
+
+<p>To add <code>/usr/local/bin</code> to your path, run:</p>
+
+<pre><code class="language-bash">$ export PATH=$PATH:/usr/local/bin
+</code></pre>
+
+<p>Now run the script for Heron tools (setting the <code>--user</code> flag):</p>
+
+<pre><code class="language-bash">$ chmod +x heron-tools-install-VERSION-PLATFORM.sh
+$ ./heron-tools-install-VERSION-PLATFORM.sh --user
+Heron tools installer
+---------------------
+
+Uncompressing......
+Heron Tools is now installed!
+# etc
+</code></pre>
+
+<h2 id="step-2-launch-an-example-topology:b6885e1f85551f51a4707c402f8200a3">Step 2 &mdash; Launch an example topology</h2>
+
+<p>If you set the <code>--user</code> flag when running the installation scripts, some example
+topologies will be installed in your <code>~/.heron/examples</code> directory. You can
+launch an example <a href="../concepts/topologies">topology</a> locally (on your machine)
+using the <a href="../operators/heron-cli">Heron CLI tool</a>:</p>
+
+<pre><code class="language-bash">$ heron submit local \
+  ~/.heron/examples/heron-examples.jar \ # The path of the topology's jar file
+  com.twitter.heron.examples.ExclamationTopology \ # The topology's Java class
+  ExclamationTopology # The name of the topology
+</code></pre>
+
+<p>This will <em>submit</em> the topology to your locally running Heron cluster but it
+won&rsquo;t <em>activate</em> the topology. That will be explored in step 5 below.</p>
+
+<h2 id="step-3-start-heron-tracker:b6885e1f85551f51a4707c402f8200a3">Step 3 &mdash; Start Heron Tracker</h2>
+
+<p>The <a href="../operators/heron-tracker">Heron Tracker</a> is a web service that
+continuously gathers information about your Heron cluster. You can launch the
+tracker by running the <code>heron-tracker</code> command (which is already installed):</p>
+
+<pre><code class="language-bash">$ heron-tracker
+... Running on port: 8888
+... Using config file: /Users/USERNAME/.herontools/conf/heron_tracker.yaml
+</code></pre>
+
+<p>You can reach Heron Tracker in your browser at <a href="http://localhost:8888">http://localhost:8888</a>.</p>
+
+<h2 id="step-4-start-heron-ui:b6885e1f85551f51a4707c402f8200a3">Step 4 &mdash; Start Heron UI</h2>
+
+<p><a href="../operators/heron-ui">Heron UI</a> is a user interface that uses Heron Tracker to
+provide detailed visual representations of your Heron topologies. To launch
+Heron UI:</p>
+
+<pre><code class="language-bash">$ heron-ui
+... Running on port: 8889
+... Using tracker url: http://localhost:8888
+</code></pre>
+
+<p>You can open Heron UI in your browser at <a href="http://localhost:8889">http://localhost:8889</a>.</p>
+
+<h2 id="step-5-explore-topology-management-commands:b6885e1f85551f51a4707c402f8200a3">Step 5 &mdash; Explore topology management commands</h2>
+
+<p>In step 2 you submitted a topology to your local cluster. The <code>heron</code> CLI tool
+also enables you to activate, deactivate, and kill topologies and more.</p>
+
+<pre><code class="language-bash">$ heron activate local ExclamationTopology
+$ heron deactivate local ExclamationTopology
+$ heron kill local ExclamationTopology
+</code></pre>
+
+<p>For more info on these commands, read about <a href="../concepts/topologies#topology-lifecycle">topology
+lifecycles</a>.</p>
+
+<p>To list the available CLI commands, run <code>heron</code> by itself:</p>
+
+<pre><code class="language-bash">usage: heron &lt;command&gt; &lt;options&gt; ...
+
+Available commands:
+    activate           Activate a topology
+    deactivate         Deactivate a topology
+    help               Prints help for commands
+    kill               Kill a topology
+    restart            Restart a topology
+    submit             Submit a topology
+    version            Print version of heron-cli
+
+For detailed documentation, go to http://heronstreaming.io
+</code></pre>
+
+<p>To invoke help output for a command, run <code>heron help COMMAND</code>. Here&rsquo;s an
+example:</p>
+
+<pre><code class="language-bash">$ heron help submit
+usage: heron submit [options] cluster/[role]/[environ] topology-file-name topology-class-name [topology-args]
+
+Required arguments:
+  cluster/[role]/[env]  Cluster, role, and environ to run topology
+  topology-file-name    Topology jar/tar/zip file
+  topology-class-name   Topology class name
+
+Optional arguments:
+  --config-path (a string; path to cluster config; default: &quot;/Users/$USER/.heron/conf&quot;)
+  --config-property (key=value; a config key and its value; default: [])
+  --deploy-deactivated (a boolean; default: &quot;false&quot;)
+  -D DEFINE             Define a system property to pass to java -D when
+                        running main.
+  --verbose (a boolean; default: &quot;false&quot;)
+</code></pre>
+
+<h2 id="step-6-explore-other-example-topologies:b6885e1f85551f51a4707c402f8200a3">Step 6 &mdash; Explore other example topologies</h2>
+
+<p>The source code for the example topologies can be found
+<a href="https://github.com/twitter/heron/tree/master/heron/examples/src/java/com/twitter/heron/examples">on
+GitHub</a>.
+The included example topologies:</p>
+
+<ul>
+<li><code>AckingTopology.java</code> &mdash; A topology with acking enabled.</li>
+<li><code>ComponentJVMOptionsTopology.java</code> &mdash; A topology that supplies JVM options
+for each component.</li>
+<li><code>CustomGroupingTopology.java</code> &mdash; A topology that implements custom grouping.</li>
+<li><code>ExclamationTopology.java</code> &mdash; A spout that emits random words to a bolt that
+then adds an explanation mark.</li>
+<li><code>MultiSpoutExclamationTopology.java</code> &mdash; a topology with multiple spouts.</li>
+<li><code>MultiStageAckingTopology.java</code> &mdash; A three-stage topology. A spout emits to a
+bolt that then feeds to another bolt.</li>
+<li><code>TaskHookTopology.java</code> &mdash; A topology that uses a task hook to subscribe t
+event notifications.</li>
+</ul>
+
+<h3 id="next-steps:b6885e1f85551f51a4707c402f8200a3">Next Steps</h3>
+
+<ul>
+<li><a href="../upgrade-storm-to-heron">Upgrade Storm topologies</a> with simple <code>pom.xml</code>
+changes</li>
+<li><a href="../operators/deployment">Deploy topologies</a> in clustered, scheduler-driven
+environments (such as on <a href="../operators/deployment/schedulers/aurora">Aurora</a>,
+on <a href="../operators/deployment/schedulers/mesos">Mesos</a>, and
+<a href="../operators/deployment/schedulers/local">locally</a>)</li>
+<li><a href="../concepts/architecture">Develop topologies</a> for Heron</li>
+</ul>
+</article></section></div></div></div><script data-no-instant>document.write('<script src="http://'
+        + (location.host || 'localhost').split(':')[0]
+		+ ':1313/livereload.js?mindelay=10"></'
+        + 'script>')</script></body></html>

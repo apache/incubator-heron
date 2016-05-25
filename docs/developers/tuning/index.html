@@ -1,0 +1,65 @@
+<!DOCTYPE html><html lang="en-us"><head><link rel="shortcut icon" type="image/png" sizes="16x16" href="http://localhost:1313/heron/img/favicon-16x16.png"><link rel="shortcut icon" type="image/png" sizes="32x32" href="http://localhost:1313/heron/img/favicon-32x32.png"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="Hugo 0.14"><title>Heron Documentation - Topology Tuning Guide</title><link rel="stylesheet" href="http://localhost:1313/heron/css/style.min.css"><link rel="stylesheet" href="http://localhost:1313/heron/css/font-awesome.min.css"><link rel="stylesheet" href="http://localhost:1313/heron/css/pygments.css"><script defer src="http://code.jquery.com/jquery-2.2.1.min.js"></script><script defer src="http://localhost:1313/heron/js/app.min.js"></script></head><body><nav class="hn-top-navbar navbar navbar-inverse navbar-fixed-top" role="navigation"><div class="hn-navbar-container container-fluid"><div class="navbar-header"><button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#hn-navbar" aria-controls="hn-navbar" aria-expanded="false"><span class="sr-only"><Toggle>navigation</Toggle></span><i class="hn-toggle-button fa fa-bars"></i></button><a class="hn-navbar-logo navbar-brand" href="http://localhost:1313/heron/"><img class="pull-left" src="http://localhost:1313/heron/img/HeronTextLogo-small.png"></a></div><div id="hn-navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav navbar-right"><li><a href="http://localhost:1313/heron/docs/getting-started">Docs</a></li><li><a href="http://localhost:1313/heron/docs/resources">Resources</a></li><li><a href="http://localhost:1313/heron/docs/contributors/community">Community</a></li><li><a href="https://github.com/twitter/heron">GitHub</a></li><li><a class="nav-icon" href="https://groups.google.com/forum/#!forum/heron-users"><i class="fa fa-comments"></i></a></li><li><a class="nav-icon" href="https://twitter.com/heronstreaming"><i class="fa fa-twitter"></i></a></li></ul></div></div></nav><div class="hn-main"><div class="container"><div class="row"><aside class="hn-sidebar hidden-xs col-sm-3 col-md-3 col-lg-2 collapse"><div><nav class="hn-sidebar-nav"><h4>Getting Started</h4><ul><li><a href="http://localhost:1313/heron/docs/getting-started">Local (Single Node)</a></li><li><a href="http://localhost:1313/heron/docs/upgrade-storm-to-heron">Upgrade Storm Topologies</a></li></ul><ul></ul><h4>Heron Concepts</h4><ul><li><a href="http://localhost:1313/heron/docs/concepts/architecture">Heron Architecture</a></li><li><a href="http://localhost:1313/heron/docs/concepts/topologies">Heron Topology</a></li></ul><ul></ul><h4>Deployment</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment">Overview</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/configuration">Configuration</a></li></ul><ul></ul><h4>State Managers</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment/statemanagers/zookeeper">Zookeeper</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/statemanagers/localfs">Local FS</a></li></ul><ul></ul><h4>Uploaders</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment/uploaders/localfs">Local FS</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/uploaders/hdfs">HDFS</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/uploaders/s3">S3</a></li></ul><ul></ul><h4>Schedulers</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/aurora">Aurora Cluster</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/local">Local Cluster</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/mesos">Mesos Cluster</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/slurm">Slurm Cluster</a></li></ul><ul></ul><h4>System Configuration</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/configuration/config-intro">Overview</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/instance">Heron Instance</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/metrics-manager">Metrics Manager</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/stmgr">Stream Manager</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/system">System-Level</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/tmaster">Topology Master</a></li></ul><ul></ul><h4>Observability</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/observability/graphite">Graphite</a></li></ul><ul></ul><h4>User Manuals</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/heron-cli">Heron Client</a></li><li><a href="http://localhost:1313/heron/docs/operators/heron-tracker-api">Heron Tracker REST API</a></li><li><a href="http://localhost:1313/heron/docs/operators/heron-tracker">Heron Tracker Runbook</a></li><li><a href="http://localhost:1313/heron/docs/operators/heron-ui">Heron UI Runbook</a></li></ul><ul></ul><h4>Topology Writers</h4><ul><li><a href="http://localhost:1313/heron/docs/developers/topologies">Writing Topologies</a></li><li><a href="http://localhost:1313/heron/docs/developers/data-model">Heron Data Model</a></li><li><a href="http://localhost:1313/heron/docs/developers/serialization">Tuple Serialization</a></li><li><a href="http://localhost:1313/heron/docs/developers/ui-guide">Heron UI Guide</a></li><li><a href="http://localhost:1313/heron/docs/developers/tuning">Tuning Guide</a></li><li><a href="http://localhost:1313/heron/docs/developers/simulator-mode">Simulator Mode</a></li><li><a href="http://localhost:1313/heron/docs/developers/troubleshooting">Troubleshooting Guide</a></li><li><a href="http://localhost:1313/heron/api">Javadoc</a></li></ul><ul></ul><h4>Heron Developers</h4><ul><li><a href="http://localhost:1313/heron/docs/developers/compiling/compiling">Compiling</a></li><li><a href="http://localhost:1313/heron/docs/developers/compiling/linux">Compiling on Linux</a></li><li><a href="http://localhost:1313/heron/docs/developers/compiling/mac">Compiling on Mac OS X</a></li><li><a href="http://localhost:1313/heron/docs/developers/compiling/docker">Compiling With Docker</a></li><li><a href="http://localhost:1313/heron/docs/contributors/testing">Running Tests</a></li><li><a href="http://localhost:1313/heron/docs/contributors/codebase">Code Organization</a></li></ul><ul></ul><h4>Extending Heron</h4><ul><li><a href="http://localhost:1313/heron/docs/contributors/custom-scheduler">Custom Scheduler</a></li><li><a href="http://localhost:1313/heron/docs/contributors/custom-metrics-sink">Custom Metrics Sink</a></li></ul><ul></ul><h4>Heron Resources</h4><ul><li><a href="http://localhost:1313/heron/docs/resources">Heron Resources</a></li></ul><ul></ul><h4>Contributors</h4><ul><li><a href="http://localhost:1313/heron/docs/contributors/community">Community</a></li><li><a href="http://localhost:1313/heron/docs/contributors/governance">Governance</a></li></ul><ul></ul></nav></div></aside><section class="hn-docs-main col-sm-9 col-md-9 col-lg-10 col-sm-offset-3 col-md-offset-3 col-lg-offset-2"><header class="hn-docs-header page-header"><h1>Topology Tuning Guide</h1><div class="hn-docs-description"></div></header><article class="hn-docs-content">
+
+<h3 id="overview:557967b118764f7a409a6e447c19dc23">Overview</h3>
+
+<p>This guide provides basic steps at tuning a topology to utilize resources efficiently. Currently, resources are primarily measured in terms of CPU cores and RAM. In Heron, some of the basic parameters that are available to tune a topology are, but not limited to, the following:</p>
+
+<ol>
+<li>Container RAM</li>
+<li>Container CPU</li>
+<li>Component RAMs</li>
+<li>Component Parallelisms</li>
+<li>Number of Containers</li>
+</ol>
+
+<p>Note that tuning a topology may be difficult and may take multiple iterations. Before
+proceeding, please make sure you understand concepts to understand the
+terminology, as well as the reasoning behind taking these steps.</p>
+
+<h3 id="steps-to-tune-a-topology:557967b118764f7a409a6e447c19dc23">Steps to Tune a Topology</h3>
+
+<ol>
+<li><p>Launch the topology with an initial estimate of resources. These can be based
+on input data size, component logic, or experience from another working
+topology.</p></li>
+
+<li><p>Resolve any backpressure issues by increasing the parallelism or container
+RAM, or CPU, or appropriately if backpressure is due to an external service.</p></li>
+
+<li><p>Make sure there is no spout lag. In steady state, the topology should be able
+to read the whole of data.</p></li>
+
+<li><p>Repeat steps 2 and 3 until there is no backpressure and no spout lag.</p></li>
+
+<li><p>By now, the CPU usage and RAM usage are stable. Based on daily of weekly data
+trends, leave appropriate room for usage spikes, and cut down the rest of the
+unused resources allocated to topology.</p></li>
+</ol>
+
+<p>While these steps seem simple, it might take some time to get the topology to
+its optimal usage. Below are some of the tips that can be helpful during tuning
+or in general.</p>
+
+<h3 id="additional-tips:557967b118764f7a409a6e447c19dc23">Additional Tips</h3>
+
+<ol>
+<li><p>If component RAMs for all the components is provided, that will the RAM
+assigned to those instances. Use this configuration according to their
+functionality to save of resources. By default, every instance is assigned
+1GB of RAM, which can be higher that what it requires. Note that if container
+RAM is specified, after setting aside some RAM for internal components of
+Heron, rest of it is equally divided among all the instances present in the
+container.</p></li>
+
+<li><p>A memory intensive operation in bolts can result in GC issues. Be aware of
+objects that might enter old generation, and cause memory starvation.</p></li>
+
+<li><p>You can use <code>Scheme</code>s in spouts to sample down the data. This can helpful
+when dealing with issues if writing to external services, or just trying to
+get an early estimate of usage without utilizing much resources. Note that
+this would still require 100% resource usage in spouts.</p></li>
+</ol>
+</article></section></div></div></div><script data-no-instant>document.write('<script src="http://'
+        + (location.host || 'localhost').split(':')[0]
+		+ ':1313/livereload.js?mindelay=10"></'
+        + 'script>')</script></body></html>

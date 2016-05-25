@@ -1,0 +1,196 @@
+<!DOCTYPE html><html lang="en-us"><head><link rel="shortcut icon" type="image/png" sizes="16x16" href="http://localhost:1313/heron/img/favicon-16x16.png"><link rel="shortcut icon" type="image/png" sizes="32x32" href="http://localhost:1313/heron/img/favicon-32x32.png"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="Hugo 0.14"><title>Heron Documentation - Heron Code Organization</title><link rel="stylesheet" href="http://localhost:1313/heron/css/style.min.css"><link rel="stylesheet" href="http://localhost:1313/heron/css/font-awesome.min.css"><link rel="stylesheet" href="http://localhost:1313/heron/css/pygments.css"><script defer src="http://code.jquery.com/jquery-2.2.1.min.js"></script><script defer src="http://localhost:1313/heron/js/app.min.js"></script></head><body><nav class="hn-top-navbar navbar navbar-inverse navbar-fixed-top" role="navigation"><div class="hn-navbar-container container-fluid"><div class="navbar-header"><button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#hn-navbar" aria-controls="hn-navbar" aria-expanded="false"><span class="sr-only"><Toggle>navigation</Toggle></span><i class="hn-toggle-button fa fa-bars"></i></button><a class="hn-navbar-logo navbar-brand" href="http://localhost:1313/heron/"><img class="pull-left" src="http://localhost:1313/heron/img/HeronTextLogo-small.png"></a></div><div id="hn-navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav navbar-right"><li><a href="http://localhost:1313/heron/docs/getting-started">Docs</a></li><li><a href="http://localhost:1313/heron/docs/resources">Resources</a></li><li><a href="http://localhost:1313/heron/docs/contributors/community">Community</a></li><li><a href="https://github.com/twitter/heron">GitHub</a></li><li><a class="nav-icon" href="https://groups.google.com/forum/#!forum/heron-users"><i class="fa fa-comments"></i></a></li><li><a class="nav-icon" href="https://twitter.com/heronstreaming"><i class="fa fa-twitter"></i></a></li></ul></div></div></nav><div class="hn-main"><div class="container"><div class="row"><aside class="hn-sidebar hidden-xs col-sm-3 col-md-3 col-lg-2 collapse"><div><nav class="hn-sidebar-nav"><h4>Getting Started</h4><ul><li><a href="http://localhost:1313/heron/docs/getting-started">Local (Single Node)</a></li><li><a href="http://localhost:1313/heron/docs/upgrade-storm-to-heron">Upgrade Storm Topologies</a></li></ul><ul></ul><h4>Heron Concepts</h4><ul><li><a href="http://localhost:1313/heron/docs/concepts/architecture">Heron Architecture</a></li><li><a href="http://localhost:1313/heron/docs/concepts/topologies">Heron Topology</a></li></ul><ul></ul><h4>Deployment</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment">Overview</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/configuration">Configuration</a></li></ul><ul></ul><h4>State Managers</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment/statemanagers/zookeeper">Zookeeper</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/statemanagers/localfs">Local FS</a></li></ul><ul></ul><h4>Uploaders</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment/uploaders/localfs">Local FS</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/uploaders/hdfs">HDFS</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/uploaders/s3">S3</a></li></ul><ul></ul><h4>Schedulers</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/aurora">Aurora Cluster</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/local">Local Cluster</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/mesos">Mesos Cluster</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/slurm">Slurm Cluster</a></li></ul><ul></ul><h4>System Configuration</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/configuration/config-intro">Overview</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/instance">Heron Instance</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/metrics-manager">Metrics Manager</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/stmgr">Stream Manager</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/system">System-Level</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/tmaster">Topology Master</a></li></ul><ul></ul><h4>Observability</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/observability/graphite">Graphite</a></li></ul><ul></ul><h4>User Manuals</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/heron-cli">Heron Client</a></li><li><a href="http://localhost:1313/heron/docs/operators/heron-tracker-api">Heron Tracker REST API</a></li><li><a href="http://localhost:1313/heron/docs/operators/heron-tracker">Heron Tracker Runbook</a></li><li><a href="http://localhost:1313/heron/docs/operators/heron-ui">Heron UI Runbook</a></li></ul><ul></ul><h4>Topology Writers</h4><ul><li><a href="http://localhost:1313/heron/docs/developers/topologies">Writing Topologies</a></li><li><a href="http://localhost:1313/heron/docs/developers/data-model">Heron Data Model</a></li><li><a href="http://localhost:1313/heron/docs/developers/serialization">Tuple Serialization</a></li><li><a href="http://localhost:1313/heron/docs/developers/ui-guide">Heron UI Guide</a></li><li><a href="http://localhost:1313/heron/docs/developers/tuning">Tuning Guide</a></li><li><a href="http://localhost:1313/heron/docs/developers/simulator-mode">Simulator Mode</a></li><li><a href="http://localhost:1313/heron/docs/developers/troubleshooting">Troubleshooting Guide</a></li><li><a href="http://localhost:1313/heron/api">Javadoc</a></li></ul><ul></ul><h4>Heron Developers</h4><ul><li><a href="http://localhost:1313/heron/docs/developers/compiling/compiling">Compiling</a></li><li><a href="http://localhost:1313/heron/docs/developers/compiling/linux">Compiling on Linux</a></li><li><a href="http://localhost:1313/heron/docs/developers/compiling/mac">Compiling on Mac OS X</a></li><li><a href="http://localhost:1313/heron/docs/developers/compiling/docker">Compiling With Docker</a></li><li><a href="http://localhost:1313/heron/docs/contributors/testing">Running Tests</a></li><li><a href="http://localhost:1313/heron/docs/contributors/codebase">Code Organization</a></li></ul><ul></ul><h4>Extending Heron</h4><ul><li><a href="http://localhost:1313/heron/docs/contributors/custom-scheduler">Custom Scheduler</a></li><li><a href="http://localhost:1313/heron/docs/contributors/custom-metrics-sink">Custom Metrics Sink</a></li></ul><ul></ul><h4>Heron Resources</h4><ul><li><a href="http://localhost:1313/heron/docs/resources">Heron Resources</a></li></ul><ul></ul><h4>Contributors</h4><ul><li><a href="http://localhost:1313/heron/docs/contributors/community">Community</a></li><li><a href="http://localhost:1313/heron/docs/contributors/governance">Governance</a></li></ul><ul></ul></nav></div></aside><section class="hn-docs-main col-sm-9 col-md-9 col-lg-10 col-sm-offset-3 col-md-offset-3 col-lg-offset-2"><header class="hn-docs-header page-header"><h1>Heron Code Organization</h1><div class="hn-docs-description"></div></header><article class="hn-docs-content">
+
+<p>This document contains information about the Heron codebase intended primarily
+for developers who want to contribute to Heron. The Heron codebase lives on
+<a href="https://github.com/twitter/heron/tree/master">github</a>.</p>
+
+<p>If you&rsquo;re looking for documentation about developing topologies for a Heron
+cluster, see <a href="../../developers/topologies">Building Topologies</a> instead.</p>
+
+<h2 id="languages:8b02a39a96f0b96cdaa66e5ca2ffdb72">Languages</h2>
+
+<p>The primary programming languages for Heron are C++, Java, and Python.</p>
+
+<ul>
+<li><p><strong>C++ 11</strong> is used for most of Heron&rsquo;s core components, including the
+<a href="../../concepts/architecture#topology-master">Topology Master</a>, and
+<a href="../../concepts/architecture#stream-manager">Stream Manager</a>.</p></li>
+
+<li><p><strong>Java 8</strong> is used primarily for Heron&rsquo;s <a href="../../concepts/topologies">topology
+API</a>, and <a href="../../concepts/architecture#heron-instance">Heron Instance</a>.
+It is currently the only language in which topologies can be written. Instructions can be found
+in <a href="../../developers/topologies">Building Topologies</a>, while documentation for the Java
+API can be found <a href="http://localhost:1313/heron/api/com/twitter/heron/api/topology/package-summary.html">here</a>. Please note that Heron topologies do not
+require Java 8 and can be written in Java 7 or later.</p></li>
+
+<li><p><strong>Python 2</strong> (specifically 2.7) is used primarily for Heron&rsquo;s <a href="../..//operators/heron-cli">CLI
+interface</a> and UI components such as <a href="../../operators/heron-ui">Heron
+UI</a> and the <a href="../../operators/heron-tracker">Heron
+Tracker</a>.</p></li>
+</ul>
+
+<h2 id="main-tools:8b02a39a96f0b96cdaa66e5ca2ffdb72">Main Tools</h2>
+
+<ul>
+<li><p><strong>Build tool</strong> &mdash; Heron uses <a href="http://bazel.io/">Bazel</a> as its build tool.
+Information on setting up and using Bazel for Heron can be found in <a href="../../developers/compiling/compiling">Compiling
+Heron</a>.</p></li>
+
+<li><p><strong>Inter-component communication</strong> &mdash; Heron uses <a href="https://developers.google.com/protocol-buffers/?hl=en">Protocol
+Buffers</a> for
+communication between components. Most <code>.proto</code> definition files can be found in
+<a href="https://github.com/twitter/heron/tree/master/heron/proto"><code>heron/proto</code></a>.</p></li>
+
+<li><p><strong>Cluster coordination</strong> &mdash; Heron relies heavily on ZooKeeper for cluster
+coordination for distributed deployment, be it for <a href="../../operators/deployment/schedulers/aurora">Mesos/Aurora</a>,
+<a href="../../operators/deployment/schedulers/mesos">Mesos alone</a>, or for a <a href="../custom-scheduler">custom
+scheduler</a> that you build. More information on ZooKeeper
+components in the codebase can be found in the <a href="#state-management">State
+Management</a> section below.</p></li>
+</ul>
+
+<h2 id="common-utilities:8b02a39a96f0b96cdaa66e5ca2ffdb72">Common Utilities</h2>
+
+<p>The <a href="https://github.com/twitter/heron/tree/master/heron/common"><code>heron/common</code></a> contains a variety of
+utilities for each of Heron&rsquo;s languages, including useful constants, file
+utilities, networking interfaces, and more.</p>
+
+<h2 id="cluster-scheduling:8b02a39a96f0b96cdaa66e5ca2ffdb72">Cluster Scheduling</h2>
+
+<p>Heron supports three cluster schedulers out of the box:
+<a href="../../operators/deployment/schedulers/mesos">Mesos</a>,
+<a href="../../operators/deployment/schedulers/aurora">Aurora</a>, and a <a href="../../operators/deployment/schedulers/local">local
+scheduler</a>. The Java code for each of those
+schedulers can be found in <a href="https://github.com/twitter/heron/tree/master/heron/schedulers"><code>heron/schedulers</code></a>
+, while the underlying scheduler API can be found <a href="http://localhost:1313/heron/api/com/twitter/heron/spi/scheduler/package-summary.html">here</a></p>
+
+<p>Info on custom schedulers can be found in <a href="../custom-scheduler">Implementing a Custom
+Scheduler</a>; info on the currently available schedulers
+can be found in <a href="../../operators/deployment/schedulers/aurora">Deploying Heron on
+Aurora</a>, <a href="../../operators/deployment/schedulers/mesos">Deploying Heron on
+Mesos</a>, and <a href="../../operators/deployment/schedulers/local">Local
+Deployment</a>.</p>
+
+<h2 id="state-management:8b02a39a96f0b96cdaa66e5ca2ffdb72">State Management</h2>
+
+<p>The parts of Heron&rsquo;s codebase related to
+<a href="http://zookeeper.apache.org/">ZooKeeper</a> are mostly contained in
+<a href="https://github.com/twitter/heron/tree/master/heron/state"><code>heron/state</code></a>. There are ZooKeeper-facing
+interfaces for <a href="https://github.com/twitter/heron/tree/master/heron/state/src/cpp">C++</a>,
+<a href="https://github.com/twitter/heron/tree/master/heron/state/src/java">Java</a>, and
+<a href="https://github.com/twitter/heron/tree/master/heron/state/src/python">Python</a> that are used in a variety of
+Heron components.</p>
+
+<h2 id="topology-components:8b02a39a96f0b96cdaa66e5ca2ffdb72">Topology Components</h2>
+
+<h3 id="topology-master:8b02a39a96f0b96cdaa66e5ca2ffdb72">Topology Master</h3>
+
+<p>The C++ code for Heron&rsquo;s <a href="../../concepts/architecture#topology-master">Topology
+Master</a> is written in C++ can be
+found in <a href="https://github.com/twitter/heron/tree/master/heron/tmaster"><code>heron/tmaster</code></a>.</p>
+
+<h3 id="stream-manager:8b02a39a96f0b96cdaa66e5ca2ffdb72">Stream Manager</h3>
+
+<p>The C++ code for Heron&rsquo;s <a href="../../concepts/architecture#stream-manager">Stream
+Manager</a> can be found in
+<a href="https://github.com/twitter/heron/tree/master/heron/stmgr"><code>heron/stmgr</code></a>.</p>
+
+<h3 id="heron-instance:8b02a39a96f0b96cdaa66e5ca2ffdb72">Heron Instance</h3>
+
+<p>The Java code for <a href="../../concepts/architecture#heron-instance">Heron
+instances</a> can be found in
+<a href="https://github.com/twitter/heron/tree/master/heron/instance"><code>heron/instance</code></a>.</p>
+
+<h3 id="metrics-manager:8b02a39a96f0b96cdaa66e5ca2ffdb72">Metrics Manager</h3>
+
+<p>The Java code for Heron&rsquo;s <a href="../../concepts/architecture#metrics-manager">Metrics
+Manager</a> can be found in
+<a href="https://github.com/twitter/heron/tree/master/heron/metricsmgr"><code>heron/metricsmgr</code></a>.</p>
+
+<p>If you&rsquo;d like to implement your own custom metrics handler (known as a <strong>metrics
+sink</strong>), see <a href="../custom-metrics-sink">Implementing a Custom Metrics Sink</a>.</p>
+
+<h2 id="developer-apis:8b02a39a96f0b96cdaa66e5ca2ffdb72">Developer APIs</h2>
+
+<h3 id="topology-api:8b02a39a96f0b96cdaa66e5ca2ffdb72">Topology API</h3>
+
+<p>Heron&rsquo;s API for writing topologies is written in Java. The code for this API can
+be found in <a href="https://github.com/twitter/heron/tree/master/heron/api"><code>heron/api</code></a>.</p>
+
+<p>Documentation for writing topologies can be found in <a href="../../developers/topologies">Building
+Topologies</a>, while API documentation can be found
+<a href="http://localhost:1313/heron/api/com/twitter/heron/api/topology/package-summary.html">here</a>.</p>
+
+<h3 id="simulator:8b02a39a96f0b96cdaa66e5ca2ffdb72">Simulator</h3>
+
+<p>Heron enables you to run topologies in <a href="../../developers/simulator-mode"><code>Simulator</code></a>
+for debugging purposes.</p>
+
+<p>The Java API for simulator can be found in
+<a href="http://localhost:1313/heron/api/com/twitter/heron/simulator/package-summary.html"><code>heron/simulator</code></a>.</p>
+
+<h3 id="example-topologies:8b02a39a96f0b96cdaa66e5ca2ffdb72">Example Topologies</h3>
+
+<p>Heron&rsquo;s codebase includes a wide variety of example
+<a href="../../concepts/topologies">topologies</a> built using Heron&rsquo;s topology API for
+Java. Those examples can be found in
+<a href="https://github.com/twitter/heron/tree/master/heron/examples"><code>heron/examples</code></a>.</p>
+
+<h2 id="user-interface-components:8b02a39a96f0b96cdaa66e5ca2ffdb72">User Interface Components</h2>
+
+<h3 id="heron-cli:8b02a39a96f0b96cdaa66e5ca2ffdb72">Heron CLI</h3>
+
+<p>Heron has a tool called <code>heron</code> that is used to both provide a CLI interface
+for <a href="../../operators/heron-cli">managing topologies</a> and to perform much of
+the heavy lifting behind assembling physical topologies in your cluster.
+The Python code for <code>heron</code> can be found in
+<a href="https://github.com/twitter/heron/tree/master/heron/cli"><code>heron/cli</code></a>.</p>
+
+<p>Sample configurations for different Heron schedulers</p>
+
+<ul>
+<li><a href="../../operators/deployment/schedulers/local">Local scheduler</a> config can be found in <a href="https://github.com/twitter/heron/tree/master/heron/config/src/yaml/conf/local"><code>heron/config/src/yaml/conf/local</code></a>,</li>
+<li><a href="../../operators/deployment/schedulers/aurora">Aurora scheduler</a> config can be found <a href="https://github.com/twitter/heron/tree/master/heron/config/src/yaml/conf/aurora"><code>heron/config/src/yaml/conf/aurora</code></a>.</li>
+</ul>
+
+<h3 id="heron-tracker:8b02a39a96f0b96cdaa66e5ca2ffdb72">Heron Tracker</h3>
+
+<p>The Python code for the <a href="../../operators/heron-tracker">Heron Tracker</a> can be
+found in <a href="https://github.com/twitter/heron/tree/master/heron/tracker"><code>heron/tracker</code></a>.</p>
+
+<p>The Tracker is a web server written in Python. It relies on the
+<a href="http://www.tornadoweb.org/en/stable/">Tornado</a> framework. You can add new HTTP
+routes to the Tracker in
+<a href="https://github.com/twitter/heron/tree/master/heron/tracker/src/python/main.py"><code>main.py</code></a> and
+corresponding handlers in the
+<a href="https://github.com/twitter/heron/tree/master/heron/tracker/src/python/handlers"><code>handlers</code></a> directory.</p>
+
+<h3 id="heron-ui:8b02a39a96f0b96cdaa66e5ca2ffdb72">Heron UI</h3>
+
+<p>The Python code for the <a href="../../operators/heron-ui">Heron UI</a> can be found in
+<a href="https://github.com/twitter/heron/tree/master/heron/ui"><code>heron/ui</code></a>.</p>
+
+<p>Like Heron Tracker, Heron UI is a web server written in Python that relies on
+the <a href="http://www.tornadoweb.org/en/stable/">Tornado</a> framework. You can add new
+HTTP routes to Heron UI in
+<a href="https://github.com/twitter/heron/tree/master/heron/web/source/python/main.py"><code>main.py</code></a> and corresponding
+handlers in the <a href="https://github.com/twitter/heron/tree/master/heron/web/source/python/handlers"><code>handlers</code></a>
+directory.</p>
+
+<h3 id="heron-shell:8b02a39a96f0b96cdaa66e5ca2ffdb72">Heron Shell</h3>
+
+<p>The Python code for the <a href="../../operators/heron-shell">Heron Shell</a> can be
+found in <a href="https://github.com/twitter/heron/tree/master/heron/shell"><code>heron/shell</code></a>. The HTTP handlers and
+web server are defined in
+<a href="https://github.com/twitter/heron/tree/master/heron/shell/src/python/main.py"><code>main.py</code></a> while the HTML,
+JavaScript, CSS, and images for the web UI can be found in the
+<a href="https://github.com/twitter/heron/tree/master/heron/shell/assets"><code>assets</code></a> directory.</p>
+
+<h2 id="tests:8b02a39a96f0b96cdaa66e5ca2ffdb72">Tests</h2>
+
+<p>There are a wide variety of tests for Heron that are scattered throughout the
+codebase. For more info see <a href="../testing">Testing Heron</a>.</p>
+</article></section></div></div></div><script data-no-instant>document.write('<script src="http://'
+        + (location.host || 'localhost').split(':')[0]
+		+ ':1313/livereload.js?mindelay=10"></'
+        + 'script>')</script></body></html>

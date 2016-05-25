@@ -1,0 +1,210 @@
+<!DOCTYPE html><html lang="en-us"><head><link rel="shortcut icon" type="image/png" sizes="16x16" href="http://localhost:1313/heron/img/favicon-16x16.png"><link rel="shortcut icon" type="image/png" sizes="32x32" href="http://localhost:1313/heron/img/favicon-32x32.png"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="Hugo 0.14"><title>Heron Documentation - Heron Architecture</title><link rel="stylesheet" href="http://localhost:1313/heron/css/style.min.css"><link rel="stylesheet" href="http://localhost:1313/heron/css/font-awesome.min.css"><link rel="stylesheet" href="http://localhost:1313/heron/css/pygments.css"><script defer src="http://code.jquery.com/jquery-2.2.1.min.js"></script><script defer src="http://localhost:1313/heron/js/app.min.js"></script></head><body><nav class="hn-top-navbar navbar navbar-inverse navbar-fixed-top" role="navigation"><div class="hn-navbar-container container-fluid"><div class="navbar-header"><button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#hn-navbar" aria-controls="hn-navbar" aria-expanded="false"><span class="sr-only"><Toggle>navigation</Toggle></span><i class="hn-toggle-button fa fa-bars"></i></button><a class="hn-navbar-logo navbar-brand" href="http://localhost:1313/heron/"><img class="pull-left" src="http://localhost:1313/heron/img/HeronTextLogo-small.png"></a></div><div id="hn-navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav navbar-right"><li><a href="http://localhost:1313/heron/docs/getting-started">Docs</a></li><li><a href="http://localhost:1313/heron/docs/resources">Resources</a></li><li><a href="http://localhost:1313/heron/docs/contributors/community">Community</a></li><li><a href="https://github.com/twitter/heron">GitHub</a></li><li><a class="nav-icon" href="https://groups.google.com/forum/#!forum/heron-users"><i class="fa fa-comments"></i></a></li><li><a class="nav-icon" href="https://twitter.com/heronstreaming"><i class="fa fa-twitter"></i></a></li></ul></div></div></nav><div class="hn-main"><div class="container"><div class="row"><aside class="hn-sidebar hidden-xs col-sm-3 col-md-3 col-lg-2 collapse"><div><nav class="hn-sidebar-nav"><h4>Getting Started</h4><ul><li><a href="http://localhost:1313/heron/docs/getting-started">Local (Single Node)</a></li><li><a href="http://localhost:1313/heron/docs/upgrade-storm-to-heron">Upgrade Storm Topologies</a></li></ul><ul></ul><h4>Heron Concepts</h4><ul><li><a href="http://localhost:1313/heron/docs/concepts/architecture">Heron Architecture</a></li><li><a href="http://localhost:1313/heron/docs/concepts/topologies">Heron Topology</a></li></ul><ul></ul><h4>Deployment</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment">Overview</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/configuration">Configuration</a></li></ul><ul></ul><h4>State Managers</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment/statemanagers/zookeeper">Zookeeper</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/statemanagers/localfs">Local FS</a></li></ul><ul></ul><h4>Uploaders</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment/uploaders/localfs">Local FS</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/uploaders/hdfs">HDFS</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/uploaders/s3">S3</a></li></ul><ul></ul><h4>Schedulers</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/aurora">Aurora Cluster</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/local">Local Cluster</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/mesos">Mesos Cluster</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/slurm">Slurm Cluster</a></li></ul><ul></ul><h4>System Configuration</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/configuration/config-intro">Overview</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/instance">Heron Instance</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/metrics-manager">Metrics Manager</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/stmgr">Stream Manager</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/system">System-Level</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/tmaster">Topology Master</a></li></ul><ul></ul><h4>Observability</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/observability/graphite">Graphite</a></li></ul><ul></ul><h4>User Manuals</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/heron-cli">Heron Client</a></li><li><a href="http://localhost:1313/heron/docs/operators/heron-tracker-api">Heron Tracker REST API</a></li><li><a href="http://localhost:1313/heron/docs/operators/heron-tracker">Heron Tracker Runbook</a></li><li><a href="http://localhost:1313/heron/docs/operators/heron-ui">Heron UI Runbook</a></li></ul><ul></ul><h4>Topology Writers</h4><ul><li><a href="http://localhost:1313/heron/docs/developers/topologies">Writing Topologies</a></li><li><a href="http://localhost:1313/heron/docs/developers/data-model">Heron Data Model</a></li><li><a href="http://localhost:1313/heron/docs/developers/serialization">Tuple Serialization</a></li><li><a href="http://localhost:1313/heron/docs/developers/ui-guide">Heron UI Guide</a></li><li><a href="http://localhost:1313/heron/docs/developers/tuning">Tuning Guide</a></li><li><a href="http://localhost:1313/heron/docs/developers/simulator-mode">Simulator Mode</a></li><li><a href="http://localhost:1313/heron/docs/developers/troubleshooting">Troubleshooting Guide</a></li><li><a href="http://localhost:1313/heron/api">Javadoc</a></li></ul><ul></ul><h4>Heron Developers</h4><ul><li><a href="http://localhost:1313/heron/docs/developers/compiling/compiling">Compiling</a></li><li><a href="http://localhost:1313/heron/docs/developers/compiling/linux">Compiling on Linux</a></li><li><a href="http://localhost:1313/heron/docs/developers/compiling/mac">Compiling on Mac OS X</a></li><li><a href="http://localhost:1313/heron/docs/developers/compiling/docker">Compiling With Docker</a></li><li><a href="http://localhost:1313/heron/docs/contributors/testing">Running Tests</a></li><li><a href="http://localhost:1313/heron/docs/contributors/codebase">Code Organization</a></li></ul><ul></ul><h4>Extending Heron</h4><ul><li><a href="http://localhost:1313/heron/docs/contributors/custom-scheduler">Custom Scheduler</a></li><li><a href="http://localhost:1313/heron/docs/contributors/custom-metrics-sink">Custom Metrics Sink</a></li></ul><ul></ul><h4>Heron Resources</h4><ul><li><a href="http://localhost:1313/heron/docs/resources">Heron Resources</a></li></ul><ul></ul><h4>Contributors</h4><ul><li><a href="http://localhost:1313/heron/docs/contributors/community">Community</a></li><li><a href="http://localhost:1313/heron/docs/contributors/governance">Governance</a></li></ul><ul></ul></nav></div></aside><section class="hn-docs-main col-sm-9 col-md-9 col-lg-10 col-sm-offset-3 col-md-offset-3 col-lg-offset-2"><header class="hn-docs-header page-header"><h1>Heron Architecture</h1><div class="hn-docs-description"></div></header><article class="hn-docs-content">
+
+<p>Heron is the direct successor of <a href="http://storm.apache.org">Apache Storm</a>. From
+an architectural perspective it is markedly different from Storm but fully
+backwards compatible with it from an API perspective.</p>
+
+<p>The sections below clarify the distinction between <a href="#relationship-with-apache-storm:1bf455b3a3c6e1e40be41ef6023b75eb">Heron and
+Storm</a>, describe the <a href="#heron-design-goals:1bf455b3a3c6e1e40be41ef6023b75eb">design
+goals</a> behind Heron, and explain major
+<a href="#topology-components:1bf455b3a3c6e1e40be41ef6023b75eb">components</a> of its architecture.</p>
+
+<h2 id="codebase:1bf455b3a3c6e1e40be41ef6023b75eb">Codebase</h2>
+
+<p>A detailed guide to the Heron codebase can be found
+<a href="http://localhost:1313/heron/docs/contributors/codebase">here</a>.</p>
+
+<h2 id="topologies:1bf455b3a3c6e1e40be41ef6023b75eb">Topologies</h2>
+
+<p>You can think of a Heron cluster as a mechanism for managing the lifecycle of
+stream-processing entities called <strong>topologies</strong>. More information can be found
+in the <a href="../topologies">Heron Topologies</a> document.</p>
+
+<h2 id="relationship-with-apache-storm:1bf455b3a3c6e1e40be41ef6023b75eb">Relationship with Apache Storm</h2>
+
+<p>Heron is the direct successor of <a href="http://storm.apache.org">Apache Storm</a> but
+built with two goals in mind:</p>
+
+<ol>
+<li>Overcoming Storm&rsquo;s performance, reliability, and other shortcomings by
+replacing Storm&rsquo;s thread-based computing model with a process-based model.</li>
+<li>Retaining full compatibility with Storm&rsquo;s data model and <a href="http://storm.apache.org/about/simple-api.html">topology
+API</a>.</li>
+</ol>
+
+<p>For a more in-depth discussion of Heron and Storm, see the <a href="http://dl.acm.org/citation.cfm?id=2742788">Twitter Heron:
+Stream Processing at Scale</a> paper.</p>
+
+<h2 id="heron-design-goals:1bf455b3a3c6e1e40be41ef6023b75eb">Heron Design Goals</h2>
+
+<ul>
+<li><strong>Isolation</strong> &mdash; <a href="../topologies">Topologies</a> should be process based
+rather than thread based, and each process should run in isolation for the
+sake of easy debugging, profiling, and troubleshooting.</li>
+<li><strong>Resource constraints</strong> &mdash; Topologies should use only those resources
+that they are initially allocated and never exceed those bounds. This makes
+Heron safe to run in shared infrastructure.</li>
+<li><strong>Compatibility</strong> &mdash; Heron is fully API and data model compatible with
+<a href="http://storm.apache.org">Apache Storm</a>, making it easy for developers
+to transition between systems.</li>
+<li><strong>Back pressure</strong> &mdash; In a distributed system like Heron, there are no
+guarantees that all system components will execute at the same speed. Heron
+has built-in <a href="#stream-manager:1bf455b3a3c6e1e40be41ef6023b75eb">back pressure mechanisms</a> to ensure that
+topologies can self-adjust in case components lag.</li>
+<li><strong>Performance</strong> &mdash; Many of Heron&rsquo;s design choices have enabled Heron to
+achieve higher throughput and lower latency than Storm while also offering
+enhanced configurability to fine-tune potential latency/throughput trade-offs.</li>
+<li><strong>Semantic guarantees</strong> &mdash; Heron provides support for both
+<a href="https://kafka.apache.org/08/design.html#semantics">at-most-once and at-least-once</a>
+processing semantics.</li>
+<li><strong>Efficiency</strong> &mdash; Heron was built with the goal of achieving all of the
+above with the minimal possible resource usage.</li>
+</ul>
+
+<h2 id="topology-components:1bf455b3a3c6e1e40be41ef6023b75eb">Topology Components</h2>
+
+<p>The following core components of Heron topologies are discussed in depth in
+the sections below:</p>
+
+<ul>
+<li><a href="#topology-master:1bf455b3a3c6e1e40be41ef6023b75eb">Topology Master</a></li>
+<li><a href="#container:1bf455b3a3c6e1e40be41ef6023b75eb">Container</a></li>
+<li><a href="#stream-manager:1bf455b3a3c6e1e40be41ef6023b75eb">Stream Manager</a></li>
+<li><a href="#heron-instance:1bf455b3a3c6e1e40be41ef6023b75eb">Heron Instance</a></li>
+<li><a href="#metrics-manager:1bf455b3a3c6e1e40be41ef6023b75eb">Metrics Manager</a></li>
+<li><a href="#heron-tracker:1bf455b3a3c6e1e40be41ef6023b75eb">Heron Tracker</a></li>
+</ul>
+
+<h3 id="topology-master:1bf455b3a3c6e1e40be41ef6023b75eb">Topology Master</h3>
+
+<p>The Topology Master (TM) manages a topology throughout its entire lifecycle,
+from the time it&rsquo;s submitted until it&rsquo;s ultimately killed. When <code>heron</code> deploys
+a topology it starts a single TM and multiple <a href="#container:1bf455b3a3c6e1e40be41ef6023b75eb">containers</a>.
+The TM creates an ephemeral <a href="http://zookeeper.apache.org">ZooKeeper</a> node to
+ensure that there&rsquo;s only one TM for the topology and that the TM is easily
+discoverable by any process in the topology. The TM also constructs the <a href="../topologies#physical-plan">physical
+plan</a> for a topology which it relays to different
+components.</p>
+
+<p><img src="http://localhost:1313/heron/img/tmaster.png" alt="Topology Master" /></p>
+
+<h4 id="topology-master-configuration:1bf455b3a3c6e1e40be41ef6023b75eb">Topology Master Configuration</h4>
+
+<p>TMs have a variety of <a href="../../operators/configuration/tmaster">configurable
+parameters</a> that you can adjust at each
+phase of a topology&rsquo;s <a href="../topologies#topology-lifecycle">lifecycle</a>.</p>
+
+<h3 id="container:1bf455b3a3c6e1e40be41ef6023b75eb">Container</h3>
+
+<p>Each Heron topology consists of multiple <strong>containers</strong>, each of which houses
+multiple <a href="#heron-instance:1bf455b3a3c6e1e40be41ef6023b75eb">Heron Instances</a>, a <a href="#stream-manager:1bf455b3a3c6e1e40be41ef6023b75eb">Stream
+Manager</a>, and a <a href="#metrics-manager:1bf455b3a3c6e1e40be41ef6023b75eb">Metrics Manager</a>. Containers
+communicate with the topology&rsquo;s TM to ensure that the topology forms a fully
+connected graph.</p>
+
+<p>For an illustration, see the figure in the <a href="#topology-master:1bf455b3a3c6e1e40be41ef6023b75eb">Topology Master</a>
+section above.</p>
+
+<h3 id="stream-manager:1bf455b3a3c6e1e40be41ef6023b75eb">Stream Manager</h3>
+
+<p>The <strong>Stream Manager</strong> (SM) manages the routing of tuples between topology
+components. Each <a href="#heron-instance:1bf455b3a3c6e1e40be41ef6023b75eb">Heron Instance</a> in a topology connects to its
+local SM, while all of the SMs in a given topology connect to one another to
+form a network. Below is a visual illustration of a network of SMs:</p>
+
+<p><img src="http://localhost:1313/heron/img/data-flow.png" alt="Heron Data Flow" /></p>
+
+<p>In addition to being a routing engine for data streams, SMs are responsible for
+propagating <a href="https://en.wikipedia.org/wiki/Back_pressure">back pressure</a>
+within the topology when necessary. Below is an illustration of back pressure:</p>
+
+<p><img src="http://localhost:1313/heron/img/backpressure1.png" alt="Back Pressure 1" /></p>
+
+<p>In the diagram above, assume that bolt <strong>B3</strong> (in container <strong>A</strong>) receives all
+of its inputs from spout <strong>S1</strong>. <strong>B3</strong> is running more slowly than other
+components. In response, the SM for container <strong>A</strong> will refuse input from the
+SMs in containers <strong>C</strong> and <strong>D</strong>, which will lead to the socket buffers in
+those containers filling up, which could lead to throughput collapse.</p>
+
+<p>In a situation like this, Heron&rsquo;s back pressure mechanism will kick in. The SM
+in container <strong>A</strong> will send a message to all the other SMs. In response, the
+other SMs will examine the container&rsquo;s <a href="../topologies#physical-plan">physical
+plan</a> and cut off inputs from spouts that feed
+bolt <strong>B3</strong> (in this case spout <strong>S1</strong>).</p>
+
+<p><img src="http://localhost:1313/heron/img/backpressure2.png" alt="Back Pressure 2" /></p>
+
+<p>Once the lagging bolt (<strong>B3</strong>) begins functioning normally, the SM in container
+<strong>A</strong> will notify the other SMs and stream routing within the topology will
+return to normal.</p>
+
+<h4 id="stream-manger-configuration:1bf455b3a3c6e1e40be41ef6023b75eb">Stream Manger Configuration</h4>
+
+<p>SMs have a variety of <a href="../../operators/configuration/stmgr">configurable
+parameters</a> that you can adjust at each
+phase of a topology&rsquo;s <a href="../topologies#topology-lifecycle">lifecycle</a>.</p>
+
+<h3 id="heron-instance:1bf455b3a3c6e1e40be41ef6023b75eb">Heron Instance</h3>
+
+<p>A <strong>Heron Instance</strong> (HI) is a process that handles a single task of a
+<a href="../topologies#spouts">spout</a> or <a href="../topologies#bolts">bolt</a>, which allows
+for easy debugging and profiling.</p>
+
+<p>Currently, Heron only supports Java, so all
+HIs are <a href="https://en.wikipedia.org/wiki/Java_virtual_machine">JVM</a> processes, but
+this will change in the future.</p>
+
+<h4 id="heron-instance-configuration:1bf455b3a3c6e1e40be41ef6023b75eb">Heron Instance Configuration</h4>
+
+<p>HIs have a variety of <a href="../../operators/configuration/instance">configurable
+parameters</a> that you can adjust at
+each phase of a topology&rsquo;s <a href="../topologies#topology-lifecycle">lifecycle</a>.</p>
+
+<h3 id="metrics-manager:1bf455b3a3c6e1e40be41ef6023b75eb">Metrics Manager</h3>
+
+<p>Each topology runs a Metrics Manager (MM) that collects and exports metrics from
+all components in a <a href="#container:1bf455b3a3c6e1e40be41ef6023b75eb">container</a>. It then routes those metrics to
+both the <a href="#topology-master:1bf455b3a3c6e1e40be41ef6023b75eb">Topology Master</a> and to external collectors, such as
+<a href="https://github.com/facebookarchive/scribe">Scribe</a>,
+<a href="http://graphite.wikidot.com/">Graphite</a>, or analogous systems.</p>
+
+<p>You can adapt Heron to support additional systems by implementing your own
+<a href="../../contributors/custom-metrics-sink">custom metrics sink</a>.</p>
+
+<h2 id="cluster-level-components:1bf455b3a3c6e1e40be41ef6023b75eb">Cluster-level Components</h2>
+
+<p>All of the components listed in the sections above can be found in each
+topology. The components listed below are cluster-level components that function
+outside of particular topologies.</p>
+
+<h3 id="heron-cli:1bf455b3a3c6e1e40be41ef6023b75eb">Heron CLI</h3>
+
+<p>Heron has a CLI tool called <code>heron</code> that is used to manage topologies.
+Documentation can be found in <a href="../../operators/heron-cli">Managing
+Topologies</a>.</p>
+
+<h3 id="heron-tracker:1bf455b3a3c6e1e40be41ef6023b75eb">Heron Tracker</h3>
+
+<p>The <strong>Heron Tracker</strong> (or just Tracker) is a centralized gateway for
+cluster-wide information about topologies, including which topologies are
+running, being launched, being killed, etc. It relies on the same
+<a href="http://zookeeper.apache.org">ZooKeeper</a> nodes as the topologies in the cluster
+and exposes that information through a JSON REST API. The Tracker can be
+run within your Heron cluster (on the same set of machines managed by your
+Heron <a href="../../operators/deployment">scheduler</a>) or outside of it.</p>
+
+<p>Instructions on running the tracker including JSON API docs can be found in <a href="../../operators/heron-tracker">Heron
+Tracker</a>.</p>
+
+<h3 id="heron-ui:1bf455b3a3c6e1e40be41ef6023b75eb">Heron UI</h3>
+
+<p><strong>Heron UI</strong> is a rich visual interface that you can use to interact with
+topologies. Through Heron UI you can see color-coded visual representations of
+the <a href="../topologies#logical-plan">logical</a> and
+<a href="../topologies#physical-plan">physical</a> plan of each topology in your cluster.</p>
+
+<p>For more information, see the <a href="../../operators/heron-ui">Heron UI</a> document.</p>
+</article></section></div></div></div><script data-no-instant>document.write('<script src="http://'
+        + (location.host || 'localhost').split(':')[0]
+		+ ':1313/livereload.js?mindelay=10"></'
+        + 'script>')</script></body></html>

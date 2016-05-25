@@ -1,0 +1,176 @@
+<!DOCTYPE html><html lang="en-us"><head><link rel="shortcut icon" type="image/png" sizes="16x16" href="http://localhost:1313/heron/img/favicon-16x16.png"><link rel="shortcut icon" type="image/png" sizes="32x32" href="http://localhost:1313/heron/img/favicon-32x32.png"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="Hugo 0.14"><title>Heron Documentation - Implementing a Custom Metrics Sink</title><link rel="stylesheet" href="http://localhost:1313/heron/css/style.min.css"><link rel="stylesheet" href="http://localhost:1313/heron/css/font-awesome.min.css"><link rel="stylesheet" href="http://localhost:1313/heron/css/pygments.css"><script defer src="http://code.jquery.com/jquery-2.2.1.min.js"></script><script defer src="http://localhost:1313/heron/js/app.min.js"></script></head><body><nav class="hn-top-navbar navbar navbar-inverse navbar-fixed-top" role="navigation"><div class="hn-navbar-container container-fluid"><div class="navbar-header"><button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#hn-navbar" aria-controls="hn-navbar" aria-expanded="false"><span class="sr-only"><Toggle>navigation</Toggle></span><i class="hn-toggle-button fa fa-bars"></i></button><a class="hn-navbar-logo navbar-brand" href="http://localhost:1313/heron/"><img class="pull-left" src="http://localhost:1313/heron/img/HeronTextLogo-small.png"></a></div><div id="hn-navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav navbar-right"><li><a href="http://localhost:1313/heron/docs/getting-started">Docs</a></li><li><a href="http://localhost:1313/heron/docs/resources">Resources</a></li><li><a href="http://localhost:1313/heron/docs/contributors/community">Community</a></li><li><a href="https://github.com/twitter/heron">GitHub</a></li><li><a class="nav-icon" href="https://groups.google.com/forum/#!forum/heron-users"><i class="fa fa-comments"></i></a></li><li><a class="nav-icon" href="https://twitter.com/heronstreaming"><i class="fa fa-twitter"></i></a></li></ul></div></div></nav><div class="hn-main"><div class="container"><div class="row"><aside class="hn-sidebar hidden-xs col-sm-3 col-md-3 col-lg-2 collapse"><div><nav class="hn-sidebar-nav"><h4>Getting Started</h4><ul><li><a href="http://localhost:1313/heron/docs/getting-started">Local (Single Node)</a></li><li><a href="http://localhost:1313/heron/docs/upgrade-storm-to-heron">Upgrade Storm Topologies</a></li></ul><ul></ul><h4>Heron Concepts</h4><ul><li><a href="http://localhost:1313/heron/docs/concepts/architecture">Heron Architecture</a></li><li><a href="http://localhost:1313/heron/docs/concepts/topologies">Heron Topology</a></li></ul><ul></ul><h4>Deployment</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment">Overview</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/configuration">Configuration</a></li></ul><ul></ul><h4>State Managers</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment/statemanagers/zookeeper">Zookeeper</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/statemanagers/localfs">Local FS</a></li></ul><ul></ul><h4>Uploaders</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment/uploaders/localfs">Local FS</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/uploaders/hdfs">HDFS</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/uploaders/s3">S3</a></li></ul><ul></ul><h4>Schedulers</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/aurora">Aurora Cluster</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/local">Local Cluster</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/mesos">Mesos Cluster</a></li><li><a href="http://localhost:1313/heron/docs/operators/deployment/schedulers/slurm">Slurm Cluster</a></li></ul><ul></ul><h4>System Configuration</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/configuration/config-intro">Overview</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/instance">Heron Instance</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/metrics-manager">Metrics Manager</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/stmgr">Stream Manager</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/system">System-Level</a></li><li><a href="http://localhost:1313/heron/docs/operators/configuration/tmaster">Topology Master</a></li></ul><ul></ul><h4>Observability</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/observability/graphite">Graphite</a></li></ul><ul></ul><h4>User Manuals</h4><ul><li><a href="http://localhost:1313/heron/docs/operators/heron-cli">Heron Client</a></li><li><a href="http://localhost:1313/heron/docs/operators/heron-tracker-api">Heron Tracker REST API</a></li><li><a href="http://localhost:1313/heron/docs/operators/heron-tracker">Heron Tracker Runbook</a></li><li><a href="http://localhost:1313/heron/docs/operators/heron-ui">Heron UI Runbook</a></li></ul><ul></ul><h4>Topology Writers</h4><ul><li><a href="http://localhost:1313/heron/docs/developers/topologies">Writing Topologies</a></li><li><a href="http://localhost:1313/heron/docs/developers/data-model">Heron Data Model</a></li><li><a href="http://localhost:1313/heron/docs/developers/serialization">Tuple Serialization</a></li><li><a href="http://localhost:1313/heron/docs/developers/ui-guide">Heron UI Guide</a></li><li><a href="http://localhost:1313/heron/docs/developers/tuning">Tuning Guide</a></li><li><a href="http://localhost:1313/heron/docs/developers/simulator-mode">Simulator Mode</a></li><li><a href="http://localhost:1313/heron/docs/developers/troubleshooting">Troubleshooting Guide</a></li><li><a href="http://localhost:1313/heron/api">Javadoc</a></li></ul><ul></ul><h4>Heron Developers</h4><ul><li><a href="http://localhost:1313/heron/docs/developers/compiling/compiling">Compiling</a></li><li><a href="http://localhost:1313/heron/docs/developers/compiling/linux">Compiling on Linux</a></li><li><a href="http://localhost:1313/heron/docs/developers/compiling/mac">Compiling on Mac OS X</a></li><li><a href="http://localhost:1313/heron/docs/developers/compiling/docker">Compiling With Docker</a></li><li><a href="http://localhost:1313/heron/docs/contributors/testing">Running Tests</a></li><li><a href="http://localhost:1313/heron/docs/contributors/codebase">Code Organization</a></li></ul><ul></ul><h4>Extending Heron</h4><ul><li><a href="http://localhost:1313/heron/docs/contributors/custom-scheduler">Custom Scheduler</a></li><li><a href="http://localhost:1313/heron/docs/contributors/custom-metrics-sink">Custom Metrics Sink</a></li></ul><ul></ul><h4>Heron Resources</h4><ul><li><a href="http://localhost:1313/heron/docs/resources">Heron Resources</a></li></ul><ul></ul><h4>Contributors</h4><ul><li><a href="http://localhost:1313/heron/docs/contributors/community">Community</a></li><li><a href="http://localhost:1313/heron/docs/contributors/governance">Governance</a></li></ul><ul></ul></nav></div></aside><section class="hn-docs-main col-sm-9 col-md-9 col-lg-10 col-sm-offset-3 col-md-offset-3 col-lg-offset-2"><header class="hn-docs-header page-header"><h1>Implementing a Custom Metrics Sink</h1><div class="hn-docs-description"></div></header><article class="hn-docs-content">
+
+<p>Each Heron topology has its own centralized <a href="../../concepts/architecture#metrics-manager">Metrics
+Manager</a> (MM), which collects
+metrics from all instances in the topology. You can define how the MM processes
+metrics by implementing a <strong>metrics sink</strong>, which specifies how the MM handles
+incoming
+<a href="http://localhost:1313/heron/api/com/twitter/heron/spi/metricsmgr/metrics/MetricsRecord.html"><code>MetricsRecord</code></a>
+objects.</p>
+
+<p>Java is currently the only supported language for custom metrics sinks. This may
+change in the future.</p>
+
+<h2 id="currently-supported-sinks:aa06ab48e9613e9713d52c24b3200421">Currently-supported Sinks</h2>
+
+<p>Heron comes equipped out of the box with three metrics sinks that you can apply
+for a specific topology. The code for these sinks may prove helpful for
+implementing your own.</p>
+
+<ul>
+<li><a href="http://localhost:1313/heron/api/metrics/com/twitter/heron/metricsmgr/sink/GraphiteSink.html"><code>GraphiteSink</code></a>
+&mdash; Sends each <code>MetricsRecord</code> object to a
+<a href="http://graphite.wikidot.com/">Graphite</a> instance according to a Graphite
+prefix.</li>
+<li><a href="http://localhost:1313/heron/api/metrics/com/twitter/heron/metricsmgr/sink/ScribeSink.html"><code>ScribeSink</code></a>
+&mdash; Sends each <code>MetricsRecord</code> object to a
+<a href="https://github.com/facebookarchive/scribe">Scribe</a> instance according to a
+Scribe category and namespace.</li>
+<li><a href="http://localhost:1313/heron/api/metrics/com/twitter/heron/metricsmgr/sink/FileSink.html"><code>FileSink</code></a>
+&mdash; Writes each <code>MetricsRecord</code> object to a JSON file at a specified path.</li>
+</ul>
+
+<p>More on using those sinks in a Heron cluster can be found in <a href="../../operators/configuration/metrics-manager">Metrics
+Manager</a>.</p>
+
+<h2 id="java-setup:aa06ab48e9613e9713d52c24b3200421">Java Setup</h2>
+
+<p>In order to create a custom metrics sink, you need to import the
+<code>metricsmgr-api</code> library into your project.</p>
+
+<h4 id="maven:aa06ab48e9613e9713d52c24b3200421">Maven</h4>
+
+<pre><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;com.twitter.heron&lt;/groupId&gt;
+  &lt;artifactId&gt;metricsmgr-api&lt;/artifactId&gt;
+  &lt;version&gt;{{.Site.Params.versions.metricsapi}}&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+
+<h4 id="gradle:aa06ab48e9613e9713d52c24b3200421">Gradle</h4>
+
+<pre><code class="language-groovy">dependencies {
+  compile group: &quot;com.twitter.heron&quot;, name: &quot;metricsmgr-api&quot;, version: &quot;{{.Site.Params.versions.metricsapi}}&quot;
+}
+</code></pre>
+
+<h2 id="the-imetricssink-interface:aa06ab48e9613e9713d52c24b3200421">The <code>IMetricsSink</code> Interface</h2>
+
+<p>Each metrics sink must implement the
+<a href="http://heronproject.github.io/metrics-api/com/twitter/heron/metricsmgr/IMetricsSink"><code>IMetricsSink</code></a>
+interface, which requires you to implement the following methods:</p>
+
+<ul>
+<li><code>void init(Map&lt;String, Object&gt; conf, SinkContext context)</code> &mdash; Defines the
+initialization behavior of the sink. The <code>conf</code> map is the configuration that
+is passed to the sink by the <code>.yaml</code> configuration file at
+<code>heron/config/metrics_sink.yaml</code>; the
+<a href="http://localhost:1313/heron/api/com/twitter/heron/spi/metricsmgr/sink/SinkContext.html"><code>SinkContext</code></a>
+object enables you to access values from the sink&rsquo;s runtime context
+(the ID of the metrics manager, the ID of the sink, and the name of the
+topology).</li>
+<li><code>void processRecord(MetricsRecord record)</code> &mdash; Defines how each
+<code>MetricsRecord</code> that passes through the sink is processed.</li>
+<li><code>void flush()</code> &mdash; Flush any buffered metrics; this function is called at
+the interval specified by the <code>flush-frequency-ms</code>. More info can be found in
+the <a href="../../operators/configuration/stmgr">Stream Manager</a> document.</li>
+<li><code>void close()</code> &mdash; Closes the stream and releases any system resources
+associated with it; if the stream is already closed, invoking <code>close()</code> has no
+effect.</li>
+</ul>
+
+<p>Your implementation of those interfaces will need to be packaged into a JAR file
+and distributed to the <code>metrics-mgr-classpath</code> folder of your <a href="../../developers/compiling">Heron
+release</a>.</p>
+
+<h2 id="example-implementation:aa06ab48e9613e9713d52c24b3200421">Example Implementation</h2>
+
+<p>Below is an example implementation that simply prints the contents of each
+metrics record as it passes through:</p>
+
+<pre><code class="language-java">import com.twitter.heron.metricsmgr.api.metrics.MetricsInfo;
+import com.twitter.heron.metricsmgr.api.metrics.MetricsRecord;
+import com.twitter.heron.metricsmgr.api.sink.IMetricsSink;
+import com.twitter.heron.metricsmgr.api.sink.SinkContext;
+
+public class PrintSink implements IMetricsSink {
+    @Override
+    public void init(Map&lt;String, Object&gt; conf, SinkContext context) {
+        System.out.println(&quot;Sink configuration:&quot;);
+        // This will print out each config in the supplied configuration
+        for (Map.Entry&lt;String, Object&gt; config : conf.entrySet()) {
+            System.out.println(String.format(&quot;%s: %s&quot;, config.getKey(), config.getValue());
+        }
+        System.out.println(String.format(&quot;Topology name: %s&quot;, context.getTopologyName());
+        System.out.println(String.format(&quot;Sink ID: %s&quot;, context.getSinkId()));
+    }
+
+    @Override
+    public void processRecord(MetricsRecord record) {
+        String recordString = String.format(&quot;Record received: %s&quot;, record.toString());
+        System.out.println(recordString);
+    }
+
+    @Override
+    public void flush() {
+        // Since we're just printing to stdout in this sink, we don't need to
+        // specify any flush() behavior
+    }
+
+    @Override
+    public void close() {
+        // Since we're just printing to stdout in this sink, we don't need to
+        // specify any close() behavior
+    }
+}
+</code></pre>
+
+<h2 id="configuring-your-custom-sink:aa06ab48e9613e9713d52c24b3200421">Configuring Your Custom Sink</h2>
+
+<p>The configuration for your sink needs to be provided in the
+<a href="http://www.yaml.org/">YAML</a> file at <code>heron/config/metrics_sinks.yaml</code>.</p>
+
+<p>At the top of that file there&rsquo;s a <code>sinks</code> parameter that lists each available
+sink by name. You should add your sink to that list. Here&rsquo;s an example:</p>
+
+<pre><code class="language-yaml">sinks:
+  - file-sink
+  - scribe-sink
+  - tmaster-sink
+  - print-sink
+</code></pre>
+
+<p>For each sink you need to specify the following:</p>
+
+<ul>
+<li><code>class</code> &mdash; The Java class name of your custom implementation of the
+<code>IMetricsSink</code> interface, e.g. <code>biz.acme.heron.metrics.PrintSink</code>.</li>
+<li><code>flush-frequency-ms</code> &mdash; The frequency (in milliseconds) at which the
+<code>flush()</code> method is called in your implementation of <code>IMetricsSink</code>.</li>
+<li><code>sink-restart-attempts</code> &mdash; The number of times that a sink will attempt to
+restart if it throws exceptions and dies. If you do not set this, the default
+is 0; if you set it to -1, the sink will attempt to restart forever.</li>
+</ul>
+
+<p>Below is an example <code>metrics_sink.yaml</code> configuration:</p>
+
+<pre><code class="language-yaml">sinks:
+  - print-sink
+
+print-sink:
+  class: &quot;biz.acme.heron.metrics.PrintSink&quot;
+  flush-frequency-ms: 60000 # One minute
+  sink-restart-attempts: -1 # Attempt to restart forever
+</code></pre>
+
+<h2 id="using-your-custom-sink:aa06ab48e9613e9713d52c24b3200421">Using Your Custom Sink</h2>
+
+<p>Once you&rsquo;ve made a JAR for your custom Java sink, distributed that JAR to
+<code>metrics-mgr-classpath</code> folder, and changed the configuration in
+<code>heron/config/metrics_sink.yaml</code>, you&rsquo;ll need to <a href="../../developers/compiling">re-compile
+Heron</a>. Any topology submitted using that compiled
+version of <code>heron-cli</code> will include the custom sink.</p>
+</article></section></div></div></div><script data-no-instant>document.write('<script src="http://'
+        + (location.host || 'localhost').split(':')[0]
+		+ ':1313/livereload.js?mindelay=10"></'
+        + 'script>')</script></body></html>
