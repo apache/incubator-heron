@@ -144,9 +144,8 @@ section.hn-docs-main {
     }
 
     .highlight {
-      border-radius: 5px;
-
       pre {
+        font-size: 12px;
         padding: 10px;
         background-color: $heron-blue-gray;
       }
