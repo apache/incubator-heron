@@ -10,3 +10,14 @@ pex_library(
   ],
   reqs = ['colorlog==2.6.1'],
 )
+
+pex_library(
+  name = "heron-network-lib",
+  srcs = glob(
+    ["network/*.py"],
+  ),
+  deps = [
+    "//heron/proto:proto-py",
+  ],
+  reqs = ["gevent==1.1.1"]
+)
