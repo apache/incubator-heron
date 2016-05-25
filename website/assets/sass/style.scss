@@ -91,28 +91,42 @@ aside.hn-sidebar {
 
     .panel {
       border: none;
+      padding: 0;
     }
 
     .panel-title {
       i {
         color: $light-gray;
-        margin-right: 5px;
+        margin-right: 7px;
       }
     }
 
     .panel-heading {
       background-color: #fff;
       border-bottom: none;
+      margin: 0;
     }
 
-    ul {
-      list-style-type: none;
-      padding-top: 10px;
-      padding-left: 20px;
+    .panel-collapse {
+      border-top: none;
+      padding: 0;
+    }
 
-      li {
-        padding: 0;
-        margin: 0;
+    .panel-body {
+      padding: 0;
+
+      ul {
+        list-style-type: none;
+        padding-left: 40px;
+        padding-top: 5px;
+
+        li {
+          padding: 0;
+
+          &:nth-last-of-type(n + 2) {
+            margin-bottom: 10px;
+          }
+        }
       }
     }
   }
