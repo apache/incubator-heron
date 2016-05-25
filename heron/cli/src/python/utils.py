@@ -42,8 +42,8 @@ SANDBOX_CONF_DIR = "./heron-conf"
 CLIENT_YAML = "client.yaml"
 
 # cli configs for role and env
-ROLE_REQUIRED = "heron.config.role.required"
-ENV_REQUIRED  = "heron.config.env.required"
+IS_ROLE_REQUIRED = "heron.config.is.role.required"
+IS_ENV_REQUIRED  = "heron.config.is.env.required"
 
 ################################################################################
 # Create a tar file with a given set of files
@@ -147,7 +147,7 @@ def get_heron_lib_dir():
 
 def get_heron_release_file():
   """
-  This will provide the path to heron release.yaml file 
+  This will provide the path to heron release.yaml file
   :return: absolute path of heron release.yaml file
   """
   return os.path.join(get_heron_dir(), RELEASE_YAML)
@@ -200,22 +200,28 @@ def parse_cluster_role_env(cluster_role_env, config_path):
       if len(parts) == 2:
         parts.append(ENVIRON)
     else:
+      cli_confs = {}
       with open(cli_conf_file, 'r') as conf_file:
-        cli_confs = yaml.load(conf_file)
+        tmp_confs = yaml.load(conf_file)
+        # the return value of yaml.load can be None if conf_file is an empty file
+        if tmp_confs is not None:
+          cli_confs = tmp_confs
+        else:
+          print "Failed to read: %s due to it is empty" %(CLIENT_YAML)
 
-        # if role is required but not provided, raise exception
-        if len(parts) == 1:
-          if (ROLE_REQUIRED in cli_confs) and (cli_confs[ROLE_REQUIRED] == True):
-            raise Exception("role required but not provided")
-          else:
-            parts.append(getpass.getuser())
+      # if role is required but not provided, raise exception
+      if len(parts) == 1:
+        if (IS_ROLE_REQUIRED in cli_confs) and (cli_confs[IS_ROLE_REQUIRED] == True):
+          raise Exception("role required but not provided")
+        else:
+          parts.append(getpass.getuser())
 
-        # if environ is required but not provided, raise exception
-        if len(parts) == 2:
-          if (ENV_REQUIRED in cli_confs) and (cli_confs[ENV_REQUIRED] == True):
-            raise Exception("environ required but not provided")
-          else:
-            parts.append(ENVIRON)
+      # if environ is required but not provided, raise exception
+      if len(parts) == 2:
+        if (IS_ENV_REQUIRED in cli_confs) and (cli_confs[IS_ENV_REQUIRED] == True):
+          raise Exception("environ required but not provided")
+        else:
+          parts.append(ENVIRON)
 
   # if cluster or role or environ is empty, print
   if len(parts[0]) == 0 or len(parts[1]) == 0 or len(parts[2]) == 0:

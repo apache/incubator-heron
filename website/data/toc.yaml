@@ -5,6 +5,12 @@ sections:
         url: /docs/getting-started
       - name: Upgrade Storm Topologies
         url: /docs/upgrade-storm-to-heron
+  - name: Heron Concepts
+    sublinks:
+      - name: Heron Architecture
+        url: /docs/concepts/architecture
+      - name: Heron Topology
+        url: /docs/concepts/topologies
   - name: Deployment
     sublinks:
       - name: Overview
@@ -63,8 +69,8 @@ sections:
         url: /docs/operators/heron-ui
   - name: Topology Writers
     sublinks:
-      - name: Heron Topologies
-        url: /docs/concepts/topologies
+      - name: Writing Topologies
+        url: /docs/developers/topologies
       - name: Heron Data Model
         url: /docs/developers/data-model
       - name: Tuple Serialization
@@ -93,10 +99,6 @@ sections:
         url: /docs/contributors/testing
       - name: Code Organization
         url: /docs/contributors/codebase
-  - name: Heron Concepts
-    sublinks:
-      - name: Heron Architecture
-        url: /docs/concepts/architecture
   - name: Extending Heron
     sublinks:
       - name: Custom Scheduler

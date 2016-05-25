@@ -7,7 +7,7 @@ for developers who want to contribute to Heron. The Heron codebase lives on
 [github]({{% githubMaster %}}).
 
 If you're looking for documentation about developing topologies for a Heron
-cluster, see [Building Topologies](../developers/topologies.html) instead.
+cluster, see [Building Topologies](../../developers/topologies) instead.
 
 ## Languages
 
@@ -20,7 +20,7 @@ The primary programming languages for Heron are C++, Java, and Python.
 * **Java 8** is used primarily for Heron's [topology
 API](../../concepts/topologies), and [Heron Instance](../../concepts/architecture#heron-instance).
 It is currently the only language in which topologies can be written. Instructions can be found
-in [Building Topologies](../developers/topologies.html), while API documentation for the Java
+in [Building Topologies](../../developers/topologies), while API documentation for the Java
 API can be found [here](/api/topology/index.html). Please note that Heron topologies do not
 require Java 8 and can be written in Java 7 or later.
 
@@ -116,16 +116,16 @@ Heron's API for writing topologies is written in Java. The code for this API can
 be found in [`heron/api`]({{% githubMaster %}}/heron/api).
 
 Documentation for writing topologies can be found in [Building
-Topologies](../developers/topologies.html), while API documentation can be found
+Topologies](../../developers/topologies), while API documentation can be found
 [here](/api/topology/index.html).
 
-### Local Mode
+### Simulator
 
-Heron enables you to run topologies in [local
-mode](../developers/topologies.html#local-mode) for debugging purposes.
+Heron enables you to run topologies in [`Simulator`](../../developers/simulator-mode)
+for debugging purposes.
 
-The Java API for local mode can be found in
-[`heron/localmode`]({{% githubMaster %}}/heron/localmode).
+The Java API for simulator can be found in
+[`heron/simulator`]({{% githubMaster %}}/heron/simulator).
 
 ### Example Topologies
 
