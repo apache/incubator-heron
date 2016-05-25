@@ -2,7 +2,7 @@
 title: Implementing a Bolt
 ---
 
-Bolts must implement the [`IBolt`](api/com/twitter/heron/api/bolt/IBolt.html) interface.
+Bolts must implement the [`IBolt`](/api/com/twitter/heron/api/bolt/IBolt.html) interface.
 
 ```java
 public interface IBolt extends Serializable {
@@ -24,4 +24,4 @@ guarantee that this method is called due to how the instance is killed.
 
 See [`ExclamationBolt`](https://github.com/twitter/heron/blob/master/heron/examples/src/java/com/twitter/heron/examples/ExclamationTopology.java#L67) for a simple bolt example.
 
-Instead of implementing the [`IBolt`](api/com/twitter/heron/api/bolt/IBolt.html) interface directly, you can implement [`IRichBolt`](/api/com/twitter/heron/api/bolt/IRichBolt.html).
+Instead of implementing the [`IBolt`](/api/com/twitter/heron/api/bolt/IBolt.html) interface directly, you can implement [`IRichBolt`](/api/com/twitter/heron/api/bolt/IRichBolt.html).
