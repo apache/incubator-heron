@@ -5,24 +5,24 @@
 
 // Base class
 .panel {
-  margin-bottom: $line-height-computed;
-  background-color: $panel-bg;
+  //margin-bottom: $line-height-computed;
+  //background-color: $panel-bg;
   border: 1px solid transparent;
   border-radius: $panel-border-radius;
-  @include box-shadow(0 1px 1px rgba(0,0,0,.05));
+  //@include box-shadow(0 1px 1px rgba(0,0,0,.05));
 }
 
 // Panel contents
 .panel-body {
-  padding: $panel-body-padding;
+  //padding: $panel-body-padding;
   @include clearfix;
 }
 
 // Optional heading
 .panel-heading {
   padding: $panel-heading-padding;
-  border-bottom: 1px solid transparent;
-  @include border-top-radius(($panel-border-radius - 1));
+  //border-bottom: 1px solid transparent;
+  //@include border-top-radius(($panel-border-radius - 1));
 
   > .dropdown .dropdown-toggle {
     color: inherit;
@@ -49,8 +49,8 @@
 .panel-footer {
   padding: $panel-footer-padding;
   background-color: $panel-footer-bg;
-  border-top: 1px solid $panel-inner-border;
-  @include border-bottom-radius(($panel-border-radius - 1));
+  //border-top: 1px solid $panel-inner-border;
+  //@include border-bottom-radius(($panel-border-radius - 1));
 }
 
 
@@ -165,7 +165,7 @@
   > .panel-body + .table-responsive,
   > .table + .panel-body,
   > .table-responsive + .panel-body {
-    border-top: 1px solid $table-border-color;
+    //border-top: 1px solid $table-border-color;
   }
   > .table > tbody:first-child > tr:first-child th,
   > .table > tbody:first-child > tr:first-child td {
@@ -237,19 +237,20 @@
 
     + .panel-collapse > .panel-body,
     + .panel-collapse > .list-group {
-      border-top: 1px solid $panel-inner-border;
+      //border-top: 1px solid $panel-inner-border;
     }
   }
 
   .panel-footer {
     border-top: 0;
     + .panel-collapse .panel-body {
-      border-bottom: 1px solid $panel-inner-border;
+      //border-bottom: 1px solid $panel-inner-border;
     }
   }
 }
 
 
+/*
 // Contextual variations
 .panel-default {
   @include panel-variant($panel-default-border, $panel-default-text, $panel-default-heading-bg, $panel-default-border);
@@ -269,3 +270,4 @@
 .panel-danger {
   @include panel-variant($panel-danger-border, $panel-danger-text, $panel-danger-heading-bg, $panel-danger-border);
 }
+*/

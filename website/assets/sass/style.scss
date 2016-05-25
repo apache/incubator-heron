@@ -85,21 +85,34 @@ a:hover {
 // Sidebar for navigating the docs
 aside.hn-sidebar {
   .hn-sidebar-nav {
+    a {
+      text-decoration: none;
+    }
+
+    .panel {
+      border: none;
+    }
+
+    .panel-title {
+      i {
+        color: $heron-blue-gray;
+        margin-right: 5px;
+      }
+    }
+
+    .panel-heading {
+      background-color: #fff;
+      border-bottom: none;
+    }
+
     ul {
       list-style-type: none;
-      padding: 0;
-      margin-bottom: 20px;
+      padding-top: 10px;
+      padding-left: 20px;
 
       li {
-        a {
-          overflow: hidden;
-          padding: 4px 0;
-          display: block;
-
-          &:hover {
-            background-color: transparent;
-          }
-        }
+        padding: 0;
+        margin: 0;
       }
     }
   }
