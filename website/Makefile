@@ -4,6 +4,9 @@ setup:
 	@pip uninstall requests
 	@pip install linkchecker pygments requests==2.9.0
 
+clean:
+	rm -rf public/*
+
 serve:
 	@hugo server --watch
 
@@ -24,6 +27,7 @@ javadocs:
 	@scripts/javadocs.sh
 
 site:
+	@make clean
 	@make build-static-assets
 	@make pages
 	@make javadocs
