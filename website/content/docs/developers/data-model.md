@@ -2,12 +2,12 @@
 title: Heron Data Model
 ---
 
-The [tuple](https://en.wikipedia.org/wiki/Tuple) is Heron's core data type. All
+Tuple is Heron's core data type. All
 data that is fed into a Heron topology via
 [spouts](../../concepts/topologies#spouts) and then processed by
 [bolts](../../concepts/topologies#bolts) consists of tuples.
 
-Heron has a [`Tuple`](/api/topology/com/twitter/heron/api/tuple/Tuple.html)
+Heron has a [`Tuple`](/api/com/twitter/heron/api/tuple/Tuple.html)
 interface for working with tuples. Heron `Tuple`s can hold values of any type;
 values are accessible either by providing an index or a field name.
 
