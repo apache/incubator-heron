@@ -30,14 +30,14 @@ import backtype.storm.serialization.IKryoFactory;
  * all the configs that can be set. It also makes it easier to do things like add
  * serializations.
  * <p>
- * <p>This class also provides constants for all the configurations possible on a Storm
+ * This class also provides constants for all the configurations possible on a Storm
  * cluster and Storm topology. Default values for these configs can be found in
- * defaults.yaml.</p>
+ * defaults.yaml.
  * <p>
- * <p>Note that you may put other configurations in any of the configs. Storm
+ * Note that you may put other configurations in any of the configs. Storm
  * will ignore anything it doesn't recognize, but your topologies are free to make
  * use of them by reading them in the prepare method of Bolts or the open method of
- * Spouts. .</p>
+ * Spouts.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class Config extends com.twitter.heron.api.Config {
@@ -163,8 +163,8 @@ public class Config extends com.twitter.heron.api.Config {
   /**
    * How many executors to spawn for ackers.
    * <p>If this is set to 0, then Storm will immediately ack tuples as soon
-   * as they come off the spout, effectively disabling reliability.</p>
-   * In Heron any values of > 0 means to enable acking.
+   * as they come off the spout, effectively disabling reliability.
+   * In Heron any values of &gt; 0 means to enable acking.
    */
   public static final String TOPOLOGY_ACKER_EXECUTORS = "topology.acker.executors";
   /**

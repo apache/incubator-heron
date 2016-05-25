@@ -1,86 +1,123 @@
 ---
-date: 2016-02-28T13:10:21-08:00
-title: Getting Started - Local (Single Node)
+title: Quick Start Guide
+description: Run a single-node Heron cluster on your laptop
 ---
 
-Run topologies locally using pre-compiled Heron binaries (Mac OSX, Ubuntu >= 14.04, CentOS 7)
+The easiest way to get started learning Heron is to install and run pre-compiled
+Heron binaries, which are currently available for:
 
-### Step 1 - Download Heron binaries with install scripts
+* Mac OS X
+* Ubuntu >= 14.04
 
-Navigate to [Twitter Heron Releases](https://github.com/twitter/heron/releases) and
-download the following self extracting binary install scripts for your platform.
+## Step 1 --- Download Heron binaries using installation scripts
 
-* heron-client-install
-* heron-tools-install
+Go to the [releases page](https://github.com/twitter/heron/releases) for Heron
+and download two installation scripts for your platform. The names of the
+scripts have this form:
 
-For example, if you want to download for Mac OSX (darwin), the
-corresponding binaries will be
+* `heron-client-install-{{% heronVersion %}}-PLATFORM.sh`
+* `heron-tools-install-{{% heronVersion %}}-PLATFORM.sh`
 
-* heron-client-install-\<version\>-darwin.sh
-* heron-tools-install-\<version\>-darwin.sh
+The installation scripts for Mac OS X (`darwin`), for example, would be named
+`heron-client-install-{{% heronVersion %}}-darwin.sh` and
+`heron-tools-install-{{% heronVersion %}}-darwin.sh`.
 
-where \<version\> is the desired heron version. For example, \<version\>=0.14.0
+Once you've downloaded the scripts, run the Heron client script with the
+`--user` flag set:
 
-Run the download self installing binary for heron client using ```--user``` as follows
 ```bash
-$ chmod +x heron-client-install-<version>-darwin.sh
-$ ./heron-client-install-<version>-darwin.sh --user
+$ chmod +x heron-client-install-VERSION-PLATFORM.sh
+$ ./heron-client-install-VERSION-PLATFORM.sh --user
+Heron client installer
+----------------------
+
 Uncompressing......
 Heron is now installed!
-Make sure you have "/Users/$USER/bin" in your path.
-```
-To add ```/Users/$USER/bin``` to your path, run:
-```bash
-$ export PATH="$PATH:$HOME/bin"
+
+Make sure you have "/usr/local/bin" in your path.
+# etc
 ```
 
-Run the download self installing binary for heron tools using ```--user``` as follows
+To add `/usr/local/bin` to your path, run:
+
 ```bash
-$ chmod +x heron-tools-install-<version>-darwin.sh
-$ ./heron-tools-install-<version>-darwin.sh --user
+$ export PATH=$PATH:/usr/local/bin
+```
+
+Now run the script for Heron tools (setting the `--user` flag):
+
+```bash
+$ chmod +x heron-tools-install-VERSION-PLATFORM.sh
+$ ./heron-tools-install-VERSION-PLATFORM.sh --user
+Heron tools installer
+---------------------
+
 Uncompressing......
 Heron Tools is now installed!
-Make sure you have "/Users/$USER/bin" in your path.
+# etc
 ```
 
-### Step 2 - Launch an example topology
+## Step 2 --- Launch an example topology
 
-Example topologies are installed with ```--user``` flag in ```~/.heron/examples```.  Launch an example [topology](../concepts/topologies) on **local cluster** using submit:
+If you set the `--user` flag when running the installation scripts, some example
+topologies will be installed in your `~/.heron/examples` directory. You can
+launch an example [topology](../concepts/topologies) locally (on your machine)
+using the [Heron CLI tool](../operators/heron-cli):
 
 ```bash
-$ heron submit local ~/.heron/examples/heron-examples.jar com.twitter.heron.examples.ExclamationTopology ExclamationTopology
+$ heron submit local \
+  ~/.heron/examples/heron-examples.jar \ # The path of the topology's jar file
+  com.twitter.heron.examples.ExclamationTopology \ # The topology's Java class
+  ExclamationTopology # The name of the topology
 ```
 
-### Step 3 - Start Heron Tracker
+This will *submit* the topology to your locally running Heron cluster but it
+won't *activate* the topology. That will be explored in step 5 below.
 
-Open a new terminal window and launch [heron-tracker](../operators/heron-tracker):
+## Step 3 --- Start Heron Tracker
+
+The [Heron Tracker](../operators/heron-tracker) is a web service that
+continuously gathers information about your Heron cluster. You can launch the
+tracker by running the `heron-tracker` command (which is already installed):
+
 ```bash
 $ heron-tracker
 ... Running on port: 8888
-... Using config file: /Users/USERNAME/.herontools/conf/localfilestateconf.yaml
+... Using config file: /Users/USERNAME/.herontools/conf/heron_tracker.yaml
 ```
-In local browser, Heron tracker can be reached at http://localhost:8888
 
+You can reach Heron Tracker in your browser at http://localhost:8888.
 
-### Step 4 - Start Heron UI
+## Step 4 --- Start Heron UI
 
-Open a new terminal window and launch UI:
+[Heron UI](../operators/heron-ui) is a user interface that uses Heron Tracker to
+provide detailed visual representations of your Heron topologies. To launch
+Heron UI:
+
 ```bash
 $ heron-ui
 ... Running on port: 8889
 ... Using tracker url: http://localhost:8888
 ```
-In local browser, Heron UI is available at http://localhost:8889
 
-### Step 5 - Explore topology management commands
+You can open Heron UI in your browser at http://localhost:8889.
+
+## Step 5 --- Explore topology management commands
+
+In step 2 you submitted a topology to your local cluster. The `heron` CLI tool
+also enables you to activate, deactivate, and kill topologies and more.
 
 ```bash
 $ heron activate local ExclamationTopology
 $ heron deactivate local ExclamationTopology
 $ heron kill local ExclamationTopology
 ```
-Explore the [Heron CLI](../operators/heron-cli)
-and the [topology lifecycle](../concepts/topologies#topology-lifecycle). To list the available CLI commands:
+
+For more info on these commands, read about [topology
+lifecycles](../concepts/topologies#topology-lifecycle).
+
+To list the available CLI commands, run `heron` by itself:
+
 ```bash
 usage: heron <command> <options> ...
 
@@ -96,7 +133,9 @@ Available commands:
 For detailed documentation, go to http://heronstreaming.io
 ```
 
-To invoke the help for submitting a topology:
+To invoke help output for a command, run `heron help COMMAND`. Here's an
+example:
+
 ```bash
 $ heron help submit
 usage: heron submit [options] cluster/[role]/[environ] topology-file-name topology-class-name [topology-args]
@@ -115,28 +154,31 @@ Optional arguments:
   --verbose (a boolean; default: "false")
 ```
 
-### Step 6 - Explore other example topologies
+## Step 6 --- Explore other example topologies
 
-The source code for the example topologies can be found at
-[heron/examples/src/java/com/twitter/heron/examples](https://github.com/twitter/heron/tree/master/heron/examples/src/java/com/twitter/heron/examples).
+The source code for the example topologies can be found
+[on
+GitHub]({{% githubMaster %}}/heron/examples/src/java/com/twitter/heron/examples).
+The included example topologies:
 
-```AckingTopology.java``` - a topology with acking enabled.
-
-```ComponentJVMOptionsTopology.java``` - a topology that supplies JVM options for each component.
-
-```CustomGroupingTopology.java``` - a topology that implements custom grouping.
-
-```ExclamationTopology.java``` - a spout emits random words to a bolt that adds an explanation mark.
-
-```MultiSpoutExclamationTopology.java``` - a topology with multiple spouts.
-
-```MultiStageAckingTopology.java``` - a three stage topology. A spout emits to bolt that feeds to another bolt.
-
-```TaskHookTopology.java``` - a topology that uses a task hook to subscribe for event notifications.
+* `AckingTopology.java` --- A topology with acking enabled.
+* `ComponentJVMOptionsTopology.java` --- A topology that supplies JVM options
+  for each component.
+* `CustomGroupingTopology.java` --- A topology that implements custom grouping.
+* `ExclamationTopology.java` --- A spout that emits random words to a bolt that
+  then adds an explanation mark.
+* `MultiSpoutExclamationTopology.java` --- a topology with multiple spouts.
+* `MultiStageAckingTopology.java` --- A three-stage topology. A spout emits to a
+  bolt that then feeds to another bolt.
+* `TaskHookTopology.java` --- A topology that uses a task hook to subscribe t
+   event notifications.
 
 ### Next Steps
-[Upgrade Storm topologies](../upgrade-storm-to-heron) with simple POM.xml changes
 
-[Deploy topologies](../operators/deployment) in clustered, scheduler-driven environments (Aurora, Mesos, Local)
-
-[Develop topologies](../concepts/architecture) for the Heron Architecture
+* [Upgrade Storm topologies](../upgrade-storm-to-heron) with simple `pom.xml`
+  changes
+* [Deploy topologies](../operators/deployment) in clustered, scheduler-driven
+  environments (such as on [Aurora](../operators/deployment/schedulers/aurora),
+  on [Mesos](../operators/deployment/schedulers/mesos), and
+  [locally](../operators/deployment/schedulers/local))
+* [Develop topologies](../concepts/architecture) for Heron

@@ -28,10 +28,10 @@ To configure Heron to use slurm scheduler, specify the following in `scheduler.y
 config file:
 
 * `heron.class.scheduler` --- Indicates the class to be loaded for slurm scheduler.
-You should set this to `com.twitter.heron.scheduler.slurm.SlurmScheduler`
+Set this to `com.twitter.heron.scheduler.slurm.SlurmScheduler`
 
 * `heron.class.launcher` --- Specifies the class to be loaded for launching
-topologies. You should set this to `com.twitter.heron.scheduler.slurm.SlurmLauncher`
+topologies. Set this to `com.twitter.heron.scheduler.slurm.SlurmLauncher`
 
 * `heron.scheduler.local.working.directory` --- The shared directory to be used as
 Heron sandbox directory.

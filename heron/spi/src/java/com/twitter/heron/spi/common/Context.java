@@ -239,11 +239,6 @@ public class Context {
     return cfg.getStringValue(ConfigKeys.get("JAVA_HOME"));
   }
 
-  public static final Boolean isZkStateManager(Config cfg) {
-    String stateManagerClass = cfg.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS"));
-    return stateManagerClass.equals(Constants.ZK_STATE_MANAGER_CLASS) ? true : false;
-  }
-
   public static String heronSandboxHome(Config cfg) {
     return cfg.getStringValue(ConfigKeys.get("HERON_SANDBOX_HOME"));
   }

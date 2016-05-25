@@ -1,4 +1,6 @@
-# Deploying Heron
+---
+title: Deploying Heron
+---
 
 Heron is designed to be run in clustered, scheduler-driven environments. It can
 be run in a `multi-tenant` or `dedicated` clusters. Furthermore, Heron supports 

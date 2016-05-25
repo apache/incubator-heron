@@ -7,9 +7,9 @@ The **Heron CLI** us used to to manage every aspect of the
 
 ## Deploying the `heron` CLI Executable
 
-To use `heron` CLI, download the `heron-client-install` for your platfrom from 
-[release binaries](https://github.com/twitter/heron/releases) and  run the 
-installation script. For example, if you have downloaded the version `0.13.5`, 
+To use `heron` CLI, download the `heron-client-install` for your platfrom from
+[release binaries](https://github.com/twitter/heron/releases) and  run the
+installation script. For example, if you have downloaded the version `0.13.5`,
 you invoke the installation script as follows:
 
 ```bash
@@ -22,7 +22,7 @@ Uncompressing......
 
 Heron is now installed!
 
-Make sure you have "/Users/$USER/bin" in your path. 
+Make sure you have "/Users/$USER/bin" in your path.
 
 See http://heronstreaming.io/docs/getting-started.html on how to use Heron!
 
@@ -37,27 +37,27 @@ distribute the resulting `heron` CLI to all machines used to manage topologies.
 All topology management commands (`submit`, `activate`, `deactivate`,
 `restart`, and `kill`) take the following required arguments:
 
-* `cluster` &mdash; The name of the cluster where the command needs to be executed. 
+* `cluster` &mdash; The name of the cluster where the command needs to be executed.
 
 * `role` &mdash; This represents the user or the group depending on deployment.
   If not provided, it defaults to the unix user.
 
-* `env` &mdash; This is a tag for including additional information (e.g) a 
-   topology can be tagged as PROD or DEVEL to indicate whether it is in production 
+* `env` &mdash; This is a tag for including additional information (e.g) a
+   topology can be tagged as PROD or DEVEL to indicate whether it is in production
    or development. If `env` is not provided, it is given a value `default`
 
 `cluster`, `role` and `env` are specified as a single argument in the form of
 `cluster/role/env` (e.g) `local/ads/PROD` to refer the cluster `local` with
-role `ads` and the environment `PROD`. If you just want to specify `cluster`, the 
+role `ads` and the environment `PROD`. If you just want to specify `cluster`, the
 argument will be simply `local`.
 
 ### Optional CLI Flags
 
-CLI supports a common set of optional flags for all topology management commands 
+CLI supports a common set of optional flags for all topology management commands
 (`submit`, `activate`, `deactivate`, `restart`, and `kill`):
 
 * `--config-path` &mdash; Every heron cluster must provide a few configuration
-  files that are kept under a directory named after the cluster. By default, 
+  files that are kept under a directory named after the cluster. By default,
   when a cluster is provided in the command, it searches the `conf` directory
   for a directory with the cluster name. This flag enables you to specify a
   non standard directory to search for the cluster directory.
@@ -66,7 +66,7 @@ CLI supports a common set of optional flags for all topology management commands
   that be overridden. These parameters are specified in the form of `key=value`.
 
 * `--verbose` &mdash; When this flag is provided, `heron` CLI prints logs
-  that provide detailed information about the execution. 
+  that provide detailed information about the execution.
 
 Below is an example topology management command that uses one of these flags:
 
@@ -76,9 +76,9 @@ $ heron activate --config-path ~/heronclusters devcluster/ads/PROD AckingTopolog
 
 ## Submitting a Topology
 
-To run a topology in a Heron cluster, submit it using the `submit` command. 
-Topologies can be submitted in either an activated (default) or deactivated state 
-(more on [activation](#activating-a-topology) and [deactivation](#deactivating-a-topology) 
+To run a topology in a Heron cluster, submit it using the `submit` command.
+Topologies can be submitted in either an activated (default) or deactivated state
+(more on [activation](#activating-a-topology) and [deactivation](#deactivating-a-topology)
 below).
 
 Here's the basic syntax:
@@ -102,7 +102,7 @@ Optional arguments:
 
 Arguments of the `submit` command:
 
-* **cluster/[role]/[env]** &mdash; The cluster where topology needs to be submitted, 
+* **cluster/[role]/[env]** &mdash; The cluster where topology needs to be submitted,
   optionally taking the role and environment. For example,`local/ads/PROD` or just `local`
 
 * **topology-file-name** &mdash; The path of the file in which you've packaged the
@@ -119,8 +119,8 @@ Arguments of the `submit` command:
 
 ### Example Topology Submission Command
 
-Below is an example command that submits a topology to a cluster named `devcluster` 
-with a main class named `com.example.topologies.MyTopology` packaged in `my-topology.jar`, 
+Below is an example command that submits a topology to a cluster named `devcluster`
+with a main class named `com.example.topologies.MyTopology` packaged in `my-topology.jar`,
 along with the optional `--config-path` where the config for `devcluster` can be found:
 
 ```bash
@@ -245,7 +245,7 @@ $ heron kill <killer-overrides> <topology>
 Arguments of the `kill` command:
 
 * **cluster/[role]/[env]** &mdash; The cluster where topology needs to be submitted,
-  optionally taking the role and environment.  For example, `local/ads/PROD` or just 
+  optionally taking the role and environment.  For example, `local/ads/PROD` or just
   `local`
 
 * **topology-name** &mdash; The name of the topology that you'd like to kill.
