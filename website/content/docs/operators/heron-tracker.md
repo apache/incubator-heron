@@ -42,22 +42,19 @@ This is a list of locations where topology writes its states. An example of
 # Each source has these attributes:
 # 1. type - type of state manager (zookeeper or file, etc.)
 # 2. name - name to be used for this source
-# 3. host - currently only used to connect to zk
-# 4. port - port to connect to
-# 5. rootpath - where all the states are stored
+# 3. hostport - only used to connect to zk, must be of the form 'host:port'
+# 4. rootpath - where all the states are stored
+# 5. tunnelhost - if ssh tunneling needs to be established to connect to it
 statemgrs:
   -
     type: "file"
     name: "local"
-    host: "localhost"
-    port: 0
     rootpath: "~/.herondata/repository/state/local"
     tunnelhost: "localhost"
   -
     type: "zookeeper"
     name: "localzk"
-    host: "localhost"
-    port: 2181
+    hostport: "localhost:2181"
     rootpath: "/heron/cluster"
     tunnelhost: "localhost"
 ```
