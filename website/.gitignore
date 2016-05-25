@@ -1,1 +1,2 @@
 linkchecker-errors.csv
+assets/solarized-pygment/{.git,build,dist,pygments_solarized.egg-info}

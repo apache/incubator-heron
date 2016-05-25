@@ -3,6 +3,7 @@ setup:
 	@npm install
 	@pip uninstall requests
 	@pip install linkchecker pygments requests==2.9.0
+	@(cd assets/solarized-pygment && ./setup.py install)
 
 serve:
 	@hugo server --watch

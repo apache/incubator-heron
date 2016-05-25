@@ -10,11 +10,9 @@ newcontenteditor: atom
 taxonomies:
   tag: tags
 
-# Pygments syntax highlighting
-pygmentsstyle: manni
 pygmentsuseclasses: false
-pygmentscodefencesguesssyntax: false
-PygmentsCodeFences: true
+pygmentsstyle: solarized_dark
+pygmentscodefences: true
 
 # Site-level parameters available through .Site.Params.{key}
 params:
