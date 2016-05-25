@@ -10,8 +10,8 @@ in the following figure.
 ![Heron Deployment](/img/heron-deployment.png)
 <br/>
 
-A Heron deployment requires several components working together. To run Heron 
-topologies in a cluster, you need the following 
+A Heron deployment requires several components working together. The following must
+be deployed to run Heron topologies in a cluster:
 
 * **Scheduler** &mdash; Heron requires a scheduler to run its topologies. It can 
 be deployed on an existing cluster running alongside other big data frameworks. 

@@ -23,7 +23,7 @@ on a single machine.
 
 Using the local scheduler is similar to deploying Heron on other schedulers.
 The [Heron] (../../../heron-cli) cli is used to deploy and manage topologies 
-as would be done using a distributed scheduler. But the main difference is in
+as would be done using a distributed scheduler. The main difference is in
 the configuration.
 
 ## Local Scheduler Configuration

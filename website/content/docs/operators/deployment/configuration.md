@@ -32,7 +32,7 @@ to Round Robin, if not specified.
 
 # Assembling the Configuration
 
-All these configuration files are assembled together to form the cluster configuration. For example,
+All configuration files are assembled together to form the cluster configuration. For example,
 a cluster named `devcluster` that uses the Aurora for scheduler, ZooKeeper for state manager and
 HDFS for uploader will have the following set of configurations.
 
