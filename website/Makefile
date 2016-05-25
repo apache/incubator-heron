@@ -1,9 +1,5 @@
 setup:
-	@brew list hugo || brew install hugo
-	@npm install
-	@pip uninstall requests
-	@pip install linkchecker pygments requests==2.9.0
-	@(cd assets/solarized-pygment && ./setup.py install)
+	@scripts/setup.sh
 
 serve:
 	@hugo server --watch
