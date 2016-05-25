@@ -1,3 +1,4 @@
+''' common module '''
 __all__ = ['common']
 
 from heron.ui.src.python.handlers.common.consts import *
