@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en-us"><head><link rel="shortcut icon" type="image/png" sizes="16x16" href="http://twitter.github.io/heron/img/favicon-16x16.png"><link rel="shortcut icon" type="image/png" sizes="32x32" href="http://twitter.github.io/heron/img/favicon-32x32.png"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="Hugo 0.14-DEV"><title>Heron Documentation - Heron UI Usage Guide</title><link rel="stylesheet" href="http://twitter.github.io/heron/css/style.min.css"><link rel="stylesheet" href="http://twitter.github.io/heron/css/font-awesome.min.css"><link rel="stylesheet" href="http://twitter.github.io/heron/css/pygments.css"><script defer src="http://code.jquery.com/jquery-2.2.1.min.js"></script><script defer src="http://twitter.github.io/heron/js/app.min.js"></script></head><body><nav class="hn-top-navbar navbar navbar-inverse navbar-fixed-top" role="navigation"><div class="hn-navbar-container container-fluid"><div class="navbar-header"><button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#hn-navbar" aria-controls="hn-navbar" aria-expanded="false"><span class="sr-only"><Toggle>navigation</Toggle></span><i class="hn-toggle-button fa fa-bars"></i></button><a class="hn-navbar-logo navbar-brand" href="http://twitter.github.io/heron/"><img class="pull-left" src="http://twitter.github.io/heron/img/HeronTextLogo-small.png"></a></div><div id="hn-navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav navbar-right"><li><a href="http://twitter.github.io/heron/docs/getting-started">Docs</a></li><li><a href="http://twitter.github.io/heron/docs/resources">Resources</a></li><li><a href="http://twitter.github.io/heron/docs/contributors/community">Community</a></li><li><a href="https://github.com/twitter/heron">GitHub</a></li><li><a class="nav-icon" href="https://groups.google.com/forum/#!forum/heron-users"><i class="fa fa-comments"></i></a></li><li><a class="nav-icon" href="https://twitter.com/heronstreaming"><i class="fa fa-twitter"></i></a></li></ul></div></div></nav><div class="hn-main"><div class="container"><div class="row"><aside class="hn-sidebar hidden-xs col-sm-3 col-md-3 col-lg-2 collapse"><div><nav class="hn-sidebar-nav"><h4>Getting Started</h4><ul><li><a href="http://twitter.github.io/heron/docs/getting-started">Local (Single Node)</a></li><li><a href="http://twitter.github.io/heron/docs/upgrade-storm-to-heron">Upgrade Storm Topologies</a></li></ul><ul></ul><h4>Heron Concepts</h4><ul><li><a href="http://twitter.github.io/heron/docs/concepts/architecture">Heron Architecture</a></li><li><a href="http://twitter.github.io/heron/docs/concepts/topologies">Heron Topology</a></li></ul><ul></ul><h4>Deployment</h4><ul><li><a href="http://twitter.github.io/heron/docs/operators/deployment">Overview</a></li><li><a href="http://twitter.github.io/heron/docs/operators/deployment/configuration">Configuration</a></li></ul><ul></ul><h4>State Managers</h4><ul><li><a href="http://twitter.github.io/heron/docs/operators/deployment/statemanagers/zookeeper">Zookeeper</a></li><li><a href="http://twitter.github.io/heron/docs/operators/deployment/statemanagers/localfs">Local FS</a></li></ul><ul></ul><h4>Uploaders</h4><ul><li><a href="http://twitter.github.io/heron/docs/operators/deployment/uploaders/localfs">Local FS</a></li><li><a href="http://twitter.github.io/heron/docs/operators/deployment/uploaders/hdfs">HDFS</a></li><li><a href="http://twitter.github.io/heron/docs/operators/deployment/uploaders/s3">S3</a></li></ul><ul></ul><h4>Schedulers</h4><ul><li><a href="http://twitter.github.io/heron/docs/operators/deployment/schedulers/aurora">Aurora Cluster</a></li><li><a href="http://twitter.github.io/heron/docs/operators/deployment/schedulers/local">Local Cluster</a></li><li><a href="http://twitter.github.io/heron/docs/operators/deployment/schedulers/mesos">Mesos Cluster</a></li><li><a href="http://twitter.github.io/heron/docs/operators/deployment/schedulers/slurm">Slurm Cluster</a></li></ul><ul></ul><h4>System Configuration</h4><ul><li><a href="http://twitter.github.io/heron/docs/operators/configuration/config-intro">Overview</a></li><li><a href="http://twitter.github.io/heron/docs/operators/configuration/instance">Heron Instance</a></li><li><a href="http://twitter.github.io/heron/docs/operators/configuration/metrics-manager">Metrics Manager</a></li><li><a href="http://twitter.github.io/heron/docs/operators/configuration/stmgr">Stream Manager</a></li><li><a href="http://twitter.github.io/heron/docs/operators/configuration/system">System-Level</a></li><li><a href="http://twitter.github.io/heron/docs/operators/configuration/tmaster">Topology Master</a></li></ul><ul></ul><h4>Observability</h4><ul><li><a href="http://twitter.github.io/heron/docs/operators/observability/graphite">Graphite</a></li></ul><ul></ul><h4>User Manuals</h4><ul><li><a href="http://twitter.github.io/heron/docs/operators/heron-cli">Heron Client</a></li><li><a href="http://twitter.github.io/heron/docs/operators/heron-tracker-api">Heron Tracker REST API</a></li><li><a href="http://twitter.github.io/heron/docs/operators/heron-tracker">Heron Tracker Runbook</a></li><li><a href="http://twitter.github.io/heron/docs/operators/heron-ui">Heron UI Runbook</a></li></ul><ul></ul><h4>Topology Writers</h4><ul><li><a href="http://twitter.github.io/heron/docs/developers/topologies">Writing Topologies</a></li><li><a href="http://twitter.github.io/heron/docs/developers/data-model">Heron Data Model</a></li><li><a href="http://twitter.github.io/heron/docs/developers/serialization">Tuple Serialization</a></li><li><a href="http://twitter.github.io/heron/docs/developers/ui-guide">Heron UI Guide</a></li><li><a href="http://twitter.github.io/heron/docs/developers/tuning">Tuning Guide</a></li><li><a href="http://twitter.github.io/heron/docs/developers/simulator-mode">Simulator Mode</a></li><li><a href="http://twitter.github.io/heron/docs/developers/troubleshooting">Troubleshooting Guide</a></li><li><a href="http://twitter.github.io/heron/api">Javadoc</a></li></ul><ul></ul><h4>Heron Developers</h4><ul><li><a href="http://twitter.github.io/heron/docs/developers/compiling/compiling">Compiling</a></li><li><a href="http://twitter.github.io/heron/docs/developers/compiling/linux">Compiling on Linux</a></li><li><a href="http://twitter.github.io/heron/docs/developers/compiling/mac">Compiling on Mac OS X</a></li><li><a href="http://twitter.github.io/heron/docs/developers/compiling/docker">Compiling With Docker</a></li><li><a href="http://twitter.github.io/heron/docs/contributors/testing">Running Tests</a></li><li><a href="http://twitter.github.io/heron/docs/contributors/codebase">Code Organization</a></li></ul><ul></ul><h4>Extending Heron</h4><ul><li><a href="http://twitter.github.io/heron/docs/contributors/custom-scheduler">Custom Scheduler</a></li><li><a href="http://twitter.github.io/heron/docs/contributors/custom-metrics-sink">Custom Metrics Sink</a></li></ul><ul></ul><h4>Heron Resources</h4><ul><li><a href="http://twitter.github.io/heron/docs/resources">Heron Resources</a></li></ul><ul></ul><h4>Contributors</h4><ul><li><a href="http://twitter.github.io/heron/docs/contributors/community">Community</a></li><li><a href="http://twitter.github.io/heron/docs/contributors/governance">Governance</a></li></ul><ul></ul></nav></div></aside><section class="hn-docs-main col-sm-9 col-md-9 col-lg-10 col-sm-offset-3 col-md-offset-3 col-lg-offset-2"><header class="hn-docs-header page-header"><h1>Heron UI Usage Guide</h1><div class="hn-docs-description"></div></header><article class="hn-docs-content">
+<!DOCTYPE html><html lang="en-us"><head><link rel="shortcut icon" type="image/png" sizes="16x16" href="/heron/img/favicon-16x16.png"><link rel="shortcut icon" type="image/png" sizes="32x32" href="/heron/img/favicon-32x32.png"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="Hugo 0.14-DEV"><title>Heron Documentation - Heron UI Usage Guide</title><link rel="stylesheet" href="/heron/css/style.min.css"><link rel="stylesheet" href="/heron/css/font-awesome.min.css"><link rel="stylesheet" href="/heron/css/pygments.css"><script defer src="http://code.jquery.com/jquery-2.2.1.min.js"></script><script defer src="/heron/js/app.min.js"></script></head><body><nav class="hn-top-navbar navbar navbar-inverse navbar-fixed-top" role="navigation"><div class="hn-navbar-container container-fluid"><div class="navbar-header"><button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#hn-navbar" aria-controls="hn-navbar" aria-expanded="false"><span class="sr-only"><Toggle>navigation</Toggle></span><i class="hn-toggle-button fa fa-bars"></i></button><a class="hn-navbar-logo navbar-brand" href="/heron/"><img class="pull-left" src="/heron/img/HeronTextLogo-small.png"></a></div><div id="hn-navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav navbar-right"><li><a href="/heron/docs/getting-started">Docs</a></li><li><a href="/heron/docs/resources">Resources</a></li><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="https://github.com/twitter/heron">GitHub</a></li><li><a class="nav-icon" href="https://groups.google.com/forum/#!forum/heron-users"><i class="fa fa-comments"></i></a></li><li><a class="nav-icon" href="https://twitter.com/heronstreaming"><i class="fa fa-twitter"></i></a></li></ul></div></div></nav><div class="hn-main"><div class="container"><div class="row"><aside class="hn-sidebar hidden-xs col-sm-3 col-md-3 col-lg-2 collapse"><div><nav class="hn-sidebar-nav"><h4>Getting Started</h4><ul><li><a href="/heron/docs/getting-started">Local (Single Node)</a></li><li><a href="/heron/docs/upgrade-storm-to-heron">Upgrade Storm Topologies</a></li></ul><ul></ul><h4>Heron Concepts</h4><ul><li><a href="/heron/docs/concepts/architecture">Heron Architecture</a></li><li><a href="/heron/docs/concepts/topologies">Heron Topology</a></li></ul><ul></ul><h4>Deployment</h4><ul><li><a href="/heron/docs/operators/deployment">Overview</a></li><li><a href="/heron/docs/operators/deployment/configuration">Configuration</a></li></ul><ul></ul><h4>State Managers</h4><ul><li><a href="/heron/docs/operators/deployment/statemanagers/zookeeper">Zookeeper</a></li><li><a href="/heron/docs/operators/deployment/statemanagers/localfs">Local FS</a></li></ul><ul></ul><h4>Uploaders</h4><ul><li><a href="/heron/docs/operators/deployment/uploaders/localfs">Local FS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/hdfs">HDFS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/s3">S3</a></li></ul><ul></ul><h4>Schedulers</h4><ul><li><a href="/heron/docs/operators/deployment/schedulers/aurora">Aurora Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/local">Local Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/mesos">Mesos Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/slurm">Slurm Cluster</a></li></ul><ul></ul><h4>System Configuration</h4><ul><li><a href="/heron/docs/operators/configuration/config-intro">Overview</a></li><li><a href="/heron/docs/operators/configuration/instance">Heron Instance</a></li><li><a href="/heron/docs/operators/configuration/metrics-manager">Metrics Manager</a></li><li><a href="/heron/docs/operators/configuration/stmgr">Stream Manager</a></li><li><a href="/heron/docs/operators/configuration/system">System-Level</a></li><li><a href="/heron/docs/operators/configuration/tmaster">Topology Master</a></li></ul><ul></ul><h4>Observability</h4><ul><li><a href="/heron/docs/operators/observability/graphite">Graphite</a></li></ul><ul></ul><h4>User Manuals</h4><ul><li><a href="/heron/docs/operators/heron-cli">Heron Client</a></li><li><a href="/heron/docs/operators/heron-tracker-api">Heron Tracker REST API</a></li><li><a href="/heron/docs/operators/heron-tracker">Heron Tracker Runbook</a></li><li><a href="/heron/docs/operators/heron-ui">Heron UI Runbook</a></li></ul><ul></ul><h4>Topology Writers</h4><ul><li><a href="/heron/docs/developers/topologies">Writing Topologies</a></li><li><a href="/heron/docs/developers/data-model">Heron Data Model</a></li><li><a href="/heron/docs/developers/serialization">Tuple Serialization</a></li><li><a href="/heron/docs/developers/ui-guide">Heron UI Guide</a></li><li><a href="/heron/docs/developers/tuning">Tuning Guide</a></li><li><a href="/heron/docs/developers/simulator-mode">Simulator Mode</a></li><li><a href="/heron/docs/developers/troubleshooting">Troubleshooting Guide</a></li><li><a href="/heron/api">Javadoc</a></li></ul><ul></ul><h4>Heron Developers</h4><ul><li><a href="/heron/docs/developers/compiling/compiling">Compiling</a></li><li><a href="/heron/docs/developers/compiling/linux">Compiling on Linux</a></li><li><a href="/heron/docs/developers/compiling/mac">Compiling on Mac OS X</a></li><li><a href="/heron/docs/developers/compiling/docker">Compiling With Docker</a></li><li><a href="/heron/docs/contributors/testing">Running Tests</a></li><li><a href="/heron/docs/contributors/codebase">Code Organization</a></li></ul><ul></ul><h4>Extending Heron</h4><ul><li><a href="/heron/docs/contributors/custom-scheduler">Custom Scheduler</a></li><li><a href="/heron/docs/contributors/custom-metrics-sink">Custom Metrics Sink</a></li></ul><ul></ul><h4>Heron Resources</h4><ul><li><a href="/heron/docs/resources">Heron Resources</a></li></ul><ul></ul><h4>Contributors</h4><ul><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="/heron/docs/contributors/governance">Governance</a></li></ul><ul></ul></nav></div></aside><section class="hn-docs-main col-sm-9 col-md-9 col-lg-10 col-sm-offset-3 col-md-offset-3 col-lg-offset-2"><header class="hn-docs-header page-header"><h1>Heron UI Usage Guide</h1><div class="hn-docs-description"></div></header><article class="hn-docs-content">
 
 <h3 id="overview:8d6aad463f3c66cbc157c72b471ae8f9">Overview</h3>
 
@@ -35,7 +35,7 @@ roles, versions, or submitters</li>
 <li>Click on the topology name to find more info about the topology</li>
 </ol>
 
-<p><img src="http://twitter.github.io/heron/img/ui-guide/all-topologies.png" alt="All topologies" />
+<p><img src="/heron/img/ui-guide/all-topologies.png" alt="All topologies" />
 </p>
 
 <h4 id="topology-page:8d6aad463f3c66cbc157c72b471ae8f9">Topology Page</h4>
@@ -59,10 +59,10 @@ roles, versions, or submitters</li>
 one. &lt;!&ndash; (TODO: Link to this configuration) &ndash;&gt;</li>
 </ol>
 
-<p><img src="http://twitter.github.io/heron/img/ui-guide/topology1.png" alt="Topology1" />
+<p><img src="/heron/img/ui-guide/topology1.png" alt="Topology1" />
 </p>
 
-<p><img src="http://twitter.github.io/heron/img/ui-guide/topology2.png" alt="Topology2" />
+<p><img src="/heron/img/ui-guide/topology2.png" alt="Topology2" />
 </p>
 
 <p>Each node in logical plan can be clicked for more specific info about that
@@ -75,7 +75,7 @@ component.</p>
 <li><a href="#instance-actions-pages">Instance level operations</a>, which are described in more details below</li>
 </ol>
 
-<p><img src="http://twitter.github.io/heron/img/ui-guide/topology-component.png" alt="Topology Component" />
+<p><img src="/heron/img/ui-guide/topology-component.png" alt="Topology Component" />
 </p>
 
 <p>Clicking on an instance will highlight that instance in the list.</p>
@@ -87,7 +87,7 @@ component.</p>
 <li>The selected instance is highlighted</li>
 </ol>
 
-<p><img src="http://twitter.github.io/heron/img/ui-guide/topology-instance.png" alt="Topology Instance" />
+<p><img src="/heron/img/ui-guide/topology-instance.png" alt="Topology Instance" />
 </p>
 
 <h4 id="aggregate-topology-metrics:8d6aad463f3c66cbc157c72b471ae8f9">Aggregate Topology Metrics</h4>
@@ -96,10 +96,10 @@ component.</p>
 health with respect to the metric, green being healthy, red indicating a problem.
 This is a quick way to find out which instances are having issues.</p>
 
-<p><img src="http://twitter.github.io/heron/img/ui-guide/topology-capacity.png" alt="Topology Capacity" />
+<p><img src="/heron/img/ui-guide/topology-capacity.png" alt="Topology Capacity" />
 </p>
 
-<p><img src="http://twitter.github.io/heron/img/ui-guide/topology-failures.png" alt="Topology Failures" />
+<p><img src="/heron/img/ui-guide/topology-failures.png" alt="Topology Failures" />
 </p>
 
 <h4 id="config-page:8d6aad463f3c66cbc157c72b471ae8f9">Config Page</h4>
@@ -108,7 +108,7 @@ This is a quick way to find out which instances are having issues.</p>
 Configurations) &ndash;&gt; that your topology is configured with. Note that spout and
 bolt level configurations are not part of topology config.</p>
 
-<p><img src="http://twitter.github.io/heron/img/ui-guide/config.png" alt="Config" />
+<p><img src="/heron/img/ui-guide/config.png" alt="Config" />
 </p>
 
 <h4 id="a-name-instance-actions-pages-instance-action-pages-a:8d6aad463f3c66cbc157c72b471ae8f9"><a name="instance-actions-pages">Instance Action Pages</a></h4>
@@ -116,7 +116,7 @@ bolt level configurations are not part of topology config.</p>
 <p>These actions are available for all the instances. They are described in the
 next sections.</p>
 
-<p><img src="http://twitter.github.io/heron/img/ui-guide/topology-instance-links.png" alt="Instance Links" />
+<p><img src="/heron/img/ui-guide/topology-instance-links.png" alt="Instance Links" />
 </p>
 
 <h4 id="logs-page:8d6aad463f3c66cbc157c72b471ae8f9">Logs Page</h4>
@@ -124,7 +124,7 @@ next sections.</p>
 <p>These are the logs generated by the selected instance. The whole logs file can
 also be downloaded.</p>
 
-<p><img src="http://twitter.github.io/heron/img/ui-guide/logs.png" alt="Logs" />
+<p><img src="/heron/img/ui-guide/logs.png" alt="Logs" />
 </p>
 
 <h4 id="job-page:8d6aad463f3c66cbc157c72b471ae8f9">Job Page</h4>
@@ -140,10 +140,10 @@ amongst other things.</p>
 <code>tmaster</code> logs.</li>
 </ol>
 
-<p><img src="http://twitter.github.io/heron/img/ui-guide/jobpage1.png" alt="Jobpage" />
+<p><img src="/heron/img/ui-guide/jobpage1.png" alt="Jobpage" />
 </p>
 
-<p><img src="http://twitter.github.io/heron/img/ui-guide/jobpage2-logfiles.png" alt="Jobpage logfiles" />
+<p><img src="/heron/img/ui-guide/jobpage2-logfiles.png" alt="Jobpage logfiles" />
 </p>
 
 <h4 id="exceptions-page:8d6aad463f3c66cbc157c72b471ae8f9">Exceptions Page</h4>
@@ -152,7 +152,7 @@ amongst other things.</p>
 deduplicated, and for each exception, the page shows the number of times this
 exception occurred, the latest and the oldest occurance times.</p>
 
-<p><img src="http://twitter.github.io/heron/img/ui-guide/exceptions.png" alt="Exceptions" />
+<p><img src="/heron/img/ui-guide/exceptions.png" alt="Exceptions" />
 </p>
 
 <h4 id="pid-page:8d6aad463f3c66cbc157c72b471ae8f9">PID Page</h4>
@@ -161,7 +161,7 @@ exception occurred, the latest and the oldest occurance times.</p>
 runs in its own JVM process, this will be unique for a host. The PID is also
 used for other tasks, such as getting jstack or heap dump for an instance.</p>
 
-<p><img src="http://twitter.github.io/heron/img/ui-guide/pid.png" alt="PID" />
+<p><img src="/heron/img/ui-guide/pid.png" alt="PID" />
 </p>
 
 <h4 id="jstack-page:8d6aad463f3c66cbc157c72b471ae8f9">Jstack Page</h4>
@@ -170,7 +170,7 @@ used for other tasks, such as getting jstack or heap dump for an instance.</p>
 the instance. The output of the command is printed on the page in the browser
 itself.</p>
 
-<p><img src="http://twitter.github.io/heron/img/ui-guide/jstack.png" alt="Jstack" />
+<p><img src="/heron/img/ui-guide/jstack.png" alt="Jstack" />
 </p>
 
 <h4 id="memory-histogram-page:8d6aad463f3c66cbc157c72b471ae8f9">Memory Histogram Page</h4>
@@ -179,7 +179,7 @@ itself.</p>
 for the instance. The output of the command is printed on the page in the
 browser itself.</p>
 
-<p><img src="http://twitter.github.io/heron/img/ui-guide/histo.png" alt="Histo" />
+<p><img src="/heron/img/ui-guide/histo.png" alt="Histo" />
 </p>
 
 <h4 id="memory-dump-page:8d6aad463f3c66cbc157c72b471ae8f9">Memory Dump page</h4>
@@ -188,6 +188,6 @@ browser itself.</p>
 agaist the PID for the instance. Follow the instructions on the page to download
 the heap dump file. This link does not download the file.</p>
 
-<p><img src="http://twitter.github.io/heron/img/ui-guide/dump.png" alt="Memory Dump" />
+<p><img src="/heron/img/ui-guide/dump.png" alt="Memory Dump" />
 </p>
 </article></section></div></div></div></body></html>
