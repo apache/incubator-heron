@@ -2,18 +2,18 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Docs on Heron</title>
-    <link>http://localhost:1313/heron/docs/</link>
+    <link>http://twitter.github.io/heron/docs/</link>
     <description>Recent content in Docs on Heron</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <atom:link href="http://localhost:1313/heron/docs/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://twitter.github.io/heron/docs/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title></title>
-      <link>http://localhost:1313/heron/docs/operators/deployment/configuration/</link>
+      <link>http://twitter.github.io/heron/docs/operators/deployment/configuration/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/heron/docs/operators/deployment/configuration/</guid>
+      <guid>http://twitter.github.io/heron/docs/operators/deployment/configuration/</guid>
       <description>
 
 &lt;h1 id=&#34;configuring-a-cluster:a66b35d20295cb764719ac8bd35837ec&#34;&gt;Configuring a Cluster&lt;/h1&gt;
@@ -114,10 +114,10 @@ heron.config.env.required: false
     
     <item>
       <title>Aurora Cluster</title>
-      <link>http://localhost:1313/heron/docs/operators/deployment/schedulers/aurora/</link>
+      <link>http://twitter.github.io/heron/docs/operators/deployment/schedulers/aurora/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/heron/docs/operators/deployment/schedulers/aurora/</guid>
+      <guid>http://twitter.github.io/heron/docs/operators/deployment/schedulers/aurora/</guid>
       <description>
 
 &lt;p&gt;Heron supports deployment on &lt;a href=&#34;http://aurora.apache.org/&#34;&gt;Apache Aurora&lt;/a&gt; out of
@@ -205,10 +205,10 @@ can be enabled by specifying the proper configuration when managing topologies.&
     
     <item>
       <title>Building on Mac OS X</title>
-      <link>http://localhost:1313/heron/docs/developers/compiling/mac/</link>
+      <link>http://twitter.github.io/heron/docs/developers/compiling/mac/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/heron/docs/developers/compiling/mac/</guid>
+      <guid>http://twitter.github.io/heron/docs/developers/compiling/mac/</guid>
       <description>
 
 &lt;p&gt;This is a step by step guide for building Heron on Mac OS (10.10 and 10.11).&lt;/p&gt;
@@ -272,10 +272,10 @@ bazel build --config=darwin scripts/packages:tarpkgs
     
     <item>
       <title>Community</title>
-      <link>http://localhost:1313/heron/docs/contributors/community/</link>
+      <link>http://twitter.github.io/heron/docs/contributors/community/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/heron/docs/contributors/community/</guid>
+      <guid>http://twitter.github.io/heron/docs/contributors/community/</guid>
       <description>
 
 &lt;h3 id=&#34;contributing-to-heron:f3b3effc19b97b19aaf2ce392427d255&#34;&gt;Contributing to Heron&lt;/h3&gt;
@@ -332,10 +332,10 @@ TODO: links to sourcecode and dev and user groups
     
     <item>
       <title>Compiling Heron</title>
-      <link>http://localhost:1313/heron/docs/developers/compiling/compiling/</link>
+      <link>http://twitter.github.io/heron/docs/developers/compiling/compiling/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/heron/docs/developers/compiling/compiling/</guid>
+      <guid>http://twitter.github.io/heron/docs/developers/compiling/compiling/</guid>
       <description>
 
 &lt;p&gt;Heron is currently available for &lt;a href=&#34;../../../developers/compiling/mac&#34;&gt;Mac OS X 10.10&lt;/a&gt;,
@@ -454,10 +454,10 @@ the following command will build the &lt;a href=&#34;../../../operators/heron-tr
     
     <item>
       <title>Compiling With Docker</title>
-      <link>http://localhost:1313/heron/docs/developers/compiling/docker/</link>
+      <link>http://twitter.github.io/heron/docs/developers/compiling/docker/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/heron/docs/developers/compiling/docker/</guid>
+      <guid>http://twitter.github.io/heron/docs/developers/compiling/docker/</guid>
       <description>
 
 &lt;p&gt;For developing Heron, you will need to compile it for the environment that you
@@ -484,8 +484,10 @@ create the VM), click on the VM, and then click on &lt;strong&gt;Settings&lt;/st
 
 &lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: You will need to stop the VM before modifying these settings.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/heron/img/virtual-box-processors.png&#34; alt=&#34;VirtualBox Processors&#34; /&gt;
-&lt;img src=&#34;http://localhost:1313/heron/img/virtual-box-memory.png&#34; alt=&#34;VirtualBox Memory&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://twitter.github.io/heron/img/virtual-box-processors.png&#34; alt=&#34;VirtualBox Processors&#34; /&gt;
+
+&lt;img src=&#34;http://twitter.github.io/heron/img/virtual-box-memory.png&#34; alt=&#34;VirtualBox Memory&#34; /&gt;
+&lt;/p&gt;
 
 &lt;h2 id=&#34;building-heron:69e60651f42783a7df723575c4088b5b&#34;&gt;Building Heron&lt;/h2&gt;
 
@@ -643,10 +645,10 @@ ADD compile.sh /compile.sh
     
     <item>
       <title>Deploying Heron</title>
-      <link>http://localhost:1313/heron/docs/operators/deployment/</link>
+      <link>http://twitter.github.io/heron/docs/operators/deployment/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/heron/docs/operators/deployment/</guid>
+      <guid>http://twitter.github.io/heron/docs/operators/deployment/</guid>
       <description>&lt;p&gt;Heron is designed to be run in clustered, scheduler-driven environments. It can
 be run in a &lt;code&gt;multi-tenant&lt;/code&gt; or &lt;code&gt;dedicated&lt;/code&gt; clusters. Furthermore, Heron supports
 &lt;code&gt;multiple clusters&lt;/code&gt; and a user can submit topologies to any of these clusters. Each
@@ -654,7 +656,8 @@ of the cluster can use &lt;code&gt;different scheduler&lt;/code&gt;. A typical H
 in the following figure.&lt;/p&gt;
 
 &lt;p&gt;&lt;br /&gt;
-&lt;img src=&#34;http://localhost:1313/heron/img/heron-deployment.png&#34; alt=&#34;Heron Deployment&#34; /&gt;
+&lt;img src=&#34;http://twitter.github.io/heron/img/heron-deployment.png&#34; alt=&#34;Heron Deployment&#34; /&gt;
+
 &lt;br/&gt;&lt;/p&gt;
 
 &lt;p&gt;A Heron deployment requires several components working together. The following must
@@ -715,10 +718,10 @@ histograms, show metrics, etc.&lt;/p&gt;&lt;/li&gt;
     
     <item>
       <title>Feature Roadmap</title>
-      <link>http://localhost:1313/heron/docs/contributors/roadmap/</link>
+      <link>http://twitter.github.io/heron/docs/contributors/roadmap/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/heron/docs/contributors/roadmap/</guid>
+      <guid>http://twitter.github.io/heron/docs/contributors/roadmap/</guid>
       <description>
 
 &lt;p&gt;This document describes the Heron core contributors’ plans for introducing features that will be incorporated into version 1.0. Note that this roadmap only includes features that the Heron core contributors team itself intends to support. We anticipate that a number of other features will be added by community contributors.&lt;/p&gt;
@@ -753,10 +756,10 @@ TODO - add feature Roadmap
     
     <item>
       <title>Governance</title>
-      <link>http://localhost:1313/heron/docs/contributors/governance/</link>
+      <link>http://twitter.github.io/heron/docs/contributors/governance/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/heron/docs/contributors/governance/</guid>
+      <guid>http://twitter.github.io/heron/docs/contributors/governance/</guid>
       <description>
 
 &lt;p&gt;The Heron project was initially developed at Twitter and is now led by a group of self-managing core contributors with additional contributions by the community. Core contributors expect that candidate core contributors will successfully submit a number of patches or new functionality, demonstrate an understanding of project codebase, and express a willingness to be active group members before they become core contributors.&lt;/p&gt;
@@ -844,10 +847,10 @@ TODO - add feature Roadmap
     
     <item>
       <title>Heron Architecture</title>
-      <link>http://localhost:1313/heron/docs/concepts/architecture/</link>
+      <link>http://twitter.github.io/heron/docs/concepts/architecture/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/heron/docs/concepts/architecture/</guid>
+      <guid>http://twitter.github.io/heron/docs/concepts/architecture/</guid>
       <description>
 
 &lt;p&gt;Heron is the direct successor of &lt;a href=&#34;http://storm.apache.org&#34;&gt;Apache Storm&lt;/a&gt;. From
@@ -862,7 +865,7 @@ goals&lt;/a&gt; behind Heron, and explain major
 &lt;h2 id=&#34;codebase:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Codebase&lt;/h2&gt;
 
 &lt;p&gt;A detailed guide to the Heron codebase can be found
-&lt;a href=&#34;http://localhost:1313/heron/docs/contributors/codebase&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;a href=&#34;http://twitter.github.io/heron/docs/contributors/codebase&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
 
 &lt;h2 id=&#34;topologies:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Topologies&lt;/h2&gt;
 
@@ -936,7 +939,8 @@ discoverable by any process in the topology. The TM also constructs the &lt;a hr
 plan&lt;/a&gt; for a topology which it relays to different
 components.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/heron/img/tmaster.png&#34; alt=&#34;Topology Master&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://twitter.github.io/heron/img/tmaster.png&#34; alt=&#34;Topology Master&#34; /&gt;
+&lt;/p&gt;
 
 &lt;h4 id=&#34;topology-master-configuration:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Topology Master Configuration&lt;/h4&gt;
 
@@ -962,13 +966,15 @@ components. Each &lt;a href=&#34;#heron-instance:1bf455b3a3c6e1e40be41ef6023b75e
 local SM, while all of the SMs in a given topology connect to one another to
 form a network. Below is a visual illustration of a network of SMs:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/heron/img/data-flow.png&#34; alt=&#34;Heron Data Flow&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://twitter.github.io/heron/img/data-flow.png&#34; alt=&#34;Heron Data Flow&#34; /&gt;
+&lt;/p&gt;
 
 &lt;p&gt;In addition to being a routing engine for data streams, SMs are responsible for
 propagating &lt;a href=&#34;https://en.wikipedia.org/wiki/Back_pressure&#34;&gt;back pressure&lt;/a&gt;
 within the topology when necessary. Below is an illustration of back pressure:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/heron/img/backpressure1.png&#34; alt=&#34;Back Pressure 1&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://twitter.github.io/heron/img/backpressure1.png&#34; alt=&#34;Back Pressure 1&#34; /&gt;
+&lt;/p&gt;
 
 &lt;p&gt;In the diagram above, assume that bolt &lt;strong&gt;B3&lt;/strong&gt; (in container &lt;strong&gt;A&lt;/strong&gt;) receives all
 of its inputs from spout &lt;strong&gt;S1&lt;/strong&gt;. &lt;strong&gt;B3&lt;/strong&gt; is running more slowly than other
@@ -982,7 +988,8 @@ other SMs will examine the container&amp;rsquo;s &lt;a href=&#34;../topologies#p
 plan&lt;/a&gt; and cut off inputs from spouts that feed
 bolt &lt;strong&gt;B3&lt;/strong&gt; (in this case spout &lt;strong&gt;S1&lt;/strong&gt;).&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/heron/img/backpressure2.png&#34; alt=&#34;Back Pressure 2&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://twitter.github.io/heron/img/backpressure2.png&#34; alt=&#34;Back Pressure 2&#34; /&gt;
+&lt;/p&gt;
 
 &lt;p&gt;Once the lagging bolt (&lt;strong&gt;B3&lt;/strong&gt;) begins functioning normally, the SM in container
 &lt;strong&gt;A&lt;/strong&gt; will notify the other SMs and stream routing within the topology will
@@ -1059,10 +1066,10 @@ the &lt;a href=&#34;../topologies#logical-plan&#34;&gt;logical&lt;/a&gt; and
     
     <item>
       <title>Heron Code Organization</title>
-      <link>http://localhost:1313/heron/docs/contributors/codebase/</link>
+      <link>http://twitter.github.io/heron/docs/contributors/codebase/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/heron/docs/contributors/codebase/</guid>
+      <guid>http://twitter.github.io/heron/docs/contributors/codebase/</guid>
       <description>
 
 &lt;p&gt;This document contains information about the Heron codebase intended primarily
@@ -1085,7 +1092,7 @@ cluster, see &lt;a href=&#34;../../developers/topologies&#34;&gt;Building Topolo
 API&lt;/a&gt;, and &lt;a href=&#34;../../concepts/architecture#heron-instance&#34;&gt;Heron Instance&lt;/a&gt;.
 It is currently the only language in which topologies can be written. Instructions can be found
 in &lt;a href=&#34;../../developers/topologies&#34;&gt;Building Topologies&lt;/a&gt;, while documentation for the Java
-API can be found &lt;a href=&#34;http://localhost:1313/heron/api/com/twitter/heron/api/topology/package-summary.html&#34;&gt;here&lt;/a&gt;. Please note that Heron topologies do not
+API can be found &lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/api/topology/package-summary.html&#34;&gt;here&lt;/a&gt;. Please note that Heron topologies do not
 require Java 8 and can be written in Java 7 or later.&lt;/p&gt;&lt;/li&gt;
 
 &lt;li&gt;&lt;p&gt;&lt;strong&gt;Python 2&lt;/strong&gt; (specifically 2.7) is used primarily for Heron&amp;rsquo;s &lt;a href=&#34;../..//operators/heron-cli&#34;&gt;CLI
@@ -1127,7 +1134,7 @@ utilities, networking interfaces, and more.&lt;/p&gt;
 &lt;a href=&#34;../../operators/deployment/schedulers/aurora&#34;&gt;Aurora&lt;/a&gt;, and a &lt;a href=&#34;../../operators/deployment/schedulers/local&#34;&gt;local
 scheduler&lt;/a&gt;. The Java code for each of those
 schedulers can be found in &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/schedulers&#34;&gt;&lt;code&gt;heron/schedulers&lt;/code&gt;&lt;/a&gt;
-, while the underlying scheduler API can be found &lt;a href=&#34;http://localhost:1313/heron/api/com/twitter/heron/spi/scheduler/package-summary.html&#34;&gt;here&lt;/a&gt;&lt;/p&gt;
+, while the underlying scheduler API can be found &lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/spi/scheduler/package-summary.html&#34;&gt;here&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;Info on custom schedulers can be found in &lt;a href=&#34;../custom-scheduler&#34;&gt;Implementing a Custom
 Scheduler&lt;/a&gt;; info on the currently available schedulers
@@ -1184,7 +1191,7 @@ be found in &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/a
 
 &lt;p&gt;Documentation for writing topologies can be found in &lt;a href=&#34;../../developers/topologies&#34;&gt;Building
 Topologies&lt;/a&gt;, while API documentation can be found
-&lt;a href=&#34;http://localhost:1313/heron/api/com/twitter/heron/api/topology/package-summary.html&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/api/topology/package-summary.html&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
 
 &lt;h3 id=&#34;simulator:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Simulator&lt;/h3&gt;
 
@@ -1192,7 +1199,7 @@ Topologies&lt;/a&gt;, while API documentation can be found
 for debugging purposes.&lt;/p&gt;
 
 &lt;p&gt;The Java API for simulator can be found in
-&lt;a href=&#34;http://localhost:1313/heron/api/com/twitter/heron/simulator/package-summary.html&#34;&gt;&lt;code&gt;heron/simulator&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+&lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/simulator/package-summary.html&#34;&gt;&lt;code&gt;heron/simulator&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
 
 &lt;h3 id=&#34;example-topologies:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Example Topologies&lt;/h3&gt;
 
@@ -1260,10 +1267,10 @@ codebase. For more info see &lt;a href=&#34;../testing&#34;&gt;Testing Heron&lt;
     
     <item>
       <title>Heron Data Model</title>
-      <link>http://localhost:1313/heron/docs/developers/data-model/</link>
+      <link>http://twitter.github.io/heron/docs/developers/data-model/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/heron/docs/developers/data-model/</guid>
+      <guid>http://twitter.github.io/heron/docs/developers/data-model/</guid>
       <description>
 
 &lt;p&gt;Tuple is Heron&amp;rsquo;s core data type. All
@@ -1271,20 +1278,20 @@ data that is fed into a Heron topology via
 &lt;a href=&#34;../../concepts/topologies#spouts&#34;&gt;spouts&lt;/a&gt; and then processed by
 &lt;a href=&#34;../../concepts/topologies#bolts&#34;&gt;bolts&lt;/a&gt; consists of tuples.&lt;/p&gt;
 
-&lt;p&gt;Heron has a &lt;a href=&#34;http://localhost:1313/heron/api/com/twitter/heron/api/tuple/Tuple.html&#34;&gt;&lt;code&gt;Tuple&lt;/code&gt;&lt;/a&gt;
+&lt;p&gt;Heron has a &lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/api/tuple/Tuple.html&#34;&gt;&lt;code&gt;Tuple&lt;/code&gt;&lt;/a&gt;
 interface for working with tuples. Heron &lt;code&gt;Tuple&lt;/code&gt;s can hold values of any type;
 values are accessible either by providing an index or a field name.&lt;/p&gt;
 
 &lt;h2 id=&#34;using-tuples:907d70eb0b7602a322a01d2263664ad7&#34;&gt;Using Tuples&lt;/h2&gt;
 
-&lt;p&gt;Heron&amp;rsquo;s &lt;code&gt;Tuple&lt;/code&gt; interface contains the methods listed in the &lt;a href=&#34;http://localhost:1313/heron/api/com/twitter/heron/api/tuple/Tuple.html&#34;&gt;Javadoc
+&lt;p&gt;Heron&amp;rsquo;s &lt;code&gt;Tuple&lt;/code&gt; interface contains the methods listed in the &lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/api/tuple/Tuple.html&#34;&gt;Javadoc
 definition&lt;/a&gt;.&lt;/p&gt;
 
 &lt;h3 id=&#34;accessing-primitive-types-by-index:907d70eb0b7602a322a01d2263664ad7&#34;&gt;Accessing Primitive Types By Index&lt;/h3&gt;
 
 &lt;p&gt;Heron &lt;code&gt;Tuple&lt;/code&gt;s support a wide variety of primitive Java types, including
 strings, Booleans, byte arrays, and more.
-&lt;a href=&#34;http://localhost:1313/heron/api/com/twitter/heron/api/tuple/Tuple.html#getString-int-&#34;&gt;&lt;code&gt;getString&lt;/code&gt;&lt;/a&gt;
+&lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/api/tuple/Tuple.html#getString-int-&#34;&gt;&lt;code&gt;getString&lt;/code&gt;&lt;/a&gt;
 method, for example, takes an integer index and returns either a string or
 &lt;code&gt;null&lt;/code&gt; if no string value is present at that index. Analogous methods can be
 found in the Javadoc.&lt;/p&gt;
@@ -1293,7 +1300,7 @@ found in the Javadoc.&lt;/p&gt;
 
 &lt;p&gt;In addition to being accessible via index, values stored in Heron tuples are
 accessible via field name as well. The
-&lt;a href=&#34;http://localhost:1313/heron/api/com/twitter/heron/api/tuple/Tuple.html#getStringByField-java.lang.String-&#34;&gt;&lt;code&gt;getStringByField&lt;/code&gt;&lt;/a&gt;
+&lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/api/tuple/Tuple.html#getStringByField-java.lang.String-&#34;&gt;&lt;code&gt;getStringByField&lt;/code&gt;&lt;/a&gt;
 method, for example, takes a field name string and returns either a string or
 &lt;code&gt;null&lt;/code&gt; if no string value is present for that field name. Analogous methods can
 be found in the Javadoc.&lt;/p&gt;
@@ -1306,13 +1313,13 @@ an index or a field name. The following methods return either an &lt;code&gt;Obj
 &lt;code&gt;null&lt;/code&gt; if no object is present:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;http://localhost:1313/heron/api/com/twitter/heron/api/tuple/Tuple.html#getValue-int-&#34;&gt;&lt;code&gt;getValue&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://localhost:1313/heron/api/com/twitter/heron/api/tuple/Tuple.html#getValueByField-java.lang.String-&#34;&gt;&lt;code&gt;getValueByField&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/api/tuple/Tuple.html#getValue-int-&#34;&gt;&lt;code&gt;getValue&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/api/tuple/Tuple.html#getValueByField-java.lang.String-&#34;&gt;&lt;code&gt;getValueByField&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;p&gt;You can also retrieve all objects contained in a Heron &lt;code&gt;Tuple&lt;/code&gt; as a Java
 &lt;a href=&#34;https://docs.oracle.com/javase/8/docs/api/java/util/List.html&#34;&gt;List&lt;/a&gt; using the
-&lt;a href=&#34;http://localhost:1313/heron/api/com/twitter/heron/api/tuple/Tuple.html#getValues--&#34;&gt;&lt;code&gt;getValues&lt;/code&gt;&lt;/a&gt;
+&lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/api/tuple/Tuple.html#getValues--&#34;&gt;&lt;code&gt;getValues&lt;/code&gt;&lt;/a&gt;
 method.&lt;/p&gt;
 
 &lt;h3 id=&#34;user-defined-types:907d70eb0b7602a322a01d2263664ad7&#34;&gt;User-defined Types&lt;/h3&gt;
@@ -1346,14 +1353,14 @@ object that contains all of the fields in the tuple. More on fields can be found
 &lt;p&gt;There are additional methods available for determining the size of Heron
 &lt;code&gt;Tuple&lt;/code&gt;s, extracting contextual information, and more. For a full listing of
 methods, see the
-&lt;a href=&#34;http://localhost:1313/heron/api/com/twitter/heron/api/tuple/Tuple.html&#34;&gt;Javadoc&lt;/a&gt;.&lt;/p&gt;
+&lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/api/tuple/Tuple.html&#34;&gt;Javadoc&lt;/a&gt;.&lt;/p&gt;
 
 &lt;h2 id=&#34;fields-1:907d70eb0b7602a322a01d2263664ad7&#34;&gt;Fields&lt;/h2&gt;
 
 &lt;p&gt;From the methods in the list above you can see that you can retrieve single
 values from a Heron tuple on the basis of their index. You can also retrieve
 multiple values using a
-&lt;a href=&#34;http://localhost:1313/heron/api/com/twitter/heron/api/tuple/Fields.html&#34;&gt;&lt;code&gt;Fields&lt;/code&gt;&lt;/a&gt; object,
+&lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/api/tuple/Fields.html&#34;&gt;&lt;code&gt;Fields&lt;/code&gt;&lt;/a&gt; object,
 which can be initialized either using varargs or a list of strings:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-java&#34;&gt;// Using varargs
@@ -1380,10 +1387,10 @@ Fields fruits = new Fields(fruitNames);
     
     <item>
       <title>Heron Instance</title>
-      <link>http://localhost:1313/heron/docs/operators/configuration/instance/</link>
+      <link>http://twitter.github.io/heron/docs/operators/configuration/instance/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/heron/docs/operators/configuration/instance/</guid>
+      <guid>http://twitter.github.io/heron/docs/operators/configuration/instance/</guid>
       <description>
 
 &lt;p&gt;You can configure the behavior of the &lt;a href=&#34;../../../concepts/architecture#heron-instance&#34;&gt;Heron
@@ -1682,10 +1689,10 @@ issues.&lt;/p&gt;
     
     <item>
       <title>Heron Resources</title>
-      <link>http://localhost:1313/heron/docs/resources/</link>
+      <link>http://twitter.github.io/heron/docs/resources/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/heron/docs/resources/</guid>
+      <guid>http://twitter.github.io/heron/docs/resources/</guid>
       <description>
 
 &lt;p&gt;Heron Resources outside this documentation:&lt;/p&gt;
@@ -1726,10 +1733,10 @@ Heron&lt;/a&gt; (June, 2015)&lt;/li&gt;
     
     <item>
       <title>Heron Shell</title>
-      <link>http://localhost:1313/heron/docs/operators/heron-shell/</link>
+      <link>http://twitter.github.io/heron/docs/operators/heron-shell/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/heron/docs/operators/heron-shell/</guid>
+      <guid>http://twitter.github.io/heron/docs/operators/heron-shell/</guid>
       <description>
 
 &lt;p&gt;Heron shell helps debugging a heron topology. It is an HTTP server that runs as a

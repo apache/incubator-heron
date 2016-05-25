@@ -2,18 +2,375 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Heron</title>
-    <link>http://localhost:1313/heron/</link>
+    <link>http://twitter.github.io/heron/</link>
     <description>Recent content on Heron</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <atom:link href="http://localhost:1313/heron/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://twitter.github.io/heron/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Community</title>
+      <link>http://twitter.github.io/heron/docs/contributors/community/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://twitter.github.io/heron/docs/contributors/community/</guid>
+      <description>
+
+&lt;h3 id=&#34;contributing-to-heron:f3b3effc19b97b19aaf2ce392427d255&#34;&gt;Contributing to Heron&lt;/h3&gt;
+
+&lt;p&gt;Community is a critical factor to the success of Heron.  Contributions are welcome! After reviewing
+the &lt;a href=&#34;../../concepts/architecture/&#34;&gt;Heron Architecture&lt;/a&gt;, &lt;a href=&#34;../../developers/compiling/compiling/&#34;&gt;Compiling Heron&lt;/a&gt;,
+and the &lt;a href=&#34;../codebase/&#34;&gt;Heron Codebase&lt;/a&gt;, this page covers how to contribute and, when you&amp;rsquo;ve made a
+patch, how to submit it.&lt;/p&gt;
+
+&lt;h3 id=&#34;how-can-i-contribute-to-heron:f3b3effc19b97b19aaf2ce392427d255&#34;&gt;How Can I Contribute to Heron?&lt;/h3&gt;
+
+&lt;p&gt;In general, contributions that fix bugs or add features (as opposed to stylistic, refactoring, or
+&amp;ldquo;cleanup&amp;rdquo; changes) are preferred. If you&amp;rsquo;re looking for places to contribute, issues labeled
+&lt;a href=&#34;https://github.com/twitter/heron/issues?q=is%3Aopen+is%3Aissue+label%3Ahelp-wanted&#34;&gt;help-wanted&lt;/a&gt;
+are good candidates. Please check the dev list before investing a lot of time in a patch.&lt;/p&gt;
+
+&lt;p&gt;Continue to &lt;a href=&#34;../../concepts/architecture/&#34;&gt;Heron Architecture&lt;/a&gt;,
+&lt;a href=&#34;../../developers/compiling/compiling/&#34;&gt;Compiling Heron&lt;/a&gt;, or &lt;a href=&#34;../codebase/&#34;&gt;Heron Codebase&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&#34;setting-up-idea:f3b3effc19b97b19aaf2ce392427d255&#34;&gt;Setting up IDEA&lt;/h3&gt;
+
+&lt;p&gt;Heron includes a script to bootstrap an IntelliJ IDEA project. The project includes support for Heron
+code styles and copyright headers. To bootstrap an IDEA project run the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$ ./scripts/setup-intellij.sh
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;submitting-a-patch:f3b3effc19b97b19aaf2ce392427d255&#34;&gt;Submitting a Patch&lt;/h3&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;Read the Heron &lt;a href=&#34;../governance&#34;&gt;governance plan&lt;/a&gt; and accept the
+&lt;a href=&#34;https://engineering.twitter.com/opensource/cla&#34;&gt;Twitter Contributor License Agreement&lt;/a&gt; (CLA).&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;Discuss your plan and design, and get agreement on our heron-dev@googlegroups.com mailing list.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;Implement the change with unit tests and verify that all tests pass.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;Submit a GitHub pull request that implements the feature. Clearly describe the the change in
+the description. Verify that Travis CI passes.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;Complete a code review by addressing comments of the reviewers.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;A project committer will merge the patch to the master branch.&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;!--
+TODO - post commit process
+TODO: links to sourcecode and dev and user groups
+--&gt;
+
+&lt;p&gt;Next: Review the &lt;a href=&#34;../codebase&#34;&gt;Heron Codebase&lt;/a&gt;&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Heron Code Organization</title>
+      <link>http://twitter.github.io/heron/docs/contributors/codebase/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://twitter.github.io/heron/docs/contributors/codebase/</guid>
+      <description>
+
+&lt;p&gt;This document contains information about the Heron codebase intended primarily
+for developers who want to contribute to Heron. The Heron codebase lives on
+&lt;a href=&#34;https://github.com/twitter/heron/tree/master&#34;&gt;github&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;If you&amp;rsquo;re looking for documentation about developing topologies for a Heron
+cluster, see &lt;a href=&#34;../../developers/topologies&#34;&gt;Building Topologies&lt;/a&gt; instead.&lt;/p&gt;
+
+&lt;h2 id=&#34;languages:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Languages&lt;/h2&gt;
+
+&lt;p&gt;The primary programming languages for Heron are C++, Java, and Python.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;C++ 11&lt;/strong&gt; is used for most of Heron&amp;rsquo;s core components, including the
+&lt;a href=&#34;../../concepts/architecture#topology-master&#34;&gt;Topology Master&lt;/a&gt;, and
+&lt;a href=&#34;../../concepts/architecture#stream-manager&#34;&gt;Stream Manager&lt;/a&gt;.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Java 8&lt;/strong&gt; is used primarily for Heron&amp;rsquo;s &lt;a href=&#34;../../concepts/topologies&#34;&gt;topology
+API&lt;/a&gt;, and &lt;a href=&#34;../../concepts/architecture#heron-instance&#34;&gt;Heron Instance&lt;/a&gt;.
+It is currently the only language in which topologies can be written. Instructions can be found
+in &lt;a href=&#34;../../developers/topologies&#34;&gt;Building Topologies&lt;/a&gt;, while documentation for the Java
+API can be found &lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/api/topology/package-summary.html&#34;&gt;here&lt;/a&gt;. Please note that Heron topologies do not
+require Java 8 and can be written in Java 7 or later.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Python 2&lt;/strong&gt; (specifically 2.7) is used primarily for Heron&amp;rsquo;s &lt;a href=&#34;../..//operators/heron-cli&#34;&gt;CLI
+interface&lt;/a&gt; and UI components such as &lt;a href=&#34;../../operators/heron-ui&#34;&gt;Heron
+UI&lt;/a&gt; and the &lt;a href=&#34;../../operators/heron-tracker&#34;&gt;Heron
+Tracker&lt;/a&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;main-tools:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Main Tools&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Build tool&lt;/strong&gt; &amp;mdash; Heron uses &lt;a href=&#34;http://bazel.io/&#34;&gt;Bazel&lt;/a&gt; as its build tool.
+Information on setting up and using Bazel for Heron can be found in &lt;a href=&#34;../../developers/compiling/compiling&#34;&gt;Compiling
+Heron&lt;/a&gt;.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Inter-component communication&lt;/strong&gt; &amp;mdash; Heron uses &lt;a href=&#34;https://developers.google.com/protocol-buffers/?hl=en&#34;&gt;Protocol
+Buffers&lt;/a&gt; for
+communication between components. Most &lt;code&gt;.proto&lt;/code&gt; definition files can be found in
+&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/proto&#34;&gt;&lt;code&gt;heron/proto&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Cluster coordination&lt;/strong&gt; &amp;mdash; Heron relies heavily on ZooKeeper for cluster
+coordination for distributed deployment, be it for &lt;a href=&#34;../../operators/deployment/schedulers/aurora&#34;&gt;Mesos/Aurora&lt;/a&gt;,
+&lt;a href=&#34;../../operators/deployment/schedulers/mesos&#34;&gt;Mesos alone&lt;/a&gt;, or for a &lt;a href=&#34;../custom-scheduler&#34;&gt;custom
+scheduler&lt;/a&gt; that you build. More information on ZooKeeper
+components in the codebase can be found in the &lt;a href=&#34;#state-management&#34;&gt;State
+Management&lt;/a&gt; section below.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;common-utilities:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Common Utilities&lt;/h2&gt;
+
+&lt;p&gt;The &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/common&#34;&gt;&lt;code&gt;heron/common&lt;/code&gt;&lt;/a&gt; contains a variety of
+utilities for each of Heron&amp;rsquo;s languages, including useful constants, file
+utilities, networking interfaces, and more.&lt;/p&gt;
+
+&lt;h2 id=&#34;cluster-scheduling:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Cluster Scheduling&lt;/h2&gt;
+
+&lt;p&gt;Heron supports three cluster schedulers out of the box:
+&lt;a href=&#34;../../operators/deployment/schedulers/mesos&#34;&gt;Mesos&lt;/a&gt;,
+&lt;a href=&#34;../../operators/deployment/schedulers/aurora&#34;&gt;Aurora&lt;/a&gt;, and a &lt;a href=&#34;../../operators/deployment/schedulers/local&#34;&gt;local
+scheduler&lt;/a&gt;. The Java code for each of those
+schedulers can be found in &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/schedulers&#34;&gt;&lt;code&gt;heron/schedulers&lt;/code&gt;&lt;/a&gt;
+, while the underlying scheduler API can be found &lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/spi/scheduler/package-summary.html&#34;&gt;here&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Info on custom schedulers can be found in &lt;a href=&#34;../custom-scheduler&#34;&gt;Implementing a Custom
+Scheduler&lt;/a&gt;; info on the currently available schedulers
+can be found in &lt;a href=&#34;../../operators/deployment/schedulers/aurora&#34;&gt;Deploying Heron on
+Aurora&lt;/a&gt;, &lt;a href=&#34;../../operators/deployment/schedulers/mesos&#34;&gt;Deploying Heron on
+Mesos&lt;/a&gt;, and &lt;a href=&#34;../../operators/deployment/schedulers/local&#34;&gt;Local
+Deployment&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;state-management:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;State Management&lt;/h2&gt;
+
+&lt;p&gt;The parts of Heron&amp;rsquo;s codebase related to
+&lt;a href=&#34;http://zookeeper.apache.org/&#34;&gt;ZooKeeper&lt;/a&gt; are mostly contained in
+&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/state&#34;&gt;&lt;code&gt;heron/state&lt;/code&gt;&lt;/a&gt;. There are ZooKeeper-facing
+interfaces for &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/state/src/cpp&#34;&gt;C++&lt;/a&gt;,
+&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/state/src/java&#34;&gt;Java&lt;/a&gt;, and
+&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/state/src/python&#34;&gt;Python&lt;/a&gt; that are used in a variety of
+Heron components.&lt;/p&gt;
+
+&lt;h2 id=&#34;topology-components:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Topology Components&lt;/h2&gt;
+
+&lt;h3 id=&#34;topology-master:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Topology Master&lt;/h3&gt;
+
+&lt;p&gt;The C++ code for Heron&amp;rsquo;s &lt;a href=&#34;../../concepts/architecture#topology-master&#34;&gt;Topology
+Master&lt;/a&gt; is written in C++ can be
+found in &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/tmaster&#34;&gt;&lt;code&gt;heron/tmaster&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&#34;stream-manager:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Stream Manager&lt;/h3&gt;
+
+&lt;p&gt;The C++ code for Heron&amp;rsquo;s &lt;a href=&#34;../../concepts/architecture#stream-manager&#34;&gt;Stream
+Manager&lt;/a&gt; can be found in
+&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/stmgr&#34;&gt;&lt;code&gt;heron/stmgr&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&#34;heron-instance:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Heron Instance&lt;/h3&gt;
+
+&lt;p&gt;The Java code for &lt;a href=&#34;../../concepts/architecture#heron-instance&#34;&gt;Heron
+instances&lt;/a&gt; can be found in
+&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/instance&#34;&gt;&lt;code&gt;heron/instance&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&#34;metrics-manager:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Metrics Manager&lt;/h3&gt;
+
+&lt;p&gt;The Java code for Heron&amp;rsquo;s &lt;a href=&#34;../../concepts/architecture#metrics-manager&#34;&gt;Metrics
+Manager&lt;/a&gt; can be found in
+&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/metricsmgr&#34;&gt;&lt;code&gt;heron/metricsmgr&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;If you&amp;rsquo;d like to implement your own custom metrics handler (known as a &lt;strong&gt;metrics
+sink&lt;/strong&gt;), see &lt;a href=&#34;../custom-metrics-sink&#34;&gt;Implementing a Custom Metrics Sink&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;developer-apis:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Developer APIs&lt;/h2&gt;
+
+&lt;h3 id=&#34;topology-api:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Topology API&lt;/h3&gt;
+
+&lt;p&gt;Heron&amp;rsquo;s API for writing topologies is written in Java. The code for this API can
+be found in &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/api&#34;&gt;&lt;code&gt;heron/api&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Documentation for writing topologies can be found in &lt;a href=&#34;../../developers/topologies&#34;&gt;Building
+Topologies&lt;/a&gt;, while API documentation can be found
+&lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/api/topology/package-summary.html&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&#34;simulator:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Simulator&lt;/h3&gt;
+
+&lt;p&gt;Heron enables you to run topologies in &lt;a href=&#34;../../developers/simulator-mode&#34;&gt;&lt;code&gt;Simulator&lt;/code&gt;&lt;/a&gt;
+for debugging purposes.&lt;/p&gt;
+
+&lt;p&gt;The Java API for simulator can be found in
+&lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/simulator/package-summary.html&#34;&gt;&lt;code&gt;heron/simulator&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&#34;example-topologies:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Example Topologies&lt;/h3&gt;
+
+&lt;p&gt;Heron&amp;rsquo;s codebase includes a wide variety of example
+&lt;a href=&#34;../../concepts/topologies&#34;&gt;topologies&lt;/a&gt; built using Heron&amp;rsquo;s topology API for
+Java. Those examples can be found in
+&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/examples&#34;&gt;&lt;code&gt;heron/examples&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;user-interface-components:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;User Interface Components&lt;/h2&gt;
+
+&lt;h3 id=&#34;heron-cli:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Heron CLI&lt;/h3&gt;
+
+&lt;p&gt;Heron has a tool called &lt;code&gt;heron&lt;/code&gt; that is used to both provide a CLI interface
+for &lt;a href=&#34;../../operators/heron-cli&#34;&gt;managing topologies&lt;/a&gt; and to perform much of
+the heavy lifting behind assembling physical topologies in your cluster.
+The Python code for &lt;code&gt;heron&lt;/code&gt; can be found in
+&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/cli&#34;&gt;&lt;code&gt;heron/cli&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Sample configurations for different Heron schedulers&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;../../operators/deployment/schedulers/local&#34;&gt;Local scheduler&lt;/a&gt; config can be found in &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/config/src/yaml/conf/local&#34;&gt;&lt;code&gt;heron/config/src/yaml/conf/local&lt;/code&gt;&lt;/a&gt;,&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;../../operators/deployment/schedulers/aurora&#34;&gt;Aurora scheduler&lt;/a&gt; config can be found &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/config/src/yaml/conf/aurora&#34;&gt;&lt;code&gt;heron/config/src/yaml/conf/aurora&lt;/code&gt;&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;heron-tracker:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Heron Tracker&lt;/h3&gt;
+
+&lt;p&gt;The Python code for the &lt;a href=&#34;../../operators/heron-tracker&#34;&gt;Heron Tracker&lt;/a&gt; can be
+found in &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/tracker&#34;&gt;&lt;code&gt;heron/tracker&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;The Tracker is a web server written in Python. It relies on the
+&lt;a href=&#34;http://www.tornadoweb.org/en/stable/&#34;&gt;Tornado&lt;/a&gt; framework. You can add new HTTP
+routes to the Tracker in
+&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/tracker/src/python/main.py&#34;&gt;&lt;code&gt;main.py&lt;/code&gt;&lt;/a&gt; and
+corresponding handlers in the
+&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/tracker/src/python/handlers&#34;&gt;&lt;code&gt;handlers&lt;/code&gt;&lt;/a&gt; directory.&lt;/p&gt;
+
+&lt;h3 id=&#34;heron-ui:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Heron UI&lt;/h3&gt;
+
+&lt;p&gt;The Python code for the &lt;a href=&#34;../../operators/heron-ui&#34;&gt;Heron UI&lt;/a&gt; can be found in
+&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/ui&#34;&gt;&lt;code&gt;heron/ui&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Like Heron Tracker, Heron UI is a web server written in Python that relies on
+the &lt;a href=&#34;http://www.tornadoweb.org/en/stable/&#34;&gt;Tornado&lt;/a&gt; framework. You can add new
+HTTP routes to Heron UI in
+&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/web/source/python/main.py&#34;&gt;&lt;code&gt;main.py&lt;/code&gt;&lt;/a&gt; and corresponding
+handlers in the &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/web/source/python/handlers&#34;&gt;&lt;code&gt;handlers&lt;/code&gt;&lt;/a&gt;
+directory.&lt;/p&gt;
+
+&lt;h3 id=&#34;heron-shell:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Heron Shell&lt;/h3&gt;
+
+&lt;p&gt;The Python code for the &lt;a href=&#34;../../operators/heron-shell&#34;&gt;Heron Shell&lt;/a&gt; can be
+found in &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/shell&#34;&gt;&lt;code&gt;heron/shell&lt;/code&gt;&lt;/a&gt;. The HTTP handlers and
+web server are defined in
+&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/shell/src/python/main.py&#34;&gt;&lt;code&gt;main.py&lt;/code&gt;&lt;/a&gt; while the HTML,
+JavaScript, CSS, and images for the web UI can be found in the
+&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/shell/assets&#34;&gt;&lt;code&gt;assets&lt;/code&gt;&lt;/a&gt; directory.&lt;/p&gt;
+
+&lt;h2 id=&#34;tests:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Tests&lt;/h2&gt;
+
+&lt;p&gt;There are a wide variety of tests for Heron that are scattered throughout the
+codebase. For more info see &lt;a href=&#34;../testing&#34;&gt;Testing Heron&lt;/a&gt;.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Heron Topologies</title>
+      <link>http://twitter.github.io/heron/docs/concepts/topologies/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://twitter.github.io/heron/docs/concepts/topologies/</guid>
+      <description>
+
+&lt;p&gt;A Heron &lt;strong&gt;topology&lt;/strong&gt; is a &lt;a href=&#34;https://en.wikipedia.org/wiki/Directed_acyclic_graph&#34;&gt;directed acyclic
+graph&lt;/a&gt; used to process
+streams of data. Heron topologies consist of three basic components:
+&lt;a href=&#34;#spouts&#34;&gt;spouts&lt;/a&gt; and &lt;a href=&#34;#bolts&#34;&gt;bolts&lt;/a&gt;, which are connected via
+&lt;strong&gt;streams&lt;/strong&gt; of &lt;a href=&#34;../../developers/data-model&#34;&gt;tuples&lt;/a&gt;. Below is a visual
+illustration of a simple topology:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://twitter.github.io/heron/img/topology.png&#34; alt=&#34;Heron topology&#34; /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;Spouts are responsible for emitting &lt;a href=&#34;../../developers/data-model&#34;&gt;tuples&lt;/a&gt;
+into the topology, while bolts are responsible for processing those tuples. In
+the diagram above, spout &lt;strong&gt;S1&lt;/strong&gt; feeds tuples to bolts &lt;strong&gt;B1&lt;/strong&gt; and &lt;strong&gt;B2&lt;/strong&gt; for
+processing; in turn, bolt &lt;strong&gt;B1&lt;/strong&gt; feeds processed tuples to bolts &lt;strong&gt;B3&lt;/strong&gt; and
+&lt;strong&gt;B4&lt;/strong&gt;, while bolt &lt;strong&gt;B2&lt;/strong&gt; feeds processed tuples to bolt &lt;strong&gt;B4&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;This is just a simple example; you can use bolts and spouts to form arbitrarily
+complex topologies.&lt;/p&gt;
+
+&lt;h2 id=&#34;topology-lifecycle:2990a96fddad7dca382b7d6e0cf93241&#34;&gt;Topology Lifecycle&lt;/h2&gt;
+
+&lt;p&gt;Once you&amp;rsquo;ve set up a &lt;a href=&#34;../../operators/deployment&#34;&gt;Heron cluster&lt;/a&gt;, you
+can use Heron&amp;rsquo;s &lt;a href=&#34;../../operators/heron-cli&#34;&gt;CLI tool&lt;/a&gt; to manage the entire
+lifecycle of a topology, which typically goes through the following stages:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;a href=&#34;../../operators/heron-cli#submitting-a-topology&#34;&gt;submit&lt;/a&gt; the topology
+to the cluster. The topology is not yet processing streams but is ready to be
+activated.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;../../operators/heron-cli#activating-a-topology&#34;&gt;activate&lt;/a&gt; the
+topology. The topology will begin processing streams in accordance with
+the topology architecture that you&amp;rsquo;ve created.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;../../operators/heron-cli#restarting-a-topology&#34;&gt;restart&lt;/a&gt; an
+active topology if, for example, you need update the topology configuration.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;../../operators/heron-cli#deactivating-a-topology&#34;&gt;deactivate&lt;/a&gt; the
+topology. Once deactivated, the topology will stop processing but
+remain running in the cluster.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;../../operators/heron-cli#killing-a-topology&#34;&gt;kill&lt;/a&gt; a topology to completely
+remove it from the cluster.  It is no longer known to the Heron cluster and
+can no longer be activated. Once killed, the only way to run that topology is
+to re-submit it.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&#34;spouts:2990a96fddad7dca382b7d6e0cf93241&#34;&gt;Spouts&lt;/h2&gt;
+
+&lt;p&gt;A Heron &lt;strong&gt;spout&lt;/strong&gt; is a source of streams, responsible for emitting
+&lt;a href=&#34;../../developers/data-model&#34;&gt;tuples&lt;/a&gt; into the topology. A spout may, for
+example, read data from a Kestrel queue or read tweets from the Twitter API and
+emit tuples to one or more bolts.&lt;/p&gt;
+
+&lt;p&gt;Information on building spouts can be found in &lt;a href=&#34;../../developers/java/spouts&#34;&gt;Building
+Spouts&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;bolts:2990a96fddad7dca382b7d6e0cf93241&#34;&gt;Bolts&lt;/h2&gt;
+
+&lt;p&gt;A Heron &lt;strong&gt;bolt&lt;/strong&gt; consumes streams of
+&lt;a href=&#34;../../developers/data-model&#34;&gt;tuples&lt;/a&gt; emitted by spouts and performs some
+set of user-defined processing operations on those tuples, which may include
+performing complex stream transformations, performing storage operations,
+aggregating multiple streams into one, emitting tuples to other bolts within the
+topology, and much more.&lt;/p&gt;
+
+&lt;p&gt;Information on building bolts can be found in &lt;a href=&#34;../../developers/java/bolts&#34;&gt;Building
+Bolts&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;data-model:2990a96fddad7dca382b7d6e0cf93241&#34;&gt;Data Model&lt;/h2&gt;
+
+&lt;p&gt;Heron has a fundamentally tuple-driven data model. You can find more information
+in &lt;a href=&#34;../../developers/data-model&#34;&gt;Heron&amp;rsquo;s Data Model&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;logical-plan:2990a96fddad7dca382b7d6e0cf93241&#34;&gt;Logical Plan&lt;/h2&gt;
+
+&lt;p&gt;A topology&amp;rsquo;s &lt;strong&gt;logical plan&lt;/strong&gt; is analagous to a database &lt;a href=&#34;https://en.wikipedia.org/wiki/Query_plan&#34;&gt;query
+plan&lt;/a&gt;. The image at the top of this
+page is an example logical plan for a topology.&lt;/p&gt;
+
+&lt;h2 id=&#34;physical-plan:2990a96fddad7dca382b7d6e0cf93241&#34;&gt;Physical Plan&lt;/h2&gt;
+
+&lt;p&gt;A topology&amp;rsquo;s &lt;strong&gt;physical plan&lt;/strong&gt; is related to its logical plan but with the
+crucial difference that a physical plan maps the actual execution logic of a
+topology, including the machines running each spout or bolt and more. Here&amp;rsquo;s a
+rough visual representation of a physical plan:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://twitter.github.io/heron/img/physicalplan.png&#34; alt=&#34;Topology Physical Plan&#34; /&gt;
+&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Heron Architecture</title>
-      <link>http://localhost:1313/heron/docs/concepts/architecture/</link>
+      <link>http://twitter.github.io/heron/docs/concepts/architecture/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/heron/docs/concepts/architecture/</guid>
+      <guid>http://twitter.github.io/heron/docs/concepts/architecture/</guid>
       <description>
 
 &lt;p&gt;Heron is the direct successor of &lt;a href=&#34;http://storm.apache.org&#34;&gt;Apache Storm&lt;/a&gt;. From
@@ -28,7 +385,7 @@ goals&lt;/a&gt; behind Heron, and explain major
 &lt;h2 id=&#34;codebase:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Codebase&lt;/h2&gt;
 
 &lt;p&gt;A detailed guide to the Heron codebase can be found
-&lt;a href=&#34;http://localhost:1313/heron/docs/contributors/codebase&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;a href=&#34;http://twitter.github.io/heron/docs/contributors/codebase&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
 
 &lt;h2 id=&#34;topologies:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Topologies&lt;/h2&gt;
 
@@ -102,7 +459,8 @@ discoverable by any process in the topology. The TM also constructs the &lt;a hr
 plan&lt;/a&gt; for a topology which it relays to different
 components.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/heron/img/tmaster.png&#34; alt=&#34;Topology Master&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://twitter.github.io/heron/img/tmaster.png&#34; alt=&#34;Topology Master&#34; /&gt;
+&lt;/p&gt;
 
 &lt;h4 id=&#34;topology-master-configuration:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Topology Master Configuration&lt;/h4&gt;
 
@@ -128,13 +486,15 @@ components. Each &lt;a href=&#34;#heron-instance:1bf455b3a3c6e1e40be41ef6023b75e
 local SM, while all of the SMs in a given topology connect to one another to
 form a network. Below is a visual illustration of a network of SMs:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/heron/img/data-flow.png&#34; alt=&#34;Heron Data Flow&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://twitter.github.io/heron/img/data-flow.png&#34; alt=&#34;Heron Data Flow&#34; /&gt;
+&lt;/p&gt;
 
 &lt;p&gt;In addition to being a routing engine for data streams, SMs are responsible for
 propagating &lt;a href=&#34;https://en.wikipedia.org/wiki/Back_pressure&#34;&gt;back pressure&lt;/a&gt;
 within the topology when necessary. Below is an illustration of back pressure:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/heron/img/backpressure1.png&#34; alt=&#34;Back Pressure 1&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://twitter.github.io/heron/img/backpressure1.png&#34; alt=&#34;Back Pressure 1&#34; /&gt;
+&lt;/p&gt;
 
 &lt;p&gt;In the diagram above, assume that bolt &lt;strong&gt;B3&lt;/strong&gt; (in container &lt;strong&gt;A&lt;/strong&gt;) receives all
 of its inputs from spout &lt;strong&gt;S1&lt;/strong&gt;. &lt;strong&gt;B3&lt;/strong&gt; is running more slowly than other
@@ -148,7 +508,8 @@ other SMs will examine the container&amp;rsquo;s &lt;a href=&#34;../topologies#p
 plan&lt;/a&gt; and cut off inputs from spouts that feed
 bolt &lt;strong&gt;B3&lt;/strong&gt; (in this case spout &lt;strong&gt;S1&lt;/strong&gt;).&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/heron/img/backpressure2.png&#34; alt=&#34;Back Pressure 2&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://twitter.github.io/heron/img/backpressure2.png&#34; alt=&#34;Back Pressure 2&#34; /&gt;
+&lt;/p&gt;
 
 &lt;p&gt;Once the lagging bolt (&lt;strong&gt;B3&lt;/strong&gt;) begins functioning normally, the SM in container
 &lt;strong&gt;A&lt;/strong&gt; will notify the other SMs and stream routing within the topology will
@@ -224,165 +585,11 @@ the &lt;a href=&#34;../topologies#logical-plan&#34;&gt;logical&lt;/a&gt; and
     </item>
     
     <item>
-      <title>Community</title>
-      <link>http://localhost:1313/heron/docs/contributors/community/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>http://localhost:1313/heron/docs/contributors/community/</guid>
-      <description>
-
-&lt;h3 id=&#34;contributing-to-heron:f3b3effc19b97b19aaf2ce392427d255&#34;&gt;Contributing to Heron&lt;/h3&gt;
-
-&lt;p&gt;Community is a critical factor to the success of Heron.  Contributions are welcome! After reviewing
-the &lt;a href=&#34;../../concepts/architecture/&#34;&gt;Heron Architecture&lt;/a&gt;, &lt;a href=&#34;../../developers/compiling/compiling/&#34;&gt;Compiling Heron&lt;/a&gt;,
-and the &lt;a href=&#34;../codebase/&#34;&gt;Heron Codebase&lt;/a&gt;, this page covers how to contribute and, when you&amp;rsquo;ve made a
-patch, how to submit it.&lt;/p&gt;
-
-&lt;h3 id=&#34;how-can-i-contribute-to-heron:f3b3effc19b97b19aaf2ce392427d255&#34;&gt;How Can I Contribute to Heron?&lt;/h3&gt;
-
-&lt;p&gt;In general, contributions that fix bugs or add features (as opposed to stylistic, refactoring, or
-&amp;ldquo;cleanup&amp;rdquo; changes) are preferred. If you&amp;rsquo;re looking for places to contribute, issues labeled
-&lt;a href=&#34;https://github.com/twitter/heron/issues?q=is%3Aopen+is%3Aissue+label%3Ahelp-wanted&#34;&gt;help-wanted&lt;/a&gt;
-are good candidates. Please check the dev list before investing a lot of time in a patch.&lt;/p&gt;
-
-&lt;p&gt;Continue to &lt;a href=&#34;../../concepts/architecture/&#34;&gt;Heron Architecture&lt;/a&gt;,
-&lt;a href=&#34;../../developers/compiling/compiling/&#34;&gt;Compiling Heron&lt;/a&gt;, or &lt;a href=&#34;../codebase/&#34;&gt;Heron Codebase&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h3 id=&#34;setting-up-idea:f3b3effc19b97b19aaf2ce392427d255&#34;&gt;Setting up IDEA&lt;/h3&gt;
-
-&lt;p&gt;Heron includes a script to bootstrap an IntelliJ IDEA project. The project includes support for Heron
-code styles and copyright headers. To bootstrap an IDEA project run the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$ ./scripts/setup-intellij.sh
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&#34;submitting-a-patch:f3b3effc19b97b19aaf2ce392427d255&#34;&gt;Submitting a Patch&lt;/h3&gt;
-
-&lt;ol&gt;
-&lt;li&gt;&lt;p&gt;Read the Heron &lt;a href=&#34;../governance&#34;&gt;governance plan&lt;/a&gt; and accept the
-&lt;a href=&#34;https://engineering.twitter.com/opensource/cla&#34;&gt;Twitter Contributor License Agreement&lt;/a&gt; (CLA).&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;Discuss your plan and design, and get agreement on our heron-dev@googlegroups.com mailing list.&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;Implement the change with unit tests and verify that all tests pass.&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;Submit a GitHub pull request that implements the feature. Clearly describe the the change in
-the description. Verify that Travis CI passes.&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;Complete a code review by addressing comments of the reviewers.&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;A project committer will merge the patch to the master branch.&lt;/p&gt;&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;!--
-TODO - post commit process
-TODO: links to sourcecode and dev and user groups
---&gt;
-
-&lt;p&gt;Next: Review the &lt;a href=&#34;../codebase&#34;&gt;Heron Codebase&lt;/a&gt;&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Heron Topologies</title>
-      <link>http://localhost:1313/heron/docs/concepts/topologies/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>http://localhost:1313/heron/docs/concepts/topologies/</guid>
-      <description>
-
-&lt;p&gt;A Heron &lt;strong&gt;topology&lt;/strong&gt; is a &lt;a href=&#34;https://en.wikipedia.org/wiki/Directed_acyclic_graph&#34;&gt;directed acyclic
-graph&lt;/a&gt; used to process
-streams of data. Heron topologies consist of three basic components:
-&lt;a href=&#34;#spouts&#34;&gt;spouts&lt;/a&gt; and &lt;a href=&#34;#bolts&#34;&gt;bolts&lt;/a&gt;, which are connected via
-&lt;strong&gt;streams&lt;/strong&gt; of &lt;a href=&#34;../../developers/data-model&#34;&gt;tuples&lt;/a&gt;. Below is a visual
-illustration of a simple topology:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/heron/img/topology.png&#34; alt=&#34;Heron topology&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Spouts are responsible for emitting &lt;a href=&#34;../../developers/data-model&#34;&gt;tuples&lt;/a&gt;
-into the topology, while bolts are responsible for processing those tuples. In
-the diagram above, spout &lt;strong&gt;S1&lt;/strong&gt; feeds tuples to bolts &lt;strong&gt;B1&lt;/strong&gt; and &lt;strong&gt;B2&lt;/strong&gt; for
-processing; in turn, bolt &lt;strong&gt;B1&lt;/strong&gt; feeds processed tuples to bolts &lt;strong&gt;B3&lt;/strong&gt; and
-&lt;strong&gt;B4&lt;/strong&gt;, while bolt &lt;strong&gt;B2&lt;/strong&gt; feeds processed tuples to bolt &lt;strong&gt;B4&lt;/strong&gt;.&lt;/p&gt;
-
-&lt;p&gt;This is just a simple example; you can use bolts and spouts to form arbitrarily
-complex topologies.&lt;/p&gt;
-
-&lt;h2 id=&#34;topology-lifecycle:2990a96fddad7dca382b7d6e0cf93241&#34;&gt;Topology Lifecycle&lt;/h2&gt;
-
-&lt;p&gt;Once you&amp;rsquo;ve set up a &lt;a href=&#34;../../operators/deployment&#34;&gt;Heron cluster&lt;/a&gt;, you
-can use Heron&amp;rsquo;s &lt;a href=&#34;../../operators/heron-cli&#34;&gt;CLI tool&lt;/a&gt; to manage the entire
-lifecycle of a topology, which typically goes through the following stages:&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;&lt;a href=&#34;../../operators/heron-cli#submitting-a-topology&#34;&gt;submit&lt;/a&gt; the topology
-to the cluster. The topology is not yet processing streams but is ready to be
-activated.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;../../operators/heron-cli#activating-a-topology&#34;&gt;activate&lt;/a&gt; the
-topology. The topology will begin processing streams in accordance with
-the topology architecture that you&amp;rsquo;ve created.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;../../operators/heron-cli#restarting-a-topology&#34;&gt;restart&lt;/a&gt; an
-active topology if, for example, you need update the topology configuration.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;../../operators/heron-cli#deactivating-a-topology&#34;&gt;deactivate&lt;/a&gt; the
-topology. Once deactivated, the topology will stop processing but
-remain running in the cluster.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;../../operators/heron-cli#killing-a-topology&#34;&gt;kill&lt;/a&gt; a topology to completely
-remove it from the cluster.  It is no longer known to the Heron cluster and
-can no longer be activated. Once killed, the only way to run that topology is
-to re-submit it.&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h2 id=&#34;spouts:2990a96fddad7dca382b7d6e0cf93241&#34;&gt;Spouts&lt;/h2&gt;
-
-&lt;p&gt;A Heron &lt;strong&gt;spout&lt;/strong&gt; is a source of streams, responsible for emitting
-&lt;a href=&#34;../../developers/data-model&#34;&gt;tuples&lt;/a&gt; into the topology. A spout may, for
-example, read data from a Kestrel queue or read tweets from the Twitter API and
-emit tuples to one or more bolts.&lt;/p&gt;
-
-&lt;p&gt;Information on building spouts can be found in &lt;a href=&#34;../../developers/java/spouts&#34;&gt;Building
-Spouts&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2 id=&#34;bolts:2990a96fddad7dca382b7d6e0cf93241&#34;&gt;Bolts&lt;/h2&gt;
-
-&lt;p&gt;A Heron &lt;strong&gt;bolt&lt;/strong&gt; consumes streams of
-&lt;a href=&#34;../../developers/data-model&#34;&gt;tuples&lt;/a&gt; emitted by spouts and performs some
-set of user-defined processing operations on those tuples, which may include
-performing complex stream transformations, performing storage operations,
-aggregating multiple streams into one, emitting tuples to other bolts within the
-topology, and much more.&lt;/p&gt;
-
-&lt;p&gt;Information on building bolts can be found in &lt;a href=&#34;../../developers/java/bolts&#34;&gt;Building
-Bolts&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2 id=&#34;data-model:2990a96fddad7dca382b7d6e0cf93241&#34;&gt;Data Model&lt;/h2&gt;
-
-&lt;p&gt;Heron has a fundamentally tuple-driven data model. You can find more information
-in &lt;a href=&#34;../../developers/data-model&#34;&gt;Heron&amp;rsquo;s Data Model&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2 id=&#34;logical-plan:2990a96fddad7dca382b7d6e0cf93241&#34;&gt;Logical Plan&lt;/h2&gt;
-
-&lt;p&gt;A topology&amp;rsquo;s &lt;strong&gt;logical plan&lt;/strong&gt; is analagous to a database &lt;a href=&#34;https://en.wikipedia.org/wiki/Query_plan&#34;&gt;query
-plan&lt;/a&gt;. The image at the top of this
-page is an example logical plan for a topology.&lt;/p&gt;
-
-&lt;h2 id=&#34;physical-plan:2990a96fddad7dca382b7d6e0cf93241&#34;&gt;Physical Plan&lt;/h2&gt;
-
-&lt;p&gt;A topology&amp;rsquo;s &lt;strong&gt;physical plan&lt;/strong&gt; is related to its logical plan but with the
-crucial difference that a physical plan maps the actual execution logic of a
-topology, including the machines running each spout or bolt and more. Here&amp;rsquo;s a
-rough visual representation of a physical plan:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/heron/img/physicalplan.png&#34; alt=&#34;Topology Physical Plan&#34; /&gt;&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
       <title>Implementing a Custom Metrics Sink</title>
-      <link>http://localhost:1313/heron/docs/contributors/custom-metrics-sink/</link>
+      <link>http://twitter.github.io/heron/docs/contributors/custom-metrics-sink/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/heron/docs/contributors/custom-metrics-sink/</guid>
+      <guid>http://twitter.github.io/heron/docs/contributors/custom-metrics-sink/</guid>
       <description>
 
 &lt;p&gt;Each Heron topology has its own centralized &lt;a href=&#34;../../concepts/architecture#metrics-manager&#34;&gt;Metrics
@@ -390,7 +597,7 @@ Manager&lt;/a&gt; (MM), which collects
 metrics from all instances in the topology. You can define how the MM processes
 metrics by implementing a &lt;strong&gt;metrics sink&lt;/strong&gt;, which specifies how the MM handles
 incoming
-&lt;a href=&#34;http://localhost:1313/heron/api/com/twitter/heron/spi/metricsmgr/metrics/MetricsRecord.html&#34;&gt;&lt;code&gt;MetricsRecord&lt;/code&gt;&lt;/a&gt;
+&lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/spi/metricsmgr/metrics/MetricsRecord.html&#34;&gt;&lt;code&gt;MetricsRecord&lt;/code&gt;&lt;/a&gt;
 objects.&lt;/p&gt;
 
 &lt;p&gt;Java is currently the only supported language for custom metrics sinks. This may
@@ -403,15 +610,15 @@ for a specific topology. The code for these sinks may prove helpful for
 implementing your own.&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;http://localhost:1313/heron/api/metrics/com/twitter/heron/metricsmgr/sink/GraphiteSink.html&#34;&gt;&lt;code&gt;GraphiteSink&lt;/code&gt;&lt;/a&gt;
+&lt;li&gt;&lt;a href=&#34;http://twitter.github.io/heron/api/metrics/com/twitter/heron/metricsmgr/sink/GraphiteSink.html&#34;&gt;&lt;code&gt;GraphiteSink&lt;/code&gt;&lt;/a&gt;
 &amp;mdash; Sends each &lt;code&gt;MetricsRecord&lt;/code&gt; object to a
 &lt;a href=&#34;http://graphite.wikidot.com/&#34;&gt;Graphite&lt;/a&gt; instance according to a Graphite
 prefix.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://localhost:1313/heron/api/metrics/com/twitter/heron/metricsmgr/sink/ScribeSink.html&#34;&gt;&lt;code&gt;ScribeSink&lt;/code&gt;&lt;/a&gt;
+&lt;li&gt;&lt;a href=&#34;http://twitter.github.io/heron/api/metrics/com/twitter/heron/metricsmgr/sink/ScribeSink.html&#34;&gt;&lt;code&gt;ScribeSink&lt;/code&gt;&lt;/a&gt;
 &amp;mdash; Sends each &lt;code&gt;MetricsRecord&lt;/code&gt; object to a
 &lt;a href=&#34;https://github.com/facebookarchive/scribe&#34;&gt;Scribe&lt;/a&gt; instance according to a
 Scribe category and namespace.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://localhost:1313/heron/api/metrics/com/twitter/heron/metricsmgr/sink/FileSink.html&#34;&gt;&lt;code&gt;FileSink&lt;/code&gt;&lt;/a&gt;
+&lt;li&gt;&lt;a href=&#34;http://twitter.github.io/heron/api/metrics/com/twitter/heron/metricsmgr/sink/FileSink.html&#34;&gt;&lt;code&gt;FileSink&lt;/code&gt;&lt;/a&gt;
 &amp;mdash; Writes each &lt;code&gt;MetricsRecord&lt;/code&gt; object to a JSON file at a specified path.&lt;/li&gt;
 &lt;/ul&gt;
 
@@ -450,7 +657,7 @@ interface, which requires you to implement the following methods:&lt;/p&gt;
 initialization behavior of the sink. The &lt;code&gt;conf&lt;/code&gt; map is the configuration that
 is passed to the sink by the &lt;code&gt;.yaml&lt;/code&gt; configuration file at
 &lt;code&gt;heron/config/metrics_sink.yaml&lt;/code&gt;; the
-&lt;a href=&#34;http://localhost:1313/heron/api/com/twitter/heron/spi/metricsmgr/sink/SinkContext.html&#34;&gt;&lt;code&gt;SinkContext&lt;/code&gt;&lt;/a&gt;
+&lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/spi/metricsmgr/sink/SinkContext.html&#34;&gt;&lt;code&gt;SinkContext&lt;/code&gt;&lt;/a&gt;
 object enables you to access values from the sink&amp;rsquo;s runtime context
 (the ID of the metrics manager, the ID of the sink, and the name of the
 topology).&lt;/li&gt;
@@ -559,212 +766,21 @@ version of &lt;code&gt;heron-cli&lt;/code&gt; will include the custom sink.&lt;/
     </item>
     
     <item>
-      <title>Heron Code Organization</title>
-      <link>http://localhost:1313/heron/docs/contributors/codebase/</link>
+      <title>Twitter License Agreement (CLA)</title>
+      <link>http://twitter.github.io/heron/docs/contributors/license/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/heron/docs/contributors/codebase/</guid>
-      <description>
-
-&lt;p&gt;This document contains information about the Heron codebase intended primarily
-for developers who want to contribute to Heron. The Heron codebase lives on
-&lt;a href=&#34;https://github.com/twitter/heron/tree/master&#34;&gt;github&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;If you&amp;rsquo;re looking for documentation about developing topologies for a Heron
-cluster, see &lt;a href=&#34;../../developers/topologies&#34;&gt;Building Topologies&lt;/a&gt; instead.&lt;/p&gt;
-
-&lt;h2 id=&#34;languages:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Languages&lt;/h2&gt;
-
-&lt;p&gt;The primary programming languages for Heron are C++, Java, and Python.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;&lt;strong&gt;C++ 11&lt;/strong&gt; is used for most of Heron&amp;rsquo;s core components, including the
-&lt;a href=&#34;../../concepts/architecture#topology-master&#34;&gt;Topology Master&lt;/a&gt;, and
-&lt;a href=&#34;../../concepts/architecture#stream-manager&#34;&gt;Stream Manager&lt;/a&gt;.&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;&lt;strong&gt;Java 8&lt;/strong&gt; is used primarily for Heron&amp;rsquo;s &lt;a href=&#34;../../concepts/topologies&#34;&gt;topology
-API&lt;/a&gt;, and &lt;a href=&#34;../../concepts/architecture#heron-instance&#34;&gt;Heron Instance&lt;/a&gt;.
-It is currently the only language in which topologies can be written. Instructions can be found
-in &lt;a href=&#34;../../developers/topologies&#34;&gt;Building Topologies&lt;/a&gt;, while documentation for the Java
-API can be found &lt;a href=&#34;http://localhost:1313/heron/api/com/twitter/heron/api/topology/package-summary.html&#34;&gt;here&lt;/a&gt;. Please note that Heron topologies do not
-require Java 8 and can be written in Java 7 or later.&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;&lt;strong&gt;Python 2&lt;/strong&gt; (specifically 2.7) is used primarily for Heron&amp;rsquo;s &lt;a href=&#34;../..//operators/heron-cli&#34;&gt;CLI
-interface&lt;/a&gt; and UI components such as &lt;a href=&#34;../../operators/heron-ui&#34;&gt;Heron
-UI&lt;/a&gt; and the &lt;a href=&#34;../../operators/heron-tracker&#34;&gt;Heron
-Tracker&lt;/a&gt;.&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;main-tools:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Main Tools&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;&lt;strong&gt;Build tool&lt;/strong&gt; &amp;mdash; Heron uses &lt;a href=&#34;http://bazel.io/&#34;&gt;Bazel&lt;/a&gt; as its build tool.
-Information on setting up and using Bazel for Heron can be found in &lt;a href=&#34;../../developers/compiling/compiling&#34;&gt;Compiling
-Heron&lt;/a&gt;.&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;&lt;strong&gt;Inter-component communication&lt;/strong&gt; &amp;mdash; Heron uses &lt;a href=&#34;https://developers.google.com/protocol-buffers/?hl=en&#34;&gt;Protocol
-Buffers&lt;/a&gt; for
-communication between components. Most &lt;code&gt;.proto&lt;/code&gt; definition files can be found in
-&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/proto&#34;&gt;&lt;code&gt;heron/proto&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;&lt;strong&gt;Cluster coordination&lt;/strong&gt; &amp;mdash; Heron relies heavily on ZooKeeper for cluster
-coordination for distributed deployment, be it for &lt;a href=&#34;../../operators/deployment/schedulers/aurora&#34;&gt;Mesos/Aurora&lt;/a&gt;,
-&lt;a href=&#34;../../operators/deployment/schedulers/mesos&#34;&gt;Mesos alone&lt;/a&gt;, or for a &lt;a href=&#34;../custom-scheduler&#34;&gt;custom
-scheduler&lt;/a&gt; that you build. More information on ZooKeeper
-components in the codebase can be found in the &lt;a href=&#34;#state-management&#34;&gt;State
-Management&lt;/a&gt; section below.&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;common-utilities:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Common Utilities&lt;/h2&gt;
-
-&lt;p&gt;The &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/common&#34;&gt;&lt;code&gt;heron/common&lt;/code&gt;&lt;/a&gt; contains a variety of
-utilities for each of Heron&amp;rsquo;s languages, including useful constants, file
-utilities, networking interfaces, and more.&lt;/p&gt;
-
-&lt;h2 id=&#34;cluster-scheduling:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Cluster Scheduling&lt;/h2&gt;
-
-&lt;p&gt;Heron supports three cluster schedulers out of the box:
-&lt;a href=&#34;../../operators/deployment/schedulers/mesos&#34;&gt;Mesos&lt;/a&gt;,
-&lt;a href=&#34;../../operators/deployment/schedulers/aurora&#34;&gt;Aurora&lt;/a&gt;, and a &lt;a href=&#34;../../operators/deployment/schedulers/local&#34;&gt;local
-scheduler&lt;/a&gt;. The Java code for each of those
-schedulers can be found in &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/schedulers&#34;&gt;&lt;code&gt;heron/schedulers&lt;/code&gt;&lt;/a&gt;
-, while the underlying scheduler API can be found &lt;a href=&#34;http://localhost:1313/heron/api/com/twitter/heron/spi/scheduler/package-summary.html&#34;&gt;here&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Info on custom schedulers can be found in &lt;a href=&#34;../custom-scheduler&#34;&gt;Implementing a Custom
-Scheduler&lt;/a&gt;; info on the currently available schedulers
-can be found in &lt;a href=&#34;../../operators/deployment/schedulers/aurora&#34;&gt;Deploying Heron on
-Aurora&lt;/a&gt;, &lt;a href=&#34;../../operators/deployment/schedulers/mesos&#34;&gt;Deploying Heron on
-Mesos&lt;/a&gt;, and &lt;a href=&#34;../../operators/deployment/schedulers/local&#34;&gt;Local
-Deployment&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2 id=&#34;state-management:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;State Management&lt;/h2&gt;
-
-&lt;p&gt;The parts of Heron&amp;rsquo;s codebase related to
-&lt;a href=&#34;http://zookeeper.apache.org/&#34;&gt;ZooKeeper&lt;/a&gt; are mostly contained in
-&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/state&#34;&gt;&lt;code&gt;heron/state&lt;/code&gt;&lt;/a&gt;. There are ZooKeeper-facing
-interfaces for &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/state/src/cpp&#34;&gt;C++&lt;/a&gt;,
-&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/state/src/java&#34;&gt;Java&lt;/a&gt;, and
-&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/state/src/python&#34;&gt;Python&lt;/a&gt; that are used in a variety of
-Heron components.&lt;/p&gt;
-
-&lt;h2 id=&#34;topology-components:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Topology Components&lt;/h2&gt;
-
-&lt;h3 id=&#34;topology-master:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Topology Master&lt;/h3&gt;
-
-&lt;p&gt;The C++ code for Heron&amp;rsquo;s &lt;a href=&#34;../../concepts/architecture#topology-master&#34;&gt;Topology
-Master&lt;/a&gt; is written in C++ can be
-found in &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/tmaster&#34;&gt;&lt;code&gt;heron/tmaster&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h3 id=&#34;stream-manager:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Stream Manager&lt;/h3&gt;
-
-&lt;p&gt;The C++ code for Heron&amp;rsquo;s &lt;a href=&#34;../../concepts/architecture#stream-manager&#34;&gt;Stream
-Manager&lt;/a&gt; can be found in
-&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/stmgr&#34;&gt;&lt;code&gt;heron/stmgr&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h3 id=&#34;heron-instance:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Heron Instance&lt;/h3&gt;
-
-&lt;p&gt;The Java code for &lt;a href=&#34;../../concepts/architecture#heron-instance&#34;&gt;Heron
-instances&lt;/a&gt; can be found in
-&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/instance&#34;&gt;&lt;code&gt;heron/instance&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h3 id=&#34;metrics-manager:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Metrics Manager&lt;/h3&gt;
-
-&lt;p&gt;The Java code for Heron&amp;rsquo;s &lt;a href=&#34;../../concepts/architecture#metrics-manager&#34;&gt;Metrics
-Manager&lt;/a&gt; can be found in
-&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/metricsmgr&#34;&gt;&lt;code&gt;heron/metricsmgr&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;If you&amp;rsquo;d like to implement your own custom metrics handler (known as a &lt;strong&gt;metrics
-sink&lt;/strong&gt;), see &lt;a href=&#34;../custom-metrics-sink&#34;&gt;Implementing a Custom Metrics Sink&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2 id=&#34;developer-apis:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Developer APIs&lt;/h2&gt;
-
-&lt;h3 id=&#34;topology-api:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Topology API&lt;/h3&gt;
-
-&lt;p&gt;Heron&amp;rsquo;s API for writing topologies is written in Java. The code for this API can
-be found in &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/api&#34;&gt;&lt;code&gt;heron/api&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Documentation for writing topologies can be found in &lt;a href=&#34;../../developers/topologies&#34;&gt;Building
-Topologies&lt;/a&gt;, while API documentation can be found
-&lt;a href=&#34;http://localhost:1313/heron/api/com/twitter/heron/api/topology/package-summary.html&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h3 id=&#34;simulator:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Simulator&lt;/h3&gt;
-
-&lt;p&gt;Heron enables you to run topologies in &lt;a href=&#34;../../developers/simulator-mode&#34;&gt;&lt;code&gt;Simulator&lt;/code&gt;&lt;/a&gt;
-for debugging purposes.&lt;/p&gt;
-
-&lt;p&gt;The Java API for simulator can be found in
-&lt;a href=&#34;http://localhost:1313/heron/api/com/twitter/heron/simulator/package-summary.html&#34;&gt;&lt;code&gt;heron/simulator&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h3 id=&#34;example-topologies:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Example Topologies&lt;/h3&gt;
-
-&lt;p&gt;Heron&amp;rsquo;s codebase includes a wide variety of example
-&lt;a href=&#34;../../concepts/topologies&#34;&gt;topologies&lt;/a&gt; built using Heron&amp;rsquo;s topology API for
-Java. Those examples can be found in
-&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/examples&#34;&gt;&lt;code&gt;heron/examples&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2 id=&#34;user-interface-components:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;User Interface Components&lt;/h2&gt;
-
-&lt;h3 id=&#34;heron-cli:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Heron CLI&lt;/h3&gt;
-
-&lt;p&gt;Heron has a tool called &lt;code&gt;heron&lt;/code&gt; that is used to both provide a CLI interface
-for &lt;a href=&#34;../../operators/heron-cli&#34;&gt;managing topologies&lt;/a&gt; and to perform much of
-the heavy lifting behind assembling physical topologies in your cluster.
-The Python code for &lt;code&gt;heron&lt;/code&gt; can be found in
-&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/cli&#34;&gt;&lt;code&gt;heron/cli&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Sample configurations for different Heron schedulers&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;../../operators/deployment/schedulers/local&#34;&gt;Local scheduler&lt;/a&gt; config can be found in &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/config/src/yaml/conf/local&#34;&gt;&lt;code&gt;heron/config/src/yaml/conf/local&lt;/code&gt;&lt;/a&gt;,&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;../../operators/deployment/schedulers/aurora&#34;&gt;Aurora scheduler&lt;/a&gt; config can be found &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/config/src/yaml/conf/aurora&#34;&gt;&lt;code&gt;heron/config/src/yaml/conf/aurora&lt;/code&gt;&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&#34;heron-tracker:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Heron Tracker&lt;/h3&gt;
-
-&lt;p&gt;The Python code for the &lt;a href=&#34;../../operators/heron-tracker&#34;&gt;Heron Tracker&lt;/a&gt; can be
-found in &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/tracker&#34;&gt;&lt;code&gt;heron/tracker&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;The Tracker is a web server written in Python. It relies on the
-&lt;a href=&#34;http://www.tornadoweb.org/en/stable/&#34;&gt;Tornado&lt;/a&gt; framework. You can add new HTTP
-routes to the Tracker in
-&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/tracker/src/python/main.py&#34;&gt;&lt;code&gt;main.py&lt;/code&gt;&lt;/a&gt; and
-corresponding handlers in the
-&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/tracker/src/python/handlers&#34;&gt;&lt;code&gt;handlers&lt;/code&gt;&lt;/a&gt; directory.&lt;/p&gt;
-
-&lt;h3 id=&#34;heron-ui:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Heron UI&lt;/h3&gt;
-
-&lt;p&gt;The Python code for the &lt;a href=&#34;../../operators/heron-ui&#34;&gt;Heron UI&lt;/a&gt; can be found in
-&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/ui&#34;&gt;&lt;code&gt;heron/ui&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Like Heron Tracker, Heron UI is a web server written in Python that relies on
-the &lt;a href=&#34;http://www.tornadoweb.org/en/stable/&#34;&gt;Tornado&lt;/a&gt; framework. You can add new
-HTTP routes to Heron UI in
-&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/web/source/python/main.py&#34;&gt;&lt;code&gt;main.py&lt;/code&gt;&lt;/a&gt; and corresponding
-handlers in the &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/web/source/python/handlers&#34;&gt;&lt;code&gt;handlers&lt;/code&gt;&lt;/a&gt;
-directory.&lt;/p&gt;
-
-&lt;h3 id=&#34;heron-shell:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Heron Shell&lt;/h3&gt;
-
-&lt;p&gt;The Python code for the &lt;a href=&#34;../../operators/heron-shell&#34;&gt;Heron Shell&lt;/a&gt; can be
-found in &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/shell&#34;&gt;&lt;code&gt;heron/shell&lt;/code&gt;&lt;/a&gt;. The HTTP handlers and
-web server are defined in
-&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/shell/src/python/main.py&#34;&gt;&lt;code&gt;main.py&lt;/code&gt;&lt;/a&gt; while the HTML,
-JavaScript, CSS, and images for the web UI can be found in the
-&lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/shell/assets&#34;&gt;&lt;code&gt;assets&lt;/code&gt;&lt;/a&gt; directory.&lt;/p&gt;
-
-&lt;h2 id=&#34;tests:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Tests&lt;/h2&gt;
-
-&lt;p&gt;There are a wide variety of tests for Heron that are scattered throughout the
-codebase. For more info see &lt;a href=&#34;../testing&#34;&gt;Testing Heron&lt;/a&gt;.&lt;/p&gt;
+      <guid>http://twitter.github.io/heron/docs/contributors/license/</guid>
+      <description>&lt;!-- TODO --&gt;
 </description>
     </item>
     
     <item>
       <title>Implementing a Custom Scheduler</title>
-      <link>http://localhost:1313/heron/docs/contributors/custom-scheduler/</link>
+      <link>http://twitter.github.io/heron/docs/contributors/custom-scheduler/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/heron/docs/contributors/custom-scheduler/</guid>
+      <guid>http://twitter.github.io/heron/docs/contributors/custom-scheduler/</guid>
       <description>
 
 &lt;p&gt;To run a Heron cluster, you&amp;rsquo;ll need to set up a scheduler that is responsible
@@ -779,7 +795,7 @@ for cluster management. Heron supports three schedulers out of the box:&lt;/p&gt
 &lt;p&gt;If you&amp;rsquo;d like to run Heron on a not-yet-supported system, such as
 &lt;a href=&#34;https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-site/YARN.html&#34;&gt;YARN&lt;/a&gt;
 or &lt;a href=&#34;https://aws.amazon.com/ecs/&#34;&gt;Amazon ECS&lt;/a&gt;, you can create your own scheduler
-using Heron&amp;rsquo;s &lt;a href=&#34;http://localhost:1313/heron/api/scheduler/index.html&#34;&gt;scheduler API&lt;/a&gt;, as detailed in the
+using Heron&amp;rsquo;s &lt;a href=&#34;http://twitter.github.io/heron/api/scheduler/index.html&#34;&gt;scheduler API&lt;/a&gt;, as detailed in the
 sections below.&lt;/p&gt;
 
 &lt;p&gt;Java is currently the only supported language for custom schedulers. This may
@@ -822,33 +838,33 @@ interfaces:&lt;/p&gt;
 
 &lt;tbody&gt;
 &lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;a href=&#34;http://localhost:1313/heron/api/com/twitter/heron/spi/scheduler/IConfigLoader.html&#34;&gt;&lt;code&gt;IConfigLoader&lt;/code&gt;&lt;/a&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/spi/scheduler/IConfigLoader.html&#34;&gt;&lt;code&gt;IConfigLoader&lt;/code&gt;&lt;/a&gt;&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Parsing and loading of configuration for the scheduler&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;a href=&#34;http://localhost:1313/heron/api/scheduler/com/twitter/heron/scheduler/aurora/AuroraConfigLoader.html&#34;&gt;Aurora&lt;/a&gt;, &lt;a href=&#34;http://localhost:1313/heron/api/scheduler/com/twitter/heron/scheduler/mesos/MesosConfigLoader.html&#34;&gt;Mesos&lt;/a&gt;, &lt;a href=&#34;http://localhost:1313/heron/api/scheduler/com/twitter/heron/scheduler/local/LocalConfigLoader.html&#34;&gt;local&lt;/a&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;a href=&#34;http://twitter.github.io/heron/api/scheduler/com/twitter/heron/scheduler/aurora/AuroraConfigLoader.html&#34;&gt;Aurora&lt;/a&gt;, &lt;a href=&#34;http://twitter.github.io/heron/api/scheduler/com/twitter/heron/scheduler/mesos/MesosConfigLoader.html&#34;&gt;Mesos&lt;/a&gt;, &lt;a href=&#34;http://twitter.github.io/heron/api/scheduler/com/twitter/heron/scheduler/local/LocalConfigLoader.html&#34;&gt;local&lt;/a&gt;&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;a href=&#34;http://localhost:1313/heron/api/com/twitter/heron/spi/scheduler/ILauncher.html&#34;&gt;&lt;code&gt;ILauncher&lt;/code&gt;&lt;/a&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/spi/scheduler/ILauncher.html&#34;&gt;&lt;code&gt;ILauncher&lt;/code&gt;&lt;/a&gt;&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Defines how the scheduler is launched&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;a href=&#34;http://localhost:1313/heron/api/scheduler/com/twitter/heron/scheduler/aurora/AuroraLauncher.html&#34;&gt;Aurora&lt;/a&gt;, &lt;a href=&#34;http://localhost:1313/heron/api/scheduler/com/twitter/heron/scheduler/mesos/MesosLauncher.html&#34;&gt;Mesos&lt;/a&gt;, &lt;a href=&#34;http://localhost:1313/heron/api/scheduler/com/twitter/heron/scheduler/local/LocalLauncher.html&#34;&gt;local&lt;/a&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;a href=&#34;http://twitter.github.io/heron/api/scheduler/com/twitter/heron/scheduler/aurora/AuroraLauncher.html&#34;&gt;Aurora&lt;/a&gt;, &lt;a href=&#34;http://twitter.github.io/heron/api/scheduler/com/twitter/heron/scheduler/mesos/MesosLauncher.html&#34;&gt;Mesos&lt;/a&gt;, &lt;a href=&#34;http://twitter.github.io/heron/api/scheduler/com/twitter/heron/scheduler/local/LocalLauncher.html&#34;&gt;local&lt;/a&gt;&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;a href=&#34;http://localhost:1313/heron/api/com/twitter/heron/spi/scheduler/IRuntimeManager.html&#34;&gt;&lt;code&gt;IRuntimeManager&lt;/code&gt;&lt;/a&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/spi/scheduler/IRuntimeManager.html&#34;&gt;&lt;code&gt;IRuntimeManager&lt;/code&gt;&lt;/a&gt;&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Handles runtime tasks such as activating topologies, killing topologies, etc.&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;a href=&#34;http://localhost:1313/heron/api/scheduler/com/twitter/heron/scheduler/aurora/AuroraTopologyRuntimeManager.html&#34;&gt;Aurora&lt;/a&gt;, &lt;a href=&#34;http://localhost:1313/heron/api/scheduler/com/twitter/heron/scheduler/mesos/MesosTopologyRuntimeManager.html&#34;&gt;Mesos&lt;/a&gt;, &lt;a href=&#34;http://localhost:1313/heron/api/scheduler/com/twitter/heron/scheduler/local/LocalTopologyRuntimeManager.html&#34;&gt;local&lt;/a&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;a href=&#34;http://twitter.github.io/heron/api/scheduler/com/twitter/heron/scheduler/aurora/AuroraTopologyRuntimeManager.html&#34;&gt;Aurora&lt;/a&gt;, &lt;a href=&#34;http://twitter.github.io/heron/api/scheduler/com/twitter/heron/scheduler/mesos/MesosTopologyRuntimeManager.html&#34;&gt;Mesos&lt;/a&gt;, &lt;a href=&#34;http://twitter.github.io/heron/api/scheduler/com/twitter/heron/scheduler/local/LocalTopologyRuntimeManager.html&#34;&gt;local&lt;/a&gt;&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;a href=&#34;http://localhost:1313/heron/api/com/twitter/heron/spi/scheduler/IScheduler.html&#34;&gt;&lt;code&gt;IScheduler&lt;/code&gt;&lt;/a&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/spi/scheduler/IScheduler.html&#34;&gt;&lt;code&gt;IScheduler&lt;/code&gt;&lt;/a&gt;&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Defines the scheduler object used to construct topologies&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;a href=&#34;http://localhost:1313/heron/api/scheduler/com/twitter/heron/scheduler/mesos/MesosScheduler.html&#34;&gt;Mesos&lt;/a&gt;, &lt;a href=&#34;http://localhost:1313/heron/api/scheduler/com/twitter/heron/scheduler/local/LocalScheduler.html&#34;&gt;local&lt;/a&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;a href=&#34;http://twitter.github.io/heron/api/scheduler/com/twitter/heron/scheduler/mesos/MesosScheduler.html&#34;&gt;Mesos&lt;/a&gt;, &lt;a href=&#34;http://twitter.github.io/heron/api/scheduler/com/twitter/heron/scheduler/local/LocalScheduler.html&#34;&gt;local&lt;/a&gt;&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;a href=&#34;http://localhost:1313/heron/api/com/twitter/heron/spi/scheduler/IUploader.html&#34;&gt;&lt;code&gt;IUploader&lt;/code&gt;&lt;/a&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/spi/scheduler/IUploader.html&#34;&gt;&lt;code&gt;IUploader&lt;/code&gt;&lt;/a&gt;&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Uploads the topology to a shared location that must be accessible to the runtime environment of the topology&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;[Aurora](), [Mesos](), &lt;a href=&#34;http://localhost:1313/heron/api/scheduler/com/twitter/heron/scheduler/local/LocalUploader.html&#34;&gt;local&lt;/a&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;[Aurora](), [Mesos](), &lt;a href=&#34;http://twitter.github.io/heron/api/scheduler/com/twitter/heron/scheduler/local/LocalUploader.html&#34;&gt;local&lt;/a&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
@@ -860,14 +876,14 @@ when you &lt;a href=&#34;../../developers/compiling&#34;&gt;compile Heron&lt;/a&
 &lt;h2 id=&#34;loading-configuration:d5ff206629d5018d6f4c39fb3876767f&#34;&gt;Loading Configuration&lt;/h2&gt;
 
 &lt;p&gt;You can set up a configuration loader for a custom scheduler by implementing the
-&lt;a href=&#34;http://localhost:1313/heron/api/com/twitter/heron/spi/scheduler/IConfig.html&#34;&gt;&lt;code&gt;IConfig&lt;/code&gt;&lt;/a&gt;
+&lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/spi/scheduler/IConfig.html&#34;&gt;&lt;code&gt;IConfig&lt;/code&gt;&lt;/a&gt;
 interface. You can use this interface to load configuration from any source
 you&amp;rsquo;d like, e.g. YAML files, JSON files, or a web service.&lt;/p&gt;
 
 &lt;p&gt;If you&amp;rsquo;d like to load configuration from files using the same syntax as Heron&amp;rsquo;s
 default configuration files for the Aurora, Mesos, and local schedulers (in
 &lt;code&gt;heron/cli2/src/python&lt;/code&gt;), you can implement the
-&lt;a href=&#34;http://localhost:1313/heron/api/scheduler/com/twitter/heron/scheduler/util/DefaultConfigLoader.html&#34;&gt;&lt;code&gt;DefaultConfigLoader&lt;/code&gt;&lt;/a&gt;
+&lt;a href=&#34;http://twitter.github.io/heron/api/scheduler/com/twitter/heron/scheduler/util/DefaultConfigLoader.html&#34;&gt;&lt;code&gt;DefaultConfigLoader&lt;/code&gt;&lt;/a&gt;
 interface.&lt;/p&gt;
 
 &lt;h2 id=&#34;configurable-parameters:d5ff206629d5018d6f4c39fb3876767f&#34;&gt;Configurable Parameters&lt;/h2&gt;
@@ -875,7 +891,7 @@ interface.&lt;/p&gt;
 &lt;p&gt;At the very least, your configuration loader will need to be able to load the
 class names (as strings) for your implementations of the components listed
 above, as you can see from the interface definition for
-&lt;a href=&#34;http://localhost:1313/heron/api/com/twitter/heron/spi/scheduler/IConfigLoader.html&#34;&gt;&lt;code&gt;IConfigLoader&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+&lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/spi/scheduler/IConfigLoader.html&#34;&gt;&lt;code&gt;IConfigLoader&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
 
 &lt;h2 id=&#34;trying-out-your-scheduler:d5ff206629d5018d6f4c39fb3876767f&#34;&gt;Trying Out Your Scheduler&lt;/h2&gt;
 
@@ -896,10 +912,10 @@ submission&lt;/a&gt; command:&lt;/p&gt;
     
     <item>
       <title>Governance</title>
-      <link>http://localhost:1313/heron/docs/contributors/governance/</link>
+      <link>http://twitter.github.io/heron/docs/contributors/governance/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/heron/docs/contributors/governance/</guid>
+      <guid>http://twitter.github.io/heron/docs/contributors/governance/</guid>
       <description>
 
 &lt;p&gt;The Heron project was initially developed at Twitter and is now led by a group of self-managing core contributors with additional contributions by the community. Core contributors expect that candidate core contributors will successfully submit a number of patches or new functionality, demonstrate an understanding of project codebase, and express a willingness to be active group members before they become core contributors.&lt;/p&gt;
@@ -986,99 +1002,11 @@ submission&lt;/a&gt; command:&lt;/p&gt;
     </item>
     
     <item>
-      <title>Twitter License Agreement (CLA)</title>
-      <link>http://localhost:1313/heron/docs/contributors/license/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>http://localhost:1313/heron/docs/contributors/license/</guid>
-      <description>&lt;!-- TODO --&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Feature Roadmap</title>
-      <link>http://localhost:1313/heron/docs/contributors/roadmap/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>http://localhost:1313/heron/docs/contributors/roadmap/</guid>
-      <description>
-
-&lt;p&gt;This document describes the Heron core contributors’ plans for introducing features that will be incorporated into version 1.0. Note that this roadmap only includes features that the Heron core contributors team itself intends to support. We anticipate that a number of other features will be added by community contributors.&lt;/p&gt;
-
-&lt;p&gt;For beta releases, the Heron team will maintain two code repositories:&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;&lt;p&gt;A non-public Twitter-internal repository, containing both the mirror of the public Heron Github repository and small proprietary Twitter-specific extensions and features.&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;An external &lt;a href=&#34;https://github.com/twitter/heron&#34;&gt;GitHub repository&lt;/a&gt;, containing only the Heron code.&lt;/p&gt;&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h3 id=&#34;feature-list:cd4a1b36ed2b93cfc52abf77a7d25d03&#34;&gt;Feature list&lt;/h3&gt;
-
-&lt;p&gt;In the following list, each feature is associated with a corresponding milestone. The convention for the priorities are:&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;&lt;p&gt;&lt;code&gt;P0&lt;/code&gt; feature will block the milestone; we will delay the milestone date until the feature is shipped.&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;&lt;code&gt;P1&lt;/code&gt; feature can delay the milestone if the feature can be shipped with a reasonable delay (2 months max).&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;&lt;code&gt;P2&lt;/code&gt; feature will be dropped and rescheduled for later rather than delaying the milestone.&lt;/p&gt;&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;!--
-TODO - add feature Roadmap
---&gt;
-
-&lt;p&gt;We will update this list when reaching each milestone; some milestones may also be refined if appropriate.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Support Policy</title>
-      <link>http://localhost:1313/heron/docs/contributors/support/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>http://localhost:1313/heron/docs/contributors/support/</guid>
-      <description>
-
-&lt;p&gt;Core contributors generally avoid making backwards-incompatible changes and are dedicated to remain backwards-compatible with the &lt;a href=&#34;http://storm.apache.org/&#34;&gt;Apache Storm API&lt;/a&gt; whenever possible. Substantial unit and integration tests are performed before every release to reasonably ensure reliability at scale.&lt;/p&gt;
-
-&lt;p&gt;However, occasionally backwards-incompatible changes are required in order to fix bugs, to make further improvements to the system, such as improving performance or usability, or to lock down APIs that are known to be brittle.&lt;/p&gt;
-
-&lt;p&gt;This document gives an overview of features that are widely used and considered stable. Stability implies that changes will be backwards compatible, or that a migration path is provided.  It also covers features that are unstable. Unstable features are not yet widely used, or are already planned to change them significantly, possibly in ways that are not backwards compatible.&lt;/p&gt;
-
-&lt;p&gt;Before a major change happens, you can reasonably expect that advanced notice will be provided on the mailing list. Just ask on heron-users@googlegroups.com.&lt;/p&gt;
-
-&lt;p&gt;All undocumented features are subject to change at any time without prior notice. Features that are documented but marked &lt;em&gt;experimental&lt;/em&gt; are also subject to change at any time without prior notice.&lt;/p&gt;
-
-&lt;p&gt;Heron relies on the Google &lt;a href=&#34;http://bazel.io&#34;&gt;Bazel&lt;/a&gt; build tool which is also in Beta.  Therefore, the Bazel Skylark macro and rules language (anything written in a .bzl file) is still subject to change. The Bazel Google group is in the process of migrating Google to Skylark, and expect the macro language to stabilize as part of that process.&lt;/p&gt;
-
-&lt;p&gt;Please help keep discover issues: report bugs and regressions in the &lt;a href=&#34;https://github.com/twitter/heron/issues&#34;&gt;GitHub bugtracker&lt;/a&gt;. Heron core contributors will make an effort to triage all reported issues within 2 business days.&lt;/p&gt;
-
-&lt;h3 id=&#34;releases:e39f786d0e9bcf34ce833b34fbb0c090&#34;&gt;Releases&lt;/h3&gt;
-
-&lt;p&gt;We regularly publish &lt;a href=&#34;https://github.com/twitter/heron/releases&#34;&gt;binary releases of Heron&lt;/a&gt;. To that end, release candidates are announced on heron-users; these are binaries that have passed all unit and integration tests. Over the next few days, regression tests are run, such as on applicable build targets at Twitter. If you have a critical project using Heron, it is recommended that you establish an automated testing process that tracks the current release candidate, and report any regressions.&lt;/p&gt;
-
-&lt;p&gt;If no regressions are discovered, official binaries are released after a week. However, regressions can delay the release of a release candidate. If regressions are found, corresponding cherry-picks are applied to the release candidate to fix those regressions. If no further regressions are found for two business days, but not before a week has elapsed since the first release candidate, the full binaries are released.&lt;/p&gt;
-
-&lt;h3 id=&#34;release-versioning:e39f786d0e9bcf34ce833b34fbb0c090&#34;&gt;Release versioning&lt;/h3&gt;
-
-&lt;p&gt;Version 0.14.0 is our first release marking the start of our beta phase. Until version 1.0.0, we increase the MINOR version every time we reach a new milestone.
-Version 1.0.0 marks the end of our beta phase; afterwards, we will label each release with a version number of the form MAJOR.MINOR.PATCH according to the &lt;a href=&#34;http://semver.org/&#34;&gt;semantic version 2.0.0 document&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h3 id=&#34;current-status:e39f786d0e9bcf34ce833b34fbb0c090&#34;&gt;Current Status&lt;/h3&gt;
-
-&lt;p&gt;Stable
-We expect the following rules and features to be stable. They are widely used within Twitter, so our internal testing should ensure that there are no major breakages.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
       <title>Testing Heron</title>
-      <link>http://localhost:1313/heron/docs/contributors/testing/</link>
+      <link>http://twitter.github.io/heron/docs/contributors/testing/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/heron/docs/contributors/testing/</guid>
+      <guid>http://twitter.github.io/heron/docs/contributors/testing/</guid>
       <description>
 
 &lt;p&gt;Heron uses &lt;a href=&#34;../../developers/compiling#installing-bazel&#34;&gt;Bazel&lt;/a&gt; for building
@@ -1141,11 +1069,51 @@ python integration-test/src/python/local_test_runner/main.py
     </item>
     
     <item>
-      <title>Compiling Heron</title>
-      <link>http://localhost:1313/heron/docs/developers/compiling/compiling/</link>
+      <title>Support Policy</title>
+      <link>http://twitter.github.io/heron/docs/contributors/support/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/heron/docs/developers/compiling/compiling/</guid>
+      <guid>http://twitter.github.io/heron/docs/contributors/support/</guid>
+      <description>
+
+&lt;p&gt;Core contributors generally avoid making backwards-incompatible changes and are dedicated to remain backwards-compatible with the &lt;a href=&#34;http://storm.apache.org/&#34;&gt;Apache Storm API&lt;/a&gt; whenever possible. Substantial unit and integration tests are performed before every release to reasonably ensure reliability at scale.&lt;/p&gt;
+
+&lt;p&gt;However, occasionally backwards-incompatible changes are required in order to fix bugs, to make further improvements to the system, such as improving performance or usability, or to lock down APIs that are known to be brittle.&lt;/p&gt;
+
+&lt;p&gt;This document gives an overview of features that are widely used and considered stable. Stability implies that changes will be backwards compatible, or that a migration path is provided.  It also covers features that are unstable. Unstable features are not yet widely used, or are already planned to change them significantly, possibly in ways that are not backwards compatible.&lt;/p&gt;
+
+&lt;p&gt;Before a major change happens, you can reasonably expect that advanced notice will be provided on the mailing list. Just ask on heron-users@googlegroups.com.&lt;/p&gt;
+
+&lt;p&gt;All undocumented features are subject to change at any time without prior notice. Features that are documented but marked &lt;em&gt;experimental&lt;/em&gt; are also subject to change at any time without prior notice.&lt;/p&gt;
+
+&lt;p&gt;Heron relies on the Google &lt;a href=&#34;http://bazel.io&#34;&gt;Bazel&lt;/a&gt; build tool which is also in Beta.  Therefore, the Bazel Skylark macro and rules language (anything written in a .bzl file) is still subject to change. The Bazel Google group is in the process of migrating Google to Skylark, and expect the macro language to stabilize as part of that process.&lt;/p&gt;
+
+&lt;p&gt;Please help keep discover issues: report bugs and regressions in the &lt;a href=&#34;https://github.com/twitter/heron/issues&#34;&gt;GitHub bugtracker&lt;/a&gt;. Heron core contributors will make an effort to triage all reported issues within 2 business days.&lt;/p&gt;
+
+&lt;h3 id=&#34;releases:e39f786d0e9bcf34ce833b34fbb0c090&#34;&gt;Releases&lt;/h3&gt;
+
+&lt;p&gt;We regularly publish &lt;a href=&#34;https://github.com/twitter/heron/releases&#34;&gt;binary releases of Heron&lt;/a&gt;. To that end, release candidates are announced on heron-users; these are binaries that have passed all unit and integration tests. Over the next few days, regression tests are run, such as on applicable build targets at Twitter. If you have a critical project using Heron, it is recommended that you establish an automated testing process that tracks the current release candidate, and report any regressions.&lt;/p&gt;
+
+&lt;p&gt;If no regressions are discovered, official binaries are released after a week. However, regressions can delay the release of a release candidate. If regressions are found, corresponding cherry-picks are applied to the release candidate to fix those regressions. If no further regressions are found for two business days, but not before a week has elapsed since the first release candidate, the full binaries are released.&lt;/p&gt;
+
+&lt;h3 id=&#34;release-versioning:e39f786d0e9bcf34ce833b34fbb0c090&#34;&gt;Release versioning&lt;/h3&gt;
+
+&lt;p&gt;Version 0.14.0 is our first release marking the start of our beta phase. Until version 1.0.0, we increase the MINOR version every time we reach a new milestone.
+Version 1.0.0 marks the end of our beta phase; afterwards, we will label each release with a version number of the form MAJOR.MINOR.PATCH according to the &lt;a href=&#34;http://semver.org/&#34;&gt;semantic version 2.0.0 document&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&#34;current-status:e39f786d0e9bcf34ce833b34fbb0c090&#34;&gt;Current Status&lt;/h3&gt;
+
+&lt;p&gt;Stable
+We expect the following rules and features to be stable. They are widely used within Twitter, so our internal testing should ensure that there are no major breakages.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Compiling Heron</title>
+      <link>http://twitter.github.io/heron/docs/developers/compiling/compiling/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://twitter.github.io/heron/docs/developers/compiling/compiling/</guid>
       <description>
 
 &lt;p&gt;Heron is currently available for &lt;a href=&#34;../../../developers/compiling/mac&#34;&gt;Mac OS X 10.10&lt;/a&gt;,
@@ -1263,11 +1231,240 @@ the following command will build the &lt;a href=&#34;../../../operators/heron-tr
     </item>
     
     <item>
-      <title>Linux Platforms</title>
-      <link>http://localhost:1313/heron/docs/developers/compiling/linux/</link>
+      <title>Feature Roadmap</title>
+      <link>http://twitter.github.io/heron/docs/contributors/roadmap/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/heron/docs/developers/compiling/linux/</guid>
+      <guid>http://twitter.github.io/heron/docs/contributors/roadmap/</guid>
+      <description>
+
+&lt;p&gt;This document describes the Heron core contributors’ plans for introducing features that will be incorporated into version 1.0. Note that this roadmap only includes features that the Heron core contributors team itself intends to support. We anticipate that a number of other features will be added by community contributors.&lt;/p&gt;
+
+&lt;p&gt;For beta releases, the Heron team will maintain two code repositories:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;A non-public Twitter-internal repository, containing both the mirror of the public Heron Github repository and small proprietary Twitter-specific extensions and features.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;An external &lt;a href=&#34;https://github.com/twitter/heron&#34;&gt;GitHub repository&lt;/a&gt;, containing only the Heron code.&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&#34;feature-list:cd4a1b36ed2b93cfc52abf77a7d25d03&#34;&gt;Feature list&lt;/h3&gt;
+
+&lt;p&gt;In the following list, each feature is associated with a corresponding milestone. The convention for the priorities are:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;&lt;code&gt;P0&lt;/code&gt; feature will block the milestone; we will delay the milestone date until the feature is shipped.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;code&gt;P1&lt;/code&gt; feature can delay the milestone if the feature can be shipped with a reasonable delay (2 months max).&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;code&gt;P2&lt;/code&gt; feature will be dropped and rescheduled for later rather than delaying the milestone.&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;!--
+TODO - add feature Roadmap
+--&gt;
+
+&lt;p&gt;We will update this list when reaching each milestone; some milestones may also be refined if appropriate.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Compiling With Docker</title>
+      <link>http://twitter.github.io/heron/docs/developers/compiling/docker/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://twitter.github.io/heron/docs/developers/compiling/docker/</guid>
+      <description>
+
+&lt;p&gt;For developing Heron, you will need to compile it for the environment that you
+want to use it in. If you&amp;rsquo;d like to use Docker to create that build environment,
+Heron provides a convenient script to make that process easier.&lt;/p&gt;
+
+&lt;p&gt;Currently, only Ubuntu 14.04, Ubuntu 15.10, and CentOS 7 are supported, but if you
+need another platform there are instructions for adding new ones
+&lt;a href=&#34;#contributing-new-environments&#34;&gt;below&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&#34;requirements:69e60651f42783a7df723575c4088b5b&#34;&gt;Requirements&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.docker.com&#34;&gt;Docker&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;running-docker-in-a-virtual-machine:69e60651f42783a7df723575c4088b5b&#34;&gt;Running Docker in a Virtual Machine&lt;/h3&gt;
+
+&lt;p&gt;If you are running Docker in a virtual machine (VM), it is recommended that you
+adjust your settings to help speed up the build. To do this, open
+&lt;a href=&#34;https://www.virtualbox.org/wiki/Downloads&#34;&gt;VirtualBox&lt;/a&gt; and go to the container
+in which Docker is running (usually &amp;ldquo;default&amp;rdquo; or whatever name you used to
+create the VM), click on the VM, and then click on &lt;strong&gt;Settings&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: You will need to stop the VM before modifying these settings.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://twitter.github.io/heron/img/virtual-box-processors.png&#34; alt=&#34;VirtualBox Processors&#34; /&gt;
+
+&lt;img src=&#34;http://twitter.github.io/heron/img/virtual-box-memory.png&#34; alt=&#34;VirtualBox Memory&#34; /&gt;
+&lt;/p&gt;
+
+&lt;h2 id=&#34;building-heron:69e60651f42783a7df723575c4088b5b&#34;&gt;Building Heron&lt;/h2&gt;
+
+&lt;p&gt;Heron provides a &lt;code&gt;build-arfifacts.sh&lt;/code&gt; script for Docker located in the
+&lt;code&gt;docker&lt;/code&gt; folder. To run that script:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$ cd /path/to/heron/repo
+$ docker/build-artifacts.sh
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Running the script by itself will display usage information:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Usage: docker/build-artifacts.sh &amp;lt;platform&amp;gt; &amp;lt;version_string&amp;gt; [source-tarball] &amp;lt;output-directory&amp;gt; 
+  
+Platforms Supported: darwin, ubuntu14.04, ubuntu15.10, centos7
+  
+Example:
+  ./build-artifacts.sh ubuntu14.04 0.12.0 .
+  
+NOTE: If running on OSX, the output directory will need to 
+      be under /Users so virtualbox has access to.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The following arguments are required:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;platform&lt;/code&gt; &amp;mdash; Currently, this can be one of: &lt;code&gt;ubuntu14.04&lt;/code&gt;, &lt;code&gt;centos7&lt;/code&gt;. You
+can add other platforms using the &lt;a href=&#34;#contributing-new-environments&#34;&gt;instructions
+below&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;version-string&lt;/code&gt; &amp;mdash; The Heron release for which you&amp;rsquo;d like to build
+artifacts.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;output-directory&lt;/code&gt; &amp;mdash; The directory in which you&amp;rsquo;d like the release to be
+built.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Here&amp;rsquo;s an example usage:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$ docker/build-artifacts.sh ubuntu14.04 0.12.0 ~/heron-release
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will build a Docker container specific to Ubuntu 14.04, create a source
+tarball of the Heron repository, run a full release build of Heron, and then
+copy the artifacts into the &lt;code&gt;~/heron-release&lt;/code&gt; directory.&lt;/p&gt;
+
+&lt;p&gt;Optionally, you can also include a tarball of the Heron source if you have one.
+By default, the script will create a tarball of the current source in the Heron
+repo and use that to build the artifacts.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: If you are running on Mac OS X, Docker must be run inside a VM.
+Therefore, you must make sure that both the source tarball and destination
+directory are somewhere under your home directory. For example, you cannot
+output the Heron artifacts to &lt;code&gt;/tmp&lt;/code&gt; because &lt;code&gt;/tmp&lt;/code&gt; refers to the directory
+inside the VM, not on the host machine. Your home directory, however, is
+automatically linked in to the VM and can be accessed normally.&lt;/p&gt;
+
+&lt;p&gt;After the build has completed, you can go to your output directory and see all
+of the generated artifacts:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$ ls ~/heron-release
+heron-api-0.12.0-ubuntu14.04.tar.gz
+heron-client-0.12.0-ubuntu14.04.tar.gz 
+heron-tools-0.12.0-ubuntu14.04.tar.gz
+heron-client-install-0.12.0-ubuntu.sh  
+heron-tools-install-0.12.0-ubuntu.sh
+heron-api-install-0.12.0-ubuntu.sh     
+heron-core-0.12.0-ubuntu.tar.gz
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;contributing-new-environments:69e60651f42783a7df723575c4088b5b&#34;&gt;Contributing New Environments&lt;/h2&gt;
+
+&lt;p&gt;You&amp;rsquo;ll notice that there are multiple
+&lt;a href=&#34;https://docs.docker.com/engine/reference/builder/&#34;&gt;Dockerfiles&lt;/a&gt; in the &lt;code&gt;docker&lt;/code&gt;
+directory of Heron&amp;rsquo;s source code, one for each of the currently supported
+platforms.&lt;/p&gt;
+
+&lt;p&gt;To add support for a new platform, add a new &lt;code&gt;Dockerfile&lt;/code&gt; to that directory and
+append the name of the platform to the name of the file. If you&amp;rsquo;d like to add
+support for Debian 8, for example, add a file named &lt;code&gt;Dockerfile.debian8&lt;/code&gt;. Once
+you&amp;rsquo;ve done that, follow the instructions in the &lt;a href=&#34;https://docs.docker.com/engine/articles/dockerfile_best-practices/&#34;&gt;Docker
+documentation&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;You should make sure that your &lt;code&gt;Dockerfile&lt;/code&gt; specifies &lt;em&gt;at least&lt;/em&gt; all of the
+following:&lt;/p&gt;
+
+&lt;h4 id=&#34;step-1-the-os-being-used-in-a-from-https-docs-docker-com-engine-reference-builder-from-statement:69e60651f42783a7df723575c4088b5b&#34;&gt;Step 1 - The OS being used in a &lt;a href=&#34;https://docs.docker.com/engine/reference/builder/#from&#34;&gt;&lt;code&gt;FROM&lt;/code&gt;&lt;/a&gt; statement.&lt;/h4&gt;
+
+&lt;p&gt;Here&amp;rsquo;s an example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-dockerfile&#34;&gt;FROM centos:centos7
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;step-2-a-target-platform-environment-variable-using-the-env-https-docs-docker-com-engine-reference-builder-env-instruction:69e60651f42783a7df723575c4088b5b&#34;&gt;Step 2 - A &lt;code&gt;TARGET_PLATFORM&lt;/code&gt; environment variable using the &lt;a href=&#34;https://docs.docker.com/engine/reference/builder/#env&#34;&gt;&lt;code&gt;ENV&lt;/code&gt;&lt;/a&gt; instruction.&lt;/h4&gt;
+
+&lt;p&gt;Here&amp;rsquo;s an example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-dockerfile&#34;&gt;ENV TARGET_PLATFORM centos
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;step-3-a-general-dependency-installation-script-using-a-run-https-docs-docker-com-engine-reference-builder-run-instruction:69e60651f42783a7df723575c4088b5b&#34;&gt;Step 3 - A general dependency installation script using a &lt;a href=&#34;https://docs.docker.com/engine/reference/builder/#run&#34;&gt;&lt;code&gt;RUN&lt;/code&gt;&lt;/a&gt; instruction.&lt;/h4&gt;
+
+&lt;p&gt;Here&amp;rsquo;s an example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-dockerfile&#34;&gt;RUN apt-get update &amp;amp;&amp;amp; apt-get -y install \
+         automake \
+         build-essential \
+         cmake \
+         curl \
+         libssl-dev \
+         git \
+         libtool \
+         libunwind8 \
+         libunwind-setjmp0-dev \
+         python \
+         python2.7-dev \
+         python-software-properties \
+         software-properties-common \
+         python-setuptools \
+         unzip \
+         wget
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;step-4-an-installation-script-for-java-8-and-a-java-home-environment-variable:69e60651f42783a7df723575c4088b5b&#34;&gt;Step 4 - An installation script for Java 8 and a &lt;code&gt;JAVA_HOME&lt;/code&gt; environment variable.&lt;/h4&gt;
+
+&lt;p&gt;Here&amp;rsquo;s an example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-dockerfile&#34;&gt;RUN \
+     echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections &amp;amp;&amp;amp; \
+     add-apt-repository -y ppa:webupd8team/java &amp;amp;&amp;amp; \
+     apt-get update &amp;amp;&amp;amp; \
+     apt-get install -y oracle-java8-installer &amp;amp;&amp;amp; \
+     rm -rf /var/lib/apt/lists/* &amp;amp;&amp;amp; \
+     rm -rf /var/cache/oracle-jdk8-installer
+
+ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;step-5-an-installation-script-for-bazel-http-bazel-io-version-0-1-2-or-above:69e60651f42783a7df723575c4088b5b&#34;&gt;Step 5 - An installation script for &lt;a href=&#34;http://bazel.io/&#34;&gt;Bazel&lt;/a&gt; version 0.1.2 or above.&lt;/h4&gt;
+
+&lt;p&gt;Here&amp;rsquo;s an example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-dockerfile&#34;&gt;RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh \
+         &amp;amp;&amp;amp; chmod +x /tmp/bazel.sh \
+         &amp;amp;&amp;amp; /tmp/bazel.sh
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&#34;step-6-add-the-bazelrc-configuration-file-for-bazel-and-the-compile-sh:69e60651f42783a7df723575c4088b5b&#34;&gt;Step 6 - Add the &lt;code&gt;bazelrc&lt;/code&gt; configuration file for Bazel and the &lt;code&gt;compile.sh&lt;/code&gt;&lt;/h4&gt;
+
+&lt;p&gt;script (from the &lt;code&gt;docker&lt;/code&gt; folder) that compiles Heron:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-dockerfile&#34;&gt;ADD bazelrc /root/.bazelrc
+ADD compile.sh /compile.sh
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Linux Platforms</title>
+      <link>http://twitter.github.io/heron/docs/developers/compiling/linux/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://twitter.github.io/heron/docs/developers/compiling/linux/</guid>
       <description>
 
 &lt;ul&gt;
@@ -1454,258 +1651,35 @@ bazel build --config=centos scripts/packages:tarpkgs
     </item>
     
     <item>
-      <title>Compiling With Docker</title>
-      <link>http://localhost:1313/heron/docs/developers/compiling/docker/</link>
+      <title>Implementing a Bolt</title>
+      <link>http://twitter.github.io/heron/docs/developers/java/bolts/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/heron/docs/developers/compiling/docker/</guid>
-      <description>
+      <guid>http://twitter.github.io/heron/docs/developers/java/bolts/</guid>
+      <description>&lt;p&gt;Bolts must implement the &lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/api/bolt/IBolt.html&#34;&gt;&lt;code&gt;IBolt&lt;/code&gt;&lt;/a&gt; interface.&lt;/p&gt;
 
-&lt;p&gt;For developing Heron, you will need to compile it for the environment that you
-want to use it in. If you&amp;rsquo;d like to use Docker to create that build environment,
-Heron provides a convenient script to make that process easier.&lt;/p&gt;
-
-&lt;p&gt;Currently, only Ubuntu 14.04, Ubuntu 15.10, and CentOS 7 are supported, but if you
-need another platform there are instructions for adding new ones
-&lt;a href=&#34;#contributing-new-environments&#34;&gt;below&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h3 id=&#34;requirements:69e60651f42783a7df723575c4088b5b&#34;&gt;Requirements&lt;/h3&gt;
+&lt;pre&gt;&lt;code class=&#34;language-java&#34;&gt;public interface IBolt extends Serializable {
+  void prepare(Map&amp;lt;String, Object&amp;gt; heronConf, TopologyContext context, OutputCollector collector);
+  void execute(Tuple input);
+  void cleanup();
+}
+&lt;/code&gt;&lt;/pre&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://docs.docker.com&#34;&gt;Docker&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;The &lt;code&gt;prepare&lt;/code&gt; method is called when the bolt is first initialized and provides
+the bolt with the executing environment.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;The &lt;code&gt;execute&lt;/code&gt; method is called to process a single input &lt;code&gt;Tuple&lt;/code&gt;. The &lt;code&gt;Tuple&lt;/code&gt;
+contains metadata about component/stream/task it comes from. And &lt;code&gt;OutputCollector&lt;/code&gt;
+is used to emit the result.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;The &lt;code&gt;cleanup&lt;/code&gt; method is called before the bolt is shutdown. There&amp;rsquo;s no
+guarantee that this method is called due to how the instance is killed.&lt;/p&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h3 id=&#34;running-docker-in-a-virtual-machine:69e60651f42783a7df723575c4088b5b&#34;&gt;Running Docker in a Virtual Machine&lt;/h3&gt;
+&lt;p&gt;See &lt;a href=&#34;https://github.com/twitter/heron/blob/master/heron/examples/src/java/com/twitter/heron/examples/ExclamationTopology.java#L67&#34;&gt;&lt;code&gt;ExclamationBolt&lt;/code&gt;&lt;/a&gt; for a simple bolt example.&lt;/p&gt;
 
-&lt;p&gt;If you are running Docker in a virtual machine (VM), it is recommended that you
-adjust your settings to help speed up the build. To do this, open
-&lt;a href=&#34;https://www.virtualbox.org/wiki/Downloads&#34;&gt;VirtualBox&lt;/a&gt; and go to the container
-in which Docker is running (usually &amp;ldquo;default&amp;rdquo; or whatever name you used to
-create the VM), click on the VM, and then click on &lt;strong&gt;Settings&lt;/strong&gt;.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: You will need to stop the VM before modifying these settings.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/heron/img/virtual-box-processors.png&#34; alt=&#34;VirtualBox Processors&#34; /&gt;
-&lt;img src=&#34;http://localhost:1313/heron/img/virtual-box-memory.png&#34; alt=&#34;VirtualBox Memory&#34; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;building-heron:69e60651f42783a7df723575c4088b5b&#34;&gt;Building Heron&lt;/h2&gt;
-
-&lt;p&gt;Heron provides a &lt;code&gt;build-arfifacts.sh&lt;/code&gt; script for Docker located in the
-&lt;code&gt;docker&lt;/code&gt; folder. To run that script:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$ cd /path/to/heron/repo
-$ docker/build-artifacts.sh
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Running the script by itself will display usage information:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Usage: docker/build-artifacts.sh &amp;lt;platform&amp;gt; &amp;lt;version_string&amp;gt; [source-tarball] &amp;lt;output-directory&amp;gt; 
-  
-Platforms Supported: darwin, ubuntu14.04, ubuntu15.10, centos7
-  
-Example:
-  ./build-artifacts.sh ubuntu14.04 0.12.0 .
-  
-NOTE: If running on OSX, the output directory will need to 
-      be under /Users so virtualbox has access to.
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The following arguments are required:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;platform&lt;/code&gt; &amp;mdash; Currently, this can be one of: &lt;code&gt;ubuntu14.04&lt;/code&gt;, &lt;code&gt;centos7&lt;/code&gt;. You
-can add other platforms using the &lt;a href=&#34;#contributing-new-environments&#34;&gt;instructions
-below&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;version-string&lt;/code&gt; &amp;mdash; The Heron release for which you&amp;rsquo;d like to build
-artifacts.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;output-directory&lt;/code&gt; &amp;mdash; The directory in which you&amp;rsquo;d like the release to be
-built.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Here&amp;rsquo;s an example usage:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$ docker/build-artifacts.sh ubuntu14.04 0.12.0 ~/heron-release
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This will build a Docker container specific to Ubuntu 14.04, create a source
-tarball of the Heron repository, run a full release build of Heron, and then
-copy the artifacts into the &lt;code&gt;~/heron-release&lt;/code&gt; directory.&lt;/p&gt;
-
-&lt;p&gt;Optionally, you can also include a tarball of the Heron source if you have one.
-By default, the script will create a tarball of the current source in the Heron
-repo and use that to build the artifacts.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: If you are running on Mac OS X, Docker must be run inside a VM.
-Therefore, you must make sure that both the source tarball and destination
-directory are somewhere under your home directory. For example, you cannot
-output the Heron artifacts to &lt;code&gt;/tmp&lt;/code&gt; because &lt;code&gt;/tmp&lt;/code&gt; refers to the directory
-inside the VM, not on the host machine. Your home directory, however, is
-automatically linked in to the VM and can be accessed normally.&lt;/p&gt;
-
-&lt;p&gt;After the build has completed, you can go to your output directory and see all
-of the generated artifacts:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$ ls ~/heron-release
-heron-api-0.12.0-ubuntu14.04.tar.gz
-heron-client-0.12.0-ubuntu14.04.tar.gz 
-heron-tools-0.12.0-ubuntu14.04.tar.gz
-heron-client-install-0.12.0-ubuntu.sh  
-heron-tools-install-0.12.0-ubuntu.sh
-heron-api-install-0.12.0-ubuntu.sh     
-heron-core-0.12.0-ubuntu.tar.gz
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;contributing-new-environments:69e60651f42783a7df723575c4088b5b&#34;&gt;Contributing New Environments&lt;/h2&gt;
-
-&lt;p&gt;You&amp;rsquo;ll notice that there are multiple
-&lt;a href=&#34;https://docs.docker.com/engine/reference/builder/&#34;&gt;Dockerfiles&lt;/a&gt; in the &lt;code&gt;docker&lt;/code&gt;
-directory of Heron&amp;rsquo;s source code, one for each of the currently supported
-platforms.&lt;/p&gt;
-
-&lt;p&gt;To add support for a new platform, add a new &lt;code&gt;Dockerfile&lt;/code&gt; to that directory and
-append the name of the platform to the name of the file. If you&amp;rsquo;d like to add
-support for Debian 8, for example, add a file named &lt;code&gt;Dockerfile.debian8&lt;/code&gt;. Once
-you&amp;rsquo;ve done that, follow the instructions in the &lt;a href=&#34;https://docs.docker.com/engine/articles/dockerfile_best-practices/&#34;&gt;Docker
-documentation&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;You should make sure that your &lt;code&gt;Dockerfile&lt;/code&gt; specifies &lt;em&gt;at least&lt;/em&gt; all of the
-following:&lt;/p&gt;
-
-&lt;h4 id=&#34;step-1-the-os-being-used-in-a-from-https-docs-docker-com-engine-reference-builder-from-statement:69e60651f42783a7df723575c4088b5b&#34;&gt;Step 1 - The OS being used in a &lt;a href=&#34;https://docs.docker.com/engine/reference/builder/#from&#34;&gt;&lt;code&gt;FROM&lt;/code&gt;&lt;/a&gt; statement.&lt;/h4&gt;
-
-&lt;p&gt;Here&amp;rsquo;s an example:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-dockerfile&#34;&gt;FROM centos:centos7
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h4 id=&#34;step-2-a-target-platform-environment-variable-using-the-env-https-docs-docker-com-engine-reference-builder-env-instruction:69e60651f42783a7df723575c4088b5b&#34;&gt;Step 2 - A &lt;code&gt;TARGET_PLATFORM&lt;/code&gt; environment variable using the &lt;a href=&#34;https://docs.docker.com/engine/reference/builder/#env&#34;&gt;&lt;code&gt;ENV&lt;/code&gt;&lt;/a&gt; instruction.&lt;/h4&gt;
-
-&lt;p&gt;Here&amp;rsquo;s an example:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-dockerfile&#34;&gt;ENV TARGET_PLATFORM centos
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h4 id=&#34;step-3-a-general-dependency-installation-script-using-a-run-https-docs-docker-com-engine-reference-builder-run-instruction:69e60651f42783a7df723575c4088b5b&#34;&gt;Step 3 - A general dependency installation script using a &lt;a href=&#34;https://docs.docker.com/engine/reference/builder/#run&#34;&gt;&lt;code&gt;RUN&lt;/code&gt;&lt;/a&gt; instruction.&lt;/h4&gt;
-
-&lt;p&gt;Here&amp;rsquo;s an example:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-dockerfile&#34;&gt;RUN apt-get update &amp;amp;&amp;amp; apt-get -y install \
-         automake \
-         build-essential \
-         cmake \
-         curl \
-         libssl-dev \
-         git \
-         libtool \
-         libunwind8 \
-         libunwind-setjmp0-dev \
-         python \
-         python2.7-dev \
-         python-software-properties \
-         software-properties-common \
-         python-setuptools \
-         unzip \
-         wget
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h4 id=&#34;step-4-an-installation-script-for-java-8-and-a-java-home-environment-variable:69e60651f42783a7df723575c4088b5b&#34;&gt;Step 4 - An installation script for Java 8 and a &lt;code&gt;JAVA_HOME&lt;/code&gt; environment variable.&lt;/h4&gt;
-
-&lt;p&gt;Here&amp;rsquo;s an example:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-dockerfile&#34;&gt;RUN \
-     echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections &amp;amp;&amp;amp; \
-     add-apt-repository -y ppa:webupd8team/java &amp;amp;&amp;amp; \
-     apt-get update &amp;amp;&amp;amp; \
-     apt-get install -y oracle-java8-installer &amp;amp;&amp;amp; \
-     rm -rf /var/lib/apt/lists/* &amp;amp;&amp;amp; \
-     rm -rf /var/cache/oracle-jdk8-installer
-
-ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h4 id=&#34;step-5-an-installation-script-for-bazel-http-bazel-io-version-0-1-2-or-above:69e60651f42783a7df723575c4088b5b&#34;&gt;Step 5 - An installation script for &lt;a href=&#34;http://bazel.io/&#34;&gt;Bazel&lt;/a&gt; version 0.1.2 or above.&lt;/h4&gt;
-
-&lt;p&gt;Here&amp;rsquo;s an example:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-dockerfile&#34;&gt;RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh \
-         &amp;amp;&amp;amp; chmod +x /tmp/bazel.sh \
-         &amp;amp;&amp;amp; /tmp/bazel.sh
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h4 id=&#34;step-6-add-the-bazelrc-configuration-file-for-bazel-and-the-compile-sh:69e60651f42783a7df723575c4088b5b&#34;&gt;Step 6 - Add the &lt;code&gt;bazelrc&lt;/code&gt; configuration file for Bazel and the &lt;code&gt;compile.sh&lt;/code&gt;&lt;/h4&gt;
-
-&lt;p&gt;script (from the &lt;code&gt;docker&lt;/code&gt; folder) that compiles Heron:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-dockerfile&#34;&gt;ADD bazelrc /root/.bazelrc
-ADD compile.sh /compile.sh
-&lt;/code&gt;&lt;/pre&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Building on Mac OS X</title>
-      <link>http://localhost:1313/heron/docs/developers/compiling/mac/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>http://localhost:1313/heron/docs/developers/compiling/mac/</guid>
-      <description>
-
-&lt;p&gt;This is a step by step guide for building Heron on Mac OS (10.10 and 10.11).&lt;/p&gt;
-
-&lt;h4 id=&#34;step-1-install-brew-if-already-not-installed:7be74c584635419861677fc2502187c9&#34;&gt;Step 1 - Install brew, if already not installed&lt;/h4&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;/usr/bin/ruby -e &amp;quot;$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)&amp;quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h4 id=&#34;step-2-install-the-required-libraries:7be74c584635419861677fc2502187c9&#34;&gt;Step 2 - Install the required libraries&lt;/h4&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;brew install automake
-brew install cmake
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h4 id=&#34;step-3-set-the-following-environment-variables:7be74c584635419861677fc2502187c9&#34;&gt;Step 3 - Set the following environment variables&lt;/h4&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$ export CC=/usr/bin/clang
-$ export CXX=/usr/bin/clang++
-$ echo $CC $CXX
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h4 id=&#34;step-4-install-bazel:7be74c584635419861677fc2502187c9&#34;&gt;Step 4 - Install Bazel&lt;/h4&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;curl -O -L https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-darwin-x86_64.sh
-chmod +x bazel-0.1.2-installer-darwin-x86_64.sh
-./bazel-0.1.2-installer-darwin-x86_64.sh --user
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h4 id=&#34;step-5-make-sure-bazel-bin-is-in-the-path:7be74c584635419861677fc2502187c9&#34;&gt;Step 5 - Make sure Bazel bin is in the PATH&lt;/h4&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;export PATH=&amp;quot;$PATH:$HOME/bin&amp;quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h4 id=&#34;step-6-get-the-latest-version-of-heron:7be74c584635419861677fc2502187c9&#34;&gt;Step 6 - Get the latest version of heron&lt;/h4&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;git clone https://github.com/twitter/heron.git &amp;amp;&amp;amp; cd heron
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h4 id=&#34;step-7-configure-heron-for-build:7be74c584635419861677fc2502187c9&#34;&gt;Step 7 - Configure Heron for build&lt;/h4&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;./bazel_configure.py
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If the configure scripts fails with missing dependencies, brew can be used to install the dependencies.&lt;/p&gt;
-
-&lt;h4 id=&#34;step-8-build-the-project:7be74c584635419861677fc2502187c9&#34;&gt;Step 8 - Build the project&lt;/h4&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;bazel build --config=darwin heron/...
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h4 id=&#34;step-9-build-the-packages:7be74c584635419861677fc2502187c9&#34;&gt;Step 9 - Build the packages&lt;/h4&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;bazel build --config=darwin scripts/packages:binpkgs
-bazel build --config=darwin scripts/packages:tarpkgs
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This will build the packages below the &lt;code&gt;bazel-bin/scripts/packages/&lt;/code&gt; directory.&lt;/p&gt;
+&lt;p&gt;Instead of implementing the &lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/api/bolt/IBolt.html&#34;&gt;&lt;code&gt;IBolt&lt;/code&gt;&lt;/a&gt; interface directly, you can implement &lt;a href=&#34;http://twitter.github.io/heron/api/com/twitter/heron/api/bolt/IRichBolt.html&#34;&gt;&lt;code&gt;IRichBolt&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
 </description>
     </item>
     
