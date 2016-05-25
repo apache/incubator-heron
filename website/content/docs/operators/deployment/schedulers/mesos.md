@@ -1,5 +1,5 @@
 ---
-title: Mesos (Experimental)
+title: Mesos (Work in Progress)
 ---
 
 Heron supports deployment on [Apache Mesos](http://mesos.apache.org/). 
