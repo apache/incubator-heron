@@ -107,9 +107,9 @@ $ curl "http://heron-tracker-url/topologies/physicalplan?cluster=datacenter1&env
 
 #### Parameters
 
-* `cluster` --- The cluster in which the topology is running
-* `environ` --- The environment in which the topology is running
-* `topology` --- The name of the topology
+* `cluster` (required) --- The cluster in which the topology is running
+* `environ` (required) --- The environment in which the topology is running
+* `topology` (required) --- The name of the topology
 
 The resulting JSON contains following information
 
@@ -145,9 +145,9 @@ $ curl "http://heron-tracker-url/topologies/schedulerlocation?cluster=datacenter
 
 #### Parameters
 
-* `cluster` --- The cluster in which the topology is running
-* `environ` --- The environment in which the topology is running
-* `topology` --- The name of the topology
+* `cluster` (required) --- The cluster in which the topology is running
+* `environ` (required) --- The environment in which the topology is running
+* `topology` (required) --- The name of the topology
 
 The `SchedulerLocation` mainly contains the link to the job on the scheduler,
 for example, the Aurora page for the job.
@@ -164,9 +164,9 @@ $ curl "http://heron-tracker-url/topologies/executionstate?cluster=datacenter1&e
 
 #### Parameters
 
-* `cluster` --- The cluster in which the topology is running
-* `environ` --- The environment in which the topology is running
-* `topology` --- The name of the topology
+* `cluster` (required) --- The cluster in which the topology is running
+* `environ` (required) --- The environment in which the topology is running
+* `topology` (required) --- The name of the topology
 
 Each execution state object lists the following:
 
