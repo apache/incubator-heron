@@ -11,7 +11,7 @@ taxonomies:
   tag: tags
 
 # Pygments syntax highlighting
-pygmentsstyle: manni
+pygmentsstyle: monokai
 pygmentsuseclasses: false
 pygmentscodefencesguesssyntax: false
 PygmentsCodeFences: true
