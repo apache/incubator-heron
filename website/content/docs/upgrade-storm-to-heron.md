@@ -34,7 +34,7 @@ Installing jars to local maven repo.
 
 Heron API is now installed!
 
-See http://heron.github.io/docs/getting-started.html to start a new project!
+See https://twitter.github.io/heron/docs/getting-started.html to start a new project!
 ```
 
 The Heron API will now be installed in your local [Maven

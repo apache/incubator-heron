@@ -4,9 +4,9 @@ title: Intro to Heron Configuration
 
 Heron can be configured at two levels:
 
-1. **The system level** &mdash; System-level configurations apply to the whole
+1. **The system level** --- System-level configurations apply to the whole
 Heron cluster rather than to any specific topology.
-2. **The topology level** &mdash; Topology configurations apply only to a
+2. **The topology level** --- Topology configurations apply only to a
 specific topology and can be modified at any stage of the topology's
 [lifecycle](../../../concepts/topologies#topology-lifecycle).
 

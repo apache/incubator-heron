@@ -37,26 +37,26 @@ Stream Processing at Scale](http://dl.acm.org/citation.cfm?id=2742788) paper.
 
 ## Heron Design Goals
 
-* **Isolation** &mdash; [Topologies](../topologies) should be process based
+* **Isolation** --- [Topologies](../topologies) should be process based
   rather than thread based, and each process should run in isolation for the
   sake of easy debugging, profiling, and troubleshooting.
-* **Resource constraints** &mdash; Topologies should use only those resources
+* **Resource constraints** --- Topologies should use only those resources
   that they are initially allocated and never exceed those bounds. This makes
   Heron safe to run in shared infrastructure.
-* **Compatibility** &mdash; Heron is fully API and data model compatible with
+* **Compatibility** --- Heron is fully API and data model compatible with
   [Apache Storm](http://storm.apache.org), making it easy for developers
   to transition between systems.
-* **Back pressure** &mdash; In a distributed system like Heron, there are no
+* **Back pressure** --- In a distributed system like Heron, there are no
   guarantees that all system components will execute at the same speed. Heron
   has built-in [back pressure mechanisms]({{< ref "#stream-manager" >}}) to ensure that
   topologies can self-adjust in case components lag.
-* **Performance** &mdash; Many of Heron's design choices have enabled Heron to
+* **Performance** --- Many of Heron's design choices have enabled Heron to
   achieve higher throughput and lower latency than Storm while also offering
   enhanced configurability to fine-tune potential latency/throughput trade-offs.
-* **Semantic guarantees** &mdash; Heron provides support for both
+* **Semantic guarantees** --- Heron provides support for both
   [at-most-once and at-least-once](https://kafka.apache.org/08/design.html#semantics)
   processing semantics.
-* **Efficiency** &mdash; Heron was built with the goal of achieving all of the
+* **Efficiency** --- Heron was built with the goal of achieving all of the
   above with the minimal possible resource usage.
 
 ## Topology Components

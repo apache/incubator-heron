@@ -20,8 +20,8 @@ The primary programming languages for Heron are C++, Java, and Python.
 * **Java 8** is used primarily for Heron's [topology
 API](../../concepts/topologies), and [Heron Instance](../../concepts/architecture#heron-instance).
 It is currently the only language in which topologies can be written. Instructions can be found
-in [Building Topologies](../../developers/topologies), while API documentation for the Java
-API can be found [here](/api/topology/index.html). Please note that Heron topologies do not
+in [Building Topologies](../../developers/topologies), while documentation for the Java
+API can be found [here](/api/com/twitter/heron/api/topology/package-summary.html). Please note that Heron topologies do not
 require Java 8 and can be written in Java 7 or later.
 
 * **Python 2** (specifically 2.7) is used primarily for Heron's [CLI
@@ -31,16 +31,16 @@ Tracker](../../operators/heron-tracker).
 
 ## Main Tools
 
-* **Build tool** &mdash; Heron uses [Bazel](http://bazel.io/) as its build tool.
+* **Build tool** --- Heron uses [Bazel](http://bazel.io/) as its build tool.
 Information on setting up and using Bazel for Heron can be found in [Compiling
 Heron](../../developers/compiling/compiling).
 
-* **Inter-component communication** &mdash; Heron uses [Protocol
+* **Inter-component communication** --- Heron uses [Protocol
 Buffers](https://developers.google.com/protocol-buffers/?hl=en) for
 communication between components. Most `.proto` definition files can be found in
 [`heron/proto`]({{% githubMaster %}}/heron/proto).
 
-* **Cluster coordination** &mdash; Heron relies heavily on ZooKeeper for cluster
+* **Cluster coordination** --- Heron relies heavily on ZooKeeper for cluster
 coordination for distributed deployment, be it for [Mesos/Aurora](../../operators/deployment/schedulers/aurora),
 [Mesos alone](../../operators/deployment/schedulers/mesos), or for a [custom
 scheduler](../custom-scheduler) that you build. More information on ZooKeeper
@@ -59,8 +59,8 @@ Heron supports three cluster schedulers out of the box:
 [Mesos](../../operators/deployment/schedulers/mesos),
 [Aurora](../../operators/deployment/schedulers/aurora), and a [local
 scheduler](../../operators/deployment/schedulers/local). The Java code for each of those
-schedulers, as well as for the underlying scheduler API, can be found in
-[`heron/schedulers`]({{% githubMaster %}}/heron/schedulers).
+schedulers can be found in [`heron/schedulers`]({{% githubMaster %}}/heron/schedulers)
+, while the underlying scheduler API can be found [here](/api/com/twitter/heron/spi/scheduler/package-summary.html)
 
 Info on custom schedulers can be found in [Implementing a Custom
 Scheduler](../custom-scheduler); info on the currently available schedulers
@@ -117,7 +117,7 @@ be found in [`heron/api`]({{% githubMaster %}}/heron/api).
 
 Documentation for writing topologies can be found in [Building
 Topologies](../../developers/topologies), while API documentation can be found
-[here](/api/topology/index.html).
+[here](/api/com/twitter/heron/api/topology/package-summary.html).
 
 ### Simulator
 
@@ -125,7 +125,7 @@ Heron enables you to run topologies in [`Simulator`](../../developers/simulator-
 for debugging purposes.
 
 The Java API for simulator can be found in
-[`heron/simulator`]({{% githubMaster %}}/heron/simulator).
+[`heron/simulator`](/api/com/twitter/heron/simulator/package-summary.html).
 
 ### Example Topologies
 
