@@ -35,7 +35,7 @@ The config file is a `yaml` file that should contain the following information.
 
 This is a list of locations where topology writes its states. An example of
 [zookeeper state manager](deployment/statemanagers/zookeeper) and
-[local file state manager](deployment/statemanagers/locafs) look like this:
+[local file state manager](deployment/statemanagers/localfs) look like this:
 
 ```yaml
 ## Contains the sources where the states are stored.
