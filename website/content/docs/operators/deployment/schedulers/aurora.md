@@ -79,6 +79,5 @@ release, any machine that has the `heron` cli tool can be used to manage Heron
 topologies (i.e. can submit topologies, activate and deactivate them, etc.).
 
 The most important thing at this stage is to ensure that `heron` cli is available
-across all machines that will be [working with topologies](../../../heron-cli).
-Once the cli is available, you can use Aurora as a scheduler by specifying the
-proper configuration when managing topologies.
+across all machines. Once the cli is available, Aurora as a scheduler 
+can be enabled by specifying the proper configuration when managing topologies.
