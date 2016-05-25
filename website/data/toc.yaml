@@ -7,10 +7,10 @@ sections:
         url: /docs/upgrade-storm-to-heron
   - name: Heron Concepts
     sublinks:
-      - name: Heron Architecture
-        url: /docs/concepts/architecture
       - name: Heron Topology
         url: /docs/concepts/topologies
+      - name: Heron Architecture
+        url: /docs/concepts/architecture
   - name: Deployment
     sublinks:
       - name: Overview
@@ -29,7 +29,7 @@ sections:
         url: /docs/operators/deployment/uploaders/localfs
       - name: HDFS
         url: /docs/operators/deployment/uploaders/hdfs
-      - name: S3
+      - name: Amazon S3
         url: /docs/operators/deployment/uploaders/s3
   - name: Schedulers
     sublinks:
