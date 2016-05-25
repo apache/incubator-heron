@@ -5,33 +5,23 @@ canonifyurls: true
 baseurl: http://twitter.github.io/heron
 
 # Site-level config
-MetaDataFormat: yaml
-NewContentEditor: atom
+metadataformat: yaml
+newcontenteditor: atom
 taxonomies:
   tag: tags
 
 # Pygments syntax highlighting
-pygmentsStyle: manni
+pygmentsstyle: manni
 pygmentsuseclasses: false
+pygmentscodefencesguesssyntax: false
 PygmentsCodeFences: true
-
-# Top navigation menu (weights are to prevent alphabetical ordering)
-menu:
-  main:
-    - Name: Getting Started
-      URL: /docs/developers/getting-started
-      Weight: 1
-    - Name: Docs
-      URL: /docs
-      Weight: 2
 
 # Site-level parameters available through .Site.Params.{key}
 params:
   author: Luc Perkins
   versions:
-    metricsapi: 0.1.0
-    schedulerapi: 0.1.0
-    topologyapi: 0.1.0
+    heron: 0.13.7
+    bazel: 0.1.2
   assets:
     favicon:
       small: /img/favicon-16x16.png
@@ -42,21 +32,15 @@ params:
     css:
       - /css/style.min.css
       - /css/font-awesome.min.css
+      - /css/pygments.css
     js:
       - http://code.jquery.com/jquery-2.2.1.min.js
       - /js/app.min.js
-    fonts:
-      - fonts/fontawesome-webfont.eot
-      - fonts/fontawesome-webfont.svg
-      - fonts/fontawesome-webfont.tff
-      - fonts/fontawesome-webfont.woff
-      - fonts/fontawesome-webfont.woff2
-      - fonts/FontAwesome.otf
-  bazelVersion: 0.1.2
-  tagline: Realtime, Distributed, Fault-Tolerant Stream Processing
+  tagline: A realtime, distributed, fault-tolerant stream processing engine from Twitter
   github:
     home: https://github.com/twitter/heron
     master: https://github.com/twitter/heron/tree/master
+    issues: https://github.com/twitter/heron/issues
   social:
     twitter: https://twitter.com/heronstreaming
     slack: https://heronusers.slack.com

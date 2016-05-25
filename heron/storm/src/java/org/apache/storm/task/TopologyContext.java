@@ -42,9 +42,8 @@ import org.apache.storm.tuple.Fields;
  * A TopologyContext is given to bolts and spouts in their "prepare" and "open"
  * methods, respectively. This object provides information about the component's
  * place within the topology, such as task ids, inputs and outputs, etc.
- * <p/>
  * <p>The TopologyContext is also used to declare ISubscribedState objects to
- * synchronize state with StateSpouts this object is subscribed to.</p>
+ * synchronize state with StateSpouts this object is subscribed to.
  */
 public class TopologyContext extends WorkerTopologyContext implements IMetricsContext {
   private com.twitter.heron.api.topology.TopologyContext delegate;
@@ -173,7 +172,7 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
     return delegate.getThisTaskIndex();
   }
 
-  /**
+  /*
    * Gets the declared inputs to this component.
    *
    * @return A map from subscribed component/stream to the grouping subscribed with.
@@ -184,7 +183,7 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
     }
   */
 
-  /**
+  /*
    * Gets information about who is consuming the outputs of this component, and how.
    *
    * @return Map from stream id to component id to the Grouping used.
@@ -250,11 +249,9 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
    * You must call this during IBolt::prepare or ISpout::open.
    * @return The IMetric argument unchanged.
    */
-  @Override
-  public <T extends IMetric<U>, U> T registerMetric(String name,
-                                                    T metric,
-                                                    int timeBucketSizeInSecs) {
-    MetricDelegate<T, U> d = new MetricDelegate<>(metric);
+  @SuppressWarnings("unchecked")
+  public <T extends IMetric> T registerMetric(String name, T metric, int timeBucketSizeInSecs) {
+    MetricDelegate d = new MetricDelegate(metric);
     delegate.registerMetric(name, d, timeBucketSizeInSecs);
     return metric;
   }
@@ -262,20 +259,16 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
   /*
    * Convenience method for registering ReducedMetric.
    */
-  @Override
-  public <T, U, V> ReducedMetric<T, U, V> registerMetric(String name,
-                                                         IReducer<T, U, V> reducer,
-                                                         int timeBucketSizeInSecs) {
-    return registerMetric(name, new ReducedMetric<>(reducer), timeBucketSizeInSecs);
+  @SuppressWarnings("rawtypes")
+  public ReducedMetric registerMetric(String name, IReducer reducer, int timeBucketSizeInSecs) {
+    return registerMetric(name, new ReducedMetric(reducer), timeBucketSizeInSecs);
   }
 
   /*
    * Convenience method for registering CombinedMetric.
    */
-  @Override
-  public <T> CombinedMetric<T> registerMetric(String name,
-                                              ICombiner<T> combiner,
-                                              int timeBucketSizeInSecs) {
-    return registerMetric(name, new CombinedMetric<>(combiner), timeBucketSizeInSecs);
+  @SuppressWarnings("rawtypes")
+  public CombinedMetric registerMetric(String name, ICombiner combiner, int timeBucketSizeInSecs) {
+    return registerMetric(name, new CombinedMetric(combiner), timeBucketSizeInSecs);
   }
 }

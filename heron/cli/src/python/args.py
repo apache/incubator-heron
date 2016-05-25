@@ -99,12 +99,11 @@ def add_config(parser):
 
 def add_system_property(parser):
   parser.add_argument(
-      '-D',
-      default=[],
+      '--topology-main-jvm-property',
+      metavar='(property=value; JVM system property for executing topology main; default: [])',
       action="append",
-      dest="javaDefines",
-      metavar='DEFINE',
-      help='Define a system property to pass to java -D when running main.')
+      default=[])
+
   return parser
 
 def add_deactive_deploy(parser):

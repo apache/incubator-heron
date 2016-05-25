@@ -16,7 +16,7 @@ package backtype.storm;
 
 import java.util.Map;
 
-import com.twitter.heron.localmode.LocalMode;
+import com.twitter.heron.simulator.Simulator;
 
 import backtype.storm.generated.AlreadyAliveException;
 import backtype.storm.generated.InvalidTopologyException;
@@ -25,19 +25,20 @@ import backtype.storm.generated.StormTopology;
 import backtype.storm.utils.ConfigUtils;
 
 public class LocalCluster implements ILocalCluster {
-  private final LocalMode localMode;
+  private final Simulator simulator;
   private String topologyName;
   private Map<String, Object> conf;
   private StormTopology topology;
 
   public LocalCluster() {
-    this.localMode = new LocalMode();
+    this.simulator = new Simulator();
     resetFields();
   }
 
   @Override
+  @SuppressWarnings({"rawtypes", "unchecked"})
   public void submitTopology(String topoName,
-                             Map<String, Object> config,
+                             Map config,
                              StormTopology stormTopology)
       throws AlreadyAliveException, InvalidTopologyException {
     assertNotAlive();
@@ -46,7 +47,7 @@ public class LocalCluster implements ILocalCluster {
     this.conf = config;
     this.topology = stormTopology;
 
-    localMode.submitTopology(topoName,
+    simulator.submitTopology(topoName,
         ConfigUtils.translateConfig(config),
         stormTopology.getStormTopology());
   }
@@ -54,26 +55,26 @@ public class LocalCluster implements ILocalCluster {
   @Override
   public void killTopology(String topoName) throws NotAliveException {
     assertAlive(topoName);
-    localMode.killTopology(topoName);
+    simulator.killTopology(topoName);
     resetFields();
   }
 
   @Override
   public void activate(String topoName) throws NotAliveException {
     assertAlive(topoName);
-    localMode.activate(topoName);
+    simulator.activate(topoName);
   }
 
   @Override
   public void deactivate(String topoName) throws NotAliveException {
     assertAlive(topoName);
-    localMode.deactivate(topoName);
+    simulator.deactivate(topoName);
   }
 
   @Override
   public void shutdown() {
     resetFields();
-    localMode.shutdown();
+    simulator.shutdown();
   }
 
   @Override

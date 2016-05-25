@@ -115,8 +115,8 @@ public final class AckingTopology {
     private long startTime;
 
     @Override
-    public void prepare(Map<String, Object> conf, TopologyContext context,
-        OutputCollector acollector) {
+    @SuppressWarnings("rawtypes")
+    public void prepare(Map conf, TopologyContext context, OutputCollector acollector) {
       collector = acollector;
       nItems = 0;
       startTime = System.currentTimeMillis();

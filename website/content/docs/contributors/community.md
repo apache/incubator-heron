@@ -1,45 +1,52 @@
 ---
 title: Community
 ---
+
 ### Contributing to Heron
+
 Community is a critical factor to the success of Heron.  Contributions are welcome! After reviewing
 the [Heron Architecture](../../concepts/architecture/), [Compiling Heron](../../developers/compiling/compiling/),
 and the [Heron Codebase](../codebase/), this page covers how to contribute and, when you've made a
 patch, how to submit it.
 
-### How can I contribute to Heron?
+### How Can I Contribute to Heron?
 
 In general, contributions that fix bugs or add features (as opposed to stylistic, refactoring, or
-"cleanup" changes) are preferred. Please check the dev list before investing a lot of time in a patch.
+"cleanup" changes) are preferred. If you're looking for places to contribute, issues labeled
+[help-wanted](https://github.com/twitter/heron/issues?q=is%3Aopen+is%3Aissue+label%3Ahelp-wanted)
+are good candidates. Please check the dev list before investing a lot of time in a patch.
 
 Continue to [Heron Architecture](../../concepts/architecture/),
 [Compiling Heron](../../developers/compiling/compiling/), or [Heron Codebase](../codebase/).
 
-### Patch Acceptance Process
-1.  Please read the Heron [governance plan](../governance).
+### Setting up IDEA
+
+Heron includes a script to bootstrap an IntelliJ IDEA project. The project includes support for Heron
+code styles and copyright headers. To bootstrap an IDEA project run the following:
+
+```bash
+$ ./scripts/setup-intellij.sh
+```
+
+### Submitting a Patch
+1. Read the Heron [governance plan](../governance) and accept the
+[Twitter Contributor License Agreement](https://engineering.twitter.com/opensource/cla) (CLA).
 
 2. Discuss your plan and design, and get agreement on our heron-dev@googlegroups.com mailing list.
 
-3. Prepare a GitHub commit that implements the feature. Don't forget to add tests.
+3. Implement the change with unit tests and verify that all tests pass.
+
+4. Submit a GitHub pull request that implements the feature. Clearly describe the the change in
+the description. Verify that Travis CI passes.
+
+5. Complete a code review by addressing comments of the reviewers.
+
+6. A project committer will merge the patch to the master branch.
 
 <!--
-4. TODO - pre commit process (travis-ci)
---> 
-
-4. Complete a code review with a core contributor using the heron-dev@googlegroups.com mailing list. Amend your existing commit and re-push to make changes to your patch.
-
-5. An engineer at Twitter applies the patch to our internal version control system.
-
-<!--
-7. TODO - post commit process
--->
-
-<!--
+TODO - post commit process
 TODO: links to sourcecode and dev and user groups
-TODO: links to code style setup
-TODO: how to get running in intellij
 -->
 
 
 Next: Review the [Heron Codebase](../codebase)
-
