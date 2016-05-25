@@ -29,7 +29,7 @@ APACHE_SRC_FILES=`find $HERON_ROOT_DIR -path "*/org/apache/storm/*" -name "*.jav
 GEN_FILES=`find $GEN_PROTO_DIR -name "*.java"`
 
 rm -rf $JAVADOC_OUTPUT_DIR
-mkdir -p $JAVADOC_OUTPUT_DIR
+mkdir -p $JAVADOC_OUTPUT_DIR $JAVADOC_STATIC_OUTPUT_DIR
 
 BIN_JARS=`find $HERON_ROOT_DIR/bazel-heron/_bin/. -name "*\.jar" | tr '\n' ':'`
 GEN_JARS=`find $HERON_ROOT_DIR/bazel-genfiles/external/. -name "*\.jar" | tr '\n' ':'`
@@ -40,6 +40,7 @@ CLOSURE_CLASSES="$HERON_ROOT_DIR/bazel-bin/heron/storm/src/java/_javac/storm-com
 export CLASSPATH=$BIN_JARS:$GEN_JARS:$SCRIBE_JARS:$PROTO_JARS:$CLOSURE_CLASSES
 
 $JAVADOC $FLAGS -d $JAVADOC_OUTPUT_DIR $GEN_FILES $HERON_SRC_FILES $BACKTYPE_SRC_FILES $APACHE_SRC_FILES
+cp -rf $JAVADOC_OUTPUT_DIR $JAVADOC_STATIC_OUTPUT_DIR/api
 
 # Generated Java API doc needs to be copied to $JAVADOC_OUTPUT_LOCAL_DIR
 # for the following two reasons:
