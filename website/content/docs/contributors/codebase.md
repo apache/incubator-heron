@@ -31,16 +31,16 @@ Tracker](../../operators/heron-tracker).
 
 ## Main Tools
 
-* **Build tool** &mdash; Heron uses [Bazel](http://bazel.io/) as its build tool.
+* **Build tool** --- Heron uses [Bazel](http://bazel.io/) as its build tool.
 Information on setting up and using Bazel for Heron can be found in [Compiling
 Heron](../../developers/compiling/compiling).
 
-* **Inter-component communication** &mdash; Heron uses [Protocol
+* **Inter-component communication** --- Heron uses [Protocol
 Buffers](https://developers.google.com/protocol-buffers/?hl=en) for
 communication between components. Most `.proto` definition files can be found in
 [`heron/proto`]({{% githubMaster %}}/heron/proto).
 
-* **Cluster coordination** &mdash; Heron relies heavily on ZooKeeper for cluster
+* **Cluster coordination** --- Heron relies heavily on ZooKeeper for cluster
 coordination for distributed deployment, be it for [Mesos/Aurora](../../operators/deployment/schedulers/aurora),
 [Mesos alone](../../operators/deployment/schedulers/mesos), or for a [custom
 scheduler](../custom-scheduler) that you build. More information on ZooKeeper

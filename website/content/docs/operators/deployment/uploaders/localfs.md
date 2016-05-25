@@ -21,10 +21,10 @@ You can make Heron aware of the local file system uploader by modifying the
 `uploader.yaml` config file specific for the Heron cluster. You'll need to specify
 the following for each cluster:
 
-* `heron.class.uploader` &mdash; Indicate the uploader class to be loaded. You should set this
+* `heron.class.uploader` --- Indicate the uploader class to be loaded. You should set this
 to `com.twitter.heron.uploader.localfs.LocalFileSystemUploader`
 
-* `heron.uploader.localfs.file.system.directory` &mdash; Provides the name of the directory where
+* `heron.uploader.localfs.file.system.directory` --- Provides the name of the directory where
 the topology jar should be uploaded. The name of the directory should be unique per cluster
 You could use the Heron environment variables `${CLUSTER}` that will be substituted by cluster
 name.

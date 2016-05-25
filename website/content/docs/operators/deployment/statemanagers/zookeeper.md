@@ -23,29 +23,29 @@ You can make Heron aware of the ZooKeeper cluster by modifying the
 `statemgr.yaml` config file specific for the Heron cluster. You'll
 need to specify the following for each cluster:
 
-* `heron.class.state.manager` &mdash; Indicates the class to be loaded for managing
+* `heron.class.state.manager` --- Indicates the class to be loaded for managing
 the state in ZooKeeper and this class is loaded using reflection. You should set this
 to `com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager`
 
-* `heron.statemgr.connection.string` &mdash; The host IP address and port to connect to ZooKeeper
+* `heron.statemgr.connection.string` --- The host IP address and port to connect to ZooKeeper
 cluster (e.g) "127.0.0.1:2181".
 
-* `heron.statemgr.root.path` &mdash; The root ZooKeeper node to be used by Heron. We recommend
+* `heron.statemgr.root.path` --- The root ZooKeeper node to be used by Heron. We recommend
 providing Heron with an exclusive root node; if you do not, make sure that the following child
 nodes are unused: `/tmasters`, `/topologies`, `/pplans`, `/executionstate`, `/schedulers`.
 
-* `heron.statemgr.zookeeper.is.initialize.tree` &mdash; Indicates whether the nodes under ZooKeeper
+* `heron.statemgr.zookeeper.is.initialize.tree` --- Indicates whether the nodes under ZooKeeper
 root `/tmasters`, `/topologies`, `/pplans`, `/executionstate`, and `/schedulers` need to created,
 if they are not found. Set it to `True` if you could like Heron to create those nodes. If those
 nodes are already there, set it to `False`. The absence of this configuration implies `True`.
 
-* `heron.statemgr.zookeeper.session.timeout.ms` &mdash; Specifies how much time in milliseconds
+* `heron.statemgr.zookeeper.session.timeout.ms` --- Specifies how much time in milliseconds
 to wait before declaring the ZooKeeper session is dead.
 
-* `heron.statemgr.zookeeper.connection.timeout.ms` &mdash; Specifies how much time in milliseconds
+* `heron.statemgr.zookeeper.connection.timeout.ms` --- Specifies how much time in milliseconds
 to wait before the connection to ZooKeeper is dead.
 
-* `heron.statemgr.zookeeper.retry.count` &mdash; Count of the number of retry attempts to connect
+* `heron.statemgr.zookeeper.retry.count` --- Count of the number of retry attempts to connect
 to ZooKeeper
 
 * `heron.statemgr.zookeeper.retry.interval.ms`: Time in milliseconds to wait between each retry

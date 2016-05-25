@@ -15,31 +15,33 @@ sections:
     sublinks:
       - name: Overview
         url: /docs/operators/deployment
+      - name: Configuration
+        url: /docs/operators/deployment/configuration
   - name: State Managers
     sublinks:
-      - name: Setup Zookeeper
+      - name: Zookeeper
         url: /docs/operators/deployment/statemanagers/zookeeper
-      - name: Setup Local FS
+      - name: Local FS
         url: /docs/operators/deployment/statemanagers/localfs
   - name: Uploaders
     sublinks:
-      - name: Setup Local FS
+      - name: Local FS
         url: /docs/operators/deployment/uploaders/localfs
-      - name: Setup HDFS
+      - name: HDFS
         url: /docs/operators/deployment/uploaders/hdfs
-      - name: Setup S3
+      - name: S3
         url: /docs/operators/deployment/uploaders/s3
   - name: Schedulers
     sublinks:
-      - name: Local Cluster
-        url: /docs/operators/deployment/schedulers/local
       - name: Aurora Cluster
         url: /docs/operators/deployment/schedulers/aurora
+      - name: Local Cluster
+        url: /docs/operators/deployment/schedulers/local
       - name: Mesos Cluster
         url: /docs/operators/deployment/schedulers/mesos
       - name: Slurm Cluster
         url: /docs/operators/deployment/schedulers/slurm
-  - name: Configuration
+  - name: System Configuration
     sublinks:
       - name: Overview
         url: /docs/operators/configuration/config-intro
@@ -111,9 +113,5 @@ sections:
     sublinks:
       - name: Community
         url: /docs/contributors/community
-      - name: Roadmap
-        url: /docs/contributors/roadmap
       - name: Governance
         url: /docs/contributors/governance
-      - name: Support
-        url: /docs/contributors/support
