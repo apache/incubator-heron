@@ -37,3 +37,6 @@ build --ignore_unsupported_sandboxing
 # Below this line, .travis.yml will cat the default bazelrc.
 # This is needed so Bazel starts with the base workspace in its
 # package path.
+build --package_path %workspace%:/Users/lucasperkins/.bazel/base_workspace
+fetch --package_path %workspace%:/Users/lucasperkins/.bazel/base_workspace
+query --package_path %workspace%:/Users/lucasperkins/.bazel/base_workspace

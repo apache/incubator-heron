@@ -136,8 +136,19 @@ section.hn-docs-main {
 
   article.hn-docs-content {
     code {
-      padding: 2px;
-      border-radius: 2px;
+      padding: 2px 4px;
+      font-size: 90%;
+      color: $code-color;
+      background-color: $code-bg;
+      border-radius: $border-radius-base;
+    }
+
+    .highlight {
+      pre {
+        font-size: 12px;
+        padding: 10px;
+        background-color: $heron-blue-gray;
+      }
     }
 
     p {
@@ -166,16 +177,6 @@ section.hn-docs-main {
     h4 {
       font-size: 1.2em;
       padding-bottom: 3px;
-    }
-
-    .highlight {
-      margin: 5px 0px;
-      border-radius: 5px;
-
-      pre {
-        border: 1px solid darken(#fafafa, 20%);
-        background-color: #fafafa;
-      }
     }
 
     img {
