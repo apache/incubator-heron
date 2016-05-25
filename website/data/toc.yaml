@@ -1,29 +1,34 @@
 sections:
   - name: Getting Started
+    label: getting-started
     sublinks:
       - name: Local (Single Node)
         url: /docs/getting-started
       - name: Upgrade Storm Topologies
         url: /docs/upgrade-storm-to-heron
   - name: Heron Concepts
+    label: concepts
     sublinks:
       - name: Heron Topology
         url: /docs/concepts/topologies
       - name: Heron Architecture
         url: /docs/concepts/architecture
   - name: Deployment
+    label: deployment
     sublinks:
       - name: Overview
         url: /docs/operators/deployment
       - name: Configuration
         url: /docs/operators/deployment/configuration
   - name: State Managers
+    label: state-managers
     sublinks:
       - name: Zookeeper
         url: /docs/operators/deployment/statemanagers/zookeeper
       - name: Local FS
         url: /docs/operators/deployment/statemanagers/localfs
   - name: Uploaders
+    label: uploaders
     sublinks:
       - name: Local FS
         url: /docs/operators/deployment/uploaders/localfs
@@ -32,6 +37,7 @@ sections:
       - name: Amazon S3
         url: /docs/operators/deployment/uploaders/s3
   - name: Schedulers
+    label: schedulers
     sublinks:
       - name: Aurora Cluster
         url: /docs/operators/deployment/schedulers/aurora
@@ -42,6 +48,7 @@ sections:
       - name: Slurm Cluster
         url: /docs/operators/deployment/schedulers/slurm
   - name: System Configuration
+    label: configuration
     sublinks:
       - name: Overview
         url: /docs/operators/configuration/config-intro
@@ -56,10 +63,12 @@ sections:
       - name: Topology Master
         url: /docs/operators/configuration/tmaster
   - name: Observability
+    label: observability
     sublinks:
       - name: Graphite
         url: /docs/operators/observability/graphite
   - name: User Manuals
+    label: user-manuals
     sublinks:
       - name: Heron Client
         url: /docs/operators/heron-cli
@@ -70,6 +79,7 @@ sections:
       - name: Heron UI Runbook
         url: /docs/operators/heron-ui
   - name: Topology Writers
+    label: topology-writers
     sublinks:
       - name: Writing Topologies
         url: /docs/developers/topologies
@@ -88,6 +98,7 @@ sections:
       - name: Javadoc
         url: /api
   - name: Heron Developers
+    label: developers
     sublinks:
       - name: Compiling
         url: /docs/developers/compiling/compiling
@@ -102,16 +113,19 @@ sections:
       - name: Code Organization
         url: /docs/contributors/codebase
   - name: Extending Heron
+    label: extending-heron
     sublinks:
       - name: Custom Scheduler
         url: /docs/contributors/custom-scheduler
       - name: Custom Metrics Sink
         url: /docs/contributors/custom-metrics-sink
   - name: Heron Resources
+    label: resources
     sublinks:
       - name: Heron Resources
         url: /docs/resources
   - name: Contributors
+    label: contributors
     sublinks:
       - name: Community
         url: /docs/contributors/community

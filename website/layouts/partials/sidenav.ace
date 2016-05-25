@@ -1,19 +1,17 @@
-div
-  nav.hn-sidebar-nav
+nav.hn-sidebar-nav
+  .panel-group id=accordion role=tablist aria-multiselectable=true
     {{range .Site.Data.toc.sections}}
-      h4 {{.name}}
-      ul
-        {{range .sublinks}}
-        li
-          a href={{.url}} {{.name}}
-        {{end}}
-      ul
-        {{range .subcategories}}
-        li {{.name}}
-        ul
-          {{range .sublinks}}
-          li
-            a href={{.url}} {{.name}}
-          {{end}}
-        {{end}}
+    .panel.panel-default
+      .panel-heading role=tab id={{.label}}
+        h4.panel-title
+          a role=button data-toggle=collapse data-parent=#accordion href=#collapse-{{.label}} aria-labelledby={{.label}}
+            i.fa.fa-caret-right
+            {{.name}}
+      .panel-collapse.collapse id=collapse-{{.label}} aria-labelledby={{.label}}
+        .panel-body
+          ul
+            {{range .sublinks}}
+            li
+              a href={{.url}} {{.name}}
+            {{end}}
     {{end}}
