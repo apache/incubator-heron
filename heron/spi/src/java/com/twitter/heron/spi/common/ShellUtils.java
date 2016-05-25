@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -118,6 +119,30 @@ public final class ShellUtils {
     // be guaranteed alive when children processing trying to flush to
     // parent processes's IO.
     ProcessBuilder pb = getProcessBuilder(false, command, workingDirectory);
+    Process process = null;
+    try {
+      process = pb.start();
+    } catch (IOException e) {
+      LOG.severe("Failed to run Async Process " + e);
+    }
+
+    return process;
+  }
+
+  public static Process runASyncProcessWithEnvs(
+      boolean verbose, String[] command, File workingDirectory, Map<String, String> envs) {
+    if (verbose) {
+      LOG.info("$> " + Arrays.toString(command));
+    }
+
+    // For AsyncProcess, we will never inherit IO, since parent process will not
+    // be guaranteed alive when children processing trying to flush to
+    // parent processes's IO.
+    ProcessBuilder pb = getProcessBuilder(false, command, workingDirectory);
+    Map<String, String> env = pb.environment();
+    for (String envKey : envs.keySet()) {
+      env.put(envKey, envs.get(envKey));
+    }
     Process process = null;
     try {
       process = pb.start();

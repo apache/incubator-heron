@@ -1,0 +1,14 @@
+# scheduler class for distributing the topology for execution
+heron.class.scheduler:                       com.twitter.heron.scheduler.mesos.MesosScheduler
+
+# launcher class for submitting and launching the topology
+heron.class.launcher:                        com.twitter.heron.scheduler.mesos.MesosLauncher
+
+# working directory for the topologies
+heron.scheduler.local.working.directory:     ${HOME}/.herondata/topologies/${TOPOLOGY}
+
+# location of java - pick it up from shell environment
+heron.directory.sandbox.java.home:           /usr/lib/jvm/java-1.8.0-openjdk-amd64/
+
+# Invoke the IScheduler as a library directly
+heron.scheduler.is.service:                  True
