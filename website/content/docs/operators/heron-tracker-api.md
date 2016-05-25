@@ -6,14 +6,14 @@ title: Heron Tracker REST API
 
 All Heron Tracker endpoints return a JSON object with the following information:
 
-* `status` -- One of the following: `success`, `failure`.
-* `executiontime` -- The time taken to return the HTTP result, in seconds.
-* `message` -- Some endpoints return special messages in this field for certain
+* `status` --- One of the following: `success`, `failure`.
+* `executiontime` --- The time taken to return the HTTP result, in seconds.
+* `message` --- Some endpoints return special messages in this field for certain
   requests. Often, this field will be an empty string. A `failure` status will
   always have a message.
-* `result` -- The result payload of the request. The contents will depend on
+* `result` --- The result payload of the request. The contents will depend on
   the endpoint.
-* `version` -- The Tracker API version.
+* `version` --- The Tracker API version.
 
 ### Endpoints
 
@@ -127,7 +127,7 @@ The resulting JSON contains following information
 * `instances` --- A list of JSON dictionaries containing following information for each instance
   * `id` --- Instance ID.
   * `name` --- Component name of this instance.
-  * `logfile` -- Link to log file for this instance, that can be read through `heron-shell`.
+  * `logfile` --- Link to log file for this instance, that can be read through `heron-shell`.
   * `stmgrId` --- Its stream manager's ID.
 * `config` --- Various topology configs. Some of the examples are:
   * `topology.message.timeout.secs` --- Time after which a tuple should be considered as failed.
