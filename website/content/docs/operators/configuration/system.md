@@ -3,13 +3,12 @@ title: System-level Configuration
 ---
 
 The parameters in the sections below are set at the system level and thus do not
-apply to any specific topology.
+apply to any specific component.
 
 ## General
 
 Config | Meaning | Default
 :----- |:------- |:-------
-`heron.java.home.path` | The `JAVA_HOME` path on the host's environment | TODO
 `heron.check.tmaster.location.interval.sec` | The interval, in seconds, after which to check if the topology master location has been fetched or not | 120
 `heron.metrics.export.interval` | The interval, in seconds, at which components export metrics to the topology's Metrics Manager
 
