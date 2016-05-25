@@ -22,6 +22,12 @@ java_library(
 )
 
 java_library(
+    name = 'basics-java-nl',
+    srcs = glob(["**/basics/*.java"]),
+    neverlink = 1,
+)
+
+java_library(
     name = 'config-java',
     srcs = glob(["**/config/*.java"]),
     deps = [

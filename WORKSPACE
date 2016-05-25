@@ -87,6 +87,11 @@ maven_jar(
 )
 
 maven_jar(
+  name = "gson-java",
+  artifact = "com.google.code.gson:gson:2.5",
+)
+
+maven_jar(
   name = "hadoop-core",
   artifact = "org.apache.hadoop:hadoop-core:0.20.2",
 )
@@ -132,6 +137,26 @@ maven_jar(
 )
 
 maven_jar(
+  name = "kafka-08-java",
+  artifact = "org.apache.kafka:kafka_2.10:0.8.2.2",
+)
+
+maven_jar(
+  name = "kafka-09-java",
+  artifact = "org.apache.kafka:kafka_2.10:0.9.0.0",
+)
+
+maven_jar(
+  name = "kafka-clients-08-java",
+  artifact = "org.apache.kafka:kafka-clients:0.8.2.2",
+)
+
+maven_jar(
+  name = "kafka-clients-09-java",
+  artifact = "org.apache.kafka:kafka-clients:0.9.0.0",
+)
+
+maven_jar(
   name = "kryo",
   artifact = "com.esotericsoftware:kryo:3.0.3",
 )
@@ -144,6 +169,11 @@ maven_jar(
 maven_jar(
   name = "mesos",
   artifact = "org.apache.mesos:mesos:0.22.0",
+)
+
+maven_jar(
+  name = "metrics-core-java",
+  artifact = "com.yammer.metrics:metrics-core:2.2.0",
 )
 
 maven_jar(
@@ -189,6 +219,11 @@ maven_jar(
 maven_jar(
   name = "protobuf-java",
   artifact = "com.google.protobuf:protobuf-java:2.5.0",
+)
+
+maven_jar(
+  name = "scala-library-java",
+  artifact = "org.scala-lang:scala-library:2.10.5",
 )
 
 maven_jar(
