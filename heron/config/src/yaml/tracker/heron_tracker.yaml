@@ -13,6 +13,7 @@ statemgrs:
     name: "local"
     rootpath: "~/.herondata/repository/state/local"
     tunnelhost: "localhost"
+#
 # To use 'localzk', launch a zookeeper server locally
 # and create the following paths:
 #   1. /heron/topologies
