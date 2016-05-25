@@ -1,13 +1,13 @@
 ---
-title: Intro to Heron Configuration
+title: Intro to Heron Internal Configuration
 ---
 
-Heron can be configured at two levels:
+Heron internal configuration can be configured at two levels:
 
 1. **The system level** --- System-level configurations apply to the whole
 Heron cluster rather than to any specific component.
 2. **The component level** --- Component configurations apply only to a
-specific component. Currently it is static at any stage of the topology's
+specific component. These configurations are fixed at any stage of the topology's
 [lifecycle](../../../concepts/topologies#topology-lifecycle), once the topology
 is deployed.
 
@@ -33,12 +33,12 @@ specific components in a topology and are detailed in the docs below:
 * [Heron Topology Master](../tmaster)
 * [Heron Stream Manager](../stmgr)
 
-### Overriding Heron Configuration
+### Overriding Heron Internal Configuration
 
-Heron configuration is considered as internal for 
-a cluster, and it is often discouraged to modify the configuration to suit one topology.
-Currently, there are no interfaces supported to override heron configuration
-for a topology via heron client or other heron tools.
+The Heron configuration applies globally to a cluster. 
+It is discouraged to modify the configuration to suit one topology.
+It is not possible to override the Heron configuration
+for a topology via Heron client or other Heron tools.
 
 More on Heron's CLI tool can be found in [Managing Heron
 Topologies](../../../../heron-cli).
