@@ -7,11 +7,10 @@ pex_test(
     deps = [
         "//heron/common/src/python:heron-network-lib",
     ],
-    eggs = [
-        "//3rdparty/eggs:pytest",
-        "//3rdparty/eggs:py",
-        "//3rdparty/eggs:unittest2",
-        "//3rdparty/eggs:pymock",
+    reqs = [
+        "pytest==2.6.4",
+        "mock==1.0.1",
+        "unittest2==0.5.1",
     ],
     size = "small",
 )
@@ -22,11 +21,10 @@ pex_test(
     deps = [
         "//heron/common/src/python:heron-network-lib",
     ],
-    eggs = [
-        "//3rdparty/eggs:pytest",
-        "//3rdparty/eggs:py",
-        "//3rdparty/eggs:unittest2",
-        "//3rdparty/eggs:pymock",
+    reqs = [
+        "pytest==2.6.4",
+        "mock==1.0.1",
+        "unittest2==0.5.1",
     ],
     size = "small",
 )
@@ -37,11 +35,10 @@ pex_test(
     deps = [
         "//heron/common/src/python:heron-network-lib",
     ],
-    eggs = [
-        "//3rdparty/eggs:pytest",
-        "//3rdparty/eggs:py",
-        "//3rdparty/eggs:unittest2",
-        "//3rdparty/eggs:pymock",
+    reqs = [
+        "pytest==2.6.4",
+        "mock==1.0.1",
+        "unittest2==0.5.1",
     ],
     size = "small",
 )

@@ -19,7 +19,5 @@ pex_library(
   deps = [
     "//heron/proto:proto-py",
   ],
-  eggs = [
-    "//3rdparty/eggs:gevent",
-  ]
+  reqs = ["gevent==1.1.1"]
 )
