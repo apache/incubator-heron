@@ -64,8 +64,10 @@ sections:
       - name: Heron Client
         url: /docs/operators/heron-cli
       - name: Heron Tracker REST API
+        url: /docs/operators/heron-tracker-api
+      - name: Heron Tracker Runbook
         url: /docs/operators/heron-tracker
-      - name: Heron UI
+      - name: Heron UI Runbook
         url: /docs/operators/heron-ui
   - name: Topology Writers
     sublinks:

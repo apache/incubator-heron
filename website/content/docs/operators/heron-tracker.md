@@ -1,402 +1,100 @@
 ---
-title: The Heron Tracker REST API
+title: Heron Tracker
 ---
 
-The **Heron Tracker** is a web service that continuously gathers a wide
-variety of information about Heron topologies in your cluster(s) and exposes
-that information through a JSON REST API.  More on the role of the Tracker can
-be found [here](../../concepts/architecture#heron-tracker).
+**Heron Tracker** is a web service that continuously gathers a wide
+variety of information about Heron topologies and exposes
+that information through a [JSON REST API](../heron-tracker-api).
+More on the role of the Tracker can be found
+[here](../../concepts/architecture#heron-tracker).
 
-The Tracker can run within your Heron cluster (e.g.
-[Mesos](../../operators/deployment/schedulers/mesos) or [Aurora](../../operators/deployment/schedulers/aurora)) or
-outside of it, provided that the machine on which it runs has access to your
-Heron cluster.
+## Building Heron Tracker
 
-## Starting the Tracker
-
-You can start the Heron Tracker by running the `heron-tracker` executable, which
-you can generate when you [compile Heron](../../developers/compiling).
+Heron uses [bazel](http://bazel.io/) for compiling.
+[Compiling](../../developers/compiling/compiling) describes how to setup bazel
+for heron.
 
 ```bash
-$ cd /path/to/heron/binaries
-$ ./heron-tracker
+# Build heron-tracker
+$ bazel build heron/tracker/src/python:heron-tracker
+
+# The location of heron-tracker pex executable is
+# bazel-bin/heron/tracker/src/python/heron-tracker
+# To run using default options:
+$ ./bazel-bin/heron/tracker/src/python/heron-tracker
 ```
 
-By default, the Tracker runs on port 8888. You can specify a different port
-using the `--port` flag:
+`heron-tracker` is a self executable
+[pex](https://pex.readthedocs.io/en/latest/whatispex.html) archive.
+
+### Heron Tracker Config File
+
+The config file is a `yaml` file that should contain the following information.
+
+#### 1. State Manager locations
+
+This is a list of locations where topology writes its states. An example of
+[zookeeper state manager](../deployment/statemanagers/zookeeper) and
+[local file state manager](../deployment/statemanagers/localfs) look like this:
+
+```yaml
+## Contains the sources where the states are stored.
+# Each source has these attributes:
+# 1. type - type of state manager (zookeeper or file, etc.)
+# 2. name - name to be used for this source
+# 3. hostport - only used to connect to zk, must be of the form 'host:port'
+# 4. rootpath - where all the states are stored
+# 5. tunnelhost - if ssh tunneling needs to be established to connect to it
+statemgrs:
+  -
+    type: "file"
+    name: "local"
+    rootpath: "~/.herondata/repository/state/local"
+    tunnelhost: "localhost"
+  -
+    type: "zookeeper"
+    name: "localzk"
+    hostport: "localhost:2181"
+    rootpath: "/heron/cluster"
+    tunnelhost: "localhost"
+```
+
+Note that topologies from all the state managers would be read.
+
+#### 2. Viz URL Format
+
+This is an optional config. If it is present, then it will show up for each
+topology as the viz link as shown below. For each topology, these parameters
+will be filled appropriately. This parameter can be used to link metrics
+dashboards with topology UI page.
+
+![Viz Link](/img/viz-link.png)
+
+```yaml
+# The URL that points to a topology's metrics dashboard.
+# This value can use following parameters to create a valid
+# URL based on the topology. All parameters are self-explanatory.
+# These are found in the execution state of the topology.
+#
+#   ${CLUSTER}
+#   ${ENVIRON}
+#   ${TOPOLOGY}
+#   ${ROLE}
+#   ${USER}
+#
+# This is a sample, and should be changed to point to corresponding dashboard.
+#
+# viz.url.format: "http://localhost/${CLUSTER}/${ENVIRON}/${TOPOLOGY}/${ROLE}/${USER}"
+```
+
+### Heron Tracker Args
+
+* `--port` - Port to run the heron-tracker on. Default port is `8888`.
+* `--config-file` - The location of the config file for tracker. Default config
+  file is `~/.herontools/conf/heron_tracker.yaml`.
 
 ```bash
-$ ./heron-tracker --port=1234
-```
-
-## JSON Interface
-
-All Heron Tracker endpoints return a JSON object with the following information:
-
-* `status` --- One of the following: `success`, `failure`.
-* `executiontime` --- The time it took to return the HTTP result, in seconds.
-* `message` --- Some endpoints return special messages in this field for certain
-  requests. Often, this field will be an empty string.
-* `result` --- The result payload of the request. The contents will depend on
-  the endpoint.
-* `version` --- The Heron release version used to build the currently running
-  Tracker executable.
-
-## Endpoints
-
-* `/` (redirects to `/topologies`)
-* [`/machines`](#-machines)
-* [`/topologies`](#-topologies)
-* [`/topologies/states`](#-topologies-states)
-* [`/topologies/info`](#-topologies-info)
-* [`/topologies/logicalplan`](#-topologies-logicalplan)
-* [`/topologies/physicalplan`](#-topologies-physicalplan)
-* [`/topologies/executionstate`](#-topologies-executionstate)
-* [`/topologies/metrics`](#-topologies-metrics)
-* [`/topologies/metricstimeline`](#-topologies-metricstimeline)
-* [`/topologies/metricsquery`](#-topologies-metricsquery)
-* [`/topologies/exceptionsummary`](#-topologies-exceptionsummary)
-* [`/topologies/pid`](#-topologies-pid)
-* [`/topologies/jstack`](#-topologies-jstack)
-* [`/topologies/jmap`](#-topologies-jmap)
-* [`/topologies/histo`](#-topologies-histo)
-
-All of these endpoints are documented in the sections below.
-
-***
-
-### `/machines`
-
-Returns JSON describing all currently available machines, sorted by (1) data
-center (if you're running Heron in multiple data centers), (2) environment, and
-(3) topology.
-
-#### Example Request
-
-```bash
-$ curl http://heron-tracker-url/machines
-```
-
-#### Optional parameters
-
-* `dc` --- The data center. If the data center you provide is valid, the JSON
-  payload will list machines only in that data center. You will receive a 404
-  if the data center is invalid. Example:
-
-  ```bash
-  $ curl "http://heron-tracker-url/machines?dc=datacenter1"
-  ```
-
-* `environ` --- The environment. Must be either `devel` or `prod`, otherwise you
-  will receive a 404. Example:
-
-  ```bash
-  $ curl "http://heron-tracker-url/machines?environ=devel"
-  ```
-
-* `topology` (repeated) --- Both `dc` and `environ` are required if the
-  `topology` parameter is present
-
-  ```bash
-  $ curl "http://heron-tracker-url/machines?topology=mytopology1&dc=datacenter1&environ=prod"
-  ```
-
-#### Response
-
-The value of the `result` field should look something like this:
-
-```json
-{
-  <dc1>: {
-    <environ1>: {
-      <topology1>: [machine1, machine2, ...],
-      <topology2>: [...],
-    },
-    <environ2> : {...},
-    ...
-  },
-  <dc2>: {...}
-}
-```
-
-***
-
-### `/topologies`
-
-Returns JSON describing all currently available topologies
-
-#### Optional Parameters
-
-* `dc` --- The data center. If the data center you provide is valid, the JSON
-  payload will list topologies only in that data center. You will receive a 404
-  if the data center is invalid. Example:
-
-  ```bash
-  $ curl "http://heron-tracker-url/topologies?dc=datacenter1"
-  ```
-
-* `environ` --- Lists topologies by the environment in which they're running.
-  Example:
-
-  ```bash
-  $ curl "http://heron-tracker-url/topologies?environ=prod"
-  ```
-
-#### Response
-
-The value of the `result` field should look something like this:
-
-```json
-{
-  <dc1>: {
-    <environ1>: [
-      topology1,
-      topology2,
-      ...
-    ],
-    <environ2>: [...],
-  },
-  <dc2>: {...}
-}
-```
-
-***
-
-### `/topologies/states`
-
-The current execution state of topologies in a cluster. Topologies can be
-grouped by data center, environment, or both.
-
-#### Optional Parameters
-
-* `dc` --- The data center. If the data center you provide is valid, the JSON
-  payload will list topologies only in that data center. You will receive a 404
-  if the data center is invalid. Example:
-
-  ```bash
-  $ curl "http://heron-tracker-url/topologies/states?dc=datacenter1"
-  ```
-
-* `environ` --- Lists topologies by the environment in which they're running.
-  Example:
-
-  ```bash
-  $ curl "http://heron-tracker-url/topologies/states?environ=prod"
-  ```
-
-#### Response
-
-The value of the `result` field should look something like this:
-
-```json
-{
-  <dc1>: {
-    <environ1>: {
-      <topology1>: {
-        <execution state>
-      },
-      <topology2>: {...},      
-      ...
-    },
-    <environ2>: {...{,
-    ...
-  <dc2>: {...}
-}
-```
-
-Each execution state object lists the following:
-
-* `release_username` --- The user that generated the Heron release for the
-  topology
-* `has_tmaster_location` --- Whether the topology's Topology Master
-  currently has a location
-* `release_tag` --- This is a legacy
-* `uploader_version` --- TODO
-* `dc` --- The data center in which the topology is running
-* `jobname` --- TODO
-* `release_version` --- TODO
-* `environ` --- The environment in which the topology is running
-* `submission_user` --- The user that submitted the topology
-* `submission_time` --- The time at which the topology was submitted
-  (timestamp in milliseconds)
-* `role` --- TODO
-* `has_physical_plan` --- Whether the topology currently has a physical plan
-
-***
-
-### `/topologies/info`
-
-#### Required Parameters
-
-* `dc` --- The data center in which the topology is running
-* `environ` --- The environment in which the topology is running
-* `topology` --- The name of the topology
-
-#### Example Request
-
-```bash
-$ curl "http://heron-tracker-url/topologies/info?dc=datacenter1&environ=prod&topology=user_topology_1"
-```
-
-#### Response
-
-The value of the `result` field should lists the following:
-
-* `name` --- The name of the topology
-* `tmaster_location` --- Information about the machine on which the topology's
-  Topology Master (TM) is running, including the following: the controller port, the
-  host, the master port, the stats port, and the ID of the TM.
-* `physical_plan` --- A JSON representation of the physical plan of the
-  topology, which includes configuration information for the topology as well
-  as information about all current spouts, bolts, state managers, and
-  instances.
-* `logical_plan` --- A JSON representation of the logical plan of the topology,
-  which includes information about all of the spouts and bolts in the topology.
-* `execution_state` --- The execution state of the topology. For more on
-  execution state, see the section regarding the `/topologies/states` endpoint
-  above.
-
-***
-
-### `/topologies/logicalplan`
-
-Returns a JSON object for the [logical
-plan](../../concepts/topologies#logical-plan) of a topology.
-
-#### Required Parameters
-
-* `dc` --- The data center in which the topology is running
-* `environ` --- The environment in which the topology is running
-* `topology` --- The name of the topology
-
-#### Example Request
-
-```bash
-$ curl "http://heron-tracker-url/topologies/logicalplan?dc=datacenter1&environ=prod&topology=user_topology_1"
-```
-
-#### Response
-
-The value of the `result` field should look something like this:
-
-```json
-TODO
-```
-
-* `spouts` --- A set of JSON objects representing each spout in the topology.
-  The following information is listed for each spout:
-  * `source` --- The source of tuples for the spout.
-  * `version` --- The Heron release version for the topology.
-  * `type` --- The type of the spout, e.g. `kafka`, `kestrel`, etc.
-  * `outputs` --- A list of streams to which the spout outputs tuples.
-* `bolts` --- A set of JSON objects representing each bolt in the topology.
-  * `outputs` --- A list of outputs for the bolt.
-  * `inputs` --- A list of inputs for the bolt.
-
-***
-
-### `/topologies/physicalplan`
-
-Returns a JSON object for the [physical
-plan](../../concepts/topologies#physical-plan) of a topology.
-
-#### Required Parameters
-
-* `dc` --- The data center in which the topology is running
-* `environ` --- The environment
-* `topology` --- The name of the topology
-
-#### Example Request
-
-```bash
-$ curl "http://heron-tracker-url/topologies/physicalplan?dc=datacenter1&environ=prod&topology=user_topology_1"
-```
-
-#### Response
-
-
-
-***
-
-### `/topologies/executionstate`
-
-The current execution state of a given topology.
-
-#### Required Parameters
-
-* `dc` --- The data center in which the topology is running
-* `environ` --- The environment in which the topology is running
-* `topology` --- The name of the topology
-
-#### Example Request
-
-```bash
-$ curl "http://heron-tracker-url/topologies/executionstate?dc=datacenter1&environ=prod&topology=user_topology_1"
-```
-
-#### Response
-
-The value of the `result` field will be a JSON object akin to the one
-documented in a [section above](#-topologies-states).
-
-***
-
-### `/topologies/metrics`
-
-***
-
-### `/topologies/metricstimeline`
-
-***
-
-### `/topologies/metricsquery`
-
-***
-
-### `/topologies/exceptionsummary`
-
-***
-
-### `/topologies/pid`
-
-***
-
-### `/topologies/jstack`
-
-***
-
-### `/topologies/jmap`
-
-#### Required Parameters
-
-* `dc` --- The data center in which the topology is running
-* `environ` --- The environment in which the topology is running
-* `topology` --- The name of the topology
-* `instance` --- The instance ID of the desired Heron instance
-
-#### Response
-
-***
-
-### `/topologies/histo`
-
-Returns JSON containing a histogram
-
-#### Required Parameters
-
-* `dc` --- The data center
-* `environ` --- The environment
-* `topology` --- The name of the topology
-* `instance` --- The instance ID of the desired Heron instance
-
-#### Response
-
-The `result` field should look something like this:
-
-```json
-{
-  "command": "<command executed at server>",
-  "stdout": "<text from stdout from executing the command>",
-  "stderr": "<text from stderr from executing the command>"
-}
+$ heron-tracker
+# is equivalent to
+$ heron-ui --port=8888 --config-file=~/.herontools/conf/heron_tracker.yaml
 ```
