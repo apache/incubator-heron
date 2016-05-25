@@ -49,12 +49,8 @@ A Heron **spout** is a source of streams, responsible for emitting
 example, read data from a Kestrel queue or read tweets from the Twitter API and
 emit tuples to one or more bolts.
 
-<!--
-//TODO: add the section below which doesn't exist.
-
 Information on building spouts can be found in [Building
-Spouts](../developers/java/spouts.html).
--->
+Spouts](../../developers/java/spouts).
 
 ## Bolts
 
@@ -65,12 +61,8 @@ performing complex stream transformations, performing storage operations,
 aggregating multiple streams into one, emitting tuples to other bolts within the
 topology, and much more.
 
-<!--
-//TODO: add the section below which doesn't exist.
-
 Information on building bolts can be found in [Building
-Bolts](../developers/java/bolts.html).
--->
+Bolts](../../developers/java/bolts).
 
 ## Data Model
 
