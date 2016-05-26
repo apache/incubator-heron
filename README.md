@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/twitter/heron.svg?token=woUsyvMQCWdrt9jhGR7x&branch=master)](https://travis-ci.com/twitter/heron)
+[![Build Status](https://travis-ci.org/twitter/heron.svg?branch=master)](https://travis-ci.org/twitter/heron)
 
 # Heron
 
