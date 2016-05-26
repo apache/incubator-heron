@@ -41,18 +41,18 @@ sections:
         url: /docs/operators/deployment/schedulers/mesos
       - name: Slurm Cluster
         url: /docs/operators/deployment/schedulers/slurm
-  - name: System Configuration
+  - name: Cluster Configuration
     sublinks:
       - name: Overview
         url: /docs/operators/configuration/config-intro
+      - name: System-Level
+        url: /docs/operators/configuration/system
       - name: Heron Instance
         url: /docs/operators/configuration/instance
       - name: Metrics Manager
         url: /docs/operators/configuration/metrics-manager
       - name: Stream Manager
         url: /docs/operators/configuration/stmgr
-      - name: System-Level
-        url: /docs/operators/configuration/system
       - name: Topology Master
         url: /docs/operators/configuration/tmaster
   - name: Observability
