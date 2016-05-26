@@ -37,8 +37,8 @@ sections:
         url: /docs/operators/deployment/schedulers/aurora
       - name: Local Cluster
         url: /docs/operators/deployment/schedulers/local
-      - name: Mesos Cluster
-        url: /docs/operators/deployment/schedulers/mesos
+#      - name: Mesos Cluster
+#        url: /docs/operators/deployment/schedulers/mesos
       - name: Slurm Cluster
         url: /docs/operators/deployment/schedulers/slurm
   - name: System Configuration

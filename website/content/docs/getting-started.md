@@ -178,7 +178,6 @@ The included example topologies:
 * [Upgrade Storm topologies](../upgrade-storm-to-heron) with simple `pom.xml`
   changes
 * [Deploy topologies](../operators/deployment) in clustered, scheduler-driven
-  environments (such as on [Aurora](../operators/deployment/schedulers/aurora),
-  on [Mesos](../operators/deployment/schedulers/mesos), and
-  [locally](../operators/deployment/schedulers/local))
+  environments (such as on [Aurora](../operators/deployment/schedulers/aurora)
+  and [locally](../operators/deployment/schedulers/local))
 * [Develop topologies](../concepts/architecture) for Heron
