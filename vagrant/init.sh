@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash
 
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -15,12 +15,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+install_ssh_keys() {
+  # own key
+  cp .vagrant/`hostname`_key.pub /home/vagrant/.ssh/id_rsa.pub
+  cp .vagrant/`hostname`_key /home/vagrant/.ssh/id_rsa
+  chown vagrant:vagrant /home/vagrant/.ssh/id_rsa*
+
+  # other hosts keys
+  cat .vagrant/*_key.pub >> /home/vagrant/.ssh/authorized_keys
+}
+
 install_mesos() {
     mode=$1 # master | slave
     apt-get -qy install mesos=0.25.0*
 
     echo "zk://master:2181/mesos" > /etc/mesos/zk
-    echo '5mins' > /etc/mesos-slave/executor_registration_timeout
+    echo '10mins' > /etc/mesos-slave/executor_registration_timeout
+    if [ $mode == "master" ]; then
+        echo 'cpus:1;mem:2048;ports:[5000-32000]' > /etc/mesos-slave/resources
+    else
+        echo 'cpus:2;mem:2048;ports:[5000-32000]' > /etc/mesos-slave/resources
+    fi
 
     ip=$(cat /etc/hosts | grep `hostname` | grep -E -o "([0-9]{1,3}[\.]){3}[0-9]{1,3}")
     echo $ip > "/etc/mesos-$mode/ip"
@@ -41,70 +56,113 @@ install_marathon() {
     service marathon start
 }
 
-install_docker() {
-    apt-get install -qy lxc-docker
-    echo 'docker,mesos' > /etc/mesos-slave/containerizers
-    service mesos-slave restart
+install_kafka-mesos() {
+    # download CLI & kafka 08/09
+    pushd /home/vagrant
+    wget -q "https://github.com/mesos/kafka/releases/download/0.9.4.0/kafka-mesos_0.9.4.0.tar.gz"
+    tar -xf kafka-mesos*gz
+    rm kafka-mesos*gz
+
+    mv -T kafka-mesos* kafka-08
+    cp -r kafka-08 kafka-09
+    sed -i s/7000/7001/g kafka-09/kafka-mesos.properties
+
+    wget -q "http://www.eu.apache.org/dist/kafka/0.8.2.2/kafka_2.10-0.8.2.2.tgz" -P kafka-08
+    wget -q "http://www.eu.apache.org/dist/kafka/0.9.0.0/kafka_2.10-0.9.0.0.tgz" -P kafka-09
+    popd
+
+    # run APP
+    curl -X POST -H "Content-Type: application/json" --data @kafka-08.json http://master:8080/v2/apps
+    curl -X POST -H "Content-Type: application/json" --data @kafka-09.json http://master:8080/v2/apps
 }
 
-install_jdk8() {
-    apt-get install -y software-properties-common python-software-properties
-    add-apt-repository -y ppa:webupd8team/java
-    apt-get -y update
-    /bin/echo debconf shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
-    apt-get -y install oracle-java8-installer oracle-java8-set-default vim wget screen git    
-}
-
-bazel_install() {
-    install_jdk8
-    apt-get install -y g++ automake cmake gcc-4.8 g++-4.8 zlib1g-dev zip pkg-config wget libssl-dev
-    mkdir -p /opt/bazel
-    pushd /opt/bazel
-        pushd /tmp
-            wget http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz
-            tar xvfz libunwind-1.1.tar.gz
-            cd libunwind-1.1 && ./configure --prefix=/usr && make install 
-        popd
-        wget 'https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh'
-        chmod +x bazel-0.1.2-installer-linux-x86_64.sh
-        ./bazel-0.1.2-installer-linux-x86_64.sh --user    
+install_aurora_coordinator() {
+    mkdir -p /home/vagrant/aurora
+    pushd /home/vagrant/aurora
+    # Installing scheduler
+    wget -c https://bintray.com/artifact/download/apache/aurora/ubuntu-trusty/aurora-scheduler_0.12.0_amd64.deb
+    dpkg -i aurora-scheduler_0.12.0_amd64.deb
+    stop aurora-scheduler
+    sudo -u aurora mkdir -p /var/lib/aurora/scheduler/db
+    sudo -u aurora mesos-log initialize --path=/var/lib/aurora/scheduler/db
+    sudo sed -i 's/EXTRA_SCHEDULER_ARGS=\"\"/EXTRA_SCHEDULER_ARGS=\"-min_offer_hold_time=1secs -enable_preemptor=false -offer_hold_jitter_window=1secs\"/' /etc/default/aurora-scheduler
+    start aurora-scheduler
     popd
 }
 
-build_heron() {
-    pushd /tmp
-        wget http://mirror.sdunix.com/gnu/libtool//libtool-2.4.6.tar.gz
-        tar xf libtool*
-        cd libtool-2.4.6
-        sh configure --prefix /usr/local
-        make install 
+install_aurora_client() {
+    mode=$1 # master | slave
+    mkdir -p /home/vagrant/aurora
+    pushd /home/vagrant/aurora
+    # Installing client
+    wget https://bintray.com/artifact/download/apache/aurora/ubuntu-trusty/aurora-tools_0.12.0_amd64.deb
+    dpkg -i aurora-tools_0.12.0_amd64.deb
     popd
-    pushd /vagrant
-        export CC=gcc-4.8
-        export CXX=g++-4.8
-        export PATH=/sbin:$PATH
-        ~/bin/bazel clean
-        ./bazel_configure.py
-        ~/bin/bazel --bazelrc=tools/travis-ci/bazel.rc build --config=ubuntu heron/...
+    if [ $mode == "slave" ]; then
+        mkdir -p /root/.aurora
+        mkdir -p /home/vagrant/.aurora
+        cp clusters.json /root/.aurora/clusters.json
+        cp clusters.json /home/vagrant/.aurora/clusters.json
+    fi
+}
+
+install_aurora_worker() {
+    mkdir -p /home/vagrant/aurora
+    pushd /home/vagrant/aurora
+    wget -c https://bintray.com/artifact/download/apache/aurora/ubuntu-trusty/aurora-executor_0.12.0_amd64.deb
+    dpkg -i aurora-executor_0.12.0_amd64.deb
     popd
+}
+
+setup_heron_zk_nodes() {
+    mkdir -p /home/vagrant/solr
+    pushd /home/vagrant/solr
+        # Not the fastest way to do this, need to figure out how to put zk-setup.cpp to use for this
+        wget 'http://www.eu.apache.org/dist/lucene/solr/5.4.1/solr-5.4.1.tgz'
+        tar -zxf solr-5.4.1.tgz
+        ./solr-5.4.1/server/scripts/cloud-scripts/zkcli.sh -zkhost master:2181 -cmd makepath /storm/heron/cluster/pplans
+        ./solr-5.4.1/server/scripts/cloud-scripts/zkcli.sh -zkhost master:2181 -cmd makepath /storm/heron/cluster/executionstate
+        ./solr-5.4.1/server/scripts/cloud-scripts/zkcli.sh -zkhost master:2181 -cmd makepath /storm/heron/cluster/tmasters
+        ./solr-5.4.1/server/scripts/cloud-scripts/zkcli.sh -zkhost master:2181 -cmd makepath /storm/heron/cluster/topologies
+    popd
+}
+
+copy_scripts() {
+    # Copying all the scripts to the home directory for simpler launching through 'vagrant ssh master -c'.
+    cp *.sh /home/vagrant
+    cp *.json /home/vagrant
+}
+
+print_usage() {
+    echo "Usage: $0 master|slave mesos|aurora"
+}
+
+copy_vagrant_conf() {
+    rm -rf /vagrant/dist/ubuntu/heron-cli/mesos
+    mkdir -p /vagrant/dist/ubuntu/heron-cli/mesos
+    cp /vagrant/contrib/kafka9/vagrant/conf/mesos/* /vagrant/dist/ubuntu/heron-cli/conf/mesos
 }
 
 if [[ $1 != "master" && $1 != "slave" ]]; then
-    echo "Usage: $0 master|slave"
+    print_usage
     exit 1
 fi
 mode=$1
 
-cd /vagrant/vagrant
+if [[ $2 != "mesos" && $2 != "aurora" ]]; then
+    print_usage
+    exit 1
+fi
+scheduler=$2
+
+cd /vagrant/contrib/kafka9/vagrant
+
+chmod +x *.sh
 
 # name resolution
 cp .vagrant/hosts /etc/hosts
 
-# ssh key
-key=".vagrant/ssh_key.pub"
-if [ -f $key ]; then
-    cat $key >> /home/vagrant/.ssh/authorized_keys
-fi
+install_ssh_keys
 
 # disable ipv6
 echo -e "\nnet.ipv6.conf.all.disable_ipv6 = 1\n" >> /etc/sysctl.conf
@@ -127,17 +185,32 @@ echo "deb http://repos.mesosphere.io/${DISTRO} ${CODENAME} main" | tee /etc/apt/
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9
 echo "deb http://get.docker.com/ubuntu docker main" > /etc/apt/sources.list.d/docker.list
 
+add-apt-repository ppa:openjdk-r/ppa -y
+
 apt-get -qy update
 
 # install deps
-apt-get install -qy vim zip mc curl wget openjdk-7-jre scala git
+apt-get install -qy vim zip mc curl wget openjdk-8-jdk scala git libcurl4-nss-dev libunwind8
+
+update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
 
 install_mesos $mode
-if [ $mode == "master" ]; then 
+if [ $mode == "master" ]; then
     install_marathon
-    bazel_install
-    build_heron
+    install_kafka-mesos
+    if [ $scheduler == "aurora" ]; then
+        install_aurora_coordinator
+    fi
+    # if [ $scheduler == "mesos" ]; then
+    #     ./submit-mesos-scheduler.sh
+    # fi
+    ./../../../setup-cli-ubuntu.sh
+    copy_vagrant_conf
+
+    setup_heron_zk_nodes
+    copy_scripts
 fi
-
-install_docker
-
+if [ $scheduler == "aurora" ]; then
+    install_aurora_worker
+    install_aurora_client $mode
+fi

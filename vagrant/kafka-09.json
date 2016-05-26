@@ -1,0 +1,23 @@
+{
+    "id": "kafka-09",
+    "cmd": "java -jar kafka-mesos*.jar scheduler --master=master:5050 --zk=master:2181/kafka-09 --api=http://master:7001 --storage=zk:/kafka-09 --framework-name=kafka-09",
+    "cpus": 0.1,
+    "mem": 128,
+    "ports": [7001],
+    "requirePorts": true,
+    "instances": 1,
+    "constraints": [["hostname", "LIKE", "master"]],
+    "uris": [
+        "file:///home/vagrant/kafka-09/kafka-mesos-0.9.4.0.jar",
+        "file:///home/vagrant/kafka-09/kafka_2.10-0.9.0.0.tgz"
+    ],
+    "healthChecks": [{
+        "protocol": "HTTP",
+        "path": "/health",
+        "gracePeriodSeconds": 5,
+        "intervalSeconds": 10,
+        "portIndex": 0,
+        "timeoutSeconds": 10,
+        "maxConsecutiveFailures": 3
+    }]
+}
