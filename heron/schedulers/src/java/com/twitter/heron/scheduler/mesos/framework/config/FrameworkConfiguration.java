@@ -10,7 +10,6 @@ public class FrameworkConfiguration {
    * Sometime similar to:
    * public static getFrameworkConfiguration getFrameworkConfigurationFromJSON(String JSONString) {}
    * public static getFrameworkConfiguration getFrameworkConfigurationFromYAML(String YAMLString) {}
-   * <p/>
    * Currently we would just construct a empty one and then set it by using public methods.
    */
   public static FrameworkConfiguration getFrameworkConfiguration() {
