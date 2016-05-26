@@ -3,9 +3,8 @@ title: Implementing a Custom Scheduler
 ---
 
 To run a Heron cluster, you'll need to set up a scheduler that is responsible
-for cluster management. Heron supports three schedulers out of the box:
+for cluster management. Heron currently supports two schedulers out of the box:
 
-* [Mesos](../../operators/deployment/schedulers/mesos)
 * [Aurora](../../operators/deployment/schedulers/aurora)
 * [Local scheduler](../../operators/deployment/schedulers/local)
 
@@ -47,11 +46,11 @@ interfaces:
 
 Interface | Role | Examples
 :-------- |:---- |:--------
-[`IConfigLoader`](/api/com/twitter/heron/spi/scheduler/IConfigLoader.html) | Parsing and loading of configuration for the scheduler | [Aurora](/api/scheduler/com/twitter/heron/scheduler/aurora/AuroraConfigLoader.html), [Mesos](/api/scheduler/com/twitter/heron/scheduler/mesos/MesosConfigLoader.html), [local](/api/scheduler/com/twitter/heron/scheduler/local/LocalConfigLoader.html)
-[`ILauncher`](/api/com/twitter/heron/spi/scheduler/ILauncher.html) | Defines how the scheduler is launched | [Aurora](/api/scheduler/com/twitter/heron/scheduler/aurora/AuroraLauncher.html), [Mesos](/api/scheduler/com/twitter/heron/scheduler/mesos/MesosLauncher.html), [local](/api/scheduler/com/twitter/heron/scheduler/local/LocalLauncher.html)
-[`IRuntimeManager`](/api/com/twitter/heron/spi/scheduler/IRuntimeManager.html) | Handles runtime tasks such as activating topologies, killing topologies, etc. | [Aurora](/api/scheduler/com/twitter/heron/scheduler/aurora/AuroraTopologyRuntimeManager.html), [Mesos](/api/scheduler/com/twitter/heron/scheduler/mesos/MesosTopologyRuntimeManager.html), [local](/api/scheduler/com/twitter/heron/scheduler/local/LocalTopologyRuntimeManager.html)
-[`IScheduler`](/api/com/twitter/heron/spi/scheduler/IScheduler.html) | Defines the scheduler object used to construct topologies | [Mesos](/api/scheduler/com/twitter/heron/scheduler/mesos/MesosScheduler.html), [local](/api/scheduler/com/twitter/heron/scheduler/local/LocalScheduler.html)
-[`IUploader`](/api/com/twitter/heron/spi/scheduler/IUploader.html) | Uploads the topology to a shared location that must be accessible to the runtime environment of the topology | [Aurora](), [Mesos](), [local](/api/scheduler/com/twitter/heron/scheduler/local/LocalUploader.html)
+[`IConfigLoader`](/api/com/twitter/heron/spi/scheduler/IConfigLoader.html) | Parsing and loading of configuration for the scheduler | [Aurora](/api/scheduler/com/twitter/heron/scheduler/aurora/AuroraConfigLoader.html), [local](/api/scheduler/com/twitter/heron/scheduler/local/LocalConfigLoader.html)
+[`ILauncher`](/api/com/twitter/heron/spi/scheduler/ILauncher.html) | Defines how the scheduler is launched | [Aurora](/api/scheduler/com/twitter/heron/scheduler/aurora/AuroraLauncher.html), [local](/api/scheduler/com/twitter/heron/scheduler/local/LocalLauncher.html)
+[`IRuntimeManager`](/api/com/twitter/heron/spi/scheduler/IRuntimeManager.html) | Handles runtime tasks such as activating topologies, killing topologies, etc. | [Aurora](/api/scheduler/com/twitter/heron/scheduler/aurora/AuroraTopologyRuntimeManager.html), [local](/api/scheduler/com/twitter/heron/scheduler/local/LocalTopologyRuntimeManager.html)
+[`IScheduler`](/api/com/twitter/heron/spi/scheduler/IScheduler.html) | Defines the scheduler object used to construct topologies | [local](/api/scheduler/com/twitter/heron/scheduler/local/LocalScheduler.html)
+[`IUploader`](/api/com/twitter/heron/spi/scheduler/IUploader.html) | Uploads the topology to a shared location that must be accessible to the runtime environment of the topology | [local](/api/scheduler/com/twitter/heron/scheduler/local/LocalUploader.html)
 
 Your implementation of those interfaces will need to be on Heron's
 [classpath](https://docs.oracle.com/javase/tutorial/essential/environment/paths.html)
@@ -65,7 +64,7 @@ interface. You can use this interface to load configuration from any source
 you'd like, e.g. YAML files, JSON files, or a web service.
 
 If you'd like to load configuration from files using the same syntax as Heron's
-default configuration files for the Aurora, Mesos, and local schedulers (in
+default configuration files for the Aurora and local schedulers (in
 `heron/cli2/src/python`), you can implement the
 [`DefaultConfigLoader`](/api/scheduler/com/twitter/heron/scheduler/util/DefaultConfigLoader.html)
 interface.
