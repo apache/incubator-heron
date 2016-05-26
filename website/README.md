@@ -135,6 +135,6 @@ Your branch is up-to-date with 'upstream/gh-pages'.
 To publish the site docs:
 
 1. Make the site as described in the above section. Verify all links are valid.
-2. Change to the `website/public` directory, commit to the `gh-pages` branch and push to the 
-   `upstream` repo. You can also push to the `gh-pages` branch of your own fork and verify
-   the site at `http://[username].github.io/heron`.
+2. Change to the `website/public` directory, commit everything to the `gh-pages` branch and push to
+   the `upstream` repo. You can also push to the `gh-pages` branch of your own fork and verify the
+   site at `http://[username].github.io/heron`.
