@@ -1,3 +1,17 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.twitter.heron;
 
 import com.twitter.heron.api.Config;
@@ -12,12 +26,14 @@ import com.twitter.heron.spouts.kafka.old.SpoutConfig;
 
 import java.util.Properties;
 
-public class KafkaOldMirrorTopology {
+public final class KafkaOldMirrorTopology {
 
   public static void main(String[] args) throws Exception {
 
     if (args.length < 2) {
-      throw new RuntimeException("Would need at least two arguments:\n 0 - Topology name\n 1 - Bootstrap Kafka servers");
+      throw new RuntimeException("Two arguments required:\n"
+                                 + "0 - Topology name\n"
+                                 + "1 - Bootstrap Kafka servers");
     }
 
     String bootstrapKafkaServers = args[1];
@@ -34,15 +50,21 @@ public class KafkaOldMirrorTopology {
       zkRoot = args[5] + zkRoot;
     }
     TopologyBuilder builder = new TopologyBuilder();
-    SpoutConfig config = new SpoutConfig(new SpoutConfig.ZkHosts(zkURL, zkRoot), consumerTopic, null, "spoutId");
+    SpoutConfig config = new SpoutConfig(new SpoutConfig.ZkHosts(zkURL, zkRoot), 
+                                            consumerTopic, null, "spoutId");
+
     config.scheme = new KeyValueSchemeAsMultiScheme(new ByteArrayKeyValueScheme());
     config.bufferSizeBytes = 100; // Don't need buffer to be too big for showcase purposes
     builder.setSpout("spout", new KafkaSpout(config), 1);
     Properties kafkaBoltProps = new Properties();
     kafkaBoltProps.put("acks", "1");
     kafkaBoltProps.put("bootstrap.servers", bootstrapKafkaServers);
-    kafkaBoltProps.put("key.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
-    kafkaBoltProps.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
+    kafkaBoltProps.put("key.serializer", 
+        "org.apache.kafka.common.serialization.ByteArraySerializer");
+    
+    kafkaBoltProps.put("value.serializer", 
+        "org.apache.kafka.common.serialization.ByteArraySerializer");
+
     kafkaBoltProps.put("metadata.fetch.timeout.ms", 1000);
     builder.setBolt("bolt",
         new KafkaBolt<byte[], byte[]>(producerTopic)
@@ -61,5 +83,9 @@ public class KafkaOldMirrorTopology {
     conf.setContainerDiskRequested(1024L * 1024 * 1024);
 
     HeronSubmitter.submitTopology(args[0], conf, builder.createTopology());
+  }
+
+  private KafkaOldMirrorTopology() {
+
   }
 }
