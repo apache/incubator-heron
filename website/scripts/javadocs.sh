@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #set -e TODO: figure out why this breaks CI and re-enable (https://github.com/twitter/heron/issues/766)
 
-JAVADOC=javadoc
+FLAGS="-quiet"
 
 HERON_ROOT_DIR=$(git rev-parse --show-toplevel)
 JAVADOC_OUTPUT_DIR=$HERON_ROOT_DIR/website/public/api
@@ -19,7 +19,7 @@ BACKTYPE_SRC_FILES=`find $HERON_ROOT_DIR -path "*/backtype/storm/*" -name "*.jav
 APACHE_SRC_FILES=`find $HERON_ROOT_DIR -path "*/org/apache/storm/*" -name "*.java"`
 GEN_FILES=`find $GEN_PROTO_DIR -name "*.java"`
 
-rm -rf $JAVADOC_OUTPUT_DIR
+rm -rf $JAVADOC_OUTPUT_DIR $JAVADOC_STATIC_OUTPUT_DIR/api
 mkdir -p $JAVADOC_OUTPUT_DIR $JAVADOC_STATIC_OUTPUT_DIR
 
 BIN_JARS=`find $HERON_ROOT_DIR/bazel-heron/_bin/. -name "*\.jar" | tr '\n' ':'`
@@ -30,13 +30,13 @@ CLOJURE_CLASSES="$HERON_ROOT_DIR/bazel-bin/heron/storm/src/java/_javac/storm-com
 
 export CLASSPATH=$BIN_JARS:$GEN_JARS:$SCRIBE_JARS:$PROTO_JARS:$CLOJURE_CLASSES
 
-$JAVADOC -quiet \
+javadoc $FLAGS \
   -windowtitle "Heron Java API" \
   -doctitle "The Heron Java API" \
   -overview $OVERVIEW_HTML_FILE \
   -d $JAVADOC_OUTPUT_DIR $GEN_FILES $HERON_SRC_FILES $BACKTYPE_SRC_FILES $APACHE_SRC_FILES
 
-cp -rf $JAVADOC_OUTPUT_DIR $JAVADOC_STATIC_OUTPUT_DIR/api
+ln -s $JAVADOC_OUTPUT_DIR $JAVADOC_STATIC_OUTPUT_DIR
 
 echo "Javdocs generated at $JAVADOC_OUTPUT_DIR"
 exit 0
