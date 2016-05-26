@@ -106,10 +106,21 @@ website is what is committed on the [gh-pages
 branch](https://github.com/twitter/heron/tree/gh-pages) of the Heron repo. To
 simplify publishing docs generated from `master` onto the `gh-pages` branch, the
 output directory of the site build process (i.e. `website/public`) is a
-submodule that points to the `gh-pages` branch of the heron repo. As a result,
-you will notice that when you `cd` into `website/public` and run `git status`
-or `git remote -v`, it appears as another heron repo based off of the `gh-pages`
-branch.
+submodule that points to the `gh-pages` branch of the heron repo. 
+
+A one-time setup is required to initialize the website/public submodule:
+
+```
+$ rm -rf website/public
+$ git submodule update --init
+$ cd website/public
+$ git checkout gh-pages
+$ git remote rename origin upstream
+```
+
+With the submodule in place, you will notice that when you `cd` into `website/public`
+and run `git status` or `git remote -v`, it appears as another heron repo based off
+of the `gh-pages` branch.
 
 ```bash
 $ git status
