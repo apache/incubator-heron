@@ -108,7 +108,7 @@ simplify publishing docs generated from `master` onto the `gh-pages` branch, the
 output directory of the site build process (i.e. `website/public`) is a
 submodule that points to the `gh-pages` branch of the heron repo. 
 
-A one-time setup is required to initialize the website/public submodule:
+A one-time setup is required to initialize the `website/public` submodule:
 
 ```
 $ rm -rf website/public
@@ -125,15 +125,16 @@ of the `gh-pages` branch.
 ```bash
 $ git status
 On branch master
-Your branch is up-to-date with 'origin/master'.
+Your branch is up-to-date with 'upstream/master'.
 $ cd website/public
 $ git status
 On branch gh-pages
-Your branch is up-to-date with 'origin/gh-pages'.
+Your branch is up-to-date with 'upstream/gh-pages'.
 ```
 
 To publish the site docs:
 
 1. Make the site as described in the above section. Verify all links are valid.
-2. Change to the `website/public` directory, commit, and push to the `gh-pages`
-   branch.
+2. Change to the `website/public` directory, commit to the `gh-pages` branch and push to the 
+   `upstream` repo. You can also push to the `gh-pages` branch of your own fork and verify
+   the site at `http://[username].github.io/heron`.
