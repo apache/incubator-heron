@@ -14,6 +14,14 @@
 
 package com.twitter.heron.spouts.kafka.old;
 
+import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.twitter.heron.api.Config;
 import com.twitter.heron.spouts.kafka.common.GlobalPartitionId;
 import com.twitter.heron.spouts.kafka.common.GlobalPartitionInformation;
@@ -21,15 +29,9 @@ import com.twitter.heron.spouts.kafka.common.IOffsetStoreManager;
 import com.twitter.heron.spouts.kafka.common.Partition;
 import com.twitter.heron.storage.MetadataStore;
 import com.twitter.heron.storage.StoreSerializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
+// CHECKSTYLE:OFF IllegalCatch
 public class PartitionCoordinator {
   public static final Logger LOG = LoggerFactory.getLogger(PartitionCoordinator.class);
   private final SpoutConfig spoutConfig;
@@ -76,7 +78,8 @@ public class PartitionCoordinator {
 
     SpoutConfig.ZkHosts brokerConf = (SpoutConfig.ZkHosts) this.spoutConfig.hosts;
     this.refreshFreqMSecs = brokerConf.refreshFreqMSecs;
-    dynamicBrokersReader = new DynamicBrokersReader(spoutConfig, brokerConf.brokerZkStr, brokerConf.brokerZkPath, spoutConfig.topic);
+    dynamicBrokersReader = new DynamicBrokersReader(spoutConfig, brokerConf.brokerZkStr,
+        brokerConf.brokerZkPath, spoutConfig.topic);
     this.executor = Executors.newSingleThreadScheduledExecutor();
     scheduleConnectionRefresh();
     kafkaOffsetMetric.setCoordinator(this);
@@ -123,7 +126,8 @@ public class PartitionCoordinator {
     GlobalPartitionInformation partitions = dynamicBrokersReader.getBrokerInfo();
     Set<GlobalPartitionId> partitionIds = new HashSet<>();
     for (Partition partition : partitions) {
-      partitionIds.add(new GlobalPartitionId(partition.host.host, partition.host.port, partition.partition));
+      partitionIds.add(new GlobalPartitionId(partition.host.host, partition.host.port, partition
+          .partition));
     }
     return partitionIds;
   }
@@ -148,7 +152,8 @@ public class PartitionCoordinator {
           LOG.info("Adding partition manager for " + id);
           MetadataStore offsetStore = offsetStoreManager.getStore(id);
           // We may consider calling "initialize" from within store managers
-          offsetStore.initialize("offset_" + spoutConfig.id, stormConf.get(Config.TOPOLOGY_NAME).toString(),
+          offsetStore.initialize("offset_" + spoutConfig.id, stormConf.get(Config.TOPOLOGY_NAME)
+              .toString(),
               componentId,
               new StoreSerializer.DefaultSerializer<Map<Object, Object>>());
           PartitionManager partitionManager = new PartitionManager(

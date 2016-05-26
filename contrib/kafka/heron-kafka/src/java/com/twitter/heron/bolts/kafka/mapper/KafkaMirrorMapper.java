@@ -14,9 +14,9 @@
 
 package com.twitter.heron.bolts.kafka.mapper;
 
-import com.twitter.heron.api.tuple.Tuple;
-
 import java.util.Map;
+
+import com.twitter.heron.api.tuple.Tuple;
 
 /**
  * Maps key and message from tuples produced by KeyValueScheme deserializer in Kafka spout.
@@ -24,9 +24,9 @@ import java.util.Map;
 @SuppressWarnings({"unchecked", "serial"})
 public class KafkaMirrorMapper<K, V> implements TupleToKafkaMapper<K, V> {
 
-  private final static String DEFAULT_KAFKA_MESSAGE_FIELD = "bytes";
-
   private final String kafkaMsgField;
+
+  private static final String DEFAULT_KAFKA_MESSAGE_FIELD = "bytes";
 
   public KafkaMirrorMapper() {
     this(DEFAULT_KAFKA_MESSAGE_FIELD);

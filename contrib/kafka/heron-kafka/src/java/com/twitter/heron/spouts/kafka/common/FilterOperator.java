@@ -14,10 +14,10 @@
 
 package com.twitter.heron.spouts.kafka.common;
 
-import org.json.simple.JSONObject;
-
 import java.io.Serializable;
 import java.util.List;
+
+import org.json.simple.JSONObject;
 
 @SuppressWarnings({"unchecked", "serial"})
 public abstract class FilterOperator implements Serializable {

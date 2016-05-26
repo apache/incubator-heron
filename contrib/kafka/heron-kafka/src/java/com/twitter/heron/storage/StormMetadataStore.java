@@ -25,7 +25,7 @@ import java.util.Map;
  * All implementation of StormMetadataStore should strive to be interoperable i.e. Clients can read
  * data written by other StormMetadataStore.
  */
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings("rawtypes")
 public abstract class StormMetadataStore {
   protected String uId;
   protected String topologyName;

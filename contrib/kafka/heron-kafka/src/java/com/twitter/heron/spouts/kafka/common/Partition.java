@@ -47,15 +47,16 @@ public class Partition {
       return false;
     }
     final Partition other = (Partition) obj;
-    return Objects.equal(this.host, other.host) && Objects.equal(this.topic, other.topic) && Objects.equal(this.partition, other.partition);
+    return Objects.equal(this.host, other.host) && Objects.equal(this.topic, other.topic)
+        && Objects.equal(this.partition, other.partition);
   }
 
   @Override
   public String toString() {
-    return "Partition{" +
-        "host=" + host +
-        ", topic=" + topic +
-        ", partition=" + partition +
-        '}';
+    return "Partition{"
+        + "host=" + host
+        + ", topic=" + topic
+        + ", partition=" + partition
+        + '}';
   }
 }

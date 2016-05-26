@@ -14,17 +14,18 @@
 
 package com.twitter.heron.spouts.kafka.old;
 
-import com.twitter.heron.api.metric.ICombiner;
-import com.twitter.heron.api.metric.IMetric;
-import kafka.api.OffsetRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.twitter.heron.api.metric.ICombiner;
+import com.twitter.heron.api.metric.IMetric;
+
 @SuppressWarnings({"unchecked", "rawtypes"})
+// CHECKSTYLE:OFF IllegalCatch
 public final class KafkaMetric {
   // Utility class. Not to be instantiated.
   private KafkaMetric() {

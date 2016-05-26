@@ -14,6 +14,8 @@
 
 package com.twitter.heron;
 
+import java.util.Properties;
+
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.HeronSubmitter;
 import com.twitter.heron.api.topology.TopologyBuilder;
@@ -24,14 +26,15 @@ import com.twitter.heron.spouts.kafka.SpoutConfig;
 import com.twitter.heron.spouts.kafka.common.ByteArrayKeyValueScheme;
 import com.twitter.heron.spouts.kafka.common.KeyValueSchemeAsMultiScheme;
 
-import java.util.Properties;
+public final class KafkaMirrorTopology {
 
-public class KafkaMirrorTopology {
+  private KafkaMirrorTopology() { }
 
   public static void main(String[] args) throws Exception {
 
     if (args.length < 2) {
-      throw new RuntimeException("Would need at least two arguments:\n 0 - Topology name\n 1 - Bootstrap Kafka servers");
+      throw new RuntimeException("Would need at least two arguments:\n 0 - Topology name\n 1 - "
+          + "Bootstrap Kafka servers");
     }
 
     String bootstrapKafkaServers = args[1];
@@ -48,8 +51,10 @@ public class KafkaMirrorTopology {
     Properties kafkaBoltProps = new Properties();
     kafkaBoltProps.put("acks", "1");
     kafkaBoltProps.put("bootstrap.servers", bootstrapKafkaServers);
-    kafkaBoltProps.put("key.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
-    kafkaBoltProps.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
+    kafkaBoltProps.put("key.serializer", "org.apache.kafka.common.serialization"
+        + ".ByteArraySerializer");
+    kafkaBoltProps.put("value.serializer", "org.apache.kafka.common.serialization"
+        + ".ByteArraySerializer");
     kafkaBoltProps.put("metadata.fetch.timeout.ms", 1000);
     builder.setBolt("bolt",
         new KafkaBolt<byte[], byte[]>(producerTopic)

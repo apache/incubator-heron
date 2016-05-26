@@ -14,16 +14,16 @@
 
 package com.twitter.heron.spouts.kafka.old;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.twitter.heron.api.spout.MultiScheme;
 import com.twitter.heron.api.spout.RawMultiScheme;
 import com.twitter.heron.spouts.kafka.common.KafkaConfig;
 import com.twitter.heron.spouts.kafka.common.TimestampExtractor;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-@SuppressWarnings({"serial"})
+@SuppressWarnings("serial")
 public class SpoutConfig implements Serializable {
   private static final long DEFAULT_TUPLE_IN_THE_PAST_THRESHOLD = 30000; // 30s
 

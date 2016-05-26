@@ -14,11 +14,11 @@
 
 package com.twitter.heron.spouts.kafka.common;
 
-import com.google.common.base.Objects;
-
 import java.io.Serializable;
 
-@SuppressWarnings({"serial"})
+import com.google.common.base.Objects;
+
+@SuppressWarnings("serial")
 public class Broker implements Serializable, Comparable<Broker> {
   public String host;
   public int port;

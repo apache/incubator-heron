@@ -14,13 +14,13 @@
 
 package com.twitter.heron.spouts.kafka.common;
 
-import com.twitter.heron.api.tuple.Values;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings({"serial"})
+import com.twitter.heron.api.tuple.Values;
+
+@SuppressWarnings("serial")
 public class StringKeyValueScheme extends StringScheme implements KeyValueScheme {
 
   @Override

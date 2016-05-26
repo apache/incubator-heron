@@ -14,15 +14,17 @@
 
 package com.twitter.heron.spouts.kafka.common;
 
-import com.twitter.heron.api.spout.MultiScheme;
-import com.twitter.heron.api.tuple.Fields;
-import com.twitter.heron.api.tuple.Values;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.util.Collections;
 import java.util.List;
 
-@SuppressWarnings({"serial"})
+import com.twitter.heron.api.spout.MultiScheme;
+import com.twitter.heron.api.tuple.Fields;
+import com.twitter.heron.api.tuple.Values;
+
+//CHECKSTYLE:OFF IllegalImport
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
+@SuppressWarnings("serial")
 public class StringMultiSchemeWithTopic
     implements MultiScheme {
   public static final String STRING_SCHEME_KEY = "str";

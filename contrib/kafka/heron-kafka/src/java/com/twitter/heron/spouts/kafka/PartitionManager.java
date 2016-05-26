@@ -14,9 +14,20 @@
 
 package com.twitter.heron.spouts.kafka;
 
+import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.SortedMultiset;
 import com.google.common.collect.TreeMultiset;
+
+// CHECKSTYLE:OFF AvoidStarImport
+import org.apache.kafka.clients.consumer.*;
+import org.apache.kafka.common.TopicPartition;
+import org.json.simple.JSONValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.metric.CombinedMetric;
 import com.twitter.heron.api.metric.CountMetric;
@@ -28,17 +39,10 @@ import com.twitter.heron.spouts.kafka.common.GlobalPartitionId;
 import com.twitter.heron.spouts.kafka.common.KeyValueSchemeAsMultiScheme;
 import com.twitter.heron.spouts.kafka.common.StringMultiSchemeWithTopic;
 import com.twitter.heron.storage.MetadataStore;
-import org.apache.kafka.clients.consumer.*;
-import org.apache.kafka.common.TopicPartition;
-import org.json.simple.JSONValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
 
 // TODO: Add comments to describe the PartitionManager lifecycle
 @SuppressWarnings({"rawtypes", "unchecked"})
+// CHECKSTYLE:OFF IllegalCatch
 public class PartitionManager {
   public static final Logger LOG = LoggerFactory.getLogger(PartitionManager.class);
 
@@ -53,7 +57,8 @@ public class PartitionManager {
 
     @Override
     public String toString() {
-      return String.format("{ \"partition\": %s, \"offset\": %s}", Integer.toString(partition.partition), offset);
+      return String.format("{ \"partition\": %s, \"offset\": %s}", Integer.toString(partition
+          .partition), offset);
     }
   }
 
@@ -109,15 +114,19 @@ public class PartitionManager {
 
     Properties kafkaProps = new Properties();
     kafkaProps.put("bootstrap.servers", spoutConfig.bootstrapBrokers);
-    kafkaProps.put("group.id", String.format("%s_%s_%s", spoutConfig.id, stormConf.get(Config.TOPOLOGY_NAME).toString(),
+    kafkaProps.put("group.id", String.format("%s_%s_%s", spoutConfig.id, stormConf.get(Config
+        .TOPOLOGY_NAME).toString(),
         componentId));
     kafkaProps.put("enable.auto.commit", "false");
     kafkaProps.put("session.timeout.ms", "30000");
-    kafkaProps.put("key.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");
-    kafkaProps.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");
+    kafkaProps.put("key.deserializer", "org.apache.kafka.common.serialization"
+        + ".ByteArrayDeserializer");
+    kafkaProps.put("value.deserializer", "org.apache.kafka.common.serialization"
+        + ".ByteArrayDeserializer");
 
     this.consumer = new KafkaConsumer<>(kafkaProps);
-    consumer.assign(Collections.singletonList(new TopicPartition(spoutConfig.topic, partition.partition)));
+    consumer.assign(Collections.singletonList(new TopicPartition(spoutConfig.topic, partition
+        .partition)));
 
     /** Add counters */
     this.fetchAPILatencyMax = new CombinedMetric(new KafkaMetric.MaxMetric());
@@ -184,11 +193,9 @@ public class PartitionManager {
    * extractor, then this method will return the timestamp (in milliseconds) of the latest emitted
    * tuple stored in the Kafka partition associated with this manager. Otherwise, it will always
    * return 0.
-   * <p/>
    * Note that this is {@code max(timestamps_associated_with_emitted_tuples)} and might not
    * necessarily be the timestamp of the last emitted tuple, since the events stored in a Kafka
    * partition might be slightly out of order.
-   * <p/>
    * If there were no tuples in the partition last time we tried reading from it, this method will
    * return a special value of -1.
    *
@@ -202,9 +209,9 @@ public class PartitionManager {
    * Returns the latest offset from which we should start reading this partition if we want to
    * capture all events that were published to this partition at time {@code timestamp}.
    * (visible for testing)
-   * <p/>
    * NOTE: no such functionality in 0.9 consumer, left for legacy reasons
    *
+   * @deprecated left just for legacy reasons
    * @param timestamp The timestamp at which the events were added to this partition.
    * @return The offset at which events were published at time {@code timestamp} (or later).
    */
@@ -491,11 +498,14 @@ public class PartitionManager {
     if (record.value() == null || record.value().length == 0) {
       return null;
     }
-    if (record.key() != null && record.key().length > 0 && spoutConfig.scheme instanceof KeyValueSchemeAsMultiScheme) {
-      tups = ((KeyValueSchemeAsMultiScheme) spoutConfig.scheme).deserializeKeyAndValue(record.key(), record.value());
+    if (record.key() != null && record.key().length > 0 && spoutConfig.scheme
+        instanceof KeyValueSchemeAsMultiScheme) {
+      tups = ((KeyValueSchemeAsMultiScheme) spoutConfig.scheme).deserializeKeyAndValue(record.key(),
+          record.value());
     } else {
       if (spoutConfig.scheme instanceof StringMultiSchemeWithTopic) {
-        tups = ((StringMultiSchemeWithTopic) spoutConfig.scheme).deserializeWithTopic(spoutConfig.topic, record.value());
+        tups = ((StringMultiSchemeWithTopic) spoutConfig.scheme).deserializeWithTopic(spoutConfig
+            .topic, record.value());
       } else {
         tups = spoutConfig.scheme.deserialize(record.value());
       }
@@ -542,9 +552,6 @@ public class PartitionManager {
     return offsetToReturn;
   }
 
-  /**
-   * @return latest or earliest offset
-   */
   private long getLimitOffset(boolean latest) {
     TopicPartition tp = new TopicPartition(spoutConfig.topic, partition.partition);
     if (latest) {
@@ -673,8 +680,9 @@ public class PartitionManager {
     if (numMessages == 0) {
       timestampOfLatestEmittedTuple = kafka.api.OffsetRequest.LatestTime();
     } else {
-      LOG.debug("Non-empty fetch from Kafka, current consumer position for partition " + partition + ":" +
-          consumer.position(new TopicPartition(spoutConfig.topic, partition.partition)));
+      LOG.debug("Non-empty fetch from Kafka, current consumer position for partition "
+          + partition + ":"
+          + consumer.position(new TopicPartition(spoutConfig.topic, partition.partition)));
     }
 
     return msgs;

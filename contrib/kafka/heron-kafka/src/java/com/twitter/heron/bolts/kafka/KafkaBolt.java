@@ -14,12 +14,11 @@
 
 package com.twitter.heron.bolts.kafka;
 
-import com.twitter.heron.api.bolt.BaseRichBolt;
-import com.twitter.heron.api.bolt.OutputCollector;
-import com.twitter.heron.api.topology.OutputFieldsDeclarer;
-import com.twitter.heron.api.topology.TopologyContext;
-import com.twitter.heron.api.tuple.Tuple;
-import com.twitter.heron.bolts.kafka.mapper.TupleToKafkaMapper;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -27,12 +26,15 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import com.twitter.heron.api.bolt.BaseRichBolt;
+import com.twitter.heron.api.bolt.OutputCollector;
+import com.twitter.heron.api.topology.OutputFieldsDeclarer;
+import com.twitter.heron.api.topology.TopologyContext;
+import com.twitter.heron.api.tuple.Tuple;
+import com.twitter.heron.bolts.kafka.mapper.TupleToKafkaMapper;
 
 @SuppressWarnings({"rawtypes", "serial"})
+// CHECKSTYLE:OFF IllegalCatch
 public class KafkaBolt<K, V> extends BaseRichBolt {
 
   public static final Logger LOG = LoggerFactory.getLogger(KafkaBolt.class);
@@ -57,8 +59,8 @@ public class KafkaBolt<K, V> extends BaseRichBolt {
     return this;
   }
 
-  public KafkaBolt<K, V> withTupleToKafkaMapper(TupleToKafkaMapper<K, V> mapper) {
-    this.mapper = mapper;
+  public KafkaBolt<K, V> withTupleToKafkaMapper(TupleToKafkaMapper<K, V> kafkaMapper) {
+    this.mapper = kafkaMapper;
     return this;
   }
 
@@ -69,7 +71,8 @@ public class KafkaBolt<K, V> extends BaseRichBolt {
   }
 
   private static boolean isTick(Tuple tuple) {
-    return tuple != null && "__system".equals(tuple.getSourceComponent()) && "__tick".equals(tuple.getSourceStreamId());
+    return tuple != null && "__system".equals(tuple.getSourceComponent()) && "__tick".equals(tuple.
+        getSourceStreamId());
   }
 
   @Override
@@ -105,7 +108,8 @@ public class KafkaBolt<K, V> extends BaseRichBolt {
             }
           };
         }
-        Future<RecordMetadata> result = producer.send(new ProducerRecord<K, V>(topic, key, message), callback);
+        Future<RecordMetadata> result = producer.send(new ProducerRecord<K, V>(topic, key, message),
+            callback);
         if (!async) {
           try {
             result.get();

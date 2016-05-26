@@ -16,10 +16,10 @@ package com.twitter.heron.spouts.kafka;
 
 import com.twitter.heron.spouts.kafka.common.IOffsetStoreManager;
 
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings("rawtypes")
 public class OffsetStoreManagerFactory {
 
-  public final static String KAFKA_STORE = "kafka";
+  public static final String KAFKA_STORE = "kafka";
 
   private SpoutConfig spoutConfig;
 

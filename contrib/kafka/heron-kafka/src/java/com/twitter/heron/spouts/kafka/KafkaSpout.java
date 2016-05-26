@@ -14,6 +14,18 @@
 
 package com.twitter.heron.spouts.kafka;
 
+import java.lang.reflect.Constructor;
+import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.twitter.heron.api.metric.MultiCountMetric;
 import com.twitter.heron.api.spout.BaseRichSpout;
 import com.twitter.heron.api.spout.SpoutOutputCollector;
@@ -23,22 +35,12 @@ import com.twitter.heron.spouts.kafka.common.FilterOperator;
 import com.twitter.heron.spouts.kafka.common.GlobalPartitionId;
 import com.twitter.heron.spouts.kafka.common.IOExecutorService;
 import com.twitter.heron.spouts.kafka.common.TransferCollector;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.Constructor;
-import java.util.*;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 /**
  * KafkaSpout is a regular spout implementation that reads from a Kafka cluster.
  */
 @SuppressWarnings({"serial", "unchecked", "rawtypes"})
+// CHECKSTYLE:OFF IllegalCatch
 public class KafkaSpout extends BaseRichSpout {
 
   public static final Logger LOG = LoggerFactory.getLogger(KafkaSpout.class);
@@ -83,12 +85,14 @@ public class KafkaSpout extends BaseRichSpout {
     int totalTasks = context.getComponentTasks(context.getThisComponentId()).size();
     applyStormConf(conf);
     startCommitThread(conf);
-    OffsetStoreManagerFactory offsetStoreManagerFactory = new OffsetStoreManagerFactory(spoutConfig);
+    OffsetStoreManagerFactory offsetStoreManagerFactory = new OffsetStoreManagerFactory(
+        spoutConfig);
     addFilterOperator(conf, context.getThisComponentId(), spoutConfig.topic);
     KafkaMetric.OffsetMetric kafkaOffsetMetric = new KafkaMetric.OffsetMetric();
 
     this.coordinator = new PartitionCoordinator(
-        conf, spoutConfig, context.getThisTaskIndex(), totalTasks, uuid, offsetStoreManagerFactory.get(),
+        conf, spoutConfig, context.getThisTaskIndex(), totalTasks, uuid,
+        offsetStoreManagerFactory.get(),
         kafkaOffsetMetric, context.getThisComponentId());
 
     spoutMetrics = new MultiCountMetric();
@@ -108,7 +112,8 @@ public class KafkaSpout extends BaseRichSpout {
   public void nextTuple() {
     long startTime = System.nanoTime();
     spoutMetrics.scope("nextTupleCalls").incr();
-    com.twitter.heron.spouts.kafka.common.TransferCollector.EmitData emitData = transferCollector.getEmitItems(1, TimeUnit.MILLISECONDS);
+    com.twitter.heron.spouts.kafka.common.TransferCollector.EmitData emitData = transferCollector
+        .getEmitItems(1, TimeUnit.MILLISECONDS);
     if (emitData != null) {
       collector.emit(emitData.streamId, emitData.tuple, emitData.messageId);
       LOG.info("Just emitted a new message");
@@ -271,7 +276,8 @@ public class KafkaSpout extends BaseRichSpout {
    */
   private void startCommitThread(Map conf) {
 
-    int updateMsec = getWithDefault(conf, SpoutConfig.TOPOLOGY_STORE_UPDATE_MSEC, spoutConfig.storeUpdateMsec);
+    int updateMsec = getWithDefault(conf, SpoutConfig.TOPOLOGY_STORE_UPDATE_MSEC, spoutConfig
+        .storeUpdateMsec);
 
     // Start commit thread.
     Runnable refreshTask = new Runnable() {

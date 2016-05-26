@@ -14,10 +14,17 @@
 
 package com.twitter.heron.spouts.kafka.old;
 
+import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.SortedMultiset;
 import com.google.common.collect.TreeMultiset;
+
+import org.json.simple.JSONValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.metric.CombinedMetric;
 import com.twitter.heron.api.metric.CountMetric;
@@ -29,6 +36,7 @@ import com.twitter.heron.spouts.kafka.common.GlobalPartitionId;
 import com.twitter.heron.spouts.kafka.common.KeyValueSchemeAsMultiScheme;
 import com.twitter.heron.spouts.kafka.common.StringMultiSchemeWithTopic;
 import com.twitter.heron.storage.MetadataStore;
+
 import kafka.api.FetchRequest;
 import kafka.api.FetchRequestBuilder;
 import kafka.api.PartitionOffsetRequestInfo;
@@ -40,15 +48,10 @@ import kafka.javaapi.consumer.SimpleConsumer;
 import kafka.javaapi.message.ByteBufferMessageSet;
 import kafka.message.Message;
 import kafka.message.MessageAndOffset;
-import org.json.simple.JSONValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
 
 // TODO: Add comments to describe the PartitionManager lifecycle
 @SuppressWarnings({"unchecked", "rawtypes"})
+// CHECKSTYLE:OFF IllegalCatch
 public class PartitionManager {
   public static final Logger LOG = LoggerFactory.getLogger(PartitionManager.class);
 
@@ -109,12 +112,13 @@ public class PartitionManager {
     this.spoutConfig = spoutConfig;
     this.topologyInstanceId = topologyInstanceId;
     this.consumer = new SimpleConsumer(
-        partition.host, partition.port, spoutConfig.socketTimeoutMs, spoutConfig.bufferSizeBytes, spoutConfig.clientId);
-    String sb = "  host:" + partition.host + "\n" +
-        "  port:" + partition.port + "\n" +
-        "  socketTimeout:" + spoutConfig.socketTimeoutMs + "\n" +
-        "  bufferSize:" + spoutConfig.bufferSizeBytes + "\n" +
-        "  clientID:" + spoutConfig.clientId;
+        partition.host, partition.port, spoutConfig.socketTimeoutMs, spoutConfig.bufferSizeBytes,
+        spoutConfig.clientId);
+    String sb = "  host:" + partition.host + "\n"
+        + "  port:" + partition.port + "\n"
+        + "  socketTimeout:" + spoutConfig.socketTimeoutMs + "\n"
+        + "  bufferSize:" + spoutConfig.bufferSizeBytes + "\n"
+        + "  clientID:" + spoutConfig.clientId;
     LOG.info("Created consumer with details:\n" + sb);
     this.stormConf = stormConf;
     this.storage = storage;
@@ -182,11 +186,9 @@ public class PartitionManager {
    * extractor, then this method will return the timestamp (in milliseconds) of the latest emitted
    * tuple stored in the Kafka partition associated with this manager. Otherwise, it will always
    * return 0.
-   * <p/>
    * Note that this is {@code max(timestamps_associated_with_emitted_tuples)} and might not
    * necessarily be the timestamp of the last emitted tuple, since the events stored in a Kafka
    * partition might be slightly out of order.
-   * <p/>
    * If there were no tuples in the partition last time we tried reading from it, this method will
    * return a special value of -1.
    *
@@ -206,34 +208,40 @@ public class PartitionManager {
    */
   public long getOffsetForTimestamp(long timestamp) {
 
-    TopicAndPartition topicAndPartition = new TopicAndPartition(spoutConfig.topic, partition.partition);
-    Map<TopicAndPartition, PartitionOffsetRequestInfo> requestInfo = new HashMap<TopicAndPartition, PartitionOffsetRequestInfo>();
+    TopicAndPartition topicAndPartition = new TopicAndPartition(spoutConfig.topic, partition
+        .partition);
+    Map<TopicAndPartition, PartitionOffsetRequestInfo> requestInfo = new
+        HashMap<TopicAndPartition, PartitionOffsetRequestInfo>();
     requestInfo.put(topicAndPartition, new PartitionOffsetRequestInfo(timestamp, 1));
-    OffsetRequest offsetRequest = new OffsetRequest(requestInfo, kafka.api.OffsetRequest.CurrentVersion(), spoutConfig.clientId);
+    OffsetRequest offsetRequest = new OffsetRequest(requestInfo, kafka.api.OffsetRequest
+        .CurrentVersion(), spoutConfig.clientId);
     OffsetResponse offsetResponse =
         consumer.getOffsetsBefore(offsetRequest);
     if (offsetResponse.hasError()) {
       LOG.error("Failed to fetch offsets from Kafka for timestamp " + timestamp
-              + " Topic = " + spoutConfig.topic
-              + " Partition = " + partition
+          + " Topic = " + spoutConfig.topic
+          + " Partition = " + partition
       );
 
       return 0;
     } else {
       long[] offsets = offsetResponse.offsets(spoutConfig.topic, partition.partition);
-      if ((offsets == null || offsets.length == 0)) {
+      if (offsets == null || offsets.length == 0) {
         LOG.error("Failed to fetch offsets from Kafka for timestamp " + timestamp
-                + " Topic = " + spoutConfig.topic
-                + " Partition = " + partition
+            + " Topic = " + spoutConfig.topic
+            + " Partition = " + partition
         );
-        Map<TopicAndPartition, PartitionOffsetRequestInfo> earliestOffsetRequestInfo = new HashMap<TopicAndPartition, PartitionOffsetRequestInfo>();
-        earliestOffsetRequestInfo.put(topicAndPartition, new PartitionOffsetRequestInfo(kafka.api.OffsetRequest.EarliestTime(), 1));
-        OffsetRequest earliestOffsetRequest = new OffsetRequest(earliestOffsetRequestInfo, kafka.api.OffsetRequest.CurrentVersion(), spoutConfig.clientId);
+        Map<TopicAndPartition, PartitionOffsetRequestInfo> earliestOffsetRequestInfo = new
+            HashMap<TopicAndPartition, PartitionOffsetRequestInfo>();
+        earliestOffsetRequestInfo.put(topicAndPartition, new PartitionOffsetRequestInfo(kafka.api
+            .OffsetRequest.EarliestTime(), 1));
+        OffsetRequest earliestOffsetRequest = new OffsetRequest(earliestOffsetRequestInfo, kafka
+            .api.OffsetRequest.CurrentVersion(), spoutConfig.clientId);
         OffsetResponse earliestOffsetResponse = consumer.getOffsetsBefore(earliestOffsetRequest);
         if (offsetResponse.hasError()) {
           LOG.error("Failed to fetch offsets from Kafka for timestamp " + timestamp
-                  + " Topic = " + spoutConfig.topic
-                  + " Partition = " + partition
+              + " Topic = " + spoutConfig.topic
+              + " Partition = " + partition
           );
           return 0;
         } else {
@@ -312,7 +320,8 @@ public class PartitionManager {
           }
         }
       }
-      currentKafkaOffset.set(messageAndOffset.nextOffset());  // Move current offset to point to this message.
+      currentKafkaOffset.set(messageAndOffset.nextOffset());  // Move current offset to point to
+      // this message.
     }
     fetchAPIMessageCount.incrBy(numMessages);
     long endTime = System.nanoTime();
@@ -345,7 +354,8 @@ public class PartitionManager {
         Message failedMessage = readMessageAtOffset(offset);
         if (failedMessage != null) {
           Iterable<List<Object>> tuples =
-              deserializeMessage(Utils.toByteArray(failedMessage.key()), Utils.toByteArray(failedMessage.payload()), offset);
+              deserializeMessage(Utils.toByteArray(failedMessage.key()), Utils.toByteArray(
+                  failedMessage.payload()), offset);
           // Add failed message to emit
           if (tuples != null) {
             synchronized (failedTuples) {
@@ -539,11 +549,14 @@ public class PartitionManager {
     if (payload == null || payload.length == 0) {
       return null;
     }
-    if (key != null && key.length > 0 && spoutConfig.scheme instanceof KeyValueSchemeAsMultiScheme) {
-      tups = ((KeyValueSchemeAsMultiScheme) spoutConfig.scheme).deserializeKeyAndValue(key, payload);
+    if (key != null && key.length > 0 && spoutConfig.scheme
+        instanceof KeyValueSchemeAsMultiScheme) {
+      tups = ((KeyValueSchemeAsMultiScheme) spoutConfig.scheme).deserializeKeyAndValue(key,
+          payload);
     } else {
       if (spoutConfig.scheme instanceof StringMultiSchemeWithTopic) {
-        tups = ((StringMultiSchemeWithTopic) spoutConfig.scheme).deserializeWithTopic(spoutConfig.topic, payload);
+        tups = ((StringMultiSchemeWithTopic) spoutConfig.scheme).deserializeWithTopic(spoutConfig
+            .topic, payload);
       } else {
         tups = spoutConfig.scheme.deserialize(payload);
       }
@@ -679,7 +692,8 @@ public class PartitionManager {
     long start = System.nanoTime();
     // currentKafkaOffset will be update in next method which iterates on returned messages.
     FetchRequestBuilder builder = new FetchRequestBuilder();
-    FetchRequest request = builder.addFetch(spoutConfig.topic, partition.partition, fromOffset, spoutConfig.fetchSizeBytes).
+    FetchRequest request = builder.addFetch(spoutConfig.topic, partition.partition, fromOffset,
+        spoutConfig.fetchSizeBytes).
         clientId(spoutConfig.clientId).maxWait(spoutConfig.fetchMaxWait).build();
 
     FetchResponse fetchResponse = null;
@@ -695,7 +709,8 @@ public class PartitionManager {
 
     if (fetchResponse != null) {
       if (fetchResponse.hasError()) {
-        KafkaError error = KafkaError.getError(fetchResponse.errorCode(spoutConfig.topic, partition.partition));
+        KafkaError error = KafkaError.getError(fetchResponse.errorCode(spoutConfig.topic,
+            partition.partition));
         if (error.equals(KafkaError.OFFSET_OUT_OF_RANGE)) {
           // Restart
           throw new RuntimeException("Restart to recover from offset out of range exception");

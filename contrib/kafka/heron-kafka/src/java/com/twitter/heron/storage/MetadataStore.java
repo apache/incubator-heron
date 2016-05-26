@@ -25,7 +25,7 @@ import java.util.Map;
  * All implementation of MetadataStore should strive to be interoperable i.e. Clients can read
  * data written by other MetadataStore.
  */
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings("rawtypes")
 public abstract class MetadataStore {
   protected String uId;
   protected String topologyName;

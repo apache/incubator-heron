@@ -14,9 +14,9 @@
 
 package com.twitter.heron.spouts.kafka.common;
 
-import com.twitter.heron.api.spout.Scheme;
-
 import java.util.List;
+
+import com.twitter.heron.api.spout.Scheme;
 
 public interface KeyValueScheme extends Scheme {
   List<Object> deserializeKeyAndValue(byte[] key, byte[] value);

@@ -16,9 +16,10 @@ package com.twitter.heron.spouts.kafka.common;
 
 import java.io.Serializable;
 import java.util.*;
+
 import com.google.common.base.Objects;
 
-@SuppressWarnings({"serial"})
+@SuppressWarnings("serial")
 public class GlobalPartitionInformation implements Iterable<Partition>, Serializable {
 
   private Map<Integer, Broker> partitionMap;
@@ -35,10 +36,10 @@ public class GlobalPartitionInformation implements Iterable<Partition>, Serializ
 
   @Override
   public String toString() {
-    return "GlobalPartitionInformation{" +
-        "topic=" + topic +
-        ", partitionMap=" + partitionMap +
-        '}';
+    return "GlobalPartitionInformation{"
+        + "topic=" + topic
+        + ", partitionMap=" + partitionMap
+        + '}';
   }
 
   public Broker getBrokerFor(Integer partitionId) {
@@ -56,7 +57,7 @@ public class GlobalPartitionInformation implements Iterable<Partition>, Serializ
   @Override
   public Iterator<Partition> iterator() {
     final Iterator<Map.Entry<Integer, Broker>> iterator = partitionMap.entrySet().iterator();
-    final String topic = this.topic;
+    final String itTopic = this.topic;
     return new Iterator<Partition>() {
       @Override
       public boolean hasNext() {
@@ -66,7 +67,7 @@ public class GlobalPartitionInformation implements Iterable<Partition>, Serializ
       @Override
       public Partition next() {
         Map.Entry<Integer, Broker> next = iterator.next();
-        return new Partition(next.getValue(), topic, next.getKey());
+        return new Partition(next.getValue(), itTopic, next.getKey());
       }
 
       @Override

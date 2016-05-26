@@ -14,9 +14,9 @@
 
 package com.twitter.heron.bolts.kafka.mapper;
 
-import com.twitter.heron.api.tuple.Tuple;
-
 import java.io.Serializable;
+
+import com.twitter.heron.api.tuple.Tuple;
 
 /**
  * as the really verbose name suggests this interface mapps a storm tuple to kafka key and message.

@@ -14,15 +14,15 @@
 
 package com.twitter.heron.spouts.kafka.common;
 
+import java.util.Random;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Random;
 
 /* This is a simple filter operator that samples with uniformly random probability of
  * sampleFreq.
  */
-@SuppressWarnings({"serial"})
+@SuppressWarnings("serial")
 public class SimpleFilterOperator extends FilterOperator {
   private static final Logger LOG = LoggerFactory.getLogger(SimpleFilterOperator.class);
 

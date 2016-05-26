@@ -14,14 +14,14 @@
 
 package com.twitter.heron.spouts.kafka.common;
 
-import com.twitter.heron.api.tuple.Fields;
-import com.twitter.heron.api.tuple.Values;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings({"serial"})
+import com.twitter.heron.api.tuple.Fields;
+import com.twitter.heron.api.tuple.Values;
+
+@SuppressWarnings("serial")
 public class ByteArrayKeyValueScheme implements KeyValueScheme {
 
   @Override

@@ -14,6 +14,8 @@
 
 package com.twitter.heron;
 
+import java.util.Properties;
+
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.HeronSubmitter;
 import com.twitter.heron.api.topology.TopologyBuilder;
@@ -23,8 +25,6 @@ import com.twitter.heron.spouts.kafka.common.ByteArrayKeyValueScheme;
 import com.twitter.heron.spouts.kafka.common.KeyValueSchemeAsMultiScheme;
 import com.twitter.heron.spouts.kafka.old.KafkaSpout;
 import com.twitter.heron.spouts.kafka.old.SpoutConfig;
-
-import java.util.Properties;
 
 public final class KafkaOldMirrorTopology {
 
@@ -50,7 +50,7 @@ public final class KafkaOldMirrorTopology {
       zkRoot = args[5] + zkRoot;
     }
     TopologyBuilder builder = new TopologyBuilder();
-    SpoutConfig config = new SpoutConfig(new SpoutConfig.ZkHosts(zkURL, zkRoot), 
+    SpoutConfig config = new SpoutConfig(new SpoutConfig.ZkHosts(zkURL, zkRoot),
                                             consumerTopic, null, "spoutId");
 
     config.scheme = new KeyValueSchemeAsMultiScheme(new ByteArrayKeyValueScheme());
@@ -59,10 +59,10 @@ public final class KafkaOldMirrorTopology {
     Properties kafkaBoltProps = new Properties();
     kafkaBoltProps.put("acks", "1");
     kafkaBoltProps.put("bootstrap.servers", bootstrapKafkaServers);
-    kafkaBoltProps.put("key.serializer", 
+    kafkaBoltProps.put("key.serializer",
         "org.apache.kafka.common.serialization.ByteArraySerializer");
-    
-    kafkaBoltProps.put("value.serializer", 
+
+    kafkaBoltProps.put("value.serializer",
         "org.apache.kafka.common.serialization.ByteArraySerializer");
 
     kafkaBoltProps.put("metadata.fetch.timeout.ms", 1000);

@@ -14,18 +14,18 @@
 
 package com.twitter.heron.spouts.kafka.common;
 
-import com.twitter.heron.api.spout.Scheme;
-import com.twitter.heron.api.tuple.Fields;
-import com.twitter.heron.api.tuple.Values;
-
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import com.twitter.heron.api.spout.Scheme;
+import com.twitter.heron.api.tuple.Fields;
+import com.twitter.heron.api.tuple.Values;
+
 /**
  * Basic implementation of scheme. May override instead of Scheme to get default behaviour
  */
-@SuppressWarnings({"serial"})
+@SuppressWarnings("serial")
 public class StringScheme implements Scheme {
 
   /**

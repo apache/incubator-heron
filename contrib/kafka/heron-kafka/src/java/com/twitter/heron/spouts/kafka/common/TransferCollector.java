@@ -14,10 +14,6 @@
 
 package com.twitter.heron.spouts.kafka.common;
 
-import com.twitter.heron.api.metric.CountMetric;
-import com.twitter.heron.api.metric.IMetric;
-import com.twitter.heron.api.spout.ISpoutOutputCollector;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +21,10 @@ import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+
+import com.twitter.heron.api.metric.CountMetric;
+import com.twitter.heron.api.metric.IMetric;
+import com.twitter.heron.api.spout.ISpoutOutputCollector;
 
 /**
  * Threadsafe collector which can be used to transfer message from async message-fetcher to

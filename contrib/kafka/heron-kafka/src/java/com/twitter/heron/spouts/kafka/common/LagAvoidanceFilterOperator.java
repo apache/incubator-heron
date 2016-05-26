@@ -14,10 +14,10 @@
 
 package com.twitter.heron.spouts.kafka.common;
 
+import java.util.Random;
+
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
-
-import java.util.Random;
 
 /* This is a filter operator that tries to avoid lag. User can specify a minLag and a maxLag.
  * Sampling will kick in after lag become over minLag. And then sampling frequency increase
@@ -25,7 +25,7 @@ import java.util.Random;
  * will be filtered. Instead if only maxLag and a sampleRate is defined, then once lag increases
  * beyond maxLag, then tuples are filtered uniformly by sampleRate.
  */
-@SuppressWarnings({"serial"})
+@SuppressWarnings("serial")
 public class LagAvoidanceFilterOperator extends FilterOperator {
   private long maxLag;
   private long minLag;

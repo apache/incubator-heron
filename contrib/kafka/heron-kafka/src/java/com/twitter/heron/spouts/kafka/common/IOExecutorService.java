@@ -15,6 +15,7 @@
 package com.twitter.heron.spouts.kafka.common;
 
 import java.util.ArrayList;
+//CHECKSTYLE:OFF AvoidStarImport
 import java.util.concurrent.*;
 import java.util.logging.Logger;
 
