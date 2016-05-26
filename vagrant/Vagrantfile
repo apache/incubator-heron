@@ -16,8 +16,7 @@
 # vi: set ft=ruby :
 
 SLAVES=1
-NET_PREFIX="192.168.3."
-SCHEDULER="mesos"
+NET_PREFIX="192.168.25."
 
 NODES={"master" => NET_PREFIX + "5"}
 (0..SLAVES-1).each do |i| NODES["slave#{i}"] = NET_PREFIX + (6 + i).to_s end
@@ -29,26 +28,19 @@ File.open('.vagrant/hosts', 'w') do |file|
   NODES.each do |name, ip| file.write("#{ip}\t#{name}\n") end
 end
 
-# create keys
-NODES.each do |name, ip|
-  %x`rm -f .vagrant/#{name}_key*`
-  %x`ssh-keygen -t rsa -P '' -f .vagrant/#{name}_key -C vagrant@#{name}`
-end
-
 Vagrant.configure(2) do |config|
   config.vm.box = "ubuntu/trusty64"
-  config.vm.synced_folder "../../../", "/vagrant"
+  config.vm.synced_folder "../", "/vagrant"
 
   config.vm.define "master" do |master|
     master.vm.provider "virtualbox" do |v|
-      v.memory = 2048
+      v.memory = 4096
     end
 
     master.vm.hostname = "master"
     master.vm.network :private_network, ip: NODES["master"]
-    master.vm.network :private_network, ip: NODES["master"].sub(".3.", ".4.")
 
-    master.vm.provision "shell", path: "init.sh", args: "master " + SCHEDULER
+    master.vm.provision "shell", path: "init.sh", args: "master"
   end
 
   (0..SLAVES-1).each do |i|
@@ -60,9 +52,8 @@ Vagrant.configure(2) do |config|
 
       slave.vm.hostname = "slave#{i}"
       slave.vm.network :private_network, ip: NODES[slave.vm.hostname]
-      slave.vm.network :private_network, ip: NODES[slave.vm.hostname].sub(".3.", ".4.")
 
-      slave.vm.provision "shell", path: "init.sh", args: "slave " + SCHEDULER
+      slave.vm.provision "shell", path: "init.sh", args: "slave"
     end
   end
 end

@@ -1,5 +1,0 @@
-[{
-  "name": "example",
-  "zk": "master:2181",
-  "scheduler_zk_path": "/aurora/scheduler"
-}]
