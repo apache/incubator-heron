@@ -2,7 +2,7 @@ nav.hn-sidebar-nav
   .panel-group id=accordion role=tablist aria-multiselectable=true
     {{range .Site.Data.toc.sections}}
     .panel.panel-default
-      .panel-heading role=tab id={{.label}}
+      section.panel-heading role=tab id={{.label}}
         h4.panel-title
           a role=button data-toggle=collapse data-parent=#accordion href=#collapse-{{.label}} aria-labelledby={{.label}}
             i.fa.fa-caret-right

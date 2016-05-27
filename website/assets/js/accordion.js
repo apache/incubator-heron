@@ -3,7 +3,13 @@ $(document).ready(function() {
   var selected = LS['sidebar-selected'] || null;
 
   if (selected != null) {
-    $('#collapse-' + selected).collapse('show');
+    var id = '#collapse-' + selected;
+
+    $(id).collapse('show');
+
+    $(id).on('hide.bs.collapse', function() {
+      LS['sidebar-selected'] = null;
+    });
   }
 
   $('.panel-heading').click(function() {
