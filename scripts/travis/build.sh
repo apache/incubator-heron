@@ -49,7 +49,7 @@ cat ~/.bazelrc >> tools/travis-ci/bazel.rc
 bazel --bazelrc=tools/travis-ci/bazel.rc build heron/...
 
 # check styles
-bazel --bazelrc=tools/travis-ci/bazel.rc run tools/java:checkstyle_all
+bazel --bazelrc=tools/travis-ci/bazel.rc run :checkstyle_all
 
 # run heron unit tests
 bazel --bazelrc=tools/travis-ci/bazel.rc test --test_tag_filters=-flaky heron/...
