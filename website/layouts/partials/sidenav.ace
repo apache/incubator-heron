@@ -1,19 +1,15 @@
-div
-  nav.hn-sidebar-nav
-    {{range .Site.Data.toc.sections}}
-      h4 {{.name}}
-      ul
-        {{range .sublinks}}
-        li
-          a href={{.url}} {{.name}}
-        {{end}}
-      ul
-        {{range .subcategories}}
-        li {{.name}}
+nav.hn-sidebar-nav
+  .panel-group id=hn-accordion role=tablist
+  {{range .Site.Data.toc.sections}}
+  .panel.panel-default
+    .panel-heading id=heading-{{.label}}
+      h4.panel-title
+        a role=button data-toggle=collapse data-parent=#hn-accordion href=#collapse-{{.label}} aria-expanded=true aria-controls=collapse-{{.label}} {{.name}}
+    .panel-collapse.collapse id=collapse-{{.label}} role=tabpanel aria-labelledby=heading-{{.label}}
+      .panel-body
         ul
           {{range .sublinks}}
           li
             a href={{.url}} {{.name}}
           {{end}}
-        {{end}}
-    {{end}}
+  {{end}}

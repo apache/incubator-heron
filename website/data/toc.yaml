@@ -1,17 +1,20 @@
 sections:
   - name: Getting Started
+    label: getting-started
     sublinks:
       - name: Local (Single Node)
         url: /docs/getting-started
       - name: Upgrade Storm Topologies
         url: /docs/upgrade-storm-to-heron
   - name: Heron Concepts
+    label: concepts
     sublinks:
       - name: Heron Topology
         url: /docs/concepts/topologies
       - name: Heron Architecture
         url: /docs/concepts/architecture
   - name: Deployment
+    label: deployment
     sublinks:
       - name: Overview
         url: /docs/operators/deployment
