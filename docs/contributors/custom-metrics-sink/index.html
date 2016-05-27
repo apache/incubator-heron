@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en-us"><head><link rel="shortcut icon" type="image/png" sizes="16x16" href="/heron/img/favicon-16x16.png"><link rel="shortcut icon" type="image/png" sizes="32x32" href="/heron/img/favicon-32x32.png"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="Hugo 0.14-DEV"><title>Heron Documentation - Implementing a Custom Metrics Sink</title><link rel="stylesheet" href="/heron/css/style.min.css"><link rel="stylesheet" href="/heron/css/font-awesome.min.css"><link rel="stylesheet" href="/heron/css/pygments.css"><script defer src="http://code.jquery.com/jquery-2.2.1.min.js"></script><script defer src="/heron/js/app.min.js"></script></head><body><nav class="hn-top-navbar navbar navbar-inverse navbar-fixed-top" role="navigation"><div class="hn-navbar-container container-fluid"><div class="navbar-header"><button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#hn-navbar" aria-controls="hn-navbar" aria-expanded="false"><span class="sr-only"><Toggle>navigation</Toggle></span><i class="hn-toggle-button fa fa-bars"></i></button><a class="hn-navbar-logo navbar-brand" href="/heron/"><img class="pull-left" src="/heron/img/HeronTextLogo-small.png"></a></div><div id="hn-navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav navbar-right"><li><a href="/heron/docs/getting-started">Docs</a></li><li><a href="/heron/docs/resources">Resources</a></li><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="https://github.com/twitter/heron">GitHub</a></li><li><a class="nav-icon" href="https://groups.google.com/forum/#!forum/heron-users"><i class="fa fa-comments"></i></a></li><li><a class="nav-icon" href="https://twitter.com/heronstreaming"><i class="fa fa-twitter"></i></a></li></ul></div></div></nav><div class="hn-main"><div class="container"><div class="row"><aside class="hn-sidebar hidden-xs col-sm-3 col-md-3 col-lg-2 collapse"><div><nav class="hn-sidebar-nav"><h4>Getting Started</h4><ul><li><a href="/heron/docs/getting-started">Local (Single Node)</a></li><li><a href="/heron/docs/upgrade-storm-to-heron">Upgrade Storm Topologies</a></li></ul><ul></ul><h4>Heron Concepts</h4><ul><li><a href="/heron/docs/concepts/architecture">Heron Architecture</a></li><li><a href="/heron/docs/concepts/topologies">Heron Topology</a></li></ul><ul></ul><h4>Deployment</h4><ul><li><a href="/heron/docs/operators/deployment">Overview</a></li><li><a href="/heron/docs/operators/deployment/configuration">Configuration</a></li></ul><ul></ul><h4>State Managers</h4><ul><li><a href="/heron/docs/operators/deployment/statemanagers/zookeeper">Zookeeper</a></li><li><a href="/heron/docs/operators/deployment/statemanagers/localfs">Local FS</a></li></ul><ul></ul><h4>Uploaders</h4><ul><li><a href="/heron/docs/operators/deployment/uploaders/localfs">Local FS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/hdfs">HDFS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/s3">S3</a></li></ul><ul></ul><h4>Schedulers</h4><ul><li><a href="/heron/docs/operators/deployment/schedulers/aurora">Aurora Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/local">Local Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/mesos">Mesos Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/slurm">Slurm Cluster</a></li></ul><ul></ul><h4>System Configuration</h4><ul><li><a href="/heron/docs/operators/configuration/config-intro">Overview</a></li><li><a href="/heron/docs/operators/configuration/instance">Heron Instance</a></li><li><a href="/heron/docs/operators/configuration/metrics-manager">Metrics Manager</a></li><li><a href="/heron/docs/operators/configuration/stmgr">Stream Manager</a></li><li><a href="/heron/docs/operators/configuration/system">System-Level</a></li><li><a href="/heron/docs/operators/configuration/tmaster">Topology Master</a></li></ul><ul></ul><h4>Observability</h4><ul><li><a href="/heron/docs/operators/observability/graphite">Graphite</a></li></ul><ul></ul><h4>User Manuals</h4><ul><li><a href="/heron/docs/operators/heron-cli">Heron Client</a></li><li><a href="/heron/docs/operators/heron-tracker-api">Heron Tracker REST API</a></li><li><a href="/heron/docs/operators/heron-tracker">Heron Tracker Runbook</a></li><li><a href="/heron/docs/operators/heron-ui">Heron UI Runbook</a></li></ul><ul></ul><h4>Topology Writers</h4><ul><li><a href="/heron/docs/developers/topologies">Writing Topologies</a></li><li><a href="/heron/docs/developers/data-model">Heron Data Model</a></li><li><a href="/heron/docs/developers/serialization">Tuple Serialization</a></li><li><a href="/heron/docs/developers/ui-guide">Heron UI Guide</a></li><li><a href="/heron/docs/developers/tuning">Tuning Guide</a></li><li><a href="/heron/docs/developers/simulator-mode">Simulator Mode</a></li><li><a href="/heron/docs/developers/troubleshooting">Troubleshooting Guide</a></li><li><a href="/heron/api">Javadoc</a></li></ul><ul></ul><h4>Heron Developers</h4><ul><li><a href="/heron/docs/developers/compiling/compiling">Compiling</a></li><li><a href="/heron/docs/developers/compiling/linux">Compiling on Linux</a></li><li><a href="/heron/docs/developers/compiling/mac">Compiling on Mac OS X</a></li><li><a href="/heron/docs/developers/compiling/docker">Compiling With Docker</a></li><li><a href="/heron/docs/contributors/testing">Running Tests</a></li><li><a href="/heron/docs/contributors/codebase">Code Organization</a></li></ul><ul></ul><h4>Extending Heron</h4><ul><li><a href="/heron/docs/contributors/custom-scheduler">Custom Scheduler</a></li><li><a href="/heron/docs/contributors/custom-metrics-sink">Custom Metrics Sink</a></li></ul><ul></ul><h4>Heron Resources</h4><ul><li><a href="/heron/docs/resources">Heron Resources</a></li></ul><ul></ul><h4>Contributors</h4><ul><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="/heron/docs/contributors/governance">Governance</a></li></ul><ul></ul></nav></div></aside><section class="hn-docs-main col-sm-9 col-md-9 col-lg-10 col-sm-offset-3 col-md-offset-3 col-lg-offset-2"><header class="hn-docs-header page-header"><h1>Implementing a Custom Metrics Sink</h1><div class="hn-docs-description"></div></header><article class="hn-docs-content">
+<!DOCTYPE html><html lang="en-us"><head><link rel="shortcut icon" type="image/png" sizes="16x16" href="/heron/img/favicon-16x16.png"><link rel="shortcut icon" type="image/png" sizes="32x32" href="/heron/img/favicon-32x32.png"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="Hugo 0.15"><title>Heron Documentation - Implementing a Custom Metrics Sink</title><link rel="stylesheet" href="/heron/css/style.min.css"><link rel="stylesheet" href="/heron/css/font-awesome.min.css"><link rel="stylesheet" href="/heron/css/pygments.css"><script defer src="http://code.jquery.com/jquery-2.2.1.min.js"></script><script defer src="/heron/js/app.min.js"></script></head><body><nav class="hn-top-navbar navbar navbar-inverse navbar-fixed-top" role="navigation"><div class="hn-navbar-container container-fluid"><div class="navbar-header"><button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#hn-navbar" aria-controls="hn-navbar" aria-expanded="false"><span class="sr-only"><Toggle>navigation</Toggle></span><i class="hn-toggle-button fa fa-bars"></i></button><a class="hn-navbar-logo navbar-brand" href="/heron/"><img class="pull-left" src="/heron/img/HeronTextLogo-small.png"></a></div><div id="hn-navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav navbar-right"><li><a href="/heron/docs/getting-started">Docs</a></li><li><a href="/heron/docs/resources">Resources</a></li><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="https://github.com/twitter/heron">GitHub</a></li><li><a class="nav-icon" href="https://groups.google.com/forum/#!forum/heron-users"><i class="fa fa-comments"></i></a></li><li><a class="nav-icon" href="https://twitter.com/heronstreaming"><i class="fa fa-twitter"></i></a></li></ul></div></div></nav><div class="hn-main"><div class="container"><div class="row"><aside class="hn-sidebar hidden-xs col-sm-3 col-md-3 col-lg-2 collapse"><div><nav class="hn-sidebar-nav"><h4>Getting Started</h4><ul><li><a href="/heron/docs/getting-started">Local (Single Node)</a></li><li><a href="/heron/docs/upgrade-storm-to-heron">Upgrade Storm Topologies</a></li></ul><ul></ul><h4>Heron Concepts</h4><ul><li><a href="/heron/docs/concepts/topologies">Heron Topology</a></li><li><a href="/heron/docs/concepts/architecture">Heron Architecture</a></li></ul><ul></ul><h4>Deployment</h4><ul><li><a href="/heron/docs/operators/deployment">Overview</a></li><li><a href="/heron/docs/operators/deployment/configuration">Configuration</a></li></ul><ul></ul><h4>State Managers</h4><ul><li><a href="/heron/docs/operators/deployment/statemanagers/zookeeper">Zookeeper</a></li><li><a href="/heron/docs/operators/deployment/statemanagers/localfs">Local FS</a></li></ul><ul></ul><h4>Uploaders</h4><ul><li><a href="/heron/docs/operators/deployment/uploaders/localfs">Local FS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/hdfs">HDFS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/s3">Amazon S3</a></li></ul><ul></ul><h4>Schedulers</h4><ul><li><a href="/heron/docs/operators/deployment/schedulers/aurora">Aurora Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/local">Local Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/slurm">Slurm Cluster</a></li></ul><ul></ul><h4>Cluster Configuration</h4><ul><li><a href="/heron/docs/operators/configuration/config-intro">Overview</a></li><li><a href="/heron/docs/operators/configuration/system">System-Level</a></li><li><a href="/heron/docs/operators/configuration/instance">Heron Instance</a></li><li><a href="/heron/docs/operators/configuration/metrics-manager">Metrics Manager</a></li><li><a href="/heron/docs/operators/configuration/stmgr">Stream Manager</a></li><li><a href="/heron/docs/operators/configuration/tmaster">Topology Master</a></li></ul><ul></ul><h4>Observability</h4><ul><li><a href="/heron/docs/operators/observability/graphite">Graphite</a></li></ul><ul></ul><h4>User Manuals</h4><ul><li><a href="/heron/docs/operators/heron-cli">Heron Client</a></li><li><a href="/heron/docs/operators/heron-tracker-api">Heron Tracker REST API</a></li><li><a href="/heron/docs/operators/heron-tracker">Heron Tracker Runbook</a></li><li><a href="/heron/docs/operators/heron-ui">Heron UI Runbook</a></li></ul><ul></ul><h4>Topology Writers</h4><ul><li><a href="/heron/docs/developers/topologies">Writing Topologies</a></li><li><a href="/heron/docs/developers/data-model">Heron Data Model</a></li><li><a href="/heron/docs/developers/serialization">Tuple Serialization</a></li><li><a href="/heron/docs/developers/ui-guide">Heron UI Guide</a></li><li><a href="/heron/docs/developers/tuning">Tuning Guide</a></li><li><a href="/heron/docs/developers/simulator-mode">Simulator Mode</a></li><li><a href="/heron/docs/developers/troubleshooting">Troubleshooting Guide</a></li><li><a href="/heron/api">Javadoc</a></li></ul><ul></ul><h4>Heron Developers</h4><ul><li><a href="/heron/docs/developers/compiling/compiling">Compiling</a></li><li><a href="/heron/docs/developers/compiling/linux">Compiling on Linux</a></li><li><a href="/heron/docs/developers/compiling/mac">Compiling on Mac OS X</a></li><li><a href="/heron/docs/developers/compiling/docker">Compiling With Docker</a></li><li><a href="/heron/docs/contributors/testing">Running Tests</a></li><li><a href="/heron/docs/contributors/codebase">Code Organization</a></li></ul><ul></ul><h4>Extending Heron</h4><ul><li><a href="/heron/docs/contributors/custom-scheduler">Custom Scheduler</a></li><li><a href="/heron/docs/contributors/custom-metrics-sink">Custom Metrics Sink</a></li></ul><ul></ul><h4>Heron Resources</h4><ul><li><a href="/heron/docs/resources">Heron Resources</a></li></ul><ul></ul><h4>Contributors</h4><ul><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="/heron/docs/contributors/governance">Governance</a></li></ul><ul></ul></nav></div></aside><section class="hn-docs-main col-sm-9 col-md-9 col-lg-10 col-sm-offset-3 col-md-offset-3 col-lg-offset-2"><header class="hn-docs-header page-header"><h1>Implementing a Custom Metrics Sink</h1><div class="hn-docs-description"></div></header><article class="hn-docs-content">
 
 <p>Each Heron topology has its own centralized <a href="../../concepts/architecture#metrics-manager">Metrics
 Manager</a> (MM), which collects
@@ -39,20 +39,18 @@ Manager</a>.</p>
 <code>metricsmgr-api</code> library into your project.</p>
 
 <h4 id="maven:aa06ab48e9613e9713d52c24b3200421">Maven</h4>
-
-<pre><code class="language-xml">&lt;dependency&gt;
-  &lt;groupId&gt;com.twitter.heron&lt;/groupId&gt;
-  &lt;artifactId&gt;metricsmgr-api&lt;/artifactId&gt;
-  &lt;version&gt;{{.Site.Params.versions.metricsapi}}&lt;/version&gt;
-&lt;/dependency&gt;
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #330099; font-weight: bold">&lt;dependency&gt;</span>
+  <span style="color: #330099; font-weight: bold">&lt;groupId&gt;</span>com.twitter.heron<span style="color: #330099; font-weight: bold">&lt;/groupId&gt;</span>
+  <span style="color: #330099; font-weight: bold">&lt;artifactId&gt;</span>metricsmgr-api<span style="color: #330099; font-weight: bold">&lt;/artifactId&gt;</span>
+  <span style="color: #330099; font-weight: bold">&lt;version&gt;</span>{{.Site.Params.versions.metricsapi}}<span style="color: #330099; font-weight: bold">&lt;/version&gt;</span>
+<span style="color: #330099; font-weight: bold">&lt;/dependency&gt;</span>
+</pre></div>
 
 <h4 id="gradle:aa06ab48e9613e9713d52c24b3200421">Gradle</h4>
-
-<pre><code class="language-groovy">dependencies {
-  compile group: &quot;com.twitter.heron&quot;, name: &quot;metricsmgr-api&quot;, version: &quot;{{.Site.Params.versions.metricsapi}}&quot;
-}
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>dependencies <span style="color: #555555">{</span>
+  compile <span style="color: #9999FF">group:</span> <span style="color: #CC3300">&quot;com.twitter.heron&quot;</span><span style="color: #555555">,</span> <span style="color: #9999FF">name:</span> <span style="color: #CC3300">&quot;metricsmgr-api&quot;</span><span style="color: #555555">,</span> <span style="color: #9999FF">version:</span> <span style="color: #CC3300">&quot;{{.Site.Params.versions.metricsapi}}&quot;</span>
+<span style="color: #555555">}</span>
+</pre></div>
 
 <h2 id="the-imetricssink-interface:aa06ab48e9613e9713d52c24b3200421">The <code>IMetricsSink</code> Interface</h2>
 
@@ -87,43 +85,42 @@ release</a>.</p>
 
 <p>Below is an example implementation that simply prints the contents of each
 metrics record as it passes through:</p>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">import</span> <span style="color: #00CCFF; font-weight: bold">com.twitter.heron.metricsmgr.api.metrics.MetricsInfo</span><span style="color: #555555">;</span>
+<span style="color: #006699; font-weight: bold">import</span> <span style="color: #00CCFF; font-weight: bold">com.twitter.heron.metricsmgr.api.metrics.MetricsRecord</span><span style="color: #555555">;</span>
+<span style="color: #006699; font-weight: bold">import</span> <span style="color: #00CCFF; font-weight: bold">com.twitter.heron.metricsmgr.api.sink.IMetricsSink</span><span style="color: #555555">;</span>
+<span style="color: #006699; font-weight: bold">import</span> <span style="color: #00CCFF; font-weight: bold">com.twitter.heron.metricsmgr.api.sink.SinkContext</span><span style="color: #555555">;</span>
 
-<pre><code class="language-java">import com.twitter.heron.metricsmgr.api.metrics.MetricsInfo;
-import com.twitter.heron.metricsmgr.api.metrics.MetricsRecord;
-import com.twitter.heron.metricsmgr.api.sink.IMetricsSink;
-import com.twitter.heron.metricsmgr.api.sink.SinkContext;
+<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">PrintSink</span> <span style="color: #006699; font-weight: bold">implements</span> IMetricsSink <span style="color: #555555">{</span>
+    <span style="color: #9999FF">@Override</span>
+    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">init</span><span style="color: #555555">(</span>Map<span style="color: #555555">&lt;</span>String<span style="color: #555555">,</span> Object<span style="color: #555555">&gt;</span> conf<span style="color: #555555">,</span> SinkContext context<span style="color: #555555">)</span> <span style="color: #555555">{</span>
+        System<span style="color: #555555">.</span><span style="color: #330099">out</span><span style="color: #555555">.</span><span style="color: #330099">println</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;Sink configuration:&quot;</span><span style="color: #555555">);</span>
+        <span style="color: #0099FF; font-style: italic">// This will print out each config in the supplied configuration</span>
+        <span style="color: #006699; font-weight: bold">for</span> <span style="color: #555555">(</span>Map<span style="color: #555555">.</span><span style="color: #330099">Entry</span><span style="color: #555555">&lt;</span>String<span style="color: #555555">,</span> Object<span style="color: #555555">&gt;</span> config <span style="color: #555555">:</span> conf<span style="color: #555555">.</span><span style="color: #330099">entrySet</span><span style="color: #555555">())</span> <span style="color: #555555">{</span>
+            System<span style="color: #555555">.</span><span style="color: #330099">out</span><span style="color: #555555">.</span><span style="color: #330099">println</span><span style="color: #555555">(</span>String<span style="color: #555555">.</span><span style="color: #330099">format</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;%s: %s&quot;</span><span style="color: #555555">,</span> config<span style="color: #555555">.</span><span style="color: #330099">getKey</span><span style="color: #555555">(),</span> config<span style="color: #555555">.</span><span style="color: #330099">getValue</span><span style="color: #555555">());</span>
+        <span style="color: #555555">}</span>
+        System<span style="color: #555555">.</span><span style="color: #330099">out</span><span style="color: #555555">.</span><span style="color: #330099">println</span><span style="color: #555555">(</span>String<span style="color: #555555">.</span><span style="color: #330099">format</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;Topology name: %s&quot;</span><span style="color: #555555">,</span> context<span style="color: #555555">.</span><span style="color: #330099">getTopologyName</span><span style="color: #555555">());</span>
+        System<span style="color: #555555">.</span><span style="color: #330099">out</span><span style="color: #555555">.</span><span style="color: #330099">println</span><span style="color: #555555">(</span>String<span style="color: #555555">.</span><span style="color: #330099">format</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;Sink ID: %s&quot;</span><span style="color: #555555">,</span> context<span style="color: #555555">.</span><span style="color: #330099">getSinkId</span><span style="color: #555555">()));</span>
+    <span style="color: #555555">}</span>
 
-public class PrintSink implements IMetricsSink {
-    @Override
-    public void init(Map&lt;String, Object&gt; conf, SinkContext context) {
-        System.out.println(&quot;Sink configuration:&quot;);
-        // This will print out each config in the supplied configuration
-        for (Map.Entry&lt;String, Object&gt; config : conf.entrySet()) {
-            System.out.println(String.format(&quot;%s: %s&quot;, config.getKey(), config.getValue());
-        }
-        System.out.println(String.format(&quot;Topology name: %s&quot;, context.getTopologyName());
-        System.out.println(String.format(&quot;Sink ID: %s&quot;, context.getSinkId()));
-    }
+    <span style="color: #9999FF">@Override</span>
+    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">processRecord</span><span style="color: #555555">(</span>MetricsRecord record<span style="color: #555555">)</span> <span style="color: #555555">{</span>
+        String recordString <span style="color: #555555">=</span> String<span style="color: #555555">.</span><span style="color: #330099">format</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;Record received: %s&quot;</span><span style="color: #555555">,</span> record<span style="color: #555555">.</span><span style="color: #330099">toString</span><span style="color: #555555">());</span>
+        System<span style="color: #555555">.</span><span style="color: #330099">out</span><span style="color: #555555">.</span><span style="color: #330099">println</span><span style="color: #555555">(</span>recordString<span style="color: #555555">);</span>
+    <span style="color: #555555">}</span>
 
-    @Override
-    public void processRecord(MetricsRecord record) {
-        String recordString = String.format(&quot;Record received: %s&quot;, record.toString());
-        System.out.println(recordString);
-    }
+    <span style="color: #9999FF">@Override</span>
+    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">flush</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
+        <span style="color: #0099FF; font-style: italic">// Since we&#39;re just printing to stdout in this sink, we don&#39;t need to</span>
+        <span style="color: #0099FF; font-style: italic">// specify any flush() behavior</span>
+    <span style="color: #555555">}</span>
 
-    @Override
-    public void flush() {
-        // Since we're just printing to stdout in this sink, we don't need to
-        // specify any flush() behavior
-    }
-
-    @Override
-    public void close() {
-        // Since we're just printing to stdout in this sink, we don't need to
-        // specify any close() behavior
-    }
-}
-</code></pre>
+    <span style="color: #9999FF">@Override</span>
+    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">close</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
+        <span style="color: #0099FF; font-style: italic">// Since we&#39;re just printing to stdout in this sink, we don&#39;t need to</span>
+        <span style="color: #0099FF; font-style: italic">// specify any close() behavior</span>
+    <span style="color: #555555">}</span>
+<span style="color: #555555">}</span>
+</pre></div>
 
 <h2 id="configuring-your-custom-sink:aa06ab48e9613e9713d52c24b3200421">Configuring Your Custom Sink</h2>
 
@@ -132,13 +129,12 @@ public class PrintSink implements IMetricsSink {
 
 <p>At the top of that file there&rsquo;s a <code>sinks</code> parameter that lists each available
 sink by name. You should add your sink to that list. Here&rsquo;s an example:</p>
-
-<pre><code class="language-yaml">sinks:
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>sinks:
   - file-sink
   - scribe-sink
   - tmaster-sink
   - print-sink
-</code></pre>
+</pre></div>
 
 <p>For each sink you need to specify the following:</p>
 
@@ -153,15 +149,14 @@ is 0; if you set it to -1, the sink will attempt to restart forever.</li>
 </ul>
 
 <p>Below is an example <code>metrics_sink.yaml</code> configuration:</p>
-
-<pre><code class="language-yaml">sinks:
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>sinks:
   - print-sink
 
 print-sink:
-  class: &quot;biz.acme.heron.metrics.PrintSink&quot;
-  flush-frequency-ms: 60000 # One minute
-  sink-restart-attempts: -1 # Attempt to restart forever
-</code></pre>
+  class: <span style="color: #CC3300">&quot;biz.acme.heron.metrics.PrintSink&quot;</span>
+  flush-frequency-ms: 60000 <span style="color: #0099FF; font-style: italic"># One minute</span>
+  sink-restart-attempts: -1 <span style="color: #0099FF; font-style: italic"># Attempt to restart forever</span>
+</pre></div>
 
 <h2 id="using-your-custom-sink:aa06ab48e9613e9713d52c24b3200421">Using Your Custom Sink</h2>
 

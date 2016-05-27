@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en-us"><head><link rel="shortcut icon" type="image/png" sizes="16x16" href="/heron/img/favicon-16x16.png"><link rel="shortcut icon" type="image/png" sizes="32x32" href="/heron/img/favicon-32x32.png"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="Hugo 0.14-DEV"><title>Heron Documentation - Heron Tracker REST API</title><link rel="stylesheet" href="/heron/css/style.min.css"><link rel="stylesheet" href="/heron/css/font-awesome.min.css"><link rel="stylesheet" href="/heron/css/pygments.css"><script defer src="http://code.jquery.com/jquery-2.2.1.min.js"></script><script defer src="/heron/js/app.min.js"></script></head><body><nav class="hn-top-navbar navbar navbar-inverse navbar-fixed-top" role="navigation"><div class="hn-navbar-container container-fluid"><div class="navbar-header"><button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#hn-navbar" aria-controls="hn-navbar" aria-expanded="false"><span class="sr-only"><Toggle>navigation</Toggle></span><i class="hn-toggle-button fa fa-bars"></i></button><a class="hn-navbar-logo navbar-brand" href="/heron/"><img class="pull-left" src="/heron/img/HeronTextLogo-small.png"></a></div><div id="hn-navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav navbar-right"><li><a href="/heron/docs/getting-started">Docs</a></li><li><a href="/heron/docs/resources">Resources</a></li><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="https://github.com/twitter/heron">GitHub</a></li><li><a class="nav-icon" href="https://groups.google.com/forum/#!forum/heron-users"><i class="fa fa-comments"></i></a></li><li><a class="nav-icon" href="https://twitter.com/heronstreaming"><i class="fa fa-twitter"></i></a></li></ul></div></div></nav><div class="hn-main"><div class="container"><div class="row"><aside class="hn-sidebar hidden-xs col-sm-3 col-md-3 col-lg-2 collapse"><div><nav class="hn-sidebar-nav"><h4>Getting Started</h4><ul><li><a href="/heron/docs/getting-started">Local (Single Node)</a></li><li><a href="/heron/docs/upgrade-storm-to-heron">Upgrade Storm Topologies</a></li></ul><ul></ul><h4>Heron Concepts</h4><ul><li><a href="/heron/docs/concepts/architecture">Heron Architecture</a></li><li><a href="/heron/docs/concepts/topologies">Heron Topology</a></li></ul><ul></ul><h4>Deployment</h4><ul><li><a href="/heron/docs/operators/deployment">Overview</a></li><li><a href="/heron/docs/operators/deployment/configuration">Configuration</a></li></ul><ul></ul><h4>State Managers</h4><ul><li><a href="/heron/docs/operators/deployment/statemanagers/zookeeper">Zookeeper</a></li><li><a href="/heron/docs/operators/deployment/statemanagers/localfs">Local FS</a></li></ul><ul></ul><h4>Uploaders</h4><ul><li><a href="/heron/docs/operators/deployment/uploaders/localfs">Local FS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/hdfs">HDFS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/s3">S3</a></li></ul><ul></ul><h4>Schedulers</h4><ul><li><a href="/heron/docs/operators/deployment/schedulers/aurora">Aurora Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/local">Local Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/mesos">Mesos Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/slurm">Slurm Cluster</a></li></ul><ul></ul><h4>System Configuration</h4><ul><li><a href="/heron/docs/operators/configuration/config-intro">Overview</a></li><li><a href="/heron/docs/operators/configuration/instance">Heron Instance</a></li><li><a href="/heron/docs/operators/configuration/metrics-manager">Metrics Manager</a></li><li><a href="/heron/docs/operators/configuration/stmgr">Stream Manager</a></li><li><a href="/heron/docs/operators/configuration/system">System-Level</a></li><li><a href="/heron/docs/operators/configuration/tmaster">Topology Master</a></li></ul><ul></ul><h4>Observability</h4><ul><li><a href="/heron/docs/operators/observability/graphite">Graphite</a></li></ul><ul></ul><h4>User Manuals</h4><ul><li><a href="/heron/docs/operators/heron-cli">Heron Client</a></li><li><a href="/heron/docs/operators/heron-tracker-api">Heron Tracker REST API</a></li><li><a href="/heron/docs/operators/heron-tracker">Heron Tracker Runbook</a></li><li><a href="/heron/docs/operators/heron-ui">Heron UI Runbook</a></li></ul><ul></ul><h4>Topology Writers</h4><ul><li><a href="/heron/docs/developers/topologies">Writing Topologies</a></li><li><a href="/heron/docs/developers/data-model">Heron Data Model</a></li><li><a href="/heron/docs/developers/serialization">Tuple Serialization</a></li><li><a href="/heron/docs/developers/ui-guide">Heron UI Guide</a></li><li><a href="/heron/docs/developers/tuning">Tuning Guide</a></li><li><a href="/heron/docs/developers/simulator-mode">Simulator Mode</a></li><li><a href="/heron/docs/developers/troubleshooting">Troubleshooting Guide</a></li><li><a href="/heron/api">Javadoc</a></li></ul><ul></ul><h4>Heron Developers</h4><ul><li><a href="/heron/docs/developers/compiling/compiling">Compiling</a></li><li><a href="/heron/docs/developers/compiling/linux">Compiling on Linux</a></li><li><a href="/heron/docs/developers/compiling/mac">Compiling on Mac OS X</a></li><li><a href="/heron/docs/developers/compiling/docker">Compiling With Docker</a></li><li><a href="/heron/docs/contributors/testing">Running Tests</a></li><li><a href="/heron/docs/contributors/codebase">Code Organization</a></li></ul><ul></ul><h4>Extending Heron</h4><ul><li><a href="/heron/docs/contributors/custom-scheduler">Custom Scheduler</a></li><li><a href="/heron/docs/contributors/custom-metrics-sink">Custom Metrics Sink</a></li></ul><ul></ul><h4>Heron Resources</h4><ul><li><a href="/heron/docs/resources">Heron Resources</a></li></ul><ul></ul><h4>Contributors</h4><ul><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="/heron/docs/contributors/governance">Governance</a></li></ul><ul></ul></nav></div></aside><section class="hn-docs-main col-sm-9 col-md-9 col-lg-10 col-sm-offset-3 col-md-offset-3 col-lg-offset-2"><header class="hn-docs-header page-header"><h1>Heron Tracker REST API</h1><div class="hn-docs-description"></div></header><article class="hn-docs-content">
+<!DOCTYPE html><html lang="en-us"><head><link rel="shortcut icon" type="image/png" sizes="16x16" href="/heron/img/favicon-16x16.png"><link rel="shortcut icon" type="image/png" sizes="32x32" href="/heron/img/favicon-32x32.png"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="Hugo 0.15"><title>Heron Documentation - Heron Tracker REST API</title><link rel="stylesheet" href="/heron/css/style.min.css"><link rel="stylesheet" href="/heron/css/font-awesome.min.css"><link rel="stylesheet" href="/heron/css/pygments.css"><script defer src="http://code.jquery.com/jquery-2.2.1.min.js"></script><script defer src="/heron/js/app.min.js"></script></head><body><nav class="hn-top-navbar navbar navbar-inverse navbar-fixed-top" role="navigation"><div class="hn-navbar-container container-fluid"><div class="navbar-header"><button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#hn-navbar" aria-controls="hn-navbar" aria-expanded="false"><span class="sr-only"><Toggle>navigation</Toggle></span><i class="hn-toggle-button fa fa-bars"></i></button><a class="hn-navbar-logo navbar-brand" href="/heron/"><img class="pull-left" src="/heron/img/HeronTextLogo-small.png"></a></div><div id="hn-navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav navbar-right"><li><a href="/heron/docs/getting-started">Docs</a></li><li><a href="/heron/docs/resources">Resources</a></li><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="https://github.com/twitter/heron">GitHub</a></li><li><a class="nav-icon" href="https://groups.google.com/forum/#!forum/heron-users"><i class="fa fa-comments"></i></a></li><li><a class="nav-icon" href="https://twitter.com/heronstreaming"><i class="fa fa-twitter"></i></a></li></ul></div></div></nav><div class="hn-main"><div class="container"><div class="row"><aside class="hn-sidebar hidden-xs col-sm-3 col-md-3 col-lg-2 collapse"><div><nav class="hn-sidebar-nav"><h4>Getting Started</h4><ul><li><a href="/heron/docs/getting-started">Local (Single Node)</a></li><li><a href="/heron/docs/upgrade-storm-to-heron">Upgrade Storm Topologies</a></li></ul><ul></ul><h4>Heron Concepts</h4><ul><li><a href="/heron/docs/concepts/topologies">Heron Topology</a></li><li><a href="/heron/docs/concepts/architecture">Heron Architecture</a></li></ul><ul></ul><h4>Deployment</h4><ul><li><a href="/heron/docs/operators/deployment">Overview</a></li><li><a href="/heron/docs/operators/deployment/configuration">Configuration</a></li></ul><ul></ul><h4>State Managers</h4><ul><li><a href="/heron/docs/operators/deployment/statemanagers/zookeeper">Zookeeper</a></li><li><a href="/heron/docs/operators/deployment/statemanagers/localfs">Local FS</a></li></ul><ul></ul><h4>Uploaders</h4><ul><li><a href="/heron/docs/operators/deployment/uploaders/localfs">Local FS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/hdfs">HDFS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/s3">Amazon S3</a></li></ul><ul></ul><h4>Schedulers</h4><ul><li><a href="/heron/docs/operators/deployment/schedulers/aurora">Aurora Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/local">Local Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/slurm">Slurm Cluster</a></li></ul><ul></ul><h4>Cluster Configuration</h4><ul><li><a href="/heron/docs/operators/configuration/config-intro">Overview</a></li><li><a href="/heron/docs/operators/configuration/system">System-Level</a></li><li><a href="/heron/docs/operators/configuration/instance">Heron Instance</a></li><li><a href="/heron/docs/operators/configuration/metrics-manager">Metrics Manager</a></li><li><a href="/heron/docs/operators/configuration/stmgr">Stream Manager</a></li><li><a href="/heron/docs/operators/configuration/tmaster">Topology Master</a></li></ul><ul></ul><h4>Observability</h4><ul><li><a href="/heron/docs/operators/observability/graphite">Graphite</a></li></ul><ul></ul><h4>User Manuals</h4><ul><li><a href="/heron/docs/operators/heron-cli">Heron Client</a></li><li><a href="/heron/docs/operators/heron-tracker-api">Heron Tracker REST API</a></li><li><a href="/heron/docs/operators/heron-tracker">Heron Tracker Runbook</a></li><li><a href="/heron/docs/operators/heron-ui">Heron UI Runbook</a></li></ul><ul></ul><h4>Topology Writers</h4><ul><li><a href="/heron/docs/developers/topologies">Writing Topologies</a></li><li><a href="/heron/docs/developers/data-model">Heron Data Model</a></li><li><a href="/heron/docs/developers/serialization">Tuple Serialization</a></li><li><a href="/heron/docs/developers/ui-guide">Heron UI Guide</a></li><li><a href="/heron/docs/developers/tuning">Tuning Guide</a></li><li><a href="/heron/docs/developers/simulator-mode">Simulator Mode</a></li><li><a href="/heron/docs/developers/troubleshooting">Troubleshooting Guide</a></li><li><a href="/heron/api">Javadoc</a></li></ul><ul></ul><h4>Heron Developers</h4><ul><li><a href="/heron/docs/developers/compiling/compiling">Compiling</a></li><li><a href="/heron/docs/developers/compiling/linux">Compiling on Linux</a></li><li><a href="/heron/docs/developers/compiling/mac">Compiling on Mac OS X</a></li><li><a href="/heron/docs/developers/compiling/docker">Compiling With Docker</a></li><li><a href="/heron/docs/contributors/testing">Running Tests</a></li><li><a href="/heron/docs/contributors/codebase">Code Organization</a></li></ul><ul></ul><h4>Extending Heron</h4><ul><li><a href="/heron/docs/contributors/custom-scheduler">Custom Scheduler</a></li><li><a href="/heron/docs/contributors/custom-metrics-sink">Custom Metrics Sink</a></li></ul><ul></ul><h4>Heron Resources</h4><ul><li><a href="/heron/docs/resources">Heron Resources</a></li></ul><ul></ul><h4>Contributors</h4><ul><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="/heron/docs/contributors/governance">Governance</a></li></ul><ul></ul></nav></div></aside><section class="hn-docs-main col-sm-9 col-md-9 col-lg-10 col-sm-offset-3 col-md-offset-3 col-lg-offset-2"><header class="hn-docs-header page-header"><h1>Heron Tracker REST API</h1><div class="hn-docs-description"></div></header><article class="hn-docs-content">
 
 <h3 id="json-interface:a835b0b91c76de6fe740dc315fd5529d">JSON Interface</h3>
 
@@ -54,9 +54,8 @@ the endpoint.</li>
 <h3 id="a-name-topologies-topologies-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies">/topologies</a></h3>
 
 <p>Returns JSON describing all currently available topologies</p>
-
-<pre><code class="language-bash">$ curl &quot;http://heron-tracker-url/topologies?cluster=cluster1&amp;environ=devel&quot;
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>$ curl <span style="color: #CC3300">&quot;http://heron-tracker-url/topologies?cluster=cluster1&amp;environ=devel&quot;</span>
+</pre></div>
 
 <h4 id="parameters:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
 
@@ -72,9 +71,8 @@ topologies that are running in this environment.</li>
 <h3 id="a-name-topologies-logicalplan-topologies-logicalplan-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_logicalplan">/topologies/logicalplan</a></h3>
 
 <p>Returns a JSON representation of the <a href="../../concepts/topologies#logical-plan">logical plan</a> of a topology.</p>
-
-<pre><code class="language-bash">$ curl &quot;http://heron-tracker-url/topologies/logicalplan?cluster=cluster1&amp;environ=devel&amp;topology=topologyName&quot;
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>$ curl <span style="color: #CC3300">&quot;http://heron-tracker-url/topologies/logicalplan?cluster=cluster1&amp;environ=devel&amp;topology=topologyName&quot;</span>
+</pre></div>
 
 <h4 id="parameters-1:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
 
@@ -115,9 +113,8 @@ JSON dictionary containing following information.
 <h3 id="a-name-topologies-physicalplan-topologies-physicalplan-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_physicalplan">/topologies/physicalplan</a></h3>
 
 <p>Returns a JSON representation of the <a href="../../concepts/topologies#physical-plan">physical plan</a> of a topology.</p>
-
-<pre><code class="language-bash">$ curl &quot;http://heron-tracker-url/topologies/physicalplan?cluster=datacenter1&amp;environ=prod&amp;topology=topologyName&quot;
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>$ curl <span style="color: #CC3300">&quot;http://heron-tracker-url/topologies/physicalplan?cluster=datacenter1&amp;environ=prod&amp;topology=topologyName&quot;</span>
+</pre></div>
 
 <h4 id="parameters-2:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
 
@@ -165,9 +162,8 @@ JSON dictionary containing following information.
 <h3 id="a-name-topologies-schedulerlocation-topologies-schedulerlocation-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_schedulerlocation">/topologies/schedulerlocation</a></h3>
 
 <p>Returns a JSON representation of the scheduler location of the topology.</p>
-
-<pre><code class="language-bash">$ curl &quot;http://heron-tracker-url/topologies/schedulerlocation?cluster=datacenter1&amp;environ=prod&amp;topology=topologyName&quot;
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>$ curl <span style="color: #CC3300">&quot;http://heron-tracker-url/topologies/schedulerlocation?cluster=datacenter1&amp;environ=prod&amp;topology=topologyName&quot;</span>
+</pre></div>
 
 <h4 id="parameters-3:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
 
@@ -185,9 +181,8 @@ for example, the Aurora page for the job.</p>
 <h3 id="a-name-topologies-executionstate-topologies-executionstate-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_executionstate">/topologies/executionstate</a></h3>
 
 <p>Returns a JSON representation of the execution state of the topology.</p>
-
-<pre><code class="language-bash">$ curl &quot;http://heron-tracker-url/topologies/executionstate?cluster=datacenter1&amp;environ=prod&amp;topology=topologyName&quot;
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>$ curl <span style="color: #CC3300">&quot;http://heron-tracker-url/topologies/executionstate?cluster=datacenter1&amp;environ=prod&amp;topology=topologyName&quot;</span>
+</pre></div>
 
 <h4 id="parameters-4:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
 
@@ -220,9 +215,8 @@ topology</li>
 <h3 id="a-name-topologies-states-topologies-states-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_states">/topologies/states</a></h3>
 
 <p>Returns a JSON list of execution states of topologies in all the cluster.</p>
-
-<pre><code class="language-bash">$ curl &quot;http://heron-tracker-url/topologies/states?cluster=cluster1&amp;environ=devel&quot;
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>$ curl <span style="color: #CC3300">&quot;http://heron-tracker-url/topologies/states?cluster=cluster1&amp;environ=devel&quot;</span>
+</pre></div>
 
 <h4 id="parameters-5:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
 
@@ -464,9 +458,8 @@ Returns the path to the file that can be downloaded externally.</p>
 <h3 id="a-name-machines-machines-a:a835b0b91c76de6fe740dc315fd5529d"><a name="machines">/machines</a></h3>
 
 <p>Returns JSON describing all machines that topologies are running on.</p>
-
-<pre><code class="language-bash">$ curl &quot;http://heron-tracker-url/machines?topology=mytopology1&amp;cluster=cluster1&amp;environ=prod&quot;
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>$ curl <span style="color: #CC3300">&quot;http://heron-tracker-url/machines?topology=mytopology1&amp;cluster=cluster1&amp;environ=prod&quot;</span>
+</pre></div>
 
 <h4 id="parameters-18:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
 
@@ -500,14 +493,12 @@ Note that these timeseries are associated with their instances.</li>
 <h4 id="operators:a835b0b91c76de6fe740dc315fd5529d">Operators</h4>
 
 <h5 id="ts:a835b0b91c76de6fe740dc315fd5529d">TS</h5>
-
-<pre><code>TS(componentName, instance, metricName)
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>TS(componentName, instance, metricName)
+</pre></div>
 
 <p>Example:</p>
-
-<pre><code>TS(component1, *, __emit-count/stream1)
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>TS(component1, *, __emit-count/stream1)
+</pre></div>
 
 <p>Time Series Operator. This is the basic operator that is responsible for getting metrics from TMaster.
 Accepts a list of 3 elements:</p>
@@ -524,11 +515,10 @@ a multivariate time series.</p>
 <hr />
 
 <h5 id="default:a835b0b91c76de6fe740dc315fd5529d">DEFAULT</h5>
-
-<pre><code>DEFAULT(0, TS(component1, *, __emit-count/stream1))      &lt;-- If the second operator returns more than one timeline, so will the DEFAULT operator.
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>DEFAULT(0, TS(component1, *, __emit-count/stream1))      &lt;-- If the second operator returns more than one timeline, so will the DEFAULT operator.
 
 DEFAULT(100.0, SUM(TS(component2, *, __emit-count/default)))     &lt;-- Second operator can be any operator
-</code></pre>
+</pre></div>
 
 <p>Default Operator. This operator is responsible for filling missing values in the metrics timeline.
 Must have 2 arguments</p>
@@ -543,9 +533,8 @@ Must have 2 arguments</p>
 <hr />
 
 <h5 id="sum:a835b0b91c76de6fe740dc315fd5529d">SUM</h5>
-
-<pre><code>SUM(TS(component1, instance1, metric1), DEFAULT(0, TS(component1, *, metric2)))
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>SUM(TS(component1, instance1, metric1), DEFAULT(0, TS(component1, *, metric2)))
+</pre></div>
 
 <p>Sum Operator. This operator is used to take sum of all argument time series. It can have any number of arguments,
 each of which must be one of the following two types:</p>
@@ -561,9 +550,8 @@ Note that &ldquo;instance&rdquo; attribute is not there in the result.</p>
 <hr />
 
 <h5 id="max:a835b0b91c76de6fe740dc315fd5529d">MAX</h5>
-
-<pre><code>MAX(100, TS(component1, *, metric1))
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>MAX(100, TS(component1, *, metric1))
+</pre></div>
 
 <p>Max Operator. This operator is used to find max of all argument operators for each individual timestamp.
 Each argument must be one of the following types:</p>
@@ -579,9 +567,8 @@ Note that &ldquo;instance&rdquo; attribute is not included in the result.</p>
 <hr />
 
 <h5 id="percentile:a835b0b91c76de6fe740dc315fd5529d">PERCENTILE</h5>
-
-<pre><code>PERCENTILE(99, TS(component1, *, metric1))
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>PERCENTILE(99, TS(component1, *, metric1))
+</pre></div>
 
 <p>Percentile Operator. This operator is used to find a quantile of all timelines retuned by the arguments, for each timestamp.
 This is a more general type of query similar to MAX. Note that <code>PERCENTILE(100, TS...)</code> is equivalent to <code>Max(TS...)</code>.
@@ -600,9 +587,8 @@ for each timestamp. Note that &ldquo;instance&rdquo; attribute is not there in t
 <hr />
 
 <h5 id="divide:a835b0b91c76de6fe740dc315fd5529d">DIVIDE</h5>
-
-<pre><code>DIVIDE(TS(component1, *, metrics1), 100)
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>DIVIDE(TS(component1, *, metrics1), 100)
+</pre></div>
 
 <p>Divide Operator. Accepts two arguments, both can be univariate or multivariate.
 Each can be of one of the following types:</p>
@@ -641,9 +627,8 @@ Each can be of one of the following types:</p>
 <hr />
 
 <h5 id="multiply:a835b0b91c76de6fe740dc315fd5529d">MULTIPLY</h5>
-
-<pre><code>MULTIPLY(10, TS(component1, *, metrics1))
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>MULTIPLY(10, TS(component1, *, metrics1))
+</pre></div>
 
 <p>Multiply Operator. Has same conditions as division operator. This is to keep the API simple.
 Accepts two arguments, both can be univariate or multivariate. Each can be of one of the following types:</p>
@@ -683,11 +668,10 @@ on the two corresponding time series.</li>
 <hr />
 
 <h5 id="subtract:a835b0b91c76de6fe740dc315fd5529d">SUBTRACT</h5>
-
-<pre><code>SUBTRACT(TS(component1, instance1, metrics1), TS(componet1, instance1, metrics2))
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>SUBTRACT(TS(component1, instance1, metrics1), TS(componet1, instance1, metrics2))
 
 SUBTRACT(TS(component1, instance1, metrics1), 100)
-</code></pre>
+</pre></div>
 
 <p>Subtract Operator. Has same conditions as division operator. This is to keep the API simple.
 Accepts two arguments, both can be univariate or multivariate. Each can be of one of the following types:</p>
@@ -727,11 +711,10 @@ on the two corresponding time series.</li>
 <hr />
 
 <h5 id="rate:a835b0b91c76de6fe740dc315fd5529d">RATE</h5>
-
-<pre><code>RATE(SUM(TS(component1, *, metrics1)))
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>RATE(SUM(TS(component1, *, metrics1)))
 
 RATE(TS(component1, *, metrics2))
-</code></pre>
+</pre></div>
 
 <p>Rate Operator. This operator is used to find rate of change for all timeseries.
 Accepts a only a single argument, which must be an Operators which returns univariate or multivariate time series.

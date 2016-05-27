@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en-us"><head><link rel="shortcut icon" type="image/png" sizes="16x16" href="/heron/img/favicon-16x16.png"><link rel="shortcut icon" type="image/png" sizes="32x32" href="/heron/img/favicon-32x32.png"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="Hugo 0.14-DEV"><title>Heron Documentation - Linux Platforms</title><link rel="stylesheet" href="/heron/css/style.min.css"><link rel="stylesheet" href="/heron/css/font-awesome.min.css"><link rel="stylesheet" href="/heron/css/pygments.css"><script defer src="http://code.jquery.com/jquery-2.2.1.min.js"></script><script defer src="/heron/js/app.min.js"></script></head><body><nav class="hn-top-navbar navbar navbar-inverse navbar-fixed-top" role="navigation"><div class="hn-navbar-container container-fluid"><div class="navbar-header"><button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#hn-navbar" aria-controls="hn-navbar" aria-expanded="false"><span class="sr-only"><Toggle>navigation</Toggle></span><i class="hn-toggle-button fa fa-bars"></i></button><a class="hn-navbar-logo navbar-brand" href="/heron/"><img class="pull-left" src="/heron/img/HeronTextLogo-small.png"></a></div><div id="hn-navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav navbar-right"><li><a href="/heron/docs/getting-started">Docs</a></li><li><a href="/heron/docs/resources">Resources</a></li><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="https://github.com/twitter/heron">GitHub</a></li><li><a class="nav-icon" href="https://groups.google.com/forum/#!forum/heron-users"><i class="fa fa-comments"></i></a></li><li><a class="nav-icon" href="https://twitter.com/heronstreaming"><i class="fa fa-twitter"></i></a></li></ul></div></div></nav><div class="hn-main"><div class="container"><div class="row"><aside class="hn-sidebar hidden-xs col-sm-3 col-md-3 col-lg-2 collapse"><div><nav class="hn-sidebar-nav"><h4>Getting Started</h4><ul><li><a href="/heron/docs/getting-started">Local (Single Node)</a></li><li><a href="/heron/docs/upgrade-storm-to-heron">Upgrade Storm Topologies</a></li></ul><ul></ul><h4>Heron Concepts</h4><ul><li><a href="/heron/docs/concepts/architecture">Heron Architecture</a></li><li><a href="/heron/docs/concepts/topologies">Heron Topology</a></li></ul><ul></ul><h4>Deployment</h4><ul><li><a href="/heron/docs/operators/deployment">Overview</a></li><li><a href="/heron/docs/operators/deployment/configuration">Configuration</a></li></ul><ul></ul><h4>State Managers</h4><ul><li><a href="/heron/docs/operators/deployment/statemanagers/zookeeper">Zookeeper</a></li><li><a href="/heron/docs/operators/deployment/statemanagers/localfs">Local FS</a></li></ul><ul></ul><h4>Uploaders</h4><ul><li><a href="/heron/docs/operators/deployment/uploaders/localfs">Local FS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/hdfs">HDFS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/s3">S3</a></li></ul><ul></ul><h4>Schedulers</h4><ul><li><a href="/heron/docs/operators/deployment/schedulers/aurora">Aurora Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/local">Local Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/mesos">Mesos Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/slurm">Slurm Cluster</a></li></ul><ul></ul><h4>System Configuration</h4><ul><li><a href="/heron/docs/operators/configuration/config-intro">Overview</a></li><li><a href="/heron/docs/operators/configuration/instance">Heron Instance</a></li><li><a href="/heron/docs/operators/configuration/metrics-manager">Metrics Manager</a></li><li><a href="/heron/docs/operators/configuration/stmgr">Stream Manager</a></li><li><a href="/heron/docs/operators/configuration/system">System-Level</a></li><li><a href="/heron/docs/operators/configuration/tmaster">Topology Master</a></li></ul><ul></ul><h4>Observability</h4><ul><li><a href="/heron/docs/operators/observability/graphite">Graphite</a></li></ul><ul></ul><h4>User Manuals</h4><ul><li><a href="/heron/docs/operators/heron-cli">Heron Client</a></li><li><a href="/heron/docs/operators/heron-tracker-api">Heron Tracker REST API</a></li><li><a href="/heron/docs/operators/heron-tracker">Heron Tracker Runbook</a></li><li><a href="/heron/docs/operators/heron-ui">Heron UI Runbook</a></li></ul><ul></ul><h4>Topology Writers</h4><ul><li><a href="/heron/docs/developers/topologies">Writing Topologies</a></li><li><a href="/heron/docs/developers/data-model">Heron Data Model</a></li><li><a href="/heron/docs/developers/serialization">Tuple Serialization</a></li><li><a href="/heron/docs/developers/ui-guide">Heron UI Guide</a></li><li><a href="/heron/docs/developers/tuning">Tuning Guide</a></li><li><a href="/heron/docs/developers/simulator-mode">Simulator Mode</a></li><li><a href="/heron/docs/developers/troubleshooting">Troubleshooting Guide</a></li><li><a href="/heron/api">Javadoc</a></li></ul><ul></ul><h4>Heron Developers</h4><ul><li><a href="/heron/docs/developers/compiling/compiling">Compiling</a></li><li><a href="/heron/docs/developers/compiling/linux">Compiling on Linux</a></li><li><a href="/heron/docs/developers/compiling/mac">Compiling on Mac OS X</a></li><li><a href="/heron/docs/developers/compiling/docker">Compiling With Docker</a></li><li><a href="/heron/docs/contributors/testing">Running Tests</a></li><li><a href="/heron/docs/contributors/codebase">Code Organization</a></li></ul><ul></ul><h4>Extending Heron</h4><ul><li><a href="/heron/docs/contributors/custom-scheduler">Custom Scheduler</a></li><li><a href="/heron/docs/contributors/custom-metrics-sink">Custom Metrics Sink</a></li></ul><ul></ul><h4>Heron Resources</h4><ul><li><a href="/heron/docs/resources">Heron Resources</a></li></ul><ul></ul><h4>Contributors</h4><ul><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="/heron/docs/contributors/governance">Governance</a></li></ul><ul></ul></nav></div></aside><section class="hn-docs-main col-sm-9 col-md-9 col-lg-10 col-sm-offset-3 col-md-offset-3 col-lg-offset-2"><header class="hn-docs-header page-header"><h1>Linux Platforms</h1><div class="hn-docs-description"></div></header><article class="hn-docs-content">
+<!DOCTYPE html><html lang="en-us"><head><link rel="shortcut icon" type="image/png" sizes="16x16" href="/heron/img/favicon-16x16.png"><link rel="shortcut icon" type="image/png" sizes="32x32" href="/heron/img/favicon-32x32.png"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="Hugo 0.15"><title>Heron Documentation - Linux Platforms</title><link rel="stylesheet" href="/heron/css/style.min.css"><link rel="stylesheet" href="/heron/css/font-awesome.min.css"><link rel="stylesheet" href="/heron/css/pygments.css"><script defer src="http://code.jquery.com/jquery-2.2.1.min.js"></script><script defer src="/heron/js/app.min.js"></script></head><body><nav class="hn-top-navbar navbar navbar-inverse navbar-fixed-top" role="navigation"><div class="hn-navbar-container container-fluid"><div class="navbar-header"><button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#hn-navbar" aria-controls="hn-navbar" aria-expanded="false"><span class="sr-only"><Toggle>navigation</Toggle></span><i class="hn-toggle-button fa fa-bars"></i></button><a class="hn-navbar-logo navbar-brand" href="/heron/"><img class="pull-left" src="/heron/img/HeronTextLogo-small.png"></a></div><div id="hn-navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav navbar-right"><li><a href="/heron/docs/getting-started">Docs</a></li><li><a href="/heron/docs/resources">Resources</a></li><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="https://github.com/twitter/heron">GitHub</a></li><li><a class="nav-icon" href="https://groups.google.com/forum/#!forum/heron-users"><i class="fa fa-comments"></i></a></li><li><a class="nav-icon" href="https://twitter.com/heronstreaming"><i class="fa fa-twitter"></i></a></li></ul></div></div></nav><div class="hn-main"><div class="container"><div class="row"><aside class="hn-sidebar hidden-xs col-sm-3 col-md-3 col-lg-2 collapse"><div><nav class="hn-sidebar-nav"><h4>Getting Started</h4><ul><li><a href="/heron/docs/getting-started">Local (Single Node)</a></li><li><a href="/heron/docs/upgrade-storm-to-heron">Upgrade Storm Topologies</a></li></ul><ul></ul><h4>Heron Concepts</h4><ul><li><a href="/heron/docs/concepts/topologies">Heron Topology</a></li><li><a href="/heron/docs/concepts/architecture">Heron Architecture</a></li></ul><ul></ul><h4>Deployment</h4><ul><li><a href="/heron/docs/operators/deployment">Overview</a></li><li><a href="/heron/docs/operators/deployment/configuration">Configuration</a></li></ul><ul></ul><h4>State Managers</h4><ul><li><a href="/heron/docs/operators/deployment/statemanagers/zookeeper">Zookeeper</a></li><li><a href="/heron/docs/operators/deployment/statemanagers/localfs">Local FS</a></li></ul><ul></ul><h4>Uploaders</h4><ul><li><a href="/heron/docs/operators/deployment/uploaders/localfs">Local FS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/hdfs">HDFS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/s3">Amazon S3</a></li></ul><ul></ul><h4>Schedulers</h4><ul><li><a href="/heron/docs/operators/deployment/schedulers/aurora">Aurora Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/local">Local Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/slurm">Slurm Cluster</a></li></ul><ul></ul><h4>Cluster Configuration</h4><ul><li><a href="/heron/docs/operators/configuration/config-intro">Overview</a></li><li><a href="/heron/docs/operators/configuration/system">System-Level</a></li><li><a href="/heron/docs/operators/configuration/instance">Heron Instance</a></li><li><a href="/heron/docs/operators/configuration/metrics-manager">Metrics Manager</a></li><li><a href="/heron/docs/operators/configuration/stmgr">Stream Manager</a></li><li><a href="/heron/docs/operators/configuration/tmaster">Topology Master</a></li></ul><ul></ul><h4>Observability</h4><ul><li><a href="/heron/docs/operators/observability/graphite">Graphite</a></li></ul><ul></ul><h4>User Manuals</h4><ul><li><a href="/heron/docs/operators/heron-cli">Heron Client</a></li><li><a href="/heron/docs/operators/heron-tracker-api">Heron Tracker REST API</a></li><li><a href="/heron/docs/operators/heron-tracker">Heron Tracker Runbook</a></li><li><a href="/heron/docs/operators/heron-ui">Heron UI Runbook</a></li></ul><ul></ul><h4>Topology Writers</h4><ul><li><a href="/heron/docs/developers/topologies">Writing Topologies</a></li><li><a href="/heron/docs/developers/data-model">Heron Data Model</a></li><li><a href="/heron/docs/developers/serialization">Tuple Serialization</a></li><li><a href="/heron/docs/developers/ui-guide">Heron UI Guide</a></li><li><a href="/heron/docs/developers/tuning">Tuning Guide</a></li><li><a href="/heron/docs/developers/simulator-mode">Simulator Mode</a></li><li><a href="/heron/docs/developers/troubleshooting">Troubleshooting Guide</a></li><li><a href="/heron/api">Javadoc</a></li></ul><ul></ul><h4>Heron Developers</h4><ul><li><a href="/heron/docs/developers/compiling/compiling">Compiling</a></li><li><a href="/heron/docs/developers/compiling/linux">Compiling on Linux</a></li><li><a href="/heron/docs/developers/compiling/mac">Compiling on Mac OS X</a></li><li><a href="/heron/docs/developers/compiling/docker">Compiling With Docker</a></li><li><a href="/heron/docs/contributors/testing">Running Tests</a></li><li><a href="/heron/docs/contributors/codebase">Code Organization</a></li></ul><ul></ul><h4>Extending Heron</h4><ul><li><a href="/heron/docs/contributors/custom-scheduler">Custom Scheduler</a></li><li><a href="/heron/docs/contributors/custom-metrics-sink">Custom Metrics Sink</a></li></ul><ul></ul><h4>Heron Resources</h4><ul><li><a href="/heron/docs/resources">Heron Resources</a></li></ul><ul></ul><h4>Contributors</h4><ul><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="/heron/docs/contributors/governance">Governance</a></li></ul><ul></ul></nav></div></aside><section class="hn-docs-main col-sm-9 col-md-9 col-lg-10 col-sm-offset-3 col-md-offset-3 col-lg-offset-2"><header class="hn-docs-header page-header"><h1>Linux Platforms</h1><div class="hn-docs-description"></div></header><article class="hn-docs-content">
 
 <ul>
 <li><a href="#building-on-ubuntu-14.04:34fe9f2d9cc3cd7e319ca75e7da08332">Ubuntu 14.04</a></li>
@@ -10,62 +10,52 @@
 <p>This is a step by step guide for building Heron on a fresh Ubuntu 14.04 installation.</p>
 
 <h4 id="step-1-first-update-ubuntu:34fe9f2d9cc3cd7e319ca75e7da08332">Step 1 - First update Ubuntu.</h4>
-
-<pre><code class="language-bash">sudo apt-get update -y
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>sudo apt-get update -y
 sudo apt-get upgrade -y
-</code></pre>
+</pre></div>
 
 <h4 id="step-2-install-required-libraries:34fe9f2d9cc3cd7e319ca75e7da08332">Step 2 - Install required libraries</h4>
-
-<pre><code class="language-bash">sudo apt-get install git build-essential automake cmake libtool zip \ 
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>sudo apt-get install git build-essential automake cmake libtool zip <span style="color: #CC3300; font-weight: bold">\ </span>
         libunwind-setjmp0-dev zlib1g-dev unzip pkg-config -y
-</code></pre>
+</pre></div>
 
 <h4 id="step-3-set-the-following-environment-variables:34fe9f2d9cc3cd7e319ca75e7da08332">Step 3 - Set the following environment variables</h4>
-
-<pre><code class="language-bash">export CC=/usr/bin/gcc-4.8
-export CCX=/usr/bin/g++-4.8
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #336666">export</span> <span style="color: #003333">CC</span><span style="color: #555555">=</span>/usr/bin/gcc-4.8
+<span style="color: #336666">export</span> <span style="color: #003333">CCX</span><span style="color: #555555">=</span>/usr/bin/g++-4.8
+</pre></div>
 
 <h4 id="step-4-install-jdk-8:34fe9f2d9cc3cd7e319ca75e7da08332">Step 4 - Install JDK 8</h4>
-
-<pre><code class="language-bash">sudo add-apt-repository ppa:webupd8team/java
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>sudo add-apt-repository ppa:webupd8team/java
 sudo apt-get update -y
 sudo apt-get install oracle-java8-installer -y
-</code></pre>
+</pre></div>
 
 <h4 id="step-5-install-bazel:34fe9f2d9cc3cd7e319ca75e7da08332">Step 5 - Install Bazel</h4>
-
-<pre><code class="language-bash">wget https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>wget https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh
 chmod +x bazel-0.1.2-installer-linux-x86_64.sh
 ./bazel-0.1.2-installer-linux-x86_64.sh --user
-</code></pre>
+</pre></div>
 
 <h4 id="step-6-make-sure-bazel-bin-is-in-the-path:34fe9f2d9cc3cd7e319ca75e7da08332">Step 6 - Make sure Bazel bin is in the PATH</h4>
-
-<pre><code class="language-bash">export PATH=&quot;$PATH:$HOME/bin&quot;
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #336666">export</span> <span style="color: #003333">PATH</span><span style="color: #555555">=</span><span style="color: #CC3300">&quot;</span><span style="color: #003333">$PATH</span><span style="color: #CC3300">:</span><span style="color: #003333">$HOME</span><span style="color: #CC3300">/bin&quot;</span>
+</pre></div>
 
 <h4 id="step-7-get-the-latest-version-of-heron:34fe9f2d9cc3cd7e319ca75e7da08332">Step 7 - Get the latest version of heron</h4>
-
-<pre><code class="language-bash">git clone https://github.com/twitter/heron.git &amp;&amp; cd heron
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>git clone https://github.com/twitter/heron.git <span style="color: #555555">&amp;&amp;</span> <span style="color: #336666">cd</span> heron
+</pre></div>
 
 <h4 id="step-8-configure-heron-for-build:34fe9f2d9cc3cd7e319ca75e7da08332">Step 8 - Configure Heron for build</h4>
-
-<pre><code class="language-bash">./bazel_configure.py
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>./bazel_configure.py
+</pre></div>
 
 <h4 id="step-9-build-the-project:34fe9f2d9cc3cd7e319ca75e7da08332">Step 9 - Build the project</h4>
-
-<pre><code class="language-bash">bazel build --config=ubuntu heron/...  
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>bazel build --config<span style="color: #555555">=</span>ubuntu heron/...  
+</pre></div>
 
 <h4 id="step-10-build-the-packages:34fe9f2d9cc3cd7e319ca75e7da08332">Step 10 - Build the packages</h4>
-
-<pre><code class="language-bash">bazel build --config=ubuntu scripts/packages:binpkgs  
-bazel build --config=ubuntu scripts/packages:tarpkgs
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>bazel build --config<span style="color: #555555">=</span>ubuntu scripts/packages:binpkgs  
+bazel build --config<span style="color: #555555">=</span>ubuntu scripts/packages:tarpkgs
+</pre></div>
 
 <p>This will build the packages below the <code>bazel-bin/scripts/packages/</code> directory.</p>
 
@@ -74,110 +64,97 @@ bazel build --config=ubuntu scripts/packages:tarpkgs
 <p>If you encounter errors with libunwind, libtool, or gperftools install them manually</p>
 
 <p>Compiling and installing <a href="https://www.gnu.org/software/libtool">libtool</a></p>
-
-<pre><code class="language-bash">wget http://ftpmirror.gnu.org/libtool/libtool-2.4.6.tar.gz
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>wget http://ftpmirror.gnu.org/libtool/libtool-2.4.6.tar.gz
 tar -xvf libtool-2.4.6.tar.gz
-cd libtool-2.4.6
+<span style="color: #336666">cd</span> libtool-2.4.6
 ./configure
 make
 sudo make install
-</code></pre>
+</pre></div>
 
 <p>Compiling and installing <a href="http://www.nongnu.org/libunwind">libunwind</a></p>
-
-<pre><code class="language-bash">wget http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>wget http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz
 tar -xvf libunwind-1.1.tar.gz
-cd libunwind-1.1
+<span style="color: #336666">cd</span> libunwind-1.1
 ./configure
 make
 sudo make install
-</code></pre>
+</pre></div>
 
 <p>Compiling and installing <a href="https://github.com/gperftools/gperftools/releases">gperftools</a></p>
-
-<pre><code class="language-bash">wget https://github.com/gperftools/gperftools/releases/download/gperftools-2.5/gperftools-2.5.tar.gz
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>wget https://github.com/gperftools/gperftools/releases/download/gperftools-2.5/gperftools-2.5.tar.gz
 tar -xvf gperftools-2.5.tar.gz
-cd gperftools-2.5
+<span style="color: #336666">cd</span> gperftools-2.5
 ./configure
 make
 sudo make install
-</code></pre>
+</pre></div>
 
 <h2 id="building-on-centos-7:34fe9f2d9cc3cd7e319ca75e7da08332">Building on CentOS 7</h2>
 
 <p>This is a step by step guide for building Heron on a fresh CentOS 7 installation.</p>
 
 <h4 id="step-1-install-the-required-dependencies:34fe9f2d9cc3cd7e319ca75e7da08332">Step 1 - Install the required dependencies</h4>
-
-<pre><code class="language-bash">sudo yum install gcc gcc-c++ kernel-devel wget unzip zlib-devel zip git automake cmake patch libtool -y
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>sudo yum install gcc gcc-c++ kernel-devel wget unzip zlib-devel zip git automake cmake patch libtool -y
+</pre></div>
 
 <h4 id="step-2-install-libunwind-from-source:34fe9f2d9cc3cd7e319ca75e7da08332">Step 2 - Install libunwind from source</h4>
-
-<pre><code class="language-bash">wget http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>wget http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz
 tar xvf libunwind-1.1.tar.gz
-cd libunwind-1.1
+<span style="color: #336666">cd</span> libunwind-1.1
 ./configure
 make
 sudo make install
-</code></pre>
+</pre></div>
 
 <h4 id="step-3-set-the-following-environment-variables-1:34fe9f2d9cc3cd7e319ca75e7da08332">Step 3 - Set the following environment variables</h4>
-
-<pre><code class="language-bash">export CC=/usr/bin/gcc
-export CCX=/usr/bin/g++
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #336666">export</span> <span style="color: #003333">CC</span><span style="color: #555555">=</span>/usr/bin/gcc
+<span style="color: #336666">export</span> <span style="color: #003333">CCX</span><span style="color: #555555">=</span>/usr/bin/g++
+</pre></div>
 
 <h4 id="step-4-install-jdk:34fe9f2d9cc3cd7e319ca75e7da08332">Step 4 - Install JDK</h4>
-
-<pre><code class="language-bash">cd /opt/
-sudo wget --no-cookies --no-check-certificate --header &quot;Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie&quot; &quot;http://download.oracle.com/otn-pub/java/jdk/8u91-b14/jdk-8u91-linux-x64.tar.gz&quot;
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #336666">cd</span> /opt/
+sudo wget --no-cookies --no-check-certificate --header <span style="color: #CC3300">&quot;Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie&quot;</span> <span style="color: #CC3300">&quot;http://download.oracle.com/otn-pub/java/jdk/8u91-b14/jdk-8u91-linux-x64.tar.gz&quot;</span>
 
 sudo tar xzf jdk-8u91-linux-x64.tar.gz
-</code></pre>
+</pre></div>
 
 <p>Use alternatives to configure the Java version</p>
-
-<pre><code class="language-bash">sudo cd /opt/jdk1.8.0_91/
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>sudo <span style="color: #336666">cd</span> /opt/jdk1.8.0_91/
 sudo alternatives --install /usr/bin/java java /opt/jdk1.8.0_91/bin/java 2
 sudo alternatives --config java
-</code></pre>
+</pre></div>
 
 <p>Set the javac and jar commands</p>
-
-<pre><code class="language-bash">sudo alternatives --install /usr/bin/jar jar /opt/jdk1.8.0_91/bin/jar 2
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>sudo alternatives --install /usr/bin/jar jar /opt/jdk1.8.0_91/bin/jar 2
 sudo alternatives --install /usr/bin/javac javac /opt/jdk1.8.0_91/bin/javac 2
 sudo alternatives --set jar /opt/jdk1.8.0_91/bin/jar
 sudo alternatives --set javac /opt/jdk1.8.0_91/bin/javac
-</code></pre>
+</pre></div>
 
 <p>Export the Java environment variables</p>
-
-<pre><code class="language-bash">export JAVA_HOME=/opt/jdk1.8.0_91
-export JRE_HOME=/opt/jdk1.8.0_91/jre
-export PATH=$PATH:/opt/jdk1.8.0_91/bin:/opt/jdk1.8.0_91/jre/bin
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #336666">export</span> <span style="color: #003333">JAVA_HOME</span><span style="color: #555555">=</span>/opt/jdk1.8.0_91
+<span style="color: #336666">export</span> <span style="color: #003333">JRE_HOME</span><span style="color: #555555">=</span>/opt/jdk1.8.0_91/jre
+<span style="color: #336666">export</span> <span style="color: #003333">PATH</span><span style="color: #555555">=</span><span style="color: #003333">$PATH</span>:/opt/jdk1.8.0_91/bin:/opt/jdk1.8.0_91/jre/bin
+</pre></div>
 
 <h4 id="step-5-install-bazel-0-1-2:34fe9f2d9cc3cd7e319ca75e7da08332">Step 5 - Install Bazel 0.1.2</h4>
-
-<pre><code class="language-bash">wget https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>wget https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh
 chmod +x bazel-0.1.2-installer-linux-x86_64.sh
 ./bazel-0.1.2-installer-linux-x86_64.sh --user
-</code></pre>
+</pre></div>
 
 <h4 id="step-6-download-heron-and-compile-it:34fe9f2d9cc3cd7e319ca75e7da08332">Step 6 - Download heron and compile it</h4>
-
-<pre><code class="language-bash">cd
-git clone https://github.com/twitter/heron.git &amp;&amp; cd heron
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #336666">cd</span>
+git clone https://github.com/twitter/heron.git <span style="color: #555555">&amp;&amp;</span> <span style="color: #336666">cd</span> heron
 ./bazel_configure.py
-bazel build --config=centos heron/...
-</code></pre>
+bazel build --config<span style="color: #555555">=</span>centos heron/...
+</pre></div>
 
 <h4 id="step-7-build-the-binary-packages:34fe9f2d9cc3cd7e319ca75e7da08332">Step 7 - Build the binary packages</h4>
-
-<pre><code class="language-bash">bazel build --config=centos scripts/packages:binpkgs
-bazel build --config=centos scripts/packages:tarpkgs
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>bazel build --config<span style="color: #555555">=</span>centos scripts/packages:binpkgs
+bazel build --config<span style="color: #555555">=</span>centos scripts/packages:tarpkgs
+</pre></div>
 
 <p>This will build the packages below the <code>bazel-bin/scripts/packages/</code> directory.</p>
 </article></section></div></div></div></body></html>

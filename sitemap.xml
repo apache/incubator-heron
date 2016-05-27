@@ -7,51 +7,19 @@
   </url>
   
   <url>
-    <loc>/heron/docs/concepts/architecture/</loc>
+    <loc>/heron/docs/operators/deployment/configuration/</loc>
+  </url>
+  
+  <url>
+    <loc>/heron/docs/operators/deployment/schedulers/aurora/</loc>
+  </url>
+  
+  <url>
+    <loc>/heron/docs/developers/compiling/mac/</loc>
   </url>
   
   <url>
     <loc>/heron/docs/contributors/community/</loc>
-  </url>
-  
-  <url>
-    <loc>/heron/docs/contributors/codebase/</loc>
-  </url>
-  
-  <url>
-    <loc>/heron/docs/concepts/topologies/</loc>
-  </url>
-  
-  <url>
-    <loc>/heron/docs/contributors/custom-metrics-sink/</loc>
-  </url>
-  
-  <url>
-    <loc>/heron/docs/contributors/custom-scheduler/</loc>
-  </url>
-  
-  <url>
-    <loc>/heron/docs/contributors/license/</loc>
-  </url>
-  
-  <url>
-    <loc>/heron/docs/contributors/governance/</loc>
-  </url>
-  
-  <url>
-    <loc>/heron/docs/contributors/roadmap/</loc>
-  </url>
-  
-  <url>
-    <loc>/heron/docs/contributors/testing/</loc>
-  </url>
-  
-  <url>
-    <loc>/heron/docs/contributors/support/</loc>
-  </url>
-  
-  <url>
-    <loc>/heron/docs/developers/compiling/linux/</loc>
   </url>
   
   <url>
@@ -63,7 +31,23 @@
   </url>
   
   <url>
-    <loc>/heron/docs/developers/compiling/mac/</loc>
+    <loc>/heron/docs/operators/deployment/</loc>
+  </url>
+  
+  <url>
+    <loc>/heron/docs/contributors/roadmap/</loc>
+  </url>
+  
+  <url>
+    <loc>/heron/docs/contributors/governance/</loc>
+  </url>
+  
+  <url>
+    <loc>/heron/docs/concepts/architecture/</loc>
+  </url>
+  
+  <url>
+    <loc>/heron/docs/contributors/codebase/</loc>
   </url>
   
   <url>
@@ -71,31 +55,31 @@
   </url>
   
   <url>
-    <loc>/heron/docs/developers/java/spouts/</loc>
+    <loc>/heron/docs/operators/configuration/instance/</loc>
   </url>
   
   <url>
-    <loc>/heron/docs/developers/topologies/</loc>
+    <loc>/heron/docs/resources/</loc>
   </url>
   
   <url>
-    <loc>/heron/docs/developers/simulator-mode/</loc>
+    <loc>/heron/docs/operators/heron-shell/</loc>
   </url>
   
   <url>
-    <loc>/heron/docs/developers/java/bolts/</loc>
+    <loc>/heron/docs/concepts/topologies/</loc>
   </url>
   
   <url>
-    <loc>/heron/docs/developers/serialization/</loc>
+    <loc>/heron/docs/operators/heron-tracker/</loc>
   </url>
   
   <url>
-    <loc>/heron/docs/developers/troubleshooting/</loc>
+    <loc>/heron/docs/operators/heron-tracker-api/</loc>
   </url>
   
   <url>
-    <loc>/heron/docs/developers/tuning/</loc>
+    <loc>/heron/docs/operators/heron-ui/</loc>
   </url>
   
   <url>
@@ -103,43 +87,27 @@
   </url>
   
   <url>
+    <loc>/heron/docs/developers/java/bolts/</loc>
+  </url>
+  
+  <url>
+    <loc>/heron/docs/contributors/custom-metrics-sink/</loc>
+  </url>
+  
+  <url>
+    <loc>/heron/docs/contributors/custom-scheduler/</loc>
+  </url>
+  
+  <url>
+    <loc>/heron/docs/developers/java/spouts/</loc>
+  </url>
+  
+  <url>
     <loc>/heron/docs/operators/configuration/config-intro/</loc>
   </url>
   
   <url>
-    <loc>/heron/docs/getting-started/</loc>
-  </url>
-  
-  <url>
-    <loc>/heron/docs/operators/configuration/stmgr/</loc>
-  </url>
-  
-  <url>
-    <loc>/heron/docs/operators/configuration/metrics-manager/</loc>
-  </url>
-  
-  <url>
-    <loc>/heron/docs/operators/configuration/system/</loc>
-  </url>
-  
-  <url>
-    <loc>/heron/docs/operators/configuration/instance/</loc>
-  </url>
-  
-  <url>
-    <loc>/heron/docs/operators/deployment/configuration/</loc>
-  </url>
-  
-  <url>
-    <loc>/heron/docs/operators/deployment/</loc>
-  </url>
-  
-  <url>
-    <loc>/heron/docs/operators/deployment/schedulers/aurora/</loc>
-  </url>
-  
-  <url>
-    <loc>/heron/docs/operators/configuration/tmaster/</loc>
+    <loc>/heron/docs/developers/compiling/linux/</loc>
   </url>
   
   <url>
@@ -147,7 +115,7 @@
   </url>
   
   <url>
-    <loc>/heron/docs/operators/deployment/schedulers/slurm/</loc>
+    <loc>/heron/docs/operators/heron-cli/</loc>
   </url>
   
   <url>
@@ -155,15 +123,23 @@
   </url>
   
   <url>
-    <loc>/heron/docs/operators/deployment/statemanagers/localfs/</loc>
+    <loc>/heron/docs/operators/configuration/metrics-manager/</loc>
   </url>
   
   <url>
-    <loc>/heron/docs/operators/deployment/statemanagers/zookeeper/</loc>
+    <loc>/heron/docs/operators/observability/graphite/</loc>
+  </url>
+  
+  <url>
+    <loc>/heron/docs/getting-started/</loc>
   </url>
   
   <url>
     <loc>/heron/docs/operators/deployment/uploaders/hdfs/</loc>
+  </url>
+  
+  <url>
+    <loc>/heron/docs/operators/deployment/statemanagers/localfs/</loc>
   </url>
   
   <url>
@@ -175,35 +151,59 @@
   </url>
   
   <url>
-    <loc>/heron/docs/operators/heron-cli/</loc>
+    <loc>/heron/docs/operators/deployment/statemanagers/zookeeper/</loc>
   </url>
   
   <url>
-    <loc>/heron/docs/operators/heron-shell/</loc>
+    <loc>/heron/docs/developers/simulator-mode/</loc>
   </url>
   
   <url>
-    <loc>/heron/docs/operators/heron-tracker/</loc>
+    <loc>/heron/docs/operators/deployment/schedulers/slurm/</loc>
   </url>
   
   <url>
-    <loc>/heron/docs/operators/heron-ui/</loc>
+    <loc>/heron/docs/operators/configuration/stmgr/</loc>
   </url>
   
   <url>
-    <loc>/heron/docs/operators/heron-tracker-api/</loc>
+    <loc>/heron/docs/contributors/support/</loc>
   </url>
   
   <url>
-    <loc>/heron/docs/resources/</loc>
+    <loc>/heron/docs/operators/configuration/system/</loc>
   </url>
   
   <url>
-    <loc>/heron/docs/operators/observability/graphite/</loc>
+    <loc>/heron/docs/contributors/testing/</loc>
+  </url>
+  
+  <url>
+    <loc>/heron/docs/operators/configuration/tmaster/</loc>
+  </url>
+  
+  <url>
+    <loc>/heron/docs/developers/troubleshooting/</loc>
+  </url>
+  
+  <url>
+    <loc>/heron/docs/developers/tuning/</loc>
+  </url>
+  
+  <url>
+    <loc>/heron/docs/developers/serialization/</loc>
+  </url>
+  
+  <url>
+    <loc>/heron/docs/contributors/license/</loc>
   </url>
   
   <url>
     <loc>/heron/docs/upgrade-storm-to-heron/</loc>
+  </url>
+  
+  <url>
+    <loc>/heron/docs/developers/topologies/</loc>
   </url>
   
 </urlset>

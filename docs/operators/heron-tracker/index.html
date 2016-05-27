@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en-us"><head><link rel="shortcut icon" type="image/png" sizes="16x16" href="/heron/img/favicon-16x16.png"><link rel="shortcut icon" type="image/png" sizes="32x32" href="/heron/img/favicon-32x32.png"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="Hugo 0.14-DEV"><title>Heron Documentation - Heron Tracker</title><link rel="stylesheet" href="/heron/css/style.min.css"><link rel="stylesheet" href="/heron/css/font-awesome.min.css"><link rel="stylesheet" href="/heron/css/pygments.css"><script defer src="http://code.jquery.com/jquery-2.2.1.min.js"></script><script defer src="/heron/js/app.min.js"></script></head><body><nav class="hn-top-navbar navbar navbar-inverse navbar-fixed-top" role="navigation"><div class="hn-navbar-container container-fluid"><div class="navbar-header"><button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#hn-navbar" aria-controls="hn-navbar" aria-expanded="false"><span class="sr-only"><Toggle>navigation</Toggle></span><i class="hn-toggle-button fa fa-bars"></i></button><a class="hn-navbar-logo navbar-brand" href="/heron/"><img class="pull-left" src="/heron/img/HeronTextLogo-small.png"></a></div><div id="hn-navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav navbar-right"><li><a href="/heron/docs/getting-started">Docs</a></li><li><a href="/heron/docs/resources">Resources</a></li><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="https://github.com/twitter/heron">GitHub</a></li><li><a class="nav-icon" href="https://groups.google.com/forum/#!forum/heron-users"><i class="fa fa-comments"></i></a></li><li><a class="nav-icon" href="https://twitter.com/heronstreaming"><i class="fa fa-twitter"></i></a></li></ul></div></div></nav><div class="hn-main"><div class="container"><div class="row"><aside class="hn-sidebar hidden-xs col-sm-3 col-md-3 col-lg-2 collapse"><div><nav class="hn-sidebar-nav"><h4>Getting Started</h4><ul><li><a href="/heron/docs/getting-started">Local (Single Node)</a></li><li><a href="/heron/docs/upgrade-storm-to-heron">Upgrade Storm Topologies</a></li></ul><ul></ul><h4>Heron Concepts</h4><ul><li><a href="/heron/docs/concepts/architecture">Heron Architecture</a></li><li><a href="/heron/docs/concepts/topologies">Heron Topology</a></li></ul><ul></ul><h4>Deployment</h4><ul><li><a href="/heron/docs/operators/deployment">Overview</a></li><li><a href="/heron/docs/operators/deployment/configuration">Configuration</a></li></ul><ul></ul><h4>State Managers</h4><ul><li><a href="/heron/docs/operators/deployment/statemanagers/zookeeper">Zookeeper</a></li><li><a href="/heron/docs/operators/deployment/statemanagers/localfs">Local FS</a></li></ul><ul></ul><h4>Uploaders</h4><ul><li><a href="/heron/docs/operators/deployment/uploaders/localfs">Local FS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/hdfs">HDFS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/s3">S3</a></li></ul><ul></ul><h4>Schedulers</h4><ul><li><a href="/heron/docs/operators/deployment/schedulers/aurora">Aurora Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/local">Local Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/mesos">Mesos Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/slurm">Slurm Cluster</a></li></ul><ul></ul><h4>System Configuration</h4><ul><li><a href="/heron/docs/operators/configuration/config-intro">Overview</a></li><li><a href="/heron/docs/operators/configuration/instance">Heron Instance</a></li><li><a href="/heron/docs/operators/configuration/metrics-manager">Metrics Manager</a></li><li><a href="/heron/docs/operators/configuration/stmgr">Stream Manager</a></li><li><a href="/heron/docs/operators/configuration/system">System-Level</a></li><li><a href="/heron/docs/operators/configuration/tmaster">Topology Master</a></li></ul><ul></ul><h4>Observability</h4><ul><li><a href="/heron/docs/operators/observability/graphite">Graphite</a></li></ul><ul></ul><h4>User Manuals</h4><ul><li><a href="/heron/docs/operators/heron-cli">Heron Client</a></li><li><a href="/heron/docs/operators/heron-tracker-api">Heron Tracker REST API</a></li><li><a href="/heron/docs/operators/heron-tracker">Heron Tracker Runbook</a></li><li><a href="/heron/docs/operators/heron-ui">Heron UI Runbook</a></li></ul><ul></ul><h4>Topology Writers</h4><ul><li><a href="/heron/docs/developers/topologies">Writing Topologies</a></li><li><a href="/heron/docs/developers/data-model">Heron Data Model</a></li><li><a href="/heron/docs/developers/serialization">Tuple Serialization</a></li><li><a href="/heron/docs/developers/ui-guide">Heron UI Guide</a></li><li><a href="/heron/docs/developers/tuning">Tuning Guide</a></li><li><a href="/heron/docs/developers/simulator-mode">Simulator Mode</a></li><li><a href="/heron/docs/developers/troubleshooting">Troubleshooting Guide</a></li><li><a href="/heron/api">Javadoc</a></li></ul><ul></ul><h4>Heron Developers</h4><ul><li><a href="/heron/docs/developers/compiling/compiling">Compiling</a></li><li><a href="/heron/docs/developers/compiling/linux">Compiling on Linux</a></li><li><a href="/heron/docs/developers/compiling/mac">Compiling on Mac OS X</a></li><li><a href="/heron/docs/developers/compiling/docker">Compiling With Docker</a></li><li><a href="/heron/docs/contributors/testing">Running Tests</a></li><li><a href="/heron/docs/contributors/codebase">Code Organization</a></li></ul><ul></ul><h4>Extending Heron</h4><ul><li><a href="/heron/docs/contributors/custom-scheduler">Custom Scheduler</a></li><li><a href="/heron/docs/contributors/custom-metrics-sink">Custom Metrics Sink</a></li></ul><ul></ul><h4>Heron Resources</h4><ul><li><a href="/heron/docs/resources">Heron Resources</a></li></ul><ul></ul><h4>Contributors</h4><ul><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="/heron/docs/contributors/governance">Governance</a></li></ul><ul></ul></nav></div></aside><section class="hn-docs-main col-sm-9 col-md-9 col-lg-10 col-sm-offset-3 col-md-offset-3 col-lg-offset-2"><header class="hn-docs-header page-header"><h1>Heron Tracker</h1><div class="hn-docs-description"></div></header><article class="hn-docs-content">
+<!DOCTYPE html><html lang="en-us"><head><link rel="shortcut icon" type="image/png" sizes="16x16" href="/heron/img/favicon-16x16.png"><link rel="shortcut icon" type="image/png" sizes="32x32" href="/heron/img/favicon-32x32.png"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="Hugo 0.15"><title>Heron Documentation - Heron Tracker</title><link rel="stylesheet" href="/heron/css/style.min.css"><link rel="stylesheet" href="/heron/css/font-awesome.min.css"><link rel="stylesheet" href="/heron/css/pygments.css"><script defer src="http://code.jquery.com/jquery-2.2.1.min.js"></script><script defer src="/heron/js/app.min.js"></script></head><body><nav class="hn-top-navbar navbar navbar-inverse navbar-fixed-top" role="navigation"><div class="hn-navbar-container container-fluid"><div class="navbar-header"><button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#hn-navbar" aria-controls="hn-navbar" aria-expanded="false"><span class="sr-only"><Toggle>navigation</Toggle></span><i class="hn-toggle-button fa fa-bars"></i></button><a class="hn-navbar-logo navbar-brand" href="/heron/"><img class="pull-left" src="/heron/img/HeronTextLogo-small.png"></a></div><div id="hn-navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav navbar-right"><li><a href="/heron/docs/getting-started">Docs</a></li><li><a href="/heron/docs/resources">Resources</a></li><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="https://github.com/twitter/heron">GitHub</a></li><li><a class="nav-icon" href="https://groups.google.com/forum/#!forum/heron-users"><i class="fa fa-comments"></i></a></li><li><a class="nav-icon" href="https://twitter.com/heronstreaming"><i class="fa fa-twitter"></i></a></li></ul></div></div></nav><div class="hn-main"><div class="container"><div class="row"><aside class="hn-sidebar hidden-xs col-sm-3 col-md-3 col-lg-2 collapse"><div><nav class="hn-sidebar-nav"><h4>Getting Started</h4><ul><li><a href="/heron/docs/getting-started">Local (Single Node)</a></li><li><a href="/heron/docs/upgrade-storm-to-heron">Upgrade Storm Topologies</a></li></ul><ul></ul><h4>Heron Concepts</h4><ul><li><a href="/heron/docs/concepts/topologies">Heron Topology</a></li><li><a href="/heron/docs/concepts/architecture">Heron Architecture</a></li></ul><ul></ul><h4>Deployment</h4><ul><li><a href="/heron/docs/operators/deployment">Overview</a></li><li><a href="/heron/docs/operators/deployment/configuration">Configuration</a></li></ul><ul></ul><h4>State Managers</h4><ul><li><a href="/heron/docs/operators/deployment/statemanagers/zookeeper">Zookeeper</a></li><li><a href="/heron/docs/operators/deployment/statemanagers/localfs">Local FS</a></li></ul><ul></ul><h4>Uploaders</h4><ul><li><a href="/heron/docs/operators/deployment/uploaders/localfs">Local FS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/hdfs">HDFS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/s3">Amazon S3</a></li></ul><ul></ul><h4>Schedulers</h4><ul><li><a href="/heron/docs/operators/deployment/schedulers/aurora">Aurora Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/local">Local Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/slurm">Slurm Cluster</a></li></ul><ul></ul><h4>Cluster Configuration</h4><ul><li><a href="/heron/docs/operators/configuration/config-intro">Overview</a></li><li><a href="/heron/docs/operators/configuration/system">System-Level</a></li><li><a href="/heron/docs/operators/configuration/instance">Heron Instance</a></li><li><a href="/heron/docs/operators/configuration/metrics-manager">Metrics Manager</a></li><li><a href="/heron/docs/operators/configuration/stmgr">Stream Manager</a></li><li><a href="/heron/docs/operators/configuration/tmaster">Topology Master</a></li></ul><ul></ul><h4>Observability</h4><ul><li><a href="/heron/docs/operators/observability/graphite">Graphite</a></li></ul><ul></ul><h4>User Manuals</h4><ul><li><a href="/heron/docs/operators/heron-cli">Heron Client</a></li><li><a href="/heron/docs/operators/heron-tracker-api">Heron Tracker REST API</a></li><li><a href="/heron/docs/operators/heron-tracker">Heron Tracker Runbook</a></li><li><a href="/heron/docs/operators/heron-ui">Heron UI Runbook</a></li></ul><ul></ul><h4>Topology Writers</h4><ul><li><a href="/heron/docs/developers/topologies">Writing Topologies</a></li><li><a href="/heron/docs/developers/data-model">Heron Data Model</a></li><li><a href="/heron/docs/developers/serialization">Tuple Serialization</a></li><li><a href="/heron/docs/developers/ui-guide">Heron UI Guide</a></li><li><a href="/heron/docs/developers/tuning">Tuning Guide</a></li><li><a href="/heron/docs/developers/simulator-mode">Simulator Mode</a></li><li><a href="/heron/docs/developers/troubleshooting">Troubleshooting Guide</a></li><li><a href="/heron/api">Javadoc</a></li></ul><ul></ul><h4>Heron Developers</h4><ul><li><a href="/heron/docs/developers/compiling/compiling">Compiling</a></li><li><a href="/heron/docs/developers/compiling/linux">Compiling on Linux</a></li><li><a href="/heron/docs/developers/compiling/mac">Compiling on Mac OS X</a></li><li><a href="/heron/docs/developers/compiling/docker">Compiling With Docker</a></li><li><a href="/heron/docs/contributors/testing">Running Tests</a></li><li><a href="/heron/docs/contributors/codebase">Code Organization</a></li></ul><ul></ul><h4>Extending Heron</h4><ul><li><a href="/heron/docs/contributors/custom-scheduler">Custom Scheduler</a></li><li><a href="/heron/docs/contributors/custom-metrics-sink">Custom Metrics Sink</a></li></ul><ul></ul><h4>Heron Resources</h4><ul><li><a href="/heron/docs/resources">Heron Resources</a></li></ul><ul></ul><h4>Contributors</h4><ul><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="/heron/docs/contributors/governance">Governance</a></li></ul><ul></ul></nav></div></aside><section class="hn-docs-main col-sm-9 col-md-9 col-lg-10 col-sm-offset-3 col-md-offset-3 col-lg-offset-2"><header class="hn-docs-header page-header"><h1>Heron Tracker</h1><div class="hn-docs-description"></div></header><article class="hn-docs-content">
 
 <p><strong>Heron Tracker</strong> is a web service that continuously gathers a wide
 variety of information about Heron topologies and exposes
@@ -11,15 +11,14 @@ More on the role of the Tracker can be found
 <p>Heron uses <a href="http://bazel.io/">bazel</a> for compiling.
 <a href="../../developers/compiling/compiling">Compiling</a> describes how to setup bazel
 for heron.</p>
-
-<pre><code class="language-bash"># Build heron-tracker
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic"># Build heron-tracker</span>
 $ bazel build heron/tracker/src/python:heron-tracker
 
-# The location of heron-tracker pex executable is
-# bazel-bin/heron/tracker/src/python/heron-tracker
-# To run using default options:
+<span style="color: #0099FF; font-style: italic"># The location of heron-tracker pex executable is</span>
+<span style="color: #0099FF; font-style: italic"># bazel-bin/heron/tracker/src/python/heron-tracker</span>
+<span style="color: #0099FF; font-style: italic"># To run using default options:</span>
 $ ./bazel-bin/heron/tracker/src/python/heron-tracker
-</code></pre>
+</pre></div>
 
 <p><code>heron-tracker</code> is a self executable
 <a href="https://pex.readthedocs.io/en/latest/whatispex.html">pex</a> archive.</p>
@@ -33,27 +32,26 @@ $ ./bazel-bin/heron/tracker/src/python/heron-tracker
 <p>This is a list of locations where topology writes its states. An example of
 <a href="../deployment/statemanagers/zookeeper">zookeeper state manager</a> and
 <a href="../deployment/statemanagers/localfs">local file state manager</a> look like this:</p>
-
-<pre><code class="language-yaml">## Contains the sources where the states are stored.
-# Each source has these attributes:
-# 1. type - type of state manager (zookeeper or file, etc.)
-# 2. name - name to be used for this source
-# 3. hostport - only used to connect to zk, must be of the form 'host:port'
-# 4. rootpath - where all the states are stored
-# 5. tunnelhost - if ssh tunneling needs to be established to connect to it
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic">## Contains the sources where the states are stored.</span>
+<span style="color: #0099FF; font-style: italic"># Each source has these attributes:</span>
+<span style="color: #0099FF; font-style: italic"># 1. type - type of state manager (zookeeper or file, etc.)</span>
+<span style="color: #0099FF; font-style: italic"># 2. name - name to be used for this source</span>
+<span style="color: #0099FF; font-style: italic"># 3. hostport - only used to connect to zk, must be of the form &#39;host:port&#39;</span>
+<span style="color: #0099FF; font-style: italic"># 4. rootpath - where all the states are stored</span>
+<span style="color: #0099FF; font-style: italic"># 5. tunnelhost - if ssh tunneling needs to be established to connect to it</span>
 statemgrs:
   -
-    type: &quot;file&quot;
-    name: &quot;local&quot;
-    rootpath: &quot;~/.herondata/repository/state/local&quot;
-    tunnelhost: &quot;localhost&quot;
+    type: <span style="color: #CC3300">&quot;file&quot;</span>
+    name: <span style="color: #CC3300">&quot;local&quot;</span>
+    rootpath: <span style="color: #CC3300">&quot;~/.herondata/repository/state/local&quot;</span>
+    tunnelhost: <span style="color: #CC3300">&quot;localhost&quot;</span>
   -
-    type: &quot;zookeeper&quot;
-    name: &quot;localzk&quot;
-    hostport: &quot;localhost:2181&quot;
-    rootpath: &quot;/heron/cluster&quot;
-    tunnelhost: &quot;localhost&quot;
-</code></pre>
+    type: <span style="color: #CC3300">&quot;zookeeper&quot;</span>
+    name: <span style="color: #CC3300">&quot;localzk&quot;</span>
+    hostport: <span style="color: #CC3300">&quot;localhost:2181&quot;</span>
+    rootpath: <span style="color: #CC3300">&quot;/heron/cluster&quot;</span>
+    tunnelhost: <span style="color: #CC3300">&quot;localhost&quot;</span>
+</pre></div>
 
 <p>Note that topologies from all the state managers would be read.</p>
 
@@ -64,24 +62,22 @@ topology as the viz link as shown below. For each topology, these parameters
 will be filled appropriately. This parameter can be used to link metrics
 dashboards with topology UI page.</p>
 
-<p><img src="/heron/img/viz-link.png" alt="Viz Link" />
-</p>
-
-<pre><code class="language-yaml"># The URL that points to a topology's metrics dashboard.
-# This value can use following parameters to create a valid
-# URL based on the topology. All parameters are self-explanatory.
-# These are found in the execution state of the topology.
-#
-#   ${CLUSTER}
-#   ${ENVIRON}
-#   ${TOPOLOGY}
-#   ${ROLE}
-#   ${USER}
-#
-# This is a sample, and should be changed to point to corresponding dashboard.
-#
-# viz.url.format: &quot;http://localhost/${CLUSTER}/${ENVIRON}/${TOPOLOGY}/${ROLE}/${USER}&quot;
-</code></pre>
+<p><img src="/heron/img/viz-link.png" alt="Viz Link" /></p>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic"># The URL that points to a topology&#39;s metrics dashboard.</span>
+<span style="color: #0099FF; font-style: italic"># This value can use following parameters to create a valid</span>
+<span style="color: #0099FF; font-style: italic"># URL based on the topology. All parameters are self-explanatory.</span>
+<span style="color: #0099FF; font-style: italic"># These are found in the execution state of the topology.</span>
+<span style="color: #0099FF; font-style: italic">#</span>
+<span style="color: #0099FF; font-style: italic">#   ${CLUSTER}</span>
+<span style="color: #0099FF; font-style: italic">#   ${ENVIRON}</span>
+<span style="color: #0099FF; font-style: italic">#   ${TOPOLOGY}</span>
+<span style="color: #0099FF; font-style: italic">#   ${ROLE}</span>
+<span style="color: #0099FF; font-style: italic">#   ${USER}</span>
+<span style="color: #0099FF; font-style: italic">#</span>
+<span style="color: #0099FF; font-style: italic"># This is a sample, and should be changed to point to corresponding dashboard.</span>
+<span style="color: #0099FF; font-style: italic">#</span>
+<span style="color: #0099FF; font-style: italic"># viz.url.format: &quot;http://localhost/${CLUSTER}/${ENVIRON}/${TOPOLOGY}/${ROLE}/${USER}&quot;</span>
+</pre></div>
 
 <h3 id="heron-tracker-args:6950c934b8af3a6218faf89c19994475">Heron Tracker Args</h3>
 
@@ -90,9 +86,8 @@ dashboards with topology UI page.</p>
 <li><code>--config-file</code> - The location of the config file for tracker. Default config
 file is <code>~/.herontools/conf/heron_tracker.yaml</code>.</li>
 </ul>
-
-<pre><code class="language-bash">$ heron-tracker
-# is equivalent to
-$ heron-ui --port=8888 --config-file=~/.herontools/conf/heron_tracker.yaml
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>$ heron-tracker
+<span style="color: #0099FF; font-style: italic"># is equivalent to</span>
+$ heron-ui --port<span style="color: #555555">=</span><span style="color: #FF6600">8888</span> --config-file<span style="color: #555555">=</span>~/.herontools/conf/heron_tracker.yaml
+</pre></div>
 </article></section></div></div></div></body></html>

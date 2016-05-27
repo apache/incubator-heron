@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en-us"><head><link rel="shortcut icon" type="image/png" sizes="16x16" href="/heron/img/favicon-16x16.png"><link rel="shortcut icon" type="image/png" sizes="32x32" href="/heron/img/favicon-32x32.png"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="Hugo 0.14-DEV"><title>Heron Documentation - Upgrade Storm Topologies to Heron</title><link rel="stylesheet" href="/heron/css/style.min.css"><link rel="stylesheet" href="/heron/css/font-awesome.min.css"><link rel="stylesheet" href="/heron/css/pygments.css"><script defer src="http://code.jquery.com/jquery-2.2.1.min.js"></script><script defer src="/heron/js/app.min.js"></script></head><body><nav class="hn-top-navbar navbar navbar-inverse navbar-fixed-top" role="navigation"><div class="hn-navbar-container container-fluid"><div class="navbar-header"><button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#hn-navbar" aria-controls="hn-navbar" aria-expanded="false"><span class="sr-only"><Toggle>navigation</Toggle></span><i class="hn-toggle-button fa fa-bars"></i></button><a class="hn-navbar-logo navbar-brand" href="/heron/"><img class="pull-left" src="/heron/img/HeronTextLogo-small.png"></a></div><div id="hn-navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav navbar-right"><li><a href="/heron/docs/getting-started">Docs</a></li><li><a href="/heron/docs/resources">Resources</a></li><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="https://github.com/twitter/heron">GitHub</a></li><li><a class="nav-icon" href="https://groups.google.com/forum/#!forum/heron-users"><i class="fa fa-comments"></i></a></li><li><a class="nav-icon" href="https://twitter.com/heronstreaming"><i class="fa fa-twitter"></i></a></li></ul></div></div></nav><div class="hn-main"><div class="container"><div class="row"><aside class="hn-sidebar hidden-xs col-sm-3 col-md-3 col-lg-2 collapse"><div><nav class="hn-sidebar-nav"><h4>Getting Started</h4><ul><li><a href="/heron/docs/getting-started">Local (Single Node)</a></li><li><a href="/heron/docs/upgrade-storm-to-heron">Upgrade Storm Topologies</a></li></ul><ul></ul><h4>Heron Concepts</h4><ul><li><a href="/heron/docs/concepts/architecture">Heron Architecture</a></li><li><a href="/heron/docs/concepts/topologies">Heron Topology</a></li></ul><ul></ul><h4>Deployment</h4><ul><li><a href="/heron/docs/operators/deployment">Overview</a></li><li><a href="/heron/docs/operators/deployment/configuration">Configuration</a></li></ul><ul></ul><h4>State Managers</h4><ul><li><a href="/heron/docs/operators/deployment/statemanagers/zookeeper">Zookeeper</a></li><li><a href="/heron/docs/operators/deployment/statemanagers/localfs">Local FS</a></li></ul><ul></ul><h4>Uploaders</h4><ul><li><a href="/heron/docs/operators/deployment/uploaders/localfs">Local FS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/hdfs">HDFS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/s3">S3</a></li></ul><ul></ul><h4>Schedulers</h4><ul><li><a href="/heron/docs/operators/deployment/schedulers/aurora">Aurora Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/local">Local Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/mesos">Mesos Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/slurm">Slurm Cluster</a></li></ul><ul></ul><h4>System Configuration</h4><ul><li><a href="/heron/docs/operators/configuration/config-intro">Overview</a></li><li><a href="/heron/docs/operators/configuration/instance">Heron Instance</a></li><li><a href="/heron/docs/operators/configuration/metrics-manager">Metrics Manager</a></li><li><a href="/heron/docs/operators/configuration/stmgr">Stream Manager</a></li><li><a href="/heron/docs/operators/configuration/system">System-Level</a></li><li><a href="/heron/docs/operators/configuration/tmaster">Topology Master</a></li></ul><ul></ul><h4>Observability</h4><ul><li><a href="/heron/docs/operators/observability/graphite">Graphite</a></li></ul><ul></ul><h4>User Manuals</h4><ul><li><a href="/heron/docs/operators/heron-cli">Heron Client</a></li><li><a href="/heron/docs/operators/heron-tracker-api">Heron Tracker REST API</a></li><li><a href="/heron/docs/operators/heron-tracker">Heron Tracker Runbook</a></li><li><a href="/heron/docs/operators/heron-ui">Heron UI Runbook</a></li></ul><ul></ul><h4>Topology Writers</h4><ul><li><a href="/heron/docs/developers/topologies">Writing Topologies</a></li><li><a href="/heron/docs/developers/data-model">Heron Data Model</a></li><li><a href="/heron/docs/developers/serialization">Tuple Serialization</a></li><li><a href="/heron/docs/developers/ui-guide">Heron UI Guide</a></li><li><a href="/heron/docs/developers/tuning">Tuning Guide</a></li><li><a href="/heron/docs/developers/simulator-mode">Simulator Mode</a></li><li><a href="/heron/docs/developers/troubleshooting">Troubleshooting Guide</a></li><li><a href="/heron/api">Javadoc</a></li></ul><ul></ul><h4>Heron Developers</h4><ul><li><a href="/heron/docs/developers/compiling/compiling">Compiling</a></li><li><a href="/heron/docs/developers/compiling/linux">Compiling on Linux</a></li><li><a href="/heron/docs/developers/compiling/mac">Compiling on Mac OS X</a></li><li><a href="/heron/docs/developers/compiling/docker">Compiling With Docker</a></li><li><a href="/heron/docs/contributors/testing">Running Tests</a></li><li><a href="/heron/docs/contributors/codebase">Code Organization</a></li></ul><ul></ul><h4>Extending Heron</h4><ul><li><a href="/heron/docs/contributors/custom-scheduler">Custom Scheduler</a></li><li><a href="/heron/docs/contributors/custom-metrics-sink">Custom Metrics Sink</a></li></ul><ul></ul><h4>Heron Resources</h4><ul><li><a href="/heron/docs/resources">Heron Resources</a></li></ul><ul></ul><h4>Contributors</h4><ul><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="/heron/docs/contributors/governance">Governance</a></li></ul><ul></ul></nav></div></aside><section class="hn-docs-main col-sm-9 col-md-9 col-lg-10 col-sm-offset-3 col-md-offset-3 col-lg-offset-2"><header class="hn-docs-header page-header"><h1>Upgrade Storm Topologies to Heron</h1><div class="hn-docs-description"></div></header><article class="hn-docs-content">
+<!DOCTYPE html><html lang="en-us"><head><link rel="shortcut icon" type="image/png" sizes="16x16" href="/heron/img/favicon-16x16.png"><link rel="shortcut icon" type="image/png" sizes="32x32" href="/heron/img/favicon-32x32.png"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="Hugo 0.15"><title>Heron Documentation - Upgrade Storm Topologies to Heron</title><link rel="stylesheet" href="/heron/css/style.min.css"><link rel="stylesheet" href="/heron/css/font-awesome.min.css"><link rel="stylesheet" href="/heron/css/pygments.css"><script defer src="http://code.jquery.com/jquery-2.2.1.min.js"></script><script defer src="/heron/js/app.min.js"></script></head><body><nav class="hn-top-navbar navbar navbar-inverse navbar-fixed-top" role="navigation"><div class="hn-navbar-container container-fluid"><div class="navbar-header"><button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#hn-navbar" aria-controls="hn-navbar" aria-expanded="false"><span class="sr-only"><Toggle>navigation</Toggle></span><i class="hn-toggle-button fa fa-bars"></i></button><a class="hn-navbar-logo navbar-brand" href="/heron/"><img class="pull-left" src="/heron/img/HeronTextLogo-small.png"></a></div><div id="hn-navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav navbar-right"><li><a href="/heron/docs/getting-started">Docs</a></li><li><a href="/heron/docs/resources">Resources</a></li><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="https://github.com/twitter/heron">GitHub</a></li><li><a class="nav-icon" href="https://groups.google.com/forum/#!forum/heron-users"><i class="fa fa-comments"></i></a></li><li><a class="nav-icon" href="https://twitter.com/heronstreaming"><i class="fa fa-twitter"></i></a></li></ul></div></div></nav><div class="hn-main"><div class="container"><div class="row"><aside class="hn-sidebar hidden-xs col-sm-3 col-md-3 col-lg-2 collapse"><div><nav class="hn-sidebar-nav"><h4>Getting Started</h4><ul><li><a href="/heron/docs/getting-started">Local (Single Node)</a></li><li><a href="/heron/docs/upgrade-storm-to-heron">Upgrade Storm Topologies</a></li></ul><ul></ul><h4>Heron Concepts</h4><ul><li><a href="/heron/docs/concepts/topologies">Heron Topology</a></li><li><a href="/heron/docs/concepts/architecture">Heron Architecture</a></li></ul><ul></ul><h4>Deployment</h4><ul><li><a href="/heron/docs/operators/deployment">Overview</a></li><li><a href="/heron/docs/operators/deployment/configuration">Configuration</a></li></ul><ul></ul><h4>State Managers</h4><ul><li><a href="/heron/docs/operators/deployment/statemanagers/zookeeper">Zookeeper</a></li><li><a href="/heron/docs/operators/deployment/statemanagers/localfs">Local FS</a></li></ul><ul></ul><h4>Uploaders</h4><ul><li><a href="/heron/docs/operators/deployment/uploaders/localfs">Local FS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/hdfs">HDFS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/s3">Amazon S3</a></li></ul><ul></ul><h4>Schedulers</h4><ul><li><a href="/heron/docs/operators/deployment/schedulers/aurora">Aurora Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/local">Local Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/slurm">Slurm Cluster</a></li></ul><ul></ul><h4>Cluster Configuration</h4><ul><li><a href="/heron/docs/operators/configuration/config-intro">Overview</a></li><li><a href="/heron/docs/operators/configuration/system">System-Level</a></li><li><a href="/heron/docs/operators/configuration/instance">Heron Instance</a></li><li><a href="/heron/docs/operators/configuration/metrics-manager">Metrics Manager</a></li><li><a href="/heron/docs/operators/configuration/stmgr">Stream Manager</a></li><li><a href="/heron/docs/operators/configuration/tmaster">Topology Master</a></li></ul><ul></ul><h4>Observability</h4><ul><li><a href="/heron/docs/operators/observability/graphite">Graphite</a></li></ul><ul></ul><h4>User Manuals</h4><ul><li><a href="/heron/docs/operators/heron-cli">Heron Client</a></li><li><a href="/heron/docs/operators/heron-tracker-api">Heron Tracker REST API</a></li><li><a href="/heron/docs/operators/heron-tracker">Heron Tracker Runbook</a></li><li><a href="/heron/docs/operators/heron-ui">Heron UI Runbook</a></li></ul><ul></ul><h4>Topology Writers</h4><ul><li><a href="/heron/docs/developers/topologies">Writing Topologies</a></li><li><a href="/heron/docs/developers/data-model">Heron Data Model</a></li><li><a href="/heron/docs/developers/serialization">Tuple Serialization</a></li><li><a href="/heron/docs/developers/ui-guide">Heron UI Guide</a></li><li><a href="/heron/docs/developers/tuning">Tuning Guide</a></li><li><a href="/heron/docs/developers/simulator-mode">Simulator Mode</a></li><li><a href="/heron/docs/developers/troubleshooting">Troubleshooting Guide</a></li><li><a href="/heron/api">Javadoc</a></li></ul><ul></ul><h4>Heron Developers</h4><ul><li><a href="/heron/docs/developers/compiling/compiling">Compiling</a></li><li><a href="/heron/docs/developers/compiling/linux">Compiling on Linux</a></li><li><a href="/heron/docs/developers/compiling/mac">Compiling on Mac OS X</a></li><li><a href="/heron/docs/developers/compiling/docker">Compiling With Docker</a></li><li><a href="/heron/docs/contributors/testing">Running Tests</a></li><li><a href="/heron/docs/contributors/codebase">Code Organization</a></li></ul><ul></ul><h4>Extending Heron</h4><ul><li><a href="/heron/docs/contributors/custom-scheduler">Custom Scheduler</a></li><li><a href="/heron/docs/contributors/custom-metrics-sink">Custom Metrics Sink</a></li></ul><ul></ul><h4>Heron Resources</h4><ul><li><a href="/heron/docs/resources">Heron Resources</a></li></ul><ul></ul><h4>Contributors</h4><ul><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="/heron/docs/contributors/governance">Governance</a></li></ul><ul></ul></nav></div></aside><section class="hn-docs-main col-sm-9 col-md-9 col-lg-10 col-sm-offset-3 col-md-offset-3 col-lg-offset-2"><header class="hn-docs-header page-header"><h1>Upgrade Storm Topologies to Heron</h1><div class="hn-docs-description"></div></header><article class="hn-docs-content">
 
 <p>Heron is designed to be fully backward compatible with existing <a href="http://storm.apache.org/index.html">Apache
 Storm</a> projects, which means that you can
@@ -21,87 +21,81 @@ the script has this form:</p>
 
 <p>Once the script is downloaded, run it while setting the <code>--user</code> and
 <code>--maven</code> flags:</p>
-
-<pre><code class="language-bash">$ chmod +x heron-api-install-0.13.2-PLATFORM.sh
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>$ chmod +x heron-api-install-0.13.2-PLATFORM.sh
 $ ./heron-api-install-0.13.2-PLATFORM.sh --user --maven
 Heron API installer
 -------------------
 
-# Binary package at HEAD (@)
-   - [Commit](https://github.com/twitter/heron/commit/)
-Installing jars to local maven repo.
+<span style="color: #0099FF; font-style: italic"># Binary package at HEAD (@)</span>
+   - <span style="color: #555555">[</span>Commit<span style="color: #555555">](</span>https://github.com/twitter/heron/commit/<span style="color: #555555">)</span>
+Installing jars to <span style="color: #336666">local</span> maven repo.
 
 Heron API is now installed!
 
 See https://twitter.github.io/heron/docs/getting-started.html to start a new project!
-</code></pre>
+</pre></div>
 
 <p>The Heron API will now be installed in your local <a href="https://maven.apache.org/settings.html">Maven
 repository</a>:</p>
-
-<pre><code class="language-bash">$ ls ~/.m2/repository/twitter/heron
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>$ ls ~/.m2/repository/twitter/heron
 heron-api
 heron-storm
-</code></pre>
+</pre></div>
 
 <h2 id="step-2-add-heron-dependencies-to-pom-xml:8f12b3317a6bd3ad7ab03258e1b2f9e9">Step 2 &mdash; Add Heron dependencies to  <code>pom.xml</code></h2>
 
 <p>Copy the <a href="https://maven.apache.org/pom.html"><code>pom.xml</code></a> segments below and paste
 them into your existing Storm <code>pom.xml</code> file in the <a href="https://maven.apache.org/pom.html#Dependencies">dependencies
 block</a>.</p>
-
-<pre><code class="language-xml">&lt;dependency&gt;
-  &lt;groupId&gt;com.twitter.heron&lt;/groupId&gt;
-  &lt;artifactId&gt;heron-api&lt;/artifactId&gt;
-  &lt;version&gt;SNAPSHOT&lt;/version&gt;
-  &lt;scope&gt;compile&lt;/scope&gt;
-&lt;/dependency&gt;
-&lt;dependency&gt;
-  &lt;groupId&gt;com.twitter.heron&lt;/groupId&gt;
-  &lt;artifactId&gt;heron-storm&lt;/artifactId&gt;
-  &lt;version&gt;SNAPSHOT&lt;/version&gt;
-  &lt;scope&gt;compile&lt;/scope&gt;
-&lt;/dependency&gt;
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #330099; font-weight: bold">&lt;dependency&gt;</span>
+  <span style="color: #330099; font-weight: bold">&lt;groupId&gt;</span>com.twitter.heron<span style="color: #330099; font-weight: bold">&lt;/groupId&gt;</span>
+  <span style="color: #330099; font-weight: bold">&lt;artifactId&gt;</span>heron-api<span style="color: #330099; font-weight: bold">&lt;/artifactId&gt;</span>
+  <span style="color: #330099; font-weight: bold">&lt;version&gt;</span>SNAPSHOT<span style="color: #330099; font-weight: bold">&lt;/version&gt;</span>
+  <span style="color: #330099; font-weight: bold">&lt;scope&gt;</span>compile<span style="color: #330099; font-weight: bold">&lt;/scope&gt;</span>
+<span style="color: #330099; font-weight: bold">&lt;/dependency&gt;</span>
+<span style="color: #330099; font-weight: bold">&lt;dependency&gt;</span>
+  <span style="color: #330099; font-weight: bold">&lt;groupId&gt;</span>com.twitter.heron<span style="color: #330099; font-weight: bold">&lt;/groupId&gt;</span>
+  <span style="color: #330099; font-weight: bold">&lt;artifactId&gt;</span>heron-storm<span style="color: #330099; font-weight: bold">&lt;/artifactId&gt;</span>
+  <span style="color: #330099; font-weight: bold">&lt;version&gt;</span>SNAPSHOT<span style="color: #330099; font-weight: bold">&lt;/version&gt;</span>
+  <span style="color: #330099; font-weight: bold">&lt;scope&gt;</span>compile<span style="color: #330099; font-weight: bold">&lt;/scope&gt;</span>
+<span style="color: #330099; font-weight: bold">&lt;/dependency&gt;</span>
+</pre></div>
 
 <h2 id="step-3-remove-storm-dependencies-from-pom-xml:8f12b3317a6bd3ad7ab03258e1b2f9e9">Step 3 &mdash; Remove Storm dependencies from <code>pom.xml</code></h2>
 
 <p>Delete the Storm dependency, which looks like this:</p>
-
-<pre><code class="language-xml">&lt;dependency&gt;
-  &lt;groupId&gt;org.apache.storm&lt;/groupId&gt;
-  &lt;artifactId&gt;storm-core&lt;/artifactId&gt;
-  &lt;version&gt;storm-VERSION&lt;/version&gt;
-  &lt;scope&gt;provided&lt;/scope&gt;
-&lt;/dependency&gt;
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #330099; font-weight: bold">&lt;dependency&gt;</span>
+  <span style="color: #330099; font-weight: bold">&lt;groupId&gt;</span>org.apache.storm<span style="color: #330099; font-weight: bold">&lt;/groupId&gt;</span>
+  <span style="color: #330099; font-weight: bold">&lt;artifactId&gt;</span>storm-core<span style="color: #330099; font-weight: bold">&lt;/artifactId&gt;</span>
+  <span style="color: #330099; font-weight: bold">&lt;version&gt;</span>storm-VERSION<span style="color: #330099; font-weight: bold">&lt;/version&gt;</span>
+  <span style="color: #330099; font-weight: bold">&lt;scope&gt;</span>provided<span style="color: #330099; font-weight: bold">&lt;/scope&gt;</span>
+<span style="color: #330099; font-weight: bold">&lt;/dependency&gt;</span>
+</pre></div>
 
 <h2 id="step-4-if-needed-remove-the-clojure-plugin-from-pom-xml:8f12b3317a6bd3ad7ab03258e1b2f9e9">Step 4 (if needed) &mdash; Remove the Clojure plugin from <code>pom.xml</code></h2>
 
 <p>Delete the <a href="https://maven.apache.org/pom.html#Plugins">Clojure plugin</a>, which
 should look like this:</p>
-
-<pre><code class="language-xml">&lt;plugin&gt;
-  &lt;groupId&gt;com.theoryinpractise&lt;/groupId&gt;
-  &lt;artifactId&gt;clojure-maven-plugin&lt;/artifactId&gt;
-  &lt;version&gt;1.3.12&lt;/version&gt;
-  &lt;extensions&gt;true&lt;/extensions&gt;
-  &lt;configuration&gt;
-    &lt;sourceDirectories&gt;
-      &lt;sourceDirectory&gt;src/clj&lt;/sourceDirectory&gt;
-    &lt;/sourceDirectories&gt;
-  &lt;/configuration&gt;
-&lt;/plugin&gt;
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #330099; font-weight: bold">&lt;plugin&gt;</span>
+  <span style="color: #330099; font-weight: bold">&lt;groupId&gt;</span>com.theoryinpractise<span style="color: #330099; font-weight: bold">&lt;/groupId&gt;</span>
+  <span style="color: #330099; font-weight: bold">&lt;artifactId&gt;</span>clojure-maven-plugin<span style="color: #330099; font-weight: bold">&lt;/artifactId&gt;</span>
+  <span style="color: #330099; font-weight: bold">&lt;version&gt;</span>1.3.12<span style="color: #330099; font-weight: bold">&lt;/version&gt;</span>
+  <span style="color: #330099; font-weight: bold">&lt;extensions&gt;</span>true<span style="color: #330099; font-weight: bold">&lt;/extensions&gt;</span>
+  <span style="color: #330099; font-weight: bold">&lt;configuration&gt;</span>
+    <span style="color: #330099; font-weight: bold">&lt;sourceDirectories&gt;</span>
+      <span style="color: #330099; font-weight: bold">&lt;sourceDirectory&gt;</span>src/clj<span style="color: #330099; font-weight: bold">&lt;/sourceDirectory&gt;</span>
+    <span style="color: #330099; font-weight: bold">&lt;/sourceDirectories&gt;</span>
+  <span style="color: #330099; font-weight: bold">&lt;/configuration&gt;</span>
+<span style="color: #330099; font-weight: bold">&lt;/plugin&gt;</span>
+</pre></div>
 
 <h2 id="step-5-run-maven-commands:8f12b3317a6bd3ad7ab03258e1b2f9e9">Step 5 &mdash; Run Maven commands</h2>
 
 <p>Run the following <a href="https://maven.apache.org/run.html">Maven lifecycle</a> commands:</p>
-
-<pre><code class="language-bash">$ mvn clean
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>$ mvn clean
 $ mvn compile
 $ mvn package
-</code></pre>
+</pre></div>
 
 <p><strong>Note</strong>: <a href="http://storm.apache.org/releases/0.10.0/Distributed-RPC.html">Storm Distribute
 RPC</a> is deprecated
@@ -116,28 +110,26 @@ cluster</a> using <code>heron submit</code>.</p>
 <code>{PATH-TO-PROJECT}.jar</code>, which is located in <code>${basedir}/target</code> by <a href="https://maven.apache.org/guides/getting-started/">Maven
 convention</a>. Then modify the
 <code>TOPOLOGY-FILE-NAME</code> and <code>TOPOLOGY-CLASS-NAME</code> for your project:</p>
-
-<pre><code class="language-bash">$ heron submit local \
-  ${basedir}/target/PATH-TO-PROJECT.jar \
-  TOPOLOGY-FILE-NAME \
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>$ heron submit <span style="color: #336666">local</span> <span style="color: #CC3300; font-weight: bold">\</span>
+  <span style="color: #AA0000">${</span><span style="color: #003333">basedir</span><span style="color: #AA0000">}</span>/target/PATH-TO-PROJECT.jar <span style="color: #CC3300; font-weight: bold">\</span>
+  TOPOLOGY-FILE-NAME <span style="color: #CC3300; font-weight: bold">\</span>
   TOPOLOGY-CLASS-NAME
-</code></pre>
+</pre></div>
 
 <p>Here&rsquo;s an example submit command using the example topology from the <a href="../getting-started">Quick
 Start Guide</a> guide:</p>
-
-<pre><code class="language-bash">$ heron submit local \
-  ~/.heron/examples/heron-examples.jar \ # The path of the topology's jar file
-  com.twitter.heron.examples.ExclamationTopology \ # The topology's Java class
-  ExclamationTopology # The name of the topology
-</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>$ heron submit <span style="color: #336666">local</span> <span style="color: #CC3300; font-weight: bold">\</span>
+  ~/.heron/examples/heron-examples.jar <span style="color: #CC3300; font-weight: bold">\ </span><span style="color: #0099FF; font-style: italic"># The path of the topology&#39;s jar file</span>
+  com.twitter.heron.examples.ExclamationTopology <span style="color: #CC3300; font-weight: bold">\ </span><span style="color: #0099FF; font-style: italic"># The topology&#39;s Java class</span>
+  ExclamationTopology <span style="color: #0099FF; font-style: italic"># The name of the topology</span>
+</pre></div>
 
 <h3 id="next-steps:8f12b3317a6bd3ad7ab03258e1b2f9e9">Next Steps</h3>
 
 <ul>
 <li><a href="../operators/deployment">Deploy topologies</a> in clustered, scheduler-driven
-environments (such as on <a href="../operators/deployment/schedulers/aurora">Aurora</a>,
-on <a href="../operators/deployment/schedulers/mesos">Mesos</a>, and
+environments (such as on <a href="../operators/deployment/schedulers/aurora">Aurora</a>
+and
 <a href="../operators/deployment/schedulers/local">locally</a>)</li>
 <li><a href="../concepts/architecture">Develop topologies</a> for Heron</li>
 </ul>
