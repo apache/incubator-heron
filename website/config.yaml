@@ -1,47 +1,41 @@
-languageCode: en-us
-title: Heron
+PygmentsCodeFences: true
 author: Luc Perkins
-canonifyurls: true
 baseurl: /heron
-
-# Site-level config
+canonifyurls: true
+languageCode: en-us
 metadataformat: yaml
 newcontenteditor: atom
-taxonomies:
-  tag: tags
-
-# Pygments syntax highlighting
-pygmentsstyle: manni
-pygmentsuseclasses: false
-pygmentscodefencesguesssyntax: false
-PygmentsCodeFences: true
-
-# Site-level parameters available through .Site.Params.{key}
 params:
-  author: Luc Perkins
-  versions:
-    heron: 0.13.7
-    bazel: 0.1.2
   assets:
-    favicon:
-      small: /img/favicon-16x16.png
-      large: /img/favicon-32x32.png
-    logo: /img/logo54x54.png #logo.png
-    textlogo: /img/HeronTextLogo.png #logo.png
-    textLogoSmall: /img/HeronTextLogo-small.png #logo.png
     css:
-      - /css/style.min.css
-      - /css/font-awesome.min.css
-      - /css/pygments.css
+    - /css/style.min.css
+    - /css/font-awesome.min.css
+    - /css/pygments.css
+    favicon:
+      large: /img/favicon-32x32.png
+      small: /img/favicon-16x16.png
     js:
-      - http://code.jquery.com/jquery-2.2.1.min.js
-      - /js/app.min.js
-  tagline: A realtime, distributed, fault-tolerant stream processing engine from Twitter
+    - http://code.jquery.com/jquery-2.2.1.min.js
+    - /js/app.min.js
+    logo: /img/logo54x54.png
+    textLogoSmall: /img/HeronTextLogo-small.png
+    textlogo: /img/HeronTextLogo.png
+  author: Luc Perkins
   github:
     home: https://github.com/twitter/heron
-    master: https://github.com/twitter/heron/tree/master
     issues: https://github.com/twitter/heron/issues
+    master: https://github.com/twitter/heron/tree/master
   social:
-    twitter: https://twitter.com/heronstreaming
-    slack: https://heronusers.slack.com
     googleGroup: https://groups.google.com/forum/#!forum/heron-users
+    slack: https://heronusers.slack.com
+    twitter: https://twitter.com/heronstreaming
+  tagline: A realtime, distributed, fault-tolerant stream processing engine from Twitter
+  versions:
+    bazel: 0.1.2
+    heron: 0.14.0
+pygmentscodefencesguesssyntax: false
+pygmentsstyle: manni
+pygmentsuseclasses: false
+taxonomies:
+  tag: tags
+title: Heron

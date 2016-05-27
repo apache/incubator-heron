@@ -26,6 +26,9 @@ linkchecker:
 javadocs:
 	@scripts/javadocs.sh
 
+update-heron-version:
+	@scripts/heron-version.sh
+
 site:
 	@make clean
 	@make build-static-assets
