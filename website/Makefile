@@ -30,6 +30,7 @@ update-heron-version:
 	@scripts/heron-version.sh
 
 site:
+	@make update-heron-version
 	@make clean
 	@make build-static-assets
 	@make pages
