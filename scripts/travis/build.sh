@@ -45,8 +45,8 @@ set +x
 cat ~/.bazelrc >> tools/travis-ci/bazel.rc
 ./bazel_configure.py
 
-# build heron
-bazel --bazelrc=tools/travis-ci/bazel.rc build heron/...
+# check styles and build heron
+bazel --bazelrc=tools/travis-ci/bazel.rc build tools/java:checkstyle_all heron/...
 
 # run heron unit tests
 bazel --bazelrc=tools/travis-ci/bazel.rc test --test_tag_filters=-flaky heron/...
