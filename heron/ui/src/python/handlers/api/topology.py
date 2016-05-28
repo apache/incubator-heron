@@ -197,7 +197,6 @@ class TopologySchedulerLocationJsonHandler(base.BaseHandler):
 
         self.write(result_map)
 
-
 # Handler for getting exceptions
 class TopologyExceptionsJsonHandler(base.BaseHandler):
     @tornado.gen.coroutine
