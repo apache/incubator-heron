@@ -1,3 +1,4 @@
+/*
 $(document).ready(function() {
   var LS = window.localStorage;
   var selected = LS['sidebar-selected'] || null;
@@ -16,3 +17,4 @@ $(document).ready(function() {
     LS['sidebar-selected'] = this['id'];
   });
 });
+*/
