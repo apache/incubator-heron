@@ -71,7 +71,7 @@ def proto_library(name, src=None, includes=[], deps=[], visibility=None,
         deps = deps,
         visibility = ["//visibility:private"],
     )
-    java_deps = ["@protobuf-java//jar"]
+    java_deps = ["@protobuf_java//jar"]
     for dep in deps:
       java_deps += [dep + "_java"]
 

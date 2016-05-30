@@ -4,7 +4,7 @@ storm_deps_files = [
     "//heron/api/src/java:api-java",
     "//heron/common/src/java:basics-java",
     "//heron/simulator/src/java:simulator-java",
-    "@json-simple//jar",
+    "@json_simple//jar",
     "//3rdparty/java:kryo",
 ]
 

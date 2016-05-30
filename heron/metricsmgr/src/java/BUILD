@@ -18,7 +18,7 @@ java_library(
         "//heron/metricsmgr/src/thrift:thrift_scribe_java",
         "//3rdparty/java:jackson",
         "@snakeyaml//jar",
-        "@protobuf-java//jar",
+        "@protobuf_java//jar",
         "@thrift//jar",
         "//3rdparty/java:logging", # slf4j is only used for thrift in scribe-sink
     ],

@@ -12,7 +12,7 @@ maven_server(
 )
 
 maven_server(
-  name = "twitter-maven",
+  name = "twitter_maven",
   url = "http://maven.twttr.com",
 )
 
@@ -22,17 +22,17 @@ maven_jar(
 )
 
 maven_jar(
-  name = "asm-all",
+  name = "asm_all",
   artifact = "org.ow2.asm:asm-all:5.1",
 )
 
 maven_jar(
-  name = "aws-java-sdk-core",
+  name = "aws_java_sdk_core",
   artifact = "com.amazonaws:aws-java-sdk-core:" + aws_version,
 )
 
 maven_jar(
-  name = "aws-java-sdk-s3",
+  name = "aws_java_sdk_s3",
   artifact = "com.amazonaws:aws-java-sdk-s3:" + aws_version,
 )
 
@@ -42,42 +42,42 @@ maven_jar(
 )
 
 maven_jar(
-  name = "commons-beanutils",
+  name = "commons_beanutils",
   artifact = "commons-beanutils:commons-beanutils:1.9.2",
 )
 
 maven_jar(
-  name = "commons-io",
+  name = "commons_io",
   artifact = "commons-io:commons-io:2.4",
 )
 
 maven_jar(
-  name = "commons-cli",
+  name = "commons_cli",
   artifact = "commons-cli:commons-cli:1.3.1",
 )
 
 maven_jar(
-  name = "commons-collections",
+  name = "commons_collections",
   artifact = "commons-collections:commons-collections:3.2.1",
 )
 
 maven_jar(
-  name = "commons-lang",
+  name = "commons_lang",
   artifact = "commons-lang:commons-lang:2.6",
 )
 
 maven_jar(
-  name = "commons-logging",
+  name = "commons_logging",
   artifact = "commons-logging:commons-logging:1.1.1",
 )
 
 maven_jar(
-  name = "curator-framework",
+  name = "curator_framework",
   artifact = "org.apache.curator:curator-framework:" + curator_version,
 )
 
 maven_jar(
-  name = "curator-client",
+  name = "curator_client",
   artifact = "org.apache.curator:curator-client:" + curator_version,
 )
 
@@ -87,32 +87,32 @@ maven_jar(
 )
 
 maven_jar(
-  name = "hadoop-core",
+  name = "hadoop_core",
   artifact = "org.apache.hadoop:hadoop-core:0.20.2",
 )
 
 maven_jar(
-  name = "http-client",
+  name = "http_client",
   artifact = "org.apache.httpcomponents:httpclient:" + httpcomponents_version,
 )
 
 maven_jar(
-  name = "http-core",
+  name = "http_core",
   artifact = "org.apache.httpcomponents:httpcore:" + httpcomponents_version,
 )
 
 maven_jar(
-  name = "jackson-annotations",
+  name = "jackson_annotations",
   artifact = "com.fasterxml.jackson.core:jackson-annotations:" + jackson_version,
 )
 
 maven_jar(
-  name = "jackson-core",
+  name = "jackson_core",
   artifact = "com.fasterxml.jackson.core:jackson-core:" + jackson_version,
 )
 
 maven_jar(
-  name = "jackson-databind",
+  name = "jackson_databind",
   artifact = "com.fasterxml.jackson.core:jackson-databind:" + jackson_version,
 )
 
@@ -127,7 +127,7 @@ maven_jar(
 )
 
 maven_jar(
-  name = "json-simple",
+  name = "json_simple",
   artifact = "com.googlecode.json-simple:json-simple:1.1",
 )
 
@@ -137,7 +137,7 @@ maven_jar(
 )
 
 maven_jar(
-  name = "log4j-over-slf4j",
+  name = "log4j_over_slf4j",
   artifact = "org.slf4j:log4j-over-slf4j:" + slf4j_version
 )
 
@@ -157,47 +157,47 @@ maven_jar(
 )
 
 maven_jar(
-  name = "powermock-api-mockito",
+  name = "powermock_api_mockito",
   artifact = "org.powermock:powermock-api-mockito:" + powermock_version,
 )
 
 maven_jar(
-  name = "powermock-api-support",
+  name = "powermock_api_support",
   artifact = "org.powermock:powermock-api-support:" + powermock_version,
 )
 
 maven_jar(
-  name = "powermock-core",
+  name = "powermock_core",
   artifact = "org.powermock:powermock-core:" + powermock_version,
 )
 
 maven_jar(
-  name = "powermock-module-junit4",
+  name = "powermock_module_junit4",
   artifact = "org.powermock:powermock-module-junit4:" + powermock_version,
 )
 
 maven_jar(
-  name = "powermock-module-junit4-common",
+  name = "powermock_module_junit4_common",
   artifact = "org.powermock:powermock-module-junit4-common:" + powermock_version,
 )
 
 maven_jar(
-  name = "powermock-reflect",
+  name = "powermock_reflect",
   artifact = "org.powermock:powermock-reflect:" + powermock_version,
 )
 
 maven_jar(
-  name = "protobuf-java",
+  name = "protobuf_java",
   artifact = "com.google.protobuf:protobuf-java:2.5.0",
 )
 
 maven_jar(
-  name = "slf4j-api",
+  name = "slf4j_api",
   artifact = "org.slf4j:slf4j-api:" + slf4j_version
 )
 
 maven_jar(
-  name = "slf4j-jdk",
+  name = "slf4j_jdk",
   artifact = "org.slf4j:slf4j-jdk14:" + slf4j_version
 )
 
@@ -209,7 +209,7 @@ maven_jar(
 maven_jar(
   name = "thrift",
   artifact = "org.apache.thrift:libthrift:0.5.0-1",
-  server = "twitter-maven",
+  server = "twitter_maven",
 )
 
 maven_jar(

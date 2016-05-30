@@ -25,7 +25,7 @@ java_library(
         "//heron/proto:proto_physical_plan_java",
         "@snakeyaml//jar",
         "@guava//jar",
-        "@protobuf-java//jar",
+        "@protobuf_java//jar",
     ],
 )
 

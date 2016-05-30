@@ -51,8 +51,8 @@ def heron_client_lib_uploader_files():
 
 def heron_client_lib_3rdparty_files():
     return [
-        "@protobuf-java//jar",
-        "@slf4j-api//jar",
-        "@slf4j-jdk//jar",
-        "@log4j-over-slf4j//jar",
+        "@protobuf_java//jar",
+        "@slf4j_api//jar",
+        "@slf4j_jdk//jar",
+        "@log4j_over_slf4j//jar",
     ]

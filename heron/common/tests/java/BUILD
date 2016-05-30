@@ -46,7 +46,7 @@ java_test(
     deps = [
         "//heron/common/src/java:common-java",
         "//heron/proto:proto_networktests_java",
-        "@protobuf-java//jar",
+        "@protobuf_java//jar",
         "@bazel_tools//third_party:junit4",
     ],
     size = "small",
@@ -58,7 +58,7 @@ java_test(
     deps = [
         "//heron/common/src/java:common-java",
         "//heron/proto:proto_networktests_java",
-        "@protobuf-java//jar",
+        "@protobuf_java//jar",
         "@bazel_tools//third_party:junit4",
     ],
     size = "small",

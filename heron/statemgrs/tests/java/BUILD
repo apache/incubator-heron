@@ -20,7 +20,7 @@ local_statemgr_deps_files = [
 
 zookeeper_statemgr_deps_files = [
     "//heron/statemgrs/src/java:zookeeper-statemgr-java",
-    "@curator-framework//jar",
+    "@curator_framework//jar",
     "@zookeeper//jar",
 ]
 
