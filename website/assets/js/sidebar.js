@@ -1,7 +1,6 @@
 $(document).ready(function() {
   var LS = window.localStorage;
   var selected = LS['sidebar-selected'] || null;
-  console.log("Selected: " + selected);
 
   if (selected != null) {
     $('#' + selected).collapse('show');
