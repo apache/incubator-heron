@@ -8,6 +8,7 @@ simulator_deps_files = \
     heron_java_proto_files() + [
         "//heron/api/src/java:api-java",
         "//heron/common/src/java:common-java",
+        "//heron/instance/src/java:instance-java",
         "@snakeyaml//jar",
     ]
 
