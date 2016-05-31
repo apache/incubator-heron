@@ -1,6 +1,8 @@
 #!/bin/bash
 #
-# Run checkstyles on all java files at once
+# Run checkstyles on all java files at once. Written to be invoked via bazel:
+#
+#  bazel run :checkstyle_all
 #
 
 set -e
