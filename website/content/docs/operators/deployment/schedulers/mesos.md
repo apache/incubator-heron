@@ -13,10 +13,10 @@ Heron's Mesos scheduler interacts with Mesos to stand up all of the
 topologies](../../../heron-cli).
 
 Using the Mesos scheduler is similar to deploying Heron on other systems in
-that you use the [Heron CLI](../../heron-cli) to manage topologies. The
+that you use the [Heron CLI](../../../heron-cli) to manage topologies. The
 difference is in the configuration and [scheduler
-overrides](../../heron-cli#submitting-a-topology) that you provide when
-you [submit a topology](../../heron-cli#submitting-a-topology).
+overrides](../../../heron-cli#submitting-a-topology) that you provide when
+you [submit a topology](../../../heron-cli#submitting-a-topology).
 
 A set of default configurations are provided with Heron in the `conf/mesos` directory. 
 The default configurations use Zookeeper based state manager. 
