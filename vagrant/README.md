@@ -16,9 +16,9 @@ There is a single requirement for the host machine. Please refer to official doc
 - Configurable number of Mesos Slaves/Agents (via `SLAVES` parameter in `Vagrantfile`)
 - Zookeeper running at `master:2181`
 - Marathon running at `master:8080`
-- Aurora scheduler (plain Mesos cluster supported by changing `SCHEDULER` parameter in `Vagrantfile` to `mesos`) running on master
-- Aurora executor running on master and all slaves
-- Kafka-Mesos scheduler running at `master:7000` either 0.8 or 0.9 (Kafka version is configurable via `KAFKA` parameter in `Vagrantfile`. Can be also disabled setting `KAFKA=none`).
+- Aurora scheduler (Can be disabled by setting `AURORA=false` in `Vagrantfile`) running on master
+- Aurora executor running on master and all slaves (if `AURORA` is set to `true`)
+- Kafka-Mesos scheduler running at `master:7000` either 0.8 or 0.9 (Kafka version is configurable via `KAFKA` parameter in `Vagrantfile`. Can be also disabled by setting `KAFKA=none`).
 - 1x Kafka Broker running on top of Kafka-Mesos framework at `master:9092` if `KAFKA` is not set to `none`.
 
 ## Running the cluster

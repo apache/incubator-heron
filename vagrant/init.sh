@@ -144,19 +144,6 @@ install_aurora_worker() {
     popd
 }
 
-setup_heron_zk_nodes() {
-    mkdir -p /home/vagrant/solr
-    pushd /home/vagrant/solr
-        # Not the fastest way to do this, need to figure out how to put zk-setup.cpp to use for this
-        wget -q 'http://www.eu.apache.org/dist/lucene/solr/5.4.1/solr-5.4.1.tgz'
-        tar -zxf solr-5.4.1.tgz
-        ./solr-5.4.1/server/scripts/cloud-scripts/zkcli.sh -zkhost master:2181 -cmd makepath /storm/heron/cluster/pplans
-        ./solr-5.4.1/server/scripts/cloud-scripts/zkcli.sh -zkhost master:2181 -cmd makepath /storm/heron/cluster/executionstate
-        ./solr-5.4.1/server/scripts/cloud-scripts/zkcli.sh -zkhost master:2181 -cmd makepath /storm/heron/cluster/tmasters
-        ./solr-5.4.1/server/scripts/cloud-scripts/zkcli.sh -zkhost master:2181 -cmd makepath /storm/heron/cluster/topologies
-    popd
-}
-
 copy_scripts() {
     # Copying all the scripts to the home directory for simpler launching through 'vagrant ssh master -c'.
     cp *.sh /home/vagrant
@@ -164,7 +151,7 @@ copy_scripts() {
 }
 
 print_usage() {
-    echo "Usage: $0 master|slave mesos|aurora 0.8|0.9|none"
+    echo "Usage: $0 master|slave true|false 0.8|0.9|none"
 }
 
 if [[ $1 != "master" && $1 != "slave" ]]; then
@@ -173,11 +160,11 @@ if [[ $1 != "master" && $1 != "slave" ]]; then
 fi
 mode=$1
 
-if [[ $2 != "mesos" && $2 != "aurora" ]]; then
+if [[ $2 != "true" && $2 != "false" ]]; then
     print_usage
     exit 1
 fi
-scheduler=$2
+aurora=$2
 
 if [[ $3 != "0.8" && $3 != "0.9" && $3 != "none" ]]; then
     print_usage
@@ -236,14 +223,13 @@ if [ $mode == "master" ]; then
         install_kafka-mesos_09
     fi
 
-    if [ $scheduler == "aurora" ]; then
+    if [ $aurora == "true" ]; then
         install_aurora_coordinator
     fi
 
-    setup_heron_zk_nodes
     copy_scripts
 fi
-if [ $scheduler == "aurora" ]; then
+if [ $aurora == "true" ]; then
     install_aurora_worker
     install_aurora_client $mode
 fi
