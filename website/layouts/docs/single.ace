@@ -10,7 +10,7 @@ html lang={{.Site.LanguageCode}}
     .hn-main
       .container
         .row
-          aside.hn-sidebar.hidden-xs.col-sm-3.col-md-3.col-lg-2.collapse
+          aside.hn-sidebar.hidden-xs.col-sm-4.col-md-3.col-lg-2.collapse
             {{partial "sidenav.html" .}}
-          section.hn-docs-main.col-sm-9.col-md-9.col-lg-10.col-sm-offset-3.col-md-offset-3.col-lg-offset-2
+          section.hn-docs-main.col-sm-8.col-md-9.col-lg-10.col-sm-offset-4.col-md-offset-3.col-lg-offset-2
             {{partial "docs/main.html" .}}

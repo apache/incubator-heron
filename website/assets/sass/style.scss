@@ -85,19 +85,46 @@ a:hover {
 // Sidebar for navigating the docs
 aside.hn-sidebar {
   .hn-sidebar-nav {
-    ul {
-      list-style-type: none;
+    a {
+      text-decoration: none;
+    }
+
+    .panel {
+      border: none;
       padding: 0;
-      margin-bottom: 20px;
+    }
 
-      li {
-        a {
-          overflow: hidden;
-          padding: 4px 0;
-          display: block;
+    .panel-title {
+      i {
+        color: $light-gray;
+        margin-right: 7px;
+      }
+    }
 
-          &:hover {
-            background-color: transparent;
+    .panel-heading {
+      background-color: #fff;
+      border-bottom: none;
+      margin: 0;
+    }
+
+    .panel-collapse {
+      border-top: none;
+      padding: 0;
+    }
+
+    .panel-body {
+      padding: 0;
+
+      ul {
+        list-style-type: none;
+        padding-left: 40px;
+        padding-top: 5px;
+
+        li {
+          padding: 0;
+
+          &:nth-last-of-type(n + 2) {
+            margin-bottom: 10px;
           }
         }
       }

@@ -34,7 +34,7 @@ params:
       - /css/font-awesome.min.css
       - /css/pygments.css
     js:
-      - http://code.jquery.com/jquery-2.2.1.min.js
+      - https://code.jquery.com/jquery-2.2.1.min.js
       - /js/app.min.js
   tagline: A realtime, distributed, fault-tolerant stream processing engine from Twitter
   github:
