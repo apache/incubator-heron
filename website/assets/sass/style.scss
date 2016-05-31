@@ -3,10 +3,6 @@
 // Import Open Sans font
 @import url(https://fonts.googleapis.com/css?family=Open+Sans);
 
-// Variables
-$light-gray: #9d9d9d;
-$heron-blue-gray: #263238;
-
 // Helpers
 div[class^="landing-feature"] {
   margin-bottom: 50px;
@@ -196,12 +192,10 @@ section.hn-docs-main {
     }
 
     .highlight {
-      margin: 5px 0px;
-      border-radius: 5px;
+      border-radius: 10px;
 
       pre {
-        border: 1px solid darken(#fafafa, 20%);
-        background-color: #fafafa;
+        color: lighten($light-gray, 15%);
       }
     }
 
