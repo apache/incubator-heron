@@ -1,12 +1,12 @@
-# Vagrant image for running Heron examples
+# Vagrant image for running and testing Heron topologies
 
 ## Overview
 
-With the help of this image one should be able to test their topologies on Heron.
+With the help of this image one should be able to run and test their topologies (including Kafka-based ones) on Heron.
 
 ## Prerequisites
 
-There are two requirements for a host machine. Please refer to official docs for installation instructions:
+There is a single requirement for the host machine. Please refer to official docs for installation instructions:
 
 - [Vagrant](http://vagrantup.com) - required for running cluster VMs
 
@@ -18,8 +18,8 @@ There are two requirements for a host machine. Please refer to official docs for
 - Marathon running at `master:8080`
 - Aurora scheduler (plain Mesos cluster supported by changing `SCHEDULER` parameter in `Vagrantfile` to `mesos`) running on master
 - Aurora executor running on master and all slaves
-- Kafka-Mesos scheduler running at `master:7000`
-- 1x Kafka Broker running on top of Kafka-Mesos framework, either 0.8 or 0.9 (Kafka version is configurable via `KAFKA` parameter in `Vagrantfile`) running at `master:9092`
+- Kafka-Mesos scheduler running at `master:7000` either 0.8 or 0.9 (Kafka version is configurable via `KAFKA` parameter in `Vagrantfile`. Can be also disabled setting `KAFKA=none`).
+- 1x Kafka Broker running on top of Kafka-Mesos framework at `master:9092` if `KAFKA` is not set to `none`.
 
 ## Running the cluster
 

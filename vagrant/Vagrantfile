@@ -18,7 +18,7 @@
 SLAVES=1
 NET_PREFIX="192.168.3."
 SCHEDULER="aurora" # aurora|mesos
-KAFKA="0.9" # 0.8|0.9
+KAFKA="0.9" # 0.8|0.9|none
 
 NODES={"master" => NET_PREFIX + "5"}
 (0..SLAVES-1).each do |i| NODES["slave#{i}"] = NET_PREFIX + (6 + i).to_s end

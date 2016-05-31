@@ -59,6 +59,9 @@ install_marathon() {
 install_kafka-mesos_08() {
     # download Kafka 0.8
     pushd /home/vagrant
+    wget -q "https://github.com/mesos/kafka/releases/download/0.9.4.0/kafka-mesos_0.9.4.0.tar.gz"
+    tar -xf kafka-mesos*gz
+    rm kafka-mesos*gz
     mv -T kafka-mesos* kafka-mesos
     wget -q "http://www.eu.apache.org/dist/kafka/0.8.2.2/kafka_2.10-0.8.2.2.tgz" -P kafka-mesos
     popd
@@ -81,6 +84,9 @@ install_kafka-mesos_08() {
 install_kafka-mesos_09() {
     # download Kafka 0.9
     pushd /home/vagrant
+    wget -q "https://github.com/mesos/kafka/releases/download/0.9.4.0/kafka-mesos_0.9.4.0.tar.gz"
+    tar -xf kafka-mesos*gz
+    rm kafka-mesos*gz
     mv -T kafka-mesos* kafka-mesos
     wget -q "http://www.eu.apache.org/dist/kafka/0.9.0.0/kafka_2.10-0.9.0.0.tgz" -P kafka-mesos
     popd
@@ -158,7 +164,7 @@ copy_scripts() {
 }
 
 print_usage() {
-    echo "Usage: $0 master|slave mesos|aurora 0.8|0.9"
+    echo "Usage: $0 master|slave mesos|aurora 0.8|0.9|none"
 }
 
 if [[ $1 != "master" && $1 != "slave" ]]; then
@@ -173,7 +179,7 @@ if [[ $2 != "mesos" && $2 != "aurora" ]]; then
 fi
 scheduler=$2
 
-if [[ $3 != "0.8" && $3 != "0.9" ]]; then
+if [[ $3 != "0.8" && $3 != "0.9" && $3 != "none" ]]; then
     print_usage
     exit 1
 fi
@@ -221,12 +227,6 @@ update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
 install_mesos $mode
 if [ $mode == "master" ]; then
     install_marathon
-
-    pushd /home/vagrant
-    wget -q "https://github.com/mesos/kafka/releases/download/0.9.4.0/kafka-mesos_0.9.4.0.tar.gz"
-    tar -xf kafka-mesos*gz
-    rm kafka-mesos*gz
-    popd
 
     if [ $kafka == "0.8" ]; then
         install_kafka-mesos_08
