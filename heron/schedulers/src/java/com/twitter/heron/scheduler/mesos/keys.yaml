@@ -14,4 +14,7 @@ TMASTER_SHELL_PORT: "tmaster.shell.port"
 TMASTER_METRICSMGR_PORT: "tmaster.metricsmgr.port"
 
 # config key for specifying the working directory of a topology
-WORKING_DIRECTORY:        heron.scheduler.local.working.directory
+WORKING_DIRECTORY:        "heron.scheduler.local.working.directory"
+
+# whether to start Mesos Scheduler in the background or in the blocking process
+BACKGROUND_SCHEDULER:     "heron.scheduler.background"

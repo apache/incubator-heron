@@ -14,6 +14,12 @@
 
 package com.twitter.heron.scheduler.mesos;
 
+import java.io.File;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
@@ -22,12 +28,6 @@ import com.twitter.heron.spi.common.ShellUtils;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;
-
-import java.io.File;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Launch topology locally to a working directory.
@@ -76,18 +76,7 @@ public class MesosLauncher implements ILauncher {
     extraArgs.put("TOPOLOGY_PACKAGE_URI", Runtime.topologyPackageUri(runtime).toString());
     extraArgs.put("CORE_PACKAGE_URI", Context.corePackageUri(config));
 
-    Process p = startScheduler(extraArgs, schedulerCmd);
-
-    if (p == null) {
-      LOG.severe("Failed to start SchedulerMain using: " + Arrays.toString(schedulerCmd));
-      return false;
-    }
-
-    LOG.info(String.format(
-        "For checking the status and logs of the topology, use the working directory %s",
-        MesosContext.workingDirectory(config)));
-
-    return true;
+    return runScheduler(extraArgs, schedulerCmd);
   }
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -126,9 +115,36 @@ public class MesosLauncher implements ILauncher {
         Context.verbose(config));
   }
 
-  protected Process startScheduler(Map<String, String> envs, String[] schedulerCmd) {
+  protected boolean runScheduler(Map<String, String> envs, String[] schedulerCmd) {
 
-    return ShellUtils.runASyncProcessWithEnvs(MesosContext.verbose(config), schedulerCmd,
-        new File(topologyWorkingDirectory), envs);
+    if (MesosContext.backgroundScheduler(config)) {
+      Process p = ShellUtils.runASyncProcessWithEnvs(MesosContext.verbose(config), schedulerCmd,
+          new File(topologyWorkingDirectory), envs);
+      if (p == null) {
+        LOG.severe("Failed to start SchedulerMain using: " + Arrays.toString(schedulerCmd));
+        return false;
+      }
+
+      LOG.info(String.format(
+          "For checking the status and logs of the topology, use the working directory %s",
+          MesosContext.workingDirectory(config)));
+
+      return true;
+    } else {
+      LOG.info(String.format("Starting Mesos scheduler process. Working dir: %s",
+          MesosContext.workingDirectory(config)));
+      int exitValue = ShellUtils.runSyncProcessWithEnvs(MesosContext.verbose(config), false,
+          schedulerCmd, new StringBuilder(), new StringBuilder(), new File(
+              topologyWorkingDirectory), envs);
+
+      if (exitValue == 0) {
+        LOG.info("Scheduler process finished");
+        return true;
+      } else {
+        LOG.severe("Scheduler exited with the code " + exitValue + ". Command that was used for"
+            + " starting it: " + Arrays.toString(schedulerCmd));
+        return false;
+      }
+    }
   }
 }

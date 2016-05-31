@@ -15,3 +15,5 @@ TMASTER_METRICSMGR_PORT: 5004
 
 # default value for the config key that specifies the working directory
 WORKING_DIRECTORY:       ${HOME}/.herondata/topologies/${CLUSTER}/${ROLE}/${TOPOLOGY}
+
+BACKGROUND_SCHEDULER:    true

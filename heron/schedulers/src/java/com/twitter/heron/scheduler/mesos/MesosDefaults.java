@@ -14,11 +14,11 @@
 
 package com.twitter.heron.scheduler.mesos;
 
-import com.twitter.heron.common.basics.TypeUtils;
-import com.twitter.heron.spi.common.Resource;
-
 import java.util.Map;
 import java.util.logging.Logger;
+
+import com.twitter.heron.common.basics.TypeUtils;
+import com.twitter.heron.spi.common.Resource;
 
 public final class MesosDefaults {
   private MesosDefaults() {
@@ -57,5 +57,9 @@ public final class MesosDefaults {
 
   public static Integer getInteger(String key) {
     return TypeUtils.getInteger(defaults.get(key));
+  }
+
+  public static Boolean getBoolean(String key) {
+    return TypeUtils.getBoolean(defaults.get(key));
   }
 }
