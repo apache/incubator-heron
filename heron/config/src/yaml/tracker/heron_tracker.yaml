@@ -15,12 +15,8 @@ statemgrs:
     tunnelhost: "localhost"
 #
 # To use 'localzk', launch a zookeeper server locally
-# and create the following paths:
-#   1. /heron/topologies
-#   2. /heron/executionstate
-#   3. /heron/pplans
-#   4. /heron/tmasters
-#   5. /heron/schedulers
+# and create the following path:
+#   *. /heron/topologies
 #
 #  -
 #    type: "zookeeper"
