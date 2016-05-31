@@ -3,7 +3,9 @@ $(document).ready(function() {
   var selected = LS['sidebar-selected'] || null;
 
   if (selected != null) {
-    $('#' + selected).collapse('show');
+    var selectedElement = '#' + selected;
+    $(selectedElement).collapse('show');
+    $('aside.hn-sidebar').scrollTo(selectedElement);
   }
 
   var tabs = $("[id^='collapse']");
