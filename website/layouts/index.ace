@@ -4,7 +4,6 @@ html lang={{.Site.LanguageCode}}
     {{partial "meta.html" .}}
     title {{.Site.Title}}
     {{partial "css.includes.html" .}}
-    {{partial "js.includes.html" .}}
   body
     .hn-main
       {{partial "navbar.html" .}}
@@ -71,3 +70,6 @@ html lang={{.Site.LanguageCode}}
       {{partial "footer.html" .}}
       {{partial "index/twitter-timeline.html" .}}
       {{partial "index/google-analytics.html" .}}
+      
+      script src=http://code.jquery.com/jquery-2.2.1.min.js
+      script src=/js/app.min.js

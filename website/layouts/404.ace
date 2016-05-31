@@ -4,7 +4,6 @@ html lang={{.Site.LanguageCode}}
     {{partial "meta.html" .}}
     title {{.Site.Title}}
     {{partial "css.includes.html" .}}
-    {{partial "js.includes.html" .}}
   body
     .not-found.text-center
       img src=/img/heron-logos/2.jpg
