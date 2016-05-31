@@ -67,7 +67,7 @@ statemgrs:
 Topologies from all the state managers would be read and can be queried from
 Tracker.
 
-Not that Tracker does not create any zookeeper nodes itself. It is a readonly
+Note that Tracker does not create any zookeeper nodes itself. It is a readonly
 service. If you launch the Tracker without creating `/topologies` node under the
 rootpath, Tracker will fail with a `NoNodeError`.
 
