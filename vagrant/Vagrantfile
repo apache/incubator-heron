@@ -17,7 +17,7 @@
 
 SLAVES=1
 NET_PREFIX="192.168.3."
-AURORA=false # true|false
+AURORA=true # true|false
 KAFKA="0.9" # 0.8|0.9|none
 
 NODES={"master" => NET_PREFIX + "5"}
