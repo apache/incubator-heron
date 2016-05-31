@@ -29,7 +29,8 @@ env:
       - CCACHE_COMPRESS=1
       - CCACHE_MAXSIZE=100M
       - PATH="/usr/lib/ccache:$PATH"
-  - CC=gcc-4.8 CXX=g++-4.8 CPP=cpp-4.8 CXXCPP=cpp-4.8
+  matrix:
+    - CC=gcc-4.8 CXX=g++-4.8 CPP=cpp-4.8 CXXCPP=cpp-4.8
 
 before_install:
 
