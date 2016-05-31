@@ -4,6 +4,15 @@ canonifyurls: true
 languageCode: en-us
 metadataformat: yaml
 newcontenteditor: atom
+taxonomies:
+  tag: tags
+
+# Pygments syntax highlighting
+pygmentsstyle: monokai
+pygmentsuseclasses: false
+pygmentscodefences: true
+
+# Site-level parameters available through .Site.Params.{key}
 params:
   assets:
     css:
@@ -14,12 +23,9 @@ params:
       large: /img/favicon-32x32.png
       small: /img/favicon-16x16.png
     js:
-    - http://code.jquery.com/jquery-2.2.1.min.js
-    - /js/app.min.js
-    logo: /img/logo54x54.png
-    textLogoSmall: /img/HeronTextLogo-small.png
-    textlogo: /img/HeronTextLogo.png
-  author: Luc Perkins
+      - https://code.jquery.com/jquery-2.2.1.min.js
+      - /js/app.min.js
+  tagline: A realtime, distributed, fault-tolerant stream processing engine from Twitter
   github:
     home: https://github.com/twitter/heron
     issues: https://github.com/twitter/heron/issues
