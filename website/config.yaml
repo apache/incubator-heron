@@ -4,8 +4,6 @@ canonifyurls: true
 languageCode: en-us
 metadataformat: yaml
 newcontenteditor: atom
-taxonomies:
-  tag: tags
 
 # Pygments syntax highlighting
 pygmentsstyle: monokai
@@ -41,10 +39,6 @@ params:
   versions:
     bazel: 0.1.2
     heron: 0.14.0
-pygmentscodefences: true
-pygmentscodefencesguesssyntax: false
-pygmentsstyle: manni
-pygmentsuseclasses: false
 taxonomies:
   tag: tags
 title: Heron
