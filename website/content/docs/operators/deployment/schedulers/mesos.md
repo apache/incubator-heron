@@ -49,6 +49,9 @@ You are free to customize the following:
 
 * `heron.local.working.directory` &mdash; The directory to be used as
   Heron's Mesos scheduler sandbox directory.
+
+* `heron.scheduler.background` &mdash; Flag whether to start Mesos Scheduler 
+  in the background or in the blocking process.
   
 #### statemgr.yaml
 
