@@ -11,10 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' mainhandler.py '''
 from heron.ui.src.python.handlers import base
 
-class MainHandler(base.BaseHandler):
-    def get(self):
-        self.redirect(u"/topologies")
 
+class MainHandler(base.BaseHandler):
+  ''' MainHandler'''
+
+  def get(self):
+    '''
+    :return:
+    '''
+    self.redirect(u"/topologies")
