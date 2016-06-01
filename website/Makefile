@@ -1,6 +1,9 @@
 setup:
 	scripts/setup.sh
 
+clean:
+	rm -rf public/*
+
 serve:
 	@hugo server --watch
 
@@ -21,6 +24,7 @@ javadocs:
 	@scripts/javadocs.sh
 
 site:
+	@make clean
 	@make build-static-assets
 	@make pages
 	@make javadocs

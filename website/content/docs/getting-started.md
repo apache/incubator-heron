@@ -170,7 +170,7 @@ The included example topologies:
 * `MultiSpoutExclamationTopology.java` --- a topology with multiple spouts.
 * `MultiStageAckingTopology.java` --- A three-stage topology. A spout emits to a
   bolt that then feeds to another bolt.
-* `TaskHookTopology.java` --- A topology that uses a task hook to subscribe t
+* `TaskHookTopology.java` --- A topology that uses a task hook to subscribe to
    event notifications.
 
 ### Next Steps
@@ -178,7 +178,6 @@ The included example topologies:
 * [Upgrade Storm topologies](../upgrade-storm-to-heron) with simple `pom.xml`
   changes
 * [Deploy topologies](../operators/deployment) in clustered, scheduler-driven
-  environments (such as on [Aurora](../operators/deployment/schedulers/aurora),
-  on [Mesos](../operators/deployment/schedulers/mesos), and
-  [locally](../operators/deployment/schedulers/local))
+  environments (such as on [Aurora](../operators/deployment/schedulers/aurora)
+  and [locally](../operators/deployment/schedulers/local))
 * [Develop topologies](../concepts/architecture) for Heron
