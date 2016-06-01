@@ -14,17 +14,17 @@ You can make Heron aware of the ZooKeeper cluster by modifying the
 `statemgr.yaml` config file specific for the Heron cluster. You'll
 need to specify the following for each cluster:
 
-* `heron.class.state.manager` &mdash; Indicates the class to be loaded for local file system
+* `heron.class.state.manager` --- Indicates the class to be loaded for local file system
 state manager. You should set this to `com.twitter.heron.statemgr.localfs.LocalFileSystemStateManager`
 
-* `heron.statemgr.connection.string` &mdash; This should be `LOCALMODE` since it always localhost.
+* `heron.statemgr.connection.string` --- This should be `LOCALMODE` since it always localhost.
 
-* `heron.statemgr.root.path` &mdash; The root path in the local file system where state information
+* `heron.statemgr.root.path` --- The root path in the local file system where state information
 is stored.  We recommend providing Heron with an exclusive directory; if you do not, make sure that
 the following sub-directories are unused: `/tmasters`, `/topologies`, `/pplans`, `/executionstate`,
 `/schedulers`.
 
-* `heron.statemgr.localfs.is.initialize.file.tree` &mdash; Indicates whether the nodes under root
+* `heron.statemgr.localfs.is.initialize.file.tree` --- Indicates whether the nodes under root
 `/tmasters`, `/topologies`, `/pplans`, `/executionstate`, and `/schedulers` need to created, if they
 are not found. Set it to `True`, if you could like Heron to create those directories. If those
 directories are already there, set it to `False`. The absence of this configuration implies `True`.

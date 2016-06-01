@@ -20,15 +20,15 @@ for a specific topology. The code for these sinks may prove helpful for
 implementing your own.
 
 * [`GraphiteSink`](/api/metrics/com/twitter/heron/metricsmgr/sink/GraphiteSink.html)
-  &mdash; Sends each `MetricsRecord` object to a
+  --- Sends each `MetricsRecord` object to a
   [Graphite](http://graphite.wikidot.com/) instance according to a Graphite
   prefix.
 * [`ScribeSink`](/api/metrics/com/twitter/heron/metricsmgr/sink/ScribeSink.html)
-  &mdash; Sends each `MetricsRecord` object to a
+  --- Sends each `MetricsRecord` object to a
   [Scribe](https://github.com/facebookarchive/scribe) instance according to a
   Scribe category and namespace.
 * [`FileSink`](/api/metrics/com/twitter/heron/metricsmgr/sink/FileSink.html)
-  &mdash; Writes each `MetricsRecord` object to a JSON file at a specified path.
+  --- Writes each `MetricsRecord` object to a JSON file at a specified path.
 
 More on using those sinks in a Heron cluster can be found in [Metrics
 Manager](../../operators/configuration/metrics-manager).
@@ -62,7 +62,7 @@ Each metrics sink must implement the
 [`IMetricsSink`](http://heronproject.github.io/metrics-api/com/twitter/heron/metricsmgr/IMetricsSink)
 interface, which requires you to implement the following methods:
 
-* `void init(Map<String, Object> conf, SinkContext context)` &mdash; Defines the
+* `void init(Map<String, Object> conf, SinkContext context)` --- Defines the
   initialization behavior of the sink. The `conf` map is the configuration that
   is passed to the sink by the `.yaml` configuration file at
   `heron/config/metrics_sink.yaml`; the
@@ -70,12 +70,12 @@ interface, which requires you to implement the following methods:
   object enables you to access values from the sink's runtime context
   (the ID of the metrics manager, the ID of the sink, and the name of the
   topology).
-* `void processRecord(MetricsRecord record)` &mdash; Defines how each
+* `void processRecord(MetricsRecord record)` --- Defines how each
   `MetricsRecord` that passes through the sink is processed.
-* `void flush()` &mdash; Flush any buffered metrics; this function is called at
+* `void flush()` --- Flush any buffered metrics; this function is called at
   the interval specified by the `flush-frequency-ms`. More info can be found in
   the [Stream Manager](../../operators/configuration/stmgr) document.
-* `void close()` &mdash; Closes the stream and releases any system resources
+* `void close()` --- Closes the stream and releases any system resources
   associated with it; if the stream is already closed, invoking `close()` has no
   effect.
 
@@ -144,11 +144,11 @@ sinks:
 
 For each sink you need to specify the following:
 
-* `class` &mdash; The Java class name of your custom implementation of the
+* `class` --- The Java class name of your custom implementation of the
   `IMetricsSink` interface, e.g. `biz.acme.heron.metrics.PrintSink`.
-* `flush-frequency-ms` &mdash; The frequency (in milliseconds) at which the
+* `flush-frequency-ms` --- The frequency (in milliseconds) at which the
   `flush()` method is called in your implementation of `IMetricsSink`.
-* `sink-restart-attempts` &mdash; The number of times that a sink will attempt to
+* `sink-restart-attempts` --- The number of times that a sink will attempt to
   restart if it throws exceptions and dies. If you do not set this, the default
   is 0; if you set it to -1, the sink will attempt to restart forever.
 

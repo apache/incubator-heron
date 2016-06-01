@@ -17,13 +17,13 @@ There are a few things you should be aware of HDFS uploader:
 You can make Heron use HDFS uploader by modifying the `uploader.yaml` config file specific
 for the Heron cluster. You'll need to specify the following for each cluster:
 
-* `heron.class.uploader` &mdash; Indicate the uploader class to be loaded. You should set this
+* `heron.class.uploader` --- Indicate the uploader class to be loaded. You should set this
 to `com.twitter.heron.uploader.hdfs.HdfsUploader`
 
-* `heron.uploader.hdfs.config.directory` &mdash; Specifies the directory of the config files
+* `heron.uploader.hdfs.config.directory` --- Specifies the directory of the config files
 for hadoop. This is used by hadoop client to upload the topology jar
 
-* `heron.uploader.hdfs.topologies.directory.uri` &mdash; URI of the directory name for uploading
+* `heron.uploader.hdfs.topologies.directory.uri` --- URI of the directory name for uploading
 topology jars. The name of the directory should be unique per cluster, if they are sharing the
 storage. In those cases, you could use the Heron environment variable `${CLUSTER}` that will be
 substituted by cluster name for distinction.
