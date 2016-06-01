@@ -49,7 +49,6 @@ def discover_host():
 ######################################################################
 def discover_timestamp():
   return str(datetime.datetime.now())
-  return subprocess.check_output("date", shell=True).strip("\n")
 
 ######################################################################
 # Get the processor the platform is running on
