@@ -12,8 +12,14 @@
 #  ./build-artifacts.sh ubuntu14.04 0.12.0 .
 #  ./build-artifacts.sh centos7 0.12.0 .
 #
-import os, sys
-import re, subprocess, shutil
+import os
+import re
+import sys
+import shutil
+import getpass
+import datetime
+import platform
+import subprocess
 
 sys.path.append('3rdparty/python/semver')
 import semver
@@ -21,7 +27,7 @@ import semver
 ######################################################################
 # Architecture and system defines
 ######################################################################
-ARCH_AND_SYS = { 
+ARCH_AND_SYS = {
   ('x86_64', 'Darwin') : ('IS_I386_MACOSX', 'IS_MACOSX'),
   ('x86_64', 'Linux' )  : ('IS_I386_LINUX',  'IS_LINUX'),
 }
@@ -30,38 +36,39 @@ ARCH_AND_SYS = {
 # Discover the name of the user compiling
 ######################################################################
 def discover_user():
-  return subprocess.check_output("whoami", shell=True).strip("\n")
-  
+  return getpass.getuser()
+
 ######################################################################
 # Discover the name of the host compiling
 ######################################################################
 def discover_host():
-  return subprocess.check_output("uname -n", shell=True).strip("\n")
-  
+  return platform.uname().node
+
 ######################################################################
 # Get the time of the setup - does not change every time you compile
 ######################################################################
 def discover_timestamp():
+  return str(datetime.datetime.now())
   return subprocess.check_output("date", shell=True).strip("\n")
-  
+
 ######################################################################
 # Get the processor the platform is running on
 ######################################################################
 def discover_processor():
-  return subprocess.check_output("uname -m", shell=True).strip("\n")
+  return platform.uname().machine
 
 ######################################################################
 # Get the operating system of the platform
 ######################################################################
 def discover_os():
-  return subprocess.check_output("uname -s", shell=True).strip("\n")
+  return platform.uname().system
 
 ######################################################################
 # Get the operating system version
 ######################################################################
 def discover_os_version():
-  return subprocess.check_output("uname -r", shell=True).strip("\n")
-  
+  return platform.uname().release
+
 ######################################################################
 # Get the git sha of the branch - you are working
 ######################################################################
@@ -171,7 +178,7 @@ def discover_version(path):
       return version
 
   # on some centos versions, cmake --version returns this
-  #   cmake version 2.6-patch 4 
+  #   cmake version 2.6-patch 4
   centos_line = re.search('^cmake version\s+(\d.\d)-patch\s+(\d)', first_line)
   if centos_line:
     version = ".".join([centos_line.group(1), centos_line.group(2)])
@@ -207,7 +214,7 @@ def assert_min_version(path, min_version):
   return version
 
 ######################################################################
-# Discover the program using env variable/program name 
+# Discover the program using env variable/program name
 ######################################################################
 def discover_program(program_name, env_variable = ""):
   env_value = program_name
@@ -218,7 +225,7 @@ def discover_program(program_name, env_variable = ""):
       pass
 
   return real_program_path(env_value)
-      
+
 ######################################################################
 # Get the platform we are running
 ######################################################################
@@ -349,7 +356,7 @@ def write_heron_config_header(config_file):
   out_file.write(define_string('PACKAGE', 'heron'))
   out_file.write(define_string('PACKAGE_NAME', 'heron'))
   out_file.write(define_string('PACKAGE_VERSION', 'unversioned'))
-    
+
   out_file.write(define_string('PACKAGE_COMPILE_USER', discover_user()))
   out_file.write(define_string('PACKAGE_COMPILE_HOST', discover_host()))
   out_file.write(define_string('PACKAGE_COMPILE_TIME', discover_timestamp()))
