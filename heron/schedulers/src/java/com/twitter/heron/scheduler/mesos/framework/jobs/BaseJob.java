@@ -1,12 +1,26 @@
-package com.twitter.heron.scheduler.mesos.framework.jobs;
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+package com.twitter.heron.scheduler.mesos.framework.jobs;
 
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class BaseJob {
   public static class EnvironmentVariable {
@@ -59,7 +73,7 @@ public class BaseJob {
   @JsonProperty
   public List<EnvironmentVariable> environmentVariables = new LinkedList<>();
 
-  public BaseJob(){
+  public BaseJob() {
     // This is necessary otherwise we could not construct BaseJob by using JSON
   }
 
@@ -68,9 +82,9 @@ public class BaseJob {
     return BaseJob.getJobDefinitionInJSON(this);
   }
 
-  public static BaseJob getJobFromJSONString(String JobDefinitionInJSON) {
+  public static BaseJob getJobFromJSONString(String jobDefinitionInJSON) {
     try {
-      return new ObjectMapper().readValue(JobDefinitionInJSON, BaseJob.class);
+      return new ObjectMapper().readValue(jobDefinitionInJSON, BaseJob.class);
     } catch (IOException e) {
       throw new IllegalArgumentException("Unable to parse the JSON string", e);
     }

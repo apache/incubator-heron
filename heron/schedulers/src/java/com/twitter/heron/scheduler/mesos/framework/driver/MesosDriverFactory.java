@@ -1,21 +1,36 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.twitter.heron.scheduler.mesos.framework.driver;
 
-import com.twitter.heron.scheduler.mesos.framework.config.FrameworkConfiguration;
-import com.twitter.heron.scheduler.mesos.framework.state.PersistenceStore;
+import java.util.logging.Logger;
+
 import org.apache.mesos.Protos;
 import org.apache.mesos.Scheduler;
 import org.apache.mesos.SchedulerDriver;
 
-import java.util.logging.Logger;
+import com.twitter.heron.scheduler.mesos.framework.config.FrameworkConfiguration;
+import com.twitter.heron.scheduler.mesos.framework.state.PersistenceStore;
 
 public class MesosDriverFactory {
   private static final Logger LOG = Logger.getLogger(MesosDriverFactory.class.getName());
 
-  SchedulerDriver mesosDriver;
+  private SchedulerDriver mesosDriver;
 
-  Scheduler scheduler;
+  private Scheduler scheduler;
   private final PersistenceStore persistenceStore;
-  FrameworkConfiguration config;
+  private FrameworkConfiguration config;
 
   public MesosDriverFactory(Scheduler scheduler,
                             PersistenceStore persistenceStore,
@@ -28,7 +43,10 @@ public class MesosDriverFactory {
   public void start() {
     Protos.Status status = get().start();
     if (status != Protos.Status.DRIVER_RUNNING) {
-      LOG.severe(String.format("MesosSchedulerDriver start resulted in status: %s. Committing suicide!", status));
+      LOG.severe(String.format("MesosSchedulerDriver start resulted in status: %s. "
+          + "Committing suicide!", status));
+
+      // CHECKSTYLE:OFF RegexpSinglelineJava
       System.exit(1);
     }
   }
@@ -49,6 +67,8 @@ public class MesosDriverFactory {
   public void close() {
     if (mesosDriver == null) {
       LOG.severe("Attempted to close a non-initialed driver");
+
+      // CHECKSTYLE:OFF RegexpSinglelineJava
       System.exit(1);
     }
 
@@ -57,8 +77,8 @@ public class MesosDriverFactory {
   }
 
   private SchedulerDriver makeDriver() {
-    Protos.FrameworkID frameworkId = config.failoverTimeoutSeconds > 0 ?
-        persistenceStore.getFrameworkID() : null;
+    Protos.FrameworkID frameworkId = config.failoverTimeoutSeconds > 0
+        ? persistenceStore.getFrameworkID() : null;
 
     if (frameworkId == null) {
       LOG.info("No pre-existing FrameworkID. First time to start the scheduler.");

@@ -1,26 +1,42 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.twitter.heron.scheduler.mesos.framework.driver;
+
+import java.util.*;
+// CHECKSTYLE:OFF AvoidStarImport
+import java.util.concurrent.*;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.mesos.Protos;
+import org.apache.mesos.Scheduler;
+import org.apache.mesos.SchedulerDriver;
 
 import com.twitter.heron.scheduler.mesos.framework.config.FrameworkConfiguration;
 import com.twitter.heron.scheduler.mesos.framework.jobs.BaseJob;
 import com.twitter.heron.scheduler.mesos.framework.jobs.BaseTask;
 import com.twitter.heron.scheduler.mesos.framework.jobs.TaskUtils;
 import com.twitter.heron.scheduler.mesos.framework.state.PersistenceStore;
-import org.apache.mesos.Protos;
-import org.apache.mesos.Scheduler;
-import org.apache.mesos.SchedulerDriver;
-
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class MesosJobFramework implements Scheduler {
   private static final Logger LOG = Logger.getLogger(MesosJobFramework.class.getName());
 
   // The port pattern should be "{{task.ports[...]}}" literally
-  public static final String portVariableTemplate = "\\{\\{task\\.ports\\[.*?\\]\\}\\}";
-  public static final Pattern portVariablePattern = Pattern.compile(portVariableTemplate);
+  public static final String PORT_VARIABLE_TEMPLATE = "\\{\\{task\\.ports\\[.*?\\]\\}\\}";
+  public static final Pattern PORT_VARIABLE_PATTERN = Pattern.compile(PORT_VARIABLE_TEMPLATE);
 
   private final FrameworkConfiguration config;
   private final MesosTaskBuilder taskBuilder;
@@ -88,15 +104,26 @@ public class MesosJobFramework implements Scheduler {
     }
   }
 
+  /**
+   * Allows the framework to query the status for non-terminal tasks.
+   * This causes the master to send back the latest task status for
+   * each task in 'statuses', if possible. Tasks that are no longer
+   * known will result in a TASK_LOST update. If statuses is empty,
+   * then the master will send the latest status for each task
+   * currently known.
+   *
+   * @param schedulerDriver The SchedulerDriver to use for reconciliation.
+   *
+   */
   public void reconcileTasks(final SchedulerDriver schedulerDriver) {
     LOG.info("Starting reconcile executor.");
     // First set up
     for (BaseTask task : trackingTasks.values()) {
       BaseTask.TaskState state = task.state;
 
-      if (state.equals(BaseTask.TaskState.SCHEDULED) ||
-          state.equals(BaseTask.TaskState.TO_KILL) ||
-          state.equals(BaseTask.TaskState.TO_KILL_NOW)) {
+      if (state.equals(BaseTask.TaskState.SCHEDULED)
+          || state.equals(BaseTask.TaskState.TO_KILL)
+          || state.equals(BaseTask.TaskState.TO_KILL_NOW)) {
         remaining.put(
             task.taskId,
             TaskUtils.getMesosTaskStatus(task, Protos.TaskState.TASK_ERROR).build());
@@ -123,7 +150,8 @@ public class MesosJobFramework implements Scheduler {
             schedulerDriver.reconcileTasks(new LinkedList<Protos.TaskStatus>());
           }
 
-          reconcileExecutors.schedule(this, config.reconciliationIntervalInMs, TimeUnit.MILLISECONDS);
+          reconcileExecutors.schedule(this, config.reconciliationIntervalInMs,
+              TimeUnit.MILLISECONDS);
         }
       }
     };
@@ -169,7 +197,8 @@ public class MesosJobFramework implements Scheduler {
   }
 
   // We could make sure the job has run earlier
-  public boolean removeScheduledJob(String jobName, MesosDriverFactory mesosDriver, boolean killJobNow) {
+  public boolean removeScheduledJob(String jobName, MesosDriverFactory mesosDriver,
+                                    boolean killJobNow) {
     synchronized (this) {
       LOG.info(String.format("Kill job: %s, killNow: %s", jobName, killJobNow));
 
@@ -195,7 +224,8 @@ public class MesosJobFramework implements Scheduler {
       updateTrackingTask(jobName, task);
 
       removePendingTask(taskId);
-      LOG.info(String.format("Removed task: %s from pendingScheduleTasks[pend-to-schedule queue]", taskId));
+      LOG.info(String.format("Removed task: %s from pendingScheduleTasks[pend-to-schedule queue]",
+          taskId));
 
       // Just send a reconcile and handle the logic in statusUpdate, more uniformly
       mesosDriver.get().reconcileTasks(
@@ -224,7 +254,8 @@ public class MesosJobFramework implements Scheduler {
   }
 
   @Override
-  public void registered(SchedulerDriver driver, Protos.FrameworkID frameworkId, Protos.MasterInfo masterInfo) {
+  public void registered(SchedulerDriver schedulerDriver, Protos.FrameworkID frameworkId,
+                         Protos.MasterInfo masterInfo) {
     LOG.info("Registered with ID: " + frameworkId.getValue());
     LOG.info("Master info: " + masterInfo.toString());
 
@@ -233,21 +264,21 @@ public class MesosJobFramework implements Scheduler {
 
 
     LOG.info("Start to reconcile all tasks under monitoring");
-    reconcileTasks(driver);
-    this.driver = driver;
+    reconcileTasks(schedulerDriver);
+    this.driver = schedulerDriver;
   }
 
   @Override
-  public void reregistered(SchedulerDriver driver, Protos.MasterInfo masterInfo) {
+  public void reregistered(SchedulerDriver schedulerDriver, Protos.MasterInfo masterInfo) {
     LOG.info("Re-registered");
 
     LOG.info("Start to reconcile all tasks under monitoring");
-    reconcileTasks(driver);
-    this.driver = driver;
+    reconcileTasks(schedulerDriver);
+    this.driver = schedulerDriver;
   }
 
   @Override
-  public void resourceOffers(SchedulerDriver driver, List<Protos.Offer> offers) {
+  public void resourceOffers(SchedulerDriver schedulerDriver, List<Protos.Offer> offers) {
     synchronized (this) {
       LOG.fine("Received Resource Offers");
 
@@ -262,8 +293,8 @@ public class MesosJobFramework implements Scheduler {
       }
 
       // Only try to schedule jobs when isReady() == true
-      List<LaunchableTasks> tasksToLaunch = isReady() ?
-          generateLaunchableTasks(offerResources) : new LinkedList<LaunchableTasks>();
+      List<LaunchableTasks> tasksToLaunch = isReady()
+          ? generateLaunchableTasks(offerResources) : new LinkedList<LaunchableTasks>();
 
       LOG.fine("Declining unused offers.");
       Set<String> usedOffers = new HashSet<>();
@@ -272,21 +303,21 @@ public class MesosJobFramework implements Scheduler {
       }
       for (Protos.Offer offer : offers) {
         if (!usedOffers.contains(offer.getId().getValue())) {
-          driver.declineOffer(offer.getId());
+          schedulerDriver.declineOffer(offer.getId());
         }
       }
 
-      launchTasks(driver, tasksToLaunch);
+      launchTasks(schedulerDriver, tasksToLaunch);
     }
   }
 
   @Override
-  public void offerRescinded(SchedulerDriver driver, Protos.OfferID offerId) {
+  public void offerRescinded(SchedulerDriver schedulerDriver, Protos.OfferID offerId) {
     LOG.info("Offer rescinded for offer:" + offerId.getValue());
   }
 
   @Override
-  public void statusUpdate(SchedulerDriver driver, Protos.TaskStatus status) {
+  public void statusUpdate(SchedulerDriver schedulerDriver, Protos.TaskStatus status) {
     // CONSIDER TASK_TO_KILL and TASK_TO_KILL_NOW is a state we monitor and terminal state.
     // We do not monitor other terminal states.
     synchronized (this) {
@@ -317,18 +348,21 @@ public class MesosJobFramework implements Scheduler {
 
       BaseTask task = trackingTasks.get(jobName);
       if (task == null) {
-        LOG.info("Received a status update from unknown task. Possibly client requested a kill and let it finish rather than kill now.");
+        LOG.info("Received a status update from unknown task. "
+            + "Possibly client requested a kill and let it finish rather than kill now.");
       } else {
-        handleMesosStatusUpdate(driver, task, status);
+        handleMesosStatusUpdate(schedulerDriver, task, status);
       }
     }
   }
 
-  private void handleMesosStatusUpdate(SchedulerDriver driver, BaseTask task, Protos.TaskStatus status) {
+  private void handleMesosStatusUpdate(SchedulerDriver schedulerDriver, BaseTask task,
+                                       Protos.TaskStatus status) {
     // We would determine what to do basing on current task and mesos status update
     switch (task.state) {
       case TO_SCHEDULE:
-        LOG.info(String.format("Received [%s] update for a task in TO_SCHEDULE state: [%s]", status, task));
+        LOG.info(String.format("Received [%s] update for a task in TO_SCHEDULE state: [%s]",
+            status, task));
         break;
       case SCHEDULED:
         switch (status.getState()) {
@@ -357,7 +391,8 @@ public class MesosJobFramework implements Scheduler {
 
             break;
           case TASK_KILLED:
-            LOG.info("Task killed which is supported running. It could be triggered by manual restart command");
+            LOG.info("Task killed which is supported running. "
+                + "It could be triggered by manual restart command");
             handleMesosFailure(task);
 
             break;
@@ -372,16 +407,17 @@ public class MesosJobFramework implements Scheduler {
 
             break;
           default:
-            LOG.severe("Unknown TaskState:" + status.getState() + " for task: " + status.getTaskId().getValue());
+            LOG.severe("Unknown TaskState:" + status.getState() + " for task: "
+                + status.getTaskId().getValue());
 
             break;
         }
 
         break;
       case TO_KILL:
-        if (status.getState().equals(Protos.TaskState.TASK_STAGING) ||
-            status.getState().equals(Protos.TaskState.TASK_STARTING) ||
-            status.getState().equals(Protos.TaskState.TASK_RUNNING)) {
+        if (status.getState().equals(Protos.TaskState.TASK_STAGING)
+            || status.getState().equals(Protos.TaskState.TASK_STARTING)
+            || status.getState().equals(Protos.TaskState.TASK_RUNNING)) {
           LOG.info(
               String.format("The job is still running in status: %s", status.getState()));
           LOG.info("Do nothing and continue to wait for its NON_RUNNING");
@@ -393,13 +429,13 @@ public class MesosJobFramework implements Scheduler {
         }
         break;
       case TO_KILL_NOW:
-        if (status.getState().equals(Protos.TaskState.TASK_STAGING) ||
-            status.getState().equals(Protos.TaskState.TASK_STARTING) ||
-            status.getState().equals(Protos.TaskState.TASK_RUNNING)) {
+        if (status.getState().equals(Protos.TaskState.TASK_STAGING)
+            || status.getState().equals(Protos.TaskState.TASK_STARTING)
+            || status.getState().equals(Protos.TaskState.TASK_RUNNING)) {
           // We are requested to kill immediately
           LOG.info("The job is still running, kill it now....");
           // Kill it again
-          driver.
+          schedulerDriver.
               killTask(Protos.TaskID.newBuilder().setValue(status.getTaskId().getValue()).build());
         } else {
           LOG.info("The job is requested to kill and now it has been killed already.");
@@ -408,15 +444,18 @@ public class MesosJobFramework implements Scheduler {
         break;
       // Terminal states
       case FINISHED_SUCCESS:
-        // We could not throw exceptions here, though they should not be states related to mesos directly,
-        // considering there might be a lot of pending statusUpdate coming at the same time
-        LOG.info(String.format("Received [%s] update for a task in terminated state: [%s]", status, task));
+        // We could not throw exceptions here, though they should not be states related to mesos
+        // directly considering there might be a lot of pending statusUpdate coming at the same time
+        LOG.info(String.format("Received [%s] update for a task in terminated state: [%s]",
+            status, task));
         break;
       case FINISHED_FAILURE:
-        LOG.info(String.format("Received [%s] update for a task in terminated state: [%s]", status, task));
+        LOG.info(String.format("Received [%s] update for a task in terminated state: [%s]",
+            status, task));
         break;
       default:
-        LOG.info(String.format("Received [%s] update for task in unknown state: [%s]", status, task));
+        LOG.info(String.format("Received [%s] update for task in unknown state: [%s]",
+            status, task));
     }
   }
 
@@ -440,17 +479,18 @@ public class MesosJobFramework implements Scheduler {
   }
 
   @Override
-  public void frameworkMessage(SchedulerDriver driver, Protos.ExecutorID executorId, Protos.SlaveID slaveId, byte[] data) {
+  public void frameworkMessage(SchedulerDriver schedulerDriver, Protos.ExecutorID executorId,
+                               Protos.SlaveID slaveId, byte[] data) {
     LOG.info("Framework message received");
   }
 
   @Override
-  public void disconnected(SchedulerDriver driver) {
+  public void disconnected(SchedulerDriver schedulerDriver) {
     LOG.info("Disconnected");
   }
 
   @Override
-  public void slaveLost(SchedulerDriver driver, Protos.SlaveID slaveId) {
+  public void slaveLost(SchedulerDriver schedulerDriver, Protos.SlaveID slaveId) {
     LOG.info(String.format("Slave %s lost", slaveId));
 
     // No need to specifically handle this case
@@ -458,14 +498,16 @@ public class MesosJobFramework implements Scheduler {
   }
 
   @Override
-  public void executorLost(SchedulerDriver driver, Protos.ExecutorID executorId, Protos.SlaveID slaveId, int status) {
+  public void executorLost(SchedulerDriver schedulerDriver, Protos.ExecutorID executorId,
+                           Protos.SlaveID slaveId, int status) {
     LOG.info("Executor lost");
   }
 
   @Override
-  public void error(SchedulerDriver driver, String message) {
+  public void error(SchedulerDriver schedulerDriver, String message) {
     LOG.severe(message);
 
+    // CHECKSTYLE:OFF RegexpSinglelineJava
     System.exit(1);
   }
 
@@ -526,7 +568,8 @@ public class MesosJobFramework implements Scheduler {
     trackingTasks.put(jobName, task);
   }
 
-  private List<LaunchableTasks> generateLaunchableTasks(Map<Protos.Offer, TaskResources> offerResources) {
+  private List<LaunchableTasks> generateLaunchableTasks(Map<Protos.Offer, TaskResources>
+                                                            offerResources) {
     List<LaunchableTasks> tasks = new LinkedList<>();
     Set<String> taskIds = new HashSet<>();
 
@@ -536,16 +579,19 @@ public class MesosJobFramework implements Scheduler {
 
       BaseTask task = trackingTasks.get(job.name);
       if (task != null && task.state.equals(BaseTask.TaskState.SCHEDULED)) {
-        LOG.info("Found job in queue that is already scheduled and running for launch: " + job.name);
+        LOG.info("Found job in queue that is already scheduled and running for launch: "
+            + job.name);
 
       } else {
         if (taskIds.contains(taskId)) {
-          LOG.info("Found job in queue that is already scheduled for launch with this offer set: " + job.name + "\n");
+          LOG.info("Found job in queue that is already scheduled for launch with this offer set: "
+              + job.name + "\n");
 
         } else {
           TaskResources neededResources = new TaskResources(job);
 
-          Iterator<Map.Entry<Protos.Offer, TaskResources>> it = offerResources.entrySet().iterator();
+          Iterator<Map.Entry<Protos.Offer, TaskResources>> it = offerResources.entrySet()
+              .iterator();
           while (it.hasNext()) {
             Map.Entry<Protos.Offer, TaskResources> kv = it.next();
             Protos.Offer offer = kv.getKey();
@@ -562,7 +608,8 @@ public class MesosJobFramework implements Scheduler {
               // Matched task, break;
               break;
             } else {
-              LOG.info(String.format("Insufficient resources remaining for task: %s, will append to queue. Need: [%s], Found: [%s]",
+              LOG.info(String.format("Insufficient resources remaining for task: %s, "
+                  + "will append to queue. Need: [%s], Found: [%s]",
                   taskId, neededResources.toString(), resources.toString()));
 
               pendingScheduleTasks.add(taskId);
@@ -582,7 +629,7 @@ public class MesosJobFramework implements Scheduler {
     driver.stop();
   }
 
-  private void launchTasks(SchedulerDriver driver, List<LaunchableTasks> tasks) {
+  private void launchTasks(SchedulerDriver schedulerDriver, List<LaunchableTasks> tasks) {
     // Group by
     Map<Protos.Offer, List<LaunchableTasks>> tasksGroupByOffer = new HashMap<>();
     for (LaunchableTasks task : tasks) {
@@ -604,7 +651,8 @@ public class MesosJobFramework implements Scheduler {
             getMesosTaskInfoBuilder(task.taskId, task.baseJob, task.offer).
             addResources(
                 taskBuilder.rangeResource(
-                    MesosTaskBuilder.portResourceName, task.portRangeStart, task.portRangeEnd, offer)).
+                    MesosTaskBuilder.PORT_RESOURCE_NAME, task.portRangeStart, task.portRangeEnd,
+                    offer)).
             setSlaveId(task.offer.getSlaveId());
 
         String convertedCommand =
@@ -629,7 +677,7 @@ public class MesosJobFramework implements Scheduler {
       LOG.info("Launching tasks from offer: " + offer + " with tasks: " + mesosTasks);
 
       Protos.Status status =
-          driver.launchTasks(Arrays.asList(new Protos.OfferID[]{offer.getId()}),
+          schedulerDriver.launchTasks(Arrays.asList(new Protos.OfferID[]{offer.getId()}),
               mesosTasks);
 
       if (status == Protos.Status.DRIVER_RUNNING) {
@@ -657,7 +705,7 @@ public class MesosJobFramework implements Scheduler {
     public final int portRangeEnd;
 
 
-    public LaunchableTasks(String taskId, BaseJob baseJob, Protos.Offer offer,
+    LaunchableTasks(String taskId, BaseJob baseJob, Protos.Offer offer,
                            int portRangeStart, int portRangeEnd) {
       this.taskId = taskId;
       this.baseJob = baseJob;
@@ -711,10 +759,10 @@ public class MesosJobFramework implements Scheduler {
         }
       }
 
-      return isPortsEnough &&
-          (this.cpu >= needed.cpu) &&
-          (this.mem >= needed.mem) &&
-          (this.disk >= needed.disk);
+      return isPortsEnough
+          && (this.cpu >= needed.cpu)
+          && (this.mem >= needed.mem)
+          && (this.disk >= needed.disk);
     }
 
     public void consume(TaskResources needed) {
@@ -726,7 +774,8 @@ public class MesosJobFramework implements Scheduler {
       for (Range portRange : portsHold) {
         if (portRange.rangeEnd - portRange.rangeStart + 1 > needed.ports) {
           // Give the ports to the needed guy
-          needed.portsHold.add(new Range(portRange.rangeStart, portRange.rangeStart + needed.ports - 1));
+          needed.portsHold.add(new Range(portRange.rangeStart, portRange.rangeStart
+              + needed.ports - 1));
           // And then consume us by update the range value
           portRange.rangeStart = portRange.rangeStart + needed.ports;
 
@@ -776,11 +825,12 @@ public class MesosJobFramework implements Scheduler {
   }
 
   // TODO(mfu): Make it more efficient
-  static String allocatePortsInCommand(String originalCommand, int portRangeStart, int portRangeEnd) {
+  static String allocatePortsInCommand(String originalCommand, int portRangeStart,
+                                       int portRangeEnd) {
     String result = originalCommand;
 
     // First figure out all the variables
-    Matcher matcher = portVariablePattern.matcher(result);
+    Matcher matcher = PORT_VARIABLE_PATTERN.matcher(result);
     Set<String> matchedPortNames = new HashSet<>();
     while (matcher.find()) {
       matchedPortNames.add(matcher.group(0));
@@ -793,10 +843,12 @@ public class MesosJobFramework implements Scheduler {
     // We do this to recognize the same variable
     for (String name : matchedPortNames) {
       if (portRangeStart > portRangeEnd) {
-        throw new RuntimeException("The command requires more ports than expected: " + originalCommand);
+        throw new RuntimeException("The command requires more ports than expected: "
+            + originalCommand);
       }
 
       result = result.replace(name, "" + portRangeStart);
+      // CHECKSTYLE:OFF ParameterAssignment
       portRangeStart++;
     }
 
@@ -804,7 +856,7 @@ public class MesosJobFramework implements Scheduler {
   }
 
   static int getRequiredPorts(String command) {
-    Matcher matcher = portVariablePattern.matcher(command);
+    Matcher matcher = PORT_VARIABLE_PATTERN.matcher(command);
     Set<String> matchedPortNames = new HashSet<>();
     while (matcher.find()) {
       matchedPortNames.add(matcher.group(0));

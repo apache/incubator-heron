@@ -1,12 +1,18 @@
-package com.twitter.heron.scheduler.mesos.framework.state;
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-import com.twitter.heron.scheduler.mesos.framework.jobs.BaseJob;
-import com.twitter.heron.scheduler.mesos.framework.jobs.BaseTask;
-import com.twitter.heron.scheduler.mesos.framework.jobs.TaskUtils;
-import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.CuratorFrameworkFactory;
-import org.apache.curator.retry.ExponentialBackoffRetry;
-import org.apache.mesos.Protos;
+package com.twitter.heron.scheduler.mesos.framework.state;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -14,6 +20,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.apache.mesos.Protos;
+
+import com.twitter.heron.scheduler.mesos.framework.jobs.BaseJob;
+import com.twitter.heron.scheduler.mesos.framework.jobs.BaseTask;
+import com.twitter.heron.scheduler.mesos.framework.jobs.TaskUtils;
 
 public class ZkPersistenceStore implements PersistenceStore {
   private static final Logger LOG = Logger.getLogger(ZkPersistenceStore.class.getName());
@@ -26,7 +41,8 @@ public class ZkPersistenceStore implements PersistenceStore {
   private final String jobPath;
   private final String taskPath;
 
-  public ZkPersistenceStore(String connectionString, int connectionTimeoutMs, int sessionTimeoutMs, String rootPath) {
+  public ZkPersistenceStore(String connectionString, int connectionTimeoutMs, int sessionTimeoutMs,
+                            String rootPath) {
     // these are reasonable arguments for the ExponentialBackoffRetry. The first
     // retry will wait 1 second - the second will wait up to 2 seconds - the
     // third will wait up to 4 seconds.
@@ -53,7 +69,7 @@ public class ZkPersistenceStore implements PersistenceStore {
     jobPath = path + "/jobs";
     taskPath = path + "/tasks";
 
-
+    // CHECKSTYLE:OFF IllegalCatch
     try {
       if (client.checkExists().forPath(jobPath) == null) {
         client.create().creatingParentsIfNeeded().forPath(jobPath);
@@ -70,18 +86,19 @@ public class ZkPersistenceStore implements PersistenceStore {
   public boolean persistJob(BaseJob baseJob) {
     LOG.info("Persist Job: " + BaseJob.getJobDefinitionInJSON(baseJob));
 
-    String path = jobPath + "/" + baseJob.name;
+    String fullPath = jobPath + "/" + baseJob.name;
     byte[] data = BaseJob.getJobDefinitionInJSON(baseJob).getBytes();
     try {
-      if (client.checkExists().forPath(path) != null) {
+      if (client.checkExists().forPath(fullPath) != null) {
         LOG.info("Reset the Job data");
-        client.setData().forPath(path, data);
+        client.setData().forPath(fullPath, data);
 
         return true;
       }
 
+      // CHECKSTYLE:OFF IllegalCatch
       client.create().creatingParentsIfNeeded().
-          forPath(path, data);
+          forPath(fullPath, data);
     } catch (Exception e) {
       LOG.log(Level.SEVERE, "Failed to persist job", e);
       return false;
@@ -94,18 +111,19 @@ public class ZkPersistenceStore implements PersistenceStore {
   public boolean persistTask(String name, BaseTask task) {
     LOG.info(String.format("Persist Task: %s with details: %s", name, task));
 
-    String path = taskPath + "/" + name;
+    String fullPath = taskPath + "/" + name;
     byte[] data = BaseTask.getTaskInJSON(task).getBytes();
     try {
-      if (client.checkExists().forPath(path) != null) {
+      if (client.checkExists().forPath(fullPath) != null) {
         LOG.info("Reset the task data");
-        client.setData().forPath(path, data);
+        client.setData().forPath(fullPath, data);
 
         return true;
       }
 
+      // CHECKSTYLE:OFF IllegalCatch
       client.create().creatingParentsIfNeeded().
-          forPath(path, data);
+          forPath(fullPath, data);
     } catch (Exception e) {
       LOG.log(Level.SEVERE, "Failed to persist task", e);
       return false;
@@ -118,6 +136,7 @@ public class ZkPersistenceStore implements PersistenceStore {
   public boolean removeTask(String taskId) {
     LOG.info("Remove Task: " + taskId);
 
+    // CHECKSTYLE:OFF IllegalCatch
     try {
       client.delete().forPath(taskPath + "/" + TaskUtils.getJobNameForTaskId(taskId));
     } catch (Exception e) {
@@ -131,6 +150,7 @@ public class ZkPersistenceStore implements PersistenceStore {
   @Override
   public boolean removeJob(String jobName) {
     LOG.info("Remove Job: " + jobName);
+    // CHECKSTYLE:OFF IllegalCatch
     try {
       client.delete().forPath(jobPath + "/" + jobName);
     } catch (Exception e) {
@@ -147,6 +167,7 @@ public class ZkPersistenceStore implements PersistenceStore {
     LOG.info("Get all Tasks");
     Map<String, BaseTask> tasks = new HashMap<>();
 
+    // CHECKSTYLE:OFF IllegalCatch
     try {
       List<String> tasksName = client.getChildren().forPath(taskPath);
       for (String taskName : tasksName) {
@@ -171,6 +192,7 @@ public class ZkPersistenceStore implements PersistenceStore {
     LOG.info("Get all Jobs");
     List<BaseJob> jobs = new LinkedList<>();
 
+    // CHECKSTYLE:OFF IllegalCatch
     try {
       List<String> jobsName = client.getChildren().forPath(jobPath);
       for (String jobName : jobsName) {
@@ -192,6 +214,7 @@ public class ZkPersistenceStore implements PersistenceStore {
     LOG.info("Get FrameworkID");
 
     byte[] res;
+    // CHECKSTYLE:OFF IllegalCatch
     try {
       if (client.checkExists().forPath(frameworkIdPath) == null) {
         LOG.info("No existing frameworkId");
@@ -212,6 +235,7 @@ public class ZkPersistenceStore implements PersistenceStore {
   @Override
   public boolean persistFrameworkID(Protos.FrameworkID frameworkID) {
     LOG.info("Persist FrameworkId: " + frameworkID);
+    // CHECKSTYLE:OFF IllegalCatch
     try {
       if (client.checkExists().forPath(frameworkIdPath) != null) {
         client.setData().forPath(frameworkIdPath, frameworkID.getValue().getBytes());
@@ -231,6 +255,7 @@ public class ZkPersistenceStore implements PersistenceStore {
   public boolean removeFrameworkID() {
     LOG.info("Remove frameworkId: " + frameworkIdPath);
 
+    // CHECKSTYLE:OFF IllegalCatch
     try {
       client.delete().forPath(frameworkIdPath);
     } catch (Exception e) {
@@ -246,6 +271,7 @@ public class ZkPersistenceStore implements PersistenceStore {
     LOG.info("Cleaning all unneeded meta-data");
     LOG.info("Doing some cleaning");
 
+    // CHECKSTYLE:OFF IllegalCatch
     try {
       client.delete().deletingChildrenIfNeeded().forPath(path);
     } catch (Exception e) {

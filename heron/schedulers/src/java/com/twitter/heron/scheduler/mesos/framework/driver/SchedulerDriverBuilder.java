@@ -1,11 +1,18 @@
-package com.twitter.heron.scheduler.mesos.framework.driver;
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-import com.google.protobuf.ByteString;
-import com.twitter.heron.scheduler.mesos.framework.config.FrameworkConfiguration;
-import org.apache.mesos.MesosSchedulerDriver;
-import org.apache.mesos.Protos;
-import org.apache.mesos.Scheduler;
-import org.apache.mesos.SchedulerDriver;
+package com.twitter.heron.scheduler.mesos.framework.driver;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,13 +23,22 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class SchedulerDriverBuilder {
+import com.google.protobuf.ByteString;
+
+import org.apache.mesos.MesosSchedulerDriver;
+import org.apache.mesos.Protos;
+import org.apache.mesos.Scheduler;
+import org.apache.mesos.SchedulerDriver;
+
+import com.twitter.heron.scheduler.mesos.framework.config.FrameworkConfiguration;
+
+public final class SchedulerDriverBuilder {
   private static final Logger LOG = Logger.getLogger(SchedulerDriverBuilder.class.getName());
 
-  Protos.Credential credential;
-  Protos.FrameworkInfo frameworkInfo;
-  FrameworkConfiguration config;
-  Scheduler scheduler;
+  private Protos.Credential credential;
+  private Protos.FrameworkInfo frameworkInfo;
+  private FrameworkConfiguration config;
+  private Scheduler scheduler;
 
   private SchedulerDriverBuilder() {
   }
@@ -31,8 +47,8 @@ public class SchedulerDriverBuilder {
     return new SchedulerDriverBuilder();
   }
 
-  public SchedulerDriverBuilder setScheduler(Scheduler scheduler) {
-    this.scheduler = scheduler;
+  public SchedulerDriverBuilder setScheduler(Scheduler sched) {
+    this.scheduler = sched;
     return this;
   }
 
@@ -51,8 +67,8 @@ public class SchedulerDriverBuilder {
       Set<PosixFilePermission> filePermissions =
           Files.getPosixFilePermissions(Paths.get(secretFile));
 
-      if (filePermissions.contains(PosixFilePermission.OTHERS_READ) ||
-          filePermissions.contains(PosixFilePermission.OTHERS_WRITE)) {
+      if (filePermissions.contains(PosixFilePermission.OTHERS_READ)
+          || filePermissions.contains(PosixFilePermission.OTHERS_WRITE)) {
         LOG.warning("Secret file $secretFile should not be globally accessible.");
       }
 
@@ -65,16 +81,16 @@ public class SchedulerDriverBuilder {
     return this;
   }
 
-  public SchedulerDriverBuilder setFrameworkInfo(FrameworkConfiguration config,
+  public SchedulerDriverBuilder setFrameworkInfo(FrameworkConfiguration frameworkConfig,
                                                  Protos.FrameworkID frameworkId) {
-    this.config = config;
+    this.config = frameworkConfig;
     Protos.FrameworkInfo.Builder frameworkInfoBuilder = Protos.FrameworkInfo.newBuilder()
-        .setName(config.schedulerName)
-        .setCheckpoint(config.checkpoint)
-        .setRole(config.role)
-        .setFailoverTimeout(config.failoverTimeoutSeconds)
-        .setUser(config.user)
-        .setHostname(config.hostname);
+        .setName(frameworkConfig.schedulerName)
+        .setCheckpoint(frameworkConfig.checkpoint)
+        .setRole(frameworkConfig.role)
+        .setFailoverTimeout(frameworkConfig.failoverTimeoutSeconds)
+        .setUser(frameworkConfig.user)
+        .setHostname(frameworkConfig.hostname);
 
     // Set the ID, if provided
     if (frameworkId != null) {
@@ -82,8 +98,8 @@ public class SchedulerDriverBuilder {
     }
 
     // set the authentication principal, if provided
-    if (config.authenticationPrincipal != null) {
-      frameworkInfoBuilder.setPrincipal(config.authenticationPrincipal);
+    if (frameworkConfig.authenticationPrincipal != null) {
+      frameworkInfoBuilder.setPrincipal(frameworkConfig.authenticationPrincipal);
     }
 
     frameworkInfo = frameworkInfoBuilder.build();
@@ -95,8 +111,8 @@ public class SchedulerDriverBuilder {
       throw new IllegalArgumentException("FrameworkInfo or Scheduler is not set");
     }
 
-    return credential == null ?
-        new MesosSchedulerDriver(scheduler, frameworkInfo, config.master) :
-        new MesosSchedulerDriver(scheduler, frameworkInfo, config.master, credential);
+    return credential == null
+        ? new MesosSchedulerDriver(scheduler, frameworkInfo, config.master)
+        : new MesosSchedulerDriver(scheduler, frameworkInfo, config.master, credential);
   }
 }

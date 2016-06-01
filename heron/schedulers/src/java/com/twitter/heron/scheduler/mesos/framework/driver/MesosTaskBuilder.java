@@ -1,25 +1,36 @@
-package com.twitter.heron.scheduler.mesos.framework.driver;
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-import com.twitter.heron.scheduler.mesos.framework.jobs.BaseJob;
-import org.apache.mesos.Protos;
-import org.apache.mesos.Protos.*;
+package com.twitter.heron.scheduler.mesos.framework.driver;
 
 import java.util.*;
 import java.util.logging.Logger;
 
+import org.apache.mesos.Protos;
+// CHECKSTYLE:OFF AvoidStarImport
+import org.apache.mesos.Protos.*;
+
+import com.twitter.heron.scheduler.mesos.framework.jobs.BaseJob;
+
 public class MesosTaskBuilder {
   private static final Logger LOG = Logger.getLogger(MesosTaskBuilder.class.getName());
 
-  public static final String cpusResourceName = "cpus";
-  public static final String memResourceName = "mem";
-  public static final String diskResourceName = "disk";
-  public static final String portResourceName = "ports";
-  public static final String taskNameTemplate = "task:%s";
-
-  //args|command.
-  //  e.g. args: -av (async job), verbose mode
-  final String executorArgsPattern = "%s|%s";
-
+  public static final String CPUS_RESOURCE_NAME = "cpus";
+  public static final String MEM_RESOURCE_NAME = "mem";
+  public static final String DISK_RESOURCE_NAME = "disk";
+  public static final String PORT_RESOURCE_NAME = "ports";
+  public static final String TASK_NAME_TEMPLATE = "task:%s";
 
   Resource scalarResource(String name, Double value) {
     // Added for convenience.  Uses default catch-all role.
@@ -37,7 +48,7 @@ public class MesosTaskBuilder {
     // Give preference to reserved offers first (those whose roles do not match "*")
     List<Resource> reservedResources = new LinkedList<>();
     for (Resource resource : offer.getResourcesList()) {
-      if (resource.hasRole() && resource.getRole() != "*") {
+      if (resource.hasRole() && !resource.getRole().equals("*")) {
         reservedResources.add(resource);
       }
     }
@@ -65,7 +76,7 @@ public class MesosTaskBuilder {
     // Give preference to reserved offers first (those whose roles do not match "*")
     List<Resource> reservedResources = new LinkedList<>();
     for (Resource resource : offer.getResourcesList()) {
-      if (resource.hasRole() && resource.getRole() != "*") {
+      if (resource.hasRole() && !resource.getRole().equals("*")) {
         reservedResources.add(resource);
       }
     }
@@ -113,7 +124,7 @@ public class MesosTaskBuilder {
   TaskInfo.Builder getMesosTaskInfoBuilder(String taskIdStr, BaseJob baseJob, Offer offer) {
     TaskID taskId = TaskID.newBuilder().setValue(taskIdStr).build();
     TaskInfo.Builder taskInfo = TaskInfo.newBuilder()
-        .setName(String.format(taskNameTemplate, baseJob.name))
+        .setName(String.format(TASK_NAME_TEMPLATE, baseJob.name))
         .setTaskId(taskId);
     Environment.Builder environment = Environment.newBuilder();
 
@@ -150,9 +161,9 @@ public class MesosTaskBuilder {
     taskInfo.setCommand(command);
 
     taskInfo
-        .addResources(scalarResource(cpusResourceName, baseJob.cpu, offer))
-        .addResources(scalarResource(memResourceName, baseJob.mem, offer))
-        .addResources(scalarResource(diskResourceName, baseJob.disk, offer));
+        .addResources(scalarResource(CPUS_RESOURCE_NAME, baseJob.cpu, offer))
+        .addResources(scalarResource(MEM_RESOURCE_NAME, baseJob.mem, offer))
+        .addResources(scalarResource(DISK_RESOURCE_NAME, baseJob.disk, offer));
 
 
     return taskInfo;

@@ -1,9 +1,18 @@
-package com.twitter.heron.scheduler.mesos.framework.state;
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-import com.twitter.heron.scheduler.mesos.framework.jobs.BaseJob;
-import com.twitter.heron.scheduler.mesos.framework.jobs.BaseTask;
-import com.twitter.heron.scheduler.mesos.framework.jobs.TaskUtils;
-import org.apache.mesos.Protos;
+package com.twitter.heron.scheduler.mesos.framework.state;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +27,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.apache.mesos.Protos;
+
+import com.twitter.heron.scheduler.mesos.framework.jobs.BaseJob;
+import com.twitter.heron.scheduler.mesos.framework.jobs.BaseTask;
+import com.twitter.heron.scheduler.mesos.framework.jobs.TaskUtils;
 
 public class FilePersistenceStore implements PersistenceStore {
   private static final Logger LOG = Logger.getLogger(FilePersistenceStore.class.getName());
@@ -39,7 +54,8 @@ public class FilePersistenceStore implements PersistenceStore {
     try {
       LOG.info("Persist Job: " + BaseJob.getJobDefinitionInJSON(baseJob));
       Files.write(
-          new File(jobPath + "/" + baseJob.name).toPath(), BaseJob.getJobDefinitionInJSON(baseJob).getBytes());
+          new File(jobPath + "/" + baseJob.name).toPath(), BaseJob.getJobDefinitionInJSON(baseJob)
+              .getBytes());
     } catch (IOException e) {
       LOG.log(Level.SEVERE, "Failed to write file", e);
       return false;
@@ -67,7 +83,8 @@ public class FilePersistenceStore implements PersistenceStore {
     LOG.info("Remove Task: " + taskId);
 
     try {
-      Files.deleteIfExists(new File(taskPath + "/" + TaskUtils.getJobNameForTaskId(taskId)).toPath());
+      Files.deleteIfExists(
+          new File(taskPath + "/" + TaskUtils.getJobNameForTaskId(taskId)).toPath());
     } catch (IOException e) {
       LOG.log(Level.SEVERE, "Failed to delete file", e);
       return false;
@@ -185,6 +202,7 @@ public class FilePersistenceStore implements PersistenceStore {
     LOG.info("Cleaning all unneeded meta-data");
     LOG.info("Doing some cleaning");
 
+    // CHECKSTYLE:OFF IllegalCatch
     try {
       Files.walkFileTree(new File(rootPath).toPath(), new SimpleFileVisitor<Path>() {
         @Override

@@ -1,24 +1,19 @@
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.twitter.heron.scheduler.mesos;
 
-import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.basics.FileUtils;
-import com.twitter.heron.common.basics.SysUtils;
-import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.scheduler.mesos.framework.config.FrameworkConfiguration;
-import com.twitter.heron.scheduler.mesos.framework.driver.MesosDriverFactory;
-import com.twitter.heron.scheduler.mesos.framework.driver.MesosJobFramework;
-import com.twitter.heron.scheduler.mesos.framework.driver.MesosTaskBuilder;
-import com.twitter.heron.scheduler.mesos.framework.jobs.BaseJob;
-import com.twitter.heron.scheduler.mesos.framework.jobs.JobScheduler;
-import com.twitter.heron.scheduler.mesos.framework.state.PersistenceStore;
-import com.twitter.heron.scheduler.mesos.framework.state.ZkPersistenceStore;
-import com.twitter.heron.spi.common.*;
-import com.twitter.heron.spi.scheduler.IScheduler;
-import com.twitter.heron.spi.utils.Runtime;
-import com.twitter.heron.spi.utils.SchedulerUtils;
-import com.twitter.heron.spi.utils.TopologyUtils;
-
-import javax.xml.bind.DatatypeConverter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -33,6 +28,27 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.xml.bind.DatatypeConverter;
+
+import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.FileUtils;
+import com.twitter.heron.common.basics.SysUtils;
+import com.twitter.heron.proto.scheduler.Scheduler;
+import com.twitter.heron.scheduler.mesos.framework.config.FrameworkConfiguration;
+import com.twitter.heron.scheduler.mesos.framework.driver.MesosDriverFactory;
+import com.twitter.heron.scheduler.mesos.framework.driver.MesosJobFramework;
+import com.twitter.heron.scheduler.mesos.framework.driver.MesosTaskBuilder;
+import com.twitter.heron.scheduler.mesos.framework.jobs.BaseJob;
+import com.twitter.heron.scheduler.mesos.framework.jobs.JobScheduler;
+import com.twitter.heron.scheduler.mesos.framework.state.PersistenceStore;
+import com.twitter.heron.scheduler.mesos.framework.state.ZkPersistenceStore;
+// CHECKSTYLE:OFF AvoidStarImport
+import com.twitter.heron.spi.common.*;
+import com.twitter.heron.spi.scheduler.IScheduler;
+import com.twitter.heron.spi.utils.Runtime;
+import com.twitter.heron.spi.utils.SchedulerUtils;
+import com.twitter.heron.spi.utils.TopologyUtils;
 
 public class MesosScheduler implements IScheduler {
   private static final Logger LOG = Logger.getLogger(MesosScheduler.class.getName());
@@ -121,15 +137,17 @@ public class MesosScheduler implements IScheduler {
 
     mesosJobFramework = new MesosJobFramework(mesosTaskBuilder, persistenceStore, frameworkConfig);
 
-    MesosDriverFactory mesosDriver = new MesosDriverFactory(mesosJobFramework, persistenceStore, frameworkConfig);
-    JobScheduler jobScheduler = new JobScheduler(mesosJobFramework, persistenceStore, mesosDriver, frameworkConfig);
+    MesosDriverFactory mesosDriver = new MesosDriverFactory(mesosJobFramework, persistenceStore,
+        frameworkConfig);
+    JobScheduler scheduler = new JobScheduler(mesosJobFramework, persistenceStore, mesosDriver,
+        frameworkConfig);
 
-    return jobScheduler;
+    return scheduler;
   }
 
   @Override
-  public boolean onSchedule(PackingPlan packing) {
-    this.packing = packing;
+  public boolean onSchedule(PackingPlan packingPlan) {
+    this.packing = packingPlan;
     // Start tmaster.
     createTmasterRunScript();
     Thread tmasterRunThread = new Thread(new Runnable() {
@@ -155,7 +173,8 @@ public class MesosScheduler implements IScheduler {
     jobDef.retries = Integer.MAX_VALUE;
     jobDef.owner = Context.role(config);
     jobDef.runAsUser = Context.role(config);
-    jobDef.description = "Container for id: " + container.id + " for topology: " + Runtime.topologyName(runtime);
+    jobDef.description = "Container for id: " + container.id + " for topology: "
+        + Runtime.topologyName(runtime);
     jobDef.cpu = container.resource.cpu;
     jobDef.disk = container.resource.disk / Constants.MB;
     jobDef.mem = container.resource.ram / Constants.MB;
@@ -196,11 +215,11 @@ public class MesosScheduler implements IScheduler {
   }
 
   @Override
-  public void initialize(Config config, Config runtime) {
+  public void initialize(Config schedulerConfig, Config runtimeConfig) {
     LOG.info("Initializing new mesos topology scheduler");
     this.tmasterRestart = new AtomicBoolean(true);
-    this.config = config;
-    this.runtime = runtime;
+    this.config = schedulerConfig;
+    this.runtime = runtimeConfig;
 
     // Start the jobScheduler
     this.jobScheduler = getJobScheduler();
@@ -244,7 +263,8 @@ public class MesosScheduler implements IScheduler {
     persistenceStore.clean();
     tmasterRestart.set(false);
     tmasterProcess.destroy();
-    //TODO: also need some delayed shutdown after giving away response, so this process itself would shutdown
+    //TODO: also need some delayed shutdown after giving away response,
+    // so this process itself would shutdown
     return true;
   }
 
@@ -324,32 +344,37 @@ public class MesosScheduler implements IScheduler {
       String sPort6) {
 
     return String.format(
-        "\"%s\" \"%s\" \"%s\" " +
-            "\"%s\" \"%s\" \"%s\" " +
-            "\"%s\" \"%s\" \"%s\" " +
-            "\"%s\" \"%s\" \"%s\" " +
-            "\"%s\" \"%s\" \"%s\" " +
-            "\"%s\" \"%s\" \"%s\" " +
-            "\"%s\" \"%s\" \"%s\" " +
-            "\"%s\" \"%s\" \"%s\" " +
-            "\"%s\" \"%s\" \"%s\" " +
-            "\"%s\" \"%s\" \"%s\"",
-        Runtime.topologyName(runtime), Runtime.topologyId(runtime), FileUtils.getBaseName(Context.topologyDefinitionFile(config)),
-        packing.getInstanceDistribution(), MesosContext.stateManagerConnectionString(config), MesosContext.stateManagerRootPath(config),
-        Context.tmasterSandboxBinary(config), Context.stmgrSandboxBinary(config), Context.metricsManagerSandboxClassPath(config),
-        formatJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)), TopologyUtils.makeClassPath(topology, Context.topologyJarFile(config)), sPort1,
-        sPort2, sPort3, Context.systemConfigSandboxFile(config), TopologyUtils.formatRamMap(
+        "\"%s\" \"%s\" \"%s\" "
+            + "\"%s\" \"%s\" \"%s\" "
+            + "\"%s\" \"%s\" \"%s\" "
+            + "\"%s\" \"%s\" \"%s\" "
+            + "\"%s\" \"%s\" \"%s\" "
+            + "\"%s\" \"%s\" \"%s\" "
+            + "\"%s\" \"%s\" \"%s\" "
+            + "\"%s\" \"%s\" \"%s\" "
+            + "\"%s\" \"%s\" \"%s\" "
+            + "\"%s\" \"%s\" \"%s\"",
+        Runtime.topologyName(runtime), Runtime.topologyId(runtime), FileUtils.getBaseName(
+            Context.topologyDefinitionFile(config)), packing.getInstanceDistribution(),
+        MesosContext.stateManagerConnectionString(config), MesosContext
+            .stateManagerRootPath(config),
+        Context.tmasterSandboxBinary(config), Context.stmgrSandboxBinary(config),
+        Context.metricsManagerSandboxClassPath(config), formatJavaOpts(TopologyUtils
+            .getInstanceJvmOptions(topology)), TopologyUtils.makeClassPath(topology, Context
+            .topologyJarFile(config)), sPort1, sPort2, sPort3,
+        Context.systemConfigSandboxFile(config), TopologyUtils.formatRamMap(
             TopologyUtils.getComponentRamMap(topology, Context.instanceRam(config))),
-        formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)), Context.topologyPackageType(config),
-        FileUtils.getBaseName(Context.topologyJarFile(config)), Context.javaSandboxHome(config),
-        sPort4, Context.shellSandboxBinary(config), sPort5, Context.cluster(config), Context.role(config),
-        Context.environ(config), Context.instanceSandboxClassPath(config), Context.metricsSinksSandboxFile(config),
+        formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)),
+        Context.topologyPackageType(config), FileUtils.getBaseName(Context.topologyJarFile(config)),
+        Context.javaSandboxHome(config), sPort4, Context.shellSandboxBinary(config), sPort5,
+        Context.cluster(config), Context.role(config), Context.environ(config), Context
+            .instanceSandboxClassPath(config), Context.metricsSinksSandboxFile(config),
         completeSchedulerClasspath(), sPort6);
   }
 
   public String getHeronTMasterArguments(
-      Config config,
-      PackingPlan packing,
+      Config schedulerConfig,
+      PackingPlan packingPlan,
       int port1,  // Port for TMaster Controller and Stream-manager port
       int port2,  // Port for TMaster and Stream-manager communication amd Stream manager with
       // metric manager communicaiton.
