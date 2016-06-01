@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-set -e
+#set -e TODO: figure out why this breaks CI and re-enable (https://github.com/twitter/heron/issues/766)
 
 JAVADOC=javadoc
 FLAGS="-quiet"
 
 HERON_ROOT_DIR=$(git rev-parse --show-toplevel)
-JAVADOC_OUTPUT_DIR=$HERON_ROOT_DIR/website/static/api
+JAVADOC_OUTPUT_DIR=$HERON_ROOT_DIR/website/public/api
 GEN_PROTO_DIR=$HERON_ROOT_DIR/bazel-bin/heron/proto/_javac
 
 (cd $HERON_ROOT_DIR && bazel build \

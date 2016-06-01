@@ -33,7 +33,7 @@ var DIST = {
 // JavaScript assets
 gulp.task('js', function() {
   return gulp.src(SRC.js)
-    .pipe($.uglify())
+    .pipe($.uglify().on('error', function(err) { console.log(err); }))
     .pipe($.concat('app.min.js'))
     .pipe(gulp.dest(DIST.js));
 });

@@ -39,8 +39,7 @@ class _HelpAction(argparse._HelpAction):
 class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
   ''' SubcommandHelpFormatter '''
   def _format_action(self, action):
-    # FIXME: pylint complains about this call, need someone to verify if this is actually a problem
-    # FIXME:   Bad first argument 'RawDescriptionHelpFormatter' given to super() (bad-super-call)
+    # pylint: disable=bad-super-call
     parts = super(argparse.RawDescriptionHelpFormatter, self)._format_action(action)
     if action.nargs == argparse.PARSER:
       parts = "\n".join(parts.split("\n")[1:])

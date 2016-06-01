@@ -37,12 +37,12 @@ distribute the resulting `heron` CLI to all machines used to manage topologies.
 All topology management commands (`submit`, `activate`, `deactivate`,
 `restart`, and `kill`) take the following required arguments:
 
-* `cluster` &mdash; The name of the cluster where the command needs to be executed.
+* `cluster` --- The name of the cluster where the command needs to be executed.
 
-* `role` &mdash; This represents the user or the group depending on deployment.
+* `role` --- This represents the user or the group depending on deployment.
   If not provided, it defaults to the unix user.
 
-* `env` &mdash; This is a tag for including additional information (e.g) a
+* `env` --- This is a tag for including additional information (e.g) a
    topology can be tagged as PROD or DEVEL to indicate whether it is in production
    or development. If `env` is not provided, it is given a value `default`
 
@@ -56,16 +56,16 @@ argument will be simply `local`.
 CLI supports a common set of optional flags for all topology management commands
 (`submit`, `activate`, `deactivate`, `restart`, and `kill`):
 
-* `--config-path` &mdash; Every heron cluster must provide a few configuration
+* `--config-path` --- Every heron cluster must provide a few configuration
   files that are kept under a directory named after the cluster. By default,
   when a cluster is provided in the command, it searches the `conf` directory
   for a directory with the cluster name. This flag enables you to specify a
   non standard directory to search for the cluster directory.
 
-* `--config-property` &mdash; Heron supports several configuration parameters
+* `--config-property` --- Heron supports several configuration parameters
   that be overridden. These parameters are specified in the form of `key=value`.
 
-* `--verbose` &mdash; When this flag is provided, `heron` CLI prints logs
+* `--verbose` --- When this flag is provided, `heron` CLI prints logs
   that provide detailed information about the execution.
 
 Below is an example topology management command that uses one of these flags:
@@ -102,18 +102,18 @@ Optional arguments:
 
 Arguments of the `submit` command:
 
-* **cluster/[role]/[env]** &mdash; The cluster where topology needs to be submitted,
+* **cluster/[role]/[env]** --- The cluster where topology needs to be submitted,
   optionally taking the role and environment. For example,`local/ads/PROD` or just `local`
 
-* **topology-file-name** &mdash; The path of the file in which you've packaged the
+* **topology-file-name** --- The path of the file in which you've packaged the
   topology's code. For Java topologies this will be a `.jar` file; for
   topologies in other languages (not yet supported), this could be a
   `.tar` file. For example, `/path/to/topology/my-topology.jar`
 
-* **topology-class-name** &mdash; The name of the class containing the `main` function
+* **topology-class-name** --- The name of the class containing the `main` function
   for the topology. For example, `com.example.topologies.MyTopology`
 
-* **topology-args** (optional) &mdash; Arguments specific to the topology.
+* **topology-args** (optional) --- Arguments specific to the topology.
   You will need to supply additional args only if the `main` function for your
   topology requires them.
 
@@ -157,10 +157,10 @@ Optional arguments:
 
 Arguments of the `activate` command:
 
-* **cluster/[role]/[env]** &mdash; The cluster where topology needs to be submitted,
+* **cluster/[role]/[env]** --- The cluster where topology needs to be submitted,
   optionally taking the role and environment. For exampple, `local/ads/PROD` or just `local`
 
-* **topology-name**  &mdash; The name of the already-submitted topology that you'd
+* **topology-name**  --- The name of the already-submitted topology that you'd
   like to activate.
 
 ### Example Topology Activation Command
@@ -191,10 +191,10 @@ Optional arguments:
 
 Arguments of the `deactivate` command:
 
-* **cluster/[role]/[env]** &mdash; The cluster where topology needs to be submitted,
+* **cluster/[role]/[env]** --- The cluster where topology needs to be submitted,
   optionally taking the role and environment. For example, `local/ads/PROD` or just `local`
 
-* **topology-name** &mdash; The name of the topology that you'd like to deactivate.
+* **topology-name** --- The name of the topology that you'd like to deactivate.
 
 ## Restarting a Topology
 
@@ -218,12 +218,12 @@ Optional arguments:
 
 Arguments of the `restart` command:
 
-* **cluster/[role]/[env]** &mdash; The cluster where topology needs to be submitted,
+* **cluster/[role]/[env]** --- The cluster where topology needs to be submitted,
   optionally taking the role and environment. For example, `local/ads/PROD` or just `local`
 
-* **topology-name** &mdash; The name of the topology that you'd like to restart.
+* **topology-name** --- The name of the topology that you'd like to restart.
 
-* **container-id** (optional) &mdash; This enables you to specify the container ID to be
+* **container-id** (optional) --- This enables you to specify the container ID to be
   restarted if you want to restart only a specific container of the topology.
 
 ### Example Topology Restart Command
@@ -244,11 +244,11 @@ $ heron kill <killer-overrides> <topology>
 
 Arguments of the `kill` command:
 
-* **cluster/[role]/[env]** &mdash; The cluster where topology needs to be submitted,
+* **cluster/[role]/[env]** --- The cluster where topology needs to be submitted,
   optionally taking the role and environment.  For example, `local/ads/PROD` or just
   `local`
 
-* **topology-name** &mdash; The name of the topology that you'd like to kill.
+* **topology-name** --- The name of the topology that you'd like to kill.
 
 ### Example Topology Kill Command
 

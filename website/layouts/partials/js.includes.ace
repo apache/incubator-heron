@@ -1,3 +1,0 @@
-{{range .Site.Params.assets.js}}
-script defer= src={{.}}
-{{end}}

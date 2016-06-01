@@ -1,9 +1,0 @@
-= doctype html
-html lang={{.Site.LanguageCode}}
-  head
-    title {{.Site.Title}}
-    {{partial "meta.html" .}}
-    {{partial "css.includes.html" .}}
-    {{partial "js.includes.html" .}}
-    body
-      {{partial "navbar.html" .}}

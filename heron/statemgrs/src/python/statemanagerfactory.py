@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import traceback
 
 """
 Factory function that instantiates and connects to the requested
@@ -45,8 +46,16 @@ def get_all_zk_state_managers(conf):
   state_locations = conf.get_state_locations_of_type("zookeeper")
   for location in state_locations:
     name = location['name']
-    host = location['host']
-    port = location['port']
+    hostport = location['hostport']
+    host = None
+    port = None
+    if ':' in hostport:
+      hostportlist = hostport.split(':')
+      if len(hostportlist) == 2:
+        host = hostportlist[0]
+        port = int(hostportlist[1])
+    if not host or not port:
+      raise Exception("Hostport for %s must be of the format 'host:port'." % (name))
     tunnelhost = location['tunnelhost']
     rootpath = location['rootpath']
     LOG.info("Connecting to zk hostport: " + host + ":" + str(port) + " rootpath: " + rootpath)

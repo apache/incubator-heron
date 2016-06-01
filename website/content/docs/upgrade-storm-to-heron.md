@@ -34,7 +34,7 @@ Installing jars to local maven repo.
 
 Heron API is now installed!
 
-See http://heron.github.io/docs/getting-started.html to start a new project!
+See https://twitter.github.io/heron/docs/getting-started.html to start a new project!
 ```
 
 The Heron API will now be installed in your local [Maven
@@ -143,7 +143,7 @@ $ heron submit local \
 ### Next Steps
 
 * [Deploy topologies](../operators/deployment) in clustered, scheduler-driven
-  environments (such as on [Aurora](../operators/deployment/schedulers/aurora),
-  on [Mesos](../operators/deployment/schedulers/mesos), and
+  environments (such as on [Aurora](../operators/deployment/schedulers/aurora)
+  and
   [locally](../operators/deployment/schedulers/local))
 * [Develop topologies](../concepts/architecture) for Heron
