@@ -313,7 +313,7 @@ public class MesosScheduler implements IScheduler {
 
       try {
         tmasterProcess = ShellUtils.runASyncProcess(
-            true, "./run-tmaster.sh", new File(""));
+            true, "./run-tmaster.sh", new File("."));
         int exitValue = tmasterProcess.waitFor();  // Block.
         LOG.log(Level.SEVERE, "Tmaster process exitted. Exit: " + exitValue);
       } catch (InterruptedException e) {
