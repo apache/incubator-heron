@@ -78,4 +78,3 @@ bazel --bazelrc=tools/travis-ci/bazel.rc build scripts/packages:binpkgs
 end_timer "$T"
 
 print_timer_summary
-
