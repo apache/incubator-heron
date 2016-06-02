@@ -15,9 +15,9 @@ function __assert_task_name {
 
 function __secs_to_readable_date {
   if [ "`uname`" == "Darwin" ]; then
-    echo `date -r $1 +%Y-%m-%d:%H:%M:%S`
+    echo `date -r $1 +'%Y-%m-%d %H:%M:%S'`
   else
-    echo `date -d @$1 +%Y-%m-%d:%H:%M:%S`
+    echo `date -d @$1 +'%Y-%m-%d %H:%M:%S'`
   fi
 }
 
