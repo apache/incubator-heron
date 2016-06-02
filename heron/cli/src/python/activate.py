@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' activate '''
-import heron.cli.src.python.run_helper as run_helper
+import heron.cli.src.python.cli_helper as cli_helper
 
 
 def create_parser(subparsers):
@@ -20,7 +20,7 @@ def create_parser(subparsers):
   :param subparsers:
   :return:
   '''
-  return run_helper.create_parser(subparsers, 'activate', 'Activate a topology')
+  return cli_helper.create_parser(subparsers, 'activate', 'Activate a topology')
 
 
 # pylint: disable=unused-argument
@@ -32,4 +32,4 @@ def run(command, parser, cl_args, unknown_args):
   :param unknown_args:
   :return:
   '''
-  return run_helper.run(command, parser, cl_args, unknown_args, "activate topology")
+  return cli_helper.run(command, parser, cl_args, unknown_args, "activate topology")
