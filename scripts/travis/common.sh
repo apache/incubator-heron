@@ -9,25 +9,25 @@ function die {
 TIMINGS=()
 DELIM="::"
 
-function assert_task_name {
+function __assert_task_name {
   [[ $1 != *"$DELIM"* ]] || die "timer task name '$1' name must not contain ::"
 }
 
-function readable_date {
+function __secs_to_readable_date {
   echo `date -r $1 +%Y-%m-%d:%H:%M:%S`
 }
 
 # Call start_timer "some timer name" to start a timer with that name
 function start_timer {
-  assert_task_name "$1"
+  __assert_task_name "$1"
   local start=`date +%s`
   TIMINGS+=("${1}${DELIM}start=${start}")
-  echo "Starting $1 at `readable_date $start`"
+  echo "Starting $1 at `__secs_to_readable_date $start`"
 }
 
 # Call end_timer "some timer name" to end a timer with that name
 function end_timer {
-  assert_task_name $1
+  __assert_task_name $1
   local end=`date +%s`
   for ((i = 0; i < ${#TIMINGS[@]}; i++)); do
     value="${TIMINGS[$i]}"
@@ -46,7 +46,7 @@ function end_timer {
 
   TIMINGS+=("${1}${DELIM}end=${end}")
   TIMINGS+=("${1}${DELIM}duration=${duration}")
-  echo "Finished $1 at `readable_date $end` ($duration secs)"
+  echo "Finished $1 at `__secs_to_readable_date $end` ($duration secs)"
 }
 
 # Prints a summary of all completed timers
