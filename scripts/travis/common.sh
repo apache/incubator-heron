@@ -32,7 +32,7 @@ function start_timer {
   __assert_task_name "$1"
   local start=`date +%s`
   TIMINGS+=("${1}${DELIM}start=${start}")
-  echo "Starting $1 at `__secs_to_readable_date $start`"
+  echo "===> Starting $1 at `__secs_to_readable_date $start`"
 }
 
 # Call end_timer "some timer name" to end a timer with that name
@@ -56,13 +56,13 @@ function end_timer {
 
   TIMINGS+=("${1}${DELIM}end=${end}")
   TIMINGS+=("${1}${DELIM}duration=${duration}")
-  echo "Finished $1 at `__secs_to_readable_date $end` (`__secs_to_duration $duration`)"
+  echo "===> Finished $1 at `__secs_to_readable_date $end` (`__secs_to_duration $duration`)"
 }
 
 # Prints a summary of all completed timers
 function print_timer_summary {
-  echo "Task duration summary for `caller | cut -d ' ' -f 2`"
-  echo "==================================================="
+  echo "===> Task duration summary for `caller | cut -d ' ' -f 2`"
+  echo "==========================================================="
   for ((i = 0; i < ${#TIMINGS[@]}; i++)); do
     value="${TIMINGS[$i]}"
     if [[ $value == *"${DELIM}duration="* ]]; then
@@ -75,7 +75,8 @@ function print_timer_summary {
 }
 
 # Uncomment below to test changes:
-#start_timer "task one"
+#T="task one"
+#start_timer "$T"
 #sleep 1
-#end_timer "task one"
+#end_timer "$T"
 #print_timer_summary
