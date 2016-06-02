@@ -2,7 +2,7 @@
 #
 # Script to kick off the travis CI integration test. Fail-fast if any of tthe below commands fail.
 #
-set -ex
+set -e
 
 DIR=`dirname $0`
 source ${DIR}/common.sh
