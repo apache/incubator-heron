@@ -14,7 +14,17 @@ function __assert_task_name {
 }
 
 function __secs_to_readable_date {
-  echo `date -r $1 +%Y-%m-%d:%H:%M:%S`
+  if [ "`uname`" == "Darwin" ]; then
+    echo `date -r $1 +%Y-%m-%d:%H:%M:%S`
+  else
+    echo `date -d @$1 +%Y-%m-%d:%H:%M:%S`
+  fi
+}
+
+function __secs_to_duration {
+  i=$1
+  ((sec=i%60, i/=60, min=i%60, hrs=i/60))
+  echo $(printf "%d:%02d:%02d" $hrs $min $sec)
 }
 
 # Call start_timer "some timer name" to start a timer with that name
@@ -46,7 +56,7 @@ function end_timer {
 
   TIMINGS+=("${1}${DELIM}end=${end}")
   TIMINGS+=("${1}${DELIM}duration=${duration}")
-  echo "Finished $1 at `__secs_to_readable_date $end` ($duration secs)"
+  echo "Finished $1 at `__secs_to_readable_date $end` (`__secs_to_duration $duration`)"
 }
 
 # Prints a summary of all completed timers
@@ -56,8 +66,10 @@ function print_timer_summary {
   for ((i = 0; i < ${#TIMINGS[@]}; i++)); do
     value="${TIMINGS[$i]}"
     if [[ $value == *"${DELIM}duration="* ]]; then
-      str=`echo $value | sed "s|${DELIM}duration=|  |g"`
-      echo "${str} secs"
+      key_value=`echo $value | sed "s|${DELIM}duration=|:|g"`
+      task=`echo ${key_value} | cut -d ':' -f 1`
+      seconds=`echo ${key_value} | cut -d ':' -f 2`
+      echo -e "${task}\t`__secs_to_duration ${seconds}`"
     fi
   done
 }
