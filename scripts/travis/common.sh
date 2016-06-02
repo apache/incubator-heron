@@ -1,0 +1,69 @@
+#!/bin/bash
+
+set -e
+
+function die {
+  echo "ERROR: $1" && exit 1;
+}
+
+TIMINGS=()
+DELIM="::"
+
+function assert_task_name {
+  [[ $1 != *"$DELIM"* ]] || die "timer task name '$1' name must not contain ::"
+}
+
+function readable_date {
+  echo `date -r $1 +%Y-%m-%d:%H:%M:%S`
+}
+
+# Call start_timer "some timer name" to start a timer with that name
+function start_timer {
+  assert_task_name "$1"
+  local start=`date +%s`
+  TIMINGS+=("${1}${DELIM}start=${start}")
+  echo "Starting $1 at `readable_date $start`"
+}
+
+# Call end_timer "some timer name" to end a timer with that name
+function end_timer {
+  assert_task_name $1
+  local end=`date +%s`
+  for ((i = 0; i < ${#TIMINGS[@]}; i++)); do
+    value="${TIMINGS[$i]}"
+    if [[ $value == "${1}${DELIM}start="* ]]; then
+      local start=`echo $value | sed "s|${1}${DELIM}start=||g"`
+    fi
+  done
+
+  [ -n "$start" ] || die "end_timer called for task '$1' before calling start_timer"
+
+  set +e # expr returns status 1 if evalutes to 0
+  duration=`expr $end - $start`
+  RESP=$?
+  set -e
+  [[ $RESP < 2 ]] || die "Couldn't compute $end - $start"
+
+  TIMINGS+=("${1}${DELIM}end=${end}")
+  TIMINGS+=("${1}${DELIM}duration=${duration}")
+  echo "Finished $1 at `readable_date $end` ($duration secs)"
+}
+
+# Prints a summary of all completed timers
+function print_timer_summary {
+  echo "Task duration summary for `caller | cut -d ' ' -f 2`"
+  echo "==================================================="
+  for ((i = 0; i < ${#TIMINGS[@]}; i++)); do
+    value="${TIMINGS[$i]}"
+    if [[ $value == *"${DELIM}duration="* ]]; then
+      str=`echo $value | sed "s|${DELIM}duration=|  |g"`
+      echo "${str} secs"
+    fi
+  done
+}
+
+# Uncomment below to test changes:
+#start_timer "task one"
+#sleep 1
+#end_timer "task one"
+#print_timer_summary

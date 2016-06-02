@@ -6,6 +6,16 @@
 
 set -e
 
+declare -A timings
+
+function start_timer {
+  timings[$1]=`date +%s`
+}
+
+function end_timer {
+  timings[$1]=`date +%s`
+}
+
 # verify that jars have not been added to the repo
 JARS=`find . -name "*.jar"`
 if [ "$JARS" ]; then
