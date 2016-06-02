@@ -13,9 +13,9 @@
 # limitations under the License.
 
 #!/usr/bin/env python2.7
-
-import os, sys
-import argparse
+''' main.py '''
+import os
+import sys
 import socket
 
 import tornado.ioloop
@@ -24,7 +24,7 @@ import tornado.web
 import tornado.log
 import tornado.template
 
-from tornado.options import options, define
+from tornado.options import define
 
 from heron.ui.src.python import handlers
 from heron.ui.src.python import args
@@ -32,9 +32,11 @@ from heron.ui.src.python import log
 from heron.ui.src.python.log import Log as LOG
 
 class Application(tornado.web.Application):
+  ''' Application '''
   def __init__(self):
-    # TODO: Change these to query sting parameters, since
+    # TODO: Change these to query string parameters, since
     # current format can lead to pattern matching issues.
+    # pylint: disable=line-too-long,bad-whitespace
     callbacks = [
       (r"/",                                                                     handlers.MainHandler),
 
@@ -80,10 +82,20 @@ class Application(tornado.web.Application):
     tornado.web.Application.__init__(self, callbacks, **settings)
 
 def define_options(port, tracker_url):
+  '''
+  :param port:
+  :param tracker_url:
+  :return:
+  '''
   define("port", default=port)
   define("tracker_url", default=tracker_url)
 
+# pylint: disable=unused-argument
 def main(argv):
+  '''
+  :param argv:
+  :return:
+  '''
   log.configure(log.logging.DEBUG)
   tornado.log.enable_pretty_logging()
 
@@ -91,7 +103,7 @@ def main(argv):
   (parser, child_parser) = args.create_parsers()
   (parsed_args, remaining) = parser.parse_known_args()
   if remaining:
-    child_parser.parse_args(args = remaining, namespace=parsed_args)
+    child_parser.parse_args(args=remaining, namespace=parsed_args)
     parser.print_help()
     parser.exit()
 
