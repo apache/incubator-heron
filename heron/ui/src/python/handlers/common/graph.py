@@ -13,11 +13,13 @@
 # limitations under the License.
 ''' graph.py '''
 
+
 ################################################################################
 class Graph(object):
   '''
   Adjacency list of edges in graph. This will correspond to the streams in a topology DAG.
   '''
+
   def __init__(self):
     # graph adjecency list. Implemented as a map with key = vertices and
     # values = set of Vertices in adjacency list.
@@ -61,7 +63,6 @@ class Graph(object):
           bfs_queue.append([W, depth + 1])
     return max_depth
 
-
   def diameter(self):
     '''
     Returns the maximum distance between any vertex and U in the connected
@@ -97,6 +98,7 @@ class TopologyDAG(Graph):
    }
   }
   '''
+
   def __init__(self, logical_plan):
     Graph.__init__(self)
     all_spouts = logical_plan['spouts']  # 'spouts' is required
@@ -122,4 +124,3 @@ class TopologyDAG(Graph):
         component_name = input_stream_data['component_name']
         stream_hash = ('%s,%s' % (component_name, stream_name))
         self.add_edge(stream_source[stream_hash], bolt_name)
-

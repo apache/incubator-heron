@@ -35,11 +35,11 @@ class TopologyConfigHandler(base.BaseHandler):
     :return:
     '''
     options = dict(
-      cluster=cluster,
-      environ=environ,
-      topology=topology,
-      active="topologies",
-      function=common.className)
+        cluster=cluster,
+        environ=environ,
+        topology=topology,
+        active="topologies",
+        function=common.className)
     self.render("config.html", **options)
 
 
@@ -57,13 +57,13 @@ class TopologyExceptionsPageHandler(base.BaseHandler):
     :return:
     '''
     options = dict(
-      cluster=cluster,
-      environ=environ,
-      topology=topology,
-      comp_name=comp_name,
-      instance=instance,
-      active="topologies",
-      function=common.className)
+        cluster=cluster,
+        environ=environ,
+        topology=topology,
+        comp_name=comp_name,
+        instance=instance,
+        active="topologies",
+        function=common.className)
     # send the exception
     self.render("exception.html", **options)
 
@@ -80,10 +80,10 @@ class ListTopologiesHandler(base.BaseHandler):
     clusters = yield access.get_clusters()
 
     options = dict(
-      topologies=[],  # no topologies
-      clusters=[str(cluster) for cluster in clusters],
-      active="topologies",  # active icon the nav bar
-      function=common.className
+        topologies=[],  # no topologies
+        clusters=[str(cluster) for cluster in clusters],
+        active="topologies",  # active icon the nav bar
+        function=common.className
     )
 
     # send the all topologies page
@@ -116,15 +116,15 @@ class TopologyPlanHandler(base.BaseHandler):
     launched_time = launched_at.strftime('%Y-%m-%d %H:%M:%S UTC')
 
     options = dict(
-      cluster=cluster,
-      environ=environ,
-      topology=topology,
-      estate=estate,
-      launched=launched_time,
-      status="running" if random.randint(0, 1) else "errors",
-      active="topologies",
-      job_page_link=job_page_link,
-      function=common.className
+        cluster=cluster,
+        environ=environ,
+        topology=topology,
+        estate=estate,
+        launched=launched_time,
+        status="running" if random.randint(0, 1) else "errors",
+        active="topologies",
+        job_page_link=job_page_link,
+        function=common.className
     )
 
     # send the single topology page
@@ -151,11 +151,11 @@ class ContainerFileHandler(base.BaseHandler):
     path = self.get_argument("path")
 
     options = dict(
-      cluster=cluster,
-      environ=environ,
-      topology=topology,
-      container=container,
-      path=path
+        cluster=cluster,
+        environ=environ,
+        topology=topology,
+        container=container,
+        path=path
     )
 
     self.render("file.html", **options)
@@ -208,12 +208,12 @@ class ContainerFileStatsHandler(base.BaseHandler):
     data = yield access.get_filestats(cluster, environ, topology, container, path)
 
     options = dict(
-      cluster=cluster,
-      environ=environ,
-      topology=topology,
-      container=container,
-      path=path,
-      filestats=data,
+        cluster=cluster,
+        environ=environ,
+        topology=topology,
+        container=container,
+        path=path,
+        filestats=data,
     )
     self.render("browse.html", **options)
 

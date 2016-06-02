@@ -21,6 +21,7 @@ import heron.cli.src.python.execute as execute
 import heron.cli.src.python.jars as jars
 import heron.cli.src.python.args as args
 
+
 ################################################################################
 def create_parser(subparsers, action, help):
   '''
@@ -30,10 +31,10 @@ def create_parser(subparsers, action, help):
   :return:
   '''
   parser = subparsers.add_parser(
-    action,
-    help=help,
-    usage="%(prog)s [options] cluster/[role]/[env] topology-name",
-    add_help=False)
+      action,
+      help=help,
+      usage="%(prog)s [options] cluster/[role]/[env] topology-name",
+      add_help=False)
 
   args.add_titles(parser)
   args.add_cluster_role_env(parser)
@@ -44,6 +45,7 @@ def create_parser(subparsers, action, help):
 
   parser.set_defaults(subcommand='activate')
   return parser
+
 
 ################################################################################
 # pylint: disable=unused-argument
@@ -79,10 +81,10 @@ def run(command, parser, cl_args, unknown_args, action):
 
     # invoke the runtime manager to kill the topology
     execute.heron_class(
-      'com.twitter.heron.scheduler.RuntimeManagerMain',
-      lib_jars,
-      extra_jars=[],
-      args=new_args
+        'com.twitter.heron.scheduler.RuntimeManagerMain',
+        lib_jars,
+        extra_jars=[],
+        args=new_args
     )
 
   except Exception:

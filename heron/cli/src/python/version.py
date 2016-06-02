@@ -15,21 +15,23 @@
 import heron.cli.src.python.args as cli_args
 import heron.cli.src.python.utils as utils
 
+
 def create_parser(subparsers):
   '''
   :param subparsers:
   :return:
   '''
   parser = subparsers.add_parser(
-    'version',
-    help='Print version of heron-cli',
-    usage="%(prog)s",
-    add_help=False)
+      'version',
+      help='Print version of heron-cli',
+      usage="%(prog)s",
+      add_help=False)
 
   cli_args.add_titles(parser)
 
   parser.set_defaults(subcommand='version')
   return parser
+
 
 # pylint: disable=unused-argument
 def run(command, parser, args, unknown_args):

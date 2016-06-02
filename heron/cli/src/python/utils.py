@@ -45,6 +45,7 @@ CLIENT_YAML = "client.yaml"
 IS_ROLE_REQUIRED = "heron.config.is.role.required"
 IS_ENV_REQUIRED = "heron.config.is.env.required"
 
+
 ################################################################################
 def create_tar(tar_filename, files, config_dir, config_files):
   '''
@@ -74,6 +75,7 @@ def create_tar(tar_filename, files, config_dir, config_files):
       else:
         raise Exception("%s is not an existing file" % filename)
 
+
 ################################################################################
 def get_subparser(parser, command):
   '''
@@ -83,9 +85,9 @@ def get_subparser(parser, command):
   :return:
   '''
   subparsers_actions = [
-    # pylint: disable=protected-access
-    action for action in parser._actions
-    if isinstance(action, argparse._SubParsersAction)
+      # pylint: disable=protected-access
+      action for action in parser._actions
+      if isinstance(action, argparse._SubParsersAction)
   ]
 
   # there will probably only be one subparser_action,
@@ -97,6 +99,7 @@ def get_subparser(parser, command):
         return subparser
   return None
 
+
 ################################################################################
 def identity(x_val):
   '''
@@ -105,6 +108,7 @@ def identity(x_val):
   :return:
   '''
   return x_val
+
 
 def cygpath(x_val):
   '''
@@ -117,6 +121,7 @@ def cygpath(x_val):
   lines = output.split("\n")
   return lines[0]
 
+
 def normalized_class_path(x_val):
   '''
   :param x_val:
@@ -126,6 +131,7 @@ def normalized_class_path(x_val):
     return cygpath(x_val)
   return identity(x_val)
 
+
 ################################################################################
 def get_classpath(jars):
   '''
@@ -134,6 +140,7 @@ def get_classpath(jars):
   :return:
   '''
   return ':'.join([normalized_class_path(jar) for jar in jars])
+
 
 ################################################################################
 # Get the root of heron dir and various sub directories depending on platform
@@ -146,6 +153,7 @@ def get_heron_dir():
   path = "/".join(os.path.realpath(__file__).split('/')[:-7])
   return normalized_class_path(path)
 
+
 def get_heron_bin_dir():
   """
   This will provide heron bin directory from .pex file.
@@ -153,6 +161,7 @@ def get_heron_bin_dir():
   """
   bin_path = os.path.join(get_heron_dir(), BIN_DIR)
   return bin_path
+
 
 def get_heron_conf_dir():
   """
@@ -162,6 +171,7 @@ def get_heron_conf_dir():
   conf_path = os.path.join(get_heron_dir(), CONF_DIR)
   return conf_path
 
+
 def get_heron_lib_dir():
   """
   This will provide heron lib directory from .pex file.
@@ -170,6 +180,7 @@ def get_heron_lib_dir():
   lib_path = os.path.join(get_heron_dir(), LIB_DIR)
   return lib_path
 
+
 def get_heron_release_file():
   """
   This will provide the path to heron release.yaml file
@@ -177,12 +188,14 @@ def get_heron_release_file():
   """
   return os.path.join(get_heron_dir(), RELEASE_YAML)
 
+
 def get_heron_cluster_conf_dir(cluster, default_config_path):
   """
   This will provide heron cluster config directory, if config path is default
   :return: absolute path of heron cluster conf directory
   """
   return os.path.join(default_config_path, cluster)
+
 
 ################################################################################
 # Get the sandbox directories and config files
@@ -193,6 +206,7 @@ def get_heron_sandbox_conf_dir():
   :return: relative path of heron sandbox conf directory
   """
   return SANDBOX_CONF_DIR
+
 
 ################################################################################
 def get_heron_libs(local_jars):
@@ -205,6 +219,7 @@ def get_heron_libs(local_jars):
   heron_libs = [os.path.join(heron_lib_dir, f) for f in local_jars]
   return heron_libs
 
+
 ################################################################################
 def get_heron_cluster(cluster_role_env):
   '''
@@ -213,6 +228,7 @@ def get_heron_cluster(cluster_role_env):
   :return:
   '''
   return cluster_role_env.split('/')[0]
+
 
 ################################################################################
 def parse_cluster_role_env(cluster_role_env, config_path):
@@ -242,7 +258,7 @@ def parse_cluster_role_env(cluster_role_env, config_path):
         if tmp_confs is not None:
           cli_confs = tmp_confs
         else:
-          print "Failed to read: %s due to it is empty" %(CLIENT_YAML)
+          print "Failed to read: %s due to it is empty" % (CLIENT_YAML)
 
       # if role is required but not provided, raise exception
       if len(parts) == 1:
@@ -265,6 +281,7 @@ def parse_cluster_role_env(cluster_role_env, config_path):
 
   return (parts[0], parts[1], parts[2])
 
+
 ################################################################################
 def parse_override_config(namespace):
   '''
@@ -283,6 +300,7 @@ def parse_override_config(namespace):
   except Exception as ex:
     raise Exception("Failed to parse override config: %s" % str(ex))
 
+
 ################################################################################
 def get_java_path():
   '''
@@ -291,6 +309,7 @@ def get_java_path():
   '''
   java_home = os.environ.get("JAVA_HOME")
   return os.path.join(java_home, BIN_DIR, "java")
+
 
 ################################################################################
 def check_java_home_set():
@@ -311,6 +330,7 @@ def check_java_home_set():
 
   Log.error("JAVA_HOME/bin/java either does not exist or not an executable")
   return False
+
 
 ################################################################################
 def check_release_file_exists():

@@ -14,12 +14,14 @@
 ''' kill.py '''
 import heron.cli.src.python.cli_helper as cli_helper
 
+
 def create_parser(subparsers):
   '''
   :param subparsers:
   :return:
   '''
   return cli_helper.create_parser(subparsers, 'kill', 'Kill a topology')
+
 
 # pylint: disable=unused-argument
 def run(command, parser, cl_args, unknown_args):

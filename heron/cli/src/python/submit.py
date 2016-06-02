@@ -26,6 +26,7 @@ import heron.cli.src.python.jars as jars
 import heron.cli.src.python.opts as opts
 import heron.cli.src.python.utils as utils
 
+
 ################################################################################
 def create_parser(subparsers):
   '''
@@ -34,11 +35,11 @@ def create_parser(subparsers):
   :return:
   '''
   parser = subparsers.add_parser(
-    'submit',
-    help='Submit a topology',
-    usage="%(prog)s [options] cluster/[role]/[env] " + \
-      "topology-file-name topology-class-name [topology-args]",
-    add_help=False
+      'submit',
+      help='Submit a topology',
+      usage="%(prog)s [options] cluster/[role]/[env] " + \
+            "topology-file-name topology-class-name [topology-args]",
+      add_help=False
   )
 
   cli_args.add_titles(parser)
@@ -52,6 +53,7 @@ def create_parser(subparsers):
 
   parser.set_defaults(subcommand='submit')
   return parser
+
 
 ################################################################################
 def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
@@ -78,33 +80,34 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
 
   # pass the args to submitter main
   args = [
-    "--cluster", cl_args['cluster'],
-    "--role", cl_args['role'],
-    "--environment", cl_args['environ'],
-    "--heron_home", utils.get_heron_dir(),
-    "--config_path", config_path,
-    "--override_config_file", cl_args['override_config_file'],
-    "--release_file", release_yaml_file,
-    "--topology_package", topology_pkg_path,
-    "--topology_defn", topology_defn_file,
-    "--topology_jar", topology_file
+      "--cluster", cl_args['cluster'],
+      "--role", cl_args['role'],
+      "--environment", cl_args['environ'],
+      "--heron_home", utils.get_heron_dir(),
+      "--config_path", config_path,
+      "--override_config_file", cl_args['override_config_file'],
+      "--release_file", release_yaml_file,
+      "--topology_package", topology_pkg_path,
+      "--topology_defn", topology_defn_file,
+      "--topology_jar", topology_file
   ]
 
   if opts.verbose():
     cli_args.append("--verbose")
 
   lib_jars = utils.get_heron_libs(
-    jars.scheduler_jars() + jars.uploader_jars() + jars.statemgr_jars() + jars.packing_jars()
+      jars.scheduler_jars() + jars.uploader_jars() + jars.statemgr_jars() + jars.packing_jars()
   )
 
   # invoke the submitter to submit and launch the topology
   execute.heron_class(
-    'com.twitter.heron.scheduler.SubmitterMain',
-    lib_jars,
-    extra_jars=[],
-    args=args,
-    javaDefines=[]
+      'com.twitter.heron.scheduler.SubmitterMain',
+      lib_jars,
+      extra_jars=[],
+      args=args,
+      javaDefines=[]
   )
+
 
 ################################################################################
 def launch_topologies(cl_args, topology_file, tmp_dir):
@@ -147,6 +150,7 @@ def launch_topologies(cl_args, topology_file, tmp_dir):
   except:
     raise
 
+
 ################################################################################
 def submit_fatjar(cl_args, unknown_args, tmp_dir):
   '''
@@ -168,11 +172,11 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
   topology_file = cl_args['topology-file-name']
   try:
     execute.heron_class(
-      cl_args['topology-class-name'],
-      utils.get_heron_libs(jars.topology_jars()),
-      extra_jars=[topology_file],
-      args=tuple(unknown_args),
-      javaDefines=cl_args['topology_main_jvm_property'])
+        cl_args['topology-class-name'],
+        utils.get_heron_libs(jars.topology_jars()),
+        extra_jars=[topology_file],
+        args=tuple(unknown_args),
+        javaDefines=cl_args['topology_main_jvm_property'])
 
   except Exception:
     Log.error("Unable to execute topology main class")
@@ -188,6 +192,7 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
     shutil.rmtree(tmp_dir)
 
   return True
+
 
 ################################################################################
 def submit_tar(cl_args, unknown_args, tmp_dir):
@@ -213,11 +218,11 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
   topology_file = cl_args['topology-file-name']
   java_defines = cl_args['topology_main_jvm_property']
   execute.heron_tar(
-    cl_args['topology-class-name'],
-    topology_file,
-    tuple(unknown_args),
-    tmp_dir,
-    java_defines)
+      cl_args['topology-class-name'],
+      topology_file,
+      tuple(unknown_args),
+      tmp_dir,
+      java_defines)
 
   try:
     launch_topologies(cl_args, topology_file, tmp_dir)
@@ -229,6 +234,7 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
     shutil.rmtree(tmp_dir)
 
   return True
+
 
 ################################################################################
 # pylint: disable=unused-argument

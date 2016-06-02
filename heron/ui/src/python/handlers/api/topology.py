@@ -53,7 +53,7 @@ class TopologyExceptionSummaryHandler(base.BaseHandler):
     exception_infos = dict()
     for comp_name in comp_names:
       exception_infos[comp_name] = yield access.get_component_exceptionsummary(
-        cluster, environ, topology, comp_name)
+          cluster, environ, topology, comp_name)
 
     # Combine exceptions from multiple component
     aggregate_exceptions = dict()
@@ -69,9 +69,9 @@ class TopologyExceptionSummaryHandler(base.BaseHandler):
     for key in aggregate_exceptions.keys():
       aggregate_exceptions_table.append([key, str(aggregate_exceptions[key])])
     result = dict(
-      status="success",
-      executiontime=time.time() - start_time,
-      result=aggregate_exceptions_table)
+        status="success",
+        executiontime=time.time() - start_time,
+        result=aggregate_exceptions_table)
     self.write(result)
 
 
@@ -135,31 +135,31 @@ class TopologyLogicalPlanJsonHandler(base.BaseHandler):
     spouts_map = dict()
     for name, value in lplan['spouts'].items():
       spouts_map[name] = dict(
-        outputs=value["outputs"],
-        spout_type=value["type"],
-        spout_source=value["source"],
+          outputs=value["outputs"],
+          spout_type=value["type"],
+          spout_source=value["source"],
       )
 
     bolts_map = dict()
     for name, value in lplan['bolts'].items():
       bolts_map[name] = dict(
-        inputComponents=[i['component_name'] for i in value['inputs']],
-        inputs=value["inputs"],
-        outputs=value["outputs"]
+          inputComponents=[i['component_name'] for i in value['inputs']],
+          inputs=value["inputs"],
+          outputs=value["outputs"]
       )
 
     diameter = common.graph.TopologyDAG(lplan).diameter()
     # construct the result
     result = dict(
-      status="success",
-      message="",
-      version=common.VERSION,
-      executiontime=time.time() - start_time,
-      result=dict(
-        stages=diameter,
-        spouts=spouts_map,
-        bolts=bolts_map
-      )
+        status="success",
+        message="",
+        version=common.VERSION,
+        executiontime=time.time() - start_time,
+        result=dict(
+            stages=diameter,
+            spouts=spouts_map,
+            bolts=bolts_map
+        )
     )
 
     self.write(result)
@@ -181,11 +181,11 @@ class TopologyPhysicalPlanJsonHandler(base.BaseHandler):
     pplan = yield access.get_physical_plan(cluster, environ, topology)
 
     result_map = dict(
-      status="success",
-      message="",
-      version=common.VERSION,
-      executiontime=time.time() - start_time,
-      result=pplan
+        status="success",
+        message="",
+        version=common.VERSION,
+        executiontime=time.time() - start_time,
+        result=pplan
     )
 
     self.write(result_map)
@@ -206,11 +206,11 @@ class TopologyExecutionStateJsonHandler(base.BaseHandler):
     estate = yield access.get_execution_state(cluster, environ, topology)
 
     result_map = dict(
-      status="success",
-      message="",
-      version=common.VERSION,
-      executiontime=time.time() - start_time,
-      result=estate
+        status="success",
+        message="",
+        version=common.VERSION,
+        executiontime=time.time() - start_time,
+        result=estate
     )
 
     self.write(result_map)
@@ -233,11 +233,11 @@ class TopologySchedulerLocationJsonHandler(base.BaseHandler):
 
     # FIXME: estate not defined
     result_map = dict(
-      status="success",
-      message="",
-      version=common.VERSION,
-      executiontime=time.time() - start_time,
-      result=estate
+        status="success",
+        message="",
+        version=common.VERSION,
+        executiontime=time.time() - start_time,
+        result=estate
     )
 
     self.write(result_map)
@@ -258,14 +258,15 @@ class TopologyExceptionsJsonHandler(base.BaseHandler):
     start_time = time.time()
     futures = yield access.get_component_exceptions(cluster, environ, topology, component)
     result_map = dict(
-      status='success',
-      executiontime=time.time() - start_time,
-      result=futures)
+        status='success',
+        executiontime=time.time() - start_time,
+        result=futures)
     self.write(json.dumps(result_map))
 
 
 class PidHandler(base.BaseHandler):
   ''' PidHandler '''
+
   @tornado.gen.coroutine
   def get(self, cluster, environ, topology, instance):
     '''
@@ -278,15 +279,16 @@ class PidHandler(base.BaseHandler):
     pplan = yield access.get_physical_plan(cluster, environ, topology)
     host = pplan['stmgrs'][pplan['instances'][instance]['stmgrId']]['host']
     result = json.loads((yield access.get_instance_pid(
-      cluster, environ, topology, instance)))
+        cluster, environ, topology, instance)))
     self.write('<pre><br/>$%s>: %s<br/><br/>%s</pre>' % (
-      host,
-      tornado.escape.xhtml_escape(result['command']),
-      tornado.escape.xhtml_escape(result['stdout'])))
+        host,
+        tornado.escape.xhtml_escape(result['command']),
+        tornado.escape.xhtml_escape(result['stdout'])))
 
 
 class JstackHandler(base.BaseHandler):
   ''' JstackHandler '''
+
   @tornado.gen.coroutine
   def get(self, cluster, environ, topology, instance):
     '''
@@ -299,15 +301,16 @@ class JstackHandler(base.BaseHandler):
     pplan = yield access.get_physical_plan(cluster, environ, topology)
     host = pplan['stmgrs'][pplan['instances'][instance]['stmgrId']]['host']
     result = json.loads((yield access.get_instance_jstack(
-      cluster, environ, topology, instance)))
+        cluster, environ, topology, instance)))
     self.write('<pre><br/>$%s>: %s<br/><br/>%s</pre>' % (
-      host,
-      tornado.escape.xhtml_escape(result['command']),
-      tornado.escape.xhtml_escape(result['stdout'])))
+        host,
+        tornado.escape.xhtml_escape(result['command']),
+        tornado.escape.xhtml_escape(result['stdout'])))
 
 
 class MemoryHistogramHandler(base.BaseHandler):
   ''' MemoryHistogramHandler '''
+
   @tornado.gen.coroutine
   def get(self, cluster, environ, topology, instance):
     '''
@@ -320,15 +323,16 @@ class MemoryHistogramHandler(base.BaseHandler):
     pplan = yield access.get_physical_plan(cluster, environ, topology)
     host = pplan['stmgrs'][pplan['instances'][instance]['stmgrId']]['host']
     result = json.loads((yield access.get_instance_mem_histogram(
-      cluster, environ, topology, instance)))
+        cluster, environ, topology, instance)))
     self.write('<pre><br/>$%s>: %s<br/><br/>%s</pre>' % (
-      host,
-      tornado.escape.xhtml_escape(result['command']),
-      tornado.escape.xhtml_escape(result['stdout'])))
+        host,
+        tornado.escape.xhtml_escape(result['command']),
+        tornado.escape.xhtml_escape(result['stdout'])))
 
 
 class JmapHandler(base.BaseHandler):
   ''' JmapHandler '''
+
   @tornado.gen.coroutine
   def get(self, cluster, environ, topology, instance):
     '''
@@ -341,12 +345,13 @@ class JmapHandler(base.BaseHandler):
     pplan = yield access.get_physical_plan(cluster, environ, topology)
     host = pplan['stmgrs'][pplan['instances'][instance]['stmgrId']]['host']
     result = json.loads((yield access.run_instance_jmap(
-      cluster, environ, topology, instance)))
+        cluster, environ, topology, instance)))
     notes = "<br/>\n".join([
-      "* May Take longer than usual (1-2 min) please be patient."
-      "* Use scp to copy heap dump files from host. (scp %s:/tmp/heap.bin /tmp/)" % host])
+        "* May Take longer than usual (1-2 min) please be patient."
+        "* Use scp to copy heap dump files from host. (scp %s:/tmp/heap.bin /tmp/)" % host
+    ])
     self.write('<pre>%s<br/>$%s>: %s<br/><br/>%s</pre>' % (
-      notes,
-      host,
-      tornado.escape.xhtml_escape(result['command']),
-      tornado.escape.xhtml_escape(result['stdout'])))
+        notes,
+        host,
+        tornado.escape.xhtml_escape(result['command']),
+        tornado.escape.xhtml_escape(result['stdout'])))

@@ -13,8 +13,10 @@
 # limitations under the License.
 ''' query.py '''
 
+
 class QueryHandler(object):
   ''' QueryHandler '''
+
   def fetch(self, cluster, metric, topology, component, instance, timerange, envirn=None):
     '''
     :param cluster:

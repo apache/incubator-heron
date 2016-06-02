@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#!/usr/bin/env python2.7
+# !/usr/bin/env python2.7
 ''' main.py '''
 import argparse
 import atexit
@@ -39,6 +39,7 @@ HELP_EPILOG = '''Getting more help:
 
 For detailed documentation, go to http://heronstreaming.io'''
 
+
 # pylint: disable=protected-access
 class _HelpAction(argparse._HelpAction):
   def __call__(self, parser, namespace, values, option_string=None):
@@ -46,8 +47,9 @@ class _HelpAction(argparse._HelpAction):
 
     # retrieve subparsers from parser
     subparsers_actions = [
-      action for action in parser._actions
-      if isinstance(action, argparse._SubParsersAction)]
+        action for action in parser._actions
+        if isinstance(action, argparse._SubParsersAction)
+    ]
 
     # there will probably only be one subparser_action,
     # but better save than sorry
@@ -58,14 +60,17 @@ class _HelpAction(argparse._HelpAction):
         print subparser.format_help()
         return
 
+
 class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
   ''' SubcommandHelpFormatter '''
+
   def _format_action(self, action):
     # pylint: disable=bad-super-call
     parts = super(argparse.RawDescriptionHelpFormatter, self)._format_action(action)
     if action.nargs == argparse.PARSER:
       parts = "\n".join(parts.split("\n")[1:])
     return parts
+
 
 ################################################################################
 def create_parser():
@@ -74,14 +79,14 @@ def create_parser():
   :return:
   '''
   parser = argparse.ArgumentParser(
-    prog='heron',
-    epilog=HELP_EPILOG,
-    formatter_class=SubcommandHelpFormatter,
-    add_help=False)
+      prog='heron',
+      epilog=HELP_EPILOG,
+      formatter_class=SubcommandHelpFormatter,
+      add_help=False)
 
   subparsers = parser.add_subparsers(
-    title="Available commands",
-    metavar='<command> <options>')
+      title="Available commands",
+      metavar='<command> <options>')
 
   activate.create_parser(subparsers)
   deactivate.create_parser(subparsers)
@@ -92,6 +97,7 @@ def create_parser():
   version.create_parser(subparsers)
 
   return parser
+
 
 ################################################################################
 def run(command, parser, command_args, unknown_args):
@@ -127,6 +133,7 @@ def run(command, parser, command_args, unknown_args):
 
   return status
 
+
 def cleanup(files):
   '''
   :param files:
@@ -134,6 +141,7 @@ def cleanup(files):
   '''
   for cur_file in files:
     shutil.rmtree(os.path.dirname(cur_file))
+
 
 ################################################################################
 def check_environment():
@@ -146,6 +154,7 @@ def check_environment():
 
   if not utils.check_release_file_exists():
     sys.exit(1)
+
 
 ################################################################################
 def extract_common_args(command, parser, cl_args):
@@ -186,6 +195,7 @@ def extract_common_args(command, parser, cl_args):
 
   cl_args.update(new_cl_args)
   return cl_args
+
 
 ################################################################################
 def main():
@@ -245,9 +255,10 @@ def main():
 
   if command != 'help':
     sys.stdout.flush()
-    Log.info('Elapsed time: %.3fs.' % (end-start))
+    Log.info('Elapsed time: %.3fs.' % (end - start))
 
   return 0 if retcode else 1
+
 
 if __name__ == "__main__":
   sys.exit(main())

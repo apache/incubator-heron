@@ -17,6 +17,7 @@ import fnmatch
 
 import heron.cli.src.python.utils as utils
 
+
 ################################################################################
 # TODO, make the jars independent version free
 def pick(dirname, pattern):
@@ -29,6 +30,7 @@ def pick(dirname, pattern):
   file_list = fnmatch.filter(os.listdir(dirname), pattern)
   return file_list[0] if file_list else None
 
+
 ################################################################################
 # TODO, make the jars independent version free
 def topology_jars():
@@ -37,9 +39,10 @@ def topology_jars():
   :return:
   '''
   jars = [
-    os.path.join(utils.get_heron_lib_dir(), "3rdparty", "*")
+      os.path.join(utils.get_heron_lib_dir(), "3rdparty", "*")
   ]
   return jars
+
 
 ################################################################################
 def scheduler_jars():
@@ -48,9 +51,10 @@ def scheduler_jars():
   :return:
   '''
   jars = [
-    os.path.join(utils.get_heron_lib_dir(), "scheduler", "*")
+      os.path.join(utils.get_heron_lib_dir(), "scheduler", "*")
   ]
   return jars
+
 
 ################################################################################
 def uploader_jars():
@@ -59,9 +63,10 @@ def uploader_jars():
   :return:
   '''
   jars = [
-    os.path.join(utils.get_heron_lib_dir(), "uploader", "*")
+      os.path.join(utils.get_heron_lib_dir(), "uploader", "*")
   ]
   return jars
+
 
 ################################################################################
 def statemgr_jars():
@@ -70,9 +75,10 @@ def statemgr_jars():
   :return:
   '''
   jars = [
-    os.path.join(utils.get_heron_lib_dir(), "statemgr", "*")
+      os.path.join(utils.get_heron_lib_dir(), "statemgr", "*")
   ]
   return jars
+
 
 ################################################################################
 def packing_jars():
@@ -81,6 +87,6 @@ def packing_jars():
   :return:
   '''
   jars = [
-    os.path.join(utils.get_heron_lib_dir(), "packing", "*")
+      os.path.join(utils.get_heron_lib_dir(), "packing", "*")
   ]
   return jars

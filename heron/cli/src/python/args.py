@@ -16,6 +16,7 @@ import os
 
 import heron.cli.src.python.utils as utils
 
+
 def add_titles(parser):
   '''
   :param parser:
@@ -25,6 +26,7 @@ def add_titles(parser):
   parser._positionals.title = "Required arguments"
   parser._optionals.title = "Optional arguments"
   return parser
+
 
 def insert_bool(param, command_args):
   '''
@@ -46,6 +48,7 @@ def insert_bool(param, command_args):
     command_args.insert(index + 1, 'True')
   return command_args
 
+
 def insert_bool_values(command_line_args):
   '''
   :param command_line_args:
@@ -55,16 +58,18 @@ def insert_bool_values(command_line_args):
   args2 = insert_bool('--deploy-deactivated', args1)
   return args2
 
+
 def add_verbose(parser):
   '''
   :param parser:
   :return:
   '''
   parser.add_argument(
-    '--verbose',
-    metavar='(a boolean; default: "false")',
-    default=False)
+      '--verbose',
+      metavar='(a boolean; default: "false")',
+      default=False)
   return parser
+
 
 def add_trace_execution(parser):
   '''
@@ -72,10 +77,11 @@ def add_trace_execution(parser):
   :return:
   '''
   parser.add_argument(
-    '--trace-execution',
-    metavar='(a boolean; default: "false")',
-    default=False)
+      '--trace-execution',
+      metavar='(a boolean; default: "false")',
+      default=False)
   return parser
+
 
 def add_topology(parser):
   '''
@@ -83,9 +89,10 @@ def add_topology(parser):
   :return:
   '''
   parser.add_argument(
-    'topology-name',
-    help='Name of the topology')
+      'topology-name',
+      help='Name of the topology')
   return parser
+
 
 def add_topology_file(parser):
   '''
@@ -93,9 +100,10 @@ def add_topology_file(parser):
   :return:
   '''
   parser.add_argument(
-    'topology-file-name',
-    help='Topology jar/tar/zip file')
+      'topology-file-name',
+      help='Topology jar/tar/zip file')
   return parser
+
 
 def add_topology_class(parser):
   '''
@@ -103,9 +111,10 @@ def add_topology_class(parser):
   :return:
   '''
   parser.add_argument(
-    'topology-class-name',
-    help='Topology class name')
+      'topology-class-name',
+      help='Topology class name')
   return parser
+
 
 def add_cluster_role_env(parser):
   '''
@@ -113,10 +122,11 @@ def add_cluster_role_env(parser):
   :return:
   '''
   parser.add_argument(
-    'cluster/[role]/[env]',
-    help='Cluster, role, and environment to run topology'
+      'cluster/[role]/[env]',
+      help='Cluster, role, and environment to run topology'
   )
   return parser
+
 
 def add_config(parser):
   '''
@@ -127,16 +137,17 @@ def add_config(parser):
   default_config_path = utils.get_heron_conf_dir()
 
   parser.add_argument(
-    '--config-path',
-    metavar='(a string; path to cluster config; default: "' + default_config_path + '")',
-    default=os.path.join(utils.get_heron_dir(), default_config_path))
+      '--config-path',
+      metavar='(a string; path to cluster config; default: "' + default_config_path + '")',
+      default=os.path.join(utils.get_heron_dir(), default_config_path))
 
   parser.add_argument(
-    '--config-property',
-    metavar='(key=value; a config key and its value; default: [])',
-    action='append',
-    default=[])
+      '--config-property',
+      metavar='(key=value; a config key and its value; default: [])',
+      action='append',
+      default=[])
   return parser
+
 
 def add_system_property(parser):
   '''
@@ -144,12 +155,13 @@ def add_system_property(parser):
   :return:
   '''
   parser.add_argument(
-    '--topology-main-jvm-property',
-    metavar='(property=value; JVM system property for executing topology main; default: [])',
-    action="append",
-    default=[])
+      '--topology-main-jvm-property',
+      metavar='(property=value; JVM system property for executing topology main; default: [])',
+      action="append",
+      default=[])
 
   return parser
+
 
 def add_deactive_deploy(parser):
   '''
@@ -157,7 +169,7 @@ def add_deactive_deploy(parser):
   :return:
   '''
   parser.add_argument(
-    '--deploy-deactivated',
-    metavar='(a boolean; default: "false")',
-    default=False)
+      '--deploy-deactivated',
+      metavar='(a boolean; default: "false")',
+      default=False)
   return parser

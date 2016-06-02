@@ -22,6 +22,7 @@ import heron.cli.src.python.opts  as opts
 import heron.cli.src.python.utils as utils
 import heron.cli.src.python.jars  as jars
 
+
 ################################################################################
 def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=None):
   '''
@@ -49,8 +50,8 @@ def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=N
   # Because of the way Python execute works,
   # the java opts must be passed as part of the list
   all_args = [utils.get_java_path(), "-client", "-Xmx1g", opts.get_heron_config()] + \
-    java_opts + \
-    ["-cp", utils.get_classpath(lib_jars + extra_jars)]
+             java_opts + \
+             ["-cp", utils.get_classpath(lib_jars + extra_jars)]
 
   all_args += [class_name] + list(args)
 
@@ -64,6 +65,7 @@ def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=N
     if status != 0:
       err_str = "User main failed with status %d. Bailing out..." % status
       raise RuntimeError(err_str)
+
 
 def heron_tar(class_name, topology_tar, arguments, tmpdir_root, java_defines):
   '''
@@ -88,10 +90,10 @@ def heron_tar(class_name, topology_tar, arguments, tmpdir_root, java_defines):
   topology_jar = os.path.basename(topology_tar).replace(".tar.gz", "").replace(".tar", "") + ".jar"
 
   extra_jars = [
-    os.path.join(tmpdir, "heron-instance.jar"),
-    os.path.join(tmpdir, topology_jar),
-    os.path.join(tmpdir, "*"),
-    os.path.join(tmpdir, "libs/*")
+      os.path.join(tmpdir, "heron-instance.jar"),
+      os.path.join(tmpdir, topology_jar),
+      os.path.join(tmpdir, "*"),
+      os.path.join(tmpdir, "libs/*")
   ]
 
   lib_jars = utils.get_heron_libs(jars.topology_jars())
