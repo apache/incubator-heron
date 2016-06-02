@@ -14,7 +14,6 @@
 ''' activate '''
 import heron.cli.src.python.cli_helper as cli_helper
 
-
 def create_parser(subparsers):
   '''
   :param subparsers:

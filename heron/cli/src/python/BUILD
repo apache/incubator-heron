@@ -17,7 +17,8 @@ pex_library(
         "submit.py",
         "utils.py",
         "version.py",
-    ], 
+        "cli_helper.py",
+    ],
     deps = [
         "//heron/common/src/python:common",
         "//heron/proto:proto-py",

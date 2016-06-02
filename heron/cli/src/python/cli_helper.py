@@ -12,15 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' cli_helper.py '''
-
-from heron.common.src.python.color import Log
-
 import heron.cli.src.python.utils as utils
 import heron.cli.src.python.opts as opts
 import heron.cli.src.python.execute as execute
 import heron.cli.src.python.jars as jars
 import heron.cli.src.python.args as args
 
+from heron.common.src.python.color import Log
 
 ################################################################################
 def create_parser(subparsers, action, help):
