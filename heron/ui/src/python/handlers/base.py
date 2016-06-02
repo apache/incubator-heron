@@ -19,6 +19,7 @@ import tornado.httpserver
 
 class BaseHandler(tornado.web.RequestHandler):
   ''' BaseHandler '''
+
   def write_error(self, status_code, **kwargs):
     '''
     :param status_code:

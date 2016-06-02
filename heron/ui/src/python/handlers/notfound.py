@@ -14,8 +14,10 @@
 ''' notfound.py '''
 from heron.ui.src.python.handlers import base
 
+
 class NotFoundHandler(base.BaseHandler):
   ''' NotFoundHandler '''
+
   # pylint: disable=unused-argument
   def get(self, *args, **kwargs):
     '''

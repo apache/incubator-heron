@@ -14,12 +14,14 @@
 ''' deactivate.py '''
 import heron.cli.src.python.run_helper as run_helper
 
+
 def create_parser(subparsers):
   '''
   :param subparsers:
   :return:
   '''
   return run_helper.create_parser(subparsers, 'deactivate', 'Deactivate a topology')
+
 
 # pylint: disable=unused-argument
 def run(command, parser, cl_args, unknown_args):

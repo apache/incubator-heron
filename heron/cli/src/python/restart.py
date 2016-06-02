@@ -19,33 +19,35 @@ import heron.cli.src.python.execute as execute
 import heron.cli.src.python.jars as jars
 import heron.cli.src.python.utils as utils
 
+
 def create_parser(subparsers):
   '''
   :param subparsers:
   :return:
   '''
   parser = subparsers.add_parser(
-    'restart',
-    help='Restart a topology',
-    usage="%(prog)s [options] cluster/[role]/[env] topology-name [container-id]",
-    add_help=False)
+      'restart',
+      help='Restart a topology',
+      usage="%(prog)s [options] cluster/[role]/[env] topology-name [container-id]",
+      add_help=False)
 
   args.add_titles(parser)
   args.add_cluster_role_env(parser)
   args.add_topology(parser)
 
   parser.add_argument(
-    'container-id',
-    nargs='?',
-    type=int,
-    default=-1,
-    help='Identifier of the container to be restarted')
+      'container-id',
+      nargs='?',
+      type=int,
+      default=-1,
+      help='Identifier of the container to be restarted')
 
   args.add_config(parser)
   args.add_verbose(parser)
 
   parser.set_defaults(subcommand='restart')
   return parser
+
 
 # pylint: disable=unused-argument
 def run(command, parser, cl_args, unknown_args):
@@ -61,26 +63,26 @@ def run(command, parser, cl_args, unknown_args):
     container_id = cl_args['container-id']
 
     new_args = [
-      "--cluster", cl_args['cluster'],
-      "--role", cl_args['role'],
-      "--environment", cl_args['environ'],
-      "--heron_home", utils.get_heron_dir(),
-      "--config_path", cl_args['config_path'],
-      "--override_config_file", cl_args['override_config_file'],
-      "--release_file", utils.get_heron_release_file(),
-      "--topology_name", topology_name,
-      "--command", command,
-      "--container_id", str(container_id)
+        "--cluster", cl_args['cluster'],
+        "--role", cl_args['role'],
+        "--environment", cl_args['environ'],
+        "--heron_home", utils.get_heron_dir(),
+        "--config_path", cl_args['config_path'],
+        "--override_config_file", cl_args['override_config_file'],
+        "--release_file", utils.get_heron_release_file(),
+        "--topology_name", topology_name,
+        "--command", command,
+        "--container_id", str(container_id)
     ]
 
     lib_jars = utils.get_heron_libs(jars.scheduler_jars() + jars.statemgr_jars())
 
     # invoke the runtime manager to kill the topology
     execute.heron_class(
-      'com.twitter.heron.scheduler.RuntimeManagerMain',
-      lib_jars,
-      extra_jars=[],
-      args=new_args
+        'com.twitter.heron.scheduler.RuntimeManagerMain',
+        lib_jars,
+        extra_jars=[],
+        args=new_args
     )
 
   except Exception as ex:

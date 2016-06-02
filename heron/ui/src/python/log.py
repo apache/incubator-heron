@@ -19,6 +19,7 @@ import logging.handlers
 # pylint: disable=invalid-name
 Log = logging.getLogger('heron-ui')
 
+
 def configure(level, logfile=None):
   '''
   :param level:

@@ -21,6 +21,7 @@ config_opts = dict()
 verbose_flag = False
 trace_execution_flag = False
 
+
 ################################################################################
 def get_heron_config():
   '''
@@ -34,6 +35,7 @@ def get_heron_config():
   all_opts = '-Dheron.options=' + (','.join(opt_list)).replace(' ', '%%%%')
   return all_opts
 
+
 ################################################################################
 def get_config(k):
   '''
@@ -46,6 +48,7 @@ def get_config(k):
     return config_opts[k]
   return None
 
+
 ################################################################################
 def set_config(k, v):
   '''
@@ -57,6 +60,7 @@ def set_config(k, v):
   global config_opts
   config_opts[k] = v
 
+
 ################################################################################
 def clear_config():
   '''
@@ -65,6 +69,7 @@ def clear_config():
   '''
   global config_opts
   config_opts = dict()
+
 
 ################################################################################
 def set_verbose():
@@ -75,12 +80,14 @@ def set_verbose():
   global verbose_flag
   verbose_flag = True
 
+
 def verbose():
   '''
   :return:
   '''
   global verbose_flag
   return verbose_flag
+
 
 ################################################################################
 def set_trace_execution():
@@ -91,6 +98,7 @@ def set_trace_execution():
   global trace_execution_flag
   trace_execution_flag = True
   set_verbose()
+
 
 def trace_execution():
   '''

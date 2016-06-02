@@ -25,6 +25,7 @@ query_handler = access.HeronQueryHandler()
 
 class MetricsHandler(base.BaseHandler):
   ''' MetricsHandler '''
+
   @tornado.gen.coroutine
   def get(self):
     '''
@@ -44,8 +45,8 @@ class MetricsHandler(base.BaseHandler):
     futures = {}
     for comp in compnames:
       future = access.get_comp_metrics(
-        cluster, environ, topology, comp, instances,
-        metricnames, time_range)
+          cluster, environ, topology, comp, instances,
+          metricnames, time_range)
       futures[comp] = future
 
     results = yield futures
@@ -55,6 +56,7 @@ class MetricsHandler(base.BaseHandler):
 
 class MetricsTimelineHandler(base.BaseHandler):
   ''' MetricsTimelineHandler '''
+
   @tornado.gen.coroutine
   def get(self):
     '''
