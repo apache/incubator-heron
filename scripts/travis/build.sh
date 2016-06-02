@@ -54,6 +54,9 @@ start_timer "$T"
 bazel --bazelrc=tools/travis-ci/bazel.rc build heron/...
 end_timer "$T"
 
+# check styles
+bazel --bazelrc=tools/travis-ci/bazel.rc run :checkstyle_all
+
 # run heron unit tests
 T="heron test non-flaky"
 start_timer "$T"
