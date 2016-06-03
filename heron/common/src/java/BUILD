@@ -35,6 +35,6 @@ java_library(
     srcs = glob(["**/network/*.java"]),
     deps = [
         ":basics-java",
-        "@protobuf-java//jar",
+        "@protobuf_java//jar",
     ],
 )

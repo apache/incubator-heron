@@ -136,7 +136,7 @@ java_library(
         ":proto_tuple_java",
         ":proto_stmgr_java",
         ":proto_networktests_java",
-        "@protobuf-java//jar",
+        "@protobuf_java//jar",
     ],
     srcs = [
         "Empty.java",

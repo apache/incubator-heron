@@ -94,7 +94,7 @@ genrule(
         ":hzkstatemgr",
         ":huploader-localfs",
         ":huploader-null",
-        ":protobuf-java",
+        ":protobuf-java-jar",
         ":slf4j-api-java",
         ":slf4j-jdk-java",
         ":log4j-over-slf4j-java",
@@ -125,7 +125,7 @@ genrule(
         "--cp $(location hzkstatemgr)                lib/statemgr/heron-zookeeper-statemgr.jar",
         "--cp $(location huploader-localfs)          lib/uploader/heron-localfs-uploader.jar",
         "--cp $(location huploader-null)             lib/uploader/heron-null-uploader.jar",
-        "--cp $(location protobuf-java)              lib/3rdparty/$$(basename $(location protobuf-java))",
+        "--cp $(location protobuf-java-jar)          lib/3rdparty/$$(basename $(location protobuf-java-jar))",
         "--cp $(location slf4j-api-java)             lib/3rdparty/$$(basename $(location slf4j-api-java))",
         "--cp $(location slf4j-jdk-java)             lib/3rdparty/$$(basename $(location slf4j-jdk-java))",
         "--cp $(location log4j-over-slf4j-java)      lib/3rdparty/$$(basename $(location log4j-over-slf4j-java))",
@@ -333,23 +333,23 @@ filegroup(
 )
 
 filegroup(
-    name = "protobuf-java",
-    srcs = ["@protobuf-java//jar"],
+    name = "protobuf-java-jar",
+    srcs = ["@protobuf_java//jar"],
 )
 
 filegroup(
     name = "slf4j-api-java",
-    srcs = ["@slf4j-api//jar"],
+    srcs = ["@slf4j_api//jar"],
 )
 
 filegroup(
     name = "slf4j-jdk-java",
-    srcs = ["@slf4j-jdk//jar"],
+    srcs = ["@slf4j_jdk//jar"],
 )
 
 filegroup(
     name = "log4j-over-slf4j-java",
-    srcs = ["@log4j-over-slf4j//jar"],
+    srcs = ["@log4j_over_slf4j//jar"],
 )
 
 filegroup(

@@ -2,8 +2,8 @@ package(default_visibility = ["//visibility:public"])
 
 common_deps = [
     ":util",
-    "@commons-cli//jar",
-    "@commons-lang//jar",
+    "@commons_cli//jar",
+    "@commons_lang//jar",
     "@guava//jar",
     "//3rdparty/java/bazel:extra_actions_proto_java",
     "//3rdparty/java/bazel:proto_java",
@@ -37,7 +37,7 @@ java_library(
     name = "util",
     srcs = ["ExtraActionUtils.java"],
     deps = [
-        "@protobuf-java//jar",
+        "@protobuf_java//jar",
         "//3rdparty/java/bazel:extra_actions_proto_java",
         "//3rdparty/java/bazel:proto_java",
     ],
