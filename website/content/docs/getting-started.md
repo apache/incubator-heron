@@ -1,6 +1,8 @@
 ---
 title: Quick Start Guide
 description: Run a single-node Heron cluster on your laptop
+aliases:
+  - /docs/install.html
 ---
 
 The easiest way to get started learning Heron is to install and run pre-compiled
