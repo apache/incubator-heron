@@ -285,7 +285,8 @@ class HeronExecutor:
     for (instance_id, component_name, global_task_id, component_index) in instance_info:
       total_jvm_size = int(self.component_rammap[component_name] / (1024 * 1024))
       heap_size_mb = total_jvm_size - code_cache_size_mb - perm_gen_size_mb
-      print "%s %d %d %d %d" % (component_name, self.component_rammap[component_name], total_jvm_size, code_cache_size_mb, perm_gen_size_mb)
+      do_print("component name: %s, ram request: %d, total jvm size: %dM, cache size: %dM, perm size: %dM"
+               % (component_name, self.component_rammap[component_name], total_jvm_size, code_cache_size_mb, perm_gen_size_mb))
       xmn_size = int(heap_size_mb / 2)
       instance_cmd = ['%s/bin/java' % self.heron_java_home,
                       '-Xmx%dM' % heap_size_mb,
@@ -347,13 +348,25 @@ class HeronExecutor:
     if self.pkg_type == "tar":
       os.system("tar -xvf %s" % self.topology_jar_file)
 
+  # Wait for the termination of a process and log its stdout & stderr
+  def wait_process_std_out_err(self, name, process):
+    (process_stdout, process_stderr) = process.communicate()
+    do_print("%s stdout: %s" %(name, process_stdout))
+    do_print("%s stderr: %s" %(name, process_stderr))
+
   def run_process(self, name, cmd):
     do_print("Running %s process as %s" % (name, ' '.join(cmd)))
-    return subprocess.Popen(cmd)
+    return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
   def run_blocking_process(self, cmd, is_shell):
-    do_print("Running process as %s" % cmd)
-    return subprocess.call(cmd, shell=is_shell)
+    do_print("Running blocking process as %s" % cmd)
+    process = subprocess.Popen(cmd, shell=is_shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    # wait for termination
+    self.wait_process_std_out_err("", process)
+
+    # return the exit code
+    return process.returncode
 
   def do_run_and_wait(self, commands):
     process_dict = { }
@@ -369,6 +382,9 @@ class HeronExecutor:
       (pid, status) = os.wait()
       (old_p, name, nattempts) = process_dict[pid]
       do_print("%s exited with status %d" % (name, status))
+      # Log the stdout & stderr of the failed process
+      self.wait_process_std_out_err(name, old_p)
+
       # Just make it world readable
       if os.path.isfile("core.%d" % pid):
         os.system("chmod a+r core.%d" % pid)
@@ -399,7 +415,9 @@ class HeronExecutor:
 
   def prepareLaunch(self):
     create_folders = 'mkdir -p %s' % self.log_dir
-    chmod_binaries = 'chmod a+rx . && chmod a+x %s && chmod +x %s && chmod +x %s && chmod +x %s' % (self.log_dir, self.tmaster_binary, self.stmgr_binary, self.heron_shell_binary)
+    chmod_binaries = \
+        'chmod a+rx . && chmod a+x %s && chmod +x %s && chmod +x %s && chmod +x %s' \
+        % (self.log_dir, self.tmaster_binary, self.stmgr_binary, self.heron_shell_binary)
 
     commands = [create_folders, chmod_binaries]
 
