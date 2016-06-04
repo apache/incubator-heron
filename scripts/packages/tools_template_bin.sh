@@ -87,7 +87,7 @@ fi
 if ! which tar >/dev/null; then
   echo >&2
   echo "tar not found, please install the corresponding package." >&2
-  echo "See $getting_started_urlfor more information on" >&2
+  echo "See $getting_started_url for more information on" >&2
   echo "dependencies of Heron." >&2
   exit 1
 fi
