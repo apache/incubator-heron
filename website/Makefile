@@ -2,7 +2,7 @@ setup:
 	@brew list hugo || brew install hugo
 	@npm install
 	@pip uninstall requests
-	@pip install linkchecker pygments requests==2.9.0
+	@pip install gitpython pyyaml linkchecker pygments requests==2.9.0
 
 clean:
 	rm -rf public/*
@@ -26,7 +26,11 @@ linkchecker:
 javadocs:
 	@scripts/javadocs.sh
 
+update-heron-version:
+	@scripts/heron-version.sh
+
 site:
+	@make update-heron-version
 	@make clean
 	@make build-static-assets
 	@make pages
