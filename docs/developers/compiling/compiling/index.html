@@ -41,9 +41,9 @@ Heron jars are compatible with Java 7.</li>
 </ul>
 
 <p>Export CC and CXX variables with path specific to your machine:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ <span style="color: #f8f8f2">export</span> <span style="color: #f8f8f2">CC</span><span style="color: #f92672">=</span>/your-path-to/bin/c_compiler
-$ <span style="color: #f8f8f2">export</span> <span style="color: #f8f8f2">CXX</span><span style="color: #f92672">=</span>/your-path-to/bin/c++_compiler
-$ <span style="color: #f8f8f2">echo</span> <span style="color: #f8f8f2">$CC</span> <span style="color: #f8f8f2">$CXX</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ export CC</span><span style="color: #f92672">=</span>/your-path-to/bin/c_compiler
+<span style="color: #f8f8f2">$ export CXX</span><span style="color: #f92672">=</span>/your-path-to/bin/c++_compiler
+<span style="color: #f8f8f2">$ echo</span> <span style="color: #f8f8f2">$CC</span> <span style="color: #f8f8f2">$CXX</span>
 </pre></div>
 
 <h2 id="installing-bazel:c58322628b54ee0c077e0910dc13c454">Installing Bazel</h2>
@@ -60,8 +60,8 @@ have Bazel 0.1.2.</p>
 
 <p>There is a Python script that you can run to configure Bazel on supported
 platforms:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ <span style="color: #f8f8f2">cd</span> /path/to/heron
-$ ./bazel_configure.py
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ cd</span> /path/to/heron
+<span style="color: #f8f8f2">$ </span>./bazel_configure.py
 </pre></div>
 
 <h2 id="building:c58322628b54ee0c077e0910dc13c454">Building</h2>
@@ -79,7 +79,7 @@ are supported:</p>
 </ul>
 
 <p>For example, on Darwin, the following command will build all packages:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ bazel build --config<span style="color: #f92672">=</span>darwin heron/...
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>bazel build --config<span style="color: #f92672">=</span>darwin heron/...
 </pre></div>
 
 <h3 id="building-all-components:c58322628b54ee0c077e0910dc13c454">Building All Components</h3>
@@ -87,8 +87,8 @@ are supported:</p>
 <p>The bazel build process can produce either executable install scripts, or
 bundled tars. To build executables or tars for all Heron components at once,
 use the following <code>bazel build</code> commands, respectively.</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ bazel build --config<span style="color: #f92672">=</span>darwin scripts/packages:binpkgs
-$ bazel build --config<span style="color: #f92672">=</span>darwin scripts/packages:tarpkgs
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>bazel build --config<span style="color: #f92672">=</span>darwin scripts/packages:binpkgs
+<span style="color: #f8f8f2">$ </span>bazel build --config<span style="color: #f92672">=</span>darwin scripts/packages:tarpkgs
 </pre></div>
 
 <p>Resulting artifacts can be found in subdirectories below the <code>bazel-bin</code>
@@ -100,7 +100,7 @@ directory. The <code>heron-tracker</code> executable, for example, can be found 
 <p>As an alternative to building a full release, you can build Heron executables for
 a single component by passing a target to the <code>bazel build</code> command. For example
 the following command will build the <a href="../../../operators/heron-tracker">Heron Tracker</a>:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ bazel build --config<span style="color: #f92672">=</span>darwin heron/tracker/src/python:heron-tracker
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>bazel build --config<span style="color: #f92672">=</span>darwin heron/tracker/src/python:heron-tracker
 </pre></div>
 
 <h2 id="testing-heron:c58322628b54ee0c077e0910dc13c454">Testing Heron</h2>

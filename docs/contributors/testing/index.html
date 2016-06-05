@@ -7,30 +7,30 @@ as described in <a href="../../developers/compiling/compiling">Compiling Heron</
 <h3 id="running-unit-tests:3047d71ccf1370a2898eb92c70273f56">Running Unit Tests</h3>
 
 <p>The following command will run all tests:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ bazel <span style="color: #f8f8f2">test</span> --config<span style="color: #f92672">=</span>darwin heron/...
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>bazel <span style="color: #f8f8f2">test</span> --config<span style="color: #f92672">=</span>darwin heron/...
 </pre></div>
 
 <p>To run a specific <a href="http://bazel.io/docs/test-encyclopedia.html">test
 target</a>, pass the test target name.</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ bazel <span style="color: #f8f8f2">test</span> --config<span style="color: #f92672">=</span>darwin heron/statemgrs/tests/java:localfs-statemgr_unittest
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>bazel <span style="color: #f8f8f2">test</span> --config<span style="color: #f92672">=</span>darwin heron/statemgrs/tests/java:localfs-statemgr_unittest
 </pre></div>
 
 <h3 id="discovering-unit-test-targets:3047d71ccf1370a2898eb92c70273f56">Discovering Unit Test Targets</h3>
 
 <p>To see a full listing of all Bazel test targets:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ bazel query <span style="color: #e6db74">&#39;kind(&quot;.*_test rule&quot;, ...)&#39;</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>bazel query <span style="color: #e6db74">&#39;kind(&quot;.*_test rule&quot;, ...)&#39;</span>
 </pre></div>
 
 <p>For <strong>Java</strong> targets only:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ bazel query <span style="color: #e6db74">&#39;kind(&quot;java_test rule&quot;, ...)&#39;</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>bazel query <span style="color: #e6db74">&#39;kind(&quot;java_test rule&quot;, ...)&#39;</span>
 </pre></div>
 
 <p>For <strong>C++</strong> targets:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ bazel query <span style="color: #e6db74">&#39;kind(&quot;cc_test rule&quot;, ...)&#39;</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>bazel query <span style="color: #e6db74">&#39;kind(&quot;cc_test rule&quot;, ...)&#39;</span>
 </pre></div>
 
 <p>For <strong>Python</strong> targets:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ bazel query <span style="color: #e6db74">&#39;kind(&quot;pex_test rule&quot;, ...)&#39;</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>bazel query <span style="color: #e6db74">&#39;kind(&quot;pex_test rule&quot;, ...)&#39;</span>
 </pre></div>
 
 <h3 id="running-integration-tests:3047d71ccf1370a2898eb92c70273f56">Running Integration Tests</h3>
@@ -43,10 +43,10 @@ target</a>, pass the test target name.</p>
 </ul>
 
 <p>To run the failure integration tests on your Mac OS X, do the following:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>bazel run --config=darwin -- scripts/packages:heron-client-install.sh --user
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">bazel</span> <span style="color: #f8f8f2">run</span> <span style="color: #f92672">--</span><span style="color: #f8f8f2">config</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">darwin</span> <span style="color: #f92672">--</span> <span style="color: #f8f8f2">scripts</span><span style="color: #f92672">/</span><span style="color: #f8f8f2">packages</span><span style="color: #f92672">:</span><span style="color: #f8f8f2">heron</span><span style="color: #f92672">-</span><span style="color: #f8f8f2">client</span><span style="color: #f92672">-</span><span style="color: #f8f8f2">install.sh</span> <span style="color: #f92672">--</span><span style="color: #f8f8f2">user</span>
 
-bazel build --config=dawrin integration-test/src/...
+<span style="color: #f8f8f2">bazel</span> <span style="color: #f8f8f2">build</span> <span style="color: #f92672">--</span><span style="color: #f8f8f2">config</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">dawrin</span> <span style="color: #f8f8f2">integration</span><span style="color: #f92672">-</span><span style="color: #f8f8f2">test</span><span style="color: #f92672">/</span><span style="color: #f8f8f2">src</span><span style="color: #f92672">/</span><span style="color: #f8f8f2">...</span>
 
-python integration-test/src/python/local_test_runner/main.py
+<span style="color: #f8f8f2">python</span> <span style="color: #f8f8f2">integration</span><span style="color: #f92672">-</span><span style="color: #f8f8f2">test</span><span style="color: #f92672">/</span><span style="color: #f8f8f2">src</span><span style="color: #f92672">/</span><span style="color: #f8f8f2">python</span><span style="color: #f92672">/</span><span style="color: #f8f8f2">local_test_runner</span><span style="color: #f92672">/</span><span style="color: #f8f8f2">main.py</span>
 </pre></div>
 </article></section></div></div></div><script src="http://code.jquery.com/jquery-2.2.1.min.js"></script><script src="/heron/js/app.min.js"></script></body></html>

@@ -21,7 +21,7 @@ instances of this spout.</p></li>
 </ul>
 
 <p>A simple example is as follows:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">TopologyBuilder</span> <span style="color: #f8f8f2">builder</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">TopologyBuilder</span><span style="color: #f92672">();</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">TopologyBuilder</span> <span style="color: #f8f8f2">builder</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">TopologyBuilder</span><span style="color: #f92672">();</span>
 <span style="color: #f8f8f2">builder</span><span style="color: #f92672">.</span><span style="color: #a6e22e">setSpout</span><span style="color: #f92672">(</span><span style="color: #e6db74">&quot;word&quot;</span><span style="color: #f92672">,</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">TestWordSpout</span><span style="color: #f92672">(),</span> <span style="color: #ae81ff">5</span><span style="color: #f92672">);</span>
 <span style="color: #f8f8f2">builder</span><span style="color: #f92672">.</span><span style="color: #a6e22e">setBolt</span><span style="color: #f92672">(</span><span style="color: #e6db74">&quot;exclaim&quot;</span><span style="color: #f92672">,</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">ExclamationBolt</span><span style="color: #f92672">(),</span> <span style="color: #ae81ff">4</span><span style="color: #f92672">);</span>
 </pre></div>
@@ -44,12 +44,12 @@ a bolt.</li>
 
 <p>The following snippet is a simple example of specifying shuffle grouping
 between our <code>word</code> spout and <code>exclaim</code> bolt.</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">builder</span><span style="color: #f92672">.</span><span style="color: #a6e22e">setBolt</span><span style="color: #f92672">(</span><span style="color: #e6db74">&quot;exclaim&quot;</span><span style="color: #f92672">,</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">ExclamationBolt</span><span style="color: #f92672">(),</span> <span style="color: #ae81ff">4</span><span style="color: #f92672">)</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">builder</span><span style="color: #f92672">.</span><span style="color: #a6e22e">setBolt</span><span style="color: #f92672">(</span><span style="color: #e6db74">&quot;exclaim&quot;</span><span style="color: #f92672">,</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">ExclamationBolt</span><span style="color: #f92672">(),</span> <span style="color: #ae81ff">4</span><span style="color: #f92672">)</span>
   <span style="color: #f92672">.</span><span style="color: #a6e22e">shuffleGrouping</span><span style="color: #f92672">(</span><span style="color: #e6db74">&quot;word&quot;</span><span style="color: #f92672">);</span>
 </pre></div>
 
 <p>Once the components and the grouping are specified, the topology can be built.</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">HeronTopology</span> <span style="color: #f8f8f2">topology</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">builder</span><span style="color: #f92672">.</span><span style="color: #a6e22e">createTopology</span><span style="color: #f92672">();</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">HeronTopology</span> <span style="color: #f8f8f2">topology</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">builder</span><span style="color: #f92672">.</span><span style="color: #a6e22e">createTopology</span><span style="color: #f92672">();</span>
 </pre></div>
 
 <p>See the <a href="https://github.com/twitter/heron/blob/master/heron/examples/src/java/com/twitter/heron/examples/ExclamationTopology.java"><code>ExclamationTopology</code></a> for the complete example. More examples can be found in the  <a href="https://github.com/twitter/heron/tree/master/heron/examples/src/java/com/twitter/heron/examples"><code>examples package</code></a>.</p>

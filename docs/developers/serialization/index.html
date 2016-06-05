@@ -26,7 +26,7 @@ documentation</a>.</p>
 <li>Register the class with Kryo using the <code>topology.kryo.register</code> parameter for
 your topology. Here&rsquo;s an example:</li>
 </ol>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>  <span style="color: #ae81ff">topology.kryo.register</span><span style="color: #f8f8f2">:</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">  <span style="color: #ae81ff">topology.kryo.register</span><span style="color: #f8f8f2">:</span>
     <span style="color: #f8f8f2">-</span> <span style="color: #ae81ff">biz.acme.heron.datatypes.CustomType1</span> <span style="color: #75715e"># This type will use the default FieldSerializer</span>
     <span style="color: #f8f8f2">-</span> <span style="color: #ae81ff">biz.acme.heron.datatypes.CustomType2</span><span style="color: #f8f8f2">:</span> <span style="color: #ae81ff">com.example.heron.serialization.CustomSerializer</span>
 </pre></div>

@@ -38,7 +38,7 @@ configuration</a>). You should build Heron releases for deployment only
 Mesos configuration in <code>heron/cli2/src/python/mesos_scheduler.conf</code>. In
 particular, you can specify a URI using the <code>heron.core.release.uri</code> parameter.
 Here&rsquo;s an example:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>heron.core.release.uri:http://s3.amazonaws.com/my-heron-binaries
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">heron.core.release.uri</span><span style="color: #f92672">:</span><span style="color: #f8f8f2">http</span><span style="color: #f92672">:</span><span style="color: #75715e">//s3.amazonaws.com/my-heron-binaries</span>
 </pre></div>
 
 <h2 id="working-with-topologies:bda0c8163dc26ef339f8a7b5a896231a">Working with Topologies</h2>
@@ -62,7 +62,7 @@ configuration located in the Heron repository at
 modify it, or use an entirely different configuration.</p>
 
 <p>Here&rsquo;s an example CLI command using this configuration:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ heron-cli activate <span style="color: #ae81ff">\</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>heron-cli activate <span style="color: #ae81ff">\</span>
     <span style="color: #75715e"># Set scheduler overrides, point to a topology JAR, etc.</span>
     --config-file<span style="color: #f92672">=</span>/Users/janedoe/heron/heron/cli/src/python/mesos_scheduler.conf<span style="color: #e6db74">`</span> <span style="color: #ae81ff">\</span>
     <span style="color: #75715e"># Other parameters</span>
@@ -73,7 +73,7 @@ modify it, or use an entirely different configuration.</p>
 <p>You can use Heron&rsquo;s Mesos configuration loader by setting the
 <code>--config-loader</code> flag to <code>com.twitter.heron.scheduler.aurora.MesosConfigLoader</code>.
 Here&rsquo;s an example CLI command:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ heron-cli submit <span style="color: #ae81ff">\</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>heron-cli submit <span style="color: #ae81ff">\</span>
     <span style="color: #75715e"># Set scheduler overrides, point to a topology JAR, etc.</span>
     --config-loader<span style="color: #f92672">=</span>com.twitter.heron.scheduler.mesos.MesosConfigLoader <span style="color: #ae81ff">\</span>
     <span style="color: #75715e"># Other parameters</span>

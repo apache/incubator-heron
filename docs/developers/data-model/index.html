@@ -56,7 +56,7 @@ method.</p>
 that you&rsquo;ve created and registered a <a href="../serialization">custom serializer</a> for the type.
 Here&rsquo;s an example (which assumes that a serializer for the type
 <code>Tweet</code> has been created and registered):</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">public</span> <span style="color: #66d9ef">void</span> <span style="color: #a6e22e">execute</span><span style="color: #f92672">(</span><span style="color: #f8f8f2">Tuple</span> <span style="color: #f8f8f2">input</span><span style="color: #f92672">)</span> <span style="color: #f92672">{</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #66d9ef">public</span> <span style="color: #66d9ef">void</span> <span style="color: #a6e22e">execute</span><span style="color: #f92672">(</span><span style="color: #f8f8f2">Tuple</span> <span style="color: #f8f8f2">input</span><span style="color: #f92672">)</span> <span style="color: #f92672">{</span>
     <span style="color: #75715e">// The following return null if no value is present or throws a</span>
     <span style="color: #75715e">// ClassCastException if type casting fails:</span>
     <span style="color: #f8f8f2">Tweet</span> <span style="color: #f8f8f2">tweet</span> <span style="color: #f92672">=</span> <span style="color: #f92672">(</span><span style="color: #f8f8f2">Tweet</span><span style="color: #f92672">)</span> <span style="color: #f8f8f2">input</span><span style="color: #f92672">.</span><span style="color: #a6e22e">getValue</span><span style="color: #f92672">(</span><span style="color: #ae81ff">0</span><span style="color: #f92672">);</span>
@@ -88,7 +88,7 @@ values from a Heron tuple on the basis of their index. You can also retrieve
 multiple values using a
 <a href="/heron/api/com/twitter/heron/api/tuple/Fields.html"><code>Fields</code></a> object,
 which can be initialized either using varargs or a list of strings:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e">// Using varargs</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e">// Using varargs</span>
 <span style="color: #f8f8f2">Fields</span> <span style="color: #f8f8f2">fruits</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">Fields</span><span style="color: #f92672">(</span><span style="color: #e6db74">&quot;apple&quot;</span><span style="color: #f92672">,</span> <span style="color: #e6db74">&quot;orange&quot;</span><span style="color: #f92672">,</span> <span style="color: #e6db74">&quot;banana&quot;</span><span style="color: #f92672">);</span>
 
 <span style="color: #75715e">// Using a list of strings</span>
@@ -99,7 +99,7 @@ which can be initialized either using varargs or a list of strings:</p>
 </pre></div>
 
 <p>You can then use that object in conjunction with a tuple:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">public</span> <span style="color: #66d9ef">void</span> <span style="color: #a6e22e">execute</span><span style="color: #f92672">(</span><span style="color: #f8f8f2">Tuple</span> <span style="color: #f8f8f2">input</span><span style="color: #f92672">)</span> <span style="color: #f92672">{</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #66d9ef">public</span> <span style="color: #66d9ef">void</span> <span style="color: #a6e22e">execute</span><span style="color: #f92672">(</span><span style="color: #f8f8f2">Tuple</span> <span style="color: #f8f8f2">input</span><span style="color: #f92672">)</span> <span style="color: #f92672">{</span>
     <span style="color: #f8f8f2">List</span><span style="color: #f92672">&lt;</span><span style="color: #f8f8f2">Object</span><span style="color: #f92672">&gt;</span> <span style="color: #f8f8f2">values</span> <span style="color: #f92672">=</span> <span style="color: #f8f8f2">input</span><span style="color: #f92672">.</span><span style="color: #a6e22e">select</span><span style="color: #f92672">(</span><span style="color: #f8f8f2">fruits</span><span style="color: #f92672">);</span>
     <span style="color: #66d9ef">for</span> <span style="color: #f92672">(</span><span style="color: #f8f8f2">Object</span> <span style="color: #f8f8f2">value</span> <span style="color: #f92672">:</span> <span style="color: #f8f8f2">values</span><span style="color: #f92672">)</span> <span style="color: #f92672">{</span>
         <span style="color: #f8f8f2">System</span><span style="color: #f92672">.</span><span style="color: #a6e22e">out</span><span style="color: #f92672">.</span><span style="color: #a6e22e">println</span><span style="color: #f92672">(</span><span style="color: #f8f8f2">value</span><span style="color: #f92672">);</span>

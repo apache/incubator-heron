@@ -21,14 +21,14 @@ the script has this form:</p>
 
 <p>Once the script is downloaded, run it while setting the <code>--user</code> and
 <code>--maven</code> flags:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ chmod +x heron-api-install-0.13.2-PLATFORM.sh
-$ ./heron-api-install-0.13.2-PLATFORM.sh --user --maven
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>chmod +x heron-api-install-0.13.2-PLATFORM.sh
+<span style="color: #f8f8f2">$ </span>./heron-api-install-0.13.2-PLATFORM.sh --user --maven
 Heron API installer
 -------------------
 
 <span style="color: #75715e"># Binary package at HEAD (@)</span>
    - <span style="color: #f92672">[</span>Commit<span style="color: #f92672">](</span>https://github.com/twitter/heron/commit/<span style="color: #f92672">)</span>
-Installing jars to <span style="color: #f8f8f2">local</span> maven repo.
+Installing jars to <span style="color: #f8f8f2">local </span>maven repo.
 
 Heron API is now installed!
 
@@ -37,7 +37,7 @@ See https://twitter.github.io/heron/docs/getting-started.html to start a new pro
 
 <p>The Heron API will now be installed in your local <a href="https://maven.apache.org/settings.html">Maven
 repository</a>:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ ls ~/.m2/repository/twitter/heron
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>ls ~/.m2/repository/twitter/heron
 heron-api
 heron-storm
 </pre></div>
@@ -47,7 +47,7 @@ heron-storm
 <p>Copy the <a href="https://maven.apache.org/pom.html"><code>pom.xml</code></a> segments below and paste
 them into your existing Storm <code>pom.xml</code> file in the <a href="https://maven.apache.org/pom.html#Dependencies">dependencies
 block</a>.</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f92672">&lt;dependency&gt;</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f92672">&lt;dependency&gt;</span>
   <span style="color: #f92672">&lt;groupId&gt;</span>com.twitter.heron<span style="color: #f92672">&lt;/groupId&gt;</span>
   <span style="color: #f92672">&lt;artifactId&gt;</span>heron-api<span style="color: #f92672">&lt;/artifactId&gt;</span>
   <span style="color: #f92672">&lt;version&gt;</span>SNAPSHOT<span style="color: #f92672">&lt;/version&gt;</span>
@@ -64,7 +64,7 @@ block</a>.</p>
 <h2 id="step-3-remove-storm-dependencies-from-pom-xml:8f12b3317a6bd3ad7ab03258e1b2f9e9">Step 3 &mdash; Remove Storm dependencies from <code>pom.xml</code></h2>
 
 <p>Delete the Storm dependency, which looks like this:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f92672">&lt;dependency&gt;</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f92672">&lt;dependency&gt;</span>
   <span style="color: #f92672">&lt;groupId&gt;</span>org.apache.storm<span style="color: #f92672">&lt;/groupId&gt;</span>
   <span style="color: #f92672">&lt;artifactId&gt;</span>storm-core<span style="color: #f92672">&lt;/artifactId&gt;</span>
   <span style="color: #f92672">&lt;version&gt;</span>storm-VERSION<span style="color: #f92672">&lt;/version&gt;</span>
@@ -76,7 +76,7 @@ block</a>.</p>
 
 <p>Delete the <a href="https://maven.apache.org/pom.html#Plugins">Clojure plugin</a>, which
 should look like this:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f92672">&lt;plugin&gt;</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f92672">&lt;plugin&gt;</span>
   <span style="color: #f92672">&lt;groupId&gt;</span>com.theoryinpractise<span style="color: #f92672">&lt;/groupId&gt;</span>
   <span style="color: #f92672">&lt;artifactId&gt;</span>clojure-maven-plugin<span style="color: #f92672">&lt;/artifactId&gt;</span>
   <span style="color: #f92672">&lt;version&gt;</span>1.3.12<span style="color: #f92672">&lt;/version&gt;</span>
@@ -92,9 +92,9 @@ should look like this:</p>
 <h2 id="step-5-run-maven-commands:8f12b3317a6bd3ad7ab03258e1b2f9e9">Step 5 &mdash; Run Maven commands</h2>
 
 <p>Run the following <a href="https://maven.apache.org/run.html">Maven lifecycle</a> commands:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ mvn clean
-$ mvn compile
-$ mvn package
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>mvn clean
+<span style="color: #f8f8f2">$ </span>mvn compile
+<span style="color: #f8f8f2">$ </span>mvn package
 </pre></div>
 
 <p><strong>Note</strong>: <a href="http://storm.apache.org/releases/0.10.0/Distributed-RPC.html">Storm Distribute
@@ -110,15 +110,15 @@ cluster</a> using <code>heron submit</code>.</p>
 <code>{PATH-TO-PROJECT}.jar</code>, which is located in <code>${basedir}/target</code> by <a href="https://maven.apache.org/guides/getting-started/">Maven
 convention</a>. Then modify the
 <code>TOPOLOGY-FILE-NAME</code> and <code>TOPOLOGY-CLASS-NAME</code> for your project:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ heron submit <span style="color: #f8f8f2">local</span> <span style="color: #ae81ff">\</span>
-  <span style="color: #e6db74">${</span><span style="color: #f8f8f2">basedir</span><span style="color: #e6db74">}</span>/target/PATH-TO-PROJECT.jar <span style="color: #ae81ff">\</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>heron submit <span style="color: #f8f8f2">local</span> <span style="color: #ae81ff">\</span>
+  <span style="color: #66d9ef">${</span><span style="color: #f8f8f2">basedir</span><span style="color: #66d9ef">}</span>/target/PATH-TO-PROJECT.jar <span style="color: #ae81ff">\</span>
   TOPOLOGY-FILE-NAME <span style="color: #ae81ff">\</span>
   TOPOLOGY-CLASS-NAME
 </pre></div>
 
 <p>Here&rsquo;s an example submit command using the example topology from the <a href="../getting-started">Quick
 Start Guide</a> guide:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ heron submit <span style="color: #f8f8f2">local</span> <span style="color: #ae81ff">\</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>heron submit <span style="color: #f8f8f2">local</span> <span style="color: #ae81ff">\</span>
   ~/.heron/examples/heron-examples.jar <span style="color: #ae81ff">\ </span><span style="color: #75715e"># The path of the topology&#39;s jar file</span>
   com.twitter.heron.examples.ExclamationTopology <span style="color: #ae81ff">\ </span><span style="color: #75715e"># The topology&#39;s Java class</span>
   ExclamationTopology <span style="color: #75715e"># The name of the topology</span>

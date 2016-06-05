@@ -9,8 +9,8 @@
 <a href="https://github.com/twitter/heron/releases">release binaries</a> and  run the
 installation script. For example, if you have downloaded the version <code>0.13.5</code>,
 you invoke the installation script as follows:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ chmod +x heron-client-install-0.13.5-darwin.sh
-$ ./heron-client-install-0.13.5-darwin.sh --user
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>chmod +x heron-client-install-0.13.5-darwin.sh
+<span style="color: #f8f8f2">$ </span>./heron-client-install-0.13.5-darwin.sh --user
 Heron client installer
 ----------------------
 
@@ -18,7 +18,7 @@ Uncompressing......
 
 Heron is now installed!
 
-Make sure you have <span style="color: #e6db74">&quot;/Users/</span><span style="color: #f8f8f2">$USER</span><span style="color: #e6db74">/bin&quot;</span> in your path.
+Make sure you have <span style="color: #e6db74">&quot;/Users/$USER/bin&quot;</span> in your path.
 
 See http://heronstreaming.io/docs/getting-started.html on how to use Heron!
 
@@ -69,7 +69,7 @@ that provide detailed information about the execution.</p></li>
 </ul>
 
 <p>Below is an example topology management command that uses one of these flags:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ heron activate --config-path ~/heronclusters devcluster/ads/PROD AckingTopology
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>heron activate --config-path ~/heronclusters devcluster/ads/PROD AckingTopology
 </pre></div>
 
 <h2 id="submitting-a-topology:93ec29cd3d9550d53ecc0d2998ab04fe">Submitting a Topology</h2>
@@ -80,7 +80,7 @@ Topologies can be submitted in either an activated (default) or deactivated stat
 below).</p>
 
 <p>Here&rsquo;s the basic syntax:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ heron <span style="color: #f8f8f2">help</span> submit
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>heron <span style="color: #f8f8f2">help </span>submit
 usage: heron submit <span style="color: #f92672">[</span>options<span style="color: #f92672">]</span> cluster/<span style="color: #f92672">[</span>role<span style="color: #f92672">]</span>/<span style="color: #f92672">[</span>env<span style="color: #f92672">]</span> topology-file-name topology-class-name <span style="color: #f92672">[</span>topology-args<span style="color: #f92672">]</span>
 
 Required arguments:
@@ -89,11 +89,11 @@ Required arguments:
   topology-class-name   Topology class name
 
 Optional arguments:
-  --config-path <span style="color: #f92672">(</span>a string<span style="color: #f8f8f2">;</span> path to cluster config<span style="color: #f8f8f2">;</span> default: <span style="color: #e6db74">&quot;/Users/</span><span style="color: #f8f8f2">$USER</span><span style="color: #e6db74">/.heron/conf&quot;</span><span style="color: #f92672">)</span>
-  --config-property <span style="color: #f92672">(</span><span style="color: #f8f8f2">key</span><span style="color: #f92672">=</span>value<span style="color: #f8f8f2">;</span> a config key and its value<span style="color: #f8f8f2">;</span> default: <span style="color: #f92672">[])</span>
-  --deploy-deactivated <span style="color: #f92672">(</span>a boolean<span style="color: #f8f8f2">;</span> default: <span style="color: #e6db74">&quot;false&quot;</span><span style="color: #f92672">)</span>
+  --config-path <span style="color: #f92672">(</span>a string; path to cluster config; default: <span style="color: #e6db74">&quot;/Users/$USER/.heron/conf&quot;</span><span style="color: #f92672">)</span>
+  --config-property <span style="color: #f92672">(</span><span style="color: #f8f8f2">key</span><span style="color: #f92672">=</span>value; a config key and its value; default: <span style="color: #f92672">[])</span>
+  --deploy-deactivated <span style="color: #f92672">(</span>a boolean; default: <span style="color: #e6db74">&quot;false&quot;</span><span style="color: #f92672">)</span>
   --topology-main-jvm-property Define a system property to pass to java -D when running main.
-  --verbose <span style="color: #f92672">(</span>a boolean<span style="color: #f8f8f2">;</span> default: <span style="color: #e6db74">&quot;false&quot;</span><span style="color: #f92672">)</span>
+  --verbose <span style="color: #f92672">(</span>a boolean; default: <span style="color: #e6db74">&quot;false&quot;</span><span style="color: #f92672">)</span>
 </pre></div>
 
 <p>Arguments of the <code>submit</code> command:</p>
@@ -120,7 +120,7 @@ topology requires them.</p></li>
 <p>Below is an example command that submits a topology to a cluster named <code>devcluster</code>
 with a main class named <code>com.example.topologies.MyTopology</code> packaged in <code>my-topology.jar</code>,
 along with the optional <code>--config-path</code> where the config for <code>devcluster</code> can be found:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ heron submit --config-path ~/heronclusters devcluster /path/to/topology/my-topology.jar <span style="color: #ae81ff">\</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>heron submit --config-path ~/heronclusters devcluster /path/to/topology/my-topology.jar <span style="color: #ae81ff">\</span>
     com.example.topologies.MyTopology my-topology
 </pre></div>
 
@@ -152,7 +152,7 @@ along with the optional <code>--config-path</code> where the config for <code>de
 <p>Topologies are submitted to the cluster in the activated state by default. To
 activate a deactivated topology use the <code>activate</code> command. Below is the basic
 syntax:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ heron <span style="color: #f8f8f2">help</span> activate
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>heron <span style="color: #f8f8f2">help </span>activate
 usage: heron activate <span style="color: #f92672">[</span>options<span style="color: #f92672">]</span> cluster/<span style="color: #f92672">[</span>role<span style="color: #f92672">]</span>/<span style="color: #f92672">[</span>env<span style="color: #f92672">]</span> topology-name
 
 Required arguments:
@@ -160,8 +160,8 @@ Required arguments:
   topology-name         Name of the topology
 
 Optional arguments:
-  --config-path <span style="color: #f92672">(</span>a string<span style="color: #f8f8f2">;</span> path to cluster config<span style="color: #f8f8f2">;</span> default: <span style="color: #e6db74">&quot;/Users/</span><span style="color: #f8f8f2">$USER</span><span style="color: #e6db74">/.heron/conf&quot;</span><span style="color: #f92672">)</span>
-  --config-property <span style="color: #f92672">(</span><span style="color: #f8f8f2">key</span><span style="color: #f92672">=</span>value<span style="color: #f8f8f2">;</span> a config key and its value<span style="color: #f8f8f2">;</span> default: <span style="color: #f92672">[])</span>
+  --config-path <span style="color: #f92672">(</span>a string; path to cluster config; default: <span style="color: #e6db74">&quot;/Users/$USER/.heron/conf&quot;</span><span style="color: #f92672">)</span>
+  --config-property <span style="color: #f92672">(</span><span style="color: #f8f8f2">key</span><span style="color: #f92672">=</span>value; a config key and its value; default: <span style="color: #f92672">[])</span>
 </pre></div>
 
 <p>Arguments of the <code>activate</code> command:</p>
@@ -175,14 +175,14 @@ like to activate.</p></li>
 </ul>
 
 <h3 id="example-topology-activation-command:93ec29cd3d9550d53ecc0d2998ab04fe">Example Topology Activation Command</h3>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ heron activate local/ads/PROD my-topology
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>heron activate <span style="color: #f8f8f2">local</span>/ads/PROD my-topology
 </pre></div>
 
 <h2 id="deactivating-a-topology:93ec29cd3d9550d53ecc0d2998ab04fe">Deactivating a Topology</h2>
 
 <p>You can deactivate a running topology at any time using the <code>deactivate</code>
 command. Here&rsquo;s the basic syntax:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ heron <span style="color: #f8f8f2">help</span> deactivate
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>heron <span style="color: #f8f8f2">help </span>deactivate
 usage: heron deactivate <span style="color: #f92672">[</span>options<span style="color: #f92672">]</span> cluster/<span style="color: #f92672">[</span>role<span style="color: #f92672">]</span>/<span style="color: #f92672">[</span>env<span style="color: #f92672">]</span> topology-name
 
 Required arguments:
@@ -190,9 +190,9 @@ Required arguments:
   topology-name         Name of the topology
 
 Optional arguments:
-  --config-path <span style="color: #f92672">(</span>a string<span style="color: #f8f8f2">;</span> path to cluster config<span style="color: #f8f8f2">;</span> default: <span style="color: #e6db74">&quot;/Users/kramasamy/.heron/conf&quot;</span><span style="color: #f92672">)</span>
-  --config-property <span style="color: #f92672">(</span><span style="color: #f8f8f2">key</span><span style="color: #f92672">=</span>value<span style="color: #f8f8f2">;</span> a config key and its value<span style="color: #f8f8f2">;</span> default: <span style="color: #f92672">[])</span>
-  --verbose <span style="color: #f92672">(</span>a boolean<span style="color: #f8f8f2">;</span> default: <span style="color: #e6db74">&quot;false&quot;</span><span style="color: #f92672">)</span>
+  --config-path <span style="color: #f92672">(</span>a string; path to cluster config; default: <span style="color: #e6db74">&quot;/Users/kramasamy/.heron/conf&quot;</span><span style="color: #f92672">)</span>
+  --config-property <span style="color: #f92672">(</span><span style="color: #f8f8f2">key</span><span style="color: #f92672">=</span>value; a config key and its value; default: <span style="color: #f92672">[])</span>
+  --verbose <span style="color: #f92672">(</span>a boolean; default: <span style="color: #e6db74">&quot;false&quot;</span><span style="color: #f92672">)</span>
 </pre></div>
 
 <p>Arguments of the <code>deactivate</code> command:</p>
@@ -208,7 +208,7 @@ optionally taking the role and environment. For example, <code>local/ads/PROD</c
 
 <p>You can restart a deactivated topology using the <code>restart</code> command (assuming
 that the topology has not yet been killed, i.e. removed from the cluster).</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ heron <span style="color: #f8f8f2">help</span> restart
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>heron <span style="color: #f8f8f2">help </span>restart
 usage: heron restart <span style="color: #f92672">[</span>options<span style="color: #f92672">]</span> cluster/<span style="color: #f92672">[</span>role<span style="color: #f92672">]</span>/<span style="color: #f92672">[</span>env<span style="color: #f92672">]</span> topology-name <span style="color: #f92672">[</span>container-id<span style="color: #f92672">]</span>
 
 Required arguments:
@@ -217,9 +217,9 @@ Required arguments:
   container-id          Identifier of the container to be restarted
 
 Optional arguments:
-  --config-path <span style="color: #f92672">(</span>a string<span style="color: #f8f8f2">;</span> path to cluster config<span style="color: #f8f8f2">;</span> default: <span style="color: #e6db74">&quot;/Users/kramasamy/.heron/conf&quot;</span><span style="color: #f92672">)</span>
-  --config-property <span style="color: #f92672">(</span><span style="color: #f8f8f2">key</span><span style="color: #f92672">=</span>value<span style="color: #f8f8f2">;</span> a config key and its value<span style="color: #f8f8f2">;</span> default: <span style="color: #f92672">[])</span>
-  --verbose <span style="color: #f92672">(</span>a boolean<span style="color: #f8f8f2">;</span> default: <span style="color: #e6db74">&quot;false&quot;</span><span style="color: #f92672">)</span>
+  --config-path <span style="color: #f92672">(</span>a string; path to cluster config; default: <span style="color: #e6db74">&quot;/Users/kramasamy/.heron/conf&quot;</span><span style="color: #f92672">)</span>
+  --config-property <span style="color: #f92672">(</span><span style="color: #f8f8f2">key</span><span style="color: #f92672">=</span>value; a config key and its value; default: <span style="color: #f92672">[])</span>
+  --verbose <span style="color: #f92672">(</span>a boolean; default: <span style="color: #e6db74">&quot;false&quot;</span><span style="color: #f92672">)</span>
 </pre></div>
 
 <p>Arguments of the <code>restart</code> command:</p>
@@ -235,7 +235,7 @@ restarted if you want to restart only a specific container of the topology.</p><
 </ul>
 
 <h3 id="example-topology-restart-command:93ec29cd3d9550d53ecc0d2998ab04fe">Example Topology Restart Command</h3>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ heron restart local/ads/PROD my-topology
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>heron restart <span style="color: #f8f8f2">local</span>/ads/PROD my-topology
 </pre></div>
 
 <h2 id="killing-a-topology:93ec29cd3d9550d53ecc0d2998ab04fe">Killing a Topology</h2>
@@ -243,7 +243,7 @@ restarted if you want to restart only a specific container of the topology.</p><
 <p>If you&rsquo;ve submitted a topology to your Heron cluster and would like to remove
 knowledge of the topology entirely, you can remove it using the <code>kill</code> command.
 Here&rsquo;s the basic syntax:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ heron <span style="color: #f8f8f2">kill</span> &lt;killer-overrides&gt; &lt;topology&gt;
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>heron <span style="color: #f8f8f2">kill</span> &lt;killer-overrides&gt; &lt;topology&gt;
 </pre></div>
 
 <p>Arguments of the <code>kill</code> command:</p>
@@ -257,7 +257,7 @@ optionally taking the role and environment.  For example, <code>local/ads/PROD</
 </ul>
 
 <h3 id="example-topology-kill-command:93ec29cd3d9550d53ecc0d2998ab04fe">Example Topology Kill Command</h3>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ heron <span style="color: #f8f8f2">kill</span> <span style="color: #f8f8f2">local</span> my-topology
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>heron <span style="color: #f8f8f2">kill local </span>my-topology
 </pre></div>
 
 <h2 id="other-commands:93ec29cd3d9550d53ecc0d2998ab04fe">Other Commands</h2>
@@ -266,12 +266,12 @@ optionally taking the role and environment.  For example, <code>local/ads/PROD</
 
 <p>Run the <code>version</code> command at any time to see which version of <code>heron</code> you&rsquo;re
 using:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ heron version
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>heron version
 heron.build.version : 0.13.5
-heron.build.time : Wed May <span style="color: #ae81ff">11</span> 23:49:00 PDT 2016
+heron.build.time : Wed May 11 23:49:00 PDT 2016
 heron.build.timestamp : 1463035740000
 heron.build.host : mbp-machine
 heron.build.user : userwhobuilt
-INFO: Elapsed time: 0.000s.
+INFO: Elapsed <span style="color: #f8f8f2">time</span>: 0.000s.
 </pre></div>
 </article></section></div></div></div><script src="http://code.jquery.com/jquery-2.2.1.min.js"></script><script src="/heron/js/app.min.js"></script></body></html>
