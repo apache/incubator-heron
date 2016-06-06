@@ -25,8 +25,8 @@ scripts have this form:</p>
 
 <p>Once you&rsquo;ve downloaded the scripts, run the Heron client script with the
 <code>--user</code> flag set:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ chmod +x heron-client-install-VERSION-PLATFORM.sh
-$ ./heron-client-install-VERSION-PLATFORM.sh --user
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>chmod +x heron-client-install-VERSION-PLATFORM.sh
+<span style="color: #f8f8f2">$ </span>./heron-client-install-VERSION-PLATFORM.sh --user
 Heron client installer
 ----------------------
 
@@ -38,12 +38,12 @@ Make sure you have <span style="color: #e6db74">&quot;/usr/local/bin&quot;</span
 </pre></div>
 
 <p>To add <code>/usr/local/bin</code> to your path, run:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ <span style="color: #f8f8f2">export</span> <span style="color: #f8f8f2">PATH</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">$PATH</span>:/usr/local/bin
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ export PATH</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">$PATH</span>:/usr/local/bin
 </pre></div>
 
 <p>Now run the script for Heron tools (setting the <code>--user</code> flag):</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ chmod +x heron-tools-install-VERSION-PLATFORM.sh
-$ ./heron-tools-install-VERSION-PLATFORM.sh --user
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>chmod +x heron-tools-install-VERSION-PLATFORM.sh
+<span style="color: #f8f8f2">$ </span>./heron-tools-install-VERSION-PLATFORM.sh --user
 Heron tools installer
 ---------------------
 
@@ -58,7 +58,7 @@ Heron Tools is now installed!
 topologies will be installed in your <code>~/.heron/examples</code> directory. You can
 launch an example <a href="../concepts/topologies">topology</a> locally (on your machine)
 using the <a href="../operators/heron-cli">Heron CLI tool</a>:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ heron submit <span style="color: #f8f8f2">local</span> <span style="color: #ae81ff">\</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>heron submit <span style="color: #f8f8f2">local</span> <span style="color: #ae81ff">\</span>
   ~/.heron/examples/heron-examples.jar <span style="color: #ae81ff">\ </span><span style="color: #75715e"># The path of the topology&#39;s jar file</span>
   com.twitter.heron.examples.ExclamationTopology <span style="color: #ae81ff">\ </span><span style="color: #75715e"># The topology&#39;s Java class</span>
   ExclamationTopology <span style="color: #75715e"># The name of the topology</span>
@@ -72,7 +72,7 @@ won&rsquo;t <em>activate</em> the topology. That will be explored in step 5 belo
 <p>The <a href="../operators/heron-tracker">Heron Tracker</a> is a web service that
 continuously gathers information about your Heron cluster. You can launch the
 tracker by running the <code>heron-tracker</code> command (which is already installed):</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ heron-tracker
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>heron-tracker
 ... Running on port: 8888
 ... Using config file: /Users/USERNAME/.herontools/conf/heron_tracker.yaml
 </pre></div>
@@ -84,7 +84,7 @@ tracker by running the <code>heron-tracker</code> command (which is already inst
 <p><a href="../operators/heron-ui">Heron UI</a> is a user interface that uses Heron Tracker to
 provide detailed visual representations of your Heron topologies. To launch
 Heron UI:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ heron-ui
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>heron-ui
 ... Running on port: 8889
 ... Using tracker url: http://localhost:8888
 </pre></div>
@@ -95,22 +95,22 @@ Heron UI:</p>
 
 <p>In step 2 you submitted a topology to your local cluster. The <code>heron</code> CLI tool
 also enables you to activate, deactivate, and kill topologies and more.</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ heron activate <span style="color: #f8f8f2">local</span> ExclamationTopology
-$ heron deactivate <span style="color: #f8f8f2">local</span> ExclamationTopology
-$ heron <span style="color: #f8f8f2">kill</span> <span style="color: #f8f8f2">local</span> ExclamationTopology
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>heron activate <span style="color: #f8f8f2">local </span>ExclamationTopology
+<span style="color: #f8f8f2">$ </span>heron deactivate <span style="color: #f8f8f2">local </span>ExclamationTopology
+<span style="color: #f8f8f2">$ </span>heron <span style="color: #f8f8f2">kill local </span>ExclamationTopology
 </pre></div>
 
 <p>For more info on these commands, read about <a href="../concepts/topologies#topology-lifecycle">topology
 lifecycles</a>.</p>
 
 <p>To list the available CLI commands, run <code>heron</code> by itself:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>usage: heron &lt;command&gt; &lt;options&gt; ...
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">usage: heron &lt;<span style="color: #f8f8f2">command</span>&gt; &lt;options&gt; ...
 
 Available commands:
     activate           Activate a topology
     deactivate         Deactivate a topology
-    <span style="color: #f8f8f2">help</span>               Prints <span style="color: #f8f8f2">help</span> <span style="color: #66d9ef">for</span> commands
-    <span style="color: #f8f8f2">kill</span>               Kill a topology
+    <span style="color: #f8f8f2">help               </span>Prints <span style="color: #f8f8f2">help </span><span style="color: #66d9ef">for </span>commands
+    <span style="color: #f8f8f2">kill               </span>Kill a topology
     restart            Restart a topology
     submit             Submit a topology
     version            Print version of heron-cli
@@ -120,7 +120,7 @@ For detailed documentation, go to http://heronstreaming.io
 
 <p>To invoke help output for a command, run <code>heron help COMMAND</code>. Here&rsquo;s an
 example:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ heron <span style="color: #f8f8f2">help</span> submit
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>heron <span style="color: #f8f8f2">help </span>submit
 usage: heron submit <span style="color: #f92672">[</span>options<span style="color: #f92672">]</span> cluster/<span style="color: #f92672">[</span>role<span style="color: #f92672">]</span>/<span style="color: #f92672">[</span>environ<span style="color: #f92672">]</span> topology-file-name topology-class-name <span style="color: #f92672">[</span>topology-args<span style="color: #f92672">]</span>
 
 Required arguments:
@@ -129,12 +129,12 @@ Required arguments:
   topology-class-name   Topology class name
 
 Optional arguments:
-  --config-path <span style="color: #f92672">(</span>a string<span style="color: #f8f8f2">;</span> path to cluster config<span style="color: #f8f8f2">;</span> default: <span style="color: #e6db74">&quot;/Users/</span><span style="color: #f8f8f2">$USER</span><span style="color: #e6db74">/.heron/conf&quot;</span><span style="color: #f92672">)</span>
-  --config-property <span style="color: #f92672">(</span><span style="color: #f8f8f2">key</span><span style="color: #f92672">=</span>value<span style="color: #f8f8f2">;</span> a config key and its value<span style="color: #f8f8f2">;</span> default: <span style="color: #f92672">[])</span>
-  --deploy-deactivated <span style="color: #f92672">(</span>a boolean<span style="color: #f8f8f2">;</span> default: <span style="color: #e6db74">&quot;false&quot;</span><span style="color: #f92672">)</span>
+  --config-path <span style="color: #f92672">(</span>a string; path to cluster config; default: <span style="color: #e6db74">&quot;/Users/$USER/.heron/conf&quot;</span><span style="color: #f92672">)</span>
+  --config-property <span style="color: #f92672">(</span><span style="color: #f8f8f2">key</span><span style="color: #f92672">=</span>value; a config key and its value; default: <span style="color: #f92672">[])</span>
+  --deploy-deactivated <span style="color: #f92672">(</span>a boolean; default: <span style="color: #e6db74">&quot;false&quot;</span><span style="color: #f92672">)</span>
   -D DEFINE             Define a system property to pass to java -D when
                         running main.
-  --verbose <span style="color: #f92672">(</span>a boolean<span style="color: #f8f8f2">;</span> default: <span style="color: #e6db74">&quot;false&quot;</span><span style="color: #f92672">)</span>
+  --verbose <span style="color: #f92672">(</span>a boolean; default: <span style="color: #e6db74">&quot;false&quot;</span><span style="color: #f92672">)</span>
 </pre></div>
 
 <h2 id="step-6-explore-other-example-topologies:b6885e1f85551f51a4707c402f8200a3">Step 6 &mdash; Explore other example topologies</h2>

@@ -12,18 +12,18 @@ For example, one can run program in IDE and set breakpoints to examine the state
 in <code>storm-compatibility-unshaded_deploy.jar</code>  (currently under <code>bazel-bin/heron/storm/src/java</code>).</p>
 
 <p>For example:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f92672">import</span> <span style="color: #f8f8f2">com.twitter.heron.simulator.Simulator</span><span style="color: #f92672">;</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f92672">import</span> <span style="color: #f8f8f2">com.twitter.heron.simulator.Simulator</span><span style="color: #f92672">;</span>
 <span style="color: #f8f8f2">Simulator</span> <span style="color: #f8f8f2">simulator</span> <span style="color: #f92672">=</span> <span style="color: #66d9ef">new</span> <span style="color: #f8f8f2">Simulator</span><span style="color: #f92672">();</span>
 </pre></div>
 
 <p>You can then submit topologies using the <code>submitTopology</code> method on the <code>Simulator</code> object. Just like the corresponding method on <code>StormSubmitter</code>, <code>submitTopology</code> takes a name, a topology configuration, and a topology object.</p>
 
 <p>For example:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">simulator</span><span style="color: #f92672">.</span><span style="color: #a6e22e">submitTopology</span><span style="color: #f92672">(</span><span style="color: #e6db74">&quot;test&quot;</span><span style="color: #f92672">,</span> <span style="color: #f8f8f2">conf</span><span style="color: #f92672">,</span> <span style="color: #f8f8f2">builder</span><span style="color: #f92672">.</span><span style="color: #a6e22e">createTopology</span><span style="color: #f92672">());</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">simulator</span><span style="color: #f92672">.</span><span style="color: #a6e22e">submitTopology</span><span style="color: #f92672">(</span><span style="color: #e6db74">&quot;test&quot;</span><span style="color: #f92672">,</span> <span style="color: #f8f8f2">conf</span><span style="color: #f92672">,</span> <span style="color: #f8f8f2">builder</span><span style="color: #f92672">.</span><span style="color: #a6e22e">createTopology</span><span style="color: #f92672">());</span>
 </pre></div>
 
 <p>Other interfaces for simulator mode are:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">simulator</span><span style="color: #f92672">.</span><span style="color: #a6e22e">killTopology</span><span style="color: #f92672">(</span><span style="color: #e6db74">&quot;test&quot;</span><span style="color: #f92672">);</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">simulator</span><span style="color: #f92672">.</span><span style="color: #a6e22e">killTopology</span><span style="color: #f92672">(</span><span style="color: #e6db74">&quot;test&quot;</span><span style="color: #f92672">);</span>
 <span style="color: #f8f8f2">simulator</span><span style="color: #f92672">.</span><span style="color: #a6e22e">activate</span><span style="color: #f92672">(</span><span style="color: #e6db74">&quot;test&quot;</span><span style="color: #f92672">);</span>
 <span style="color: #f8f8f2">simulator</span><span style="color: #f92672">.</span><span style="color: #a6e22e">deactivate</span><span style="color: #f92672">(</span><span style="color: #e6db74">&quot;test&quot;</span><span style="color: #f92672">);</span>
 <span style="color: #f8f8f2">simulator</span><span style="color: #f92672">.</span><span style="color: #a6e22e">shutdown</span><span style="color: #f92672">();</span>

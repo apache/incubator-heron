@@ -41,7 +41,7 @@ a cluster named <code>devcluster</code> that uses the Aurora for scheduler, ZooK
 HDFS for uploader will have the following set of configurations.</p>
 
 <h2 id="scheduler-yaml-for-aurora:a66b35d20295cb764719ac8bd35837ec">scheduler.yaml (for Aurora)</h2>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e"># scheduler class for distributing the topology for execution</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e"># scheduler class for distributing the topology for execution</span>
 <span style="color: #ae81ff">heron.class.scheduler</span><span style="color: #f8f8f2">:</span> <span style="color: #ae81ff">com.twitter.heron.scheduler.aurora.AuroraScheduler</span>
 
 <span style="color: #75715e"># launcher class for submitting and launching the topology</span>
@@ -55,7 +55,7 @@ HDFS for uploader will have the following set of configurations.</p>
 </pre></div>
 
 <h2 id="statemgr-yaml-for-zookeeper:a66b35d20295cb764719ac8bd35837ec">statemgr.yaml (for ZooKeeper)</h2>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e"># zookeeper state manager class for managing state in a persistent fashion</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e"># zookeeper state manager class for managing state in a persistent fashion</span>
 <span style="color: #ae81ff">heron.class.state.manager</span><span style="color: #f8f8f2">:</span> <span style="color: #ae81ff">com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager</span>
 
 <span style="color: #75715e"># zookeeper state manager connection string</span>
@@ -69,7 +69,7 @@ HDFS for uploader will have the following set of configurations.</p>
 </pre></div>
 
 <h2 id="uploader-yaml-for-hdfs:a66b35d20295cb764719ac8bd35837ec">uploader.yaml (for HDFS)</h2>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e"># Directory of config files for hadoop client to read from</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e"># Directory of config files for hadoop client to read from</span>
 <span style="color: #ae81ff">heron.uploader.hdfs.config.directory</span><span style="color: #f8f8f2">:</span>              <span style="color: #e6db74">&quot;/home/hadoop/hadoop/conf/&quot;</span>
 
 <span style="color: #75715e"># The URI of the directory for uploading topologies in the hdfs</span>
@@ -77,12 +77,12 @@ HDFS for uploader will have the following set of configurations.</p>
 </pre></div>
 
 <h2 id="packing-yaml-for-round-robin:a66b35d20295cb764719ac8bd35837ec">packing.yaml (for Round Robin)</h2>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e"># packing algorithm for packing instances into containers</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e"># packing algorithm for packing instances into containers</span>
 <span style="color: #ae81ff">heron.class.packing.algorithm</span><span style="color: #f8f8f2">:</span>    <span style="color: #ae81ff">com.twitter.heron.packing.roundrobin.RoundRobinPacking</span>
 </pre></div>
 
 <h2 id="client-yaml-for-heron-cli:a66b35d20295cb764719ac8bd35837ec">client.yaml (for heron cli)</h2>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e"># should the role parameter be required</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e"># should the role parameter be required</span>
 <span style="color: #ae81ff">heron.config.role.required</span><span style="color: #f8f8f2">:</span> <span style="color: #ae81ff">false</span>
 
 <span style="color: #75715e"># should the environ parameter be required</span>

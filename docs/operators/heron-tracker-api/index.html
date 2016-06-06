@@ -54,7 +54,7 @@ the endpoint.</li>
 <h3 id="a-name-topologies-topologies-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies">/topologies</a></h3>
 
 <p>Returns JSON describing all currently available topologies</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ curl <span style="color: #e6db74">&quot;http://heron-tracker-url/topologies?cluster=cluster1&amp;environ=devel&quot;</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>curl <span style="color: #e6db74">&quot;http://heron-tracker-url/topologies?cluster=cluster1&amp;environ=devel&quot;</span>
 </pre></div>
 
 <h4 id="parameters:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
@@ -71,7 +71,7 @@ topologies that are running in this environment.</li>
 <h3 id="a-name-topologies-logicalplan-topologies-logicalplan-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_logicalplan">/topologies/logicalplan</a></h3>
 
 <p>Returns a JSON representation of the <a href="../../concepts/topologies#logical-plan">logical plan</a> of a topology.</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ curl <span style="color: #e6db74">&quot;http://heron-tracker-url/topologies/logicalplan?cluster=cluster1&amp;environ=devel&amp;topology=topologyName&quot;</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>curl <span style="color: #e6db74">&quot;http://heron-tracker-url/topologies/logicalplan?cluster=cluster1&amp;environ=devel&amp;topology=topologyName&quot;</span>
 </pre></div>
 
 <h4 id="parameters-1:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
@@ -113,7 +113,7 @@ JSON dictionary containing following information.
 <h3 id="a-name-topologies-physicalplan-topologies-physicalplan-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_physicalplan">/topologies/physicalplan</a></h3>
 
 <p>Returns a JSON representation of the <a href="../../concepts/topologies#physical-plan">physical plan</a> of a topology.</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ curl <span style="color: #e6db74">&quot;http://heron-tracker-url/topologies/physicalplan?cluster=datacenter1&amp;environ=prod&amp;topology=topologyName&quot;</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>curl <span style="color: #e6db74">&quot;http://heron-tracker-url/topologies/physicalplan?cluster=datacenter1&amp;environ=prod&amp;topology=topologyName&quot;</span>
 </pre></div>
 
 <h4 id="parameters-2:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
@@ -162,7 +162,7 @@ JSON dictionary containing following information.
 <h3 id="a-name-topologies-schedulerlocation-topologies-schedulerlocation-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_schedulerlocation">/topologies/schedulerlocation</a></h3>
 
 <p>Returns a JSON representation of the scheduler location of the topology.</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ curl <span style="color: #e6db74">&quot;http://heron-tracker-url/topologies/schedulerlocation?cluster=datacenter1&amp;environ=prod&amp;topology=topologyName&quot;</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>curl <span style="color: #e6db74">&quot;http://heron-tracker-url/topologies/schedulerlocation?cluster=datacenter1&amp;environ=prod&amp;topology=topologyName&quot;</span>
 </pre></div>
 
 <h4 id="parameters-3:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
@@ -181,7 +181,7 @@ for example, the Aurora page for the job.</p>
 <h3 id="a-name-topologies-executionstate-topologies-executionstate-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_executionstate">/topologies/executionstate</a></h3>
 
 <p>Returns a JSON representation of the execution state of the topology.</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ curl <span style="color: #e6db74">&quot;http://heron-tracker-url/topologies/executionstate?cluster=datacenter1&amp;environ=prod&amp;topology=topologyName&quot;</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>curl <span style="color: #e6db74">&quot;http://heron-tracker-url/topologies/executionstate?cluster=datacenter1&amp;environ=prod&amp;topology=topologyName&quot;</span>
 </pre></div>
 
 <h4 id="parameters-4:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
@@ -215,7 +215,7 @@ topology</li>
 <h3 id="a-name-topologies-states-topologies-states-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_states">/topologies/states</a></h3>
 
 <p>Returns a JSON list of execution states of topologies in all the cluster.</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ curl <span style="color: #e6db74">&quot;http://heron-tracker-url/topologies/states?cluster=cluster1&amp;environ=devel&quot;</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>curl <span style="color: #e6db74">&quot;http://heron-tracker-url/topologies/states?cluster=cluster1&amp;environ=devel&quot;</span>
 </pre></div>
 
 <h4 id="parameters-5:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
@@ -458,7 +458,7 @@ Returns the path to the file that can be downloaded externally.</p>
 <h3 id="a-name-machines-machines-a:a835b0b91c76de6fe740dc315fd5529d"><a name="machines">/machines</a></h3>
 
 <p>Returns JSON describing all machines that topologies are running on.</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ curl <span style="color: #e6db74">&quot;http://heron-tracker-url/machines?topology=mytopology1&amp;cluster=cluster1&amp;environ=prod&quot;</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>curl <span style="color: #e6db74">&quot;http://heron-tracker-url/machines?topology=mytopology1&amp;cluster=cluster1&amp;environ=prod&quot;</span>
 </pre></div>
 
 <h4 id="parameters-18:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
@@ -493,11 +493,11 @@ Note that these timeseries are associated with their instances.</li>
 <h4 id="operators:a835b0b91c76de6fe740dc315fd5529d">Operators</h4>
 
 <h5 id="ts:a835b0b91c76de6fe740dc315fd5529d">TS</h5>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>TS(componentName, instance, metricName)
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">TS(componentName,</span> <span style="color: #f8f8f2">instance,</span> <span style="color: #f8f8f2">metricName)</span>
 </pre></div>
 
 <p>Example:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>TS(component1, *, __emit-count/stream1)
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">TS(component1,</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">__emit</span><span style="color: #f92672">-</span><span style="color: #f8f8f2">count</span><span style="color: #f92672">/</span><span style="color: #f8f8f2">stream1)</span>
 </pre></div>
 
 <p>Time Series Operator. This is the basic operator that is responsible for getting metrics from TMaster.
@@ -515,9 +515,9 @@ a multivariate time series.</p>
 <hr />
 
 <h5 id="default:a835b0b91c76de6fe740dc315fd5529d">DEFAULT</h5>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>DEFAULT(0, TS(component1, *, __emit-count/stream1))      &lt;-- If the second operator returns more than one timeline, so will the DEFAULT operator.
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">DEFAULT<span style="color: #f8f8f2">(</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">,</span> TS<span style="color: #f8f8f2">(</span>component1<span style="color: #f8f8f2">,</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">,</span> __emit<span style="color: #f92672">-</span>count<span style="color: #f92672">/</span>stream1<span style="color: #f8f8f2">))</span>      <span style="color: #f92672">&lt;--</span> If the second operator returns more than one timeline<span style="color: #f8f8f2">,</span> so will the DEFAULT operator.
 
-DEFAULT(100.0, SUM(TS(component2, *, __emit-count/default)))     &lt;-- Second operator can be any operator
+DEFAULT<span style="color: #f8f8f2">(</span><span style="color: #ae81ff">100.0</span><span style="color: #f8f8f2">,</span> SUM<span style="color: #f8f8f2">(</span>TS<span style="color: #f8f8f2">(</span>component2<span style="color: #f8f8f2">,</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">,</span> __emit<span style="color: #f92672">-</span>count<span style="color: #f92672">/</span>default<span style="color: #f8f8f2">)))</span>     <span style="color: #f92672">&lt;--</span> Second operator can be any operator
 </pre></div>
 
 <p>Default Operator. This operator is responsible for filling missing values in the metrics timeline.
@@ -533,7 +533,7 @@ Must have 2 arguments</p>
 <hr />
 
 <h5 id="sum:a835b0b91c76de6fe740dc315fd5529d">SUM</h5>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>SUM(TS(component1, instance1, metric1), DEFAULT(0, TS(component1, *, metric2)))
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">SUM(TS(component1,</span> <span style="color: #f8f8f2">instance1,</span> <span style="color: #f8f8f2">metric1),</span> <span style="color: #f8f8f2">DEFAULT(</span><span style="color: #ae81ff">0</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">TS(component1,</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">metric2)))</span>
 </pre></div>
 
 <p>Sum Operator. This operator is used to take sum of all argument time series. It can have any number of arguments,
@@ -550,7 +550,7 @@ Note that &ldquo;instance&rdquo; attribute is not there in the result.</p>
 <hr />
 
 <h5 id="max:a835b0b91c76de6fe740dc315fd5529d">MAX</h5>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>MAX(100, TS(component1, *, metric1))
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">MAX(</span><span style="color: #ae81ff">100</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">TS(component1,</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">metric1))</span>
 </pre></div>
 
 <p>Max Operator. This operator is used to find max of all argument operators for each individual timestamp.
@@ -567,7 +567,7 @@ Note that &ldquo;instance&rdquo; attribute is not included in the result.</p>
 <hr />
 
 <h5 id="percentile:a835b0b91c76de6fe740dc315fd5529d">PERCENTILE</h5>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>PERCENTILE(99, TS(component1, *, metric1))
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">PERCENTILE(</span><span style="color: #ae81ff">99</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">TS(component1,</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">metric1))</span>
 </pre></div>
 
 <p>Percentile Operator. This operator is used to find a quantile of all timelines retuned by the arguments, for each timestamp.
@@ -587,7 +587,7 @@ for each timestamp. Note that &ldquo;instance&rdquo; attribute is not there in t
 <hr />
 
 <h5 id="divide:a835b0b91c76de6fe740dc315fd5529d">DIVIDE</h5>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>DIVIDE(TS(component1, *, metrics1), 100)
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">DIVIDE(TS(component1,</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">metrics1),</span> <span style="color: #ae81ff">100</span><span style="color: #f8f8f2">)</span>
 </pre></div>
 
 <p>Divide Operator. Accepts two arguments, both can be univariate or multivariate.
@@ -627,7 +627,7 @@ Each can be of one of the following types:</p>
 <hr />
 
 <h5 id="multiply:a835b0b91c76de6fe740dc315fd5529d">MULTIPLY</h5>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>MULTIPLY(10, TS(component1, *, metrics1))
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">MULTIPLY(</span><span style="color: #ae81ff">10</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">TS(component1,</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">metrics1))</span>
 </pre></div>
 
 <p>Multiply Operator. Has same conditions as division operator. This is to keep the API simple.
@@ -668,9 +668,9 @@ on the two corresponding time series.</li>
 <hr />
 
 <h5 id="subtract:a835b0b91c76de6fe740dc315fd5529d">SUBTRACT</h5>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>SUBTRACT(TS(component1, instance1, metrics1), TS(componet1, instance1, metrics2))
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">SUBTRACT(TS(component1,</span> <span style="color: #f8f8f2">instance1,</span> <span style="color: #f8f8f2">metrics1),</span> <span style="color: #f8f8f2">TS(componet1,</span> <span style="color: #f8f8f2">instance1,</span> <span style="color: #f8f8f2">metrics2))</span>
 
-SUBTRACT(TS(component1, instance1, metrics1), 100)
+<span style="color: #f8f8f2">SUBTRACT(TS(component1,</span> <span style="color: #f8f8f2">instance1,</span> <span style="color: #f8f8f2">metrics1),</span> <span style="color: #ae81ff">100</span><span style="color: #f8f8f2">)</span>
 </pre></div>
 
 <p>Subtract Operator. Has same conditions as division operator. This is to keep the API simple.
@@ -711,9 +711,9 @@ on the two corresponding time series.</li>
 <hr />
 
 <h5 id="rate:a835b0b91c76de6fe740dc315fd5529d">RATE</h5>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>RATE(SUM(TS(component1, *, metrics1)))
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">RATE(SUM(TS(component1,</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">metrics1)))</span>
 
-RATE(TS(component1, *, metrics2))
+<span style="color: #f8f8f2">RATE(TS(component1,</span> <span style="color: #f92672">*</span><span style="color: #f8f8f2">,</span> <span style="color: #f8f8f2">metrics2))</span>
 </pre></div>
 
 <p>Rate Operator. This operator is used to find rate of change for all timeseries.

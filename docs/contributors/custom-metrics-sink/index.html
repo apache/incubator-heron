@@ -39,7 +39,7 @@ Manager</a>.</p>
 <code>metricsmgr-api</code> library into your project.</p>
 
 <h4 id="maven:aa06ab48e9613e9713d52c24b3200421">Maven</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f92672">&lt;dependency&gt;</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f92672">&lt;dependency&gt;</span>
   <span style="color: #f92672">&lt;groupId&gt;</span>com.twitter.heron<span style="color: #f92672">&lt;/groupId&gt;</span>
   <span style="color: #f92672">&lt;artifactId&gt;</span>metricsmgr-api<span style="color: #f92672">&lt;/artifactId&gt;</span>
   <span style="color: #f92672">&lt;version&gt;</span>{{.Site.Params.versions.metricsapi}}<span style="color: #f92672">&lt;/version&gt;</span>
@@ -47,7 +47,7 @@ Manager</a>.</p>
 </pre></div>
 
 <h4 id="gradle:aa06ab48e9613e9713d52c24b3200421">Gradle</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">dependencies</span> <span style="color: #f92672">{</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">dependencies</span> <span style="color: #f92672">{</span>
   <span style="color: #f8f8f2">compile</span> <span style="color: #f8f8f2">group:</span> <span style="color: #e6db74">&quot;com.twitter.heron&quot;</span><span style="color: #f92672">,</span> <span style="color: #f8f8f2">name:</span> <span style="color: #e6db74">&quot;metricsmgr-api&quot;</span><span style="color: #f92672">,</span> <span style="color: #f8f8f2">version:</span> <span style="color: #e6db74">&quot;{{.Site.Params.versions.metricsapi}}&quot;</span>
 <span style="color: #f92672">}</span>
 </pre></div>
@@ -85,7 +85,7 @@ release</a>.</p>
 
 <p>Below is an example implementation that simply prints the contents of each
 metrics record as it passes through:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f92672">import</span> <span style="color: #f8f8f2">com.twitter.heron.metricsmgr.api.metrics.MetricsInfo</span><span style="color: #f92672">;</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f92672">import</span> <span style="color: #f8f8f2">com.twitter.heron.metricsmgr.api.metrics.MetricsInfo</span><span style="color: #f92672">;</span>
 <span style="color: #f92672">import</span> <span style="color: #f8f8f2">com.twitter.heron.metricsmgr.api.metrics.MetricsRecord</span><span style="color: #f92672">;</span>
 <span style="color: #f92672">import</span> <span style="color: #f8f8f2">com.twitter.heron.metricsmgr.api.sink.IMetricsSink</span><span style="color: #f92672">;</span>
 <span style="color: #f92672">import</span> <span style="color: #f8f8f2">com.twitter.heron.metricsmgr.api.sink.SinkContext</span><span style="color: #f92672">;</span>
@@ -129,7 +129,7 @@ metrics record as it passes through:</p>
 
 <p>At the top of that file there&rsquo;s a <code>sinks</code> parameter that lists each available
 sink by name. You should add your sink to that list. Here&rsquo;s an example:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #ae81ff">sinks</span><span style="color: #f8f8f2">:</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #ae81ff">sinks</span><span style="color: #f8f8f2">:</span>
   <span style="color: #f8f8f2">-</span> <span style="color: #ae81ff">file-sink</span>
   <span style="color: #f8f8f2">-</span> <span style="color: #ae81ff">scribe-sink</span>
   <span style="color: #f8f8f2">-</span> <span style="color: #ae81ff">tmaster-sink</span>
@@ -149,7 +149,7 @@ is 0; if you set it to -1, the sink will attempt to restart forever.</li>
 </ul>
 
 <p>Below is an example <code>metrics_sink.yaml</code> configuration:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #ae81ff">sinks</span><span style="color: #f8f8f2">:</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #ae81ff">sinks</span><span style="color: #f8f8f2">:</span>
   <span style="color: #f8f8f2">-</span> <span style="color: #ae81ff">print-sink</span>
 
 <span style="color: #ae81ff">print-sink</span><span style="color: #f8f8f2">:</span>

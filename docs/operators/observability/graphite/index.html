@@ -43,26 +43,26 @@ the Heron UI to deep link to a specific topology&rsquo;s dashboard.</p>
 <p>Suggested targets for the scripted dashboard include:</p>
 
 <p><strong>Component Backpressure</strong>:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #e6db74">&#39;aliasByNode(sortByMaxima(highestAverage(heron.&#39;</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">topology_name</span> <span style="color: #f92672">+</span> <span style="color: #e6db74">&#39;.stmgr.stmgr-*.</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #e6db74">&#39;aliasByNode(sortByMaxima(highestAverage(heron.&#39;</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">topology_name</span> <span style="color: #f92672">+</span> <span style="color: #e6db74">&#39;.stmgr.stmgr-*.</span>
 <span style="color: #f8f8f2">time_spent_back_pressure_by_compid</span><span style="color: #f92672">.*</span><span style="color: #f8f8f2">,</span> <span style="color: #ae81ff">5</span><span style="color: #f8f8f2">)),</span> <span style="color: #ae81ff">5</span><span style="color: #f8f8f2">)</span><span style="color: #e6db74">&#39;</span>
 </pre></div>
 
 <p><strong>Fail Count by Component</strong>:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #e6db74">&#39;sumSeriesWithWildcards(aliasByNode(heron.&#39;</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">topology_name</span> <span style="color: #f92672">+</span> <span style="color: #e6db74">&#39;.*.*.fail-count.default,2),3)&#39;</span><span style="color: #960050; background-color: #1e0010">`</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #e6db74">&#39;sumSeriesWithWildcards(aliasByNode(heron.&#39;</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">topology_name</span> <span style="color: #f92672">+</span> <span style="color: #e6db74">&#39;.*.*.fail-count.default,2),3)&#39;</span><span style="color: #960050; background-color: #1e0010">`</span>
 </pre></div>
 
 <p><strong>CPU Throttling periods</strong>:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">aliasByNode(nonNegativeDerivative(mesos</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">tasks</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">prod</span><span style="color: #f92672">.*.</span><span style="color: #e6db74">&#39; + topology_name + &#39;</span><span style="color: #f92672">.*.</span><span style="color: #f8f8f2">cpu</span><span style="color: #f92672">.</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">aliasByNode(nonNegativeDerivative(mesos</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">tasks</span><span style="color: #f92672">.</span><span style="color: #f8f8f2">prod</span><span style="color: #f92672">.*.</span><span style="color: #e6db74">&#39; + topology_name + &#39;</span><span style="color: #f92672">.*.</span><span style="color: #f8f8f2">cpu</span><span style="color: #f92672">.</span>
 <span style="color: #f8f8f2">nr_throttled),</span> <span style="color: #ae81ff">4</span><span style="color: #f8f8f2">,</span><span style="color: #ae81ff">5</span><span style="color: #f8f8f2">)</span>
 </pre></div>
 
 <p><strong>JVM Deaths</strong>:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #e6db74">&#39;aliasByNode(drawAsInfinite(maximumAbove(removeAboveValue(heron.&#39;</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">topology_name</span> <span style="color: #f92672">+</span> <span style="color: #e6db74">&#39;.*.*.jvm.</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #e6db74">&#39;aliasByNode(drawAsInfinite(maximumAbove(removeAboveValue(heron.&#39;</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">topology_name</span> <span style="color: #f92672">+</span> <span style="color: #e6db74">&#39;.*.*.jvm.</span>
 <span style="color: #f8f8f2">uptime</span><span style="color: #f92672">-</span><span style="color: #f8f8f2">secs,</span> <span style="color: #ae81ff">60</span><span style="color: #f8f8f2">),</span><span style="color: #ae81ff">1</span><span style="color: #f8f8f2">)),</span><span style="color: #ae81ff">2</span><span style="color: #f8f8f2">,</span><span style="color: #ae81ff">3</span><span style="color: #f8f8f2">)</span><span style="color: #e6db74">&#39;</span>
 </pre></div>
 
 <p><strong>Top 5 worst GC components</strong>:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #e6db74">&#39;aliasByNode(highestMax(nonNegativeDerivative(heron.&#39;</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">topology_name</span> <span style="color: #f92672">+</span> <span style="color: #e6db74">&#39;.*.*.jvm.gc-time-ms.</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #e6db74">&#39;aliasByNode(highestMax(nonNegativeDerivative(heron.&#39;</span> <span style="color: #f92672">+</span> <span style="color: #f8f8f2">topology_name</span> <span style="color: #f92672">+</span> <span style="color: #e6db74">&#39;.*.*.jvm.gc-time-ms.</span>
 <span style="color: #f8f8f2">PS</span><span style="color: #f92672">-*</span><span style="color: #f8f8f2">),</span><span style="color: #ae81ff">5</span><span style="color: #f8f8f2">),</span> <span style="color: #ae81ff">2</span><span style="color: #f8f8f2">,</span><span style="color: #ae81ff">3</span><span style="color: #f8f8f2">,</span><span style="color: #ae81ff">6</span><span style="color: #f8f8f2">)</span><span style="color: #e6db74">&#39;</span>
 </pre></div>
 

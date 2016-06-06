@@ -3,46 +3,46 @@
 <p>This is a step by step guide for building Heron on Mac OS (10.10 and 10.11).</p>
 
 <h4 id="step-1-install-brew-if-already-not-installed:7be74c584635419861677fc2502187c9">Step 1 - Install brew, if already not installed</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>/usr/bin/ruby -e <span style="color: #e6db74">&quot;</span><span style="color: #66d9ef">$(</span>curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install<span style="color: #66d9ef">)</span><span style="color: #e6db74">&quot;</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">/usr/bin/ruby -e <span style="color: #e6db74">&quot;$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)&quot;</span>
 </pre></div>
 
 <h4 id="step-2-install-the-required-libraries:7be74c584635419861677fc2502187c9">Step 2 - Install the required libraries</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>brew install automake
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">brew install automake
 brew install cmake
 </pre></div>
 
 <h4 id="step-3-set-the-following-environment-variables:7be74c584635419861677fc2502187c9">Step 3 - Set the following environment variables</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ <span style="color: #f8f8f2">export</span> <span style="color: #f8f8f2">CC</span><span style="color: #f92672">=</span>/usr/bin/clang
-$ <span style="color: #f8f8f2">export</span> <span style="color: #f8f8f2">CXX</span><span style="color: #f92672">=</span>/usr/bin/clang++
-$ <span style="color: #f8f8f2">echo</span> <span style="color: #f8f8f2">$CC</span> <span style="color: #f8f8f2">$CXX</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ export CC</span><span style="color: #f92672">=</span>/usr/bin/clang
+<span style="color: #f8f8f2">$ export CXX</span><span style="color: #f92672">=</span>/usr/bin/clang++
+<span style="color: #f8f8f2">$ echo</span> <span style="color: #f8f8f2">$CC</span> <span style="color: #f8f8f2">$CXX</span>
 </pre></div>
 
 <h4 id="step-4-install-bazel:7be74c584635419861677fc2502187c9">Step 4 - Install Bazel</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>curl -O -L https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-darwin-x86_64.sh
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">curl -O -L https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-darwin-x86_64.sh
 chmod +x bazel-0.1.2-installer-darwin-x86_64.sh
 ./bazel-0.1.2-installer-darwin-x86_64.sh --user
 </pre></div>
 
 <h4 id="step-5-make-sure-bazel-bin-is-in-the-path:7be74c584635419861677fc2502187c9">Step 5 - Make sure Bazel bin is in the PATH</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">export</span> <span style="color: #f8f8f2">PATH</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;</span><span style="color: #f8f8f2">$PATH</span><span style="color: #e6db74">:</span><span style="color: #f8f8f2">$HOME</span><span style="color: #e6db74">/bin&quot;</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">export PATH</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;$PATH:$HOME/bin&quot;</span>
 </pre></div>
 
 <h4 id="step-6-get-the-latest-version-of-heron:7be74c584635419861677fc2502187c9">Step 6 - Get the latest version of heron</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>git clone https://github.com/twitter/heron.git <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">cd</span> heron
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">git clone https://github.com/twitter/heron.git <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">cd </span>heron
 </pre></div>
 
 <h4 id="step-7-configure-heron-for-build:7be74c584635419861677fc2502187c9">Step 7 - Configure Heron for build</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>./bazel_configure.py
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">./bazel_configure.py
 </pre></div>
 
 <p>If the configure scripts fails with missing dependencies, brew can be used to install the dependencies.</p>
 
 <h4 id="step-8-build-the-project:7be74c584635419861677fc2502187c9">Step 8 - Build the project</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>bazel build --config<span style="color: #f92672">=</span>darwin heron/...
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">bazel build --config<span style="color: #f92672">=</span>darwin heron/...
 </pre></div>
 
 <h4 id="step-9-build-the-packages:7be74c584635419861677fc2502187c9">Step 9 - Build the packages</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>bazel build --config<span style="color: #f92672">=</span>darwin scripts/packages:binpkgs
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">bazel build --config<span style="color: #f92672">=</span>darwin scripts/packages:binpkgs
 bazel build --config<span style="color: #f92672">=</span>darwin scripts/packages:tarpkgs
 </pre></div>
 

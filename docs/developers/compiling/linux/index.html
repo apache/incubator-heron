@@ -10,50 +10,50 @@
 <p>This is a step by step guide for building Heron on a fresh Ubuntu 14.04 installation.</p>
 
 <h4 id="step-1-first-update-ubuntu:34fe9f2d9cc3cd7e319ca75e7da08332">Step 1 - First update Ubuntu.</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>sudo apt-get update -y
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">sudo apt-get update -y
 sudo apt-get upgrade -y
 </pre></div>
 
 <h4 id="step-2-install-required-libraries:34fe9f2d9cc3cd7e319ca75e7da08332">Step 2 - Install required libraries</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>sudo apt-get install git build-essential automake cmake libtool zip <span style="color: #ae81ff">\ </span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">sudo apt-get install git build-essential automake cmake libtool zip <span style="color: #ae81ff">\ </span>
         libunwind-setjmp0-dev zlib1g-dev unzip pkg-config -y
 </pre></div>
 
 <h4 id="step-3-set-the-following-environment-variables:34fe9f2d9cc3cd7e319ca75e7da08332">Step 3 - Set the following environment variables</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">export</span> <span style="color: #f8f8f2">CC</span><span style="color: #f92672">=</span>/usr/bin/gcc-4.8
-<span style="color: #f8f8f2">export</span> <span style="color: #f8f8f2">CCX</span><span style="color: #f92672">=</span>/usr/bin/g++-4.8
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">export CC</span><span style="color: #f92672">=</span>/usr/bin/gcc-4.8
+<span style="color: #f8f8f2">export CCX</span><span style="color: #f92672">=</span>/usr/bin/g++-4.8
 </pre></div>
 
 <h4 id="step-4-install-jdk-8:34fe9f2d9cc3cd7e319ca75e7da08332">Step 4 - Install JDK 8</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>sudo add-apt-repository ppa:webupd8team/java
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">sudo add-apt-repository ppa:webupd8team/java
 sudo apt-get update -y
 sudo apt-get install oracle-java8-installer -y
 </pre></div>
 
 <h4 id="step-5-install-bazel:34fe9f2d9cc3cd7e319ca75e7da08332">Step 5 - Install Bazel</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>wget https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">wget https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh
 chmod +x bazel-0.1.2-installer-linux-x86_64.sh
 ./bazel-0.1.2-installer-linux-x86_64.sh --user
 </pre></div>
 
 <h4 id="step-6-make-sure-bazel-bin-is-in-the-path:34fe9f2d9cc3cd7e319ca75e7da08332">Step 6 - Make sure Bazel bin is in the PATH</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">export</span> <span style="color: #f8f8f2">PATH</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;</span><span style="color: #f8f8f2">$PATH</span><span style="color: #e6db74">:</span><span style="color: #f8f8f2">$HOME</span><span style="color: #e6db74">/bin&quot;</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">export PATH</span><span style="color: #f92672">=</span><span style="color: #e6db74">&quot;$PATH:$HOME/bin&quot;</span>
 </pre></div>
 
 <h4 id="step-7-get-the-latest-version-of-heron:34fe9f2d9cc3cd7e319ca75e7da08332">Step 7 - Get the latest version of heron</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>git clone https://github.com/twitter/heron.git <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">cd</span> heron
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">git clone https://github.com/twitter/heron.git <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">cd </span>heron
 </pre></div>
 
 <h4 id="step-8-configure-heron-for-build:34fe9f2d9cc3cd7e319ca75e7da08332">Step 8 - Configure Heron for build</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>./bazel_configure.py
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">./bazel_configure.py
 </pre></div>
 
 <h4 id="step-9-build-the-project:34fe9f2d9cc3cd7e319ca75e7da08332">Step 9 - Build the project</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>bazel build --config<span style="color: #f92672">=</span>ubuntu heron/...  
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">bazel build --config<span style="color: #f92672">=</span>ubuntu heron/...  
 </pre></div>
 
 <h4 id="step-10-build-the-packages:34fe9f2d9cc3cd7e319ca75e7da08332">Step 10 - Build the packages</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>bazel build --config<span style="color: #f92672">=</span>ubuntu scripts/packages:binpkgs  
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">bazel build --config<span style="color: #f92672">=</span>ubuntu scripts/packages:binpkgs  
 bazel build --config<span style="color: #f92672">=</span>ubuntu scripts/packages:tarpkgs
 </pre></div>
 
@@ -64,27 +64,27 @@ bazel build --config<span style="color: #f92672">=</span>ubuntu scripts/packages
 <p>If you encounter errors with libunwind, libtool, or gperftools install them manually</p>
 
 <p>Compiling and installing <a href="https://www.gnu.org/software/libtool">libtool</a></p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>wget http://ftpmirror.gnu.org/libtool/libtool-2.4.6.tar.gz
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">wget http://ftpmirror.gnu.org/libtool/libtool-2.4.6.tar.gz
 tar -xvf libtool-2.4.6.tar.gz
-<span style="color: #f8f8f2">cd</span> libtool-2.4.6
+<span style="color: #f8f8f2">cd </span>libtool-2.4.6
 ./configure
 make
 sudo make install
 </pre></div>
 
 <p>Compiling and installing <a href="http://www.nongnu.org/libunwind">libunwind</a></p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>wget http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">wget http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz
 tar -xvf libunwind-1.1.tar.gz
-<span style="color: #f8f8f2">cd</span> libunwind-1.1
+<span style="color: #f8f8f2">cd </span>libunwind-1.1
 ./configure
 make
 sudo make install
 </pre></div>
 
 <p>Compiling and installing <a href="https://github.com/gperftools/gperftools/releases">gperftools</a></p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>wget https://github.com/gperftools/gperftools/releases/download/gperftools-2.5/gperftools-2.5.tar.gz
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">wget https://github.com/gperftools/gperftools/releases/download/gperftools-2.5/gperftools-2.5.tar.gz
 tar -xvf gperftools-2.5.tar.gz
-<span style="color: #f8f8f2">cd</span> gperftools-2.5
+<span style="color: #f8f8f2">cd </span>gperftools-2.5
 ./configure
 make
 sudo make install
@@ -95,64 +95,64 @@ sudo make install
 <p>This is a step by step guide for building Heron on a fresh CentOS 7 installation.</p>
 
 <h4 id="step-1-install-the-required-dependencies:34fe9f2d9cc3cd7e319ca75e7da08332">Step 1 - Install the required dependencies</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>sudo yum install gcc gcc-c++ kernel-devel wget unzip zlib-devel zip git automake cmake patch libtool -y
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">sudo yum install gcc gcc-c++ kernel-devel wget unzip zlib-devel zip git automake cmake patch libtool -y
 </pre></div>
 
 <h4 id="step-2-install-libunwind-from-source:34fe9f2d9cc3cd7e319ca75e7da08332">Step 2 - Install libunwind from source</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>wget http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">wget http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz
 tar xvf libunwind-1.1.tar.gz
-<span style="color: #f8f8f2">cd</span> libunwind-1.1
+<span style="color: #f8f8f2">cd </span>libunwind-1.1
 ./configure
 make
 sudo make install
 </pre></div>
 
 <h4 id="step-3-set-the-following-environment-variables-1:34fe9f2d9cc3cd7e319ca75e7da08332">Step 3 - Set the following environment variables</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">export</span> <span style="color: #f8f8f2">CC</span><span style="color: #f92672">=</span>/usr/bin/gcc
-<span style="color: #f8f8f2">export</span> <span style="color: #f8f8f2">CCX</span><span style="color: #f92672">=</span>/usr/bin/g++
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">export CC</span><span style="color: #f92672">=</span>/usr/bin/gcc
+<span style="color: #f8f8f2">export CCX</span><span style="color: #f92672">=</span>/usr/bin/g++
 </pre></div>
 
 <h4 id="step-4-install-jdk:34fe9f2d9cc3cd7e319ca75e7da08332">Step 4 - Install JDK</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">cd</span> /opt/
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">cd</span> /opt/
 sudo wget --no-cookies --no-check-certificate --header <span style="color: #e6db74">&quot;Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie&quot;</span> <span style="color: #e6db74">&quot;http://download.oracle.com/otn-pub/java/jdk/8u91-b14/jdk-8u91-linux-x64.tar.gz&quot;</span>
 
 sudo tar xzf jdk-8u91-linux-x64.tar.gz
 </pre></div>
 
 <p>Use alternatives to configure the Java version</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>sudo <span style="color: #f8f8f2">cd</span> /opt/jdk1.8.0_91/
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">sudo <span style="color: #f8f8f2">cd</span> /opt/jdk1.8.0_91/
 sudo alternatives --install /usr/bin/java java /opt/jdk1.8.0_91/bin/java 2
 sudo alternatives --config java
 </pre></div>
 
 <p>Set the javac and jar commands</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>sudo alternatives --install /usr/bin/jar jar /opt/jdk1.8.0_91/bin/jar 2
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">sudo alternatives --install /usr/bin/jar jar /opt/jdk1.8.0_91/bin/jar 2
 sudo alternatives --install /usr/bin/javac javac /opt/jdk1.8.0_91/bin/javac 2
 sudo alternatives --set jar /opt/jdk1.8.0_91/bin/jar
 sudo alternatives --set javac /opt/jdk1.8.0_91/bin/javac
 </pre></div>
 
 <p>Export the Java environment variables</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">export</span> <span style="color: #f8f8f2">JAVA_HOME</span><span style="color: #f92672">=</span>/opt/jdk1.8.0_91
-<span style="color: #f8f8f2">export</span> <span style="color: #f8f8f2">JRE_HOME</span><span style="color: #f92672">=</span>/opt/jdk1.8.0_91/jre
-<span style="color: #f8f8f2">export</span> <span style="color: #f8f8f2">PATH</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">$PATH</span>:/opt/jdk1.8.0_91/bin:/opt/jdk1.8.0_91/jre/bin
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">export JAVA_HOME</span><span style="color: #f92672">=</span>/opt/jdk1.8.0_91
+<span style="color: #f8f8f2">export JRE_HOME</span><span style="color: #f92672">=</span>/opt/jdk1.8.0_91/jre
+<span style="color: #f8f8f2">export PATH</span><span style="color: #f92672">=</span><span style="color: #f8f8f2">$PATH</span>:/opt/jdk1.8.0_91/bin:/opt/jdk1.8.0_91/jre/bin
 </pre></div>
 
 <h4 id="step-5-install-bazel-0-1-2:34fe9f2d9cc3cd7e319ca75e7da08332">Step 5 - Install Bazel 0.1.2</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>wget https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">wget https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh
 chmod +x bazel-0.1.2-installer-linux-x86_64.sh
 ./bazel-0.1.2-installer-linux-x86_64.sh --user
 </pre></div>
 
 <h4 id="step-6-download-heron-and-compile-it:34fe9f2d9cc3cd7e319ca75e7da08332">Step 6 - Download heron and compile it</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #f8f8f2">cd</span>
-git clone https://github.com/twitter/heron.git <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">cd</span> heron
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">cd</span>
+git clone https://github.com/twitter/heron.git <span style="color: #f92672">&amp;&amp;</span> <span style="color: #f8f8f2">cd </span>heron
 ./bazel_configure.py
 bazel build --config<span style="color: #f92672">=</span>centos heron/...
 </pre></div>
 
 <h4 id="step-7-build-the-binary-packages:34fe9f2d9cc3cd7e319ca75e7da08332">Step 7 - Build the binary packages</h4>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>bazel build --config<span style="color: #f92672">=</span>centos scripts/packages:binpkgs
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%">bazel build --config<span style="color: #f92672">=</span>centos scripts/packages:binpkgs
 bazel build --config<span style="color: #f92672">=</span>centos scripts/packages:tarpkgs
 </pre></div>
 

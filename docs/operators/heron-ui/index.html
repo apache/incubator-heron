@@ -13,13 +13,13 @@ various elements that UI exposes.</p>
 <p>Heron uses <a href="http://bazel.io/">bazel</a> for compiling.
 <a href="../../developers/compiling/compiling">This page</a> describes how to setup bazel
 for heron.</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #75715e"># Build heron-ui</span>
-$ bazel build heron/ui/src/python:heron-ui
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #75715e"># Build heron-ui</span>
+<span style="color: #f8f8f2">$ </span>bazel build heron/ui/src/python:heron-ui
 
 <span style="color: #75715e"># The location of heron-ui pex executable is</span>
 <span style="color: #75715e"># bazel-bin/heron/ui/src/python/heron-ui</span>
 <span style="color: #75715e"># To run using default options:</span>
-$ ./bazel-bin/heron/ui/src/python/heron-ui
+<span style="color: #f8f8f2">$ </span>./bazel-bin/heron/ui/src/python/heron-ui
 </pre></div>
 
 <p><code>heron-ui</code> is a self executable
@@ -32,8 +32,8 @@ $ ./bazel-bin/heron/ui/src/python/heron-ui
 <li><code>--tracker_url</code> - The base url for tracker. All the information about the
 topologies is fetched from tracker. Default url is <code>http://localhost:8888</code>.</li>
 </ul>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ heron-ui
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span style="color: #f8f8f2">$ </span>heron-ui
 <span style="color: #75715e"># is equivalent to</span>
-$ heron-ui --port<span style="color: #f92672">=</span><span style="color: #ae81ff">8889</span> --tracker_url<span style="color: #f92672">=</span>http://localhost:8888
+<span style="color: #f8f8f2">$ </span>heron-ui --port<span style="color: #f92672">=</span>8889 --tracker_url<span style="color: #f92672">=</span>http://localhost:8888
 </pre></div>
 </article></section></div></div></div><script src="http://code.jquery.com/jquery-2.2.1.min.js"></script><script src="/heron/js/app.min.js"></script></body></html>
