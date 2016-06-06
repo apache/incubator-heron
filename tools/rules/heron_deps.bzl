@@ -12,5 +12,5 @@ def heron_java_proto_files():
         "//heron/proto:proto_topology_java",
         "//heron/proto:proto_common_java",
         "//heron/proto:proto_stmgr_java",
-        "@protobuf-java//jar",
+        "@com_google_protobuf_protobuf_java//jar",
     ]

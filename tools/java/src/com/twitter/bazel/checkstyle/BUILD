@@ -2,9 +2,9 @@ package(default_visibility = ["//visibility:public"])
 
 common_deps = [
     ":util",
-    "@commons-cli//jar",
-    "@commons-lang//jar",
-    "@guava//jar",
+    "@commons_cli_commons_cli//jar",
+    "@commons_lang_commons_lang//jar",
+    "@com_google_guava_guava//jar",
     "//3rdparty/java/bazel:extra_actions_proto_java",
     "//3rdparty/java/bazel:proto_java",
 ]
@@ -14,7 +14,7 @@ java_binary(
     srcs = ["JavaCheckstyle.java"],
     main_class = "com.twitter.bazel.checkstyle.JavaCheckstyle",
     deps = common_deps + [
-        "@checkstyle//jar",
+        "@com_puppycrawl_tools_checkstyle//jar",
         "//3rdparty/java:checkstyle",
     ],
 )
@@ -37,7 +37,7 @@ java_library(
     name = "util",
     srcs = ["ExtraActionUtils.java"],
     deps = [
-        "@protobuf-java//jar",
+        "@com_google_protobuf_protobuf_java//jar",
         "//3rdparty/java/bazel:extra_actions_proto_java",
         "//3rdparty/java/bazel:proto_java",
     ],

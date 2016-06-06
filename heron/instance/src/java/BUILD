@@ -39,5 +39,5 @@ jarjar_binary(
     name = "heron-instance",
     src = ":instance-unshaded_deploy.jar",
     shade = "shade.conf",
-    deps = ["@jarjar//jar"]
+    deps = ["@org_sonatype_plugins_jarjar_maven_plugin//jar"]
 )

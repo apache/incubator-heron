@@ -12,9 +12,9 @@ java_library(
         "//heron/storm/src/java:storm-compatibility-java",
         "//heron/proto:proto_topology_java",
         "//3rdparty/java:jackson",
-        "@protobuf-java//jar",
-        "@http-client//jar",
-        "@http-core//jar",
+        "@com_google_protobuf_protobuf_java//jar",
+        "@org_apache_httpcomponents_http_client//jar",
+        "@org_apache_httpcomponents_http_core//jar",
     ],
 )
 
@@ -66,7 +66,7 @@ java_binary(
     deps = [
         "//heron/api/src/java:api-java",
         "//heron/storm/src/java:storm-compatibility-java",
-        "@commons-logging//jar",
+        "@commons_logging_commons_logging//jar",
         ":common",
         ":core"
     ],

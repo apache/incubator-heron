@@ -334,22 +334,22 @@ filegroup(
 
 filegroup(
     name = "protobuf-java",
-    srcs = ["@protobuf-java//jar"],
+    srcs = ["@com_google_protobuf_protobuf_java//jar"],
 )
 
 filegroup(
     name = "slf4j-api-java",
-    srcs = ["@slf4j-api//jar"],
+    srcs = ["@org_slf4j_slf4j_api//jar"],
 )
 
 filegroup(
     name = "slf4j-jdk-java",
-    srcs = ["@slf4j-jdk//jar"],
+    srcs = ["@org_slf4j_slf4j_jdk14//jar"],
 )
 
 filegroup(
     name = "log4j-over-slf4j-java",
-    srcs = ["@log4j-over-slf4j//jar"],
+    srcs = ["@org_slf4j_log4j_over_slf4j//jar"],
 )
 
 filegroup(

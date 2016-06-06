@@ -7,6 +7,13 @@ java_toolchain(
     encoding = "UTF-8",
     source_version = "7",
     target_version = "7",
+    bootclasspath = [],
+    extclasspath = [],
+    javac = [],
+    javabuilder = [],
+    singlejar = [],
+    genclass = [],
+    ijar = [],
     misc = [
         "-extra_checks:on",
         "-Xlint:all",

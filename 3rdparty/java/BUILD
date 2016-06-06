@@ -6,34 +6,34 @@ java_library(
     name = "aws-java-sdk",
     srcs = [ "Empty.java" ],
     exports = [
-        "@aws-java-sdk-core//jar",
-        "@aws-java-sdk-s3//jar",
+        "@com_amazonaws_aws_java_sdk_core//jar",
+        "@com_amazonaws_aws_java_sdk_s3//jar",
     ],
     deps = [
-        "@aws-java-sdk-core//jar",
-        "@aws-java-sdk-s3//jar",
+        "@com_amazonaws_aws_java_sdk_core//jar",
+        "@com_amazonaws_aws_java_sdk_s3//jar",
         "@bazel_tools//third_party:joda_time",
-        "@commons-logging//jar",
-        "@http-client//jar",
-        "@http-core//jar",
-        "@jackson-annotations//jar",
-        "@jackson-core//jar",
-        "@jackson-databind//jar",
+        "@commons_logging_commons_logging//jar",
+        "@org_apache_httpcomponents_http_client//jar",
+        "@org_apache_httpcomponents_http_core//jar",
+        "@com_fasterxml_jackson_core_jackson_annotations//jar",
+        "@com_fasterxml_jackson_core_jackson_core//jar",
+        "@com_fasterxml_jackson_core_jackson_databind//jar",
     ],
 )
 
 java_library(
     name = "checkstyle",
     srcs = [ "Empty.java" ],
-    exports = [ "@checkstyle//jar" ],
+    exports = [ "@com_puppycrawl_tools_checkstyle//jar" ],
     deps = [
-        "@antlr//jar",
-        "@checkstyle//jar",
-        "@commons-beanutils//jar",
-        "@commons-cli//jar",
-        "@commons-collections//jar",
-        "@commons-logging//jar",
-        "@guava//jar",
+        "@antlr_antlr//jar",
+        "@com_puppycrawl_tools_checkstyle//jar",
+        "@commons_beanutils_commons_beanutils//jar",
+        "@commons_cli_commons_cli//jar",
+        "@commons_collections_commons_collections//jar",
+        "@commons_logging_commons_logging//jar",
+        "@com_google_guava_guava//jar",
     ]
 )
 
@@ -41,55 +41,55 @@ java_library(
     name = "jackson",
     srcs = [ "Empty.java" ],
     exports = [
-        "@jackson-annotations//jar",
-        "@jackson-core//jar",
-        "@jackson-databind//jar",
+        "@com_fasterxml_jackson_core_jackson_annotations//jar",
+        "@com_fasterxml_jackson_core_jackson_core//jar",
+        "@com_fasterxml_jackson_core_jackson_databind//jar",
     ],
     deps = [
-        "@jackson-annotations//jar",
-        "@jackson-core//jar",
-        "@jackson-databind//jar",
+        "@com_fasterxml_jackson_core_jackson_annotations//jar",
+        "@com_fasterxml_jackson_core_jackson_core//jar",
+        "@com_fasterxml_jackson_core_jackson_databind//jar",
     ],
 )
 
 java_library(
     name = "jarjar",
     srcs = [ "Empty.java" ],
-    exports = [ "@jarjar//jar" ],
+    exports = [ "@org_sonatype_plugins_jarjar_maven_plugin//jar" ],
     deps = [
-        "@asm-all//jar",
-        "@jarjar//jar",
+        "@org_ow2_asm_asm_all//jar",
+        "@org_sonatype_plugins_jarjar_maven_plugin//jar",
     ],
 )
 
 java_library(
     name = "logging",
     srcs = [ "Empty.java" ],
-    exports = [ "@slf4j-api//jar" ],
+    exports = [ "@org_slf4j_slf4j_api//jar" ],
     deps = [
-        "@slf4j-api//jar",
-        "@slf4j-jdk//jar",
-        "@log4j-over-slf4j//jar",
+        "@org_slf4j_slf4j_api//jar",
+        "@org_slf4j_slf4j_jdk14//jar",
+        "@org_slf4j_log4j_over_slf4j//jar",
     ],
 )
 
 java_library(
     name = "kryo",
     srcs = [ "Empty.java" ],
-    exports = [ "@kryo//jar" ],
+    exports = [ "@com_esotericsoftware_kryo//jar" ],
     deps = [
-        "@kryo//jar",
-        "@minlog//jar",
-        "@objenesis//jar",
+        "@com_esotericsoftware_kryo//jar",
+        "@com_esotericsoftware_minlog//jar",
+        "@org_objenesis_objenesis//jar",
     ],
 )
 
 java_library(
     name = "hadoop-core",
     srcs = [ "Empty.java" ],
-    exports = ["@hadoop-core//jar" ],
+    exports = ["@org_apache_hadoop_hadoop_core//jar" ],
     deps = [
-        "@hadoop-core//jar",
+        "@org_apache_hadoop_hadoop_core//jar",
     ],
     neverlink = 1,
 )
@@ -98,18 +98,18 @@ java_library(
     name = "powermock",
     srcs = [ "Empty.java" ],
     exports = [
-        "@powermock-api-mockito//jar",
-        "@powermock-core//jar",
-        "@powermock-module-junit4//jar",
+        "@org_powermock_powermock_api_mockito//jar",
+        "@org_powermock_powermock_core//jar",
+        "@org_powermock_powermock_module_junit4//jar",
     ],
     deps = [
-        "@powermock-api-mockito//jar",
-        "@powermock-api-support//jar",
-        "@powermock-core//jar",
-        "@powermock-module-junit4//jar",
-        "@powermock-module-junit4-common//jar",
-        "@powermock-reflect//jar",
-        "@javassist//jar",
+        "@org_powermock_powermock_api_mockito//jar",
+        "@org_powermock_powermock_api_support//jar",
+        "@org_powermock_powermock_core//jar",
+        "@org_powermock_powermock_module_junit4//jar",
+        "@org_powermock_powermock_module_junit4_common//jar",
+        "@org_powermock_powermock_reflect//jar",
+        "@org_javassist_javassist//jar",
     ],
 )
 
@@ -118,7 +118,7 @@ java_library(
 java_library(
     name = "protobuf-java-neverlink",
     srcs = [ "Empty.java" ],
-    deps = [ "@protobuf-java//jar" ],
-    exports = [ "@checkstyle//jar" ],
+    deps = [ "@com_google_protobuf_protobuf_java//jar" ],
+    exports = [ "@com_puppycrawl_tools_checkstyle//jar" ],
     neverlink = 1,
 )
