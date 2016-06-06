@@ -152,6 +152,14 @@ def discover_version(path):
   if version:
     return version
 
+  # on debian, /usr/bin/gcc --version returns this:
+  #   gcc-5 (Debian 5.3.1-14) 5.3.1 20160409
+  debian_line = re.search('.*?Debian.*?\s(\d+[\d\.]+\d+)\s.*', first_line)
+  if debian_line:
+    version = get_trailing_version(debian_line.group(1))
+    if version:
+      return version
+
   # on centos, /usr/bin/gcc --version returns this:
   #   gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-4)
   redhat_line = re.search('(.*)\s+[0-9]+\s+\(Red Hat .*\)$', first_line)
