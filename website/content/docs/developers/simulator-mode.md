@@ -7,8 +7,8 @@ Simulator mode is specifically designed for topology developers to better debug 
 Simulator mode simulates a heron cluster in a single JVM process. This is useful for developing and testing topologies.
 Running topologies under simulator mode is similar to running topologies on a cluster.
 
-With a whole topology running in a single process, you could enjoy all free benefits it brings.
-For example, one can run program in IDE and set breakpoints to examine the states of a topology, or profile your program to optimize it.
+With a whole topology running in a single process, one could enjoy all free benefits it brings.
+For example, one can run program in IDE and set breakpoints to examine the states of a topology, or profile the program to optimize it.
 
 # Develop topology with simulator mode
 
@@ -39,9 +39,9 @@ simulator.deactivate("test");
 simulator.shutdown();
 ```
 
-To kill a topology, you could also terminate the process.
+To kill a topology, one could also terminate the process.
 
-The simulator mode will run in separate threads other than main thread. All those interfaces are thread-safe. This means that you could invoke these interfaces in other threads and monitor the corresponding behaviors interactively.
+The simulator mode will run in separate threads other than main thread. All those interfaces are thread-safe. This means that one could invoke these interfaces in other threads and monitor the corresponding behaviors interactively.
 
 # Debug topology using IntelliJ
 
