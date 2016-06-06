@@ -154,7 +154,7 @@ def discover_version(path):
 
   # on debian, /usr/bin/gcc --version returns this:
   #   gcc-5 (Debian 5.3.1-14) 5.3.1 20160409
-  debian_line = re.search('.*?Debian.*?\s(\d+[\d\.]+\d+)\s.*', first_line)
+  debian_line = re.search('.*?Debian.*?\s(\d[\d\.]+\d+)\s.*', first_line)
   if debian_line:
     version = get_trailing_version(debian_line.group(1))
     if version:
@@ -199,6 +199,15 @@ def discover_version(path):
     version = anaconda_line.group(0).split(' ')[1]
     if version:
       return version
+
+  # python on debian, --V returns this:
+  # Python 2.7.11+
+  python_line = re.search('^Python\s+(\d[\d\.]+)\+{0,1}.*', first_line)
+  if python_line:
+    version = python_line.group(1)
+    if version:
+      return version
+
 
   fail ("Could not determine the version of %s from the following output\n%s\n%s" % (path, command, version_output))
 
