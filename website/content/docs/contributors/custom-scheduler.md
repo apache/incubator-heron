@@ -3,7 +3,7 @@ title: Implementing a Custom Scheduler
 ---
 
 To run a Heron cluster, you'll need to set up a scheduler that is responsible
-for cluster management. Heron currently supports followings schedulers out of the box:
+for cluster management. Heron currently supports the followings schedulers out of the box:
 
 * [Aurora](../../operators/deployment/schedulers/aurora)
 * [Local scheduler](../../operators/deployment/schedulers/local)
@@ -52,17 +52,14 @@ Interface | Role | Examples
 [`IScheduler`](/api/com/twitter/heron/spi/scheduler/IScheduler.html) | Defines the scheduler object used to construct topologies | [local](/api/com/twitter/heron/scheduler/local/LocalScheduler.html)
 [`IUploader`](/api/com/twitter/heron/spi/uploader/IUploader.html) | Uploads the topology to a shared location accessible to the runtime environment of the topology | [local](/api/com/twitter/heron/uploader/localfs/LocalFileSystemUploader.html) [hdfs](/api/com/twitter/heron/uploader/hdfs/HdfsUploader.html) [s3](/api/com/twitter/heron/uploader/s3/S3Uploader.html)
 
-Your implementation of those interfaces will need to be on Heron's
-[classpath](https://docs.oracle.com/javase/tutorial/essential/environment/paths.html)
-when you [compile Heron](../../developers/compiling).
+Heron provides a number of built-in implementations out of box.
 
-Those interfaces and implementation are independent; you can choose and combine them to fit your use scenarios.
+## Running the Scheduler
 
-## Trying Out Your Scheduler
-
-Once you've implemented a custom scheduler (or other components), you'll need to specify implementation of all interfaces above
-in the [config](../../operators/deployment/configuration) . You'll also need to point to the config folder when submitting a topology via heron-cli. Here's an example [topology
-submission](../../operators/heron-cli#submitting-a-topology) command:
+To run the a custom scheduler, the implementation of the interface above must be specified in the [config](../../operators/deployment/configuration) .
+By default, the heron-cli looks for config under `${HERON_HOME}/conf/`. The location can be overridden using option `--config-path`. 
+Below is an example showing the command for [topology
+submission](../../operators/heron-cli#submitting-a-topology):
 
 ```bash
 $ heron submit [cluster-name-storing-your-new-config]/[role]/[env] \
@@ -70,3 +67,8 @@ $ heron submit [cluster-name-storing-your-new-config]/[role]/[env] \
     /path/to/topology/my-topology.jar \
     biz.acme.topologies.MyTopology 
 ```
+
+The implementation for each of the interface listed above must be on Heron's
+[classpath](https://docs.oracle.com/javase/tutorial/essential/environment/paths.html). 
+
+

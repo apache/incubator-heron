@@ -129,7 +129,7 @@ public class PrintSink implements IMetricsSink {
 ## Configuring Your Custom Sink
 
 The configuration for your sink needs to be provided in the
-[YAML](http://www.yaml.org/) file at `heron/config/metrics_sinks.yaml`.
+[YAML](http://www.yaml.org/) file at `heron/config/src/yaml/conf/${CLUSTER}/metrics_sinks.yaml`.
 
 At the top of that file there's a `sinks` parameter that lists each available
 sink by name. You should add your sink to that list. Here's an example:
@@ -142,7 +142,7 @@ sinks:
   - print-sink
 ```
 
-For each sink you need to specify the following:
+For each sink you are required to specify the followings:
 
 * `class` --- The Java class name of your custom implementation of the
   `IMetricsSink` interface, e.g. `biz.acme.heron.metrics.PrintSink`.
@@ -164,10 +164,14 @@ print-sink:
   sink-restart-attempts: -1 # Attempt to restart forever
 ```
 
+It is optional to add other configurations for the sink. All configurations will be constructed
+ as an unmodifiable map `Map<String, Object> conf` and passed to `init(conf, context)`.
+
 ## Using Your Custom Sink
 
 Once you've made a JAR for your custom Java sink, distributed that JAR to
 `metrics-mgr-classpath` folder, and changed the configuration in
-`heron/config/metrics_sink.yaml`, you'll need to [re-compile
-Heron](../../developers/compiling). Any topology submitted using that compiled
-version of `heron-cli` will include the custom sink.
+`heron/config/src/yaml/conf/${CLUSTER}/metrics_sinks.yaml`. 
+Any topology submitted using that configuration will include the custom sink.You must [re-compile
+Heron](../../developers/compiling) if you want to include the configuration in a new heron-cli distribution. 
+
