@@ -2,13 +2,16 @@
 title: Simulator Mode
 ---
 
-Simulator mode is specifically designed for topology developers to better debug or optimize their topologies.
+Simulator mode is specifically designed for topology developers to easily debug or optimize their 
+topologies.
 
-Simulator mode simulates a heron cluster in a single JVM process. This is useful for developing and testing topologies.
-Running topologies under simulator mode is similar to running topologies on a cluster.
+Simulator mode simulates a heron cluster in a single JVM process. This is useful for developing and 
+testing topologies. Running topologies under simulator mode is similar to running topologies on a 
+cluster.
 
 With a whole topology running in a single process, one could enjoy all free benefits it brings.
-For example, one can run program in IDE and set breakpoints to examine the states of a topology, or profile the program to optimize it.
+For example, one can run program in an IDE and set breakpoints to examine the states of a topology, 
+or profile the program to optimize it.
 
 # Develop topology with simulator mode
 
@@ -22,7 +25,9 @@ import com.twitter.heron.simulator.Simulator;
 Simulator simulator = new Simulator();
 ```
 
-You can then submit topologies using the ``submitTopology`` method on the ``Simulator`` object. Just like the corresponding method on ``StormSubmitter``, ``submitTopology`` takes a name, a topology configuration, and a topology object.
+You can then submit topologies using the ``submitTopology`` method on the ``Simulator`` object. Just
+like the corresponding method on ``StormSubmitter``, ``submitTopology`` takes a name, a topology 
+configuration, and a topology object.
 
 For example:
 
@@ -41,15 +46,20 @@ simulator.shutdown();
 
 To kill a topology, one could also terminate the process.
 
-The simulator mode will run in separate threads other than main thread. All those interfaces are thread-safe. This means that one could invoke these interfaces in other threads and monitor the corresponding behaviors interactively.
+The simulator mode will run in separate threads other than main thread. All those interfaces are 
+thread-safe. This means that one could invoke these interfaces in other threads and monitor the 
+corresponding behaviors interactively.
 
 # Debug topology using IntelliJ
 
-Bolts and Spouts run as separate threads in simulator. To add breakpoints inside a bolt/spout, the Suspend Policy of the breakpoint needs to be set as Thread. To change the Suspend Policy, Right click on the breakpoint as shown in the following image:
+Bolts and Spouts run as separate threads in simulator. To add breakpoints inside a bolt/spout, the 
+Suspend Policy of the breakpoint needs to be set as Thread. To change the Suspend Policy, right 
+click on the breakpoint as shown in the following image:
 
 ![Set Breakpoint](/img/intellij-set-breakpoint.jpg)
 
-If output and logs are not convenient to be checked in intellij console, they can be saved to local file by choose `Run -> Edit Configurations....` and set as shown in the following image:
+If it's not convenient to check the output and logs in IntelliJ console, save them to a local file 
+by choosing `Run -> Edit Configurations....` as shown in the following image:
 
 ![Save Console](/img/intellij-save-console.jpg)
 
