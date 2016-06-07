@@ -19,15 +19,15 @@ Heron comes equipped out of the box with three metrics sinks that you can apply
 for a specific topology. The code for these sinks may prove helpful for
 implementing your own.
 
-* [`GraphiteSink`](/api/metrics/com/twitter/heron/metricsmgr/sink/GraphiteSink.html)
+* [`GraphiteSink`](/api/com/twitter/heron/metricsmgr/sink/GraphiteSink.html)
   --- Sends each `MetricsRecord` object to a
   [Graphite](http://graphite.wikidot.com/) instance according to a Graphite
   prefix.
-* [`ScribeSink`](/api/metrics/com/twitter/heron/metricsmgr/sink/ScribeSink.html)
+* [`ScribeSink`](/api/com/twitter/heron/metricsmgr/sink/ScribeSink.html)
   --- Sends each `MetricsRecord` object to a
   [Scribe](https://github.com/facebookarchive/scribe) instance according to a
   Scribe category and namespace.
-* [`FileSink`](/api/metrics/com/twitter/heron/metricsmgr/sink/FileSink.html)
+* [`FileSink`](/api/com/twitter/heron/metricsmgr/sink/FileSink.html)
   --- Writes each `MetricsRecord` object to a JSON file at a specified path.
 
 More on using those sinks in a Heron cluster can be found in [Metrics
@@ -59,7 +59,7 @@ dependencies {
 ## The `IMetricsSink` Interface
 
 Each metrics sink must implement the
-[`IMetricsSink`](http://heronproject.github.io/metrics-api/com/twitter/heron/metricsmgr/IMetricsSink)
+[`IMetricsSink`](/api/com/twitter/heron/spi/metricsmgr/sink/IMetricsSink.html)
 interface, which requires you to implement the following methods:
 
 * `void init(Map<String, Object> conf, SinkContext context)` --- Defines the
