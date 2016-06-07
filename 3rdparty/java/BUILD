@@ -99,8 +99,10 @@ java_library(
     srcs = [ "Empty.java" ],
     exports = [
         "@org_powermock_powermock_api_mockito//jar",
+        "@org_powermock_powermock_api_support//jar",
         "@org_powermock_powermock_core//jar",
         "@org_powermock_powermock_module_junit4//jar",
+        "@org_powermock_powermock_module_junit4_common//jar",
     ],
     deps = [
         "@org_powermock_powermock_api_mockito//jar",
