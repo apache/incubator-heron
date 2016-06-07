@@ -548,59 +548,65 @@ following:&lt;/p&gt;
 &lt;h4 id=&#34;step-1-the-os-being-used-in-a-from-https-docs-docker-com-engine-reference-builder-from-statement:69e60651f42783a7df723575c4088b5b&#34;&gt;Step 1 - The OS being used in a &lt;a href=&#34;https://docs.docker.com/engine/reference/builder/#from&#34;&gt;&lt;code&gt;FROM&lt;/code&gt;&lt;/a&gt; statement.&lt;/h4&gt;
 
 &lt;p&gt;Here&amp;rsquo;s an example:&lt;/p&gt;
-FROM centos:centos7
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #66d9ef&#34;&gt;FROM&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt; centos:centos7&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 
 &lt;h4 id=&#34;step-2-a-target-platform-environment-variable-using-the-env-https-docs-docker-com-engine-reference-builder-env-instruction:69e60651f42783a7df723575c4088b5b&#34;&gt;Step 2 - A &lt;code&gt;TARGET_PLATFORM&lt;/code&gt; environment variable using the &lt;a href=&#34;https://docs.docker.com/engine/reference/builder/#env&#34;&gt;&lt;code&gt;ENV&lt;/code&gt;&lt;/a&gt; instruction.&lt;/h4&gt;
 
 &lt;p&gt;Here&amp;rsquo;s an example:&lt;/p&gt;
-ENV TARGET_PLATFORM centos
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #66d9ef&#34;&gt;ENV&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt; TARGET_PLATFORM centos&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 
 &lt;h4 id=&#34;step-3-a-general-dependency-installation-script-using-a-run-https-docs-docker-com-engine-reference-builder-run-instruction:69e60651f42783a7df723575c4088b5b&#34;&gt;Step 3 - A general dependency installation script using a &lt;a href=&#34;https://docs.docker.com/engine/reference/builder/#run&#34;&gt;&lt;code&gt;RUN&lt;/code&gt;&lt;/a&gt; instruction.&lt;/h4&gt;
 
 &lt;p&gt;Here&amp;rsquo;s an example:&lt;/p&gt;
-RUN apt-get update &amp;&amp; apt-get -y install \
-         automake \
-         build-essential \
-         cmake \
-         curl \
-         libssl-dev \
-         git \
-         libtool \
-         libunwind8 \
-         libunwind-setjmp0-dev \
-         python \
-         python2.7-dev \
-         python-software-properties \
-         software-properties-common \
-         python-setuptools \
-         unzip \
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #66d9ef&#34;&gt;RUN&lt;/span&gt; apt-get update &lt;span style=&#34;color: #f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; apt-get -y install &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+         automake &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+         build-essential &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+         cmake &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+         curl &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+         libssl-dev &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+         git &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+         libtool &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+         libunwind8 &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+         libunwind-setjmp0-dev &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+         python &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+         python2.7-dev &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+         python-software-properties &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+         software-properties-common &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+         python-setuptools &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+         unzip &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
          wget
+&lt;/pre&gt;&lt;/div&gt;
 
 &lt;h4 id=&#34;step-4-an-installation-script-for-java-8-and-a-java-home-environment-variable:69e60651f42783a7df723575c4088b5b&#34;&gt;Step 4 - An installation script for Java 8 and a &lt;code&gt;JAVA_HOME&lt;/code&gt; environment variable.&lt;/h4&gt;
 
 &lt;p&gt;Here&amp;rsquo;s an example:&lt;/p&gt;
-RUN \
-     echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections &amp;&amp; \
-     add-apt-repository -y ppa:webupd8team/java &amp;&amp; \
-     apt-get update &amp;&amp; \
-     apt-get install -y oracle-java8-installer &amp;&amp; \
-     rm -rf /var/lib/apt/lists/* &amp;&amp; \
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #66d9ef&#34;&gt;RUN&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+     &lt;span style=&#34;color: #f8f8f2&#34;&gt;echo&lt;/span&gt; oracle-java8-installer shared/accepted-oracle-license-v1-1 &lt;span style=&#34;color: #66d9ef&#34;&gt;select&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;true&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;|&lt;/span&gt; debconf-set-selections &lt;span style=&#34;color: #f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+     add-apt-repository -y ppa:webupd8team/java &lt;span style=&#34;color: #f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+     apt-get update &lt;span style=&#34;color: #f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+     apt-get install -y oracle-java8-installer &lt;span style=&#34;color: #f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+     rm -rf /var/lib/apt/lists/* &lt;span style=&#34;color: #f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
      rm -rf /var/cache/oracle-jdk8-installer
 
-ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
+&lt;span style=&#34;color: #66d9ef&#34;&gt;ENV&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt; JAVA_HOME /usr/lib/jvm/java-8-oracle&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 
 &lt;h4 id=&#34;step-5-an-installation-script-for-bazel-http-bazel-io-version-0-1-2-or-above:69e60651f42783a7df723575c4088b5b&#34;&gt;Step 5 - An installation script for &lt;a href=&#34;http://bazel.io/&#34;&gt;Bazel&lt;/a&gt; version 0.1.2 or above.&lt;/h4&gt;
 
 &lt;p&gt;Here&amp;rsquo;s an example:&lt;/p&gt;
-RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh \
-         &amp;&amp; chmod +x /tmp/bazel.sh \
-         &amp;&amp; /tmp/bazel.sh
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #66d9ef&#34;&gt;RUN&lt;/span&gt; wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+         &lt;span style=&#34;color: #f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; chmod +x /tmp/bazel.sh &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+         &lt;span style=&#34;color: #f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; /tmp/bazel.sh
+&lt;/pre&gt;&lt;/div&gt;
 
 &lt;h4 id=&#34;step-6-add-the-bazelrc-configuration-file-for-bazel-and-the-compile-sh:69e60651f42783a7df723575c4088b5b&#34;&gt;Step 6 - Add the &lt;code&gt;bazelrc&lt;/code&gt; configuration file for Bazel and the &lt;code&gt;compile.sh&lt;/code&gt;&lt;/h4&gt;
 
 &lt;p&gt;script (from the &lt;code&gt;docker&lt;/code&gt; folder) that compiles Heron:&lt;/p&gt;
-ADD bazelrc /root/.bazelrc
-ADD compile.sh /compile.sh
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #66d9ef&#34;&gt;ADD&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt; bazelrc /root/.bazelrc&lt;/span&gt;
+&lt;span style=&#34;color: #66d9ef&#34;&gt;ADD&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt; compile.sh /compile.sh&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 </description>
     </item>
     

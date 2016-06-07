@@ -109,57 +109,63 @@ following:</p>
 <h4 id="step-1-the-os-being-used-in-a-from-https-docs-docker-com-engine-reference-builder-from-statement:69e60651f42783a7df723575c4088b5b">Step 1 - The OS being used in a <a href="https://docs.docker.com/engine/reference/builder/#from"><code>FROM</code></a> statement.</h4>
 
 <p>Here&rsquo;s an example:</p>
-FROM centos:centos7
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">FROM</span><span style="color: #e6db74"> centos:centos7</span>
+</pre></div>
 
 <h4 id="step-2-a-target-platform-environment-variable-using-the-env-https-docs-docker-com-engine-reference-builder-env-instruction:69e60651f42783a7df723575c4088b5b">Step 2 - A <code>TARGET_PLATFORM</code> environment variable using the <a href="https://docs.docker.com/engine/reference/builder/#env"><code>ENV</code></a> instruction.</h4>
 
 <p>Here&rsquo;s an example:</p>
-ENV TARGET_PLATFORM centos
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">ENV</span><span style="color: #e6db74"> TARGET_PLATFORM centos</span>
+</pre></div>
 
 <h4 id="step-3-a-general-dependency-installation-script-using-a-run-https-docs-docker-com-engine-reference-builder-run-instruction:69e60651f42783a7df723575c4088b5b">Step 3 - A general dependency installation script using a <a href="https://docs.docker.com/engine/reference/builder/#run"><code>RUN</code></a> instruction.</h4>
 
 <p>Here&rsquo;s an example:</p>
-RUN apt-get update && apt-get -y install \
-         automake \
-         build-essential \
-         cmake \
-         curl \
-         libssl-dev \
-         git \
-         libtool \
-         libunwind8 \
-         libunwind-setjmp0-dev \
-         python \
-         python2.7-dev \
-         python-software-properties \
-         software-properties-common \
-         python-setuptools \
-         unzip \
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">RUN</span> apt-get update <span style="color: #f92672">&amp;&amp;</span> apt-get -y install <span style="color: #ae81ff">\</span>
+         automake <span style="color: #ae81ff">\</span>
+         build-essential <span style="color: #ae81ff">\</span>
+         cmake <span style="color: #ae81ff">\</span>
+         curl <span style="color: #ae81ff">\</span>
+         libssl-dev <span style="color: #ae81ff">\</span>
+         git <span style="color: #ae81ff">\</span>
+         libtool <span style="color: #ae81ff">\</span>
+         libunwind8 <span style="color: #ae81ff">\</span>
+         libunwind-setjmp0-dev <span style="color: #ae81ff">\</span>
+         python <span style="color: #ae81ff">\</span>
+         python2.7-dev <span style="color: #ae81ff">\</span>
+         python-software-properties <span style="color: #ae81ff">\</span>
+         software-properties-common <span style="color: #ae81ff">\</span>
+         python-setuptools <span style="color: #ae81ff">\</span>
+         unzip <span style="color: #ae81ff">\</span>
          wget
+</pre></div>
 
 <h4 id="step-4-an-installation-script-for-java-8-and-a-java-home-environment-variable:69e60651f42783a7df723575c4088b5b">Step 4 - An installation script for Java 8 and a <code>JAVA_HOME</code> environment variable.</h4>
 
 <p>Here&rsquo;s an example:</p>
-RUN \
-     echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
-     add-apt-repository -y ppa:webupd8team/java && \
-     apt-get update && \
-     apt-get install -y oracle-java8-installer && \
-     rm -rf /var/lib/apt/lists/* && \
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">RUN</span> <span style="color: #ae81ff">\</span>
+     <span style="color: #f8f8f2">echo</span> oracle-java8-installer shared/accepted-oracle-license-v1-1 <span style="color: #66d9ef">select</span> <span style="color: #f8f8f2">true</span> <span style="color: #f8f8f2">|</span> debconf-set-selections <span style="color: #f92672">&amp;&amp;</span> <span style="color: #ae81ff">\</span>
+     add-apt-repository -y ppa:webupd8team/java <span style="color: #f92672">&amp;&amp;</span> <span style="color: #ae81ff">\</span>
+     apt-get update <span style="color: #f92672">&amp;&amp;</span> <span style="color: #ae81ff">\</span>
+     apt-get install -y oracle-java8-installer <span style="color: #f92672">&amp;&amp;</span> <span style="color: #ae81ff">\</span>
+     rm -rf /var/lib/apt/lists/* <span style="color: #f92672">&amp;&amp;</span> <span style="color: #ae81ff">\</span>
      rm -rf /var/cache/oracle-jdk8-installer
 
-ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
+<span style="color: #66d9ef">ENV</span><span style="color: #e6db74"> JAVA_HOME /usr/lib/jvm/java-8-oracle</span>
+</pre></div>
 
 <h4 id="step-5-an-installation-script-for-bazel-http-bazel-io-version-0-1-2-or-above:69e60651f42783a7df723575c4088b5b">Step 5 - An installation script for <a href="http://bazel.io/">Bazel</a> version 0.1.2 or above.</h4>
 
 <p>Here&rsquo;s an example:</p>
-RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh \
-         && chmod +x /tmp/bazel.sh \
-         && /tmp/bazel.sh
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">RUN</span> wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh <span style="color: #ae81ff">\</span>
+         <span style="color: #f92672">&amp;&amp;</span> chmod +x /tmp/bazel.sh <span style="color: #ae81ff">\</span>
+         <span style="color: #f92672">&amp;&amp;</span> /tmp/bazel.sh
+</pre></div>
 
 <h4 id="step-6-add-the-bazelrc-configuration-file-for-bazel-and-the-compile-sh:69e60651f42783a7df723575c4088b5b">Step 6 - Add the <code>bazelrc</code> configuration file for Bazel and the <code>compile.sh</code></h4>
 
 <p>script (from the <code>docker</code> folder) that compiles Heron:</p>
-ADD bazelrc /root/.bazelrc
-ADD compile.sh /compile.sh
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span><span style="color: #66d9ef">ADD</span><span style="color: #e6db74"> bazelrc /root/.bazelrc</span>
+<span style="color: #66d9ef">ADD</span><span style="color: #e6db74"> compile.sh /compile.sh</span>
+</pre></div>
 </article></section></div></div></div><script src="http://code.jquery.com/jquery-2.2.1.min.js"></script><script src="/heron/js/app.min.js"></script></body></html>
