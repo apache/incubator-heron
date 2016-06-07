@@ -3,7 +3,7 @@ title: Implementing a Custom Scheduler
 ---
 
 To run a Heron cluster, you'll need to set up a scheduler that is responsible
-for cluster management. Heron currently supports the followings schedulers out of the box:
+for cluster management. Heron currently supports the following schedulers out of the box:
 
 * [Aurora](../../operators/deployment/schedulers/aurora)
 * [Local scheduler](../../operators/deployment/schedulers/local)
@@ -56,8 +56,8 @@ Heron provides a number of built-in implementations out of box.
 
 ## Running the Scheduler
 
-To run the a custom scheduler, the implementation of the interface above must be specified in the [config](../../operators/deployment/configuration) .
-By default, the heron-cli looks for config under `${HERON_HOME}/conf/`. The location can be overridden using option `--config-path`. 
+To run the a custom scheduler, the implementation of the interface above must be specified in the [config](../../operators/deployment/configuration).
+By default, the heron-cli looks for configurations under `${HERON_HOME}/conf/`. The location can be overridden using option `--config-path`. 
 Below is an example showing the command for [topology
 submission](../../operators/heron-cli#submitting-a-topology):
 
