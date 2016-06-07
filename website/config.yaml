@@ -21,7 +21,6 @@ params:
   versions:
     heron: 0.13.7
     bazel: 0.1.2
-    heronspi: 0.14.0
   assets:
     favicon:
       small: /img/favicon-16x16.png

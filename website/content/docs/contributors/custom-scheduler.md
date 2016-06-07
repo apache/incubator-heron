@@ -28,7 +28,7 @@ library into your project.
 <dependency>
   <groupId>com.twitter.heron</groupId>
   <artifactId>heron-spi</artifactId>
-  <version>{{% heronSpiVersion %}}</version>
+  <version>{{% heronVersion %}}</version>
 </dependency>
 ```
 
@@ -36,7 +36,7 @@ library into your project.
 
 ```groovy
 dependencies {
-  compile group: "com.twitter.heron", name: "heron-spi", version: "{{% heronSpiVersion %}}"
+  compile group: "com.twitter.heron", name: "heron-spi", version: "{{% heronVersion %}}"
 }
 ```
 
