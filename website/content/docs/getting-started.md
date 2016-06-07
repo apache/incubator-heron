@@ -71,6 +71,13 @@ $ heron submit local \
   ~/.heron/examples/heron-examples.jar \ # The path of the topology's jar file
   com.twitter.heron.examples.ExclamationTopology \ # The topology's Java class
   ExclamationTopology # The name of the topology
+
+  INFO: Launching topology 'ExclamationTopology'
+
+  # etc
+
+  INFO: Topology 'ExclamationTopology' launched successfully
+  INFO: Elapsed time: 3.409s.
 ```
 
 This will *submit* the topology to your locally running Heron cluster but it
@@ -88,7 +95,8 @@ $ heron-tracker
 ... Using config file: /Users/USERNAME/.herontools/conf/heron_tracker.yaml
 ```
 
-You can reach Heron Tracker in your browser at http://localhost:8888.
+You can reach Heron Tracker in your browser at http://localhost:8888 and see something like this
+![alt tag](http://twitter.github.io/heron/img/heron-tracker.png)
 
 ## Step 4 --- Start Heron UI
 
@@ -102,7 +110,8 @@ $ heron-ui
 ... Using tracker url: http://localhost:8888
 ```
 
-You can open Heron UI in your browser at http://localhost:8889.
+You can open Heron UI in your browser at http://localhost:8889 and see something like this
+![alt tag](http://twitter.github.io/heron/img/heron-ui.png)
 
 ## Step 5 --- Explore topology management commands
 
