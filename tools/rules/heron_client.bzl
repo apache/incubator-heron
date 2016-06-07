@@ -54,5 +54,4 @@ def heron_client_lib_3rdparty_files():
         "@protobuf-java//jar",
         "@slf4j-api//jar",
         "@slf4j-jdk//jar",
-        "@log4j-over-slf4j//jar",
     ]
