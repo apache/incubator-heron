@@ -19,7 +19,7 @@ change in the future.
 
 ## Java Setup
 
-In order to create a custom scheduler, you need to import the `scheduler`
+In order to create a custom scheduler, you need to import the `heron-spi`
 library into your project.
 
 #### Maven
@@ -27,15 +27,16 @@ library into your project.
 ```xml
 <dependency>
   <groupId>com.twitter.heron</groupId>
-  <artifactId>scheduler-api</artifactId>
-  <version>{{.Site.Params.versions.schedulerapi}}</version>
+  <artifactId>heron-spi</artifactId>
+  <version>{{% heronVersion %}}</version>
 </dependency>
 ```
+
 #### Gradle
 
 ```groovy
 dependencies {
-  compile group: "com.twitter.heron", name: "scheduler-api", version: "{{.Site.Params.versions.schedulerapi}}"
+  compile group: "com.twitter.heron", name: "heron-spi", version: "{{% heronVersion %}}"
 }
 ```
 
