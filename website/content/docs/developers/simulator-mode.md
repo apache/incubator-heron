@@ -5,13 +5,9 @@ title: Simulator Mode
 Simulator mode is specifically designed for topology developers to easily debug or optimize their 
 topologies.
 
-Simulator mode simulates a heron cluster in a single JVM process. This is useful for developing and 
+Simulator mode simulates a heron cluster in a single JVM process, which is useful for developing and 
 testing topologies. Running topologies under simulator mode is similar to running topologies on a 
 cluster.
-
-With a whole topology running in a single process, one could enjoy all free benefits it brings.
-For example, one can run program in an IDE and set breakpoints to examine the states of a topology, 
-or profile the program to optimize it.
 
 # Develop topology with simulator mode
 
