@@ -35,16 +35,16 @@ Manager](../../operators/configuration/metrics-manager).
 
 ## Java Setup
 
-In order to create a custom metrics sink, you need to import the
-`metricsmgr-api` library into your project.
+In order to create a custom metrics sink, you need to import the `heron-api`
+library into your project.
 
 #### Maven
 
 ```xml
 <dependency>
   <groupId>com.twitter.heron</groupId>
-  <artifactId>metricsmgr-api</artifactId>
-  <version>{{.Site.Params.versions.metricsapi}}</version>
+  <artifactId>heron-api</artifactId>
+  <version>{{% heronApiVersion %}}</version>
 </dependency>
 ```
 
@@ -52,7 +52,7 @@ In order to create a custom metrics sink, you need to import the
 
 ```groovy
 dependencies {
-  compile group: "com.twitter.heron", name: "metricsmgr-api", version: "{{.Site.Params.versions.metricsapi}}"
+  compile group: "com.twitter.heron", name: "heron-api", version: "{{% heronApiVersion %}}"
 }
 ```
 

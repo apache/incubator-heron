@@ -27,15 +27,16 @@ library into your project.
 ```xml
 <dependency>
   <groupId>com.twitter.heron</groupId>
-  <artifactId>scheduler-api</artifactId>
-  <version>{{.Site.Params.versions.schedulerapi}}</version>
+  <artifactId>heron-api</artifactId>
+  <version>{{% heronApiVersion %}}</version>
 </dependency>
 ```
+
 #### Gradle
 
 ```groovy
 dependencies {
-  compile group: "com.twitter.heron", name: "scheduler-api", version: "{{.Site.Params.versions.schedulerapi}}"
+  compile group: "com.twitter.heron", name: "heron-api", version: "{{% heronApiVersion %}}"
 }
 ```
 
