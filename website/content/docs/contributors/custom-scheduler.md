@@ -56,7 +56,7 @@ Heron provides a number of built-in implementations out of box.
 
 ## Running the Scheduler
 
-To run the a custom scheduler, the implementation of the interface above must be specified in the [config](../../operators/deployment/configuration).
+To run the a custom scheduler, the implementation of the interfaces above must be specified in the [config](../../operators/deployment/configuration).
 By default, the heron-cli looks for configurations under `${HERON_HOME}/conf/`. The location can be overridden using option `--config-path`. 
 Below is an example showing the command for [topology
 submission](../../operators/heron-cli#submitting-a-topology):
@@ -68,7 +68,7 @@ $ heron submit [cluster-name-storing-your-new-config]/[role]/[env] \
     biz.acme.topologies.MyTopology 
 ```
 
-The implementation for each of the interface listed above must be on Heron's
+The implementation for each of the interfaces listed above must be on Heron's
 [classpath](https://docs.oracle.com/javase/tutorial/essential/environment/paths.html). 
 
 
