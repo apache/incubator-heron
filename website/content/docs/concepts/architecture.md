@@ -200,3 +200,16 @@ the [logical](../topologies#logical-plan) and
 [physical](../topologies#physical-plan) plan of each topology in your cluster.
 
 For more information, see the [Heron UI](../../operators/heron-ui) document.
+
+## Topology Submit Sequence
+
+[Topology Lifecycle](../topologies#topology-lifecycle) describes the lifecycle states of a Heron
+topology. The diagram below illustrates the sequence of interactions amongst the Heron architectural 
+components during the `submit` and `deactivate` client actions. Additionally, the system interaction
+while viewing a topology on the Heron UI is included.
+
+<!--
+The source for this diagram lives here:
+https://docs.google.com/drawings/d/10d1Q_VO0HFtOHftDV7kK6VbZMVI5EpEYHrD-LR7SczE
+-->
+<img src="/img/topology-submit-sequence-diagram.png" style="max-width:140%;!important;" alt="Topology Sequence Diagram"/>
