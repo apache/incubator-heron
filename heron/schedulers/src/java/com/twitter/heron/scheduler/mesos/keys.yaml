@@ -1,0 +1,20 @@
+HERON_MESOS_FRAMEWORK_ZOOKEEPER_ENDPOINT: "heron.mesos.framework.zookeeper.endpoint"
+HERON_MESOS_FRAMEWORK_ZOOKEEPER_ROOT: "heron.mesos.framework.zookeeper.root"
+HERON_MESOS_FRAMEWORK_ZOOKEEPER_CONNECT_TIMEOUT: "heron.mesos.framework.zookeeper.connect.timeout"
+HERON_MESOS_FRAMEWORK_ZOOKEEPER_SESSION_TIMEOUT: "heron.mesos.framework.zookeeper.session.timeout"
+HERON_MESOS_FRAMEWORK_RECONCILIATION_INTERVAL_MS: "heron.mesos.framework.reconciliation.interval.ms"
+HERON_MESOS_FRAMEWORK_FAILOVER_TIMEOUT_SECONDS: "heron.mesos.framework.failover.timeout.seconds"
+
+MESOS_MASTER_URI: "mesos.master.uri"
+
+TMASTER_STAT_PORT: "tmaster.stat.port"
+TMASTER_MAIN_PORT: "tmaster.main.port"
+TMASTER_CONTROLLER_PORT: "tmaster.controller.port"
+TMASTER_SHELL_PORT: "tmaster.shell.port"
+TMASTER_METRICSMGR_PORT: "tmaster.metricsmgr.port"
+
+# config key for specifying the working directory of a topology
+WORKING_DIRECTORY:        "heron.scheduler.local.working.directory"
+
+# whether to start Mesos Scheduler in the background or in the blocking process
+BACKGROUND_SCHEDULER:     "heron.scheduler.background"

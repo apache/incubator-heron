@@ -1,0 +1,6 @@
+# location of the core package
+heron.package.core.uri:                      "file:///vagrant/.herondata/dist/heron-core-release.tar.gz"
+heron.directory.java.home:                   /usr/lib/jvm/java-1.8.0-openjdk-amd64/
+
+heron.config.role.required: false
+heron.config.env.required: false

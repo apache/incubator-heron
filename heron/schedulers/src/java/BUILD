@@ -25,6 +25,18 @@ scheduler_deps_files = \
     spi_deps_files + \
     api_deps_files
 
+mesos_scheduler_extra_deps_files = [
+    "@mesos//jar",
+    "//3rdparty/java:jackson",
+    "@curator-framework//jar",
+    "@curator-client//jar",
+    "@zookeeper//jar",
+]
+
+mesos_scheduler_deps = \
+    scheduler_deps_files + \
+    mesos_scheduler_extra_deps_files
+
 java_library(
     name='local-scheduler-java',
     srcs = glob(["**/local/*.java"]),
@@ -110,5 +122,26 @@ genrule(
     name = "heron-slurm-scheduler",
     srcs = [":slurm-scheduler-unshaded_deploy.jar"],
     outs = ["heron-slurm-scheduler.jar"],
+    cmd  = "cp $< $@",
+)
+
+java_library(
+    name='mesos-scheduler-java',
+    srcs = glob(["com/twitter/heron/scheduler/mesos/**/*.java"]),
+    deps = mesos_scheduler_deps,
+    resources = glob(["**/mesos/*.yaml"]),
+)
+
+java_binary(
+    name='mesos-scheduler-unshaded',
+    srcs = glob(["com/twitter/heron/scheduler/mesos/**/*.java"]),
+    deps = mesos_scheduler_deps,
+    resources = glob(["**/mesos/*.yaml"]),
+)
+
+genrule(
+    name = "heron-mesos-scheduler",
+    srcs = [":mesos-scheduler-unshaded_deploy.jar"],
+    outs = ["heron-mesos-scheduler.jar"],
     cmd  = "cp $< $@",
 )

@@ -1,0 +1,21 @@
+# local state manager class for managing state in a persistent fashion
+heron.class.state.manager:        com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager
+
+# local state manager connection string
+heron.statemgr.connection.string: "127.0.0.1:2181"
+
+# path of the root address to store the state in a local file system
+heron.statemgr.root.path:         "/heron"
+
+####################################################################
+# Following are config for Zk State Manager
+####################################################################
+heron.statemgr.zookeeper.is.initialize.tree:              True
+
+heron.statemgr.zookeeper.session.timeout.ms:              30000
+
+heron.statemgr.zookeeper.connection.timeout.ms:           30000
+
+heron.statemgr.zookeeper.retry.count:                     10
+
+heron.statemgr.zookeeper.retry.interval.ms:               10000

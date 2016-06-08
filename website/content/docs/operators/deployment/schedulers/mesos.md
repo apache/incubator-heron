@@ -12,77 +12,77 @@ Heron's Mesos scheduler interacts with Mesos to stand up all of the
 [components](../../../../concepts/architecture) necessary to [manage
 topologies](../../../heron-cli).
 
+Using the Mesos scheduler is similar to deploying Heron on other systems in
+that you use the [Heron CLI](../../../heron-cli) to manage topologies. The
+difference is in the configuration and [scheduler
+overrides](../../../heron-cli#submitting-a-topology) that you provide when
+you [submit a topology](../../../heron-cli#submitting-a-topology).
+
+A set of default configurations are provided with Heron in the `conf/mesos` directory. 
+The default configurations use Zookeeper based state manager. 
+
+When a Heron topology is submitted, the Mesos scheduler accepts the resource offers required to run the job and starts
+the Heron containers on these nodes. Mesos scheduler itself runs in a local sandbox.
+
 ## ZooKeeper
 
 To run Heron on Mesos, you'll need to set up a ZooKeeper cluster and configure
 Heron to communicate with it. Instructions can be found in [Setting up
 ZooKeeper](../../statemanagers/zookeeper).
 
-## Hosting Binaries
+## Useful Configuration files
 
-In order to deploy Heron, your Mesos cluster will need to have access to a
-variety of Heron binaries, which can be hosted wherever you'd like, so long as
-it's accessible to Mesos (for example in [Amazon S3](https://aws.amazon.com/s3/)
-or using a local blog storage solution). You can build those binaries using the
-instructions in [Creating a New Heron Release](../../../../developers/compiling#building-a-full-release-package).
+These are some of the useful configuration files found in `conf/mesos` directory.
 
-Once your Heron binaries are hosted somewhere that's accessible to Mesos, you
-should run tests to ensure that Mesos can successfully fetch them.
+#### scheduler.yaml
 
-**Note**: Setting up a Heron cluster involves changing a series of configuration
-files in the actual `heron` repository itself (for example [ZooKeeper
-configuration](#ZooKeeper)). You should build Heron releases for deployment only
-*after* you've made the necessary configuration changes.
+This configuration file specifies the scheduler implementation to use and 
+properties for that scheduler. Make sure to have the following properties set to the following:
 
-### Specifying a URI for Heron Releases
+* `heron.class.scheduler`: com.twitter.heron.scheduler.mesos.MesosScheduler
 
-Once you've set up a way to host Heron release binaries, you should modify the
-Mesos configuration in `heron/cli2/src/python/mesos_scheduler.conf`. In
-particular, you can specify a URI using the `heron.core.release.uri` parameter.
-Here's an example:
+* `heron.class.launcher`: com.twitter.heron.scheduler.mesos.MesosLauncher
 
-```
-heron.core.release.uri:http://s3.amazonaws.com/my-heron-binaries
-```
+* `heron.scheduler.is.service`: True
+
+You are free to customize the following:
+
+* `heron.local.working.directory` &mdash; The directory to be used as
+  Heron's Mesos scheduler sandbox directory.
+
+* `heron.scheduler.background` &mdash; Flag whether to start Mesos Scheduler 
+  in the background or in the blocking process.
+  
+#### statemgr.yaml
+
+This is the configuration for the state manager. Mesos scheduler will use it for topology management as well as for 
+storing its own state.
+
+* `heron.class.state.manager` &mdash; Specifies the state manager. 
+   By default it uses the zk state manager. Refer the `conf/local/statemgr.yaml` for local
+   based state manager configurations.
 
 ## Working with Topologies
 
 Once you've set up ZooKeeper and generated a Mesos-accessible Heron release,
-any machine that has the `heron-cli` tool can be used to manage Heron
+any machine that has the Heron CLI tool installed can be used to manage Heron
 topologies (i.e. can submit topologies, activate and deactivate them, etc.).
 
-The most important thing at this stage is to ensure that `heron-cli` is synced
-across all machines that will be [working with topologies](../../../heron-cli).
-Once that has been ensured, you can use Mesos as a scheduler by specifying the
-proper configuration and configuration loader when managing topologies.
+### Example Submission Command 
 
-### Specifying a Configuration
-
-You'll need to specify a scheduler configuration at all stages of a topology's
-[lifecycle](../../../../concepts/topologies#topology-lifecycle) by using the
-`--config-file` flag to point at a configuration file. There is a default Mesos
-configuration located in the Heron repository at
-`heron/cli/src/python/mesos_scheduler.conf`. You can use this file as is,
-modify it, or use an entirely different configuration.
-
-Here's an example CLI command using this configuration:
+Here is an example command to submit the MultiSpoutExclamationTopology that comes with Heron.
 
 ```bash
-$ heron-cli activate \
-    # Set scheduler overrides, point to a topology JAR, etc.
-    --config-file=/Users/janedoe/heron/heron/cli/src/python/mesos_scheduler.conf` \
-    # Other parameters
+heron submit mesos/<role> HERON_HOME/heron/examples/heron-examples.jar com.twitter.heron.examples.MultiSpoutExclamationTopology Topology_name
 ```
 
-### Specifying the Configuration Loader
+**NOTE:** `<role>` here stands for the Mesos framework user. This is the name of the user, from which the commands on 
+the Mesos slaves will be executed. 
 
-You can use Heron's Mesos configuration loader by setting the
-`--config-loader` flag to `com.twitter.heron.scheduler.aurora.MesosConfigLoader`.
-Here's an example CLI command:
+### Example Kill Command 
+
+To kill the topology you can use the kill command with the cluster name and topology name.
 
 ```bash
-$ heron-cli submit \
-    # Set scheduler overrides, point to a topology JAR, etc.
-    --config-loader=com.twitter.heron.scheduler.mesos.MesosConfigLoader \
-    # Other parameters
+$ heron kill mesos Topology_name
 ```
