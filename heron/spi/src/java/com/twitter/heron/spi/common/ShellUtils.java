@@ -90,14 +90,11 @@ public final class ShellUtils {
       pStdOut.append(inputstreamToString(process.getInputStream()));
       pStdErr.append(inputstreamToString(process.getErrorStream()));
 
-      if (pStdOut.length() != 0) {
-        LOG.log(Level.FINE, "$> {0}", pStdOut.toString());
-      }
+      LOG.log(Level.FINE, "\tSTDOUT: {0}", pStdOut.toString());
 
       // Always log the stderr if there is any
-      if (pStdErr.length() != 0) {
-        LOG.log(Level.SEVERE, "$> {0}", pStdErr.toString());
-      }
+      LOG.log(Level.SEVERE, "\tSTDERR: {0}", pStdErr.toString());
+
       return exitValue;
     } catch (IOException | InterruptedException e) {
       LOG.severe("Failed to check status of packer " + e);
