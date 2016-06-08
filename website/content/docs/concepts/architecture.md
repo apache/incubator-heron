@@ -206,7 +206,7 @@ For more information, see the [Heron UI](../../operators/heron-ui) document.
 [Topology Lifecycle](../topologies#topology-lifecycle) describes the lifecycle states of a Heron
 topology. The diagram below illustrates the sequence of interactions amongst the Heron architectural 
 components during the `submit` and `deactivate` client actions. Additionally, the system interaction
-while viewing a topology on the Heron UI is included.
+while viewing a topology on the Heron UI is shown.
 
 <!--
 The source for this diagram lives here:
