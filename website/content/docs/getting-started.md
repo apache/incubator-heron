@@ -195,72 +195,8 @@ The included example topologies:
 * `TaskHookTopology.java` --- A topology that uses a task hook to subscribe to
    event notifications.
 
-## Frequently Asked Questions
-
-### 1. How do I know if a topology has been successfully submitted?
-
-- The following message will appear upon successful submission:
-
-```bash
-  INFO: Topology 'ExclamationTopology' launched successfully
-```
-- Note even if the topology is submitted successfully, it could still fail to
-start some component. For example, `stmgr` may fail to start due to unfulfilled
-dependencies. To troubleshoot, refer to question 3 and the debugging example below.
-
-### 2. How do I know if a topology is running normally?
-- Heron Tracker and Heron UI provides information about the Heron cluster and
-topologies. Refer to step 3 and 4 above.
-
-### 3. How can I debug if a topology failed to start?
-- `~/.herondata/topologies/{cluster}/{role}/{topologyName}/heron-executor.stdout`
-and `~/.herondata/topologies/{cluster}/{role}/{topologyName}/log-files/` contain
-helpful information about what went wrong.
-- Installation of `libunwind` is required. Upgrade of `gcc` and `glibc` might be needed.
-- Killing the topology via `heron kill` and resubmitting it via `heron submit` might also help.
-  - If `heron kill` returned error, the topology can still be killed by running
-  `killall` to kill associated running process and `rm -rf ~/.herondata/` to clean up the state.
-
-### A debugging example
-This example illustrates in detail how to investigate failures. Note the error
-messages may vary case by case, but this example may provide some general guidance 
-for troubleshooting.
-
-```bash
-$ heron activate local ExclamationTopology
-
-...
-
-ERROR: Failed to activate topology 'ExclamationTopology'
-INFO: Elapsed time: 1.883s.
-```
-In `~/.herondata/topologies/{cluster}/{role}/{topologyName}/heron-executor.stdout`, there is an error message:
-```bash
-2016-06-07 14:42:13 Running stmgr-1 process as ./heron-core/bin/heron-stmgr ExclamationTopology \
-ExclamationTopology8b1ba199-530a-4425-b903-3f3e5b97d34e ExclamationTopology.defn LOCALMODE \
-/Users/{username}/.herondata/repository/state/local stmgr-1 \
-container_1_word_2,container_1_exclaim1_1 65424 65428 65427 ./heron-conf/heron_internals.yaml
-
-...
-
-2016-06-07 14:42:13 stmgr-1 exited with status ...
-```
-
-Something is wrong with `stmgr-1`. To investigate further, under the working directory,
-run the command seen at `heron-executor.stdout` directly:
-
-```bash
-$ ./heron-core/bin/heron-stmgr ExclamationTopology \
-ExclamationTopology8b1ba199-530a-4425-b903-3f3e5b97d34e ExclamationTopology.defn LOCALMODE \
-/Users/{username}/.herondata/repository/state/local stmgr-1 \
-container_1_word_2,container_1_exclaim1_1 65424 65428 65427 ./heron-conf/heron_internals.yaml
-
-./heron-core/bin/heron-stmgr: \
-error while loading shared libraries: \
-libunwind.so.8: cannot open shared object file: No such file or directory
-```
-
-This shows `libunwind` might be missing or not installed correctly. Installing `libunwind` and re-running the topology fixes the problem.
+## Troubleshooting
+In case of any issues, please refer to [Troubleshooting Guide](../troubleshooting).
 
 ### Next Steps
 
