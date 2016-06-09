@@ -21,6 +21,7 @@ https://player.oreilly.com/videos/9781491927977?login=true)(Jun, 2015)
 
 ## Blog Posts
 
+* [Open Sourcing Twitter Heron](https://blog.twitter.com/2016/open-sourcing-twitter-heron) (May, 2016)
 * [Flying Faster with Twitter
   Heron](https://blog.twitter.com/2015/flying-faster-with-twitter-heron) (June, 2015)
 
