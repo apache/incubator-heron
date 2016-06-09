@@ -5,6 +5,23 @@ title: Writing a Topology
 A topology specifies components like spouts and bolts, as well as the relation
 between components and proper configurations.
 
+### Install Heron APIs for development
+
+Before getting started writing a topology, you need to install Heron API and 
+import its library to your own topology project.
+
+* Go to the releases page for Heron and download the Heron API installation 
+script for your platform. The name of the script for Mac OS X (`darwin`), 
+for example, would be named `heron-api-install-{{% heronVersion %}}-darwin.sh`.
+
+* Once you've downloaded, run the installation script with the `--user` flag set.
+
+* After successful installation, import `~/.heronapi/heron-storm.jar` to your 
+project as a dependency. This allows you to use Heron APIs that are necessary 
+to develop your own topology.
+
+### Writing your own topology
+
 [Spouts](../java/spouts) and [Bolts](../java/bolts) discuss how to implement a
 spouts and bolts, respectively.
 
