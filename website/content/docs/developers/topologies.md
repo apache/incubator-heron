@@ -20,9 +20,16 @@ for example, would be named `heron-api-install-{{% heronVersion %}}-darwin.sh`.
 project as a dependency. This allows you to use Heron APIs that are necessary 
 to develop your own topology.
 
-Alternatively, you can download the published artifacts from 
-[maven](https://search.maven.org/#search%7Cga%7C1%7Ca%3A%22heron-storm%22)
-and include a `pom.xml` or `heron-storm.jar` to your project as a dependency.
+Alternatively, you can add a dependency on `heron-storm.jar` to your 
+project's `pom.xml` file as follows:
+
+```xml
+<dependency>
+    <groupId>com.twitter.heron</groupId>
+    <artifactId>heron-storm</artifactId>
+    <version>{{% heronVersion %}}</version>
+</dependency>
+```
 
 ### Writing your own topology
 
