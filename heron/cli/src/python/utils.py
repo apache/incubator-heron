@@ -212,14 +212,18 @@ def parse_cluster_role_env(cluster_role_env, config_path):
       # if role is required but not provided, raise exception
       if len(parts) == 1:
         if (IS_ROLE_REQUIRED in cli_confs) and (cli_confs[IS_ROLE_REQUIRED] == True):
-          raise Exception("role required but not provided. See %s in %s" % (IS_ROLE_REQUIRED, CLIENT_YAML))
+          raise Exception(
+            "role required but not provided (cluster/role/env = %s). See %s in %s" %
+            (cluster_role_env, IS_ROLE_REQUIRED, CLIENT_YAML))
         else:
           parts.append(getpass.getuser())
 
       # if environ is required but not provided, raise exception
       if len(parts) == 2:
         if (IS_ENV_REQUIRED in cli_confs) and (cli_confs[IS_ENV_REQUIRED] == True):
-          raise Exception("environ required but not provided. See %s in %s" % (IS_ENV_REQUIRED, CLIENT_YAML))
+          raise Exception(
+            "environ required but not provided (cluster/role/env = %s). See %s in %s" %
+            (cluster_role_env, IS_ENV_REQUIRED, CLIENT_YAML))
         else:
           parts.append(ENVIRON)
 
