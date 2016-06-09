@@ -20,8 +20,10 @@ for example, would be named `heron-api-install-{{% heronVersion %}}-darwin.sh`.
 project as a dependency. This allows you to use Heron APIs that are necessary 
 to develop your own topology.
 
-Alternatively, you can add a dependency on `heron-storm.jar` to your 
-project's `pom.xml` file as follows:
+### Maven Integration
+
+Alternatively, you can integrate the latest Heron API by just including
+the following lines to your project's `pom.xml` file.
 
 ```xml
 <dependency>
