@@ -31,7 +31,7 @@ For example:
 simulator.submitTopology("test", conf, builder.createTopology());
 ```
 
-Other interfaces for simulator mode are:
+Other lifecycle methods to use with simulator mode are:
 
 ```java
 simulator.killTopology("test");
@@ -42,8 +42,8 @@ simulator.shutdown();
 
 To kill a topology, one could also terminate the process.
 
-The simulator mode will run in separate threads other than main thread. All those interfaces are 
-thread-safe. This means that one could invoke these interfaces in other threads and monitor the 
+The simulator mode will run in separate threads other than main thread. All the above methods are 
+thread-safe. This means that one could invoke these methods in other threads and monitor the 
 corresponding behaviors interactively.
 
 # Debug topology using IntelliJ
