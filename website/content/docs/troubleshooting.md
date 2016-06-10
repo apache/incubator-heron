@@ -59,6 +59,43 @@ INFO: Elapsed time: 1.883s.
 
     Then fix it correspondingly.
     
+* It is also possible that your computer has an issue with resolving localhost.
+To check, run the following command on your shell. 
+    
+    ```bash
+    $ python -c "import socket; print socket.gethostbyname(socket.gethostname())"
+    Traceback (most recent call last):
+      File "<string>", line 1, in <module>
+    socket.gaierror: [Errno 8] nodename nor servname provided, or not known
+    ```
+    
+    If the output looks like a normal IP address, such as `127.0.0.1`, 
+    you don't have this issue.
+    If the output is similar to the above, you need to modify `/etc/hosts`
+    file to correctly resolve localhost, as shown below. 
+    
+    1. Run the following command, whose output is your computer's hostname.
+    
+        ```bash
+        $ python -c "import socket; print socket.gethostname()"
+        ```
+    
+    2. Open `/etc/hosts` file as superuser and find a line containing
+    
+        ```bash
+        127.0.0.1	localhost
+        ```
+    
+    3. Append your hostname after the word "localhost" on the line. 
+    For example, if your hostname was `tw-heron`, then the line should
+    look like the following:
+    
+        ```bash
+        127.0.0.1   localhost   tw-heron
+        ```
+        
+    4. Save the file and restart your computer.
+    
 ### 3. Why does the process fail during runtime? 
 
 If a component (e.g., TMaster or Stream Manager) has failed during runtime, visit the component's logs in
@@ -74,3 +111,6 @@ In general, it suffices to run:
 If returned error, the topology can still be killed by running 
     `kill pid` to kill all associated running process and `rm -rf ~/.herondata/` 
     to clean up the state.
+    
+
+
