@@ -258,7 +258,7 @@ The included example topologies:
    event notifications.
 
 ## Troubleshooting
-In case of any issues, please refer to [Quick Start Troubleshooting](../troubleshooting).
+In case of any issues, please refer to [Quick Start Troubleshooting](../getting-started-troubleshooting).
 
 ### Next Steps
 

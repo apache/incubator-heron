@@ -1,5 +1,5 @@
 ---
-title: Quick Start Troubleshooting 
+title: Quick Start Troubleshooting
 ---
 
 This guide provides basic help for issues frequently encountered when deploying topologies.
@@ -44,18 +44,22 @@ INFO: Elapsed time: 1.883s.
 #### What to do
 
 * This file will show if any specific components have failed to start.
-
-        ~/.herondata/topologies/{cluster}/{role}/{TopologyName}/heron-executor.stdout
-
+    
+    ```bash
+    ~/.herondata/topologies/{cluster}/{role}/{TopologyName}/heron-executor.stdout
+    ```
+    
     For example, there may be errors when trying to spawn a Stream Manager process in the file:
     
-        Running stmgr-1 process as ./heron-core/bin/heron-stmgr ExclamationTopology \
-        ExclamationTopology0a9c6550-7f3d-44fb-97ea-5c779fac6924 ExclamationTopology.defn LOCALMODE \
-        /Users/${USERNAME}/.herondata/repository/state/local stmgr-1 \
-        container_1_word_2,container_1_exclaim1_1 58106 58110 58109 ./heron-conf/heron_internals.yaml
-        2016-06-09 16:20:28:  stdout: 
-        2016-06-09 16:20:28:  stderr: error while loading shared libraries: libunwind.so.8: \
-        cannot open shared object file: No such file or directory
+    ```bash
+    Running stmgr-1 process as ./heron-core/bin/heron-stmgr ExclamationTopology \
+    ExclamationTopology0a9c6550-7f3d-44fb-97ea-5c779fac6924 ExclamationTopology.defn LOCALMODE \
+    /Users/${USERNAME}/.herondata/repository/state/local stmgr-1 \
+    container_1_word_2,container_1_exclaim1_1 58106 58110 58109 ./heron-conf/heron_internals.yaml
+    2016-06-09 16:20:28:  stdout: 
+    2016-06-09 16:20:28:  stderr: error while loading shared libraries: libunwind.so.8: \
+    cannot open shared object file: No such file or directory
+    ```
 
     Then fix it correspondingly.
     
@@ -63,13 +67,17 @@ INFO: Elapsed time: 1.883s.
 
 If a component (e.g., TMaster or Stream Manager) has failed during runtime, visit the component's logs in
     
-    ~/.herondata/topologies/{cluster}/{role}/{TopologyName}/log-files/
+```bash
+~/.herondata/topologies/{cluster}/{role}/{TopologyName}/log-files/
+```
 
 ### 4. How to force kill and clean up a topology?
 
 In general, it suffices to run:
         
-    heron kill ...
+```bash
+heron kill ...
+```
 
 If returned error, the topology can still be killed by running 
     `kill pid` to kill all associated running process and `rm -rf ~/.herondata/` 
