@@ -42,7 +42,7 @@ simulator.shutdown();
 
 To kill a topology, one could also terminate the process.
 
-The simulator mode will run in separate threads other than main thread. All the above methods are 
+The simulator mode will run in separate threads other than the main thread. All the above methods are 
 thread-safe. This means that one could invoke these methods in other threads and monitor the 
 corresponding behaviors interactively.
 
