@@ -34,6 +34,7 @@ import org.apache.reef.tang.exceptions.InjectionException;
 import com.twitter.heron.scheduler.reef.HeronMasterDriver.HeronContainerAllocationHandler;
 import com.twitter.heron.scheduler.reef.HeronMasterDriver.HeronExecutorContainerErrorHandler;
 import com.twitter.heron.scheduler.reef.HeronMasterDriver.HeronExecutorLauncher;
+import com.twitter.heron.scheduler.reef.HeronMasterDriver.HeronRunningTaskHandler;
 import com.twitter.heron.scheduler.reef.HeronMasterDriver.HeronSchedulerLauncher;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
@@ -131,6 +132,7 @@ public class ReefLauncher implements ILauncher {
         .set(DriverConfiguration.ON_EVALUATOR_ALLOCATED, HeronContainerAllocationHandler.class)
         .set(DriverConfiguration.ON_EVALUATOR_FAILED, HeronExecutorContainerErrorHandler.class)
         .set(DriverConfiguration.ON_CONTEXT_ACTIVE, HeronExecutorLauncher.class)
+        .set(DriverConfiguration.ON_TASK_RUNNING, HeronRunningTaskHandler.class)
         .set(DriverConfiguration.GLOBAL_FILES, topologyPackageLocation)
         .set(DriverConfiguration.GLOBAL_FILES, coreReleasePackage)
         .set(HeronDriverConfiguration.TOPOLOGY_NAME, topologyName)

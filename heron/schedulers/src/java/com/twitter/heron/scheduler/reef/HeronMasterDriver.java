@@ -34,6 +34,7 @@ import org.apache.reef.driver.evaluator.AllocatedEvaluator;
 import org.apache.reef.driver.evaluator.EvaluatorRequest;
 import org.apache.reef.driver.evaluator.EvaluatorRequestor;
 import org.apache.reef.driver.evaluator.FailedEvaluator;
+import org.apache.reef.driver.task.RunningTask;
 import org.apache.reef.driver.task.TaskConfiguration;
 import org.apache.reef.runtime.common.files.REEFFileNames;
 import org.apache.reef.tang.Configuration;
@@ -94,6 +95,11 @@ public class HeronMasterDriver {
 
   // This map will be needed to make container requests for a failed heron executor
   private Map<String, String> reefContainerToHeronExecutorMap = new ConcurrentHashMap<>();
+
+  // On topology restarts all existing tasks need to be killed. This map maintains handlers for all
+  // currently running tasks and mapped to the owner container.
+  private Map<RunningTask, ActiveContext> runningTaskToContextMap = new ConcurrentHashMap<>();
+
   private PackingPlan packing;
 
   @Inject
@@ -169,6 +175,33 @@ public class HeronMasterDriver {
     for (Entry<String, ActiveContext> entry : contexts.entrySet()) {
       LOG.log(Level.INFO, "Close context: {0}", entry.getKey());
       entry.getValue().close();
+    }
+  }
+
+  /**
+   * REEF scheduler will retain all REEF containers. Currently running heron-executors/REEF-tasks
+   * will be killed and new REEF-tasks representing previously running heron-executor will be
+   * started.
+   */
+  public void restartTopology() {
+    restartContainer(null);
+  }
+
+  public void restartContainer(String id) {
+    if (id == null) {
+      LOG.log(Level.INFO, "Restarting all tasks of topology: {0}", topologyName);
+    } else {
+      LOG.log(Level.INFO, "Find & restart task for id={0} in: {1}", new Object[]{id, topologyName});
+    }
+
+    for (RunningTask runningTask : runningTaskToContextMap.keySet()) {
+      if (id != null && !runningTask.getId().equals(id)) {
+        continue;
+      }
+      ActiveContext context = runningTaskToContextMap.remove(runningTask);
+      LOG.log(Level.INFO, "Killing task: {0}", runningTask.getId());
+      runningTask.close();
+      submitHeronExecutorTask(context);
     }
   }
 
@@ -255,6 +288,30 @@ public class HeronMasterDriver {
     Map<String, ActiveContext> result = activeContexts;
     activeContexts = null;
     return result;
+  }
+
+  void submitHeronExecutorTask(ActiveContext context) {
+    String id = context.getId();
+    LOG.log(Level.INFO, "Submitting evaluator task for id: {0}", id);
+
+    // topologyName and other configurations are required by Heron Executor and Task to load
+    // configuration files. Using REEF configuration model is better than depending on external
+    // persistence.
+    final Configuration taskConf = HeronTaskConfiguration.CONF
+        .set(TaskConfiguration.TASK, HeronExecutorTask.class)
+        .set(TaskConfiguration.ON_CLOSE, HeronExecutorTask.HeronExecutorTaskTerminator.class)
+        .set(TaskConfiguration.IDENTIFIER, id)
+        .set(HeronTaskConfiguration.TOPOLOGY_NAME, topologyName)
+        .set(HeronTaskConfiguration.TOPOLOGY_JAR, topologyJar)
+        .set(HeronTaskConfiguration.TOPOLOGY_PACKAGE_NAME, topologyPackageName)
+        .set(HeronTaskConfiguration.HERON_CORE_PACKAGE_NAME, heronCorePackageName)
+        .set(HeronTaskConfiguration.ROLE, role)
+        .set(HeronTaskConfiguration.ENV, env)
+        .set(HeronTaskConfiguration.CLUSTER, cluster)
+        .set(HeronTaskConfiguration.PACKED_PLAN, getPackingAsString())
+        .set(HeronTaskConfiguration.CONTAINER_ID, id)
+        .build();
+    context.submitTask(taskConf);
   }
 
   /**
@@ -359,26 +416,21 @@ public class HeronMasterDriver {
         return;
       }
 
-      String id = context.getId();
-      LOG.log(Level.INFO, "Submitting evaluator task for id: {0}", id);
+      submitHeronExecutorTask(context);
+    }
+  }
 
-      // topologyName and other configurations are required by Heron Executor and Task to load
-      // configuration files. Using REEF configuration model is better than depending on external
-      // persistence.
-      final Configuration taskConf = HeronTaskConfiguration.CONF
-          .set(TaskConfiguration.TASK, HeronExecutorTask.class)
-          .set(TaskConfiguration.IDENTIFIER, id)
-          .set(HeronTaskConfiguration.TOPOLOGY_NAME, topologyName)
-          .set(HeronTaskConfiguration.TOPOLOGY_JAR, topologyJar)
-          .set(HeronTaskConfiguration.TOPOLOGY_PACKAGE_NAME, topologyPackageName)
-          .set(HeronTaskConfiguration.HERON_CORE_PACKAGE_NAME, heronCorePackageName)
-          .set(HeronTaskConfiguration.ROLE, role)
-          .set(HeronTaskConfiguration.ENV, env)
-          .set(HeronTaskConfiguration.CLUSTER, cluster)
-          .set(HeronTaskConfiguration.PACKED_PLAN, getPackingAsString())
-          .set(HeronTaskConfiguration.CONTAINER_ID, id)
-          .build();
-      context.submitTask(taskConf);
+  /**
+   * This class manages active tasks. The task handlers provided by REEF will be memorized to be
+   * used later for operations like topology restart. Restarting a task does not require new
+   * container request.
+   */
+  public final class HeronRunningTaskHandler implements EventHandler<RunningTask> {
+    @Override
+    public void onNext(RunningTask runningTask) {
+      LOG.log(Level.INFO, "Task, id:{0}, has started. Count of running tasks: {1}",
+          new Object[]{runningTask.getId(), runningTaskToContextMap.size() + 1});
+      runningTaskToContextMap.put(runningTask, runningTask.getActiveContext());
     }
   }
 }

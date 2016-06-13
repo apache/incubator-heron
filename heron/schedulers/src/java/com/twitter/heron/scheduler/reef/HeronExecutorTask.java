@@ -25,7 +25,10 @@ import javax.inject.Inject;
 
 import org.apache.reef.runtime.common.files.REEFFileNames;
 import org.apache.reef.tang.annotations.Parameter;
+import org.apache.reef.tang.annotations.Unit;
 import org.apache.reef.task.Task;
+import org.apache.reef.task.events.CloseEvent;
+import org.apache.reef.wake.EventHandler;
 
 import com.twitter.heron.api.generated.TopologyAPI.Topology;
 import com.twitter.heron.common.basics.SysUtils;
@@ -45,6 +48,7 @@ import com.twitter.heron.spi.utils.SchedulerConfig;
 import com.twitter.heron.spi.utils.SchedulerUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
+@Unit
 public class HeronExecutorTask implements Task {
   private static final Logger LOG = Logger.getLogger(HeronExecutorTask.class.getName());
 
@@ -60,6 +64,9 @@ public class HeronExecutorTask implements Task {
 
   private REEFFileNames reefFileNames;
   private String localHeronConfDir;
+
+  // Reference to the thread waiting for heron executor to complete
+  private volatile Thread processTarget;
 
   @Inject
   public HeronExecutorTask(final REEFFileNames fileNames,
@@ -96,9 +103,16 @@ public class HeronExecutorTask implements Task {
     LOG.log(Level.INFO, "Preparing evaluator for running executor-id: {0}", heronExecutorId);
     String[] executorCmd = getExecutorCommand();
 
+    processTarget = Thread.currentThread();
+
     final Process regularExecutor = ShellUtils.runASyncProcess(true, executorCmd, new File("."));
     LOG.log(Level.INFO, "Started heron executor-id: {0}", heronExecutorId);
-    regularExecutor.waitFor();
+    try {
+      regularExecutor.waitFor();
+    } catch (InterruptedException e) {
+      LOG.log(Level.INFO, "Destroy heron executor-id: {0}", heronExecutorId);
+      regularExecutor.destroy();
+    }
     return null;
   }
 
@@ -137,5 +151,16 @@ public class HeronExecutorTask implements Task {
 
   Topology getTopology(String topologyDefFile) {
     return TopologyUtils.getTopology(topologyDefFile);
+  }
+
+  /**
+   * This class will kill heron executor process when topology or container restart is requested.
+   */
+  public final class HeronExecutorTaskTerminator implements EventHandler<CloseEvent> {
+    @Override
+    public void onNext(CloseEvent closeEvent) {
+      LOG.log(Level.INFO, "Received request to terminate executor-id: {0}", heronExecutorId);
+      processTarget.interrupt();
+    }
   }
 }

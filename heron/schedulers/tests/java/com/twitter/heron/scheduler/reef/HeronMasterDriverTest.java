@@ -23,6 +23,7 @@ import org.apache.reef.driver.evaluator.AllocatedEvaluator;
 import org.apache.reef.driver.evaluator.EvaluatorRequest;
 import org.apache.reef.driver.evaluator.EvaluatorRequestor;
 import org.apache.reef.driver.evaluator.FailedEvaluator;
+import org.apache.reef.driver.task.RunningTask;
 import org.apache.reef.evaluator.context.parameters.ContextIdentifier;
 import org.apache.reef.tang.Configuration;
 import org.apache.reef.tang.types.NamedParameterNode;
@@ -101,7 +102,7 @@ public class HeronMasterDriverTest {
   }
 
   @Test
-  public void closesContainersOnKill() throws Exception {
+  public void onKillClosesContainers() throws Exception {
     ActiveContext mockContext1 = Mockito.mock(ActiveContext.class);
     Mockito.when(mockContext1.getId()).thenReturn("0"); // TM
 
@@ -117,6 +118,64 @@ public class HeronMasterDriverTest {
 
     Mockito.verify(mockContext1).close();
     Mockito.verify(mockContext2).close();
+  }
+
+  @Test
+  public void onRestartKillsAndStartsTasks() throws Exception {
+    Mockito.doReturn("").when(spyDriver).getPackingAsString();
+
+    ActiveContext mockContext1 = Mockito.mock(ActiveContext.class);
+    Mockito.when(mockContext1.getId()).thenReturn("0"); // TM
+    RunningTask mockTaskTM = Mockito.mock(RunningTask.class);
+    Mockito.when(mockTaskTM.getActiveContext()).thenReturn(mockContext1);
+
+    ActiveContext mockContext2 = Mockito.mock(ActiveContext.class);
+    Mockito.when(mockContext2.getId()).thenReturn("1"); // worker
+    RunningTask mockTaskWorker = Mockito.mock(RunningTask.class);
+    Mockito.when(mockTaskWorker.getActiveContext()).thenReturn(mockContext2);
+
+    spyDriver.new HeronRunningTaskHandler().onNext(mockTaskTM);
+    spyDriver.new HeronRunningTaskHandler().onNext(mockTaskWorker);
+
+    spyDriver.restartTopology();
+
+    Mockito.verify(mockTaskTM).close();
+    Mockito.verify(mockTaskWorker).close();
+
+    Mockito.verify(mockContext1).submitTask(Mockito.any(Configuration.class));
+    Mockito.verify(mockContext1, Mockito.never()).close();
+    Mockito.verify(mockContext2).submitTask(Mockito.any(Configuration.class));
+    Mockito.verify(mockContext2, Mockito.never()).close();
+  }
+
+  @Test
+  public void restartsSpecificTask() throws Exception {
+    Mockito.doReturn("").when(spyDriver).getPackingAsString();
+
+    ActiveContext mockContextTM = Mockito.mock(ActiveContext.class);
+    Mockito.when(mockContextTM.getId()).thenReturn("0"); // TM
+    RunningTask mockTaskTM = Mockito.mock(RunningTask.class);
+    Mockito.when(mockTaskTM.getActiveContext()).thenReturn(mockContextTM);
+    Mockito.when(mockTaskTM.getId()).thenReturn("0");
+
+    ActiveContext mockContextWorker = Mockito.mock(ActiveContext.class);
+    Mockito.when(mockContextWorker.getId()).thenReturn("1"); // worker
+    RunningTask mockTaskWorker = Mockito.mock(RunningTask.class);
+    Mockito.when(mockTaskWorker.getActiveContext()).thenReturn(mockContextWorker);
+    Mockito.when(mockTaskWorker.getId()).thenReturn("1");
+
+    spyDriver.new HeronRunningTaskHandler().onNext(mockTaskTM);
+    spyDriver.new HeronRunningTaskHandler().onNext(mockTaskWorker);
+
+    spyDriver.restartContainer("0");
+
+    Mockito.verify(mockTaskTM).close();
+    Mockito.verify(mockTaskTM, Mockito.timeout(2)).getActiveContext();
+    Mockito.verify(mockContextTM).submitTask(Mockito.any(Configuration.class));
+
+    Mockito.verify(mockTaskWorker, Mockito.never()).close();
+    Mockito.verify(mockTaskWorker, Mockito.timeout(1)).getActiveContext();
+    Mockito.verify(mockContextWorker, Mockito.never()).submitTask(Mockito.any(Configuration.class));
   }
 
   @Test

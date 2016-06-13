@@ -60,12 +60,18 @@ public class ReefScheduler implements IScheduler {
 
   @Override
   public boolean onRestart(RestartTopologyRequest request) {
-    // TODO: Need to provide this implementation
-    return false;
+    int containerId = request.getContainerIndex();
+
+    if (containerId == -1) {
+      HeronMasterDriverProvider.getInstance().restartTopology();
+    } else {
+      HeronMasterDriverProvider.getInstance().restartContainer(String.valueOf(containerId));
+    }
+
+    return true;
   }
 
   @Override
   public void close() {
-    //TODO
   }
 }
