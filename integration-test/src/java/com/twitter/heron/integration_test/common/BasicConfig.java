@@ -21,18 +21,19 @@ import com.twitter.heron.api.Config;
 public class BasicConfig extends Config {
   private static final long serialVersionUID = -3583884076092048052L;
   private static final int DEFAULT_NUM_STMGRS = 1;
+  private static final long DEFAULT_CONTAINER_RAM = 4L * 1024 * 1024 * 1024;
 
   public BasicConfig() {
-    this(true, DEFAULT_NUM_STMGRS);
+    this(true, DEFAULT_NUM_STMGRS, DEFAULT_CONTAINER_RAM);
   }
 
-  public BasicConfig(boolean isDebug, int numStmgrs) {
+  public BasicConfig(boolean isDebug, int numStmgrs, long container_ram) {
     super();
-    super.setTeamEmail("streaming-compute@twitter.com");
-    super.setTeamName("stream-computing");
-    super.setTopologyProjectName("heron-integration-test");
     super.setDebug(isDebug);
     super.setNumStmgrs(numStmgrs);
     super.setEnableAcking(true);
+
+    // Limit the ram for per container
+    super.setContainerRamRequested(container_ram);
   }
 }
