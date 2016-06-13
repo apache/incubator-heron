@@ -22,9 +22,7 @@ RUN yum -y install \
       make \
       patch \
       python \
-      python2.7-dev \
-      python-software-properties \
-      software-properties-common \
+      python-devel \
       python-setuptools \
       zip \
       unzip \

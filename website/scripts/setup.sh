@@ -3,4 +3,4 @@
 brew list hugo || brew install hugo
 npm install
 sudo -H pip uninstall -y requests
-sudo -H pip install linkchecker pygments requests==2.9.0
+sudo -H pip install linkchecker Pygments==2.1.3 requests==2.9.0

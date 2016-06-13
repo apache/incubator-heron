@@ -19,15 +19,15 @@ Heron comes equipped out of the box with three metrics sinks that you can apply
 for a specific topology. The code for these sinks may prove helpful for
 implementing your own.
 
-* [`GraphiteSink`](/api/metrics/com/twitter/heron/metricsmgr/sink/GraphiteSink.html)
+* [`GraphiteSink`](/api/com/twitter/heron/metricsmgr/sink/GraphiteSink.html)
   --- Sends each `MetricsRecord` object to a
   [Graphite](http://graphite.wikidot.com/) instance according to a Graphite
   prefix.
-* [`ScribeSink`](/api/metrics/com/twitter/heron/metricsmgr/sink/ScribeSink.html)
+* [`ScribeSink`](/api/com/twitter/heron/metricsmgr/sink/ScribeSink.html)
   --- Sends each `MetricsRecord` object to a
   [Scribe](https://github.com/facebookarchive/scribe) instance according to a
   Scribe category and namespace.
-* [`FileSink`](/api/metrics/com/twitter/heron/metricsmgr/sink/FileSink.html)
+* [`FileSink`](/api/com/twitter/heron/metricsmgr/sink/FileSink.html)
   --- Writes each `MetricsRecord` object to a JSON file at a specified path.
 
 More on using those sinks in a Heron cluster can be found in [Metrics
@@ -35,16 +35,16 @@ Manager](../../operators/configuration/metrics-manager).
 
 ## Java Setup
 
-In order to create a custom metrics sink, you need to import the
-`metricsmgr-api` library into your project.
+In order to create a custom metrics sink, you need to import the `heron-spi`
+library into your project.
 
 #### Maven
 
 ```xml
 <dependency>
   <groupId>com.twitter.heron</groupId>
-  <artifactId>metricsmgr-api</artifactId>
-  <version>{{.Site.Params.versions.metricsapi}}</version>
+  <artifactId>heron-spi</artifactId>
+  <version>{{% heronVersion %}}</version>
 </dependency>
 ```
 
@@ -52,14 +52,14 @@ In order to create a custom metrics sink, you need to import the
 
 ```groovy
 dependencies {
-  compile group: "com.twitter.heron", name: "metricsmgr-api", version: "{{.Site.Params.versions.metricsapi}}"
+  compile group: "com.twitter.heron", name: "heron-spi", version: "{{% heronVersion %}}"
 }
 ```
 
 ## The `IMetricsSink` Interface
 
 Each metrics sink must implement the
-[`IMetricsSink`](http://heronproject.github.io/metrics-api/com/twitter/heron/metricsmgr/IMetricsSink)
+[`IMetricsSink`](/api/com/twitter/heron/spi/metricsmgr/sink/IMetricsSink.html)
 interface, which requires you to implement the following methods:
 
 * `void init(Map<String, Object> conf, SinkContext context)` --- Defines the
@@ -129,7 +129,7 @@ public class PrintSink implements IMetricsSink {
 ## Configuring Your Custom Sink
 
 The configuration for your sink needs to be provided in the
-[YAML](http://www.yaml.org/) file at `heron/config/metrics_sinks.yaml`.
+[YAML](http://www.yaml.org/) file at `heron/config/src/yaml/conf/${CLUSTER}/metrics_sinks.yaml`.
 
 At the top of that file there's a `sinks` parameter that lists each available
 sink by name. You should add your sink to that list. Here's an example:
@@ -142,7 +142,7 @@ sinks:
   - print-sink
 ```
 
-For each sink you need to specify the following:
+For each sink you are required to specify the followings:
 
 * `class` --- The Java class name of your custom implementation of the
   `IMetricsSink` interface, e.g. `biz.acme.heron.metrics.PrintSink`.
@@ -164,10 +164,14 @@ print-sink:
   sink-restart-attempts: -1 # Attempt to restart forever
 ```
 
+It is optional to add other configurations for the sink. All configurations will be constructed
+ as an unmodifiable map `Map<String, Object> conf` and passed to `init(conf, context)`.
+
 ## Using Your Custom Sink
 
 Once you've made a JAR for your custom Java sink, distributed that JAR to
 `metrics-mgr-classpath` folder, and changed the configuration in
-`heron/config/metrics_sink.yaml`, you'll need to [re-compile
-Heron](../../developers/compiling). Any topology submitted using that compiled
-version of `heron-cli` will include the custom sink.
+`heron/config/src/yaml/conf/${CLUSTER}/metrics_sinks.yaml`. 
+Any topology submitted using that configuration will include the custom sink.You must [re-compile
+Heron](../../developers/compiling) if you want to include the configuration in a new heron-cli distribution. 
+
