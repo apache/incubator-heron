@@ -19,7 +19,7 @@ pygmentscodefences: true
 params:
   author: Luc Perkins
   versions:
-    heron: 0.13.7
+    heron: 0.14.0
     bazel: 0.1.2
   assets:
     favicon:
