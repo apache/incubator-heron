@@ -282,7 +282,7 @@ def check_release_file_exists():
 
   # if the file does not exist and is not a file
   if not os.path.isfile(release_file):
-    Log.error("%s file not found: %s" % release_file)
+    Log.error("Required file not found: %s" % release_file)
     return False
 
   return True
