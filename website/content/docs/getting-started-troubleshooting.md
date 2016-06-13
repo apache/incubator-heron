@@ -75,7 +75,7 @@ To check, run the following command in a shell.
     
     If the output looks like a normal IP address, such as `127.0.0.1`, 
     you don't have this issue.
-    If the output is similar to the above, you need to modify `/etc/hosts`
+    If the output is similar to the above, you need to modify the `/etc/hosts`
     file to correctly resolve localhost, as shown below. 
     
     1. Run the following command, whose output is your computer's hostname.
