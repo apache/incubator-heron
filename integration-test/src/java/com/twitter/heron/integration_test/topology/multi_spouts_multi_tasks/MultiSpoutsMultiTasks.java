@@ -51,6 +51,9 @@ public final class MultiSpoutsMultiTasks {
     // Conf
     Config conf = new BasicConfig();
 
+    // Limit the ram for per container
+    conf.setContainerRamRequested(5L * 1024 * 1024 * 1024);
+
     // Submit it!
     HeronSubmitter.submitTopology(topologyName, conf, builder.createTopology());
   }
