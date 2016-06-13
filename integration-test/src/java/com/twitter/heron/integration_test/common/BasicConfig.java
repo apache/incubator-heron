@@ -27,13 +27,13 @@ public class BasicConfig extends Config {
     this(true, DEFAULT_NUM_STMGRS, DEFAULT_CONTAINER_RAM);
   }
 
-  public BasicConfig(boolean isDebug, int numStmgrs, long container_ram) {
+  public BasicConfig(boolean isDebug, int numStmgrs, long containerRam) {
     super();
     super.setDebug(isDebug);
     super.setNumStmgrs(numStmgrs);
     super.setEnableAcking(true);
 
     // Limit the ram for per container
-    super.setContainerRamRequested(container_ram);
+    super.setContainerRamRequested(containerRam);
   }
 }
