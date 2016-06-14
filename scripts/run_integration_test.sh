@@ -5,12 +5,14 @@
 # ($ bazel build --config=PLATFORM integration-test/src/...)
 #
 
-declare -a required_files=("./bazel-bin/integration-test/src/python/http_server/http-server" \
-                           "./bazel-bin/integration-test/src/python/test_runner/test-runner.pex");
+HTTP_SERVER="./bazel-bin/integration-test/src/python/http_server/http-server"
+TEST_RUNNER="./bazel-bin/integration-test/src/python/test_runner/test-runner.pex"
+
+declare -a required_files=(${HTTP_SERVER} ${TEST_RUNNER});
 
 for file in ${required_files[@]}; do
   if [ ! -f ${file} ]; then
-    echo "Required files do not exist." >&2
+    echo "Required file ${file} does not exist." >&2
     echo "Make sure that the integration tests are built prior to" >&2
     echo "running this script using the following command." >&2
     echo "  bazel build --config={PLATFORM} integration-test/src/..." >&2
@@ -18,11 +20,11 @@ for file in ${required_files[@]}; do
   fi
 done
 
-./bazel-bin/integration-test/src/python/http_server/http-server 8080 &
+${HTTP_SERVER} 8080 &
 http_server_id=$!
 trap "kill -9 $http_server_id" SIGINT SIGTERM EXIT
 
-./bazel-bin/integration-test/src/python/test_runner/test-runner.pex \
+${TEST_RUNNER} \
   -hc heron -tj bazel-genfiles/integration-test/src/java/integration-tests.jar \
   -rh localhost -rp 8080\
   -tp integration-test/src/java/com/twitter/heron/integration_test/topology/ \
