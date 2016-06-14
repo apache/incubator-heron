@@ -88,6 +88,20 @@ def fetchResultFromServer(serverAddress, serverPort, topologyName):
       time.sleep(RETRY_INTERVAL)
 
   logging.error("Failed to fetch results after %d attempts" % RETRY_ATTEMPTS)
+  # For testing
+  # Cat the results
+  print "heron-executor.stdout"
+  cat_command = "cat /home/travis/.herondata/topologies/local/heron-staging/%s/heron-executor.stdout" %(topologyName)
+  os.system(cat_command)
+
+  print "heron-executor.stderr"
+  cat_command = "cat /home/travis/.herondata/topologies/local/heron-staging/%s/heron-executor.stderr" %(topologyName)
+  os.system(cat_command)
+
+  print "scheduler log"
+  cat_command = "cat /home/travis/.herondata/topologies/local/heron-staging/%s/log-files/heron-%s-scheduler.log.0" %(topologyName, topologyName)
+  os.system(cat_command)
+
   raise RuntimeError("exceeded fetching result retry attempts")
 
 def getHTTPResponse(serverAddress, serverPort, topologyName):
