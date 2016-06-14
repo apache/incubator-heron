@@ -49,7 +49,7 @@ $ bazel query 'kind("pex_test rule", ...)'
 
 ### Running Integration Tests
 
-In order to run the integration tests on your Mac OS X, you need to first
+In order to run the integration tests on a Mac OS X, you need to first
 install the Heron client as shown below:
 
 ```bash
@@ -62,10 +62,10 @@ Integration tests are divided into two categories:
 
     These integration tests are designed for testing the functionality of 
     Heron, such as topologies and groupings.
-    To run the functional integration tests on your Mac OS X, do the following:
+    To run the functional integration tests on a Mac OS X, do the following:
 
     ```bash
-    bazel build --config=dawrin integration-test/src/...
+    bazel build --config=darwin integration-test/src/...
 
     ./scripts/run_integration_test.sh
     ```
@@ -74,10 +74,10 @@ Integration tests are divided into two categories:
 
     These integration tests are designed for testing recovery from failure/restart
     in certain processes, such as Topology Master and Metrics Manager.
-    To run the failure integration tests on your Mac OS X, do the following:
+    To run the failure integration tests on a Mac OS X, do the following:
 
     ```bash
-    bazel build --config=dawrin integration-test/src/...
+    bazel build --config=darwin integration-test/src/...
 
     python integration-test/src/python/local_test_runner/main.py
     ```

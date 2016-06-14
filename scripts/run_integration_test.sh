@@ -5,6 +5,19 @@
 # ($ bazel build --config=PLATFORM integration-test/src/...)
 #
 
+declare -a required_files=("./bazel-bin/integration-test/src/python/http_server/http-server" \
+                           "./bazel-bin/integration-test/src/python/test_runner/test-runner.pex");
+
+for file in ${required_files[@]}; do
+  if [ ! -f ${file} ]; then
+    echo "Required files do not exist." >&2
+    echo "Make sure that the integration tests are built prior to" >&2
+    echo "running this script using the following command." >&2
+    echo "  bazel build --config={PLATFORM} integration-test/src/..." >&2
+    exit 1;
+  fi
+done
+
 ./bazel-bin/integration-test/src/python/http_server/http-server 8080 &
 http_server_id=$!
 trap "kill -9 $http_server_id" SIGINT SIGTERM EXIT
