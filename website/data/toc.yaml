@@ -103,6 +103,8 @@ sections:
         url: /docs/contributors/testing
       - name: Code Organization
         url: /docs/contributors/codebase
+      - name: Deploying to Maven Central
+        url: /docs/developers/release-process-maven
   - name: Extending Heron
     sublinks:
       - name: Custom Scheduler
