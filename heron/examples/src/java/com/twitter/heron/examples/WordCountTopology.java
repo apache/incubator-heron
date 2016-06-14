@@ -60,19 +60,27 @@ public final class WordCountTopology {
     public RandomString(int length) {
       // Construct the symbol set
       StringBuilder tmp = new StringBuilder();
-      for (char ch = '0'; ch <= '9'; ++ch)
+      for (char ch = '0'; ch <= '9'; ++ch) {
         tmp.append(ch);
-      for (char ch = 'a'; ch <= 'z'; ++ch)
+      }
+
+      for (char ch = 'a'; ch <= 'z'; ++ch) {
         tmp.append(ch);
+      }
+
       symbols = tmp.toString().toCharArray();
-      if (length < 1)
+      if (length < 1) {
         throw new IllegalArgumentException("length < 1: " + length);
+      }
+
       buf = new char[length];
     }
 
     public String nextString() {
-      for (int idx = 0; idx < buf.length; ++idx)
+      for (int idx = 0; idx < buf.length; ++idx) {
         buf[idx] = symbols[random.nextInt(symbols.length)];
+      }
+
       return new String(buf);
     }
   }
@@ -86,9 +94,9 @@ public final class WordCountTopology {
     private static final int ARRAY_LENGTH = 128 * 1024;
     private static final int WORD_LENGTH = 20;
 
-    private static final String[] words = new String[ARRAY_LENGTH];
+    private final String[] words = new String[ARRAY_LENGTH];
 
-    private static final Random rnd = new Random(31);
+    private final Random rnd = new Random(31);
 
     private SpoutOutputCollector collector;
 
