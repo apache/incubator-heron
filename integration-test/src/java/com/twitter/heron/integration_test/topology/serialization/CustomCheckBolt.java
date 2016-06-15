@@ -13,41 +13,32 @@
 // limitations under the License.
 package com.twitter.heron.integration_test.topology.serialization;
 
-import java.util.Map;
-
-import com.twitter.heron.api.spout.BaseRichSpout;
-import com.twitter.heron.api.spout.SpoutOutputCollector;
+import com.twitter.heron.api.bolt.BaseBasicBolt;
+import com.twitter.heron.api.bolt.BasicOutputCollector;
 import com.twitter.heron.api.topology.OutputFieldsDeclarer;
-import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Fields;
-import com.twitter.heron.api.tuple.Values;
+import com.twitter.heron.api.tuple.Tuple;
 
 /**
- * A spout that emits two different custom objects continuously in order,
- * one object every "nextTuple()" called
- * Note that CustomObject uses Java serialization
+ * A bolt that checks deserialization works fine
  */
-public class CustomSpout extends BaseRichSpout {
-  private static final long serialVersionUID = -5906196959214294058L;
-  private SpoutOutputCollector collector;
-  private int emitted = 0;
+public class CustomCheckBolt extends BaseBasicBolt {
+  private static final long serialVersionUID = 3404960992657778759L;
+  private int nItems;
   private CustomObject[] inputObjects;
 
-  public CustomSpout(CustomObject[] inputObjects) {
+  public CustomCheckBolt(CustomObject[] inputObjects) {
+    this.nItems = 0;
     this.inputObjects = inputObjects;
   }
 
   @Override
-  public void open(Map<String, Object> conf,
-                   TopologyContext context,
-                   SpoutOutputCollector outputCollector) {
-    this.collector = outputCollector;
-  }
-
-  @Override
-  public void nextTuple() {
-    CustomObject obj = inputObjects[(emitted++) % inputObjects.length];
-    collector.emit(new Values(obj));
+  public void execute(Tuple input, BasicOutputCollector collector) {
+    System.out.println("Got: " + input.getValueByField("custom").toString());
+    if (input.getValueByField("custom")
+        .equals(inputObjects[(nItems++) % inputObjects.length])) {
+      collector.emit(input.getValues());
+    }
   }
 
   @Override
