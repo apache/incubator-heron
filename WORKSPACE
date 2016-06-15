@@ -4,6 +4,7 @@ curator_version = "2.9.0"
 httpcomponents_version = "4.3"
 jackson_version = "2.6.3"
 powermock_version = "1.6.2"
+reef_version = "0.14.0"
 slf4j_version = "1.7.7"
 
 maven_server(
@@ -62,6 +63,11 @@ maven_jar(
 )
 
 maven_jar(
+  name = "commons-lang3",
+  artifact = "org.apache.commons:commons-lang3:3.3.2",
+)
+
+maven_jar(
   name = "commons-lang",
   artifact = "commons-lang:commons-lang:2.6",
 )
@@ -117,8 +123,23 @@ maven_jar(
 )
 
 maven_jar(
+  name = "jackson-core-asl",
+  artifact = "org.codehaus.jackson:jackson-core-asl:1.9.13",
+)
+
+maven_jar(
+  name = "jackson-mapper-asl",
+  artifact = "org.codehaus.jackson:jackson-mapper-asl:1.9.13",
+)
+
+maven_jar(
   name = "javassist",
   artifact = "org.javassist:javassist:3.18.1-GA",
+)
+
+maven_jar(
+  name = "javax.inject",
+  artifact = "javax.inject:javax.inject:1",
 )
 
 maven_jar(
@@ -189,6 +210,46 @@ maven_jar(
 maven_jar(
   name = "protobuf-java",
   artifact = "com.google.protobuf:protobuf-java:2.5.0",
+)
+
+maven_jar(
+  name = "reef-common",
+  artifact = "org.apache.reef:reef-common:" + reef_version
+)
+
+maven_jar(
+  name = "reef-runtime-yarn",
+  artifact = "org.apache.reef:reef-runtime-yarn:" + reef_version
+)
+
+maven_jar(
+  name = "reef-utils",
+  artifact = "org.apache.reef:reef-utils:" + reef_version
+)
+
+maven_jar(
+  name = "tang",
+  artifact = "org.apache.reef:tang:" + reef_version
+)
+
+maven_jar(
+  name = "wake",
+  artifact = "org.apache.reef:wake:" + reef_version
+)
+
+maven_jar(
+  name = "reef-runtime-local",
+  artifact = "org.apache.reef:reef-runtime-local:" + reef_version
+)
+
+maven_jar(
+  name = "avro",
+  artifact = "org.apache.avro:avro:1.7.4"
+)
+
+maven_jar(
+  name = "netty-all",
+  artifact = "io.netty:netty-all:4.0.21.Final"
 )
 
 maven_jar(

@@ -28,6 +28,11 @@ filegroup(
 )
 
 filegroup(
+    name = "conf-reef-yaml",
+    srcs = glob(["conf/reef/*"]),
+)
+
+filegroup(
     name = "conf-slurm-yaml",
     srcs = glob(["conf/slurm/*"]),
 )
