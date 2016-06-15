@@ -135,6 +135,10 @@
   </url>
   
   <url>
+    <loc>/heron/docs/getting-started-troubleshooting/</loc>
+  </url>
+  
+  <url>
     <loc>/heron/docs/operators/deployment/uploaders/hdfs/</loc>
   </url>
   
