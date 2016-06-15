@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.scheduler.reef;
+package com.twitter.heron.scheduler.yarn;
 
 import java.util.Map;
 

@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.scheduler.reef;
+package com.twitter.heron.scheduler.yarn;
 
 import org.apache.reef.tang.annotations.Name;
 import org.apache.reef.tang.annotations.NamedParameter;
 
 public class HeronConfigurationOptions {
-  @NamedParameter(doc = "Heron-REEF cluster configuration param", default_value = "reef")
+  @NamedParameter(doc = "Heron-REEF cluster configuration param", default_value = "yarn")
   public class Cluster implements Name<String> {
   }
 

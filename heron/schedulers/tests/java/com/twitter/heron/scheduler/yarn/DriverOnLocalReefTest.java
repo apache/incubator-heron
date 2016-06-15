@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.scheduler.reef;
+package com.twitter.heron.scheduler.yarn;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -38,9 +38,9 @@ import org.apache.reef.wake.EventHandler;
 import org.apache.reef.wake.time.event.StartTime;
 import org.junit.Test;
 
-import com.twitter.heron.scheduler.reef.DriverOnLocalReefTest.TestDriver.Activated;
-import com.twitter.heron.scheduler.reef.DriverOnLocalReefTest.TestDriver.Allocated;
-import com.twitter.heron.scheduler.reef.DriverOnLocalReefTest.TestDriver.DriverStarter;
+import com.twitter.heron.scheduler.yarn.DriverOnLocalReefTest.TestDriver.Activated;
+import com.twitter.heron.scheduler.yarn.DriverOnLocalReefTest.TestDriver.Allocated;
+import com.twitter.heron.scheduler.yarn.DriverOnLocalReefTest.TestDriver.DriverStarter;
 import com.twitter.heron.spi.common.PackingPlan;
 
 public class DriverOnLocalReefTest {

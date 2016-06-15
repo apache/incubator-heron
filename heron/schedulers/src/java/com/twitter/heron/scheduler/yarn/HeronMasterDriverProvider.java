@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.scheduler.reef;
+package com.twitter.heron.scheduler.yarn;
 
 import com.twitter.heron.scheduler.SchedulerMain;
 
 /**
- * {@link HeronMasterDriverProvider} is used by {@link ReefScheduler} to discover and use
+ * {@link HeronMasterDriverProvider} is used by {@link YarnScheduler} to discover and use
  * instance of {@link HeronMasterDriver} injected by REEF framework
  */
 public final class HeronMasterDriverProvider {

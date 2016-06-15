@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.scheduler.reef;
+package com.twitter.heron.scheduler.yarn;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,12 +26,12 @@ import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
 
 /**
- * {@link ReefScheduler} in invoked by Heron Scheduler to perform topology actions on REEF
+ * {@link YarnScheduler} in invoked by Heron Scheduler to perform topology actions on REEF
  * cluster. This instance will delegate all topology management functions to
  * {@link HeronMasterDriver}.
  */
-public class ReefScheduler implements IScheduler {
-  private static final Logger LOG = Logger.getLogger(ReefScheduler.class.getName());
+public class YarnScheduler implements IScheduler {
+  private static final Logger LOG = Logger.getLogger(YarnScheduler.class.getName());
 
   @Override
   public void initialize(Config config, Config runtime) {

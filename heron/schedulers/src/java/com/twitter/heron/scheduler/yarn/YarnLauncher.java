@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.scheduler.reef;
+package com.twitter.heron.scheduler.yarn;
 
 import java.io.File;
 import java.net.URI;
@@ -31,25 +31,25 @@ import org.apache.reef.tang.Tang;
 import org.apache.reef.tang.annotations.Unit;
 import org.apache.reef.tang.exceptions.InjectionException;
 
-import com.twitter.heron.scheduler.reef.HeronMasterDriver.HeronContainerAllocationHandler;
-import com.twitter.heron.scheduler.reef.HeronMasterDriver.HeronExecutorContainerErrorHandler;
-import com.twitter.heron.scheduler.reef.HeronMasterDriver.HeronExecutorLauncher;
-import com.twitter.heron.scheduler.reef.HeronMasterDriver.HeronRunningTaskHandler;
-import com.twitter.heron.scheduler.reef.HeronMasterDriver.HeronSchedulerLauncher;
+import com.twitter.heron.scheduler.yarn.HeronMasterDriver.HeronContainerAllocationHandler;
+import com.twitter.heron.scheduler.yarn.HeronMasterDriver.HeronExecutorContainerErrorHandler;
+import com.twitter.heron.scheduler.yarn.HeronMasterDriver.HeronExecutorLauncher;
+import com.twitter.heron.scheduler.yarn.HeronMasterDriver.HeronRunningTaskHandler;
+import com.twitter.heron.scheduler.yarn.HeronMasterDriver.HeronSchedulerLauncher;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
 
 /**
- * Launches Heron Scheduler on a REEF on YARN cluster. The launcher will start a master (driver/AM)
+ * Launches Heron Scheduler on a YARN using REEF. The launcher will start a master (driver/AM)
  * container for each topology first. The master container will start worker containers
  * subsequently. This launcher is responsible for copying scheduler dependencies, topology package
  * and heron-core libraries in file cache.
  */
 @Unit
-public class ReefLauncher implements ILauncher {
-  private static final Logger LOG = Logger.getLogger(ReefLauncher.class.getName());
+public class YarnLauncher implements ILauncher {
+  private static final Logger LOG = Logger.getLogger(YarnLauncher.class.getName());
   private String topologyName;
   private String topologyPackageLocation;
   private String topologyJar;

@@ -25,10 +25,10 @@ scheduler_deps_files = \
     spi_deps_files + \
     api_deps_files
 
-reef_deps_files = \
+yarn_deps_files = \
     scheduler_deps_files + [
         "//heron/scheduler-core/src/java:scheduler-java",
-        "//3rdparty/java:reef",
+        "//3rdparty/java:yarn",
     ]
 
 java_library(
@@ -120,22 +120,22 @@ genrule(
 )
 
 java_library(
-    name='reef-scheduler-java',
-    srcs = glob(["**/reef/*.java"]),
-    deps = reef_deps_files,
-    resources = glob(["**/reef/*.yaml"]),
+    name='yarn-scheduler-java',
+    srcs = glob(["**/yarn/*.java"]),
+    deps = yarn_deps_files,
+    resources = glob(["**/yarn/*.yaml"]),
 )
 
 java_binary(
-    name='reef-scheduler-unshaded',
-    srcs = glob(["**/reef/*.java"]),
-    deps = reef_deps_files,
-    resources = glob(["**/reef/*.yaml"]),
+    name='yarn-scheduler-unshaded',
+    srcs = glob(["**/yarn/*.java"]),
+    deps = yarn_deps_files,
+    resources = glob(["**/yarn/*.yaml"]),
 )
 
 genrule(
-    name = "heron-reef-scheduler",
-    srcs = [":reef-scheduler-unshaded_deploy.jar"],
-    outs = ["heron-reef-scheduler.jar"],
+    name = "heron-yarn-scheduler",
+    srcs = [":yarn-scheduler-unshaded_deploy.jar"],
+    outs = ["heron-yarn-scheduler.jar"],
     cmd  = "cp $< $@",
 )

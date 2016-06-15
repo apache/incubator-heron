@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.scheduler.reef;
+package com.twitter.heron.scheduler.yarn;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -44,7 +44,7 @@ public class HeronMasterDriverTest {
     mockRequestor = Mockito.mock(EvaluatorRequestor.class);
     driver = new HeronMasterDriver(mockRequestor,
         null,
-        "reef",
+        "yarn",
         "heron",
         "testTopology",
         "env",

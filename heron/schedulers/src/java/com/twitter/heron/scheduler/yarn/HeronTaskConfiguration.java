@@ -12,22 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.scheduler.reef;
+package com.twitter.heron.scheduler.yarn;
 
 import org.apache.reef.driver.task.TaskConfiguration;
 import org.apache.reef.tang.formats.ConfigurationModule;
 import org.apache.reef.tang.formats.ConfigurationModuleBuilder;
 import org.apache.reef.tang.formats.RequiredParameter;
 
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.Cluster;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.Environ;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.HeronCorePackageName;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.HeronExecutorId;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.PackedPlan;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.Role;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.TopologyJar;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.TopologyName;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.TopologyPackageName;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Cluster;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Environ;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.HeronCorePackageName;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.HeronExecutorId;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.PackedPlan;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Role;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyJar;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyName;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyPackageName;
 
 public class HeronTaskConfiguration extends ConfigurationModuleBuilder {
   public static final RequiredParameter<String> TOPOLOGY_NAME = new RequiredParameter<>();

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.scheduler.reef;
+package com.twitter.heron.scheduler.yarn;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -32,15 +32,15 @@ import org.apache.reef.wake.EventHandler;
 
 import com.twitter.heron.api.generated.TopologyAPI.Topology;
 import com.twitter.heron.common.basics.SysUtils;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.Cluster;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.Environ;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.HeronCorePackageName;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.HeronExecutorId;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.PackedPlan;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.Role;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.TopologyJar;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.TopologyName;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.TopologyPackageName;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Cluster;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Environ;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.HeronCorePackageName;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.HeronExecutorId;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.PackedPlan;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Role;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyJar;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyName;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyPackageName;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.common.ShellUtils;

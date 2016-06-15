@@ -199,10 +199,10 @@ pkg_tar(
 )
 
 pkg_tar(
-    name = "heron-client-conf-reef",
-    package_dir = "conf/reef",
+    name = "heron-client-conf-yarn",
+    package_dir = "conf/yarn",
     files = [
-        "//heron/config/src/yaml:conf-reef-yaml",
+        "//heron/config/src/yaml:conf-yarn-yaml",
     ],
 )
 
@@ -228,7 +228,7 @@ pkg_tar(
         ":heron-client-conf-local",
         ":heron-client-conf-aurora",
         ":heron-client-conf-slurm",
-        ":heron-client-conf-reef",
+        ":heron-client-conf-yarn",
         ":heron-client-dist",
         ":heron-client-examples",
         ":heron-client-lib-3rdparty",

@@ -85,7 +85,7 @@ java_library(
 )
 
 java_library(
-    name = "reef",
+    name = "yarn",
     srcs = [ "Empty.java" ],
     exports = [ 
         "@reef-common//jar",

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.scheduler.reef;
+package com.twitter.heron.scheduler.yarn;
 
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -22,14 +22,14 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
 
-public class ReefSchedulerTest {
+public class YarnSchedulerTest {
   @Test
   @PrepareForTest(HeronMasterDriverProvider.class)
   public void delegatesToDriverOnSchedule() {
     HeronMasterDriver mockHeronDriver = Mockito.mock(HeronMasterDriver.class);
     HeronMasterDriverProvider.setInstance(mockHeronDriver);
 
-    IScheduler scheduler = new ReefScheduler();
+    IScheduler scheduler = new YarnScheduler();
     PackingPlan mockPacking = Mockito.mock(PackingPlan.class);
     scheduler.onSchedule(mockPacking);
 
@@ -44,7 +44,7 @@ public class ReefSchedulerTest {
     HeronMasterDriver mockHeronDriver = Mockito.mock(HeronMasterDriver.class);
     HeronMasterDriverProvider.setInstance(mockHeronDriver);
 
-    IScheduler scheduler = new ReefScheduler();
+    IScheduler scheduler = new YarnScheduler();
     scheduler.onKill(null);
 
     Mockito.verify(mockHeronDriver).killTopology();

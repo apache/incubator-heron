@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.scheduler.reef;
+package com.twitter.heron.scheduler.yarn;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
@@ -28,7 +28,7 @@ import org.apache.reef.tang.annotations.Unit;
 import org.apache.reef.wake.EventHandler;
 
 /**
- * Contains client-side listeners for REEF scheduler events.
+ * Contains client-side listeners for YARN scheduler events emitted by REEF.
  */
 @Unit
 public class ReefClientSideHandlers {

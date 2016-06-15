@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.scheduler.reef;
+package com.twitter.heron.scheduler.yarn;
 
 import java.io.IOException;
 import java.util.Map;
@@ -44,22 +44,22 @@ import org.apache.reef.wake.EventHandler;
 import org.apache.reef.wake.time.event.StartTime;
 
 import com.twitter.heron.scheduler.SchedulerMain;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.Cluster;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.Environ;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.HeronCorePackageName;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.HttpPort;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.Role;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.TopologyJar;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.TopologyName;
-import com.twitter.heron.scheduler.reef.HeronConfigurationOptions.TopologyPackageName;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Cluster;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Environ;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.HeronCorePackageName;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.HttpPort;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Role;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyJar;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyName;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyPackageName;
 import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.common.PackingPlan.ContainerPlan;
 import com.twitter.heron.spi.common.PackingPlan.Resource;
 
 /**
- * {@link HeronMasterDriver} serves Heron Scheduler by managing containers / processes for Heron
- * TMaster and workers using REEF framework. This includes making container request for topology,
- * providing bits to start Heron components and killing containers.
+ * {@link HeronMasterDriver} serves Heron's YARN Scheduler by managing containers / processes for
+ * Heron TMaster and workers using REEF framework. This includes making container request for
+ * topology, providing package needed to start Heron components and killing containers.
  */
 @Unit
 public class HeronMasterDriver {
@@ -180,7 +180,7 @@ public class HeronMasterDriver {
   }
 
   /**
-   * REEF scheduler will retain all REEF containers. Currently running heron-executors/REEF-tasks
+   * REEF will retain all YARN containers. Currently running heron-executors/REEF-tasks
    * will be killed and new REEF-tasks representing previously running heron-executor will be
    * started.
    */

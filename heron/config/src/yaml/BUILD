@@ -33,8 +33,8 @@ filegroup(
 )
 
 filegroup(
-    name = "conf-reef-yaml",
-    srcs = glob(["conf/reef/*"]),
+    name = "conf-yarn-yaml",
+    srcs = glob(["conf/yarn/*"]),
 )
 
 filegroup(
