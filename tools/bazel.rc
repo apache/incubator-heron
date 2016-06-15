@@ -7,7 +7,6 @@ build:centos --spawn_strategy=standalone
 build:centos --python2_path /usr/bin/python2.7
 build:centos --linkopt -lm
 build:centos --linkopt -lpthread
-build:centos --linkopt -lunwind
 build:centos --linkopt -lrt
 build:centos --experimental_action_listener=tools/cpp:compile_cpp
 build:centos --experimental_action_listener=tools/java:compile_java
@@ -32,7 +31,6 @@ build:ubuntu --spawn_strategy=standalone
 build:ubuntu --python2_path /usr/bin/python2.7
 build:ubuntu --linkopt -lm
 build:ubuntu --linkopt -lpthread
-build:ubuntu --linkopt -lunwind
 build:ubuntu --linkopt -lrt
 build:ubuntu --experimental_action_listener=tools/java:compile_java
 build:ubuntu --experimental_action_listener=tools/cpp:compile_cpp

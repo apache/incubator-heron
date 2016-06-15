@@ -48,6 +48,7 @@ cc_library(
         "//config:config-cxx",
         "//3rdparty/glog:glog-cxx",
         "//3rdparty/gperftools:tcmalloc-cxx",
+        "//3rdparty/libunwind:libunwind-cxx",
         "//3rdparty/jansson:jansson-cxx",
         "//3rdparty/kashmir:kashmir-cxx",
         "//3rdparty/protobuf:protobuf-cxx",

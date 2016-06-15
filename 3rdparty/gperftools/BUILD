@@ -12,6 +12,7 @@ genrule(
     name = "gperftools-srcs",
     srcs = [
         package_file, 
+        "//3rdparty/libunwind:libunwind-files",
     ],
     outs = [
         "bin/pprof",
@@ -44,6 +45,7 @@ genrule(
         "lib/libtcmalloc_minimal_debug.a",
     ],
     cmd = "\n".join([
+        "export UNWIND_DIR=$$(pwd)/$(GENDIR)/3rdparty/libunwind",
         "export INSTALL_DIR=$$(pwd)/$(@D)",
         "export TMP_DIR=$$(mktemp -d -t gperftools.XXXXX)",
         "mkdir -p $$TMP_DIR",
@@ -51,8 +53,8 @@ genrule(
         "cd $$TMP_DIR",
         "tar xfz " + package_file,
         "cd " + package_dir,
-        "./configure --prefix=$$INSTALL_DIR --enable-shared=no",
-        "make install",
+        './configure --prefix=$$INSTALL_DIR --enable-shared=no LIBS="-Wl,--rpath -Wl,$$UNWIND_DIR/lib -L$$UNWIND_DIR/lib" CPPFLAGS=-I$$UNWIND_DIR/include LDFLAGS=-L$$UNWIND_DIR/lib',
+        'make install LIBS="-Wl,--rpath -Wl,$$UNWIND_DIR/lib -L$$UNWIND_DIR/lib" CPPFLAGS=-I$$UNWIND_DIR/include LDFLAGS=-L$$UNWIND_DIR/lib',
         "rm -rf $$TMP_DIR",
     ]),
 )
