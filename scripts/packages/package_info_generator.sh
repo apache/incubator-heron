@@ -58,7 +58,7 @@ done
 
 echo "heron.build.version : '${release_name}'"
 echo "heron.build.time : ${build_time}"
-echo "heron.build.timestamp : '${build_timestamp}'"
+echo "heron.build.timestamp : ${build_timestamp}"
 echo "heron.build.host : ${build_host}"
 echo "heron.build.user : ${build_user}"
 echo "heron.build.git.revision : ${git_hash}"
