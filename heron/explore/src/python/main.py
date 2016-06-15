@@ -31,7 +31,7 @@ from tornado.options import define
 LOG = logging.getLogger(__name__)
 
 # default parameter - url to connect to heron tracker
-DEFAULT_TRACKER_URL = "127.0.0.1:8888"
+DEFAULT_TRACKER_URL = "http://localhost:8888"
 
 class _HelpAction(argparse._HelpAction):
   def __call__(self, parser, namespace, values, option_string=None):
@@ -139,7 +139,6 @@ def main():
 
   # insert the boolean values for some of the options
   sys.argv = parse.insert_bool_values(sys.argv)
-
 
   # parse the args
   args, unknown_args = parser.parse_known_args()

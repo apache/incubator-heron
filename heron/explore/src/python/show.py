@@ -151,7 +151,6 @@ def run_env(command, parser, cl_args, unknown_args):
 def run(command, parser, cl_args, unknown_args):
   parser = utils.get_subparser(parser, cl_args['subcommand'])
   subcommand = cl_args['subsubcommand']
-  print(cl_args)
   if subcommand == 'help':
     return run_help(command, parser, cl_args, unknown_args)
   if subcommand == 'cluster':
