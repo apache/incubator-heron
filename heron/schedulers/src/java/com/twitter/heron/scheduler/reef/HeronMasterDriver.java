@@ -89,7 +89,7 @@ public class HeronMasterDriver {
   // TODO: event thread.
   // Currently yarn does not support mapping container requests to allocation (YARN-4879). As a
   // result it is not possible to concurrently start containers of different sizes. This Executor
-  // and Queue will ensures containers are started serially.
+  // and Queue will ensure containers are started serially.
   private ExecutorService executor = Executors.newSingleThreadExecutor();
   private BlockingQueue<AllocatedEvaluator> allocatedContainerQ = new LinkedBlockingDeque<>();
 
@@ -160,10 +160,11 @@ public class HeronMasterDriver {
       try {
         launchContainerForExecutor(entry.getKey(), getCpuForExecutor(reqResource), mem);
       } catch (InterruptedException e) {
-        LOG.log(Level.WARNING, "Error while waiting for container allocation for workers; "
-            + "Continue container request for remaining workers", e);
-        // TODO: Just log a WARNING without any actions for now. Need to resubmit failed requests
-        // TODO: and track number of retries
+        // Fail deployment of topology if there is a error starting any worker
+        LOG.log(Level.SEVERE, "Container allocation for id:{0} failed. Attempting to close "
+            + "currently allocated resources for {1}", new Object[]{entry.getKey(), topologyName});
+        killTopology();
+        throw new RuntimeException("Failed to allocate container for workers", e);
       }
     }
   }
@@ -356,11 +357,11 @@ public class HeronMasterDriver {
         allocatedContainerQ.put(evaluator);
         LOG.log(Level.INFO, "{0} containers waiting for activation", allocatedContainerQ.size());
       } catch (InterruptedException e) {
-        LOG.log(Level.WARNING, "Unexpected error while waiting for consumer to use allocated"
-            + " container. Evaluator will be destroyed " + evaluator.getId(), e);
-        evaluator.close();
-        // TODO: Just log a WARNING without any actions for now. This should not happen as only one
-        // TODO: container request is created at a time.
+        // Fail deployment of topology if there is a error starting any worker
+        LOG.log(Level.SEVERE, "Container allocation for id:{0} failed. Trying to close currently"
+            + " allocated resources for {1}", new Object[]{evaluator.getId(), topologyName});
+        killTopology();
+        throw new RuntimeException("Failed to allocate container for workers", e);
       }
     }
   }
