@@ -17,9 +17,10 @@ pygmentscodefences: true
 
 # Site-level parameters available through .Site.Params.{key}
 params:
-  author: Luc Perkins
+  author: Twitter, Inc.
+  description: A realtime, distributed, fault-tolerant stream processing engine from Twitter
   versions:
-    heron: 0.13.7
+    heron: 0.14.0
     bazel: 0.1.2
   assets:
     favicon:
@@ -44,3 +45,14 @@ params:
     twitter: https://twitter.com/heronstreaming
     slack: https://heronusers.slack.com
     googleGroup: https://groups.google.com/forum/#!forum/heron-users
+  seo:
+    opengraph:
+      - property: locale
+        content: en_US
+      - property: type
+        content: article
+    twittercards:
+      - name: card
+        content: summary
+      - name: site
+        content: "@heronstreaming"

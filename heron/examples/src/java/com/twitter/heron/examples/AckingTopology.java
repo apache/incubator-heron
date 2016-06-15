@@ -132,7 +132,7 @@ public final class AckingTopology {
       ++nItems;
       if (nItems % 10000 == 0) {
         long latency = System.currentTimeMillis() - startTime;
-        System.out.println("Done " + nItems + " in " + latency);
+        System.out.println("Bolt processed " + nItems + " tuples in " + latency + " ms");
         GlobalMetrics.incr("selected_items");
         // Here we explicitly forget to do the ack or fail
         // It would trigger fail on this tuple on spout end after MessageTimeout Seconds
