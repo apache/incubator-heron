@@ -8,6 +8,8 @@ TEST_RUNNER="./bazel-bin/integration-test/src/python/test_runner/test-runner.pex
 INTEGRATION_TESTS="./bazel-genfiles/integration-test/src/java/integration-tests.jar"
 CORE_PKG="file://`pwd`/bazel-bin/scripts/packages/heron-core.tar.gz"
 
+set -e
+
 function usage() {
   echo "Usage: $0 [platform]" >&2
   echo "Currently supported platforms are:" >&2
@@ -24,9 +26,7 @@ else
 fi
 
 # building tar packages
-bazel build --config=${PLATFORM} heron/...
-bazel build --config=${PLATFORM} scripts/packages:tarpkgs
-bazel build --config=${PLATFORM} integration-test/src/...
+bazel build --config=${PLATFORM} {heron/...,scripts/packages:tarpkgs,integration-test/src/...}
 
 # run the simple http server
 ${HTTP_SERVER} 8080 &
