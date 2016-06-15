@@ -17,7 +17,6 @@ RUN yum -y install \
       gcc-c++ \
       git \
       kernel-devel \
-      libunwind-devel \
       libtool \
       make \
       patch \
