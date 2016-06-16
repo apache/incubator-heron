@@ -119,6 +119,10 @@ public class LaunchRunner implements Callable<Boolean> {
     // get the packed plan
     packing.initialize(config, runtime);
     PackingPlan packedPlan = packing.pack();
+    if (packedPlan == null) {
+      LOG.severe("Failed to pack a valid PackingPlan. Check the config.");
+      return false;
+    }
 
     // Add the instanceDistribution to the runtime
     Config ytruntime = Config.newBuilder()
