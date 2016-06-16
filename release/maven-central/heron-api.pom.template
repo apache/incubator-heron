@@ -5,7 +5,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.twitter.heron</groupId>
   <artifactId>heron-api</artifactId>
-  <version>0.14.0</version>  
+  <version>VERSION</version>  
   <packaging>jar</packaging>
   <name>heron-api</name>
   <description>Heron API</description>

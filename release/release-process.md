@@ -1,8 +1,22 @@
 ---
-title: Publish Release to Maven Central
+title: Release Process
 ---
+<-- TODO -->
+# How to Update Version
 
-# Account Setup
+<-- TODO -->
+# How to Tag
+
+<-- TODO -->
+# Test Process
+
+<-- TODO -->
+# Build Process
+
+
+# Publish to Maven Central
+
+## Account Setup
 Following http://central.sonatype.org/ 
 
 1. Request access to publish to com.twitter by creating account and requesting access in https://issues.sonatype.org
@@ -17,6 +31,7 @@ Follow [Manual Staging Bundle Creation and Deployment](http://central.sonatype.o
 Two artifacts are required for each version: ```heron-api``` and ```heron-storm```
 Example POM files required located in ```heron/release/maven-central/```
 
+<-- TODO refer to release "build process" instructions, not download  -->
 ### Step 1 - Download and install ```heron-api-install-{VERSION}-{DIST}.sh``` from https://github.com/twitter/heron/releases
 
 Example for version ```0.14.0``` installed using ```--user```
