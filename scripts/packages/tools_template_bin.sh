@@ -1,5 +1,3 @@
-#!/bin/bash -e
-
 # Copyright 2015 The Bazel Authors. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -139,7 +137,7 @@ mkdir -p ${bin} ${base}
 echo -n .
 
 unzip -q -o "${BASH_SOURCE[0]}" -d "${base}"
-tar xfz "${base}/heron-tools.tar.gz" -C "${base}"
+$UNTAR_CMD "${base}/heron-tools.tar.gz" -C "${base}"
 echo -n .
 chmod 0755 ${base}/bin/heron-tracker ${base}/bin/heron-ui
 echo -n .
