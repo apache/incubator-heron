@@ -20,6 +20,3 @@ function set_untar_command {
 }
 
 set_untar_command
-
-echo UNTAR_CMD: $UNTAR_CMD
-
