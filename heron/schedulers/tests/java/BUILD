@@ -1,7 +1,7 @@
 load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 common_deps_files = [
-    "@guava//jar",
+    "@com_google_guava_guava//jar",
     "//3rdparty/java:powermock",
     "//heron/api/src/java:api-java",
     "//heron/common/src/java:basics-java",
@@ -36,7 +36,7 @@ slurm_deps_files = [
 ]
 
 java_test(
-  name="aurora-scheduler_unittest",
+  name="AuroraSchedulerTest",
   srcs=glob(
     ["**/AuroraSchedulerTest.java"]
   ),
@@ -45,7 +45,7 @@ java_test(
 )
 
 java_test(
-  name="aurora-launcher_unittest",
+  name="AuroraLauncherTest",
   srcs=glob(
     ["**/AuroraLauncherTest.java"]
   ),
@@ -54,7 +54,7 @@ java_test(
 )
 
 java_test(
-  name="aurora-controller_unittest",
+  name="AuroraControllerTest",
   srcs=glob(
     ["**/AuroraControllerTest.java"]
   ),
@@ -63,7 +63,7 @@ java_test(
 )
 
 java_test(
-  name="local-launcher_unittest",
+  name="LocalLauncherTest",
   srcs=glob(
     ["**/LocalLauncherTest.java"]
   ),
@@ -72,7 +72,7 @@ java_test(
 )
 
 java_test(
-  name="local-scheduler_unittest",
+  name="LocalSchedulerTest",
   srcs=glob(
     ["**/LocalSchedulerTest.java"]
   ),
@@ -81,7 +81,7 @@ java_test(
 )
 
 java_test(
-  name="slurm-launcher_unittest",
+  name="SlurmLauncherTest",
   srcs=glob(
     ["**/SlurmLauncherTest.java"]
   ),
@@ -90,7 +90,7 @@ java_test(
 )
 
 java_test(
-  name="slurm-scheduler_unittest",
+  name="SlurmSchedulerTest",
   srcs=glob(
     ["**/SlurmSchedulerTest.java"]
   ),
@@ -99,7 +99,7 @@ java_test(
 )
 
 java_test(
-  name="slurm-controller_unittest",
+  name="SlurmControllerTest",
   srcs=glob(
     ["**/SlurmControllerTest.java"]
   ),
