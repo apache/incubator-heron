@@ -44,14 +44,19 @@ public class CustomObject implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
     CustomObject that = (CustomObject) o;
 
-    if (name != null ? !name.equals(that.name) : that.name != null) return false;
+    if (name != null ? !name.equals(that.name) : that.name != null) {
+      return false;
+    }
     return age != null ? age.equals(that.age) : that.age == null;
-
   }
 
   @Override

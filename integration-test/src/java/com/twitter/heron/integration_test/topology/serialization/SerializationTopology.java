@@ -14,13 +14,10 @@
 package com.twitter.heron.integration_test.topology.serialization;
 
 import java.net.URL;
-import java.util.HashMap;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.HeronSubmitter;
-import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.integration_test.common.BasicConfig;
-import com.twitter.heron.integration_test.common.bolt.IdentityBolt;
 import com.twitter.heron.integration_test.common.bolt.IncrementBolt;
 import com.twitter.heron.integration_test.core.TestTopologyBuilder;
 
@@ -40,7 +37,7 @@ public final class SerializationTopology {
     URL httpServerUrl = new URL(args[0]);
     String topologyName = args[1];
 
-    CustomObject inputObjects[] = createInputObjects();
+    CustomObject[] inputObjects = createInputObjects();
     TestTopologyBuilder builder = new TestTopologyBuilder(topologyName, httpServerUrl.toString());
 
     builder.setSpout("custom-spout", new CustomSpout(inputObjects), 1);
@@ -63,5 +60,4 @@ public final class SerializationTopology {
         new CustomObject("C", 30)
     };
   }
-
 }

@@ -34,7 +34,7 @@ public class CustomCheckBolt extends BaseBasicBolt {
 
   @Override
   public void execute(Tuple input, BasicOutputCollector collector) {
-    System.out.println("Got: " + input.getValueByField("custom").toString());
+    System.out.println("Received input tuple: " + input.getValueByField("custom").toString());
     if (input.getValueByField("custom")
         .equals(inputObjects[(nItems++) % inputObjects.length])) {
       collector.emit(input.getValues());
