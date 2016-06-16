@@ -9,7 +9,7 @@ java_toolchain(
     target_version = "7",
     bootclasspath = ["@bazel_tools//tools/jdk:bootclasspath"],
     extclasspath = ["@bazel_tools//tools/jdk:extdir"],
-    javac = ["@bazel_tools//tools/jdk:javac"],
+    javac = ["@bazel_tools//third_party/java/jdk/langtools:javac_jar"],
     javabuilder = ["@bazel_tools//tools/jdk:JavaBuilder_deploy.jar"],
     singlejar = ["@bazel_tools//tools/jdk:SingleJar_deploy.jar"],
     genclass = ["@bazel_tools//tools/jdk:GenClass_deploy.jar"],

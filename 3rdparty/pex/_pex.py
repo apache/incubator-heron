@@ -20,7 +20,7 @@ if not zipfile.is_zipfile(sys.argv[0]):
     sys.modules.pop('twitter.common.python', None)
 
     root = os.path.join(
-        os.sep.join(__file__.split(os.sep)[:-6]), '3rdparty/pex/_pex.runfiles/3rdparty')
+        os.sep.join(__file__.split(os.sep)[:-6]), 'pex/_pex.runfiles/__main__/3rdparty')
     sys.path.insert(0, os.path.join(root, 'pex'))
     sys.path.insert(0, os.path.join(root, 'setuptools'))
     setuptools_py =  os.path.join(root, 'setuptools')
