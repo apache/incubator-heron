@@ -26,6 +26,7 @@ else
 fi
 
 # building tar packages
+bazel run --config=${PLATFORM} -- scripts/packages:heron-client-install.sh --user
 bazel build --config=${PLATFORM} {heron/...,scripts/packages:tarpkgs,integration-test/src/...}
 
 # run the simple http server
