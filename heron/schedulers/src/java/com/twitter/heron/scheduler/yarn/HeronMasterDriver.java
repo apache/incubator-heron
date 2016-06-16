@@ -34,6 +34,7 @@ import org.apache.reef.driver.evaluator.AllocatedEvaluator;
 import org.apache.reef.driver.evaluator.EvaluatorRequest;
 import org.apache.reef.driver.evaluator.EvaluatorRequestor;
 import org.apache.reef.driver.evaluator.FailedEvaluator;
+import org.apache.reef.driver.task.CompletedTask;
 import org.apache.reef.driver.task.RunningTask;
 import org.apache.reef.driver.task.TaskConfiguration;
 import org.apache.reef.runtime.common.files.REEFFileNames;
@@ -255,7 +256,7 @@ public class HeronMasterDriver {
   }
 
   private int getCpuForExecutor(Resource resource) {
-    return resource.cpu.intValue();
+    return (int) Math.ceil(resource.cpu);
   }
 
   private int getMemInMBForExecutor(Resource resource) {
@@ -432,6 +433,18 @@ public class HeronMasterDriver {
       LOG.log(Level.INFO, "Task, id:{0}, has started. Count of running tasks: {1}",
           new Object[]{runningTask.getId(), runningTaskToContextMap.size() + 1});
       runningTaskToContextMap.put(runningTask, runningTask.getActiveContext());
+    }
+  }
+
+  /**
+   * Tasks will be closed when on a restart request from user. The intent is to retain the
+   * container and just restart the executor process. Hence do-nothing when a task completes.
+   */
+  public final class HeronCompletedTaskHandler implements EventHandler<CompletedTask> {
+    @Override
+    public void onNext(CompletedTask completedTask) {
+      LOG.log(Level.INFO, "Task/executor completed, id:{0}. Count of running tasks: {1}",
+          new Object[]{completedTask.getId(), runningTaskToContextMap.size() + 1});
     }
   }
 }
