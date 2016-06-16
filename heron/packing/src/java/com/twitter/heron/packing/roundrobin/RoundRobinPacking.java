@@ -178,8 +178,7 @@ public class RoundRobinPacking implements IPacking {
   protected Map<String, Map<String, Long>> getInstancesRamMapInContainer(
       Map<String, List<String>> allocation) {
     Map<String, Long> ramMap =
-        TopologyUtils.getComponentRamMap(topology,
-            Long.parseLong(NOT_SPECIFIED_NUMBER_VALUE));
+        TopologyUtils.getComponentRamMapConfig(topology);
 
     Map<String, Map<String, Long>> instancesRamMapInContainer = new HashMap<>();
 
@@ -192,10 +191,8 @@ public class RoundRobinPacking implements IPacking {
       long usedRam = 0;
       for (String instanceId : entry.getValue()) {
         String componentName = getComponentName(instanceId);
-        long ram = ramMap.get(componentName);
-
-        // Use component ram map if set
-        if (ram != Long.parseLong(NOT_SPECIFIED_NUMBER_VALUE)) {
+        if (ramMap.containsKey(componentName)) {
+          long ram = ramMap.get(componentName);
           ramInsideContainer.put(instanceId, ram);
           usedRam += ram;
         }

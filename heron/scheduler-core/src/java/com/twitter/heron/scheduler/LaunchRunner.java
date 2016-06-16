@@ -128,6 +128,7 @@ public class LaunchRunner implements Callable<Boolean> {
     Config ytruntime = Config.newBuilder()
         .putAll(runtime)
         .put(Keys.instanceDistribution(), packedPlan.getInstanceDistribution())
+        .put(Keys.componentRamMap(), packedPlan.getComponentRamDistribution())
         .build();
 
     // initialize the launcher

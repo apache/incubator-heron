@@ -14,6 +14,7 @@
 
 package com.twitter.heron.spi.common;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class PackingPlan {
@@ -34,7 +35,7 @@ public class PackingPlan {
   }
 
   /**
-   * Pack the packing plan into a String describing instance distribution, used by executor
+   * Get the String describing instance distribution from PackingPlan, used by executor
    *
    * @return String describing instance distribution
    */
@@ -60,6 +61,32 @@ public class PackingPlan {
     packingBuilder.deleteCharAt(packingBuilder.length() - 1);
 
     return packingBuilder.toString();
+  }
+
+  /**
+   * Get the formatted String describing component ram distribution from PackingPlan,
+   * used by executor
+   *
+   * @return String describing component ram distribution
+   */
+  public String getComponentRamDistribution() {
+    Map<String, Long> ramMap = new HashMap<>();
+    // The implementation assumes instances for the same component require same ram
+    for (ContainerPlan containerPlan : this.containers.values()) {
+      for (InstancePlan instancePlan : containerPlan.instances.values()) {
+        ramMap.put(instancePlan.componentName, instancePlan.resource.ram);
+      }
+    }
+
+    // Convert it into a formatted String
+    StringBuilder ramMapBuilder = new StringBuilder();
+    for (String component : ramMap.keySet()) {
+      ramMapBuilder.append(String.format("%s:%d,", component, ramMap.get(component)));
+    }
+
+    // Remove the duplicated "," at the end
+    ramMapBuilder.deleteCharAt(ramMapBuilder.length() - 1);
+    return ramMapBuilder.toString();
   }
 
   /**
