@@ -5,7 +5,7 @@ test_deps_files = [
     "//3rdparty/java:powermock",
     "@bazel_tools//third_party:mockito",
     "@bazel_tools//third_party:junit4",
-    "@com_google_guava_guava//jar",
+    "@guava//jar",
 ]
 
 spi_deps_files = [
@@ -20,8 +20,8 @@ local_statemgr_deps_files = [
 
 zookeeper_statemgr_deps_files = [
     "//heron/statemgrs/src/java:zookeeper-statemgr-java",
-    "@org_apache_curator_curator_framework//jar",
-    "@org_apache_zookeeper_zookeeper//jar",
+    "@curator-framework//jar",
+    "@zookeeper//jar",
 ]
 
 localfs_deps_files = \
