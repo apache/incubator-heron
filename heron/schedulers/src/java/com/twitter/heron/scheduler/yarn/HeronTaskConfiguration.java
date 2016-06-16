@@ -20,6 +20,7 @@ import org.apache.reef.tang.formats.ConfigurationModuleBuilder;
 import org.apache.reef.tang.formats.RequiredParameter;
 
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Cluster;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.ComponentRamMap;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Environ;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.HeronCorePackageName;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.HeronExecutorId;
@@ -38,6 +39,7 @@ public class HeronTaskConfiguration extends ConfigurationModuleBuilder {
   public static final RequiredParameter<String> ROLE = new RequiredParameter<>();
   public static final RequiredParameter<String> ENV = new RequiredParameter<>();
   public static final RequiredParameter<String> PACKED_PLAN = new RequiredParameter<>();
+  public static final RequiredParameter<String> COMPONENT_RAM_MAP = new RequiredParameter<>();
   public static final RequiredParameter<String> CONTAINER_ID = new RequiredParameter<>();
 
   public static final ConfigurationModule CONF = new HeronTaskConfiguration()
@@ -50,6 +52,7 @@ public class HeronTaskConfiguration extends ConfigurationModuleBuilder {
       .bindNamedParameter(Environ.class, ENV)
       .bindNamedParameter(Role.class, ROLE)
       .bindNamedParameter(PackedPlan.class, PACKED_PLAN)
+      .bindNamedParameter(ComponentRamMap.class, COMPONENT_RAM_MAP)
       .bindNamedParameter(HeronExecutorId.class, CONTAINER_ID)
       .build();
 }

@@ -268,6 +268,10 @@ public class HeronMasterDriver {
     return packing.getInstanceDistribution();
   }
 
+  String getComponentRamMap() {
+    return packing.getComponentRamDistribution();
+  }
+
   boolean addActiveContext(ActiveContext context) {
     if (activeContexts == null) {
       LOG.log(Level.WARNING, "Topology has been killed, new context ignored and closed.");
@@ -311,6 +315,7 @@ public class HeronMasterDriver {
         .set(HeronTaskConfiguration.ENV, env)
         .set(HeronTaskConfiguration.CLUSTER, cluster)
         .set(HeronTaskConfiguration.PACKED_PLAN, getPackingAsString())
+        .set(HeronTaskConfiguration.COMPONENT_RAM_MAP, getComponentRamMap())
         .set(HeronTaskConfiguration.CONTAINER_ID, id)
         .build();
     context.submitTask(taskConf);

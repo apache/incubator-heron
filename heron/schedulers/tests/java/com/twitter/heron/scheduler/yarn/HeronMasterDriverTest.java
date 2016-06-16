@@ -110,6 +110,7 @@ public class HeronMasterDriverTest {
     Mockito.when(mockContext2.getId()).thenReturn("1"); // worker
 
     Mockito.doReturn("").when(spyDriver).getPackingAsString();
+    Mockito.doReturn("").when(spyDriver).getComponentRamMap();
 
     spyDriver.new HeronExecutorLauncher().onNext(mockContext1);
     spyDriver.new HeronExecutorLauncher().onNext(mockContext2);
@@ -123,6 +124,7 @@ public class HeronMasterDriverTest {
   @Test
   public void onRestartKillsAndStartsTasks() throws Exception {
     Mockito.doReturn("").when(spyDriver).getPackingAsString();
+    Mockito.doReturn("").when(spyDriver).getComponentRamMap();
 
     ActiveContext mockContext1 = Mockito.mock(ActiveContext.class);
     Mockito.when(mockContext1.getId()).thenReturn("0"); // TM
@@ -151,6 +153,7 @@ public class HeronMasterDriverTest {
   @Test
   public void restartsSpecificTask() throws Exception {
     Mockito.doReturn("").when(spyDriver).getPackingAsString();
+    Mockito.doReturn("").when(spyDriver).getComponentRamMap();
 
     ActiveContext mockContextTM = Mockito.mock(ActiveContext.class);
     Mockito.when(mockContextTM.getId()).thenReturn("0"); // TM
@@ -204,7 +207,8 @@ public class HeronMasterDriverTest {
     addContainer("1", 1.0, 1024L, containers);
     PackingPlan packing = new PackingPlan("packingId", containers, null);
     spyDriver.scheduleHeronWorkers(packing);
-    Mockito.verify(spyDriver, Mockito.timeout(1000).times(1)).allocateContainer("1", 1, 1024);
+    Mockito.verify(mockWorkerEvaluator, Mockito.timeout(1000).times(1))
+        .submitContext(Mockito.any(Configuration.class));
 
     FailedEvaluator mockFailedContainer = Mockito.mock(FailedEvaluator.class);
     Mockito.when(mockFailedContainer.getId()).thenReturn("worker");
