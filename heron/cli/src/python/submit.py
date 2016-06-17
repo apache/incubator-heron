@@ -94,7 +94,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
   ]
 
   if opts.verbose():
-    cli_args.append("--verbose")
+    args.append("--verbose")
 
   lib_jars = utils.get_heron_libs(
       jars.scheduler_jars() + jars.uploader_jars() + jars.statemgr_jars() + jars.packing_jars()
