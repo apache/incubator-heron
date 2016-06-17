@@ -21,7 +21,7 @@ roundrobin_deps_files = \
     ]
 
 java_test(
-    name = "round-robin-packing_unittest",
+    name = "RoundRobinPackingTest",
     srcs = glob(
         ["**/roundrobin/RoundRobinPackingTest.java"]
     ),

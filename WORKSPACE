@@ -137,11 +137,6 @@ maven_jar(
 )
 
 maven_jar(
-  name = "log4j-over-slf4j",
-  artifact = "org.slf4j:log4j-over-slf4j:" + slf4j_version
-)
-
-maven_jar(
   name = "mesos",
   artifact = "org.apache.mesos:mesos:0.22.0",
 )
