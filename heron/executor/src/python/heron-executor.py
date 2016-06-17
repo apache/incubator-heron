@@ -169,10 +169,18 @@ class HeronExecutor:
   def get_metricsmgr_cmd(self, id, sink_config_file, port):
     metricsmgr_main_class = 'com.twitter.heron.metricsmgr.MetricsManager'
 
+    # TODO(mfu): Read them from config
+    metricsmgr_heap_size_mb = 512
+    metricsmgr_perm_gen_size_mb = 128
+    metricsmgr_code_cache_size_mb = 64
+
     metricsmgr_cmd = ['%s/bin/java' % self.heron_java_home,
-                      # We could not rely on the default -Xmx setting, which could be very big,
-                      # for instance, the default -Xmx in Twitter mesos machine is around 18GB
-                      '-Xmx1024M',
+                      '-Xmx%dM' %(metricsmgr_heap_size_mb),
+                      '-Xms%dM' %(metricsmgr_heap_size_mb),
+                      '-XX:MaxPermSize=%dM' % metricsmgr_perm_gen_size_mb,
+                      '-XX:PermSize=%dM' % metricsmgr_perm_gen_size_mb,
+                      '-XX:ReservedCodeCacheSize=%dM' % metricsmgr_code_cache_size_mb,
+                      '-XX:+AlwaysPreTouch',
                       '-XX:+PrintCommandLineFlags',
                       '-verbosegc',
                       '-XX:+PrintGCDetails',
@@ -214,8 +222,6 @@ class HeronExecutor:
            self.metrics_sinks_config_file,
            self.metricsmgr_port]
     retval["heron-tmaster"] = tmaster_cmd
-
-    # metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
 
     retval[self.metricsmgr_ids[0]] = self.get_metricsmgr_cmd(
       self.metricsmgr_ids[0],
@@ -270,8 +276,6 @@ class HeronExecutor:
            self.heron_internals_config_file]
     retval[self.stmgr_ids[self.shard - 1]] = stmgr_cmd
 
-    # metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
-
     retval[self.metricsmgr_ids[self.shard]] = self.get_metricsmgr_cmd(
       self.metricsmgr_ids[self.shard],
       self.metrics_sinks_config_file,
@@ -279,22 +283,28 @@ class HeronExecutor:
     )
 
     # TO DO (Karthik) to be moved into keys and defaults files
-    code_cache_size_mb = 64
-    perm_gen_size_mb = 128
+    instance_code_cache_size_mb = 64
+    instance_perm_gen_size_mb = 128
 
     for (instance_id, component_name, global_task_id, component_index) in instance_info:
       total_jvm_size = int(self.component_rammap[component_name] / (1024 * 1024))
-      heap_size_mb = total_jvm_size - code_cache_size_mb - perm_gen_size_mb
       do_print("component name: %s, ram request: %d, total jvm size: %dM, cache size: %dM, perm size: %dM"
-               % (component_name, self.component_rammap[component_name], total_jvm_size, code_cache_size_mb, perm_gen_size_mb))
+               % (component_name, self.component_rammap[component_name], total_jvm_size, instance_code_cache_size_mb, instance_perm_gen_size_mb))
+
+      heap_size_mb = total_jvm_size - instance_code_cache_size_mb - instance_perm_gen_size_mb
+      # TODO(mfu): Make this check locally before topology submission
+      if (heap_size_mb <= 0):
+        raise ValueError('Too small component memory specified.')
+
       xmn_size = int(heap_size_mb / 2)
       instance_cmd = ['%s/bin/java' % self.heron_java_home,
                       '-Xmx%dM' % heap_size_mb,
                       '-Xms%dM' % heap_size_mb,
                       '-Xmn%dM' % xmn_size,
-                      '-XX:MaxPermSize=%dM' % perm_gen_size_mb,
-                      '-XX:PermSize=%dM' % perm_gen_size_mb,
-                      '-XX:ReservedCodeCacheSize=%dM' % code_cache_size_mb,
+                      '-XX:MaxPermSize=%dM' % instance_perm_gen_size_mb,
+                      '-XX:PermSize=%dM' % instance_perm_gen_size_mb,
+                      '-XX:ReservedCodeCacheSize=%dM' % instance_code_cache_size_mb,
+                      '-XX:+AlwaysPreTouch',
                       '-XX:+CMSScavengeBeforeRemark',
                       '-XX:TargetSurvivorRatio=90',
                       '-XX:+PrintCommandLineFlags',
