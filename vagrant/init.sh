@@ -65,9 +65,9 @@ bazel_install() {
             tar xvfz libunwind-1.1.tar.gz
             cd libunwind-1.1 && ./configure --prefix=/usr && make install 
         popd
-        wget 'https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh'
-        chmod +x bazel-0.1.2-installer-linux-x86_64.sh
-        ./bazel-0.1.2-installer-linux-x86_64.sh --user    
+        wget 'https://github.com/bazelbuild/bazel/releases/download/0.2.3/bazel-0.2.3-installer-linux-x86_64.sh'
+        chmod +x bazel-0.2.3-installer-linux-x86_64.sh
+        ./bazel-0.2.3-installer-linux-x86_64.sh --user    
     popd
 }
 
