@@ -17,21 +17,22 @@ title: Release Process
 # Publish to Maven Central
 
 ## Account Setup
-Following http://central.sonatype.org/ 
+Following [sonatype.org](http://central.sonatype.org/)
 
 1. Request access to publish to com.twitter by creating account and requesting access in https://issues.sonatype.org
-2. Twitter contact needed to confirm access (see example https://issues.sonatype.org/browse/OSSRH-22297)
-3. Install local GPG/PGP to sign files by following http://central.sonatype.org/pages/requirements.html#sign-files-with-gpgpgp 
-4. Publish public key (example http://central.sonatype.org/pages/working-with-pgp-signatures.html#distributing-your-public-key)
-5. Confirm public key is published (example http://pgp.mit.edu/ note leading ```0x``` required for hex keys)
+2. Twitter contact needed to confirm access [see example](https://issues.sonatype.org/browse/OSSRH-22297)
+3. Install local GPG/PGP to sign files by following [sonatype instructions](http://central.sonatype.org/pages/requirements.html#sign-files-with-gpgpgp) 
+4. Publish public key [see example](http://central.sonatype.org/pages/working-with-pgp-signatures.html#distributing-your-public-key)
+5. Confirm public key is published [see example](http://pgp.mit.edu/) note leading ```0x``` required for hex keys)
 
 # Release Steps
 Follow [Manual Staging Bundle Creation and Deployment](http://central.sonatype.org/pages/manual-staging-bundle-creation-and-deployment.html) by signing files manually, steps summarized below.
 
-Two artifacts are required for each version: ```heron-api``` and ```heron-storm```
-Example POM files required located in ```heron/release/maven-central/```
+Three artifacts are required for each version: ```heron-api```, ```heron-storm```, and ```heron-spi```
+Example POM template files required located in ```heron/release/maven-central/```
 
 <-- TODO refer to release "build process" instructions, not download  -->
+<-- TODO update for "heron-spi" artifact when available -->
 ### Step 1 - Download and install ```heron-api-install-{VERSION}-{DIST}.sh``` from https://github.com/twitter/heron/releases
 
 Example for version ```0.14.0``` installed using ```--user```
@@ -57,21 +58,20 @@ Note "heron-api-0.14.0-javadoc.jar" and "heron-api-0.14.0-sources.jar" are curre
 
 Copy artifact {artifact}.jar from ```~/.heronapi``` to temp folder and rename to {artifact-version}.jar
 
-Copy artifact POM from ```heron/release/maven-central/``` and update version in name and POM.
+Generate versioned POM file using ```./maven-central/maven-pom-version.sh VERSION``` 
 
-Example, update ```heron-api``` version POM ```0.14.0``` to new version.
 ```
-heron-api-0.14.0.pom
+$ ./maven-central/maven-pom-version.sh 0.14.1
+$ ls
+heron-api-0.14.1.pom
+heron-storm-0.14.1.pom
+heron-spi-0.14.1.pom
+...
 ```
-and in POM file.
-```
- <artifactId>heron-api</artifactId>
-  <version>0.14.0</version>  
-  <packaging>jar</packaging>
-```
+Copy versioned POM files to artifact temp directory
 
 ### Step 3 - Manually sign each file using GPG/PGP 
-Use GPG/PGP to sign each file by following http://central.sonatype.org/pages/requirements.html#sign-files-with-gpgpgp 
+Use GPG/PGP to sign each file by following [steps](http://central.sonatype.org/pages/requirements.html#sign-files-with-gpgpgp)
 
 Example on MacOSX using gpg 
 ```
@@ -104,7 +104,7 @@ bundle.jar
 ...
 ```
 
-### Step 4 - Upload each ```bundle.jar``` to https://oss.sonatype.org/
+### Step 4 - Upload each ```bundle.jar``` sonatype.org
 Login to https://oss.sonatype.org/#welcome
 
 For each artifact, ```heron-api``` and ```heron-storm```, separately upload the ```bundle.jar```:
