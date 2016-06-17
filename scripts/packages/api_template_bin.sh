@@ -139,6 +139,9 @@ function install_to_maven() {
   mvn install:install-file -q -Dfile="${tmp_dir}/heron-api.jar" -DgroupId="com.twitter.heron" \
     -DartifactId="heron-api" -Dversion="SNAPSHOT" -Dpackaging="jar"
 
+  mvn install:install-file -q -Dfile="${tmp_dir}/heron-spi.jar" -DgroupId="com.twitter.heron" \
+    -DartifactId="heron-spi" -Dversion="SNAPSHOT" -Dpackaging="jar"
+
   mvn install:install-file -q -Dfile="${tmp_dir}/heron-storm.jar" -DgroupId="com.twitter.heron" \
     -DartifactId="heron-storm" -Dversion="SNAPSHOT" -Dpackaging="jar"
 
