@@ -149,7 +149,7 @@ mkdir -p ${bin} ${base} ${base}/etc
 echo -n .
 
 unzip -q -o "${BASH_SOURCE[0]}" -d "${base}"
-untar ${tmp_dir}/heron-client.tar.gz ${base}
+untar ${base}/heron-client.tar.gz ${base}
 echo -n .
 chmod 0755 ${base}/bin/heron
 echo -n .
