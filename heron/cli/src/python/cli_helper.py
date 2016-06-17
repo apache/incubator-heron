@@ -41,7 +41,7 @@ def create_parser(subparsers, action, help):
   args.add_config(parser)
   args.add_verbose(parser)
 
-  parser.set_defaults(subcommand='activate')
+  parser.set_defaults(subcommand=action)
   return parser
 
 

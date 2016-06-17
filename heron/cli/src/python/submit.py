@@ -105,7 +105,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
       lib_jars,
       extra_jars=[],
       args=args,
-      javaDefines=[]
+      java_defines=[]
   )
 
 
@@ -176,7 +176,7 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
         utils.get_heron_libs(jars.topology_jars()),
         extra_jars=[topology_file],
         args=tuple(unknown_args),
-        javaDefines=cl_args['topology_main_jvm_property'])
+        java_defines=cl_args['topology_main_jvm_property'])
 
   except Exception:
     Log.error("Unable to execute topology main class")
