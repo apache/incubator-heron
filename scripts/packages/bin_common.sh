@@ -13,13 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-function set_untar_command {
+function set_untar_flags {
   # Some tar implementations emit verbose timestamp warnings, allowing the ability to disable them
   # via --warning=no-timestamp (which we want to do in that case). To find out if we have one of
   # those implementations, we see if help returns an error for that flag.
   SUPPRESS_TAR_TS_WARNINGS="--warning=no-timestamp"
   tar $SUPPRESS_TAR_TS_WARNINGS --help &> /dev/null && TAR_X_FLAGS=$SUPPRESS_TAR_TS_WARNINGS
-  UNTAR_CMD="tar $TAR_X_FLAGS xfz"
+  # echo this so function doesn't return 1
+  echo $TAR_X_FLAGS
 }
 
-set_untar_command
+# Untars a gzipped archived to an output dir. Lazily creates dir if it doesn't exit
+function untar {
+  if (( $# < 2 )); then
+    echo "Usage: untar <tar_file> <output_dir>" >&2
+    echo "Args passed: $@" >&2
+    exit 1
+  fi
+  [ -d "$2" ] || mkdir -p $2
+  echo tar xfz $1 -C $2 $TAR_X_FLAGS
+  tar xfz $1 -C $2 $TAR_X_FLAGS
+}
+
+set_untar_flags

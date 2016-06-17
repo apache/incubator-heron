@@ -137,7 +137,7 @@ mkdir -p ${bin} ${base}
 echo -n .
 
 unzip -q -o "${BASH_SOURCE[0]}" -d "${base}"
-$UNTAR_CMD ${base}/heron-tools.tar.gz -C ${base}
+untar ${base}/heron-tools.tar.gz ${base}
 echo -n .
 chmod 0755 ${base}/bin/heron-tracker ${base}/bin/heron-ui
 echo -n .
