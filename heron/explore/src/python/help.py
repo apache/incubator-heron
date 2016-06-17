@@ -46,7 +46,6 @@ def run(command, parser, args, unknown_args):
 
   # get the subparser for the specific command
   subparser = utils.get_subparser(parser, command_help)
-  LOG.info(command_help)
   if subparser:
     print(subparser.format_help())
     return True
