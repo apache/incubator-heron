@@ -16,6 +16,7 @@ import glob
 import os
 import shutil
 import tempfile
+import traceback
 
 from heron.common.src.python.color import Log
 from heron.proto import topology_pb2
@@ -144,7 +145,7 @@ def launch_topologies(cl_args, topology_file, tmp_dir):
         Log.info("Topology \'%s\' launched successfully" % topology_defn.name)
 
       except Exception as ex:
-        Log.error('Failed to launch topology \'%s\' because %s' % (topology_defn.name, str(ex)))
+        Log.exception('Failed to launch topology \'%s\' because %s' % (topology_defn.name, str(ex)))
         raise
 
   except:
