@@ -149,7 +149,9 @@ mkdir -p ${bin} ${base} ${base}/etc
 echo -n .
 
 unzip -q -o "${BASH_SOURCE[0]}" -d "${base}"
-$UNTAR_CMD ${base}/heron-client.tar.gz -C ${base}
+# TODO: remove debugging before merging to master
+echo $UNTAR_CMD ${base}/heron-client.tar.gz -C ${base}
+`$UNTAR_CMD ${base}/heron-client.tar.gz -C ${base}`
 echo -n .
 chmod 0755 ${base}/bin/heron
 echo -n .
