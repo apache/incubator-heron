@@ -23,7 +23,19 @@ function query() {
 
 set +e
 # Build everything
-bazel build {heron,integration-test,tools/java}/...
+os_type=darwin
+case "$OSTYPE" in
+  darwin*)
+    os_type=darwin
+    ;;
+  linux*)
+    os_type=ubuntu
+    if [ -f /etc/redhat-release ] ; then
+      os_type=centos
+    fi
+    ;;
+esac
+bazel build --config=${os_type} {heron,integration-test,tools/java}/...
 result=$?
 if [ "${result}" -eq "0" ] ; then
   echo "Bazel build successful!!"
