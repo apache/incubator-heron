@@ -37,21 +37,21 @@ zookeeper_deps_files = \
     test_deps_files
 
 java_test(
-    name = "localfs-statemgr_unittest",
+    name = "LocalFileSystemStateManagerTest",
     srcs = glob(["**/localfs/LocalFileSystemStateManagerTest.java"]),
     deps = localfs_deps_files,
     size = "small",
 )
 
 java_test(
-    name = "zk_utils_unittest",
+    name = "ZkUtilsTest",
     srcs = glob(["**/zookeeper/ZkUtilsTest.java"]),
     deps = zookeeper_deps_files,
     size = "small",
 )
 
 java_test(
-    name = "zk-statemgr_unittest",
+    name = "CuratorStateManagerTest",
     srcs = glob(["**/zookeeper/curator/CuratorStateManagerTest.java"]),
     deps = zookeeper_deps_files,
     size = "small",
