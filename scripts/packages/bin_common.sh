@@ -14,6 +14,9 @@
 # limitations under the License.
 
 function set_untar_command {
+  # Some tar implementations emit verbose timestamp warnings, allowing the ability to disable them
+  # via --warning=no-timestamp (which we want to do in that case). To find out if we have one of
+  # those implementations, we see if help returns an error for that flag.
   SUPPRESS_TAR_TS_WARNINGS="--warning=no-timestamp"
   tar $SUPPRESS_TAR_TS_WARNINGS --help &> /dev/null && export TAR_X_FLAGS=$SUPPRESS_TAR_TS_WARNINGS
   UNTAR_CMD="tar xfz $TAR_X_FLAGS"
