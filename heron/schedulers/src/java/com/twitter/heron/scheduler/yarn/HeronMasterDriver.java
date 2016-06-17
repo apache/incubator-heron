@@ -79,15 +79,11 @@ public class HeronMasterDriver {
   private final String env;
   private final String topologyJar;
   private final int httpPort;
-  // TODO: Currently REEF does not support YARN AM HA (REEF-345). In absence of this, YARN will kill
-  // TODO: all containers if AM container is lost. Subsequently handle precise reconstruction of it
-  // TODO: after AM is restarted?
+  // TODO: https://github.com/twitter/heron/issues/949: implement Driver HA
   // Once topology is killed, no more activeContexts should be allowed. This could happen when
   // container allocation is happening and topology is killed concurrently.
   private Map<String, ActiveContext> activeContexts = new ConcurrentHashMap<>();
-  // TODO: Let the PackingAlgorithm return homogeneous containers to avoid allocation latencies.
-  // TODO: Get rid of this lock. Add a request queue for new and failed Contexts. Avoid blocking any
-  // TODO: event thread.
+  // TODO: https://github.com/twitter/heron/issues/950, support homogeneous container allocation
   // Currently yarn does not support mapping container requests to allocation (YARN-4879). As a
   // result it is not possible to concurrently start containers of different sizes. This Executor
   // and Queue will ensure containers are started serially.
@@ -140,7 +136,7 @@ public class HeronMasterDriver {
   void scheduleTMasterContainer() {
     LOG.log(Level.INFO, "Scheduling container for TM: {0}", topologyName);
     try {
-      // TODO: Co-locate TMaster and Scheduler to avoid issues caused by network partitioning.
+      // TODO: https://github.com/twitter/heron/issues/951: colocate TMaster and Scheduler
       launchContainerForExecutor(TMASTER_CONTAINER_ID, 1, TM_MEM_SIZE_MB);
     } catch (InterruptedException e) {
       // Deployment of topology fails if there is a error starting TMaster

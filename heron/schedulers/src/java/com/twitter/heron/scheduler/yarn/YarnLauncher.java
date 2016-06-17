@@ -126,6 +126,7 @@ public class YarnLauncher implements ILauncher {
     // topologyName and other configurations are required by Heron Driver/Scheduler to load
     // configuration files. Using REEF configuration model is better than depending on external
     // persistence.
+    // TODO: https://github.com/twitter/heron/issues/952: explore sharing across topologies
     return HeronDriverConfiguration.CONF
         .setMultiple(DriverConfiguration.GLOBAL_LIBRARIES, libJars)
         .set(DriverConfiguration.DRIVER_IDENTIFIER, topologyName)
