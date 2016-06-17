@@ -77,13 +77,32 @@ java_test(
 )
 
 java_test(
-  name="yarn-scheduler_unittest",
-  srcs=glob([
-      "**/YarnSchedulerTest.java",
-      "**/HeronMasterDriverTest.java",
-      "**/DriverOnLocalYarnTest.java",
-      "**/HeronExecutorTaskTest.java",
-    ]
+  name="YarnSchedulerTest",
+  srcs=glob(["**/YarnSchedulerTest.java"]
+  ),
+  deps=scheduler_deps_files + yarn_deps_files,
+  size="small",
+)
+
+java_test(
+  name="HeronMasterDriverTest",
+  srcs=glob(["**/HeronMasterDriverTest.java"]
+  ),
+  deps=scheduler_deps_files + yarn_deps_files,
+  size="small",
+)
+
+java_test(
+  name="DriverOnLocalReefTest",
+  srcs=glob(["**/DriverOnLocalReefTest.java"]
+  ),
+  deps=scheduler_deps_files + yarn_deps_files,
+  size="small",
+)
+
+java_test(
+  name="HeronExecutorTaskTest",
+  srcs=glob(["**/HeronExecutorTaskTest.java"]
   ),
   deps=scheduler_deps_files + yarn_deps_files,
   size="small",
