@@ -32,14 +32,14 @@ java_library(
 )
 
 java_test(
-    name = "local-filesystem-config_unittest",
+    name = "LocalFileSystemConfigTest",
     srcs = glob(["**/localfs/LocalFileSystemConfigTest.java"]),
     deps = localfs_deps_files,
     size = "small",
 )
 
 java_test(
-    name = "local-filesystem-uploader_unittest",
+    name = "LocalFileSystemUploaderTest",
     srcs = glob(["**/localfs/LocalFileSystemUploaderTest.java"]),
     deps = localfs_deps_files,
     size = "small",
@@ -47,7 +47,7 @@ java_test(
 )
 
 java_test(
-    name = "s3-uploader_unittest",
+    name = "S3UploaderTest",
     srcs = glob(["**/s3/S3UploaderTest.java"]),
     size = "small",
     deps = common_deps_files + spi_deps_files + [
@@ -57,7 +57,7 @@ java_test(
 )
 
 java_test(
-    name = "hadoop-uploader_unittest",
+    name = "HdfsUploaderTest",
     srcs = glob(["**/hdfs/HdfsUploaderTest.java"]),
     deps = hdfs_deps_files,
     size = "small",

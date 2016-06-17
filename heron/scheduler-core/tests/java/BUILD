@@ -26,7 +26,7 @@ scheduler_deps_files = \
 
 # Following unit tests are for classes under package com.twitter.heron.scheduler
 java_test(
-  name="launch-runner_unittest",
+  name="LaunchRunnerTest",
   srcs=glob(
     ["**/LaunchRunnerTest.java"] +
     ["**/util/TopologyUtilityTest.java"]
@@ -36,7 +36,7 @@ java_test(
 )
 
 java_test(
-  name="runtime-manager-runner_unittest",
+  name="RuntimeManagerRunnerTest",
   srcs=glob(
     ["**/RuntimeManagerRunnerTest.java"] +
     ["**/util/TopologyUtilityTest.java"]
@@ -46,7 +46,7 @@ java_test(
 )
 
 java_test(
-  name="runtime-manager-main_unittest",
+  name="RuntimeManagerMainTest",
   srcs=glob(
     ["**/RuntimeManagerMainTest.java"] +
     ["**/util/TopologyUtilityTest.java"]
@@ -57,7 +57,7 @@ java_test(
 )
 
 java_test(
-  name="submitter-main_unittest",
+  name="SubmitterMainTest",
   srcs=glob(
     ["**/SubmitterMainTest.java"] +
     ["**/util/TopologyUtilityTest.java"]
@@ -67,7 +67,7 @@ java_test(
 )
 
 java_test(
-  name="scheduler-main_unittest",
+  name="SchedulerMainTest",
   srcs=glob(
     ["**/SchedulerMainTest.java"] +
     ["**/util/TopologyUtilityTest.java"]
@@ -78,7 +78,7 @@ java_test(
 
 # Following unit tests are for classes under package com.twitter.heron.scheduler.server
 java_test(
-  name="scheduler-server_unittest",
+  name="SchedulerServerTest",
   srcs=glob(
     ["**/SchedulerServerTest.java"]
   ),
@@ -90,7 +90,7 @@ java_test(
 # Following unit tests are for class under package com.twitter.heron.scheduler.client
 
 java_test(
-  name="library_scheduler_client_unittest",
+  name="LibrarySchedulerClientTest",
   srcs=glob(
     ["**/LibrarySchedulerClientTest.java"]
   ),
@@ -99,7 +99,7 @@ java_test(
 )
 
 java_test(
-  name="http_service_scheduler_client_unittest",
+  name="HttpServiceSchedulerClientTest",
   srcs=glob(
     ["**/HttpServiceSchedulerClientTest.java"]
   ),
@@ -108,7 +108,7 @@ java_test(
 )
 
 java_test(
-  name="scheduler_client_factory_unittest",
+  name="SchedulerClientFactoryTest",
   srcs=glob(
     ["**/SchedulerClientFactoryTest.java"]
   ),

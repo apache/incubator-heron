@@ -56,7 +56,7 @@ for i in "${@}"; do
   done <<<"$(cat $i)"
 done
 
-echo "heron.build.version : ${release_name}"
+echo "heron.build.version : '${release_name}'"
 echo "heron.build.time : ${build_time}"
 echo "heron.build.timestamp : ${build_timestamp}"
 echo "heron.build.host : ${build_host}"
