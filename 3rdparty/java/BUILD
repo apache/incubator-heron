@@ -69,7 +69,6 @@ java_library(
     deps = [
         "@slf4j-api//jar",
         "@slf4j-jdk//jar",
-        "@log4j-over-slf4j//jar",
     ],
 )
 
@@ -99,8 +98,10 @@ java_library(
     srcs = [ "Empty.java" ],
     exports = [
         "@powermock-api-mockito//jar",
+        "@powermock-api-support//jar",
         "@powermock-core//jar",
         "@powermock-module-junit4//jar",
+        "@powermock-module-junit4-common//jar",
     ],
     deps = [
         "@powermock-api-mockito//jar",

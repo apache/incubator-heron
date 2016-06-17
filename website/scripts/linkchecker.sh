@@ -27,5 +27,6 @@ if [[ $STATUS != 0 ]]; then
   rm -f $OUT_FILE
   exit $STATUS
 else
+  rm -f $OUT_FILE
   echo "linkchecker passes";
 fi

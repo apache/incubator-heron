@@ -2,6 +2,7 @@
 html lang={{.Site.LanguageCode}}
   head
     {{partial "meta.html" .}}
+    {{partial "docs/page-meta.html" .}}
     title {{.Site.Title}} Documentation - {{.Title}}
     {{partial "css.includes.html" .}}
   body

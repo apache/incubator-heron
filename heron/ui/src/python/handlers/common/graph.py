@@ -40,7 +40,7 @@ class Graph(object):
       self.edges[U].add(V)
 
   def __str__(self):
-    print self.edges
+    return str(self.edges)
 
   def bfs_depth(self, U):
     '''

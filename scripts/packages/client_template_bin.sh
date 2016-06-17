@@ -16,6 +16,9 @@
 
 # Heron self-extractable installer for client package
 
+# Set help URL
+getting_started_url=http://heronstreaming.io/docs/getting-started
+
 # Installation and etc prefix can be overriden from command line
 install_prefix=${1:-"/usr/local/heron"}
 heronrc=${2:-"/usr/local/heron/etc/heron.heronrc"}
@@ -83,7 +86,7 @@ function test_write() {
 if ! which unzip >/dev/null; then
   echo >&2
   echo "unzip not found, please install the corresponding package." >&2
-  echo "See http://heronstreaming.io/docs/install.html for more information on" >&2
+  echo "See $getting_started_url for more information on" >&2
   echo "dependencies of Heron." >&2
   exit 1
 fi
@@ -93,7 +96,7 @@ fi
 if ! which tar >/dev/null; then
   echo >&2
   echo "tar not found, please install the corresponding package." >&2
-  echo "See http://heronstreaming.io/docs/install.html for more information on" >&2
+  echo "See $getting_started_url for more information on" >&2
   echo "dependencies of Heron." >&2
   exit 1
 fi
@@ -118,7 +121,7 @@ fi
 if [ ! -x "${JAVA_HOME}/bin/javac" ]; then
   echo >&2
   echo "Java not found, please install the corresponding package" >&2
-  echo "See http://heronstreaming.io/docs/install.html for more information on" >&2
+  echo "See $getting_started_url for more information on" >&2
   echo "dependencies of Heron." >&2
   exit 1
 fi
@@ -177,9 +180,9 @@ cat <<EOF
 
 Heron is now installed!
 
-Make sure you have "${bin}" in your path. 
+Make sure you have "${bin}" in your path.
 
-See http://heronstreaming.io/docs/getting-started.html for how to use Heron.
+See ${getting_started_url} for how to use Heron.
 EOF
 echo
 cat <<'EOF'

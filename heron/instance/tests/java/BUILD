@@ -10,7 +10,7 @@ test_deps_files = \
     ]
 
 java_test(
-    name = "custom-grouping_unittest",
+    name = "CustomGroupingTest",
     srcs = glob(
         ["**/CustomGroupingTest.java"] +
         ["**/resource/*.java"]
@@ -21,7 +21,7 @@ java_test(
 )
 
 java_test(
-    name = "bolt-instance_unittest",
+    name = "BoltInstanceTest",
     srcs = glob(
         ["**/BoltInstanceTest.java"] +
         ["**/resource/*.java"]
@@ -32,7 +32,7 @@ java_test(
 )
 
 java_test(
-    name = "activate-deactivate_unittest",
+    name = "ActivateDeactivateTest",
     srcs = glob(
         ["**/ActivateDeactivateTest.java"] +
         ["**/resource/*.java"]
@@ -43,7 +43,7 @@ java_test(
 )
 
 java_test(
-    name = "spout-instance_unittest",
+    name = "SpoutInstanceTest",
     srcs = glob(
         ["**/SpoutInstanceTest.java"] +
         ["**/resource/*.java"]
@@ -54,7 +54,7 @@ java_test(
 )
 
 java_test(
-    name = "global-metrics_unittest",
+    name = "GlobalMetricsTest",
     srcs = glob(
         ["**/GlobalMetricsTest.java"] +
         ["**/resource/*.java"]
@@ -65,7 +65,7 @@ java_test(
 )
 
 java_test(
-    name = "multiassignable-metric_unittest",
+    name = "MultiAssignableMetricTest",
     srcs = glob(
         ["**/MultiAssignableMetricTest.java"] +
         ["**/resource/*.java"]
@@ -76,7 +76,7 @@ java_test(
 )
 
 java_test(
-    name = "connect_unittest",
+    name = "ConnectTest",
     srcs = glob(
         ["**/ConnectTest.java"] +
         ["**/resource/*.java"]
@@ -87,7 +87,7 @@ java_test(
 )
 
 java_test(
-    name = "handle-read_unittest",
+    name = "HandleReadTest",
     srcs = glob(
         ["**/HandleReadTest.java"] +
         ["**/resource/*.java"]
@@ -98,7 +98,7 @@ java_test(
 )
 
 java_test(
-    name = "handle-write_unittest",
+    name = "HandleWriteTest",
     srcs = glob(
         ["**/HandleWriteTest.java"] +
         ["**/resource/*.java"]

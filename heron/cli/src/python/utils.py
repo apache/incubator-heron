@@ -262,15 +262,19 @@ def parse_cluster_role_env(cluster_role_env, config_path):
 
       # if role is required but not provided, raise exception
       if len(parts) == 1:
-        if (IS_ROLE_REQUIRED in cli_confs) and cli_confs[IS_ROLE_REQUIRED]:
-          raise Exception("role required but not provided")
+        if (IS_ROLE_REQUIRED in cli_confs) and (cli_confs[IS_ROLE_REQUIRED]):
+          raise Exception(
+              "role required but not provided (cluster/role/env = %s). See %s in %s" %
+              (cluster_role_env, IS_ROLE_REQUIRED, CLIENT_YAML))
         else:
           parts.append(getpass.getuser())
 
       # if environ is required but not provided, raise exception
       if len(parts) == 2:
-        if (IS_ENV_REQUIRED in cli_confs) and cli_confs[IS_ENV_REQUIRED]:
-          raise Exception("environ required but not provided")
+        if (IS_ENV_REQUIRED in cli_confs) and (cli_confs[IS_ENV_REQUIRED]):
+          raise Exception(
+              "environ required but not provided (cluster/role/env = %s). See %s in %s" %
+              (cluster_role_env, IS_ENV_REQUIRED, CLIENT_YAML))
         else:
           parts.append(ENVIRON)
 
@@ -342,7 +346,7 @@ def check_release_file_exists():
 
   # if the file does not exist and is not a file
   if not os.path.isfile(release_file):
-    Log.error("%s file not found: %s" % release_file)
+    Log.error("Required file not found: %s" % release_file)
     return False
 
   return True

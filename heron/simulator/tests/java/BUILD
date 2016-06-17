@@ -10,7 +10,7 @@ test_deps_files = \
     ]
 
 java_test(
-    name = "instance-executor_unittest",
+    name = "InstanceExecutorTest",
     srcs = glob(
         ["**/InstanceExecutorTest.java"] +
         ["**/PhysicalPlanUtilTest.java"],
@@ -20,56 +20,56 @@ java_test(
 )
 
 java_test(
-    name = "all-grouping_unittest",
+    name = "AllGroupingTest",
     srcs = glob(["**/AllGroupingTest.java"]),
     deps = test_deps_files, 
     size = "small",
 )
 
 java_test(
-    name = "custom-grouping_unittest",
+    name = "CustomGroupingTest",
     srcs = glob(["**/CustomGroupingTest.java"]),
     deps = test_deps_files, 
     size = "small",
 )
 
 java_test(
-    name = "fields-grouping_unittest",
+    name = "FieldsGroupingTest",
     srcs = glob(["**/FieldsGroupingTest.java"]),
     deps = test_deps_files, 
     size = "small",
 )
 
 java_test(
-    name = "lowest-grouping_unittest",
+    name = "LowestGroupingTest",
     srcs = glob(["**/LowestGroupingTest.java"]),
     deps = test_deps_files, 
     size = "small",
 )
 
 java_test(
-    name = "shuffle-grouping_unittest",
+    name = "ShuffleGroupingTest",
     srcs = glob(["**/ShuffleGroupingTest.java"]),
     deps = test_deps_files, 
     size = "small",
 )
 
 java_test(
-    name = "physical-plan-util_unittest",
+    name = "PhysicalPlanUtilTest",
     srcs = glob(["**/PhysicalPlanUtilTest.java"]),
     deps = test_deps_files, 
     size = "small",
 )
 
 java_test(
-    name = "rotating-map_unittest",
+    name = "RotatingMapTest",
     srcs = glob(["**/RotatingMapTest.java"]),
     deps = test_deps_files, 
     size = "small",
 )
 
 java_test(
-    name = "stream-consumers_unittest",
+    name = "StreamConsumersTest",
     srcs = glob(
         ["**/StreamConsumersTest.java"] +
         ["**/PhysicalPlanUtilTest.java"],
@@ -79,14 +79,14 @@ java_test(
 )
 
 java_test(
-    name = "tuple-cache_unittest",
+    name = "TupleCacheTest",
     srcs = glob(["**/TupleCacheTest.java"]),
     deps = test_deps_files, 
     size = "small",
 )
 
 java_test(
-    name = "xor-manager_unittest",
+    name = "XORManagerTest",
     srcs = glob(
         ["**/XORManagerTest.java"] +
         ["**/PhysicalPlanUtilTest.java"],
@@ -96,7 +96,7 @@ java_test(
 )
 
 java_test(
-    name = "simulator_unittest",
+    name = "SimulatorTest",
     srcs = glob(["**/SimulatorTest.java"]),
     deps = test_deps_files,
     size = "small",

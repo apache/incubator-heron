@@ -56,6 +56,7 @@ public final class ExclamationTopology {
       conf.setNumStmgrs(1);
       StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
     } else {
+      System.out.println("Toplogy name not provided as an argument, running in simulator mode.");
       LocalCluster cluster = new LocalCluster();
       cluster.submitTopology("test", conf, builder.createTopology());
       Utils.sleep(10000);
@@ -87,7 +88,7 @@ public final class ExclamationTopology {
       // collector.ack(tuple);
       if (++nItems % 100000 == 0) {
         long latency = System.currentTimeMillis() - startTime;
-        System.out.println("Done " + nItems + " in " + latency);
+        System.out.println("Bolt processed " + nItems + " tuples in " + latency + " ms");
         GlobalMetrics.incr("selected_items");
       }
     }

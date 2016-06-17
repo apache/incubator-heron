@@ -6,16 +6,19 @@ DIR=`dirname $0`
 
 source ${DIR}/common.sh
 
-start_timer "make site"
+T="make site"
+start_timer "$T"
 (cd website && make site)
-end_timer "make site"
+end_timer "$T"
 
-start_timer "${DIR}/build.sh"
+T="${DIR}/build.sh"
+start_timer "$T"
 ${DIR}/build.sh
-end_timer "${DIR}/build.sh"
+end_timer "$T"
 
-start_timer "${DIR}/test.sh"
+T="${DIR}/test.sh"
+start_timer "$T"
 ${DIR}/test.sh
-end_timer "${DIR}/test.sh"
+end_timer "$T"
 
 print_timer_summary
