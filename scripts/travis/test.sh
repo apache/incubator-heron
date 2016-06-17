@@ -2,18 +2,32 @@
 #
 # Script to kick off the travis CI integration test. Fail-fast if any of tthe below commands fail.
 #
-set -ex
+set -e
+
+DIR=`dirname $0`
+source ${DIR}/common.sh
 
 # build test related jar
+T="heron build integration-test"
+start_timer "$T"
 bazel --bazelrc=tools/travis-ci/bazel.rc build integration-test/src/...
+end_timer "$T"
 
 # install client
+T="heron client install"
+start_timer "$T"
 bazel --bazelrc=tools/travis-ci/bazel.rc run -- scripts/packages:heron-client-install.sh --user
+end_timer "$T"
 
 # run local integration test
+T="heron integration-test local"
+start_timer "$T"
 python integration-test/src/python/local_test_runner/main.py
+end_timer "$T"
 
 # run integration test
+T="heron integration-test"
+start_timer "$T"
 ./bazel-bin/integration-test/src/python/http_server/http-server 8080 &
 http_server_id=$!
 trap "kill -9 $http_server_id" SIGINT SIGTERM EXIT
@@ -23,4 +37,6 @@ trap "kill -9 $http_server_id" SIGINT SIGTERM EXIT
   -rh localhost -rp 8080\
   -tp integration-test/src/java/com/twitter/heron/integration_test/topology/ \
   -cl local -rl heron-staging -ev devel -pi 'file://${HERON_DIST}/heron-core.tar.gz'
+end_timer "$T"
 
+print_timer_summary

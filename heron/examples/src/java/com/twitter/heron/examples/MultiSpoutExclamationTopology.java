@@ -90,7 +90,7 @@ public final class MultiSpoutExclamationTopology {
       // collector.ack(tuple);
       if (++nItems % 100000 == 0) {
         long latency = System.currentTimeMillis() - startTime;
-        System.out.println("Done " + nItems + " in " + latency);
+        System.out.println("Bolt processed " + nItems + " tuples in " + latency + " ms");
         GlobalMetrics.incr("selected_items");
       }
     }

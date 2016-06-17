@@ -73,14 +73,11 @@ public final class ShellUtils {
   public static int runSyncProcess(
       boolean verbose, boolean isInheritIO, String[] cmdline, StringBuilder stdout,
       StringBuilder stderr, File workingDirectory) {
-    // TODO(nbhagat): Update stdout and stderr
-
     StringBuilder pStdOut = stdout;
     StringBuilder pStdErr = stderr;
     try {
-      if (verbose) {
-        LOG.info("$> " + Arrays.toString(cmdline));
-      }
+      // Log the command for debugging
+      LOG.log(Level.FINE, "$> {0}", Arrays.toString(cmdline));
       Process process = getProcessBuilder(isInheritIO, cmdline, workingDirectory).start();
 
       int exitValue = process.waitFor();
@@ -92,10 +89,12 @@ public final class ShellUtils {
       }
       pStdOut.append(inputstreamToString(process.getInputStream()));
       pStdErr.append(inputstreamToString(process.getErrorStream()));
-      if (verbose) {
-        LOG.info(pStdOut.toString());
-        LOG.info(pStdErr.toString());
-      }
+
+      LOG.log(Level.FINE, "\tSTDOUT: {0}", pStdOut.toString());
+
+      // Always log the stderr if there is any
+      LOG.log(Level.SEVERE, "\tSTDERR: {0}", pStdErr.toString());
+
       return exitValue;
     } catch (IOException | InterruptedException e) {
       LOG.severe("Failed to check status of packer " + e);
@@ -110,9 +109,8 @@ public final class ShellUtils {
 
   public static Process runASyncProcess(
       boolean verbose, String[] command, File workingDirectory) {
-    if (verbose) {
-      LOG.info("$> " + Arrays.toString(command));
-    }
+    // Log the command for debugging
+    LOG.log(Level.FINE, "$> {0}", Arrays.toString(command));
 
     // For AsyncProcess, we will never inherit IO, since parent process will not
     // be guaranteed alive when children processing trying to flush to

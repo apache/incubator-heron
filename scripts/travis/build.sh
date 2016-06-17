@@ -6,6 +6,9 @@
 
 set -e
 
+DIR=`dirname $0`
+source ${DIR}/common.sh
+
 # verify that jars have not been added to the repo
 JARS=`find . -name "*.jar"`
 if [ "$JARS" ]; then
@@ -46,15 +49,32 @@ cat ~/.bazelrc >> tools/travis-ci/bazel.rc
 ./bazel_configure.py
 
 # build heron
+T="heron build"
+start_timer "$T"
 bazel --bazelrc=tools/travis-ci/bazel.rc build heron/...
+end_timer "$T"
 
 # run heron unit tests
+T="heron test non-flaky"
+start_timer "$T"
 bazel --bazelrc=tools/travis-ci/bazel.rc test --test_tag_filters=-flaky heron/...
+end_timer "$T"
 
 # flaky tests are often due to test port race conditions, which should be fixed. For now, run them serially
+T="heron test flaky"
+start_timer "$T"
 bazel --bazelrc=tools/travis-ci/bazel.rc test --test_tag_filters=flaky --jobs=0 heron/...
+end_timer "$T"
 
 # build packages
+T="heron build tarpkgs"
+start_timer "$T"
 bazel --bazelrc=tools/travis-ci/bazel.rc build scripts/packages:tarpkgs
-bazel --bazelrc=tools/travis-ci/bazel.rc build scripts/packages:binpkgs
+end_timer "$T"
 
+T="heron build binpkgs"
+start_timer "$T"
+bazel --bazelrc=tools/travis-ci/bazel.rc build scripts/packages:binpkgs
+end_timer "$T"
+
+print_timer_summary
