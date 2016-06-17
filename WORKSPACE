@@ -7,6 +7,11 @@ powermock_version = "1.6.2"
 reef_version = "0.14.0"
 slf4j_version = "1.7.7"
 
+maven_jar(
+  name = "avro",
+  artifact = "org.apache.avro:avro:1.7.4"
+)
+
 maven_server(
   name = "default",
   url = "http://central.maven.org/maven2/",
@@ -173,6 +178,11 @@ maven_jar(
 )
 
 maven_jar(
+  name = "netty-all",
+  artifact = "io.netty:netty-all:4.0.21.Final"
+)
+
+maven_jar(
   name = "objenesis",
   artifact = "org.objenesis:objenesis:2.1",
 )
@@ -218,6 +228,11 @@ maven_jar(
 )
 
 maven_jar(
+  name = "reef-runtime-local",
+  artifact = "org.apache.reef:reef-runtime-local:" + reef_version
+)
+
+maven_jar(
   name = "reef-runtime-yarn",
   artifact = "org.apache.reef:reef-runtime-yarn:" + reef_version
 )
@@ -225,31 +240,6 @@ maven_jar(
 maven_jar(
   name = "reef-utils",
   artifact = "org.apache.reef:reef-utils:" + reef_version
-)
-
-maven_jar(
-  name = "tang",
-  artifact = "org.apache.reef:tang:" + reef_version
-)
-
-maven_jar(
-  name = "wake",
-  artifact = "org.apache.reef:wake:" + reef_version
-)
-
-maven_jar(
-  name = "reef-runtime-local",
-  artifact = "org.apache.reef:reef-runtime-local:" + reef_version
-)
-
-maven_jar(
-  name = "avro",
-  artifact = "org.apache.avro:avro:1.7.4"
-)
-
-maven_jar(
-  name = "netty-all",
-  artifact = "io.netty:netty-all:4.0.21.Final"
 )
 
 maven_jar(
@@ -268,9 +258,19 @@ maven_jar(
 )
 
 maven_jar(
+  name = "tang",
+  artifact = "org.apache.reef:tang:" + reef_version
+)
+
+maven_jar(
   name = "thrift",
   artifact = "org.apache.thrift:libthrift:0.5.0-1",
   server = "twitter-maven",
+)
+
+maven_jar(
+  name = "wake",
+  artifact = "org.apache.reef:wake:" + reef_version
 )
 
 maven_jar(
