@@ -131,7 +131,7 @@ function install_to_maven() {
   # Uncompress from zip
   tmp_dir=`mktemp -d -t heron.XXXX`
   unzip -q -o "${BASH_SOURCE[0]}" -d "${tmp_dir}"
-  `$UNTAR_CMD ${tmp_dir}/heron-api.tar.gz -C ${tmp_dir}`
+  $UNTAR_CMD ${tmp_dir}/heron-api.tar.gz -C ${tmp_dir}
 
   # Install into maven local
   mvn install:install-file -q -Dfile="${tmp_dir}/heron-api.jar" -DgroupId="com.twitter.heron" \
