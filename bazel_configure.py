@@ -21,7 +21,7 @@ import datetime
 import platform
 import subprocess
 
-sys.path.append('3rdparty/python/semver')
+sys.path.append('third_party/python/semver')
 import semver
 
 ######################################################################

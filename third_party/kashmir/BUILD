@@ -17,7 +17,7 @@ cc_library(
         "uuid.h",
     ],
     copts = [
-        "-I3rdparty",
+        "-Ithird_party",
         "-I.",
     ],
     linkstatic = 1,

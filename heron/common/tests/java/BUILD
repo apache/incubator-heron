@@ -33,7 +33,7 @@ java_test(
     srcs = glob(["**/FileUtilsTest.java"]),
     deps = [
         "//heron/common/src/java:common-java",
-        "//3rdparty/java:powermock",
+        "//third_party/java:powermock",
         "@bazel_tools//third_party:mockito",
         "@bazel_tools//third_party:junit4",
     ],

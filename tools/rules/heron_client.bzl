@@ -49,7 +49,7 @@ def heron_client_lib_uploader_files():
         "//heron/uploaders/src/java:heron-hdfs-uploader",
     ]
 
-def heron_client_lib_3rdparty_files():
+def heron_client_lib_third_party_files():
     return [
         "@com_google_protobuf_protobuf_java//jar",
         "@org_slf4j_slf4j_api//jar",

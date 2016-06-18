@@ -11,7 +11,7 @@ java_library(
         "//heron/api/src/java:api-java",
         "//heron/storm/src/java:storm-compatibility-java",
         "//heron/proto:proto_topology_java",
-        "//3rdparty/java:jackson",
+        "//third_party/java:jackson",
         "@com_google_protobuf_protobuf_java//jar",
         "@org_apache_httpcomponents_http_client//jar",
         "@org_apache_httpcomponents_http_core//jar",
@@ -26,8 +26,8 @@ java_library(
     deps = [
         "//heron/api/src/java:api-java",
         "//heron/storm/src/java:storm-compatibility-java",
-        "//3rdparty/java:hadoop-core",
-        "//3rdparty/java:jackson",
+        "//third_party/java:hadoop-core",
+        "//third_party/java:jackson",
         ":core"
     ],
 )

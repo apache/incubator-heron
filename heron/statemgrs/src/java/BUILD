@@ -19,7 +19,7 @@ zookeeper_deps_files = \
         "@org_apache_curator_curator_client//jar",
         "@org_apache_curator_curator_framework//jar",
         "@org_apache_zookeeper_zookeeper//jar",
-        "//3rdparty/java:logging"
+        "//third_party/java:logging"
     ]
 
 java_library(

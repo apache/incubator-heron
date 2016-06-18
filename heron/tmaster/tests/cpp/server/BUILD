@@ -11,7 +11,7 @@ cc_test(
     deps = [
         "//heron/stmgr/src/cpp:manager-cxx",
         "//heron/tmaster/src/cpp:tmaster-cxx",
-        "//3rdparty/gtest:gtest-cxx",
+        "//third_party/gtest:gtest-cxx",
     ],
     data = [
         "//heron/config/src/yaml:test-config-internals-yaml",

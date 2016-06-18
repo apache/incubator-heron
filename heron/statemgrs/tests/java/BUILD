@@ -2,7 +2,7 @@
 load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 test_deps_files = [
-    "//3rdparty/java:powermock",
+    "//third_party/java:powermock",
     "@bazel_tools//third_party:mockito",
     "@bazel_tools//third_party:junit4",
     "@com_google_guava_guava//jar",

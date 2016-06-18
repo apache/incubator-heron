@@ -46,7 +46,7 @@ genthrift_java = rule(
     genthrift_java_impl,
     attrs = genthrift_base_attrs + {
         "_thrift": attr.label(
-            default = Label("//3rdparty/thrift:thrift"),
+            default = Label("//third_party/thrift:thrift"),
             allow_files = True,
             single_file = True,
         ),
@@ -71,7 +71,7 @@ def thrift_library(name, src=None, deps=[], visibility=None,
     )
     java_deps = [
         "@org_apache_thrift_libthrift//jar",
-        "//3rdparty/java:logging",
+        "//third_party/java:logging",
     ]
     for dep in deps:
       java_deps += [dep+"_java"]

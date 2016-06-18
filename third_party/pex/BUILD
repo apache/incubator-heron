@@ -6,7 +6,7 @@ py_library(
     name = 'pex',
     srcs = glob(['**/*.py']),
     deps = [
-        "//3rdparty/setuptools:pkg_resources",
+        "//third_party/setuptools:pkg_resources",
     ]
 )
 

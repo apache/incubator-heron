@@ -5,8 +5,8 @@ common_deps = [
     "@commons_cli_commons_cli//jar",
     "@commons_lang_commons_lang//jar",
     "@com_google_guava_guava//jar",
-    "//3rdparty/java/bazel:extra_actions_proto_java",
-    "//3rdparty/java/bazel:proto_java",
+    "//third_party/java/bazel:extra_actions_proto_java",
+    "//third_party/java/bazel:proto_java",
 ]
 
 java_binary(
@@ -15,7 +15,7 @@ java_binary(
     main_class = "com.twitter.bazel.checkstyle.JavaCheckstyle",
     deps = common_deps + [
         "@com_puppycrawl_tools_checkstyle//jar",
-        "//3rdparty/java:checkstyle",
+        "//third_party/java:checkstyle",
     ],
 )
 
@@ -38,7 +38,7 @@ java_library(
     srcs = ["ExtraActionUtils.java"],
     deps = [
         "@com_google_protobuf_protobuf_java//jar",
-        "//3rdparty/java/bazel:extra_actions_proto_java",
-        "//3rdparty/java/bazel:proto_java",
+        "//third_party/java/bazel:extra_actions_proto_java",
+        "//third_party/java/bazel:proto_java",
     ],
 )

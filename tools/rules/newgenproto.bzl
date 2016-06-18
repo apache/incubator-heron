@@ -60,7 +60,7 @@ _genproto_attrs = {
         providers = ["proto_src"],
     ),
     "_protoc": attr.label(
-        default = Label("//3rdparty/protobuf:protoc"),
+        default = Label("//third_party/protobuf:protoc"),
         executable = True,
     ),
     "gen_cc": attr.bool(),
@@ -124,7 +124,7 @@ def proto_library(name, src=None, deps=[], visibility=None,
     )
 
   if gen_cc:
-    cc_deps = ["//3rdparty/protobuf:protobuf-cxx"]
+    cc_deps = ["//third_party/protobuf:protobuf-cxx"]
     for dep in deps:
       cc_deps += [dep + "_cc"]
     native.cc_library(
