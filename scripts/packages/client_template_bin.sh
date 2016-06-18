@@ -1,5 +1,3 @@
-#!/bin/bash -e
-
 # Copyright 2015 The Bazel Authors. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -151,7 +149,7 @@ mkdir -p ${bin} ${base} ${base}/etc
 echo -n .
 
 unzip -q -o "${BASH_SOURCE[0]}" -d "${base}"
-tar xfz "${base}/heron-client.tar.gz" -C "${base}"
+untar ${base}/heron-client.tar.gz ${base}
 echo -n .
 chmod 0755 ${base}/bin/heron
 echo -n .
