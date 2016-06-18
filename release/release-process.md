@@ -49,7 +49,7 @@ Example, create folder named ```heron-api-bundle-0.14.0```
 Artifact bundle must contain:
 
 1. {artifact-version}.jar
-2. {artifact-version}-pom.jar
+2. {artifact-version}.pom
 3. {artifact-version}-javadoc.jar
 4. {artifact-version}-sources.jar
 
