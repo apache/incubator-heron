@@ -38,7 +38,7 @@ sudo apt-get update -y
 sudo apt-get install oracle-java8-installer -y
 ```
 
-#### Step 5 - Install Bazel
+#### Step 5 - Install Bazel {{% bazelVersion %}}
 
 ```bash
 wget https://github.com/bazelbuild/bazel/releases/download/0.2.3/bazel-0.2.3-installer-linux-x86_64.sh
@@ -176,7 +176,7 @@ export JRE_HOME=/opt/jdk1.8.0_91/jre
 export PATH=$PATH:/opt/jdk1.8.0_91/bin:/opt/jdk1.8.0_91/jre/bin
 ```
 
-#### Step 5 - Install Bazel 0.2.3
+#### Step 5 - Install Bazel {{% bazelVersion %}}
 
 ```bash
 wget https://github.com/bazelbuild/bazel/releases/download/0.2.3/bazel-0.2.3-installer-linux-x86_64.sh

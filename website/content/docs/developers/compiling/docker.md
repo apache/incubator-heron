@@ -162,7 +162,7 @@ RUN \
 ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
 ```
 
-#### Step 5 - An installation script for [Bazel](http://bazel.io/) version 0.2.3 or above.
+#### Step 5 - An installation script for [Bazel](http://bazel.io/) version {{% bazelVersion %}} or above.
 Here's an example:
 
 ```dockerfile

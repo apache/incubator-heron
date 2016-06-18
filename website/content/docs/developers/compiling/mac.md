@@ -25,7 +25,7 @@ $ export CXX=/usr/bin/clang++
 $ echo $CC $CXX
 ```
 
-#### Step 4 - Install Bazel
+#### Step 4 - Install Bazel {{% bazelVersion %}}
 
 ```bash
 curl -O -L https://github.com/bazelbuild/bazel/releases/download/0.2.3/bazel-0.2.3-installer-darwin-x86_64.sh
