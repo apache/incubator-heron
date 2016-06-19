@@ -1,16 +1,16 @@
 ---
 title: Release Process
 ---
-<-- TODO -->
+<!-- TODO -->
 # How to Update Version
 
-<-- TODO -->
+<!-- TODO -->
 # How to Tag
 
-<-- TODO -->
+<!-- TODO -->
 # Test Process
 
-<-- TODO -->
+<!-- TODO -->
 # Build Process
 
 
@@ -33,8 +33,8 @@ Follow [Manual Staging Bundle Creation and Deployment](http://central.sonatype.o
 Three artifacts are required for each version: `heron-api`, `heron-storm`, and `heron-spi`
 Example POM template files required located in `heron/release/maven/`
 
-<-- TODO refer to release "build process" instructions, not download  -->
-<-- TODO update for "heron-spi" artifact when available -->
+<!-- TODO refer to release "build process" instructions, not download  -->
+<!-- TODO update for "heron-spi" artifact when available -->
 ### Step 1 - Download and install `heron-api-install-{VERSION}-{DIST}.sh` from [github releases](https://github.com/twitter/heron/releases)
 
 Example for version `0.14.0` installed using `--user`
