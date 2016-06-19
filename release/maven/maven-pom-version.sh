@@ -16,10 +16,15 @@
 # Updates maven POM artifacts with version.
 
 # Usage
-# ./maven-central/maven-pom-version.sh VERSION
+# ./maven/maven-pom-version.sh VERSION
 # Example
-# ./maven-central/maven-pom-version.sh 0.14.1
+# ./maven/maven-pom-version.sh 0.14.1
 
-cat ./maven-central/heron-api.pom.template | sed "s/VERSION/$1/g" >> ./heron-api-$1.pom
-cat ./maven-central/heron-storm.pom.template | sed "s/VERSION/$1/g" >> ./heron-storm-$1.pom
-cat ./maven-central/heron-spi.pom.template | sed "s/VERSION/$1/g" >> ./heron-spi-$1.pom
+if [ "$1" = "" ]; then
+    echo "ERROR: heron version missing. Usage './maven/maven-pom-version.sh VERSION' "
+    exit 1
+fi
+
+cat ./maven/heron-api.pom.template | sed "s/VERSION/$1/g" >> ./heron-api-$1.pom
+cat ./maven/heron-storm.pom.template | sed "s/VERSION/$1/g" >> ./heron-storm-$1.pom
+cat ./maven/heron-spi.pom.template | sed "s/VERSION/$1/g" >> ./heron-spi-$1.pom
