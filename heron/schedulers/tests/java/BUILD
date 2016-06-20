@@ -27,6 +27,20 @@ aurora_deps_files = [
     "//heron/schedulers/src/java:aurora-scheduler-java",
 ]
 
+yarn_deps_files = [
+    "//heron/schedulers/src/java:yarn-scheduler-java",
+    "@reef-common//jar",
+    "@tang//jar",
+    "@wake//jar",
+    "@reef-runtime-local//jar",
+    "@javax.inject//jar",
+    "@avro//jar",
+    "@commons-lang//jar",
+    "@netty-all//jar",
+    "@jackson-core-asl//jar",
+    "@jackson-mapper-asl//jar",
+]
+
 local_deps_files = [
     "//heron/schedulers/src/java:local-scheduler-java",
 ]
@@ -59,6 +73,38 @@ java_test(
     ["**/AuroraControllerTest.java"]
   ),
   deps=scheduler_deps_files + aurora_deps_files,
+  size="small",
+)
+
+java_test(
+  name="YarnSchedulerTest",
+  srcs=glob(["**/YarnSchedulerTest.java"]
+  ),
+  deps=scheduler_deps_files + yarn_deps_files,
+  size="small",
+)
+
+java_test(
+  name="HeronMasterDriverTest",
+  srcs=glob(["**/HeronMasterDriverTest.java"]
+  ),
+  deps=scheduler_deps_files + yarn_deps_files,
+  size="small",
+)
+
+java_test(
+  name="DriverOnLocalReefTest",
+  srcs=glob(["**/DriverOnLocalReefTest.java"]
+  ),
+  deps=scheduler_deps_files + yarn_deps_files,
+  size="small",
+)
+
+java_test(
+  name="HeronExecutorTaskTest",
+  srcs=glob(["**/HeronExecutorTaskTest.java"]
+  ),
+  deps=scheduler_deps_files + yarn_deps_files,
   size="small",
 )
 
