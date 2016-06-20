@@ -97,6 +97,7 @@ def create_parser():
 
   # subparser for help subcommand
   help.create_parser(subparsers)
+
   return parser
 
 ################################################################################
@@ -114,8 +115,6 @@ def run(command, *args):
   # logical plan
   if command == 'components':
     return physicalplan.run_components(command, *args)
-  if command == 'metrics':
-    return physicalplan.run_metrics(command, *args)
   if command == 'cluster':
     return show.run_cluster(command, *args)
   if command == 'env':

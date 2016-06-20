@@ -32,6 +32,7 @@ def create_parser(subparsers):
     add_help = False)
   args.add_cluster_env_topo(spouts_parser)
   args.add_role(spouts_parser)
+  args.add_spout_name(spouts_parser)
   spouts_parser.set_defaults(subcommand='spouts')
 
   bolts_parser = subparsers.add_parser(
@@ -41,6 +42,7 @@ def create_parser(subparsers):
     add_help = False)
   args.add_cluster_env_topo(bolts_parser)
   args.add_role(bolts_parser)
+  args.add_bolt_name(bolts_parser)
   bolts_parser.set_defaults(subcommand='bolts')
 
   containers_parser = subparsers.add_parser(
@@ -103,15 +105,50 @@ def get_component_metrics(component, cluster, env, topology):
     stats.append(info)
   headers = ['container id'] + [m[k] for k in all_queries if k in metrics.keys()]
   sys.stdout.flush()
+  print('\'%s\' metrics:' % component)
   print(tabulate(stats, headers=headers))
   sys.stdout.flush()
   return True
 
 def run_spouts(command, parser, cl_args, unknown_args):
+  print(cl_args)
   try:
-    [cluster, env, topology] = parse_topo_loc(cl_args)
+    topo_loc = [cluster, env, topology] = parse_topo_loc(cl_args)
   except:
     return False
+  try:
+    result = get_topology_info(*topo_loc)
+    spouts = result['physical_plan']['spouts'].keys()
+    spout_name = cl_args['spout']
+    if spout_name in spouts:
+      spouts = [spout_name]
+  except Exception as ex:
+    LOG.error('Error %s' % str(ex))
+    return False
+  for spout in spouts:
+    result = get_component_metrics(spout, cluster, env, topology)
+    if not result: return False
+  return True
+
+def run_bolts(command, parser, cl_args, unknown_args):
+  print(cl_args)
+  try:
+    topo_loc = [cluster, env, topology] = parse_topo_loc(cl_args)
+  except:
+    return False
+  try:
+    result = get_topology_info(*topo_loc)
+    bolts = result['physical_plan']['bolts'].keys()
+    bolt_name = cl_args['bolt']
+    if bolt_name in bolts:
+      bolts = [bolt_name]
+  except Exception as ex:
+    LOG.error('Error %s' % str(ex))
+    return False
+  for bolt in bolts:
+    result = get_component_metrics(bolt, cluster, env, topology)
+    if not result: return False
+  return True
 
 def run_containers(command, parser, cl_args, unknown_args):
   try:
@@ -143,35 +180,3 @@ def run_containers(command, parser, cl_args, unknown_args):
     sys.stdout.flush()
     print(tabulate(table, headers=headers))
     return True
-
-
-'''
-def run_metrics(command, parser, cl_args, unknown_args):
-  try:
-    topo_loc = [cluster, env, topology] = cl_args['[cluster]/[env]/[topology]'].split('/')
-  except Exception:
-
-  [container_id, spout_name, bolt_name] = [cl_args[k] for k in ['cid', 'spout', 'bolt']]
-  if spout_name is None and bolt_name is None:
-
-    else:
-      try:
-        name = stmgrs[container_id]
-      except Exception as ex:
-        LOG.error("Error: %s" % str(ex))
-        LOG.error("Unknown container ID \'%d\'" % container_id)
-      container = containers[name]
-      table = []
-      for k in ["host", "pid", "id"]:
-        table.append([k, container[k]])
-      sys.stdout.flush()
-      print(tabulate(table))
-      return True
-  elif spout_name is not None:
-    return get_component_metrics(spout_name, *topo_loc)
-  elif bolt_name is not None:
-    return get_component_metrics(bolt_name, *topo_loc)
-  else:
-    LOG.error("Unknown error")
-    return False
-'''
