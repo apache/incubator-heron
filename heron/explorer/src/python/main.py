@@ -107,20 +107,29 @@ def run(command, *args):
   # physical plan
   if command == 'containers':
     return physicalplan.run_containers(command, *args)
-  if command == 'spouts':
+  if command == 'spouts-metric':
     return physicalplan.run_spouts(command, *args)
-  if command == 'bolts':
+  if command == 'bolts-metric':
     return physicalplan.run_bolts(command, *args)
 
   # logical plan
   if command == 'components':
-    return physicalplan.run_components(command, *args)
+    return logicalplan.run_components(command, *args)
+  if command == 'spouts':
+    return logicalplan.run_spouts(command, *args)
+  if command == 'bolts':
+    return logicalplan.run_bolts(command, *args)
+
+  # show
   if command == 'cluster':
     return show.run_cluster(command, *args)
   if command == 'env':
     return show.run_env(command, *args)
+
+  # help
   if command == 'help':
     return help.run(command, *args)
+
   return 1
 
 def configure_logging(level):

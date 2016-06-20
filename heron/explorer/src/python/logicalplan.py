@@ -23,18 +23,34 @@ import json
 LOG = logging.getLogger(__name__)
 
 def create_parser(subparsers):
-  parser = subparsers.add_parser(
+  components_parser = subparsers.add_parser(
     'components',
     help='display information of a topology in a logical plan',
     usage = "%(prog)s [options]",
     add_help = False)
+  args.add_cluster_env_topo(components_parser)
+  args.add_role(components_parser)
+  components_parser.set_defaults(subcommand='components')
 
-  args.add_cluster_env_topo(parser)
-  args.add_spouts(parser)
-  args.add_bolts(parser)
-  args.add_verbose(parser)
-  parser.set_defaults(subcommand='components')
-  return parser
+  spouts_parser = subparsers.add_parser(
+    'spouts',
+    help='display information of spouts of a topology in a logical plan',
+    usage = "%(prog)s [options]",
+    add_help = False)
+  args.add_cluster_env_topo(spouts_parser)
+  args.add_role(spouts_parser)
+  spouts_parser.set_defaults(subcommand='spouts')
+
+  bolts_parser = subparsers.add_parser(
+    'bolts',
+    help='display information of bolts of a topology in a logical plan',
+    usage = "%(prog)s [options]",
+    add_help = False)
+  args.add_cluster_env_topo(bolts_parser)
+  args.add_role(bolts_parser)
+  bolts_parser.set_defaults(subcommand='bolts')
+
+  return subparsers
 
 def get_logical_plan(cluster, env, topology):
   instance = tornado.ioloop.IOLoop.instance()
@@ -46,22 +62,23 @@ def get_logical_plan(cluster, env, topology):
               % ('/'.join([cluster, env, topology])))
     raise
 
-def get_components(cl_args):
+def parse_topo_loc(cl_args):
   try:
-    topo_loc = cl_args['[cluster]/[env]/[topology]']
-    [cluster, env, topology] = topo_loc.split('/')
+    topo_loc = cl_args['[cluster]/[env]/[topology]'].split('/')
+    if len(topo_loc) != 3 and len(topo_loc) != 4:
+      raise
+    return topo_loc
   except Exception:
-    LOG.error('Error: invalid topology location \'%s\'' % topo_loc)
+    LOG.error('Error: invalid topology location')
     raise
-  try:
-    return get_logical_plan(cluster, env, topology), topo_loc
-  except Exception as ex:
-    LOG.error('Error: %s' % str(ex))
-    raise
+
+def dump_components(components):
+  print(TopologyDAG(components))
+  return True
 
 def dump_bolts(bolts, topo_loc):
   try:
-    print('Bolts under topology \'%s\'' % topo_loc)
+    print('Bolts under topology \'%s\'' % '/'.join(topo_loc))
     for bolt in bolts.keys():
       print('  %s' % bolt)
     return True
@@ -71,7 +88,7 @@ def dump_bolts(bolts, topo_loc):
 
 def dump_spouts(spouts, topo_loc):
   try:
-    print('Spouts under topology \'%s\'' % topo_loc)
+    print('Spouts under topology \'%s\'' % '/'.join(topo_loc))
     for spout in spouts.keys():
       print('  %s' % spout)
     return True
@@ -79,20 +96,28 @@ def dump_spouts(spouts, topo_loc):
     LOG.error('Error: %s' % str(ex))
     raise ex
 
-def run(command, parser, cl_args, unknown_args):
+def run(cl_args, bolts_only, spouts_only):
   try:
-    print(cl_args)
-    components, topo_loc = get_components(cl_args)
-    show_bolts, show_spouts = cl_args['bolt'], cl_args['spout']
+    topo_loc = [cluster, env, topology] = parse_topo_loc(cl_args)
+  except:
+    return False
+  try:
+    components = get_logical_plan(cluster, env ,topology)
     bolts, spouts = components["bolts"], components["spouts"]
-    if not show_bolts and not show_spouts:
-      # should display some ascii topology
-      # but Python does not have a handy library for doing this
-      str(TopologyDAG(components))
-      return False
+    if not bolts and not spouts:
+      return dump_components(components)
+    if bolts_only:
+      return dump_bolts(bolts, topo_loc)
     else:
-      if show_bolts: dump_bolts(bolts, topo_loc)
-      if show_spouts: dump_spouts(spouts, topo_loc)
-      return True
-  except Exception as ex:
-    print('Error: %s' % str(ex))
+      return dump_spouts(spouts, topo_loc)
+  except:
+    return False
+
+def run_components(command, parser, cl_args, unknown_args):
+  return run(cl_args, False, False)
+
+def run_spouts(command, parser, cl_args, unknown_args):
+  return run(cl_args, False, True)
+
+def run_bolts(command, parser, cl_args, unknown_args):
+  return run(cl_args, True, False)

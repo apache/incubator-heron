@@ -26,24 +26,24 @@ LOG = logging.getLogger(__name__)
 
 def create_parser(subparsers):
   spouts_parser = subparsers.add_parser(
-    'spouts',
+    'spouts-metric',
     help = 'show info of a topology\'s spouts metrics',
     usage = "%(prog)s [options]",
     add_help = False)
   args.add_cluster_env_topo(spouts_parser)
   args.add_role(spouts_parser)
   args.add_spout_name(spouts_parser)
-  spouts_parser.set_defaults(subcommand='spouts')
+  spouts_parser.set_defaults(subcommand='spouts-metric')
 
   bolts_parser = subparsers.add_parser(
-   'bolts',
+   'bolts-metric',
     help = 'show info of a topology\'s bolts metrics',
     usage = "%(prog)s [options]",
     add_help = False)
   args.add_cluster_env_topo(bolts_parser)
   args.add_role(bolts_parser)
   args.add_bolt_name(bolts_parser)
-  bolts_parser.set_defaults(subcommand='bolts')
+  bolts_parser.set_defaults(subcommand='bolts-metric')
 
   containers_parser = subparsers.add_parser(
     'containers',
