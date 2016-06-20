@@ -75,6 +75,7 @@ heron-spi-0.14.1.pom
 Copy versioned POM files to artifact temp directory
 
 ### Step 3 - Manually sign each file using GPG/PGP 
+
 Use GPG/PGP to sign each file by following [steps](http://central.sonatype.org/pages/requirements.html#sign-files-with-gpgpgp)
 
 Example on Mac OS X using gpg 
@@ -85,7 +86,7 @@ heron-api-0.14.0-javadoc.jar
 heron-api-0.14.0-javadoc.jar.asc
 ```
 
-### Step 3 - Create `bundle.jar` for each `heron-api`, `heron-storm` and `heron-spi` artifact
+### Step 4 - Create `bundle.jar` for each `heron-api`, `heron-storm` and `heron-spi` artifact
 
 For each artifact temp file, for example `heron-api-bundle-0.14.0` following .jar and signed .asc files are required:
 ```
@@ -109,7 +110,7 @@ bundle.jar
 ...
 ```
 
-### Step 4 - Upload each `bundle.jar` to [sonatype.org](https://oss.sonatype.org/#welcome) and Release to Maven Central
+### Step 5 - Upload each `bundle.jar` to [sonatype.org](https://oss.sonatype.org/#welcome) and Release to Maven Central
 
 Login to [sonatype.org](https://oss.sonatype.org/#welcome)
 
