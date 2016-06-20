@@ -89,15 +89,10 @@ are made.
 
 ## Checking Links
 
-To verify that the links in the docs are all valid, run `make linkchecker`,
-which will produce a report of broken links. If `linkchecker` fails to install
-or run properly, you can install it manually. Note that due to [this
-issue](https://github.com/wummel/linkchecker/pull/657) `linkchecker` versions
-9.2 and 9.3 require Python `requests` >= 2.2.0 and < 2.10.0.
-
-If you run `make setup` you should have all of these tools available. Be warned,
-though, that `make setup` will uninstall whichever version of `requests` you
-currently have installed and replace it with version 2.9.0.
+To verify that the links in the docs are all valid, make sure `wget` is installed
+and run `make linkchecker`, which will produce a report of broken links. However,
+no URL of parent webpages that contain broken links will be reported, but
+one can use `grep` command to find those parent webpages.
 
 ## Publishing the Site
 
@@ -106,7 +101,7 @@ website is what is committed on the [gh-pages
 branch](https://github.com/twitter/heron/tree/gh-pages) of the Heron repo. To
 simplify publishing docs generated from `master` onto the `gh-pages` branch, the
 output directory of the site build process (i.e. `website/public`) is a
-submodule that points to the `gh-pages` branch of the heron repo. 
+submodule that points to the `gh-pages` branch of the heron repo.
 
 A one-time setup is required to initialize the `website/public` submodule:
 
