@@ -59,7 +59,7 @@ Artifact bundle must contain (code format for `{artifact-version}.jar` generated
 
 Note `heron-api-0.14.0-javadoc.jar` and `heron-api-0.14.0-sources.jar` are currently placeholders due to Bazel version but required by Maven Central checks.  
 
-Copy artifact {artifact}.jar from `~/.heronapi` to temp folder and rename to `{artifact-version}.jar`
+Copy artifact `{artifact}.jar` from `~/.heronapi` to temp folder and rename to `{artifact-version}.jar`
 
 Generate versioned POM file using `./maven/maven-pom-version.sh VERSION`
 Example:
