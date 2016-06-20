@@ -15,7 +15,7 @@
 import os
 import re
 import sys
-import shutil
+import stat
 import getpass
 import datetime
 import platform
@@ -42,7 +42,7 @@ def discover_user():
 # Discover the name of the host compiling
 ######################################################################
 def discover_host():
-  return platform.uname().node
+  return platform.node()
 
 ######################################################################
 # Get the time of the setup - does not change every time you compile
@@ -54,19 +54,19 @@ def discover_timestamp():
 # Get the processor the platform is running on
 ######################################################################
 def discover_processor():
-  return platform.uname().machine
+  return platform.machine()
 
 ######################################################################
 # Get the operating system of the platform
 ######################################################################
 def discover_os():
-  return platform.uname().system
+  return platform.system()
 
 ######################################################################
 # Get the operating system version
 ######################################################################
 def discover_os_version():
-  return platform.uname().release
+  return platform.release()
 
 ######################################################################
 # Get the git sha of the branch - you are working
@@ -123,12 +123,6 @@ def real_program_path(program_name):
     return os.path.realpath(which_path)
 
   return None
-
-######################################################################
-# Get the real path of the program
-######################################################################
-def real_path(apath):
-  return os.path.realpath(apath)
 
 def fail(message):
   print("\nFAILED:  %s" % message)
@@ -246,16 +240,14 @@ def discover_program(program_name, env_variable = ""):
 # Get the platform we are running
 ######################################################################
 def discover_platform():
-  output = subprocess.Popen(['uname'], stdout=subprocess.PIPE).communicate()
-  return output[0].strip("\n")
+  return discover_os()
 
 ######################################################################
 # Make the file executable
 ######################################################################
 def make_executable(path):
-  mode = os.stat(path).st_mode
-  mode |= (mode & 0444) >> 2    # copy R bits to X
-  os.chmod(path, mode)
+  st_mode = os.stat(path).st_mode
+  os.chmod(path, st_mode | stat.S_IXUSR)
 
 ######################################################################
 # Discover a tool needed to compile Heron
@@ -294,21 +286,6 @@ def discover_tool_default(program, msg, envvar, defvalue):
   else:
     print 'Using %s:\t%s' % (msg.ljust(20), VALUE)
   return VALUE
-
-######################################################################
-# Discover the includes paths for files
-######################################################################
-def discover_include_paths(program):
-  includes_command = program + ' -E -x c++ - -v 2>&1 < /dev/null '  \
-    + '| sed -n \'/search starts here:/,/End of search list/p\' '  \
-    + '| sed \'/#include.*/d\' ' \
-    + '| sed \'/End of search list./d\' '
-  includes = subprocess.Popen(includes_command, shell=True, stdout=subprocess.PIPE).communicate()[0]
-  include_paths = [real_path(path.strip()) for path in includes.split('\n')]
-  builtin_includes  = '\n'.join([
-    '  cxx_builtin_include_directory: "%s"' % item for item in include_paths
-  ])
-  return builtin_includes
 
 def export_env_to_file(out_file, env):
   if env in os.environ:
