@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-#set -e TODO: figure out why this breaks CI and re-enable (https://github.com/twitter/heron/issues/766)
-
+set -e
 JAVADOC=javadoc
 FLAGS="-quiet"
 
 HERON_ROOT_DIR=$(git rev-parse --show-toplevel)
 JAVADOC_OUTPUT_DIR=$HERON_ROOT_DIR/website/public/api
+JAVADOC_OUTPUT_LOCAL_DIR=$HERON_ROOT_DIR/website/static/api
 GEN_PROTO_DIR=$HERON_ROOT_DIR/bazel-bin/heron/proto/_javac
 
 (cd $HERON_ROOT_DIR && bazel build \
@@ -30,6 +30,8 @@ CLOSURE_CLASSES="$HERON_ROOT_DIR/bazel-bin/heron/storm/src/java/_javac/storm-com
 export CLASSPATH=$BIN_JARS:$GEN_JARS:$SCRIBE_JARS:$PROTO_JARS:$CLOSURE_CLASSES
 
 $JAVADOC $FLAGS -d $JAVADOC_OUTPUT_DIR $GEN_FILES $HERON_SRC_FILES $BACKTYPE_SRC_FILES $APACHE_SRC_FILES
+
+cp -r $JAVADOC_OUTPUT_DIR $JAVADOC_OUTPUT_LOCAL_DIR
 
 echo "Javdocs generated at $JAVADOC_OUTPUT_DIR"
 exit 0
