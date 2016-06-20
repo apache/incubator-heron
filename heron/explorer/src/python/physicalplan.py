@@ -32,6 +32,7 @@ def create_parser(subparsers):
     add_help = False)
   args.add_cluster_env_topo(spouts_parser)
   args.add_role(spouts_parser)
+  spouts_parser.set_defaults(subcommand='spouts')
 
   bolts_parser = subparsers.add_parser(
    'bolts',
@@ -40,21 +41,26 @@ def create_parser(subparsers):
     add_help = False)
   args.add_cluster_env_topo(bolts_parser)
   args.add_role(bolts_parser)
+  bolts_parser.set_defaults(subcommand='bolts')
 
-  components_parser = subparsers.add_parser(
-   'components',
-    help = 'show info of a topology\'s bolts components',
+  containers_parser = subparsers.add_parser(
+    'containers',
+    help = 'show info of a topology\'s containers metrics',
     usage = "%(prog)s [options]",
     add_help = False)
-  args.add_cluster_env_topo(components_parser)
-  args.add_role(components_parser)
+  args.add_cluster_env_topo(containers_parser)
+  args.add_role(containers_parser)
+  args.add_container_id(containers_parser)
+  containers_parser.set_defaults(subcommand='containers')
+  return subparsers
 
-  group = parser.add_mutually_exclusive_group()
-  args.add_container_id(group, required=False)
-  args.add_spout_name(group, required=False)
-  args.add_bolt_name(group, required=False)
-  parser.set_defaults(subcommand='metrics')
-  return parser
+def parse_topo_loc(cl_args):
+  try:
+    topo_loc = cl_args['[cluster]/[env]/[topology]'].split('/')
+    return topo_loc
+  except Exception:
+    LOG.error('Error: invalid topology location')
+    raise
 
 def get_topology_info(*args):
   instance = tornado.ioloop.IOLoop.instance()
@@ -101,38 +107,53 @@ def get_component_metrics(component, cluster, env, topology):
   sys.stdout.flush()
   return True
 
+def run_spouts(command, parser, cl_args, unknown_args):
+  try:
+    [cluster, env, topology] = parse_topo_loc(cl_args)
+  except:
+    return False
+
+def run_containers(command, parser, cl_args, unknown_args):
+  try:
+    [cluster, env, topology] = parse_topo_loc(cl_args)
+  except:
+    return False
+  container_id = cl_args['cid']
+  result = get_topology_info(cluster, env, topology)
+  containers = result['physical_plan']['stmgrs']
+  all_bolts, all_spouts = set(), set()
+  for container, bolts in result['physical_plan']['bolts'].items():
+    all_bolts = all_bolts | set(bolts)
+  for container, spouts in result['physical_plan']['spouts'].items():
+    all_spouts = all_spouts | set(spouts)
+  stmgrs = containers.keys()
+  stmgrs.sort()
+  if container_id is None:
+    table = []
+    for id, name in enumerate(stmgrs):
+      cid = id + 1
+      host = containers[name]["host"]
+      port = containers[name]["port"]
+      pid = containers[name]["pid"]
+      instances = containers[name]["instance_ids"]
+      bolt_nums = len([instance for instance in instances if instance in all_bolts])
+      spout_nums = len([instance for instance in instances if instance in all_spouts])
+      table.append([cid, host, port, pid, bolt_nums, spout_nums, len(instances)])
+    headers = ["container", "host", "port", "pid", "#bolt", "#spout", "#instance"]
+    sys.stdout.flush()
+    print(tabulate(table, headers=headers))
+    return True
+
+
+'''
 def run_metrics(command, parser, cl_args, unknown_args):
   try:
     topo_loc = [cluster, env, topology] = cl_args['[cluster]/[env]/[topology]'].split('/')
   except Exception:
-    LOG.error('Error: invalid topology location')
-    return False
+
   [container_id, spout_name, bolt_name] = [cl_args[k] for k in ['cid', 'spout', 'bolt']]
   if spout_name is None and bolt_name is None:
-    result = get_topology_info(cluster, env, topology)
-    containers = result['physical_plan']['stmgrs']
-    all_bolts, all_spouts = set(), set()
-    for container, bolts in result['physical_plan']['bolts'].items():
-      all_bolts = all_bolts | set(bolts)
-    for container, spouts in result['physical_plan']['spouts'].items():
-      all_spouts = all_spouts | set(spouts)
-    stmgrs = containers.keys()
-    stmgrs.sort()
-    if container_id is None:
-      table = []
-      for id, name in enumerate(stmgrs):
-        cid = id + 1
-        host = containers[name]["host"]
-        port = containers[name]["port"]
-        pid = containers[name]["pid"]
-        instances = containers[name]["instance_ids"]
-        bolt_nums = len([instance for instance in instances if instance in all_bolts])
-        spout_nums = len([instance for instance in instances if instance in all_spouts])
-        table.append([cid, host, port, pid, bolt_nums, spout_nums, len(instances)])
-      headers = ["container", "host", "port", "pid", "#bolt", "#spout", "#instance"]
-      sys.stdout.flush()
-      print(tabulate(table, headers=headers))
-      return True
+
     else:
       try:
         name = stmgrs[container_id]
@@ -153,3 +174,4 @@ def run_metrics(command, parser, cl_args, unknown_args):
   else:
     LOG.error("Unknown error")
     return False
+'''

@@ -103,8 +103,17 @@ def create_parser():
 # Run the command
 ################################################################################
 def run(command, *args):
+  # physical plan
+  if command == 'containers':
+    return physicalplan.run_containers(command, *args)
+  if command == 'spouts':
+    return physicalplan.run_spouts(command, *args)
+  if command == 'bolts':
+    return physicalplan.run_bolts(command, *args)
+
+  # logical plan
   if command == 'components':
-    return logicalplan.run(command, *args)
+    return physicalplan.run_components(command, *args)
   if command == 'metrics':
     return physicalplan.run_metrics(command, *args)
   if command == 'cluster':
