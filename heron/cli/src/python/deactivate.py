@@ -32,4 +32,4 @@ def run(command, parser, cl_args, unknown_args):
   :param unknown_args:
   :return:
   '''
-  return cli_helper.run.run_helper(command, parser, cl_args, unknown_args, "deactivate topology")
+  return cli_helper.run_helper(command, parser, cl_args, unknown_args, "deactivate topology")
