@@ -33,7 +33,7 @@ export CLASSPATH=$BIN_JARS:$GEN_JARS:$SCRIBE_JARS:$PROTO_JARS:$CLOSURE_CLASSES
 
 $JAVADOC $FLAGS -d $JAVADOC_OUTPUT_DIR $GEN_FILES $HERON_SRC_FILES $BACKTYPE_SRC_FILES $APACHE_SRC_FILES
 
-# Generated Java API doc needs to be copied to $javadoc_output_local_dir
+# Generated Java API doc needs to be copied to $JAVADOC_OUTPUT_LOCAL_DIR
 # for the following two reasons:
 # 1. When one is developing website locally using Hugo server, he should
 #    be able to click into API doc link and view API doc to
@@ -41,7 +41,7 @@ $JAVADOC $FLAGS -d $JAVADOC_OUTPUT_DIR $GEN_FILES $HERON_SRC_FILES $BACKTYPE_SRC
 # 2. ``wget`` needs to verify if links to Java API doc are valid when Hugo is
 #    serving the website locally. This means that Hugo should be able to display
 #    Java API doc properly.
-cp -r $JAVADOC_OUTPUT_DIR $javadoc_output_local_dir
+cp -r $JAVADOC_OUTPUT_DIR $JAVADOC_OUTPUT_LOCAL_DIR
 
 echo "Javdocs generated at $JAVADOC_OUTPUT_DIR"
 exit 0
