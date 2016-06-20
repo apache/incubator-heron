@@ -256,34 +256,37 @@ genrule(
 
 genrule(
     name = "generate-client-launcher",
-    srcs = ["client_template_bin.sh"] + generated_release_files,
+    srcs = ["client_template_bin.sh", "bin_common.sh"] + generated_release_files,
     outs = ["client_launcher_bin.sh"],
     cmd = """
         release_info="$$(cat $(location :release.yaml))"
+        bin_common="$$(cat $(location bin_common.sh))"
         template="$$(cat $(location client_template_bin.sh))"
-        echo "$${template//%release_info%/$${release_info}}" >$@
+        echo "$${bin_common}\n\n$${template//%release_info%/$${release_info}}" >$@
         """,
 )
 
 genrule(
     name = "generate-tools-launcher",
-    srcs = ["tools_template_bin.sh"] + generated_release_files,
+    srcs = ["tools_template_bin.sh", "bin_common.sh"] + generated_release_files,
     outs = ["tools_launcher_bin.sh"],
     cmd = """
         release_info="$$(cat $(location :release.yaml))"
+        bin_common="$$(cat $(location bin_common.sh))"
         template="$$(cat $(location tools_template_bin.sh))"
-        echo "$${template//%release_info%/$${release_info}}" >$@
+        echo "$${bin_common}\n\n$${template//%release_info%/$${release_info}}" >$@
         """,
 )
 
 genrule(
     name = "generate-api-launcher",
-    srcs = ["api_template_bin.sh"] + generated_release_files,
+    srcs = ["api_template_bin.sh", "bin_common.sh"] + generated_release_files,
     outs = ["api_launcher_bin.sh"],
     cmd = """
         release_info="$$(cat $(location :release.yaml))"
+        bin_common="$$(cat $(location bin_common.sh))"
         template="$$(cat $(location api_template_bin.sh))"
-        echo "$${template//%release_info%/$${release_info}}" >$@
+        echo "$${bin_common}\n\n$${template//%release_info%/$${release_info}}" >$@
         """,
 )
 

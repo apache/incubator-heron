@@ -1,6 +1,7 @@
 #!/bin/bash
 
 brew list hugo || brew install hugo
+which wget || brew install wget
 npm install
-sudo -H pip uninstall -y requests Pygments
-sudo -H pip install linkchecker Pygments==2.1.3 requests==2.9.0
+sudo -H pip uninstall -y Pygments
+sudo -H pip install Pygments==2.1.3

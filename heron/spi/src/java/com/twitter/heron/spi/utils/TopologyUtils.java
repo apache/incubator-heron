@@ -167,7 +167,7 @@ public final class TopologyUtils {
    * Returns a empty map if the Config is not set
    *
    * @param topology the topology def
-   * @return a map (componentName -> ram required)
+   * @return a map (componentName -&gt; ram required)
    */
   public static Map<String, Long> getComponentRamMapConfig(TopologyAPI.Topology topology) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
