@@ -173,7 +173,7 @@ public class RoundRobinPacking implements IPacking {
    * Calculate the ram required by any instance in the container
    *
    * @param allocation the allocation of instances in different container
-   * @return A map: (containerId -> (instanceId -> instanceRequiredRam))
+   * @return A map: (containerId -&gt; (instanceId -&gt; instanceRequiredRam))
    */
   protected Map<String, Map<String, Long>> getInstancesRamMapInContainer(
       Map<String, List<String>> allocation) {
@@ -240,7 +240,7 @@ public class RoundRobinPacking implements IPacking {
   /**
    * Get the instances' allocation basing on round robin algorithm
    *
-   * @return containerId -> list of InstanceId belonging to this container
+   * @return containerId -&gt; list of InstanceId belonging to this container
    */
   protected Map<String, List<String>> getRoundRobinAllocation() {
     Map<String, List<String>> allocation = new HashMap<>();
@@ -345,7 +345,7 @@ public class RoundRobinPacking implements IPacking {
    * Get the ram size capable for the container requiring largest ram
    *
    * @param instancesRamMapInContainer the ram map for any instance in container
-   * (containerId -> (instanceId -> instanceRequiredRam))
+   * (containerId -&gt; (instanceId -&gt; instanceRequiredRam))
    * @return the ram size
    */
   protected long getLargestContainerRam(Map<String, Map<String, Long>> instancesRamMapInContainer) {

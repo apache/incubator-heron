@@ -1,0 +1,11 @@
+# scheduler class for distributing the topology for execution
+heron.class.scheduler:                       com.twitter.heron.scheduler.yarn.YarnScheduler
+
+# launcher class for submitting and launching the topology
+heron.class.launcher:                        com.twitter.heron.scheduler.yarn.YarnLauncher
+
+# working directory for the topologies
+heron.scheduler.local.working.directory:     ${HOME}/.herondata/topologies/${CLUSTER}/${ROLE}/${TOPOLOGY}
+
+# location of java - pick it up from shell environment
+heron.directory.sandbox.java.home:           ${JAVA_HOME}
