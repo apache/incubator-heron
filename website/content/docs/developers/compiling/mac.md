@@ -28,9 +28,9 @@ $ echo $CC $CXX
 #### Step 4 - Install Bazel {{% bazelVersion %}}
 
 ```bash
-curl -O -L https://github.com/bazelbuild/bazel/releases/download/0.2.3/bazel-0.2.3-installer-darwin-x86_64.sh
-chmod +x bazel-0.2.3-installer-darwin-x86_64.sh
-./bazel-0.2.3-installer-darwin-x86_64.sh --user
+wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/{{% bazelVersion %}}/bazel-{{% bazelVersion %}}-installer-linux-x86_64.sh
+chmod +x /tmp/bazel.sh
+/tmp/bazel.sh --user
 ```
 
 #### Step 5 - Make sure Bazel bin is in the PATH

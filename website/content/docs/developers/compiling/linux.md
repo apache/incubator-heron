@@ -41,9 +41,9 @@ sudo apt-get install oracle-java8-installer -y
 #### Step 5 - Install Bazel {{% bazelVersion %}}
 
 ```bash
-wget https://github.com/bazelbuild/bazel/releases/download/0.2.3/bazel-0.2.3-installer-linux-x86_64.sh
-chmod +x bazel-0.2.3-installer-linux-x86_64.sh
-./bazel-0.2.3-installer-linux-x86_64.sh --user
+wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/{{% bazelVersion %}}/bazel-{{% bazelVersion %}}-installer-linux-x86_64.sh
+chmod +x /tmp/bazel.sh
+/tmp/bazel.sh --user
 ```
 
 #### Step 6 - Make sure Bazel bin is in the PATH
@@ -179,9 +179,9 @@ export PATH=$PATH:/opt/jdk1.8.0_91/bin:/opt/jdk1.8.0_91/jre/bin
 #### Step 5 - Install Bazel {{% bazelVersion %}}
 
 ```bash
-wget https://github.com/bazelbuild/bazel/releases/download/0.2.3/bazel-0.2.3-installer-linux-x86_64.sh
-chmod +x bazel-0.2.3-installer-linux-x86_64.sh
-./bazel-0.2.3-installer-linux-x86_64.sh --user
+wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/{{% bazelVersion %}}/bazel-{{% bazelVersion %}}-installer-linux-x86_64.sh
+chmod +x /tmp/bazel.sh
+/tmp/bazel.sh --user
 ```
 
 #### Step 6 - Download heron and compile it
