@@ -17,7 +17,7 @@ import tornado.gen
 import tornado.ioloop
 from heron.ui.src.python.handlers.access import heron as API
 from heron.ui.src.python.handlers.common.graph import Graph, TopologyDAG
-import heron.explore.src.python.args as args
+import heron.explorer.src.python.args as args
 import json
 
 LOG = logging.getLogger(__name__)

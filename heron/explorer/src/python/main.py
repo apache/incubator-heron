@@ -20,12 +20,12 @@ import sys
 import time
 
 # command-line parsing
-import heron.explore.src.python.args as parse
-import heron.explore.src.python.help as help
-import heron.explore.src.python.topology as topology
-import heron.explore.src.python.logicalplan as logicalplan
-import heron.explore.src.python.physicalplan as physicalplan
-import heron.explore.src.python.show as show
+import heron.explorer.src.python.args as parse
+import heron.explorer.src.python.help as help
+import heron.explorer.src.python.topology as topology
+import heron.explorer.src.python.logicalplan as logicalplan
+import heron.explorer.src.python.physicalplan as physicalplan
+import heron.explorer.src.python.show as show
 from tornado.options import define
 
 LOG = logging.getLogger(__name__)
@@ -63,11 +63,11 @@ class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
 ################################################################################
 def create_parser():
   help_epilog = '''Getting more help:
-  heron-explore help <command> Prints help and options for <command>\n
+  heron-explorer help <command> Prints help and options for <command>\n
   For detailed documentation, go to http://heronstreaming.io'''
 
   parser = argparse.ArgumentParser(
-      prog='heron-explore',
+      prog='heron-explorer',
       epilog=help_epilog,
       formatter_class=SubcommandHelpFormatter,
       add_help=False)

@@ -3,7 +3,7 @@ package(default_visibility = ["//visibility:public"])
 load("/tools/rules/pex_rules", "pex_library", "pex_binary")
 
 pex_library(
-    name = "heron-explore-lib",
+    name = "heron-explorer-lib",
     srcs = [
         "args.py",
         "help.py",
@@ -27,9 +27,9 @@ pex_library(
 )
 
 pex_binary(
-    name = "heron-explore",
+    name = "heron-explorer",
     srcs = ["main.py"],
     deps = [
-        ":heron-explore-lib",
+        ":heron-explorer-lib",
     ],
 )

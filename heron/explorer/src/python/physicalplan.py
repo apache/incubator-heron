@@ -17,8 +17,8 @@ import logging
 import tornado.gen
 import tornado.ioloop
 from heron.ui.src.python.handlers.access import heron as API
-import heron.explore.src.python.args as args
-import heron.explore.src.python.logicalplan as logicalplan
+import heron.explorer.src.python.args as args
+import heron.explorer.src.python.logicalplan as logicalplan
 from tabulate import tabulate
 import json
 

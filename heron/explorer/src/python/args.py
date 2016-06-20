@@ -14,11 +14,11 @@
 
 import os
 import argparse
-import heron.explore.src.python.help as help
+import heron.explorer.src.python.help as help
 
 
 help_epilog = '''Getting more help:
-  heron-explore help <command> Prints help and options for <command>
+  heron-explorer help <command> Prints help and options for <command>
 
 For detailed documentation, go to http://heronstreaming.io'''
 

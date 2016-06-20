@@ -26,8 +26,8 @@ import subprocess
 import tarfile
 import tempfile
 
-import heron.explore.src.python.args as args
-import heron.explore.src.python.utils as utils
+import heron.explorer.src.python.args as args
+import heron.explorer.src.python.utils as utils
 from heron.common.src.python.color import Log
 
 def create_parser(subparsers):
