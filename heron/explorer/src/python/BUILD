@@ -10,7 +10,6 @@ pex_library(
         "opts.py",
         "show.py",
         "utils.py",
-        "topology.py",
         "logicalplan.py",
         "physicalplan.py",
     ],

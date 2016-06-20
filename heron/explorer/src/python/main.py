@@ -22,7 +22,6 @@ import time
 # command-line parsing
 import heron.explorer.src.python.args as parse
 import heron.explorer.src.python.help as help
-import heron.explorer.src.python.topology as topology
 import heron.explorer.src.python.logicalplan as logicalplan
 import heron.explorer.src.python.physicalplan as physicalplan
 import heron.explorer.src.python.show as show
@@ -87,9 +86,6 @@ def create_parser():
       title="Available commands",
       metavar='<command> <options>')
 
-  # subparser for subcommands related to topology in general
-  topology.create_parser(subparsers)
-
   # subparser for subcommands related to logical plan
   logicalplan.create_parser(subparsers)
 
@@ -107,14 +103,14 @@ def create_parser():
 # Run the command
 ################################################################################
 def run(command, *args):
-  if command == 'topology': # remove
-    return topology.run(command, *args)
   if command == 'components':
     return logicalplan.run(command, *args)
   if command == 'metrics':
     return physicalplan.run_metrics(command, *args)
-  if command == 'show':
-    return show.run(command, *args)
+  if command == 'cluster':
+    return show.run_cluster(command, *args)
+  if command == 'env':
+    return show.run_env(command, *args)
   if command == 'help':
     return help.run(command, *args)
   return 1
