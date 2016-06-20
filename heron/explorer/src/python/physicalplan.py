@@ -25,13 +25,30 @@ import json
 LOG = logging.getLogger(__name__)
 
 def create_parser(subparsers):
-  parser = subparsers.add_parser(
-    'metrics',
-    help = 'show info of a topology\'s metrics',
+  spouts_parser = subparsers.add_parser(
+    'spouts',
+    help = 'show info of a topology\'s spouts metrics',
     usage = "%(prog)s [options]",
     add_help = False)
-  args.add_cluster_env_topo(parser)
-  args.add_verbose(parser)
+  args.add_cluster_env_topo(spouts_parser)
+  args.add_role(spouts_parser)
+
+  bolts_parser = subparsers.add_parser(
+   'bolts',
+    help = 'show info of a topology\'s bolts metrics',
+    usage = "%(prog)s [options]",
+    add_help = False)
+  args.add_cluster_env_topo(bolts_parser)
+  args.add_role(bolts_parser)
+
+  components_parser = subparsers.add_parser(
+   'components',
+    help = 'show info of a topology\'s bolts components',
+    usage = "%(prog)s [options]",
+    add_help = False)
+  args.add_cluster_env_topo(components_parser)
+  args.add_role(components_parser)
+
   group = parser.add_mutually_exclusive_group()
   args.add_container_id(group, required=False)
   args.add_spout_name(group, required=False)
