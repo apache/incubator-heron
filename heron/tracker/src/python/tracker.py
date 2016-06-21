@@ -431,7 +431,7 @@ class Tracker:
 
     self.topologyInfos[(topology.name, topology.state_manager_name)] = top
 
-  def getTopologyInfo(self, topologyName, cluster, environ):
+  def getTopologyInfo(self, topologyName, cluster, role, environ):
     """
     Returns the JSON representation of a topology
     by its name, cluster and environ.
@@ -443,8 +443,14 @@ class Tracker:
       if (topologyName == topology_name and
           cluster == executionState["cluster"] and
           environ == executionState["environ"]):
-        return topologyInfo
-    LOG.info("Could not find topology info for topology: {0}, \
-             cluster: {1} and environ: {2}".format(topologyName, cluster, environ))
+        if (not role) or (role and executionState["submission_user"] == role):
+          return topologyInfo
+    if role:
+      LOG.info("Could not find topology info for topology: {0}, \
+               cluster: {1}, role: {2}, and environ: {3}".format(
+        topologyName, cluster, role, environ))
+    else:
+      LOG.info("Could not find topology info for topology: {0}, \
+               cluster: {1} and environ: {2}".format(topologyName, cluster, environ))
     raise Exception("No topology found")
 
