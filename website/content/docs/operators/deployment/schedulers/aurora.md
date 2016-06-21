@@ -29,9 +29,9 @@ can download the core binary from github or build it using the instructions
 in [Creating a New Heron Release](../../../../developers/compiling#building-a-full-release-package).
 
 Command for fetching the binary is in the `heron.aurora` config file. By default it is 
-using a curl command to fetch the binary. For example, if the binary is hosted in a place such as 
+using a `curl` command to fetch the binary. For example, if the binary is hosted in 
 HDFS, you need to change the fetch user package command in `heron.aurora` to use the 
-hdfs command instead of curl.
+`hdfs` command instead of `curl`.
 
 ### `heron.aurora` example binary fetch using HDFS
 
@@ -49,12 +49,12 @@ should run tests to ensure that Aurora can successfully fetch them.
 ## Uploading the Topologies
 
 Heron uses an uploader to upload the topology to a shared location so that a worker can fetch 
-the topology to its sandbox. The configuration for an uploader is in `uploader.yaml` config file. 
-For distributed aurora deployments Heron can use `HdfsUploader` or `S3Uploader`. 
-Details on configuring the uploaders can be found in [HDFS](../../uploaders/hdfs) and 
-[S3](../../uploaders/s3) documentations. 
+the topology to its sandbox. The configuration for an uploader is in the `uploader.yaml` 
+config file. For distributed Aurora deployments, Heron can use `HdfsUploader` or `S3Uploader`. 
+Details on configuring the uploaders can be found in the documentation for the 
+[HDFS](../../uploaders/hdfs) and [S3](../../uploaders/s3) uploaders. 
 
-After configuring an uploader, `heron.aurora` config file needs to be modified accordingly to 
+After configuring an uploader, the `heron.aurora` config file needs to be modified accordingly to 
 fetch the topology. 
 
 ### `heron.aurora` example topology fetch using HDFS
