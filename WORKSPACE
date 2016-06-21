@@ -4,11 +4,17 @@ curator_version = "2.9.0"
 httpcomponents_version = "4.3"
 jackson_version = "2.6.3"
 powermock_version = "1.6.2"
+reef_version = "0.14.0"
 slf4j_version = "1.7.7"
 
 maven_server(
   name = "default",
   url = "http://central.maven.org/maven2/",
+)
+
+maven_jar(
+  name = "org_apache_avro_avro",
+  artifact = "org.apache.avro:avro:1.7.4"
 )
 
 maven_server(
@@ -59,6 +65,11 @@ maven_jar(
 maven_jar(
   name = "commons_collections_commons_collections",
   artifact = "commons-collections:commons-collections:3.2.1",
+)
+
+maven_jar(
+  name = "org_apache_commons_commons_lang3",
+  artifact = "org.apache.commons:commons-lang3:3.3.2",
 )
 
 maven_jar(
@@ -117,8 +128,23 @@ maven_jar(
 )
 
 maven_jar(
+  name = "org_codehaus_jackson_jackson_core_asl",
+  artifact = "org.codehaus.jackson:jackson-core-asl:1.9.13",
+)
+
+maven_jar(
+  name = "org_codehaus_jackson_jackson_mapper_asl",
+  artifact = "org.codehaus.jackson:jackson-mapper-asl:1.9.13",
+)
+
+maven_jar(
   name = "org_javassist_javassist",
   artifact = "org.javassist:javassist:3.18.1-GA",
+)
+
+maven_jar(
+  name = "javax_inject_javax_inject",
+  artifact = "javax.inject:javax.inject:1",
 )
 
 maven_jar(
@@ -149,6 +175,11 @@ maven_jar(
 maven_jar(
   name = "com_esotericsoftware_minlog",
   artifact = "com.esotericsoftware:minlog:1.3.0",
+)
+
+maven_jar(
+  name = "io_netty_netty_all",
+  artifact = "io.netty:netty-all:4.0.21.Final"
 )
 
 maven_jar(
@@ -192,6 +223,26 @@ maven_jar(
 )
 
 maven_jar(
+  name = "org_apache_reef_reef_common",
+  artifact = "org.apache.reef:reef-common:" + reef_version
+)
+
+maven_jar(
+  name = "org_apache_reef_reef_runtime_local",
+  artifact = "org.apache.reef:reef-runtime-local:" + reef_version
+)
+
+maven_jar(
+  name = "org_apache_reef_reef_runtime_yarn",
+  artifact = "org.apache.reef:reef-runtime-yarn:" + reef_version
+)
+
+maven_jar(
+  name = "org_apache_reef_reef_utils",
+  artifact = "org.apache.reef:reef-utils:" + reef_version
+)
+
+maven_jar(
   name = "org_slf4j_slf4j_api",
   artifact = "org.slf4j:slf4j-api:" + slf4j_version
 )
@@ -207,9 +258,19 @@ maven_jar(
 )
 
 maven_jar(
+  name = "org_apache_reef_tang",
+  artifact = "org.apache.reef:tang:" + reef_version
+)
+
+maven_jar(
   name = "org_apache_thrift_libthrift",
   artifact = "org.apache.thrift:libthrift:0.5.0-1",
   server = "maven_twttr_com",
+)
+
+maven_jar(
+  name = "org_apache_reef_wake",
+  artifact = "org.apache.reef:wake:" + reef_version
 )
 
 maven_jar(

@@ -85,6 +85,29 @@ java_library(
 )
 
 java_library(
+    name = "yarn",
+    srcs = [ "Empty.java" ],
+    exports = [
+        "@org_apache_reef_reef_common//jar",
+        "@org_apache_reef_reef_utils//jar",
+        "@org_apache_reef_reef_runtime_yarn//jar",
+        "@org_apache_reef_wake//jar",
+        "@org_apache_reef_tang//jar",
+        "@org_apache_commons_commons_lang3//jar",
+        "@javax_inject_javax_inject//jar",
+    ],
+    deps = [
+        "@org_apache_reef_reef_common//jar",
+        "@org_apache_reef_reef_utils//jar",
+        "@org_apache_reef_reef_runtime_yarn//jar",
+        "@org_apache_reef_wake//jar",
+        "@org_apache_reef_tang//jar",
+        "@org_apache_commons_commons_lang3//jar",
+        "@javax_inject_javax_inject//jar",
+    ],
+)
+
+java_library(
     name = "hadoop-core",
     srcs = [ "Empty.java" ],
     exports = ["@org_apache_hadoop_hadoop_core//jar" ],
