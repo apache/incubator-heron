@@ -37,13 +37,13 @@ Example POM template files required located in `heron/release/maven/`
 <!-- TODO update for "heron-spi" artifact when available -->
 ### Step 1 - Download and install `heron-api-install-{VERSION}-{DIST}.sh` from [github releases](https://github.com/twitter/heron/releases)
 
-Example for version `0.14.0` installed using `--user`
+Example command for `heron-api` version `0.14.0` installed using the `--user` flag:
 ```
 $ wget https://github.com/twitter/heron/releases/download/0.14.0/heron-api-install-0.14.0-darwin.sh
 $ chmod +x heron-api-install-0.14.0-darwin.sh
 $ ./heron-api-install-0.14.0-darwin.sh --user
 ```
-Jars are installed into `~/.heronapi`
+After install using the above command and `--user` flag, the `heron-api` artifacts are installed into the `~/.heronapi` directory.
 
 ### Step 2 - Create temp folder for each `heron-api`, `heron-storm` and `heron-spi` artifact 
 
