@@ -59,6 +59,7 @@ utils_deps_files = \
 scheduler_deps_files = \
     heron_java_proto_files() + [
         ":common-spi-java",
+        ":packing-spi-java",
         "//heron/common/src/java:config-java",
         "@guava//jar",
     ]

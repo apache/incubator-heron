@@ -25,8 +25,8 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.packing.IPacking;
+import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
