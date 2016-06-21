@@ -1,0 +1,72 @@
+FROM ubuntu:14.04
+
+#Expose heron-tracker, heron-ui ports
+EXPOSE 8888
+EXPOSE 8889
+
+# This is passed to the heron build command via the --config flag
+ENV TARGET_PLATFORM ubuntu
+
+RUN apt-get update && apt-get -y install \
+      automake \
+      build-essential \
+      cmake \
+      curl \
+      libssl-dev \
+      git \
+      libtool \
+      libunwind8 \
+      libunwind-setjmp0-dev \
+      python \
+      python2.7-dev \
+      python-software-properties \
+      software-properties-common \
+      python-setuptools \
+      zip \
+      unzip \
+      wget \ 
+      vim
+
+RUN \
+  echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
+  add-apt-repository -y ppa:webupd8team/java && \
+  apt-get update && \
+  apt-get install -y oracle-java8-installer && \
+  rm -rf /var/lib/apt/lists/* && \
+  rm -rf /var/cache/oracle-jdk8-installer
+ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
+
+# Install heron with `--user`, running heron-tracker, heron-ui
+# heron client
+RUN \ 
+  wget -O ~/heron-client-install-0.14.0-ubuntu.sh https://github.com/twitter/heron/releases/download/0.14.0/heron-client-install-0.14.0-ubuntu.sh && \
+  chmod +x ~/heron-client-install-0.14.0-ubuntu.sh && \
+  ~/heron-client-install-0.14.0-ubuntu.sh --user
+
+# heron tools
+RUN \ 
+  wget -O ~/heron-tools-install-0.14.0-ubuntu.sh https://github.com/twitter/heron/releases/download/0.14.0/heron-tools-install-0.14.0-ubuntu.sh && \ 
+  chmod +x ~/heron-tools-install-0.14.0-ubuntu.sh && \
+  ~/heron-tools-install-0.14.0-ubuntu.sh --user
+
+# heron api
+RUN \
+  wget -O ~/heron-api-install-0.14.0-ubuntu.sh https://github.com/twitter/heron/releases/download/0.14.0/heron-api-install-0.14.0-ubuntu.sh && \
+  chmod +x ~/heron-api-install-0.14.0-ubuntu.sh && \ 
+  ~/heron-api-install-0.14.0-ubuntu.sh --user
+
+# modify .profile to run heron-tracker, heron-ui, export path for /bin/bash usage
+RUN mkdir -p ~/.herondata/repository/state/local/topologies
+RUN echo '# running...heron-tracker, heron-ui for /bin/bash usage' >> ~/.bashrc
+RUN echo 'export JAVA_HOME=/usr/lib/jvm/java-8-oracle' >> ~/.bashrc
+RUN echo 'export PATH=$PATH:~/bin' >> ~/.bashrc
+RUN echo 'heron-tracker &' >> ~/.bashrc
+RUN echo 'heron-ui &' >> ~/.bashrc
+
+# heron path
+ENV PATH $PATH:~/bin
+
+
+
+
+
