@@ -34,6 +34,7 @@ class JmapHandler(BaseHandler):
    - environ - Running environment.
    - topology - Name of topology (Note: Case sensitive. Can only
                 include [a-zA-Z0-9-_]+)
+   - role (optional)
    - instance - Instance Id
 
   Issue a jmap for instance and save the result in a file like
@@ -55,8 +56,9 @@ class JmapHandler(BaseHandler):
       cluster = self.get_argument_cluster()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
+      role = self.get_argument(constants.PARAM_ROLE, default=None)
       instance = self.get_argument_instance()
-      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, environ)
+      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)
       ret = yield self.runInstanceJmap(topology_info, instance)
       self.write_success_response(ret)
     except Exception as e:

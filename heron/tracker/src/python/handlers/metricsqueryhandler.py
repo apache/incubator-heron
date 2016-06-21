@@ -30,6 +30,7 @@ class MetricsQueryHandler(BaseHandler):
    - starttime (required)
    - endtime (required)
    - query (required)
+   - role (optional)
 
   The response JSON is a list of timelines
   asked in the query for this topology
@@ -44,7 +45,9 @@ class MetricsQueryHandler(BaseHandler):
       cluster = self.get_argument_cluster()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
-      topology = self.tracker.getTopologyByClusterEnvironAndName(cluster, environ, topology_name)
+      role = self.get_argument(constants.PARAM_ROLE, default=None)
+      topology = self.tracker.getTopologyByClusterRoleEnvironAndName(
+        cluster, role, environ, topology_name)
 
       start_time = self.get_argument_starttime()
       end_time = self.get_argument_endtime()

@@ -31,6 +31,7 @@ class MetricsHandler(BaseHandler):
    - cluster (required)
    - environ (required)
    - topology (required) name of the requested topology
+   - role (optional)
    - component (required)
    - metricname (required, repeated)
    - interval (optional)
@@ -51,10 +52,12 @@ class MetricsHandler(BaseHandler):
       cluster = self.get_argument_cluster()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
+      role = self.get_argument(constants.PARAM_ROLE, default=None)
       component = self.get_argument_component()
       metric_names = self.get_required_arguments_metricnames()
 
-      topology = self.tracker.getTopologyByClusterEnvironAndName(cluster, environ, topology_name)
+      topology = self.tracker.getTopologyByClusterRoleEnvironAndName(
+        cluster, role, environ, topology_name)
 
       interval = int(self.get_argument(constants.PARAM_INTERVAL, default=-1))
       instances = self.get_arguments(constants.PARAM_INSTANCE)

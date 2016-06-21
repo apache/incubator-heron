@@ -49,6 +49,7 @@ class PidHandler(BaseHandler):
    - environ - Running environment.
    - topology - Name of topology (Note: Case sensitive. Can only
                 include [a-zA-Z0-9-_]+)
+   - role (optional)
    - instance - Instance Id
 
   If successfule returns the pid of instance. May include training
@@ -70,8 +71,9 @@ class PidHandler(BaseHandler):
       cluster = self.get_argument_cluster()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
+      role = self.get_argument(constants.PARAM_ROLE, default=None)
       instance = self.get_argument_instance()
-      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, environ)
+      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)
       result = yield getInstancePid(topology_info, instance)
       self.write_success_response(result)
     except Exception as e:

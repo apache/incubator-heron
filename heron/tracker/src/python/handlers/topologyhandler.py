@@ -26,6 +26,7 @@ class TopologyHandler(BaseHandler):
    - cluster (required)
    - environ (required)
    - topology (required) name of the requested topology
+   - role (optional)
 
   the response json is a dictionary with all the
   information of the topology, including its

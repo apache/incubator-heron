@@ -78,16 +78,17 @@ class Tracker:
       onTopologiesWatch = partial(on_topologies_watch, state_manager)
       state_manager.get_topologies(onTopologiesWatch)
 
-  def getTopologyByClusterEnvironAndName(self, cluster, environ, topName):
+  def getTopologyByClusterRoleEnvironAndName(self, cluster, role, environ, topologyName):
     """
     Find and return the topology given its cluster, environ and topology name.
     Raises exception if topology is not found, or more than one are found.
     """
-    topologies = filter(lambda t: t.name == topName
+    topologies = filter(lambda t: t.name == topologyName
                         and t.cluster == cluster
+                        and (not role or t.execution_state.role == role)
                         and t.environ == environ, self.topologies)
     if not topologies or len(topologies) > 1:
-      raise Exception("Topology not found for {0}, {1}, {2}".format(cluster, environ, topName))
+      raise Exception("Topology not found for {0}, {1}, {2}".format(cluster, environ, topologyName))
 
     # There is only one topology which is returned.
     return topologies[0]
@@ -443,7 +444,7 @@ class Tracker:
       if (topologyName == topology_name and
           cluster == executionState["cluster"] and
           environ == executionState["environ"]):
-        if (not role) or (role and executionState["submission_user"] == role):
+        if (not role) or (executionState["submission_user"] == role):
           return topologyInfo
     if role:
       LOG.info("Could not find topology info for topology: {0}, \
