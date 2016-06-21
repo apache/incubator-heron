@@ -43,7 +43,7 @@ $ wget https://github.com/twitter/heron/releases/download/0.14.0/heron-api-insta
 $ chmod +x heron-api-install-0.14.0-darwin.sh
 $ ./heron-api-install-0.14.0-darwin.sh --user
 ```
-After install using the above command and `--user` flag, the `heron-api` artifacts are installed into the `~/.heronapi` directory.
+After running the above install script with `--user` flag, the `heron-api` artifacts are installed into the `~/.heronapi` directory.
 
 ### Step 2 - Create temp folder for each `heron-api`, `heron-storm` and `heron-spi` artifact 
 
