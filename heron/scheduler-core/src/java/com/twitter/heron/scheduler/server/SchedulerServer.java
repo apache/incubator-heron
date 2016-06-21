@@ -23,7 +23,7 @@ import java.util.concurrent.Executors;
 import com.sun.net.httpserver.HttpServer;
 
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.NetworkUtils;
+import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.scheduler.IScheduler;
 
 public class SchedulerServer {

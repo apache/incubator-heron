@@ -25,7 +25,7 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.NetworkUtils;
+import com.twitter.heron.spi.utils.NetworkUtils;
 
 /**
  * This class manages topology by sending request

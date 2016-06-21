@@ -20,7 +20,7 @@ import org.mockito.Mockito;
 
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.NetworkUtils;
+import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.scheduler.IScheduler;
 
 public class SchedulerServerTest {

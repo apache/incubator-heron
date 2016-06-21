@@ -14,7 +14,7 @@ util_deps_files = \
     common_deps_files + [
         "//heron/spi/src/java:utils-spi-java", 
     ]
-    
+
 proto_deps_files = \
     heron_java_proto_files() + \
     util_deps_files
@@ -32,8 +32,8 @@ java_library(
 
 java_test(
     name = "shell-utils_unittest",
-    srcs = glob(["**/common/ShellUtilsTest.java"]),
-    deps = common_deps_files, 
+    srcs = glob(["**/utils/ShellUtilsTest.java"]),
+    deps = util_deps_files,
     size = "small",
 )
 
@@ -46,8 +46,8 @@ java_test(
 
 java_test(
     name = "network-utils_unittest",
-    srcs = glob(["**/common/NetworkUtilsTest.java"]),
-    deps = common_deps_files,
+    srcs = glob(["**/utils/NetworkUtilsTest.java"]),
+    deps = util_deps_files,
     size = "small",
 )
 

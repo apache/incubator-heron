@@ -4,6 +4,7 @@ uploader_spi_files = [
     "//heron/common/src/java:basics-java",
     "//heron/spi/src/java:common-spi-java",
     "//heron/spi/src/java:uploader-spi-java",
+    "//heron/spi/src/java:utils-spi-java",
     "//heron/spi/src/java:uploader-utils-java",
 ]
 
