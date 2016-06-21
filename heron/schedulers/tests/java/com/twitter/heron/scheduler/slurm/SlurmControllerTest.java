@@ -30,7 +30,7 @@ import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.twitter.heron.spi.common.ShellUtils;
+import com.twitter.heron.spi.utils.ShellUtils;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({SlurmContext.class, ShellUtils.class})

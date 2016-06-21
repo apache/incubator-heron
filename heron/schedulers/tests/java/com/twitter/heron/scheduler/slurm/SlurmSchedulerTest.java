@@ -33,7 +33,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
-import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.utils.SchedulerUtils;
 
 @RunWith(PowerMockRunner.class)

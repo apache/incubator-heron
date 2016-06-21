@@ -29,11 +29,11 @@ import java.util.logging.Logger;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
-import com.twitter.heron.spi.common.PackingPlan;
-import com.twitter.heron.spi.common.ShellUtils;
+import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;
+import com.twitter.heron.spi.utils.ShellUtils;
 
 public class LocalScheduler implements IScheduler {
   private static final Logger LOG = Logger.getLogger(LocalScheduler.class.getName());
