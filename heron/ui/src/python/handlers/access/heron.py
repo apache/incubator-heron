@@ -125,10 +125,10 @@ def get_cluster_topologies(cluster):
 # Get the execution state of a topology in a cluster
 ################################################################################
 @tornado.gen.coroutine
-def get_execution_state(cluster, environ, topology):
+def get_execution_state(cluster, environ, topology, role=None):
   request_url = tornado.httputil.url_concat(
       create_url(EXECUTION_STATE_URL_FMT),
-      dict(cluster = cluster, environ = environ, topology = topology)
+      dict(cluster = cluster, role = role, environ = environ, topology = topology)
   )
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
@@ -136,10 +136,10 @@ def get_execution_state(cluster, environ, topology):
 # Get the logical plan state of a topology in a cluster
 ################################################################################
 @tornado.gen.coroutine
-def get_logical_plan(cluster, environ, topology):
+def get_logical_plan(cluster, environ, topology, role=None):
   request_url = tornado.httputil.url_concat(
       create_url(lOGICALPLAN_URL_FMT),
-      dict(cluster = cluster, environ = environ, topology = topology)
+      dict(cluster = cluster, role = role, environ = environ, topology = topology)
   )
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
@@ -147,10 +147,10 @@ def get_logical_plan(cluster, environ, topology):
 # Get the list of component names for the topology from Heron Nest
 ################################################################################
 @tornado.gen.coroutine
-def get_comps(cluster, environ, topology):
+def get_comps(cluster, environ, topology, role=None):
   request_url = tornado.httputil.url_concat(
       create_url(lOGICALPLAN_URL_FMT),
-      dict(cluster = cluster, environ = environ, topology = topology)
+      dict(cluster = cluster, role = role, environ = environ, topology = topology)
   )
   lplan = yield fetch_url_as_json(request_url)
   comps = lplan['spouts'].keys() + lplan['bolts'].keys()
@@ -160,10 +160,10 @@ def get_comps(cluster, environ, topology):
 # Get the physical plan state of a topology in a cluster from tracker
 ################################################################################
 @tornado.gen.coroutine
-def get_physical_plan(cluster, environ, topology):
+def get_physical_plan(cluster, environ, topology, role=None):
   request_url = tornado.httputil.url_concat(
       create_url(PHYSICALPLAN_URL_FMT),
-      dict(cluster = cluster, environ = environ, topology = topology)
+      dict(cluster = cluster, role = role, environ = environ, topology = topology)
   )
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
@@ -171,10 +171,10 @@ def get_physical_plan(cluster, environ, topology):
 # Get the scheduler location of a topology in a cluster from tracker
 ################################################################################
 @tornado.gen.coroutine
-def get_scheduler_location(cluster, environ, topology):
+def get_scheduler_location(cluster, environ, topology, role=None):
   request_url = tornado.httputil.url_concat(
       create_url(SCHEDULER_LOCATION_URL_FMT),
-      dict(cluster = cluster, environ = environ, topology = topology)
+      dict(cluster = cluster, role = role, environ = environ, topology = topology)
   )
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
@@ -182,10 +182,11 @@ def get_scheduler_location(cluster, environ, topology):
 # Get summary of exception for a component
 ################################################################################
 @tornado.gen.coroutine
-def get_component_exceptionsummary(cluster, environ, topology, component):
+def get_component_exceptionsummary(cluster, environ, topology, component, role=None):
   request_url = tornado.httputil.url_concat(
       create_url(EXCEPTION_SUMMARY_URL_FMT),
       dict(cluster = cluster,
+           role = role,
            environ = environ,
            topology = topology,
            component = component)
@@ -196,10 +197,11 @@ def get_component_exceptionsummary(cluster, environ, topology, component):
 # Get exceptions for 'component' for 'topology'
 ################################################################################
 @tornado.gen.coroutine
-def get_component_exceptions(cluster, environ, topology, component):
+def get_component_exceptions(cluster, environ, topology, component, role=None):
   request_url = tornado.httputil.url_concat(
       create_url(EXCEPTIONS_URL_FMT),
       dict(cluster = cluster,
+           role = role,
            environ = environ,
            topology = topology,
            component = component)
@@ -213,12 +215,13 @@ def get_component_exceptions(cluster, environ, topology, component):
 ################################################################################
 @tornado.gen.coroutine
 def get_comp_instance_metrics(
-        cluster, environ, topology, component, metrics, instances, time_range):
+        cluster, environ, topology, component, metrics, instances, time_range, role=None):
 
   # form the fetch url
   request_url = tornado.httputil.url_concat(
       create_url(METRICS_URL_FMT),
       dict(cluster = cluster,
+           role = role,
            environ = environ,
            topology = topology,
            component = component)
@@ -252,12 +255,13 @@ def get_comp_instance_metrics(
 ################################################################################
 @tornado.gen.coroutine
 def get_comp_metrics(
-        cluster, environ, topology, component, instances, metricnames, time_range):
+        cluster, environ, topology, component, instances, metricnames, time_range, role=None):
 
   # form the url
   request_url = tornado.httputil.url_concat(
       create_url(METRICS_URL_FMT),
       dict(cluster = cluster,
+           role = role,
            environ = environ,
            topology = topology,
            component = component)
@@ -288,15 +292,16 @@ def get_comp_metrics(
 # time_range - 2-tuple consisting of start and end of range
 ################################################################################
 @tornado.gen.coroutine
-def get_metrics(cluster, environment, topology, timerange, query):
+def get_metrics(cluster, environment, topology, timerange, query, role=None):
   request_url = tornado.httputil.url_concat(
       create_url(METRICS_QUERY_URL_FMT),
       dict(cluster = cluster,
-            environ = environment,
-            topology = topology,
-            starttime = timerange[0],
-            endtime = timerange[1],
-            query = query)
+           role = role,
+           environ = environment,
+           topology = topology,
+           starttime = timerange[0],
+           endtime = timerange[1],
+           query = query)
   )
   logging.info("get_metrics %s" % (request_url))
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
@@ -309,15 +314,16 @@ def get_metrics(cluster, environment, topology, timerange, query):
 ################################################################################
 @tornado.gen.coroutine
 def get_comp_metrics_timeline(
-        cluster, environ, topology, component, instances, metricnames, time_range):
+        cluster, environ, topology, component, instances, metricnames, time_range, role=None):
 
   # form the url
   request_url = tornado.httputil.url_concat(
         create_url(METRICS_TIMELINE_URL_FMT),
         dict(cluster = cluster,
-            environ = environ,
-            topology = topology,
-            component = component)
+             role = role,
+             environ = environ,
+             topology = topology,
+             component = component)
   )
 
   # append each metric to the url
@@ -349,10 +355,11 @@ def get_topology_info(cluster, environ, topology):
 
 # Get pid of the instance
 @tornado.gen.coroutine
-def get_instance_pid(cluster, environ, topology, instance):
+def get_instance_pid(cluster, environ, topology, instance, role=None):
   request_url = tornado.httputil.url_concat(
       create_url(PID_URL_FMT),
       dict(cluster = cluster,
+           role = role,
            environ = environ,
            topology = topology,
            instance = instance)
@@ -361,10 +368,11 @@ def get_instance_pid(cluster, environ, topology, instance):
 
 # Get jstack of instance
 @tornado.gen.coroutine
-def get_instance_jstack(cluster, environ, topology, instance):
+def get_instance_jstack(cluster, environ, topology, instance, role=None):
   request_url = tornado.httputil.url_concat(
       create_url(JSTACK_URL_FMT),
       dict(cluster = cluster,
+           role = role,
            environ = environ,
            topology = topology,
            instance = instance)
@@ -373,10 +381,11 @@ def get_instance_jstack(cluster, environ, topology, instance):
 
 # Get histogram of active memory objects.
 @tornado.gen.coroutine
-def get_instance_mem_histogram(cluster, environ, topology, instance):
+def get_instance_mem_histogram(cluster, environ, topology, instance, role=None):
   request_url = tornado.httputil.url_concat(
       create_url(HISTOGRAM_URL_FMT),
       dict(cluster = cluster,
+           role = role,
            environ = environ,
            topology = topology,
            instance = instance)
@@ -385,10 +394,11 @@ def get_instance_mem_histogram(cluster, environ, topology, instance):
 
 # Call heap dump for an instance and save it at /tmp/heap.bin
 @tornado.gen.coroutine
-def run_instance_jmap(cluster, environ, topology, instance):
+def run_instance_jmap(cluster, environ, topology, instance, role=None):
   request_url = tornado.httputil.url_concat(
       create_url(JMAP_URL_FMT),
       dict(cluster = cluster,
+           role = role,
            environ = environ,
            topology = topology,
            instance = instance)
@@ -397,10 +407,11 @@ def run_instance_jmap(cluster, environ, topology, instance):
 
 # Get file data from the container
 @tornado.gen.coroutine
-def get_container_file_data(cluster, environ, topology, container, path, offset, length):
+def get_container_file_data(cluster, environ, topology, container, path, offset, length, role=None):
   request_url = tornado.httputil.url_concat(
       create_url(FILE_DATA_URL_FMT),
       dict(cluster = cluster,
+           role = role,
            environ = environ,
            topology = topology,
            container = container,
@@ -412,10 +423,11 @@ def get_container_file_data(cluster, environ, topology, container, path, offset,
 
 # Get filestats
 @tornado.gen.coroutine
-def get_filestats(cluster, environ, topology, container, path):
+def get_filestats(cluster, environ, topology, container, path, role=None):
   request_url = tornado.httputil.url_concat(
       create_url(FILESTATS_URL_FMT),
       dict(cluster = cluster,
+           role = role,
            environ = environ,
            topology = topology,
            container = container,
