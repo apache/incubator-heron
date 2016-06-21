@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#set -e
+
 JAVADOC=javadoc
 FLAGS="-quiet"
 
@@ -10,10 +10,44 @@ JAVADOC_OUTPUT_DIR=$HERON_ROOT_DIR/website/public/api
 JAVADOC_OUTPUT_LOCAL_DIR=$HERON_ROOT_DIR/website/static/api
 GEN_PROTO_DIR=$HERON_ROOT_DIR/bazel-bin/heron/proto/_javac
 
-(cd $HERON_ROOT_DIR && bazel build \
-  `bazel query 'kind("java_library", "heron/...")'`\
-  `bazel query 'kind("java_test", "heron/...")'` \
-  `bazel query 'kind("java_library", "integration-test/...")'`)
+cd $HERON_ROOT_DIR
+BAZEL_TARGETS=\
+$(bazel query 'kind("java_library", "heron/...")' | sort)
+
+BAZEL_TEST_TARGETS=\
+$(bazel query 'kind("java_test", "heron/...")' | sort)
+
+BAZEL_INTEGR_TEST_TARGETS=\
+$(bazel query 'kind("java_library", "integration-test/...")' | sort)
+
+if [[ -z "${BAZEL_TARGETS}" || -z "${BAZEL_TEST_TARGETS}" || -z "${BAZEL_INTEGR_TEST_TARGETS}" ]]; then
+  echo "ERROR: Cannot find enough bazel build jobs"\
+  exit 1
+fi
+
+PASS_COUNTER=0
+FAIL_COUNTER=0
+COUNTER=0
+
+for BUILD_JOB in $BAZEL_TARGETS $BAZEL_TEST_TARGETS $BAZEL_INTEGR_TEST_TARGETS; do
+  ((COUNTER++))
+  bazel build ${BUILD_JOB}
+ if [[ $? -eq 0 ]]; then
+    ((PASS_COUNTER++))
+ else
+    ((FAIL_COUNTER++))
+    echo "ERROR: Build failed of " ${BUILD_JOB}
+ fi
+done
+
+echo "*********Summary*********"
+echo "${COUNTER} build jobs:" \
+     "${PASS_COUNTER} passed;" \
+     "${FAIL_COUNTER} failed"
+
+if [[ ${FAIL_COUNTER} -gt 0 ]]; then
+   exit 1
+fi
 
 HERON_SRC_FILES=`find $HERON_ROOT_DIR -path "*/com/twitter/*" -name "*.java"`
 BACKTYPE_SRC_FILES=`find $HERON_ROOT_DIR -path "*/backtype/storm/*" -name "*.java"`
@@ -32,6 +66,10 @@ CLOSURE_CLASSES="$HERON_ROOT_DIR/bazel-bin/heron/storm/src/java/_javac/storm-com
 export CLASSPATH=$BIN_JARS:$GEN_JARS:$SCRIBE_JARS:$PROTO_JARS:$CLOSURE_CLASSES
 
 $JAVADOC $FLAGS -d $JAVADOC_OUTPUT_DIR $GEN_FILES $HERON_SRC_FILES $BACKTYPE_SRC_FILES $APACHE_SRC_FILES
+
+if [[ $? != 0 ]]; then
+  exit 1
+fi
 
 # Generated Java API doc needs to be copied to $JAVADOC_OUTPUT_LOCAL_DIR
 # for the following two reasons:
