@@ -12,7 +12,7 @@ GEN_PROTO_DIR=$HERON_ROOT_DIR/bazel-bin/heron/proto/_javac
 
 # Check if this script is run with Travis flag
 if [ $# -eq 1 ] && [ $1 == "--travis" ]; then
-    BAZEL_CMD="bazel --bazelrc=../../tools/travis-ci/bazel.rc build"
+    BAZEL_CMD="bazel --bazelrc=$HERON_ROOT_DIR/tools/travis-ci/bazel.rc build"
 else
     BAZEL_CMD="bazel build"
 fi
