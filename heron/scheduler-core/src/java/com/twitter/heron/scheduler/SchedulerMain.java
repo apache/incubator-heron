@@ -325,11 +325,16 @@ public class SchedulerMain {
       // get a packed plan and schedule it
       packing.initialize(config, runtime);
       PackingPlan packedPlan = packing.pack();
+      if (packedPlan == null) {
+        LOG.severe("Failed to pack a valid PackingPlan. Check the config.");
+        return false;
+      }
 
       // Add the instanceDistribution to the runtime
       Config ytruntime = Config.newBuilder()
           .putAll(runtime)
           .put(Keys.instanceDistribution(), packedPlan.getInstanceDistribution())
+          .put(Keys.componentRamMap(), packedPlan.getComponentRamDistribution())
           .build();
 
       // initialize the scheduler

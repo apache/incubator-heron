@@ -90,7 +90,7 @@ java_library(
         "//heron/common/src/java:basics-java",
         "//heron/common/src/java:config-java",
     ],
-    resources = common_resource_files, 
+    resources = common_resource_files,
 )
 
 java_library(
@@ -98,7 +98,7 @@ java_library(
     srcs = glob([
         "**/spi/utils/**/*.java",
     ]),
-    deps = utils_deps_files, 
+    deps = utils_deps_files,
 )
 
 java_library(
@@ -106,7 +106,7 @@ java_library(
     srcs = glob([
         "**/spi/packing/**/*.java",
     ]),
-    deps = packing_deps_files, 
+    deps = packing_deps_files,
 )
 
 java_library(
@@ -114,7 +114,7 @@ java_library(
     srcs = glob([
         "**/spi/scheduler/**/*.java",
     ]),
-    deps = scheduler_deps_files, 
+    deps = scheduler_deps_files,
 )
 
 java_library(
@@ -146,4 +146,20 @@ java_library(
         ["**/spi/statemgr/**/*.java"],
     ),
     deps = statemgr_deps_files,
+)
+
+java_binary(
+    name = "spi-unshaded",
+    srcs = glob([
+        "**/spi/utils/**/*.java",
+        "**/spi/common/**/*.java",
+    ]),
+    deps = utils_deps_files,
+)
+
+genrule(
+    name = "heron-spi-jar",
+    srcs = [":spi-unshaded_deploy.jar"],
+    outs = ["heron-spi.jar"],
+    cmd  = "cp $< $@",
 )

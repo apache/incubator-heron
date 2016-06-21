@@ -21,6 +21,7 @@ https://player.oreilly.com/videos/9781491927977?login=true)(Jun, 2015)
 
 ## Blog Posts
 
+* [Open Sourcing Twitter Heron](https://blog.twitter.com/2016/open-sourcing-twitter-heron) (May, 2016)
 * [Flying Faster with Twitter
   Heron](https://blog.twitter.com/2015/flying-faster-with-twitter-heron) (June, 2015)
 
@@ -29,3 +30,12 @@ https://player.oreilly.com/videos/9781491927977?login=true)(Jun, 2015)
 * [Real-Time Analytics: Algorithms and Systems - Twitter University ](
 http://www.slideshare.net/arunkejariwal/real-time-analytics-algorithms-and-systems) (May, 2016)
 * [Stream Processing and Anomaly Detection - Velocity O'Reilly ](http://www.slideshare.net/arunkejariwal/velocity-2015final)(Jun, 2015)
+
+## Press 
+
+* [Heron, Twitter's Data Streaming Platform, Has Been Open Sourced](http://www.benzinga.com/tech/16/06/8119962/heron-twitters-data-streaming-platform-has-been-open-sourced) (BenZinga, Jun, 2016)
+* [Twitter Open Sources Heron -- Data Streaming For Dummies](http://www.forbes.com/sites/adrianbridgwater/2016/06/16/twitter-open-sources-heron-data-streaming-for-dummies/#6f8984319b50) (Forbes, Jun, 2016)
+* [Getting Started with Heron on Apache Mesos and Apache Kafka](https://allthingshadoop.com/2016/05/30/getting-started-with-heron-on-apache-mesos-and-apache-kafka/) (All Things Hadoop, May, 2016)
+* [Twitter open-sources Heron, its real-time stream-processing engine](http://venturebeat.com/2016/05/25/twitter-open-sources-heron-its-real-time-stream-processing-engine/) (VentureBeat, May, 2016)
+* [Twitter's Heron Will Start a New Chapter in Real-Time Streaming](http://www.forbes.com/sites/janakirammsv/2015/06/08/twitters-heron-will-start-a-new-chapter-in-real-time-streaming/#62c8645b2306) (Forbes, Jun, 2015)
+* [Twitter Has Replaced Storm with Heron](https://www.infoq.com/news/2015/06/twitter-storm-heron) (InfoQ, Jun, 2015)

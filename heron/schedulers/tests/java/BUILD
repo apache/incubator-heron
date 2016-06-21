@@ -27,6 +27,20 @@ aurora_deps_files = [
     "//heron/schedulers/src/java:aurora-scheduler-java",
 ]
 
+yarn_deps_files = [
+    "//heron/schedulers/src/java:yarn-scheduler-java",
+    "@reef-common//jar",
+    "@tang//jar",
+    "@wake//jar",
+    "@reef-runtime-local//jar",
+    "@javax.inject//jar",
+    "@avro//jar",
+    "@commons-lang//jar",
+    "@netty-all//jar",
+    "@jackson-core-asl//jar",
+    "@jackson-mapper-asl//jar",
+]
+
 local_deps_files = [
     "//heron/schedulers/src/java:local-scheduler-java",
 ]
@@ -36,7 +50,7 @@ slurm_deps_files = [
 ]
 
 java_test(
-  name="aurora-scheduler_unittest",
+  name="AuroraSchedulerTest",
   srcs=glob(
     ["**/AuroraSchedulerTest.java"]
   ),
@@ -45,7 +59,7 @@ java_test(
 )
 
 java_test(
-  name="aurora-launcher_unittest",
+  name="AuroraLauncherTest",
   srcs=glob(
     ["**/AuroraLauncherTest.java"]
   ),
@@ -54,7 +68,7 @@ java_test(
 )
 
 java_test(
-  name="aurora-controller_unittest",
+  name="AuroraControllerTest",
   srcs=glob(
     ["**/AuroraControllerTest.java"]
   ),
@@ -63,7 +77,39 @@ java_test(
 )
 
 java_test(
-  name="local-launcher_unittest",
+  name="YarnSchedulerTest",
+  srcs=glob(["**/YarnSchedulerTest.java"]
+  ),
+  deps=scheduler_deps_files + yarn_deps_files,
+  size="small",
+)
+
+java_test(
+  name="HeronMasterDriverTest",
+  srcs=glob(["**/HeronMasterDriverTest.java"]
+  ),
+  deps=scheduler_deps_files + yarn_deps_files,
+  size="small",
+)
+
+java_test(
+  name="DriverOnLocalReefTest",
+  srcs=glob(["**/DriverOnLocalReefTest.java"]
+  ),
+  deps=scheduler_deps_files + yarn_deps_files,
+  size="small",
+)
+
+java_test(
+  name="HeronExecutorTaskTest",
+  srcs=glob(["**/HeronExecutorTaskTest.java"]
+  ),
+  deps=scheduler_deps_files + yarn_deps_files,
+  size="small",
+)
+
+java_test(
+  name="LocalLauncherTest",
   srcs=glob(
     ["**/LocalLauncherTest.java"]
   ),
@@ -72,7 +118,7 @@ java_test(
 )
 
 java_test(
-  name="local-scheduler_unittest",
+  name="LocalSchedulerTest",
   srcs=glob(
     ["**/LocalSchedulerTest.java"]
   ),
@@ -81,7 +127,7 @@ java_test(
 )
 
 java_test(
-  name="slurm-launcher_unittest",
+  name="SlurmLauncherTest",
   srcs=glob(
     ["**/SlurmLauncherTest.java"]
   ),
@@ -90,7 +136,7 @@ java_test(
 )
 
 java_test(
-  name="slurm-scheduler_unittest",
+  name="SlurmSchedulerTest",
   srcs=glob(
     ["**/SlurmSchedulerTest.java"]
   ),
@@ -99,7 +145,7 @@ java_test(
 )
 
 java_test(
-  name="slurm-controller_unittest",
+  name="SlurmControllerTest",
   srcs=glob(
     ["**/SlurmControllerTest.java"]
   ),

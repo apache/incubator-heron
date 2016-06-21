@@ -1,5 +1,3 @@
-#!/bin/bash -e
-
 # Copyright 2015 The Bazel Authors. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -117,7 +115,7 @@ function install_to_local() {
   echo -n .
 
   unzip -q -o "${BASH_SOURCE[0]}" -d "${base}"
-  tar xfz "${base}/heron-api.tar.gz" -C "${base}"
+  untar ${base}/heron-api.tar.gz ${base}
   echo -n .
   chmod -R og-w "${base}"
   chmod -R og+rX "${base}"
@@ -133,11 +131,14 @@ function install_to_maven() {
   # Uncompress from zip
   tmp_dir=`mktemp -d -t heron.XXXX`
   unzip -q -o "${BASH_SOURCE[0]}" -d "${tmp_dir}"
-  tar xfz "${tmp_dir}/heron-api.tar.gz" -C "${tmp_dir}"
+  untar ${tmp_dir}/heron-api.tar.gz ${tmp_dir}
 
   # Install into maven local
   mvn install:install-file -q -Dfile="${tmp_dir}/heron-api.jar" -DgroupId="com.twitter.heron" \
     -DartifactId="heron-api" -Dversion="SNAPSHOT" -Dpackaging="jar"
+
+  mvn install:install-file -q -Dfile="${tmp_dir}/heron-spi.jar" -DgroupId="com.twitter.heron" \
+    -DartifactId="heron-spi" -Dversion="SNAPSHOT" -Dpackaging="jar"
 
   mvn install:install-file -q -Dfile="${tmp_dir}/heron-storm.jar" -DgroupId="com.twitter.heron" \
     -DartifactId="heron-storm" -Dversion="SNAPSHOT" -Dpackaging="jar"

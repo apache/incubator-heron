@@ -57,21 +57,21 @@ java_test(
 )
 
 java_test(
-    name = "scheduler-utils_unittest",
+    name = "SchedulerUtilsTest",
     srcs = glob(["**/utils/SchedulerUtilsTest.java"]),
     deps = proto_deps_files, 
     size = "small",
 )
 
 java_test(
-    name = "topology-utils_unittest",
+    name = "TopologyUtilsTest",
     srcs = glob(["**/utils/TopologyUtilsTest.java"]),
     deps = api_deps_files, 
     size = "small",
 )
 
 java_test(
-    name = "exception-info_unittest",
+    name = "ExceptionInfoTest",
     srcs = glob(["**/ExceptionInfoTest.java"]),
     deps = [
         "//heron/spi/src/java:metricsmgr-spi-java", 
@@ -81,7 +81,7 @@ java_test(
 )
 
 java_test(
-    name = "metrics-info_unittest",
+    name = "MetricsInfoTest",
     srcs = glob(["**/MetricsInfoTest.java"]),
     deps = [
         "//heron/spi/src/java:metricsmgr-spi-java", 
@@ -91,7 +91,7 @@ java_test(
 )
 
 java_test(
-    name = "metrics-record_unittest",
+    name = "MetricsRecordTest",
     srcs = glob(["**/MetricsRecordTest.java"]),
     deps = [
         "//heron/spi/src/java:metricsmgr-spi-java", 
@@ -101,42 +101,42 @@ java_test(
 )
 
 java_test(
-    name = "config-keys_unittest",
+    name = "ConfigKeysTest",
     srcs = glob(["**/ConfigKeysTest.java"]),
     deps = [":test-utils-java"] + common_deps_files,
     size = "small",
 )
 
 java_test(
-    name = "config-defaults_unittest",
+    name = "ConfigDefaultsTest",
     srcs = glob(["**/ConfigDefaultsTest.java"]),
     deps = [":test-utils-java"] + common_deps_files,
     size = "small",
 )
 
 java_test(
-    name = "config-keys-defaults_unittest",
+    name = "ConfigKeysDefaultsTest",
     srcs = glob(["**/ConfigKeysDefaultsTest.java"]),
     deps = [":test-utils-java"] + common_deps_files,
     size = "small",
 )
 
 java_test(
-    name = "misc_unittest",
+    name = "MiscTest",
     srcs = glob(["**/MiscTest.java"]),
     deps = [":test-utils-java"] + common_deps_files,
     size = "small",
 )
 
 java_test(
-    name = "cluster-defaults_unittest",
+    name = "ClusterDefaultsTest",
     srcs = glob(["**/ClusterDefaultsTest.java"]),
     deps = [":test-utils-java"] + common_deps_files,
     size = "small",
 )
 
 java_test(
-    name = "cluster-config_unittest",
+    name = "ClusterConfigTest",
     srcs = glob(["**/ClusterConfigTest.java"]),
     deps = [":test-utils-java"] + common_deps_files,
     data = glob(["**/testdata/**/*.yaml"]),
@@ -144,7 +144,7 @@ java_test(
 )
 
 java_test(
-    name = "uploader-utils_unittest",
+    name = "UploaderUtilsTest",
     srcs = glob(["**/utils/UploaderUtilsTest.java"]),
     deps = util_deps_files,
     size = "small",

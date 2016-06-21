@@ -69,7 +69,6 @@ java_library(
     deps = [
         "@slf4j-api//jar",
         "@slf4j-jdk//jar",
-        "@log4j-over-slf4j//jar",
     ],
 )
 
@@ -81,6 +80,29 @@ java_library(
         "@kryo//jar",
         "@minlog//jar",
         "@objenesis//jar",
+    ],
+)
+
+java_library(
+    name = "yarn",
+    srcs = [ "Empty.java" ],
+    exports = [ 
+        "@reef-common//jar",
+        "@reef-utils//jar",
+        "@reef-runtime-yarn//jar",
+        "@wake//jar",
+        "@tang//jar",
+        "@commons-lang3//jar",
+        "@javax.inject//jar",
+    ],
+    deps = [
+        "@reef-common//jar",
+        "@reef-utils//jar",
+        "@reef-runtime-yarn//jar",
+        "@wake//jar",
+        "@tang//jar",
+        "@commons-lang3//jar",
+        "@javax.inject//jar",
     ],
 )
 

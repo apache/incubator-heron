@@ -14,6 +14,7 @@
 
 package com.twitter.heron.spi.packing;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class PackingPlan {
@@ -27,8 +28,14 @@ public class PackingPlan {
     this.resource = resource;
   }
 
+  @Override
+  public String toString() {
+    return String.format("{plan-id: %s, containers-list: %s, plan-resource: %s}",
+        id, containers.toString(), resource);
+  }
+
   /**
-   * Pack the packing plan into a String describing instance distribution, used by executor
+   * Get the String describing instance distribution from PackingPlan, used by executor
    *
    * @return String describing instance distribution
    */
@@ -57,17 +64,63 @@ public class PackingPlan {
   }
 
   /**
+   * Get the formatted String describing component ram distribution from PackingPlan,
+   * used by executor
+   *
+   * @return String describing component ram distribution
+   */
+  public String getComponentRamDistribution() {
+    Map<String, Long> ramMap = new HashMap<>();
+    // The implementation assumes instances for the same component require same ram
+    for (ContainerPlan containerPlan : this.containers.values()) {
+      for (InstancePlan instancePlan : containerPlan.instances.values()) {
+        ramMap.put(instancePlan.componentName, instancePlan.resource.ram);
+      }
+    }
+
+    // Convert it into a formatted String
+    StringBuilder ramMapBuilder = new StringBuilder();
+    for (String component : ramMap.keySet()) {
+      ramMapBuilder.append(String.format("%s:%d,", component, ramMap.get(component)));
+    }
+
+    // Remove the duplicated "," at the end
+    ramMapBuilder.deleteCharAt(ramMapBuilder.length() - 1);
+    return ramMapBuilder.toString();
+  }
+
+  /**
    * Type definition of packing structure output.
    */
   public static class Resource {
-    public Double cpu;
-    public Long ram;
-    public Long disk;
+    public double cpu;
+    public long ram;
+    public long disk;
 
-    public Resource(Double cpu, Long ram, Long disk) {
+    public Resource(double cpu, long ram, long disk) {
       this.cpu = cpu;
       this.ram = ram;
       this.disk = disk;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj instanceof Resource) {
+        Resource r = (Resource) obj;
+        return (this.cpu == r.cpu) && (this.ram == r.ram) && (this.disk == r.disk);
+      } else {
+        return false;
+      }
+    }
+
+    @Override
+    public int hashCode() {
+      return (Long.hashCode(ram) << 2) & (Long.hashCode(disk) << 1) & (Double.hashCode(cpu));
+    }
+
+    @Override
+    public String toString() {
+      return String.format("{cpu: %f, ram: %d, disk: %d}", cpu, ram, disk);
     }
   }
 
@@ -80,6 +133,12 @@ public class PackingPlan {
       this.id = id;
       this.componentName = componentName;
       this.resource = resource;
+    }
+
+    @Override
+    public String toString() {
+      return String.format("{instance-id: %s, componentName: %s, instance-resource: %s}",
+          id, componentName, resource.toString());
     }
   }
 
@@ -94,6 +153,12 @@ public class PackingPlan {
       this.id = id;
       this.instances = instances;
       this.resource = resource;
+    }
+
+    @Override
+    public String toString() {
+      return String.format("{container-id: %s, instances-list: %s, container-resource: %s}",
+          id, instances.toString(), resource);
     }
   }
 }

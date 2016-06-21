@@ -21,12 +21,18 @@ def heron_client_aurora_files():
         "//heron/config/src/yaml:conf-aurora-yaml",
     ]
 
+def heron_client_yarn_files():
+    return [
+        "//heron/config/src/yaml:conf-yarn-yaml",
+    ]
+
 def heron_client_lib_scheduler_files():
     return [
         "//heron/scheduler-core/src/java:heron-scheduler",
         "//heron/schedulers/src/java:heron-local-scheduler",
         "//heron/schedulers/src/java:heron-aurora-scheduler",
         "//heron/schedulers/src/java:heron-slurm-scheduler",
+        "//heron/schedulers/src/java:heron-yarn-scheduler",
         "//heron/packing/src/java:heron-roundrobin-packing",
     ]
 
@@ -54,5 +60,4 @@ def heron_client_lib_3rdparty_files():
         "@protobuf-java//jar",
         "@slf4j-api//jar",
         "@slf4j-jdk//jar",
-        "@log4j-over-slf4j//jar",
     ]

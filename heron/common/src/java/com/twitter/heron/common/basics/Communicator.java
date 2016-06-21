@@ -53,8 +53,12 @@ public class Communicator<E> {
   private volatile int capacity;
 
   /**
-   * Used in Used in updateExpectedAvailableCapacity()
+   * Used in updateExpectedAvailableCapacity()
    * Variables related to dynamically tune Communicator's expected available capacity
+   * <p>
+   * The value should be positive number && smaller than the capacity
+   * -- Non-positive number can cause starvation concerns.
+   * -- Too large positive number can bring gc issues.
    */
   private volatile int expectedAvailableCapacity;
 
@@ -225,7 +229,8 @@ public class Communicator<E> {
       expectedAvailableCapacity = availableCapacity + 1;
     }
 
-    if (inAvgSize > expectedQueueSize && availableCapacity > 0) {
+    // Make sure expectedAvailableCapacity will still be positive number if we decrease it
+    if (inAvgSize > expectedQueueSize && availableCapacity > 1) {
       // The decrease of available capacity is quick since
       // we want to recover quickly once we back-up items , which may cause GC issues
       expectedAvailableCapacity = availableCapacity / 2;
