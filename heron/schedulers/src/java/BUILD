@@ -28,7 +28,7 @@ scheduler_deps_files = \
 yarn_deps_files = \
     scheduler_deps_files + [
         "//heron/scheduler-core/src/java:scheduler-java",
-        "//3rdparty/java:yarn",
+        "//third_party/java:yarn",
     ]
 
 java_library(
