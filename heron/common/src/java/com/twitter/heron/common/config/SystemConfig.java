@@ -131,6 +131,12 @@ public class SystemConfig {
       = "heron.instance.set.data.tuple.capacity";
 
   /**
+   * The maximum size in bytes of data tuple to batch in a HeronDataTupleSet protobuf
+   */
+  public static final String INSTANCE_SET_DATA_TUPLE_SIZE_BYTES
+      = "heron.instance.set.data.tuple.size.bytes";
+
+  /**
    * The size of packets read from stream manager will be determined by the minimal of
    * (a) time based (b) size based
    */
@@ -341,6 +347,11 @@ public class SystemConfig {
   public int getInstanceSetDataTupleCapacity() {
     return TypeUtils.getInteger(this.config.get(
         SystemConfig.INSTANCE_SET_DATA_TUPLE_CAPACITY));
+  }
+
+  public long getInstanceSetDataTupleSizeBytes() {
+    return TypeUtils.getInteger(this.config.get(
+        SystemConfig.INSTANCE_SET_DATA_TUPLE_SIZE_BYTES));
   }
 
   public int getInstanceSetControlTupleCapacity() {

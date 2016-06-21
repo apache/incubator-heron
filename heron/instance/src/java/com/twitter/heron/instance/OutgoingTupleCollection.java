@@ -41,8 +41,13 @@ public class OutgoingTupleCollection {
   // Total data emitted in bytes for the entire life
   private long totalDataEmittedInBytes = 0;
 
-  private int dataTupleSetCapacity;
-  private int controlTupleSetCapacity;
+  // Current size in bytes for data types to pack into the HeronTupleSet
+  private long currentDataTupleSizeInBytes = 0;
+  // Maximum data tuple size in bytes we can put in one HeronTupleSet
+  private long maxDataTupleSizeInBytes = Long.MAX_VALUE;
+
+  private int dataTupleSetCapacity = Integer.MAX_VALUE;
+  private int controlTupleSetCapacity = Integer.MAX_VALUE;
 
   public OutgoingTupleCollection(
       PhysicalPlanHelper helper,
@@ -51,7 +56,10 @@ public class OutgoingTupleCollection {
     this.helper = helper;
     this.systemConfig =
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
+
+    // Read the config values
     this.dataTupleSetCapacity = systemConfig.getInstanceSetDataTupleCapacity();
+    this.maxDataTupleSizeInBytes = systemConfig.getInstanceSetDataTupleSizeBytes();
     this.controlTupleSetCapacity = systemConfig.getInstanceSetControlTupleCapacity();
   }
 
@@ -65,11 +73,13 @@ public class OutgoingTupleCollection {
       long tupleSizeInBytes) {
     if (currentDataTuple == null
         || !currentDataTuple.getStream().getId().equals(streamId)
-        || currentDataTuple.getTuplesCount() > dataTupleSetCapacity) {
+        || currentDataTuple.getTuplesCount() > dataTupleSetCapacity
+        || currentDataTupleSizeInBytes > maxDataTupleSizeInBytes) {
       initNewDataTuple(streamId);
     }
     currentDataTuple.addTuples(newTuple);
 
+    currentDataTupleSizeInBytes += tupleSizeInBytes;
     totalDataEmittedInBytes += tupleSizeInBytes;
   }
 
@@ -99,6 +109,10 @@ public class OutgoingTupleCollection {
 
   private void initNewDataTuple(String streamId) {
     flushRemaining();
+
+    // Reset the set for data tuple
+    currentDataTupleSizeInBytes = 0;
+
     TopologyAPI.StreamId.Builder sbldr = TopologyAPI.StreamId.newBuilder();
     sbldr.setId(streamId);
     sbldr.setComponentName(helper.getMyComponent());
