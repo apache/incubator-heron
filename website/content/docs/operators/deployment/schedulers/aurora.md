@@ -28,8 +28,44 @@ S3](https://aws.amazon.com/s3/) or using a local blob storage solution). You
 can download the core binary from github or build it using the instructions
 in [Creating a New Heron Release](../../../../developers/compiling#building-a-full-release-package).
 
+Command for fetching the binary is in the `heron.aurora` config file. By default it is 
+using a curl command to fetch the binary. For example, if the binary is hosted in a place such as 
+HDFS, you need to change the fetch user package command in `heron.aurora` to use the 
+hdfs command instead of curl.
+
+### `heron.aurora` example binary fetch using HDFS
+
+```bash
+fetch_heron_system = Process(
+  name = 'fetch_heron_system',
+  cmdline = 'hdfs dfs -get %s %s && tar zxf %s' % (heron_core_release_uri, 
+        core_release_file, core_release_file)
+)
+```
+
 Once your Heron binaries are hosted somewhere that is accessible to Aurora, you
 should run tests to ensure that Aurora can successfully fetch them.
+
+## Uploading the Topologies
+
+Heron uses an uploader to upload the topology to a shared location so that a worker can fetch 
+the topology to its sandbox. The configuration for an uploader is in `uploader.yaml` config file. 
+For distributed aurora deployments Heron can use `HdfsUploader` or `S3Uploader`. 
+Details on configuring the uploaders can be found in [HDFS](../../uploaders/hdfs) and 
+[S3](../../uploaders/s3) documentations. 
+
+After configuring an uploader, `heron.aurora` config file needs to be modified accordingly to 
+fetch the topology. 
+
+### `heron.aurora` example topology fetch using HDFS
+
+```bash
+fetch_user_package = Process(
+  name = 'fetch_user_package',
+  cmdline = 'hdfs dfs -get %s %s && tar zxf %s' % (heron_topology_jar_uri, 
+          topology_package_file, topology_package_file)
+)
+```
 
 ## Aurora Scheduler Configuration
 
