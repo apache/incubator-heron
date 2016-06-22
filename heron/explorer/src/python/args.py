@@ -14,8 +14,6 @@
 
 import os
 import argparse
-import heron.explorer.src.python.help as help
-
 
 help_epilog = '''Getting more help:
   heron-explorer help <command> Prints help and options for <command>

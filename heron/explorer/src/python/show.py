@@ -17,11 +17,6 @@ import tornado.gen
 import tornado.ioloop
 from heron.ui.src.python.handlers.access import heron as API
 import heron.explorer.src.python.args as args
-from heron.explorer.src.python.physicalplan import get_topology_info
-import heron.explorer.src.python.help as help
-from tabulate import tabulate
-import json
-import utils
 
 LOG = logging.getLogger(__name__)
 

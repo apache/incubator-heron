@@ -65,11 +65,12 @@ def get_logical_plan(cluster, env, topology, role):
 
 def parse_topo_loc(cl_args):
   try:
-    topo_loc = cl_args['[cluster]/[role]/[env]/[topology]'].split('/')
+    topo_loc = cl_args['cluster/role/env/topology'].split('/')
     if len(topo_loc) != 4:
       raise
     return topo_loc
-  except Exception:
+  except Exception as ex:
+    LOG.error('Error: %s' % str(ex))
     LOG.error('Error: invalid topology location')
     raise
 
