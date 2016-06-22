@@ -43,7 +43,7 @@ jarjar_binary = rule(
     attrs = jarjar_attrs + {
         "deps": attr.label_list(),
         "_jarjar": attr.label(
-            default = Label("//3rdparty/java/jarjar:jarjar_bin"),
+            default = Label("//third_party/java/jarjar:jarjar_bin"),
             allow_files = True,
             executable = True,
         ),

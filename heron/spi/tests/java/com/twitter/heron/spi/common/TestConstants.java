@@ -16,7 +16,7 @@ package com.twitter.heron.spi.common;
 
 final class TestConstants {
   public static final String TEST_DATA_PATH =
-      "/heron/spi/tests/java/com/twitter/heron/spi/common/testdata";
+      "/__main__/heron/spi/tests/java/com/twitter/heron/spi/common/testdata";
 
   private TestConstants() {
   }
