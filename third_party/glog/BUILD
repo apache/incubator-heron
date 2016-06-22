@@ -46,7 +46,7 @@ cc_library(
         "include/glog/vlog_is_on.h",
     ],
     deps = [
-      "//3rdparty/gflags:gflags-cxx",
+      "//third_party/gflags:gflags-cxx",
     ],
     hdrs = [
         "include/glog/logging.h",

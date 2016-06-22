@@ -4,8 +4,8 @@ load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 common_deps_files = [
     "//heron/common/src/java:basics-java",
-    "@commons-io//jar",
-    "@guava//jar",
+    "@commons_io_commons_io//jar",
+    "@com_google_guava_guava//jar",
 ]
 
 spi_deps_files = [
@@ -24,6 +24,12 @@ scheduler_deps_files = \
     common_deps_files + \
     spi_deps_files + \
     api_deps_files
+
+yarn_deps_files = \
+    scheduler_deps_files + [
+        "//heron/scheduler-core/src/java:scheduler-java",
+        "//third_party/java:yarn",
+    ]
 
 java_library(
     name='local-scheduler-java',
@@ -110,5 +116,26 @@ genrule(
     name = "heron-slurm-scheduler",
     srcs = [":slurm-scheduler-unshaded_deploy.jar"],
     outs = ["heron-slurm-scheduler.jar"],
+    cmd  = "cp $< $@",
+)
+
+java_library(
+    name='yarn-scheduler-java',
+    srcs = glob(["**/yarn/*.java"]),
+    deps = yarn_deps_files,
+    resources = glob(["**/yarn/*.yaml"]),
+)
+
+java_binary(
+    name='yarn-scheduler-unshaded',
+    srcs = glob(["**/yarn/*.java"]),
+    deps = yarn_deps_files,
+    resources = glob(["**/yarn/*.yaml"]),
+)
+
+genrule(
+    name = "heron-yarn-scheduler",
+    srcs = [":yarn-scheduler-unshaded_deploy.jar"],
+    outs = ["heron-yarn-scheduler.jar"],
     cmd  = "cp $< $@",
 )

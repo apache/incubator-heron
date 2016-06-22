@@ -1,8 +1,8 @@
 load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 common_deps_files = [
-    "@guava//jar",
-    "//3rdparty/java:powermock",
+    "@com_google_guava_guava//jar",
+    "//third_party/java:powermock",
     "//heron/api/src/java:api-java",
     "//heron/common/src/java:basics-java",
     "//heron/scheduler-core/src/java:scheduler-java",
