@@ -39,16 +39,16 @@ function get_heron_python_paths() {
 
 function get_heron_thirdparty_dependencies() {
   # bazel-bin/heron/proto for heron proto jars from heron/proto
-  # bazel-genfiles/external for 3rdparty deps
-  # bazel-heron/bazel-out/host/bin/3rdparty for extra_action proto jars in 3rdparty
-  # bazel-heron/bazel-out/host/genfiles/external more 3rdparty deps
-  echo "$(find {bazel-bin/heron/proto,bazel-genfiles/external,bazel-heron/bazel-out/host/bin/3rdparty,bazel-heron/bazel-out/host/genfiles/external}/. -name "*jar" -type f | sort -u)";
+  # bazel-genfiles/external for third_party deps
+  # bazel-heron/bazel-out/host/bin/third_party for extra_action proto jars in third_party
+  # bazel-heron/bazel-out/host/genfiles/external more third_party deps
+  echo "$(find {bazel-bin/heron/proto,bazel-genfiles/external,bazel-heron/bazel-out/host/bin/third_party,bazel-heron/bazel-out/host/genfiles/external}/. -name "*jar" -type f | sort -u)";
 }
 
 function get_heron_bazel_deps(){
   local bazel_third_party_base="$(bazel info output_base)/external/bazel_tools/third_party/";
   local bazel_ext_deps=`bazel query 'labels("deps", heron/...)'  | egrep -E "bazel_tools"`;
-  local heron_resolved_deps=`for dep in $bazel_ext_deps; do bazel query "$dep" --output xml | grep "<label" | grep "\.jar" | sed 's/<label value="//' | sed 's/"\/\>//'| sort -u | sed 's/\/\/3rdparty/$MODULE_DIR\/3rdparty/' | sed "s|\@bazel_tools\/\/third_party\:|$bazel_third_party_base|" ; done`;
+  local heron_resolved_deps=`for dep in $bazel_ext_deps; do bazel query "$dep" --output xml | grep "<label" | grep "\.jar" | sed 's/<label value="//' | sed 's/"\/\>//'| sort -u | sed 's/\/\/third_party/$MODULE_DIR\/third_party/' | sed "s|\@bazel_tools\/\/third_party\:|$bazel_third_party_base|" ; done`;
   echo "${heron_resolved_deps}";
 }
 

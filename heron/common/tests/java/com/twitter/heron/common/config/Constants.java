@@ -24,7 +24,7 @@ public final class Constants {
   public static final String LAUNCHER_CLASS_KEY = "heron.launcher.class";
 
   public static final String TEST_DATA_PATH =
-      "/heron/common/tests/java/com/twitter/heron/common/config/testdata";
+      "/__main__/heron/common/tests/java/com/twitter/heron/common/config/testdata";
 
   private Constants() {
   }
