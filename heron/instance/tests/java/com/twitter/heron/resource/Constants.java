@@ -41,7 +41,7 @@ public final class Constants {
   // For bazel, we use the env var to get the path of heron internals config file
   public static final String BUILD_TEST_SRCDIR = "TEST_SRCDIR";
   public static final String BUILD_TEST_HERON_INTERNALS_CONFIG_PATH =
-      "/heron/config/src/yaml/conf/test/test_heron_internals.yaml";
+      "/__main__/heron/config/src/yaml/conf/test/test_heron_internals.yaml";
 
   private Constants() {
   }

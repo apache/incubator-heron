@@ -48,7 +48,7 @@ genproto_java = rule(
     genproto_java_impl,
     attrs = genproto_base_attrs + {
         "_protoc": attr.label(
-            default = Label("//3rdparty/protobuf:protoc"),
+            default = Label("//third_party/protobuf:protoc"),
             allow_files = True,
             single_file = True,
         ),
@@ -71,7 +71,7 @@ def proto_library(name, src=None, includes=[], deps=[], visibility=None,
         deps = deps,
         visibility = ["//visibility:private"],
     )
-    java_deps = ["@protobuf-java//jar"]
+    java_deps = ["@com_google_protobuf_protobuf_java//jar"]
     for dep in deps:
       java_deps += [dep + "_java"]
 
@@ -97,13 +97,13 @@ def proto_library(name, src=None, includes=[], deps=[], visibility=None,
     proto_src = src[:-6] + ".pb.cc"
     proto_srcgen_rule = name + "_cc_src"
     proto_lib = name + "_cc"
-    protoc = "//3rdparty/protobuf:protoc"
+    protoc = "//third_party/protobuf:protoc"
     if not includes:
       proto_cmd = "$(location %s) --cpp_out=$(@D) %s" % (protoc, proto_path)
     else:
       proto_cmd = "$(location %s) %s --cpp_out=$(@D) %s" % (protoc, proto_include_paths, proto_path)
 
-    cc_deps = ["//3rdparty/protobuf:protobuf-cxx"]
+    cc_deps = ["//third_party/protobuf:protobuf-cxx"]
     proto_deps = [src, protoc]
     for dep in deps:
       cc_deps += [dep + "_cc"]
@@ -133,7 +133,7 @@ def proto_library(name, src=None, includes=[], deps=[], visibility=None,
     proto_src = src[:-6] + "_pb2.py"
     proto_srcgen_rule = name + "_py_src"
     proto_lib = name + "_py"
-    protoc = "//3rdparty/protobuf:protoc"
+    protoc = "//third_party/protobuf:protoc"
     if not includes:
       proto_cmd = "$(location %s) --python_out=$(@D) %s" % (protoc, proto_path)
     else:

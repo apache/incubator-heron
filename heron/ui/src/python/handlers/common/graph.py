@@ -32,7 +32,7 @@ class Graph(object):
       self.edges[U].add(V)
 
   def __str__(self):
-    print self.edges
+    return str(self.edges)
 
   # Returns the maximum distance between any vertex and U in the connected 
   # component containing U

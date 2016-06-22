@@ -162,6 +162,7 @@ public final class SchedulerUtils {
   /**
    * Util method to get the arguments to the heron executor. This method creates the arguments
    * without the container index, which is the first argument to the executor
+   *
    * @param config The static Config
    * @param runtime The runtime Config
    * @param freePorts list of free ports
@@ -204,8 +205,7 @@ public final class SchedulerUtils {
     commands.add(Integer.toString(tmasterControllerPort));
     commands.add(Integer.toString(tmasterStatsPort));
     commands.add(Context.systemConfigSandboxFile(config));
-    commands.add(TopologyUtils.formatRamMap(
-        TopologyUtils.getComponentRamMap(topology, Context.instanceRam(config))));
+    commands.add(Runtime.componentRamMap(runtime));
     commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
     commands.add(Context.topologyPackageType(config));
     commands.add(Context.topologyJarFile(config));
@@ -250,6 +250,7 @@ public final class SchedulerUtils {
 
   /**
    * Set the location of scheduler for other processes to discover
+   *
    * @param runtime the runtime configuration
    * @param schedulerEndpoint the endpoint that scheduler listens for receives requests
    * @param scheduler the IScheduler to provide more info

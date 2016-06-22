@@ -28,7 +28,7 @@ def pick(dirname, pattern):
 ################################################################################
 def topology_jars():
   jars = [
-      os.path.join(utils.get_heron_lib_dir(), "3rdparty", "*")
+      os.path.join(utils.get_heron_lib_dir(), "third_party", "*")
   ]
   return jars
 
