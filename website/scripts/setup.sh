@@ -8,6 +8,7 @@ if [ $PLAT_FORM = darwin ]; then
   nvm install node
   curl -L https://www.npmjs.com/install.sh | sh 
   brew list hugo || brew install hugo
+  which wget || brew install wget
 elif [ $PLAT_FORM = ubuntu ]; then
   sudo apt-get install golang git mercurial python-pygments -y
   export GOROOT=/usr/lib/go
@@ -23,5 +24,5 @@ elif [ $PLAT_FORM = centos ]; then
 fi
 
 npm install
-sudo -H pip uninstall -y requests Pygments
-sudo -H pip install linkchecker Pygments==2.1.3 requests==2.9.0
+sudo -H pip uninstall -y Pygments
+sudo -H pip install Pygments==2.1.3
