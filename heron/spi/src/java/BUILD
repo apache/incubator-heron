@@ -118,6 +118,24 @@ java_library(
 )
 
 java_library(
+    name='shell-utils-java',
+    srcs = glob([
+        "**/spi/utils/ShellUtils.java",
+    ]),
+)
+
+java_library(
+    name='network-utils-java',
+    srcs = glob([
+        "**/spi/utils/NetworkUtils.java",
+    ]),
+    deps = [
+        ":shell-utils-java",
+        "//heron/common/src/java:basics-java",
+    ],
+)
+
+java_library(
     name='uploader-spi-java',
     srcs = glob([
         "**/spi/uploader/**/*.java",
