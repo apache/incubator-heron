@@ -36,21 +36,21 @@ java_library(
 )
 
 java_test(
-    name = "packing-plan_unittest",
+    name = "PackingPlanTest",
     srcs = glob(["**/packing/PackingPlanTest.java"]),
     deps = packing_deps_files,
     size = "small",
 )
 
 java_test(
-    name = "shell-utils_unittest",
+    name = "ShellUtilsTest",
     srcs = glob(["**/utils/ShellUtilsTest.java"]),
     deps = util_deps_files,
     size = "small",
 )
 
 java_test(
-    name = "network-utils_unittest",
+    name = "NetworkUtilsTest",
     srcs = glob(["**/utils/NetworkUtilsTest.java"]),
     deps = util_deps_files,
     size = "small",
