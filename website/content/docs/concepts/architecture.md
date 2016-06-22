@@ -213,3 +213,35 @@ The source for this diagram lives here:
 https://docs.google.com/drawings/d/10d1Q_VO0HFtOHftDV7kK6VbZMVI5EpEYHrD-LR7SczE
 -->
 <img src="/img/topology-submit-sequence-diagram.png" style="max-width:140%;!important;" alt="Topology Sequence Diagram"/>
+
+## Brief Description
+
+The following briefly describes how a topology is handled internally.
+
+1. Client
+When a topology is submitted using `heron submit` command, it first executes
+the `main` of the topology and creates `.defn` file containing the topology's
+logical plan. Then, it runs `com.twitter.heron.scheduler.SubmitterMain`, which
+is responsible for invoking an uploader and an launcher for the topology.
+The uploader uploads the topology package to the given location, while the
+launcher (in `LaunchRunner.call()`) registers the topology's logical plan
+and executor state to the state manager and invokes the main scheduler.
+
+2. Shared Services
+When the main scheduler (`com.twitter.heron.scheduler.SchedulerMain`) is invoked 
+by the launcher, it fetches the submitted topology artifact from the
+topology storage, initializes the state manager, and gets the packed plan, which 
+specifies how multiple instances should be packed into containers. Then, it runs
+the specified scheduler, such as `com.twitter.heron.scheduler.local.LocalScheduler`,
+which invokes `heron-executor` for each container.
+
+3. Topologies
+`heron-executor` process is responsible for running the heron instances 
+corresponding to its container. Note that Topology Master is always executed on
+the container 0 
+For example, container 0 always executes the
+Topology Master, whereas other containers execute heron instances (bolt/spout)
+that are assigned to themselves by the packed plan. For those containers that
+execute heron instances, 
+
+
