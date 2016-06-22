@@ -147,10 +147,9 @@ def get_cluster_role_env_topologies(cluster, role, env):
 ################################################################################
 @tornado.gen.coroutine
 def get_execution_state(cluster, environ, topology, role=None):
-  request_url = tornado.httputil.url_concat(
-      create_url(EXECUTION_STATE_URL_FMT),
-      dict(cluster = cluster, role= role, environ = environ, topology = topology)
-  )
+  parameters = dict(cluster = cluster, environ = environ, topology = topology)
+  if role: parameters.update(dict(role=role))
+  request_url = tornado.httputil.url_concat(create_url(EXECUTION_STATE_URL_FMT), parameters)
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
 ################################################################################
@@ -158,10 +157,9 @@ def get_execution_state(cluster, environ, topology, role=None):
 ################################################################################
 @tornado.gen.coroutine
 def get_logical_plan(cluster, environ, topology, role=None):
-  request_url = tornado.httputil.url_concat(
-      create_url(lOGICALPLAN_URL_FMT),
-      dict(cluster = cluster, role = role, environ = environ, topology = topology)
-  )
+  parameters = dict(cluster = cluster, environ = environ, topology = topology)
+  if role: parameters.update(dict(role=role))
+  request_url = tornado.httputil.url_concat(create_url(lOGICALPLAN_URL_FMT), parameters)
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
 ################################################################################
@@ -169,10 +167,9 @@ def get_logical_plan(cluster, environ, topology, role=None):
 ################################################################################
 @tornado.gen.coroutine
 def get_comps(cluster, environ, topology, role=None):
-  request_url = tornado.httputil.url_concat(
-      create_url(lOGICALPLAN_URL_FMT),
-      dict(cluster = cluster, role = role, environ = environ, topology = topology)
-  )
+  parameters = dict(cluster = cluster, environ = environ, topology = topology)
+  if role: parameters.update(dict(role=role))
+  request_url = tornado.httputil.url_concat(create_url(lOGICALPLAN_URL_FMT), parameters)
   lplan = yield fetch_url_as_json(request_url)
   comps = lplan['spouts'].keys() + lplan['bolts'].keys()
   raise tornado.gen.Return(comps)
@@ -182,10 +179,9 @@ def get_comps(cluster, environ, topology, role=None):
 ################################################################################
 @tornado.gen.coroutine
 def get_physical_plan(cluster, environ, topology, role=None):
-  request_url = tornado.httputil.url_concat(
-      create_url(PHYSICALPLAN_URL_FMT),
-      dict(cluster = cluster, role = role, environ = environ, topology = topology)
-  )
+  parameters = dict(cluster = cluster, environ = environ, topology = topology)
+  if role: parameters.update(dict(role=role))
+  request_url = tornado.httputil.url_concat(create_url(PHYSICALPLAN_URL_FMT), parameters)
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
 ################################################################################
@@ -193,10 +189,9 @@ def get_physical_plan(cluster, environ, topology, role=None):
 ################################################################################
 @tornado.gen.coroutine
 def get_scheduler_location(cluster, environ, topology, role=None):
-  request_url = tornado.httputil.url_concat(
-      create_url(SCHEDULER_LOCATION_URL_FMT),
-      dict(cluster = cluster, role = role, environ = environ, topology = topology)
-  )
+  parameters = dict(cluster = cluster, environ = environ, topology = topology)
+  if role: parameters.update(dict(role=role))
+  request_url = tornado.httputil.url_concat(create_url(SCHEDULER_LOCATION_URL_FMT), parameters)
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
 ################################################################################
@@ -209,7 +204,6 @@ def get_component_exceptionsummary(cluster, environ, topology, component, role=N
                     topology = topology,
                     component = component)
   if role: parameters.update(dict(role=role))
-
   request_url = tornado.httputil.url_concat(create_url(EXCEPTION_SUMMARY_URL_FMT), parameters)
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
