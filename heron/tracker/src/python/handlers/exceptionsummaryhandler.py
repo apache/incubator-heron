@@ -33,6 +33,7 @@ class ExceptionSummaryHandler(BaseHandler):
    - environ - Running environment.
    - topology - Name of topology (Note: Case sensitive. Can only
                 include [a-zA-Z0-9-_]+)
+   - role (optional)
    - component - Component name
    - instance - (optional, repeated)
 
@@ -49,8 +50,10 @@ class ExceptionSummaryHandler(BaseHandler):
       cluster = self.get_argument_cluster()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
+      role = self.get_argument(constants.PARAM_ROLE, default=None)
       component = self.get_argument_component()
-      topology = self.tracker.getTopologyByClusterEnvironAndName(cluster, environ, topology_name)
+      topology = self.tracker.getTopologyByClusterRoleEnvironAndName(
+        cluster, environ, role, topology_name)
       instances = self.get_arguments(constants.PARAM_INSTANCE)
       exceptions_summary = yield tornado.gen.Task(self.getComponentExceptionSummary,
                                                   topology.tmaster, component, instances)

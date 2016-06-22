@@ -16,6 +16,7 @@ class ContainerFileDataHandler(BaseHandler):
    - environ - Running environment.
    - topology - Name of topology (Note: Case sensitive. Can only
                 include [a-zA-Z0-9-_]+)
+   - role (optional)
    - container - Container number
    - path - Relative path to the file
    - offset - From which to read the file
@@ -33,11 +34,12 @@ class ContainerFileDataHandler(BaseHandler):
       cluster = self.get_argument_cluster()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
+      role = self.get_argument(constants.PARAM_ROLE, default=None)
       container = self.get_argument(constants.PARAM_CONTAINER)
       path = self.get_argument(constants.PARAM_PATH)
       offset = self.get_argument_offset()
       length = self.get_argument_length()
-      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, environ)
+      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)
 
       stmgr_id = "stmgr-" + container
       stmgr = topology_info["physical_plan"]["stmgrs"][stmgr_id]
@@ -62,6 +64,7 @@ class ContainerFileStatsHandler(BaseHandler):
    - environ - Running environment.
    - topology - Name of topology (Note: Case sensitive. Can only
                 include [a-zA-Z0-9-_]+)
+   - role (optional)
    - container - Container number
    - path - Relative path to the directory
 
@@ -77,9 +80,10 @@ class ContainerFileStatsHandler(BaseHandler):
       cluster = self.get_argument_cluster()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
+      role = self.get_argument(constants.PARAM_ROLE, default=None)
       container = self.get_argument(constants.PARAM_CONTAINER)
       path = self.get_argument(constants.PARAM_PATH, default=".")
-      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, environ)
+      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)
 
       stmgr_id = "stmgr-" + str(container)
       stmgr = topology_info["physical_plan"]["stmgrs"][stmgr_id]

@@ -26,6 +26,7 @@ class LogicalPlanHandler(BaseHandler):
    - cluster (required)
    - environ (required)
    - topology (required) name of the requested topology
+   - role (optional)
 
   The response JSON is a dictionary with all the
   information of logical plan of the topology.
@@ -39,7 +40,8 @@ class LogicalPlanHandler(BaseHandler):
       cluster = self.get_argument_cluster()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
-      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, environ)
+      role = self.get_argument(constants.PARAM_ROLE, default=None)
+      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)
       logical_plan = topology_info["logical_plan"]
       self.write_success_response(logical_plan)
     except Exception as e:
