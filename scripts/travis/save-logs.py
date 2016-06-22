@@ -45,11 +45,14 @@ def main(file, cmd):
     print
     print cmd, "done", errcode
     if errcode != 0:
-       f = open(sys.argv[1])
+       f = open(file)
        lines = f.read().splitlines()
        f.close()
+       count = 0
        for line in lines:
-          print line
+          count += 1
+          if (count <= 1000):
+             print line
        sys.exit(errcode)
     return errcode
 
