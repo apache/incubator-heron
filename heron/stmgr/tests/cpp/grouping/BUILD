@@ -7,7 +7,7 @@ cc_test(
     ],
     deps = [
         "//heron/stmgr/src/cpp:grouping-cxx",
-        "//3rdparty/gtest:gtest-cxx",
+        "//third_party/gtest:gtest-cxx",
     ],
     copts = [
         "-Iheron",
@@ -27,7 +27,7 @@ cc_test(
     ],
     deps = [
         "//heron/stmgr/src/cpp:grouping-cxx",
-        "//3rdparty/gtest:gtest-cxx",
+        "//third_party/gtest:gtest-cxx",
     ],
     copts = [
         "-Iheron",
@@ -47,7 +47,7 @@ cc_test(
     ],
     deps = [
         "//heron/stmgr/src/cpp:grouping-cxx",
-        "//3rdparty/gtest:gtest-cxx",
+        "//third_party/gtest:gtest-cxx",
     ],
     copts = [
         "-Iheron",
@@ -67,7 +67,7 @@ cc_test(
     ],
     deps = [
         "//heron/stmgr/src/cpp:grouping-cxx",
-        "//3rdparty/gtest:gtest-cxx",
+        "//third_party/gtest:gtest-cxx",
     ],
     copts = [
         "-Iheron",
@@ -87,7 +87,7 @@ cc_test(
     ],
     deps = [
         "//heron/stmgr/src/cpp:grouping-cxx",
-        "//3rdparty/gtest:gtest-cxx",
+        "//third_party/gtest:gtest-cxx",
     ],
     copts = [
         "-Iheron",

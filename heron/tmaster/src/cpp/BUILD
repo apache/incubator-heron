@@ -42,7 +42,7 @@ cc_library(
         "//heron/common/src/cpp/metrics:metrics-cxx",
         "//heron/statemgrs/src/cpp:statemgrs-cxx",
         "//heron/proto:proto-cxx",
-        "//3rdparty/yaml-cpp:yaml-cxx",
+        "//third_party/yaml-cpp:yaml-cxx",
     ],
     linkstatic = 1,
 )
