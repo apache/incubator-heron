@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#set -e
+set -e
 JAVADOC=javadoc
 FLAGS="-quiet"
 
