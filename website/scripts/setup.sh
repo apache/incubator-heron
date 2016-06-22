@@ -1,9 +1,12 @@
 #!/bin/bash
 
-source ../../scripts/detect_os_type.sh
+source ../scripts/detect_os_type.sh
 
 PLAT_FORM=`platform`
-if [ $PLAT_FORM = darwin ]; then 
+if [ $PLAT_FORM = darwin ]; then
+  brew update && brew install nvm && source $(brew --prefix nvm)/nvm.sh
+  nvm install node
+  curl -L https://www.npmjs.com/install.sh | sh 
   brew list hugo || brew install hugo
 elif [ $PLAT_FORM = ubuntu ]; then
   sudo apt-get install golang git mercurial python-pygments -y
