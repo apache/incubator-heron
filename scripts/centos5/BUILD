@@ -169,6 +169,7 @@ genrule(
     srcs = [
         ":release.yaml",
         ":hapi",
+        ":hspi",
         ":hstorm",
     ],
     outs = [
@@ -180,6 +181,7 @@ genrule(
         "$(location package_release.sh)              $(location heron-api.tar.gz)",
         "--cp $(location release.yaml)               release.yaml",
         "--cp $(location hapi)                       heron-api.jar",
+        "--cp $(location hspi)                       heron-spi.jar",
         "--cp $(location hstorm)                     heron-storm.jar",
     ]),
     heuristic_label_expansion = False,
@@ -355,6 +357,11 @@ filegroup(
 filegroup(
     name = "hapi",
     srcs = ["//heron/api/src/java:heron-api"],
+)
+
+filegroup(
+    name = "hspi",
+    srcs = ["//heron/api/src/java:heron-spi"],
 )
 
 filegroup(

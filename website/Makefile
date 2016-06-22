@@ -29,3 +29,10 @@ site:
 	@make pages
 	@make javadocs
 	@make linkchecker
+
+travis-site:
+	@make clean
+	@make build-static-assets
+	@make pages
+	@scripts/javadocs.sh --travis
+	@make linkchecker
