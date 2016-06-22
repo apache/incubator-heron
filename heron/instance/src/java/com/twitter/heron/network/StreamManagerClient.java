@@ -196,6 +196,10 @@ public class StreamManagerClient extends HeronClient {
 
   // Send out all the data
   public void sendAllMessage() {
+    if (!isConnected()) {
+      return;
+    }
+
     LOG.info("Flushing all pending data in StreamManagerClient");
     // Collect all tuples in queue
     int size = outStreamQueue.size();
