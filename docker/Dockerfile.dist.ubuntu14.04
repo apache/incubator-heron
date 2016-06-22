@@ -26,9 +26,6 @@ ADD artifacts /heron
 
 WORKDIR /heron
 
-#avoid errors on tracker initial startup
-#RUN mkdir -p /root/.herondata/repository/state/local/topologies
-
 #run heron installers
 RUN /heron/heron-tools-install-*-ubuntu14.04.sh && \
     /heron/heron-client-install-*-ubuntu14.04.sh && \
