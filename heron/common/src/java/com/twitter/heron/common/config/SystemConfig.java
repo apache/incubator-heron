@@ -272,7 +272,7 @@ public class SystemConfig {
   /**
    * The size of packets read from socket will be determined by the minimal of:
    * (a) time based (b) size based
-   *
+   * <p>
    * Time based, the maximum batch time in ms for instance to read from socket per attempt
    */
   public static final String METRICSMGR_NETWORK_READ_BATCH_TIME_MS
@@ -287,7 +287,7 @@ public class SystemConfig {
   /**
    * The size of packets written to socket will be determined by the minimal of
    * (a) time based (b) size based
-   *
+   * <p>
    * Time based, the maximum batch time in ms to write to socket
    */
   public static final String METRICSMGR_NETWORK_WRITE_BATCH_TIME_MS
@@ -350,8 +350,11 @@ public class SystemConfig {
   }
 
   public long getInstanceSetDataTupleSizeBytes() {
-    return TypeUtils.getInteger(this.config.get(
-        SystemConfig.INSTANCE_SET_DATA_TUPLE_SIZE_BYTES));
+    // TODO(mfu): Provide default values for all configs uniformly
+    // TODO(mfu): https://github.com/twitter/heron/issues/970
+    Object value = this.config.get(
+        SystemConfig.INSTANCE_SET_DATA_TUPLE_SIZE_BYTES);
+    return value == null ? Long.MAX_VALUE : TypeUtils.getLong(value);
   }
 
   public int getInstanceSetControlTupleCapacity() {
