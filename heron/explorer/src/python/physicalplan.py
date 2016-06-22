@@ -18,7 +18,6 @@ import tornado.gen
 import tornado.ioloop
 from heron.ui.src.python.handlers.access import heron as API
 import heron.explorer.src.python.args as args
-import heron.explorer.src.python.logicalplan as logicalplan
 from tabulate import tabulate
 import json
 
@@ -30,8 +29,7 @@ def create_parser(subparsers):
     help = 'show info of a topology\'s spouts metrics',
     usage = "%(prog)s [options]",
     add_help = False)
-  args.add_cluster_env_topo(spouts_parser)
-  args.add_role(spouts_parser)
+  args.add_cluster_role_env_topo(spouts_parser)
   args.add_spout_name(spouts_parser)
   spouts_parser.set_defaults(subcommand='spouts-metric')
 
@@ -40,8 +38,7 @@ def create_parser(subparsers):
     help = 'show info of a topology\'s bolts metrics',
     usage = "%(prog)s [options]",
     add_help = False)
-  args.add_cluster_env_topo(bolts_parser)
-  args.add_role(bolts_parser)
+  args.add_cluster_role_env_topo(bolts_parser)
   args.add_bolt_name(bolts_parser)
   bolts_parser.set_defaults(subcommand='bolts-metric')
 
@@ -50,15 +47,16 @@ def create_parser(subparsers):
     help = 'show info of a topology\'s containers metrics',
     usage = "%(prog)s [options]",
     add_help = False)
-  args.add_cluster_env_topo(containers_parser)
-  args.add_role(containers_parser)
+  args.add_cluster_role_env_topo(containers_parser)
   args.add_container_id(containers_parser)
   containers_parser.set_defaults(subcommand='containers')
   return subparsers
 
 def parse_topo_loc(cl_args):
   try:
-    topo_loc = cl_args['[cluster]/[env]/[topology]'].split('/')
+    topo_loc = cl_args['[cluster]/[role]/[env]/[topology]'].split('/')
+    if len(topo_loc) != 4:
+      raise
     return topo_loc
   except Exception:
     LOG.error('Error: invalid topology location')
@@ -77,9 +75,10 @@ def get_topology_metrics(*args):
   try:
     return instance.run_sync(lambda: API.get_comp_metrics(*args))
   except Exception as ex:
+    LOG.error('Error: %s' % str(ex))
     raise
 
-def get_component_metrics(component, cluster, env, topology):
+def get_component_metrics(component, cluster, env, topology, role):
   queries_normal = ['complete-latency', 'execute-latency', 'process-latency',
      'jvm-uptime-secs', 'jvm-process-cpu-load', 'jvm-memory-used-mb']
   count_queries_normal = ['emit-count', 'execute-count', 'ack-count', 'fail-count']
@@ -88,7 +87,8 @@ def get_component_metrics(component, cluster, env, topology):
   all_queries = queries + count_queries
   m = dict(zip(queries, queries_normal) + zip(count_queries, count_queries_normal))
   try:
-    result = get_topology_metrics(cluster, env, topology, component, [], all_queries, [0, -1])
+    result = get_topology_metrics(
+      cluster, env, topology, component, [], all_queries, [0, -1], role)
   except:
     LOG.error("Failed to retrive metrics of component \'%s\'" % component)
     return False
@@ -113,11 +113,11 @@ def get_component_metrics(component, cluster, env, topology):
 def run_spouts(command, parser, cl_args, unknown_args):
   print(cl_args)
   try:
-    topo_loc = [cluster, env, topology] = parse_topo_loc(cl_args)
+    [cluster, role, env, topology] = parse_topo_loc(cl_args)
   except:
     return False
   try:
-    result = get_topology_info(*topo_loc)
+    result = get_topology_info(cluster, env, topology, role)
     spouts = result['physical_plan']['spouts'].keys()
     spout_name = cl_args['spout']
     if spout_name in spouts:
@@ -126,18 +126,18 @@ def run_spouts(command, parser, cl_args, unknown_args):
     LOG.error('Error %s' % str(ex))
     return False
   for spout in spouts:
-    result = get_component_metrics(spout, cluster, env, topology)
+    result = get_component_metrics(spout, cluster, env, topology, role)
     if not result: return False
   return True
 
 def run_bolts(command, parser, cl_args, unknown_args):
   print(cl_args)
   try:
-    topo_loc = [cluster, env, topology] = parse_topo_loc(cl_args)
+    [cluster, role, env, topology] = parse_topo_loc(cl_args)
   except:
     return False
   try:
-    result = get_topology_info(*topo_loc)
+    result = get_topology_info(cluster, env, topology, role)
     bolts = result['physical_plan']['bolts'].keys()
     bolt_name = cl_args['bolt']
     if bolt_name in bolts:
@@ -146,17 +146,17 @@ def run_bolts(command, parser, cl_args, unknown_args):
     LOG.error('Error %s' % str(ex))
     return False
   for bolt in bolts:
-    result = get_component_metrics(bolt, cluster, env, topology)
+    result = get_component_metrics(bolt, cluster, env, topology, role)
     if not result: return False
   return True
 
 def run_containers(command, parser, cl_args, unknown_args):
   try:
-    [cluster, env, topology] = parse_topo_loc(cl_args)
+    [cluster, role, env, topology] = parse_topo_loc(cl_args)
   except:
     return False
   container_id = cl_args['cid']
-  result = get_topology_info(cluster, env, topology)
+  result = get_topology_info(cluster, env, topology, role)
   containers = result['physical_plan']['stmgrs']
   all_bolts, all_spouts = set(), set()
   for container, bolts in result['physical_plan']['bolts'].items():

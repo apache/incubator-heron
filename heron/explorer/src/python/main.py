@@ -121,10 +121,8 @@ def run(command, *args):
     return logicalplan.run_bolts(command, *args)
 
   # show
-  if command == 'cluster':
-    return show.run_cluster(command, *args)
-  if command == 'env':
-    return show.run_env(command, *args)
+  if command == 'show':
+    return show.run(command, *args)
 
   # help
   if command == 'help':

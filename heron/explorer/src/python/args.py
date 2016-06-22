@@ -131,10 +131,10 @@ def add_bolt_name(parser, required=False, labelled=False):
     type=str, metavar='BOLT_ID')
   return parser
 
-def add_cluster_env_topo(parser):
+def add_cluster_role_env_topo(parser):
   parser.add_argument(
-    '[cluster]/[env]/[topology]',
-    help='Cluster, environment, and topology name'
+    'cluster/role/env/topology',
+    help='Cluster, role, environment, and topology name'
   )
   return parser
 
@@ -146,4 +146,10 @@ def add_spouts(parser):
 def add_bolts(parser):
   parser.add_argument(
     '--bolt', help='display bolt', action='store_true')
+  return parser
+
+def add_cluster_role_env(parser):
+  parser.add_argument(
+    'cluster/[role]/[env]', help='Topologies location', type=str,
+    metavar='CLUSTER/[ROLE]/[ENV]')
   return parser

@@ -18,6 +18,7 @@ import tornado.ioloop
 from heron.ui.src.python.handlers.access import heron as API
 from heron.ui.src.python.handlers.common.graph import Graph, TopologyDAG
 import heron.explorer.src.python.args as args
+from tabulate import tabulate
 import json
 
 LOG = logging.getLogger(__name__)
@@ -28,7 +29,7 @@ def create_parser(subparsers):
     help='display information of a topology in a logical plan',
     usage = "%(prog)s [options]",
     add_help = False)
-  args.add_cluster_env_topo(components_parser)
+  args.add_cluster_role_env_topo(components_parser)
   args.add_role(components_parser)
   components_parser.set_defaults(subcommand='components')
 
@@ -37,7 +38,7 @@ def create_parser(subparsers):
     help='display information of spouts of a topology in a logical plan',
     usage = "%(prog)s [options]",
     add_help = False)
-  args.add_cluster_env_topo(spouts_parser)
+  args.add_cluster_role_env_topo(spouts_parser)
   args.add_role(spouts_parser)
   spouts_parser.set_defaults(subcommand='spouts')
 
@@ -46,26 +47,26 @@ def create_parser(subparsers):
     help='display information of bolts of a topology in a logical plan',
     usage = "%(prog)s [options]",
     add_help = False)
-  args.add_cluster_env_topo(bolts_parser)
+  args.add_cluster_role_env_topo(bolts_parser)
   args.add_role(bolts_parser)
   bolts_parser.set_defaults(subcommand='bolts')
 
   return subparsers
 
-def get_logical_plan(cluster, env, topology):
+def get_logical_plan(cluster, env, topology, role):
   instance = tornado.ioloop.IOLoop.instance()
   try:
-    return instance.run_sync(lambda: API.get_logical_plan(cluster, env, topology))
+    return instance.run_sync(lambda: API.get_logical_plan(cluster, env, topology, role))
   except Exception as ex:
     LOG.error('Error: %s' % str(ex))
     LOG.error('Failed to retrive logical plan info of topology \'%s\''
-              % ('/'.join([cluster, env, topology])))
+              % ('/'.join([cluster, role, env, topology])))
     raise
 
 def parse_topo_loc(cl_args):
   try:
-    topo_loc = cl_args['[cluster]/[env]/[topology]'].split('/')
-    if len(topo_loc) != 3 and len(topo_loc) != 4:
+    topo_loc = cl_args['[cluster]/[role]/[env]/[topology]'].split('/')
+    if len(topo_loc) != 4:
       raise
     return topo_loc
   except Exception:
@@ -73,7 +74,7 @@ def parse_topo_loc(cl_args):
     raise
 
 def dump_components(components):
-  print(TopologyDAG(components))
+  print(json.dumps(components, indent=4))
   return True
 
 def dump_bolts(bolts, topo_loc):
@@ -98,13 +99,13 @@ def dump_spouts(spouts, topo_loc):
 
 def run(cl_args, bolts_only, spouts_only):
   try:
-    topo_loc = [cluster, env, topology] = parse_topo_loc(cl_args)
+    topo_loc = [cluster, role, env, topology] = parse_topo_loc(cl_args)
   except:
     return False
   try:
-    components = get_logical_plan(cluster, env ,topology)
+    components = get_logical_plan(cluster, env, topology, role)
     bolts, spouts = components["bolts"], components["spouts"]
-    if not bolts and not spouts:
+    if not bolts_only and not spouts_only:
       return dump_components(components)
     if bolts_only:
       return dump_bolts(bolts, topo_loc)

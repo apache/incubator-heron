@@ -34,24 +34,14 @@ LOG = logging.getLogger(__name__)
 # users may submit topologies of same names
 # Bill: might not that important in real production since it rarely happens
 def create_parser(subparsers):
-  cluster_parser = subparsers.add_parser(
-    'cluster',
-    help='Show cluster info',
+  parser = subparsers.add_parser(
+    'show',
+    help='Show running topologies',
     usage="%(prog)s [options]",
     add_help=False)
-  args.add_cluster(cluster_parser, required=True)
-  args.add_role(cluster_parser)
-  cluster_parser.set_defaults(subcommand='cluster')
+  args.add_cluster_role_env(parser)
+  parser.set_defaults(subcommand='show')
 
-  env_parser = subparsers.add_parser(
-    'env',
-    help='Show env info',
-    usage="%(prog)s [options]",
-    add_help=False)
-  args.add_env(env_parser, required=True)
-  args.add_role(env_parser)
-
-  env_parser.set_defaults(subcommand='env')
   return subparsers
 
 def get_cluster_topologies(cluster):
@@ -63,8 +53,27 @@ def get_cluster_topologies(cluster):
     LOG.error('Failed to retrive topologies running in cluster \'%s\'' % cluster)
     raise
 
-def run_cluster(command, parser, cl_args, unknown_args):
-  cluster = cl_args['cluster']
+def get_cluster_role_topologies(cluster, role):
+  instance = tornado.ioloop.IOLoop.instance()
+  try:
+    return instance.run_sync(lambda: API.get_cluster_role_topologies(cluster, role))
+  except Exception as ex:
+    LOG.error('Error: %s' % str(ex))
+    LOG.error('Failed to retrive topologies running in cluster'
+              '\'%s\' submitted by %s' % (cluster, role))
+    raise
+
+def get_cluster_role_env_topologies(cluster, role, env):
+  instance = tornado.ioloop.IOLoop.instance()
+  try:
+    return instance.run_sync(lambda: API.get_cluster_role_env_topologies(cluster, role, env))
+  except Exception as ex:
+    LOG.error('Error: %s' % str(ex))
+    LOG.error('Failed to retrive topologies running in cluster'
+              '\'%s\' submitted by %s under environment %s' % (cluster, role, env))
+    raise
+
+def show_cluster(cluster):
   try:
     result = get_cluster_topologies(cluster)[cluster]
   except Exception as ex:
@@ -77,21 +86,41 @@ def run_cluster(command, parser, cl_args, unknown_args):
       print("  ... with %d more topologies" % (len(topos) - 10))
   return True
 
-def run_env(command, parser, cl_args, unknown_args):
-  print(cl_args)
+def show_cluster_role(cluster, role):
   try:
-    [cluster, env] = cl_args['env'].split('/')
+    result = get_cluster_role_topologies(cluster, role)
   except:
-    print('Invalid environment %s' % cl_args['env'])
     return False
-  try:
-    result = get_cluster_topologies(cluster)[cluster][env]
-  except:
-    LOG.error("Failed to retrieve topologies under environment \'%s\'" % env)
-    return False
-  print('Topologies under cluster \'%s\' in environment \'%s\':' % (cluster, env))
-  for env in result[:10]:
-    print("  %s" % env)
-  if len(result) > 10:
-    print("  ... with %d more topologies" % (len(result) - 10))
+  print('Topologies under cluster \'%s\' submitted by \'%s\':' % (cluster, role))
+  for env, topo_names in result[cluster].iteritems():
+    print('Environment \'%s\':' % env)
+    for topo_name in topo_names:
+      print('  %s' % topo_name)
   return True
+
+def show_cluster_role_env(cluster, role, env):
+  try:
+    result = get_cluster_role_env_topologies(cluster, role, env)
+  except:
+    return False
+  print('Topologies under cluster \'%s\' submitted by \'%s\':' % (cluster, role))
+  for env, topo_names in result[cluster].iteritems():
+    print('Environment \'%s\':' % env)
+    for topo_name in topo_names:
+      print('  %s' % topo_name)
+  return True
+
+def run(command, parser, cl_args, unknown_args):
+  location = cl_args['cluster/[role]/[env]'].split('/')
+  if len(location) == 0:
+    LOG.error('Invalid topology selection')
+    return False
+  elif len(location) == 1:
+    return show_cluster(*location)
+  elif len(location) == 2:
+    return show_cluster_role(*location)
+  elif len(location) == 3:
+    return show_cluster_role_env(*location)
+  else:
+    return False
+
