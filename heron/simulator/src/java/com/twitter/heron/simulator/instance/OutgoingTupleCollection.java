@@ -39,15 +39,15 @@ public class OutgoingTupleCollection {
   private HeronTuples.HeronControlTupleSet.Builder currentControlTuple;
 
   // Total data emitted in bytes for the entire life
-  private long totalDataEmittedInBytes = 0;
+  private long totalDataEmittedInBytes;
 
   // Current size in bytes for data types to pack into the HeronTupleSet
-  private long currentDataTupleSizeInBytes = 0;
+  private long currentDataTupleSizeInBytes;
   // Maximum data tuple size in bytes we can put in one HeronTupleSet
-  private long maxDataTupleSizeInBytes = Long.MAX_VALUE;
+  private long maxDataTupleSizeInBytes;
 
-  private int dataTupleSetCapacity = Integer.MAX_VALUE;
-  private int controlTupleSetCapacity = Integer.MAX_VALUE;
+  private int dataTupleSetCapacity;
+  private int controlTupleSetCapacity;
 
   public OutgoingTupleCollection(
       PhysicalPlanHelper helper,
@@ -56,6 +56,10 @@ public class OutgoingTupleCollection {
     this.helper = helper;
     this.systemConfig =
         (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(SystemConfig.HERON_SYSTEM_CONFIG);
+
+    // Initialize the values in constructor
+    this.totalDataEmittedInBytes = 0;
+    this.currentDataTupleSizeInBytes = 0;
 
     // Read the config values
     this.dataTupleSetCapacity = systemConfig.getInstanceSetDataTupleCapacity();
@@ -73,8 +77,8 @@ public class OutgoingTupleCollection {
       long tupleSizeInBytes) {
     if (currentDataTuple == null
         || !currentDataTuple.getStream().getId().equals(streamId)
-        || currentDataTuple.getTuplesCount() > dataTupleSetCapacity
-        || currentDataTupleSizeInBytes > maxDataTupleSizeInBytes) {
+        || currentDataTuple.getTuplesCount() >= dataTupleSetCapacity
+        || currentDataTupleSizeInBytes >= maxDataTupleSizeInBytes) {
       initNewDataTuple(streamId);
     }
     currentDataTuple.addTuples(newTuple);
@@ -86,7 +90,7 @@ public class OutgoingTupleCollection {
   public void addAckTuple(HeronTuples.AckTuple.Builder newTuple, long tupleSizeInBytes) {
     if (currentControlTuple == null
         || currentControlTuple.getFailsCount() > 0
-        || currentControlTuple.getAcksCount() > controlTupleSetCapacity) {
+        || currentControlTuple.getAcksCount() >= controlTupleSetCapacity) {
       initNewControlTuple();
     }
     currentControlTuple.addAcks(newTuple);
@@ -98,7 +102,7 @@ public class OutgoingTupleCollection {
   public void addFailTuple(HeronTuples.AckTuple.Builder newTuple, long tupleSizeInBytes) {
     if (currentControlTuple == null
         || currentControlTuple.getAcksCount() > 0
-        || currentControlTuple.getFailsCount() > controlTupleSetCapacity) {
+        || currentControlTuple.getFailsCount() >= controlTupleSetCapacity) {
       initNewControlTuple();
     }
     currentControlTuple.addFails(newTuple);
