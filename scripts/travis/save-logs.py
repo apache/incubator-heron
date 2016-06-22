@@ -14,7 +14,25 @@
 
 import sys
 import subprocess
+import mmap
+import os
+
 from datetime import datetime, timedelta
+
+def tail(filename, n):
+    """Returns last n lines from the filename. No exception handling"""
+    size = os.path.getsize(filename)
+    with open(filename, "rb") as f:
+        fm = mmap.mmap(f.fileno(), 0, mmap.MAP_SHARED, mmap.PROT_READ)
+        try:
+            for i in xrange(size - 1, -1, -1):
+                if fm[i] == '\n':
+                    n -= 1
+                    if n == -1:
+                        break
+            return fm[i + 1 if i else 0:].splitlines()
+        finally:
+            fm.close()
 
 def main(file, cmd):
     print cmd, "writing to", file
@@ -45,14 +63,9 @@ def main(file, cmd):
     print
     print cmd, "done", errcode
     if errcode != 0:
-       f = open(file)
-       lines = f.read().splitlines()
-       f.close()
-       count = 0
+       lines = tail(file, 1000)
        for line in lines:
-          count += 1
-          if (count <= 1000):
-             print line
+           print line
        sys.exit(errcode)
     return errcode
 
