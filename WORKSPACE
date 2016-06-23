@@ -5,7 +5,7 @@ httpcomponents_version = "4.3"
 jackson_version = "2.6.3"
 powermock_version = "1.6.2"
 reef_version = "0.14.0"
-slf4j_version = "1.7.7"
+slf4j_version = "1.7.21"
 
 maven_server(
   name = "default",
