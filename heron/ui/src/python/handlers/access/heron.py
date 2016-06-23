@@ -332,7 +332,7 @@ def get_comp_metrics(
 @tornado.gen.coroutine
 def get_metrics(cluster, environment, topology, timerange, query, role=None):
   request_url = tornado.httputil.url_concat(
-      create_url(METRICS_QUERY_URL_FMT)
+      create_url(METRICS_QUERY_URL_FMT),
       dict(cluster = cluster,
             environ = environment,
             topology = topology,
