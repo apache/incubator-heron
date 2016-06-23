@@ -25,12 +25,12 @@ $ export CXX=/usr/bin/clang++
 $ echo $CC $CXX
 ```
 
-#### Step 4 - Install Bazel
+#### Step 4 - Install Bazel {{% bazelVersion %}}
 
 ```bash
-curl -O -L https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-darwin-x86_64.sh
-chmod +x bazel-0.1.2-installer-darwin-x86_64.sh
-./bazel-0.1.2-installer-darwin-x86_64.sh --user
+wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/{{% bazelVersion %}}/bazel-{{% bazelVersion %}}-installer-darwin-x86_64.sh
+chmod +x /tmp/bazel.sh
+/tmp/bazel.sh --user
 ```
 
 #### Step 5 - Make sure Bazel bin is in the PATH

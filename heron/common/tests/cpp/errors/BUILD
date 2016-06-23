@@ -39,7 +39,7 @@ cc_test(
     ],
     deps = [
         "//heron/common/src/cpp/errors:errors-cxx",
-        "//3rdparty/gtest:gtest-cxx",
+        "//third_party/gtest:gtest-cxx",
     ],
     copts = [
         "-I.",
@@ -61,7 +61,7 @@ cc_test(
     ],
     deps = [
         "//heron/common/src/cpp/errors:errors-cxx",
-        "//3rdparty/gtest:gtest-cxx",
+        "//third_party/gtest:gtest-cxx",
     ],
     copts = [
         "-I.",
@@ -83,7 +83,7 @@ cc_test(
     ],
     deps = [
         "//heron/common/src/cpp/errors:errors-cxx",
-        "//3rdparty/gtest:gtest-cxx",
+        "//third_party/gtest:gtest-cxx",
     ],
     copts = [
         "-I.",

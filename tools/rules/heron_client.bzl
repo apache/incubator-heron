@@ -55,9 +55,10 @@ def heron_client_lib_uploader_files():
         "//heron/uploaders/src/java:heron-hdfs-uploader",
     ]
 
-def heron_client_lib_3rdparty_files():
+def heron_client_lib_third_party_files():
     return [
-        "@protobuf-java//jar",
-        "@slf4j-api//jar",
-        "@slf4j-jdk//jar",
+        "@com_google_protobuf_protobuf_java//jar",
+        "@org_slf4j_slf4j_api//jar",
+        "@org_slf4j_slf4j_jdk14//jar",
+        "@org_slf4j_log4j_over_slf4j//jar",
     ]
