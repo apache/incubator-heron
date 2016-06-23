@@ -188,7 +188,8 @@ public class HeronMasterDriverTest {
     Mockito.doReturn(mockTMasterEvaluator).when(spyDriver).allocateContainer("0", 1, 1024);
 
     spyDriver.scheduleTMasterContainer();
-    Mockito.verify(spyDriver, Mockito.timeout(1000).times(1)).allocateContainer("0", 1, 1024);
+    Mockito.verify(mockTMasterEvaluator, Mockito.timeout(1000).times(1))
+        .submitContext(Mockito.any(Configuration.class));
 
     FailedEvaluator mockFailedContainer = Mockito.mock(FailedEvaluator.class);
     Mockito.when(mockFailedContainer.getId()).thenReturn("tMaster");

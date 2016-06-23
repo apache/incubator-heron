@@ -46,7 +46,7 @@ cc_library(
         "//config:config-cxx",
         "//heron/common/src/cpp/network:network-cxx",
         "//heron/proto:proto-cxx",
-        "//3rdparty/yaml-cpp:yaml-cxx",
+        "//third_party/yaml-cpp:yaml-cxx",
     ],
     linkstatic = 1,
 )

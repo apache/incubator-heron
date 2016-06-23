@@ -7,7 +7,7 @@ load("/tools/rules/heron_deps", "heron_java_proto_files")
 common_deps_files = \
     heron_java_proto_files() + [
         "//heron/api/src/java:api-java",
-        "@snakeyaml//jar",
+        "@org_yaml_snakeyaml//jar",
     ]
 
 java_library(
@@ -26,7 +26,7 @@ java_library(
     srcs = glob(["**/config/*.java"]),
     deps = [
         ":basics-java",
-        "@snakeyaml//jar",
+        "@org_yaml_snakeyaml//jar",
     ],
 )
 
@@ -35,6 +35,6 @@ java_library(
     srcs = glob(["**/network/*.java"]),
     deps = [
         ":basics-java",
-        "@protobuf-java//jar",
+        "@com_google_protobuf_protobuf_java//jar",
     ],
 )

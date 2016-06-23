@@ -38,8 +38,8 @@ cc_library(
         "//heron/proto:proto-cxx",
         "//heron/common/src/cpp/network:network-cxx",
         "//heron/common/src/cpp/config:config-cxx",
-        "//3rdparty/glog:glog-cxx",
-        "//3rdparty/protobuf:protobuf-cxx",
+        "//third_party/glog:glog-cxx",
+        "//third_party/protobuf:protobuf-cxx",
     ],
     linkstatic = 1,
 )

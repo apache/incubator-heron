@@ -13,7 +13,7 @@ end_timer "$T"
 
 T="make site"
 start_timer "$T"
-(cd website && make site)
+(cd website && make travis-site)
 end_timer "$T"
 
 T="${DIR}/test.sh"
