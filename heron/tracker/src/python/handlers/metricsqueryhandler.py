@@ -25,6 +25,7 @@ class MetricsQueryHandler(BaseHandler):
   URL - /topologies/metricsquery
   Parameters:
    - cluster (required)
+   - role - Name of person who submits the topology (optional)
    - environ (required)
    - topology (required) name of the requested topology
    - starttime (required)
@@ -42,9 +43,10 @@ class MetricsQueryHandler(BaseHandler):
   def get(self):
     try:
       cluster = self.get_argument_cluster()
+      role = self.get_argument(constants.PARAM_ROLE, default=None)
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
-      topology = self.tracker.getTopologyByClusterEnvironAndName(cluster, environ, topology_name)
+      topology = self.tracker.getTopologyByClusterEnvironAndName(cluster, role, environ, topology_name)
 
       start_time = self.get_argument_starttime()
       end_time = self.get_argument_endtime()

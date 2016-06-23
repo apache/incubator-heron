@@ -25,6 +25,7 @@ class ExecutionStateHandler(BaseHandler):
   Parameters:
    - cluster (required)
    - environ (required)
+   - role - Name of person who submits the topology (optional)
    - topology (required) name of the requested topology
 
   The response JSON is a dictionary with all the
@@ -38,9 +39,10 @@ class ExecutionStateHandler(BaseHandler):
   def get(self):
     try:
       cluster = self.get_argument_cluster()
+      role = self.get_argument(constants.PARAM_ROLE, default=None)
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
-      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, environ)
+      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)
       execution_state = topology_info["execution_state"]
       self.write_success_response(execution_state)
     except Exception as e:

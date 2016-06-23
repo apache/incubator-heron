@@ -24,6 +24,7 @@ class TopologyHandler(BaseHandler):
   url - /topologies/info
   Parameters:
    - cluster (required)
+   - role - Name of person who submits the topology (optional)
    - environ (required)
    - topology (required) name of the requested topology
 
@@ -38,11 +39,11 @@ class TopologyHandler(BaseHandler):
   def get(self):
     try:
       cluster = self.get_argument_cluster()
+      role = self.get_argument(constants.PARAM_ROLE, default=None)
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
-      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, environ)
+      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)
       self.write_success_response(topology_info)
     except Exception as e:
       traceback.print_exc()
       self.write_error_response(e)
-

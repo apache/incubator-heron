@@ -51,6 +51,8 @@ class StatesHandler(BaseHandler):
     # Get all the values for parameter "environ".
     environs = self.get_arguments(constants.PARAM_ENVIRON)
 
+    role = self.get_argument(constants.PARAM_ROLE, default=None)
+
     ret = {}
     topologies = self.tracker.topologies
     for topology in topologies:
@@ -76,7 +78,7 @@ class StatesHandler(BaseHandler):
       if environ not in ret[cluster]:
         ret[cluster][environ] = {}
       try:
-        topology_info = self.tracker.getTopologyInfo(topology.name, cluster, environ)
+        topology_info = self.tracker.getTopologyInfo(topology.name, cluster, role, environ)
         if topology_info and "execution_state" in topology_info:
           ret[cluster][environ][topology.name] = topology_info["execution_state"]
       except Exception as e:

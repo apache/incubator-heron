@@ -52,13 +52,16 @@ class TopologiesHandler(BaseHandler):
     clusters = self.get_arguments(constants.PARAM_CLUSTER)
     # Get all the values for parameter "environ".
     environs = self.get_arguments(constants.PARAM_ENVIRON)
+    # Get role
+    role = self.get_argument(constants.PARAM_ROLE, default=None)
 
     ret = {}
     topologies = self.tracker.topologies
     for topology in topologies:
       cluster = topology.cluster 
       environ = topology.environ
-      if not cluster or not environ:
+      topo_role = topology.execution_state.role
+      if not cluster or not topo_role or not environ:
         continue
 
       # This cluster is not asked for.
@@ -71,6 +74,12 @@ class TopologiesHandler(BaseHandler):
       # Note that "if not environs", then
       # we show for all the environs.
       if environs and environ not in environs:
+        continue
+
+      # This role is not asked for.
+      # Note that "if not role", then
+      # we show for all the roles.
+      if role and role != topo_role:
         continue
 
       if cluster not in ret:

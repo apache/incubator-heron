@@ -24,6 +24,7 @@ class PhysicalPlanHandler(BaseHandler):
   URL - /topologies/physicalplan
   Parameters:
    - cluster (required)
+   - role - Name of person who submits the topology (optional)
    - environ (required)
    - topology (required) name of the requested topology
 
@@ -38,9 +39,10 @@ class PhysicalPlanHandler(BaseHandler):
   def get(self):
     try:
       cluster = self.get_argument_cluster()
+      role = self.get_argument(constants.PARAM_ROLE, default=None)
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
-      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, environ)
+      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)
       physical_plan = topology_info["physical_plan"]
       self.write_success_response(physical_plan)
     except Exception as e:
