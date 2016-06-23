@@ -78,7 +78,7 @@ class Tracker:
       onTopologiesWatch = partial(on_topologies_watch, state_manager)
       state_manager.get_topologies(onTopologiesWatch)
 
-  def getTopologyByClusterEnvironAndName(self, cluster, role, environ, topologyName):
+  def getTopologyByClusterRoleEnvironAndName(self, cluster, role, environ, topologyName):
     """
     Find and return the topology given its cluster, environ, topology name, and
     an optional role.

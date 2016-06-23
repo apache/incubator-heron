@@ -50,7 +50,7 @@ class ExceptionHandler(BaseHandler):
       role = self.get_argument(constants.PARAM_ROLE, default=None)
       topName = self.get_argument_topology()
       component = self.get_argument_component()
-      topology = self.tracker.getTopologyByClusterEnvironAndName(cluster, role, environ, topName)
+      topology = self.tracker.getTopologyByClusterRoleEnvironAndName(cluster, role, environ, topName)
       instances = self.get_arguments(constants.PARAM_INSTANCE)
       exceptions_logs = yield tornado.gen.Task(self.getComponentException,
                                                topology.tmaster, component, instances)

@@ -46,7 +46,7 @@ class MetricsQueryHandler(BaseHandler):
       role = self.get_argument(constants.PARAM_ROLE, default=None)
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
-      topology = self.tracker.getTopologyByClusterEnvironAndName(cluster, role, environ, topology_name)
+      topology = self.tracker.getTopologyByClusterRoleEnvironAndName(cluster, role, environ, topology_name)
 
       start_time = self.get_argument_starttime()
       end_time = self.get_argument_endtime()
