@@ -29,7 +29,6 @@ pex_test(
     srcs = ["topology_unittest.py"],
     deps = [
         "//heron/tracker/src/python:heron-tracker-lib",
-        "//heron/proto:proto-py",
     ],
     reqs = [
         "mock==1.0.1",
@@ -75,6 +74,7 @@ pex_test(
     srcs = ["tracker_unittest.py"],
     deps = [
         "//heron/tracker/src/python:heron-tracker-lib",
+        "//heron/proto:proto-py",
     ],
     reqs = [
         "mock==1.0.1",
