@@ -17,6 +17,7 @@ import tornado.gen
 from heron.tracker.src.python import constants
 from heron.tracker.src.python.handlers import BaseHandler
 
+
 class TopologiesHandler(BaseHandler):
   """
   URL - /topologies
@@ -90,4 +91,3 @@ class TopologiesHandler(BaseHandler):
         ret[cluster][topo_role][environ] = []
       ret[cluster][topo_role][environ].append(topology.name)
     self.write_success_response(ret)
-

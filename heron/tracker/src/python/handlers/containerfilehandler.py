@@ -1,11 +1,11 @@
 import json
-import os
 import tornado.gen
 import traceback
 
 from heron.tracker.src.python.handlers import BaseHandler
 from heron.tracker.src.python import constants
 from heron.tracker.src.python import utils
+
 
 class ContainerFileDataHandler(BaseHandler):
   """
@@ -35,6 +35,7 @@ class ContainerFileDataHandler(BaseHandler):
       role = self.get_argument_role()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
+      role = self.get_argument(constants.PARAM_ROLE, default=None)
       container = self.get_argument(constants.PARAM_CONTAINER)
       path = self.get_argument(constants.PARAM_PATH)
       offset = self.get_argument_offset()
@@ -55,6 +56,7 @@ class ContainerFileDataHandler(BaseHandler):
       traceback.print_exc()
       self.write_error_response(e)
 
+
 class ContainerFileStatsHandler(BaseHandler):
   """
   URL - /topologies/containerfilestats?cluster=<cluster>&topology=<topology> \
@@ -62,7 +64,11 @@ class ContainerFileStatsHandler(BaseHandler):
   Parameters:
    - cluster - Name of cluster.
    - environ - Running environment.
+<<<<<<< f57e472c35d9eacc611d348b151a7579987c72cc
    - role - (optional) Role used to submit the topology.
+=======
+   - role - Name of person who submits the topology (optional)
+>>>>>>> Adapt to tracker API with new parameter.
    - topology - Name of topology (Note: Case sensitive. Can only
                 include [a-zA-Z0-9-_]+)
    - container - Container number
@@ -81,6 +87,7 @@ class ContainerFileStatsHandler(BaseHandler):
       role = self.get_argument_role()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
+      role = self.get_argument(constants.PARAM_ROLE, default=None)
       container = self.get_argument(constants.PARAM_CONTAINER)
       path = self.get_argument(constants.PARAM_PATH, default=".")
       topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)

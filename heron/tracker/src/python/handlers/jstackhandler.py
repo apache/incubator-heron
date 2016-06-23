@@ -18,12 +18,12 @@ import tornado.gen
 import tornado.web
 import traceback
 
-from heron.tracker.src.python import constants
 from heron.tracker.src.python import utils
 from heron.tracker.src.python.handlers import BaseHandler
 from heron.tracker.src.python.handlers.pidhandler import getInstancePid
 
 LOG = logging.getLogger(__name__)
+
 
 class JstackHandler(BaseHandler):
   """
@@ -72,7 +72,6 @@ class JstackHandler(BaseHandler):
     pid_response = yield getInstancePid(topology_info, instance_id)
     try:
       http_client = tornado.httpclient.AsyncHTTPClient()
-      component_id = instance_id.split('_')[1] # Format: container_<id>_<instance_id>
       pid_json = json.loads(pid_response)
       pid = pid_json['stdout'].strip()
       if pid == '':
@@ -84,4 +83,3 @@ class JstackHandler(BaseHandler):
       raise tornado.gen.Return(response.body)
     except tornado.httpclient.HTTPError as e:
       raise Exception(str(e))
-
