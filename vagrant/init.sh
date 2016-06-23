@@ -55,6 +55,7 @@ install_jdk8() {
     apt-get -y install oracle-java8-installer oracle-java8-set-default vim wget screen git    
 }
 
+bazelVersion=0.2.3
 bazel_install() {
     install_jdk8
     apt-get install -y g++ automake cmake gcc-4.8 g++-4.8 zlib1g-dev zip pkg-config wget libssl-dev
@@ -65,9 +66,9 @@ bazel_install() {
             tar xvfz libunwind-1.1.tar.gz
             cd libunwind-1.1 && ./configure --prefix=/usr && make install 
         popd
-        wget 'https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh'
-        chmod +x bazel-0.1.2-installer-linux-x86_64.sh
-        ./bazel-0.1.2-installer-linux-x86_64.sh --user    
+        wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/${bazelVersion}/bazel-${bazelVersion}-installer-linux-x86_64.sh
+        chmod +x /tmp/bazel.sh
+        /tmp/bazel.sh --user 
     popd
 }
 

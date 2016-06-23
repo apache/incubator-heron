@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
+
 JAVADOC=javadoc
 FLAGS="-quiet"
 
@@ -10,7 +11,14 @@ JAVADOC_OUTPUT_DIR=$HERON_ROOT_DIR/website/public/api
 JAVADOC_OUTPUT_LOCAL_DIR=$HERON_ROOT_DIR/website/static/api
 GEN_PROTO_DIR=$HERON_ROOT_DIR/bazel-bin/heron/proto/_javac
 
-(cd $HERON_ROOT_DIR && bazel build \
+# Check if this script is run with Travis flag
+if [ $# -eq 1 ] && [ $1 == "--travis" ]; then
+    BAZEL_CMD="bazel --bazelrc=$HERON_ROOT_DIR/tools/travis-ci/bazel.rc build"
+else
+    BAZEL_CMD="bazel build"
+fi
+
+(cd $HERON_ROOT_DIR && $BAZEL_CMD \
   `bazel query 'kind("java_library", "heron/...")'`\
   `bazel query 'kind("java_test", "heron/...")'` \
   `bazel query 'kind("java_library", "integration-test/...")'`)

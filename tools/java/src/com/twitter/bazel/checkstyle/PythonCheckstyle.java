@@ -127,7 +127,7 @@ public final class PythonCheckstyle {
     return Collections2.filter(spawnInfo.getInputFileList(),
         Predicates.and(
             Predicates.containsPattern(".*/src/.+\\.py[c]{0,1}$"),
-            Predicates.not(Predicates.containsPattern("3rdparty/"))
+            Predicates.not(Predicates.containsPattern("third_party/"))
         )
     );
   }

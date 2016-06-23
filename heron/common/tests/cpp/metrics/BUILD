@@ -7,7 +7,7 @@ cc_test(
     ],
     deps = [
         "//heron/common/src/cpp/metrics:metrics-cxx",
-        "//3rdparty/gtest:gtest-cxx",
+        "//third_party/gtest:gtest-cxx",
     ],
     copts = [
         "-Iheron",
@@ -26,7 +26,7 @@ cc_test(
     ],
     deps = [
         "//heron/common/src/cpp/metrics:metrics-cxx",
-        "//3rdparty/gtest:gtest-cxx",
+        "//third_party/gtest:gtest-cxx",
     ],
     copts = [
         "-Iheron",
@@ -45,7 +45,7 @@ cc_test(
     ],
     deps = [
         "//heron/common/src/cpp/metrics:metrics-cxx",
-        "//3rdparty/gtest:gtest-cxx",
+        "//third_party/gtest:gtest-cxx",
     ],
     copts = [
         "-Iheron",
@@ -64,7 +64,7 @@ cc_test(
     ],
     deps = [
         "//heron/common/src/cpp/metrics:metrics-cxx",
-        "//3rdparty/gtest:gtest-cxx",
+        "//third_party/gtest:gtest-cxx",
     ],
     copts = [
         "-Iheron",
@@ -83,7 +83,7 @@ cc_test(
     ],
     deps = [
         "//heron/common/src/cpp/metrics:metrics-cxx",
-        "//3rdparty/gtest:gtest-cxx",
+        "//third_party/gtest:gtest-cxx",
     ],
     copts = [
         "-Iheron",
