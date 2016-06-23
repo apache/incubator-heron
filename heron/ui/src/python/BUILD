@@ -13,6 +13,9 @@ pex_library(
         "requests==2.3.0",
         "tornado==4.0.2",
     ],
+    deps = [
+        "//heron/common/src/python:common",
+    ]
 )
 
 pex_binary(

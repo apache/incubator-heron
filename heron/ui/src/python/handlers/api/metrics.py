@@ -18,7 +18,7 @@ import logging
 import json
 
 from heron.ui.src.python.handlers import base
-from heron.ui.src.python.handlers import access
+from heron.common.src.python.handler import access
 
 import tornado.gen
 
