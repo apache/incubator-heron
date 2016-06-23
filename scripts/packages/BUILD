@@ -1,13 +1,12 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/build_defs/pkg/pkg", "pkg_tar")
-load("/tools/build_defs/pkg/pkg", "pkg_deb")
+load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar", "pkg_deb")
 
 load("/tools/rules/heron_api", "heron_api_files")
 
 load("/tools/rules/heron_client", "heron_client_bin_files")
 load("/tools/rules/heron_client", "heron_client_conf_files")
-load("/tools/rules/heron_client", "heron_client_lib_3rdparty_files")
+load("/tools/rules/heron_client", "heron_client_lib_third_party_files")
 load("/tools/rules/heron_client", "heron_client_lib_scheduler_files")
 load("/tools/rules/heron_client", "heron_client_lib_packing_files")
 load("/tools/rules/heron_client", "heron_client_lib_statemgr_files")
@@ -163,9 +162,9 @@ pkg_tar(
 )
 
 pkg_tar(
-    name = "heron-client-lib-3rdparty",
-    package_dir = "lib/3rdparty",
-    files = heron_client_lib_3rdparty_files(),
+    name = "heron-client-lib-third_party",
+    package_dir = "lib/third_party",
+    files = heron_client_lib_third_party_files(),
 )
 
 pkg_tar(
@@ -231,7 +230,7 @@ pkg_tar(
         ":heron-client-conf-yarn",
         ":heron-client-dist",
         ":heron-client-examples",
-        ":heron-client-lib-3rdparty",
+        ":heron-client-lib-third_party",
         ":heron-client-lib-scheduler",
         ":heron-client-lib-packing",
         ":heron-client-lib-statemgr",

@@ -113,7 +113,7 @@ EOF
 # Slight hack to make sure (1) our langtools is picked up before the SDK
 # default, but that (2) SDK is picked up before auto-value, because that
 # apparently causes problems for auto-value otherwise.
-readonly javac_jar="3rdparty/java/jdk/langtools/javac.jar"
+readonly javac_jar="third_party/java/jdk/langtools/javac.jar"
 write_jar_entry "$javac_jar"
 
 cat >> $iml_file <<'EOF'

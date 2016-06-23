@@ -11,8 +11,8 @@ cc_library(
         "pb2json.h",
     ],
     deps = [
-        "//3rdparty/jansson:jansson-cxx",
-        "//3rdparty/protobuf:protobuf-cxx",
+        "//third_party/jansson:jansson-cxx",
+        "//third_party/protobuf:protobuf-cxx",
     ],
     linkstatic = 1,
 )

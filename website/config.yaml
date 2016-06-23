@@ -21,7 +21,7 @@ params:
   description: A realtime, distributed, fault-tolerant stream processing engine from Twitter
   versions:
     heron: 0.14.0
-    bazel: 0.1.2
+    bazel: 0.2.3
   assets:
     favicon:
       small: /img/favicon-16x16.png

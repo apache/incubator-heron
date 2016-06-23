@@ -20,7 +20,7 @@ if not zipfile.is_zipfile(sys.argv[0]):
     sys.modules.pop('twitter.common.python', None)
 
     root = os.path.join(
-        os.sep.join(__file__.split(os.sep)[:-6]), '3rdparty/pex/_pex.runfiles/3rdparty')
+        os.sep.join(__file__.split(os.sep)[:-6]), 'pex/_pex.runfiles/__main__/third_party')
     sys.path.insert(0, os.path.join(root, 'pex'))
     sys.path.insert(0, os.path.join(root, 'setuptools'))
     setuptools_py =  os.path.join(root, 'setuptools')
@@ -140,8 +140,8 @@ def main():
             PythonInterpreter.from_binary(options.python).identity,
             extras={
                 # TODO: Fix this to resolve automatically
-                ('setuptools', '18.0.1'): '3rdparty/pex/setuptools-18.0.1-py2.py3-none-any.whl',
-                ('wheel', '0.23.0'): '3rdparty/pex/wheel-0.23.0-py2.7.egg'
+                ('setuptools', '18.0.1'): 'third_party/pex/setuptools-18.0.1-py2.py3-none-any.whl',
+                ('wheel', '0.23.0'): 'third_party/pex/wheel-0.23.0-py2.7.egg'
             })
 
         # resolve setuptools
