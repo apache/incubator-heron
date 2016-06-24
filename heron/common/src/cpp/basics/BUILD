@@ -53,7 +53,7 @@ cc_library(
         "//third_party/protobuf:protobuf-cxx",
     ] + select({
         "//tools/platform:darwin": [], 
-        "//conditions:default": ["//3rdparty/libunwind:libunwind-cxx"],
+        "//conditions:default": ["//third_party/libunwind:libunwind-cxx"],
     }),
     linkstatic = 1,
 )
