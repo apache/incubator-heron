@@ -7,6 +7,7 @@ import subprocess
 import sys
 from datetime import datetime, timedelta
 
+
 def tail(filename, n):
   """Returns last n lines from the filename. No exception handling"""
   size = os.path.getsize(filename)
