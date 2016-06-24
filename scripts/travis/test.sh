@@ -36,7 +36,7 @@ trap "kill -9 $http_server_id" SIGINT SIGTERM EXIT
   -hc heron -tj bazel-genfiles/integration-test/src/java/integration-tests.jar \
   -rh localhost -rp 8080\
   -tp integration-test/src/java/com/twitter/heron/integration_test/topology/ \
-  -cl local -rl heron-staging -ev devel -pi 'file://${HERON_DIST}/heron-core.tar.gz'
+  -cl local -rl heron-staging -ev devel
 end_timer "$T"
 
 print_timer_summary
