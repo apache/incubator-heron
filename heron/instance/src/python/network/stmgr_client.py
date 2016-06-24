@@ -12,9 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from heron_client import HeronClient
-from utils import Log
+from heron.instance.src.python.utils import Log
 from heron.proto import stmgr_pb2
 from heron.proto import physical_plan_pb2
+
+# StmgrClient is an implementation of the Heron client in python and communicates
+# with Stream Manager. It will:
+# 1. Register the message of NewInstanceAssignmentMessage and TupleMessage
+# 2. Send a register request when on_connect() is called
+# 3. Handle relative response for requests
+# TODO: will implement the rest later
 
 class StmgrClient(HeronClient):
   def __init__(self, strmgr_host, port, topology_name, topology_id,
@@ -36,9 +43,9 @@ class StmgrClient(HeronClient):
 
   def send_register_req(self):
     # TODO: change it to RegisterInstanceRequest
-    request = stmgr_pb2.StrMgrHelloRequest()
+    request = stmgr_pb2.RegisterInstanceRequest()
+    request.instance.MergeFrom(self.instance)
     request.topology_name = self.topology_name
     request.topology_id = self.topology_id
-    request.stmgr = "stmgr1"
 
     self.send_request(request, None, None, 10)

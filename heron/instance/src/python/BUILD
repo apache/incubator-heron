@@ -4,11 +4,10 @@ load("/tools/rules/pex_rules", "pex_library", "pex_binary")
 
 pex_library(
   name = "heron-nw-cli-lib",
-  srcs = [
-    "heron_client.py",
-    "stmgr_client.py",
-    "utils.py",
-  ],
+  srcs = glob(
+    ["**/*.py"],
+    exclude = ["main.py"]
+  ),
   deps = [
     "//heron/proto:proto-py",
   ],

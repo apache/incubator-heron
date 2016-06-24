@@ -14,7 +14,9 @@
 
 # This is a temporary main file to execute stmgr_client.py
 
-from stmgr_client import StmgrClient
+from heron.proto import physical_plan_pb2
+
+from network.stmgr_client import StmgrClient
 
 
 def print_usage():
@@ -24,9 +26,19 @@ def main():
   #if len(sys.argv) != 2:
   #  print_usage()
   #  sys.exit(1)
+  instance_info = physical_plan_pb2.InstanceInfo()
+  instance_info.task_id = 123
+  instance_info.component_index = 23
+  instance_info.component_name = "hello"
+
+  sample_instance = physical_plan_pb2.Instance()
+  sample_instance.instance_id = "instance_id_is_this"
+  sample_instance.stmgr_id = "stmgr_id_is_this"
+  sample_instance.info.MergeFrom(instance_info)
+
 
   client = StmgrClient("localhost", 1234, "topology--name", "topology--id",
-                       None, None, None, None)
+                       sample_instance, None, None, None)
   try:
     # try to establish a connection with localhost:1234
     client.start()

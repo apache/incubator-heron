@@ -12,12 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# TODO: write unit test
+
 import asyncore
 import socket
 
 from abc import abstractmethod
-from utils import Log
 from google.protobuf.message import Message
+from heron_protocol import get_outgoing_packet, REQID
+from heron.instance.src.python.utils import Log
 
 class HeronClient(asyncore.dispatcher):
   TIMEOUT_SEC = 30.0
@@ -29,6 +32,7 @@ class HeronClient(asyncore.dispatcher):
     self.in_buffer = ''
     # name to message.Message
     self.message_map = {}
+    self.response_message_map = {}
 
   ##################################
   # asyncore.dispatcher override
@@ -43,10 +47,14 @@ class HeronClient(asyncore.dispatcher):
   def handle_close(self):
     self.close()
 
-  # called when read is ready
+  # read bytes stream from socket and convert them into a list of IncomingPacket
   def handle_read(self):
-    # TODO: read packets and pass them to handle_packet()
-    pass
+    # TODO: handle_read -- Incoming packet and stuff
+    bytes_read = 0
+    num_pkts_read = 0
+    pkt_list = []
+
+
 
   def handle_write(self):
     sent = self.send(self.out_buffer)
@@ -78,11 +86,17 @@ class HeronClient(asyncore.dispatcher):
 
   def send_request(self, request, context, response_type, timeout_sec):
     # TODO: send request and implement timeout handler
-    Log.debug("In send_request(): \n" + request.__str__())
-    self.out_buffer += request.__str__()
+    Log.debug("In send_request()")
+    # generates a unique request id
+    reqid = REQID.generate()
+    # register response message type
+    self.response_message_map[reqid] = response_type
+
+    pkt = get_outgoing_packet(reqid, request)
+    self.send_packet(pkt)
 
   def send_message(self):
-    # TODO: sent message (non-request-response based communication)
+    # TODO: send message (non-request-response based communication)
     pass
 
   def handle_timeout(self):
@@ -93,6 +107,9 @@ class HeronClient(asyncore.dispatcher):
     # otherwise, it's just an message -- call on_incoming_message()
     pass
 
+  def send_packet(self, pkt):
+    self.out_buffer += pkt
+
   def get_classname(self):
     return self.__class__.__name__
 
@@ -102,4 +119,8 @@ class HeronClient(asyncore.dispatcher):
 
   @abstractmethod
   def on_connect(self):
+    pass
+
+  @abstractmethod
+  def on_response(self):
     pass
