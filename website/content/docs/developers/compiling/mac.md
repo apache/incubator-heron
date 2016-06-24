@@ -28,7 +28,7 @@ $ echo $CC $CXX
 #### Step 4 - Install Bazel {{% bazelVersion %}}
 
 ```bash
-wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/{{% bazelVersion %}}/bazel-{{% bazelVersion %}}-installer-darwin-x86_64.sh
+wget -O /tmp/bazel.sh  https://github.com/bazelbuild/bazel/releases/download/0.2.3/bazel-0.2.3-installer-darwin-x86_64.sh
 chmod +x /tmp/bazel.sh
 /tmp/bazel.sh --user
 ```
