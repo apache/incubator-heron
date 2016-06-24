@@ -111,8 +111,11 @@ def submitTopology(heronCliPath, cluster, role, env, jarPath, classPath, pkgUri,
   # Form the command to submit a topology.
   # Note the single quote around the arg for heron.package.core.uri.
   # This is needed to prevent shell expansion.
-  cmd = "%s submit %s/%s/%s --config-property heron.package.core.uri='%s' %s %s %s --verbose" % (
-    heronCliPath, cluster, role, env, pkgUri, jarPath, classPath, args)
+  cmd = "%s submit %s/%s/%s %s %s %s --verbose" % (
+    heronCliPath, cluster, role, env, jarPath, classPath, args)
+
+  if pkgUri is not None:
+    cmd = "%s --config-property heron.package.core.uri='%s'" %(cmd, pkgUri)
 
   logging.info("Submitting command: %s" % (cmd))
 
@@ -184,7 +187,7 @@ def main():
   parser.add_argument('-rh', '--results-server-hostname', dest='resultsServerHostname')
   parser.add_argument('-rp', '--results-server-port', dest='resultsServerPort', default=conf['resultsServerPort'])
   parser.add_argument('-tp', '--topologies-path', dest='topologiesPath')
-  parser.add_argument('-pi', '--release-package-uri', dest='releasePackageUri', default=conf['releasePackageUri'])
+  parser.add_argument('-pi', '--release-package-uri', dest='releasePackageUri', default=None)
 
   #TODO: Enable this option
   #parser.add_argument('-dt', '--disable-topologies', dest='disabledTopologies', default='',
