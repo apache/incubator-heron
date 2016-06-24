@@ -23,7 +23,8 @@ function query() {
 
 set +e
 # Build everything
-bazel build {heron,integration-test,tools/java}/...
+source ./detect_os_type.sh
+bazel build --config=`platform` {heron,integration-test,tools/java}/...
 result=$?
 if [ "${result}" -eq "0" ] ; then
   echo "Bazel build successful!!"
