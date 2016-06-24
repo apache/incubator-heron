@@ -44,7 +44,7 @@ genrule(
         "mkdir -p $$TMP_DIR",
         "cp -R $(SRCS) $$TMP_DIR",
         "cd $$TMP_DIR",
-        "unzip -o " + package_file,
+        "unzip -q -o " + package_file,
         "cd " + package_dir,
         "./configure --prefix=$$INSTALL_DIR --enable-shared=no",
         "make",
