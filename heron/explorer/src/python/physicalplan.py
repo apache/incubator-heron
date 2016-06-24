@@ -67,7 +67,7 @@ def get_topology_info(*args):
   try:
     return instance.run_sync(lambda: API.get_topology_info(*args))
   except Exception as ex:
-    Log.error('Error: %s' % str(ex))
+    Log.error(str(ex))
     raise
 
 
@@ -76,7 +76,7 @@ def get_topology_metrics(*args):
   try:
     return instance.run_sync(lambda: API.get_comp_metrics(*args))
   except Exception as ex:
-    Log.error('Error: %s' % str(ex))
+    Log.error(str(ex))
     raise
 
 
@@ -116,7 +116,6 @@ def get_component_metrics(component, cluster, env, topology, role):
 
 
 def run_spouts(command, parser, cl_args, unknown_args):
-  print(cl_args)
   try:
     [cluster, role, env, topology] = parse_topo_loc(cl_args)
   except:
@@ -138,7 +137,6 @@ def run_spouts(command, parser, cl_args, unknown_args):
 
 
 def run_bolts(command, parser, cl_args, unknown_args):
-  print(cl_args)
   try:
     [cluster, role, env, topology] = parse_topo_loc(cl_args)
   except:

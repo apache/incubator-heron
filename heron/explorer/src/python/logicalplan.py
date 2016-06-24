@@ -13,12 +13,12 @@
 # limitations under the License.
 
 import heron.explorer.src.python.args as args
-import json
 import tornado.gen
 import tornado.ioloop
+from collections import defaultdict
 from heron.common.src.python.color import Log
 from heron.common.src.python.handler.access import heron as API
-#from tabulate import tabulate
+from tabulate import tabulate
 
 
 def create_parser(subparsers):
@@ -82,15 +82,31 @@ def parse_topo_loc(cl_args):
 
 
 def dump_components(components):
-  print(json.dumps(components, indent=4))
+  inputs, outputs = defaultdict(list), defaultdict(list)
+  for ctype, component in components.iteritems():
+    if ctype == 'bolts':
+      for component_name, component_info in component.iteritems():
+        for input_stream in component_info['inputs']:
+          input_name = input_stream['component_name']
+          inputs[component_name].append(input_name)
+          outputs[input_name].append(component_name)
+  info = []
+  for ctype, component in components.iteritems():
+    for component_name, component_info in component.iteritems():
+      row = [ctype, component_name]
+      row.append(','.join(inputs.get(component_name, ['-'])))
+      row.append(','.join(outputs.get(component_name, ['-'])))
+      info.append(row)
+  header = ['type', 'name', 'input', 'output']
+  print(tabulate(info, headers=header))
   return True
 
 
 def dump_bolts(bolts, topo_loc):
   try:
     print('Bolts under topology \'%s\'' % '/'.join(topo_loc))
-    for bolt in bolts.keys():
-      print('  %s' % bolt)
+    bolts = [[bolt] for bolt in bolts.keys()]
+    print(tabulate(bolts))
     return True
   except Exception as ex:
     Log.error('Error: %s' % str(ex))
