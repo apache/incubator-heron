@@ -17,11 +17,6 @@ maven_jar(
   artifact = "org.apache.avro:avro:1.7.4"
 )
 
-maven_server(
-  name = "maven_twttr_com",
-  url = "http://maven.twttr.com",
-)
-
 maven_jar(
   name = "antlr_antlr",
   artifact = "antlr:antlr:2.7.7",
@@ -264,8 +259,7 @@ maven_jar(
 
 maven_jar(
   name = "org_apache_thrift_libthrift",
-  artifact = "org.apache.thrift:libthrift:0.5.0-1",
-  server = "maven_twttr_com",
+  artifact = "org.apache.thrift:libthrift:0.9.3",
 )
 
 maven_jar(

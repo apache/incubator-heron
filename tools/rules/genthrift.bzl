@@ -29,7 +29,7 @@ def genthrift_java_impl(ctx):
       "set -e",
       "rm -rf " + java_srcs,
       "mkdir " + java_srcs,
-      thrift.path + " -r --gen java -o " + java_srcs + " " + src.path,
+      thrift.path + " -r --gen java:beans,hashcode,nocamel,generated_annotations=undated -o " + java_srcs + " " + src.path,
       "jar cMf " + srcjar.path + " -C " + java_srcs + " .",
       "rm -rf " + java_srcs,
   ])
