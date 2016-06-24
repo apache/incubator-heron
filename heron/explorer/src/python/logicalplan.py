@@ -103,25 +103,17 @@ def dump_components(components):
 
 
 def dump_bolts(bolts, topo_loc):
-  try:
-    print('Bolts under topology \'%s\'' % '/'.join(topo_loc))
-    bolts = [[bolt] for bolt in bolts.keys()]
-    print(tabulate(bolts))
-    return True
-  except Exception as ex:
-    Log.error('Error: %s' % str(ex))
-    raise ex
+  print('Bolts under topology \'%s\'' % '/'.join(topo_loc))
+  for bolt in bolts.keys():
+    print('  %s' % bolt)
+  return True
 
 
 def dump_spouts(spouts, topo_loc):
-  try:
-    print('Spouts under topology \'%s\'' % '/'.join(topo_loc))
-    for spout in spouts.keys():
-      print('  %s' % spout)
-    return True
-  except Exception as ex:
-    Log.error('Error: %s' % str(ex))
-    raise ex
+  print('Spouts under topology \'%s\'' % '/'.join(topo_loc))
+  for spout in spouts.keys():
+    print('  %s' % spout)
+  return True
 
 
 def run(cl_args, bolts_only, spouts_only):
