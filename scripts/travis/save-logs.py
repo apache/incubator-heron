@@ -50,8 +50,7 @@ def main(file, cmd):
   print "\n %s finished with errcode: %d" % (cmd, errcode)
   if errcode != 0:
      lines = tail(file, 1000)
-     for line in lines:
-         print line
+     print '\n'.join(lines)
      sys.exit(errcode)
   return errcode
 
