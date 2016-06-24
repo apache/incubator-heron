@@ -10,6 +10,7 @@ common_deps_files = [
 
 spi_deps_files = [
     "//heron/spi/src/java:common-spi-java",
+    "//heron/spi/src/java:packing-spi-java",
     "//heron/spi/src/java:statemgr-spi-java",
     "//heron/spi/src/java:scheduler-spi-java",
     "//heron/spi/src/java:utils-spi-java",
