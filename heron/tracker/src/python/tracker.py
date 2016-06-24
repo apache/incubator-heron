@@ -450,8 +450,7 @@ class Tracker:
           environ == executionState["environ"]):
         # If role is specified, first try to match "role" field. If "role" field
         # does not exist, try to match "submission_user" field.
-        if not role or executionState.get("role") == role or \
-          executionState.get("submission_user") == role:
+        if not role or executionState.get("role") == role:
           return topologyInfo
     if role:
       LOG.info("Could not find topology info for topology: {0}, \
