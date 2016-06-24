@@ -33,6 +33,11 @@ before_install:
   - chmod +x bazel-0.2.3-installer-linux-x86_64.sh
   - ./bazel-0.2.3-installer-linux-x86_64.sh --user
 
+  # download and install thrift 0.9.3
+  - wget -O thrift.tar.gz  http://apache.fayea.com/thrift/0.9.3/thrift-0.9.3.tar.gz
+  - tar -zxvf thrift.tar.gz
+  - cd thrift-0.9.3 && ./configure --with-boost=/bin && make && sudo make --silent install && cd ..
+
 before_script:
   # required for building the website docs
   - (cd website && npm install && npm install gulp && which gulp)

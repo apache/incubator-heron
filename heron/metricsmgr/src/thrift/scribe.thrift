@@ -25,8 +25,8 @@ enum ResultCode
 
 struct LogEntry
 {
-  1:  string category;
-  2:  string message;
+  1:  string category,
+  2:  string message
 }
 
 service scribe
