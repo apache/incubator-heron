@@ -9,7 +9,7 @@ package_file = package_name + "-" + package_version + ".tar.gz"
 package_dir = package_name + "-" + package_version
 
 COMMON_EXECUTE = [
-    "export UNWIND_DIR=$$(pwd)/$(GENDIR)/3rdparty/libunwind",
+    "export UNWIND_DIR=$$(pwd)/$(GENDIR)/third_party/libunwind",
     "export INSTALL_DIR=$$(pwd)/$(@D)",
     "export TMP_DIR=$$(mktemp -d -t glog.XXXXX)",
     "mkdir -p $$TMP_DIR",
@@ -37,7 +37,7 @@ genrule(
         "//tools/platform:darwin": [package_file],
         "//conditions:default": [
             package_file,
-            "//3rdparty/libunwind:libunwind-files",
+            "//third_party/libunwind:libunwind-files",
          ]
     }),
     outs = [
