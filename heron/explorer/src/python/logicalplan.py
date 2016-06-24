@@ -14,42 +14,49 @@
 
 import heron.explorer.src.python.args as args
 import json
-import logging
 import tornado.gen
 import tornado.ioloop
 from heron.common.src.python.color import Log
 from heron.common.src.python.handler.access import heron as API
-from tabulate import tabulate
+#from tabulate import tabulate
+
 
 def create_parser(subparsers):
   components_parser = subparsers.add_parser(
     'components',
     help='display information of a topology in a logical plan',
-    usage = "%(prog)s [options]",
-    add_help = False)
+    usage="%(prog)s [options]",
+    add_help=False)
   args.add_cluster_role_env_topo(components_parser)
   args.add_role(components_parser)
+  args.add_verbose(components_parser)
+  args.add_tracker_url(components_parser)
   components_parser.set_defaults(subcommand='components')
 
   spouts_parser = subparsers.add_parser(
     'spouts',
     help='display information of spouts of a topology in a logical plan',
-    usage = "%(prog)s [options]",
-    add_help = False)
+    usage="%(prog)s [options]",
+    add_help=False)
   args.add_cluster_role_env_topo(spouts_parser)
   args.add_role(spouts_parser)
+  args.add_verbose(spouts_parser)
+  args.add_tracker_url(spouts_parser)
   spouts_parser.set_defaults(subcommand='spouts')
 
   bolts_parser = subparsers.add_parser(
     'bolts',
     help='display information of bolts of a topology in a logical plan',
-    usage = "%(prog)s [options]",
-    add_help = False)
+    usage="%(prog)s [options]",
+    add_help=False)
   args.add_cluster_role_env_topo(bolts_parser)
   args.add_role(bolts_parser)
+  args.add_verbose(bolts_parser)
+  args.add_tracker_url(bolts_parser)
   bolts_parser.set_defaults(subcommand='bolts')
 
   return subparsers
+
 
 def get_logical_plan(cluster, env, topology, role):
   instance = tornado.ioloop.IOLoop.instance()
@@ -61,6 +68,7 @@ def get_logical_plan(cluster, env, topology, role):
               % ('/'.join([cluster, role, env, topology])))
     raise
 
+
 def parse_topo_loc(cl_args):
   try:
     topo_loc = cl_args['cluster/role/env/topology'].split('/')
@@ -68,12 +76,15 @@ def parse_topo_loc(cl_args):
       raise
     return topo_loc
   except Exception as ex:
+    Log.error(str(ex))
     Log.error('Error: invalid topology location')
     raise
+
 
 def dump_components(components):
   print(json.dumps(components, indent=4))
   return True
+
 
 def dump_bolts(bolts, topo_loc):
   try:
@@ -85,6 +96,7 @@ def dump_bolts(bolts, topo_loc):
     Log.error('Error: %s' % str(ex))
     raise ex
 
+
 def dump_spouts(spouts, topo_loc):
   try:
     print('Spouts under topology \'%s\'' % '/'.join(topo_loc))
@@ -94,6 +106,7 @@ def dump_spouts(spouts, topo_loc):
   except Exception as ex:
     Log.error('Error: %s' % str(ex))
     raise ex
+
 
 def run(cl_args, bolts_only, spouts_only):
   try:
@@ -112,11 +125,14 @@ def run(cl_args, bolts_only, spouts_only):
   except:
     return False
 
+
 def run_components(command, parser, cl_args, unknown_args):
   return run(cl_args, False, False)
 
+
 def run_spouts(command, parser, cl_args, unknown_args):
   return run(cl_args, False, True)
+
 
 def run_bolts(command, parser, cl_args, unknown_args):
   return run(cl_args, True, False)

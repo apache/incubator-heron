@@ -15,10 +15,14 @@
 import argparse
 import os
 
+
 help_epilog = '''Getting more help:
   heron-explorer help <command> Prints help and options for <command>
 
 For detailed documentation, go to http://heronstreaming.io'''
+
+# default parameter - url to connect to heron tracker
+DEFAULT_TRACKER_URL = "http://localhost:8888"
 
 class _HelpAction(argparse._HelpAction):
 
@@ -78,6 +82,13 @@ def add_verbose(parser):
       req(False, False, 'verbose'),
       metavar='(a boolean; default: "false")',
       default=False)
+  return parser
+
+def add_tracker_url(parser):
+  parser.add_argument(
+    '--tracker_url',
+    metavar='(tracker url; default: "' + DEFAULT_TRACKER_URL + '")',
+    type=str, default=DEFAULT_TRACKER_URL)
   return parser
 
 def add_topology(parser, required=False, labelled=False):

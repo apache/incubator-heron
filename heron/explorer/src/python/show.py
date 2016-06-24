@@ -12,13 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
+import heron.explorer.src.python.args as args
+import heron.explorer.src.python.opts as opts
+import json
+import sys
 import tornado.gen
 import tornado.ioloop
 from heron.common.src.python.color import Log
 from heron.common.src.python.handler.access import heron as API
-import heron.explorer.src.python.args as args
-import json
+from tabulate import tabulate
+
 
 # subsubparsers for roles and env are currently not supported
 # because of design of Heron tracker API
@@ -36,78 +39,107 @@ def create_parser(subparsers):
     add_help=False)
   args.add_cluster_role_env(parser)
   parser.set_defaults(subcommand='show')
-
   return subparsers
+
 
 def get_cluster_topologies(cluster):
   instance = tornado.ioloop.IOLoop.instance()
   try:
-    result = instance.run_sync(lambda: API.get_cluster_topologies(cluster))
-    if not result: raise
+    return instance.run_sync(lambda: API.get_cluster_topologies(cluster))
   except Exception as ex:
+    Log.error(str(ex))
     Log.error('Failed to retrive topologies running in cluster \'%s\'' % cluster)
     raise
+
 
 def get_cluster_role_topologies(cluster, role):
   instance = tornado.ioloop.IOLoop.instance()
   try:
     return instance.run_sync(lambda: API.get_cluster_role_topologies(cluster, role))
   except Exception as ex:
-    Log.error('Error: %s' % str(ex))
+    Log.error(str(ex))
     Log.error('Failed to retrive topologies running in cluster'
               '\'%s\' submitted by %s' % (cluster, role))
     raise
+
 
 def get_cluster_role_env_topologies(cluster, role, env):
   instance = tornado.ioloop.IOLoop.instance()
   try:
     return instance.run_sync(lambda: API.get_cluster_role_env_topologies(cluster, role, env))
   except Exception as ex:
-    Log.error('Error: %s' % str(ex))
+    Log.error(str(ex))
     Log.error('Failed to retrive topologies running in cluster'
               '\'%s\' submitted by %s under environment %s' % (cluster, role, env))
     raise
 
+def pp_table(result):
+  max_count = 20
+  info, count = [], 0
+  for role, envs_topos in result.iteritems():
+      for env, topos in envs_topos.iteritems():
+        for topo in topos:
+          count += 1
+          if count > max_count:
+            continue
+          else:
+            info.append([role, env, topo])
+  header = ['role', 'env', 'topology']
+  rest_count = 0 if count <= max_count else count - max_count
+  return tabulate(info, headers=header), rest_count
+
+
 def show_cluster(cluster):
   try:
     result = get_cluster_topologies(cluster)
-    Log.info(result)
+    if not result:
+      Log.error('Unknown cluster \'%s\'' % cluster)
+      return False
     result = result[cluster]
-  except Exception as ex:
+  except Exception:
     return False
-  for env, topos in result.iteritems():
-    print('Environment \'%s\':' % env)
-    for topo in topos[:10]:
-      print("  %s" % topo)
-    if len(topos) > 10:
-      print("  ... with %d more topologies" % (len(topos) - 10))
+  table, rest_count = pp_table(result)
+  print('Topologies running in cluster \'%s\'' % cluster)
+  if rest_count:
+    print('  with %d more...' % rest_count)
+  print(table)
   return True
+
 
 def show_cluster_role(cluster, role):
   try:
     result = get_cluster_role_topologies(cluster, role)
-  except:
+    if not result:
+      Log.error('Unknown cluster/role \'%s\'' % '/'.join([cluster, role]))
+      return False
+    result = result[cluster]
+  except Exception:
     return False
-  print('Topologies under cluster \'%s\' submitted by \'%s\':' % (cluster, role))
-
-  for env, topo_names in result[cluster].iteritems():
-    print('Environment \'%s\':' % env)
-    for topo_name in topo_names:
-      print('  %s' % topo_name)
+  table, rest_count = pp_table(result)
+  print('Topologies running in cluster \'%s\' submitted by \'%s\':' % (cluster, role))
+  if rest_count:
+    print('  with %d more...' % rest_count)
+  print(table)
   return True
+
 
 def show_cluster_role_env(cluster, role, env):
   try:
     result = get_cluster_role_env_topologies(cluster, role, env)
-  except:
+    if not result:
+      Log.error('Unknown cluster/role/env \'%s\'' % '/'.join([cluster, role, env]))
+      return False
+    result = result[cluster]
+  except Exception:
     return False
-  print('Topologies under cluster \'%s\' submitted by \'%s\':' % (cluster, role))
-  print(json.dumps(result, indent=4))
-  for env, topo_names in result[cluster].iteritems():
-    print('Environment \'%s\':' % env)
-    for topo_name in topo_names:
-      print('  %s' % topo_name)
+  table, rest_count = pp_table(result)
+  print('Topologies running in cluster \'%s\',\
+         submitted by \'%s\', and under environment \'%s\':' % (cluster, role, env))
+  if rest_count:
+    print('  with %d more...' % rest_count)
+  print(table)
   return True
+
 
 def run(command, parser, cl_args, unknown_args):
   location = cl_args['cluster/[role]/[env]'].split('/')
@@ -122,4 +154,3 @@ def run(command, parser, cl_args, unknown_args):
     return show_cluster_role_env(*location)
   else:
     return False
-

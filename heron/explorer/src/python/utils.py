@@ -14,14 +14,13 @@
 
 import argparse
 
+
 ################################################################################
 # Retrieve the given subparser from parser
 ################################################################################
 def get_subparser(parser, command):
-  subparsers_actions = [
-    action for action in parser._actions
-    if isinstance(action, argparse._SubParsersAction)
-  ]
+  subparsers_actions = [action for action in parser._actions
+                        if isinstance(action, argparse._SubParsersAction)]
 
   # there will probably only be one subparser_action,
   # but better save than sorry
@@ -31,4 +30,3 @@ def get_subparser(parser, command):
       if choice == command:
         return subparser
   return None
-

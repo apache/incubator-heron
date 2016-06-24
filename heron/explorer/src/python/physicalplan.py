@@ -18,38 +18,38 @@ import tornado.gen
 import tornado.ioloop
 from heron.common.src.python.color import Log
 from heron.common.src.python.handler.access import heron as API
-import json
 from tabulate import tabulate
 
 
 def create_parser(subparsers):
   spouts_parser = subparsers.add_parser(
     'spouts-metric',
-    help = 'show info of a topology\'s spouts metrics',
-    usage = "%(prog)s [options]",
-    add_help = False)
+    help='show info of a topology\'s spouts metrics',
+    usage="%(prog)s [options]",
+    add_help=False)
   args.add_cluster_role_env_topo(spouts_parser)
   args.add_spout_name(spouts_parser)
   spouts_parser.set_defaults(subcommand='spouts-metric')
 
   bolts_parser = subparsers.add_parser(
    'bolts-metric',
-    help = 'show info of a topology\'s bolts metrics',
-    usage = "%(prog)s [options]",
-    add_help = False)
+    help='show info of a topology\'s bolts metrics',
+    usage="%(prog)s [options]",
+    add_help=False)
   args.add_cluster_role_env_topo(bolts_parser)
   args.add_bolt_name(bolts_parser)
   bolts_parser.set_defaults(subcommand='bolts-metric')
 
   containers_parser = subparsers.add_parser(
     'containers',
-    help = 'show info of a topology\'s containers metrics',
-    usage = "%(prog)s [options]",
-    add_help = False)
+    help='show info of a topology\'s containers metrics',
+    usage="%(prog)s [options]",
+    add_help=False)
   args.add_cluster_role_env_topo(containers_parser)
   args.add_container_id(containers_parser)
   containers_parser.set_defaults(subcommand='containers')
   return subparsers
+
 
 def parse_topo_loc(cl_args):
   try:
@@ -61,6 +61,7 @@ def parse_topo_loc(cl_args):
     Log.error('Error: invalid topology location')
     raise
 
+
 def get_topology_info(*args):
   instance = tornado.ioloop.IOLoop.instance()
   try:
@@ -68,6 +69,7 @@ def get_topology_info(*args):
   except Exception as ex:
     Log.error('Error: %s' % str(ex))
     raise
+
 
 def get_topology_metrics(*args):
   instance = tornado.ioloop.IOLoop.instance()
@@ -77,9 +79,12 @@ def get_topology_metrics(*args):
     Log.error('Error: %s' % str(ex))
     raise
 
+
 def get_component_metrics(component, cluster, env, topology, role):
-  queries_normal = ['complete-latency', 'execute-latency', 'process-latency',
-     'jvm-uptime-secs', 'jvm-process-cpu-load', 'jvm-memory-used-mb']
+  queries_normal = [
+    'complete-latency', 'execute-latency', 'process-latency',
+    'jvm-uptime-secs', 'jvm-process-cpu-load', 'jvm-memory-used-mb'
+  ]
   count_queries_normal = ['emit-count', 'execute-count', 'ack-count', 'fail-count']
   queries = ['__%s' % m for m in queries_normal]
   count_queries = ['__%s/default' % m for m in count_queries_normal]
@@ -109,6 +114,7 @@ def get_component_metrics(component, cluster, env, topology, role):
   sys.stdout.flush()
   return True
 
+
 def run_spouts(command, parser, cl_args, unknown_args):
   print(cl_args)
   try:
@@ -126,8 +132,10 @@ def run_spouts(command, parser, cl_args, unknown_args):
     return False
   for spout in spouts:
     result = get_component_metrics(spout, cluster, env, topology, role)
-    if not result: return False
+    if not result:
+      return False
   return True
+
 
 def run_bolts(command, parser, cl_args, unknown_args):
   print(cl_args)
@@ -146,8 +154,10 @@ def run_bolts(command, parser, cl_args, unknown_args):
     return False
   for bolt in bolts:
     result = get_component_metrics(bolt, cluster, env, topology, role)
-    if not result: return False
+    if not result:
+      return False
   return True
+
 
 def run_containers(command, parser, cl_args, unknown_args):
   try:

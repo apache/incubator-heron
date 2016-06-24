@@ -12,32 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 #!/usr/bin/env python2.7
 
 import argparse
 import heron.explorer.src.python.args as parse
 import heron.explorer.src.python.help as help
 import heron.explorer.src.python.logicalplan as logicalplan
+import heron.explorer.src.python.opts as opts
 import heron.explorer.src.python.physicalplan as physicalplan
 import heron.explorer.src.python.show as show
-import logging
 import sys
 import time
-
 from heron.common.src.python.color import Log
-from tornado.options import define
 
-# default parameter - url to connect to heron tracker
-DEFAULT_TRACKER_URL = "http://localhost:8888"
 
 class _HelpAction(argparse._HelpAction):
   def __call__(self, parser, namespace, values, option_string=None):
     parser.print_help()
 
     # retrieve subparsers from parser
-    subparsers_actions = [
-      action for action in parser._actions
-      if isinstance(action, argparse._SubParsersAction)]
+    subparsers_actions = [action for action in parser._actions
+                          if isinstance(action, argparse._SubParsersAction)]
 
     # there will probably only be one subparser_action,
     # but better save than sorry
@@ -48,12 +44,15 @@ class _HelpAction(argparse._HelpAction):
         print(subparser.format_help())
         return
 
+
 class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
   def _format_action(self, action):
-    parts = super(argparse.RawDescriptionHelpFormatter, self)._format_action(action)
+    parts = super(argparse.RawDescriptionHelpFormatter,
+                  self)._format_action(action)
     if action.nargs == argparse.PARSER:
       parts = "\n".join(parts.split("\n")[1:])
     return parts
+
 
 ################################################################################
 # Main parser
@@ -69,15 +68,8 @@ def create_parser():
       formatter_class=SubcommandHelpFormatter,
       add_help=False)
 
-  # option to specify tracker_url
-  parser.add_argument(
-    '--tracker_url',
-    metavar='(tracker url; default: "' + DEFAULT_TRACKER_URL + '")',
-    type=str, default=DEFAULT_TRACKER_URL)
-
-  parser.add_argument(
-    '--verbose',
-    action='store_true')
+  parse.add_verbose(parser)
+  parse.add_tracker_url(parser)
 
   # sub-commands
   subparsers = parser.add_subparsers(
@@ -97,6 +89,7 @@ def create_parser():
   help.create_parser(subparsers)
 
   return parser
+
 
 ################################################################################
 # Run the command
@@ -128,6 +121,7 @@ def run(command, *args):
 
   return 1
 
+
 ################################################################################
 # Run the command
 ################################################################################
@@ -149,14 +143,10 @@ def main():
   command_line_args = vars(args)
 
   # set tracker_url variable globally
-  define("tracker_url", command_line_args["tracker_url"])
+  opts.set_tracker_url(command_line_args)
+  opts.set_logger_level(command_line_args, Log)
 
   command = command_line_args['subcommand']
-
-  if command_line_args['verbose']:
-    Log.setLevel(logging.INFO)
-  else:
-    Log.setLevel(logging.WARNING)
 
   if command != 'help':
     Log.debug("Using tracker URL: %s", command_line_args["tracker_url"])
@@ -168,7 +158,7 @@ def main():
 
   if command != 'help':
     sys.stdout.flush()
-    Log.info('Elapsed time: %.3fs.' % (end-start))
+    Log.info('Elapsed time: %.3fs.' % (end - start))
 
   return 0 if ret else 1
 
