@@ -7,6 +7,8 @@ package_version = "1.1"
 
 package_file = package_name + "-" + package_version + ".tar.gz"
 package_dir = package_name + "-" + package_version
+package_patch = package_name + "-" + package_version + ".patch"
+
 
 out_files = [
     "include/libunwind-common.h",
@@ -36,6 +38,7 @@ genrule(
         "cp -R $(SRCS) $$TMP_DIR",
         "cd $$TMP_DIR",
         "tar xfz " + package_file,
+        "patch -d " + package_dir + " -p1 < " + package_patch,
         "cd " + package_dir,
         "./configure --prefix=$$INSTALL_DIR --enable-shared=no",
         "make install",
