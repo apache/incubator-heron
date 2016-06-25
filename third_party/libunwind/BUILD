@@ -8,6 +8,7 @@ package_version = "1.1"
 package_file = package_name + "-" + package_version + ".tar.gz"
 package_dir = package_name + "-" + package_version
 package_patch = package_name + "-" + package_version + ".patch"
+typo_patch = "libunwind-1.1-lzma-typo.patch"
 
 
 out_files = [
@@ -28,7 +29,9 @@ out_files = [
 genrule(
     name = "libunwind-srcs",
     srcs = [
-        package_file, 
+        package_file,
+        package_patch,
+        typo_patch
     ],
     outs = out_files,
     cmd = "\n".join([
@@ -39,6 +42,7 @@ genrule(
         "cd $$TMP_DIR",
         "tar xfz " + package_file,
         "patch -d " + package_dir + " -p1 < " + package_patch,
+        "patch -d " + package_dir + " -p1 < " + typo_patch,
         "cd " + package_dir,
         "./configure --prefix=$$INSTALL_DIR --enable-shared=no",
         "make install",
