@@ -44,9 +44,9 @@ import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyName;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyPackageName;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.common.ShellUtils;
 import com.twitter.heron.spi.utils.SchedulerConfig;
 import com.twitter.heron.spi.utils.SchedulerUtils;
+import com.twitter.heron.spi.utils.ShellUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
 @Unit

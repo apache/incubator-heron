@@ -6,6 +6,7 @@ common_deps_files = \
     heron_java_proto_files() + [
         "//heron/spi/src/java:common-spi-java",
         "//heron/spi/src/java:statemgr-spi-java",
+        "//heron/spi/src/java:network-utils-java",
         "@com_google_guava_guava//jar",
     ]
 

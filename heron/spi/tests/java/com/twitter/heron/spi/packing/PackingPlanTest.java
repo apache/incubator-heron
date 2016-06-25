@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.spi.common;
+package com.twitter.heron.spi.packing;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,6 +21,8 @@ import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.twitter.heron.spi.common.Constants;
 
 public class PackingPlanTest {
   public static PackingPlan generatePacking(Map<String, List<String>> basePacking) {
