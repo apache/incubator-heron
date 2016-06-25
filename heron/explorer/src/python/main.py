@@ -21,7 +21,7 @@ import heron.explorer.src.python.help as help
 import heron.explorer.src.python.logicalplan as logicalplan
 import heron.explorer.src.python.opts as opts
 import heron.explorer.src.python.physicalplan as physicalplan
-import heron.explorer.src.python.show as show
+import heron.explorer.src.python.topologies as topologies
 import sys
 import time
 from heron.common.src.python.color import Log
@@ -83,7 +83,7 @@ def create_parser():
   physicalplan.create_parser(subparsers)
 
   # subparser for subcommands related to displaying info
-  show.create_parser(subparsers)
+  topologies.create_parser(subparsers)
 
   # subparser for help subcommand
   help.create_parser(subparsers)
@@ -112,8 +112,8 @@ def run(command, *args):
     return logicalplan.run_bolts(command, *args)
 
   # show
-  if command == 'show':
-    return show.run(command, *args)
+  if command == 'topologies':
+    return topologies.run(command, *args)
 
   # help
   if command == 'help':

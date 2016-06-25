@@ -8,7 +8,7 @@ pex_library(
         "args.py",
         "help.py",
         "opts.py",
-        "show.py",
+        "topologies.py",
         "utils.py",
         "logicalplan.py",
         "physicalplan.py",

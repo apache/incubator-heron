@@ -13,9 +13,6 @@
 # limitations under the License.
 
 import heron.explorer.src.python.args as args
-import heron.explorer.src.python.opts as opts
-import json
-import sys
 import tornado.gen
 import tornado.ioloop
 from heron.common.src.python.color import Log
@@ -33,12 +30,12 @@ from tabulate import tabulate
 # Bill: might not that important in real production since it rarely happens
 def create_parser(subparsers):
   parser = subparsers.add_parser(
-    'show',
+    'topologies',
     help='Show running topologies',
     usage="%(prog)s [options]",
     add_help=False)
   args.add_cluster_role_env(parser)
-  parser.set_defaults(subcommand='show')
+  parser.set_defaults(subcommand='topologies')
   return subparsers
 
 
@@ -72,6 +69,7 @@ def get_cluster_role_env_topologies(cluster, role, env):
     Log.error('Failed to retrive topologies running in cluster'
               '\'%s\' submitted by %s under environment %s' % (cluster, role, env))
     raise
+
 
 def pp_table(result):
   max_count = 20

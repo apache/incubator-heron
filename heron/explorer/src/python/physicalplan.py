@@ -53,7 +53,9 @@ def create_parser(subparsers):
 
 def parse_topo_loc(cl_args):
   try:
-    topo_loc = cl_args['cluster/role/env/topology'].split('/')
+    topo_loc = cl_args['cluster/role/env'].split('/')
+    topo_name = cl_args['topology-name']
+    topo_loc.append(topo_name)
     if len(topo_loc) != 4:
       raise
     return topo_loc
