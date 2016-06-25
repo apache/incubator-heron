@@ -35,11 +35,14 @@ def heron_client_lib_scheduler_files():
         "//heron/schedulers/src/java:heron-slurm-scheduler",
         "//heron/schedulers/src/java:heron-yarn-scheduler",
         "//heron/packing/src/java:heron-roundrobin-packing",
+	"//heron/packing/src/java:heron-binpacking-packing",
     ]
 
 def heron_client_lib_packing_files():
     return [
         "//heron/packing/src/java:heron-roundrobin-packing",
+        "//heron/packing/src/java:heron-binpacking-packing",
+
     ]
 
 def heron_client_lib_statemgr_files():
