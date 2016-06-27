@@ -9,7 +9,7 @@ slf4j_version = "1.7.7"
 
 maven_server(
   name = "default",
-  url = "http://10.130.72.155:8080/nexus/content/groups/public",
+  url = "http://central.maven.org/maven2/",
 )
 
 maven_jar(
