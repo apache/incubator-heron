@@ -140,7 +140,6 @@ heron_binary_paths="$(collect_generated_binary_deps)"
 for jar in ${heron_binary_paths}; do
   write_jar_entry "$jar";
 done
-#write_jar_entry "bazel-bin/heron/metricsmgr/src/thrift"
 
 cat >> $iml_file <<'EOF'
     <orderEntry type="library" name="Python 2.7.10 (/usr/bin/python) interpreter library" level="application" />

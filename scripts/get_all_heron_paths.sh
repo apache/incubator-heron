@@ -103,8 +103,7 @@ function get_containing_library() {
 
 function collect_generated_binary_deps() {
   local proto_deps=$(find bazel-bin/heron/proto -type f | grep "jar$");
-  local thrift_deps=$(find bazel-bin/heron/metricsmgr/src/thrift -type f | grep "jar$");
-  echo "${proto_deps} ${thrift_deps}" | sort | uniq
+  echo "${proto_deps}" | sort | uniq
 }
 
 function collect_generated_paths() {
