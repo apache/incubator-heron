@@ -14,7 +14,12 @@ util_deps_files = \
     common_deps_files + [
         "//heron/spi/src/java:utils-spi-java", 
     ]
-    
+
+packing_deps_files = \
+    common_deps_files + [
+        "//heron/spi/src/java:packing-spi-java",
+    ]
+
 proto_deps_files = \
     heron_java_proto_files() + \
     util_deps_files
@@ -31,23 +36,23 @@ java_library(
 )
 
 java_test(
-    name = "ShellUtilsTest",
-    srcs = glob(["**/common/ShellUtilsTest.java"]),
-    deps = common_deps_files, 
+    name = "PackingPlanTest",
+    srcs = glob(["**/packing/PackingPlanTest.java"]),
+    deps = packing_deps_files,
     size = "small",
 )
 
 java_test(
-    name = "PackingPlanTest",
-    srcs = glob(["**/common/PackingPlanTest.java"]),
-    deps = common_deps_files,
+    name = "ShellUtilsTest",
+    srcs = glob(["**/utils/ShellUtilsTest.java"]),
+    deps = util_deps_files,
     size = "small",
 )
 
 java_test(
     name = "NetworkUtilsTest",
-    srcs = glob(["**/common/NetworkUtilsTest.java"]),
-    deps = common_deps_files,
+    srcs = glob(["**/utils/NetworkUtilsTest.java"]),
+    deps = util_deps_files,
     size = "small",
 )
 
