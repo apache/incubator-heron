@@ -10,7 +10,7 @@ if [ $PLATFORM = darwin ]; then
   brew list hugo || brew install hugo
   which wget || brew install wget
 elif [ $PLATFORM = ubuntu ]; then
-  sudo apt-get install golang git mercurial python-pygments -y
+  sudo apt-get install golang git mercurial -y
   export GOROOT=/usr/lib/go
   export GOPATH=$HOME/go
   export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
@@ -24,5 +24,5 @@ elif [ $PLATFORM = centos ]; then
 fi
 
 npm install
-sudo -H pip uninstall -y Pygments
-sudo -H pip install Pygments==2.1.3
+sudo -H pip uninstall -y pygments
+sudo -H pip install pygments==2.1.3
