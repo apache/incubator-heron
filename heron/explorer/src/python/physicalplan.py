@@ -128,8 +128,10 @@ def run_spouts(command, parser, cl_args, unknown_args):
     spout_name = cl_args['spout']
     if spout_name in spouts:
       spouts = [spout_name]
-  except Exception as ex:
-    Log.error('Error %s' % str(ex))
+    else:
+      Log.error('Unknown spout: \'%s\'' % spout_name)
+      raise
+  except Exception:
     return False
   for spout in spouts:
     result = get_component_metrics(spout, cluster, env, topology, role)
@@ -149,8 +151,10 @@ def run_bolts(command, parser, cl_args, unknown_args):
     bolt_name = cl_args['bolt']
     if bolt_name in bolts:
       bolts = [bolt_name]
-  except Exception as ex:
-    Log.error('Error %s' % str(ex))
+    else:
+      Log.error('Unknown bolt: \'%s\'' % bolt_name)
+      raise
+  except Exception:
     return False
   for bolt in bolts:
     result = get_component_metrics(bolt, cluster, env, topology, role)

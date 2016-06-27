@@ -147,9 +147,14 @@ def main():
   opts.set_logger_level(command_line_args, Log)
 
   command = command_line_args['subcommand']
+  if unknown_args:
+    Log.error('Unknown argument: %s' % unknown_args[0])
+    # show help message
+    command = 'help'
+    command_line_args['help-command'] = 'help'
 
   if command != 'help':
-    Log.debug("Using tracker URL: %s", command_line_args["tracker_url"])
+    Log.info("Using tracker URL: %s", command_line_args["tracker_url"])
 
   # timing command execution
   start = time.time()

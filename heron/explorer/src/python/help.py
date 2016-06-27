@@ -12,27 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
 import utils
 from heron.common.src.python.color import Log
+
 
 def create_parser(subparsers):
   parser = subparsers.add_parser(
       'help',
       help='Prints help for commands',
-      add_help = False)
+      add_help=False)
 
   parser._positionals.title = "Required arguments"
   parser._optionals.title = "Optional arguments"
 
   parser.add_argument(
       'help-command',
-      nargs = '?',
-      default = 'help',
+      nargs='?',
+      default='help',
       help='Provide help for a command')
 
   parser.set_defaults(subcommand='help')
   return parser
+
 
 def run(command, parser, args, unknown_args):
   # get the command for detailed help
