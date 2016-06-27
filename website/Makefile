@@ -1,11 +1,11 @@
 setup:
-	@brew list hugo || brew install hugo
-	@npm install
-	@pip uninstall requests
-	@pip install linkchecker pygments requests==2.9.0
+	scripts/setup.sh
+
+clean:
+	rm -rf public/* static/*
 
 serve:
-	@hugo server --watch
+	@hugo server --watch --ignoreCache
 
 develop-static-assets:
 	@npm run develop
@@ -24,7 +24,15 @@ javadocs:
 	@scripts/javadocs.sh
 
 site:
+	@make clean
 	@make build-static-assets
 	@make pages
 	@make javadocs
+	@make linkchecker
+
+travis-site:
+	@make clean
+	@make build-static-assets
+	@make pages
+	@scripts/javadocs.sh --travis
 	@make linkchecker

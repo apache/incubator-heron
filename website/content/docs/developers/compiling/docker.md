@@ -162,11 +162,11 @@ RUN \
 ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
 ```
 
-#### Step 5 - An installation script for [Bazel](http://bazel.io/) version 0.1.2 or above.
+#### Step 5 - An installation script for [Bazel](http://bazel.io/) version {{% bazelVersion %}} or above.
 Here's an example:
 
 ```dockerfile
-RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh \
+RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.2.3/bazel-0.2.3-installer-linux-x86_64.sh \
          && chmod +x /tmp/bazel.sh \
          && /tmp/bazel.sh
 ```

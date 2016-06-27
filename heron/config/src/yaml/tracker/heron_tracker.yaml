@@ -13,12 +13,17 @@ statemgrs:
     name: "local"
     rootpath: "~/.herondata/repository/state/local"
     tunnelhost: "localhost"
-  -
-    type: "zookeeper"
-    name: "localzk"
-    hostport: "localhost:2181"
-    rootpath: "/heron"
-    tunnelhost: "localhost"
+#
+# To use 'localzk', launch a zookeeper server locally
+# and create the following path:
+#   *. /heron/topologies
+#
+#  -
+#    type: "zookeeper"
+#    name: "localzk"
+#    hostport: "localhost:2181"
+#    rootpath: "/heron"
+#    tunnelhost: "localhost"
 
 # The URL that points to a topology's metrics dashboard.
 # This value can use following parameters to create a valid

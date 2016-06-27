@@ -2,7 +2,7 @@ languageCode: en-us
 title: Heron
 author: Luc Perkins
 canonifyurls: true
-baseurl: http://twitter.github.io/heron
+baseurl: /heron
 
 # Site-level config
 metadataformat: yaml
@@ -11,17 +11,17 @@ taxonomies:
   tag: tags
 
 # Pygments syntax highlighting
-pygmentsstyle: manni
+pygmentsstyle: monokai
 pygmentsuseclasses: false
-pygmentscodefencesguesssyntax: false
-PygmentsCodeFences: true
+pygmentscodefences: true
 
 # Site-level parameters available through .Site.Params.{key}
 params:
-  author: Luc Perkins
+  author: Twitter, Inc.
+  description: A realtime, distributed, fault-tolerant stream processing engine from Twitter
   versions:
-    heron: 0.13.7
-    bazel: 0.1.2
+    heron: 0.14.0
+    bazel: 0.2.3
   assets:
     favicon:
       small: /img/favicon-16x16.png
@@ -34,7 +34,7 @@ params:
       - /css/font-awesome.min.css
       - /css/pygments.css
     js:
-      - http://code.jquery.com/jquery-2.2.1.min.js
+      - https://code.jquery.com/jquery-2.2.1.min.js
       - /js/app.min.js
   tagline: A realtime, distributed, fault-tolerant stream processing engine from Twitter
   github:
@@ -45,3 +45,14 @@ params:
     twitter: https://twitter.com/heronstreaming
     slack: https://heronusers.slack.com
     googleGroup: https://groups.google.com/forum/#!forum/heron-users
+  seo:
+    opengraph:
+      - property: locale
+        content: en_US
+      - property: type
+        content: article
+    twittercards:
+      - name: card
+        content: summary
+      - name: site
+        content: "@heronstreaming"

@@ -5,6 +5,8 @@ sections:
         url: /docs/getting-started
       - name: Upgrade Storm Topologies
         url: /docs/upgrade-storm-to-heron
+      - name: Troubleshooting Guide
+        url: /docs/getting-started-troubleshooting
   - name: Heron Concepts
     sublinks:
       - name: Heron Topology
@@ -37,22 +39,22 @@ sections:
         url: /docs/operators/deployment/schedulers/aurora
       - name: Local Cluster
         url: /docs/operators/deployment/schedulers/local
-      - name: Mesos Cluster
-        url: /docs/operators/deployment/schedulers/mesos
+#      - name: Mesos Cluster
+#        url: /docs/operators/deployment/schedulers/mesos
       - name: Slurm Cluster
         url: /docs/operators/deployment/schedulers/slurm
-  - name: System Configuration
+  - name: Cluster Configuration
     sublinks:
       - name: Overview
         url: /docs/operators/configuration/config-intro
+      - name: System-Level
+        url: /docs/operators/configuration/system
       - name: Heron Instance
         url: /docs/operators/configuration/instance
       - name: Metrics Manager
         url: /docs/operators/configuration/metrics-manager
       - name: Stream Manager
         url: /docs/operators/configuration/stmgr
-      - name: System-Level
-        url: /docs/operators/configuration/system
       - name: Topology Master
         url: /docs/operators/configuration/tmaster
   - name: Observability

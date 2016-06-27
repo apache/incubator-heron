@@ -251,7 +251,7 @@ AM_CONDITIONAL([ENABLE_COVERAGE], [test x$enable_coverage = xyes])
 
 # Save the configure arguments so we can pass them to any third-party
 # libraries that we might run configure on (see
-# 3rdparty/Makefile.am). One downside of our strategy for shipping
+# third_party/Makefile.am). One downside of our strategy for shipping
 # and building third-party libraries is that we can't expose options
 # from nested third-party configure scripts.
 CONFIGURE_ARGS="$ac_configure_args"

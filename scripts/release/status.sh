@@ -62,7 +62,7 @@ echo "HERON_BUILD_HOST ${build_host}"
 
 if [ -z ${HERON_BUILD_TIME+x} ];
 then
-  build_time=$(date)
+  build_time=$(LC_ALL=en_EN.utf8 date)
 else
   build_time=${HERON_BUILD_TIME}
 fi

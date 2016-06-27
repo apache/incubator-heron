@@ -47,9 +47,9 @@ pre {
   word-break: break-all;
   word-wrap: break-word;
   color: $pre-color;
-  background-color: $pre-bg;
-  border: 1px solid $pre-border-color;
-  border-radius: $border-radius-base;
+  background-color: $heron-blue-gray;
+  //border: 1px solid $pre-border-color;
+  //border-radius: $border-radius-base;
 
   // Account for some code outputs that place code tags in pre tags
   code {

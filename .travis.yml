@@ -29,9 +29,9 @@ before_install:
   - cd libunwind-1.1 && ./configure --prefix=/usr && sudo make --silent install && cd ..
 
   # download and install bazel
-  - wget -q 'https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh'
-  - chmod +x bazel-0.1.2-installer-linux-x86_64.sh
-  - ./bazel-0.1.2-installer-linux-x86_64.sh --user
+  - wget -q 'https://github.com/bazelbuild/bazel/releases/download/0.2.3/bazel-0.2.3-installer-linux-x86_64.sh'
+  - chmod +x bazel-0.2.3-installer-linux-x86_64.sh
+  - ./bazel-0.2.3-installer-linux-x86_64.sh --user
 
 before_script:
   # required for building the website docs
@@ -39,13 +39,10 @@ before_script:
   - wget -q https://github.com/spf13/hugo/releases/download/v0.15/hugo_0.15_amd64.deb
   - sudo dpkg -i hugo*.deb
   - hugo version
-  - pip install --user requests==2.9.0
-  - pip install --user LinkChecker
-  - linkchecker --version
 
 script:
   - which gcc-4.8
   - gcc --version
   - which g++-4.8
   - g++ --version
-  - (cd website && make site) && scripts/travis/build.sh && scripts/travis/test.sh
+  - scripts/travis/ci.sh

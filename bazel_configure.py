@@ -12,16 +12,22 @@
 #  ./build-artifacts.sh ubuntu14.04 0.12.0 .
 #  ./build-artifacts.sh centos7 0.12.0 .
 #
-import os, sys
-import re, subprocess, shutil
+import os
+import re
+import sys
+import stat
+import getpass
+import datetime
+import platform
+import subprocess
 
-sys.path.append('3rdparty/python/semver')
+sys.path.append('third_party/python/semver')
 import semver
 
 ######################################################################
 # Architecture and system defines
 ######################################################################
-ARCH_AND_SYS = { 
+ARCH_AND_SYS = {
   ('x86_64', 'Darwin') : ('IS_I386_MACOSX', 'IS_MACOSX'),
   ('x86_64', 'Linux' )  : ('IS_I386_LINUX',  'IS_LINUX'),
 }
@@ -30,38 +36,38 @@ ARCH_AND_SYS = {
 # Discover the name of the user compiling
 ######################################################################
 def discover_user():
-  return subprocess.check_output("whoami", shell=True).strip("\n")
-  
+  return getpass.getuser()
+
 ######################################################################
 # Discover the name of the host compiling
 ######################################################################
 def discover_host():
-  return subprocess.check_output("uname -n", shell=True).strip("\n")
-  
+  return platform.node()
+
 ######################################################################
 # Get the time of the setup - does not change every time you compile
 ######################################################################
 def discover_timestamp():
-  return subprocess.check_output("date", shell=True).strip("\n")
-  
+  return str(datetime.datetime.now())
+
 ######################################################################
 # Get the processor the platform is running on
 ######################################################################
 def discover_processor():
-  return subprocess.check_output("uname -m", shell=True).strip("\n")
+  return platform.machine()
 
 ######################################################################
 # Get the operating system of the platform
 ######################################################################
 def discover_os():
-  return subprocess.check_output("uname -s", shell=True).strip("\n")
+  return platform.system()
 
 ######################################################################
 # Get the operating system version
 ######################################################################
 def discover_os_version():
-  return subprocess.check_output("uname -r", shell=True).strip("\n")
-  
+  return platform.release()
+
 ######################################################################
 # Get the git sha of the branch - you are working
 ######################################################################
@@ -118,12 +124,6 @@ def real_program_path(program_name):
 
   return None
 
-######################################################################
-# Get the real path of the program
-######################################################################
-def real_path(apath):
-  return os.path.realpath(apath)
-
 def fail(message):
   print("\nFAILED:  %s" % message)
   sys.exit(1)
@@ -145,6 +145,14 @@ def discover_version(path):
   version = get_trailing_version(first_line)
   if version:
     return version
+
+  # on debian, /usr/bin/gcc --version returns this:
+  #   gcc-5 (Debian 5.3.1-14) 5.3.1 20160409
+  debian_line = re.search('.*?Debian.*?\s(\d[\d\.]+\d+)\s.*', first_line)
+  if debian_line:
+    version = get_trailing_version(debian_line.group(1))
+    if version:
+      return version
 
   # on centos, /usr/bin/gcc --version returns this:
   #   gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-4)
@@ -171,7 +179,7 @@ def discover_version(path):
       return version
 
   # on some centos versions, cmake --version returns this
-  #   cmake version 2.6-patch 4 
+  #   cmake version 2.6-patch 4
   centos_line = re.search('^cmake version\s+(\d.\d)-patch\s+(\d)', first_line)
   if centos_line:
     version = ".".join([centos_line.group(1), centos_line.group(2)])
@@ -185,6 +193,15 @@ def discover_version(path):
     version = anaconda_line.group(0).split(' ')[1]
     if version:
       return version
+
+  # python on debian, --V returns this:
+  # Python 2.7.11+
+  python_line = re.search('^Python\s+(\d[\d\.]+)\+{0,1}.*', first_line)
+  if python_line:
+    version = python_line.group(1)
+    if version:
+      return version
+
 
   fail ("Could not determine the version of %s from the following output\n%s\n%s" % (path, command, version_output))
 
@@ -207,7 +224,7 @@ def assert_min_version(path, min_version):
   return version
 
 ######################################################################
-# Discover the program using env variable/program name 
+# Discover the program using env variable/program name
 ######################################################################
 def discover_program(program_name, env_variable = ""):
   env_value = program_name
@@ -218,21 +235,19 @@ def discover_program(program_name, env_variable = ""):
       pass
 
   return real_program_path(env_value)
-      
+
 ######################################################################
 # Get the platform we are running
 ######################################################################
 def discover_platform():
-  output = subprocess.Popen(['uname'], stdout=subprocess.PIPE).communicate()
-  return output[0].strip("\n")
+  return discover_os()
 
 ######################################################################
 # Make the file executable
 ######################################################################
 def make_executable(path):
-  mode = os.stat(path).st_mode
-  mode |= (mode & 0444) >> 2    # copy R bits to X
-  os.chmod(path, mode)
+  st_mode = os.stat(path).st_mode
+  os.chmod(path, st_mode | stat.S_IXUSR)
 
 ######################################################################
 # Discover a tool needed to compile Heron
@@ -271,21 +286,6 @@ def discover_tool_default(program, msg, envvar, defvalue):
   else:
     print 'Using %s:\t%s' % (msg.ljust(20), VALUE)
   return VALUE
-
-######################################################################
-# Discover the includes paths for files
-######################################################################
-def discover_include_paths(program):
-  includes_command = program + ' -E -x c++ - -v 2>&1 < /dev/null '  \
-    + '| sed -n \'/search starts here:/,/End of search list/p\' '  \
-    + '| sed \'/#include.*/d\' ' \
-    + '| sed \'/End of search list./d\' '
-  includes = subprocess.Popen(includes_command, shell=True, stdout=subprocess.PIPE).communicate()[0]
-  include_paths = [real_path(path.strip()) for path in includes.split('\n')]
-  builtin_includes  = '\n'.join([
-    '  cxx_builtin_include_directory: "%s"' % item for item in include_paths
-  ])
-  return builtin_includes
 
 def export_env_to_file(out_file, env):
   if env in os.environ:
@@ -349,7 +349,7 @@ def write_heron_config_header(config_file):
   out_file.write(define_string('PACKAGE', 'heron'))
   out_file.write(define_string('PACKAGE_NAME', 'heron'))
   out_file.write(define_string('PACKAGE_VERSION', 'unversioned'))
-    
+
   out_file.write(define_string('PACKAGE_COMPILE_USER', discover_user()))
   out_file.write(define_string('PACKAGE_COMPILE_HOST', discover_host()))
   out_file.write(define_string('PACKAGE_COMPILE_TIME', discover_timestamp()))

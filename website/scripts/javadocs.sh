@@ -1,15 +1,24 @@
 #!/usr/bin/env bash
-#set -e TODO: figure out why this breaks CI and re-enable (https://github.com/twitter/heron/issues/766)
+set -e
 
 FLAGS="-quiet"
 
 HERON_ROOT_DIR=$(git rev-parse --show-toplevel)
+# for display on GitHub website
 JAVADOC_OUTPUT_DIR=$HERON_ROOT_DIR/website/public/api
-JAVADOC_STATIC_OUTPUT_DIR=$HERON_ROOT_DIR/website/static
+# for display on local Hugo server
+JAVADOC_OUTPUT_LOCAL_DIR=$HERON_ROOT_DIR/website/static/api
 GEN_PROTO_DIR=$HERON_ROOT_DIR/bazel-bin/heron/proto/_javac
 OVERVIEW_HTML_FILE=$HERON_ROOT_DIR/website/scripts/javadocs-overview.html
 
-(cd $HERON_ROOT_DIR && bazel build \
+# Check if this script is run with Travis flag
+if [ $# -eq 1 ] && [ $1 == "--travis" ]; then
+    BAZEL_CMD="bazel --bazelrc=$HERON_ROOT_DIR/tools/travis-ci/bazel.rc build"
+else
+    BAZEL_CMD="bazel build"
+fi
+
+(cd $HERON_ROOT_DIR && $BAZEL_CMD \
   `bazel query 'kind("java_library", "heron/...")'`\
   `bazel query 'kind("java_test", "heron/...")'` \
   `bazel query 'kind("java_library", "integration-test/...")'`)
@@ -36,7 +45,15 @@ javadoc $FLAGS \
   -overview $OVERVIEW_HTML_FILE \
   -d $JAVADOC_OUTPUT_DIR $GEN_FILES $HERON_SRC_FILES $BACKTYPE_SRC_FILES $APACHE_SRC_FILES
 
-ln -s $JAVADOC_OUTPUT_DIR $JAVADOC_STATIC_OUTPUT_DIR
+# Generated Java API doc needs to be copied to $JAVADOC_OUTPUT_LOCAL_DIR
+# for the following two reasons:
+# 1. When one is developing website locally using Hugo server, he should
+#    be able to click into API doc link and view API doc to
+#    check if the correct API link is given.
+# 2. ``wget`` needs to verify if links to Java API doc are valid when Hugo is
+#    serving the website locally. This means that Hugo should be able to display
+#    Java API doc properly.
+cp -r $JAVADOC_OUTPUT_DIR $JAVADOC_OUTPUT_LOCAL_DIR
 
 echo "Javdocs generated at $JAVADOC_OUTPUT_DIR"
 exit 0

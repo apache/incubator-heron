@@ -29,7 +29,6 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.api.Config;
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.spi.common.Constants;
 
 /**
  * Utility to process TopologyAPI.Topology proto
@@ -126,7 +125,7 @@ public final class TopologyUtils {
     }
 
     // Only verify ram map string well-formed.
-    getComponentRamMap(topology, -1);
+    getComponentRamMapConfig(topology);
     // Verify all bolts input streams exist. First get all output streams.
     Set<String> outputStreams = new HashSet<>();
     for (TopologyAPI.Spout spout : topology.getSpoutsList()) {
@@ -162,16 +161,22 @@ public final class TopologyUtils {
   }
 
 
-  public static Map<String, Long> getComponentRamMap(
-      TopologyAPI.Topology topology, long defaultRam) {
+  /**
+   * Parses the value in Config.TOPOLOGY_COMPONENT_RAMMAP,
+   * and returns a map containing only component specified.
+   * Returns a empty map if the Config is not set
+   *
+   * @param topology the topology def
+   * @return a map (componentName -&gt; ram required)
+   */
+  public static Map<String, Long> getComponentRamMapConfig(TopologyAPI.Topology topology) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     Map<String, Long> ramMap = new HashMap<>();
-    Set<String> componentNames = getComponentParallelism(topology).keySet();
-    for (String componentName : componentNames) {
-      ramMap.put(componentName, defaultRam);
-    }
 
-    // Apply Ram overrides
+    // Get the set of component names to make sure the config only specifies valid component name
+    Set<String> componentNames = getComponentParallelism(topology).keySet();
+
+    // Parse the config value
     String ramMapStr = getConfigWithDefault(topologyConfig, Config.TOPOLOGY_COMPONENT_RAMMAP, null);
     if (ramMapStr != null) {
       String[] ramMapTokens = ramMapStr.split(",");
@@ -183,28 +188,15 @@ public final class TopologyUtils {
         if (componentAndRam.length != 2) {
           throw new RuntimeException("Malformed component rammap");
         }
-        if (!ramMap.containsKey(componentAndRam[0])) {
+        if (!componentNames.contains(componentAndRam[0])) {
           throw new RuntimeException("Invalid component. " + componentAndRam[0] + " not found");
         }
         long requiredRam = Long.parseLong(componentAndRam[1]);
-        if (requiredRam < 128L * Constants.MB && requiredRam > 0) {
-          throw new RuntimeException(String.format(
-              "Component %s require at least 128MB ram. Given on %d MB",
-              componentAndRam[0], requiredRam / Constants.MB));
-        }
+
         ramMap.put(componentAndRam[0], requiredRam);
       }
     }
     return ramMap;
-  }
-
-  public static String formatRamMap(Map<String, Long> ramMap) {
-    StringBuilder ramMapBuilder = new StringBuilder();
-    for (String component : ramMap.keySet()) {
-      ramMapBuilder.append(String.format("%s:%d,", component, ramMap.get(component)));
-    }
-    ramMapBuilder.deleteCharAt(ramMapBuilder.length() - 1);
-    return ramMapBuilder.toString();
   }
 
   public static int getNumContainers(TopologyAPI.Topology topology) {

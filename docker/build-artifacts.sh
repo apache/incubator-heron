@@ -47,7 +47,7 @@ heron_build_user() {
 }
 
 heron_build_time() {
-  local build_time=$(date)
+  local build_time=$(LC_ALL=en_EN.utf8 date)
   echo $build_time
 }
 

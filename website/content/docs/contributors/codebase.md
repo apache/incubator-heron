@@ -41,8 +41,7 @@ communication between components. Most `.proto` definition files can be found in
 [`heron/proto`]({{% githubMaster %}}/heron/proto).
 
 * **Cluster coordination** --- Heron relies heavily on ZooKeeper for cluster
-coordination for distributed deployment, be it for [Mesos/Aurora](../../operators/deployment/schedulers/aurora),
-[Mesos alone](../../operators/deployment/schedulers/mesos), or for a [custom
+coordination for distributed deployment, be it for [Aurora](../../operators/deployment/schedulers/aurora) or for a [custom
 scheduler](../custom-scheduler) that you build. More information on ZooKeeper
 components in the codebase can be found in the [State
 Management](#state-management) section below.
@@ -55,9 +54,8 @@ utilities, networking interfaces, and more.
 
 ## Cluster Scheduling
 
-Heron supports three cluster schedulers out of the box:
-[Mesos](../../operators/deployment/schedulers/mesos),
-[Aurora](../../operators/deployment/schedulers/aurora), and a [local
+Heron supports two cluster schedulers out of the box:
+[Aurora](../../operators/deployment/schedulers/aurora) and a [local
 scheduler](../../operators/deployment/schedulers/local). The Java code for each of those
 schedulers can be found in [`heron/schedulers`]({{% githubMaster %}}/heron/schedulers)
 , while the underlying scheduler API can be found [here](/api/com/twitter/heron/spi/scheduler/package-summary.html)
@@ -65,8 +63,7 @@ schedulers can be found in [`heron/schedulers`]({{% githubMaster %}}/heron/sched
 Info on custom schedulers can be found in [Implementing a Custom
 Scheduler](../custom-scheduler); info on the currently available schedulers
 can be found in [Deploying Heron on
-Aurora](../../operators/deployment/schedulers/aurora), [Deploying Heron on
-Mesos](../../operators/deployment/schedulers/mesos), and [Local
+Aurora](../../operators/deployment/schedulers/aurora) and [Local
 Deployment](../../operators/deployment/schedulers/local).
 
 ## State Management
