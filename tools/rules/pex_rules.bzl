@@ -231,7 +231,7 @@ pex_binary = rule(
     executable = True,
     attrs = pex_bin_attrs + {
         "_pexbuilder": attr.label(
-            default = Label("//3rdparty/pex:_pex"),
+            default = Label("//third_party/pex:_pex"),
             allow_files = False,
             executable = True,
         ),
@@ -243,7 +243,7 @@ pex_test = rule(
     executable = True,
     attrs = pex_attrs + {
         "_pexbuilder": attr.label(
-            default = Label("//3rdparty/pex:_pex"),
+            default = Label("//third_party/pex:_pex"),
             allow_files = False,
             executable = True,
         ),

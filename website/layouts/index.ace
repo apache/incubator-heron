@@ -2,6 +2,7 @@
 html lang={{.Site.LanguageCode}}
   head
     {{partial "meta.html" .}}
+    {{partial "index/index-meta.html" .}}
     title {{.Site.Title}}
     {{partial "css.includes.html" .}}
   body
@@ -30,7 +31,7 @@ html lang={{.Site.LanguageCode}}
                 .col-sm-6
                   .panel.panel-primary
                     .panel-heading Proven at Twitter Scale
-                    .panel-body Heron powers all realtime analytics with varied use cases at Twitter for over 2 years. Incident reports dropped by an order of magnitude demonstrating proven reliability and scalability
+                    .panel-body Heron has powered all realtime analytics with varied use cases at Twitter since 2014. Incident reports dropped by an order of magnitude demonstrating proven reliability and scalability
               .row
                 .col-sm-6
                   .panel.panel-primary

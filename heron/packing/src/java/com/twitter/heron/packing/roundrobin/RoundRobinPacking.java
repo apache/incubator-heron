@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -27,44 +26,260 @@ import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
-import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
  * Round-robin packing algorithm
+ * <p>
+ * This IPacking implementation generates PackingPlan: instances of the component are assigned
+ * to each container one by one in circular order, without any priority. Each container is expected
+ * to take equal number of instances if # of instances is multiple of # of containers.
+ * <p>
+ * Following semantics are guaranteed:
+ * 1. Every container requires same size of resource, i.e. same cpu, ram and disk.
+ * Consider that instances in different containers can be different, the value of size
+ * will be aligned to the max one.
+ * <p>
+ * 2. The size of resource required by the whole topology is equal to
+ * ((# of container specified in config) + 1) * (size of resource required for a single container).
+ * The extra 1 is considered for Heron internal container,
+ * i.e. the one containing Scheduler and TMaster.
+ * <p>
+ * 3. The disk required for a container is calculated as:
+ * value for com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_DISK_REQUESTED if exists, otherwise,
+ * (disk for instances in container) + (disk padding for heron internal process)
+ * <p>
+ * 4. The cpu required for a container is calculated as:
+ * value for com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_CPU_REQUESTED if exists, otherwise,
+ * (cpu for instances in container) + (cpu padding for heron internal process)
+ * <p>
+ * 5. The ram required for a container is calculated as:
+ * value for com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED if exists, otherwise,
+ * (ram for instances in container) + (ram padding for heron internal process)
+ * <p>
+ * 6. The ram required for one instance is calculated as:
+ * value in com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_RAMMAP if exists, otherwise,
+ * - if com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED not exists:
+ * the default ram value for one instance
+ * - if com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED exists:
+ * ((TOPOLOGY_CONTAINER_RAM_REQUESTED) - (ram padding for heron internal process)
+ * - (ram used by instances within TOPOLOGY_COMPONENT_RAMMAP config))) /
+ * (the # of instances in container not specified in TOPOLOGY_COMPONENT_RAMMAP config)
+ * 7. The pack() return null if PackingPlan fails to pass the safe check, for instance,
+ * the size of ram for an instance is less than the minimal required value.
  */
 public class RoundRobinPacking implements IPacking {
   private static final Logger LOG = Logger.getLogger(RoundRobinPacking.class.getName());
-  private static final long DEFAULT_DISK_PADDING = 12 * Constants.GB;
+
+  // TODO(mfu): Read these values from Config
+  public static final long DEFAULT_DISK_PADDING_PER_CONTAINER = 12L * Constants.GB;
+  public static final long DEFAULT_RAM_PADDING_PER_CONTAINER = 2L * Constants.GB;
+  public static final double DEFAULT_CPU_PADDING_PER_CONTAINER = 1;
+  public static final long MIN_RAM_PER_INSTANCE = 192L * Constants.MB;
+
+  // Use as a stub as default number value when getting config value
+  public static final String NOT_SPECIFIED_NUMBER_VALUE = "-1";
 
   protected TopologyAPI.Topology topology;
-  protected long stmgrRamDefault;
+
   protected long instanceRamDefault;
   protected double instanceCpuDefault;
   protected long instanceDiskDefault;
 
   @Override
   public void initialize(Config config, Config runtime) {
-    this.stmgrRamDefault = Context.stmgrRam(config);
+    this.topology = com.twitter.heron.spi.utils.Runtime.topology(runtime);
+
     this.instanceRamDefault = Context.instanceRam(config);
     this.instanceCpuDefault = Context.instanceCpu(config).doubleValue();
     this.instanceDiskDefault = Context.instanceDisk(config);
-    this.topology = Runtime.topology(runtime);
   }
 
   @Override
   public PackingPlan pack() {
-    Map<String, List<String>> containerInstancesMap = getBasePacking();
-    return fillInResource(containerInstancesMap);
+    // Get the instances' round-robin allocation
+    Map<String, List<String>> roundRobinAllocation = getRoundRobinAllocation();
+
+    // Get the ram map for every instance
+    Map<String, Map<String, Long>> instancesRamMap =
+        getInstancesRamMapInContainer(roundRobinAllocation);
+
+    long containerDiskInBytes = getContainerDiskHint(roundRobinAllocation);
+    double containerCpu = getContainerCpuHint(roundRobinAllocation);
+
+    // Align the ram to the maximal one
+    long containerRam = getLargestContainerRam(instancesRamMap);
+
+    // Construct the PackingPlan
+    Map<String, PackingPlan.ContainerPlan> containerPlanMap = new HashMap<>();
+
+    for (Map.Entry<String, List<String>> entry : roundRobinAllocation.entrySet()) {
+      String containerId = entry.getKey();
+      List<String> instanceList = entry.getValue();
+
+      // Calculate the resource required for single instance
+      Map<String, PackingPlan.InstancePlan> instancePlanMap = new HashMap<>();
+      for (String instanceId : instanceList) {
+        long instanceRam = instancesRamMap.get(containerId).get(instanceId);
+
+        // Currently not yet support disk or cpu config for different components,
+        // so just use the default value.
+        long instanceDisk = instanceDiskDefault;
+        double instanceCpu = instanceCpuDefault;
+
+        PackingPlan.Resource resource =
+            new PackingPlan.Resource(instanceCpu, instanceRam, instanceDisk);
+        PackingPlan.InstancePlan instancePlan =
+            new PackingPlan.InstancePlan(
+                instanceId,
+                getComponentName(instanceId),
+                resource);
+        // Insert it into the map
+        instancePlanMap.put(instanceId, instancePlan);
+      }
+
+      PackingPlan.Resource resource =
+          new PackingPlan.Resource(containerCpu, containerRam, containerDiskInBytes);
+      PackingPlan.ContainerPlan containerPlan =
+          new PackingPlan.ContainerPlan(containerId, instancePlanMap, resource);
+
+      containerPlanMap.put(containerId, containerPlan);
+    }
+
+    // Take the heron internal container into account
+    int totalContainer = containerPlanMap.size() + 1;
+    long topologyRam = totalContainer * containerRam;
+    long topologyDisk = totalContainer * containerDiskInBytes;
+    double topologyCpu = totalContainer * containerCpu;
+
+    PackingPlan.Resource resource = new PackingPlan.Resource(
+        topologyCpu, topologyRam, topologyDisk);
+
+    PackingPlan plan = new PackingPlan(topology.getId(), containerPlanMap, resource);
+
+    // Check whether it is a valid PackingPlan
+    if (!isValidPackingPlan(plan)) {
+      return null;
+    }
+    return plan;
   }
 
   @Override
   public void close() {
+
   }
 
-  private int getLargestContainerSize(Map<String, List<String>> packing) {
+  /**
+   * Calculate the ram required by any instance in the container
+   *
+   * @param allocation the allocation of instances in different container
+   * @return A map: (containerId -&gt; (instanceId -&gt; instanceRequiredRam))
+   */
+  protected Map<String, Map<String, Long>> getInstancesRamMapInContainer(
+      Map<String, List<String>> allocation) {
+    Map<String, Long> ramMap =
+        TopologyUtils.getComponentRamMapConfig(topology);
+
+    Map<String, Map<String, Long>> instancesRamMapInContainer = new HashMap<>();
+
+    for (Map.Entry<String, List<String>> entry : allocation.entrySet()) {
+      String containerId = entry.getKey();
+      Map<String, Long> ramInsideContainer = new HashMap<>();
+      instancesRamMapInContainer.put(containerId, ramInsideContainer);
+
+      // Calculate the actual value
+      long usedRam = 0;
+      for (String instanceId : entry.getValue()) {
+        String componentName = getComponentName(instanceId);
+        if (ramMap.containsKey(componentName)) {
+          long ram = ramMap.get(componentName);
+          ramInsideContainer.put(instanceId, ram);
+          usedRam += ram;
+        }
+      }
+
+      // Now we have calculated ram for instances specified in ComponentRamMap
+      // Then to calculate ram for the rest instances
+      long containerRamHint = getContainerRamHint(allocation);
+      int instancesAllocated = ramInsideContainer.size();
+      int instancesToAllocate = entry.getValue().size() - instancesAllocated;
+
+      if (instancesToAllocate != 0) {
+        // The ram map is partially set. We need to calculate ram for the rest
+
+        // We have different strategy depending on whether container ram is specified
+        // If container ram is specified
+        if (containerRamHint != Long.parseLong(NOT_SPECIFIED_NUMBER_VALUE)) {
+          // remove ram for heron internal process
+          long remainingRam = containerRamHint - DEFAULT_RAM_PADDING_PER_CONTAINER - usedRam;
+
+          // Split remaining ram evenly
+          long individualInstanceRam = remainingRam / instancesToAllocate;
+
+          // Put the results in instancesRam
+          for (String instanceId : entry.getValue()) {
+            if (!ramInsideContainer.containsKey(instanceId)) {
+              ramInsideContainer.put(instanceId, individualInstanceRam);
+            }
+          }
+        } else {
+          // If container ram is not specified
+          for (String instanceId : entry.getValue()) {
+            if (!ramInsideContainer.containsKey(instanceId)) {
+              ramInsideContainer.put(instanceId, instanceRamDefault);
+            }
+          }
+        }
+      }
+    }
+
+    return instancesRamMapInContainer;
+  }
+
+
+  /**
+   * Get the instances' allocation basing on round robin algorithm
+   *
+   * @return containerId -&gt; list of InstanceId belonging to this container
+   */
+  protected Map<String, List<String>> getRoundRobinAllocation() {
+    Map<String, List<String>> allocation = new HashMap<>();
+    int numContainer = TopologyUtils.getNumContainers(topology);
+    int totalInstance = TopologyUtils.getTotalInstance(topology);
+    if (numContainer > totalInstance) {
+      throw new RuntimeException("More containers allocated than instance.");
+    }
+
+    for (int i = 1; i <= numContainer; ++i) {
+      allocation.put(getContainerId(i), new ArrayList<String>());
+    }
+
+    int index = 1;
+    int globalTaskIndex = 1;
+    Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
+    for (String component : parallelismMap.keySet()) {
+      int numInstance = parallelismMap.get(component);
+      for (int i = 0; i < numInstance; ++i) {
+        allocation.
+            get(getContainerId(index)).
+            add(getInstanceId(index, component, globalTaskIndex, i));
+
+        index = (index == numContainer) ? 1 : index + 1;
+        globalTaskIndex++;
+      }
+    }
+    return allocation;
+  }
+
+  /**
+   * Get # of instances in the largest container
+   *
+   * @param allocation the instances' allocation
+   * @return # of instances in the largest container
+   */
+  protected int getLargestContainerSize(Map<String, List<String>> allocation) {
     int max = 0;
-    for (List<String> instances : packing.values()) {
+    for (List<String> instances : allocation.values()) {
       if (instances.size() > max) {
         max = instances.size();
       }
@@ -75,16 +290,13 @@ public class RoundRobinPacking implements IPacking {
   /**
    * Provide cpu per container.
    *
-   * @param packing packing output.
+   * @param allocation packing output.
    * @return cpu per container.
    */
-  public double getContainerCpuHint(Map<String, List<String>> packing) {
+  protected double getContainerCpuHint(Map<String, List<String>> allocation) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
-    double totalInstanceCpu = instanceCpuDefault * TopologyUtils.getTotalInstance(topology);
-    // TODO(nbhagat): Add 1 more cpu for metrics manager also.
-    // TODO(nbhagat): Use max cpu here. To get max use packing information.
     double defaultContainerCpu =
-        (float) (1 + totalInstanceCpu / TopologyUtils.getNumContainers(topology));
+        DEFAULT_CPU_PADDING_PER_CONTAINER + getLargestContainerSize(allocation);
 
     String cpuHint = TopologyUtils.getConfigWithDefault(
         topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_CPU_REQUESTED,
@@ -96,212 +308,94 @@ public class RoundRobinPacking implements IPacking {
   /**
    * Provide disk per container.
    *
-   * @param packing packing output.
+   * @param allocation packing output.
    * @return disk per container.
    */
-  public long getContainerDiskHint(Map<String, List<String>> packing) {
+  protected long getContainerDiskHint(Map<String, List<String>> allocation) {
     long defaultContainerDisk =
-        instanceDiskDefault * getLargestContainerSize(packing) + DEFAULT_DISK_PADDING;
+        instanceDiskDefault * getLargestContainerSize(allocation)
+            + DEFAULT_DISK_PADDING_PER_CONTAINER;
 
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
 
     String diskHint = TopologyUtils.getConfigWithDefault(
         topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_DISK_REQUESTED,
-            Long.toString(defaultContainerDisk));
+        Long.toString(defaultContainerDisk));
 
     return Long.parseLong(diskHint);
   }
 
   /**
-   * Provide default ram for instances of component whose Ram requirement is not specified.
+   * Provide ram per container.
    *
-   * @return default ram in bytes.
+   * @param allocation packing
+   * @return Container ram requirement
    */
-  public long getDefaultInstanceRam(Map<String, List<String>> packing) {
+  public long getContainerRamHint(Map<String, List<String>> allocation) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
 
-    String containerRam = TopologyUtils.getConfigWithDefault(
-        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED, "-1");
+    String ramHint = TopologyUtils.getConfigWithDefault(
+        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED,
+        NOT_SPECIFIED_NUMBER_VALUE);
 
-    long containerRamRequested = Long.parseLong(containerRam);
-    return getDefaultInstanceRam(
-        packing, topology, instanceRamDefault, stmgrRamDefault, containerRamRequested);
+    return Long.parseLong(ramHint);
   }
 
   /**
-   * Check if user has provided ram for some component. Use user provided ram mapping to override
-   * default ram assignment from config. Default ram assignment depends on if user has provided
-   * by uniformly sharing remaining container's requested ram between all instance. If container
-   * ram is not provided than default is set from config.
+   * Get the ram size capable for the container requiring largest ram
    *
-   * @param packing packing
-   * @return Container ram requirement
+   * @param instancesRamMapInContainer the ram map for any instance in container
+   * (containerId -&gt; (instanceId -&gt; instanceRequiredRam))
+   * @return the ram size
    */
-  public long getContainerRamHint(Map<String, List<String>> packing) {
-    List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
+  protected long getLargestContainerRam(Map<String, Map<String, Long>> instancesRamMapInContainer) {
+    long maxContainerRam = 0;
+    for (Map<String, Long> map : instancesRamMapInContainer.values()) {
+      long usedRam = 0;
+      for (long ram : map.values()) {
+        usedRam += ram;
+      }
+      usedRam += DEFAULT_RAM_PADDING_PER_CONTAINER;
+      maxContainerRam = Math.max(maxContainerRam, usedRam);
+    }
 
-    // Get RAM mapping with default instance ram value.
-    Map<String, Long> ramMap = TopologyUtils.getComponentRamMap(
-        topology, getDefaultInstanceRam(packing));
-    // Find container with maximum ram.
-    long maxRamRequired = 0;
-    for (List<String> instances : packing.values()) {
-      long ramRequired = 0;
-      for (String instanceId : instances) {
-        String componentName = getComponentName(instanceId);
-        ramRequired += ramMap.get(componentName);
-      }
-      if (ramRequired > maxRamRequired) {
-        maxRamRequired = ramRequired;
+    return maxContainerRam;
+  }
+
+  /**
+   * Check whether the PackingPlan generated is valid
+   *
+   * @param plan The PackingPlan to check
+   * @return true if it is valid. Otherwise return false
+   */
+  protected boolean isValidPackingPlan(PackingPlan plan) {
+    for (PackingPlan.ContainerPlan containerPlan : plan.containers.values()) {
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.instances.values()) {
+        // Safe check
+        if (instancePlan.resource.ram < MIN_RAM_PER_INSTANCE) {
+          LOG.severe(String.format(
+              "Require at least %dMB ram. Given on %d MB",
+              MIN_RAM_PER_INSTANCE / Constants.MB, instancePlan.resource.ram / Constants.MB));
+
+          return false;
+        }
       }
     }
-    long defaultRequest = maxRamRequired + stmgrRamDefault;
-    long containerRamRequested = Long.parseLong(TopologyUtils.getConfigWithDefault(
-        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED,
-        "" + defaultRequest));
-    if (defaultRequest > containerRamRequested) {
-      LOG.log(Level.SEVERE,
-          "Container is set to value lower than computed defaults. This could be due"
-          + " to incorrect RAM map provided for components.");
-    }
-    return containerRamRequested;
+
+    return true;
   }
 
 
-  public int getNumContainers() {
-    List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
-    return Integer.parseInt(TopologyUtils.getConfigWithDefault(
-        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_STMGRS, "1").trim());
-  }
-
-  public String getContainerId(int index) {
+  public static String getContainerId(int index) {
     return "" + index;
   }
 
-  public String getInstanceId(
+  public static String getInstanceId(
       int containerIdx, String componentName, int instanceIdx, int componentIdx) {
     return String.format("%d:%s:%d:%d", containerIdx, componentName, instanceIdx, componentIdx);
   }
 
-  /**
-   * Fill in the resources for the base packing of instances into containers
-   */
-  public PackingPlan fillInResource(Map<String, List<String>> basePacking) {
-    Map<String, Long> ramMap = TopologyUtils.getComponentRamMap(
-        topology, getDefaultInstanceRam(basePacking));
-
-    Map<String, PackingPlan.ContainerPlan> containerPlanMap = new HashMap<>();
-
-    long containerRam = getContainerRamHint(basePacking);
-    long containerDisk = getContainerDiskHint(basePacking);
-    double containerCpu = getContainerCpuHint(basePacking);
-
-    for (Map.Entry<String, List<String>> entry : basePacking.entrySet()) {
-      String containerId = entry.getKey();
-      List<String> instanceList = entry.getValue();
-
-      Map<String, PackingPlan.InstancePlan> instancePlanMap = new HashMap<>();
-
-      for (String instanceId : instanceList) {
-        long instanceRam = ramMap.get(getComponentName(instanceId));
-        long instanceDisk = 1 * Constants.GB;  // Not used in aurora.
-
-        PackingPlan.Resource resource =
-            new PackingPlan.Resource(instanceCpuDefault, instanceRam, instanceDisk);
-        PackingPlan.InstancePlan instancePlan =
-            new PackingPlan.InstancePlan(instanceId, getComponentName(instanceId), resource);
-        instancePlanMap.put(instanceId, instancePlan);
-      }
-
-      PackingPlan.Resource resource =
-          new PackingPlan.Resource(containerCpu, containerRam, containerDisk);
-      PackingPlan.ContainerPlan containerPlan =
-          new PackingPlan.ContainerPlan(containerId, instancePlanMap, resource);
-
-      containerPlanMap.put(containerId, containerPlan);
-    }
-
-    // We also need to take TMASTER container into account
-    // TODO(mfu): Figure out a better definition
-    int totalContainer = containerPlanMap.size() + 1;
-    long topologyRam = totalContainer * containerRam;
-    long topologyDisk = totalContainer * containerDisk;
-    double topologyCpu = totalContainer * containerCpu;
-
-    PackingPlan.Resource resource = new PackingPlan.Resource(
-        topologyCpu, topologyRam, topologyDisk);
-    return new PackingPlan(topology.getId(), containerPlanMap, resource);
-  }
-
-  public String getComponentName(String instanceId) {
+  public static String getComponentName(String instanceId) {
     return instanceId.split(":")[1];
-  }
-
-  // Return: containerId -> list of InstanceId belonging to this container
-  private Map<String, List<String>> getBasePacking() {
-    Map<String, List<String>> packing = new HashMap<>();
-    int numContainer = getNumContainers();
-    int totalInstance = TopologyUtils.getTotalInstance(topology);
-    if (numContainer > totalInstance) {
-      throw new RuntimeException("More containers allocated than instance. Bailing out.");
-    }
-
-    for (int i = 1; i <= numContainer; ++i) {
-      packing.put(getContainerId(i), new ArrayList<String>());
-    }
-    int index = 1;
-    int globalTaskIndex = 1;
-    Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
-    for (String component : parallelismMap.keySet()) {
-      int numInstance = parallelismMap.get(component);
-      for (int i = 0; i < numInstance; ++i) {
-        packing.get(getContainerId(index)).add(getInstanceId(index, component, globalTaskIndex, i));
-        index = (index == numContainer) ? 1 : index + 1;
-        globalTaskIndex++;
-      }
-    }
-    return packing;
-  }
-
-  /**
-   * Provide default ram for instances of component whose Ram requirement is not specified.
-   *
-   * @param instanceRamDefaultValue Default value of instance ram. If no information is specified,
-   * This value will be used.
-   * @param stmgrRam Ram reserved for stream manager
-   * @param containerRamRequested If Container notion is valid then pass that, -1 otherwise.
-   * @return default ram in bytes.
-   */
-  public long getDefaultInstanceRam(Map<String, List<String>> packing,
-                                    TopologyAPI.Topology aTopology,
-                                    long instanceRamDefaultValue,
-                                    long stmgrRam,
-                                    long containerRamRequested) {
-    long defaultInstanceRam = instanceRamDefaultValue;
-
-    if (containerRamRequested != -1) {
-      Map<String, Long> ramMap = TopologyUtils.getComponentRamMap(aTopology, -1);
-      // Find the minimum possible ram that can be fit in this packing.
-      long minInstanceRam = Long.MAX_VALUE;
-      for (List<String> instances : packing.values()) {
-        Long ramRemaining = containerRamRequested - stmgrRam;  // Remove stmgr.
-        int defaultInstance = 0;
-        for (String id : instances) {
-          if (-1 != ramMap.get(getComponentName(id))) {
-            ramRemaining -= ramMap.get(getComponentName(id));  // Remove known ram
-          } else {
-            defaultInstance++;
-          }
-        }
-        // Evenly distribute remaining ram.
-        if (defaultInstance != 0 && minInstanceRam > (ramRemaining / defaultInstance)) {
-          minInstanceRam = ramRemaining / defaultInstance;
-        }
-      }
-      if (minInstanceRam != Integer.MAX_VALUE) {
-        defaultInstanceRam = minInstanceRam;
-      }
-    }
-    return defaultInstanceRam;
   }
 }

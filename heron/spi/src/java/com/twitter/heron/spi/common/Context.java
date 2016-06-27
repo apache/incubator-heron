@@ -47,8 +47,8 @@ public class Context {
     return cfg.getStringValue(ConfigKeys.get("BUILD_TIME"));
   }
 
-  public static String buildTimeStamp(Config cfg) {
-    return cfg.getStringValue(ConfigKeys.get("BUILD_TIMESTAMP"));
+  public static Long buildTimeStamp(Config cfg) {
+    return cfg.getLongValue(ConfigKeys.get("BUILD_TIMESTAMP"));
   }
 
   public static String buildHost(Config cfg) {
@@ -273,6 +273,10 @@ public class Context {
 
   public static String packingSandboxFile(Config cfg) {
     return cfg.getStringValue(Keys.packingSandboxFile());
+  }
+
+  public static String overrideSandboxFile(Config cfg) {
+    return cfg.getStringValue(Keys.overrideSandboxFile());
   }
 
   public static String schedulerSandboxFile(Config cfg) {

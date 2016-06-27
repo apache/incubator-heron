@@ -136,7 +136,7 @@ public class AuroraScheduler implements IScheduler {
     auroraProperties.put("TOPOLOGY_ID", topology.getId());
     auroraProperties.put("TOPOLOGY_DEFINITION_FILE",
         FileUtils.getBaseName(Context.topologyDefinitionFile(config)));
-    auroraProperties.put("INSTANCE_DISTRIBUTION", packing.getInstanceDistribution());
+    auroraProperties.put("INSTANCE_DISTRIBUTION", Runtime.instanceDistribution(runtime));
     auroraProperties.put("STATEMGR_CONNECTION_STRING",
         Context.stateManagerConnectionString(config));
     auroraProperties.put("STATEMGR_ROOT_PATH", Context.stateManagerRootPath(config));
@@ -150,9 +150,7 @@ public class AuroraScheduler implements IScheduler {
         TopologyUtils.makeClassPath(topology, Context.topologyJarFile(config)));
 
     auroraProperties.put("SANDBOX_SYSTEM_YAML", Context.systemConfigSandboxFile(config));
-    auroraProperties.put("COMPONENT_RAMMAP",
-        TopologyUtils.formatRamMap(
-            TopologyUtils.getComponentRamMap(topology, Context.instanceRam(config))));
+    auroraProperties.put("COMPONENT_RAMMAP", Runtime.componentRamMap(runtime));
     auroraProperties.put("COMPONENT_JVM_OPTS_IN_BASE64",
         formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
     auroraProperties.put("TOPOLOGY_PACKAGE_TYPE", Context.topologyPackageType(config));

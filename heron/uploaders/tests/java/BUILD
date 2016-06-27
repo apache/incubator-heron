@@ -1,8 +1,8 @@
 load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 common_deps_files = [
-    "//3rdparty/java:powermock",
-    "@commons-io//jar",
+    "//third_party/java:powermock",
+    "@commons_io_commons_io//jar",
     "@bazel_tools//third_party:mockito",
     "@bazel_tools//third_party:junit4",
 ]
@@ -32,14 +32,14 @@ java_library(
 )
 
 java_test(
-    name = "local-filesystem-config_unittest",
+    name = "LocalFileSystemConfigTest",
     srcs = glob(["**/localfs/LocalFileSystemConfigTest.java"]),
     deps = localfs_deps_files,
     size = "small",
 )
 
 java_test(
-    name = "local-filesystem-uploader_unittest",
+    name = "LocalFileSystemUploaderTest",
     srcs = glob(["**/localfs/LocalFileSystemUploaderTest.java"]),
     deps = localfs_deps_files,
     size = "small",
@@ -47,17 +47,17 @@ java_test(
 )
 
 java_test(
-    name = "s3-uploader_unittest",
+    name = "S3UploaderTest",
     srcs = glob(["**/s3/S3UploaderTest.java"]),
     size = "small",
     deps = common_deps_files + spi_deps_files + [
         "//heron/uploaders/src/java:s3-uploader-java",
-        "//3rdparty/java:aws-java-sdk"
+        "//third_party/java:aws-java-sdk"
     ],
 )
 
 java_test(
-    name = "hadoop-uploader_unittest",
+    name = "HdfsUploaderTest",
     srcs = glob(["**/hdfs/HdfsUploaderTest.java"]),
     deps = hdfs_deps_files,
     size = "small",
