@@ -361,7 +361,7 @@ filegroup(
 
 filegroup(
     name = "hspi",
-    srcs = ["//heron/api/src/java:heron-spi"],
+    srcs = ["//heron/spi/src/java:heron-spi"],
 )
 
 filegroup(
