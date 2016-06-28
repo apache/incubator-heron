@@ -411,13 +411,15 @@ genrule(
     name = "generate-api-launcher",
     srcs = [
         ":release.yaml",
-        "//scripts/packages:api-template-bin.sh"
+        "//scripts/packages:api-template-bin.sh",
+        "//scripts/packages:bin-common.sh"
     ],
     outs = ["api_launcher_bin.sh"],
     cmd = """
         release_info="$$(cat $(location :release.yaml))"
+        bin_common="$$(cat $(location //scripts/packages:bin-common.sh))"
         template="$$(cat $(location //scripts/packages:api-template-bin.sh))"
-        echo "$${template//%release_info%/$${release_info}}" >$@
+        echo "$${bin_common}\n\n$${template//%release_info%/$${release_info}}" >$@
         """,
 )
 
@@ -425,13 +427,15 @@ genrule(
     name = "generate-client-launcher",
     srcs = [
         ":release.yaml",
-        "//scripts/packages:client-template-bin.sh"
+        "//scripts/packages:client-template-bin.sh",
+        "//scripts/packages:bin-common.sh"
     ],
     outs = ["client_launcher_bin.sh"],
     cmd = """
         release_info="$$(cat $(location :release.yaml))"
+        bin_common="$$(cat $(location //scripts/packages:bin-common.sh))"
         template="$$(cat $(location //scripts/packages:client-template-bin.sh))"
-        echo "$${template//%release_info%/$${release_info}}" >$@
+        echo "$${bin_common}\n\n$${template//%release_info%/$${release_info}}" >$@
         """,
 )
 
@@ -439,13 +443,15 @@ genrule(
     name = "generate-tools-launcher",
     srcs = [
         ":release.yaml",
-        "//scripts/packages:tools-template-bin.sh"
+        "//scripts/packages:tools-template-bin.sh",
+        "//scripts/packages:bin-common.sh"
     ],
     outs = ["tools_launcher_bin.sh"],
     cmd = """
         release_info="$$(cat $(location :release.yaml))"
+        bin_common="$$(cat $(location //scripts/packages:bin_common.sh))"
         template="$$(cat $(location //scripts/packages:tools-template-bin.sh))"
-        echo "$${template//%release_info%/$${release_info}}" >$@
+        echo "$${bin_common}\n\n$${template//%release_info%/$${release_info}}" >$@
         """,
 )
 
