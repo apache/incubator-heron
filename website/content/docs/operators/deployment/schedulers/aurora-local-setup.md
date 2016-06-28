@@ -254,7 +254,7 @@ Now that everything is working you need to perform one last step to be able to s
 ## Associating new Aurora cluster into Heron UI
 
 Heron UI uses information that is gets from the heron tracker when displaying the information in the heron UI interface.
-So in-order to allow the Heron UI to show Aurora cluster information we need to modify configuration of the Heron tracker 
+So in-order to allow the Heron UI to show Aurora cluster information you need to modify configuration of the Heron tracker 
 so that it can identify the Aurora Cluster. 
 
 Heron Tracker configurations are located at `/home/vagrant/.herontools/conf` the configuration file is named `heron_tracker.yaml`.
@@ -275,9 +275,9 @@ statemgrs:
     tunnelhost: "localhost"
 ```
 
-You can see that there already two entries. Before we had to create paths in Zookeeper for `/heron/topologies` this is
-because the entry named `localzk` in this file. If we remove this we will not need to create that path in Zookeeper. 
-Not all we have to is to add a new entry for the aurora cluster into this file ( we will comment out localzk ). 
+You can see that there already two entries. Before, you had to create paths in Zookeeper for `/heron/topologies` this is
+because the entry named `localzk` in this file. If you remove this you will not need to create that path in Zookeeper. 
+Now all you have to is to add a new entry for the aurora cluster into this file ( lets comment out `localzk` ). 
 Then the file would look like below.
 
 ```yaml
