@@ -28,7 +28,6 @@ import com.google.protobuf.Message;
 
 import com.twitter.heron.common.basics.ISelectHandler;
 import com.twitter.heron.common.basics.NIOLooper;
-import com.twitter.heron.proto.system.Common;
 
 /**
  * Implements this class could handle some following socket related behaviors:
@@ -128,7 +127,7 @@ public abstract class HeronClient implements ISelectHandler {
       LOG.log(Level.SEVERE, "Error connecting to remote endpoint: " + endpoint, e);
       Runnable r = new Runnable() {
         public void run() {
-          onConnect(Common.StatusCode.CONNECT_ERROR);
+          onConnect(StatusCode.CONNECT_ERROR);
         }
       };
       nioLooper.registerTimerEventInSeconds(0, r);
