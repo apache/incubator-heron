@@ -242,7 +242,7 @@ Now you should be able to see the topology in the Aurora UI ( http://192.168.33.
 
 
 below is a brief explanation on some of the important parameters that are used in this command. the first
-parameter `devcluster/pulasthi/devel` defines cluster, role and env ( env can have values `prod | devel | test | staging` ).
+parameter `devcluster/heronuser/devel` defines cluster, role and env ( env can have values `prod | devel | test | staging` ).
 The cluster is the name of the aurora cluster which is `devcluster` in our case. You can give something like your
 name for the role name and for env you need to choose from one of the env values. 
 
