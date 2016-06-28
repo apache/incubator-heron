@@ -2,26 +2,24 @@
 
 ## To compile source using a docker container:
 ```
-docker/build-artifacts.sh <platform> <version_string> [source-tarball] <output-directory>
-# e.g.  docker/build-artifacts.sh ubuntu14.04 testbuild ~/heron-release
+./docker/build-artifacts.sh <platform> <version_string> [source-tarball] <output-directory>
+# e.g.  ./docker/build-artifacts.sh ubuntu14.04 testbuild ~/heron-release
 ```
 
 ## To build docker containers for running heron daemons:
 ```
-docker/build-docker.sh <platform> <version_string> <output-directory>
-# e.g. docker/build-docker.sh ubuntu14.04 testbuild ~/heron-release
+./docker/build-docker.sh <platform> <version_string> <output-directory>
+# e.g. ./docker/build-docker.sh ubuntu14.04 testbuild ~/heron-release
 ```
 
 ### To run docker containers for local dev work:
 ```
-cd docker
-./start-docker.sh heron:<version_string>-<platform>
-# e.g. docker/start-docker.sh heron:testbuild-ubuntu14.04
+./docker/start-docker.sh heron:<version_string>-<platform>
+# e.g. ./docker/start-docker.sh heron:testbuild-ubuntu14.04
 ```
 ### To stop docker containers for local dev work:
 ```
-cd docker 
-docker-compose stop
+./docker/stop-docker.sh
 ```
 ### To submit/activate/kill a topology:
 ```
@@ -32,3 +30,6 @@ docker-compose stop
 #To kill a topology:
         docker exec -it heron_executor_1 heron kill local ExclamationTopology
 ```
+## To access heron ui:
+* determine the IP of your docker host
+* navigate to http://<your docker host>:8889 in your web browser

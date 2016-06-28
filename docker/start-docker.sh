@@ -9,7 +9,7 @@ echo "    using image $HERON_IMAGE..."
 echo "(only sample topologies will be available for submission; mount additional volumes to heron-executor to make additional topologies available for submission)"
 echo "  "
 
-docker-compose -p heron up -d
+docker-compose -f docker/docker-compose.yml -p heron up -d
 
 echo "Example topologies are available in /usr/local/heron/examples/heron-examples.jar"
 echo "  "
