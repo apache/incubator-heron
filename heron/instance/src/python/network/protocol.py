@@ -81,6 +81,9 @@ class HeronProtocol:
 
   @staticmethod
   def decode_packet(packet):
+    if not packet.is_complete:
+      raise RuntimeError("In decode_packet(): Packet corrupted")
+
     data = packet.data
 
     len_typename = HeronProtocol.unpack_int(data[:4])
@@ -108,6 +111,22 @@ class IncomingPacket:
     # for debugging identification purposes
     self.id = random.getrandbits(8)
 
+  @staticmethod
+  def create_packet(header, data):
+    packet = IncomingPacket()
+    packet.header = header
+    packet.data = data
+
+    if len(header) == HeronProtocol.HEADER_SIZE:
+      packet.is_header_read = True
+      if len(data) == packet.get_datasize():
+        packet.is_complete = True
+
+    return packet
+
+  def convert_to_raw(self):
+    return self.header + self.data
+
   def get_datasize(self):
     if not self.is_header_read:
       return -1
@@ -122,7 +141,7 @@ class IncomingPacket:
         if len(self.header) == HeronProtocol.HEADER_SIZE:
           self.is_header_read = True
         else:
-          Log.debug("Header read incomplete")
+          Log.debug("Header read incomplete: " + str(len(self.header)))
           return
 
       if self.is_header_read and not self.is_complete:
@@ -139,7 +158,7 @@ class IncomingPacket:
       else:
         # Fatal error
         Log.debug("Fatal error")
-        raise
+        raise RuntimeError("Fatal error occured in IncomingPacket.read()")
 
   def __str__(self):
     return "Packet ID: " + str(self.id) + ", header: " + \

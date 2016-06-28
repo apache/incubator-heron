@@ -117,6 +117,7 @@ class HeronClient(asyncore.dispatcher):
 
   def handle_packet(self, packet):
     # TODO: check if it has REQID: if yes, handle response message -- call on_reseponse()
+    # only called when packet.is_complete is True
     # otherwise, it's just an message -- call on_incoming_message()
     typename, reqid, serialized_msg = HeronProtocol.decode_packet(packet)
     if self.context_map.has_key(reqid):
