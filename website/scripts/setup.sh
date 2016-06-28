@@ -1,6 +1,7 @@
 #!/bin/bash
 
-source ../scripts/detect_os_type.sh
+DIR=`dirname $0`
+source ${DIR}/../../scripts/detect_os_type.sh
 
 PLATFORM=`platform`
 if [ $PLATFORM = darwin ]; then

@@ -11,7 +11,8 @@ CORE_PKG="file://`pwd`/bazel-bin/scripts/packages/heron-core.tar.gz"
 set -e
 
 # building tar packages
-source ./detect_os_type.sh
+DIR=`dirname $0`
+source ${DIR}/detect_os_type.sh
 bazel run --config=`platform` -- scripts/packages:heron-client-install.sh --user
 bazel build --config=`platform` {heron/...,scripts/packages:tarpkgs,integration-test/src/...}
 

@@ -23,7 +23,8 @@ function query() {
 
 set +e
 # Build everything
-source ./detect_os_type.sh
+DIR=`dirname $0`
+source ${DIR}/detect_os_type.sh
 bazel build --config=`platform` {heron,integration-test,tools/java}/...
 result=$?
 if [ "${result}" -eq "0" ] ; then
