@@ -136,7 +136,7 @@ java_library(
         ":proto_tuple_java",
         ":proto_stmgr_java",
         ":proto_networktests_java",
-        "@protobuf-java//jar",
+        "@com_google_protobuf_protobuf_java//jar",
     ],
     srcs = [
         "Empty.java",
@@ -162,7 +162,7 @@ java_library(
         ":proto_tuple_java",
         ":proto_stmgr_java",
         ":proto_networktests_java",
-        "//3rdparty/java:protobuf-java-neverlink",
+        "//third_party/java:protobuf-java-neverlink",
     ],
 )
 
@@ -225,7 +225,7 @@ cc_library(
         ":proto_topology_cc",
         ":proto_stats_cc",
         ":proto_common_cc",
-        "//3rdparty/protobuf:protobuf-cxx",
+        "//third_party/protobuf:protobuf-cxx",
     ],
     linkstatic = 1,
 )

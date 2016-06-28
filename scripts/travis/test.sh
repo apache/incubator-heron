@@ -10,13 +10,13 @@ source ${DIR}/common.sh
 # build test related jar
 T="heron build integration-test"
 start_timer "$T"
-bazel --bazelrc=tools/travis-ci/bazel.rc build integration-test/src/...
+python ${DIR}/save-logs.py "heron_build_integration_test.txt" bazel --bazelrc=tools/travis-ci/bazel.rc build integration-test/src/...
 end_timer "$T"
 
 # install client
 T="heron client install"
 start_timer "$T"
-bazel --bazelrc=tools/travis-ci/bazel.rc run -- scripts/packages:heron-client-install.sh --user
+python ${DIR}/save-logs.py "heron_client_install.txt" bazel --bazelrc=tools/travis-ci/bazel.rc run -- scripts/packages:heron-client-install.sh --user
 end_timer "$T"
 
 # run local integration test
@@ -36,7 +36,7 @@ trap "kill -9 $http_server_id" SIGINT SIGTERM EXIT
   -hc heron -tj bazel-genfiles/integration-test/src/java/integration-tests.jar \
   -rh localhost -rp 8080\
   -tp integration-test/src/java/com/twitter/heron/integration_test/topology/ \
-  -cl local -rl heron-staging -ev devel -pi 'file://${HERON_DIST}/heron-core.tar.gz'
+  -cl local -rl heron-staging -ev devel
 end_timer "$T"
 
 print_timer_summary

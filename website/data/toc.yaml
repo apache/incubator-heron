@@ -9,6 +9,8 @@ sections:
         url: /docs/getting-started-troubleshooting
   - name: Heron Concepts
     sublinks:
+      - name: Heron Design Goals
+        url: /docs/concepts/design-goals
       - name: Heron Topology
         url: /docs/concepts/topologies
       - name: Heron Architecture

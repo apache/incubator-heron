@@ -33,6 +33,11 @@ filegroup(
 )
 
 filegroup(
+    name = "conf-yarn-yaml",
+    srcs = glob(["conf/yarn/*"]),
+)
+
+filegroup(
     name = "conf-local-heron-internals",
     srcs = ["conf/local/heron_internals.yaml"],
 )

@@ -1,0 +1,5 @@
+# uploader class for transferring the topology jar/tar files to storage
+heron.class.uploader:                            com.twitter.heron.uploader.NullUploader
+
+# name of the directory to upload topologies for local file system uploader
+#heron.uploader.localfs.file.system.directory:    ${HOME}/.herondata/repository/topologies/${CLUSTER}/${ROLE}/${TOPOLOGY} 
