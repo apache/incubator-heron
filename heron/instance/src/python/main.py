@@ -37,7 +37,7 @@ def main():
   sample_instance.info.MergeFrom(instance_info)
 
 
-  client = StmgrClient("localhost", 1234, "topology--name", "topology--id",
+  client = StmgrClient("localhost", 8080, "topology--name", "topology--id",
                        sample_instance, None, None, None)
   try:
     # try to establish a connection with localhost:1234

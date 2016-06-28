@@ -1,0 +1,172 @@
+# Copyright 2016 Twitter. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Implementation of Heron's application level protocol for Python
+# Hugely referenced from com.twitter.heron.common.network
+import struct
+import random
+import socket
+
+from heron.instance.src.python.utils import Log
+from google.protobuf.message import Message
+
+
+class HeronProtocol:
+  # TODO: check endian
+  INT_PACK_FMT = ">I"
+  HEADER_SIZE = 4
+
+  @staticmethod
+  def pack_int(i):
+    return struct.pack(HeronProtocol.INT_PACK_FMT, i)
+
+  @staticmethod
+  def unpack_int(i):
+    return struct.unpack(HeronProtocol.INT_PACK_FMT, i)[0]
+
+  @staticmethod
+  def get_size_to_pack_string(string):
+    return 4 + len(string)
+
+  @staticmethod
+  def get_size_to_pack_message(serialized_msg):
+    return 4 + len(serialized_msg)
+
+  @staticmethod
+  def get_outgoing_packet(reqid, message):
+    assert message.IsInitialized()
+    packet = ""
+
+    # calculate the totla size of the packet incl. header
+    typename = message.DESCRIPTOR.full_name
+
+    serialized_msg = message.SerializeToString()
+
+    datasize = HeronProtocol.get_size_to_pack_string(typename) + \
+               REQID.REQID_SIZE + HeronProtocol.get_size_to_pack_message(serialized_msg)
+    Log.debug("Outgoing datasize: " + str(datasize))
+
+    # first write out how much data is there as the header
+    packet += HeronProtocol.pack_int(datasize)
+
+    # next write the type string
+    packet += HeronProtocol.pack_int(len(typename))
+    packet += bytearray(typename)
+
+    # reqid
+    packet += reqid.pack()
+
+    # add the proto
+    packet += HeronProtocol.pack_int(HeronProtocol.get_size_to_pack_message(serialized_msg))
+    packet += serialized_msg
+    return packet
+
+  @staticmethod
+  def read_new_packet(dispatcher):
+    packet = IncomingPacket()
+    packet.read(dispatcher)
+    return packet
+
+  @staticmethod
+  def decode_packet(packet):
+    data = packet.data
+
+    len_typename = HeronProtocol.unpack_int(data[:4])
+    data = data[4:]
+
+    typename = data[:len_typename]
+    data = data[len_typename:]
+
+    reqid = REQID.unpack(data[:REQID.REQID_SIZE])
+    data = data[REQID.REQID_SIZE:]
+
+    len_msg = HeronProtocol.unpack_int(data[:4])
+    data = data[4:]
+
+    serialized_msg = data[:len_msg]
+
+    return typename, reqid, serialized_msg
+
+class IncomingPacket:
+  def __init__(self):
+    self.header = ''
+    self.data = ''
+    self.is_header_read = False
+    self.is_complete = False
+    self.id = random.getrandbits(8)
+
+  def get_datasize(self):
+    if not self.is_header_read:
+      return -1
+    return HeronProtocol.unpack_int(self.header)
+
+  def read(self, dispatcher):
+    try:
+      if not self.is_header_read:
+        # try reading header
+        to_read = HeronProtocol.HEADER_SIZE - len(self.header)
+        self.header += dispatcher.recv(to_read)
+        if len(self.header) == HeronProtocol.HEADER_SIZE:
+          self.is_header_read = True
+        else:
+          Log.debug("Header read incomplete")
+          return
+
+      if self.is_header_read and not self.is_complete:
+        # try reading data
+        to_read = self.get_datasize() - len(self.data)
+        self.data += dispatcher.recv(to_read)
+        if len(self.data) == self.get_datasize():
+          self.is_complete = True
+    except socket.error as e:
+      if e.errno == socket.errno.EAGAIN or e.errno == socket.errno.EWOULDBLOCK:
+        # Try again later -> call continue_read later
+        Log.debug("Try again error")
+        pass
+      else:
+        # Fatal error
+        Log.debug("Fatal error")
+        raise
+
+  def __str__(self):
+    return "Packet ID: " + str(self.id) + ", header: " + \
+           repr(self.is_header_read) + ", complete: " + repr(self.is_complete)
+
+
+class REQID:
+  REQID_SIZE = 32
+
+  def __init__(self, data_bytes):
+    self.bytes = data_bytes
+
+  @staticmethod
+  def generate():
+    data_bytes = bytearray(random.getrandbits(8) for i in range (REQID.REQID_SIZE))
+    return REQID(data_bytes)
+
+  def pack(self):
+    return self.bytes
+
+  @staticmethod
+  def unpack(raw_data):
+    return REQID(bytearray(raw_data))
+
+  def __eq__(self, another):
+    return hasattr(another, 'bytes') and self.bytes == another.bytes
+
+  def __hash__(self):
+    return hash(self.__str__())
+
+  def __str__(self):
+    return ''.join([str(i) for i in list(self.bytes)])

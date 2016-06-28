@@ -48,4 +48,4 @@ class StmgrClient(HeronClient):
     request.topology_name = self.topology_name
     request.topology_id = self.topology_id
 
-    self.send_request(request, None, None, 10)
+    self.send_request(request, "Context", stmgr_pb2.NewInstanceAssignmentMessage(), 10)

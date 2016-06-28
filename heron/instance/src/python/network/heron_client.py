@@ -19,7 +19,7 @@ import socket
 
 from abc import abstractmethod
 from google.protobuf.message import Message
-from heron_protocol import get_outgoing_packet, REQID
+from protocol import HeronProtocol, REQID, IncomingPacket
 from heron.instance.src.python.utils import Log
 
 class HeronClient(asyncore.dispatcher):
@@ -29,10 +29,11 @@ class HeronClient(asyncore.dispatcher):
     self.hostname = hostname
     self.port = int(port)
     self.out_buffer = ''
-    self.in_buffer = ''
     # name to message.Message
-    self.message_map = {}
-    self.response_message_map = {}
+    self.registered_message_map = dict()
+    self.response_message_map = dict()
+    self.context_map = dict()
+    self.incomplete_pkt = None
 
   ##################################
   # asyncore.dispatcher override
@@ -49,12 +50,26 @@ class HeronClient(asyncore.dispatcher):
 
   # read bytes stream from socket and convert them into a list of IncomingPacket
   def handle_read(self):
-    # TODO: handle_read -- Incoming packet and stuff
-    bytes_read = 0
-    num_pkts_read = 0
-    pkt_list = []
+    # TODO: currently only reads one packet
 
+    try:
+      if self.incomplete_pkt is None:
+        # incomplete packet doesn't exist
+        pkt = HeronProtocol.read_new_packet(self)
+      else:
+        # continue reading into the incomplete packet
+        Log.debug("Continue reading")
+        pkt = self.incomplete_pkt
+        pkt.read(self)
 
+      if pkt.is_complete:
+        self.incomplete_pkt = None
+        self.handle_packet(pkt)
+      else:
+        Log.debug("In handle_read(): Not yet complete")
+        self.incomplete_pkt = pkt
+    except:
+      Log.debug("Exception!")
 
   def handle_write(self):
     sent = self.send(self.out_buffer)
@@ -82,17 +97,18 @@ class HeronClient(asyncore.dispatcher):
   # Register the protobuf Message's name with protobuf Message
   def register_on_message(self, message):
     Log.debug("In register_on_message(): " + message.DESCRIPTOR.full_name)
-    self.message_map[message.DESCRIPTOR.full_name] = message
+    self.registered_message_map[message.DESCRIPTOR.full_name] = message
 
   def send_request(self, request, context, response_type, timeout_sec):
     # TODO: send request and implement timeout handler
-    Log.debug("In send_request()")
     # generates a unique request id
     reqid = REQID.generate()
+    Log.debug("In send_request(): " + str(reqid))
     # register response message type
     self.response_message_map[reqid] = response_type
+    self.context_map[reqid] = context
 
-    pkt = get_outgoing_packet(reqid, request)
+    pkt = HeronProtocol.get_outgoing_packet(reqid, request)
     self.send_packet(pkt)
 
   def send_message(self):
@@ -102,10 +118,19 @@ class HeronClient(asyncore.dispatcher):
   def handle_timeout(self):
     pass
 
-  def handle_packet(self):
+  def handle_packet(self, packet):
     # TODO: check if it has REQID: if yes, handle response message -- call on_reseponse()
     # otherwise, it's just an message -- call on_incoming_message()
-    pass
+    typename, reqid, serialized_msg = HeronProtocol.decode_packet(packet)
+    if self.context_map.has_key(reqid):
+      # this incoming packet has the response of a request
+      context = self.context_map.pop(reqid)
+      response_msg = self.response_message_map.pop(reqid)
+
+      response_msg.ParseFromString(serialized_msg)
+
+      Log.debug("Received response: \n" + response_msg.__str__())
+
 
   def send_packet(self, pkt):
     self.out_buffer += pkt
