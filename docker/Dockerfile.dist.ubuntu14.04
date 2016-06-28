@@ -2,16 +2,16 @@ FROM ubuntu:14.04
 
 RUN apt-get update && apt-get -y install \
       curl \
-      libssl-dev \
       git \
+      libssl-dev \
       libtool \
       libunwind8 \
       libunwind-setjmp0-dev \
       python \
       software-properties-common \
-      zip \
       unzip \
-      wget
+      wget \
+      zip
 
 RUN \
   echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
