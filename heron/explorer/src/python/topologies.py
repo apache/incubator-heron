@@ -33,7 +33,7 @@ def create_parser(subparsers):
     'topologies',
     help='Show running topologies',
     usage="%(prog)s [options]",
-    add_help=False)
+    add_help=True)
   args.add_cluster_role_env(parser)
   parser.set_defaults(subcommand='topologies')
   return subparsers
@@ -151,4 +151,5 @@ def run(command, parser, cl_args, unknown_args):
   elif len(location) == 3:
     return show_cluster_role_env(*location)
   else:
+    Log.error('Invalid topology location')
     return False

@@ -60,7 +60,7 @@ def parse_topo_loc(cl_args):
       raise
     return topo_loc
   except Exception:
-    Log.error('Error: invalid topology location')
+    Log.error('Invalid topology location')
     raise
 
 
@@ -126,11 +126,12 @@ def run_spouts(command, parser, cl_args, unknown_args):
     result = get_topology_info(cluster, env, topology, role)
     spouts = result['physical_plan']['spouts'].keys()
     spout_name = cl_args['spout']
-    if spout_name in spouts:
-      spouts = [spout_name]
-    else:
-      Log.error('Unknown spout: \'%s\'' % spout_name)
-      raise
+    if spout_name:
+      if spout_name in spouts:
+        spouts = [spout_name]
+      else:
+        Log.error('Unknown spout: \'%s\'' % spout_name)
+        raise
   except Exception:
     return False
   for spout in spouts:
@@ -149,11 +150,12 @@ def run_bolts(command, parser, cl_args, unknown_args):
     result = get_topology_info(cluster, env, topology, role)
     bolts = result['physical_plan']['bolts'].keys()
     bolt_name = cl_args['bolt']
-    if bolt_name in bolts:
-      bolts = [bolt_name]
-    else:
-      Log.error('Unknown bolt: \'%s\'' % bolt_name)
-      raise
+    if bolt_name:
+      if bolt_name in bolts:
+        bolts = [bolt_name]
+      else:
+        Log.error('Unknown bolt: \'%s\'' % bolt_name)
+        raise
   except Exception:
     return False
   for bolt in bolts:
