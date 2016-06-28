@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from heron_client import HeronClient
-from heron.instance.src.python.utils import Log
+from heron.common.src.python.color import Log
 from heron.proto import stmgr_pb2
 from heron.proto import physical_plan_pb2
+
+from protocol import StatusCode
 
 # StmgrClient is an implementation of the Heron client in python and communicates
 # with Stream Manager. It will:
@@ -24,6 +26,7 @@ from heron.proto import physical_plan_pb2
 # TODO: will implement the rest later
 
 class StmgrClient(HeronClient):
+
   def __init__(self, strmgr_host, port, topology_name, topology_id,
                instance, in_stream_queue, out_stream_queue, in_control_queue):
     HeronClient.__init__(self, strmgr_host, port)
@@ -32,10 +35,20 @@ class StmgrClient(HeronClient):
     self.instance = instance
 
   # send register request
-  def on_connect(self):
+  def on_connect(self, status):
     Log.debug("In on_connect of " + self.get_classname())
     self.register_msg_to_handle()
     self.send_register_req()
+
+  def on_response(self, status, context, response):
+    if status != StatusCode.OK:
+      raise RuntimeError("Response from Stream Manager not OK")
+    # TODO: use of isinstance -- check later if appropriate
+    if isinstance(response, stmgr_pb2.RegisterInstanceResponse):
+      self.handle_register_response(response)
+    else:
+      Log.debug("Weird kind: " + response.DESCRIPTOR.full_name)
+      raise RuntimeError("Unknown kind of response received from Stream Manager")
 
   def register_msg_to_handle(self):
     self.register_on_message(stmgr_pb2.NewInstanceAssignmentMessage)
@@ -48,4 +61,8 @@ class StmgrClient(HeronClient):
     request.topology_name = self.topology_name
     request.topology_id = self.topology_id
 
-    self.send_request(request, "Context", stmgr_pb2.NewInstanceAssignmentMessage(), 10)
+    self.send_request(request, "Context", stmgr_pb2.RegisterInstanceResponse(), 10)
+
+  def handle_register_response(self, response):
+    Log.debug("In handle_register_response()")
+

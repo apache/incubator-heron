@@ -9,6 +9,7 @@ pex_library(
     exclude = ["main.py", "test_server.py"]
   ),
   deps = [
+    "//heron/common/src/python:common",
     "//heron/proto:proto-py",
   ],
 )

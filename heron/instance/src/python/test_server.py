@@ -14,9 +14,10 @@
 
 import asyncore
 import socket
+import network.mock_protobuf as mock
 from network.protocol import HeronProtocol, REQID, IncomingPacket
-from heron.proto import stmgr_pb2, physical_plan_pb2, topology_pb2
-from utils import Log
+from heron.proto import stmgr_pb2
+from heron.common.src.python.color import Log
 from google.protobuf.descriptor import Descriptor
 
 class HeronTestHandler(asyncore.dispatcher_with_send):
@@ -44,21 +45,19 @@ class HeronTestHandler(asyncore.dispatcher_with_send):
 
   def handle_packet(self, packet):
     typename, reqid, serialized_msg = HeronProtocol.decode_packet(packet)
-    print typename
-    print reqid
+    Log.debug("In handle_read() with typename: " + typename + ", and reqid: " + str(reqid))
 
     # make sure this is right class
-    
     request = stmgr_pb2.RegisterInstanceRequest()
     request.ParseFromString(serialized_msg)
     
-    print request.__str__()
+    Log.debug("Request message: \n" + request.__str__())
 
     self.send_response(reqid)
 
   def send_response(self, reqid):
     # create NewInstanceAssignmentMessage
-    response = self.get_mock_assignment_message()
+    response = mock.get_mock_register_response()
     pkt = HeronProtocol.get_outgoing_packet(reqid, response)
     self.send_packet(pkt)
 
@@ -68,43 +67,6 @@ class HeronTestHandler(asyncore.dispatcher_with_send):
   def handle_write(self):
     sent = self.send(self.out_buffer)
     self.out_buffer = self.out_buffer[sent:]
-
-  def get_mock_assignment_message(self):
-
-    # topology
-    sample_topology = topology_pb2.Topology()
-    sample_topology.id = "topology_id"
-    sample_topology.name = "topology_name"
-    sample_topology.state = 1
-
-    # instance info
-    instance_info = physical_plan_pb2.InstanceInfo()
-    instance_info.task_id = 123
-    instance_info.component_index = 23
-    instance_info.component_name = "hello"
-
-    # pplan
-    sample_pplan = physical_plan_pb2.PhysicalPlan()
-    sample_pplan.topology.MergeFrom(sample_topology)
-
-    sample_stmgr = sample_pplan.stmgrs.add()
-    sample_stmgr.id = "Stmgr_id"
-    sample_stmgr.host_name = "localhost"
-    sample_stmgr.data_port = 9999
-    sample_stmgr.local_endpoint = "hello"
-
-    sample_instance = sample_pplan.instances.add()
-    sample_instance.instance_id = "instance_id_is_this"
-    sample_instance.stmgr_id = "stmgr_id_is_this"
-    sample_instance.info.MergeFrom(instance_info)
-
-    # message
-    mock_message = stmgr_pb2.NewInstanceAssignmentMessage()
-    mock_message.pplan.MergeFrom(sample_pplan)
-
-    return mock_message
-
-
 
 
 class HeronTestServer(asyncore.dispatcher):
@@ -119,7 +81,7 @@ class HeronTestServer(asyncore.dispatcher):
     pair = self.accept()
     if pair is not None:
       sock, addr = pair
-      print "Incoming connection from %s" % repr(addr)
+      Log.info("Incoming connection from %s" % repr(addr))
       handler = HeronTestHandler(sock)
 
 server = HeronTestServer('localhost', 8080)

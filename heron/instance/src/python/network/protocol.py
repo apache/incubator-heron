@@ -18,7 +18,7 @@ import struct
 import random
 import socket
 
-from heron.instance.src.python.utils import Log
+from heron.common.src.python.color import Log
 from google.protobuf.message import Message
 
 
@@ -36,15 +36,16 @@ class HeronProtocol:
     return struct.unpack(HeronProtocol.INT_PACK_FMT, i)[0]
 
   @staticmethod
-  def get_size_to_pack_string(string):
+  def _get_size_to_pack_string(string):
     return 4 + len(string)
 
   @staticmethod
-  def get_size_to_pack_message(serialized_msg):
+  def _get_size_to_pack_message(serialized_msg):
     return 4 + len(serialized_msg)
 
   @staticmethod
   def get_outgoing_packet(reqid, message):
+    Log.debug("In get_outgoing_pkt():\n" + message.__str__())
     assert message.IsInitialized()
     packet = ""
 
@@ -53,8 +54,8 @@ class HeronProtocol:
 
     serialized_msg = message.SerializeToString()
 
-    datasize = HeronProtocol.get_size_to_pack_string(typename) + \
-               REQID.REQID_SIZE + HeronProtocol.get_size_to_pack_message(serialized_msg)
+    datasize = HeronProtocol._get_size_to_pack_string(typename) + \
+               REQID.REQID_SIZE + HeronProtocol._get_size_to_pack_message(serialized_msg)
     Log.debug("Outgoing datasize: " + str(datasize))
 
     # first write out how much data is there as the header
@@ -68,7 +69,7 @@ class HeronProtocol:
     packet += reqid.pack()
 
     # add the proto
-    packet += HeronProtocol.pack_int(HeronProtocol.get_size_to_pack_message(serialized_msg))
+    packet += HeronProtocol.pack_int(HeronProtocol._get_size_to_pack_message(serialized_msg))
     packet += serialized_msg
     return packet
 
@@ -104,6 +105,7 @@ class IncomingPacket:
     self.data = ''
     self.is_header_read = False
     self.is_complete = False
+    # for debugging identification purposes
     self.id = random.getrandbits(8)
 
   def get_datasize(self):
@@ -155,6 +157,11 @@ class REQID:
     data_bytes = bytearray(random.getrandbits(8) for i in range (REQID.REQID_SIZE))
     return REQID(data_bytes)
 
+  @staticmethod
+  def generate_zero():
+    data_bytes = bytearray(0 for i in range (REQID.REQID_SIZE))
+    return REQID(data_bytes)
+
   def pack(self):
     return self.bytes
 
@@ -170,3 +177,13 @@ class REQID:
 
   def __str__(self):
     return ''.join([str(i) for i in list(self.bytes)])
+
+class StatusCode:
+  OK = 0
+  WRITE_ERROR = 1
+  READ_ERROR = 2
+  INVALID_PACKET = 3
+  CONNECT_ERROR = 4
+  CLOSE_ERROR = 5
+  TIMEOUT_ERROR = 6
+

@@ -18,9 +18,10 @@ import asyncore
 import socket
 
 from abc import abstractmethod
-from google.protobuf.message import Message
-from protocol import HeronProtocol, REQID, IncomingPacket
-from heron.instance.src.python.utils import Log
+
+from google.protobuf import message
+from protocol import HeronProtocol, REQID, IncomingPacket, StatusCode
+from heron.common.src.python.color import Log
 
 class HeronClient(asyncore.dispatcher):
   TIMEOUT_SEC = 30.0
@@ -41,8 +42,8 @@ class HeronClient(asyncore.dispatcher):
 
   # called when connect is ready
   def handle_connect(self):
-    Log.debug("Connected to " + self.hostname + ":" + str(self.port))
-    self.on_connect()
+    Log.info("Connected to " + self.hostname + ":" + str(self.port))
+    self.on_connect(StatusCode.OK)
 
   # called when close is ready
   def handle_close(self):
@@ -51,25 +52,21 @@ class HeronClient(asyncore.dispatcher):
   # read bytes stream from socket and convert them into a list of IncomingPacket
   def handle_read(self):
     # TODO: currently only reads one packet
+    if self.incomplete_pkt is None:
+      # incomplete packet doesn't exist
+      pkt = HeronProtocol.read_new_packet(self)
+    else:
+      # continue reading into the incomplete packet
+      Log.debug("In handle_read(): Continue reading")
+      pkt = self.incomplete_pkt
+      pkt.read(self)
 
-    try:
-      if self.incomplete_pkt is None:
-        # incomplete packet doesn't exist
-        pkt = HeronProtocol.read_new_packet(self)
-      else:
-        # continue reading into the incomplete packet
-        Log.debug("Continue reading")
-        pkt = self.incomplete_pkt
-        pkt.read(self)
-
-      if pkt.is_complete:
-        self.incomplete_pkt = None
-        self.handle_packet(pkt)
-      else:
-        Log.debug("In handle_read(): Not yet complete")
-        self.incomplete_pkt = pkt
-    except:
-      Log.debug("Exception!")
+    if pkt.is_complete:
+      self.incomplete_pkt = None
+      self.handle_packet(pkt)
+    else:
+      Log.debug("In handle_read(): Packet read not yet complete")
+      self.incomplete_pkt = pkt
 
   def handle_write(self):
     sent = self.send(self.out_buffer)
@@ -103,7 +100,7 @@ class HeronClient(asyncore.dispatcher):
     # TODO: send request and implement timeout handler
     # generates a unique request id
     reqid = REQID.generate()
-    Log.debug("In send_request(): " + str(reqid))
+    Log.debug("In send_request() with REQID: " + str(reqid))
     # register response message type
     self.response_message_map[reqid] = response_type
     self.context_map[reqid] = context
@@ -127,10 +124,17 @@ class HeronClient(asyncore.dispatcher):
       context = self.context_map.pop(reqid)
       response_msg = self.response_message_map.pop(reqid)
 
-      response_msg.ParseFromString(serialized_msg)
-
-      Log.debug("Received response: \n" + response_msg.__str__())
-
+      try:
+        response_msg.ParseFromString(serialized_msg)
+        if response_msg.IsInitialized():
+          Log.debug("In handle_Packet(): Received response with size " +
+                    str(packet.get_datasize()) +
+                    "\n" + response_msg.__str__())
+          self.on_response(StatusCode.OK, context, response_msg)
+        else:
+          raise message.DecodeError
+      except message.DecodeError:
+        self.on_response(StatusCode.INVALID_PACKET, context, None)
 
   def send_packet(self, pkt):
     self.out_buffer += pkt
@@ -143,9 +147,9 @@ class HeronClient(asyncore.dispatcher):
   #######################################################
 
   @abstractmethod
-  def on_connect(self):
+  def on_connect(self, status):
     pass
 
   @abstractmethod
-  def on_response(self):
+  def on_response(self, status, context, response):
     pass
