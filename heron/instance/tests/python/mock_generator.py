@@ -24,8 +24,7 @@ def convert_to_incoming_packet(reqid, message):
   packet = IncomingPacket()
   packet.read(dispatcher)
 
-  # packet.data needs to be in string format
-  packet.data = str(packet.data)
+  packet.data = packet.data
   return packet
 
 # Returns a list of mock request packets (REQID is non-zero)
@@ -134,5 +133,6 @@ class MockHeronClient(HeronClient):
     return self.dispatcher.recv(numbytes)
 
   def handle_packet(self, packet):
+    # should only be called when packet is complete
     self.called_handle_packet = True
     HeronClient.handle_packet(self, packet)

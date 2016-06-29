@@ -108,9 +108,10 @@ class HeronClient(asyncore.dispatcher):
     pkt = HeronProtocol.get_outgoing_packet(reqid, request)
     self.send_packet(pkt)
 
-  def send_message(self):
-    # TODO: send message (non-request-response based communication)
-    pass
+  def send_message(self, message):
+    Log.debug("In send_message()")
+    pkt = HeronProtocol.get_outgoing_packet(REQID.generate_zero(), message)
+    self.send_packet(pkt)
 
   def handle_timeout(self):
     pass

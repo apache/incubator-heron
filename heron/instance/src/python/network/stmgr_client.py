@@ -13,8 +13,7 @@
 # limitations under the License.
 from heron_client import HeronClient
 from heron.common.src.python.color import Log
-from heron.proto import stmgr_pb2
-from heron.proto import physical_plan_pb2
+from heron.proto import stmgr_pb2, common_pb2
 
 from protocol import StatusCode
 
@@ -65,6 +64,27 @@ class StmgrClient(HeronClient):
 
   def handle_register_response(self, response):
     Log.debug("In handle_register_response()")
+    if response.status.status != common_pb2.StatusCode.Value("OK"):
+      raise RuntimeError("Stream Manager returned a not OK response for register")
+    Log.info("We registered ourselves to the Stream Manager")
+
+    if response.HasField("pplan"):
+      Log.info("Handling assignment message from response")
+      self.handle_assignment_message(response.pplan)
 
   def on_incoming_message(self, message):
+    # TODO: gateway metrics update
+
+    if isinstance(message, stmgr_pb2.NewInstanceAssignmentMessage):
+      Log.info("Handling assignment message from direct NewInstanceAssignmentMessage")
+      self.handle_assignment_message(message.pplan)
+    elif isinstance(message, stmgr_pb2.TupleMessage):
+      self.handle_new_tuples(message)
+    else:
+      raise RuntimeError("Unknown kind of message received from Stream Manager")
+
+  def handle_new_tuples(self, tuple_msg):
+    pass
+
+  def handle_assignment_message(self, pplan):
     pass

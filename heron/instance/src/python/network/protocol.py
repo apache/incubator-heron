@@ -71,7 +71,7 @@ class HeronProtocol:
     # add the proto
     packet += HeronProtocol.pack_int(HeronProtocol._get_size_to_pack_message(serialized_msg))
     packet += serialized_msg
-    return packet
+    return str(packet)
 
   @staticmethod
   def read_new_packet(dispatcher):

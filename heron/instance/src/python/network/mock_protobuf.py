@@ -61,7 +61,7 @@ def get_mock_pplan(stmgr=None):
 
 def get_mock_status():
   mock_status = common_pb2.Status()
-  mock_status.status = 1
+  mock_status.status = common_pb2.StatusCode.Value("OK")
   mock_status.message = "OKOKOK"
   return mock_status
 
