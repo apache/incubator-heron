@@ -37,6 +37,7 @@ def create_parser(subparsers):
   args.add_cluster_role_env(parser)
   args.add_verbose(parser)
   args.add_tracker_url(parser)
+  args.add_config(parser)
   parser.set_defaults(subcommand='topologies')
   return subparsers
 
@@ -133,8 +134,7 @@ def show_cluster_role_env(cluster, role, env):
   except Exception:
     return False
   table, rest_count = pp_table(result)
-  print('Topologies running in cluster \'%s\',\
-         submitted by \'%s\', and under environment \'%s\':' % (cluster, role, env))
+  print('Topologies running in cluster \'%s\', submitted by \'%s\', and under environment \'%s\':' % (cluster, role, env))
   if rest_count:
     print('  with %d more...' % rest_count)
   print(table)

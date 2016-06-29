@@ -13,6 +13,8 @@
 # limitations under the License.
 
 import argparse
+import heron.explorer.src.python.utils as utils
+import os
 
 
 help_epilog = '''Getting more help:
@@ -51,6 +53,18 @@ class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
       parts = "\n".join(parts.split("\n")[1:])
     return parts
 
+
+def add_config(parser):
+
+  # the default config path
+  default_config_path = utils.get_heron_conf_dir()
+
+  parser.add_argument(
+      '--config-path',
+      metavar='(a string; path to cluster config; default: "' + default_config_path + '")',
+      default=os.path.join(utils.get_heron_dir(), default_config_path))
+
+  return parser
 
 def add_titles(parser):
   parser._positionals.title = "Required arguments"
@@ -156,18 +170,6 @@ def add_bolt_name(parser, required=False, labelled=False):
   return parser
 
 
-def add_cluster_role_env_topo(parser):
-  parser.add_argument(
-    'cluster/role/env',
-    help='Cluster, role, environment, and topology name'
-  )
-  parser.add_argument(
-    'topology-name',
-    help='topology name'
-  )
-  return parser
-
-
 def add_spouts(parser):
   parser.add_argument(
     '--spout', help='display spout', action='store_true')
@@ -185,3 +187,11 @@ def add_cluster_role_env(parser):
     'cluster/[role]/[env]', help='Topologies location', type=str,
     metavar='CLUSTER/[ROLE]/[ENV]')
   return parser
+
+def add_topology_name(parser):
+  parser.add_argument(
+    'topology-name',
+    help='topology name'
+  )
+  return parser
+

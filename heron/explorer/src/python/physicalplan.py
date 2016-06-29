@@ -27,9 +27,11 @@ def create_parser(subparsers):
     help='show info of a topology\'s spouts metrics',
     usage="%(prog)s [options]",
     add_help=False)
-  args.add_cluster_role_env_topo(spouts_parser)
+  args.add_cluster_role_env(spouts_parser)
+  args.add_topology_name(spouts_parser)
   args.add_verbose(spouts_parser)
   args.add_tracker_url(spouts_parser)
+  args.add_config(spouts_parser)
   args.add_spout_name(spouts_parser)
   spouts_parser.set_defaults(subcommand='spouts-metric')
 
@@ -38,9 +40,11 @@ def create_parser(subparsers):
     help='show info of a topology\'s bolts metrics',
     usage="%(prog)s [options]",
     add_help=False)
-  args.add_cluster_role_env_topo(bolts_parser)
+  args.add_cluster_role_env(bolts_parser)
+  args.add_topology_name(bolts_parser)
   args.add_verbose(bolts_parser)
   args.add_tracker_url(bolts_parser)
+  args.add_config(bolts_parser)
   args.add_bolt_name(bolts_parser)
   bolts_parser.set_defaults(subcommand='bolts-metric')
 
@@ -49,9 +53,11 @@ def create_parser(subparsers):
     help='show info of a topology\'s containers metrics',
     usage="%(prog)s [options]",
     add_help=False)
-  args.add_cluster_role_env_topo(containers_parser)
+  args.add_cluster_role_env(containers_parser)
+  args.add_topology_name(containers_parser)
   args.add_verbose(containers_parser)
   args.add_tracker_url(containers_parser)
+  args.add_config(containers_parser)
   args.add_container_id(containers_parser)
   containers_parser.set_defaults(subcommand='containers')
   return subparsers
@@ -59,7 +65,7 @@ def create_parser(subparsers):
 
 def parse_topo_loc(cl_args):
   try:
-    topo_loc = cl_args['cluster/role/env'].split('/')
+    topo_loc = cl_args['cluster/[role]/[env]'].split('/')
     topo_name = cl_args['topology-name']
     topo_loc.append(topo_name)
     if len(topo_loc) != 4:
@@ -124,10 +130,8 @@ def get_component_metrics(component, cluster, env, topology, role):
 
 
 def run_spouts(command, parser, cl_args, unknown_args):
-  try:
-    [cluster, role, env, topology] = parse_topo_loc(cl_args)
-  except:
-    return False
+  cluster, role, env = cl_args['cluster'], cl_args['role'], cl_args['environ']
+  topology = cl_args['topology-name']
   try:
     result = get_topology_info(cluster, env, topology, role)
     spouts = result['physical_plan']['spouts'].keys()
@@ -148,10 +152,8 @@ def run_spouts(command, parser, cl_args, unknown_args):
 
 
 def run_bolts(command, parser, cl_args, unknown_args):
-  try:
-    [cluster, role, env, topology] = parse_topo_loc(cl_args)
-  except:
-    return False
+  cluster, role, env = cl_args['cluster'], cl_args['role'], cl_args['environ']
+  topology = cl_args['topology-name']
   try:
     result = get_topology_info(cluster, env, topology, role)
     bolts = result['physical_plan']['bolts'].keys()
@@ -172,10 +174,8 @@ def run_bolts(command, parser, cl_args, unknown_args):
 
 
 def run_containers(command, parser, cl_args, unknown_args):
-  try:
-    [cluster, role, env, topology] = parse_topo_loc(cl_args)
-  except:
-    return False
+  cluster, role, env = cl_args['cluster'], cl_args['role'], cl_args['environ']
+  topology = cl_args['topology-name']
   container_id = cl_args['cid']
   result = get_topology_info(cluster, env, topology, role)
   containers = result['physical_plan']['stmgrs']

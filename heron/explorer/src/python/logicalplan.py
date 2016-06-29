@@ -27,9 +27,11 @@ def create_parser(subparsers):
     help='display information of a topology in a logical plan',
     usage="%(prog)s [options]",
     add_help=False)
-  args.add_cluster_role_env_topo(components_parser)
+  args.add_cluster_role_env(components_parser)
+  args.add_topology_name(components_parser)
   args.add_verbose(components_parser)
   args.add_tracker_url(components_parser)
+  args.add_config(components_parser)
   components_parser.set_defaults(subcommand='components')
 
   spouts_parser = subparsers.add_parser(
@@ -37,9 +39,11 @@ def create_parser(subparsers):
     help='display information of spouts of a topology in a logical plan',
     usage="%(prog)s [options]",
     add_help=False)
-  args.add_cluster_role_env_topo(spouts_parser)
+  args.add_cluster_role_env(spouts_parser)
+  args.add_topology_name(spouts_parser)
   args.add_verbose(spouts_parser)
   args.add_tracker_url(spouts_parser)
+  args.add_config(spouts_parser)
   spouts_parser.set_defaults(subcommand='spouts')
 
   bolts_parser = subparsers.add_parser(
@@ -47,9 +51,11 @@ def create_parser(subparsers):
     help='display information of bolts of a topology in a logical plan',
     usage="%(prog)s [options]",
     add_help=False)
-  args.add_cluster_role_env_topo(bolts_parser)
+  args.add_cluster_role_env(bolts_parser)
+  args.add_topology_name(bolts_parser)
   args.add_verbose(bolts_parser)
   args.add_tracker_url(bolts_parser)
+  args.add_config(bolts_parser)
   bolts_parser.set_defaults(subcommand='bolts')
 
   return subparsers
@@ -68,7 +74,7 @@ def get_logical_plan(cluster, env, topology, role):
 
 def parse_topo_loc(cl_args):
   try:
-    topo_loc = cl_args['cluster/role/env'].split('/')
+    topo_loc = cl_args['cluster/[role]/[env]'].split('/')
     topo_loc.append(cl_args['topology-name'])
     if len(topo_loc) != 4:
       raise
@@ -114,10 +120,9 @@ def dump_spouts(spouts, topo_loc):
 
 
 def run(cl_args, bolts_only, spouts_only):
-  try:
-    topo_loc = [cluster, role, env, topology] = parse_topo_loc(cl_args)
-  except:
-    return False
+  cluster, role, env = cl_args['cluster'], cl_args['role'], cl_args['environ']
+  topology = cl_args['topology-name']
+  topo_loc = [cluster, role, env, topology]
   try:
     components = get_logical_plan(cluster, env, topology, role)
     bolts, spouts = components["bolts"], components["spouts"]
