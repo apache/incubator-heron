@@ -1,0 +1,37 @@
+version: '2'
+services:
+  tracker:
+    image: ${HERON_IMAGE}
+    command: heron-tracker
+    ports:
+      - "8888:8888"
+    hostname: tracker
+    networks:
+      - heron
+    volumes:
+      - "herondata:/root/.herondata"
+  ui:
+    image: ${HERON_IMAGE}
+
+    command: heron-ui --tracker_url=http://tracker:8888
+    ports:
+      - "8889:8889"
+    hostname: ui
+    networks:
+      - heron
+  executor:
+    image: ${HERON_IMAGE}
+    #do nothing, but keep container running to allow local procs to stay alive
+    command: tail -f /dev/null
+    hostname: executor
+    networks:
+      - heron
+    volumes:
+      - "herondata:/root/.herondata"
+networks:
+  heron:
+    driver: bridge
+volumes:
+  herondata:
+    driver: local
+
