@@ -19,7 +19,6 @@ import socket
 
 from abc import abstractmethod
 
-from google.protobuf import message
 from protocol import HeronProtocol, REQID, IncomingPacket, StatusCode
 from heron.common.src.python.color import Log
 
@@ -92,9 +91,10 @@ class HeronClient(asyncore.dispatcher):
     self.handle_close()
 
   # Register the protobuf Message's name with protobuf Message
-  def register_on_message(self, message):
+  def register_on_message(self, msg_builder):
+    message = msg_builder()
     Log.debug("In register_on_message(): " + message.DESCRIPTOR.full_name)
-    self.registered_message_map[message.DESCRIPTOR.full_name] = message
+    self.registered_message_map[message.DESCRIPTOR.full_name] = msg_builder
 
   def send_request(self, request, context, response_type, timeout_sec):
     # TODO: send request and implement timeout handler
@@ -128,14 +128,30 @@ class HeronClient(asyncore.dispatcher):
       try:
         response_msg.ParseFromString(serialized_msg)
         if response_msg.IsInitialized():
-          Log.debug("In handle_Packet(): Received response with size " +
-                    str(packet.get_datasize()) +
-                    "\n" + response_msg.__str__())
+          Log.debug("In handle_packet(): Received response with size " +
+                    str(packet.get_datasize()) + "\n" + str(response_msg))
           self.on_response(StatusCode.OK, context, response_msg)
         else:
-          raise message.DecodeError
+          raise RuntimeError("Response not initialized")
       except Exception:
         self.on_response(StatusCode.INVALID_PACKET, context, None)
+    elif reqid.is_zero():
+      # this is a Message -- no need to send back response
+      try:
+        msg_builder = self.registered_message_map[typename]
+        message = msg_builder()
+        message.ParseFromString(serialized_msg)
+        if message.IsInitialized():
+          Log.debug("In handle_packet(): Received message with size " +
+                    str(packet.get_datasize()) + "\n" + str(message))
+          self.on_incoming_message(message)
+        else:
+          raise RuntimeError("Message not initialized")
+      except Exception as e:
+        Log.error("Error when handling message packet" + e.message)
+    else:
+      # might be a timeout response
+      pass
 
   def send_packet(self, pkt):
     self.out_buffer += pkt
@@ -153,4 +169,8 @@ class HeronClient(asyncore.dispatcher):
 
   @abstractmethod
   def on_response(self, status, context, response):
+    pass
+
+  @abstractmethod
+  def on_incoming_message(self, message):
     pass

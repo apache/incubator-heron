@@ -26,7 +26,6 @@ from protocol import StatusCode
 # TODO: will implement the rest later
 
 class StmgrClient(HeronClient):
-
   def __init__(self, strmgr_host, port, topology_name, topology_id,
                instance, in_stream_queue, out_stream_queue, in_control_queue):
     HeronClient.__init__(self, strmgr_host, port)
@@ -36,7 +35,6 @@ class StmgrClient(HeronClient):
 
   # send register request
   def on_connect(self, status):
-    Log.debug("In on_connect of " + self.get_classname())
     self.register_msg_to_handle()
     self.send_register_req()
 
@@ -47,12 +45,14 @@ class StmgrClient(HeronClient):
     if isinstance(response, stmgr_pb2.RegisterInstanceResponse):
       self.handle_register_response(response)
     else:
-      Log.debug("Weird kind: " + response.DESCRIPTOR.full_name)
+      Log.error("Weird kind: " + response.DESCRIPTOR.full_name)
       raise RuntimeError("Unknown kind of response received from Stream Manager")
 
   def register_msg_to_handle(self):
-    self.register_on_message(stmgr_pb2.NewInstanceAssignmentMessage)
-    self.register_on_message(stmgr_pb2.TupleMessage)
+    new_instance_builder = lambda : stmgr_pb2.NewInstanceAssignmentMessage()
+    tuple_msg_builder = lambda : stmgr_pb2.TupleMessage()
+    self.register_on_message(new_instance_builder)
+    self.register_on_message(tuple_msg_builder)
 
   def send_register_req(self):
     # TODO: change it to RegisterInstanceRequest
@@ -66,3 +66,5 @@ class StmgrClient(HeronClient):
   def handle_register_response(self, response):
     Log.debug("In handle_register_response()")
 
+  def on_incoming_message(self, message):
+    pass

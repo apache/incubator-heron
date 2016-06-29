@@ -36,7 +36,7 @@ class ProtocolTest(unittest.TestCase):
 
   def test_encode_decode_packet(self):
     # get_mock_packets() uses HeronProtocol.get_outgoing_packet
-    pkt_list, raw_list = mock_generator.get_mock_packets()
+    pkt_list, raw_list = mock_generator.get_mock_requst_packets()
     for pkt, raw in zip(pkt_list, raw_list):
       raw_reqid, raw_message = raw
       typename, reqid, seriazelid_msg = HeronProtocol.decode_packet(pkt)

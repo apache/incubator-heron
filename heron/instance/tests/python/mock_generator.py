@@ -28,7 +28,8 @@ def convert_to_incoming_packet(reqid, message):
   packet.data = str(packet.data)
   return packet
 
-def get_mock_packets():
+# Returns a list of mock request packets (REQID is non-zero)
+def get_mock_requst_packets():
   pkt_list = []
   raw_list = []
 
@@ -41,12 +42,28 @@ def get_mock_packets():
 
   return pkt_list, raw_list
 
-def get_a_mock_packet_and_raw():
+# Returns a mock request packet and its raw data
+def get_a_mock_request_packet_and_raw():
   reqid = REQID.generate()
   message = mock_protobuf.get_mock_register_response()
   pkt = convert_to_incoming_packet(reqid, message)
   return pkt, reqid, message
 
+# Returns a list of mock message packets and its builder (REQID is zero)
+def get_a_mock_message_list_and_builder():
+  pkt_list = []
+  raw_list = mock_protobuf.get_many_mock_pplans()
+
+  for msg in raw_list:
+    reqid = REQID.generate_zero()
+    pkt = convert_to_incoming_packet(reqid, msg)
+    pkt_list.append(pkt)
+    typename = msg.DESCRIPTOR.full_name
+
+  builder, typename = mock_protobuf.get_pplan_builder_and_typename()
+  return pkt_list, raw_list, builder, typename
+
+# Returns an incomplete packet
 def get_fail_packet():
   raw = HeronProtocol.get_outgoing_packet(REQID.generate(), mock_protobuf.get_mock_pplan())
   packet = IncomingPacket.create_packet(raw[:4], raw[4:])
@@ -65,15 +82,15 @@ class MockDispatcher:
 
   def prepare_normal(self):
     #self.to_be_received = b"".join(pkt.convert_to_raw() for pkt in get_mock_packets()[0])
-    for pkt in get_mock_packets()[0]:
+    for pkt in get_mock_requst_packets()[0]:
       self.to_be_received += pkt.convert_to_raw()
 
   def prepare_header_only(self):
-    pkt = get_mock_packets()[0][0]
+    pkt = get_mock_requst_packets()[0][0]
     self.to_be_received = pkt.header
 
   def prepare_partial_data(self):
-    pkt = get_mock_packets()[0][0]
+    pkt = get_mock_requst_packets()[0][0]
     self.to_be_received = pkt.header + pkt.data[:self.PARTIAL_DATA_SIZE]
 
   def prepare_eagain(self):
@@ -101,6 +118,7 @@ class MockHeronClient(HeronClient):
     self.on_response_status = None
     self.called_handle_packet = False
     self.dispatcher = MockDispatcher()
+    self.incoming_msg = None
 
   def on_connect(self, status):
     if status == StatusCode.OK:
@@ -108,6 +126,9 @@ class MockHeronClient(HeronClient):
 
   def on_response(self, status, context, response):
     self.on_response_status = status
+
+  def on_incoming_message(self, message):
+    self.incoming_msg = message
 
   def recv(self, numbytes):
     return self.dispatcher.recv(numbytes)

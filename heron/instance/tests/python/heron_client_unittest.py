@@ -26,25 +26,34 @@ class ClientTest(unittest.TestCase):
     self.assertTrue(self.mock_client.passed_on_connect)
 
   def test_register_on_message(self):
+    # try with pplan
     message = mock_protobuf.get_mock_pplan()
     fullname = message.DESCRIPTOR.full_name
-    self.mock_client.register_on_message(message)
+    self.mock_client.register_on_message(mock_protobuf.get_pplan_builder_and_typename()[0])
     self.assertTrue(fullname in self.mock_client.registered_message_map)
 
   def test_handle_packet(self):
-    # normal -- status OK
-    packet, reqid, message = mock_generator.get_a_mock_packet_and_raw()
+    # response -- status OK
+    packet, reqid, message = mock_generator.get_a_mock_request_packet_and_raw()
 
     self.mock_client.context_map[reqid] = None
     self.mock_client.response_message_map[reqid] = message
     self.mock_client.handle_packet(packet)
     self.assertEqual(self.mock_client.on_response_status, StatusCode.OK)
 
-    # status INVALID_PACKET (parse invalid)
+    # response -- status INVALID_PACKET (parse invalid)
     self.mock_client.context_map[reqid] = None
     self.mock_client.response_message_map[reqid] = None
     self.mock_client.handle_packet(packet)
     self.assertEqual(self.mock_client.on_response_status, StatusCode.INVALID_PACKET)
+
+    # message -- status OK
+    pkt_list, msg_list, builder, typename = mock_generator.get_a_mock_message_list_and_builder()
+    self.mock_client.registered_message_map[typename] = builder
+    for pkt, msg in zip(pkt_list, msg_list):
+      self.mock_client.handle_packet(pkt)
+      self.assertEqual(self.mock_client.incoming_msg, msg)
+
 
   def test_handle_read(self):
     # normal
@@ -58,8 +67,3 @@ class ClientTest(unittest.TestCase):
     self.assertIsNotNone(self.mock_client.incomplete_pkt)
     self.assertTrue(self.mock_client.incomplete_pkt.is_header_read)
     self.assertFalse(self.mock_client.incomplete_pkt.is_complete)
-
-
-
-
-

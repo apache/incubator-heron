@@ -184,6 +184,9 @@ class REQID:
   def pack(self):
     return self.bytes
 
+  def is_zero(self):
+    return self == REQID.generate_zero()
+
   @staticmethod
   def unpack(raw_data):
     return REQID(bytearray(raw_data))

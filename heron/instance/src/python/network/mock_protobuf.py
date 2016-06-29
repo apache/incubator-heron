@@ -22,12 +22,12 @@ def get_mock_topology():
   topology.state = 1
   return topology
 
-def get_mock_stmgr():
+def get_mock_stmgr(id="Stmgr_id", host="localhost", port=9999, endpoint="hello"):
   stmgr = physical_plan_pb2.StMgr()
-  stmgr.id = "Stmgr_id"
-  stmgr.host_name = "localhost"
-  stmgr.data_port = 9999
-  stmgr.local_endpoint = "hello"
+  stmgr.id = id
+  stmgr.host_name = host
+  stmgr.data_port = port
+  stmgr.local_endpoint = endpoint
   return stmgr
 
 def get_mock_instance():
@@ -44,12 +44,15 @@ def get_mock_instance():
 
   return instance
 
-def get_mock_pplan():
+def get_mock_pplan(stmgr=None):
   pplan = physical_plan_pb2.PhysicalPlan()
   pplan.topology.MergeFrom(get_mock_topology())
 
   sample_stmgr = pplan.stmgrs.add()
-  sample_stmgr.CopyFrom(get_mock_stmgr())
+  if stmgr is None:
+    sample_stmgr.CopyFrom(get_mock_stmgr())
+  else:
+    sample_stmgr.CopyFrom(stmgr)
 
   sample_instance = pplan.instances.add()
   sample_instance.CopyFrom(get_mock_instance())
@@ -74,4 +77,17 @@ def get_mock_register_response():
   mock_response.status.MergeFrom(get_mock_status())
   mock_response.pplan.MergeFrom(get_mock_pplan())
   return mock_response
+
+def get_pplan_builder_and_typename():
+  builder = lambda : physical_plan_pb2.PhysicalPlan()
+  typename = builder().DESCRIPTOR.full_name
+  return builder, typename
+
+def get_many_mock_pplans():
+  pplans_lst = []
+  for i in range(10):
+    _id = "Stmgr-" + str(i)
+    pplan = get_mock_pplan(get_mock_stmgr(id=_id))
+    pplans_lst.append(pplan)
+  return pplans_lst
 
