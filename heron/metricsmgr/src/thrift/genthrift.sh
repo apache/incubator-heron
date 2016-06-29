@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if ! which thrifddt >/dev/null; then
+if ! which thrift >/dev/null; then
    echo "thrift not found,please install the corresponding package." >&2
    echo "***Build and Install Guide***" >&2
    echo "sudo apt-get install automake libssl-dev byacc bison flex libevent-dev -y"
