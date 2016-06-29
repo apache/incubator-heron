@@ -167,7 +167,7 @@ def get_heron_sandbox_conf_dir():
   This will provide heron conf directory in the sandbox
   :return: relative path of heron sandbox conf directory
   """
-  return SANDBOX_CONF_DIR;
+  return SANDBOX_CONF_DIR
 
 ################################################################################
 # Get all the heron lib jars with the absolute paths
@@ -229,7 +229,7 @@ def parse_cluster_role_env(cluster_role_env, config_path):
 
   # if cluster or role or environ is empty, print
   if len(parts[0]) == 0 or len(parts[1]) == 0 or len(parts[2]) == 0:
-    print "Failed to parse %s: %s" % (argstr, namespace[argstr])
+    print "Failed to parse: \'%s\'" % cluster_role_env
     sys.exit(1)
 
   return (parts[0], parts[1], parts[2])
@@ -246,7 +246,7 @@ def parse_override_config(namespace):
         f.write("%s\n" % config.replace('=', ': '))
 
     return override_config_file
-  except e:
+  except Exception as e:
     raise Exception("Failed to parse override config: %s" % str(e))
 
 ################################################################################
