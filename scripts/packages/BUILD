@@ -339,3 +339,8 @@ filegroup(
     name = "tools-template-bin.sh",
     srcs = ["tools_template_bin.sh"],
 )
+
+filegroup(
+    name = "bin-common.sh",
+    srcs = ["bin_common.sh"],
+)
