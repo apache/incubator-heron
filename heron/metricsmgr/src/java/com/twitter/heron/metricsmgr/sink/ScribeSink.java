@@ -122,10 +122,10 @@ public class ScribeSink implements IMetricsSink {
     }
 
     // Convert MetricsRecord to Twitter Cuckoo Format
-    LogEntry logEntry = new LogEntry();
-    logEntry.category = (String) config.get(KEY_CATEGORY);
-    logEntry.message = makeJSON(record);
-    LOG.fine("Metrics to log to Scribe" + logEntry.message);
+    String category = (String) config.get(KEY_CATEGORY);
+    String message = makeJSON(record);
+    LogEntry logEntry = new LogEntry(category, message);
+    LOG.fine("Metrics to log to Scribe" + message);
 
     List<LogEntry> pendingEntries = new LinkedList<LogEntry>();
     pendingEntries.add(logEntry);
