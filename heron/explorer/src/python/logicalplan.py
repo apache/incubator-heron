@@ -28,6 +28,8 @@ def create_parser(subparsers):
     usage="%(prog)s [options]",
     add_help=False)
   args.add_cluster_role_env_topo(components_parser)
+  args.add_verbose(components_parser)
+  args.add_tracker_url(components_parser)
   components_parser.set_defaults(subcommand='components')
 
   spouts_parser = subparsers.add_parser(
@@ -36,6 +38,8 @@ def create_parser(subparsers):
     usage="%(prog)s [options]",
     add_help=False)
   args.add_cluster_role_env_topo(spouts_parser)
+  args.add_verbose(spouts_parser)
+  args.add_tracker_url(spouts_parser)
   spouts_parser.set_defaults(subcommand='spouts')
 
   bolts_parser = subparsers.add_parser(
@@ -44,6 +48,8 @@ def create_parser(subparsers):
     usage="%(prog)s [options]",
     add_help=False)
   args.add_cluster_role_env_topo(bolts_parser)
+  args.add_verbose(bolts_parser)
+  args.add_tracker_url(bolts_parser)
   bolts_parser.set_defaults(subcommand='bolts')
 
   return subparsers

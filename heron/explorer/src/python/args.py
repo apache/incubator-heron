@@ -85,8 +85,9 @@ def req(req, label, subcommand):
 
 def add_verbose(parser):
   parser.add_argument(
-      req(False, False, 'verbose'),
+      '--verbose',
       metavar='(a boolean; default: "false")',
+      type=bool,
       default=False)
   return parser
 

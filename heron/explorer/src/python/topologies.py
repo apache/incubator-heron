@@ -35,6 +35,8 @@ def create_parser(subparsers):
     usage="%(prog)s [options]",
     add_help=True)
   args.add_cluster_role_env(parser)
+  args.add_verbose(parser)
+  args.add_tracker_url(parser)
   parser.set_defaults(subcommand='topologies')
   return subparsers
 

@@ -68,9 +68,6 @@ def create_parser():
       formatter_class=SubcommandHelpFormatter,
       add_help=False)
 
-  parse.add_verbose(parser)
-  parse.add_tracker_url(parser)
-
   # sub-commands
   subparsers = parser.add_subparsers(
       title="Available commands",
@@ -140,13 +137,13 @@ def main():
 
   # parse the args
   args, unknown_args = parser.parse_known_args()
-  command_line_args = vars(args)
 
-  # set tracker_url variable globally
+  command_line_args = vars(args)
   opts.set_tracker_url(command_line_args)
-  opts.set_logger_level(command_line_args, Log)
+  opts.set_verbose(command_line_args)
 
   command = command_line_args['subcommand']
+
   if unknown_args:
     Log.error('Unknown argument: %s' % unknown_args[0])
     # show help message
