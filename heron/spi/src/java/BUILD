@@ -12,6 +12,7 @@ java_library(
         "**/spi/uploader/**/*.java",
         "**/spi/utils/**/*.java",
         "**/spi/statemgr/**/*.java",
+        "**/spi/metricsmgr/**/*.java",
     ]),
     deps = [
         "//heron/api/src/java:api-java",
@@ -50,6 +51,7 @@ utils_deps_files = \
         ":statemgr-spi-java",
         ":scheduler-spi-java",
         ":packing-spi-java",
+        ":metricsmgr-spi-java",
         "//heron/common/src/java:basics-java",
         "//heron/common/src/java:config-java",
         "//heron/api/src/java:api-java",
