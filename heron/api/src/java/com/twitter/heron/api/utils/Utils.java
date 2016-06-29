@@ -21,7 +21,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +34,7 @@ public final class Utils {
 
   public static List<Object> tuple(Object... values) {
     List<Object> ret = new ArrayList<>();
-    Collections.addAll(ret, Arrays.asList(values));
+    Collections.addAll(ret, values);
     return ret;
   }
 
