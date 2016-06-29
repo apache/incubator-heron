@@ -134,7 +134,7 @@ class HeronClient(asyncore.dispatcher):
           self.on_response(StatusCode.OK, context, response_msg)
         else:
           raise message.DecodeError
-      except message.DecodeError:
+      except Exception:
         self.on_response(StatusCode.INVALID_PACKET, context, None)
 
   def send_packet(self, pkt):

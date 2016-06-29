@@ -13,12 +13,20 @@
 # limitations under the License.
 import socket
 
-from heron.instance.src.python.network.protocol import REQID, HeronProtocol, IncomingPacket
+from heron.instance.src.python.network.protocol import REQID, HeronProtocol, IncomingPacket, StatusCode
+from heron.instance.src.python.network.heron_client import HeronClient
 import heron.instance.src.python.network.mock_protobuf as mock_protobuf
 
 def convert_to_incoming_packet(reqid, message):
   raw = HeronProtocol.get_outgoing_packet(reqid, message)
-  return IncomingPacket.create_packet(raw[:4], raw[4:])
+  dispatcher = MockDispatcher()
+  dispatcher.prepare_with_raw(raw)
+  packet = IncomingPacket()
+  packet.read(dispatcher)
+
+  # packet.data needs to be in string format
+  packet.data = str(packet.data)
+  return packet
 
 def get_mock_packets():
   pkt_list = []
@@ -26,12 +34,18 @@ def get_mock_packets():
 
   # normal packet (PhysicalPlan as request)
   reqid = REQID.generate()
-  message = mock_protobuf.get_mock_pplan()
+  message = mock_protobuf.get_mock_register_response()
   normal_pkt = convert_to_incoming_packet(reqid, message)
   pkt_list.append(normal_pkt)
   raw_list.append((reqid, message))
 
   return pkt_list, raw_list
+
+def get_a_mock_packet_and_raw():
+  reqid = REQID.generate()
+  message = mock_protobuf.get_mock_register_response()
+  pkt = convert_to_incoming_packet(reqid, message)
+  return pkt, reqid, message
 
 def get_fail_packet():
   raw = HeronProtocol.get_outgoing_packet(REQID.generate(), mock_protobuf.get_mock_pplan())
@@ -46,7 +60,9 @@ class MockDispatcher:
     self.eagain_test = False
     self.fatal_error_test = False
 
-  # Prepares complete sequence of packets
+  def prepare_with_raw(self, raw):
+    self.to_be_received = raw
+
   def prepare_normal(self):
     #self.to_be_received = b"".join(pkt.convert_to_raw() for pkt in get_mock_packets()[0])
     for pkt in get_mock_packets()[0]:
@@ -76,3 +92,26 @@ class MockDispatcher:
     self.to_be_received = self.to_be_received[numbytes:]
     return ret
 
+class MockHeronClient(HeronClient):
+  HOST = '127.0.0.1'
+  PORT = 9090
+  def __init__(self):
+    HeronClient.__init__(self, self.HOST, self.PORT)
+    self.passed_on_connect = False
+    self.on_response_status = None
+    self.called_handle_packet = False
+    self.dispatcher = MockDispatcher()
+
+  def on_connect(self, status):
+    if status == StatusCode.OK:
+      self.passed_on_connect = True
+
+  def on_response(self, status, context, response):
+    self.on_response_status = status
+
+  def recv(self, numbytes):
+    return self.dispatcher.recv(numbytes)
+
+  def handle_packet(self, packet):
+    self.called_handle_packet = True
+    HeronClient.handle_packet(self, packet)
