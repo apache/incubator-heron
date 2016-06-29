@@ -13,6 +13,6 @@
   <suppress files="foo/bar/Bat.java" checks=".*"/>
   -->
 
-  <suppress files="Empty.java" checks=".*"/>
+  <suppress files="(Empty|LogEntry|ResultCode|scribe)\.java" checks=".*"/>
 
 </suppressions>
