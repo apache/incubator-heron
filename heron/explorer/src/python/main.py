@@ -23,7 +23,6 @@ import heron.explorer.src.python.opts as opts
 import heron.explorer.src.python.physicalplan as physicalplan
 import heron.explorer.src.python.topologies as topologies
 import heron.explorer.src.python.utils as utils
-import os
 import sys
 import time
 from heron.common.src.python.color import Log
@@ -133,9 +132,6 @@ def extract_common_args(command, parser, cl_args):
     return dict()
   cluster = utils.get_heron_cluster(cluster_role_env)
   config_path = utils.get_heron_cluster_conf_dir(cluster, config_path)
-  if not os.path.isdir(config_path):
-    Log.error("Config path cluster directory does not exist: %s" % config_path)
-    return dict()
 
   new_cl_args = dict()
   try:
@@ -182,7 +178,8 @@ def main():
   if command != 'help':
     opts.set_tracker_url(command_line_args)
     opts.set_verbose(command_line_args)
-    command_line_args = extract_common_args(command, parser, command_line_args)
+    if command != 'topologies':
+      command_line_args = extract_common_args(command, parser, command_line_args)
     if not command_line_args:
       return 1
     Log.info("Using tracker URL: %s", command_line_args["tracker_url"])

@@ -208,9 +208,18 @@ def get_heron_cluster(cluster_role_env):
 ################################################################################
 def parse_cluster_role_env(cluster_role_env, config_path):
   parts = cluster_role_env.split('/')[:3]
+  no_config = False
+  if not os.path.isdir(config_path):
+    Log.info("Config path cluster directory does not exist: %s" % config_path)
+    no_config = True
+
 
   # if cluster/role/env is not completely provided, check further
   if len(parts) < 3:
+    if no_config:
+      raise Exception(
+        "Config is required if role or env is not provided")
+
     cli_conf_file = os.path.join(config_path, CLIENT_YAML)
 
     # if client conf doesn't exist, use default value
