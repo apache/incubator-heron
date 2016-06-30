@@ -13,11 +13,8 @@
 # limitations under the License.
 
 import heron.explorer.src.python.args as args
-import tornado.gen
-import tornado.ioloop
 from collections import defaultdict
 from heron.common.src.python.color import Log
-from heron.common.src.python.handler.access import heron as API
 from heron.explorer.src.python.utils import get_logical_plan, get_topology_info
 from tabulate import tabulate
 

@@ -16,7 +16,8 @@ import heron.explorer.src.python.args as args
 import sys
 from heron.common.src.python.color import Log
 from tabulate import tabulate
-from heron.explorer.src.python.utils import get_topology_info, get_topology_metrics
+from heron.explorer.src.python.utils import get_topology_info
+from heron.explorer.src.python.utils import get_topology_metrics
 
 
 def create_parser(subparsers):

@@ -216,6 +216,7 @@ def parse_cluster_role_env(cluster_role_env, config_path):
     Log.info("Config path cluster directory does not exist: %s" % config_path)
     no_config = True
 
+
   # if cluster/role/env is not completely provided, check further
   if len(parts) < 3:
     if no_config:
@@ -322,7 +323,6 @@ def check_release_file_exists():
 
   return True
 
-
 def get_logical_plan(cluster, env, topology, role):
   instance = tornado.ioloop.IOLoop.instance()
   try:
@@ -332,7 +332,6 @@ def get_logical_plan(cluster, env, topology, role):
     Log.error('Failed to retrive logical plan info of topology \'%s\''
               % ('/'.join([cluster, role, env, topology])))
     raise
-
 
 def get_topology_info(*args):
   instance = tornado.ioloop.IOLoop.instance()
@@ -349,4 +348,45 @@ def get_topology_metrics(*args):
     return instance.run_sync(lambda: API.get_comp_metrics(*args))
   except Exception as ex:
     Log.error(str(ex))
+    raise
+
+def get_logical_plan(cluster, env, topology, role):
+  instance = tornado.ioloop.IOLoop.instance()
+  try:
+    return instance.run_sync(lambda: API.get_logical_plan(cluster, env, topology, role))
+  except Exception as ex:
+    Log.error('Error: %s' % str(ex))
+    Log.error('Failed to retrive logical plan info of topology \'%s\''
+              % ('/'.join([cluster, role, env, topology])))
+    raise
+
+def get_cluster_topologies(cluster):
+  instance = tornado.ioloop.IOLoop.instance()
+  try:
+    return instance.run_sync(lambda: API.get_cluster_topologies(cluster))
+  except Exception as ex:
+    Log.error(str(ex))
+    Log.error('Failed to retrive topologies running in cluster \'%s\'' % cluster)
+    raise
+
+
+def get_cluster_role_topologies(cluster, role):
+  instance = tornado.ioloop.IOLoop.instance()
+  try:
+    return instance.run_sync(lambda: API.get_cluster_role_topologies(cluster, role))
+  except Exception as ex:
+    Log.error(str(ex))
+    Log.error('Failed to retrive topologies running in cluster'
+              '\'%s\' submitted by %s' % (cluster, role))
+    raise
+
+
+def get_cluster_role_env_topologies(cluster, role, env):
+  instance = tornado.ioloop.IOLoop.instance()
+  try:
+    return instance.run_sync(lambda: API.get_cluster_role_env_topologies(cluster, role, env))
+  except Exception as ex:
+    Log.error(str(ex))
+    Log.error('Failed to retrive topologies running in cluster'
+              '\'%s\' submitted by %s under environment %s' % (cluster, role, env))
     raise
