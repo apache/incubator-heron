@@ -47,7 +47,8 @@ public class FieldsGrouping extends Grouping {
     int taskIndex = 0;
     int primeNumber = 633910111;
     for (Integer indices : fieldsGroupingIndices) {
-      taskIndex += Math.abs(tuple.getValues(indices).hashCode()) % primeNumber;
+      int hash = tuple.getValues(indices).hashCode();
+      taskIndex += (hash % primeNumber + primeNumber) % primeNumber;
     }
 
     taskIndex = taskIndex % taskIds.size();
