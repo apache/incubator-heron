@@ -169,7 +169,7 @@ class HeronExecutor:
   def get_metricsmgr_cmd(self, id, sink_config_file, port):
     metricsmgr_main_class = 'com.twitter.heron.metricsmgr.MetricsManager'
 
-    metricsmgr_cmd = ['%s/bin/java' % self.heron_java_home,
+    metricsmgr_cmd = [os.path.join(self.heron_java_home, 'bin/java'),
                       # We could not rely on the default -Xmx setting, which could be very big,
                       # for instance, the default -Xmx in Twitter mesos machine is around 18GB
                       '-Xmx1024M',
@@ -288,7 +288,7 @@ class HeronExecutor:
       do_print("component name: %s, ram request: %d, total jvm size: %dM, cache size: %dM, perm size: %dM"
                % (component_name, self.component_rammap[component_name], total_jvm_size, code_cache_size_mb, perm_gen_size_mb))
       xmn_size = int(heap_size_mb / 2)
-      instance_cmd = ['%s/bin/java' % self.heron_java_home,
+      instance_cmd = [os.path.join(self.heron_java_home, 'bin/java'),
                       '-Xmx%dM' % heap_size_mb,
                       '-Xms%dM' % heap_size_mb,
                       '-Xmn%dM' % xmn_size,
