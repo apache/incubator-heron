@@ -15,7 +15,9 @@ from heron_client import HeronClient
 from heron.common.src.python.color import Log
 from heron.proto import stmgr_pb2, common_pb2
 
-from protocol import StatusCode
+from .protocol import StatusCode
+from instance.pplan_helper import PhysicalPlanHelper
+
 
 # StmgrClient is an implementation of the Heron client in python and communicates
 # with Stream Manager. It will:
@@ -32,28 +34,45 @@ class StmgrClient(HeronClient):
     self.topology_id = topology_id
     self.instance = instance
 
+    self._in_stream = in_stream_queue
+    self._out_stream = out_stream_queue
+    self._control_stream = in_control_queue
+
+    self._pplan_helper = None
+
   # send register request
   def on_connect(self, status):
-    self.register_msg_to_handle()
-    self.send_register_req()
+    self._register_msg_to_handle()
+    self._send_register_req()
 
   def on_response(self, status, context, response):
     if status != StatusCode.OK:
       raise RuntimeError("Response from Stream Manager not OK")
     # TODO: use of isinstance -- check later if appropriate
     if isinstance(response, stmgr_pb2.RegisterInstanceResponse):
-      self.handle_register_response(response)
+      self._handle_register_response(response)
     else:
       Log.error("Weird kind: " + response.DESCRIPTOR.full_name)
       raise RuntimeError("Unknown kind of response received from Stream Manager")
 
-  def register_msg_to_handle(self):
+  def on_incoming_message(self, message):
+    # TODO: gateway metrics update
+
+    if isinstance(message, stmgr_pb2.NewInstanceAssignmentMessage):
+      Log.info("Handling assignment message from direct NewInstanceAssignmentMessage")
+      self._handle_assignment_message(message.pplan)
+    elif isinstance(message, stmgr_pb2.TupleMessage):
+      self._handle_new_tuples(message)
+    else:
+      raise RuntimeError("Unknown kind of message received from Stream Manager")
+
+  def _register_msg_to_handle(self):
     new_instance_builder = lambda : stmgr_pb2.NewInstanceAssignmentMessage()
     tuple_msg_builder = lambda : stmgr_pb2.TupleMessage()
     self.register_on_message(new_instance_builder)
     self.register_on_message(tuple_msg_builder)
 
-  def send_register_req(self):
+  def _send_register_req(self):
     # TODO: change it to RegisterInstanceRequest
     request = stmgr_pb2.RegisterInstanceRequest()
     request.instance.MergeFrom(self.instance)
@@ -62,29 +81,32 @@ class StmgrClient(HeronClient):
 
     self.send_request(request, "Context", stmgr_pb2.RegisterInstanceResponse(), 10)
 
-  def handle_register_response(self, response):
-    Log.debug("In handle_register_response()")
+  def _handle_register_response(self, response):
+    Log.debug("In _handle_register_response()")
     if response.status.status != common_pb2.StatusCode.Value("OK"):
       raise RuntimeError("Stream Manager returned a not OK response for register")
     Log.info("We registered ourselves to the Stream Manager")
 
     if response.HasField("pplan"):
       Log.info("Handling assignment message from response")
-      self.handle_assignment_message(response.pplan)
+      self._handle_assignment_message(response.pplan)
 
-  def on_incoming_message(self, message):
-    # TODO: gateway metrics update
 
-    if isinstance(message, stmgr_pb2.NewInstanceAssignmentMessage):
-      Log.info("Handling assignment message from direct NewInstanceAssignmentMessage")
-      self.handle_assignment_message(message.pplan)
-    elif isinstance(message, stmgr_pb2.TupleMessage):
-      self.handle_new_tuples(message)
+  def _handle_new_tuples(self, tuple_msg):
+    pass
+
+  def _handle_assignment_message(self, pplan):
+    Log.info("In _handle_assignment_message(): Physical Plan: \n" + pplan)
+    new_helper = PhysicalPlanHelper(pplan, self.instance.instance_id)
+
+    # TODO: handle when pplan_helper already exists
+
+    if self._pplan_helper is None:
+      Log.info("Received a new Physical Plan")
     else:
-      raise RuntimeError("Unknown kind of message received from Stream Manager")
+      Log.info("Received a new Physical Plan with the same assignment -- State Change")
 
-  def handle_new_tuples(self, tuple_msg):
-    pass
+    self._pplan_helper = new_helper
 
-  def handle_assignment_message(self, pplan):
-    pass
+    Log.info("Push to Slave")
+    self._control_stream.offer(new_helper)

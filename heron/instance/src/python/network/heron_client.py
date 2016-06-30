@@ -12,16 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# TODO: write unit test
-
 import asyncore
 import socket
 
 from abc import abstractmethod
 
-from protocol import HeronProtocol, REQID, IncomingPacket, StatusCode
+from .protocol import HeronProtocol, REQID, IncomingPacket, StatusCode
 from heron.common.src.python.color import Log
 
+# TODO: asyncore.dispatcher -> wrap as GatewayLooper class?
 class HeronClient(asyncore.dispatcher):
   TIMEOUT_SEC = 30.0
   def __init__(self, hostname, port):
