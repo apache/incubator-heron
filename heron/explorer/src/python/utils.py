@@ -20,9 +20,12 @@ import sys
 import subprocess
 import tarfile
 import tempfile
+import tornado.gen
+import tornado.ioloop
 import yaml
 
 from heron.common.src.python.color import Log
+from heron.common.src.python.handler.access import heron as API
 
 # default environ tag, if not provided
 ENVIRON = "default"
@@ -319,3 +322,31 @@ def check_release_file_exists():
     return False
 
   return True
+
+def get_logical_plan(cluster, env, topology, role):
+  instance = tornado.ioloop.IOLoop.instance()
+  try:
+    return instance.run_sync(lambda: API.get_logical_plan(cluster, env, topology, role))
+  except Exception as ex:
+    Log.error('Error: %s' % str(ex))
+    Log.error('Failed to retrive logical plan info of topology \'%s\''
+              % ('/'.join([cluster, role, env, topology])))
+    raise
+
+def get_topology_info(*args):
+  instance = tornado.ioloop.IOLoop.instance()
+  try:
+    return instance.run_sync(lambda: API.get_topology_info(*args))
+  except Exception as ex:
+    Log.error(str(ex))
+    raise
+
+
+def get_topology_metrics(*args):
+  instance = tornado.ioloop.IOLoop.instance()
+  try:
+    return instance.run_sync(lambda: API.get_comp_metrics(*args))
+  except Exception as ex:
+    Log.error(str(ex))
+    raise
+

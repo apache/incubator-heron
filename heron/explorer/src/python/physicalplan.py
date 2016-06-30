@@ -14,11 +14,9 @@
 
 import heron.explorer.src.python.args as args
 import sys
-import tornado.gen
-import tornado.ioloop
 from heron.common.src.python.color import Log
-from heron.common.src.python.handler.access import heron as API
 from tabulate import tabulate
+from heron.explorer.src.python.utils import get_topology_info, get_topology_metrics
 
 
 def create_parser(subparsers):
@@ -73,24 +71,6 @@ def parse_topo_loc(cl_args):
     return topo_loc
   except Exception:
     Log.error('Invalid topology location')
-    raise
-
-
-def get_topology_info(*args):
-  instance = tornado.ioloop.IOLoop.instance()
-  try:
-    return instance.run_sync(lambda: API.get_topology_info(*args))
-  except Exception as ex:
-    Log.error(str(ex))
-    raise
-
-
-def get_topology_metrics(*args):
-  instance = tornado.ioloop.IOLoop.instance()
-  try:
-    return instance.run_sync(lambda: API.get_comp_metrics(*args))
-  except Exception as ex:
-    Log.error(str(ex))
     raise
 
 

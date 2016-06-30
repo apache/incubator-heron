@@ -18,6 +18,7 @@ import tornado.ioloop
 from collections import defaultdict
 from heron.common.src.python.color import Log
 from heron.common.src.python.handler.access import heron as API
+from heron.explorer.src.python.utils import get_logical_plan, get_topology_info
 from tabulate import tabulate
 
 
@@ -61,17 +62,6 @@ def create_parser(subparsers):
   return subparsers
 
 
-def get_logical_plan(cluster, env, topology, role):
-  instance = tornado.ioloop.IOLoop.instance()
-  try:
-    return instance.run_sync(lambda: API.get_logical_plan(cluster, env, topology, role))
-  except Exception as ex:
-    Log.error('Error: %s' % str(ex))
-    Log.error('Failed to retrive logical plan info of topology \'%s\''
-              % ('/'.join([cluster, role, env, topology])))
-    raise
-
-
 def parse_topo_loc(cl_args):
   try:
     topo_loc = cl_args['cluster/[role]/[env]'].split('/')
@@ -84,7 +74,7 @@ def parse_topo_loc(cl_args):
     raise
 
 
-def dump_components(components):
+def dump_components(components, topo_info):
   inputs, outputs = defaultdict(list), defaultdict(list)
   for ctype, component in components.iteritems():
     if ctype == 'bolts':
@@ -94,13 +84,19 @@ def dump_components(components):
           inputs[component_name].append(input_name)
           outputs[input_name].append(component_name)
   info = []
+  spouts_instance = topo_info['physical_plan']['spouts']
+  bolts_instance = topo_info['physical_plan']['bolts']
   for ctype, component in components.iteritems():
     for component_name, component_info in component.iteritems():
       row = [ctype, component_name]
+      if ctype == 'spouts':
+        row.append(len(spouts_instance[component_name]))
+      else:
+        row.append(len(bolts_instance[component_name]))
       row.append(','.join(inputs.get(component_name, ['-'])))
       row.append(','.join(outputs.get(component_name, ['-'])))
       info.append(row)
-  header = ['type', 'name', 'input', 'output']
+  header = ['type', 'name', '#instances', 'input', 'output']
   print(tabulate(info, headers=header))
   return True
 
@@ -119,30 +115,31 @@ def dump_spouts(spouts, topo_loc):
   return True
 
 
-def run(cl_args, bolts_only, spouts_only):
+def run(cl_args, compo_type):
   cluster, role, env = cl_args['cluster'], cl_args['role'], cl_args['environ']
   topology = cl_args['topology-name']
   topo_loc = [cluster, role, env, topology]
   try:
     components = get_logical_plan(cluster, env, topology, role)
     bolts, spouts = components["bolts"], components["spouts"]
-    if not bolts_only and not spouts_only:
-      return dump_components(components)
-    if bolts_only:
+    if compo_type == 'bolts':
       return dump_bolts(bolts, topo_loc)
-    else:
+    if compo_type == 'spouts':
       return dump_spouts(spouts, topo_loc)
+    else:
+      topo_info = get_topology_info(cluster, env, topology, role)
+      return dump_components(components, topo_info)
   except:
     return False
 
 
 def run_components(command, parser, cl_args, unknown_args):
-  return run(cl_args, False, False)
+  return run(cl_args, 'all')
 
 
 def run_spouts(command, parser, cl_args, unknown_args):
-  return run(cl_args, False, True)
+  return run(cl_args, 'spouts')
 
 
 def run_bolts(command, parser, cl_args, unknown_args):
-  return run(cl_args, True, False)
+  return run(cl_args, 'bolts')
