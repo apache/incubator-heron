@@ -169,7 +169,7 @@ class HeronExecutor:
   def get_metricsmgr_cmd(self, id, sink_config_file, port):
     metricsmgr_main_class = 'com.twitter.heron.metricsmgr.MetricsManager'
 
-    metricsmgr_cmd = ['%s/bin/java' % self.heron_java_home,
+    metricsmgr_cmd = [os.path.join(self.heron_java_home, 'bin/java'),
                       # We could not rely on the default -Xmx setting, which could be very big,
                       # for instance, the default -Xmx in Twitter mesos machine is around 18GB
                       '-Xmx1024M',
