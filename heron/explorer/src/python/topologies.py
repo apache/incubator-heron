@@ -43,7 +43,7 @@ def create_parser(subparsers):
 
 
 # only working with updated tracker
-def pp_table(result):
+def to_table(result):
   max_count = 20
   info, count = [], 0
   for role, envs_topos in result.iteritems():
@@ -68,7 +68,7 @@ def show_cluster(cluster):
     result = result[cluster]
   except Exception:
     return False
-  table, rest_count = pp_table(result)
+  table, rest_count = to_table(result)
   print('Topologies running in cluster \'%s\'' % cluster)
   if rest_count:
     print('  with %d more...' % rest_count)
@@ -85,7 +85,7 @@ def show_cluster_role(cluster, role):
     result = result[cluster]
   except Exception:
     return False
-  table, rest_count = pp_table(result)
+  table, rest_count = to_table(result)
   print('Topologies running in cluster \'%s\' submitted by \'%s\':' % (cluster, role))
   if rest_count:
     print('  with %d more...' % rest_count)
@@ -102,7 +102,7 @@ def show_cluster_role_env(cluster, role, env):
     result = result[cluster]
   except Exception:
     return False
-  table, rest_count = pp_table(result)
+  table, rest_count = to_table(result)
   print('Topologies running in cluster \'%s\', submitted by \'%s\', and under environment \'%s\':' % (cluster, role, env))
   if rest_count:
     print('  with %d more...' % rest_count)
