@@ -13,11 +13,11 @@
 # limitations under the License.
 
 import heron.explorer.src.python.args as args
-import tornado.gen
-import tornado.ioloop
 from heron.common.src.python.color import Log
-from heron.common.src.python.handler.access import heron as API
 from tabulate import tabulate
+from heron.explorer.src.python.utils import get_cluster_topologies
+from heron.explorer.src.python.utils import get_cluster_role_topologies
+from heron.explorer.src.python.utils import get_cluster_role_env_topologies
 
 
 # subsubparsers for roles and env are currently not supported
@@ -40,38 +40,6 @@ def create_parser(subparsers):
   args.add_config(parser)
   parser.set_defaults(subcommand='topologies')
   return subparsers
-
-
-def get_cluster_topologies(cluster):
-  instance = tornado.ioloop.IOLoop.instance()
-  try:
-    return instance.run_sync(lambda: API.get_cluster_topologies(cluster))
-  except Exception as ex:
-    Log.error(str(ex))
-    Log.error('Failed to retrive topologies running in cluster \'%s\'' % cluster)
-    raise
-
-
-def get_cluster_role_topologies(cluster, role):
-  instance = tornado.ioloop.IOLoop.instance()
-  try:
-    return instance.run_sync(lambda: API.get_cluster_role_topologies(cluster, role))
-  except Exception as ex:
-    Log.error(str(ex))
-    Log.error('Failed to retrive topologies running in cluster'
-              '\'%s\' submitted by %s' % (cluster, role))
-    raise
-
-
-def get_cluster_role_env_topologies(cluster, role, env):
-  instance = tornado.ioloop.IOLoop.instance()
-  try:
-    return instance.run_sync(lambda: API.get_cluster_role_env_topologies(cluster, role, env))
-  except Exception as ex:
-    Log.error(str(ex))
-    Log.error('Failed to retrive topologies running in cluster'
-              '\'%s\' submitted by %s under environment %s' % (cluster, role, env))
-    raise
 
 
 # only working with updated tracker

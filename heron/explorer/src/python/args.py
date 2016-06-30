@@ -66,6 +66,7 @@ def add_config(parser):
 
   return parser
 
+
 def add_titles(parser):
   parser._positionals.title = "Required arguments"
   parser._optionals.title = "Optional arguments"
@@ -188,10 +189,10 @@ def add_cluster_role_env(parser):
     metavar='CLUSTER/[ROLE]/[ENV]')
   return parser
 
+
 def add_topology_name(parser):
   parser.add_argument(
     'topology-name',
     help='topology name'
   )
   return parser
-

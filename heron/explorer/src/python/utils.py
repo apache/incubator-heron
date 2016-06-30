@@ -216,7 +216,6 @@ def parse_cluster_role_env(cluster_role_env, config_path):
     Log.info("Config path cluster directory does not exist: %s" % config_path)
     no_config = True
 
-
   # if cluster/role/env is not completely provided, check further
   if len(parts) < 3:
     if no_config:
@@ -323,6 +322,7 @@ def check_release_file_exists():
 
   return True
 
+
 def get_logical_plan(cluster, env, topology, role):
   instance = tornado.ioloop.IOLoop.instance()
   try:
@@ -332,6 +332,7 @@ def get_logical_plan(cluster, env, topology, role):
     Log.error('Failed to retrive logical plan info of topology \'%s\''
               % ('/'.join([cluster, role, env, topology])))
     raise
+
 
 def get_topology_info(*args):
   instance = tornado.ioloop.IOLoop.instance()
@@ -349,4 +350,3 @@ def get_topology_metrics(*args):
   except Exception as ex:
     Log.error(str(ex))
     raise
-
