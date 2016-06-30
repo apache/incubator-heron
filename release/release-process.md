@@ -21,10 +21,10 @@ title: Release Process
 Steps taken from Maven Release process outlined by [sonatype.org](http://central.sonatype.org/) and summarized below.
 
 1. Request access to publish to com.twitter by creating account and requesting access in [sonatype.org](https://issues.sonatype.org).
-2. Twitter contact needed to confirm access -[see example](https://issues.sonatype.org/browse/OSSRH-22297).
+2. Twitter contact needed to confirm access [(see example)](https://issues.sonatype.org/browse/OSSRH-22297).
 3. Install local GPG/PGP to sign files by following [sonatype instructions](http://central.sonatype.org/pages/requirements.html#sign-files-with-gpgpgp). 
-4. Publish public key [see example](http://central.sonatype.org/pages/working-with-pgp-signatures.html#distributing-your-public-key).
-5. Confirm public key is published [see example](http://pgp.mit.edu/) note leading `0x` required for hex keys).
+4. Publish public key [(see example)](http://central.sonatype.org/pages/working-with-pgp-signatures.html#distributing-your-public-key).
+5. Confirm public key is published [(see example)](http://pgp.mit.edu/). Note leading `0x` required for hex keys.
 
 # Release Steps
 
