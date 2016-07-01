@@ -17,8 +17,6 @@ package com.twitter.heron.simulator.grouping;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.google.protobuf.ByteString;
-
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.HeronTuples;
 
@@ -60,7 +58,7 @@ public class FieldsGrouping extends Grouping {
 
     int taskIndex = 0;
     for (Integer indices : fieldsGroupingIndices) {
-      int hash = getByteStringHashCode(tuple.getValues(indices)) % primeNumber;
+      int hash = getHashCode(tuple.getValues(indices)) % primeNumber;
       taskIndex += hash >= 0 ? hash : hash + primeNumber;
     }
 
@@ -71,13 +69,13 @@ public class FieldsGrouping extends Grouping {
   }
 
   /**
-   * Returns a hash code value for the given ByteString,
+   * Returns a hash code value for the given Object,
    * basing on customized hash method.
    *
-   * @param bs the given
-   * @return the hash code of the ByteString
+   * @param o the given
+   * @return the hash code of the Object
    */
-  protected int getByteStringHashCode(ByteString bs) {
-    return bs.hashCode();
+  protected int getHashCode(Object o) {
+    return o.hashCode();
   }
 }

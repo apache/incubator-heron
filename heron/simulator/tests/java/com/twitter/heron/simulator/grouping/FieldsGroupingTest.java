@@ -78,7 +78,7 @@ public class FieldsGroupingTest {
     FieldsGrouping g = Mockito.spy(new FieldsGrouping(is, schema, taskIds));
 
     Mockito.doReturn(Integer.MIN_VALUE).
-        when(g).getByteStringHashCode(Mockito.any(ByteString.class));
+        when(g).getHashCode(Mockito.any(ByteString.class));
     g.getListToSend(tuple);
     Assert.assertTrue(true);
 
@@ -89,7 +89,7 @@ public class FieldsGroupingTest {
     FieldsGrouping customizedPrimeNumberGrouping =
         Mockito.spy(new FieldsGrouping(is, schema, taskIds, primeNumber));
     Mockito.doReturn(mockHashCode).
-        when(customizedPrimeNumberGrouping).getByteStringHashCode(Mockito.any(ByteString.class));
+        when(customizedPrimeNumberGrouping).getHashCode(Mockito.any(ByteString.class));
     customizedPrimeNumberGrouping.getListToSend(tuple);
     Assert.assertTrue(true);
   }
