@@ -19,7 +19,7 @@ from heron.common.src.python.color import Log
 from heron.proto import physical_plan_pb2
 
 
-class HeronInstance:
+class HeronInstance(object):
   def __init__(self, topology_name, topology_id, instance, stream_port, metrics_port):
     self.topology_name = topology_name
     self.topology_id = topology_id

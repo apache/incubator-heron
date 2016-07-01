@@ -22,7 +22,7 @@ from heron.common.src.python.color import Log
 from google.protobuf.message import Message
 
 
-class HeronProtocol:
+class HeronProtocol(object):
   # TODO: check endian
   INT_PACK_FMT = ">I"
   HEADER_SIZE = 4
@@ -102,7 +102,7 @@ class HeronProtocol:
 
     return typename, reqid, serialized_msg
 
-class IncomingPacket:
+class IncomingPacket(object):
   def __init__(self):
     self.header = ''
     self.data = ''
@@ -165,7 +165,7 @@ class IncomingPacket:
            repr(self.is_header_read) + ", complete: " + repr(self.is_complete)
 
 
-class REQID:
+class REQID(object):
   REQID_SIZE = 32
 
   def __init__(self, data_bytes):

@@ -15,7 +15,7 @@ import Queue
 
 from heron.common.src.python.color import Log
 
-class HeronCommunicator:
+class HeronCommunicator(object):
   def __init__(self, producer=None, consumer=None):
     self._producer = producer
     self._consumer = consumer

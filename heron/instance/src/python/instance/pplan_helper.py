@@ -15,7 +15,7 @@ import socket
 
 from heron.proto import topology_pb2
 
-class PhysicalPlanHelper:
+class PhysicalPlanHelper(object):
   def __init__(self, pplan, instance_id):
     self.pplan = pplan
     self.my_instance_id = instance_id
