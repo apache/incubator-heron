@@ -80,6 +80,7 @@ public class FieldsGroupingTest {
     Mockito.doReturn(Integer.MIN_VALUE).
         when(g).getHashCode(Mockito.any(ByteString.class));
     g.getListToSend(tuple);
+    // Assert True here to make Test Tool take this test case into account
     Assert.assertTrue(true);
   }
 
