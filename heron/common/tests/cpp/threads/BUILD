@@ -5,7 +5,7 @@ cc_test(
     srcs = ["spcountdownlatch_unittest.cpp"],
     deps = [
         "//heron/common/src/cpp/threads:threads-cxx",
-        "//3rdparty/gtest:gtest-cxx",
+        "//third_party/gtest:gtest-cxx",
     ],
     copts = [
         "-Iheron/common/src/cpp",

@@ -323,6 +323,10 @@ public class Keys {
     return ConfigKeys.get("SANDBOX_PACKING_YAML");
   }
 
+  public static String overrideSandboxFile() {
+    return ConfigKeys.get("SANDBOX_OVERRIDE_YAML");
+  }
+
   public static String schedulerSandboxFile() {
     return ConfigKeys.get("SANDBOX_SCHEDULER_YAML");
   }

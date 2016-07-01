@@ -9,7 +9,7 @@ To observe Heron's runtime metrics, you can integrate Heron and the Heron UI wit
 To accomplish this, you need to do the following:
 
 * Export topology metrics from Heron
-* Gather Mesos, Aurora and Linux metrics with Diamond
+* Gather Aurora and Linux metrics with Diamond
 * Set up a scripted dashboard with Grafana
 * Configure the Heron UI to link to Grafana
 
@@ -18,10 +18,10 @@ To accomplish this, you need to do the following:
 Heron supports custom metric exporters from the Metrics Manager. You can build your own metrics sink
 or use the [provided Graphite sink](/docs/contributors/custom-metrics-sink/).
 
-### Gathering Metrics From Mesos & Aurora
+### Gathering Metrics From Aurora
 
 In addition to the topology-specific data available from Heron, much more data is available directly
-from Mesos, Aurora and the Linux kernel. These can help identify many operational problems, such as
+from Aurora and the Linux kernel. These can help identify many operational problems, such as
 CPU throttling or crashes.
 
 A common way to collect data from these sources is via a system metrics collection daemon such as
@@ -29,11 +29,7 @@ A common way to collect data from these sources is via a system metrics collecti
 
 Diamond has the following relevant collectors available:
 
-* [Mesos](https://github.com/python-diamond/Diamond/tree/master/src/collectors/mesos)
 * [Aurora](https://github.com/python-diamond/Diamond/tree/master/src/collectors/aurora)
-* [Cgroups](https://github.com/python-diamond/Diamond/tree/master/src/collectors/mesos_cgroup)
-(Requires the use of [cgroup isolation](http://mesos.apache.org/documentation/latest/configuration/)
-in Mesos)
 
 
 ### Creating A Scripted Grafana Dashboard

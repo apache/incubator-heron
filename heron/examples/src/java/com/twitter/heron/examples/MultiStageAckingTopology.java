@@ -138,7 +138,7 @@ public final class MultiStageAckingTopology {
       ++nItems;
       if (nItems % 10000 == 0) {
         long latency = System.currentTimeMillis() - startTime;
-        System.out.println("Done " + nItems + " in " + latency);
+        System.out.println("Bolt processed " + nItems + " tuples in " + latency + " ms");
         GlobalMetrics.incr("selected_items");
       }
       if (emit) {

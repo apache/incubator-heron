@@ -2,7 +2,7 @@ FROM centos:centos7
 
 # This is passed to the heron build command via the --config flag
 ENV TARGET_PLATFORM centos
-
+ENV bazelVersion 0.2.3
 ENV JAVA_VERSION 8u31
 ENV BUILD_VERSION b13
 
@@ -22,9 +22,7 @@ RUN yum -y install \
       make \
       patch \
       python \
-      python2.7-dev \
-      python-software-properties \
-      software-properties-common \
+      python-devel \
       python-setuptools \
       zip \
       unzip \
@@ -41,7 +39,7 @@ RUN alternatives --install /usr/bin/javac javac /usr/java/latest/bin/javac 20000
 
 ENV JAVA_HOME /usr/java/latest
 
-RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh \
+RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/$bazelVersion/bazel-$bazelVersion-installer-linux-x86_64.sh \
       && chmod +x /tmp/bazel.sh \
       && /tmp/bazel.sh
 

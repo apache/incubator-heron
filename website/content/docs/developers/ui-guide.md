@@ -25,7 +25,7 @@ Below is the home page of Heron UI.
 The following information or actions can be found on this page.
 
 1. List of all topologies
-2. Number of topologies fitered after search (total by default)
+2. Number of topologies filtered after search (total by default)
 3. A topology's overview
 4. Filter the topologies using `cluster`
 5. Filter the topologies using string matching in names, clusters, environs,

@@ -1,5 +1,3 @@
-#!/bin/bash -e
-
 # Copyright 2015 The Bazel Authors. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Set help URL
+getting_started_url=http://heronstreaming.io/docs/getting-started
+
 # Heron self-extractable installer for api package
 function usage() {
   echo "Usage: $progname [options]" >&2
@@ -25,74 +26,12 @@ function usage() {
   exit 1
 }
 
-function test_write() {
-  local file="$1"
-  while [ "$file" != "/" ] && [ -n "${file}" ] && [ ! -e "$file" ]; do
-    file="$(dirname "${file}")"
-  done
-  [ -w "${file}" ] || {
-    echo >&2
-    echo "The Heron installer must have write access to $1!" >&2
-    echo >&2
-    usage
-  }
-}
-
-# Test for unzip dependencies
-function check_unzip() {
-  if ! which unzip >/dev/null; then
-    echo >&2
-    echo "unzip not found, please install the corresponding package." >&2
-    echo "See http://heronstreaming.io/docs/install.html for more information on" >&2
-    echo "dependencies of Heron." >&2
-    exit 1
-  fi
-}
-
-# Test for tar dependencies
-function check_tar() {
-  if ! which tar >/dev/null; then
-    echo >&2
-    echo "tar not found, please install the corresponding package." >&2
-    echo "See http://heronstreaming.io/docs/install.html for more information on" >&2
-    echo "dependencies of Heron." >&2
-    exit 1
-  fi
-}
-
 # Test for maven dependencies
 function check_maven() {
   if ! which mvn >/dev/null; then
      echo >&2
      echo "maven not found, please install the corresponding package." >&2
-    echo "See http://heronstreaming.io/docs/install.html for more information on" >&2
-    echo "dependencies of Heron." >&2
-    exit 1
-  fi
-}
-
-# Test for java dependencies
-function check_java() {
-  if [ -z "${JAVA_HOME-}" ]; then
-    case "$(uname -s | tr 'A-Z' 'a-z')" in
-      linux)
-        JAVA_HOME="$(readlink -f $(which javac) 2>/dev/null | sed 's_/bin/javac__')" || true
-        BASHRC="~/.bashrc"
-        ;;
-      freebsd)
-        JAVA_HOME="/usr/local/openjdk8"
-        BASHRC="~/.bashrc"
-        ;;
-      darwin)
-        JAVA_HOME="$(/usr/libexec/java_home -v ${JAVA_VERSION}+ 2> /dev/null)" || true
-        BASHRC="~/.bash_profile"
-        ;;
-    esac
-  fi
-  if [ ! -x "${JAVA_HOME}/bin/javac" ]; then
-    echo >&2
-    echo "Java not found, please install the corresponding package" >&2
-    echo "See http://heronstreaming.io/docs/install.html for more information on" >&2
+    echo "See $getting_started_url for more information on" >&2
     echo "dependencies of Heron." >&2
     exit 1
   fi
@@ -114,7 +53,7 @@ function install_to_local() {
   echo -n .
 
   unzip -q -o "${BASH_SOURCE[0]}" -d "${base}"
-  tar xfz "${base}/heron-api.tar.gz" -C "${base}"
+  untar ${base}/heron-api.tar.gz ${base}
   echo -n .
   chmod -R og-w "${base}"
   chmod -R og+rX "${base}"
@@ -130,11 +69,14 @@ function install_to_maven() {
   # Uncompress from zip
   tmp_dir=`mktemp -d -t heron.XXXX`
   unzip -q -o "${BASH_SOURCE[0]}" -d "${tmp_dir}"
-  tar xfz "${tmp_dir}/heron-api.tar.gz" -C "${tmp_dir}"
+  untar ${tmp_dir}/heron-api.tar.gz ${tmp_dir}
 
   # Install into maven local
   mvn install:install-file -q -Dfile="${tmp_dir}/heron-api.jar" -DgroupId="com.twitter.heron" \
     -DartifactId="heron-api" -Dversion="SNAPSHOT" -Dpackaging="jar"
+
+  mvn install:install-file -q -Dfile="${tmp_dir}/heron-spi.jar" -DgroupId="com.twitter.heron" \
+    -DartifactId="heron-spi" -Dversion="SNAPSHOT" -Dpackaging="jar"
 
   mvn install:install-file -q -Dfile="${tmp_dir}/heron-storm.jar" -DgroupId="com.twitter.heron" \
     -DartifactId="heron-storm" -Dversion="SNAPSHOT" -Dpackaging="jar"
@@ -188,7 +130,7 @@ cat <<EOF
 
 Heron API is now installed!
 
-See http://heronstreaming.io/docs/getting-started.html for how to use Heron.
+See ${getting_started_url} for how to use Heron.
 EOF
 echo
 cat <<'EOF'

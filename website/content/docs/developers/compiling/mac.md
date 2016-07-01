@@ -17,8 +17,9 @@ $ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/inst
 ### Step 2 --- Install other required libraries
 
 ```bash
-$ brew install automake
-$ brew install cmake
+brew install automake
+brew install cmake
+brew install libtool
 ```
 
 ### Step 3 --- Set the following environment variables
@@ -29,12 +30,12 @@ $ export CXX=/usr/bin/clang++
 $ echo $CC $CXX
 ```
 
-### Step 4 --- Install Bazel
+#### Step 4 - Install Bazel {{% bazelVersion %}}
 
 ```bash
-$ curl -O -L https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-darwin-x86_64.sh
-$ chmod +x bazel-0.1.2-installer-darwin-x86_64.sh
-$ ./bazel-0.1.2-installer-darwin-x86_64.sh --user
+wget -O /tmp/bazel.sh  https://github.com/bazelbuild/bazel/releases/download/0.2.3/bazel-0.2.3-installer-darwin-x86_64.sh
+chmod +x /tmp/bazel.sh
+/tmp/bazel.sh --user
 ```
 
 ### Step 5 --- Make sure the Bazel executable is on your `PATH`

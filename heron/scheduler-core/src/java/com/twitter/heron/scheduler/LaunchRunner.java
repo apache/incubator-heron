@@ -23,8 +23,8 @@ import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.common.PackingPlan;
 import com.twitter.heron.spi.packing.IPacking;
+import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.Runtime;
@@ -119,11 +119,16 @@ public class LaunchRunner implements Callable<Boolean> {
     // get the packed plan
     packing.initialize(config, runtime);
     PackingPlan packedPlan = packing.pack();
+    if (packedPlan == null) {
+      LOG.severe("Failed to pack a valid PackingPlan. Check the config.");
+      return false;
+    }
 
     // Add the instanceDistribution to the runtime
     Config ytruntime = Config.newBuilder()
         .putAll(runtime)
         .put(Keys.instanceDistribution(), packedPlan.getInstanceDistribution())
+        .put(Keys.componentRamMap(), packedPlan.getComponentRamDistribution())
         .build();
 
     // initialize the launcher

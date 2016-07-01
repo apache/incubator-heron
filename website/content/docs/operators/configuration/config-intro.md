@@ -1,17 +1,21 @@
 ---
-title: Intro to Heron Configuration
+title: Intro to Heron Cluster Configuration
 ---
 
-Heron can be configured at two levels:
+Heron clusters can be configured at two levels:
 
 1. **The system level** --- System-level configurations apply to the whole
-Heron cluster rather than to any specific topology.
-2. **The topology level** --- Topology configurations apply only to a
-specific topology and can be modified at any stage of the topology's
-[lifecycle](../../../concepts/topologies#topology-lifecycle).
+Heron cluster rather than to any specific component (e.g. logging configurations).
+2. **The component level** --- Component-level configurations enable you to establish 
+default configurations for different components. 
+These configurations are fixed at any stage of the topology's
+[lifecycle](../../../concepts/topologies#topology-lifecycle), once the topology
+is deployed.
 
-All system-level configs and topology-level defaults are declared in a
-[YAML](http://www.yaml.org/) config file in `heron/config/heron_internals.yaml`
+Neither system- nor component-level configurations can be overridden by topology developers.
+
+All system-level configs and component-level defaults are declared in a
+[YAML](http://www.yaml.org/) config file in `heron/config/src/yaml/conf/{cluster}/heron_internals.yaml`
 in the Heron codebase. You can leave that file as is when [compiling
 Heron](../../../developers/compiling) or modify the values to suit your use
 case.
@@ -21,35 +25,23 @@ case.
 There are a small handful of system-level configs for Heron. These are detailed
 in [System-level Configuration](../system).
 
-## The Topology Level
+## The Component Level
 
-There is a wide variety of topology-level configurations that you can establish
+There is a wide variety of component-level configurations that you can establish
 as defaults in your Heron cluster. These configurations tend to apply to
 specific components in a topology and are detailed in the docs below:
 
 * [Heron Instance](../instance)
 * [Heron Metrics Manager](../metrics-manager)
-* [Heron Topology Master](../tmaster)
 * [Heron Stream Manager](../stmgr)
+* [Heron Topology Master](../tmaster)
 
-### Overriding Topology-level Defaults
+### Overriding Heron Cluster Configuration
 
-The parameters set in `heron/config/heron_internals.yaml` are defaults that
-will be automatically applied to all topologies in your cluster. You can
-override these values on a per-topology basis using **scheduler overrides**.
-These overrides are the second argument in all topology management commands and
-have the following syntax:
-
-    param1:value1 param2:value2 param3:value3 ...
-
-Here's an example:
-
-```bash
-$ heron-cli submit "topology.debug:false heron.local.working.directory:/path/to/dir" \
-    /path/to/topology/my-topology.jar \
-    biz.acme.topologies.MyTopology \
-    my-topology
-```
+The Heron configuration applies globally to a cluster. 
+It is discouraged to modify the configuration to suit one topology.
+It is not possible to override the Heron configuration
+for a topology via Heron client or other Heron tools.
 
 More on Heron's CLI tool can be found in [Managing Heron
-Topologies](../../../../heron-cli).
+Topologies](../../heron-cli).

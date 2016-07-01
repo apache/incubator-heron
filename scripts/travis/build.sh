@@ -6,6 +6,9 @@
 
 set -e
 
+DIR=`dirname $0`
+source ${DIR}/common.sh
+
 # verify that jars have not been added to the repo
 JARS=`find . -name "*.jar"`
 if [ "$JARS" ]; then
@@ -15,9 +18,9 @@ if [ "$JARS" ]; then
 fi
 
 # verify that eggs have not been added to the repo
-# ./3rdparty/pex/wheel-0.23.0-py2.7.egg should be the only one
+# ./third_party/pex/wheel-0.23.0-py2.7.egg should be the only one
 set +e
-EGGS=`find . -name "*.egg" | grep -v "3rdparty/pex/wheel"`
+EGGS=`find . -name "*.egg" | grep -v "third_party/pex/wheel"`
 set -e
 if [ "$EGGS" ]; then
   echo 'ERROR: The following eggs were found in the repo, which is not permitted. Python dependencies should be added using the "reqs" attribute:'
@@ -26,9 +29,9 @@ if [ "$EGGS" ]; then
 fi
 
 # verify that wheels have not been added to the repo
-# ./3rdparty/pex/setuptools-18.0.1-py2.py3-none-any.whl should be the only one
+# ./third_party/pex/setuptools-18.0.1-py2.py3-none-any.whl should be the only one
 set +e
-WHEELS=`find . -name "*.whl" | grep -v "3rdparty/pex/setuptools"`
+WHEELS=`find . -name "*.whl" | grep -v "third_party/pex/setuptools"`
 set -e
 if [ "$WHEELS" ]; then
   echo 'ERROR: The following wheels were found in the repo, which is not permitted. Python dependencies should be added using the "reqs" attribute:'
@@ -46,15 +49,32 @@ cat ~/.bazelrc >> tools/travis-ci/bazel.rc
 ./bazel_configure.py
 
 # build heron
-bazel --bazelrc=tools/travis-ci/bazel.rc build heron/...
+T="heron build"
+start_timer "$T"
+python ${DIR}/save-logs.py "heron_build.txt" bazel --bazelrc=tools/travis-ci/bazel.rc build heron/...
+end_timer "$T"
 
 # run heron unit tests
-bazel --bazelrc=tools/travis-ci/bazel.rc test --test_tag_filters=-flaky heron/...
+T="heron test non-flaky"
+start_timer "$T"
+python ${DIR}/save-logs.py "heron_test_non_flaky.txt" bazel --bazelrc=tools/travis-ci/bazel.rc test --test_tag_filters=-flaky heron/...
+end_timer "$T"
 
 # flaky tests are often due to test port race conditions, which should be fixed. For now, run them serially
-bazel --bazelrc=tools/travis-ci/bazel.rc test --test_tag_filters=flaky --jobs=0 heron/...
+T="heron test flaky"
+start_timer "$T"
+python ${DIR}/save-logs.py "heron_test_flaky.txt" bazel --bazelrc=tools/travis-ci/bazel.rc test --test_tag_filters=flaky --jobs=0 heron/...
+end_timer "$T"
 
 # build packages
-bazel --bazelrc=tools/travis-ci/bazel.rc build scripts/packages:tarpkgs
-bazel --bazelrc=tools/travis-ci/bazel.rc build scripts/packages:binpkgs
+T="heron build tarpkgs"
+start_timer "$T"
+python ${DIR}/save-logs.py "heron_build_tarpkgs.txt" bazel --bazelrc=tools/travis-ci/bazel.rc build scripts/packages:tarpkgs
+end_timer "$T"
 
+T="heron build binpkgs"
+start_timer "$T"
+python ${DIR}/save-logs.py "heron_build_binpkgs.txt" bazel --bazelrc=tools/travis-ci/bazel.rc build scripts/packages:binpkgs
+end_timer "$T"
+
+print_timer_summary

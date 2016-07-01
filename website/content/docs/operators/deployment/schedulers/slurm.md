@@ -2,23 +2,23 @@
 title: Slurm Cluster (Experimental)
 ---
 
-In addition to out-of-the-box schedulers for [Mesos](../mesos) and
+In addition to out-of-the-box scheduler for
 [Aurora](../aurora), Heron can also be deployed in a HPC cluster with the Slurm Scheduler.
 This allows a researcher to deploy Heron and execute streaming scientific work-flows.
 
 ## How Slurm Deployment Works
 
-Using the Slurm scheduler is similar to deploying Heron on other systems. The Heron 
-(../../heron-cli) cli is used to deploy and manage topologies similar to other 
+Using the Slurm scheduler is similar to deploying Heron on other systems. The Heron
+(../../heron-cli) cli is used to deploy and manage topologies similar to other
 schedulers. The main difference is in the configuration.
 
 A set of default configuration files are provided with Heron in the [conf/slurm]
-(https://github.com/twitter/heron/tree/master/heron/config/src/yaml/conf/slurm) directory. 
+(https://github.com/twitter/heron/tree/master/heron/config/src/yaml/conf/slurm) directory.
 The default configuration uses the local file system based state manager. It is
 possible that the local file system is mounted using NFS.
 
-When a Heron topology is submitted, the Slurm scheduler allocates the nodes required to 
-run the job and starts the Heron processes in those nodes. It uses a `slurm.sh` script found in 
+When a Heron topology is submitted, the Slurm scheduler allocates the nodes required to
+run the job and starts the Heron processes in those nodes. It uses a `slurm.sh` script found in
 [conf/slum](https://github.com/twitter/heron/tree/master/heron/config/src/yaml/conf/slurm)
 directory to submit the topoloy as a batch job to the slurm scheduler.
 
@@ -66,7 +66,7 @@ heron.scheduler.is.service: False
 ```
 
 ## Slurm Script `slurm.sh`
-   
-The script `slurm.sh` is used by the scheduler to submit the Heron job to the Slurm scheduler. 
+
+The script `slurm.sh` is used by the scheduler to submit the Heron job to the Slurm scheduler.
 Edit this file to set specific slurm settings like time, account. The script and `scheduler.yaml`
-must be included with other cluster configuration files. 
+must be included with other cluster configuration files.

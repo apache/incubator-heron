@@ -99,6 +99,10 @@ public class MetricsManagerClient extends HeronClient {
 
   // Send out all the data
   public void sendAllMessage() {
+    if (!isConnected()) {
+      return;
+    }
+
     LOG.info("Flushing all pending data in MetricsManagerClient");
     // Collect all tuples in queue
     for (Communicator<Metrics.MetricPublisherPublishMessage> c : outMetricsQueues) {

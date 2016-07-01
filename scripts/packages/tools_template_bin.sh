@@ -1,5 +1,3 @@
-#!/bin/bash -e
-
 # Copyright 2015 The Bazel Authors. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +13,9 @@
 # limitations under the License.
 
 # Heron self-extractable installer for tools package
+
+# Set help URL
+getting_started_url=http://heronstreaming.io/docs/getting-started
 
 # Installation and etc prefix can be overriden from command line
 install_prefix=${1:-"/usr/local/herontools"}
@@ -56,63 +57,7 @@ done
 bin="${bin//%prefix%/${prefix}}"
 base="${base//%prefix%/${prefix}}"
 
-function test_write() {
-  local file="$1"
-  while [ "$file" != "/" ] && [ -n "${file}" ] && [ ! -e "$file" ]; do
-    file="$(dirname "${file}")"
-  done
-  [ -w "${file}" ] || {
-    echo >&2
-    echo "The Heron installer must have write access to $1!" >&2
-    echo >&2
-    usage
-  }
-}
-
-# Test for dependencies
-# unzip
-if ! which unzip >/dev/null; then
-  echo >&2
-  echo "unzip not found, please install the corresponding package." >&2
-  echo "See http://heronstreaming.io/docs/install.html for more information on" >&2
-  echo "dependencies of Heron." >&2
-  exit 1
-fi
-
-# Test for dependencies
-# tar
-if ! which tar >/dev/null; then
-  echo >&2
-  echo "tar not found, please install the corresponding package." >&2
-  echo "See http://heronstreaming.io/docs/install.html for more information on" >&2
-  echo "dependencies of Heron." >&2
-  exit 1
-fi
-
-# java
-if [ -z "${JAVA_HOME-}" ]; then
-  case "$(uname -s | tr 'A-Z' 'a-z')" in
-    linux)
-      JAVA_HOME="$(readlink -f $(which javac) 2>/dev/null | sed 's_/bin/javac__')" || true
-      BASHRC="~/.bashrc"
-      ;;
-    freebsd)
-      JAVA_HOME="/usr/local/openjdk8"
-      BASHRC="~/.bashrc"
-      ;;
-    darwin)
-      JAVA_HOME="$(/usr/libexec/java_home -v ${JAVA_VERSION}+ 2> /dev/null)" || true
-      BASHRC="~/.bash_profile"
-      ;;
-  esac
-fi
-if [ ! -x "${JAVA_HOME}/bin/javac" ]; then
-  echo >&2
-  echo "Java not found, please install the corresponding package" >&2
-  echo "See http://heronstreaming.io/docs/install.html for more information on" >&2
-  echo "dependencies of Heron." >&2
-  exit 1
-fi
+check_unzip; check_tar; check_java
 
 # Test for write access
 test_write "${bin}"
@@ -136,7 +81,7 @@ mkdir -p ${bin} ${base}
 echo -n .
 
 unzip -q -o "${BASH_SOURCE[0]}" -d "${base}"
-tar xfz "${base}/heron-tools.tar.gz" -C "${base}"
+untar ${base}/heron-tools.tar.gz ${base}
 echo -n .
 chmod 0755 ${base}/bin/heron-tracker ${base}/bin/heron-ui
 echo -n .
@@ -155,9 +100,9 @@ cat <<EOF
 
 Heron Tools is now installed!
 
-Make sure you have "${bin}" in your path. 
+Make sure you have "${bin}" in your path.
 
-See http://heronstreaming.io/docs/getting-started.html for how to use Heron.
+See ${getting_started_url} for how to use Heron.
 EOF
 echo
 cat <<'EOF'

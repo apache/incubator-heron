@@ -5,7 +5,7 @@ cc_test(
     srcs = ["fileutils_unittest.cpp"],
     deps = [
         "//heron/common/src/cpp/basics:basics-cxx",
-        "//3rdparty/gtest:gtest-cxx",
+        "//third_party/gtest:gtest-cxx",
     ],
     copts = [
         "-I.",
@@ -20,7 +20,7 @@ cc_test(
     srcs = ["rid_unittest.cpp"],
     deps = [
         "//heron/common/src/cpp/basics:basics-cxx",
-        "//3rdparty/gtest:gtest-cxx",
+        "//third_party/gtest:gtest-cxx",
     ],
     copts = [
         "-I.",
@@ -35,7 +35,7 @@ cc_test(
     srcs = ["strutils_unittest.cpp"],
     deps = [
         "//heron/common/src/cpp/basics:basics-cxx",
-        "//3rdparty/gtest:gtest-cxx",
+        "//third_party/gtest:gtest-cxx",
     ],
     copts = [
         "-I.",
@@ -50,7 +50,7 @@ cc_test(
     srcs = ["utils_unittest.cpp"],
     deps = [
         "//heron/common/src/cpp/basics:basics-cxx",
-        "//3rdparty/gtest:gtest-cxx",
+        "//third_party/gtest:gtest-cxx",
     ],
     copts = [
         "-I.",

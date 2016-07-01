@@ -49,17 +49,26 @@ $ bazel query 'kind("pex_test rule", ...)'
 
 ### Running Integration Tests
 
-Integration tests are divided into two categories
+Integration tests are divided into two categories:
 
 * Functional integration tests
+
+    These integration tests are designed for testing the functionality of 
+    Heron, such as topologies and groupings.
+    To run the functional integration tests on a Mac OS X, do the following:
+
+    ```bash
+    $ ./scripts/run_integration_test.sh
+    ```
+
 * Failure integration tests
 
-To run the failure integration tests on your Mac OS X, do the following:
+    These integration tests are designed for testing recovery from failure/restart
+    in certain processes, such as Topology Master and Metrics Manager.
+    To run the failure integration tests on a Mac OS X, do the following:
 
-```
-bazel run --config=darwin -- scripts/packages:heron-client-install.sh --user
+    ```bash
+    $ bazel build --config=darwin integration-test/src/...
 
-bazel build --config=dawrin integration-test/src/...
-
-python integration-test/src/python/local_test_runner/main.py
-```
+    $ python integration-test/src/python/local_test_runner/main.py
+    ```

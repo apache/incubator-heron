@@ -40,17 +40,17 @@ cc_library(
         "basics.h",
     ],
     copts = [
-        "-I3rdparty",
+        "-Ithird_party",
         "-Iheron/common/src/cpp",
         "-I.",
     ],
     deps = [
         "//config:config-cxx",
-        "//3rdparty/glog:glog-cxx",
-        "//3rdparty/gperftools:tcmalloc-cxx",
-        "//3rdparty/jansson:jansson-cxx",
-        "//3rdparty/kashmir:kashmir-cxx",
-        "//3rdparty/protobuf:protobuf-cxx",
+        "//third_party/glog:glog-cxx",
+        "//third_party/gperftools:tcmalloc-cxx",
+        "//third_party/jansson:jansson-cxx",
+        "//third_party/kashmir:kashmir-cxx",
+        "//third_party/protobuf:protobuf-cxx",
     ],
     linkstatic = 1,
 )

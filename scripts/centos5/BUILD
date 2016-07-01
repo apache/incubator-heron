@@ -125,10 +125,10 @@ genrule(
         "--cp $(location hzkstatemgr)                lib/statemgr/heron-zookeeper-statemgr.jar",
         "--cp $(location huploader-localfs)          lib/uploader/heron-localfs-uploader.jar",
         "--cp $(location huploader-null)             lib/uploader/heron-null-uploader.jar",
-        "--cp $(location protobuf-java)              lib/3rdparty/$$(basename $(location protobuf-java))",
-        "--cp $(location slf4j-api-java)             lib/3rdparty/$$(basename $(location slf4j-api-java))",
-        "--cp $(location slf4j-jdk-java)             lib/3rdparty/$$(basename $(location slf4j-jdk-java))",
-        "--cp $(location log4j-over-slf4j-java)      lib/3rdparty/$$(basename $(location log4j-over-slf4j-java))",
+        "--cp $(location protobuf-java)              lib/third_party/$$(basename $(location protobuf-java))",
+        "--cp $(location slf4j-api-java)             lib/third_party/$$(basename $(location slf4j-api-java))",
+        "--cp $(location slf4j-jdk-java)             lib/third_party/$$(basename $(location slf4j-jdk-java))",
+        "--cp $(location log4j-over-slf4j-java)      lib/third_party/$$(basename $(location log4j-over-slf4j-java))",
     ]),
     heuristic_label_expansion = False,
     tags = ["manual"],
@@ -169,6 +169,7 @@ genrule(
     srcs = [
         ":release.yaml",
         ":hapi",
+        ":hspi",
         ":hstorm",
     ],
     outs = [
@@ -180,6 +181,7 @@ genrule(
         "$(location package_release.sh)              $(location heron-api.tar.gz)",
         "--cp $(location release.yaml)               release.yaml",
         "--cp $(location hapi)                       heron-api.jar",
+        "--cp $(location hspi)                       heron-spi.jar",
         "--cp $(location hstorm)                     heron-storm.jar",
     ]),
     heuristic_label_expansion = False,
@@ -334,27 +336,32 @@ filegroup(
 
 filegroup(
     name = "protobuf-java",
-    srcs = ["@protobuf-java//jar"],
+    srcs = ["@com_google_protobuf_protobuf_java//jar"],
 )
 
 filegroup(
     name = "slf4j-api-java",
-    srcs = ["@slf4j-api//jar"],
+    srcs = ["@org_slf4j_slf4j_api//jar"],
 )
 
 filegroup(
     name = "slf4j-jdk-java",
-    srcs = ["@slf4j-jdk//jar"],
+    srcs = ["@org_slf4j_slf4j_jdk14//jar"],
 )
 
 filegroup(
     name = "log4j-over-slf4j-java",
-    srcs = ["@log4j-over-slf4j//jar"],
+    srcs = ["@org_slf4j_log4j_over_slf4j//jar"],
 )
 
 filegroup(
     name = "hapi",
     srcs = ["//heron/api/src/java:heron-api"],
+)
+
+filegroup(
+    name = "hspi",
+    srcs = ["//heron/spi/src/java:heron-spi"],
 )
 
 filegroup(
@@ -404,13 +411,15 @@ genrule(
     name = "generate-api-launcher",
     srcs = [
         ":release.yaml",
-        "//scripts/packages:api-template-bin.sh"
+        "//scripts/packages:api-template-bin.sh",
+        "//scripts/packages:bin-common.sh"
     ],
     outs = ["api_launcher_bin.sh"],
     cmd = """
         release_info="$$(cat $(location :release.yaml))"
+        bin_common="$$(cat $(location //scripts/packages:bin-common.sh))"
         template="$$(cat $(location //scripts/packages:api-template-bin.sh))"
-        echo "$${template//%release_info%/$${release_info}}" >$@
+        echo "$${bin_common}\n\n$${template//%release_info%/$${release_info}}" >$@
         """,
 )
 
@@ -418,13 +427,15 @@ genrule(
     name = "generate-client-launcher",
     srcs = [
         ":release.yaml",
-        "//scripts/packages:client-template-bin.sh"
+        "//scripts/packages:client-template-bin.sh",
+        "//scripts/packages:bin-common.sh"
     ],
     outs = ["client_launcher_bin.sh"],
     cmd = """
         release_info="$$(cat $(location :release.yaml))"
+        bin_common="$$(cat $(location //scripts/packages:bin-common.sh))"
         template="$$(cat $(location //scripts/packages:client-template-bin.sh))"
-        echo "$${template//%release_info%/$${release_info}}" >$@
+        echo "$${bin_common}\n\n$${template//%release_info%/$${release_info}}" >$@
         """,
 )
 
@@ -432,13 +443,15 @@ genrule(
     name = "generate-tools-launcher",
     srcs = [
         ":release.yaml",
-        "//scripts/packages:tools-template-bin.sh"
+        "//scripts/packages:tools-template-bin.sh",
+        "//scripts/packages:bin-common.sh"
     ],
     outs = ["tools_launcher_bin.sh"],
     cmd = """
         release_info="$$(cat $(location :release.yaml))"
+        bin_common="$$(cat $(location //scripts/packages:bin_common.sh))"
         template="$$(cat $(location //scripts/packages:tools-template-bin.sh))"
-        echo "$${template//%release_info%/$${release_info}}" >$@
+        echo "$${bin_common}\n\n$${template//%release_info%/$${release_info}}" >$@
         """,
 )
 

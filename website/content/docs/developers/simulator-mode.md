@@ -2,15 +2,14 @@
 title: Simulator Mode
 ---
 
-This page explains how to develop a topology on your local machine.
+Simulator mode is specifically designed for topology developers to easily debug or optimize their 
+topologies.
 
-Simulator mode is specifically designed for topology developers to better debug or optimize their topologies.
+Simulator mode simulates a heron cluster in a single JVM process, which is useful for developing and 
+testing topologies. Running topologies under simulator mode is similar to running topologies on a 
+cluster.
 
-Simulator mode simulates a heron cluster in a single JVM process. This is useful for developing and testing topologies.
-Running topologies under simulator mode is similar to running topologies on a cluster.
-
-With a whole topology running in a single process, you could enjoy all free benefits it brings.
-For example, one can run program in IDE and set breakpoints to examine the states of a topology, or profile your program to optimize it.
+# Develop topology with simulator mode
 
 To use simulator mode, simply use the ``SimulatorMode`` class, which is
 in ``storm-compatibility-unshaded_deploy.jar``  (currently under ``bazel-bin/heron/storm/src/java``).
@@ -22,7 +21,9 @@ import com.twitter.heron.simulator.Simulator;
 Simulator simulator = new Simulator();
 ```
 
-You can then submit topologies using the ``submitTopology`` method on the ``Simulator`` object. Just like the corresponding method on ``StormSubmitter``, ``submitTopology`` takes a name, a topology configuration, and a topology object.
+You can then submit topologies using the ``submitTopology`` method on the ``Simulator`` object. Just
+like the corresponding method on ``StormSubmitter``, ``submitTopology`` takes a name, a topology 
+configuration, and a topology object.
 
 For example:
 
@@ -30,7 +31,7 @@ For example:
 simulator.submitTopology("test", conf, builder.createTopology());
 ```
 
-Other interfaces for simulator mode are:
+Other lifecycle methods to use with simulator mode are:
 
 ```java
 simulator.killTopology("test");
@@ -39,8 +40,22 @@ simulator.deactivate("test");
 simulator.shutdown();
 ```
 
-To kill a topology, you could also simply terminate this process.
+To kill a topology, one could also terminate the process.
 
-An interesting point is that, the simulator mode will run in separate threads other than main thread. All those interfaces are thread-safe. This means that you could invoke these interfaces in other threads and monitor the corresponding behaviors interactively.
+The simulator mode will run in separate threads other than the main thread. All the above methods are 
+thread-safe. This means that one could invoke these methods in other threads and monitor the 
+corresponding behaviors interactively.
 
-You may also want to use visual panels to communicate related information, tips or things users need to be aware of.
+# Debug topology using IntelliJ
+
+Bolts and Spouts run as separate threads in simulator. To add breakpoints inside a bolt/spout, the 
+Suspend Policy of the breakpoint needs to be set as Thread. To change the Suspend Policy, right 
+click on the breakpoint as shown in the following image:
+
+![Set Breakpoint](/img/intellij-set-breakpoint.jpg)
+
+If it's not convenient to check the output and logs in IntelliJ console, save them to a local file 
+by choosing `Run -> Edit Configurations....` as shown in the following image:
+
+![Save Console](/img/intellij-save-console.jpg)
+

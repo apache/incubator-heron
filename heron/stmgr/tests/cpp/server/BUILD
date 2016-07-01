@@ -19,7 +19,7 @@ cc_test(
         "//heron/stmgr/src/cpp:util-cxx",
         # TODO: Stmgr unit tests should not depend on tmaster
         "//heron/tmaster/src/cpp:tmaster-cxx",
-        "//3rdparty/gtest:gtest-cxx",
+        "//third_party/gtest:gtest-cxx",
     ],
     data = ["//heron/config/src/yaml:test-config-internals-yaml"],
     copts = [
