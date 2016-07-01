@@ -81,17 +81,6 @@ public class FieldsGroupingTest {
         when(g).getHashCode(Mockito.any(ByteString.class));
     g.getListToSend(tuple);
     Assert.assertTrue(true);
-
-    // It will not throw exceptions though
-    // (hash code of ByteString + primeNumber) > Integer.MAX_VALUE
-    int primeNumber = Integer.MAX_VALUE - 1;
-    int mockHashCode = primeNumber - 1;
-    FieldsGrouping customizedPrimeNumberGrouping =
-        Mockito.spy(new FieldsGrouping(is, schema, taskIds, primeNumber));
-    Mockito.doReturn(mockHashCode).
-        when(customizedPrimeNumberGrouping).getHashCode(Mockito.any(ByteString.class));
-    customizedPrimeNumberGrouping.getListToSend(tuple);
-    Assert.assertTrue(true);
   }
 
   /**

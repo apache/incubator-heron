@@ -21,24 +21,12 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.HeronTuples;
 
 public class FieldsGrouping extends Grouping {
-  private static final int DEFAULT_PRIME_NUMBER = 633910111;
-
   private final List<Integer> fieldsGroupingIndices = new LinkedList<>();
-  private final int primeNumber;
 
   public FieldsGrouping(TopologyAPI.InputStream inputStream,
                         TopologyAPI.StreamSchema schema,
                         List<Integer> taskIds) {
-    this(inputStream, schema, taskIds, DEFAULT_PRIME_NUMBER);
-  }
-
-  public FieldsGrouping(TopologyAPI.InputStream inputStream,
-                        TopologyAPI.StreamSchema schema,
-                        List<Integer> taskIds,
-                        int primeNumber) {
     super(taskIds);
-
-    this.primeNumber = primeNumber;
 
     for (int i = 0; i < schema.getKeysCount(); i++) {
       for (int j = 0; j < inputStream.getGroupingFields().getKeysCount(); j++) {
@@ -57,12 +45,14 @@ public class FieldsGrouping extends Grouping {
     List<Integer> res = new LinkedList<>();
 
     int taskIndex = 0;
+    int primeNumber = 633910111;
     for (Integer indices : fieldsGroupingIndices) {
-      int hash = getHashCode(tuple.getValues(indices)) % primeNumber;
-      taskIndex += hash >= 0 ? hash : hash + primeNumber;
+      taskIndex += getHashCode(tuple.getValues(indices)) % primeNumber;
     }
 
     taskIndex = taskIndex % taskIds.size();
+    // Make sure taskIndex is greater than 0
+    taskIndex = taskIndex >= 0 ? taskIndex : taskIndex + taskIds.size();
     res.add(taskIds.get(taskIndex));
 
     return res;
