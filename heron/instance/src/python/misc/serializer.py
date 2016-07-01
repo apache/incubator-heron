@@ -23,7 +23,7 @@ class HeronSerializer(object):
   """Serializer interface for Heron"""
 
   @abstractmethod
-  def initialize(self,config):
+  def initialize(self, config):
     pass
 
   @abstractmethod
@@ -46,7 +46,7 @@ class HeronSerializer(object):
 
 
 class PythonSerializer(HeronSerializer):
-  def initialize(self, config):
+  def initialize(self, config=None):
     pass
 
   def serialize(self, obj):

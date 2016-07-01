@@ -14,8 +14,18 @@
 import socket
 
 from heron.proto import topology_pb2
+from heron.common.src.python.color import Log
 
 class PhysicalPlanHelper(object):
+  """Helper class for accessing Physical Plan
+
+  :ivar pplan: Physical Plan object
+  :ivar my_instance_id: instance id for this instance
+  :ivar my_instance: instance object for this instance
+  :ivar my_component_name: component name for this instance
+  :ivar my_task_id: global task id for this instance
+  :ivar is_spout: ``True`` if it's spout, ``False`` if it's bolt
+  """
   def __init__(self, pplan, instance_id):
     self.pplan = pplan
     self.my_instance_id = instance_id
@@ -51,20 +61,31 @@ class PhysicalPlanHelper(object):
 
   def _get_my_spout_or_bolt(self, topology):
     my_spbl = None
-    for spbl in (topology.spouts + topology.bolts):
+    for spbl in (list(topology.spouts) + list(topology.bolts)):
       if spbl.comp.name == self.my_component_name:
         if my_spbl is not None:
           raise RuntimeError("Duplicate my component found")
         my_spbl = spbl
 
-    if isinstance(spbl, topology_pb2.Spout):
+    if isinstance(my_spbl, topology_pb2.Spout):
       is_spout = True
-    elif isinstance(spbl, topology_pb2.Bolt):
+    elif isinstance(my_spbl, topology_pb2.Bolt):
       is_spout = False
     else:
       raise RuntimeError("My component neither spout nor bolt")
+    return my_spbl, is_spout
 
-    return spbl, is_spout
+  def get_my_spout(self):
+    if self.is_spout:
+      return self.my_spbl
+    else:
+      return None
+
+  def get_my_bolt(self):
+    if self.is_spout:
+      return None
+    else:
+      return self.my_spbl
 
   def get_topology_state(self):
     return self.pplan.topology.state

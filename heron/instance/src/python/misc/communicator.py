@@ -51,7 +51,3 @@ class HeronCommunicator(object):
 
   def __str__(self):
     return "HeronCommunicator"
-
-
-
-

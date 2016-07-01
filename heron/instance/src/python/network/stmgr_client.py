@@ -11,12 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from heron_client import HeronClient
 from heron.common.src.python.color import Log
 from heron.proto import stmgr_pb2, common_pb2
 
+from heron.instance.src.python.misc.pplan_helper import PhysicalPlanHelper
+from .heron_client import HeronClient
 from .protocol import StatusCode
-from instance.pplan_helper import PhysicalPlanHelper
 
 
 # StmgrClient is an implementation of the Heron client in python and communicates

@@ -16,7 +16,7 @@
 import socket
 import unittest
 from heron.instance.src.python.network.protocol import REQID, HeronProtocol, IncomingPacket
-import mock_generator
+import heron.instance.tests.python.mock_generator as mock_generator
 
 class ProtocolTest(unittest.TestCase):
   def setUp(self):

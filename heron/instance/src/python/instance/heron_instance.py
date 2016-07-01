@@ -13,10 +13,11 @@
 # limitations under the License.
 import sys
 
-from .communicator import HeronCommunicator
-from .gateway import Gateway
 from heron.common.src.python.color import Log
 from heron.proto import physical_plan_pb2
+
+from misc.communicator import HeronCommunicator
+from .gateway import Gateway
 
 
 class HeronInstance(object):
@@ -41,7 +42,7 @@ class HeronInstance(object):
 
 
 def print_usage():
-  print("./heron-instance <topology_name> <topology_id> "
+  print("Usage: ./heron-instance <topology_name> <topology_id> "
         "<instance_id> <component_name> <task_id> "
         "<component_index> <stmgr_id> <stmgr_port> <metricsmgr_port> "
         "<heron_internals_config_filename>")

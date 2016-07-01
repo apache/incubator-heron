@@ -14,11 +14,10 @@
 
 # Abstract class for Bolt/Spout -- Python interface of IInstance.java
 
-from heron.common.src.python.color import Log
 from heron.proto import tuple_pb2
 
-from instance.serializer import PythonSerializer
-from .outgoing_tuple_helper import OutgoingTupleHelper
+from heron.instance.src.python.misc.outgoing_tuple_helper import OutgoingTupleHelper
+from heron.instance.src.python.misc.serializer import PythonSerializer
 
 # TODO: maybe implement some basic stuff
 
@@ -33,10 +32,11 @@ class BaseInstance(object):
   :ivar pplan_helper: Physical Plan Helper for this component
   :ivar in_stream:    In-Stream Heron Communicator
   :ivar output_helper: Outgoing Tuple Helper
+  :ivar serializer: Implementation of Heron Serializer
   """
 
   DEFAULT_STREAM_ID = "default"
-  make_data_tuple = lambda : tuple_pb2.HeronDataTuple()
+  make_data_tuple = lambda _ : tuple_pb2.HeronDataTuple()
 
   def __init__(self, pplan_helper, in_stream, out_stream, serializer=PythonSerializer()):
     self.pplan_helper = pplan_helper
@@ -47,13 +47,6 @@ class BaseInstance(object):
   def run_tasks(self):
     while True:
       self._run()
-
-  def _serialize_obj(self, object):
-    """Serialize object using the serializer for this instance
-
-    :returns: Serialized bytestring
-    """
-    return str(self.serializer.serialize(object))
 
   def _admit_data_tuple(self, output_tuple, stream_id, is_spout, anchors=None, message_id=None):
     """Internal implementation of OutputCollector
@@ -72,9 +65,8 @@ class BaseInstance(object):
 
     # Serialize
     for object in output_tuple:
-      serialized = self._serialize_obj(object)
-      value = data_tuple.values.add()
-      value = serialized
+      serialized = self.serializer.serialize(object)
+      data_tuple.values.append(serialized)
       tuple_size_in_bytes += len(serialized)
 
     self.output_helper.add_data_tuple(stream_id, data_tuple, tuple_size_in_bytes)

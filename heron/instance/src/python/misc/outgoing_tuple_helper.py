@@ -30,10 +30,10 @@ class OutgoingTupleHelper(object):
   :ivar current_control_tuple_set: (HeronControlTupleSet) currently buffered control tuple
   """
 
-  make_data_tuple_set = lambda : tuple_pb2.HeronDataTupleSet()
-  make_control_tuple_set = lambda : tuple_pb2.HeronControlTupleSet()
-  make_tuple_set = lambda : tuple_pb2.HeronTupleSet()
-  make_stream_id = lambda : topology_pb2.StreamId()
+  make_data_tuple_set = lambda _ : tuple_pb2.HeronDataTupleSet()
+  make_control_tuple_set = lambda _ : tuple_pb2.HeronControlTupleSet()
+  make_tuple_set = lambda _ : tuple_pb2.HeronTupleSet()
+  make_stream_id = lambda _ : topology_pb2.StreamId()
 
   def __init__(self, pplan_helper, out_stream):
     self.out_stream = out_stream
@@ -101,6 +101,8 @@ class OutgoingTupleHelper(object):
       tuple_set.data.CopyFrom(self.current_data_tuple_set)
       self._push_tuple_to_stream(tuple_set)
       self.current_data_tuple_set = None
+      self.current_data_tuple_size_in_bytes = 0
+
 
     if self.current_control_tuple_set is not None:
       tuple_set = self.make_tuple_set()

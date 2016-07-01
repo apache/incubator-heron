@@ -16,7 +16,7 @@ import threading
 
 # TODO: implement wait/notify mechanism
 from heron.common.src.python.color import Log
-from instance.pplan_helper import PhysicalPlanHelper
+from misc.pplan_helper import PhysicalPlanHelper
 
 
 class Slave(threading.Thread):
@@ -48,5 +48,5 @@ class Slave(threading.Thread):
     else:
       Log.error("Unrecognized control message type")
 
-  def handle_new_assignment(self, ctrl_msg):
+  def handle_new_assignment(self, pplan_helper):
     pass
