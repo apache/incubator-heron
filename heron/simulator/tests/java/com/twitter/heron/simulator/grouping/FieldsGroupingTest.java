@@ -26,6 +26,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.HeronTuples;
@@ -38,6 +39,59 @@ public class FieldsGroupingTest {
 
   @After
   public void after() throws Exception {
+  }
+
+  /**
+   * Test to make sure that getListToSend
+   * will not throw exceptions in corner cases
+   */
+  @Test
+  public void testGetListToSend() throws Exception {
+    List<Integer> taskIds = new LinkedList<>();
+    for (int i = 0; i < 100; i++) {
+      taskIds.add(i);
+    }
+
+    TopologyAPI.StreamSchema.KeyType kt =
+        TopologyAPI.StreamSchema.KeyType.newBuilder().
+            setType(TopologyAPI.Type.OBJECT).
+            setKey("field1").
+            build();
+
+    TopologyAPI.StreamSchema schema = TopologyAPI.StreamSchema.newBuilder().addKeys(kt).build();
+
+    TopologyAPI.InputStream is = TopologyAPI.InputStream.newBuilder().
+        setGroupingFields(schema).
+        setGtype(TopologyAPI.Grouping.FIELDS).
+        setStream(TopologyAPI.StreamId.newBuilder().
+            setComponentName("componentName").
+            setId("id"))
+        .build();
+
+    HeronTuples.HeronDataTuple tuple =
+        HeronTuples.HeronDataTuple.newBuilder().
+            setKey(-1).
+            addValues(ByteString.copyFromUtf8("")).
+            build();
+
+    // It will not throw exceptions though the hashCode of ByteString is Integer.MIN_VALUE
+    FieldsGrouping g = Mockito.spy(new FieldsGrouping(is, schema, taskIds));
+
+    Mockito.doReturn(Integer.MIN_VALUE).
+        when(g).getByteStringHashCode(Mockito.any(ByteString.class));
+    g.getListToSend(tuple);
+    Assert.assertTrue(true);
+
+    // It will not throw exceptions though
+    // (hash code of ByteString + primeNumber) > Integer.MAX_VALUE
+    int primeNumber = Integer.MAX_VALUE - 1;
+    int mockHashCode = primeNumber - 1;
+    FieldsGrouping customizedPrimeNumberGrouping =
+        Mockito.spy(new FieldsGrouping(is, schema, taskIds, primeNumber));
+    Mockito.doReturn(mockHashCode).
+        when(customizedPrimeNumberGrouping).getByteStringHashCode(Mockito.any(ByteString.class));
+    customizedPrimeNumberGrouping.getListToSend(tuple);
+    Assert.assertTrue(true);
   }
 
   /**

@@ -17,16 +17,30 @@ package com.twitter.heron.simulator.grouping;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.google.protobuf.ByteString;
+
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.HeronTuples;
 
 public class FieldsGrouping extends Grouping {
+  private static final int DEFAULT_PRIME_NUMBER = 633910111;
+
   private final List<Integer> fieldsGroupingIndices = new LinkedList<>();
+  private final int primeNumber;
 
   public FieldsGrouping(TopologyAPI.InputStream inputStream,
                         TopologyAPI.StreamSchema schema,
                         List<Integer> taskIds) {
+    this(inputStream, schema, taskIds, DEFAULT_PRIME_NUMBER);
+  }
+
+  public FieldsGrouping(TopologyAPI.InputStream inputStream,
+                        TopologyAPI.StreamSchema schema,
+                        List<Integer> taskIds,
+                        int primeNumber) {
     super(taskIds);
+
+    this.primeNumber = primeNumber;
 
     for (int i = 0; i < schema.getKeysCount(); i++) {
       for (int j = 0; j < inputStream.getGroupingFields().getKeysCount(); j++) {
@@ -45,9 +59,8 @@ public class FieldsGrouping extends Grouping {
     List<Integer> res = new LinkedList<>();
 
     int taskIndex = 0;
-    int primeNumber = 633910111;
     for (Integer indices : fieldsGroupingIndices) {
-      int hash = tuple.getValues(indices).hashCode() % primeNumber;
+      int hash = getByteStringHashCode(tuple.getValues(indices)) % primeNumber;
       taskIndex += hash >= 0 ? hash : hash + primeNumber;
     }
 
@@ -55,5 +68,16 @@ public class FieldsGrouping extends Grouping {
     res.add(taskIds.get(taskIndex));
 
     return res;
+  }
+
+  /**
+   * Returns a hash code value for the given ByteString,
+   * basing on customized hash method.
+   *
+   * @param bs the given
+   * @return the hash code of the ByteString
+   */
+  protected int getByteStringHashCode(ByteString bs) {
+    return bs.hashCode();
   }
 }
