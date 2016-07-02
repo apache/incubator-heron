@@ -19,11 +19,16 @@ Heron Resources outside this documentation:
 * [Stream Processing and Anomaly Detection - Velocity O'Reilly - Note: requires O'Reilly login ](
 https://player.oreilly.com/videos/9781491927977?login=true)(Jun, 2015)
 
-## Blog Posts
+## Official Blog Posts
 
 * [Open Sourcing Twitter Heron](https://blog.twitter.com/2016/open-sourcing-twitter-heron) (May, 2016)
 * [Flying Faster with Twitter
   Heron](https://blog.twitter.com/2015/flying-faster-with-twitter-heron) (June, 2015)
+
+## Community Blog Posts
+
+* [Deploying Heron on a Cluster of Machines with Apache Aurora](http://streamanalytics.blogspot.com/2016/06/deploying-heron-on-cluster-of-machines.html) (Supun Kamburugamuve, Jun, 2016)
+* [Setting up Heron Locally with Apache Aurora](http://pulasthisupun.blogspot.com/2016/06/setting-up-heron-cluster-with-apache.html) (Pulasthi Supun, Jun, 2016)
 
 ## Slides
 
