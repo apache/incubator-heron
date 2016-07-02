@@ -1,0 +1,24 @@
+{
+  "metrics": {
+    "__jvm-process-cpu-load": {
+      "container_1_word_2": "0.233365"
+    },
+    "__jvm-uptime-secs": {
+      "container_1_word_2": "29332"
+    },
+    "__emit-count\/default": {
+      "container_1_word_2": "1.2758e+10"
+    },
+    "__ack-count\/default": {
+      "container_1_word_2": "0"
+    },
+    "__fail-count\/default": {
+      "container_1_word_2": "0"
+    },
+    "__jvm-memory-used-mb": {
+      "container_1_word_2": "61.3333"
+    }
+  },
+  "interval": 1467416596,
+  "component": "word"
+}

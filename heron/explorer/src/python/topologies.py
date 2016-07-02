@@ -20,14 +20,6 @@ from heron.explorer.src.python.utils import get_cluster_role_topologies
 from heron.explorer.src.python.utils import get_cluster_role_env_topologies
 
 
-# subsubparsers for roles and env are currently not supported
-# because of design of Heron tracker API
-# Tracker API does not have the concepts of roles
-# see ``getTopologyInfo`` in ``heron/tracer/src/python/tracker.py``
-# this function simply returns the first topology it finds that
-# matches cluster/env/topology_name. It is possible that two different
-# users may submit topologies of same names
-# Bill: might not that important in real production since it rarely happens
 def create_parser(subparsers):
   parser = subparsers.add_parser(
     'topologies',
@@ -45,7 +37,7 @@ def create_parser(subparsers):
 # only working with updated tracker
 def to_table(result):
   max_count = 20
-  info, count = [], 0
+  table, count = [], 0
   for role, envs_topos in result.iteritems():
     for env, topos in envs_topos.iteritems():
       for topo in topos:
@@ -53,10 +45,10 @@ def to_table(result):
         if count > max_count:
           continue
         else:
-          info.append([role, env, topo])
+          table.append([role, env, topo])
   header = ['role', 'env', 'topology']
   rest_count = 0 if count <= max_count else count - max_count
-  return tabulate(info, headers=header), rest_count
+  return table, header, rest_count
 
 
 def show_cluster(cluster):
@@ -68,11 +60,11 @@ def show_cluster(cluster):
     result = result[cluster]
   except Exception:
     return False
-  table, rest_count = to_table(result)
+  table, header, rest_count = to_table(result)
   print('Topologies running in cluster \'%s\'' % cluster)
   if rest_count:
     print('  with %d more...' % rest_count)
-  print(table)
+  print(tabulate(table, headers=header))
   return True
 
 
@@ -85,11 +77,11 @@ def show_cluster_role(cluster, role):
     result = result[cluster]
   except Exception:
     return False
-  table, rest_count = to_table(result)
+  table, header, rest_count = to_table(result)
   print('Topologies running in cluster \'%s\' submitted by \'%s\':' % (cluster, role))
   if rest_count:
     print('  with %d more...' % rest_count)
-  print(table)
+  print(tabulate(table, headers=header))
   return True
 
 
@@ -102,25 +94,22 @@ def show_cluster_role_env(cluster, role, env):
     result = result[cluster]
   except Exception:
     return False
-  table, rest_count = to_table(result)
+  table, header, rest_count = to_table(result)
   print('Topologies running in cluster \'%s\', submitted by \'%s\', and under environment \'%s\':' % (cluster, role, env))
   if rest_count:
     print('  with %d more...' % rest_count)
-  print(table)
+  print(tabulate(table, headers=header))
   return True
 
 
 def run(command, parser, cl_args, unknown_args):
   location = cl_args['cluster/[role]/[env]'].split('/')
-  if len(location) == 0:
-    Log.error('Invalid topology selection')
-    return False
-  elif len(location) == 1:
+  if len(location) == 1:
     return show_cluster(*location)
   elif len(location) == 2:
     return show_cluster_role(*location)
   elif len(location) == 3:
     return show_cluster_role_env(*location)
   else:
-    Log.error('Invalid topology location')
+    Log.error('Invalid topologies selection')
     return False

@@ -1,0 +1,28 @@
+{
+  "spouts": {
+    "word": {
+      "source": "NA",
+      "version": "NA",
+      "type": "default",
+      "outputs": [
+        {
+          "stream_name": "default"
+        }
+      ]
+    }
+  },
+  "bolts": {
+    "exclaim1": {
+      "outputs": [
+
+      ],
+      "inputs": [
+        {
+          "stream_name": "default",
+          "grouping": "SHUFFLE",
+          "component_name": "word"
+        }
+      ]
+    }
+  }
+}

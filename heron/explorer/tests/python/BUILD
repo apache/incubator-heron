@@ -7,6 +7,7 @@ pex_test(
         "//heron/explorer/src/python:heron-explorer-lib",
     ],
     reqs = [
+        "tabulate==0.7.5",
         "mock==1.0.1",
         "py==1.4.27",
         "pytest==2.6.4",

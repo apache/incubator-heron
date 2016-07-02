@@ -151,21 +151,21 @@ def extract_common_args(command, parser, cl_args):
 ################################################################################
 # Run the command
 ################################################################################
-def main():
+def main(args):
 
   # create the argument parser
   parser = create_parser()
 
   # if no argument is provided, print help and exit
-  if len(sys.argv[1:]) == 0:
+  if not args:
     parser.print_help()
     return 0
 
   # insert the boolean values for some of the options
-  sys.argv = parse.insert_bool_values(sys.argv)
+  all_args = parse.insert_bool_values(args)
 
   # parse the args
-  args, unknown_args = parser.parse_known_args()
+  args, unknown_args = parser.parse_known_args(args=all_args)
   command_line_args = vars(args)
   command = command_line_args['subcommand']
 
@@ -196,4 +196,4 @@ def main():
   return 0 if ret else 1
 
 if __name__ == "__main__":
-  sys.exit(main())
+  sys.exit(main(sys.argv[1:]))

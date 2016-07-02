@@ -7,11 +7,12 @@ pex_library(
     srcs = [
         "args.py",
         "help.py",
+        "logicalplan.py",
+        "main.py",
         "opts.py",
+        "physicalplan.py",
         "topologies.py",
         "utils.py",
-        "logicalplan.py",
-        "physicalplan.py",
     ],
     deps = [
         "//heron/common/src/python/handler/access:tracker-access",

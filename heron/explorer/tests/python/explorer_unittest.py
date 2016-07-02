@@ -13,14 +13,146 @@
 # limitations under the License.
 
 import unittest2 as unittest
-# import mock
+from mock import Mock
 
 # import heron.explorer.src.python.logicalplan as logicalplan
 # import heron.explorer.src.python.physicalplan as physicalplan
-# import heron.explorer.src.python.topologies as topologies
-# import heron.explorer.src.python.utils as utils
+import heron.explorer.src.python.topologies as topologies
+import heron.explorer.src.python.main as main
+import heron.explorer.src.python.args as args
+import heron.explorer.src.python.utils as utils
+import json
+import os
 
 
 class ExplorerTest(unittest.TestCase):
+
   def setUp(self):
-    pass
+    base_path = os.path.dirname(os.path.realpath(__file__))
+    info_path = os.path.join(base_path, 'info.json')
+    lp_path = os.path.join(base_path, 'logicalplan.json')
+    topo_path = os.path.join(base_path, 'topologies.json')
+    metrics_path = os.path.join(base_path, 'metrics.json')
+    with open(info_path) as f:
+      utils.get_topology_info = Mock(return_value=json.load(f))
+    with open(lp_path) as f:
+      utils.get_logical_plan = Mock(return_value=json.load(f))
+    with open(topo_path) as f:
+      j = json.load(f)
+      utils.get_cluster_topologies = Mock(return_value=j)
+      utils.get_cluster_role_topologies = Mock(return_value=j)
+      utils.get_cluster_role_env_topologies = Mock(return_value=j)
+    with open(metrics_path) as f:
+      utils.get_topology_metrics = Mock(return_value=json.load(f))
+
+  def sample_topo_result(self):
+    info = []
+    info.append(['a1', 'a2', 'a3'])
+    info.append(['a1', 'a3', 'a5'])
+    info.append(['a1', 'a3', 'a6'])
+    info.append(['a2', 'a3', 'a6'])
+    info.append(['b1', 'b2', 'b3'])
+    info.append(['c1', 'c2', 'c3'])
+    d = {}
+    for row in info:
+      tmp = d
+      if row[0] not in tmp:
+        tmp[row[0]] = {}
+      tmp = tmp[row[0]]
+      if row[1] not in tmp:
+        tmp[row[1]] = []
+      tmp[row[1]].append(row[2])
+    return d, info
+
+  def acc_with_optional_args(self, cl, acc):
+    clv = cl + ['--verbose']
+    clt = cl + ['--tracker-url="http://a.com"']
+    cltv = clv + ['--tracker-url="http://a.com"']
+    for cl in clv, clt, cltv:
+      acc.append(args.insert_bool_values(cl))
+
+  def sample_topo_cls(self):
+    clt1 = ['topologies', 'local']
+    clt2 = ['topologies', 'local/foo']
+    clt3 = ['topologies', 'local/foo/bar']
+    all_cl = []
+    for cl in clt1, clt2, clt3:
+      self.acc_with_optional_args(cl, all_cl)
+    return all_cl
+
+  def sample_lp_cls(self):
+    clsp = ['spouts', 'local/rli/default', 'ExclamationTopology']
+    clbo = ['bolts', 'local/rli/default', 'ExclamationTopology']
+    clco = ['components', 'local/rli/default', 'ExclamationTopology']
+    good_cls = []
+    for cl in clsp, clbo, clco:
+      self.acc_with_optional_args(cl, good_cls)
+    bad_cl1 = ['spouts', 'local/rli/defult', 'ExclamationTopology']
+    return good_cls, bad_cl1
+
+  def sample_pp_cls(self):
+    clsp = ['spouts-metric', 'local/rli/default', 'ExclamationTopology']
+    clbo = ['bolts-metric', 'local/rli/default', 'ExclamationTopology']
+    clco = ['containers', 'local/rli/default', 'ExclamationTopology']
+    good_cls = []
+    for cl in clsp, clbo, clco:
+      self.acc_with_optional_args(cl, good_cls)
+    bad_cl1 = ['spouts-metric', 'local/rli/defult', 'ExclamationTopology']
+    return good_cls, bad_cl1
+
+  def sample_cli(self):
+    clt1 = ['topologies', 'local']
+    clt2 = ['topologies', 'local/foo']
+    clt3 = ['topologies', 'local/foo/bar']
+    cls1 = ['spouts', 'local/foo/bar', 'topo']
+    cls2 = ['spouts-metric', 'local/foo/bar', 'topo']
+    clb1 = ['bolts', 'local/foo/bar', 'topo']
+    clb2 = ['bolts-metric', 'local/foo/bar', 'topo']
+    clc1 = ['components', 'local/foo/bar', 'topo']
+    clc2 = ['containers', 'local/foo/bar', 'topo']
+    cll = [clt1, clt2, clt3, cls1, cls2, clb1, clb2, clc1, clc2]
+    all_cl = []
+    for cl in cll:
+      self.acc_with_optional_args(cl, all_cl)
+    # help subcommand
+    for sub in ['topologies', 'spouts', 'bolts', 'bolts-metric',
+                'spouts-metric', 'components', 'containers', 'help']:
+      all_cl.append(['help', sub])
+    return all_cl
+
+  def test_topo(self):
+    for cl in self.sample_topo_cls():
+      self.assertEqual(0, main.main(cl))
+
+  def test_lp(self):
+    good, bad = self.sample_lp_cls()
+    for cl in good:
+      self.assertEqual(0, main.main(cl))
+    #self.assertEqual(1, main.main(bad))
+
+  def test_help(self):
+    all_cl = []
+    for sub in ['topologies', 'spouts', 'bolts', 'bolts-metric',
+                'spouts-metric', 'components', 'containers', 'help']:
+      all_cl.append(['help', sub])
+    for cl in all_cl:
+      self.assertEqual(0, main.main(cl))
+
+  def test_pp(self):
+    good, bad = self.sample_pp_cls()
+    for cl in good:
+      self.assertEqual(0, main.main(cl))
+    self.assertEqual(1, main.main(bad))
+
+  def test_topo_result_to_table(self):
+    d, told = self.sample_topo_result()
+    tnew, header, rc = topologies.to_table(d)
+    told.sort(), tnew.sort()
+    self.assertEqual(told, tnew)
+
+  def test_cli_parsing(self):
+    parser = main.create_parser()
+    clis = self.sample_cli()
+    for cli in clis:
+      known_args, unknown_args = parser.parse_known_args(cli)
+      self.assertTrue(unknown_args is not None)
