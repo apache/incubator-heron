@@ -45,6 +45,8 @@ sections:
 #        url: /docs/operators/deployment/schedulers/mesos
       - name: Slurm Cluster
         url: /docs/operators/deployment/schedulers/slurm
+      - name: YARN Cluster
+        url: /docs/operators/deployment/schedulers/yarn
   - name: Cluster Configuration
     sublinks:
       - name: Overview
