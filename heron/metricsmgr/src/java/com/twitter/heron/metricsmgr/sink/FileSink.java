@@ -64,9 +64,19 @@ public class FileSink implements IMetricsSink {
 
   @Override
   public void init(Map<String, Object> conf, SinkContext context) {
+    verifyConf(conf);
     filenamePrefix = conf.get(FILENAME_KEY) + "." + context.getMetricsMgrId();
     fileMaximum = TypeUtils.getInteger(conf.get(MAXIMUM_FILE_COUNT_KEY));
     sinkContext = context;
+  }
+
+  private void verifyConf(Map<String, Object> conf) {
+    if (!conf.containsKey(FILENAME_KEY)) {
+      throw new IllegalArgumentException("Require: " + FILENAME_KEY);
+    }
+    if (!conf.containsKey(MAXIMUM_FILE_COUNT_KEY)) {
+      throw new IllegalArgumentException("Require: " + MAXIMUM_FILE_COUNT_KEY);
+    }
   }
 
   private PrintStream openNewFile(String filename) {
