@@ -31,7 +31,7 @@ class JmapHandler(BaseHandler):
         &environ=<environment>&instance=<instance>
   Parameters:
    - cluster - Name of cluster.
-   - role - Role used to submit the topology (optional).
+   - role - (optional) Role used to submit the topology.
    - environ - Running environment.
    - topology - Name of topology (Note: Case sensitive. Can only
                 include [a-zA-Z0-9-_]+)

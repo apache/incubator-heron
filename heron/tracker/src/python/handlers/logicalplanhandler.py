@@ -24,7 +24,7 @@ class LogicalPlanHandler(BaseHandler):
   URL - /topologies/logicalplan
   Parameters:
    - cluster (required)
-   - role - Role used to submit the topology (optional).
+   - role - (role) Role used to submit the topology.
    - environ (required)
    - topology (required) name of the requested topology
 

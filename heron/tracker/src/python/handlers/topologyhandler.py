@@ -16,7 +16,6 @@ import tornado.gen
 import tornado.web
 import traceback
 
-from heron.tracker.src.python import constants
 from heron.tracker.src.python.handlers import BaseHandler
 
 
@@ -25,7 +24,7 @@ class TopologyHandler(BaseHandler):
   url - /topologies/info
   Parameters:
    - cluster (required)
-   - role - Role used to submit the topology (optional).
+   - role - (optional) Role used to submit the topology.
    - environ (required)
    - topology (required) name of the requested topology
 

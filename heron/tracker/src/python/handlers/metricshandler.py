@@ -29,7 +29,7 @@ class MetricsHandler(BaseHandler):
   URL - /topologies/metrics
   Parameters:
    - cluster (required)
-   - role - Role used to submit the topology (optional).
+   - role - (optional) Role used to submit the topology.
    - environ (required)
    - topology (required) name of the requested topology
    - component (required)
