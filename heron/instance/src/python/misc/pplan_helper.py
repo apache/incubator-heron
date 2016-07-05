@@ -89,3 +89,7 @@ class PhysicalPlanHelper(object):
 
   def get_topology_state(self):
     return self.pplan.topology.state
+
+  def is_topology_running(self):
+    return self.pplan.topology.state == topology_pb2.TopologyState.Value("RUNNING")
+

@@ -26,20 +26,28 @@ class Slave(threading.Thread):
     self._out_stream = out_stream
     self._control_stream = control_stream
     self._pplan_helper = None
+    self.my_instance = None
 
   def run(self):
-    try:
-      while not self._control_stream.empty():
-        msg = self._control_stream.poll()
-        self.handle_control_message(msg)
-    except Queue.Empty:
-      pass
+    while True:
+      try:
+        while not self._control_stream.is_empty():
+          msg = self._control_stream.poll()
+          self._handle_control_message(msg)
+      except Queue.Empty:
+        pass
 
-  def handle_control_message(self, ctrl_msg):
+      try:
+        while not self._in_stream.is_empty():
+          pass
+      except Queue.Empty:
+        pass
+
+  def _handle_control_message(self, ctrl_msg):
     if isinstance(ctrl_msg, PhysicalPlanHelper):
       # handle new physical plan
       if self._pplan_helper is None:
-        self.handle_new_assignment(ctrl_msg)
+        self._handle_new_assignment(ctrl_msg)
       else:
         # TODO: Implement State change
         pass
@@ -48,5 +56,26 @@ class Slave(threading.Thread):
     else:
       Log.error("Unrecognized control message type")
 
-  def handle_new_assignment(self, pplan_helper):
+  def _handle_new_assignment(self, pplan_helper):
+    Log.info("Incarnating ourselves as " + pplan_helper.my_component_name +
+             " with task id " + pplan_helper.my_task_id)
+
+    # TODO: bind the metrics collector with topology context
+
+    # TODO (MOST IMPORTANT): handle importing pex file and load the class
+    # -> need to load the class from python_class_name in Component
+    if pplan_helper.is_spout:
+      # Starting a spout
+      self.my_instance = pplan_helper.get_my_spout()
+    else:
+      # Starting a bolt
+      self.my_instance = pplan_helper.get_my_bolt()
+
+    if pplan_helper.is_topology_running():
+      self._start_instance()
+    else:
+      Log.info("The instance is deployed in deactivated state")
+
+  def _start_instance(self):
     pass
+

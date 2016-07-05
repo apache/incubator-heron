@@ -16,9 +16,14 @@ import Queue
 from heron.common.src.python.color import Log
 
 class HeronCommunicator(object):
-  def __init__(self, producer=None, consumer=None):
-    self._producer = producer
-    self._consumer = consumer
+  def __init__(self, producer_cb=None, consumer_cb=None):
+    """Initialize HeronCommunicator
+
+    :param producer_cb: Callback function to be called (usually on producer thread) when ``poll()`` is called by the consumer.
+    :param consumer_cb: Callback function to be called (usually on consumer thread) when ``offer()`` is called by the producer.
+    """
+    self._producer_callback = producer_cb
+    self._consumer_callback = consumer_cb
     self._buffer = Queue.Queue()
 
   def get_size(self):
@@ -31,22 +36,25 @@ class HeronCommunicator(object):
     try:
       # non-blocking
       ret = self._buffer.get(block=False)
-      # TODO: wakeup _producer
+
+      if self._producer_callback is not None and callable(self._producer_callback):
+        self._producer_callback()
       return ret
     except Queue.Empty:
       Log.debug(str(self) + " : " + "Empty in poll()")
-      # TODO: maybe sleep _consumer?
+      # TODO: maybe sleep _consumer_callback?
       raise Queue.Empty
 
   def offer(self, item):
     try:
       # non-blocking
       self._buffer.put(item, block=False)
-      # TODO: wakeup _consumer
+      if self._consumer_callback is not None and callable(self._consumer_callback):
+        self._consumer_callback()
       return True
     except Queue.Full:
       Log.debug(str(self) + " : " + "Full in offer()")
-      # TODO: maybe sleep _producer?
+      # TODO: maybe sleep _producer_callback?
       return False
 
   def __str__(self):

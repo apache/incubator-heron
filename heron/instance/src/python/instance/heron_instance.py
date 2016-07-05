@@ -29,9 +29,9 @@ class HeronInstance(object):
     self.metrics_port = metrics_port
 
     # TODO: change from None to actual provider/consumer
-    self._in_stream = HeronCommunicator(producer=None, consumer=None)
-    self._out_stream = HeronCommunicator(producer=None, consumer=None)
-    self._control_stream = HeronCommunicator(producer=None, consumer=None)
+    self._in_stream = HeronCommunicator(producer_cb=None, consumer_cb=None)
+    self._out_stream = HeronCommunicator(producer_cb=None, consumer_cb=None)
+    self._control_stream = HeronCommunicator(producer_cb=None, consumer_cb=None)
 
     self._gateway_thread = Gateway(topology_name, topology_id, instance, stream_port, metrics_port,
                                    self._in_stream, self._out_stream, self._control_stream)

@@ -70,6 +70,9 @@ class HeronClient(asyncore.dispatcher):
     sent = self.send(self.out_buffer)
     self.out_buffer = self.out_buffer[sent:]
 
+  def writable(self):
+    return len(self.out_buffer) > 0
+
   # called when an error was raised
   #def handle_error(self):
   #  Log.debug("Error occurred -- connection closed")
