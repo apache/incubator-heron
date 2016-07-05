@@ -8,7 +8,6 @@ def heron_tools_bin_files():
     return [
         "//heron/tracker/src/python:heron-tracker",
         "//heron/ui/src/python:heron-ui",
-        "//heron/explorer/src/python:heron-explorer",
     ]
 
 def heron_tools_conf_files():

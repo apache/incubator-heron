@@ -89,6 +89,10 @@ if [ -d "${base}" -a -x "${base}/bin/heron" ]; then
   rm -fr "${base}"
 fi
 
+if [ -d "${base}" -a -x "${base}/bin/heron-explorer" ]; then
+  rm -fr "${base}"
+fi
+
 mkdir -p ${bin} ${base} ${base}/etc
 echo -n .
 
@@ -104,6 +108,7 @@ echo -n .
 
 ln -s "${base}/bin/heron" "${bin}/heron"
 ln -s "${base}/bin/heron" "${bin}/heron-cli3"
+ln -s "${base}/bin/heron-explorer" "${bin}/heron-explorer"
 echo -n .
 
 if [ -f "${heronrc}" ]; then

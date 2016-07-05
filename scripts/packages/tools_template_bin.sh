@@ -73,13 +73,7 @@ fi
 if [ -L "${bin}/heron-ui" ]; then
   rm -f "${bin}/heron-ui"
 fi
-if [ -L "${bin}/heron-explorer" ]; then
-  rm -f "${bin}/heron-explorer"
-fi
 if [ -d "${base}" -a -x "${base}/bin/heron-tracker" ]; then
-  rm -fr "${base}"
-fi
-if [ -d "${base}" -a -x "${base}/bin/heron-explorer" ]; then
   rm -fr "${base}"
 fi
 
@@ -98,7 +92,6 @@ echo -n .
 
 ln -s "${base}/bin/heron-tracker" "${bin}/heron-tracker"
 ln -s "${base}/bin/heron-ui"      "${bin}/heron-ui"
-ln -s "${base}/bin/heron-explorer" "${bin}/heron-explorer"
 echo -n .
 
 rm "${base}/heron-tools.tar.gz"
