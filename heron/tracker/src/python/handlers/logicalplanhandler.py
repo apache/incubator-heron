@@ -38,7 +38,7 @@ class LogicalPlanHandler(BaseHandler):
   def get(self):
     try:
       cluster = self.get_argument_cluster()
-      role = self.get_argument(constants.PARAM_ROLE, default=None)
+      role = self.get_argument_role()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
       topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)

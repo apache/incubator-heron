@@ -43,7 +43,7 @@ class MetricsQueryHandler(BaseHandler):
   def get(self):
     try:
       cluster = self.get_argument_cluster()
-      role = self.get_argument(constants.PARAM_ROLE, default=None)
+      role = self.get_argument_role()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
       topology = self.tracker.getTopologyByClusterRoleEnvironAndName(cluster, role, environ, topology_name)

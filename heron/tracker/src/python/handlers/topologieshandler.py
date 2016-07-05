@@ -53,7 +53,7 @@ class TopologiesHandler(BaseHandler):
     # Get all the values for parameter "environ".
     environs = self.get_arguments(constants.PARAM_ENVIRON)
     # Get role
-    role = self.get_argument(constants.PARAM_ROLE, default=None)
+    role = self.get_argument_role()
 
     ret = {}
     topologies = self.tracker.topologies

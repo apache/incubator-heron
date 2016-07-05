@@ -47,7 +47,7 @@ class ExceptionHandler(BaseHandler):
     try:
       cluster = self.get_argument_cluster()
       environ = self.get_argument_environ()
-      role = self.get_argument(constants.PARAM_ROLE, default=None)
+      role = self.get_argument_role()
       topName = self.get_argument_topology()
       component = self.get_argument_component()
       topology = self.tracker.getTopologyByClusterRoleEnvironAndName(cluster, role, environ, topName)

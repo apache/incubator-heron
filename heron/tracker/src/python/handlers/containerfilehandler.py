@@ -32,9 +32,9 @@ class ContainerFileDataHandler(BaseHandler):
   def get(self):
     try:
       cluster = self.get_argument_cluster()
+      role = self.get_argument_role()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
-      role = self.get_argument(constants.PARAM_ROLE, default=None)
       container = self.get_argument(constants.PARAM_CONTAINER)
       path = self.get_argument(constants.PARAM_PATH)
       offset = self.get_argument_offset()
@@ -78,9 +78,9 @@ class ContainerFileStatsHandler(BaseHandler):
   def get(self):
     try:
       cluster = self.get_argument_cluster()
+      role = self.get_argument_role()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
-      role = self.get_argument(constants.PARAM_ROLE, default=None)
       container = self.get_argument(constants.PARAM_CONTAINER)
       path = self.get_argument(constants.PARAM_PATH, default=".")
       topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)
