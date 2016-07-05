@@ -20,28 +20,28 @@ from tornado.options import options
 from fetch import fetch_url_as_json
 from query import QueryHandler
 
-CLUSTER_URL_FMT           = "%s/clusters"
-TOPOLOGIES_URL_FMT        = "%s/topologies"
-EXECUTION_STATE_URL_FMT   = "%s/executionstate"   % TOPOLOGIES_URL_FMT
-lOGICALPLAN_URL_FMT       = "%s/logicalplan"      % TOPOLOGIES_URL_FMT
-PHYSICALPLAN_URL_FMT      = "%s/physicalplan"     % TOPOLOGIES_URL_FMT
-SCHEDULER_LOCATION_URL_FMT= "%s/schedulerlocation"% TOPOLOGIES_URL_FMT
+CLUSTER_URL_FMT             = "%s/clusters"
+TOPOLOGIES_URL_FMT          = "%s/topologies"
+EXECUTION_STATE_URL_FMT     = "%s/executionstate"     % TOPOLOGIES_URL_FMT
+lOGICALPLAN_URL_FMT         = "%s/logicalplan"        % TOPOLOGIES_URL_FMT
+PHYSICALPLAN_URL_FMT        = "%s/physicalplan"       % TOPOLOGIES_URL_FMT
+SCHEDULER_LOCATION_URL_FMT  = "%s/schedulerlocation"  % TOPOLOGIES_URL_FMT
 
-METRICS_URL_FMT           = "%s/metrics"          % TOPOLOGIES_URL_FMT
-METRICS_QUERY_URL_FMT     = "%s/metricsquery"     % TOPOLOGIES_URL_FMT
-METRICS_TIMELINE_URL_FMT  = "%s/metricstimeline"  % TOPOLOGIES_URL_FMT
+METRICS_URL_FMT             = "%s/metrics"            % TOPOLOGIES_URL_FMT
+METRICS_QUERY_URL_FMT       = "%s/metricsquery"       % TOPOLOGIES_URL_FMT
+METRICS_TIMELINE_URL_FMT    = "%s/metricstimeline"    % TOPOLOGIES_URL_FMT
 
-EXCEPTIONS_URL_FMT        = "%s/exceptions"       % TOPOLOGIES_URL_FMT
-EXCEPTION_SUMMARY_URL_FMT = "%s/exceptionsummary" % TOPOLOGIES_URL_FMT
+EXCEPTIONS_URL_FMT          = "%s/exceptions"         % TOPOLOGIES_URL_FMT
+EXCEPTION_SUMMARY_URL_FMT   = "%s/exceptionsummary"   % TOPOLOGIES_URL_FMT
 
-INFO_URL_FMT              = "%s/info"             % TOPOLOGIES_URL_FMT
-PID_URL_FMT               = "%s/pid"              % TOPOLOGIES_URL_FMT
-JSTACK_URL_FMT            = "%s/jstack"           % TOPOLOGIES_URL_FMT
-JMAP_URL_FMT              = "%s/jmap"             % TOPOLOGIES_URL_FMT
-HISTOGRAM_URL_FMT         = "%s/histo"            % TOPOLOGIES_URL_FMT
+INFO_URL_FMT                = "%s/info"               % TOPOLOGIES_URL_FMT
+PID_URL_FMT                 = "%s/pid"                % TOPOLOGIES_URL_FMT
+JSTACK_URL_FMT              = "%s/jstack"             % TOPOLOGIES_URL_FMT
+JMAP_URL_FMT                = "%s/jmap"               % TOPOLOGIES_URL_FMT
+HISTOGRAM_URL_FMT           = "%s/histo"              % TOPOLOGIES_URL_FMT
 
-FILE_DATA_URL_FMT         = "%s/containerfiledata"  % TOPOLOGIES_URL_FMT
-FILESTATS_URL_FMT         = "%s/containerfilestats" % TOPOLOGIES_URL_FMT
+FILE_DATA_URL_FMT           = "%s/containerfiledata"  % TOPOLOGIES_URL_FMT
+FILESTATS_URL_FMT           = "%s/containerfilestats" % TOPOLOGIES_URL_FMT
 
 capacity = "DIVIDE(" \
         "  DEFAULT(0," \
@@ -138,7 +138,7 @@ def get_cluster_topologies(cluster):
 # Get the list of topologies given a cluster submitted by a given role
 ################################################################################
 def get_cluster_role_topologies(cluster, role):
-  return _get_topologies(cluster, role)
+  return _get_topologies(cluster, role=role)
 
 
 ################################################################################
@@ -146,7 +146,7 @@ def get_cluster_role_topologies(cluster, role):
 # a given environment
 ################################################################################
 def get_cluster_role_env_topologies(cluster, role, env):
-  return _get_topologies(cluster, role, env)
+  return _get_topologies(cluster, role=role, env=env)
 
 
 ################################################################################
@@ -171,11 +171,12 @@ def get_execution_state(cluster, environ, topology, role=None):
 def get_logical_plan(cluster, environ, topology, role=None):
   request_url = tornado.httputil.url_concat(
       create_url(lOGICALPLAN_URL_FMT),
-      dict(cluster = cluster, environ = environ, topology = topology)
+      dict(cluster=cluster, environ=environ, topology=topology)
   )
   if role:
     request_url = tornado.httputil.url_concat(request_url, dict(role=role))
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
+
 
 ################################################################################
 # Get the list of component names for the topology from Heron Nest
@@ -184,7 +185,7 @@ def get_logical_plan(cluster, environ, topology, role=None):
 def get_comps(cluster, environ, topology, role=None):
   request_url = tornado.httputil.url_concat(
       create_url(lOGICALPLAN_URL_FMT),
-      dict(cluster = cluster, environ = environ, topology = topology)
+      dict(cluster=cluster, environ=environ, topology=topology)
   )
   if role:
     request_url = tornado.httputil.url_concat(request_url, dict(role=role))

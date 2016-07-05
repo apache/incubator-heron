@@ -19,6 +19,7 @@ import traceback
 from heron.tracker.src.python import constants
 from heron.tracker.src.python.handlers import BaseHandler
 
+
 class TopologyHandler(BaseHandler):
   """
   url - /topologies/info
