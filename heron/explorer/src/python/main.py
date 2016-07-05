@@ -149,7 +149,7 @@ def extract_common_args(command, parser, cl_args):
     new_cl_args['environ'] = cluster_tuple[2]
     new_cl_args['config_path'] = config_path
   except Exception as e:
-    Log.error("Argument cluster/[role]/[env] is not correct: %s" % str(e))
+    Log.error("Unable to get valid topology location: %s" % str(e))
     return dict()
 
   cl_args.update(new_cl_args)
