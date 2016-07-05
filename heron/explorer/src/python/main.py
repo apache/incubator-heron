@@ -17,6 +17,7 @@
 
 import argparse
 import heron.explorer.src.python.args as parse
+import heron.explorer.src.python.clusters as clusters
 import heron.explorer.src.python.help as help
 import heron.explorer.src.python.logicalplan as logicalplan
 import heron.explorer.src.python.opts as opts
@@ -74,6 +75,9 @@ def create_parser():
       title="Available commands",
       metavar='<command> <options>')
 
+  # subparser for subcommands related to clusters
+  clusters.create_parser(subparsers)
+
   # subparser for subcommands related to logical plan
   logicalplan.create_parser(subparsers)
 
@@ -93,6 +97,10 @@ def create_parser():
 # Run the command
 ################################################################################
 def run(command, *args):
+  # physical plan
+  if command == 'clusters':
+    return clusters.run(command, *args)
+
   # physical plan
   if command == 'containers':
     return physicalplan.run_containers(command, *args)
@@ -170,6 +178,7 @@ def main(args):
   command = command_line_args['subcommand']
 
   if unknown_args:
+    print(unknown_args)
     Log.error('Unknown argument: %s' % unknown_args[0])
     # show help message
     command = 'help'
@@ -178,7 +187,7 @@ def main(args):
   if command != 'help':
     opts.set_tracker_url(command_line_args)
     opts.set_verbose(command_line_args)
-    if command != 'topologies':
+    if command not in ['topologies', 'clusters']:
       command_line_args = extract_common_args(command, parser, command_line_args)
     if not command_line_args:
       return 1

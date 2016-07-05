@@ -6,6 +6,7 @@ pex_library(
     name = "heron-explorer-lib",
     srcs = [
         "args.py",
+        "clusters.py",
         "help.py",
         "logicalplan.py",
         "main.py",

@@ -44,6 +44,8 @@ class ExplorerTest(unittest.TestCase):
       utils.get_cluster_role_env_topologies = Mock(return_value=j)
     with open(metrics_path) as f:
       utils.get_topology_metrics = Mock(return_value=json.load(f))
+    clusters = ['nyc', 'london', 'tokyo']
+    utils.get_clusters = Mock(return_value=clusters)
 
   def sample_topo_result(self):
     info = []
@@ -100,6 +102,12 @@ class ExplorerTest(unittest.TestCase):
     bad_cl1 = ['spouts-metric', 'local/rli/defult', 'ExclamationTopology']
     return good_cls, bad_cl1
 
+  def sample_cluster_cls(self):
+    cl = ['clusters']
+    good_cls = []
+    self.acc_with_optional_args(cl, good_cls)
+    return good_cls
+
   def sample_cli(self):
     clt1 = ['topologies', 'local']
     clt2 = ['topologies', 'local/foo']
@@ -143,6 +151,11 @@ class ExplorerTest(unittest.TestCase):
     for cl in good:
       self.assertEqual(0, main.main(cl))
     self.assertEqual(1, main.main(bad))
+
+  def test_sample_clusters(self):
+    good = self.sample_cluster_cls()
+    for cl in good:
+      self.assertEqual(0, main.main(cl))
 
   def test_topo_result_to_table(self):
     d, told = self.sample_topo_result()

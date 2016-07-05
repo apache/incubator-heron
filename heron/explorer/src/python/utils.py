@@ -323,6 +323,16 @@ def check_release_file_exists():
   return True
 
 
+def get_clusters():
+  instance = tornado.ioloop.IOLoop.instance()
+  try:
+    return instance.run_sync(lambda: API.get_clusters())
+  except Exception as ex:
+    Log.error('Error: %s' % str(ex))
+    Log.error('Failed to retrive clusters')
+    raise
+
+
 def get_logical_plan(cluster, env, topology, role):
   instance = tornado.ioloop.IOLoop.instance()
   try:

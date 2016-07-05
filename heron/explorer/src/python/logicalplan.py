@@ -71,7 +71,7 @@ def parse_topo_loc(cl_args):
     raise
 
 
-def dump_components(components, topo_info):
+def to_table(components, topo_info):
   inputs, outputs = defaultdict(list), defaultdict(list)
   for ctype, component in components.iteritems():
     if ctype == 'bolts':
@@ -94,38 +94,42 @@ def dump_components(components, topo_info):
       row.append(','.join(outputs.get(component_name, ['-'])))
       info.append(row)
   header = ['type', 'name', '#instances', 'input', 'output']
-  print(tabulate(info, headers=header))
-  return True
+  return info, header
 
 
-def dump_bolts(bolts, topo_loc):
-  print('Bolts under topology \'%s\'' % '/'.join(topo_loc))
-  for bolt in bolts.keys():
-    print('  %s' % bolt)
-  return True
+def filter_bolts(table, header):
+  bolts_info = []
+  for row in table:
+    if row[0] == 'bolts':
+      bolts_info.append(row)
+  return bolts_info, header
 
 
-def dump_spouts(spouts, topo_loc):
-  print('Spouts under topology \'%s\'' % '/'.join(topo_loc))
-  for spout in spouts.keys():
-    print('  %s' % spout)
-  return True
+def filter_spouts(table, header):
+  spouts_info = []
+  for row in table:
+    if row[0] == 'spouts':
+      spouts_info.append(row)
+  return spouts_info, header
 
 
 def run(cl_args, compo_type):
   cluster, role, env = cl_args['cluster'], cl_args['role'], cl_args['environ']
   topology = cl_args['topology-name']
-  topo_loc = [cluster, role, env, topology]
+  #topo_loc = [cluster, role, env, topology]
   try:
     components = get_logical_plan(cluster, env, topology, role)
-    bolts, spouts = components["bolts"], components["spouts"]
+    topo_info = get_topology_info(cluster, env, topology, role)
+    table, header = to_table(components, topo_info)
     if compo_type == 'bolts':
-      return dump_bolts(bolts, topo_loc)
-    if compo_type == 'spouts':
-      return dump_spouts(spouts, topo_loc)
+      table, header = filter_bolts(table, header)
+      print(tabulate(table, headers=header))
+    elif compo_type == 'spouts':
+      table, header = filter_spouts(table, header)
+      print(tabulate(table, headers=header))
     else:
-      topo_info = get_topology_info(cluster, env, topology, role)
-      return dump_components(components, topo_info)
+      print(tabulate(table, headers=header))
+    return True
   except:
     return False
 
