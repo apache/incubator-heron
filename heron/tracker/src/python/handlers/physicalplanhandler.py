@@ -24,7 +24,7 @@ class PhysicalPlanHandler(BaseHandler):
   URL - /topologies/physicalplan
   Parameters:
    - cluster (required)
-   - role - Name of person who submits the topology (optional)
+   - role - Role used to submit the topology (optional).
    - environ (required)
    - topology (required) name of the requested topology
 

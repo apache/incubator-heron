@@ -46,7 +46,7 @@ class PidHandler(BaseHandler):
         &environ=<environment>&instance=<instance>
   Parameters:
    - cluster - Name of the cluster.
-   - role - Name of person who submits the topology (optional)
+   - role - Role used to submit the topology (optional).
    - environ - Running environment.
    - topology - Name of topology (Note: Case sensitive. Can only
                 include [a-zA-Z0-9-_]+)

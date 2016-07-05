@@ -25,7 +25,7 @@ class MetricsQueryHandler(BaseHandler):
   URL - /topologies/metricsquery
   Parameters:
    - cluster (required)
-   - role - Name of person who submits the topology (optional)
+   - role - Role used to submit the topology (optional).
    - environ (required)
    - topology (required) name of the requested topology
    - starttime (required)

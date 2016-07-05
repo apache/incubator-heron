@@ -25,7 +25,7 @@ class ExecutionStateHandler(BaseHandler):
   Parameters:
    - cluster (required)
    - environ (required)
-   - role - Name of person who submits the topology (optional)
+   - role - Role used to submit the topology (optional).
    - topology (required) name of the requested topology
 
   The response JSON is a dictionary with all the
