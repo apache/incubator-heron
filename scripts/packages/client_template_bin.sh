@@ -81,15 +81,15 @@ if [ -L "${bin}/heron" ]; then
   rm -f "${bin}/heron"
 fi
 
+if [ -L "${bin}/heron-explorer" ]; then
+  rm -f "${bin}/heron-explorer"
+fi
+
 if [ -L "${bin}/heron-cli3" ]; then
   rm -f "${bin}/heron-cli3"
 fi
 
 if [ -d "${base}" -a -x "${base}/bin/heron" ]; then
-  rm -fr "${base}"
-fi
-
-if [ -d "${base}" -a -x "${base}/bin/heron-explorer" ]; then
   rm -fr "${base}"
 fi
 
