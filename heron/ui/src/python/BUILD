@@ -14,7 +14,6 @@ pex_library(
         "tornado==4.0.2",
     ],
     deps = [
-        "//heron/common/src/python/handler/access:tracker-access",
         "//heron/common/src/python:common",
         "//heron/common/src/python:tracker-access",
     ]
