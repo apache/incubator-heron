@@ -214,51 +214,50 @@ https://docs.google.com/drawings/d/10d1Q_VO0HFtOHftDV7kK6VbZMVI5EpEYHrD-LR7SczE
 -->
 <img src="/img/topology-submit-sequence-diagram.png" style="max-width:140%;!important;" alt="Topology Sequence Diagram"/>
 
-### Brief Description
+### Topology Submit Description
 
-The following briefly describes how a topology is handled internally.
+The following describes in more detail how a topology is submitted.
 
 * Client
 
-    When a topology is submitted using `heron submit` command, it first executes
-    the `main` of the topology and creates `.defn` file containing the topology's
+    When a topology is submitted using the `heron submit` command, it first executes
+    the `main` of the topology and creates a `.defn` file containing the topology's
     logical plan. Then, it runs `com.twitter.heron.scheduler.SubmitterMain`, which
     is responsible for invoking an uploader and a launcher for the topology.
     The uploader uploads the topology package to the given location, while the
-    launcher registers the topology's logical plan and executor state with 
+    launcher registers the topology's logical plan and executor state with
     the state manager and invokes the main scheduler.
 
 * Shared Services
 
-    When the main scheduler (`com.twitter.heron.scheduler.SchedulerMain`) is invoked 
+    When the main scheduler (`com.twitter.heron.scheduler.SchedulerMain`) is invoked
     by the launcher, it fetches the submitted topology artifact from the
-    topology storage, initializes the state manager, and prepares the packed plan, which 
+    topology storage, initializes the State Manager, and prepares a physical plan that
     specifies how multiple instances should be packed into containers. Then, it starts
     the specified scheduler, such as `com.twitter.heron.scheduler.local.LocalScheduler`,
-    which invokes `heron-executor` for each container.
+    which invokes the `heron-executor` for each container.
 
 * Topologies
 
-    `heron-executor` process is run for each container and is responsible for 
-    executing the topology master or heron instances (bolt/spout) that are
-    assigned to the container. This instance distribution is determined
-    by the packed plan. Note that the topology master is always executed 
-    on the container 0. When `heron-executor` executes 
-    normal heron instances (i.e. except for container 0), it first prepares 
-    the stream manager and the metrics manager, before starting 
-    `com.twitter.heron.instance.HeronInstance` for each instance that is 
-    assigned to the container. 
+    `heron-executor` process is run for each container and is responsible for
+    executing the Topology Master or Heron Instances (Bolt/Spout) that are
+    assigned to the container. Note that the Topology Master is always executed
+    on container 0. When `heron-executor` executes normal Heron Instances
+    (i.e. except for container 0), it first prepares
+    the Stream Manager and the Metrics Manager before starting
+    `com.twitter.heron.instance.HeronInstance` for each instance that is
+    assigned to the container.
     
-    Heron Instance has two threads: Gateway thread and Slave thread. Gateway
-    thread is mainly responsible for communicating with the stream manager 
-    and the metrics manager using `StreamManagerClient` and `MetricsManagerClient`
+    Heron Instance has two threads: the gateway thread and the slave thread.
+    The gateway thread is mainly responsible for communicating with the Stream Manager
+    and the Metrics Manager using `StreamManagerClient` and `MetricsManagerClient`
     respectively, as well as sending/receiving tuples to/from the slave
-    thread. On the other hand, Slave thread runs either spout or bolt 
+    thread. On the other hand, the slave thread runs either spout or bolt
     of the topology based on the physical plan.
     
-    When a new Heron Instance is started, its `StreamManagerClient` establish
+    When a new Heron Instance is started, its `StreamManagerClient` establishes
     a connection and registers itself with the stream manager.
-    After the successful registration, the gateway thread sends its physical plan to 
+    After the successful registration, the gateway thread sends its physical plan to
     the slave thread, which then executes the assigned instance accordingly.
     
 
