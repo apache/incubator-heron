@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json, time
 import logging
 
 import tornado.httpclient
@@ -86,15 +85,17 @@ queries = dict(
 def get_tracker_endpoint():
     return options.tracker_url
 
+
 # Given an URL format, substitute with tracker service endpoint
 def create_url(fmt):
     return fmt % get_tracker_endpoint()
+
 
 @tornado.gen.coroutine
 def get_clusters():
   request_url = create_url(CLUSTER_URL_FMT)
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
-  
+
 
 ################################################################################
 # Get the list of topologies given a data center from heron tracker
@@ -104,6 +105,7 @@ def get_topologies():
   request_url = create_url(TOPOLOGIES_URL_FMT)
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
+
 ################################################################################
 # Get the list of topologies and their states
 ################################################################################
@@ -112,35 +114,40 @@ def get_topologies_states():
   request_url = create_url(TOPOLOGIES_URL_FMT) + "/states"
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
+
+@tornado.gen.coroutine
+def _get_topologies(cluster, role=None, env=None):
+  endpoint = create_url(TOPOLOGIES_URL_FMT)
+  params = dict(cluster=cluster)
+  if role:
+    params['role'] = role
+  if env:
+    params['environ'] = env
+  request_url = tornado.httputil.url_concat(endpoint, params)
+  raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
+
+
 ################################################################################
 # Get the list of topologies given a cluster
 ################################################################################
-@tornado.gen.coroutine
 def get_cluster_topologies(cluster):
-  endpoint = create_url(TOPOLOGIES_URL_FMT)
-  request_url = tornado.httputil.url_concat(endpoint, dict(cluster=cluster))
-  raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
+  return _get_topologies(cluster)
+
 
 ################################################################################
 # Get the list of topologies given a cluster submitted by a given role
 ################################################################################
-@tornado.gen.coroutine
 def get_cluster_role_topologies(cluster, role):
-  endpoint = create_url(TOPOLOGIES_URL_FMT)
-  request_url = tornado.httputil.url_concat(endpoint,
-    dict(cluster=cluster, role=role))
-  raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
+  return _get_topologies(cluster, role)
+
 
 ################################################################################
 # Get the list of topologies given a cluster submitted by a given role under
 # a given environment
 ################################################################################
-@tornado.gen.coroutine
 def get_cluster_role_env_topologies(cluster, role, env):
-  endpoint = create_url(TOPOLOGIES_URL_FMT)
-  request_url = tornado.httputil.url_concat(endpoint,
-    dict(cluster=cluster, role=role, environ=env))
-  raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
+  return _get_topologies(cluster, role, env)
+
 
 ################################################################################
 # Get the execution state of a topology in a cluster
@@ -149,12 +156,13 @@ def get_cluster_role_env_topologies(cluster, role, env):
 def get_execution_state(cluster, environ, topology, role=None):
   request_url = tornado.httputil.url_concat(
       create_url(EXECUTION_STATE_URL_FMT),
-      dict(cluster = cluster, environ = environ, topology = topology)
+      dict(cluster=cluster, environ=environ, topology=topology)
   )
   if role:
     request_url = tornado.httputil.url_concat(request_url, dict(role=role))
 
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
+
 
 ################################################################################
 # Get the logical plan state of a topology in a cluster
