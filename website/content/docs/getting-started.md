@@ -156,7 +156,7 @@ $ heron-tracker
 ... Using config file: $HOME/.herontools/conf/heron_tracker.yaml
 ```
 
-You can reach Heron Tracker in your browser at ``http://localhost:8888``
+You can reach Heron Tracker in your browser at [http://localhost:8888](http://localhost:8888)
 and see something like the following upon successful submission of the topology:
 ![alt tag](/img/heron-tracker.png)
 
