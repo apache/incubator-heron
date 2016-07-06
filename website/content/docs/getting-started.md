@@ -250,7 +250,7 @@ The included example topologies:
   for each component.
 * `CustomGroupingTopology.java` --- A topology that implements custom grouping.
 * `ExclamationTopology.java` --- A spout that emits random words to a bolt that
-  then adds an explanation mark.
+  then adds an exclamation mark.
 * `MultiSpoutExclamationTopology.java` --- a topology with multiple spouts.
 * `MultiStageAckingTopology.java` --- A three-stage topology. A spout emits to a
   bolt that then feeds to another bolt.

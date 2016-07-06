@@ -22,6 +22,7 @@ supports several scheduler options:
   * [Aurora](schedulers/aurora)
   * [Local](schedulers/local)
   * [Slurm](schedulers/slurm)
+  * [YARN](schedulers/yarn)
 
 * **State Manager** --- Heron state manager tracks the state of all deployed
 topologies. The topology state includes its logical plan,

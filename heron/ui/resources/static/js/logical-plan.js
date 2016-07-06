@@ -124,7 +124,7 @@
     groupIndex++;
     var toProcess = [];
     var nextLinks = group.map(function (node) {
-      return nodesToLinks[node.name];
+      return (nodesToLinks[node.name] === undefined) ? [] : nodesToLinks[node.name];
     });
 
     nextLinks.forEach(function (arr) {
@@ -132,7 +132,6 @@
     });
 
     while (toProcess.length > 0) {
-
       // In case of circular graphs, this will prevent infinte loop
       if (groupIndex > numNodes) {
         break;
@@ -296,7 +295,7 @@
          .linkDistance(200)
          .start();
 
-    hOffset = 1.0 / (groups.length + 0.618);
+    hOffset = 1.0 / (groups.length + 1);
 
     nodes.forEach(function (node) {
       var x = hOffset * (node.groupIndex + 1);
@@ -315,7 +314,6 @@
     var yRange = d3.extent(nodes, function (d) { return d.y; });
     outerSvg.attr('height', (yRange[1] - yRange[0]) + padding.top + padding.bottom);
     svg.attr('transform', 'translate(' + padding.left + ',' + (padding.top - yRange[0]) + ')')
-
 
     var node = svg.selectAll(".topnode")
                   .data(nodes)
