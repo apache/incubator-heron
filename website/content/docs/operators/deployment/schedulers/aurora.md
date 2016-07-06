@@ -3,8 +3,9 @@ title: Aurora Cluster
 ---
 
 Heron supports deployment on [Apache Aurora](http://aurora.apache.org/) out of
-the box. You can also run Heron on
-a [local scheduler](../local).
+the box. A step by step guide on how to setup Heron with Apache Aurora locally 
+can be found in [Setting up Heron with Aurora Cluster Locally on Linux](../aurora-local-setup). You can also run Heron on
+a [local scheduler](../local). 
 
 ## How Heron on Aurora Works
 

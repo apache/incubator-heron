@@ -78,16 +78,21 @@ class Tracker:
       onTopologiesWatch = partial(on_topologies_watch, state_manager)
       state_manager.get_topologies(onTopologiesWatch)
 
-  def getTopologyByClusterEnvironAndName(self, cluster, environ, topName):
+  def getTopologyByClusterRoleEnvironAndName(self, cluster, role, environ, topologyName):
     """
-    Find and return the topology given its cluster, environ and topology name.
+    Find and return the topology given its cluster, environ, topology name, and
+    an optional role.
     Raises exception if topology is not found, or more than one are found.
     """
-    topologies = filter(lambda t: t.name == topName
+    topologies = filter(lambda t: t.name == topologyName
                         and t.cluster == cluster
+                        and (not role or t.execution_state.role == role)
                         and t.environ == environ, self.topologies)
     if not topologies or len(topologies) > 1:
-      raise Exception("Topology not found for {0}, {1}, {2}".format(cluster, environ, topName))
+      if role is not None:
+        raise Exception("Topology not found for {0}, {1}, {2}, {3}".format(cluster, role, environ, topologyName))
+      else:
+        raise Exception("Topology not found for {0}, {1}, {2}".format(cluster, environ, topologyName))
 
     # There is only one topology which is returned.
     return topologies[0]
@@ -431,10 +436,10 @@ class Tracker:
 
     self.topologyInfos[(topology.name, topology.state_manager_name)] = top
 
-  def getTopologyInfo(self, topologyName, cluster, environ):
+  def getTopologyInfo(self, topologyName, cluster, role, environ):
     """
     Returns the JSON representation of a topology
-    by its name, cluster and environ.
+    by its name, cluster, environ, and an optional role parameter.
     Raises exception if no such topology is found.
     """
     # Iterate over the values to filter the desired topology.
@@ -443,8 +448,15 @@ class Tracker:
       if (topologyName == topology_name and
           cluster == executionState["cluster"] and
           environ == executionState["environ"]):
-        return topologyInfo
-    LOG.info("Could not find topology info for topology: {0}, \
-             cluster: {1} and environ: {2}".format(topologyName, cluster, environ))
+        # If role is specified, first try to match "role" field. If "role" field
+        # does not exist, try to match "submission_user" field.
+        if not role or executionState.get("role") == role:
+          return topologyInfo
+    if role is not None:
+      LOG.info("Could not find topology info for topology: {0}, \
+               cluster: {1}, role: {2}, and environ: {3}".format(topologyName, cluster, role, environ))
+    else:
+      LOG.info("Could not find topology info for topology: {0}, \
+               cluster: {1} and environ: {2}".format(topologyName, cluster, environ))
     raise Exception("No topology found")
 

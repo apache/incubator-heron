@@ -31,6 +31,7 @@ class ExceptionHandler(BaseHandler):
   Parameters:
    - cluster - Name of cluster.
    - environ - Running environment.
+   - role - (optional) Role used to submit the topology.
    - topology - Name of topology (Note: Case sensitive. Can only
                 include [a-zA-Z0-9-_]+)
    - component - Component name
@@ -46,9 +47,10 @@ class ExceptionHandler(BaseHandler):
     try:
       cluster = self.get_argument_cluster()
       environ = self.get_argument_environ()
+      role = self.get_argument_role()
       topName = self.get_argument_topology()
       component = self.get_argument_component()
-      topology = self.tracker.getTopologyByClusterEnvironAndName(cluster, environ, topName)
+      topology = self.tracker.getTopologyByClusterRoleEnvironAndName(cluster, role, environ, topName)
       instances = self.get_arguments(constants.PARAM_INSTANCE)
       exceptions_logs = yield tornado.gen.Task(self.getComponentException,
                                                topology.tmaster, component, instances)

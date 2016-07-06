@@ -24,6 +24,7 @@ class SchedulerLocationHandler(BaseHandler):
   URL - /topologies/schedulerlocation
   Parameters:
    - cluster (required)
+   - role - (optional) Role used to submit the topology.
    - environ (required)
    - topology (required) name of the requested topology
 
@@ -38,9 +39,10 @@ class SchedulerLocationHandler(BaseHandler):
   def get(self):
     try:
       cluster = self.get_argument_cluster()
+      role = self.get_argument_role()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
-      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, environ)
+      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)
       scheduler_location = topology_info["scheduler_location"]
       self.write_success_response(scheduler_location)
     except Exception as e:

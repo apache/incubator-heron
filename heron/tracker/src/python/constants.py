@@ -38,6 +38,7 @@ PARAM_PATH = "path"
 PARAM_QUERY = "query"
 PARAM_STARTTIME = "starttime"
 PARAM_TOPOLOGY = "topology"
+PARAM_ROLE = "role"
 
 # These are the keys in the JSON response
 # formed by the handlers.

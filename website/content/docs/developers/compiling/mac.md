@@ -15,6 +15,7 @@ This is a step by step guide for building Heron on Mac OS (10.10 and 10.11).
 ```bash
 brew install automake
 brew install cmake
+brew install libtool
 ```
 
 #### Step 3 - Set the following environment variables

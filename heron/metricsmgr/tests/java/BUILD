@@ -60,3 +60,19 @@ java_test(
     ],
     size = "small",
 )
+
+java_test(
+    name = "FileSinkTest",
+    srcs = glob(["**/FileSinkTest.java"]),
+    deps = [
+        "//heron/api/src/java:api-java",
+        "//heron/common/src/java:common-java",
+        "//heron/spi/src/java:metricsmgr-spi-java",
+        "//heron/metricsmgr/src/java:metricsmgr-java",
+        "//heron/proto:proto_tmaster_java",
+        "@com_google_protobuf_protobuf_java//jar",
+        "@bazel_tools//third_party:junit4",
+        "@bazel_tools//third_party:mockito",
+    ],
+    size = "small",
+)
