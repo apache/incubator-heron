@@ -15,7 +15,7 @@ pex_library(
     ],
     deps = [
         "//heron/common/src/python:common",
-        "//heron/common/src/python/handler/access:tracker-access",
+        "//heron/common/src/python:tracker-access",
     ]
 )
 
