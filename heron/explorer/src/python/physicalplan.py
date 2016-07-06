@@ -22,7 +22,7 @@ from tabulate import tabulate
 def create_parser(subparsers):
   spouts_parser = subparsers.add_parser(
     'spouts-metric',
-    help='show info of a topology\'s spouts metrics',
+    help='Display info of a topology\'s spouts metrics',
     usage="%(prog)s [options]",
     add_help=False)
   args.add_cluster_role_env(spouts_parser)
@@ -35,7 +35,7 @@ def create_parser(subparsers):
 
   bolts_parser = subparsers.add_parser(
    'bolts-metric',
-    help='show info of a topology\'s bolts metrics',
+    help='Display info of a topology\'s bolts metrics',
     usage="%(prog)s [options]",
     add_help=False)
   args.add_cluster_role_env(bolts_parser)
@@ -48,7 +48,7 @@ def create_parser(subparsers):
 
   containers_parser = subparsers.add_parser(
     'containers',
-    help='show info of a topology\'s containers metrics',
+    help='Display info of a topology\'s containers metrics',
     usage="%(prog)s [options]",
     add_help=False)
   args.add_cluster_role_env(containers_parser)
@@ -72,39 +72,6 @@ def parse_topo_loc(cl_args):
   except Exception:
     Log.error('Invalid topology location')
     raise
-
-
-'''
-def get_component_metrics(component, cluster, env, topology, role):
-  queries_normal = [
-    'complete-latency', 'execute-latency', 'process-latency',
-    'jvm-uptime-secs', 'jvm-process-cpu-load', 'jvm-memory-used-mb'
-  ]
-  count_queries_normal = ['emit-count', 'execute-count', 'ack-count', 'fail-count']
-  queries = ['__%s' % m for m in queries_normal]
-  count_queries = ['__%s/default' % m for m in count_queries_normal]
-  all_queries = queries + count_queries
-  m = dict(zip(queries, queries_normal) + zip(count_queries, count_queries_normal))
-  try:
-    result = utils.get_topology_metrics(
-      cluster, env, topology, component, [], all_queries, [0, -1], role)
-  except:
-    Log.error("Failed to retrive metrics of component \'%s\'" % component)
-    return None
-  metrics = result["metrics"]
-  names = metrics.values()[0].keys()
-  stats = []
-  for n in names:
-    info = [n]
-    for field in all_queries:
-      try:
-        info.append(str(metrics[field][n]))
-      except KeyError:
-        pass
-    stats.append(info)
-  header = ['container id'] + [m[k] for k in all_queries if k in metrics.keys()]
-  return stats, header
-'''
 
 
 def to_table(metrics):

@@ -22,7 +22,7 @@ from tabulate import tabulate
 def create_parser(subparsers):
   components_parser = subparsers.add_parser(
     'components',
-    help='display information of a topology in a logical plan',
+    help='Display information of a topology in a logical plan',
     usage="%(prog)s [options]",
     add_help=False)
   args.add_cluster_role_env(components_parser)
@@ -34,7 +34,7 @@ def create_parser(subparsers):
 
   spouts_parser = subparsers.add_parser(
     'spouts',
-    help='display information of spouts of a topology in a logical plan',
+    help='Display information of spouts of a topology in a logical plan',
     usage="%(prog)s [options]",
     add_help=False)
   args.add_cluster_role_env(spouts_parser)
@@ -46,7 +46,7 @@ def create_parser(subparsers):
 
   bolts_parser = subparsers.add_parser(
     'bolts',
-    help='display information of bolts of a topology in a logical plan',
+    help='Display information of bolts of a topology in a logical plan',
     usage="%(prog)s [options]",
     add_help=False)
   args.add_cluster_role_env(bolts_parser)

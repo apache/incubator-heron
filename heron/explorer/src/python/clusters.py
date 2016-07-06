@@ -21,7 +21,7 @@ from heron.explorer.src.python.utils import get_clusters
 def create_parser(subparsers):
   parser = subparsers.add_parser(
     'clusters',
-    help='Show exisitng clusters',
+    help='Display exisitng clusters',
     usage="%(prog)s [options]",
     add_help=True)
   args.add_verbose(parser)

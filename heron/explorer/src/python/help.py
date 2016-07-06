@@ -29,7 +29,7 @@ def create_parser(subparsers):
       'help-command',
       nargs='?',
       default='help',
-      help='Provide help for a command')
+      help='provide help for a command')
 
   parser.set_defaults(subcommand='help')
   return parser

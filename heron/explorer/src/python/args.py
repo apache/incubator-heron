@@ -118,7 +118,7 @@ def add_tracker_url(parser):
 def add_topology(parser, required=False, labelled=False):
   parser.add_argument(
       req(required, labelled, 'topology'),
-      help='Name of the topology',
+      help='name of the topology',
       metavar='TOPOLOGY', type=str)
   return parser
 
@@ -126,7 +126,7 @@ def add_topology(parser, required=False, labelled=False):
 def add_cluster(parser, required=False, labelled=False):
   parser.add_argument(
     req(required, labelled, 'cluster'),
-    help='Name of cluster',
+    help='name of cluster',
     metavar='CLUSTER', type=str)
   return parser
 
@@ -134,7 +134,7 @@ def add_cluster(parser, required=False, labelled=False):
 def add_env(parser, required=False, labelled=False):
   parser.add_argument(
     req(required, labelled, 'env'),
-    help='Environment',
+    help='environment',
     metavar='ENV', type=str)
   return parser
 
@@ -142,7 +142,7 @@ def add_env(parser, required=False, labelled=False):
 def add_role(parser, required=False, labelled=False):
   parser.add_argument(
     req(required, labelled, 'role'),
-    help='Roles',
+    help='roles',
     metavar='ROLE', type=str)
   return parser
 
@@ -150,7 +150,7 @@ def add_role(parser, required=False, labelled=False):
 def add_container_id(parser, required=False, labelled=False):
   parser.add_argument(
     req(required, labelled, 'cid'),
-    help='Container ID',
+    help='container ID',
     type=int, metavar='CONTAINER_ID')
   return parser
 
