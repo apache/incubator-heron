@@ -125,11 +125,11 @@ class SingleThreadHeronInstance(object):
     # TODO : preliminary loading
     pex_loader.load_pex(self.topo_pex_file_path, python_class_name)
     if is_spout:
-      spout_class = pex_loader.import_and_get_class(python_class_name)
+      spout_class = pex_loader.import_and_get_class(self.topo_pex_file_path, python_class_name)
       my_spout = spout_class(self.my_pplan_helper, self.in_stream, self.out_stream)
       return my_spout
     else:
-      bolt_class = pex_loader.import_and_get_class(python_class_name)
+      bolt_class = pex_loader.import_and_get_class(self.topo_pex_file_path, python_class_name)
       my_bolt = bolt_class(self.my_pplan_helper, self.in_stream, self.out_stream)
       return my_bolt
 
