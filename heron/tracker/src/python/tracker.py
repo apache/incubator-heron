@@ -89,7 +89,7 @@ class Tracker:
                         and (not role or t.execution_state.role == role)
                         and t.environ == environ, self.topologies)
     if not topologies or len(topologies) > 1:
-      if role:
+      if role is not None:
         raise Exception("Topology not found for {0}, {1}, {2}, {3}".format(cluster, role, environ, topologyName))
       else:
         raise Exception("Topology not found for {0}, {1}, {2}".format(cluster, environ, topologyName))
@@ -452,7 +452,7 @@ class Tracker:
         # does not exist, try to match "submission_user" field.
         if not role or executionState.get("role") == role:
           return topologyInfo
-    if role:
+    if role is not None:
       LOG.info("Could not find topology info for topology: {0}, \
                cluster: {1}, role: {2}, and environ: {3}".format(topologyName, cluster, role, environ))
     else:
