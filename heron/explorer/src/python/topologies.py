@@ -24,7 +24,7 @@ def create_parser(subparsers):
   parser = subparsers.add_parser(
     'topologies',
     help='Display running topologies',
-    usage="%(prog)s [options]",
+    usage="%(prog)s cluster/[role]/[env] [options]",
     add_help=True)
   args.add_cluster_role_env(parser)
   args.add_verbose(parser)

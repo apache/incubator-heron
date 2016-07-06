@@ -23,7 +23,7 @@ def create_parser(subparsers):
   spouts_parser = subparsers.add_parser(
     'spouts-metric',
     help='Display info of a topology\'s spouts metrics',
-    usage="%(prog)s [options]",
+    usage="%(prog)s cluster/[role]/[env] topology-name [options]",
     add_help=False)
   args.add_cluster_role_env(spouts_parser)
   args.add_topology_name(spouts_parser)
@@ -36,7 +36,7 @@ def create_parser(subparsers):
   bolts_parser = subparsers.add_parser(
    'bolts-metric',
     help='Display info of a topology\'s bolts metrics',
-    usage="%(prog)s [options]",
+    usage="%(prog)s cluster/[role]/[env] topology-name [options]",
     add_help=False)
   args.add_cluster_role_env(bolts_parser)
   args.add_topology_name(bolts_parser)
@@ -49,7 +49,7 @@ def create_parser(subparsers):
   containers_parser = subparsers.add_parser(
     'containers',
     help='Display info of a topology\'s containers metrics',
-    usage="%(prog)s [options]",
+    usage="%(prog)s cluster/[role]/[env] topology-name [options]",
     add_help=False)
   args.add_cluster_role_env(containers_parser)
   args.add_topology_name(containers_parser)

@@ -23,7 +23,7 @@ def create_parser(subparsers):
   components_parser = subparsers.add_parser(
     'components',
     help='Display information of a topology in a logical plan',
-    usage="%(prog)s [options]",
+    usage="%(prog)s cluster/[role]/[env] topology-name [options]",
     add_help=False)
   args.add_cluster_role_env(components_parser)
   args.add_topology_name(components_parser)
@@ -35,7 +35,7 @@ def create_parser(subparsers):
   spouts_parser = subparsers.add_parser(
     'spouts',
     help='Display information of spouts of a topology in a logical plan',
-    usage="%(prog)s [options]",
+    usage="%(prog)s cluster/[role]/[env] topology-name [options]",
     add_help=False)
   args.add_cluster_role_env(spouts_parser)
   args.add_topology_name(spouts_parser)
@@ -47,7 +47,7 @@ def create_parser(subparsers):
   bolts_parser = subparsers.add_parser(
     'bolts',
     help='Display information of bolts of a topology in a logical plan',
-    usage="%(prog)s [options]",
+    usage="%(prog)s cluster/[role]/[env] topology-name [options]",
     add_help=False)
   args.add_cluster_role_env(bolts_parser)
   args.add_topology_name(bolts_parser)
