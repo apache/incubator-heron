@@ -178,11 +178,10 @@ def main(args):
   command = command_line_args['subcommand']
 
   if unknown_args:
-    print(unknown_args)
     Log.error('Unknown argument: %s' % unknown_args[0])
     # show help message
+    command_line_args['help-command'] = command
     command = 'help'
-    command_line_args['help-command'] = 'help'
 
   if command != 'help':
     opts.set_tracker_url(command_line_args)
