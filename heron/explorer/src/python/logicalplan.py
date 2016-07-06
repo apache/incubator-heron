@@ -85,7 +85,7 @@ def to_table(components, topo_info):
   bolts_instance = topo_info['physical_plan']['bolts']
   for ctype, component in components.iteritems():
     for component_name, component_info in component.iteritems():
-      row = [ctype, component_name]
+      row = [ctype[:-1], component_name]
       if ctype == 'spouts':
         row.append(len(spouts_instance[component_name]))
       else:
