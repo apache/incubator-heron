@@ -38,7 +38,7 @@ if [[ $GREP_STATUS != 0 ]]; then
   LINES=$(tail "+${LN}" "${WGET_LOG}")
   BAD_LINKS=""
   COUNT=0
-  # filter out broken links with prefix ``localhost:15532``
+  # only keep broken links with prefix ``localhost:15532``
   for LINE in $LINES; do
     if [[ $LINE == *"${PORT}"* ]]
     then
