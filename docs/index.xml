@@ -108,6 +108,150 @@ HDFS for uploader will have the following set of configurations.&lt;/p&gt;
     </item>
     
     <item>
+      <title>Apache Hadoop YARN Cluster (Experimental)</title>
+      <link>/heron/docs/operators/deployment/schedulers/yarn/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/heron/docs/operators/deployment/schedulers/yarn/</guid>
+      <description>
+
+&lt;p&gt;In addition to out-of-the-box schedulers for &lt;a href=&#34;../aurora&#34;&gt;Aurora&lt;/a&gt;, Heron can also be deployed on a
+YARN cluster with the YARN scheduler. The YARN scheduler is implemented using the
+&lt;a href=&#34;https://reef.apache.org/&#34;&gt;Apache REEF&lt;/a&gt; framework.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Key features&lt;/strong&gt; of the YARN scheduler:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Heterogeneous container allocation:&lt;/strong&gt; The YARN scheduler will request heterogeneous containers
+from the YARN ResourceManager &lt;a href=&#34;http://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-site/YARN.html&#34;&gt;RM&lt;/a&gt;. In other words the topology will not request more resources than what is really needed.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Container reuse:&lt;/strong&gt; The REEF framework allows the YARN scheduler to retain containers
+across events like topology restarts.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;topology-deployment-on-a-yarn-cluster:d35c852e97c6bc7b1a42bb1b90a84abf&#34;&gt;Topology deployment on a YARN Cluster&lt;/h2&gt;
+
+&lt;p&gt;Using the YARN scheduler is similar to deploying Heron on other clusters, i.e. using the
+&lt;a href=&#34;/heron/docs/operators/heron-cli/&#34;&gt;Heron CLI&lt;/a&gt;.
+This document assumes that the Hadoop yarn client is installed and configured.&lt;/p&gt;
+
+&lt;p&gt;Following steps are executed when a Heron topology is submitted:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;The REEF client copies the &lt;code&gt;Heron Core package&lt;/code&gt; and the &lt;code&gt;topology package&lt;/code&gt; on the distributed file system.&lt;/li&gt;
+&lt;li&gt;It then starts the YARN Application Master (AM) for the topology.&lt;/li&gt;
+&lt;li&gt;The AM subsequently invokes the &lt;code&gt;Heron Scheduler&lt;/code&gt; in the same process.&lt;/li&gt;
+&lt;li&gt;This is followed by container allocation for the topology&amp;rsquo;s master and workers. As a result &lt;code&gt;N+2&lt;/code&gt;
+containers are allocated for each topology.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&#34;configuring-the-heron-client-classpath:d35c852e97c6bc7b1a42bb1b90a84abf&#34;&gt;Configuring the Heron client classpath&lt;/h3&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Command &lt;code&gt;hadoop classpath&lt;/code&gt; provides a list of jars needed to submit a hadoop job. Copy all jars
+to &lt;code&gt;HERON_INSTALL_DIR/lib/scheduler&lt;/code&gt;.
+
+&lt;ul&gt;
+&lt;li&gt;Do not copy commons-cli jar if it is older than version 1.3.1.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Create a jar containing core-site.xml and yarn-site.xml. Add this jar to
+&lt;code&gt;HERON_INSTALL_DIR/lib/scheduler&lt;/code&gt; too.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;The YARN scheduler needs Hadoop and YARN jars in the classpath. Heron currently does not allow
+customizing client classpath. Hadoop and YARN jars are version dependent and should not be
+bundled with the Heron distribution. So, this manual step is needed till this Heron issue
+(&lt;a href=&#34;https://github.com/twitter/heron/issues/271&#34;&gt;271&lt;/a&gt;) is fixed.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&#34;configure-the-yarn-scheduler:d35c852e97c6bc7b1a42bb1b90a84abf&#34;&gt;Configure the YARN scheduler&lt;/h3&gt;
+
+&lt;p&gt;A set of default configuration files are provided with Heron in the &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/config/src/yaml/conf/yarn&#34;&gt;conf/yarn&lt;/a&gt; directory.
+The default configuration uses the local state manager. This will work with single-node local
+YARN installation only. A Zookeeper based state management will be needed for topology
+deployment on a multi-node YARN cluster.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Custom Heron Launcher for YARN: &lt;code&gt;YarnLauncher&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Custom Heron Scheduler for YARN: &lt;code&gt;YarnScheduler&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;State manager for multi-node deployment:
+&lt;code&gt;com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;YarnLauncher&lt;/code&gt; performs the job of uploader also. So &lt;code&gt;NullUploader&lt;/code&gt; is used.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&#34;topology-management:d35c852e97c6bc7b1a42bb1b90a84abf&#34;&gt;Topology management&lt;/h2&gt;
+
+&lt;h3 id=&#34;topology-submission:d35c852e97c6bc7b1a42bb1b90a84abf&#34;&gt;Topology Submission&lt;/h3&gt;
+
+&lt;p&gt;&lt;strong&gt;Command&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;$ heron submit yarn heron-examples.jar com.twitter.heron.examples.AckingTopology AckingTopology&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Sample Output&lt;/strong&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;INFO&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;Launching&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;topology&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;AckingTopology&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color: #f92672&#34;&gt;...&lt;/span&gt;
+&lt;span style=&#34;color: #f92672&#34;&gt;...&lt;/span&gt;
+&lt;span style=&#34;color: #f8f8f2&#34;&gt;Powered&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;by&lt;/span&gt;
+     &lt;span style=&#34;color: #f8f8f2&#34;&gt;___________&lt;/span&gt;  &lt;span style=&#34;color: #f8f8f2&#34;&gt;______&lt;/span&gt;  &lt;span style=&#34;color: #f8f8f2&#34;&gt;______&lt;/span&gt;  &lt;span style=&#34;color: #f8f8f2&#34;&gt;_______&lt;/span&gt;
+    &lt;span style=&#34;color: #e6db74&#34;&gt;/  ______  / /  ___/ /  ___/ /  ____/&lt;/span&gt;
+   &lt;span style=&#34;color: #e6db74&#34;&gt;/     _____/ /  /__  /  /__  /  /&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;___&lt;/span&gt;
+  &lt;span style=&#34;color: #e6db74&#34;&gt;/  /\  \     /  ___/ /  ___/ /  ____/&lt;/span&gt;
+ &lt;span style=&#34;color: #e6db74&#34;&gt;/  /  \  \   /  /__  /  /__  /  /&lt;/span&gt;
+&lt;span style=&#34;color: #e6db74&#34;&gt;/__/    \__\ /_____/ /_____/ /__/&lt;/span&gt;
+
+&lt;span style=&#34;color: #f92672&#34;&gt;...&lt;/span&gt;
+&lt;span style=&#34;color: #f92672&#34;&gt;...&lt;/span&gt;
+&lt;span style=&#34;color: #f8f8f2&#34;&gt;com&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;twitter&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;heron&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;scheduler&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;yarn&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;ReefClientSideHandlers&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;INFO&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;:&lt;/span&gt;  &lt;span style=&#34;color: #f8f8f2&#34;&gt;Topology&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;AckingTopology&lt;/span&gt; &lt;span style=&#34;color: #66d9ef&#34;&gt;is&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;running&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;jobId&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;AckingTopology&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;Verification&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Visit the YARN http console or execute command &lt;code&gt;yarn application -list&lt;/code&gt; on a yarn client host.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;Total number of applications (application-types: [] and states: [SUBMITTED, ACCEPTED, RUNNING]):1
+                Application-Id	    Application-Name	    Application-Type	      User	     Queue	             State	       Final-State	       Progress	                       Tracking-URL
+application_1466548964728_0004	      AckingTopology	                YARN	     heron	   default	           RUNNING	         UNDEFINED	             0%	                                N/A
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3 id=&#34;topology-termination:d35c852e97c6bc7b1a42bb1b90a84abf&#34;&gt;Topology termination&lt;/h3&gt;
+
+&lt;p&gt;&lt;strong&gt;Command&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;$ heron kill yarn AckingTopology&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;###Log File location&lt;/p&gt;
+
+&lt;p&gt;Assuming HDFS as the file system, Heron logs and REEF logs can be found in the following locations:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;Logs generated when the topologies AM starts:
+&lt;code&gt;&amp;lt;LOG_DIR&amp;gt;/userlogs/application_1466548964728_0004/container_1466548964728_0004_01_000001/driver.stderr&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;Ths scheduler&amp;rsquo;s logs are created on the first/AM container:
+&lt;code&gt;&amp;lt;NM_LOCAL_DIR&amp;gt;/usercache/heron/appcache/application_1466548964728_0004/container_1466548964728_0004_01_000001/log-files&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;Logs generated when the TMaster starts in its container:
+&lt;code&gt;&amp;lt;LOG_DIR&amp;gt;/userlogs/application_1466548964728_0004/container_1466548964728_0004_01_000002/evaluator.stderr&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;The TMaster&amp;rsquo;s logs are created on the second container owned by the topology app:
+&lt;code&gt;&amp;lt;NM_LOCAL_DIR&amp;gt;/usercache/heron/appcache/application_1466548964728_0004/container_1466548964728_0004_01_000002/log-files&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;Worker logs are created on the remaining containers in the YARN NodeManager&amp;rsquo;s local directory.&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&#34;work-in-progress:d35c852e97c6bc7b1a42bb1b90a84abf&#34;&gt;Work in Progress&lt;/h2&gt;
+
+&lt;ol&gt;
+&lt;li&gt;The YARN Scheduler will restart any failed workers and TMaster containers. However &lt;a href=&#34;https://hadoop.apache.org/docs/r2.7.1/hadoop-yarn/hadoop-yarn-site/ResourceManagerHA.html&#34;&gt;AM HA&lt;/a&gt;  is not
+supported yet. As a result AM failure will result in topology failure.
+Issue: &lt;a href=&#34;https://github.com/twitter/heron/issues/949&#34;&gt;#949&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;TMaster and Scheduler are started in separate containers. Increased network latency can result
+in warnings or failures. Issue: &lt;a href=&#34;https://github.com/twitter/heron/issues/951&#34;&gt;#951&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Aurora Cluster</title>
       <link>/heron/docs/operators/deployment/schedulers/aurora/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -116,7 +260,8 @@ HDFS for uploader will have the following set of configurations.&lt;/p&gt;
       <description>
 
 &lt;p&gt;Heron supports deployment on &lt;a href=&#34;http://aurora.apache.org/&#34;&gt;Apache Aurora&lt;/a&gt; out of
-the box. You can also run Heron on
+the box. A step by step guide on how to setup Heron with Apache Aurora locally
+can be found in &lt;a href=&#34;../aurora-local-setup&#34;&gt;Setting up Heron with Aurora Cluster Locally on Linux&lt;/a&gt;. You can also run Heron on
 a &lt;a href=&#34;../local&#34;&gt;local scheduler&lt;/a&gt;.&lt;/p&gt;
 
 &lt;h2 id=&#34;how-heron-on-aurora-works:387ae9f85e97bfb68065bef3a59cae96&#34;&gt;How Heron on Aurora Works&lt;/h2&gt;
@@ -141,8 +286,40 @@ S3&lt;/a&gt; or using a local blob storage solution). You
 can download the core binary from github or build it using the instructions
 in &lt;a href=&#34;../../../../developers/compiling#building-a-full-release-package&#34;&gt;Creating a New Heron Release&lt;/a&gt;.&lt;/p&gt;
 
+&lt;p&gt;Command for fetching the binary is in the &lt;code&gt;heron.aurora&lt;/code&gt; config file. By default it is
+using a &lt;code&gt;curl&lt;/code&gt; command to fetch the binary. For example, if the binary is hosted in
+HDFS, you need to change the fetch user package command in &lt;code&gt;heron.aurora&lt;/code&gt; to use the
+&lt;code&gt;hdfs&lt;/code&gt; command instead of &lt;code&gt;curl&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h3 id=&#34;heron-aurora-example-binary-fetch-using-hdfs:387ae9f85e97bfb68065bef3a59cae96&#34;&gt;&lt;code&gt;heron.aurora&lt;/code&gt; example binary fetch using HDFS&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;fetch_heron_system&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; Process&lt;span style=&#34;color: #f92672&#34;&gt;(&lt;/span&gt;
+  &lt;span style=&#34;color: #f8f8f2&#34;&gt;name&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;fetch_heron_system&amp;#39;&lt;/span&gt;,
+  &lt;span style=&#34;color: #f8f8f2&#34;&gt;cmdline&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;hdfs dfs -get %s %s &amp;amp;&amp;amp; tar zxf %s&amp;#39;&lt;/span&gt; % &lt;span style=&#34;color: #f92672&#34;&gt;(&lt;/span&gt;heron_core_release_uri, 
+        core_release_file, core_release_file&lt;span style=&#34;color: #f92672&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color: #f92672&#34;&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
 &lt;p&gt;Once your Heron binaries are hosted somewhere that is accessible to Aurora, you
 should run tests to ensure that Aurora can successfully fetch them.&lt;/p&gt;
+
+&lt;h2 id=&#34;uploading-the-topologies:387ae9f85e97bfb68065bef3a59cae96&#34;&gt;Uploading the Topologies&lt;/h2&gt;
+
+&lt;p&gt;Heron uses an uploader to upload the topology to a shared location so that a worker can fetch
+the topology to its sandbox. The configuration for an uploader is in the &lt;code&gt;uploader.yaml&lt;/code&gt;
+config file. For distributed Aurora deployments, Heron can use &lt;code&gt;HdfsUploader&lt;/code&gt; or &lt;code&gt;S3Uploader&lt;/code&gt;.
+Details on configuring the uploaders can be found in the documentation for the
+&lt;a href=&#34;../../uploaders/hdfs&#34;&gt;HDFS&lt;/a&gt; and &lt;a href=&#34;../../uploaders/s3&#34;&gt;S3&lt;/a&gt; uploaders.&lt;/p&gt;
+
+&lt;p&gt;After configuring an uploader, the &lt;code&gt;heron.aurora&lt;/code&gt; config file needs to be modified accordingly to
+fetch the topology.&lt;/p&gt;
+
+&lt;h3 id=&#34;heron-aurora-example-topology-fetch-using-hdfs:387ae9f85e97bfb68065bef3a59cae96&#34;&gt;&lt;code&gt;heron.aurora&lt;/code&gt; example topology fetch using HDFS&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;fetch_user_package&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; Process&lt;span style=&#34;color: #f92672&#34;&gt;(&lt;/span&gt;
+  &lt;span style=&#34;color: #f8f8f2&#34;&gt;name&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;fetch_user_package&amp;#39;&lt;/span&gt;,
+  &lt;span style=&#34;color: #f8f8f2&#34;&gt;cmdline&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;hdfs dfs -get %s %s &amp;amp;&amp;amp; tar zxf %s&amp;#39;&lt;/span&gt; % &lt;span style=&#34;color: #f92672&#34;&gt;(&lt;/span&gt;heron_topology_jar_uri, 
+          topology_package_file, topology_package_file&lt;span style=&#34;color: #f92672&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color: #f92672&#34;&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 
 &lt;h2 id=&#34;aurora-scheduler-configuration:387ae9f85e97bfb68065bef3a59cae96&#34;&gt;Aurora Scheduler Configuration&lt;/h2&gt;
 
@@ -214,6 +391,7 @@ can be enabled by specifying the proper configuration when managing topologies.&
 &lt;h4 id=&#34;step-2-install-the-required-libraries:7be74c584635419861677fc2502187c9&#34;&gt;Step 2 - Install the required libraries&lt;/h4&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;brew install automake
 brew install cmake
+brew install libtool
 &lt;/pre&gt;&lt;/div&gt;
 
 &lt;h4 id=&#34;step-3-set-the-following-environment-variables:7be74c584635419861677fc2502187c9&#34;&gt;Step 3 - Set the following environment variables&lt;/h4&gt;
@@ -222,10 +400,10 @@ $ &lt;span style=&#34;color: #f8f8f2&#34;&gt;export&lt;/span&gt; &lt;span style=
 $ &lt;span style=&#34;color: #f8f8f2&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;$CC&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;$CXX&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h4 id=&#34;step-4-install-bazel:7be74c584635419861677fc2502187c9&#34;&gt;Step 4 - Install Bazel&lt;/h4&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;curl -O -L https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-darwin-x86_64.sh
-chmod +x bazel-0.1.2-installer-darwin-x86_64.sh
-./bazel-0.1.2-installer-darwin-x86_64.sh --user
+&lt;h4 id=&#34;step-4-install-bazel-hugoshortcode-1:7be74c584635419861677fc2502187c9&#34;&gt;Step 4 - Install Bazel 0.2.3&lt;/h4&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;wget -O /tmp/bazel.sh  https://github.com/bazelbuild/bazel/releases/download/0.2.3/bazel-0.2.3-installer-darwin-x86_64.sh
+chmod +x /tmp/bazel.sh
+/tmp/bazel.sh --user
 &lt;/pre&gt;&lt;/div&gt;
 
 &lt;h4 id=&#34;step-5-make-sure-bazel-bin-is-in-the-path:7be74c584635419861677fc2502187c9&#34;&gt;Step 5 - Make sure Bazel bin is in the PATH&lt;/h4&gt;
@@ -344,7 +522,7 @@ package&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;You must have the following installed to compile Heron:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;http://bazel.io/docs/install.html&#34;&gt;Bazel&lt;/a&gt; = 0.1.2. Later versions
+&lt;li&gt;&lt;a href=&#34;http://bazel.io/docs/install.html&#34;&gt;Bazel&lt;/a&gt; = 0.2.3 . Later versions
 might work but have not been tested. See &lt;a href=&#34;#installing-bazel:c58322628b54ee0c077e0910dc13c454&#34;&gt;Installing Bazel&lt;/a&gt;.&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html&#34;&gt;Java
 8&lt;/a&gt;
@@ -371,12 +549,12 @@ $ &lt;span style=&#34;color: #f8f8f2&#34;&gt;echo&lt;/span&gt; &lt;span style=&#
 &lt;h2 id=&#34;installing-bazel:c58322628b54ee0c077e0910dc13c454&#34;&gt;Installing Bazel&lt;/h2&gt;
 
 &lt;p&gt;Heron uses the &lt;a href=&#34;http://bazel.io&#34;&gt;Bazel&lt;/a&gt; build tool. Bazel releases can be found
-&lt;a href=&#34;https://github.com/bazelbuild/bazel/releases/tag/0.1.2&#34;&gt;here&lt;/a&gt;
+&lt;a href=&#34;https://github.com/bazelbuild/bazel/releases/tag/0.2.3&#34;&gt;here&lt;/a&gt;
 and installation instructions can be found &lt;a href=&#34;http://bazel.io/docs/install.html&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;To ensure that Bazel has been installed, run &lt;code&gt;bazel version&lt;/code&gt; and check the
 version (listed next to &lt;code&gt;Build label&lt;/code&gt; in the script&amp;rsquo;s output) to ensure that you
-have Bazel 0.1.2.&lt;/p&gt;
+have Bazel 0.2.3.&lt;/p&gt;
 
 &lt;h2 id=&#34;configuring-bazel:c58322628b54ee0c077e0910dc13c454&#34;&gt;Configuring Bazel&lt;/h2&gt;
 
@@ -593,10 +771,10 @@ following:&lt;/p&gt;
 &lt;span style=&#34;color: #66d9ef&#34;&gt;ENV&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt; JAVA_HOME /usr/lib/jvm/java-8-oracle&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h4 id=&#34;step-5-an-installation-script-for-bazel-http-bazel-io-version-0-1-2-or-above:69e60651f42783a7df723575c4088b5b&#34;&gt;Step 5 - An installation script for &lt;a href=&#34;http://bazel.io/&#34;&gt;Bazel&lt;/a&gt; version 0.1.2 or above.&lt;/h4&gt;
+&lt;h4 id=&#34;step-5-an-installation-script-for-bazel-http-bazel-io-version-hugoshortcode-1-or-above:69e60651f42783a7df723575c4088b5b&#34;&gt;Step 5 - An installation script for &lt;a href=&#34;http://bazel.io/&#34;&gt;Bazel&lt;/a&gt; version 0.2.3 or above.&lt;/h4&gt;
 
 &lt;p&gt;Here&amp;rsquo;s an example:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #66d9ef&#34;&gt;RUN&lt;/span&gt; wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.1.2/bazel-0.1.2-installer-linux-x86_64.sh &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #66d9ef&#34;&gt;RUN&lt;/span&gt; wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.2.3/bazel-0.2.3-installer-linux-x86_64.sh &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
          &lt;span style=&#34;color: #f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; chmod +x /tmp/bazel.sh &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
          &lt;span style=&#34;color: #f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; /tmp/bazel.sh
 &lt;/pre&gt;&lt;/div&gt;
@@ -639,6 +817,7 @@ supports several scheduler options:&lt;/p&gt;
 &lt;li&gt;&lt;a href=&#34;schedulers/aurora&#34;&gt;Aurora&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;schedulers/local&#34;&gt;Local&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;schedulers/slurm&#34;&gt;Slurm&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;schedulers/yarn&#34;&gt;YARN&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
 
 &lt;li&gt;&lt;p&gt;&lt;strong&gt;State Manager&lt;/strong&gt; &amp;mdash; Heron state manager tracks the state of all deployed
@@ -855,29 +1034,8 @@ Stream Processing at Scale&lt;/a&gt; paper.&lt;/p&gt;
 
 &lt;h2 id=&#34;heron-design-goals:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Heron Design Goals&lt;/h2&gt;
 
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Isolation&lt;/strong&gt; &amp;mdash; &lt;a href=&#34;../topologies&#34;&gt;Topologies&lt;/a&gt; should be process based
-rather than thread based, and each process should run in isolation for the
-sake of easy debugging, profiling, and troubleshooting.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Resource constraints&lt;/strong&gt; &amp;mdash; Topologies should use only those resources
-that they are initially allocated and never exceed those bounds. This makes
-Heron safe to run in shared infrastructure.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Compatibility&lt;/strong&gt; &amp;mdash; Heron is fully API and data model compatible with
-&lt;a href=&#34;http://storm.apache.org&#34;&gt;Apache Storm&lt;/a&gt;, making it easy for developers
-to transition between systems.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Back pressure&lt;/strong&gt; &amp;mdash; In a distributed system like Heron, there are no
-guarantees that all system components will execute at the same speed. Heron
-has built-in &lt;a href=&#34;#stream-manager:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;back pressure mechanisms&lt;/a&gt; to ensure that
-topologies can self-adjust in case components lag.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Performance&lt;/strong&gt; &amp;mdash; Many of Heron&amp;rsquo;s design choices have enabled Heron to
-achieve higher throughput and lower latency than Storm while also offering
-enhanced configurability to fine-tune potential latency/throughput trade-offs.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Semantic guarantees&lt;/strong&gt; &amp;mdash; Heron provides support for both
-&lt;a href=&#34;https://kafka.apache.org/08/design.html#semantics&#34;&gt;at-most-once and at-least-once&lt;/a&gt;
-processing semantics.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Efficiency&lt;/strong&gt; &amp;mdash; Heron was built with the goal of achieving all of the
-above with the minimal possible resource usage.&lt;/li&gt;
-&lt;/ul&gt;
+&lt;p&gt;For a description of the principles that Heron was designed to fulfill, see
+&lt;a href=&#34;/heron/docs/concepts/design-goals&#34;&gt;Heron Design Goals&lt;/a&gt;.&lt;/p&gt;
 
 &lt;h2 id=&#34;topology-components:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Topology Components&lt;/h2&gt;
 
@@ -1355,6 +1513,60 @@ which can be initialized either using varargs or a list of strings:&lt;/p&gt;
     </item>
     
     <item>
+      <title>Heron Design Goals</title>
+      <link>/heron/docs/concepts/design-goals/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/heron/docs/concepts/design-goals/</guid>
+      <description>
+
+&lt;p&gt;From its very conception, Heron was built to fulfill a set of core design goals,
+including:&lt;/p&gt;
+
+&lt;h3 id=&#34;isolation:bce6205dbf0cc8cc2c7641348bebb77f&#34;&gt;Isolation&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&#34;/heron/docs/concepts/topologies&#34;&gt;Topologies&lt;/a&gt; should be process based rather than
+thread based, and each process should run in isolation for the sake of easy
+debugging, profiling, and troubleshooting.&lt;/p&gt;
+
+&lt;h3 id=&#34;resource-constraints:bce6205dbf0cc8cc2c7641348bebb77f&#34;&gt;Resource constraints&lt;/h3&gt;
+
+&lt;p&gt;Topologies should use only those resources that they are initially allocated and
+never exceed those bounds. This makes Heron safe to run in shared infrastructure.&lt;/p&gt;
+
+&lt;h3 id=&#34;compatibility:bce6205dbf0cc8cc2c7641348bebb77f&#34;&gt;Compatibility&lt;/h3&gt;
+
+&lt;p&gt;Heron is fully API and data model compatible with &lt;a href=&#34;http://storm.apache.org&#34;&gt;Apache
+Storm&lt;/a&gt;, making it easy for developers to transition
+between systems.&lt;/p&gt;
+
+&lt;h3 id=&#34;back-pressure:bce6205dbf0cc8cc2c7641348bebb77f&#34;&gt;Back pressure&lt;/h3&gt;
+
+&lt;p&gt;In a distributed system like Heron, there are no guarantees that all system
+components will execute at the same speed. Heron has built-in &lt;a href=&#34;/heron/docs/concepts/architecture/#stream-manager:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;back pressure
+mechanisms&lt;/a&gt; to ensure that
+topologies can self-adjust in case components lag.&lt;/p&gt;
+
+&lt;h3 id=&#34;performance:bce6205dbf0cc8cc2c7641348bebb77f&#34;&gt;Performance&lt;/h3&gt;
+
+&lt;p&gt;Many of Heron&amp;rsquo;s design choices have enabled Heron to achieve higher throughput
+and lower latency than Storm while also offering enhanced configurability to
+fine-tune potential latency/throughput trade-offs.&lt;/p&gt;
+
+&lt;h3 id=&#34;semantic-guarantees:bce6205dbf0cc8cc2c7641348bebb77f&#34;&gt;Semantic guarantees&lt;/h3&gt;
+
+&lt;p&gt;Heron provides support for both &lt;a href=&#34;https://kafka.apache.org/08/design.html#semantics&#34;&gt;at-most-once and
+at-least-once&lt;/a&gt; processing
+semantics.&lt;/p&gt;
+
+&lt;h3 id=&#34;efficiency:bce6205dbf0cc8cc2c7641348bebb77f&#34;&gt;Efficiency&lt;/h3&gt;
+
+&lt;p&gt;Heron was built with the goal of achieving all of the above with the minumim
+possible resource usage.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Heron Instance</title>
       <link>/heron/docs/operators/configuration/instance/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -1653,112 +1865,6 @@ issues.&lt;/p&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Heron Resources</title>
-      <link>/heron/docs/resources/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/heron/docs/resources/</guid>
-      <description>
-
-&lt;p&gt;Heron Resources outside this documentation:&lt;/p&gt;
-
-&lt;h2 id=&#34;conference-journal-papers:74f7fb04a75e766307d398251c369a21&#34;&gt;Conference &amp;amp; Journal Papers&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;http://dl.acm.org/citation.cfm?id=2742788&#34;&gt;Twitter Heron: Stream Processing at
-Scale - SIGMOD’15&lt;/a&gt; (May, 2015)&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://dl.acm.org/citation.cfm?id=2595641&#34;&gt;Storm@Twitter - SIGMOD&amp;rsquo;14&lt;/a&gt; (Jun, 2014)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;videos:74f7fb04a75e766307d398251c369a21&#34;&gt;Videos&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://m.youtube.com/watch?v=ua0ufmr9sQI&amp;amp;feature=youtu.be&#34;&gt;Twitter Heron on Apache Aurora - #compute event @Twitter&lt;/a&gt; (Apr, 2016)&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://www.infoq.com/presentations/twitter-heron&#34;&gt;Flying Faster with Heron - InfoQ&lt;/a&gt; (Apr, 2016)&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://www.youtube.com/watch?v=pUaFOuGgmco&#34;&gt;Twitter Heron: Stream Processing at
-Scale - @Scale&lt;/a&gt; (Sep, 2015)&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://player.oreilly.com/videos/9781491927977?login=true&#34;&gt;Stream Processing and Anomaly Detection - Velocity O&amp;rsquo;Reilly - Note: requires O&amp;rsquo;Reilly login &lt;/a&gt;(Jun, 2015)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;blog-posts:74f7fb04a75e766307d398251c369a21&#34;&gt;Blog Posts&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://blog.twitter.com/2016/open-sourcing-twitter-heron&#34;&gt;Open Sourcing Twitter Heron&lt;/a&gt; (May, 2016)&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://blog.twitter.com/2015/flying-faster-with-twitter-heron&#34;&gt;Flying Faster with Twitter
-Heron&lt;/a&gt; (June, 2015)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;slides:74f7fb04a75e766307d398251c369a21&#34;&gt;Slides&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;http://www.slideshare.net/arunkejariwal/real-time-analytics-algorithms-and-systems&#34;&gt;Real-Time Analytics: Algorithms and Systems - Twitter University &lt;/a&gt; (May, 2016)&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://www.slideshare.net/arunkejariwal/velocity-2015final&#34;&gt;Stream Processing and Anomaly Detection - Velocity O&amp;rsquo;Reilly &lt;/a&gt;(Jun, 2015)&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Heron Shell</title>
-      <link>/heron/docs/operators/heron-shell/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/heron/docs/operators/heron-shell/</guid>
-      <description>
-
-&lt;p&gt;Heron shell helps debugging a heron topology. It is an HTTP server that runs as a
-separate process in every container.  It exposes many utilities through REST APIs.
-These utilities are described below in more details.&lt;/p&gt;
-
-&lt;p&gt;The port to connect to heron shell for each container is stored in the physical
-plan. Heron tracker picks up this port and connects to shell. See the next
-section for more details.&lt;/p&gt;
-
-&lt;h2 id=&#34;shell-utilities:0dbf155d60f4be8202f7d0ba6b068fb4&#34;&gt;Shell Utilities&lt;/h2&gt;
-
-&lt;h3 id=&#34;log-files:0dbf155d60f4be8202f7d0ba6b068fb4&#34;&gt;Log files&lt;/h3&gt;
-
-&lt;p&gt;This is probably the most useful utility of shell. Since relative paths to log
-files are known, these paths are directly embedded in UI through Tracker. This
-makes the logs available in the browser. The log files start at the end and
-users can scroll up a page at a time, or download them locally.&lt;/p&gt;
-
-&lt;h3 id=&#34;browse:0dbf155d60f4be8202f7d0ba6b068fb4&#34;&gt;Browse&lt;/h3&gt;
-
-&lt;p&gt;A container is expected to run in a sandbox directory. All the files
-under this directory are accessible through shell. This can be used to download
-the jars or tars for a topology, or browse through, download, or even view the
-files online. Viewing and downloading log files is one special case of browse.&lt;/p&gt;
-
-&lt;h3 id=&#34;pid-of-a-process:0dbf155d60f4be8202f7d0ba6b068fb4&#34;&gt;Pid of a process&lt;/h3&gt;
-
-&lt;p&gt;Each instance in the topology runs as a separate jvm process. This allows us to
-monitor each spout or bolt instance in isolation. To run more sophisticated
-operations on the process as mentioned in this list below, we need to know the
-process id of the process running as that instance.&lt;/p&gt;
-
-&lt;h3 id=&#34;jstack-of-a-process:0dbf155d60f4be8202f7d0ba6b068fb4&#34;&gt;Jstack of a process&lt;/h3&gt;
-
-&lt;p&gt;This utility runs the &lt;code&gt;jstack&lt;/code&gt; command on the jvm process that is running an
-instance. The result is passed back through the REST API which can be viewed
-directly in the browser.&lt;/p&gt;
-
-&lt;h3 id=&#34;jmap-of-a-process:0dbf155d60f4be8202f7d0ba6b068fb4&#34;&gt;Jmap of a process&lt;/h3&gt;
-
-&lt;p&gt;This utility runs &lt;code&gt;jmap&lt;/code&gt; on the process running one instance to capture a heap
-dump. Since a heap dump can be huge, the dump file is created on the host that
-is running the container. This file can be downloaded using the info that is
-returned as the response to this endpoint. The dumps are also accessible through
-the &amp;ldquo;browse&amp;rdquo; utility.&lt;/p&gt;
-
-&lt;h3 id=&#34;memory-histogram-of-a-process:0dbf155d60f4be8202f7d0ba6b068fb4&#34;&gt;Memory histogram of a process&lt;/h3&gt;
-
-&lt;p&gt;This utility runs &lt;code&gt;jmap&lt;/code&gt; with &lt;code&gt;-histo&lt;/code&gt; option, to output the memory
-histogram for the jvm process of an instance. The resulting histogram is passed
-back as part of the response, and can be viewed directly in the browser.&lt;/p&gt;
 </description>
     </item>
     

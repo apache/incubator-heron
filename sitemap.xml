@@ -11,6 +11,10 @@
   </url>
   
   <url>
+    <loc>/heron/docs/operators/deployment/schedulers/yarn/</loc>
+  </url>
+  
+  <url>
     <loc>/heron/docs/operators/deployment/schedulers/aurora/</loc>
   </url>
   
@@ -52,6 +56,10 @@
   
   <url>
     <loc>/heron/docs/developers/data-model/</loc>
+  </url>
+  
+  <url>
+    <loc>/heron/docs/concepts/design-goals/</loc>
   </url>
   
   <url>
@@ -156,6 +164,10 @@
   
   <url>
     <loc>/heron/docs/operators/deployment/statemanagers/zookeeper/</loc>
+  </url>
+  
+  <url>
+    <loc>/heron/docs/operators/deployment/schedulers/aurora-local-setup/</loc>
   </url>
   
   <url>
