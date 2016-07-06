@@ -6,7 +6,7 @@ pex_library(
   name = "pyinstance_lib",
   srcs = glob(
     ["**/*.py"],
-    exclude = ["main.py", "test_server.py", "example/*.py"]
+    exclude = ["main.py", "test_server.py"]
   ),
   deps = [
     "//heron/common/src/python:common",
@@ -30,14 +30,6 @@ pex_binary(
   name = "test-server-py",
   srcs = ["test_server.py"],
   deps = ["//heron/instance/tests/python:pytest-lib"],
-)
-
-pex_binary(
-  name = "word_spout",
-  srcs = glob(["example/*.py"],),
-  deps = [
-    ":pyinstance_lib"
-  ],
 )
 
 pex_binary(

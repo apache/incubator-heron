@@ -54,6 +54,11 @@ class SingleThreadHeronInstance(object):
     Log.debug("socket map: " + str(socket_map))
 
     while socket_map:
+      for task in self.my_tasks:
+        Log.debug("Exec my tasks")
+        task()
+        # Send all messages
+        self.send_buffered_messages()
       asyncore.poll(timeout, socket_map)
 
   def handle_new_tuple_set(self, tuple_msg_set):
@@ -117,7 +122,8 @@ class SingleThreadHeronInstance(object):
       Log.info("The instance is deployed in deactivated state")
 
   def load_py_instance(self, is_spout, python_class_name):
-    pex_loader.load_pex(self.topo_pex_file_path)
+    # TODO : preliminary loading
+    pex_loader.load_pex(self.topo_pex_file_path, python_class_name)
     if is_spout:
       spout_class = pex_loader.import_and_get_class(python_class_name)
       my_spout = spout_class(self.my_pplan_helper, self.in_stream, self.out_stream)
@@ -132,6 +138,7 @@ class SingleThreadHeronInstance(object):
     if self.my_instance[0]:
       # It's spout --> add task
       # run_in_single_thread is invoked in loop
+      Log.info("Add spout task")
       self.my_tasks.append(self.my_instance[2].run_in_single_thread)
 
 def print_usage():

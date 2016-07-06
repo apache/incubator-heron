@@ -21,7 +21,7 @@ from heron.common.src.python.color import Log
 class Spout(BaseInstance):
   """The base class for all heron spouts in Python"""
   def __init__(self, pplan_helper, in_stream, out_stream):
-    super(Spout, self).__init__(in_stream, out_stream)
+    super(Spout, self).__init__(pplan_helper,in_stream, out_stream)
     self._pplan_helper = pplan_helper
     self.topology_state = topology_pb2.TopologyState.Value("PAUSED")
 

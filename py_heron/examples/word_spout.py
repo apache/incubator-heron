@@ -25,8 +25,8 @@ class WordSpout(Spout):
     Log.info("In open() of WordSpout")
 
   def next_tuple(self):
-    next_int = random.randint(len(self.words))
-    self.emit(list(self.words[next_int]))
+    next_int = random.randint(0, len(self.words)-1)
+    self.emit(self.words[next_int])
 
   def fail(self, msg_id):
     pass

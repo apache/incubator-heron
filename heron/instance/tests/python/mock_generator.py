@@ -109,7 +109,7 @@ def get_a_sample_pplan(with_detail=False):
   """
 
   spout_1 = mock_protobuf.get_mock_spout(component=mock_protobuf.get_mock_component(name="spout1",
-                                                                                    python_cls="heron.instance.src.python.example.word_spout.WordSpout"))
+                                                                                    python_cls="py_heron.examples.word_spout.WordSpout"))
   bolt_1 = mock_protobuf.get_mock_bolt(component=mock_protobuf.get_mock_component(name="bolt1"))
   bolt_2 = mock_protobuf.get_mock_bolt(component=mock_protobuf.get_mock_component(name="bolt2"))
 
