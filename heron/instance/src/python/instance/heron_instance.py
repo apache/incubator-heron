@@ -19,7 +19,7 @@ from heron.proto import physical_plan_pb2
 from misc.communicator import HeronCommunicator
 from .gateway import Gateway
 
-
+# TODO (Very important): add topology_pex_file_path argument
 class HeronInstance(object):
   def __init__(self, topology_name, topology_id, instance, stream_port, metrics_port):
     self.topology_name = topology_name

@@ -108,7 +108,8 @@ def get_a_sample_pplan(with_detail=False):
   :param with_detail: If False (default), returns just pplan. If True, returns both pplan and a list of dictionaries for each instance containing instance_id, task_id, comp_index, comp_name
   """
 
-  spout_1 = mock_protobuf.get_mock_spout(component=mock_protobuf.get_mock_component(name="spout1"))
+  spout_1 = mock_protobuf.get_mock_spout(component=mock_protobuf.get_mock_component(name="spout1",
+                                                                                    python_cls="heron.instance.src.python.example.word_spout.WordSpout"))
   bolt_1 = mock_protobuf.get_mock_bolt(component=mock_protobuf.get_mock_component(name="bolt1"))
   bolt_2 = mock_protobuf.get_mock_bolt(component=mock_protobuf.get_mock_component(name="bolt2"))
 
@@ -134,6 +135,11 @@ def get_a_sample_pplan(with_detail=False):
     keys = ["instance_id", "task_id", "comp_index", "comp_name"]
     zipped = zip(instance_ids, task_ids, comp_indexes, comp_names)
     return pplan, [dict(zip(keys, z)) for z in zipped]
+
+def get_a_sample_register_response():
+  """Creates a sample RegisterInstanceResponse based on get_a_sample_pplan()"""
+  return mock_protobuf.get_mock_register_response(pplan=get_a_sample_pplan())
+
 
 def make_data_tuple_from_list(lst, serializer=PythonSerializer()):
   """Make HeronDataTuple from a list of objects"""

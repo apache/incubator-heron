@@ -19,7 +19,7 @@ def get_mock_config():
 
 def get_mock_component(name="component_name",
                        config=get_mock_config(),
-                       python_cls="heron.sample.pycls"):
+                       python_cls="heron.instance.src.python.example.word_spout.WordSpout"):
   component = topology_pb2.Component()
   component.name = name
   component.python_class_name = python_cls

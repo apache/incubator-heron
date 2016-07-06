@@ -22,8 +22,8 @@ from heron.common.src.python.color import Log
 # TODO: declare output fields
 class Bolt(BaseInstance):
   """The base class for all heron bolts in Python"""
-  def __init__(self, pplan_helper, in_stream, out_stream, serializer):
-    super(Bolt, self).__init__(pplan_helper, in_stream, out_stream, serializer)
+  def __init__(self, pplan_helper, in_stream, out_stream):
+    super(Bolt, self).__init__(pplan_helper, in_stream, out_stream)
     # TODO: bolt metrics
 
     if self.pplan_helper.is_spout:
@@ -33,7 +33,6 @@ class Bolt(BaseInstance):
 
   def start(self):
     self.prepare(None, None)
-    self.run_tasks()
 
   def stop(self):
     pass
@@ -57,6 +56,9 @@ class Bolt(BaseInstance):
   def _run(self):
     self._read_tuples_and_execute()
     self.output_helper.send_out_tuples()
+
+  def run_in_single_thread(self):
+    self._run()
 
   def _read_tuples_and_execute(self):
     while not self.in_stream.is_empty():
@@ -124,4 +126,6 @@ class Bolt(BaseInstance):
 
   def cleanup(self):
     pass
+
+
 

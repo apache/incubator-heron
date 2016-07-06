@@ -14,7 +14,7 @@
 
 import asyncore
 import socket
-import network.mock_protobuf as mock
+import heron.instance.tests.python.mock_generator as mock
 from network.protocol import HeronProtocol, REQID, IncomingPacket
 from heron.proto import stmgr_pb2
 from heron.common.src.python.color import Log
@@ -47,17 +47,27 @@ class HeronTestHandler(asyncore.dispatcher_with_send):
     typename, reqid, serialized_msg = HeronProtocol.decode_packet(packet)
     Log.debug("In handle_read() with typename: " + typename + ", and reqid: " + str(reqid))
 
-    # make sure this is right class
-    request = stmgr_pb2.RegisterInstanceRequest()
-    request.ParseFromString(serialized_msg)
-    
-    Log.debug("Request message: \n" + request.__str__())
+    if reqid.is_zero():
+      Log.info("Received a new message")
+      # Should be TupleMessage instance
+      message = stmgr_pb2.TupleMessage()
+      message.ParseFromString(serialized_msg)
+      Log.debug("Received message: \n" + str(message))
+    else:
+      Log.info("Received a register request")
 
-    self.send_response(reqid)
+      # make sure this is right class
+      request = stmgr_pb2.RegisterInstanceRequest()
+      request.ParseFromString(serialized_msg)
+
+      Log.debug("Request message: \n" + str(request))
+
+      self.send_response(reqid)
 
   def send_response(self, reqid):
     # create NewInstanceAssignmentMessage
-    response = mock.get_mock_register_response()
+    Log.debug("Sending response...")
+    response = mock.get_a_sample_register_response()
     pkt = HeronProtocol.get_outgoing_packet(reqid, response)
     self.send_packet(pkt)
 

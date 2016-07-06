@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import asyncore
 import threading
 
 from network.stmgr_client import StmgrClient
@@ -27,6 +28,7 @@ class Gateway(threading.Thread):
                                      instance, in_stream, out_stream, control_stream)
 
   def run(self):
-    self._stmgr_client.start()
+    self._stmgr_client.start_connect()
+    asyncore.loop()
 
 

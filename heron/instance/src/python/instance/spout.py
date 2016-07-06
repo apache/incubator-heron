@@ -20,7 +20,7 @@ from heron.common.src.python.color import Log
 
 class Spout(BaseInstance):
   """The base class for all heron spouts in Python"""
-  def __init__(self, pplan_helper, in_stream, out_stream, serializer):
+  def __init__(self, pplan_helper, in_stream, out_stream):
     super(Spout, self).__init__(in_stream, out_stream)
     self._pplan_helper = pplan_helper
     self.topology_state = topology_pb2.TopologyState.Value("PAUSED")
@@ -33,7 +33,6 @@ class Spout(BaseInstance):
   def start(self):
     self.open(None, None)
     self.topology_state = topology_pb2.TopologyState.Value("RUNNING")
-    self.run_tasks()
 
   def stop(self):
     pass
@@ -60,6 +59,9 @@ class Spout(BaseInstance):
 
     #TODO: implement ACK/outqueue full etc
     #TODO: call _read_tuples_and_execute when ACK enabled
+
+  def run_in_single_thread(self):
+    self._run()
 
   def _read_tuples_and_execute(self):
     while not self.in_stream.is_empty():
@@ -118,7 +120,7 @@ class Spout(BaseInstance):
     :param config: The Heron configuration for this spout. This is the configuration provided to the topology merged in with cluster configuration on this machine.
     :param context: This object can be used to get information about this task's place within the topology, including the task id and component id of this task, input and output information, etc.
     """
-    pass
+    raise NotImplementedError
 
   def close(self):
     """Called when this spout is going to be shutdown
@@ -139,7 +141,7 @@ class Spout(BaseInstance):
 
     *Must be implemented by a subclass.*
     """
-    pass
+    raise NotImplementedError
 
   @abstractmethod
   def ack(self, msg_id):
@@ -151,7 +153,7 @@ class Spout(BaseInstance):
 
     *Must be implemented by a subclass.*
     """
-    pass
+    raise NotImplementedError
 
   @abstractmethod
   def fail(self, msg_id):
@@ -163,7 +165,7 @@ class Spout(BaseInstance):
 
     *Must be implemented by a subclass.*
     """
-    pass
+    raise NotImplementedError
 
   def activate(self):
     """Called when a spout has been activated out of a deactivated mode

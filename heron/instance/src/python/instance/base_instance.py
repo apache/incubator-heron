@@ -100,6 +100,16 @@ class BaseInstance(object):
     """
     raise NotImplementedError
 
+  def run_in_single_thread(self):
+    """Tasks to be executed when running in a single-thread mode
+
+    This is called when new tuples are available to be processed by this
+    instance. These tuples are buffered in ``in_stream`` before calling this method.
+    Tuples buffered in ``out_stream`` will be sent to the Stream Manager
+    immediately after completing this method.
+    """
+    raise NotImplementedError
+
   def _read_tuples_and_execute(self):
     """Read tuples from a queue and process the tuples"""
     raise NotImplementedError

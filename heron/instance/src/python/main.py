@@ -13,6 +13,7 @@
 # limitations under the License.
 
 # This is a temporary main file to execute stmgr_client.py
+import asyncore
 
 from heron.proto import physical_plan_pb2
 
@@ -34,7 +35,8 @@ def main():
                        sample_instance, None, None, None)
   try:
     # try to establish a connection with localhost:1234
-    client.start()
+    client.start_connect()
+    asyncore.loop()
   except KeyboardInterrupt:
     print "Keyboard Interrupt -- bye"
   finally:

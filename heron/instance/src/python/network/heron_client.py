@@ -70,9 +70,6 @@ class HeronClient(asyncore.dispatcher):
     sent = self.send(self.out_buffer)
     self.out_buffer = self.out_buffer[sent:]
 
-  def writable(self):
-    return len(self.out_buffer) > 0
-
   # called when an error was raised
   #def handle_error(self):
   #  Log.debug("Error occurred -- connection closed")
@@ -80,13 +77,16 @@ class HeronClient(asyncore.dispatcher):
 
   #################################
 
-  def start(self):
+  def start_connect(self):
+    """Tries to connect to the Heron Server
+
+    ``loop()`` method needs to be called after this.
+    """
     # TODO: specify buffer size, exception handling
     self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
 
     # when ready, handle_connect is called
     self.connect((self.hostname, self.port))
-    asyncore.loop(timeout=self.TIMEOUT_SEC)
 
   def stop(self):
     # TODO: cleanup things and close the connection
@@ -130,13 +130,16 @@ class HeronClient(asyncore.dispatcher):
 
       try:
         response_msg.ParseFromString(serialized_msg)
-        if response_msg.IsInitialized():
-          Log.debug("In handle_packet(): Received response with size " +
-                    str(packet.get_datasize()) + "\n" + str(response_msg))
-          self.on_response(StatusCode.OK, context, response_msg)
-        else:
-          raise RuntimeError("Response not initialized")
-      except Exception:
+      except Exception as e:
+        Log.error("Invalid Packet Error: " + e.message)
+        self.on_response(StatusCode.INVALID_PACKET, context, None)
+
+      if response_msg.IsInitialized():
+        Log.debug("In handle_packet(): Received response with size " +
+                  str(packet.get_datasize()) + "\n" + str(response_msg))
+        self.on_response(StatusCode.OK, context, response_msg)
+      else:
+        Log.error("Response not initialized")
         self.on_response(StatusCode.INVALID_PACKET, context, None)
     elif reqid.is_zero():
       # this is a Message -- no need to send back response

@@ -24,7 +24,7 @@ class OutgoingTupleHelper(object):
   2. ``add_data_tuple()``, ``add_ack_tuple()`` and ``add_fail_tuple()``
   3. ``flush_remaining()`` tuples and send out the tuples
 
-  :ivar out_stream: (HeronCommunicator) Out-Stream
+  :ivar out_stream: (HeronCommunicator) Out-Stream. Pushed message is an instance of HeronTupleSet
   :ivar pplan_helper: (PhysicalPlanHelper) Physical Plan Helper for this component
   :ivar current_data_tuple_set: (HeronDataTupleSet) currently buffered data tuple
   :ivar current_control_tuple_set: (HeronControlTupleSet) currently buffered control tuple
