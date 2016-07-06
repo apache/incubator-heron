@@ -319,6 +319,7 @@ def check_release_file_exists():
 
   return True
 
+
 def _all_metric_queries():
   queries_normal = [
     'complete-latency', 'execute-latency', 'process-latency',
@@ -329,13 +330,16 @@ def _all_metric_queries():
   count_queries = ['__%s/default' % m for m in count_queries_normal]
   return queries, queries_normal, count_queries, count_queries_normal
 
+
 def metric_queries():
   qs = _all_metric_queries()
   return qs[0] + qs[2]
 
+
 def queries_map():
   qs = _all_metric_queries()
   return dict(zip(qs[0], qs[1]) + zip(qs[2], qs[3]))
+
 
 def get_clusters():
   instance = tornado.ioloop.IOLoop.instance()
@@ -345,6 +349,7 @@ def get_clusters():
     Log.error('Error: %s' % str(ex))
     Log.error('Failed to retrive clusters')
     raise
+
 
 def get_logical_plan(cluster, env, topology, role):
   instance = tornado.ioloop.IOLoop.instance()
