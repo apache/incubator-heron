@@ -55,6 +55,7 @@ com.twitter.heron.integration_test.topology.one_bolt_multi_tasks
 com.twitter.heron.integration_test.topology.one_spout_bolt_multi_tasks
 com.twitter.heron.integration_test.topology.one_spout_multi_tasks
 com.twitter.heron.integration_test.topology.one_spout_two_bolts
+com.twitter.heron.integration_test.topology.serialization
 com.twitter.heron.integration_test.topology.shuffle_grouping
 com.twitter.heron.local_integration_test.topology.local_readwrite
 com.twitter.heron.metrics
@@ -77,6 +78,7 @@ com.twitter.heron.scheduler.client
 com.twitter.heron.scheduler.local
 com.twitter.heron.scheduler.server
 com.twitter.heron.scheduler.slurm
+com.twitter.heron.scheduler.yarn
 com.twitter.heron.simulator
 com.twitter.heron.simulator.executors
 com.twitter.heron.simulator.grouping
