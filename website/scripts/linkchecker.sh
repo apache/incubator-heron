@@ -2,10 +2,11 @@
 echo "Running linkchecker"
 
 WGET_LOG=wget.log
+PORT=15532
 
 # kill all running Hugo servers and start serving website in the background
 killall hugo 2>/dev/null || true
-hugo serve --port=15532 --ignoreCache 1>/dev/null 2>&1 &
+hugo serve --port=$PORT --ignoreCache 1>/dev/null 2>&1 &
 
 # sleep 5 seconds to make sure Hugo gets into background
 sleep 5
@@ -31,13 +32,40 @@ GREP_STATUS=$?
 
 if [[ $GREP_STATUS != 0 ]]; then
   # examine wget.log
-  BROKEN_MSG="broken link\."
+  BROKEN_MSG="^Found.*broken link"
   BROKEN_MSG_LINE=$(grep -n "${BROKEN_MSG}" ${WGET_LOG})
   LN=$(echo "${BROKEN_MSG_LINE}" | cut -f1 -d:)
-  tail "+${LN}" "$WGET_LOG"
-  exit 1
+  LINES=$(tail "+${LN}" "${WGET_LOG}")
+  BAD_LINKS=""
+  COUNT=0
+  # only keep broken links with prefix ``localhost:15532``
+  for LINE in $LINES; do
+    if [[ $LINE == *"${PORT}"* ]]
+    then
+      COUNT=$((COUNT + 1))
+      BAD_LINKS="$BAD_LINKS $LINE"
+    fi
+  done
+  if [[ $COUNT == 0 ]]
+  then
+    echo $NO_BROKEN_MSG
+    exit 0
+  else
+    LINKS=""
+    # grammar police
+    if [[ $COUNT == 1 ]]
+    then
+      LINKS="link"
+    else
+      LINKS="links"
+    fi
+    echo "Found $COUNT broken $LINKS:"
+    for BAD_LINK in $BAD_LINKS; do
+      echo "  $BAD_LINK"
+    done
+  fi
 else
-  echo "${NO_BROKEN_MSG}"
+  echo $NO_BROKEN_MSG
   rm -f $WGET_LOG
   exit 0
 fi

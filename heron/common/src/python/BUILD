@@ -10,3 +10,9 @@ pex_library(
   ],
   reqs = ['colorlog==2.6.1'],
 )
+
+pex_library(
+  name = 'tracker-access',
+  srcs = glob(['**/handler/access/*.py']),
+  deps = [],
+)

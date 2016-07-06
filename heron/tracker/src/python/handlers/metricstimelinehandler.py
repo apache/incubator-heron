@@ -27,6 +27,7 @@ class MetricsTimelineHandler(BaseHandler):
   URL - /topologies/metricstimeline
   Parameters:
    - cluster (required)
+   - role - (optional) Role used to submit the topology.
    - environ (required)
    - topology (required) name of the requested topology
    - component (required)
@@ -48,6 +49,7 @@ class MetricsTimelineHandler(BaseHandler):
   def get(self):
     try:
       cluster = self.get_argument_cluster()
+      role = self.get_argument_role()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
       component = self.get_argument_component()
@@ -57,7 +59,7 @@ class MetricsTimelineHandler(BaseHandler):
       self.validateInterval(start_time, end_time)
       instances = self.get_arguments(constants.PARAM_INSTANCE)
 
-      topology = self.tracker.getTopologyByClusterEnvironAndName(cluster, environ, topology_name)
+      topology = self.tracker.getTopologyByClusterRoleEnvironAndName(cluster, role, environ, topology_name)
       metrics = yield tornado.gen.Task(metricstimeline.getMetricsTimeline,
                                        topology.tmaster, component, metric_names,
                                        instances, int(start_time), int(end_time))
