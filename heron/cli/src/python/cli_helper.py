@@ -21,16 +21,16 @@ import heron.cli.src.python.args as args
 from heron.common.src.python.color import Log
 
 ################################################################################
-def create_parser(subparsers, action, help):
+def create_parser(subparsers, action, help_arg):
   '''
   :param subparsers:
   :param action:
-  :param help:
+  :param help_arg:
   :return:
   '''
   parser = subparsers.add_parser(
       action,
-      help=help,
+      help=help_arg,
       usage="%(prog)s [options] cluster/[role]/[env] topology-name",
       add_help=False)
 
@@ -61,15 +61,15 @@ def run(command, parser, cl_args, unknown_args, action):
     topology_name = cl_args['topology-name']
 
     new_args = [
-      "--cluster", cl_args['cluster'],
-      "--role", cl_args['role'],
-      "--environment", cl_args['environ'],
-      "--heron_home", utils.get_heron_dir(),
-      "--config_path", cl_args['config_path'],
-      "--override_config_file", cl_args['override_config_file'],
-      "--release_file", utils.get_heron_release_file(),
-      "--topology_name", topology_name,
-      "--command", command,
+        "--cluster", cl_args['cluster'],
+        "--role", cl_args['role'],
+        "--environment", cl_args['environ'],
+        "--heron_home", utils.get_heron_dir(),
+        "--config_path", cl_args['config_path'],
+        "--override_config_file", cl_args['override_config_file'],
+        "--release_file", utils.get_heron_release_file(),
+        "--topology_name", topology_name,
+        "--command", command,
     ]
 
     if opts.verbose():

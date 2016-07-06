@@ -19,7 +19,7 @@ import tornado.web
 import tornado.gen
 
 from heron.ui.src.python.handlers import base
-from heron.ui.src.python.handlers import access
+from heron.common.src.python.handler import access
 from heron.ui.src.python.handlers import common
 
 

@@ -18,7 +18,7 @@ import tornado.web
 import tornado.gen
 from datetime import datetime
 
-import access
+from heron.common.src.python.handler import access
 import base
 import common
 

@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.yaml.snakeyaml.Yaml;
 
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.basics.TypeUtils;
 
 public class MetricsSinksConfig {
@@ -38,15 +39,19 @@ public class MetricsSinksConfig {
   @SuppressWarnings("unchecked")
   public MetricsSinksConfig(String filename) throws FileNotFoundException {
     FileInputStream fin = new FileInputStream(new File(filename));
-    Yaml yaml = new Yaml();
-    Map<Object, Object> ret = (Map<Object, Object>) yaml.load(fin);
+    try {
+      Yaml yaml = new Yaml();
+      Map<Object, Object> ret = (Map<Object, Object>) yaml.load(fin);
 
-    if (ret == null) {
-      throw new RuntimeException("Could not parse metrics-sinks config file");
-    } else {
-      for (String sinkId : TypeUtils.getListOfStrings(ret.get(CONFIG_KEY_METRICS_SINKS))) {
-        sinksConfigs.put(sinkId, (Map<String, Object>) ret.get(sinkId));
+      if (ret == null) {
+        throw new RuntimeException("Could not parse metrics-sinks config file");
+      } else {
+        for (String sinkId : TypeUtils.getListOfStrings(ret.get(CONFIG_KEY_METRICS_SINKS))) {
+          sinksConfigs.put(sinkId, (Map<String, Object>) ret.get(sinkId));
+        }
       }
+    } finally {
+      SysUtils.closeIgnoringExceptions(fin);
     }
   }
 

@@ -12,6 +12,7 @@ spi_deps_files = [
     "//heron/common/src/java:basics-java", 
     "//heron/spi/src/java:common-spi-java", 
     "//heron/spi/src/java:statemgr-spi-java",
+    "//heron/spi/src/java:network-utils-java",
 ]
 
 local_statemgr_deps_files = [

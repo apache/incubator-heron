@@ -55,7 +55,7 @@ public class FileSink implements IMetricsSink {
 
   // We would convert a file's metrics into a JSON object, i.e. array
   // So we need to add "[" at the start and "]" at the end
-  private static boolean isFileStart = true;
+  private boolean isFileStart = true;
   private PrintStream writer;
   private String filenamePrefix;
   private int fileMaximum = 1;
@@ -64,15 +64,22 @@ public class FileSink implements IMetricsSink {
 
   @Override
   public void init(Map<String, Object> conf, SinkContext context) {
-    filenamePrefix = (String) conf.get(FILENAME_KEY) + "." + context.getMetricsMgrId();
+    verifyConf(conf);
+    filenamePrefix = conf.get(FILENAME_KEY) + "." + context.getMetricsMgrId();
     fileMaximum = TypeUtils.getInteger(conf.get(MAXIMUM_FILE_COUNT_KEY));
     sinkContext = context;
-
-    // We set System.out as writer's default value here to avoid null object
-    writer = System.out;
   }
 
-  private void openNewFile(String filename) {
+  private void verifyConf(Map<String, Object> conf) {
+    if (!conf.containsKey(FILENAME_KEY)) {
+      throw new IllegalArgumentException("Require: " + FILENAME_KEY);
+    }
+    if (!conf.containsKey(MAXIMUM_FILE_COUNT_KEY)) {
+      throw new IllegalArgumentException("Require: " + MAXIMUM_FILE_COUNT_KEY);
+    }
+  }
+
+  private PrintStream openNewFile(String filename) {
     // If the file already exists, set it Writable to avoid permission denied
     File f = new File(filename);
     if (f.exists() && !f.isDirectory()) {
@@ -80,9 +87,7 @@ public class FileSink implements IMetricsSink {
     }
 
     try {
-      writer = filename == null ? System.out
-          : new PrintStream(new FileOutputStream(filename, false),
-          true, "UTF-8");
+      return new PrintStream(new FileOutputStream(filename, false), true, "UTF-8");
     } catch (FileNotFoundException | UnsupportedEncodingException e) {
       throw new RuntimeException("Error creating " + filename, e);
     }
@@ -139,7 +144,7 @@ public class FileSink implements IMetricsSink {
   @Override
   public void processRecord(MetricsRecord record) {
     if (isFileStart) {
-      openNewFile(String.format("%s.%s", filenamePrefix, currentFileIndex));
+      writer = openNewFile(String.format("%s.%d", filenamePrefix, currentFileIndex));
 
       writer.print("[");
       isFileStart = false;
@@ -156,6 +161,12 @@ public class FileSink implements IMetricsSink {
 
   @Override
   public void flush() {
+    if (isFileStart) {
+      // No record has been processed since the previous flush, so create a new file
+      // and output an empty JSON array.
+      writer = openNewFile(String.format("%s.%d", filenamePrefix, currentFileIndex));
+      writer.print("[");
+    }
     writer.print("]");
     writer.flush();
     writer.close();
@@ -171,6 +182,8 @@ public class FileSink implements IMetricsSink {
 
   @Override
   public void close() {
-    writer.close();
+    if (writer != null) {
+      writer.close();
+    }
   }
 }

@@ -16,7 +16,6 @@ import glob
 import os
 import shutil
 import tempfile
-import traceback
 
 from heron.common.src.python.color import Log
 from heron.proto import topology_pb2

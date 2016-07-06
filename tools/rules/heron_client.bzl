@@ -60,5 +60,4 @@ def heron_client_lib_third_party_files():
         "@com_google_protobuf_protobuf_java//jar",
         "@org_slf4j_slf4j_api//jar",
         "@org_slf4j_slf4j_jdk14//jar",
-        "@org_slf4j_log4j_over_slf4j//jar",
     ]

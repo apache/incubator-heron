@@ -24,6 +24,7 @@ class LogicalPlanHandler(BaseHandler):
   URL - /topologies/logicalplan
   Parameters:
    - cluster (required)
+   - role - (role) Role used to submit the topology.
    - environ (required)
    - topology (required) name of the requested topology
 
@@ -37,9 +38,10 @@ class LogicalPlanHandler(BaseHandler):
   def get(self):
     try:
       cluster = self.get_argument_cluster()
+      role = self.get_argument_role()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
-      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, environ)
+      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)
       logical_plan = topology_info["logical_plan"]
       self.write_success_response(logical_plan)
     except Exception as e:
