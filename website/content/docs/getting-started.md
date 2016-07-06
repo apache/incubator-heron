@@ -107,7 +107,7 @@ Note the output shows if the topology has been launched successfully and the wor
 
 To check what's under the working directory, run:
 ```bash
-$ ls -al ~/.herondata/topologies/local/${ROLE}/ExclamationTopology 
+$ ls -al ~/.herondata/topologies/local/${ROLE}/ExclamationTopology
 -rw-r--r--   1 username  role     2299 Jun  7 16:44 ExclamationTopology.defn
 -rw-r--r--   1 username  role        5 Jun  7 16:44 container_1_exclaim1_1.pid
 -rw-r--r--   1 username  role        5 Jun  7 16:44 container_1_word_2.pid
@@ -156,9 +156,9 @@ $ heron-tracker
 ... Using config file: $HOME/.herontools/conf/heron_tracker.yaml
 ```
 
-You can reach Heron Tracker in your browser at [http://localhost:8888](http://localhost:8888)
-and see something like the following upon successful submission of the topology: 
-![alt tag](http://twitter.github.io/heron/img/heron-tracker.png)
+You can reach Heron Tracker in your browser at ``http://localhost:8888``
+and see something like the following upon successful submission of the topology:
+![alt tag](/img/heron-tracker.png)
 
 To explore Heron Tracker, please refer to [Heron Tracker Rest API](../operators/heron-tracker-api)
 
@@ -175,8 +175,8 @@ $ heron-ui
 ```
 
 You can open Heron UI in your browser at [http://localhost:8889](http://localhost:8889)
-and see something like this upon successful submission of the topology: 
-![alt tag](http://twitter.github.io/heron/img/heron-ui.png)
+and see something like this upon successful submission of the topology:
+![alt tag](/img/heron-ui.png)
 
 To play with Heron UI, please refer to [Heron UI Usage Guide](../developers/ui-guide)
 ## Step 5 --- Explore topology management commands
