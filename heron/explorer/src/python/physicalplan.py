@@ -13,11 +13,10 @@
 # limitations under the License.
 
 import heron.explorer.src.python.args as args
+import heron.explorer.src.python.utils as utils
 import sys
 from heron.common.src.python.color import Log
 from tabulate import tabulate
-from heron.explorer.src.python.utils import get_topology_info
-from heron.explorer.src.python.utils import get_topology_metrics
 
 
 def create_parser(subparsers):
@@ -75,6 +74,7 @@ def parse_topo_loc(cl_args):
     raise
 
 
+'''
 def get_component_metrics(component, cluster, env, topology, role):
   queries_normal = [
     'complete-latency', 'execute-latency', 'process-latency',
@@ -86,11 +86,11 @@ def get_component_metrics(component, cluster, env, topology, role):
   all_queries = queries + count_queries
   m = dict(zip(queries, queries_normal) + zip(count_queries, count_queries_normal))
   try:
-    result = get_topology_metrics(
+    result = utils.get_topology_metrics(
       cluster, env, topology, component, [], all_queries, [0, -1], role)
   except:
     Log.error("Failed to retrive metrics of component \'%s\'" % component)
-    return False
+    return None
   metrics = result["metrics"]
   names = metrics.values()[0].keys()
   stats = []
@@ -102,19 +102,33 @@ def get_component_metrics(component, cluster, env, topology, role):
       except KeyError:
         pass
     stats.append(info)
-  headers = ['container id'] + [m[k] for k in all_queries if k in metrics.keys()]
-  sys.stdout.flush()
-  print('\'%s\' metrics:' % component)
-  print(tabulate(stats, headers=headers))
-  sys.stdout.flush()
-  return True
+  header = ['container id'] + [m[k] for k in all_queries if k in metrics.keys()]
+  return stats, header
+'''
+
+
+def to_table(metrics):
+  all_queries = utils.metric_queries()
+  m = utils.queries_map()
+  names = metrics.values()[0].keys()
+  stats = []
+  for n in names:
+    info = [n]
+    for field in all_queries:
+      try:
+        info.append(str(metrics[field][n]))
+      except KeyError:
+        pass
+    stats.append(info)
+  header = ['container id'] + [m[k] for k in all_queries if k in metrics.keys()]
+  return stats, header
 
 
 def run_spouts(command, parser, cl_args, unknown_args):
   cluster, role, env = cl_args['cluster'], cl_args['role'], cl_args['environ']
   topology = cl_args['topology-name']
   try:
-    result = get_topology_info(cluster, env, topology, role)
+    result = utils.get_topology_info(cluster, env, topology, role)
     spouts = result['physical_plan']['spouts'].keys()
     spout_name = cl_args['spout']
     if spout_name:
@@ -125,10 +139,17 @@ def run_spouts(command, parser, cl_args, unknown_args):
         raise
   except Exception:
     return False
+  spouts_result = []
   for spout in spouts:
-    result = get_component_metrics(spout, cluster, env, topology, role)
-    if not result:
+    try:
+      metrics = utils.get_component_metrics(spout, cluster, env, topology, role)
+      stat, header = to_table(metrics)
+      spouts_result.append((spout, stat, header))
+    except:
       return False
+  for spout, stat, header in spouts_result:
+    print('\'%s\' metrics:' % spout)
+    print(tabulate(stat, headers=header))
   return True
 
 
@@ -136,7 +157,7 @@ def run_bolts(command, parser, cl_args, unknown_args):
   cluster, role, env = cl_args['cluster'], cl_args['role'], cl_args['environ']
   topology = cl_args['topology-name']
   try:
-    result = get_topology_info(cluster, env, topology, role)
+    result = utils.get_topology_info(cluster, env, topology, role)
     bolts = result['physical_plan']['bolts'].keys()
     bolt_name = cl_args['bolt']
     if bolt_name:
@@ -147,10 +168,17 @@ def run_bolts(command, parser, cl_args, unknown_args):
         raise
   except Exception:
     return False
+  bolts_result = []
   for bolt in bolts:
-    result = get_component_metrics(bolt, cluster, env, topology, role)
-    if not result:
+    try:
+      metrics = utils.get_component_metrics(bolt, cluster, env, topology, role)
+      stat, header = to_table(metrics)
+      bolts_result.append((bolt, stat, header))
+    except Exception:
       return False
+  for bolt, stat, header in bolts_result:
+    print('\'%s\' metrics:' % bolt)
+    print(tabulate(stat, headers=header))
   return True
 
 
@@ -158,7 +186,7 @@ def run_containers(command, parser, cl_args, unknown_args):
   cluster, role, env = cl_args['cluster'], cl_args['role'], cl_args['environ']
   topology = cl_args['topology-name']
   container_id = cl_args['cid']
-  result = get_topology_info(cluster, env, topology, role)
+  result = utils.get_topology_info(cluster, env, topology, role)
   containers = result['physical_plan']['stmgrs']
   all_bolts, all_spouts = set(), set()
   for container, bolts in result['physical_plan']['bolts'].items():
@@ -167,18 +195,23 @@ def run_containers(command, parser, cl_args, unknown_args):
     all_spouts = all_spouts | set(spouts)
   stmgrs = containers.keys()
   stmgrs.sort()
-  if container_id is None:
-    table = []
-    for id, name in enumerate(stmgrs):
-      cid = id + 1
-      host = containers[name]["host"]
-      port = containers[name]["port"]
-      pid = containers[name]["pid"]
-      instances = containers[name]["instance_ids"]
-      bolt_nums = len([instance for instance in instances if instance in all_bolts])
-      spout_nums = len([instance for instance in instances if instance in all_spouts])
-      table.append([cid, host, port, pid, bolt_nums, spout_nums, len(instances)])
-    headers = ["container", "host", "port", "pid", "#bolt", "#spout", "#instance"]
-    sys.stdout.flush()
-    print(tabulate(table, headers=headers))
-    return True
+  if container_id is not None:
+    try:
+      stmgrs = [stmgrs[container_id]]
+    except:
+      Log.error('Invalid container id: %d' % container_id)
+      return False
+  table = []
+  for id, name in enumerate(stmgrs):
+    cid = id + 1
+    host = containers[name]["host"]
+    port = containers[name]["port"]
+    pid = containers[name]["pid"]
+    instances = containers[name]["instance_ids"]
+    bolt_nums = len([instance for instance in instances if instance in all_bolts])
+    spout_nums = len([instance for instance in instances if instance in all_spouts])
+    table.append([cid, host, port, pid, bolt_nums, spout_nums, len(instances)])
+  headers = ["container", "host", "port", "pid", "#bolt", "#spout", "#instance"]
+  sys.stdout.flush()
+  print(tabulate(table, headers=headers))
+  return True

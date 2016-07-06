@@ -97,9 +97,13 @@ def create_parser():
 # Run the command
 ################################################################################
 def run(command, *args):
-  # physical plan
+  # show all clusters
   if command == 'clusters':
     return clusters.run(command, *args)
+
+  # show topologies
+  if command == 'topologies':
+    return topologies.run(command, *args)
 
   # physical plan
   if command == 'containers':
@@ -116,10 +120,6 @@ def run(command, *args):
     return logicalplan.run_spouts(command, *args)
   if command == 'bolts':
     return logicalplan.run_bolts(command, *args)
-
-  # show
-  if command == 'topologies':
-    return topologies.run(command, *args)
 
   # help
   if command == 'help':

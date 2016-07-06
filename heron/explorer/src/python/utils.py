@@ -319,6 +319,23 @@ def check_release_file_exists():
 
   return True
 
+def _all_metric_queries():
+  queries_normal = [
+    'complete-latency', 'execute-latency', 'process-latency',
+    'jvm-uptime-secs', 'jvm-process-cpu-load', 'jvm-memory-used-mb'
+  ]
+  queries = ['__%s' % m for m in queries_normal]
+  count_queries_normal = ['emit-count', 'execute-count', 'ack-count', 'fail-count']
+  count_queries = ['__%s/default' % m for m in count_queries_normal]
+  return queries, queries_normal, count_queries, count_queries_normal
+
+def metric_queries():
+  qs = _all_metric_queries()
+  return qs[0] + qs[2]
+
+def queries_map():
+  qs = _all_metric_queries()
+  return dict(zip(qs[0], qs[1]) + zip(qs[2], qs[3]))
 
 def get_clusters():
   instance = tornado.ioloop.IOLoop.instance()
@@ -328,7 +345,6 @@ def get_clusters():
     Log.error('Error: %s' % str(ex))
     Log.error('Failed to retrive clusters')
     raise
-
 
 def get_logical_plan(cluster, env, topology, role):
   instance = tornado.ioloop.IOLoop.instance()
@@ -356,6 +372,17 @@ def get_topology_metrics(*args):
     return instance.run_sync(lambda: API.get_comp_metrics(*args))
   except Exception as ex:
     Log.error(str(ex))
+    Log.error("Failed to retrive metrics of component \'%s\'" % args[3])
+    raise
+
+
+def get_component_metrics(component, cluster, env, topology, role):
+  all_queries = metric_queries()
+  try:
+    result = get_topology_metrics(
+      cluster, env, topology, component, [], all_queries, [0, -1], role)
+    return result["metrics"]
+  except:
     raise
 
 
