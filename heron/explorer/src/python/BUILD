@@ -16,7 +16,7 @@ pex_library(
         "utils.py",
     ],
     deps = [
-        "//heron/common/src/python/handler/access:tracker-access",
+        "//heron/common/src/python:tracker-access",
         "//heron/common/src/python:common",
         "//heron/statemgrs/src/python:zk-statemgr-py",
         "//heron/proto:proto-py",
