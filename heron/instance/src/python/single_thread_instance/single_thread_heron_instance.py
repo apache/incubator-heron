@@ -123,7 +123,6 @@ class SingleThreadHeronInstance(object):
     self.my_instance[2].start()
     if self.my_instance[0]:
       # It's spout --> add task
-      # run_in_single_thread is invoked in loop
       Log.info("Add spout task")
       def spout_task():
         self.my_instance[2].run_in_single_thread()
