@@ -93,7 +93,7 @@ def to_table(components, topo_info):
       row.append(','.join(inputs.get(component_name, ['-'])))
       row.append(','.join(outputs.get(component_name, ['-'])))
       info.append(row)
-  header = ['type', 'name', '#instances', 'input', 'output']
+  header = ['type', 'name', 'parallelism', 'input', 'output']
   return info, header
 
 
