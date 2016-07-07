@@ -151,14 +151,14 @@ def add_container_id(parser, required=False, labelled=False):
   parser.add_argument(
     req(required, labelled, 'cid'),
     help='container ID',
-    type=int, metavar='CONTAINER_ID')
+    type=int, metavar='ID')
   return parser
 
 
 def add_spout_name(parser, required=False, labelled=False):
   parser.add_argument(
     req(required, labelled, 'spout'),
-    help='spout name',
+    help='Spout name',
     type=str, metavar='SPOUT_ID')
   return parser
 
@@ -166,7 +166,7 @@ def add_spout_name(parser, required=False, labelled=False):
 def add_bolt_name(parser, required=False, labelled=False):
   parser.add_argument(
     req(required, labelled, 'bolt'),
-    help='bolt name',
+    help='Bolt name',
     type=str, metavar='BOLT_ID')
   return parser
 
@@ -174,7 +174,7 @@ def add_bolt_name(parser, required=False, labelled=False):
 def add_component_name(parser):
   parser.add_argument(
     '--component',
-    help='component name',
+    help='Component name',
     type=str)
   return parser
 
@@ -201,6 +201,6 @@ def add_cluster_role_env(parser):
 def add_topology_name(parser):
   parser.add_argument(
     'topology-name',
-    help='topology name'
+    help='Topology name'
   )
   return parser
