@@ -64,11 +64,7 @@ class ContainerFileStatsHandler(BaseHandler):
   Parameters:
    - cluster - Name of cluster.
    - environ - Running environment.
-<<<<<<< f57e472c35d9eacc611d348b151a7579987c72cc
    - role - (optional) Role used to submit the topology.
-=======
-   - role - Name of person who submits the topology (optional)
->>>>>>> Adapt to tracker API with new parameter.
    - topology - Name of topology (Note: Case sensitive. Can only
                 include [a-zA-Z0-9-_]+)
    - container - Container number
