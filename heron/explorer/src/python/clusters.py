@@ -32,7 +32,7 @@ def create_parser(subparsers):
 
 def run(command, parser, cl_args, unknown_args):
   clusters = get_clusters()
-  print('Existing clusters:')
+  print('Available clusters:')
   for cluster in clusters:
     print('  %s' % cluster)
   return True

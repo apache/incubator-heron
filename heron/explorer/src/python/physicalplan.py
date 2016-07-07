@@ -20,31 +20,18 @@ from tabulate import tabulate
 
 
 def create_parser(subparsers):
-  spouts_parser = subparsers.add_parser(
-    'spouts-metric',
-    help='Display info of a topology\'s spouts metrics',
+  metrics_parser = subparsers.add_parser(
+    'metrics',
+    help='Display info of a topology\'s metrics',
     usage="%(prog)s cluster/[role]/[env] topology-name [options]",
     add_help=False)
-  args.add_cluster_role_env(spouts_parser)
-  args.add_topology_name(spouts_parser)
-  args.add_verbose(spouts_parser)
-  args.add_tracker_url(spouts_parser)
-  args.add_config(spouts_parser)
-  args.add_spout_name(spouts_parser)
-  spouts_parser.set_defaults(subcommand='spouts-metric')
-
-  bolts_parser = subparsers.add_parser(
-   'bolts-metric',
-    help='Display info of a topology\'s bolts metrics',
-    usage="%(prog)s cluster/[role]/[env] topology-name [options]",
-    add_help=False)
-  args.add_cluster_role_env(bolts_parser)
-  args.add_topology_name(bolts_parser)
-  args.add_verbose(bolts_parser)
-  args.add_tracker_url(bolts_parser)
-  args.add_config(bolts_parser)
-  args.add_bolt_name(bolts_parser)
-  bolts_parser.set_defaults(subcommand='bolts-metric')
+  args.add_cluster_role_env(metrics_parser)
+  args.add_topology_name(metrics_parser)
+  args.add_verbose(metrics_parser)
+  args.add_tracker_url(metrics_parser)
+  args.add_config(metrics_parser)
+  args.add_component_name(metrics_parser)
+  metrics_parser.set_defaults(subcommand='metrics')
 
   containers_parser = subparsers.add_parser(
     'containers',
@@ -58,6 +45,7 @@ def create_parser(subparsers):
   args.add_config(containers_parser)
   args.add_container_id(containers_parser)
   containers_parser.set_defaults(subcommand='containers')
+
   return subparsers
 
 
@@ -91,31 +79,35 @@ def to_table(metrics):
   return stats, header
 
 
-def run_spouts(command, parser, cl_args, unknown_args):
+def run_metrics(command, parser, cl_args, unknown_args):
   cluster, role, env = cl_args['cluster'], cl_args['role'], cl_args['environ']
   topology = cl_args['topology-name']
   try:
     result = utils.get_topology_info(cluster, env, topology, role)
     spouts = result['physical_plan']['spouts'].keys()
-    spout_name = cl_args['spout']
-    if spout_name:
-      if spout_name in spouts:
-        spouts = [spout_name]
+    bolts = result['physical_plan']['bolts'].keys()
+    components = spouts + bolts
+    cname = cl_args['component']
+    if cname:
+      if cname in components:
+        components = [cname]
       else:
-        Log.error('Unknown spout: \'%s\'' % spout_name)
+        Log.error('Unknown component: \'%s\'' % cname)
         raise
   except Exception:
     return False
-  spouts_result = []
-  for spout in spouts:
+  cresult = []
+  for comp in components:
     try:
-      metrics = utils.get_component_metrics(spout, cluster, env, topology, role)
+      metrics = utils.get_component_metrics(comp, cluster, env, topology, role)
       stat, header = to_table(metrics)
-      spouts_result.append((spout, stat, header))
+      cresult.append((comp, stat, header))
     except:
       return False
-  for spout, stat, header in spouts_result:
-    print('\'%s\' metrics:' % spout)
+  for i, (comp, stat, header) in enumerate(cresult):
+    if i != 0:
+      print('')
+    print('\'%s\' metrics:' % comp)
     print(tabulate(stat, headers=header))
   return True
 
@@ -143,7 +135,9 @@ def run_bolts(command, parser, cl_args, unknown_args):
       bolts_result.append((bolt, stat, header))
     except Exception:
       return False
-  for bolt, stat, header in bolts_result:
+  for i, (bolt, stat, header) in enumerate(bolts_result):
+    if i != 0:
+      print('')
     print('\'%s\' metrics:' % bolt)
     print(tabulate(stat, headers=header))
   return True

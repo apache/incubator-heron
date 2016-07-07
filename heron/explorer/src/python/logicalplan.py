@@ -22,7 +22,7 @@ from tabulate import tabulate
 def create_parser(subparsers):
   components_parser = subparsers.add_parser(
     'components',
-    help='Display information of a topology in a logical plan',
+    help='Display information of a topology\'s components',
     usage="%(prog)s cluster/[role]/[env] topology-name [options]",
     add_help=False)
   args.add_cluster_role_env(components_parser)
@@ -34,7 +34,7 @@ def create_parser(subparsers):
 
   spouts_parser = subparsers.add_parser(
     'spouts',
-    help='Display information of spouts of a topology in a logical plan',
+    help='Display information of a topology\'s spouts',
     usage="%(prog)s cluster/[role]/[env] topology-name [options]",
     add_help=False)
   args.add_cluster_role_env(spouts_parser)
@@ -46,7 +46,7 @@ def create_parser(subparsers):
 
   bolts_parser = subparsers.add_parser(
     'bolts',
-    help='Display information of bolts of a topology in a logical plan',
+    help='Display information of a topology\'s bolts',
     usage="%(prog)s cluster/[role]/[env] topology-name [options]",
     add_help=False)
   args.add_cluster_role_env(bolts_parser)
@@ -100,7 +100,7 @@ def to_table(components, topo_info):
 def filter_bolts(table, header):
   bolts_info = []
   for row in table:
-    if row[0] == 'bolts':
+    if row[0] == 'bolt':
       bolts_info.append(row)
   return bolts_info, header
 
@@ -108,7 +108,7 @@ def filter_bolts(table, header):
 def filter_spouts(table, header):
   spouts_info = []
   for row in table:
-    if row[0] == 'spouts':
+    if row[0] == 'spout':
       spouts_info.append(row)
   return spouts_info, header
 

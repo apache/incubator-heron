@@ -108,10 +108,8 @@ def run(command, *args):
   # physical plan
   if command == 'containers':
     return physicalplan.run_containers(command, *args)
-  if command == 'spouts-metric':
-    return physicalplan.run_spouts(command, *args)
-  if command == 'bolts-metric':
-    return physicalplan.run_bolts(command, *args)
+  if command == 'metrics':
+    return physicalplan.run_metrics(command, *args)
 
   # logical plan
   if command == 'components':

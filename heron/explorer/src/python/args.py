@@ -171,6 +171,14 @@ def add_bolt_name(parser, required=False, labelled=False):
   return parser
 
 
+def add_component_name(parser):
+  parser.add_argument(
+    '--component',
+    help='component name',
+    type=str)
+  return parser
+
+
 def add_spouts(parser):
   parser.add_argument(
     '--spout', help='display spout', action='store_true')

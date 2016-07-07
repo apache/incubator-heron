@@ -93,13 +93,12 @@ class ExplorerTest(unittest.TestCase):
     return good_cls, bad_cl1
 
   def sample_pp_cls(self):
-    clsp = ['spouts-metric', 'local/rli/default', 'ExclamationTopology']
-    clbo = ['bolts-metric', 'local/rli/default', 'ExclamationTopology']
+    clsp = ['metrics', 'local/rli/default', 'ExclamationTopology']
     clco = ['containers', 'local/rli/default', 'ExclamationTopology']
     good_cls = []
-    for cl in clsp, clbo, clco:
+    for cl in clsp, clco:
       self.acc_with_optional_args(cl, good_cls)
-    bad_cl1 = ['spouts-metric', 'local/rli/defult', 'ExclamationTopology']
+    bad_cl1 = ['metrics', 'local/rli/defult', 'ExclamationTopology']
     return good_cls, bad_cl1
 
   def sample_cluster_cls(self):
@@ -113,18 +112,17 @@ class ExplorerTest(unittest.TestCase):
     clt2 = ['topologies', 'local/foo']
     clt3 = ['topologies', 'local/foo/bar']
     cls1 = ['spouts', 'local/foo/bar', 'topo']
-    cls2 = ['spouts-metric', 'local/foo/bar', 'topo']
     clb1 = ['bolts', 'local/foo/bar', 'topo']
-    clb2 = ['bolts-metric', 'local/foo/bar', 'topo']
+    clb2 = ['metrics', 'local/foo/bar', 'topo']
     clc1 = ['components', 'local/foo/bar', 'topo']
     clc2 = ['containers', 'local/foo/bar', 'topo']
-    cll = [clt1, clt2, clt3, cls1, cls2, clb1, clb2, clc1, clc2]
+    cll = [clt1, clt2, clt3, cls1, clb1, clb2, clc1, clc2]
     all_cl = []
     for cl in cll:
       self.acc_with_optional_args(cl, all_cl)
     # help subcommand
-    for sub in ['topologies', 'spouts', 'bolts', 'bolts-metric',
-                'spouts-metric', 'components', 'containers', 'help']:
+    for sub in ['clusters', 'topologies', 'spouts', 'bolts',
+                'metrics', 'components', 'containers', 'help']:
       all_cl.append(['help', sub])
     return all_cl
 
@@ -140,8 +138,8 @@ class ExplorerTest(unittest.TestCase):
 
   def test_help(self):
     all_cl = []
-    for sub in ['topologies', 'spouts', 'bolts', 'bolts-metric',
-                'spouts-metric', 'components', 'containers', 'help']:
+    for sub in ['clusters', 'topologies', 'spouts', 'bolts', 'metrics',
+                'components', 'containers', 'help']:
       all_cl.append(['help', sub])
     for cl in all_cl:
       self.assertEqual(0, main.main(cl))
