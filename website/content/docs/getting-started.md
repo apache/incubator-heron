@@ -39,7 +39,7 @@ Heron client installer
 Uncompressing......
 Heron is now installed!
 
-Make sure you have "~/bin" in your path.
+Make sure you have "${HOME}/bin" in your path.
 ...
 ```
 
