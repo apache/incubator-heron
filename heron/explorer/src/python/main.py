@@ -24,6 +24,7 @@ import heron.explorer.src.python.opts as opts
 import heron.explorer.src.python.physicalplan as physicalplan
 import heron.explorer.src.python.topologies as topologies
 import heron.explorer.src.python.utils as utils
+import heron.explorer.src.python.version as version
 import sys
 import time
 from heron.common.src.python.color import Log
@@ -61,7 +62,7 @@ class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
 ################################################################################
 def create_parser():
   help_epilog = '''Getting more help:
-  heron-explorer help <command> Prints help and options for <command>\n
+  heron-explorer help <command>     Prints help and options for <command>\n
   For detailed documentation, go to http://heronstreaming.io'''
 
   parser = argparse.ArgumentParser(
@@ -90,6 +91,9 @@ def create_parser():
   # subparser for help subcommand
   help.create_parser(subparsers)
 
+  # subparser for version subcommand
+  version.create_parser(subparsers)
+
   return parser
 
 
@@ -102,26 +106,30 @@ def run(command, *args):
     return clusters.run(command, *args)
 
   # show topologies
-  if command == 'topologies':
+  elif command == 'topologies':
     return topologies.run(command, *args)
 
   # physical plan
-  if command == 'containers':
+  elif command == 'containers':
     return physicalplan.run_containers(command, *args)
-  if command == 'metrics':
+  elif command == 'metrics':
     return physicalplan.run_metrics(command, *args)
 
   # logical plan
-  if command == 'components':
+  elif command == 'components':
     return logicalplan.run_components(command, *args)
-  if command == 'spouts':
+  elif command == 'spouts':
     return logicalplan.run_spouts(command, *args)
-  if command == 'bolts':
+  elif command == 'bolts':
     return logicalplan.run_bolts(command, *args)
 
   # help
-  if command == 'help':
+  elif command == 'help':
     return help.run(command, *args)
+
+  # version
+  elif command == 'version':
+    return version.run(command, *args)
 
   return 1
 
@@ -181,7 +189,7 @@ def main(args):
     command_line_args['help-command'] = command
     command = 'help'
 
-  if command != 'help':
+  if command not in ['help', 'version']:
     opts.set_tracker_url(command_line_args)
     opts.set_verbose(command_line_args)
     if command not in ['topologies', 'clusters']:

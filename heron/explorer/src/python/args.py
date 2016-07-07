@@ -175,6 +175,7 @@ def add_component_name(parser):
   parser.add_argument(
     '--component',
     help='Component name',
+    metavar='COMP',
     type=str)
   return parser
 

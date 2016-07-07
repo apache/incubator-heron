@@ -14,6 +14,7 @@ pex_library(
         "physicalplan.py",
         "topologies.py",
         "utils.py",
+        "version.py",
     ],
     deps = [
         "//heron/common/src/python:tracker-access",
