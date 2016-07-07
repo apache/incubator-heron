@@ -75,17 +75,17 @@ $ vagrant ssh
 ### Step 1.a : Download installation script files
 
 You can download the script files that match your Linux distribution from 
-https://github.com/twitter/heron/releases/tag/0.14.0
+https://github.com/twitter/heron/releases/tag/0.14.1
 
-For example for the 0.14.0 release the files you need to download For Ubuntu will be the following.
+For example for the 0.14.1 release the files you need to download For Ubuntu will be the following.
 
-* `heron-client-install-0.14.0-ubuntu.sh`
-* `heron-tools-install-0.14.0-ubuntu.sh`
+* `heron-client-install-0.14.1-ubuntu.sh`
+* `heron-tools-install-0.14.1-ubuntu.sh`
 
 Optionally - You want need the following for the steps in the blog post
 
-* `heron-api-install-0.14.0-ubuntu.sh`
-* `heron-core-0.14.0-ubuntu.tar.gz`
+* `heron-api-install-0.14.1-ubuntu.sh`
+* `heron-core-0.14.1-ubuntu.tar.gz`
 
 ### Step 1.b: Execute the client and tools shell scripts
 
