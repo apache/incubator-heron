@@ -198,7 +198,10 @@ class REQID(object):
     return hash(self.__str__())
 
   def __str__(self):
-    return ''.join([str(i) for i in list(self.bytes)])
+    if self.is_zero():
+      return "ZERO"
+    else:
+      return ''.join([str(i) for i in list(self.bytes)])
 
 class StatusCode:
   OK = 0

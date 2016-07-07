@@ -12,9 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from heron.common.src.python.color import Log
-import sys, os, zipfile, re, zipimport, zipfile
+import os
+import re
+import sys
+import zipimport
+import zipfile
 
+from heron.common.src.python.color import Log
 
 # TODO: Verify that this regex is fine
 egg_regex = r"^(\.deps\/[^\/\s]*\.egg)\/"
@@ -28,7 +32,7 @@ def _get_deps_list(abs_path_to_pex):
                    if re.match(egg_regex, i) is not None]))
   return deps
 
-def load_pex(path_to_pex, python_class_name):
+def load_pex(path_to_pex):
   """Loads pex file and its dependencies to the current python path"""
   abs_path_to_pex = os.path.abspath(path_to_pex)
   Log.debug("Add a pex to the path: " + abs_path_to_pex)
@@ -39,14 +43,7 @@ def load_pex(path_to_pex, python_class_name):
     Log.debug("Add a new dependency to the path: " + dep)
     sys.path.insert(0, os.path.join(abs_path_to_pex, dep))
 
-  # add class path
-  #split = python_class_name.split('.')
-  #to_add = '/'.join(split[:-1])
-  #Log.debug("Add a class path: " + to_add)
-  #sys.path.insert(0, os.path.join(abs_path_to_pex, to_add))
   Log.debug("Python path: " + str(sys.path))
-  Log.debug("Loaded module: " + str([i for i in sys.modules if 'heron' in i]))
-  Log.debug("__name__: " + str(__name__))
 
 def resolve_heron_suffix_issue(abs_pex_path, python_class_name):
   """Resolves duplicate package suffix problems

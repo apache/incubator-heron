@@ -15,6 +15,7 @@ import asyncore
 import sys
 
 from heron.common.src.python.color import Log
+from heron.common.src.python.basics.gateway_looper import GatewayLooper
 from heron.proto import physical_plan_pb2, stmgr_pb2
 from heron.instance.src.python.single_thread_instance.single_thread_stmgr_client import SingleThreadStmgrClient
 from heron.instance.src.python.misc.communicator import HeronCommunicator
@@ -39,27 +40,12 @@ class SingleThreadHeronInstance(object):
 
     # my_instance is a tuple containing (is_spout, TopologyAPI.{Spout|Bolt}, loaded python instance)
     self.my_instance = None
-    # Tasks to execute in loop
-    self.my_tasks = []
+    self.looper = GatewayLooper()
 
   def start(self):
     self._stmgr_client.start_connect()
-    self.loop()
-
-  def loop(self, timeout=0.0, socket_map=None):
-    """Loop asynchronous stuff"""
-    Log.debug("In loop()")
-    if socket_map is None:
-      socket_map = asyncore.socket_map
-    Log.debug("socket map: " + str(socket_map))
-
-    while socket_map:
-      for task in self.my_tasks:
-        Log.debug("Exec my tasks")
-        task()
-        # Send all messages
-        self.send_buffered_messages()
-      asyncore.poll(timeout, socket_map)
+    self.looper.prepare_map()
+    self.looper.loop()
 
   def handle_new_tuple_set(self, tuple_msg_set):
     """Called when new TupleMessage arrives
@@ -123,7 +109,7 @@ class SingleThreadHeronInstance(object):
 
   def load_py_instance(self, is_spout, python_class_name):
     # TODO : preliminary loading
-    pex_loader.load_pex(self.topo_pex_file_path, python_class_name)
+    pex_loader.load_pex(self.topo_pex_file_path)
     if is_spout:
       spout_class = pex_loader.import_and_get_class(self.topo_pex_file_path, python_class_name)
       my_spout = spout_class(self.my_pplan_helper, self.in_stream, self.out_stream)
@@ -139,7 +125,11 @@ class SingleThreadHeronInstance(object):
       # It's spout --> add task
       # run_in_single_thread is invoked in loop
       Log.info("Add spout task")
-      self.my_tasks.append(self.my_instance[2].run_in_single_thread)
+      def spout_task():
+        self.my_instance[2].run_in_single_thread()
+        self.send_buffered_messages()
+
+      self.looper.add_wakeup_task(spout_task)
 
 def print_usage():
   print("Usage: ./single_thread_heron_instance <topology_name> <topology_id> "

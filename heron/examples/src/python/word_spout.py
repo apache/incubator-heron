@@ -12,21 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import random
+from itertools import cycle
 from heron.instance.src.python.instance.spout import Spout
 from heron.common.src.python.color import Log
+
 
 class WordSpout(Spout):
   def __init__(self, pplan_helper, in_stream, out_stream):
     super(WordSpout, self).__init__(pplan_helper, in_stream, out_stream)
-    self.words = ["hello", "bye", "good", "bad", "heron", "storm"]
+    self.words = cycle(["hello", "bye", "good", "bad", "heron", "storm"])
 
   def open(self, config, context):
     Log.info("In open() of WordSpout")
 
   def next_tuple(self):
-    next_int = random.randint(0, len(self.words)-1)
-    self.emit(self.words[next_int])
+    word = next(self.words)
+    self.emit([word])
 
   def fail(self, msg_id):
     pass

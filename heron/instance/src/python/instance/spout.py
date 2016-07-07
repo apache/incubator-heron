@@ -49,7 +49,6 @@ class Spout(BaseInstance):
     """
     if anchors is not None:
       raise RuntimeError("anchors cannot be set for emit() from Spout")
-
     self._admit_data_tuple(output_tuple, stream_id, is_spout=True, anchors=None, message_id=message_id)
 
   def _run(self):
@@ -143,7 +142,6 @@ class Spout(BaseInstance):
     """
     raise NotImplementedError
 
-  @abstractmethod
   def ack(self, msg_id):
     """Determine that the tuple emitted by this spout with the msg_id has been fully processed
 
@@ -151,11 +149,10 @@ class Spout(BaseInstance):
     has been fully processed. Typically, an implementation of this method will take that
     message off the queue and prevent it from being replayed.
 
-    *Must be implemented by a subclass.*
+    *Should be implemented by a subclass.*
     """
-    raise NotImplementedError
+    pass
 
-  @abstractmethod
   def fail(self, msg_id):
     """Determine that the tuple emitted by this spout with the msg_id has failed to be fully processed
 
@@ -165,7 +162,7 @@ class Spout(BaseInstance):
 
     *Must be implemented by a subclass.*
     """
-    raise NotImplementedError
+    pass
 
   def activate(self):
     """Called when a spout has been activated out of a deactivated mode
