@@ -29,13 +29,8 @@ class GatewayLooper(EventLooper):
     # Pipe used for wake up select
     self.pipe_r, self.pipe_w = os.pipe()
 
-    self.register_timer_task_in_sec(self.exit_loop, 5)
-    self.started = time.asctime()
-    def at_exit():
-      os.close(self.pipe_r)
-      os.close(self.pipe_w)
-      Log.info("GatewayLooper - started: " + str(self.started) + ", stopped: " + str(time.asctime()))
-    self.add_exit_task(at_exit)
+    #self.register_timer_task_in_sec(self.exit_loop, 5)
+    self.started = time.time()
 
   def prepare_map(self):
     # TODO need to change and use signal.set_wakeup_fd
@@ -50,10 +45,18 @@ class GatewayLooper(EventLooper):
 
   def wake_up(self):
     os.write(self.pipe_w, "\n")
+    Log.debug("Wake up called")
+
+  def on_exit(self):
+    super(GatewayLooper, self).on_exit()
+    os.close(self.pipe_r)
+    os.close(self.pipe_w)
 
   def poll(self, timeout=0.0, map=None):
-    if map:
-      r = []; w = []; e = []
+    # Modified version of poll() from asyncore module
+    r = []; w = []; e = []
+
+    if map is not None:
       for fd, obj in map.items():
         is_r = obj.readable()
         is_w = obj.writable()
@@ -65,17 +68,18 @@ class GatewayLooper(EventLooper):
         if is_r or is_w:
           e.append(fd)
 
-      # Add wakeup fd
-      r.append(self.pipe_r)
+    # Add wakeup fd
+    r.append(self.pipe_r)
 
-      try:
-        r, w, e = select.select(r, w, e, timeout)
-      except select.error, err:
-        if err.args[0] != errno.EINTR:
-          raise
-        else:
-          return
+    try:
+      r, w, e = select.select(r, w, e, timeout)
+    except select.error, err:
+      if err.args[0] != errno.EINTR:
+        raise
+      else:
+        return
 
+    if map is not None:
       for fd in r:
         obj = map.get(fd)
         if obj is None:
