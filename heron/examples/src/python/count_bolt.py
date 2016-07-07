@@ -11,21 +11,27 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from collections import Counter
 
-from itertools import cycle
-from heron.instance.src.python.instance.spout import Spout
+from heron.instance.src.python.instance.bolt import Bolt
 from heron.common.src.python.color import Log
 
+class CountBolt(Bolt):
+  def __init__(self):
+    self.counter = Counter()
+    self.total = 0
 
-class WordSpout(Spout):
-  def __init__(self, pplan_helper, in_stream, out_stream):
-    super(WordSpout, self).__init__(pplan_helper, in_stream, out_stream)
-    self.words = cycle(["hello", "bye", "good", "bad", "heron", "storm"])
+  def prepare(self, config, context):
+    Log.debug("In prepare() of CountBolt")
+    pass
 
-  def open(self, config, context):
-    Log.info("In open() of WordSpout")
+  def _increment(self, word, inc_by):
+    self.counter[word] += inc_by
+    self.total += inc_by
 
-  def next_tuple(self):
-    word = next(self.words)
-    self.emit([word])
+  def execute(self, tuple):
+    word = tuple[0]
+    self._increment(word, 10 if word == "heron" else 1)
+    if self.total % 1000 == 0:
+      Log.info("Current map: " + str(self.counter))
 

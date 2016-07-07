@@ -83,7 +83,11 @@ class Bolt(BaseInstance):
         Log.error("Received tuple not instance of HeronTupleSet")
 
   def _handle_data_tuple(self, data_tuple, stream):
-    pass
+    values = []
+    for value in data_tuple.values:
+      values.append(self.serializer.deserialize(value))
+
+    self.execute(values)
 
   def _activate(self):
     pass
@@ -120,6 +124,8 @@ class Bolt(BaseInstance):
     *Must be implemented by a subclass.*
 
     You can emit a tuple from this bolt by using ``self.emit()`` method.
+
+    :type tuple: list
     """
     # TODO: documentation and Tuple implementation
     pass

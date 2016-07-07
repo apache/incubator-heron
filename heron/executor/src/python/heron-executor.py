@@ -41,7 +41,7 @@ def print_usage():
          "  - <classpath>: the path to the Python Heron Instance executable\n" +
          "  - <pkg_type>: pex\n" +
          "  - <topology_jar_file>: the path to the topology pex file\n" +
-         "<instance_jvm_opts>, <component_rammap>, <component_jvm_opts>, <instance_classpath> are ignored"
+         "<instance_jvm_opts>, <component_rammap>, <component_jvm_opts>, <instance_classpath> are ignored")
 
 
 
