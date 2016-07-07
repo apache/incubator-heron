@@ -158,7 +158,10 @@ def run_containers(command, parser, cl_args, unknown_args):
   stmgrs.sort()
   if container_id is not None:
     try:
-      stmgrs = [stmgrs[container_id]]
+      normalized_cid = container_id - 1
+      if normalized_cid < 0:
+        raise
+      stmgrs = [stmgrs[normalized_cid]]
     except:
       Log.error('Invalid container id: %d' % container_id)
       return False

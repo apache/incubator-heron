@@ -98,6 +98,7 @@ class ExplorerTest(unittest.TestCase):
     good_cls = []
     for cl in clsp, clco:
       self.acc_with_optional_args(cl, good_cls)
+    good_cls.append(clco + ['--cid 1'])
     bad_cl1 = ['metrics', 'local/rli/defult', 'ExclamationTopology']
     return good_cls, bad_cl1
 
