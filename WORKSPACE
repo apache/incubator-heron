@@ -1,5 +1,5 @@
 # versions shared across artifacts that should be upgraded together
-aws_version = "1.10.66"
+aws_version = "1.11.14"
 curator_version = "2.9.0"
 httpcomponents_version = "4.3"
 jackson_version = "2.6.3"
