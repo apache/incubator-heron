@@ -393,8 +393,7 @@ def get_comp_metrics(
 
   # form the url
   request_url = tornado.httputil.url_concat(
-      create_url(METRICS_URL_FMT),
-  )
+      create_url(METRICS_URL_FMT), params)
 
   # append each metric to the url
   for metric_name in metricnames:
