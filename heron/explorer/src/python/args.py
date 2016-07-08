@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import argparse
 import heron.explorer.src.python.utils as utils
 import os
 
@@ -24,34 +23,6 @@ For detailed documentation, go to http://heronstreaming.io'''
 
 # default parameter - url to connect to heron tracker
 DEFAULT_TRACKER_URL = "http://localhost:8888"
-
-
-class _HelpAction(argparse._HelpAction):
-
-  def __call__(self, parser, namespace, values, option_string=None):
-    parser.print_help()
-
-    # retrieve subparsers from parser
-    subparsers_actions = [
-      action for action in parser._actions
-      if isinstance(action, argparse._SubParsersAction)]
-
-    # there will probably only be one subparser_action,
-    # but better save than sorry
-    for subparsers_action in subparsers_actions:
-      # get all subparsers and print help
-      for choice, subparser in subparsers_action.choices.items():
-        print("Subparser '{}'".format(choice))
-        print(subparser.format_help())
-        return
-
-
-class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
-  def _format_action(self, action):
-    parts = super(argparse.RawDescriptionHelpFormatter, self)._format_action(action)
-    if action.nargs == argparse.PARSER:
-      parts = "\n".join(parts.split("\n")[1:])
-    return parts
 
 
 def add_config(parser):
@@ -94,10 +65,6 @@ def insert_bool_values(command_line_args):
   return args1
 
 
-def req(req, label, subcommand):
-  return subcommand if req and not label else "--" + subcommand
-
-
 def add_verbose(parser):
   parser.add_argument(
       '--verbose',
@@ -115,59 +82,11 @@ def add_tracker_url(parser):
   return parser
 
 
-def add_topology(parser, required=False, labelled=False):
+def add_container_id(parser):
   parser.add_argument(
-      req(required, labelled, 'topology'),
-      help='name of the topology',
-      metavar='TOPOLOGY', type=str)
-  return parser
-
-
-def add_cluster(parser, required=False, labelled=False):
-  parser.add_argument(
-    req(required, labelled, 'cluster'),
-    help='name of cluster',
-    metavar='CLUSTER', type=str)
-  return parser
-
-
-def add_env(parser, required=False, labelled=False):
-  parser.add_argument(
-    req(required, labelled, 'env'),
-    help='environment',
-    metavar='ENV', type=str)
-  return parser
-
-
-def add_role(parser, required=False, labelled=False):
-  parser.add_argument(
-    req(required, labelled, 'role'),
-    help='roles',
-    metavar='ROLE', type=str)
-  return parser
-
-
-def add_container_id(parser, required=False, labelled=False):
-  parser.add_argument(
-    req(required, labelled, 'cid'),
+    '--cid',
     help='container ID',
     type=int, metavar='ID')
-  return parser
-
-
-def add_spout_name(parser, required=False, labelled=False):
-  parser.add_argument(
-    req(required, labelled, 'spout'),
-    help='Spout name',
-    type=str, metavar='SPOUT_ID')
-  return parser
-
-
-def add_bolt_name(parser, required=False, labelled=False):
-  parser.add_argument(
-    req(required, labelled, 'bolt'),
-    help='Bolt name',
-    type=str, metavar='BOLT_ID')
   return parser
 
 
