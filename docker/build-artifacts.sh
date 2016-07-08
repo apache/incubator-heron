@@ -135,9 +135,9 @@ run_build() {
   export HERON_TREE_STATUS="$(heron_tree_status)"
 
   if [ $TARGET_PLATFORM = "darwin" ]; then
-    docker/compile-platform.sh
+    $DOCKER_DIR/compile-platform.sh
   else
-    docker/compile-docker.sh
+    $DOCKER_DIR/compile-docker.sh
   fi
 }
 
