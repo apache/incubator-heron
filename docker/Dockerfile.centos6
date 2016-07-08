@@ -2,7 +2,7 @@ FROM centos:centos6
 
 # This is passed to the heron build command via the --config flag
 ENV TARGET_PLATFORM centos
-ENV bazelVersion 0.2.3
+ENV bazelVersion 0.3.0
 ENV JAVA_VERSION 8u31
 ENV BUILD_VERSION b13
 
