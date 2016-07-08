@@ -8,7 +8,7 @@ test --ram_utilization_factor=10 --test_output=errors
 build --verbose_failures
 
 build --show_timestamps
-test --show_timestamps --test_output=errors
+test --show_timestamps
 
 # Limits the jobs to 25 since the resources are limited
 build --jobs 25
@@ -31,7 +31,7 @@ build --crosstool_top //tools/travis-ci/toolchain:CROSSTOOL
 # in a container (unless you require sudo in your .travis.yml) this
 # fails to run tests.
 build --spawn_strategy=standalone --genrule_strategy=standalone
-test --test_strategy=standalone --test_output=errors
+test --test_strategy=standalone
 
 # Ignore unsupported warning for sandboxing
 build --ignore_unsupported_sandboxing
