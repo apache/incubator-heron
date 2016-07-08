@@ -60,7 +60,7 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
                          Map<String, Object> defaultResources,
                          Map<String, Object> userResources,
                          Map<String, Object> executorData, Map<String, Object> registeredMetrics,
-                         org.apache.storm.clojure.Atom openOrPrepareWasCalled) {
+                         org.apache.storm.clojure.lang.Atom openOrPrepareWasCalled) {
     super((com.twitter.heron.api.topology.TopologyContext) null);
   }
 
