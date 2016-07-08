@@ -5,15 +5,18 @@ import contextlib
 import os
 import random
 import subprocess
+import sys
 import tempfile
 import zipfile
+from collections import namedtuple
 from textwrap import dedent
 
+from .bin.pex import log, main
 from .common import safe_mkdir, safe_rmtree
 from .compatibility import nested
 from .installer import EggInstaller, Packager
 from .pex_builder import PEXBuilder
-from .util import DistributionHelper
+from .util import DistributionHelper, named_temporary_file
 
 
 @contextlib.contextmanager
@@ -23,6 +26,19 @@ def temporary_dir():
     yield td
   finally:
     safe_rmtree(td)
+
+
+@contextlib.contextmanager
+def temporary_filename():
+  """Creates a temporary filename.
+
+  This is useful when you need to pass a filename to an API. Windows requires all
+  handles to a file be closed before deleting/renaming it, so this makes it a bit
+  simpler."""
+  with named_temporary_file() as fp:
+    fp.write(b'')
+    fp.close()
+    yield fp.name
 
 
 def random_bytes(length):
@@ -159,15 +175,51 @@ def write_simple_pex(td, exe_contents, dists=None, coverage=False):
   return pb
 
 
+class IntegResults(namedtuple('results', 'output return_code exception')):
+  """Convenience object to return integration run results."""
+
+  def assert_success(self):
+    assert self.exception is None and self.return_code is None
+
+  def assert_failure(self):
+    assert self.exception or self.return_code
+
+
+def run_pex_command(args, env=None):
+  """Simulate running pex command for integration testing.
+
+  This is different from run_simple_pex in that it calls the pex command rather
+  than running a generated pex.  This is useful for testing end to end runs
+  with specific command line arguments or env options.
+  """
+  def logger_callback(_output):
+    def mock_logger(msg, v=None):
+      _output.append(msg)
+
+    return mock_logger
+
+  exception = None
+  error_code = None
+  output = []
+  log.set_logger(logger_callback(output))
+  try:
+    main(args=args)
+  except SystemExit as e:
+    error_code = e.code
+  except Exception as e:
+    exception = e
+  return IntegResults(output, error_code, exception)
+
+
 # TODO(wickman) Why not PEX.run?
 def run_simple_pex(pex, args=(), env=None):
   po = subprocess.Popen(
-      [pex] + list(args),
+      [sys.executable, pex] + list(args),
       stdout=subprocess.PIPE,
       stderr=subprocess.STDOUT,
       env=env)
   po.wait()
-  return po.stdout.read(), po.returncode
+  return po.stdout.read().replace(b'\r', b''), po.returncode
 
 
 def run_simple_pex_test(body, args=(), env=None, dists=None, coverage=False):
