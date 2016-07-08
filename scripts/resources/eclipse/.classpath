@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" output="target/classes" path="heron/api/src/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/cli/src/python">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/common/src/cpp">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/common/src/java">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/common/src/python">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/examples/src/java">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/examples/src/scala">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/executor/src/python">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/executor/tests/python">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/instance/src/python">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/instance/tests/python">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/metricsmgr/src/java">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/metricsmgr/src/thrift">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/metricsmgr/tests/java">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/packing/src/java">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/packing/tests/java">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/proto">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/scheduler-core/src/java">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/scheduler-core/tests/java">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/schedulers/src/java">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/schedulers/tests/java">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+       <classpathentry kind="src" output="target/classes" path="heron/shell/assets">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/shell/src/python">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+       <classpathentry kind="src" output="target/classes" path="heron/simulator/src/java">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/simulator/tests/java">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+       <classpathentry kind="src" output="target/classes" path="heron/spi/src/java">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/spi/tests/java">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+       <classpathentry kind="src" output="target/classes" path="heron/statemgrs/src/cpp">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+       <classpathentry kind="src" output="target/classes" path="heron/statemgrs/src/java">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+       <classpathentry kind="src" output="target/classes" path="heron/statemgrs/src/python">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/statemgrs/tests/cpp">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/stmgr/src/cpp">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/stmgr/tests/cpp">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/storm/src/java">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/tmaster/src/cpp">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/tmaster/tests/cpp">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/tracker/src/python">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/tracker/tests/python">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+
+        <classpathentry kind="src" output="target/classes" path="heron/ui/resources">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/ui/src/python">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+
+        <classpathentry kind="src" output="target/classes" path="heron/uploaders/src/java">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="heron/uploaders/tests/java">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+
+        <classpathentry kind="src" output="target/classes" path="integration-test/src/java">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+        <classpathentry kind="src" output="target/classes" path="integration-test/src/python">
+	  <attributes>
+	          <attribute name="optional" value="true"/>
+		  <attribute name="maven.pomderived" value="true"/>
+	  </attributes>
+	</classpathentry>
+
+	<classpathentry kind="src" output="target/test-classes" path="src/test/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" path="heron/api/src/java"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="output" path="target/classes"/>
+</classpath>
