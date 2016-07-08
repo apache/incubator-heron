@@ -71,6 +71,7 @@ def parse_topo_loc(cl_args):
     raise
 
 
+# normalize raw logical plan info to table
 def to_table(components, topo_info):
   inputs, outputs = defaultdict(list), defaultdict(list)
   for ctype, component in components.iteritems():

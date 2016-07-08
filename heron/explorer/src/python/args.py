@@ -16,15 +16,11 @@ import heron.explorer.src.python.utils as utils
 import os
 
 
-help_epilog = '''Getting more help:
-  heron-explorer help <command> Prints help and options for <command>
-
-For detailed documentation, go to http://heronstreaming.io'''
-
 # default parameter - url to connect to heron tracker
 DEFAULT_TRACKER_URL = "http://localhost:8888"
 
 
+# add argument for config file path
 def add_config(parser):
 
   # the default config path
@@ -65,6 +61,7 @@ def insert_bool_values(command_line_args):
   return args1
 
 
+# add optional argument that sets log level to verbose
 def add_verbose(parser):
   parser.add_argument(
       '--verbose',
@@ -74,6 +71,7 @@ def add_verbose(parser):
   return parser
 
 
+# add optional argument that specifies tracker API endpoint
 def add_tracker_url(parser):
   parser.add_argument(
     '--tracker_url',
@@ -82,6 +80,7 @@ def add_tracker_url(parser):
   return parser
 
 
+# add optional argument that specifies container id
 def add_container_id(parser):
   parser.add_argument(
     '--cid',
@@ -90,6 +89,7 @@ def add_container_id(parser):
   return parser
 
 
+# add optional argument that specifies component name
 def add_component_name(parser):
   parser.add_argument(
     '--component',
@@ -99,18 +99,21 @@ def add_component_name(parser):
   return parser
 
 
+# add optional argument that displays spout only
 def add_spouts(parser):
   parser.add_argument(
     '--spout', help='display spout', action='store_true')
   return parser
 
 
+# add optional argument that displays bolts only
 def add_bolts(parser):
   parser.add_argument(
     '--bolt', help='display bolt', action='store_true')
   return parser
 
 
+# add argument that specifies topologies location
 def add_cluster_role_env(parser):
   parser.add_argument(
     'cluster/[role]/[env]', help='Topologies location', type=str,
@@ -118,6 +121,7 @@ def add_cluster_role_env(parser):
   return parser
 
 
+# add argument that specifies topology name
 def add_topology_name(parser):
   parser.add_argument(
     'topology-name',

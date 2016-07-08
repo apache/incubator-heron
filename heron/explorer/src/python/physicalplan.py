@@ -62,6 +62,7 @@ def parse_topo_loc(cl_args):
     raise
 
 
+# normalize raw metrics API result to table
 def to_table(metrics):
   all_queries = utils.metric_queries()
   m = utils.queries_map()
