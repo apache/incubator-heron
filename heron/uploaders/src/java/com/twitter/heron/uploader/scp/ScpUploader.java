@@ -79,9 +79,6 @@ public class ScpUploader implements IUploader {
     this.controller = getScpController();
     // get the destination directory
     this.destTopologyDirectory = ScpContext.uploadDirPath(config);
-    if (this.destTopologyDirectory == null) {
-
-    }
     // get the original topology package location
     this.topologyPackageLocation = Context.topologyPackageFile(config);
 
