@@ -53,6 +53,7 @@ def heron_client_lib_uploader_files():
         "//heron/uploaders/src/java:heron-localfs-uploader",
         "//heron/uploaders/src/java:heron-s3-uploader",
         "//heron/uploaders/src/java:heron-hdfs-uploader",
+        "//heron/uploaders/src/java:heron-scp-uploader",
     ]
 
 def heron_client_lib_third_party_files():
