@@ -27,7 +27,23 @@ import com.twitter.heron.spi.uploader.IUploader;
 import com.twitter.heron.spi.utils.UploaderUtils;
 
 /**
- * Uploader for uploading topology packages to a common location using the scp command.
+ * Uploader for uploading topology packages to the file system of a machine in the cluster using
+ * the scp command.
+ * <p>
+ * This uploader can be used to upload the topologies to a shared machine in the cluster. Then scp
+ * command can be used to fetch the packages from this location. In case of a failure,
+ * it will delete the topology copied to the share location.
+ * </p>
+ * The config values for this uploader are:
+ * <ul>
+ * <li>heron.class.uploader:  uploader class for transferring the topology jar/tar files to storage
+ * <li>heron.uploader.scp.command:   This is the first part of the scp command used by the uploader.
+ * This has to be customized to reflect the user name, hostname and ssh keys if required.
+ * <li>heron.uploader.ssh.command:   The ssh command that will be used to connect to the uploading
+ * host to execute command such as delete files, make directories
+ * <li>heron.uploader.scp.dir.path:  The directory where the file will be uploaded, make sure
+ * the user has the necessary permissions to upload the file here.
+ * </ul>
  */
 public class ScpUploader implements IUploader {
   private static final Logger LOG = Logger.getLogger(ScpUploader.class.getName());
@@ -69,7 +85,7 @@ public class ScpUploader implements IUploader {
   @Override
   public URI uploadPackage() {
     // first, check if the topology package exists
-    boolean fileExists = new File(topologyPackageLocation).isFile();
+    boolean fileExists = isLocalFileExists(topologyPackageLocation);
     if (!fileExists) {
       LOG.log(Level.SEVERE, "Topology file {0} does not exist.", topologyPackageLocation);
       return null;
@@ -84,13 +100,18 @@ public class ScpUploader implements IUploader {
 
     // now copy the file
     if (!this.controller.copyFromLocalFile(topologyPackageLocation, destTopologyFile)) {
-      LOG.log(Level.SEVERE, "Failed to upload the file from local file system to remote machine " +
-          "{0} -> {1}.", new String[]{topologyPackageLocation, destTopologyDirectory});
+      LOG.log(Level.SEVERE, "Failed to upload the file from local file system to remote machine "
+          + "{0} -> {1}.", new String[]{topologyPackageLocation, destTopologyDirectory});
       return null;
     }
 
     LOG.log(Level.INFO, "Package URL to download: {}", packageURI.toString());
     return packageURI;
+  }
+
+  // Utils method
+  protected boolean isLocalFileExists(String file) {
+    return new File(file).isFile();
   }
 
   @Override

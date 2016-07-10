@@ -14,14 +14,9 @@
 
 package com.twitter.heron.uploader.scp;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.twitter.heron.spi.utils.ShellUtils;
 
 public class ScpController {
-  private static final Logger LOG = Logger.getLogger(ScpController.class.getName());
-
   private String scpCommand;
   private String sshCommand;
   private boolean isVerbose;
@@ -32,26 +27,18 @@ public class ScpController {
     this.isVerbose = isVerbose;
   }
 
-  public boolean exists(String filePath) {
-    String command = String.format("");
-    return 0 == ShellUtils.runProcess(isVerbose, command, null, null);
-  }
-
   public boolean mkdirsIfNotExists(String dir) {
     String command = String.format("%s mkdir -p %s", sshCommand,  dir);
-    LOG.log(Level.INFO, command);
     return 0 == ShellUtils.runProcess(isVerbose, command, null, null);
   }
 
   public boolean copyFromLocalFile(String source, String destination) {
-    String command = String.format("%s%s %s", scpCommand, source, destination);
-    LOG.log(Level.INFO, command);
+    String command = String.format("%s:%s %s", scpCommand, source, destination);
     return 0 == ShellUtils.runProcess(isVerbose, command, null, null);
   }
 
   public boolean delete(String filePath) {
     String command = String.format("%s rm -rf %s", sshCommand, filePath);
-    LOG.log(Level.INFO, command);
     return 0 == ShellUtils.runProcess(isVerbose, command, null, null);
   }
 }

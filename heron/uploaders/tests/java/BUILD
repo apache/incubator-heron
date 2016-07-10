@@ -26,6 +26,13 @@ hdfs_deps_files = \
         "//heron/uploaders/src/java:hdfs-uploader-java",
     ]
 
+scp_deps_files = \
+    common_deps_files + \
+    spi_deps_files + [
+        "//heron/uploaders/src/java:scp-uploader-java",
+    ]
+
+
 java_library(
     name = "local-filesystem-constants-java",
     srcs = glob(["**/localfs/LocalFileSystemConstantsTest.java"]),
@@ -60,5 +67,12 @@ java_test(
     name = "HdfsUploaderTest",
     srcs = glob(["**/hdfs/HdfsUploaderTest.java"]),
     deps = hdfs_deps_files,
+    size = "small",
+)
+
+java_test(
+    name = "ScpUploaderTest",
+    srcs = glob(["**/scp/ScpUploaderTest.java"]),
+    deps = scp_deps_files,
     size = "small",
 )
