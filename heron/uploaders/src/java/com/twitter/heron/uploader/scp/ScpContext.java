@@ -21,6 +21,8 @@ public class ScpContext extends Context {
   public static final String HERON_UPLOADER_SCP_COMMAND = "heron.uploader.scp.command";
   public static final String HERON_UPLOADER_SSH_COMMAND = "heron.uploader.ssh.command";
   public static final String HERON_UPLOADER_SCP_DIR_PATH = "heron.uploader.scp.dir.path";
+  public static final String HERON_UPLOADER_SCP_DIR_PATH_DEFAULT =
+      "${HOME}/heron/repository/${CLUSTER}/${ROLE}/${TOPOLOGY}";
 
   public static String scpCommand(Config config) {
     return config.getStringValue(HERON_UPLOADER_SCP_COMMAND);
@@ -31,6 +33,6 @@ public class ScpContext extends Context {
   }
 
   public static String uploadDirPath(Config config) {
-    return config.getStringValue(HERON_UPLOADER_SCP_DIR_PATH);
+    return config.getStringValue(HERON_UPLOADER_SCP_DIR_PATH, HERON_UPLOADER_SCP_DIR_PATH_DEFAULT);
   }
 }

@@ -37,10 +37,10 @@ import com.twitter.heron.spi.utils.UploaderUtils;
  * The config values for this uploader are:
  * <ul>
  * <li>heron.class.uploader:  uploader class for transferring the topology jar/tar files to storage
- * <li>heron.uploader.scp.command:   This is the first part of the scp command used by the uploader.
- * This has to be customized to reflect the user name, hostname and ssh keys if required.
- * <li>heron.uploader.ssh.command:   The ssh command that will be used to connect to the uploading
- * host to execute command such as delete files, make directories
+ * <li>heron.uploader.scp.command.options:   This is the first part of the scp command used by the
+ * uploader. This has to be customized to reflect the user name, hostname and ssh keys if required.
+ * <li>heron.uploader.ssh.command.options:   The ssh command that will be used to connect to
+ * the uploading host to execute command such as delete files, make directories
  * <li>heron.uploader.scp.dir.path:  The directory where the file will be uploaded, make sure
  * the user has the necessary permissions to upload the file here.
  * </ul>
@@ -58,19 +58,30 @@ public class ScpUploader implements IUploader {
 
   // Utils method
   protected ScpController getScpController() {
+    String scpCommand = ScpContext.scpCommand(config);
+    String sshCommand = ScpContext.sshCommand(config);
+    if (scpCommand == null) {
+      throw new RuntimeException("Missing heron.uploader.scp.command.options config value");
+    }
+
+    if (sshCommand == null) {
+      throw new RuntimeException("Missing heron.uploader.ssh.command.options config value");
+    }
+
     return new ScpController(
-        ScpContext.scpCommand(config), ScpContext.sshCommand(config), Context.verbose(config));
+        scpCommand, sshCommand, Context.verbose(config));
   }
 
   @Override
   public void initialize(Config ipconfig) {
     this.config = ipconfig;
-
     // Instantiate the scp controller
     this.controller = getScpController();
-
     // get the destination directory
     this.destTopologyDirectory = ScpContext.uploadDirPath(config);
+    if (this.destTopologyDirectory == null) {
+
+    }
     // get the original topology package location
     this.topologyPackageLocation = Context.topologyPackageFile(config);
 
