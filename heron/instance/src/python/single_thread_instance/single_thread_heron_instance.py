@@ -14,7 +14,7 @@
 import asyncore
 import sys
 
-from heron.common.src.python.color import Log
+from heron.common.src.python.color import Log, init_logger
 from heron.common.src.python.basics.gateway_looper import GatewayLooper
 from heron.proto import physical_plan_pb2, stmgr_pb2
 from heron.instance.src.python.single_thread_instance.single_thread_stmgr_client import SingleThreadStmgrClient
@@ -24,6 +24,7 @@ import heron.instance.src.python.misc.pex_loader as pex_loader
 class SingleThreadHeronInstance(object):
   def __init__(self, topology_name, topology_id, instance,
                stream_port, metrics_port, topo_pex_file_path):
+
     self.topology_name = topology_name
     self.topology_id = topology_id
     self.instance = instance
@@ -166,13 +167,14 @@ def main():
   instance.stmgr_id = stmgr_id
   instance.info.MergeFrom(instance_info)
 
+  init_logger("/tmp/shi.log")
 
-  Log.info("\nStarting instance " + instance_id + " for topology " + topology_name +
-           " and topologyId " + topology_id + " for component " + component_name +
-           " with taskId " + task_id + " and componentIndex " + component_index +
-           " and stmgrId " + stmgr_id + " and stmgrPort " + stmgr_port +
-           " and metricsManagerPort " + metrics_port +
-           "\n Topology Pex file located at: " + topology_pex_file_path)
+  Log.info("\nStarting instance: " + instance_id + " for topology: " + topology_name +
+           " and topologyId: " + topology_id + " for component: " + component_name +
+           " with taskId: " + task_id + " and componentIndex: " + component_index +
+           " and stmgrId: " + stmgr_id + " and stmgrPort: " + stmgr_port +
+           " and metricsManagerPort: " + metrics_port +
+           "\n **Topology Pex file located at: " + topology_pex_file_path)
 
   heron_instance = SingleThreadHeronInstance(topology_name, topology_id, instance,
                                              stmgr_port, metrics_port, topology_pex_file_path)

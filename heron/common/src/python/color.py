@@ -24,3 +24,17 @@ stream.setFormatter(formatter)
 Log = logging.getLogger()
 Log.setLevel(logging.DEBUG)
 Log.addHandler(stream)
+
+# Added for more specific configuration for Python Heron Instance
+# TODO: need to be cleaned up later
+def init_logger(out_path):
+  logger = logging.getLogger()
+
+  log_format = "%(asctime)s-%(levelname)s: %(filename)s: %(message)s"
+  date_format = '%a, %d %b %Y %H:%M:%S'
+  logging.basicConfig(format=log_format, datefmt=date_format)
+
+  fh = logging.FileHandler(out_path, mode='w')
+  fh.setLevel(logging.DEBUG)
+  fh.setFormatter(logging.Formatter(log_format))
+  logger.addHandler(fh)
