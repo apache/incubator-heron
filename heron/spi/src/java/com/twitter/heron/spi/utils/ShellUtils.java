@@ -21,6 +21,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -73,12 +75,20 @@ public final class ShellUtils {
   public static int runSyncProcess(
       boolean verbose, boolean isInheritIO, String[] cmdline, StringBuilder stdout,
       StringBuilder stderr, File workingDirectory) {
+    return runSyncProcess(
+        verbose, isInheritIO, cmdline, stdout, stderr, workingDirectory,
+        new HashMap<String, String>());
+  }
+
+  public static int runSyncProcess(
+      boolean verbose, boolean isInheritIO, String[] cmdline, StringBuilder stdout,
+      StringBuilder stderr, File workingDirectory, Map<String, String> envs) {
     StringBuilder pStdOut = stdout;
     StringBuilder pStdErr = stderr;
     try {
       // Log the command for debugging
       LOG.log(Level.FINE, "$> {0}", Arrays.toString(cmdline));
-      Process process = getProcessBuilder(isInheritIO, cmdline, workingDirectory).start();
+      Process process = getProcessBuilder(isInheritIO, cmdline, workingDirectory, envs).start();
 
       int exitValue = process.waitFor();
       if (pStdOut == null) {
@@ -109,13 +119,18 @@ public final class ShellUtils {
 
   public static Process runASyncProcess(
       boolean verbose, String[] command, File workingDirectory) {
+    return runASyncProcess(verbose, command, workingDirectory, new HashMap<String, String>());
+  }
+
+  public static Process runASyncProcess(
+      boolean verbose, String[] command, File workingDirectory, Map<String, String> envs) {
     // Log the command for debugging
     LOG.log(Level.FINE, "$> {0}", Arrays.toString(command));
 
     // For AsyncProcess, we will never inherit IO, since parent process will not
     // be guaranteed alive when children processing trying to flush to
     // parent processes's IO.
-    ProcessBuilder pb = getProcessBuilder(false, command, workingDirectory);
+    ProcessBuilder pb = getProcessBuilder(false, command, workingDirectory, envs);
     Process process = null;
     try {
       process = pb.start();
@@ -142,11 +157,16 @@ public final class ShellUtils {
   }
 
   protected static ProcessBuilder getProcessBuilder(
-      boolean isInheritIO, String[] command, File workingDirectory) {
+      boolean isInheritIO, String[] command, File workingDirectory, Map<String, String> envs) {
     ProcessBuilder pb = new ProcessBuilder(command)
         .directory(workingDirectory);
     if (isInheritIO) {
       pb.inheritIO();
+    }
+
+    Map<String, String> env = pb.environment();
+    for (String envKey : envs.keySet()) {
+      env.put(envKey, envs.get(envKey));
     }
 
     return pb;
