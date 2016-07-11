@@ -167,7 +167,10 @@ def main():
   instance.stmgr_id = stmgr_id
   instance.info.MergeFrom(instance_info)
 
-  init_logger("/tmp/shi.log")
+
+  # TODO: improve later
+  log_file = "/tmp/" + instance_id + ".log"
+  init_logger(log_file)
 
   Log.info("\nStarting instance: " + instance_id + " for topology: " + topology_name +
            " and topologyId: " + topology_id + " for component: " + component_name +
