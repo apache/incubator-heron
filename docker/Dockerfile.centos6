@@ -2,7 +2,7 @@ FROM centos:centos6
 
 # This is passed to the heron build command via the --config flag
 ENV TARGET_PLATFORM centos
-ENV bazelVersion 0.3.0
+ENV bazelVersion 0.2.3
 ENV JAVA_VERSION 8u31
 ENV BUILD_VERSION b13
 
@@ -44,4 +44,20 @@ RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/
       && /tmp/bazel.sh
 
 ADD bazelrc /root/.bazelrc
+
+#install python 2.7.8
+RUN  yum install sqlite-devel -y \
+     && wget https://www.python.org/ftp/python/2.7.8/Python-2.7.8.tgz \
+     && tar xf Python-2.7.8.tgz \
+     && cd Python-2.7.8 \
+     && ./configure --prefix=/usr/local \
+     && make && make install
+
+#update gcc to 4.8
+RUN rpm --import http://ftp.scientificlinux.org/linux/scientific/5x/x86_64/RPM-GPG-KEYs/RPM-GPG-KEY-cern \
+    && wget -O /etc/yum.repos.d/slc6-devtoolset.repo http://linuxsoft.cern.ch/cern/devtoolset/slc6-devtoolset.repo \
+    && yum install devtoolset-2 -y \
+    && scl enable devtoolset-2 bash \
+    && gcc --version
+
 ADD compile-platform.sh /compile-platform.sh
