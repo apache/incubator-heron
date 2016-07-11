@@ -18,5 +18,5 @@
 
 set -e
 DIR=`dirname $0`
-cp -r ${DIR}/resources/eclipse/.classpath  ${DIR}/../
-cp -r ${DIR}/resources/eclipse/.project  ${DIR}/../
+cp ${DIR}/resources/eclipse/classpath ${DIR}/../.classpath
+cp ${DIR}/resources/eclipse/project ${DIR}/../.project
