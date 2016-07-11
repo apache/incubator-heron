@@ -1,7 +1,6 @@
 # versions shared across artifacts that should be upgraded together
 aws_version = "1.11.14"
 curator_version = "2.9.0"
-httpcomponents_version = "4.3"
 jackson_version = "2.6.3"
 powermock_version = "1.6.2"
 reef_version = "0.14.0"
@@ -104,12 +103,12 @@ maven_jar(
 
 maven_jar(
   name = "org_apache_httpcomponents_http_client",
-  artifact = "org.apache.httpcomponents:httpclient:" + httpcomponents_version,
+  artifact = "org.apache.httpcomponents:httpclient:4.5.2",
 )
 
 maven_jar(
   name = "org_apache_httpcomponents_http_core",
-  artifact = "org.apache.httpcomponents:httpcore:" + httpcomponents_version,
+  artifact = "org.apache.httpcomponents:httpcore:4.4.5",
 )
 
 maven_jar(
