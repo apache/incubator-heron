@@ -155,14 +155,14 @@ public class SchedulerUtilsTest {
 
   @Test
   public void testSchedulerCommandArgs() throws Exception {
-    List<Integer> freePorts = new ArrayList();
+    List<Integer> freePorts = new ArrayList<>();
 
     freePorts.add(1);
     String[] expectedArgs =
         {"--cluster", null, "--role", null,
             "--environment", null, "--topology_name", null,
             "--topology_jar", null, "--http_port", "1"};
-    Assert.assertArrayEquals(expectedArgs,SchedulerUtils.schedulerCommandArgs(
-        Mockito.mock(Config.class), Mockito.mock(Config.class), freePorts) );
+    Assert.assertArrayEquals(expectedArgs, SchedulerUtils.schedulerCommandArgs(
+        Mockito.mock(Config.class), Mockito.mock(Config.class), freePorts));
   }
 }

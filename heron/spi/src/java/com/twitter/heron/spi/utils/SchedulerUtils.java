@@ -103,6 +103,7 @@ public final class SchedulerUtils {
         .append(Context.stateManagerSandboxClassPath(config))
         .toString();
     commands.add(completeSchedulerProcessClassPath);
+    commands.add("com.twitter.heron.scheduler.SchedulerMain");
 
     String[] commandArgs = schedulerCommandArgs(config, runtime, freePorts);
     commands.addAll(Arrays.asList(commandArgs));
