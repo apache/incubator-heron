@@ -27,11 +27,15 @@ def create_parser(subparsers):
     add_help=False)
   args.add_cluster_role_env(components_parser)
   args.add_topology_name(components_parser)
+  args.add_spouts(components_parser)
+  args.add_bolts(components_parser)
   args.add_verbose(components_parser)
   args.add_tracker_url(components_parser)
   args.add_config(components_parser)
   components_parser.set_defaults(subcommand='components')
 
+  return subparsers
+'''
   spouts_parser = subparsers.add_parser(
     'spouts',
     help='Display information of a topology\'s spouts',
@@ -55,8 +59,7 @@ def create_parser(subparsers):
   args.add_tracker_url(bolts_parser)
   args.add_config(bolts_parser)
   bolts_parser.set_defaults(subcommand='bolts')
-
-  return subparsers
+'''
 
 
 def parse_topo_loc(cl_args):
@@ -117,18 +120,18 @@ def filter_spouts(table, header):
 def run(cl_args, compo_type):
   cluster, role, env = cl_args['cluster'], cl_args['role'], cl_args['environ']
   topology = cl_args['topology-name']
-  #topo_loc = [cluster, role, env, topology]
+  spouts_only, bolts_only = cl_args['spout'], cl_args['bolt']
   try:
     components = get_logical_plan(cluster, env, topology, role)
     topo_info = get_topology_info(cluster, env, topology, role)
     table, header = to_table(components, topo_info)
-    if compo_type == 'bolts':
-      table, header = filter_bolts(table, header)
+    if spouts_only == bolts_only:
       print(tabulate(table, headers=header))
-    elif compo_type == 'spouts':
+    elif spouts_only:
       table, header = filter_spouts(table, header)
       print(tabulate(table, headers=header))
     else:
+      table, header = filter_bolts(table, header)
       print(tabulate(table, headers=header))
     return True
   except:

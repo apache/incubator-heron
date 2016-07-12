@@ -83,9 +83,9 @@ class ExplorerTest(unittest.TestCase):
     return all_cl
 
   def sample_lp_cls(self):
-    clsp = ['spouts', 'local/rli/default', 'ExclamationTopology']
-    clbo = ['bolts', 'local/rli/default', 'ExclamationTopology']
     clco = ['components', 'local/rli/default', 'ExclamationTopology']
+    clsp = ['components', 'local/rli/default', 'ExclamationTopology', '--spout']
+    clbo = ['components', 'local/rli/default', 'ExclamationTopology', '--bolt']
     good_cls = []
     for cl in clsp, clbo, clco:
       self.acc_with_optional_args(cl, good_cls)
@@ -112,17 +112,17 @@ class ExplorerTest(unittest.TestCase):
     clt1 = ['topologies', 'local']
     clt2 = ['topologies', 'local/foo']
     clt3 = ['topologies', 'local/foo/bar']
-    cls1 = ['spouts', 'local/foo/bar', 'topo']
-    clb1 = ['bolts', 'local/foo/bar', 'topo']
     clb2 = ['metrics', 'local/foo/bar', 'topo']
     clc1 = ['components', 'local/foo/bar', 'topo']
+    clc1 = ['components', 'local/foo/bar', 'topo', '--spout']
+    clc1 = ['components', 'local/foo/bar', 'topo', '--bolt']
     clc2 = ['containers', 'local/foo/bar', 'topo']
-    cll = [clt1, clt2, clt3, cls1, clb1, clb2, clc1, clc2]
+    cll = [clt1, clt2, clt3, clb2, clc1, clc2]
     all_cl = []
     for cl in cll:
       self.acc_with_optional_args(cl, all_cl)
     # help subcommand
-    for sub in ['clusters', 'topologies', 'spouts', 'bolts',
+    for sub in ['clusters', 'topologies',
                 'metrics', 'components', 'containers', 'help']:
       all_cl.append(['help', sub])
     return all_cl
@@ -139,7 +139,7 @@ class ExplorerTest(unittest.TestCase):
 
   def test_help(self):
     all_cl = []
-    for sub in ['clusters', 'topologies', 'spouts', 'bolts', 'metrics',
+    for sub in ['clusters', 'topologies', 'metrics',
                 'components', 'containers', 'help']:
       all_cl.append(['help', sub])
     for cl in all_cl:
