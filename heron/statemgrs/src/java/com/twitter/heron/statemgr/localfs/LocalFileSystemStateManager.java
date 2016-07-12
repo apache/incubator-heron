@@ -254,7 +254,7 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
       print("==> TMasterLocation:\n%s",   stateManager.getTMasterLocation(null, topologyName).get());
       print("==> PhysicalPlan:\n%s",      stateManager.getPhysicalPlan(null, topologyName).get());
     } else {
-      print("==> Topology %s is not running", topologyName);
+      print("==> Topology %s not found under %s", topologyName, config.get(Keys.stateManagerRootPath()));
     }
   }
 
