@@ -27,11 +27,15 @@ if __name__ == '__main__':
   if len(sys.argv) != 2:
     usage()
 
+  print ("DEBUG: In main of WordCountTopology")
+
   word_count_topology = Topology("WordCountTopology")
   word_count_topology.set_spout("word_spout", WordSpout, "heron.examples.src.python.word_spout.WordSpout")
-  word_count_topology.set_bolt("count_bolt", CountBolt, "heron.examples.src.python.count_bolt.CountBolt")
+  word_count_topology.set_bolt("count_bolt", CountBolt, "heron.examples.src.python.count_bolt.CountBolt", inputs=["word_spout"])
 
   word_count_topology.write_to_file(sys.argv[1])
+
+  print("DEBUG: Wrote topology definition")
 
   path = os.path.join(sys.argv[1], "topo_info")
   info = "Topology id: " + word_count_topology.topology_id + "\n"

@@ -17,7 +17,8 @@ from heron.instance.src.python.instance.bolt import Bolt
 from heron.common.src.python.color import Log
 
 class CountBolt(Bolt):
-  def __init__(self):
+  def __init__(self, pplan_helper, in_stream, out_stream):
+    super(CountBolt, self).__init__(pplan_helper, in_stream, out_stream)
     self.counter = Counter()
     self.total = 0
 
@@ -32,6 +33,6 @@ class CountBolt(Bolt):
   def execute(self, tuple):
     word = tuple[0]
     self._increment(word, 10 if word == "heron" else 1)
-    if self.total % 1000 == 0:
+    if self.total % 100 == 0:
       Log.info("Current map: " + str(self.counter))
 

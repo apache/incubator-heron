@@ -77,3 +77,20 @@ def heron_tar(class_name, topology_tar, arguments, tmpdir_root, javaDefines):
 
   # Now execute the class
   heron_class(class_name, lib_jars, extra_jars, arguments, javaDefines)
+
+def heron_pex(topology_pex, tmp_dir):
+  # TODO: Currently pex topology is assumed to be executed as `./topology.pex <tmp_dir>`
+  print ("DEBUG: executing topology pex file with tmp_dir: " + tmp_dir)
+  all_args = [topology_pex, tmp_dir]
+  if opts.verbose():
+    print('$> %s' % ' '.join(all_args))
+
+  # invoke the command with subprocess and print error message
+    if not opts.trace_execution():
+      status = subprocess.call(all_args)
+      if status != 0:
+        err_str = "User main failed with status %d. Bailing out..." % status
+        raise RuntimeError(err_str)
+
+
+

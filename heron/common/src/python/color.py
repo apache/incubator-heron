@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import logging
+import logging.handlers
 import colorlog
 
 # formatter = colorlog.ColoredFormatter('%(log_color)s%(levelname)s:%(name)s:%(message)s')
@@ -26,7 +27,7 @@ Log.setLevel(logging.DEBUG)
 Log.addHandler(stream)
 
 # Added for more specific configuration for Python Heron Instance
-# TODO: need to be cleaned up later
+# TODO: No need to use colorlog
 def init_logger(out_path):
   logger = logging.getLogger()
 
@@ -38,3 +39,4 @@ def init_logger(out_path):
   fh.setLevel(logging.DEBUG)
   fh.setFormatter(logging.Formatter(log_format))
   logger.addHandler(fh)
+

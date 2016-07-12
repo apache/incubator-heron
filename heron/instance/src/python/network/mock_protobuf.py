@@ -143,7 +143,7 @@ def get_many_mock_pplans():
   pplans_lst = []
   for i in range(10):
     _id = "Stmgr-" + str(i)
-    pplan = get_mock_pplan(stmgr=get_mock_stmgr(id=_id))
+    pplan = get_mock_pplan(stmgrs=[get_mock_stmgr(id=_id)])
     pplans_lst.append(pplan)
   return pplans_lst
 

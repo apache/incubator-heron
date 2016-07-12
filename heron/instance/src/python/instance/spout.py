@@ -14,6 +14,8 @@
 import Queue
 from abc import abstractmethod
 
+import time
+
 from .base_instance import BaseInstance
 from heron.proto import topology_pb2, tuple_pb2
 from heron.common.src.python.color import Log
@@ -92,7 +94,6 @@ class Spout(BaseInstance):
 
   def _produce_tuple(self):
     self.next_tuple()
-
 
   def _activate(self):
     Log.info("Spout is activated")

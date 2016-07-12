@@ -200,6 +200,7 @@ public final class SchedulerUtils {
     commands.add(Context.stmgrSandboxBinary(config));
     commands.add(Context.metricsManagerSandboxClassPath(config));
     commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)));
+    // TODO: need to change to PEX compatible -> path to python heron instance
     commands.add(TopologyUtils.makeClassPath(topology, Context.topologyJarFile(config)));
     commands.add(Integer.toString(masterPort));
     commands.add(Integer.toString(tmasterControllerPort));

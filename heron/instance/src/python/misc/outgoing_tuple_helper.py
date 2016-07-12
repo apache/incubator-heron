@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from heron.common.src.python.color import Log
 from heron.proto import tuple_pb2, topology_pb2
 
 class OutgoingTupleHelper(object):
@@ -97,6 +98,7 @@ class OutgoingTupleHelper(object):
 
   def _flush_remaining(self):
     if self.current_data_tuple_set is not None:
+      Log.debug("In flush_remaining() - flush data tuple set")
       tuple_set = self.make_tuple_set()
       tuple_set.data.CopyFrom(self.current_data_tuple_set)
       self._push_tuple_to_stream(tuple_set)
@@ -105,6 +107,7 @@ class OutgoingTupleHelper(object):
 
 
     if self.current_control_tuple_set is not None:
+      Log.debug("In flush_remaining() - flush control tuple set")
       tuple_set = self.make_tuple_set()
       tuple_set.control.CopyFrom(self.current_control_tuple_set)
       self._push_tuple_to_stream(tuple_set)

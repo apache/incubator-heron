@@ -319,7 +319,8 @@ class HeronExecutor:
     retval = {}
     for (instance_id, component_name, global_task_id, component_index) in instance_info:
       do_print("Python instance %s component: %s" %(instance_id, component_name))
-      instance_cmd = [self.py_instance_exec,
+      # TODO: change this hardcoded cmd
+      instance_cmd = ["/Users/tnojima/workspace/heron/bazel-bin/heron/instance/src/python/single_thread_heron_instance",
                       self.topology_name,
                       self.topology_id,
                       instance_id,
@@ -404,7 +405,11 @@ class HeronExecutor:
 
   def run_process(self, name, cmd):
     do_print("Running %s process as %s" % (name, ' '.join(cmd)))
-    return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if 'stmgr' in cmd[0]:
+      out = open('/tmp/stmgr.out', 'a')
+      return subprocess.Popen(cmd, stdout=out, stderr=out)
+    else:
+      return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
   def run_blocking_process(self, cmd, is_shell):
     do_print("Running blocking process as %s" % cmd)

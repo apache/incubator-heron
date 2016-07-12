@@ -17,6 +17,8 @@ import socket
 
 from abc import abstractmethod
 
+import sys
+
 from .protocol import HeronProtocol, REQID, IncomingPacket, StatusCode
 from heron.common.src.python.color import Log
 
@@ -33,6 +35,7 @@ class HeronClient(asyncore.dispatcher):
     self.response_message_map = dict()
     self.context_map = dict()
     self.incomplete_pkt = None
+    self.total_bytes_sent = 0
 
   ##################################
   # asyncore.dispatcher override
@@ -45,6 +48,7 @@ class HeronClient(asyncore.dispatcher):
 
   # called when close is ready
   def handle_close(self):
+    Log.info("handle_close() called")
     self.close()
 
   # read bytes stream from socket and convert them into a list of IncomingPacket
@@ -67,8 +71,18 @@ class HeronClient(asyncore.dispatcher):
       self.incomplete_pkt = pkt
 
   def handle_write(self):
+    if len(self.out_buffer) == 0:
+      return
     sent = self.send(self.out_buffer)
+    self.total_bytes_sent += sent
+    Log.debug("In handle_write(): sent " + str(sent) +
+              " bytes; in total " + str(self.total_bytes_sent) + " bytes were sent.")
     self.out_buffer = self.out_buffer[sent:]
+
+  def writable(self):
+    if self.connecting:
+      return True
+    return len(self.out_buffer) != 0
 
   # called when an error was raised
   #def handle_error(self):
@@ -118,6 +132,14 @@ class HeronClient(asyncore.dispatcher):
   def handle_timeout(self):
     pass
 
+  def handle_error(self):
+    nil, t, v, tbinfo = asyncore.compact_traceback()
+
+    self_msg = "Heron Client failed for object at %0x" % id(self)
+    Log.error("Uncaptured python exception, closing channel %s (%s:%s %s)" % (self_msg, t, v, tbinfo))
+
+    self.handle_close()
+
   def handle_packet(self, packet):
     # TODO: check if it has REQID: if yes, handle response message -- call on_reseponse()
     # only called when packet.is_complete is True
@@ -133,6 +155,7 @@ class HeronClient(asyncore.dispatcher):
       except Exception as e:
         Log.error("Invalid Packet Error: " + e.message)
         self.on_response(StatusCode.INVALID_PACKET, context, None)
+        return
 
       if response_msg.IsInitialized():
         Log.debug("In handle_packet(): Received response with size " +
@@ -157,10 +180,13 @@ class HeronClient(asyncore.dispatcher):
         Log.error("Error when handling message packet" + e.message)
     else:
       # might be a timeout response
+      Log.debug("In handle_packet(): Weird message received")
       pass
 
   def send_packet(self, pkt):
     self.out_buffer += pkt
+    Log.debug("After send_packet(), pkt size: " + str(len(pkt)) +
+              ", out_buffer size: " + str(len(self.out_buffer)))
 
   def get_classname(self):
     return self.__class__.__name__

@@ -11,8 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import asyncore
 import sys
+import traceback
 
 from heron.common.src.python.color import Log, init_logger
 from heron.common.src.python.basics.gateway_looper import GatewayLooper
@@ -67,6 +67,7 @@ class SingleThreadHeronInstance(object):
 
   def send_buffered_messages(self):
     """Send messages in out_stream to the Stream Manager"""
+    Log.debug("send_buffered_messages() called")
     while not self.out_stream.is_empty():
       tuple_set = self.out_stream.poll()
       msg = stmgr_pb2.TupleMessage()
@@ -92,21 +93,25 @@ class SingleThreadHeronInstance(object):
 
     # TODO (MOST IMPORTANT): handle importing pex file and load the class
     # -> need to load the class from python_class_name in Component
-    if pplan_helper.is_spout:
-      # Starting a spout
-      my_spout = pplan_helper.get_my_spout()
-      py_spout_instance = self.load_py_instance(True, my_spout.comp.python_class_name)
-      self.my_instance = (True, my_spout, py_spout_instance)
-    else:
-      # Starting a bolt
-      my_bolt = pplan_helper.get_my_bolt()
-      py_bolt_instance = self.load_py_instance(False, my_bolt.comp.python_class_name)
-      self.my_instance = (False, my_bolt, py_bolt_instance)
+    try:
+      if pplan_helper.is_spout:
+        # Starting a spout
+        my_spout = pplan_helper.get_my_spout()
+        py_spout_instance = self.load_py_instance(True, my_spout.comp.python_class_name)
+        self.my_instance = (True, my_spout, py_spout_instance)
+      else:
+        # Starting a bolt
+        my_bolt = pplan_helper.get_my_bolt()
+        py_bolt_instance = self.load_py_instance(False, my_bolt.comp.python_class_name)
+        self.my_instance = (False, my_bolt, py_bolt_instance)
 
-    if pplan_helper.is_topology_running():
-      self.start_instance()
-    else:
-      Log.info("The instance is deployed in deactivated state")
+      if pplan_helper.is_topology_running():
+        self.start_instance()
+      else:
+        Log.info("The instance is deployed in deactivated state")
+    except Exception as e:
+      Log.error("Error with loading bolt/spout instance from pex file")
+      Log.error(traceback.format_exc())
 
   def load_py_instance(self, is_spout, python_class_name):
     # TODO : preliminary loading
@@ -121,6 +126,7 @@ class SingleThreadHeronInstance(object):
       return my_bolt
 
   def start_instance(self):
+    Log.info("Start bolt/spout instance now...")
     self.my_instance[2].start()
     if self.my_instance[0]:
       # It's spout --> add task

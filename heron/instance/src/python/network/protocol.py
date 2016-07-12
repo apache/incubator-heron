@@ -40,8 +40,8 @@ class HeronProtocol(object):
     return 4 + len(string)
 
   @staticmethod
-  def _get_size_to_pack_message(serialized_msg):
-    return 4 + len(serialized_msg)
+  def _get_size_to_pack_message(message):
+    return 4 + message.ByteSize()
 
   @staticmethod
   def get_outgoing_packet(reqid, message):
@@ -52,10 +52,8 @@ class HeronProtocol(object):
     # calculate the totla size of the packet incl. header
     typename = message.DESCRIPTOR.full_name
 
-    serialized_msg = message.SerializeToString()
-
     datasize = HeronProtocol._get_size_to_pack_string(typename) + \
-               REQID.REQID_SIZE + HeronProtocol._get_size_to_pack_message(serialized_msg)
+               REQID.REQID_SIZE + HeronProtocol._get_size_to_pack_message(message)
     Log.debug("Outgoing datasize: " + str(datasize))
 
     # first write out how much data is there as the header
@@ -63,14 +61,14 @@ class HeronProtocol(object):
 
     # next write the type string
     packet += HeronProtocol.pack_int(len(typename))
-    packet += bytearray(typename)
+    packet += typename
 
     # reqid
     packet += reqid.pack()
 
     # add the proto
-    packet += HeronProtocol.pack_int(HeronProtocol._get_size_to_pack_message(serialized_msg))
-    packet += serialized_msg
+    packet += HeronProtocol.pack_int(message.ByteSize())
+    packet += message.SerializeToString()
     return str(packet)
 
   @staticmethod

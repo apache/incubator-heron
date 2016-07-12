@@ -14,6 +14,7 @@
 import time
 from heapq import heappush, heappop, heapify
 from abc import abstractmethod
+from heron.common.src.python.color import Log
 
 import sys
 
@@ -38,6 +39,7 @@ class EventLooper(object):
     self.trigger_timers()
 
   def on_exit(self):
+    Log.info("In on_exit() of event_looper")
     for task in self.exit_tasks:
       task()
 
@@ -74,7 +76,7 @@ class EventLooper(object):
     """
     # TODO: Problem if timer task added right after sys.maxint -> wouldn't be called
     if len(self.timer_tasks) == 0:
-      return 10.0
+      return 1.0
     else:
       next_timeout_interval = self.timer_tasks[0][0] - time.time()
       return next_timeout_interval

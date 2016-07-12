@@ -37,3 +37,9 @@ pex_binary(
   srcs = ["single_thread_instance/single_thread_heron_instance.py"],
   deps = [":pyinstance_lib"],
 )
+
+pex_binary(
+  name = "defn_decoder",
+  srcs = ["defn_decoder.py"],
+  deps = ["//heron/proto:proto-py"]
+)

@@ -31,6 +31,7 @@ class GatewayLooper(EventLooper):
 
     #self.register_timer_task_in_sec(self.exit_loop, 5)
     self.started = time.time()
+    Log.debug("Gateway Looper started time: " + str(time.asctime()))
 
   def prepare_map(self):
     # TODO need to change and use signal.set_wakeup_fd
@@ -71,13 +72,20 @@ class GatewayLooper(EventLooper):
     # Add wakeup fd
     r.append(self.pipe_r)
 
+    Log.debug("Will select() with timeout: " + str(timeout) + ", with map: " + str(map))
     try:
       r, w, e = select.select(r, w, e, timeout)
     except select.error, err:
       if err.args[0] != errno.EINTR:
         raise
       else:
+        Log.debug("Trivial error: " + err.message)
         return
+    Log.debug("Selected [r]: " + str(r) + " [w]: " + str(w) + " [e]: " + str(e))
+
+    if self.pipe_r in r:
+      os.read(self.pipe_r, 1)
+      r.remove(self.pipe_r)
 
     if map is not None:
       for fd in r:

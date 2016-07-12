@@ -80,7 +80,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
       "--release_file", release_yaml_file,
       "--topology_package", topology_pkg_path,
       "--topology_defn", topology_defn_file,
-      "--topology_jar", topology_file
+      "--topology_jar", topology_file   # pex file if pex specified
   ]
 
   if opts.verbose():
@@ -211,6 +211,32 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
 
   return True
 
+
+################################################################################
+#  Execute the pex file to create topology definition file by running
+#  the topology's main class.
+################################################################################
+def submit_pex(cl_args, unknown_args, tmp_dir):
+  # execute main of the topology to create the topology definition
+  # TODO: currently topology's class name is not necessary
+  topology_file = cl_args['topology-file-name']
+  try:
+    execute.heron_pex(topology_file, tmp_dir)
+  except Exception as ex:
+    Log.error("Unable to execute topology main class")
+    return False
+
+  try:
+    launch_topologies(cl_args, topology_file, tmp_dir)
+
+  except Exception as ex:
+    return False
+
+  finally:
+    shutil.rmtree(tmp_dir)
+
+  return True
+
 ################################################################################
 #  Submits the topology to the scheduler
 #  * Depending on the topology file name extension, we treat the file as a
@@ -226,14 +252,15 @@ def run(command, parser, cl_args, unknown_args):
 
   # check to see if the topology file exists
   if not os.path.isfile(topology_file):
-    Log.error("Topology jar|tar file %s does not exist" % topology_file)
+    Log.error("Topology jar|tar|pex file %s does not exist" % topology_file)
     return False
 
   # check if it is a valid file type
   jar_type = topology_file.endswith(".jar")
   tar_type = topology_file.endswith(".tar") or topology_file.endswith(".tar.gz")
-  if not jar_type and not tar_type:
-    Log.error("Unknown file type. Please use .tar or .tar.gz or .jar file")
+  pex_type = topology_file.endswith(".pex")
+  if not jar_type and not tar_type and not pex_type:
+    Log.error("Unknown file type. Please use .tar or .tar.gz or .jar or .pex file")
     return False
 
   # create a temporary directory for topology definition file
@@ -255,5 +282,8 @@ def run(command, parser, cl_args, unknown_args):
 
   elif tar_type:
     return submit_tar(cl_args, unknown_args, tmp_dir)
+
+  elif pex_type:
+    return submit_pex(cl_args, unknown_args, tmp_dir)
 
   return False

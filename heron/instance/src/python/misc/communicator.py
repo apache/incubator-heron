@@ -36,9 +36,6 @@ class HeronCommunicator(object):
     try:
       # non-blocking
       ret = self._buffer.get(block=False)
-
-      if self._producer_callback is not None and callable(self._producer_callback):
-        self._producer_callback()
       return ret
     except Queue.Empty:
       Log.debug(str(self) + " : " + "Empty in poll()")
@@ -49,8 +46,6 @@ class HeronCommunicator(object):
     try:
       # non-blocking
       self._buffer.put(item, block=False)
-      if self._consumer_callback is not None and callable(self._consumer_callback):
-        self._consumer_callback()
       return True
     except Queue.Full:
       Log.debug(str(self) + " : " + "Full in offer()")

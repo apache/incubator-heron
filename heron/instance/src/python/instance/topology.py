@@ -26,6 +26,7 @@ class Topology(object):
     self.topology.id = self.topology_id
     self.topology.name = self.topology_name
     self.topology.state = topology_pb2.TopologyState.Value("RUNNING")
+    self.topology.topology_config.CopyFrom(self._get_default_topoconfig())
 
     self.spouts = {}
     self.bolts = {}
@@ -46,7 +47,7 @@ class Topology(object):
     to_add.CopyFrom(spout)
     self.spouts[name] = spout
 
-  def set_bolt(self, name, bolt_cls, classpath):
+  def set_bolt(self, name, bolt_cls, classpath, inputs=[]):
     """Set a bolt
 
     Currently, everything that was emitted will be delivered to this bolt (All grouping).
@@ -55,9 +56,10 @@ class Topology(object):
     bolt = topology_pb2.Bolt()
     bolt.comp.CopyFrom(self._get_base_component(name, classpath))
 
-    # input stream
-    input_stream = bolt.inputs.add()
-    input_stream.CopyFrom(self._get_input_stream(name, self.DEFAULT_STREAM_ID))
+    # input stream (it's ALL grouping)
+    for input_comp in inputs:
+      input_stream = bolt.inputs.add()
+      input_stream.CopyFrom(self._get_input_stream(input_comp, self.DEFAULT_STREAM_ID))
 
     # output stream
     output_stream = bolt.outputs.add()
@@ -75,12 +77,19 @@ class Topology(object):
     with open(path, 'wb') as f:
       f.write(self.topology.SerializeToString())
 
+  def _get_basic_comp_config(self):
+    config = topology_pb2.Config()
+    key = config.kvs.add()
+    key.key = "topology.component.parallelism"
+    key.value = "1"
+    return config
+
   def _get_base_component(self, name, classpath, config=None):
     comp = topology_pb2.Component()
     comp.name = name
     comp.python_class_name = classpath
     if config is None:
-      comp.config.CopyFrom(topology_pb2.Config())
+      comp.config.CopyFrom(self._get_basic_comp_config())
     else:
       comp.config.CopyFrom(config)
     return comp
@@ -111,3 +120,15 @@ class Topology(object):
       key.type = topology_pb2.Type.Value("OBJECT")
 
     return stream_schema
+
+  def _get_default_topoconfig(self):
+    config = topology_pb2.Config()
+    conf_dict = {"topology.message.timeout.secs": "30",
+                 "topology.acking": "false",
+                 "topology.debug": "true"}
+
+    for key, value in conf_dict.iteritems():
+      kvs = config.kvs.add()
+      kvs.key = key
+      kvs.value = value
+    return config

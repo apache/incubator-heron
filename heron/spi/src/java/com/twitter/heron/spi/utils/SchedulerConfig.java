@@ -14,6 +14,7 @@
 
 package com.twitter.heron.spi.utils;
 
+import java.io.File;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -43,9 +44,15 @@ public final class SchedulerConfig {
    */
   protected static Config topologyConfigs(String topologyJarFile,
                                           String topologyDefnFile, TopologyAPI.Topology topology) {
-
-    String pkgType = FileUtils.isOriginalPackageJar(
-        FileUtils.getBaseName(topologyJarFile)) ? "jar" : "tar";
+    String basename = FileUtils.getBaseName(topologyJarFile);
+    String pkgType;
+    if (FileUtils.isOriginalPackagePex(basename)) {
+      pkgType = "pex";
+    } else if (FileUtils.isOriginalPackageJar(basename)) {
+      pkgType = "jar";
+    } else {
+      pkgType = "tar";
+    }
 
     Config config = Config.newBuilder()
         .put(Keys.topologyId(), topology.getId())

@@ -27,5 +27,6 @@ class WordSpout(Spout):
 
   def next_tuple(self):
     word = next(self.words)
+    Log.debug("Will emit: " + word)
     self.emit([word])
 
