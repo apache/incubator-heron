@@ -83,7 +83,7 @@ def add_tracker_url(parser):
 # add optional argument that specifies container id
 def add_container_id(parser):
   parser.add_argument(
-    '--cid',
+    '--id',
     help='container ID',
     type=int, metavar='ID')
   return parser
