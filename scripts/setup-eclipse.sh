@@ -52,6 +52,7 @@ readonly classpath_file=$DIR/../.classpath
 rm -rf $classpath_file
 cat >> $classpath_file <<EOH
 <?xml version="1.0" encoding="UTF-8"?>
+<classpath>
 EOH
 
 function generate_source_dirs() {
