@@ -19,7 +19,7 @@ from heron.common.src.python.color import Log
 def create_parser(subparsers):
   parser = subparsers.add_parser(
       'help',
-      help='Prints help for commands',
+      help='Display help',
       add_help=False)
 
   parser._positionals.title = "Required arguments"

@@ -34,7 +34,6 @@ def create_parser(subparsers):
   return subparsers
 
 
-# only working with updated tracker
 def to_table(result):
   max_count = 20
   table, count = [], 0
@@ -95,7 +94,8 @@ def show_cluster_role_env(cluster, role, env):
   except Exception:
     return False
   table, header, rest_count = to_table(result)
-  print('Topologies running in cluster \'%s\', submitted by \'%s\', and under environment \'%s\':' % (cluster, role, env))
+  print('Topologies running in cluster \'%s\', submitted by \'%s\', and\
+ under environment \'%s\':' % (cluster, role, env))
   if rest_count:
     print('  with %d more...' % rest_count)
   print(tabulate(table, headers=header))

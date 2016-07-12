@@ -19,7 +19,7 @@ import heron.explorer.src.python.utils as utils
 def create_parser(subparsers):
   parser = subparsers.add_parser(
       'version',
-      help='print version of heron-explorer',
+      help='Display version',
       usage="%(prog)s",
       add_help=False)
   args.add_titles(parser)
