@@ -254,7 +254,24 @@ public class Config extends com.twitter.heron.api.Config {
    * Same in Heron
    */
   public static final String TOPOLOGY_PROJECT_NAME = "topology.project.name";
+  
+  /**
+   * Max pending tuples in one ShellBolt
+   */
+  public static final String TOPOLOGY_SHELLBOLT_MAX_PENDING="topology.shellbolt.max.pending";
 
+  /**
+   * How long a subprocess can go without heartbeating before the ShellSpout/ShellBolt tries to
+   * suicide itself.
+   */
+  public static final String TOPOLOGY_SUBPROCESS_TIMEOUT_SECS = "topology.subprocess.timeout.secs";
+  
+  /**
+   * How long a worker can go without heartbeating before the supervisor tries to
+   * restart the worker process.
+   */
+  public static final String SUPERVISOR_WORKER_TIMEOUT_SECS = "supervisor.worker.timeout.secs";
+  
   /**
    * ----  DO NOT USE -----
    * This variable is used to rewrite the TOPOLOGY_AUTO_TASK_HOOKS variable.
