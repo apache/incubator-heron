@@ -34,42 +34,46 @@ public abstract class FileSystemStateManager implements IStateManager {
   }
 
   protected String getTMasterLocationDir() {
-    return rootAddress + "/tmasters";
+    return concatPath(rootAddress, "tmasters");
   }
 
   protected String getTopologyDir() {
-    return rootAddress + "/topologies";
+    return concatPath(rootAddress, "topologies");
   }
 
   protected String getPhysicalPlanDir() {
-    return rootAddress + "/pplans";
+    return concatPath(rootAddress, "pplans");
   }
 
   protected String getExecutionStateDir() {
-    return rootAddress + "/executionstate";
+    return concatPath(rootAddress, "executionstate");
   }
 
   protected String getSchedulerLocationDir() {
-    return rootAddress + "/schedulers";
+    return concatPath(rootAddress, "schedulers");
   }
 
   protected String getTMasterLocationPath(String topologyName) {
-    return getTMasterLocationDir() + "/" + topologyName;
+    return concatPath(getTMasterLocationDir(), topologyName);
   }
 
   protected String getTopologyPath(String topologyName) {
-    return String.format("%s/%s", getTopologyDir(), topologyName);
+    return concatPath(getTopologyDir(), topologyName);
   }
 
   protected String getPhysicalPlanPath(String topologyName) {
-    return String.format("%s/%s", getPhysicalPlanDir(), topologyName);
+    return concatPath(getPhysicalPlanDir(), topologyName);
   }
 
   protected String getExecutionStatePath(String topologyName) {
-    return String.format("%s/%s", getExecutionStateDir(), topologyName);
+    return concatPath(getExecutionStateDir(), topologyName);
   }
 
   protected String getSchedulerLocationPath(String topologyName) {
-    return String.format("%s/%s", getSchedulerLocationDir(), topologyName);
+    return concatPath(getSchedulerLocationDir(), topologyName);
+  }
+
+  private static String concatPath(String basePath, String appendPath) {
+    return String.format("%s/%s", basePath, appendPath);
   }
 }
