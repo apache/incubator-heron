@@ -109,7 +109,12 @@ public class HeronExecutorTask implements Task {
 
     processTarget = Thread.currentThread();
 
-    final Process regularExecutor = ShellUtils.runASyncProcess(true, executorCmd, new File("."));
+    // Log the working directory, this will make people fast locate the
+    // directory to find the log files
+    File workingDirectory = new File(".");
+    LOG.log(Level.INFO, "working dir: {0}", workingDirectory.getAbsolutePath());
+
+    final Process regularExecutor = ShellUtils.runASyncProcess(true, executorCmd, workingDirectory);
     LOG.log(Level.INFO, "Started heron executor-id: {0}", heronExecutorId);
     try {
       regularExecutor.waitFor();
