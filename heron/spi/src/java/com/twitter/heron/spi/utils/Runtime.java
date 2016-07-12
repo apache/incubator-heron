@@ -15,6 +15,7 @@
 package com.twitter.heron.spi.utils;
 
 import java.net.URI;
+import java.util.Properties;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.Config;
@@ -24,6 +25,7 @@ import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 public final class Runtime {
+
 
   private Runtime() {
   }
@@ -82,5 +84,9 @@ public final class Runtime {
 
   public static Long numContainers(Config runtime) {
     return runtime.getLongValue(Keys.numContainers());
+  }
+
+  public static Properties schedulerProperties(Config runtime) {
+    return (Properties) runtime.get(Keys.SCHEDULER_PROPERTIES);
   }
 }
