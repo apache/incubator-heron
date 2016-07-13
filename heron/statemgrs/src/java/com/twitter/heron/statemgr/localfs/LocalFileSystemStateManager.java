@@ -87,7 +87,17 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     return future;
   }
 
-  protected ListenableFuture<Boolean> deleteData(String path) {
+  @Override
+  protected ListenableFuture<Boolean> nodeExists(String path) {
+    SettableFuture<Boolean> future = SettableFuture.create();
+    boolean ret = FileUtils.isFileExists(path);
+    future.set(ret);
+
+    return future;
+  }
+
+  @Override
+  protected ListenableFuture<Boolean> deleteNode(String path) {
     final SettableFuture<Boolean> future = SettableFuture.create();
     boolean ret = FileUtils.deleteFile(path);
     future.set(ret);
@@ -95,8 +105,9 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     return future;
   }
 
+  @Override
   @SuppressWarnings("unchecked") // we don't know what M is until runtime
-  protected <M extends Message> ListenableFuture<M> getData(String path, Message.Builder builder) {
+  protected <M extends Message> ListenableFuture<M> getNodeData(WatchCallback watcher, String path, Message.Builder builder) {
     final SettableFuture<M> future = SettableFuture.create();
     byte[] data = FileUtils.readFromFile(path);
     if (data.length == 0) {
@@ -147,74 +158,6 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     // This is because when running in simulator we control when a scheduler dies and
     // comes up deterministically.
     return setData(getSchedulerLocationPath(topologyName), location.toByteArray(), true);
-  }
-
-  @Override
-  public ListenableFuture<Boolean> deleteTMasterLocation(String topologyName) {
-    return deleteData(getTMasterLocationPath(topologyName));
-  }
-
-  @Override
-  public ListenableFuture<Boolean> deleteSchedulerLocation(String topologyName) {
-    return deleteData(getSchedulerLocationPath(topologyName));
-  }
-
-  @Override
-  public ListenableFuture<Boolean> deleteExecutionState(String topologyName) {
-    return deleteData(getExecutionStatePath(topologyName));
-  }
-
-  @Override
-  public ListenableFuture<Boolean> deleteTopology(String topologyName) {
-    return deleteData(getTopologyPath(topologyName));
-  }
-
-  @Override
-  public ListenableFuture<Boolean> deletePhysicalPlan(String topologyName) {
-    return deleteData(getPhysicalPlanPath(topologyName));
-  }
-
-  @Override
-  public ListenableFuture<Scheduler.SchedulerLocation> getSchedulerLocation(
-      WatchCallback watcher, String topologyName) {
-    return getData(getSchedulerLocationPath(topologyName),
-        Scheduler.SchedulerLocation.newBuilder());
-  }
-
-  @Override
-  public ListenableFuture<TopologyAPI.Topology> getTopology(
-      WatchCallback watcher, String topologyName) {
-    return getData(getTopologyPath(topologyName), TopologyAPI.Topology.newBuilder());
-  }
-
-  @Override
-  public ListenableFuture<ExecutionEnvironment.ExecutionState> getExecutionState(
-      WatchCallback watcher, String topologyName) {
-    return getData(getExecutionStatePath(topologyName),
-        ExecutionEnvironment.ExecutionState.newBuilder());
-  }
-
-  @Override
-  public ListenableFuture<PhysicalPlans.PhysicalPlan> getPhysicalPlan(
-      WatchCallback watcher, String topologyName) {
-    return getData(getPhysicalPlanPath(topologyName),
-        PhysicalPlans.PhysicalPlan.newBuilder());
-  }
-
-  @Override
-  public ListenableFuture<TopologyMaster.TMasterLocation> getTMasterLocation(
-      WatchCallback watcher, String topologyName) {
-    return getData(getTMasterLocationPath(topologyName),
-        TopologyMaster.TMasterLocation.newBuilder());
-  }
-
-  @Override
-  public ListenableFuture<Boolean> isTopologyRunning(String topologyName) {
-    SettableFuture<Boolean> future = SettableFuture.create();
-    boolean ret = FileUtils.isFileExists(getTopologyPath(topologyName));
-    future.set(ret);
-
-    return future;
   }
 
   @Override
