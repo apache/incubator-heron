@@ -45,6 +45,11 @@ local_deps_files = [
     "//heron/schedulers/src/java:local-scheduler-java",
 ]
 
+mesos_deps_files = [
+    "//heron/schedulers/src/java:mesos-scheduler-java",
+    "@org_apache_mesos_mesos//jar",
+]
+
 slurm_deps_files = [
     "//heron/schedulers/src/java:slurm-scheduler-java",
 ]
@@ -150,5 +155,59 @@ java_test(
     ["**/SlurmControllerTest.java"]
   ),
   deps=scheduler_deps_files + slurm_deps_files,
+  size="small",
+)
+
+java_test(
+  name="MesosLauncherTest",
+  srcs=glob(
+    ["**/MesosLauncherTest.java"]
+  ),
+  deps=scheduler_deps_files + mesos_deps_files,
+  size="small",
+)
+
+java_test(
+  name="MesosSchedulerTest",
+  srcs=glob(
+    ["**/MesosSchedulerTest.java"]
+  ),
+  deps=scheduler_deps_files + mesos_deps_files,
+  size="small",
+)
+
+java_test(
+  name="TaskUtilsTest",
+  srcs=glob(
+    ["**/**/TaskUtilsTest.java"]
+  ),
+  deps=scheduler_deps_files + mesos_deps_files,
+  size="small",
+)
+
+java_test(
+  name="TaskResourcesTest",
+  srcs=glob(
+    ["**/**/TaskResourcesTest.java"]
+  ),
+  deps=scheduler_deps_files + mesos_deps_files,
+  size="small",
+)
+
+java_test(
+  name="LaunchableTaskTest",
+  srcs=glob(
+    ["**/**/LaunchableTaskTest.java"]
+  ),
+  deps=scheduler_deps_files + mesos_deps_files,
+  size="small",
+)
+
+java_test(
+  name="MesosFrameworkTest",
+  srcs=glob(
+    ["**/**/MesosFrameworkTest.java"]
+  ),
+  deps=scheduler_deps_files + mesos_deps_files,
   size="small",
 )
