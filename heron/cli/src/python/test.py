@@ -18,9 +18,9 @@ HERON_RC_SPL='@'+ HERON_RC
 p = re.compile('(^[^\:]*):([^\s]*) (.*)')
 filters       = ['^@']
 expressions   = [re.compile(x) for x in filters]
+
+
 class HeronRCArgumentParser(argparse.ArgumentParser):
-
-
 
  	def __init__(self, *args, **kwargs):
 		self.cmdmap=collections.defaultdict(dict)
@@ -48,13 +48,12 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
 		    else: # otherwise, we will return the 1st group
 		        return match.group(1) # captured quoted-string
 		return regex.sub(_replacer, string)
+
 	def initializeFromRC(self):
 		if os.path.exists(HERON_RC):
-			#print "file exists\n"
 
 			with open(HERON_RC) as f:
 				for line in f:
-					#print 'line' + line
 					m = p.match(line)
 					value = ''
 					command='*'
@@ -63,9 +62,7 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
 						value = self.remove_comments(m.group(3).rstrip(os.linesep))
 						command = ( m.group(1),'*') [ m.group(1) == None or m.group(1) == 'all' or  m.group(1) == '']
 						env = ( m.group(2), '*') [ m.group(2) == None or m.group(2) == 'all' or  m.group(2) == '']
-						#print command , env , value
 					else:
-						#print 'no match' + line
 						value = self.remove_comments(line.rstrip(os.linesep))
 
 					if ( command in self.cmdmap and env in self.cmdmap[command]):
@@ -73,8 +70,6 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
 					else:
 						self.cmdmap[command][env] =  value				
 
-			jsonarray = json.dumps(self.cmdmap)
-			print jsonarray
 		else:
 			print "WARN: %s is not an existing file" % HERON_RC
 
