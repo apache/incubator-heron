@@ -14,6 +14,7 @@
 
 package com.twitter.heron.statemgr.localfs;
 
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,22 +30,20 @@ import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 import com.twitter.heron.statemgr.FileSystemStateManager;
 
 public class LocalFileSystemStateManager extends FileSystemStateManager {
   private static final Logger LOG = Logger.getLogger(LocalFileSystemStateManager.class.getName());
 
-  private Config config;
-
   @Override
   public void initialize(Config ipconfig) {
 
     super.initialize(ipconfig);
-    this.config = ipconfig;
 
     // By default, we would init the file tree if it is not there
-    boolean isInitLocalFileTree = LocalFileSystemContext.initLocalFileTree(config);
+    boolean isInitLocalFileTree = LocalFileSystemContext.initLocalFileTree(ipconfig);
 
     if (isInitLocalFileTree && !initTree()) {
       throw new IllegalArgumentException("Failed to initialize Local State manager. "
@@ -75,12 +74,8 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     boolean schedulerLocationDir = FileUtils.isDirectoryExists(getSchedulerLocationDir())
         || FileUtils.createDirectory(getSchedulerLocationDir());
 
-    if (topologyDir && tmasterLocationDir && physicalPlanDir && executionStateDir
-        && schedulerLocationDir) {
-      return true;
-    }
-
-    return false;
+    return topologyDir && tmasterLocationDir && physicalPlanDir && executionStateDir
+        && schedulerLocationDir;
   }
 
   // Make utils class protected for easy unit testing
@@ -226,5 +221,49 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   public void close() {
     // We would not clear anything here
     // Scheduler kill interface should take care of the cleaning
+  }
+
+  /**
+   * Returns all information stored in the StateManager. This is a utility method used for debugging
+   * while developing. To invoke, run:
+   *
+   *   bazel run heron/statemgrs/src/java:localfs-statemgr-unshaded -- &lt;topology-name&gt;
+   */
+  public static void main(String[] args) throws ExecutionException, InterruptedException {
+    if (args.length < 1) {
+      throw new RuntimeException(String.format(
+          "Usage: java %s <topology_name> - view state manager details for a topology",
+          LocalFileSystemStateManager.class.getCanonicalName()));
+    }
+
+    String topologyName = args[0];
+    Config config = Config.newBuilder()
+        .put(Keys.stateManagerRootPath(),
+            System.getProperty("user.home") + "/.herondata/repository/state/local")
+        .build();
+
+    print("==> State Manager root path: %s", config.get(Keys.stateManagerRootPath()));
+
+    com.twitter.heron.spi.statemgr.IStateManager stateManager = new LocalFileSystemStateManager();
+    stateManager.initialize(config);
+
+    if (stateManager.isTopologyRunning(topologyName).get()) {
+      print("==> Topology %s found", topologyName);
+      print("==> ExecutionState:\n%s",
+          stateManager.getExecutionState(null, topologyName).get());
+      print("==> SchedulerLocation:\n%s",
+          stateManager.getSchedulerLocation(null, topologyName).get());
+      print("==> TMasterLocation:\n%s",
+          stateManager.getTMasterLocation(null, topologyName).get());
+      print("==> PhysicalPlan:\n%s",
+          stateManager.getPhysicalPlan(null, topologyName).get());
+    } else {
+      print("==> Topology %s not found under %s",
+          topologyName, config.get(Keys.stateManagerRootPath()));
+    }
+  }
+
+  private static void print(String format, Object... values) {
+    System.out.println(String.format(format, values));
   }
 }
