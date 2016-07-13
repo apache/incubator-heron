@@ -103,15 +103,6 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
 
 		return new_arg_strings
 
-	def convert_arg_line_to_args(self, line):
-		for arg in line.split():
-			#print arg
-			if not arg.strip():
-				continue
-			if arg[0] == '#':
-				break
-			yield arg
-
 
 
 
