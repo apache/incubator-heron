@@ -4,6 +4,7 @@
 # This file contains several 2.x/3.x compatibility checkstyle violations for a reason
 # checkstyle: noqa
 
+import os
 from abc import ABCMeta
 from numbers import Integral, Real
 from sys import version_info as sys_version_info
@@ -21,6 +22,13 @@ except ImportError:
     # Python 3.x
     from io import StringIO
     from io import BytesIO
+
+try:
+  # Python 2.x
+  from ConfigParser import ConfigParser
+except ImportError:
+  # Python 3.x
+  from configparser import ConfigParser
 
 AbstractClass = ABCMeta('AbstractClass', (object,), {})
 PY2 = sys_version_info[0] == 2
@@ -81,15 +89,28 @@ else:
   from contextlib import nested
 
 
+if PY3:
+  from urllib.request import pathname2url, url2pathname
+else:
+  from urllib import pathname2url, url2pathname
+
+
+WINDOWS = os.name == 'nt'
+
+
 __all__ = (
   'AbstractClass',
   'BytesIO',
+  'ConfigParser',
   'PY2',
   'PY3',
   'StringIO',
+  'WINDOWS',
   'bytes',
   'exec_function',
   'nested',
+  'pathname2url',
   'string',
   'to_bytes',
+  'url2pathname',
 )

@@ -16,6 +16,7 @@ import zipfile
 from collections import defaultdict
 from uuid import uuid4
 
+
 def die(msg, exit_code=1):
   print(msg, file=sys.stderr)
   sys.exit(exit_code)
@@ -27,18 +28,26 @@ def safe_copy(source, dest, overwrite=False):
     shutil.copyfile(source, temp_dest)
     os.rename(temp_dest, dest)
 
-  try:
-    os.link(source, dest)
-  except OSError as e:
-    if e.errno == errno.EEXIST:
-      # File already exists.  If overwrite=True, write otherwise skip.
-      if overwrite:
+  # If the platform supports hard-linking, use that and fall back to copying.
+  # Windows does not support hard-linking.
+  if hasattr(os, 'link'):
+    try:
+      os.link(source, dest)
+    except OSError as e:
+      if e.errno == errno.EEXIST:
+        # File already exists.  If overwrite=True, write otherwise skip.
+        if overwrite:
+          do_copy()
+      elif e.errno == errno.EXDEV:
+        # Hard link across devices, fall back on copying
         do_copy()
-    elif e.errno == errno.EXDEV:
-      # Hard link across devices, fall back on copying
+      else:
+        raise
+  elif os.path.exists(dest):
+    if overwrite:
       do_copy()
-    else:
-      raise
+  else:
+    do_copy()
 
 
 # See http://stackoverflow.com/questions/2572172/referencing-other-modules-in-atexit
@@ -129,6 +138,21 @@ def safe_rmtree(directory):
   """Delete a directory if it's present. If it's not present, no-op."""
   if os.path.exists(directory):
     shutil.rmtree(directory, True)
+
+
+def rename_if_empty(src, dest, allowable_errors=(errno.EEXIST, errno.ENOTEMPTY)):
+  """Rename `src` to `dest` using `os.rename()`.
+
+  If an `OSError` with errno in `allowable_errors` is encountered during the rename, the `dest`
+  dir is left unchanged and the `src` directory will simply be removed.
+  """
+  try:
+    os.rename(src, dest)
+  except OSError as e:
+    if e.errno in allowable_errors:
+      safe_rmtree(src)
+    else:
+      raise
 
 
 def chmod_plus_x(path):
@@ -263,17 +287,8 @@ class Chroot(object):
     self._ensure_parent(dst)
     abs_src = src
     abs_dst = os.path.join(self.chroot, dst)
-    try:
-      os.link(abs_src, abs_dst)
-    except OSError as e:
-      if e.errno == errno.EEXIST:
-        # File already exists, skip XXX -- ensure target and dest are same?
-        pass
-      elif e.errno == errno.EXDEV:
-        # Hard link across devices, fall back on copying
-        shutil.copyfile(abs_src, abs_dst)
-      else:
-        raise
+    safe_copy(abs_src, abs_dst, overwrite=False)
+    # TODO: Ensure the target and dest are the same if the file already exists.
 
   def write(self, data, dst, label=None, mode='wb'):
     """Write data to ``chroot/dst`` with optional label.
