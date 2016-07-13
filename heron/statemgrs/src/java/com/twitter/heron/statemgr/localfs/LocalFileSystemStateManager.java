@@ -227,7 +227,7 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
    * Returns all information stored in the StateManager. This is a utility method used for debugging
    * while developing. To invoke, run:
    *
-   *   bazel run heron/statemgrs/src/java:localfs-statemgr-unshaded -- &lt;topology-name>
+   *   bazel run heron/statemgrs/src/java:localfs-statemgr-unshaded -- &lt;topology-name&gt;
    */
   public static void main(String[] args) throws ExecutionException, InterruptedException {
     if (args.length < 1) {
