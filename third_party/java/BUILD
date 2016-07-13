@@ -12,7 +12,7 @@ java_library(
     deps = [
         "@com_amazonaws_aws_java_sdk_core//jar",
         "@com_amazonaws_aws_java_sdk_s3//jar",
-        "@bazel_tools//third_party:joda_time",
+        "//third_party:joda_time",
         "@commons_logging_commons_logging//jar",
         "@org_apache_httpcomponents_http_client//jar",
         "@org_apache_httpcomponents_http_core//jar",

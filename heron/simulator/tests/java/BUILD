@@ -5,8 +5,8 @@ test_deps_files = \
         "//heron/api/src/java:api-java", 
         "//heron/common/src/java:common-java",
         "//heron/simulator/src/java:simulator-java",
-        "@bazel_tools//third_party:mockito",
-        "@bazel_tools//third_party:junit4", 
+        "//third_party:mockito",
+        "//third_party:junit4",
     ]
 
 java_test(
