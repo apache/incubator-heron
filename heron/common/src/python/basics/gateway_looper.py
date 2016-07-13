@@ -76,10 +76,10 @@ class GatewayLooper(EventLooper):
     try:
       r, w, e = select.select(r, w, e, timeout)
     except select.error, err:
+      Log.debug("Trivial error: " + err.message)
       if err.args[0] != errno.EINTR:
         raise
       else:
-        Log.debug("Trivial error: " + err.message)
         return
     Log.debug("Selected [r]: " + str(r) + " [w]: " + str(w) + " [e]: " + str(e))
 

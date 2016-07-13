@@ -19,7 +19,7 @@ import colorlog
 # formatter = colorlog.ColoredFormatter('%(log_color)s%(levelname)s:%(name)s:%(message)s')
 formatter = colorlog.ColoredFormatter('%(log_color)s%(levelname)s:%(reset)s %(message)s')
 stream = logging.StreamHandler()
-stream.setLevel(logging.DEBUG)
+stream.setLevel(logging.INFO)
 stream.setFormatter(formatter)
 
 Log = logging.getLogger()
@@ -28,6 +28,7 @@ Log.addHandler(stream)
 
 # Added for more specific configuration for Python Heron Instance
 # TODO: No need to use colorlog
+# TODO (important): fix stdout/stderr constipation problem
 def init_logger(out_path):
   logger = logging.getLogger()
 

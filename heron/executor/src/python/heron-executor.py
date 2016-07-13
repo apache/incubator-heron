@@ -405,11 +405,7 @@ class HeronExecutor:
 
   def run_process(self, name, cmd):
     do_print("Running %s process as %s" % (name, ' '.join(cmd)))
-    if 'stmgr' in cmd[0]:
-      out = open('/tmp/stmgr.out', 'a')
-      return subprocess.Popen(cmd, stdout=out, stderr=out)
-    else:
-      return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
   def run_blocking_process(self, cmd, is_shell):
     do_print("Running blocking process as %s" % cmd)

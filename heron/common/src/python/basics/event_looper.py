@@ -34,9 +34,13 @@ class EventLooper(object):
     self.on_exit()
 
   def run_once(self):
-    self.do_wait()
-    self.execute_wakeup_tasks()
-    self.trigger_timers()
+    try:
+      self.do_wait()
+      self.execute_wakeup_tasks()
+      self.trigger_timers()
+    except Exception as e:
+      Log.error("Error occured during run_once(): " + e.message)
+      self.should_exit = True
 
   def on_exit(self):
     Log.info("In on_exit() of event_looper")

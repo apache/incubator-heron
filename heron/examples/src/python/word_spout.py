@@ -21,6 +21,7 @@ class WordSpout(Spout):
   def __init__(self, pplan_helper, in_stream, out_stream):
     super(WordSpout, self).__init__(pplan_helper, in_stream, out_stream)
     self.words = cycle(["hello", "bye", "good", "bad", "heron", "storm"])
+    self.emit_count = 0
 
   def open(self, config, context):
     Log.info("In open() of WordSpout")
@@ -28,5 +29,9 @@ class WordSpout(Spout):
   def next_tuple(self):
     word = next(self.words)
     Log.debug("Will emit: " + word)
+    self.emit_count += 1
     self.emit([word])
+    Log.debug("Emit count: " + str(self.emit_count))
+    if self.emit_count % 1000 == 0:
+      Log.info("Emitted " + str(self.emit_count))
 

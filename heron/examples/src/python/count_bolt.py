@@ -21,6 +21,7 @@ class CountBolt(Bolt):
     super(CountBolt, self).__init__(pplan_helper, in_stream, out_stream)
     self.counter = Counter()
     self.total = 0
+    self.tuple_count = 0
 
   def prepare(self, config, context):
     Log.debug("In prepare() of CountBolt")
@@ -32,7 +33,9 @@ class CountBolt(Bolt):
 
   def execute(self, tuple):
     word = tuple[0]
+    self.tuple_count += 1
+    Log.debug("Tuple count: " + str(self.tuple_count))
     self._increment(word, 10 if word == "heron" else 1)
-    if self.total % 100 == 0:
+    if self.total % 1000 == 0:
       Log.info("Current map: " + str(self.counter))
 

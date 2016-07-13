@@ -130,6 +130,9 @@ class IncomingPacket(object):
       return -1
     return HeronProtocol.unpack_int(self.header)
 
+  def get_pktsize(self):
+    return len(self.data) + len(self.header)
+
   def read(self, dispatcher):
     try:
       if not self.is_header_read:

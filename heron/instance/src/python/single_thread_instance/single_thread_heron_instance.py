@@ -14,6 +14,7 @@
 import sys
 import traceback
 
+import signal
 from heron.common.src.python.color import Log, init_logger
 from heron.common.src.python.basics.gateway_looper import GatewayLooper
 from heron.proto import physical_plan_pb2, stmgr_pb2
@@ -42,6 +43,10 @@ class SingleThreadHeronInstance(object):
     # my_instance is a tuple containing (is_spout, TopologyAPI.{Spout|Bolt}, loaded python instance)
     self.my_instance = None
     self.looper = GatewayLooper()
+    def go_trace(sig, stack):
+      with open("/tmp/trace.log", "w") as f:
+        traceback.print_stack(stack, file=f)
+    signal.signal(signal.SIGUSR1, go_trace)
 
   def start(self):
     self._stmgr_client.start_connect()

@@ -36,6 +36,7 @@ class HeronClient(asyncore.dispatcher):
     self.context_map = dict()
     self.incomplete_pkt = None
     self.total_bytes_sent = 0
+    self.total_bytes_received = 0
 
   ##################################
   # asyncore.dispatcher override
@@ -64,6 +65,7 @@ class HeronClient(asyncore.dispatcher):
       pkt.read(self)
 
     if pkt.is_complete:
+      self.total_bytes_received += pkt.get_pktsize()
       self.incomplete_pkt = None
       self.handle_packet(pkt)
     else:
@@ -127,6 +129,7 @@ class HeronClient(asyncore.dispatcher):
   def send_message(self, message):
     Log.debug("In send_message()")
     pkt = HeronProtocol.get_outgoing_packet(REQID.generate_zero(), message)
+    Log.debug("After get outgoing packet")
     self.send_packet(pkt)
 
   def handle_timeout(self):
@@ -158,8 +161,8 @@ class HeronClient(asyncore.dispatcher):
         return
 
       if response_msg.IsInitialized():
-        Log.debug("In handle_packet(): Received response with size " +
-                  str(packet.get_datasize()) + "\n" + str(response_msg))
+        Log.debug("In handle_packet(): Received response with size " + str(packet.get_datasize()) +
+                  "; in total received " + str(self.total_bytes_received) + " bytes. \n" + str(response_msg))
         self.on_response(StatusCode.OK, context, response_msg)
       else:
         Log.error("Response not initialized")
@@ -171,8 +174,8 @@ class HeronClient(asyncore.dispatcher):
         message = msg_builder()
         message.ParseFromString(serialized_msg)
         if message.IsInitialized():
-          Log.debug("In handle_packet(): Received message with size " +
-                    str(packet.get_datasize()) + "\n" + str(message))
+          Log.debug("In handle_packet(): Received message with size " + str(packet.get_datasize()) +
+                    "; in total received " + str(self.total_bytes_received) + " bytes. \n" + str(message))
           self.on_incoming_message(message)
         else:
           raise RuntimeError("Message not initialized")
