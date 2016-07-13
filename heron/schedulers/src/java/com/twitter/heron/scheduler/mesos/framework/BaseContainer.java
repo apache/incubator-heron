@@ -48,17 +48,18 @@ public class BaseContainer {
   public String description;
 
   @JsonProperty
+  // # of cpu cores requested
   public double cpu;
 
   @JsonProperty
-  // in mb
-  public double disk;
+  public double diskInMB;
 
   @JsonProperty
   // in mb
-  public double mem;
+  public double memInMB;
 
   @JsonProperty
+  // # of ports requested
   public int ports;
 
   @JsonProperty

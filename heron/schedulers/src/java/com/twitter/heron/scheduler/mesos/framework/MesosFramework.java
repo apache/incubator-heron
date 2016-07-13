@@ -25,7 +25,9 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedTransferQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import org.apache.mesos.Protos;
@@ -60,6 +62,10 @@ public class MesosFramework implements Scheduler {
   // The Mesos' SchedulerDriver
   private volatile SchedulerDriver driver;
 
+  // Indicates whether the MesosFramework has registered.
+  // Scheduler.registered(...) method will count down and release the latch
+  private final CountDownLatch registeredLatch;
+
   private volatile Protos.FrameworkID frameworkId;
 
   public MesosFramework(Config heronConfig, Config heronRuntime) {
@@ -69,6 +75,8 @@ public class MesosFramework implements Scheduler {
     this.tasksId = new ConcurrentHashMap<>();
     this.toScheduleTasks = new LinkedTransferQueue<>();
 
+    // Initialize it as 1. Will count down and release once got registered
+    this.registeredLatch = new CountDownLatch(1);
     this.isTerminated = false;
   }
 
@@ -140,9 +148,46 @@ public class MesosFramework implements Scheduler {
     return true;
   }
 
+  /**
+   * Check whether the MesosFramework has been terminated
+   *
+   * @return true if MesosFramework has been terminated
+   */
   public boolean isTerminated() {
     return isTerminated;
   }
+
+  /**
+   * Causes the current thread to wait for MesosFramework got registered,
+   * unless the thread is interrupted, or the specified waiting time elapses.
+   *
+   * @param timeout the maximum time to wait
+   * @param unit the time unit of the timeout argument
+   * @return true MesosFramework got registered,
+   * and false if the waiting time elapsed before the count reached zero
+   */
+  public boolean waitForRegistered(long timeout, TimeUnit unit) {
+    try {
+      if (this.registeredLatch.await(timeout, unit)) {
+        return true;
+      }
+    } catch (InterruptedException e) {
+      LOG.severe("Failed to wait for mesos framework got registered");
+      return false;
+    }
+
+    return false;
+  }
+
+  /**
+   * Get the FrameworkID registered with Mesos Master
+   *
+   * @return the FrameworkID
+   */
+  public Protos.FrameworkID getFrameworkId() {
+    return frameworkId;
+  }
+
 
   @Override
   public void registered(SchedulerDriver schedulerDriver,
@@ -151,6 +196,9 @@ public class MesosFramework implements Scheduler {
     LOG.info("Registered! ID = " + frameworkID.getValue());
     this.driver = schedulerDriver;
     this.frameworkId = frameworkID;
+
+    // Release the latch
+    this.registeredLatch.countDown();
   }
 
   @Override
@@ -384,8 +432,8 @@ public class MesosFramework implements Scheduler {
       TaskResources neededResources =
           new TaskResources(
               baseContainer.cpu,
-              baseContainer.mem,
-              baseContainer.disk,
+              baseContainer.memInMB,
+              baseContainer.diskInMB,
               baseContainer.ports);
 
       Iterator<Map.Entry<Protos.Offer, TaskResources>> it = offerResources.entrySet()
@@ -489,9 +537,5 @@ public class MesosFramework implements Scheduler {
 
   protected SchedulerDriver getSchedulerDriver() {
     return driver;
-  }
-
-  protected Protos.FrameworkID getFrameworkId() {
-    return frameworkId;
   }
 }

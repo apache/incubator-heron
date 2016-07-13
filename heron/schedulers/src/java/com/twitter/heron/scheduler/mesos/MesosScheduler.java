@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import org.apache.mesos.MesosSchedulerDriver;
@@ -81,12 +82,30 @@ public class MesosScheduler implements IScheduler {
     // start the driver, non-blocking
     driver.start();
 
+    // Staging the Mesos Framework
+    LOG.info("Waiting for Mesos Framework get registered");
+    long timeout = MesosContext.getHeronMesosFrameworkStagingTimeoutMs(config);
+    if (!mesosFramework.waitForRegistered(timeout, TimeUnit.MILLISECONDS)) {
+      LOG.severe("Mesos Framework failed to register with Mesos Master in time.");
+      return false;
+    }
+
     return mesosFramework.createJob(jobDefinition);
   }
 
   @Override
   public List<String> getJobLinks() {
-    return new ArrayList<>();
+    Protos.FrameworkID frameworkID = mesosFramework.getFrameworkId();
+    // FrameworkID should exist otherwise onSchedule(..) returned false directly earlier
+    // So no need to null check
+
+    // The job link's format
+    String jobLink = String.format("%s/#/frameworks/%s",
+        MesosContext.getHeronMesosMasterUri(config), frameworkID.getValue());
+
+    List<String> jobLinks = new ArrayList<>();
+    jobLinks.add(jobLink);
+    return jobLinks;
   }
 
   @Override
@@ -137,8 +156,8 @@ public class MesosScheduler implements IScheduler {
     PackingPlan.Resource containerResource =
         packing.containers.values().iterator().next().resource;
     container.cpu = containerResource.cpu;
-    container.disk = containerResource.disk / Constants.MB;
-    container.mem = containerResource.ram / Constants.MB;
+    container.diskInMB = containerResource.disk / Constants.MB;
+    container.memInMB = containerResource.ram / Constants.MB;
     container.ports = SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR;
 
     // Force running as shell

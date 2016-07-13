@@ -49,7 +49,7 @@ public class MesosLauncher implements ILauncher {
     this.config = mConfig;
     this.runtime = mRuntime;
 
-    // get the topology working directory
+    // get the scheduler working directory
     this.schedulerWorkingDirectory = MesosContext.getSchedulerWorkingDirectory(config);
   }
 

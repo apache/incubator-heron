@@ -115,7 +115,7 @@ public class TaskResources {
   }
 
   public String toString() {
-    return String.format("cpu: %s; mem: %s; disk: %s; ports: %d.",
+    return String.format("cpu: %f; mem: %f; disk: %f; ports: %d.",
         this.cpu, this.mem, this.disk, this.ports);
   }
 

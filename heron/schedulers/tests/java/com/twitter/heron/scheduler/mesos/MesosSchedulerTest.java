@@ -17,6 +17,7 @@ package com.twitter.heron.scheduler.mesos;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.mesos.SchedulerDriver;
 import org.junit.After;
@@ -85,6 +86,10 @@ public class MesosSchedulerTest {
   public void testOnSchedule() throws Exception {
     Mockito.doReturn(baseContainer).when(scheduler)
         .getBaseContainer(Mockito.anyInt(), Mockito.any(PackingPlan.class));
+
+    Mockito.doReturn(true).when(mesosFramework).waitForRegistered(
+        Mockito.anyLong(), Mockito.eq(TimeUnit.MILLISECONDS));
+
     scheduler.onSchedule(Mockito.mock(PackingPlan.class));
     Mockito.verify(driver).start();
 
@@ -135,8 +140,8 @@ public class MesosSchedulerTest {
     // Assert we have constructed the correct BaseContainer structure
     Assert.assertEquals(ROLE, container.runAsUser);
     Assert.assertEquals(CPU, container.cpu, 0.01);
-    Assert.assertEquals(MEM, container.mem * Constants.MB, 0.01);
-    Assert.assertEquals(DISK, container.disk * Constants.MB, 0.01);
+    Assert.assertEquals(MEM, container.memInMB * Constants.MB, 0.01);
+    Assert.assertEquals(DISK, container.diskInMB * Constants.MB, 0.01);
     Assert.assertEquals(SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR, container.ports);
     Assert.assertEquals(2, container.dependencies.size());
     Assert.assertTrue(container.dependencies.contains(CORE_PACKAGE_URI));

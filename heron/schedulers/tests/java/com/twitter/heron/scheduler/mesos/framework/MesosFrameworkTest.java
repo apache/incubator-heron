@@ -247,8 +247,8 @@ public class MesosFrameworkTest {
 
     BaseContainer baseContainer = new BaseContainer();
     baseContainer.cpu = 0.1;
-    baseContainer.mem = 0;
-    baseContainer.disk = 0;
+    baseContainer.memInMB = 0;
+    baseContainer.diskInMB = 0;
     baseContainer.ports = 0;
 
     String taskName = TaskUtils.getTaskNameForContainerIndex(CONTAINER_INDEX);
@@ -276,8 +276,8 @@ public class MesosFrameworkTest {
     BaseContainer baseContainer = new BaseContainer();
     // request more cpu than provided
     baseContainer.cpu = 10000;
-    baseContainer.mem = 0;
-    baseContainer.disk = 0;
+    baseContainer.memInMB = 0;
+    baseContainer.diskInMB = 0;
     baseContainer.ports = 0;
 
     String taskName = TaskUtils.getTaskNameForContainerIndex(CONTAINER_INDEX);

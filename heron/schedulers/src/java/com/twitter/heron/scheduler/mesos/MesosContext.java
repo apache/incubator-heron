@@ -24,6 +24,9 @@ public final class MesosContext {
 
   public static final String HERON_MESOS_NATIVE_LIBRARY_PATH = "heron.mesos.native.library.path";
 
+  public static final String HERON_MESOS_FRAMEWORK_STAGING_TIMEOUT_MS =
+      "heron.mesos.framework.staging.timeout.ms";
+
   private MesosContext() {
   }
 
@@ -37,5 +40,9 @@ public final class MesosContext {
 
   public static String getHeronMesosNativeLibraryPath(Config config) {
     return config.getStringValue(HERON_MESOS_NATIVE_LIBRARY_PATH);
+  }
+
+  public static long getHeronMesosFrameworkStagingTimeoutMs(Config config) {
+    return config.getLongValue(HERON_MESOS_FRAMEWORK_STAGING_TIMEOUT_MS, 1000);
   }
 }

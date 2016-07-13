@@ -158,8 +158,8 @@ public class LaunchableTask {
 
     taskInfo
         .addResources(scalarResource(TaskResources.CPUS_RESOURCE_NAME, baseContainer.cpu))
-        .addResources(scalarResource(TaskResources.MEM_RESOURCE_NAME, baseContainer.mem))
-        .addResources(scalarResource(TaskResources.DISK_RESOURCE_NAME, baseContainer.disk))
+        .addResources(scalarResource(TaskResources.MEM_RESOURCE_NAME, baseContainer.memInMB))
+        .addResources(scalarResource(TaskResources.DISK_RESOURCE_NAME, baseContainer.diskInMB))
         .addResources(rangeResource(TaskResources.PORT_RESOURCE_NAME,
             this.freePorts.get(0), this.freePorts.get(this.freePorts.size() - 1))).
         setSlaveId(this.offer.getSlaveId());

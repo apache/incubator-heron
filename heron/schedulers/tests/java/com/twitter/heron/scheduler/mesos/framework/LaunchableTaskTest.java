@@ -110,8 +110,8 @@ public class LaunchableTaskTest {
     container.description = String.format("Container %d for topology %s",
         containerIndex, TOPOLOGY_NAME);
     container.cpu = CPU;
-    container.disk = DISK;
-    container.mem = MEM;
+    container.diskInMB = DISK;
+    container.memInMB = MEM;
     container.ports = SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR;
     container.shell = true;
     container.retries = Integer.MAX_VALUE;
