@@ -11,56 +11,54 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-''' restart.py '''
-from heron.common.src.python.color import Log
-
-import heron.cli.src.python.args as args
+''' cli_helper.py '''
+import heron.cli.src.python.utils as utils
+import heron.cli.src.python.opts as opts
 import heron.cli.src.python.execute as execute
 import heron.cli.src.python.jars as jars
-import heron.cli.src.python.utils as utils
+import heron.cli.src.python.args as args
 
+from heron.common.src.python.color import Log
 
-def create_parser(subparsers):
+################################################################################
+def create_parser(subparsers, action, help_arg):
   '''
   :param subparsers:
+  :param action:
+  :param help_arg:
   :return:
   '''
   parser = subparsers.add_parser(
-      'restart',
-      help='Restart a topology',
-      usage="%(prog)s [options] cluster/[role]/[env] topology-name [container-id]",
+      action,
+      help=help_arg,
+      usage="%(prog)s [options] cluster/[role]/[env] topology-name",
       add_help=False)
 
   args.add_titles(parser)
   args.add_cluster_role_env(parser)
   args.add_topology(parser)
 
-  parser.add_argument(
-      'container-id',
-      nargs='?',
-      type=int,
-      default=-1,
-      help='Identifier of the container to be restarted')
-
   args.add_config(parser)
   args.add_verbose(parser)
 
-  parser.set_defaults(subcommand='restart')
+  parser.set_defaults(subcommand=action)
   return parser
 
 
+################################################################################
 # pylint: disable=unused-argument
-def run(command, parser, cl_args, unknown_args):
+def run(command, parser, cl_args, unknown_args, action):
   '''
+  helper function to take action on topologies
   :param command:
   :param parser:
   :param cl_args:
   :param unknown_args:
+  :param action:        description of action taken
   :return:
   '''
   try:
     topology_name = cl_args['topology-name']
-    container_id = cl_args['container-id']
 
     new_args = [
         "--cluster", cl_args['cluster'],
@@ -72,8 +70,10 @@ def run(command, parser, cl_args, unknown_args):
         "--release_file", utils.get_heron_release_file(),
         "--topology_name", topology_name,
         "--command", command,
-        "--container_id", str(container_id)
     ]
+
+    if opts.verbose():
+      new_args.append("--verbose")
 
     lib_jars = utils.get_heron_libs(jars.scheduler_jars() + jars.statemgr_jars())
 
@@ -85,10 +85,9 @@ def run(command, parser, cl_args, unknown_args):
         args=new_args
     )
 
-  except Exception as ex:
-    print 'Error: %s' % str(ex)
-    Log.error('Failed to restart topology \'%s\'' % topology_name)
+  except Exception:
+    Log.error('Failed to %s \'%s\'' % (action, topology_name))
     return False
 
-  Log.info('Successfully restarted topology \'%s\'' % topology_name)
+  Log.info('Successfully %s \'%s\'' % (action, topology_name))
   return True

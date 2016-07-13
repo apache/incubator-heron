@@ -11,35 +11,38 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import os, signal, sys
-import time, random
+''' ranges.py '''
+import time
 
 TIME_RANGES_3 = {
-    "tenMinMetric" :       (0,        10*60,    'm'),
-    "threeHourMetric" :    (0,        3*60*60,  'h'),
-    "oneDayMetric" :       (0,        24*60*60, 'h'),
+    "tenMinMetric": (0, 10 * 60, 'm'),
+    "threeHourMetric": (0, 3 * 60 * 60, 'h'),
+    "oneDayMetric": (0, 24 * 60 * 60, 'h'),
 }
 
 TIME_RANGES_6 = {
-    "tenMinMetric" :       (0,        10*60,    'm'),
-    "threeHourMetric" :    (0,        3*60*60,  'h'),
-    "oneDayMetric" :       (0,        24*60*60, 'h'),
+    "tenMinMetric": (0, 10 * 60, 'm'),
+    "threeHourMetric": (0, 3 * 60 * 60, 'h'),
+    "oneDayMetric": (0, 24 * 60 * 60, 'h'),
 
-    "prevTenMinMetric":    (10*60,    20*60,    'm'),
-    "prevThreeHourMetric": (3*60*60,  6*60*60,  'h'),  
-    "prevOneDayMetric" :   (24*60*60, 48*60*60, 'h')  
+    "prevTenMinMetric": (10 * 60, 20 * 60, 'm'),
+    "prevThreeHourMetric": (3 * 60 * 60, 6 * 60 * 60, 'h'),
+    "prevOneDayMetric": (24 * 60 * 60, 48 * 60 * 60, 'h')
 }
 
+
 def get_time_ranges(ranges):
+  '''
+  :param ranges:
+  :return:
+  '''
+  # get the current time
+  now = int(time.time())
 
-    # get the current time
-    now = int(time.time())
+  # form the new
+  time_slots = dict()
 
-    # form the new 
-    time_slots = dict()
+  for key, value in ranges.iteritems():
+    time_slots[key] = (now - value[0], now - value[1], value[2])
 
-    for key, value in ranges.iteritems():
-        time_slots[key] = (now - value[0], now-value[1], value[2])
-
-    return (now, time_slots)
+  return (now, time_slots)

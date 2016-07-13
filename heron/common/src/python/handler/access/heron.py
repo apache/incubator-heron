@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+''' heron.py '''
 
 import logging
 
@@ -20,10 +21,11 @@ from tornado.options import options
 from fetch import fetch_url_as_json
 from query import QueryHandler
 
+# pylint: disable=bad-whitespace
 CLUSTER_URL_FMT             = "%s/clusters"
 TOPOLOGIES_URL_FMT          = "%s/topologies"
 EXECUTION_STATE_URL_FMT     = "%s/executionstate"     % TOPOLOGIES_URL_FMT
-lOGICALPLAN_URL_FMT         = "%s/logicalplan"        % TOPOLOGIES_URL_FMT
+LOGICALPLAN_URL_FMT         = "%s/logicalplan"        % TOPOLOGIES_URL_FMT
 PHYSICALPLAN_URL_FMT        = "%s/physicalplan"       % TOPOLOGIES_URL_FMT
 SCHEDULER_LOCATION_URL_FMT  = "%s/schedulerlocation"  % TOPOLOGIES_URL_FMT
 
@@ -43,32 +45,33 @@ HISTOGRAM_URL_FMT           = "%s/histo"              % TOPOLOGIES_URL_FMT
 FILE_DATA_URL_FMT           = "%s/containerfiledata"  % TOPOLOGIES_URL_FMT
 FILESTATS_URL_FMT           = "%s/containerfilestats" % TOPOLOGIES_URL_FMT
 
+# pylint: disable=invalid-name
 capacity = "DIVIDE(" \
-  "  DEFAULT(0," \
-  "    MULTIPLY(" \
-  "      TS({0},{1},__execute-count/default)," \
-  "      TS({0},{1},__execute-latency/default)" \
-  "    )" \
-  "  )," \
-  "  60000000000" \
-  ")"
+           "  DEFAULT(0," \
+           "    MULTIPLY(" \
+           "      TS({0},{1},__execute-count/default)," \
+           "      TS({0},{1},__execute-latency/default)" \
+           "    )" \
+           "  )," \
+           "  60000000000" \
+           ")"
 
 failures = "DEFAULT(0," \
-  "  DIVIDE(" \
-  "    TS({0},{1},__fail-count/default)," \
-  "    SUM(" \
-  "      DEFAULT(1, TS({0},{1},__execute-count/default))," \
-  "      DEFAULT(0, TS({0},{1},__fail-count/default))" \
-  "    )" \
-  "  )" \
-  ")"
+           "  DIVIDE(" \
+           "    TS({0},{1},__fail-count/default)," \
+           "    SUM(" \
+           "      DEFAULT(1, TS({0},{1},__execute-count/default))," \
+           "      DEFAULT(0, TS({0},{1},__fail-count/default))" \
+           "    )" \
+           "  )" \
+           ")"
 
 cpu = "DEFAULT(0, TS({0},{1},__jvm-process-cpu-load))"
 
 memory = "DIVIDE(" \
-  "  DEFAULT(0, TS({0},{1},__jvm-memory-used-mb))," \
-  "  DEFAULT(1, TS({0},{1},__jvm-memory-mb-total))" \
-  ")"
+         "  DEFAULT(0, TS({0},{1},__jvm-memory-used-mb))," \
+         "  DEFAULT(1, TS({0},{1},__jvm-memory-mb-total))" \
+         ")"
 
 gc = "RATE(TS({0},{1},__jvm-gc-collection-time-ms))"
 
@@ -81,36 +84,51 @@ queries = dict(
 )
 
 
-# Get the endpoint for heron tracker
 def get_tracker_endpoint():
-    return options.tracker_url
+  '''
+  Get the endpoint for heron tracker
+  :return:
+  '''
+  return options.tracker_url
 
 
-# Given an URL format, substitute with tracker service endpoint
 def create_url(fmt):
-    return fmt % get_tracker_endpoint()
+  '''
+  Given an URL format, substitute with tracker service endpoint
+  :param fmt:
+  :return:
+  '''
+  return fmt % get_tracker_endpoint()
+
 
 
 @tornado.gen.coroutine
 def get_clusters():
+  '''
+  :return:
+  '''
   request_url = create_url(CLUSTER_URL_FMT)
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
 
 ################################################################################
-# Get the list of topologies given a data center from heron tracker
-################################################################################
 @tornado.gen.coroutine
 def get_topologies():
+  '''
+  Get the list of topologies given a data center from heron tracker
+  :return:
+  '''
   request_url = create_url(TOPOLOGIES_URL_FMT)
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
 
 ################################################################################
-# Get the list of topologies and their states
-################################################################################
 @tornado.gen.coroutine
 def get_topologies_states():
+  '''
+  Get the list of topologies and their states
+  :return:
+  '''
   request_url = create_url(TOPOLOGIES_URL_FMT) + "/states"
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
@@ -128,73 +146,107 @@ def _get_topologies(cluster, role=None, env=None):
 
 
 ################################################################################
-# Get the list of topologies given a cluster
-################################################################################
 def get_cluster_topologies(cluster):
+  '''
+  Get the list of topologies given a cluster
+  :param cluster:
+  :return:
+  '''
   return _get_topologies(cluster)
 
 
 ################################################################################
-# Get the list of topologies given a cluster submitted by a given role
-################################################################################
 def get_cluster_role_topologies(cluster, role):
+  '''
+  Get the list of topologies given a cluster submitted by a given role
+  :param cluster:
+  :param role:
+  :return:
+  '''
   return _get_topologies(cluster, role=role)
 
 
 ################################################################################
-# Get the list of topologies given a cluster submitted by a given role under
-# a given environment
-################################################################################
 def get_cluster_role_env_topologies(cluster, role, env):
+  '''
+  Get the list of topologies given a cluster submitted by a given role under a given environment
+  :param cluster:
+  :param role:
+  :param env:
+  :return:
+  '''
   return _get_topologies(cluster, role=role, env=env)
 
 
 ################################################################################
-# Get the execution state of a topology in a cluster
-################################################################################
 @tornado.gen.coroutine
 def get_execution_state(cluster, environ, topology, role=None):
+  '''
+  Get the execution state of a topology in a cluster
+  :param cluster:
+  :param environ:
+  :param topology:
+  :param role:
+  :return:
+  '''
   params = dict(cluster=cluster, environ=environ, topology=topology)
   if role is not None:
     params['role'] = role
-  request_url = tornado.httputil.url_concat(
-    create_url(EXECUTION_STATE_URL_FMT), params)
+  request_url = tornado.httputil.url_concat(create_url(EXECUTION_STATE_URL_FMT), params)
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
 
-################################################################################
-# Get the logical plan state of a topology in a cluster
 ################################################################################
 @tornado.gen.coroutine
 def get_logical_plan(cluster, environ, topology, role=None):
+  '''
+  Get the logical plan state of a topology in a cluster
+  :param cluster:
+  :param environ:
+  :param topology:
+  :param role:
+  :return:
+  '''
   params = dict(cluster=cluster, environ=environ, topology=topology)
   if role is not None:
     params['role'] = role
   request_url = tornado.httputil.url_concat(
-      create_url(lOGICALPLAN_URL_FMT), params)
+      create_url(LOGICALPLAN_URL_FMT), params)
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
 
 ################################################################################
-# Get the list of component names for the topology from Heron Nest
-################################################################################
 @tornado.gen.coroutine
 def get_comps(cluster, environ, topology, role=None):
+  '''
+  Get the list of component names for the topology from Heron Nest
+  :param cluster:
+  :param environ:
+  :param topology:
+  :param role:
+  :return:
+  '''
   params = dict(cluster=cluster, environ=environ, topology=topology)
   if role is not None:
     params['role'] = role
   request_url = tornado.httputil.url_concat(
-      create_url(lOGICALPLAN_URL_FMT), params)
+      create_url(LOGICALPLAN_URL_FMT), params)
   lplan = yield fetch_url_as_json(request_url)
   comps = lplan['spouts'].keys() + lplan['bolts'].keys()
   raise tornado.gen.Return(comps)
 
 
 ################################################################################
-# Get the physical plan state of a topology in a cluster from tracker
-################################################################################
 @tornado.gen.coroutine
 def get_physical_plan(cluster, environ, topology, role=None):
+  '''
+  Get the physical plan state of a topology in a cluster from tracker
+  :param cluster:
+  :param environ:
+  :param topology:
+  :param role:
+  :return:
+  '''
   params = dict(cluster=cluster, environ=environ, topology=topology)
   if role is not None:
     params['role'] = role
@@ -204,10 +256,16 @@ def get_physical_plan(cluster, environ, topology, role=None):
 
 
 ################################################################################
-# Get the scheduler location of a topology in a cluster from tracker
-################################################################################
 @tornado.gen.coroutine
 def get_scheduler_location(cluster, environ, topology, role=None):
+  '''
+  Get the scheduler location of a topology in a cluster from tracker
+  :param cluster:
+  :param environ:
+  :param topology:
+  :param role:
+  :return:
+  '''
   params = dict(cluster=cluster, environ=environ, topology=topology)
   if role is not None:
     params['role'] = role
@@ -217,15 +275,22 @@ def get_scheduler_location(cluster, environ, topology, role=None):
 
 
 ################################################################################
-# Get summary of exception for a component
-################################################################################
 @tornado.gen.coroutine
 def get_component_exceptionsummary(cluster, environ, topology, component, role=None):
+  '''
+  Get summary of exception for a component
+  :param cluster:
+  :param environ:
+  :param topology:
+  :param component:
+  :param role:
+  :return:
+  '''
   params = dict(
-    cluster=cluster,
-    environ=environ,
-    topology=topology,
-    component=component)
+      cluster=cluster,
+      environ=environ,
+      topology=topology,
+      component=component)
   if role is not None:
     params['role'] = role
   request_url = tornado.httputil.url_concat(
@@ -234,15 +299,22 @@ def get_component_exceptionsummary(cluster, environ, topology, component, role=N
 
 
 ################################################################################
-# Get exceptions for 'component' for 'topology'
-################################################################################
 @tornado.gen.coroutine
 def get_component_exceptions(cluster, environ, topology, component, role=None):
+  '''
+  Get exceptions for 'component' for 'topology'
+  :param cluster:
+  :param environ:
+  :param topology:
+  :param component:
+  :param role:
+  :return:
+  '''
   params = dict(
-    cluster=cluster,
-    environ=environ,
-    topology=topology,
-    component=component)
+      cluster=cluster,
+      environ=environ,
+      topology=topology,
+      component=component)
   if role is not None:
     params['role'] = role
   request_url = tornado.httputil.url_concat(
@@ -251,18 +323,26 @@ def get_component_exceptions(cluster, environ, topology, component, role=None):
 
 
 ################################################################################
-# Get the metrics for some instances of a topology from tracker
-# metrics    - dict of display name to cuckoo name
-# time_range - 2-tuple consisting of start and end of range
-################################################################################
 @tornado.gen.coroutine
 def get_comp_instance_metrics(
-        cluster, environ, topology, component, metrics, instances, time_range, role=None):
+    cluster, environ, topology, component, metrics, instances, time_range, role=None):
+  '''
+  Get the metrics for some instances of a topology from tracker
+  :param cluster:
+  :param environ:
+  :param topology:
+  :param component:
+  :param metrics:     dict of display name to cuckoo name
+  :param instances:
+  :param time_range:  2-tuple consisting of start and end of range
+  :param role:
+  :return:
+  '''
   params = dict(
-    cluster=cluster,
-    environ=environ,
-    topology=topology,
-    component=component)
+      cluster=cluster,
+      environ=environ,
+      topology=topology,
+      component=component)
   if role is not None:
     params['role'] = role
 
@@ -274,37 +354,40 @@ def get_comp_instance_metrics(
   all_instances = instances if isinstance(instances, list) else [instances]
 
   # append each metric to the url
-  for display_name, metric_name in metrics.iteritems():
-    request_url = tornado.httputil.url_concat(
-        request_url,
-        dict(metricname=metric_name[0])
-    )
+  for _, metric_name in metrics.iteritems():
+    request_url = tornado.httputil.url_concat(request_url, dict(metricname=metric_name[0]))
 
   # append each instance to the url
   for i in all_instances:
     request_url = tornado.httputil.url_concat(request_url, dict(instance=i))
 
   # append the time interval to the url
-  request_url = tornado.httputil.url_concat(
-      request_url,
-      dict(interval=time_range[1])
-  )
+  request_url = tornado.httputil.url_concat(request_url, dict(interval=time_range[1]))
+
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
 
 ################################################################################
-# Get the metrics for all the instances of a topology from Heron Nest
-# metrics    - dict of display name to cuckoo name
-# time_range - 2-tuple consisting of start and end of range
-################################################################################
 @tornado.gen.coroutine
 def get_comp_metrics(
-        cluster, environ, topology, component, instances, metricnames, time_range, role=None):
+    cluster, environ, topology, component, instances, metricnames, time_range, role=None):
+  '''
+  Get the metrics for all the instances of a topology from Heron Nest
+  :param cluster:
+  :param environ:
+  :param topology:
+  :param component:
+  :param instances:
+  :param metricnames:   dict of display name to cuckoo name
+  :param time_range:    2-tuple consisting of start and end of range
+  :param role:
+  :return:
+  '''
   params = dict(
-    cluster=cluster,
-    environ=environ,
-    topology=topology,
-    component=component)
+      cluster=cluster,
+      environ=environ,
+      topology=topology,
+      component=component)
   if role is not None:
     params['role'] = role
 
@@ -314,35 +397,38 @@ def get_comp_metrics(
 
   # append each metric to the url
   for metric_name in metricnames:
-    request_url = tornado.httputil.url_concat(
-      request_url, dict(metricname=metric_name))
+    request_url = tornado.httputil.url_concat(request_url, dict(metricname=metric_name))
 
   # append each instance to the url
   for instance in instances:
-    request_url = tornado.httputil.url_concat(
-      request_url, dict(instance=instance))
+    request_url = tornado.httputil.url_concat(request_url, dict(instance=instance))
 
   # append the time interval to the url
-  request_url = tornado.httputil.url_concat(
-    request_url, dict(interval=time_range[1]))
+  request_url = tornado.httputil.url_concat(request_url, dict(interval=time_range[1]))
 
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
 
 ################################################################################
-# Get the metrics for a topology from tracker
-# metrics    - dict of display name to cuckoo name
-# time_range - 2-tuple consisting of start and end of range
-################################################################################
 @tornado.gen.coroutine
 def get_metrics(cluster, environment, topology, timerange, query, role=None):
+  '''
+  Get the metrics for a topology from tracker
+  :param cluster:
+  :param environment:
+  :param topology:
+  :param timerange:
+  :param query:
+  :param role:
+  :return:
+  '''
   params = dict(
-    cluster=cluster,
-    environ=environment,
-    topology=topology,
-    starttime=timerange[0],
-    endtime=timerange[1],
-    query=query)
+      cluster=cluster,
+      environ=environment,
+      topology=topology,
+      starttime=timerange[0],
+      endtime=timerange[1],
+      query=query)
 
   if role is not None:
     params['role'] = role
@@ -351,64 +437,74 @@ def get_metrics(cluster, environment, topology, timerange, query, role=None):
       create_url(METRICS_QUERY_URL_FMT), params
   )
 
-  logging.info("get_metrics %s" % (request_url))
+  logging.info("get_metrics %s", request_url)
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
 
 ################################################################################
-# Get the minute-by-minute metrics for all instances of a topology from tracker
-# metrics    - dict of display name to cuckoo name
-# time_range - 2-tuple consisting of start and end of range
-################################################################################
 @tornado.gen.coroutine
 def get_comp_metrics_timeline(
-        cluster, environ, topology, component, instances, metricnames, time_range, role=None):
-
+    cluster, environ, topology, component, instances, metricnames, time_range, role=None):
+  '''
+  Get the minute-by-minute metrics for all instances of a topology from tracker
+  :param cluster:
+  :param environ:
+  :param topology:
+  :param component:
+  :param instances:
+  :param metricnames:   dict of display name to cuckoo name
+  :param time_range:    2-tuple consisting of start and end of range
+  :param role:
+  :return:
+  '''
   params = dict(
-    cluster=cluster,
-    environ=environ,
-    topology=topology,
-    component=component)
+      cluster=cluster,
+      environ=environ,
+      topology=topology,
+      component=component)
 
   if role is not None:
     params['role'] = role
 
   # form the url
-  request_url = tornado.httputil.url_concat(
-    create_url(METRICS_TIMELINE_URL_FMT), params)
+  request_url = tornado.httputil.url_concat(create_url(METRICS_TIMELINE_URL_FMT), params)
 
   if role is not None:
     request_url = tornado.httputil.url_concat(request_url, dict(role=role))
 
   # append each metric to the url
   for metric_name in metricnames:
-    request_url = tornado.httputil.url_concat(
-      request_url, dict(metricname=metric_name))
+    request_url = tornado.httputil.url_concat(request_url, dict(metricname=metric_name))
 
   # append each instance to the url
   for instance in instances:
-    request_url = tornado.httputil.url_concat(
-      request_url, dict(instance=instance))
+    request_url = tornado.httputil.url_concat(request_url, dict(instance=instance))
 
   # append the time interval to the url
   request_url = tornado.httputil.url_concat(
-    request_url, dict(starttime=time_range[0], endtime=time_range[1]))
+      request_url, dict(starttime=time_range[0], endtime=time_range[1]))
 
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
 
 @tornado.gen.coroutine
 def get_topology_info(cluster, environ, topology, role=None):
+  '''
+  :param cluster:
+  :param environ:
+  :param topology:
+  :param role:
+  :return:
+  '''
   params = dict(
-    cluster=cluster,
-    environ=environ,
-    topology=topology)
+      cluster=cluster,
+      environ=environ,
+      topology=topology)
 
   if role is not None:
     params['role'] = role
 
-  request_url = tornado.httputil.url_concat(
-    create_url(INFO_URL_FMT), params)
+  request_url = tornado.httputil.url_concat(create_url(INFO_URL_FMT), params)
 
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
@@ -416,17 +512,24 @@ def get_topology_info(cluster, environ, topology, role=None):
 # Get pid of the instance
 @tornado.gen.coroutine
 def get_instance_pid(cluster, environ, topology, instance, role=None):
+  '''
+  :param cluster:
+  :param environ:
+  :param topology:
+  :param instance:
+  :param role:
+  :return:
+  '''
   params = dict(
-    cluster=cluster,
-    environ=environ,
-    topology=topology,
-    instance=instance)
+      cluster=cluster,
+      environ=environ,
+      topology=topology,
+      instance=instance)
 
   if role is not None:
     params['role'] = role
 
-  request_url = tornado.httputil.url_concat(
-    create_url(PID_URL_FMT), params)
+  request_url = tornado.httputil.url_concat(create_url(PID_URL_FMT), params)
 
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
@@ -434,11 +537,19 @@ def get_instance_pid(cluster, environ, topology, instance, role=None):
 # Get jstack of instance
 @tornado.gen.coroutine
 def get_instance_jstack(cluster, environ, topology, instance, role=None):
+  '''
+  :param cluster:
+  :param environ:
+  :param topology:
+  :param instance:
+  :param role:
+  :return:
+  '''
   params = dict(
-    cluster=cluster,
-    environ=environ,
-    topology=topology,
-    instance=instance)
+      cluster=cluster,
+      environ=environ,
+      topology=topology,
+      instance=instance)
 
   if role is not None:
     params['role'] = role
@@ -452,11 +563,19 @@ def get_instance_jstack(cluster, environ, topology, instance, role=None):
 # Get histogram of active memory objects.
 @tornado.gen.coroutine
 def get_instance_mem_histogram(cluster, environ, topology, instance, role=None):
+  '''
+  :param cluster:
+  :param environ:
+  :param topology:
+  :param instance:
+  :param role:
+  :return:
+  '''
   params = dict(
-    cluster=cluster,
-    environ=environ,
-    topology=topology,
-    instance=instance)
+      cluster=cluster,
+      environ=environ,
+      topology=topology,
+      instance=instance)
 
   if role is not None:
     params['role'] = role
@@ -470,11 +589,19 @@ def get_instance_mem_histogram(cluster, environ, topology, instance, role=None):
 # Call heap dump for an instance and save it at /tmp/heap.bin
 @tornado.gen.coroutine
 def run_instance_jmap(cluster, environ, topology, instance, role=None):
+  '''
+  :param cluster:
+  :param environ:
+  :param topology:
+  :param instance:
+  :param role:
+  :return:
+  '''
   params = dict(
-    cluster=cluster,
-    environ=environ,
-    topology=topology,
-    instance=instance)
+      cluster=cluster,
+      environ=environ,
+      topology=topology,
+      instance=instance)
 
   if role is not None:
     params['role'] = role
@@ -491,14 +618,25 @@ def run_instance_jmap(cluster, environ, topology, instance, role=None):
 # Get file data from the container
 @tornado.gen.coroutine
 def get_container_file_data(cluster, environ, topology, container, path, offset, length, role=None):
+  '''
+  :param cluster:
+  :param environ:
+  :param topology:
+  :param container:
+  :param path:
+  :param offset:
+  :param length:
+  :param role:
+  :return:
+  '''
   params = dict(
-    cluster=cluster,
-    environ=environ,
-    topology=topology,
-    container=container,
-    path=path,
-    offset=offset,
-    length=length)
+      cluster=cluster,
+      environ=environ,
+      topology=topology,
+      container=container,
+      path=path,
+      offset=offset,
+      length=length)
 
   if role is not None:
     params['role'] = role
@@ -515,27 +653,46 @@ def get_container_file_data(cluster, environ, topology, container, path, offset,
 # Get filestats
 @tornado.gen.coroutine
 def get_filestats(cluster, environ, topology, container, path, role=None):
+  '''
+  :param cluster:
+  :param environ:
+  :param topology:
+  :param container:
+  :param path:
+  :param role:
+  :return:
+  '''
   params = dict(
-    cluster=cluster,
-    environ=environ,
-    topology=topology,
-    container=container,
-    path=path)
+      cluster=cluster,
+      environ=environ,
+      topology=topology,
+      container=container,
+      path=path)
 
   if role is not None:
     params['role'] = role
 
-  request_url = tornado.httputil.url_concat(
-    create_url(FILESTATS_URL_FMT), params)
+  request_url = tornado.httputil.url_concat(create_url(FILESTATS_URL_FMT), params)
 
   raise tornado.gen.Return((yield fetch_url_as_json(request_url)))
 
 
 class HeronQueryHandler(QueryHandler):
+  ''' HeronQueryHandler '''
 
   @tornado.gen.coroutine
   def fetch(self, cluster, metric, topology, component, instance, timerange, environ=None):
-    components = [component] if "*" != component else (yield get_comps(cluster, environ, topology))
+    '''
+    :param cluster:
+    :param metric:
+    :param topology:
+    :param component:
+    :param instance:
+    :param timerange:
+    :param environ:
+    :return:
+    '''
+    components = [component] if component != "*" else (yield get_comps(cluster, environ, topology))
 
     futures = []
     for comp in components:
@@ -560,7 +717,18 @@ class HeronQueryHandler(QueryHandler):
 
   @tornado.gen.coroutine
   def fetch_max(self, cluster, metric, topology, component, instance, timerange, environ=None):
-    components = [component] if "*" != component else (yield get_comps(cluster, environ, topology))
+    '''
+    :param cluster:
+    :param metric:
+    :param topology:
+    :param component:
+    :param instance:
+    :param timerange:
+    :param environ:
+    :return:
+    '''
+
+    components = [component] if component != "*" else (yield get_comps(cluster, environ, topology))
 
     futures = []
     for comp in components:
@@ -572,19 +740,26 @@ class HeronQueryHandler(QueryHandler):
       results = yield futures
 
       keys = results[0]["timeline"][0]["data"].keys()
-      timelines = (map(r["timeline"][0]["data"].get, keys) for r in results)
+      timelines = ([res["timeline"][0]["data"][key] for key in keys] for res in results)
       values = (max(v) for v in zip(*timelines))
       data = dict(zip(keys, values))
 
       result = dict(
-        status="success",
-        starttime=timerange[0],
-        endtime=timerange[1],
-        result=dict(timeline=[dict(data=data)])
+          status="success",
+          starttime=timerange[0],
+          endtime=timerange[1],
+          result=dict(timeline=[dict(data=data)])
       )
 
     raise tornado.gen.Return(result)
 
+  # pylint: disable=no-self-use
   def get_query(self, metric, component, instance):
+    '''
+    :param metric:
+    :param component:
+    :param instance:
+    :return:
+    '''
     q = queries.get(metric)
     return q.format(component, instance)
