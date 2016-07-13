@@ -36,19 +36,37 @@ public abstract class FileSystemStateManager implements IStateManager {
   // Store the root address of the hierarchical file system
   protected String rootAddress;
 
-  abstract protected ListenableFuture<Boolean> nodeExists(String path);
+  protected abstract ListenableFuture<Boolean> nodeExists(String path);
 
-  abstract protected ListenableFuture<Boolean> deleteNode(String path);
+  protected abstract ListenableFuture<Boolean> deleteNode(String path);
 
-  abstract protected <M extends Message> ListenableFuture<M> getNodeData(WatchCallback watcher,
+  protected abstract <M extends Message> ListenableFuture<M> getNodeData(WatchCallback watcher,
                                                                          String path,
                                                                          Message.Builder builder);
 
-  protected String getTMasterLocationDir() { return concatPath(rootAddress, "tmasters"); }
-  protected String getTopologyDir() { return concatPath(rootAddress, "topologies"); }
-  protected String getPhysicalPlanDir() { return concatPath(rootAddress, "pplans"); }
-  protected String getExecutionStateDir() { return concatPath(rootAddress, "executionstate"); }
-  protected String getSchedulerLocationDir() { return concatPath(rootAddress, "schedulers"); }
+  protected String getTMasterLocationDir() {
+    return concatPath(rootAddress, "tmasters");
+  }
+
+  protected String getTopologyDir() {
+    return concatPath(rootAddress, "topologies");
+  }
+
+  protected String getPackingPlanDir() {
+    return concatPath(rootAddress, "packingplans");
+  }
+
+  protected String getPhysicalPlanDir() {
+    return concatPath(rootAddress, "pplans");
+  }
+
+  protected String getExecutionStateDir() {
+    return concatPath(rootAddress, "executionstate");
+  }
+
+  protected String getSchedulerLocationDir() {
+    return concatPath(rootAddress, "schedulers");
+  }
 
   protected String getTMasterLocationPath(String topologyName) {
     return concatPath(getTMasterLocationDir(), topologyName);

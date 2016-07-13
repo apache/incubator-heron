@@ -107,7 +107,9 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
 
   @Override
   @SuppressWarnings("unchecked") // we don't know what M is until runtime
-  protected <M extends Message> ListenableFuture<M> getNodeData(WatchCallback watcher, String path, Message.Builder builder) {
+  protected <M extends Message> ListenableFuture<M> getNodeData(WatchCallback watcher,
+                                                                String path,
+                                                                Message.Builder builder) {
     final SettableFuture<M> future = SettableFuture.create();
     byte[] data = FileUtils.readFromFile(path);
     if (data.length == 0) {
