@@ -15,7 +15,7 @@ import Queue
 import threading
 
 # TODO: implement wait/notify mechanism
-from heron.common.src.python.color import Log
+from heron.common.src.python.log import Log
 from misc.pplan_helper import PhysicalPlanHelper
 
 

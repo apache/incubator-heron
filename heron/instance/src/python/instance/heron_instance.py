@@ -13,7 +13,7 @@
 # limitations under the License.
 import sys
 
-from heron.common.src.python.color import Log
+from heron.common.src.python.log import Log
 from heron.proto import physical_plan_pb2
 
 from misc.communicator import HeronCommunicator

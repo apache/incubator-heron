@@ -18,7 +18,7 @@ import sys
 import zipimport
 import zipfile
 
-from heron.common.src.python.color import Log
+from heron.common.src.python.log import Log
 
 # TODO: Verify that this regex is fine
 egg_regex = r"^(\.deps\/[^\/\s]*\.egg)\/"

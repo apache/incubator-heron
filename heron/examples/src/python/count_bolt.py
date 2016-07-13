@@ -14,7 +14,7 @@
 from collections import Counter
 
 from heron.instance.src.python.instance.bolt import Bolt
-from heron.common.src.python.color import Log
+from heron.common.src.python.log import Log
 
 class CountBolt(Bolt):
   def __init__(self, pplan_helper, in_stream, out_stream):

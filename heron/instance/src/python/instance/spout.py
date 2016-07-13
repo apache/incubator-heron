@@ -18,7 +18,7 @@ import time
 
 from .base_instance import BaseInstance
 from heron.proto import topology_pb2, tuple_pb2
-from heron.common.src.python.color import Log
+from heron.common.src.python.log import Log
 
 class Spout(BaseInstance):
   """The base class for all heron spouts in Python"""

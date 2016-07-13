@@ -13,7 +13,7 @@
 # limitations under the License.
 import Queue
 
-from heron.common.src.python.color import Log
+from heron.common.src.python.log import Log
 
 class HeronCommunicator(object):
   def __init__(self, producer_cb=None, consumer_cb=None):

@@ -13,19 +13,16 @@
 # limitations under the License.
 
 import logging
-import logging.handlers
 
-# Create the logger
-Log = logging.getLogger('common')
+# Create the root logger
+Log = logging.getLogger()
 
-def configure(level, logfile = None):
+def init_logger(level, logfile):
   log_format = "%(asctime)s-%(levelname)s: %(message)s"
   date_format = '%a, %d %b %Y %H:%M:%S'
 
-  logging.basicConfig(format=log_format, datefmt=date_format)
+  logging.basicConfig(format=log_format, datefmt=date_format,
+                      filename=logfile, filemode='w')
   Log.setLevel(level)
 
-  if (logfile != None):
-    fh = logging.FileHandler(logfile)
-    fh.setFormatter(logging.Formatter(log_format))
-    Log.addHandler(fh)
+

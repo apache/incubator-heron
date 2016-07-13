@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from heron.common.src.python.color import Log
+from heron.common.src.python.log import Log
 from heron.proto import tuple_pb2, topology_pb2
 
 class OutgoingTupleHelper(object):

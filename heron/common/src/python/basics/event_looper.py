@@ -14,7 +14,7 @@
 import time
 from heapq import heappush, heappop, heapify
 from abc import abstractmethod
-from heron.common.src.python.color import Log
+from heron.common.src.python.log import Log
 
 import sys
 

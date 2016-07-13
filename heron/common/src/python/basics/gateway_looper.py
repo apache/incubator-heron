@@ -18,7 +18,7 @@ import select
 import errno
 
 from event_looper import EventLooper
-from heron.common.src.python.color import Log
+from heron.common.src.python.log import Log
 import asyncore
 
 class GatewayLooper(EventLooper):

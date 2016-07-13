@@ -20,7 +20,7 @@ from abc import abstractmethod
 import sys
 
 from .protocol import HeronProtocol, REQID, IncomingPacket, StatusCode
-from heron.common.src.python.color import Log
+from heron.common.src.python.log import Log
 
 # TODO: asyncore.dispatcher -> wrap as GatewayLooper class?
 class HeronClient(asyncore.dispatcher):

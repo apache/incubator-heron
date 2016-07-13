@@ -15,7 +15,7 @@ import asyncore
 import threading
 
 from network.stmgr_client import StmgrClient
-from heron.common.src.python.color import Log
+from heron.common.src.python.log import Log
 
 class Gateway(threading.Thread):
   STMGR_HOST = "127.0.0.1"

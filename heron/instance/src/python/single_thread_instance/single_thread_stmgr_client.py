@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from heron.common.src.python.color import Log
+from heron.common.src.python.log import Log
 from heron.proto import stmgr_pb2, common_pb2
 
 from heron.instance.src.python.misc.pplan_helper import PhysicalPlanHelper

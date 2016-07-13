@@ -18,7 +18,7 @@ import struct
 import random
 import socket
 
-from heron.common.src.python.color import Log
+from heron.common.src.python.log import Log
 from google.protobuf.message import Message
 
 

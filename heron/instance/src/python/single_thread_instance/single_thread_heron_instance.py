@@ -11,11 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import logging
 import sys
 import traceback
 
 import signal
-from heron.common.src.python.color import Log, init_logger
+from heron.common.src.python.log import Log, init_logger
 from heron.common.src.python.basics.gateway_looper import GatewayLooper
 from heron.proto import physical_plan_pb2, stmgr_pb2
 from heron.instance.src.python.single_thread_instance.single_thread_stmgr_client import SingleThreadStmgrClient
@@ -43,6 +44,8 @@ class SingleThreadHeronInstance(object):
     # my_instance is a tuple containing (is_spout, TopologyAPI.{Spout|Bolt}, loaded python instance)
     self.my_instance = None
     self.looper = GatewayLooper()
+
+    # Debugging purposes
     def go_trace(sig, stack):
       with open("/tmp/trace.log", "w") as f:
         traceback.print_stack(stack, file=f)
@@ -181,7 +184,7 @@ def main():
 
   # TODO: improve later
   log_file = "/tmp/" + instance_id + ".log"
-  init_logger(log_file)
+  init_logger(level=logging.DEBUG, logfile=log_file)
 
   Log.info("\nStarting instance: " + instance_id + " for topology: " + topology_name +
            " and topologyId: " + topology_id + " for component: " + component_name +

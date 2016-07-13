@@ -14,7 +14,7 @@
 import socket
 
 from heron.proto import topology_pb2
-from heron.common.src.python.color import Log
+from heron.common.src.python.log import Log
 
 class PhysicalPlanHelper(object):
   """Helper class for accessing Physical Plan

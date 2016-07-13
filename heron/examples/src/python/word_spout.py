@@ -14,7 +14,7 @@
 
 from itertools import cycle
 from heron.instance.src.python.instance.spout import Spout
-from heron.common.src.python.color import Log
+from heron.common.src.python.log import Log
 
 
 class WordSpout(Spout):

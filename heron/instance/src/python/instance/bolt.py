@@ -17,7 +17,7 @@ from abc import abstractmethod
 
 from .base_instance import BaseInstance
 from heron.proto import tuple_pb2
-from heron.common.src.python.color import Log
+from heron.common.src.python.log import Log
 
 # TODO: declare output fields
 class Bolt(BaseInstance):
