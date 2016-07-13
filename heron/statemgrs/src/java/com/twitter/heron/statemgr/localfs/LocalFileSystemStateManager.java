@@ -74,8 +74,8 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     boolean schedulerLocationDir = FileUtils.isDirectoryExists(getSchedulerLocationDir())
         || FileUtils.createDirectory(getSchedulerLocationDir());
 
-    return (topologyDir && tmasterLocationDir && physicalPlanDir && executionStateDir
-        && schedulerLocationDir);
+    return topologyDir && tmasterLocationDir && physicalPlanDir && executionStateDir
+        && schedulerLocationDir;
   }
 
   // Make utils class protected for easy unit testing
@@ -231,9 +231,9 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
    */
   public static void main(String[] args) throws ExecutionException, InterruptedException {
     if (args.length < 1) {
-      print("Usage: java %s <topology_name> - view state manager details for a topology",
-          LocalFileSystemStateManager.class.getCanonicalName());
-      System.exit(1);
+      throw new RuntimeException(String.format(
+          "Usage: java %s <topology_name> - view state manager details for a topology",
+          LocalFileSystemStateManager.class.getCanonicalName()));
     }
 
     String topologyName = args[0];
@@ -249,12 +249,17 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
 
     if (stateManager.isTopologyRunning(topologyName).get()) {
       print("==> Topology %s found", topologyName);
-      print("==> ExecutionState:\n%s",    stateManager.getExecutionState(null, topologyName).get());
-      print("==> SchedulerLocation:\n%s", stateManager.getSchedulerLocation(null, topologyName).get());
-      print("==> TMasterLocation:\n%s",   stateManager.getTMasterLocation(null, topologyName).get());
-      print("==> PhysicalPlan:\n%s",      stateManager.getPhysicalPlan(null, topologyName).get());
+      print("==> ExecutionState:\n%s",
+          stateManager.getExecutionState(null, topologyName).get());
+      print("==> SchedulerLocation:\n%s",
+          stateManager.getSchedulerLocation(null, topologyName).get());
+      print("==> TMasterLocation:\n%s",
+          stateManager.getTMasterLocation(null, topologyName).get());
+      print("==> PhysicalPlan:\n%s",
+          stateManager.getPhysicalPlan(null, topologyName).get());
     } else {
-      print("==> Topology %s not found under %s", topologyName, config.get(Keys.stateManagerRootPath()));
+      print("==> Topology %s not found under %s",
+          topologyName, config.get(Keys.stateManagerRootPath()));
     }
   }
 
