@@ -24,7 +24,7 @@ import org.junit.Test;
 public class UploaderUtilsTest {
 
   @Test
-  public void testGenerateFilename() {
+  public void testGenerateFilename() throws Exception {
     int expectedUniqueFilename = 10000;
     String topologyName = "topologyName";
     String role = "role";
@@ -33,10 +33,26 @@ public class UploaderUtilsTest {
     Set<String> filenames = new HashSet<>();
     for (int i = 0; i < expectedUniqueFilename; i++) {
       filenames.add(UploaderUtils.generateFilename(
-          topologyName, role, tag, version));
+          topologyName, role, tag, version, ""));
     }
 
     // All filenames should be unique
     Assert.assertEquals(expectedUniqueFilename, filenames.size());
+  }
+
+  @Test
+  public void testFilenameFormat() throws Exception {
+    String topologyName = "topologyName";
+    String role = "role";
+    String filename = UploaderUtils.generateFilename(topologyName, role);
+
+    Assert.assertTrue(filename.endsWith(UploaderUtils.DEFAULT_FILENAME_EXTENSION));
+
+    String tag = "";
+    int version = -1;
+    String extension = ".extension";
+    String customizedFilename =
+        UploaderUtils.generateFilename(topologyName, role, tag, version, extension);
+    Assert.assertTrue(customizedFilename.endsWith(extension));
   }
 }

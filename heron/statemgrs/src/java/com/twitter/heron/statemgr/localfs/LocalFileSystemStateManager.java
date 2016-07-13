@@ -209,4 +209,48 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   private static void print(String format, Object... values) {
     System.out.println(String.format(format, values));
   }
+
+  /**
+   * Returns all information stored in the StateManager. This is a utility method used for debugging
+   * while developing. To invoke, run:
+   *
+   *   bazel run heron/statemgrs/src/java:localfs-statemgr-unshaded -- &lt;topology-name&gt;
+   */
+  public static void main(String[] args) throws ExecutionException, InterruptedException {
+    if (args.length < 1) {
+      throw new RuntimeException(String.format(
+          "Usage: java %s <topology_name> - view state manager details for a topology",
+          LocalFileSystemStateManager.class.getCanonicalName()));
+    }
+
+    String topologyName = args[0];
+    Config config = Config.newBuilder()
+        .put(Keys.stateManagerRootPath(),
+            System.getProperty("user.home") + "/.herondata/repository/state/local")
+        .build();
+
+    print("==> State Manager root path: %s", config.get(Keys.stateManagerRootPath()));
+
+    com.twitter.heron.spi.statemgr.IStateManager stateManager = new LocalFileSystemStateManager();
+    stateManager.initialize(config);
+
+    if (stateManager.isTopologyRunning(topologyName).get()) {
+      print("==> Topology %s found", topologyName);
+      print("==> ExecutionState:\n%s",
+          stateManager.getExecutionState(null, topologyName).get());
+      print("==> SchedulerLocation:\n%s",
+          stateManager.getSchedulerLocation(null, topologyName).get());
+      print("==> TMasterLocation:\n%s",
+          stateManager.getTMasterLocation(null, topologyName).get());
+      print("==> PhysicalPlan:\n%s",
+          stateManager.getPhysicalPlan(null, topologyName).get());
+    } else {
+      print("==> Topology %s not found under %s",
+          topologyName, config.get(Keys.stateManagerRootPath()));
+    }
+  }
+
+  private static void print(String format, Object... values) {
+    System.out.println(String.format(format, values));
+  }
 }

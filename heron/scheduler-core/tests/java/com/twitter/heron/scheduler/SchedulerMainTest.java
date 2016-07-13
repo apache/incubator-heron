@@ -15,6 +15,7 @@
 package com.twitter.heron.scheduler;
 
 import java.util.HashMap;
+import java.util.Properties;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -104,7 +105,8 @@ public class SchedulerMainTest {
     // Mock objects to be verified
     schedulerMain =
         Mockito.spy(
-            new SchedulerMain(config, topology, iSchedulerServerPort));
+            new SchedulerMain(
+                config, topology, iSchedulerServerPort, Mockito.mock(Properties.class)));
     schedulerServer = Mockito.mock(SchedulerServer.class);
     Mockito.doReturn(schedulerServer).when(schedulerMain).getServer(
         Mockito.any(Config.class), Mockito.eq(scheduler), Mockito.eq(iSchedulerServerPort));

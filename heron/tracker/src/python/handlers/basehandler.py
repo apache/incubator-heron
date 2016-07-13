@@ -49,7 +49,7 @@ class BaseHandler(tornado.web.RequestHandler):
     now = time.time()
     spent = now - self.basehandler_starttime
     response[constants.RESPONSE_KEY_EXECUTION_TIME] = spent
-    self.write(tornado.escape.json_encode(response))
+    self.write_json_response(response)
 
   def write_error_response(self, message):
     """
@@ -60,7 +60,11 @@ class BaseHandler(tornado.web.RequestHandler):
     now = time.time()
     spent = now - self.basehandler_starttime
     response[constants.RESPONSE_KEY_EXECUTION_TIME] = spent
+    self.write_json_response(response)
+
+  def write_json_response(self, response):
     self.write(tornado.escape.json_encode(response))
+    self.set_header("Content-Type", "application/json")
 
   def make_response(self, status):
     """
