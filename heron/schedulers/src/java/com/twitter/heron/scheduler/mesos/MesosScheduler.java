@@ -18,7 +18,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.mesos.MesosSchedulerDriver;
@@ -50,19 +54,68 @@ public class MesosScheduler implements IScheduler {
   private MesosFramework mesosFramework;
   private SchedulerDriver driver;
 
+
   @Override
   public void initialize(Config mConfig, Config mRuntime) {
     this.config = mConfig;
     this.runtime = mRuntime;
     this.mesosFramework = getMesosFramework();
+
+  }
+
+  /**
+   * Waits for the driver to be stopped or aborted
+   *
+   * @param timeout maximum time waiting
+   * @param unit time unit to wait
+   */
+  protected void joinSchedulerDriver(long timeout, TimeUnit unit) {
+    // ExecutorService used to monitor whether close() completes in time
+    ExecutorService service = Executors.newFixedThreadPool(1);
+    final CountDownLatch closeLatch = new CountDownLatch(1);
+    Runnable driverJoin = new Runnable() {
+      @Override
+      public void run() {
+        driver.join();
+        closeLatch.countDown();
+      }
+    };
+    service.submit(driverJoin);
+
+    LOG.info("Waiting for Mesos Driver got stopped");
+    try {
+      if (!closeLatch.await(timeout, unit)) {
+        LOG.severe("Mesos Driver failed to stop in time.");
+      } else {
+        LOG.info("Mesos Driver stopped.");
+      }
+    } catch (InterruptedException e) {
+      LOG.log(Level.SEVERE, "Close latch thread is interrupted: ", e);
+    }
+
+    // Shutdown the ExecutorService
+    service.shutdownNow();
   }
 
   @Override
   public void close() {
     // Stop the SchedulerDriver
     if (driver != null) {
-      driver.stop();
+      // Stop the SchedulerDriver
+      if (this.mesosFramework.isTerminated()) {
+        driver.stop();
+      } else {
+        driver.stop(true);
+      }
+
+      // Waits for the driver to be stopped or aborted,
+      // i.e. waits for the message sent to Mesos Master
+      long stopTimeoutInMs = MesosContext.getHeronMesosSchedulerDriverStopTimeoutMs(config);
+      joinSchedulerDriver(stopTimeoutInMs, TimeUnit.MILLISECONDS);
     }
+
+    // Will not kill the topology when close() is invoked,
+    // since the lifecycle of Topology is independent from Scheduler
   }
 
   @Override

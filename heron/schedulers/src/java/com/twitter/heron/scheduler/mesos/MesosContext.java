@@ -27,6 +27,9 @@ public final class MesosContext {
   public static final String HERON_MESOS_FRAMEWORK_STAGING_TIMEOUT_MS =
       "heron.mesos.framework.staging.timeout.ms";
 
+  public static final String HERON_MESOS_SCHEDULER_DRIVER_STOP_TIMEOUT_MS =
+      "heron.mesos.scheduler.driver.stop.timeout.ms";
+
   private MesosContext() {
   }
 
@@ -44,5 +47,9 @@ public final class MesosContext {
 
   public static long getHeronMesosFrameworkStagingTimeoutMs(Config config) {
     return config.getLongValue(HERON_MESOS_FRAMEWORK_STAGING_TIMEOUT_MS, 1000);
+  }
+
+  public static long getHeronMesosSchedulerDriverStopTimeoutMs(Config config) {
+    return config.getLongValue(HERON_MESOS_SCHEDULER_DRIVER_STOP_TIMEOUT_MS, 1000);
   }
 }

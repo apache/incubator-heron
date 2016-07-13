@@ -13,8 +13,11 @@ heron.directory.sandbox.java.home:           ${JAVA_HOME}
 # The URI of Mesos Master
 heron.mesos.master.uri:                      "127.0.0.1:5050"
 
-# The maximum time waiting for MesosFramework got registered with Mesos Master
+# The maximum time in milliseconds waiting for MesosFramework got registered with Mesos Master
 heron.mesos.framework.staging.timeout.ms:              2000
+
+# The maximum time in milliseconds waiting for Mesos Scheduler Driver to complete stop()
+heron.mesos.scheduler.driver.stop.timeout.ms:              5000
 
 # the path to load native mesos library
 heron.mesos.native.library.path:             "/usr/lib/mesos/0.28.1/lib/"
