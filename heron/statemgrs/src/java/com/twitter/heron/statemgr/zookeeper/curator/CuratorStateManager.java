@@ -161,7 +161,8 @@ public class CuratorStateManager extends FileSystemStateManager {
   }
 
   // Make utils class protected for easy unit testing
-  protected ListenableFuture<Boolean> existNode(String path) {
+  @Override
+  protected ListenableFuture<Boolean> nodeExists(String path) {
     final SettableFuture<Boolean> result = SettableFuture.create();
 
     try {
@@ -198,6 +199,7 @@ public class CuratorStateManager extends FileSystemStateManager {
     return result;
   }
 
+  @Override
   protected ListenableFuture<Boolean> deleteNode(String path) {
     final SettableFuture<Boolean> result = SettableFuture.create();
 
@@ -215,6 +217,7 @@ public class CuratorStateManager extends FileSystemStateManager {
     return result;
   }
 
+  @Override
   protected <M extends Message> ListenableFuture<M> getNodeData(
       WatchCallback watcher,
       String path,
@@ -244,7 +247,7 @@ public class CuratorStateManager extends FileSystemStateManager {
       // Suppress it since forPath() throws Exception
       // SUPPRESS CHECKSTYLE IllegalCatch
     } catch (Exception e) {
-      future.setException(new RuntimeException("Could not getData", e));
+      future.setException(new RuntimeException("Could not getNodeData", e));
     }
 
     return future;
@@ -297,21 +300,6 @@ public class CuratorStateManager extends FileSystemStateManager {
   }
 
   @Override
-  public ListenableFuture<Boolean> deleteExecutionState(String topologyName) {
-    return deleteNode(getExecutionStatePath(topologyName));
-  }
-
-  @Override
-  public ListenableFuture<Boolean> deleteTopology(String topologyName) {
-    return deleteNode(getTopologyPath(topologyName));
-  }
-
-  @Override
-  public ListenableFuture<Boolean> deletePhysicalPlan(String topologyName) {
-    return deleteNode(getPhysicalPlanPath(topologyName));
-  }
-
-  @Override
   public ListenableFuture<Boolean> deleteSchedulerLocation(String topologyName) {
     // if scheduler is service, the znode is ephemeral and it's deleted automatically
     if (isSchedulerService) {
@@ -321,50 +309,5 @@ public class CuratorStateManager extends FileSystemStateManager {
     } else {
       return deleteNode(getSchedulerLocationPath(topologyName));
     }
-  }
-
-  @Override
-  public ListenableFuture<TopologyMaster.TMasterLocation> getTMasterLocation(
-      WatchCallback watcher,
-      String topologyName) {
-    return getNodeData(watcher, getTMasterLocationPath(topologyName),
-        TopologyMaster.TMasterLocation.newBuilder());
-  }
-
-  @Override
-  public ListenableFuture<Scheduler.SchedulerLocation> getSchedulerLocation(
-      WatchCallback watcher,
-      String topologyName) {
-    return getNodeData(watcher, getSchedulerLocationPath(topologyName),
-        Scheduler.SchedulerLocation.newBuilder());
-  }
-
-  @Override
-  public ListenableFuture<TopologyAPI.Topology> getTopology(
-      WatchCallback watcher,
-      String topologyName) {
-    return getNodeData(watcher, getTopologyPath(topologyName),
-        TopologyAPI.Topology.newBuilder());
-  }
-
-  @Override
-  public ListenableFuture<ExecutionEnvironment.ExecutionState> getExecutionState(
-      WatchCallback watcher,
-      String topologyName) {
-    return getNodeData(watcher, getExecutionStatePath(topologyName),
-        ExecutionEnvironment.ExecutionState.newBuilder());
-  }
-
-  @Override
-  public ListenableFuture<PhysicalPlans.PhysicalPlan> getPhysicalPlan(
-      WatchCallback watcher,
-      String topologyName) {
-    return getNodeData(watcher, getPhysicalPlanPath(topologyName),
-        PhysicalPlans.PhysicalPlan.newBuilder());
-  }
-
-  @Override
-  public ListenableFuture<Boolean> isTopologyRunning(String topologyName) {
-    return existNode(getTopologyPath(topologyName));
   }
 }
