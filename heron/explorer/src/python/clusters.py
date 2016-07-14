@@ -15,7 +15,7 @@
 import heron.explorer.src.python.args as args
 # from heron.common.src.python.color import Log
 # from tabulate import tabulate
-from heron.explorer.src.python.utils import get_clusters
+import heron.common.src.python.utils as utils
 
 
 def create_parser(subparsers):
@@ -31,7 +31,7 @@ def create_parser(subparsers):
 
 
 def run(command, parser, cl_args, unknown_args):
-  clusters = get_clusters()
+  clusters = utils.get_clusters()
   print('Available clusters:')
   for cluster in clusters:
     print('  %s' % cluster)

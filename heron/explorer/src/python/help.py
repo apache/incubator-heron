@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import utils
+import heron.common.src.python.utils as utils
 from heron.common.src.python.color import Log
 
 

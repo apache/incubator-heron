@@ -24,7 +24,7 @@ import heron.cli.src.python.args as cli_args
 import heron.cli.src.python.execute as execute
 import heron.cli.src.python.jars as jars
 import heron.cli.src.python.opts as opts
-import heron.cli.src.python.utils as utils
+import heron.common.src.python.utils as utils
 
 
 ################################################################################

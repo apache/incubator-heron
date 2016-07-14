@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' utils.py '''
 import argparse
 import contextlib
 import getpass
@@ -121,10 +121,18 @@ def get_classpath(jars):
   return ':'.join(map(normalized_class_path, jars))
 
 
+def get_heron_dir():
+  """
+  This will extract heron directory from .pex file.
+  :return: root location for heron-cli.
+  """
+  path = "/".join(os.path.realpath(__file__).split('/')[:-7])
+  return normalized_class_path(path)
+
 ################################################################################
 # Get the root of heron dir and various sub directories depending on platform
 ################################################################################
-def get_heron_dir():
+def get_heron_dir_explorer():
   """
   This will extract heron directory from .pex file.
   From heron-cli with modification since we need to reuse cli's conf

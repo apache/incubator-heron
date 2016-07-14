@@ -15,7 +15,7 @@
 import heron.explorer.src.python.args as args
 from collections import defaultdict
 from heron.common.src.python.color import Log
-from heron.explorer.src.python.utils import get_logical_plan, get_topology_info
+import heron.common.src.python.utils as utils
 from tabulate import tabulate
 
 
@@ -122,8 +122,8 @@ def run(cl_args, compo_type):
   topology = cl_args['topology-name']
   spouts_only, bolts_only = cl_args['spout'], cl_args['bolt']
   try:
-    components = get_logical_plan(cluster, env, topology, role)
-    topo_info = get_topology_info(cluster, env, topology, role)
+    components = utils.get_logical_plan(cluster, env, topology, role)
+    topo_info = utils.get_topology_info(cluster, env, topology, role)
     table, header = to_table(components, topo_info)
     if spouts_only == bolts_only:
       print(tabulate(table, headers=header))

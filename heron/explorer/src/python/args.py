@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import heron.explorer.src.python.utils as utils
+import heron.common.src.python.utils as utils
 import os
 
 
@@ -29,7 +29,7 @@ def add_config(parser):
   parser.add_argument(
       '--config-path',
       metavar='(a string; path to cluster config; default: "' + default_config_path + '")',
-      default=os.path.join(utils.get_heron_dir(), default_config_path))
+      default=os.path.join(utils.get_heron_dir_explorer(), default_config_path))
 
   return parser
 

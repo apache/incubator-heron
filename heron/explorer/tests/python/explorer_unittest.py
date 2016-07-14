@@ -20,7 +20,7 @@ from mock import Mock
 import heron.explorer.src.python.topologies as topologies
 import heron.explorer.src.python.main as main
 import heron.explorer.src.python.args as args
-import heron.explorer.src.python.utils as utils
+import heron.common.src.python.utils as utils
 import json
 import os
 

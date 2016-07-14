@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import heron.explorer.src.python.args as args
-import heron.explorer.src.python.utils as utils
+import heron.common.src.python.utils as utils
 import sys
 from heron.common.src.python.color import Log
 from tabulate import tabulate

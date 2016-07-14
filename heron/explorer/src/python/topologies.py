@@ -15,9 +15,7 @@
 import heron.explorer.src.python.args as args
 from heron.common.src.python.color import Log
 from tabulate import tabulate
-from heron.explorer.src.python.utils import get_cluster_topologies
-from heron.explorer.src.python.utils import get_cluster_role_topologies
-from heron.explorer.src.python.utils import get_cluster_role_env_topologies
+import heron.common.src.python.utils as utils
 
 
 def create_parser(subparsers):
@@ -52,7 +50,7 @@ def to_table(result):
 
 def show_cluster(cluster):
   try:
-    result = get_cluster_topologies(cluster)
+    result = utils.get_cluster_topologies(cluster)
     if not result:
       Log.error('Unknown cluster \'%s\'' % cluster)
       return False
@@ -69,7 +67,7 @@ def show_cluster(cluster):
 
 def show_cluster_role(cluster, role):
   try:
-    result = get_cluster_role_topologies(cluster, role)
+    result = utils.get_cluster_role_topologies(cluster, role)
     if not result:
       Log.error('Unknown cluster/role \'%s\'' % '/'.join([cluster, role]))
       return False
@@ -86,7 +84,7 @@ def show_cluster_role(cluster, role):
 
 def show_cluster_role_env(cluster, role, env):
   try:
-    result = get_cluster_role_env_topologies(cluster, role, env)
+    result = utils.get_cluster_role_env_topologies(cluster, role, env)
     if not result:
       Log.error('Unknown cluster/role/env \'%s\'' % '/'.join([cluster, role, env]))
       return False

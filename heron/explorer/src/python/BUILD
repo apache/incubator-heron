@@ -4,18 +4,7 @@ load("/tools/rules/pex_rules", "pex_library", "pex_binary")
 
 pex_library(
     name = "heron-explorer-lib",
-    srcs = [
-        "args.py",
-        "clusters.py",
-        "help.py",
-        "logicalplan.py",
-        "main.py",
-        "opts.py",
-        "physicalplan.py",
-        "topologies.py",
-        "utils.py",
-        "version.py",
-    ],
+    srcs = glob(["**/*.py"],),
     deps = [
         "//heron/common/src/python:tracker-access",
         "//heron/common/src/python:common",

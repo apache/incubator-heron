@@ -23,7 +23,7 @@ import heron.explorer.src.python.logicalplan as logicalplan
 import heron.explorer.src.python.opts as opts
 import heron.explorer.src.python.physicalplan as physicalplan
 import heron.explorer.src.python.topologies as topologies
-import heron.explorer.src.python.utils as utils
+import heron.common.src.python.utils as utils
 import heron.explorer.src.python.version as version
 import sys
 import time

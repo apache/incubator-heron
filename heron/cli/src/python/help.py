@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' help.py '''
-import utils
+import heron.common.src.python.utils as utils
 
 
 def create_parser(subparsers):

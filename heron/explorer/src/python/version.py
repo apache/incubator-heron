@@ -13,7 +13,7 @@
 # limitations under the license.
 
 import heron.explorer.src.python.args as args
-import heron.explorer.src.python.utils as utils
+import heron.common.src.python.utils as utils
 
 
 def create_parser(subparsers):
