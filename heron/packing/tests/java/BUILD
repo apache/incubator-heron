@@ -8,8 +8,8 @@ packing_deps_files = [
 ]
 
 test_deps_files = [
-    "//third_party:junit4",
-    "//third_party:mockito",
+    "//third_party/java:junit4",
+    "//third_party/java:mockito",
 ]
 
 roundrobin_deps_files = \
