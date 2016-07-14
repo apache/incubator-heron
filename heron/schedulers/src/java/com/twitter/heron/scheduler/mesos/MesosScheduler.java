@@ -61,6 +61,25 @@ public class MesosScheduler implements IScheduler {
     this.runtime = mRuntime;
     this.mesosFramework = getMesosFramework();
 
+    String masterURI = MesosContext.getHeronMesosMasterUri(config);
+    this.driver = getSchedulerDriver(masterURI, mesosFramework);
+
+    startSchedulerDriver();
+  }
+
+  /**
+   * Start the scheduler driver and wait it to get registered
+   */
+  protected void startSchedulerDriver() {
+    // start the driver, non-blocking
+    driver.start();
+
+    // Staging the Mesos Framework
+    LOG.info("Waiting for Mesos Framework get registered");
+    long timeout = MesosContext.getHeronMesosFrameworkStagingTimeoutMs(config);
+    if (!mesosFramework.waitForRegistered(timeout, TimeUnit.MILLISECONDS)) {
+      throw new RuntimeException("Failed to register with Mesos Master in time");
+    }
   }
 
   /**
@@ -127,20 +146,6 @@ public class MesosScheduler implements IScheduler {
          containerIndex < Runtime.numContainers(runtime);
          containerIndex++) {
       jobDefinition.put(containerIndex, getBaseContainer(containerIndex, packing));
-    }
-
-    String masterURI = MesosContext.getHeronMesosMasterUri(config);
-    this.driver = getSchedulerDriver(masterURI, mesosFramework);
-
-    // start the driver, non-blocking
-    driver.start();
-
-    // Staging the Mesos Framework
-    LOG.info("Waiting for Mesos Framework get registered");
-    long timeout = MesosContext.getHeronMesosFrameworkStagingTimeoutMs(config);
-    if (!mesosFramework.waitForRegistered(timeout, TimeUnit.MILLISECONDS)) {
-      LOG.severe("Mesos Framework failed to register with Mesos Master in time.");
-      return false;
     }
 
     return mesosFramework.createJob(jobDefinition);

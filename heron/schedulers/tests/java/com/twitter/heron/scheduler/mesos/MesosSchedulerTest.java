@@ -17,7 +17,6 @@ package com.twitter.heron.scheduler.mesos;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.mesos.SchedulerDriver;
 import org.junit.After;
@@ -73,6 +72,8 @@ public class MesosSchedulerTest {
     Mockito.doReturn(mesosFramework).when(scheduler).getMesosFramework();
     Mockito.doReturn(driver).when(scheduler)
         .getSchedulerDriver(Mockito.anyString(), Mockito.eq(mesosFramework));
+    Mockito.doNothing().when(scheduler)
+        .startSchedulerDriver();
 
     scheduler.initialize(config, runtime);
   }
@@ -87,11 +88,7 @@ public class MesosSchedulerTest {
     Mockito.doReturn(baseContainer).when(scheduler)
         .getBaseContainer(Mockito.anyInt(), Mockito.any(PackingPlan.class));
 
-    Mockito.doReturn(true).when(mesosFramework).waitForRegistered(
-        Mockito.anyLong(), Mockito.eq(TimeUnit.MILLISECONDS));
-
     scheduler.onSchedule(Mockito.mock(PackingPlan.class));
-    Mockito.verify(driver).start();
 
     Map<Integer, BaseContainer> expectedJobDef = new HashMap<>();
     for (int containerIndex = 0;

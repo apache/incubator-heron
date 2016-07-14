@@ -436,6 +436,7 @@ public class MesosFramework implements Scheduler {
               baseContainer.diskInMB,
               baseContainer.ports);
 
+      boolean isMatched = false;
       Iterator<Map.Entry<Protos.Offer, TaskResources>> it = offerResources.entrySet()
           .iterator();
       while (it.hasNext()) {
@@ -446,8 +447,6 @@ public class MesosFramework implements Scheduler {
         if (resources.canSatisfy(neededResources)) {
           resources.consume(neededResources);
 
-          // Add the tasks
-
           // Construct the list of free ports to use for a heron executor.
           List<Integer> freePorts = new ArrayList<>();
           for (int port = (int) (neededResources.getPortsHold().get(0).rangeStart);
@@ -455,20 +454,27 @@ public class MesosFramework implements Scheduler {
             freePorts.add(port);
           }
 
+          // Add the tasks
           tasks.add(new LaunchableTask(taskId, baseContainer, offer, freePorts));
+
+          // Set the flag
+          isMatched = true;
 
           // Matched baseContainer, break;
           break;
-        } else {
-          LOG.info(String.format("Insufficient resources remaining for baseContainer: %s, "
-                  + "will append to queue. Need: [%s], Found: [%s]",
-              taskId, neededResources.toString(), resources.toString()));
-
-          toScheduleTasks.add(taskId);
-
-          // No enough Resources remaining. Return the tasks generated.
-          return tasks;
         }
+      }
+
+      if (!isMatched) {
+        LOG.info(String.format("Insufficient resources remaining for baseContainer: %s, "
+                + "will append to queue. Need: [%s]",
+            taskId, neededResources.toString()));
+        toScheduleTasks.add(taskId);
+
+        // Offer will not be able to satisfy resources needed for any rest container,
+        // since all containers are homogeneous.
+        // Break the loop
+        break;
       }
     }
 
