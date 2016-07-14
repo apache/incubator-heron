@@ -11,40 +11,28 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-''' version.py '''
-import heron.cli.src.python.args as cli_args
+
+import heron.explorer.src.python.args as args
+# from heron.common.src.python.color import Log
+# from tabulate import tabulate
 import heron.common.src.python.utils as utils
 
 
 def create_parser(subparsers):
-  '''
-  :param subparsers:
-  :return:
-  '''
   parser = subparsers.add_parser(
-      'version',
-      help='Print version of heron-cli',
-      usage="%(prog)s",
-      add_help=False)
+    'clusters',
+    help='Display exisitng clusters',
+    usage="%(prog)s [options]",
+    add_help=True)
+  args.add_verbose(parser)
+  args.add_tracker_url(parser)
+  parser.set_defaults(subcommand='clusters')
+  return subparsers
 
-  cli_args.add_titles(parser)
 
-  parser.set_defaults(subcommand='version')
-  return parser
-
-
-# pylint: disable=unused-argument
-def run(command, parser, args, unknown_args):
-  '''
-  :param command:
-  :param parser:
-  :param args:
-  :param unknown_args:
-  :return:
-  '''
-  release_file = utils.get_heron_release_file()
-  with open(release_file) as release_info:
-    for line in release_info:
-      print line,
-
+def run(command, parser, cl_args, unknown_args):
+  clusters = utils.get_clusters()
+  print('Available clusters:')
+  for cluster in clusters:
+    print('  %s' % cluster)
   return True

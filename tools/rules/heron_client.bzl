@@ -4,6 +4,7 @@
 def heron_client_bin_files():
     return [
         "//heron/cli/src/python:heron",
+        "//heron/explorer/src/python:heron-explorer",
     ]
 
 def heron_client_conf_files():

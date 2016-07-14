@@ -24,6 +24,7 @@ from heron.tracker.src.python.handlers import BaseHandler
 
 LOG = logging.getLogger(__name__)
 
+
 class ExceptionHandler(BaseHandler):
   """
   URL - /topologies/exceptions?cluster=<cluster>&topology=<topology> \
@@ -89,7 +90,6 @@ class ExceptionHandler(BaseHandler):
     except tornado.httpclient.HTTPError as e:
       raise Exception(str(e))
 
-
     # Check the response code - error if it is in 400s or 500s
     responseCode = result.code
     if responseCode >= 400:
@@ -120,4 +120,3 @@ class ExceptionHandler(BaseHandler):
                   'count': str(exception_log.count),
                   'logging': exception_log.logging})
     raise tornado.gen.Return(ret)
-

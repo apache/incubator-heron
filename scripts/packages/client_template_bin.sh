@@ -81,6 +81,10 @@ if [ -L "${bin}/heron" ]; then
   rm -f "${bin}/heron"
 fi
 
+if [ -L "${bin}/heron-explorer" ]; then
+  rm -f "${bin}/heron-explorer"
+fi
+
 if [ -L "${bin}/heron-cli3" ]; then
   rm -f "${bin}/heron-cli3"
 fi
@@ -104,6 +108,7 @@ echo -n .
 
 ln -s "${base}/bin/heron" "${bin}/heron"
 ln -s "${base}/bin/heron" "${bin}/heron-cli3"
+ln -s "${base}/bin/heron-explorer" "${bin}/heron-explorer"
 echo -n .
 
 if [ -f "${heronrc}" ]; then

@@ -24,6 +24,7 @@ from heron.tracker.src.python.handlers import BaseHandler
 
 LOG = logging.getLogger(__name__)
 
+
 class MetricsHandler(BaseHandler):
   """
   URL - /topologies/metrics
@@ -61,7 +62,8 @@ class MetricsHandler(BaseHandler):
       interval = int(self.get_argument(constants.PARAM_INTERVAL, default=-1))
       instances = self.get_arguments(constants.PARAM_INSTANCE)
 
-      metrics = yield tornado.gen.Task(self.getComponentMetrics,
+      metrics = yield tornado.gen.Task(
+        self.getComponentMetrics,
         topology.tmaster, component, metric_names, instances, interval)
 
       self.write_success_response(metrics)
@@ -128,7 +130,6 @@ class MetricsHandler(BaseHandler):
     except tornado.httpclient.HTTPError as e:
       raise Exception(str(e))
 
-
     # Check the response code - error if it is in 400s or 500s
     responseCode = result.code
     if responseCode >= 400:
@@ -159,4 +160,3 @@ class MetricsHandler(BaseHandler):
         ret["metrics"][metricname][instance] = value
 
     raise tornado.gen.Return(ret)
-

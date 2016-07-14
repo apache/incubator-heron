@@ -14,7 +14,7 @@
 ''' args.py '''
 import os
 
-import heron.cli.src.python.utils as utils
+import heron.common.src.python.utils as utils
 
 
 def add_titles(parser):

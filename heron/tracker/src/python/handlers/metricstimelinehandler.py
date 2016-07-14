@@ -16,11 +16,10 @@ import tornado.gen
 import tornado.web
 import traceback
 
-from heron.proto import common_pb2
-from heron.proto import tmaster_pb2
 from heron.tracker.src.python import constants
 from heron.tracker.src.python import metricstimeline
 from heron.tracker.src.python.handlers import BaseHandler
+
 
 class MetricsTimelineHandler(BaseHandler):
   """
