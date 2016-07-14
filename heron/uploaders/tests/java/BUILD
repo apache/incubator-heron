@@ -3,8 +3,8 @@ load("/tools/rules/heron_deps", "heron_java_proto_files")
 common_deps_files = [
     "//third_party/java:powermock",
     "@commons_io_commons_io//jar",
-    "@bazel_tools//third_party:mockito",
-    "@bazel_tools//third_party:junit4",
+    "//third_party/java:mockito",
+    "//third_party/java:junit4",
 ]
 
 spi_deps_files = [

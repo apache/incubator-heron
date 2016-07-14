@@ -6,8 +6,8 @@ common_deps_files = [
     "//heron/api/src/java:api-java",
     "//heron/common/src/java:basics-java",
     "//heron/scheduler-core/src/java:scheduler-java",
-    "@bazel_tools//third_party:junit4",
-    "@bazel_tools//third_party:mockito",
+    "//third_party/java:junit4",
+    "//third_party/java:mockito",
 ]
 
 spi_deps_files = [

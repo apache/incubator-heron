@@ -3,7 +3,7 @@ java_test(
     srcs = glob(["**/CommunicatorTest.java"]),
     deps = [
         "//heron/common/src/java:common-java",
-        "@bazel_tools//third_party:junit4",
+        "//third_party/java:junit4",
     ],
     size = "small",
 )
@@ -13,7 +13,7 @@ java_test(
     srcs = glob(["**/SysUtilsTest.java"]),
     deps = [
         "//heron/common/src/java:common-java",
-        "@bazel_tools//third_party:junit4",
+        "//third_party/java:junit4",
     ],
     size = "small",
 )
@@ -23,7 +23,7 @@ java_test(
     srcs = glob(["**/WakeableLooperTest.java"]),
     deps = [
         "//heron/common/src/java:common-java",
-        "@bazel_tools//third_party:junit4",
+        "//third_party/java:junit4",
     ],
     size = "small",
 )
@@ -34,8 +34,8 @@ java_test(
     deps = [
         "//heron/common/src/java:common-java",
         "//third_party/java:powermock",
-        "@bazel_tools//third_party:mockito",
-        "@bazel_tools//third_party:junit4",
+        "//third_party/java:mockito",
+        "//third_party/java:junit4",
     ],
     size = "small",
 )
@@ -47,7 +47,7 @@ java_test(
         "//heron/common/src/java:common-java",
         "//heron/proto:proto_networktests_java",
         "@com_google_protobuf_protobuf_java//jar",
-        "@bazel_tools//third_party:junit4",
+        "//third_party/java:junit4",
     ],
     size = "small",
 )
@@ -59,7 +59,7 @@ java_test(
         "//heron/common/src/java:common-java",
         "//heron/proto:proto_networktests_java",
         "@com_google_protobuf_protobuf_java//jar",
-        "@bazel_tools//third_party:junit4",
+        "//third_party/java:junit4",
     ],
     size = "small",
 )
@@ -75,7 +75,7 @@ java_test(
     deps = [
         ":config-test-java",
         "//heron/common/src/java:config-java",
-        "@bazel_tools//third_party:junit4",
+        "//third_party/java:junit4",
     ],
     data = glob(["**/config/testdata/**/*.yaml"]),
     size = "small",
@@ -87,7 +87,7 @@ java_test(
     deps = [
         ":config-test-java",
         "//heron/common/src/java:config-java",
-        "@bazel_tools//third_party:junit4",
+        "//third_party/java:junit4",
     ],
     data = glob(["**/config/testdata/**/*.yaml"]),
     size = "small",
@@ -99,7 +99,7 @@ java_test(
     deps = [
         ":config-test-java",
         "//heron/common/src/java:config-java",
-        "@bazel_tools//third_party:junit4",
+        "//third_party/java:junit4",
     ],
     data = glob(["**/config/testdata/sysconfig.yaml"]),
     size = "small",

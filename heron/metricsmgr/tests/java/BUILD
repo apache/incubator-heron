@@ -9,8 +9,8 @@ java_test(
         "//heron/proto:proto_metrics_java",
         "//heron/proto:proto_tmaster_java",
         "@com_google_protobuf_protobuf_java//jar",
-        "@bazel_tools//third_party:mockito",
-        "@bazel_tools//third_party:junit4",
+        "//third_party/java:mockito",
+        "//third_party/java:junit4",
     ],
     size = "small",
 )
@@ -26,7 +26,7 @@ java_test(
         "//heron/proto:proto_common_java",
         "//heron/proto:proto_metrics_java", 
         "@com_google_protobuf_protobuf_java//jar",
-        "@bazel_tools//third_party:junit4",
+        "//third_party/java:junit4",
     ],
     size = "small",
 )
@@ -41,7 +41,7 @@ java_test(
         "//heron/metricsmgr/src/java:metricsmgr-java", 
         "//heron/proto:proto-java",
         "@com_google_protobuf_protobuf_java//jar",
-        "@bazel_tools//third_party:junit4",
+        "//third_party/java:junit4",
     ],
     size = "small",
 )
@@ -56,7 +56,7 @@ java_test(
         "//heron/metricsmgr/src/java:metricsmgr-java", 
         "//heron/proto:proto_tmaster_java",
         "@com_google_protobuf_protobuf_java//jar",
-        "@bazel_tools//third_party:junit4",
+        "//third_party/java:junit4",
     ],
     size = "small",
 )
@@ -71,8 +71,8 @@ java_test(
         "//heron/metricsmgr/src/java:metricsmgr-java",
         "//heron/proto:proto_tmaster_java",
         "@com_google_protobuf_protobuf_java//jar",
-        "@bazel_tools//third_party:junit4",
-        "@bazel_tools//third_party:mockito",
+        "//third_party/java:junit4",
+        "//third_party/java:mockito",
     ],
     size = "small",
 )

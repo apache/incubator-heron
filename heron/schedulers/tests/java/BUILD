@@ -5,8 +5,8 @@ common_deps_files = [
     "//third_party/java:powermock",
     "//heron/api/src/java:api-java",
     "//heron/common/src/java:basics-java",
-    "@bazel_tools//third_party:junit4",
-    "@bazel_tools//third_party:mockito",
+    "//third_party/java:junit4",
+    "//third_party/java:mockito",
 ]
 
 spi_deps_files = [

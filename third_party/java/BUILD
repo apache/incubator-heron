@@ -12,7 +12,7 @@ java_library(
     deps = [
         "@com_amazonaws_aws_java_sdk_core//jar",
         "@com_amazonaws_aws_java_sdk_s3//jar",
-        "@bazel_tools//third_party:joda_time",
+        "//third_party/java:joda_time",
         "@commons_logging_commons_logging//jar",
         "@org_apache_httpcomponents_http_client//jar",
         "@org_apache_httpcomponents_http_core//jar",
@@ -145,4 +145,25 @@ java_library(
     deps = [ "@com_google_protobuf_protobuf_java//jar" ],
     exports = [ "@com_puppycrawl_tools_checkstyle//jar" ],
     neverlink = 1,
+)
+
+java_library(
+    name = "joda_time",
+    srcs = [ "Empty.java" ],
+    exports = [ "@joda_time_joda_time//jar" ],
+    deps = [ "@joda_time_joda_time//jar" ],
+)
+
+java_library(
+    name = "junit4",
+    srcs = [ "Empty.java" ],
+    exports = [ "@junit_junit//jar" ],
+    deps = [ "@junit_junit//jar" ],
+)
+
+java_library(
+    name = "mockito",
+    srcs = [ "Empty.java" ],
+    exports = [ "@org_mockito_mockito_all//jar" ],
+    deps = [ "@org_mockito_mockito_all//jar" ],
 )

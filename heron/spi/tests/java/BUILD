@@ -6,8 +6,8 @@ common_deps_files = [
     "//heron/common/src/java:config-java",
     "//heron/spi/src/java:common-spi-java",
     "//third_party/java:powermock",
-    "@bazel_tools//third_party:junit4",
-    "@bazel_tools//third_party:mockito",
+    "//third_party/java:junit4",
+    "//third_party/java:mockito",
 ]
 
 util_deps_files = \
@@ -75,7 +75,7 @@ java_test(
     srcs = glob(["**/ExceptionInfoTest.java"]),
     deps = [
         "//heron/spi/src/java:metricsmgr-spi-java", 
-        "@bazel_tools//third_party:junit4",
+        "//third_party/java:junit4",
     ],
     size = "small",
 )
@@ -85,7 +85,7 @@ java_test(
     srcs = glob(["**/MetricsInfoTest.java"]),
     deps = [
         "//heron/spi/src/java:metricsmgr-spi-java", 
-        "@bazel_tools//third_party:junit4",
+        "//third_party/java:junit4",
     ],
     size = "small",
 )
@@ -95,7 +95,7 @@ java_test(
     srcs = glob(["**/MetricsRecordTest.java"]),
     deps = [
         "//heron/spi/src/java:metricsmgr-spi-java", 
-        "@bazel_tools//third_party:junit4",
+        "//third_party/java:junit4",
     ],
     size = "small",
 )
