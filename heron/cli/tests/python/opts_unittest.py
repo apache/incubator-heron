@@ -11,9 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' opts_unittest.py '''
 import unittest2 as unittest
 import heron.cli.src.python.opts as opts
+
+#pylint: disable=missing-docstring, no-self-use
 
 class OptsTest(unittest.TestCase):
   def setUp(self):
@@ -23,7 +25,7 @@ class OptsTest(unittest.TestCase):
     opts.clear_config()
     opts.set_config('XX', 'xx')
     self.assertEqual('xx', opts.get_config('XX'))
-    
+
   def test_two_opts(self):
     opts.clear_config()
     opts.set_config('XX', 'xx')
@@ -34,11 +36,11 @@ class OptsTest(unittest.TestCase):
   def test_non_exist_key(self):
     opts.clear_config()
     opts.set_config('XX', 'xx')
-    self.assertEqual(None, opts.get_config('YY')) 
+    self.assertEqual(None, opts.get_config('YY'))
 
   def test_many_opts(self):
     opts.clear_config()
-    for k in range(1, 100): 
+    for k in range(1, 100):
       key = "key-%d" % (k)
       value = "value-%d" % (k)
       opts.set_config(key, value)
@@ -54,7 +56,6 @@ class OptsTest(unittest.TestCase):
     self.assertEqual('yy', opts.get_config('YY'))
     opts.clear_config()
     self.assertEqual(None, opts.get_config('YY'))
-    
+
   def tearDown(self):
     opts.clear_config()
-
