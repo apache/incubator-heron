@@ -20,6 +20,3 @@ from heron.examples.src.python.count_bolt import CountBolt
 class WordCount(Topology):
   word_spout = WordSpout.spec()
   count_bolt = CountBolt.spec(inputs={word_spout: Grouping.fields('word')})
-
-
-

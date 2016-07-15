@@ -19,6 +19,7 @@ from .base_instance import BaseInstance
 from heron.proto import tuple_pb2
 from heron.common.src.python.log import Log
 from heron.instance.src.python.instance.comp_spec import HeronComponentSpec
+from heron.instance.src.python.instance.tuple import TupleHelper
 
 # TODO: declare output fields
 class Bolt(BaseInstance):
@@ -74,12 +75,12 @@ class Bolt(BaseInstance):
 
     It is compatible with StreamParse API.
 
-    :type tup: list or ``pyheron.Tuple``
+    :type tup: list or tuple
     :param tup: the new output Tuple to send from this bolt, should only contain only serializable data.
     :type stream: str
     :param stream: the ID of the stream to emit this Tuple to. Leave empty to emit to the default stream.
     :type anchors: list
-    :param anchors: IDs the Tuples which the emitted Tuple which the emitted Tuples should be anchored to.
+    :param anchors: a list of HeronTuples to which the emitted Tuples should be anchored.
     :type direct_task: int
     :param direct_task: the task to send the Tupel to if performing a direct emit.
     :type need_task_ids: bool
@@ -123,7 +124,9 @@ class Bolt(BaseInstance):
     for value in data_tuple.values:
       values.append(self.serializer.deserialize(value))
 
-    self.process(values)
+    # create HeronTuple
+    tup = TupleHelper.make_tuple(stream, data_tuple.key, values, roots=None)
+    self.process(tup)
 
   def _activate(self):
     pass
@@ -166,7 +169,7 @@ class Bolt(BaseInstance):
 
     You can emit a tuple from this bolt by using ``self.emit()`` method.
 
-    :type tuple: list
+    :type tup: ``Tuple``
     """
     # TODO: documentation and Tuple implementation
     raise NotImplementedError()

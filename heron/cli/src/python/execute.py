@@ -21,6 +21,7 @@ import tempfile
 import heron.cli.src.python.opts  as opts
 import heron.cli.src.python.utils as utils
 import heron.cli.src.python.jars  as jars
+import heron.common.src.python.pex_loader as pex_loader
 
 ################################################################################
 # Execute a heron class given the args and the jars needed for class path
@@ -78,9 +79,13 @@ def heron_tar(class_name, topology_tar, arguments, tmpdir_root, javaDefines):
   # Now execute the class
   heron_class(class_name, lib_jars, extra_jars, arguments, javaDefines)
 
-def heron_pex(topology_pex, tmp_dir):
+def heron_pex(topology_pex, topology_class_name, tmp_dir):
   # TODO: Currently pex topology is assumed to be executed as `./topology.pex <tmp_dir>`
-  print ("DEBUG: executing topology pex file with tmp_dir: " + tmp_dir)
+  print ("DEBUG: loading topology pex file with tmp_dir: " + tmp_dir)
+
+  pex_loader.load_pex(topology_pex)
+  topology_class = pex_loader.import_and_get_class(topology_pex, topology_class_name)
+
   all_args = [topology_pex, tmp_dir]
   if opts.verbose():
     print('$> %s' % ' '.join(all_args))

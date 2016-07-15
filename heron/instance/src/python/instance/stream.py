@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 from heron.proto import topology_pb2
 
 class Stream(object):

@@ -21,7 +21,7 @@ from heron.common.src.python.basics.gateway_looper import GatewayLooper
 from heron.proto import physical_plan_pb2, stmgr_pb2
 from heron.instance.src.python.single_thread_instance.single_thread_stmgr_client import SingleThreadStmgrClient
 from heron.instance.src.python.misc.communicator import HeronCommunicator
-import heron.instance.src.python.misc.pex_loader as pex_loader
+import heron.common.src.python.pex_loader as pex_loader
 
 class SingleThreadHeronInstance(object):
   def __init__(self, topology_name, topology_id, instance,

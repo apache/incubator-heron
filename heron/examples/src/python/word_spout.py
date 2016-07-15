@@ -18,11 +18,12 @@ from heron.common.src.python.log import Log
 
 
 class WordSpout(Spout):
-  words = cycle(["hello", "bye", "good", "bad", "heron", "storm"])
-  emit_count = 0
+  outputs = ['word']
 
   def initialize(self, config, context):
     Log.info("In initialize() of WordSpout")
+    self.words = cycle(["hello", "bye", "good", "bad", "heron", "storm"])
+    self.emit_count = 0
 
   def next_tuple(self):
     word = next(self.words)
@@ -32,4 +33,3 @@ class WordSpout(Spout):
     Log.debug("Emit count: " + str(self.emit_count))
     if self.emit_count % 1000 == 0:
       Log.info("Emitted " + str(self.emit_count))
-

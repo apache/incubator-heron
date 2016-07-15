@@ -92,9 +92,8 @@ def import_and_get_class(path_to_pex, python_class_name):
   if python_class_name.startswith("heron."):
     resolve_heron_suffix_issue(abs_path_to_pex, python_class_name)
 
-  Log.debug("After zipimport Loaded module: " + str([i for i in sys.modules if 'examples' in i]))
-
   mod = __import__(from_path, fromlist=[import_name], level=-1)
   Log.debug("Imported module: " + str(mod))
   return getattr(mod, import_name)
+
 

@@ -17,13 +17,12 @@ from heron.instance.src.python.instance.bolt import Bolt
 from heron.common.src.python.log import Log
 
 class CountBolt(Bolt):
-  counter = Counter()
-  total = 0
-  tuple_count = 0
+  outputs = ['word', 'count']
 
   def initialize(self, config, context):
     Log.debug("In prepare() of CountBolt")
-    pass
+    self.counter = Counter()
+    self.total = 0
 
   def _increment(self, word, inc_by):
     self.counter[word] += inc_by
@@ -32,8 +31,9 @@ class CountBolt(Bolt):
   def process(self, tuple):
     word = tuple[0]
     self.tuple_count += 1
-    Log.debug("Tuple count: " + str(self.tuple_count))
     self._increment(word, 10 if word == "heron" else 1)
     if self.total % 1000 == 0:
       Log.info("Current map: " + str(self.counter))
+
+    self.emit([word, self.counter[word]])
 
