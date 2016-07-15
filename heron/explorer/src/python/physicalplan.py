@@ -11,20 +11,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' physicalplan.py '''
+import sys
 import heron.explorer.src.python.args as args
 import heron.common.src.python.utils as utils
-import sys
 from heron.common.src.python.color import Log
 from tabulate import tabulate
 
 
 def create_parser(subparsers):
+  """ create parser """
   metrics_parser = subparsers.add_parser(
-    'metrics',
-    help='Display info of a topology\'s metrics',
-    usage="%(prog)s cluster/[role]/[env] topology-name [options]",
-    add_help=False)
+      'metrics',
+      help='Display info of a topology\'s metrics',
+      usage="%(prog)s cluster/[role]/[env] topology-name [options]",
+      add_help=False)
   args.add_cluster_role_env(metrics_parser)
   args.add_topology_name(metrics_parser)
   args.add_verbose(metrics_parser)
@@ -34,10 +35,10 @@ def create_parser(subparsers):
   metrics_parser.set_defaults(subcommand='metrics')
 
   containers_parser = subparsers.add_parser(
-    'containers',
-    help='Display info of a topology\'s containers metrics',
-    usage="%(prog)s cluster/[role]/[env] topology-name [options]",
-    add_help=False)
+      'containers',
+      help='Display info of a topology\'s containers metrics',
+      usage="%(prog)s cluster/[role]/[env] topology-name [options]",
+      add_help=False)
   args.add_cluster_role_env(containers_parser)
   args.add_topology_name(containers_parser)
   args.add_verbose(containers_parser)
@@ -49,7 +50,9 @@ def create_parser(subparsers):
   return subparsers
 
 
+# pylint: disable=misplaced-bare-raise
 def parse_topo_loc(cl_args):
+  """ parse topology location """
   try:
     topo_loc = cl_args['cluster/[role]/[env]'].split('/')
     topo_name = cl_args['topology-name']
@@ -62,8 +65,8 @@ def parse_topo_loc(cl_args):
     raise
 
 
-# normalize raw metrics API result to table
 def to_table(metrics):
+  """ normalize raw metrics API result to table """
   all_queries = utils.metric_queries()
   m = utils.queries_map()
   names = metrics.values()[0].keys()
@@ -80,7 +83,9 @@ def to_table(metrics):
   return stats, header
 
 
+# pylint: disable=unused-argument
 def run_metrics(command, parser, cl_args, unknown_args):
+  """ run metrics subcommand """
   cluster, role, env = cl_args['cluster'], cl_args['role'], cl_args['environ']
   topology = cl_args['topology-name']
   try:
@@ -107,13 +112,15 @@ def run_metrics(command, parser, cl_args, unknown_args):
       return False
   for i, (comp, stat, header) in enumerate(cresult):
     if i != 0:
-      print('')
-    print('\'%s\' metrics:' % comp)
-    print(tabulate(stat, headers=header))
+      print ''
+    print '\'%s\' metrics:' % comp
+    print tabulate(stat, headers=header)
   return True
 
 
+# pylint: disable=unused-argument
 def run_bolts(command, parser, cl_args, unknown_args):
+  """ run bolts subcommand """
   cluster, role, env = cl_args['cluster'], cl_args['role'], cl_args['environ']
   topology = cl_args['topology-name']
   try:
@@ -138,22 +145,23 @@ def run_bolts(command, parser, cl_args, unknown_args):
       return False
   for i, (bolt, stat, header) in enumerate(bolts_result):
     if i != 0:
-      print('')
-    print('\'%s\' metrics:' % bolt)
-    print(tabulate(stat, headers=header))
+      print ''
+    print '\'%s\' metrics:' % bolt
+    print tabulate(stat, headers=header)
   return True
 
-
+# pylint: disable=too-many-locals
 def run_containers(command, parser, cl_args, unknown_args):
+  """ run containers subcommand """
   cluster, role, env = cl_args['cluster'], cl_args['role'], cl_args['environ']
   topology = cl_args['topology-name']
   container_id = cl_args['id']
   result = utils.get_topology_info(cluster, env, topology, role)
   containers = result['physical_plan']['stmgrs']
   all_bolts, all_spouts = set(), set()
-  for container, bolts in result['physical_plan']['bolts'].items():
+  for _, bolts in result['physical_plan']['bolts'].items():
     all_bolts = all_bolts | set(bolts)
-  for container, spouts in result['physical_plan']['spouts'].items():
+  for _, spouts in result['physical_plan']['spouts'].items():
     all_spouts = all_spouts | set(spouts)
   stmgrs = containers.keys()
   stmgrs.sort()
@@ -167,8 +175,8 @@ def run_containers(command, parser, cl_args, unknown_args):
       Log.error('Invalid container id: %d' % container_id)
       return False
   table = []
-  for id, name in enumerate(stmgrs):
-    cid = id + 1
+  for sid, name in enumerate(stmgrs):
+    cid = sid + 1
     host = containers[name]["host"]
     port = containers[name]["port"]
     pid = containers[name]["pid"]
@@ -178,5 +186,5 @@ def run_containers(command, parser, cl_args, unknown_args):
     table.append([cid, host, port, pid, bolt_nums, spout_nums, len(instances)])
   headers = ["container", "host", "port", "pid", "#bolt", "#spout", "#instance"]
   sys.stdout.flush()
-  print(tabulate(table, headers=headers))
+  print tabulate(table, headers=headers)
   return True

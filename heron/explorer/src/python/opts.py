@@ -11,12 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+''' opts.py '''
+import logging
 from heron.common.src.python.color import Log
 from tornado.options import define
-import logging
 
 
 def set_verbose(cl_args):
+  """ set verbose level """
   if cl_args['verbose']:
     Log.setLevel(logging.INFO)
   else:
@@ -24,4 +26,5 @@ def set_verbose(cl_args):
 
 
 def set_tracker_url(cl_args):
+  """ define global Tornado variable """
   define("tracker_url", cl_args["tracker_url"])

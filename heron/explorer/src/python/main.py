@@ -12,12 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 #!/usr/bin/env python2.7
-
+''' main.py '''
 import argparse
+import sys
+import time
+
 import heron.explorer.src.python.args as parse
 import heron.explorer.src.python.clusters as clusters
+# pylint: disable=redefined-builtin
 import heron.explorer.src.python.help as help
 import heron.explorer.src.python.logicalplan as logicalplan
 import heron.explorer.src.python.opts as opts
@@ -25,12 +28,12 @@ import heron.explorer.src.python.physicalplan as physicalplan
 import heron.explorer.src.python.topologies as topologies
 import heron.common.src.python.utils as utils
 import heron.explorer.src.python.version as version
-import sys
-import time
 from heron.common.src.python.color import Log
 
 
+# pylint: disable=bad-super-call
 class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
+  """ subcommand help message formatter """
   def _format_action(self, action):
     parts = super(argparse.RawDescriptionHelpFormatter,
                   self)._format_action(action)
@@ -43,6 +46,7 @@ class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
 # Main parser
 ################################################################################
 def create_parser():
+  """ create parser """
   help_epilog = '''Getting more help:
   heron-explorer help <command>     Disply help and options for <command>\n
   For detailed documentation, go to http://heronstreaming.io'''
@@ -82,7 +86,9 @@ def create_parser():
 ################################################################################
 # Run the command
 ################################################################################
+# pylint: disable=too-many-return-statements
 def run(command, *args):
+  """ run command """
   # show all clusters
   if command == 'clusters':
     return clusters.run(command, *args)
@@ -117,6 +123,7 @@ def run(command, *args):
 
 
 def extract_common_args(command, parser, cl_args):
+  """ extract common args """
   try:
     # do not pop like cli because ``topologies`` subcommand still needs it
     cluster_role_env = cl_args['cluster/[role]/[env]']
@@ -124,7 +131,7 @@ def extract_common_args(command, parser, cl_args):
   except KeyError:
     # if some of the arguments are not found, print error and exit
     subparser = utils.get_subparser(parser, command)
-    print(subparser.format_help())
+    print subparser.format_help()
     return dict()
   cluster = utils.get_heron_cluster(cluster_role_env)
   config_path = utils.get_heron_cluster_conf_dir(cluster, config_path)
@@ -148,7 +155,7 @@ def extract_common_args(command, parser, cl_args):
 # Run the command
 ################################################################################
 def main(args):
-
+  """ main """
   # create the argument parser
   parser = create_parser()
 
