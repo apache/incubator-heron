@@ -42,7 +42,7 @@ import com.twitter.heron.spi.common.Context;
  *
  * We put synchronized block:
  * ```
- * synchronized(toScheduleTasks) {...}
+ * synchronized(this) {...}
  * ```
  * in critical areas for public methods potentially modifying its value.
  * Make sure not acquiring other locks inside this block to prevent the potential for deadlock.
@@ -89,7 +89,7 @@ public class MesosFramework implements Scheduler {
 
   // Create a topology
   public boolean createJob(Map<Integer, BaseContainer> jobDefinition) {
-    synchronized (toScheduleTasks) {
+    synchronized (this) {
       if (isTerminated) {
         LOG.severe("Job has been killed");
         return false;
@@ -112,7 +112,7 @@ public class MesosFramework implements Scheduler {
 
   // Kill a topology
   public boolean killJob() {
-    synchronized (toScheduleTasks) {
+    synchronized (this) {
       if (isTerminated) {
         LOG.info("Job has been killed");
         return false;
@@ -137,7 +137,7 @@ public class MesosFramework implements Scheduler {
 
   // Restart a topology
   public boolean restartJob(int containerIndex) {
-    synchronized (toScheduleTasks) {
+    synchronized (this) {
       if (isTerminated) {
         LOG.severe("Job has been killed");
         return false;
@@ -221,7 +221,7 @@ public class MesosFramework implements Scheduler {
 
   @Override
   public void resourceOffers(SchedulerDriver schedulerDriver, List<Protos.Offer> offers) {
-    synchronized (toScheduleTasks) {
+    synchronized (this) {
       LOG.fine("Received Resource Offers: " + offers.toString());
 
       Map<Protos.Offer, TaskResources> offerResources = new HashMap<>();
@@ -257,7 +257,7 @@ public class MesosFramework implements Scheduler {
 
   @Override
   public void statusUpdate(SchedulerDriver schedulerDriver, Protos.TaskStatus taskStatus) {
-    synchronized (toScheduleTasks) {
+    synchronized (this) {
       LOG.info(String.format("Received status update [%s]", taskStatus));
       if (isTerminated) {
         LOG.info("The framework terminated. Ignoring any status update.");
