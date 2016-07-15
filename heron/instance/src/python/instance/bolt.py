@@ -18,10 +18,12 @@ from abc import abstractmethod
 from .base_instance import BaseInstance
 from heron.proto import tuple_pb2
 from heron.common.src.python.log import Log
+from heron.instance.src.python.instance.comp_spec import HeronComponentSpec
 
 # TODO: declare output fields
 class Bolt(BaseInstance):
   """The base class for all heron bolts in Python"""
+
   def __init__(self, pplan_helper, in_stream, out_stream):
     super(Bolt, self).__init__(pplan_helper, in_stream, out_stream)
     # TODO: bolt metrics
@@ -31,27 +33,61 @@ class Bolt(BaseInstance):
 
     # TODO: Topology context, serializer and sys config
 
+  @classmethod
+  def spec(cls, name=None, inputs=None, par=1, config=None):
+    """Register this bolt to the topology abd create ``HeronComponentSpec``
+
+    The usage of this method is compatible with StreamParse API, although it does not create
+    ``ShellBoltSpec`` but instead directly registers to a ``Topology`` class.
+
+    :type name: str
+    :param name: Name of this bolt.
+    :param inputs: Streams that feed into this Bolt.
+
+                   Two forms of this are acceptable:
+
+                   1. A `dict` mapping from ``HeronComponentSpec`` to ``Grouping``
+                   2. A `list` of ``HeronComponentSpec`` or ``Stream``
+    :type par: int
+    :param par: Parallelism hint for this spout.
+    :type config: dict
+    :param config: Component-specific config settings.
+    """
+    python_class_path = cls.get_python_class_path()
+
+    if hasattr(cls, 'outputs'):
+      _outputs = cls.outputs
+    else:
+      _outputs = None
+
+    return HeronComponentSpec(name, python_class_path, is_spout=False, par=par,
+                              inputs=inputs, outputs=_outputs, config=config)
+
   def start(self):
-    self.prepare(None, None)
+    self.initialize()
 
   def stop(self):
     pass
 
-  def emit(self, output_tuple, stream_id=BaseInstance.DEFAULT_STREAM_ID, anchors=None, message_id=None):
+  def emit(self, tup, stream=BaseInstance.DEFAULT_STREAM_ID, anchors=None, direct_task=None, need_task_ids=False):
     """Emits a new tuple from this Bolt
 
-    :type output_tuple: list
-    :param output_tuple: The new output tuple from this bolt as a list of serializable objects
-    :type stream_id: str
-    :param stream_id: The stream to emit to
-    :type anchors: list
-    :param anchors: The tuples to anchor to
-    :param message_id: Must be ``None`` for Bolt
-    """
-    if message_id is not None:
-      raise RuntimeError("message_id cannot be set for emit() from Bolt")
+    It is compatible with StreamParse API.
 
-    self._admit_data_tuple(output_tuple, stream_id, is_spout=False, anchors=anchors, message_id=None)
+    :type tup: list or ``pyheron.Tuple``
+    :param tup: the new output Tuple to send from this bolt, should only contain only serializable data.
+    :type stream: str
+    :param stream: the ID of the stream to emit this Tuple to. Leave empty to emit to the default stream.
+    :type anchors: list
+    :param anchors: IDs the Tuples which the emitted Tuple which the emitted Tuples should be anchored to.
+    :type direct_task: int
+    :param direct_task: the task to send the Tupel to if performing a direct emit.
+    :type need_task_ids: bool
+    :param need_task_ids: indicate whether or not you would like the task IDs the Tuple was emitted.
+    """
+    # TODO: return when need_task_ids=True
+    return super(Bolt, self)._admit_data_tuple(tup, stream_id=stream, is_spout=False,
+                                               anchors=anchors, message_id=None)
 
   def _run(self):
     self._read_tuples_and_execute()
@@ -87,7 +123,7 @@ class Bolt(BaseInstance):
     for value in data_tuple.values:
       values.append(self.serializer.deserialize(value))
 
-    self.execute(values)
+    self.process(values)
 
   def _activate(self):
     pass
@@ -102,36 +138,60 @@ class Bolt(BaseInstance):
   ###################################
 
   @abstractmethod
-  def prepare(self, heron_config, context):
+  def initialize(self, config=None, context=None):
     """Called when a task for this component is initialized within a worker on the cluster
 
-    It provides the bolt with the environment in which the bolt executes.
+    It is compatible with StreamParse API. (Parameter name changed from ``storm_conf`` to ``config``)
 
-    *Must be implemented by a subclass.*
+    It provides the bolt with the environment in which the bolt executes. A good place to
+    initialize connections to data sources.
 
-    :param heron_config: The Heron configuration for this bolt. This is the configuration provided to the topology merged in with cluster configuration on this machine.
+    *Should be implemented by a subclass.*
+
+    :type config: dict
+    :param config: The Heron configuration for this bolt. This is the configuration provided to the topology merged in with cluster configuration on this machine.
+    :type context: dict
     :param context: This object can be used to get information about this task's place within the topology, including the task id and component id of this task, input and output information, etc.
     """
     pass
 
   @abstractmethod
-  def execute(self, tuple):
+  def process(self, tup):
     """Process a single tuple of input
 
     The Tuple object contains metadata on it about which component/stream/task it came from.
     To emit a tuple, call ``self.emit(tuple)``.
 
-    *Must be implemented by a subclass.*
+    **Must be implemented by a subclass.**
 
     You can emit a tuple from this bolt by using ``self.emit()`` method.
 
     :type tuple: list
     """
     # TODO: documentation and Tuple implementation
+    raise NotImplementedError()
+
+  def ack(self, tup):
+    """Indicate that processing of a Tuple has succeeded
+
+    It is compatible with StreamParse API.
+
+    *Should be implemented by a subclass.*
+    """
+    pass
+
+  def fail(self, tup):
+    """Indicate that processing of a Tuple has failed
+
+    It is compatible with StreamParse API.
+
+    *Should be implemented by a subclass.*
+    """
     pass
 
   def cleanup(self):
     pass
+
 
 
 

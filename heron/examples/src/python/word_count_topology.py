@@ -13,33 +13,13 @@
 # limitations under the License.
 
 from heron.instance.src.python.instance.topology import Topology
+from heron.instance.src.python.instance.stream import Grouping
 from heron.examples.src.python.word_spout import WordSpout
 from heron.examples.src.python.count_bolt import CountBolt
-import sys
-import os
 
-def usage():
-  print sys.argv[0] + " <topology_tmp_dir>"
-  print "  <topology_tmp_dir> is a directory in which topology.defn file will be created"
-  sys.exit(1)
+class WordCount(Topology):
+  word_spout = WordSpout.spec()
+  count_bolt = CountBolt.spec(inputs={word_spout: Grouping.fields('word')})
 
-if __name__ == '__main__':
-  if len(sys.argv) != 2:
-    usage()
-
-  print ("DEBUG: In main of WordCountTopology")
-
-  word_count_topology = Topology("WordCountTopology")
-  word_count_topology.set_spout("word_spout", WordSpout, "heron.examples.src.python.word_spout.WordSpout")
-  word_count_topology.set_bolt("count_bolt", CountBolt, "heron.examples.src.python.count_bolt.CountBolt", inputs=["word_spout"])
-
-  word_count_topology.write_to_file(sys.argv[1])
-
-  print("DEBUG: Wrote topology definition")
-
-  path = os.path.join(sys.argv[1], "topo_info")
-  info = "Topology id: " + word_count_topology.topology_id + "\n"
-  with open(path, 'w') as f:
-    f.write(info)
 
 

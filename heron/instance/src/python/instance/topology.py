@@ -14,114 +14,64 @@
 import os
 import uuid
 from heron.proto import topology_pb2
+from heron.instance.src.python.instance.comp_spec import HeronComponentSpec
 
-class Topology(object):
-  DEFAULT_STREAM_ID = "default"
+class TopologyType(type):
+  """Metaclass to define a Heron topology in Python"""
+  def __new__(mcs, classname, bases, class_dict):
+    bolt_specs = {}
+    spout_specs = {}
+    # Copy HeronComponentSpec items out of class_dict
+    specs = TopologyType.class_dict_to_specs(class_dict)
+    for spec in specs.itervalues():
+      if spec.is_spout:
+        TopologyType.add_spout_specs(spec, spout_specs)
+      else:
+        TopologyType.add_bolt_specs(spec, bolt_specs)
+    if classname != 'Topology' and not spout_specs:
+      raise ValueError("A Topology requires at least one Spout")
 
-  def __init__(self, name):
-    self.topology_name = name
-    self.topology_id = name + str(uuid.uuid4())
+    class_dict['protobuf_bolts'] = bolt_specs
+    class_dict['protobuf_spouts'] = spout_specs
+    class_dict['heron_specs'] = list(specs.values())
 
-    self.topology = topology_pb2.Topology()
-    self.topology.id = self.topology_id
-    self.topology.name = self.topology_name
-    self.topology.state = topology_pb2.TopologyState.Value("RUNNING")
-    self.topology.topology_config.CopyFrom(self._get_default_topoconfig())
+    # create topology protobuf here
+    TopologyType.init_topology(classname, class_dict)
 
-    self.spouts = {}
-    self.bolts = {}
+    return type.__new__(mcs, classname, bases, class_dict)
 
-  def set_spout(self, name, spout_cls, classpath):
-    """Set a spout
+  @classmethod
+  def class_dict_to_specs(mcs, class_dict):
+    """Takes a class ``__dict__`` and returns the ``HeronComponentSpec`` entries"""
+    specs = {}
 
-    Currently, only supports one output stream, with default stream id and "word" field
-    """
-    spout = topology_pb2.Spout()
-    spout.comp.CopyFrom(self._get_base_component(name, classpath))
+    for name, spec in class_dict.iteritems():
+      if isinstance(spec, HeronComponentSpec):
+        # Use the variable name as the specification name.
+          if spec.name is None:
+            spec.name = name
+          if spec.name in specs:
+            raise ValueError("Duplicate component name: " + spec.name)
+          else:
+            specs[spec.name] = spec
+    return specs
 
-    # Just one output stream
-    output_stream = spout.outputs.add()
-    output_stream.CopyFrom(self._get_output_stream(name, self.DEFAULT_STREAM_ID, ["word"]))
+  @classmethod
+  def add_spout_specs(mcs, spec, spout_specs):
+    if not spec.outputs:
+      raise ValueError(spec.python_class_path + " : " + spec.name +
+                       " requires at least one output, because it is a spout")
+    spout_specs[spec.name] = spec.get_protobuf()
 
-    to_add = self.topology.spouts.add()
-    to_add.CopyFrom(spout)
-    self.spouts[name] = spout
+  @classmethod
+  def add_bolt_specs(mcs, spec, bolt_specs):
+    if not spec.inputs:
+      raise ValueError(spec.python_class_path + " : " + spec.name +
+                       " requires at least one input, because it is a bolt")
+    bolt_specs[spec.name] = spec.get_protobuf()
 
-  def set_bolt(self, name, bolt_cls, classpath, inputs=[]):
-    """Set a bolt
-
-    Currently, everything that was emitted will be delivered to this bolt (All grouping).
-    Just one input and output stream.
-    """
-    bolt = topology_pb2.Bolt()
-    bolt.comp.CopyFrom(self._get_base_component(name, classpath))
-
-    # input stream (it's ALL grouping)
-    for input_comp in inputs:
-      input_stream = bolt.inputs.add()
-      input_stream.CopyFrom(self._get_input_stream(input_comp, self.DEFAULT_STREAM_ID))
-
-    # output stream
-    output_stream = bolt.outputs.add()
-    output_stream.CopyFrom(self._get_output_stream(name, self.DEFAULT_STREAM_ID, ["word"]))
-
-    to_add = self.topology.bolts.add()
-    to_add.CopyFrom(bolt)
-    self.bolts[name] = bolt
-
-  def write_to_file(self, dest):
-    assert self.topology.IsInitialized()
-    filename = self.topology_name + ".defn"
-    path = os.path.join(dest, filename)
-
-    with open(path, 'wb') as f:
-      f.write(self.topology.SerializeToString())
-
-  def _get_basic_comp_config(self):
-    config = topology_pb2.Config()
-    key = config.kvs.add()
-    key.key = "topology.component.parallelism"
-    key.value = "1"
-    return config
-
-  def _get_base_component(self, name, classpath, config=None):
-    comp = topology_pb2.Component()
-    comp.name = name
-    comp.python_class_name = classpath
-    if config is None:
-      comp.config.CopyFrom(self._get_basic_comp_config())
-    else:
-      comp.config.CopyFrom(config)
-    return comp
-
-  def _get_output_stream(self, comp_name, stream_id, fields):
-    output_stream = topology_pb2.OutputStream()
-    output_stream.stream.CopyFrom(self._get_stream_id(comp_name, stream_id))
-    output_stream.schema.CopyFrom(self._get_stream_schema(fields))
-    return output_stream
-
-  def _get_input_stream(self, comp_name, stream_id, gtype=topology_pb2.Grouping.Value("ALL")):
-    input_stream = topology_pb2.InputStream()
-    input_stream.stream.CopyFrom(self._get_stream_id(comp_name, stream_id))
-    input_stream.gtype = gtype
-    return input_stream
-
-  def _get_stream_id(self, comp_name, id):
-    stream_id = topology_pb2.StreamId()
-    stream_id.id = id
-    stream_id.component_name = comp_name
-    return stream_id
-
-  def _get_stream_schema(self, fields):
-    stream_schema = topology_pb2.StreamSchema()
-    for field in fields:
-      key = stream_schema.keys.add()
-      key.key = field
-      key.type = topology_pb2.Type.Value("OBJECT")
-
-    return stream_schema
-
-  def _get_default_topoconfig(self):
+  @classmethod
+  def get_default_topoconfig(mcs):
     config = topology_pb2.Config()
     conf_dict = {"topology.message.timeout.secs": "30",
                  "topology.acking": "false",
@@ -132,3 +82,48 @@ class Topology(object):
       kvs.key = key
       kvs.value = value
     return config
+
+  @classmethod
+  def init_topology(mcs, classname, class_dict):
+    if classname == 'Topology':
+      # Base class can't initialize protobuf
+      return
+    topology_name = classname + 'Topology'
+    topology_id = topology_name + str(uuid.uuid4())
+
+    # create protobuf
+    topology = topology_pb2.Topology()
+    topology.id = topology_id
+    topology.name = topology_name
+    topology.state = topology_pb2.TopologyState.Value("RUNNING")
+    topology.topology_config.CopyFrom(TopologyType.get_default_topoconfig())
+
+    TopologyType.add_bolts_and_spouts(topology, class_dict)
+
+    class_dict['topology_name'] = topology_name
+    class_dict['topology_id'] = topology_id
+    class_dict['protobuf_topology'] = topology
+
+  @classmethod
+  def add_bolts_and_spouts(mcs, topology, class_dict):
+    spouts = list(class_dict["protobuf_spouts"].values())
+    bolts = list(class_dict["protobuf_bolts"].values())
+
+    for spout in spouts:
+      added = topology.spouts.add()
+      added.CopyFrom(spout)
+    for bolt in bolts:
+      added = topology.bolts.add()
+      added.CopyFrom(bolt)
+
+class Topology(object):
+  __metaclass__ = TopologyType
+  @classmethod
+  def write(cls, dest):
+    if cls.__name__ == 'Topology':
+      raise ValueError("The base Topology class cannot be writable")
+    filename = cls.topology_name + ".defn"
+    path = os.path.join(dest, filename)
+
+    with open(path, 'wb') as f:
+      f.write(cls.protobuf_topology.SerializeToString())

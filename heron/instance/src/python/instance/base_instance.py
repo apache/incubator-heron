@@ -44,6 +44,10 @@ class BaseInstance(object):
     self.serializer = serializer
     self.output_helper = OutgoingTupleHelper(self.pplan_helper, out_stream)
 
+  @classmethod
+  def get_python_class_path(cls):
+    return cls.__module__ + "." + cls.__name__
+
   def run_tasks(self):
     while True:
       self._run()
@@ -71,13 +75,14 @@ class BaseInstance(object):
 
     self.output_helper.add_data_tuple(stream_id, data_tuple, tuple_size_in_bytes)
 
+
   ##################################################################
   # The followings are to be implemented by Spout/Bolt independently
   ##################################################################
 
   def start(self):
     """Do the basic setup for Heron Instance"""
-    raise NotImplementedError
+    raise NotImplementedError()
 
   def stop(self):
     """Do the basic clean for Heron Instance
@@ -85,11 +90,7 @@ class BaseInstance(object):
     Note that this method is not guaranteed to be invoked
     """
     # TODO: We never actually call this method
-    raise NotImplementedError
-
-  def emit(self, output_tuple, stream_id=DEFAULT_STREAM_ID, anchors=None, message_id=None):
-    """Emits a tuple from this instance"""
-    raise NotImplementedError
+    raise NotImplementedError()
 
   def _run(self):
     """Tasks to be executed every time this is waken up
@@ -98,7 +99,7 @@ class BaseInstance(object):
     Equivalent to addSpoutTasks()/addBoltTasks() in Java implementation.
     Separated out so it can be properly unit tested.
     """
-    raise NotImplementedError
+    raise NotImplementedError()
 
   def run_in_single_thread(self):
     """Tasks to be executed when running in a single-thread mode
@@ -108,17 +109,17 @@ class BaseInstance(object):
     Tuples buffered in ``out_stream`` will be sent to the Stream Manager
     immediately after completing this method.
     """
-    raise NotImplementedError
+    raise NotImplementedError()
 
   def _read_tuples_and_execute(self):
     """Read tuples from a queue and process the tuples"""
-    raise NotImplementedError
+    raise NotImplementedError()
 
   def _activate(self):
     """Activate the instance"""
-    raise NotImplementedError
+    raise NotImplementedError()
 
   def _deactivate(self):
     """Deactivate the instance"""
-    raise NotImplementedError
+    raise NotImplementedError()
 

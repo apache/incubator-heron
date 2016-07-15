@@ -17,13 +17,11 @@ from heron.instance.src.python.instance.bolt import Bolt
 from heron.common.src.python.log import Log
 
 class CountBolt(Bolt):
-  def __init__(self, pplan_helper, in_stream, out_stream):
-    super(CountBolt, self).__init__(pplan_helper, in_stream, out_stream)
-    self.counter = Counter()
-    self.total = 0
-    self.tuple_count = 0
+  counter = Counter()
+  total = 0
+  tuple_count = 0
 
-  def prepare(self, config, context):
+  def initialize(self, config, context):
     Log.debug("In prepare() of CountBolt")
     pass
 
@@ -31,7 +29,7 @@ class CountBolt(Bolt):
     self.counter[word] += inc_by
     self.total += inc_by
 
-  def execute(self, tuple):
+  def process(self, tuple):
     word = tuple[0]
     self.tuple_count += 1
     Log.debug("Tuple count: " + str(self.tuple_count))

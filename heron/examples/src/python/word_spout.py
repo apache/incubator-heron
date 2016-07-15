@@ -18,13 +18,11 @@ from heron.common.src.python.log import Log
 
 
 class WordSpout(Spout):
-  def __init__(self, pplan_helper, in_stream, out_stream):
-    super(WordSpout, self).__init__(pplan_helper, in_stream, out_stream)
-    self.words = cycle(["hello", "bye", "good", "bad", "heron", "storm"])
-    self.emit_count = 0
+  words = cycle(["hello", "bye", "good", "bad", "heron", "storm"])
+  emit_count = 0
 
-  def open(self, config, context):
-    Log.info("In open() of WordSpout")
+  def initialize(self, config, context):
+    Log.info("In initialize() of WordSpout")
 
   def next_tuple(self):
     word = next(self.words)

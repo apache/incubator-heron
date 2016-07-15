@@ -19,9 +19,11 @@ import time
 from .base_instance import BaseInstance
 from heron.proto import topology_pb2, tuple_pb2
 from heron.common.src.python.log import Log
+from heron.instance.src.python.instance.comp_spec import HeronComponentSpec
 
 class Spout(BaseInstance):
   """The base class for all heron spouts in Python"""
+
   def __init__(self, pplan_helper, in_stream, out_stream):
     super(Spout, self).__init__(pplan_helper,in_stream, out_stream)
     self._pplan_helper = pplan_helper
@@ -32,26 +34,57 @@ class Spout(BaseInstance):
 
     # TODO: topology context, serializer and sys config
 
+  @classmethod
+  def spec(cls, name=None, par=1, config=None):
+    """Register this spout to the topology and create ``HeronComponentSpec``
+
+    The usage of this method is compatible with StreamParse API, although it does not create
+    ``ShellBoltSpec`` but instead directly registers to a ``Topology`` class.
+
+    :type name: str
+    :param name: Name of this spout.
+    :type par: int
+    :param par: Parallelism hint for this spout.
+    :type config: dict
+    :param config: Component-specific config settings.
+    """
+    python_class_path = cls.get_python_class_path()
+
+    if hasattr(cls, 'outputs'):
+      _outputs = cls.outputs
+    else:
+      _outputs = None
+
+    return HeronComponentSpec(name, python_class_path, is_spout=True, par=par,
+                              inputs=None, outputs=_outputs, config=config)
+
   def start(self):
-    self.open(None, None)
+    self.initialize()
     self.topology_state = topology_pb2.TopologyState.Value("RUNNING")
 
   def stop(self):
     pass
 
-  def emit(self, output_tuple, stream_id=BaseInstance.DEFAULT_STREAM_ID, message_id=None, anchors=None):
+  def emit(self, tup, tup_id=None, stream=BaseInstance.DEFAULT_STREAM_ID,
+           direct_task=None, need_task_ids=False):
     """Emits a new tuple from this Spout
 
-    :type output_tuple: list
-    :param output_tuple: The new output tuple from this bolt
-    :type stream_id: str
-    :param stream_id: The stream to emit to
-    :param message_id: The message ID
-    :param anchors: Must be ``None`` for Spout
+    It is compatible with StreamParse API.
+
+    :type tup: list or tuple
+    :param tup: the new outpu Tuple to send from this spout, should contain only serializable data.
+    :type tup_id: str
+    :param tup_id: the ID for the Tuple. Leave this blank for an unreliable emit.
+    :type stream: str
+    :param stream: the ID of the stream this Tuple should be emitted to. Leave empty to emit to the default stream.
+    :type direct_task: int
+    :param direct_task: the task to send the Tuple to if performing a direct emit.
+    :type need_task_ids: bool
+    :param need_task_ids: indicate whether or not you would like the task IDs the Tuple was emitted.
     """
-    if anchors is not None:
-      raise RuntimeError("anchors cannot be set for emit() from Spout")
-    self._admit_data_tuple(output_tuple, stream_id, is_spout=True, anchors=None, message_id=message_id)
+    # TODO: return when need_task_ids=True
+    return super(Spout, self)._admit_data_tuple(tup, stream_id=stream, is_spout=True,
+                                                anchors=None, message_id=tup_id)
 
   def _run(self):
     if self._should_produce_tuple():
@@ -97,12 +130,12 @@ class Spout(BaseInstance):
 
   def _activate(self):
     Log.info("Spout is activated")
-    self._activate()
+    self.activate()
     self.topology_state = topology_pb2.TopologyState.Value("RUNNING")
 
   def _deactivate(self):
     Log.info("Spout is deactivated")
-    self._deactivate()
+    self.deactivate()
     self.topology_state = topology_pb2.TopologyState.Value("PAUSED")
 
   ###################################
@@ -110,17 +143,22 @@ class Spout(BaseInstance):
   ###################################
 
   @abstractmethod
-  def open(self, config, context):
+  def initialize(self, config=None, context=None):
     """Called when a task for this component is initialized within a worker on the cluster
 
-    It provides the spout with the environment in which the spout executes.
+    It is compatible with StreamParse API. (Parameter name changed from ``storm_conf`` to ``config``)
 
-    *Must be implemented by a subclass.*
+    It provides the spout with the environment in which the spout executes. A good place to
+    initialize connections to data sources.
 
+    *Should be implemented by a subclass.*
+
+    :type config: dict
     :param config: The Heron configuration for this spout. This is the configuration provided to the topology merged in with cluster configuration on this machine.
+    :type context: dict
     :param context: This object can be used to get information about this task's place within the topology, including the task id and component id of this task, input and output information, etc.
     """
-    raise NotImplementedError
+    pass
 
   def close(self):
     """Called when this spout is going to be shutdown
@@ -133,20 +171,24 @@ class Spout(BaseInstance):
   def next_tuple(self):
     """When this method is called, Heron is requesting that the Spout emit tuples
 
+    It is compatible with StreamParse API.
+
     This method should be non-blocking, so if the Spout has no tuples to emit,
     this method should return; next_tuple(), ack(), and fail() are all called in a tight
     loop in a single thread in the spout task. WHen there are no tuples to emit, it is
     courteous to have next_tuple sleep for a short amount of time (like a single millisecond)
     so as not to waste too much CPU.
 
-    *Must be implemented by a subclass.*
+    **Must be implemented by a subclass.**
     """
-    raise NotImplementedError
+    raise NotImplementedError()
 
-  def ack(self, msg_id):
-    """Determine that the tuple emitted by this spout with the msg_id has been fully processed
+  def ack(self, tup_id):
+    """Determine that the tuple emitted by this spout with the tup_id has been fully processed
 
-    Heron has determined that the tuple emitted by this spout with the msg_id identifier
+    It is compatible with StreamParse API.
+
+    Heron has determined that the tuple emitted by this spout with the tup_id identifier
     has been fully processed. Typically, an implementation of this method will take that
     message off the queue and prevent it from being replayed.
 
@@ -154,14 +196,16 @@ class Spout(BaseInstance):
     """
     pass
 
-  def fail(self, msg_id):
-    """Determine that the tuple emitted by this spout with the msg_id has failed to be fully processed
+  def fail(self, tup_id):
+    """Determine that the tuple emitted by this spout with the tup_id has failed to be fully processed
 
-    The tuple emitted by this spout with the msg_id identifier has failed to be
+    It is compatible with StreamParse API.
+
+    The tuple emitted by this spout with the tup_id identifier has failed to be
     fully processed. Typically, an implementation of this method will put that
     message back on the queue to be replayed at a later time.
 
-    *Must be implemented by a subclass.*
+    *Should be implemented by a subclass.*
     """
     pass
 
