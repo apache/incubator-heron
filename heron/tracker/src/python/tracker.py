@@ -25,6 +25,7 @@ from heron.tracker.src.python import utils
 
 LOG = logging.getLogger(__name__)
 
+
 class Tracker:
   """
   Tracker is a stateless cache of all the topologies
@@ -459,4 +460,3 @@ class Tracker:
       LOG.info("Could not find topology info for topology: {0}, \
                cluster: {1} and environ: {2}".format(topologyName, cluster, environ))
     raise Exception("No topology found")
-

@@ -16,9 +16,9 @@ import tornado.gen
 import tornado.web
 import traceback
 
-from heron.tracker.src.python import constants
 from heron.tracker.src.python.handlers import BaseHandler
 from heron.tracker.src.python.query import Query
+
 
 class MetricsQueryHandler(BaseHandler):
   """
@@ -43,6 +43,7 @@ class MetricsQueryHandler(BaseHandler):
   def get(self):
     try:
       cluster = self.get_argument_cluster()
+
       role = self.get_argument_role()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
@@ -61,12 +62,7 @@ class MetricsQueryHandler(BaseHandler):
       self.write_error_response(e)
 
   @tornado.gen.coroutine
-  def executeMetricsQuery(self,
-                         tmaster,
-                         queryString,
-                         start_time,
-                         end_time,
-                         callback=None):
+  def executeMetricsQuery(self, tmaster, queryString, start_time, end_time, callback=None):
     """
     Get the specified metrics for the given query in this topology.
     Returns the following dict on success:
@@ -109,4 +105,3 @@ class MetricsQueryHandler(BaseHandler):
       ret["timeline"].append(tl)
 
     raise tornado.gen.Return(ret)
-

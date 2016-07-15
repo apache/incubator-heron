@@ -11,58 +11,81 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+''' jars.py '''
+import os
+import fnmatch
 
-import os, fnmatch
+import heron.common.src.python.utils as utils
 
-import heron.cli.src.python.utils as utils
 
 ################################################################################
-# Get the topology jars - TODO, make the jars independent version free
-################################################################################
+# TODO, make the jars independent version free
 def pick(dirname, pattern):
+  '''
+  Get the topology jars
+  :param dirname:
+  :param pattern:
+  :return:
+  '''
   file_list = fnmatch.filter(os.listdir(dirname), pattern)
   return file_list[0] if file_list else None
-    
+
+
 ################################################################################
-# Get the topology jars - TODO, make the jars independent version free
-################################################################################
+# TODO, make the jars independent version free
 def topology_jars():
+  '''
+  Get the topology jars
+  :return:
+  '''
   jars = [
       os.path.join(utils.get_heron_lib_dir(), "third_party", "*")
   ]
   return jars
 
-################################################################################
-# Get the scheduler jars
+
 ################################################################################
 def scheduler_jars():
+  '''
+  Get the scheduler jars
+  :return:
+  '''
   jars = [
-       os.path.join(utils.get_heron_lib_dir(), "scheduler", "*")
+      os.path.join(utils.get_heron_lib_dir(), "scheduler", "*")
   ]
   return jars
 
-################################################################################
-# Get the uploader jars
+
 ################################################################################
 def uploader_jars():
+  '''
+  Get the uploader jars
+  :return:
+  '''
   jars = [
       os.path.join(utils.get_heron_lib_dir(), "uploader", "*")
   ]
   return jars
 
-################################################################################
-# Get the statemgr jars
+
 ################################################################################
 def statemgr_jars():
+  '''
+  Get the statemgr jars
+  :return:
+  '''
   jars = [
       os.path.join(utils.get_heron_lib_dir(), "statemgr", "*")
   ]
   return jars
 
-################################################################################
-# Get the packing algorithm jars
+
 ################################################################################
 def packing_jars():
+  '''
+  Get the packing algorithm jars
+  :return:
+  '''
   jars = [
       os.path.join(utils.get_heron_lib_dir(), "packing", "*")
   ]

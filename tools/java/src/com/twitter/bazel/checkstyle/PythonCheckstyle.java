@@ -42,6 +42,7 @@ import org.apache.commons.cli.ParseException;
 public final class PythonCheckstyle {
   public static final Logger LOG = Logger.getLogger(PythonCheckstyle.class.getName());
   private static final String CLASSNAME = PythonCheckstyle.class.getCanonicalName();
+  private static final String PYLINT_RCFILE = "tools/python/checkstyle.ini";
 
   private PythonCheckstyle() {
   }
@@ -80,6 +81,7 @@ public final class PythonCheckstyle {
       // Create and run the command
       List<String> commandBuilder = new ArrayList<>();
       commandBuilder.add(pylintFile);
+      commandBuilder.add("--rcfile=" + PYLINT_RCFILE);
       commandBuilder.addAll(sourceFiles);
       runLinter(commandBuilder);
 

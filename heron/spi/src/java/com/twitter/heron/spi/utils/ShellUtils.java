@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -127,10 +128,20 @@ public final class ShellUtils {
     // Log the command for debugging
     LOG.log(Level.FINE, "$> {0}", Arrays.toString(command));
 
+    // the log file can help people to find out what happened between pb.start()
+    // and the async process started
+    String commandFileName = Paths.get(command[0]).getFileName().toString();
+    String uuid = UUID.randomUUID().toString().substring(0, 8);
+    String logFilePath = workingDirectory + "/" + commandFileName + "-" + uuid + "-started.stderr";
+    File logFile = new File(logFilePath);
+
     // For AsyncProcess, we will never inherit IO, since parent process will not
     // be guaranteed alive when children processing trying to flush to
     // parent processes's IO.
     ProcessBuilder pb = getProcessBuilder(false, command, workingDirectory, envs);
+    pb.redirectErrorStream(true);
+    pb.redirectOutput(ProcessBuilder.Redirect.appendTo(logFile));
+
     Process process = null;
     try {
       process = pb.start();

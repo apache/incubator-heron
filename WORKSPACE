@@ -271,3 +271,18 @@ maven_jar(
   name = "org_apache_zookeeper_zookeeper",
   artifact = "org.apache.zookeeper:zookeeper:3.4.6",
 )
+
+maven_jar(
+  name = "joda_time_joda_time",
+  artifact = "joda-time:joda-time:2.3",
+)
+
+maven_jar(
+  name = "junit_junit",
+  artifact = "junit:junit:4.11",
+)
+
+maven_jar(
+  name = "org_mockito_mockito_all",
+  artifact = "org.mockito:mockito-all:1.10.19",
+)

@@ -1,11 +1,11 @@
 import json
-import os
 import tornado.gen
 import traceback
 
 from heron.tracker.src.python.handlers import BaseHandler
 from heron.tracker.src.python import constants
 from heron.tracker.src.python import utils
+
 
 class ContainerFileDataHandler(BaseHandler):
   """
@@ -54,6 +54,7 @@ class ContainerFileDataHandler(BaseHandler):
     except Exception as e:
       traceback.print_exc()
       self.write_error_response(e)
+
 
 class ContainerFileStatsHandler(BaseHandler):
   """
