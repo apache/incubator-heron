@@ -15,7 +15,6 @@
 import logging
 import colorlog
 
-# pylint: disable=invalid-name
 formatter = colorlog.ColoredFormatter('%(log_color)s%(levelname)s:%(reset)s %(message)s')
 stream = logging.StreamHandler()
 stream.setLevel(logging.DEBUG)

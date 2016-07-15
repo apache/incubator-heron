@@ -50,10 +50,10 @@ IS_ROLE_REQUIRED = "heron.config.is.role.required"
 IS_ENV_REQUIRED = "heron.config.is.env.required"
 
 
-################################################################################
-# Create a tar file with a given set of files
-################################################################################
 def create_tar(tar_filename, files, config_dir, config_files):
+  '''
+  Create a tar file with a given set of files
+  '''
   with contextlib.closing(tarfile.open(tar_filename, 'w:gz')) as tar:
     for filename in files:
       if os.path.isfile(filename):
@@ -74,13 +74,14 @@ def create_tar(tar_filename, files, config_dir, config_files):
         raise Exception("%s is not an existing file" % filename)
 
 
-################################################################################
-# Retrieve the given subparser from parser
-################################################################################
 def get_subparser(parser, command):
+  '''
+  Retrieve the given subparser from parser
+  '''
+  # pylint: disable=protected-access
   subparsers_actions = [
-    action for action in parser._actions
-    if isinstance(action, argparse._SubParsersAction)
+      action for action in parser._actions
+      if isinstance(action, argparse._SubParsersAction)
   ]
 
   # there will probably only be one subparser_action,
@@ -93,31 +94,38 @@ def get_subparser(parser, command):
   return None
 
 
-################################################################################
-# Get normalized class path depending on platform
-################################################################################
-def identity(x):
-  return x
-
-
 def cygpath(x):
+  '''
+  normalized class path on cygwin
+  '''
   command = ['cygpath', '-wp', x]
   p = subprocess.Popen(command, stdout=subprocess.PIPE)
-  output, errors = p.communicate()
+  result = p.communicate()
+  output = result[0]
   lines = output.split("\n")
   return lines[0]
 
 
+def identity(x):
+  '''
+  identity function
+  '''
+  return x
+
+
 def normalized_class_path(x):
+  '''
+  normalize path
+  '''
   if sys.platform == 'cygwin':
     return cygpath(x)
   return identity(x)
 
 
-################################################################################
-# Get the normalized class path of all jars
-################################################################################
 def get_classpath(jars):
+  '''
+  Get the normalized class path of all jars
+  '''
   return ':'.join(map(normalized_class_path, jars))
 
 
@@ -128,6 +136,7 @@ def get_heron_dir():
   """
   path = "/".join(os.path.realpath(__file__).split('/')[:-7])
   return normalized_class_path(path)
+
 
 ################################################################################
 # Get the root of heron dir and various sub directories depending on platform
@@ -187,9 +196,6 @@ def get_heron_cluster_conf_dir(cluster, default_config_path):
   return os.path.join(default_config_path, cluster)
 
 
-################################################################################
-# Get the sandbox directories and config files
-################################################################################
 def get_heron_sandbox_conf_dir():
   """
   This will provide heron conf directory in the sandbox
@@ -198,26 +204,21 @@ def get_heron_sandbox_conf_dir():
   return SANDBOX_CONF_DIR
 
 
-################################################################################
-# Get all the heron lib jars with the absolute paths
-################################################################################
 def get_heron_libs(local_jars):
+  """Get all the heron lib jars with the absolute paths"""
   heron_lib_dir = get_heron_lib_dir()
   heron_libs = [os.path.join(heron_lib_dir, f) for f in local_jars]
   return heron_libs
 
 
-################################################################################
-# Get the cluster to which topology is submitted
-################################################################################
 def get_heron_cluster(cluster_role_env):
+  """Get the cluster to which topology is submitted"""
   return cluster_role_env.split('/')[0]
 
 
-################################################################################
-# Parse cluster/[role]/[environ], supply default, if not provided, not required
-################################################################################
+# pylint: disable=too-many-branches
 def parse_cluster_role_env(cluster_role_env, config_path):
+  """Parse cluster/[role]/[environ], supply default, if not provided, not required"""
   parts = cluster_role_env.split('/')[:3]
   Log.info("Using config file under %s" % config_path)
   if not os.path.isdir(config_path):
@@ -249,8 +250,8 @@ def parse_cluster_role_env(cluster_role_env, config_path):
       if len(parts) == 1:
         if (IS_ROLE_REQUIRED in cli_confs) and (cli_confs[IS_ROLE_REQUIRED] is True):
           raise Exception(
-            "role required but not provided (cluster/role/env = %s). See %s in %s" %
-            (cluster_role_env, IS_ROLE_REQUIRED, CLIENT_YAML))
+              "role required but not provided (cluster/role/env = %s). See %s in %s" %
+              (cluster_role_env, IS_ROLE_REQUIRED, CLIENT_YAML))
         else:
           parts.append(getpass.getuser())
 
@@ -258,8 +259,8 @@ def parse_cluster_role_env(cluster_role_env, config_path):
       if len(parts) == 2:
         if (IS_ENV_REQUIRED in cli_confs) and (cli_confs[IS_ENV_REQUIRED] is True):
           raise Exception(
-            "environ required but not provided (cluster/role/env = %s). See %s in %s" %
-            (cluster_role_env, IS_ENV_REQUIRED, CLIENT_YAML))
+              "environ required but not provided (cluster/role/env = %s). See %s in %s" %
+              (cluster_role_env, IS_ENV_REQUIRED, CLIENT_YAML))
         else:
           parts.append(ENVIRON)
 
@@ -275,6 +276,7 @@ def parse_cluster_role_env(cluster_role_env, config_path):
 # Parse the command line for overriding the defaults
 ################################################################################
 def parse_override_config(namespace):
+  """Parse the command line for overriding the defaults"""
   try:
     tmp_dir = tempfile.mkdtemp()
     override_config_file = os.path.join(tmp_dir, OVERRIDE_YAML)
@@ -287,19 +289,14 @@ def parse_override_config(namespace):
     raise Exception("Failed to parse override config: %s" % str(e))
 
 
-################################################################################
-# Get the path of java executable
-################################################################################
 def get_java_path():
+  """Get the path of java executable"""
   java_home = os.environ.get("JAVA_HOME")
   return os.path.join(java_home, BIN_DIR, "java")
 
 
-################################################################################
-# Check if the java home set
-################################################################################
 def check_java_home_set():
-
+  """Check if the java home set"""
   # check if environ variable is set
   if "JAVA_HOME" not in os.environ:
     Log.error("JAVA_HOME not set")
@@ -314,10 +311,8 @@ def check_java_home_set():
   return False
 
 
-################################################################################
-# Check if the release.yaml file exists
-################################################################################
 def check_release_file_exists():
+  """Check if the release.yaml file exists"""
   release_file = get_heron_release_file()
 
   # if the file does not exist and is not a file
@@ -330,8 +325,8 @@ def check_release_file_exists():
 
 def _all_metric_queries():
   queries_normal = [
-    'complete-latency', 'execute-latency', 'process-latency',
-    'jvm-uptime-secs', 'jvm-process-cpu-load', 'jvm-memory-used-mb'
+      'complete-latency', 'execute-latency', 'process-latency',
+      'jvm-uptime-secs', 'jvm-process-cpu-load', 'jvm-memory-used-mb'
   ]
   queries = ['__%s' % m for m in queries_normal]
   count_queries_normal = ['emit-count', 'execute-count', 'ack-count', 'fail-count']
@@ -340,17 +335,21 @@ def _all_metric_queries():
 
 
 def metric_queries():
+  """all metric queries"""
   qs = _all_metric_queries()
   return qs[0] + qs[2]
 
 
 def queries_map():
+  """map from query parameter to query name"""
   qs = _all_metric_queries()
   return dict(zip(qs[0], qs[1]) + zip(qs[2], qs[3]))
 
 
 def get_clusters():
+  """Synced API call to get all cluster names"""
   instance = tornado.ioloop.IOLoop.instance()
+  # pylint: disable=unnecessary-lambda
   try:
     return instance.run_sync(lambda: API.get_clusters())
   except Exception as ex:
@@ -360,6 +359,7 @@ def get_clusters():
 
 
 def get_logical_plan(cluster, env, topology, role):
+  """Synced API call to get logical plans"""
   instance = tornado.ioloop.IOLoop.instance()
   try:
     return instance.run_sync(lambda: API.get_logical_plan(cluster, env, topology, role))
@@ -371,6 +371,7 @@ def get_logical_plan(cluster, env, topology, role):
 
 
 def get_topology_info(*args):
+  """Synced API call to get topology information"""
   instance = tornado.ioloop.IOLoop.instance()
   try:
     return instance.run_sync(lambda: API.get_topology_info(*args))
@@ -380,6 +381,7 @@ def get_topology_info(*args):
 
 
 def get_topology_metrics(*args):
+  """Synced API call to get topology metrics"""
   instance = tornado.ioloop.IOLoop.instance()
   try:
     return instance.run_sync(lambda: API.get_comp_metrics(*args))
@@ -390,16 +392,18 @@ def get_topology_metrics(*args):
 
 
 def get_component_metrics(component, cluster, env, topology, role):
+  """Synced API call to get component metrics"""
   all_queries = metric_queries()
   try:
     result = get_topology_metrics(
-      cluster, env, topology, component, [], all_queries, [0, -1], role)
+        cluster, env, topology, component, [], all_queries, [0, -1], role)
     return result["metrics"]
   except:
     raise
 
 
 def get_cluster_topologies(cluster):
+  """Synced API call to get topologies under a cluster"""
   instance = tornado.ioloop.IOLoop.instance()
   try:
     return instance.run_sync(lambda: API.get_cluster_topologies(cluster))
@@ -410,6 +414,7 @@ def get_cluster_topologies(cluster):
 
 
 def get_cluster_role_topologies(cluster, role):
+  """Synced API call to get topologies under a cluster submitted by a role"""
   instance = tornado.ioloop.IOLoop.instance()
   try:
     return instance.run_sync(lambda: API.get_cluster_role_topologies(cluster, role))
@@ -421,6 +426,7 @@ def get_cluster_role_topologies(cluster, role):
 
 
 def get_cluster_role_env_topologies(cluster, role, env):
+  """Synced API call to get topologies under a cluster submitted by a role under env"""
   instance = tornado.ioloop.IOLoop.instance()
   try:
     return instance.run_sync(lambda: API.get_cluster_role_env_topologies(cluster, role, env))
