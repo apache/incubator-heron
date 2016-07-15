@@ -498,7 +498,7 @@ def setup():
   os.setpgrp() # create new process group, become its leader
 
   do_print('Register the SIGTERM signal handler')
-  signal.signal(signal.SIGTERM, signal_handler)
+  signal.signal(signal.SIGTERM, signal_handlerG)
 
   do_print('Register the atexit clean up')
   atexit.register(cleanup)

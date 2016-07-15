@@ -184,7 +184,7 @@ def main():
 
   # TODO: improve later
   log_file = "/tmp/" + instance_id + ".log"
-  init_logger(level=logging.DEBUG, logfile=log_file)
+  init_logger(level=logging.INFO, logfile=log_file)
 
   Log.info("\nStarting instance: " + instance_id + " for topology: " + topology_name +
            " and topologyId: " + topology_id + " for component: " + component_name +

@@ -81,13 +81,13 @@ class HeronComponentSpec(object):
       for comp_spec, gtype in self.inputs.iteritems():
         in_stream = bolt.inputs.add()
         in_stream.stream.CopyFrom(self._get_stream_id(comp_spec.name, Stream.DEFAULT_STREAM_ID))
-        if isinstance(gtype, tuple) and gtype[0] == Stream.FIELD:
+        if isinstance(gtype, tuple) and gtype[0] == Grouping.FIELDS:
           # it's field grouping
-          in_stream.gtype = Stream.FIELD
+          in_stream.gtype = Grouping.FIELDS
           grouping_fields = gtype[1]
           in_stream.grouping_fields.CopyFrom(self._get_stream_schema(grouping_fields))
         else:
-          if gtype == Stream.FIELD or gtype == Stream.CUSTOM or gtype == Stream.DIRECT:
+          if gtype == Grouping.FIELDS or gtype == Grouping.CUSTOM or gtype == Grouping.DIRECT:
             raise ValueError("Grouping wrong")
           in_stream.gtype = gtype
     elif isinstance(self.inputs, list):

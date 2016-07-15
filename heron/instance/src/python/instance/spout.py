@@ -59,7 +59,8 @@ class Spout(BaseInstance):
                               inputs=None, outputs=_outputs, config=config)
 
   def start(self):
-    self.initialize()
+    # TODO: add config
+    self.initialize(config={}, context={})
     self.topology_state = topology_pb2.TopologyState.Value("RUNNING")
 
   def stop(self):
@@ -143,7 +144,7 @@ class Spout(BaseInstance):
   ###################################
 
   @abstractmethod
-  def initialize(self, config=None, context=None):
+  def initialize(self, config={}, context={}):
     """Called when a task for this component is initialized within a worker on the cluster
 
     It is compatible with StreamParse API. (Parameter name changed from ``storm_conf`` to ``config``)

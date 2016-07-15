@@ -29,8 +29,7 @@ class CountBolt(Bolt):
     self.total += inc_by
 
   def process(self, tuple):
-    word = tuple[0]
-    self.tuple_count += 1
+    word = tuple.values[0]
     self._increment(word, 10 if word == "heron" else 1)
     if self.total % 1000 == 0:
       Log.info("Current map: " + str(self.counter))

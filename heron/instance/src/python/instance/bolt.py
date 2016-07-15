@@ -65,7 +65,7 @@ class Bolt(BaseInstance):
                               inputs=inputs, outputs=_outputs, config=config)
 
   def start(self):
-    self.initialize()
+    self.initialize(config={}, context={})
 
   def stop(self):
     pass
@@ -141,7 +141,7 @@ class Bolt(BaseInstance):
   ###################################
 
   @abstractmethod
-  def initialize(self, config=None, context=None):
+  def initialize(self, config={}, context={}):
     """Called when a task for this component is initialized within a worker on the cluster
 
     It is compatible with StreamParse API. (Parameter name changed from ``storm_conf`` to ``config``)

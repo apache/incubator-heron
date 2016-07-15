@@ -17,6 +17,7 @@ import os
 import subprocess
 import tarfile
 import tempfile
+import traceback
 
 import heron.cli.src.python.opts  as opts
 import heron.cli.src.python.utils as utils
@@ -83,19 +84,16 @@ def heron_pex(topology_pex, topology_class_name, tmp_dir):
   # TODO: Currently pex topology is assumed to be executed as `./topology.pex <tmp_dir>`
   print ("DEBUG: loading topology pex file with tmp_dir: " + tmp_dir)
 
-  pex_loader.load_pex(topology_pex)
-  topology_class = pex_loader.import_and_get_class(topology_pex, topology_class_name)
-
-  all_args = [topology_pex, tmp_dir]
   if opts.verbose():
-    print('$> %s' % ' '.join(all_args))
-
-  # invoke the command with subprocess and print error message
-    if not opts.trace_execution():
-      status = subprocess.call(all_args)
-      if status != 0:
-        err_str = "User main failed with status %d. Bailing out..." % status
-        raise RuntimeError(err_str)
+    print("Importing " + topology_class_name + " from " + topology_pex)
+  try:
+    pex_loader.load_pex(topology_pex)
+    topology_class = pex_loader.import_and_get_class(topology_pex, topology_class_name)
+    topology_class.write(tmp_dir)
+  except Exception as e:
+    traceback.print_exc()
+    err_str = "Topology pex failed to be loaded. Bailing out..."
+    raise RuntimeError(err_str)
 
 
 

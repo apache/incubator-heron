@@ -67,6 +67,7 @@ def resolve_heron_suffix_issue(abs_pex_path, python_class_name):
 
   # then import any subpackage under `heron` in the pex file,
   # except for `instance`, `proto` and `common`
+
   #sub_importer = zipimport.zipimporter(os.path.join(abs_pex_path, "heron"))
 
   #subpkg_regex = r"^heron\/([^\/\s\.-]*)\/__init__\.py$"
@@ -75,7 +76,7 @@ def resolve_heron_suffix_issue(abs_pex_path, python_class_name):
   #to_import = [i for i in sub_lst if i != "common" and i != "instance" and i != "proto"]
   #for mod in to_import:
   #  Log.debug("Importing subpackage: " + mod)
-    #importer.load_module(mod)
+  #  sub_importer.load_module(mod)
 
 def import_and_get_class(path_to_pex, python_class_name):
   abs_path_to_pex = os.path.abspath(path_to_pex)

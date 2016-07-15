@@ -224,7 +224,7 @@ def submit_pex(cl_args, unknown_args, tmp_dir):
   try:
     execute.heron_pex(topology_file, topology_class_name, tmp_dir)
   except Exception as ex:
-    Log.error("Unable to execute topology main class")
+    Log.error("Unable to execute topology main class: " + ex.message)
     return False
 
   try:
