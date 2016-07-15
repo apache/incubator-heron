@@ -119,56 +119,21 @@ java_tests(
   size = "small",
 )
 
-java_test(
-  name="MesosLauncherTest",
-  srcs=glob(
-    ["**/MesosLauncherTest.java"]
-  ),
-  deps=scheduler_deps_files + mesos_deps_files,
-  size="small",
+java_library(
+  name = "mesos-tests",
+  srcs = glob(["**/mesos/**/*.java"]),
+  deps = scheduler_deps_files + mesos_deps_files,
 )
 
-java_test(
-  name="MesosSchedulerTest",
-  srcs=glob(
-    ["**/MesosSchedulerTest.java"]
-  ),
-  deps=scheduler_deps_files + mesos_deps_files,
-  size="small",
-)
-
-java_test(
-  name="TaskUtilsTest",
-  srcs=glob(
-    ["**/**/TaskUtilsTest.java"]
-  ),
-  deps=scheduler_deps_files + mesos_deps_files,
-  size="small",
-)
-
-java_test(
-  name="TaskResourcesTest",
-  srcs=glob(
-    ["**/**/TaskResourcesTest.java"]
-  ),
-  deps=scheduler_deps_files + mesos_deps_files,
-  size="small",
-)
-
-java_test(
-  name="LaunchableTaskTest",
-  srcs=glob(
-    ["**/**/LaunchableTaskTest.java"]
-  ),
-  deps=scheduler_deps_files + mesos_deps_files,
-  size="small",
-)
-
-java_test(
-  name="MesosFrameworkTest",
-  srcs=glob(
-    ["**/**/MesosFrameworkTest.java"]
-  ),
-  deps=scheduler_deps_files + mesos_deps_files,
-  size="small",
+java_tests(
+  test_classes = [
+    "com.twitter.heron.scheduler.mesos.MesosLauncherTest",
+    "com.twitter.heron.scheduler.mesos.MesosSchedulerTest",
+    "com.twitter.heron.scheduler.mesos.framework.TaskUtilsTest",
+    "com.twitter.heron.scheduler.mesos.framework.TaskResourcesTest",
+    "com.twitter.heron.scheduler.mesos.framework.LaunchableTaskTest",
+    "com.twitter.heron.scheduler.mesos.framework.MesosFrameworkTest",
+  ],
+  runtime_deps = [ ":mesos-tests" ],
+  size = "small",
 )
