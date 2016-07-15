@@ -13,6 +13,7 @@
 # limitations under the License.
 ''' help.py '''
 import heron.common.src.python.utils as utils
+from heron.common.src.python.color import Log
 
 
 def create_parser(subparsers):
@@ -60,6 +61,7 @@ def run(command, parser, args, unknown_args):
   subparser = utils.get_subparser(parser, command_help)
   if subparser:
     print subparser.format_help()
+    return True
+  else:
+    Log.error("Unknown subcommand \'%s\'" % command_help)
     return False
-
-  return True
