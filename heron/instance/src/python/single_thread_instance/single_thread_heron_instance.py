@@ -12,16 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
+import os
 import sys
 import traceback
 
 import signal
+import yaml
 from heron.common.src.python.log import Log, init_logger
 from heron.common.src.python.basics.gateway_looper import GatewayLooper
 from heron.proto import physical_plan_pb2, stmgr_pb2
 from heron.instance.src.python.single_thread_instance.single_thread_stmgr_client import SingleThreadStmgrClient
 from heron.instance.src.python.misc.communicator import HeronCommunicator
 import heron.common.src.python.pex_loader as pex_loader
+import heron.common.src.python.constants as constants
 
 class SingleThreadHeronInstance(object):
   def __init__(self, topology_name, topology_id, instance,
@@ -151,6 +154,15 @@ def print_usage():
         "<component_index> <stmgr_id> <stmgr_port> <metricsmgr_port> "
         "<heron_internals_config_filename> <topology_pex_file_path>")
 
+def config_reader(config_path):
+  if not config_path.endswith(".yaml"):
+    raise ValueError("Config file not yaml")
+
+  with open(config_path, 'r') as f:
+    config = yaml.load(f)
+
+  return config
+
 def main():
   if len(sys.argv) != 12:
     print_usage()
@@ -165,7 +177,7 @@ def main():
   stmgr_id = sys.argv[7]
   stmgr_port = sys.argv[8]
   metrics_port = sys.argv[9]
-  system_config = sys.argv[10]
+  system_config = config_reader(sys.argv[10])
   topology_pex_file_path = sys.argv[11]
 
   # TODO: Add the SystemConfig into SingletonRegistory
@@ -181,10 +193,14 @@ def main():
   instance.stmgr_id = stmgr_id
   instance.info.MergeFrom(instance_info)
 
+  # Logging init
+  log_dir = os.path.abspath(system_config[constants.LOGGING_DIRECTORY])
+  max_log_files = system_config[constants.MAX_LOG_FILES]
+  max_log_bytes = system_config[constants.MAX_LOG_SIZE_MB] * constants.MB
 
-  # TODO: improve later
-  log_file = "/tmp/" + instance_id + ".log"
-  init_logger(level=logging.INFO, logfile=log_file)
+  # TODO: improve this later
+  log_file = os.path.join(log_dir, instance_id + ".log.0")
+  init_logger(level=logging.INFO, logfile=log_file, max_files=max_log_files, max_bytes=max_log_bytes)
 
   Log.info("\nStarting instance: " + instance_id + " for topology: " + topology_name +
            " and topologyId: " + topology_id + " for component: " + component_name +
@@ -192,6 +208,7 @@ def main():
            " and stmgrId: " + stmgr_id + " and stmgrPort: " + stmgr_port +
            " and metricsManagerPort: " + metrics_port +
            "\n **Topology Pex file located at: " + topology_pex_file_path)
+  Log.info("System config: " + str(system_config))
 
   heron_instance = SingleThreadHeronInstance(topology_name, topology_id, instance,
                                              stmgr_port, metrics_port, topology_pex_file_path)

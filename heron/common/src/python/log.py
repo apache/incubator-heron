@@ -13,16 +13,17 @@
 # limitations under the License.
 
 import logging
+from logging.handlers import RotatingFileHandler
 
 # Create the root logger
 Log = logging.getLogger()
 
-def init_logger(level, logfile):
-  log_format = "%(asctime)s-%(levelname)s: %(message)s"
+def init_logger(level, logfile, max_files, max_bytes):
+  log_format = "%(asctime)s:%(levelname)s:%(filename)s: %(message)s"
   date_format = '%a, %d %b %Y %H:%M:%S'
 
-  logging.basicConfig(format=log_format, datefmt=date_format,
-                      filename=logfile, filemode='w')
   Log.setLevel(level)
-
+  handler = RotatingFileHandler(logfile, maxBytes=max_bytes, backupCount=max_files)
+  handler.setFormatter(logging.Formatter(fmt=log_format, datefmt=date_format))
+  Log.addHandler(handler)
 

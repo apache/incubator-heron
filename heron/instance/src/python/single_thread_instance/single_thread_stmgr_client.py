@@ -25,7 +25,6 @@ from heron.instance.src.python.network.protocol import StatusCode
 # 2. Send a register request when on_connect() is called
 # 3. Handle relative response for requests
 # TODO: will implement the rest later
-
 class SingleThreadStmgrClient(HeronClient):
   """SingleThreadStmgrClient is a Stream Manager Client for a single-threaded Heron Instance"""
   def __init__(self, heron_instance_cls, strmgr_host, port, topology_name, topology_id, instance):

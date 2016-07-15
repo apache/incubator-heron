@@ -12,15 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from collections import Counter
-
 from heron.instance.src.python.instance.bolt import Bolt
-from heron.common.src.python.log import Log
 
 class CountBolt(Bolt):
   outputs = ['word', 'count']
 
   def initialize(self, config, context):
-    Log.debug("In prepare() of CountBolt")
+    self.logger.debug("In prepare() of CountBolt")
     self.counter = Counter()
     self.total = 0
 
@@ -32,7 +30,7 @@ class CountBolt(Bolt):
     word = tuple.values[0]
     self._increment(word, 10 if word == "heron" else 1)
     if self.total % 1000 == 0:
-      Log.info("Current map: " + str(self.counter))
+      self.log("Current map: " + str(self.counter))
 
     self.emit([word, self.counter[word]])
 

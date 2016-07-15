@@ -28,3 +28,7 @@ TOPOLOGY_ADDITIONAL_CLASSPATH = "topology.additional.classpath"
 RAM_FOR_STMGR = 1 * GB
 DEFAULT_RAM_FOR_INSTANCE = 1 * GB
 DEFAULT_DISK_PADDING_PER_CONTAINER = 12 * GB
+
+LOGGING_DIRECTORY = 'heron.logging.directory'
+MAX_LOG_FILES = 'heron.logging.maximum.files'
+MAX_LOG_SIZE_MB = 'heron.logging.maximum.size.mb'

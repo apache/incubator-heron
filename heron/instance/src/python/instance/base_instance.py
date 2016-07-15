@@ -1,5 +1,8 @@
+import logging
+
 from heron.proto import tuple_pb2
 
+from heron.common.src.python.log import Log
 from heron.instance.src.python.misc.outgoing_tuple_helper import OutgoingTupleHelper
 from heron.instance.src.python.misc.serializer import PythonSerializer
 
@@ -27,6 +30,7 @@ class BaseInstance(object):
     self.in_stream = in_stream
     self.serializer = serializer
     self.output_helper = OutgoingTupleHelper(self.pplan_helper, out_stream)
+    self.logger = Log
 
   @classmethod
   def get_python_class_path(cls):
@@ -35,6 +39,32 @@ class BaseInstance(object):
   def run_tasks(self):
     while True:
       self._run()
+
+  def log(self, message, level=None):
+    """Log message, optionally providing a logging level
+
+    It is compatible with StreamParse API.
+
+    :type message: str
+    :param message: the log message to send
+    :type level: str
+    :param level: the logging level, one of: trace (=debug), debug, info, warn or error (default: info)
+    """
+    if level is None:
+      _log_level = logging.INFO
+    else:
+      if level == "trace" or level == "debug":
+        _log_level = logging.DEBUG
+      elif level == "info":
+        _log_level = logging.INFO
+      elif level == "warn":
+        _log_level = logging.WARNING
+      elif level == "error":
+        _log_level = logging.ERROR
+      else:
+        raise ValueError(level + " is not supported as logging level")
+
+    self.logger.log(_log_level, message)
 
   def _admit_data_tuple(self, output_tuple, stream_id, is_spout, anchors=None, message_id=None):
     """Internal implementation of OutputCollector
