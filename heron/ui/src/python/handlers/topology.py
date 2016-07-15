@@ -13,14 +13,13 @@
 # limitations under the License.
 ''' topology.py '''
 import random
+from datetime import datetime
 import tornado.escape
 import tornado.web
 import tornado.gen
-from datetime import datetime
-
 import heron.common.src.python.handler.access as access
-import base
-import common
+import handlers.base as base
+import handlers.common as common
 
 
 ################################################################################
@@ -34,6 +33,7 @@ class TopologyConfigHandler(base.BaseHandler):
     :param topology:
     :return:
     '''
+    # pylint: disable=no-member
     options = dict(
         cluster=cluster,
         environ=environ,
@@ -56,6 +56,7 @@ class TopologyExceptionsPageHandler(base.BaseHandler):
     :param instance:
     :return:
     '''
+    # pylint: disable=no-member
     options = dict(
         cluster=cluster,
         environ=environ,
@@ -68,7 +69,6 @@ class TopologyExceptionsPageHandler(base.BaseHandler):
     self.render("exception.html", **options)
 
 
-# TODO: get the list of clusters from tracker and fetch the topologies
 class ListTopologiesHandler(base.BaseHandler):
   ''' Handler for displaying all the topologies - defaults to 'local'''
 
@@ -79,6 +79,7 @@ class ListTopologiesHandler(base.BaseHandler):
     '''
     clusters = yield access.get_clusters()
 
+    # pylint: disable=no-member
     options = dict(
         topologies=[],  # no topologies
         clusters=[str(cluster) for cluster in clusters],
@@ -115,6 +116,7 @@ class TopologyPlanHandler(base.BaseHandler):
     launched_at = datetime.utcfromtimestamp(estate['submission_time'])
     launched_time = launched_at.strftime('%Y-%m-%d %H:%M:%S UTC')
 
+    # pylint: disable=no-member
     options = dict(
         cluster=cluster,
         environ=environ,
