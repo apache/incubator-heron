@@ -4,7 +4,6 @@ import sys
 
 from heron.common.src.python.color import Log
 from heron.package.src.python.common import constants
-from heron.package.src.python.common import utils
 
 METASTORE_NAME = "heron.package.metastore.name"
 METASTORE_ROOT_PATH = "heron.package.metastore.root_path"
@@ -91,7 +90,7 @@ class LocalMetastore(Metastore):
              key != constants.COUNTER:
             version_msg = "Version: %s" % key
             if version_map[key][constants.DELETED]:
-              version_msg = version_msg + " DELETED."
+              version_msg = version_msg + " DELETED"
 
             versions.append(version_msg)
       else:
@@ -223,7 +222,9 @@ class LocalMetastore(Metastore):
       Log.error("The tag '%s' is unset. No package version found" % tag)
       return dict()
     else:
-      return pkg_info[version]
+      info = pkg_info[version]
+      info[constants.VERSION] = version
+      return info
 
   def set_tag(self, tag, role, pkg_name, version, extra_info):
     return self._update_tag(tag, role, pkg_name, extra_info, version)

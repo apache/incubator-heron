@@ -165,7 +165,7 @@ class HeronPackage(Package):
     role = args[constants.ROLE]
     pkg_name = args[constants.PKG]
     extra_info = args[constants.EXTRA]
-    is_raw = args[constants.is_raw]
+    is_raw = args[constants.RAW]
 
     live_pkg_info = self.metastore.get_meta_by_tag(constants.LIVE, role, pkg_name, extra_info)
     utils.print_dict(live_pkg_info, is_raw)
@@ -176,7 +176,7 @@ class HeronPackage(Package):
     extra_info = args[constants.EXTRA]
     is_raw = args[constants.RAW]
 
-    latest_pkg_info = self.metastore.get_tag(constants.LATEST, role, pkg_name, extra_info)
+    latest_pkg_info = self.metastore.get_meta_by_tag(constants.LATEST, role, pkg_name, extra_info)
     utils.print_dict(latest_pkg_info, is_raw)
 
   # clean the inconsistency state of package store.

@@ -2,7 +2,6 @@ import argparse
 
 from heron.package.src.python.common import constants
 
-# TODO (NLU): clean the parser part code
 help_epilog = '''Getting more help:
   heron-package help <command> Prints help and options for <command>
 
