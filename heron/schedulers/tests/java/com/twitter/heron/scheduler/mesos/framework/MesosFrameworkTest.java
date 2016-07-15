@@ -294,10 +294,12 @@ public class MesosFrameworkTest {
   @Test
   public void testLaunchTasks() throws Exception {
     Protos.Offer offer = getOffer();
+    String taskId = TaskUtils.getTaskId(
+        TaskUtils.getTaskNameForContainerIndex(CONTAINER_INDEX), 0);
 
     List<LaunchableTask> tasksToLaunch = new ArrayList<>();
     LaunchableTask launchableTask = Mockito.spy(
-        new LaunchableTask("", new BaseContainer(), offer, new ArrayList<Integer>()));
+        new LaunchableTask(taskId, new BaseContainer(), offer, new ArrayList<Integer>()));
     Protos.TaskInfo pTask = Protos.TaskInfo.getDefaultInstance();
     Mockito.doReturn(pTask).when(launchableTask).constructMesosTaskInfo(config, runtime);
     tasksToLaunch.add(launchableTask);
@@ -305,10 +307,29 @@ public class MesosFrameworkTest {
     List<Protos.TaskInfo> mesosTasks = new LinkedList<>();
     mesosTasks.add(pTask);
 
+    // Launch topology successfully
+    Mockito.when(mesosFramework.getSchedulerDriver().launchTasks(
+        Mockito.anyCollectionOf(Protos.OfferID.class),
+        Mockito.anyCollectionOf(Protos.TaskInfo.class)))
+        .thenReturn(Protos.Status.DRIVER_RUNNING);
     mesosFramework.launchTasks(tasksToLaunch);
+
+    // Should not invoke handleMesosFailure
+    Mockito.verify(mesosFramework, Mockito.never()).handleMesosFailure(taskId);
     // Verify the launching
     Mockito.verify(mesosFramework.getSchedulerDriver())
         .launchTasks(Arrays.asList(new Protos.OfferID[]{offer.getId()}),
             mesosTasks);
+
+    // Failed to launch the tasks
+    Mockito.when(mesosFramework.getSchedulerDriver().launchTasks(
+        Mockito.anyCollectionOf(Protos.OfferID.class),
+        Mockito.anyCollectionOf(Protos.TaskInfo.class)))
+        .thenReturn(Protos.Status.DRIVER_NOT_STARTED);
+
+    Mockito.doNothing().when(mesosFramework).handleMesosFailure(taskId);
+
+    mesosFramework.launchTasks(tasksToLaunch);
+    Mockito.verify(mesosFramework).handleMesosFailure(taskId);
   }
 }

@@ -71,7 +71,9 @@ public class MesosScheduler implements IScheduler {
    * Start the scheduler driver and wait it to get registered
    */
   protected void startSchedulerDriver() {
-    // start the driver, non-blocking
+    // start the driver non-blocking,
+    // since we need to set heron state after the scheduler driver is started.
+    // Heron will block the main thread eventually
     driver.start();
 
     // Staging the Mesos Framework
@@ -210,13 +212,8 @@ public class MesosScheduler implements IScheduler {
     container.description = String.format("Container %d for topology %s",
         containerIndex, Context.topologyName(config));
 
-    // We assume every container is homogeneous
-    PackingPlan.Resource containerResource =
-        packing.containers.values().iterator().next().resource;
-    container.cpu = containerResource.cpu;
-    container.diskInMB = containerResource.disk / Constants.MB;
-    container.memInMB = containerResource.ram / Constants.MB;
-    container.ports = SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR;
+    // Fill in the resources requirement for this container
+    fillResourcesRequirementForBaseContainer(container, containerIndex, packing);
 
     // Force running as shell
     container.shell = true;
@@ -233,5 +230,35 @@ public class MesosScheduler implements IScheduler {
     container.dependencies.add(topologyPath);
     container.dependencies.add(heronCoreReleasePath);
     return container;
+  }
+
+  /**
+   * Fill the the resources requirement, i.e. cpu, memory and disk for the given container.
+   * This method changes the BaseContainer passed in.
+   * <p>
+   * Notice: Currently we just make every container homogeneous,
+   * requiring maximum resources for every container.
+   *
+   * @param container the BaseContainer to fill value in
+   * @param containerIndex the index of the container
+   * @param packing the packing plan
+   */
+  protected void fillResourcesRequirementForBaseContainer(
+      BaseContainer container, Integer containerIndex, PackingPlan packing) {
+    double cpu = 0;
+    double disk = 0;
+    double mem = 0;
+    for (PackingPlan.ContainerPlan cp : packing.containers.values()) {
+      PackingPlan.Resource containerResource = cp.resource;
+      cpu = Math.max(cpu, containerResource.cpu);
+      disk = Math.max(disk, containerResource.disk);
+      mem = Math.max(mem, containerResource.ram);
+    }
+
+    container.cpu = cpu;
+    // Convert them from bytes to MB
+    container.diskInMB = disk / Constants.MB;
+    container.memInMB = mem / Constants.MB;
+    container.ports = SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR;
   }
 }

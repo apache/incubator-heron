@@ -39,6 +39,13 @@ import com.twitter.heron.spi.common.Context;
 
 /**
  * Mesos Framework, communicating with Mesos Master, to do the actual scheduling.
+ *
+ * We put synchronized block:
+ * ```
+ * synchronized(toScheduleTasks) {...}
+ * ```
+ * in critical areas for public methods potentially modifying its value.
+ * Make sure not acquiring other locks inside this block to prevent the potential for deadlock.
  */
 
 public class MesosFramework implements Scheduler {
@@ -82,20 +89,22 @@ public class MesosFramework implements Scheduler {
 
   // Create a topology
   public boolean createJob(Map<Integer, BaseContainer> jobDefinition) {
-    if (isTerminated) {
-      LOG.severe("Job has been killed");
-      return false;
-    }
+    synchronized (toScheduleTasks) {
+      if (isTerminated) {
+        LOG.severe("Job has been killed");
+        return false;
+      }
 
-    // Record the jobDefinition
-    containersInfo.putAll(jobDefinition);
+      // Record the jobDefinition
+      containersInfo.putAll(jobDefinition);
 
-    // To scheduler them with 0 attempt
-    for (Map.Entry<Integer, BaseContainer> entry : jobDefinition.entrySet()) {
-      Integer containerIndex = entry.getKey();
-      BaseContainer container = entry.getValue();
-      String taskId = TaskUtils.getTaskId(container.name, 0);
-      scheduleNewTask(taskId);
+      // To scheduler them with 0 attempt
+      for (Map.Entry<Integer, BaseContainer> entry : jobDefinition.entrySet()) {
+        Integer containerIndex = entry.getKey();
+        BaseContainer container = entry.getValue();
+        String taskId = TaskUtils.getTaskId(container.name, 0);
+        scheduleNewTask(taskId);
+      }
     }
 
     return true;
@@ -103,49 +112,53 @@ public class MesosFramework implements Scheduler {
 
   // Kill a topology
   public boolean killJob() {
-    if (isTerminated) {
-      LOG.info("Job has been killed");
-      return false;
+    synchronized (toScheduleTasks) {
+      if (isTerminated) {
+        LOG.info("Job has been killed");
+        return false;
+      }
+      isTerminated = true;
+
+      LOG.info(String.format("Kill job: %s", Context.topologyName(heronConfig)));
+      LOG.info("Remove all tasks to schedule");
+      toScheduleTasks.clear();
+
+      // Kill all the tasks
+      for (String taskId : tasksId.values()) {
+        driver.killTask(Protos.TaskID.newBuilder().setValue(taskId).build());
+      }
+
+      containersInfo.clear();
+      tasksId.clear();
+
+      return true;
     }
-    isTerminated = true;
-
-    LOG.info(String.format("Kill job: %s", Context.topologyName(heronConfig)));
-    LOG.info("Remove all tasks to schedule");
-    toScheduleTasks.clear();
-
-    // Kill all the tasks
-    for (String taskId : tasksId.values()) {
-      driver.killTask(Protos.TaskID.newBuilder().setValue(taskId).build());
-    }
-
-    containersInfo.clear();
-    tasksId.clear();
-
-    return true;
   }
 
   // Restart a topology
   public boolean restartJob(int containerIndex) {
-    if (isTerminated) {
-      LOG.severe("Job has been killed");
-      return false;
-    }
+    synchronized (toScheduleTasks) {
+      if (isTerminated) {
+        LOG.severe("Job has been killed");
+        return false;
+      }
 
-    // List of tasks to restart
-    List<String> tasksToRestart = new ArrayList<>();
-    if (containerIndex == -1) {
-      // Restart all tasks
-      tasksToRestart.addAll(tasksId.values());
-    } else {
-      tasksToRestart.add(tasksId.get(containerIndex));
-    }
+      // List of tasks to restart
+      List<String> tasksToRestart = new ArrayList<>();
+      if (containerIndex == -1) {
+        // Restart all tasks
+        tasksToRestart.addAll(tasksId.values());
+      } else {
+        tasksToRestart.add(tasksId.get(containerIndex));
+      }
 
-    // Kill the task -- the framework will automatically restart it
-    for (String taskId : tasksToRestart) {
-      driver.killTask(Protos.TaskID.newBuilder().setValue(taskId).build());
-    }
+      // Kill the task -- the framework will automatically restart it
+      for (String taskId : tasksToRestart) {
+        driver.killTask(Protos.TaskID.newBuilder().setValue(taskId).build());
+      }
 
-    return true;
+      return true;
+    }
   }
 
   /**
@@ -208,29 +221,31 @@ public class MesosFramework implements Scheduler {
 
   @Override
   public void resourceOffers(SchedulerDriver schedulerDriver, List<Protos.Offer> offers) {
-    LOG.fine("Received Resource Offers: " + offers.toString());
+    synchronized (toScheduleTasks) {
+      LOG.fine("Received Resource Offers: " + offers.toString());
 
-    Map<Protos.Offer, TaskResources> offerResources = new HashMap<>();
-    // Convert the offers into TasksResources, an utils class.
-    for (Protos.Offer offer : offers) {
-      offerResources.put(offer, TaskResources.apply(offer, Context.role(heronConfig)));
-    }
+      Map<Protos.Offer, TaskResources> offerResources = new HashMap<>();
+      // Convert the offers into TasksResources, an utils class.
+      for (Protos.Offer offer : offers) {
+        offerResources.put(offer, TaskResources.apply(offer, Context.role(heronConfig)));
+      }
 
-    // Generate launchable tasks
-    List<LaunchableTask> tasksToLaunch = generateLaunchableTasks(offerResources);
+      // Generate launchable tasks
+      List<LaunchableTask> tasksToLaunch = generateLaunchableTasks(offerResources);
 
-    // Launch tasks
-    launchTasks(tasksToLaunch);
+      // Launch tasks
+      launchTasks(tasksToLaunch);
 
-    // Decline unused offers
-    LOG.fine("Declining unused offers.");
-    Set<String> usedOffers = new HashSet<>();
-    for (LaunchableTask task : tasksToLaunch) {
-      usedOffers.add(task.offer.getId().getValue());
-    }
-    for (Protos.Offer offer : offers) {
-      if (!usedOffers.contains(offer.getId().getValue())) {
-        schedulerDriver.declineOffer(offer.getId());
+      // Decline unused offers
+      LOG.fine("Declining unused offers.");
+      Set<String> usedOffers = new HashSet<>();
+      for (LaunchableTask task : tasksToLaunch) {
+        usedOffers.add(task.offer.getId().getValue());
+      }
+      for (Protos.Offer offer : offers) {
+        if (!usedOffers.contains(offer.getId().getValue())) {
+          schedulerDriver.declineOffer(offer.getId());
+        }
       }
     }
   }
@@ -242,19 +257,26 @@ public class MesosFramework implements Scheduler {
 
   @Override
   public void statusUpdate(SchedulerDriver schedulerDriver, Protos.TaskStatus taskStatus) {
-    LOG.info(String.format("Received status update [%s]", taskStatus));
-    if (isTerminated) {
-      LOG.info("The framework terminated. Ignoring any status update.");
-    }
+    synchronized (toScheduleTasks) {
+      LOG.info(String.format("Received status update [%s]", taskStatus));
+      if (isTerminated) {
+        LOG.info("The framework terminated. Ignoring any status update.");
 
-    String taskId = taskStatus.getTaskId().getValue();
+        return;
+      }
 
-    BaseContainer container = containersInfo.get(TaskUtils.getContainerIndexForTaskId(taskId));
+      String taskId = taskStatus.getTaskId().getValue();
 
-    if (container == null) {
-      LOG.info("Received a status update from unknown container. ");
-    } else {
-      handleMesosStatusUpdate(taskId, taskStatus);
+      BaseContainer container = containersInfo.get(TaskUtils.getContainerIndexForTaskId(taskId));
+
+      if (container == null) {
+        LOG.warning("Received a status update from unknown container. ");
+
+        // TODO(mfu): Don't know what should be done here. Simply ignore this status update for now.
+        return;
+      } else {
+        handleMesosStatusUpdate(taskId, taskStatus);
+      }
     }
   }
 
@@ -521,7 +543,13 @@ public class MesosFramework implements Scheduler {
         LOG.info(String.format("Tasks launched, status: '%s'", status));
 
       } else {
-        LOG.info("Other status returned: " + status);
+        LOG.severe("Other status returned: " + status);
+
+        // Handled failed tasks
+        for (LaunchableTask task : tasks) {
+          handleMesosFailure(task.taskId);
+          // No need to decline the offers; mesos master already reclaim them
+        }
       }
     }
   }
