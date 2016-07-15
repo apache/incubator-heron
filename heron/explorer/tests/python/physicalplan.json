@@ -1,0 +1,83 @@
+{
+  "status": "success",
+  "executiontime": 4.5061111450195e-5,
+  "message": "",
+  "version": "1.0.0",
+  "result": {
+    "spouts": {
+      "word": [
+        "container_1_word_2"
+      ]
+    },
+    "instances": {
+      "container_1_word_2": {
+        "stmgrId": "stmgr-1",
+        "logfile": "http:\/\/tw-mbp-rli:61369\/file\/log-files\/container_1_word_2.log.0",
+        "id": "container_1_word_2",
+        "name": "word"
+      },
+      "container_1_exclaim1_1": {
+        "stmgrId": "stmgr-1",
+        "logfile": "http:\/\/tw-mbp-rli:61369\/file\/log-files\/container_1_exclaim1_1.log.0",
+        "id": "container_1_exclaim1_1",
+        "name": "exclaim1"
+      }
+    },
+    "config": {
+      "topology.message.timeout.secs": "30",
+      "topology.auto.task.hooks": {
+        "raw": "0xac0xed0x000x05sr0x000x14java.util.LinkedList0x0c)S]J`0x88\"0x030x000x00xpw0x040x000x000x000x01t0x00&backtype.storm.hooks.ITaskHookDelegatex",
+        "value": "[\n  \"backtype.storm.hooks.ITaskHookDelegate\"\n]"
+      },
+      "topology.fall.back.on.java.serialization": {
+        "raw": "0xac0xed0x000x05sr0x000x11java.lang.Boolean0xcd r0x800xd50x9c0xfa0xee0x020x000x01Z0x000x05valuexp0x00",
+        "value": "{\n  \"annotations\": [], \n  \"classdesc\": {\n    \"fields_names\": [\n      \"value\"\n    ], \n    \"fields_types\": [\n      \"Z\"\n    ], \n    \"flags\": 2, \n    \"name\": \"java.lang.Boolean\", \n    \"serialVersionUID\": 3441455744, \n    \"superclass\": null\n  }, \n  \"value\": false\n}"
+      },
+      "topology.serializer.classname": "backtype.storm.serialization.HeronPluggableSerializerDelegate",
+      "topology.container.cpu": "1.0",
+      "topology.component.rammap": "word:536870912,exclaim1:536870912",
+      "topology.worker.childopts": "-XX:+HeapDumpOnOutOfMemoryError",
+      "topology.kryo.factory": {
+        "raw": "0xac0xed0x000x05t0x00\/backtype.storm.serialization.DefaultKryoFactory",
+        "value": "\"backtype.storm.serialization.DefaultKryoFactory\""
+      },
+      "topology.debug": "true",
+      "topology.max.spout.pending": "10",
+      "stormcompat.topology.auto.task.hooks": {
+        "raw": "0xac0xed0x000x05sr0x000x13java.util.ArrayListx0x810xd20x1d0x990xc7a0x9d0x030x000x01I0x000x04sizexp0x000x000x000x00w0x040x000x000x000x00x",
+        "value": "[]"
+      },
+      "topology.enable.message.timeouts": "true",
+      "topology.component.parallelism": "1",
+      "topology.name": "ExclamationTopology",
+      "topology.skip.missing.kryo.registrations": {
+        "raw": "0xac0xed0x000x05sr0x000x11java.lang.Boolean0xcd r0x800xd50x9c0xfa0xee0x020x000x01Z0x000x05valuexp0x00",
+        "value": "{\n  \"annotations\": [], \n  \"classdesc\": {\n    \"fields_names\": [\n      \"value\"\n    ], \n    \"fields_types\": [\n      \"Z\"\n    ], \n    \"flags\": 2, \n    \"name\": \"java.lang.Boolean\", \n    \"serialVersionUID\": 3441455744, \n    \"superclass\": null\n  }, \n  \"value\": false\n}"
+      },
+      "topology.acking": "false",
+      "topology.stmgrs": "1",
+      "topology.container.disk": "1073741824"
+    },
+    "bolts": {
+      "exclaim1": [
+        "container_1_exclaim1_1"
+      ]
+    },
+    "stmgrs": {
+      "stmgr-1": {
+        "cwd": "\/Users\/rli\/.herondata\/topologies\/local\/rli\/ExclamationTopology",
+        "host": "tw-mbp-rli",
+        "joburl": "http:\/\/tw-mbp-rli:61369\/browse\/",
+        "shell_port": 61369,
+        "logfiles": "http:\/\/tw-mbp-rli:61369\/browse\/log-files",
+        "pid": 3109,
+        "id": "stmgr-1",
+        "instance_ids": [
+          "container_1_exclaim1_1",
+          "container_1_word_2"
+        ],
+        "port": 61366
+      }
+    }
+  }
+}

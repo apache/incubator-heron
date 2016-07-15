@@ -110,8 +110,16 @@ class PEXBuilder(object):
       interpreter exit.
     """
     chroot_clone = self._chroot.clone(into=into)
-    return self.__class__(
-        chroot=chroot_clone, interpreter=self._interpreter, pex_info=self._pex_info.copy())
+    clone = self.__class__(
+        chroot=chroot_clone,
+        interpreter=self._interpreter,
+        pex_info=self._pex_info.copy(),
+        preamble=self._preamble,
+        copy=self._copy)
+    clone.set_shebang(self._shebang)
+    for dist in self._distributions:
+      clone.add_distribution(dist)
+    return clone
 
   def path(self):
     return self.chroot().path()
@@ -204,7 +212,9 @@ class PEXBuilder(object):
       self._pex_info.script = script
       return
 
-    raise self.InvalidExecutableSpecification('Could not find script %s in PEX!' % script)
+    raise self.InvalidExecutableSpecification(
+        'Could not find script %r in any distribution %s within PEX!' % (
+            script, ', '.join(str(d) for d in self._distributions)))
 
   def set_entry_point(self, entry_point):
     """Set the entry point of this PEX environment.
@@ -229,10 +239,10 @@ class PEXBuilder(object):
     used to override the default behavior which is to have a #!/usr/bin/env line referencing an
     interpreter compatible with the one used to build the PEX.
 
-    :param shebang: The shebang line minus the #!.
+    :param shebang: The shebang line. If it does not include the leading '#!' it will be added.
     :type shebang: str
     """
-    self._shebang = '#!%s' % shebang
+    self._shebang = '#!%s' % shebang if not shebang.startswith('#!') else shebang
 
   def _add_dist_dir(self, path, dist_name):
     for root, _, files in os.walk(path):

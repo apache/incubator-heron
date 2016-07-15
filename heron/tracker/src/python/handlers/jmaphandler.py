@@ -18,12 +18,12 @@ import tornado.gen
 import tornado.web
 import traceback
 
-from heron.tracker.src.python import constants
 from heron.tracker.src.python import utils
 from heron.tracker.src.python.handlers import BaseHandler
 from heron.tracker.src.python.handlers.pidhandler import getInstancePid
 
 LOG = logging.getLogger(__name__)
+
 
 class JmapHandler(BaseHandler):
   """
@@ -84,4 +84,3 @@ class JmapHandler(BaseHandler):
       raise tornado.gen.Return(response.body)
     except tornado.httpclient.HTTPError as e:
       raise Exception(str(e))
-

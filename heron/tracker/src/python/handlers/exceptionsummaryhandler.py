@@ -24,6 +24,7 @@ from heron.tracker.src.python.handlers import BaseHandler
 
 LOG = logging.getLogger(__name__)
 
+
 class ExceptionSummaryHandler(BaseHandler):
   """
   URL - /topologies/exceptionsummary?cluster=<cluster>&topology=<topology> \
@@ -56,7 +57,6 @@ class ExceptionSummaryHandler(BaseHandler):
       instances = self.get_arguments(constants.PARAM_INSTANCE)
       exceptions_summary = yield tornado.gen.Task(self.getComponentExceptionSummary,
                                                   topology.tmaster, component, instances)
-      result = self.make_success_response(exceptions_summary)
       self.write_success_response(exceptions_summary)
     except Exception as e:
       traceback.print_exc()
@@ -118,4 +118,3 @@ class ExceptionSummaryHandler(BaseHandler):
                   'firsttime': exception_log.firsttime,
                   'count': str(exception_log.count)})
     raise tornado.gen.Return(ret)
-

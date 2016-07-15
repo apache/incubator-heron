@@ -17,6 +17,7 @@ import tornado.gen
 from heron.tracker.src.python import constants
 from heron.tracker.src.python.handlers import BaseHandler
 
+
 class StatesHandler(BaseHandler):
   """
   URL - /topologies/states
@@ -81,8 +82,7 @@ class StatesHandler(BaseHandler):
         topology_info = self.tracker.getTopologyInfo(topology.name, cluster, role, environ)
         if topology_info and "execution_state" in topology_info:
           ret[cluster][environ][topology.name] = topology_info["execution_state"]
-      except Exception as e:
+      except Exception:
         # Do nothing
         pass
     self.write_success_response(ret)
-

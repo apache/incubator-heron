@@ -54,14 +54,15 @@ java_library(
     name = "localfs-statemgr-java",
     srcs = glob(["**/FileSystemStateManager.java"]) + glob(["**/localfs/**/*.java"]),
     resources = glob(["**/localfs/**/*.yaml"]),
-    deps = localfs_deps_files, 
+    deps = localfs_deps_files,
 )
 
 java_binary(
     name = "localfs-statemgr-unshaded",
     srcs = glob(["**/FileSystemStateManager.java"]) + glob(["**/localfs/**/*.java"]),
     resources = glob(["**/localfs/**/*.yaml"]),
-    deps = localfs_deps_files, 
+    deps = localfs_deps_files,
+    main_class="com.twitter.heron.statemgr.localfs.LocalFileSystemStateManager"
 )
 
 genrule(

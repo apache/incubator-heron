@@ -66,7 +66,7 @@ To check Heron is successfully installed, run:
 
 ```bash
 $ heron version
-heron.build.version : 0.14.0
+heron.build.version : 0.14.1
 heron.build.time : Tue May 24 22:44:01 PDT 2016
 heron.build.timestamp : 1464155053000
 heron.build.host : ${HOSTNAME}

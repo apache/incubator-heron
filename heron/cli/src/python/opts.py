@@ -11,67 +11,98 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+''' opts.py '''
 
 ################################################################################
 # Global variable to store config map and verbosity
 ################################################################################
+# pylint: disable=invalid-name,global-variable-not-assigned,global-statement
 config_opts = dict()
 verbose_flag = False
 trace_execution_flag = False
 
-################################################################################
-# Get config opts from the global variable
+
 ################################################################################
 def get_heron_config():
+  '''
+  Get config opts from the global variable
+  :return:
+  '''
   opt_list = []
-  for (k, v) in config_opts.items():
-    opt_list.append('%s=%s' % (k, v))
+  for (key, value) in config_opts.items():
+    opt_list.append('%s=%s' % (key, value))
 
   all_opts = '-Dheron.options=' + (','.join(opt_list)).replace(' ', '%%%%')
   return all_opts
 
-################################################################################
-# Get config opts from the config map
+
 ################################################################################
 def get_config(k):
+  '''
+  Get config opts from the config map
+  :param k:
+  :return:
+  '''
   global config_opts
   if config_opts.has_key(k):
     return config_opts[k]
   return None
 
-################################################################################
-# Store a config opt in the config map
+
 ################################################################################
 def set_config(k, v):
+  '''
+  Store a config opt in the config map
+  :param k:
+  :param v:
+  :return:
+  '''
   global config_opts
   config_opts[k] = v
 
-################################################################################
-# Clear all the config in the config map
+
 ################################################################################
 def clear_config():
+  '''
+  Clear all the config in the config map
+  :return:
+  '''
   global config_opts
   config_opts = dict()
 
-################################################################################
-# Methods to get and set verbose levels
+
 ################################################################################
 def set_verbose():
+  '''
+  Methods to get and set verbose levels
+  :return:
+  '''
   global verbose_flag
   verbose_flag = True
 
+
 def verbose():
+  '''
+  :return:
+  '''
   global verbose_flag
   return verbose_flag
 
-################################################################################
-# Methods to get and set trace execution
+
 ################################################################################
 def set_trace_execution():
+  '''
+  Methods to get and set trace execution
+  :return:
+  '''
   global trace_execution_flag
   trace_execution_flag = True
   set_verbose()
 
+
 def trace_execution():
+  '''
+  :return:
+  '''
   global trace_execution_flag
   return trace_execution_flag
