@@ -18,8 +18,8 @@ import tornado.escape
 import tornado.web
 import tornado.gen
 import heron.common.src.python.handler.access as access
-import handlers.base as base
-import handlers.common as common
+import base
+import common
 
 
 ################################################################################
