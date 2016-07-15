@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+""" machienshandler.py """
 import tornado.gen
 
 from heron.tracker.src.python import constants
@@ -42,11 +42,14 @@ class MachinesHandler(BaseHandler):
   }
   """
 
+  # pylint: disable=attribute-defined-outside-init
   def initialize(self, tracker):
+    """ initialize """
     self.tracker = tracker
 
   @tornado.gen.coroutine
   def get(self):
+    """ get method """
     clusters = self.get_arguments(constants.PARAM_CLUSTER)
     environs = self.get_arguments(constants.PARAM_ENVIRON)
     topology_names = self.get_arguments(constants.PARAM_TOPOLOGY)
@@ -91,4 +94,3 @@ class MachinesHandler(BaseHandler):
       ret[cluster][environ][topology_name] = topology.get_machines()
 
     self.write_success_response(ret)
-

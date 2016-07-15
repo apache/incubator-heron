@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' query_operators.py '''
 import math
 import tornado.httpclient
 import tornado.gen
@@ -21,7 +21,7 @@ from heron.tracker.src.python.metricstimeline import getMetricsTimeline
 #####################################################################
 # Data Structure for fetched Metrics
 #####################################################################
-class Metrics:
+class Metrics(object):
   """Represents a univariate timeseries.
   Multivariate timeseries is simply a list of this."""
   def __init__(self, componentName, metricName, instance, start, end, timeline):
@@ -33,7 +33,9 @@ class Metrics:
     self.end = end
     self.timeline = self.floorTimestamps(start, end, timeline)
 
+  # pylint: disable=no-self-use
   def floorTimestamps(self, start, end, timeline):
+    """ floor timestamp """
     ret = {}
     for timestamp, value in timeline.iteritems():
       ts = timestamp / 60 * 60
@@ -42,6 +44,7 @@ class Metrics:
     return ret
 
   def setDefault(self, constant, start, end):
+    """ set default time """
     starttime = start / 60 * 60
     if starttime < start:
       starttime += 60
@@ -59,13 +62,17 @@ class Metrics:
 ################################################################
 # All the Operators supported by query system.
 ################################################################
-class Operator:
+
+# pylint: disable=no-self-use
+class Operator(object):
   """Base class for all operators"""
-  def __init__(self, children):
+  def __init__(self, _):
     raise Exception("Not implemented exception")
 
+  # pylint: disable=unused-argument
   @tornado.gen.coroutine
   def execute(self, tracker, tmaster, start, end):
+    """ execute """
     raise Exception("Not implemented exception")
 
   def isOperator(self):
@@ -81,6 +88,7 @@ class TS(Operator):
   2. instance - can be "*" for all instances, or a single instance ID
   3. metricName - Full metric name with stream id if applicable
   Returns a list of Metrics objects, each representing single timeseries"""
+  # pylint: disable=super-init-not-called
   def __init__(self, children):
     if len(children) != 3:
       raise Exception("TS format error, expects 3 arguments")
@@ -114,7 +122,7 @@ class TS(Operator):
     # Put a blank timeline.
     if "timeline" not in metrics or not metrics["timeline"]:
       metrics["timeline"] = {
-        self.metricName: {}
+          self.metricName: {}
       }
     timelines = metrics["timeline"][self.metricName]
     allMetrics = []
@@ -145,6 +153,7 @@ class Default(Operator):
   2. Operator - can be any concrete subclass of Operator on which "execute" can
      be called which returns a list of Metrics.
   Returns a list of Metrics objects, each representing single timeseries"""
+  # pylint: disable=super-init-not-called
   def __init__(self, children):
     if len(children) != 2:
       raise Exception("DEFAULT format error, expects 2 arguments")
@@ -153,7 +162,8 @@ class Default(Operator):
     self.constant = children[0]
     self.timeseries = children[1]
     if not self.timeseries.isOperator():
-      raise Exception("Second argument to DEFAULT must be an operator, but is " + str(type(self.timeseries)))
+      raise Exception(
+          "Second argument to DEFAULT must be an operator, but is " + str(type(self.timeseries)))
 
   @tornado.gen.coroutine
   def execute(self, tracker, tmaster, start, end):
@@ -172,6 +182,7 @@ class Sum(Operator):
   2. Operator - can be any concrete subclass of Operator on which "execute" can
      be called which returns a list of Metrics.
   Returns a list of only one Metrics object, representing sum of all timeseries"""
+  # pylint: disable=super-init-not-called
   def __init__(self, children):
     self.timeSeriesList = children
 
@@ -211,6 +222,7 @@ class Max(Operator):
   2. Operator - can be any concrete subclass of Operator on which "execute" can
      be called which returns a list of Metrics.
   Returns a list of only one Metrics object, representing max of all timeseries"""
+  # pylint: disable=super-init-not-called
   def __init__(self, children):
     if len(children) < 1:
       raise Exception("MAX expects at least one operand.")
@@ -259,6 +271,8 @@ class Percentile(Operator):
   3. Operator - can be any concrete subclass of Operator on which "execute" can
      be called which returns a list of Metrics.
   Returns a list of only one Metrics object, representing quantile of all timeseries"""
+
+  # pylint: disable=super-init-not-called
   def __init__(self, children):
     if len(children) < 1:
       raise Exception("PERCENTILE expects at least two operands.")
@@ -271,7 +285,6 @@ class Percentile(Operator):
 
   @tornado.gen.coroutine
   def execute(self, tracker, tmaster, start, end):
-    constants = filter(lambda ts: isinstance(ts, float), self.timeSeriesList)
     leftOverTimeSeries = filter(lambda ts: not isinstance(ts, float), self.timeSeriesList)
 
     futureMetrics = []
@@ -330,12 +343,15 @@ class Divide(Operator):
   3. When both operands are univariate.
      a. Instance information is ignored in this case
      b. Returns univariate timeseries which is the result of division operation."""
+
+  # pylint: disable=super-init-not-called
   def __init__(self, children):
     if len(children) != 2:
       raise Exception("DIVIDE expects exactly two arguments.")
     self.timeSeries1 = children[0]
     self.timeSeries2 = children[1]
 
+  # pylint: disable=too-many-branches, too-many-statements
   @tornado.gen.coroutine
   def execute(self, tracker, tmaster, start, end):
     # Future metrics so as to execute them in parallel
@@ -388,6 +404,7 @@ class Divide(Operator):
           metrics2[m.instance] = m
 
     # In case both are multivariate, only equal instances will get operated on.
+    # pylint: disable=too-many-boolean-expressions
     if ((len(metrics) > 1 or (len(metrics) == 1 and "" not in metrics))
         and (len(metrics2) > 1 or (len(metrics2) == 1 and "" not in metrics2))):
       allMetrics = []
@@ -399,7 +416,8 @@ class Divide(Operator):
           if timestamp not in metrics2[key].timeline or metrics2[key].timeline[timestamp] == 0:
             metrics[key].timeline.pop(timestamp)
           else:
-            met.timeline[timestamp] = metrics[key].timeline[timestamp] / metrics2[key].timeline[timestamp]
+            met.timeline[timestamp] = metrics[key].timeline[timestamp] / \
+              metrics2[key].timeline[timestamp]
         allMetrics.append(met)
       raise tornado.gen.Return(allMetrics)
     # If first is univariate
@@ -409,6 +427,7 @@ class Divide(Operator):
         # Initialize with first metrics timeline, but second metric's instance
         # because that is multivariate
         met = Metrics(None, None, metric.instance, start, end, dict(metrics[""].timeline))
+        # pylint: disable=consider-iterating-dictionary
         for timestamp in met.timeline.keys():
           if timestamp not in metric.timeline or metric.timeline[timestamp] == 0:
             met.timeline.pop(timestamp)
@@ -422,6 +441,7 @@ class Divide(Operator):
       for key, metric in metrics.iteritems():
         # Initialize with first metrics timeline and its instance
         met = Metrics(None, None, metric.instance, start, end, dict(metric.timeline))
+        # pylint: disable=consider-iterating-dictionary
         for timestamp in met.timeline.keys():
           if timestamp not in metrics2[""].timeline or metrics2[""].timeline[timestamp] == 0:
             met.timeline.pop(timestamp)
@@ -453,12 +473,14 @@ class Multiply(Operator):
   3. When both operands are univariate.
      a. Instance information is ignored in this case
      b. Returns univariate timeseries which is the result of multiplication operation."""
+  # pylint: disable=super-init-not-called
   def __init__(self, children):
     if len(children) != 2:
       raise Exception("MULTIPLY expects exactly two arguments.")
     self.timeSeries1 = children[0]
     self.timeSeries2 = children[1]
 
+  # pylint: disable=too-many-branches, too-many-statements
   @tornado.gen.coroutine
   def execute(self, tracker, tmaster, start, end):
     # Future metrics so as to execute them in parallel
@@ -509,6 +531,7 @@ class Multiply(Operator):
           metrics2[m.instance] = m
 
     # In case both are multivariate, only equal instances will get operated
+    # pylint: disable=too-many-boolean-expressions
     if ((len(metrics) > 1 or (len(metrics) == 1 and "" not in metrics))
         and (len(metrics2) > 1 or (len(metrics2) == 1 and "" not in metrics2))):
       allMetrics = []
@@ -520,7 +543,8 @@ class Multiply(Operator):
           if timestamp not in metrics2[key].timeline:
             metrics[key].timeline.pop(timestamp)
           else:
-            met.timeline[timestamp] = metrics[key].timeline[timestamp] * metrics2[key].timeline[timestamp]
+            met.timeline[timestamp] = metrics[key].timeline[timestamp] * \
+              metrics2[key].timeline[timestamp]
         allMetrics.append(met)
       raise tornado.gen.Return(allMetrics)
     # If first is univariate
@@ -530,6 +554,7 @@ class Multiply(Operator):
         # Initialize with first metrics timeline, but second metric's instance
         # because that is multivariate
         met = Metrics(None, None, metric.instance, start, end, dict(metrics[""].timeline))
+        # pylint: disable=consider-iterating-dictionary
         for timestamp in met.timeline.keys():
           if timestamp not in metric.timeline:
             met.timeline.pop(timestamp)
@@ -543,6 +568,7 @@ class Multiply(Operator):
       for key, metric in metrics.iteritems():
         # Initialize with first metrics timeline and its instance
         met = Metrics(None, None, metric.instance, start, end, dict(metric.timeline))
+        # pylint: disable=consider-iterating-dictionary
         for timestamp in met.timeline.keys():
           if timestamp not in metrics2[""].timeline:
             met.timeline.pop(timestamp)
@@ -574,12 +600,14 @@ class Subtract(Operator):
   3. When both operands are univariate.
      a. Instance information is ignored in this case
      b. Returns univariate timeseries which is the result of subtraction operation."""
+  # pylint: disable=super-init-not-called
   def __init__(self, children):
     if len(children) != 2:
       raise Exception("SUBTRACT expects exactly two arguments.")
     self.timeSeries1 = children[0]
     self.timeSeries2 = children[1]
 
+  # pylint: disable=too-many-branches, too-many-statements
   @tornado.gen.coroutine
   def execute(self, tracker, tmaster, start, end):
     # Future metrics so as to execute them in parallel
@@ -640,7 +668,8 @@ class Subtract(Operator):
           if timestamp not in metrics2[key].timeline:
             metrics[key].timeline.pop(timestamp)
           else:
-            met.timeline[timestamp] = metrics[key].timeline[timestamp] - metrics2[key].timeline[timestamp]
+            met.timeline[timestamp] = metrics[key].timeline[timestamp] - \
+              metrics2[key].timeline[timestamp]
         allMetrics.append(met)
       raise tornado.gen.Return(allMetrics)
     # If first is univariate
@@ -650,6 +679,7 @@ class Subtract(Operator):
         # Initialize with first metrics timeline, but second metric's instance
         # because that is multivariate
         met = Metrics(None, None, metric.instance, start, end, dict(metrics[""].timeline))
+        # pylint: disable=consider-iterating-dictionary
         for timestamp in met.timeline.keys():
           if timestamp not in metric.timeline:
             met.timeline.pop(timestamp)
@@ -663,6 +693,7 @@ class Subtract(Operator):
       for key, metric in metrics.iteritems():
         # Initialize with first metrics timeline and its instance
         met = Metrics(None, None, metric.instance, start, end, dict(metric.timeline))
+        # pylint: disable=consider-iterating-dictionary
         for timestamp in met.timeline.keys():
           if timestamp not in metrics2[""].timeline:
             met.timeline.pop(timestamp)
@@ -676,6 +707,7 @@ class Rate(Operator):
   """Rate Operator. This operator is used to find rate of change for all timeseries.
   Accepts a list of 1 element, which has to be a concrete subclass of Operators.
   Returns a list of Metrics object, representing rate of all timeseries"""
+  # pylint: disable=super-init-not-called
   def __init__(self, children):
     if len(children) != 1:
       raise Exception("RATE expects exactly one argument.")
@@ -699,4 +731,3 @@ class Rate(Operator):
           timeline[timestamp] = metric.timeline[timestamp] - metric.timeline[prev]
       metric.timeline = timeline
     raise tornado.gen.Return(metrics)
-

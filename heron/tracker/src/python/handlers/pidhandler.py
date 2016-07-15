@@ -11,11 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' pidhandler.py '''
 import logging
+import traceback
 import tornado.gen
 import tornado.web
-import traceback
 
 from heron.tracker.src.python import utils
 from heron.tracker.src.python.handlers import BaseHandler
@@ -34,7 +34,7 @@ def getInstancePid(topology_info, instance_id):
     http_client = tornado.httpclient.AsyncHTTPClient()
     endpoint = utils.make_shell_endpoint(topology_info, instance_id)
     url = "%s/pid/%s" % (endpoint, instance_id)
-    LOG.debug("HTTP call for url: %s" % url)
+    LOG.debug("HTTP call for url: %s", url)
     response = yield http_client.fetch(url)
     raise tornado.gen.Return(response.body)
   except tornado.httpclient.HTTPError as e:
@@ -63,11 +63,14 @@ class PidHandler(BaseHandler):
   }
   """
 
+  # pylint: disable=attribute-defined-outside-init
   def initialize(self, tracker):
+    """ initialize """
     self.tracker = tracker
 
   @tornado.gen.coroutine
   def get(self):
+    """ get method """
     try:
       cluster = self.get_argument_cluster()
       role = self.get_argument_role()

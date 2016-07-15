@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' tracker.py '''
 import json
 import logging
 
@@ -26,7 +26,7 @@ from heron.tracker.src.python import utils
 LOG = logging.getLogger(__name__)
 
 
-class Tracker:
+class Tracker(object):
   """
   Tracker is a stateless cache of all the topologies
   for the given state managers. It watches for
@@ -57,7 +57,9 @@ class Tracker:
     """
     self.state_managers = statemanagerfactory.get_all_state_managers(self.config.statemgr_config)
 
+    # pylint: disable=deprecated-lambda
     def on_topologies_watch(state_manager, topologies):
+      """watch topologies"""
       LOG.info("State watch triggered for topologies.")
       LOG.debug("Topologies: " + str(topologies))
       existingTopologies = self.getTopologiesForStateLocation(state_manager.name)
@@ -65,8 +67,8 @@ class Tracker:
       LOG.debug("Existing topologies: " + str(existingTopNames))
       for name in existingTopNames:
         if name not in topologies:
-          LOG.info("Removing topology: {0} in rootpath: {1}".format(
-            name, state_manager.rootpath))
+          LOG.info("Removing topology: %s in rootpath: %s",
+                   name, state_manager.rootpath)
           self.removeTopology(name, state_manager.name)
 
       for name in topologies:
@@ -79,6 +81,7 @@ class Tracker:
       onTopologiesWatch = partial(on_topologies_watch, state_manager)
       state_manager.get_topologies(onTopologiesWatch)
 
+  # pylint: disable=deprecated-lambda
   def getTopologyByClusterRoleEnvironAndName(self, cluster, role, environ, topologyName):
     """
     Find and return the topology given its cluster, environ, topology name, and
@@ -91,9 +94,11 @@ class Tracker:
                         and t.environ == environ, self.topologies)
     if not topologies or len(topologies) > 1:
       if role is not None:
-        raise Exception("Topology not found for {0}, {1}, {2}, {3}".format(cluster, role, environ, topologyName))
+        raise Exception("Topology not found for {0}, {1}, {2}, {3}".format(
+            cluster, role, environ, topologyName))
       else:
-        raise Exception("Topology not found for {0}, {1}, {2}".format(cluster, environ, topologyName))
+        raise Exception("Topology not found for {0}, {1}, {2}".format(
+            cluster, environ, topologyName))
 
     # There is only one topology which is returned.
     return topologies[0]
@@ -110,8 +115,8 @@ class Tracker:
     on any changes on the topology.
     """
     topology = Topology(topologyName, state_manager.name)
-    LOG.info("Adding new topology: {0}, state_manager: {1}".format(
-      topologyName, state_manager.name))
+    LOG.info("Adding new topology: %s, state_manager: %s",
+             topologyName, state_manager.name)
     self.topologies.append(topology)
 
     # Register a watch on topology and change
@@ -119,24 +124,28 @@ class Tracker:
     topology.register_watch(self.setTopologyInfo)
 
     def on_topology_pplan(data):
+      """watch physical plan"""
       LOG.info("Watch triggered for topology pplan: " + topologyName)
       topology.set_physical_plan(data)
       if not data:
         LOG.debug("No data to be set")
 
     def on_topology_execution_state(data):
+      """watch execution state"""
       LOG.info("Watch triggered for topology execution state: " + topologyName)
       topology.set_execution_state(data)
       if not data:
         LOG.debug("No data to be set")
 
     def on_topology_tmaster(data):
+      """set tmaster"""
       LOG.info("Watch triggered for topology tmaster: " + topologyName)
       topology.set_tmaster(data)
       if not data:
         LOG.debug("No data to be set")
 
     def on_topology_scheduler_location(data):
+      """set scheduler location"""
       LOG.info("Watch triggered for topology scheduler location: " + topologyName)
       topology.set_scheduler_location(data)
       if not data:
@@ -172,33 +181,34 @@ class Tracker:
     execution_state = topology.execution_state
 
     executionState = {
-      "cluster": execution_state.cluster,
-      "environ": execution_state.environ,
-      "role": execution_state.role,
-      "jobname": topology.name,
-      "submission_time": execution_state.submission_time,
-      "submission_user": execution_state.submission_user,
-      "release_username": execution_state.release_state.release_username,
-      "release_tag": execution_state.release_state.release_tag,
-      "release_version": execution_state.release_state.release_version,
-      "has_physical_plan": None,
-      "has_tmaster_location": None,
-      "has_scheduler_location": None,
+        "cluster": execution_state.cluster,
+        "environ": execution_state.environ,
+        "role": execution_state.role,
+        "jobname": topology.name,
+        "submission_time": execution_state.submission_time,
+        "submission_user": execution_state.submission_user,
+        "release_username": execution_state.release_state.release_username,
+        "release_tag": execution_state.release_state.release_tag,
+        "release_version": execution_state.release_state.release_version,
+        "has_physical_plan": None,
+        "has_tmaster_location": None,
+        "has_scheduler_location": None,
     }
 
     viz_url = self.config.get_formatted_viz_url(executionState)
     executionState["viz"] = viz_url
     return executionState
 
+  # pylint: disable=no-self-use
   def extract_scheduler_location(self, topology):
     """
     Returns the representation of scheduler location that will
     be returned from Tracker.
     """
     schedulerLocation = {
-      "name": None,
-      "http_endpoint": None,
-      "job_page_link": None,
+        "name": None,
+        "http_endpoint": None,
+        "job_page_link": None,
     }
 
     if topology.scheduler_location:
@@ -216,12 +226,12 @@ class Tracker:
     be returned from Tracker.
     """
     tmasterLocation = {
-      "name": None,
-      "id": None,
-      "host": None,
-      "controller_port": None,
-      "master_port": None,
-      "stats_port": None,
+        "name": None,
+        "id": None,
+        "host": None,
+        "controller_port": None,
+        "master_port": None,
+        "stats_port": None,
     }
     if topology.tmaster:
       tmasterLocation["name"] = topology.tmaster.topology_name
@@ -239,8 +249,8 @@ class Tracker:
     be returned from Tracker.
     """
     logicalPlan = {
-      "spouts": {},
-      "bolts": {},
+        "spouts": {},
+        "bolts": {},
     }
 
     # Add spouts.
@@ -258,14 +268,14 @@ class Tracker:
         elif kvs.key == "spout.version":
           spoutVersion = kvs.value
       spoutPlan = {
-        "type": spoutType,
-        "source": spoutSource,
-        "version": spoutVersion,
-        "outputs": []
+          "type": spoutType,
+          "source": spoutSource,
+          "version": spoutVersion,
+          "outputs": []
       }
       for outputStream in list(spout.outputs):
         spoutPlan["outputs"].append({
-          "stream_name": outputStream.stream.id
+            "stream_name": outputStream.stream.id
         })
 
       logicalPlan["spouts"][spoutName] = spoutPlan
@@ -274,35 +284,36 @@ class Tracker:
     for bolt in topology.bolts():
       boltName = bolt.comp.name
       boltPlan = {
-        "outputs": [],
-        "inputs": []
+          "outputs": [],
+          "inputs": []
       }
       for outputStream in list(bolt.outputs):
         boltPlan["outputs"].append({
-          "stream_name": outputStream.stream.id
+            "stream_name": outputStream.stream.id
         })
       for inputStream in list(bolt.inputs):
         boltPlan["inputs"].append({
-          "stream_name": inputStream.stream.id,
-          "component_name": inputStream.stream.component_name,
-          "grouping": topology_pb2.Grouping.Name(inputStream.gtype)
+            "stream_name": inputStream.stream.id,
+            "component_name": inputStream.stream.component_name,
+            "grouping": topology_pb2.Grouping.Name(inputStream.gtype)
         })
 
       logicalPlan["bolts"][boltName] = boltPlan
 
     return logicalPlan
 
+  # pylint: disable=too-many-locals
   def extract_physical_plan(self, topology):
     """
     Returns the representation of physical plan that will
     be returned from Tracker.
     """
     physicalPlan = {
-      "instances": {},
-      "stmgrs": {},
-      "spouts": {},
-      "bolts": {},
-      "config": {},
+        "instances": {},
+        "stmgrs": {},
+        "spouts": {},
+        "bolts": {},
+        "config": {},
     }
 
     if not topology.physical_plan:
@@ -312,7 +323,6 @@ class Tracker:
     bolts = topology.bolts()
     stmgrs = None
     instances = None
-    configs = {}
 
     # Physical Plan
     stmgrs = list(topology.physical_plan.stmgrs)
@@ -328,15 +338,15 @@ class Tracker:
           try:
             pobj = javaobj.loads(kvs.java_serialized_value)
             physicalPlan["config"][kvs.key] = {
-              'value' : json.dumps(pobj,
-                                   default=lambda custom_field: custom_field.__dict__,
-                                   sort_keys=True,
-                                   indent=2),
-              'raw' : utils.hex_escape(kvs.java_serialized_value)}
-          except Exception as e:
+                'value' : json.dumps(pobj,
+                                     default=lambda custom_field: custom_field.__dict__,
+                                     sort_keys=True,
+                                     indent=2),
+                'raw' : utils.hex_escape(kvs.java_serialized_value)}
+          except Exception:
             physicalPlan["config"][kvs.key] = {
-              'value' : 'A Java Object',
-              'raw' : utils.hex_escape(kvs.java_serialized_value)}
+                'value' : 'A Java Object',
+                'raw' : utils.hex_escape(kvs.java_serialized_value)}
     for spout in spouts:
       spout_name = spout.comp.name
       physicalPlan["spouts"][spout_name] = []
@@ -349,19 +359,18 @@ class Tracker:
       cwd = stmgr.cwd
       shell_port = stmgr.shell_port if stmgr.HasField("shell_port") else None
       physicalPlan["stmgrs"][stmgr.id] = {
-        "id": stmgr.id,
-        "host": host,
-        "port": stmgr.data_port,
-        "shell_port": shell_port,
-        "cwd": cwd,
-        "pid": stmgr.pid,
-        "joburl": utils.make_shell_job_url(host, shell_port, cwd),
-        "logfiles": utils.make_shell_logfiles_url(host, shell_port, cwd),
-        "instance_ids": []
+          "id": stmgr.id,
+          "host": host,
+          "port": stmgr.data_port,
+          "shell_port": shell_port,
+          "cwd": cwd,
+          "pid": stmgr.pid,
+          "joburl": utils.make_shell_job_url(host, shell_port, cwd),
+          "logfiles": utils.make_shell_logfiles_url(host, shell_port, cwd),
+          "instance_ids": []
       }
 
     for instance in instances:
-      taskId = str(instance.info.task_id)
       instance_id = instance.instance_id
       stmgrId = instance.stmgr_id
       name = instance.info.component_name
@@ -371,10 +380,10 @@ class Tracker:
       shell_port = stmgrInfo["shell_port"]
 
       physicalPlan["instances"][instance_id] = {
-        "id": instance_id,
-        "name": name,
-        "stmgrId": stmgrId,
-        "logfile": utils.make_shell_logfiles_url(host, shell_port, cwd, instance.instance_id),
+          "id": instance_id,
+          "name": name,
+          "stmgrId": stmgrId,
+          "logfile": utils.make_shell_logfiles_url(host, shell_port, cwd, instance.instance_id),
       }
       physicalPlan["stmgrs"][stmgrId]["instance_ids"].append(instance_id)
       if name in physicalPlan["spouts"]:
@@ -415,13 +424,13 @@ class Tracker:
       has_scheduler_location = False
 
     top = {
-      "name": topology.name,
-      "id": topology.id,
-      "logical_plan": None,
-      "physical_plan": None,
-      "execution_state": None,
-      "tmaster_location": None,
-      "scheduler_location": None,
+        "name": topology.name,
+        "id": topology.id,
+        "logical_plan": None,
+        "physical_plan": None,
+        "execution_state": None,
+        "tmaster_location": None,
+        "scheduler_location": None,
     }
 
     executionState = self.extract_execution_state(topology)
@@ -444,7 +453,7 @@ class Tracker:
     Raises exception if no such topology is found.
     """
     # Iterate over the values to filter the desired topology.
-    for (topology_name, state_manager_name), topologyInfo in self.topologyInfos.iteritems():
+    for (topology_name, _), topologyInfo in self.topologyInfos.iteritems():
       executionState = topologyInfo["execution_state"]
       if (topologyName == topology_name and
           cluster == executionState["cluster"] and
@@ -455,7 +464,8 @@ class Tracker:
           return topologyInfo
     if role is not None:
       LOG.info("Could not find topology info for topology: {0}, \
-               cluster: {1}, role: {2}, and environ: {3}".format(topologyName, cluster, role, environ))
+               cluster: {1}, role: {2}, and environ: {3}".format(
+                   topologyName, cluster, role, environ))
     else:
       LOG.info("Could not find topology info for topology: {0}, \
                cluster: {1} and environ: {2}".format(topologyName, cluster, environ))
