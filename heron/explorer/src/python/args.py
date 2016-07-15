@@ -11,10 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import heron.common.src.python.utils as utils
+''' args.py '''
 import os
-
+import heron.common.src.python.utils as utils
 
 # default parameter - url to connect to heron tracker
 DEFAULT_TRACKER_URL = "http://localhost:8888"
@@ -22,7 +21,7 @@ DEFAULT_TRACKER_URL = "http://localhost:8888"
 
 # add argument for config file path
 def add_config(parser):
-
+  """ add config """
   # the default config path
   default_config_path = utils.get_heron_conf_dir()
 
@@ -34,13 +33,16 @@ def add_config(parser):
   return parser
 
 
+# pylint: disable=protected-access
 def add_titles(parser):
+  """ add titles """
   parser._positionals.title = "Required arguments"
   parser._optionals.title = "Optional arguments"
   return parser
 
 
 def insert_bool(param, command_args):
+  """ insert boolean """
   index = 0
   found = False
   for lelem in command_args:
@@ -57,12 +59,14 @@ def insert_bool(param, command_args):
 
 
 def insert_bool_values(command_line_args):
+  """ insert boolean values """
   args1 = insert_bool('--verbose', command_line_args)
   return args1
 
 
 # add optional argument that sets log level to verbose
 def add_verbose(parser):
+  """ add optional verbose argument"""
   parser.add_argument(
       '--verbose',
       metavar='(a boolean; default: "false")',
@@ -71,60 +75,60 @@ def add_verbose(parser):
   return parser
 
 
-# add optional argument that specifies tracker API endpoint
 def add_tracker_url(parser):
+  """ add optional tracker_url argument """
   parser.add_argument(
-    '--tracker_url',
-    metavar='(tracker url; default: "' + DEFAULT_TRACKER_URL + '")',
-    type=str, default=DEFAULT_TRACKER_URL)
+      '--tracker_url',
+      metavar='(tracker url; default: "' + DEFAULT_TRACKER_URL + '")',
+      type=str, default=DEFAULT_TRACKER_URL)
   return parser
 
 
-# add optional argument that specifies container id
 def add_container_id(parser):
+  """ add optional argument that specifies container id """
   parser.add_argument(
-    '--id',
-    help='container ID',
-    type=int, metavar='ID')
+      '--id',
+      help='container ID',
+      type=int, metavar='ID')
   return parser
 
 
-# add optional argument that specifies component name
 def add_component_name(parser):
+  """ add optional argument that specifies component name """
   parser.add_argument(
-    '--component',
-    help='Component name',
-    metavar='COMP',
-    type=str)
+      '--component',
+      help='Component name',
+      metavar='COMP',
+      type=str)
   return parser
 
 
-# add optional argument that displays spout only
 def add_spouts(parser):
+  """ add optional argument that displays spout only """
   parser.add_argument(
-    '--spout', help='display spout', action='store_true')
+      '--spout', help='display spout', action='store_true')
   return parser
 
 
-# add optional argument that displays bolts only
 def add_bolts(parser):
+  """ add optional argument that displays bolts only """
   parser.add_argument(
-    '--bolt', help='display bolt', action='store_true')
+      '--bolt', help='display bolt', action='store_true')
   return parser
 
 
-# add argument that specifies topologies location
 def add_cluster_role_env(parser):
+  """ add argument that specifies topologies location """
   parser.add_argument(
-    'cluster/[role]/[env]', help='Topologies location', type=str,
-    metavar='CLUSTER/[ROLE]/[ENV]')
+      'cluster/[role]/[env]', help='Topologies location', type=str,
+      metavar='CLUSTER/[ROLE]/[ENV]')
   return parser
 
 
-# add argument that specifies topology name
 def add_topology_name(parser):
+  """ add argument that specifies topology name """
   parser.add_argument(
-    'topology-name',
-    help='Topology name'
+      'topology-name',
+      help='Topology name'
   )
   return parser
