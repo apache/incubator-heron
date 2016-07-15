@@ -52,21 +52,22 @@ class HeronPackage(Package):
     file_path = args[constants.PKG_PATH]
 
     # 1. upload file
-    is_successful, store_location = self.blobstore.upload(file_path)
-    if not is_successful:
+    successful, store_location = self.blobstore.upload(file_path)
+    if not successful:
       Log.error("Failed to upload the package. Bailing out...")
       sys.exit(1)
 
     # 2. add package version info into metastore
-    is_successful = self.metastore.add_pkg_meta(
-      role, pkg_name, description, store_location, extra_info)
-    if not is_successful:
+    successful, version = self.metastore.add_pkg_meta(
+      role, pkg_name, store_location, description, extra_info)
+    if not successful:
       Log.error("Failed to add the meta data. Bailing out...")
       sys.exit(1)
 
-    # 3. return a uri referencing this uploaded package in format scheme://role/pkg/version
-    pkg_uri = self.metastore.get_pkg_uri(role, pkg_name, extra_info, self.blobstore.get_scheme())
-    Log.info("Package URI: %s" % pkg_uri)
+    # 3. return a uri referencing this uploaded package in customized format
+    pkg_uri = self.metastore.get_pkg_uri(
+      self.blobstore.get_scheme(), role, pkg_name, version, extra_info)
+    Log.info("Uploaded package uri: %s" % pkg_uri)
     return pkg_uri
 
   def download(self, args):
@@ -77,18 +78,17 @@ class HeronPackage(Package):
     extra_info = args[constants.EXTRA]
     dest_path = args[constants.DEST_PATH]
 
-    # download needs to handle version number case as well as live/latest tag case
-    # 1. fetch meta_info
+    # 1. find package location
     pkg_location = self.metastore.get_pkg_location(role, pkg_name, version, extra_info)
     if pkg_location is None:
       Log.error("Cannot find requested package. Bailing out...")
       sys.exit(1)
 
-    # 2. call download
+    # 2. download
     if self.blobstore.download(pkg_location, dest_path):
-      Log.info("The download operation succeeded")
+      Log.info("Successfully downloaded package")
     else:
-      Log.error("The download operation failed")
+      Log.error("Failed to download pacakge")
 
   def delete_version(self, args):
     """Delete the package file referenced by pkg_uri"""
@@ -97,16 +97,15 @@ class HeronPackage(Package):
     version = args[constants.VERSION]
     extra_info = args[constants.EXTRA]
 
-    # 1. find meta data for the package
+    # 1. find package location
     pkg_location = self.metastore.get_pkg_location(role, pkg_name, version, extra_info)
     if pkg_location is None:
       Log.error("Cannot find requested package. Bailing out...")
       sys.exit(1)
 
     # 2. modify the metastore info & write back
-    #  live should not be deleted;
+    #  live cannot be deleted;
     #  latest needs to be updated if it's deleted
-    # info write needs to be atomic
     self.metastore.delete_pkg_meta(role, pkg_name, version, extra_info)
 
     # 3. try to delete the package(deletion operation failure can be handled in clean cmd)
@@ -114,7 +113,6 @@ class HeronPackage(Package):
     if not isSuccess:
       Log.error("meta info updated but blob file still exists. Can be cleaned with the clean cmd.")
 
-  # meta-information query operations
   def list_packages(self, args):
     role = args[constants.ROLE]
     extra_info = args[constants.EXTRA]

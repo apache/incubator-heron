@@ -10,10 +10,12 @@ pex_library(
       "common/utils.py",
       "common/package.py",
       "common/constants.py",
+      "common/parser.py",
     ],
     deps = [
       "//heron/common/src/python:common",
     ],
+    reqs = ["pyyaml==3.10"],
 )
 
 pex_binary(

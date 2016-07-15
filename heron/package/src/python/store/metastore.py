@@ -6,6 +6,14 @@ from heron.common.src.python.color import Log
 from heron.package.src.python.common import constants
 from heron.package.src.python.common import utils
 
+METASTORE_NAME = "heron.package.metastore.name"
+METASTORE_ROOT_PATH = "heron.package.metastore.root_path"
+
+def get_metastore(conf):
+  metastore = getattr(sys.modules[__name__], conf[METASTORE_NAME])
+  instance = metastore(conf)
+  return instance
+
 class Metastore(object):
   # get all package names
   def get_packages(self, role, extra_info):
@@ -16,7 +24,7 @@ class Metastore(object):
     raise NotImplementedError('get_versions is not implemented')
 
   # add meta data for a package's version
-  def add_pkg_meta(self, role, pkg_name, description, location, extra_info):
+  def add_pkg_meta(self, role, pkg_name, location, description, extra_info):
     raise NotImplementedError('add_pkg_meta in not implemented')
 
   # delete meta data for a package's version
@@ -39,14 +47,17 @@ class Metastore(object):
   def unset_tag(self, tag, role, pkg_name, extra_info):
      raise NotImplementedError('unset_tag is not implemented')
 
-  # get a pkg's info 
+  # get a pkg's info
   def get_meta_by_tag(self, tag, role, pkg_name, extra_info):
     raise NotImplementedError('get_meat_by_tag is not implemented')
 
+  # get pkg uri
+  def get_pkg_uri(self, scheme, role, pkg_name, version, extra_info):
+    raise NotImplementedError('get_pkg_uri is not implemented')
+
 class LocalMetastore(Metastore):
-  def __init__(self):
-    # TODO (nlu): make this read from config
-    self.meta_file = "/Users/nlu/blobs/meta.json"
+  def __init__(self, conf):
+    self.meta_file = conf[METASTORE_ROOT_PATH]
 
     # create the file if missing
     if not os.path.exists(self.meta_file):
@@ -106,14 +117,12 @@ class LocalMetastore(Metastore):
     meta_info[role][pkg_name][constants.COUNTER] += 1
     version = str(meta_info[role][pkg_name][constants.COUNTER])
 
-    # TODO (nlu): create proper pkg info to be stored
-    # deleted should be false, needs to set location, description
     version_entry = {}
     version_entry[constants.STORE_PATH] = location
     version_entry[constants.DELETED] = False
     version_entry[constants.DESC] = description
     meta_info[role][pkg_name][version] = version_entry
-    meta_info[role][pkg_name][constants.LATEST_TAG] = version
+    meta_info[role][pkg_name][constants.LATEST] = version
 
     with open(self.meta_file, "w") as meta_file:
       json.dump(meta_info, meta_file)
@@ -140,18 +149,21 @@ class LocalMetastore(Metastore):
     # verify pkg
     if role not in meta_info or pkg_name not in meta_info[role]:
       Log.error("requested package does not exist")
-      sys.exit(1)
+      return None
 
     # translate version
     pkg_info = meta_info[role][pkg_name]
     version = self._translate_version(version, pkg_info)
 
     if not self._is_valid_version(pkg_info, version):
-      Log.error("the requested version %s is not correct. Bailing out..." % version)
-      sys.exit(1)
+      Log.error("requested version %s is not correct. Bailing out..." % version)
+      return None
 
     # fetch location
     return pkg_info[str(version)][constants.STORE_PATH]
+
+  def get_pkg_uri(self, scheme, role, pkg_name, version, extra_info):
+    return "%s://%s/%s/%s" % (scheme, role, pkg_name, version)
 
   # delete is nothing but set the Deleted tag
   def delete_pkg_meta(self, role, pkg_name, version, extra_info):
@@ -186,10 +198,10 @@ class LocalMetastore(Metastore):
     return True
 
   def _find_second_latest(self, pkg_info):
-    if pkg_info[constants.LATEST_TAG] is None:
+    if pkg_info[constants.LATEST] is None:
       return None
 
-    latest = int(pkg_info[constants.LATEST_TAG])
+    latest = int(pkg_info[constants.LATEST])
     for v in range(latest - 1, 0, -1):
       version = str(v)
       if not pkg_info[version][constants.DELETED]:

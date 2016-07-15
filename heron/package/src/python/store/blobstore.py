@@ -1,11 +1,25 @@
 import os
 import shutil
+import sys
 import time
 
 from heron.common.src.python.color import Log
 from heron.package.src.python.common import utils
 
+BLOBSTORE_NAME = "heron.package.blobstore.name"
+BLOBSTORE_ROOT_PATH = "heron.package.blobstore.root_path"
+BLOBSTORE_SCHEME = "heron.package.blobstore.scheme"
+
+def get_blobstore(conf):
+  blobstore = getattr(sys.modules[__name__], conf[BLOBSTORE_NAME])
+  instance = blobstore(conf)
+  return instance
+
 class Blobstore(object):
+  def get_scheme(self):
+    """Return the storage scheme"""
+    raise NotImplementedError('get_scheme is not implemented')
+
   def upload(self, file_path):
     """Upload the file at file_path into blobstore"""
     """return a stored path"""
@@ -19,41 +33,45 @@ class Blobstore(object):
     """Delete a file in blobstore with given path"""
     raise NotImplementedError('delete is not implemented')
 
-  def get_scheme(self):
-    """Return the storage scheme"""
-    raise NotImplementedError('get_scheme is not implemented')
-
 class LocalBlobstore(Blobstore):
-  def __init__(self):
-    # TODO (nlu): get root path and scheme from config
-    self.root_path = "/Users/nlu/blobs"
-    self.scheme = "localfs"
+  def __init__(self, conf):
+    self.root_path = conf[BLOBSTORE_ROOT_PATH]
+    self.scheme = conf[BLOBSTORE_SCHEME]
 
-  # return a tuple, first field indicates the status of upload
-  # second field is the path if succeed
+  def get_scheme(self):
+    return self.scheme
+
   def upload(self, file_path):
+    if not self._is_valid_file(file_path):
+      Log.error("Upload file doesn't exist")
+      return False, ""
+
     dest_path = self._resolve_path(file_path)
     if self._copy_file(file_path, dest_path):
       return True, os.path.join(dest_path, os.path.basename(file_path))
     else:
       return False, ""
 
-  def download(self, file_path, dest_file):
+  def download(self, file_path, dest_path):
     if not self._is_valid_file(file_path):
       Log.error("Requested file does not exist")
       return False
 
-    if not self._is_valid_file(dest_file):
-      Log.error("File destination does not exist")
+    if not self._is_valid_file(dest_path):
+      Log.error("File destination '%s' does not exist" % dest_path)
       return False
 
-    if self._copy_file(file_path, dest_file):
+    if self._copy_file(file_path, dest_path):
       Log.info("%s is successfully downloaded" % os.path.basename(file_path))
       return True
     else:
       return False
 
   def delete(self, file_path):
+    if not self._is_valid_file(file_path):
+      Log.error("Requested file does not exist")
+      return False
+
     try:
       os.remove(file_path)
       Log.info("%s is successfully deleted" % os.path.basename(file_path))
@@ -62,9 +80,6 @@ class LocalBlobstore(Blobstore):
       return False
 
     return True
-
-  def get_scheme(self):
-    return self.scheme
 
   def _copy_file(self, src, dst):
     try:
