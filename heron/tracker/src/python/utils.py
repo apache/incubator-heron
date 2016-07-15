@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' utils.py '''
 """
 Contains utility functions used by tracker.
 """
@@ -19,13 +19,12 @@ Contains utility functions used by tracker.
 import os
 import string
 import sys
-
-from heron.proto.execution_state_pb2 import ExecutionState
+import subprocess
 
 # directories for heron tools distribution
-BIN_DIR  = "bin"
+BIN_DIR = "bin"
 CONF_DIR = "conf"
-LIB_DIR  = "lib"
+LIB_DIR = "lib"
 
 def hex_escape(bin_str):
   """
@@ -40,14 +39,13 @@ def make_shell_endpoint(topologyInfo, instance_id):
   if shell port is present, otherwise returns None.
   """
   # Format: container_<id>_<instance_id>
-  component_id = instance_id.split('_')[1]
   pplan = topologyInfo["physical_plan"]
   stmgrId = pplan["instances"][instance_id]["stmgrId"]
   host = pplan["stmgrs"][stmgrId]["host"]
   shell_port = pplan["stmgrs"][stmgrId]["shell_port"]
   return "http://%s:%d" % (host, shell_port)
 
-def make_shell_job_url(host, shell_port, cwd):
+def make_shell_job_url(host, shell_port, _):
   """
   Make the job url from the info
   stored in stmgr. This points to dir from where
@@ -58,7 +56,7 @@ def make_shell_job_url(host, shell_port, cwd):
     return None
   return "http://%s:%d/browse/" % (host, shell_port)
 
-def make_shell_logfiles_url(host, shell_port, cwd, instance_id=None):
+def make_shell_logfiles_url(host, shell_port, _, instance_id=None):
   """
   Make the url for log-files in heron-shell
   from the info stored in stmgr.
@@ -78,7 +76,8 @@ def make_shell_logfile_data_url(host, shell_port, instance_id, offset, length):
   Make the url for log-file data in heron-shell
   from the info stored in stmgr.
   """
-  return "http://%s:%d/filedata/log-files/%s.log.0?offset=%s&length=%s" % (host, shell_port, instance_id, offset, length)
+  return "http://%s:%d/filedata/log-files/%s.log.0?offset=%s&length=%s" % \
+    (host, shell_port, instance_id, offset, length)
 
 def make_shell_filestats_url(host, shell_port, path):
   """
@@ -87,6 +86,7 @@ def make_shell_filestats_url(host, shell_port, path):
   """
   return "http://%s:%d/filestats/%s" % (host, shell_port, path)
 
+# pylint: disable=unused-argument
 def make_viz_dashboard_url(name, cluster, environ):
   """
   Link to the dashboard. Must override to return a valid url.
@@ -109,8 +109,8 @@ def cygpath(x):
   :return: the path in windows
   """
   command = ['cygpath', '-wp', x]
-  p = subprocess.Popen(command,stdout=subprocess.PIPE)
-  output, errors = p.communicate()
+  p = subprocess.Popen(command, stdout=subprocess.PIPE)
+  output, _ = p.communicate()
   lines = output.split("\n")
   return lines[0]
 
@@ -131,7 +131,7 @@ def get_heron_tracker_dir():
   This will extract heron tracker directory from .pex file.
   :return: root location for heron-tools.
   """
-  path = "/".join(os.path.realpath( __file__ ).split('/')[:-7])
+  path = "/".join(os.path.realpath(__file__).split('/')[:-7])
   return normalized_class_path(path)
 
 def get_heron_tracker_bin_dir():
@@ -150,10 +150,10 @@ def get_heron_tracker_conf_dir():
   conf_path = os.path.join(get_heron_tracker_dir(), CONF_DIR)
   return conf_path
 
-def get_heron_tracker_lib_dir():
-  """
-  This will provide heron tracker lib directory from .pex file.
-  :return: absolute path of heron lib directory
-  """
-  lib_path = os.path.join(get_heron_tools_dir(), LIB_DIR)
-  return lib_path
+# def get_heron_tracker_lib_dir():
+#   """
+#   This will provide heron tracker lib directory from .pex file.
+#   :return: absolute path of heron lib directory
+#   """
+#   lib_path = os.path.join(get_heron_tools_dir(), LIB_DIR)
+#   return lib_path

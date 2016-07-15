@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' statehandler.py '''
 import tornado.gen
 
 from heron.tracker.src.python import constants
@@ -41,11 +41,15 @@ class StatesHandler(BaseHandler):
     <cluster2>: {...}
   }
   """
+
+  # pylint: disable=attribute-defined-outside-init
   def initialize(self, tracker):
+    """ initialize """
     self.tracker = tracker
 
   @tornado.gen.coroutine
   def get(self):
+    """ get method """
     # Get all the values for parameter "cluster".
     clusters = self.get_arguments(constants.PARAM_CLUSTER)
 

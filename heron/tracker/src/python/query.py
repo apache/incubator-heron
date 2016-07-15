@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+""" query.py """
 import tornado.httpclient
 import tornado.gen
 
@@ -21,30 +21,34 @@ from heron.tracker.src.python.query_operators import *
 ####################################################################
 # Parsing and executing the query string.
 ####################################################################
-class Query:
+
+# pylint: disable=no-self-use
+class Query(object):
   """Execute the query for metrics. Uses Tracker to get
      individual metrics that are part of the query.
      Example usage:
         query = Query(tracker)
         result = query.execute(tmaster, query_string)"""
-
+  # pylint: disable=undefined-variable
   def __init__(self, tracker):
     self.tracker = tracker
     self.operators = {
-      'TS': TS,
-      'DEFAULT': Default,
-      'MAX': Max,
-      'SUM': Sum,
-      'SUBTRACT': Subtract,
-      'PERCENTILE': Percentile,
-      'DIVIDE': Divide,
-      'MULTIPLY': Multiply,
-      'RATE': Rate
+        'TS':TS,
+        'DEFAULT':Default,
+        'MAX':Max,
+        'SUM':Sum,
+        'SUBTRACT':Subtract,
+        'PERCENTILE':Percentile,
+        'DIVIDE':Divide,
+        'MULTIPLY':Multiply,
+        'RATE':Rate
     }
 
 
+  # pylint: disable=attribute-defined-outside-init, no-member
   @tornado.gen.coroutine
   def execute_query(self, tmaster, query_string, start, end):
+    """ execute query """
     if not tmaster:
       raise Exception("No tmaster found")
     self.tmaster = tmaster
