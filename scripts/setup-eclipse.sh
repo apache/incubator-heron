@@ -57,7 +57,7 @@ EOH
 function generate_source_dirs() {
 for srcdir in $dir_list; do
     cat >> $classpath_file << EOH
-  <classpathentry kind="src" output="bin/$srcdir" path="$srcdir">$
+  <classpathentry kind="src" output="bazel-bin/$srcdir" path="$srcdir">$
     <attributes>$
       <attribute name="optional" value="true"/>$
       <attribute name="maven.pomderived" value="true"/>$
