@@ -18,8 +18,6 @@ import fnmatch
 import heron.common.src.python.utils as utils
 
 
-################################################################################
-# TODO, make the jars independent version free
 def pick(dirname, pattern):
   '''
   Get the topology jars
@@ -31,8 +29,6 @@ def pick(dirname, pattern):
   return file_list[0] if file_list else None
 
 
-################################################################################
-# TODO, make the jars independent version free
 def topology_jars():
   '''
   Get the topology jars
@@ -44,7 +40,6 @@ def topology_jars():
   return jars
 
 
-################################################################################
 def scheduler_jars():
   '''
   Get the scheduler jars
@@ -56,7 +51,6 @@ def scheduler_jars():
   return jars
 
 
-################################################################################
 def uploader_jars():
   '''
   Get the uploader jars
@@ -68,7 +62,6 @@ def uploader_jars():
   return jars
 
 
-################################################################################
 def statemgr_jars():
   '''
   Get the statemgr jars
@@ -80,7 +73,6 @@ def statemgr_jars():
   return jars
 
 
-################################################################################
 def packing_jars():
   '''
   Get the packing algorithm jars
