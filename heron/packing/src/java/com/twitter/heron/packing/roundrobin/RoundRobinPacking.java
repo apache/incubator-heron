@@ -181,12 +181,11 @@ public class RoundRobinPacking implements IPacking {
 
     Map<String, Map<String, Long>> instancesRamMapInContainer = new HashMap<>();
 
-    List<String> instancesToBeAccounted = new ArrayList<>();
-
     for (Map.Entry<String, List<String>> entry : allocation.entrySet()) {
       String containerId = entry.getKey();
       Map<String, Long> ramInsideContainer = new HashMap<>();
       instancesRamMapInContainer.put(containerId, ramInsideContainer);
+      List<String> instancesToBeAccounted = new ArrayList<>();
 
       // Calculate the actual value
       long usedRam = 0;

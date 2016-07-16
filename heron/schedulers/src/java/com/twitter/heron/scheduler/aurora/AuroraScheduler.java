@@ -132,6 +132,8 @@ public class AuroraScheduler implements IScheduler {
 
     // Align the ram to the maximal one
     PackingPlan.Resource containerResource = getMaxRequiredResource(packing);
+    // Update total topology resource requirement on Aurora clusters
+    packing.resource.ram = containerResource.ram * (packing.containers.size() + 1);
 
     auroraProperties.put("SANDBOX_EXECUTOR_BINARY", Context.executorSandboxBinary(config));
     auroraProperties.put("TOPOLOGY_NAME", topology.getName());
