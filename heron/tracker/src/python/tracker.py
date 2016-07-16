@@ -463,10 +463,10 @@ class Tracker(object):
         if not role or executionState.get("role") == role:
           return topologyInfo
     if role is not None:
-      LOG.info("Could not find topology info for topology: {0}, \
-               cluster: {1}, role: {2}, and environ: {3}".format(
-                   topologyName, cluster, role, environ))
+      LOG.info("Could not find topology info for topology: %s," \
+               "cluster: %s, role: %s, and environ: %s",
+               topologyName, cluster, role, environ)
     else:
-      LOG.info("Could not find topology info for topology: {0}, \
-               cluster: {1} and environ: {2}".format(topologyName, cluster, environ))
+      LOG.info("Could not find topology info for topology: %s," \
+               "cluster: %s and environ: %s", topologyName, cluster, environ)
     raise Exception("No topology found")
