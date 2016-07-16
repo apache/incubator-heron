@@ -427,7 +427,7 @@ class Divide(Operator):
         # Initialize with first metrics timeline, but second metric's instance
         # because that is multivariate
         met = Metrics(None, None, metric.instance, start, end, dict(metrics[""].timeline))
-        for timestamp in met.timeline:
+        for timestamp in met.timeline.keys():
           if timestamp not in metric.timeline or metric.timeline[timestamp] == 0:
             met.timeline.pop(timestamp)
           else:
@@ -440,7 +440,7 @@ class Divide(Operator):
       for key, metric in metrics.iteritems():
         # Initialize with first metrics timeline and its instance
         met = Metrics(None, None, metric.instance, start, end, dict(metric.timeline))
-        for timestamp in met.timeline:
+        for timestamp in met.timeline.keys():
           if timestamp not in metrics2[""].timeline or metrics2[""].timeline[timestamp] == 0:
             met.timeline.pop(timestamp)
           else:
@@ -552,7 +552,7 @@ class Multiply(Operator):
         # Initialize with first metrics timeline, but second metric's instance
         # because that is multivariate
         met = Metrics(None, None, metric.instance, start, end, dict(metrics[""].timeline))
-        for timestamp in met.timeline:
+        for timestamp in met.timeline.keys():
           if timestamp not in metric.timeline:
             met.timeline.pop(timestamp)
           else:
@@ -565,7 +565,7 @@ class Multiply(Operator):
       for key, metric in metrics.iteritems():
         # Initialize with first metrics timeline and its instance
         met = Metrics(None, None, metric.instance, start, end, dict(metric.timeline))
-        for timestamp in met.timeline:
+        for timestamp in met.timeline.keys():
           if timestamp not in metrics2[""].timeline:
             met.timeline.pop(timestamp)
           else:
@@ -675,7 +675,7 @@ class Subtract(Operator):
         # Initialize with first metrics timeline, but second metric's instance
         # because that is multivariate
         met = Metrics(None, None, metric.instance, start, end, dict(metrics[""].timeline))
-        for timestamp in met.timeline:
+        for timestamp in met.timeline.keys():
           if timestamp not in metric.timeline:
             met.timeline.pop(timestamp)
           else:
@@ -688,7 +688,7 @@ class Subtract(Operator):
       for key, metric in metrics.iteritems():
         # Initialize with first metrics timeline and its instance
         met = Metrics(None, None, metric.instance, start, end, dict(metric.timeline))
-        for timestamp in met.timeline:
+        for timestamp in met.timeline.keys():
           if timestamp not in metrics2[""].timeline:
             met.timeline.pop(timestamp)
           else:
