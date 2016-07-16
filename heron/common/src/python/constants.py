@@ -32,3 +32,5 @@ DEFAULT_DISK_PADDING_PER_CONTAINER = 12 * GB
 LOGGING_DIRECTORY = 'heron.logging.directory'
 MAX_LOG_FILES = 'heron.logging.maximum.files'
 MAX_LOG_SIZE_MB = 'heron.logging.maximum.size.mb'
+
+TOPOLOGY_TICK_TUPLE_FREQ_SECS = "topology.tick.tuple.freq.secs"

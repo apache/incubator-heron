@@ -72,7 +72,7 @@ class SingleThreadHeronInstance(object):
       # First add message to the in_stream
       self.in_stream.offer(tuple_msg_set)
       # Call run_in_single_thread() method
-      self.my_instance[2].run_in_single_thread()
+      self.my_instance[2].process_incoming_tuples()
       # Send all messages
       self.send_buffered_messages()
 
@@ -115,38 +115,34 @@ class SingleThreadHeronInstance(object):
         my_bolt = pplan_helper.get_my_bolt()
         py_bolt_instance = self.load_py_instance(False, my_bolt.comp.python_class_name)
         self.my_instance = (False, my_bolt, py_bolt_instance)
-
-      if pplan_helper.is_topology_running():
-        self.start_instance()
-      else:
-        Log.info("The instance is deployed in deactivated state")
     except Exception as e:
       Log.error("Error with loading bolt/spout instance from pex file")
       Log.error(traceback.format_exc())
+
+    if pplan_helper.is_topology_running():
+      try:
+        self.start_instance()
+      except Exception as e:
+        Log.error("Error with starting bolt/spout instance: " + e.message)
+        Log.error(traceback.format_exc())
+    else:
+      Log.info("The instance is deployed in deactivated state")
 
   def load_py_instance(self, is_spout, python_class_name):
     # TODO : preliminary loading
     pex_loader.load_pex(self.topo_pex_file_path)
     if is_spout:
       spout_class = pex_loader.import_and_get_class(self.topo_pex_file_path, python_class_name)
-      my_spout = spout_class(self.my_pplan_helper, self.in_stream, self.out_stream)
+      my_spout = spout_class(self, self.my_pplan_helper, self.in_stream, self.out_stream, self.looper)
       return my_spout
     else:
       bolt_class = pex_loader.import_and_get_class(self.topo_pex_file_path, python_class_name)
-      my_bolt = bolt_class(self.my_pplan_helper, self.in_stream, self.out_stream)
+      my_bolt = bolt_class(self, self.my_pplan_helper, self.in_stream, self.out_stream, self.looper)
       return my_bolt
 
   def start_instance(self):
     Log.info("Start bolt/spout instance now...")
     self.my_instance[2].start()
-    if self.my_instance[0]:
-      # It's spout --> add task
-      Log.info("Add spout task")
-      def spout_task():
-        self.my_instance[2].run_in_single_thread()
-        self.send_buffered_messages()
-
-      self.looper.add_wakeup_task(spout_task)
 
 def print_usage():
   print("Usage: ./single_thread_heron_instance <topology_name> <topology_id> "
@@ -154,7 +150,7 @@ def print_usage():
         "<component_index> <stmgr_id> <stmgr_port> <metricsmgr_port> "
         "<heron_internals_config_filename> <topology_pex_file_path>")
 
-def config_reader(config_path):
+def yaml_config_reader(config_path):
   if not config_path.endswith(".yaml"):
     raise ValueError("Config file not yaml")
 
@@ -177,7 +173,7 @@ def main():
   stmgr_id = sys.argv[7]
   stmgr_port = sys.argv[8]
   metrics_port = sys.argv[9]
-  system_config = config_reader(sys.argv[10])
+  system_config = yaml_config_reader(sys.argv[10])
   topology_pex_file_path = sys.argv[11]
 
   # TODO: Add the SystemConfig into SingletonRegistory

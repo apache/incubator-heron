@@ -53,11 +53,18 @@ HeronTuple = namedtuple('Tuple', StreamParseTuple._fields + ('creation', ))
 
 class TupleHelper(object):
   """Tuple generator, returns StreamParse compatible tuple"""
+  TICK_TUPLE_ID = "__tick"
   @staticmethod
   def make_tuple(stream, tuple_id, values, roots=None):
     component_name = stream.component_name
     stream_id = stream.id
     gen_task = roots[0].taskid if roots is not None else None
-    return HeronTuple(id=tuple_id, component=component_name, stream=stream_id,
+    return HeronTuple(id=str(tuple_id), component=component_name, stream=stream_id,
                       task=gen_task, values=values, creation=time.time())
+  @staticmethod
+  def make_tick_tuple():
+    return HeronTuple(id=TupleHelper.TICK_TUPLE_ID, component=None,
+                      stream=TupleHelper.TICK_TUPLE_ID, task=None, values=None,
+                      creation=time.time())
+
 

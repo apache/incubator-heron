@@ -93,3 +93,20 @@ class PhysicalPlanHelper(object):
   def is_topology_running(self):
     return self.pplan.topology.state == topology_pb2.TopologyState.Value("RUNNING")
 
+  def get_topology_config(self):
+    if self.pplan.topology.HasField("topology_config"):
+      return self._get_dict_from_config(self.pplan.topology.topology_config)
+    else:
+      return None
+
+  @staticmethod
+  def _get_dict_from_config(topology_config):
+    config = {}
+    for kv in topology_config.kvs:
+      if kv.HasField("value"):
+        config[kv.key] = kv.value
+      else:
+        raise ValueError("Unsupported config key:value found: " + str(kv))
+
+    return config
+

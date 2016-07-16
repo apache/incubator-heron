@@ -21,16 +21,20 @@ from heron.common.src.python.log import Log
 from heron.instance.src.python.instance.comp_spec import HeronComponentSpec
 from heron.instance.src.python.instance.tuple import TupleHelper
 
+import heron.common.src.python.constants as constants
+
 # TODO: declare output fields
 class Bolt(BaseInstance):
   """The base class for all heron bolts in Python"""
 
-  def __init__(self, pplan_helper, in_stream, out_stream):
-    super(Bolt, self).__init__(pplan_helper, in_stream, out_stream)
+  def __init__(self, heron_instance, pplan_helper, in_stream, out_stream, looper):
+    super(Bolt, self).__init__(heron_instance, pplan_helper, in_stream, out_stream, looper)
     # TODO: bolt metrics
 
     if self.pplan_helper.is_spout:
       raise RuntimeError("No bolt in physical plan")
+
+    self.topo_config = self.pplan_helper.get_topology_config()
 
     # TODO: Topology context, serializer and sys config
 
@@ -65,7 +69,10 @@ class Bolt(BaseInstance):
                               inputs=inputs, outputs=_outputs, config=config)
 
   def start(self):
-    self.initialize(config={}, context={})
+    self.initialize(config=self.topo_config, context={})
+
+    # prepare tick tuple
+    self._prepare_tick_tup_timer()
 
   def stop(self):
     pass
@@ -90,12 +97,18 @@ class Bolt(BaseInstance):
     return super(Bolt, self)._admit_data_tuple(tup, stream_id=stream, is_spout=False,
                                                anchors=anchors, message_id=None)
 
-  def _run(self):
+  @staticmethod
+  def is_tick(tup):
+    """Returns whether or not the given HeronTuple is a tick Tuple
+
+    It is compatible with StreamParse API.
+    """
+    return tup.stream == TupleHelper.TICK_TUPLE_ID
+
+  def process_incoming_tuples(self):
+    """Should be called when tuple was buffered into in_stream"""
     self._read_tuples_and_execute()
     self.output_helper.send_out_tuples()
-
-  def run_in_single_thread(self):
-    self._run()
 
   def _read_tuples_and_execute(self):
     while not self.in_stream.is_empty():
@@ -133,6 +146,20 @@ class Bolt(BaseInstance):
 
   def _deactivate(self):
     pass
+
+  def _prepare_tick_tup_timer(self):
+    if constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS in self.topo_config:
+      tick_freq_sec = self.topo_config[constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS]
+      Log.debug("Tick Tuple Frequency: " + tick_freq_sec + " sec.")
+
+      def send_tick():
+        tick = TupleHelper.make_tick_tuple()
+        self.process(tick)
+        self.output_helper.send_out_tuples()
+        self.heron_instance.send_buffered_messages()
+        self._prepare_tick_tup_timer()
+
+      self.looper.register_timer_task_in_sec(send_tick, tick_freq_sec)
 
 
 
@@ -194,6 +221,7 @@ class Bolt(BaseInstance):
 
   def cleanup(self):
     pass
+
 
 
 

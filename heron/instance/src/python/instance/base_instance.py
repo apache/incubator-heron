@@ -25,20 +25,18 @@ class BaseInstance(object):
   DEFAULT_STREAM_ID = "default"
   make_data_tuple = lambda _ : tuple_pb2.HeronDataTuple()
 
-  def __init__(self, pplan_helper, in_stream, out_stream, serializer=PythonSerializer()):
+  def __init__(self, heron_instance, pplan_helper, in_stream, out_stream, looper, serializer=PythonSerializer()):
+    self.heron_instance = heron_instance
     self.pplan_helper = pplan_helper
     self.in_stream = in_stream
     self.serializer = serializer
     self.output_helper = OutgoingTupleHelper(self.pplan_helper, out_stream)
+    self.looper = looper
     self.logger = Log
 
   @classmethod
   def get_python_class_path(cls):
     return cls.__module__ + "." + cls.__name__
-
-  def run_tasks(self):
-    while True:
-      self._run()
 
   def log(self, message, level=None):
     """Log message, optionally providing a logging level
@@ -106,23 +104,8 @@ class BaseInstance(object):
     # TODO: We never actually call this method
     raise NotImplementedError()
 
-  def _run(self):
-    """Tasks to be executed every time this is waken up
-
-    This is called inside of ``run_tasks()``.
-    Equivalent to addSpoutTasks()/addBoltTasks() in Java implementation.
-    Separated out so it can be properly unit tested.
-    """
-    raise NotImplementedError()
-
-  def run_in_single_thread(self):
-    """Tasks to be executed when running in a single-thread mode
-
-    This is called when new tuples are available to be processed by this
-    instance. These tuples are buffered in ``in_stream`` before calling this method.
-    Tuples buffered in ``out_stream`` will be sent to the Stream Manager
-    immediately after completing this method.
-    """
+  def process_incoming_tuples(self):
+    """Should be called when a tuple was buffered into in_stream"""
     raise NotImplementedError()
 
   def _read_tuples_and_execute(self):

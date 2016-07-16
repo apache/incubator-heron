@@ -65,7 +65,8 @@ class EventLooper(object):
 
   def register_timer_task_in_sec(self, task, second):
     # Python time is in float
-    expiration = time.time() + second
+    second_in_float = float(second)
+    expiration = time.time() + second_in_float
     heappush(self.timer_tasks, (expiration, task))
 
   def exit_loop(self):

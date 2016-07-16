@@ -76,7 +76,8 @@ class TopologyType(type):
     config = topology_pb2.Config()
     conf_dict = {"topology.message.timeout.secs": "30",
                  "topology.acking": "false",
-                 "topology.debug": "true"}
+                 "topology.debug": "true",
+                 "topology.tick.tuple.freq.secs": "5"}
 
     for key, value in conf_dict.iteritems():
       kvs = config.kvs.add()

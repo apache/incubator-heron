@@ -27,6 +27,9 @@ class CountBolt(Bolt):
     self.total += inc_by
 
   def process(self, tuple):
+    if self.is_tick(tuple):
+      self.log("Got tick tuple!")
+      return
     word = tuple.values[0]
     self._increment(word, 10 if word == "heron" else 1)
     if self.total % 1000 == 0:

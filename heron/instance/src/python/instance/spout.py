@@ -24,8 +24,8 @@ from heron.instance.src.python.instance.comp_spec import HeronComponentSpec
 class Spout(BaseInstance):
   """The base class for all heron spouts in Python"""
 
-  def __init__(self, pplan_helper, in_stream, out_stream):
-    super(Spout, self).__init__(pplan_helper,in_stream, out_stream)
+  def __init__(self, heron_instance, pplan_helper, in_stream, out_stream, looper):
+    super(Spout, self).__init__(heron_instance, pplan_helper,in_stream, out_stream, looper)
     self._pplan_helper = pplan_helper
     self.topology_state = topology_pb2.TopologyState.Value("PAUSED")
 
@@ -62,6 +62,7 @@ class Spout(BaseInstance):
     # TODO: add config
     self.initialize(config={}, context={})
     self.topology_state = topology_pb2.TopologyState.Value("RUNNING")
+    self._add_spout_task()
 
   def stop(self):
     pass
@@ -87,16 +88,8 @@ class Spout(BaseInstance):
     return super(Spout, self)._admit_data_tuple(tup, stream_id=stream, is_spout=True,
                                                 anchors=None, message_id=tup_id)
 
-  def _run(self):
-    if self._should_produce_tuple():
-      self._produce_tuple()
-      self.output_helper.send_out_tuples()
-
-    #TODO: implement ACK/outqueue full etc
-    #TODO: call _read_tuples_and_execute when ACK enabled
-
-  def run_in_single_thread(self):
-    self._run()
+  def process_incoming_tuples(self):
+    raise RuntimeError("Incoming tuple handling not implemented yet")
 
   def _read_tuples_and_execute(self):
     while not self.in_stream.is_empty():
@@ -138,6 +131,20 @@ class Spout(BaseInstance):
     Log.info("Spout is deactivated")
     self.deactivate()
     self.topology_state = topology_pb2.TopologyState.Value("PAUSED")
+
+  def _add_spout_task(self):
+    #TODO: implement ACK/outqueue full etc
+    #TODO: call _read_tuples_and_execute when ACK enabled
+
+    Log.info("Add spout task")
+    def spout_task():
+      if self._should_produce_tuple():
+        self._produce_tuple()
+        self.output_helper.send_out_tuples()
+        self.heron_instance.send_buffered_messages()
+
+    self.looper.add_wakeup_task(spout_task)
+
 
   ###################################
   # API: To be implemented by users
@@ -226,5 +233,6 @@ class Spout(BaseInstance):
     The spout may or may not be reactivated in the future.
     """
     pass
+
 
 
