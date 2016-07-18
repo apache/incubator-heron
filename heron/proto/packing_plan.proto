@@ -1,0 +1,14 @@
+package heron.proto.system;
+
+option java_package = "com.twitter.heron.proto.system";
+option java_outer_classname = "PackingPlans";
+
+// This file defines the packing plan of a topology.
+// It reflects the the instances and containers of a topology.
+
+message PackingPlan {
+  // TODO: using a serialized string here for prototyping only! For production we must refactor to
+  // represent as a strongly typed set of objects.
+  required string instance_distribution = 1;
+  required string component_ram_distribution = 2;
+}

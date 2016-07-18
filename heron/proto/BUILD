@@ -69,6 +69,15 @@ proto_library(
 )
 
 proto_library(
+    name = "proto_packing_plan",
+    src = "packing_plan.proto",
+    includes = ["heron/proto"],
+    gen_cc = 1,
+    gen_java = 1,
+    gen_py = 1,
+)
+
+proto_library(
     name = "proto_tuple",
     src = "tuple.proto",
     includes = ["heron/proto"],
@@ -115,6 +124,7 @@ proto_library(
     gen_py = 1,
     deps = [
         ":proto_common",
+        ":proto_packing_plan",
         ":proto_physical_plan",
         ":proto_stats",
         ":proto_topology",
@@ -130,6 +140,7 @@ java_library(
         ":proto_stats_java",
         ":proto_topology_java",
         ":proto_scheduler_java",
+        ":proto_packing_plan_java",
         ":proto_physical_plan_java",
         ":proto_metrics_java",
         ":proto_tmaster_java",
@@ -156,6 +167,7 @@ java_library(
         ":proto_stats_java",
         ":proto_topology_java",
         ":proto_scheduler_java",
+        ":proto_packing_plan_java",
         ":proto_physical_plan_java",
         ":proto_metrics_java",
         ":proto_tmaster_java",
@@ -183,6 +195,7 @@ pex_library(
         ":proto_stats_py",
         ":proto_topology_py",
         ":proto_scheduler_py",
+        ":proto_packing_plan_py",
         ":proto_physical_plan_py",
         ":proto_metrics_py",
         ":proto_tmaster_py",
@@ -220,6 +233,7 @@ cc_library(
         ":proto_scheduler_cc",
         ":proto_tmaster_cc",
         ":proto_tuple_cc",
+        ":proto_packing_plan_cc",
         ":proto_physical_plan_cc",
         ":proto_execution_state_cc",
         ":proto_topology_cc",

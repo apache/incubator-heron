@@ -14,19 +14,28 @@
 
 package com.twitter.heron.statemgr.localfs;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
+import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
+import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.Config;
@@ -52,30 +61,25 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   }
 
   protected boolean initTree() {
+    List<Pair<String, String>> dirNamesAndPaths = new ArrayList<>();
+    dirNamesAndPaths.add(Pair.create("Topologies", getTopologyDir()));
+    dirNamesAndPaths.add(Pair.create("Tmaster location", getTMasterLocationDir()));
+    dirNamesAndPaths.add(Pair.create("Packing plan", getPackingPlanDir()));
+    dirNamesAndPaths.add(Pair.create("Physical plan", getPhysicalPlanDir()));
+    dirNamesAndPaths.add(Pair.create("Execution state", getExecutionStateDir()));
+    dirNamesAndPaths.add(Pair.create("Scheduler location", getSchedulerLocationDir()));
+
     // Make necessary directories
-    LOG.log(Level.FINE, "Topologies directory: {0}", getTopologyDir());
-    LOG.log(Level.FINE, "Tmaster location directory: {0}", getTMasterLocationDir());
-    LOG.log(Level.FINE, "Physical plan directory: {0}", getPhysicalPlanDir());
-    LOG.log(Level.FINE, "Execution state directory: {0}", getExecutionStateDir());
-    LOG.log(Level.FINE, "Scheduler location directory: {0}", getSchedulerLocationDir());
+    for (Pair<String, String> dirNamesAndPath : dirNamesAndPaths) {
+      LOG.log(Level.FINE,
+          String.format("%s directory: %s", dirNamesAndPath.first, dirNamesAndPath.second));
+      if(!FileUtils.isDirectoryExists(dirNamesAndPath.second) &&
+         !FileUtils.createDirectory(dirNamesAndPath.second)) {
+        return false;
+      }
+    }
 
-    boolean topologyDir = FileUtils.isDirectoryExists(getTopologyDir())
-        || FileUtils.createDirectory(getTopologyDir());
-
-    boolean tmasterLocationDir = FileUtils.isDirectoryExists(getTMasterLocationDir())
-        || FileUtils.createDirectory(getTMasterLocationDir());
-
-    boolean physicalPlanDir = FileUtils.isDirectoryExists(getPhysicalPlanDir())
-        || FileUtils.createDirectory(getPhysicalPlanDir());
-
-    boolean executionStateDir = FileUtils.isDirectoryExists(getExecutionStateDir())
-        || FileUtils.createDirectory(getExecutionStateDir());
-
-    boolean schedulerLocationDir = FileUtils.isDirectoryExists(getSchedulerLocationDir())
-        || FileUtils.createDirectory(getSchedulerLocationDir());
-
-    return topologyDir && tmasterLocationDir && physicalPlanDir && executionStateDir
-        && schedulerLocationDir;
+    return true;
   }
 
   // Make utils class protected for easy unit testing
@@ -144,13 +148,19 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
 
   @Override
   public ListenableFuture<Boolean> setTopology(TopologyAPI.Topology topology, String topologyName) {
-    return setData(getTopologyPath(topologyName), topology.toByteArray(), false);
+    return setData(getTopologyPath(topologyName), topology.toByteArray(), true);
   }
 
   @Override
   public ListenableFuture<Boolean> setPhysicalPlan(
       PhysicalPlans.PhysicalPlan physicalPlan, String topologyName) {
     return setData(getPhysicalPlanPath(topologyName), physicalPlan.toByteArray(), false);
+  }
+
+  @Override
+  public ListenableFuture<Boolean> setPackingPlan(
+      PackingPlans.PackingPlan packingPlan, String topologyName) {
+    return setData(getPackingPlanPath(topologyName), packingPlan.toByteArray(), true);
   }
 
   @Override
@@ -172,8 +182,16 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
    * Returns all information stored in the StateManager. This is a utility method used for debugging
    * while developing. To invoke, run:
    *
-   *   bazel run heron/statemgrs/src/java:localfs-statemgr-unshaded -- &lt;topology-name&gt;
-   */
+   *  bazel run heron/statemgrs/src/java:localfs-statemgr-unshaded -- \
+   *    &lt;topology-name&gt; [new_instance_distribution]
+   *
+   * If a new_instance_distribution is provided, the instance distribution will be updated to
+   * trigger a scaling event. For example:
+   *
+   *  bazel run heron/statemgrs/src/java:localfs-statemgr-unshaded -- \
+   *    ExclamationTopology 1:word:3:0:exclaim1:2:0:exclaim1:1:0
+   *
+≈   */
   public static void main(String[] args) throws ExecutionException, InterruptedException {
     if (args.length < 1) {
       throw new RuntimeException(String.format(
@@ -192,19 +210,147 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     com.twitter.heron.spi.statemgr.IStateManager stateManager = new LocalFileSystemStateManager();
     stateManager.initialize(config);
 
+    PackingPlans.PackingPlan existingPackingPlan = null;
     if (stateManager.isTopologyRunning(topologyName).get()) {
       print("==> Topology %s found", topologyName);
-      print("==> ExecutionState:\n%s",
-          stateManager.getExecutionState(null, topologyName).get());
+      print("==> ExecutionState:\n%s", stateManager.getExecutionState(null, topologyName).get());
       print("==> SchedulerLocation:\n%s",
           stateManager.getSchedulerLocation(null, topologyName).get());
-      print("==> TMasterLocation:\n%s",
-          stateManager.getTMasterLocation(null, topologyName).get());
-      print("==> PhysicalPlan:\n%s",
-          stateManager.getPhysicalPlan(null, topologyName).get());
+      print("==> TMasterLocation:\n%s", stateManager.getTMasterLocation(null, topologyName).get());
+      print("==> PhysicalPlan:\n%s", stateManager.getPhysicalPlan(null, topologyName).get());
+      existingPackingPlan = stateManager.getPackingPlan(null, topologyName).get();
+      print("==> PackingPlan:\n%s", existingPackingPlan);
     } else {
       print("==> Topology %s not found under %s",
           topologyName, config.get(Keys.stateManagerRootPath()));
+    }
+
+    if (args.length == 2) {
+      String proposedInstanceDistribution = args[1];
+
+      Map<String, Integer> proposedChanges = parallelismChanges(
+          existingPackingPlan.getInstanceDistribution(),
+          proposedInstanceDistribution);
+
+      PackingPlans.PackingPlan newPackingPlan = createPackingPlan(
+          proposedInstanceDistribution,
+          existingPackingPlan.getComponentRamDistribution());
+
+      TopologyAPI.Topology updatedTopology = stateManager.getTopology(null, topologyName).get();
+      for (Map.Entry<String, Integer> proposedChange : proposedChanges.entrySet()) {
+        String componentName = proposedChange.getKey();
+        Integer parallelism = proposedChange.getValue();
+        print("Updating packing plan to change component %s to parallelism=%s", componentName,
+            parallelism);
+
+        updatedTopology = updateTopology(updatedTopology, componentName, parallelism);
+      }
+
+      //update parallelism in topology since TMaster checks that Sum(parallelism) == Sum(instances)
+      boolean success = stateManager.setTopology(updatedTopology, topologyName).get();
+      print("==> Set Topology: %s", success);
+
+      updatedTopology = stateManager.getTopology(null, topologyName).get();
+      print("==> Got Topology: %s", updatedTopology);
+
+      success = stateManager.deletePhysicalPlan(topologyName).get();
+      print("==> Deleted Physical Plan: %s", success);
+
+      stateManager.setPackingPlan(newPackingPlan, topologyName);
+      existingPackingPlan = stateManager.getPackingPlan(null, topologyName).get();
+      print("==> Updated PackingPlan:\n%s", existingPackingPlan);
+    }
+  }
+
+  // Given the existing and proposed instance distribution, verify the proposal and return only
+  // the changes being requested.
+  private static Map<String, Integer> parallelismChanges(String existingInstanceDistribution,
+                                                         String proposedInstanceDistribution) {
+    Map<String, Integer> existingParallelism =
+        parseInstanceDistribution(existingInstanceDistribution);
+    Map<String, Integer> proposedParallelism =
+        parseInstanceDistribution(proposedInstanceDistribution);
+    Map<String, Integer> parallelismChanges = new HashMap<>();
+
+    for (String componentName : proposedParallelism.keySet()) {
+      Integer newParallelism = proposedParallelism.get(componentName);
+      assertTrue(existingParallelism.containsKey(componentName),
+        "key %s in proposed instance distribution %s not found in current instance distribution %s",
+        componentName, proposedInstanceDistribution, existingInstanceDistribution);
+      assertTrue(newParallelism > 0,
+        "Non-positive parallelism (%s) for component %s found in instance distribution %s",
+        newParallelism, componentName, proposedInstanceDistribution);
+
+      if (!newParallelism.equals(existingParallelism.get(componentName))) {
+        parallelismChanges.put(componentName, newParallelism);
+      }
+    }
+    return parallelismChanges;
+  }
+
+  // given a string like "1:word:3:0:exclaim1:2:0:exclaim1:1:0" returns a map of
+  // { word -> 1, explain1 -> 2 }
+  private static Map<String, Integer> parseInstanceDistribution(String instanceDistribution) {
+    Map<String, Integer> componentParallelism = new HashMap<>();
+    String[] tokens = instanceDistribution.split(":");
+    assertTrue(tokens.length > 3 && (tokens.length - 1) % 3 == 0,
+        "Invalid instance distribution format. Expected componentId " +
+        "followed by instance triples: %s", instanceDistribution);
+    Set<String> idsFound = new HashSet<>();
+    for (int i = 1; i < tokens.length; i += 3) {
+      String instanceName = tokens[i];
+      String instanceId = tokens[i + 1];
+      assertTrue(!idsFound.contains(instanceId),
+          "Duplicate instanceId (%s) found in instance distribution %s for instance %s %s",
+          instanceId, instanceDistribution, instanceName, i);
+      idsFound.add(instanceId);
+      Integer occurrences = componentParallelism.getOrDefault(instanceName, 0);
+      componentParallelism.put(instanceName, occurrences + 1);
+    }
+    return componentParallelism;
+  }
+
+  private static PackingPlans.PackingPlan createPackingPlan(String instanceDistribution,
+                                                            String componentRamDistribution) {
+    PackingPlans.PackingPlan.Builder builder = PackingPlans.PackingPlan.newBuilder();
+    builder.setInstanceDistribution(instanceDistribution);
+    builder.setComponentRamDistribution(componentRamDistribution);
+    return builder.build();
+  }
+
+  private static TopologyAPI.Topology updateTopology(TopologyAPI.Topology topology,
+                                                     String componentName,
+                                                     int parallelism) {
+    TopologyAPI.Topology.Builder builder = TopologyAPI.Topology.newBuilder().mergeFrom(topology);
+    for (int i = 0; i < builder.getBoltsCount(); i++) {
+      TopologyAPI.Bolt.Builder boltBuilder = builder.getBoltsBuilder(i);
+      TopologyAPI.Component.Builder compBuilder = boltBuilder.getCompBuilder();
+      for (Map.Entry<Descriptors.FieldDescriptor, Object> entry : compBuilder.getAllFields().entrySet()) {
+        if (entry.getKey().getName().equals("name") && componentName.equals(entry.getValue())) {
+          TopologyAPI.Config.Builder confBuilder = compBuilder.getConfigBuilder();
+          boolean keyFound = false;
+          for (TopologyAPI.Config.KeyValue.Builder kvBuilder : confBuilder.getKvsBuilderList()) {
+            if (kvBuilder.getKey().equals(com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_PARALLELISM)) {
+              kvBuilder.setValue(Integer.toString(parallelism));
+              keyFound = true;
+              break;
+            }
+          }
+          if (!keyFound) {
+            TopologyAPI.Config.KeyValue.Builder kvBuilder = TopologyAPI.Config.KeyValue.newBuilder();
+            kvBuilder.setKey(com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_PARALLELISM);
+            kvBuilder.setValue(Integer.toString(parallelism));
+            confBuilder.addKvs(kvBuilder);
+          }
+        }
+      }
+    }
+    return builder.build();
+  }
+
+  private static void assertTrue(boolean condition, String message, Object... values) {
+    if (!condition) {
+      throw new RuntimeException("ERROR: " + String.format(message, values));
     }
   }
 

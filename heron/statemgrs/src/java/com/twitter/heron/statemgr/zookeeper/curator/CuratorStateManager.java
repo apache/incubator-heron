@@ -35,6 +35,7 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
+import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.Config;
@@ -279,6 +280,13 @@ public class CuratorStateManager extends FileSystemStateManager {
       PhysicalPlans.PhysicalPlan physicalPlan,
       String topologyName) {
     return createNode(getPhysicalPlanPath(topologyName), physicalPlan.toByteArray(), false);
+  }
+
+  @Override
+  public ListenableFuture<Boolean> setPackingPlan(
+      PackingPlans.PackingPlan packingPlan,
+      String topologyName) {
+    return createNode(getPackingPlanPath(topologyName), packingPlan.toByteArray(), false);
   }
 
   @Override

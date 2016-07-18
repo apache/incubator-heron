@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.SettableFuture;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
+import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.Config;
@@ -66,6 +67,13 @@ public class NullStateManager implements IStateManager {
   }
 
   @Override
+  public ListenableFuture<Boolean> setPackingPlan(
+      PackingPlans.PackingPlan packingPlan,
+      String topologyName) {
+    return nullFuture;
+  }
+
+  @Override
   public ListenableFuture<Boolean> setPhysicalPlan(
       PhysicalPlans.PhysicalPlan physicalPlan,
       String topologyName) {
@@ -93,6 +101,9 @@ public class NullStateManager implements IStateManager {
   public ListenableFuture<Boolean> deleteTopology(String topologyName) {
     return nullFuture;
   }
+
+  @Override
+  public ListenableFuture<Boolean> deletePackingPlan(String topologyName) { return nullFuture; }
 
   @Override
   public ListenableFuture<Boolean> deletePhysicalPlan(String topologyName) {
@@ -127,6 +138,13 @@ public class NullStateManager implements IStateManager {
 
   @Override
   public ListenableFuture<ExecutionEnvironment.ExecutionState> getExecutionState(
+      WatchCallback watcher,
+      String topologyName) {
+    return SettableFuture.create();
+  }
+
+  @Override
+  public ListenableFuture<PackingPlans.PackingPlan> getPackingPlan(
       WatchCallback watcher,
       String topologyName) {
     return SettableFuture.create();

@@ -27,6 +27,7 @@ from kazoo.exceptions import NotEmptyError
 from kazoo.exceptions import ZookeeperError
 
 from heron.proto.execution_state_pb2 import ExecutionState
+from heron.proto.packing_plan_pb2 import PackingPlan
 from heron.proto.physical_plan_pb2 import PhysicalPlan
 from heron.proto.scheduler_pb2 import SchedulerLocation
 from heron.proto.tmaster_pb2 import TMasterLocation
@@ -190,6 +191,51 @@ class ZkStateManager(StateManager):
     except Exception as e:
       # Just re raise the exception.
       raise
+
+  def get_packing_plan(self, topologyName, callback=None):
+    isWatching = False
+
+    # Temp dict used to return result
+    # if callback is not provided.
+    ret = {
+      "result": None
+    }
+    if callback:
+      isWatching = True
+    else:
+      # Custom callback to get the topologies
+      # right now.
+      def callback(data):
+        ret["result"] = data
+
+    self._get_packing_plan_with_watch(topologyName, callback, isWatching)
+
+    # The topologies are now populated with the data.
+    return ret["result"]
+
+  def _get_packing_plan_with_watch(self, topologyName, callback, isWatching):
+    """
+    Helper function to get packing_plan with
+    a callback. The future watch is placed
+    only if isWatching is True.
+    """
+    path = self.get_packing_plan_path(topologyName)
+    if isWatching:
+      LOG.info("Adding data watch for path: " + path)
+
+    @self.client.DataWatch(path)
+    def watch_packing_plan(data, stats):
+      if data:
+        packing_plan = PackingPlan()
+        packing_plan.ParseFromString(data)
+        callback(packing_plan)
+      else:
+        callback(None)
+
+      # Returning False will result in no future watches
+      # being triggered. If isWatching is True, then
+      # the future watches will be triggered.
+      return isWatching
 
   def get_pplan(self, topologyName, callback=None):
     isWatching = False

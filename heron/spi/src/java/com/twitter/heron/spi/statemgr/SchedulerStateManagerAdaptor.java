@@ -25,6 +25,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
+import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 
@@ -117,6 +118,16 @@ public class SchedulerStateManagerAdaptor {
   }
 
   /**
+   * Set the packing plan for the given topology
+   *
+   * @param packingPlan the packing plan of the topology
+   * @return Boolean - Success or Failure
+   */
+  public Boolean setPackingPlan(PackingPlans.PackingPlan packingPlan, String topologyName) {
+    return awaitResult(delegate.setPackingPlan(packingPlan, topologyName));
+  }
+
+  /**
    * Delete the tmaster location for the given topology
    *
    * @return Boolean - Success or Failure
@@ -141,6 +152,15 @@ public class SchedulerStateManagerAdaptor {
    */
   public Boolean deleteTopology(String topologyName) {
     return awaitResult(delegate.deleteTopology(topologyName));
+  }
+
+  /**
+   * Delete the packing plan for the given topology
+   *
+   * @return Boolean - Success or Failure
+   */
+  public Boolean deletePackingPlan(String topologyName) {
+    return awaitResult(delegate.deletePackingPlan(topologyName));
   }
 
   /**

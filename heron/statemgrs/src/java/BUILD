@@ -12,6 +12,7 @@ common_deps_files = \
 
 localfs_deps_files = \
     common_deps_files + [
+        "//heron/api/src/java:api-java",
         "//heron/common/src/java:basics-java",
     ]
     

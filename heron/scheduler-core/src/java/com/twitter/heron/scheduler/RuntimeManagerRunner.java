@@ -159,23 +159,25 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
 
     Boolean result;
 
-    // It is possible that  TMasterLocation, PhysicalPlan and SchedulerLocation are not set
-    // Just log but don't consider them failure
+    // It is possible that TMasterLocation, PackingPlan, PhysicalPlan and SchedulerLocation are nots
+    // set. Just log but don't consider it a failure and don't return false
     result = statemgr.deleteTMasterLocation(topologyName);
     if (result == null || !result) {
-      // We would not return false since it is possible that TMaster didn't write physical plan
       LOG.warning("Failed to clear TMaster location. Check whether TMaster set it correctly.");
+    }
+
+    result = statemgr.deletePackingPlan(topologyName);
+    if (result == null || !result) {
+      LOG.warning("Failed to clear packing plan. Check whether TMaster set it correctly.");
     }
 
     result = statemgr.deletePhysicalPlan(topologyName);
     if (result == null || !result) {
-      // We would not return false since it is possible that TMaster didn't write physical plan
       LOG.warning("Failed to clear physical plan. Check whether TMaster set it correctly.");
     }
 
     result = statemgr.deleteSchedulerLocation(topologyName);
     if (result == null || !result) {
-      // We would not return false since it is possible that TMaster didn't write physical plan
       LOG.warning("Failed to clear scheduler location. Check whether Scheduler set it correctly.");
     }
 

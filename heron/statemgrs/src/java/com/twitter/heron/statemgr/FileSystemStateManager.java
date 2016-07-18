@@ -23,6 +23,7 @@ import com.google.protobuf.Message;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
+import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.Config;
@@ -76,6 +77,10 @@ public abstract class FileSystemStateManager implements IStateManager {
     return concatPath(getTopologyDir(), topologyName);
   }
 
+  protected String getPackingPlanPath(String topologyName) {
+    return concatPath(getPackingPlanDir(), topologyName);
+  }
+
   protected String getPhysicalPlanPath(String topologyName) {
     return concatPath(getPhysicalPlanDir(), topologyName);
   }
@@ -115,6 +120,11 @@ public abstract class FileSystemStateManager implements IStateManager {
   }
 
   @Override
+  public ListenableFuture<Boolean> deletePackingPlan(String topologyName) {
+    return deleteNode(getPackingPlanPath(topologyName));
+  }
+
+  @Override
   public ListenableFuture<Boolean> deletePhysicalPlan(String topologyName) {
     return deleteNode(getPhysicalPlanPath(topologyName));
   }
@@ -137,6 +147,13 @@ public abstract class FileSystemStateManager implements IStateManager {
       WatchCallback watcher, String topologyName) {
     return getNodeData(watcher, getExecutionStatePath(topologyName),
         ExecutionEnvironment.ExecutionState.newBuilder());
+  }
+
+  @Override
+  public ListenableFuture<PackingPlans.PackingPlan> getPackingPlan(
+      WatchCallback watcher, String topologyName) {
+    return getNodeData(watcher, getPackingPlanPath(topologyName),
+        PackingPlans.PackingPlan.newBuilder());
   }
 
   @Override

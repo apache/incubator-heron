@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
+import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
@@ -110,6 +111,13 @@ public class LaunchRunner implements Callable<Boolean> {
     return builder.build();
   }
 
+  private PackingPlans.PackingPlan createPackingPlan(PackingPlan packingPlan) {
+    PackingPlans.PackingPlan.Builder builder = PackingPlans.PackingPlan.newBuilder();
+    builder.setInstanceDistribution(packingPlan.getInstanceDistribution());
+    builder.setComponentRamDistribution(packingPlan.getComponentRamDistribution());
+    return builder.build();
+  }
+
   @Override
   public Boolean call() {
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
@@ -145,12 +153,20 @@ public class LaunchRunner implements Callable<Boolean> {
       return false;
     }
 
+    result = statemgr.setPackingPlan(createPackingPlan(packedPlan), topologyName);
+    if (result == null || !result) {
+      LOG.severe("Failed to set packing plan");
+      statemgr.deleteTopology(topologyName);
+      return false;
+    }
+
     // store the execution state into the state manager
     ExecutionEnvironment.ExecutionState executionState = createExecutionState();
 
     result = statemgr.setExecutionState(executionState, topologyName);
     if (result == null || !result) {
       LOG.severe("Failed to set execution state");
+      statemgr.deletePackingPlan(topologyName);
       statemgr.deleteTopology(topologyName);
       return false;
     }
@@ -158,6 +174,7 @@ public class LaunchRunner implements Callable<Boolean> {
     // launch the topology, clear the state if it fails
     if (!launcher.launch(packedPlan)) {
       statemgr.deleteExecutionState(topologyName);
+      statemgr.deletePackingPlan(topologyName);
       statemgr.deleteTopology(topologyName);
       LOG.log(Level.SEVERE, "Failed to launch topology");
       return false;
