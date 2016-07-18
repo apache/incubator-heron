@@ -16,12 +16,12 @@ from abc import abstractmethod
 
 import time
 
-from .base_instance import BaseInstance
+from .component import Component
 from heron.proto import topology_pb2, tuple_pb2
 from heron.common.src.python.log import Log
 from heron.instance.src.python.instance.comp_spec import HeronComponentSpec
 
-class Spout(BaseInstance):
+class Spout(Component):
   """The base class for all heron spouts in Python"""
 
   def __init__(self, heron_instance, pplan_helper, in_stream, out_stream, looper):
@@ -67,14 +67,14 @@ class Spout(BaseInstance):
   def stop(self):
     pass
 
-  def emit(self, tup, tup_id=None, stream=BaseInstance.DEFAULT_STREAM_ID,
+  def emit(self, tup, tup_id=None, stream=Component.DEFAULT_STREAM_ID,
            direct_task=None, need_task_ids=False):
     """Emits a new tuple from this Spout
 
     It is compatible with StreamParse API.
 
     :type tup: list or tuple
-    :param tup: the new outpu Tuple to send from this spout, should contain only serializable data.
+    :param tup: the new output Tuple to send from this spout, should contain only serializable data.
     :type tup_id: str
     :param tup_id: the ID for the Tuple. Leave this blank for an unreliable emit.
     :type stream: str

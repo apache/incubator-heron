@@ -17,7 +17,7 @@ pex_library(
 
 pex_library(
   name = "topology_lib",
-  srcs = ["instance/base_instance.py", "instance/bolt.py", "instance/spout.py"],
+  srcs = ["instance/component.py", "instance/bolt.py", "instance/spout.py"],
 )
 
 pex_binary(

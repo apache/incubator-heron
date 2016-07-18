@@ -9,7 +9,7 @@ from heron.instance.src.python.misc.serializer import PythonSerializer
 # TODO: maybe implement some basic stuff
 
 
-class BaseInstance(object):
+class Component(object):
   """The base class for heron bolt/spout instance
 
   Implements the following functionality:

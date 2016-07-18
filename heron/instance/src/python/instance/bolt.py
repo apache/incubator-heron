@@ -15,7 +15,7 @@
 import Queue
 from abc import abstractmethod
 
-from .base_instance import BaseInstance
+from .component import Component
 from heron.proto import tuple_pb2
 from heron.common.src.python.log import Log
 from heron.instance.src.python.instance.comp_spec import HeronComponentSpec
@@ -24,7 +24,7 @@ from heron.instance.src.python.instance.tuple import TupleHelper
 import heron.common.src.python.constants as constants
 
 # TODO: declare output fields
-class Bolt(BaseInstance):
+class Bolt(Component):
   """The base class for all heron bolts in Python"""
 
   def __init__(self, heron_instance, pplan_helper, in_stream, out_stream, looper):
@@ -40,7 +40,7 @@ class Bolt(BaseInstance):
 
   @classmethod
   def spec(cls, name=None, inputs=None, par=1, config=None):
-    """Register this bolt to the topology abd create ``HeronComponentSpec``
+    """Register this bolt to the topology and create ``HeronComponentSpec``
 
     The usage of this method is compatible with StreamParse API, although it does not create
     ``ShellBoltSpec`` but instead directly registers to a ``Topology`` class.
@@ -77,7 +77,7 @@ class Bolt(BaseInstance):
   def stop(self):
     pass
 
-  def emit(self, tup, stream=BaseInstance.DEFAULT_STREAM_ID, anchors=None, direct_task=None, need_task_ids=False):
+  def emit(self, tup, stream=Component.DEFAULT_STREAM_ID, anchors=None, direct_task=None, need_task_ids=False):
     """Emits a new tuple from this Bolt
 
     It is compatible with StreamParse API.
