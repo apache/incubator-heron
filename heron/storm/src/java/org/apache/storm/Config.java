@@ -156,6 +156,13 @@ public class Config extends com.twitter.heron.api.Config {
    * This currently gets translated to TOPOLOGY_STMGRS. Please see the
    * documentation for TOPOLOGY_STMGRS.
    */
+  
+  /**
+   * The serializer for communication between shell components and non-JVM
+   * processes
+   */
+  public static final String TOPOLOGY_MULTILANG_SERIALIZER = "topology.multilang.serializer";
+  
   public static final String TOPOLOGY_WORKERS = "topology.workers";
   /**
    * How many executors to spawn for ackers.

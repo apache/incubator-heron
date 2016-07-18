@@ -33,6 +33,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * which one is for task ids (unbounded), another one is for bolt msg (bounded).
  */
 public class ShellBoltMessageQueue implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final LinkedList<List<Integer>> taskIdsQueue = new LinkedList<>();
     private final LinkedBlockingQueue<BoltMsg> boltMsgQueue;
 

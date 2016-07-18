@@ -71,6 +71,7 @@ import backtype.storm.utils.Utils;
  * declarer.declare(new Fields("field1", "field2")); } } ```
  */
 public class ShellBolt implements IBolt {
+  private static final long serialVersionUID = 1L;
   public static final String HEARTBEAT_STREAM_ID = "__heartbeat";
   public static final Logger LOG = LoggerFactory.getLogger(ShellBolt.class);
   OutputCollector _collector;
