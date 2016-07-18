@@ -10,6 +10,7 @@ but with a wide array of architectural improvements.
 For more information:
 
 * Official Heron documentation located at [heronstreaming.io](http://heronstreaming.io)
+* Official Heron resources, including Conference & Journal Papers, Videos, Blog Posts and selected Press located at [Heron Resources](http://twitter.github.io/heron/docs/resources/)
 * [Twitter Heron: Stream Processing at
   Scale](http://dl.acm.org/citation.cfm?id=2742788) (academic paper)
 * [Twitter Heron: Stream Processing at
@@ -20,9 +21,11 @@ For more information:
 
 ## Update
 
-Currently, we are working on ensuring that Heron is easy to install and run in a
-Mesos Cluster in AWS, Mesos/Aurora in AWS, and locally on a laptop. We will post
-updates as we progress.
+We recently merged updates to run Heron natively using [Mesos](http://mesos.apache.org/) in [AWS](https://aws.amazon.com/), Mesos/[Aurora](http://aurora.apache.org/) in AWS, and locally on a laptop.  
+
+We also added beta testing for [Apache YARN](https://hadoop.apache.org/docs/r2.7.1/hadoop-yarn/hadoop-yarn-site/YARN.html) support using [Apache REEF](http://reef.apache.org/), in addition to the Simple Linux Utility for Resource Management [(SLURM)](http://slurm.schedmd.com/). 
+
+We are working to add support for [Mesosphere DC/OS](https://dcos.io/) and [Kubernetes](http://kubernetes.io/).  We are currently reviewing implementation details for dynamic topology scaling and will continue to post updates as we progress.
 
 ## Documentation
 
