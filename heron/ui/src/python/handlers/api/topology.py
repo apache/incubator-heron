@@ -66,7 +66,7 @@ class TopologyExceptionSummaryHandler(base.BaseHandler):
           aggregate_exceptions[class_name] += int(exception_log['count'])
     # Put the exception value in a table
     aggregate_exceptions_table = []
-    for key in aggregate_exceptions.keys():
+    for key in aggregate_exceptions:
       aggregate_exceptions_table.append([key, str(aggregate_exceptions[key])])
     result = dict(
         status="success",
@@ -219,6 +219,7 @@ class TopologyExecutionStateJsonHandler(base.BaseHandler):
 class TopologySchedulerLocationJsonHandler(base.BaseHandler):
   ''' TopologySchedulerLocationJsonHandler '''
 
+  # pylint: disable=unused-argument
   @tornado.gen.coroutine
   def get(self, cluster, environ, topology):
     '''
@@ -228,10 +229,8 @@ class TopologySchedulerLocationJsonHandler(base.BaseHandler):
     :return:
     '''
     start_time = time.time()
-    # FIXME: is there a purpose to saving the return value of this?
-    scheduler_location = yield access.get_scheduler_location(cluster, environ, topology)
+    estate = yield access.get_execution_state(cluster, environ, topology)
 
-    # FIXME: estate not defined
     result_map = dict(
         status="success",
         message="",

@@ -11,12 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+""" memoryhistogramhandler.py """
 import json
 import logging
+import traceback
 import tornado.gen
 import tornado.web
-import traceback
 
 from heron.tracker.src.python import utils
 from heron.tracker.src.python.handlers import BaseHandler
@@ -46,11 +46,14 @@ class MemoryHistogramHandler(BaseHandler):
   }
   """
 
+  # pylint: disable=attribute-defined-outside-init
   def initialize(self, tracker):
+    """ initialize """
     self.tracker = tracker
 
   @tornado.gen.coroutine
   def get(self):
+    """ get method """
     try:
       cluster = self.get_argument_cluster()
       role = self.get_argument_role()
@@ -64,6 +67,7 @@ class MemoryHistogramHandler(BaseHandler):
       traceback.print_exc()
       self.write_error_response(e)
 
+  # pylint: disable=no-self-use
   @tornado.gen.coroutine
   def getInstanceMemoryHistogram(self, topology_info, instance_id):
     """
@@ -79,7 +83,7 @@ class MemoryHistogramHandler(BaseHandler):
       endpoint = utils.make_shell_endpoint(topology_info, instance_id)
       url = "%s/histo/%s" % (endpoint, pid)
       response = yield http_client.fetch(url)
-      LOG.debug("HTTP call for url: %s" % url)
+      LOG.debug("HTTP call for url: %s", url)
       raise tornado.gen.Return(response.body)
     except tornado.httpclient.HTTPError as e:
       raise Exception(str(e))

@@ -11,10 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' topologyhandler.py '''
+import traceback
 import tornado.gen
 import tornado.web
-import traceback
 
 from heron.tracker.src.python.handlers import BaseHandler
 
@@ -32,11 +32,15 @@ class TopologyHandler(BaseHandler):
   information of the topology, including its
   logical and physical plan.
   """
+
+  # pylint: disable=attribute-defined-outside-init
   def initialize(self, tracker):
+    """ initialize """
     self.tracker = tracker
 
   @tornado.gen.coroutine
   def get(self):
+    """ get method """
     try:
       cluster = self.get_argument_cluster()
       role = self.get_argument_role()

@@ -11,22 +11,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' explorer_unittest.py '''
+import json
+import os
 import unittest2 as unittest
 from mock import Mock
 
-# import heron.explorer.src.python.logicalplan as logicalplan
-# import heron.explorer.src.python.physicalplan as physicalplan
 import heron.explorer.src.python.topologies as topologies
 import heron.explorer.src.python.main as main
 import heron.explorer.src.python.args as args
 import heron.common.src.python.utils as utils
-import json
-import os
 
 
+# pylint: disable=missing-docstring, no-self-use
 class ExplorerTest(unittest.TestCase):
-
+  ''' unit tests '''
   def setUp(self):
     base_path = os.path.dirname(os.path.realpath(__file__))
     info_path = os.path.join(base_path, 'info.json')
@@ -132,7 +131,7 @@ class ExplorerTest(unittest.TestCase):
       self.assertEqual(0, main.main(cl))
 
   def test_lp(self):
-    good, bad = self.sample_lp_cls()
+    good, _ = self.sample_lp_cls()
     for cl in good:
       self.assertEqual(0, main.main(cl))
     #self.assertEqual(1, main.main(bad))
@@ -158,13 +157,14 @@ class ExplorerTest(unittest.TestCase):
 
   def test_topo_result_to_table(self):
     d, told = self.sample_topo_result()
-    tnew, header, rc = topologies.to_table(d)
-    told.sort(), tnew.sort()
+    tnew, _, _ = topologies.to_table(d)
+    told.sort()
+    tnew.sort()
     self.assertEqual(told, tnew)
 
   def test_cli_parsing(self):
     parser = main.create_parser()
     clis = self.sample_cli()
     for cli in clis:
-      known_args, unknown_args = parser.parse_known_args(cli)
+      _, unknown_args = parser.parse_known_args(cli)
       self.assertTrue(unknown_args is not None)

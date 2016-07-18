@@ -76,7 +76,8 @@ def get_additional_classpath(topology):
   The argument is the proto object for topology.
   Returns an empty string if no additional classpath specified
   """
-  additional_classpath = str(get_topology_config(topology, constants.TOPOLOGY_ADDITIONAL_CLASSPATH) or "")
+  additional_classpath = str(get_topology_config(
+      topology, constants.TOPOLOGY_ADDITIONAL_CLASSPATH) or "")
   return additional_classpath
 
 def get_cpus_per_container(topology):
@@ -122,9 +123,9 @@ def get_ram_per_container(topology):
   component_distribution = get_component_distribution(topology)
   rammap = get_component_rammap(topology)
   maxsize = 0
-  for (container, container_items) in component_distribution.items():
+  for (_, container_items) in component_distribution.items():
     ramsize = 0
-    for (component_name, global_task_id, component_index) in container_items:
+    for (component_name, _, _) in container_items:
       ramsize += int(rammap[component_name])
     if ramsize > maxsize:
       maxsize = ramsize
@@ -210,7 +211,7 @@ def get_component_distribution(topology):
   containers = {}
   nstmgrs = get_nstmgrs(topology)
   for i in range(1, nstmgrs + 1):
-      containers[i] = []
+    containers[i] = []
   index = 1
   global_task_id = 1
   for (component_name, ninstances) in get_component_parallelism(topology).items():
@@ -267,8 +268,9 @@ def get_topology_state_string(topology):
   """
   return topology_pb2.TopologyState.Name(topology.state)
 
+# pylint: disable=too-many-return-statements, too-many-branches
 def sane(topology):
-  # First check if topology name is ok
+  """ First check if topology name is ok """
   if topology.name == "":
     print "Topology name cannot be empty"
     return False
@@ -319,9 +321,8 @@ def sane(topology):
       all_outputs.add((outputstream.stream.id, outputstream.stream.component_name))
   for bolt in topology.bolts:
     for inputstream in bolt.inputs:
-      if not (inputstream.stream.id, inputstream.stream.component_name) in all_outputs:
+      if (inputstream.stream.id, inputstream.stream.component_name) not in all_outputs:
         print "Bolt " + bolt.comp.name + " has an input stream that no one emits"
         return False
 
   return True
-

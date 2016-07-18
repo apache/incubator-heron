@@ -11,19 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' topologies.py '''
 import heron.explorer.src.python.args as args
 from heron.common.src.python.color import Log
-from tabulate import tabulate
 import heron.common.src.python.utils as utils
+from tabulate import tabulate
 
 
 def create_parser(subparsers):
+  ''' create parser '''
   parser = subparsers.add_parser(
-    'topologies',
-    help='Display running topologies',
-    usage="%(prog)s cluster/[role]/[env] [options]",
-    add_help=True)
+      'topologies',
+      help='Display running topologies',
+      usage="%(prog)s cluster/[role]/[env] [options]",
+      add_help=True)
   args.add_cluster_role_env(parser)
   args.add_verbose(parser)
   args.add_tracker_url(parser)
@@ -33,6 +34,7 @@ def create_parser(subparsers):
 
 
 def to_table(result):
+  ''' normalize raw result to table '''
   max_count = 20
   table, count = [], 0
   for role, envs_topos in result.iteritems():
@@ -49,6 +51,7 @@ def to_table(result):
 
 
 def show_cluster(cluster):
+  ''' print topologies information to stdout '''
   try:
     result = utils.get_cluster_topologies(cluster)
     if not result:
@@ -58,14 +61,15 @@ def show_cluster(cluster):
   except Exception:
     return False
   table, header, rest_count = to_table(result)
-  print('Topologies running in cluster \'%s\'' % cluster)
+  print 'Topologies running in cluster \'%s\'' % cluster
   if rest_count:
-    print('  with %d more...' % rest_count)
-  print(tabulate(table, headers=header))
+    print '  with %d more...' % rest_count
+  print tabulate(table, headers=header)
   return True
 
 
 def show_cluster_role(cluster, role):
+  ''' print topologies information to stdout '''
   try:
     result = utils.get_cluster_role_topologies(cluster, role)
     if not result:
@@ -75,14 +79,15 @@ def show_cluster_role(cluster, role):
   except Exception:
     return False
   table, header, rest_count = to_table(result)
-  print('Topologies running in cluster \'%s\' submitted by \'%s\':' % (cluster, role))
+  print 'Topologies running in cluster \'%s\' submitted by \'%s\':' % (cluster, role)
   if rest_count:
-    print('  with %d more...' % rest_count)
-  print(tabulate(table, headers=header))
+    print '  with %d more...' % rest_count
+  print tabulate(table, headers=header)
   return True
 
 
 def show_cluster_role_env(cluster, role, env):
+  ''' print topologies information to stdout '''
   try:
     result = utils.get_cluster_role_env_topologies(cluster, role, env)
     if not result:
@@ -92,15 +97,16 @@ def show_cluster_role_env(cluster, role, env):
   except Exception:
     return False
   table, header, rest_count = to_table(result)
-  print('Topologies running in cluster \'%s\', submitted by \'%s\', and\
- under environment \'%s\':' % (cluster, role, env))
+  print 'Topologies running in cluster \'%s\', submitted by \'%s\', and\
+ under environment \'%s\':' % (cluster, role, env)
   if rest_count:
-    print('  with %d more...' % rest_count)
-  print(tabulate(table, headers=header))
+    print '  with %d more...' % rest_count
+  print tabulate(table, headers=header)
   return True
 
-
+# pylint: disable=unused-argument
 def run(command, parser, cl_args, unknown_args):
+  """ run command """
   location = cl_args['cluster/[role]/[env]'].split('/')
   if len(location) == 1:
     return show_cluster(*location)

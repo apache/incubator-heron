@@ -11,7 +11,7 @@ build:centos --linkopt -lunwind
 build:centos --linkopt -lrt
 build:centos --experimental_action_listener=tools/cpp:compile_cpp
 build:centos --experimental_action_listener=tools/java:compile_java
-# TODO: enable this: build:centos --experimental_action_listener=tools/python:compile_python
+build:centos --experimental_action_listener=tools/python:compile_python
 build:centos --workspace_status_command scripts/release/status.sh
 
 # For Mac
@@ -20,7 +20,7 @@ build:darwin --python2_path /usr/bin/python2.7
 build:darwin --java_toolchain=//tools/java:heron_java_toolchain
 build:darwin --experimental_action_listener=tools/cpp:compile_cpp
 build:darwin --experimental_action_listener=tools/java:compile_java
-# TODO: enable this: build:darwin --experimental_action_listener=tools/python:compile_python
+build:darwin --experimental_action_listener=tools/python:compile_python
 build:darwin --workspace_status_command scripts/release/status.sh
 
 # For Ubuntu
@@ -36,5 +36,5 @@ build:ubuntu --linkopt -lunwind
 build:ubuntu --linkopt -lrt
 build:ubuntu --experimental_action_listener=tools/java:compile_java
 build:ubuntu --experimental_action_listener=tools/cpp:compile_cpp
-# TODO: enable this: build:ubuntu --experimental_action_listener=tools/python:compile_python
+build:ubuntu --experimental_action_listener=tools/python:compile_python
 build:ubuntu --workspace_status_command scripts/release/status.sh

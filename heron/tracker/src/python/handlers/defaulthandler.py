@@ -11,10 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+""" defaulthandler.py """
 import tornado.gen
 
-from heron.tracker.src.python import constants
 from heron.tracker.src.python.handlers import BaseHandler
 
 class DefaultHandler(BaseHandler):
@@ -30,5 +29,5 @@ class DefaultHandler(BaseHandler):
 
   @tornado.gen.coroutine
   def get(self, url):
+    """ get method """
     self.write_error_response("URL not supported: " + url)
-
