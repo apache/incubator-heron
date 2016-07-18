@@ -1,3 +1,4 @@
+"""A metastore module defines the interfaces for storing meta information"""
 import json
 import os
 import sys
@@ -9,52 +10,55 @@ METASTORE_NAME = "heron.package.metastore.name"
 METASTORE_ROOT_PATH = "heron.package.metastore.root_path"
 
 def get_metastore(conf):
+  """get metastore instance with retrospection"""
   metastore = getattr(sys.modules[__name__], conf[METASTORE_NAME])
   instance = metastore(conf)
   return instance
 
 class Metastore(object):
-  # get all package names
+  """Interfaces for metastore"""
   def get_packages(self, role, extra_info):
+    """get all package names"""
     raise NotImplementedError('get_packages is not implemented')
 
-  # get all available version numbers for a package
   def get_versions(self, role, pkg_name, extra_info):
+    """get all available version numbers for a package"""
     raise NotImplementedError('get_versions is not implemented')
 
-  # add meta data for a package's version
   def add_pkg_meta(self, role, pkg_name, location, description, extra_info):
+    """add meta data for a package's version"""
     raise NotImplementedError('add_pkg_meta in not implemented')
 
-  # delete meta data for a package's version
   def delete_pkg_meta(self, role, pkg_name, version, extra_info):
+    """delete meta data for a package's version"""
     raise NotImplementedError('delete_pkg_meta is not implemented')
 
-  # get meta data for a package's version
   def get_pkg_meta(self, role, pkg_name, version, extra_info):
+    """get meta data for a package's version"""
     raise NotImplementedError('get_pkg_meta is not implemented')
 
-  # get package stored location
   def get_pkg_location(self, role, pkg_name, version, extra_info):
+    """get package stored location"""
     raise NotImplementedError('get_pkg_location is not implemented')
 
-  # set the tag on a package, only "LIVE" and "LATEST" tags are available
   def set_tag(self, tag, role, pkg_name, version, extra_info):
+    """set the tag on a package, only "LIVE" and "LATEST" tags are available"""
     raise NotImplementedError('set_tag is not implemented')
 
-  # clean the tag on a package
   def unset_tag(self, tag, role, pkg_name, extra_info):
-     raise NotImplementedError('unset_tag is not implemented')
+    """clean the tag on a package"""
+    raise NotImplementedError('unset_tag is not implemented')
 
-  # get a pkg's info
   def get_meta_by_tag(self, tag, role, pkg_name, extra_info):
+    """get a pkg's info"""
     raise NotImplementedError('get_meat_by_tag is not implemented')
 
-  # get pkg uri
   def get_pkg_uri(self, scheme, role, pkg_name, version, extra_info):
+    """get pkg uri"""
     raise NotImplementedError('get_pkg_uri is not implemented')
 
 class LocalMetastore(Metastore):
+  """Local file system based implementation of Metastore"""
   def __init__(self, conf):
     self.meta_file = conf[METASTORE_ROOT_PATH]
 
@@ -70,7 +74,7 @@ class LocalMetastore(Metastore):
       meta_info = json.load(meta_file)
       if role in meta_info:
         pkg_map = meta_info[role]
-        for key, value in pkg_map.items():
+        for key, _ in pkg_map.items():
           packages.append(key)
       else:
         Log.error("role %s not found" % role)
@@ -84,7 +88,7 @@ class LocalMetastore(Metastore):
       meta_info = json.load(meta_file)
       if role in meta_info and pkg_name in meta_info[role]:
         version_map = meta_info[role][pkg_name]
-        for key, value in version_map.items():
+        for key, _ in version_map.items():
           if key != constants.LIVE and \
              key != constants.LATEST and \
              key != constants.COUNTER:
@@ -99,7 +103,7 @@ class LocalMetastore(Metastore):
     versions.sort()
     return versions
 
-  def add_pkg_meta(self, role, pkg_name, description, location, extra_info):
+  def add_pkg_meta(self, role, pkg_name, location, description, extra_info):
     with open(self.meta_file, "r") as meta_file:
       meta_info = json.load(meta_file)
 
@@ -196,7 +200,8 @@ class LocalMetastore(Metastore):
 
     return True
 
-  def _find_second_latest(self, pkg_info):
+  @staticmethod
+  def _find_second_latest(pkg_info):
     if pkg_info[constants.LATEST] is None:
       return None
 
@@ -212,7 +217,7 @@ class LocalMetastore(Metastore):
     with open(self.meta_file, "r") as meta_file:
       meta_info = json.load(meta_file)
 
-    if not self._is_valid_pkg(meta_info, role, pkg_name, extra_info):
+    if not self._is_valid_pkg(meta_info, role, pkg_name):
       Log.error('package info is not valid')
       return dict()
 
@@ -227,16 +232,16 @@ class LocalMetastore(Metastore):
       return info
 
   def set_tag(self, tag, role, pkg_name, version, extra_info):
-    return self._update_tag(tag, role, pkg_name, extra_info, version)
+    return self._update_tag(tag, role, pkg_name, version)
 
   def unset_tag(self, tag, role, pkg_name, extra_info):
-    return self._update_tag(tag, role, pkg_name, extra_info, None, True)
+    return self._update_tag(tag, role, pkg_name, None, True)
 
-  def _update_tag(self, tag, role, pkg_name, extra_info, version = None, is_reset = False):
+  def _update_tag(self, tag, role, pkg_name, version=None, is_reset=False):
     with open(self.meta_file, "r") as meta_file:
       meta_info = json.load(meta_file)
 
-    if not self._is_valid_pkg(meta_info, role, pkg_name, extra_info):
+    if not self._is_valid_pkg(meta_info, role, pkg_name):
       Log.error('package info is not valid')
       return False
 
@@ -255,26 +260,30 @@ class LocalMetastore(Metastore):
 
     return True
 
-  def _is_valid_pkg(self, meta_info, role, pkg_name, extra_info):
+  @staticmethod
+  def _is_valid_pkg(meta_info, role, pkg_name):
     valid_pkg = False
     if pkg_name in meta_info.get(role, {}):
       valid_pkg = True
 
     return valid_pkg
 
-  def _is_valid_version(self, pkg_info, version):
+  @staticmethod
+  def _is_valid_version(pkg_info, version):
     return version == constants.LATEST or \
            version == constants.LIVE or \
            pkg_info[constants.LATEST] >= version
 
-  def _translate_version(self, version, pkg_info):
+  @staticmethod
+  def _translate_version(version, pkg_info):
+    v = str(version)
     if version == constants.LATEST:
-      return pkg_info[constants.LATEST]
+      v = str(pkg_info[constants.LATEST])
     elif version == constants.LIVE:
       if pkg_info[constants.LIVE] is None:
         Log.error("there's no live version for the pkg. Bailing out...")
         sys.exit(1)
 
-      return pkg_info[constants.LIVE]
-    else:
-      return version
+      v = str(pkg_info[constants.LIVE])
+
+    return v

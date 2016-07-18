@@ -1,3 +1,4 @@
+"""store related module"""
 
 from .metastore import (
     Metastore,

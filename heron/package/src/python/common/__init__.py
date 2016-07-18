@@ -1,3 +1,4 @@
+"""common module"""
 
 from .package import (
     Package,

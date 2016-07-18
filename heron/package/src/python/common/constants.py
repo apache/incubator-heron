@@ -1,3 +1,5 @@
+"""constans used by package management tool"""
+
 CLUSTER = "cluster"
 COUNTER = "counter"
 DELETED = "deleted"

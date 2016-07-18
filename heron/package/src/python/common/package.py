@@ -1,3 +1,4 @@
+"""Package module defines the interfaces of package management tool needs to implement"""
 import sys
 
 from heron.common.src.python.color import Log
@@ -5,46 +6,58 @@ from heron.package.src.python.common import constants
 from heron.package.src.python.common import utils
 
 class Package(object):
+  """Package interface"""
   def add_version(self, args):
+    """add a package with 'args' information"""
     raise NotImplementedError("add_version is not implemented")
 
   def download(self, args):
-   raise NotImplementedError("download is not implemented")
+    """download a package referenced by 'args'"""
+    raise NotImplementedError("download is not implemented")
 
   def delete_version(self, args):
+    """delete a package referenced by 'args'"""
     raise NotImplementedError("delete_version is not implemented")
 
   def list_packages(self, args):
+    """list all packages referenced by 'args'"""
     raise NotImplementedError("list_packages is not implemented")
 
   def list_versions(self, args):
+    """list all versions of a package referenced by 'args'"""
     raise NotImplementedError("list_versions is not implemented")
 
   def set_live(self, args):
+    """set a package's version to 'live'"""
     raise NotImplementedError("set_live is not implemented")
 
   def unset_live(self, args):
+    """unset the 'live' tag on a package"""
     raise NotImplementedError("unset_live is not implemented")
 
   def show_version(self, args):
+    """show the basic information for package's version"""
     raise NotImplementedError("show_version is not implemented")
 
   def show_live(self, args):
+    """show the basic information for package's 'live' version"""
     raise NotImplementedError("show_live is not implemented")
 
   def show_latest(self, args):
+    """show the basic information for package's 'latest' version"""
     raise NotImplementedError("show_latest is not implemented")
 
   def clean(self, args):
+    """clean the state"""
     raise NotImplementedError("clean is not implemented")
 
 class HeronPackage(Package):
+  """A metastore and blobstore based implementation of Package"""
   def __init__(self, metastore, blobstore):
     self.metastore = metastore
     self.blobstore = blobstore
 
   def add_version(self, args):
-    """Upload a given package file with role, package_name, description and extra args"""
     role = args[constants.ROLE]
     pkg_name = args[constants.PKG]
     description = args[constants.DESC]
@@ -59,19 +72,18 @@ class HeronPackage(Package):
 
     # 2. add package version info into metastore
     successful, version = self.metastore.add_pkg_meta(
-      role, pkg_name, store_location, description, extra_info)
+        role, pkg_name, store_location, description, extra_info)
     if not successful:
       Log.error("Failed to add the meta data. Bailing out...")
       sys.exit(1)
 
     # 3. return a uri referencing this uploaded package in customized format
     pkg_uri = self.metastore.get_pkg_uri(
-      self.blobstore.get_scheme(), role, pkg_name, version, extra_info)
+        self.blobstore.get_scheme(), role, pkg_name, version, extra_info)
     Log.info("Uploaded package uri: %s" % pkg_uri)
     return pkg_uri
 
   def download(self, args):
-    """Download the package file referenced by pkg_uri to current dir"""
     role = args[constants.ROLE]
     pkg_name = args[constants.PKG]
     version = args[constants.VERSION]
@@ -91,7 +103,6 @@ class HeronPackage(Package):
       Log.error("Failed to download pacakge")
 
   def delete_version(self, args):
-    """Delete the package file referenced by pkg_uri"""
     role = args[constants.ROLE]
     pkg_name = args[constants.PKG]
     version = args[constants.VERSION]
@@ -180,5 +191,5 @@ class HeronPackage(Package):
     utils.print_dict(latest_pkg_info, is_raw)
 
   # clean the inconsistency state of package store.
-  def clean(self):
+  def clean(self, args):
     pass

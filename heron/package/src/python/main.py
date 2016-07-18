@@ -1,3 +1,4 @@
+"""entry point for package management tool"""
 import sys
 
 from heron.package.src.python.common import package
@@ -7,6 +8,7 @@ from heron.package.src.python.store import blobstore
 from heron.package.src.python.store import metastore
 
 def get_packer(conf):
+  """get blobstore/metastore based package with config"""
   blobstore_object = blobstore.get_blobstore(conf)
   metastore_object = metastore.get_metastore(conf)
 
@@ -14,6 +16,7 @@ def get_packer(conf):
   return packer
 
 def main():
+  """main entry point"""
   cmd_parser = parser.create_parser()
 
   # if no argument is provided, print help and exit
@@ -24,7 +27,7 @@ def main():
   namespace = vars(cmd_parser.parse_args())
   command = namespace['command']
   if command == "help":
-    parser.help(cmd_parser, namespace)
+    parser.help_cmd(cmd_parser, namespace)
   else:
     conf = utils.load_packer_conf()
     packer = get_packer(conf)
