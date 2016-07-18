@@ -7,6 +7,8 @@ import shlex
 import re
 import collections
 import json
+import heron.cli.src.python.activate as activate
+import heron.cli.src.python.utils as utils
 
 ################################################################################
 # Run the command
@@ -19,6 +21,19 @@ p = re.compile('(^[^\:]*):([^\s]*) (.*)')
 filters       = ['^@']
 expressions   = [re.compile(x) for x in filters]
 
+help_epilog = '''Getting more help: 
+  heron help <command> Prints help and options for <command>
+
+For detailed documentation, go to http://heronstreaming.io'''
+
+
+
+class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
+  def _format_action(self, action):
+    parts = super(argparse.RawDescriptionHelpFormatter, self)._format_action(action)
+    if action.nargs == argparse.PARSER:
+      parts = "\n".join(parts.split("\n")[1:])
+    return parts
 
 class HeronRCArgumentParser(argparse.ArgumentParser):
 
@@ -61,18 +76,20 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
 					env = '*'
 					if (m != None):
 						value = self.remove_comments(m.group(3).rstrip(os.linesep))
-						command = ( m.group(1),'') [ m.group(1) == None  ]
-						env = ( m.group(2), '') [ m.group(2) == None ]
+						command = ( m.group(1),'') [ m.group(1) == None or m.group(1) == '' ]
+						env = ( m.group(2), '') [ m.group(2) == None or m.group(2) == '']
 					else:
 						value = self.remove_comments(line.rstrip(os.linesep))
 
-					args_list = insert_bool_values(value.split())  # make sure that all the single args have a boolean value associated so that we can load the args to a key value structure
+					args_list = utils.insert_bool_values(value.split())  # make sure that all the single args have a boolean value associated so that we can load the args to a key value structure
 					args_list_string = ' '.join (args_list)
-
+					if command == None or command == '' :
+						continue
 					if ( command in self.cmdmap and env in self.cmdmap[command]):
 						self.cmdmap[command][env] =  self.cmdmap[command][env] 	+ ' ' + args_list_string	
 					else:
-						self.cmdmap[command][env] =  args_list_string				
+						self.cmdmap[command][env] =  args_list_string
+			print self.cmdmap	
 
 		else:
 			print "WARN: %s is not an existing file" % HERON_RC
@@ -80,21 +97,13 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
 
     # for each command / cluster-role-env combination, get the commands from heronrc
     #     remove any duplicates that have already been supplied already  and present in the command-dictionary     
-	def get_args_for_command_role (self , command, role, commanddict):
+	def get_args_for_command_role (self , command, role):
 		args_for_command_role=''
-		new_arg_strings = []
 
 		if ( command in self.cmdmap and role in self.cmdmap[command]):
 			args_for_command_role = (self.cmdmap[command][role],args_for_command_role) [self.cmdmap[command][role] == None or self.cmdmap[command][role] == '']
 
-		newcommanddict=dict(zip(*[iter(args_for_command_role.split())]*2))
-		for key,value in newcommanddict.items():
-			if ( not key in commanddict ):
-				commanddict[key] = value
-				new_arg_strings.append (key)
-				new_arg_strings.append(value)
-
-		return new_arg_strings
+		return args_for_command_role.split()
 
 	# this is invoked when the parser.parse_args is called
 	#  apply the commands in the following precedence order
@@ -102,50 +111,37 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
 
 	def _read_args_from_files(self,arg_strings):
 		new_arg_strings = []
-		commanddict=dict(zip(*[iter(arg_strings)]*2))
-		for arg_string in arg_strings[2:]:
-    		if not arg_string or not arg_string.startswith('@'):
-    			new_arg_strings.append(arg_string)
-		commanddict=dict(zip(*[iter(arg_strings[2:])]*2))	
-		#print sys.argv[1] , sys.argv[2], commanddict
-		command = self.get_default('subcommand')
+		#command = self.get_default('subcommand')
+		#role = self.get_default('cluster/[role]/[env]')
+		command = sys.argv[1]
 		role = sys.argv[2]
-		new_arg_strings.extend(self.get_args_for_command_role(command, role, commanddict))
-		new_arg_strings.extend(self.get_args_for_command_role(command, '*',commanddict))
-		new_arg_strings.extend(self.get_args_for_command_role('*', '*',commanddict))
-		new_arg_strings.extend(arg_strings)
-		print new_arg_strings
-		return new_arg_strings
 
+		print command, role
+		new_arg_strings.extend(self.get_args_for_command_role(command, role))
+		new_arg_strings.extend(self.get_args_for_command_role(command, '*'))
+		new_arg_strings.extend(self.get_args_for_command_role('*', '*'))
+		arg_strings.extend(new_arg_strings)
+		print arg_strings
+		return arg_strings
 
-## the below two functions should be moved to util
-
-def insert_bool(param, command_args):
-  index = 0 
-  found = False
-  for lelem in command_args:
-    if lelem == '--' and not found:
-      break
-    if lelem == param:
-      found = True
-      break
-    index = index + 1   
-
-  if found:
-    command_args.insert(index + 1, 'True')
-  return command_args 
-
-def insert_bool_values(command_line_args):
-  args1 = insert_bool('--verbose', command_line_args)
-  args2 = insert_bool('--deploy-deactivated', args1)
-  args3 = insert_bool('--trace-execution', args2)
-  return args3
 
 #test stub
 def main():
-	parser = HeronRCArgumentParser(description="test parser",fromfile_prefix_chars='@')
-	parser.set_defaults(subcommand='submit')
-	args = parser.parse_args(['submit', 'devcluster/ads/PROD', '123123'])
+	#parser = HeronRCArgumentParser(description="test parser",fromfile_prefix_chars='@')
+	  #parser = argparse.ArgumentParser(
+	parser = HeronRCArgumentParser(
+		prog = 'heron',
+		epilog = help_epilog,
+		formatter_class=SubcommandHelpFormatter,
+		fromfile_prefix_chars='@',
+		add_help = False)
+	subparsers = parser.add_subparsers(
+		title = "Available commands", 
+		metavar = '<command> <options>')
+
+	activate.create_parser(subparsers)
+	args, unknown_args = parser.parse_known_args()
+	print args, unknown_args
 
 
 if __name__ == "__main__":

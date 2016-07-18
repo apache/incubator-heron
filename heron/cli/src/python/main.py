@@ -69,7 +69,8 @@ class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
 # Main parser
 ################################################################################
 def create_parser():
-  parser = argparse.ArgumentParser(
+  #parser = argparse.ArgumentParser(
+  parser = HeronRCArgumentParser(
       prog = 'heron',
       epilog = help_epilog,
       formatter_class=SubcommandHelpFormatter,
