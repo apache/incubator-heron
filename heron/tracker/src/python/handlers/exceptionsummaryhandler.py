@@ -11,11 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' execeptionsummaryhandler.py '''
 import logging
+import traceback
 import tornado.gen
 import tornado.web
-import traceback
 
 from heron.proto import common_pb2
 from heron.proto import tmaster_pb2
@@ -24,6 +24,7 @@ from heron.tracker.src.python.handlers import BaseHandler
 
 LOG = logging.getLogger(__name__)
 
+# pylint: disable=attribute-defined-outside-init
 class ExceptionSummaryHandler(BaseHandler):
   """
   URL - /topologies/exceptionsummary?cluster=<cluster>&topology=<topology> \
@@ -42,26 +43,29 @@ class ExceptionSummaryHandler(BaseHandler):
   occurances, first occurance time and latest occurance time.
   """
   def initialize(self, tracker):
+    """ initialize """
     self.tracker = tracker
 
   @tornado.gen.coroutine
   def get(self):
+    """ get """
     try:
       cluster = self.get_argument_cluster()
       environ = self.get_argument_environ()
       role = self.get_argument_role()
       topology_name = self.get_argument_topology()
       component = self.get_argument_component()
-      topology = self.tracker.getTopologyByClusterRoleEnvironAndName(cluster, role, environ, topology_name)
+      topology = self.tracker.getTopologyByClusterRoleEnvironAndName(
+          cluster, role, environ, topology_name)
       instances = self.get_arguments(constants.PARAM_INSTANCE)
       exceptions_summary = yield tornado.gen.Task(self.getComponentExceptionSummary,
                                                   topology.tmaster, component, instances)
-      result = self.make_success_response(exceptions_summary)
       self.write_success_response(exceptions_summary)
     except Exception as e:
       traceback.print_exc()
       self.write_error_response(e)
 
+  # pylint: disable=dangerous-default-value, no-self-use, unused-argument
   @tornado.gen.coroutine
   def getComponentExceptionSummary(self, tmaster, component_name, instances=[], callback=None):
     """
@@ -83,7 +87,7 @@ class ExceptionSummaryHandler(BaseHandler):
                                              body=request_str,
                                              method='POST',
                                              request_timeout=5)
-    LOG.debug('Making HTTP call to fetch exceptionsummary url: %s' % url)
+    LOG.debug('Making HTTP call to fetch exceptionsummary url: %s', url)
     try:
       client = tornado.httpclient.AsyncHTTPClient()
       result = yield client.fetch(request)
@@ -97,7 +101,7 @@ class ExceptionSummaryHandler(BaseHandler):
       message = "Error in getting exceptions from Tmaster, code: " + responseCode
       LOG.error(message)
       raise tornado.gen.Return({
-        "message": message
+          "message": message
       })
 
     # Parse the response from tmaster.
@@ -107,7 +111,7 @@ class ExceptionSummaryHandler(BaseHandler):
     if exception_response.status.status == common_pb2.NOTOK:
       if exception_response.status.HasField("message"):
         raise tornado.gen.Return({
-          "message": exception_response.status.message
+            "message": exception_response.status.message
         })
 
     # Send response
@@ -118,4 +122,3 @@ class ExceptionSummaryHandler(BaseHandler):
                   'firsttime': exception_log.firsttime,
                   'count': str(exception_log.count)})
     raise tornado.gen.Return(ret)
-

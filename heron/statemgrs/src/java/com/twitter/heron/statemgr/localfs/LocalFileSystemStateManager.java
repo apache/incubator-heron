@@ -14,6 +14,7 @@
 
 package com.twitter.heron.statemgr.localfs;
 
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,22 +30,20 @@ import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 import com.twitter.heron.statemgr.FileSystemStateManager;
 
 public class LocalFileSystemStateManager extends FileSystemStateManager {
   private static final Logger LOG = Logger.getLogger(LocalFileSystemStateManager.class.getName());
 
-  private Config config;
-
   @Override
   public void initialize(Config ipconfig) {
 
     super.initialize(ipconfig);
-    this.config = ipconfig;
 
     // By default, we would init the file tree if it is not there
-    boolean isInitLocalFileTree = LocalFileSystemContext.initLocalFileTree(config);
+    boolean isInitLocalFileTree = LocalFileSystemContext.initLocalFileTree(ipconfig);
 
     if (isInitLocalFileTree && !initTree()) {
       throw new IllegalArgumentException("Failed to initialize Local State manager. "
@@ -75,12 +74,8 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     boolean schedulerLocationDir = FileUtils.isDirectoryExists(getSchedulerLocationDir())
         || FileUtils.createDirectory(getSchedulerLocationDir());
 
-    if (topologyDir && tmasterLocationDir && physicalPlanDir && executionStateDir
-        && schedulerLocationDir) {
-      return true;
-    }
-
-    return false;
+    return topologyDir && tmasterLocationDir && physicalPlanDir && executionStateDir
+        && schedulerLocationDir;
   }
 
   // Make utils class protected for easy unit testing
@@ -92,7 +87,17 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     return future;
   }
 
-  protected ListenableFuture<Boolean> deleteData(String path) {
+  @Override
+  protected ListenableFuture<Boolean> nodeExists(String path) {
+    SettableFuture<Boolean> future = SettableFuture.create();
+    boolean ret = FileUtils.isFileExists(path);
+    future.set(ret);
+
+    return future;
+  }
+
+  @Override
+  protected ListenableFuture<Boolean> deleteNode(String path) {
     final SettableFuture<Boolean> future = SettableFuture.create();
     boolean ret = FileUtils.deleteFile(path);
     future.set(ret);
@@ -100,8 +105,11 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     return future;
   }
 
+  @Override
   @SuppressWarnings("unchecked") // we don't know what M is until runtime
-  protected <M extends Message> ListenableFuture<M> getData(String path, Message.Builder builder) {
+  protected <M extends Message> ListenableFuture<M> getNodeData(WatchCallback watcher,
+                                                                String path,
+                                                                Message.Builder builder) {
     final SettableFuture<M> future = SettableFuture.create();
     byte[] data = FileUtils.readFromFile(path);
     if (data.length == 0) {
@@ -155,76 +163,52 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   }
 
   @Override
-  public ListenableFuture<Boolean> deleteTMasterLocation(String topologyName) {
-    return deleteData(getTMasterLocationPath(topologyName));
-  }
-
-  @Override
-  public ListenableFuture<Boolean> deleteSchedulerLocation(String topologyName) {
-    return deleteData(getSchedulerLocationPath(topologyName));
-  }
-
-  @Override
-  public ListenableFuture<Boolean> deleteExecutionState(String topologyName) {
-    return deleteData(getExecutionStatePath(topologyName));
-  }
-
-  @Override
-  public ListenableFuture<Boolean> deleteTopology(String topologyName) {
-    return deleteData(getTopologyPath(topologyName));
-  }
-
-  @Override
-  public ListenableFuture<Boolean> deletePhysicalPlan(String topologyName) {
-    return deleteData(getPhysicalPlanPath(topologyName));
-  }
-
-  @Override
-  public ListenableFuture<Scheduler.SchedulerLocation> getSchedulerLocation(
-      WatchCallback watcher, String topologyName) {
-    return getData(getSchedulerLocationPath(topologyName),
-        Scheduler.SchedulerLocation.newBuilder());
-  }
-
-  @Override
-  public ListenableFuture<TopologyAPI.Topology> getTopology(
-      WatchCallback watcher, String topologyName) {
-    return getData(getTopologyPath(topologyName), TopologyAPI.Topology.newBuilder());
-  }
-
-  @Override
-  public ListenableFuture<ExecutionEnvironment.ExecutionState> getExecutionState(
-      WatchCallback watcher, String topologyName) {
-    return getData(getExecutionStatePath(topologyName),
-        ExecutionEnvironment.ExecutionState.newBuilder());
-  }
-
-  @Override
-  public ListenableFuture<PhysicalPlans.PhysicalPlan> getPhysicalPlan(
-      WatchCallback watcher, String topologyName) {
-    return getData(getPhysicalPlanPath(topologyName),
-        PhysicalPlans.PhysicalPlan.newBuilder());
-  }
-
-  @Override
-  public ListenableFuture<TopologyMaster.TMasterLocation> getTMasterLocation(
-      WatchCallback watcher, String topologyName) {
-    return getData(getTMasterLocationPath(topologyName),
-        TopologyMaster.TMasterLocation.newBuilder());
-  }
-
-  @Override
-  public ListenableFuture<Boolean> isTopologyRunning(String topologyName) {
-    SettableFuture<Boolean> future = SettableFuture.create();
-    boolean ret = FileUtils.isFileExists(getTopologyPath(topologyName));
-    future.set(ret);
-
-    return future;
-  }
-
-  @Override
   public void close() {
     // We would not clear anything here
     // Scheduler kill interface should take care of the cleaning
+  }
+
+  /**
+   * Returns all information stored in the StateManager. This is a utility method used for debugging
+   * while developing. To invoke, run:
+   *
+   *   bazel run heron/statemgrs/src/java:localfs-statemgr-unshaded -- &lt;topology-name&gt;
+   */
+  public static void main(String[] args) throws ExecutionException, InterruptedException {
+    if (args.length < 1) {
+      throw new RuntimeException(String.format(
+          "Usage: java %s <topology_name> - view state manager details for a topology",
+          LocalFileSystemStateManager.class.getCanonicalName()));
+    }
+
+    String topologyName = args[0];
+    Config config = Config.newBuilder()
+        .put(Keys.stateManagerRootPath(),
+            System.getProperty("user.home") + "/.herondata/repository/state/local")
+        .build();
+
+    print("==> State Manager root path: %s", config.get(Keys.stateManagerRootPath()));
+
+    com.twitter.heron.spi.statemgr.IStateManager stateManager = new LocalFileSystemStateManager();
+    stateManager.initialize(config);
+
+    if (stateManager.isTopologyRunning(topologyName).get()) {
+      print("==> Topology %s found", topologyName);
+      print("==> ExecutionState:\n%s",
+          stateManager.getExecutionState(null, topologyName).get());
+      print("==> SchedulerLocation:\n%s",
+          stateManager.getSchedulerLocation(null, topologyName).get());
+      print("==> TMasterLocation:\n%s",
+          stateManager.getTMasterLocation(null, topologyName).get());
+      print("==> PhysicalPlan:\n%s",
+          stateManager.getPhysicalPlan(null, topologyName).get());
+    } else {
+      print("==> Topology %s not found under %s",
+          topologyName, config.get(Keys.stateManagerRootPath()));
+    }
+  }
+
+  private static void print(String format, Object... values) {
+    System.out.println(String.format(format, values));
   }
 }

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 #!/usr/bin/env python2.7
-
+''' main.py '''
 import json
 import logging
 import os
@@ -58,20 +58,23 @@ def str_cmd(cmd):
   (stdout, stderr) = (stream_to_string(p.stdout), stream_to_string(p.stderr))
   return {'command': ' '.join(cmd), 'stderr': stderr, 'stdout': stdout}
 
+# pylint: disable=unnecessary-lambda
 def chain(cmd_list):
   """
   Feed output of one command to the next and return final output
   Returns string output of chained application of commands.
   """
   return {
-    'command' : ' | '.join(map(lambda x: ' '.join(x) , cmd_list)),
-    'stdout' : stream_to_string(reduce(pipe, [None] + cmd_list))
+      'command' : ' | '.join(map(lambda x: ' '.join(x), cmd_list)),
+      'stdout' : stream_to_string(reduce(pipe, [None] + cmd_list))
   }
 
 def get_container_id(instance_id):
+  ''' get container id '''
   return instance_id.split('_')[1]  # Format: container_<index>_component_name_<index>
 
 def get_asset(asset_name):
+  ''' get assset '''
   return pkgutil.get_data("heron.shell", os.path.join("assets", asset_name))
 
 
@@ -79,22 +82,28 @@ class PidHandler(tornado.web.RequestHandler):
   """
   Responsible for getting the process ID for an instance.
   """
+
+  # pylint: disable=attribute-defined-outside-init
   @tornado.web.asynchronous
   def get(self, instance_id):
+    ''' get method '''
     self.content_type = 'application/json'
     self.write(json.dumps(chain([
-      ['ps', 'auxwwww'],
-      ['grep', instance_id],
-      ['grep', 'java'],
-      ['awk', '{print $2}']])).strip())
+        ['ps', 'auxwwww'],
+        ['grep', instance_id],
+        ['grep', 'java'],
+        ['awk', '{print $2}']])).strip())
     self.finish()
 
 class MemoryHistogramHandler(tornado.web.RequestHandler):
   """
   Responsible for getting the memory histogram of a jvm process given its pid.
   """
+
+  # pylint: disable=attribute-defined-outside-init
   @tornado.web.asynchronous
   def get(self, pid):
+    ''' get method '''
     body = str_cmd(['jmap', '-histo', pid])
     self.content_type = 'application/json'
     self.write(json.dumps(body))
@@ -104,8 +113,11 @@ class JmapHandler(tornado.web.RequestHandler):
   """
   Responsible for getting the jmap for a jvm process given its pid.
   """
+
+  # pylint: disable=attribute-defined-outside-init
   @tornado.web.asynchronous
   def get(self, pid):
+    ''' get method '''
     str_cmd(['rm', '-rf', '/tmp/heap.bin'])
     body = str_cmd(['jmap', '-dump:format=b,file=/tmp/heap.bin', pid])
     str_cmd(['chmod', '+r', '/tmp/heap.bin'])
@@ -117,8 +129,11 @@ class JstackHandler(tornado.web.RequestHandler):
   """
   Responsible for getting the jstack for a jvm process given its pid.
   """
+
+  # pylint: disable=attribute-defined-outside-init
   @tornado.web.asynchronous
   def get(self, pid):
+    ''' get method '''
     body = str_cmd(['jstack', pid])
     self.content_type = 'application/json'
     self.write(json.dumps(body))
@@ -128,8 +143,11 @@ class BrowseHandler(tornado.web.RequestHandler):
   """
   Responsible for browsing directories.
   """
+
+  # pylint: disable=attribute-defined-outside-init
   @tornado.web.asynchronous
   def get(self, path):
+    ''' get method '''
     if not path:
       path = "."
     if path.startswith("/"):
@@ -139,13 +157,13 @@ class BrowseHandler(tornado.web.RequestHandler):
       return
     t = Template(get_asset("browse.html"))
     args = dict(
-      path = path,
-      listing = utils.get_listing(path),
-      format_prefix = utils.format_prefix,
-      stat = stat,
-      get_stat = utils.get_stat,
-      os = os,
-      css = get_asset("bootstrap.css")
+        path=path,
+        listing=utils.get_listing(path),
+        format_prefix=utils.format_prefix,
+        stat=stat,
+        get_stat=utils.get_stat,
+        os=os,
+        css=get_asset("bootstrap.css")
     )
     self.write(t.generate(**args))
     self.finish()
@@ -156,8 +174,8 @@ class FileStatsHandler(tornado.web.RequestHandler):
   """
   @tornado.web.asynchronous
   def get(self, path):
+    ''' get method '''
     path = tornado.escape.url_unescape(path)
-    logger = logging.getLogger(__file__)
     if not path:
       path = "."
 
@@ -179,9 +197,9 @@ class FileStatsHandler(tornado.web.RequestHandler):
         if stat.S_ISDIR(utils.get_stat(path, fn).st_mode):
           is_dir = True
         file_stats[fn] = {
-          "formatted_stat": formatted_stat,
-          "is_dir": is_dir,
-          "path": tornado.escape.url_escape(os.path.join(path, fn)),
+            "formatted_stat": formatted_stat,
+            "is_dir": is_dir,
+            "path": tornado.escape.url_escape(os.path.join(path, fn)),
         }
         if fn == "..":
           path_fragments = path.split("/")
@@ -201,6 +219,7 @@ class FileHandler(tornado.web.RequestHandler):
   """
   @tornado.web.asynchronous
   def get(self, path):
+    """ get method """
     t = Template(get_asset("file.html"))
     if path is None:
       self.set_status(404)
@@ -213,10 +232,10 @@ class FileHandler(tornado.web.RequestHandler):
       self.finish()
       return
     args = dict(
-      filename = path,
-      jquery = get_asset("jquery.js"),
-      pailer = get_asset("jquery.pailer.js"),
-      css = get_asset("bootstrap.css"),
+        filename=path,
+        jquery=get_asset("jquery.js"),
+        pailer=get_asset("jquery.pailer.js"),
+        css=get_asset("bootstrap.css"),
     )
     self.write(t.generate(**args))
     self.finish()
@@ -228,6 +247,7 @@ class FileDataHandler(tornado.web.RequestHandler):
   """
   @tornado.web.asynchronous
   def get(self, path):
+    """ get method """
     if path is None:
       return {}
     if path.startswith("/"):
@@ -248,18 +268,19 @@ class DownloadHandler(tornado.web.StaticFileHandler):
   Responsible for downloading the files.
   """
   def set_headers(self):
+    """ set headers """
     self.set_header("Content-Disposition", "attachment")
 
 app = tornado.web.Application([
-  (r"^/jmap/([0-9]+$)", JmapHandler),
-  (r"^/histo/([0-9]+$)", MemoryHistogramHandler),
-  (r"^/jstack/([0-9]+$)", JstackHandler),
-  (r"^/pid/(.*)", PidHandler),
-  (r"^/browse/(.*)", BrowseHandler),
-  (r"^/file/(.*)", FileHandler),
-  (r"^/filedata/(.*)", FileDataHandler),
-  (r"^/filestats/(.*)", FileStatsHandler),
-  (r"^/download/(.*)", DownloadHandler, {"path":"."}),
+    (r"^/jmap/([0-9]+$)", JmapHandler),
+    (r"^/histo/([0-9]+$)", MemoryHistogramHandler),
+    (r"^/jstack/([0-9]+$)", JstackHandler),
+    (r"^/pid/(.*)", PidHandler),
+    (r"^/browse/(.*)", BrowseHandler),
+    (r"^/file/(.*)", FileHandler),
+    (r"^/filedata/(.*)", FileDataHandler),
+    (r"^/filestats/(.*)", FileStatsHandler),
+    (r"^/download/(.*)", DownloadHandler, {"path":"."}),
 ])
 
 

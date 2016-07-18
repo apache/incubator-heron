@@ -11,14 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' executionstatehandler.py '''
+import traceback
 import tornado.gen
 import tornado.web
-import traceback
 
-from heron.tracker.src.python import constants
 from heron.tracker.src.python.handlers import BaseHandler
 
+# pylint: disable=attribute-defined-outside-init
 class ExecutionStateHandler(BaseHandler):
   """
   URL - /topologies/executionstate
@@ -33,10 +33,12 @@ class ExecutionStateHandler(BaseHandler):
   """
 
   def initialize(self, tracker):
+    """ initialize """
     self.tracker = tracker
 
   @tornado.gen.coroutine
   def get(self):
+    """ get method """
     try:
       cluster = self.get_argument_cluster()
       role = self.get_argument_role()
@@ -48,4 +50,3 @@ class ExecutionStateHandler(BaseHandler):
     except Exception as e:
       traceback.print_exc()
       self.write_error_response(e)
-

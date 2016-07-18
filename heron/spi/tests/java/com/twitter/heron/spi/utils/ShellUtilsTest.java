@@ -17,6 +17,8 @@ package com.twitter.heron.spi.utils;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -74,5 +76,26 @@ public class ShellUtilsTest {
     String testString = generateRandomLongString(1024);
     ByteArrayInputStream is = new ByteArrayInputStream(testString.getBytes());
     Assert.assertEquals(testString, ShellUtils.inputstreamToString(is));
+  }
+
+  @Test
+  public void testGetProcessBuilder() throws IOException {
+    String[] command = {"printenv"};
+    Map<String, String> env = new HashMap<>();
+    String key = "heron-shell-utils-test-env-key";
+    String value = "heron-shell-utils-test-env-value";
+    env.put(key, value);
+    // The process should not inherit IO
+    ProcessBuilder pb = ShellUtils.getProcessBuilder(false, command, new File("."), env);
+
+    // Process running normally
+    Process p = pb.start();
+    wait(10, TimeUnit.MILLISECONDS);
+    Assert.assertTrue(p.getInputStream().available() > 0);
+
+    String output = ShellUtils.inputstreamToString(p.getInputStream());
+    // Environment variables setting properly
+    String entry = String.format("%s=%s", key, value);
+    Assert.assertTrue(output.contains(entry));
   }
 }

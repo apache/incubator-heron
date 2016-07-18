@@ -11,8 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+''' stateexceptions.py '''
 
 class StateException(Exception):
+  """ state exception """
   EX_TYPE_NO_NODE_ERROR = 1
   EX_TYPE_NODE_EXISTS_ERROR = 2
   EX_TYPE_NOT_EMPTY_ERROR = 3

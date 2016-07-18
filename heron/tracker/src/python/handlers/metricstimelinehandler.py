@@ -11,16 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' metricstimelinehandler.py '''
+import traceback
 import tornado.gen
 import tornado.web
-import traceback
 
-from heron.proto import common_pb2
-from heron.proto import tmaster_pb2
 from heron.tracker.src.python import constants
 from heron.tracker.src.python import metricstimeline
 from heron.tracker.src.python.handlers import BaseHandler
+
 
 class MetricsTimelineHandler(BaseHandler):
   """
@@ -42,11 +41,14 @@ class MetricsTimelineHandler(BaseHandler):
   by that component.
   """
 
+  # pylint: disable=attribute-defined-outside-init
   def initialize(self, tracker):
+    """ initialize """
     self.tracker = tracker
 
   @tornado.gen.coroutine
   def get(self):
+    """ get method """
     try:
       cluster = self.get_argument_cluster()
       role = self.get_argument_role()
@@ -59,7 +61,8 @@ class MetricsTimelineHandler(BaseHandler):
       self.validateInterval(start_time, end_time)
       instances = self.get_arguments(constants.PARAM_INSTANCE)
 
-      topology = self.tracker.getTopologyByClusterRoleEnvironAndName(cluster, role, environ, topology_name)
+      topology = self.tracker.getTopologyByClusterRoleEnvironAndName(
+          cluster, role, environ, topology_name)
       metrics = yield tornado.gen.Task(metricstimeline.getMetricsTimeline,
                                        topology.tmaster, component, metric_names,
                                        instances, int(start_time), int(end_time))

@@ -11,7 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+''' utils.py '''
 
+
+# pylint: disable=invalid-name
 def className(selected, item):
-  if selected == item: return "active"
+  '''
+  :param selected:
+  :param item:
+  :return:
+  '''
+  if selected == item:
+    return "active"
   return ''

@@ -11,13 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' physicalplanhandler.py '''
+import traceback
 import tornado.gen
 import tornado.web
-import traceback
 
-from heron.tracker.src.python import constants
 from heron.tracker.src.python.handlers import BaseHandler
+
 
 class PhysicalPlanHandler(BaseHandler):
   """
@@ -32,11 +32,14 @@ class PhysicalPlanHandler(BaseHandler):
   information of physical plan of the topology.
   """
 
+  # pylint: disable=attribute-defined-outside-init
   def initialize(self, tracker):
+    """initialize"""
     self.tracker = tracker
 
   @tornado.gen.coroutine
   def get(self):
+    """get method"""
     try:
       cluster = self.get_argument_cluster()
       role = self.get_argument_role()
@@ -48,4 +51,3 @@ class PhysicalPlanHandler(BaseHandler):
     except Exception as e:
       traceback.print_exc()
       self.write_error_response(e)
-
