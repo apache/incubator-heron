@@ -13,22 +13,23 @@ RUN yum -y install \
       cmake \
       openssl-devel \
       file \
+      git \
       gcc \
       gcc-c++ \
-      git \
+      glibc-static \
+      glibc-devel.i686 \
+      glibc-i686 \
       kernel-devel \
       libunwind-devel \
       libtool \
       make \
       patch \
-      python \
-      python-devel \
-      python-setuptools \
       zip \
       unzip \
       wget \
       which
 
+# installl jdk 8
 RUN wget --no-cookies --no-check-certificate --header "Cookie: oraclelicense=accept-securebackup-cookie" "http://download.oracle.com/otn-pub/java/jdk/$JAVA_VERSION-$BUILD_VERSION/jdk-$JAVA_VERSION-linux-x64.rpm" -O /tmp/jdk-8-linux-x64.rpm
 
 RUN yum -y install /tmp/jdk-8-linux-x64.rpm
@@ -39,25 +40,52 @@ RUN alternatives --install /usr/bin/javac javac /usr/java/latest/bin/javac 20000
 
 ENV JAVA_HOME /usr/java/latest
 
+#install bazel 
 RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/$bazelVersion/bazel-$bazelVersion-installer-linux-x86_64.sh \
       && chmod +x /tmp/bazel.sh \
       && /tmp/bazel.sh
 
 ADD bazelrc /root/.bazelrc
 
+#update gcc to 4.8
+RUN wget  http://www.multiprecision.org/mpc/download/mpc-1.0.1.tar.gz \
+    && wget http://www.mpfr.org/mpfr-current/mpfr-3.1.4.tar.bz2 \
+    && wget https://gmplib.org/download/gmp/gmp-5.1.3.tar.bz2 \
+    && wget http://isl.gforge.inria.fr/isl-0.11.1.tar.bz2 \
+    && wget http://ftp.vim.org/languages/gcc/infrastructure/cloog-0.18.0.tar.gz \
+    && wget https://ftp.gnu.org/gnu/gcc/gcc-4.8.2/gcc-4.8.2.tar.gz \
+    && yum groupinstall "Development tools" -y
+
+RUN tar -zxvf gcc-4.8.2.tar.gz \
+    && cd gcc-4.8.2  \
+    && tar -zxvf ../mpc-1.0.1.tar.gz && tar -jxvf ../mpfr-3.1.4.tar.bz2 \
+    && tar -jxvf ../gmp-5.1.3.tar.bz2 && tar -jxvf ../isl-0.11.1.tar.bz2 \
+    && tar -zxvf ../cloog-0.18.0.tar.gz \
+    && mv mpc-1.0.1  mpc && mv mpfr-3.1.4 mpfr && mv gmp-5.1.3 gmp && mv isl-0.11.1 isl \
+    && mv cloog-0.18.0 cloog \
+    && ./configure --prefix=/usr/local/gcc
+
+RUN cd gcc-4.8.2 \
+    && make
+
+RUN cd gcc-4.8.2 \
+    && make install
+
+RUN yum remove -y gcc gcc-c++updatedb \
+    && cd /usr/bin && ln -s /usr/local/gcc/bin/gcc gcc && ln -s /usr/local/gcc/bin/g++ g++ \
+    && gcc -v \
+    && g++ --version \
+
 #install python 2.7.8
-RUN  yum install sqlite-devel -y \
-     && wget https://www.python.org/ftp/python/2.7.8/Python-2.7.8.tgz \
+RUN  wget https://www.python.org/ftp/python/2.7.8/Python-2.7.8.tgz \
      && tar xf Python-2.7.8.tgz \
      && cd Python-2.7.8 \
-     && ./configure --prefix=/usr/local \
-     && make && make install
+     && ./configure --prefix=/usr/local
 
-#update gcc to 4.8
-RUN rpm --import http://ftp.scientificlinux.org/linux/scientific/5x/x86_64/RPM-GPG-KEYs/RPM-GPG-KEY-cern \
-    && wget -O /etc/yum.repos.d/slc6-devtoolset.repo http://linuxsoft.cern.ch/cern/devtoolset/slc6-devtoolset.repo \
-    && yum install devtoolset-2 -y \
-    && scl enable devtoolset-2 bash \
-    && gcc --version
+RUN cd Python-2.7.8  \
+    && make && make altinstall
+	
+RUN cd /usr/bin/ && mv python python2.6 && ln -s /usr/local/bin/python2.7  /usr/bin/python \
+    && python -V
 
 ADD compile-platform.sh /compile-platform.sh
