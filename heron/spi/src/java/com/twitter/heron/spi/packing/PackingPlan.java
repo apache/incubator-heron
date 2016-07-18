@@ -64,6 +64,15 @@ public class PackingPlan {
   }
 
   /**
+   * Get the containers created in this packing plan
+   *
+   * @return Map describing the container info
+   */
+  public Map<String, ContainerPlan> getContainers() {
+    return this.containers;
+  }
+
+  /**
    * Get the formatted String describing component ram distribution from PackingPlan,
    * used by executor
    *
