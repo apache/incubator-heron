@@ -25,7 +25,7 @@ We recently merged updates to run Heron natively using [Mesos](http://mesos.apac
 
 We also added beta testing for [Apache YARN](https://hadoop.apache.org/docs/r2.7.1/hadoop-yarn/hadoop-yarn-site/YARN.html) support using [Apache REEF](http://reef.apache.org/), in addition to the Simple Linux Utility for Resource Management [(SLURM)](http://slurm.schedmd.com/). 
 
-We are working to add support for [Mesosphere DC/OS](https://dcos.io/) and [Kubernetes](http://kubernetes.io/).  We are currently reviewing implementation details for dynamic topology scaling and will continue to post updates as we progress.
+We are working to add support for [Mesosphere DC/OS](https://dcos.io/) and [Kubernetes](http://kubernetes.io/).  We will continue to post updates as we progress.
 
 ## Documentation
 
