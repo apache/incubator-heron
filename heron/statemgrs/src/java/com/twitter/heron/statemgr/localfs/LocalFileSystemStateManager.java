@@ -73,8 +73,8 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     for (Pair<String, String> dirNamesAndPath : dirNamesAndPaths) {
       LOG.log(Level.FINE,
           String.format("%s directory: %s", dirNamesAndPath.first, dirNamesAndPath.second));
-      if(!FileUtils.isDirectoryExists(dirNamesAndPath.second) &&
-         !FileUtils.createDirectory(dirNamesAndPath.second)) {
+      if (!FileUtils.isDirectoryExists(dirNamesAndPath.second)
+          && !FileUtils.createDirectory(dirNamesAndPath.second)) {
         return false;
       }
     }
@@ -275,11 +275,12 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     for (String componentName : proposedParallelism.keySet()) {
       Integer newParallelism = proposedParallelism.get(componentName);
       assertTrue(existingParallelism.containsKey(componentName),
-        "key %s in proposed instance distribution %s not found in current instance distribution %s",
-        componentName, proposedInstanceDistribution, existingInstanceDistribution);
+          "key %s in proposed instance distribution %s not found in "
+              + "current instance distribution %s",
+          componentName, proposedInstanceDistribution, existingInstanceDistribution);
       assertTrue(newParallelism > 0,
-        "Non-positive parallelism (%s) for component %s found in instance distribution %s",
-        newParallelism, componentName, proposedInstanceDistribution);
+          "Non-positive parallelism (%s) for component %s found in instance distribution %s",
+          newParallelism, componentName, proposedInstanceDistribution);
 
       if (!newParallelism.equals(existingParallelism.get(componentName))) {
         parallelismChanges.put(componentName, newParallelism);
@@ -294,8 +295,8 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     Map<String, Integer> componentParallelism = new HashMap<>();
     String[] tokens = instanceDistribution.split(":");
     assertTrue(tokens.length > 3 && (tokens.length - 1) % 3 == 0,
-        "Invalid instance distribution format. Expected componentId " +
-        "followed by instance triples: %s", instanceDistribution);
+        "Invalid instance distribution format. Expected componentId "
+        + "followed by instance triples: %s", instanceDistribution);
     Set<String> idsFound = new HashSet<>();
     for (int i = 1; i < tokens.length; i += 3) {
       String instanceName = tokens[i];
@@ -325,19 +326,22 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     for (int i = 0; i < builder.getBoltsCount(); i++) {
       TopologyAPI.Bolt.Builder boltBuilder = builder.getBoltsBuilder(i);
       TopologyAPI.Component.Builder compBuilder = boltBuilder.getCompBuilder();
-      for (Map.Entry<Descriptors.FieldDescriptor, Object> entry : compBuilder.getAllFields().entrySet()) {
+      for (Map.Entry<Descriptors.FieldDescriptor, Object> entry
+          : compBuilder.getAllFields().entrySet()) {
         if (entry.getKey().getName().equals("name") && componentName.equals(entry.getValue())) {
           TopologyAPI.Config.Builder confBuilder = compBuilder.getConfigBuilder();
           boolean keyFound = false;
           for (TopologyAPI.Config.KeyValue.Builder kvBuilder : confBuilder.getKvsBuilderList()) {
-            if (kvBuilder.getKey().equals(com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_PARALLELISM)) {
+            if (kvBuilder.getKey().equals(
+                com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_PARALLELISM)) {
               kvBuilder.setValue(Integer.toString(parallelism));
               keyFound = true;
               break;
             }
           }
           if (!keyFound) {
-            TopologyAPI.Config.KeyValue.Builder kvBuilder = TopologyAPI.Config.KeyValue.newBuilder();
+            TopologyAPI.Config.KeyValue.Builder kvBuilder =
+                TopologyAPI.Config.KeyValue.newBuilder();
             kvBuilder.setKey(com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_PARALLELISM);
             kvBuilder.setValue(Integer.toString(parallelism));
             confBuilder.addKvs(kvBuilder);
