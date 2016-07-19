@@ -16,6 +16,7 @@ package com.twitter.heron.statemgr.zookeeper.curator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -40,6 +41,7 @@ import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 import com.twitter.heron.statemgr.FileSystemStateManager;
 import com.twitter.heron.statemgr.zookeeper.ZkContext;
@@ -317,5 +319,14 @@ public class CuratorStateManager extends FileSystemStateManager {
     } else {
       return deleteNode(getSchedulerLocationPath(topologyName));
     }
+  }
+
+  public static void main(String[] args) throws ExecutionException, InterruptedException,
+      IllegalAccessException, ClassNotFoundException, InstantiationException {
+    Config config = Config.newBuilder()
+        .put(Keys.stateManagerRootPath(), "/storm/heron/states")
+        .put(Keys.stateManagerConnectionString(), "szookeeper.smf1.twitter.com")
+        .build();
+    FileSystemStateManager.doMain(CuratorStateManager.class, args, config);
   }
 }

@@ -14,6 +14,7 @@ localfs_deps_files = \
     common_deps_files + [
         "//heron/api/src/java:api-java",
         "//heron/common/src/java:basics-java",
+        "//heron/spi/src/java:heron-spi",
     ]
     
 zookeeper_deps_files = \
@@ -83,6 +84,7 @@ java_binary(
     name = "zookeeper-statemgr-unshaded",
     srcs = glob(["**/zookeeper/**/*.java"]) + glob(["**/FileSystemStateManager.java"]),
     deps = zookeeper_deps_files,
+    main_class="com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager"
 )
 
 genrule(
