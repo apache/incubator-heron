@@ -19,3 +19,14 @@ pex_library(
   srcs = glob(['**/handler/access/*.py']),
   deps = [],
 )
+
+pex_library(
+  name = "heron-network-lib",
+  srcs = glob(
+    ["network/*.py"],
+  ),
+  deps = [
+    "//heron/proto:proto-py",
+  ],
+  reqs = ["gevent==1.1.1"]
+)
