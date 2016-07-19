@@ -17,6 +17,7 @@ from heron.proto import stmgr_pb2, common_pb2
 from heron.instance.src.python.misc.pplan_helper import PhysicalPlanHelper
 from heron.instance.src.python.network.heron_client import HeronClient
 from heron.instance.src.python.network.protocol import StatusCode
+from heron.instance.src.python.metrics.metrics_helper import GatewayMetrics
 
 
 # SingleThreadStmgrClient is an implementation of the Heron client in python and communicates
@@ -27,13 +28,14 @@ from heron.instance.src.python.network.protocol import StatusCode
 # TODO: will implement the rest later
 class SingleThreadStmgrClient(HeronClient):
   """SingleThreadStmgrClient is a Stream Manager Client for a single-threaded Heron Instance"""
-  def __init__(self, heron_instance_cls, strmgr_host, port,
-               topology_name, topology_id, instance, sock_map):
-    HeronClient.__init__(self, strmgr_host, port, sock_map)
+  def __init__(self, looper, heron_instance_cls, strmgr_host, port,
+               topology_name, topology_id, instance, sock_map, gateway_metrics):
+    HeronClient.__init__(self, looper, strmgr_host, port, sock_map)
     self.heron_instance_cls = heron_instance_cls
     self.topology_name = topology_name
     self.topology_id = topology_id
     self.instance = instance
+    self.gateway_metrics = gateway_metrics
 
     self._pplan_helper = None
 
@@ -54,7 +56,8 @@ class SingleThreadStmgrClient(HeronClient):
       raise RuntimeError("Unknown kind of response received from Stream Manager")
 
   def on_incoming_message(self, message):
-    # TODO: gateway metrics update
+    self.gateway_metrics.update_count(GatewayMetrics.RECEIVED_PKT_COUNT)
+    self.gateway_metrics.update_count(GatewayMetrics.RECEIVED_PKT_SIZE, message.ByteSize())
 
     if isinstance(message, stmgr_pb2.NewInstanceAssignmentMessage):
       Log.info("Handling assignment message from direct NewInstanceAssignmentMessage")

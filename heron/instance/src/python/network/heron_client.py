@@ -14,10 +14,9 @@
 
 import asyncore
 import socket
+import traceback
 
 from abc import abstractmethod
-
-import sys
 
 from .protocol import HeronProtocol, REQID, IncomingPacket, StatusCode
 from heron.common.src.python.log import Log
@@ -25,10 +24,12 @@ from heron.common.src.python.log import Log
 # TODO: asyncore.dispatcher -> wrap as GatewayLooper class?
 class HeronClient(asyncore.dispatcher):
   TIMEOUT_SEC = 30.0
-  def __init__(self, hostname, port, map):
+  def __init__(self, looper, hostname, port, map):
     asyncore.dispatcher.__init__(self, map=map)
+    self.looper = looper
     self.hostname = hostname
     self.port = int(port)
+    self.endpoint= (self.hostname, self.port)
     self.out_buffer = ''
     # name to message.Message
     self.registered_message_map = dict()
@@ -49,7 +50,7 @@ class HeronClient(asyncore.dispatcher):
 
   # called when close is ready
   def handle_close(self):
-    Log.info("handle_close() called")
+    Log.info(self.get_classname() + " handle_close() called")
     self.close()
 
   # read bytes stream from socket and convert them into a list of IncomingPacket
@@ -98,11 +99,12 @@ class HeronClient(asyncore.dispatcher):
 
     ``loop()`` method needs to be called after this.
     """
+    Log.debug("In start_connect() of " + self.get_classname())
     # TODO: specify buffer size, exception handling
     self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
 
     # when ready, handle_connect is called
-    self.connect((self.hostname, self.port))
+    self.connect(self.endpoint)
 
   def stop(self):
     # TODO: cleanup things and close the connection
@@ -118,7 +120,7 @@ class HeronClient(asyncore.dispatcher):
     # TODO: send request and implement timeout handler
     # generates a unique request id
     reqid = REQID.generate()
-    Log.debug("In send_request() with REQID: " + str(reqid))
+    Log.debug(self.get_classname() + ": In send_request() with REQID: " + str(reqid))
     # register response message type
     self.response_message_map[reqid] = response_type
     self.context_map[reqid] = context
@@ -127,7 +129,7 @@ class HeronClient(asyncore.dispatcher):
     self.send_packet(pkt)
 
   def send_message(self, message):
-    Log.debug("In send_message()")
+    Log.debug("In send_message() of " + self.get_classname())
     pkt = HeronProtocol.get_outgoing_packet(REQID.generate_zero(), message)
     Log.debug("After get outgoing packet")
     self.send_packet(pkt)
@@ -138,10 +140,15 @@ class HeronClient(asyncore.dispatcher):
   def handle_error(self):
     nil, t, v, tbinfo = asyncore.compact_traceback()
 
-    self_msg = "Heron Client failed for object at %0x" % id(self)
+    self_msg = self.get_classname() + " failed for object at %0x" % id(self)
     Log.error("Uncaptured python exception, closing channel %s (%s:%s %s)" % (self_msg, t, v, tbinfo))
 
-    self.handle_close()
+    # TODO: make it more robust
+    if self.connecting:
+      self.handle_close()
+      self.looper.register_timer_task_in_sec(self.start_connect, 1)
+    else:
+      self.handle_close()
 
   def handle_packet(self, packet):
     # TODO: check if it has REQID: if yes, handle response message -- call on_reseponse()
@@ -180,7 +187,8 @@ class HeronClient(asyncore.dispatcher):
         else:
           raise RuntimeError("Message not initialized")
       except Exception as e:
-        Log.error("Error when handling message packet" + e.message)
+        Log.error("Error when handling message packet " + e.message)
+        Log.error(traceback.format_exc())
     else:
       # might be a timeout response
       Log.debug("In handle_packet(): Weird message received")

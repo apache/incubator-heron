@@ -22,7 +22,10 @@ from heron.common.src.python.log import Log, init_logger
 from heron.common.src.python.basics.gateway_looper import GatewayLooper
 from heron.proto import physical_plan_pb2, stmgr_pb2
 from heron.instance.src.python.single_thread_instance.single_thread_stmgr_client import SingleThreadStmgrClient
+from heron.instance.src.python.network.metricsmgr_client import MetricsManagerClient
 from heron.instance.src.python.misc.communicator import HeronCommunicator
+from heron.instance.src.python.metrics.metrics_helper import GatewayMetrics, MetricsHelper
+
 import heron.common.src.python.pex_loader as pex_loader
 import heron.common.src.python.constants as constants
 
@@ -37,17 +40,25 @@ class SingleThreadHeronInstance(object):
     self.metrics_port = metrics_port
     self.topo_pex_file_path = topo_pex_file_path
 
+    self.looper = GatewayLooper()
     self.in_stream = HeronCommunicator(producer_cb=None, consumer_cb=None)
     self.out_stream = HeronCommunicator(producer_cb=None, consumer_cb=None)
 
+    # Do metrics
+    self.out_metrics = HeronCommunicator()
+    self.metrics_helper = MetricsHelper(self.looper, self.out_metrics)
+    self.gateway_metrics = GatewayMetrics(self.metrics_helper)
+
     self.socket_map = dict()
-    self._stmgr_client = SingleThreadStmgrClient(self, 'localhost', stream_port, topology_name,
-                                                   topology_id, instance, self.socket_map)
+    self._stmgr_client = SingleThreadStmgrClient(self.looper, self, 'localhost', stream_port, topology_name,
+                                                   topology_id, instance, self.socket_map, self.gateway_metrics)
+    self._metrics_client = MetricsManagerClient(self.looper, 'localhost', metrics_port, instance,
+                                                self.out_metrics, self.socket_map)
     self.my_pplan_helper = None
 
     # my_instance is a tuple containing (is_spout, TopologyAPI.{Spout|Bolt}, loaded python instance)
     self.my_instance = None
-    self.looper = GatewayLooper()
+
 
     # Debugging purposes
     def go_trace(sig, stack):
@@ -57,7 +68,10 @@ class SingleThreadHeronInstance(object):
 
   def start(self):
     self._stmgr_client.start_connect()
+    self._metrics_client.start_connect()
     self.looper.prepare_map(self.socket_map)
+    # call send_buffered_messages everytime it is waken up
+    self.looper.add_wakeup_task(self.send_buffered_messages)
     self.looper.loop()
 
   def handle_new_tuple_set(self, tuple_msg_set):
@@ -74,8 +88,6 @@ class SingleThreadHeronInstance(object):
       self.in_stream.offer(tuple_msg_set)
       # Call run_in_single_thread() method
       self.my_instance[2].process_incoming_tuples()
-      # Send all messages
-      self.send_buffered_messages()
 
   def send_buffered_messages(self):
     """Send messages in out_stream to the Stream Manager"""
@@ -134,11 +146,11 @@ class SingleThreadHeronInstance(object):
     pex_loader.load_pex(self.topo_pex_file_path)
     if is_spout:
       spout_class = pex_loader.import_and_get_class(self.topo_pex_file_path, python_class_name)
-      my_spout = spout_class(self, self.my_pplan_helper, self.in_stream, self.out_stream, self.looper)
+      my_spout = spout_class(self.my_pplan_helper, self.in_stream, self.out_stream, self.looper)
       return my_spout
     else:
       bolt_class = pex_loader.import_and_get_class(self.topo_pex_file_path, python_class_name)
-      my_bolt = bolt_class(self, self.my_pplan_helper, self.in_stream, self.out_stream, self.looper)
+      my_bolt = bolt_class(self.my_pplan_helper, self.in_stream, self.out_stream, self.looper)
       return my_bolt
 
   def start_instance(self):
@@ -197,7 +209,7 @@ def main():
 
   # TODO: improve this later
   log_file = os.path.join(log_dir, instance_id + ".log.0")
-  init_logger(level=logging.INFO, logfile=log_file, max_files=max_log_files, max_bytes=max_log_bytes)
+  init_logger(level=logging.DEBUG, logfile=log_file, max_files=max_log_files, max_bytes=max_log_bytes)
 
   Log.info("\nStarting instance: " + instance_id + " for topology: " + topology_name +
            " and topologyId: " + topology_id + " for component: " + component_name +

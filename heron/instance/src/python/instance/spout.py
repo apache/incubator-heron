@@ -24,8 +24,8 @@ from heron.instance.src.python.instance.comp_spec import HeronComponentSpec
 class Spout(Component):
   """The base class for all heron spouts in Python"""
 
-  def __init__(self, heron_instance, pplan_helper, in_stream, out_stream, looper):
-    super(Spout, self).__init__(heron_instance, pplan_helper,in_stream, out_stream, looper)
+  def __init__(self, pplan_helper, in_stream, out_stream, looper):
+    super(Spout, self).__init__(pplan_helper,in_stream, out_stream, looper)
     self._pplan_helper = pplan_helper
     self.topology_state = topology_pb2.TopologyState.Value("PAUSED")
 
@@ -141,7 +141,7 @@ class Spout(Component):
       if self._should_produce_tuple():
         self._produce_tuple()
         self.output_helper.send_out_tuples()
-        self.heron_instance.send_buffered_messages()
+        self.looper.wake_up() # so emitted tuples would be added to buffer now
 
     self.looper.add_wakeup_task(spout_task)
 

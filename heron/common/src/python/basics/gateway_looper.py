@@ -85,7 +85,8 @@ class GatewayLooper(EventLooper):
     Log.debug("Selected [r]: " + str(r) + " [w]: " + str(w) + " [e]: " + str(e))
 
     if self.pipe_r in r:
-      os.read(self.pipe_r, 1)
+      Log.debug("Read from pipe")
+      os.read(self.pipe_r, 1024)
       r.remove(self.pipe_r)
 
     if self.sock_map is not None:

@@ -25,8 +25,7 @@ class Component(object):
   DEFAULT_STREAM_ID = "default"
   make_data_tuple = lambda _ : tuple_pb2.HeronDataTuple()
 
-  def __init__(self, heron_instance, pplan_helper, in_stream, out_stream, looper, serializer=PythonSerializer()):
-    self.heron_instance = heron_instance
+  def __init__(self, pplan_helper, in_stream, out_stream, looper, serializer=PythonSerializer()):
     self.pplan_helper = pplan_helper
     self.in_stream = in_stream
     self.serializer = serializer

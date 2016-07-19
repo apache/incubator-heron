@@ -27,8 +27,8 @@ import heron.common.src.python.constants as constants
 class Bolt(Component):
   """The base class for all heron bolts in Python"""
 
-  def __init__(self, heron_instance, pplan_helper, in_stream, out_stream, looper):
-    super(Bolt, self).__init__(heron_instance, pplan_helper, in_stream, out_stream, looper)
+  def __init__(self, pplan_helper, in_stream, out_stream, looper):
+    super(Bolt, self).__init__(pplan_helper, in_stream, out_stream, looper)
     # TODO: bolt metrics
 
     if self.pplan_helper.is_spout:
@@ -156,7 +156,7 @@ class Bolt(Component):
         tick = TupleHelper.make_tick_tuple()
         self.process(tick)
         self.output_helper.send_out_tuples()
-        self.heron_instance.send_buffered_messages()
+        self.looper.wake_up() # so emitted tuples would be added to buffer now
         self._prepare_tick_tup_timer()
 
       self.looper.register_timer_task_in_sec(send_tick, tick_freq_sec)

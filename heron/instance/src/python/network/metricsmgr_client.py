@@ -19,11 +19,23 @@ from heron.instance.src.python.network.heron_client import HeronClient
 from heron.instance.src.python.network.protocol import StatusCode
 
 class MetricsManagerClient(HeronClient):
-  def __init__(self, metrics_host, port, instance, metrics_out_queue, gateway_metrics, sock_map):
-    HeronClient.__init__(self, metrics_host, port, sock_map)
+  def __init__(self, looper, metrics_host, port, instance, out_metrics, sock_map):
+    HeronClient.__init__(self, looper, metrics_host, port, sock_map)
     self.instance = instance
-    self.out_queue = metrics_out_queue
-    self.gateway_metrics = gateway_metrics
+    self.out_queue = out_metrics
+
+    self._add_metrics_client_tasks()
+
+  def _add_metrics_client_tasks(self):
+    self.looper.add_wakeup_task(self._send_metrics_messages)
+
+  def _send_metrics_messages(self):
+    if self.connected:
+      while not self.out_queue.is_empty():
+        message = self.out_queue.poll()
+        assert isinstance(message, metrics_pb2.MetricPublisherPublishMessage)
+        Log.debug("Sending metric message: " + str(message))
+        self.send_message(message)
 
   def on_connect(self, status):
     Log.debug("In on_connect of MetricsManagerClient")
@@ -52,14 +64,16 @@ class MetricsManagerClient(HeronClient):
     metric_publisher.instance_id = self.instance.instance_id
     metric_publisher.instance_index = self.instance.info.component_index
 
-    request = metrics_pb2.MetricsPublisherRegisterRequest()
+    request = metrics_pb2.MetricPublisherRegisterRequest()
     request.publisher.CopyFrom(metric_publisher)
+
+    Log.debug("Sending MetricsCli register request: \n" + str(request))
 
     self.send_request(request, "MetricsClientContext",
                       metrics_pb2.MetricPublisherRegisterResponse(), 10)
 
   def _handle_register_response(self, response):
     if response.status.status != common_pb2.StatusCode.Value("OK"):
-      raise RuntimeError("Stream Manager returned a not OK response for register")
+      raise RuntimeError("Metrics Manager returned a not OK response for register")
     Log.info("We registered ourselves to the Metrics Manager")
 

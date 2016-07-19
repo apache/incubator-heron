@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import time
+import traceback
 from heapq import heappush, heappop, heapify
 from abc import abstractmethod
 from heron.common.src.python.log import Log
@@ -40,6 +41,7 @@ class EventLooper(object):
       self.trigger_timers()
     except Exception as e:
       Log.error("Error occured during run_once(): " + e.message)
+      Log.error(traceback.format_exc())
       self.should_exit = True
 
   def on_exit(self):
