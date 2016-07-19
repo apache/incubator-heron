@@ -8,6 +8,8 @@ import shutil
 import time
 from collections import namedtuple
 
+from pkg_resources import safe_name
+
 from .common import safe_mkdir
 from .fetcher import Fetcher
 from .interpreter import PythonInterpreter
@@ -56,6 +58,10 @@ class _ResolvedPackages(namedtuple('_ResolvedPackages', 'resolvable packages par
 
 
 class _ResolvableSet(object):
+  @classmethod
+  def normalize(cls, name):
+    return safe_name(name).lower()
+
   def __init__(self, tuples=None):
     # A list of _ResolvedPackages
     self.__tuples = tuples or []
@@ -71,7 +77,7 @@ class _ResolvableSet(object):
     # adversely but could be the source of subtle resolution quirks.
     resolvables = {}
     for resolved_packages in self.__tuples:
-      key = resolved_packages.resolvable.name
+      key = self.normalize(resolved_packages.resolvable.name)
       previous = resolvables.get(key, _ResolvedPackages.empty())
       if previous.resolvable is None:
         resolvables[key] = resolved_packages
@@ -86,7 +92,7 @@ class _ResolvableSet(object):
           '(from: %s)' % resolved_packages.parent if resolved_packages.parent else '')
     return ', '.join(
         render_resolvable(resolved_packages) for resolved_packages in self.__tuples
-        if resolved_packages.resolvable.name == name)
+        if self.normalize(resolved_packages.resolvable.name) == self.normalize(name))
 
   def _check(self):
     # Check whether or not the resolvables in this set are satisfiable, raise an exception if not.
@@ -102,7 +108,8 @@ class _ResolvableSet(object):
 
   def get(self, name):
     """Get the set of compatible packages given a resolvable name."""
-    resolvable, packages, parent = self._collapse().get(name, _ResolvedPackages.empty())
+    resolvable, packages, parent = self._collapse().get(
+        self.normalize(name), _ResolvedPackages.empty())
     return packages
 
   def packages(self):
@@ -111,7 +118,8 @@ class _ResolvableSet(object):
 
   def extras(self, name):
     return set.union(
-        *[set(tup.resolvable.extras()) for tup in self.__tuples if tup.resolvable.name == name])
+        *[set(tup.resolvable.extras()) for tup in self.__tuples
+          if self.normalize(tup.resolvable.name) == self.normalize(name)])
 
   def replace_built(self, built_packages):
     """Return a copy of this resolvable set but with built packages.
@@ -154,12 +162,13 @@ class Resolver(object):
       local_package = Package.from_href(context.fetch(package))
     if local_package is None:
       raise Untranslateable('Could not fetch package %s' % package)
-    with TRACER.timed('Translating %s into distribution' % local_package.path, V=2):
+    with TRACER.timed('Translating %s into distribution' % local_package.local_path, V=2):
       dist = translator.translate(local_package)
     if dist is None:
       raise Untranslateable('Package %s is not translateable by %s' % (package, translator))
     if not distribution_compatible(dist, self._interpreter, self._platform):
-      raise Untranslateable('Could not get distribution for %s on appropriate platform.' % package)
+      raise Untranslateable(
+        'Could not get distribution for %s on platform %s.' % (package, self._platform))
     return dist
 
   def resolve(self, resolvables, resolvable_set=None):
@@ -212,7 +221,7 @@ class CachingResolver(Resolver):
   def filter_packages_by_ttl(cls, packages, ttl, now=None):
     now = now if now is not None else time.time()
     return [package for package in packages
-        if package.remote or package.local and (now - os.path.getmtime(package.path)) < ttl]
+        if package.remote or package.local and (now - os.path.getmtime(package.local_path)) < ttl]
 
   def __init__(self, cache, cache_ttl, *args, **kw):
     self.__cache = cache
@@ -242,7 +251,7 @@ class CachingResolver(Resolver):
     # cache package locally
     if package.remote:
       package = Package.from_href(options.get_context().fetch(package, into=self.__cache))
-      os.utime(package.path, None)
+      os.utime(package.local_path, None)
 
     # build into distribution
     dist = super(CachingResolver, self).build(package, options)

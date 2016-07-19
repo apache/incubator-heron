@@ -82,6 +82,7 @@ SANDBOX_SCHEDULER_YAML:       ${HERON_SANDBOX_CONF}/scheduler.yaml
 SANDBOX_STATEMGR_YAML:        ${HERON_SANDBOX_CONF}/statemgr.yaml
 SANDBOX_SYSTEM_YAML:          ${HERON_SANDBOX_CONF}/heron_internals.yaml
 SANDBOX_UPLOADER_YAML:        ${HERON_SANDBOX_CONF}/uploader.yaml
+SANDBOX_OVERRIDE_YAML:        ${HERON_SANDBOX_CONF}/override.yaml
 
 ################################################################################
 # Default values for heron sandbox binaries and jars

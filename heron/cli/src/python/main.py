@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#!/usr/bin/env python2.7
-
+# !/usr/bin/env python2.7
+''' main.py '''
 import argparse
 import atexit
 import os
@@ -23,7 +23,7 @@ import time
 
 from heron.common.src.python.color import Log
 
-import heron.cli.src.python.help as help
+import heron.cli.src.python.help as cli_help
 import heron.cli.src.python.args as parse
 import heron.cli.src.python.opts as opts
 import heron.cli.src.python.activate as activate
@@ -31,34 +31,41 @@ import heron.cli.src.python.deactivate as deactivate
 import heron.cli.src.python.kill as kill
 import heron.cli.src.python.restart as restart
 import heron.cli.src.python.submit as submit
-import heron.cli.src.python.utils as utils
+import heron.common.src.python.utils as utils
 import heron.cli.src.python.version as version
 
-help_epilog = '''Getting more help: 
+HELP_EPILOG = '''Getting more help:
   heron help <command> Prints help and options for <command>
 
 For detailed documentation, go to http://heronstreaming.io'''
 
+
+# pylint: disable=protected-access
 class _HelpAction(argparse._HelpAction):
   def __call__(self, parser, namespace, values, option_string=None):
     parser.print_help()
 
     # retrieve subparsers from parser
     subparsers_actions = [
-      action for action in parser._actions
-      if isinstance(action, argparse._SubParsersAction)]
+        action for action in parser._actions
+        if isinstance(action, argparse._SubParsersAction)
+    ]
 
     # there will probably only be one subparser_action,
     # but better save than sorry
     for subparsers_action in subparsers_actions:
       # get all subparsers and print help
       for choice, subparser in subparsers_action.choices.items():
-        print("Subparser '{}'".format(choice))
-        print(subparser.format_help())
+        print "Subparser '{}'".format(choice)
+        print subparser.format_help()
         return
 
+
 class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
+  ''' SubcommandHelpFormatter '''
+
   def _format_action(self, action):
+    # pylint: disable=bad-super-call
     parts = super(argparse.RawDescriptionHelpFormatter, self)._format_action(action)
     if action.nargs == argparse.PARSER:
       parts = "\n".join(parts.split("\n")[1:])
@@ -66,22 +73,24 @@ class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
 
 
 ################################################################################
-# Main parser
-################################################################################
 def create_parser():
+  '''
+  Main parser
+  :return:
+  '''
   parser = argparse.ArgumentParser(
-      prog = 'heron',
-      epilog = help_epilog,
+      prog='heron',
+      epilog=HELP_EPILOG,
       formatter_class=SubcommandHelpFormatter,
-      add_help = False)
+      add_help=False)
 
   subparsers = parser.add_subparsers(
-      title = "Available commands", 
-      metavar = '<command> <options>')
+      title="Available commands",
+      metavar='<command> <options>')
 
   activate.create_parser(subparsers)
   deactivate.create_parser(subparsers)
-  help.create_parser(subparsers)
+  cli_help.create_parser(subparsers)
   kill.create_parser(subparsers)
   restart.create_parser(subparsers)
   submit.create_parser(subparsers)
@@ -89,51 +98,73 @@ def create_parser():
 
   return parser
 
-################################################################################
-# Run the command
+
 ################################################################################
 def run(command, parser, command_args, unknown_args):
+  '''
+  Run the command
+  :param command:
+  :param parser:
+  :param command_args:
+  :param unknown_args:
+  :return:
+  '''
+  status = 1
   if command == 'activate':
-    return activate.run(command, parser, command_args, unknown_args)
+    status = activate.run(command, parser, command_args, unknown_args)
 
   elif command == 'deactivate':
-    return deactivate.run(command, parser, command_args, unknown_args)
+    status = deactivate.run(command, parser, command_args, unknown_args)
 
   elif command == 'kill':
-    return kill.run(command, parser, command_args, unknown_args)
+    status = kill.run(command, parser, command_args, unknown_args)
 
   elif command == 'restart':
-    return restart.run(command, parser, command_args, unknown_args)
-  
+    status = restart.run(command, parser, command_args, unknown_args)
+
   elif command == 'submit':
-    return submit.run(command, parser, command_args, unknown_args)
+    status = submit.run(command, parser, command_args, unknown_args)
 
   elif command == 'help':
-    return help.run(command, parser, command_args, unknown_args)
+    status = cli_help.run(command, parser, command_args, unknown_args)
 
   elif command == 'version':
-    return version.run(command, parser, command_args, unknown_args)
+    status = version.run(command, parser, command_args, unknown_args)
 
-  return 1
+  return status
+
 
 def cleanup(files):
-  for file in files:
-    shutil.rmtree(os.path.dirname(file))
+  '''
+  :param files:
+  :return:
+  '''
+  for cur_file in files:
+    shutil.rmtree(os.path.dirname(cur_file))
+
 
 ################################################################################
-# Check whether the environment variables are set
-################################################################################
 def check_environment():
+  '''
+  Check whether the environment variables are set
+  :return:
+  '''
   if not utils.check_java_home_set():
     sys.exit(1)
 
   if not utils.check_release_file_exists():
     sys.exit(1)
 
-################################################################################
-# Extract all the common args for all commands
+
 ################################################################################
 def extract_common_args(command, parser, cl_args):
+  '''
+  Extract all the common args for all commands
+  :param command:
+  :param parser:
+  :param cl_args:
+  :return:
+  '''
   try:
     cluster_role_env = cl_args.pop('cluster/[role]/[env]')
     config_path = cl_args['config_path']
@@ -141,7 +172,7 @@ def extract_common_args(command, parser, cl_args):
   except KeyError:
     # if some of the arguments are not found, print error and exit
     subparser = utils.get_subparser(parser, command)
-    print(subparser.format_help())
+    print subparser.format_help()
     return dict()
 
   cluster = utils.get_heron_cluster(cluster_role_env)
@@ -158,22 +189,24 @@ def extract_common_args(command, parser, cl_args):
     new_cl_args['environ'] = cluster_tuple[2]
     new_cl_args['config_path'] = config_path
     new_cl_args['override_config_file'] = override_config_file
-  except Exception as e:
-    Log.error("Argument cluster/[role]/[env] is not correct: %s" % str(e))
+  except Exception as ex:
+    Log.error("Argument cluster/[role]/[env] is not correct: %s" % str(ex))
     return dict()
 
   cl_args.update(new_cl_args)
   return cl_args
 
-################################################################################
-# Run the command
+
 ################################################################################
 def main():
-
+  '''
+  Run the command
+  :return:
+  '''
   # verify if the environment variables are correctly set
   check_environment()
 
-  # create the argument parser 
+  # create the argument parser
   parser = create_parser()
 
   # if no argument is provided, print help and exit
@@ -189,7 +222,7 @@ def main():
   command_line_args = vars(args)
 
   try:
-    if command_line_args['verbose']: 
+    if command_line_args['verbose']:
       opts.set_verbose()
     if command_line_args['trace_execution']:
       opts.set_trace_execution()
@@ -216,15 +249,16 @@ def main():
   if opts.verbose():
     print command_line_args
 
-  start = time.time() 
+  start = time.time()
   retcode = run(command, parser, command_line_args, unknown_args)
   end = time.time()
 
   if command != 'help':
     sys.stdout.flush()
-    Log.info('Elapsed time: %.3fs.' % (end-start))
+    Log.info('Elapsed time: %.3fs.' % (end - start))
 
-  return 0 if retcode == True else 1
+  return 0 if retcode else 1
+
 
 if __name__ == "__main__":
   sys.exit(main())

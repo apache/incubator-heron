@@ -20,6 +20,8 @@ import java.util.Random;
  * Utility used by Uploader
  */
 public final class UploaderUtils {
+  public static final String DEFAULT_FILENAME_EXTENSION = ".tar.gz";
+
   private UploaderUtils() {
 
   }
@@ -35,7 +37,7 @@ public final class UploaderUtils {
       String topologyName,
       String role) {
     // By default, we have empty tag info and version 0
-    return generateFilename(topologyName, role, "tag", 0);
+    return generateFilename(topologyName, role, "tag", 0, DEFAULT_FILENAME_EXTENSION);
   }
 
   /**
@@ -45,14 +47,16 @@ public final class UploaderUtils {
    * @param role role owns the topology
    * @param version version of the job, put 0 if not needed
    * @param tag extra info to tag the file
+   * @param extension file extension
    * @return a unique filename
    */
   public static String generateFilename(
       String topologyName,
       String role,
       String tag,
-      int version) {
-    return String.format("%s-%s-%s-%d-%d",
-        topologyName, role, tag, version, new Random().nextLong());
+      int version,
+      String extension) {
+    return String.format("%s-%s-%s-%d-%d%s",
+        topologyName, role, tag, version, new Random().nextLong(), extension);
   }
 }

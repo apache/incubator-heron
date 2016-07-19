@@ -51,30 +51,30 @@ cat ~/.bazelrc >> tools/travis-ci/bazel.rc
 # build heron
 T="heron build"
 start_timer "$T"
-bazel --bazelrc=tools/travis-ci/bazel.rc build --config=ubuntu heron/...
+python ${DIR}/save-logs.py "heron_build.txt" bazel --bazelrc=tools/travis-ci/bazel.rc build heron/...
 end_timer "$T"
 
 # run heron unit tests
 T="heron test non-flaky"
 start_timer "$T"
-bazel --bazelrc=tools/travis-ci/bazel.rc test --config=ubuntu --test_tag_filters=-flaky heron/...
+python ${DIR}/save-logs.py "heron_test_non_flaky.txt" bazel --bazelrc=tools/travis-ci/bazel.rc test --test_tag_filters=-flaky heron/...
 end_timer "$T"
 
 # flaky tests are often due to test port race conditions, which should be fixed. For now, run them serially
 T="heron test flaky"
 start_timer "$T"
-bazel --bazelrc=tools/travis-ci/bazel.rc test --config=ubuntu --test_tag_filters=flaky --jobs=0 heron/...
+python ${DIR}/save-logs.py "heron_test_flaky.txt" bazel --bazelrc=tools/travis-ci/bazel.rc test --test_tag_filters=flaky --jobs=0 heron/...
 end_timer "$T"
 
 # build packages
 T="heron build tarpkgs"
 start_timer "$T"
-bazel --bazelrc=tools/travis-ci/bazel.rc build --config=ubuntu scripts/packages:tarpkgs
+python ${DIR}/save-logs.py "heron_build_tarpkgs.txt" bazel --bazelrc=tools/travis-ci/bazel.rc build scripts/packages:tarpkgs
 end_timer "$T"
 
 T="heron build binpkgs"
 start_timer "$T"
-bazel --bazelrc=tools/travis-ci/bazel.rc build --config=ubuntu scripts/packages:binpkgs
+python ${DIR}/save-logs.py "heron_build_binpkgs.txt" bazel --bazelrc=tools/travis-ci/bazel.rc build scripts/packages:binpkgs
 end_timer "$T"
 
 print_timer_summary

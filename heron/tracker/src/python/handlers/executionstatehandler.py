@@ -11,20 +11,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' executionstatehandler.py '''
+import traceback
 import tornado.gen
 import tornado.web
-import traceback
 
-from heron.tracker.src.python import constants
 from heron.tracker.src.python.handlers import BaseHandler
 
+# pylint: disable=attribute-defined-outside-init
 class ExecutionStateHandler(BaseHandler):
   """
   URL - /topologies/executionstate
   Parameters:
    - cluster (required)
    - environ (required)
+   - role - (optional) Role used to submit the topology.
    - topology (required) name of the requested topology
 
   The response JSON is a dictionary with all the
@@ -32,18 +33,20 @@ class ExecutionStateHandler(BaseHandler):
   """
 
   def initialize(self, tracker):
+    """ initialize """
     self.tracker = tracker
 
   @tornado.gen.coroutine
   def get(self):
+    """ get method """
     try:
       cluster = self.get_argument_cluster()
+      role = self.get_argument_role()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
-      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, environ)
+      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)
       execution_state = topology_info["execution_state"]
       self.write_success_response(execution_state)
     except Exception as e:
       traceback.print_exc()
       self.write_error_response(e)
-

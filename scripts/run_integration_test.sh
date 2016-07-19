@@ -10,24 +10,11 @@ CORE_PKG="file://`pwd`/bazel-bin/scripts/packages/heron-core.tar.gz"
 
 set -e
 
-function usage() {
-  echo "Usage: $0 [platform]" >&2
-  echo "Currently supported platforms are:" >&2
-  echo "  darwin, ubuntu, and centos5" >&2
-  exit 1
-}
-
-if [ $# -eq 1 ] && \
-   [[ "$1" == "darwin" || "$1" == "ubuntu" || "$1" == "centos5" ]];
-then
-  PLATFORM="$1"
-else
-  usage
-fi
-
 # building tar packages
-bazel run --config=${PLATFORM} -- scripts/packages:heron-client-install.sh --user
-bazel build --config=${PLATFORM} {heron/...,scripts/packages:tarpkgs,integration-test/src/...}
+DIR=`dirname $0`
+source ${DIR}/detect_os_type.sh
+bazel run --config=`platform` -- scripts/packages:heron-client-install.sh --user
+bazel build --config=`platform` {heron/...,scripts/packages:tarpkgs,integration-test/src/...}
 
 # run the simple http server
 ${HTTP_SERVER} 8080 &

@@ -3,6 +3,7 @@ startup --host_jvm_args=-Xmx2500m
 startup --host_jvm_args=-Xms2500m
 startup --batch
 test --ram_utilization_factor=10
+test --test_output=errors
 
 # This is so we understand failures better
 build --verbose_failures

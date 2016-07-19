@@ -19,7 +19,7 @@ import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
-import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
 
 public class YarnSchedulerTest {

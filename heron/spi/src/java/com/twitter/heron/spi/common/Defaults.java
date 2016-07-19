@@ -255,6 +255,10 @@ public class Defaults {
     return ConfigDefaults.get("SANDBOX_UPLOADER_YAML");
   }
 
+  public static String overrideSandboxFile() {
+    return ConfigDefaults.get("SANDBOX_OVERRIDE_YAML");
+  }
+
   public static String executorSandboxBinary() {
     return ConfigDefaults.get("SANDBOX_EXECUTOR_BINARY");
   }

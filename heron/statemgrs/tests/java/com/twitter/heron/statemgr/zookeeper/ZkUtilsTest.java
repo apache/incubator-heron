@@ -29,7 +29,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
-import com.twitter.heron.spi.common.NetworkUtils;
+import com.twitter.heron.spi.utils.NetworkUtils;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(NetworkUtils.class)

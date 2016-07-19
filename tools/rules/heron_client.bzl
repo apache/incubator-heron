@@ -4,6 +4,7 @@
 def heron_client_bin_files():
     return [
         "//heron/cli/src/python:heron",
+        "//heron/explorer/src/python:heron-explorer",
     ]
 
 def heron_client_conf_files():
@@ -33,12 +34,16 @@ def heron_client_lib_scheduler_files():
         "//heron/schedulers/src/java:heron-aurora-scheduler",
         "//heron/schedulers/src/java:heron-slurm-scheduler",
         "//heron/schedulers/src/java:heron-yarn-scheduler",
+        "//heron/schedulers/src/java:heron-mesos-scheduler",
         "//heron/packing/src/java:heron-roundrobin-packing",
+	"//heron/packing/src/java:heron-binpacking-packing",
     ]
 
 def heron_client_lib_packing_files():
     return [
         "//heron/packing/src/java:heron-roundrobin-packing",
+        "//heron/packing/src/java:heron-binpacking-packing",
+
     ]
 
 def heron_client_lib_statemgr_files():
@@ -60,5 +65,4 @@ def heron_client_lib_third_party_files():
         "@com_google_protobuf_protobuf_java//jar",
         "@org_slf4j_slf4j_api//jar",
         "@org_slf4j_slf4j_jdk14//jar",
-        "@org_slf4j_log4j_over_slf4j//jar",
     ]
