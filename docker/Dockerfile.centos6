@@ -43,7 +43,8 @@ ENV JAVA_HOME /usr/java/latest
 #install bazel 
 RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/$bazelVersion/bazel-$bazelVersion-installer-linux-x86_64.sh \
       && chmod +x /tmp/bazel.sh \
-      && /tmp/bazel.sh
+      && mkdir -p /root/bin \
+      && /tmp/bazel.sh --user
 
 ADD bazelrc /root/.bazelrc
 
@@ -87,5 +88,18 @@ RUN cd Python-2.7.8  \
 	
 RUN cd /usr/bin/ && mv python python2.6 && ln -s /usr/local/bin/python2.7  /usr/bin/python \
     && python -V
+
+ENV PATH $PATH:$JAVA_HOME/bin:/root/bin
+ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:/root/glibc-2.14/lib
+
+RUN wget http://ftp.gnu.org/gnu/glibc/glibc-2.14.tar.gz \
+    && tar xvf glibc-2.14.tar.gz \
+    && cd glibc-2.14 \
+    && mkdir build && cd ./build \
+    && ../configure --prefix=/root/glibc-2.14 \
+    && make -j4 && make install \
+    && /gcc-4.8.2/stage1-x86_64-unknown-linux-gnu/libstdc++-v3/src/.libs/libstdc++.so.6.0.18  /usr/lib64/ \
+    && cd /usr/lib64  && rm -rf libstdc++.so.6 && ln -s libstdc++.so.6.0.18 libstdc++.so.6 \
+    && bazel version
 
 ADD compile-platform.sh /compile-platform.sh
