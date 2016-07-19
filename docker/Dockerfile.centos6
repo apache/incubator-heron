@@ -98,7 +98,7 @@ RUN wget http://ftp.gnu.org/gnu/glibc/glibc-2.14.tar.gz \
     && mkdir build && cd ./build \
     && ../configure --prefix=/root/glibc-2.14 \
     && make -j4 && make install \
-    && /gcc-4.8.2/stage1-x86_64-unknown-linux-gnu/libstdc++-v3/src/.libs/libstdc++.so.6.0.18  /usr/lib64/ \
+    && cp /gcc-4.8.2/stage1-x86_64-unknown-linux-gnu/libstdc++-v3/src/.libs/libstdc++.so.6.0.18  /usr/lib64/ \
     && cd /usr/lib64  && rm -rf libstdc++.so.6 && ln -s libstdc++.so.6.0.18 libstdc++.so.6 \
     && bazel version
 
