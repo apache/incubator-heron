@@ -40,8 +40,9 @@ class SingleThreadHeronInstance(object):
     self.in_stream = HeronCommunicator(producer_cb=None, consumer_cb=None)
     self.out_stream = HeronCommunicator(producer_cb=None, consumer_cb=None)
 
+    self.socket_map = dict()
     self._stmgr_client = SingleThreadStmgrClient(self, 'localhost', stream_port, topology_name,
-                                                   topology_id, instance)
+                                                   topology_id, instance, self.socket_map)
     self.my_pplan_helper = None
 
     # my_instance is a tuple containing (is_spout, TopologyAPI.{Spout|Bolt}, loaded python instance)
@@ -56,7 +57,7 @@ class SingleThreadHeronInstance(object):
 
   def start(self):
     self._stmgr_client.start_connect()
-    self.looper.prepare_map()
+    self.looper.prepare_map(self.socket_map)
     self.looper.loop()
 
   def handle_new_tuple_set(self, tuple_msg_set):

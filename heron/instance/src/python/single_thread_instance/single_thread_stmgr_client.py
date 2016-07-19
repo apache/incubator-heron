@@ -27,8 +27,9 @@ from heron.instance.src.python.network.protocol import StatusCode
 # TODO: will implement the rest later
 class SingleThreadStmgrClient(HeronClient):
   """SingleThreadStmgrClient is a Stream Manager Client for a single-threaded Heron Instance"""
-  def __init__(self, heron_instance_cls, strmgr_host, port, topology_name, topology_id, instance):
-    HeronClient.__init__(self, strmgr_host, port)
+  def __init__(self, heron_instance_cls, strmgr_host, port,
+               topology_name, topology_id, instance, sock_map):
+    HeronClient.__init__(self, strmgr_host, port, sock_map)
     self.heron_instance_cls = heron_instance_cls
     self.topology_name = topology_name
     self.topology_id = topology_id
@@ -38,7 +39,7 @@ class SingleThreadStmgrClient(HeronClient):
 
   # send register request
   def on_connect(self, status):
-    Log.debug("In on_connect")
+    Log.debug("In on_connect of STStmgrClient")
     self._register_msg_to_handle()
     self._send_register_req()
 
@@ -46,7 +47,6 @@ class SingleThreadStmgrClient(HeronClient):
     Log.debug("In on_response with status: " + str(status))
     if status != StatusCode.OK:
       raise RuntimeError("Response from Stream Manager not OK")
-    # TODO: use of isinstance -- check later if appropriate
     if isinstance(response, stmgr_pb2.RegisterInstanceResponse):
       self._handle_register_response(response)
     else:

@@ -25,8 +25,8 @@ from heron.common.src.python.log import Log
 # TODO: asyncore.dispatcher -> wrap as GatewayLooper class?
 class HeronClient(asyncore.dispatcher):
   TIMEOUT_SEC = 30.0
-  def __init__(self, hostname, port):
-    asyncore.dispatcher.__init__(self)
+  def __init__(self, hostname, port, map):
+    asyncore.dispatcher.__init__(self, map=map)
     self.hostname = hostname
     self.port = int(port)
     self.out_buffer = ''

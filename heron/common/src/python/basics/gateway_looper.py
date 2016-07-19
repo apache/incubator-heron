@@ -24,7 +24,7 @@ import asyncore
 class GatewayLooper(EventLooper):
   def __init__(self):
     super(GatewayLooper, self).__init__()
-    self.map = None
+    self.sock_map = None
 
     # Pipe used for wake up select
     self.pipe_r, self.pipe_w = os.pipe()
@@ -33,16 +33,15 @@ class GatewayLooper(EventLooper):
     self.started = time.time()
     Log.debug("Gateway Looper started time: " + str(time.asctime()))
 
-  def prepare_map(self):
-    # TODO need to change and use signal.set_wakeup_fd
-    self.map = asyncore.socket_map
+  def prepare_map(self, sock_map):
+    self.sock_map = sock_map
 
   def do_wait(self):
     next_timeout = self.get_next_timeout_interval()
     if next_timeout > 0:
-      self.poll(timeout=next_timeout, map=self.map)
+      self.poll(timeout=next_timeout)
     else:
-      self.poll(timeout=0.0, map=self.map)
+      self.poll(timeout=0.0)
 
   def wake_up(self):
     os.write(self.pipe_w, "\n")
@@ -53,12 +52,14 @@ class GatewayLooper(EventLooper):
     os.close(self.pipe_r)
     os.close(self.pipe_w)
 
-  def poll(self, timeout=0.0, map=None):
+  def poll(self, timeout=0.0):
+    if self.sock_map is None:
+      raise RuntimeError("Socket map is not registered to gateway looper")
     # Modified version of poll() from asyncore module
     r = []; w = []; e = []
 
-    if map is not None:
-      for fd, obj in map.items():
+    if self.sock_map is not None:
+      for fd, obj in self.sock_map.items():
         is_r = obj.readable()
         is_w = obj.writable()
         if is_r:
@@ -72,7 +73,7 @@ class GatewayLooper(EventLooper):
     # Add wakeup fd
     r.append(self.pipe_r)
 
-    Log.debug("Will select() with timeout: " + str(timeout) + ", with map: " + str(map))
+    Log.debug("Will select() with timeout: " + str(timeout) + ", with map: " + str(self.sock_map))
     try:
       r, w, e = select.select(r, w, e, timeout)
     except select.error, err:
@@ -87,21 +88,21 @@ class GatewayLooper(EventLooper):
       os.read(self.pipe_r, 1)
       r.remove(self.pipe_r)
 
-    if map is not None:
+    if self.sock_map is not None:
       for fd in r:
-        obj = map.get(fd)
+        obj = self.sock_map.get(fd)
         if obj is None:
           continue
         asyncore.read(obj)
 
       for fd in w:
-        obj = map.get(fd)
+        obj = self.sock_map.get(fd)
         if obj is None:
           continue
         asyncore.write(obj)
 
       for fd in e:
-        obj = map.get(fd)
+        obj = self.sock_map.get(fd)
         if obj is None:
           continue
         asyncore._exception(obj)
