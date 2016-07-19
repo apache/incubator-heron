@@ -15,11 +15,14 @@
 import Queue
 from abc import abstractmethod
 
+import time
+
 from .component import Component
 from heron.proto import tuple_pb2
 from heron.common.src.python.log import Log
 from heron.instance.src.python.instance.comp_spec import HeronComponentSpec
 from heron.instance.src.python.instance.tuple import TupleHelper
+from heron.instance.src.python.metrics.metrics_helper import BoltMetrics
 
 import heron.common.src.python.constants as constants
 
@@ -27,14 +30,16 @@ import heron.common.src.python.constants as constants
 class Bolt(Component):
   """The base class for all heron bolts in Python"""
 
-  def __init__(self, pplan_helper, in_stream, out_stream, looper):
-    super(Bolt, self).__init__(pplan_helper, in_stream, out_stream, looper)
+  def __init__(self, pplan_helper, in_stream, out_stream, looper, sys_config):
+    super(Bolt, self).__init__(pplan_helper, in_stream, out_stream, looper, sys_config)
     # TODO: bolt metrics
 
     if self.pplan_helper.is_spout:
       raise RuntimeError("No bolt in physical plan")
 
-    self.topo_config = self.pplan_helper.get_topology_config()
+    self.bolt_config = self.pplan_helper.context['config']
+
+    self.bolt_metrics = BoltMetrics(self.pplan_helper.context, self.sys_config, self.pplan_helper)
 
     # TODO: Topology context, serializer and sys config
 
@@ -69,7 +74,7 @@ class Bolt(Component):
                               inputs=inputs, outputs=_outputs, config=config)
 
   def start(self):
-    self.initialize(config=self.topo_config, context={})
+    self.initialize(config=self.bolt_config, context=self.pplan_helper.context)
 
     # prepare tick tuple
     self._prepare_tick_tup_timer()
@@ -95,7 +100,7 @@ class Bolt(Component):
     """
     # TODO: return when need_task_ids=True
     return super(Bolt, self)._admit_data_tuple(tup, stream_id=stream, is_spout=False,
-                                               anchors=anchors, message_id=None)
+                                               anchors=anchors, message_id=None, metrics=self.bolt_metrics)
 
   @staticmethod
   def is_tick(tup):
@@ -133,13 +138,22 @@ class Bolt(Component):
         Log.error("Received tuple not instance of HeronTupleSet")
 
   def _handle_data_tuple(self, data_tuple, stream):
+    start_time = time.time()
+
     values = []
     for value in data_tuple.values:
       values.append(self.serializer.deserialize(value))
 
     # create HeronTuple
     tup = TupleHelper.make_tuple(stream, data_tuple.key, values, roots=None)
+
+    deserialized_time = time.time()
     self.process(tup)
+    execute_latency = time.time() - deserialized_time
+
+    self.bolt_metrics.execute_tuple(stream.id, stream.component_name,
+                                    execute_latency * constants.SEC_TO_NS)
+
 
   def _activate(self):
     pass
@@ -148,8 +162,8 @@ class Bolt(Component):
     pass
 
   def _prepare_tick_tup_timer(self):
-    if constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS in self.topo_config:
-      tick_freq_sec = self.topo_config[constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS]
+    if constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS in self.bolt_config:
+      tick_freq_sec = self.bolt_config[constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS]
       Log.debug("Tick Tuple Frequency: " + tick_freq_sec + " sec.")
 
       def send_tick():

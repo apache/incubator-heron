@@ -16,6 +16,8 @@ KB = 1024
 MB = 1024 * KB
 GB = 1024 * MB
 
+SEC_TO_NS = 1000000000
+
 TOPOLOGY_CONTAINER_CPU_REQUESTED = "topology.container.cpu"
 TOPOLOGY_COMPONENT_JVMOPTS = "topology.component.jvmopts"
 TOPOLOGY_COMPONENT_PARALLELISM = "topology.component.parallelism"
@@ -34,3 +36,4 @@ MAX_LOG_FILES = 'heron.logging.maximum.files'
 MAX_LOG_SIZE_MB = 'heron.logging.maximum.size.mb'
 
 TOPOLOGY_TICK_TUPLE_FREQ_SECS = "topology.tick.tuple.freq.secs"
+METRICS_EXPORT_INTERVAL_SECS = "heron.metrics.export.interval.sec"

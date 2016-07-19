@@ -15,6 +15,7 @@ import socket
 
 from heron.proto import topology_pb2
 from heron.common.src.python.log import Log
+from heron.common.src.python.utils.topology_context import TopologyContext
 
 class PhysicalPlanHelper(object):
   """Helper class for accessing Physical Plan
@@ -55,6 +56,8 @@ class PhysicalPlanHelper(object):
 
     self.hostname = socket.gethostname()
     self.my_component = self.my_spbl.comp
+
+    self.context = None
 
     # TODO: topology.proto -- Component needs to change: Add python_class_name
     # TODO: implement CustomGrouping stuff
@@ -97,7 +100,15 @@ class PhysicalPlanHelper(object):
     if self.pplan.topology.HasField("topology_config"):
       return self._get_dict_from_config(self.pplan.topology.topology_config)
     else:
-      return None
+      return {}
+
+  def set_topology_context(self, metrics_collector):
+    Log.debug("Setting topology context")
+    cluster_config = self.get_topology_config()
+    cluster_config.update(self._get_dict_from_config(self.my_component.config))
+    task_to_component_map = self._get_task_to_comp_map()
+    self.context = TopologyContext(cluster_config, self.pplan.topology, task_to_component_map,
+                                   self.my_task_id, metrics_collector)
 
   @staticmethod
   def _get_dict_from_config(topology_config):
@@ -106,7 +117,14 @@ class PhysicalPlanHelper(object):
       if kv.HasField("value"):
         config[kv.key] = kv.value
       else:
-        raise ValueError("Unsupported config key:value found: " + str(kv))
+        Log.error("Unsupported config key:value found: " + str(kv))
+        continue
 
     return config
+
+  def _get_task_to_comp_map(self):
+    ret = {}
+    for instance in self.pplan.instances:
+      ret[instance.info.task_id] = instance.info.component_name
+    return ret
 

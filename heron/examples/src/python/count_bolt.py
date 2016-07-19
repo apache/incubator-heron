@@ -21,6 +21,7 @@ class CountBolt(Bolt):
     self.logger.debug("In prepare() of CountBolt")
     self.counter = Counter()
     self.total = 0
+    self.logger.debug("Bolt context: \n" + str(context))
 
   def _increment(self, word, inc_by):
     self.counter[word] += inc_by

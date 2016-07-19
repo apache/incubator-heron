@@ -20,17 +20,20 @@ from .component import Component
 from heron.proto import topology_pb2, tuple_pb2
 from heron.common.src.python.log import Log
 from heron.instance.src.python.instance.comp_spec import HeronComponentSpec
+from heron.instance.src.python.metrics.metrics_helper import SpoutMetrics
 
 class Spout(Component):
   """The base class for all heron spouts in Python"""
 
-  def __init__(self, pplan_helper, in_stream, out_stream, looper):
-    super(Spout, self).__init__(pplan_helper,in_stream, out_stream, looper)
-    self._pplan_helper = pplan_helper
+  def __init__(self, pplan_helper, in_stream, out_stream, looper, sys_config):
+    super(Spout, self).__init__(pplan_helper,in_stream, out_stream, looper, sys_config)
     self.topology_state = topology_pb2.TopologyState.Value("PAUSED")
 
-    if not self._pplan_helper.is_spout:
+    if not self.pplan_helper.is_spout:
       raise RuntimeError("No spout in physicial plan")
+    self.spout_config = self.pplan_helper.context['config']
+
+    self.spout_metrics = SpoutMetrics(self.pplan_helper.context, self.sys_config, self.pplan_helper)
 
     # TODO: topology context, serializer and sys config
 
@@ -60,7 +63,7 @@ class Spout(Component):
 
   def start(self):
     # TODO: add config
-    self.initialize(config={}, context={})
+    self.initialize(config=self.spout_config, context=self.pplan_helper.context)
     self.topology_state = topology_pb2.TopologyState.Value("RUNNING")
     self._add_spout_task()
 
@@ -86,7 +89,7 @@ class Spout(Component):
     """
     # TODO: return when need_task_ids=True
     return super(Spout, self)._admit_data_tuple(tup, stream_id=stream, is_spout=True,
-                                                anchors=None, message_id=tup_id)
+                                                anchors=None, message_id=tup_id, metrics=self.spout_metrics)
 
   def process_incoming_tuples(self):
     raise RuntimeError("Incoming tuple handling not implemented yet")

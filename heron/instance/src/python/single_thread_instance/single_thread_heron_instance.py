@@ -24,14 +24,14 @@ from heron.proto import physical_plan_pb2, stmgr_pb2
 from heron.instance.src.python.single_thread_instance.single_thread_stmgr_client import SingleThreadStmgrClient
 from heron.instance.src.python.network.metricsmgr_client import MetricsManagerClient
 from heron.instance.src.python.misc.communicator import HeronCommunicator
-from heron.instance.src.python.metrics.metrics_helper import GatewayMetrics, MetricsHelper
+from heron.instance.src.python.metrics.metrics_helper import GatewayMetrics, MetricsCollector
 
 import heron.common.src.python.pex_loader as pex_loader
 import heron.common.src.python.constants as constants
 
 class SingleThreadHeronInstance(object):
   def __init__(self, topology_name, topology_id, instance,
-               stream_port, metrics_port, topo_pex_file_path):
+               stream_port, metrics_port, topo_pex_file_path, sys_config):
 
     self.topology_name = topology_name
     self.topology_id = topology_id
@@ -39,6 +39,7 @@ class SingleThreadHeronInstance(object):
     self.stream_port = stream_port
     self.metrics_port = metrics_port
     self.topo_pex_file_path = topo_pex_file_path
+    self.sys_config = sys_config
 
     self.looper = GatewayLooper()
     self.in_stream = HeronCommunicator(producer_cb=None, consumer_cb=None)
@@ -46,8 +47,8 @@ class SingleThreadHeronInstance(object):
 
     # Do metrics
     self.out_metrics = HeronCommunicator()
-    self.metrics_helper = MetricsHelper(self.looper, self.out_metrics)
-    self.gateway_metrics = GatewayMetrics(self.metrics_helper)
+    self.metrics_collector = MetricsCollector(self.looper, self.out_metrics)
+    self.gateway_metrics = GatewayMetrics(self.metrics_collector, sys_config)
 
     self.socket_map = dict()
     self._stmgr_client = SingleThreadStmgrClient(self.looper, self, 'localhost', stream_port, topology_name,
@@ -58,7 +59,6 @@ class SingleThreadHeronInstance(object):
 
     # my_instance is a tuple containing (is_spout, TopologyAPI.{Spout|Bolt}, loaded python instance)
     self.my_instance = None
-
 
     # Debugging purposes
     def go_trace(sig, stack):
@@ -112,11 +112,10 @@ class SingleThreadHeronInstance(object):
     # TODO: bind the metrics collector with topology context
 
     self.my_pplan_helper = pplan_helper
+    self.my_pplan_helper.set_topology_context(self.metrics_collector)
 
     # TODO: handle STATE CHANGE
 
-    # TODO (MOST IMPORTANT): handle importing pex file and load the class
-    # -> need to load the class from python_class_name in Component
     try:
       if pplan_helper.is_spout:
         # Starting a spout
@@ -146,11 +145,11 @@ class SingleThreadHeronInstance(object):
     pex_loader.load_pex(self.topo_pex_file_path)
     if is_spout:
       spout_class = pex_loader.import_and_get_class(self.topo_pex_file_path, python_class_name)
-      my_spout = spout_class(self.my_pplan_helper, self.in_stream, self.out_stream, self.looper)
+      my_spout = spout_class(self.my_pplan_helper, self.in_stream, self.out_stream, self.looper, self.sys_config)
       return my_spout
     else:
       bolt_class = pex_loader.import_and_get_class(self.topo_pex_file_path, python_class_name)
-      my_bolt = bolt_class(self.my_pplan_helper, self.in_stream, self.out_stream, self.looper)
+      my_bolt = bolt_class(self.my_pplan_helper, self.in_stream, self.out_stream, self.looper, self.sys_config)
       return my_bolt
 
   def start_instance(self):
@@ -219,8 +218,8 @@ def main():
            "\n **Topology Pex file located at: " + topology_pex_file_path)
   Log.info("System config: " + str(system_config))
 
-  heron_instance = SingleThreadHeronInstance(topology_name, topology_id, instance,
-                                             stmgr_port, metrics_port, topology_pex_file_path)
+  heron_instance = SingleThreadHeronInstance(topology_name, topology_id, instance, stmgr_port,
+                                             metrics_port, topology_pex_file_path, system_config)
   heron_instance.start()
 
 if __name__ == '__main__':

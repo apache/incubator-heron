@@ -23,6 +23,7 @@ class WordSpout(Spout):
     self.logger.info("In initialize() of WordSpout")
     self.words = cycle(["hello", "bye", "good", "bad", "heron", "storm"])
     self.emit_count = 0
+    self.logger.debug("Spout context: \n" + str(context))
 
   def next_tuple(self):
     word = next(self.words)

@@ -11,27 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import collections
-from abc import abstractmethod
 from heron.common.src.python.log import Log
 from heron.proto import metrics_pb2
+from heron.common.src.python.utils.metrics import CountMetric, MultiCountMetric, MeanReducedMetric, ReducedMetric, MultiMeanReducedMetric, MultiReducedMetric
+import heron.common.src.python.constants as constants
 
-class IMetric(object):
-  @abstractmethod
-  def get_value_and_reset(self):
-    pass
-
-class CountMetric(IMetric):
-  def __init__(self):
-    self.value = 0
-
-  def incr(self, to_add=1):
-    self.value += to_add
-
-  def get_value_and_reset(self):
-    ret = self.value
-    self.value = 0
-    return ret
 
 class GatewayMetrics(object):
   RECEIVED_PKT_SIZE = '__gateway-received-packets-size'
@@ -39,8 +23,8 @@ class GatewayMetrics(object):
   RECEIVED_PKT_COUNT = '__gateway-received-packets-count'
   SENT_PKT_COUNT = '__gateway-sent-packets-count'
 
-  def __init__(self, metrics_helper):
-    self.metrics_helper = metrics_helper
+  def __init__(self, metric_collector, sys_config):
+    self.metric_collector = metric_collector
     self.metrics = {
       self.RECEIVED_PKT_SIZE: CountMetric(),
       self.SENT_PKT_SIZE: CountMetric(),
@@ -48,10 +32,10 @@ class GatewayMetrics(object):
       self.SENT_PKT_COUNT: CountMetric()
     }
     # TODO: change hardcoding
-    interval = 3.0
+    interval = float(sys_config[constants.METRICS_EXPORT_INTERVAL_SECS])
 
     for key, value in self.metrics.iteritems():
-      metrics_helper.register_metric(key, value, interval)
+      metric_collector.register_metric(key, value, interval)
 
   def update_count(self, name, incr_by=1):
     if name not in self.metrics:
@@ -59,7 +43,134 @@ class GatewayMetrics(object):
       return
     self.metrics[name].incr(incr_by)
 
-class MetricsHelper(object):
+# TODO: seriously reconsider the design of this again
+class ComponentMetrics(object):
+  """Metrics to be collected for both Bolt and Spout"""
+  ACK_COUNT = "__ack-count"
+  FAIL_LATENCY = "__fail-latency"
+  FAIL_COUNT = "__fail-count"
+  EMIT_COUNT = "__emit-count"
+  TUPLE_SERIALIZATION_TIME_NS = "__tuple-serialization-time-ns"
+
+  OUT_QUEUE_FULL_COUNT = "__out-queue-full-count"
+
+  component_metrics = {
+    EMIT_COUNT: MultiCountMetric()
+  }
+
+  # a list of metrics that require to initialize multi count metrics
+  to_multi_init = [ACK_COUNT, FAIL_COUNT, EMIT_COUNT]
+
+  def __init__(self, context, sys_config, additional_metrics):
+    self.context = context
+    interval = float(sys_config[constants.METRICS_EXPORT_INTERVAL_SECS])
+    self.metrics = self.component_metrics
+    self.metrics.update(additional_metrics)
+
+    for key, value in self.metrics.iteritems():
+      context.register_metric(key, value, interval)
+
+  def update_count(self, name, key=None, incr_by=1):
+    """Update the value of CountMetric or MultiCountMetric"""
+    if name not in self.metrics:
+      Log.error("In update_count(): " + name + " is not registered in the metric")
+
+    if key is None and isinstance(self.metrics[name], CountMetric):
+      self.metrics[name].incr(incr_by)
+    elif key is not None and isinstance(self.metrics[name], MultiCountMetric):
+      self.metrics[name].incr(key, incr_by)
+    else:
+      Log.error("In update_count(): " + name + " is registered but not supported with this method ")
+
+  def update_reduced_metric(self, name, value, key=None):
+    """Update the value of ReducedMetric or MultiReducedMetric"""
+    if name not in self.metrics:
+      Log.error("In update_reduced_metric(): " + name + " is not registered in the metric")
+
+    if key is None and isinstance(self.metrics[name], ReducedMetric):
+      self.metrics[name].update(value)
+    elif key is not None and isinstance(self.metrics[name], MultiReducedMetric):
+      self.metrics[name].update(key, value)
+    else:
+      Log.error("In update_count(): " + name + " is registered but not supported with this method")
+
+
+class SpoutMetrics(ComponentMetrics):
+  COMPLETE_LATENCY = "__complete-latency"
+  TIMEOUT_COUNT = "__timeout-count"
+  NEXT_TUPLE_LATENCY = "__next-tuple-latency"
+  NEXT_TUPLE_COUNT = "__next-tuple-count"
+  PENDING_ACKED_COUNT = "__pending-acked-count"
+
+  spout_metrics = {
+    #NEXT_TUPLE_LATENCY: MeanReducedMetric()
+  }
+
+  to_multi_init = [ComponentMetrics.ACK_COUNT, ComponentMetrics.FAIL_COUNT,
+                   TIMEOUT_COUNT, ComponentMetrics.EMIT_COUNT]
+
+  def __init__(self, context, sys_config, pplan_helper):
+    super(SpoutMetrics, self).__init__(context, sys_config, self.spout_metrics)
+    self._init_multi_count_metrics(pplan_helper)
+
+  def _init_multi_count_metrics(self, pplan_helper):
+    to_init = [self.metrics[i] for i in self.to_multi_init
+               if i in self.metrics and isinstance(self.metrics[i], MultiCountMetric)]
+    for out_stream in pplan_helper.get_my_spout().outputs:
+      stream_id = out_stream.stream.id
+      for metric in to_init:
+        metric.add_key(stream_id)
+
+class BoltMetrics(ComponentMetrics):
+  PROCESS_LATENCY = "__process-latency"
+  EXEC_COUNT = "__execute-count"
+  EXEC_LATENCY = "__execute-latency"
+  EXEC_TIME_NS = "__execute-time-ns"
+  TUPLE_DESERIALIZATION_TIME_NS = "__tuple-deserialization-time-ns"
+
+  bolt_metrics = {
+    EXEC_COUNT: MultiCountMetric(),
+    EXEC_LATENCY: MultiMeanReducedMetric(),
+    EXEC_TIME_NS: MultiCountMetric()
+  }
+
+  inputs_init = [ComponentMetrics.ACK_COUNT, ComponentMetrics.FAIL_COUNT,
+                 EXEC_COUNT, EXEC_TIME_NS]
+  outputs_init = [ComponentMetrics.EMIT_COUNT]
+
+  def __init__(self, context, sys_config, pplan_helper):
+    super(BoltMetrics, self).__init__(context, sys_config, self.bolt_metrics)
+    self._init_multi_count_metrics(pplan_helper)
+
+  def _init_multi_count_metrics(self, pplan_helper):
+    # inputs
+    to_in_init = [self.metrics[i] for i in self.inputs_init
+                  if i in self.metrics and isinstance(self.metrics[i], MultiCountMetric)]
+    for in_stream in pplan_helper.get_my_bolt().inputs:
+      stream_id = in_stream.stream.id
+      global_stream_id = in_stream.stream.component_name + "/" + stream_id
+      for metric in to_in_init:
+        metric.add_key(stream_id)
+        metric.add_key(global_stream_id)
+    # outputs
+    to_out_init = [self.metrics[i] for i in self.outputs_init
+                   if i in self.metrics and isinstance(self.metrics[i], MultiCountMetric)]
+    for out_stream in pplan_helper.get_my_bolt().outputs:
+      stream_id = out_stream.stream.id
+      for metric in to_out_init:
+        metric.add_key(stream_id)
+
+  def execute_tuple(self, stream_id, source_component, latency_in_ns):
+    self.update_count(self.EXEC_COUNT, stream_id)
+    self.update_reduced_metric(self.EXEC_LATENCY, latency_in_ns, stream_id)
+    self.update_count(self.EXEC_TIME_NS, stream_id, incr_by=latency_in_ns)
+
+    global_stream_id = source_component + "/" + stream_id
+    self.update_count(self.EXEC_COUNT, global_stream_id)
+    self.update_reduced_metric(self.EXEC_LATENCY, latency_in_ns, global_stream_id)
+    self.update_count(self.EXEC_TIME_NS, global_stream_id, incr_by=latency_in_ns)
+
+class MetricsCollector(object):
   """Helper class for pushing metrics to Out-Metrics queue"""
   def __init__(self, looper, out_metrics):
     self.looper = looper
@@ -71,7 +182,7 @@ class MetricsHelper(object):
     if name in self.metrics_map:
       raise RuntimeError("Another metric has already been registered with name: " + name)
 
-    Log.debug("Register metric: " + name)
+    Log.debug("Register metric: " + name + ", with interval: " + str(time_bucket_in_sec))
     self.metrics_map[name] = metric
 
     if time_bucket_in_sec in self.time_bucket_in_sec_to_metrics_name:
@@ -101,8 +212,17 @@ class MetricsHelper(object):
     metric_value = self.metrics_map[name].get_value_and_reset()
     Log.debug("In gather_one_metric with name: " + name + ", and value: " + str(metric_value))
 
-    # TODO: currently only treat value as str
-    self._add_data_to_message(message, name, metric_value)
+    if metric_value is None:
+      return
+    elif isinstance(metric_value, dict):
+      for key, value in metric_value.iteritems():
+        if key is not None and value is not None:
+          self._add_data_to_message(message, name + "/" + str(key), value)
+        else:
+          Log.error("<" + str(key) + ":" + str(value) + "> is not a valid key-value to output as metric")
+          continue
+    else:
+      self._add_data_to_message(message, name, metric_value)
 
   @staticmethod
   def _add_data_to_message(message, metric_name, metric_value):
