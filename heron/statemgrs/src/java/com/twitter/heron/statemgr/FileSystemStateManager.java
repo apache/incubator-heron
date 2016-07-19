@@ -257,22 +257,26 @@ public abstract class FileSystemStateManager implements IStateManager {
 
       //update parallelism in topology since TMaster checks that Sum(parallelism) == Sum(instances)
       if (stateManager.nodeExists(stateManager.getTopologyPath(topologyName)).get()) {
-        boolean success = stateManager.deleteTopology(topologyName).get();
-        print("==> Deleted existing Topology: %s", success);
+        print("==> Deleted existing Topology: %s",
+            stateManager.deleteTopology(topologyName).get());
       }
 
-      boolean success = stateManager.setTopology(updatedTopology, topologyName).get();
-      print("==> Set Topology: %s", success);
+      print("==> Set Topology: %s", stateManager.setTopology(updatedTopology, topologyName).get());
 
       updatedTopology = stateManager.getTopology(null, topologyName).get();
       print("==> Got Topology: %s", updatedTopology);
 
-      success = stateManager.deletePhysicalPlan(topologyName).get();
-      print("==> Deleted Physical Plan: %s", success);
-
+      if (stateManager.nodeExists(stateManager.getPackingPlanPath(topologyName)).get()) {
+        print("==> Deleted existing Topology: %s",
+            stateManager.deletePackingPlan(topologyName).get());
+      }
       stateManager.setPackingPlan(newPackingPlan, topologyName);
       existingPackingPlan = stateManager.getPackingPlan(null, topologyName).get();
       print("==> Updated PackingPlan:\n%s", existingPackingPlan);
+
+      if (stateManager.nodeExists(stateManager.getPhysicalPlanPath(topologyName)).get()) {
+        print("==> Deleted Physical Plan: %s", stateManager.deletePhysicalPlan(topologyName).get());
+      }
     }
   }
 
