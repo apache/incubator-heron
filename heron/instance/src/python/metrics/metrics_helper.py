@@ -53,12 +53,13 @@ class ComponentMetrics(object):
   OUT_QUEUE_FULL_COUNT = "__out-queue-full-count"
 
   component_metrics = {
+    ACK_COUNT: MultiCountMetric(),
+    FAIL_LATENCY: MultiMeanReducedMetric(),
+    FAIL_COUNT: MultiCountMetric(),
     EMIT_COUNT: MultiCountMetric(),
+    TUPLE_SERIALIZATION_TIME_NS: MultiCountMetric(),
     OUT_QUEUE_FULL_COUNT: CountMetric()
   }
-
-  # a list of metrics that require to initialize multi count metrics
-  to_multi_init = [ACK_COUNT, FAIL_COUNT, EMIT_COUNT]
 
   def __init__(self, additional_metrics):
     self.metrics = self.component_metrics
@@ -108,9 +109,11 @@ class SpoutMetrics(ComponentMetrics):
   PENDING_ACKED_COUNT = "__pending-acked-count"
 
   spout_metrics = {
+    COMPLETE_LATENCY: MultiMeanReducedMetric(),
+    TIMEOUT_COUNT: MultiCountMetric(),
     NEXT_TUPLE_LATENCY: MeanReducedMetric(),
     NEXT_TUPLE_COUNT: CountMetric(),
-    COMPLETE_LATENCY: MultiMeanReducedMetric()
+    PENDING_ACKED_COUNT: MeanReducedMetric()
   }
 
   to_multi_init = [ComponentMetrics.ACK_COUNT, ComponentMetrics.FAIL_COUNT,
@@ -135,6 +138,14 @@ class SpoutMetrics(ComponentMetrics):
   def acked_tuple(self, stream_id, complete_latency_ns):
     self.update_count(self.ACK_COUNT, stream_id)
     self.update_reduced_metric(self.COMPLETE_LATENCY, complete_latency_ns, stream_id)
+
+  def failed_tuple(self, stream_id, fail_latency_ns):
+    self.update_count(self.FAIL_COUNT, stream_id)
+    self.update_reduced_metric(self.FAIL_LATENCY, fail_latency_ns, stream_id)
+
+  def update_pending_tuples_count(self, count):
+    self.update_reduced_metric(self.PENDING_ACKED_COUNT, count)
+
 
 class BoltMetrics(ComponentMetrics):
   PROCESS_LATENCY = "__process-latency"

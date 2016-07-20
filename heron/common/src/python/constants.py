@@ -16,6 +16,7 @@ KB = 1024
 MB = 1024 * KB
 GB = 1024 * MB
 
+MS_TO_SEC = 0.001
 SEC_TO_NS = 1000000000
 
 TOPOLOGY_CONTAINER_CPU_REQUESTED = "topology.container.cpu"
@@ -37,5 +38,9 @@ MAX_LOG_SIZE_MB = 'heron.logging.maximum.size.mb'
 
 TOPOLOGY_TICK_TUPLE_FREQ_SECS = "topology.tick.tuple.freq.secs"
 TOPOLOGY_ACKING_ENABLED = "topology.acking"
+TOPOLOGY_MAX_SPOUT_PENDING = "topology.max.spout.pending"
 METRICS_EXPORT_INTERVAL_SECS = "heron.metrics.export.interval.sec"
 
+INSTANCE_ACK_BATCH_TIME_MS = "heron.instance.ack.batch.time.ms"
+INSTANCE_EMIT_BATCH_TIME_MS = "heron.instance.emit.batch.time.ms"
+INSTANCE_EMIT_BATCH_SIZE_BYTES = "heron.instance.emit.batch.size.bytes"

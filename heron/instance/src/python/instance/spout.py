@@ -82,6 +82,16 @@ class Spout(Component):
   def stop(self):
     pass
 
+  def _activate(self):
+    Log.info("Spout is activated")
+    self.activate()
+    self.topology_state = topology_pb2.TopologyState.Value("RUNNING")
+
+  def _deactivate(self):
+    Log.info("Spout is deactivated")
+    self.deactivate()
+    self.topology_state = topology_pb2.TopologyState.Value("PAUSED")
+
   def emit(self, tup, tup_id=None, stream=Component.DEFAULT_STREAM_ID,
            direct_task=None, need_task_ids=False):
     """Emits a new tuple from this Spout
@@ -126,7 +136,7 @@ class Spout(Component):
     # TODO: return when need_task_ids=True
     ret = super(Spout, self).admit_data_tuple(stream_id=stream, data_tuple=data_tuple,
                                               tuple_size_in_bytes=tuple_size_in_bytes)
-
+    self.total_tuples_emitted += 1
     self.spout_metrics.update_emit_count(stream)
     return ret
 
@@ -134,6 +144,8 @@ class Spout(Component):
     raise RuntimeError("Incoming tuple handling not implemented yet")
 
   def _read_tuples_and_execute(self):
+    start_time = time.time()
+    ack_batch_time = float(self.sys_config[constants.INSTANCE_ACK_BATCH_TIME_MS]) * constants.MS_TO_SEC
     while not self.in_stream.is_empty():
       try:
         tuples = self.in_stream.poll()
@@ -153,36 +165,35 @@ class Spout(Component):
       else:
         Log.error("Received tuple not instance of HeronTupleSet")
 
-  def _handle_ack_tuple(self, tuple, is_success):
-    # TODO: implement ACKs
-    pass
-
-  def _should_produce_tuple(self):
-    # TODO: implement later -- like for Back Pressure
-    return True
+      # avoid spending too much time here
+      if time.time() - start_time - ack_batch_time > 0:
+        break
 
   def _produce_tuple(self):
-    # TODO: do ACKing and stuff
-    start_time = time.time()
-    self.next_tuple()
-    latency = time.time() - start_time
-    self.spout_metrics.next_tuple(latency * constants.SEC_TO_NS)
+    max_spout_pending = int(self.sys_config[constants.TOPOLOGY_MAX_SPOUT_PENDING])
+    total_tuples_emitted_before = self.total_tuples_emitted
+    total_data_emitted_bytes_before = self.get_total_data_emitted_in_bytes()
+    emit_batch_time = float(self.sys_config[constants.INSTANCE_EMIT_BATCH_TIME_MS]) * constants.MS_TO_SEC
+    emit_batch_size = int(self.sys_config[constants.INSTANCE_EMIT_BATCH_SIZE_BYTES])
+    start_cycle_time = time.time()
 
-  def _activate(self):
-    Log.info("Spout is activated")
-    self.activate()
-    self.topology_state = topology_pb2.TopologyState.Value("RUNNING")
+    while (self.acking_enabled and max_spout_pending > len(self.in_flight_tuples)) or not self.acking_enabled:
+      start_time = time.time()
+      self.next_tuple()
+      latency = time.time() - start_time
+      self.spout_metrics.next_tuple(latency * constants.SEC_TO_NS)
 
-  def _deactivate(self):
-    Log.info("Spout is deactivated")
-    self.deactivate()
-    self.topology_state = topology_pb2.TopologyState.Value("PAUSED")
+      if (self.total_tuples_emitted == total_tuples_emitted_before) or \
+        (time.time() - start_cycle_time - emit_batch_time > 0) or \
+        (self.get_total_data_emitted_in_bytes() - total_data_emitted_bytes_before > emit_batch_size):
+        # no tuples to emit or batch reached
+        break
+
+      total_tuples_emitted_before = self.total_tuples_emitted
+
 
   def _add_spout_task(self):
-    #TODO: implement ACK/outqueue full etc
-    #TODO: call _read_tuples_and_execute when ACK enabled
-
-    Log.info("Add spout task")
+    Log.info("Adding spout task...")
     def spout_task():
       if self._should_produce_tuple():
         self._produce_tuple()
@@ -193,7 +204,7 @@ class Spout(Component):
 
       if self.acking_enabled:
         self._read_tuples_and_execute()
-        # Add update pending tupels count for metrics
+        self.spout_metrics.update_pending_tuples_count(len(self.in_flight_tuples))
       else:
         self._do_immediate_acks()
 
@@ -202,6 +213,34 @@ class Spout(Component):
 
     self.looper.add_wakeup_task(spout_task)
 
+  def _should_produce_tuple(self):
+    # TODO: implement later -- like for Back Pressure
+    return True
+
+  def _is_continue_to_work(self):
+    # TODO: implement later
+    return False
+
+  # ACK/FAIL related
+  def _handle_ack_tuple(self, tuple, is_success):
+    for rt in tuple.roots:
+      if rt.taskid != self.pplan_helper.my_task_id:
+        raise RuntimeError("Receiving tuple for task: " + str(rt.taskid) +
+                           " in task: " + str(self.pplan_helper.my_task_id))
+
+      try:
+        tuple_info = self.in_flight_tuples.pop(rt.key)
+      except KeyError:
+        # rt.key is not in in_flight_tuples -> already removed due to time-out
+        return
+
+      if tuple_info.tuple_id is not None:
+        latency = time.time() - tuple_info.insertion_time
+        if is_success:
+          self._invoke_ack(tuple_info.tuple_id, tuple_info.stream_id, latency * constants.SEC_TO_NS)
+        else:
+          self._invoke_fail(tuple_info.tuple_id, tuple_info.stream_id, latency * constants.SEC_TO_NS)
+
   def _do_immediate_acks(self):
     size = len(self.immediate_acks)
     for i in range(size):
@@ -209,8 +248,14 @@ class Spout(Component):
       self._invoke_ack(tuple_info.tuple_id, tuple_info.stream_id, 0)
 
   def _invoke_ack(self, tuple_id, stream_id, complete_latency_ns):
+    Log.debug("In invoke_ack(): Acking " + str(tuple_id) + " from stream: " + stream_id)
     self.ack(tuple_id)
     self.spout_metrics.acked_tuple(stream_id, complete_latency_ns)
+
+  def _invoke_fail(self, tuple_id, stream_id, fail_latency_ns):
+    Log.debug("In invoke_fail(): Failing " + str(tuple_id) + " from stream: " + stream_id)
+    self.fail(tuple_id)
+    self.spout_metrics.failed_tuple(stream_id, fail_latency_ns)
 
   ###################################
   # API: To be implemented by users
@@ -299,8 +344,3 @@ class Spout(Component):
     The spout may or may not be reactivated in the future.
     """
     pass
-
-
-
-
-
