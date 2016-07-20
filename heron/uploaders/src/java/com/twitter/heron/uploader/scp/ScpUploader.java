@@ -101,7 +101,7 @@ public class ScpUploader implements IUploader {
 
     // create the upload directory, if not exists
     if (!this.controller.mkdirsIfNotExists(destTopologyDirectory)) {
-      LOG.log(Level.SEVERE, "Failed to create directories requried for uploading the topology {0}.",
+      LOG.log(Level.SEVERE, "Failed to create directories required for uploading the topology {0}.",
           destTopologyDirectory);
       return null;
     }
