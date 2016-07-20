@@ -36,7 +36,7 @@ import com.twitter.heron.common.basics.TypeUtils;
  * use of them by reading them in the prepare method of Bolts or the open method of
  * Spouts.
  */
-public class Config extends HashMap<String, Object> {
+public class HeronConfig extends HashMap<String, Object> {
   /**
    * Topology-specific options for the worker child process. This is used in addition to WORKER_CHILDOPTS.
    */
@@ -205,110 +205,110 @@ public class Config extends HashMap<String, Object> {
     apiVars.add(TOPOLOGY_ADDITIONAL_CLASSPATH);
   }
 
-  public Config() {
+  public HeronConfig() {
     super();
   }
 
-  public Config(Map<String, Object> map) {
+  public HeronConfig(Map<String, Object> map) {
     super(map);
   }
 
   public static void setDebug(Map<String, Object> conf, boolean isOn) {
-    conf.put(Config.TOPOLOGY_DEBUG, String.valueOf(isOn));
+    conf.put(HeronConfig.TOPOLOGY_DEBUG, String.valueOf(isOn));
   }
 
   public static void setTeamName(Map<String, Object> conf, String teamName) {
-    conf.put(Config.TOPOLOGY_TEAM_NAME, teamName);
+    conf.put(HeronConfig.TOPOLOGY_TEAM_NAME, teamName);
   }
 
   public static void setTeamEmail(Map<String, Object> conf, String teamEmail) {
-    conf.put(Config.TOPOLOGY_TEAM_EMAIL, teamEmail);
+    conf.put(HeronConfig.TOPOLOGY_TEAM_EMAIL, teamEmail);
   }
 
   public static void setTopologyCapTicket(Map<String, Object> conf, String ticket) {
-    conf.put(Config.TOPOLOGY_CAP_TICKET, ticket);
+    conf.put(HeronConfig.TOPOLOGY_CAP_TICKET, ticket);
   }
 
   public static void setTopologyProjectName(Map<String, Object> conf, String project) {
-    conf.put(Config.TOPOLOGY_PROJECT_NAME, project);
+    conf.put(HeronConfig.TOPOLOGY_PROJECT_NAME, project);
   }
 
   public static void setNumStmgrs(Map<String, Object> conf, int stmgrs) {
-    conf.put(Config.TOPOLOGY_STMGRS, Integer.toString(stmgrs));
+    conf.put(HeronConfig.TOPOLOGY_STMGRS, Integer.toString(stmgrs));
   }
 
   public static void setSerializationClassName(Map<String, Object> conf, String className) {
-    conf.put(Config.TOPOLOGY_SERIALIZER_CLASSNAME, className);
+    conf.put(HeronConfig.TOPOLOGY_SERIALIZER_CLASSNAME, className);
   }
 
   public static void setEnableAcking(Map<String, Object> conf, boolean acking) {
-    conf.put(Config.TOPOLOGY_ENABLE_ACKING, String.valueOf(acking));
+    conf.put(HeronConfig.TOPOLOGY_ENABLE_ACKING, String.valueOf(acking));
   }
 
   public static void setMessageTimeoutSecs(Map<String, Object> conf, int secs) {
-    conf.put(Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS, Integer.toString(secs));
+    conf.put(HeronConfig.TOPOLOGY_MESSAGE_TIMEOUT_SECS, Integer.toString(secs));
   }
 
   public static void setComponentParallelism(Map<String, Object> conf, int parallelism) {
-    conf.put(Config.TOPOLOGY_COMPONENT_PARALLELISM, Integer.toString(parallelism));
+    conf.put(HeronConfig.TOPOLOGY_COMPONENT_PARALLELISM, Integer.toString(parallelism));
   }
 
   public static void setMaxSpoutPending(Map<String, Object> conf, int max) {
-    conf.put(Config.TOPOLOGY_MAX_SPOUT_PENDING, Integer.toString(max));
+    conf.put(HeronConfig.TOPOLOGY_MAX_SPOUT_PENDING, Integer.toString(max));
   }
 
   public static void setTickTupleFrequency(Map<String, Object> conf, int seconds) {
-    conf.put(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS, Integer.toString(seconds));
+    conf.put(HeronConfig.TOPOLOGY_TICK_TUPLE_FREQ_SECS, Integer.toString(seconds));
   }
 
   public static void setContainerCpuRequested(Map<String, Object> conf, float ncpus) {
-    conf.put(Config.TOPOLOGY_CONTAINER_CPU_REQUESTED, Float.toString(ncpus));
+    conf.put(HeronConfig.TOPOLOGY_CONTAINER_CPU_REQUESTED, Float.toString(ncpus));
   }
 
   public static void setContainerDiskRequested(Map<String, Object> conf, long nbytes) {
-    conf.put(Config.TOPOLOGY_CONTAINER_DISK_REQUESTED, Long.toString(nbytes));
+    conf.put(HeronConfig.TOPOLOGY_CONTAINER_DISK_REQUESTED, Long.toString(nbytes));
   }
 
   public static void setContainerRamRequested(Map<String, Object> conf, long nbytes) {
-    conf.put(Config.TOPOLOGY_CONTAINER_RAM_REQUESTED, Long.toString(nbytes));
+    conf.put(HeronConfig.TOPOLOGY_CONTAINER_RAM_REQUESTED, Long.toString(nbytes));
   }
 
   public static void setContainerMaxCpuHint(Map<String, Object> conf, float ncpus) {
-    conf.put(Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT, Float.toString(ncpus));
+    conf.put(HeronConfig.TOPOLOGY_CONTAINER_MAX_CPU_HINT, Float.toString(ncpus));
   }
 
   public static void setContainerMaxDiskHint(Map<String, Object> conf, long nbytes) {
-    conf.put(Config.TOPOLOGY_CONTAINER_MAX_DISK_HINT, Long.toString(nbytes));
+    conf.put(HeronConfig.TOPOLOGY_CONTAINER_MAX_DISK_HINT, Long.toString(nbytes));
   }
 
   public static void setContainerMaxRamHint(Map<String, Object> conf, long nbytes) {
-    conf.put(Config.TOPOLOGY_CONTAINER_MAX_RAM_HINT, Long.toString(nbytes));
+    conf.put(HeronConfig.TOPOLOGY_CONTAINER_MAX_RAM_HINT, Long.toString(nbytes));
   }
 
   public static void setContainerPaddingPercentage(Map<String, Object> conf, int percentage) {
-    conf.put(Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE, Integer.toString(percentage));
+    conf.put(HeronConfig.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE, Integer.toString(percentage));
   }
 
   public static void setComponentRamMap(Map<String, Object> conf, String ramMap) {
-    conf.put(Config.TOPOLOGY_COMPONENT_RAMMAP, ramMap);
+    conf.put(HeronConfig.TOPOLOGY_COMPONENT_RAMMAP, ramMap);
   }
 
   public static void setAutoTaskHooks(Map<String, Object> conf, List<String> hooks) {
-    conf.put(Config.TOPOLOGY_AUTO_TASK_HOOKS, hooks);
+    conf.put(HeronConfig.TOPOLOGY_AUTO_TASK_HOOKS, hooks);
   }
 
   public static List<String> getAutoTaskHooks(Map<String, Object> conf) {
-    return TypeUtils.getListOfStrings(conf.get(Config.TOPOLOGY_AUTO_TASK_HOOKS));
+    return TypeUtils.getListOfStrings(conf.get(HeronConfig.TOPOLOGY_AUTO_TASK_HOOKS));
   }
 
   public static void setComponentRam(Map<String, Object> conf, String component, long ramInBytes) {
-    if (conf.containsKey(Config.TOPOLOGY_COMPONENT_RAMMAP)) {
-      String oldEntry = (String) conf.get(Config.TOPOLOGY_COMPONENT_RAMMAP);
+    if (conf.containsKey(HeronConfig.TOPOLOGY_COMPONENT_RAMMAP)) {
+      String oldEntry = (String) conf.get(HeronConfig.TOPOLOGY_COMPONENT_RAMMAP);
       String newEntry = String.format("%s,%s:%d", oldEntry, component, ramInBytes);
-      conf.put(Config.TOPOLOGY_COMPONENT_RAMMAP, newEntry);
+      conf.put(HeronConfig.TOPOLOGY_COMPONENT_RAMMAP, newEntry);
     } else {
       String newEntry = String.format("%s:%d", component, ramInBytes);
-      conf.put(Config.TOPOLOGY_COMPONENT_RAMMAP, newEntry);
+      conf.put(HeronConfig.TOPOLOGY_COMPONENT_RAMMAP, newEntry);
     }
   }
 
@@ -324,7 +324,7 @@ public class Config extends HashMap<String, Object> {
     componentBase64 = DatatypeConverter.printBase64Binary(
         component.getBytes(StandardCharsets.UTF_8));
 
-    String oldEntry = (String) conf.get(Config.TOPOLOGY_COMPONENT_JVMOPTS);
+    String oldEntry = (String) conf.get(HeronConfig.TOPOLOGY_COMPONENT_JVMOPTS);
     String newEntry;
     if (oldEntry == null) {
       newEntry = String.format("{\"%s\":\"%s\"}", componentBase64, optsBase64);
@@ -338,7 +338,7 @@ public class Config extends HashMap<String, Object> {
     //     "componentNameAInBase64": "jvmOptionsInBase64",
     //     "componentNameBInBase64": "jvmOptionsInBase64"
     //  }
-    conf.put(Config.TOPOLOGY_COMPONENT_JVMOPTS, newEntry);
+    conf.put(HeronConfig.TOPOLOGY_COMPONENT_JVMOPTS, newEntry);
 
   }
 
@@ -438,7 +438,7 @@ public class Config extends HashMap<String, Object> {
    * Appends the given classpath to the additional classpath config
    */
   public void addClasspath(Map<String, Object> conf, String classpath) {
-    String cpKey = Config.TOPOLOGY_ADDITIONAL_CLASSPATH;
+    String cpKey = HeronConfig.TOPOLOGY_ADDITIONAL_CLASSPATH;
 
     if (conf.containsKey(cpKey)) {
       String newEntry = String.format("%s:%s", conf.get(cpKey), classpath);
