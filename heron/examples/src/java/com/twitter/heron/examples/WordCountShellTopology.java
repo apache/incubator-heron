@@ -26,6 +26,9 @@ import org.apache.storm.tuple.Fields;
  */
 public class WordCountShellTopology {
 
+  private WordCountShellTopology() {
+  }
+
   public static void main(String[] args) throws Exception {
 
     TopologyBuilder builder = new TopologyBuilder();
