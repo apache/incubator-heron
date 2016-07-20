@@ -81,6 +81,9 @@ class Component(object):
   def admit_data_tuple(self, stream_id, data_tuple, tuple_size_in_bytes):
     self.output_helper.add_data_tuple(stream_id, data_tuple, tuple_size_in_bytes)
 
+  def admit_control_tuple(self, control_tuple, tuple_size_in_bytes, is_ack):
+    self.output_helper.add_control_tuple(control_tuple, tuple_size_in_bytes, is_ack)
+
   def get_total_data_emitted_in_bytes(self):
     return self.output_helper.total_data_emitted_in_bytes
 

@@ -21,7 +21,7 @@ from .component import Component
 from heron.proto import tuple_pb2
 from heron.common.src.python.log import Log
 from heron.instance.src.python.instance.comp_spec import HeronComponentSpec
-from heron.instance.src.python.instance.tuple import TupleHelper
+from heron.instance.src.python.instance.tuple import TupleHelper, HeronTuple
 from heron.instance.src.python.metrics.metrics_helper import BoltMetrics
 
 import heron.common.src.python.constants as constants
@@ -32,14 +32,15 @@ class Bolt(Component):
 
   def __init__(self, pplan_helper, in_stream, out_stream, looper, sys_config):
     super(Bolt, self).__init__(pplan_helper, in_stream, out_stream, looper, sys_config)
-    # TODO: bolt metrics
 
     if self.pplan_helper.is_spout:
       raise RuntimeError("No bolt in physical plan")
-
     self.bolt_config = self.pplan_helper.context['config']
-
     self.bolt_metrics = BoltMetrics(self.pplan_helper)
+
+    # acking related
+    self.acking_enabled = True if self.bolt_config.get(constants.TOPOLOGY_ACKING_ENABLED, 'false') == 'true' else False
+    Log.info("Enable ACK: " + str(self.acking_enabled))
 
     # TODO: Topology context, serializer and sys config
 
@@ -83,6 +84,12 @@ class Bolt(Component):
   def stop(self):
     pass
 
+  def _activate(self):
+    pass
+
+  def _deactivate(self):
+    pass
+
   def emit(self, tup, stream=Component.DEFAULT_STREAM_ID, anchors=None, direct_task=None, need_task_ids=False):
     """Emits a new tuple from this Bolt
 
@@ -104,13 +111,25 @@ class Bolt(Component):
     data_tuple = tuple_pb2.HeronDataTuple()
     data_tuple.key = 0
 
+    # Set the anchors for a tuple
+    if anchors is not None:
+      merged_roots = set()
+      for tup in [t for t in anchors if isinstance(t, HeronTuple) and t.roots is not None]:
+        merged_roots.update(tup.roots)
+      for rt in merged_roots:
+        to_add = data_tuple.roots.add()
+        to_add.CopyFrom(rt)
+
     tuple_size_in_bytes = 0
+    start_time = time.time()
 
     # Serialize
     for obj in tup:
       serialized = self.serializer.serialize(obj)
       data_tuple.values.append(serialized)
       tuple_size_in_bytes += len(serialized)
+    latency = time.time() - start_time
+    self.bolt_metrics.serialize_data_tuple(stream, latency * constants.SEC_TO_NS)
 
     # TODO: return when need_task_ids=True
     ret = super(Bolt, self).admit_data_tuple(stream_id=stream, data_tuple=data_tuple,
@@ -119,27 +138,21 @@ class Bolt(Component):
     self.bolt_metrics.update_emit_count(stream)
     return ret
 
-  @staticmethod
-  def is_tick(tup):
-    """Returns whether or not the given HeronTuple is a tick Tuple
-
-    It is compatible with StreamParse API.
-    """
-    return tup.stream == TupleHelper.TICK_TUPLE_ID
-
   def process_incoming_tuples(self):
     """Should be called when tuple was buffered into in_stream"""
     self._read_tuples_and_execute()
     self.output_helper.send_out_tuples()
 
   def _read_tuples_and_execute(self):
+    start_cycle_time = time.time()
+    total_data_emitted_bytes_before = self.get_total_data_emitted_in_bytes()
+    exec_batch_time = float(self.sys_config[constants.INSTANCE_EXECUTE_BATCH_TIME_MS]) * constants.MS_TO_SEC
+    exec_batch_size = int(self.sys_config[constants.INSTANCE_EXECUTE_BATCH_SIZE_BYTES])
     while not self.in_stream.is_empty():
       try:
         tuples = self.in_stream.poll()
       except Queue.Empty:
         break
-
-      # TODO: Topology Context
 
       if isinstance(tuples, tuple_pb2.HeronTupleSet):
         if tuples.HasField("control"):
@@ -154,6 +167,11 @@ class Bolt(Component):
       else:
         Log.error("Received tuple not instance of HeronTupleSet")
 
+      if (time.time() - start_cycle_time - exec_batch_time > 0) or \
+          (self.get_total_data_emitted_in_bytes() - total_data_emitted_bytes_before > exec_batch_size):
+        # batch reached
+        break
+
   def _handle_data_tuple(self, data_tuple, stream):
     start_time = time.time()
 
@@ -162,21 +180,25 @@ class Bolt(Component):
       values.append(self.serializer.deserialize(value))
 
     # create HeronTuple
-    tup = TupleHelper.make_tuple(stream, data_tuple.key, values, roots=None)
+    tup = TupleHelper.make_tuple(stream, data_tuple.key, values, roots=data_tuple.roots)
 
     deserialized_time = time.time()
     self.process(tup)
     execute_latency = time.time() - deserialized_time
+    deserialize_latency = deserialized_time - start_time
 
+    self.bolt_metrics.deserialize_data_tuple(stream.id, stream.component_name,
+                                             deserialize_latency * constants.SEC_TO_NS)
     self.bolt_metrics.execute_tuple(stream.id, stream.component_name,
                                     execute_latency * constants.SEC_TO_NS)
 
+  @staticmethod
+  def is_tick(tup):
+    """Returns whether or not the given HeronTuple is a tick Tuple
 
-  def _activate(self):
-    pass
-
-  def _deactivate(self):
-    pass
+    It is compatible with StreamParse API.
+    """
+    return tup.stream == TupleHelper.TICK_TUPLE_ID
 
   def _prepare_tick_tup_timer(self):
     if constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS in self.bolt_config:
@@ -197,6 +219,51 @@ class Bolt(Component):
       self.looper.register_timer_task_in_sec(send_tick, tick_freq_sec)
 
 
+  def ack(self, tup):
+    """Indicate that processing of a Tuple has succeeded
+
+    It is compatible with StreamParse API.
+    """
+    if not isinstance(tup, HeronTuple):
+      Log.error("Only HeronTuple type is supported in ack()")
+      return
+
+    if self.acking_enabled:
+      ack_tuple = tuple_pb2.AckTuple()
+      ack_tuple.ackedtuple = int(tup.id)
+
+      tuple_size_in_bytes = 0
+      for rt in tup.roots:
+        to_add = ack_tuple.roots.add()
+        to_add.CopyFrom(rt)
+        tuple_size_in_bytes += rt.ByteSize()
+      super(Bolt, self).admit_control_tuple(ack_tuple, tuple_size_in_bytes, True)
+
+    latency = time.time() - tup.creation_time
+    self.bolt_metrics.acked_tuple(tup.stream, tup.component, latency * constants.SEC_TO_NS)
+
+  def fail(self, tup):
+    """Indicate that processing of a Tuple has failed
+
+    It is compatible with StreamParse API.
+    """
+    if not isinstance(tup, HeronTuple):
+      Log.error("Only HeronTuple type is supported in fail()")
+      return
+
+    if self.acking_enabled:
+      fail_tuple = tuple_pb2.AckTuple()
+      fail_tuple.ackedtuple = int(tup.id)
+
+      tuple_size_in_bytes = 0
+      for rt in tup.roots:
+        to_add = fail_tuple.roots.add()
+        to_add.CopyFrom(rt)
+        tuple_size_in_bytes += rt.ByteSize()
+      super(Bolt, self).admit_control_tuple(fail_tuple, tuple_size_in_bytes, False)
+
+    latency = time.time() - tup.creation_time
+    self.bolt_metrics.failed_tuple(tup.stream, tup.component, latency * constants.SEC_TO_NS)
 
   ###################################
   # API: To be implemented by users
@@ -236,23 +303,6 @@ class Bolt(Component):
     # TODO: documentation and Tuple implementation
     raise NotImplementedError()
 
-  def ack(self, tup):
-    """Indicate that processing of a Tuple has succeeded
-
-    It is compatible with StreamParse API.
-
-    *Should be implemented by a subclass.*
-    """
-    pass
-
-  def fail(self, tup):
-    """Indicate that processing of a Tuple has failed
-
-    It is compatible with StreamParse API.
-
-    *Should be implemented by a subclass.*
-    """
-    pass
 
   def cleanup(self):
     pass

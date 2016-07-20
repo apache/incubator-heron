@@ -75,7 +75,8 @@ class TopologyType(type):
   def get_default_topoconfig(mcs):
     config = topology_pb2.Config()
     conf_dict = {"topology.message.timeout.secs": "30",
-                 "topology.acking": "false",
+                 "topology.acking": "true",
+                 "topology.max.spout.pending": "10000000",
                  "topology.debug": "true",
                  "topology.tick.tuple.freq.secs": "5"}
 

@@ -39,7 +39,7 @@ class Spout(Component):
     self.spout_metrics = SpoutMetrics(self.pplan_helper)
 
     # acking related
-    self.acking_enabled = True if self.spout_config[constants.TOPOLOGY_ACKING_ENABLED] == "true" else False
+    self.acking_enabled = True if self.spout_config.get(constants.TOPOLOGY_ACKING_ENABLED, 'false') == 'true' else False
     Log.info("Enable ACK: " + str(self.acking_enabled))
     self.in_flight_tuples = dict()
     self.immediate_acks = collections.deque()
@@ -127,11 +127,16 @@ class Spout(Component):
 
     tuple_size_in_bytes = 0
 
+    start_time = time.time()
+
     # Serialize
     for obj in tup:
       serialized = self.serializer.serialize(obj)
       data_tuple.values.append(serialized)
       tuple_size_in_bytes += len(serialized)
+
+    latency = time.time() - start_time
+    self.spout_metrics.serialize_data_tuple(stream, latency * constants.SEC_TO_NS)
 
     # TODO: return when need_task_ids=True
     ret = super(Spout, self).admit_data_tuple(stream_id=stream, data_tuple=data_tuple,
@@ -141,10 +146,11 @@ class Spout(Component):
     return ret
 
   def process_incoming_tuples(self):
-    raise RuntimeError("Incoming tuple handling not implemented yet")
+    Log.debug("In spout, process_incoming_tuples() don't do anything")
+    pass
 
   def _read_tuples_and_execute(self):
-    start_time = time.time()
+    start_cycle_time = time.time()
     ack_batch_time = float(self.sys_config[constants.INSTANCE_ACK_BATCH_TIME_MS]) * constants.MS_TO_SEC
     while not self.in_stream.is_empty():
       try:
@@ -166,11 +172,12 @@ class Spout(Component):
         Log.error("Received tuple not instance of HeronTupleSet")
 
       # avoid spending too much time here
-      if time.time() - start_time - ack_batch_time > 0:
+      if time.time() - start_cycle_time - ack_batch_time > 0:
         break
 
   def _produce_tuple(self):
-    max_spout_pending = int(self.sys_config[constants.TOPOLOGY_MAX_SPOUT_PENDING])
+    # TODO: Don't do the default config here
+    max_spout_pending = int(self.spout_config.get(constants.TOPOLOGY_MAX_SPOUT_PENDING, 10000000))
     total_tuples_emitted_before = self.total_tuples_emitted
     total_data_emitted_bytes_before = self.get_total_data_emitted_in_bytes()
     emit_batch_time = float(self.sys_config[constants.INSTANCE_EMIT_BATCH_TIME_MS]) * constants.MS_TO_SEC

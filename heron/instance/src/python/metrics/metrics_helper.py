@@ -100,6 +100,9 @@ class ComponentMetrics(object):
   def update_emit_count(self, stream_id):
     self.update_count(self.EMIT_COUNT, key=stream_id)
 
+  def serialize_data_tuple(self, stream_id, latency_in_ns):
+    self.update_count(self.TUPLE_SERIALIZATION_TIME_NS, stream_id, latency_in_ns)
+
 
 class SpoutMetrics(ComponentMetrics):
   COMPLETE_LATENCY = "__complete-latency"
@@ -155,9 +158,11 @@ class BoltMetrics(ComponentMetrics):
   TUPLE_DESERIALIZATION_TIME_NS = "__tuple-deserialization-time-ns"
 
   bolt_metrics = {
+    PROCESS_LATENCY: MultiMeanReducedMetric(),
     EXEC_COUNT: MultiCountMetric(),
     EXEC_LATENCY: MultiMeanReducedMetric(),
-    EXEC_TIME_NS: MultiCountMetric()
+    EXEC_TIME_NS: MultiCountMetric(),
+    TUPLE_DESERIALIZATION_TIME_NS: MultiCountMetric()
   }
 
   inputs_init = [ComponentMetrics.ACK_COUNT, ComponentMetrics.FAIL_COUNT,
@@ -195,6 +200,25 @@ class BoltMetrics(ComponentMetrics):
     self.update_count(self.EXEC_COUNT, global_stream_id)
     self.update_reduced_metric(self.EXEC_LATENCY, latency_in_ns, global_stream_id)
     self.update_count(self.EXEC_TIME_NS, global_stream_id, incr_by=latency_in_ns)
+
+  def deserialize_data_tuple(self, stream_id, source_component, latency_in_ns):
+    self.update_count(self.TUPLE_DESERIALIZATION_TIME_NS, stream_id, latency_in_ns)
+    global_stream_id = source_component + "/" + stream_id
+    self.update_count(self.TUPLE_DESERIALIZATION_TIME_NS, global_stream_id, latency_in_ns)
+
+  def acked_tuple(self, stream_id, source_component, latency_in_ns):
+    self.update_count(self.ACK_COUNT, stream_id)
+    self.update_reduced_metric(self.PROCESS_LATENCY, latency_in_ns, stream_id)
+    global_stream_id = source_component + '/' + stream_id
+    self.update_count(self.ACK_COUNT, global_stream_id)
+    self.update_reduced_metric(self.PROCESS_LATENCY, latency_in_ns, global_stream_id)
+
+  def failed_tuple(self, stream_id, source_component, latency_in_ns):
+    self.update_count(self.FAIL_COUNT, stream_id)
+    self.update_reduced_metric(self.FAIL_LATENCY, latency_in_ns, stream_id)
+    global_stream_id = source_component + '/' + stream_id
+    self.update_count(self.FAIL_COUNT, global_stream_id)
+    self.update_reduced_metric(self.FAIL_LATENCY, latency_in_ns, global_stream_id)
 
 class MetricsCollector(object):
   """Helper class for pushing metrics to Out-Metrics queue"""

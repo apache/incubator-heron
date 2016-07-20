@@ -29,7 +29,8 @@ class WordSpout(Spout):
     word = next(self.words)
     self.logger.debug("Will emit: " + word)
     self.emit_count += 1
-    self.emit([word])
+    self.emit([word], tup_id='message id')
     self.logger.debug("Emit count: " + str(self.emit_count))
     if self.emit_count % 1000 == 0:
       self.logger.info("Emitted " + str(self.emit_count))
+

@@ -34,7 +34,7 @@ StreamParseTuple = namedtuple('Tuple', 'id component stream task values')
 :type values: tuple
 """
 
-HeronTuple = namedtuple('Tuple', StreamParseTuple._fields + ('creation', ))
+HeronTuple = namedtuple('Tuple', StreamParseTuple._fields + ('creation_time', 'roots'))
 """StreamParse compatible Heron Tuple
 
 :ivar id: the ID of the Tuple
@@ -47,8 +47,10 @@ HeronTuple = namedtuple('Tuple', StreamParseTuple._fields + ('creation', ))
 :type task: int
 :ivar values: the payload of the Tuple where data is stored.
 :type values: tuple or list
-:ivar creation: the time the Tuple was created
-:type creation: float
+:ivar creation_time: the time the Tuple was created
+:type creation_time: float
+:ivar roots: a list of RootId (protobuf)
+:type roots: list
 """
 
 RootTupleInfo = namedtuple('RootTupleInfo', 'stream_id tuple_id insertion_time key')
@@ -58,22 +60,23 @@ class TupleHelper(object):
   """Tuple generator, returns StreamParse compatible tuple"""
   TICK_TUPLE_ID = "__tick"
   TICK_SOURCE_COMPONENT = "__system"
+  MAX_SFIXED64_RAND_BITS = 61 #last three bits are used for type
   @staticmethod
-  def make_tuple(stream, tuple_id, values, roots=None):
+  def make_tuple(stream, tuple_key, values, roots=None):
     component_name = stream.component_name
     stream_id = stream.id
-    gen_task = roots[0].taskid if roots is not None else None
-    return HeronTuple(id=str(tuple_id), component=component_name, stream=stream_id,
-                      task=gen_task, values=values, creation=time.time())
+    gen_task = roots[0].taskid if roots is not None and len(roots) > 0 else None
+    return HeronTuple(id=str(tuple_key), component=component_name, stream=stream_id,
+                      task=gen_task, values=values, creation_time=time.time(), roots=roots)
   @staticmethod
   def make_tick_tuple():
     return HeronTuple(id=TupleHelper.TICK_TUPLE_ID, component=TupleHelper.TICK_SOURCE_COMPONENT,
                       stream=TupleHelper.TICK_TUPLE_ID, task=None, values=None,
-                      creation=time.time())
+                      creation_time=time.time(), roots=None)
 
   @staticmethod
   def make_root_tuple_info(stream_id, tuple_id):
-    key = random.getrandbits(64)
+    key = random.getrandbits(TupleHelper.MAX_SFIXED64_RAND_BITS)
     return RootTupleInfo(stream_id=stream_id, tuple_id=tuple_id, insertion_time=time.time(), key=key)
 
 

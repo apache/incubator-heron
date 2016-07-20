@@ -33,8 +33,15 @@ class CountBolt(Bolt):
       return
     word = tuple.values[0]
     self._increment(word, 10 if word == "heron" else 1)
-    if self.total % 1000 == 0:
+    if self.total % 10000 == 0:
       self.log("Current map: " + str(self.counter))
+
+    if self.total % 2 == 0:
+      self.logger.debug("Will fail tuple: " + str(tuple))
+      self.fail(tuple)
+    else:
+      self.logger.debug("Will ack tuple: " + str(tuple))
+      self.ack(tuple)
 
     self.emit([word, self.counter[word]])
 
