@@ -514,12 +514,21 @@ class HeronExecutor:
       """
 
       # TODO: replace with proper config loading. only for prototyping!
-      statemgr_locations = [{
-        'type': 'file',
-        'name': 'local',
-        'rootpath': '~/.herondata/repository/state/local',
-        'tunnelhost': 'localhost',
-      }]
+      statemgr_locations = [
+        {
+            'type': 'file',
+            'name': 'local',
+            'rootpath': '~/.herondata/repository/state/local',
+            'tunnelhost': 'localhost',
+        },
+        # {
+        #     'type': 'zookeeper',
+        #     'name': 'zk',
+        #     'hostport': 'szookeeper.local.twitter.com:2181',
+        #     'rootpath': '/storm/heron/states',
+        #     'tunnelhost': 'localhost',
+        # },
+      ]
 
       statemgr_config = StateMgrConfig()
       statemgr_config.set_state_locations(statemgr_locations)
