@@ -8,7 +8,9 @@ import re
 import collections
 import json
 import heron.cli.src.python.activate as activate
-import heron.cli.src.python.utils as utils
+import heron.cli.src.python.args as args
+import traceback
+import logging
 
 ################################################################################
 # Run the command
@@ -36,15 +38,16 @@ class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
     return parts
 
 class HeronRCArgumentParser(argparse.ArgumentParser):
-
+	cmdmap=collections.defaultdict(dict)
  	def __init__(self, *args, **kwargs):
-		self.cmdmap=collections.defaultdict(dict)
-		self.cmdmap['*']['*'] = ''
+		#self.cmdmap=collections.defaultdict(dict)
+		
 
-		self.initializeFromRC()
+		HeronRCArgumentParser.initializeFromRC()
 		super(HeronRCArgumentParser, self).__init__(*args, **kwargs)
-
-	def remove_comments(self,string):
+	
+	@classmethod
+	def remove_comments(hrc,string):
 		pattern = r"(\#.*$)"
 		# first group captures quoted strings (double or single)
 		# second group captures comments (//single-line or /* multi-line */)
@@ -64,45 +67,52 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
 	# cmdmap ['submit']['devcluster/ads/PROD'] = '--config-property "heron.class.launcher=com.twitter.heron.scheduler.aurora.AuroraLauncher"'
 	# cmdmap ['*']['devcluster/ads/PROD'] = '--config-property "heron.class.launcher=com.twitter.heron.scheduler.aurora.AuroraLauncher"'
 	# cmdmap ['*']['*'] = '--config-property "heron.class.launcher=com.twitter.heron.scheduler.aurora.AuroraLauncher"'
-
-	def initializeFromRC(self):
+	@classmethod
+	def initializeFromRC(hrc):
+		if  len(hrc.cmdmap) > 0:
+			return 
 		if os.path.exists(HERON_RC):
 
 			with open(HERON_RC) as f:
+				hrc.cmdmap['*']['*'] = ''
 				for line in f:
 					m = p.match(line)
 					value = ''
-					command='*'
-					env = '*'
+					command=''
+					env = ''
 					if (m != None):
-						value = self.remove_comments(m.group(3).rstrip(os.linesep))
+						value = hrc.remove_comments(m.group(3).rstrip(os.linesep))
 						command = ( m.group(1),'') [ m.group(1) == None or m.group(1) == '' ]
 						env = ( m.group(2), '') [ m.group(2) == None or m.group(2) == '']
 					else:
-						value = self.remove_comments(line.rstrip(os.linesep))
+						value = hrc.remove_comments(line.rstrip(os.linesep))
 
-					args_list = utils.insert_bool_values(value.split())  # make sure that all the single args have a boolean value associated so that we can load the args to a key value structure
+					args_list = args.insert_bool_values(value.split())  # make sure that all the single args have a boolean value associated so that we can load the args to a key value structure
 					args_list_string = ' '.join (args_list)
 					if command == None or command == '' :
 						continue
-					if ( command in self.cmdmap and env in self.cmdmap[command]):
-						self.cmdmap[command][env] =  self.cmdmap[command][env] 	+ ' ' + args_list_string	
+					if ( command in hrc.cmdmap and env in hrc.cmdmap[command]):
+						hrc.cmdmap[command][env] =  hrc.cmdmap[command][env] 	+ ' ' + args_list_string	
 					else:
-						self.cmdmap[command][env] =  args_list_string
-			print self.cmdmap	
-
+						hrc.cmdmap[command][env] =  args_list_string
+			try:
+				print "cmdmap", hrc.cmdmap	
+				raise ValueError('A very specific bad thing happened')
+			except Exception as error:
+				traceback.print_stack()
 		else:
 			print "WARN: %s is not an existing file" % HERON_RC
 
 
     # for each command / cluster-role-env combination, get the commands from heronrc
     #     remove any duplicates that have already been supplied already  and present in the command-dictionary     
-	def get_args_for_command_role (self , command, role):
+	@classmethod
+	def get_args_for_command_role (hrc, command, role):
 		args_for_command_role=''
 
-		if ( command in self.cmdmap and role in self.cmdmap[command]):
-			args_for_command_role = (self.cmdmap[command][role],args_for_command_role) [self.cmdmap[command][role] == None or self.cmdmap[command][role] == '']
-
+		if ( command in hrc.cmdmap and role in hrc.cmdmap[command]):
+			args_for_command_role = (hrc.cmdmap[command][role],args_for_command_role) [hrc.cmdmap[command][role] == None or hrc.cmdmap[command][role] == '']
+		print command , role , args_for_command_role
 		return args_for_command_role.split()
 
 	# this is invoked when the parser.parse_args is called
@@ -116,13 +126,28 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
 		command = sys.argv[1]
 		role = sys.argv[2]
 
-		print command, role
+		print "####", command, role
 		new_arg_strings.extend(self.get_args_for_command_role(command, role))
 		new_arg_strings.extend(self.get_args_for_command_role(command, '*'))
 		new_arg_strings.extend(self.get_args_for_command_role('*', '*'))
 		arg_strings.extend(new_arg_strings)
-		print arg_strings
+		print "####", arg_strings
 		return arg_strings
+
+	#def _parse_known_args(self, arg_strings, namespace):
+	def parse_known_args(self, args=None, namespace=None):
+
+		namespace, args = super(HeronRCArgumentParser, self).parse_known_args(args, namespace)
+		if self.prog != 'heron':
+			return namespace,args	
+		try:
+			print "in HeronRCArgumentParser._parse_known_args", self, namespace, args
+			raise ValueError('A very specific bad thing happened')
+		except Exception as error:
+			traceback.print_stack()
+
+			#logging.exception("Something awful happened!")
+		return namespace, args
 
 
 #test stub
@@ -140,8 +165,9 @@ def main():
 		metavar = '<command> <options>')
 
 	activate.create_parser(subparsers)
+	#print subparsers
 	args, unknown_args = parser.parse_known_args()
-	print args, unknown_args
+	#print args, unknown_args
 
 
 if __name__ == "__main__":
