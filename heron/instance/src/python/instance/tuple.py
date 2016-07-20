@@ -14,6 +14,7 @@
 
 # Abstract class for Bolt/Spout -- Python interface of IInstance.java
 # Tuple definition
+import random
 from collections import namedtuple
 
 import time
@@ -50,6 +51,8 @@ HeronTuple = namedtuple('Tuple', StreamParseTuple._fields + ('creation', ))
 :type creation: float
 """
 
+RootTupleInfo = namedtuple('RootTupleInfo', 'stream_id tuple_id insertion_time key')
+
 
 class TupleHelper(object):
   """Tuple generator, returns StreamParse compatible tuple"""
@@ -67,5 +70,10 @@ class TupleHelper(object):
     return HeronTuple(id=TupleHelper.TICK_TUPLE_ID, component=TupleHelper.TICK_SOURCE_COMPONENT,
                       stream=TupleHelper.TICK_TUPLE_ID, task=None, values=None,
                       creation=time.time())
+
+  @staticmethod
+  def make_root_tuple_info(stream_id, tuple_id):
+    key = random.getrandbits(64)
+    return RootTupleInfo(stream_id=stream_id, tuple_id=tuple_id, insertion_time=time.time(), key=key)
 
 

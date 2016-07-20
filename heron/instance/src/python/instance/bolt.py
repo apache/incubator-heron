@@ -39,7 +39,7 @@ class Bolt(Component):
 
     self.bolt_config = self.pplan_helper.context['config']
 
-    self.bolt_metrics = BoltMetrics(self.pplan_helper.context, self.sys_config, self.pplan_helper)
+    self.bolt_metrics = BoltMetrics(self.pplan_helper)
 
     # TODO: Topology context, serializer and sys config
 
@@ -74,6 +74,7 @@ class Bolt(Component):
                               inputs=inputs, outputs=_outputs, config=config)
 
   def start(self):
+    self.bolt_metrics.register_metrics(self.pplan_helper.context, self.sys_config)
     self.initialize(config=self.bolt_config, context=self.pplan_helper.context)
 
     # prepare tick tuple
@@ -98,9 +99,25 @@ class Bolt(Component):
     :type need_task_ids: bool
     :param need_task_ids: indicate whether or not you would like the task IDs the Tuple was emitted.
     """
+    # TODO: check whether this tuple is sane with pplan_helper.check_output_schema
+    # TODO: custom grouping and invoke hook emit
+    data_tuple = tuple_pb2.HeronDataTuple()
+    data_tuple.key = 0
+
+    tuple_size_in_bytes = 0
+
+    # Serialize
+    for obj in tup:
+      serialized = self.serializer.serialize(obj)
+      data_tuple.values.append(serialized)
+      tuple_size_in_bytes += len(serialized)
+
     # TODO: return when need_task_ids=True
-    return super(Bolt, self)._admit_data_tuple(tup, stream_id=stream, is_spout=False,
-                                               anchors=anchors, message_id=None, metrics=self.bolt_metrics)
+    ret = super(Bolt, self).admit_data_tuple(stream_id=stream, data_tuple=data_tuple,
+                                             tuple_size_in_bytes=tuple_size_in_bytes)
+
+    self.bolt_metrics.update_emit_count(stream)
+    return ret
 
   @staticmethod
   def is_tick(tup):

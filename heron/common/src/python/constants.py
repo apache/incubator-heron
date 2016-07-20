@@ -36,4 +36,6 @@ MAX_LOG_FILES = 'heron.logging.maximum.files'
 MAX_LOG_SIZE_MB = 'heron.logging.maximum.size.mb'
 
 TOPOLOGY_TICK_TUPLE_FREQ_SECS = "topology.tick.tuple.freq.secs"
+TOPOLOGY_ACKING_ENABLED = "topology.acking"
 METRICS_EXPORT_INTERVAL_SECS = "heron.metrics.export.interval.sec"
+

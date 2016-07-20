@@ -78,33 +78,8 @@ class Component(object):
 
     self.logger.log(_log_level, message)
 
-  def _admit_data_tuple(self, output_tuple, stream_id, is_spout,
-                        anchors=None, message_id=None, metrics=None):
-    """Internal implementation of OutputCollector
-
-    Handles emitting data tuples. Record metrics of: number of emitted tuples and serialize latency
-    """
-    # TODO (Important) : check whether this tuple is sane with pplan_helper.check_output_schema
-    # TODO : custom grouping and invoke hook emit
-
-    data_tuple = self.make_data_tuple()
-    data_tuple.key = 0
-
-    # TODO : set the anchors for a tuple (for Bolt), or message id (for Spout)
-
-    tuple_size_in_bytes = 0
-
-    # Serialize
-    for object in output_tuple:
-      serialized = self.serializer.serialize(object)
-      data_tuple.values.append(serialized)
-      tuple_size_in_bytes += len(serialized)
-
+  def admit_data_tuple(self, stream_id, data_tuple, tuple_size_in_bytes):
     self.output_helper.add_data_tuple(stream_id, data_tuple, tuple_size_in_bytes)
-
-    if metrics is not None:
-      metrics.update_count(ComponentMetrics.EMIT_COUNT, key=stream_id)
-
 
   ##################################################################
   # The followings are to be implemented by Spout/Bolt independently

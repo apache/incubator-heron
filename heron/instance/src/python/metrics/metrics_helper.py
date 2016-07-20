@@ -50,22 +50,22 @@ class ComponentMetrics(object):
   FAIL_COUNT = "__fail-count"
   EMIT_COUNT = "__emit-count"
   TUPLE_SERIALIZATION_TIME_NS = "__tuple-serialization-time-ns"
-
   OUT_QUEUE_FULL_COUNT = "__out-queue-full-count"
 
   component_metrics = {
-    EMIT_COUNT: MultiCountMetric()
+    EMIT_COUNT: MultiCountMetric(),
+    OUT_QUEUE_FULL_COUNT: CountMetric()
   }
 
   # a list of metrics that require to initialize multi count metrics
   to_multi_init = [ACK_COUNT, FAIL_COUNT, EMIT_COUNT]
 
-  def __init__(self, context, sys_config, additional_metrics):
-    self.context = context
-    interval = float(sys_config[constants.METRICS_EXPORT_INTERVAL_SECS])
+  def __init__(self, additional_metrics):
     self.metrics = self.component_metrics
     self.metrics.update(additional_metrics)
 
+  def register_metrics(self, context, sys_config):
+    interval = float(sys_config[constants.METRICS_EXPORT_INTERVAL_SECS])
     for key, value in self.metrics.iteritems():
       context.register_metric(key, value, interval)
 
@@ -93,6 +93,12 @@ class ComponentMetrics(object):
     else:
       Log.error("In update_count(): " + name + " is registered but not supported with this method")
 
+  def update_out_queue_full_count(self):
+    self.update_count(self.OUT_QUEUE_FULL_COUNT)
+
+  def update_emit_count(self, stream_id):
+    self.update_count(self.EMIT_COUNT, key=stream_id)
+
 
 class SpoutMetrics(ComponentMetrics):
   COMPLETE_LATENCY = "__complete-latency"
@@ -103,14 +109,15 @@ class SpoutMetrics(ComponentMetrics):
 
   spout_metrics = {
     NEXT_TUPLE_LATENCY: MeanReducedMetric(),
-    NEXT_TUPLE_COUNT: CountMetric()
+    NEXT_TUPLE_COUNT: CountMetric(),
+    COMPLETE_LATENCY: MultiMeanReducedMetric()
   }
 
   to_multi_init = [ComponentMetrics.ACK_COUNT, ComponentMetrics.FAIL_COUNT,
                    TIMEOUT_COUNT, ComponentMetrics.EMIT_COUNT]
 
-  def __init__(self, context, sys_config, pplan_helper):
-    super(SpoutMetrics, self).__init__(context, sys_config, self.spout_metrics)
+  def __init__(self, pplan_helper):
+    super(SpoutMetrics, self).__init__(self.spout_metrics)
     self._init_multi_count_metrics(pplan_helper)
 
   def _init_multi_count_metrics(self, pplan_helper):
@@ -124,6 +131,10 @@ class SpoutMetrics(ComponentMetrics):
   def next_tuple(self, latency_in_ns):
     self.update_reduced_metric(self.NEXT_TUPLE_LATENCY, latency_in_ns)
     self.update_count(self.NEXT_TUPLE_COUNT)
+
+  def acked_tuple(self, stream_id, complete_latency_ns):
+    self.update_count(self.ACK_COUNT, stream_id)
+    self.update_reduced_metric(self.COMPLETE_LATENCY, complete_latency_ns, stream_id)
 
 class BoltMetrics(ComponentMetrics):
   PROCESS_LATENCY = "__process-latency"
@@ -142,8 +153,8 @@ class BoltMetrics(ComponentMetrics):
                  EXEC_COUNT, EXEC_TIME_NS]
   outputs_init = [ComponentMetrics.EMIT_COUNT]
 
-  def __init__(self, context, sys_config, pplan_helper):
-    super(BoltMetrics, self).__init__(context, sys_config, self.bolt_metrics)
+  def __init__(self, pplan_helper):
+    super(BoltMetrics, self).__init__(self.bolt_metrics)
     self._init_multi_count_metrics(pplan_helper)
 
   def _init_multi_count_metrics(self, pplan_helper):
