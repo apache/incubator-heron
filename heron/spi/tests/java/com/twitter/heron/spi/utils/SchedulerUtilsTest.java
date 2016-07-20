@@ -14,6 +14,9 @@
 
 package com.twitter.heron.spi.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,6 +27,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.system.Common;
+import com.twitter.heron.spi.common.Config;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({FileUtils.class, ShellUtils.class, SchedulerUtils.class})
@@ -147,5 +151,18 @@ public class SchedulerUtilsTest {
         setupWorkingDirectory(
             WORKING_DIR, CORE_RELEASE_URI, CORE_RELEASE_DEST,
             TOPOLOGY_URI, TOPOLOGY_DEST, isVerbose));
+  }
+
+  @Test
+  public void testSchedulerCommandArgs() throws Exception {
+    List<Integer> freePorts = new ArrayList<>();
+
+    freePorts.add(1);
+    String[] expectedArgs =
+        {"--cluster", null, "--role", null,
+            "--environment", null, "--topology_name", null,
+            "--topology_jar", null, "--http_port", "1"};
+    Assert.assertArrayEquals(expectedArgs, SchedulerUtils.schedulerCommandArgs(
+        Mockito.mock(Config.class), Mockito.mock(Config.class), freePorts));
   }
 }

@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' config.py '''
 import os
 import yaml
 
@@ -20,7 +20,8 @@ from heron.statemgrs.src.python.config import Config as StateMgrConfig
 STATEMGRS_KEY = "statemgrs"
 VIZ_URL_FORMAT_KEY = "viz.url.format"
 
-class Config:
+
+class Config(object):
   """
   Responsible for reading the yaml config file and
   exposing various tracker configs.
@@ -34,6 +35,7 @@ class Config:
     self.parse_config_file(conf_file)
 
   def parse_config_file(self, conf_file):
+    """parse config files"""
     expanded_conf_file_path = os.path.expanduser(conf_file)
     assert os.path.lexists(expanded_conf_file_path), "Config file does not exists: %s" % (conf_file)
 
@@ -44,22 +46,25 @@ class Config:
     self.load_configs()
 
   def load_configs(self):
+    """load config files"""
     self.statemgr_config.set_state_locations(self.configs[STATEMGRS_KEY])
     if VIZ_URL_FORMAT_KEY in self.configs:
       self.viz_url_format = self.validated_viz_url_format(self.configs[VIZ_URL_FORMAT_KEY])
     else:
       self.viz_url_format = ""
 
+  # pylint: disable=no-self-use
   def validated_viz_url_format(self, viz_url_format):
+    """validate visualization url format"""
     # We try to create a string by substituting all known
     # parameters. If an unknown parameter is present, an error
     # will be thrown
     valid_parameters = {
-      "${CLUSTER}": "cluster",
-      "${ENVIRON}": "environ",
-      "${TOPOLOGY}": "topology",
-      "${ROLE}": "role",
-      "${USER}": "user",
+        "${CLUSTER}": "cluster",
+        "${ENVIRON}": "environ",
+        "${TOPOLOGY}": "topology",
+        "${ROLE}": "role",
+        "${USER}": "user",
     }
     dummy_formatted_viz_url = viz_url_format
     for key, value in valid_parameters.iteritems():
@@ -80,11 +85,11 @@ class Config:
 
     # Create the parameters based on execution state
     valid_parameters = {
-      "${CLUSTER}": execution_state["cluster"],
-      "${ENVIRON}": execution_state["environ"],
-      "${TOPOLOGY}": execution_state["jobname"],
-      "${ROLE}": execution_state["role"],
-      "${USER}": execution_state["submission_user"],
+        "${CLUSTER}": execution_state["cluster"],
+        "${ENVIRON}": execution_state["environ"],
+        "${TOPOLOGY}": execution_state["jobname"],
+        "${ROLE}": execution_state["role"],
+        "${USER}": execution_state["submission_user"],
     }
 
     formatted_viz_url = self.viz_url_format

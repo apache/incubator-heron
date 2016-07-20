@@ -1,5 +1,6 @@
+''' topology_unittest.py '''
+# pylint: disable=missing-docstring
 import unittest2 as unittest
-import mock
 
 from mock_proto import MockProto
 from heron.tracker.src.python.topology import Topology
@@ -67,13 +68,13 @@ class TopologyTest(unittest.TestCase):
     bolts = self.topology.bolts()
     self.assertEqual(3, len(bolts))
     self.assertEqual(["mock_bolt1", "mock_bolt2", "mock_bolt3"],
-                      self.topology.bolt_names())
+                     self.topology.bolt_names())
 
   def test_num_instances(self):
     # When pplan is not set
     self.assertEqual(0, self.topology.num_instances())
 
-    pplan = MockProto().create_mock_medium_physical_plan(1,2,3,4)
+    pplan = MockProto().create_mock_medium_physical_plan(1, 2, 3, 4)
     self.topology.set_physical_plan(pplan)
 
     self.assertEqual(10, self.topology.num_instances())
@@ -81,8 +82,9 @@ class TopologyTest(unittest.TestCase):
   def test_trigger_watches(self):
     # Workaround
     scope = {
-      "is_called": False
+        "is_called": False
     }
+    # pylint: disable=unused-argument, unused-variable
     def callback(something):
       scope["is_called"] = True
     uid = self.topology.register_watch(callback)
@@ -109,8 +111,9 @@ class TopologyTest(unittest.TestCase):
   def test_unregister_watch(self):
     # Workaround
     scope = {
-      "is_called": False
+        "is_called": False
     }
+    # pylint: disable=unused-argument
     def callback(something):
       scope["is_called"] = True
     uid = self.topology.register_watch(callback)
@@ -128,8 +131,9 @@ class TopologyTest(unittest.TestCase):
   def test_bad_watch(self):
     # Workaround
     scope = {
-      "is_called": False
+        "is_called": False
     }
+    # pylint: disable=unused-argument, unused-variable
     def callback(something):
       scope["is_called"] = True
       raise Exception("Test Bad Trigger Exception")

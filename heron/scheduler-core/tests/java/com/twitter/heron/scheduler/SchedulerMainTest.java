@@ -15,6 +15,8 @@
 package com.twitter.heron.scheduler;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -45,13 +47,11 @@ import com.twitter.heron.spi.utils.TopologyUtils;
 @PrepareForTest({
     TopologyUtils.class, ReflectionUtils.class, SchedulerUtils.class})
 public class SchedulerMainTest {
-  @Rule
-  public final ExpectedException exception = ExpectedException.none();
-
   private static final String STATE_MANAGER_CLASS = "STATE_MANAGER_CLASS";
   private static final String PACKING_CLASS = "PACKING_CLASS";
   private static final String SCHEDULER_CLASS = "SCHEDULER_CLASS";
-
+  @Rule
+  public final ExpectedException exception = ExpectedException.none();
   private IStateManager stateManager;
   private IPacking packing;
   private IScheduler scheduler;
@@ -92,6 +92,12 @@ public class SchedulerMainTest {
     Mockito.when(packing.pack()).thenReturn(packingPlan);
     Mockito.when(packingPlan.getInstanceDistribution()).thenReturn(packingString);
 
+    Map<String, PackingPlan.ContainerPlan> containers = new HashMap<>();
+    containers.put("dummy", new PackingPlan.ContainerPlan("dummy", null,
+        new PackingPlan.Resource(1, 1, 1)));
+
+    Mockito.when(packingPlan.getContainers()).thenReturn(containers);
+
     // Mock ReflectionUtils stuff
     PowerMockito.spy(ReflectionUtils.class);
     PowerMockito.doReturn(stateManager).
@@ -104,7 +110,8 @@ public class SchedulerMainTest {
     // Mock objects to be verified
     schedulerMain =
         Mockito.spy(
-            new SchedulerMain(config, topology, iSchedulerServerPort));
+            new SchedulerMain(
+                config, topology, iSchedulerServerPort, Mockito.mock(Properties.class)));
     schedulerServer = Mockito.mock(SchedulerServer.class);
     Mockito.doReturn(schedulerServer).when(schedulerMain).getServer(
         Mockito.any(Config.class), Mockito.eq(scheduler), Mockito.eq(iSchedulerServerPort));

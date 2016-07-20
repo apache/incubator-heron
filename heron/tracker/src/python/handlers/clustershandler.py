@@ -11,12 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' clustershandler.py '''
 import tornado.gen
 
-from heron.tracker.src.python import constants
 from heron.tracker.src.python.handlers import BaseHandler
 
+# pylint: disable=attribute-defined-outside-init
 class ClustersHandler(BaseHandler):
   """
   URL - /clusters
@@ -25,10 +25,12 @@ class ClustersHandler(BaseHandler):
   """
 
   def initialize(self, tracker):
+    """ initialize """
     self.tracker = tracker
 
   @tornado.gen.coroutine
   def get(self):
+    """ get method """
     clusters = [statemgr.name for statemgr in self.tracker.state_managers]
 
     self.write_success_response(clusters)

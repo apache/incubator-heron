@@ -39,14 +39,14 @@ Heron client installer
 Uncompressing......
 Heron is now installed!
 
-Make sure you have "/usr/local/bin" in your path.
+Make sure you have "${HOME}/bin" in your path.
 ...
 ```
 
-To add `/usr/local/bin` to your path, run:
+To add `~/bin` to your path, run:
 
 ```bash
-$ export PATH=$PATH:/usr/local/bin
+$ export PATH=$PATH:~/bin
 ```
 
 Now run the script for Heron tools (setting the `--user` flag):
@@ -66,7 +66,7 @@ To check Heron is successfully installed, run:
 
 ```bash
 $ heron version
-heron.build.version : 0.14.0
+heron.build.version : 0.14.1
 heron.build.time : Tue May 24 22:44:01 PDT 2016
 heron.build.timestamp : 1464155053000
 heron.build.host : ${HOSTNAME}

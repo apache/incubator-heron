@@ -97,7 +97,6 @@ genrule(
         ":protobuf-java",
         ":slf4j-api-java",
         ":slf4j-jdk-java",
-        ":log4j-over-slf4j-java",
     ],
     outs = [
         "heron-client.tar.gz",
@@ -128,7 +127,6 @@ genrule(
         "--cp $(location protobuf-java)              lib/third_party/$$(basename $(location protobuf-java))",
         "--cp $(location slf4j-api-java)             lib/third_party/$$(basename $(location slf4j-api-java))",
         "--cp $(location slf4j-jdk-java)             lib/third_party/$$(basename $(location slf4j-jdk-java))",
-        "--cp $(location log4j-over-slf4j-java)      lib/third_party/$$(basename $(location log4j-over-slf4j-java))",
     ]),
     heuristic_label_expansion = False,
     tags = ["manual"],
@@ -350,11 +348,6 @@ filegroup(
 )
 
 filegroup(
-    name = "log4j-over-slf4j-java",
-    srcs = ["@org_slf4j_log4j_over_slf4j//jar"],
-)
-
-filegroup(
     name = "hapi",
     srcs = ["//heron/api/src/java:heron-api"],
 )
@@ -449,7 +442,7 @@ genrule(
     outs = ["tools_launcher_bin.sh"],
     cmd = """
         release_info="$$(cat $(location :release.yaml))"
-        bin_common="$$(cat $(location //scripts/packages:bin_common.sh))"
+        bin_common="$$(cat $(location //scripts/packages:bin-common.sh))"
         template="$$(cat $(location //scripts/packages:tools-template-bin.sh))"
         echo "$${bin_common}\n\n$${template//%release_info%/$${release_info}}" >$@
         """,

@@ -11,17 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' topology.py '''
 import logging
 import traceback
-import urllib2
 import uuid
 
 from heron.common.src.python import constants
 
 LOG = logging.getLogger(__name__)
 
-class Topology:
+# pylint: disable=too-many-instance-attributes
+class Topology(object):
   """
   Class Topology
     Contains all the relevant information about
@@ -71,7 +71,7 @@ class Topology:
     RETRY_COUNT = 5
     # Retry in case UID is previously
     # generated, just in case...
-    for i in range(RETRY_COUNT):
+    for _ in range(RETRY_COUNT):
       # Generate a random UUID.
       uid = uuid.uuid4()
       if uid not in self.watches:
@@ -114,6 +114,7 @@ class Topology:
       self.unregister_watch(uid)
 
   def set_physical_plan(self, physical_plan):
+    """ set physical plan """
     if not physical_plan:
       self.physical_plan = None
       self.id = None
@@ -122,6 +123,7 @@ class Topology:
       self.id = physical_plan.topology.id
     self.trigger_watches()
 
+  # pylint: disable=no-self-use
   def get_execution_state_dc_environ(self, execution_state):
     """
     Helper function to extract dc and environ from execution_state.
@@ -130,6 +132,7 @@ class Topology:
     return (execution_state.cluster, execution_state.environ)
 
   def set_execution_state(self, execution_state):
+    """ set exectuion state """
     if not execution_state:
       self.execution_state = None
       self.cluster = None
@@ -143,10 +146,12 @@ class Topology:
     self.trigger_watches()
 
   def set_tmaster(self, tmaster):
+    """ set exectuion state """
     self.tmaster = tmaster
     self.trigger_watches()
 
   def set_scheduler_location(self, scheduler_location):
+    """ set exectuion state """
     self.scheduler_location = scheduler_location
     self.trigger_watches()
 
@@ -206,4 +211,3 @@ class Topology:
       stmgrs = list(self.physical_plan.stmgrs)
       return map(lambda s: s.host_name, stmgrs)
     return []
-

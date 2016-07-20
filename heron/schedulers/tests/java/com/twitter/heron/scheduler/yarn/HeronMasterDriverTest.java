@@ -221,11 +221,14 @@ public class HeronMasterDriverTest {
   @Test
   public void createsContextConfigForExecutorId() {
     Configuration config = driver.createContextConfig("4");
+    boolean found = false;
     for (NamedParameterNode<?> namedParameterNode : config.getNamedParameters()) {
-      if (namedParameterNode.getName().equals(ContextIdentifier.class.getName())) {
-        Assert.assertEquals(4, config.getNamedParameter(namedParameterNode));
+      if (namedParameterNode.getName().equals(ContextIdentifier.class.getSimpleName())) {
+        Assert.assertEquals("4", config.getNamedParameter(namedParameterNode));
+        found = true;
       }
     }
+    Assert.assertTrue("\"ContextIdentifier\" didn't exist.", found);
   }
 
   @Test

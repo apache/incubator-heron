@@ -11,14 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' metricsqueryhandler.py '''
+import traceback
 import tornado.gen
 import tornado.web
-import traceback
 
-from heron.tracker.src.python import constants
 from heron.tracker.src.python.handlers import BaseHandler
 from heron.tracker.src.python.query import Query
+
 
 class MetricsQueryHandler(BaseHandler):
   """
@@ -36,17 +36,22 @@ class MetricsQueryHandler(BaseHandler):
   asked in the query for this topology
   """
 
+  # pylint: disable=attribute-defined-outside-init
   def initialize(self, tracker):
+    """ initialize """
     self.tracker = tracker
 
   @tornado.gen.coroutine
   def get(self):
+    """ get method """
     try:
       cluster = self.get_argument_cluster()
+
       role = self.get_argument_role()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
-      topology = self.tracker.getTopologyByClusterRoleEnvironAndName(cluster, role, environ, topology_name)
+      topology = self.tracker.getTopologyByClusterRoleEnvironAndName(
+          cluster, role, environ, topology_name)
 
       start_time = self.get_argument_starttime()
       end_time = self.get_argument_endtime()
@@ -60,13 +65,9 @@ class MetricsQueryHandler(BaseHandler):
       traceback.print_exc()
       self.write_error_response(e)
 
+  # pylint: disable=unused-argument
   @tornado.gen.coroutine
-  def executeMetricsQuery(self,
-                         tmaster,
-                         queryString,
-                         start_time,
-                         end_time,
-                         callback=None):
+  def executeMetricsQuery(self, tmaster, queryString, start_time, end_time, callback=None):
     """
     Get the specified metrics for the given query in this topology.
     Returns the following dict on success:
@@ -102,11 +103,10 @@ class MetricsQueryHandler(BaseHandler):
 
     for metric in metrics:
       tl = {
-        "data": metric.timeline
+          "data": metric.timeline
       }
       if metric.instance:
         tl["instance"] = metric.instance
       ret["timeline"].append(tl)
 
     raise tornado.gen.Return(ret)
-

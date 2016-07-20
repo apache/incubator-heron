@@ -4,16 +4,16 @@
 from __future__ import absolute_import
 
 import contextlib
-import errno
 import os
 import shutil
+import tempfile
 import uuid
 from hashlib import sha1
 from threading import Lock
 
 from pkg_resources import find_distributions, resource_isdir, resource_listdir, resource_string
 
-from .common import safe_mkdir, safe_mkdtemp, safe_open, safe_rmtree
+from .common import rename_if_empty, safe_mkdir, safe_mkdtemp, safe_open
 from .finders import register_finders
 
 
@@ -118,7 +118,9 @@ class CacheHelper(object):
   @classmethod
   def _compute_hash(cls, names, stream_factory):
     digest = sha1()
-    digest.update(''.join(names).encode('utf-8'))
+    # Always use / as the path separator, since that's what zip uses.
+    hashed_names = [n.replace(os.sep, '/') for n in names]
+    digest.update(''.join(hashed_names).encode('utf-8'))
     for name in names:
       with contextlib.closing(stream_factory(name)) as fp:
         cls.update_hash(fp, digest)
@@ -136,7 +138,7 @@ class CacheHelper(object):
 
   @classmethod
   def _iter_files(cls, directory):
-    normpath = os.path.normpath(directory)
+    normpath = os.path.realpath(os.path.normpath(directory))
     for root, _, files in os.walk(normpath):
       for f in files:
         yield os.path.relpath(os.path.join(root, f), normpath)
@@ -173,13 +175,8 @@ class CacheHelper(object):
           with contextlib.closing(zf.open(name)) as zi:
             with safe_open(os.path.join(target_dir_tmp, target_name), 'wb') as fp:
               shutil.copyfileobj(zi, fp)
-      try:
-        os.rename(target_dir_tmp, target_dir)
-      except OSError as e:
-        if e.errno == errno.ENOTEMPTY:
-          safe_rmtree(target_dir_tmp)
-        else:
-          raise
+
+      rename_if_empty(target_dir_tmp, target_dir)
 
     dist = DistributionHelper.distribution_from_path(target_dir)
     assert dist is not None, 'Failed to cache distribution %s' % source
@@ -200,3 +197,19 @@ class Memoizer(object):
   def store(self, key, value):
     with self._lock:
       self._data[key] = value
+
+
+@contextlib.contextmanager
+def named_temporary_file(*args, **kwargs):
+  """
+  Due to a bug in python (https://bugs.python.org/issue14243), we need
+  this to be able to use the temporary file without deleting it.
+  """
+  assert 'delete' not in kwargs
+  kwargs['delete'] = False
+  fp = tempfile.NamedTemporaryFile(*args, **kwargs)
+  try:
+    with fp:
+      yield fp
+  finally:
+    os.remove(fp.name)

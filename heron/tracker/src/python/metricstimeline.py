@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+""" metricstimeline.py """
 import logging
 import tornado.gen
 
@@ -20,6 +20,7 @@ from heron.proto import tmaster_pb2
 
 LOG = logging.getLogger(__name__)
 
+# pylint: disable=too-many-locals, too-many-branches, unused-argument
 @tornado.gen.coroutine
 def getMetricsTimeline(tmaster,
                        component_name,
@@ -141,4 +142,3 @@ def getMetricsTimeline(tmaster,
         ret["timeline"][metricname][instance][interval_value.interval.start] = interval_value.value
 
   raise tornado.gen.Return(ret)
-

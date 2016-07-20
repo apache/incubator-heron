@@ -334,13 +334,15 @@ public class MetricsManager {
           exception);
 
       String sinkId = threadName;
-      int thisSinkRetryAttempts = sinksRetryAttempts.remove(sinkId);
+      Integer thisSinkRetryAttempts = sinksRetryAttempts.remove(sinkId);
 
       // Remove the old sink executor
       SinkExecutor oldSinkExecutor = sinkExecutors.remove(sinkId);
 
-      // Remove the unneeded Communicator bind with Metrics Manager Server
-      metricsManagerServer.removeSinkCommunicator(oldSinkExecutor.getCommunicator());
+      if (oldSinkExecutor != null) {
+        // Remove the unneeded Communicator bind with Metrics Manager Server
+        metricsManagerServer.removeSinkCommunicator(oldSinkExecutor.getCommunicator());
+      }
 
       // Close the sink
       SysUtils.closeIgnoringExceptions(oldSinkExecutor);

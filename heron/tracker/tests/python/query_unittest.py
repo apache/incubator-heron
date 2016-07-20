@@ -1,5 +1,7 @@
+''' query_unittest.py '''
+# pylint: disable=missing-docstring, undefined-variable
 import unittest2 as unittest
-from mock import call, patch, Mock
+from mock import Mock
 
 from heron.tracker.src.python.query import *
 
@@ -37,8 +39,9 @@ class QueryTest(unittest.TestCase):
     self.assertEqual(["a(x, y)", "b(p, q)"], self.query.get_sub_parts(query))
 
     query = ",,"
-    self.assertEqual(["","",""], self.query.get_sub_parts(query))
+    self.assertEqual(["", "", ""], self.query.get_sub_parts(query))
 
+  # pylint: disable=too-many-statements
   def test_parse_query_string(self):
     query = "TS(a, b, c)"
     root = self.query.parse_query_string(query)

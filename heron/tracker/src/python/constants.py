@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+""" constants.py """
 # This file contains all the constants used
 # across the tracker service.
 
@@ -64,4 +64,3 @@ DEFAULT_PORT = 8888
 
 # default config file to read
 DEFAULT_CONFIG_FILE = "heron_tracker.yaml"
-

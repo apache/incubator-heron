@@ -15,6 +15,7 @@
 package com.twitter.heron.scheduler;
 
 import java.io.IOException;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -58,15 +59,19 @@ public class SchedulerMain {
 
   private TopologyAPI.Topology topology = null;  // topology definition
   private Config config;                        // holds all the config read
+  // Properties passed from command line property arguments
+  private final Properties properties;
 
   public SchedulerMain(
       Config config,
       TopologyAPI.Topology topology,
-      int schedulerServerPort) {
+      int schedulerServerPort,
+      Properties properties) {
     // initialize the options
     this.config = config;
     this.topology = topology;
     this.schedulerServerPort = schedulerServerPort;
+    this.properties = properties;
   }
 
   // Print usage options
@@ -127,12 +132,21 @@ public class SchedulerMain {
         .required()
         .build();
 
+    Option property = Option.builder(Keys.SCHEDULER_COMMAND_LINE_PROPERTIES_OVERRIDE_OPTION)
+        .desc("use value for given property")
+        .longOpt("property_override")
+        .hasArgs()
+        .valueSeparator()
+        .argName("property=value")
+        .build();
+
     options.addOption(cluster);
     options.addOption(role);
     options.addOption(environment);
     options.addOption(topologyName);
     options.addOption(topologyJar);
     options.addOption(schedulerHTTPPort);
+    options.addOption(property);
 
     return options;
   }
@@ -173,6 +187,11 @@ public class SchedulerMain {
       throw new RuntimeException("Error parsing command line options: ", e);
     }
 
+    // It returns a new empty Properties instead of null,
+    // if no properties passed from command line. So no need for null check.
+    Properties schedulerProperties =
+        cmd.getOptionProperties(Keys.SCHEDULER_COMMAND_LINE_PROPERTIES_OVERRIDE_OPTION);
+
     // initialize the scheduler with the options
     String topologyName = cmd.getOptionValue("topology_name");
     SchedulerMain schedulerMain = createInstance(cmd.getOptionValue("cluster"),
@@ -180,7 +199,10 @@ public class SchedulerMain {
         cmd.getOptionValue("environment"),
         cmd.getOptionValue("topology_jar"),
         topologyName,
-        Integer.parseInt(cmd.getOptionValue("http_port")));
+        Integer.parseInt(cmd.getOptionValue("http_port")),
+        schedulerProperties);
+
+    LOG.info("Scheduler command line properties override: " + schedulerProperties.toString());
 
     // run the scheduler
     boolean ret = schedulerMain.runScheduler();
@@ -200,6 +222,17 @@ public class SchedulerMain {
                                              String topologyJar,
                                              String topologyName,
                                              int httpPort) throws IOException {
+    return createInstance(
+        cluster, role, env, topologyJar, topologyName, httpPort, new Properties());
+  }
+
+  public static SchedulerMain createInstance(String cluster,
+                                             String role,
+                                             String env,
+                                             String topologyJar,
+                                             String topologyName,
+                                             int httpPort,
+                                             Properties schedulerProperties) throws IOException {
     // Look up the topology def file location
     String topologyDefnFile = TopologyUtils.lookUpTopologyDefnFile(".", topologyName);
 
@@ -219,7 +252,8 @@ public class SchedulerMain {
     setupLogging(schedulerConfig);
 
     // Create a new instance
-    SchedulerMain schedulerMain = new SchedulerMain(schedulerConfig, topology, httpPort);
+    SchedulerMain schedulerMain =
+        new SchedulerMain(schedulerConfig, topology, httpPort, schedulerProperties);
 
     LOG.log(Level.INFO, "Loaded scheduler config: {0}", schedulerMain.config);
     return schedulerMain;
@@ -320,6 +354,7 @@ public class SchedulerMain {
           .put(Keys.schedulerStateManagerAdaptor(), adaptor)
           .put(Keys.numContainers(), 1 + TopologyUtils.getNumContainers(topology))
           .put(Keys.schedulerShutdown(), getShutdown())
+          .put(Keys.SCHEDULER_PROPERTIES, properties)
           .build();
 
       // get a packed plan and schedule it
@@ -335,6 +370,7 @@ public class SchedulerMain {
           .putAll(runtime)
           .put(Keys.instanceDistribution(), packedPlan.getInstanceDistribution())
           .put(Keys.componentRamMap(), packedPlan.getComponentRamDistribution())
+          .put(Keys.numContainers(), 1 + packedPlan.getContainers().size())
           .build();
 
       // initialize the scheduler

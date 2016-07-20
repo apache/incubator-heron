@@ -11,11 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' topologieshandler.py '''
 import tornado.gen
 
 from heron.tracker.src.python import constants
 from heron.tracker.src.python.handlers import BaseHandler
+
 
 class TopologiesHandler(BaseHandler):
   """
@@ -43,11 +44,14 @@ class TopologiesHandler(BaseHandler):
     <cluster2>: {...}
   }
   """
+  # pylint: disable=attribute-defined-outside-init
   def initialize(self, tracker):
+    """ initialize """
     self.tracker = tracker
 
   @tornado.gen.coroutine
   def get(self):
+    """ get method """
     # Get all the values for parameter "cluster".
     clusters = self.get_arguments(constants.PARAM_CLUSTER)
     # Get all the values for parameter "environ".
@@ -90,4 +94,3 @@ class TopologiesHandler(BaseHandler):
         ret[cluster][topo_role][environ] = []
       ret[cluster][topo_role][environ].append(topology.name)
     self.write_success_response(ret)
-

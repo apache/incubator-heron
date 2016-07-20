@@ -11,12 +11,34 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+''' query.py '''
 
 
 class QueryHandler(object):
+  ''' QueryHandler '''
 
   def fetch(self, cluster, metric, topology, component, instance, timerange, envirn=None):
+    '''
+    :param cluster:
+    :param metric:
+    :param topology:
+    :param component:
+    :param instance:
+    :param timerange:
+    :param envirn:
+    :return:
+    '''
     pass
 
   def fetch_max(self, cluster, metric, topology, component, instance, timerange, envirn=None):
+    '''
+    :param cluster:
+    :param metric:
+    :param topology:
+    :param component:
+    :param instance:
+    :param timerange:
+    :param envirn:
+    :return:
+    '''
     pass
