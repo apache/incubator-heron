@@ -168,7 +168,11 @@ class Bolt(Component):
 
       def send_tick():
         tick = TupleHelper.make_tick_tuple()
+        start_time = time.time()
         self.process(tick)
+        latency = time.time() - start_time
+        self.bolt_metrics.execute_tuple(tick.id, tick.component,
+                                        latency * constants.SEC_TO_NS)
         self.output_helper.send_out_tuples()
         self.looper.wake_up() # so emitted tuples would be added to buffer now
         self._prepare_tick_tup_timer()

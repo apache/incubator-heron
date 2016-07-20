@@ -31,7 +31,6 @@ class GatewayMetrics(object):
       self.RECEIVED_PKT_COUNT: CountMetric(),
       self.SENT_PKT_COUNT: CountMetric()
     }
-    # TODO: change hardcoding
     interval = float(sys_config[constants.METRICS_EXPORT_INTERVAL_SECS])
 
     for key, value in self.metrics.iteritems():
@@ -103,7 +102,8 @@ class SpoutMetrics(ComponentMetrics):
   PENDING_ACKED_COUNT = "__pending-acked-count"
 
   spout_metrics = {
-    #NEXT_TUPLE_LATENCY: MeanReducedMetric()
+    NEXT_TUPLE_LATENCY: MeanReducedMetric(),
+    NEXT_TUPLE_COUNT: CountMetric()
   }
 
   to_multi_init = [ComponentMetrics.ACK_COUNT, ComponentMetrics.FAIL_COUNT,
@@ -120,6 +120,10 @@ class SpoutMetrics(ComponentMetrics):
       stream_id = out_stream.stream.id
       for metric in to_init:
         metric.add_key(stream_id)
+
+  def next_tuple(self, latency_in_ns):
+    self.update_reduced_metric(self.NEXT_TUPLE_LATENCY, latency_in_ns)
+    self.update_count(self.NEXT_TUPLE_COUNT)
 
 class BoltMetrics(ComponentMetrics):
   PROCESS_LATENCY = "__process-latency"

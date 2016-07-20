@@ -22,6 +22,8 @@ from heron.common.src.python.log import Log
 from heron.instance.src.python.instance.comp_spec import HeronComponentSpec
 from heron.instance.src.python.metrics.metrics_helper import SpoutMetrics
 
+import heron.common.src.python.constants as constants
+
 class Spout(Component):
   """The base class for all heron spouts in Python"""
 
@@ -32,8 +34,9 @@ class Spout(Component):
     if not self.pplan_helper.is_spout:
       raise RuntimeError("No spout in physicial plan")
     self.spout_config = self.pplan_helper.context['config']
-
     self.spout_metrics = SpoutMetrics(self.pplan_helper.context, self.sys_config, self.pplan_helper)
+
+
 
     # TODO: topology context, serializer and sys config
 
@@ -123,7 +126,11 @@ class Spout(Component):
     return True
 
   def _produce_tuple(self):
+    # TODO: do ACKing and stuff
+    start_time = time.time()
     self.next_tuple()
+    latency = time.time() - start_time
+    self.spout_metrics.next_tuple(latency * constants.SEC_TO_NS)
 
   def _activate(self):
     Log.info("Spout is activated")
