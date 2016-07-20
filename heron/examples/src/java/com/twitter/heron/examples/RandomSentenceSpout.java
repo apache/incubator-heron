@@ -26,14 +26,15 @@ import org.apache.storm.tuple.Values;
 import org.apache.storm.utils.Utils;
 
 public class RandomSentenceSpout extends BaseRichSpout {
-  SpoutOutputCollector _collector;
-  Random _rand;
+  private static final long serialVersionUID = 1L;
+  SpoutOutputCollector spoutOutCollector;
+  Random random;
 
   @Override
   public void open(Map conf, TopologyContext context,
       SpoutOutputCollector collector) {
-    _collector = collector;
-    _rand = new Random();
+    spoutOutCollector = collector;
+    random = new Random();
   }
 
   @Override
@@ -43,8 +44,8 @@ public class RandomSentenceSpout extends BaseRichSpout {
         "an apple a day keeps the doctor away",
         "four score and seven years ago", "snow white and the seven dwarfs",
         "i am at two with nature" };
-    String sentence = sentences[_rand.nextInt(sentences.length)];
-    _collector.emit(new Values(sentence));
+    String sentence = sentences[random.nextInt(sentences.length)];
+    spoutOutCollector.emit(new Values(sentence));
   }
 
   @Override
