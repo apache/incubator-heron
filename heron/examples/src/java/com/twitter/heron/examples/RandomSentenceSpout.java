@@ -27,8 +27,8 @@ import org.apache.storm.utils.Utils;
 
 public class RandomSentenceSpout extends BaseRichSpout {
   private static final long serialVersionUID = 1L;
-  SpoutOutputCollector spoutOutCollector;
-  Random random;
+  private SpoutOutputCollector spoutOutCollector;
+  private Random random;
 
   @Override
   public void open(Map conf, TopologyContext context,
@@ -40,10 +40,10 @@ public class RandomSentenceSpout extends BaseRichSpout {
   @Override
   public void nextTuple() {
     Utils.sleep(100);
-    String[] sentences = new String[] { "the cow jumped over the moon",
+    String[] sentences = new String[] {"the cow jumped over the moon",
         "an apple a day keeps the doctor away",
         "four score and seven years ago", "snow white and the seven dwarfs",
-        "i am at two with nature" };
+        "i am at two with nature"};
     String sentence = sentences[random.nextInt(sentences.length)];
     spoutOutCollector.emit(new Values(sentence));
   }
@@ -59,6 +59,22 @@ public class RandomSentenceSpout extends BaseRichSpout {
   @Override
   public void declareOutputFields(OutputFieldsDeclarer declarer) {
     declarer.declare(new Fields("word"));
+  }
+
+  public SpoutOutputCollector getSpoutOutCollector() {
+    return spoutOutCollector;
+  }
+
+  public void setSpoutOutCollector(SpoutOutputCollector spoutOutCollector) {
+    this.spoutOutCollector = spoutOutCollector;
+  }
+
+  public Random getRandom() {
+    return random;
+  }
+
+  public void setRandom(Random random) {
+    this.random = random;
   }
 
 }

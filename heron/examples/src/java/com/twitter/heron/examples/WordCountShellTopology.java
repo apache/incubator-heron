@@ -20,9 +20,7 @@ import java.util.Map;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.StormSubmitter;
-import org.apache.storm.task.ShellBolt;
 import org.apache.storm.topology.BasicOutputCollector;
-import org.apache.storm.topology.IRichBolt;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.topology.base.BaseBasicBolt;
@@ -35,24 +33,6 @@ import org.apache.storm.tuple.Values;
  * capabilities.
  */
 public class WordCountShellTopology {
-  public static class SplitSentence extends ShellBolt implements IRichBolt {
-
-    private static final long serialVersionUID = 1L;
-
-    protected SplitSentence() {
-      super("python", "splitsentence.py");
-    }
-
-    @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer) {
-      declarer.declare(new Fields("word"));
-    }
-
-    @Override
-    public Map<String, Object> getComponentConfiguration() {
-      return null;
-    }
-  }
 
   public static class WordCount extends BaseBasicBolt {
     private static final long serialVersionUID = 1L;
