@@ -286,3 +286,8 @@ maven_jar(
   name = "org_mockito_mockito_all",
   artifact = "org.mockito:mockito-all:1.10.19",
 )
+
+maven_jar(
+  name = "com_google_googlejavaformat_google_java_format",
+  artifact = "com.google.googlejavaformat:google-java-format:1.0-all-deps",
+)
