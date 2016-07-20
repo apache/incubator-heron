@@ -1,20 +1,17 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2016 Twitter. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package org.apache.storm.multilang;
 
 import java.util.ArrayList;
@@ -32,153 +29,151 @@ import java.util.List;
  *
  */
 public class ShellMsg {
-    private String command;
-    private Object id;
-    private List<String> anchors;
-    private String stream;
-    private long task;
-    private String msg;
-    private List<Object> tuple;
-    private boolean needTaskIds;
+  private String command;
+  private Object id;
+  private List<String> anchors;
+  private String stream;
+  private long task;
+  private String msg;
+  private List<Object> tuple;
+  private boolean needTaskIds;
 
-    //metrics rpc 
-    private String metricName;
-    private Object metricParams;
+  // metrics rpc
+  private String metricName;
+  private Object metricParams;
 
-    //logLevel
-    public enum ShellLogLevel {
-        TRACE, DEBUG, INFO, WARN, ERROR;
+  // logLevel
+  public enum ShellLogLevel {
+    TRACE, DEBUG, INFO, WARN, ERROR;
 
-        public static ShellLogLevel fromInt(int i) {
-            switch (i) {
-                case 0: return TRACE;
-                case 1: return DEBUG;
-                case 2: return INFO;
-                case 3: return WARN;
-                case 4: return ERROR;
-                default: return INFO;
-            }
-        }
+    public static ShellLogLevel fromInt(int i) {
+      switch (i) {
+      case 0:
+        return TRACE;
+      case 1:
+        return DEBUG;
+      case 2:
+        return INFO;
+      case 3:
+        return WARN;
+      case 4:
+        return ERROR;
+      default:
+        return INFO;
+      }
     }
+  }
 
-    private ShellLogLevel logLevel = ShellLogLevel.INFO;
+  private ShellLogLevel logLevel = ShellLogLevel.INFO;
 
-    public String getCommand() {
-        return command;
+  public String getCommand() {
+    return command;
+  }
+
+  public void setCommand(String command) {
+    this.command = command;
+  }
+
+  public Object getId() {
+    return id;
+  }
+
+  public void setId(Object id) {
+    this.id = id;
+  }
+
+  public List<String> getAnchors() {
+    return anchors;
+  }
+
+  public void setAnchors(List<String> anchors) {
+    this.anchors = anchors;
+  }
+
+  public void addAnchor(String anchor) {
+    if (anchors == null) {
+      anchors = new ArrayList<String>();
     }
+    this.anchors.add(anchor);
+  }
 
-    public void setCommand(String command) {
-        this.command = command;
-    }
+  public String getStream() {
+    return stream;
+  }
 
-    public Object getId() {
-        return id;
-    }
+  public void setStream(String stream) {
+    this.stream = stream;
+  }
 
-    public void setId(Object id) {
-        this.id = id;
-    }
+  public long getTask() {
+    return task;
+  }
 
-    public List<String> getAnchors() {
-        return anchors;
-    }
+  public void setTask(long task) {
+    this.task = task;
+  }
 
-    public void setAnchors(List<String> anchors) {
-        this.anchors = anchors;
-    }
+  public String getMsg() {
+    return msg;
+  }
 
-    public void addAnchor(String anchor) {
-        if (anchors == null) {
-            anchors = new ArrayList<String>();
-        }
-        this.anchors.add(anchor);
-    }
+  public void setMsg(String msg) {
+    this.msg = msg;
+  }
 
-    public String getStream() {
-        return stream;
-    }
+  public List<Object> getTuple() {
+    return tuple;
+  }
 
-    public void setStream(String stream) {
-        this.stream = stream;
-    }
+  public void setTuple(List<Object> tuple) {
+    this.tuple = tuple;
+  }
 
-    public long getTask() {
-        return task;
+  public void addTuple(Object tuple) {
+    if (this.tuple == null) {
+      this.tuple = new ArrayList<Object>();
     }
+    this.tuple.add(tuple);
+  }
 
-    public void setTask(long task) {
-        this.task = task;
-    }
+  public boolean areTaskIdsNeeded() {
+    return needTaskIds;
+  }
 
-    public String getMsg() {
-        return msg;
-    }
+  public void setNeedTaskIds(boolean needTaskIds) {
+    this.needTaskIds = needTaskIds;
+  }
 
-    public void setMsg(String msg) {
-        this.msg = msg;
-    }
+  public void setMetricName(String metricName) {
+    this.metricName = metricName;
+  }
 
-    public List<Object> getTuple() {
-        return tuple;
-    }
+  public String getMetricName() {
+    return this.metricName;
+  }
 
-    public void setTuple(List<Object> tuple) {
-        this.tuple = tuple;
-    }
+  public void setMetricParams(Object metricParams) {
+    this.metricParams = metricParams;
+  }
 
-    public void addTuple(Object tuple) {
-        if (this.tuple == null) {
-            this.tuple = new ArrayList<Object>();
-        }
-        this.tuple.add(tuple);
-    }
+  public Object getMetricParams() {
+    return metricParams;
+  }
 
-    public boolean areTaskIdsNeeded() {
-        return needTaskIds;
-    }
+  public ShellLogLevel getLogLevel() {
+    return logLevel;
+  }
 
-    public void setNeedTaskIds(boolean needTaskIds) {
-        this.needTaskIds = needTaskIds;
-    }
+  public void setLogLevel(int logLevel) {
+    this.logLevel = ShellLogLevel.fromInt(logLevel);
+  }
 
-    public void setMetricName(String metricName) {
-        this.metricName = metricName;
-    }
-
-    public String getMetricName() {
-        return this.metricName;
-    }
-
-    public void setMetricParams(Object metricParams) {
-        this.metricParams = metricParams;
-    }
-
-    public Object getMetricParams() {
-        return metricParams;
-    }
-
-    public ShellLogLevel getLogLevel() {
-        return logLevel;
-    }
-
-    public void setLogLevel(int logLevel) {
-        this.logLevel = ShellLogLevel.fromInt(logLevel);
-    }
-
-    @Override
-    public String toString() {
-        return "ShellMsg{" +
-                "command='" + command + '\'' +
-                ", id=" + id +
-                ", anchors=" + anchors +
-                ", stream='" + stream + '\'' +
-                ", task=" + task +
-                ", msg='" + msg + '\'' +
-                ", tuple=" + tuple +
-                ", needTaskIds=" + needTaskIds +
-                ", metricName='" + metricName + '\'' +
-                ", metricParams=" + metricParams +
-                ", logLevel=" + logLevel +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "ShellMsg{" + "command='" + command + '\'' + ", id=" + id
+        + ", anchors=" + anchors + ", stream='" + stream + '\'' + ", task="
+        + task + ", msg='" + msg + '\'' + ", tuple=" + tuple + ", needTaskIds="
+        + needTaskIds + ", metricName='" + metricName + '\'' + ", metricParams="
+        + metricParams + ", logLevel=" + logLevel + '}';
+  }
 }
