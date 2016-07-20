@@ -353,7 +353,7 @@ def get_clusters():
   try:
     return instance.run_sync(lambda: API.get_clusters())
   except Exception as ex:
-    Log.error('Error: %s' % str(ex))
+    Log.error(str(ex))
     Log.error('Failed to retrive clusters')
     raise
 
@@ -364,7 +364,7 @@ def get_logical_plan(cluster, env, topology, role):
   try:
     return instance.run_sync(lambda: API.get_logical_plan(cluster, env, topology, role))
   except Exception as ex:
-    Log.error('Error: %s' % str(ex))
+    Log.error(str(ex))
     Log.error('Failed to retrive logical plan info of topology \'%s\''
               % ('/'.join([cluster, role, env, topology])))
     raise
@@ -377,6 +377,7 @@ def get_topology_info(*args):
     return instance.run_sync(lambda: API.get_topology_info(*args))
   except Exception as ex:
     Log.error(str(ex))
+    Log.error('Failed to get topology info')
     raise
 
 
@@ -387,7 +388,7 @@ def get_topology_metrics(*args):
     return instance.run_sync(lambda: API.get_comp_metrics(*args))
   except Exception as ex:
     Log.error(str(ex))
-    Log.error("Failed to retrive metrics of component \'%s\'" % args[3])
+    Log.error("Failed to retrive metrics of topology \'%s\'" % args[3])
     raise
 
 
@@ -398,7 +399,10 @@ def get_component_metrics(component, cluster, env, topology, role):
     result = get_topology_metrics(
         cluster, env, topology, component, [], all_queries, [0, -1], role)
     return result["metrics"]
-  except:
+  except Exception as ex:
+    Log.error(str(ex))
+    topology_loc = '/'.join([cluster, role, env, topology])
+    Log.error("Failed to retrive metrics of component '%s' in '%s'" % (component, topology_loc))
     raise
 
 

@@ -33,7 +33,10 @@ def create_parser(subparsers):
 # pylint: disable=unused-argument
 def run(command, parser, cl_args, unknown_args):
   """ run command """
-  clusters = utils.get_clusters()
+  try:
+    clusters = utils.get_clusters()
+  except:
+    return False
   print 'Available clusters:'
   for cluster in clusters:
     print '  %s' % cluster

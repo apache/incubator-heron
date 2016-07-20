@@ -156,7 +156,10 @@ def run_containers(command, parser, cl_args, unknown_args):
   cluster, role, env = cl_args['cluster'], cl_args['role'], cl_args['environ']
   topology = cl_args['topology-name']
   container_id = cl_args['id']
-  result = utils.get_topology_info(cluster, env, topology, role)
+  try:
+    result = utils.get_topology_info(cluster, env, topology, role)
+  except:
+    return False
   containers = result['physical_plan']['stmgrs']
   all_bolts, all_spouts = set(), set()
   for _, bolts in result['physical_plan']['bolts'].items():
