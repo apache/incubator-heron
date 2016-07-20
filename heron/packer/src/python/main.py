@@ -1,7 +1,7 @@
-"""entry point for package management tool"""
+"""Entry point for package management tool"""
 import sys
 
-from heron.package.src.python.common import package
+from heron.package.src.python.common import packer
 from heron.package.src.python.common import parser
 from heron.package.src.python.common import utils
 from heron.package.src.python.store import blobstore
@@ -12,8 +12,8 @@ def get_packer(conf):
   blobstore_object = blobstore.get_blobstore(conf)
   metastore_object = metastore.get_metastore(conf)
 
-  packer = package.HeronPackage(metastore_object, blobstore_object)
-  return packer
+  packer_object = packer.HeronPacker(metastore_object, blobstore_object)
+  return packer_object
 
 def main():
   """main entry point"""
@@ -25,6 +25,7 @@ def main():
     sys.exit(1)
 
   namespace = vars(cmd_parser.parse_args())
+
   command = namespace['command']
   if command == "help":
     parser.help_cmd(cmd_parser, namespace)

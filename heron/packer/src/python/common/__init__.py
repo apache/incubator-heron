@@ -1,7 +1,7 @@
 """common module"""
 
-from .package import (
-    Package,
+from .packer import (
+    Packer,
     HeronPacker
 )
 

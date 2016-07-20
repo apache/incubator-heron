@@ -5,7 +5,7 @@ from heron.common.src.python.color import Log
 from heron.package.src.python.common import constants
 from heron.package.src.python.common import utils
 
-class Package(object):
+class Packer(object):
   """Package interface"""
   def add_version(self, args):
     """add a package with 'args' information"""
@@ -51,7 +51,7 @@ class Package(object):
     """clean the state"""
     raise NotImplementedError("clean is not implemented")
 
-class HeronPackage(Package):
+class HeronPacker(Packer):
   """A metastore and blobstore based implementation of Package"""
   def __init__(self, metastore, blobstore):
     self.metastore = metastore
@@ -90,13 +90,13 @@ class HeronPackage(Package):
     extra_info = args[constants.EXTRA]
     dest_path = args[constants.DEST_PATH]
 
-    # 1. find package location
+    # find package location
     pkg_location = self.metastore.get_pkg_location(role, pkg_name, version, extra_info)
     if pkg_location is None:
       Log.error("Cannot find requested package. Bailing out...")
       sys.exit(1)
 
-    # 2. download
+    # download
     if self.blobstore.download(pkg_location, dest_path):
       Log.info("Successfully downloaded package")
     else:
@@ -108,18 +108,21 @@ class HeronPackage(Package):
     version = args[constants.VERSION]
     extra_info = args[constants.EXTRA]
 
-    # 1. find package location
+    # find package location
     pkg_location = self.metastore.get_pkg_location(role, pkg_name, version, extra_info)
     if pkg_location is None:
       Log.error("Cannot find requested package. Bailing out...")
       sys.exit(1)
 
-    # 2. modify the metastore info & write back
-    #  live cannot be deleted;
-    #  latest needs to be updated if it's deleted
-    self.metastore.delete_pkg_meta(role, pkg_name, version, extra_info)
+    # update metastore info with following 2 constraints:
+    #   live cannot be deleted;
+    #   latest needs to be updated if it's deleted
+    isSuccess = self.metastore.delete_pkg_meta(role, pkg_name, version, extra_info)
+    if not isSuccess:
+      Log.error("Failed to update metastore. Bailing out...")
+      sys.exit(1)
 
-    # 3. try to delete the package(deletion operation failure can be handled in clean cmd)
+    # delete the package
     isSuccess = self.blobstore.delete(pkg_location)
     if not isSuccess:
       Log.error("meta info updated but blob file still exists. Can be cleaned with the clean cmd.")
@@ -129,7 +132,9 @@ class HeronPackage(Package):
     extra_info = args[constants.EXTRA]
     is_raw = args[constants.RAW]
 
+    # get packages from metastore
     packages = self.metastore.get_packages(role, extra_info)
+
     utils.print_list(packages, is_raw)
 
   def list_versions(self, args):
@@ -138,6 +143,7 @@ class HeronPackage(Package):
     extra_info = args[constants.EXTRA]
     is_raw = args[constants.RAW]
 
+    # get versions from metastore
     versions = self.metastore.get_versions(role, pkg_name, extra_info)
     utils.print_list(versions, is_raw)
 
@@ -147,20 +153,22 @@ class HeronPackage(Package):
     version = args[constants.VERSION]
     extra_info = args[constants.EXTRA]
 
+    # set live in metastore
     if self.metastore.set_tag(constants.LIVE, role, pkg_name, version, extra_info):
-      Log.info("Set live success")
+      Log.info("Set live on %s/%s/%s success" % (role, pkg_name, version))
     else:
-      Log.error("Set live failed")
+      Log.error("Set live on %s/%s/%s failed" % (role, pkg_name, version))
 
   def unset_live(self, args):
     role = args[constants.ROLE]
     pkg_name = args[constants.PKG]
     extra_info = args[constants.EXTRA]
 
+    # unset live in metastore
     if self.metastore.unset_tag(constants.LIVE, role, pkg_name, extra_info):
-      Log.info("Unset live success")
+      Log.info("Unset live on %s/%s success" % (role, pkg_name))
     else:
-      Log.error("Unset live failed")
+      Log.error("Unset live one %s/%s failed" % (role, pkg_name))
 
   def show_version(self, args):
     role = args[constants.ROLE]
@@ -169,6 +177,7 @@ class HeronPackage(Package):
     extra_info = args[constants.EXTRA]
     is_raw = args[constants.RAW]
 
+    # get package meta from metastore
     pkg_info = self.metastore.get_pkg_meta(role, pkg_name, version, extra_info)
     utils.print_dict(pkg_info, is_raw)
 
@@ -178,6 +187,7 @@ class HeronPackage(Package):
     extra_info = args[constants.EXTRA]
     is_raw = args[constants.RAW]
 
+    # get live package information from metastore
     live_pkg_info = self.metastore.get_meta_by_tag(constants.LIVE, role, pkg_name, extra_info)
     utils.print_dict(live_pkg_info, is_raw)
 
@@ -187,6 +197,7 @@ class HeronPackage(Package):
     extra_info = args[constants.EXTRA]
     is_raw = args[constants.RAW]
 
+    # get latest package information from metastore
     latest_pkg_info = self.metastore.get_meta_by_tag(constants.LATEST, role, pkg_name, extra_info)
     utils.print_dict(latest_pkg_info, is_raw)
 

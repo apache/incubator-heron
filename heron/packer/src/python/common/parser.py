@@ -1,4 +1,4 @@
-"""package cli building module"""
+"""packer cli building module"""
 import argparse
 
 from heron.package.src.python.common import constants
@@ -53,7 +53,7 @@ def help_cmd(parser, namespace):
     return False
 
 def get_commands(packer):
-  """Bind cli commands with methods"""
+  """Bind cli commands with actual methods"""
   PACKER_COMMANDS = {
       "add_version": packer.add_version,
       "download": packer.download,
