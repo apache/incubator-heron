@@ -3,13 +3,13 @@ title: Setting Up SCP Uploader
 ---
 
 For small clusters with simple setups that doesn't have a HDFS like file system, the SCP uploader
-can be used to manage the package files. This uploader uses the scp linux command to upload the files
-to a node accessible by all the worker nodes in the cluster. Then a scheduler like Aurora can
-use the scp command again to download the content to each of the worker machines.
+can be used to manage the package files. This uploader uses the `scp` linux command to upload the
+files to a node accessible by all the worker nodes in the cluster. Then a scheduler like Aurora can
+use the `scp` command again to download the content to each of the worker machines.
 
 SCP Uploader requirements
 
-* SCP uploader requires the scp and ssh utilities installed. Also it is better to have
+* SCP uploader requires the `scp` and `ssh` linux utilities installed. Also it is better to have
 passwordless ssh configured between the shared node and worker nodes in the cluster.
 
 ### SCP Uploader Configuration
@@ -43,7 +43,7 @@ heron.uploader.ssh.command.options:   "-i ~/.ssh/id_rsa user@host"
 heron.uploader.scp.dir.path:   ${HOME}/heron/repository/${CLUSTER}/${ROLE}/${TOPOLOGY}
 ```
 
-Below is an example scp command configuration in the `heron.aurora` file.
+Below is an example `scp` command configuration in the `heron.aurora` file.
 
 ```bash
 fetch_user_package = Process(
