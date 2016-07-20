@@ -24,7 +24,7 @@ import org.apache.storm.tuple.Fields;
  * This topology demonstrates Storm's stream groupings and multilang
  * capabilities.
  */
-public class WordCountShellTopology {
+public final class WordCountShellTopology {
 
   private WordCountShellTopology() {
   }
