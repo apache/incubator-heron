@@ -32,6 +32,15 @@ yarn_deps_files = \
         "//third_party/java:yarn",
     ]
 
+mesos_deps_files = \
+    scheduler_deps_files + [
+       "//third_party/java:jackson",
+       "@org_apache_mesos_mesos//jar",
+       "@org_apache_curator_curator_client//jar",
+       "@org_apache_curator_curator_framework//jar",
+       "@org_apache_zookeeper_zookeeper//jar",
+   ]
+
 java_library(
     name='local-scheduler-java',
     srcs = glob(["**/local/*.java"]),
@@ -138,5 +147,26 @@ genrule(
     name = "heron-yarn-scheduler",
     srcs = [":yarn-scheduler-unshaded_deploy.jar"],
     outs = ["heron-yarn-scheduler.jar"],
+    cmd  = "cp $< $@",
+)
+
+java_library(
+    name='mesos-scheduler-java',
+    srcs = glob(["com/twitter/heron/scheduler/mesos/**/*.java"]),
+    deps = mesos_deps_files,
+    resources = glob(["**/mesos/*.yaml"]),
+)
+
+java_binary(
+    name='mesos-scheduler-unshaded',
+    srcs = glob(["com/twitter/heron/scheduler/mesos/**/*.java"]),
+    deps = mesos_deps_files,
+    resources = glob(["**/mesos/*.yaml"]),
+)
+
+genrule(
+    name = "heron-mesos-scheduler",
+    srcs = [":mesos-scheduler-unshaded_deploy.jar"],
+    outs = ["heron-mesos-scheduler.jar"],
     cmd  = "cp $< $@",
 )

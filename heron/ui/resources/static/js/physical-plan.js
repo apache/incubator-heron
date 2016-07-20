@@ -42,6 +42,12 @@
       // make ordering of instances the same in each container
       container.children = _.sortBy(container.children, 'name');
     });
+
+    // Sort the containers by their id so they are easier to find in the UI.
+    auroraContainers = _.sortBy(auroraContainers, function(container) {
+      return parseInt(container.id.split('-')[1]);
+    });
+
     var maxInstances = d3.max(auroraContainers, function (d) {
       return d.children.length;
     });

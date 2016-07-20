@@ -370,6 +370,7 @@ public class SchedulerMain {
           .putAll(runtime)
           .put(Keys.instanceDistribution(), packedPlan.getInstanceDistribution())
           .put(Keys.componentRamMap(), packedPlan.getComponentRamDistribution())
+          .put(Keys.numContainers(), 1 + packedPlan.getContainers().size())
           .build();
 
       // initialize the scheduler
