@@ -10,7 +10,6 @@ import json
 import heron.cli.src.python.activate as activate
 import heron.cli.src.python.args as args
 import traceback
-import logging
 
 ################################################################################
 # Run the command
@@ -40,9 +39,6 @@ class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
 class HeronRCArgumentParser(argparse.ArgumentParser):
 	cmdmap=collections.defaultdict(dict)
  	def __init__(self, *args, **kwargs):
-		#self.cmdmap=collections.defaultdict(dict)
-		
-
 		HeronRCArgumentParser.initializeFromRC()
 		super(HeronRCArgumentParser, self).__init__(*args, **kwargs)
 	
@@ -95,11 +91,7 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
 						hrc.cmdmap[command][env] =  hrc.cmdmap[command][env] 	+ ' ' + args_list_string	
 					else:
 						hrc.cmdmap[command][env] =  args_list_string
-			try:
-				print "cmdmap", hrc.cmdmap	
-				raise ValueError('A very specific bad thing happened')
-			except Exception as error:
-				traceback.print_stack()
+			#print "cmdmap", hrc.cmdmap	
 		else:
 			print "WARN: %s is not an existing file" % HERON_RC
 
@@ -112,7 +104,6 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
 
 		if ( command in hrc.cmdmap and role in hrc.cmdmap[command]):
 			args_for_command_role = (hrc.cmdmap[command][role],args_for_command_role) [hrc.cmdmap[command][role] == None or hrc.cmdmap[command][role] == '']
-		print command , role , args_for_command_role
 		return args_for_command_role.split()
 
 	# this is invoked when the parser.parse_args is called
@@ -121,34 +112,13 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
 
 	def _read_args_from_files(self,arg_strings):
 		new_arg_strings = []
-		#command = self.get_default('subcommand')
-		#role = self.get_default('cluster/[role]/[env]')
 		command = sys.argv[1]
 		role = sys.argv[2]
-
-		print "####", command, role
-		new_arg_strings.extend(self.get_args_for_command_role(command, role))
-		new_arg_strings.extend(self.get_args_for_command_role(command, '*'))
 		new_arg_strings.extend(self.get_args_for_command_role('*', '*'))
-		arg_strings.extend(new_arg_strings)
-		print "####", arg_strings
+		new_arg_strings.extend(self.get_args_for_command_role(command, '*'))
+		new_arg_strings.extend(self.get_args_for_command_role(command, role))
+		new_arg_strings.extend(arg_strings)
 		return arg_strings
-
-	#def _parse_known_args(self, arg_strings, namespace):
-	def parse_known_args(self, args=None, namespace=None):
-
-		namespace, args = super(HeronRCArgumentParser, self).parse_known_args(args, namespace)
-		if self.prog != 'heron':
-			return namespace,args	
-		try:
-			print "in HeronRCArgumentParser._parse_known_args", self, namespace, args
-			raise ValueError('A very specific bad thing happened')
-		except Exception as error:
-			traceback.print_stack()
-
-			#logging.exception("Something awful happened!")
-		return namespace, args
-
 
 #test stub
 def main():
@@ -165,9 +135,8 @@ def main():
 		metavar = '<command> <options>')
 
 	activate.create_parser(subparsers)
-	#print subparsers
 	args, unknown_args = parser.parse_known_args()
-	#print args, unknown_args
+	print args, unknown_args
 
 
 if __name__ == "__main__":

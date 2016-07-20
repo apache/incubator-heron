@@ -1,7 +1,0 @@
-submit:all --config-path world
-all: --config-path noenv
-all:* --config-path noenvstar
-:devcluster/ads/PROD --config-path nocmd
-*:devcluster/ads/PROD --config-path nocmdstar
-submit:devcluster/ads/PROD --config-path nocmd
---config-path hello
