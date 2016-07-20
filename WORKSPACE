@@ -1,3 +1,5 @@
+workspace(name = "com_twitter_heron")
+
 # versions shared across artifacts that should be upgraded together
 aws_version = "1.11.14"
 curator_version = "2.9.0"
@@ -286,3 +288,11 @@ maven_jar(
   name = "org_mockito_mockito_all",
   artifact = "org.mockito:mockito-all:1.10.19",
 )
+
+git_repository(
+  name = "io_bazel_rules_pex",
+  remote = "https://github.com/benley/bazel_rules_pex.git",
+  tag = "0.2",
+)
+load("@io_bazel_rules_pex//pex:pex_rules.bzl", "pex_repositories")
+pex_repositories()

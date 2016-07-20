@@ -4,7 +4,7 @@ import unittest2 as unittest
 
 from heron.common.src.python import constants
 from heron.tracker.src.python import topology_helpers
-from mock_proto import MockProto
+from heron.tracker.tests.python.mock_proto import MockProto
 
 class TopologyHelpersTest(unittest.TestCase):
   def setUp(self):

@@ -1,7 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/build_defs/pkg/pkg", "pkg_tar")
-
 # load("/tools/rules/heron_client", "heron_client_files")
 load("/tools/rules/heron_client", "heron_client_bin_files")
 load("/tools/rules/heron_client", "heron_client_conf_files")

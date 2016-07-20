@@ -1,5 +1,3 @@
-load("/tools/rules/pex_rules", "pex_test")
-load("/tools/rules/pex_rules", "pex_library")
 
 pex_library(
   name = 'mock_proto',
@@ -9,10 +7,11 @@ pex_library(
   ],
 )
 
-pex_test(
+pex_pytest(
     name = "topology_helpers_unittest",
     srcs = ["topology_helpers_unittest.py"],
     deps = [
+        ":mock_proto",
         "//heron/tracker/src/python:heron-tracker-lib",
     ],
     reqs = [
@@ -24,10 +23,11 @@ pex_test(
     size = "small",
 )
 
-pex_test(
+pex_pytest(
     name = "topology_unittest",
     srcs = ["topology_unittest.py"],
     deps = [
+        ":mock_proto",
         "//heron/tracker/src/python:heron-tracker-lib",
     ],
     reqs = [
@@ -39,7 +39,7 @@ pex_test(
     size = "small",
 )
 
-pex_test(
+pex_pytest(
     name = "query_operator_unittest",
     srcs = ["query_operator_unittest.py"],
     deps = [
@@ -54,7 +54,7 @@ pex_test(
     size = "small",
 )
 
-pex_test(
+pex_pytest(
     name = "query_unittest",
     srcs = ["query_unittest.py"],
     deps = [
@@ -69,7 +69,7 @@ pex_test(
     size = "small",
 )
 
-pex_test(
+pex_pytest(
     name = "tracker_unittest",
     srcs = ["tracker_unittest.py"],
     deps = [

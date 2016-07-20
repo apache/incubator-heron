@@ -1,6 +1,5 @@
-load("/tools/rules/pex_rules", "pex_test")
 
-pex_test(
+pex_pytest(
     name = "opts_unittest",
     srcs = ["opts_unittest.py"],
     deps = [

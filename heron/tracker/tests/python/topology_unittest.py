@@ -2,7 +2,7 @@
 # pylint: disable=missing-docstring
 import unittest2 as unittest
 
-from mock_proto import MockProto
+from heron.tracker.tests.python.mock_proto import MockProto
 from heron.tracker.src.python.topology import Topology
 
 class TopologyTest(unittest.TestCase):

@@ -1,6 +1,5 @@
-load("/tools/rules/pex_rules", "pex_test")
 
-pex_test(
+pex_pytest(
     name = "explorer_unittest",
     srcs = ["explorer_unittest.py"],
     deps = [
