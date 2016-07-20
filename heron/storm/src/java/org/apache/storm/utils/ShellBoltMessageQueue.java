@@ -88,7 +88,7 @@ public class ShellBoltMessageQueue implements Serializable {
      *
      * @param timeout how long to wait before giving up, in units of unit
      * @param unit a TimeUnit determining how to interpret the timeout parameter
-     * @return List\<Integer\> if task id is available,
+     * @return Integer List if task id is available,
      * BoltMsg if task id is not available but bolt message is available,
      * null if the specified waiting time elapses before an element is available.
      * @throws InterruptedException
