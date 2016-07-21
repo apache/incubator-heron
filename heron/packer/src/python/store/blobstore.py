@@ -5,7 +5,7 @@ import sys
 import time
 
 from heron.common.src.python.color import Log
-from heron.package.src.python.common import utils
+from heron.packer.src.python.common import utils
 
 BLOBSTORE_NAME = "heron.package.blobstore.name"
 BLOBSTORE_ROOT_PATH = "heron.package.blobstore.root_path"
@@ -66,7 +66,7 @@ class LocalBlobstore(Blobstore):
       Log.error("Requested file does not exist")
       return False
 
-    if not LocalBlobstore._is_valid_file(dest_path):
+    if not os.path.isdir(dest_path):
       Log.error("File destination '%s' is not valid" % dest_path)
       return False
 

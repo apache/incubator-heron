@@ -2,8 +2,8 @@
 import sys
 
 from heron.common.src.python.color import Log
-from heron.package.src.python.common import constants
-from heron.package.src.python.common import utils
+from heron.packer.src.python.common import constants
+from heron.packer.src.python.common import utils
 
 class Packer(object):
   """Package interface"""
@@ -188,7 +188,7 @@ class HeronPacker(Packer):
     is_raw = args[constants.RAW]
 
     # get live package information from metastore
-    live_pkg_info = self.metastore.get_meta_by_tag(constants.LIVE, role, pkg_name, extra_info)
+    live_pkg_info = self.metastore.get_pkg_meta(role, pkg_name, constants.LIVE, extra_info)
     utils.print_dict(live_pkg_info, is_raw)
 
   def show_latest(self, args):
@@ -198,7 +198,7 @@ class HeronPacker(Packer):
     is_raw = args[constants.RAW]
 
     # get latest package information from metastore
-    latest_pkg_info = self.metastore.get_meta_by_tag(constants.LATEST, role, pkg_name, extra_info)
+    latest_pkg_info = self.metastore.get_pkg_meta(role, pkg_name, constants.LATEST, extra_info)
     utils.print_dict(latest_pkg_info, is_raw)
 
   # clean the inconsistency state of package store.

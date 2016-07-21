@@ -1,7 +1,7 @@
 """packer cli building module"""
 import argparse
 
-from heron.package.src.python.common import constants
+from heron.packer.src.python.common import constants
 from heron.common.src.python.color import Log
 
 help_epilog = '''Getting more help:

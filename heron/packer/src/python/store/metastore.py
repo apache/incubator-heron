@@ -4,7 +4,7 @@ import os
 import sys
 
 from heron.common.src.python.color import Log
-from heron.package.src.python.common import constants
+from heron.packer.src.python.common import constants
 
 METASTORE_NAME = "heron.package.metastore.name"
 METASTORE_ROOT_PATH = "heron.package.metastore.root_path"
@@ -35,7 +35,7 @@ class Metastore(object):
     raise NotImplementedError('delete_pkg_meta is not implemented')
 
   def get_pkg_meta(self, role, pkg_name, version, extra_info):
-    """Get meta data for a package's version"""
+    """Get meta data for a package's version, "LIVE" and "LATEST" tag are supported"""
     raise NotImplementedError('get_pkg_meta is not implemented')
 
   def get_pkg_location(self, role, pkg_name, version, extra_info):
@@ -49,10 +49,6 @@ class Metastore(object):
   def unset_tag(self, tag, role, pkg_name, extra_info):
     """Clean the tag on a package"""
     raise NotImplementedError('unset_tag is not implemented')
-
-  def get_meta_by_tag(self, tag, role, pkg_name, extra_info):
-    """Get a pkg's info by tag, only "LIVE" and "LATEST" tags are available"""
-    raise NotImplementedError('get_meat_by_tag is not implemented')
 
   def get_pkg_uri(self, scheme, role, pkg_name, version, extra_info):
     """Get pkg uri"""
@@ -168,7 +164,7 @@ class LocalMetastore(Metastore):
 
     if not self._is_valid_pkg(meta_info, role, pkg_name):
       Log.error("requested role/pkg (%s/%s) not found" % (role, pkg_name))
-      return False
+      return None
 
     # version must be less than LATEST version or be LIVE/LATEST tag
     pkg_info = meta_info[role][pkg_name]
@@ -183,7 +179,10 @@ class LocalMetastore(Metastore):
 
   def get_pkg_location(self, role, pkg_name, version, extra_info):
     version_info = self.get_pkg_meta(role, pkg_name, version, extra_info)
-    return version_info[constants.STORE_PATH]
+    if version_info is None:
+      return None
+    else:
+      return version_info[constants.STORE_PATH]
 
   def get_pkg_uri(self, scheme, role, pkg_name, version, extra_info):
     return "%s://%s/%s/%s" % (scheme, role, pkg_name, version)
@@ -236,24 +235,6 @@ class LocalMetastore(Metastore):
 
     return "0"
 
-  def get_meta_by_tag(self, tag, role, pkg_name, extra_info):
-    meta_info = self._load_meta_file()
-
-    if not self._is_valid_pkg(meta_info, role, pkg_name):
-      Log.error("requested role/pkg (%s/%s) not found" % (role, pkg_name))
-      return dict()
-
-    pkg_info = meta_info[role][pkg_name]
-    version = pkg_info[tag]
-    if (tag == constants.LIVE and version is None) or \
-            (tag == constants.LATEST and version == "0"):
-      Log.error("The tag '%s' is unset. No package version found" % tag)
-      return dict()
-    else:
-      info = pkg_info[version]
-      info[constants.VERSION] = version
-      return info
-
   def set_tag(self, tag, role, pkg_name, version, extra_info):
     return self._update_tag(tag, role, pkg_name, version)
 
@@ -298,21 +279,21 @@ class LocalMetastore(Metastore):
     # a valid version must be either a tag name or a version # less than LATEST
     return version == constants.LATEST or \
            version == constants.LIVE or \
-           pkg_info[constants.LATEST] >= version
+           int(pkg_info[constants.LATEST]) >= int(version)
 
   @staticmethod
   def _translate_version(version, pkg_info):
     # if a version is a tag name, convert it to the actual version
     if version == constants.LATEST:
       if pkg_info[constants.LATEST] == 0:
-        Log.error("there's no version available for the pkg. Bailing out...")
-      version = str(pkg_info[constants.LATEST])
+        Log.error("there's no latest version available for the pkg. Bailing out...")
+      version = pkg_info[constants.LATEST]
 
     elif version == constants.LIVE:
       if pkg_info[constants.LIVE] is None:
         Log.error("there's no live version for the pkg. Bailing out...")
         sys.exit(1)
-      version = str(pkg_info[constants.LIVE])
+      version = pkg_info[constants.LIVE]
 
     return version
 
