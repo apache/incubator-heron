@@ -16,7 +16,7 @@ package com.twitter.heron.common.utils.misc;
 
 import java.util.Map;
 
-import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronConfig;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.serializer.KryoSerializer;
 

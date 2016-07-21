@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 
 import com.google.protobuf.ByteString;
 
-import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronConfig;
 import com.twitter.heron.api.bolt.IOutputCollector;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.tuple.Tuple;

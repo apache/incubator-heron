@@ -13,12 +13,12 @@
 // limitations under the License.
 package com.twitter.heron.integration_test.common;
 
-import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronConfig;
 
 /**
  * A basic configuration for heron topology
  */
-public class BasicConfig extends Config {
+public class BasicConfig extends HeronConfig {
   private static final long serialVersionUID = -3583884076092048052L;
   private static final int DEFAULT_NUM_STMGRS = 1;
 

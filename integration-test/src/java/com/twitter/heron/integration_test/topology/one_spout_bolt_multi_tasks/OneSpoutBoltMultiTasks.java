@@ -15,7 +15,7 @@ package com.twitter.heron.integration_test.topology.one_spout_bolt_multi_tasks;
 
 import java.net.URL;
 
-import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronConfig;
 import com.twitter.heron.api.HeronSubmitter;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.integration_test.common.BasicConfig;
@@ -47,7 +47,7 @@ public final class OneSpoutBoltMultiTasks {
         .shuffleGrouping("ab-spout");
 
     // Conf
-    Config conf = new BasicConfig();
+    HeronConfig conf = new BasicConfig();
 
     // Submit it!
     HeronSubmitter.submitTopology(topologyName, conf, builder.createTopology());

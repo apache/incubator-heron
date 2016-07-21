@@ -15,7 +15,7 @@ package com.twitter.heron.integration_test.topology.fields_grouping;
 
 import java.net.URL;
 
-import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronConfig;
 import com.twitter.heron.api.HeronSubmitter;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.integration_test.common.BasicConfig;
@@ -49,8 +49,8 @@ public final class FieldsGrouping {
     builder.setBolt("sum-bolt", new CountAggregatorBolt(), 1)
         .noneGrouping("count-bolt");
 
-    // Conf
-    Config conf = new BasicConfig();
+    // HeronConfig
+    HeronConfig conf = new BasicConfig();
 
     // Submit it!
     HeronSubmitter.submitTopology(topologyName, conf, builder.createTopology());

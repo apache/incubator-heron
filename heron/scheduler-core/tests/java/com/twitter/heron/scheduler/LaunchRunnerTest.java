@@ -55,7 +55,7 @@ public class LaunchRunnerTest {
     return TopologyAPI.Config.KeyValue.newBuilder().setKey(key).setValue(value).build();
   }
 
-  public static TopologyAPI.Topology createTopology(com.twitter.heron.api.Config heronConfig) {
+  public static TopologyAPI.Topology createTopology(com.twitter.heron.api.HeronConfig heronConfig) {
     TopologyBuilder builder = new TopologyBuilder();
     builder.setSpout("spout-1", new BaseRichSpout() {
       private static final long serialVersionUID = -762965195665496156L;
@@ -107,7 +107,7 @@ public class LaunchRunnerTest {
     ILauncher launcher = Mockito.mock(ILauncher.class);
     IPacking packing = Mockito.mock(IPacking.class);
     SchedulerStateManagerAdaptor adaptor = Mockito.mock(SchedulerStateManagerAdaptor.class);
-    TopologyAPI.Topology topology = createTopology(new com.twitter.heron.api.Config());
+    TopologyAPI.Topology topology = createTopology(new com.twitter.heron.api.HeronConfig());
 
     Mockito.doReturn(launcher).when(runtime).get(Keys.launcherClassInstance());
     Mockito.doReturn(packing).when(runtime).get(Keys.packingClassInstance());
@@ -128,7 +128,7 @@ public class LaunchRunnerTest {
   @Test
   public void testTrimTopology() throws Exception {
     LaunchRunner launchRunner = new LaunchRunner(createRunnerConfig(), createRunnerRuntime());
-    TopologyAPI.Topology topologyBeforeTrimmed = createTopology(new com.twitter.heron.api.Config());
+    TopologyAPI.Topology topologyBeforeTrimmed = createTopology(new com.twitter.heron.api.HeronConfig());
     TopologyAPI.Topology topologyAfterTrimmed = launchRunner.trimTopology(topologyBeforeTrimmed);
 
     for (TopologyAPI.Spout spout : topologyBeforeTrimmed.getSpoutsList()) {

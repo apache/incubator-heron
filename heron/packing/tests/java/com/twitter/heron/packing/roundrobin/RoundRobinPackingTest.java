@@ -48,7 +48,7 @@ public class RoundRobinPackingTest {
 
   protected TopologyAPI.Topology getTopology(
       int spoutParallelism, int boltParallelism,
-      com.twitter.heron.api.Config topologyConfig) {
+      com.twitter.heron.api.HeronConfig topologyConfig) {
     // Setup the spout parallelism
     Map<String, Integer> spouts = new HashMap<>();
     spouts.put(SPOUT_NAME, spoutParallelism);
@@ -88,8 +88,8 @@ public class RoundRobinPackingTest {
     int boltParallelism = 3;
 
     // Set up the topology and its config
-    com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
-    topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
+    com.twitter.heron.api.HeronConfig topologyConfig = new com.twitter.heron.api.HeronConfig();
+    topologyConfig.put(com.twitter.heron.api.HeronConfig.TOPOLOGY_STMGRS, numContainers);
 
     // Explicit set insufficient ram for container
     long containerRam = -1L * Constants.GB;
@@ -112,8 +112,8 @@ public class RoundRobinPackingTest {
     int boltParallelism = 3;
 
     // Set up the topology and its config
-    com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
-    topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
+    com.twitter.heron.api.HeronConfig topologyConfig = new com.twitter.heron.api.HeronConfig();
+    topologyConfig.put(com.twitter.heron.api.HeronConfig.TOPOLOGY_STMGRS, numContainers);
 
     // No explicit resources required
     TopologyAPI.Topology topologyNoExplicitResourcesConfig =
@@ -150,8 +150,8 @@ public class RoundRobinPackingTest {
     int boltParallelism = 3;
 
     // Set up the topology and its config
-    com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
-    topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
+    com.twitter.heron.api.HeronConfig topologyConfig = new com.twitter.heron.api.HeronConfig();
+    topologyConfig.put(com.twitter.heron.api.HeronConfig.TOPOLOGY_STMGRS, numContainers);
     // Explicit set resources for container
     long containerRam = 10L * Constants.GB;
     long containerDisk = 20L * Constants.GB;
@@ -210,8 +210,8 @@ public class RoundRobinPackingTest {
     int boltParallelism = 3;
 
     // Set up the topology and its config
-    com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
-    topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
+    com.twitter.heron.api.HeronConfig topologyConfig = new com.twitter.heron.api.HeronConfig();
+    topologyConfig.put(com.twitter.heron.api.HeronConfig.TOPOLOGY_STMGRS, numContainers);
 
     // Explicit set resources for container
     // the value should be ignored, since we set the complete component ram map
@@ -256,8 +256,8 @@ public class RoundRobinPackingTest {
     int boltParallelism = 3;
 
     // Set up the topology and its config
-    com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
-    topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
+    com.twitter.heron.api.HeronConfig topologyConfig = new com.twitter.heron.api.HeronConfig();
+    topologyConfig.put(com.twitter.heron.api.HeronConfig.TOPOLOGY_STMGRS, numContainers);
 
     // Explicit set resources for container
     long containerRam = 10L * Constants.GB;
@@ -310,8 +310,8 @@ public class RoundRobinPackingTest {
     int componentParallelism = 4;
 
     // Set up the topology and its config
-    com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
-    topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
+    com.twitter.heron.api.HeronConfig topologyConfig = new com.twitter.heron.api.HeronConfig();
+    topologyConfig.put(com.twitter.heron.api.HeronConfig.TOPOLOGY_STMGRS, numContainers);
 
     TopologyAPI.Topology topology =
         getTopology(componentParallelism, componentParallelism, topologyConfig);

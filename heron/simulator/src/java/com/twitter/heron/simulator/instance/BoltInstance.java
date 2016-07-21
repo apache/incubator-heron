@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 
 import com.google.protobuf.ByteString;
 
-import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronConfig;
 import com.twitter.heron.api.bolt.IBolt;
 import com.twitter.heron.api.bolt.OutputCollector;
 import com.twitter.heron.api.generated.TopologyAPI;

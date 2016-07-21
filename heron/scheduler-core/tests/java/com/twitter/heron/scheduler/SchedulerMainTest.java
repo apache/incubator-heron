@@ -79,7 +79,7 @@ public class SchedulerMainTest {
 
     TopologyAPI.Topology topology =
         TopologyTests.createTopology(
-            iTopologyName, new com.twitter.heron.api.Config(),
+            iTopologyName, new com.twitter.heron.api.HeronConfig(),
             new HashMap<String, Integer>(), new HashMap<String, Integer>());
     String packingString = "dummyPackingString";
 

@@ -15,7 +15,7 @@ package com.twitter.heron.integration_test.topology.serialization;
 
 import java.net.URL;
 
-import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronConfig;
 import com.twitter.heron.api.HeronSubmitter;
 import com.twitter.heron.integration_test.common.BasicConfig;
 import com.twitter.heron.integration_test.common.bolt.IncrementBolt;
@@ -47,7 +47,7 @@ public final class SerializationTopology {
         .shuffleGrouping("check-bolt");
 
     // Conf
-    Config conf = new BasicConfig();
+    HeronConfig conf = new BasicConfig();
     conf.setSerializationClassName("com.twitter.heron.api.serializer.JavaSerializer");
 
     HeronSubmitter.submitTopology(topologyName, conf, builder.createTopology());

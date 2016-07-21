@@ -53,7 +53,7 @@ public final class StormSubmitter {
       StormTopology topology) throws AlreadyAliveException, InvalidTopologyException {
 
     // First do config translation
-    com.twitter.heron.api.Config heronConfig = ConfigUtils.translateConfig(stormConfig);
+    com.twitter.heron.api.HeronConfig heronConfig = ConfigUtils.translateConfig(stormConfig);
 
     // Now submit a heron topology
     try {

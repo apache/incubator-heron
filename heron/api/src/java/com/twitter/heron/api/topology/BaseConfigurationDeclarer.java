@@ -17,7 +17,7 @@ package com.twitter.heron.api.topology;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronConfig;
 
 public abstract class BaseConfigurationDeclarer<T extends ComponentConfigurationDeclarer<?>>
     implements ComponentConfigurationDeclarer<T> {

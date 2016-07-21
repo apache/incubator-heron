@@ -44,7 +44,7 @@ import backtype.storm.serialization.IKryoFactory;
  * Spouts.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class Config extends com.twitter.heron.api.Config {
+public class Config extends com.twitter.heron.api.HeronConfig {
   private static final long serialVersionUID = 2282398261811468412L;
 
   /**

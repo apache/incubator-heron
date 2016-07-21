@@ -48,18 +48,18 @@ import com.twitter.heron.spi.utils.TopologyUtils;
  * and the padding configuration.
  * <p>
  * 2. The user provides a hint for the maximum CPU, RAM and Disk that can be used by each container through
- * the com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT,
- * com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_RAM_HINT,
- * com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_DISK_HINT parameters.
+ * the com.twitter.heron.api.HeronConfig.TOPOLOGY_CONTAINER_MAX_CPU_HINT,
+ * com.twitter.heron.api.HeronConfig.TOPOLOGY_CONTAINER_MAX_RAM_HINT,
+ * com.twitter.heron.api.HeronConfig.TOPOLOGY_CONTAINER_MAX_DISK_HINT parameters.
  * If the parameters are not specified then a default value is used for the maximum container
  * size.
  * <p>
  * 3. The user provides a percentage of each container size that will be added to the resources
- * allocated by the container through the com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE
+ * allocated by the container through the com.twitter.heron.api.HeronConfig.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE
  * If the parameter is not specified then a default value of 10 is used (10% of the container size)
  * <p>
  * 4. The ram required for one instance is calculated as:
- * value in com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_RAMMAP if exists, otherwise,
+ * value in com.twitter.heron.api.HeronConfig.TOPOLOGY_COMPONENT_RAMMAP if exists, otherwise,
  * the default ram value for one instance.
  * <p>
  * 5. The cpu required for one instance is calculated as the default cpu value for one instance.
@@ -134,7 +134,7 @@ public class FirstFitDecreasingPacking implements IPacking {
 
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     int paddingPercentage = Integer.parseInt(TopologyUtils.getConfigWithDefault(
-        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE,
+        topologyConfig, com.twitter.heron.api.HeronConfig.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE,
         Integer.toString(DEFAULT_CONTAINER_PADDING_PERCENTAGE)));
 
     long topologyRam = 0;
@@ -311,15 +311,15 @@ public class FirstFitDecreasingPacking implements IPacking {
   private int allocateNewContainer(ArrayList<Container> containers) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     long maxContainerRam = Long.parseLong(TopologyUtils.getConfigWithDefault(
-        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_RAM_HINT,
+        topologyConfig, com.twitter.heron.api.HeronConfig.TOPOLOGY_CONTAINER_MAX_RAM_HINT,
         Long.toString(instanceRamDefault * 4)));
 
     double maxContainerCpu = Double.parseDouble(TopologyUtils.getConfigWithDefault(
-        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT,
+        topologyConfig, com.twitter.heron.api.HeronConfig.TOPOLOGY_CONTAINER_MAX_CPU_HINT,
         Double.toString(instanceCpuDefault * 4)));
 
     long maxContainerDisk = Long.parseLong(TopologyUtils.getConfigWithDefault(
-        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_DISK_HINT,
+        topologyConfig, com.twitter.heron.api.HeronConfig.TOPOLOGY_CONTAINER_MAX_DISK_HINT,
         Long.toString(instanceDiskDefault * 4)));
 
     containers.add(new Container(maxContainerRam, maxContainerCpu, maxContainerDisk));
@@ -343,7 +343,7 @@ public class FirstFitDecreasingPacking implements IPacking {
 
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     long maxContainerRam = Long.parseLong(TopologyUtils.getConfigWithDefault(
-        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_RAM_HINT,
+        topologyConfig, com.twitter.heron.api.HeronConfig.TOPOLOGY_CONTAINER_MAX_RAM_HINT,
         Long.toString(instanceRamDefault * 4)));
 
     if (instanceRAM > maxContainerRam) {
