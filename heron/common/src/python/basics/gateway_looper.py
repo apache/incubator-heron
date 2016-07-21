@@ -29,7 +29,7 @@ class GatewayLooper(EventLooper):
     # Pipe used for wake up select
     self.pipe_r, self.pipe_w = os.pipe()
 
-    #self.register_timer_task_in_sec(self.exit_loop, 5)
+    #self.register_timer_task_in_sec(self.exit_loop, 10)
     self.started = time.time()
     Log.debug("Gateway Looper started time: " + str(time.asctime()))
 

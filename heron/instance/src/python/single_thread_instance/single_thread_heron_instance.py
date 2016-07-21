@@ -64,6 +64,7 @@ class SingleThreadHeronInstance(object):
     def go_trace(sig, stack):
       with open("/tmp/trace.log", "w") as f:
         traceback.print_stack(stack, file=f)
+      self.looper.register_timer_task_in_sec(self.looper.exit_loop, 0.0)
     signal.signal(signal.SIGUSR1, go_trace)
 
   def start(self):
@@ -208,7 +209,7 @@ def main():
 
   # TODO: improve this later
   log_file = os.path.join(log_dir, instance_id + ".log.0")
-  init_logger(level=logging.DEBUG, logfile=log_file, max_files=max_log_files, max_bytes=max_log_bytes)
+  init_logger(level=logging.INFO, logfile=log_file, max_files=max_log_files, max_bytes=max_log_bytes)
 
   Log.info("\nStarting instance: " + instance_id + " for topology: " + topology_name +
            " and topologyId: " + topology_id + " for component: " + component_name +

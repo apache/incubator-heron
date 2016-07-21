@@ -181,8 +181,8 @@ class HeronClient(asyncore.dispatcher):
         message = msg_builder()
         message.ParseFromString(serialized_msg)
         if message.IsInitialized():
-          Log.debug("In handle_packet(): Received message with size " + str(packet.get_datasize()) +
-                    "; in total received " + str(self.total_bytes_received) + " bytes. \n" + str(message))
+          #Log.debug("In handle_packet(): Received message with size " + str(packet.get_datasize()) +
+          #          "; in total received " + str(self.total_bytes_received) + " bytes. \n" + str(message))
           self.on_incoming_message(message)
         else:
           raise RuntimeError("Message not initialized")

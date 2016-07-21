@@ -226,7 +226,7 @@ class Spout(Component):
 
   def _is_continue_to_work(self):
     # TODO: implement later
-    return False
+    return True
 
   # ACK/FAIL related
   def _handle_ack_tuple(self, tuple, is_success):

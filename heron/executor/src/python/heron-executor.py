@@ -404,8 +404,15 @@ class HeronExecutor:
     do_print("%s stderr: %s" %(name, process_stderr))
 
   def run_process(self, name, cmd):
-    do_print("Running %s process as %s" % (name, ' '.join(cmd)))
-    return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if 'single_thread_heron_instance' in cmd[0]:
+      env = os.environ.copy()
+      env["PEX_PROFILE"] = "true"
+      do_print("Set environment variable: " + str(env))
+      do_print("Running -env_set %s process as %s" % (name, ' '.join(cmd)))
+      return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
+    else:
+      do_print("Running %s process as %s" % (name, ' '.join(cmd)))
+      return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
   def run_blocking_process(self, cmd, is_shell):
     do_print("Running blocking process as %s" % cmd)
@@ -498,7 +505,7 @@ def setup():
   os.setpgrp() # create new process group, become its leader
 
   do_print('Register the SIGTERM signal handler')
-  signal.signal(signal.SIGTERM, signal_handlerG)
+  signal.signal(signal.SIGTERM, signal_handler)
 
   do_print('Register the atexit clean up')
   atexit.register(cleanup)

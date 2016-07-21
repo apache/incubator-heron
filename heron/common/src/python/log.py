@@ -20,10 +20,9 @@ Log = logging.getLogger()
 
 def init_logger(level, logfile, max_files, max_bytes):
   log_format = "%(asctime)s:%(levelname)s:%(filename)s: %(message)s"
-  date_format = '%a, %d %b %Y %H:%M:%S'
 
   Log.setLevel(level)
   handler = RotatingFileHandler(logfile, maxBytes=max_bytes, backupCount=max_files)
-  handler.setFormatter(logging.Formatter(fmt=log_format, datefmt=date_format))
+  handler.setFormatter(logging.Formatter(fmt=log_format))
   Log.addHandler(handler)
 

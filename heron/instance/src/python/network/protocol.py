@@ -45,7 +45,7 @@ class HeronProtocol(object):
 
   @staticmethod
   def get_outgoing_packet(reqid, message):
-    Log.debug("In get_outgoing_pkt():\n" + message.__str__())
+    #Log.debug("In get_outgoing_pkt():\n" + message.__str__())
     assert message.IsInitialized()
     packet = ""
 
