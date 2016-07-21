@@ -202,7 +202,7 @@ public final class TopologyUtils {
   public static int getNumContainers(TopologyAPI.Topology topology) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     return Integer.parseInt(TopologyUtils.getConfigWithDefault(
-        topologyConfig, Config.TOPOLOGY_STMGRS, "1").trim());
+        topologyConfig, HeronConfig.TOPOLOGY_STMGRS, "1").trim());
   }
 
   // TODO(nbhagat): libs is dependent on pants for building. Instead take classpath as argument.
