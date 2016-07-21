@@ -14,7 +14,7 @@
 
 package com.twitter.heron.spi.packing;
 
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 
 /**
  * Packing algorithm to use for packing multiple instances into containers. Packing hints like
@@ -25,7 +25,7 @@ public interface IPacking extends AutoCloseable {
   /**
    * Initialize the packing algorithm with the static and runtime config
    */
-  void initialize(Config config, Config runtime);
+  void initialize(SpiCommonConfig config, SpiCommonConfig runtime);
 
   /**
    * Called by scheduler to generate container packing.

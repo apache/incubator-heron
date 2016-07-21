@@ -17,13 +17,13 @@ package com.twitter.heron.uploader;
 import java.net.URI;
 
 import com.twitter.heron.common.basics.TypeUtils;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.uploader.IUploader;
 
 public class NullUploader implements IUploader {
 
   @Override
-  public void initialize(Config config) {
+  public void initialize(SpiCommonConfig config) {
   }
 
   @Override

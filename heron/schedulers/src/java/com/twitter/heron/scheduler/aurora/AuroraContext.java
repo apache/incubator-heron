@@ -14,7 +14,7 @@
 
 package com.twitter.heron.scheduler.aurora;
 
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
 
 public final class AuroraContext extends Context {
@@ -23,7 +23,7 @@ public final class AuroraContext extends Context {
   private AuroraContext() {
   }
 
-  public static String getJobLinkTemplate(Config config) {
+  public static String getJobLinkTemplate(SpiCommonConfig config) {
     return config.getStringValue(JOB_LINK_TEMPLATE);
   }
 }

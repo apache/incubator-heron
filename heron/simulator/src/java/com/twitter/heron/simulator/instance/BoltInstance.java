@@ -241,7 +241,7 @@ public class BoltInstance implements IInstance {
 
   private void PrepareTickTupleTimer() {
     Object tickTupleFreqSecs =
-        helper.getTopologyContext().getTopologyConfig().get(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS);
+        helper.getTopologyContext().getTopologyConfig().get(HeronConfig.TOPOLOGY_TICK_TUPLE_FREQ_SECS);
 
     if (tickTupleFreqSecs != null) {
       int freq = TypeUtils.getInteger(tickTupleFreqSecs);

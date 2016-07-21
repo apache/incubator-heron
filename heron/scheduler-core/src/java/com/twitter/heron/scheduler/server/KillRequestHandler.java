@@ -21,7 +21,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.Runtime;
@@ -31,9 +31,9 @@ public class KillRequestHandler implements HttpHandler {
   private static final Logger LOG = Logger.getLogger(KillRequestHandler.class.getName());
 
   private IScheduler scheduler;
-  private Config runtime;
+  private SpiCommonConfig runtime;
 
-  public KillRequestHandler(Config runtime, IScheduler scheduler) {
+  public KillRequestHandler(SpiCommonConfig runtime, IScheduler scheduler) {
     this.scheduler = scheduler;
     this.runtime = runtime;
   }

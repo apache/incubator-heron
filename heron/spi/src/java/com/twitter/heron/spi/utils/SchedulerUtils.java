@@ -27,7 +27,7 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.Common;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
@@ -52,8 +52,8 @@ public final class SchedulerUtils {
    * @return true if scheduling successfully
    */
   public static boolean onScheduleAsLibrary(
-      Config config,
-      Config runtime,
+      SpiCommonConfig config,
+      SpiCommonConfig runtime,
       IScheduler scheduler,
       PackingPlan packing) {
     boolean ret = false;
@@ -86,8 +86,8 @@ public final class SchedulerUtils {
    * @return String[] representing the command to start heron-scheduler
    */
   public static String[] schedulerCommand(
-      Config config,
-      Config runtime,
+      SpiCommonConfig config,
+      SpiCommonConfig runtime,
       List<Integer> freePorts) {
     List<String> commands = new ArrayList<>();
 
@@ -120,7 +120,7 @@ public final class SchedulerUtils {
    * @return String[] representing the arguments to start heron-scheduler
    */
   public static String[] schedulerCommandArgs(
-      Config config, Config runtime, List<Integer> freePorts) {
+      SpiCommonConfig config, SpiCommonConfig runtime, List<Integer> freePorts) {
     // First let us have some safe checks
     if (freePorts.size() < PORTS_REQUIRED_FOR_SCHEDULER) {
       throw new RuntimeException("Failed to find enough ports for executor");
@@ -161,8 +161,8 @@ public final class SchedulerUtils {
    * @return String[] representing the command to start heron-executor
    */
   public static String[] executorCommand(
-      Config config,
-      Config runtime,
+      SpiCommonConfig config,
+      SpiCommonConfig runtime,
       int containerIndex,
       List<Integer> freePorts) {
     // To construct the command aligning to executor interfaces
@@ -186,7 +186,7 @@ public final class SchedulerUtils {
    * @return String[] representing the arguments to start heron-executor
    */
   public static String[] executorCommandArgs(
-      Config config, Config runtime, List<Integer> freePorts) {
+      SpiCommonConfig config, SpiCommonConfig runtime, List<Integer> freePorts) {
     TopologyAPI.Topology topology = Runtime.topology(runtime);
 
     // First let us have some safe checks
@@ -257,7 +257,7 @@ public final class SchedulerUtils {
    * @param isService true if the scheduler is a service; false otherwise
    */
   public static boolean setLibSchedulerLocation(
-      Config runtime,
+      SpiCommonConfig runtime,
       IScheduler scheduler,
       boolean isService) {
     // Dummy value since there is no scheduler running as service
@@ -273,7 +273,7 @@ public final class SchedulerUtils {
    * @param scheduler the IScheduler to provide more info
    */
   public static boolean setSchedulerLocation(
-      Config runtime,
+      SpiCommonConfig runtime,
       String schedulerEndpoint,
       IScheduler scheduler) {
 

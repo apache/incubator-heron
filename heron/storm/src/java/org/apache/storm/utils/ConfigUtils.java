@@ -36,8 +36,8 @@ public final class ConfigUtils {
    * @param stormConfig the storm config
    * @return a heron config
    */
-  public static Config translateConfig(Map<String, Object> stormConfig) {
-    Config heronConfig = new Config(stormConfig);
+  public static HeronConfig translateConfig(Map<String, Object> stormConfig) {
+    HeronConfig heronConfig = new HeronConfig(stormConfig);
     // Look at serialization stuff first
     doSerializationTranslation(heronConfig);
 
@@ -83,7 +83,7 @@ public final class ConfigUtils {
     return heronConfig;
   }
 
-  private static void doSerializationTranslation(Config heronConfig) {
+  private static void doSerializationTranslation(HeronConfig heronConfig) {
     if (heronConfig.containsKey(org.apache.storm.Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION)
         && (heronConfig.get(org.apache.storm.Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION)
           instanceof Boolean)
@@ -121,7 +121,7 @@ public final class ConfigUtils {
    * pass a ITaskHookDelegate to Heron and remember the actual task hooks in an internal
    * variable STORMCOMPAT_TOPOLOGY_AUTO_TASK_HOOKS
    */
-  private static void doTaskHooksTranslation(Config heronConfig) {
+  private static void doTaskHooksTranslation(HeronConfig heronConfig) {
     List<String> hooks = heronConfig.getAutoTaskHooks();
     if (hooks != null) {
       heronConfig.put(org.apache.storm.Config.STORMCOMPAT_TOPOLOGY_AUTO_TASK_HOOKS, hooks);

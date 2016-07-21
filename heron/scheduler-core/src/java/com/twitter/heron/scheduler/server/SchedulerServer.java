@@ -22,7 +22,7 @@ import java.util.concurrent.Executors;
 
 import com.sun.net.httpserver.HttpServer;
 
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.NetworkUtils;
 
@@ -35,10 +35,10 @@ public class SchedulerServer {
   private static final int SERVER_BACK_LOG = 0;
 
   private final HttpServer schedulerServer;
-  private final Config runtime;
+  private final SpiCommonConfig runtime;
   private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-  public SchedulerServer(Config runtime, IScheduler scheduler, int port)
+  public SchedulerServer(SpiCommonConfig runtime, IScheduler scheduler, int port)
       throws IOException {
 
     this.runtime = runtime;

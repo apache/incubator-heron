@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.common.basics.SysUtils;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.PackingPlan;
@@ -39,13 +39,13 @@ import com.twitter.heron.spi.utils.ShellUtils;
 public class MesosLauncher implements ILauncher {
   private static final Logger LOG = Logger.getLogger(MesosLauncher.class.getName());
 
-  private Config config;
-  private Config runtime;
+  private SpiCommonConfig config;
+  private SpiCommonConfig runtime;
 
   private String schedulerWorkingDirectory;
 
   @Override
-  public void initialize(Config mConfig, Config mRuntime) {
+  public void initialize(SpiCommonConfig mConfig, SpiCommonConfig mRuntime) {
     this.config = mConfig;
     this.runtime = mRuntime;
 

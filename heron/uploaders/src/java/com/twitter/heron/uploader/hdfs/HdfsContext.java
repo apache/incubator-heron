@@ -14,7 +14,7 @@
 
 package com.twitter.heron.uploader.hdfs;
 
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
 
 final class HdfsContext extends Context {
@@ -25,11 +25,11 @@ final class HdfsContext extends Context {
   private HdfsContext() {
   }
 
-  public static String hadoopConfigDirectory(Config config) {
+  public static String hadoopConfigDirectory(SpiCommonConfig config) {
     return config.getStringValue(HADOOP_CONFIG_DIRECTORY);
   }
 
-  public static String hdfsTopologiesDirectoryURI(Config config) {
+  public static String hdfsTopologiesDirectoryURI(SpiCommonConfig config) {
     return config.getStringValue(HDFS_TOPOLOGIES_DIRECTORY_URI);
   }
 }

@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.Runtime;
@@ -41,13 +41,13 @@ public class LocalScheduler implements IScheduler {
   private final ExecutorService monitorService = Executors.newCachedThreadPool();
   // map to keep track of the process and the shard it is running
   private final Map<Process, Integer> processToContainer = new ConcurrentHashMap<>();
-  private Config config;
-  private Config runtime;
+  private SpiCommonConfig config;
+  private SpiCommonConfig runtime;
   // has the topology been killed?
   private volatile boolean isTopologyKilled = false;
 
   @Override
-  public void initialize(Config mConfig, Config mRuntime) {
+  public void initialize(SpiCommonConfig mConfig, SpiCommonConfig mRuntime) {
     this.config = mConfig;
     this.runtime = mRuntime;
   }

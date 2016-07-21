@@ -25,7 +25,7 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.WatchCallback;
@@ -89,7 +89,7 @@ public abstract class FileSystemStateManager implements IStateManager {
   }
 
   @Override
-  public void initialize(Config config) {
+  public void initialize(SpiCommonConfig config) {
     this.rootAddress = Context.stateManagerRootPath(config);
     LOG.log(Level.FINE, "File system state manager root address: {0}", rootAddress);
   }

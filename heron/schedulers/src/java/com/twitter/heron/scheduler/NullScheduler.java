@@ -18,14 +18,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
 
 public class NullScheduler implements IScheduler {
 
   @Override
-  public void initialize(Config config, Config runtime) {
+  public void initialize(SpiCommonConfig config, SpiCommonConfig runtime) {
 
   }
 

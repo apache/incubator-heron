@@ -33,7 +33,7 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.mesos.framework.BaseContainer;
 import com.twitter.heron.scheduler.mesos.framework.MesosFramework;
 import com.twitter.heron.scheduler.mesos.framework.TaskUtils;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
@@ -49,14 +49,14 @@ import com.twitter.heron.spi.utils.SchedulerUtils;
 public class MesosScheduler implements IScheduler {
   private static final Logger LOG = Logger.getLogger(MesosScheduler.class.getName());
 
-  private Config config;
-  private Config runtime;
+  private SpiCommonConfig config;
+  private SpiCommonConfig runtime;
   private MesosFramework mesosFramework;
   private SchedulerDriver driver;
 
 
   @Override
-  public void initialize(Config mConfig, Config mRuntime) {
+  public void initialize(SpiCommonConfig mConfig, SpiCommonConfig mRuntime) {
     this.config = mConfig;
     this.runtime = mRuntime;
     this.mesosFramework = getMesosFramework();

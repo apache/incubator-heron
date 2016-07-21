@@ -34,7 +34,7 @@ import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.config.SystemConfig;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.scheduler.server.SchedulerServer;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.IPacking;
@@ -58,12 +58,12 @@ public class SchedulerMain {
   private int schedulerServerPort = -1;       // http port where the scheduler is listening
 
   private TopologyAPI.Topology topology = null;  // topology definition
-  private Config config;                        // holds all the config read
+  private SpiCommonConfig config;                        // holds all the config read
   // Properties passed from command line property arguments
   private final Properties properties;
 
   public SchedulerMain(
-      Config config,
+      SpiCommonConfig config,
       TopologyAPI.Topology topology,
       int schedulerServerPort,
       Properties properties) {
@@ -240,7 +240,7 @@ public class SchedulerMain {
     TopologyAPI.Topology topology = TopologyUtils.getTopology(topologyDefnFile);
 
     // build the config by expanding all the variables
-    Config schedulerConfig = SchedulerConfig.loadConfig(
+    SpiCommonConfig schedulerConfig = SchedulerConfig.loadConfig(
         cluster,
         role,
         env,
@@ -260,7 +260,7 @@ public class SchedulerMain {
   }
 
   // Set up logging based on the Config
-  private static void setupLogging(Config config) throws IOException {
+  private static void setupLogging(SpiCommonConfig config) throws IOException {
     String systemConfigFilename = Context.systemConfigSandboxFile(config);
 
     SystemConfig systemConfig = new SystemConfig(systemConfigFilename, true);
@@ -298,7 +298,7 @@ public class SchedulerMain {
    * @return an instance of the http server
    */
   protected SchedulerServer getServer(
-      Config runtime, IScheduler scheduler, int port) throws IOException {
+      SpiCommonConfig runtime, IScheduler scheduler, int port) throws IOException {
 
     // create an instance of the server using scheduler class and port
     return new SchedulerServer(runtime, scheduler, port);
@@ -347,7 +347,7 @@ public class SchedulerMain {
       SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
       // build the runtime config
-      Config runtime = Config.newBuilder()
+      SpiCommonConfig runtime = SpiCommonConfig.newBuilder()
           .put(Keys.topologyId(), topology.getId())
           .put(Keys.topologyName(), topology.getName())
           .put(Keys.topologyDefinition(), topology)
@@ -366,7 +366,7 @@ public class SchedulerMain {
       }
 
       // Add the instanceDistribution to the runtime
-      Config ytruntime = Config.newBuilder()
+      SpiCommonConfig ytruntime = SpiCommonConfig.newBuilder()
           .putAll(runtime)
           .put(Keys.instanceDistribution(), packedPlan.getInstanceDistribution())
           .put(Keys.componentRamMap(), packedPlan.getComponentRamDistribution())

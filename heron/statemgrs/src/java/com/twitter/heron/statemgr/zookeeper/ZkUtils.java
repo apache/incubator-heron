@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.Pair;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.utils.NetworkUtils;
 
@@ -39,7 +39,7 @@ public final class ZkUtils {
    * @param config basing on which we setup the tunnel process
    * @return Pair of (zk_format_connectionString, List of tunneled processes)
    */
-  public static Pair<String, List<Process>> setupZkTunnel(Config config) {
+  public static Pair<String, List<Process>> setupZkTunnel(SpiCommonConfig config) {
     // Remove all spaces
     String connectionString = Context.stateManagerConnectionString(config).replaceAll("\\s+", "");
 

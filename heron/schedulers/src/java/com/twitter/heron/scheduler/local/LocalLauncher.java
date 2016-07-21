@@ -23,7 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.SysUtils;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
@@ -37,13 +37,13 @@ import com.twitter.heron.spi.utils.ShellUtils;
 public class LocalLauncher implements ILauncher {
   protected static final Logger LOG = Logger.getLogger(LocalLauncher.class.getName());
 
-  private Config config;
-  private Config runtime;
+  private SpiCommonConfig config;
+  private SpiCommonConfig runtime;
 
   private String topologyWorkingDirectory;
 
   @Override
-  public void initialize(Config mConfig, Config mRuntime) {
+  public void initialize(SpiCommonConfig mConfig, SpiCommonConfig mRuntime) {
     this.config = mConfig;
     this.runtime = mRuntime;
 

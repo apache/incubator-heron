@@ -21,7 +21,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.TypeUtils;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.uploader.IUploader;
 import com.twitter.heron.spi.utils.UploaderUtils;
@@ -49,7 +49,7 @@ public class ScpUploader implements IUploader {
   private static final Logger LOG = Logger.getLogger(ScpUploader.class.getName());
   // get the directory containing the file
   private String destTopologyDirectory;
-  private Config config;
+  private SpiCommonConfig config;
   private String topologyPackageLocation;
   private String destTopologyFile;
   private URI packageURI;
@@ -73,7 +73,7 @@ public class ScpUploader implements IUploader {
   }
 
   @Override
-  public void initialize(Config ipconfig) {
+  public void initialize(SpiCommonConfig ipconfig) {
     this.config = ipconfig;
     // Instantiate the scp controller
     this.controller = getScpController();

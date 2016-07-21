@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.scheduler.IScheduler;
 
 /**
@@ -27,11 +27,11 @@ import com.twitter.heron.spi.scheduler.IScheduler;
 public class LibrarySchedulerClient implements ISchedulerClient {
   private static final Logger LOG = Logger.getLogger(LibrarySchedulerClient.class.getName());
 
-  private final Config config;
-  private final Config runtime;
+  private final SpiCommonConfig config;
+  private final SpiCommonConfig runtime;
   private final IScheduler scheduler;
 
-  public LibrarySchedulerClient(Config config, Config runtime, IScheduler scheduler) {
+  public LibrarySchedulerClient(SpiCommonConfig config, SpiCommonConfig runtime, IScheduler scheduler) {
     this.config = config;
     this.runtime = runtime;
     this.scheduler = scheduler;

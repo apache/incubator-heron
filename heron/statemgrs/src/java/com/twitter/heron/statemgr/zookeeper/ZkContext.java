@@ -14,7 +14,7 @@
 
 package com.twitter.heron.statemgr.zookeeper;
 
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
 
 public final class ZkContext extends Context {
@@ -37,23 +37,23 @@ public final class ZkContext extends Context {
   private ZkContext() {
   }
 
-  public static boolean isInitializeTree(Config config) {
+  public static boolean isInitializeTree(SpiCommonConfig config) {
     return config.getBooleanValue(IS_INITIALIZE_TREE, true);
   }
 
-  public static int sessionTimeoutMs(Config config) {
+  public static int sessionTimeoutMs(SpiCommonConfig config) {
     return config.getIntegerValue(SESSION_TIMEOUT_MS, 30000);
   }
 
-  public static int connectionTimeoutMs(Config config) {
+  public static int connectionTimeoutMs(SpiCommonConfig config) {
     return config.getIntegerValue(CONNECTION_TIMEOUT_MS, 30000);
   }
 
-  public static int retryCount(Config config) {
+  public static int retryCount(SpiCommonConfig config) {
     return config.getIntegerValue(RETRY_COUNT, 10);
   }
 
-  public static int retryIntervalMs(Config config) {
+  public static int retryIntervalMs(SpiCommonConfig config) {
     return config.getIntegerValue(RETRY_INTERVAL_MS, 10000);
   }
 
@@ -61,27 +61,27 @@ public final class ZkContext extends Context {
   // Following are config for tunneling
   ///////////////////////////////////////////////////////
 
-  public static boolean isTunnelNeeded(Config config) {
+  public static boolean isTunnelNeeded(SpiCommonConfig config) {
     return config.getBooleanValue(IS_TUNNEL_NEEDED, false);
   }
 
-  public static int tunnelConnectionTimeoutMs(Config config) {
+  public static int tunnelConnectionTimeoutMs(SpiCommonConfig config) {
     return config.getIntegerValue(TUNNEL_CONNECTION_TIMEOUT_MS, 1000);
   }
 
-  public static int tunnelConnectionRetryCount(Config config) {
+  public static int tunnelConnectionRetryCount(SpiCommonConfig config) {
     return config.getIntegerValue(TUNNEL_CONNECTION_RETRY_COUNT, 2);
   }
 
-  public static int tunnelVerifyCount(Config config) {
+  public static int tunnelVerifyCount(SpiCommonConfig config) {
     return config.getIntegerValue(TUNNEL_VERIFY_COUNT, 10);
   }
 
-  public static int tunnelRetryIntervalMs(Config config) {
+  public static int tunnelRetryIntervalMs(SpiCommonConfig config) {
     return config.getIntegerValue(TUNNEL_RETRY_INTERVAL_MS, 1000);
   }
 
-  public static String tunnelHost(Config config) {
+  public static String tunnelHost(SpiCommonConfig config) {
     return config.getStringValue(TUNNEL_HOST, "no.tunnel.host.specified");
   }
 }

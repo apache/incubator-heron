@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.proto.scheduler.Scheduler.KillTopologyRequest;
 import com.twitter.heron.proto.scheduler.Scheduler.RestartTopologyRequest;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
 
@@ -34,7 +34,7 @@ public class YarnScheduler implements IScheduler {
   private static final Logger LOG = Logger.getLogger(YarnScheduler.class.getName());
 
   @Override
-  public void initialize(Config config, Config runtime) {
+  public void initialize(SpiCommonConfig config, SpiCommonConfig runtime) {
   }
 
   @Override

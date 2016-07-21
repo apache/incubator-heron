@@ -14,7 +14,7 @@
 
 package com.twitter.heron.scheduler.slurm;
 
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Misc;
 
@@ -23,17 +23,17 @@ public class SlurmContext extends Context {
   public static final String SLURM_JOB_ID = "heron.scheduler.slurm.job.id";
   public static final String SLURM_SHELL_SCRIPT = "heron.scheduler.slurm.shell.script";
 
-  public static String workingDirectory(Config config) {
+  public static String workingDirectory(SpiCommonConfig config) {
     String workingDirectory = config.getStringValue(WORKING_DIRECTORY,
         "${HOME}/.herondata/topologies/${CLUSTER}/${ROLE}/${TOPOLOGY}");
     return Misc.substitute(config, workingDirectory);
   }
 
-  public static String jobIdFile(Config config) {
+  public static String jobIdFile(SpiCommonConfig config) {
     return config.getStringValue(SLURM_JOB_ID, "slurm-job.pid");
   }
 
-  public static String slurmShellScript(Config config) {
+  public static String slurmShellScript(SpiCommonConfig config) {
     return config.getStringValue(SLURM_SHELL_SCRIPT, "slurm.sh");
   }
 }

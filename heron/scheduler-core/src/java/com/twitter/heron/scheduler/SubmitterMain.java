@@ -32,7 +32,7 @@ import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.common.utils.logging.LoggingHelper;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.IPacking;
@@ -57,14 +57,14 @@ public class SubmitterMain {
    * @param topology, proto in memory version of topology definition
    * @return config, the topology config
    */
-  protected static Config topologyConfigs(
+  protected static SpiCommonConfig topologyConfigs(
       String topologyPackage, String topologyJarFile, String topologyDefnFile,
       TopologyAPI.Topology topology) {
 
     String pkgType = FileUtils.isOriginalPackageJar(
         FileUtils.getBaseName(topologyJarFile)) ? "jar" : "tar";
 
-    Config config = Config.newBuilder()
+    SpiCommonConfig config = SpiCommonConfig.newBuilder()
         .put(Keys.topologyId(), topology.getId())
         .put(Keys.topologyName(), topology.getName())
         .put(Keys.topologyDefinitionFile(), topologyDefnFile)
@@ -84,8 +84,8 @@ public class SubmitterMain {
    * <p>
    * return config, the defaults config
    */
-  protected static Config defaultConfigs(String heronHome, String configPath, String releaseFile) {
-    Config config = Config.newBuilder()
+  protected static SpiCommonConfig defaultConfigs(String heronHome, String configPath, String releaseFile) {
+    SpiCommonConfig config = SpiCommonConfig.newBuilder()
         .putAll(ClusterDefaults.getDefaults())
         .putAll(ClusterDefaults.getSandboxDefaults())
         .putAll(ClusterConfig.loadConfig(heronHome, configPath, releaseFile))
@@ -100,8 +100,8 @@ public class SubmitterMain {
    * <p>
    * @return config, the override config
    */
-  protected static Config overrideConfigs(String overrideConfigPath) {
-    Config config = Config.newBuilder()
+  protected static SpiCommonConfig overrideConfigs(String overrideConfigPath) {
+    SpiCommonConfig config = SpiCommonConfig.newBuilder()
         .putAll(ClusterConfig.loadOverrideConfig(overrideConfigPath))
         .build();
     return config;
@@ -116,11 +116,11 @@ public class SubmitterMain {
    * @param verbose, enable verbose logging
    * @return config, the command line config
    */
-  protected static Config commandLineConfigs(String cluster,
+  protected static SpiCommonConfig commandLineConfigs(String cluster,
                                              String role,
                                              String environ,
                                              Boolean verbose) {
-    Config config = Config.newBuilder()
+    SpiCommonConfig config = SpiCommonConfig.newBuilder()
         .put(Keys.cluster(), cluster)
         .put(Keys.role(), role)
         .put(Keys.environ(), environ)
@@ -299,8 +299,8 @@ public class SubmitterMain {
     // load the topology configs
 
     // build the final config by expanding all the variables
-    Config config = Config.expand(
-        Config.newBuilder()
+    SpiCommonConfig config = SpiCommonConfig.expand(
+        SpiCommonConfig.newBuilder()
             .putAll(defaultConfigs(heronHome, configPath, releaseFile))
             .putAll(overrideConfigs(overrideConfigFile))
             .putAll(commandLineConfigs(cluster, role, environ, verbose))
@@ -323,13 +323,13 @@ public class SubmitterMain {
   }
 
   // holds all the config read
-  private final Config config;
+  private final SpiCommonConfig config;
 
   // topology definition
   private final TopologyAPI.Topology topology;
 
   public SubmitterMain(
-      Config config,
+      SpiCommonConfig config,
       TopologyAPI.Topology topology) {
     // initialize the options
     this.config = config;
@@ -404,7 +404,7 @@ public class SubmitterMain {
         } else {
           // Secondly, try to submit a topology
           // build the runtime config
-          Config runtime = Config.newBuilder()
+          SpiCommonConfig runtime = SpiCommonConfig.newBuilder()
               .put(Keys.topologyId(), topology.getId())
               .put(Keys.topologyName(), topology.getName())
               .put(Keys.topologyDefinition(), topology)
@@ -459,7 +459,7 @@ public class SubmitterMain {
     return uploaderRet;
   }
 
-  protected boolean callLauncherRunner(Config runtime) {
+  protected boolean callLauncherRunner(SpiCommonConfig runtime) {
     // using launch runner, launch the topology
     LaunchRunner launchRunner = new LaunchRunner(config, runtime);
     boolean result = launchRunner.call();

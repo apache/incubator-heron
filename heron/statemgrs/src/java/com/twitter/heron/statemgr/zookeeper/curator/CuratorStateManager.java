@@ -37,7 +37,7 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 import com.twitter.heron.statemgr.FileSystemStateManager;
@@ -51,10 +51,10 @@ public class CuratorStateManager extends FileSystemStateManager {
   private String connectionString;
   private boolean isSchedulerService;
   private List<Process> tunnelProcesses;
-  private Config config;
+  private SpiCommonConfig config;
 
   @Override
-  public void initialize(Config newConfig) {
+  public void initialize(SpiCommonConfig newConfig) {
     super.initialize(newConfig);
 
     this.config = newConfig;

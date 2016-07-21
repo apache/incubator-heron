@@ -16,7 +16,7 @@ package com.twitter.heron.spi.uploader;
 
 import java.net.URI;
 
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 
 /**
  * Uploads topology package to a shared location. This location must be
@@ -37,7 +37,7 @@ public interface IUploader extends AutoCloseable {
   /**
    * Initialize the uploader with the incoming context.
    */
-  void initialize(Config config);
+  void initialize(SpiCommonConfig config);
 
   /**
    * UploadPackage will upload the topology package to the given location.

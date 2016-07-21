@@ -18,7 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
@@ -28,11 +28,11 @@ import com.twitter.heron.spi.utils.Runtime;
 public class SchedulerClientFactory {
   private static final Logger LOG = Logger.getLogger(SchedulerClientFactory.class.getName());
 
-  private Config config;
+  private SpiCommonConfig config;
 
-  private Config runtime;
+  private SpiCommonConfig runtime;
 
-  public SchedulerClientFactory(Config config, Config runtime) {
+  public SchedulerClientFactory(SpiCommonConfig config, SpiCommonConfig runtime) {
     this.config = config;
     this.runtime = runtime;
   }

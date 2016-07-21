@@ -14,7 +14,7 @@
 
 package com.twitter.heron.scheduler.mesos;
 
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 
 public final class MesosContext {
   public static final String SCHEDULER_WORKING_DIRECTORY =
@@ -33,23 +33,23 @@ public final class MesosContext {
   private MesosContext() {
   }
 
-  public static String getSchedulerWorkingDirectory(Config config) {
+  public static String getSchedulerWorkingDirectory(SpiCommonConfig config) {
     return config.getStringValue(SCHEDULER_WORKING_DIRECTORY);
   }
 
-  public static String getHeronMesosMasterUri(Config config) {
+  public static String getHeronMesosMasterUri(SpiCommonConfig config) {
     return config.getStringValue(HERON_MESOS_MASTER_URI);
   }
 
-  public static String getHeronMesosNativeLibraryPath(Config config) {
+  public static String getHeronMesosNativeLibraryPath(SpiCommonConfig config) {
     return config.getStringValue(HERON_MESOS_NATIVE_LIBRARY_PATH);
   }
 
-  public static long getHeronMesosFrameworkStagingTimeoutMs(Config config) {
+  public static long getHeronMesosFrameworkStagingTimeoutMs(SpiCommonConfig config) {
     return config.getLongValue(HERON_MESOS_FRAMEWORK_STAGING_TIMEOUT_MS, 1000);
   }
 
-  public static long getHeronMesosSchedulerDriverStopTimeoutMs(Config config) {
+  public static long getHeronMesosSchedulerDriverStopTimeoutMs(SpiCommonConfig config) {
     return config.getLongValue(HERON_MESOS_SCHEDULER_DRIVER_STOP_TIMEOUT_MS, 1000);
   }
 }

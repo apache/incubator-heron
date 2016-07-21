@@ -34,7 +34,7 @@ import org.apache.mesos.Protos;
 import org.apache.mesos.Scheduler;
 import org.apache.mesos.SchedulerDriver;
 
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
 
 /**
@@ -51,8 +51,8 @@ import com.twitter.heron.spi.common.Context;
 public class MesosFramework implements Scheduler {
   private static final Logger LOG = Logger.getLogger(MesosFramework.class.getName());
 
-  private final Config heronConfig;
-  private final Config heronRuntime;
+  private final SpiCommonConfig heronConfig;
+  private final SpiCommonConfig heronRuntime;
 
   // ContainerIndex -> BaseContainer
   private final Map<Integer, BaseContainer> containersInfo;
@@ -75,7 +75,7 @@ public class MesosFramework implements Scheduler {
 
   private volatile Protos.FrameworkID frameworkId;
 
-  public MesosFramework(Config heronConfig, Config heronRuntime) {
+  public MesosFramework(SpiCommonConfig heronConfig, SpiCommonConfig heronRuntime) {
     this.heronConfig = heronConfig;
     this.heronRuntime = heronRuntime;
     this.containersInfo = new ConcurrentHashMap<>();

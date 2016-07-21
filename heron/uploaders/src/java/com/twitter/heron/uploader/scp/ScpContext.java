@@ -14,7 +14,7 @@
 
 package com.twitter.heron.uploader.scp;
 
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
 
 public class ScpContext extends Context {
@@ -24,15 +24,15 @@ public class ScpContext extends Context {
   public static final String HERON_UPLOADER_SCP_DIR_PATH_DEFAULT =
       "${HOME}/heron/repository/${CLUSTER}/${ROLE}/${TOPOLOGY}";
 
-  public static String scpCommand(Config config) {
+  public static String scpCommand(SpiCommonConfig config) {
     return config.getStringValue(HERON_UPLOADER_SCP_COMMAND);
   }
 
-  public static String sshCommand(Config config) {
+  public static String sshCommand(SpiCommonConfig config) {
     return config.getStringValue(HERON_UPLOADER_SSH_COMMAND);
   }
 
-  public static String uploadDirPath(Config config) {
+  public static String uploadDirPath(SpiCommonConfig config) {
     return config.getStringValue(HERON_UPLOADER_SCP_DIR_PATH, HERON_UPLOADER_SCP_DIR_PATH_DEFAULT);
   }
 }

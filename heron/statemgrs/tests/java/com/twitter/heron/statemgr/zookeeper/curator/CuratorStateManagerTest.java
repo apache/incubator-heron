@@ -43,7 +43,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import com.twitter.heron.common.basics.Pair;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.statemgr.zookeeper.ZkContext;
 
@@ -58,12 +58,12 @@ public class CuratorStateManagerTest {
   private static final String TOPOLOGY_NAME = "topology";
   private static final String TUNNEL_STRING = "tunnelConnectionString";
 
-  private Config tunnelingConfig;
-  private Config config;
+  private SpiCommonConfig tunnelingConfig;
+  private SpiCommonConfig config;
 
   @Before
   public void before() throws Exception {
-    Config.Builder builder = Config.newBuilder()
+    SpiCommonConfig.Builder builder = SpiCommonConfig.newBuilder()
         .put(Keys.stateManagerRootPath(), ROOT_ADDR)
         .put(Keys.topologyName(), TOPOLOGY_NAME)
         .put(Keys.stateManagerConnectionString(), CONNECTION_STRING);

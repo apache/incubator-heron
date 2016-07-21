@@ -24,10 +24,10 @@ import com.twitter.heron.common.basics.TypeUtils;
 /**
  * Config is an Immutable Map of &lt;String, Object&gt;
  */
-public class Config {
+public class SpiCommonConfig {
   private final Map<String, Object> cfgMap = new HashMap<>();
 
-  protected Config(Builder build) {
+  protected SpiCommonConfig(Builder build) {
     cfgMap.putAll(build.keyValues);
   }
 
@@ -35,8 +35,8 @@ public class Config {
     return Builder.create();
   }
 
-  public static Config expand(Config config) {
-    Config.Builder cb = Config.newBuilder();
+  public static SpiCommonConfig expand(SpiCommonConfig config) {
+    SpiCommonConfig.Builder cb = SpiCommonConfig.newBuilder();
     for (String key : config.getKeySet()) {
       Object value = config.get(key);
       if (value instanceof String) {
@@ -136,7 +136,7 @@ public class Config {
   public static class Builder {
     private final Map<String, Object> keyValues = new HashMap<>();
 
-    private static Config.Builder create() {
+    private static SpiCommonConfig.Builder create() {
       return new Builder();
     }
 
@@ -145,7 +145,7 @@ public class Config {
       return this;
     }
 
-    public Builder putAll(Config ctx) {
+    public Builder putAll(SpiCommonConfig ctx) {
       keyValues.putAll(ctx.cfgMap);
       return this;
     }
@@ -155,8 +155,8 @@ public class Config {
       return this;
     }
 
-    public Config build() {
-      return new Config(this);
+    public SpiCommonConfig build() {
+      return new SpiCommonConfig(this);
     }
   }
 }

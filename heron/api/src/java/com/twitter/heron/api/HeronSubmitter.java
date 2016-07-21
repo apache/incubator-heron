@@ -43,7 +43,7 @@ public final class HeronSubmitter {
    * explicitly killed.
    *
    * @param name the name of the topology.
-   * @param heronConfig the topology-specific configuration. See {@link Config}.
+   * @param heronConfig the topology-specific configuration. See {@link HeronConfig}.
    * @param topology the processing to execute.
    * @throws AlreadyAliveException if a topology with this name is already running
    * @throws InvalidTopologyException if an invalid topology was submitted

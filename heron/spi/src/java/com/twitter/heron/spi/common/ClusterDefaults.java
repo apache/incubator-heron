@@ -19,8 +19,8 @@ public final class ClusterDefaults {
   private ClusterDefaults() {
   }
 
-  public static Config getDefaultHome() {
-    Config.Builder cb = Config.newBuilder();
+  public static SpiCommonConfig getDefaultHome() {
+    SpiCommonConfig.Builder cb = SpiCommonConfig.newBuilder();
 
     cb.put(Keys.heronHome(), Defaults.heronHome());
     cb.put(Keys.heronBin(), Defaults.heronBin());
@@ -32,8 +32,8 @@ public final class ClusterDefaults {
     return cb.build();
   }
 
-  public static Config getSandboxHome() {
-    Config.Builder cb = Config.newBuilder();
+  public static SpiCommonConfig getSandboxHome() {
+    SpiCommonConfig.Builder cb = SpiCommonConfig.newBuilder();
 
     cb.put(Keys.heronSandboxHome(), Defaults.heronSandboxHome());
     cb.put(Keys.heronSandboxBin(), Defaults.heronSandboxBin());
@@ -43,8 +43,8 @@ public final class ClusterDefaults {
     return cb.build();
   }
 
-  public static Config getDefaultFiles() {
-    Config.Builder cb = Config.newBuilder();
+  public static SpiCommonConfig getDefaultFiles() {
+    SpiCommonConfig.Builder cb = SpiCommonConfig.newBuilder();
 
     cb.put(Keys.clusterFile(), Defaults.clusterFile());
     cb.put(Keys.defaultsFile(), Defaults.defaultsFile());
@@ -57,8 +57,8 @@ public final class ClusterDefaults {
     return cb.build();
   }
 
-  public static Config getSandboxDefaultFiles() {
-    Config.Builder cb = Config.newBuilder();
+  public static SpiCommonConfig getSandboxDefaultFiles() {
+    SpiCommonConfig.Builder cb = SpiCommonConfig.newBuilder();
 
     cb.put(Keys.clusterSandboxFile(), Defaults.clusterSandboxFile());
     cb.put(Keys.defaultsSandboxFile(), Defaults.defaultsSandboxFile());
@@ -71,8 +71,8 @@ public final class ClusterDefaults {
     return cb.build();
   }
 
-  public static Config getSandboxBinaries() {
-    Config.Builder cb = Config.newBuilder();
+  public static SpiCommonConfig getSandboxBinaries() {
+    SpiCommonConfig.Builder cb = SpiCommonConfig.newBuilder();
 
     cb.put(Keys.executorSandboxBinary(), Defaults.executorSandboxBinary());
     cb.put(Keys.stmgrSandboxBinary(), Defaults.stmgrSandboxBinary());
@@ -81,22 +81,22 @@ public final class ClusterDefaults {
     return cb.build();
   }
 
-  public static Config getDefaultJars() {
-    Config.Builder cb = Config.newBuilder();
+  public static SpiCommonConfig getDefaultJars() {
+    SpiCommonConfig.Builder cb = SpiCommonConfig.newBuilder();
 
     cb.put(Keys.schedulerJar(), Defaults.schedulerJar());
     return cb.build();
   }
 
-  public static Config getSandboxJars() {
-    Config.Builder cb = Config.newBuilder();
+  public static SpiCommonConfig getSandboxJars() {
+    SpiCommonConfig.Builder cb = SpiCommonConfig.newBuilder();
 
     cb.put(Keys.schedulerSandboxJar(), Defaults.schedulerSandboxJar());
     return cb.build();
   }
 
-  public static Config getDefaultFilesAndPaths() {
-    Config.Builder cb = Config.newBuilder();
+  public static SpiCommonConfig getDefaultFilesAndPaths() {
+    SpiCommonConfig.Builder cb = SpiCommonConfig.newBuilder();
 
     cb.put(Keys.corePackageUri(), Defaults.corePackageUri());
     // cb.put(Keys.logDirectory(), Defaults.logDirectory());
@@ -110,8 +110,8 @@ public final class ClusterDefaults {
     return cb.build();
   }
 
-  public static Config getSandboxFilesAndPaths() {
-    Config.Builder cb = Config.newBuilder();
+  public static SpiCommonConfig getSandboxFilesAndPaths() {
+    SpiCommonConfig.Builder cb = SpiCommonConfig.newBuilder();
 
     cb.put(Keys.instanceSandboxClassPath(), Defaults.instanceSandboxClassPath());
     cb.put(Keys.metricsManagerSandboxClassPath(), Defaults.metricsManagerSandboxClassPath());
@@ -122,8 +122,8 @@ public final class ClusterDefaults {
     return cb.build();
   }
 
-  public static Config getDefaultResources() {
-    Config.Builder cb = Config.newBuilder();
+  public static SpiCommonConfig getDefaultResources() {
+    SpiCommonConfig.Builder cb = SpiCommonConfig.newBuilder();
 
     cb.put(Keys.stmgrRam(), Defaults.stmgrRam());
     cb.put(Keys.instanceCpu(), Defaults.instanceCpu());
@@ -132,16 +132,16 @@ public final class ClusterDefaults {
     return cb.build();
   }
 
-  public static Config getDefaultMiscellaneous() {
-    Config.Builder cb = Config.newBuilder();
+  public static SpiCommonConfig getDefaultMiscellaneous() {
+    SpiCommonConfig.Builder cb = SpiCommonConfig.newBuilder();
 
     cb.put(Keys.verbose(), Defaults.verbose());
     cb.put(Keys.schedulerService(), Defaults.schedulerService());
     return cb.build();
   }
 
-  public static Config getDefaults() {
-    Config.Builder cb = Config.newBuilder();
+  public static SpiCommonConfig getDefaults() {
+    SpiCommonConfig.Builder cb = SpiCommonConfig.newBuilder();
 
     cb.putAll(getDefaultHome());
     cb.putAll(getDefaultJars());
@@ -151,8 +151,8 @@ public final class ClusterDefaults {
     return cb.build();
   }
 
-  public static Config getSandboxDefaults() {
-    Config.Builder cb = Config.newBuilder();
+  public static SpiCommonConfig getSandboxDefaults() {
+    SpiCommonConfig.Builder cb = SpiCommonConfig.newBuilder();
 
     cb.putAll(getSandboxHome());
     cb.putAll(getSandboxBinaries());
