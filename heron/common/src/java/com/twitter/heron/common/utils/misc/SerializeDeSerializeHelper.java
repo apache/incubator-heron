@@ -31,7 +31,7 @@ public final class SerializeDeSerializeHelper {
   public static IPluggableSerializer getSerializer(Map<String, Object> config) {
     IPluggableSerializer serializer;
     try {
-      String serializerClassName = (String) config.get(Config.TOPOLOGY_SERIALIZER_CLASSNAME);
+      String serializerClassName = (String) config.get(HeronConfig.TOPOLOGY_SERIALIZER_CLASSNAME);
       if (serializerClassName == null) {
         serializer = new KryoSerializer();
       } else {

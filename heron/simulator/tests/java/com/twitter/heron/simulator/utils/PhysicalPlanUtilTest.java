@@ -106,10 +106,10 @@ public class PhysicalPlanUtilTest implements Serializable {
     }, 2)
         .shuffleGrouping("word");
 
-    Config conf = new Config();
+    HeronConfig conf = new HeronConfig();
     conf.setDebug(true);
     conf.setMaxSpoutPending(10);
-    conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
+    conf.put(HeronConfig.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
     conf.setComponentRam("word", 500 * 1024 * 1024);
     conf.setComponentRam("exclaim", 1024 * 1024 * 1024);
     conf.setMessageTimeoutSecs(1);

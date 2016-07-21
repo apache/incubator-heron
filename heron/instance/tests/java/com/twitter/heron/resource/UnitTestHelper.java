@@ -77,7 +77,7 @@ public final class UnitTestHelper {
     // Here we need case switch to corresponding grouping
     topologyBuilder.setBolt("test-bolt", new TestBolt(), 1).shuffleGrouping("test-spout");
 
-    Config conf = new Config();
+    HeronConfig conf = new HeronConfig();
     conf.setTeamEmail("streaming-compute@twitter.com");
     conf.setTeamName("stream-computing");
     conf.setTopologyProjectName("heron-integration-test");

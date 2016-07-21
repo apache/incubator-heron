@@ -36,8 +36,8 @@ public final class ConfigUtils {
    * @param stormConfig the storm config
    * @return a heron config
    */
-  public static Config translateConfig(Map<String, Object> stormConfig) {
-    Config heronConfig = new Config(stormConfig);
+  public static HeronConfig translateConfig(Map<String, Object> stormConfig) {
+    HeronConfig heronConfig = new HeronConfig(stormConfig);
     // Look at serialization stuff first
     doSerializationTranslation(heronConfig);
 
@@ -48,33 +48,33 @@ public final class ConfigUtils {
     }
     if (heronConfig.containsKey(backtype.storm.Config.TOPOLOGY_WORKERS)) {
       Integer nWorkers = (Integer) heronConfig.get(backtype.storm.Config.TOPOLOGY_WORKERS);
-      com.twitter.heron.api.HeronConfig.setNumStmgrs(heronConfig, nWorkers);
+      HeronConfig.setNumStmgrs(heronConfig, nWorkers);
     }
     if (heronConfig.containsKey(backtype.storm.Config.TOPOLOGY_ACKER_EXECUTORS)) {
       Integer nAckers = (Integer) heronConfig.get(backtype.storm.Config.TOPOLOGY_ACKER_EXECUTORS);
-      com.twitter.heron.api.HeronConfig.setEnableAcking(heronConfig, nAckers > 0);
+      HeronConfig.setEnableAcking(heronConfig, nAckers > 0);
     }
     if (heronConfig.containsKey(backtype.storm.Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS)) {
       Integer nSecs =
           (Integer) heronConfig.get(backtype.storm.Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS);
-      com.twitter.heron.api.HeronConfig.setMessageTimeoutSecs(heronConfig, nSecs);
+      HeronConfig.setMessageTimeoutSecs(heronConfig, nSecs);
     }
     if (heronConfig.containsKey(backtype.storm.Config.TOPOLOGY_MAX_SPOUT_PENDING)) {
       Integer nPending =
           Integer.parseInt(
               heronConfig.get(backtype.storm.Config.TOPOLOGY_MAX_SPOUT_PENDING).toString());
-      com.twitter.heron.api.HeronConfig.setMaxSpoutPending(heronConfig, nPending);
+      HeronConfig.setMaxSpoutPending(heronConfig, nPending);
     }
     if (heronConfig.containsKey(backtype.storm.Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS)) {
       Integer tSecs =
           Integer.parseInt(
               heronConfig.get(backtype.storm.Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS).toString());
-      com.twitter.heron.api.HeronConfig.setTickTupleFrequency(heronConfig, tSecs);
+      HeronConfig.setTickTupleFrequency(heronConfig, tSecs);
     }
     if (heronConfig.containsKey(backtype.storm.Config.TOPOLOGY_DEBUG)) {
       Boolean dBg =
           Boolean.parseBoolean(heronConfig.get(backtype.storm.Config.TOPOLOGY_DEBUG).toString());
-      com.twitter.heron.api.HeronConfig.setDebug(heronConfig, dBg);
+      HeronConfig.setDebug(heronConfig, dBg);
     }
 
     doTaskHooksTranslation(heronConfig);
@@ -82,17 +82,17 @@ public final class ConfigUtils {
     return heronConfig;
   }
 
-  private static void doSerializationTranslation(Config heronConfig) {
+  private static void doSerializationTranslation(HeronConfig heronConfig) {
     if (heronConfig.containsKey(backtype.storm.Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION)
         && (heronConfig.get(backtype.storm.Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION)
           instanceof Boolean)
         && ((Boolean)
         heronConfig.get(backtype.storm.Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION))) {
-      com.twitter.heron.api.HeronConfig.setSerializationClassName(heronConfig,
+      HeronConfig.setSerializationClassName(heronConfig,
           "com.twitter.heron.api.serializer.JavaSerializer");
     } else {
       heronConfig.put(backtype.storm.Config.TOPOLOGY_FALL_BACK_ON_JAVA_SERIALIZATION, false);
-      com.twitter.heron.api.HeronConfig.setSerializationClassName(heronConfig,
+      HeronConfig.setSerializationClassName(heronConfig,
           "backtype.storm.serialization.HeronPluggableSerializerDelegate");
       if (!heronConfig.containsKey(backtype.storm.Config.TOPOLOGY_KRYO_FACTORY)) {
         heronConfig.put(backtype.storm.Config.TOPOLOGY_KRYO_FACTORY,
@@ -119,7 +119,7 @@ public final class ConfigUtils {
    * pass a ITaskHookDelegate to Heron and remember the actual task hooks in an internal
    * variable STORMCOMPAT_TOPOLOGY_AUTO_TASK_HOOKS
    */
-  private static void doTaskHooksTranslation(Config heronConfig) {
+  private static void doTaskHooksTranslation(HeronConfig heronConfig) {
     List<String> hooks = heronConfig.getAutoTaskHooks();
     if (hooks != null) {
       heronConfig.put(backtype.storm.Config.STORMCOMPAT_TOPOLOGY_AUTO_TASK_HOOKS, hooks);

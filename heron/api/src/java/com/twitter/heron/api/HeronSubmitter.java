@@ -48,7 +48,7 @@ public final class HeronSubmitter {
    * @throws AlreadyAliveException if a topology with this name is already running
    * @throws InvalidTopologyException if an invalid topology was submitted
    */
-  public static void submitTopology(String name, Config heronConfig, HeronTopology topology)
+  public static void submitTopology(String name, HeronConfig heronConfig, HeronTopology topology)
       throws AlreadyAliveException, InvalidTopologyException {
     Map<String, String> heronCmdOptions = Utils.readCommandLineOpts();
 
@@ -105,7 +105,7 @@ public final class HeronSubmitter {
    * explicitly killed.
    */
   // TODO add submit options
-  public static String submitJar(Config config, String localJar) {
+  public static String submitJar(HeronConfig config, String localJar) {
     throw new UnsupportedOperationException("submitJar unsupported");
   }
 }

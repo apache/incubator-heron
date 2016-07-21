@@ -78,13 +78,13 @@ public final class TopologyUtils {
     for (TopologyAPI.Spout spout : topology.getSpoutsList()) {
       String componentName = spout.getComp().getName();
       String parallelism = getConfigWithException(
-          spout.getComp().getConfig().getKvsList(), Config.TOPOLOGY_COMPONENT_PARALLELISM).trim();
+          spout.getComp().getConfig().getKvsList(), HeronConfig.TOPOLOGY_COMPONENT_PARALLELISM).trim();
       parallelismMap.put(componentName, Integer.parseInt(parallelism));
     }
     for (TopologyAPI.Bolt bolt : topology.getBoltsList()) {
       String componentName = bolt.getComp().getName();
       String parallelism = getConfigWithException(
-          bolt.getComp().getConfig().getKvsList(), Config.TOPOLOGY_COMPONENT_PARALLELISM).trim();
+          bolt.getComp().getConfig().getKvsList(), HeronConfig.TOPOLOGY_COMPONENT_PARALLELISM).trim();
       parallelismMap.put(componentName, Integer.parseInt(parallelism));
     }
     return parallelismMap;
@@ -93,13 +93,13 @@ public final class TopologyUtils {
   public static String getInstanceJvmOptions(TopologyAPI.Topology topology) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     return
-        getConfigWithDefault(topologyConfig, Config.TOPOLOGY_WORKER_CHILDOPTS, "");
+        getConfigWithDefault(topologyConfig, HeronConfig.TOPOLOGY_WORKER_CHILDOPTS, "");
   }
 
   public static String getComponentJvmOptions(TopologyAPI.Topology topology) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     return
-        getConfigWithDefault(topologyConfig, Config.TOPOLOGY_COMPONENT_JVMOPTS, "");
+        getConfigWithDefault(topologyConfig, HeronConfig.TOPOLOGY_COMPONENT_JVMOPTS, "");
   }
 
   public static int getTotalInstance(TopologyAPI.Topology topology) {
@@ -157,14 +157,14 @@ public final class TopologyUtils {
 
   public static String getAdditionalClassPath(TopologyAPI.Topology topology) {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
-    return getConfigWithDefault(topologyConfig, Config.TOPOLOGY_ADDITIONAL_CLASSPATH, "");
+    return getConfigWithDefault(topologyConfig, HeronConfig.TOPOLOGY_ADDITIONAL_CLASSPATH, "");
   }
 
 
   /**
-   * Parses the value in Config.TOPOLOGY_COMPONENT_RAMMAP,
+   * Parses the value in HeronConfig.TOPOLOGY_COMPONENT_RAMMAP,
    * and returns a map containing only component specified.
-   * Returns a empty map if the Config is not set
+   * Returns a empty map if the HeronConfig is not set
    *
    * @param topology the topology def
    * @return a map (componentName -&gt; ram required)
@@ -177,7 +177,7 @@ public final class TopologyUtils {
     Set<String> componentNames = getComponentParallelism(topology).keySet();
 
     // Parse the config value
-    String ramMapStr = getConfigWithDefault(topologyConfig, Config.TOPOLOGY_COMPONENT_RAMMAP, null);
+    String ramMapStr = getConfigWithDefault(topologyConfig, HeronConfig.TOPOLOGY_COMPONENT_RAMMAP, null);
     if (ramMapStr != null) {
       String[] ramMapTokens = ramMapStr.split(",");
       for (String token : ramMapTokens) {

@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.esotericsoftware.kryo.Serializer;
+import com.twitter.heron.api.HeronConfig;
 
 import org.apache.storm.serialization.IKryoDecorator;
 import org.apache.storm.serialization.IKryoFactory;
@@ -44,7 +45,7 @@ import org.apache.storm.serialization.IKryoFactory;
  * Spouts. .</p>
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class Config extends com.twitter.heron.api.HeronConfig {
+public class Config extends HeronConfig {
   private static final long serialVersionUID = 4781760255471579334L;
 
   /**

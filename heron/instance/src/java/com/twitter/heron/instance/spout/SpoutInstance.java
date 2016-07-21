@@ -81,9 +81,9 @@ public class SpoutInstance implements IInstance {
     config = topologyContext.getTopologyConfig();
     systemConfig = (SystemConfig) SingletonRegistry.INSTANCE.getSingleton(
         SystemConfig.HERON_SYSTEM_CONFIG);
-    this.ackEnabled = Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_ENABLE_ACKING));
+    this.ackEnabled = Boolean.parseBoolean((String) config.get(HeronConfig.TOPOLOGY_ENABLE_ACKING));
     this.enableMessageTimeouts =
-        Boolean.parseBoolean((String) config.get(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS));
+        Boolean.parseBoolean((String) config.get(HeronConfig.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS));
     LOG.info("Enable Ack: " + this.ackEnabled);
     LOG.info("EnableMessageTimeouts: " + this.enableMessageTimeouts);
 

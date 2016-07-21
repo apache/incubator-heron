@@ -59,7 +59,7 @@ public class TopologyUtilsTest {
   @Test
   public void testGetComponentRamMapDefaultValue() {
     int componentParallelism = 2;
-    Config topologyConfig = new Config();
+    HeronConfig topologyConfig = new HeronConfig();
     Map<String, Integer> spouts = new HashMap<>();
     spouts.put("spout", componentParallelism);
     Map<String, Integer> bolts = new HashMap<>();
@@ -75,7 +75,7 @@ public class TopologyUtilsTest {
   @Test
   public void testGetComponentRamMapAllRamSpecified() {
     int componentParallelism = 2;
-    Config topologyConfig = new Config();
+    HeronConfig topologyConfig = new HeronConfig();
     Map<String, Integer> spouts = new HashMap<>();
     spouts.put("spout", componentParallelism);
     Map<String, Integer> bolts = new HashMap<>();
@@ -95,7 +95,7 @@ public class TopologyUtilsTest {
   @Test
   public void testGetComponentRamMapSomeRamSpecified() {
     int componentParallelism = 2;
-    Config topologyConfig = new Config();
+    HeronConfig topologyConfig = new HeronConfig();
     Map<String, Integer> spouts = new HashMap<>();
     spouts.put("spout", componentParallelism);
     Map<String, Integer> bolts = new HashMap<>();

@@ -31,13 +31,13 @@ public class HeronTopology {
 
   private TopologyAPI.TopologyState state;
 
-  private Config heronConfig;
+  private HeronConfig heronConfig;
 
   public HeronTopology(TopologyAPI.Topology.Builder topologyBuilder) {
     this.topologyBuilder = topologyBuilder;
   }
 
-  private static TopologyAPI.Config.Builder getConfigBuilder(Config config) {
+  private static TopologyAPI.Config.Builder getConfigBuilder(HeronConfig config) {
     TopologyAPI.Config.Builder cBldr = TopologyAPI.Config.newBuilder();
     Set<String> apiVars = config.getApiVars();
     for (Map.Entry<String, Object> entry : config.entrySet()) {
@@ -55,26 +55,26 @@ public class HeronTopology {
   }
 
   private static void addDefaultTopologyConfig(Map<String, Object> userConfig) {
-    if (!userConfig.containsKey(Config.TOPOLOGY_DEBUG)) {
-      userConfig.put(Config.TOPOLOGY_DEBUG, "false");
+    if (!userConfig.containsKey(HeronConfig.TOPOLOGY_DEBUG)) {
+      userConfig.put(HeronConfig.TOPOLOGY_DEBUG, "false");
     }
-    if (!userConfig.containsKey(Config.TOPOLOGY_STMGRS)) {
-      userConfig.put(Config.TOPOLOGY_STMGRS, "1");
+    if (!userConfig.containsKey(HeronConfig.TOPOLOGY_STMGRS)) {
+      userConfig.put(HeronConfig.TOPOLOGY_STMGRS, "1");
     }
-    if (!userConfig.containsKey(Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS)) {
-      userConfig.put(Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS, "30");
+    if (!userConfig.containsKey(HeronConfig.TOPOLOGY_MESSAGE_TIMEOUT_SECS)) {
+      userConfig.put(HeronConfig.TOPOLOGY_MESSAGE_TIMEOUT_SECS, "30");
     }
-    if (!userConfig.containsKey(Config.TOPOLOGY_COMPONENT_PARALLELISM)) {
-      userConfig.put(Config.TOPOLOGY_COMPONENT_PARALLELISM, "1");
+    if (!userConfig.containsKey(HeronConfig.TOPOLOGY_COMPONENT_PARALLELISM)) {
+      userConfig.put(HeronConfig.TOPOLOGY_COMPONENT_PARALLELISM, "1");
     }
-    if (!userConfig.containsKey(Config.TOPOLOGY_MAX_SPOUT_PENDING)) {
-      userConfig.put(Config.TOPOLOGY_MAX_SPOUT_PENDING, "100");
+    if (!userConfig.containsKey(HeronConfig.TOPOLOGY_MAX_SPOUT_PENDING)) {
+      userConfig.put(HeronConfig.TOPOLOGY_MAX_SPOUT_PENDING, "100");
     }
-    if (!userConfig.containsKey(Config.TOPOLOGY_ENABLE_ACKING)) {
-      userConfig.put(Config.TOPOLOGY_ENABLE_ACKING, "false");
+    if (!userConfig.containsKey(HeronConfig.TOPOLOGY_ENABLE_ACKING)) {
+      userConfig.put(HeronConfig.TOPOLOGY_ENABLE_ACKING, "false");
     }
-    if (!userConfig.containsKey(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS)) {
-      userConfig.put(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS, "true");
+    if (!userConfig.containsKey(HeronConfig.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS)) {
+      userConfig.put(HeronConfig.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS, "true");
     }
   }
 
@@ -91,7 +91,7 @@ public class HeronTopology {
 
     // Add extra config
     addDefaultTopologyConfig(heronConfig);
-    heronConfig.put(Config.TOPOLOGY_NAME, name);
+    heronConfig.put(HeronConfig.TOPOLOGY_NAME, name);
 
     topologyBuilder.setTopologyConfig(getConfigBuilder(heronConfig));
 
@@ -108,7 +108,7 @@ public class HeronTopology {
     return this;
   }
 
-  public HeronTopology setConfig(Config hConfig) {
+  public HeronTopology setConfig(HeronConfig hConfig) {
     this.heronConfig = hConfig;
     return this;
   }

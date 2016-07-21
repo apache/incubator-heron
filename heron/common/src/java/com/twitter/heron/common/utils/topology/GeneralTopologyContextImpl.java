@@ -266,7 +266,7 @@ public class GeneralTopologyContextImpl implements GeneralTopologyContext {
 
   public int maxTopologyMessageTimeout() {
     // TODO:- get the per component overrides implemented
-    return TypeUtils.getInteger(topologyConfig.get(Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS));
+    return TypeUtils.getInteger(topologyConfig.get(HeronConfig.TOPOLOGY_MESSAGE_TIMEOUT_SECS));
   }
 
   private boolean areStreamsEqual(TopologyAPI.StreamId a, TopologyAPI.StreamId b) {
