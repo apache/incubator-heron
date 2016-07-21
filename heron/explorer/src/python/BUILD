@@ -13,7 +13,7 @@ pex_library(
     ],
     reqs = [
         "tornado==4.0.2",
-        "tabulate==0.7.5",
+        "tabulate==0.7.4",
     ],
 )
 
