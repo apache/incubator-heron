@@ -221,7 +221,7 @@ public class SpoutInstance implements IInstance {
    * @return true Wake up itself directly in next looper.doWait()
    */
   private boolean isContinueWork() {
-    long maxSpoutPending = TypeUtils.getLong(config.get(Config.TOPOLOGY_MAX_SPOUT_PENDING));
+    long maxSpoutPending = TypeUtils.getLong(config.get(HeronConfig.TOPOLOGY_MAX_SPOUT_PENDING));
     return topologyState.equals(TopologyAPI.TopologyState.RUNNING)
         && ((!ackEnabled && collector.isOutQueuesAvailable())
         || (ackEnabled && collector.isOutQueuesAvailable()
@@ -243,7 +243,7 @@ public class SpoutInstance implements IInstance {
   }
 
   private void produceTuple() {
-    int maxSpoutPending = TypeUtils.getInteger(config.get(Config.TOPOLOGY_MAX_SPOUT_PENDING));
+    int maxSpoutPending = TypeUtils.getInteger(config.get(HeronConfig.TOPOLOGY_MAX_SPOUT_PENDING));
 
     long totalTuplesEmitted = collector.getTotalTuplesEmitted();
 
@@ -311,7 +311,7 @@ public class SpoutInstance implements IInstance {
   }
 
   private void lookForTimeouts() {
-    long timeoutInSeconds = TypeUtils.getLong(config.get(Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS));
+    long timeoutInSeconds = TypeUtils.getLong(config.get(HeronConfig.TOPOLOGY_MESSAGE_TIMEOUT_SECS));
     long timeoutInNs = timeoutInSeconds * Constants.SECONDS_TO_NANOSECONDS;
     int nBucket = systemConfig.getInstanceAcknowledgementNbuckets();
     List<RootTupleInfo> expiredObjects = collector.retireExpired(timeoutInNs);

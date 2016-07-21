@@ -133,7 +133,7 @@ public class FirstFitDecreasingPacking implements IPacking {
     Map<String, PackingPlan.ContainerPlan> containerPlanMap = new HashMap<>();
     Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
 
-    List<SpiCommonConfig.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
+    List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     int paddingPercentage = Integer.parseInt(TopologyUtils.getConfigWithDefault(
         topologyConfig, HeronConfig.TOPOLOGY_CONTAINER_PADDING_PERCENTAGE,
         Integer.toString(DEFAULT_CONTAINER_PADDING_PERCENTAGE)));
@@ -310,7 +310,7 @@ public class FirstFitDecreasingPacking implements IPacking {
    * @return the number of containers
    */
   private int allocateNewContainer(ArrayList<Container> containers) {
-    List<SpiCommonConfig.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
+    List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     long maxContainerRam = Long.parseLong(TopologyUtils.getConfigWithDefault(
         topologyConfig, HeronConfig.TOPOLOGY_CONTAINER_MAX_RAM_HINT,
         Long.toString(instanceRamDefault * 4)));
@@ -342,7 +342,7 @@ public class FirstFitDecreasingPacking implements IPacking {
       return false;
     }
 
-    List<SpiCommonConfig.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
+    List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     long maxContainerRam = Long.parseLong(TopologyUtils.getConfigWithDefault(
         topologyConfig, HeronConfig.TOPOLOGY_CONTAINER_MAX_RAM_HINT,
         Long.toString(instanceRamDefault * 4)));

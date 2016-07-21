@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IPacking;
@@ -87,7 +87,7 @@ public class RoundRobinPacking implements IPacking {
   protected long instanceDiskDefault;
 
   @Override
-  public void initialize(Config config, Config runtime) {
+  public void initialize(SpiCommonConfig config, SpiCommonConfig runtime) {
     this.topology = com.twitter.heron.spi.utils.Runtime.topology(runtime);
 
     this.instanceRamDefault = Context.instanceRam(config);
