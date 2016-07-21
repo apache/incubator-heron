@@ -182,6 +182,10 @@ public abstract class FileSystemStateManager implements IStateManager {
     return getNodeData(watcher, getStatePath(location, topologyName), builder);
   }
 
+  private static String concatPath(String basePath, String appendPath) {
+    return String.format("%s/%s", basePath, appendPath);
+  }
+
   /**
    * Returns all information stored in the StateManager. This is a utility method used for debugging
    * while developing. To invoke, run:

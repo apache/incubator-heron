@@ -133,7 +133,9 @@ public class SchedulerStateManagerAdaptor {
    * @return Boolean - Success or Failure
    */
   public Boolean deleteTMasterLocation(String topologyName) {
-    return awaitResult(delegate.deleteTMasterLocation(topologyName));
+    return awaitResult(delegate.doesTMasterLocationExists(topologyName))
+        ? awaitResult(delegate.deleteTMasterLocation(topologyName))
+        : true;
   }
 
   /**
@@ -142,7 +144,9 @@ public class SchedulerStateManagerAdaptor {
    * @return Boolean - Success or Failure
    */
   public Boolean deleteExecutionState(String topologyName) {
-    return awaitResult(delegate.deleteExecutionState(topologyName));
+    return awaitResult(delegate.doesExecutionStateExists(topologyName))
+        ? awaitResult(delegate.deleteExecutionState(topologyName))
+        : true;
   }
 
   /**
@@ -151,7 +155,9 @@ public class SchedulerStateManagerAdaptor {
    * @return Boolean - Success or Failure
    */
   public Boolean deleteTopology(String topologyName) {
-    return awaitResult(delegate.deleteTopology(topologyName));
+    return awaitResult(delegate.doesTopologyExists(topologyName))
+        ? awaitResult(delegate.deleteTopology(topologyName))
+        : true;
   }
 
   /**
@@ -169,7 +175,9 @@ public class SchedulerStateManagerAdaptor {
    * @return Boolean - Success or Failure
    */
   public Boolean deletePhysicalPlan(String topologyName) {
-    return awaitResult(delegate.deletePhysicalPlan(topologyName));
+    return awaitResult(delegate.doesPhysicalPlanExists(topologyName))
+        ? awaitResult(delegate.deletePhysicalPlan(topologyName))
+        : true;
   }
 
   /**
@@ -178,7 +186,9 @@ public class SchedulerStateManagerAdaptor {
    * @return Boolean - Success or Failure
    */
   public Boolean deleteSchedulerLocation(String topologyName) {
-    return awaitResult(delegate.deleteSchedulerLocation(topologyName));
+    return awaitResult(delegate.doesSchedulerLocationExists(topologyName))
+        ? awaitResult(delegate.deleteSchedulerLocation(topologyName))
+        : true;
   }
 
   /**
@@ -206,6 +216,68 @@ public class SchedulerStateManagerAdaptor {
    */
   public TopologyAPI.Topology getTopology(String topologyName) {
     return awaitResult(delegate.getTopology(null, topologyName));
+  }
+
+  /**
+   * Checks to see if the execution state exists
+   *
+   * @return a boolean indicating whether the execution state exists or not
+   */
+  public boolean doesExecutionStateExist(String topologyName) {
+    return awaitResult(delegate.doesExecutionStateExists(topologyName));
+  }
+
+  /**
+   * Clean all states of a heron topology.
+   * TMasterLocation, PackingPlan, PhysicalPlan, SchedulerLocation, ExecutionState, and Topology
+   */
+  public Boolean cleanState(String topologyName) {
+    LOG.fine("Cleaning up topology state");
+
+    Boolean result;
+
+    // It is possible that  TMasterLocation, PhysicalPlan and SchedulerLocation are not set
+    // Just log but don't consider them failure
+    result = deleteTMasterLocation(topologyName);
+    if (result == null || !result) {
+      // We would not return false since it is possible that TMaster didn't write physical plan
+      LOG.warning("Failed to clear TMaster location.");
+    }
+
+    result = deletePackingPlan(topologyName);
+    if (result == null || !result) {
+      // We would not return false since it is possible that TMaster didn't write physical plan
+      LOG.warning("Failed to clear packing plan.");
+    }
+
+    result = deletePhysicalPlan(topologyName);
+    if (result == null || !result) {
+      // We would not return false since it is possible that TMaster didn't write physical plan
+      LOG.warning("Failed to clear physical plan.");
+    }
+
+    result = deleteSchedulerLocation(topologyName);
+    if (result == null || !result) {
+      // We would not return false since it is possible that TMaster didn't write physical plan
+      LOG.warning("Failed to clear scheduler location.");
+    }
+
+    result = deleteExecutionState(topologyName);
+    if (result == null || !result) {
+      LOG.severe("Failed to clear execution state");
+      return false;
+    }
+
+    // Set topology def at last since we determine whether a topology is running
+    // by checking the existence of topology def
+    result = deleteTopology(topologyName);
+    if (result == null || !result) {
+      LOG.severe("Failed to clear topology definition");
+      return false;
+    }
+
+    LOG.fine("Cleaned up topology state");
+    return true;
   }
 
   /**
