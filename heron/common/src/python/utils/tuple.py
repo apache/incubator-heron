@@ -12,12 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Abstract class for Bolt/Spout -- Python interface of IInstance.java
-# Tuple definition
-import random
-from collections import namedtuple
-
 import time
+import random
+
+from collections import namedtuple
 
 StreamParseTuple = namedtuple('Tuple', 'id component stream task values')
 """Storm's primitive data type passed around via streams.
@@ -60,7 +58,10 @@ class TupleHelper(object):
   """Tuple generator, returns StreamParse compatible tuple"""
   TICK_TUPLE_ID = "__tick"
   TICK_SOURCE_COMPONENT = "__system"
-  MAX_SFIXED64_RAND_BITS = 61 #last three bits are used for type
+
+  #last three bits are used for type
+  MAX_SFIXED64_RAND_BITS = 61
+
   @staticmethod
   def make_tuple(stream, tuple_key, values, roots=None):
     component_name = stream.component_name
@@ -78,5 +79,4 @@ class TupleHelper(object):
   def make_root_tuple_info(stream_id, tuple_id):
     key = random.getrandbits(TupleHelper.MAX_SFIXED64_RAND_BITS)
     return RootTupleInfo(stream_id=stream_id, tuple_id=tuple_id, insertion_time=time.time(), key=key)
-
 

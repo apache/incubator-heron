@@ -14,7 +14,7 @@
 
 import unittest
 
-from heron.instance.src.python.misc.serializer import PythonSerializer
+from heron.common.src.python.utils.misc import PythonSerializer
 import heron.instance.tests.python.mock_generator as mock_generator
 
 class SerializerTest(unittest.TestCase):

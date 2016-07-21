@@ -14,8 +14,6 @@
 
 import unittest
 
-from heron.instance.src.python.instance.bolt import Bolt
-from heron.instance.src.python.misc.pplan_helper import PhysicalPlanHelper
 import heron.instance.tests.python.mock_generator as mock_generator
 
 class BoltTest(unittest.TestCase):

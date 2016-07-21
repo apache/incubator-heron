@@ -18,7 +18,6 @@ try:
 except:
   import pickle
 
-
 class HeronSerializer(object):
   """Serializer interface for Heron"""
 

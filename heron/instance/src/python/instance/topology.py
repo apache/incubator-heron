@@ -14,7 +14,7 @@
 import os
 import uuid
 from heron.proto import topology_pb2
-from heron.instance.src.python.instance.comp_spec import HeronComponentSpec
+from heron.instance.src.python.instance.component import HeronComponentSpec
 from heron.instance.src.python.instance.stream import Stream
 
 class TopologyType(type):

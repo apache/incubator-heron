@@ -17,11 +17,10 @@ from abc import abstractmethod
 
 import time
 
-from .component import Component
+from .component import Component, HeronComponentSpec
 from heron.proto import tuple_pb2
 from heron.common.src.python.log import Log
-from heron.instance.src.python.instance.comp_spec import HeronComponentSpec
-from heron.instance.src.python.instance.tuple import TupleHelper, HeronTuple
+from heron.common.src.python.utils.tuple import TupleHelper, HeronTuple
 from heron.common.src.python.utils.metrics import BoltMetrics
 
 import heron.common.src.python.constants as constants

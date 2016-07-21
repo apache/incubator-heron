@@ -17,11 +17,10 @@ import Queue
 import time
 import collections
 
-from .component import Component
+from .component import Component, HeronComponentSpec
 from heron.proto import topology_pb2, tuple_pb2
 from heron.common.src.python.log import Log
-from heron.instance.src.python.instance.comp_spec import HeronComponentSpec
-from heron.instance.src.python.instance.tuple import TupleHelper
+from heron.common.src.python.utils.tuple import TupleHelper
 from heron.common.src.python.utils.metrics import SpoutMetrics
 
 import heron.common.src.python.constants as constants

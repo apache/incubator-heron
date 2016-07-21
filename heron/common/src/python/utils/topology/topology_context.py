@@ -54,23 +54,22 @@ class TopologyContext(dict):
     collector = self.get_metrics_collector()
     collector.register_metric(name, metric, time_bucket_in_sec)
 
-  @staticmethod
-  def _get_inputs_and_outputs_and_outfields(topology):
+  @classmethod
+  def _get_inputs_and_outputs_and_outfields(cls, topology):
     inputs = {}
     outputs = {}
     out_fields = {}
     for spout in topology.spouts:
       inputs[spout.comp.name] = []  # spout doesn't have any inputs
       outputs[spout.comp.name] = spout.outputs
-      out_fields.update(TopologyContext._get_output_to_comp_fields(spout.outputs))
+      out_fields.update(cls._get_output_to_comp_fields(spout.outputs))
 
     for bolt in topology.bolts:
       inputs[bolt.comp.name] = bolt.inputs
       outputs[bolt.comp.name] = bolt.outputs
-      out_fields.update(TopologyContext._get_output_to_comp_fields(bolt.outputs))
+      out_fields.update(cls._get_output_to_comp_fields(bolt.outputs))
 
     return inputs, outputs, out_fields
-
 
   @staticmethod
   def _get_output_to_comp_fields(outputs):

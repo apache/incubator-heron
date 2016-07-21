@@ -14,7 +14,7 @@
 from heron.common.src.python.log import Log
 from heron.proto import stmgr_pb2, common_pb2
 
-from heron.instance.src.python.misc.pplan_helper import PhysicalPlanHelper
+from heron.common.src.python.utils.misc import PhysicalPlanHelper
 from .heron_client import HeronClient
 from .protocol import StatusCode
 

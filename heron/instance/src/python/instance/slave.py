@@ -16,7 +16,7 @@ import threading
 
 # TODO: implement wait/notify mechanism
 from heron.common.src.python.log import Log
-from misc.pplan_helper import PhysicalPlanHelper
+from heron.common.src.python.utils.misc import PhysicalPlanHelper
 
 
 class Slave(threading.Thread):
