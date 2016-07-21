@@ -71,7 +71,8 @@ public final class ClusterConfig {
     return cb.build();
   }
 
-  protected static SpiCommonConfig loadSandboxConfigHome(String heronSandboxHome, String configPath) {
+  protected static SpiCommonConfig loadSandboxConfigHome(
+      String heronSandboxHome, String configPath) {
     SpiCommonConfig.Builder cb = SpiCommonConfig.newBuilder()
         .put(Keys.clusterSandboxFile(),
             Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.clusterSandboxFile()))
@@ -155,7 +156,8 @@ public final class ClusterConfig {
         .build();
   }
 
-  public static SpiCommonConfig loadConfig(String heronHome, String configPath, String releaseFile) {
+  public static SpiCommonConfig loadConfig(String heronHome, String configPath,
+      String releaseFile) {
     SpiCommonConfig homeConfig = loadBasicConfig(heronHome, configPath);
     SpiCommonConfig sandboxConfig = loadBasicSandboxConfig();
 
