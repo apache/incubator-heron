@@ -14,8 +14,6 @@
 
 package com.twitter.heron.statemgr.localfs;
 
-import com.google.common.util.concurrent.ListenableFuture;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -27,12 +25,13 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
-import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 
 /**
  * LocalFileSystemStateManager Tester.

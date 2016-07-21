@@ -21,8 +21,8 @@ import org.mockito.Mockito;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.spi.common.Command;
-import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.ConfigKeys;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.statemgr.NullStateManager;
 

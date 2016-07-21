@@ -14,7 +14,6 @@
 
 package com.twitter.heron.scheduler.slurm;
 
-
 import java.util.HashMap;
 
 import org.junit.Assert;
@@ -25,8 +24,8 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.ConfigKeys;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.utils.SchedulerUtils;
 

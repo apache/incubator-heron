@@ -14,9 +14,9 @@
 
 package com.twitter.heron.scheduler.local;
 
-import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Misc;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 
 public class LocalContext extends Context {
   public static String workingDirectory(SpiCommonConfig config) {

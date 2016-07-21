@@ -20,9 +20,9 @@ import org.mockito.Mockito;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.NullScheduler;
-import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 public class SchedulerClientFactoryTest {

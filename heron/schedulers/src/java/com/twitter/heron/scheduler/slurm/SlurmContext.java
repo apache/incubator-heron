@@ -14,9 +14,9 @@
 
 package com.twitter.heron.scheduler.slurm;
 
-import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Misc;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 
 public class SlurmContext extends Context {
   public static final String WORKING_DIRECTORY = "heron.scheduler.local.working.directory";

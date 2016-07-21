@@ -18,8 +18,8 @@ import java.net.URI;
 import java.util.Properties;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;

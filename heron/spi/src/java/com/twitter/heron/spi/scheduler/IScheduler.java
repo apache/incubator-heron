@@ -14,7 +14,6 @@
 
 package com.twitter.heron.spi.scheduler;
 
-
 import java.util.List;
 
 import com.twitter.heron.proto.scheduler.Scheduler;

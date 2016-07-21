@@ -19,8 +19,8 @@ import java.net.URI;
 import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.TypeUtils;
-import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.uploader.IUploader;
 import com.twitter.heron.spi.utils.UploaderUtils;
 

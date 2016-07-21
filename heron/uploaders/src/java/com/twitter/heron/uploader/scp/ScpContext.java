@@ -14,8 +14,8 @@
 
 package com.twitter.heron.uploader.scp;
 
-import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 
 public class ScpContext extends Context {
   public static final String HERON_UPLOADER_SCP_COMMAND = "heron.uploader.scp.command.options";

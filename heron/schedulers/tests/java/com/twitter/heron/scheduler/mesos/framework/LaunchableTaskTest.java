@@ -25,11 +25,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.utils.SchedulerUtils;
-
 
 public class LaunchableTaskTest {
   private static final String TOPOLOGY_NAME = "testTopology";

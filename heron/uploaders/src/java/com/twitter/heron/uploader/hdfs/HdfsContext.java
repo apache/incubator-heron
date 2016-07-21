@@ -14,8 +14,8 @@
 
 package com.twitter.heron.uploader.hdfs;
 
-import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 
 final class HdfsContext extends Context {
   public static final String HADOOP_CONFIG_DIRECTORY = "heron.uploader.hdfs.config.directory";

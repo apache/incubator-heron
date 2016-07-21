@@ -14,8 +14,8 @@
 
 package com.twitter.heron.statemgr.zookeeper;
 
-import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 
 public final class ZkContext extends Context {
   public static final String IS_INITIALIZE_TREE = "heron.statemgr.zookeeper.is.initialize.tree";

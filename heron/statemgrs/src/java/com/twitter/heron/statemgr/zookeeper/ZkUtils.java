@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.Pair;
-import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.utils.NetworkUtils;
 
 public final class ZkUtils {

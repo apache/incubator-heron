@@ -28,13 +28,12 @@ import org.mockito.Mockito;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.mesos.framework.BaseContainer;
 import com.twitter.heron.scheduler.mesos.framework.MesosFramework;
-import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.utils.SchedulerUtils;
-
 
 public class MesosSchedulerTest {
   private static final String TOPOLOGY_NAME = "testTopology";

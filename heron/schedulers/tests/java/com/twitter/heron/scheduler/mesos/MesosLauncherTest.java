@@ -21,11 +21,10 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.twitter.heron.common.basics.TypeUtils;
-import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.packing.PackingPlan;
-
 
 public class MesosLauncherTest {
   @Test

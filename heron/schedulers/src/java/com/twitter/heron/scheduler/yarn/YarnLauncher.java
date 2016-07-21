@@ -37,8 +37,8 @@ import com.twitter.heron.scheduler.yarn.HeronMasterDriver.HeronExecutorContainer
 import com.twitter.heron.scheduler.yarn.HeronMasterDriver.HeronExecutorLauncher;
 import com.twitter.heron.scheduler.yarn.HeronMasterDriver.HeronRunningTaskHandler;
 import com.twitter.heron.scheduler.yarn.HeronMasterDriver.HeronSchedulerLauncher;
-import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
 

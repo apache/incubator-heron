@@ -14,8 +14,8 @@
 
 package com.twitter.heron.uploader.s3;
 
-import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 
 public class S3Context extends Context {
   public static final String HERON_UPLOADER_S3_BUCKET = "heron.uploader.s3.bucket";

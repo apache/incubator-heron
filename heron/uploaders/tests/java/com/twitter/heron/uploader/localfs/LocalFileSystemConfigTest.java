@@ -19,10 +19,10 @@ import java.nio.file.Paths;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.common.Misc;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 
 public class LocalFileSystemConfigTest {
 

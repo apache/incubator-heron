@@ -15,7 +15,6 @@
 package com.twitter.heron.spi.statemgr;
 
 import com.google.common.util.concurrent.ListenableFuture;
-
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;

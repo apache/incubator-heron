@@ -24,9 +24,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.spi.common.Command;
-import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 @RunWith(PowerMockRunner.class)
