@@ -26,7 +26,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Command;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.SchedulerUtils;
 
@@ -36,8 +36,8 @@ public class HttpServiceSchedulerClientTest {
   private static final String TOPOLOGY_NAME = "topologyName";
   private static final String SCHEDULER_HTTP_ENDPOINT = "";
 
-  private final Config config = Mockito.mock(Config.class);
-  private final Config runtime = Mockito.mock(Config.class);
+  private final SpiCommonConfig config = Mockito.mock(SpiCommonConfig.class);
+  private final SpiCommonConfig runtime = Mockito.mock(SpiCommonConfig.class);
 
   private Scheduler.RestartTopologyRequest restartTopologyRequest =
       Scheduler.RestartTopologyRequest.newBuilder().

@@ -22,7 +22,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.SchedulerUtils;
@@ -37,32 +37,32 @@ public class AuroraLauncherTest {
     // Failed to schedule
     PowerMockito.spy(SchedulerUtils.class);
     PowerMockito.doReturn(false).when(SchedulerUtils.class, "onScheduleAsLibrary",
-        Mockito.any(Config.class),
-        Mockito.any(Config.class),
+        Mockito.any(SpiCommonConfig.class),
+        Mockito.any(SpiCommonConfig.class),
         Mockito.any(IScheduler.class),
         Mockito.any(PackingPlan.class));
 
     Assert.assertFalse(launcher.launch(Mockito.mock(PackingPlan.class)));
     PowerMockito.verifyStatic();
     SchedulerUtils.onScheduleAsLibrary(
-        Mockito.any(Config.class),
-        Mockito.any(Config.class),
+        Mockito.any(SpiCommonConfig.class),
+        Mockito.any(SpiCommonConfig.class),
         Mockito.any(IScheduler.class),
         Mockito.any(PackingPlan.class));
 
     // Happy path
     PowerMockito.spy(SchedulerUtils.class);
     PowerMockito.doReturn(true).when(SchedulerUtils.class, "onScheduleAsLibrary",
-        Mockito.any(Config.class),
-        Mockito.any(Config.class),
+        Mockito.any(SpiCommonConfig.class),
+        Mockito.any(SpiCommonConfig.class),
         Mockito.any(IScheduler.class),
         Mockito.any(PackingPlan.class));
 
     Assert.assertTrue(launcher.launch(Mockito.mock(PackingPlan.class)));
     PowerMockito.verifyStatic();
     SchedulerUtils.onScheduleAsLibrary(
-        Mockito.any(Config.class),
-        Mockito.any(Config.class),
+        Mockito.any(SpiCommonConfig.class),
+        Mockito.any(SpiCommonConfig.class),
         Mockito.any(IScheduler.class),
         Mockito.any(PackingPlan.class));
 

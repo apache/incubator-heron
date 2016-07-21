@@ -24,7 +24,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.PackingPlan;
@@ -38,8 +38,8 @@ public class LocalLauncherTest {
   private static final String ENVIRON = "testEnviron";
   private static final String WORKING_DIRECTORY = "workingDirectory";
 
-  private static Config createRunnerConfig() {
-    Config config = Mockito.mock(Config.class);
+  private static SpiCommonConfig createRunnerConfig() {
+    SpiCommonConfig config = Mockito.mock(SpiCommonConfig.class);
     Mockito.when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
     Mockito.when(config.getStringValue(ConfigKeys.get("CLUSTER"))).thenReturn(CLUSTER);
     Mockito.when(config.getStringValue(ConfigKeys.get("ROLE"))).thenReturn(ROLE);
@@ -50,8 +50,8 @@ public class LocalLauncherTest {
 
   @Test
   public void testLaunch() throws Exception {
-    Config config = createRunnerConfig();
-    Config runtime = Mockito.mock(Config.class);
+    SpiCommonConfig config = createRunnerConfig();
+    SpiCommonConfig runtime = Mockito.mock(SpiCommonConfig.class);
     URI mockURI = new URI("h:a");
     Mockito.doReturn(mockURI).when(runtime).get(Keys.topologyPackageUri());
     PackingPlan packingPlan = Mockito.mock(PackingPlan.class);

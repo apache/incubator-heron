@@ -31,7 +31,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.scheduler.server.SchedulerServer;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
@@ -63,7 +63,7 @@ public class SchedulerMainTest {
    */
   @Before
   public void setUp() throws Exception {
-    Config config = Mockito.mock(Config.class);
+    SpiCommonConfig config = Mockito.mock(SpiCommonConfig.class);
     Mockito.
         when(config.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS"))).
         thenReturn(STATE_MANAGER_CLASS);
@@ -114,7 +114,7 @@ public class SchedulerMainTest {
                 config, topology, iSchedulerServerPort, Mockito.mock(Properties.class)));
     schedulerServer = Mockito.mock(SchedulerServer.class);
     Mockito.doReturn(schedulerServer).when(schedulerMain).getServer(
-        Mockito.any(Config.class), Mockito.eq(scheduler), Mockito.eq(iSchedulerServerPort));
+        Mockito.any(SpiCommonConfig.class), Mockito.eq(scheduler), Mockito.eq(iSchedulerServerPort));
 
     Mockito.doReturn(true).when(scheduler).onSchedule(Mockito.any(PackingPlan.class));
 
@@ -122,7 +122,7 @@ public class SchedulerMainTest {
     PowerMockito.spy(SchedulerUtils.class);
     PowerMockito.doReturn(true).
         when(SchedulerUtils.class, "setSchedulerLocation",
-            Mockito.any(Config.class),
+            Mockito.any(SpiCommonConfig.class),
             Mockito.anyString(), Mockito.eq(scheduler));
 
     // Avoid infinite waiting
@@ -138,11 +138,11 @@ public class SchedulerMainTest {
     PowerMockito.doThrow(new ClassNotFoundException("")).
         when(ReflectionUtils.class, "newInstance", STATE_MANAGER_CLASS);
     Assert.assertFalse(schedulerMain.runScheduler());
-    Mockito.verify(stateManager, Mockito.never()).initialize(Mockito.any(Config.class));
+    Mockito.verify(stateManager, Mockito.never()).initialize(Mockito.any(SpiCommonConfig.class));
     Mockito.verify(packing, Mockito.never()).
-        initialize(Mockito.any(Config.class), Mockito.any(Config.class));
+        initialize(Mockito.any(SpiCommonConfig.class), Mockito.any(SpiCommonConfig.class));
     Mockito.verify(scheduler, Mockito.never()).
-        initialize(Mockito.any(Config.class), Mockito.any(Config.class));
+        initialize(Mockito.any(SpiCommonConfig.class), Mockito.any(SpiCommonConfig.class));
   }
 
   // Exceptions during initialize components --
@@ -152,7 +152,7 @@ public class SchedulerMainTest {
     PowerMockito.doReturn(stateManager).
         when(ReflectionUtils.class, "newInstance", STATE_MANAGER_CLASS);
     Mockito.doThrow(new RuntimeException()).
-        when(stateManager).initialize(Mockito.any(Config.class));
+        when(stateManager).initialize(Mockito.any(SpiCommonConfig.class));
     exception.expect(RuntimeException.class);
     schedulerMain.runScheduler();
 
@@ -167,7 +167,7 @@ public class SchedulerMainTest {
   @Test
   public void testOnSchedulerFailure() throws Exception {
     Mockito.doNothing().
-        when(stateManager).initialize(Mockito.any(Config.class));
+        when(stateManager).initialize(Mockito.any(SpiCommonConfig.class));
     Mockito.doReturn(false).when(scheduler).onSchedule(Mockito.any(PackingPlan.class));
     Assert.assertFalse(schedulerMain.runScheduler());
     Mockito.verify(stateManager).close();
@@ -198,7 +198,7 @@ public class SchedulerMainTest {
   public void testSetSchedulerLocationFailure() throws Exception {
     PowerMockito.doReturn(false).
         when(SchedulerUtils.class, "setSchedulerLocation",
-            Mockito.any(Config.class),
+            Mockito.any(SpiCommonConfig.class),
             Mockito.anyString(), Mockito.eq(scheduler));
     Assert.assertFalse(schedulerMain.runScheduler());
 

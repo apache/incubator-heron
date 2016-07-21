@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.ConfigKeys;
 
 import static org.junit.Assert.assertEquals;
@@ -36,13 +36,13 @@ import static org.mockito.Mockito.when;
 public class S3UploaderTest {
   private S3Uploader uploader;
   private AmazonS3Client mockS3Client;
-  private Config.Builder configBuilder;
+  private SpiCommonConfig.Builder configBuilder;
 
   @Before
   public void setUp() {
     mockS3Client = mock(AmazonS3Client.class);
 
-    configBuilder = Config.newBuilder()
+    configBuilder = SpiCommonConfig.newBuilder()
         .put(S3Context.HERON_UPLOADER_S3_BUCKET, "bucket")
         .put(S3Context.HERON_UPLOADER_S3_ACCESS_KEY, "access_key")
         .put(S3Context.HERON_UPLOADER_S3_SECRET_KEY, "secret_key")

@@ -32,7 +32,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Misc;
 import com.twitter.heron.spi.packing.PackingPlan;
 
@@ -72,7 +72,7 @@ public class AuroraSchedulerTest {
   public void testOnSchedule() throws Exception {
     AuroraController controller = Mockito.mock(AuroraController.class);
     Mockito.doReturn(controller).when(scheduler).getController();
-    scheduler.initialize(Mockito.mock(Config.class), Mockito.mock(Config.class));
+    scheduler.initialize(Mockito.mock(SpiCommonConfig.class), Mockito.mock(SpiCommonConfig.class));
 
     // Fail to schedule due to null PackingPlan
     Assert.assertFalse(scheduler.onSchedule(null));
@@ -112,7 +112,7 @@ public class AuroraSchedulerTest {
   public void testOnKill() throws Exception {
     AuroraController controller = Mockito.mock(AuroraController.class);
     Mockito.doReturn(controller).when(scheduler).getController();
-    scheduler.initialize(Mockito.mock(Config.class), Mockito.mock(Config.class));
+    scheduler.initialize(Mockito.mock(SpiCommonConfig.class), Mockito.mock(SpiCommonConfig.class));
 
     // Failed to kill job via controller
     Mockito.doReturn(false).when(
@@ -131,7 +131,7 @@ public class AuroraSchedulerTest {
   public void testOnRestart() throws Exception {
     AuroraController controller = Mockito.mock(AuroraController.class);
     Mockito.doReturn(controller).when(scheduler).getController();
-    scheduler.initialize(Mockito.mock(Config.class), Mockito.mock(Config.class));
+    scheduler.initialize(Mockito.mock(SpiCommonConfig.class), Mockito.mock(SpiCommonConfig.class));
 
     // Construct the RestartTopologyRequest
     int containerToRestart = 1;
@@ -158,11 +158,11 @@ public class AuroraSchedulerTest {
     final String JOB_LINK_FORMAT = "http://go/${CLUSTER}/${ROLE}/${ENVIRON}/${TOPOLOGY}";
     final String SUBSTITUTED_JOB_LINK = "http://go/local/heron/test/test_topology";
 
-    Config mockConfig = Mockito.mock(Config.class);
+    SpiCommonConfig mockConfig = Mockito.mock(SpiCommonConfig.class);
     Mockito.when(mockConfig.getStringValue(AuroraContext.JOB_LINK_TEMPLATE))
         .thenReturn(JOB_LINK_FORMAT);
 
-    scheduler.initialize(mockConfig, Mockito.mock(Config.class));
+    scheduler.initialize(mockConfig, Mockito.mock(SpiCommonConfig.class));
 
     PowerMockito.spy(Misc.class);
     PowerMockito.doReturn(SUBSTITUTED_JOB_LINK)

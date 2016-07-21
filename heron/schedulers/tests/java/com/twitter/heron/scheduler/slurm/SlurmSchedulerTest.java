@@ -31,7 +31,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.utils.SchedulerUtils;
@@ -73,8 +73,8 @@ public class SlurmSchedulerTest {
     scheduler.close();
   }
 
-  private static Config createRunnerConfig() {
-    Config config = Mockito.mock(Config.class);
+  private static SpiCommonConfig createRunnerConfig() {
+    SpiCommonConfig config = Mockito.mock(SpiCommonConfig.class);
     Mockito.when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
     Mockito.when(config.getStringValue(ConfigKeys.get("CLUSTER"))).thenReturn(CLUSTER);
     Mockito.when(config.getStringValue(ConfigKeys.get("ROLE"))).thenReturn(ROLE);
@@ -92,8 +92,8 @@ public class SlurmSchedulerTest {
     SlurmController controller = Mockito.mock(SlurmController.class);
     Mockito.doReturn(controller).when(scheduler).getController();
 
-    Config config = createRunnerConfig();
-    Config runtime = Mockito.mock(Config.class);
+    SpiCommonConfig config = createRunnerConfig();
+    SpiCommonConfig runtime = Mockito.mock(SpiCommonConfig.class);
 
     PowerMockito.spy(SlurmContext.class);
     PowerMockito.doReturn(WORKING_DIRECTORY).when(SlurmContext.class, "workingDirectory",
@@ -144,8 +144,8 @@ public class SlurmSchedulerTest {
     Mockito.doReturn(controller).when(scheduler).getController();
     Mockito.doReturn(SLURM_ID_FILE).when(scheduler).getJobIdFilePath();
 
-    Config config = createRunnerConfig();
-    Config runtime = Mockito.mock(Config.class);
+    SpiCommonConfig config = createRunnerConfig();
+    SpiCommonConfig runtime = Mockito.mock(SpiCommonConfig.class);
 
     PowerMockito.spy(SlurmContext.class);
     PowerMockito.doReturn(WORKING_DIRECTORY).when(SlurmContext.class, "workingDirectory",

@@ -24,7 +24,7 @@ import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.ClusterDefaults;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.PackingPlan;
@@ -64,13 +64,13 @@ public class RoundRobinPackingTest {
   }
 
   protected PackingPlan getRoundRobinPackingPlan(TopologyAPI.Topology topology) {
-    Config config = Config.newBuilder()
+    SpiCommonConfig config = SpiCommonConfig.newBuilder()
         .put(Keys.topologyId(), topology.getId())
         .put(Keys.topologyName(), topology.getName())
         .putAll(ClusterDefaults.getDefaults())
         .build();
 
-    Config runtime = Config.newBuilder()
+    SpiCommonConfig runtime = SpiCommonConfig.newBuilder()
         .put(Keys.topologyDefinition(), topology)
         .build();
 

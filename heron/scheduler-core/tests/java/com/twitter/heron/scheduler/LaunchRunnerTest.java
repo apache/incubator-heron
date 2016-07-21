@@ -32,7 +32,7 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.IPacking;
@@ -90,8 +90,8 @@ public class LaunchRunnerTest {
         getTopology();
   }
 
-  private static Config createRunnerConfig() {
-    Config config = Mockito.mock(Config.class);
+  private static SpiCommonConfig createRunnerConfig() {
+    SpiCommonConfig config = Mockito.mock(SpiCommonConfig.class);
     Mockito.when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
     Mockito.when(config.getStringValue(ConfigKeys.get("CLUSTER"))).thenReturn(CLUSTER);
     Mockito.when(config.getStringValue(ConfigKeys.get("ROLE"))).thenReturn(ROLE);
@@ -102,8 +102,8 @@ public class LaunchRunnerTest {
     return config;
   }
 
-  private static Config createRunnerRuntime() {
-    Config runtime = Mockito.spy(Config.newBuilder().build());
+  private static SpiCommonConfig createRunnerRuntime() {
+    SpiCommonConfig runtime = Mockito.spy(SpiCommonConfig.newBuilder().build());
     ILauncher launcher = Mockito.mock(ILauncher.class);
     IPacking packing = Mockito.mock(IPacking.class);
     SchedulerStateManagerAdaptor adaptor = Mockito.mock(SchedulerStateManagerAdaptor.class);
@@ -171,8 +171,8 @@ public class LaunchRunnerTest {
 
   @Test
   public void testSetExecutionStateFail() throws Exception {
-    Config runtime = createRunnerRuntime();
-    Config config = createRunnerConfig();
+    SpiCommonConfig runtime = createRunnerRuntime();
+    SpiCommonConfig config = createRunnerConfig();
     ILauncher launcher = Runtime.launcherClassInstance(runtime);
 
     LaunchRunner launchRunner = new LaunchRunner(config, runtime);
@@ -190,8 +190,8 @@ public class LaunchRunnerTest {
 
   @Test
   public void testSetTopologyFail() throws Exception {
-    Config runtime = createRunnerRuntime();
-    Config config = createRunnerConfig();
+    SpiCommonConfig runtime = createRunnerRuntime();
+    SpiCommonConfig config = createRunnerConfig();
     ILauncher launcher = Runtime.launcherClassInstance(runtime);
 
     LaunchRunner launchRunner = new LaunchRunner(config, runtime);
@@ -208,8 +208,8 @@ public class LaunchRunnerTest {
 
   @Test
   public void testLaunchFail() throws Exception {
-    Config runtime = createRunnerRuntime();
-    Config config = createRunnerConfig();
+    SpiCommonConfig runtime = createRunnerRuntime();
+    SpiCommonConfig config = createRunnerConfig();
     ILauncher launcher = Runtime.launcherClassInstance(runtime);
 
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
@@ -237,8 +237,8 @@ public class LaunchRunnerTest {
 
   @Test
   public void testCallSuccess() throws Exception {
-    Config runtime = createRunnerRuntime();
-    Config config = createRunnerConfig();
+    SpiCommonConfig runtime = createRunnerRuntime();
+    SpiCommonConfig config = createRunnerConfig();
     ILauncher launcher = Runtime.launcherClassInstance(runtime);
     Mockito.when(launcher.launch(Mockito.any(PackingPlan.class))).thenReturn(true);
 

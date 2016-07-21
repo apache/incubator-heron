@@ -24,7 +24,7 @@ import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.ClusterDefaults;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
@@ -69,13 +69,13 @@ public class FirstFitDecreasingPackingTest {
   }
 
   protected PackingPlan getFirstFitDecreasingPackingPlan(TopologyAPI.Topology topology) {
-    Config config = Config.newBuilder()
+    SpiCommonConfig config = SpiCommonConfig.newBuilder()
         .put(Keys.topologyId(), topology.getId())
         .put(Keys.topologyName(), topology.getName())
         .putAll(ClusterDefaults.getDefaults())
         .build();
 
-    Config runtime = Config.newBuilder()
+    SpiCommonConfig runtime = SpiCommonConfig.newBuilder()
         .put(Keys.topologyDefinition(), topology)
         .build();
 

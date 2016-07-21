@@ -23,12 +23,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Keys;
 
 public class LocalFileSystemUploaderTest {
 
-  private Config config;
+  private SpiCommonConfig config;
   private String fileSystemDirectory;
   private String testTopologyDirectory;
 
@@ -43,7 +43,7 @@ public class LocalFileSystemUploaderTest {
         LocalFileSystemConstantsTest.TEST_DATA_PATH).toString();
 
     // Create the minimum config for tests
-    config = Config.newBuilder()
+    config = SpiCommonConfig.newBuilder()
         .put(Keys.cluster(), "cluster")
         .put(Keys.role(), "role")
         .put(Keys.topologyName(), "topology")
@@ -63,7 +63,7 @@ public class LocalFileSystemUploaderTest {
     // identify the location of the test topology tar file
     String topologyPackage = Paths.get(testTopologyDirectory, "some-topology.tar").toString();
 
-    Config newconfig = Config.newBuilder()
+    SpiCommonConfig newconfig = SpiCommonConfig.newBuilder()
         .putAll(config).put(Keys.topologyPackageFile(), topologyPackage).build();
 
     // create the uploader and load the package
@@ -83,7 +83,7 @@ public class LocalFileSystemUploaderTest {
     String topologyPackage = Paths.get(
         testTopologyDirectory, "doesnot-exist-topology.tar").toString();
 
-    Config newconfig = Config.newBuilder()
+    SpiCommonConfig newconfig = SpiCommonConfig.newBuilder()
         .putAll(config).put(Keys.topologyPackageFile(), topologyPackage).build();
 
     // create the uploader and load the package
@@ -100,7 +100,7 @@ public class LocalFileSystemUploaderTest {
     // identify the location of the test topology tar file
     String topologyPackage = Paths.get(testTopologyDirectory, "some-topology.tar").toString();
 
-    Config newconfig = Config.newBuilder()
+    SpiCommonConfig newconfig = SpiCommonConfig.newBuilder()
         .putAll(config).put(Keys.topologyPackageFile(), topologyPackage).build();
 
     // create the uploader and load the package

@@ -21,7 +21,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.twitter.heron.common.basics.TypeUtils;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.PackingPlan;
@@ -35,7 +35,7 @@ public class MesosLauncherTest {
     final String NATIVE_LIBRARY_PATH = "native_library_path";
     final URI mockURI = TypeUtils.getURI("file:///mock/uri");
 
-    Config config = Mockito.mock(Config.class);
+    SpiCommonConfig config = Mockito.mock(SpiCommonConfig.class);
     Mockito.when(config.getStringValue(MesosContext.SCHEDULER_WORKING_DIRECTORY))
         .thenReturn("working-dir");
     Mockito.when(config.getStringValue(MesosContext.HERON_MESOS_NATIVE_LIBRARY_PATH))
@@ -44,7 +44,7 @@ public class MesosLauncherTest {
         .thenReturn(JAVA_HOME);
 
 
-    Config runtime = Mockito.mock(Config.class);
+    SpiCommonConfig runtime = Mockito.mock(SpiCommonConfig.class);
     Mockito.when(runtime.get(Keys.topologyPackageUri())).thenReturn(mockURI);
 
     MesosLauncher launcher = Mockito.spy(MesosLauncher.class);
@@ -72,10 +72,10 @@ public class MesosLauncherTest {
   public void testLaunch() throws Exception {
     MesosLauncher launcher = Mockito.spy(MesosLauncher.class);
     PackingPlan packingPlan = Mockito.mock(PackingPlan.class);
-    Config config = Mockito.mock(Config.class);
+    SpiCommonConfig config = Mockito.mock(SpiCommonConfig.class);
     Mockito.doReturn("working-dir").
         when(config).getStringValue(MesosContext.SCHEDULER_WORKING_DIRECTORY);
-    Config runtime = Mockito.mock(Config.class);
+    SpiCommonConfig runtime = Mockito.mock(SpiCommonConfig.class);
     launcher.initialize(config, runtime);
 
     // Failed to setup working dir

@@ -25,7 +25,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.scheduler.ILauncher;
@@ -46,7 +46,7 @@ public class SubmitterMainTest {
 
   @Test
   public void testValidateSubmit() throws Exception {
-    Config config = Mockito.mock(Config.class);
+    SpiCommonConfig config = Mockito.mock(SpiCommonConfig.class);
 
     SchedulerStateManagerAdaptor adaptor = Mockito.mock(SchedulerStateManagerAdaptor.class);
     TopologyAPI.Topology topology = TopologyAPI.Topology.getDefaultInstance();
@@ -86,7 +86,7 @@ public class SubmitterMainTest {
     PowerMockito.doReturn(uploader).
         when(ReflectionUtils.class, "newInstance", UPLOADER_CLASS);
 
-    Config config = Mockito.mock(Config.class);
+    SpiCommonConfig config = Mockito.mock(SpiCommonConfig.class);
     Mockito.
         when(config.getStringValue(ConfigKeys.get(STATE_MANAGER_CLASS))).
         thenReturn(STATE_MANAGER_CLASS);
@@ -148,14 +148,14 @@ public class SubmitterMainTest {
 
     // Failed to callLauncherRunner
     Mockito.doReturn(false).when(submitterMain).
-        callLauncherRunner(Mockito.any(Config.class));
+        callLauncherRunner(Mockito.any(SpiCommonConfig.class));
     Assert.assertFalse(submitterMain.submitTopology());
     // Should invoke undo
     Mockito.verify(uploader).undo();
 
     // Happy path
     Mockito.doReturn(true).when(submitterMain).
-        callLauncherRunner(Mockito.any(Config.class));
+        callLauncherRunner(Mockito.any(SpiCommonConfig.class));
     Assert.assertTrue(submitterMain.submitTopology());
   }
 }

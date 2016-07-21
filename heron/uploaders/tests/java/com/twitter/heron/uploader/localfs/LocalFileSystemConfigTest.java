@@ -19,7 +19,7 @@ import java.nio.file.Paths;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.common.Misc;
@@ -28,8 +28,8 @@ public class LocalFileSystemConfigTest {
 
   private static final String TOPOLOGY_PACKAGE_FILE = "/tmp/something.tar.gz";
 
-  private Config getDefaultConfig() {
-    Config config = Config.newBuilder()
+  private SpiCommonConfig getDefaultConfig() {
+    SpiCommonConfig config = SpiCommonConfig.newBuilder()
         .put(Keys.cluster(), "cluster")
         .put(Keys.role(), "role")
         .put(Keys.topologyName(), "topology")
@@ -43,7 +43,7 @@ public class LocalFileSystemConfigTest {
 
   @Test
   public void testDefaultConfig() throws Exception {
-    Config config = Config.expand(getDefaultConfig());
+    SpiCommonConfig config = SpiCommonConfig.expand(getDefaultConfig());
 
     Assert.assertEquals(
         LocalFileSystemContext.fileSystemDirectory(config),
@@ -55,8 +55,8 @@ public class LocalFileSystemConfigTest {
   public void testOverrideConfig() throws Exception {
     String overrideDirectory = "/users/twitter";
 
-    Config config = Config.expand(
-        Config.newBuilder()
+    SpiCommonConfig config = SpiCommonConfig.expand(
+        SpiCommonConfig.newBuilder()
             .putAll(getDefaultConfig())
             .put(LocalFileSystemKeys.fileSystemDirectory(), overrideDirectory)
             .build());
@@ -69,7 +69,7 @@ public class LocalFileSystemConfigTest {
 
   @Test
   public void testTopologyDirectory() throws Exception {
-    Config config = Config.expand(getDefaultConfig());
+    SpiCommonConfig config = SpiCommonConfig.expand(getDefaultConfig());
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();
     uploader.initialize(config);
 
@@ -84,7 +84,7 @@ public class LocalFileSystemConfigTest {
 
   @Test
   public void testTopologyFile() throws Exception {
-    Config config = Config.expand(getDefaultConfig());
+    SpiCommonConfig config = SpiCommonConfig.expand(getDefaultConfig());
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();
     uploader.initialize(config);
 
@@ -99,8 +99,8 @@ public class LocalFileSystemConfigTest {
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();
     String overrideDirectory = "/users/twitter";
 
-    Config config = Config.expand(
-        Config.newBuilder()
+    SpiCommonConfig config = SpiCommonConfig.expand(
+        SpiCommonConfig.newBuilder()
             .putAll(getDefaultConfig())
             .put(LocalFileSystemKeys.fileSystemDirectory(), overrideDirectory)
             .build());
@@ -117,8 +117,8 @@ public class LocalFileSystemConfigTest {
   public void testOverrideTopologyFile() throws Exception {
     LocalFileSystemUploader uploader = new LocalFileSystemUploader();
     String overrideDirectory = "/users/twitter";
-    Config config = Config.expand(
-        Config.newBuilder()
+    SpiCommonConfig config = SpiCommonConfig.expand(
+        SpiCommonConfig.newBuilder()
             .putAll(getDefaultConfig())
             .put(LocalFileSystemKeys.fileSystemDirectory(), overrideDirectory)
             .build());
