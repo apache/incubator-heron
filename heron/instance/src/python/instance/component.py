@@ -18,7 +18,6 @@ from heron.proto import tuple_pb2
 from heron.common.src.python.log import Log
 from heron.instance.src.python.misc.outgoing_tuple_helper import OutgoingTupleHelper
 from heron.instance.src.python.misc.serializer import PythonSerializer
-from heron.instance.src.python.metrics.metrics_helper import ComponentMetrics
 
 # TODO: maybe implement some basic stuff
 

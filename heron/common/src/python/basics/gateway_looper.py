@@ -29,7 +29,6 @@ class GatewayLooper(EventLooper):
     # Pipe used for wake up select
     self.pipe_r, self.pipe_w = os.pipe()
 
-    #self.register_timer_task_in_sec(self.exit_loop, 10)
     self.started = time.time()
     Log.debug("Gateway Looper started time: " + str(time.asctime()))
 
@@ -54,7 +53,7 @@ class GatewayLooper(EventLooper):
 
   def poll(self, timeout=0.0):
     if self.sock_map is None:
-      raise RuntimeError("Socket map is not registered to gateway looper")
+      Log.warning("Socket map is not registered to Gateway Looper")
     # Modified version of poll() from asyncore module
     r = []; w = []; e = []
 
@@ -64,7 +63,6 @@ class GatewayLooper(EventLooper):
         is_w = obj.writable()
         if is_r:
           r.append(fd)
-        # accepting sockets should not be writable
         if is_w and not obj.accepting:
           w.append(fd)
         if is_r or is_w:

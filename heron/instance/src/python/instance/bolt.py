@@ -22,7 +22,7 @@ from heron.proto import tuple_pb2
 from heron.common.src.python.log import Log
 from heron.instance.src.python.instance.comp_spec import HeronComponentSpec
 from heron.instance.src.python.instance.tuple import TupleHelper, HeronTuple
-from heron.instance.src.python.metrics.metrics_helper import BoltMetrics
+from heron.common.src.python.utils.metrics import BoltMetrics
 
 import heron.common.src.python.constants as constants
 

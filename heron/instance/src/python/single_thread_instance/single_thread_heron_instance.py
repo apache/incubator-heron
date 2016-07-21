@@ -15,16 +15,17 @@ import logging
 import os
 import sys
 import traceback
-
 import signal
 import yaml
+
 from heron.common.src.python.log import Log, init_logger
 from heron.common.src.python.basics.gateway_looper import GatewayLooper
+from heron.common.src.python.utils.metrics import GatewayMetrics, MetricsCollector
+
 from heron.proto import physical_plan_pb2, stmgr_pb2
 from heron.instance.src.python.single_thread_instance.single_thread_stmgr_client import SingleThreadStmgrClient
 from heron.instance.src.python.network.metricsmgr_client import MetricsManagerClient
 from heron.instance.src.python.misc.communicator import HeronCommunicator
-from heron.instance.src.python.metrics.metrics_helper import GatewayMetrics, MetricsCollector
 
 import heron.common.src.python.pex_loader as pex_loader
 import heron.common.src.python.constants as constants

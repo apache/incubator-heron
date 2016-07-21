@@ -22,7 +22,7 @@ from heron.proto import topology_pb2, tuple_pb2
 from heron.common.src.python.log import Log
 from heron.instance.src.python.instance.comp_spec import HeronComponentSpec
 from heron.instance.src.python.instance.tuple import TupleHelper
-from heron.instance.src.python.metrics.metrics_helper import SpoutMetrics
+from heron.common.src.python.utils.metrics import SpoutMetrics
 
 import heron.common.src.python.constants as constants
 

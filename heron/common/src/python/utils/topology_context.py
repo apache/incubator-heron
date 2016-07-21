@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from heron.instance.src.python.metrics.metrics_helper import MetricsCollector
+from heron.common.src.python.utils.metrics import MetricsCollector
 
 class TopologyContext(dict):
   # topology as supplied by the cluster overloaded by any component specific config
@@ -44,11 +44,15 @@ class TopologyContext(dict):
     self[self.OUTPUTS] = outputs
     self[self.COMPONENT_TO_OUT_FIELDS] = out_fields
 
-  def register_metric(self, name, metric, time_bucket_in_sec):
+  def get_metrics_collector(self):
     if TopologyContext.METRICS_COLLECTOR not in self or \
         not isinstance(self.get(TopologyContext.METRICS_COLLECTOR), MetricsCollector):
       raise RuntimeError("Metrics collector is not registered in this context")
-    self.get(TopologyContext.METRICS_COLLECTOR).register_metric(name, metric, time_bucket_in_sec)
+    return self.get(TopologyContext.METRICS_COLLECTOR)
+
+  def register_metric(self, name, metric, time_bucket_in_sec):
+    collector = self.get_metrics_collector()
+    collector.register_metric(name, metric, time_bucket_in_sec)
 
   @staticmethod
   def _get_inputs_and_outputs_and_outfields(topology):

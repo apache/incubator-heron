@@ -11,67 +11,40 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+from .metrics import (CountMetric, MultiCountMetric, MeanReducedMetric,
+                      ReducedMetric, MultiMeanReducedMetric, MultiReducedMetric)
+
 from heron.common.src.python.log import Log
 from heron.proto import metrics_pb2
-from heron.common.src.python.utils.metrics import CountMetric, MultiCountMetric, MeanReducedMetric, ReducedMetric, MultiMeanReducedMetric, MultiReducedMetric
+
 import heron.common.src.python.constants as constants
 
+class BaseMetricsHelper(object):
+  """Helper class for metrics management
 
-class GatewayMetrics(object):
-  RECEIVED_PKT_SIZE = '__gateway-received-packets-size'
-  SENT_PKT_SIZE = '__gateway-sent-packets-size'
-  RECEIVED_PKT_COUNT = '__gateway-received-packets-count'
-  SENT_PKT_COUNT = '__gateway-sent-packets-count'
+  It registers metrics to the metrics collector and provides methods for
+  updating metrics. This supports updating of: CountMetric, MultiCountMetric,
+  ReducedMetric and MultiReducedMetric class.
+  """
+  def __init__(self, metrics):
+    self.metrics = metrics
 
-  def __init__(self, metric_collector, sys_config):
-    self.metric_collector = metric_collector
-    self.metrics = {
-      self.RECEIVED_PKT_SIZE: CountMetric(),
-      self.SENT_PKT_SIZE: CountMetric(),
-      self.RECEIVED_PKT_COUNT: CountMetric(),
-      self.SENT_PKT_COUNT: CountMetric()
-    }
-    interval = float(sys_config[constants.METRICS_EXPORT_INTERVAL_SECS])
-
+  def register_metrics(self, metrics_collector, interval):
+    """Registers its metrics to a given metrics collector with a given interval"""
     for key, value in self.metrics.iteritems():
-      metric_collector.register_metric(key, value, interval)
+      metrics_collector.register_metric(key, value, interval)
 
-  def update_count(self, name, incr_by=1):
-    if name not in self.metrics:
-      Log.error("In update_count: " + name + " is not registered in the metric")
-      return
-    self.metrics[name].incr(incr_by)
+  def update_count(self, name, incr_by=1, key=None):
+    """Update the value of CountMetric or MultiCountMetric
 
-# TODO: seriously reconsider the design of this again
-class ComponentMetrics(object):
-  """Metrics to be collected for both Bolt and Spout"""
-  ACK_COUNT = "__ack-count"
-  FAIL_LATENCY = "__fail-latency"
-  FAIL_COUNT = "__fail-count"
-  EMIT_COUNT = "__emit-count"
-  TUPLE_SERIALIZATION_TIME_NS = "__tuple-serialization-time-ns"
-  OUT_QUEUE_FULL_COUNT = "__out-queue-full-count"
-
-  component_metrics = {
-    ACK_COUNT: MultiCountMetric(),
-    FAIL_LATENCY: MultiMeanReducedMetric(),
-    FAIL_COUNT: MultiCountMetric(),
-    EMIT_COUNT: MultiCountMetric(),
-    TUPLE_SERIALIZATION_TIME_NS: MultiCountMetric(),
-    OUT_QUEUE_FULL_COUNT: CountMetric()
-  }
-
-  def __init__(self, additional_metrics):
-    self.metrics = self.component_metrics
-    self.metrics.update(additional_metrics)
-
-  def register_metrics(self, context, sys_config):
-    interval = float(sys_config[constants.METRICS_EXPORT_INTERVAL_SECS])
-    for key, value in self.metrics.iteritems():
-      context.register_metric(key, value, interval)
-
-  def update_count(self, name, key=None, incr_by=1):
-    """Update the value of CountMetric or MultiCountMetric"""
+    :type name: str
+    :param name: name of the registered metric to be updated.
+    :type incr_by: int
+    :param incr_by: specifies how much to increment. Default is 1.
+    :type key: str or None
+    :param key: specifies a key for MultiCountMetric. Needs to be `None` for updating CountMetric.
+    """
     if name not in self.metrics:
       Log.error("In update_count(): " + name + " is not registered in the metric")
 
@@ -83,7 +56,14 @@ class ComponentMetrics(object):
       Log.error("In update_count(): " + name + " is registered but not supported with this method ")
 
   def update_reduced_metric(self, name, value, key=None):
-    """Update the value of ReducedMetric or MultiReducedMetric"""
+    """Update the value of ReducedMetric or MultiReducedMetric
+
+    :type name: str
+    :param name: name of the registered metric to be updated.
+    :param value: specifies a value to be reduced.
+    :type key: str or None
+    :param key: specifies a key for MultiReducedMetric. Needs to be `None` for updating ReducedMetric.
+    """
     if name not in self.metrics:
       Log.error("In update_reduced_metric(): " + name + " is not registered in the metric")
 
@@ -94,6 +74,55 @@ class ComponentMetrics(object):
     else:
       Log.error("In update_count(): " + name + " is registered but not supported with this method")
 
+class GatewayMetrics(BaseMetricsHelper):
+  RECEIVED_PKT_SIZE = '__gateway-received-packets-size'
+  SENT_PKT_SIZE = '__gateway-sent-packets-size'
+  RECEIVED_PKT_COUNT = '__gateway-received-packets-count'
+  SENT_PKT_COUNT = '__gateway-sent-packets-count'
+
+  metrics = {
+    RECEIVED_PKT_SIZE: CountMetric(),
+    SENT_PKT_SIZE: CountMetric(),
+    RECEIVED_PKT_COUNT: CountMetric(),
+    SENT_PKT_COUNT: CountMetric()
+  }
+
+  def __init__(self, metrics_collector, sys_config):
+    super(GatewayMetrics, self).__init__(self.metrics)
+    interval = float(sys_config[constants.METRICS_EXPORT_INTERVAL_SECS])
+    self.register_metrics(metrics_collector, interval)
+
+  def received_packet(self, received_pkt_size_bytes):
+    self.update_count(self.RECEIVED_PKT_COUNT)
+    self.update_count(self.RECEIVED_PKT_SIZE, incr_by=received_pkt_size_bytes)
+
+# TODO: seriously reconsider the design of this again
+class ComponentMetrics(BaseMetricsHelper):
+  """Metrics to be collected for both Bolt and Spout"""
+  FAIL_LATENCY = "__fail-latency"
+  FAIL_COUNT = "__fail-count"
+  EMIT_COUNT = "__emit-count"
+  TUPLE_SERIALIZATION_TIME_NS = "__tuple-serialization-time-ns"
+  OUT_QUEUE_FULL_COUNT = "__out-queue-full-count"
+
+  component_metrics = {
+    FAIL_LATENCY: MultiMeanReducedMetric(),
+    FAIL_COUNT: MultiCountMetric(),
+    EMIT_COUNT: MultiCountMetric(),
+    TUPLE_SERIALIZATION_TIME_NS: MultiCountMetric(),
+    OUT_QUEUE_FULL_COUNT: CountMetric()
+  }
+
+  def __init__(self, additional_metrics):
+    metrics = self.component_metrics
+    metrics.update(additional_metrics)
+    super(ComponentMetrics, self).__init__(metrics)
+
+  def register_metrics(self, context, sys_config):
+    interval = float(sys_config[constants.METRICS_EXPORT_INTERVAL_SECS])
+    collector = context.get_metrics_collector()
+    super(ComponentMetrics, self).register_metrics(collector, interval)
+
   def update_out_queue_full_count(self):
     self.update_count(self.OUT_QUEUE_FULL_COUNT)
 
@@ -101,10 +130,11 @@ class ComponentMetrics(object):
     self.update_count(self.EMIT_COUNT, key=stream_id)
 
   def serialize_data_tuple(self, stream_id, latency_in_ns):
-    self.update_count(self.TUPLE_SERIALIZATION_TIME_NS, stream_id, latency_in_ns)
+    self.update_count(self.TUPLE_SERIALIZATION_TIME_NS, incr_by=latency_in_ns, key=stream_id)
 
 
 class SpoutMetrics(ComponentMetrics):
+  ACK_COUNT = "__ack-count"
   COMPLETE_LATENCY = "__complete-latency"
   TIMEOUT_COUNT = "__timeout-count"
   NEXT_TUPLE_LATENCY = "__next-tuple-latency"
@@ -112,6 +142,7 @@ class SpoutMetrics(ComponentMetrics):
   PENDING_ACKED_COUNT = "__pending-acked-count"
 
   spout_metrics = {
+    ACK_COUNT: MultiCountMetric(),
     COMPLETE_LATENCY: MultiMeanReducedMetric(),
     TIMEOUT_COUNT: MultiCountMetric(),
     NEXT_TUPLE_LATENCY: MeanReducedMetric(),
@@ -119,7 +150,7 @@ class SpoutMetrics(ComponentMetrics):
     PENDING_ACKED_COUNT: MeanReducedMetric()
   }
 
-  to_multi_init = [ComponentMetrics.ACK_COUNT, ComponentMetrics.FAIL_COUNT,
+  to_multi_init = [ACK_COUNT, ComponentMetrics.FAIL_COUNT,
                    TIMEOUT_COUNT, ComponentMetrics.EMIT_COUNT]
 
   def __init__(self, pplan_helper):
@@ -139,18 +170,18 @@ class SpoutMetrics(ComponentMetrics):
     self.update_count(self.NEXT_TUPLE_COUNT)
 
   def acked_tuple(self, stream_id, complete_latency_ns):
-    self.update_count(self.ACK_COUNT, stream_id)
+    self.update_count(self.ACK_COUNT, key=stream_id)
     self.update_reduced_metric(self.COMPLETE_LATENCY, complete_latency_ns, stream_id)
 
   def failed_tuple(self, stream_id, fail_latency_ns):
-    self.update_count(self.FAIL_COUNT, stream_id)
+    self.update_count(self.FAIL_COUNT, key=stream_id)
     self.update_reduced_metric(self.FAIL_LATENCY, fail_latency_ns, stream_id)
 
   def update_pending_tuples_count(self, count):
     self.update_reduced_metric(self.PENDING_ACKED_COUNT, count)
 
-
 class BoltMetrics(ComponentMetrics):
+  ACK_COUNT = "__ack-count"
   PROCESS_LATENCY = "__process-latency"
   EXEC_COUNT = "__execute-count"
   EXEC_LATENCY = "__execute-latency"
@@ -158,6 +189,7 @@ class BoltMetrics(ComponentMetrics):
   TUPLE_DESERIALIZATION_TIME_NS = "__tuple-deserialization-time-ns"
 
   bolt_metrics = {
+    ACK_COUNT: MultiCountMetric(),
     PROCESS_LATENCY: MultiMeanReducedMetric(),
     EXEC_COUNT: MultiCountMetric(),
     EXEC_LATENCY: MultiMeanReducedMetric(),
@@ -165,7 +197,7 @@ class BoltMetrics(ComponentMetrics):
     TUPLE_DESERIALIZATION_TIME_NS: MultiCountMetric()
   }
 
-  inputs_init = [ComponentMetrics.ACK_COUNT, ComponentMetrics.FAIL_COUNT,
+  inputs_init = [ACK_COUNT, ComponentMetrics.FAIL_COUNT,
                  EXEC_COUNT, EXEC_TIME_NS]
   outputs_init = [ComponentMetrics.EMIT_COUNT]
 
@@ -192,40 +224,43 @@ class BoltMetrics(ComponentMetrics):
         metric.add_key(stream_id)
 
   def execute_tuple(self, stream_id, source_component, latency_in_ns):
-    self.update_count(self.EXEC_COUNT, stream_id)
+    self.update_count(self.EXEC_COUNT, key=stream_id)
     self.update_reduced_metric(self.EXEC_LATENCY, latency_in_ns, stream_id)
-    self.update_count(self.EXEC_TIME_NS, stream_id, incr_by=latency_in_ns)
+    self.update_count(self.EXEC_TIME_NS, incr_by=latency_in_ns, key=stream_id)
 
     global_stream_id = source_component + "/" + stream_id
-    self.update_count(self.EXEC_COUNT, global_stream_id)
+    self.update_count(self.EXEC_COUNT, key=global_stream_id)
     self.update_reduced_metric(self.EXEC_LATENCY, latency_in_ns, global_stream_id)
-    self.update_count(self.EXEC_TIME_NS, global_stream_id, incr_by=latency_in_ns)
+    self.update_count(self.EXEC_TIME_NS, incr_by=latency_in_ns, key=global_stream_id)
 
   def deserialize_data_tuple(self, stream_id, source_component, latency_in_ns):
-    self.update_count(self.TUPLE_DESERIALIZATION_TIME_NS, stream_id, latency_in_ns)
+    self.update_count(self.TUPLE_DESERIALIZATION_TIME_NS, incr_by=latency_in_ns, key=stream_id)
     global_stream_id = source_component + "/" + stream_id
-    self.update_count(self.TUPLE_DESERIALIZATION_TIME_NS, global_stream_id, latency_in_ns)
+    self.update_count(self.TUPLE_DESERIALIZATION_TIME_NS, incr_by=latency_in_ns, key=global_stream_id)
 
   def acked_tuple(self, stream_id, source_component, latency_in_ns):
-    self.update_count(self.ACK_COUNT, stream_id)
+    self.update_count(self.ACK_COUNT, key=stream_id)
     self.update_reduced_metric(self.PROCESS_LATENCY, latency_in_ns, stream_id)
     global_stream_id = source_component + '/' + stream_id
-    self.update_count(self.ACK_COUNT, global_stream_id)
+    self.update_count(self.ACK_COUNT, key=global_stream_id)
     self.update_reduced_metric(self.PROCESS_LATENCY, latency_in_ns, global_stream_id)
 
   def failed_tuple(self, stream_id, source_component, latency_in_ns):
-    self.update_count(self.FAIL_COUNT, stream_id)
+    self.update_count(self.FAIL_COUNT, key=stream_id)
     self.update_reduced_metric(self.FAIL_LATENCY, latency_in_ns, stream_id)
     global_stream_id = source_component + '/' + stream_id
-    self.update_count(self.FAIL_COUNT, global_stream_id)
+    self.update_count(self.FAIL_COUNT, key=global_stream_id)
     self.update_reduced_metric(self.FAIL_LATENCY, latency_in_ns, global_stream_id)
 
 class MetricsCollector(object):
   """Helper class for pushing metrics to Out-Metrics queue"""
   def __init__(self, looper, out_metrics):
     self.looper = looper
+    # map <metrics name -> IMetric object>
     self.metrics_map = dict()
+    # map <time_bucket_sec -> metrics name>
     self.time_bucket_in_sec_to_metrics_name = dict()
+    # out metrics queue
     self.out_metrics = out_metrics
 
   def register_metric(self, name, metric, time_bucket_in_sec):

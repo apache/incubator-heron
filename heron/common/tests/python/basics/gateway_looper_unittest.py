@@ -13,8 +13,9 @@
 # limitations under the License.
 import threading
 import time
+import unittest2 as unittest
+
 from heron.common.src.python.basics.gateway_looper import GatewayLooper
-import unittest
 
 class GatewayLooperTest(unittest.TestCase):
   def setUp(self):
@@ -40,7 +41,7 @@ class GatewayLooperTest(unittest.TestCase):
 
     start_time = time.time()
     # Wait in poll() for 30 sec or waken up
-    looper.poll(timeout=poll_timeout, map=None)
+    looper.poll(timeout=poll_timeout)
     end_time = time.time()
     return start_time, end_time
 

@@ -13,12 +13,11 @@
 # limitations under the License.
 import time
 import traceback
-from heapq import heappush, heappop, heapify
+from heapq import heappush, heappop
 from abc import abstractmethod
 from heron.common.src.python.log import Log
 
 import sys
-
 
 class EventLooper(object):
   """Event Looper can block the thread on ``do_wait()`` and unblock on ``wake_up()``"""
@@ -81,15 +80,14 @@ class EventLooper(object):
     This should be used from do_wait().
     :returns (float) next_timeout, or 10.0 if there are no timer events
     """
-    # TODO: Problem if timer task added right after sys.maxint -> wouldn't be called
     if len(self.timer_tasks) == 0:
-      return 1.0
+      return sys.maxint
     else:
       next_timeout_interval = self.timer_tasks[0][0] - time.time()
       return next_timeout_interval
 
   def execute_wakeup_tasks(self):
-    # In Java impl, this is how it's implemented due to possible ConcurrentModificationException
+    # Check the length of wakeup tasks first to avoid concurrent issues
     size = len(self.wakeup_tasks)
     for i in range(size):
       self.wakeup_tasks[i]()

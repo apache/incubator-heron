@@ -17,8 +17,6 @@ from heron.proto import stmgr_pb2, common_pb2
 from heron.instance.src.python.misc.pplan_helper import PhysicalPlanHelper
 from heron.instance.src.python.network.heron_client import HeronClient
 from heron.instance.src.python.network.protocol import StatusCode
-from heron.instance.src.python.metrics.metrics_helper import GatewayMetrics
-
 
 # SingleThreadStmgrClient is an implementation of the Heron client in python and communicates
 # with Stream Manager. It will:
@@ -56,8 +54,7 @@ class SingleThreadStmgrClient(HeronClient):
       raise RuntimeError("Unknown kind of response received from Stream Manager")
 
   def on_incoming_message(self, message):
-    self.gateway_metrics.update_count(GatewayMetrics.RECEIVED_PKT_COUNT)
-    self.gateway_metrics.update_count(GatewayMetrics.RECEIVED_PKT_SIZE, message.ByteSize())
+    self.gateway_metrics.received_packet(message.ByteSize())
 
     if isinstance(message, stmgr_pb2.NewInstanceAssignmentMessage):
       Log.info("Handling assignment message from direct NewInstanceAssignmentMessage")

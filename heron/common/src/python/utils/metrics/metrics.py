@@ -13,7 +13,6 @@
 # limitations under the License.
 from abc import abstractmethod
 
-
 class IMetric(object):
   @abstractmethod
   def get_value_and_reset(self):
@@ -49,9 +48,7 @@ class MultiCountMetric(IMetric):
       ret[key] = value.get_value_and_reset()
     return ret
 
-
 # Reducer metric
-
 class IReducer(object):
   @abstractmethod
   def init(self):
