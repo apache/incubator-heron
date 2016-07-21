@@ -11,19 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+""" memoryhistogramhandler.py """
 import json
 import logging
+import traceback
 import tornado.gen
 import tornado.web
-import traceback
 
-from heron.tracker.src.python import constants
 from heron.tracker.src.python import utils
 from heron.tracker.src.python.handlers import BaseHandler
 from heron.tracker.src.python.handlers.pidhandler import getInstancePid
 
 LOG = logging.getLogger(__name__)
+
 
 class MemoryHistogramHandler(BaseHandler):
   """
@@ -31,6 +31,7 @@ class MemoryHistogramHandler(BaseHandler):
         &environ=<environment>&instance=<instance>
   Parameters:
    - cluster - Name of the cluster.
+   - role - (optional) Role used to submit the topology.
    - environ - Running environment.
    - topology - Name of topology (Note: Case sensitive. Can only
                 include [a-zA-Z0-9-_]+)
@@ -45,23 +46,28 @@ class MemoryHistogramHandler(BaseHandler):
   }
   """
 
+  # pylint: disable=attribute-defined-outside-init
   def initialize(self, tracker):
+    """ initialize """
     self.tracker = tracker
 
   @tornado.gen.coroutine
   def get(self):
+    """ get method """
     try:
       cluster = self.get_argument_cluster()
+      role = self.get_argument_role()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
       instance = self.get_argument_instance()
-      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, environ)
+      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)
       ret = yield self.getInstanceMemoryHistogram(topology_info, instance)
       self.write_success_response(ret)
     except Exception as e:
       traceback.print_exc()
       self.write_error_response(e)
 
+  # pylint: disable=no-self-use
   @tornado.gen.coroutine
   def getInstanceMemoryHistogram(self, topology_info, instance_id):
     """
@@ -70,7 +76,6 @@ class MemoryHistogramHandler(BaseHandler):
     pid_response = yield getInstancePid(topology_info, instance_id)
     try:
       http_client = tornado.httpclient.AsyncHTTPClient()
-      component_id = instance_id.split('_')[1] # Format: container_<id>_<instance_id>
       pid_json = json.loads(pid_response)
       pid = pid_json['stdout'].strip()
       if pid == '':
@@ -78,8 +83,7 @@ class MemoryHistogramHandler(BaseHandler):
       endpoint = utils.make_shell_endpoint(topology_info, instance_id)
       url = "%s/histo/%s" % (endpoint, pid)
       response = yield http_client.fetch(url)
-      LOG.debug("HTTP call for url: %s" % url)
+      LOG.debug("HTTP call for url: %s", url)
       raise tornado.gen.Return(response.body)
     except tornado.httpclient.HTTPError as e:
       raise Exception(str(e))
-

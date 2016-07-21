@@ -18,15 +18,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
-import com.twitter.heron.spi.common.ShellUtils;
+import com.twitter.heron.spi.utils.ShellUtils;
 
 /**
  * This file defines Utils methods used by Aurora
  */
 public class AuroraController {
-  private static final Logger LOG = Logger.getLogger(AuroraController.class.getName());
 
   private final String jobName;
   private final String cluster;
@@ -45,24 +43,6 @@ public class AuroraController {
     this.role = role;
     this.env = env;
     this.isVerbose = isVerbose;
-  }
-
-  // Static method to append verbose and batching options if needed
-  public static void appendAuroraCommandOptions(
-      List<String> auroraCmd,
-      boolean isVerbose) {
-    // Append verbose if needed
-    if (isVerbose) {
-      auroraCmd.add("--verbose");
-    }
-
-    // Append batch size.
-    // Note that we can not use "--no-batching" since "restart" command does not accept it.
-    // So we play a small trick here by setting batch size Integer.MAX_VALUE.
-    auroraCmd.add("--batch-size");
-    auroraCmd.add("" + Integer.MAX_VALUE);
-
-    return;
   }
 
   // Create an aurora job
@@ -116,6 +96,21 @@ public class AuroraController {
   // Utils method for unit tests
   protected boolean runProcess(List<String> auroraCmd) {
     return 0 == ShellUtils.runProcess(
-        isVerbose, auroraCmd.toArray(new String[0]), new StringBuilder(), new StringBuilder());
+        isVerbose, auroraCmd.toArray(new String[auroraCmd.size()]),
+        new StringBuilder(), new StringBuilder());
+  }
+
+  // Static method to append verbose and batching options if needed
+  private static void appendAuroraCommandOptions(List<String> auroraCmd, boolean isVerbose) {
+    // Append verbose if needed
+    if (isVerbose) {
+      auroraCmd.add("--verbose");
+    }
+
+    // Append batch size.
+    // Note that we can not use "--no-batching" since "restart" command does not accept it.
+    // So we play a small trick here by setting batch size Integer.MAX_VALUE.
+    auroraCmd.add("--batch-size");
+    auroraCmd.add("" + Integer.MAX_VALUE);
   }
 }

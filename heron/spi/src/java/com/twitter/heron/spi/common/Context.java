@@ -275,6 +275,10 @@ public class Context {
     return cfg.getStringValue(Keys.packingSandboxFile());
   }
 
+  public static String overrideSandboxFile(Config cfg) {
+    return cfg.getStringValue(Keys.overrideSandboxFile());
+  }
+
   public static String schedulerSandboxFile(Config cfg) {
     return cfg.getStringValue(Keys.schedulerSandboxFile());
   }

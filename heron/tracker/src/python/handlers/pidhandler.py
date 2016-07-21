@@ -11,17 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' pidhandler.py '''
 import logging
+import traceback
 import tornado.gen
 import tornado.web
-import traceback
 
-from heron.tracker.src.python import constants
 from heron.tracker.src.python import utils
 from heron.tracker.src.python.handlers import BaseHandler
 
 LOG = logging.getLogger(__name__)
+
 
 @tornado.gen.coroutine
 def getInstancePid(topology_info, instance_id):
@@ -34,11 +34,12 @@ def getInstancePid(topology_info, instance_id):
     http_client = tornado.httpclient.AsyncHTTPClient()
     endpoint = utils.make_shell_endpoint(topology_info, instance_id)
     url = "%s/pid/%s" % (endpoint, instance_id)
-    LOG.debug("HTTP call for url: %s" % url)
+    LOG.debug("HTTP call for url: %s", url)
     response = yield http_client.fetch(url)
     raise tornado.gen.Return(response.body)
   except tornado.httpclient.HTTPError as e:
     raise Exception(str(e))
+
 
 class PidHandler(BaseHandler):
   """
@@ -46,6 +47,7 @@ class PidHandler(BaseHandler):
         &environ=<environment>&instance=<instance>
   Parameters:
    - cluster - Name of the cluster.
+   - role - (optional) Role used to submit the topology.
    - environ - Running environment.
    - topology - Name of topology (Note: Case sensitive. Can only
                 include [a-zA-Z0-9-_]+)
@@ -61,20 +63,23 @@ class PidHandler(BaseHandler):
   }
   """
 
+  # pylint: disable=attribute-defined-outside-init
   def initialize(self, tracker):
+    """ initialize """
     self.tracker = tracker
 
   @tornado.gen.coroutine
   def get(self):
+    """ get method """
     try:
       cluster = self.get_argument_cluster()
+      role = self.get_argument_role()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
       instance = self.get_argument_instance()
-      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, environ)
+      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)
       result = yield getInstancePid(topology_info, instance)
       self.write_success_response(result)
     except Exception as e:
       traceback.print_exc()
       self.write_error_response(e)
-

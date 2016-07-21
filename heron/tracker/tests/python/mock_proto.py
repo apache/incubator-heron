@@ -1,3 +1,4 @@
+''' mock_proto.py '''
 import heron.proto.execution_state_pb2 as protoEState
 import heron.proto.physical_plan_pb2 as protoPPlan
 import heron.proto.tmaster_pb2 as protoTmaster
@@ -5,7 +6,9 @@ import heron.proto.topology_pb2 as protoTopology
 
 from heron.common.src.python import constants
 
-class MockProto:
+# pylint: disable=no-self-use, missing-docstring
+class MockProto(object):
+  ''' Mocking Proto'''
   topology_name = "mock_topology_name"
   topology_id = "mock_topology_id"
   cluster = "mock_topology_cluster"
@@ -40,7 +43,8 @@ class MockProto:
       bolt.outputs.add().stream.CopyFrom(stream)
     return bolt
 
-  def create_mock_simple_topology(self,
+  def create_mock_simple_topology(
+      self,
       spout_parallelism=1,
       bolt_parallelism=1):
     """
@@ -65,7 +69,8 @@ class MockProto:
 
     return topology
 
-  def create_mock_medium_topology(self,
+  def create_mock_medium_topology(
+      self,
       spout_parallelism=1,
       bolt1_parallelism=1,
       bolt2_parallelism=1,
@@ -100,8 +105,8 @@ class MockProto:
 
     # Spouts
     spout1 = self.create_mock_spout("mock_spout1",
-                                   [stream1, stream2],
-                                   spout_parallelism)
+                                    [stream1, stream2],
+                                    spout_parallelism)
     topology.spouts.extend([spout1])
 
     # Bolts
@@ -122,7 +127,8 @@ class MockProto:
 
     return topology
 
-  def create_mock_simple_physical_plan(self,
+  def create_mock_simple_physical_plan(
+      self,
       spout_parallelism=1,
       bolt_parallelism=1):
     pplan = protoPPlan.PhysicalPlan()
@@ -131,7 +137,8 @@ class MockProto:
         bolt_parallelism))
     return pplan
 
-  def create_mock_medium_physical_plan(self,
+  def create_mock_medium_physical_plan(
+      self,
       spout_parallelism=1,
       bolt1_parallelism=1,
       bolt2_parallelism=1,

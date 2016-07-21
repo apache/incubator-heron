@@ -14,7 +14,7 @@
 
 package com.twitter.heron.uploader.hdfs;
 
-import com.twitter.heron.spi.common.ShellUtils;
+import com.twitter.heron.spi.utils.ShellUtils;
 
 public class HdfsController {
   private final String configDir;

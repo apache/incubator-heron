@@ -80,8 +80,8 @@ interface, which requires you to implement the following methods:
   effect.
 
 Your implementation of those interfaces will need to be packaged into a JAR file
-and distributed to the `metrics-mgr-classpath` folder of your [Heron
-release](../../developers/compiling).
+and distributed to the `heron-core/lib/metricsmgr` folder of your [Heron
+release](../../developers/compiling/compiling).
 
 ## Example Implementation
 
@@ -170,7 +170,7 @@ It is optional to add other configurations for the sink. All configurations will
 ## Using Your Custom Sink
 
 Once you've made a JAR for your custom Java sink, distributed that JAR to
-`metrics-mgr-classpath` folder, and changed the configuration in
+`heron-core/lib/metricsmgr` folder, and changed the configuration in
 `heron/config/src/yaml/conf/${CLUSTER}/metrics_sinks.yaml`. 
 Any topology submitted using that configuration will include the custom sink.You must [re-compile
 Heron](../../developers/compiling) if you want to include the configuration in a new heron-cli distribution. 

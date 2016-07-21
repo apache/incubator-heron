@@ -18,7 +18,7 @@ import traceback
 import signal
 import yaml
 
-from heron.common.src.python.log import Log, init_logger
+from heron.common.src.python.log import Log, init_rotating_logger
 from heron.common.src.python.basics.gateway_looper import GatewayLooper
 from heron.common.src.python.utils.metrics import GatewayMetrics, MetricsCollector
 
@@ -210,7 +210,8 @@ def main():
 
   # TODO: improve this later
   log_file = os.path.join(log_dir, instance_id + ".log.0")
-  init_logger(level=logging.INFO, logfile=log_file, max_files=max_log_files, max_bytes=max_log_bytes)
+  init_rotating_logger(level=logging.INFO, logfile=log_file,
+                       max_files=max_log_files, max_bytes=max_log_bytes)
 
   Log.info("\nStarting instance: " + instance_id + " for topology: " + topology_name +
            " and topologyId: " + topology_id + " for component: " + component_name +

@@ -11,12 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+''' config.py '''
 
-import os
-import pkgutil
-import yaml
-
-class Config:
+class Config(object):
   """
   Responsible for reading the yaml config files and
   exposing state locations through python methods.
@@ -32,7 +29,9 @@ class Config:
   def __init__(self):
     self.location = None
 
+  # pylint: disable=attribute-defined-outside-init
   def set_state_locations(self, state_locations):
+    """ set state locations """
     self.locations = state_locations
     self.validate_state_locations()
 
@@ -54,4 +53,3 @@ class Config:
     Return a list of state locations of a particular type.
     """
     return filter(lambda location: location['type'] == location_type, self.locations)
-

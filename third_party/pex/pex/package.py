@@ -3,7 +3,7 @@
 
 import os
 
-from pkg_resources import EGG_NAME, parse_version, safe_name
+from pkg_resources import EGG_NAME, parse_version, safe_name, safe_version
 
 from .archiver import Archiver
 from .base import maybe_requirement
@@ -133,7 +133,7 @@ class SourcePackage(Package):
 
   @property
   def raw_version(self):
-    return safe_name(self._raw_version)
+    return safe_version(self._raw_version)
 
   # SourcePackages are always compatible as they can be translated to a distribution.
   def compatible(self, identity, platform=Platform.current()):
@@ -167,7 +167,7 @@ class EggPackage(Package):
 
   @property
   def raw_version(self):
-    return safe_name(self._raw_version)
+    return safe_version(self._raw_version)
 
   @property
   def py_version(self):
@@ -219,8 +219,6 @@ class WheelPackage(Package):
             yield (py, abi, real_arch)
 
   def compatible(self, identity, platform=Platform.current()):
-    print("WheelPackage.compatible() - name=[%s] version=[%s] identity=[%s] platform=[%s]" % (self._name, self._raw_version, identity, platform))
-    print("WheelPackage.compatible() - self._supported_tags=%s" % self._supported_tags)
     for tag in PEP425.iter_supported_tags(identity, platform):
       if tag in self._supported_tags:
         return True

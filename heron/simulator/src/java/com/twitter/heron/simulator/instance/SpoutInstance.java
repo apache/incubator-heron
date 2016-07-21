@@ -178,7 +178,9 @@ public class SpoutInstance implements IInstance {
           // Notice: Tuples are not necessary emitted during nextTuple methods. We could emit
           // tuples as long as we invoke collector.emit(...)
           collector.sendOutTuples();
-        } else {
+        }
+
+        if (!collector.isOutQueuesAvailable()) {
           spoutMetrics.updateOutQueueFullCount();
         }
 

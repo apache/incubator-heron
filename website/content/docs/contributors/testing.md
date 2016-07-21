@@ -58,7 +58,7 @@ Integration tests are divided into two categories:
     To run the functional integration tests on a Mac OS X, do the following:
 
     ```bash
-    $ ./scripts/run_integration_test.sh darwin
+    $ ./scripts/run_integration_test.sh
     ```
 
 * Failure integration tests

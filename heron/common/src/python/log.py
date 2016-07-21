@@ -11,18 +11,36 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' log.py '''
 import logging
 from logging.handlers import RotatingFileHandler
 
-# Create the root logger
-Log = logging.getLogger()
+# Create the logger
+# pylint: disable=invalid-name
+Log = logging.getLogger('common')
 
-def init_logger(level, logfile, max_files, max_bytes):
+def configure(level, logfile=None):
+  '''
+  :param level:
+  :param logfile:
+  :return:
+  '''
+  log_format = "%(asctime)s-%(levelname)s: %(message)s"
+  date_format = '%a, %d %b %Y %H:%M:%S'
+
+  logging.basicConfig(format=log_format, datefmt=date_format)
+  Log.setLevel(level)
+
+  if logfile is not None:
+    handle = logging.FileHandler(logfile)
+    handle.setFormatter(logging.Formatter(log_format))
+    Log.addHandler(handle)
+
+def init_rotating_logger(level, logfile, max_files, max_bytes):
+  root_logger = logging.getLogger()
   log_format = "%(asctime)s:%(levelname)s:%(filename)s: %(message)s"
 
-  Log.setLevel(level)
+  root_logger.setLevel(level)
   handler = RotatingFileHandler(logfile, maxBytes=max_bytes, backupCount=max_files)
   handler.setFormatter(logging.Formatter(fmt=log_format))
-  Log.addHandler(handler)
-
+  root_logger.addHandler(handler)

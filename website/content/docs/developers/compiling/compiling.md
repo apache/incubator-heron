@@ -21,7 +21,7 @@ Instructions on running unit tests for Heron can also be found in [Testing Heron
 
 You must have the following installed to compile Heron:
 
-* [Bazel](http://bazel.io/docs/install.html) = {{% bazelVersion %}}. Later versions
+* [Bazel](http://bazel.io/docs/install.html) = {{% bazelVersion %}} . Later versions
   might work but have not been tested. See [Installing Bazel]({{< ref "#installing-bazel" >}}).
 * [Java
   8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)

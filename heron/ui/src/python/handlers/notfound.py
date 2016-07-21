@@ -11,11 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' notfound.py '''
 from heron.ui.src.python.handlers import base
-import tornado.web
+
 
 class NotFoundHandler(base.BaseHandler):
-    def get(self, *args, **kwargs):
-        errormessage = "Sorry, we could not find this page"
-        self.render("error.html", errormessage=errormessage)
+  ''' NotFoundHandler '''
+
+  # pylint: disable=unused-argument
+  def get(self, *args, **kwargs):
+    '''
+    :param args:
+    :param kwargs:
+    :return:
+    '''
+    errormessage = "Sorry, we could not find this page"
+    self.render("error.html", errormessage=errormessage)

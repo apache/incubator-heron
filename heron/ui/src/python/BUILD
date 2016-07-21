@@ -13,6 +13,10 @@ pex_library(
         "requests==2.3.0",
         "tornado==4.0.2",
     ],
+    deps = [
+        "//heron/common/src/python:common",
+        "//heron/common/src/python:tracker-access",
+    ]
 )
 
 pex_binary(

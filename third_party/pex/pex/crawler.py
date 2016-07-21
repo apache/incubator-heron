@@ -12,6 +12,7 @@ from .compatibility import PY3
 from .http import Context
 from .link import Link
 from .tracer import TRACER
+from .util import Memoizer
 
 if PY3:
   from queue import Empty, Queue
@@ -19,6 +20,15 @@ if PY3:
 else:
   from Queue import Empty, Queue
   from urlparse import urlparse
+
+
+def unescape(s):
+  """Unescapes html. Taken from https://wiki.python.org/moin/EscapingHtml"""
+  s = s.replace("&lt;", "<")
+  s = s.replace("&gt;", ">")
+  # this has to be last:
+  s = s.replace("&amp;", "&")
+  return s
 
 
 class PageParser(object):
@@ -33,7 +43,7 @@ class PageParser(object):
   def href_match_to_url(cls, match):
     def pick(group):
       return '' if group is None else group
-    return pick(match.group(1)) or pick(match.group(2)) or pick(match.group(3))
+    return unescape(pick(match.group(1)) or pick(match.group(2)) or pick(match.group(3)))
 
   @classmethod
   def rel_links(cls, page):
@@ -64,14 +74,22 @@ def partition(L, pred):
 class Crawler(object):
   """A multi-threaded crawler that supports local (disk) and remote (web) crawling."""
 
+  # Memoizer for calls to Crawler.crawl().
+  _CRAWL_CACHE = Memoizer()
+
+  @classmethod
+  def reset_cache(cls):
+    """Reset the internal crawl cache. This is intended primarily for tests."""
+    cls._CRAWL_CACHE = Memoizer()
+
   @classmethod
   def crawl_local(cls, link):
     try:
-      dirents = os.listdir(link.path)
+      dirents = os.listdir(link.local_path)
     except OSError as e:
-      TRACER.log('Failed to read %s: %s' % (link.path, e), V=1)
+      TRACER.log('Failed to read %s: %s' % (link.local_path, e), V=1)
       return set(), set()
-    files, dirs = partition([os.path.join(link.path, fn) for fn in dirents], os.path.isdir)
+    files, dirs = partition([os.path.join(link.local_path, fn) for fn in dirents], os.path.isdir)
     return set(map(Link.from_filename, files)), set(map(Link.from_filename, dirs))
 
   @classmethod
@@ -99,7 +117,22 @@ class Crawler(object):
     self._threads = threads
     self.context = context or Context.get()
 
+  def _make_cache_key(self, links, follow_links):
+    return (follow_links,) + tuple(links)
+
   def crawl(self, link_or_links, follow_links=False):
+    links = list(Link.wrap_iterable(link_or_links))
+    cache_key = self._make_cache_key(links, follow_links)
+
+    # Memoize crawling to a global Memoizer (Crawler._CRAWL_CACHE).
+    result = self._CRAWL_CACHE.get(cache_key)
+    if result is None:
+      result = self._crawl(links, follow_links)
+      self._CRAWL_CACHE.store(cache_key, result)
+
+    return result
+
+  def _crawl(self, link_or_links, follow_links):
     links, seen = set(), set()
     queue = Queue()
     converged = threading.Event()
@@ -127,7 +160,8 @@ class Crawler(object):
                 queue.put(rel)
         queue.task_done()
 
-    for link in Link.wrap_iterable(link_or_links):
+    for i, link in enumerate(link_or_links):
+      TRACER.log('crawling link i=%s link=%s follow_links=%s' % (i, link, follow_links), V=3)
       queue.put(link)
 
     workers = []
@@ -140,6 +174,5 @@ class Crawler(object):
     queue.join()
     converged.set()
 
-    # We deliberately not join back the worker threads, since they are no longer of
-    # any use to us.
+    # We deliberately do not join the worker threads, since they are no longer of any use to us.
     return links

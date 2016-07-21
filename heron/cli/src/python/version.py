@@ -11,28 +11,40 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+''' version.py '''
+import heron.cli.src.python.args as cli_args
+import heron.common.src.python.utils as utils
 
-import heron.cli.src.python.args as args
-import heron.cli.src.python.utils as utils
-from heron.common.src.python.color import Log
 
 def create_parser(subparsers):
+  '''
+  :param subparsers:
+  :return:
+  '''
   parser = subparsers.add_parser(
-      'version', 
+      'version',
       help='Print version of heron-cli',
-      usage = "%(prog)s",
-      add_help = False)
+      usage="%(prog)s",
+      add_help=False)
 
-  args.add_titles(parser)
+  cli_args.add_titles(parser)
 
   parser.set_defaults(subcommand='version')
   return parser
 
-def run(command, parser, args, unknown_args):
 
+# pylint: disable=unused-argument
+def run(command, parser, args, unknown_args):
+  '''
+  :param command:
+  :param parser:
+  :param args:
+  :param unknown_args:
+  :return:
+  '''
   release_file = utils.get_heron_release_file()
   with open(release_file) as release_info:
     for line in release_info:
-        print line,
+      print line,
 
   return True

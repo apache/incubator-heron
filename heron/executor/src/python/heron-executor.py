@@ -13,7 +13,7 @@
 # limitations under the License.
 
 #!/usr/bin/env python2.7
-
+''' heron-executor '''
 import atexit
 import datetime
 import os
@@ -28,14 +28,16 @@ import random
 import yaml
 
 def print_usage():
-  print ("./heron-executor <shardid> <topname> <topid> <topdefnfile> "
-         " <instance_distribution> <zknode> <zkroot> <tmaster_binary> <stmgr_binary> "
-         " <metricsmgr_classpath> <instance_jvm_opts_in_base64> <classpath> "
-         " <master_port> <tmaster_controller_port> <tmaster_stats_port> <heron_internals_config_file> "
-         " <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_jar_file>"
-         " <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>"
-         " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file> "
-         " <scheduler_classpath> <scheduler_port>")
+  '''print usage'''
+  print (
+      "./heron-executor <shardid> <topname> <topid> <topdefnfile> "
+      " <instance_distribution> <zknode> <zkroot> <tmaster_binary> <stmgr_binary> "
+      " <metricsmgr_classpath> <instance_jvm_opts_in_base64> <classpath> "
+      " <master_port> <tmaster_controller_port> <tmaster_stats_port> <heron_internals_config_file> "
+      " <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_jar_file>"
+      " <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>"
+      " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file> "
+      " <scheduler_classpath> <scheduler_port>")
 
   print ("\n" + "To execute a python instance:\n" +
          "  - <classpath>: the path to the Python Heron Instance executable\n" +
@@ -43,16 +45,17 @@ def print_usage():
          "  - <topology_jar_file>: the path to the topology pex file\n" +
          "<instance_jvm_opts>, <component_rammap>, <component_jvm_opts>, <instance_classpath> are ignored")
 
-
-
 def do_print(statement):
+  """ print msesage """
   timestr = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
   print "%s: %s" % (timestr, statement)
   sys.stdout.flush()
 
-# given a string s of the form "a:b:c:d:e:f...", extract triplets
-# [('a', 'b', 'c'), ('d', 'e', 'f')]
 def extract_triplets(s):
+  """
+  given a string s of the form "a:b:c:d:e:f...", extract triplets
+  [('a', 'b', 'c'), ('d', 'e', 'f')]
+  """
   t = s.split(':')
   assert len(t) % 3 == 0
   result = []
@@ -62,27 +65,34 @@ def extract_triplets(s):
   return result
 
 def id_list(prefix, start, count):
+  """ id_list """
   ids = []
   for i in range(start, count + 1):
     ids.append(prefix + str(i))
   return ids
 
 def stmgr_list(count):
+  """ prepend stmgr """
   return id_list("stmgr-", 1, count)
 
 def metricsmgr_list(count):
+  """ prepend metricmgr """
   return id_list("metricsmgr-", 0, count)
 
 def heron_shell_list(count):
+  """ prepend heron-shell """
   return id_list("heron-shell-", 0, count)
 
 def get_heron_executor_process_name(shard_id):
+  """ prepend heron-executor """
   return 'heron-executor-' + str(shard_id)
 
 def get_process_pid_filename(process_name):
+  """ get process pid filename """
   return '%s.pid' % process_name
 
 def get_tmp_filename():
+  """ get tmp filename """
   return '%s.heron.tmp' % (''.join(random.choice(string.ascii_uppercase) for i in range(12)))
 
 def atomic_write_file(path, content):
@@ -103,11 +113,14 @@ def atomic_write_file(path, content):
   os.rename(tmp_file, path)
 
 def log_pid_for_process(process_name, pid):
+  """ log pid for process """
   filename = get_process_pid_filename(process_name)
   do_print('Logging pid %d to file %s' %(pid, filename))
   atomic_write_file(filename, str(pid))
 
-class HeronExecutor:
+# pylint: disable=too-many-instance-attributes
+class HeronExecutor(object):
+  """ Heron executor """
   def __init__(self, args):
     self.max_runs = 100
     self.interval_between_runs = 10
@@ -117,12 +130,14 @@ class HeronExecutor:
     self.topology_defn_file = args[4]
     # args[5] is the instance distribution encoding
     # First get the container id to distribution encoding
-    f1 = map(lambda z: (int(z[0]), ':'.join(z[1:])), map(lambda x: x.split(':'), args[5].split(',')))
+    f1 = map(lambda z: (int(z[0]), ':'.join(z[1:])),
+             map(lambda x: x.split(':'), args[5].split(',')))
     # Next get the triplets
     f2 = map(lambda x: {x[0] : extract_triplets(x[1])}, f1)
     # Finally convert that into a map
     self.instance_distribution = reduce(lambda x, y: dict(x.items() + y.items()), f2)
 
+    # pylint: disable=line-too-long
     self.zknode = args[6]
     self.zkroot = args[7]
     self.tmaster_binary = args[8]
@@ -143,7 +158,7 @@ class HeronExecutor:
     # And the json is a map from base64-encoding-component-name to base64-encoding-jvm-options
     self.component_jvm_opts = {}
     # First we need to decode the base64 string back to a json map string
-    component_jvm_opts_in_json= base64.b64decode(args[18].lstrip('"').rstrip('"').replace('&equals;', '='))
+    component_jvm_opts_in_json = base64.b64decode(args[18].lstrip('"').rstrip('"').replace('&equals;', '='))
     if component_jvm_opts_in_json != "":
       for (k, v) in json.loads(component_jvm_opts_in_json).items():
         # In json, the component name and jvm options are still in base64 encoding
@@ -168,7 +183,7 @@ class HeronExecutor:
 
     # Read the heron_internals.yaml for cluster internal config
     self.heron_internals_config = {}
-    with open(self.heron_internals_config_file,'r') as stream:
+    with open(self.heron_internals_config_file, 'r') as stream:
       self.heron_internals_config = yaml.load(stream)
     self.log_dir = self.heron_internals_config['heron.logging.directory']
 
@@ -180,10 +195,11 @@ class HeronExecutor:
       self.topology_pex = self.topology_jar_file
       self.py_instance_exec = self.classpath
 
-  def get_metricsmgr_cmd(self, id, sink_config_file, port):
+  def get_metricsmgr_cmd(self, mid, sink_config_file, port):
+    ''' command to get metric manager '''
     metricsmgr_main_class = 'com.twitter.heron.metricsmgr.MetricsManager'
 
-    metricsmgr_cmd = ['%s/bin/java' % self.heron_java_home,
+    metricsmgr_cmd = [os.path.join(self.heron_java_home, 'bin/java'),
                       # We could not rely on the default -Xmx setting, which could be very big,
                       # for instance, the default -Xmx in Twitter mesos machine is around 18GB
                       '-Xmx1024M',
@@ -204,7 +220,7 @@ class HeronExecutor:
                       '-cp',
                       self.metricsmgr_classpath,
                       metricsmgr_main_class,
-                      id,
+                      mid,
                       port,
                       self.topology_name,
                       self.topology_id,
@@ -214,45 +230,46 @@ class HeronExecutor:
     return metricsmgr_cmd
 
   def get_tmaster_processes(self):
+    ''' get tmaster processes '''
     retval = {}
-    tmaster_cmd = [ self.tmaster_binary,
-           self.master_port,
-           self.tmaster_controller_port,
-           self.tmaster_stats_port,
-           self.topology_name,
-           self.topology_id,
-           self.zknode,
-           self.zkroot,
-           ','.join(self.stmgr_ids),
-           self.heron_internals_config_file,
-           self.metrics_sinks_config_file,
-           self.metricsmgr_port]
+    tmaster_cmd = [
+        self.tmaster_binary,
+        self.master_port,
+        self.tmaster_controller_port,
+        self.tmaster_stats_port,
+        self.topology_name,
+        self.topology_id,
+        self.zknode,
+        self.zkroot,
+        ','.join(self.stmgr_ids),
+        self.heron_internals_config_file,
+        self.metrics_sinks_config_file,
+        self.metricsmgr_port]
     retval["heron-tmaster"] = tmaster_cmd
 
     # metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
 
     retval[self.metricsmgr_ids[0]] = self.get_metricsmgr_cmd(
-      self.metricsmgr_ids[0],
-      self.metrics_sinks_config_file,
-      self.metricsmgr_port
-    )
+        self.metricsmgr_ids[0],
+        self.metrics_sinks_config_file,
+        self.metricsmgr_port)
 
     return retval
 
   def get_scheduler_processes(self):
+    ''' get scheduler processes '''
     retval = {}
     scheduler_cmd = [
-           'java',
-           '-cp',
-           self.scheduler_classpath,
-           'com.twitter.heron.scheduler.SchedulerMain',
-           self.cluster,
-           self.role,
-           self.environ,
-           self.topology_name,
-           self.topology_jar_file,
-           self.scheduler_port
-           ]
+        'java',
+        '-cp',
+        self.scheduler_classpath,
+        'com.twitter.heron.scheduler.SchedulerMain',
+        self.cluster,
+        self.role,
+        self.environ,
+        self.topology_name,
+        self.topology_jar_file,
+        self.scheduler_port]
     retval["heron-tscheduler"] = scheduler_cmd
 
     return retval
@@ -267,10 +284,12 @@ class HeronExecutor:
     for (instance_id, component_name, global_task_id, component_index) in instance_info:
       total_jvm_size = int(self.component_rammap[component_name] / (1024 * 1024))
       heap_size_mb = total_jvm_size - code_cache_size_mb - perm_gen_size_mb
+      # pylint: disable=line-too-long
       do_print("component name: %s, ram request: %d, total jvm size: %dM, cache size: %dM, perm size: %dM"
-               % (component_name, self.component_rammap[component_name], total_jvm_size, code_cache_size_mb, perm_gen_size_mb))
+               % (component_name, self.component_rammap[component_name],
+                  total_jvm_size, code_cache_size_mb, perm_gen_size_mb))
       xmn_size = int(heap_size_mb / 2)
-      instance_cmd = ['%s/bin/java' % self.heron_java_home,
+      instance_cmd = [os.path.join(self.heron_java_home, 'bin/java'),
                       '-Xmx%dM' % heap_size_mb,
                       '-Xms%dM' % heap_size_mb,
                       '-Xmn%dM' % xmn_size,
@@ -291,8 +310,7 @@ class HeronExecutor:
                       '-XX:+HeapDumpOnOutOfMemoryError',
                       '-XX:+UseConcMarkSweepGC',
                       '-XX:ParallelGCThreads=4',
-                      '-Xloggc:log-files/gc.%s.log' % instance_id
-                      ]
+                      '-Xloggc:log-files/gc.%s.log' % instance_id]
       instance_cmd = instance_cmd + self.instance_jvm_opts.split()
       if component_name in self.component_jvm_opts:
         instance_cmd = instance_cmd + self.component_jvm_opts[component_name].split()
@@ -340,27 +358,33 @@ class HeronExecutor:
   # Returns the processes to handle streams, including the stream-mgr and the user code containing
   # the stream logic of the topology
   def get_streaming_processes(self):
+    '''
+    Returns the processes to handle streams, including the stream-mgr and the user code containing
+    the stream logic of the topology
+    '''
     retval = {}
     # First lets make sure that our shard id is a valid one
     assert self.shard in self.instance_distribution
     my_instances = self.instance_distribution[self.shard]
     instance_info = []
     for (component_name, global_task_id, component_index) in my_instances:
-      instance_id = "container_" + str(self.shard) + "_" + component_name + "_" + str(global_task_id)
+      instance_id = "container_" + str(self.shard) + "_" + \
+                    component_name + "_" + str(global_task_id)
       instance_info.append((instance_id, component_name, global_task_id, component_index))
 
-    stmgr_cmd = [self.stmgr_binary,
-           self.topology_name,
-           self.topology_id,
-           self.topology_defn_file,
-           self.zknode,
-           self.zkroot,
-           self.stmgr_ids[self.shard - 1],
-           ','.join(map(lambda x: x[0], instance_info)),
-           self.master_port,
-           self.metricsmgr_port,
-           self.shell_port,
-           self.heron_internals_config_file]
+    stmgr_cmd = [
+      self.stmgr_binary,
+      self.topology_name,
+      self.topology_id,
+      self.topology_defn_file,
+      self.zknode,
+      self.zkroot,
+      self.stmgr_ids[self.shard - 1],
+      ','.join(map(lambda x: x[0], instance_info)),
+      self.master_port,
+      self.metricsmgr_port,
+      self.shell_port,
+      self.heron_internals_config_file]
     retval[self.stmgr_ids[self.shard - 1]] = stmgr_cmd
 
     # metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
@@ -387,23 +411,29 @@ class HeronExecutor:
     """
     retval = {}
 
-    retval[self.heron_shell_ids[self.shard]] = ['%s' % self.heron_shell_binary,
-                                       '--port=%s' % self.shell_port,
-                                       '--log_file_prefix=%s/heron-shell.log' % self.log_dir]
+    retval[self.heron_shell_ids[self.shard]] = [
+        '%s' % self.heron_shell_binary,
+        '--port=%s' % self.shell_port,
+        '--log_file_prefix=%s/heron-shell.log' % self.log_dir]
 
     return retval
 
   def untar_if_tar(self):
+    """ untar """
     if self.pkg_type == "tar":
       os.system("tar -xvf %s" % self.topology_jar_file)
 
-  # Wait for the termination of a process and log its stdout & stderr
+  # pylint: disable=no-self-use
   def wait_process_std_out_err(self, name, process):
+    '''
+    Wait for the termination of a process and log its stdout & stderr
+    '''
     (process_stdout, process_stderr) = process.communicate()
     do_print("%s stdout: %s" %(name, process_stdout))
     do_print("%s stderr: %s" %(name, process_stderr))
 
   def run_process(self, name, cmd):
+    ''' run process '''
     if 'single_thread_heron_instance' in cmd[0]:
       env = os.environ.copy()
       env["PEX_PROFILE"] = "true"
@@ -415,6 +445,7 @@ class HeronExecutor:
       return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
   def run_blocking_process(self, cmd, is_shell):
+    ''' run blocking process '''
     do_print("Running blocking process as %s" % cmd)
     process = subprocess.Popen(cmd, shell=is_shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -425,7 +456,8 @@ class HeronExecutor:
     return process.returncode
 
   def do_run_and_wait(self, commands):
-    process_dict = { }
+    ''' run commands and wait'''
+    process_dict = {}
     # First start all the processes
     for (name, cmd) in commands.items():
       p = self.run_process(name, cmd)
@@ -456,7 +488,8 @@ class HeronExecutor:
       log_pid_for_process(name, p.pid)
 
   def launch(self):
-    commands = { }
+    ''' launch '''
+    commands = {}
     if self.shard == 0:
       commands = self.get_tmaster_processes()
     else:
@@ -470,6 +503,7 @@ class HeronExecutor:
     self.do_run_and_wait(commands)
 
   def prepareLaunch(self):
+    ''' prepare launch '''
     create_folders = 'mkdir -p %s' % self.log_dir
     chmod_binaries = \
         'chmod a+rx . && chmod a+x %s && chmod +x %s && chmod +x %s && chmod +x %s' \
@@ -483,6 +517,7 @@ class HeronExecutor:
         sys.exit(1)
 
 def main():
+  ''' main '''
   if len(sys.argv) != 32:
     print_usage()
     sys.exit(1)
@@ -490,12 +525,15 @@ def main():
   executor.prepareLaunch()
   executor.launch()
 
+# pylint: disable=unused-argument
 def signal_handler(signal_to_handle, frame):
+  ''' signal handler '''
   # We would do nothing here but just exit
   # Just catch the SIGTERM and then cleanup(), registered with atexit, would invoke
   sys.exit(signal_to_handle)
 
 def setup():
+  ''' setup '''
   # Redirect stdout and stderr to files in append mode
   # The filename format is heron-executor.stdxxx
   sys.stdout = open('heron-executor.stdout', 'a')

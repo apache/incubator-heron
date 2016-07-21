@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.twitter.heron.spi.common.ShellUtils;
+import com.twitter.heron.spi.utils.ShellUtils;
 
 public class SlurmController {
   private static final Logger LOG = Logger.getLogger(SlurmController.class.getName());

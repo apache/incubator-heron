@@ -66,63 +66,7 @@ bin="${bin//%prefix%/${prefix}}"
 base="${base//%prefix%/${prefix}}"
 heronrc="${heronrc//%prefix%/${prefix}}"
 
-function test_write() {
-  local file="$1"
-  while [ "$file" != "/" ] && [ -n "${file}" ] && [ ! -e "$file" ]; do
-    file="$(dirname "${file}")"
-  done
-  [ -w "${file}" ] || {
-    echo >&2
-    echo "The Heron installer must have write access to $1!" >&2
-    echo >&2
-    usage
-  }
-}
-
-# Test for dependencies
-# unzip
-if ! which unzip >/dev/null; then
-  echo >&2
-  echo "unzip not found, please install the corresponding package." >&2
-  echo "See $getting_started_url for more information on" >&2
-  echo "dependencies of Heron." >&2
-  exit 1
-fi
-
-# Test for dependencies
-# tar
-if ! which tar >/dev/null; then
-  echo >&2
-  echo "tar not found, please install the corresponding package." >&2
-  echo "See $getting_started_url for more information on" >&2
-  echo "dependencies of Heron." >&2
-  exit 1
-fi
-
-# java
-if [ -z "${JAVA_HOME-}" ]; then
-  case "$(uname -s | tr 'A-Z' 'a-z')" in
-    linux)
-      JAVA_HOME="$(readlink -f $(which javac) 2>/dev/null | sed 's_/bin/javac__')" || true
-      BASHRC="~/.bashrc"
-      ;;
-    freebsd)
-      JAVA_HOME="/usr/local/openjdk8"
-      BASHRC="~/.bashrc"
-      ;;
-    darwin)
-      JAVA_HOME="$(/usr/libexec/java_home -v ${JAVA_VERSION}+ 2> /dev/null)" || true
-      BASHRC="~/.bash_profile"
-      ;;
-  esac
-fi
-if [ ! -x "${JAVA_HOME}/bin/javac" ]; then
-  echo >&2
-  echo "Java not found, please install the corresponding package" >&2
-  echo "See $getting_started_url for more information on" >&2
-  echo "dependencies of Heron." >&2
-  exit 1
-fi
+check_unzip; check_tar; check_java
 
 # Test for write access
 test_write "${bin}"
@@ -135,6 +79,10 @@ echo -n "Uncompressing."
 # Cleaning-up, with some guards.
 if [ -L "${bin}/heron" ]; then
   rm -f "${bin}/heron"
+fi
+
+if [ -L "${bin}/heron-explorer" ]; then
+  rm -f "${bin}/heron-explorer"
 fi
 
 if [ -L "${bin}/heron-cli3" ]; then
@@ -160,6 +108,7 @@ echo -n .
 
 ln -s "${base}/bin/heron" "${bin}/heron"
 ln -s "${base}/bin/heron" "${bin}/heron-cli3"
+ln -s "${base}/bin/heron-explorer" "${bin}/heron-explorer"
 echo -n .
 
 if [ -f "${heronrc}" ]; then

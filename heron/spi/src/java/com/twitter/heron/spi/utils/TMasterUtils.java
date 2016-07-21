@@ -23,7 +23,6 @@ import java.util.logging.Logger;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
-import com.twitter.heron.spi.common.NetworkUtils;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 public final class TMasterUtils {

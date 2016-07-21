@@ -6,6 +6,7 @@ common_deps_files = \
     heron_java_proto_files() + [
         "//heron/spi/src/java:common-spi-java",
         "//heron/spi/src/java:statemgr-spi-java",
+        "//heron/spi/src/java:network-utils-java",
         "@com_google_guava_guava//jar",
     ]
 
@@ -53,14 +54,15 @@ java_library(
     name = "localfs-statemgr-java",
     srcs = glob(["**/FileSystemStateManager.java"]) + glob(["**/localfs/**/*.java"]),
     resources = glob(["**/localfs/**/*.yaml"]),
-    deps = localfs_deps_files, 
+    deps = localfs_deps_files,
 )
 
 java_binary(
     name = "localfs-statemgr-unshaded",
     srcs = glob(["**/FileSystemStateManager.java"]) + glob(["**/localfs/**/*.java"]),
     resources = glob(["**/localfs/**/*.yaml"]),
-    deps = localfs_deps_files, 
+    deps = localfs_deps_files,
+    main_class="com.twitter.heron.statemgr.localfs.LocalFileSystemStateManager"
 )
 
 genrule(
