@@ -306,8 +306,7 @@ public abstract class FileSystemStateManager implements IStateManager {
           stateManager.deletePackingPlan(topologyName).get());
     }
     stateManager.setPackingPlan(newPackingPlan, topologyName);
-    existingPackingPlan = stateManager.getPackingPlan(null, topologyName).get();
-    print("==> Updated PackingPlan:\n%s", existingPackingPlan);
+    print("==> Updated PackingPlan:\n%s", stateManager.getPackingPlan(null, topologyName).get());
 
     if (stateManager.nodeExists(stateManager.getPhysicalPlanPath(topologyName)).get()) {
       print("==> Deleted Physical Plan: %s", stateManager.deletePhysicalPlan(topologyName).get());
@@ -372,7 +371,7 @@ public abstract class FileSystemStateManager implements IStateManager {
   // { word -> 1, explain1 -> 3 }
   private static Map<String, Integer> parseInstanceDistribution(String instanceDistribution) {
     Map<String, Integer> componentParallelism = new HashMap<>();
-    String [] containers = parseInstanceDistributionContainers(instanceDistribution);
+    String[] containers = parseInstanceDistributionContainers(instanceDistribution);
     for (String container : containers) {
       String[] tokens = container.split(":");
       assertTrue(tokens.length > 3 && (tokens.length - 1) % 3 == 0,
