@@ -127,8 +127,8 @@ public class RoundRobinPackingTest {
         packingPlanNoExplicitResourcesConfig.resource.cpu, DELTA);
 
     Assert.assertEquals(
-        (Math.max(spoutParallelism, boltParallelism) * Constants.GB
-            + RoundRobinPacking.DEFAULT_RAM_PADDING_PER_CONTAINER) * (numContainers + 1),
+        (spoutParallelism + boltParallelism) * Constants.GB
+            + RoundRobinPacking.DEFAULT_RAM_PADDING_PER_CONTAINER * numContainers,
         packingPlanNoExplicitResourcesConfig.resource.ram);
 
     Assert.assertEquals(
@@ -168,8 +168,11 @@ public class RoundRobinPackingTest {
     Assert.assertEquals(containerCpu * (numContainers + 1),
         packingPlanExplicitResourcesConfig.resource.cpu, DELTA);
 
-    Assert.assertEquals(containerRam * (numContainers + 1),
-        packingPlanExplicitResourcesConfig.resource.ram);
+    // The total recommended ram should be in the range of configured ram, account for rounding
+    // errors
+    Assert.assertEquals((double) containerRam * numContainers,
+        (double) packingPlanExplicitResourcesConfig.resource.ram,
+        spoutParallelism + boltParallelism);
 
     Assert.assertEquals(containerDisk * (numContainers + 1),
         packingPlanExplicitResourcesConfig.resource.disk);
@@ -181,7 +184,9 @@ public class RoundRobinPackingTest {
         : packingPlanExplicitResourcesConfig.containers.values()) {
       Assert.assertEquals(containerCpu, containerPlan.resource.cpu, DELTA);
 
-      Assert.assertEquals(containerRam, containerPlan.resource.ram);
+      Assert.assertEquals((double) containerRam,
+          (double) containerPlan.resource.ram,
+          containerPlan.instances.size());
 
       Assert.assertEquals(containerDisk, containerPlan.resource.disk);
 

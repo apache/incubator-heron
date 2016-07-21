@@ -107,18 +107,16 @@ public class RoundRobinPacking implements IPacking {
     long containerDiskInBytes = getContainerDiskHint(roundRobinAllocation);
     double containerCpu = getContainerCpuHint(roundRobinAllocation);
 
-    // Align the ram to the maximal one
-    long containerRam = getLargestContainerRam(instancesRamMap);
-
     // Construct the PackingPlan
     Map<String, PackingPlan.ContainerPlan> containerPlanMap = new HashMap<>();
-
+    long topologyRam = 0;
     for (Map.Entry<String, List<String>> entry : roundRobinAllocation.entrySet()) {
       String containerId = entry.getKey();
       List<String> instanceList = entry.getValue();
 
       // Calculate the resource required for single instance
       Map<String, PackingPlan.InstancePlan> instancePlanMap = new HashMap<>();
+      long containerRam = DEFAULT_RAM_PADDING_PER_CONTAINER;
       for (String instanceId : instanceList) {
         long instanceRam = instancesRamMap.get(containerId).get(instanceId);
 
@@ -136,6 +134,7 @@ public class RoundRobinPacking implements IPacking {
                 resource);
         // Insert it into the map
         instancePlanMap.put(instanceId, instancePlan);
+        containerRam += instanceRam;
       }
 
       PackingPlan.Resource resource =
@@ -144,11 +143,11 @@ public class RoundRobinPacking implements IPacking {
           new PackingPlan.ContainerPlan(containerId, instancePlanMap, resource);
 
       containerPlanMap.put(containerId, containerPlan);
+      topologyRam += containerRam;
     }
 
     // Take the heron internal container into account
     int totalContainer = containerPlanMap.size() + 1;
-    long topologyRam = totalContainer * containerRam;
     long topologyDisk = totalContainer * containerDiskInBytes;
     double topologyCpu = totalContainer * containerCpu;
 
@@ -186,6 +185,7 @@ public class RoundRobinPacking implements IPacking {
       String containerId = entry.getKey();
       Map<String, Long> ramInsideContainer = new HashMap<>();
       instancesRamMapInContainer.put(containerId, ramInsideContainer);
+      List<String> instancesToBeAccounted = new ArrayList<>();
 
       // Calculate the actual value
       long usedRam = 0;
@@ -195,16 +195,19 @@ public class RoundRobinPacking implements IPacking {
           long ram = ramMap.get(componentName);
           ramInsideContainer.put(instanceId, ram);
           usedRam += ram;
+        } else {
+          instancesToBeAccounted.add(instanceId);
         }
       }
 
       // Now we have calculated ram for instances specified in ComponentRamMap
       // Then to calculate ram for the rest instances
       long containerRamHint = getContainerRamHint(allocation);
-      int instancesAllocated = ramInsideContainer.size();
-      int instancesToAllocate = entry.getValue().size() - instancesAllocated;
+      int instancesToAllocate = instancesToBeAccounted.size();
 
       if (instancesToAllocate != 0) {
+        long individualInstanceRam = instanceRamDefault;
+
         // The ram map is partially set. We need to calculate ram for the rest
 
         // We have different strategy depending on whether container ram is specified
@@ -214,21 +217,12 @@ public class RoundRobinPacking implements IPacking {
           long remainingRam = containerRamHint - DEFAULT_RAM_PADDING_PER_CONTAINER - usedRam;
 
           // Split remaining ram evenly
-          long individualInstanceRam = remainingRam / instancesToAllocate;
+          individualInstanceRam = remainingRam / instancesToAllocate;
+        }
 
-          // Put the results in instancesRam
-          for (String instanceId : entry.getValue()) {
-            if (!ramInsideContainer.containsKey(instanceId)) {
-              ramInsideContainer.put(instanceId, individualInstanceRam);
-            }
-          }
-        } else {
-          // If container ram is not specified
-          for (String instanceId : entry.getValue()) {
-            if (!ramInsideContainer.containsKey(instanceId)) {
-              ramInsideContainer.put(instanceId, instanceRamDefault);
-            }
-          }
+        // Put the results in instancesRam
+        for (String instanceId : instancesToBeAccounted) {
+          ramInsideContainer.put(instanceId, individualInstanceRam);
         }
       }
     }
@@ -339,27 +333,6 @@ public class RoundRobinPacking implements IPacking {
         NOT_SPECIFIED_NUMBER_VALUE);
 
     return Long.parseLong(ramHint);
-  }
-
-  /**
-   * Get the ram size capable for the container requiring largest ram
-   *
-   * @param instancesRamMapInContainer the ram map for any instance in container
-   * (containerId -&gt; (instanceId -&gt; instanceRequiredRam))
-   * @return the ram size
-   */
-  protected long getLargestContainerRam(Map<String, Map<String, Long>> instancesRamMapInContainer) {
-    long maxContainerRam = 0;
-    for (Map<String, Long> map : instancesRamMapInContainer.values()) {
-      long usedRam = 0;
-      for (long ram : map.values()) {
-        usedRam += ram;
-      }
-      usedRam += DEFAULT_RAM_PADDING_PER_CONTAINER;
-      maxContainerRam = Math.max(maxContainerRam, usedRam);
-    }
-
-    return maxContainerRam;
   }
 
   /**
