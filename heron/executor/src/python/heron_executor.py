@@ -14,10 +14,12 @@
 
 #!/usr/bin/env python2.7
 
-''' heron_executor_core '''
+''' heron-executor '''
+import atexit
 import datetime
 import os
 import sys
+import signal
 import subprocess
 import time
 import json
@@ -34,6 +36,18 @@ from heron.statemgrs.src.python import statemanagerfactory
 from heron.statemgrs.src.python.config import Config as StateMgrConfig
 
 STATEMGRS_KEY = "statemgrs"
+
+def print_usage():
+  '''print usage'''
+  print (
+      "./heron-executor <shardid> <topname> <topid> <topdefnfile> "
+      " <instance_distribution> <zknode> <zkroot> <tmaster_binary> <stmgr_binary> "
+      " <metricsmgr_classpath> <instance_jvm_opts_in_base64> <classpath> "
+      " <master_port> <tmaster_controller_port> <tmaster_stats_port> <heron_internals_config_file> "
+      " <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_jar_file>"
+      " <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>"
+      " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file> "
+      " <scheduler_classpath> <scheduler_port>")
 
 def do_print(statement):
   """ print message """
@@ -596,3 +610,50 @@ class HeronExecutor(object):
       state_manager.get_packing_plan(self.topology_name, onPackingPlanWatch)
       do_print("Registered state watch for packing plan changes with state manager %s." %
                str(state_manager))
+
+def main():
+  ''' main '''
+  if len(sys.argv) != 32:
+    print_usage()
+    sys.exit(1)
+  # pylint: disable=undefined-variable
+  executor = HeronExecutor(sys.argv)
+  executor.prepareLaunch()
+  executor.register_packing_plan_watcher(executor)
+  executor.monitor_processes()
+
+# pylint: disable=unused-argument
+def signal_handler(signal_to_handle, frame):
+  ''' signal handler '''
+  # We would do nothing here but just exit
+  # Just catch the SIGTERM and then cleanup(), registered with atexit, would invoke
+  sys.exit(signal_to_handle)
+
+def setup():
+  ''' setup '''
+  # Redirect stdout and stderr to files in append mode
+  # The filename format is heron-executor.stdxxx
+  sys.stdout = open('heron-executor.stdout', 'a')
+  sys.stderr = open('heron-executor.stderr', 'a')
+
+  do_print('Set up process group; executor becomes leader')
+  os.setpgrp() # create new process group, become its leader
+
+  do_print('Register the SIGTERM signal handler')
+  signal.signal(signal.SIGTERM, signal_handler)
+
+  do_print('Register the atexit clean up')
+  atexit.register(cleanup)
+
+def cleanup():
+  """Handler to trigger when receiving the SIGTERM signal
+  Do cleanup inside this method, including:
+  1. Terminate all children processes
+  """
+  do_print('Executor terminated; exiting all process in executor.')
+  # We would not wait or check whether process spawned dead or not
+  os.killpg(0, signal.SIGTERM)
+
+if __name__ == "__main__":
+  setup()
+  main()

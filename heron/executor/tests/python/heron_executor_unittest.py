@@ -14,7 +14,7 @@
 
 import unittest2 as unittest
 
-from heron.executor.src.python.heron_executor_core import *
+from heron.executor.src.python.heron_executor import *
 
 class MockPOpen:
   next_pid = 0

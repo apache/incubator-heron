@@ -4,7 +4,7 @@ pex_test(
     name = "executor_unittest",
     srcs = ["heron_executor_unittest.py"],
     deps = [
-        "//heron/executor/src/python:heron-executor-core",
+        "//heron/executor/src/python:heron-executor-lib",
     ],
     reqs = [
         "py==1.4.27",
