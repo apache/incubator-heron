@@ -534,8 +534,8 @@ def main():
   # pylint: disable=undefined-variable
   executor = HeronExecutor(sys.argv)
   executor.prepare_launch()
-  executor.monitor_processes()
   executor.launch()
+  executor.monitor_processes()
 
 # pylint: disable=unused-argument
 def signal_handler(signal_to_handle, frame):
