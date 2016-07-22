@@ -337,6 +337,8 @@ public abstract class FileSystemStateManager implements IStateManager {
       }
       ids.append(id);
     }
+    print("getInstancesIdsToKill totalCount=%s, numToKill=%s, ids=%s",
+        totalCount, numToKill, ids.toString());
     return ids.toString();
   }
 
