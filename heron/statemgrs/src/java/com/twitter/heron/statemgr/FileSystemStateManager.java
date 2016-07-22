@@ -14,11 +14,8 @@
 
 package com.twitter.heron.statemgr;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -40,8 +37,6 @@ import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.WatchCallback;
-import com.twitter.heron.spi.utils.ReflectionUtils;
-import com.twitter.heron.spi.utils.ShellUtils;
 
 public abstract class FileSystemStateManager implements IStateManager {
   private static final Logger LOG = Logger.getLogger(FileSystemStateManager.class.getName());
