@@ -29,10 +29,10 @@ class MockPOpen:
     MockPOpen.next_pid = next_pid
 
 class MockExecutor(HeronExecutor):
+  """mock executor that overrides methods that don't apply to unit tests, like running processes"""
   def __init__(self):
     self.processes = []
 
-  """mock executor that overrides methods that don't apply to unit tests, like running processes"""
   def load_logging_dir(self, heron_internals_config_file):
     return "fake_dir"
 
