@@ -1,3 +1,4 @@
+load("/tools/rules/java_tests", "java_tests")
 load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 common_deps_files = [
@@ -16,7 +17,6 @@ spi_deps_files = [
 localfs_deps_files = \
     common_deps_files + \
     spi_deps_files + [
-        ":local-filesystem-constants-java",
         "//heron/uploaders/src/java:localfs-uploader-java",
     ]
 
@@ -26,24 +26,27 @@ hdfs_deps_files = \
         "//heron/uploaders/src/java:hdfs-uploader-java",
     ]
 
+scp_deps_files = \
+    common_deps_files + \
+    spi_deps_files + [
+        "//heron/uploaders/src/java:scp-uploader-java",
+    ]
+
+
 java_library(
-    name = "local-filesystem-constants-java",
-    srcs = glob(["**/localfs/LocalFileSystemConstantsTest.java"]),
+    name = "localfs-tests",
+    srcs = glob(["**/localfs/*.java"]),
+    deps = localfs_deps_files,
 )
 
-java_test(
-    name = "LocalFileSystemConfigTest",
-    srcs = glob(["**/localfs/LocalFileSystemConfigTest.java"]),
-    deps = localfs_deps_files,
-    size = "small",
-)
-
-java_test(
-    name = "LocalFileSystemUploaderTest",
-    srcs = glob(["**/localfs/LocalFileSystemUploaderTest.java"]),
-    deps = localfs_deps_files,
-    size = "small",
-    data = glob(["**/localfs/testdata/*.tar"]),
+java_tests(
+  test_classes = [
+    "com.twitter.heron.uploader.localfs.LocalFileSystemConfigTest",
+    "com.twitter.heron.uploader.localfs.LocalFileSystemUploaderTest",
+  ],
+  runtime_deps = [ ":localfs-tests" ],
+  data = glob(["**/localfs/testdata/*.tar"]),
+  size = "small",
 )
 
 java_test(
@@ -60,5 +63,12 @@ java_test(
     name = "HdfsUploaderTest",
     srcs = glob(["**/hdfs/HdfsUploaderTest.java"]),
     deps = hdfs_deps_files,
+    size = "small",
+)
+
+java_test(
+    name = "ScpUploaderTest",
+    srcs = glob(["**/scp/ScpUploaderTest.java"]),
+    deps = scp_deps_files,
     size = "small",
 )

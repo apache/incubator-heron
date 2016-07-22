@@ -253,9 +253,6 @@ public abstract class FileSystemStateManager implements IStateManager {
     for (Map.Entry<String, Integer> proposedChange : proposedChanges.entrySet()) {
       String componentName = proposedChange.getKey();
       Integer parallelism = proposedChange.getValue();
-      print("Updating packing plan to change component %s to parallelism=%s", componentName,
-          parallelism);
-
       topology = mergeTopology(topology, componentName, parallelism);
     }
 

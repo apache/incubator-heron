@@ -11,12 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' help.py '''
 import heron.common.src.python.utils as utils
 from heron.common.src.python.color import Log
 
 
+# pylint: disable=protected-access
 def create_parser(subparsers):
+  """ create parser """
   parser = subparsers.add_parser(
       'help',
       help='Display help',
@@ -35,7 +37,9 @@ def create_parser(subparsers):
   return parser
 
 
+# pylint: disable=unused-argument
 def run(command, parser, args, unknown_args):
+  """ run command """
   # get the command for detailed help
   command_help = args['help-command']
 
@@ -47,7 +51,7 @@ def run(command, parser, args, unknown_args):
   # get the subparser for the specific command
   subparser = utils.get_subparser(parser, command_help)
   if subparser:
-    print(subparser.format_help())
+    print subparser.format_help()
     return True
   else:
     Log.error("Unknown subcommand \'%s\'" % command_help)

@@ -11,13 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' basehandlers.py '''
 import time
 import tornado.escape
 import tornado.web
 
 from heron.tracker.src.python import constants
 
+# pylint: disable=too-many-public-methods
 class BaseHandler(tornado.web.RequestHandler):
   """
   Base Handler. All the other handlers derive from
@@ -27,9 +28,10 @@ class BaseHandler(tornado.web.RequestHandler):
   """
 
   def set_default_headers(self):
-    # Allow any domain to make queries to tracker.
+    ''' Allow any domain to make queries to tracker. '''
     self.set_header("Access-Control-Allow-Origin", "*")
 
+  # pylint: disable=attribute-defined-outside-init
   def prepare(self):
     """
     Used for timing. Sets the basehandler_starttime to current time, and
@@ -63,9 +65,11 @@ class BaseHandler(tornado.web.RequestHandler):
     self.write_json_response(response)
 
   def write_json_response(self, response):
+    """ write back json response """
     self.write(tornado.escape.json_encode(response))
     self.set_header("Content-Type", "application/json")
 
+  # pylint: disable=no-self-use
   def make_response(self, status):
     """
     Makes the base dict for the response.
@@ -74,10 +78,10 @@ class BaseHandler(tornado.web.RequestHandler):
     should be "success" or "failure".
     """
     response = {
-      constants.RESPONSE_KEY_STATUS: status,
-      constants.RESPONSE_KEY_VERSION: constants.API_VERSION,
-      constants.RESPONSE_KEY_EXECUTION_TIME: 0,
-      constants.RESPONSE_KEY_MESSAGE: "",
+        constants.RESPONSE_KEY_STATUS: status,
+        constants.RESPONSE_KEY_VERSION: constants.API_VERSION,
+        constants.RESPONSE_KEY_EXECUTION_TIME: 0,
+        constants.RESPONSE_KEY_MESSAGE: "",
     }
     return response
 
@@ -259,4 +263,3 @@ class BaseHandler(tornado.web.RequestHandler):
     end = int(endTime)
     if start > end:
       raise Exception("starttime is greater than endtime.")
-

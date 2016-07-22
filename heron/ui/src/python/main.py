@@ -15,7 +15,6 @@
 # !/usr/bin/env python2.7
 ''' main.py '''
 import os
-import sys
 import socket
 
 import tornado.ioloop
@@ -36,49 +35,68 @@ class Application(tornado.web.Application):
   ''' Application '''
 
   def __init__(self):
-    # TODO: Change these to query string parameters, since
+    # Change these to query string parameters, since
     # current format can lead to pattern matching issues.
-    # pylint: disable=line-too-long,bad-whitespace
     callbacks = [
         (r"/", handlers.MainHandler),
 
         (r"/topologies", handlers.ListTopologiesHandler),
-        (r"/topologies/filestats/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)", handlers.ContainerFileStatsHandler),
-        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/config", handlers.TopologyConfigHandler),
-        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/exceptions", handlers.TopologyExceptionsPageHandler),
-        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)", handlers.TopologyPlanHandler),
+        (r"/topologies/filestats/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)",
+         handlers.ContainerFileStatsHandler),
+        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/config",
+         handlers.TopologyConfigHandler),
+        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/exceptions",
+         handlers.TopologyExceptionsPageHandler),
+        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)",
+         handlers.TopologyPlanHandler),
 
         # topology metric apis
-        (r"/topologies/metrics", handlers.api.MetricsHandler),
-        (r"/topologies/metrics/timeline", handlers.api.MetricsTimelineHandler),
+        (r"/topologies/metrics",
+         handlers.api.MetricsHandler),
+        (r"/topologies/metrics/timeline",
+         handlers.api.MetricsTimelineHandler),
 
-        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/file", handlers.ContainerFileHandler),
-        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/filedata", handlers.ContainerFileDataHandler),
-        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/filedownload", handlers.ContainerFileDownloadHandler),
+        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/file",
+         handlers.ContainerFileHandler),
+        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/filedata",
+         handlers.ContainerFileDataHandler),
+        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/filedownload",
+         handlers.ContainerFileDownloadHandler),
 
         # Topology list and plan handlers
-        (r"/topologies/list.json", handlers.api.ListTopologiesJsonHandler),
-        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/logicalplan.json", handlers.api.TopologyLogicalPlanJsonHandler),
-        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/physicalplan.json", handlers.api.TopologyPhysicalPlanJsonHandler),
-        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/executionstate.json", handlers.api.TopologyExecutionStateJsonHandler),
+        (r"/topologies/list.json",
+         handlers.api.ListTopologiesJsonHandler),
+        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/logicalplan.json",
+         handlers.api.TopologyLogicalPlanJsonHandler),
+        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/physicalplan.json",
+         handlers.api.TopologyPhysicalPlanJsonHandler),
+        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/executionstate.json",
+         handlers.api.TopologyExecutionStateJsonHandler),
         (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/schedulerlocation.json",
          handlers.api.TopologySchedulerLocationJsonHandler),
 
         # Counter Handlers
-        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/exceptions.json", handlers.api.TopologyExceptionsJsonHandler),
+        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/exceptions.json",
+         handlers.api.TopologyExceptionsJsonHandler),
         (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/exceptionsummary.json",
          handlers.api.TopologyExceptionSummaryHandler),
 
         # Heron shell Handlers
-        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/pid", handlers.api.PidHandler),
-        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/jstack", handlers.api.JstackHandler),
-        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/jmap", handlers.api.JmapHandler),
-        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/histo", handlers.api.MemoryHistogramHandler),
+        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/pid",
+         handlers.api.PidHandler),
+        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/jstack",
+         handlers.api.JstackHandler),
+        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/jmap",
+         handlers.api.JmapHandler),
+        (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/histo",
+         handlers.api.MemoryHistogramHandler),
     ]
 
     settings = dict(
-        template_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../resources/templates"),
-        static_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../resources/static"),
+        template_path=os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   "../../resources/templates"),
+        static_path=os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                 "../../resources/static"),
         gzip=True,
         debug=True,
         default_handler_class=handlers.NotFoundHandler,
@@ -96,8 +114,7 @@ def define_options(port, tracker_url):
   define("tracker_url", default=tracker_url)
 
 
-# pylint: disable=unused-argument
-def main(argv):
+def main():
   '''
   :param argv:
   :return:
@@ -127,4 +144,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-  main(sys.argv)
+  main()

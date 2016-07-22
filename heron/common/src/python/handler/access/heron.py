@@ -45,7 +45,6 @@ HISTOGRAM_URL_FMT           = "%s/histo"              % TOPOLOGIES_URL_FMT
 FILE_DATA_URL_FMT           = "%s/containerfiledata"  % TOPOLOGIES_URL_FMT
 FILESTATS_URL_FMT           = "%s/containerfilestats" % TOPOLOGIES_URL_FMT
 
-# pylint: disable=invalid-name
 capacity = "DIVIDE(" \
            "  DEFAULT(0," \
            "    MULTIPLY(" \
@@ -99,7 +98,6 @@ def create_url(fmt):
   :return:
   '''
   return fmt % get_tracker_endpoint()
-
 
 
 @tornado.gen.coroutine
@@ -324,8 +322,8 @@ def get_component_exceptions(cluster, environ, topology, component, role=None):
 
 ################################################################################
 @tornado.gen.coroutine
-def get_comp_instance_metrics(
-    cluster, environ, topology, component, metrics, instances, time_range, role=None):
+def get_comp_instance_metrics(cluster, environ, topology, component,
+                              metrics, instances, time_range, role=None):
   '''
   Get the metrics for some instances of a topology from tracker
   :param cluster:
@@ -369,8 +367,8 @@ def get_comp_instance_metrics(
 
 ################################################################################
 @tornado.gen.coroutine
-def get_comp_metrics(
-    cluster, environ, topology, component, instances, metricnames, time_range, role=None):
+def get_comp_metrics(cluster, environ, topology, component,
+                     instances, metricnames, time_range, role=None):
   '''
   Get the metrics for all the instances of a topology from Heron Nest
   :param cluster:
@@ -443,8 +441,8 @@ def get_metrics(cluster, environment, topology, timerange, query, role=None):
 
 ################################################################################
 @tornado.gen.coroutine
-def get_comp_metrics_timeline(
-    cluster, environ, topology, component, instances, metricnames, time_range, role=None):
+def get_comp_metrics_timeline(cluster, environ, topology, component,
+                              instances, metricnames, time_range, role=None):
   '''
   Get the minute-by-minute metrics for all instances of a topology from tracker
   :param cluster:
@@ -617,7 +615,8 @@ def run_instance_jmap(cluster, environ, topology, instance, role=None):
 
 # Get file data from the container
 @tornado.gen.coroutine
-def get_container_file_data(cluster, environ, topology, container, path, offset, length, role=None):
+def get_container_file_data(cluster, environ, topology, container,
+                            path, offset, length, role=None):
   '''
   :param cluster:
   :param environ:

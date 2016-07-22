@@ -86,7 +86,6 @@ def heron_tar(class_name, topology_tar, arguments, tmpdir_root, java_defines):
   # in addition to the topology jar at top level. Pants keeps
   # filename for jar and tar the same except for extension.
 
-  # TODO: We need to extract heron-core to separate folder.
   topology_jar = os.path.basename(topology_tar).replace(".tar.gz", "").replace(".tar", "") + ".jar"
 
   extra_jars = [

@@ -11,12 +11,13 @@
 # without warranties or conditions of any kind, either express or implied.
 # see the license for the specific language governing permissions and
 # limitations under the license.
-
+''' version.py '''
 import heron.explorer.src.python.args as args
 import heron.common.src.python.utils as utils
 
 
 def create_parser(subparsers):
+  """ create parser """
   parser = subparsers.add_parser(
       'version',
       help='Display version',
@@ -26,10 +27,11 @@ def create_parser(subparsers):
   parser.set_defaults(subcommand='version')
   return parser
 
-
-def run(command, parser, args, unknown_args):
+# pylint: disable=unused-argument
+def run(command, parser, known_args, unknown_args):
+  """ run command """
   release_file = utils.get_heron_release_file()
   with open(release_file) as release_info:
     for line in release_info:
-        print line,
+      print line,
   return True

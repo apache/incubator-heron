@@ -1,3 +1,4 @@
+''' main.py '''
 import logging
 import os
 import sys
@@ -8,11 +9,15 @@ import tornado.web
 RESULTS_DIRECTORY = "results"
 
 class MainHandler(tornado.web.RequestHandler):
+  '''main handler'''
   def get(self):
+    ''' get method'''
     self.write("Heron integration-test helper")
 
 class FileHandler(tornado.web.RequestHandler):
+  ''' file handler '''
   def get(self, fileName):
+    ''' get method'''
     jsonFilePath = RESULTS_DIRECTORY + "/" + fileName + ".json"
 
     if not os.path.exists(jsonFilePath):
@@ -20,13 +25,14 @@ class FileHandler(tornado.web.RequestHandler):
       self.set_status(404)
       self.finish("%s does not exist" % (fileName + ".json"))
     else:
-      with open (jsonFilePath, "r") as jsonFile:
-        data=jsonFile.read()
+      with open(jsonFilePath, "r") as jsonFile:
+        data = jsonFile.read()
 
       self.set_header("Content-Type", 'application/json; charset="utf-8"')
       self.write(data)
 
   def post(self, fileName):
+    ''' post '''
     jsonFilePath = RESULTS_DIRECTORY + "/" + fileName + ".json"
 
     #Overwrites the existing file
@@ -41,9 +47,12 @@ class FileHandler(tornado.web.RequestHandler):
         self.set_status(400)
         self.finish("Invalid Json")
 
-# Runs a tornado http server that listens for any
-# integration test josn result get/post requests
 def main():
+  '''
+  Runs a tornado http server that listens for any
+  integration test josn result get/post requests
+  '''
+
   root = logging.getLogger()
   root.setLevel(logging.DEBUG)
 
@@ -51,18 +60,18 @@ def main():
     os.makedirs(RESULTS_DIRECTORY)
 
   application = tornado.web.Application([
-    (r"/", MainHandler),
-    (r"^/results/([a-zA-Z0-9_-]+$)", FileHandler)
+      (r"/", MainHandler),
+      (r"^/results/([a-zA-Z0-9_-]+$)", FileHandler)
   ])
 
-  if(len(sys.argv) == 1):
+  if len(sys.argv) == 1:
     logging.error("Missing argument: port addresss")
     sys.exit(1)
 
   try:
     port = int(sys.argv[1])
   except Exception as e:
-    logging.error("Exception: %s \nprovide a valid port address" % e)
+    logging.error("Exception: %s \nprovide a valid port address", e)
     sys.exit(1)
 
   logging.info("Starting server at port " + str(port))

@@ -11,17 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+'''
+statemanagerfactory.py
+Factory function that instantiates and connects to the requested
+state managers based on a conf file.
+Returns these state managers.
+'''
 
 import os
 import traceback
 
-"""
-Factory function that instantiates and connects to the requested
-state managers based on a conf file.
-Returns these state managers.
-"""
 
-from heron.statemgrs.src.python.config import Config
 from heron.statemgrs.src.python.filestatemanager import FileStateManager
 from heron.statemgrs.src.python.log import Log as LOG
 from heron.statemgrs.src.python.zkstatemanager import ZkStateManager
@@ -62,7 +62,7 @@ def get_all_zk_state_managers(conf):
     state_manager = ZkStateManager(name, host, port, rootpath, tunnelhost)
     try:
       state_manager.start()
-    except Exception as e:
+    except Exception:
       LOG.error("Exception while connecting to state_manager.")
       traceback.print_exc()
     state_managers.append(state_manager)
@@ -82,7 +82,7 @@ def get_all_file_state_managers(conf):
     state_manager = FileStateManager(name, rootpath)
     try:
       state_manager.start()
-    except Exception as e:
+    except Exception:
       LOG.error("Exception while connecting to state_manager.")
       traceback.print_exc()
     state_managers.append(state_manager)

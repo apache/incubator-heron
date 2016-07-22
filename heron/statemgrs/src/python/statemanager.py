@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' statemanager.py '''
 import abc
 import socket
 import subprocess
@@ -23,6 +23,7 @@ HERON_SCHEDULER_LOCATION_PREFIX = "{0}/schedulers/"
 HERON_TMASTER_PREFIX = "{0}/tmasters/"
 HERON_TOPOLOGIES_KEY = "{0}/topologies"
 
+# pylint: disable=too-many-public-methods, attribute-defined-outside-init
 class StateManager:
   """
   This is the abstract base class for state manager.
@@ -80,6 +81,7 @@ class StateManager:
 
   @property
   def hostport(self):
+    """ string of host and port """
     return self.host + ":" + str(self.port)
 
   @property
@@ -135,6 +137,7 @@ class StateManager:
     except:
       return False
 
+  # pylint: disable=no-self-use
   def pick_unused_port(self):
     """
     Pick an unused port.
@@ -142,7 +145,7 @@ class StateManager:
     """
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind(('127.0.0.1', 0))
-    addr, port = s.getsockname()
+    _, port = s.getsockname()
     s.close()
     return port
 
@@ -152,7 +155,8 @@ class StateManager:
     that can be used to communicate with the state host.
     """
     localport = self.pick_unused_port()
-    self.tunnel = subprocess.Popen(('ssh', self.tunnelhost, '-NL%d:%s:%d' % (localport, self.host, self.port)))
+    self.tunnel = subprocess.Popen(
+        ('ssh', self.tunnelhost, '-NL%d:%s:%d' % (localport, self.host, self.port)))
     return localport
 
   def terminate_ssh_tunnel(self):
@@ -199,6 +203,9 @@ class StateManager:
     return path
 
   def get_pplan_path(self, topologyName):
+    """
+    Get the packing plan path
+    """
     path = HERON_PPLANS_PREFIX.format(self.rootpath) + topologyName
     return path
 
@@ -345,4 +352,3 @@ class StateManager:
     self.delete_pplan(topologyName)
     self.delete_execution_state(topologyName)
     self.delete_topology(topologyName)
-
