@@ -173,12 +173,27 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     // Scheduler kill interface should take care of the cleaning
   }
 
+  @Override
+  protected void addContainers(String topologyName, Integer count) {
+    throw new UnsupportedOperationException(
+        "Adding containers not supported when using " + this.getClass());
+  }
+
+  @Override
+  protected void removeContainers(String topologyName,
+                                  Integer existingContainerCount,
+                                  Integer count) {
+    throw new UnsupportedOperationException(
+        "Removing containers not supported when using " + this.getClass());
+  }
+
   public static void main(String[] args) throws ExecutionException, InterruptedException,
       IllegalAccessException, ClassNotFoundException, InstantiationException {
     Config config = Config.newBuilder()
         .put(Keys.stateManagerRootPath(),
             System.getProperty("user.home") + "/.herondata/repository/state/local")
         .build();
-    FileSystemStateManager.doMain(LocalFileSystemStateManager.class, args, config);
+    LocalFileSystemStateManager stateManager = new LocalFileSystemStateManager();
+    stateManager.doMain(args, config);
   }
 }

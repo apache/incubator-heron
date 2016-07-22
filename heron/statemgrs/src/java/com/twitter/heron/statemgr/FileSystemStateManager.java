@@ -205,39 +205,35 @@ public abstract class FileSystemStateManager implements IStateManager {
    *    ExclamationTopology 1:word:3:0:exclaim1:2:0:exclaim1:1:0
    *
    */
-  protected static void doMain(
-      Class<? extends FileSystemStateManager> stateManagerClass, String[] args, Config config)
+  protected void doMain(String[] args, Config config)
       throws ExecutionException, InterruptedException, InstantiationException,
       IllegalAccessException, ClassNotFoundException {
-    FileSystemStateManager stateManager =
-        ReflectionUtils.<FileSystemStateManager>newInstance(stateManagerClass.getCanonicalName());
 
     if (args.length < 1) {
       throw new RuntimeException(String.format(
           "Usage: java %s <topology_name> - view state manager details for a topology",
-          stateManagerClass.getCanonicalName()));
+          this.getClass().getCanonicalName()));
     }
 
     String topologyName = args[0];
     print("==> State Manager root path: %s", config.get(Keys.stateManagerRootPath()));
 
-    stateManager.initialize(config);
+    initialize(config);
 
     PackingPlans.PackingPlan existingPackingPlan = null;
-    if (stateManager.isTopologyRunning(topologyName).get()) {
+    if (isTopologyRunning(topologyName).get()) {
       print("==> Topology %s found", topologyName);
-      print("==> ExecutionState:\n%s", stateManager.getExecutionState(null, topologyName).get());
+      print("==> ExecutionState:\n%s", getExecutionState(null, topologyName).get());
       print("==> SchedulerLocation:\n%s",
-          stateManager.getSchedulerLocation(null, topologyName).get());
-      print("==> TMasterLocation:\n%s", stateManager.getTMasterLocation(null, topologyName).get());
-      print("==> PhysicalPlan:\n%s", stateManager.getPhysicalPlan(null, topologyName).get());
-      existingPackingPlan = stateManager.getPackingPlan(null, topologyName).get();
+          getSchedulerLocation(null, topologyName).get());
+      print("==> TMasterLocation:\n%s", getTMasterLocation(null, topologyName).get());
+      print("==> PhysicalPlan:\n%s", getPhysicalPlan(null, topologyName).get());
+      existingPackingPlan = getPackingPlan(null, topologyName).get();
       print("==> PackingPlan:\n%s", existingPackingPlan);
 
       if (args.length == 2) {
         String proposedInstanceDistribution = args[1];
-        adjustTopology(stateManager, topologyName,
-            existingPackingPlan, proposedInstanceDistribution);
+        adjustTopology(topologyName, existingPackingPlan, proposedInstanceDistribution);
       }
     } else {
       print("==> Topology %s not found under %s",
@@ -246,10 +242,9 @@ public abstract class FileSystemStateManager implements IStateManager {
   }
 
   // Handles scaling the cluster out or in based on the proposedInstanceDistribution
-  private static void adjustTopology(FileSystemStateManager stateManager,
-                                     String topologyName,
-                                     PackingPlans.PackingPlan existingPackingPlan,
-                                     String proposedInstanceDistribution)
+  private void adjustTopology(String topologyName,
+                              PackingPlans.PackingPlan existingPackingPlan,
+                              String proposedInstanceDistribution)
       throws ExecutionException, InterruptedException {
     Map<String, Integer> proposedChanges = parallelismChanges(
         existingPackingPlan.getInstanceDistribution(),
@@ -259,7 +254,7 @@ public abstract class FileSystemStateManager implements IStateManager {
         proposedInstanceDistribution,
         existingPackingPlan.getComponentRamDistribution());
 
-    TopologyAPI.Topology topology = stateManager.getTopology(null, topologyName).get();
+    TopologyAPI.Topology topology = getTopology(null, topologyName).get();
     for (Map.Entry<String, Integer> proposedChange : proposedChanges.entrySet()) {
       String componentName = proposedChange.getKey();
       Integer parallelism = proposedChange.getValue();
@@ -282,68 +277,45 @@ public abstract class FileSystemStateManager implements IStateManager {
     // request new aurora resources if necessary. Once containers are allocated we must make the
     // changes to state manager quickly, otherwise aurora might penalize for thrashing on start-up
     if (containerDelta > 0) {
-      //aurora job add smf1/billg/devel/ExclamationTopology/0 1
-      List<String> auroraCmd =
-          new ArrayList<>(Arrays.asList("aurora", "job", "add", "--wait-until",
-              "RUNNING", getAuroraJobName(topologyName) + "/0", containerDelta.toString()));
-      print("Requesting %s new aurora containers %s", containerDelta, auroraCmd);
-      assertTrue(runProcess(auroraCmd), "Failed to create new aurora instances");
+      addContainers(topologyName, containerDelta);
     }
 
     //update parallelism in topology since TMaster checks that Sum(parallelism) == Sum(instances)
-    if (stateManager.nodeExists(stateManager.getTopologyPath(topologyName)).get()) {
+    if (nodeExists(getTopologyPath(topologyName)).get()) {
       print("==> Deleted existing Topology: %s",
-          stateManager.deleteTopology(topologyName).get());
+          deleteTopology(topologyName).get());
     }
 
-    print("==> Set Topology: %s", stateManager.setTopology(topology, topologyName).get());
+    print("==> Set Topology: %s", setTopology(topology, topologyName).get());
 
-    topology = stateManager.getTopology(null, topologyName).get();
+    topology = getTopology(null, topologyName).get();
     print("==> Got Topology: %s", topology);
 
-    if (stateManager.nodeExists(stateManager.getPackingPlanPath(topologyName)).get()) {
+    if (nodeExists(getPackingPlanPath(topologyName)).get()) {
       print("==> Deleted existing Topology: %s",
-          stateManager.deletePackingPlan(topologyName).get());
+          deletePackingPlan(topologyName).get());
     }
-    stateManager.setPackingPlan(newPackingPlan, topologyName);
-    print("==> Updated PackingPlan:\n%s", stateManager.getPackingPlan(null, topologyName).get());
+    setPackingPlan(newPackingPlan, topologyName);
+    print("==> Updated PackingPlan:\n%s", getPackingPlan(null, topologyName).get());
 
-    if (stateManager.nodeExists(stateManager.getPhysicalPlanPath(topologyName)).get()) {
-      print("==> Deleted Physical Plan: %s", stateManager.deletePhysicalPlan(topologyName).get());
+    if (nodeExists(getPhysicalPlanPath(topologyName)).get()) {
+      print("==> Deleted Physical Plan: %s", deletePhysicalPlan(topologyName).get());
     }
 
     if (containerDelta < 0) {
-      String instancesToKill = getInstancesIdsToKill(existingContainerCount, -containerDelta);
-      //aurora job kill smf1/billg/devel/ExclamationTopology/3,4,5
-      List<String> auroraCmd =
-          new ArrayList<>(Arrays.asList("aurora", "job", "kill"
-              , getAuroraJobName(topologyName) + "/" + instancesToKill));
-      print("Killing %s aurora container(s): %s", -containerDelta, auroraCmd);
-      assertTrue(runProcess(auroraCmd),
-          "Failed to kill freed aurora instances %s", instancesToKill);
+      removeContainers(topologyName, existingContainerCount, -containerDelta);
     }
   }
 
-  private static String getAuroraJobName(String topologyName) {
-    //TODO: don't assume smf1 and devel
-    return String.format("smf1/%s/devel/%s", System.getProperty("user.name"), topologyName);
-  }
-
-  private static String getInstancesIdsToKill(int totalCount, int numToKill) {
-    StringBuilder ids = new StringBuilder();
-    for (int id = totalCount - numToKill + 1; id <= totalCount; id++) {
-      if (ids.length() > 0) {
-        ids.append(",");
-      }
-      ids.append(id);
-    }
-    return ids.toString();
-  }
+  protected abstract void addContainers(String topologyName, Integer count);
+  protected abstract void removeContainers(String topologyName,
+                                           Integer existingContainerCount,
+                                           Integer count);
 
   // Given the existing and proposed instance distribution, verify the proposal and return only
   // the changes being requested.
-  private static Map<String, Integer> parallelismChanges(String existingInstanceDistribution,
-                                                         String proposedInstanceDistribution) {
+  private Map<String, Integer> parallelismChanges(String existingInstanceDistribution,
+                                                  String proposedInstanceDistribution) {
     Map<String, Integer> existingParallelism =
         parseInstanceDistribution(existingInstanceDistribution);
     Map<String, Integer> proposedParallelism =
@@ -369,7 +341,7 @@ public abstract class FileSystemStateManager implements IStateManager {
 
   // given a string like "1:word:3:0:exclaim1:2:0:exclaim1:1:0,2:exclaim1:4:0" returns a map of
   // { word -> 1, explain1 -> 3 }
-  private static Map<String, Integer> parseInstanceDistribution(String instanceDistribution) {
+  private Map<String, Integer> parseInstanceDistribution(String instanceDistribution) {
     Map<String, Integer> componentParallelism = new HashMap<>();
     String[] containers = parseInstanceDistributionContainers(instanceDistribution);
     for (String container : containers) {
@@ -437,19 +409,13 @@ public abstract class FileSystemStateManager implements IStateManager {
     return builder.build();
   }
 
-  private static boolean runProcess(List<String> auroraCmd) {
-    boolean isVerbose = true;
-    return 0 == ShellUtils.runProcess(
-        isVerbose, auroraCmd.toArray(new String[0]), new StringBuilder(), new StringBuilder());
-  }
-
-  private static void assertTrue(boolean condition, String message, Object... values) {
+  protected void assertTrue(boolean condition, String message, Object... values) {
     if (!condition) {
       throw new RuntimeException("ERROR: " + String.format(message, values));
     }
   }
 
-  private static void print(String format, Object... values) {
+  protected void print(String format, Object... values) {
     System.out.println(String.format(format, values));
   }
 }
