@@ -37,6 +37,7 @@ def configure(level, logfile=None):
     Log.addHandler(handle)
 
 def init_rotating_logger(level, logfile, max_files, max_bytes):
+  """Initializes a rotating logger"""
   root_logger = logging.getLogger()
   log_format = "%(asctime)s:%(levelname)s:%(filename)s: %(message)s"
 

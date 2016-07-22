@@ -11,12 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+'''Unittest for GatewayLooper'''
 import threading
 import time
 import unittest2 as unittest
 
 from heron.common.src.python.basics.gateway_looper import GatewayLooper
 
+# pylint: disable=missing-docstring
 class GatewayLooperTest(unittest.TestCase):
   def setUp(self):
     pass
@@ -36,7 +38,7 @@ class GatewayLooperTest(unittest.TestCase):
 
   def prepare_wakeup_test(self, sleep, poll_timeout=30.0):
     looper = GatewayLooper()
-    waker = threading.Thread(target= self.sleep_and_call_wakeup, args = (sleep, looper))
+    waker = threading.Thread(target=self.sleep_and_call_wakeup, args=(sleep, looper))
     waker.start()
 
     start_time = time.time()
@@ -44,6 +46,3 @@ class GatewayLooperTest(unittest.TestCase):
     looper.poll(timeout=poll_timeout)
     end_time = time.time()
     return start_time, end_time
-
-
-

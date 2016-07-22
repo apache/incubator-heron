@@ -15,8 +15,7 @@ from heron.common.src.python.log import Log
 from heron.proto import stmgr_pb2, common_pb2
 
 from heron.common.src.python.utils.misc import PhysicalPlanHelper
-from heron.instance.src.python.network.heron_client import HeronClient
-from heron.instance.src.python.network.protocol import StatusCode
+from heron.common.src.python.network import HeronClient, StatusCode
 
 # SingleThreadStmgrClient is an implementation of the Heron client in python and communicates
 # with Stream Manager. It will:

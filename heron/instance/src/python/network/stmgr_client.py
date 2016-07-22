@@ -12,12 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from heron.common.src.python.log import Log
-from heron.proto import stmgr_pb2, common_pb2
-
+from heron.common.src.python.network import HeronClient, StatusCode
 from heron.common.src.python.utils.misc import PhysicalPlanHelper
-from .heron_client import HeronClient
-from .protocol import StatusCode
-
+from heron.proto import stmgr_pb2, common_pb2
 
 # StmgrClient is an implementation of the Heron client in python and communicates
 # with Stream Manager. It will:

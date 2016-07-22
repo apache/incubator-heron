@@ -28,6 +28,11 @@ TOPOLOGY_COMPONENT_RAMMAP = "topology.component.rammap"
 TOPOLOGY_STMGRS = "topology.stmgrs"
 TOPOLOGY_WORKER_CHILDOPTS = "topology.worker.childopts"
 TOPOLOGY_ADDITIONAL_CLASSPATH = "topology.additional.classpath"
+
+TOPOLOGY_TICK_TUPLE_FREQ_SECS = "topology.tick.tuple.freq.secs"
+TOPOLOGY_ACKING_ENABLED = "topology.acking"
+TOPOLOGY_MAX_SPOUT_PENDING = "topology.max.spout.pending"
+
 RAM_FOR_STMGR = 1 * GB
 DEFAULT_RAM_FOR_INSTANCE = 1 * GB
 DEFAULT_DISK_PADDING_PER_CONTAINER = 12 * GB
@@ -36,13 +41,10 @@ LOGGING_DIRECTORY = 'heron.logging.directory'
 MAX_LOG_FILES = 'heron.logging.maximum.files'
 MAX_LOG_SIZE_MB = 'heron.logging.maximum.size.mb'
 
-TOPOLOGY_TICK_TUPLE_FREQ_SECS = "topology.tick.tuple.freq.secs"
-TOPOLOGY_ACKING_ENABLED = "topology.acking"
-TOPOLOGY_MAX_SPOUT_PENDING = "topology.max.spout.pending"
-METRICS_EXPORT_INTERVAL_SECS = "heron.metrics.export.interval.sec"
-
 INSTANCE_ACK_BATCH_TIME_MS = "heron.instance.ack.batch.time.ms"
 INSTANCE_EMIT_BATCH_TIME_MS = "heron.instance.emit.batch.time.ms"
 INSTANCE_EMIT_BATCH_SIZE_BYTES = "heron.instance.emit.batch.size.bytes"
 INSTANCE_EXECUTE_BATCH_TIME_MS = "heron.instance.execute.batch.time.ms"
 INSTANCE_EXECUTE_BATCH_SIZE_BYTES = "heron.instance.execute.batch.size.bytes"
+
+METRICS_EXPORT_INTERVAL_SECS = "heron.metrics.export.interval.sec"

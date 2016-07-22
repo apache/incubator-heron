@@ -12,11 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#import unittest2 as unittest
-import socket
-import unittest
-from heron.instance.src.python.network.protocol import REQID, HeronProtocol, IncomingPacket
-import heron.instance.tests.python.mock_generator as mock_generator
+# pylint: disable=missing-docstring
+import unittest2 as unittest
+from heron.common.src.python.network import REQID, HeronProtocol, IncomingPacket
+import heron.common.tests.python.mock_generator as mock_generator
 
 class ProtocolTest(unittest.TestCase):
   def setUp(self):
@@ -32,16 +31,16 @@ class ProtocolTest(unittest.TestCase):
     zero_reqid = REQID.generate_zero()
     packed_zero = REQID.pack(zero_reqid)
     # the length of REQID is 32 bytes
-    self.assertEqual(packed_zero, bytearray(0 for i in range (32)))
+    self.assertEqual(packed_zero, bytearray(0 for i in range(32)))
 
   def test_encode_decode_packet(self):
     # get_mock_packets() uses HeronProtocol.get_outgoing_packet
-    pkt_list, raw_list = mock_generator.get_mock_requst_packets()
+    pkt_list, raw_list = mock_generator.get_mock_requst_packets(is_message=False)
     for pkt, raw in zip(pkt_list, raw_list):
       raw_reqid, raw_message = raw
       typename, reqid, seriazelid_msg = HeronProtocol.decode_packet(pkt)
       self.assertEqual(reqid, raw_reqid)
-      self.assertEqual(typename,raw_message.DESCRIPTOR.full_name)
+      self.assertEqual(typename, raw_message.DESCRIPTOR.full_name)
       self.assertEqual(seriazelid_msg, raw_message.SerializeToString())
 
   def test_fail_decode_packet(self):
@@ -50,13 +49,15 @@ class ProtocolTest(unittest.TestCase):
       HeronProtocol.decode_packet(packet)
 
   def test_read(self):
+    # complete packets are prepared
     normal_dispatcher = mock_generator.MockDispatcher()
-    normal_dispatcher.prepare_normal()
+    normal_dispatcher.prepare_valid_response()
     pkt = IncomingPacket()
     pkt.read(normal_dispatcher)
     self.assertTrue(pkt.is_header_read)
     self.assertTrue(pkt.is_complete)
 
+    # a packet with just a header is prepared
     header_dispatcher = mock_generator.MockDispatcher()
     header_dispatcher.prepare_header_only()
     pkt = IncomingPacket()
@@ -65,6 +66,7 @@ class ProtocolTest(unittest.TestCase):
     self.assertFalse(pkt.is_complete)
     self.assertEqual(pkt.data, "")
 
+    # an incomplete data packet is prepared
     partial_data_dispatcher = mock_generator.MockDispatcher()
     partial_data_dispatcher.prepare_partial_data()
     pkt = IncomingPacket()
@@ -73,6 +75,7 @@ class ProtocolTest(unittest.TestCase):
     self.assertFalse(pkt.is_complete)
     self.assertEqual(len(pkt.data), partial_data_dispatcher.PARTIAL_DATA_SIZE)
 
+    # error test
     try:
       eagain_dispatcher = mock_generator.MockDispatcher()
       eagain_dispatcher.prepare_eagain()
@@ -86,7 +89,3 @@ class ProtocolTest(unittest.TestCase):
       fatal_dispatcher.prepare_fatal()
       pkt = IncomingPacket()
       pkt.read(fatal_dispatcher)
-
-
-
-

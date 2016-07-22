@@ -14,11 +14,13 @@
 
 import asyncore
 import socket
+
 import heron.instance.tests.python.mock_generator as mock
-from network.protocol import HeronProtocol, REQID, IncomingPacket
-from heron.proto import stmgr_pb2
 from heron.common.src.python.log import Log
-from google.protobuf.descriptor import Descriptor
+from heron.proto import stmgr_pb2
+
+from heron.common.src.python.network import HeronProtocol
+
 
 class HeronTestHandler(asyncore.dispatcher_with_send):
   def __init__(self, sock):

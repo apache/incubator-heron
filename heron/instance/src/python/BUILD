@@ -20,11 +20,6 @@ pex_library(
   srcs = ["instance/component.py", "instance/bolt.py", "instance/spout.py"],
 )
 
-pex_binary(
-  name = "heron-nw-cli-py",
-  srcs = ["main.py"],
-  deps = [":pyinstance_lib"],
-)
 
 pex_binary(
   name = "test-server-py",

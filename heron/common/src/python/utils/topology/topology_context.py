@@ -11,10 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+'''topology_context.py'''
 
 from heron.common.src.python.utils.metrics import MetricsCollector
 
 class TopologyContext(dict):
+  """Helper Class for Topology Context, inheriting from dict"""
   # topology as supplied by the cluster overloaded by any component specific config
   CONFIG = 'config'
   # topology protobuf
@@ -45,12 +47,14 @@ class TopologyContext(dict):
     self[self.COMPONENT_TO_OUT_FIELDS] = out_fields
 
   def get_metrics_collector(self):
+    """Returns this context's metrics collector"""
     if TopologyContext.METRICS_COLLECTOR not in self or \
         not isinstance(self.get(TopologyContext.METRICS_COLLECTOR), MetricsCollector):
       raise RuntimeError("Metrics collector is not registered in this context")
     return self.get(TopologyContext.METRICS_COLLECTOR)
 
   def register_metric(self, name, metric, time_bucket_in_sec):
+    """Registers a new metric to this context"""
     collector = self.get_metrics_collector()
     collector.register_metric(name, metric, time_bucket_in_sec)
 
@@ -89,8 +93,3 @@ class TopologyContext(dict):
 
       out_fields[comp_name][stream_id] = tuple(ret)
     return out_fields
-
-
-
-
-

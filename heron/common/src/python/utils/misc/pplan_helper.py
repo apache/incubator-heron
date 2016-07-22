@@ -11,12 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+'''pplan_helper.py'''
 import socket
 
 from heron.proto import topology_pb2
 from heron.common.src.python.log import Log
 from heron.common.src.python.utils.topology import TopologyContext
 
+# pylint: disable=too-many-instance-attributes
+# pylint: disable=fixme
 class PhysicalPlanHelper(object):
   """Helper class for accessing Physical Plan
 
@@ -59,12 +62,11 @@ class PhysicalPlanHelper(object):
 
     self.context = None
 
-    # TODO: topology.proto -- Component needs to change: Add python_class_name
     # TODO: implement CustomGrouping stuff
 
   def _get_my_spout_or_bolt(self, topology):
     my_spbl = None
-    for spbl in (list(topology.spouts) + list(topology.bolts)):
+    for spbl in list(topology.spouts) + list(topology.bolts):
       if spbl.comp.name == self.my_component_name:
         if my_spbl is not None:
           raise RuntimeError("Duplicate my component found")
@@ -79,30 +81,36 @@ class PhysicalPlanHelper(object):
     return my_spbl, is_spout
 
   def get_my_spout(self):
+    """Returns spout instance, or ``None`` if bolt is assigned"""
     if self.is_spout:
       return self.my_spbl
     else:
       return None
 
   def get_my_bolt(self):
+    """Returns bolt instance, or ``None`` if spout is assigned"""
     if self.is_spout:
       return None
     else:
       return self.my_spbl
 
   def get_topology_state(self):
+    """Returns the current topology state"""
     return self.pplan.topology.state
 
   def is_topology_running(self):
+    """Checks whether topology is currently running"""
     return self.pplan.topology.state == topology_pb2.TopologyState.Value("RUNNING")
 
   def get_topology_config(self):
+    """Returns the topology config"""
     if self.pplan.topology.HasField("topology_config"):
       return self._get_dict_from_config(self.pplan.topology.topology_config)
     else:
       return {}
 
   def set_topology_context(self, metrics_collector):
+    """Sets a new topology context"""
     Log.debug("Setting topology context")
     cluster_config = self.get_topology_config()
     cluster_config.update(self._get_dict_from_config(self.my_component.config))
@@ -127,4 +135,3 @@ class PhysicalPlanHelper(object):
     for instance in self.pplan.instances:
       ret[instance.info.task_id] = instance.info.component_name
     return ret
-

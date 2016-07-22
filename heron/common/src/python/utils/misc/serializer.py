@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+'''serializer.py: common python serializer for heron'''
 from abc import abstractmethod
 
 try:
@@ -20,9 +21,9 @@ except:
 
 class HeronSerializer(object):
   """Serializer interface for Heron"""
-
   @abstractmethod
   def initialize(self, config):
+    """Initializes the serializer"""
     pass
 
   @abstractmethod
@@ -45,6 +46,7 @@ class HeronSerializer(object):
 
 
 class PythonSerializer(HeronSerializer):
+  """Default serializer"""
   def initialize(self, config=None):
     pass
 
@@ -53,4 +55,3 @@ class PythonSerializer(HeronSerializer):
 
   def deserialize(self, input_str):
     return pickle.loads(input_str)
-

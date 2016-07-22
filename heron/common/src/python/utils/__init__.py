@@ -79,10 +79,8 @@ def get_subparser(parser, command):
   Retrieve the given subparser from parser
   '''
   # pylint: disable=protected-access
-  subparsers_actions = [
-    action for action in parser._actions
-    if isinstance(action, argparse._SubParsersAction)
-    ]
+  subparsers_actions = [action for action in parser._actions
+                        if isinstance(action, argparse._SubParsersAction)]
 
   # there will probably only be one subparser_action,
   # but better save than sorry
@@ -249,18 +247,16 @@ def parse_cluster_role_env(cluster_role_env, config_path):
       # if role is required but not provided, raise exception
       if len(parts) == 1:
         if (IS_ROLE_REQUIRED in cli_confs) and (cli_confs[IS_ROLE_REQUIRED] is True):
-          raise Exception(
-            "role required but not provided (cluster/role/env = %s). See %s in %s" %
-            (cluster_role_env, IS_ROLE_REQUIRED, CLIENT_YAML))
+          raise Exception("role required but not provided (cluster/role/env = %s). See %s in %s"
+                          % (cluster_role_env, IS_ROLE_REQUIRED, CLIENT_YAML))
         else:
           parts.append(getpass.getuser())
 
       # if environ is required but not provided, raise exception
       if len(parts) == 2:
         if (IS_ENV_REQUIRED in cli_confs) and (cli_confs[IS_ENV_REQUIRED] is True):
-          raise Exception(
-            "environ required but not provided (cluster/role/env = %s). See %s in %s" %
-            (cluster_role_env, IS_ENV_REQUIRED, CLIENT_YAML))
+          raise Exception("environ required but not provided (cluster/role/env = %s). See %s in %s"
+                          % (cluster_role_env, IS_ENV_REQUIRED, CLIENT_YAML))
         else:
           parts.append(ENVIRON)
 
@@ -324,10 +320,12 @@ def check_release_file_exists():
 
 
 def _all_metric_queries():
-  queries_normal = [
-    'complete-latency', 'execute-latency', 'process-latency',
-    'jvm-uptime-secs', 'jvm-process-cpu-load', 'jvm-memory-used-mb'
-  ]
+  queries_normal = ['complete-latency',
+                    'execute-latency',
+                    'process-latency',
+                    'jvm-uptime-secs',
+                    'jvm-process-cpu-load',
+                    'jvm-memory-used-mb']
   queries = ['__%s' % m for m in queries_normal]
   count_queries_normal = ['emit-count', 'execute-count', 'ack-count', 'fail-count']
   count_queries = ['__%s/default' % m for m in count_queries_normal]
@@ -395,8 +393,8 @@ def get_component_metrics(component, cluster, env, topology, role):
   """Synced API call to get component metrics"""
   all_queries = metric_queries()
   try:
-    result = get_topology_metrics(
-      cluster, env, topology, component, [], all_queries, [0, -1], role)
+    result = get_topology_metrics(cluster, env, topology, component, [],
+                                  all_queries, [0, -1], role)
     return result["metrics"]
   except:
     raise

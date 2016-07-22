@@ -11,11 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+'''Unittest for EventLooper'''
 import time
-import unittest
+import unittest2 as unittest
 
-from heron.common.src.python.basics.event_looper import EventLooper
+from heron.common.src.python.basics import EventLooper
 
+# pylint: disable=missing-docstring
 class EventLooperTest(unittest.TestCase):
   def setUp(self):
     self.looper = EventLooper()
@@ -26,7 +28,7 @@ class EventLooperTest(unittest.TestCase):
 
   def test_loop(self):
     def to_run():
-      for i in range(3):
+      for _ in range(3):
         self.global_value += 10
         self.looper.wake_up()
       self.looper.exit_loop()
@@ -80,7 +82,7 @@ class EventLooperTest(unittest.TestCase):
     self.assertEqual(10, self.global_value)
 
   def test_get_next_timeout_interval(self):
-    to_run = lambda : None
+    to_run = lambda: None
 
     interval = 1.0
     self.looper.register_timer_task_in_sec(to_run, interval)
@@ -110,4 +112,3 @@ class EventLooperTest(unittest.TestCase):
     self.looper.trigger_timers()
     self.looper.trigger_timers()
     self.assertEqual(10, self.global_value)
-

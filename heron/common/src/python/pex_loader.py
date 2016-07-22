@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+'''pex_loader.py: module for dynamically loading pex'''
 
 import os
 import re
@@ -20,10 +21,7 @@ import zipfile
 
 from heron.common.src.python.log import Log
 
-# TODO: Verify that this regex is fine
 egg_regex = r"^(\.deps\/[^\/\s]*\.egg)\/"
-
-# TODO: Error handling
 
 def _get_deps_list(abs_path_to_pex):
   """Get a list of paths to included dependencies in the specified pex file"""
@@ -45,7 +43,7 @@ def load_pex(path_to_pex):
 
   Log.debug("Python path: " + str(sys.path))
 
-def resolve_heron_suffix_issue(abs_pex_path, python_class_name):
+def resolve_heron_suffix_issue(abs_pex_path):
   """Resolves duplicate package suffix problems
 
   When dynamically loading a pex file and a corresponding python class (bolt/spout/topology),
@@ -55,30 +53,15 @@ def resolve_heron_suffix_issue(abs_pex_path, python_class_name):
   This function resolves this issue by individually loading packages with suffix `heron` to
   avoid this issue.
 
-  **Note that this function assumes that there is no user-defined code/package under `heron.instance`,
-  `heron.proto` and `heron.common` packages, so they wouldn't be imported**
+  **Note that this function assumes that there is no user-defined code/package
+  under `heron.instance`, `heron.proto` and `heron.common` packages, so they wouldn't be imported**
   """
-
   # import top-level package named `heron` of a given pex file
   importer = zipimport.zipimporter(abs_pex_path)
   importer.load_module("heron")
 
-  # TODO: check if they are necessary
-
-  # then import any subpackage under `heron` in the pex file,
-  # except for `instance`, `proto` and `common`
-
-  #sub_importer = zipimport.zipimporter(os.path.join(abs_pex_path, "heron"))
-
-  #subpkg_regex = r"^heron\/([^\/\s\.-]*)\/__init__\.py$"
-  #f = zipfile.ZipFile(abs_pex_path)
-  #sub_lst = [re.match(subpkg_regex,i).group(1) for i in f.namelist() if re.match(subpkg_regex,i)]
-  #to_import = [i for i in sub_lst if i != "common" and i != "instance" and i != "proto"]
-  #for mod in to_import:
-  #  Log.debug("Importing subpackage: " + mod)
-  #  sub_importer.load_module(mod)
-
 def import_and_get_class(path_to_pex, python_class_name):
+  """Imports and load a class from a given pex file path and python class name"""
   abs_path_to_pex = os.path.abspath(path_to_pex)
 
   Log.debug("Add a pex to the path: " + abs_path_to_pex)
@@ -89,12 +72,10 @@ def import_and_get_class(path_to_pex, python_class_name):
 
   Log.debug("From path: " + from_path + " -- " + "Import name: " + import_name)
 
-  # Resolve duplicate package suffix problem (heron.), if the top level package of the topology is heron
+  # Resolve duplicate package suffix problem (heron.), if the top level package name is heron
   if python_class_name.startswith("heron."):
-    resolve_heron_suffix_issue(abs_path_to_pex, python_class_name)
+    resolve_heron_suffix_issue(abs_path_to_pex)
 
   mod = __import__(from_path, fromlist=[import_name], level=-1)
   Log.debug("Imported module: " + str(mod))
   return getattr(mod, import_name)
-
-

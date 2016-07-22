@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+'''tuple.py: heron's default data type'''
 
 import time
 import random
@@ -64,6 +65,13 @@ class TupleHelper(object):
 
   @staticmethod
   def make_tuple(stream, tuple_key, values, roots=None):
+    """Creates a HeronTuple
+
+    :param stream: protobuf message ``StreamId``
+    :param tuple_key: tuple id
+    :param values: a list of values
+    :param roots: a list of protobuf message ``RootId``
+    """
     component_name = stream.component_name
     stream_id = stream.id
     gen_task = roots[0].taskid if roots is not None and len(roots) > 0 else None
@@ -71,12 +79,14 @@ class TupleHelper(object):
                       task=gen_task, values=values, creation_time=time.time(), roots=roots)
   @staticmethod
   def make_tick_tuple():
+    """Creates a TickTuple"""
     return HeronTuple(id=TupleHelper.TICK_TUPLE_ID, component=TupleHelper.TICK_SOURCE_COMPONENT,
                       stream=TupleHelper.TICK_TUPLE_ID, task=None, values=None,
                       creation_time=time.time(), roots=None)
 
   @staticmethod
   def make_root_tuple_info(stream_id, tuple_id):
+    """Creates a RootTupleInfo"""
     key = random.getrandbits(TupleHelper.MAX_SFIXED64_RAND_BITS)
-    return RootTupleInfo(stream_id=stream_id, tuple_id=tuple_id, insertion_time=time.time(), key=key)
-
+    return RootTupleInfo(stream_id=stream_id, tuple_id=tuple_id,
+                         insertion_time=time.time(), key=key)

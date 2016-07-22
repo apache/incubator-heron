@@ -11,17 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+'''gateway_looper.py'''
+
+import asyncore
+import errno
 import os
 import time
 import select
 
-import errno
-
 from event_looper import EventLooper
 from heron.common.src.python.log import Log
-import asyncore
 
 class GatewayLooper(EventLooper):
+  """Event looper for asyncore module"""
   def __init__(self):
     super(GatewayLooper, self).__init__()
     self.sock_map = None
@@ -33,6 +35,7 @@ class GatewayLooper(EventLooper):
     Log.debug("Gateway Looper started time: " + str(time.asctime()))
 
   def prepare_map(self, sock_map):
+    """Specifies which socket map to use; should be asyncore's socket map"""
     self.sock_map = sock_map
 
   def do_wait(self):
@@ -51,11 +54,14 @@ class GatewayLooper(EventLooper):
     os.close(self.pipe_r)
     os.close(self.pipe_w)
 
+  # pylint: disable=too-many-branches
   def poll(self, timeout=0.0):
+    """Modified version of poll() from asyncore module"""
     if self.sock_map is None:
       Log.warning("Socket map is not registered to Gateway Looper")
-    # Modified version of poll() from asyncore module
-    r = []; w = []; e = []
+    r = []
+    w = []
+    e = []
 
     if self.sock_map is not None:
       for fd, obj in self.sock_map.items():
@@ -104,5 +110,5 @@ class GatewayLooper(EventLooper):
         obj = self.sock_map.get(fd)
         if obj is None:
           continue
+        # pylint: disable=W0212
         asyncore._exception(obj)
-

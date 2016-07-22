@@ -15,8 +15,7 @@ import socket
 
 from heron.common.src.python.log import Log
 from heron.proto import metrics_pb2, common_pb2
-from heron.instance.src.python.network.heron_client import HeronClient
-from heron.instance.src.python.network.protocol import StatusCode
+from heron.common.src.python.network import HeronClient, StatusCode
 
 class MetricsManagerClient(HeronClient):
   def __init__(self, looper, metrics_host, port, instance, out_metrics, sock_map):

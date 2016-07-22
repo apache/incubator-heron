@@ -11,15 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""mock_protobuf.py: creates different kinds of protobuf message for testing purposes"""
 from heron.proto import stmgr_pb2, physical_plan_pb2, topology_pb2, common_pb2
 
-def get_mock_config():
-  return topology_pb2.Config()
+# pylint: disable=dangerous-default-value
+# pylint: disable=redefined-builtin
 
+def get_mock_config():
+  """Returns an empty protobuf Config object from topology_pb2"""
+  return topology_pb2.Config()
 
 def get_mock_component(name="component_name",
                        config=get_mock_config(),
                        python_cls="heron.instance.src.python.example.word_spout.WordSpout"):
+  """Returns a mock protobuf Component object from topology_pb2"""
   component = topology_pb2.Component()
   component.name = name
   component.python_class_name = python_cls
@@ -27,6 +32,7 @@ def get_mock_component(name="component_name",
   return component
 
 def get_mock_bolt(component=get_mock_component(), inputs=[], outputs=[]):
+  """Returns a mock protobuf Bolt object from topology_pb2"""
   bolt = topology_pb2.Bolt()
   bolt.comp.CopyFrom(component)
 
@@ -41,6 +47,7 @@ def get_mock_bolt(component=get_mock_component(), inputs=[], outputs=[]):
   return bolt
 
 def get_mock_spout(component=get_mock_component(), outputs=[]):
+  """Returns a mock protobuf Spout object from topology_pb2"""
   spout = topology_pb2.Spout()
   spout.comp.CopyFrom(component)
 
@@ -51,6 +58,7 @@ def get_mock_spout(component=get_mock_component(), outputs=[]):
   return spout
 
 def get_mock_topology(id="topology_id", name="topology_name", state=1, spouts=[], bolts=[]):
+  """Returns a mock protobuf Topology object from topology_pb2"""
   # topology
   topology = topology_pb2.Topology()
   topology.id = id
@@ -68,6 +76,7 @@ def get_mock_topology(id="topology_id", name="topology_name", state=1, spouts=[]
   return topology
 
 def get_mock_stmgr(id="Stmgr_id", host="localhost", port=9999, endpoint="hello"):
+  """Returns a mock protobuf StMgr object from physical_plan_pb2"""
   stmgr = physical_plan_pb2.StMgr()
   stmgr.id = id
   stmgr.host_name = host
@@ -76,6 +85,7 @@ def get_mock_stmgr(id="Stmgr_id", host="localhost", port=9999, endpoint="hello")
   return stmgr
 
 def get_mock_instance_info(task_id=123, component_index=23, component_name="hello"):
+  """Returns a mock protobuf InstanceInfo object from physical_plan_pb2"""
   # instance info
   instance_info = physical_plan_pb2.InstanceInfo()
   instance_info.task_id = task_id
@@ -86,6 +96,7 @@ def get_mock_instance_info(task_id=123, component_index=23, component_name="hell
 def get_mock_instance(instance_id="instance_id",
                       stmgr_id="Stmgr_id",
                       info=get_mock_instance_info()):
+  """Returns a mock protobuf Instance object from physical_plan_pb2"""
   instance = physical_plan_pb2.Instance()
   instance.instance_id = instance_id
   instance.stmgr_id = stmgr_id
@@ -95,6 +106,7 @@ def get_mock_instance(instance_id="instance_id",
 def get_mock_pplan(topology=get_mock_topology(),
                    stmgrs=[],
                    instances=[]):
+  """Returns a mock protobuf PhysicalPlan object from physical_plan_pb2"""
   pplan = physical_plan_pb2.PhysicalPlan()
   pplan.topology.MergeFrom(topology)
 
@@ -113,37 +125,41 @@ def get_mock_pplan(topology=get_mock_topology(),
 
   return pplan
 
-def get_mock_status(status="OK", message="OKOKOK"):
+def get_mock_status(status="OK", message="OK Message"):
+  """Returns a mock protobuf Status object from common_pb2"""
   mock_status = common_pb2.Status()
   mock_status.status = common_pb2.StatusCode.Value(status)
   mock_status.message = message
   return mock_status
 
 def get_mock_assignment_message(pplan=get_mock_pplan()):
+  """Returns a mock protobuf NewInstanceAssignmentMessage object from stmgr_pb2"""
   # message
   mock_message = stmgr_pb2.NewInstanceAssignmentMessage()
   mock_message.pplan.MergeFrom(pplan)
   return mock_message
 
 def get_mock_register_response(status=get_mock_status(), pplan=get_mock_pplan()):
+  """Returns a mock protobuf RegisterInstanceResponse object from stmgr_pb2"""
   mock_response = stmgr_pb2.RegisterInstanceResponse()
   mock_response.status.MergeFrom(status)
   mock_response.pplan.MergeFrom(pplan)
   return mock_response
 
-
 #####
 
 def get_pplan_builder_and_typename():
-  builder = lambda : physical_plan_pb2.PhysicalPlan()
+  """Returns a PhysicalPlan builder callable and typename 'PhysicalPlan'"""
+  # pylint: disable=unnecessary-lambda
+  builder = lambda: physical_plan_pb2.PhysicalPlan()
   typename = builder().DESCRIPTOR.full_name
   return builder, typename
 
 def get_many_mock_pplans():
+  """Returns a list of 10 PhysicalPlan objects, differing just by stream manager id"""
   pplans_lst = []
   for i in range(10):
     _id = "Stmgr-" + str(i)
     pplan = get_mock_pplan(stmgrs=[get_mock_stmgr(id=_id)])
     pplans_lst.append(pplan)
   return pplans_lst
-
