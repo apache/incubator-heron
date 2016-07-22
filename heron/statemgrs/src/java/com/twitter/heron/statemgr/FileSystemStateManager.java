@@ -275,7 +275,7 @@ public abstract class FileSystemStateManager implements IStateManager {
         proposedInstanceDistribution).length;
     Integer containerDelta = proposedContainerCount - existingContainerCount;
 
-    assertTrue(proposedContainerCount < 1,
+    assertTrue(proposedContainerCount > 0,
         "proposed instance distribution must have at least 1 container %s",
         proposedInstanceDistribution);
 
