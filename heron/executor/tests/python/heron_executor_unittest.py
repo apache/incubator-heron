@@ -17,6 +17,7 @@ import unittest2 as unittest
 from heron.executor.src.python.heron_executor import *
 
 class MockPOpen:
+  """fake subprocess.Popen object that we can use to mock processes and pids"""
   next_pid = 0
 
   def __init__(self):
@@ -28,11 +29,17 @@ class MockPOpen:
     MockPOpen.next_pid = next_pid
 
 class MockExecutor(HeronExecutor):
+  """mock executor that overrides methods that don't apply to unit tests, like running processes"""
+  def __init__(self):
+    self.processes = []
+
   def load_logging_dir(self, heron_internals_config_file):
     return "fake_dir"
 
   def run_process(self, name, cmd):
-    return MockPOpen()
+    popen = MockPOpen()
+    self.processes.append((popen.pid, name, cmd))
+    return popen
 
 class HeronExecutorTest(unittest.TestCase):
   dist_expected = { 1:[('word', '3', '0'), ('exclaim1', '2', '0'), ('exclaim1', '1', '0')]}
@@ -41,7 +48,7 @@ class HeronExecutorTest(unittest.TestCase):
   def get_expected_metricsmgr_command(container_id):
     return "heron_java_home/bin/java -Xmx1024M -XX:+PrintCommandLineFlags -verbosegc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintGCCause -XX:+PrintPromotionFailure -XX:+PrintTenuringDistribution -XX:+PrintHeapAtGC -XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+PrintCommandLineFlags -Xloggc:log-files/gc.metricsmgr.log -Djava.net.preferIPv4Stack=true -cp metricsmgr_classpath com.twitter.heron.metricsmgr.MetricsManager metricsmgr-%d metricsmgr_port topname topid heron/config/src/yaml/conf/test/test_heron_internals.yaml metrics_sinks_config_file" % container_id
 
-  def get_expected_instance_command(component_name, instance_id, container_id):
+  def get_expected_instance_command(component_name, instance_id, container_id = 1):
     instance_name = "container_%d_%s_%d" % (container_id, component_name, instance_id)
     return "heron_java_home/bin/java -Xmx320M -Xms320M -Xmn160M -XX:MaxPermSize=128M -XX:PermSize=128M -XX:ReservedCodeCacheSize=64M -XX:+CMSScavengeBeforeRemark -XX:TargetSurvivorRatio=90 -XX:+PrintCommandLineFlags -verbosegc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintGCCause -XX:+PrintPromotionFailure -XX:+PrintTenuringDistribution -XX:+PrintHeapAtGC -XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:ParallelGCThreads=4 -Xloggc:log-files/gc.%s.log -XX:+HeapDumpOnOutOfMemoryError -Djava.net.preferIPv4Stack=true -cp instance_classpath:classpath com.twitter.heron.instance.HeronInstance topname topid %s %s %d 0 stmgr-%d master_port metricsmgr_port heron/config/src/yaml/conf/test/test_heron_internals.yaml" % (instance_name, instance_name, component_name, instance_id, container_id)
 
@@ -53,9 +60,9 @@ class HeronExecutorTest(unittest.TestCase):
 
   expected_processes_container_1 = [
     (37, 'stmgr-1', 'stmgr_binary topname topid topdefnfile zknode zkroot stmgr-1 container_1_word_3,container_1_exclaim1_2,container_1_exclaim1_1 master_port metricsmgr_port shell-port heron/config/src/yaml/conf/test/test_heron_internals.yaml'),
-    (38, 'container_1_word_3', get_expected_instance_command('word', 3, 1)),
-    (39, 'container_1_exclaim1_1', get_expected_instance_command('exclaim1', 1, 1)),
-    (40, 'container_1_exclaim1_2', get_expected_instance_command('exclaim1', 2, 1)),
+    (38, 'container_1_word_3', get_expected_instance_command('word', 3)),
+    (39, 'container_1_exclaim1_1', get_expected_instance_command('exclaim1', 1)),
+    (40, 'container_1_exclaim1_2', get_expected_instance_command('exclaim1', 2)),
     (41, 'heron-shell-1', shell_command_expected),
     (42, 'metricsmgr-1', get_expected_metricsmgr_command(1)),
   ]
@@ -98,19 +105,20 @@ class HeronExecutorTest(unittest.TestCase):
     self.assertEquals(["metricsmgr-0", "metricsmgr-1"], self.executor_0.metricsmgr_ids)
     self.assertEquals(["heron-shell-0", "heron-shell-1"], self.executor_0.heron_shell_ids)
 
-  def test_commands_container_0(self):
-    self.do_test_commands(self.executor_0, self.expected_processes_container_0)
+  def test_launch_container_0(self):
+    self.do_test_launch(self.executor_0, self.expected_processes_container_0)
 
-  def test_commands_container_1(self):
-    self.do_test_commands(self.executor_1, self.expected_processes_container_1)
+  def test_launch_container_1(self):
+    self.do_test_launch(self.executor_1, self.expected_processes_container_1)
 
-  def do_test_commands(self, executor, expected_processes):
+  def do_test_launch(self, executor, expected_processes):
     executor.update_instance_distribution(self.dist_expected)
     executor.launch()
-    found_processes = executor.processes_to_monitor
+    monitored_processes = executor.processes_to_monitor
 
-    print("do_test_commands - expected_processes: %s found_process: %s" % (expected_processes, found_processes))
-    self.assert_processes(expected_processes, found_processes)
+    print("do_test_commands - expected_processes: %s monitored_processes: %s" % (expected_processes, monitored_processes))
+    self.assertEquals(executor.processes, monitored_processes)
+    self.assert_processes(expected_processes, monitored_processes)
 
   def test_change_instance_dist_container_1(self):
     MockPOpen.set_next_pid(37)

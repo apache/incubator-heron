@@ -38,7 +38,6 @@ from heron.statemgrs.src.python.config import Config as StateMgrConfig
 STATEMGRS_KEY = "statemgrs"
 
 def print_usage():
-  '''print usage'''
   print (
       "./heron-executor <shardid> <topname> <topid> <topdefnfile> "
       " <instance_distribution> <zknode> <zkroot> <tmaster_binary> <stmgr_binary> "
@@ -50,7 +49,6 @@ def print_usage():
       " <scheduler_classpath> <scheduler_port>")
 
 def do_print(statement):
-  """ print message """
   timestr = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
   print "%s: %s" % (timestr, statement)
   sys.stdout.flush()
@@ -69,34 +67,27 @@ def extract_triplets(s):
   return result
 
 def id_list(prefix, start, count):
-  """ id_list """
   ids = []
   for i in range(start, count + 1):
     ids.append(prefix + str(i))
   return ids
 
 def stmgr_list(count):
-  """ prepend stmgr """
   return id_list("stmgr-", 1, count)
 
 def metricsmgr_list(count):
-  """ prepend metricmgr """
   return id_list("metricsmgr-", 0, count)
 
 def heron_shell_list(count):
-  """ prepend heron-shell """
   return id_list("heron-shell-", 0, count)
 
 def get_heron_executor_process_name(shard_id):
-  """ prepend heron-executor """
   return 'heron-executor-' + str(shard_id)
 
 def get_process_pid_filename(process_name):
-  """ get process pid filename """
   return '%s.pid' % process_name
 
 def get_tmp_filename():
-  """ get tmp filename """
   return '%s.heron.tmp' % (''.join(random.choice(string.ascii_uppercase) for i in range(12)))
 
 def atomic_write_file(path, content):
@@ -117,14 +108,15 @@ def atomic_write_file(path, content):
   os.rename(tmp_file, path)
 
 def log_pid_for_process(process_name, pid):
-  """ log pid for process """
   filename = get_process_pid_filename(process_name)
   do_print('Logging pid %d to file %s' %(pid, filename))
   atomic_write_file(filename, str(pid))
 
 # pylint: disable=too-many-instance-attributes
 class HeronExecutor(object):
-  """ Heron executor """
+  """ Heron executor is a class that is responsible for running each of the process on a given
+  container. Based on the container id and the instance distribution, it determines if the container
+  is a master node or a worker node and it starts processes accordingly."""
   def __init__(self, args):
     self.max_runs = 100
     self.interval_between_runs = 10
@@ -132,10 +124,6 @@ class HeronExecutor(object):
     self.topology_name = args[2]
     self.topology_id = args[3]
     self.topology_defn_file = args[4]
-    # pylint: disable=fixme
-    # TODO: ignoring for now to see if we can load this from state manager but should remove it
-    # from args list
-    #self.instance_distribution = self.parse_instance_distribution(args[5])
     self.zknode = args[6]
     self.zkroot = args[7]
     self.tmaster_binary = args[8]
@@ -182,7 +170,7 @@ class HeronExecutor(object):
     # Read the heron_internals.yaml for logging dir
     self.log_dir = self.load_logging_dir(self.heron_internals_config_file)
 
-    # these get set when we get the instance distribution from the state manager
+    # these get set when we call update_instance_distribution
     self.instance_distribution = {}
     self.stmgr_ids = []
     self.metricsmgr_ids = []
@@ -219,7 +207,7 @@ class HeronExecutor(object):
     return reduce(lambda x, y: dict(x.items() + y.items()), f2)
 
   def get_metricsmgr_cmd(self, metricsManagerId, sink_config_file, port):
-    ''' command to get metric manager '''
+    ''' get the command to start the metrics manager processes '''
     metricsmgr_main_class = 'com.twitter.heron.metricsmgr.MetricsManager'
 
     metricsmgr_cmd = [os.path.join(self.heron_java_home, 'bin/java'),
@@ -253,7 +241,7 @@ class HeronExecutor(object):
     return metricsmgr_cmd
 
   def get_tmaster_processes(self):
-    ''' get tmaster processes '''
+    ''' get the command to start the tmaster processes '''
     retval = {}
     tmaster_cmd = [
         self.tmaster_binary,
@@ -280,7 +268,6 @@ class HeronExecutor(object):
     return retval
 
   def get_scheduler_processes(self):
-    ''' get scheduler processes '''
     retval = {}
     scheduler_cmd = [
         'java',
@@ -392,9 +379,7 @@ class HeronExecutor(object):
 
   # Returns the common heron support processes that all containers get, like the heron shell
   def get_heron_support_processes(self):
-    """
-    Get a map from all daemon services' name to the command to start them
-    """
+    """ Get a map from all daemon services' name to the command to start them """
     retval = {}
 
     retval[self.heron_shell_ids[self.shard]] = [
@@ -405,15 +390,12 @@ class HeronExecutor(object):
     return retval
 
   def untar_if_tar(self):
-    """ untar """
     if self.pkg_type == "tar":
       os.system("tar -xvf %s" % self.topology_jar_file)
 
   # pylint: disable=no-self-use
   def wait_process_std_out_err(self, name, process):
-    '''
-    Wait for the termination of a process and log its stdout & stderr
-    '''
+    ''' Wait for the termination of a process and log its stdout & stderr '''
     (process_stdout, process_stderr) = process.communicate()
     if process_stdout:
       do_print("%s stdout: %s" %(name, process_stdout))
@@ -421,12 +403,10 @@ class HeronExecutor(object):
       do_print("%s stderr: %s" %(name, process_stderr))
 
   def run_process(self, name, cmd):
-    ''' run process '''
     do_print("Running %s process as %s" % (name, ' '.join(cmd)))
     return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
   def run_blocking_process(self, cmd, is_shell):
-    ''' run blocking process '''
     do_print("Running blocking process as %s" % cmd)
     process = subprocess.Popen(cmd, shell=is_shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -446,6 +426,7 @@ class HeronExecutor(object):
           p.kill()
 
   def start_processes(self, commands):
+    """Start all commands and add them to the dict of processes to be monitored """
     processes_to_monitor = {}
     # First start all the processes
     for (name, command) in commands.items():
@@ -458,7 +439,9 @@ class HeronExecutor(object):
     self.processes_to_monitor.update(processes_to_monitor)
 
   def monitor_processes(self):
-    ''' monitor active process '''
+    """ Monitor all processes in processes_to_monitor dict,
+    restarting any if they fail, up to max_runs times.
+    """
     # Now wait for any child to die
     while True:
       if len(self.processes_to_monitor) > 0:
@@ -484,7 +467,6 @@ class HeronExecutor(object):
           log_pid_for_process(name, p.pid)
 
   def get_commands_to_run(self):
-    commands = {}
     if self.shard == 0:
       commands = self.get_tmaster_processes()
     else:
@@ -542,8 +524,7 @@ class HeronExecutor(object):
              (len(commands_to_kill), len(commands_to_keep),
               len(commands_to_start), len(self.processes_to_monitor)))
 
-  def prepareLaunch(self):
-    ''' prepare launch '''
+  def prepare_launch(self):
     create_folders = 'mkdir -p %s' % self.log_dir
     chmod_binaries = \
         'chmod a+rx . && chmod a+x %s && chmod +x %s && chmod +x %s && chmod +x %s' \
@@ -553,7 +534,7 @@ class HeronExecutor(object):
 
     for command in commands:
       if self.run_blocking_process(command, True) != 0:
-        do_print("Failed to run command: %s. Exitting" % command)
+        do_print("Failed to run command: %s. Exiting" % command)
         sys.exit(1)
 
   def register_packing_plan_watcher(self, executor):
@@ -612,25 +593,22 @@ class HeronExecutor(object):
                str(state_manager))
 
 def main():
-  ''' main '''
   if len(sys.argv) != 32:
     print_usage()
     sys.exit(1)
   # pylint: disable=undefined-variable
   executor = HeronExecutor(sys.argv)
-  executor.prepareLaunch()
+  executor.prepare_launch()
   executor.register_packing_plan_watcher(executor)
   executor.monitor_processes()
 
 # pylint: disable=unused-argument
 def signal_handler(signal_to_handle, frame):
-  ''' signal handler '''
   # We would do nothing here but just exit
   # Just catch the SIGTERM and then cleanup(), registered with atexit, would invoke
   sys.exit(signal_to_handle)
 
 def setup():
-  ''' setup '''
   # Redirect stdout and stderr to files in append mode
   # The filename format is heron-executor.stdxxx
   sys.stdout = open('heron-executor.stdout', 'a')
