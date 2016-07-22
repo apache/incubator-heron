@@ -26,92 +26,59 @@ HERON_TOPOLOGIES_KEY = "{0}/topologies"
 # pylint: disable=too-many-public-methods, attribute-defined-outside-init
 class StateManager:
   """
-  This is the abstract base class for state manager.
-  These abstract methods must be implemented by the
-  concrete subclasses.
+  This is the abstract base class for state manager. It provides methods to get/set/delete various
+  state from the state store. The getters accept an optional callback, which will watch for state
+  changes of the object and invoke the callback when one occurs.
   """
 
   __metaclass__ = abc.ABCMeta
 
   @property
   def name(self):
-    """
-    Getter for the name of the state manager.
-    """
     return self.__name
 
   @name.setter
   def name(self, newName):
-    """
-    Setter for the name of the state manager.
-    """
     self.__name = newName
 
   @property
   def host(self):
-    """
-    Getter for the host if the state is available on a
-    different host.
-    """
     return self.__host
 
   @host.setter
   def host(self, newHost):
-    """
-    Setter for the host if the state is available on a
-    different host.
-    """
     self.__host = newHost
 
   @property
   def port(self):
-    """
-    Getter for the port if the state is available on a
-    different host.
-    """
     return self.__port
 
   @port.setter
   def port(self, newPort):
-    """
-    Setter for the port if the state is available on a
-    different host.
-    """
     self.__port = newPort
 
   @property
   def hostport(self):
-    """ string of host and port """
     return self.host + ":" + str(self.port)
 
   @property
   def rootpath(self):
-    """
-    Getter for the path where the heron states are stored.
-    """
+    """ Getter for the path where the heron states are stored. """
     return self.__hostport
 
   @rootpath.setter
   def rootpath(self, newRootPath):
-    """
-    Getter for the path where the heron states are stored.
-    """
+    """ Setter for the path where the heron states are stored. """
     self.__hostport = newRootPath
 
   @property
   def tunnelhost(self):
-    """
-    Getter for the tunnelhost to create the tunnel if host is
-    not accessible
-    """
+    """ Getter for the tunnelhost to create the tunnel if host is not accessible """
     return self.__tunnelhost
 
   @tunnelhost.setter
   def tunnelhost(self, newTunnelHost):
-    """
-    Getter for the tunnelhost to create the tunnel if host is
-    not accessible
-    """
+    """ Setter for the tunnelhost to create the tunnel if host is not accessible """
     self.__tunnelhost = newTunnelHost
 
   @abc.abstractmethod
@@ -120,16 +87,14 @@ class StateManager:
     @param host - Host where the states are stored
     @param port - Port to connect to
     @param rootpath - Path where the heron states are stored
-    @param tunnelhost - Host to which to tunnel through if state
-                        host is not directly accessible
+    @param tunnelhost - Host to which to tunnel through if state host is not directly accessible
     """
     pass
 
   def is_host_port_reachable(self):
     """
-    Returns true if the host is reachable.
-    In some cases, it may not be reachable and must
-    establish a tunnel.
+    Returns true if the host is reachable. In some cases, it may not be reachable a tunnel
+    must be used.
     """
     try:
       socket.create_connection((self.host, self.port), 2)
@@ -139,10 +104,7 @@ class StateManager:
 
   # pylint: disable=no-self-use
   def pick_unused_port(self):
-    """
-    Pick an unused port.
-    There is a slight chance that this wont work.
-    """
+    """ Pick an unused port. There is a slight chance that this wont work. """
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind(('127.0.0.1', 0))
     _, port = s.getsockname()
@@ -160,108 +122,54 @@ class StateManager:
     return localport
 
   def terminate_ssh_tunnel(self):
-    """
-    Terminate the ssh tunnel if it was created.
-    """
     if self.tunnel:
       self.tunnel.terminate()
 
   @abc.abstractmethod
   def start(self):
-    """
-    If the state manager needs to connect to a remote host.
-    """
+    """ If the state manager needs to connect to a remote host. """
     pass
 
   @abc.abstractmethod
   def stop(self):
-    """
-    If the state manager had connected to a remote server,
-    it would need to stop as well.
-    """
+    """ If the state manager had connected to a remote server, it would need to stop as well. """
     pass
 
   def get_topologies_path(self):
-    """
-    Create the path using rootpath.
-    """
-    path = HERON_TOPOLOGIES_KEY.format(self.rootpath)
-    return path
+    return HERON_TOPOLOGIES_KEY.format(self.rootpath)
 
   def get_topology_path(self, topologyName):
-    """
-    Create the path using rootpath and topology name.
-    """
-    path = HERON_TOPOLOGIES_KEY.format(self.rootpath) + "/" + topologyName
-    return path
+    return HERON_TOPOLOGIES_KEY.format(self.rootpath) + "/" + topologyName
 
   def get_packing_plan_path(self, topologyName):
-    """
-    Create the path using rootoath and topology name.
-    """
-    path = HERON_PACKING_PLANS_PREFIX.format(self.rootpath) + topologyName
-    return path
+    return HERON_PACKING_PLANS_PREFIX.format(self.rootpath) + topologyName
 
   def get_pplan_path(self, topologyName):
-    """
-    Get the packing plan path
-    """
-    path = HERON_PPLANS_PREFIX.format(self.rootpath) + topologyName
-    return path
+    return HERON_PPLANS_PREFIX.format(self.rootpath) + topologyName
 
   def get_execution_state_path(self, topologyName):
-    """
-    Create the path using rootpath and topology name.
-    """
-    path = HERON_EXECUTION_STATE_PREFIX.format(self.rootpath) + topologyName
-    return path
+    return HERON_EXECUTION_STATE_PREFIX.format(self.rootpath) + topologyName
 
   def get_tmaster_path(self, topologyName):
-    """
-    Create the path using rootpath and topology name.
-    """
-    path = HERON_TMASTER_PREFIX.format(self.rootpath) + topologyName
-    return path
+    return HERON_TMASTER_PREFIX.format(self.rootpath) + topologyName
 
   def get_scheduler_location_path(self, topologyName):
-    """
-    Create the path using rootpath and topology name.
-    """
-    path = HERON_SCHEDULER_LOCATION_PREFIX.format(self.rootpath) + topologyName
-    return path
+    return HERON_SCHEDULER_LOCATION_PREFIX.format(self.rootpath) + topologyName
 
   @abc.abstractmethod
   def get_topologies(self, callback=None):
-    """
-    Gets the topologies for the rootpath.
-    If the callback is provided,
-    sets watch on the path and calls the callback
-    with the new list of children.
-    """
     pass
 
   @abc.abstractmethod
   def get_topology(self, topologyName, callback=None):
-    """
-    Gets the topology.
-    If the callback is provided,
-    sets watch on the path and calls the callback
-    with the new pplan.
-    """
     pass
 
   @abc.abstractmethod
   def create_topology(self, topologyName, topology):
-    """
-    Adds the topology entry to topologies list.
-    """
     pass
 
   @abc.abstractmethod
   def delete_topology(self, topologyName):
-    """
-    Removes the topology entry from topologies list.
-    """
     pass
 
   @abc.abstractmethod
@@ -276,70 +184,34 @@ class StateManager:
 
   @abc.abstractmethod
   def get_pplan(self, topologyName, callback=None):
-    """
-    Gets the pplan for the topology.
-    If the callback is provided,
-    sets watch on the path and calls the callback
-    with the new pplan.
-    """
     pass
 
   @abc.abstractmethod
   def create_pplan(self, topologyName, pplan):
-    """
-    Adds the topology entry to pplan.
-    """
     pass
 
   @abc.abstractmethod
   def delete_pplan(self, topologyName):
-    """
-    Removes the topology entry from pplan.
-    """
     pass
 
   @abc.abstractmethod
   def get_execution_state(self, topologyName, callback=None):
-    """
-    Gets the execution state for the topology.
-    If the callback is provided,
-    sets watch on the path and calls the callback
-    with the new pplan.
-    """
     pass
 
   @abc.abstractmethod
   def create_execution_state(self, topologyName, executionState):
-    """
-    Adds the topology entry to execution_state.
-    """
     pass
 
   @abc.abstractmethod
   def delete_execution_state(self, topologyName):
-    """
-    Removes the topology entry from execution_state.
-    """
     pass
 
   @abc.abstractmethod
   def get_tmaster(self, topologyName, callback=None):
-    """
-    Gets the tmaster for the topology.
-    If the callback is provided,
-    sets watch on the path and calls the callback
-    with the new pplan.
-    """
     pass
 
   @abc.abstractmethod
   def get_scheduler_location(self, topologyName, callback=None):
-    """
-    Gets the scheduler location for the topology.
-    If the callback is provided,
-    sets watch on the path and calls the callback
-    with the new pplan.
-    """
     pass
 
   def delete_topology_from_zk(self, topologyName):
