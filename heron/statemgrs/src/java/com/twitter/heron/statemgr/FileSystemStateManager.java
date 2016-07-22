@@ -316,9 +316,9 @@ public abstract class FileSystemStateManager implements IStateManager {
       String instancesToKill = getInstancesIdsToKill(existingContainerCount, -containerDelta);
       //aurora job kill smf1/billg/devel/ExclamationTopology/3,4,5
       List<String> auroraCmd =
-          new ArrayList<>(Arrays.asList("aurora", "job", "kill", "--wait-until",
-              "RUNNING", getAuroraJobName(topologyName) + "/" + instancesToKill));
-      print("Killing %s aurora containers %s", -containerDelta, auroraCmd);
+          new ArrayList<>(Arrays.asList("aurora", "job", "kill"
+              , getAuroraJobName(topologyName) + "/" + instancesToKill));
+      print("Killing %s aurora container(s): %s", -containerDelta, auroraCmd);
       assertTrue(runProcess(auroraCmd),
           "Failed to kill freed aurora instances %s", instancesToKill);
     }
@@ -331,14 +331,12 @@ public abstract class FileSystemStateManager implements IStateManager {
 
   private static String getInstancesIdsToKill(int totalCount, int numToKill) {
     StringBuilder ids = new StringBuilder();
-    for (int id = totalCount - numToKill + 1; id < totalCount; id++) {
+    for (int id = totalCount - numToKill + 1; id <= totalCount; id++) {
       if (ids.length() > 0) {
         ids.append(",");
       }
       ids.append(id);
     }
-    print("getInstancesIdsToKill totalCount=%s, numToKill=%s, ids=%s",
-        totalCount, numToKill, ids.toString());
     return ids.toString();
   }
 
