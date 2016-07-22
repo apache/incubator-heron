@@ -18,17 +18,16 @@ import atexit
 import datetime
 import os
 import sys
+import signal
 import subprocess
 import time
 import json
 import base64
-import signal
 import string
 import random
 import yaml
 
 def print_usage():
-  '''print usage'''
   print (
       "./heron-executor <shardid> <topname> <topid> <topdefnfile> "
       " <instance_distribution> <zknode> <zkroot> <tmaster_binary> <stmgr_binary> "
@@ -40,7 +39,6 @@ def print_usage():
       " <scheduler_classpath> <scheduler_port>")
 
 def do_print(statement):
-  """ print msesage """
   timestr = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
   print "%s: %s" % (timestr, statement)
   sys.stdout.flush()
@@ -59,34 +57,27 @@ def extract_triplets(s):
   return result
 
 def id_list(prefix, start, count):
-  """ id_list """
   ids = []
   for i in range(start, count + 1):
     ids.append(prefix + str(i))
   return ids
 
 def stmgr_list(count):
-  """ prepend stmgr """
   return id_list("stmgr-", 1, count)
 
 def metricsmgr_list(count):
-  """ prepend metricmgr """
   return id_list("metricsmgr-", 0, count)
 
 def heron_shell_list(count):
-  """ prepend heron-shell """
   return id_list("heron-shell-", 0, count)
 
 def get_heron_executor_process_name(shard_id):
-  """ prepend heron-executor """
   return 'heron-executor-' + str(shard_id)
 
 def get_process_pid_filename(process_name):
-  """ get process pid filename """
   return '%s.pid' % process_name
 
 def get_tmp_filename():
-  """ get tmp filename """
   return '%s.heron.tmp' % (''.join(random.choice(string.ascii_uppercase) for i in range(12)))
 
 def atomic_write_file(path, content):
@@ -107,14 +98,15 @@ def atomic_write_file(path, content):
   os.rename(tmp_file, path)
 
 def log_pid_for_process(process_name, pid):
-  """ log pid for process """
   filename = get_process_pid_filename(process_name)
   do_print('Logging pid %d to file %s' %(pid, filename))
   atomic_write_file(filename, str(pid))
 
 # pylint: disable=too-many-instance-attributes
 class HeronExecutor(object):
-  """ Heron executor """
+  """ Heron executor is a class that is responsible for running each of the process on a given
+  container. Based on the container id and the instance distribution, it determines if the container
+  is a master node or a worker node and it starts processes accordingly."""
   def __init__(self, args):
     self.max_runs = 100
     self.interval_between_runs = 10
@@ -122,36 +114,30 @@ class HeronExecutor(object):
     self.topology_name = args[2]
     self.topology_id = args[3]
     self.topology_defn_file = args[4]
-    # args[5] is the instance distribution encoding
-    # First get the container id to distribution encoding
-    f1 = map(lambda z: (int(z[0]), ':'.join(z[1:])),
-             map(lambda x: x.split(':'), args[5].split(',')))
-    # Next get the triplets
-    f2 = map(lambda x: {x[0] : extract_triplets(x[1])}, f1)
-    # Finally convert that into a map
-    self.instance_distribution = reduce(lambda x, y: dict(x.items() + y.items()), f2)
-
-    # pylint: disable=line-too-long
     self.zknode = args[6]
     self.zkroot = args[7]
     self.tmaster_binary = args[8]
     self.stmgr_binary = args[9]
     self.metricsmgr_classpath = args[10]
-    self.instance_jvm_opts = base64.b64decode(args[11].lstrip('"').rstrip('"').replace('&equals;', '='))
+    self.instance_jvm_opts =\
+        base64.b64decode(args[11].lstrip('"').rstrip('"').replace('&equals;', '='))
     self.classpath = args[12]
     self.master_port = args[13]
     self.tmaster_controller_port = args[14]
     self.tmaster_stats_port = args[15]
     self.heron_internals_config_file = args[16]
-    self.component_rammap = map(lambda x: {x.split(':')[0]: int(x.split(':')[1])}, args[17].split(','))
-    self.component_rammap = reduce(lambda x, y: dict(x.items() + y.items()), self.component_rammap)
+    self.component_rammap =\
+        map(lambda x: {x.split(':')[0]: int(x.split(':')[1])}, args[17].split(','))
+    self.component_rammap =\
+        reduce(lambda x, y: dict(x.items() + y.items()), self.component_rammap)
 
-    # component_jvm_opts_in_base64 itself is a base64-encoding-json-map, which is appended with " at the start
-    # and end. It also escapes "=" to "&equals" due to aurora limition
+    # component_jvm_opts_in_base64 itself is a base64-encoding-json-map, which is appended with
+    # " at the start and end. It also escapes "=" to "&equals" due to aurora limitation
     # And the json is a map from base64-encoding-component-name to base64-encoding-jvm-options
     self.component_jvm_opts = {}
     # First we need to decode the base64 string back to a json map string
-    component_jvm_opts_in_json = base64.b64decode(args[18].lstrip('"').rstrip('"').replace('&equals;', '='))
+    component_jvm_opts_in_json =\
+        base64.b64decode(args[18].lstrip('"').rstrip('"').replace('&equals;', '='))
     if component_jvm_opts_in_json != "":
       for (k, v) in json.loads(component_jvm_opts_in_json).items():
         # In json, the component name and jvm options are still in base64 encoding
@@ -159,9 +145,6 @@ class HeronExecutor(object):
 
     self.pkg_type = args[19]
     self.topology_jar_file = args[20]
-    self.stmgr_ids = stmgr_list(len(self.instance_distribution))
-    self.metricsmgr_ids = metricsmgr_list(len(self.instance_distribution))
-    self.heron_shell_ids = heron_shell_list(len(self.instance_distribution))
     self.heron_java_home = args[21]
     self.shell_port = args[22]
     self.heron_shell_binary = args[23]
@@ -174,17 +157,48 @@ class HeronExecutor(object):
     self.scheduler_classpath = args[30]
     self.scheduler_port = args[31]
 
-    # Read the heron_internals.yaml for cluster internal config
-    self.heron_internals_config = {}
-    with open(self.heron_internals_config_file, 'r') as stream:
-      self.heron_internals_config = yaml.load(stream)
-    self.log_dir = self.heron_internals_config['heron.logging.directory']
+    # Read the heron_internals.yaml for logging dir
+    self.log_dir = self.load_logging_dir(self.heron_internals_config_file)
+
+    # these get set when we call update_instance_distribution
+    self.instance_distribution = {}
+    self.stmgr_ids = []
+    self.metricsmgr_ids = []
+    self.heron_shell_ids = []
+
+    # this will soon be refactored to get this from the state manager instead of args
+    self.update_instance_distribution(self.parse_instance_distribution(args[5]))
+
+    # This gets set once processes are launched
+    self.processes_to_monitor = {}
 
     # Log itself pid
     log_pid_for_process(get_heron_executor_process_name(self.shard), os.getpid())
 
-  def get_metricsmgr_cmd(self, mid, sink_config_file, port):
-    ''' command to get metric manager '''
+  # pylint: disable=no-self-use
+  def load_logging_dir(self, heron_internals_config_file):
+    with open(heron_internals_config_file, 'r') as stream:
+      heron_internals_config = yaml.load(stream)
+    return heron_internals_config['heron.logging.directory']
+
+  def update_instance_distribution(self, new_distribution):
+    self.instance_distribution = new_distribution
+    self.stmgr_ids = stmgr_list(len(self.instance_distribution))
+    self.metricsmgr_ids = metricsmgr_list(len(self.instance_distribution))
+    self.heron_shell_ids = heron_shell_list(len(self.instance_distribution))
+
+  # pylint: disable=no-self-use
+  def parse_instance_distribution(self, encoded_distribution):
+    # First get the container id to distribution encoding
+    f1 = map(lambda z: (int(z[0]), ':'.join(z[1:])),
+             map(lambda x: x.split(':'), encoded_distribution.split(',')))
+    # Next get the triplets
+    f2 = map(lambda x: {x[0] : extract_triplets(x[1])}, f1)
+    # Finally convert that into a map
+    return reduce(lambda x, y: dict(x.items() + y.items()), f2)
+
+  def get_metricsmgr_cmd(self, metricsManagerId, sink_config_file, port):
+    ''' get the command to start the metrics manager processes '''
     metricsmgr_main_class = 'com.twitter.heron.metricsmgr.MetricsManager'
 
     metricsmgr_cmd = [os.path.join(self.heron_java_home, 'bin/java'),
@@ -208,7 +222,7 @@ class HeronExecutor(object):
                       '-cp',
                       self.metricsmgr_classpath,
                       metricsmgr_main_class,
-                      mid,
+                      metricsManagerId,
                       port,
                       self.topology_name,
                       self.topology_id,
@@ -218,7 +232,7 @@ class HeronExecutor(object):
     return metricsmgr_cmd
 
   def get_tmaster_processes(self):
-    ''' get tmaster processes '''
+    ''' get the command to start the tmaster processes '''
     retval = {}
     tmaster_cmd = [
         self.tmaster_binary,
@@ -245,7 +259,6 @@ class HeronExecutor(object):
     return retval
 
   def get_scheduler_processes(self):
-    ''' get scheduler processes '''
     retval = {}
     scheduler_cmd = [
         'java',
@@ -357,9 +370,7 @@ class HeronExecutor(object):
 
   # Returns the common heron support processes that all containers get, like the heron shell
   def get_heron_support_processes(self):
-    """
-    Get a map from all daemon services' name to the command to start them
-    """
+    """ Get a map from all daemon services' name to the command to start them """
     retval = {}
 
     retval[self.heron_shell_ids[self.shard]] = [
@@ -370,26 +381,23 @@ class HeronExecutor(object):
     return retval
 
   def untar_if_tar(self):
-    """ untar """
     if self.pkg_type == "tar":
       os.system("tar -xvf %s" % self.topology_jar_file)
 
   # pylint: disable=no-self-use
   def wait_process_std_out_err(self, name, process):
-    '''
-    Wait for the termination of a process and log its stdout & stderr
-    '''
+    ''' Wait for the termination of a process and log its stdout & stderr '''
     (process_stdout, process_stderr) = process.communicate()
-    do_print("%s stdout: %s" %(name, process_stdout))
-    do_print("%s stderr: %s" %(name, process_stderr))
+    if process_stdout:
+      do_print("%s stdout: %s" %(name, process_stdout))
+    if process_stderr:
+      do_print("%s stderr: %s" %(name, process_stderr))
 
   def run_process(self, name, cmd):
-    ''' run process '''
     do_print("Running %s process as %s" % (name, ' '.join(cmd)))
     return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
   def run_blocking_process(self, cmd, is_shell):
-    ''' run blocking process '''
     do_print("Running blocking process as %s" % cmd)
     process = subprocess.Popen(cmd, shell=is_shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -399,41 +407,57 @@ class HeronExecutor(object):
     # return the exit code
     return process.returncode
 
-  def do_run_and_wait(self, commands):
-    ''' run commands and wait'''
-    process_dict = {}
+  def kill_processes(self, commands):
+    # remove the command from processes_to_monitor and kill the process
+    for command_name, command in commands.iteritems():
+      for p, name, _, _ in self.processes_to_monitor.values():
+        if name == command_name:
+          del self.processes_to_monitor[p.pid]
+          do_print("Killing %s process with pid %s: %s" % (name, p.pid, ' '.join(command)))
+          p.kill()
+
+  def start_processes(self, commands):
+    """Start all commands and add them to the dict of processes to be monitored """
+    processes_to_monitor = {}
     # First start all the processes
-    for (name, cmd) in commands.items():
-      p = self.run_process(name, cmd)
-      process_dict[p.pid] = (p, name, 1)
+    for (name, command) in commands.items():
+      p = self.run_process(name, command)
+      processes_to_monitor[p.pid] = (p, name, command, 1)
 
       # Log down the pid file
       log_pid_for_process(name, p.pid)
+
+    self.processes_to_monitor.update(processes_to_monitor)
+
+  def monitor_processes(self):
+    """ Monitor all processes in processes_to_monitor dict,
+    restarting any if they fail, up to max_runs times.
+    """
     # Now wait for any child to die
     while True:
-      (pid, status) = os.wait()
-      (old_p, name, nattempts) = process_dict[pid]
-      do_print("%s exited with status %d" % (name, status))
-      # Log the stdout & stderr of the failed process
-      self.wait_process_std_out_err(name, old_p)
+      if len(self.processes_to_monitor) > 0:
+        (pid, status) = os.wait()
+        if pid in self.processes_to_monitor.keys():
+          (old_p, name, command, nattempts) = self.processes_to_monitor[pid]
+          do_print("%s (pid=%s) exited with status %d. command=%s" % (name, pid, status, command))
+          # Log the stdout & stderr of the failed process
+          self.wait_process_std_out_err(name, old_p)
 
-      # Just make it world readable
-      if os.path.isfile("core.%d" % pid):
-        os.system("chmod a+r core.%d" % pid)
-      if nattempts > self.max_runs:
-        do_print("%s exited too many times" % name)
-        sys.exit(1)
-      time.sleep(self.interval_between_runs)
-      p = self.run_process(name, commands[name])
-      del process_dict[pid]
-      process_dict[p.pid] = (p, name, nattempts + 1)
+          # Just make it world readable
+          if os.path.isfile("core.%d" % pid):
+            os.system("chmod a+r core.%d" % pid)
+          if nattempts > self.max_runs:
+            do_print("%s exited too many times" % name)
+            sys.exit(1)
+          time.sleep(self.interval_between_runs)
+          p = self.run_process(name, command)
+          del self.processes_to_monitor[pid]
+          self.processes_to_monitor[p.pid] = (p, name, command, nattempts + 1)
 
-      # Log down the pid file
-      log_pid_for_process(name, p.pid)
+          # Log down the pid file
+          log_pid_for_process(name, p.pid)
 
-  def launch(self):
-    ''' launch '''
-    commands = {}
+  def get_commands_to_run(self):
     if self.shard == 0:
       commands = self.get_tmaster_processes()
     else:
@@ -442,12 +466,55 @@ class HeronExecutor(object):
 
     # Attach daemon processes
     commands.update(self.get_heron_support_processes())
+    return commands
 
-    # Run all processes in background
-    self.do_run_and_wait(commands)
+  def get_command_changes(self, current_commands, updated_commands):
+    """
+    Compares the current command with updated command to return a 3-tuple of dicts,
+    keyed by command name: commands_to_kill, commands_to_keep and commands_to_start.
+    """
+    commands_to_kill = {}
+    commands_to_keep = {}
+    commands_to_start = {}
 
-  def prepareLaunch(self):
-    ''' prepare launch '''
+    # if the current command has a matching command in the updated commands we keep it
+    # otherwise we kill it
+    for current_name, current_command in current_commands.iteritems():
+      if current_name in updated_commands.keys() and \
+        current_command == updated_commands[current_name] and \
+        current_name != 'heron-tmaster': # always restart tmaster of instance dist has changed
+        commands_to_keep[current_name] = current_command
+      else:
+        commands_to_kill[current_name] = current_command
+
+    # updated commands not in the keep list need to be started
+    for updated_name, updated_command in updated_commands.iteritems():
+      if updated_name not in commands_to_keep.keys():
+        commands_to_start[updated_name] = updated_command
+
+    return commands_to_kill, commands_to_keep, commands_to_start
+
+  def launch(self):
+    current_commands = dict(map((lambda x: (x[1], x[2])), self.processes_to_monitor.values()))
+    updated_commands = self.get_commands_to_run()
+
+    # get the commands to kill, keep and start
+    commands_to_kill, commands_to_keep, commands_to_start = \
+        self.get_command_changes(current_commands, updated_commands)
+
+    do_print("current commands: %s" % sorted(current_commands.keys()))
+    do_print("new commands    : %s" % sorted(updated_commands.keys()))
+    do_print("commands_to_kill: %s" % sorted(commands_to_kill.keys()))
+    do_print("commands_to_keep: %s" % sorted(commands_to_keep.keys()))
+    do_print("commands_to_start: %s" % sorted(commands_to_start.keys()))
+
+    self.kill_processes(commands_to_kill)
+    self.start_processes(commands_to_start)
+    do_print("Launch complete - processes killed=%s kept=%s started=%s monitored=%s" %
+             (len(commands_to_kill), len(commands_to_keep),
+              len(commands_to_start), len(self.processes_to_monitor)))
+
+  def prepare_launch(self):
     create_folders = 'mkdir -p %s' % self.log_dir
     chmod_binaries = \
         'chmod a+rx . && chmod a+x %s && chmod +x %s && chmod +x %s && chmod +x %s' \
@@ -457,27 +524,26 @@ class HeronExecutor(object):
 
     for command in commands:
       if self.run_blocking_process(command, True) != 0:
-        do_print("Failed to run command: %s. Exitting" % command)
+        do_print("Failed to run command: %s. Exiting" % command)
         sys.exit(1)
 
 def main():
-  ''' main '''
   if len(sys.argv) != 32:
     print_usage()
     sys.exit(1)
+  # pylint: disable=undefined-variable
   executor = HeronExecutor(sys.argv)
-  executor.prepareLaunch()
+  executor.prepare_launch()
+  executor.monitor_processes()
   executor.launch()
 
 # pylint: disable=unused-argument
 def signal_handler(signal_to_handle, frame):
-  ''' signal handler '''
   # We would do nothing here but just exit
   # Just catch the SIGTERM and then cleanup(), registered with atexit, would invoke
   sys.exit(signal_to_handle)
 
 def setup():
-  ''' setup '''
   # Redirect stdout and stderr to files in append mode
   # The filename format is heron-executor.stdxxx
   sys.stdout = open('heron-executor.stdout', 'a')
