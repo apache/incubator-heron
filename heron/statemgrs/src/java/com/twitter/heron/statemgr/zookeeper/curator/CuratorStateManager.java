@@ -330,8 +330,8 @@ public class CuratorStateManager extends FileSystemStateManager {
     String instancesToKill = getInstancesIdsToKill(existingContainerCount, count);
     //aurora job kill smf1/billg/devel/ExclamationTopology/3,4,5
     List<String> auroraCmd =
-        new ArrayList<>(Arrays.asList("aurora", "job", "kill"
-            , getAuroraJobName(topologyName) + "/" + instancesToKill));
+        new ArrayList<>(Arrays.asList("aurora", "job", "kill",
+            getAuroraJobName(topologyName) + "/" + instancesToKill));
     print("Killing %s aurora container(s): %s", count, auroraCmd);
     assertTrue(runProcess(auroraCmd),
         "Failed to kill freed aurora instances %s", instancesToKill);
