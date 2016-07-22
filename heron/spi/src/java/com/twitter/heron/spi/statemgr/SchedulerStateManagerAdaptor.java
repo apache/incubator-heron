@@ -133,7 +133,7 @@ public class SchedulerStateManagerAdaptor {
    * @return Boolean - Success or Failure
    */
   public Boolean deleteTMasterLocation(String topologyName) {
-    return awaitResult(delegate.doesTMasterLocationExists(topologyName))
+    return awaitResult(delegate.tmasterLocationExists(topologyName))
         ? awaitResult(delegate.deleteTMasterLocation(topologyName))
         : true;
   }
@@ -144,7 +144,7 @@ public class SchedulerStateManagerAdaptor {
    * @return Boolean - Success or Failure
    */
   public Boolean deleteExecutionState(String topologyName) {
-    return awaitResult(delegate.doesExecutionStateExists(topologyName))
+    return awaitResult(delegate.executionStateExists(topologyName))
         ? awaitResult(delegate.deleteExecutionState(topologyName))
         : true;
   }
@@ -155,7 +155,7 @@ public class SchedulerStateManagerAdaptor {
    * @return Boolean - Success or Failure
    */
   public Boolean deleteTopology(String topologyName) {
-    return awaitResult(delegate.doesTopologyExists(topologyName))
+    return awaitResult(delegate.topologyExists(topologyName))
         ? awaitResult(delegate.deleteTopology(topologyName))
         : true;
   }
@@ -175,7 +175,7 @@ public class SchedulerStateManagerAdaptor {
    * @return Boolean - Success or Failure
    */
   public Boolean deletePhysicalPlan(String topologyName) {
-    return awaitResult(delegate.doesPhysicalPlanExists(topologyName))
+    return awaitResult(delegate.physicalPlanExists(topologyName))
         ? awaitResult(delegate.deletePhysicalPlan(topologyName))
         : true;
   }
@@ -186,7 +186,7 @@ public class SchedulerStateManagerAdaptor {
    * @return Boolean - Success or Failure
    */
   public Boolean deleteSchedulerLocation(String topologyName) {
-    return awaitResult(delegate.doesSchedulerLocationExists(topologyName))
+    return awaitResult(delegate.schedulerLocationExists(topologyName))
         ? awaitResult(delegate.deleteSchedulerLocation(topologyName))
         : true;
   }
@@ -224,7 +224,7 @@ public class SchedulerStateManagerAdaptor {
    * @return a boolean indicating whether the execution state exists or not
    */
   public boolean doesExecutionStateExist(String topologyName) {
-    return awaitResult(delegate.doesExecutionStateExists(topologyName));
+    return awaitResult(delegate.executionStateExists(topologyName));
   }
 
   /**

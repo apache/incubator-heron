@@ -369,7 +369,7 @@ public class RuntimeManagerMain {
     RuntimeManagerRunner runtimeManagerRunner =
         new RuntimeManagerRunner(config, runtime, command, schedulerClient);
 
-    S// invoke the appropriate handlers based on command
+    // invoke the appropriate handlers based on command
     boolean ret = runtimeManagerRunner.call();
 
     return ret;
