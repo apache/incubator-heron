@@ -101,6 +101,7 @@ def run_metrics(command, parser, cl_args, unknown_args):
         Log.error('Unknown component: \'%s\'' % cname)
         raise
   except Exception:
+    Log.error("Fail to connect to tracker: \'%s\'", cl_args["tracker_url"])
     return False
   cresult = []
   for comp in components:
@@ -134,6 +135,7 @@ def run_bolts(command, parser, cl_args, unknown_args):
         Log.error('Unknown bolt: \'%s\'' % bolt_name)
         raise
   except Exception:
+    Log.error("Fail to connect to tracker: \'%s\'", cl_args["tracker_url"])
     return False
   bolts_result = []
   for bolt in bolts:
@@ -142,6 +144,7 @@ def run_bolts(command, parser, cl_args, unknown_args):
       stat, header = to_table(metrics)
       bolts_result.append((bolt, stat, header))
     except Exception:
+      Log.error("Fail to connect to tracker: \'%s\'", cl_args["tracker_url"])
       return False
   for i, (bolt, stat, header) in enumerate(bolts_result):
     if i != 0:
@@ -159,6 +162,7 @@ def run_containers(command, parser, cl_args, unknown_args):
   try:
     result = utils.get_topology_info(cluster, env, topology, role)
   except:
+    Log.error("Fail to connect to tracker: \'%s\'", cl_args["tracker_url"])
     return False
   containers = result['physical_plan']['stmgrs']
   all_bolts, all_spouts = set(), set()
