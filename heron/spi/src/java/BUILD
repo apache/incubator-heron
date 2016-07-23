@@ -171,8 +171,13 @@ java_library(
 java_binary(
     name = "spi-unshaded",
     srcs = glob([
-        "**/spi/utils/**/*.java",
         "**/spi/common/**/*.java",
+        "**/spi/metricsmgr/**/*.java",
+        "**/spi/packing/**/*.java",
+        "**/spi/scheduler/**/*.java",
+        "**/spi/statemgr/**/*.java",
+        "**/spi/uploader/**/*.java",
+        "**/spi/utils/**/*.java",
     ]),
     deps = utils_deps_files,
 )
