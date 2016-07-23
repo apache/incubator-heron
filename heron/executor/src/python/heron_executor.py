@@ -537,30 +537,48 @@ class HeronExecutor(object):
         do_print("Failed to run command: %s. Exiting" % command)
         sys.exit(1)
 
+  def __get_state_manager_locations(self, state_manager_config_file='heron-conf/statemgr.yaml'):
+    """ reads configs to determine which state manager to use """
+    with open(state_manager_config_file, 'r') as stream:
+      config = yaml.load(stream)
+    state_manager_class = config['heron.class.state.manager']
+
+    # pylint: disable=fixme
+    # TODO: replace with proper config loading. only for prototyping!
+    if state_manager_class == 'com.twitter.heron.statemgr.localfs.LocalFileSystemStateManager':
+      return \
+        [
+            {
+                'type': 'file',
+                'name': 'local',
+                # this doesn't work since root path is
+                # ${HOME}/.herondata/repository/state/${CLUSTER}
+                #'rootpath': config['heron.statemgr.root.path'],
+                'rootpath': '~/.herondata/repository/state/local',
+                'tunnelhost': 'localhost',
+            }
+        ]
+    elif state_manager_class == 'com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager':
+      return \
+        [
+            {
+                'type': 'zookeeper',
+                'name': 'zk',
+                'hostport': config['heron.statemgr.connection.string'],
+                'rootpath': config['heron.statemgr.root.path'],
+                'tunnelhost': config['heron.statemgr.tunnel.host'],
+            }
+        ]
+    do_print("FATAL: unrecognized heron.class.state.manager found in %s: %s" %
+             (state_manager_config_file, config))
+    sys.exit(1)
+
   def register_packing_plan_watcher(self, executor):
     """
     Receive updates to the packing plan from the statemgrs and update processes as needed.
     """
-    # pylint: disable=fixme
-    # TODO: replace with proper config loading. only for prototyping!
-    statemgr_locations = [
-        {
-            'type': 'file',
-            'name': 'local',
-            'rootpath': '~/.herondata/repository/state/local',
-            'tunnelhost': 'localhost',
-        },
-        # {
-        #     'type': 'zookeeper',
-        #     'name': 'zk',
-        #     'hostport': 'szookeeper.local.twitter.com:2181',
-        #     'rootpath': '/storm/heron/states',
-        #     'tunnelhost': 'localhost',
-        # },
-    ]
-
     statemgr_config = StateMgrConfig()
-    statemgr_config.set_state_locations(statemgr_locations)
+    statemgr_config.set_state_locations(self.__get_state_manager_locations())
     state_managers = statemanagerfactory.get_all_state_managers(statemgr_config)
 
     # pylint: disable=unused-argument
