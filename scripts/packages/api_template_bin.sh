@@ -26,73 +26,11 @@ function usage() {
   exit 1
 }
 
-function test_write() {
-  local file="$1"
-  while [ "$file" != "/" ] && [ -n "${file}" ] && [ ! -e "$file" ]; do
-    file="$(dirname "${file}")"
-  done
-  [ -w "${file}" ] || {
-    echo >&2
-    echo "The Heron installer must have write access to $1!" >&2
-    echo >&2
-    usage
-  }
-}
-
-# Test for unzip dependencies
-function check_unzip() {
-  if ! which unzip >/dev/null; then
-    echo >&2
-    echo "unzip not found, please install the corresponding package." >&2
-    echo "See $getting_started_url for more information on" >&2
-    echo "dependencies of Heron." >&2
-    exit 1
-  fi
-}
-
-# Test for tar dependencies
-function check_tar() {
-  if ! which tar >/dev/null; then
-    echo >&2
-    echo "tar not found, please install the corresponding package." >&2
-    echo "See $getting_started_url for more information on" >&2
-    echo "dependencies of Heron." >&2
-    exit 1
-  fi
-}
-
 # Test for maven dependencies
 function check_maven() {
   if ! which mvn >/dev/null; then
      echo >&2
      echo "maven not found, please install the corresponding package." >&2
-    echo "See $getting_started_url for more information on" >&2
-    echo "dependencies of Heron." >&2
-    exit 1
-  fi
-}
-
-# Test for java dependencies
-function check_java() {
-  if [ -z "${JAVA_HOME-}" ]; then
-    case "$(uname -s | tr 'A-Z' 'a-z')" in
-      linux)
-        JAVA_HOME="$(readlink -f $(which javac) 2>/dev/null | sed 's_/bin/javac__')" || true
-        BASHRC="~/.bashrc"
-        ;;
-      freebsd)
-        JAVA_HOME="/usr/local/openjdk8"
-        BASHRC="~/.bashrc"
-        ;;
-      darwin)
-        JAVA_HOME="$(/usr/libexec/java_home -v ${JAVA_VERSION}+ 2> /dev/null)" || true
-        BASHRC="~/.bash_profile"
-        ;;
-    esac
-  fi
-  if [ ! -x "${JAVA_HOME}/bin/javac" ]; then
-    echo >&2
-    echo "Java not found, please install the corresponding package" >&2
     echo "See $getting_started_url for more information on" >&2
     echo "dependencies of Heron." >&2
     exit 1

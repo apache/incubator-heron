@@ -1,8 +1,13 @@
+''' query_operator_unittest.py '''
+# pylint: disable=too-many-lines, missing-docstring, too-many-public-methods, undefined-variable
+# over 500 bad indentation errors so disable
+# pylint: disable=bad-continuation
+# pylint: disable=unused-argument, unused-variable
 import tornado.concurrent
 import tornado.gen
 import tornado.testing
 
-from mock import call, patch, Mock
+from mock import patch, Mock
 
 from heron.tracker.src.python.query_operators import *
 
@@ -20,34 +25,35 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def getMetricTimelineSideEffect(*args):
       self.assertEqual((tmaster, "a", ["c"], ["b"], 40, 360), args)
       raise tornado.gen.Return({
-        "starttime": 40,
-        "endtime": 360,
-        "component": "a",
-        "timeline": {
-          "c": {
-            "b": {
-              40: "1.0",
-              100: "1.0",
-              160: "1.0",
-              220: "1.0",
-              280: "1.0",
-              340: "1.0"
-            }
+          "starttime": 40,
+          "endtime": 360,
+          "component": "a",
+          "timeline": {
+              "c": {
+                  "b": {
+                      40: "1.0",
+                      100: "1.0",
+                      160: "1.0",
+                      220: "1.0",
+                      280: "1.0",
+                      340: "1.0"
+                  }
+              }
           }
-        }
       })
 
-    with patch("heron.tracker.src.python.query_operators.getMetricsTimeline", side_effect=getMetricTimelineSideEffect):
+    with patch("heron.tracker.src.python.query_operators.getMetricsTimeline",
+               side_effect=getMetricTimelineSideEffect):
       metrics = yield ts.execute(tracker, tmaster, start, end)
       self.assertEqual(1, len(metrics))
       self.assertEqual("b", metrics[0].instance)
       self.assertEqual("c", metrics[0].metricName)
       self.assertEqual("a", metrics[0].componentName)
       self.assertDictEqual({
-        120: 1.0,
-        180: 1.0,
-        240: 1.0,
-        300: 1.0
+          120: 1.0,
+          180: 1.0,
+          240: 1.0,
+          300: 1.0
       }, metrics[0].timeline)
 
   @tornado.testing.gen_test
@@ -63,11 +69,13 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def getMetricTimelineSideEffect(*args):
       self.assertEqual((tmaster, "a", ["c"], ["b"], 40, 360), args)
       raise tornado.gen.Return({
-        "message": "some_exception"
+          "message": "some_exception"
       })
 
+    # pylint: disable=unused-variable
     with self.assertRaises(Exception):
-      with patch("heron.tracker.src.python.query_operators.getMetricsTimeline", side_effect=getMetricTimelineSideEffect):
+      with patch("heron.tracker.src.python.query_operators.getMetricsTimeline",
+                 side_effect=getMetricTimelineSideEffect):
         metrics = yield ts.execute(tracker, tmaster, start, end)
 
   @tornado.testing.gen_test
@@ -83,31 +91,34 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
     def getMetricTimelineSideEffect(*args):
       self.assertEqual((tmaster, "a", ["c"], [], 40, 360), args)
       raise tornado.gen.Return({
-        "starttime": 40,
-        "endtime": 360,
-        "component": "a",
-        "timeline": {
-          "c": {
-            "b": {
-              40: "1.0",
-              100: "1.0",
-              # 160: "1.0", # This value is missing
-              220: "1.0",
-              280: "1.0",
-              340: "1.0"
-            }, "d": {
-              40: "2.0",
-              100: "2.0",
-              160: "2.0",
-              220: "2.0",
-              280: "2.0",
-              340: "2.0"
-            }
+          "starttime": 40,
+          "endtime": 360,
+          "component": "a",
+          "timeline": {
+              "c": {
+                  "b": {
+                      40: "1.0",
+                      100: "1.0",
+                      # 160: "1.0", # This value is missing
+                      220: "1.0",
+                      280: "1.0",
+                      340: "1.0"
+                  },
+                  "d": {
+                      40: "2.0",
+                      100: "2.0",
+                      160: "2.0",
+                      220: "2.0",
+                      280: "2.0",
+                      340: "2.0"
+                  }
+              }
           }
-        }
       })
 
-    with patch("heron.tracker.src.python.query_operators.getMetricsTimeline", side_effect=getMetricTimelineSideEffect):
+    # pylint: disable=unused-variable
+    with patch("heron.tracker.src.python.query_operators.getMetricsTimeline",
+               side_effect=getMetricTimelineSideEffect):
       ts = TS(["a", "*", "c"])
       metrics = yield ts.execute(tracker, tmaster, start, end)
       self.assertEqual(2, len(metrics))
@@ -118,19 +129,19 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
           self.assertEqual("c", metric.metricName)
           self.assertEqual("a", metric.componentName)
           self.assertDictEqual({
-            # 120: 1.0, # Missing value is not reported
-            180: 1.0,
-            240: 1.0,
-            300: 1.0
+              # 120: 1.0, # Missing value is not reported
+              180: 1.0,
+              240: 1.0,
+              300: 1.0
           }, metric.timeline)
         elif metric.instance == "d":
           self.assertEqual("c", metric.metricName)
           self.assertEqual("a", metric.componentName)
           self.assertDictEqual({
-            120: 2.0,
-            180: 2.0,
-            240: 2.0,
-            300: 2.0
+              120: 2.0,
+              180: 2.0,
+              240: 2.0,
+              300: 2.0
           }, metric.timeline)
         else:
           self.assertTrue(False, "Wrong metrics generated by TS.execute")
@@ -150,10 +161,10 @@ class QueryOperatorTests(tornado.testing.AsyncTestCase):
       self.assertEqual((tracker, tmaster, 100, 300), args)
       raise tornado.gen.Return([
         Metrics("component", "metricName", "instance", start, end, {
-          120: 1.0,
-          180: 1.0,
-          240: 1.0,
-          300: 1.0,
+            120: 1.0,
+            180: 1.0,
+            240: 1.0,
+            300: 1.0,
         })
       ])
     ts.execute.side_effect = ts_side_effect

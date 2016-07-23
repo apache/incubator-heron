@@ -11,6 +11,7 @@ import tempfile
 from pkg_resources import Distribution, PathMetadata
 
 from .common import safe_mkdtemp, safe_rmtree
+from .compatibility import WINDOWS
 from .interpreter import PythonInterpreter
 from .tracer import TRACER
 from .version import SETUPTOOLS_REQUIREMENT, WHEEL_REQUIREMENT
@@ -36,7 +37,7 @@ class InstallerBase(object):
   SETUP_BOOTSTRAP_FOOTER = """
 __file__ = 'setup.py'
 sys.argv[0] = 'setup.py'
-exec(compile(open(__file__).read().replace('\\r\\n', '\\n'), __file__, 'exec'))
+exec(compile(open(__file__, 'rb').read(), __file__, 'exec'))
 """
 
   class Error(Exception): pass
@@ -190,7 +191,7 @@ class Installer(InstallerBase):
 class DistributionPackager(InstallerBase):
   def mixins(self):
     mixins = super(DistributionPackager, self).mixins().copy()
-    mixins.update(setuptools='setuptools>=1')
+    mixins.update(setuptools=SETUPTOOLS_REQUIREMENT)
     return mixins
 
   def find_distribution(self):
@@ -209,7 +210,10 @@ class Packager(DistributionPackager):
   """
 
   def _setup_command(self):
-    return ['sdist', '--formats=gztar', '--dist-dir=%s' % self._install_tmp]
+    if WINDOWS:
+      return ['sdist', '--formats=zip', '--dist-dir=%s' % self._install_tmp]
+    else:
+      return ['sdist', '--formats=gztar', '--dist-dir=%s' % self._install_tmp]
 
   @after_installation
   def sdist(self):

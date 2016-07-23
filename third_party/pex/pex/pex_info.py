@@ -30,7 +30,7 @@ class PexInfo(object):
   requirements: list                # list of requirements for this environment
 
   # Environment options
-  pex_root: ~/.pex                   # root of all pex-related files
+  pex_root: string                   # root of all pex-related files eg: ~/.pex
   entry_point: string                # entry point into this pex
   script: string                     # script to execute in this pex environment
                                      # at most one of script/entry_point can be specified
@@ -265,7 +265,8 @@ class PexInfo(object):
   def dump(self, **kwargs):
     pex_info_copy = self._pex_info.copy()
     pex_info_copy['requirements'] = list(self._requirements)
+    pex_info_copy['distributions'] = self._distributions.copy()
     return json.dumps(pex_info_copy, **kwargs)
 
   def copy(self):
-    return PexInfo(info=self._pex_info.copy())
+    return self.from_json(self.dump())

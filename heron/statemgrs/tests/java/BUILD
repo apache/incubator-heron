@@ -3,8 +3,8 @@ load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 test_deps_files = [
     "//third_party/java:powermock",
-    "@bazel_tools//third_party:mockito",
-    "@bazel_tools//third_party:junit4",
+    "//third_party/java:mockito",
+    "//third_party/java:junit4",
     "@com_google_guava_guava//jar",
 ]
 
@@ -12,6 +12,7 @@ spi_deps_files = [
     "//heron/common/src/java:basics-java", 
     "//heron/spi/src/java:common-spi-java", 
     "//heron/spi/src/java:statemgr-spi-java",
+    "//heron/spi/src/java:network-utils-java",
 ]
 
 local_statemgr_deps_files = [

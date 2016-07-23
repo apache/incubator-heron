@@ -39,14 +39,14 @@ Heron client installer
 Uncompressing......
 Heron is now installed!
 
-Make sure you have "/usr/local/bin" in your path.
+Make sure you have "${HOME}/bin" in your path.
 ...
 ```
 
-To add `/usr/local/bin` to your path, run:
+To add `~/bin` to your path, run:
 
 ```bash
-$ export PATH=$PATH:/usr/local/bin
+$ export PATH=$PATH:~/bin
 ```
 
 Now run the script for Heron tools (setting the `--user` flag):
@@ -66,7 +66,7 @@ To check Heron is successfully installed, run:
 
 ```bash
 $ heron version
-heron.build.version : 0.14.0
+heron.build.version : 0.14.1
 heron.build.time : Tue May 24 22:44:01 PDT 2016
 heron.build.timestamp : 1464155053000
 heron.build.host : ${HOSTNAME}
@@ -107,7 +107,7 @@ Note the output shows if the topology has been launched successfully and the wor
 
 To check what's under the working directory, run:
 ```bash
-$ ls -al ~/.herondata/topologies/local/${ROLE}/ExclamationTopology 
+$ ls -al ~/.herondata/topologies/local/${ROLE}/ExclamationTopology
 -rw-r--r--   1 username  role     2299 Jun  7 16:44 ExclamationTopology.defn
 -rw-r--r--   1 username  role        5 Jun  7 16:44 container_1_exclaim1_1.pid
 -rw-r--r--   1 username  role        5 Jun  7 16:44 container_1_word_2.pid
@@ -157,8 +157,8 @@ $ heron-tracker
 ```
 
 You can reach Heron Tracker in your browser at [http://localhost:8888](http://localhost:8888)
-and see something like the following upon successful submission of the topology: 
-![alt tag](http://twitter.github.io/heron/img/heron-tracker.png)
+and see something like the following upon successful submission of the topology:
+![alt tag](/img/heron-tracker.png)
 
 To explore Heron Tracker, please refer to [Heron Tracker Rest API](../operators/heron-tracker-api)
 
@@ -175,8 +175,8 @@ $ heron-ui
 ```
 
 You can open Heron UI in your browser at [http://localhost:8889](http://localhost:8889)
-and see something like this upon successful submission of the topology: 
-![alt tag](http://twitter.github.io/heron/img/heron-ui.png)
+and see something like this upon successful submission of the topology:
+![alt tag](/img/heron-ui.png)
 
 To play with Heron UI, please refer to [Heron UI Usage Guide](../developers/ui-guide)
 ## Step 5 --- Explore topology management commands
@@ -250,7 +250,7 @@ The included example topologies:
   for each component.
 * `CustomGroupingTopology.java` --- A topology that implements custom grouping.
 * `ExclamationTopology.java` --- A spout that emits random words to a bolt that
-  then adds an explanation mark.
+  then adds an exclamation mark.
 * `MultiSpoutExclamationTopology.java` --- a topology with multiple spouts.
 * `MultiStageAckingTopology.java` --- A three-stage topology. A spout emits to a
   bolt that then feeds to another bolt.

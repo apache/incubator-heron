@@ -11,19 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' schedulerlocationhandler.py '''
+import traceback
 import tornado.gen
 import tornado.web
-import traceback
 
-from heron.tracker.src.python import constants
 from heron.tracker.src.python.handlers import BaseHandler
+
 
 class SchedulerLocationHandler(BaseHandler):
   """
   URL - /topologies/schedulerlocation
   Parameters:
    - cluster (required)
+   - role - (optional) Role used to submit the topology.
    - environ (required)
    - topology (required) name of the requested topology
 
@@ -31,19 +32,22 @@ class SchedulerLocationHandler(BaseHandler):
   information of scheduler location of the topology.
   """
 
+  # pylint: disable=attribute-defined-outside-init
   def initialize(self, tracker):
+    """ initialize """
     self.tracker = tracker
 
   @tornado.gen.coroutine
   def get(self):
+    """ get method """
     try:
       cluster = self.get_argument_cluster()
+      role = self.get_argument_role()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
-      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, environ)
+      topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)
       scheduler_location = topology_info["scheduler_location"]
       self.write_success_response(scheduler_location)
     except Exception as e:
       traceback.print_exc()
       self.write_error_response(e)
-

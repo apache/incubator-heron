@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.NetworkUtils;
+import com.twitter.heron.spi.utils.NetworkUtils;
 
 public final class ZkUtils {
   public static final String LOCAL_HOST = "localhost";

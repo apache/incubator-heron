@@ -11,11 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+""" metrichandler.py """
 import logging
+import traceback
 import tornado.gen
 import tornado.web
-import traceback
 
 from heron.proto import common_pb2
 from heron.proto import tmaster_pb2
@@ -24,11 +24,13 @@ from heron.tracker.src.python.handlers import BaseHandler
 
 LOG = logging.getLogger(__name__)
 
+
 class MetricsHandler(BaseHandler):
   """
   URL - /topologies/metrics
   Parameters:
    - cluster (required)
+   - role - (optional) Role used to submit the topology.
    - environ (required)
    - topology (required) name of the requested topology
    - component (required)
@@ -42,31 +44,38 @@ class MetricsHandler(BaseHandler):
   by that component.
   """
 
+  # pylint: disable=attribute-defined-outside-init
   def initialize(self, tracker):
+    """ initialize """
     self.tracker = tracker
 
   @tornado.gen.coroutine
   def get(self):
+    """ get method """
     try:
       cluster = self.get_argument_cluster()
+      role = self.get_argument_role()
       environ = self.get_argument_environ()
       topology_name = self.get_argument_topology()
       component = self.get_argument_component()
       metric_names = self.get_required_arguments_metricnames()
 
-      topology = self.tracker.getTopologyByClusterEnvironAndName(cluster, environ, topology_name)
+      topology = self.tracker.getTopologyByClusterRoleEnvironAndName(
+          cluster, role, environ, topology_name)
 
       interval = int(self.get_argument(constants.PARAM_INTERVAL, default=-1))
       instances = self.get_arguments(constants.PARAM_INSTANCE)
 
-      metrics = yield tornado.gen.Task(self.getComponentMetrics,
-        topology.tmaster, component, metric_names, instances, interval)
+      metrics = yield tornado.gen.Task(
+          self.getComponentMetrics,
+          topology.tmaster, component, metric_names, instances, interval)
 
       self.write_success_response(metrics)
     except Exception as e:
       traceback.print_exc()
       self.write_error_response(e)
 
+  # pylint: disable=too-many-locals, no-self-use, unused-argument
   @tornado.gen.coroutine
   def getComponentMetrics(self,
                           tmaster,
@@ -126,7 +135,6 @@ class MetricsHandler(BaseHandler):
     except tornado.httpclient.HTTPError as e:
       raise Exception(str(e))
 
-
     # Check the response code - error if it is in 400s or 500s
     responseCode = result.code
     if responseCode >= 400:
@@ -157,4 +165,3 @@ class MetricsHandler(BaseHandler):
         ret["metrics"][metricname][instance] = value
 
     raise tornado.gen.Return(ret)
-

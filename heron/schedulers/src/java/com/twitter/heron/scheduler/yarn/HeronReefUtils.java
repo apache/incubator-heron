@@ -18,7 +18,7 @@ import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.twitter.heron.spi.common.ShellUtils;
+import com.twitter.heron.spi.utils.ShellUtils;
 
 final class HeronReefUtils {
   private static final Logger LOG = Logger.getLogger(HeronReefUtils.class.getName());

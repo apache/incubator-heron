@@ -27,7 +27,7 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.packing.PackingPlan;
 
 
 public class LocalSchedulerTest {

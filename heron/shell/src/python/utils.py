@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' utils.py '''
 import grp
 import os
 import pwd
@@ -31,6 +31,7 @@ def format_mode(sres):
   user = (mode & 07)
 
   def stat_type(md):
+    ''' stat type'''
     if stat.S_ISDIR(md):
       return 'd'
     elif stat.S_ISSOCK(md):
@@ -39,10 +40,11 @@ def format_mode(sres):
       return '-'
 
   def triple(md):
+    ''' triple '''
     return '%c%c%c' % (
-      'r' if md & 0b100 else '-',
-      'w' if md & 0b010 else '-',
-      'x' if md & 0b001 else '-')
+        'r' if md & 0b100 else '-',
+        'w' if md & 0b010 else '-',
+        'x' if md & 0b001 else '-')
 
   return ''.join([stat_type(mode), triple(root), triple(group), triple(user)])
 
@@ -52,9 +54,11 @@ def format_mtime(mtime):
   """
   now = datetime.now()
   dt = datetime.fromtimestamp(mtime)
-  return '%s %2d %5s' % (dt.strftime('%b'), dt.day,
-    dt.year if dt.year != now.year else dt.strftime('%H:%M'))
+  return '%s %2d %5s' % (
+      dt.strftime('%b'), dt.day,
+      dt.year if dt.year != now.year else dt.strftime('%H:%M'))
 
+# pylint: disable=unused-argument
 def format_prefix(filename, sres):
   """
   Prefix to a filename in the directory listing. This is to make the
@@ -73,12 +77,12 @@ def format_prefix(filename, sres):
     group = sres.st_gid
 
   return '%s %3d %10s %10s %10d %s' % (
-    format_mode(sres),
-    sres.st_nlink,
-    user,
-    group,
-    sres.st_size,
-    format_mtime(sres.st_mtime),
+      format_mode(sres),
+      sres.st_nlink,
+      user,
+      group,
+      sres.st_size,
+      format_mtime(sres.st_mtime),
   )
 
 def get_listing(path):
@@ -93,6 +97,7 @@ def get_listing(path):
   return listing
 
 def get_stat(path, filename):
+  ''' get stat '''
   return os.stat(os.path.join(path, filename))
 
 def read_chunk(filename, offset=None, length=None):
@@ -113,7 +118,7 @@ def read_chunk(filename, offset=None, length=None):
 
   try:
     fstat = os.stat(filename)
-  except Exception as e:
+  except Exception:
     return {}
 
   if offset == -1:
@@ -126,11 +131,10 @@ def read_chunk(filename, offset=None, length=None):
     fp.seek(offset)
     try:
       data = fp.read(length)
-    except IOError as e:
+    except IOError:
       return {}
 
   if data:
     return dict(offset=offset, length=len(data), data=escape(data.decode('utf8', 'replace')))
 
   return dict(offset=offset, length=0)
-

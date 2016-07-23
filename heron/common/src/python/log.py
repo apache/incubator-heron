@@ -11,21 +11,27 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+''' log.py '''
 import logging
 import logging.handlers
 
 # Create the logger
+# pylint: disable=invalid-name
 Log = logging.getLogger('common')
 
-def configure(level, logfile = None):
+def configure(level, logfile=None):
+  '''
+  :param level:
+  :param logfile:
+  :return:
+  '''
   log_format = "%(asctime)s-%(levelname)s: %(message)s"
   date_format = '%a, %d %b %Y %H:%M:%S'
 
   logging.basicConfig(format=log_format, datefmt=date_format)
   Log.setLevel(level)
 
-  if (logfile != None):
-    fh = logging.FileHandler(logfile)
-    fh.setFormatter(logging.Formatter(log_format))
-    Log.addHandler(fh)
+  if logfile != None:
+    handle = logging.FileHandler(logfile)
+    handle.setFormatter(logging.Formatter(log_format))
+    Log.addHandler(handle)

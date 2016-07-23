@@ -41,7 +41,7 @@ import org.junit.Test;
 import com.twitter.heron.scheduler.yarn.DriverOnLocalReefTest.TestDriver.Activated;
 import com.twitter.heron.scheduler.yarn.DriverOnLocalReefTest.TestDriver.Allocated;
 import com.twitter.heron.scheduler.yarn.DriverOnLocalReefTest.TestDriver.DriverStarter;
-import com.twitter.heron.spi.common.PackingPlan;
+import com.twitter.heron.spi.packing.PackingPlan;
 
 public class DriverOnLocalReefTest {
   @Test

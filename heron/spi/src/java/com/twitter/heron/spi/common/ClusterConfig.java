@@ -90,7 +90,9 @@ public final class ClusterConfig {
         .put(Keys.systemSandboxFile(),
             Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.systemSandboxFile()))
         .put(Keys.uploaderSandboxFile(),
-            Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.uploaderSandboxFile()));
+            Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.uploaderSandboxFile()))
+        .put(Keys.overrideSandboxFile(),
+            Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.overrideSandboxFile()));
     return cb.build();
   }
 
@@ -179,6 +181,10 @@ public final class ClusterConfig {
         .putAll(loadSchedulerConfig(Context.schedulerSandboxFile(sandboxConfig)))
         .putAll(loadStateManagerConfig(Context.stateManagerSandboxFile(sandboxConfig)))
         .putAll(loadUploaderConfig(Context.uploaderSandboxFile(sandboxConfig)));
+
+    // Add the override config at the end to replace any exisiting configs
+    cb.putAll(loadOverrideConfig(Context.overrideSandboxFile(sandboxConfig)));
+
     return cb.build();
   }
 }

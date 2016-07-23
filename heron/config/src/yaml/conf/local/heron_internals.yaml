@@ -198,6 +198,9 @@ heron.instance.network.options.socket.received.buffer.size.bytes: 8738000
 # The maximum # of data tuple to batch in a HeronDataTupleSet protobuf
 heron.instance.set.data.tuple.capacity: 1024
 
+# The maximum size in bytes of data tuple to batch in a HeronDataTupleSet protobuf
+heron.instance.set.data.tuple.size.bytes: 8388608
+
 # The maximum # of control tuple to batch in a HeronControlTupleSet protobuf
 heron.instance.set.control.tuple.capacity: 1024
 
