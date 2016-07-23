@@ -6,7 +6,6 @@ pex_library(
   name = "pyinstance_lib",
   srcs = glob(
     ["**/*.py"],
-    exclude = ["main.py", "test_server.py"]
   ),
   deps = [
     "//heron/common/src/python:common",
@@ -20,12 +19,6 @@ pex_library(
   srcs = ["instance/component.py", "instance/bolt.py", "instance/spout.py"],
 )
 
-
-pex_binary(
-  name = "test-server-py",
-  srcs = ["test_server.py"],
-  deps = ["//heron/instance/tests/python:pytest-lib"],
-)
 
 pex_binary(
   name = "single_thread_heron_instance",

@@ -434,7 +434,7 @@ class HeronExecutor(object):
 
   def run_process(self, name, cmd):
     ''' run process '''
-    if 'single_thread_heron_instance' in cmd[0]:
+    if 'single_thread_heron_instance' in cmd[0] and False:
       env = os.environ.copy()
       env["PEX_PROFILE"] = "true"
       do_print("Set environment variable: " + str(env))

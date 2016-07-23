@@ -48,3 +48,12 @@ INSTANCE_EXECUTE_BATCH_TIME_MS = "heron.instance.execute.batch.time.ms"
 INSTANCE_EXECUTE_BATCH_SIZE_BYTES = "heron.instance.execute.batch.size.bytes"
 
 METRICS_EXPORT_INTERVAL_SECS = "heron.metrics.export.interval.sec"
+
+INSTANCE_NW_WRITE_BATCH_SIZE_BYTES = "heron.instance.network.write.batch.size.bytes"
+INSTANCE_NW_WRITE_BATCH_TIME_MS = "heron.instance.network.write.batch.time.ms"
+INSTANCE_NW_READ_BATCH_SIZE_BYTES = "heron.instance.network.read.batch.size.bytes"
+INSTANCE_NW_READ_BATCH_TIME_MS = "heron.instance.network.read.batch.time.ms"
+INSTANCE_NW_OPTIONS_SOCKET_RECEIVED_BUFFER_SIZE_BYTES = \
+  "heron.instance.network.options.socket.received.buffer.size.bytes"
+INSTANCE_NW_OPTIONS_SOCKET_SEND_BUFFER_SIZE_BYTES = \
+  "heron.instance.network.options.socket.send.buffer.size.bytes"

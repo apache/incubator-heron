@@ -139,6 +139,7 @@ class MultiReducedMetric(IMetric):
     ret = {}
     for key, value in self.value.iteritems():
       ret[key] = value.get_value_and_reset()
+      self.value[key] = value
     return ret
 
 MeanReducedMetric = lambda: ReducedMetric(MeanReducer)

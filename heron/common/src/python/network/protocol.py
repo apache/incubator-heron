@@ -34,49 +34,18 @@ class HeronProtocol(object):
     return struct.unpack(HeronProtocol.INT_PACK_FMT, i)[0]
 
   @staticmethod
-  def _get_size_to_pack_string(string):
+  def get_size_to_pack_string(string):
     """Get size to pack string, four byte used for specifying length of the string"""
     return 4 + len(string)
 
   @staticmethod
-  def _get_size_to_pack_message(message):
+  def get_size_to_pack_message(message):
     """Get size to pack message, four byte used for specifying length of the message"""
     return 4 + message.ByteSize()
 
   @staticmethod
-  def get_outgoing_packet(reqid, message):
-    """Creates a packet (bytestring) from a given reqid and message
-
-    :param reqid: REQID object
-    :param message: protocol buffer object
-    """
-    assert message.IsInitialized()
-    packet = ''
-
-    # calculate the totla size of the packet incl. header
-    typename = message.DESCRIPTOR.full_name
-
-    datasize = HeronProtocol._get_size_to_pack_string(typename) + \
-               REQID.REQID_SIZE + HeronProtocol._get_size_to_pack_message(message)
-
-    # first write out how much data is there as the header
-    packet += HeronProtocol.pack_int(datasize)
-
-    # next write the type string
-    packet += HeronProtocol.pack_int(len(typename))
-    packet += typename
-
-    # reqid
-    packet += reqid.pack()
-
-    # add the proto
-    packet += HeronProtocol.pack_int(message.ByteSize())
-    packet += message.SerializeToString()
-    return str(packet)
-
-  @staticmethod
   def read_new_packet(dispatcher):
-    """Reads new packet
+    """Reads new packet and returns an IncomingPacket object
 
     :param dispatcher: asyncore's dispatcher class from which packets is read
     """
@@ -107,6 +76,59 @@ class HeronProtocol(object):
     serialized_msg = data[:len_msg]
 
     return typename, reqid, serialized_msg
+
+class OutgoingPacket(object):
+  """Wrapper class for outgoing packet"""
+  def __init__(self, raw_data):
+    self.raw = str(raw_data)
+    self.to_send = str(raw_data)
+
+  def __len__(self):
+    return len(self.raw)
+
+  @staticmethod
+  def create_packet(reqid, message):
+    """Creates Outgoing Packet from a given reqid and message
+
+    :param reqid: REQID object
+    :param message: protocol buffer object
+    """
+    assert message.IsInitialized()
+    packet = ''
+
+    # calculate the totla size of the packet incl. header
+    typename = message.DESCRIPTOR.full_name
+
+    datasize = HeronProtocol.get_size_to_pack_string(typename) + \
+               REQID.REQID_SIZE + HeronProtocol.get_size_to_pack_message(message)
+
+    # first write out how much data is there as the header
+    packet += HeronProtocol.pack_int(datasize)
+
+    # next write the type string
+    packet += HeronProtocol.pack_int(len(typename))
+    packet += typename
+
+    # reqid
+    packet += reqid.pack()
+
+    # add the proto
+    packet += HeronProtocol.pack_int(message.ByteSize())
+    packet += message.SerializeToString()
+    return OutgoingPacket(packet)
+
+  @property
+  def sent_complete(self):
+    """Indicates whether this packet is successfully sent"""
+    return len(self.to_send) == 0
+
+  def send(self, dispatcher):
+    """Sends this outgoing packet to dispatcher's socket"""
+    if self.sent_complete:
+      return
+
+    sent = dispatcher.send(self.to_send)
+    self.to_send = self.to_send[sent:]
 
 class IncomingPacket(object):
   """Helper class for incoming packet"""
@@ -181,7 +203,7 @@ class IncomingPacket(object):
         Log.debug("Try again error")
       else:
         # Fatal error
-        Log.debug("Fatal error")
+        Log.debug("Fatal error when reading IncomingPacket")
         raise RuntimeError("Fatal error occured in IncomingPacket.read()")
 
   def __str__(self):

@@ -15,7 +15,6 @@
 import logging
 from heron.proto import tuple_pb2, topology_pb2
 
-from heron.common.src.python.log import Log
 from heron.common.src.python.utils.misc import PythonSerializer
 from heron.instance.src.python.instance.stream import Stream, Grouping
 from heron.instance.src.python.misc.outgoing_tuple_helper import OutgoingTupleHelper
@@ -44,7 +43,9 @@ class Component(object):
     self.output_helper = OutgoingTupleHelper(self.pplan_helper, out_stream)
     self.looper = looper
     self.sys_config = sys_config
-    self.logger = Log
+
+    # will set a root logger here
+    self.logger = logging.getLogger()
 
   @classmethod
   def get_python_class_path(cls):

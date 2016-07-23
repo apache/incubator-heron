@@ -178,12 +178,12 @@ class SpoutMetrics(ComponentMetrics):
   def acked_tuple(self, stream_id, complete_latency_ns):
     """Apply updates to the ack metrics"""
     self.update_count(self.ACK_COUNT, key=stream_id)
-    self.update_reduced_metric(self.COMPLETE_LATENCY, complete_latency_ns, stream_id)
+    self.update_reduced_metric(self.COMPLETE_LATENCY, complete_latency_ns, key=stream_id)
 
   def failed_tuple(self, stream_id, fail_latency_ns):
     """Apply updates to the fail metrics"""
     self.update_count(self.FAIL_COUNT, key=stream_id)
-    self.update_reduced_metric(self.FAIL_LATENCY, fail_latency_ns, stream_id)
+    self.update_reduced_metric(self.FAIL_LATENCY, fail_latency_ns, key=stream_id)
 
   def update_pending_tuples_count(self, count):
     """Apply updates to the pending tuples count"""
@@ -324,8 +324,9 @@ class MetricsCollector(object):
         if key is not None and value is not None:
           self._add_data_to_message(message, name + "/" + str(key), value)
         else:
-          Log.error("<" + str(key) + ":" + str(value) +
-                    "> is not a valid key-value to output as metric")
+          Log.info("When gathering metric: " + name + " <" + str(key) + ":" + str(value) +
+                   "> is not a valid key-value to output as metric. Skipping...")
+
           continue
     else:
       self._add_data_to_message(message, name, metric_value)

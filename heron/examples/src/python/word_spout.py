@@ -24,13 +24,24 @@ class WordSpout(Spout):
     self.words = cycle(["hello", "bye", "good", "bad", "heron", "storm"])
     self.emit_count = 0
     self.logger.debug("Spout context: \n" + str(context))
+    self.ack_count = 0
+    self.fail_count = 0
 
   def next_tuple(self):
     word = next(self.words)
-    self.logger.debug("Will emit: " + word)
-    self.emit_count += 1
+    #self.logger.debug("Will emit: " + word)
     self.emit([word], tup_id='message id')
-    self.logger.debug("Emit count: " + str(self.emit_count))
-    if self.emit_count % 1000 == 0:
+    #self.emit([word])
+    self.emit_count += 1
+    if self.emit_count % 100000 == 0:
       self.logger.info("Emitted " + str(self.emit_count))
 
+  def ack(self, tup_id):
+    self.ack_count += 1
+    if self.ack_count % 10000 == 0:
+      self.logger.info("Acked " + str(self.ack_count))
+
+  def fail(self, tup_id):
+    self.fail_count += 1
+    if self.fail_count % 10000 == 0:
+      self.logger.info("Failed " + str(self.fail_count))

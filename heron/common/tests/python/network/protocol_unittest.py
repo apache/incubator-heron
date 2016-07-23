@@ -27,14 +27,16 @@ class ProtocolTest(unittest.TestCase):
     unpacked_reqid = REQID.unpack(packed_reqid)
 
     self.assertEqual(reqid, unpacked_reqid)
+    self.assertFalse(reqid.is_zero())
 
     zero_reqid = REQID.generate_zero()
     packed_zero = REQID.pack(zero_reqid)
     # the length of REQID is 32 bytes
     self.assertEqual(packed_zero, bytearray(0 for i in range(32)))
+    self.assertTrue(zero_reqid.is_zero())
 
   def test_encode_decode_packet(self):
-    # get_mock_packets() uses HeronProtocol.get_outgoing_packet
+    # get_mock_packets() uses OutgoingPacket.create_packet() to encode
     pkt_list, raw_list = mock_generator.get_mock_requst_packets(is_message=False)
     for pkt, raw in zip(pkt_list, raw_list):
       raw_reqid, raw_message = raw

@@ -14,8 +14,9 @@
 """module for generating mock classes/objects for testing purposes"""
 import socket
 
-from heron.common.src.python.network import (HeronClient, REQID, HeronProtocol,
-                                             IncomingPacket, StatusCode)
+from heron.common.src.python.network import (HeronClient, REQID, OutgoingPacket,
+                                             IncomingPacket, StatusCode,
+                                             SocketOptions)
 import heron.common.tests.python.mock_protobuf as mock_protobuf
 
 # pylint: disable=missing-docstring
@@ -28,7 +29,7 @@ prim_list = [1000, -234, 0.00023, "string",
 
 def convert_to_incoming_packet(reqid, message):
   """Convert (reqid, message) pair to IncomingPacket object"""
-  raw = HeronProtocol.get_outgoing_packet(reqid, message)
+  raw = OutgoingPacket.create_packet(reqid, message).raw
   dispatcher = MockDispatcher()
   dispatcher.prepare_with_raw(raw)
   packet = IncomingPacket()
@@ -81,13 +82,13 @@ def get_a_mock_message_list_and_builder():
 
 def get_fail_packet():
   """Returns an incomplete IncomingPacket object"""
-  raw = HeronProtocol.get_outgoing_packet(REQID.generate(), mock_protobuf.get_mock_pplan())
+  raw = OutgoingPacket.create_packet(REQID.generate(), mock_protobuf.get_mock_pplan()).raw
   packet = IncomingPacket.create_packet(raw[:4], raw[4:])
   packet.is_complete = False
   return packet
 
 class MockDispatcher(object):
-  """Mock asyncore.dispatcher class, supporting only recv() method
+  """Mock asyncore.dispatcher class, supporting only recv() and send() method
 
   This dispatcher provides several options as to how to prepare its receive buffer.
   """
@@ -136,11 +137,17 @@ class MockDispatcher(object):
     self.to_be_received = self.to_be_received[numbytes:]
     return ret
 
+  # pylint: disable=no-self-use
+  def send(self, buf):
+    """mock sends the content of a given buffer"""
+    return len(buf)
+
 class MockHeronClient(HeronClient):
   HOST = '127.0.0.1'
   PORT = 9090
   def __init__(self):
-    HeronClient.__init__(self, None, self.HOST, self.PORT, {})
+    socket_options = SocketOptions(32768, 16, 32768, 16, 1024000, 1024000)
+    HeronClient.__init__(self, None, self.HOST, self.PORT, {}, socket_options)
     self.on_connect_called = False
     self.on_response_status = None
     self.called_handle_packet = False

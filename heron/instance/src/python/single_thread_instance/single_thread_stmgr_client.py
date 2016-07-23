@@ -25,9 +25,9 @@ from heron.common.src.python.network import HeronClient, StatusCode
 # TODO: will implement the rest later
 class SingleThreadStmgrClient(HeronClient):
   """SingleThreadStmgrClient is a Stream Manager Client for a single-threaded Heron Instance"""
-  def __init__(self, looper, heron_instance_cls, strmgr_host, port,
-               topology_name, topology_id, instance, sock_map, gateway_metrics):
-    HeronClient.__init__(self, looper, strmgr_host, port, sock_map)
+  def __init__(self, looper, heron_instance_cls, strmgr_host, port, topology_name, topology_id,
+               instance, sock_map, gateway_metrics, socket_options):
+    HeronClient.__init__(self, looper, strmgr_host, port, sock_map, socket_options)
     self.heron_instance_cls = heron_instance_cls
     self.topology_name = topology_name
     self.topology_id = topology_id
@@ -70,7 +70,6 @@ class SingleThreadStmgrClient(HeronClient):
     self.register_on_message(tuple_msg_builder)
 
   def _send_register_req(self):
-    # TODO: change it to RegisterInstanceRequest
     request = stmgr_pb2.RegisterInstanceRequest()
     request.instance.MergeFrom(self.instance)
     request.topology_name = self.topology_name

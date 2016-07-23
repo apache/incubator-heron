@@ -42,5 +42,5 @@ class CountBolt(Bolt):
       self.logger.debug("Will ack tuple: " + str(tuple))
       self.ack(tuple)
 
-    self.emit([word, self.counter[word]])
+    #self.emit([word, self.counter[word]])
 

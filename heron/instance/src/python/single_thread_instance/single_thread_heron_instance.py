@@ -21,6 +21,7 @@ import yaml
 from heron.common.src.python.log import Log, init_rotating_logger
 from heron.common.src.python.basics.gateway_looper import GatewayLooper
 from heron.common.src.python.utils.metrics import GatewayMetrics, MetricsCollector
+from heron.common.src.python.network import create_socket_options
 
 from heron.proto import physical_plan_pb2, stmgr_pb2
 from heron.instance.src.python.single_thread_instance.single_thread_stmgr_client import SingleThreadStmgrClient
@@ -52,10 +53,14 @@ class SingleThreadHeronInstance(object):
     self.gateway_metrics = GatewayMetrics(self.metrics_collector, sys_config)
 
     self.socket_map = dict()
-    self._stmgr_client = SingleThreadStmgrClient(self.looper, self, 'localhost', stream_port, topology_name,
-                                                   topology_id, instance, self.socket_map, self.gateway_metrics)
+
+    socket_options = create_socket_options(self.sys_config)
+    self._stmgr_client = SingleThreadStmgrClient(self.looper, self, 'localhost', stream_port,
+                                                 topology_name, topology_id, instance,
+                                                 self.socket_map, self.gateway_metrics,
+                                                 socket_options)
     self._metrics_client = MetricsManagerClient(self.looper, 'localhost', metrics_port, instance,
-                                                self.out_metrics, self.socket_map)
+                                                self.out_metrics, self.socket_map, socket_options)
     self.my_pplan_helper = None
 
     # my_instance is a tuple containing (is_spout, TopologyAPI.{Spout|Bolt}, loaded python instance)
