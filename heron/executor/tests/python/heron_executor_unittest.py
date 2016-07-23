@@ -30,8 +30,9 @@ class MockPOpen:
 
 class MockExecutor(HeronExecutor):
   """mock executor that overrides methods that don't apply to unit tests, like running processes"""
-  def __init__(self):
+  def __init__(self, args):
     self.processes = []
+    super(MockExecutor, self).__init__(args)
 
   def load_logging_dir(self, heron_internals_config_file):
     return "fake_dir"
@@ -84,7 +85,7 @@ class HeronExecutorTest(unittest.TestCase):
   def get_args(self, shard_id):
     return ("""
     ./heron-executor %d topname topid topdefnfile
-    instance_dist zknode zkroot tmaster_binary stmgr_binary
+    1:word:3:0:exclaim1:2:0:exclaim1:1:0 zknode zkroot tmaster_binary stmgr_binary
     metricsmgr_classpath "LVhYOitIZWFwRHVtcE9uT3V0T2ZNZW1vcnlFcnJvcg&equals;&equals;" classpath
     master_port tmaster_controller_port tmaster_stats_port heron/config/src/yaml/conf/test/test_heron_internals.yaml
     exclaim1:536870912,word:536870912 "" pkg_type topology_jar_file
@@ -116,8 +117,13 @@ class HeronExecutorTest(unittest.TestCase):
     executor.launch()
     monitored_processes = executor.processes_to_monitor
 
+    # convert to (pid, name, command)
+    found_processes = map(lambda (pid, name, command): (pid, name, ' '.join(command)), executor.processes)
+    found_monitored = map(lambda (pid, value): (pid, value[1], ' '.join(value[2])), monitored_processes.items())
+    print("do_test_commands - found_processes: %s found_monitored: %s" % (found_processes, found_monitored))
+    self.assertEquals(found_processes, found_monitored)
+
     print("do_test_commands - expected_processes: %s monitored_processes: %s" % (expected_processes, monitored_processes))
-    self.assertEquals(executor.processes, monitored_processes)
     self.assert_processes(expected_processes, monitored_processes)
 
   def test_change_instance_dist_container_1(self):
@@ -125,7 +131,7 @@ class HeronExecutorTest(unittest.TestCase):
     self.executor_1.update_instance_distribution(self.dist_expected)
     current_commands = self.executor_1.get_commands_to_run()
 
-    self.assertEquals(dict(map((lambda x: (x[1], x[2].split(' '))), self.expected_processes_container_1)), current_commands)
+    self.assertEquals(dict(map((lambda (_, name, command): (name, command.split(' '))), self.expected_processes_container_1)), current_commands)
 
     # update instance distribution
     new_distribution = self.executor_1.parse_instance_distribution("1:word:3:0:word:2:0:exclaim1:1:0")
