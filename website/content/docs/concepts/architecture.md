@@ -197,7 +197,8 @@ https://docs.google.com/drawings/d/10d1Q_VO0HFtOHftDV7kK6VbZMVI5EpEYHrD-LR7SczE
 
 ### Topology Submit Description
 
-The following describes in more detail how a topology is submitted.
+The following describes in more detail how a topology is submitted and
+launched using local scheduler.
 
 * Client
 
