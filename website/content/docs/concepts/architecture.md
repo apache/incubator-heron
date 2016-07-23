@@ -207,7 +207,7 @@ The following describes in more detail how a topology is submitted.
     is responsible for invoking an uploader and a launcher for the topology.
     The uploader uploads the topology package to the given location, while the
     launcher registers the topology's logical plan and executor state with
-    the state manager and invokes the main scheduler.
+    the State Manager and invokes the main scheduler.
 
 * Shared Services
 
@@ -220,7 +220,7 @@ The following describes in more detail how a topology is submitted.
 
 * Topologies
 
-    `heron-executor` process is run for each container and is responsible for
+    `heron-executor` process is started for each container and is responsible for
     executing the Topology Master or Heron Instances (Bolt/Spout) that are
     assigned to the container. Note that the Topology Master is always executed
     on container 0. When `heron-executor` executes normal Heron Instances
