@@ -1,7 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/tools/rules/pex_rules", "pex_library", "pex_binary")
-
 pex_library(
     name = "heron-ui-lib",
     srcs = glob(
@@ -25,7 +23,7 @@ pex_binary(
     deps = [
         ":heron-ui-lib",
     ],
-    resources = [
+    data = [
         "//heron/ui/resources:templates",
         "//heron/ui/resources:static",
     ],

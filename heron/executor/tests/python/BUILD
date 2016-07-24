@@ -1,6 +1,5 @@
-load("/tools/rules/pex_rules", "pex_test")
 
-pex_test(
+pex_pytest(
     name = "aurora_unittest",
     srcs = ["aurora_unittest.py"],
     reqs = [

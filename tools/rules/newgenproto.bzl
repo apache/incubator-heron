@@ -1,4 +1,4 @@
-load("pex_rules", "pex_library")
+load("@io_bazel_rules_pex//pex:pex_rules.bzl", "pex_library")
 
 standard_proto_path = "heron/proto"
 
