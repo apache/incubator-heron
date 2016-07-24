@@ -77,7 +77,13 @@ class ZkStateManager(StateManager):
       def callback(data):
         ret["result"] = data
 
-    self._get_topologies_with_watch(callback, isWatching)
+    try:
+      self._get_topologies_with_watch(callback, isWatching)
+    except NoNodeError as err:
+      self.client.stop()
+      path = self.get_topologies_path()
+      raise StateException("Error required topology path '%s' not found" % (path),
+                           StateException.EX_TYPE_NO_NODE_ERROR), None, sys.exc_info()[2]
 
     # The topologies are now populated with the data.
     return ret["result"]
@@ -185,8 +191,8 @@ class ZkStateManager(StateManager):
       raise StateException("NotEmptyError while deleting topology",
                         StateException.EX_TYPE_NOT_EMPTY_ERROR), None, sys.exc_info()[2]
     except ZookeeperError as e:
-      raise StateException("Zookeeper while deleting topology",
-                        StateException.EX_TYPE_ZOOKEEPER_ERROR), None, sys.exc_info()[2]
+       StateException("Zookeeper while deleting topology",
+                        StateException.EX_TraiseYPE_ZOOKEEPER_ERROR), None, sys.exc_info()[2]
     except Exception as e:
       # Just re raise the exception.
       raise
