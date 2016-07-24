@@ -145,7 +145,7 @@ public class CuratorStateManagerTest {
   }
 
   /**
-   * Test existNode method
+   * Test nodeExists method
    * @throws Exception
    */
   @Test
@@ -171,12 +171,12 @@ public class CuratorStateManagerTest {
     spyStateManager.initialize(config);
 
     // Verify the result is true when path is correct
-    ListenableFuture<Boolean> result1 = spyStateManager.existNode(correctPath);
+    ListenableFuture<Boolean> result1 = spyStateManager.nodeExists(correctPath);
     Mockito.verify(mockExistsBuilder).forPath(correctPath);
     Assert.assertTrue(result1.get());
 
     // Verify the result is false when path is wrong
-    ListenableFuture<Boolean> result2 = spyStateManager.existNode(wrongPath);
+    ListenableFuture<Boolean> result2 = spyStateManager.nodeExists(wrongPath);
     Mockito.verify(mockExistsBuilder).forPath(wrongPath);
     Assert.assertFalse(result2.get());
   }

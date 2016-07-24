@@ -1,3 +1,4 @@
+load("/tools/rules/java_tests", "java_tests")
 load("/tools/rules/heron_deps", "heron_java_proto_files")
 
 common_deps_files = [
@@ -5,8 +6,8 @@ common_deps_files = [
     "//third_party/java:powermock",
     "//heron/api/src/java:api-java",
     "//heron/common/src/java:basics-java",
-    "@bazel_tools//third_party:junit4",
-    "@bazel_tools//third_party:mockito",
+    "//third_party/java:junit4",
+    "//third_party/java:mockito",
 ]
 
 spi_deps_files = [
@@ -45,110 +46,94 @@ local_deps_files = [
     "//heron/schedulers/src/java:local-scheduler-java",
 ]
 
+mesos_deps_files = [
+    "//heron/schedulers/src/java:mesos-scheduler-java",
+    "@org_apache_mesos_mesos//jar",
+]
+
 slurm_deps_files = [
     "//heron/schedulers/src/java:slurm-scheduler-java",
 ]
 
-java_test(
-  name="AuroraSchedulerTest",
-  srcs=glob(
-    ["**/AuroraSchedulerTest.java"]
-  ),
-  deps=scheduler_deps_files + aurora_deps_files,
-  size="small",
+java_library(
+  name = "aurora-tests",
+  srcs = glob(["**/aurora/*.java"]),
+  deps = scheduler_deps_files + aurora_deps_files,
 )
 
-java_test(
-  name="AuroraLauncherTest",
-  srcs=glob(
-    ["**/AuroraLauncherTest.java"]
-  ),
-  deps=scheduler_deps_files + aurora_deps_files,
-  size="small",
+java_tests(
+  test_classes = [
+    "com.twitter.heron.scheduler.aurora.AuroraSchedulerTest",
+    "com.twitter.heron.scheduler.aurora.AuroraLauncherTest",
+    "com.twitter.heron.scheduler.aurora.AuroraControllerTest",
+  ],
+  runtime_deps = [ ":aurora-tests" ],
+  size = "small",
 )
 
-java_test(
-  name="AuroraControllerTest",
-  srcs=glob(
-    ["**/AuroraControllerTest.java"]
-  ),
-  deps=scheduler_deps_files + aurora_deps_files,
-  size="small",
+java_library(
+  name = "yarn-tests",
+  srcs = glob(["**/yarn/*.java"]),
+  deps = scheduler_deps_files + yarn_deps_files,
 )
 
-java_test(
-  name="YarnSchedulerTest",
-  srcs=glob(["**/YarnSchedulerTest.java"]
-  ),
-  deps=scheduler_deps_files + yarn_deps_files,
-  size="small",
+java_tests(
+  test_classes = [
+    "com.twitter.heron.scheduler.yarn.YarnSchedulerTest",
+    "com.twitter.heron.scheduler.yarn.HeronMasterDriverTest",
+    "com.twitter.heron.scheduler.yarn.DriverOnLocalReefTest",
+    "com.twitter.heron.scheduler.yarn.HeronExecutorTaskTest",
+  ],
+  runtime_deps = [ ":yarn-tests" ],
+  size = "small",
 )
 
-java_test(
-  name="HeronMasterDriverTest",
-  srcs=glob(["**/HeronMasterDriverTest.java"]
-  ),
-  deps=scheduler_deps_files + yarn_deps_files,
-  size="small",
+java_library(
+  name = "local-tests",
+  srcs = glob(["**/local/*.java"]),
+  deps = scheduler_deps_files + local_deps_files,
 )
 
-java_test(
-  name="DriverOnLocalReefTest",
-  srcs=glob(["**/DriverOnLocalReefTest.java"]
-  ),
-  deps=scheduler_deps_files + yarn_deps_files,
-  size="small",
+java_tests(
+  test_classes = [
+    "com.twitter.heron.scheduler.local.LocalLauncherTest",
+    "com.twitter.heron.scheduler.local.LocalSchedulerTest",
+  ],
+  runtime_deps = [ ":local-tests" ],
+  size = "small",
 )
 
-java_test(
-  name="HeronExecutorTaskTest",
-  srcs=glob(["**/HeronExecutorTaskTest.java"]
-  ),
-  deps=scheduler_deps_files + yarn_deps_files,
-  size="small",
+java_library(
+  name = "slurm-tests",
+  srcs = glob(["**/slurm/*.java"]),
+  deps = scheduler_deps_files + slurm_deps_files,
 )
 
-java_test(
-  name="LocalLauncherTest",
-  srcs=glob(
-    ["**/LocalLauncherTest.java"]
-  ),
-  deps=scheduler_deps_files + local_deps_files,
-  size="small",
+java_tests(
+  test_classes = [
+    "com.twitter.heron.scheduler.slurm.SlurmLauncherTest",
+    "com.twitter.heron.scheduler.slurm.SlurmSchedulerTest",
+    "com.twitter.heron.scheduler.slurm.SlurmControllerTest",
+  ],
+  runtime_deps = [ ":slurm-tests" ],
+  size = "small",
 )
 
-java_test(
-  name="LocalSchedulerTest",
-  srcs=glob(
-    ["**/LocalSchedulerTest.java"]
-  ),
-  deps=scheduler_deps_files + local_deps_files,
-  size="small",
+java_library(
+  name = "mesos-tests",
+  srcs = glob(["**/mesos/**/*.java"]),
+  deps = scheduler_deps_files + mesos_deps_files,
 )
 
-java_test(
-  name="SlurmLauncherTest",
-  srcs=glob(
-    ["**/SlurmLauncherTest.java"]
-  ),
-  deps=scheduler_deps_files + slurm_deps_files,
-  size="small",
-)
-
-java_test(
-  name="SlurmSchedulerTest",
-  srcs=glob(
-    ["**/SlurmSchedulerTest.java"]
-  ),
-  deps=scheduler_deps_files + slurm_deps_files,
-  size="small",
-)
-
-java_test(
-  name="SlurmControllerTest",
-  srcs=glob(
-    ["**/SlurmControllerTest.java"]
-  ),
-  deps=scheduler_deps_files + slurm_deps_files,
-  size="small",
+java_tests(
+  test_classes = [
+    "com.twitter.heron.scheduler.mesos.MesosLauncherTest",
+    "com.twitter.heron.scheduler.mesos.MesosSchedulerTest",
+    "com.twitter.heron.scheduler.mesos.framework.TaskUtilsTest",
+    "com.twitter.heron.scheduler.mesos.framework.TaskResourcesTest",
+    "com.twitter.heron.scheduler.mesos.framework.LaunchableTaskTest",
+    "com.twitter.heron.scheduler.mesos.framework.MesosFrameworkTest",
+  ],
+  runtime_deps = [ ":mesos-tests" ],
+  size = "small",
 )

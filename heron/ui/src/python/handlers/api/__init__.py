@@ -1,4 +1,4 @@
-
+''' api module '''
 from .metrics import (
     MetricsHandler,
     MetricsTimelineHandler

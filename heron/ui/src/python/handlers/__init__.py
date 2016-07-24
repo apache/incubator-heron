@@ -1,3 +1,4 @@
+''' handler module '''
 __all__ = ['handlers']
 
 from heron.ui.src.python.handlers import api

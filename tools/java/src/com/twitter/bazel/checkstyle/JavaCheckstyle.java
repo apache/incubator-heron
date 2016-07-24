@@ -14,9 +14,12 @@
 package com.twitter.bazel.checkstyle;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.logging.Logger;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Collections2;
 import com.google.devtools.build.lib.actions.extra.ExtraActionInfo;
 import com.google.devtools.build.lib.actions.extra.JavaCompileInfo;
 
@@ -87,11 +90,14 @@ public final class JavaCheckstyle {
   }
 
   private static String[] getSourceFiles(String extraActionFile) {
-
     ExtraActionInfo info = ExtraActionUtils.getExtraActionInfo(extraActionFile);
     JavaCompileInfo jInfo = info.getExtension(JavaCompileInfo.javaCompileInfo);
 
-    String[] sourceFiles = new String[jInfo.getSourceFileList().size()];
-    return jInfo.getSourceFileList().toArray(sourceFiles);
+    // Filter out files under heron/storm directory due to license issues
+    Collection<String> sourceFiles = Collections2.filter(jInfo.getSourceFileList(),
+        Predicates.not(Predicates.containsPattern("heron/storm/src/java"))
+    );
+
+    return sourceFiles.toArray(new String[sourceFiles.size()]);
   }
 }

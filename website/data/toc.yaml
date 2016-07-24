@@ -35,6 +35,8 @@ sections:
         url: /docs/operators/deployment/uploaders/hdfs
       - name: Amazon S3
         url: /docs/operators/deployment/uploaders/s3
+      - name: Secure Copy (SCP)
+        url: /docs/operators/deployment/uploaders/scp
   - name: Schedulers
     sublinks:
       - name: Aurora Cluster
@@ -87,6 +89,8 @@ sections:
         url: /docs/developers/ui-guide
       - name: Tuning Guide
         url: /docs/developers/tuning
+      - name: Packing Algorithms 
+        url: /docs/developers/packing/ffdpacking
       - name: Simulator Mode
         url: /docs/developers/simulator-mode
       - name: Troubleshooting Guide

@@ -11,13 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+""" logicalplanhandler.py """
+import traceback
 import tornado.gen
 import tornado.web
-import traceback
 
-from heron.tracker.src.python import constants
 from heron.tracker.src.python.handlers import BaseHandler
+
 
 class LogicalPlanHandler(BaseHandler):
   """
@@ -31,6 +31,7 @@ class LogicalPlanHandler(BaseHandler):
   The response JSON is a dictionary with all the
   information of logical plan of the topology.
   """
+  # pylint: disable=missing-docstring, attribute-defined-outside-init
   def initialize(self, tracker):
     self.tracker = tracker
 
@@ -47,4 +48,3 @@ class LogicalPlanHandler(BaseHandler):
     except Exception as e:
       traceback.print_exc()
       self.write_error_response(e)
-
