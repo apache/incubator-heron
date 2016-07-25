@@ -78,7 +78,7 @@ class Topology(object):
           callback(self)
         except Exception as e:
           Log.error("Caught exception while triggering callback: " + str(e))
-          traceback.print_exc()
+          Log.debug(traceback.format_exc())
           return None
         self.watches[uid] = callback
         return uid
@@ -105,7 +105,7 @@ class Topology(object):
         callback(self)
       except Exception as e:
         Log.error("Caught exception while triggering callback: " + str(e))
-        traceback.print_exc()
+        Log.debug(traceback.format_exc())
         to_remove.append(uid)
 
     for uid in to_remove:

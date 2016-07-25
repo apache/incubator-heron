@@ -110,7 +110,7 @@ def getMetricsTimeline(tmaster,
 
   if metricResponse.status.status == common_pb2.NOTOK:
     if metricResponse.status.HasField("message"):
-      raise Exception(metricResponse.status.message)
+      Log.warn(metricResponse.status.message)
 
   # Form the response.
   ret = {}

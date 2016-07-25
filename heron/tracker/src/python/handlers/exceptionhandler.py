@@ -59,7 +59,7 @@ class ExceptionHandler(BaseHandler):
                                                topology.tmaster, component, instances)
       self.write_success_response(exceptions_logs)
     except Exception as e:
-      traceback.print_exc()
+      Log.debug(traceback.format_exc())
       self.write_error_response(e)
 
   # pylint: disable=bad-option-value, dangerous-default-value, no-self-use,

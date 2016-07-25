@@ -211,7 +211,9 @@ def main():
   define_options(namespace['port'], namespace['config_file'])
   http_server = tornado.httpserver.HTTPServer(Application())
   http_server.listen(namespace['port'])
+
   tornado.ioloop.IOLoop.instance().start()
+
 
 if __name__ == "__main__":
   main()

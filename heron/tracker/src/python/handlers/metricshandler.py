@@ -71,7 +71,7 @@ class MetricsHandler(BaseHandler):
 
       self.write_success_response(metrics)
     except Exception as e:
-      traceback.print_exc()
+      Log.debug(traceback.format_exc())
       self.write_error_response(e)
 
   # pylint: disable=too-many-locals, no-self-use, unused-argument
@@ -147,7 +147,7 @@ class MetricsHandler(BaseHandler):
 
     if metricResponse.status.status == common_pb2.NOTOK:
       if metricResponse.status.HasField("message"):
-        raise Exception(metricResponse.status.message)
+        Log.warn(metricResponse.status.message)
 
     # Form the response.
     ret = {}
