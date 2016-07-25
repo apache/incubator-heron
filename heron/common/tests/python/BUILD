@@ -13,3 +13,17 @@ pex_library(
     "unittest2==0.5.1",
   ],
 )
+
+pex_test(
+  name = "pex_loader_unittest",
+  srcs = ["pex_loader_unittest.py"],
+  deps = [
+    "//heron/common/src/python:common",
+  ],
+  reqs = [
+           "py==1.4.27",
+           "pytest==2.6.4",
+           "unittest2==0.5.1",
+  ],
+  size = "small",
+)
