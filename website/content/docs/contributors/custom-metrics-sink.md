@@ -171,6 +171,7 @@ It is optional to add other configurations for the sink. All configurations will
 
 Once you've made a JAR for your custom Java sink, distributed that JAR to
 `heron-core/lib/metricsmgr` folder, and changed the configuration in
-`heron/config/src/yaml/conf/${CLUSTER}/metrics_sinks.yaml`.
+`heron/config/src/yaml/conf/${CLUSTER}/metrics_sinks.yaml`. 
 Any topology submitted using that configuration will include the custom sink.You must [re-compile
 Heron](../../developers/compiling) if you want to include the configuration in a new heron-cli distribution.
+
