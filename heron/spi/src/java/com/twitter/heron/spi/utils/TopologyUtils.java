@@ -77,14 +77,16 @@ public final class TopologyUtils {
     Map<String, Integer> parallelismMap = new HashMap<>();
     for (TopologyAPI.Spout spout : topology.getSpoutsList()) {
       String componentName = spout.getComp().getName();
-      String parallelism = getConfigWithException(
-          spout.getComp().getConfig().getKvsList(), HeronConfig.TOPOLOGY_COMPONENT_PARALLELISM).trim();
+      String parallelism =
+          getConfigWithException(spout.getComp().getConfig().getKvsList(),
+              HeronConfig.TOPOLOGY_COMPONENT_PARALLELISM).trim();
       parallelismMap.put(componentName, Integer.parseInt(parallelism));
     }
     for (TopologyAPI.Bolt bolt : topology.getBoltsList()) {
       String componentName = bolt.getComp().getName();
-      String parallelism = getConfigWithException(
-          bolt.getComp().getConfig().getKvsList(), HeronConfig.TOPOLOGY_COMPONENT_PARALLELISM).trim();
+      String parallelism =
+          getConfigWithException(bolt.getComp().getConfig().getKvsList(),
+              HeronConfig.TOPOLOGY_COMPONENT_PARALLELISM).trim();
       parallelismMap.put(componentName, Integer.parseInt(parallelism));
     }
     return parallelismMap;
@@ -177,7 +179,8 @@ public final class TopologyUtils {
     Set<String> componentNames = getComponentParallelism(topology).keySet();
 
     // Parse the config value
-    String ramMapStr = getConfigWithDefault(topologyConfig, HeronConfig.TOPOLOGY_COMPONENT_RAMMAP, null);
+    String ramMapStr = getConfigWithDefault(topologyConfig,
+        HeronConfig.TOPOLOGY_COMPONENT_RAMMAP, null);
     if (ramMapStr != null) {
       String[] ramMapTokens = ramMapStr.split(",");
       for (String token : ramMapTokens) {
