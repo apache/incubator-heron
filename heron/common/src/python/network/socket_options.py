@@ -24,12 +24,12 @@ SocketOptions = namedtuple('Options', 'nw_write_batch_size_bytes, nw_write_batch
 
 def create_socket_options(sys_config):
   """Creates SocketOptions object from a given sys_config dict"""
-  opt_list = [const.INSTANCE_NW_WRITE_BATCH_SIZE_BYTES,
-              const.INSTANCE_NW_WRITE_BATCH_TIME_MS,
-              const.INSTANCE_NW_READ_BATCH_SIZE_BYTES,
-              const.INSTANCE_NW_READ_BATCH_TIME_MS,
-              const.INSTANCE_NW_OPTIONS_SOCKET_RECEIVED_BUFFER_SIZE_BYTES,
-              const.INSTANCE_NW_OPTIONS_SOCKET_SEND_BUFFER_SIZE_BYTES]
+  opt_list = [const.INSTANCE_NETWORK_WRITE_BATCH_SIZE_BYTES,
+              const.INSTANCE_NETWORK_WRITE_BATCH_TIME_MS,
+              const.INSTANCE_NETWORK_READ_BATCH_SIZE_BYTES,
+              const.INSTANCE_NETWORK_READ_BATCH_TIME_MS,
+              const.INSTANCE_NETWORK_OPTIONS_SOCKET_RECEIVED_BUFFER_SIZE_BYTES,
+              const.INSTANCE_NETWORK_OPTIONS_SOCKET_SEND_BUFFER_SIZE_BYTES]
 
   Log.debug("In create_socket_options()")
   try:

@@ -38,7 +38,7 @@ class Bolt(Component):
     self.bolt_metrics = BoltMetrics(self.pplan_helper)
 
     # acking related
-    self.acking_enabled = True if self.bolt_config.get(constants.TOPOLOGY_ACKING_ENABLED, 'false') == 'true' else False
+    self.acking_enabled = True if self.bolt_config.get(constants.TOPOLOGY_ENABLE_ACKING, 'false') == 'true' else False
     Log.info("Enable ACK: " + str(self.acking_enabled))
 
     # TODO: Topology context, serializer and sys config

@@ -38,7 +38,7 @@ class Spout(Component):
     self.spout_metrics = SpoutMetrics(self.pplan_helper)
 
     # acking related
-    self.acking_enabled = True if self.spout_config.get(constants.TOPOLOGY_ACKING_ENABLED, 'false') == 'true' else False
+    self.acking_enabled = True if self.spout_config.get(constants.TOPOLOGY_ENABLE_ACKING, 'false') == 'true' else False
     Log.info("Enable ACK: " + str(self.acking_enabled))
     self.in_flight_tuples = dict()
     self.immediate_acks = collections.deque()

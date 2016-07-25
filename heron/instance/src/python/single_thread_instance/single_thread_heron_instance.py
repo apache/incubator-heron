@@ -209,9 +209,9 @@ def main():
   instance.info.MergeFrom(instance_info)
 
   # Logging init
-  log_dir = os.path.abspath(system_config[constants.LOGGING_DIRECTORY])
-  max_log_files = system_config[constants.MAX_LOG_FILES]
-  max_log_bytes = system_config[constants.MAX_LOG_SIZE_MB] * constants.MB
+  log_dir = os.path.abspath(system_config[constants.HERON_LOGGING_DIRECTORY])
+  max_log_files = system_config[constants.HERON_LOGGING_MAXIMUM_FILES]
+  max_log_bytes = system_config[constants.HERON_LOGGING_MAXIMUM_SIZE_MB] * constants.MB
 
   # TODO: improve this later
   log_file = os.path.join(log_dir, instance_id + ".log.0")

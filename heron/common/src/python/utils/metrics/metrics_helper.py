@@ -89,7 +89,7 @@ class GatewayMetrics(BaseMetricsHelper):
 
   def __init__(self, metrics_collector, sys_config):
     super(GatewayMetrics, self).__init__(self.metrics)
-    interval = float(sys_config[constants.METRICS_EXPORT_INTERVAL_SECS])
+    interval = float(sys_config[constants.HERON_METRICS_EXPORT_INTERVAL_SEC])
     self.register_metrics(metrics_collector, interval)
 
   def received_packet(self, received_pkt_size_bytes):
@@ -122,7 +122,7 @@ class ComponentMetrics(BaseMetricsHelper):
     :param context: Topology Context
     :param sys_config: System config
     """
-    interval = float(sys_config[constants.METRICS_EXPORT_INTERVAL_SECS])
+    interval = float(sys_config[constants.HERON_METRICS_EXPORT_INTERVAL_SEC])
     collector = context.get_metrics_collector()
     super(ComponentMetrics, self).register_metrics(collector, interval)
 
