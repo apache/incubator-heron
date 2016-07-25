@@ -87,7 +87,7 @@ TOPOLOGY_ADDITIONAL_CLASSPATH = "topology.additional.classpath"
 
 
 ####################################################################################################
-#############################  Constants for system configuration ##################################
+#############################  Constants for System configuration ##################################
 ####################################################################################################
 
 # The relative path to the logging directory
@@ -101,9 +101,9 @@ HERON_LOGGING_ERR_THRESHOLD = "heron.logging.err.threshold"
 # The interval in seconds to get and reset the system metrics.
 HERON_METRICS_EXPORT_INTERVAL_SEC = "heron.metrics.export.interval.sec"
 
-#########################################################
-############ Sytem config: Instance related #############
-#########################################################
+####################################################################################################
+############################### Sytem config: Instance related #####################################
+####################################################################################################
 
 # The queue capacity (num of items) in bolt for buffer packets to read from stream manager
 INSTANCE_INTERNAL_BOLT_READ_QUEUE_CAPACITY = "heron.instance.internal.bolt.read.queue.capacity"
@@ -194,9 +194,9 @@ INSTANCE_TUNING_CURRENT_SAMPLE_WEIGHT = "heron.instance.tuning.current.sample.we
 # Interval in ms to tune the size of in &amp; out data queue in instance
 INSTANCE_TUNING_INTERVAL_MS = "heron.instance.tuning.interval.ms"
 
-################################################################
-############ Sytem config: Metrics Manager related #############
-################################################################
+####################################################################################################
+########################### Sytem config: Metrics Manager related ##################################
+####################################################################################################
 
 # Time based, the maximum batch time in ms for instance to read from socket per attempt
 METRICSMGR_NETWORK_READ_BATCH_TIME_MS = "heron.metricsmgr.network.read.batch.time.ms"
