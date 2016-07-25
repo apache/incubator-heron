@@ -26,7 +26,9 @@ RAM_FOR_STMGR = 1 * GB
 DEFAULT_RAM_FOR_INSTANCE = 1 * GB
 DEFAULT_DISK_PADDING_PER_CONTAINER = 12 * GB
 
+#################################################
 #####  Constants for topology configuration #####
+#################################################
 
 # Topology-specific options for the worker child process.
 TOPOLOGY_WORKER_CHILDOPTS = "topology.worker.childopts"
@@ -52,6 +54,7 @@ TOPOLOGY_AUTO_TASK_HOOKS = "topology.auto.task.hooks"
 TOPOLOGY_SERIALIZER_CLASSNAME = "topology.serializer.classname"
 # How many executors to spawn for ackers.
 TOPOLOGY_ENABLE_ACKING = "topology.acking"
+
 # Number of cpu cores per container to be reserved for this topology.
 TOPOLOGY_CONTAINER_CPU_REQUESTED = "topology.container.cpu"
 # Amount of ram per container to be reserved for this topology, in bytes.
@@ -83,7 +86,9 @@ TOPOLOGY_PROJECT_NAME = "topology.project.name"
 TOPOLOGY_ADDITIONAL_CLASSPATH = "topology.additional.classpath"
 
 
+##############################################
 ##### Constants for system configuration #####
+##############################################
 
 # The relative path to the logging directory
 HERON_LOGGING_DIRECTORY = 'heron.logging.directory'
@@ -95,6 +100,10 @@ HERON_LOGGING_MAXIMUM_FILES = "heron.logging.maximum.files"
 HERON_LOGGING_ERR_THRESHOLD = "heron.logging.err.threshold"
 # The interval in seconds to get and reset the system metrics.
 HERON_METRICS_EXPORT_INTERVAL_SEC = "heron.metrics.export.interval.sec"
+
+########################
+### Instance related ###
+########################
 
 # The queue capacity (num of items) in bolt for buffer packets to read from stream manager
 INSTANCE_INTERNAL_BOLT_READ_QUEUE_CAPACITY = "heron.instance.internal.bolt.read.queue.capacity"
@@ -184,6 +193,10 @@ INSTANCE_TUNING_CURRENT_SAMPLE_WEIGHT = "heron.instance.tuning.current.sample.we
 
 # Interval in ms to tune the size of in &amp; out data queue in instance
 INSTANCE_TUNING_INTERVAL_MS = "heron.instance.tuning.interval.ms"
+
+###############################
+### Metrics Manager related ###
+###############################
 
 # Time based, the maximum batch time in ms for instance to read from socket per attempt
 METRICSMGR_NETWORK_READ_BATCH_TIME_MS = "heron.metricsmgr.network.read.batch.time.ms"
