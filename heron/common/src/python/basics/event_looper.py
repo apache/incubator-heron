@@ -21,7 +21,26 @@ from heapq import heappush, heappop
 from heron.common.src.python.log import Log
 
 class EventLooper(object):
-  """Event Looper can block the thread on ``do_wait()`` and unblock on ``wake_up()``"""
+  """EventLooper is a Python implementation of WakeableLooper.java
+
+  EventLooper is a generic class that could:
+
+  - Block the thread when ``do_wait()`` is called
+  - Unblock it when ``wake_up()`` is called or the waiting time exceeds the timeout
+  - Execute timer event
+
+  The EventLooper will execute in a while loop, unless ``exit_loop()`` is called.
+  In every execution, it will execute ``run_once()``, inside which it will:
+
+  - ``do_wait()`` to perform blocking tasks, which will be waken up if ``wake_up()`` is called, or
+    time exceeds the timeout, or an event is successfully dispatched.
+  - run ``execute_wakeup_tasks()``, in which registered wakeup tasks are executed. Note that these
+    tasks will be executed every loop after wakeup.
+  - run ``trigger_timers()``, in which expired timers are executed and removed.
+
+  Note that the EventLooper class is NOT designed to be thread-safe,
+  except for ``wake_up()`` method.
+  """
   def __init__(self):
     self.should_exit = False
     self.wakeup_tasks = []
@@ -29,7 +48,10 @@ class EventLooper(object):
     self.exit_tasks = []
 
   def loop(self):
-    """Start loop"""
+    """Start loop
+
+    This will start a while loop until ``exit_loop()`` is called.
+    """
     while not self.should_exit:
       self.run_once()
 
@@ -59,21 +81,34 @@ class EventLooper(object):
 
   @abstractmethod
   def wake_up(self):
-    """Wakes up do_wait() operation, should be implemented by a subclass"""
+    """Wakes up do_wait() operation, should be implemented by a subclass
+
+    Note that this method should be implemented in a thread-safe way.
+    """
     pass
 
   def add_wakeup_task(self, task):
-    """Add a wakeup task"""
+    """Add a wakeup task
+
+    :param task: function to be run as a wakeup task
+    """
     self.wakeup_tasks.append(task)
     # make sure to run this at least once
     self.wake_up()
 
   def add_exit_task(self, task):
-    """Add an exit task"""
+    """Add an exit task
+
+    :param task: function to be run as an exit task
+    """
     self.exit_tasks.append(task)
 
   def register_timer_task_in_sec(self, task, second):
-    """Registers a new timer task"""
+    """Registers a new timer task
+
+    :param task: function to be run at a specified second from now
+    :param second: how many seconds to wait before the timer is triggered
+    """
     # Python time is in float
     second_in_float = float(second)
     expiration = time.time() + second_in_float

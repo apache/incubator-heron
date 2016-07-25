@@ -23,7 +23,19 @@ from event_looper import EventLooper
 from heron.common.src.python.log import Log
 
 class GatewayLooper(EventLooper):
-  """Event looper for asyncore module"""
+  """A GatewayLooper, inheriting EventLooper
+
+  It is a class wrapping Python's asyncore module (and selector) to dispatch events.
+  This class can be used as a looper for an ``asyncore.dispatcher`` class, instead of calling
+  ``asyncore.loop()``.
+
+  As it is a subclass of EventLooper, it will execute in a while loop until
+  the ``exit_loop()`` is called.
+
+  In order to use this class, users first need to specify a socket map that maps from
+  a file descriptor to ``asyncore.dispatcher`` class, using ``prepare_map()`` method.
+  The GatewayLooper will dispatch ready events that are in the specified map.
+  """
   def __init__(self):
     super(GatewayLooper, self).__init__()
     self.sock_map = None
