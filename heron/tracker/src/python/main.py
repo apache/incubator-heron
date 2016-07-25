@@ -31,6 +31,7 @@ from heron.tracker.src.python.tracker import Tracker
 import heron.common.src.python.utils as common_utils
 
 LOG = logging.getLogger(__name__)
+from heron.common.src.python.color import Log
 
 class Application(tornado.web.Application):
   """ Tornado server application """
@@ -72,9 +73,9 @@ class Application(tornado.web.Application):
         static_path=os.path.dirname(__file__)
     )
     tornado.web.Application.__init__(self, tornadoHandlers, **settings)
-    LOG.info("-" * 100)
-    LOG.info("Tracker started")
-    LOG.info("-" * 100)
+    Log.info("-" * 100)
+    Log.info("Tracker started")
+    Log.info("-" * 100)
 
 
 # pylint: disable=protected-access
@@ -175,10 +176,7 @@ def define_options(port, config_file):
   define("config_file", default=config_file)
 
 def configure_logging(level):
-  """ configure logging format """
-  log_format = "%(asctime)s-%(levelname)s:%(filename)s:%(lineno)s: %(message)s"
-  date_format = '%d %b %Y %H:%M:%S'
-  logging.basicConfig(format=log_format, datefmt=date_format, level=level)
+  Log.setLevel(level)
 
 def main():
   """ main """
@@ -205,8 +203,8 @@ def main():
   else:
     configure_logging(logging.INFO)
 
-  LOG.info("Running on port: %d", namespace['port'])
-  LOG.info("Using config file: %s", namespace['config_file'])
+  Log.info("Running on port: %d", namespace['port'])
+  Log.info("Using config file: %s", namespace['config_file'])
 
   # TO DO check if the config file exists
 

@@ -13,7 +13,6 @@
 # limitations under the License.
 ''' jstackhandler.py '''
 import json
-import logging
 import traceback
 import tornado.gen
 import tornado.web
@@ -22,7 +21,7 @@ from heron.tracker.src.python import utils
 from heron.tracker.src.python.handlers import BaseHandler
 from heron.tracker.src.python.handlers.pidhandler import getInstancePid
 
-LOG = logging.getLogger(__name__)
+from heron.common.src.python.color import Log
 
 
 # pylint: disable=attribute-defined-outside-init
@@ -83,7 +82,7 @@ class JstackHandler(BaseHandler):
       endpoint = utils.make_shell_endpoint(topology_info, instance_id)
       url = "%s/jstack/%s" % (endpoint, pid)
       response = yield http_client.fetch(url)
-      LOG.debug("HTTP call for url: %s", url)
+      Log.debug("HTTP call for url: %s", url)
       raise tornado.gen.Return(response.body)
     except tornado.httpclient.HTTPError as e:
       raise Exception(str(e))

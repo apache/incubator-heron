@@ -12,13 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' topology.py '''
-import logging
 import traceback
 import uuid
 
 from heron.common.src.python import constants
-
-LOG = logging.getLogger(__name__)
+from heron.common.src.python.color import Log
 
 # pylint: disable=too-many-instance-attributes
 class Topology(object):
@@ -75,11 +73,11 @@ class Topology(object):
       # Generate a random UUID.
       uid = uuid.uuid4()
       if uid not in self.watches:
-        LOG.info("Registering a watch with uid: " + str(uid))
+        Log.info("Registering a watch with uid: " + str(uid))
         try:
           callback(self)
         except Exception as e:
-          LOG.error("Caught exception while triggering callback: " + str(e))
+          Log.error("Caught exception while triggering callback: " + str(e))
           traceback.print_exc()
           return None
         self.watches[uid] = callback
@@ -92,7 +90,7 @@ class Topology(object):
     """
     # Do not raise an error if UUID is
     # not present in the watches.
-    LOG.info("Unregister a watch with uid: " + str(uid))
+    Log.info("Unregister a watch with uid: " + str(uid))
     self.watches.pop(uid, None)
 
   def trigger_watches(self):
@@ -106,7 +104,7 @@ class Topology(object):
       try:
         callback(self)
       except Exception as e:
-        LOG.error("Caught exception while triggering callback: " + str(e))
+        Log.error("Caught exception while triggering callback: " + str(e))
         traceback.print_exc()
         to_remove.append(uid)
 
