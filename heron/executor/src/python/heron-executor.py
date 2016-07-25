@@ -471,12 +471,14 @@ def main():
     print_usage()
     sys.exit(1)
 
-  # get the current environment and augment it with PEX_ROOT
+  # Since Heron on YARN runs as headless users, pex compiled
+  # binaries should be exploded into the container working
+  # directory. In order to do this, we need to set the
+  # PEX_ROOT shell environment before forking the processes
   shell_env = os.environ.copy()
   shell_env["PEX_ROOT"] = os.path.join(os.path.abspath('.'), ".pex")
-  for k, v in shell_env.iteritems():
-    print k, v
 
+  # Instantiate the executor and launch it
   executor = HeronExecutor(sys.argv, shell_env)
   executor.prepareLaunch()
   executor.launch()
