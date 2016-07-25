@@ -166,7 +166,7 @@ class HeronExecutor(object):
     self.metricsmgr_ids = []
     self.heron_shell_ids = []
 
-    # this will soon be refactored to get this from the state manager instead of args
+    # this will soon be refactored to get instance dist dynamically at runtime instead of args
     self.update_instance_distribution(self.parse_instance_distribution(args[5]))
 
     # This gets set once processes are launched
