@@ -71,9 +71,10 @@ message Config {
 message Component {
   // The name of the component. Like Tail-FlatMap
   required string name = 1;
-  // Only one of the below two are set
+  // Only one of the below three are set
   optional string java_class_name = 2;
   optional bytes java_object = 4;
+  optional string python_class_name = 5;
   required Config config = 3;
 }
 
