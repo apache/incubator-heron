@@ -83,7 +83,7 @@ class ZkStateManager(StateManager):
 
     try:
       self._get_topologies_with_watch(callback, isWatching)
-    except NoNodeError as err:
+    except NoNodeError:
       self.client.stop()
       path = self.get_topologies_path()
       raise StateException("Error required topology path '%s' not found" % (path),
