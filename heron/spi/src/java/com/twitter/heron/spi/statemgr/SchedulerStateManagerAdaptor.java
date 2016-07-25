@@ -133,9 +133,7 @@ public class SchedulerStateManagerAdaptor {
    * @return Boolean - Success or Failure
    */
   public Boolean deleteTMasterLocation(String topologyName) {
-    return awaitResult(delegate.tmasterLocationExists(topologyName))
-        ? awaitResult(delegate.deleteTMasterLocation(topologyName))
-        : true;
+    return awaitResult(delegate.deleteTMasterLocation(topologyName));
   }
 
   /**
@@ -144,9 +142,7 @@ public class SchedulerStateManagerAdaptor {
    * @return Boolean - Success or Failure
    */
   public Boolean deleteExecutionState(String topologyName) {
-    return awaitResult(delegate.executionStateExists(topologyName))
-        ? awaitResult(delegate.deleteExecutionState(topologyName))
-        : true;
+    return awaitResult(delegate.deleteExecutionState(topologyName));
   }
 
   /**
@@ -155,9 +151,7 @@ public class SchedulerStateManagerAdaptor {
    * @return Boolean - Success or Failure
    */
   public Boolean deleteTopology(String topologyName) {
-    return awaitResult(delegate.topologyExists(topologyName))
-        ? awaitResult(delegate.deleteTopology(topologyName))
-        : true;
+    return awaitResult(delegate.deleteTopology(topologyName));
   }
 
   /**
@@ -175,9 +169,7 @@ public class SchedulerStateManagerAdaptor {
    * @return Boolean - Success or Failure
    */
   public Boolean deletePhysicalPlan(String topologyName) {
-    return awaitResult(delegate.physicalPlanExists(topologyName))
-        ? awaitResult(delegate.deletePhysicalPlan(topologyName))
-        : true;
+     return awaitResult(delegate.deletePhysicalPlan(topologyName));
   }
 
   /**
@@ -186,9 +178,7 @@ public class SchedulerStateManagerAdaptor {
    * @return Boolean - Success or Failure
    */
   public Boolean deleteSchedulerLocation(String topologyName) {
-    return awaitResult(delegate.schedulerLocationExists(topologyName))
-        ? awaitResult(delegate.deleteSchedulerLocation(topologyName))
-        : true;
+    return awaitResult(delegate.deleteSchedulerLocation(topologyName));
   }
 
   /**
