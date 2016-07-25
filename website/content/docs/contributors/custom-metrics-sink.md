@@ -2,9 +2,9 @@
 title: Implementing a Custom Metrics Sink
 ---
 
-Each Heron topology has its own centralized [Metrics
+Each Heron container has its own centralized [Metrics
 Manager](../../concepts/architecture#metrics-manager) (MM), which collects
-metrics from all instances in the topology. You can define how the MM processes
+metrics from all instances in the container. You can define how the MM processes
 metrics by implementing a **metrics sink**, which specifies how the MM handles
 incoming
 [`MetricsRecord`](/api/com/twitter/heron/spi/metricsmgr/metrics/MetricsRecord.html)
@@ -171,7 +171,6 @@ It is optional to add other configurations for the sink. All configurations will
 
 Once you've made a JAR for your custom Java sink, distributed that JAR to
 `heron-core/lib/metricsmgr` folder, and changed the configuration in
-`heron/config/src/yaml/conf/${CLUSTER}/metrics_sinks.yaml`. 
+`heron/config/src/yaml/conf/${CLUSTER}/metrics_sinks.yaml`.
 Any topology submitted using that configuration will include the custom sink.You must [re-compile
-Heron](../../developers/compiling) if you want to include the configuration in a new heron-cli distribution. 
-
+Heron](../../developers/compiling) if you want to include the configuration in a new heron-cli distribution.
