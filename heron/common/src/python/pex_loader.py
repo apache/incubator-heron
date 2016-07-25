@@ -24,22 +24,26 @@ from heron.common.src.python.log import Log
 egg_regex = r"^(\.deps\/[^\/\s]*\.egg)\/"
 
 def _get_deps_list(abs_path_to_pex):
-  """Get a list of paths to included dependencies in the specified pex file"""
+  """Get a list of paths to included dependencies in the specified pex file
+
+  Note that dependencies are located under `.deps` directory
+  """
   pex = zipfile.ZipFile(abs_path_to_pex, mode='r')
   deps = list(set([re.match(egg_regex, i).group(1) for i in pex.namelist()
                    if re.match(egg_regex, i) is not None]))
   return deps
 
-def load_pex(path_to_pex):
+def load_pex(path_to_pex, include_deps=True):
   """Loads pex file and its dependencies to the current python path"""
   abs_path_to_pex = os.path.abspath(path_to_pex)
   Log.debug("Add a pex to the path: " + abs_path_to_pex)
   sys.path.insert(0, abs_path_to_pex)
 
   # add dependencies to path
-  for dep in _get_deps_list(abs_path_to_pex):
-    Log.debug("Add a new dependency to the path: " + dep)
-    sys.path.insert(0, os.path.join(abs_path_to_pex, dep))
+  if include_deps:
+    for dep in _get_deps_list(abs_path_to_pex):
+      Log.debug("Add a new dependency to the path: " + dep)
+      sys.path.insert(0, os.path.join(abs_path_to_pex, dep))
 
   Log.debug("Python path: " + str(sys.path))
 
@@ -61,7 +65,13 @@ def resolve_heron_suffix_issue(abs_pex_path):
   importer.load_module("heron")
 
 def import_and_get_class(path_to_pex, python_class_name):
-  """Imports and load a class from a given pex file path and python class name"""
+  """Imports and load a class from a given pex file path and python class name
+
+  For example, if you want to get a class called `Sample` in
+  /some-path/sample.pex/heron/examples/src/python/sample.py,
+  ``path_to_pex`` needs to be ``/some-path/sample.pex``, and
+  ``python_class_name`` needs to be ``heron.examples.src.python.sample.Sample``
+  """
   abs_path_to_pex = os.path.abspath(path_to_pex)
 
   Log.debug("Add a pex to the path: " + abs_path_to_pex)
