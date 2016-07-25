@@ -129,7 +129,8 @@ def pex_binary_impl(ctx):
   pexbuilder = ctx.executable._pexbuilder
 
   # form the arguments to pex builder
-  arguments =  [] if ctx.attr.zip_safe else ["--not-zip-safe"]
+  arguments = ["--disable-cache"]
+  arguments +=  [] if ctx.attr.zip_safe else ["--not-zip-safe"]
   arguments += common_pex_arguments(main_pkg, deploy_pex.path, manifest_file.path)
 
   # form the inputs to pex builder
