@@ -16,6 +16,7 @@
 ''' main.py '''
 import os
 import socket
+import sys
 
 import tornado.ioloop
 import tornado.options
@@ -28,6 +29,7 @@ from tornado.options import define
 from heron.ui.src.python import handlers
 from heron.ui.src.python import args
 from heron.ui.src.python import log
+from heron.ui.src.python import version
 from heron.ui.src.python.log import Log as LOG
 
 
@@ -122,13 +124,21 @@ def main():
   log.configure(log.logging.DEBUG)
   tornado.log.enable_pretty_logging()
 
+
   # create the parser and parse the arguments
   (parser, child_parser) = args.create_parsers()
   (parsed_args, remaining) = parser.parse_known_args()
-  if remaining:
+
+  if remaining == ['help']:
     child_parser.parse_args(args=remaining, namespace=parsed_args)
     parser.print_help()
     parser.exit()
+  elif remaining == ['version']:
+    version.run()
+    parser.exit()
+  else:
+    LOG.error('Unknown command')
+    sys.exit(1)
 
   # log additional information
   command_line_args = vars(parsed_args)
