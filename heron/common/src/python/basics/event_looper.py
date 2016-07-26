@@ -23,20 +23,20 @@ from heron.common.src.python.log import Log
 class EventLooper(object):
   """EventLooper is a Python implementation of WakeableLooper.java
 
-  EventLooper is a generic class that could:
+  EventLooper is a class for scheduling recurring tasks that could:
 
   - Block the thread when ``do_wait()`` is called
   - Unblock it when ``wake_up()`` is called or the waiting time exceeds the timeout
   - Execute timer event
 
   The EventLooper will execute in a while loop, unless ``exit_loop()`` is called.
-  In every execution, it will execute ``run_once()``, inside which it will:
+  In every execution, it will execute ``_run_once()``, inside which it will:
 
   - ``do_wait()`` to perform blocking tasks, which will be waken up if ``wake_up()`` is called, or
     time exceeds the timeout, or an event is successfully dispatched.
-  - run ``execute_wakeup_tasks()``, in which registered wakeup tasks are executed. Note that these
+  - run ``_execute_wakeup_tasks()``, in which registered wakeup tasks are executed. Note that these
     tasks will be executed every loop after wakeup.
-  - run ``trigger_timers()``, in which expired timers are executed and removed.
+  - run ``_trigger_timers()``, in which expired timers are executed and removed.
 
   Note that the EventLooper class is NOT designed to be thread-safe,
   except for ``wake_up()`` method.
@@ -53,18 +53,18 @@ class EventLooper(object):
     This will start a while loop until ``exit_loop()`` is called.
     """
     while not self.should_exit:
-      self.run_once()
+      self._run_once()
 
     self.on_exit()
 
-  def run_once(self):
+  def _run_once(self):
     """Run once, should be called only from loop()"""
     try:
       self.do_wait()
-      self.execute_wakeup_tasks()
-      self.trigger_timers()
+      self._execute_wakeup_tasks()
+      self._trigger_timers()
     except Exception as e:
-      Log.error("Error occured during run_once(): " + e.message)
+      Log.error("Error occured during _run_once(): " + e.message)
       Log.error(traceback.format_exc())
       self.should_exit = True
 
@@ -119,7 +119,7 @@ class EventLooper(object):
     self.should_exit = True
     self.wake_up()
 
-  def get_next_timeout_interval(self):
+  def _get_next_timeout_interval(self):
     """Get the next timeout from now
 
     This should be used from do_wait().
@@ -131,14 +131,14 @@ class EventLooper(object):
       next_timeout_interval = self.timer_tasks[0][0] - time.time()
       return next_timeout_interval
 
-  def execute_wakeup_tasks(self):
+  def _execute_wakeup_tasks(self):
     """Executes wakeup tasks, should only be called from loop()"""
     # Check the length of wakeup tasks first to avoid concurrent issues
     size = len(self.wakeup_tasks)
     for i in range(size):
       self.wakeup_tasks[i]()
 
-  def trigger_timers(self):
+  def _trigger_timers(self):
     """Triggers expired timers"""
     current = time.time()
     while len(self.timer_tasks) > 0 and (self.timer_tasks[0][0] - current <= 0):

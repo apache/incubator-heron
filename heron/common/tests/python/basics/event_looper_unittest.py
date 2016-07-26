@@ -18,6 +18,7 @@ import unittest2 as unittest
 from heron.common.src.python.basics import EventLooper
 
 # pylint: disable=missing-docstring
+# pylint: disable=W0212
 class EventLooperTest(unittest.TestCase):
   def setUp(self):
     self.looper = EventLooper()
@@ -86,7 +87,7 @@ class EventLooperTest(unittest.TestCase):
 
     interval = 1.0
     self.looper.register_timer_task_in_sec(to_run, interval)
-    next_interval = self.looper.get_next_timeout_interval()
+    next_interval = self.looper._get_next_timeout_interval()
     self.assertAlmostEqual(next_interval, interval, delta=0.01)
 
   def test_run_once(self):
@@ -94,7 +95,7 @@ class EventLooperTest(unittest.TestCase):
       self.global_value = 10
 
     self.looper.add_wakeup_task(to_run)
-    self.looper.run_once()
+    self.looper._run_once()
     self.assertEqual(10, self.global_value)
 
   def test_trigger_timers(self):
@@ -105,10 +106,10 @@ class EventLooperTest(unittest.TestCase):
     self.looper.register_timer_task_in_sec(to_run, interval)
 
     # run right now, to_run() should not have been executed yet
-    self.looper.trigger_timers()
+    self.looper._trigger_timers()
     self.assertEqual(6, self.global_value)
 
     time.sleep(interval)
-    self.looper.trigger_timers()
-    self.looper.trigger_timers()
+    self.looper._trigger_timers()
+    self.looper._trigger_timers()
     self.assertEqual(10, self.global_value)

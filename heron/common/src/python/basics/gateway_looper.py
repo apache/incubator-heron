@@ -36,9 +36,13 @@ class GatewayLooper(EventLooper):
   a file descriptor to ``asyncore.dispatcher`` class, using ``prepare_map()`` method.
   The GatewayLooper will dispatch ready events that are in the specified map.
   """
-  def __init__(self):
+  def __init__(self, socket_map):
+    """Initializes a GatewayLooper instance
+
+    :param socket_map: socket map used for asyncore.dispatcher
+    """
     super(GatewayLooper, self).__init__()
-    self.sock_map = None
+    self.sock_map = socket_map
 
     # Pipe used for wake up select
     self.pipe_r, self.pipe_w = os.pipe()
@@ -46,12 +50,8 @@ class GatewayLooper(EventLooper):
     self.started = time.time()
     Log.debug("Gateway Looper started time: " + str(time.asctime()))
 
-  def prepare_map(self, sock_map):
-    """Specifies which socket map to use; should be asyncore's socket map"""
-    self.sock_map = sock_map
-
   def do_wait(self):
-    next_timeout = self.get_next_timeout_interval()
+    next_timeout = self._get_next_timeout_interval()
     if next_timeout > 0:
       self.poll(timeout=next_timeout)
     else:
@@ -71,54 +71,56 @@ class GatewayLooper(EventLooper):
     """Modified version of poll() from asyncore module"""
     if self.sock_map is None:
       Log.warning("Socket map is not registered to Gateway Looper")
-    r = []
-    w = []
-    e = []
+    readable_lst = []
+    writable_lst = []
+    error_lst = []
 
     if self.sock_map is not None:
       for fd, obj in self.sock_map.items():
         is_r = obj.readable()
         is_w = obj.writable()
         if is_r:
-          r.append(fd)
+          readable_lst.append(fd)
         if is_w and not obj.accepting:
-          w.append(fd)
+          writable_lst.append(fd)
         if is_r or is_w:
-          e.append(fd)
+          error_lst.append(fd)
 
     # Add wakeup fd
-    r.append(self.pipe_r)
+    readable_lst.append(self.pipe_r)
 
     Log.debug("Will select() with timeout: " + str(timeout) + ", with map: " + str(self.sock_map))
     try:
-      r, w, e = select.select(r, w, e, timeout)
+      readable_lst, writable_lst, error_lst = \
+        select.select(readable_lst, writable_lst, error_lst, timeout)
     except select.error, err:
       Log.debug("Trivial error: " + err.message)
       if err.args[0] != errno.EINTR:
         raise
       else:
         return
-    Log.debug("Selected [r]: " + str(r) + " [w]: " + str(w) + " [e]: " + str(e))
+    Log.debug("Selected [r]: " + str(readable_lst) +
+              " [w]: " + str(writable_lst) + " [e]: " + str(error_lst))
 
-    if self.pipe_r in r:
+    if self.pipe_r in readable_lst:
       Log.debug("Read from pipe")
       os.read(self.pipe_r, 1024)
-      r.remove(self.pipe_r)
+      readable_lst.remove(self.pipe_r)
 
     if self.sock_map is not None:
-      for fd in r:
+      for fd in readable_lst:
         obj = self.sock_map.get(fd)
         if obj is None:
           continue
         asyncore.read(obj)
 
-      for fd in w:
+      for fd in writable_lst:
         obj = self.sock_map.get(fd)
         if obj is None:
           continue
         asyncore.write(obj)
 
-      for fd in e:
+      for fd in error_lst:
         obj = self.sock_map.get(fd)
         if obj is None:
           continue

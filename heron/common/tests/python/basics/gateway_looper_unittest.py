@@ -37,7 +37,7 @@ class GatewayLooperTest(unittest.TestCase):
       self.assertAlmostEqual(start + sleep, end, delta=0.01)
 
   def prepare_wakeup_test(self, sleep, poll_timeout=30.0):
-    looper = GatewayLooper()
+    looper = GatewayLooper(socket_map={})
     waker = threading.Thread(target=self.sleep_and_call_wakeup, args=(sleep, looper))
     waker.start()
 
