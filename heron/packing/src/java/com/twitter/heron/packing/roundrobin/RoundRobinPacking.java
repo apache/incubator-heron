@@ -26,6 +26,7 @@ import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
@@ -125,8 +126,8 @@ public class RoundRobinPacking implements IPacking {
         long instanceDisk = instanceDiskDefault;
         double instanceCpu = instanceCpuDefault;
 
-        PackingPlan.Resource resource =
-            new PackingPlan.Resource(instanceCpu, instanceRam, instanceDisk);
+        Resource resource =
+            new Resource(instanceCpu, instanceRam, instanceDisk);
         PackingPlan.InstancePlan instancePlan =
             new PackingPlan.InstancePlan(
                 instanceId,
@@ -137,8 +138,8 @@ public class RoundRobinPacking implements IPacking {
         containerRam += instanceRam;
       }
 
-      PackingPlan.Resource resource =
-          new PackingPlan.Resource(containerCpu, containerRam, containerDiskInBytes);
+      Resource resource =
+          new Resource(containerCpu, containerRam, containerDiskInBytes);
       PackingPlan.ContainerPlan containerPlan =
           new PackingPlan.ContainerPlan(containerId, instancePlanMap, resource);
 
@@ -151,7 +152,7 @@ public class RoundRobinPacking implements IPacking {
     long topologyDisk = totalContainer * containerDiskInBytes;
     double topologyCpu = totalContainer * containerCpu;
 
-    PackingPlan.Resource resource = new PackingPlan.Resource(
+    Resource resource = new Resource(
         topologyCpu, topologyRam, topologyDisk);
 
     PackingPlan plan = new PackingPlan(topology.getId(), containerPlanMap, resource);

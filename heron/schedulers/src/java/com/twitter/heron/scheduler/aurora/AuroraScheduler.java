@@ -31,6 +31,7 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Misc;
 import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;
@@ -128,9 +129,8 @@ public class AuroraScheduler implements IScheduler {
     Map<String, String> auroraProperties = new HashMap<>();
 
     TopologyAPI.Topology topology = Runtime.topology(runtime);
-
     // Align the cpu, ram, disk to the maximal one
-    PackingPlan.Resource containerResource = SchedulerUtils.getMaxRequiredResource(packing);
+    Resource containerResource = SchedulerUtils.getMaxRequiredResource(packing);
     // Update total topology resource requirement on Aurora clusters
     packing.resource.ram = containerResource.ram * (packing.containers.size() + 1);
 
