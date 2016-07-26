@@ -195,8 +195,8 @@ def strip_java_objects(topology):
   stripped_topology.CopyFrom(topology)
   components = list(stripped_topology.spouts) + list(stripped_topology.bolts)
   for component in components:
-    if component.comp.HasField("java_object"):
-      component.comp.ClearField("java_object")
+    if component.comp.HasField("serialized_object"):
+      component.comp.ClearField("serialized_object")
 
   return stripped_topology
 

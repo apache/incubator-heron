@@ -77,11 +77,12 @@ public class BoltInstance implements IInstance {
         SystemConfig.HERON_SYSTEM_CONFIG);
 
     // Get the bolt. Notice, in fact, we will always use the deserialization way to get bolt.
-    if (helper.getMyBolt().getComp().hasJavaObject()) {
-      bolt = (IBolt) Utils.deserialize(helper.getMyBolt().getComp().getJavaObject().toByteArray());
-    } else if (helper.getMyBolt().getComp().hasJavaClassName()) {
+    if (helper.getMyBolt().getComp().hasSerializedObject()) {
+      bolt = (IBolt) Utils.deserialize(
+          helper.getMyBolt().getComp().getSerializedObject().toByteArray());
+    } else if (helper.getMyBolt().getComp().hasClassName()) {
       try {
-        String boltClassName = helper.getMyBolt().getComp().getJavaClassName();
+        String boltClassName = helper.getMyBolt().getComp().getClassName();
         bolt = (IBolt) Class.forName(boltClassName).newInstance();
       } catch (ClassNotFoundException ex) {
         throw new RuntimeException(ex + " Bolt class must be in class path.");

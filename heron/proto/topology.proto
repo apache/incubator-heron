@@ -33,6 +33,12 @@ enum Type {
   OBJECT = 1; // generic type
 }
 
+enum ComponentObjectSpec {
+  JAVA_CLASS_NAME = 1;
+  JAVA_SERIALIZED_OBJECT = 2;
+  PYTHON_CLASS_NAME = 3;
+}
+
 message StreamSchema {
   message KeyType {
     required string key = 1;
@@ -71,11 +77,16 @@ message Config {
 message Component {
   // The name of the component. Like Tail-FlatMap
   required string name = 1;
-  // Only one of the below three are set
-  optional string java_class_name = 2;
-  optional bytes java_object = 4;
-  optional string python_class_name = 5;
+  // Only one of the below two is set, whose meaning is determined
+  // by the value of spec. For example, when spec is JAVA_CLASS_NAME,
+  // `class_name` is set and contains Java's class name.
+  // When spec is JAVA_SERIALIZED_OBJECT, `serialized_object` is set and
+  // contains a serialized Java object.
+  optional string class_name = 2;
+  optional bytes serialized_object = 4;
+
   required Config config = 3;
+  required ComponentObjectSpec spec = 5;
 }
 
 message Spout {
