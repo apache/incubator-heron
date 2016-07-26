@@ -289,7 +289,7 @@ def discover_tool_default(program, msg, envvar, defvalue):
 
 def export_env_to_file(out_file, env):
   if env in os.environ:
-    out_file.write('export %s=%s\n' % (env, os.environ[env]))
+    out_file.write('export %s="%s"\n' % (env, os.environ[env]))
 
 ######################################################################
 # Generate the shell script that recreates the environment

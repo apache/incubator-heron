@@ -81,7 +81,13 @@ class ZkStateManager(StateManager):
         """Custom callback to get the topologies right now."""
         ret["result"] = data
 
-    self._get_topologies_with_watch(callback, isWatching)
+    try:
+      self._get_topologies_with_watch(callback, isWatching)
+    except NoNodeError:
+      self.client.stop()
+      path = self.get_topologies_path()
+      raise StateException("Error required topology path '%s' not found" % (path),
+                           StateException.EX_TYPE_NO_NODE_ERROR), None, sys.exc_info()[2]
 
     # The topologies are now populated with the data.
     return ret["result"]
