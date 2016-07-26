@@ -17,6 +17,7 @@ import unittest
 import re
 import sys
 import heron.common.src.python.pex_loader as pex_loader
+import heron.common.tests.python.pex_loader.constants as constants
 
 # pylint: disable=missing-docstring
 class PexLoaderTest(unittest.TestCase):
@@ -45,3 +46,19 @@ class PexLoaderTest(unittest.TestCase):
       pex_loader.load_pex(path, include_deps=False)
       abs_path = os.path.abspath(path)
       self.assertIn(abs_path, sys.path)
+
+  def test_sample(self):
+    path = self.get_path_of_sample(constants.SAMPLE_PEX)
+    print path
+    pex_loader.load_pex(path)
+    cls = pex_loader.import_and_get_class(path, constants.SAMPLE_PEX_CLASSPATH)
+    self.assertIsNotNone(cls)
+    self.assertEqual(cls.name, "sample class")
+    self.assertEqual(cls.age, 100)
+
+  @staticmethod
+  def get_path_of_sample(sample):
+    file_dir = "/".join(os.path.realpath(__file__).split('/')[:-1])
+    testdata_dir = os.path.join(file_dir, constants.TEST_DATA_PATH)
+    sample_pex_path = os.path.join(testdata_dir, sample)
+    return sample_pex_path
