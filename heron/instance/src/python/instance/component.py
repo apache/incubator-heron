@@ -154,7 +154,8 @@ class HeronComponentSpec(object):
   def _get_base_component(self):
     comp = topology_pb2.Component()
     comp.name = self.name
-    comp.python_class_name = self.python_class_path
+    comp.spec = topology_pb2.ComponentObjectSpec.Value("PYTHON_CLASS_NAME")
+    comp.class_name = self.python_class_path
     comp.config.CopyFrom(self._get_comp_config())
     return comp
 

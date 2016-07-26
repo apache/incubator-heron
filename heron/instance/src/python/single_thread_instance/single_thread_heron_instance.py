@@ -127,12 +127,12 @@ class SingleThreadHeronInstance(object):
       if pplan_helper.is_spout:
         # Starting a spout
         my_spout = pplan_helper.get_my_spout()
-        py_spout_instance = self.load_py_instance(True, my_spout.comp.python_class_name)
+        py_spout_instance = self.load_py_instance(True, my_spout.comp.class_name)
         self.my_instance = (True, my_spout, py_spout_instance)
       else:
         # Starting a bolt
         my_bolt = pplan_helper.get_my_bolt()
-        py_bolt_instance = self.load_py_instance(False, my_bolt.comp.python_class_name)
+        py_bolt_instance = self.load_py_instance(False, my_bolt.comp.class_name)
         self.my_instance = (False, my_bolt, py_bolt_instance)
     except Exception as e:
       Log.error("Error with loading bolt/spout instance from pex file")
