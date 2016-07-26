@@ -78,7 +78,8 @@ public class BoltInstance implements IInstance {
 
     // Get the bolt. Notice, in fact, we will always use the deserialization way to get bolt.
     if (helper.getMyBolt().getComp().hasSerializedObject()) {
-      bolt = (IBolt) Utils.deserialize(helper.getMyBolt().getComp().getSerializedObject().toByteArray());
+      bolt = (IBolt) Utils.deserialize(
+          helper.getMyBolt().getComp().getSerializedObject().toByteArray());
     } else if (helper.getMyBolt().getComp().hasClassName()) {
       try {
         String boltClassName = helper.getMyBolt().getComp().getClassName();
