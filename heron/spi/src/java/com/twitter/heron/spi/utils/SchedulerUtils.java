@@ -438,4 +438,20 @@ public final class SchedulerUtils {
 
     return true;
   }
+
+  /**
+   * This method finds the container with highest resource requirement and returns the resource.
+   * Currently only RAM is used for max identification.
+   */
+  public static PackingPlan.Resource getMaxRequiredResource(PackingPlan packingPlan) {
+    PackingPlan.Resource maxResource = packingPlan.containers.values().iterator().next().resource;
+    for (PackingPlan.ContainerPlan entry : packingPlan.containers.values()) {
+      PackingPlan.Resource resource = entry.resource;
+      if (maxResource.ram < resource.ram) {
+        maxResource = resource;
+      }
+    }
+
+    return maxResource;
+  }
 }

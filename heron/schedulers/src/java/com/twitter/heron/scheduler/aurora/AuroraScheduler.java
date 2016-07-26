@@ -35,6 +35,7 @@ import com.twitter.heron.spi.packing.PackingPlan.ContainerPlan;
 import com.twitter.heron.spi.packing.PackingPlan.Resource;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.Runtime;
+import com.twitter.heron.spi.utils.SchedulerUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
 public class AuroraScheduler implements IScheduler {
@@ -131,7 +132,7 @@ public class AuroraScheduler implements IScheduler {
     TopologyAPI.Topology topology = Runtime.topology(runtime);
 
     // Align the ram to the maximal one
-    PackingPlan.Resource containerResource = getMaxRequiredResource(packing);
+    PackingPlan.Resource containerResource = SchedulerUtils.getMaxRequiredResource(packing);
     // Update total topology resource requirement on Aurora clusters
     packing.resource.ram = containerResource.ram * (packing.containers.size() + 1);
 
@@ -192,22 +193,6 @@ public class AuroraScheduler implements IScheduler {
     auroraProperties.put("TOPOLOGY_PACKAGE_URI", topologyPkgURI);
 
     return auroraProperties;
-  }
-
-  /**
-   * This method finds the container with highest resource requirement and returns the resource.
-   * Currently only RAM is used for max identification.
-   */
-  private Resource getMaxRequiredResource(PackingPlan packingPlan) {
-    Resource maxResource = packingPlan.containers.values().iterator().next().resource;
-    for (ContainerPlan entry : packingPlan.containers.values()) {
-      Resource resource = entry.resource;
-      if (maxResource.ram < resource.ram) {
-        maxResource = resource;
-      }
-    }
-
-    return maxResource;
   }
 
   protected boolean isProduction() {
