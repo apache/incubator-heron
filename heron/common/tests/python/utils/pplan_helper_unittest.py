@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pylint: disable=missing-docstring
+
 import unittest
 
 from heron.common.src.python.utils.misc import PhysicalPlanHelper
