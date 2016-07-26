@@ -21,6 +21,7 @@ import zipfile
 
 from heron.common.src.python.log import Log
 
+# TODO: Add whl regex as well
 egg_regex = r"^(\.deps\/[^\/\s]*\.egg)\/"
 
 def _get_deps_list(abs_path_to_pex):

@@ -1,9 +1,9 @@
 package(default_visibility = ["//visibility:public"])
 load("/tools/rules/pex_rules", "pex_library", "pex_test")
 
-pex_library(
-  name = "pytest-lib",
-  srcs = ["mock_generator.py", "mock_protobuf.py"],
+pex_test(
+  name = "pex_loader_unittest",
+  srcs = ["pex_loader_unittest.py", "constants.py"],
   deps = [
     "//heron/common/src/python:common",
   ],
@@ -12,4 +12,6 @@ pex_library(
     "pytest==2.6.4",
     "unittest2==0.5.1",
   ],
+  data = glob(["testdata/pex/*.pex"]),
+  size = "small",
 )
