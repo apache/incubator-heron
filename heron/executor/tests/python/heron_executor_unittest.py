@@ -34,10 +34,10 @@ class MockExecutor(HeronExecutor):
     self.processes = []
     super(MockExecutor, self).__init__(args, None)
 
-  def load_logging_dir(self, heron_internals_config_file):
+  def _load_logging_dir(self, heron_internals_config_file):
     return "fake_dir"
 
-  def run_process(self, name, cmd, env=None):
+  def _run_process(self, name, cmd, env=None):
     popen = MockPOpen()
     self.processes.append((popen.pid, name, cmd))
     return popen
