@@ -16,6 +16,7 @@ package com.twitter.heron.scheduler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
@@ -23,8 +24,10 @@ import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
+import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 import com.twitter.heron.spi.utils.SchedulerUtils;
+import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
  * {@link LauncherUtils} contains helper methods used by the server and client side launch
@@ -115,6 +118,19 @@ public class LauncherUtils {
 
     scheduler.initialize(config, ytruntime);
     return scheduler;
+  }
+
+  /**
+   * @return runtime config instance with initially available details, like topology
+   */
+  public static Config getPrimaryRuntime(TopologyAPI.Topology topology,
+                                         SchedulerStateManagerAdaptor adaptor) {
+    return Config.newBuilder()
+        .put(Keys.topologyId(), topology.getId())
+        .put(Keys.topologyName(), topology.getName())
+        .put(Keys.topologyDefinition(), topology)
+        .put(Keys.schedulerStateManagerAdaptor(), adaptor)
+        .put(Keys.numContainers(), 1 + TopologyUtils.getNumContainers(topology)).build();
   }
 
   private static Config putPackingInRuntimeConfig(Config runtime, PackingPlan packing) {

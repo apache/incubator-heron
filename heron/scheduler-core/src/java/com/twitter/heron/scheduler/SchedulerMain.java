@@ -338,11 +338,7 @@ public class SchedulerMain {
 
       // build the runtime config
       Config runtime = Config.newBuilder()
-          .put(Keys.topologyId(), topology.getId())
-          .put(Keys.topologyName(), topology.getName())
-          .put(Keys.topologyDefinition(), topology)
-          .put(Keys.schedulerStateManagerAdaptor(), adaptor)
-          .put(Keys.numContainers(), 1 + TopologyUtils.getNumContainers(topology))
+          .putAll(LauncherUtils.getPrimaryRuntime(topology, adaptor))
           .put(Keys.schedulerShutdown(), getShutdown())
           .put(Keys.SCHEDULER_PROPERTIES, properties)
           .build();
