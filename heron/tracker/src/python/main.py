@@ -17,6 +17,7 @@
 import argparse
 import logging
 import os
+import sys
 import tornado.httpserver
 import tornado.ioloop
 import tornado.web
@@ -25,6 +26,7 @@ from tornado.options import define, options
 from heron.tracker.src.python import constants
 from heron.tracker.src.python import handlers
 from heron.tracker.src.python import utils
+from heron.tracker.src.python import version
 from heron.tracker.src.python.config import Config
 from heron.tracker.src.python.tracker import Tracker
 
@@ -159,7 +161,13 @@ def create_parsers():
       add_help=False)
 
   help_parser.set_defaults(help=True)
-  return (parser, ya_parser)
+
+  subparsers.add_parser(
+      'version',
+      help='Prints version',
+      add_help=True)
+
+  return parser, ya_parser
 
 def define_options(port, config_file):
   """ define Tornado global variables """
@@ -178,9 +186,17 @@ def main():
   (parser, _) = create_parsers()
   (args, remaining) = parser.parse_known_args()
 
-  if remaining:
+  if remaining == ['help']:
     parser.print_help()
     parser.exit()
+
+  elif remaining == ['version']:
+    version.run()
+    parser.exit()
+
+  else:
+    LOG.error('Unknown subcommand')
+    sys.exit(1)
 
   namespace = vars(args)
 

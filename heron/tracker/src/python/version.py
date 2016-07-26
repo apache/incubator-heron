@@ -11,27 +11,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-''' log.py '''
-import logging
-import logging.handlers
+''' version.py '''
+import heron.common.src.python.utils as utils
 
-# Create the logger
-# pylint: disable=invalid-name
-Log = logging.getLogger('common')
 
-def configure(level, logfile=None):
+def run():
   '''
-  :param level:
-  :param logfile:
+  :param command:
+  :param parser:
+  :param args:
+  :param unknown_args:
   :return:
   '''
-  log_format = "%(asctime)s-%(levelname)s: %(message)s"
-  date_format = '%a, %d %b %Y %H:%M:%S'
+  release_file = utils.get_heron_release_file()
+  with open(release_file) as release_info:
+    for line in release_info:
+      print line,
 
-  logging.basicConfig(format=log_format, datefmt=date_format)
-  Log.setLevel(level)
-
-  if logfile is not None:
-    handle = logging.FileHandler(logfile)
-    handle.setFormatter(logging.Formatter(log_format))
-    Log.addHandler(handle)
+  return True
