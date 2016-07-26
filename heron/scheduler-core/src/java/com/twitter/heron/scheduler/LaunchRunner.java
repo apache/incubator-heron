@@ -119,15 +119,8 @@ public class LaunchRunner implements Callable<Boolean> {
       return false;
     }
 
-    // Add the instanceDistribution to the runtime
-    Config ytruntime = Config.newBuilder()
-        .putAll(runtime)
-        .put(Keys.instanceDistribution(), packedPlan.getInstanceDistribution())
-        .put(Keys.componentRamMap(), packedPlan.getComponentRamDistribution())
-        .build();
-
     // initialize the launcher
-    launcher.initialize(config, ytruntime);
+    launcher.initialize(config, runtime);
 
     Boolean result;
 

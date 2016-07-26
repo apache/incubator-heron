@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
@@ -50,7 +51,8 @@ public class LauncherUtils {
     boolean ret = false;
 
     try {
-      scheduler.initialize(config, runtime);
+      Config ytruntime = putPackingInRuntimeConfig(runtime, packing);
+      scheduler.initialize(config, ytruntime);
       ret = scheduler.onSchedule(packing);
 
       if (ret) {
@@ -90,5 +92,43 @@ public class LauncherUtils {
     } finally {
       SysUtils.closeIgnoringExceptions(packing);
     }
+  }
+
+  /**
+   * @return initialized scheduler instance
+   */
+  public static IScheduler getSchedulerInstance(
+      Config config,
+      Config runtime,
+      PackingPlan packing) {
+    String schedulerClass = Context.schedulerClass(config);
+    IScheduler scheduler;
+    try {
+      // create an instance of scheduler
+      scheduler = ReflectionUtils.newInstance(schedulerClass);
+    } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
+      LOG.log(Level.SEVERE, "Failed to instantiate scheduler", e);
+      return null;
+    }
+
+    Config ytruntime = putPackingInRuntimeConfig(runtime, packing);
+
+    scheduler.initialize(config, ytruntime);
+    return scheduler;
+  }
+
+  private static Config putPackingInRuntimeConfig(Config runtime, PackingPlan packing) {
+    Config ytruntime;
+    if (packing == null) {
+      ytruntime = runtime;
+    } else {
+      ytruntime = Config.newBuilder()
+          .putAll(runtime)
+          .put(Keys.instanceDistribution(), packing.getInstanceDistribution())
+          .put(Keys.componentRamMap(), packing.getComponentRamDistribution())
+          .put(Keys.numContainers(), 1 + packing.getContainers().size())
+          .build();
+    }
+    return ytruntime;
   }
 }

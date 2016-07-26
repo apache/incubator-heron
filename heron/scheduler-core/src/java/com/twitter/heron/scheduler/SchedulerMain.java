@@ -312,17 +312,14 @@ public class SchedulerMain {
    * @return true if scheduled successfully
    */
   public boolean runScheduler() {
+    IScheduler scheduler = null;
+
     String statemgrClass = Context.stateManagerClass(config);
     IStateManager statemgr;
 
-    String schedulerClass = Context.schedulerClass(config);
-    IScheduler scheduler;
     try {
       // create an instance of state manager
       statemgr = ReflectionUtils.newInstance(statemgrClass);
-
-      // create an instance of scheduler
-      scheduler = ReflectionUtils.newInstance(schedulerClass);
     } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
       LOG.log(Level.SEVERE, "Failed to instantiate instances", e);
       return false;
@@ -357,18 +354,12 @@ public class SchedulerMain {
         return false;
       }
 
-      // Add the instanceDistribution to the runtime
-      Config ytruntime = Config.newBuilder()
-          .putAll(runtime)
-          .put(Keys.instanceDistribution(), packedPlan.getInstanceDistribution())
-          .put(Keys.componentRamMap(), packedPlan.getComponentRamDistribution())
-          .put(Keys.numContainers(), 1 + packedPlan.getContainers().size())
-          .build();
-
-      // initialize the scheduler
-      scheduler.initialize(config, ytruntime);
-
       // schedule the packed plan
+      scheduler = LauncherUtils.getSchedulerInstance(config, runtime, packedPlan);
+      if (scheduler == null) {
+        return false;
+      }
+
       isSuccessful = scheduler.onSchedule(packedPlan);
       if (!isSuccessful) {
         LOG.severe("Failed to schedule topology");
@@ -377,7 +368,7 @@ public class SchedulerMain {
 
       // Failures in server initialization throw exceptions
       // get the scheduler server endpoint for receiving requests
-      server = getServer(ytruntime, scheduler, schedulerServerPort);
+      server = getServer(runtime, scheduler, schedulerServerPort);
       // start the server to manage runtime requests
       server.start();
 
@@ -389,7 +380,7 @@ public class SchedulerMain {
       if (isSuccessful) {
         // wait until kill request or some interrupt occurs if the scheduler starts successfully
         LOG.info("Waiting for termination... ");
-        Runtime.schedulerShutdown(ytruntime).await();
+        Runtime.schedulerShutdown(runtime).await();
       }
     } catch (IOException e) {
       LOG.log(Level.SEVERE, "Failed to start server", e);
