@@ -50,7 +50,7 @@ def to_table(result):
   return table, header, rest_count
 
 
-def show_cluster(cluster):
+def show_cluster(cl_args, cluster):
   ''' print topologies information to stdout '''
   try:
     result = utils.get_cluster_topologies(cluster)
@@ -59,6 +59,7 @@ def show_cluster(cluster):
       return False
     result = result[cluster]
   except Exception:
+    Log.error("Fail to connect to tracker: \'%s\'", cl_args["tracker_url"])
     return False
   table, header, rest_count = to_table(result)
   print 'Topologies running in cluster \'%s\'' % cluster
@@ -68,7 +69,7 @@ def show_cluster(cluster):
   return True
 
 
-def show_cluster_role(cluster, role):
+def show_cluster_role(cl_args, cluster, role):
   ''' print topologies information to stdout '''
   try:
     result = utils.get_cluster_role_topologies(cluster, role)
@@ -77,6 +78,7 @@ def show_cluster_role(cluster, role):
       return False
     result = result[cluster]
   except Exception:
+    Log.error("Fail to connect to tracker: \'%s\'", cl_args["tracker_url"])
     return False
   table, header, rest_count = to_table(result)
   print 'Topologies running in cluster \'%s\' submitted by \'%s\':' % (cluster, role)
@@ -86,7 +88,7 @@ def show_cluster_role(cluster, role):
   return True
 
 
-def show_cluster_role_env(cluster, role, env):
+def show_cluster_role_env(cl_args, cluster, role, env):
   ''' print topologies information to stdout '''
   try:
     result = utils.get_cluster_role_env_topologies(cluster, role, env)
@@ -95,6 +97,7 @@ def show_cluster_role_env(cluster, role, env):
       return False
     result = result[cluster]
   except Exception:
+    Log.error("Fail to connect to tracker: \'%s\'", cl_args["tracker_url"])
     return False
   table, header, rest_count = to_table(result)
   print 'Topologies running in cluster \'%s\', submitted by \'%s\', and\
@@ -109,11 +112,11 @@ def run(command, parser, cl_args, unknown_args):
   """ run command """
   location = cl_args['cluster/[role]/[env]'].split('/')
   if len(location) == 1:
-    return show_cluster(*location)
+    return show_cluster(cl_args, *location)
   elif len(location) == 2:
-    return show_cluster_role(*location)
+    return show_cluster_role(cl_args, *location)
   elif len(location) == 3:
-    return show_cluster_role_env(*location)
+    return show_cluster_role_env(cl_args, *location)
   else:
     Log.error('Invalid topologies selection')
     return False
