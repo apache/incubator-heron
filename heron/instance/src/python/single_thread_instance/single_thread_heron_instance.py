@@ -43,16 +43,17 @@ class SingleThreadHeronInstance(object):
     self.topo_pex_file_path = topo_pex_file_path
     self.sys_config = sys_config
 
-    self.looper = GatewayLooper()
     self.in_stream = HeronCommunicator(producer_cb=None, consumer_cb=None)
     self.out_stream = HeronCommunicator(producer_cb=None, consumer_cb=None)
+
+    self.socket_map = dict()
+    self.looper = GatewayLooper(self.socket_map)
 
     # Do metrics
     self.out_metrics = HeronCommunicator()
     self.metrics_collector = MetricsCollector(self.looper, self.out_metrics)
     self.gateway_metrics = GatewayMetrics(self.metrics_collector, sys_config)
 
-    self.socket_map = dict()
 
     socket_options = create_socket_options(self.sys_config)
     self._stmgr_client = SingleThreadStmgrClient(self.looper, self, 'localhost', stream_port,
@@ -76,7 +77,6 @@ class SingleThreadHeronInstance(object):
   def start(self):
     self._stmgr_client.start_connect()
     self._metrics_client.start_connect()
-    self.looper.prepare_map(self.socket_map)
     # call send_buffered_messages everytime it is waken up
     self.looper.add_wakeup_task(self.send_buffered_messages)
     self.looper.loop()
