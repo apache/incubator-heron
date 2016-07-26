@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pylint: disable=missing-docstring
 import unittest
 
-import heron.instance.tests.python.mock_generator as mock_generator
+import heron.common.tests.python.utils.mock_generator as mock_generator
 
 class OutgoingTupleHelperTest(unittest.TestCase):
   DEFAULT_STREAM_ID = "stream_id"
@@ -43,14 +44,3 @@ class OutgoingTupleHelperTest(unittest.TestCase):
     sent_data_tuple_set = out_helper.out_stream.poll().data
     self.assertEqual(sent_data_tuple_set.stream.id, self.DEFAULT_STREAM_ID)
     self.assertEqual(sent_data_tuple_set.tuples[0], prim_data_tuple)
-
-
-
-
-
-
-
-
-
-
-

@@ -17,9 +17,8 @@
 import unittest
 
 from heron.common.src.python.utils.misc import PhysicalPlanHelper
+import heron.common.tests.python.utils.mock_generator as mock_generator
 from heron.proto import topology_pb2
-
-import heron.instance.tests.python.mock_generator as mock_generator
 
 class PhysicalPlanHelperTest(unittest.TestCase):
   def setUp(self):
@@ -28,7 +27,7 @@ class PhysicalPlanHelperTest(unittest.TestCase):
   def test_sample_success(self):
 
     # Instance 1 should be Spout 1
-    pplan, instances = mock_generator.get_a_sample_pplan(with_detail=True)
+    pplan, instances = mock_generator.get_a_sample_pplan()
     instance_1 = instances[0]
 
     pplan_helper = PhysicalPlanHelper(pplan, instance_1["instance_id"])

@@ -15,9 +15,8 @@
 import logging
 from heron.proto import tuple_pb2, topology_pb2
 
-from heron.common.src.python.utils.misc import PythonSerializer
+from heron.common.src.python.utils.misc import PythonSerializer, OutgoingTupleHelper
 from heron.instance.src.python.instance.stream import Stream, Grouping
-from heron.instance.src.python.misc.outgoing_tuple_helper import OutgoingTupleHelper
 
 
 class Component(object):

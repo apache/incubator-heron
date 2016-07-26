@@ -36,6 +36,13 @@ def get_mock_component(name="component_name",
   component.config.CopyFrom(config)
   return component
 
+def get_mock_stream_id(id="stream_id", component_name="component_name"):
+  """Returns a mock protobuf StreamId from topology_pb2"""
+  stream_id = topology_pb2.StreamId()
+  stream_id.id = id
+  stream_id.component_name = component_name
+  return stream_id
+
 def get_mock_bolt(component=get_mock_component(), inputs=[], outputs=[]):
   """Returns a mock protobuf Bolt object from topology_pb2"""
   bolt = topology_pb2.Bolt()

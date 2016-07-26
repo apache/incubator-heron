@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+'''outgoing_tuple_helper.py: module to provide a helper class for preparing and pushing tuples'''
 
 from heron.common.src.python.log import Log
 from heron.proto import tuple_pb2, topology_pb2
@@ -30,11 +31,11 @@ class OutgoingTupleHelper(object):
   :ivar current_data_tuple_set: (HeronDataTupleSet) currently buffered data tuple
   :ivar current_control_tuple_set: (HeronControlTupleSet) currently buffered control tuple
   """
-
-  make_data_tuple_set = lambda _ : tuple_pb2.HeronDataTupleSet()
-  make_control_tuple_set = lambda _ : tuple_pb2.HeronControlTupleSet()
-  make_tuple_set = lambda _ : tuple_pb2.HeronTupleSet()
-  make_stream_id = lambda _ : topology_pb2.StreamId()
+  # pylint: disable=no-value-for-parameter
+  make_data_tuple_set = lambda _: tuple_pb2.HeronDataTupleSet()
+  make_control_tuple_set = lambda _: tuple_pb2.HeronControlTupleSet()
+  make_tuple_set = lambda _: tuple_pb2.HeronTupleSet()
+  make_stream_id = lambda _: topology_pb2.StreamId()
 
   def __init__(self, pplan_helper, out_stream):
     self.out_stream = out_stream
@@ -52,7 +53,8 @@ class OutgoingTupleHelper(object):
 
   def add_data_tuple(self, stream_id, new_data_tuple, tuple_size_in_bytes):
     """Add a new data tuple to the currently buffered set of tuples"""
-    if (self.current_data_tuple_set is None) or (self.current_data_tuple_set.stream.id != stream_id):
+    if (self.current_data_tuple_set is None) or \
+        (self.current_data_tuple_set.stream.id != stream_id):
       self._init_new_data_tuple(stream_id)
 
     added_tuple = self.current_data_tuple_set.tuples.add()
