@@ -2,9 +2,9 @@
 title: Implementing a Custom Metrics Sink
 ---
 
-Each Heron topology has its own centralized [Metrics
+Each Heron container has its own centralized [Metrics
 Manager](../../concepts/architecture#metrics-manager) (MM), which collects
-metrics from all instances in the topology. You can define how the MM processes
+metrics from all instances in the container. You can define how the MM processes
 metrics by implementing a **metrics sink**, which specifies how the MM handles
 incoming
 [`MetricsRecord`](/api/com/twitter/heron/spi/metricsmgr/metrics/MetricsRecord.html)
