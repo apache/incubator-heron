@@ -27,7 +27,6 @@ import heron.common.src.python.constants as constants
 # pylint: disable=fixme
 class HeronClient(asyncore.dispatcher):
   """Python implementation of HeronClient, using asyncore module"""
-  TIMEOUT_SEC = 30.0
   def __init__(self, looper, hostname, port, socket_map, socket_options):
     """Initializes HeronClient
 

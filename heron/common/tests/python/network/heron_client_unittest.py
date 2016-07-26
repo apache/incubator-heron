@@ -17,7 +17,7 @@
 
 import unittest2 as unittest
 from heron.common.src.python.network import StatusCode
-import heron.common.tests.python.mock_generator as mock_generator
+import heron.common.tests.python.network.mock_generator as mock_generator
 import heron.common.tests.python.mock_protobuf as mock_protobuf
 
 class ClientTest(unittest.TestCase):
