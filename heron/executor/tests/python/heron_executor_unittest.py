@@ -14,7 +14,8 @@
 
 import unittest2 as unittest
 
-from heron.executor.src.python.heron_executor import *
+from heron.executor.src.python.heron_executor import ProcessInfo
+from heron.executor.src.python.heron_executor import HeronExecutor
 
 class MockPOpen:
   """fake subprocess.Popen object that we can use to mock processes and pids"""
@@ -39,7 +40,7 @@ class MockExecutor(HeronExecutor):
 
   def _run_process(self, name, cmd, env=None):
     popen = MockPOpen()
-    self.processes.append((popen.pid, name, cmd))
+    self.processes.append(ProcessInfo(popen, name, cmd))
     return popen
 
 class HeronExecutorTest(unittest.TestCase):
@@ -53,19 +54,21 @@ class HeronExecutorTest(unittest.TestCase):
     instance_name = "container_%d_%s_%d" % (container_id, component_name, instance_id)
     return "heron_java_home/bin/java -Xmx320M -Xms320M -Xmn160M -XX:MaxPermSize=128M -XX:PermSize=128M -XX:ReservedCodeCacheSize=64M -XX:+CMSScavengeBeforeRemark -XX:TargetSurvivorRatio=90 -XX:+PrintCommandLineFlags -verbosegc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintGCCause -XX:+PrintPromotionFailure -XX:+PrintTenuringDistribution -XX:+PrintHeapAtGC -XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:ParallelGCThreads=4 -Xloggc:log-files/gc.%s.log -XX:+HeapDumpOnOutOfMemoryError -Djava.net.preferIPv4Stack=true -cp instance_classpath:classpath com.twitter.heron.instance.HeronInstance topname topid %s %s %d 0 stmgr-%d master_port metricsmgr_port heron/config/src/yaml/conf/test/test_heron_internals.yaml" % (instance_name, instance_name, component_name, instance_id, container_id)
 
+  MockPOpen.set_next_pid(37)
   expected_processes_container_0 = [
-    (37, 'heron-shell-0', shell_command_expected),
-    (38, 'metricsmgr-0',  get_expected_metricsmgr_command(0)),
-    (39, 'heron-tmaster', 'tmaster_binary master_port tmaster_controller_port tmaster_stats_port topname topid zknode zkroot stmgr-1 heron/config/src/yaml/conf/test/test_heron_internals.yaml metrics_sinks_config_file metricsmgr_port'),
+    ProcessInfo(MockPOpen(), 'heron-shell-0', shell_command_expected),
+    ProcessInfo(MockPOpen(), 'metricsmgr-0',  get_expected_metricsmgr_command(0)),
+    ProcessInfo(MockPOpen(), 'heron-tmaster', 'tmaster_binary master_port tmaster_controller_port tmaster_stats_port topname topid zknode zkroot stmgr-1 heron/config/src/yaml/conf/test/test_heron_internals.yaml metrics_sinks_config_file metricsmgr_port'),
   ]
 
+  MockPOpen.set_next_pid(37)
   expected_processes_container_1 = [
-    (37, 'stmgr-1', 'stmgr_binary topname topid topdefnfile zknode zkroot stmgr-1 container_1_word_3,container_1_exclaim1_2,container_1_exclaim1_1 master_port metricsmgr_port shell-port heron/config/src/yaml/conf/test/test_heron_internals.yaml'),
-    (38, 'container_1_word_3', get_expected_instance_command('word', 3)),
-    (39, 'container_1_exclaim1_1', get_expected_instance_command('exclaim1', 1)),
-    (40, 'container_1_exclaim1_2', get_expected_instance_command('exclaim1', 2)),
-    (41, 'heron-shell-1', shell_command_expected),
-    (42, 'metricsmgr-1', get_expected_metricsmgr_command(1)),
+    ProcessInfo(MockPOpen(), 'stmgr-1', 'stmgr_binary topname topid topdefnfile zknode zkroot stmgr-1 container_1_word_3,container_1_exclaim1_2,container_1_exclaim1_1 master_port metricsmgr_port shell-port heron/config/src/yaml/conf/test/test_heron_internals.yaml'),
+    ProcessInfo(MockPOpen(), 'container_1_word_3', get_expected_instance_command('word', 3)),
+    ProcessInfo(MockPOpen(), 'container_1_exclaim1_1', get_expected_instance_command('exclaim1', 1)),
+    ProcessInfo(MockPOpen(), 'container_1_exclaim1_2', get_expected_instance_command('exclaim1', 2)),
+    ProcessInfo(MockPOpen(), 'heron-shell-1', shell_command_expected),
+    ProcessInfo(MockPOpen(), 'metricsmgr-1', get_expected_metricsmgr_command(1)),
   ]
 
   def setUp(self):
@@ -118,8 +121,12 @@ class HeronExecutorTest(unittest.TestCase):
     monitored_processes = executor.processes_to_monitor
 
     # convert to (pid, name, command)
-    found_processes = map(lambda (pid, name, command): (pid, name, ' '.join(command)), executor.processes)
-    found_monitored = map(lambda (pid, value): (pid, value[1], ' '.join(value[2])), monitored_processes.items())
+    found_processes = map(lambda (process_info):
+                          (process_info.pid, process_info.name, process_info.command_str),
+                          executor.processes)
+    found_monitored = map(lambda (pid, process_info):
+                          (pid, process_info.name, process_info.command_str),
+                          monitored_processes.items())
     print("do_test_commands - found_processes: %s found_monitored: %s" % (found_processes, found_monitored))
     self.assertEquals(found_processes, found_monitored)
 
@@ -131,7 +138,9 @@ class HeronExecutorTest(unittest.TestCase):
     self.executor_1.update_instance_distribution(self.dist_expected)
     current_commands = self.executor_1.get_commands_to_run()
 
-    self.assertEquals(dict(map((lambda (_, name, command): (name, command.split(' '))), self.expected_processes_container_1)), current_commands)
+    self.assertEquals(dict(
+      map((lambda (process_info): (process_info.name, process_info.command.split(' '))),
+          self.expected_processes_container_1)), current_commands)
 
     # update instance distribution
     new_distribution = self.executor_1.parse_instance_distribution("1:word:3:0:word:2:0:exclaim1:1:0")
@@ -154,7 +163,8 @@ class HeronExecutorTest(unittest.TestCase):
       self.assert_process(expected_process, found_processes)
 
   def assert_process(self, expected_process, found_processes):
-    (pid, expected_name, expected_command) = expected_process
+    pid = expected_process.pid
     self.assertTrue(found_processes[pid])
-    self.assertEquals((expected_name, 1), (found_processes[pid][1], found_processes[pid][3]))
-    self.assertEquals(expected_command, ' '.join(found_processes[pid][2]))
+    self.assertEquals(expected_process.name, found_processes[pid].name)
+    self.assertEquals(expected_process.command, found_processes[pid].command_str)
+    self.assertEquals(1, found_processes[pid].attempts)

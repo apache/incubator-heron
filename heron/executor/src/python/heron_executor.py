@@ -102,6 +102,26 @@ def log_pid_for_process(process_name, pid):
   do_print('Logging pid %d to file %s' %(pid, filename))
   atomic_write_file(filename, str(pid))
 
+class ProcessInfo(object):
+  def __init__(self, process, name, command, attempts=1):
+    """
+    Container for info related to a running process
+    :param process: the process POpen object
+    :param name: the logical (i.e., unique) name of the process
+    :param command: an array of strings comprising the command and it's args
+    :param attempts: how many times the command has been run (defaults to 1)
+    """
+    self.process = process
+    self.pid = process.pid
+    self.name = name
+    self.command = command
+    self.command_str = ' '.join(command) # convenience for unit tests
+    self.attempts = attempts
+
+  def increment_attempts(self):
+    self.attempts += 1
+    return self
+
 # pylint: disable=too-many-instance-attributes
 class HeronExecutor(object):
   """ Heron executor is a class that is responsible for running each of the process on a given
@@ -413,11 +433,12 @@ class HeronExecutor(object):
   def _kill_processes(self, commands):
     # remove the command from processes_to_monitor and kill the process
     for command_name, command in commands.iteritems():
-      for p, name, _, _ in self.processes_to_monitor.values():
-        if name == command_name:
-          del self.processes_to_monitor[p.pid]
-          do_print("Killing %s process with pid %s: %s" % (name, p.pid, ' '.join(command)))
-          p.kill()
+      for process_info in self.processes_to_monitor.values():
+        if process_info.name == command_name:
+          del self.processes_to_monitor[process_info.pid]
+          do_print("Killing %s process with pid %s: %s" %
+                   (process_info.name, process_info.pid, ' '.join(command)))
+          process_info.process.kill()
 
   def _start_processes(self, commands):
     """Start all commands and add them to the dict of processes to be monitored """
@@ -425,7 +446,7 @@ class HeronExecutor(object):
     # First start all the processes
     for (name, command) in commands.items():
       p = self._run_process(name, command, self.shell_env)
-      processes_to_monitor[p.pid] = (p, name, command, 1)
+      processes_to_monitor[p.pid] = ProcessInfo(p, name, command)
 
       # Log down the pid file
       log_pid_for_process(name, p.pid)
@@ -441,21 +462,24 @@ class HeronExecutor(object):
       if len(self.processes_to_monitor) > 0:
         (pid, status) = os.wait()
         if pid in self.processes_to_monitor.keys():
-          (old_p, name, command, nattempts) = self.processes_to_monitor[pid]
+          old_process_info = self.processes_to_monitor[pid]
+          name = old_process_info.name
+          command = old_process_info.command
           do_print("%s (pid=%s) exited with status %d. command=%s" % (name, pid, status, command))
           # Log the stdout & stderr of the failed process
-          self._wait_process_std_out_err(name, old_p)
+          self._wait_process_std_out_err(name, old_process_info.process)
 
           # Just make it world readable
           if os.path.isfile("core.%d" % pid):
             os.system("chmod a+r core.%d" % pid)
-          if nattempts > self.max_runs:
+          if old_process_info.attempts >= self.max_runs:
             do_print("%s exited too many times" % name)
             sys.exit(1)
           time.sleep(self.interval_between_runs)
           p = self._run_process(name, command)
           del self.processes_to_monitor[pid]
-          self.processes_to_monitor[p.pid] = (p, name, command, nattempts + 1)
+          self.processes_to_monitor[p.pid] =\
+            ProcessInfo(p, name, command, old_process_info.attempts + 1)
 
           # Log down the pid file
           log_pid_for_process(name, p.pid)
