@@ -46,3 +46,7 @@ class PexLoaderTest(unittest.TestCase):
       pex_loader.load_pex(path, include_deps=False)
       abs_path = os.path.abspath(path)
       self.assertIn(abs_path, sys.path)
+
+  def test_fail(self):
+    print(__file__)
+    self.fail()
