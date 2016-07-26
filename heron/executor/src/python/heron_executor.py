@@ -107,7 +107,8 @@ class HeronExecutor(object):
   """ Heron executor is a class that is responsible for running each of the process on a given
   container. Based on the container id and the instance distribution, it determines if the container
   is a master node or a worker node and it starts processes accordingly."""
-  def __init__(self, args):
+  def __init__(self, args, shell_env):
+    self.shell_env = shell_env
     self.max_runs = 100
     self.interval_between_runs = 10
     self.shard = int(args[1])
@@ -393,13 +394,15 @@ class HeronExecutor(object):
     if process_stderr:
       do_print("%s stderr: %s" %(name, process_stderr))
 
-  def run_process(self, name, cmd):
+  def run_process(self, name, cmd, env_to_exec=None):
     do_print("Running %s process as %s" % (name, ' '.join(cmd)))
-    return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                            env=env_to_exec)
 
-  def run_blocking_process(self, cmd, is_shell):
+  def run_blocking_process(self, cmd, is_shell, env_to_exec=None):
     do_print("Running blocking process as %s" % cmd)
-    process = subprocess.Popen(cmd, shell=is_shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process = subprocess.Popen(cmd, shell=is_shell, stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE, env=env_to_exec)
 
     # wait for termination
     self.wait_process_std_out_err("", process)
@@ -421,7 +424,7 @@ class HeronExecutor(object):
     processes_to_monitor = {}
     # First start all the processes
     for (name, command) in commands.items():
-      p = self.run_process(name, command)
+      p = self.run_process(name, command, self.shell_env)
       processes_to_monitor[p.pid] = (p, name, command, 1)
 
       # Log down the pid file
@@ -523,7 +526,7 @@ class HeronExecutor(object):
     commands = [create_folders, chmod_binaries]
 
     for command in commands:
-      if self.run_blocking_process(command, True) != 0:
+      if self.run_blocking_process(command, True, self.shell_env) != 0:
         do_print("Failed to run command: %s. Exiting" % command)
         sys.exit(1)
 
@@ -531,8 +534,17 @@ def main():
   if len(sys.argv) != 32:
     print_usage()
     sys.exit(1)
+
+  # Since Heron on YARN runs as headless users, pex compiled
+  # binaries should be exploded into the container working
+  # directory. In order to do this, we need to set the
+  # PEX_ROOT shell environment before forking the processes
+  shell_env = os.environ.copy()
+  shell_env["PEX_ROOT"] = os.path.join(os.path.abspath('.'), ".pex")
+
+  # Instantiate the executor and launch it
   # pylint: disable=undefined-variable
-  executor = HeronExecutor(sys.argv)
+  executor = HeronExecutor(sys.argv, shell_env)
   executor.prepare_launch()
   executor.launch()
   executor.monitor_processes()

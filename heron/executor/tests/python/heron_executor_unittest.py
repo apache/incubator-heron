@@ -32,12 +32,12 @@ class MockExecutor(HeronExecutor):
   """mock executor that overrides methods that don't apply to unit tests, like running processes"""
   def __init__(self, args):
     self.processes = []
-    super(MockExecutor, self).__init__(args)
+    super(MockExecutor, self).__init__(args, None)
 
   def load_logging_dir(self, heron_internals_config_file):
     return "fake_dir"
 
-  def run_process(self, name, cmd):
+  def run_process(self, name, cmd, env=None):
     popen = MockPOpen()
     self.processes.append((popen.pid, name, cmd))
     return popen
