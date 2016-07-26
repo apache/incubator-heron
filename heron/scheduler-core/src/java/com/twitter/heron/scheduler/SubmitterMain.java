@@ -354,10 +354,6 @@ public class SubmitterMain {
     String launcherClass = Context.launcherClass(config);
     ILauncher launcher;
 
-    // Create an instance of the packing class
-    String packingClass = Context.packingClass(config);
-    IPacking packing;
-
     // create an instance of the uploader class
     String uploaderClass = Context.uploaderClass(config);
     IUploader uploader;
@@ -368,9 +364,6 @@ public class SubmitterMain {
 
       // create an instance of launcher
       launcher = ReflectionUtils.newInstance(launcherClass);
-
-      // create an instance of the packing class
-      packing = ReflectionUtils.newInstance(packingClass);
 
       // create an instance of uploader
       uploader = ReflectionUtils.newInstance(uploaderClass);
@@ -412,7 +405,6 @@ public class SubmitterMain {
               .put(Keys.numContainers(), 1 + TopologyUtils.getNumContainers(topology))
               .put(Keys.topologyPackageUri(), packageURI)
               .put(Keys.launcherClassInstance(), launcher)
-              .put(Keys.packingClassInstance(), packing)
               .build();
 
           isSuccessful = callLauncherRunner(runtime);
@@ -429,7 +421,6 @@ public class SubmitterMain {
 
       // 4. Close the resources
       SysUtils.closeIgnoringExceptions(uploader);
-      SysUtils.closeIgnoringExceptions(packing);
       SysUtils.closeIgnoringExceptions(launcher);
       SysUtils.closeIgnoringExceptions(statemgr);
     }

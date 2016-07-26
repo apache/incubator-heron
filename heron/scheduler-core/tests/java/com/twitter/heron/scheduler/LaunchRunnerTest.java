@@ -111,7 +111,6 @@ public class LaunchRunnerTest {
     TopologyAPI.Topology topology = createTopology(new com.twitter.heron.api.Config());
 
     Mockito.doReturn(launcher).when(runtime).get(Keys.launcherClassInstance());
-    Mockito.doReturn(packing).when(runtime).get(Keys.packingClassInstance());
     Mockito.doReturn(adaptor).when(runtime).get(Keys.schedulerStateManagerAdaptor());
     Mockito.doReturn(topology).when(runtime).get(Keys.topologyDefinition());
 

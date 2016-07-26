@@ -16,7 +16,7 @@ package com.twitter.heron.scheduler.aurora;
 
 import java.util.logging.Logger;
 
-import com.twitter.heron.scheduler.common.LauncherUtils;
+import com.twitter.heron.scheduler.LauncherUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;

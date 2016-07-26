@@ -37,7 +37,6 @@ import com.twitter.heron.scheduler.server.SchedulerServer;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.IStateManager;
@@ -316,17 +315,11 @@ public class SchedulerMain {
     String statemgrClass = Context.stateManagerClass(config);
     IStateManager statemgr;
 
-    String packingClass = Context.packingClass(config);
-    IPacking packing;
-
     String schedulerClass = Context.schedulerClass(config);
     IScheduler scheduler;
     try {
       // create an instance of state manager
       statemgr = ReflectionUtils.newInstance(statemgrClass);
-
-      // create an instance of the packing class
-      packing = ReflectionUtils.newInstance(packingClass);
 
       // create an instance of scheduler
       scheduler = ReflectionUtils.newInstance(schedulerClass);
@@ -358,8 +351,7 @@ public class SchedulerMain {
           .build();
 
       // get a packed plan and schedule it
-      packing.initialize(config, runtime);
-      PackingPlan packedPlan = packing.pack();
+      PackingPlan packedPlan = LauncherUtils.createPackingPlan(config, runtime);
       if (packedPlan == null) {
         LOG.severe("Failed to pack a valid PackingPlan. Check the config.");
         return false;
@@ -410,7 +402,6 @@ public class SchedulerMain {
 
       // 4. Close the resources
       SysUtils.closeIgnoringExceptions(scheduler);
-      SysUtils.closeIgnoringExceptions(packing);
       SysUtils.closeIgnoringExceptions(statemgr);
     }
 

@@ -54,10 +54,6 @@ public final class Runtime {
     return (SchedulerStateManagerAdaptor) runtime.get(Keys.schedulerStateManagerAdaptor());
   }
 
-  public static IPacking packingClassInstance(Config runtime) {
-    return (IPacking) runtime.get(Keys.packingClassInstance());
-  }
-
   public static ILauncher launcherClassInstance(Config runtime) {
     return (ILauncher) runtime.get(Keys.launcherClassInstance());
   }
