@@ -33,9 +33,10 @@ enum Type {
   OBJECT = 1; // generic type
 }
 
-enum Language {
-  JAVA = 1;
-  PYTHON = 2;
+enum ComponentObjectSpec {
+  JAVA_CLASS_NAME = 1;
+  JAVA_SERIALIZED_OBJECT = 2;
+  PYTHON_CLASS_NAME = 3;
 }
 
 message StreamSchema {
@@ -76,11 +77,12 @@ message Config {
 message Component {
   // The name of the component. Like Tail-FlatMap
   required string name = 1;
-  required Language lang = 5;
-  // Only one of the below three are set
+  // Only one of the below two are set
   optional string class_name = 2;
   optional bytes serialized_object = 4;
+
   required Config config = 3;
+  required ComponentObjectSpec spec = 5;
 }
 
 message Spout {
