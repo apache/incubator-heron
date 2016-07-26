@@ -25,7 +25,9 @@ class PexLoaderTest(unittest.TestCase):
     # Testing egg_regex to find dependencies
     pass_test_cases = [".deps/sample_egg.egg/",
                        ".deps/sample_egg_1234.egg/",
-                       ".deps/sample_egg.egg.egg/"]
+                       ".deps/sample_egg.egg.egg/",
+                       ".deps/sample_egg.whl/",
+                       ".deps/sample.egg.whl/"]
     for test in pass_test_cases:
       # should match without the trailing slash
       self.assertEqual(re.match(pex_loader.egg_regex, test).group(1), test[:-1])
@@ -35,7 +37,10 @@ class PexLoaderTest(unittest.TestCase):
                        ".deps/sample/egg.egg/",   # contains slash
                        ".deps/sample_ egg.egg/",  # contains space
                        "deps/sample_egg.egg/",    # not starting from .deps
-                       "/.deps/sample_egg.egg/"]   # starting from slash
+                       "/.deps/sample_egg.egg/",  # starting from slash
+                       ".deps/sample_whl/",
+                       ".deps/sample.egg.wh/",
+                       ".deps/sample.whl.egg"]
     for test in fail_test_cases:
       self.assertIsNone(re.match(pex_loader.egg_regex, test))
 

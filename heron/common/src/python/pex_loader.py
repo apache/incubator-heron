@@ -21,8 +21,7 @@ import zipfile
 
 from heron.common.src.python.log import Log
 
-# TODO: Add whl regex as well
-egg_regex = r"^(\.deps\/[^\/\s]*\.egg)\/"
+egg_regex = r"^(\.deps\/[^\/\s]*\.(egg|whl))\/"
 
 def _get_deps_list(abs_path_to_pex):
   """Get a list of paths to included dependencies in the specified pex file
