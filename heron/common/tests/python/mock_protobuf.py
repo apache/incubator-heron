@@ -32,7 +32,8 @@ def get_mock_component(name="component_name",
   """Returns a mock protobuf Component object from topology_pb2"""
   component = topology_pb2.Component()
   component.name = name
-  component.python_class_name = python_cls
+  component.spec = topology_pb2.ComponentObjectSpec.Value("PYTHON_CLASS_NAME")
+  component.class_name = python_cls
   component.config.CopyFrom(config)
   return component
 
