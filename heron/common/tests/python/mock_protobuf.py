@@ -11,7 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""mock_protobuf.py: creates different kinds of protobuf message for testing purposes"""
+"""mock_protobuf.py: provides methods to create dummy protobuf message for testing
+
+This module is used mainly for testing Python Heron Instance as well as common modules
+written in Python.
+"""
+
 from heron.proto import stmgr_pb2, physical_plan_pb2, topology_pb2, common_pb2
 
 # pylint: disable=dangerous-default-value
