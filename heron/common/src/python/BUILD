@@ -11,6 +11,7 @@ pex_library(
   reqs = [
     'colorlog==2.6.1',
     'tornado==4.0.2',
+    'pyyaml==3.10'
   ]
 )
 

@@ -12,6 +12,7 @@ from .metrics import (IMetric,
                       MultiMeanReducedMetric)
 
 from .metrics_helper import (GatewayMetrics,
+                             BaseMetricsHelper,
                              ComponentMetrics,
                              SpoutMetrics,
                              BoltMetrics,
