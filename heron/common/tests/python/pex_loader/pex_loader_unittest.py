@@ -56,7 +56,8 @@ class PexLoaderTest(unittest.TestCase):
     self.assertEqual(cls.name, "sample class")
     self.assertEqual(cls.age, 100)
 
-  def get_path_of_sample(self, sample):
+  @staticmethod
+  def get_path_of_sample(sample):
     file_dir = "/".join(os.path.realpath(__file__).split('/')[:-1])
     testdata_dir = os.path.join(file_dir, constants.TEST_DATA_PATH)
     sample_pex_path = os.path.join(testdata_dir, sample)
