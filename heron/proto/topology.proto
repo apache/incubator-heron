@@ -77,7 +77,11 @@ message Config {
 message Component {
   // The name of the component. Like Tail-FlatMap
   required string name = 1;
-  // Only one of the below two are set
+  // Only one of the below two is set, whose meaning is determined
+  // by the value of spec. For example, when spec is JAVA_CLASS_NAME,
+  // `class_name` is set and contains Java's class name.
+  // When spec is JAVA_SERIALIZED_OBJECT, `serialized_object` is set and
+  // contains a serialized Java object.
   optional string class_name = 2;
   optional bytes serialized_object = 4;
 
