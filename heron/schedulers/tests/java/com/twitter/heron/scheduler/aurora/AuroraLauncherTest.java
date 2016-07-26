@@ -22,6 +22,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.twitter.heron.scheduler.common.LauncherUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
@@ -44,7 +45,7 @@ public class AuroraLauncherTest {
 
     Assert.assertFalse(launcher.launch(Mockito.mock(PackingPlan.class)));
     PowerMockito.verifyStatic();
-    SchedulerUtils.onScheduleAsLibrary(
+    LauncherUtils.onScheduleAsLibrary(
         Mockito.any(Config.class),
         Mockito.any(Config.class),
         Mockito.any(IScheduler.class),
@@ -60,7 +61,7 @@ public class AuroraLauncherTest {
 
     Assert.assertTrue(launcher.launch(Mockito.mock(PackingPlan.class)));
     PowerMockito.verifyStatic();
-    SchedulerUtils.onScheduleAsLibrary(
+    LauncherUtils.onScheduleAsLibrary(
         Mockito.any(Config.class),
         Mockito.any(Config.class),
         Mockito.any(IScheduler.class),

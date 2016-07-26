@@ -18,6 +18,7 @@ import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.twitter.heron.scheduler.common.LauncherUtils;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
@@ -65,7 +66,7 @@ public class SlurmLauncher implements ILauncher {
       return false;
     }
 
-    return SchedulerUtils.onScheduleAsLibrary(config, runtime,
+    return LauncherUtils.onScheduleAsLibrary(config, runtime,
         new SlurmScheduler(topologyWorkingDirectory), packing);
   }
 

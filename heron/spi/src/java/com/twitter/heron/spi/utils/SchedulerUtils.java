@@ -43,41 +43,6 @@ public final class SchedulerUtils {
   }
 
   /**
-   * Invoke the onScheduler() in IScheduler directly as a library
-   *
-   * @param config The Config to initialize IScheduler
-   * @param runtime The runtime Config to initialize IScheduler
-   * @param scheduler the IScheduler to invoke
-   * @param packing The PackingPlan to scheduler for OnSchedule()
-   * @return true if scheduling successfully
-   */
-  public static boolean onScheduleAsLibrary(
-      Config config,
-      Config runtime,
-      IScheduler scheduler,
-      PackingPlan packing) {
-    boolean ret = false;
-
-    try {
-      scheduler.initialize(config, runtime);
-      ret = scheduler.onSchedule(packing);
-
-      if (ret) {
-        // Set the SchedulerLocation at last step,
-        // since some methods in IScheduler will provide correct values
-        // only after IScheduler.onSchedule is invoked correctly
-        ret = setLibSchedulerLocation(runtime, scheduler, false);
-      } else {
-        LOG.severe("Failed to invoke IScheduler as library");
-      }
-    } finally {
-      scheduler.close();
-    }
-
-    return ret;
-  }
-
-  /**
    * Utils method to construct the command to start heron-scheduler
    *
    * @param config The static Config
