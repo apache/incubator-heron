@@ -131,6 +131,12 @@ def get_classpath(jars):
 def get_heron_dir():
   """
   This will extract heron directory from .pex file.
+
+  For example,
+  when __file__ is '/Users/heron-user/bin/heron/heron/common/src/python/utils/__init__.pyc', and
+  its real path is '/Users/heron-user/.heron/bin/heron/common/src/python/utils/__init__.pyc',
+  the internal variable ``path`` would be '/Users/heron-user/.heron', which is the heron directory
+
   :return: root location for heron-cli.
   """
   path = "/".join(os.path.realpath(__file__).split('/')[:-8])
