@@ -21,7 +21,7 @@ build --linkopt -lunwind
 build --linkopt -lrt
 build --experimental_action_listener=tools/cpp:compile_cpp
 build --experimental_action_listener=tools/java:compile_java
-# TODO: enable this: build --experimental_action_listener=tools/python:compile_python
+build --experimental_action_listener=tools/python:compile_python
 build --workspace_status_command scripts/release/status.sh
 
 # This is so we use a recent enough GCC when building.
