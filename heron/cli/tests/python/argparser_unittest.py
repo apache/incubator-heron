@@ -55,7 +55,7 @@ class HeronRCTest(unittest.TestCase):
 
     #print parser, args.config_property[0]
 
-    self.assertEqual('this-is-it', args.config_property[0])
+    self.assertEqual('this-is-it', args.config_property)
 
   def test_parser_rolecmdspecific(self):
     #sys.argv=["heron-cli", "activate", "devcluster/ads/PROD", "12313"]
@@ -75,10 +75,10 @@ class HeronRCTest(unittest.TestCase):
       metavar = '<command> <options>')
     activate.create_parser(subparsers)
     print "\n"
-    #args, unknown_args = parser.parse_known_args(["activate", "devcluster/ads/PROD", "12313"])
-    args, unknown_args = parser.parse_known_args()
+    args, unknown_args = parser.parse_known_args(["activate", "devcluster/ads/PROD", "12313"])
+    #args, unknown_args = parser.parse_known_args()
     print args
-    self.assertEqual('test-cmd-activate-role', getattr(args,"config_property"))
+    self.assertEqual('test-cmd-activate-role',args.config_property)
 
   def tearDown(self):
     opts.clear_config()

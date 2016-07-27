@@ -129,53 +129,15 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
 			role = (sys.argv[2], self.rcclusterrole) [self.rcclusterrole != '']
 		#command = arg_strings[1]
 		#role = arg_strings[2]
-
-		new_arg_strings.extend(self.get_args_for_command_role('*', '*'))
-		new_arg_strings.extend(self.get_args_for_command_role(command, '*'))
 		new_arg_strings.extend(self.get_args_for_command_role(command, role))
+		new_arg_strings.extend(self.get_args_for_command_role(command, '*'))
+		new_arg_strings.extend(self.get_args_for_command_role('*', '*'))
 		#new_arg_strings.extend(arg_strings)
 		arg_strings.extend(new_arg_strings)
 		#print 
 		#print sys.argv , command , role, new_arg_strings
 		return arg_strings
 
-	def _xparse_known_args(self, args=None, namespace=None):
-		print "entering in parse_known_args", namespace,args
-		if args is None:
-		    # args default to the system args
-		    args = sys.argv[1:]
-		else:
-		    # make sure that args are mutable
-		    args = list(args)
-
-		# default Namespace built from parser defaults
-		if namespace is None:
-		    namespace = argparse.Namespace()
-		# add any action defaults that aren't present
-		for action in self._actions:
-		    if action.dest is not argparse.SUPPRESS:
-		        if not hasattr(namespace, action.dest):
-		            if action.default is not argparse.SUPPRESS:
-		                setattr(namespace, action.dest, action.default)
-
-		# add any parser defaults that aren't present
-		for dest in self._defaults:
-		    if not hasattr(namespace, dest):
-		        setattr(namespace, dest, self._defaults[dest])
-
-		# parse the arguments and exit if there are any errors
-		try:
-			print "3 parse_known_args--" , namespace,args
-			namespace, args = self._parse_known_args(args, namespace)
-
-			if hasattr(namespace, argparse._UNRECOGNIZED_ARGS_ATTR):
-			    args.extend(getattr(namespace, argparse._UNRECOGNIZED_ARGS_ATTR))
-			    delattr(namespace, argparse._UNRECOGNIZED_ARGS_ATTR)
-			print "4 parse_known_args--" , namespace,args
-			return namespace, args
-		except argparse.ArgumentError:
-		    err = sys.exc_info()[1]
-		    self.error(str(err))
 
 	def _parse_known_args(self, arg_strings, namespace):
 		#print "ENTERING in _parse_known_args", arg_strings, namespace
@@ -188,11 +150,19 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
 		namespace, args = super(HeronRCArgumentParser, self).parse_known_args(args, namespace)
 		#print "EXITING parse_known_args--" , namespace
 
-		if self.prog != 'heron':
+		if self.prog == 'heron':
 			
 			try:
 				print "in HeronRCArgumentParser._parse_known_args", self, namespace, args
-				raise ValueError('A very specific bad thing happened')
+				#raise ValueError('A very specific bad thing happened')
+				for key in namespace.__dict__:
+					val = namespace.__dict__[key]
+					if val is not None and type(val) is list :
+						print "LIST:", key,  ":", val, " first item :", val[0]
+						namespace.__dict__[key] = val[0]
+					else:
+						print key, ":", val
+
 			except Exception as error:
 				traceback.print_stack()
 			return namespace,args	
