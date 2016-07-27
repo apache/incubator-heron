@@ -321,3 +321,9 @@ def check_release_file_exists():
     return False
 
   return True
+
+def print_version():
+  release_file = get_heron_release_file()
+  with open(release_file) as release_info:
+    for line in release_info:
+      print line,

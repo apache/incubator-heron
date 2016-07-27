@@ -20,9 +20,9 @@ from tornado.options import define
 def set_verbose(cl_args):
   """ set verbose level """
   if cl_args['verbose']:
-    Log.setLevel(logging.INFO)
+    Log.setLevel(logging.DEBUG)
   else:
-    Log.setLevel(logging.WARNING)
+    Log.setLevel(logging.INFO)
 
 
 def set_tracker_url(cl_args):

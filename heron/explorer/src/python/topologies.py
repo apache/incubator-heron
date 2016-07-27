@@ -55,7 +55,7 @@ def show_cluster(cl_args, cluster):
   try:
     result = tracker_access.get_cluster_topologies(cluster)
     if not result:
-      Log.error('Unknown cluster \'%s\'' % cluster)
+      Log.error('No topologies in cluster \'%s\'' % cluster)
       return False
     result = result[cluster]
   except Exception:
