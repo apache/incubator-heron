@@ -88,7 +88,7 @@ def main():
     parser = optparse.OptionParser(usage="usage: %prog [options] output")
     parser.add_option('--entry-point', default='__main__')
     parser.add_option('--no-pypi', action='store_false', dest='pypi', default=True)
-    parser.add_option('--disable-cache', action='store_true', dest='pypi', default=False)
+    parser.add_option('--disable-cache', action='store_true', dest='disable_cache', default=False)
     parser.add_option('--not-zip-safe', action='store_false', dest='zip_safe', default=True)
     parser.add_option('--python', default="/usr/bin/python2.7")
     parser.add_option('--find-links', dest='find_links', default='')

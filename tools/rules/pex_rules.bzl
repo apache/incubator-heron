@@ -170,12 +170,15 @@ def pex_test_impl(ctx):
   pex_test_files = pex_test_file_types.filter(pex_file_types.filter(transitive_sources))
   test_run_args = ' '.join([f.path for f in pex_test_files])
 
+  arguments = ["--disable-cache"]
+  arguments += common_pex_arguments('pytest', deploy_pex.path, manifest_file.path)
+
   ctx.action(
       inputs = [manifest_file] + list(transitive_sources) + list(transitive_eggs) + list(transitive_resources),
       executable = pexbuilder,
       outputs = [ deploy_pex ],
       mnemonic = "PexPython",
-      arguments = common_pex_arguments('pytest', deploy_pex.path, manifest_file.path))
+      arguments = arguments)
 
   executable = ctx.outputs.executable
   ctx.action(
