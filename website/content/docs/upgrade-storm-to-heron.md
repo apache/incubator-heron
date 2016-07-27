@@ -41,8 +41,9 @@ The Heron API will now be installed in your local [Maven
 repository](https://maven.apache.org/settings.html):
 
 ```bash
-$ ls ~/.m2/repository/twitter/heron
+$ ls ~/.m2/repository/com/twitter/heron
 heron-api
+heron-spi
 heron-storm
 ```
 
