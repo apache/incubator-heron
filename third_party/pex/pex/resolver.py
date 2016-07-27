@@ -259,10 +259,7 @@ class CachingResolver(Resolver):
     # if distribution is not in cache, copy
     target = os.path.join(self.__cache, os.path.basename(dist.location))
     if not os.path.exists(target):
-      print(target)
       shutil.copyfile(dist.location, target + '~')
-      print(dist.location)
-      print(target + '~')
       os.rename(target + '~', target)
     os.utime(target, None)
 
