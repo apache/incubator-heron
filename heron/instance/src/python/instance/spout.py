@@ -108,7 +108,9 @@ class Spout(Component):
     :type need_task_ids: bool
     :param need_task_ids: indicate whether or not you would like the task IDs the Tuple was emitted.
     """
-    # TODO: check whether this tuple is sane with pplan_helper.check_output_schema
+    # first check whether this tuple is sane
+    self.pplan_helper.check_output_schema(stream, tup)
+
     # TODO: custom grouping and invoke hook emit
     data_tuple = tuple_pb2.HeronDataTuple()
     data_tuple.key = 0

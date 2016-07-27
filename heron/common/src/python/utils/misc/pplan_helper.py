@@ -50,7 +50,7 @@ class PhysicalPlanHelper(object):
     # get spout or bolt
     self.my_spbl, self.is_spout = self._get_my_spout_or_bolt(pplan.topology)
 
-    # output schema
+    # Map <stream id -> number of fields in that stream's schema>
     self.output_schema = dict()
     outputs = self.my_spbl.outputs
 
@@ -79,6 +79,24 @@ class PhysicalPlanHelper(object):
     else:
       raise RuntimeError("My component neither spout nor bolt")
     return my_spbl, is_spout
+
+  def check_output_schema(self, stream_id, tuple):
+    """Checks if a given stream_id and tuple matches with the output schema
+
+    :type stream_id: str
+    :param stream_id: stream id into which tuple is sent
+    :type tuple: list
+    :param tuple: tuple that is going to be sent
+    """
+    # do some checking to make sure that the number of fields match what's expected
+    size = self.output_schema.get(stream_id, None)
+    if size is None:
+      raise RuntimeError(self.my_component_name + " emitting stream " + stream_id +
+                         " but was not declared in output fields")
+    elif size != len(tuple):
+      raise RuntimeError("Number of fields emitted in stream " + stream_id +
+                         " does not match what's expected. Expected: " + str(size) +
+                         ", Observed: " + str(len(tuple)))
 
   def get_my_spout(self):
     """Returns spout instance, or ``None`` if bolt is assigned"""
