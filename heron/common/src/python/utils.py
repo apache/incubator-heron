@@ -49,6 +49,13 @@ CLIENT_YAML = "client.yaml"
 IS_ROLE_REQUIRED = "heron.config.is.role.required"
 IS_ENV_REQUIRED = "heron.config.is.env.required"
 
+class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
+  def _format_action(self, action):
+    parts = super(argparse.RawDescriptionHelpFormatter, self)._format_action(action)
+    if action.nargs == argparse.PARSER:
+      parts = "\n".join(parts.split("\n")[1:])
+    return parts
+
 
 def create_tar(tar_filename, files, config_dir, config_files):
   '''
@@ -435,3 +442,34 @@ def get_cluster_role_env_topologies(cluster, role, env):
     Log.error('Failed to retrive topologies running in cluster'
               '\'%s\' submitted by %s under environment %s' % (cluster, role, env))
     raise
+
+    
+def insert_bool(param, command_args):
+  '''
+  :param param:
+  :param command_args:
+  :return:
+  '''
+  index = 0
+  found = False
+  for lelem in command_args:
+    if lelem == '--' and not found:
+      break
+    if lelem == param:
+      found = True
+      break
+    index = index + 1
+
+  if found:
+    command_args.insert(index + 1, 'True')
+  return command_args
+
+
+def insert_bool_values(command_line_args):
+  '''
+  :param command_line_args:
+  :return:
+  '''
+  args1 = insert_bool('--verbose', command_line_args)
+  args2 = insert_bool('--deploy-deactivated', args1)
+  return args2

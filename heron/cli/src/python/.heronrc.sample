@@ -1,6 +1,10 @@
-activate:* --config-path cmd-activate-*                   #command specific
-:devcluster/ads/PROD --config-path cmd-invalid     #invalid
-submit:devcluster/ads/PROD --config-path cmd-submit-role   #role and command specific
-activate:devcluster/ads/PROD --config-path cmd-activate-role   #role and command specific
---config-path hello   #global
-*:* --config-path hello-global   #global
+*:*:* --config-property test-hello-global   #global
+heron:*:* --config-property  command-global  #app - global
+
+heron:activate:* --config-property test-cmd-activate-*                   #command specific
+
+heron:submit:devcluster/ads/PROD --config-property test-cmd-submit-role   #role and command specific
+heron:activate:devcluster/ads/PROD --config-property test-cmd-activate-role   #role and command specific
+
+:devcluster/ads/PROD --config-property test-cmd-invalid     #invalid
+--config-property test-hello   #global

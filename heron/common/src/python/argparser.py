@@ -10,6 +10,8 @@ import json
 #import heron.cli.src.python.activate as activate
 import heron.common.src.python.utils as utils
 import traceback
+from heron.common.src.python.color import Log
+    
 
 ################################################################################
 # Run the command
@@ -18,7 +20,7 @@ import traceback
 HERON_RC_FILE = "~/.heronrc"
 HERON_RC=os.path.expanduser(HERON_RC_FILE)
 HERON_RC_SPL='@'+ HERON_RC
-p = re.compile('(^[^\:]*):([^\s]*) (.*)')
+heron_command_pattern = re.compile('(^[^\:]*):([^\:]*):([^\s]*) (.*)')
 filters       = ['^@']
 expressions   = [re.compile(x) for x in filters]
 
@@ -70,49 +72,59 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
 	# cmdmap ['*']['*'] = '--config-property "heron.class.launcher=com.twitter.heron.scheduler.aurora.AuroraLauncher"'
 	@classmethod
 	def initializeFromRC(hrc,rcfile):
-
 		if  len(hrc.cmdmap) > 0:
 			return 
 		effective_rc  = (rcfile, HERON_RC) [ rcfile == None] 
-		#print rcfile, effective_rc
+		Log.warn('Effective RC file is %s' % (effective_rc))
 		if os.path.exists(effective_rc):
 
 			with open(effective_rc) as f:
-				hrc.cmdmap['*']['*'] = ''
+				hrc.cmdmap['*']['*'] = collections.defaultdict(dict)
+				hrc.cmdmap['*']['*']['*'] = ''
 				for line in f:
-					m = p.match(line)
+					m = heron_command_pattern.match(line)
 					value = ''
 					command=''
+					app = ''
 					env = ''
 					if (m != None):
-						value = hrc.remove_comments(m.group(3).rstrip(os.linesep))
-						command = ( m.group(1),'') [ m.group(1) == None or m.group(1) == '' ]
-						env = ( m.group(2), '') [ m.group(2) == None or m.group(2) == '']
+						value = hrc.remove_comments(m.group(4).rstrip(os.linesep))
+						app = ( m.group(1),'') [ m.group(1) == None or m.group(1) == '' ]
+						command = ( m.group(2),'') [ m.group(2) == None or m.group(1) == '' ]
+						env = ( m.group(3), '') [ m.group(3) == None or m.group(2) == '']
 					else:
-						value = hrc.remove_comments(line.rstrip(os.linesep))
+						continue
+						#value = hrc.remove_comments(line.rstrip(os.linesep))
 
 					args_list = utils.insert_bool_values(value.split())  # make sure that all the single args have a boolean value associated so that we can load the args to a key value structure
 					args_list_string = ' '.join (args_list)
 					if command == None or command == '' :
 						continue
-					if ( command in hrc.cmdmap and env in hrc.cmdmap[command]):
-						hrc.cmdmap[command][env] =  hrc.cmdmap[command][env] 	+ ' ' + args_list_string	
+					if app == None or app == '':
+						continue
+					if env == None or env == '':
+						continue
+					#print app , command  , env, args_list_string, hrc.cmdmap
+					if ( app not in hrc.cmdmap) :
+						hrc.cmdmap[app] = collections.defaultdict(dict)
+
+					if ( command in hrc.cmdmap[app] and env in hrc.cmdmap[app][command]):
+						hrc.cmdmap[app][command][env] =  hrc.cmdmap[app][command][env] 	+ ' ' + args_list_string	
 					else:
-						hrc.cmdmap[command][env] =  args_list_string
-			#print "cmdmap", hrc.cmdmap	
+						hrc.cmdmap[app][command][env] =  args_list_string
+			Log.debug( "RC cmdmap %s"% json.dumps(hrc.cmdmap) )
 		else:
-			print "WARN: %s is not an existing file" % effective_rc
+			Log.warn("WARN: %s is not an existing file" % effective_rc)
 
 
     # for each command / cluster-role-env combination, get the commands from heronrc
     #     remove any duplicates that have already been supplied already  and present in the command-dictionary     
 	@classmethod
-	def get_args_for_command_role (hrc, command, role):
+	def get_args_for_command_role (hrc, app,command, role):
 		args_for_command_role=''
 
-		if ( command in hrc.cmdmap and role in hrc.cmdmap[command]):
-			args_for_command_role = (hrc.cmdmap[command][role],args_for_command_role) [hrc.cmdmap[command][role] == None or hrc.cmdmap[command][role] == '']
-		#print "get_args_for_command_role", command, role, args_for_command_role
+		if ( app in hrc.cmdmap and command in hrc.cmdmap[app] and role in hrc.cmdmap[app][command]):
+			args_for_command_role = (hrc.cmdmap[app][command][role],args_for_command_role) [hrc.cmdmap[app][command][role] == None]
 		return args_for_command_role.split()
 
 	# this is invoked when the parser.parse_args is called
@@ -127,42 +139,26 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
 		role = self.rcclusterrole
 		if len(sys.argv)>2 :
 			role = (sys.argv[2], self.rcclusterrole) [self.rcclusterrole != '']
-		#command = arg_strings[1]
-		#role = arg_strings[2]
-		new_arg_strings.extend(self.get_args_for_command_role(command, role))
-		new_arg_strings.extend(self.get_args_for_command_role(command, '*'))
-		new_arg_strings.extend(self.get_args_for_command_role('*', '*'))
+		app = self.prog
+		new_arg_strings.extend(self.get_args_for_command_role(app, command, role))
+		new_arg_strings.extend(self.get_args_for_command_role(app, command, '*'))
+		new_arg_strings.extend(self.get_args_for_command_role(app, '*', '*'))
+		new_arg_strings.extend(self.get_args_for_command_role('*','*', '*'))
 		#new_arg_strings.extend(arg_strings)
 		arg_strings.extend(new_arg_strings)
-		#print 
-		#print sys.argv , command , role, new_arg_strings
 		return arg_strings
 
 
-	def _parse_known_args(self, arg_strings, namespace):
-		#print "ENTERING in _parse_known_args", arg_strings, namespace
-		namespace, args = super(HeronRCArgumentParser, self)._parse_known_args(arg_strings, namespace)
-		#print "EXITING _parse_known_args--" , arg_strings, namespace
-		return namespace, args
 	
 	def parse_known_args(self, args=None, namespace=None):
-		#print "ENTERING in parse_known_args", args
 		namespace, args = super(HeronRCArgumentParser, self).parse_known_args(args, namespace)
-		#print "EXITING parse_known_args--" , namespace
 
-		if self.prog == 'heron':
-			
+		if self.prog == 'heron':			
 			try:
-				print "in HeronRCArgumentParser._parse_known_args", self, namespace, args
-				#raise ValueError('A very specific bad thing happened')
 				for key in namespace.__dict__:
 					val = namespace.__dict__[key]
 					if val is not None and type(val) is list :
-						print "LIST:", key,  ":", val, " first item :", val[0]
 						namespace.__dict__[key] = val[0]
-					else:
-						print key, ":", val
-
 			except Exception as error:
 				traceback.print_stack()
 			return namespace,args	

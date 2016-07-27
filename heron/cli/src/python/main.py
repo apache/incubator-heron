@@ -61,18 +61,6 @@ class _HelpAction(argparse._HelpAction):
         print subparser.format_help()
         return
 
-
-class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
-  ''' SubcommandHelpFormatter '''
-
-  def _format_action(self, action):
-    # pylint: disable=bad-super-call
-    parts = super(argparse.RawDescriptionHelpFormatter, self)._format_action(action)
-    if action.nargs == argparse.PARSER:
-      parts = "\n".join(parts.split("\n")[1:])
-    return parts
-
-
 ################################################################################
 def create_parser():
   '''
@@ -83,7 +71,7 @@ def create_parser():
   parser = hrc.HeronRCArgumentParser(
       prog='heron',
       epilog=HELP_EPILOG,
-      formatter_class=SubcommandHelpFormatter,
+      formatter_class=utils.SubcommandHelpFormatter,
       add_help=False)
 
   subparsers = parser.add_subparsers(
@@ -217,7 +205,7 @@ def main():
     return 0
 
   # insert the boolean values for some of the options
-  sys.argv = parse.insert_bool_values(sys.argv)
+  sys.argv = utils.insert_bool_values(sys.argv)
 
   # parse the args
   args, unknown_args = parser.parse_known_args()
