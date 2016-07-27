@@ -14,7 +14,7 @@
 ''' physicalplan.py '''
 import sys
 import heron.explorer.src.python.args as args
-import heron.common.src.python.utils as utils
+import heron.common.src.python.utils.tracker_access as tracker_access
 from heron.common.src.python.color import Log
 from tabulate import tabulate
 
@@ -67,8 +67,8 @@ def parse_topo_loc(cl_args):
 
 def to_table(metrics):
   """ normalize raw metrics API result to table """
-  all_queries = utils.metric_queries()
-  m = utils.queries_map()
+  all_queries = tracker_access.metric_queries()
+  m = tracker_access.queries_map()
   names = metrics.values()[0].keys()
   stats = []
   for n in names:
@@ -89,7 +89,7 @@ def run_metrics(command, parser, cl_args, unknown_args):
   cluster, role, env = cl_args['cluster'], cl_args['role'], cl_args['environ']
   topology = cl_args['topology-name']
   try:
-    result = utils.get_topology_info(cluster, env, topology, role)
+    result = tracker_access.get_topology_info(cluster, env, topology, role)
     spouts = result['physical_plan']['spouts'].keys()
     bolts = result['physical_plan']['bolts'].keys()
     components = spouts + bolts
@@ -106,7 +106,7 @@ def run_metrics(command, parser, cl_args, unknown_args):
   cresult = []
   for comp in components:
     try:
-      metrics = utils.get_component_metrics(comp, cluster, env, topology, role)
+      metrics = tracker_access.get_component_metrics(comp, cluster, env, topology, role)
     except:
       Log.error("Fail to connect to tracker: \'%s\'", cl_args["tracker_url"])
       return False
@@ -126,7 +126,7 @@ def run_bolts(command, parser, cl_args, unknown_args):
   cluster, role, env = cl_args['cluster'], cl_args['role'], cl_args['environ']
   topology = cl_args['topology-name']
   try:
-    result = utils.get_topology_info(cluster, env, topology, role)
+    result = tracker_access.get_topology_info(cluster, env, topology, role)
     bolts = result['physical_plan']['bolts'].keys()
     bolt_name = cl_args['bolt']
     if bolt_name:
@@ -141,7 +141,7 @@ def run_bolts(command, parser, cl_args, unknown_args):
   bolts_result = []
   for bolt in bolts:
     try:
-      metrics = utils.get_component_metrics(bolt, cluster, env, topology, role)
+      metrics = tracker_access.get_component_metrics(bolt, cluster, env, topology, role)
       stat, header = to_table(metrics)
       bolts_result.append((bolt, stat, header))
     except Exception:
@@ -161,7 +161,7 @@ def run_containers(command, parser, cl_args, unknown_args):
   topology = cl_args['topology-name']
   container_id = cl_args['id']
   try:
-    result = utils.get_topology_info(cluster, env, topology, role)
+    result = tracker_access.get_topology_info(cluster, env, topology, role)
   except:
     Log.error("Fail to connect to tracker: \'%s\'", cl_args["tracker_url"])
     return False
