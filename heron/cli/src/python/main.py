@@ -25,7 +25,7 @@ from heron.common.src.python.color import Log
 
 import heron.cli.src.python.help as cli_help
 import heron.cli.src.python.args as parse
-import heron.cli.src.python.argparse as hrc
+import heron.cli.common.python.argparser as hrc_parse
 import heron.cli.src.python.opts as opts
 import heron.cli.src.python.activate as activate
 import heron.cli.src.python.deactivate as deactivate
@@ -68,7 +68,7 @@ def create_parser():
   :return:
   '''
   #parser = argparse.ArgumentParser(
-  parser = hrc.HeronRCArgumentParser(
+  parser = hrc_parse.HeronRCArgumentParser(
       prog='heron',
       epilog=HELP_EPILOG,
       formatter_class=utils.SubcommandHelpFormatter,
