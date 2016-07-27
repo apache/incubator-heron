@@ -11,7 +11,7 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License
-package com.twitter.heron.scheduler;
+package com.twitter.heron.spi.utils;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,9 +25,6 @@ import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
-import com.twitter.heron.spi.utils.ReflectionUtils;
-import com.twitter.heron.spi.utils.SchedulerUtils;
-import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
  * {@link LauncherUtils} contains helper methods used by the server and client side launch
