@@ -69,5 +69,5 @@ class MetricsTimelineHandler(BaseHandler):
                                        instances, int(start_time), int(end_time))
       self.write_success_response(metrics)
     except Exception as e:
-      Log.warn(traceback.format_exc())
+      Log.debug(traceback.format_exc())
       self.write_error_response(e)

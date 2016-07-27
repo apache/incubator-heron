@@ -63,7 +63,7 @@ class JstackHandler(BaseHandler):
       ret = yield self.getInstanceJstack(topology_info, instance)
       self.write_success_response(ret)
     except Exception as e:
-      Log.warn(traceback.format_exc())
+      Log.debug(traceback.format_exc())
       self.write_error_response(e)
 
   # pylint: disable=no-self-use

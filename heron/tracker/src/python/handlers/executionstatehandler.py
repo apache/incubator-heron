@@ -49,5 +49,5 @@ class ExecutionStateHandler(BaseHandler):
       execution_state = topology_info["execution_state"]
       self.write_success_response(execution_state)
     except Exception as e:
-      Log.warn(traceback.format_exc())
+      Log.debug(traceback.format_exc())
       self.write_error_response(e)

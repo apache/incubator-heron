@@ -50,5 +50,5 @@ class SchedulerLocationHandler(BaseHandler):
       scheduler_location = topology_info["scheduler_location"]
       self.write_success_response(scheduler_location)
     except Exception as e:
-      Log.warn(traceback.format_exc())
+      Log.debug(traceback.format_exc())
       self.write_error_response(e)
