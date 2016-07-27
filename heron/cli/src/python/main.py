@@ -31,7 +31,7 @@ import heron.cli.src.python.deactivate as deactivate
 import heron.cli.src.python.kill as kill
 import heron.cli.src.python.restart as restart
 import heron.cli.src.python.submit as submit
-import heron.common.src.python.utils as utils
+import heron.common.src.python.utils.config as utils
 import heron.cli.src.python.version as version
 
 HELP_EPILOG = '''Getting more help:

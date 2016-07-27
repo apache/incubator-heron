@@ -18,6 +18,7 @@ from logging.handlers import RotatingFileHandler
 # Create the logger
 # pylint: disable=invalid-name
 Log = logging.getLogger('common')
+logging.basicConfig()
 
 def configure(level, logfile=None):
   '''

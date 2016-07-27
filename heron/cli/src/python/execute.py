@@ -20,7 +20,7 @@ import tempfile
 import traceback
 
 import heron.cli.src.python.opts  as opts
-import heron.common.src.python.utils as utils
+import heron.common.src.python.utils.config as utils
 import heron.cli.src.python.jars  as jars
 import heron.common.src.python.pex_loader as pex_loader
 

@@ -15,7 +15,7 @@
 import os
 import fnmatch
 
-import heron.common.src.python.utils as utils
+import heron.common.src.python.utils.config as utils
 
 
 def pick(dirname, pattern):

@@ -14,7 +14,7 @@
 ''' topologies.py '''
 import heron.explorer.src.python.args as args
 from heron.common.src.python.color import Log
-import heron.common.src.python.utils as utils
+import heron.common.src.python.utils.tracker_access as tracker_access
 from tabulate import tabulate
 
 
@@ -53,7 +53,7 @@ def to_table(result):
 def show_cluster(cl_args, cluster):
   ''' print topologies information to stdout '''
   try:
-    result = utils.get_cluster_topologies(cluster)
+    result = tracker_access.get_cluster_topologies(cluster)
     if not result:
       Log.error('Unknown cluster \'%s\'' % cluster)
       return False
@@ -72,7 +72,7 @@ def show_cluster(cl_args, cluster):
 def show_cluster_role(cl_args, cluster, role):
   ''' print topologies information to stdout '''
   try:
-    result = utils.get_cluster_role_topologies(cluster, role)
+    result = tracker_access.get_cluster_role_topologies(cluster, role)
     if not result:
       Log.error('Unknown cluster/role \'%s\'' % '/'.join([cluster, role]))
       return False
@@ -91,7 +91,7 @@ def show_cluster_role(cl_args, cluster, role):
 def show_cluster_role_env(cl_args, cluster, role, env):
   ''' print topologies information to stdout '''
   try:
-    result = utils.get_cluster_role_env_topologies(cluster, role, env)
+    result = tracker_access.get_cluster_role_env_topologies(cluster, role, env)
     if not result:
       Log.error('Unknown cluster/role/env \'%s\'' % '/'.join([cluster, role, env]))
       return False

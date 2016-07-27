@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' cli_helper.py '''
-import heron.common.src.python.utils as utils
+import heron.common.src.python.utils.config as utils
 import heron.cli.src.python.opts as opts
 import heron.cli.src.python.execute as execute
 import heron.cli.src.python.jars as jars

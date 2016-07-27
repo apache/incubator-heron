@@ -15,7 +15,7 @@
 from collections import defaultdict
 import heron.explorer.src.python.args as args
 from heron.common.src.python.color import Log
-import heron.common.src.python.utils as utils
+import heron.common.src.python.utils.tracker_access as tracker_access
 from tabulate import tabulate
 
 
@@ -104,8 +104,8 @@ def run(cl_args, compo_type):
   topology = cl_args['topology-name']
   spouts_only, bolts_only = cl_args['spout'], cl_args['bolt']
   try:
-    components = utils.get_logical_plan(cluster, env, topology, role)
-    topo_info = utils.get_topology_info(cluster, env, topology, role)
+    components = tracker_access.get_logical_plan(cluster, env, topology, role)
+    topo_info = tracker_access.get_topology_info(cluster, env, topology, role)
     table, header = to_table(components, topo_info)
     if spouts_only == bolts_only:
       print tabulate(table, headers=header)
