@@ -132,19 +132,19 @@ public class LaunchRunnerTest {
     TopologyAPI.Topology topologyAfterTrimmed = launchRunner.trimTopology(topologyBeforeTrimmed);
 
     for (TopologyAPI.Spout spout : topologyBeforeTrimmed.getSpoutsList()) {
-      Assert.assertTrue(spout.getComp().hasJavaObject());
+      Assert.assertTrue(spout.getComp().hasSerializedObject());
     }
 
     for (TopologyAPI.Bolt bolt : topologyBeforeTrimmed.getBoltsList()) {
-      Assert.assertTrue(bolt.getComp().hasJavaObject());
+      Assert.assertTrue(bolt.getComp().hasSerializedObject());
     }
 
     for (TopologyAPI.Spout spout : topologyAfterTrimmed.getSpoutsList()) {
-      Assert.assertFalse(spout.getComp().hasJavaObject());
+      Assert.assertFalse(spout.getComp().hasSerializedObject());
     }
 
     for (TopologyAPI.Bolt bolt : topologyAfterTrimmed.getBoltsList()) {
-      Assert.assertFalse(bolt.getComp().hasJavaObject());
+      Assert.assertFalse(bolt.getComp().hasSerializedObject());
     }
   }
 

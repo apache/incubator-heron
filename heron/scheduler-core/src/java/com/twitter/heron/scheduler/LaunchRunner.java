@@ -100,12 +100,12 @@ public class LaunchRunner implements Callable<Boolean> {
 
     // clear the state of user spout java objects - which can be potentially huge
     for (TopologyAPI.Spout.Builder spout : builder.getSpoutsBuilderList()) {
-      spout.getCompBuilder().clearJavaObject();
+      spout.getCompBuilder().clearSerializedObject();
     }
 
     // clear the state of user spout java objects - which can be potentially huge
     for (TopologyAPI.Bolt.Builder bolt : builder.getBoltsBuilderList()) {
-      bolt.getCompBuilder().clearJavaObject();
+      bolt.getCompBuilder().clearSerializedObject();
     }
 
     return builder.build();

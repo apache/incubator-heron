@@ -59,7 +59,8 @@ public abstract class BaseComponentDeclarer<T extends ComponentConfigurationDecl
 
   public void dump(TopologyAPI.Component.Builder bldr) {
     bldr.setName(name);
-    bldr.setJavaObject(ByteString.copyFrom(Utils.serialize(component)));
+    bldr.setSpec(TopologyAPI.ComponentObjectSpec.JAVA_SERIALIZED_OBJECT);
+    bldr.setSerializedObject(ByteString.copyFrom(Utils.serialize(component)));
 
     TopologyAPI.Config.Builder cBldr = TopologyAPI.Config.newBuilder();
     for (Map.Entry<String, Object> entry : componentConfiguration.entrySet()) {
