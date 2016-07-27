@@ -428,3 +428,9 @@ def get_cluster_role_env_topologies(cluster, role, env):
   except Exception:
     Log.info(traceback.format_exc())
     raise
+
+def print_version():
+  release_file = get_heron_release_file()
+  with open(release_file) as release_info:
+    for line in release_info:
+      print line,
