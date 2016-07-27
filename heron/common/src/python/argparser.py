@@ -30,6 +30,7 @@ import heron.common.src.python.utils as utils
 HERON_RC_FILE = "~/.heronrc"
 HERON_RC = os.path.expanduser(HERON_RC_FILE)
 HERON_RC_SPL = '@' + HERON_RC
+# pylint: disable=anomalous-backslash-in-string
 heron_command_pattern = re.compile('(^[^:]*):([^:]*):([^\s]*) (.*)')
 filters = ['^@']
 expressions = [re.compile(x) for x in filters]
@@ -39,11 +40,11 @@ help_epilog = '''Getting more help:
 
 For detailed documentation, go to http://heronstreaming.io'''
 
-"""
-HERON RC parser support for specifying config level arguments in an RC file.
-check README.md.
-"""
 class HeronRCArgumentParser(argparse.ArgumentParser):
+  """
+  HERON RC parser support for specifying config level arguments in an RC file.
+  check README.md.
+  """
   cmdmap = collections.defaultdict(dict)
 
   """
