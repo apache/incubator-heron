@@ -52,6 +52,7 @@ IS_ENV_REQUIRED = "heron.config.is.env.required"
 
 class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
   def _format_action(self, action):
+    # pylint: disable=bad-super-call
     parts = super(argparse.RawDescriptionHelpFormatter, self)._format_action(action)
     if action.nargs == argparse.PARSER:
       parts = "\n".join(parts.split("\n")[1:])
@@ -436,7 +437,6 @@ def get_cluster_role_env_topologies(cluster, role, env):
     Log.debug(traceback.format_exc())
     raise
 
-    
 def insert_bool(param, command_args):
   '''
   :param param:
