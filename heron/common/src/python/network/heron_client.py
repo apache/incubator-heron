@@ -179,7 +179,6 @@ class HeronClient(asyncore.dispatcher):
     Log.debug("In register_on_message(): " + message.DESCRIPTOR.full_name)
     self.registered_message_map[message.DESCRIPTOR.full_name] = msg_builder
 
-  # pylint: disable=unused-argument
   def send_request(self, request, context, response_type, timeout_sec):
     """Sends a request message (REQID is non-zero)"""
     # TODO: send request and implement timeout handler
