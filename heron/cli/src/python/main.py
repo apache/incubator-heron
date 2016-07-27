@@ -24,7 +24,6 @@ import time
 from heron.common.src.python.color import Log
 
 import heron.cli.src.python.help as cli_help
-import heron.cli.src.python.args as parse
 import heron.cli.common.python.argparser as hrc_parse
 import heron.cli.src.python.opts as opts
 import heron.cli.src.python.activate as activate
