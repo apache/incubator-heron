@@ -20,7 +20,7 @@ import tempfile
 import traceback
 
 import heron.cli.src.python.opts  as opts
-import heron.common.src.python.utils.config as utils
+import heron.common.src.python.utils.config as config
 import heron.cli.src.python.jars  as jars
 import heron.common.src.python.pex_loader as pex_loader
 
@@ -51,9 +51,9 @@ def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=N
   # Construct the command line for the sub process to run
   # Because of the way Python execute works,
   # the java opts must be passed as part of the list
-  all_args = [utils.get_java_path(), "-client", "-Xmx1g", opts.get_heron_config()] + \
+  all_args = [config.get_java_path(), "-client", "-Xmx1g", opts.get_heron_config()] + \
              java_opts + \
-             ["-cp", utils.get_classpath(lib_jars + extra_jars)]
+             ["-cp", config.get_classpath(lib_jars + extra_jars)]
 
   all_args += [class_name] + list(args)
 
@@ -97,20 +97,19 @@ def heron_tar(class_name, topology_tar, arguments, tmpdir_root, java_defines):
       os.path.join(tmpdir, "libs/*")
   ]
 
-  lib_jars = utils.get_heron_libs(jars.topology_jars())
+  lib_jars = config.get_heron_libs(jars.topology_jars())
 
   # Now execute the class
   heron_class(class_name, lib_jars, extra_jars, arguments, java_defines)
 
 def heron_pex(topology_pex, topology_class_name, tmp_dir):
   if opts.verbose():
-    print("Importing " + topology_class_name + " from " + topology_pex)
+    print "Importing " + topology_class_name + " from " + topology_pex
   try:
     pex_loader.load_pex(topology_pex)
     topology_class = pex_loader.import_and_get_class(topology_pex, topology_class_name)
     topology_class.write(tmp_dir)
-  except Exception as e:
+  except Exception:
     traceback.print_exc()
     err_str = "Topology pex failed to be loaded. Bailing out..."
     raise RuntimeError(err_str)
-
