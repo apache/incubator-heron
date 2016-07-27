@@ -31,7 +31,7 @@ class SingleThreadStmgrClient(HeronClient):
   """
   def __init__(self, looper, heron_instance_cls, strmgr_host, port, topology_name, topology_id,
                instance, sock_map, gateway_metrics, socket_options, sys_config):
-    HeronClient.__init__(self, looper, strmgr_host, port, sock_map, socket_options, sys_config)
+    HeronClient.__init__(self, looper, strmgr_host, port, sock_map, socket_options)
     self.heron_instance_cls = heron_instance_cls
     self.topology_name = topology_name
     self.topology_id = topology_id
@@ -39,6 +39,7 @@ class SingleThreadStmgrClient(HeronClient):
     self.instance = instance
     self.gateway_metrics = gateway_metrics
     self._pplan_helper = None
+    self.sys_config = sys_config
 
   # send register request
   def on_connect(self, status):

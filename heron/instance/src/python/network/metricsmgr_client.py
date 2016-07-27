@@ -20,10 +20,10 @@ from heron.common.src.python.network import HeronClient, StatusCode
 class MetricsManagerClient(HeronClient):
   def __init__(self, looper, metrics_host, port, instance,
                out_metrics, sock_map, socket_options, sys_config):
-    HeronClient.__init__(self, looper, metrics_host, port,
-                         sock_map, socket_options, sys_config)
+    HeronClient.__init__(self, looper, metrics_host, port, sock_map, socket_options)
     self.instance = instance
     self.out_queue = out_metrics
+    self.sys_config = sys_config
 
     self._add_metrics_client_tasks()
 
