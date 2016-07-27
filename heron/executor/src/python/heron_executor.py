@@ -308,7 +308,7 @@ class HeronExecutor(object):
     return retval
 
   # Returns the processes for each Java Heron Instance
-  def get_java_instance_cmd(self, instance_info):
+  def _get_java_instance_cmd(self, instance_info):
     retval = {}
     # TO DO (Karthik) to be moved into keys and defaults files
     code_cache_size_mb = 64
@@ -428,7 +428,7 @@ class HeronExecutor(object):
     )
 
     if self.pkg_type == 'jar' or self.pkg_type == 'tar':
-      retval.update(self.get_java_instance_cmd(instance_info))
+      retval.update(self._get_java_instance_cmd(instance_info))
     else:
       # Python
       retval.update(self.get_python_instance_cmd(instance_info))
