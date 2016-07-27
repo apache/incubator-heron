@@ -179,7 +179,6 @@ class HeronClient(asyncore.dispatcher):
     Log.debug("In register_on_message(): " + message.DESCRIPTOR.full_name)
     self.registered_message_map[message.DESCRIPTOR.full_name] = msg_builder
 
-  # pylint: disable=unused-argument
   def send_request(self, request, context, response_type, timeout_sec):
     """Sends a request message (REQID is non-zero)"""
     # TODO: send request and implement timeout handler
@@ -189,6 +188,12 @@ class HeronClient(asyncore.dispatcher):
     # register response message type
     self.response_message_map[reqid] = response_type
     self.context_map[reqid] = context
+
+    # Add timeout for this request if necessary
+    if timeout_sec > 0:
+      def timeout_task():
+        self.handle_timeout(reqid)
+      self.looper.register_timer_task_in_sec(timeout_task, timeout_sec)
 
     outgoing_pkt = OutgoingPacket.create_packet(reqid, request)
     self._send_packet(outgoing_pkt)
@@ -200,9 +205,12 @@ class HeronClient(asyncore.dispatcher):
     Log.debug("After get outgoing packet")
     self._send_packet(outgoing_pkt)
 
-  def handle_timeout(self):
+  def handle_timeout(self, reqid):
     """Handles timeout"""
-    raise NotImplementedError("handle_timeout() is not yet implemented")
+    if self.context_map.has_key(reqid):
+      context = self.context_map.pop(reqid)
+      self.response_message_map.pop(reqid)
+      self.on_response(StatusCode.TIMEOUT_ERROR, context, None)
 
   def handle_error(self):
     _, t, v, tbinfo = asyncore.compact_traceback()
@@ -211,12 +219,15 @@ class HeronClient(asyncore.dispatcher):
     Log.error("Uncaptured python exception, closing channel %s (%s:%s %s)" %
               (self_msg, t, v, tbinfo))
 
-    # TODO: make it more robust
     if self.connecting:
+      # Error when trying to connect
+      # first cleanup by handle_close(), and tells a subclass about this error.
+      # the subclass can then call start_connect() again, if appropriate
       self.handle_close()
-      self.looper.register_timer_task_in_sec(self.start_connect, 1)
+      self.on_connect(StatusCode.CONNECT_ERROR)
     else:
       self.handle_close()
+      self.on_error()
 
   def _handle_packet(self, packet):
     # only called when packet.is_complete is True
@@ -290,5 +301,14 @@ class HeronClient(asyncore.dispatcher):
     """Called when the client receives a message
 
     Should be implemented by a subclass.
+    """
+    pass
+
+  @abstractmethod
+  def on_error(self):
+    """Called when the client meets errors
+
+    Note that this method is not called when a connection is not yet established.
+    In such a case, ``on_connect()`` with status == StatusCode.CONNECT_ERROR is called.
     """
     pass
