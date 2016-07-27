@@ -98,7 +98,8 @@ def make_manifest(ctx, output):
     command = ('touch %s && echo "%s" > %s' % (output.path, manifest_text, output.path)))
 
 def common_pex_arguments(entry_point, deploy_pex_path, manifest_file_path):
-  arguments = ['--entry-point', entry_point]
+  arguments = ['--disable-cache']
+  arguments += ['--entry-point', entry_point]
 
   # Our internal build environment requires extra args injected and this is a brutal hack. Ideally
   # bazel would provide a mechanism to swap in env-specific global params here
@@ -129,7 +130,7 @@ def pex_binary_impl(ctx):
   pexbuilder = ctx.executable._pexbuilder
 
   # form the arguments to pex builder
-  arguments =  [] if ctx.attr.zip_safe else ["--not-zip-safe"]
+  arguments = [] if ctx.attr.zip_safe else ["--not-zip-safe"]
   arguments += common_pex_arguments(main_pkg, deploy_pex.path, manifest_file.path)
 
   # form the inputs to pex builder
@@ -169,12 +170,14 @@ def pex_test_impl(ctx):
   pex_test_files = pex_test_file_types.filter(pex_file_types.filter(transitive_sources))
   test_run_args = ' '.join([f.path for f in pex_test_files])
 
+  arguments = common_pex_arguments('pytest', deploy_pex.path, manifest_file.path)
+
   ctx.action(
       inputs = [manifest_file] + list(transitive_sources) + list(transitive_eggs) + list(transitive_resources),
       executable = pexbuilder,
       outputs = [ deploy_pex ],
       mnemonic = "PexPython",
-      arguments = common_pex_arguments('pytest', deploy_pex.path, manifest_file.path))
+      arguments = arguments)
 
   executable = ctx.outputs.executable
   ctx.action(
