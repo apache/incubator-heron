@@ -158,4 +158,29 @@ public class NullStateManager implements IStateManager {
       String topologyName) {
     return SettableFuture.create();
   }
+
+  @Override
+  public ListenableFuture<Boolean> tmasterLocationExists(String topologyName) {
+    return nullFuture;
+  }
+
+  @Override
+  public ListenableFuture<Boolean> schedulerLocationExists(String topologyName) {
+    return nullFuture;
+  }
+
+  @Override
+  public ListenableFuture<Boolean> topologyExists(String topologyName) {
+    return nullFuture;
+  }
+
+  @Override
+  public ListenableFuture<Boolean> executionStateExists(String topologyName) {
+    return nullFuture;
+  }
+
+  @Override
+  public ListenableFuture<Boolean> physicalPlanExists(String topologyName) {
+    return nullFuture;
+  }
 }

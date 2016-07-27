@@ -347,18 +347,14 @@ public class RuntimeManagerMain {
       return false;
     }
 
-    // Check whether cluster/role/environ matched. It is possible to get into a state where some of
-    // the data does not actually exist in zookeeper. If we are in this state them assume the
-    // runtime is valid.
-    if (adaptor.doesExecutionStateExist(topologyName)) {
-      ExecutionEnvironment.ExecutionState executionState = adaptor.getExecutionState(topologyName);
-      if (executionState == null
-          || !executionState.getCluster().equals(Context.cluster(config))
-          || !executionState.getRole().equals(Context.role(config))
-          || !executionState.getEnviron().equals(Context.environ(config))) {
-        LOG.severe("cluster/role/environ not matched");
-        return false;
-      }
+    // Check whether cluster/role/environ matched
+    ExecutionEnvironment.ExecutionState executionState = adaptor.getExecutionState(topologyName);
+    if (executionState == null
+        || !executionState.getCluster().equals(Context.cluster(config))
+        || !executionState.getRole().equals(Context.role(config))
+        || !executionState.getEnviron().equals(Context.environ(config))) {
+      LOG.severe("cluster/role/environ not matched");
+      return false;
     }
 
     return true;

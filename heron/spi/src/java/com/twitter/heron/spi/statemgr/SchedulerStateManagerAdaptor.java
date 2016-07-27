@@ -169,7 +169,7 @@ public class SchedulerStateManagerAdaptor {
    * @return Boolean - Success or Failure
    */
   public Boolean deletePhysicalPlan(String topologyName) {
-     return awaitResult(delegate.deletePhysicalPlan(topologyName));
+    return awaitResult(delegate.deletePhysicalPlan(topologyName));
   }
 
   /**
