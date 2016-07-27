@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import collections
 import logging
 import os
 import sys
@@ -25,16 +26,21 @@ from heron.common.src.python.utils.misc import HeronCommunicator
 from heron.common.src.python.network import create_socket_options
 
 from heron.proto import physical_plan_pb2, stmgr_pb2
-from heron.instance.src.python.single_thread_instance.single_thread_stmgr_client import SingleThreadStmgrClient
 from heron.instance.src.python.network.metricsmgr_client import MetricsManagerClient
 
 import heron.common.src.python.pex_loader as pex_loader
 import heron.common.src.python.constants as constants
 
+from .single_thread_stmgr_client import SingleThreadStmgrClient
+
+LoadedInstance = collections.namedtuple('LoadedInstance', 'is_spout, protobuf, py_class')
+
 class SingleThreadHeronInstance(object):
+  STREAM_MGR_HOST = "127.0.0.1"
+  METRICS_MGR_HOST = "127.0.0.1"
   def __init__(self, topology_name, topology_id, instance,
                stream_port, metrics_port, topo_pex_file_path, sys_config):
-
+    # Basic information about this heron instance
     self.topology_name = topology_name
     self.topology_id = topology_id
     self.instance = instance
@@ -49,22 +55,22 @@ class SingleThreadHeronInstance(object):
     self.socket_map = dict()
     self.looper = GatewayLooper(self.socket_map)
 
-    # Do metrics
+    # Initialize metrics related
     self.out_metrics = HeronCommunicator()
     self.metrics_collector = MetricsCollector(self.looper, self.out_metrics)
     self.gateway_metrics = GatewayMetrics(self.metrics_collector, sys_config)
 
-
+    # Create socket options and socket clients
     socket_options = create_socket_options(self.sys_config)
-    self._stmgr_client = SingleThreadStmgrClient(self.looper, self, 'localhost', stream_port,
+    self._stmgr_client = SingleThreadStmgrClient(self.looper, self, self.STREAM_MGR_HOST, stream_port,
                                                  topology_name, topology_id, instance,
                                                  self.socket_map, self.gateway_metrics,
-                                                 socket_options)
-    self._metrics_client = MetricsManagerClient(self.looper, 'localhost', metrics_port, instance,
-                                                self.out_metrics, self.socket_map, socket_options)
+                                                 socket_options, self.sys_config)
+    self._metrics_client = MetricsManagerClient(self.looper, self.METRICS_MGR_HOST, metrics_port, instance,
+                                                self.out_metrics, self.socket_map, socket_options, self.sys_config)
     self.my_pplan_helper = None
 
-    # my_instance is a tuple containing (is_spout, TopologyAPI.{Spout|Bolt}, loaded python instance)
+    # my_instance is a LoadedInstance tuple
     self.my_instance = None
 
     # Debugging purposes
@@ -77,7 +83,7 @@ class SingleThreadHeronInstance(object):
   def start(self):
     self._stmgr_client.start_connect()
     self._metrics_client.start_connect()
-    # call send_buffered_messages everytime it is waken up
+    # call send_buffered_messages every time it is waken up
     self.looper.add_wakeup_task(self.send_buffered_messages)
     self.looper.loop()
 
@@ -94,7 +100,7 @@ class SingleThreadHeronInstance(object):
       # First add message to the in_stream
       self.in_stream.offer(tuple_msg_set)
       # Call run_in_single_thread() method
-      self.my_instance[2].process_incoming_tuples()
+      self.my_instance.py_class.process_incoming_tuples()
 
   def send_buffered_messages(self):
     """Send messages in out_stream to the Stream Manager"""
@@ -128,12 +134,16 @@ class SingleThreadHeronInstance(object):
         # Starting a spout
         my_spout = pplan_helper.get_my_spout()
         py_spout_instance = self.load_py_instance(True, my_spout.comp.class_name)
-        self.my_instance = (True, my_spout, py_spout_instance)
+        self.my_instance = LoadedInstance(is_spout=True,
+                                          protobuf=my_spout,
+                                          py_class=py_spout_instance)
       else:
         # Starting a bolt
         my_bolt = pplan_helper.get_my_bolt()
         py_bolt_instance = self.load_py_instance(False, my_bolt.comp.class_name)
-        self.my_instance = (False, my_bolt, py_bolt_instance)
+        self.my_instance = LoadedInstance(is_spout=False,
+                                          protobuf=my_bolt,
+                                          py_class=py_bolt_instance)
     except Exception as e:
       Log.error("Error with loading bolt/spout instance from pex file")
       Log.error(traceback.format_exc())
@@ -161,7 +171,7 @@ class SingleThreadHeronInstance(object):
 
   def start_instance(self):
     Log.info("Start bolt/spout instance now...")
-    self.my_instance[2].start()
+    self.my_instance.py_class.start()
 
 def print_usage():
   print("Usage: ./single_thread_heron_instance <topology_name> <topology_id> "
@@ -195,8 +205,6 @@ def main():
   system_config = yaml_config_reader(sys.argv[10])
   topology_pex_file_path = sys.argv[11]
 
-  # TODO: Add the SystemConfig into SingletonRegistory
-
   # create the protobuf instance
   instance_info = physical_plan_pb2.InstanceInfo()
   instance_info.task_id = int(task_id)
@@ -213,7 +221,6 @@ def main():
   max_log_files = system_config[constants.HERON_LOGGING_MAXIMUM_FILES]
   max_log_bytes = system_config[constants.HERON_LOGGING_MAXIMUM_SIZE_MB] * constants.MB
 
-  # TODO: improve this later
   log_file = os.path.join(log_dir, instance_id + ".log.0")
   init_rotating_logger(level=logging.INFO, logfile=log_file,
                        max_files=max_log_files, max_bytes=max_log_bytes)

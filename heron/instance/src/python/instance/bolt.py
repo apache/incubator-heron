@@ -25,7 +25,6 @@ from heron.common.src.python.utils.metrics import BoltMetrics
 
 import heron.common.src.python.constants as constants
 
-# TODO: declare output fields
 class Bolt(Component):
   """The base class for all heron bolts in Python"""
 

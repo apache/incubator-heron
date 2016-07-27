@@ -12,33 +12,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from heron.common.src.python.log import Log
+
 from heron.proto import stmgr_pb2, common_pb2
 
 from heron.common.src.python.utils.misc import PhysicalPlanHelper
 from heron.common.src.python.network import HeronClient, StatusCode
+import heron.common.src.python.constants as constants
 
-# SingleThreadStmgrClient is an implementation of the Heron client in python and communicates
-# with Stream Manager. It will:
-# 1. Register the message of NewInstanceAssignmentMessage and TupleMessage
-# 2. Send a register request when on_connect() is called
-# 3. Handle relative response for requests
-# TODO: will implement the rest later
 class SingleThreadStmgrClient(HeronClient):
-  """SingleThreadStmgrClient is a Stream Manager Client for a single-threaded Heron Instance"""
+  """SingleThreadStmgrClient is a Heron Client that communicates with Stream Manager
+
+  This class is intended to be used with SingleThreadHeronInstance.
+
+  It will:
+  1. Register the message of NewInstanceAssignmentMessage and TupleMessage
+  2. Send a register request when on_connect() is called
+  3. Handle relative response for requests
+  """
   def __init__(self, looper, heron_instance_cls, strmgr_host, port, topology_name, topology_id,
-               instance, sock_map, gateway_metrics, socket_options):
-    HeronClient.__init__(self, looper, strmgr_host, port, sock_map, socket_options)
+               instance, sock_map, gateway_metrics, socket_options, sys_config):
+    HeronClient.__init__(self, looper, strmgr_host, port, sock_map, socket_options, sys_config)
     self.heron_instance_cls = heron_instance_cls
     self.topology_name = topology_name
     self.topology_id = topology_id
+    # physical_plan_pb2.Instance message
     self.instance = instance
     self.gateway_metrics = gateway_metrics
-
     self._pplan_helper = None
 
   # send register request
   def on_connect(self, status):
     Log.debug("In on_connect of STStmgrClient")
+    if status != StatusCode.OK:
+      Log.error("Error connecting to Stream Manager with status: " + str(status))
+      retry_interval = float(self.sys_config[constants.INSTANCE_RECONNECT_STREAMMGR_INTERVAL_SEC])
+      self.looper.register_timer_task_in_sec(self.start_connect, retry_interval)
+      return
     self._register_msg_to_handle()
     self._send_register_req()
 

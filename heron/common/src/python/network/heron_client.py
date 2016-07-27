@@ -27,7 +27,7 @@ import heron.common.src.python.constants as constants
 # pylint: disable=fixme
 class HeronClient(asyncore.dispatcher):
   """Python implementation of HeronClient, using asyncore module"""
-  def __init__(self, looper, hostname, port, socket_map, socket_options):
+  def __init__(self, looper, hostname, port, socket_map, socket_options, sys_config):
     """Initializes HeronClient
 
     :type looper: ``GatewayLooper`` (heron.common.src.python.basics)
@@ -40,6 +40,8 @@ class HeronClient(asyncore.dispatcher):
     :param socket_map: socket map used for asyncore.dispatcher
     :type socket_options: ``SocketOptions`` (heron.common.src.python.network)
     :param socket_options: options for the socket and this client
+    :type sys_config: dict
+    :param sys_config: system configuration
     """
     asyncore.dispatcher.__init__(self, map=socket_map)
     self.looper = looper
@@ -48,6 +50,7 @@ class HeronClient(asyncore.dispatcher):
     self.endpoint = (self.hostname, self.port)
     self.out_buffer = []
     self.socket_options = socket_options
+    self.sys_config = sys_config
 
     # map <message name -> message.Message object>
     self.registered_message_map = dict()
@@ -211,10 +214,12 @@ class HeronClient(asyncore.dispatcher):
     Log.error("Uncaptured python exception, closing channel %s (%s:%s %s)" %
               (self_msg, t, v, tbinfo))
 
-    # TODO: make it more robust
     if self.connecting:
+      # Error when trying to connect
+      # first cleanup by handle_close(), and tells a subclass about this error.
+      # the subclass can then call start_connect() again, if appropriate
       self.handle_close()
-      self.looper.register_timer_task_in_sec(self.start_connect, 1)
+      self.on_connect(StatusCode.CONNECT_ERROR)
     else:
       self.handle_close()
 

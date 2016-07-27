@@ -18,8 +18,10 @@ from heron.proto import metrics_pb2, common_pb2
 from heron.common.src.python.network import HeronClient, StatusCode
 
 class MetricsManagerClient(HeronClient):
-  def __init__(self, looper, metrics_host, port, instance, out_metrics, sock_map, socket_options):
-    HeronClient.__init__(self, looper, metrics_host, port, sock_map, socket_options)
+  def __init__(self, looper, metrics_host, port, instance,
+               out_metrics, sock_map, socket_options, sys_config):
+    HeronClient.__init__(self, looper, metrics_host, port,
+                         sock_map, socket_options, sys_config)
     self.instance = instance
     self.out_queue = out_metrics
 
