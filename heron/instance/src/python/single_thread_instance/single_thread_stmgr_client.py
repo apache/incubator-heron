@@ -73,6 +73,13 @@ class SingleThreadStmgrClient(HeronClient):
     else:
       raise RuntimeError("Unknown kind of message received from Stream Manager")
 
+  def on_error(self):
+    Log.error("Disconnected from Stream Manager")
+    # cleaning up
+    self._pplan_helper = None
+    # retry again
+    self.on_connect(StatusCode.CONNECT_ERROR)
+
   def _register_msg_to_handle(self):
     new_instance_builder = lambda : stmgr_pb2.NewInstanceAssignmentMessage()
     tuple_msg_builder = lambda : stmgr_pb2.TupleMessage()
