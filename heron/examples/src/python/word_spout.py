@@ -14,9 +14,13 @@
 
 from itertools import cycle
 from heron.instance.src.python.instance.spout import Spout
+from heron.instance.src.python.instance.stream import Stream
 
 
 class WordSpout(Spout):
+  #default_stream = Stream(fields=['word'])
+  #another_stream = Stream(fields=['word'], name="another_stream")
+  #outputs = [default_stream, another_stream]
   outputs = ['word']
 
   def initialize(self, config, context):
@@ -29,8 +33,10 @@ class WordSpout(Spout):
 
   def next_tuple(self):
     word = next(self.words)
+    #another_word = 'another_' + word
     #self.logger.debug("Will emit: " + word)
     self.emit([word], tup_id='message id')
+    #self.emit([another_word], tup_id='another id', stream="another_stream")
     #self.emit([word])
     self.emit_count += 1
     if self.emit_count % 100000 == 0:

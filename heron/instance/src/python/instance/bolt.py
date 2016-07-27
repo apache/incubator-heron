@@ -49,14 +49,24 @@ class Bolt(Component):
     The usage of this method is compatible with StreamParse API, although it does not create
     ``ShellBoltSpec`` but instead directly registers to a ``Topology`` class.
 
+    This method does not take a ``outputs`` argument because ``outputs`` should be
+    an attribute of your ``Spout`` subclass. Also, some ways of declaring inputs is not supported
+    in this implementation; please read the documentation below.
+
     :type name: str
     :param name: Name of this bolt.
     :param inputs: Streams that feed into this Bolt.
 
                    Two forms of this are acceptable:
 
-                   1. A `dict` mapping from ``HeronComponentSpec`` to ``Grouping``
-                   2. A `list` of ``HeronComponentSpec`` or ``Stream``
+                   1. A `dict` mapping from ``HeronComponentSpec`` to ``Grouping``.
+                      In this case, default stream is used.
+                   2. A `dict` mapping from ``GlobalStreamId`` to ``Grouping``.
+                      This ``GlobalStreamId`` object itself is different from StreamParse, because
+                      Heron does not use thrift, although its constructor method is compatible.
+                   3. A `list` of ``HeronComponentSpec``. In this case, default stream with
+                      SHUFFLE grouping is used.
+                   4. A `list` of ``GlobalStreamId``. In this case, SHUFFLE grouping is used.
     :type par: int
     :param par: Parallelism hint for this spout.
     :type config: dict

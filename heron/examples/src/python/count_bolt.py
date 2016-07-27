@@ -22,6 +22,7 @@ class CountBolt(Bolt):
     self.counter = Counter()
     self.total = 0
     self.logger.debug("Bolt context: \n" + str(context))
+    self.stream_name = []
 
   def _increment(self, word, inc_by):
     self.counter[word] += inc_by
@@ -31,9 +32,13 @@ class CountBolt(Bolt):
     if self.is_tick(tuple):
       self.log("Got tick tuple!")
       self.log("Current map: " + str(self.counter))
+      self.log("Stream name: " + str(self.stream_name))
       return
     word = tuple.values[0]
     self._increment(word, 10 if word == "heron" else 1)
+
+    if tuple.stream not in self.stream_name:
+      self.stream_name.append(tuple.stream)
 
     if self.total % 2 == 0:
       self.logger.debug("Will fail tuple: " + str(tuple))
@@ -43,4 +48,3 @@ class CountBolt(Bolt):
       self.ack(tuple)
 
     #self.emit([word, self.counter[word]])
-

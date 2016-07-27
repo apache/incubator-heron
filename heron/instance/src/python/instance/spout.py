@@ -54,6 +54,9 @@ class Spout(Component):
     The usage of this method is compatible with StreamParse API, although it does not create
     ``ShellBoltSpec`` but instead directly registers to a ``Topology`` class.
 
+    Note that this method does not take a ``outputs`` arguments because ``outputs`` should be
+    an attribute of your ``Spout`` subclass.
+
     :type name: str
     :param name: Name of this spout.
     :type par: int

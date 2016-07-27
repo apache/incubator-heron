@@ -16,7 +16,7 @@ import logging
 from heron.proto import tuple_pb2, topology_pb2
 
 from heron.common.src.python.utils.misc import PythonSerializer, OutgoingTupleHelper
-from heron.instance.src.python.instance.stream import Stream, Grouping
+from heron.instance.src.python.instance.stream import Stream, Grouping, GlobalStreamId
 
 
 class Component(object):
@@ -178,37 +178,87 @@ class HeronComponentSpec(object):
   def _add_in_streams(self, bolt):
     if self.inputs is None:
       return
+    # sanitize inputs and get a map <GlobalStreamId -> Grouping>
+    input_dict = self._sanitize_inputs()
+
+    for global_streamid, gtype in input_dict.iteritems():
+      in_stream = bolt.inputs.add()
+      in_stream.stream.CopyFrom(self._get_stream_id(global_streamid.component_id,
+                                                    global_streamid.stream_id))
+      if isinstance(gtype, Grouping.FIELDS):
+        # it's a field grouping
+        in_stream.gtype = gtype.gtype
+        in_stream.grouping_fields.CopyFrom(self._get_stream_schema(gtype.fields))
+      else:
+        in_stream.gtype = gtype
+
+  def _sanitize_inputs(self):
+    """Sanitizes input fields and returns a map <GlobalStreamId -> Grouping>"""
+    ret = {}
+    if self.inputs is None:
+      return
 
     if isinstance(self.inputs, dict):
-      # inputs are dictionary mapping from HeronComponentSpec to Grouping via default stream
-      for comp_spec, gtype in self.inputs.iteritems():
-        in_stream = bolt.inputs.add()
-        in_stream.stream.CopyFrom(self._get_stream_id(comp_spec.name, Stream.DEFAULT_STREAM_ID))
-        if isinstance(gtype, tuple) and gtype[0] == Grouping.FIELDS:
-          # it's field grouping
-          in_stream.gtype = Grouping.FIELDS
-          grouping_fields = gtype[1]
-          in_stream.grouping_fields.CopyFrom(self._get_stream_schema(grouping_fields))
+      # inputs are dictionary, must be either <HeronComponentSpec -> Grouping> or
+      # <GlobalStreamId -> Grouping>
+      for key, grouping in self.inputs.iteritems():
+        if not Grouping.is_grouping_sane(grouping):
+          raise ValueError('A given grouping is not supported')
+        if isinstance(key, HeronComponentSpec):
+          # use default streamid
+          global_streamid = GlobalStreamId(key.name, Stream.DEFAULT_STREAM_ID)
+          ret[global_streamid] = grouping
+        elif isinstance(key, GlobalStreamId):
+          ret[key] = grouping
         else:
-          if gtype == Grouping.FIELDS or gtype == Grouping.CUSTOM or gtype == Grouping.DIRECT:
-            raise ValueError("Grouping wrong")
-          in_stream.gtype = gtype
-    elif isinstance(self.inputs, list):
-      # inputs are list of HeronComponentSpec or Stream
-      # TODO: implement
-      raise NotImplementedError("Input stream as list of HeronComponentSpec or Stream not supported yet")
+          raise ValueError(str(key) + " is not supported as a key to inputs")
+    elif isinstance(self.inputs, (list, tuple)):
+      # inputs are lists, must be either a list of HeronComponentSpec or GlobalStreamId
+      # will use SHUFFLE grouping
+      for input_obj in self.inputs:
+        if isinstance(input_obj, HeronComponentSpec):
+          global_streamid = GlobalStreamId(input_obj.name, Stream.DEFAULT_STREAM_ID)
+          ret[global_streamid] = Grouping.SHUFFLE
+        elif isinstance(input_obj, GlobalStreamId):
+          ret[input_obj] = Grouping.SHUFFLE
+        else:
+          raise ValueError(str(input_obj) + " is not supported as an input")
+    else:
+      raise TypeError("Inputs must be a list, dict, or None, given: " + str(self.inputs))
+
+    return ret
 
   def _add_out_streams(self, spbl):
-    # TODO: currently only supports default stream -- so just one output stream
     if self.outputs is None:
       return
 
-    # Add default stream
-    # Assuming that every element in outputs is output field, not Stream objects
-    default_fields = [i for i in self.outputs if isinstance(i, str)]
-    default_stream = spbl.outputs.add()
-    default_stream.stream.CopyFrom(self._get_stream_id(self.name, Stream.DEFAULT_STREAM_ID))
-    default_stream.schema.CopyFrom(self._get_stream_schema(default_fields))
+    # sanitize outputs and get a map <stream_id -> out fields>
+    output_map = self._sanitize_outputs()
+
+    for stream_id, out_fields in output_map.iteritems():
+      out_stream = spbl.outputs.add()
+      out_stream.stream.CopyFrom(self._get_stream_id(self.name, stream_id))
+      out_stream.schema.CopyFrom(self._get_stream_schema(out_fields))
+
+  def _sanitize_outputs(self):
+    """Sanitizes output fields and returns a map <stream_id -> list of output fields>"""
+    ret = {}
+    if self.outputs is None:
+      return
+
+    for output in self.outputs:
+      if not isinstance(output, (str, Stream)):
+        raise TypeError("Outputs must be a list of strings or Streams, given: " + str(output))
+
+      if isinstance(output, str):
+        # it's a default stream
+        if Stream.DEFAULT_STREAM_ID not in ret:
+          ret[Stream.DEFAULT_STREAM_ID] = list()
+        ret[Stream.DEFAULT_STREAM_ID].append(output)
+      else:
+        # output is a Stream object
+        ret[output.stream_id] = output.fields
+    return ret
 
   @staticmethod
   def _get_stream_id(comp_name, id):

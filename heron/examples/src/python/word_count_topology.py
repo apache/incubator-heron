@@ -13,10 +13,13 @@
 # limitations under the License.
 
 from heron.instance.src.python.instance.topology import Topology
-from heron.instance.src.python.instance.stream import Grouping
+from heron.instance.src.python.instance.stream import Grouping, GlobalStreamId
 from heron.examples.src.python.word_spout import WordSpout
 from heron.examples.src.python.count_bolt import CountBolt
 
 class WordCount(Topology):
+  another_stream = GlobalStreamId(componentId="word_spout", streamId="another_stream")
   word_spout = WordSpout.spec(par=1)
+  #count_bolt = CountBolt.spec(par=1, inputs={word_spout: Grouping.fields('word'),
+  #                                           another_stream: Grouping.fields('word')})
   count_bolt = CountBolt.spec(par=1, inputs={word_spout: Grouping.fields('word')})

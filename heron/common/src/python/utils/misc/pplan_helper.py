@@ -23,12 +23,15 @@ from heron.common.src.python.utils.topology import TopologyContext
 class PhysicalPlanHelper(object):
   """Helper class for accessing Physical Plan
 
-  :ivar pplan: Physical Plan object
+  :ivar pplan: Physical Plan protobuf message
   :ivar my_instance_id: instance id for this instance
-  :ivar my_instance: instance object for this instance
+  :ivar my_instance: Instance protobuf message for this instance
   :ivar my_component_name: component name for this instance
   :ivar my_task_id: global task id for this instance
   :ivar is_spout: ``True`` if it's spout, ``False`` if it's bolt
+  :ivar hostname: hostname of this instance
+  :ivar my_component: Component protobuf message for this instance
+  :ivar context: Topology context if set, otherwise ``None``
   """
   def __init__(self, pplan, instance_id):
     self.pplan = pplan
@@ -48,17 +51,17 @@ class PhysicalPlanHelper(object):
     self.my_task_id = self.my_instance.info.task_id
 
     # get spout or bolt
-    self.my_spbl, self.is_spout = self._get_my_spout_or_bolt(pplan.topology)
+    self._my_spbl, self.is_spout = self._get_my_spout_or_bolt(pplan.topology)
 
     # Map <stream id -> number of fields in that stream's schema>
-    self.output_schema = dict()
-    outputs = self.my_spbl.outputs
+    self._output_schema = dict()
+    outputs = self._my_spbl.outputs
 
     for out_stream in outputs:
-      self.output_schema[out_stream.stream.id] = len(out_stream.schema.keys)
+      self._output_schema[out_stream.stream.id] = len(out_stream.schema.keys)
 
     self.hostname = socket.gethostname()
-    self.my_component = self.my_spbl.comp
+    self.my_component = self._my_spbl.comp
 
     self.context = None
 
@@ -89,7 +92,7 @@ class PhysicalPlanHelper(object):
     :param tuple: tuple that is going to be sent
     """
     # do some checking to make sure that the number of fields match what's expected
-    size = self.output_schema.get(stream_id, None)
+    size = self._output_schema.get(stream_id, None)
     if size is None:
       raise RuntimeError(self.my_component_name + " emitting stream " + stream_id +
                          " but was not declared in output fields")
@@ -101,7 +104,7 @@ class PhysicalPlanHelper(object):
   def get_my_spout(self):
     """Returns spout instance, or ``None`` if bolt is assigned"""
     if self.is_spout:
-      return self.my_spbl
+      return self._my_spbl
     else:
       return None
 
@@ -110,7 +113,7 @@ class PhysicalPlanHelper(object):
     if self.is_spout:
       return None
     else:
-      return self.my_spbl
+      return self._my_spbl
 
   def get_topology_state(self):
     """Returns the current topology state"""
