@@ -147,7 +147,7 @@ class MetricsHandler(BaseHandler):
 
     if metricResponse.status.status == common_pb2.NOTOK:
       if metricResponse.status.HasField("message"):
-        Log.warn(metricResponse.status.message)
+        Log.error(metricResponse.status.message)
 
     # Form the response.
     ret = {}
