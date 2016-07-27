@@ -20,6 +20,7 @@ import sys
 import subprocess
 import tarfile
 import tempfile
+import traceback
 import tornado.gen
 import tornado.ioloop
 import yaml
@@ -359,9 +360,8 @@ def get_clusters():
   # pylint: disable=unnecessary-lambda
   try:
     return instance.run_sync(lambda: API.get_clusters())
-  except Exception as ex:
-    Log.error('Error: %s' % str(ex))
-    Log.error('Failed to retrive clusters')
+  except Exception:
+    Log.debug(traceback.format_exc())
     raise
 
 
@@ -370,10 +370,8 @@ def get_logical_plan(cluster, env, topology, role):
   instance = tornado.ioloop.IOLoop.instance()
   try:
     return instance.run_sync(lambda: API.get_logical_plan(cluster, env, topology, role))
-  except Exception as ex:
-    Log.error('Error: %s' % str(ex))
-    Log.error('Failed to retrive logical plan info of topology \'%s\''
-              % ('/'.join([cluster, role, env, topology])))
+  except Exception:
+    Log.debug(traceback.format_exc())
     raise
 
 
@@ -382,8 +380,8 @@ def get_topology_info(*args):
   instance = tornado.ioloop.IOLoop.instance()
   try:
     return instance.run_sync(lambda: API.get_topology_info(*args))
-  except Exception as ex:
-    Log.error(str(ex))
+  except Exception:
+    Log.debug(traceback.format_exc())
     raise
 
 
@@ -392,9 +390,8 @@ def get_topology_metrics(*args):
   instance = tornado.ioloop.IOLoop.instance()
   try:
     return instance.run_sync(lambda: API.get_comp_metrics(*args))
-  except Exception as ex:
-    Log.error(str(ex))
-    Log.error("Failed to retrive metrics of component \'%s\'" % args[3])
+  except Exception:
+    Log.debug(traceback.format_exc())
     raise
 
 
@@ -405,7 +402,8 @@ def get_component_metrics(component, cluster, env, topology, role):
     result = get_topology_metrics(
         cluster, env, topology, component, [], all_queries, [0, -1], role)
     return result["metrics"]
-  except:
+  except Exception:
+    Log.debug(traceback.format_exc())
     raise
 
 
@@ -414,9 +412,8 @@ def get_cluster_topologies(cluster):
   instance = tornado.ioloop.IOLoop.instance()
   try:
     return instance.run_sync(lambda: API.get_cluster_topologies(cluster))
-  except Exception as ex:
-    Log.error(str(ex))
-    Log.error('Failed to retrive topologies running in cluster \'%s\'' % cluster)
+  except Exception:
+    Log.debug(traceback.format_exc())
     raise
 
 
@@ -425,10 +422,8 @@ def get_cluster_role_topologies(cluster, role):
   instance = tornado.ioloop.IOLoop.instance()
   try:
     return instance.run_sync(lambda: API.get_cluster_role_topologies(cluster, role))
-  except Exception as ex:
-    Log.error(str(ex))
-    Log.error('Failed to retrive topologies running in cluster'
-              '\'%s\' submitted by %s' % (cluster, role))
+  except Exception:
+    Log.debug(traceback.format_exc())
     raise
 
 
@@ -437,10 +432,8 @@ def get_cluster_role_env_topologies(cluster, role, env):
   instance = tornado.ioloop.IOLoop.instance()
   try:
     return instance.run_sync(lambda: API.get_cluster_role_env_topologies(cluster, role, env))
-  except Exception as ex:
-    Log.error(str(ex))
-    Log.error('Failed to retrive topologies running in cluster'
-              '\'%s\' submitted by %s under environment %s' % (cluster, role, env))
+  except Exception:
+    Log.debug(traceback.format_exc())
     raise
 
     
@@ -473,3 +466,9 @@ def insert_bool_values(command_line_args):
   args1 = insert_bool('--verbose', command_line_args)
   args2 = insert_bool('--deploy-deactivated', args1)
   return args2
+
+def print_version():
+  release_file = get_heron_release_file()
+  with open(release_file) as release_info:
+    for line in release_info:
+      print line,
