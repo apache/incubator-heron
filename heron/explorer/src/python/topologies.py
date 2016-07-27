@@ -55,7 +55,7 @@ def show_cluster(cl_args, cluster):
   try:
     result = utils.get_cluster_topologies(cluster)
     if not result:
-      Log.error('Unknown cluster \'%s\'' % cluster)
+      Log.error('No topologies found under cluster \'%s\'' % cluster)
       return False
     result = result[cluster]
   except Exception:
