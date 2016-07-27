@@ -24,7 +24,7 @@ import heron.cli.src.python.args as cli_args
 import heron.cli.src.python.execute as execute
 import heron.cli.src.python.jars as jars
 import heron.cli.src.python.opts as opts
-import heron.common.src.python.utils.config as utils
+import heron.common.src.python.utils.config as config
 
 
 ################################################################################
@@ -66,24 +66,24 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
   :return:
   '''
   # get the normalized path for topology.tar.gz
-  topology_pkg_path = utils.normalized_class_path(os.path.join(tmp_dir, 'topology.tar.gz'))
+  topology_pkg_path = config.normalized_class_path(os.path.join(tmp_dir, 'topology.tar.gz'))
 
   # get the release yaml file
-  release_yaml_file = utils.get_heron_release_file()
+  release_yaml_file = config.get_heron_release_file()
 
   # create a tar package with the cluster configuration and generated config files
   config_path = cl_args['config_path']
   tar_pkg_files = [topology_file, topology_defn_file]
   generated_config_files = [release_yaml_file, cl_args['override_config_file']]
 
-  utils.create_tar(topology_pkg_path, tar_pkg_files, config_path, generated_config_files)
+  config.create_tar(topology_pkg_path, tar_pkg_files, config_path, generated_config_files)
 
   # pass the args to submitter main
   args = [
       "--cluster", cl_args['cluster'],
       "--role", cl_args['role'],
       "--environment", cl_args['environ'],
-      "--heron_home", utils.get_heron_dir(),
+      "--heron_home", config.get_heron_dir(),
       "--config_path", config_path,
       "--override_config_file", cl_args['override_config_file'],
       "--release_file", release_yaml_file,
@@ -95,7 +95,7 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
   if opts.verbose():
     args.append("--verbose")
 
-  lib_jars = utils.get_heron_libs(
+  lib_jars = config.get_heron_libs(
       jars.scheduler_jars() + jars.uploader_jars() + jars.statemgr_jars() + jars.packing_jars()
   )
 
@@ -173,7 +173,7 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
   try:
     execute.heron_class(
         cl_args['topology-class-name'],
-        utils.get_heron_libs(jars.topology_jars()),
+        config.get_heron_libs(jars.topology_jars()),
         extra_jars=[topology_file],
         args=tuple(unknown_args),
         java_defines=cl_args['topology_main_jvm_property'])
@@ -239,9 +239,9 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
 #  Execute the pex file to create topology definition file by running
 #  the topology's main class.
 ################################################################################
+# pylint: disable=unused-argument
 def submit_pex(cl_args, unknown_args, tmp_dir):
   # execute main of the topology to create the topology definition
-  # TODO: currently topology's class name is not necessary
   topology_file = cl_args['topology-file-name']
   topology_class_name = cl_args['topology-class-name']
   try:

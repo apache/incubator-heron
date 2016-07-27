@@ -13,7 +13,7 @@
 # limitations under the License.
 ''' version.py '''
 import heron.cli.src.python.args as cli_args
-import heron.common.src.python.utils.config as utils
+import heron.common.src.python.utils.config as config
 
 
 def create_parser(subparsers):
@@ -42,7 +42,7 @@ def run(command, parser, args, unknown_args):
   :param unknown_args:
   :return:
   '''
-  release_file = utils.get_heron_release_file()
+  release_file = config.get_heron_release_file()
   with open(release_file) as release_info:
     for line in release_info:
       print line,

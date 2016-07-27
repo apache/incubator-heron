@@ -15,7 +15,7 @@
 import os
 import fnmatch
 
-import heron.common.src.python.utils.config as utils
+import heron.common.src.python.utils.config as config
 
 
 def pick(dirname, pattern):
@@ -35,7 +35,7 @@ def topology_jars():
   :return:
   '''
   jars = [
-      os.path.join(utils.get_heron_lib_dir(), "third_party", "*")
+      os.path.join(config.get_heron_lib_dir(), "third_party", "*")
   ]
   return jars
 
@@ -46,7 +46,7 @@ def scheduler_jars():
   :return:
   '''
   jars = [
-      os.path.join(utils.get_heron_lib_dir(), "scheduler", "*")
+      os.path.join(config.get_heron_lib_dir(), "scheduler", "*")
   ]
   return jars
 
@@ -57,7 +57,7 @@ def uploader_jars():
   :return:
   '''
   jars = [
-      os.path.join(utils.get_heron_lib_dir(), "uploader", "*")
+      os.path.join(config.get_heron_lib_dir(), "uploader", "*")
   ]
   return jars
 
@@ -68,7 +68,7 @@ def statemgr_jars():
   :return:
   '''
   jars = [
-      os.path.join(utils.get_heron_lib_dir(), "statemgr", "*")
+      os.path.join(config.get_heron_lib_dir(), "statemgr", "*")
   ]
   return jars
 
@@ -79,6 +79,6 @@ def packing_jars():
   :return:
   '''
   jars = [
-      os.path.join(utils.get_heron_lib_dir(), "packing", "*")
+      os.path.join(config.get_heron_lib_dir(), "packing", "*")
   ]
   return jars
