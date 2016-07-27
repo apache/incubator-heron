@@ -7,8 +7,8 @@ import shlex
 import re
 import collections
 import json
-import heron.cli.src.python.activate as activate
-import heron.cli.src.python.args as args
+#import heron.cli.src.python.activate as activate
+import heron.common.src.python.utils as utils
 import traceback
 
 ################################################################################
@@ -29,17 +29,15 @@ For detailed documentation, go to http://heronstreaming.io'''
 
 
 
-class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
-  def _format_action(self, action):
-    parts = super(argparse.RawDescriptionHelpFormatter, self)._format_action(action)
-    if action.nargs == argparse.PARSER:
-      parts = "\n".join(parts.split("\n")[1:])
-    return parts
-
 class HeronRCArgumentParser(argparse.ArgumentParser):
 	cmdmap=collections.defaultdict(dict)
+	
+
  	def __init__(self, *args, **kwargs):
-		HeronRCArgumentParser.initializeFromRC()
+ 		rcfile = HeronRCArgumentParser.getAndRemoveKey(kwargs, "rcfile")
+ 		self.rccommand = HeronRCArgumentParser.getAndRemoveKey(kwargs, "rccommand")
+ 		self.rcclusterrole = HeronRCArgumentParser.getAndRemoveKey(kwargs, "rcclusterrole")
+		HeronRCArgumentParser.initializeFromRC(rcfile)
 		super(HeronRCArgumentParser, self).__init__(*args, **kwargs)
 	
 	@classmethod
@@ -57,6 +55,13 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
 		        return match.group(1) # captured quoted-string
 		return regex.sub(_replacer, string)
 
+	@classmethod
+	def getAndRemoveKey(hrc, dict, key):
+		val = None
+		if key in dict:
+			val =  dict[key]
+			del(dict[key])
+		return val
 	# initialize the command map from heron rc file in the parser, that can be later used for command substitution during parse_args phase
 	# patterns
 	# cmdmap [cmd][environment] = 'argument list'
@@ -64,12 +69,15 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
 	# cmdmap ['*']['devcluster/ads/PROD'] = '--config-property "heron.class.launcher=com.twitter.heron.scheduler.aurora.AuroraLauncher"'
 	# cmdmap ['*']['*'] = '--config-property "heron.class.launcher=com.twitter.heron.scheduler.aurora.AuroraLauncher"'
 	@classmethod
-	def initializeFromRC(hrc):
+	def initializeFromRC(hrc,rcfile):
+
 		if  len(hrc.cmdmap) > 0:
 			return 
-		if os.path.exists(HERON_RC):
+		effective_rc  = (rcfile, HERON_RC) [ rcfile == None] 
+		#print rcfile, effective_rc
+		if os.path.exists(effective_rc):
 
-			with open(HERON_RC) as f:
+			with open(effective_rc) as f:
 				hrc.cmdmap['*']['*'] = ''
 				for line in f:
 					m = p.match(line)
@@ -83,7 +91,7 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
 					else:
 						value = hrc.remove_comments(line.rstrip(os.linesep))
 
-					args_list = args.insert_bool_values(value.split())  # make sure that all the single args have a boolean value associated so that we can load the args to a key value structure
+					args_list = utils.insert_bool_values(value.split())  # make sure that all the single args have a boolean value associated so that we can load the args to a key value structure
 					args_list_string = ' '.join (args_list)
 					if command == None or command == '' :
 						continue
@@ -93,7 +101,7 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
 						hrc.cmdmap[command][env] =  args_list_string
 			#print "cmdmap", hrc.cmdmap	
 		else:
-			print "WARN: %s is not an existing file" % HERON_RC
+			print "WARN: %s is not an existing file" % effective_rc
 
 
     # for each command / cluster-role-env combination, get the commands from heronrc
@@ -104,6 +112,7 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
 
 		if ( command in hrc.cmdmap and role in hrc.cmdmap[command]):
 			args_for_command_role = (hrc.cmdmap[command][role],args_for_command_role) [hrc.cmdmap[command][role] == None or hrc.cmdmap[command][role] == '']
+		#print "get_args_for_command_role", command, role, args_for_command_role
 		return args_for_command_role.split()
 
 	# this is invoked when the parser.parse_args is called
@@ -112,14 +121,84 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
 
 	def _read_args_from_files(self,arg_strings):
 		new_arg_strings = []
-		command = sys.argv[1]
-		role = sys.argv[2]
+		command = self.rccommand
+		if len(sys.argv) > 1:
+			command = (sys.argv[1], self.rccommand) [self.rccommand != '']
+		role = self.rcclusterrole
+		if len(sys.argv)>2 :
+			role = (sys.argv[2], self.rcclusterrole) [self.rcclusterrole != '']
+		#command = arg_strings[1]
+		#role = arg_strings[2]
+
 		new_arg_strings.extend(self.get_args_for_command_role('*', '*'))
 		new_arg_strings.extend(self.get_args_for_command_role(command, '*'))
 		new_arg_strings.extend(self.get_args_for_command_role(command, role))
-		new_arg_strings.extend(arg_strings)
+		#new_arg_strings.extend(arg_strings)
+		arg_strings.extend(new_arg_strings)
+		#print 
+		#print sys.argv , command , role, new_arg_strings
 		return arg_strings
 
+	def _xparse_known_args(self, args=None, namespace=None):
+		print "entering in parse_known_args", namespace,args
+		if args is None:
+		    # args default to the system args
+		    args = sys.argv[1:]
+		else:
+		    # make sure that args are mutable
+		    args = list(args)
+
+		# default Namespace built from parser defaults
+		if namespace is None:
+		    namespace = argparse.Namespace()
+		# add any action defaults that aren't present
+		for action in self._actions:
+		    if action.dest is not argparse.SUPPRESS:
+		        if not hasattr(namespace, action.dest):
+		            if action.default is not argparse.SUPPRESS:
+		                setattr(namespace, action.dest, action.default)
+
+		# add any parser defaults that aren't present
+		for dest in self._defaults:
+		    if not hasattr(namespace, dest):
+		        setattr(namespace, dest, self._defaults[dest])
+
+		# parse the arguments and exit if there are any errors
+		try:
+			print "3 parse_known_args--" , namespace,args
+			namespace, args = self._parse_known_args(args, namespace)
+
+			if hasattr(namespace, argparse._UNRECOGNIZED_ARGS_ATTR):
+			    args.extend(getattr(namespace, argparse._UNRECOGNIZED_ARGS_ATTR))
+			    delattr(namespace, argparse._UNRECOGNIZED_ARGS_ATTR)
+			print "4 parse_known_args--" , namespace,args
+			return namespace, args
+		except argparse.ArgumentError:
+		    err = sys.exc_info()[1]
+		    self.error(str(err))
+
+	def _parse_known_args(self, arg_strings, namespace):
+		#print "ENTERING in _parse_known_args", arg_strings, namespace
+		namespace, args = super(HeronRCArgumentParser, self)._parse_known_args(arg_strings, namespace)
+		#print "EXITING _parse_known_args--" , arg_strings, namespace
+		return namespace, args
+	
+	def parse_known_args(self, args=None, namespace=None):
+		#print "ENTERING in parse_known_args", args
+		namespace, args = super(HeronRCArgumentParser, self).parse_known_args(args, namespace)
+		#print "EXITING parse_known_args--" , namespace
+
+		if self.prog != 'heron':
+			
+			try:
+				print "in HeronRCArgumentParser._parse_known_args", self, namespace, args
+				raise ValueError('A very specific bad thing happened')
+			except Exception as error:
+				traceback.print_stack()
+			return namespace,args	
+
+			#logging.exception("Something awful happened!")
+		return namespace, args
 #test stub
 def main():
 	#parser = HeronRCArgumentParser(description="test parser",fromfile_prefix_chars='@')
@@ -127,14 +206,14 @@ def main():
 	parser = HeronRCArgumentParser(
 		prog = 'heron',
 		epilog = help_epilog,
-		formatter_class=SubcommandHelpFormatter,
+		formatter_class=utils.SubcommandHelpFormatter,
 		fromfile_prefix_chars='@',
-		add_help = False)
+		add_help = False,
+		rcfile = "./.heronrc")
 	subparsers = parser.add_subparsers(
 		title = "Available commands", 
 		metavar = '<command> <options>')
 
-	activate.create_parser(subparsers)
 	args, unknown_args = parser.parse_known_args()
 	print args, unknown_args
 

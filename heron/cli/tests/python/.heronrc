@@ -1,0 +1,6 @@
+activate:* --config-property test-cmd-activate-*                   #command specific
+:devcluster/ads/PROD --config-property test-cmd-invalid     #invalid
+submit:devcluster/ads/PROD --config-property test-cmd-submit-role   #role and command specific
+activate:devcluster/ads/PROD --config-property test-cmd-activate-role   #role and command specific
+--config-property test-hello   #global
+*:* --config-property test-hello-global   #global
