@@ -194,8 +194,8 @@ def main():
     version.run()
     parser.exit()
 
-  else:
-    LOG.error('Unknown subcommand')
+  elif remaining != []:
+    LOG.error('Invalid subcommand')
     sys.exit(1)
 
   namespace = vars(args)

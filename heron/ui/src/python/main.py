@@ -133,11 +133,13 @@ def main():
     child_parser.parse_args(args=remaining, namespace=parsed_args)
     parser.print_help()
     parser.exit()
+
   elif remaining == ['version']:
     version.run()
     parser.exit()
-  else:
-    LOG.error('Unknown command')
+
+  elif remaining != []:
+    LOG.error('Invalid subcommand')
     sys.exit(1)
 
   # log additional information
