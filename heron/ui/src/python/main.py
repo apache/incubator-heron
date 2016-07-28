@@ -30,7 +30,6 @@ from heron.ui.src.python import handlers
 from heron.ui.src.python import args
 from heron.ui.src.python import log
 from heron.ui.src.python.log import Log as LOG
-import heron.common.src.python.utils as utils
 
 class Application(tornado.web.Application):
   ''' Application '''
@@ -131,10 +130,6 @@ def main():
   if remaining == ['help']:
     child_parser.parse_args(args=remaining, namespace=parsed_args)
     parser.print_help()
-    parser.exit()
-
-  elif remaining == ['version']:
-    utils.print_version()
     parser.exit()
 
   elif remaining != []:

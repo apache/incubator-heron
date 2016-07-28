@@ -29,4 +29,5 @@ pex_binary(
         "//heron/ui/resources:templates",
         "//heron/ui/resources:static",
     ],
+    zip_safe = False,
 )
