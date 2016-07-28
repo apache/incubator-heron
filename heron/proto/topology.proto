@@ -75,10 +75,10 @@ message Config {
     required string key = 1;
     // Only one of the below are set
     optional string value = 2;
-    //optional bytes java_serialized_value = 3;
     optional bytes serialized_value = 3;
 
-    required ConfigValueType type = 4;
+    // This is made optional for backward compatibility (#1179)
+    optional ConfigValueType type = 4;
   }
   repeated KeyValue kvs = 1;
 }
