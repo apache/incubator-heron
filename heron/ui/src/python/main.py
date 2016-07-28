@@ -16,7 +16,6 @@
 ''' main.py '''
 import os
 import socket
-import sys
 
 import tornado.ioloop
 import tornado.options
@@ -127,14 +126,10 @@ def main():
   (parser, child_parser) = args.create_parsers()
   (parsed_args, remaining) = parser.parse_known_args()
 
-  if remaining == ['help']:
+  if remaining:
     child_parser.parse_args(args=remaining, namespace=parsed_args)
     parser.print_help()
     parser.exit()
-
-  elif remaining != []:
-    LOG.error('Invalid subcommand')
-    sys.exit(1)
 
   # log additional information
   command_line_args = vars(parsed_args)
