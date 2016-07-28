@@ -35,10 +35,10 @@ import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.LauncherUtils;
 import com.twitter.heron.spi.utils.Runtime;
 
 
@@ -106,7 +106,6 @@ public class LaunchRunnerTest {
   private static Config createRunnerRuntime() {
     Config runtime = Mockito.spy(Config.newBuilder().build());
     ILauncher launcher = Mockito.mock(ILauncher.class);
-    IPacking packing = Mockito.mock(IPacking.class);
     SchedulerStateManagerAdaptor adaptor = Mockito.mock(SchedulerStateManagerAdaptor.class);
     TopologyAPI.Topology topology = createTopology(new com.twitter.heron.api.Config());
 
@@ -115,8 +114,13 @@ public class LaunchRunnerTest {
     Mockito.doReturn(topology).when(runtime).get(Keys.topologyDefinition());
 
     PackingPlan packingPlan = Mockito.mock(PackingPlan.class);
-    Mockito.when(packing.pack()).thenReturn(packingPlan);
     Mockito.when(packingPlan.getInstanceDistribution()).thenReturn(MOCK_PACKING_STRING);
+
+    LauncherUtils mockLauncherUtils = Mockito.mock(LauncherUtils.class);
+    Mockito.when(
+        mockLauncherUtils._createPackingPlan(Mockito.any(Config.class), Mockito.any(Config.class)))
+        .thenReturn(packingPlan);
+    LauncherUtils.setInstance(mockLauncherUtils);
 
     return runtime;
   }

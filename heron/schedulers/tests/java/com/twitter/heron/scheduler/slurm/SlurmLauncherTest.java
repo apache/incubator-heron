@@ -17,6 +17,8 @@ package com.twitter.heron.scheduler.slurm;
 
 import java.util.HashMap;
 
+import com.sun.javaws.Launcher;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,10 +31,10 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
-import com.twitter.heron.spi.utils.SchedulerUtils;
+import com.twitter.heron.spi.utils.LauncherUtils;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({SlurmContext.class, SchedulerUtils.class})
+@PrepareForTest({SlurmContext.class, LauncherUtils.class})
 public class SlurmLauncherTest {
   private static final String TOPOLOGY_NAME = "testTopology";
   private static final String CLUSTER = "testCluster";
@@ -79,8 +81,8 @@ public class SlurmLauncherTest {
     Mockito.verify(slurmLauncher).setupWorkingDirectory();
 
     // Failed to schedule
-    PowerMockito.spy(SchedulerUtils.class);
-    PowerMockito.doReturn(false).when(SchedulerUtils.class, "onScheduleAsLibrary",
+    PowerMockito.spy(LauncherUtils.class);
+    PowerMockito.doReturn(false).when(LauncherUtils.class, "onScheduleAsLibrary",
         Mockito.any(Config.class),
         Mockito.any(Config.class),
         Mockito.any(IScheduler.class),
@@ -88,15 +90,15 @@ public class SlurmLauncherTest {
     PowerMockito.doReturn(true).when(slurmLauncher).setupWorkingDirectory();
     Assert.assertFalse(slurmLauncher.launch(Mockito.mock(PackingPlan.class)));
     PowerMockito.verifyStatic();
-    SchedulerUtils.onScheduleAsLibrary(
+    LauncherUtils.onScheduleAsLibrary(
         Mockito.any(Config.class),
         Mockito.any(Config.class),
         Mockito.any(IScheduler.class),
         Mockito.any(PackingPlan.class));
 
     // happy path
-    PowerMockito.mockStatic(SchedulerUtils.class);
-    PowerMockito.doReturn(true).when(SchedulerUtils.class, "onScheduleAsLibrary",
+    PowerMockito.mockStatic(LauncherUtils.class);
+    PowerMockito.doReturn(true).when(LauncherUtils.class, "onScheduleAsLibrary",
         Mockito.any(Config.class),
         Mockito.any(Config.class),
         Mockito.any(IScheduler.class),
@@ -104,7 +106,7 @@ public class SlurmLauncherTest {
     Assert.assertTrue(slurmLauncher.launch(Mockito.mock(PackingPlan.class)));
     Mockito.verify(slurmLauncher, Mockito.times(3)).launch(Mockito.any(PackingPlan.class));
     PowerMockito.verifyStatic();
-    SchedulerUtils.onScheduleAsLibrary(
+    LauncherUtils.onScheduleAsLibrary(
         Mockito.any(Config.class),
         Mockito.any(Config.class),
         Mockito.any(IScheduler.class),

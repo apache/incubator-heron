@@ -26,18 +26,17 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.LauncherUtils;
-import com.twitter.heron.spi.utils.SchedulerUtils;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(SchedulerUtils.class)
+@PrepareForTest(LauncherUtils.class)
 public class AuroraLauncherTest {
   @Test
   public void testLaunch() throws Exception {
     AuroraLauncher launcher = Mockito.spy(AuroraLauncher.class);
 
     // Failed to schedule
-    PowerMockito.spy(SchedulerUtils.class);
-    PowerMockito.doReturn(false).when(SchedulerUtils.class, "onScheduleAsLibrary",
+    PowerMockito.spy(LauncherUtils.class);
+    PowerMockito.doReturn(false).when(LauncherUtils.class, "onScheduleAsLibrary",
         Mockito.any(Config.class),
         Mockito.any(Config.class),
         Mockito.any(IScheduler.class),
@@ -52,8 +51,8 @@ public class AuroraLauncherTest {
         Mockito.any(PackingPlan.class));
 
     // Happy path
-    PowerMockito.spy(SchedulerUtils.class);
-    PowerMockito.doReturn(true).when(SchedulerUtils.class, "onScheduleAsLibrary",
+    PowerMockito.spy(LauncherUtils.class);
+    PowerMockito.doReturn(true).when(LauncherUtils.class, "onScheduleAsLibrary",
         Mockito.any(Config.class),
         Mockito.any(Config.class),
         Mockito.any(IScheduler.class),
