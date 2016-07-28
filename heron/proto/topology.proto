@@ -39,6 +39,12 @@ enum ComponentObjectSpec {
   PYTHON_CLASS_NAME = 3;
 }
 
+enum ConfigValueType {
+  STRING_VALUE = 1; //normal string
+  JAVA_SERIALIZED_VALUE = 2;
+  PYTHON_SERIALIZED_VALUE = 3;
+}
+
 message StreamSchema {
   message KeyType {
     required string key = 1;
@@ -69,7 +75,10 @@ message Config {
     required string key = 1;
     // Only one of the below are set
     optional string value = 2;
-    optional bytes java_serialized_value = 3;
+    //optional bytes java_serialized_value = 3;
+    optional bytes serialized_value = 3;
+
+    required ConfigValueType type = 4;
   }
   repeated KeyValue kvs = 1;
 }

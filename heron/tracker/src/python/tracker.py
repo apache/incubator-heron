@@ -333,20 +333,22 @@ class Tracker(object):
       for kvs in topology.physical_plan.topology.topology_config.kvs:
         if kvs.value:
           physicalPlan["config"][kvs.key] = kvs.value
-        elif kvs.java_serialized_value:
-          # Hexadecimal byte array for Serialized objects
-          try:
-            pobj = javaobj.loads(kvs.java_serialized_value)
-            physicalPlan["config"][kvs.key] = {
-                'value' : json.dumps(pobj,
-                                     default=lambda custom_field: custom_field.__dict__,
-                                     sort_keys=True,
-                                     indent=2),
-                'raw' : utils.hex_escape(kvs.java_serialized_value)}
-          except Exception:
-            physicalPlan["config"][kvs.key] = {
-                'value' : 'A Java Object',
-                'raw' : utils.hex_escape(kvs.java_serialized_value)}
+        elif kvs.serialized_value:
+          # non-Java serialized value is simply ignored for now
+          if kvs.type == topology_pb2.ConfigValueType.Value('JAVA_SERIALIZED_VALUE'):
+            # Hexadecimal byte array for Serialized objects
+            try:
+              pobj = javaobj.loads(kvs.serialized_value)
+              physicalPlan["config"][kvs.key] = {
+                  'value' : json.dumps(pobj,
+                                       default=lambda custom_field: custom_field.__dict__,
+                                       sort_keys=True,
+                                       indent=2),
+                  'raw' : utils.hex_escape(kvs.serialized_value)}
+            except Exception:
+              physicalPlan["config"][kvs.key] = {
+                  'value' : 'A Java Object',
+                  'raw' : utils.hex_escape(kvs.serialized_value)}
     for spout in spouts:
       spout_name = spout.comp.name
       physicalPlan["spouts"][spout_name] = []

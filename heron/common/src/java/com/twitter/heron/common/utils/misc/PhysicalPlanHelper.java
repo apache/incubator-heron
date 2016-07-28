@@ -201,17 +201,19 @@ public class PhysicalPlanHelper {
     for (TopologyAPI.Config.KeyValue kv : config.getKvsList()) {
       if (kv.hasValue()) {
         retval.put(kv.getKey(), kv.getValue());
-      } else {
-        retval.put(kv.getKey(), Utils.deserialize(kv.getJavaSerializedValue().toByteArray()));
+      } else if (kv.getType().equals(TopologyAPI.ConfigValueType.JAVA_SERIALIZED_VALUE)){
+        retval.put(kv.getKey(), Utils.deserialize(kv.getSerializedValue().toByteArray()));
       }
+      // non-Java serialized value is simply ignored
     }
     // Override any component specific configs
     for (TopologyAPI.Config.KeyValue kv : acomponent.getConfig().getKvsList()) {
       if (kv.hasValue()) {
         retval.put(kv.getKey(), kv.getValue());
-      } else {
-        retval.put(kv.getKey(), Utils.deserialize(kv.getJavaSerializedValue().toByteArray()));
+      } else if (kv.getType().equals(TopologyAPI.ConfigValueType.JAVA_SERIALIZED_VALUE)){
+        retval.put(kv.getKey(), Utils.deserialize(kv.getSerializedValue().toByteArray()));
       }
+      // non-Java serialized value is simply ignored
     }
     return retval;
   }
