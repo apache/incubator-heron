@@ -23,6 +23,7 @@ class CountBolt(Bolt):
     self.total = 0
     self.logger.debug("Bolt context: \n" + str(context))
     self.stream_name = []
+    self.logger.info("Given component-specific config: \n" + str(config))
 
   def _increment(self, word, inc_by):
     self.counter[word] += inc_by

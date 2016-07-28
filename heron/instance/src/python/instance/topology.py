@@ -153,13 +153,21 @@ class TopologyType(type):
     """Checks if a given config_dict is sane, and returns a sanitized config_dict <str -> str>
 
     It checks if keys are all strings and convert all non-string values to strings
+
+    If non-string is given as a value, it is converted to string by a built-in ``str()`` method.
+    For a boolean value, ``True`` is converted to "true" instead of "True", and ``False`` is
+    converted to "false" instead of "False", in order to keep the consistency with
+    Java configuration.
     """
     sanitized = {}
     for key, value in config_dict.iteritems():
       if not isinstance(key, str):
         raise TypeError("Key for topology-wide config must be string, given: " +
                         str(type(key)) + ":" + str(key))
-      sanitized[key] = str(value)
+      if isinstance(value, bool):
+        sanitized[key] = "true" if value else "false"
+      else:
+        sanitized[key] = str(value)
     return sanitized
 
 

@@ -13,11 +13,12 @@
 # limitations under the License.
 
 import logging
-from heron.proto import tuple_pb2, topology_pb2
 
 from heron.common.src.python.utils.misc import PythonSerializer, OutgoingTupleHelper
 from heron.instance.src.python.instance.stream import Stream, Grouping, GlobalStreamId
+from heron.proto import tuple_pb2, topology_pb2
 
+import heron.common.src.python.constants as constants
 
 class Component(object):
   """The base class for heron bolt/spout instance
@@ -118,23 +119,25 @@ class Component(object):
     raise NotImplementedError()
 
 class HeronComponentSpec(object):
-  def __init__(self, name, python_class_path, is_spout, par, inputs=None, outputs=None, config=None):
+  def __init__(self, name, python_class_path, is_spout, par,
+               inputs=None, outputs=None, config=None):
     self.name = name
     self.python_class_path = python_class_path
     self.is_spout = is_spout
     self.parallelism = par
     self.inputs = inputs
     self.outputs = outputs
-    self.config = config
+    self.custom_config = config
 
   def get_protobuf(self):
-    """Returns protobuf object of this component"""
+    """Returns protobuf message (Spout or Bolt) of this component"""
     if self.is_spout:
       return self._get_spout()
     else:
       return self._get_bolt()
 
   def _get_spout(self):
+    """Returns Spout protobuf message"""
     spout = topology_pb2.Spout()
     spout.comp.CopyFrom(self._get_base_component())
 
@@ -143,6 +146,7 @@ class HeronComponentSpec(object):
     return spout
 
   def _get_bolt(self):
+    """Returns Bolt protobuf message"""
     bolt = topology_pb2.Bolt()
     bolt.comp.CopyFrom(self._get_base_component())
 
@@ -152,6 +156,7 @@ class HeronComponentSpec(object):
     return bolt
 
   def _get_base_component(self):
+    """Returns Component protobuf message"""
     comp = topology_pb2.Component()
     comp.name = self.name
     comp.spec = topology_pb2.ComponentObjectSpec.Value("PYTHON_CLASS_NAME")
@@ -160,22 +165,53 @@ class HeronComponentSpec(object):
     return comp
 
   def _get_comp_config(self):
-    config = topology_pb2.Config()
+    """Returns component-specific Config protobuf message
+
+    It first adds ``topology.component.parallelism``, and is overriden by
+    a user-defined component-specific configuration, specified by spec().
+    """
+    proto_config = topology_pb2.Config()
 
     # first add parallelism
-    key = config.kvs.add()
-    key.key = "topology.component.parallelism"
+    key = proto_config.kvs.add()
+    key.key = constants.TOPOLOGY_COMPONENT_PARALLELISM
     key.value = str(self.parallelism)
 
-    # iterate through self.config
-    if self.config is not None:
-      for key, value in config.iteritems():
-        kvs = config.kvs.add()
+    # iterate through self.custom_config
+    if self.custom_config is not None:
+      sanitized = self._sanitize_config(self.custom_config)
+      for key, value in sanitized.iteritems():
+        kvs = proto_config.kvs.add()
         kvs.key = key
         kvs.value = value
-    return config
+    return proto_config
+
+  @staticmethod
+  def _sanitize_config(custom_config):
+    """Checks whether a given custom_config and returns a sanitized dict <str -> str>
+
+    If non-string is given as a value, it is converted to string by a built-in ``str()`` method.
+    For a boolean value, ``True`` is converted to "true" instead of "True", and ``False`` is
+    converted to "false" instead of "False", in order to keep the consistency with
+    Java configuration.
+    """
+    if not isinstance(custom_config, dict):
+      raise TypeError("component-specific configuration must be given as a dict type, given: "
+                      + str(type(custom_config)))
+    sanitized = {}
+    for key, value in custom_config.iteritems():
+      if not isinstance(key, str):
+        raise TypeError("Key for component-specific configuration must be string, given: " +
+                        str(type(key)) + ":" + str(key))
+      if isinstance(value, bool):
+        sanitized[key] = "true" if value else "false"
+      else:
+        sanitized[key] = str(value)
+
+    return sanitized
 
   def _add_in_streams(self, bolt):
+    """Adds inputs to a given protobuf Bolt message"""
     if self.inputs is None:
       return
     # sanitize inputs and get a map <GlobalStreamId -> Grouping>
@@ -229,6 +265,7 @@ class HeronComponentSpec(object):
     return ret
 
   def _add_out_streams(self, spbl):
+    """Adds outputs to a given protobuf Bolt or Spout message"""
     if self.outputs is None:
       return
 
@@ -262,6 +299,7 @@ class HeronComponentSpec(object):
 
   @staticmethod
   def _get_stream_id(comp_name, id):
+    """Returns a StreamId protobuf message"""
     stream_id = topology_pb2.StreamId()
     stream_id.id = id
     stream_id.component_name = comp_name
@@ -269,6 +307,7 @@ class HeronComponentSpec(object):
 
   @staticmethod
   def _get_stream_schema(fields):
+    """Returns a StreamSchema protobuf message"""
     stream_schema = topology_pb2.StreamSchema()
     for field in fields:
       key = stream_schema.keys.add()

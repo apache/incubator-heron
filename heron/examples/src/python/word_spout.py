@@ -30,6 +30,7 @@ class WordSpout(Spout):
     self.logger.debug("Spout context: \n" + str(context))
     self.ack_count = 0
     self.fail_count = 0
+    self.logger.info("Given component-specific config: \n" + str(config))
 
   def next_tuple(self):
     word = next(self.words)
