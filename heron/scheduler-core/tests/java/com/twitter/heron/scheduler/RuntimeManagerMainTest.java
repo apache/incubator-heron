@@ -21,8 +21,8 @@ import org.mockito.Mockito;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.spi.common.Command;
-import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.statemgr.NullStateManager;
 
@@ -36,7 +36,7 @@ public class RuntimeManagerMainTest {
     final String CLUSTER = "cluster";
     final String ROLE = "role";
     final String ENVIRON = "env";
-    Config config = Mockito.mock(Config.class);
+    SpiCommonConfig config = Mockito.mock(SpiCommonConfig.class);
     Mockito.when(config.getStringValue(ConfigKeys.get("CLUSTER"))).thenReturn(CLUSTER);
     Mockito.when(config.getStringValue(ConfigKeys.get("ROLE"))).thenReturn(ROLE);
     Mockito.when(config.getStringValue(ConfigKeys.get("ENVIRON"))).thenReturn(ENVIRON);
@@ -78,7 +78,7 @@ public class RuntimeManagerMainTest {
    */
   @Test
   public void testManageTopology() throws Exception {
-    Config config = Mockito.mock(Config.class);
+    SpiCommonConfig config = Mockito.mock(SpiCommonConfig.class);
     Mockito.when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
 
     RuntimeManagerMain runtimeManagerMain =
@@ -107,22 +107,22 @@ public class RuntimeManagerMainTest {
 
     // Failed to get ISchedulerClient
     Mockito.doReturn(null).when(runtimeManagerMain).
-        getSchedulerClient(Mockito.any(Config.class));
+        getSchedulerClient(Mockito.any(SpiCommonConfig.class));
     Assert.assertFalse(runtimeManagerMain.manageTopology());
 
     // Successfully get ISchedulerClient
     ISchedulerClient client = Mockito.mock(ISchedulerClient.class);
     Mockito.doReturn(client).when(runtimeManagerMain).
-        getSchedulerClient(Mockito.any(Config.class));
+        getSchedulerClient(Mockito.any(SpiCommonConfig.class));
 
     // Failed to callRuntimeManagerRunner
     Mockito.doReturn(false).when(runtimeManagerMain).
-        callRuntimeManagerRunner(Mockito.any(Config.class), Mockito.eq(client));
+        callRuntimeManagerRunner(Mockito.any(SpiCommonConfig.class), Mockito.eq(client));
     Assert.assertFalse(runtimeManagerMain.manageTopology());
 
     // Happy path
     Mockito.doReturn(true).when(runtimeManagerMain).
-        callRuntimeManagerRunner(Mockito.any(Config.class), Mockito.eq(client));
+        callRuntimeManagerRunner(Mockito.any(SpiCommonConfig.class), Mockito.eq(client));
     Assert.assertTrue(runtimeManagerMain.manageTopology());
   }
 }

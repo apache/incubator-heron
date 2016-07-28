@@ -24,11 +24,10 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.packing.PackingPlan;
-
 
 public class LocalSchedulerTest {
   private static final String TOPOLOGY_NAME = "testTopology";
@@ -39,10 +38,10 @@ public class LocalSchedulerTest {
   @Before
   public void before() throws Exception {
     scheduler = Mockito.spy(LocalScheduler.class);
-    Config config = Mockito.mock(Config.class);
+    SpiCommonConfig config = Mockito.mock(SpiCommonConfig.class);
     Mockito.when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
 
-    Config runtime = Mockito.mock(Config.class);
+    SpiCommonConfig runtime = Mockito.mock(SpiCommonConfig.class);
     Mockito.when(runtime.getLongValue(Keys.numContainers())).thenReturn(NUM_CONTAINER);
     scheduler.initialize(config, runtime);
   }

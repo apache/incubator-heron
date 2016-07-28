@@ -43,7 +43,7 @@ public final class Misc {
    * @return String string that represents the modified path
    */
   public static String substitute(String heronHome, String pathString) {
-    Config config = Config.newBuilder()
+    SpiCommonConfig config = SpiCommonConfig.newBuilder()
         .put(Keys.heronHome(), heronHome)
         .build();
     return substitute(config, pathString);
@@ -59,7 +59,7 @@ public final class Misc {
    * @return String string that represents the modified path
    */
   public static String substitute(String heronHome, String configPath, String pathString) {
-    Config config = Config.newBuilder()
+    SpiCommonConfig config = SpiCommonConfig.newBuilder()
         .put(Keys.heronHome(), heronHome)
         .put(Keys.heronConf(), configPath)
         .build();
@@ -75,7 +75,7 @@ public final class Misc {
    * @return String string that represents the modified path
    */
   public static String substituteSandbox(String heronSandboxHome, String pathString) {
-    Config config = Config.newBuilder()
+    SpiCommonConfig config = SpiCommonConfig.newBuilder()
         .put(Keys.heronSandboxHome(), heronSandboxHome)
         .build();
     return substitute(config, pathString);
@@ -94,7 +94,7 @@ public final class Misc {
       String heronSandboxHome,
       String configPath,
       String pathString) {
-    Config config = Config.newBuilder()
+    SpiCommonConfig config = SpiCommonConfig.newBuilder()
         .put(Keys.heronSandboxHome(), heronSandboxHome)
         .put(Keys.heronSandboxConf(), configPath)
         .build();
@@ -121,7 +121,7 @@ public final class Misc {
    * @param pathString string representing a path including ${HERON_*} variables
    * @return String string that represents the modified path
    */
-  private static String substituteURL(Config config, String pathString) {
+  private static String substituteURL(SpiCommonConfig config, String pathString) {
     Matcher m = urlPattern.matcher(pathString);
     if (m.matches()) {
       StringBuilder sb = new StringBuilder();
@@ -139,7 +139,7 @@ public final class Misc {
    * @param pathString string representing a path including ${HERON_*} variables
    * @return String string that represents the modified path
    */
-  public static String substitute(Config config, String pathString) {
+  public static String substitute(SpiCommonConfig config, String pathString) {
 
     // trim the leading and trailing spaces
     String trimmedPath = pathString.trim();

@@ -79,6 +79,14 @@ generate_source_dirs
 dir_list=`find $DIR/../heron -path "*/tests/python" | cut -d '/' -f 3-`
 generate_source_dirs
 
+dir_list=`find $DIR/../integration-test -path "*/src/java" | cut -d '/' -f 3-`
+generate_source_dirs
+
+dir_list=`find $DIR/../bazel-out/local-fastbuild/bin/heron/proto -path "*_java_temp" | cut -d '/' -f 3-`
+generate_source_dirs
+
+dir_list=`find $DIR/../bazel-bin/heron  -path  "*java_temp/gen-java" | cut -d '/' -f 3-`
+generate_source_dirs
 
 for jarfile in ` find $DIR/../bazel-genfiles/ -name \*.jar | cut -d '/' -f 3-`; do 
   cat >> $classpath_file << EOH

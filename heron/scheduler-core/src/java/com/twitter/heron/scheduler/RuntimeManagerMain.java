@@ -34,9 +34,9 @@ import com.twitter.heron.scheduler.client.SchedulerClientFactory;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Command;
-import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.ReflectionUtils;
@@ -216,27 +216,27 @@ public class RuntimeManagerMain {
     Command command = Command.makeCommand(commandOption);
 
     // first load the defaults, then the config from files to override it
-    Config.Builder defaultsConfig = Config.newBuilder()
+    SpiCommonConfig.Builder defaultsConfig = SpiCommonConfig.newBuilder()
         .putAll(ClusterDefaults.getDefaults())
         .putAll(ClusterConfig.loadConfig(heronHome, configPath, releaseFile));
 
     // add config parameters from the command line
-    Config.Builder commandLineConfig = Config.newBuilder()
+    SpiCommonConfig.Builder commandLineConfig = SpiCommonConfig.newBuilder()
         .put(Keys.cluster(), cluster)
         .put(Keys.role(), role)
         .put(Keys.environ(), environ)
         .put(Keys.verbose(), verbose)
         .put(Keys.topologyContainerId(), containerId);
 
-    Config.Builder topologyConfig = Config.newBuilder()
+    SpiCommonConfig.Builder topologyConfig = SpiCommonConfig.newBuilder()
         .put(Keys.topologyName(), topologyName);
 
-    Config.Builder overrideConfig = Config.newBuilder()
+    SpiCommonConfig.Builder overrideConfig = SpiCommonConfig.newBuilder()
         .putAll(ClusterConfig.loadOverrideConfig(overrideConfigFile));
 
     // build the final config by expanding all the variables
-    Config config = Config.expand(
-        Config.newBuilder()
+    SpiCommonConfig config = SpiCommonConfig.expand(
+        SpiCommonConfig.newBuilder()
             .putAll(defaultsConfig.build())
             .putAll(overrideConfig.build())
             .putAll(commandLineConfig.build())
@@ -259,13 +259,13 @@ public class RuntimeManagerMain {
   }
 
   // holds all the config read
-  private final Config config;
+  private final SpiCommonConfig config;
 
   // command to manage a topology
   private final Command command;
 
   public RuntimeManagerMain(
-      Config config,
+      SpiCommonConfig config,
       Command command) {
     // initialize the options
     this.config = config;
@@ -311,7 +311,7 @@ public class RuntimeManagerMain {
         LOG.log(Level.FINE, "Topology: {0} to be {1}ed", new Object[]{topologyName, command});
 
         // build the runtime config
-        Config runtime = Config.newBuilder()
+        SpiCommonConfig runtime = SpiCommonConfig.newBuilder()
             .put(Keys.topologyName(), Context.topologyName(config))
             .put(Keys.schedulerStateManagerAdaptor(), adaptor)
             .build();
@@ -360,7 +360,7 @@ public class RuntimeManagerMain {
     return true;
   }
 
-  protected boolean callRuntimeManagerRunner(Config runtime, ISchedulerClient schedulerClient) {
+  protected boolean callRuntimeManagerRunner(SpiCommonConfig runtime, ISchedulerClient schedulerClient) {
     // create an instance of the runner class
     RuntimeManagerRunner runtimeManagerRunner =
         new RuntimeManagerRunner(config, runtime, command, schedulerClient);
@@ -371,7 +371,7 @@ public class RuntimeManagerMain {
     return ret;
   }
 
-  protected ISchedulerClient getSchedulerClient(Config runtime) {
+  protected ISchedulerClient getSchedulerClient(SpiCommonConfig runtime) {
     return new SchedulerClientFactory(config, runtime).getSchedulerClient();
   }
 }

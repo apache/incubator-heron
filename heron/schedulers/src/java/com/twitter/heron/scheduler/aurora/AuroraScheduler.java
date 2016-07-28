@@ -27,9 +27,9 @@ import javax.xml.bind.DatatypeConverter;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Misc;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlan.ContainerPlan;
 import com.twitter.heron.spi.packing.PackingPlan.Resource;
@@ -40,12 +40,12 @@ import com.twitter.heron.spi.utils.TopologyUtils;
 public class AuroraScheduler implements IScheduler {
   private static final Logger LOG = Logger.getLogger(AuroraLauncher.class.getName());
 
-  private Config config;
-  private Config runtime;
+  private SpiCommonConfig config;
+  private SpiCommonConfig runtime;
   private AuroraController controller;
 
   @Override
-  public void initialize(Config mConfig, Config mRuntime) {
+  public void initialize(SpiCommonConfig mConfig, SpiCommonConfig mRuntime) {
     this.config = mConfig;
     this.runtime = mRuntime;
     this.controller = getController();

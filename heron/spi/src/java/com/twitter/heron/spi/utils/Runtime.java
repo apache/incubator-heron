@@ -18,8 +18,8 @@ import java.net.URI;
 import java.util.Properties;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
@@ -30,63 +30,63 @@ public final class Runtime {
   private Runtime() {
   }
 
-  public static String topologyId(Config runtime) {
+  public static String topologyId(SpiCommonConfig runtime) {
     return runtime.getStringValue(Keys.topologyId());
   }
 
-  public static String topologyName(Config runtime) {
+  public static String topologyName(SpiCommonConfig runtime) {
     return runtime.getStringValue(Keys.topologyName());
   }
 
-  public static String topologyClassPath(Config runtime) {
+  public static String topologyClassPath(SpiCommonConfig runtime) {
     return runtime.getStringValue(Keys.topologyClassPath());
   }
 
-  public static TopologyAPI.Topology topology(Config runtime) {
+  public static TopologyAPI.Topology topology(SpiCommonConfig runtime) {
     return (TopologyAPI.Topology) runtime.get(Keys.topologyDefinition());
   }
 
-  public static URI topologyPackageUri(Config cfg) {
+  public static URI topologyPackageUri(SpiCommonConfig cfg) {
     return (URI) cfg.get(Keys.topologyPackageUri());
   }
 
-  public static SchedulerStateManagerAdaptor schedulerStateManagerAdaptor(Config runtime) {
+  public static SchedulerStateManagerAdaptor schedulerStateManagerAdaptor(SpiCommonConfig runtime) {
     return (SchedulerStateManagerAdaptor) runtime.get(Keys.schedulerStateManagerAdaptor());
   }
 
-  public static IPacking packingClassInstance(Config runtime) {
+  public static IPacking packingClassInstance(SpiCommonConfig runtime) {
     return (IPacking) runtime.get(Keys.packingClassInstance());
   }
 
-  public static ILauncher launcherClassInstance(Config runtime) {
+  public static ILauncher launcherClassInstance(SpiCommonConfig runtime) {
     return (ILauncher) runtime.get(Keys.launcherClassInstance());
   }
 
-  public static Shutdown schedulerShutdown(Config runtime) {
+  public static Shutdown schedulerShutdown(SpiCommonConfig runtime) {
     return (Shutdown) runtime.get(Keys.schedulerShutdown());
   }
 
-  public static String componentRamMap(Config runtime) {
+  public static String componentRamMap(SpiCommonConfig runtime) {
     return runtime.getStringValue(Keys.componentRamMap());
   }
 
-  public static String componentJvmOpts(Config runtime) {
+  public static String componentJvmOpts(SpiCommonConfig runtime) {
     return runtime.getStringValue(Keys.componentJvmOpts());
   }
 
-  public static String instanceDistribution(Config runtime) {
+  public static String instanceDistribution(SpiCommonConfig runtime) {
     return runtime.getStringValue(Keys.instanceDistribution());
   }
 
-  public static String instanceJvmOpts(Config runtime) {
+  public static String instanceJvmOpts(SpiCommonConfig runtime) {
     return runtime.getStringValue(Keys.instanceJvmOpts());
   }
 
-  public static Long numContainers(Config runtime) {
+  public static Long numContainers(SpiCommonConfig runtime) {
     return runtime.getLongValue(Keys.numContainers());
   }
 
-  public static Properties schedulerProperties(Config runtime) {
+  public static Properties schedulerProperties(SpiCommonConfig runtime) {
     return (Properties) runtime.get(Keys.SCHEDULER_PROPERTIES);
   }
 }

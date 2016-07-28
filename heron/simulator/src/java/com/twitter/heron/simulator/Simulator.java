@@ -22,7 +22,7 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronConfig;
 import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.SingletonRegistry;
@@ -94,7 +94,7 @@ public class Simulator {
     SingletonRegistry.INSTANCE.registerSingleton(SystemConfig.HERON_SYSTEM_CONFIG, sysConfig);
   }
 
-  public void submitTopology(String name, Config heronConfig, HeronTopology heronTopology) {
+  public void submitTopology(String name, HeronConfig heronConfig, HeronTopology heronTopology) {
     TopologyAPI.Topology topologyToRun =
         heronTopology.
             setConfig(heronConfig).

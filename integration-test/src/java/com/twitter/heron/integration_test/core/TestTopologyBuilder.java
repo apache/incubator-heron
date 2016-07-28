@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronConfig;
 import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.api.bolt.IRichBolt;
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -113,7 +113,7 @@ public class TestTopologyBuilder extends TopologyBuilder {
     // We get the user-defined TopologyAPI.Topology.Builder
     TopologyAPI.Topology.Builder topologyBlr =
         super.createTopology().
-            setConfig(new Config()).
+            setConfig(new HeronConfig()).
             setName("").
             setState(TopologyAPI.TopologyState.RUNNING).
             getTopology().toBuilder();

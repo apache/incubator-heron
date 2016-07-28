@@ -18,9 +18,8 @@ import java.io.IOException;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.NetworkUtils;
 import com.twitter.heron.spi.utils.SchedulerUtils;
@@ -28,7 +27,7 @@ import com.twitter.heron.spi.utils.SchedulerUtils;
 public class RestartRequestHandler implements HttpHandler {
   private IScheduler scheduler;
 
-  public RestartRequestHandler(Config runtime, IScheduler scheduler) {
+  public RestartRequestHandler(SpiCommonConfig runtime, IScheduler scheduler) {
     this.scheduler = scheduler;
   }
 

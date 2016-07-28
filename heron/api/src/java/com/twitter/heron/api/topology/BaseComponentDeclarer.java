@@ -19,7 +19,7 @@ import java.util.Map;
 
 import com.google.protobuf.ByteString;
 
-import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronConfig;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.utils.Utils;
 
@@ -37,10 +37,10 @@ public abstract class BaseComponentDeclarer<T extends ComponentConfigurationDecl
       this.componentConfiguration = new HashMap<>();
     }
     if (taskParallelism != null) {
-      this.componentConfiguration.put(Config.TOPOLOGY_COMPONENT_PARALLELISM,
+      this.componentConfiguration.put(HeronConfig.TOPOLOGY_COMPONENT_PARALLELISM,
           taskParallelism.toString());
     } else {
-      this.componentConfiguration.put(Config.TOPOLOGY_COMPONENT_PARALLELISM,
+      this.componentConfiguration.put(HeronConfig.TOPOLOGY_COMPONENT_PARALLELISM,
           "1");
     }
   }

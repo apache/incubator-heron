@@ -30,9 +30,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 
 public class MesosFrameworkTest {
   private static final String TOPOLOGY_NAME = "testTopology";
@@ -42,8 +42,8 @@ public class MesosFrameworkTest {
   private static final String TOPOLOGY_PACKAGE_URI = "topologyPackageURI";
   private static final String CORE_PACKAGE_URI = "corePackageURI";
 
-  private Config config;
-  private Config runtime;
+  private SpiCommonConfig config;
+  private SpiCommonConfig runtime;
 
   private MesosFramework mesosFramework;
 
@@ -89,12 +89,12 @@ public class MesosFrameworkTest {
 
   @Before
   public void before() throws Exception {
-    config = Mockito.mock(Config.class);
+    config = Mockito.mock(SpiCommonConfig.class);
     Mockito.when(config.getStringValue(ConfigKeys.get("TOPOLOGY_NAME"))).thenReturn(TOPOLOGY_NAME);
     Mockito.when(config.getStringValue(Keys.role())).thenReturn(ROLE);
     Mockito.when(config.getStringValue(Keys.corePackageUri())).thenReturn(CORE_PACKAGE_URI);
 
-    runtime = Mockito.mock(Config.class);
+    runtime = Mockito.mock(SpiCommonConfig.class);
     Mockito.when(runtime.getLongValue(Keys.numContainers())).thenReturn(NUM_CONTAINER);
     Properties properties = new Properties();
     properties.put(Keys.topologyPackageUri(), TOPOLOGY_PACKAGE_URI);

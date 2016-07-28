@@ -20,9 +20,9 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
-import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
@@ -35,13 +35,13 @@ import com.twitter.heron.spi.utils.Runtime;
 public class LaunchRunner implements Callable<Boolean> {
   private static final Logger LOG = Logger.getLogger(LaunchRunner.class.getName());
 
-  private Config config;
-  private Config runtime;
+  private SpiCommonConfig config;
+  private SpiCommonConfig runtime;
 
   private ILauncher launcher;
   private IPacking packing;
 
-  public LaunchRunner(Config config, Config runtime) {
+  public LaunchRunner(SpiCommonConfig config, SpiCommonConfig runtime) {
 
     this.config = config;
     this.runtime = runtime;
@@ -125,7 +125,7 @@ public class LaunchRunner implements Callable<Boolean> {
     }
 
     // Add the instanceDistribution to the runtime
-    Config ytruntime = Config.newBuilder()
+    SpiCommonConfig ytruntime = SpiCommonConfig.newBuilder()
         .putAll(runtime)
         .put(Keys.instanceDistribution(), packedPlan.getInstanceDistribution())
         .put(Keys.componentRamMap(), packedPlan.getComponentRamDistribution())

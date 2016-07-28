@@ -24,7 +24,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronConfig;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.grouping.CustomStreamGrouping;
 import com.twitter.heron.api.topology.TopologyBuilder;
@@ -173,7 +173,7 @@ public class CustomGroupingTest {
     topologyBuilder.setBolt("test-bolt", new TestBolt(), 1).
         customGrouping("test-spout", myCustomGrouping);
 
-    Config conf = new Config();
+    HeronConfig conf = new HeronConfig();
     conf.setTeamEmail("streaming-compute@twitter.com");
     conf.setTeamName("stream-computing");
     conf.setTopologyProjectName("heron-integration-test");

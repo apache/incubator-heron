@@ -14,8 +14,6 @@
 
 package com.twitter.heron.statemgr.localfs;
 
-import com.google.common.util.concurrent.ListenableFuture;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -27,12 +25,13 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
-import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 
 /**
  * LocalFileSystemStateManager Tester.
@@ -43,11 +42,11 @@ public class LocalFileSystemStateManagerTest {
 
   private static final String TOPOLOGY_NAME = "topologyName";
   private static final String ROOT_ADDR = "/";
-  private Config config;
+  private SpiCommonConfig config;
 
   @Before
   public void before() throws Exception {
-    config = Config.newBuilder()
+    config = SpiCommonConfig.newBuilder()
         .put(Keys.stateManagerRootPath(), ROOT_ADDR)
         .put(LocalFileSystemKeys.initializeFileTree(), false)
         .build();
@@ -57,7 +56,7 @@ public class LocalFileSystemStateManagerTest {
   public void after() throws Exception {
   }
 
-  public Config getConfig() {
+  public SpiCommonConfig getConfig() {
     return config;
   }
 

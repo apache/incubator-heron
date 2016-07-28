@@ -19,8 +19,8 @@ import java.net.URI;
 import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.TypeUtils;
-import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.uploader.IUploader;
 import com.twitter.heron.spi.utils.UploaderUtils;
 
@@ -28,7 +28,7 @@ public class HdfsUploader implements IUploader {
   private static final Logger LOG = Logger.getLogger(HdfsUploader.class.getName());
   // get the directory containing the file
   private String destTopologyDirectoryURI;
-  private Config config;
+  private SpiCommonConfig config;
   private String topologyPackageLocation;
   private URI packageURI;
 
@@ -36,7 +36,7 @@ public class HdfsUploader implements IUploader {
   private HdfsController controller;
 
   @Override
-  public void initialize(Config ipconfig) {
+  public void initialize(SpiCommonConfig ipconfig) {
     this.config = ipconfig;
 
     // Instantiate the hdfs controller

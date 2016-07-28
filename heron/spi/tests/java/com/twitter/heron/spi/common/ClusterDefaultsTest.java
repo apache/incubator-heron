@@ -23,15 +23,15 @@ import org.junit.Test;
 public class ClusterDefaultsTest {
   private static final Logger LOG = Logger.getLogger(ClusterDefaultsTest.class.getName());
 
-  private Config home;
-  private Config sandbox;
-  private Config props;
+  private SpiCommonConfig home;
+  private SpiCommonConfig sandbox;
+  private SpiCommonConfig props;
 
   @Before
   public void initialize() {
     home = ClusterDefaults.getDefaultHome();
     sandbox = ClusterDefaults.getSandboxHome();
-    props = Config.newBuilder()
+    props = SpiCommonConfig.newBuilder()
         .putAll(ClusterDefaults.getDefaultMiscellaneous())
         .putAll(ClusterDefaults.getDefaultJars())
         .putAll(ClusterDefaults.getSandboxBinaries())
@@ -84,7 +84,7 @@ public class ClusterDefaultsTest {
 
   @Test
   public void testDefaultResources() throws Exception {
-    Config defaultResources = ClusterDefaults.getDefaultResources();
+    SpiCommonConfig defaultResources = ClusterDefaults.getDefaultResources();
 
     Assert.assertEquals(
         Defaults.stmgrRam(),

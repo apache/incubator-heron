@@ -14,7 +14,7 @@
 
 package com.twitter.heron.spi.scheduler;
 
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.packing.PackingPlan;
 
 /**
@@ -27,7 +27,7 @@ public interface ILauncher extends AutoCloseable {
    * to setup scheduler and other parameters required by launcher to contact
    * services which will launch scheduler.
    */
-  void initialize(Config config, Config runtime);
+  void initialize(SpiCommonConfig config, SpiCommonConfig runtime);
 
   /**
    * This is to for disposing or cleaning up any internal state accumulated by

@@ -27,9 +27,8 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
-
-import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.uploader.IUploader;
 
 /**
@@ -71,7 +70,7 @@ public class S3Uploader implements IUploader {
   private File packageFileHandler;
 
   @Override
-  public void initialize(Config config) {
+  public void initialize(SpiCommonConfig config) {
     bucket = S3Context.bucket(config);
     String accessKey = S3Context.accessKey(config);
     String accessSecret = S3Context.secretKey(config);

@@ -16,13 +16,13 @@ package com.twitter.heron.packing;
 
 import java.util.HashMap;
 
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 
 public class NullPacking implements IPacking {
 
-  public void initialize(Config config, Config runtime) {
+  public void initialize(SpiCommonConfig config, SpiCommonConfig runtime) {
   }
 
   public PackingPlan pack() {

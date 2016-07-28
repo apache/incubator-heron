@@ -14,11 +14,11 @@
 
 package com.twitter.heron.uploader.localfs;
 
-import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 
 public class LocalFileSystemContext extends Context {
-  public static String fileSystemDirectory(Config config) {
+  public static String fileSystemDirectory(SpiCommonConfig config) {
     return config.getStringValue(LocalFileSystemKeys.fileSystemDirectory());
   }
 }

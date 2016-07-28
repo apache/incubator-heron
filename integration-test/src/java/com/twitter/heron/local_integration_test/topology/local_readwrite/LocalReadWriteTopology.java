@@ -13,7 +13,7 @@
 // limitations under the License.
 package com.twitter.heron.local_integration_test.topology.local_readwrite;
 
-import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronConfig;
 import com.twitter.heron.api.HeronSubmitter;
 import com.twitter.heron.api.tuple.Fields;
 import com.twitter.heron.integration_test.common.BasicConfig;
@@ -51,7 +51,7 @@ public final class LocalReadWriteTopology {
     builder.setBolt("identity-bolt", new IdentityBolt(new Fields("line")), 1)
         .shuffleGrouping("paused-local-spout");
 
-    Config conf = new BasicConfig();
+    HeronConfig conf = new BasicConfig();
 
     HeronSubmitter.submitTopology(topologyName, conf, builder.createTopology());
   }

@@ -14,8 +14,8 @@
 
 package com.twitter.heron.statemgr.localfs;
 
-import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 
 public class LocalFileSystemContext extends Context {
 
@@ -25,7 +25,7 @@ public class LocalFileSystemContext extends Context {
    * @param config the config map
    * @return true if config does not exist, else the specified value
    */
-  public static boolean initLocalFileTree(Config config) {
+  public static boolean initLocalFileTree(SpiCommonConfig config) {
     return config.getBooleanValue(
         LocalFileSystemKeys.initializeFileTree(), true);
   }

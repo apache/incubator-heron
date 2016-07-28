@@ -17,7 +17,7 @@ package com.twitter.heron.api.topology;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronConfig;
 
 public abstract class BaseConfigurationDeclarer<T extends ComponentConfigurationDeclarer<?>>
     implements ComponentConfigurationDeclarer<T> {
@@ -30,7 +30,7 @@ public abstract class BaseConfigurationDeclarer<T extends ComponentConfiguration
 
   @Override
   public T setDebug(boolean debug) {
-    return addConfiguration(Config.TOPOLOGY_DEBUG, debug);
+    return addConfiguration(HeronConfig.TOPOLOGY_DEBUG, debug);
   }
 
   @Override
@@ -39,6 +39,6 @@ public abstract class BaseConfigurationDeclarer<T extends ComponentConfiguration
     if (val != null) {
       intValue = val.intValue();
     }
-    return addConfiguration(Config.TOPOLOGY_MAX_SPOUT_PENDING, intValue);
+    return addConfiguration(HeronConfig.TOPOLOGY_MAX_SPOUT_PENDING, intValue);
   }
 }

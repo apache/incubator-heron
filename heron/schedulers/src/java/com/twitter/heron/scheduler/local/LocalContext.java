@@ -14,12 +14,12 @@
 
 package com.twitter.heron.scheduler.local;
 
-import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Misc;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 
 public class LocalContext extends Context {
-  public static String workingDirectory(Config config) {
+  public static String workingDirectory(SpiCommonConfig config) {
     String workingDirectory = config.getStringValue(
         LocalKeys.get("WORKING_DIRECTORY"), LocalDefaults.get("WORKING_DIRECTORY"));
     return Misc.substitute(config, workingDirectory);

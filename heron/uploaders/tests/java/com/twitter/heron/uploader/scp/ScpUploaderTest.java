@@ -22,17 +22,17 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 
 public class ScpUploaderTest {
-  private Config config;
+  private SpiCommonConfig config;
 
   @Rule
   public ExpectedException exception = ExpectedException.none();
 
   @Before
   public void setUp() throws Exception {
-    config = Mockito.mock(Config.class);
+    config = Mockito.mock(SpiCommonConfig.class);
   }
 
   @After

@@ -15,7 +15,7 @@ package com.twitter.heron.integration_test.topology.global_grouping;
 
 import java.net.URL;
 
-import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronConfig;
 import com.twitter.heron.api.HeronSubmitter;
 import com.twitter.heron.integration_test.common.BasicConfig;
 import com.twitter.heron.integration_test.common.bolt.WordCountBolt;
@@ -45,8 +45,8 @@ public final class GlobalGrouping {
     builder.setBolt("count-bolt", new WordCountBolt(), 3)
         .globalGrouping("ab-spout");
 
-    // Conf
-    Config conf = new BasicConfig();
+    // HeronConfig
+    HeronConfig conf = new BasicConfig();
 
     // Submit it!
     HeronSubmitter.submitTopology(topologyName, conf, builder.createTopology());

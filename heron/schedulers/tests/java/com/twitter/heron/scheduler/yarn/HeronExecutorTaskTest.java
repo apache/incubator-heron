@@ -69,7 +69,7 @@ public class HeronExecutorTaskTest {
     builder.setSpout("spout-1", new TestSpout(), 2);
     builder.setBolt("bolt-1", new TestBolt(), 1).shuffleGrouping("spout-1");
     HeronTopology topology = builder.createTopology();
-    com.twitter.heron.api.Config config = new com.twitter.heron.api.Config();
+    com.twitter.heron.api.HeronConfig config = new com.twitter.heron.api.HeronConfig();
     return topology.setName(name).setConfig(config).setState(TopologyState.RUNNING).getTopology();
   }
 

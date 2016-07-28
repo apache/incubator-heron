@@ -25,21 +25,21 @@ import java.nio.file.StandardCopyOption;
 import java.util.logging.Logger;
 
 import com.twitter.heron.common.basics.TypeUtils;
-import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.uploader.IUploader;
 import com.twitter.heron.spi.utils.UploaderUtils;
 
 public class LocalFileSystemUploader implements IUploader {
   private static final Logger LOG = Logger.getLogger(LocalFileSystemUploader.class.getName());
 
-  private Config config;
+  private SpiCommonConfig config;
   private String destTopologyFile;
   private String destTopologyDirectory;
   private String topologyPackageLocation;
 
   @Override
-  public void initialize(Config ipconfig) {
+  public void initialize(SpiCommonConfig ipconfig) {
     this.config = ipconfig;
 
     this.destTopologyDirectory = LocalFileSystemContext.fileSystemDirectory(config);

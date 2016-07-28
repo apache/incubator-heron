@@ -17,7 +17,7 @@ package com.twitter.heron.spi.utils;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronConfig;
 import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.api.bolt.BaseBasicBolt;
 import com.twitter.heron.api.bolt.BasicOutputCollector;
@@ -47,7 +47,7 @@ public final class TopologyTests {
    */
   public static TopologyAPI.Topology createTopologyWithConnection(
       String topologyName,
-      Config heronConfig,
+      HeronConfig heronConfig,
       Map<String, Integer> spouts,
       Map<String, Integer> bolts,
       Map<String, String> connections) {
@@ -99,7 +99,7 @@ public final class TopologyTests {
   }
 
   public static TopologyAPI.Topology createTopology(String topologyName,
-                                                    Config heronConfig,
+                                                    HeronConfig heronConfig,
                                                     Map<String, Integer> spouts,
                                                     Map<String, Integer> bolts) {
     return createTopologyWithConnection(

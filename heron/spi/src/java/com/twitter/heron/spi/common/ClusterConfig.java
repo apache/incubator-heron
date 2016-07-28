@@ -23,8 +23,8 @@ public final class ClusterConfig {
   private ClusterConfig() {
   }
 
-  protected static Config loadHeronHome(String heronHome, String configPath) {
-    Config.Builder cb = Config.newBuilder()
+  protected static SpiCommonConfig loadHeronHome(String heronHome, String configPath) {
+    SpiCommonConfig.Builder cb = SpiCommonConfig.newBuilder()
         .put(Keys.heronHome(), heronHome)
         .put(Keys.heronBin(), Misc.substitute(heronHome, Defaults.heronBin()))
         .put(Keys.heronConf(), configPath)
@@ -35,8 +35,8 @@ public final class ClusterConfig {
     return cb.build();
   }
 
-  protected static Config loadSandboxHome(String heronSandboxHome, String configPath) {
-    Config.Builder cb = Config.newBuilder()
+  protected static SpiCommonConfig loadSandboxHome(String heronSandboxHome, String configPath) {
+    SpiCommonConfig.Builder cb = SpiCommonConfig.newBuilder()
         .put(Keys.heronSandboxHome(), heronSandboxHome)
         .put(Keys.heronSandboxBin(),
             Misc.substituteSandbox(heronSandboxHome, Defaults.heronSandboxBin()))
@@ -48,8 +48,8 @@ public final class ClusterConfig {
     return cb.build();
   }
 
-  protected static Config loadConfigHome(String heronHome, String configPath) {
-    Config.Builder cb = Config.newBuilder()
+  protected static SpiCommonConfig loadConfigHome(String heronHome, String configPath) {
+    SpiCommonConfig.Builder cb = SpiCommonConfig.newBuilder()
         .put(Keys.clusterFile(),
             Misc.substitute(heronHome, configPath, Defaults.clusterFile()))
         .put(Keys.clientFile(),
@@ -71,8 +71,9 @@ public final class ClusterConfig {
     return cb.build();
   }
 
-  protected static Config loadSandboxConfigHome(String heronSandboxHome, String configPath) {
-    Config.Builder cb = Config.newBuilder()
+  protected static SpiCommonConfig loadSandboxConfigHome(
+      String heronSandboxHome, String configPath) {
+    SpiCommonConfig.Builder cb = SpiCommonConfig.newBuilder()
         .put(Keys.clusterSandboxFile(),
             Misc.substituteSandbox(heronSandboxHome, configPath, Defaults.clusterSandboxFile()))
         .put(Keys.defaultsSandboxFile(),
@@ -96,70 +97,71 @@ public final class ClusterConfig {
     return cb.build();
   }
 
-  protected static Config loadClusterConfig(String clusterFile) {
+  protected static SpiCommonConfig loadClusterConfig(String clusterFile) {
     Map<String, Object> readConfig = ConfigReader.loadFile(clusterFile);
-    return Config.newBuilder().putAll(readConfig).build();
+    return SpiCommonConfig.newBuilder().putAll(readConfig).build();
   }
 
-  protected static Config loadClientConfig(String clientFile) {
+  protected static SpiCommonConfig loadClientConfig(String clientFile) {
     Map<String, Object> readConfig = ConfigReader.loadFile(clientFile);
-    return Config.newBuilder().putAll(readConfig).build();
+    return SpiCommonConfig.newBuilder().putAll(readConfig).build();
   }
 
-  protected static Config loadDefaultsConfig(String defaultsFile) {
+  protected static SpiCommonConfig loadDefaultsConfig(String defaultsFile) {
     Map<String, Object> readConfig = ConfigReader.loadFile(defaultsFile);
-    return Config.newBuilder().putAll(readConfig).build();
+    return SpiCommonConfig.newBuilder().putAll(readConfig).build();
   }
 
-  protected static Config loadPackingConfig(String packingFile) {
+  protected static SpiCommonConfig loadPackingConfig(String packingFile) {
     Map<String, Object> readConfig = ConfigReader.loadFile(packingFile);
-    return Config.newBuilder().putAll(readConfig).build();
+    return SpiCommonConfig.newBuilder().putAll(readConfig).build();
   }
 
-  protected static Config loadSchedulerConfig(String schedulerFile) {
+  protected static SpiCommonConfig loadSchedulerConfig(String schedulerFile) {
     Map<String, Object> readConfig = ConfigReader.loadFile(schedulerFile);
-    return Config.newBuilder().putAll(readConfig).build();
+    return SpiCommonConfig.newBuilder().putAll(readConfig).build();
   }
 
-  protected static Config loadStateManagerConfig(String stateMgrFile) {
+  protected static SpiCommonConfig loadStateManagerConfig(String stateMgrFile) {
     Map<String, Object> readConfig = ConfigReader.loadFile(stateMgrFile);
-    return Config.newBuilder().putAll(readConfig).build();
+    return SpiCommonConfig.newBuilder().putAll(readConfig).build();
   }
 
-  protected static Config loadUploaderConfig(String uploaderFile) {
+  protected static SpiCommonConfig loadUploaderConfig(String uploaderFile) {
     Map<String, Object> readConfig = ConfigReader.loadFile(uploaderFile);
-    return Config.newBuilder().putAll(readConfig).build();
+    return SpiCommonConfig.newBuilder().putAll(readConfig).build();
   }
 
-  public static Config loadOverrideConfig(String overrideConfigFile) {
+  public static SpiCommonConfig loadOverrideConfig(String overrideConfigFile) {
     Map<String, Object> readConfig = ConfigReader.loadFile(overrideConfigFile);
-    return Config.newBuilder().putAll(readConfig).build();
+    return SpiCommonConfig.newBuilder().putAll(readConfig).build();
   }
 
-  protected static Config loadReleaseConfig(String releaseFile) {
+  protected static SpiCommonConfig loadReleaseConfig(String releaseFile) {
     Map<String, Object> readConfig = ConfigReader.loadFile(releaseFile);
-    return Config.newBuilder().putAll(readConfig).build();
+    return SpiCommonConfig.newBuilder().putAll(readConfig).build();
   }
 
-  public static Config loadBasicConfig(String heronHome, String configPath) {
-    return Config.newBuilder()
+  public static SpiCommonConfig loadBasicConfig(String heronHome, String configPath) {
+    return SpiCommonConfig.newBuilder()
         .putAll(loadHeronHome(heronHome, configPath))
         .putAll(loadConfigHome(heronHome, configPath))
         .build();
   }
 
-  public static Config loadBasicSandboxConfig() {
-    return Config.newBuilder()
+  public static SpiCommonConfig loadBasicSandboxConfig() {
+    return SpiCommonConfig.newBuilder()
         .putAll(loadSandboxHome(Defaults.heronSandboxHome(), Defaults.heronSandboxConf()))
         .putAll(loadSandboxConfigHome(Defaults.heronSandboxHome(), Defaults.heronSandboxConf()))
         .build();
   }
 
-  public static Config loadConfig(String heronHome, String configPath, String releaseFile) {
-    Config homeConfig = loadBasicConfig(heronHome, configPath);
-    Config sandboxConfig = loadBasicSandboxConfig();
+  public static SpiCommonConfig loadConfig(String heronHome, String configPath,
+      String releaseFile) {
+    SpiCommonConfig homeConfig = loadBasicConfig(heronHome, configPath);
+    SpiCommonConfig sandboxConfig = loadBasicSandboxConfig();
 
-    Config.Builder cb = Config.newBuilder()
+    SpiCommonConfig.Builder cb = SpiCommonConfig.newBuilder()
         .putAll(homeConfig)
         .putAll(sandboxConfig)
         .putAll(loadClusterConfig(Context.clusterFile(homeConfig)))
@@ -172,10 +174,10 @@ public final class ClusterConfig {
     return cb.build();
   }
 
-  public static Config loadSandboxConfig() {
-    Config sandboxConfig = loadBasicSandboxConfig();
+  public static SpiCommonConfig loadSandboxConfig() {
+    SpiCommonConfig sandboxConfig = loadBasicSandboxConfig();
 
-    Config.Builder cb = Config.newBuilder()
+    SpiCommonConfig.Builder cb = SpiCommonConfig.newBuilder()
         .putAll(sandboxConfig)
         .putAll(loadPackingConfig(Context.packingSandboxFile(sandboxConfig)))
         .putAll(loadSchedulerConfig(Context.schedulerSandboxFile(sandboxConfig)))

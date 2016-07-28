@@ -20,9 +20,9 @@ import org.mockito.Mockito;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.NullScheduler;
-import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
 public class SchedulerClientFactoryTest {
@@ -31,8 +31,8 @@ public class SchedulerClientFactoryTest {
   @Test
   public void testGetServiceSchedulerClient() throws Exception {
     // Instantiate mock objects
-    Config config = Mockito.mock(Config.class);
-    Config runtime = Mockito.mock(Config.class);
+    SpiCommonConfig config = Mockito.mock(SpiCommonConfig.class);
+    SpiCommonConfig runtime = Mockito.mock(SpiCommonConfig.class);
     SchedulerStateManagerAdaptor statemgr = Mockito.mock(SchedulerStateManagerAdaptor.class);
 
     // Get a ServiceSchedulerClient
@@ -57,8 +57,8 @@ public class SchedulerClientFactoryTest {
   @Test
   public void testGetLibrarySchedulerClient() throws Exception {
     // Instantiate mock objects
-    Config config = Mockito.mock(Config.class);
-    Config runtime = Mockito.mock(Config.class);
+    SpiCommonConfig config = Mockito.mock(SpiCommonConfig.class);
+    SpiCommonConfig runtime = Mockito.mock(SpiCommonConfig.class);
 
     // Return a NullScheduler
     Mockito.when(config.getStringValue(ConfigKeys.get("SCHEDULER_CLASS"))).

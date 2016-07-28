@@ -20,11 +20,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.spi.common.Command;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.utils.NetworkUtils;
 
 /**
@@ -35,11 +34,11 @@ import com.twitter.heron.spi.utils.NetworkUtils;
 public class HttpServiceSchedulerClient implements ISchedulerClient {
   private static final Logger LOG = Logger.getLogger(HttpServiceSchedulerClient.class.getName());
 
-  private final Config config;
-  private final Config runtime;
+  private final SpiCommonConfig config;
+  private final SpiCommonConfig runtime;
   private final String schedulerHttpEndpoint;
 
-  public HttpServiceSchedulerClient(Config config, Config runtime,
+  public HttpServiceSchedulerClient(SpiCommonConfig config, SpiCommonConfig runtime,
                                     String schedulerHttpEndpoint) {
     this.config = config;
     this.runtime = runtime;

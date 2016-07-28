@@ -26,7 +26,7 @@ public class ClusterConfigTest {
 
   private String heronHome;
   private String configPath;
-  private Config basicConfig;
+  private SpiCommonConfig basicConfig;
 
   @Before
   public void setUp() {
@@ -35,7 +35,7 @@ public class ClusterConfigTest {
 
     configPath = Paths.get(heronHome, "local").toString();
 
-    basicConfig = Config.newBuilder()
+    basicConfig = SpiCommonConfig.newBuilder()
         .putAll(ClusterConfig.loadHeronHome(heronHome, configPath))
         .putAll(ClusterConfig.loadConfigHome(heronHome, configPath))
         .build();
@@ -47,7 +47,7 @@ public class ClusterConfigTest {
   @Test
   public void testClusterFile() throws Exception {
 
-    Config props = ClusterConfig.loadClusterConfig(Context.clusterFile(basicConfig));
+    SpiCommonConfig props = ClusterConfig.loadClusterConfig(Context.clusterFile(basicConfig));
 
     Assert.assertEquals(4, props.size());
 
@@ -63,7 +63,7 @@ public class ClusterConfigTest {
    */
   @Test
   public void testDefaultsFile() throws Exception {
-    Config props = ClusterConfig.loadDefaultsConfig(Context.defaultsFile(basicConfig));
+    SpiCommonConfig props = ClusterConfig.loadDefaultsConfig(Context.defaultsFile(basicConfig));
 
     Assert.assertEquals(10, props.size());
 
@@ -116,7 +116,7 @@ public class ClusterConfigTest {
 
   @Test
   public void testSchedulerFile() throws Exception {
-    Config props = ClusterConfig.loadSchedulerConfig(Context.schedulerFile(basicConfig));
+    SpiCommonConfig props = ClusterConfig.loadSchedulerConfig(Context.schedulerFile(basicConfig));
 
     Assert.assertEquals(2, props.size());
 
@@ -133,7 +133,7 @@ public class ClusterConfigTest {
 
   @Test
   public void testPackingFile() throws Exception {
-    Config props = ClusterConfig.loadPackingConfig(Context.packingFile(basicConfig));
+    SpiCommonConfig props = ClusterConfig.loadPackingConfig(Context.packingFile(basicConfig));
 
     Assert.assertEquals(1, props.size());
     Assert.assertEquals(
@@ -144,7 +144,7 @@ public class ClusterConfigTest {
 
   @Test
   public void testUploaderFile() throws Exception {
-    Config props = ClusterConfig.loadUploaderConfig(Context.uploaderFile(basicConfig));
+    SpiCommonConfig props = ClusterConfig.loadUploaderConfig(Context.uploaderFile(basicConfig));
 
     Assert.assertEquals(2, props.size());
     Assert.assertEquals(

@@ -16,13 +16,12 @@ package com.twitter.heron.statemgr;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
-
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 
@@ -30,7 +29,7 @@ public class NullStateManager implements IStateManager {
   public SettableFuture<Boolean> nullFuture = SettableFuture.create();
 
   @Override
-  public void initialize(Config config) {
+  public void initialize(SpiCommonConfig config) {
     nullFuture.set(null);
   }
 

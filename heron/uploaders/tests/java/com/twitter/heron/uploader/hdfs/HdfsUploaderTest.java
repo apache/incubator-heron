@@ -20,7 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 
 public class HdfsUploaderTest {
   private HdfsUploader uploader;
@@ -28,7 +28,7 @@ public class HdfsUploaderTest {
 
   @Before
   public void setUp() throws Exception {
-    Config config = Mockito.mock(Config.class);
+    SpiCommonConfig config = Mockito.mock(SpiCommonConfig.class);
 
     // Insert mock HdfsController
     uploader = Mockito.spy(new HdfsUploader());

@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronConfig;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.PhysicalPlans;
 
@@ -128,13 +128,13 @@ public final class PhysicalPlanUtil {
     for (TopologyAPI.Spout spout : topology.getSpoutsList()) {
       String componentName = spout.getComp().getName();
       String parallelism = getConfigWithException(
-          spout.getComp().getConfig().getKvsList(), Config.TOPOLOGY_COMPONENT_PARALLELISM).trim();
+          spout.getComp().getConfig().getKvsList(), HeronConfig.TOPOLOGY_COMPONENT_PARALLELISM).trim();
       parallelismMap.put(componentName, Integer.parseInt(parallelism));
     }
     for (TopologyAPI.Bolt bolt : topology.getBoltsList()) {
       String componentName = bolt.getComp().getName();
       String parallelism = getConfigWithException(
-          bolt.getComp().getConfig().getKvsList(), Config.TOPOLOGY_COMPONENT_PARALLELISM).trim();
+          bolt.getComp().getConfig().getKvsList(), HeronConfig.TOPOLOGY_COMPONENT_PARALLELISM).trim();
       parallelismMap.put(componentName, Integer.parseInt(parallelism));
     }
     return parallelismMap;

@@ -20,6 +20,7 @@ package backtype.storm;
 
 import java.util.Map;
 
+import com.twitter.heron.api.HeronConfig;
 import com.twitter.heron.api.HeronSubmitter;
 
 import backtype.storm.generated.AlreadyAliveException;
@@ -53,7 +54,7 @@ public final class StormSubmitter {
       StormTopology topology) throws AlreadyAliveException, InvalidTopologyException {
 
     // First do config translation
-    com.twitter.heron.api.Config heronConfig = ConfigUtils.translateConfig(stormConfig);
+    HeronConfig heronConfig = ConfigUtils.translateConfig(stormConfig);
 
     // Now submit a heron topology
     try {

@@ -27,7 +27,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.system.Common;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({FileUtils.class, ShellUtils.class, SchedulerUtils.class})
@@ -163,6 +163,6 @@ public class SchedulerUtilsTest {
             "--environment", null, "--topology_name", null,
             "--topology_jar", null, "--http_port", "1"};
     Assert.assertArrayEquals(expectedArgs, SchedulerUtils.schedulerCommandArgs(
-        Mockito.mock(Config.class), Mockito.mock(Config.class), freePorts));
+        Mockito.mock(SpiCommonConfig.class), Mockito.mock(SpiCommonConfig.class), freePorts));
   }
 }

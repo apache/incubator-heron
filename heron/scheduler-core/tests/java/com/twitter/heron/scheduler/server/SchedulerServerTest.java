@@ -19,7 +19,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.twitter.heron.common.basics.SysUtils;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.NetworkUtils;
 
@@ -28,7 +28,7 @@ public class SchedulerServerTest {
   public void testSchedulerServer() throws Exception {
     int freePort = SysUtils.getFreePort();
     IScheduler scheduler = Mockito.mock(IScheduler.class);
-    Config runtime = Mockito.mock(Config.class);
+    SpiCommonConfig runtime = Mockito.mock(SpiCommonConfig.class);
 
     SchedulerServer schedulerServer =
         Mockito.spy(new SchedulerServer(runtime, scheduler, freePort));

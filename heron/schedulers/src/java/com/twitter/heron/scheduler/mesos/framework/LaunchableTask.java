@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 
 import org.apache.mesos.Protos;
 
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.utils.SchedulerUtils;
 
 /**
@@ -134,7 +134,7 @@ public class LaunchableTask {
    * @param heronRuntime the heron runtime
    * @return Mesos TaskInfo in Protos to launch
    */
-  public Protos.TaskInfo constructMesosTaskInfo(Config heronConfig, Config heronRuntime) {
+  public Protos.TaskInfo constructMesosTaskInfo(SpiCommonConfig heronConfig, SpiCommonConfig heronRuntime) {
     //String taskIdStr, BaseContainer task, Offer offer
     String taskIdStr = this.taskId;
 
@@ -204,7 +204,7 @@ public class LaunchableTask {
   }
 
   protected String executorCommand(
-      Config config, Config runtime, int containerIndex) {
+      SpiCommonConfig config, SpiCommonConfig runtime, int containerIndex) {
     String[] executorCmd =
         SchedulerUtils.executorCommand(config, runtime, containerIndex, freePorts);
     return join(executorCmd, " ");

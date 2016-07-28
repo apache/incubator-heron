@@ -21,9 +21,9 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.utils.TopologyUtils;
@@ -46,22 +46,22 @@ import com.twitter.heron.spi.utils.TopologyUtils;
  * i.e. the one containing Scheduler and TMaster.
  * <p>
  * 3. The disk required for a container is calculated as:
- * value for com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_DISK_REQUESTED if exists, otherwise,
+ * value for com.twitter.heron.api.HeronConfig.TOPOLOGY_CONTAINER_DISK_REQUESTED if exists, otherwise,
  * (disk for instances in container) + (disk padding for heron internal process)
  * <p>
  * 4. The cpu required for a container is calculated as:
- * value for com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_CPU_REQUESTED if exists, otherwise,
+ * value for com.twitter.heron.api.HeronConfig.TOPOLOGY_CONTAINER_CPU_REQUESTED if exists, otherwise,
  * (cpu for instances in container) + (cpu padding for heron internal process)
  * <p>
  * 5. The ram required for a container is calculated as:
- * value for com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED if exists, otherwise,
+ * value for com.twitter.heron.api.HeronConfig.TOPOLOGY_CONTAINER_RAM_REQUESTED if exists, otherwise,
  * (ram for instances in container) + (ram padding for heron internal process)
  * <p>
  * 6. The ram required for one instance is calculated as:
- * value in com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_RAMMAP if exists, otherwise,
- * - if com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED not exists:
+ * value in com.twitter.heron.api.HeronConfig.TOPOLOGY_COMPONENT_RAMMAP if exists, otherwise,
+ * - if com.twitter.heron.api.HeronConfig.TOPOLOGY_CONTAINER_RAM_REQUESTED not exists:
  * the default ram value for one instance
- * - if com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED exists:
+ * - if com.twitter.heron.api.HeronConfig.TOPOLOGY_CONTAINER_RAM_REQUESTED exists:
  * ((TOPOLOGY_CONTAINER_RAM_REQUESTED) - (ram padding for heron internal process)
  * - (ram used by instances within TOPOLOGY_COMPONENT_RAMMAP config))) /
  * (the # of instances in container not specified in TOPOLOGY_COMPONENT_RAMMAP config)
@@ -87,7 +87,7 @@ public class RoundRobinPacking implements IPacking {
   protected long instanceDiskDefault;
 
   @Override
-  public void initialize(Config config, Config runtime) {
+  public void initialize(SpiCommonConfig config, SpiCommonConfig runtime) {
     this.topology = com.twitter.heron.spi.utils.Runtime.topology(runtime);
 
     this.instanceRamDefault = Context.instanceRam(config);
@@ -293,7 +293,7 @@ public class RoundRobinPacking implements IPacking {
         DEFAULT_CPU_PADDING_PER_CONTAINER + getLargestContainerSize(allocation);
 
     String cpuHint = TopologyUtils.getConfigWithDefault(
-        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_CPU_REQUESTED,
+        topologyConfig, com.twitter.heron.api.HeronConfig.TOPOLOGY_CONTAINER_CPU_REQUESTED,
         Double.toString(defaultContainerCpu));
 
     return Double.parseDouble(cpuHint);
@@ -313,7 +313,7 @@ public class RoundRobinPacking implements IPacking {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
 
     String diskHint = TopologyUtils.getConfigWithDefault(
-        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_DISK_REQUESTED,
+        topologyConfig, com.twitter.heron.api.HeronConfig.TOPOLOGY_CONTAINER_DISK_REQUESTED,
         Long.toString(defaultContainerDisk));
 
     return Long.parseLong(diskHint);
@@ -329,7 +329,7 @@ public class RoundRobinPacking implements IPacking {
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
 
     String ramHint = TopologyUtils.getConfigWithDefault(
-        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED,
+        topologyConfig, com.twitter.heron.api.HeronConfig.TOPOLOGY_CONTAINER_RAM_REQUESTED,
         NOT_SPECIFIED_NUMBER_VALUE);
 
     return Long.parseLong(ramHint);

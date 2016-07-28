@@ -20,12 +20,12 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.scheduler.IScheduler;
 
 public class LibrarySchedulerClientTest {
-  private final Config config = Mockito.mock(Config.class);
-  private final Config runtime = Mockito.mock(Config.class);
+  private final SpiCommonConfig config = Mockito.mock(SpiCommonConfig.class);
+  private final SpiCommonConfig runtime = Mockito.mock(SpiCommonConfig.class);
 
   @Before
   public void setUp() throws Exception {

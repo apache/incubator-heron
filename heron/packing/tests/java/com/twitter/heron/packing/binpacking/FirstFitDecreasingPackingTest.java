@@ -24,10 +24,10 @@ import org.junit.Test;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.ClusterDefaults;
-import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.utils.TopologyTests;
 
@@ -53,7 +53,7 @@ public class FirstFitDecreasingPackingTest {
 
   protected TopologyAPI.Topology getTopology(
       int spoutParallelism, int boltParallelism,
-      com.twitter.heron.api.Config topologyConfig) {
+      com.twitter.heron.api.HeronConfig topologyConfig) {
     // Setup the spout parallelism
     Map<String, Integer> spouts = new HashMap<>();
     spouts.put(SPOUT_NAME, spoutParallelism);
@@ -69,13 +69,13 @@ public class FirstFitDecreasingPackingTest {
   }
 
   protected PackingPlan getFirstFitDecreasingPackingPlan(TopologyAPI.Topology topology) {
-    Config config = Config.newBuilder()
+    SpiCommonConfig config = SpiCommonConfig.newBuilder()
         .put(Keys.topologyId(), topology.getId())
         .put(Keys.topologyName(), topology.getName())
         .putAll(ClusterDefaults.getDefaults())
         .build();
 
-    Config runtime = Config.newBuilder()
+    SpiCommonConfig runtime = SpiCommonConfig.newBuilder()
         .put(Keys.topologyDefinition(), topology)
         .build();
 
@@ -99,7 +99,7 @@ public class FirstFitDecreasingPackingTest {
     int boltParallelism = 3;
 
     // Set up the topology and its config
-    com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
+    com.twitter.heron.api.HeronConfig topologyConfig = new com.twitter.heron.api.HeronConfig();
 
     TopologyAPI.Topology topology =
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
@@ -137,7 +137,7 @@ public class FirstFitDecreasingPackingTest {
     int boltParallelism = 3;
 
     // Set up the topology and its config
-    com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
+    com.twitter.heron.api.HeronConfig topologyConfig = new com.twitter.heron.api.HeronConfig();
 
     topologyConfig.setContainerPaddingPercentage(50);
     TopologyAPI.Topology topology =
@@ -177,7 +177,7 @@ public class FirstFitDecreasingPackingTest {
     int boltParallelism = 3;
 
     // Set up the topology and its config
-    com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
+    com.twitter.heron.api.HeronConfig topologyConfig = new com.twitter.heron.api.HeronConfig();
 
     // Explicit set resources for container
     long containerRam = 10L * Constants.GB;
@@ -245,7 +245,7 @@ public class FirstFitDecreasingPackingTest {
     int boltParallelism = 3;
 
     // Set up the topology and its config
-    com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
+    com.twitter.heron.api.HeronConfig topologyConfig = new com.twitter.heron.api.HeronConfig();
 
     // Explicit set max resources for container
     // the value should be ignored, since we set the complete component ram map
@@ -309,7 +309,7 @@ public class FirstFitDecreasingPackingTest {
     int boltParallelism = 3;
 
     // Set up the topology and its config
-    com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
+    com.twitter.heron.api.HeronConfig topologyConfig = new com.twitter.heron.api.HeronConfig();
 
     long maxContainerRam = 10L * Constants.GB;
 
@@ -372,7 +372,7 @@ public class FirstFitDecreasingPackingTest {
     int boltParallelism = 3;
 
     // Set up the topology and its config
-    com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
+    com.twitter.heron.api.HeronConfig topologyConfig = new com.twitter.heron.api.HeronConfig();
 
     // Explicit set resources for container
     long maxContainerRam = 10L * Constants.GB;
@@ -434,7 +434,7 @@ public class FirstFitDecreasingPackingTest {
     int boltParallelism = 3;
 
     // Set up the topology and its config
-    com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
+    com.twitter.heron.api.HeronConfig topologyConfig = new com.twitter.heron.api.HeronConfig();
 
     topologyConfig.setContainerPaddingPercentage(0);
     // Explicit set resources for container
@@ -497,7 +497,7 @@ public class FirstFitDecreasingPackingTest {
     int boltParallelism = 3;
 
     // Set up the topology and its config
-    com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
+    com.twitter.heron.api.HeronConfig topologyConfig = new com.twitter.heron.api.HeronConfig();
 
     // Explicit set resources for container
     long maxContainerRam = 10L * Constants.GB;

@@ -20,8 +20,8 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.spi.common.ClusterConfig;
 import com.twitter.heron.spi.common.ClusterDefaults;
-import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 
 /**
  * For loading scheduler config
@@ -41,13 +41,13 @@ public final class SchedulerConfig {
    * @param topology, proto in memory version of topology definition
    * @return config, the topology config
    */
-  protected static Config topologyConfigs(String topologyJarFile,
+  protected static SpiCommonConfig topologyConfigs(String topologyJarFile,
                                           String topologyDefnFile, TopologyAPI.Topology topology) {
 
     String pkgType = FileUtils.isOriginalPackageJar(
         FileUtils.getBaseName(topologyJarFile)) ? "jar" : "tar";
 
-    Config config = Config.newBuilder()
+    SpiCommonConfig config = SpiCommonConfig.newBuilder()
         .put(Keys.topologyId(), topology.getId())
         .put(Keys.topologyName(), topology.getName())
         .put(Keys.topologyDefinitionFile(), topologyDefnFile)
@@ -63,8 +63,8 @@ public final class SchedulerConfig {
    * <p>
    * return config, the defaults config
    */
-  protected static Config sandboxConfigs() {
-    Config config = Config.newBuilder()
+  protected static SpiCommonConfig sandboxConfigs() {
+    SpiCommonConfig config = SpiCommonConfig.newBuilder()
         .putAll(ClusterDefaults.getSandboxDefaults())
         .putAll(ClusterConfig.loadSandboxConfig())
         .build();
@@ -79,8 +79,8 @@ public final class SchedulerConfig {
    * @param environ, user provided environment/tag
    * @return config, the command line config
    */
-  protected static Config commandLineConfigs(String cluster, String role, String environ) {
-    Config config = Config.newBuilder()
+  protected static SpiCommonConfig commandLineConfigs(String cluster, String role, String environ) {
+    SpiCommonConfig config = SpiCommonConfig.newBuilder()
         .put(Keys.cluster(), cluster)
         .put(Keys.role(), role)
         .put(Keys.environ(), environ)
@@ -89,7 +89,7 @@ public final class SchedulerConfig {
   }
 
   // build the config by expanding all the variables
-  public static Config loadConfig(
+  public static SpiCommonConfig loadConfig(
       String cluster,
       String role,
       String environ,
@@ -97,8 +97,8 @@ public final class SchedulerConfig {
       String topologyDefnFile,
       TopologyAPI.Topology topology) {
 
-    Config config = Config.expand(
-        Config.newBuilder()
+    SpiCommonConfig config = SpiCommonConfig.expand(
+        SpiCommonConfig.newBuilder()
             .putAll(sandboxConfigs())
             .putAll(commandLineConfigs(cluster, role, environ))
             .putAll(topologyConfigs(topologyJarFile, topologyDefnFile, topology))

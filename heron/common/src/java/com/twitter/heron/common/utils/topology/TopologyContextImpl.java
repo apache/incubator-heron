@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronConfig;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.api.hooks.ITaskHook;
 import com.twitter.heron.api.hooks.info.BoltAckInfo;
@@ -67,7 +67,7 @@ public class TopologyContextImpl extends GeneralTopologyContextImpl implements T
     // Init task hooks
     this.taskHooks = new LinkedList<>();
     List<String> taskHooksClassNames =
-        TypeUtils.getListOfStrings(clusterConfig.get(Config.TOPOLOGY_AUTO_TASK_HOOKS));
+        TypeUtils.getListOfStrings(clusterConfig.get(HeronConfig.TOPOLOGY_AUTO_TASK_HOOKS));
 
     if (taskHooksClassNames != null) {
       // task hooks are registered

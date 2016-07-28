@@ -27,8 +27,8 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.common.basics.Pair;
-import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.utils.NetworkUtils;
 
 @RunWith(PowerMockRunner.class)
@@ -63,7 +63,7 @@ public class ZkUtilsTest {
     String connectionString = String.format("%s:%d, %s:%d,  %s:%d   ",
         host0, port0, host1, port1, host2, port2);
 
-    Config config = Mockito.mock(Config.class);
+    SpiCommonConfig config = Mockito.mock(SpiCommonConfig.class);
     Mockito.when(config.getStringValue(ConfigKeys.get("STATEMGR_CONNECTION_STRING"))).
         thenReturn(connectionString);
 

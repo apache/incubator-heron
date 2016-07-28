@@ -21,7 +21,7 @@ import java.util.TreeMap;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronConfig;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.Constants;
 
@@ -29,7 +29,7 @@ public class TopologyUtilsTest {
   @Test
   public void testGetComponentParallelism() {
     int componentParallelism = 4;
-    Config topologyConfig = new Config();
+    HeronConfig topologyConfig = new HeronConfig();
     Map<String, Integer> spouts = new HashMap<>();
     spouts.put("spout", componentParallelism);
     Map<String, Integer> bolts = new HashMap<>();
@@ -45,7 +45,7 @@ public class TopologyUtilsTest {
   @Test
   public void testGetTotalInstance() {
     int componentParallelism = 4;
-    Config topologyConfig = new Config();
+    HeronConfig topologyConfig = new HeronConfig();
     Map<String, Integer> spouts = new HashMap<>();
     spouts.put("spout", componentParallelism);
     Map<String, Integer> bolts = new HashMap<>();
@@ -59,7 +59,7 @@ public class TopologyUtilsTest {
   @Test
   public void testGetComponentRamMapDefaultValue() {
     int componentParallelism = 2;
-    Config topologyConfig = new Config();
+    HeronConfig topologyConfig = new HeronConfig();
     Map<String, Integer> spouts = new HashMap<>();
     spouts.put("spout", componentParallelism);
     Map<String, Integer> bolts = new HashMap<>();
@@ -75,7 +75,7 @@ public class TopologyUtilsTest {
   @Test
   public void testGetComponentRamMapAllRamSpecified() {
     int componentParallelism = 2;
-    Config topologyConfig = new Config();
+    HeronConfig topologyConfig = new HeronConfig();
     Map<String, Integer> spouts = new HashMap<>();
     spouts.put("spout", componentParallelism);
     Map<String, Integer> bolts = new HashMap<>();
@@ -95,7 +95,7 @@ public class TopologyUtilsTest {
   @Test
   public void testGetComponentRamMapSomeRamSpecified() {
     int componentParallelism = 2;
-    Config topologyConfig = new Config();
+    HeronConfig topologyConfig = new HeronConfig();
     Map<String, Integer> spouts = new HashMap<>();
     spouts.put("spout", componentParallelism);
     Map<String, Integer> bolts = new HashMap<>();
@@ -120,7 +120,7 @@ public class TopologyUtilsTest {
     Map<String, Integer> bolts = new HashMap<>();
     bolts.put("bolt", componentParallelism);
     Assert.assertFalse(TopologyUtils.verifyTopology(TopologyTests.createTopology(
-        "test.topology" /* Bad topology name */, new Config(), spouts, bolts)));
+        "test.topology" /* Bad topology name */, new HeronConfig(), spouts, bolts)));
   }
 
   @Test
@@ -133,6 +133,6 @@ public class TopologyUtilsTest {
     Map<String, String> connections = new HashMap<>();
     connections.put("bolt", "spout");
     Assert.assertTrue(TopologyUtils.verifyTopology(TopologyTests.createTopologyWithConnection(
-        "testTopology"  /* Bad topology name */, new Config(), spouts, bolts, connections)));
+        "testTopology"  /* Bad topology name */, new HeronConfig(), spouts, bolts, connections)));
   }
 }

@@ -22,8 +22,8 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.spi.common.Command;
-import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.TMasterUtils;
@@ -31,12 +31,12 @@ import com.twitter.heron.spi.utils.TMasterUtils;
 public class RuntimeManagerRunner implements Callable<Boolean> {
   private static final Logger LOG = Logger.getLogger(RuntimeManagerRunner.class.getName());
 
-  private final Config config;
-  private final Config runtime;
+  private final SpiCommonConfig config;
+  private final SpiCommonConfig runtime;
   private final Command command;
   private final ISchedulerClient schedulerClient;
 
-  public RuntimeManagerRunner(Config config, Config runtime,
+  public RuntimeManagerRunner(SpiCommonConfig config, SpiCommonConfig runtime,
                               Command command, ISchedulerClient schedulerClient) {
 
     this.config = config;

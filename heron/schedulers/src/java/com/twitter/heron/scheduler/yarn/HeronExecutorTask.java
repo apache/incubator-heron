@@ -42,8 +42,8 @@ import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Role;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyJar;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyName;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyPackageName;
-import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.utils.SchedulerConfig;
 import com.twitter.heron.spi.utils.SchedulerUtils;
 import com.twitter.heron.spi.utils.ShellUtils;
@@ -128,7 +128,7 @@ public class HeronExecutorTask implements Task {
   String[] getExecutorCommand() {
     String topologyDefFile = getTopologyDefnFile();
     Topology topology = getTopology(topologyDefFile);
-    Config config = SchedulerConfig.loadConfig(cluster,
+    SpiCommonConfig config = SchedulerConfig.loadConfig(cluster,
         role,
         env,
         topologyJar,
@@ -140,7 +140,7 @@ public class HeronExecutorTask implements Task {
       freePorts.add(SysUtils.getFreePort());
     }
 
-    Config runtime = Config.newBuilder()
+    SpiCommonConfig runtime = SpiCommonConfig.newBuilder()
         .put(Keys.instanceDistribution(), packedPlan)
         .put(Keys.componentRamMap(), componentRamMap)
         .put(Keys.topologyDefinition(), topology)

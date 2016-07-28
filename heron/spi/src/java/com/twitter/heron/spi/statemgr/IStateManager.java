@@ -21,7 +21,7 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 
 /**
  * This file defines the IStateManager interface.
@@ -53,7 +53,7 @@ public interface IStateManager extends AutoCloseable {
   /**
    * Initialize StateManager with the incoming context.
    */
-  void initialize(Config config);
+  void initialize(SpiCommonConfig config);
 
   /**
    * This is to for disposing or cleaning up any internal state accumulated by

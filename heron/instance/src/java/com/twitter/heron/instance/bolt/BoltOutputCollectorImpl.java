@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 
 import com.google.protobuf.ByteString;
 
-import com.twitter.heron.api.Config;
+import com.twitter.heron.api.HeronConfig;
 import com.twitter.heron.api.bolt.IOutputCollector;
 import com.twitter.heron.api.serializer.IPluggableSerializer;
 import com.twitter.heron.api.tuple.Tuple;
@@ -79,9 +79,9 @@ public class BoltOutputCollectorImpl implements IOutputCollector {
     this.boltMetrics = boltMetrics;
 
     Map<String, Object> config = helper.getTopologyContext().getTopologyConfig();
-    if (config.containsKey(Config.TOPOLOGY_ENABLE_ACKING)
-        && config.get(Config.TOPOLOGY_ENABLE_ACKING) != null) {
-      this.ackEnabled = Boolean.parseBoolean(config.get(Config.TOPOLOGY_ENABLE_ACKING).toString());
+    if (config.containsKey(HeronConfig.TOPOLOGY_ENABLE_ACKING)
+        && config.get(HeronConfig.TOPOLOGY_ENABLE_ACKING) != null) {
+      this.ackEnabled = Boolean.parseBoolean(config.get(HeronConfig.TOPOLOGY_ENABLE_ACKING).toString());
     } else {
       this.ackEnabled = false;
     }

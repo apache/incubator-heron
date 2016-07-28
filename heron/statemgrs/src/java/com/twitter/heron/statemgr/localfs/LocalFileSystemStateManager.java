@@ -22,15 +22,14 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
-
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
-import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 import com.twitter.heron.statemgr.FileSystemStateManager;
 
@@ -38,7 +37,7 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   private static final Logger LOG = Logger.getLogger(LocalFileSystemStateManager.class.getName());
 
   @Override
-  public void initialize(Config ipconfig) {
+  public void initialize(SpiCommonConfig ipconfig) {
 
     super.initialize(ipconfig);
 
@@ -182,7 +181,7 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     }
 
     String topologyName = args[0];
-    Config config = Config.newBuilder()
+    SpiCommonConfig config = SpiCommonConfig.newBuilder()
         .put(Keys.stateManagerRootPath(),
             System.getProperty("user.home") + "/.herondata/repository/state/local")
         .build();

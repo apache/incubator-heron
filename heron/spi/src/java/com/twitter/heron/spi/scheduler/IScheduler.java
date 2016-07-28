@@ -14,11 +14,10 @@
 
 package com.twitter.heron.spi.scheduler;
 
-
 import java.util.List;
 
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.common.SpiCommonConfig;
 import com.twitter.heron.spi.packing.PackingPlan;
 
 /**
@@ -29,7 +28,7 @@ public interface IScheduler extends AutoCloseable {
   /**
    * This will initialize scheduler using config file. Will be called during start.
    */
-  void initialize(Config config, Config runtime);
+  void initialize(SpiCommonConfig config, SpiCommonConfig runtime);
 
   /**
    * This is to for disposing or cleaning up any internal state accumulated by
