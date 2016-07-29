@@ -134,7 +134,8 @@ public class NetworkUtilsTest {
     Mockito.doReturn(os).when(connection).getOutputStream();
 
     byte[] data = new byte[dataLength];
-    Assert.assertTrue(NetworkUtils.sendHttpPostRequest(connection, data));
+    Assert.assertTrue(NetworkUtils.sendHttpPostRequest(connection,
+        NetworkUtils.URL_ENCODE_TYPE, data));
 
     Assert.assertEquals("POST", connection.getRequestMethod());
     Assert.assertEquals("application/x-www-form-urlencoded",
@@ -155,7 +156,8 @@ public class NetworkUtilsTest {
     Mockito.doThrow(new IOException("Designed IO exception for testing")).
         when(connection).getOutputStream();
 
-    Assert.assertFalse(NetworkUtils.sendHttpPostRequest(connection, new byte[0]));
+    Assert.assertFalse(NetworkUtils.sendHttpPostRequest(connection,
+        NetworkUtils.URL_ENCODE_TYPE, new byte[0]));
 
     connection.disconnect();
   }

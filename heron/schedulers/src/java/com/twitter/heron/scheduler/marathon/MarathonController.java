@@ -83,6 +83,7 @@ public class MarathonController {
       return false;
     }
 
+    // send post request to restart app
     byte[] empty = new byte[0];
     if (!NetworkUtils.sendHttpPostRequest(conn, NetworkUtils.JSON_TYPE, empty)) {
       LOG.log(Level.SEVERE, "Failed to set post request");
