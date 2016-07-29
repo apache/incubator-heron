@@ -203,7 +203,7 @@ public class PhysicalPlanHelper {
       if (kv.hasValue()) {
         retval.put(kv.getKey(), kv.getValue());
       } else {
-        retval.put(kv.getKey(), Utils.deserialize(kv.getJavaSerializedValue().toByteArray()));
+        retval.put(kv.getKey(), Utils.deserialize(kv.getSerializedValue().toByteArray()));
       }
     }
     // Override any component specific configs
@@ -211,7 +211,7 @@ public class PhysicalPlanHelper {
       if (kv.hasValue()) {
         retval.put(kv.getKey(), kv.getValue());
       } else {
-        retval.put(kv.getKey(), Utils.deserialize(kv.getJavaSerializedValue().toByteArray()));
+        retval.put(kv.getKey(), Utils.deserialize(kv.getSerializedValue().toByteArray()));
       }
     }
     return retval;

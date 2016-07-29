@@ -44,6 +44,12 @@ enum CustomGroupingObjectType {
   PYTHON_OBJECT = 2;
 }
 
+enum ConfigValueType {
+  STRING_VALUE = 1; //normal string
+  JAVA_SERIALIZED_VALUE = 2;
+  PYTHON_SERIALIZED_VALUE = 3;
+}
+
 message StreamSchema {
   message KeyType {
     required string key = 1;
@@ -66,6 +72,8 @@ message InputStream {
   required StreamId stream = 1;
   required Grouping gtype = 2;
   optional StreamSchema grouping_fields = 3;
+
+  // we should refactor when upgrading to protobuf v3.0 (#1181)
   optional bytes custom_grouping_object = 4;
   optional CustomGroupingObjectType type = 5;
 }
@@ -75,7 +83,10 @@ message Config {
     required string key = 1;
     // Only one of the below are set
     optional string value = 2;
-    optional bytes java_serialized_value = 3;
+    optional bytes serialized_value = 3;
+
+    // This is made optional for backward compatibility (#1179)
+    optional ConfigValueType type = 4;
   }
   repeated KeyValue kvs = 1;
 }
