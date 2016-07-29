@@ -36,7 +36,8 @@ class Component(object):
   DEFAULT_STREAM_ID = "default"
   make_data_tuple = lambda _ : tuple_pb2.HeronDataTuple()
 
-  def __init__(self, pplan_helper, in_stream, out_stream, looper, sys_config, serializer=PythonSerializer()):
+  def __init__(self, pplan_helper, in_stream, out_stream, looper,
+               sys_config, serializer=PythonSerializer()):
     self.pplan_helper = pplan_helper
     self.in_stream = in_stream
     self.serializer = serializer
@@ -46,6 +47,7 @@ class Component(object):
 
     # will set a root logger here
     self.logger = logging.getLogger()
+
 
   @classmethod
   def get_python_class_path(cls):
@@ -59,7 +61,8 @@ class Component(object):
     :type message: str
     :param message: the log message to send
     :type level: str
-    :param level: the logging level, one of: trace (=debug), debug, info, warn or error (default: info)
+    :param level: the logging level,
+                  one of: trace (=debug), debug, info, warn or error (default: info)
     """
     if level is None:
       _log_level = logging.INFO
@@ -129,6 +132,9 @@ class HeronComponentSpec(object):
     self.outputs = outputs
     self.custom_config = config
 
+    # serializer used for serializing configuration
+    self.config_serializer = PythonSerializer()
+
   def get_protobuf(self):
     """Returns protobuf message (Spout or Bolt) of this component"""
     if self.is_spout:
@@ -176,37 +182,56 @@ class HeronComponentSpec(object):
     key = proto_config.kvs.add()
     key.key = constants.TOPOLOGY_COMPONENT_PARALLELISM
     key.value = str(self.parallelism)
+    key.type = topology_pb2.ConfigValueType.Value("STRING_VALUE")
 
     # iterate through self.custom_config
     if self.custom_config is not None:
       sanitized = self._sanitize_config(self.custom_config)
       for key, value in sanitized.iteritems():
-        kvs = proto_config.kvs.add()
-        kvs.key = key
-        kvs.value = value
+        if isinstance(value, str):
+          kvs = proto_config.kvs.add()
+          kvs.key = key
+          kvs.value = value
+          kvs.type = topology_pb2.ConfigValueType.Value("STRING_VALUE")
+        else:
+          # need to serialize
+          kvs = proto_config.kvs.add()
+          kvs.key = key
+          kvs.serialized_value = self.config_serializer.serialize(value)
+          kvs.type = topology_pb2.ConfigValueType.Value("PYTHON_SERIALIZED_VALUE")
+
     return proto_config
 
   @staticmethod
   def _sanitize_config(custom_config):
-    """Checks whether a given custom_config and returns a sanitized dict <str -> str>
+    """Checks whether a given custom_config and returns a sanitized dict <str -> (str|object)>
 
-    If non-string is given as a value, it is converted to string by a built-in ``str()`` method.
-    For a boolean value, ``True`` is converted to "true" instead of "True", and ``False`` is
-    converted to "false" instead of "False", in order to keep the consistency with
-    Java configuration.
+    It checks if keys are all strings and sanitizes values of a given dictionary as follows:
+
+    - If string, number or boolean is given as a value, it is converted to string.
+      For string and number (int, float), it is converted to string by a built-in ``str()`` method.
+      For a boolean value, ``True`` is converted to "true" instead of "True", and ``False`` is
+      converted to "false" instead of "False", in order to keep the consistency with
+      Java configuration.
+
+    - If neither of the above is given as a value, it is inserted into the sanitized dict as it is.
+      These values will need to be serialized before adding to a protobuf message.
     """
     if not isinstance(custom_config, dict):
-      raise TypeError("component-specific configuration must be given as a dict type, given: "
+      raise TypeError("Component-specific configuration must be given as a dict type, given: "
                       + str(type(custom_config)))
     sanitized = {}
     for key, value in custom_config.iteritems():
       if not isinstance(key, str):
         raise TypeError("Key for component-specific configuration must be string, given: " +
                         str(type(key)) + ":" + str(key))
+
       if isinstance(value, bool):
         sanitized[key] = "true" if value else "false"
-      else:
+      elif isinstance(value, (str, int, float)):
         sanitized[key] = str(value)
+      else:
+        sanitized[key] = value
 
     return sanitized
 

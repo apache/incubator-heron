@@ -14,6 +14,7 @@
 import os
 import uuid
 from heron.proto import topology_pb2
+from heron.common.src.python.utils.misc import PythonSerializer
 from heron.instance.src.python.instance.component import HeronComponentSpec
 from heron.instance.src.python.instance.stream import Stream
 
@@ -66,6 +67,8 @@ class TopologyType(type):
   def class_dict_to_topo_config(mcs, class_dict):
     """Takes a class ``__dict__`` and returns a map containing topology-wide configuration
 
+    Returned dictionary is a sanitized dict <str -> (str|object)>
+
     This classmethod firsts insert default topology configuration, and then override them
     with a given topology-wide configuration.
     Note that this configuration will be overriden by a component-specific configuration at
@@ -105,14 +108,24 @@ class TopologyType(type):
     bolt_specs[spec.name] = spec.get_protobuf()
 
   @classmethod
-  def get_default_topoconfig(mcs, class_dict):
+  def get_topology_config_protobuf(mcs, class_dict):
     config = topology_pb2.Config()
     conf_dict = class_dict['_topo_config']
+    config_serializer = PythonSerializer()
 
     for key, value in conf_dict.iteritems():
-      kvs = config.kvs.add()
-      kvs.key = key
-      kvs.value = value
+      if isinstance(value, str):
+        kvs = config.kvs.add()
+        kvs.key = key
+        kvs.value = value
+        kvs.type = topology_pb2.ConfigValueType.Value("STRING_VALUE")
+      else:
+        # need to serialize
+        kvs = config.kvs.add()
+        kvs.key = key
+        kvs.serialized_value = config_serializer.serialize(value)
+        kvs.type = topology_pb2.ConfigValueType.Value("PYTHON_SERIALIZED_VALUE")
+
     return config
 
   @classmethod
@@ -128,7 +141,7 @@ class TopologyType(type):
     topology.id = topology_id
     topology.name = topology_name
     topology.state = topology_pb2.TopologyState.Value("RUNNING")
-    topology.topology_config.CopyFrom(TopologyType.get_default_topoconfig(class_dict))
+    topology.topology_config.CopyFrom(TopologyType.get_topology_config_protobuf(class_dict))
 
     TopologyType.add_bolts_and_spouts(topology, class_dict)
 
@@ -149,27 +162,34 @@ class TopologyType(type):
       added.CopyFrom(bolt)
 
   @staticmethod
-  def _sanitize_config(config_dict):
-    """Checks if a given config_dict is sane, and returns a sanitized config_dict <str -> str>
+  def _sanitize_config(custom_config):
+    """Checks whether a given custom_config and returns a sanitized dict <str -> (str|object)>
 
-    It checks if keys are all strings and convert all non-string values to strings
+    It checks if keys are all strings and sanitizes values of a given dictionary as follows:
 
-    If non-string is given as a value, it is converted to string by a built-in ``str()`` method.
-    For a boolean value, ``True`` is converted to "true" instead of "True", and ``False`` is
-    converted to "false" instead of "False", in order to keep the consistency with
-    Java configuration.
+    - If string, number or boolean is given as a value, it is converted to string.
+      For string and number (int, float), it is converted to string by a built-in ``str()`` method.
+      For a boolean value, ``True`` is converted to "true" instead of "True", and ``False`` is
+      converted to "false" instead of "False", in order to keep the consistency with
+      Java configuration.
+
+    - If neither of the above is given as a value, it is inserted into the sanitized dict as it is.
+      These values will need to be serialized before adding to a protobuf message.
     """
     sanitized = {}
-    for key, value in config_dict.iteritems():
+    for key, value in custom_config.iteritems():
       if not isinstance(key, str):
-        raise TypeError("Key for topology-wide config must be string, given: " +
+        raise TypeError("Key for component-specific configuration must be string, given: " +
                         str(type(key)) + ":" + str(key))
+
       if isinstance(value, bool):
         sanitized[key] = "true" if value else "false"
-      else:
+      elif isinstance(value, (str, int, float)):
         sanitized[key] = str(value)
-    return sanitized
+      else:
+        sanitized[key] = value
 
+    return sanitized
 
 class Topology(object):
   """Topology is an abstract class to define a topology
