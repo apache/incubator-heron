@@ -158,7 +158,6 @@ class SingleThreadHeronInstance(object):
       Log.info("The instance is deployed in deactivated state")
 
   def load_py_instance(self, is_spout, python_class_name):
-    # TODO : preliminary loading
     pex_loader.load_pex(self.topo_pex_file_path)
     if is_spout:
       spout_class = pex_loader.import_and_get_class(self.topo_pex_file_path, python_class_name)

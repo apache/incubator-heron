@@ -17,6 +17,10 @@ import os
 from heron.common.src.python.utils.metrics import MetricsCollector
 
 import heron.common.src.python.constants as constants
+import heron.common.src.python.pex_loader as pex_loader
+
+from .task_hook import (ITaskHook, EmitInfo, SpoutAckInfo, SpoutFailInfo, BoltExecuteInfo,
+                        BoltAckInfo, BoltFailInfo)
 
 class TopologyContext(dict):
   """Helper Class for Topology Context, inheriting from dict
@@ -81,15 +85,6 @@ class TopologyContext(dict):
     self[self.TASK_HOOKS] = []
     self._init_task_hooks()
 
-  def _init_task_hooks(self):
-    task_hooks_cls_list = self[self.CONFIG].get(constants.TOPOLOGY_AUTO_TASK_HOOKS, None)
-    if task_hooks_cls_list is None:
-      return
-
-    for class_name in task_hooks_cls_list:
-      pass
-
-
   def get_metrics_collector(self):
     """Returns this context's metrics collector"""
     if TopologyContext.METRICS_COLLECTOR not in self or \
@@ -137,3 +132,143 @@ class TopologyContext(dict):
 
       out_fields[comp_name][stream_id] = tuple(ret)
     return out_fields
+
+  ######### Task hook related ##########
+
+  def _init_task_hooks(self):
+    task_hooks_cls_list = self[self.CONFIG].get(constants.TOPOLOGY_AUTO_TASK_HOOKS, None)
+    if task_hooks_cls_list is None:
+      return
+
+    # load pex first
+    topo_pex_path = self[self.TOPOLOGY_PEX_PATH]
+    pex_loader.load_pex(topo_pex_path)
+    for class_name in task_hooks_cls_list:
+      try:
+        task_hook_cls = pex_loader.import_and_get_class(topo_pex_path, class_name)
+        task_hook_instance = task_hook_cls()
+        assert isinstance(task_hook_instance, ITaskHook)
+        self[self.TASK_HOOKS].append(task_hook_instance)
+      except AssertionError:
+        raise RuntimeError("Auto-registered task hook not instance of ITaskHook")
+      except Exception as e:
+        raise RuntimeError("Error with loading task hook class: %s, with error message: %s"
+                           % (class_name, e.message))
+
+  def add_task_hook(self, task_hook):
+    """Registers a specified task hook to this context
+
+    :type task_hook: heron.common.src.python.utils.topology.ITaskHook
+    :param task_hook: Implementation of ITaskHook
+    """
+    if not isinstance(task_hook, ITaskHook):
+      raise TypeError("In add_task_hook(): attempt to add non ITaskHook instance, given: %s"
+                      % str(type(task_hook)))
+    self[self.TASK_HOOKS].append(task_hook)
+
+  @property
+  def hook_exists(self):
+    """Returns whether Task Hook is registered"""
+    return len(self[self.TASK_HOOKS]) != 0
+
+  def invoke_hook_prepare(self):
+    """invoke task hooks for after the spout/bolt's initialize() method"""
+    for task_hook in self[self.TASK_HOOKS]:
+      task_hook.prepare(self[self.CONFIG], self)
+
+  def invoke_hook_cleanup(self):
+    """invoke task hooks for just before the spout/bolt's cleanup method"""
+    for task_hook in self[self.TASK_HOOKS]:
+      task_hook.clean_up()
+
+  def invoke_hook_emit(self, values, stream_id, out_tasks):
+    """invoke task hooks for every time a tuple is emitted in spout/bolt
+
+    :type values: list
+    :param values: values emitted
+    :type stream_id: str
+    :param stream_id: stream id into which tuple is emitted
+    :type out_tasks: list
+    :param out_tasks: tasks that are emitted
+    """
+    if self.hook_exists:
+      emit_info = EmitInfo(values=values, stream_id=stream_id,
+                           task_id=self[self.TASK_ID], out_tasks=out_tasks)
+      for task_hook in self[self.TASK_HOOKS]:
+        task_hook.emit(emit_info)
+
+  def invoke_hook_spout_ack(self, message_id, complete_latency_ns):
+    """invoke task hooks for every time spout acks a tuple
+
+    :type message_id: str
+    :param message_id: message id to which an acked tuple was anchored
+    :type complete_latency_ns: float
+    :param complete_latency_ns: complete latency in nano seconds
+    """
+    if self.hook_exists:
+      spout_ack_info = SpoutAckInfo(message_id=message_id,
+                                    spout_task_id=self[self.TASK_ID],
+                                    complete_latency_ms=complete_latency_ns * constants.NS_TO_MS)
+      for task_hook in self[self.TASK_HOOKS]:
+        task_hook.spout_ack(spout_ack_info)
+
+  def invoke_hook_spout_fail(self, message_id, fail_latency_ns):
+    """invoke task hooks for every time spout fails a tuple
+
+    :type message_id: str
+    :param message_id: message id to which a failed tuple was anchored
+    :type fail_latency_ns: float
+    :param fail_latency_ns: fail latency in nano seconds
+    """
+    if self.hook_exists:
+      spout_fail_info = SpoutFailInfo(message_id=message_id,
+                                      spout_task_id=self[self.TASK_ID],
+                                      fail_latency_ms=fail_latency_ns * constants.NS_TO_MS)
+      for task_hook in self[self.TASK_HOOKS]:
+        task_hook.spout_fail(spout_fail_info)
+
+  def invoke_hook_bolt_execute(self, heron_tuple, execute_latency_ns):
+    """invoke task hooks for every time bolt processes a tuple
+
+    :type heron_tuple: HeronTuple
+    :param heron_tuple: tuple that is executed
+    :type execute_latency_ns: float
+    :param execute_latency_ns: execute latency in nano seconds
+    """
+    if self.hook_exists:
+      bolt_execute_info = BoltExecuteInfo(heron_tuple=heron_tuple,
+                                          executing_task_id=self[self.TASK_ID],
+                                          execute_latency_ms=execute_latency_ns *
+                                                             constants.NS_TO_MS)
+      for task_hook in self[self.TASK_HOOKS]:
+        task_hook.bolt_execute(bolt_execute_info)
+
+  def invoke_hook_bolt_ack(self, heron_tuple, process_latency_ns):
+    """invoke task hooks for every time bolt acks a tuple
+
+    :type heron_tuple: HeronTuple
+    :param heron_tuple: tuple that is acked
+    :type process_latency_ns: float
+    :param process_latency_ns: process latency in nano seconds
+    """
+    if self.hook_exists:
+      bolt_ack_info = BoltAckInfo(heron_tuple=heron_tuple,
+                                  acking_task_id=self[self.TASK_ID],
+                                  process_latency_ms=process_latency_ns * constants.NS_TO_MS)
+      for task_hook in self[self.TASK_HOOKS]:
+        task_hook.bolt_ack(bolt_ack_info)
+
+  def invoke_hook_bolt_fail(self, heron_tuple, fail_latency_ns):
+    """invoke task hooks for every time bolt fails a tuple
+
+    :type heron_tuple: HeronTuple
+    :param heron_tuple: tuple that is failed
+    :type fail_latency_ns: float
+    :param fail_latency_ns: fail latency in nano seconds
+    """
+    if self.hook_exists:
+      bolt_fail_info = BoltFailInfo(heron_tuple=heron_tuple,
+                                    failing_task_id=self[self.TASK_ID],
+                                    fail_latency_ms=fail_latency_ns * constants.NS_TO_MS)
+      for task_hook in self[self.TASK_HOOKS]:
+        task_hook.bolt_fail(bolt_fail_info)
