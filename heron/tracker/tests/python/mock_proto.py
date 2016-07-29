@@ -22,6 +22,7 @@ class MockProto(object):
     spout.comp.name = spout_name
     kv = spout.comp.config.kvs.add()
     kv.key = constants.TOPOLOGY_COMPONENT_PARALLELISM
+    kv.type = protoTopology.ConfigValueType.Value('STRING_VALUE')
     kv.value = str(spout_parallelism)
     for stream in output_streams:
       spout.outputs.add().stream.CopyFrom(stream)
@@ -36,6 +37,7 @@ class MockProto(object):
     bolt.comp.name = bolt_name
     kv = bolt.comp.config.kvs.add()
     kv.key = constants.TOPOLOGY_COMPONENT_PARALLELISM
+    kv.type = protoTopology.ConfigValueType.Value('STRING_VALUE')
     kv.value = str(bolt_parallelism)
     for stream in input_streams:
       bolt.inputs.add().stream.CopyFrom(stream)
@@ -166,4 +168,5 @@ class MockProto(object):
   def add_topology_config(self, topology, key, value):
     kv = topology.topology_config.kvs.add()
     kv.key = key
+    kv.type = protoTopology.ConfigValueType.Value('STRING_VALUE')
     kv.value = str(value)
