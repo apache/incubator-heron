@@ -39,6 +39,11 @@ enum ComponentObjectSpec {
   PYTHON_CLASS_NAME = 3;
 }
 
+enum CustomGroupingObjectType {
+  JAVA_OBJECT = 1;
+  PYTHON_OBJECT = 2;
+}
+
 message StreamSchema {
   message KeyType {
     required string key = 1;
@@ -61,7 +66,8 @@ message InputStream {
   required StreamId stream = 1;
   required Grouping gtype = 2;
   optional StreamSchema grouping_fields = 3;
-  optional bytes custom_grouping_java_object = 4;
+  optional bytes custom_grouping_object = 4;
+  optional CustomGroupingObjectType type = 5;
 }
 
 message Config {
