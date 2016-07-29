@@ -79,8 +79,8 @@ public class MarathonScheduler implements IScheduler {
   @Override
   public List<String> getJobLinks() {
     List<String> jobLinks = new LinkedList<>();
-    String marathonGroupLink = MarathonContext.getSchedulerURI(config) +
-        MarathonConstants.JOB_LINK + Runtime.topologyName(runtime);
+    String marathonGroupLink = MarathonContext.getSchedulerURI(config)
+        + MarathonConstants.JOB_LINK + Runtime.topologyName(runtime);
     jobLinks.add(marathonGroupLink);
     return jobLinks;
   }
@@ -144,7 +144,7 @@ public class MarathonScheduler implements IScheduler {
 
     String[] uris = new String[]{heronCoreURI, topologyURI};
 
-    ArrayNode urisNode= mapper.createArrayNode();
+    ArrayNode urisNode = mapper.createArrayNode();
     for (String uri : uris) {
       ObjectNode uriObject = mapper.createObjectNode();
       uriObject.put(MarathonConstants.URI, uri);

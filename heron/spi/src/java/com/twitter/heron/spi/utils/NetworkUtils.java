@@ -41,7 +41,7 @@ public final class NetworkUtils {
   public static final String LOCAL_HOST = "localhost";
 
   public static final String JSON_TYPE = "application/json";
-  public static final String URL_ENCODE_TYPE= "application/x-www-form-urlencoded";
+  public static final String URL_ENCODE_TYPE = "application/x-www-form-urlencoded";
 
   private static final Logger LOG = Logger.getLogger(NetworkUtils.class.getName());
 

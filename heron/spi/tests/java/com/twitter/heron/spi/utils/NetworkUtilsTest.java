@@ -157,7 +157,7 @@ public class NetworkUtilsTest {
         when(connection).getOutputStream();
 
     Assert.assertFalse(NetworkUtils.sendHttpPostRequest(connection,
-        NetworkUtils.URL_ENCODE_TYPE, new byte[0]));
+        NetworkUtils.URL_ENCODE_TYPE, new byte[1]));
 
     connection.disconnect();
   }

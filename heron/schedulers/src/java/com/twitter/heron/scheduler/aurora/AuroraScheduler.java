@@ -31,8 +31,6 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Misc;
 import com.twitter.heron.spi.packing.PackingPlan;
-import com.twitter.heron.spi.packing.PackingPlan.ContainerPlan;
-import com.twitter.heron.spi.packing.PackingPlan.Resource;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;

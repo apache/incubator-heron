@@ -14,16 +14,11 @@
 
 package com.twitter.heron.scheduler.marathon;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.ProtocolException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.spi.utils.NetworkUtils;
-
-import sun.nio.ch.Net;
 
 public class MarathonController {
   private static final Logger LOG = Logger.getLogger(MarathonController.class.getName());
