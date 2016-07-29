@@ -28,7 +28,7 @@ class TopologyContext(dict):
   This is automatically created by Heron Instance and topology writers never need to create
   an instance by themselves.
 
-  The following keys are present by default
+  The following keys are present by default.
 
   :key CONFIG: contains cluster configuration
                (topology-wide config overriden by component-specific config)
@@ -85,6 +85,25 @@ class TopologyContext(dict):
     self[self.TASK_HOOKS] = []
     self._init_task_hooks()
 
+  ##### Helper method for common use #####
+
+  @property
+  def task_id(self):
+    """Property to get the task id of this component"""
+    return self[self.TASK_ID]
+
+  @property
+  def component_id(self):
+    """Property to get the component id of this component"""
+    return self[self.TASK_TO_COMPONENT_MAP].get(self.task_id)
+
+  def get_cluster_config(self):
+    """Returns the cluster config for this component
+
+    Note that the returned config is auto-typed map: <str -> any Python object>.
+    """
+    return self[self.CONFIG]
+
   def get_metrics_collector(self):
     """Returns this context's metrics collector"""
     if TopologyContext.METRICS_COLLECTOR not in self or \
@@ -96,6 +115,8 @@ class TopologyContext(dict):
     """Registers a new metric to this context"""
     collector = self.get_metrics_collector()
     collector.register_metric(name, metric, time_bucket_in_sec)
+
+  ########################################
 
   @classmethod
   def _get_inputs_and_outputs_and_outfields(cls, topology):
@@ -136,7 +157,7 @@ class TopologyContext(dict):
   ######### Task hook related ##########
 
   def _init_task_hooks(self):
-    task_hooks_cls_list = self[self.CONFIG].get(constants.TOPOLOGY_AUTO_TASK_HOOKS, None)
+    task_hooks_cls_list = self.get_cluster_config().get(constants.TOPOLOGY_AUTO_TASK_HOOKS, None)
     if task_hooks_cls_list is None:
       return
 
@@ -174,7 +195,7 @@ class TopologyContext(dict):
   def invoke_hook_prepare(self):
     """invoke task hooks for after the spout/bolt's initialize() method"""
     for task_hook in self[self.TASK_HOOKS]:
-      task_hook.prepare(self[self.CONFIG], self)
+      task_hook.prepare(self.get_cluster_config(), self)
 
   def invoke_hook_cleanup(self):
     """invoke task hooks for just before the spout/bolt's cleanup method"""
@@ -189,11 +210,11 @@ class TopologyContext(dict):
     :type stream_id: str
     :param stream_id: stream id into which tuple is emitted
     :type out_tasks: list
-    :param out_tasks: tasks that are emitted
+    :param out_tasks: list of custom grouping target task id
     """
     if self.hook_exists:
       emit_info = EmitInfo(values=values, stream_id=stream_id,
-                           task_id=self[self.TASK_ID], out_tasks=out_tasks)
+                           task_id=self.task_id, out_tasks=out_tasks)
       for task_hook in self[self.TASK_HOOKS]:
         task_hook.emit(emit_info)
 
@@ -207,7 +228,7 @@ class TopologyContext(dict):
     """
     if self.hook_exists:
       spout_ack_info = SpoutAckInfo(message_id=message_id,
-                                    spout_task_id=self[self.TASK_ID],
+                                    spout_task_id=self.task_id,
                                     complete_latency_ms=complete_latency_ns * constants.NS_TO_MS)
       for task_hook in self[self.TASK_HOOKS]:
         task_hook.spout_ack(spout_ack_info)
@@ -222,7 +243,7 @@ class TopologyContext(dict):
     """
     if self.hook_exists:
       spout_fail_info = SpoutFailInfo(message_id=message_id,
-                                      spout_task_id=self[self.TASK_ID],
+                                      spout_task_id=self.task_id,
                                       fail_latency_ms=fail_latency_ns * constants.NS_TO_MS)
       for task_hook in self[self.TASK_HOOKS]:
         task_hook.spout_fail(spout_fail_info)
@@ -237,7 +258,7 @@ class TopologyContext(dict):
     """
     if self.hook_exists:
       bolt_execute_info = BoltExecuteInfo(heron_tuple=heron_tuple,
-                                          executing_task_id=self[self.TASK_ID],
+                                          executing_task_id=self.task_id,
                                           execute_latency_ms=execute_latency_ns *
                                                              constants.NS_TO_MS)
       for task_hook in self[self.TASK_HOOKS]:
@@ -253,7 +274,7 @@ class TopologyContext(dict):
     """
     if self.hook_exists:
       bolt_ack_info = BoltAckInfo(heron_tuple=heron_tuple,
-                                  acking_task_id=self[self.TASK_ID],
+                                  acking_task_id=self.task_id,
                                   process_latency_ms=process_latency_ns * constants.NS_TO_MS)
       for task_hook in self[self.TASK_HOOKS]:
         task_hook.bolt_ack(bolt_ack_info)
@@ -268,7 +289,7 @@ class TopologyContext(dict):
     """
     if self.hook_exists:
       bolt_fail_info = BoltFailInfo(heron_tuple=heron_tuple,
-                                    failing_task_id=self[self.TASK_ID],
+                                    failing_task_id=self.task_id,
                                     fail_latency_ms=fail_latency_ns * constants.NS_TO_MS)
       for task_hook in self[self.TASK_HOOKS]:
         task_hook.bolt_fail(bolt_fail_info)

@@ -35,16 +35,19 @@ class Spout(Component):
     if not self.pplan_helper.is_spout:
       raise RuntimeError("No spout in physicial plan")
 
-    # spout_config is auto-typed, not <str -> str> only
-    self.spout_config = self.pplan_helper.context['config']
+    context = self.pplan_helper.context
     self.spout_metrics = SpoutMetrics(self.pplan_helper)
 
     # acking related
-    self.acking_enabled = self.spout_config.get(constants.TOPOLOGY_ENABLE_ACKING, False)
-    Log.info("Enable ACK: " + str(self.acking_enabled))
+    self.acking_enabled = context.get_cluster_config().get(constants.TOPOLOGY_ENABLE_ACKING, False)
+    self.enable_message_timeouts = \
+      context.get_cluster_config().get(constants.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS)
+    Log.info("Enable ACK: %s" % str(self.acking_enabled))
+    # TODO: implement timeout
+    Log.info("Enable Message Timeouts: %s" % str(self.enable_message_timeouts))
+
     self.in_flight_tuples = dict()
     self.immediate_acks = collections.deque()
-
     self.total_tuples_emitted = 0
 
     # TODO: topology context, serializer and sys config
@@ -77,14 +80,19 @@ class Spout(Component):
                               inputs=None, outputs=_outputs, config=config)
 
   def start(self):
-    # TODO: add config
-    self.spout_metrics.register_metrics(self.pplan_helper.context, self.sys_config)
-    self.initialize(config=self.spout_config, context=self.pplan_helper.context)
+    context = self.pplan_helper.context
+    self.spout_metrics.register_metrics(context, self.sys_config)
+    self.initialize(config=context.get_cluster_config(), context=context)
+    context.invoke_hook_prepare()
+
     self._add_spout_task()
     self.topology_state = topology_pb2.TopologyState.Value("RUNNING")
 
   def stop(self):
-    pass
+    self.pplan_helper.context.invoke_hook_cleanup()
+    self.close()
+
+    self.looper.exit_loop()
 
   def _activate(self):
     Log.info("Spout is activated")
@@ -116,7 +124,9 @@ class Spout(Component):
     # first check whether this tuple is sane
     self.pplan_helper.check_output_schema(stream, tup)
 
-    # TODO: custom grouping and invoke hook emit
+    # TODO: custom grouping
+    self.pplan_helper.context.invoke_hook_emit(tup, stream, None)
+
     data_tuple = tuple_pb2.HeronDataTuple()
     data_tuple.key = 0
 
@@ -141,8 +151,8 @@ class Spout(Component):
       data_tuple.values.append(serialized)
       tuple_size_in_bytes += len(serialized)
 
-    latency = time.time() - start_time
-    self.spout_metrics.serialize_data_tuple(stream, latency * constants.SEC_TO_NS)
+    serialize_latency_ns = (time.time() - start_time) * constants.SEC_TO_NS
+    self.spout_metrics.serialize_data_tuple(stream, serialize_latency_ns)
 
     # TODO: return when need_task_ids=True
     ret = super(Spout, self).admit_data_tuple(stream_id=stream, data_tuple=data_tuple,
@@ -183,28 +193,31 @@ class Spout(Component):
 
   def _produce_tuple(self):
     # TOPOLOGY_MAX_SPOUT_PENDING must be provided (if not included, raise KeyError)
-    max_spout_pending = self.spout_config.get(constants.TOPOLOGY_MAX_SPOUT_PENDING)
+    max_spout_pending = \
+      self.pplan_helper.context.get_cluster_config().get(constants.TOPOLOGY_MAX_SPOUT_PENDING)
 
     total_tuples_emitted_before = self.total_tuples_emitted
     total_data_emitted_bytes_before = self.get_total_data_emitted_in_bytes()
-    emit_batch_time = float(self.sys_config[constants.INSTANCE_EMIT_BATCH_TIME_MS]) * constants.MS_TO_SEC
+    emit_batch_time = \
+      float(self.sys_config[constants.INSTANCE_EMIT_BATCH_TIME_MS]) * constants.MS_TO_SEC
     emit_batch_size = int(self.sys_config[constants.INSTANCE_EMIT_BATCH_SIZE_BYTES])
     start_cycle_time = time.time()
 
-    while (self.acking_enabled and max_spout_pending > len(self.in_flight_tuples)) or not self.acking_enabled:
+    while (self.acking_enabled and max_spout_pending > len(self.in_flight_tuples)) or \
+        not self.acking_enabled:
       start_time = time.time()
       self.next_tuple()
-      latency = time.time() - start_time
-      self.spout_metrics.next_tuple(latency * constants.SEC_TO_NS)
+      next_tuple_latency_ns = (time.time() - start_time) * constants.SEC_TO_NS
+      self.spout_metrics.next_tuple(next_tuple_latency_ns)
 
       if (self.total_tuples_emitted == total_tuples_emitted_before) or \
         (time.time() - start_cycle_time - emit_batch_time > 0) or \
-        (self.get_total_data_emitted_in_bytes() - total_data_emitted_bytes_before > emit_batch_size):
+        (self.get_total_data_emitted_in_bytes() - total_data_emitted_bytes_before >
+           emit_batch_size):
         # no tuples to emit or batch reached
         break
 
       total_tuples_emitted_before = self.total_tuples_emitted
-
 
   def _add_spout_task(self):
     Log.info("Adding spout task...")
@@ -239,8 +252,8 @@ class Spout(Component):
   def _handle_ack_tuple(self, tuple, is_success):
     for rt in tuple.roots:
       if rt.taskid != self.pplan_helper.my_task_id:
-        raise RuntimeError("Receiving tuple for task: " + str(rt.taskid) +
-                           " in task: " + str(self.pplan_helper.my_task_id))
+        raise RuntimeError("Receiving tuple for task: %s in task: %s"
+                           % (str(rt.taskid), str(self.pplan_helper.my_task_id)))
 
       try:
         tuple_info = self.in_flight_tuples.pop(rt.key)
@@ -249,11 +262,11 @@ class Spout(Component):
         return
 
       if tuple_info.tuple_id is not None:
-        latency = time.time() - tuple_info.insertion_time
+        latency_ns = (time.time() - tuple_info.insertion_time) * constants.SEC_TO_NS
         if is_success:
-          self._invoke_ack(tuple_info.tuple_id, tuple_info.stream_id, latency * constants.SEC_TO_NS)
+          self._invoke_ack(tuple_info.tuple_id, tuple_info.stream_id, latency_ns)
         else:
-          self._invoke_fail(tuple_info.tuple_id, tuple_info.stream_id, latency * constants.SEC_TO_NS)
+          self._invoke_fail(tuple_info.tuple_id, tuple_info.stream_id, latency_ns)
 
   def _do_immediate_acks(self):
     size = len(self.immediate_acks)
@@ -262,13 +275,15 @@ class Spout(Component):
       self._invoke_ack(tuple_info.tuple_id, tuple_info.stream_id, 0)
 
   def _invoke_ack(self, tuple_id, stream_id, complete_latency_ns):
-    Log.debug("In invoke_ack(): Acking " + str(tuple_id) + " from stream: " + stream_id)
+    Log.debug("In invoke_ack(): Acking %s from stream: %s" % (str(tuple_id), stream_id))
     self.ack(tuple_id)
+    self.pplan_helper.context.invoke_hook_spout_ack(tuple_id, complete_latency_ns)
     self.spout_metrics.acked_tuple(stream_id, complete_latency_ns)
 
   def _invoke_fail(self, tuple_id, stream_id, fail_latency_ns):
-    Log.debug("In invoke_fail(): Failing " + str(tuple_id) + " from stream: " + stream_id)
+    Log.debug("In invoke_fail(): Failing %s from stream: %s" % (str(tuple_id), stream_id))
     self.fail(tuple_id)
+    self.pplan_helper.context.invoke_hook_spout_fail(tuple_id, fail_latency_ns)
     self.spout_metrics.failed_tuple(stream_id, fail_latency_ns)
 
   ###################################
@@ -276,7 +291,7 @@ class Spout(Component):
   ###################################
 
   @abstractmethod
-  def initialize(self, config={}, context={}):
+  def initialize(self, config, context):
     """Called when a task for this component is initialized within a worker on the cluster
 
     It is compatible with StreamParse API.

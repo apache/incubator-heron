@@ -35,11 +35,11 @@ class Bolt(Component):
       raise RuntimeError("No bolt in physical plan")
 
     # bolt_config is auto-typed, not <str -> str> only
-    self.bolt_config = self.pplan_helper.context['config']
+    context = self.pplan_helper.context
     self.bolt_metrics = BoltMetrics(self.pplan_helper)
 
     # acking related
-    self.acking_enabled = self.bolt_config.get(constants.TOPOLOGY_ENABLE_ACKING, False)
+    self.acking_enabled = context.get_cluster_config().get(constants.TOPOLOGY_ENABLE_ACKING, False)
     Log.info("Enable ACK: %s" % str(self.acking_enabled))
 
     # TODO: Topology context, serializer and sys config
@@ -85,14 +85,18 @@ class Bolt(Component):
                               inputs=inputs, outputs=_outputs, config=config)
 
   def start(self):
-    self.bolt_metrics.register_metrics(self.pplan_helper.context, self.sys_config)
-    self.initialize(config=self.bolt_config, context=self.pplan_helper.context)
+    context = self.pplan_helper.context
+    self.bolt_metrics.register_metrics(context, self.sys_config)
+    self.initialize(config=context.get_cluster_config(), context=context)
+    context.invoke_hook_prepare()
 
     # prepare tick tuple
     self._prepare_tick_tup_timer()
 
   def stop(self):
-    pass
+    self.pplan_helper.context.invoke_hook_cleanup()
+    self.cleanup()
+    self.looper.exit_loop()
 
   def _activate(self):
     pass
@@ -120,7 +124,9 @@ class Bolt(Component):
     # first check whether this tuple is sane
     self.pplan_helper.check_output_schema(stream, tup)
 
-    # TODO: custom grouping and invoke hook emit
+    # TODO: custom grouping
+    self.pplan_helper.context.invoke_hook_emit(tup, stream, None)
+
     data_tuple = tuple_pb2.HeronDataTuple()
     data_tuple.key = 0
 
@@ -141,8 +147,8 @@ class Bolt(Component):
       serialized = self.serializer.serialize(obj)
       data_tuple.values.append(serialized)
       tuple_size_in_bytes += len(serialized)
-    latency = time.time() - start_time
-    self.bolt_metrics.serialize_data_tuple(stream, latency * constants.SEC_TO_NS)
+    serialize_latency_ns = (time.time() - start_time) * constants.SEC_TO_NS
+    self.bolt_metrics.serialize_data_tuple(stream, serialize_latency_ns)
 
     # TODO: return when need_task_ids=True
     ret = super(Bolt, self).admit_data_tuple(stream_id=stream, data_tuple=data_tuple,
@@ -181,7 +187,8 @@ class Bolt(Component):
         Log.error("Received tuple not instance of HeronTupleSet")
 
       if (time.time() - start_cycle_time - exec_batch_time > 0) or \
-          (self.get_total_data_emitted_in_bytes() - total_data_emitted_bytes_before > exec_batch_size):
+          (self.get_total_data_emitted_in_bytes() - total_data_emitted_bytes_before
+             > exec_batch_size):
         # batch reached
         break
 
@@ -197,13 +204,14 @@ class Bolt(Component):
 
     deserialized_time = time.time()
     self.process(tup)
-    execute_latency = time.time() - deserialized_time
-    deserialize_latency = deserialized_time - start_time
+    execute_latency_ns = (time.time() - deserialized_time) * constants.SEC_TO_NS
+    deserialize_latency_ns = (deserialized_time - start_time) * constants.SEC_TO_NS
+
+    self.pplan_helper.context.invoke_hook_bolt_execute(tup, execute_latency_ns)
 
     self.bolt_metrics.deserialize_data_tuple(stream.id, stream.component_name,
-                                             deserialize_latency * constants.SEC_TO_NS)
-    self.bolt_metrics.execute_tuple(stream.id, stream.component_name,
-                                    execute_latency * constants.SEC_TO_NS)
+                                             deserialize_latency_ns)
+    self.bolt_metrics.execute_tuple(stream.id, stream.component_name, execute_latency_ns)
 
   @staticmethod
   def is_tick(tup):
@@ -214,17 +222,17 @@ class Bolt(Component):
     return tup.stream == TupleHelper.TICK_TUPLE_ID
 
   def _prepare_tick_tup_timer(self):
-    if constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS in self.bolt_config:
-      tick_freq_sec = self.bolt_config[constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS]
+    cluster_config = self.pplan_helper.context.get_cluster_config()
+    if constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS in cluster_config:
+      tick_freq_sec = cluster_config[constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS]
       Log.debug("Tick Tuple Frequency: %s sec." % str(tick_freq_sec))
 
       def send_tick():
         tick = TupleHelper.make_tick_tuple()
         start_time = time.time()
         self.process(tick)
-        latency = time.time() - start_time
-        self.bolt_metrics.execute_tuple(tick.id, tick.component,
-                                        latency * constants.SEC_TO_NS)
+        tick_execute_latency_ns = (time.time() - start_time) * constants.SEC_TO_NS
+        self.bolt_metrics.execute_tuple(tick.id, tick.component, tick_execute_latency_ns)
         self.output_helper.send_out_tuples()
         self.looper.wake_up() # so emitted tuples would be added to buffer now
         self._prepare_tick_tup_timer()
@@ -252,8 +260,9 @@ class Bolt(Component):
         tuple_size_in_bytes += rt.ByteSize()
       super(Bolt, self).admit_control_tuple(ack_tuple, tuple_size_in_bytes, True)
 
-    latency = time.time() - tup.creation_time
-    self.bolt_metrics.acked_tuple(tup.stream, tup.component, latency * constants.SEC_TO_NS)
+    process_latency_ns = (time.time() - tup.creation_time) * constants.SEC_TO_NS
+    self.pplan_helper.context.invoke_hook_bolt_ack(tup, process_latency_ns)
+    self.bolt_metrics.acked_tuple(tup.stream, tup.component, process_latency_ns)
 
   def fail(self, tup):
     """Indicate that processing of a Tuple has failed
@@ -275,15 +284,16 @@ class Bolt(Component):
         tuple_size_in_bytes += rt.ByteSize()
       super(Bolt, self).admit_control_tuple(fail_tuple, tuple_size_in_bytes, False)
 
-    latency = time.time() - tup.creation_time
-    self.bolt_metrics.failed_tuple(tup.stream, tup.component, latency * constants.SEC_TO_NS)
+    fail_latency_ns = (time.time() - tup.creation_time) * constants.SEC_TO_NS
+    self.pplan_helper.context.invoke_hook_bolt_fail(tup, fail_latency_ns)
+    self.bolt_metrics.failed_tuple(tup.stream, tup.component, fail_latency_ns)
 
   ###################################
-  # API: To be implemented by users
+  # API: To be implemented by users #
   ###################################
 
   @abstractmethod
-  def initialize(self, config={}, context={}):
+  def initialize(self, config, context):
     """Called when a task for this component is initialized within a worker on the cluster
 
     It is compatible with StreamParse API.
@@ -314,13 +324,12 @@ class Bolt(Component):
     The Tuple object contains metadata on it about which component/stream/task it came from.
     To emit a tuple, call ``self.emit(tuple)``.
 
-    **Must be implemented by a subclass.**
+    **Must be implemented by a subclass, otherwise NotImplementedError is raised.**
 
-    You can emit a tuple from this bolt by using ``self.emit()`` method.
-
-    :type tup: ``Tuple``
+    :type tup: heron.common.src.python.utils.tuple.HeronTuple
+    :param tup: HeronTuple to process
     """
-    raise NotImplementedError()
+    raise NotImplementedError("Bolt not implementing process() method.")
 
 
   def cleanup(self):
