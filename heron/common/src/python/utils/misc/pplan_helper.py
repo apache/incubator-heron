@@ -156,11 +156,12 @@ class PhysicalPlanHelper(object):
     config_serializer = PythonSerializer()
     for kv in topology_config.kvs:
       if kv.HasField("value"):
+        assert kv.type == topology_pb2.ConfigValueType.Value("STRING_VALUE")
         # value is string
         if PhysicalPlanHelper._is_number(kv.value):
           config[kv.key] = PhysicalPlanHelper._get_number(kv.value)
-        elif kv.value in ("true", "True", "false", "False"):
-          config[kv.key] = True if kv.value in ("true", "True") else False
+        elif kv.value.lower() in ("true", "false"):
+          config[kv.key] = True if kv.value.lower() == "true" else False
         else:
           config[kv.key] = kv.value
       elif kv.HasField("serialized_value") and \
@@ -168,7 +169,9 @@ class PhysicalPlanHelper(object):
         # deserialize that
         config[kv.key] = config_serializer.deserialize(kv.serialized_value)
       else:
-        Log.error("Unsupported config <key:value> found: %s" % str(kv))
+        assert kv.HasField("type")
+        Log.error("Unsupported config <key:value> found: %s, with type: %s"
+                  % (str(kv), str(kv.type)))
         continue
 
     return config
