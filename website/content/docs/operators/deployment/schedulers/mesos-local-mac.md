@@ -40,14 +40,18 @@ command loads the config in `$HOME/.heron/conf`. Add `--config-path=your_conf_pa
 config path.
 
 ```bash
-heron submit mesos --verbose ~/.heron/examples/heron-examples.jar com.twitter.heron.examples.ExclamationTopology ExclamationTopology
+heron submit mesos --verbose ~/.heron/examples/heron-examples.jar \
+com.twitter.heron.examples.ExclamationTopology ExclamationTopology
 ```
 
 The following will be displayed upon a successful submit.
 
 ```bash
-[2016-07-25 22:04:41 -0700] com.twitter.heron.scheduler.mesos.MesosLauncher INFO:  For checking the status and logs of the topology, use the working directory $HOME/.herondata/topologies/mesos/$USER/ExclamationTopology
-[2016-07-25 22:04:41 -0700] com.twitter.heron.scheduler.SubmitterMain FINE:  Topology ExclamationTopology submitted successfully
+[2016-07-25 22:04:41 -0700] com.twitter.heron.scheduler.mesos.MesosLauncher INFO: \
+For checking the status and logs of the topology, use the working directory \
+$HOME/.herondata/topologies/mesos/$USER/ExclamationTopology
+[2016-07-25 22:04:41 -0700] com.twitter.heron.scheduler.SubmitterMain FINE:  Topology \
+ExclamationTopology submitted successfully
 INFO: Topology 'ExclamationTopology' launched successfully
 INFO: Elapsed time: 4.114s.
 ``` 
@@ -63,18 +67,23 @@ The log file will show whether the launch succeeded. If it succeeded, at the end
 it will show the task is running.
 
 ```bash
-[2016-07-25 22:15:47 -0700] com.twitter.heron.scheduler.mesos.framework.MesosFramework INFO:  Received status update [...]
-[2016-07-25 22:15:47 -0700] com.twitter.heron.scheduler.mesos.framework.MesosFramework INFO:  Task with id 'container_1_1469510147073:0' RUNNING
+[2016-07-25 22:15:47 -0700] com.twitter.heron.scheduler.mesos.framework.MesosFramework INFO: \
+Received status update [...]
+[2016-07-25 22:15:47 -0700] com.twitter.heron.scheduler.mesos.framework.MesosFramework INFO: \
+Task with id 'container_1_1469510147073:0' RUNNING
 ``` 
 
 If the launch fails, an error message will be included. For example, if the Mesos library isn't
 found in the configured location, the following exception will occur.
 
 ```bash
-[2016-07-25 22:04:42 -0700] stderr STDERR:  Failed to load native Mesos library from /usr/lib/mesos/0.28.1/lib
+[2016-07-25 22:04:42 -0700] stderr STDERR:  Failed to load native Mesos library from \
+/usr/lib/mesos/0.28.1/lib
 [2016-07-25 22:04:42 -0700] stderr STDERR:  Exception in thread "main"
-[2016-07-25 22:04:42 -0700] stderr STDERR:  java.lang.UnsatisfiedLinkError: no mesos in java.library.path
-[2016-07-25 22:04:42 -0700] stderr STDERR:      at java.lang.ClassLoader.loadLibrary(ClassLoader.java:1867)
+[2016-07-25 22:04:42 -0700] stderr STDERR:  java.lang.UnsatisfiedLinkError: no mesos in \ 
+java.library.path
+[2016-07-25 22:04:42 -0700] stderr STDERR:      at \
+java.lang.ClassLoader.loadLibrary(ClassLoader.java:1867)
 ...
 ```
 
