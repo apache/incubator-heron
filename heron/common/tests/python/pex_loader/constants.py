@@ -11,20 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-''' opts.py '''
-import logging
-from heron.common.src.python.color import Log
-from tornado.options import define
-
-
-def set_verbose(cl_args):
-  """ set verbose level """
-  if cl_args['verbose']:
-    Log.setLevel(logging.DEBUG)
-  else:
-    Log.setLevel(logging.INFO)
-
-
-def set_tracker_url(cl_args):
-  """ define global Tornado variable """
-  define("tracker_url", cl_args["tracker_url"])
+'''Constants for pex_loader unittest testdata'''
+TEST_DATA_PATH = 'testdata/pex'
+SAMPLE_PEX = 'sample_pex.pex'
+SAMPLE_PEX_CLASSPATH = 'heron.common.tests.python.pex_loader.testdata.src.sample.SampleClass'
