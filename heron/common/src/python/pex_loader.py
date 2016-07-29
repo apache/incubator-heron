@@ -36,7 +36,7 @@ def _get_deps_list(abs_path_to_pex):
 def load_pex(path_to_pex, include_deps=True):
   """Loads pex file and its dependencies to the current python path"""
   abs_path_to_pex = os.path.abspath(path_to_pex)
-  Log.debug("Add a pex to the path: " + abs_path_to_pex)
+  Log.debug("Add a pex to the path: %s" % abs_path_to_pex)
   if abs_path_to_pex not in sys.path:
     sys.path.insert(0, abs_path_to_pex)
 
@@ -45,10 +45,10 @@ def load_pex(path_to_pex, include_deps=True):
     for dep in _get_deps_list(abs_path_to_pex):
       to_join = os.path.join(abs_path_to_pex, dep)
       if to_join not in sys.path:
-        Log.debug("Add a new dependency to the path: " + dep)
+        Log.debug("Add a new dependency to the path: %s" % dep)
         sys.path.insert(0, to_join)
 
-  Log.debug("Python path: " + str(sys.path))
+  Log.debug("Python path: %s" % str(sys.path))
 
 def resolve_heron_suffix_issue(abs_pex_path, class_path):
   """Resolves duplicate package suffix problems
@@ -99,13 +99,13 @@ def import_and_get_class(path_to_pex, python_class_name):
   """
   abs_path_to_pex = os.path.abspath(path_to_pex)
 
-  Log.debug("Add a pex to the path: " + abs_path_to_pex)
-  Log.debug("In import_and_get_class with cls_name: " + python_class_name)
+  Log.debug("Add a pex to the path: %s" % abs_path_to_pex)
+  Log.debug("In import_and_get_class with cls_name: %s" % python_class_name)
   split = python_class_name.split('.')
   from_path = '.'.join(split[:-1])
   import_name = python_class_name.split('.')[-1]
 
-  Log.debug("From path: " + from_path + " -- " + "Import name: " + import_name)
+  Log.debug("From path: %s, import name: %s" % (from_path, import_name))
 
   # Resolve duplicate package suffix problem (heron.), if the top level package name is heron
   if python_class_name.startswith("heron."):
@@ -113,5 +113,5 @@ def import_and_get_class(path_to_pex, python_class_name):
     return getattr(mod, import_name)
 
   mod = __import__(from_path, fromlist=[import_name], level=-1)
-  Log.debug("Imported module: " + str(mod))
+  Log.debug("Imported module: %s" % str(mod))
   return getattr(mod, import_name)
