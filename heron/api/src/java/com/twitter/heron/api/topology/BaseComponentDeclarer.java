@@ -67,6 +67,7 @@ public abstract class BaseComponentDeclarer<T extends ComponentConfigurationDecl
       TopologyAPI.Config.KeyValue.Builder kvBldr = TopologyAPI.Config.KeyValue.newBuilder();
       kvBldr.setKey(entry.getKey());
       kvBldr.setValue(entry.getValue().toString());
+      kvBldr.setType(TopologyAPI.ConfigValueType.STRING_VALUE);
       cBldr.addKvs(kvBldr);
     }
     bldr.setConfig(cBldr);
