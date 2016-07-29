@@ -350,9 +350,10 @@ public class SchedulerMain {
         LOG.severe("Failed to pack a valid PackingPlan. Check the config.");
         return false;
       }
+      Config ytruntime = LauncherUtils.createConfigWithPackingDetails(runtime, packedPlan);
 
-      // schedule the packed plan
-      scheduler = LauncherUtils.getSchedulerInstance(config, runtime, packedPlan);
+      // invoke scheduler
+      scheduler = LauncherUtils.getSchedulerInstance(config, ytruntime);
       if (scheduler == null) {
         return false;
       }

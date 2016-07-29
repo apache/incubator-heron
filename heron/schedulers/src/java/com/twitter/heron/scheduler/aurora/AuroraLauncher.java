@@ -41,7 +41,8 @@ public class AuroraLauncher implements ILauncher {
 
   @Override
   public boolean launch(PackingPlan packing) {
-    return LauncherUtils.onScheduleAsLibrary(config, runtime, getScheduler(), packing);
+    Config ytruntime = LauncherUtils.createConfigWithPackingDetails(runtime, packing);
+    return LauncherUtils.onScheduleAsLibrary(config, ytruntime, getScheduler(), packing);
   }
 
   // Get AuroraScheduler
