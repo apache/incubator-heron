@@ -66,8 +66,8 @@ public class SlurmLauncher implements ILauncher {
       return false;
     }
 
-    Config ytruntime = LauncherUtils.createConfigWithPackingDetails(runtime, packing);
-    return LauncherUtils.onScheduleAsLibrary(config, ytruntime,
+    Config ytruntime = LauncherUtils.instance.createConfigWithPackingDetails(runtime, packing);
+    return LauncherUtils.instance.onScheduleAsLibrary(config, ytruntime,
         new SlurmScheduler(topologyWorkingDirectory), packing);
   }
 

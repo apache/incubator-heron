@@ -339,21 +339,21 @@ public class SchedulerMain {
 
       // build the runtime config
       Config runtime = Config.newBuilder()
-          .putAll(LauncherUtils.getPrimaryRuntime(topology, adaptor))
+          .putAll(LauncherUtils.instance.getPrimaryRuntime(topology, adaptor))
           .put(Keys.schedulerShutdown(), getShutdown())
           .put(Keys.SCHEDULER_PROPERTIES, properties)
           .build();
 
       // get a packed plan and schedule it
-      PackingPlan packedPlan = LauncherUtils.createPackingPlan(config, runtime);
+      PackingPlan packedPlan = LauncherUtils.instance.createPackingPlan(config, runtime);
       if (packedPlan == null) {
         LOG.severe("Failed to pack a valid PackingPlan. Check the config.");
         return false;
       }
-      Config ytruntime = LauncherUtils.createConfigWithPackingDetails(runtime, packedPlan);
+      Config ytruntime = LauncherUtils.instance.createConfigWithPackingDetails(runtime, packedPlan);
 
       // invoke scheduler
-      scheduler = LauncherUtils.getSchedulerInstance(config, ytruntime);
+      scheduler = LauncherUtils.instance.getSchedulerInstance(config, ytruntime);
       if (scheduler == null) {
         return false;
       }
@@ -366,7 +366,7 @@ public class SchedulerMain {
 
       // Failures in server initialization throw exceptions
       // get the scheduler server endpoint for receiving requests
-      server = getServer(runtime, scheduler, schedulerServerPort);
+      server = getServer(ytruntime, scheduler, schedulerServerPort);
       // start the server to manage runtime requests
       server.start();
 
@@ -378,7 +378,7 @@ public class SchedulerMain {
       if (isSuccessful) {
         // wait until kill request or some interrupt occurs if the scheduler starts successfully
         LOG.info("Waiting for termination... ");
-        Runtime.schedulerShutdown(runtime).await();
+        Runtime.schedulerShutdown(ytruntime).await();
       }
     } catch (IOException e) {
       LOG.log(Level.SEVERE, "Failed to start server", e);

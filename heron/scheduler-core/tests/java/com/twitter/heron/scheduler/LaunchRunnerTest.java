@@ -39,7 +39,6 @@ import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.LauncherUtils;
-import com.twitter.heron.spi.utils.LauncherUtils.LauncherUtilImpl;
 import com.twitter.heron.spi.utils.Runtime;
 
 
@@ -117,7 +116,7 @@ public class LaunchRunnerTest {
     PackingPlan packingPlan = Mockito.mock(PackingPlan.class);
     Mockito.when(packingPlan.getInstanceDistribution()).thenReturn(MOCK_PACKING_STRING);
 
-    LauncherUtilImpl mockLauncherUtils = Mockito.mock(LauncherUtilImpl.class);
+    LauncherUtils mockLauncherUtils = Mockito.mock(LauncherUtils.class);
     Mockito.when(
         mockLauncherUtils.createPackingPlan(Mockito.any(Config.class), Mockito.any(Config.class)))
         .thenReturn(packingPlan);

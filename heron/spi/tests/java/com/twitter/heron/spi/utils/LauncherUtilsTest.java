@@ -50,7 +50,7 @@ public class LauncherUtilsTest {
     Config mockConfig = Mockito.mock(Config.class);
     Mockito.when(mockConfig.getStringValue(Keys.packingClass())).thenReturn(PACKING_CLASS);
 
-    PackingPlan resultPacking = LauncherUtils.createPackingPlan(mockConfig, null);
+    PackingPlan resultPacking = LauncherUtils.instance.createPackingPlan(mockConfig, null);
     Assert.assertEquals(mockPackingPlan, resultPacking);
 
     Mockito.verify(mockPacking).initialize(Mockito.any(Config.class), Mockito.any(Config.class));
@@ -73,7 +73,7 @@ public class LauncherUtilsTest {
     Mockito.when(mockPacking.getComponentRamDistribution()).thenReturn("ramMap");
     Mockito.when(mockPacking.getContainers()).thenReturn(containerMap);
 
-    Config newRuntime = LauncherUtils.createConfigWithPackingDetails(runtime, mockPacking);
+    Config newRuntime = LauncherUtils.instance.createConfigWithPackingDetails(runtime, mockPacking);
     Assert.assertNull(Runtime.instanceDistribution(runtime));
     Assert.assertNull(Runtime.componentRamMap(runtime));
     Assert.assertEquals("instances", Runtime.instanceDistribution(newRuntime));
@@ -93,7 +93,7 @@ public class LauncherUtilsTest {
     PowerMockito.spy(TopologyUtils.class);
     PowerMockito.doReturn(456).when(TopologyUtils.class, "getNumContainers", mockTopology);
 
-    Config runtime = LauncherUtils.getPrimaryRuntime(mockTopology, mockStMgr);
+    Config runtime = LauncherUtils.instance.getPrimaryRuntime(mockTopology, mockStMgr);
     Assert.assertEquals("testTopologyId", Runtime.topologyId(runtime));
     Assert.assertEquals("testTopologyName", Runtime.topologyName(runtime));
     Assert.assertEquals(mockTopology, Runtime.topology(runtime));
