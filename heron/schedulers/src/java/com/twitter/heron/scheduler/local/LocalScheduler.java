@@ -17,12 +17,9 @@ package com.twitter.heron.scheduler.local;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -30,16 +27,16 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.protobuf.Descriptors;
+import com.google.common.base.Optional;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
-import com.twitter.heron.proto.system.PackingPlans;
+import com.twitter.heron.scheduler.ScalableScheduler;
+import com.twitter.heron.scheduler.UpdateTopologyManager;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
-import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;
 import com.twitter.heron.spi.utils.ShellUtils;
@@ -52,6 +49,7 @@ public class LocalScheduler implements IScheduler {
   private final Map<Process, Integer> processToContainer = new ConcurrentHashMap<>();
   private Config config;
   private Config runtime;
+  private UpdateTopologyManager updateTopologyManager;
   // has the topology been killed?
   private volatile boolean isTopologyKilled = false;
 
@@ -59,6 +57,8 @@ public class LocalScheduler implements IScheduler {
   public void initialize(Config mConfig, Config mRuntime) {
     this.config = mConfig;
     this.runtime = mRuntime;
+    this.updateTopologyManager =
+        new UpdateTopologyManager(runtime, Optional.<ScalableScheduler>absent());
   }
 
   @Override
@@ -235,8 +235,10 @@ public class LocalScheduler implements IScheduler {
   @Override
   public boolean onUpdate(Scheduler.UpdateTopologyRequest request) {
     try {
-      adjustTopology(request.getCurrentPackingPlan(), request.getProposedPackingPlan());
-    } catch (ExecutionException|InterruptedException e) {
+      TopologyAPI.Topology topology = Runtime.topology(runtime);
+      updateTopologyManager.updateTopology(
+          request.getCurrentPackingPlan(), request.getProposedPackingPlan());
+    } catch (ExecutionException | InterruptedException e) {
       LOG.log(Level.SEVERE, "Could not update topology for request: " + request, e);
       return false;
     }
@@ -255,170 +257,5 @@ public class LocalScheduler implements IScheduler {
   // This method shall be used only for unit test
   Map<Process, Integer> getProcessToContainer() {
     return processToContainer;
-  }
-
-
-  // Handles scaling the cluster out or in based on the proposedInstanceDistribution
-  private void adjustTopology(PackingPlans.PackingPlan existingPackingPlan,
-                              PackingPlans.PackingPlan proposedPackingPlan)
-      throws ExecutionException, InterruptedException {
-    TopologyAPI.Topology topology = Runtime.topology(runtime);
-    String topologyName = topology.getName();
-
-    Map<String, Integer> proposedChanges = parallelismChanges(
-        existingPackingPlan.getInstanceDistribution(),
-        proposedPackingPlan.getInstanceDistribution());
-
-    SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
-
-    for (Map.Entry<String, Integer> proposedChange : proposedChanges.entrySet()) {
-      String componentName = proposedChange.getKey();
-      Integer parallelism = proposedChange.getValue();
-      topology = mergeTopology(topology, componentName, parallelism);
-    }
-
-    int existingContainerCount = parseInstanceDistributionContainers(
-        existingPackingPlan.getInstanceDistribution()).length;
-    int proposedContainerCount = parseInstanceDistributionContainers(
-        proposedPackingPlan.getInstanceDistribution()).length;
-    Integer containerDelta = proposedContainerCount - existingContainerCount;
-
-    assertTrue(proposedContainerCount > 0,
-        "proposed instance distribution must have at least 1 container %s",
-        proposedPackingPlan.getInstanceDistribution());
-
-    // request new aurora resources if necessary. Once containers are allocated we must make the
-    // changes to state manager quickly, otherwise aurora might penalize for thrashing on start-up
-    if (containerDelta > 0) {
-      addContainers(topologyName, containerDelta);
-    }
-
-    // assert found is same as existing.
-    PackingPlans.PackingPlan foundPackingPlan = stateManager.getPackingPlan(topologyName);
-    assertTrue(foundPackingPlan.equals(existingPackingPlan),
-        "Existing packing plan received does not equal the packing plan found in the state "
-        + "manager. Not updating topology. Received: %s, Found: %s",
-        existingPackingPlan, foundPackingPlan);
-
-    //update parallelism in topology since TMaster checks that Sum(parallelism) == Sum(instances)
-    print("==> Deleted existing Topology: %s", stateManager.deleteTopology(topologyName));
-    print("==> Set new Topology: %s", stateManager.setTopology(topology, topologyName));
-
-    print("==> Deleted existing packing plan: %s", stateManager.deletePackingPlan(topologyName));
-    print("==> Set new PackingPlan: %s",
-        stateManager.setPackingPlan(proposedPackingPlan, topologyName));
-
-    print("==> Deleted Physical Plan: %s", stateManager.deletePhysicalPlan(topologyName));
-
-    if (containerDelta < 0) {
-      removeContainers(topologyName, existingContainerCount, -containerDelta);
-    }
-  }
-
-  void addContainers(String topologyName, Integer count) {
-    throw new RuntimeException("addContainers not implemented by this scheduler.");
-  }
-
-  void removeContainers(String topologyName, Integer existingContainerCount, Integer count) {
-    throw new RuntimeException("addContainers not implemented by this scheduler.");
-  }
-
-  // Given the existing and proposed instance distribution, verify the proposal and return only
-  // the changes being requested.
-  private Map<String, Integer> parallelismChanges(String existingInstanceDistribution,
-                                                  String proposedInstanceDistribution) {
-    Map<String, Integer> existingParallelism =
-        parseInstanceDistribution(existingInstanceDistribution);
-    Map<String, Integer> proposedParallelism =
-        parseInstanceDistribution(proposedInstanceDistribution);
-    Map<String, Integer> parallelismChanges = new HashMap<>();
-
-    for (String componentName : proposedParallelism.keySet()) {
-      Integer newParallelism = proposedParallelism.get(componentName);
-      assertTrue(existingParallelism.containsKey(componentName),
-          "key %s in proposed instance distribution %s not found in "
-              + "current instance distribution %s",
-          componentName, proposedInstanceDistribution, existingInstanceDistribution);
-      assertTrue(newParallelism > 0,
-          "Non-positive parallelism (%s) for component %s found in instance distribution %s",
-          newParallelism, componentName, proposedInstanceDistribution);
-
-      if (!newParallelism.equals(existingParallelism.get(componentName))) {
-        parallelismChanges.put(componentName, newParallelism);
-      }
-    }
-    return parallelismChanges;
-  }
-
-  // given a string like "1:word:3:0:exclaim1:2:0:exclaim1:1:0,2:exclaim1:4:0" returns a map of
-  // { word -> 1, explain1 -> 3 }
-  private Map<String, Integer> parseInstanceDistribution(String instanceDistribution) {
-    Map<String, Integer> componentParallelism = new HashMap<>();
-    String[] containers = parseInstanceDistributionContainers(instanceDistribution);
-    for (String container : containers) {
-      String[] tokens = container.split(":");
-      assertTrue(tokens.length > 3 && (tokens.length - 1) % 3 == 0,
-          "Invalid instance distribution format. Expected componentId "
-              + "followed by instance triples: %s", instanceDistribution);
-      Set<String> idsFound = new HashSet<>();
-      for (int i = 1; i < tokens.length; i += 3) {
-        String instanceName = tokens[i];
-        String instanceId = tokens[i + 1];
-        assertTrue(!idsFound.contains(instanceId),
-            "Duplicate instanceId (%s) found in instance distribution %s for instance %s %s",
-            instanceId, instanceDistribution, instanceName, i);
-        idsFound.add(instanceId);
-        Integer occurrences = componentParallelism.getOrDefault(instanceName, 0);
-        componentParallelism.put(instanceName, occurrences + 1);
-      }
-    }
-    return componentParallelism;
-  }
-
-  private static String[] parseInstanceDistributionContainers(String instanceDistribution) {
-    return instanceDistribution.split(",");
-  }
-
-  private static TopologyAPI.Topology mergeTopology(TopologyAPI.Topology topology,
-                                                    String componentName,
-                                                    int parallelism) {
-    TopologyAPI.Topology.Builder builder = TopologyAPI.Topology.newBuilder().mergeFrom(topology);
-    for (int i = 0; i < builder.getBoltsCount(); i++) {
-      TopologyAPI.Bolt.Builder boltBuilder = builder.getBoltsBuilder(i);
-      TopologyAPI.Component.Builder compBuilder = boltBuilder.getCompBuilder();
-      for (Map.Entry<Descriptors.FieldDescriptor, Object> entry
-          : compBuilder.getAllFields().entrySet()) {
-        if (entry.getKey().getName().equals("name") && componentName.equals(entry.getValue())) {
-          TopologyAPI.Config.Builder confBuilder = compBuilder.getConfigBuilder();
-          boolean keyFound = false;
-          for (TopologyAPI.Config.KeyValue.Builder kvBuilder : confBuilder.getKvsBuilderList()) {
-            if (kvBuilder.getKey().equals(
-                com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_PARALLELISM)) {
-              kvBuilder.setValue(Integer.toString(parallelism));
-              keyFound = true;
-              break;
-            }
-          }
-          if (!keyFound) {
-            TopologyAPI.Config.KeyValue.Builder kvBuilder =
-                TopologyAPI.Config.KeyValue.newBuilder();
-            kvBuilder.setKey(com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_PARALLELISM);
-            kvBuilder.setValue(Integer.toString(parallelism));
-            confBuilder.addKvs(kvBuilder);
-          }
-        }
-      }
-    }
-    return builder.build();
-  }
-
-  protected void assertTrue(boolean condition, String message, Object... values) {
-    if (!condition) {
-      throw new RuntimeException("ERROR: " + String.format(message, values));
-    }
-  }
-
-  protected void print(String format, Object... values) {
-    LOG.fine(String.format(format, values));
   }
 }

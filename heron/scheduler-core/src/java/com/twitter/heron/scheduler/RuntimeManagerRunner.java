@@ -255,7 +255,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     Integer nextInstanceId = totalInstances + 1; // TODO: don't assume they go from 1 -> N
     StringBuilder newInstanceDist = new StringBuilder(currentPlan.getInstanceDistribution());
     boolean addNewContainer = false;
-    if(addNewContainer) {
+    if (addNewContainer) {
       newInstanceDist.append(",");
       newInstanceDist.append(totalInstances + 1);
       newInstanceDist.append(":");

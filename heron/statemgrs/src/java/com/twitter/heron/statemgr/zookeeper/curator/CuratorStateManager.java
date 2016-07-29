@@ -323,46 +323,6 @@ public class CuratorStateManager extends FileSystemStateManager {
     }
   }
 
-  @Override
-  protected void removeContainers(String topologyName,
-                                  Integer existingContainerCount,
-                                  Integer count) {
-    String instancesToKill = getInstancesIdsToKill(existingContainerCount, count);
-    //aurora job kill smf1/billg/devel/ExclamationTopology/3,4,5
-    List<String> auroraCmd =
-        new ArrayList<>(Arrays.asList("aurora", "job", "kill",
-            getAuroraJobName(topologyName) + "/" + instancesToKill));
-    print("Killing %s aurora container(s): %s", count, auroraCmd);
-    assertTrue(runProcess(auroraCmd),
-        "Failed to kill freed aurora instances %s", instancesToKill);
-  }
-
-  @Override
-  protected void addContainers(String topologyName, Integer count) {
-    //aurora job add smf1/billg/devel/ExclamationTopology/0 1
-    List<String> auroraCmd =
-        new ArrayList<>(Arrays.asList("aurora", "job", "add", "--wait-until",
-            "RUNNING", getAuroraJobName(topologyName) + "/0", count.toString()));
-    print("Requesting %s new aurora containers %s", count, auroraCmd);
-    assertTrue(runProcess(auroraCmd), "Failed to create new aurora instances");
-  }
-
-  private static String getAuroraJobName(String topologyName) {
-    //TODO: don't assume smf1 and devel
-    return String.format("smf1/%s/devel/%s", System.getProperty("user.name"), topologyName);
-  }
-
-  private static String getInstancesIdsToKill(int totalCount, int numToKill) {
-    StringBuilder ids = new StringBuilder();
-    for (int id = totalCount - numToKill + 1; id <= totalCount; id++) {
-      if (ids.length() > 0) {
-        ids.append(",");
-      }
-      ids.append(id);
-    }
-    return ids.toString();
-  }
-
   public static void main(String[] args) throws ExecutionException, InterruptedException,
       IllegalAccessException, ClassNotFoundException, InstantiationException {
     Config config = Config.newBuilder()
@@ -371,11 +331,5 @@ public class CuratorStateManager extends FileSystemStateManager {
         .build();
     CuratorStateManager stateManager = new CuratorStateManager();
     stateManager.doMain(args, config);
-  }
-
-  private static boolean runProcess(List<String> auroraCmd) {
-    boolean isVerbose = true;
-    return 0 == ShellUtils.runProcess(
-        isVerbose, auroraCmd.toArray(new String[0]), new StringBuilder(), new StringBuilder());
   }
 }

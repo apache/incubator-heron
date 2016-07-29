@@ -55,6 +55,8 @@ public class NullScheduler implements IScheduler {
   }
 
   @Override
-  public boolean onUpdate(Scheduler.UpdateTopologyRequest request) { return false; }
+  public boolean onUpdate(Scheduler.UpdateTopologyRequest request) {
+    return false;
+  }
 }
 

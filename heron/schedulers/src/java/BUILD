@@ -21,6 +21,7 @@ api_deps_files = [
 ]
 
 scheduler_deps_files = \
+    ["//heron/scheduler-core/src/java:scheduler-java"] + \
     heron_java_proto_files() + \
     common_deps_files + \
     spi_deps_files + \
@@ -28,7 +29,6 @@ scheduler_deps_files = \
 
 yarn_deps_files = \
     scheduler_deps_files + [
-        "//heron/scheduler-core/src/java:scheduler-java",
         "//third_party/java:yarn",
     ]
 
