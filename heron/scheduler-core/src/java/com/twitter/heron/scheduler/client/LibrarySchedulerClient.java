@@ -65,6 +65,20 @@ public class LibrarySchedulerClient implements ISchedulerClient {
     return ret;
   }
 
+  @Override
+  public boolean updateTopology(Scheduler.UpdateTopologyRequest updateTopologyRequest) {
+    boolean ret = false;
+
+    try {
+      scheduler.initialize(config, runtime);
+      ret = scheduler.onUpdate(updateTopologyRequest);
+    } finally {
+      SysUtils.closeIgnoringExceptions(scheduler);
+    }
+
+    return ret;
+  }
+
   // TODO(mfu): Use JAVA8's lambda feature providing a method for all commands in SchedulerUtils
   // TODO(mfu): boolean invokeSchedulerAsLibrary(String commandName, Function invoker);
 }

@@ -55,7 +55,10 @@ proto_library(
     gen_cc = 1,
     gen_java = 1,
     gen_py = 1,
-    deps = [":proto_common"],
+    deps = [
+        ":proto_common",
+        ":proto_packing_plan"
+    ],
 )
 
 proto_library(

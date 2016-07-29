@@ -179,6 +179,12 @@ public class MesosScheduler implements IScheduler {
     return mesosFramework.restartJob(containerId);
   }
 
+  @Override
+  public boolean onUpdate(Scheduler.UpdateTopologyRequest request) {
+    LOG.severe("Topology onUpdate not implemented by this scheduler.");
+    return false;
+  }
+
   protected MesosFramework getMesosFramework() {
     return new MesosFramework(config, runtime);
   }

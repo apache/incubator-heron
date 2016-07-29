@@ -109,6 +109,12 @@ public class AuroraScheduler implements IScheduler {
     return controller.restartJob(containerId);
   }
 
+  @Override
+  public boolean onUpdate(Scheduler.UpdateTopologyRequest request) {
+    LOG.severe("Topology onUpdate not implemented by this scheduler.");
+    return false;
+  }
+
   /**
    * Encode the JVM options
    *

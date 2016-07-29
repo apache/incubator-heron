@@ -31,7 +31,7 @@ def create_parser(subparsers, action, help_arg):
   parser = subparsers.add_parser(
       action,
       help=help_arg,
-      usage="%(prog)s [options] cluster/[role]/[env] topology-name",
+      usage="%(prog)s [options] cluster/[role]/[env] <topology-name>",
       add_help=False)
 
   args.add_titles(parser)

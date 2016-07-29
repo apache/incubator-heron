@@ -222,9 +222,9 @@ public abstract class FileSystemStateManager implements IStateManager {
       print("==> SchedulerLocation:\n%s",
           getSchedulerLocation(null, topologyName).get());
       print("==> TMasterLocation:\n%s", getTMasterLocation(null, topologyName).get());
-      print("==> PhysicalPlan:\n%s", getPhysicalPlan(null, topologyName).get());
       existingPackingPlan = getPackingPlan(null, topologyName).get();
       print("==> PackingPlan:\n%s", existingPackingPlan);
+      print("==> PhysicalPlan:\n%s", getPhysicalPlan(null, topologyName).get());
 
       if (args.length == 2) {
         String proposedInstanceDistribution = args[1];

@@ -23,6 +23,7 @@ public enum Command {
   KILL,
   ACTIVATE,
   DEACTIVATE,
+  UPDATE,
   RESTART;
 
   public static Command makeCommand(String commandString) {

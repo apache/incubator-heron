@@ -199,15 +199,14 @@ public class SchedulerStateManagerAdaptor {
     return awaitResult(delegate.getSchedulerLocation(null, topologyName));
   }
 
-// TODO(mfu): Currently this one is not used; comment it out.
-// /**
-//   * Get the topology definition for the given topology
-//   *
-//   * @return Topology
-//   */
-//  public TopologyAPI.Topology getTopology(String topologyName) {
-//    return awaitResult(delegate.getTopology(null, topologyName));
-//  }
+ /**
+   * Get the topology definition for the given topology
+   *
+   * @return Topology
+   */
+  public TopologyAPI.Topology getTopology(String topologyName) {
+    return awaitResult(delegate.getTopology(null, topologyName));
+  }
 
   /**
    * Get the execution state for the given topology
@@ -225,5 +224,14 @@ public class SchedulerStateManagerAdaptor {
    */
   public PhysicalPlans.PhysicalPlan getPhysicalPlan(String topologyName) {
     return awaitResult(delegate.getPhysicalPlan(null, topologyName));
+  }
+
+  /**
+   * Get the packing plan for the given topology
+   *
+   * @return PackingPlans.PackingPlan
+   */
+  public PackingPlans.PackingPlan getPackingPlan(String topologyName) {
+    return awaitResult(delegate.getPackingPlan(null, topologyName));
   }
 }

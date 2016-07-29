@@ -531,7 +531,8 @@ class HeronExecutor(object):
     return commands_to_kill, commands_to_keep, commands_to_start
 
   def launch(self):
-    current_commands = dict(map((lambda x: (x[1], x[2])), self.processes_to_monitor.values()))
+    current_commands = dict(map((lambda process: (process.name, process.command)),
+                                self.processes_to_monitor.values()))
     updated_commands = self.get_commands_to_run()
 
     # get the commands to kill, keep and start

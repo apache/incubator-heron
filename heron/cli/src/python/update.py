@@ -17,8 +17,10 @@ from heron.common.src.python.color import Log
 import heron.cli.src.python.args as args
 import heron.cli.src.python.execute as execute
 import heron.cli.src.python.jars as jars
+import heron.cli.src.python.opts as opts
 import heron.common.src.python.utils as utils
 
+import re
 
 def create_parser(subparsers):
   '''
@@ -26,26 +28,31 @@ def create_parser(subparsers):
   :return:
   '''
   parser = subparsers.add_parser(
-      'restart',
-      help='Restart a topology',
-      usage="%(prog)s [options] cluster/[role]/[env] <topology-name> [container-id]",
+      'update',
+      help='Update a topology',
+      usage="%(prog)s [options] cluster/[role]/[env] <topology-name> "
+      + "--component-parallelism <name:value> [name:value]",
       add_help=False)
 
   args.add_titles(parser)
   args.add_cluster_role_env(parser)
   args.add_topology(parser)
 
+  # pylint: disable=fixme
+  # TODO: passing this flag repeated should combine into a list but instead only the last is picked
+  # up and others are ignored
   parser.add_argument(
-      'container-id',
-      nargs='?',
-      type=int,
-      default=-1,
-      help='Identifier of the container to be restarted')
+      '--component-parallelism',
+      nargs='+',
+      type=str,
+      required=True,
+      help='Component name and the new parallelism value '
+      + 'colon-delimited: [component_name]:[parallelism]')
 
   args.add_config(parser)
   args.add_verbose(parser)
 
-  parser.set_defaults(subcommand='restart')
+  parser.set_defaults(subcommand='update')
   return parser
 
 
@@ -60,7 +67,13 @@ def run(command, parser, cl_args, unknown_args):
   '''
   topology_name = cl_args['topology-name']
   try:
-    container_id = cl_args['container-id']
+    pattern = re.compile(r"^[\w-]+:[\d]+$")
+    component_parallelism_list = cl_args['component_parallelism']
+    for component_parallelism in component_parallelism_list:
+      if not pattern.match(component_parallelism):
+        Log.error('Invalid syntax for component parallelism (<component_name>:<value>): %s'
+                  % component_parallelism)
+        return False
 
     new_args = [
         "--cluster", cl_args['cluster'],
@@ -72,8 +85,11 @@ def run(command, parser, cl_args, unknown_args):
         "--release_file", utils.get_heron_release_file(),
         "--topology_name", topology_name,
         "--command", command,
-        "--container_id", str(container_id)
+        "--component_parallelism", ','.join(component_parallelism_list),
     ]
+
+    if opts.verbose():
+      new_args.append("--verbose")
 
     lib_jars = utils.get_heron_libs(jars.scheduler_jars() + jars.statemgr_jars())
 
@@ -87,8 +103,8 @@ def run(command, parser, cl_args, unknown_args):
 
   except Exception as ex:
     print 'Error: %s' % str(ex)
-    Log.error('Failed to restart topology \'%s\'' % topology_name)
+    Log.error('Failed to update topology \'%s\'' % topology_name)
     return False
 
-  Log.info('Successfully restarted topology \'%s\'' % topology_name)
+  Log.info('Successfully updated topology \'%s\'' % topology_name)
   return True

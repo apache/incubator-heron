@@ -31,6 +31,7 @@ public class SchedulerServer {
   // initialize the various URL end points
   public static final String KILL_REQUEST_CONTEXT = "/kill";
   public static final String RESTART_REQUEST_CONTEXT = "/restart";
+  public static final String UPDATE_REQUEST_CONTEXT = "/update";
 
   private static final int SERVER_BACK_LOG = 0;
 
@@ -50,6 +51,9 @@ public class SchedulerServer {
 
     this.schedulerServer.createContext(RESTART_REQUEST_CONTEXT,
         new RestartRequestHandler(runtime, scheduler));
+
+    this.schedulerServer.createContext(UPDATE_REQUEST_CONTEXT,
+        new UpdateRequestHandler(runtime, scheduler));
   }
 
   public void start() {

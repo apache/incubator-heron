@@ -56,6 +56,11 @@ public class HttpServiceSchedulerClient implements ISchedulerClient {
     return requestSchedulerService(Command.KILL, killTopologyRequest.toByteArray());
   }
 
+  @Override
+  public boolean updateTopology(Scheduler.UpdateTopologyRequest updateTopologyRequest) {
+    return requestSchedulerService(Command.UPDATE, updateTopologyRequest.toByteArray());
+  }
+
   /**
    * Send payload to target HTTP connection to request a service
    *
