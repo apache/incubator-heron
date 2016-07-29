@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 '''topology_context.py'''
+import os
 
 from heron.common.src.python.utils.metrics import MetricsCollector
 
@@ -38,6 +39,7 @@ class TopologyContext(dict):
                                 map <stream_id -> a list of output fields>
   :key TASK_HOOKS: list of registered ITaskHook classes
   :key METRICS_COLLECTOR: contains MetricsCollector object that is responsible for this component
+  :key TOPOLOGY_PEX_PATH: contains the absolute path to the topology PEX file
   """
   # topology as supplied by the cluster overloaded by any component specific config
   CONFIG = 'config'
@@ -55,23 +57,28 @@ class TopologyContext(dict):
   COMPONENT_TO_OUT_FIELDS = 'comp_to_out_fields'
   # list of ITaskHook
   TASK_HOOKS = 'task_hooks'
+  # path to topology pex file
+  TOPOLOGY_PEX_PATH = 'topology_pex_path'
 
   METRICS_COLLECTOR = 'metrics_collector'
 
-  def __init__(self, config, topology, task_to_component, my_task_id, metrics_collector, **kwargs):
+  def __init__(self, config, topology, task_to_component, my_task_id, metrics_collector,
+               topo_pex_path, **kwargs):
     super(TopologyContext, self).__init__(**kwargs)
     self[self.CONFIG] = config
     self[self.TOPOLOGY] = topology
     self[self.TASK_TO_COMPONENT_MAP] = task_to_component
     self[self.TASK_ID] = my_task_id
     self[self.METRICS_COLLECTOR] = metrics_collector
+    self[self.TOPOLOGY_PEX_PATH] = os.path.abspath(topo_pex_path)
+
     inputs, outputs, out_fields = self._get_inputs_and_outputs_and_outfields(topology)
     self[self.INPUTS] = inputs
     self[self.OUTPUTS] = outputs
     self[self.COMPONENT_TO_OUT_FIELDS] = out_fields
-    self[self.TASK_HOOKS] = []
 
     # init task hooks
+    self[self.TASK_HOOKS] = []
     self._init_task_hooks()
 
   def _init_task_hooks(self):
@@ -81,7 +88,6 @@ class TopologyContext(dict):
 
     for class_name in task_hooks_cls_list:
       pass
-
 
 
   def get_metrics_collector(self):

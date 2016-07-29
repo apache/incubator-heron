@@ -125,7 +125,7 @@ class SingleThreadHeronInstance(object):
     # TODO: bind the metrics collector with topology context
 
     self.my_pplan_helper = pplan_helper
-    self.my_pplan_helper.set_topology_context(self.metrics_collector)
+    self.my_pplan_helper.set_topology_context(self.metrics_collector, self.topo_pex_file_path)
 
     # TODO: handle STATE CHANGE
 
