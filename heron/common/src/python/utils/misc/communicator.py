@@ -50,7 +50,7 @@ class HeronCommunicator(object):
         self._producer_callback()
       return ret
     except Queue.Empty:
-      Log.debug(str(self) + " : " + "Empty in poll()")
+      Log.debug("%s: Empty in poll()" % str(self))
       raise Queue.Empty
 
   def offer(self, item):
@@ -65,7 +65,7 @@ class HeronCommunicator(object):
         self._consumer_callback()
       return True
     except Queue.Full:
-      Log.debug(str(self) + " : " + "Full in offer()")
+      Log.debug("%s: Full in offer()" % str(self))
       return False
 
   def __str__(self):

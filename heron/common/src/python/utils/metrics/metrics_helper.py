@@ -46,14 +46,14 @@ class BaseMetricsHelper(object):
     :param key: specifies a key for MultiCountMetric. Needs to be `None` for updating CountMetric.
     """
     if name not in self.metrics:
-      Log.error("In update_count(): " + name + " is not registered in the metric")
+      Log.error("In update_count(): %s is not registered in the metric" % name)
 
     if key is None and isinstance(self.metrics[name], CountMetric):
       self.metrics[name].incr(incr_by)
     elif key is not None and isinstance(self.metrics[name], MultiCountMetric):
       self.metrics[name].incr(key, incr_by)
     else:
-      Log.error("In update_count(): " + name + " is registered but not supported with this method ")
+      Log.error("In update_count(): %s is registered but not supported with this method" % name)
 
   def update_reduced_metric(self, name, value, key=None):
     """Update the value of ReducedMetric or MultiReducedMetric
@@ -66,14 +66,14 @@ class BaseMetricsHelper(object):
                 ReducedMetric.
     """
     if name not in self.metrics:
-      Log.error("In update_reduced_metric(): " + name + " is not registered in the metric")
+      Log.error("In update_reduced_metric(): %s is not registered in the metric" % name)
 
     if key is None and isinstance(self.metrics[name], ReducedMetric):
       self.metrics[name].update(value)
     elif key is not None and isinstance(self.metrics[name], MultiReducedMetric):
       self.metrics[name].update(key, value)
     else:
-      Log.error("In update_count(): " + name + " is registered but not supported with this method")
+      Log.error("In update_count(): %s is registered but not supported with this method" % name)
 
 class GatewayMetrics(BaseMetricsHelper):
   """Metrics helper class for Gateway metric"""
@@ -285,9 +285,9 @@ class MetricsCollector(object):
     :param time_bucket_in_sec: time interval for update to the metrics manager
     """
     if name in self.metrics_map:
-      raise RuntimeError("Another metric has already been registered with name: " + name)
+      raise RuntimeError("Another metric has already been registered with name: %s" % name)
 
-    Log.debug("Register metric: " + name + ", with interval: " + str(time_bucket_in_sec))
+    Log.debug("Register metric: %s, with interval: %s" % (name, str(time_bucket_in_sec)))
     self.metrics_map[name] = metric
 
     if time_bucket_in_sec in self.time_bucket_in_sec_to_metrics_name:
@@ -300,7 +300,7 @@ class MetricsCollector(object):
     if time_bucket_in_sec in self.time_bucket_in_sec_to_metrics_name:
       message = metrics_pb2.MetricPublisherPublishMessage()
       for name in self.time_bucket_in_sec_to_metrics_name[time_bucket_in_sec]:
-        Log.debug("Will call gather_one_metric with " + name)
+        Log.debug("Will call gather_one_metric with %s" % name)
         self._gather_one_metric(name, message)
 
       assert message.IsInitialized()
@@ -315,7 +315,7 @@ class MetricsCollector(object):
 
   def _gather_one_metric(self, name, message):
     metric_value = self.metrics_map[name].get_value_and_reset()
-    Log.debug("In gather_one_metric with name: " + name + ", and value: " + str(metric_value))
+    Log.debug("In gather_one_metric with name: %s, and value: %s" % (name, str(metric_value)))
 
     if metric_value is None:
       return
@@ -323,9 +323,10 @@ class MetricsCollector(object):
       for key, value in metric_value.iteritems():
         if key is not None and value is not None:
           self._add_data_to_message(message, name + "/" + str(key), value)
+          self._add_data_to_message(message, "%s/%s" % (name, str(key)), value)
         else:
-          Log.info("When gathering metric: " + name + " <" + str(key) + ":" + str(value) +
-                   "> is not a valid key-value to output as metric. Skipping...")
+          Log.info("When gathering metric: %s, <%s:%s> is not a valid key-value to output "
+                   "as metric. Skipping..." % (name, str(key), str(value)))
 
           continue
     else:

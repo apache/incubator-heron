@@ -45,7 +45,7 @@ class PhysicalPlanHelper(object):
         break
 
     if self.my_instance is None:
-      raise RuntimeError("There was no instance that matched my id " + self.my_instance_id)
+      raise RuntimeError("There was no instance that matched my id: %s" % self.my_instance_id)
 
     self.my_component_name = self.my_instance.info.component_name
     self.my_task_id = self.my_instance.info.task_id
@@ -94,12 +94,11 @@ class PhysicalPlanHelper(object):
     # do some checking to make sure that the number of fields match what's expected
     size = self._output_schema.get(stream_id, None)
     if size is None:
-      raise RuntimeError(self.my_component_name + " emitting stream " + stream_id +
-                         " but was not declared in output fields")
+      raise RuntimeError("%s emitting to stream %s but was not declared in output fields"
+                         % (self.my_component_name, stream_id))
     elif size != len(tup):
-      raise RuntimeError("Number of fields emitted in stream " + stream_id +
-                         " does not match what's expected. Expected: " + str(size) +
-                         ", Observed: " + str(len(tup)))
+      raise RuntimeError("Number of fields emitted in stream %s does not match what's expected. "
+                         "Expected: %s, Observed: %s" % (stream_id, size, len(tup)))
 
   def get_my_spout(self):
     """Returns spout instance, or ``None`` if bolt is assigned"""
@@ -146,7 +145,7 @@ class PhysicalPlanHelper(object):
       if kv.HasField("value"):
         config[kv.key] = kv.value
       else:
-        Log.error("Unsupported config key:value found: " + str(kv))
+        Log.error("Unsupported config <key:value> found: %s" % str(kv))
         continue
 
     return config
