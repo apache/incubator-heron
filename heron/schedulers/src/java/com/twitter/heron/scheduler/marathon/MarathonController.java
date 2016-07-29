@@ -47,7 +47,10 @@ public class MarathonController {
     }
 
     // Send kill topology request
-    NetworkUtils.sendHttpDeleteRequest(conn);
+    if (!NetworkUtils.sendHttpDeleteRequest(conn)) {
+      LOG.log(Level.SEVERE, "Failed to set delete request");
+      return false;
+    }
 
     // Check response
     boolean success = NetworkUtils.checkHttpResponseCode(conn, HttpURLConnection.HTTP_OK);
