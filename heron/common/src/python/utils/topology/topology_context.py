@@ -15,8 +15,30 @@
 
 from heron.common.src.python.utils.metrics import MetricsCollector
 
+import heron.common.src.python.constants as constants
+
 class TopologyContext(dict):
-  """Helper Class for Topology Context, inheriting from dict"""
+  """Helper Class for Topology Context, inheriting from dict
+
+  This is automatically created by Heron Instance and topology writers never need to create
+  an instance by themselves.
+
+  The following keys are present by default
+
+  :key CONFIG: contains cluster configuration
+               (topology-wide config overriden by component-specific config)
+  :key TOPOLOGY: contains Topology protobuf message
+  :key TASK_TO_COMPONENT_MAP: contains dictionary mapping from task_id to component-id
+  :key TASK_ID: contains task id for this component
+  :key INPUTS: contains dictionary mapping from component_id to list of its inputs
+               as protobuf InputStream messages
+  :key OUTPUTS: contains dictionary mapping from component_id to list of its outputs
+                as protobuf OutputStream messages
+  :key COMPONENT_TO_OUT_FIELDS: contains nested dictionary mapping from component_id to
+                                map <stream_id -> a list of output fields>
+  :key TASK_HOOKS: list of registered ITaskHook classes
+  :key METRICS_COLLECTOR: contains MetricsCollector object that is responsible for this component
+  """
   # topology as supplied by the cluster overloaded by any component specific config
   CONFIG = 'config'
   # topology protobuf
@@ -31,6 +53,8 @@ class TopologyContext(dict):
   OUTPUTS = 'outputs'
   # dict <component_id -> <stream_id -> fields>>
   COMPONENT_TO_OUT_FIELDS = 'comp_to_out_fields'
+  # list of ITaskHook
+  TASK_HOOKS = 'task_hooks'
 
   METRICS_COLLECTOR = 'metrics_collector'
 
@@ -45,6 +69,20 @@ class TopologyContext(dict):
     self[self.INPUTS] = inputs
     self[self.OUTPUTS] = outputs
     self[self.COMPONENT_TO_OUT_FIELDS] = out_fields
+    self[self.TASK_HOOKS] = []
+
+    # init task hooks
+    self._init_task_hooks()
+
+  def _init_task_hooks(self):
+    task_hooks_cls_list = self[self.CONFIG].get(constants.TOPOLOGY_AUTO_TASK_HOOKS, None)
+    if task_hooks_cls_list is None:
+      return
+
+    for class_name in task_hooks_cls_list:
+      pass
+
+
 
   def get_metrics_collector(self):
     """Returns this context's metrics collector"""
