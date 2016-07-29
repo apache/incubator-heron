@@ -21,12 +21,12 @@ import heron.common.src.python.constants as constants
 
 class WordCount(Topology):
   config = {constants.TOPOLOGY_ENABLE_ACKING: "true",
-            constants.TOPOLOGY_MAX_SPOUT_PENDING: 10000000}
+            constants.TOPOLOGY_MAX_SPOUT_PENDING: 100000000}
 
   #another_stream = GlobalStreamId(componentId="word_spout", streamId="another_stream")
-  word_spout = WordSpout.spec(par=2)
+  word_spout = WordSpout.spec(par=1)
   #count_bolt = CountBolt.spec(par=1, inputs={word_spout: Grouping.fields('word'),
   #                                           another_stream: Grouping.fields('word')})
-  count_bolt = CountBolt.spec(par=2,
+  count_bolt = CountBolt.spec(par=1,
                               inputs={word_spout: Grouping.fields('word')},
                               config={constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS: 10})

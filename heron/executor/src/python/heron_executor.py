@@ -462,9 +462,18 @@ class HeronExecutor(object):
       do_print("%s stderr: %s" %(name, process_stderr))
 
   def _run_process(self, name, cmd, env_to_exec=None):
-    do_print("Running %s process as %s" % (name, ' '.join(cmd)))
-    return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                            env=env_to_exec)
+    if 'single_thread_heron_instance' in cmd[0]:
+      if env_to_exec is None:
+        env = {}
+      else:
+        env = env_to_exec.copy()
+      env["PEX_PROFILE"] = "true"
+      do_print("Running -env_set %s process as %s" % (name, ' '.join(cmd)))
+      return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
+    else:
+      do_print("Running %s process as %s" % (name, ' '.join(cmd)))
+      return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                              env=env_to_exec)
 
   def _run_blocking_process(self, cmd, is_shell, env_to_exec=None):
     do_print("Running blocking process as %s" % cmd)
