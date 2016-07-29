@@ -86,7 +86,9 @@ message Component {
   optional bytes serialized_object = 4;
 
   required Config config = 3;
-  required ComponentObjectSpec spec = 5;
+
+  // This is made optional for backward compatibility
+  optional ComponentObjectSpec spec = 5;
 }
 
 message Spout {
