@@ -23,6 +23,8 @@ import java.util.logging.Logger;
 
 import com.twitter.heron.spi.utils.NetworkUtils;
 
+import sun.nio.ch.Net;
+
 public class MarathonController {
   private static final Logger LOG = Logger.getLogger(MarathonController.class.getName());
 
@@ -40,55 +42,30 @@ public class MarathonController {
     this.isVerbose = isVerbose;
   }
 
-  protected HttpURLConnection createHttpConnection(String uri) {
-    HttpURLConnection connection;
-    try {
-      connection = NetworkUtils.getConnection(uri);
-    } catch (IOException ex) {
-      throw new RuntimeException("Failed to create connection for " + uri);
-    }
-
-    return connection;
-  }
-
   public boolean killTopology() {
     // Setup Connection
     String topologyURI = String.format("%s/v2/groups/%s", this.marathonURI, this.topologyName);
-    HttpURLConnection conn = createHttpConnection(topologyURI);
-
-    try {
-      conn.setRequestMethod("DELETE");
-    } catch (ProtocolException e) {
-      LOG.log(Level.SEVERE, "Failed to set delete request: ", e);
-      conn.disconnect();
+    HttpURLConnection conn = NetworkUtils.getHttpConnection(topologyURI);
+    if (conn == null) {
+      LOG.log(Level.SEVERE, "Failed to find marathon scheduler");
       return false;
     }
 
-    try {
-      conn.connect();
-    } catch (IOException ex) {
-      LOG.log(Level.SEVERE, "Failed to connect: ", ex);
-      return false;
-    } finally {
-      conn.disconnect();
-    }
+    // Send kill topology request
+    NetworkUtils.sendHttpDeleteRequest(conn);
 
     // Check response
-    try {
-      int responseCode = conn.getResponseCode();
-      if (responseCode != HttpURLConnection.HTTP_OK) {
-        throw new RuntimeException("Failed to kill topology");
-      } else {
-        LOG.log(Level.INFO, "Topology killed successfully");
-      }
-    } catch (IOException ex) {
-      LOG.log(Level.SEVERE, "Failed to get response code");
-      return false;
-    } finally {
-      conn.disconnect();
-    }
+    boolean success = NetworkUtils.checkHttpResponseCode(conn, HttpURLConnection.HTTP_OK);
+    // Disconnect to release resources
+    conn.disconnect();
 
-    return true;
+    if (success) {
+      LOG.log(Level.INFO, "Successfully killed topology");
+      return true;
+    } else {
+      LOG.log(Level.SEVERE, "Failed to kill topology");
+      return false;
+    }
   }
 
   public boolean restartApp(int appId) {
@@ -100,43 +77,31 @@ public class MarathonController {
     // Setup Connection
     String restartRequest = String.format("%s/v2/apps/%s/%d/restart",
         this.marathonURI, this.topologyName, appId);
-    HttpURLConnection conn = createHttpConnection(restartRequest);
-
-    try {
-      conn.setRequestMethod("POST");
-    } catch (ProtocolException e) {
-      LOG.log(Level.SEVERE, "Failed to set post request: ", e);
-      conn.disconnect();
+    HttpURLConnection conn = NetworkUtils.getHttpConnection(restartRequest);
+    if (conn == null) {
+      LOG.log(Level.SEVERE, "Failed to find marathon scheduler");
       return false;
     }
 
-    try {
-      conn.connect();
-    } catch (IOException ex) {
-      LOG.log(Level.SEVERE, "Failed to connect: ", ex);
-      return false;
-    } finally {
+    byte[] empty = new byte[0];
+    if (!NetworkUtils.sendHttpPostRequest(conn, NetworkUtils.JSON_TYPE, empty)) {
+      LOG.log(Level.SEVERE, "Failed to set post request");
       conn.disconnect();
+      return false;
     }
 
     // Check response
-    try {
-      int responseCode = conn.getResponseCode();
-      if (responseCode != HttpURLConnection.HTTP_OK) {
-        String msg = String.format("Failed to restart container %d" + appId);
-        throw new RuntimeException(msg);
-      } else {
-        String msg = String.format("Container %s restarted successfully", appId);
-        LOG.log(Level.INFO, msg);
-      }
-    } catch (IOException ex) {
-      LOG.log(Level.SEVERE, "Failed to get response code");
-      return false;
-    } finally {
-      conn.disconnect();
-    }
+    boolean success = NetworkUtils.checkHttpResponseCode(conn, HttpURLConnection.HTTP_OK);
+    // Disconnect to release resources
+    conn.disconnect();
 
-    return true;
+    if (success) {
+      LOG.log(Level.INFO, "Successfully restarted container {0}", appId);
+      return true;
+    } else {
+      LOG.log(Level.SEVERE, "Failed to restart container {0}", appId);
+      return false;
+    }
   }
 
   // submit a topology as a group, containers as apps in the group
@@ -147,52 +112,30 @@ public class MarathonController {
 
     // Setup Connection
     String schedulerURI = String.format("%s/v2/groups", this.marathonURI);
-    HttpURLConnection conn = createHttpConnection(schedulerURI);
-
-    try {
-      conn.setRequestMethod("POST");
-    } catch (ProtocolException e) {
-      LOG.log(Level.SEVERE, "Failed to set post request: ", e);
-      conn.disconnect();
+    HttpURLConnection conn = NetworkUtils.getHttpConnection(schedulerURI);
+    if (conn == null) {
+      LOG.log(Level.SEVERE, "Failed to find marathon scheduler");
       return false;
     }
-    conn.setDoOutput(true);
-    conn.setRequestProperty(NetworkUtils.CONTENT_TYPE, "application/json");
 
-    OutputStream os = null;
-    try {
-      // Send request
-      os = conn.getOutputStream();
-      os.write(appConf.getBytes());
-      os.flush();
-    } catch (IOException exception) {
-      LOG.log(Level.SEVERE, "Failed to send the topology conf", exception);
+    // Send post request with marathon conf for topology
+    if (!NetworkUtils.sendHttpPostRequest(conn, NetworkUtils.JSON_TYPE, appConf.getBytes())) {
+      LOG.log(Level.SEVERE, "Failed to ");
       conn.disconnect();
       return false;
-    } finally {
-      try {
-        if (os != null) {
-          os.close();
-        }
-      } catch (IOException ex) {
-        // Do nothing
-      }
     }
 
     // Check response
-    try {
-      int responseCode = conn.getResponseCode();
-      if (responseCode != HttpURLConnection.HTTP_CREATED) {
-        throw new RuntimeException("Failed to submit topology");
-      } else {
-        LOG.log(Level.INFO, "Topology submitted successfully");
-        return true;
-      }
-    } catch (IOException ex) {
-      LOG.log(Level.SEVERE, "Failed to get response code");
+    boolean success = NetworkUtils.checkHttpResponseCode(conn, HttpURLConnection.HTTP_CREATED);
+    // Disconnect to release resources
+    conn.disconnect();
+
+    if (success) {
+      LOG.log(Level.INFO, "Topology submitted successfully");
+      return true;
+    } else {
+      LOG.log(Level.SEVERE, "Failed to submit topology");
       return false;
-    } finally {
-      conn.disconnect();
     }
   }
 }

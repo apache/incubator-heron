@@ -63,7 +63,8 @@ public class HttpServiceSchedulerClient implements ISchedulerClient {
    * @return true if got OK response successfully
    */
   protected boolean requestSchedulerService(Command command, byte[] data) {
-    final HttpURLConnection connection = createHttpConnection(command);
+    String endpoint = getCommandEndpoint(schedulerHttpEndpoint, command);
+    final HttpURLConnection connection = NetworkUtils.getHttpConnection(endpoint);
     if (connection == null) {
       LOG.severe("Scheduler not found.");
       return false;
@@ -72,7 +73,7 @@ public class HttpServiceSchedulerClient implements ISchedulerClient {
     // now, we have a valid connection
     try {
       // send the actual http request
-      if (!NetworkUtils.sendHttpPostRequest(connection, data)) {
+      if (!NetworkUtils.sendHttpPostRequest(connection, NetworkUtils.URL_ENCODE_TYPE, data)) {
         LOG.log(Level.SEVERE, "Failed to send http request to scheduler");
         return false;
       }
@@ -99,25 +100,6 @@ public class HttpServiceSchedulerClient implements ISchedulerClient {
     }
 
     return true;
-  }
-
-  /**
-   * Create a http connection, if the scheduler end point is present
-   */
-  protected HttpURLConnection createHttpConnection(Command command) {
-    // construct the http request for command
-    String endpoint = getCommandEndpoint(schedulerHttpEndpoint, command);
-
-    // construct the http url connection
-    HttpURLConnection connection;
-    try {
-      connection = NetworkUtils.getConnection(endpoint);
-    } catch (IOException e) {
-      LOG.log(Level.SEVERE, "Failed to connect to scheduler http endpoint: {0}", endpoint);
-      return null;
-    }
-
-    return connection;
   }
 
   /**

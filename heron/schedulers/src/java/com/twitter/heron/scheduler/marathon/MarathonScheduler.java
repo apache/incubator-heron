@@ -79,8 +79,8 @@ public class MarathonScheduler implements IScheduler {
   @Override
   public List<String> getJobLinks() {
     List<String> jobLinks = new LinkedList<>();
-    String marathonGroupLink =
-        MarathonContext.getSchedulerURI(config) + "/ui/#/group/%2F" + Runtime.topologyName(runtime);
+    String marathonGroupLink = MarathonContext.getSchedulerURI(config) +
+        MarathonConstants.JOB_LINK + Runtime.topologyName(runtime);
     jobLinks.add(marathonGroupLink);
     return jobLinks;
   }
@@ -110,31 +110,31 @@ public class MarathonScheduler implements IScheduler {
     for (int i = 0; i < Runtime.numContainers(runtime); i++) {
       ObjectNode instance = mapper.createObjectNode();
 
-      instance.put("id", Integer.toString(i));
-      instance.put("cmd", getExecutorCommand(i));
-      instance.put("cpus", containerResource.cpu);
-      instance.put("mem", containerResource.ram / Constants.MB);
-      instance.put("disk", containerResource.disk / Constants.MB);
-      instance.set("portDefinitions", getPorts(mapper));
-      instance.put("instances", 1);
-      instance.set("labels", getLabels(mapper));
-      instance.set("fetch", getFetchList(mapper));
-      instance.put("user", Context.role(config));
+      instance.put(MarathonConstants.ID, Integer.toString(i));
+      instance.put(MarathonConstants.COMMAND, getExecutorCommand(i));
+      instance.put(MarathonConstants.CPU, containerResource.cpu);
+      instance.put(MarathonConstants.MEMORY, containerResource.ram / Constants.MB);
+      instance.put(MarathonConstants.DISK, containerResource.disk / Constants.MB);
+      instance.set(MarathonConstants.PORT_DEFINITIONS, getPorts(mapper));
+      instance.put(MarathonConstants.INSTANCES, 1);
+      instance.set(MarathonConstants.LABELS, getLabels(mapper));
+      instance.set(MarathonConstants.FETCH, getFetchList(mapper));
+      instance.put(MarathonConstants.USER, Context.role(config));
 
       instances.add(instance);
     }
 
     // Create marathon group for a topology
     ObjectNode appConf = mapper.createObjectNode();
-    appConf.put("id", Runtime.topologyName(runtime));
-    appConf.set("apps", instances);
+    appConf.put(MarathonConstants.ID, Runtime.topologyName(runtime));
+    appConf.set(MarathonConstants.APPS, instances);
 
     return appConf.toString();
   }
 
   protected  ObjectNode getLabels(ObjectMapper mapper) {
     ObjectNode labelNode = mapper.createObjectNode();
-    labelNode.put("environment", Context.environ(config));
+    labelNode.put(MarathonConstants.ENVIRONMENT, Context.environ(config));
     return labelNode;
   }
 
@@ -147,10 +147,10 @@ public class MarathonScheduler implements IScheduler {
     ArrayNode urisNode= mapper.createArrayNode();
     for (String uri : uris) {
       ObjectNode uriObject = mapper.createObjectNode();
-      uriObject.put("uri", uri);
-      uriObject.put("executable", false);
-      uriObject.put("extract", true);
-      uriObject.put("cache", false);
+      uriObject.put(MarathonConstants.URI, uri);
+      uriObject.put(MarathonConstants.EXECUTABLE, false);
+      uriObject.put(MarathonConstants.EXTRACT, true);
+      uriObject.put(MarathonConstants.CACHE, false);
 
       urisNode.add(uriObject);
     }
@@ -160,14 +160,12 @@ public class MarathonScheduler implements IScheduler {
 
   protected ArrayNode getPorts(ObjectMapper mapper) {
     ArrayNode ports = mapper.createArrayNode();
-    String[] portNames = new String[]{
-        "master", "tmaster-controller", "tmaster-stats", "shell", "metricsmrg", "scheduler"};
 
-    for (String portName : portNames) {
+    for (String portName : MarathonConstants.PORT_NAMES) {
       ObjectNode port = mapper.createObjectNode();
-      port.put("port", 0);
-      port.put("protocol", "tcp");
-      port.put("name", portName);
+      port.put(MarathonConstants.PORT, 0);
+      port.put(MarathonConstants.PROTOCOL, MarathonConstants.TCP);
+      port.put(MarathonConstants.PORT_NAME, portName);
 
       ports.add(port);
     }
@@ -192,18 +190,18 @@ public class MarathonScheduler implements IScheduler {
     commands.add(Context.metricsManagerSandboxClassPath(config));
     commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)));
     commands.add(TopologyUtils.makeClassPath(topology, Context.topologyJarFile(config)));
-    commands.add("$PORT0"); // master port
-    commands.add("$PORT1"); // tmaster controller port
-    commands.add("$PORT2"); // tmaster stats port
+    commands.add(MarathonConstants.MASTER_PORT);
+    commands.add(MarathonConstants.TMASTER_CONTROLLER_PORT);
+    commands.add(MarathonConstants.TMASTER_STATS_PORT);
     commands.add(Context.systemConfigSandboxFile(config));
     commands.add(Runtime.componentRamMap(runtime));
     commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
     commands.add(Context.topologyPackageType(config));
     commands.add(Context.topologyJarFile(config));
     commands.add(Context.javaSandboxHome(config));
-    commands.add("$PORT3"); // shell port
+    commands.add(MarathonConstants.SHELL_PORT);
     commands.add(Context.shellSandboxBinary(config));
-    commands.add("$PORT4"); // metrics port
+    commands.add(MarathonConstants.METRICSMGR_PORT);
     commands.add(Context.cluster(config));
     commands.add(Context.role(config));
     commands.add(Context.environ(config));
@@ -216,7 +214,7 @@ public class MarathonScheduler implements IScheduler {
         .append(Context.stateManagerSandboxClassPath(config))
         .toString();
     commands.add(completeSchedulerProcessClassPath);
-    commands.add("$PORT5"); // scheduler port
+    commands.add(MarathonConstants.SCHEDULER_PORT);
 
     return Joiner.on(" ").join(commands);
   }
