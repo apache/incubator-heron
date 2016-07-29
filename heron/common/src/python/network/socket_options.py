@@ -35,11 +35,10 @@ def create_socket_options(sys_config):
   try:
     value_lst = [int(sys_config[opt]) for opt in opt_list]
     sock_opt = SocketOptions(*value_lst)
-    Log.debug("Socket options: " + str(sock_opt))
     return sock_opt
   except ValueError as e:
     # couldn't convert to int
-    raise ValueError("Invalid value in sys_config: " + e.message)
+    raise ValueError("Invalid value in sys_config: %s" % e.message)
   except KeyError as e:
     # option key was not found
-    raise KeyError("Incomplete sys_config: " + e.message)
+    raise KeyError("Incomplete sys_config: %s" % e.message)
