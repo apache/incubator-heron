@@ -180,6 +180,7 @@ def print_usage():
         "<heron_internals_config_filename> <topology_pex_file_path>")
 
 def yaml_config_reader(config_path):
+  # TODO: create auto-typed system config
   if not config_path.endswith(".yaml"):
     raise ValueError("Config file not yaml")
 

@@ -192,7 +192,7 @@ class TopologyType(type):
     return sanitized
 
 class Topology(object):
-  """Topology is an abstract class to define a topology
+  """Topology is an abstract class for defining a topology
 
   Topology writers can define their custom topology by inheriting this class.
   The usage of this class is compatible with StreamParse API.

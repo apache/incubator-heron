@@ -17,7 +17,8 @@ import socket
 from heron.proto import topology_pb2
 from heron.common.src.python.log import Log
 from heron.common.src.python.utils.topology import TopologyContext
-from heron.common.src.python.utils.misc import PythonSerializer
+
+from .serializer import PythonSerializer
 
 # pylint: disable=too-many-instance-attributes
 class PhysicalPlanHelper(object):

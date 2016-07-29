@@ -34,11 +34,13 @@ class Spout(Component):
 
     if not self.pplan_helper.is_spout:
       raise RuntimeError("No spout in physicial plan")
+
+    # spout_config is auto-typed, not <str -> str> only
     self.spout_config = self.pplan_helper.context['config']
     self.spout_metrics = SpoutMetrics(self.pplan_helper)
 
     # acking related
-    self.acking_enabled = True if self.spout_config.get(constants.TOPOLOGY_ENABLE_ACKING, 'false') == 'true' else False
+    self.acking_enabled = self.spout_config.get(constants.TOPOLOGY_ENABLE_ACKING, False)
     Log.info("Enable ACK: " + str(self.acking_enabled))
     self.in_flight_tuples = dict()
     self.immediate_acks = collections.deque()
@@ -180,8 +182,9 @@ class Spout(Component):
         break
 
   def _produce_tuple(self):
-    # TODO: Don't do the default config here
-    max_spout_pending = int(self.spout_config.get(constants.TOPOLOGY_MAX_SPOUT_PENDING, 10000000))
+    # TOPOLOGY_MAX_SPOUT_PENDING must be provided (if not included, raise KeyError)
+    max_spout_pending = self.spout_config.get(constants.TOPOLOGY_MAX_SPOUT_PENDING)
+
     total_tuples_emitted_before = self.total_tuples_emitted
     total_data_emitted_bytes_before = self.get_total_data_emitted_in_bytes()
     emit_batch_time = float(self.sys_config[constants.INSTANCE_EMIT_BATCH_TIME_MS]) * constants.MS_TO_SEC
@@ -276,7 +279,8 @@ class Spout(Component):
   def initialize(self, config={}, context={}):
     """Called when a task for this component is initialized within a worker on the cluster
 
-    It is compatible with StreamParse API. (Parameter name changed from ``storm_conf`` to ``config``)
+    It is compatible with StreamParse API.
+    (Parameter name changed from ``storm_conf`` to ``config``)
 
     It provides the spout with the environment in which the spout executes. A good place to
     initialize connections to data sources.
@@ -284,9 +288,15 @@ class Spout(Component):
     *Should be implemented by a subclass.*
 
     :type config: dict
-    :param config: The Heron configuration for this spout. This is the configuration provided to the topology merged in with cluster configuration on this machine.
+    :param config: The Heron configuration for this bolt. This is the configuration provided to
+                   the topology merged in with cluster configuration on this machine.
+                   Note that types of string values in the config have been automatically converted,
+                   meaning that number strings and boolean strings are converted to appropriate
+                   types.
     :type context: dict
-    :param context: This object can be used to get information about this task's place within the topology, including the task id and component id of this task, input and output information, etc.
+    :param context: This object can be used to get information about this task's place within the
+                    topology, including the task id and component id of this task, input and output
+                    information, etc.
     """
     pass
 

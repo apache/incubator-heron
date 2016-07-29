@@ -33,12 +33,14 @@ class Bolt(Component):
 
     if self.pplan_helper.is_spout:
       raise RuntimeError("No bolt in physical plan")
+
+    # bolt_config is auto-typed, not <str -> str> only
     self.bolt_config = self.pplan_helper.context['config']
     self.bolt_metrics = BoltMetrics(self.pplan_helper)
 
     # acking related
-    self.acking_enabled = True if self.bolt_config.get(constants.TOPOLOGY_ENABLE_ACKING, 'false') == 'true' else False
-    Log.info("Enable ACK: " + str(self.acking_enabled))
+    self.acking_enabled = self.bolt_config.get(constants.TOPOLOGY_ENABLE_ACKING, False)
+    Log.info("Enable ACK: %s" % str(self.acking_enabled))
 
     # TODO: Topology context, serializer and sys config
 
@@ -98,7 +100,8 @@ class Bolt(Component):
   def _deactivate(self):
     pass
 
-  def emit(self, tup, stream=Component.DEFAULT_STREAM_ID, anchors=None, direct_task=None, need_task_ids=False):
+  def emit(self, tup, stream=Component.DEFAULT_STREAM_ID,
+           anchors=None, direct_task=None, need_task_ids=False):
     """Emits a new tuple from this Bolt
 
     It is compatible with StreamParse API.
@@ -213,7 +216,7 @@ class Bolt(Component):
   def _prepare_tick_tup_timer(self):
     if constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS in self.bolt_config:
       tick_freq_sec = self.bolt_config[constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS]
-      Log.debug("Tick Tuple Frequency: " + tick_freq_sec + " sec.")
+      Log.debug("Tick Tuple Frequency: %s sec." % str(tick_freq_sec))
 
       def send_tick():
         tick = TupleHelper.make_tick_tuple()
@@ -283,7 +286,8 @@ class Bolt(Component):
   def initialize(self, config={}, context={}):
     """Called when a task for this component is initialized within a worker on the cluster
 
-    It is compatible with StreamParse API. (Parameter name changed from ``storm_conf`` to ``config``)
+    It is compatible with StreamParse API.
+    (Parameter name changed from ``storm_conf`` to ``config``)
 
     It provides the bolt with the environment in which the bolt executes. A good place to
     initialize connections to data sources.
@@ -291,9 +295,15 @@ class Bolt(Component):
     *Should be implemented by a subclass.*
 
     :type config: dict
-    :param config: The Heron configuration for this bolt. This is the configuration provided to the topology merged in with cluster configuration on this machine.
+    :param config: The Heron configuration for this bolt. This is the configuration provided to
+                   the topology merged in with cluster configuration on this machine.
+                   Note that types of string values in the config have been automatically converted,
+                   meaning that number strings and boolean strings are converted to appropriate
+                   types.
     :type context: dict
-    :param context: This object can be used to get information about this task's place within the topology, including the task id and component id of this task, input and output information, etc.
+    :param context: This object can be used to get information about this task's place within the
+                    topology, including the task id and component id of this task, input and output
+                    information, etc.
     """
     pass
 
@@ -310,14 +320,8 @@ class Bolt(Component):
 
     :type tup: ``Tuple``
     """
-    # TODO: documentation and Tuple implementation
     raise NotImplementedError()
 
 
   def cleanup(self):
     pass
-
-
-
-
-
