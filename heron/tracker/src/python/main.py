@@ -28,7 +28,7 @@ from heron.tracker.src.python import handlers
 from heron.tracker.src.python import utils
 from heron.tracker.src.python.config import Config
 from heron.tracker.src.python.tracker import Tracker
-import heron.common.src.python.utils as common_utils
+import heron.common.src.python.utils.config as common_config
 
 LOG = logging.getLogger(__name__)
 
@@ -191,7 +191,7 @@ def main():
     parser.exit()
 
   elif remaining == ['version']:
-    common_utils.print_version()
+    common_config.print_version()
     parser.exit()
 
   elif remaining != []:

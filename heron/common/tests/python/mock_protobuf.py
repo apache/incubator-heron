@@ -18,13 +18,37 @@ written in Python.
 """
 
 from heron.proto import stmgr_pb2, physical_plan_pb2, topology_pb2, common_pb2
+from heron.common.src.python.utils.misc import PythonSerializer
 
 # pylint: disable=dangerous-default-value
 # pylint: disable=redefined-builtin
 
-def get_mock_config():
-  """Returns an empty protobuf Config object from topology_pb2"""
-  return topology_pb2.Config()
+def get_mock_config(config_dict=None):
+  """Returns a protobuf Config object from topology_pb2"""
+  if config_dict is None:
+    return topology_pb2.Config()
+
+  proto_config = topology_pb2.Config()
+  config_serializer = PythonSerializer()
+  assert isinstance(config_dict, dict)
+  for key, value in config_dict.iteritems():
+    if isinstance(value, bool):
+      kvs = proto_config.kvs.add()
+      kvs.key = key
+      kvs.value = "true" if value else "false"
+      kvs.type = topology_pb2.ConfigValueType.Value("STRING_VALUE")
+    elif isinstance(value, (str, int, float)):
+      kvs = proto_config.kvs.add()
+      kvs.key = key
+      kvs.value = str(value)
+      kvs.type = topology_pb2.ConfigValueType.Value("STRING_VALUE")
+    else:
+      kvs = proto_config.kvs.add()
+      kvs.key = key
+      kvs.serialized_value = config_serializer.serialize(value)
+      kvs.type = topology_pb2.ConfigValueType.Value("PYTHON_SERIALIZED_VALUE")
+
+  return proto_config
 
 def get_mock_component(name="component_name",
                        config=get_mock_config(),
@@ -36,6 +60,13 @@ def get_mock_component(name="component_name",
   component.class_name = python_cls
   component.config.CopyFrom(config)
   return component
+
+def get_mock_stream_id(id="stream_id", component_name="component_name"):
+  """Returns a mock protobuf StreamId from topology_pb2"""
+  stream_id = topology_pb2.StreamId()
+  stream_id.id = id
+  stream_id.component_name = component_name
+  return stream_id
 
 def get_mock_bolt(component=get_mock_component(), inputs=[], outputs=[]):
   """Returns a mock protobuf Bolt object from topology_pb2"""

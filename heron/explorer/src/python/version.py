@@ -13,7 +13,7 @@
 # limitations under the license.
 ''' version.py '''
 import heron.explorer.src.python.args as args
-import heron.common.src.python.utils as utils
+import heron.common.src.python.utils.config as config
 
 
 def create_parser(subparsers):
@@ -30,7 +30,7 @@ def create_parser(subparsers):
 # pylint: disable=unused-argument
 def run(command, parser, known_args, unknown_args):
   """ run command """
-  release_file = utils.get_heron_release_file()
+  release_file = config.get_heron_release_file()
   with open(release_file) as release_info:
     for line in release_info:
       print line,
