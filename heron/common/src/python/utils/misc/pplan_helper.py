@@ -21,6 +21,7 @@ from heron.common.src.python.utils.topology import TopologyContext
 from .serializer import PythonSerializer
 
 # pylint: disable=too-many-instance-attributes
+# pylint: disable=fixme
 class PhysicalPlanHelper(object):
   """Helper class for accessing Physical Plan
 
@@ -151,7 +152,6 @@ class PhysicalPlanHelper(object):
     - Normal string is inserted to dict as is
     - Serialized value is deserialized and inserted as a corresponding Python object
     """
-    # TODO: write unittest
     config = {}
     config_serializer = PythonSerializer()
     for kv in topology_config.kvs:

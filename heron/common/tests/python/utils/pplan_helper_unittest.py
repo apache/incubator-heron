@@ -41,6 +41,7 @@ class PhysicalPlanHelperTest(unittest.TestCase):
     self.assertEqual(instance_1["task_id"], pplan_helper.my_task_id)
     self.assertEqual(instance_1["comp_name"], pplan_helper.my_component_name)
 
+  # pylint: disable=protected-access
   def test_number_autotype(self):
     # testing _is_number() and _get_number()
 
