@@ -60,9 +60,9 @@ class HeronClient(asyncore.dispatcher):
     self.total_bytes_received = 0
     self.total_pkt_received = 0
 
-    Log.debug("Initializing " + self._get_classname() + " with endpoint: " +
-              str(self.endpoint) + ", socket_map: " + str(socket_map) +
-              ", socket_options: " + str(self.socket_options))
+    Log.debug("Initializing %s with endpoint: %s, \nsocket_map: %s, \nsocket_options: %s"
+              % (self._get_classname(), str(self.endpoint),
+                 str(socket_map), str(self.socket_options)))
 
 
   ##################################
@@ -71,12 +71,12 @@ class HeronClient(asyncore.dispatcher):
 
   # called when connect is ready
   def handle_connect(self):
-    Log.info("Connected to " + self.hostname + ":" + str(self.port))
+    Log.info("Connected to %s:%d" % (self.hostname, self.port))
     self.on_connect(StatusCode.OK)
 
   # called when close is ready
   def handle_close(self):
-    Log.info(self._get_classname() + " handle_close() called")
+    Log.info("%s: handle_close() called" % self._get_classname())
     self.close()
 
   # read bytes stream from socket and convert them into a list of IncomingPacket
@@ -103,7 +103,7 @@ class HeronClient(asyncore.dispatcher):
       if pkt.is_complete:
         num_pkt_read += 1
         bytes_read += pkt.get_pktsize()
-        Log.debug("Read a complete packet of size " + str(bytes_read))
+        Log.debug("Read a complete packet of size %d" % bytes_read)
         self.incomplete_pkt = None
         read_pkt_list.append(pkt)
       else:
@@ -158,7 +158,7 @@ class HeronClient(asyncore.dispatcher):
 
     ``loop()`` method needs to be called after this.
     """
-    Log.debug("In start_connect() of " + self._get_classname())
+    Log.debug("In start_connect() of %s" % self._get_classname())
     # TODO: specify buffer size, exception handling
     self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -176,7 +176,7 @@ class HeronClient(asyncore.dispatcher):
     :param msg_builder: callable to create a protobuf message that this client wants to receive
     """
     message = msg_builder()
-    Log.debug("In register_on_message(): " + message.DESCRIPTOR.full_name)
+    Log.debug("In register_on_message(): %s" % message.DESCRIPTOR.full_name)
     self.registered_message_map[message.DESCRIPTOR.full_name] = msg_builder
 
   def send_request(self, request, context, response_type, timeout_sec):
@@ -184,7 +184,7 @@ class HeronClient(asyncore.dispatcher):
     # TODO: send request and implement timeout handler
     # generates a unique request id
     reqid = REQID.generate()
-    Log.debug(self._get_classname() + ": In send_request() with REQID: " + str(reqid))
+    Log.debug("%s: In send_request() with REQID: %s" % (self._get_classname(), str(reqid)))
     # register response message type
     self.response_message_map[reqid] = response_type
     self.context_map[reqid] = context
@@ -200,9 +200,8 @@ class HeronClient(asyncore.dispatcher):
 
   def send_message(self, message):
     """Sends a message (REQID is zero)"""
-    Log.debug("In send_message() of " + self._get_classname())
+    Log.debug("In send_message() of %s" % self._get_classname())
     outgoing_pkt = OutgoingPacket.create_packet(REQID.generate_zero(), message)
-    Log.debug("After get outgoing packet")
     self._send_packet(outgoing_pkt)
 
   def handle_timeout(self, reqid):
@@ -215,7 +214,7 @@ class HeronClient(asyncore.dispatcher):
   def handle_error(self):
     _, t, v, tbinfo = asyncore.compact_traceback()
 
-    self_msg = self._get_classname() + " failed for object at %0x" % id(self)
+    self_msg = "%s failed for object at %0x" % (self._get_classname(), id(self))
     Log.error("Uncaptured python exception, closing channel %s (%s:%s %s)" %
               (self_msg, t, v, tbinfo))
 
@@ -241,7 +240,7 @@ class HeronClient(asyncore.dispatcher):
       try:
         response_msg.ParseFromString(serialized_msg)
       except Exception as e:
-        Log.error("Invalid Packet Error: " + e.message)
+        Log.error("Invalid Packet Error: %s" % e.message)
         self.on_response(StatusCode.INVALID_PACKET, context, None)
         return
 
@@ -254,7 +253,7 @@ class HeronClient(asyncore.dispatcher):
       # this is a Message -- no need to send back response
       try:
         if typename not in self.registered_message_map:
-          raise ValueError(typename + " is not registered in message map")
+          raise ValueError("%s is not registered in message map" % typename)
         msg_builder = self.registered_message_map[typename]
         message = msg_builder()
         message.ParseFromString(serialized_msg)
@@ -263,11 +262,11 @@ class HeronClient(asyncore.dispatcher):
         else:
           raise RuntimeError("Message not initialized")
       except Exception as e:
-        Log.error("Error when handling message packet: " + e.message)
+        Log.error("Error when handling message packet: %s" % e.message)
         Log.error(traceback.format_exc())
     else:
       # might be a timeout response
-      Log.debug("In handle_packet(): Received message whose REQID is not registered: " + str(reqid))
+      Log.info("In handle_packet(): Received message with not registered REQID: %s" + str(reqid))
 
   def _send_packet(self, pkt):
     """Pushes a packet to a send buffer, the content of which will be send when available"""
