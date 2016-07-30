@@ -13,10 +13,10 @@
 # limitations under the License.
 import os
 import uuid
+
 from heron.proto import topology_pb2
 from heron.common.src.python.utils.misc import PythonSerializer
 from heron.instance.src.python.instance.component import HeronComponentSpec
-from heron.instance.src.python.instance.stream import Stream
 
 import heron.common.src.python.constants as constants
 
