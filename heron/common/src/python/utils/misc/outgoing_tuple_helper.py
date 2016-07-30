@@ -18,6 +18,8 @@ from heron.proto import tuple_pb2, topology_pb2
 
 import heron.common.src.python.constants as constants
 
+# pylint: disable=too-many-instance-attributes
+# pylint: disable=no-value-for-parameter
 class OutgoingTupleHelper(object):
   """Helper class for preparing and pushing tuples to Out-Stream
 
@@ -33,7 +35,6 @@ class OutgoingTupleHelper(object):
   :ivar current_data_tuple_set: (HeronDataTupleSet) currently buffered data tuple
   :ivar current_control_tuple_set: (HeronControlTupleSet) currently buffered control tuple
   """
-  # pylint: disable=no-value-for-parameter
   make_data_tuple_set = lambda _: tuple_pb2.HeronDataTupleSet()
   make_control_tuple_set = lambda _: tuple_pb2.HeronControlTupleSet()
   make_tuple_set = lambda _: tuple_pb2.HeronTupleSet()
@@ -77,13 +78,14 @@ class OutgoingTupleHelper(object):
 
     :param is_ack: ``True`` if Ack, ``False`` if Fail
     """
-    if (self.current_control_tuple_set is None) or \
-        (is_ack and len(self.current_control_tuple_set.fails) > 0) or \
-        (is_ack and len(self.current_control_tuple_set.acks) >=
-          self.control_tuple_set_capacity) or \
-        (not is_ack and len(self.current_control_tuple_set.acks) > 0) or \
-        (not is_ack and len(self.current_control_tuple_set.fails) >=
-          self.control_tuple_set_capacity):
+    if self.current_control_tuple_set is None:
+      self._init_new_control_tuple()
+    elif is_ack and (len(self.current_control_tuple_set.fails) > 0 or
+                     len(self.current_control_tuple_set.acks) >= self.control_tuple_set_capacity):
+      self._init_new_control_tuple()
+    elif not is_ack and \
+        (len(self.current_control_tuple_set.acks) > 0 or
+         len(self.current_control_tuple_set.fails) >= self.control_tuple_set_capacity):
       self._init_new_control_tuple()
 
     if is_ack:

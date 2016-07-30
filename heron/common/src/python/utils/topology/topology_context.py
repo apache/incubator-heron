@@ -257,10 +257,10 @@ class TopologyContext(dict):
     :param execute_latency_ns: execute latency in nano seconds
     """
     if self.hook_exists:
-      bolt_execute_info = BoltExecuteInfo(heron_tuple=heron_tuple,
-                                          executing_task_id=self.task_id,
-                                          execute_latency_ms=execute_latency_ns *
-                                                             constants.NS_TO_MS)
+      bolt_execute_info = \
+        BoltExecuteInfo(heron_tuple=heron_tuple,
+                        executing_task_id=self.task_id,
+                        execute_latency_ms=execute_latency_ns * constants.NS_TO_MS)
       for task_hook in self[self.TASK_HOOKS]:
         task_hook.bolt_execute(bolt_execute_info)
 
