@@ -19,6 +19,7 @@ from heron.common.src.python.utils.misc import (OutgoingTupleHelper, PhysicalPla
                                                 HeronCommunicator, PythonSerializer)
 from heron.proto import tuple_pb2
 
+import heron.common.src.python.constants as constants
 import heron.common.tests.python.mock_protobuf as mock_protobuf
 
 prim_list = [1000, -234, 0.00023, "string",
@@ -99,10 +100,13 @@ class MockOutgoingTupleHelper(OutgoingTupleHelper):
   def __init__(self, mode=SAMPLE_SUCCESS):
     self.called_init_new_data = False
     self.called_init_new_control = False
+    sample_sys_config = {constants.INSTANCE_SET_DATA_TUPLE_CAPACITY: 1000,
+                         constants.INSTANCE_SET_DATA_TUPLE_SIZE_BYTES: 2000,
+                         constants.INSTANCE_SET_CONTROL_TUPLE_CAPACITY: 3000}
 
     if mode == MockOutgoingTupleHelper.SAMPLE_SUCCESS:
       pplan_helper, out_stream = self._prepare_sample_success()
-      super(MockOutgoingTupleHelper, self).__init__(pplan_helper, out_stream)
+      super(MockOutgoingTupleHelper, self).__init__(pplan_helper, out_stream, sample_sys_config)
 
   @staticmethod
   def _prepare_sample_success():

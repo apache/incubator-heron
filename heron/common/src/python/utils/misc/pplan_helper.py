@@ -131,14 +131,14 @@ class PhysicalPlanHelper(object):
     else:
       return {}
 
-  def set_topology_context(self, metrics_collector):
+  def set_topology_context(self, metrics_collector, topo_pex_file_path):
     """Sets a new topology context"""
     Log.debug("Setting topology context")
     cluster_config = self.get_topology_config()
     cluster_config.update(self._get_dict_from_config(self.my_component.config))
     task_to_component_map = self._get_task_to_comp_map()
     self.context = TopologyContext(cluster_config, self.pplan.topology, task_to_component_map,
-                                   self.my_task_id, metrics_collector)
+                                   self.my_task_id, metrics_collector, topo_pex_file_path)
 
   @staticmethod
   def _get_dict_from_config(topology_config):
