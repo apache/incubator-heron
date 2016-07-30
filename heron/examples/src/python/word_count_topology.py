@@ -20,8 +20,10 @@ from heron.examples.src.python.count_bolt import CountBolt
 import heron.common.src.python.constants as constants
 
 class WordCount(Topology):
+  task_hooks = ["heron.examples.src.python.test_task_hook.TestTaskHook"]
   config = {constants.TOPOLOGY_ENABLE_ACKING: "true",
             constants.TOPOLOGY_MAX_SPOUT_PENDING: 100000000,
+            constants.TOPOLOGY_AUTO_TASK_HOOKS: task_hooks,
             "topology.wide.config.sample": {"key1": 12, "key2": 34}}
 
   #another_stream = GlobalStreamId(componentId="word_spout", streamId="another_stream")
