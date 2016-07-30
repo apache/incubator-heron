@@ -79,6 +79,10 @@ class Tracker(object):
       onTopologiesWatch = partial(on_topologies_watch, state_manager)
       state_manager.get_topologies(onTopologiesWatch)
 
+  def stop_sync(self):
+    for state_manager in self.state_managers:
+      state_manager.stop()
+
   # pylint: disable=deprecated-lambda
   def getTopologyByClusterRoleEnvironAndName(self, cluster, role, environ, topologyName):
     """
