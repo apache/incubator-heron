@@ -11,19 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import Queue
-from abc import abstractmethod
+'''bolt.py: module for base bolt for python topology'''
 
 import time
+import Queue
 
-from .component import Component, HeronComponentSpec
+from abc import abstractmethod
 from heron.proto import tuple_pb2
 from heron.common.src.python.log import Log
 from heron.common.src.python.utils.tuple import TupleHelper, HeronTuple
 from heron.common.src.python.utils.metrics import BoltMetrics
 
 import heron.common.src.python.constants as constants
+
+from .component import Component, HeronComponentSpec
 
 class Bolt(Component):
   """The base class for all heron bolts in Python"""
@@ -76,6 +77,7 @@ class Bolt(Component):
     """
     python_class_path = cls.get_python_class_path()
 
+    # pylint: disable=no-member
     if hasattr(cls, 'outputs'):
       _outputs = cls.outputs
     else:
@@ -191,7 +193,7 @@ class Bolt(Component):
 
       if (time.time() - start_cycle_time - exec_batch_time > 0) or \
           (self.get_total_data_emitted_in_bytes() - total_data_emitted_bytes_before
-             > exec_batch_size):
+           > exec_batch_size):
         # batch reached
         break
 
@@ -302,8 +304,10 @@ class Bolt(Component):
     It is compatible with StreamParse API.
     (Parameter name changed from ``storm_conf`` to ``config``)
 
-    It provides the bolt with the environment in which the bolt executes. A good place to
-    initialize connections to data sources.
+    It provides the bolt with the environment in which the bolt executes. Note that
+    you should NOT override ``__init__()`` for initialization of your bolt, as it is
+    used internally by Heron Instance; instead, you should use this method to initialize
+    any custom instance variables or connections to databases.
 
     *Should be implemented by a subclass.*
 

@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+'''topology.py: module for defining python topologies'''
 import os
 import uuid
 
@@ -55,12 +56,12 @@ class TopologyType(type):
     for name, spec in class_dict.iteritems():
       if isinstance(spec, HeronComponentSpec):
         # Use the variable name as the specification name.
-          if spec.name is None:
-            spec.name = name
-          if spec.name in specs:
-            raise ValueError("Duplicate component name: %s" % spec.name)
-          else:
-            specs[spec.name] = spec
+        if spec.name is None:
+          spec.name = name
+        if spec.name in specs:
+          raise ValueError("Duplicate component name: %s" % spec.name)
+        else:
+          specs[spec.name] = spec
     return specs
 
   @classmethod
@@ -202,13 +203,10 @@ class Topology(object):
   by placing ``HeronComponentSpec`` as class instances.
   For more information, refer to ``spec()`` method of both ``Bolt`` and ``Spout`` class.
 
-  In addition to the compatibility with StreamParse API, this class supports ``config`` option,
-  with which topology writers can specify topology-wide configurations. Note that topology-wide
-  configurations are overridden by component-specific configurations that might be specified
-  from ``spec()`` method of ``Bolt`` or ``Spout`` class. Specifying topology-wide configurations
-  is also simple: topology writers need to declare an ``dict`` instance named ``config`` in their
-  custom topology subclass.
-
+  In addition, you can also set a topology-wide configuration, by adding a ``config`` class
+  attribute to your topology class, that is dict mapping from option names to their values.
+  Note that topology-wide configurations are overridden by component-specific configurations
+  that might be specified from ``spec()`` method of ``Bolt`` or ``Spout`` class.
 
   :Example: A sample WordCountTopology can be defined as follows:
   ::
@@ -226,6 +224,8 @@ class Topology(object):
   ::
   """
   __metaclass__ = TopologyType
+
+  # pylint: disable=no-member
   @classmethod
   def write(cls, dest):
     """Writes the Topology .defn file to ``dest``

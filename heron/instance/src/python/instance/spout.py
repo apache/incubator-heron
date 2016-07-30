@@ -11,19 +11,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from abc import abstractmethod
+'''spout.py: module for base spout for python topology'''
 
 import Queue
 import time
 import collections
 
-from .component import Component, HeronComponentSpec
+from abc import abstractmethod
 from heron.proto import topology_pb2, tuple_pb2
 from heron.common.src.python.log import Log
 from heron.common.src.python.utils.tuple import TupleHelper
 from heron.common.src.python.utils.metrics import SpoutMetrics
 
 import heron.common.src.python.constants as constants
+
+from .component import Component, HeronComponentSpec
 
 class Spout(Component):
   """The base class for all heron spouts in Python"""
@@ -71,6 +73,7 @@ class Spout(Component):
     """
     python_class_path = cls.get_python_class_path()
 
+    # pylint: disable=no-member
     if hasattr(cls, 'outputs'):
       _outputs = cls.outputs
     else:
@@ -166,7 +169,6 @@ class Spout(Component):
 
   def process_incoming_tuples(self):
     Log.debug("In spout, process_incoming_tuples() don't do anything")
-    pass
 
   def _read_tuples_and_execute(self):
     start_cycle_time = time.time()
@@ -216,7 +218,7 @@ class Spout(Component):
       if (self.total_tuples_emitted == total_tuples_emitted_before) or \
         (time.time() - start_cycle_time - emit_batch_time > 0) or \
         (self.get_total_data_emitted_in_bytes() - total_data_emitted_bytes_before >
-           emit_batch_size):
+         emit_batch_size):
         # no tuples to emit or batch reached
         break
 
@@ -252,8 +254,8 @@ class Spout(Component):
     return True
 
   # ACK/FAIL related
-  def _handle_ack_tuple(self, tuple, is_success):
-    for rt in tuple.roots:
+  def _handle_ack_tuple(self, tup, is_success):
+    for rt in tup.roots:
       if rt.taskid != self.pplan_helper.my_task_id:
         raise RuntimeError("Receiving tuple for task: %s in task: %s"
                            % (str(rt.taskid), str(self.pplan_helper.my_task_id)))
@@ -273,7 +275,7 @@ class Spout(Component):
 
   def _do_immediate_acks(self):
     size = len(self.immediate_acks)
-    for i in range(size):
+    for _ in range(size):
       tuple_info = self.immediate_acks.pop()
       self._invoke_ack(tuple_info.tuple_id, tuple_info.stream_id, 0)
 
@@ -300,8 +302,10 @@ class Spout(Component):
     It is compatible with StreamParse API.
     (Parameter name changed from ``storm_conf`` to ``config``)
 
-    It provides the spout with the environment in which the spout executes. A good place to
-    initialize connections to data sources.
+    It provides the spout with the environment in which the spout executes. Note that
+    you should NOT override ``__init__()`` for initialization of your spout, as it is
+    used internally by Heron Instance; instead, you should use this method to initialize
+    any custom instance variables or connections to data sources.
 
     *Should be implemented by a subclass.*
 

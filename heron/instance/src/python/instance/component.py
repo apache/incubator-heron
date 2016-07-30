@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+'''component.py: module for base component (base for spout/bolt) and its spec'''
 
 import logging
 
@@ -120,6 +121,7 @@ class Component(object):
     """Deactivate the instance"""
     raise NotImplementedError()
 
+# pylint: disable=too-many-instance-attributes
 class HeronComponentSpec(object):
   """Class to specify the information and location of components in a topology
 
@@ -259,6 +261,7 @@ class HeronComponentSpec(object):
       else:
         in_stream.gtype = gtype
 
+  # pylint: disable=too-many-branches
   def _sanitize_inputs(self):
     """Sanitizes input fields and returns a map <GlobalStreamId -> Grouping>"""
     ret = {}
@@ -329,10 +332,10 @@ class HeronComponentSpec(object):
     return ret
 
   @staticmethod
-  def _get_stream_id(comp_name, id):
+  def _get_stream_id(comp_name, stream_id):
     """Returns a StreamId protobuf message"""
     stream_id = topology_pb2.StreamId()
-    stream_id.id = id
+    stream_id.id = stream_id
     stream_id.component_name = comp_name
     return stream_id
 

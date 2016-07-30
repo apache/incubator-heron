@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+'''stream.py: module for defining Stream and Grouping for python topology'''
 
 import collections
 
@@ -89,6 +90,7 @@ class GlobalStreamId(object):
     return self.component_id + ":" + self.stream_id
 
 class Grouping(object):
+  """Helper class for defining Grouping for Python topology"""
   SHUFFLE = topology_pb2.Grouping.Value("SHUFFLE")
   ALL = topology_pb2.Grouping.Value("ALL")
   LOWEST = topology_pb2.Grouping.Value("LOWEST")
