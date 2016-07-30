@@ -14,9 +14,7 @@
 package com.twitter.heron.scheduler;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
@@ -26,6 +24,8 @@ import com.google.protobuf.Descriptors;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.spi.common.Config;
+import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.packing.PackingPlanProtoDeserializer;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.Runtime;
 
@@ -38,36 +38,36 @@ public class UpdateTopologyManager {
 
   private Config runtime;
   private Optional<ScalableScheduler> scalableScheduler;
+  private PackingPlanProtoDeserializer deserializer;
 
   public UpdateTopologyManager(Config runtime, Optional<ScalableScheduler> scalableScheduler) {
     this.runtime = runtime;
     this.scalableScheduler = scalableScheduler;
+    this.deserializer = new PackingPlanProtoDeserializer();
   }
 
   /**
    * Scales the topology out or in based on the proposedPackingPlan
-   * @param existingPackingPlan the current plan. If this isn't what's found in the state manager,
+   * @param existingProtoPackingPlan the current plan. If this isn't what's found in the state manager,
    * the update will fail
-   * @param proposedPackingPlan packing plan to change the topology to
+   * @param proposedProtoPackingPlan packing plan to change the topology to
    */
-  public void updateTopology(PackingPlans.PackingPlan existingPackingPlan,
-                             PackingPlans.PackingPlan proposedPackingPlan)
+  public void updateTopology(final PackingPlans.PackingPlan existingProtoPackingPlan,
+                             final PackingPlans.PackingPlan proposedProtoPackingPlan)
       throws ExecutionException, InterruptedException {
     String topologyName = Runtime.topologyName(runtime);
+    PackingPlan existingPackingPlan = deserializer.fromProto(existingProtoPackingPlan);
+    PackingPlan proposedPackingPlan = deserializer.fromProto(proposedProtoPackingPlan);
 
-    Map<String, Integer> proposedChanges = parallelismChanges(
-        existingPackingPlan.getInstanceDistribution(),
-        proposedPackingPlan.getInstanceDistribution());
+    Map<String, Integer> proposedChanges = parallelismDeltas(
+        existingPackingPlan, proposedPackingPlan);
 
-    int existingContainerCount = parseInstanceDistributionContainers(
-        existingPackingPlan.getInstanceDistribution()).length;
-    int proposedContainerCount = parseInstanceDistributionContainers(
-        proposedPackingPlan.getInstanceDistribution()).length;
+    int existingContainerCount = existingPackingPlan.getContainers().size();
+    int proposedContainerCount = proposedPackingPlan.getContainers().size();
     Integer containerDelta = proposedContainerCount - existingContainerCount;
 
     assertTrue(proposedContainerCount > 0,
-        "proposed instance distribution must have at least 1 container %s",
-        proposedPackingPlan.getInstanceDistribution());
+        "proposed packing plan must have at least 1 container %s", proposedPackingPlan);
 
     SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
 
@@ -91,10 +91,10 @@ public class UpdateTopologyManager {
 
     // assert found is same as existing.
     PackingPlans.PackingPlan foundPackingPlan = stateManager.getPackingPlan(topologyName);
-    assertTrue(foundPackingPlan.equals(existingPackingPlan),
+    assertTrue(foundPackingPlan.equals(existingProtoPackingPlan),
         "Existing packing plan received does not equal the packing plan found in the state "
         + "manager. Not updating updatedTopology. Received: %s, Found: %s",
-        existingPackingPlan, foundPackingPlan);
+        existingProtoPackingPlan, foundPackingPlan);
 
     // update parallelism in updatedTopology since TMaster checks that
     // Sum(parallelism) == Sum(instances)
@@ -104,7 +104,7 @@ public class UpdateTopologyManager {
     // update packing plan to trigger the scaling event
     print("==> Deleted existing packing plan: %s", stateManager.deletePackingPlan(topologyName));
     print("==> Set new PackingPlan: %s",
-        stateManager.setPackingPlan(proposedPackingPlan, topologyName));
+        stateManager.setPackingPlan(proposedProtoPackingPlan, topologyName));
 
     // delete the physical plan so TMaster doesn't try to re-establish it on start-up.
     print("==> Deleted Physical Plan: %s", stateManager.deletePhysicalPlan(topologyName));
@@ -116,58 +116,27 @@ public class UpdateTopologyManager {
 
   // Given the existing and proposed instance distribution, verify the proposal and return only
   // the changes being requested.
-  private Map<String, Integer> parallelismChanges(String existingInstanceDistribution,
-                                                  String proposedInstanceDistribution) {
-    Map<String, Integer> existingParallelism =
-        parseInstanceDistribution(existingInstanceDistribution);
-    Map<String, Integer> proposedParallelism =
-        parseInstanceDistribution(proposedInstanceDistribution);
+  private Map<String, Integer> parallelismDeltas(PackingPlan existingPackingPlan,
+                                                 PackingPlan proposedPackingPlan) {
+    Map<String, Integer> existingComponentCounts = existingPackingPlan.getComponentCounts();
+    Map<String, Integer> proposedComponentCounts = proposedPackingPlan.getComponentCounts();
+
     Map<String, Integer> parallelismChanges = new HashMap<>();
 
-    for (String componentName : proposedParallelism.keySet()) {
-      Integer newParallelism = proposedParallelism.get(componentName);
-      assertTrue(existingParallelism.containsKey(componentName),
-          "key %s in proposed instance distribution %s not found in "
-              + "current instance distribution %s",
-          componentName, proposedInstanceDistribution, existingInstanceDistribution);
+    for (String componentName : proposedComponentCounts.keySet()) {
+      Integer newParallelism = proposedComponentCounts.get(componentName);
+      assertTrue(existingComponentCounts.containsKey(componentName),
+          "component %s in proposed instance distribution not found in "
+              + "current instance distribution", componentName);
       assertTrue(newParallelism > 0,
-          "Non-positive parallelism (%s) for component %s found in instance distribution %s",
-          newParallelism, componentName, proposedInstanceDistribution);
+          "Non-positive parallelism (%s) for component %s found in proposed instance distribution",
+          newParallelism, componentName);
 
-      if (!newParallelism.equals(existingParallelism.get(componentName))) {
+      if (!newParallelism.equals(existingComponentCounts.get(componentName))) {
         parallelismChanges.put(componentName, newParallelism);
       }
     }
     return parallelismChanges;
-  }
-
-  // given a string like "1:word:3:0:exclaim1:2:0:exclaim1:1:0,2:exclaim1:4:0" returns a map of
-  // { word -> 1, explain1 -> 3 }
-  private Map<String, Integer> parseInstanceDistribution(String instanceDistribution) {
-    Map<String, Integer> componentParallelism = new HashMap<>();
-    String[] containers = parseInstanceDistributionContainers(instanceDistribution);
-    for (String container : containers) {
-      String[] tokens = container.split(":");
-      assertTrue(tokens.length > 3 && (tokens.length - 1) % 3 == 0,
-          "Invalid instance distribution format. Expected componentId "
-              + "followed by instance triples: %s", instanceDistribution);
-      Set<String> idsFound = new HashSet<>();
-      for (int i = 1; i < tokens.length; i += 3) {
-        String instanceName = tokens[i];
-        String instanceId = tokens[i + 1];
-        assertTrue(!idsFound.contains(instanceId),
-            "Duplicate instanceId (%s) found in instance distribution %s for instance %s %s",
-            instanceId, instanceDistribution, instanceName, i);
-        idsFound.add(instanceId);
-        Integer occurrences = componentParallelism.getOrDefault(instanceName, 0);
-        componentParallelism.put(instanceName, occurrences + 1);
-      }
-    }
-    return componentParallelism;
-  }
-
-  private static String[] parseInstanceDistributionContainers(String instanceDistribution) {
-    return instanceDistribution.split(",");
   }
 
   private static TopologyAPI.Topology mergeTopology(TopologyAPI.Topology topology,
