@@ -29,8 +29,8 @@ message PackingPlan {
   repeated ContainerPlan container_plans = 2;
   required Resource resource = 3;
 
-  // TODO: using a serialized string here for prototyping only! For production we must refactor to
-  // represent as a strongly typed set of objects.
+  // Java should read the packing plan and call the getters to recompute these. They are serialized
+  // only to make it easy for the python impl logic that knows how to parse these strings.
   required string instance_distribution = 4;
   required string component_ram_distribution = 5;
 }
