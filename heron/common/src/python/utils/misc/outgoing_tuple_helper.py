@@ -16,6 +16,8 @@
 from heron.common.src.python.log import Log
 from heron.proto import tuple_pb2, topology_pb2
 
+import heron.common.src.python.constants as constants
+
 class OutgoingTupleHelper(object):
   """Helper class for preparing and pushing tuples to Out-Stream
 
@@ -37,7 +39,7 @@ class OutgoingTupleHelper(object):
   make_tuple_set = lambda _: tuple_pb2.HeronTupleSet()
   make_stream_id = lambda _: topology_pb2.StreamId()
 
-  def __init__(self, pplan_helper, out_stream):
+  def __init__(self, pplan_helper, out_stream, sys_config):
     self.out_stream = out_stream
     self.pplan_helper = pplan_helper
 
@@ -47,6 +49,11 @@ class OutgoingTupleHelper(object):
     self.current_data_tuple_size_in_bytes = 0
     self.total_data_emitted_in_bytes = 0
 
+    # read the config values
+    self.data_tuple_set_capacity = sys_config[constants.INSTANCE_SET_DATA_TUPLE_CAPACITY]
+    self.max_data_tuple_size_in_bytes = sys_config[constants.INSTANCE_SET_DATA_TUPLE_SIZE_BYTES]
+    self.control_tuple_set_capacity = sys_config[constants.INSTANCE_SET_CONTROL_TUPLE_CAPACITY]
+
   def send_out_tuples(self):
     """Sends out currently buffered tuples into the Out-Stream"""
     self._flush_remaining()
@@ -54,7 +61,9 @@ class OutgoingTupleHelper(object):
   def add_data_tuple(self, stream_id, new_data_tuple, tuple_size_in_bytes):
     """Add a new data tuple to the currently buffered set of tuples"""
     if (self.current_data_tuple_set is None) or \
-        (self.current_data_tuple_set.stream.id != stream_id):
+        (self.current_data_tuple_set.stream.id != stream_id) or \
+        (len(self.current_data_tuple_set.tuples) >= self.data_tuple_set_capacity) or \
+        (self.current_data_tuple_size_in_bytes >= self.max_data_tuple_size_in_bytes):
       self._init_new_data_tuple(stream_id)
 
     added_tuple = self.current_data_tuple_set.tuples.add()
@@ -70,7 +79,11 @@ class OutgoingTupleHelper(object):
     """
     if (self.current_control_tuple_set is None) or \
         (is_ack and len(self.current_control_tuple_set.fails) > 0) or \
-        (not is_ack and len(self.current_control_tuple_set.acks) > 0):
+        (is_ack and len(self.current_control_tuple_set.acks) >=
+          self.control_tuple_set_capacity) or \
+        (not is_ack and len(self.current_control_tuple_set.acks) > 0) or \
+        (not is_ack and len(self.current_control_tuple_set.fails) >=
+          self.control_tuple_set_capacity):
       self._init_new_control_tuple()
 
     if is_ack:

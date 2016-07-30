@@ -41,7 +41,7 @@ class Component(object):
     self.pplan_helper = pplan_helper
     self.in_stream = in_stream
     self.serializer = serializer
-    self.output_helper = OutgoingTupleHelper(self.pplan_helper, out_stream)
+    self.output_helper = OutgoingTupleHelper(self.pplan_helper, out_stream, sys_config)
     self.looper = looper
     self.sys_config = sys_config
 

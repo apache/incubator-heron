@@ -29,7 +29,7 @@ class Spout(Component):
   """The base class for all heron spouts in Python"""
 
   def __init__(self, pplan_helper, in_stream, out_stream, looper, sys_config):
-    super(Spout, self).__init__(pplan_helper,in_stream, out_stream, looper, sys_config)
+    super(Spout, self).__init__(pplan_helper, in_stream, out_stream, looper, sys_config)
     self.topology_state = topology_pb2.TopologyState.Value("PAUSED")
 
     if not self.pplan_helper.is_spout:
