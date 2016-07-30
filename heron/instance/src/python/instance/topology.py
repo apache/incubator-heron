@@ -58,7 +58,7 @@ class TopologyType(type):
           if spec.name is None:
             spec.name = name
           if spec.name in specs:
-            raise ValueError("Duplicate component name: " + spec.name)
+            raise ValueError("Duplicate component name: %s" % spec.name)
           else:
             specs[spec.name] = spec
     return specs
@@ -96,15 +96,15 @@ class TopologyType(type):
   @classmethod
   def add_spout_specs(mcs, spec, spout_specs):
     if not spec.outputs:
-      raise ValueError(spec.python_class_path + " : " + spec.name +
-                       " requires at least one output, because it is a spout")
+      raise ValueError("%s: %s requires at least one output, because it is a spout"
+                       % (spec.python_class_path, spec.name))
     spout_specs[spec.name] = spec.get_protobuf()
 
   @classmethod
   def add_bolt_specs(mcs, spec, bolt_specs):
     if not spec.inputs:
-      raise ValueError(spec.python_class_path + " : " + spec.name +
-                       " requires at least one input, because it is a bolt")
+      raise ValueError("%s: %s requires at least one input, because it is a bolt"
+                       % (spec.python_class_path, spec.name))
     bolt_specs[spec.name] = spec.get_protobuf()
 
   @classmethod
@@ -179,8 +179,8 @@ class TopologyType(type):
     sanitized = {}
     for key, value in custom_config.iteritems():
       if not isinstance(key, str):
-        raise TypeError("Key for component-specific configuration must be string, given: " +
-                        str(type(key)) + ":" + str(key))
+        raise TypeError("Key for component-specific configuration must be string, given: %s: %s"
+                        % (str(type(key)), str(key)))
 
       if isinstance(value, bool):
         sanitized[key] = "true" if value else "false"
@@ -234,7 +234,7 @@ class Topology(object):
     """
     if cls.__name__ == 'Topology':
       raise ValueError("The base Topology class cannot be writable")
-    filename = cls.topology_name + ".defn"
+    filename = "%s.defn" % cls.topology_name
     path = os.path.join(dest, filename)
 
     with open(path, 'wb') as f:

@@ -38,9 +38,9 @@ class Stream(object):
       fields = list(fields)
       for field in fields:
         if not isinstance(field, str):
-          raise TypeError("All field names must be strings, given: " + str(field))
+          raise TypeError("All field names must be strings, given: %s" % str(field))
     else:
-      raise TypeError("Straem fields must be a list, tuple or None, given: " + str(fields))
+      raise TypeError("Straem fields must be a list, tuple or None, given: %s" % str(fields))
 
     # self.fields is always list
     self.fields = fields
@@ -48,14 +48,14 @@ class Stream(object):
     if isinstance(name, str):
       self.stream_id = name
     else:
-      raise TypeError("Stream name must be a string, given: " + str(name))
+      raise TypeError("Stream name must be a string, given: %s" % str(name))
 
     if isinstance(direct, bool):
       self.direct = direct
       if self.direct:
         raise NotImplementedError("Direct stream is not supported yet.")
     else:
-      raise TypeError("'direct' must be either True or False, given: " + str(direct))
+      raise TypeError("'direct' must be either True or False, given: %s" % str(direct))
 
 class GlobalStreamId(object):
   """Wrapper class to define stream_id and its component name

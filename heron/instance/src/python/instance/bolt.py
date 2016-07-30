@@ -111,9 +111,11 @@ class Bolt(Component):
     It is compatible with StreamParse API.
 
     :type tup: list or tuple
-    :param tup: the new output Tuple to send from this bolt, should only contain only serializable data.
+    :param tup: the new output Tuple to send from this bolt,
+                should only contain only serializable data.
     :type stream: str
-    :param stream: the ID of the stream to emit this Tuple to. Leave empty to emit to the default stream.
+    :param stream: the ID of the stream to emit this Tuple to.
+                   Leave empty to emit to the default stream.
     :type anchors: list
     :param anchors: a list of HeronTuples to which the emitted Tuples should be anchored.
     :type direct_task: int
@@ -165,8 +167,9 @@ class Bolt(Component):
   def _read_tuples_and_execute(self):
     start_cycle_time = time.time()
     total_data_emitted_bytes_before = self.get_total_data_emitted_in_bytes()
-    exec_batch_time = float(self.sys_config[constants.INSTANCE_EXECUTE_BATCH_TIME_MS]) * constants.MS_TO_SEC
-    exec_batch_size = int(self.sys_config[constants.INSTANCE_EXECUTE_BATCH_SIZE_BYTES])
+    exec_batch_time = \
+      self.sys_config[constants.INSTANCE_EXECUTE_BATCH_TIME_MS] * constants.MS_TO_SEC
+    exec_batch_size = self.sys_config[constants.INSTANCE_EXECUTE_BATCH_SIZE_BYTES]
     while not self.in_stream.is_empty():
       try:
         tuples = self.in_stream.poll()

@@ -111,11 +111,14 @@ class Spout(Component):
     It is compatible with StreamParse API.
 
     :type tup: list or tuple
-    :param tup: the new output Tuple to send from this spout, should contain only serializable data.
+    :param tup: the new output Tuple to send from this spout,
+                should contain only serializable data.
     :type tup_id: str or object
-    :param tup_id: the ID for the Tuple. Leave this blank for an unreliable emit. (Same as messageId in Java)
+    :param tup_id: the ID for the Tuple. Leave this blank for an unreliable emit.
+                   (Same as messageId in Java)
     :type stream: str
-    :param stream: the ID of the stream this Tuple should be emitted to. Leave empty to emit to the default stream.
+    :param stream: the ID of the stream this Tuple should be emitted to.
+                   Leave empty to emit to the default stream.
     :type direct_task: int
     :param direct_task: the task to send the Tuple to if performing a direct emit.
     :type need_task_ids: bool
@@ -167,7 +170,7 @@ class Spout(Component):
 
   def _read_tuples_and_execute(self):
     start_cycle_time = time.time()
-    ack_batch_time = float(self.sys_config[constants.INSTANCE_ACK_BATCH_TIME_MS]) * constants.MS_TO_SEC
+    ack_batch_time = self.sys_config[constants.INSTANCE_ACK_BATCH_TIME_MS] * constants.MS_TO_SEC
     while not self.in_stream.is_empty():
       try:
         tuples = self.in_stream.poll()
@@ -334,9 +337,9 @@ class Spout(Component):
     courteous to have next_tuple sleep for a short amount of time (like a single millisecond)
     so as not to waste too much CPU.
 
-    **Must be implemented by a subclass.**
+    **Must be implemented by a subclass, otherwise NotImplementedError is raised.**
     """
-    raise NotImplementedError()
+    raise NotImplementedError("Spout not implementing next_tuple() method")
 
   def ack(self, tup_id):
     """Determine that the tuple emitted by this spout with the tup_id has been fully processed
@@ -352,7 +355,7 @@ class Spout(Component):
     pass
 
   def fail(self, tup_id):
-    """Determine that the tuple emitted by this spout with the tup_id has failed to be fully processed
+    """Determine that the tuple emitted by this spout with the tup_id has failed to be processed
 
     It is compatible with StreamParse API.
 
