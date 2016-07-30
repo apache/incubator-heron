@@ -266,7 +266,8 @@ class HeronClient(asyncore.dispatcher):
         Log.error(traceback.format_exc())
     else:
       # might be a timeout response
-      Log.info("In handle_packet(): Received message with not registered REQID: %s" + str(reqid))
+      Log.info("In handle_packet(): Received message whose REQID is not registered: %s"
+               % str(reqid))
 
   def _send_packet(self, pkt):
     """Pushes a packet to a send buffer, the content of which will be send when available"""
