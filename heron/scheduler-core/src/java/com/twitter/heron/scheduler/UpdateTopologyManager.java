@@ -83,18 +83,18 @@ public class UpdateTopologyManager {
       updatedTopology = mergeTopology(updatedTopology, componentName, parallelism);
     }
 
-    // request new aurora resources if necessary. Once containers are allocated we must make the
-    // changes to state manager quickly, otherwise aurora might penalize for thrashing on start-up
-    if (containerDelta > 0 && scalableScheduler.isPresent()) {
-      scalableScheduler.get().addContainers(containerDelta);
-    }
-
     // assert found is same as existing.
     PackingPlans.PackingPlan foundPackingPlan = stateManager.getPackingPlan(topologyName);
     assertTrue(foundPackingPlan.equals(existingProtoPackingPlan),
         "Existing packing plan received does not equal the packing plan found in the state "
         + "manager. Not updating updatedTopology. Received: %s, Found: %s",
         existingProtoPackingPlan, foundPackingPlan);
+
+    // request new resources if necessary. Once containers are allocated we should make the changes
+    // to state manager quickly, otherwise the scheduler might penalize for thrashing on start-up
+    if (containerDelta > 0 && scalableScheduler.isPresent()) {
+      scalableScheduler.get().addContainers(containerDelta);
+    }
 
     // update parallelism in updatedTopology since TMaster checks that
     // Sum(parallelism) == Sum(instances)
