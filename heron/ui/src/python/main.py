@@ -150,8 +150,9 @@ def main():
     LOG.debug('SIGINT received. Stopping UI')
     tornado.ioloop.IOLoop.instance().stop()
 
-  # associate SIGINT with a handler
+  # associate SIGINT and SIGTERM with a handler
   signal.signal(signal.SIGINT, signal_handler)
+  signal.signal(signal.SIGTERM, signal_handler)
 
   # start Tornado IO loop
   tornado.ioloop.IOLoop.instance().start()

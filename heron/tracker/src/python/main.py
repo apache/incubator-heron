@@ -220,12 +220,12 @@ def main():
   def signal_handler(signum, frame):
     # start a new line after ^C character because this looks nice
     print '\n',
-    LOG.debug('SIGINT received. Stopping tracker')
     application.stop()
     tornado.ioloop.IOLoop.instance().stop()
 
-  # associate SIGINT with a handler
+  # associate SIGINT and SIGTERM with a handler
   signal.signal(signal.SIGINT, signal_handler)
+  signal.signal(signal.SIGTERM, signal_handler)
 
   LOG.info("Running on port: %d", namespace['port'])
   LOG.info("Using config file: %s", namespace['config_file'])
