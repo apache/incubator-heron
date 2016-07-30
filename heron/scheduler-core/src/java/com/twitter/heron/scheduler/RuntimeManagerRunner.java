@@ -167,8 +167,9 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
         topologyName, newParallelism));
     SchedulerStateManagerAdaptor manager = Runtime.schedulerStateManagerAdaptor(runtime);
 
+    Map<String, Integer> changeRequests = parallelismChangeRequests(newParallelism);
     PackingPlans.PackingPlan currentPlan = manager.getPackingPlan(topologyName);
-    PackingPlans.PackingPlan proposedPlan = buildNewPackingPlan(currentPlan, newParallelism);
+    PackingPlans.PackingPlan proposedPlan = buildNewPackingPlan(currentPlan, changeRequests);
 
     Scheduler.UpdateTopologyRequest updateTopologyRequest =
         Scheduler.UpdateTopologyRequest.newBuilder()
@@ -242,7 +243,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
 
   // *** all below should be replaced with the proper way to compute a new packing plan ***
   private PackingPlans.PackingPlan buildNewPackingPlan(PackingPlans.PackingPlan currentProtoPlan,
-                                                       String newParallelism) {
+                                                       Map<String, Integer> changeRequests) {
     PackingPlanProtoDeserializer deserializer = new PackingPlanProtoDeserializer();
     PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
     PackingPlan currentPackingPlan = deserializer.fromProto(currentProtoPlan);
@@ -250,7 +251,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     Map<String, Integer> componentCounts = currentPackingPlan.getComponentCounts();
     Integer totalInstances = currentPackingPlan.getInstanceCount();
 
-    Map<String, Integer> componentChanges = parallelismDelta(componentCounts, newParallelism);
+    Map<String, Integer> componentChanges = parallelismDelta(componentCounts, changeRequests);
 
     // just add instances to the first container for prototype, cloning resources
     PackingPlan.ContainerPlan containerToUse =
@@ -262,8 +263,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     for (String component : componentChanges.keySet()) {
       Integer delta = componentChanges.get(component);
       assertTrue(delta > 0,
-          "Component reductions (%s) for %s not supported. Parallelism change request: %s",
-          delta, component, newParallelism);
+          "Component reductions (%s) for %s not supported.", delta, component);
       for (int i = 0; i < delta; i++) {
         String instanceId =
             String.format("%s:%s:%d:0", containerToUse.id, component, nextGlobalInstanceId++);
@@ -277,8 +277,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
   }
 
   private Map<String, Integer> parallelismDelta(Map<String, Integer> componentCounts,
-                                               String newParallelism) {
-    Map<String, Integer> changeRequests = parallelismChangeRequests(newParallelism);
+                                                Map<String, Integer> changeRequests) {
     for (String component : changeRequests.keySet()) {
       if (!componentCounts.containsKey(component)) {
         throw new IllegalArgumentException(
