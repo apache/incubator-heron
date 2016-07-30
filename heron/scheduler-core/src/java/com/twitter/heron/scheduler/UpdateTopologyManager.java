@@ -13,7 +13,6 @@
 // limitations under the License.
 package com.twitter.heron.scheduler;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
@@ -59,36 +58,33 @@ public class UpdateTopologyManager {
     PackingPlan existingPackingPlan = deserializer.fromProto(existingProtoPackingPlan);
     PackingPlan proposedPackingPlan = deserializer.fromProto(proposedProtoPackingPlan);
 
-    Map<String, Integer> proposedChanges = parallelismDeltas(
-        existingPackingPlan, proposedPackingPlan);
-
-    int existingContainerCount = existingPackingPlan.getContainers().size();
-    int proposedContainerCount = proposedPackingPlan.getContainers().size();
+    Integer proposedContainerCount = proposedPackingPlan.getContainers().size();
+    Integer existingContainerCount = existingPackingPlan.getContainers().size();
     Integer containerDelta = proposedContainerCount - existingContainerCount;
 
     assertTrue(proposedContainerCount > 0,
         "proposed packing plan must have at least 1 container %s", proposedPackingPlan);
-
-    SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
-
     assertTrue(containerDelta == 0 || scalableScheduler.isPresent(),
         "Topology change requires scaling containers by %s but scheduler does not support "
         + "scaling, aborting. Existing packing plan: %s, proposed packing plan: %s",
         containerDelta, existingPackingPlan, proposedPackingPlan);
 
-    // fetch the topology, which will need to be updated
-    TopologyAPI.Topology updatedTopology = stateManager.getTopology(topologyName);
-    for (String componentName : proposedChanges.keySet()) {
-      Integer parallelism = proposedChanges.get(componentName);
-      updatedTopology = mergeTopology(updatedTopology, componentName, parallelism);
-    }
+    SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
 
-    // assert found is same as existing.
+    // assert found PackingPlan is same as existing PackingPlan.
     PackingPlans.PackingPlan foundPackingPlan = stateManager.getPackingPlan(topologyName);
     assertTrue(foundPackingPlan.equals(existingProtoPackingPlan),
         "Existing packing plan received does not equal the packing plan found in the state "
         + "manager. Not updating updatedTopology. Received: %s, Found: %s",
         existingProtoPackingPlan, foundPackingPlan);
+
+    // fetch the topology, which will need to be updated
+    TopologyAPI.Topology updatedTopology = stateManager.getTopology(topologyName);
+    Map<String, Integer> proposedComponentCounts = proposedPackingPlan.getComponentCounts();
+    for (String componentName : proposedComponentCounts.keySet()) {
+      Integer parallelism = proposedComponentCounts.get(componentName);
+      updatedTopology = mergeTopology(updatedTopology, componentName, parallelism);
+    }
 
     // request new resources if necessary. Once containers are allocated we should make the changes
     // to state manager quickly, otherwise the scheduler might penalize for thrashing on start-up
@@ -98,45 +94,20 @@ public class UpdateTopologyManager {
 
     // update parallelism in updatedTopology since TMaster checks that
     // Sum(parallelism) == Sum(instances)
-    print("==> Deleted existing Topology: %s", stateManager.deleteTopology(topologyName));
-    print("==> Set new Topology: %s", stateManager.setTopology(updatedTopology, topologyName));
+    logFine("Deleted existing Topology: %s", stateManager.deleteTopology(topologyName));
+    logFine("Set new Topology: %s", stateManager.setTopology(updatedTopology, topologyName));
 
     // update packing plan to trigger the scaling event
-    print("==> Deleted existing packing plan: %s", stateManager.deletePackingPlan(topologyName));
-    print("==> Set new PackingPlan: %s",
+    logFine("Deleted existing packing plan: %s", stateManager.deletePackingPlan(topologyName));
+    logFine("Set new PackingPlan: %s",
         stateManager.setPackingPlan(proposedProtoPackingPlan, topologyName));
 
     // delete the physical plan so TMaster doesn't try to re-establish it on start-up.
-    print("==> Deleted Physical Plan: %s", stateManager.deletePhysicalPlan(topologyName));
+    logFine("Deleted Physical Plan: %s", stateManager.deletePhysicalPlan(topologyName));
 
     if (containerDelta < 0 && scalableScheduler.isPresent()) {
       scalableScheduler.get().removeContainers(existingContainerCount, -containerDelta);
     }
-  }
-
-  // Given the existing and proposed instance distribution, verify the proposal and return only
-  // the changes being requested.
-  private Map<String, Integer> parallelismDeltas(PackingPlan existingPackingPlan,
-                                                 PackingPlan proposedPackingPlan) {
-    Map<String, Integer> existingComponentCounts = existingPackingPlan.getComponentCounts();
-    Map<String, Integer> proposedComponentCounts = proposedPackingPlan.getComponentCounts();
-
-    Map<String, Integer> parallelismChanges = new HashMap<>();
-
-    for (String componentName : proposedComponentCounts.keySet()) {
-      Integer newParallelism = proposedComponentCounts.get(componentName);
-      assertTrue(existingComponentCounts.containsKey(componentName),
-          "component %s in proposed instance distribution not found in "
-              + "current instance distribution", componentName);
-      assertTrue(newParallelism > 0,
-          "Non-positive parallelism (%s) for component %s found in proposed instance distribution",
-          newParallelism, componentName);
-
-      if (!newParallelism.equals(existingComponentCounts.get(componentName))) {
-        parallelismChanges.put(componentName, newParallelism);
-      }
-    }
-    return parallelismChanges;
   }
 
   private static TopologyAPI.Topology mergeTopology(TopologyAPI.Topology topology,
@@ -172,13 +143,13 @@ public class UpdateTopologyManager {
     return builder.build();
   }
 
-  protected void assertTrue(boolean condition, String message, Object... values) {
+  private void assertTrue(boolean condition, String message, Object... values) {
     if (!condition) {
       throw new RuntimeException("ERROR: " + String.format(message, values));
     }
   }
 
-  protected void print(String format, Object... values) {
+  private void logFine(String format, Object... values) {
     LOG.fine(String.format(format, values));
   }
 }
