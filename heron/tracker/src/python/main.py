@@ -39,8 +39,7 @@ class Application(tornado.web.Application):
   def __init__(self):
 
     config = Config(options.config_file)
-    tracker = Tracker(config)
-    self.tracker = tracker
+    self.tracker = Tracker(config)
     self.tracker.synch_topologies()
     tornadoHandlers = [
         (r"/", handlers.MainHandler),
