@@ -13,7 +13,6 @@
 # limitations under the License.
 ''' color.py '''
 import logging
-import logging.handlers
 import colorlog
 
 formatter = colorlog.ColoredFormatter('%(log_color)s%(levelname)s:%(reset)s %(message)s')
