@@ -15,9 +15,7 @@
 package com.twitter.heron.scheduler;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,6 +27,9 @@ import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.packing.PackingPlanProtoDeserializer;
+import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.TMasterUtils;
@@ -240,42 +241,39 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
   }
 
   // *** all below should be replaced with the proper way to compute a new packing plan ***
-  private PackingPlans.PackingPlan buildNewPackingPlan(PackingPlans.PackingPlan currentPlan,
+  private PackingPlans.PackingPlan buildNewPackingPlan(PackingPlans.PackingPlan currentProtoPlan,
                                                        String newParallelism) {
-    Map<String, Integer> componentCounts =
-        parseInstanceDistribution(currentPlan.getInstanceDistribution());
-    Integer totalInstances = 0;
-    for (Integer count : componentCounts.values()) {
-      totalInstances += count;
-    }
+    PackingPlanProtoDeserializer deserializer = new PackingPlanProtoDeserializer();
+    PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
+    PackingPlan currentPackingPlan = deserializer.fromProto(currentProtoPlan);
+
+    Map<String, Integer> componentCounts = currentPackingPlan.getComponentCounts();
+    Integer totalInstances = currentPackingPlan.getInstanceCount();
 
     Map<String, Integer> componentChanges = parallelismDelta(componentCounts, newParallelism);
 
-    // just add instances to the last container
-    Integer nextInstanceId = totalInstances + 1; // TODO: don't assume they go from 1 -> N
-    StringBuilder newInstanceDist = new StringBuilder(currentPlan.getInstanceDistribution());
-    boolean addNewContainer = false;
-    if (addNewContainer) {
-      newInstanceDist.append(",");
-      newInstanceDist.append(totalInstances + 1);
-      newInstanceDist.append(":");
-    }
+    // just add instances to the first container for prototype, cloning resources
+    PackingPlan.ContainerPlan containerToUse =
+        currentPackingPlan.getContainers().values().iterator().next();
+    PackingPlan.Resource resourceToUse =
+        containerToUse.instances.values().iterator().next().resource;
 
+    Integer nextGlobalInstanceId = totalInstances + 1; // TODO: don't assume they go from 1 -> N
     for (String component : componentChanges.keySet()) {
       Integer delta = componentChanges.get(component);
       assertTrue(delta > 0,
           "Component reductions (%s) for %s not supported. Parallelism change request: %s",
           delta, component, newParallelism);
       for (int i = 0; i < delta; i++) {
-        newInstanceDist.append(":");
-        newInstanceDist.append(component);
-        newInstanceDist.append(":");
-        newInstanceDist.append(nextInstanceId++);
-        newInstanceDist.append(":0");
+        String instanceId =
+            String.format("%s:%s:%d:0", containerToUse.id, component, nextGlobalInstanceId++);
+        PackingPlan.InstancePlan instancePlan =
+            new PackingPlan.InstancePlan(instanceId, component, resourceToUse);
+        containerToUse.instances.put(instanceId, instancePlan);
       }
     }
 
-    return createPackingPlan(newInstanceDist.toString(), currentPlan.getComponentRamDistribution());
+    return serializer.toProto(currentPackingPlan);
   }
 
   private Map<String, Integer> parallelismDelta(Map<String, Integer> componentCounts,
@@ -305,43 +303,6 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
       changes.put(kvp[0], Integer.parseInt(kvp[1]));
     }
     return changes;
-  }
-
-  // given a string like "1:word:3:0:exclaim1:2:0:exclaim1:1:0,2:exclaim1:4:0" returns a map of
-  // { word -> 1, explain1 -> 3 }
-  private Map<String, Integer> parseInstanceDistribution(String instanceDistribution) {
-    Map<String, Integer> componentParallelism = new HashMap<>();
-    String[] containers = parseInstanceDistributionContainers(instanceDistribution);
-    for (String container : containers) {
-      String[] tokens = container.split(":");
-      assertTrue(tokens.length > 3 && (tokens.length - 1) % 3 == 0,
-          "Invalid instance distribution format. Expected componentId "
-              + "followed by instance triples: %s", instanceDistribution);
-      Set<String> idsFound = new HashSet<>();
-      for (int i = 1; i < tokens.length; i += 3) {
-        String instanceName = tokens[i];
-        String instanceId = tokens[i + 1];
-        assertTrue(!idsFound.contains(instanceId),
-            "Duplicate instanceId (%s) found in instance distribution %s for instance %s %s",
-            instanceId, instanceDistribution, instanceName, i);
-        idsFound.add(instanceId);
-        Integer occurrences = componentParallelism.getOrDefault(instanceName, 0);
-        componentParallelism.put(instanceName, occurrences + 1);
-      }
-    }
-    return componentParallelism;
-  }
-
-  private static String[] parseInstanceDistributionContainers(String instanceDistribution) {
-    return instanceDistribution.split(",");
-  }
-
-  private static PackingPlans.PackingPlan createPackingPlan(String instanceDistribution,
-                                                            String componentRamDistribution) {
-    PackingPlans.PackingPlan.Builder builder = PackingPlans.PackingPlan.newBuilder();
-    builder.setInstanceDistribution(instanceDistribution);
-    builder.setComponentRamDistribution(componentRamDistribution);
-    return builder.build();
   }
 
   protected void assertTrue(boolean condition, String message, Object... values) {

@@ -34,6 +34,31 @@ public class PackingPlan {
         id, containers.toString(), resource);
   }
 
+  public Integer getInstanceCount() {
+    Integer totalInstances = 0;
+    for (Integer count : getComponentCounts().values()) {
+      totalInstances += count;
+    }
+    return totalInstances;
+  }
+
+  /**
+   * Return a map containing the count of all of the components, keyed by name
+   */
+  public Map<String, Integer> getComponentCounts() {
+    Map<String, Integer> componentCounts = new HashMap<>();
+    for (ContainerPlan containerPlan : containers.values()) {
+      for (InstancePlan instancePlan : containerPlan.instances.values()) {
+        Integer count = 0;
+        if (componentCounts.containsKey(instancePlan.componentName)) {
+          count = componentCounts.get(instancePlan.componentName);
+        }
+        componentCounts.put(instancePlan.componentName, ++count);
+      }
+    }
+    return componentCounts;
+  }
+
   /**
    * Get the String describing instance distribution from PackingPlan, used by executor
    *

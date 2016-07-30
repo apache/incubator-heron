@@ -14,16 +14,11 @@
 
 package com.twitter.heron.statemgr;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 
 import com.twitter.heron.api.generated.TopologyAPI;

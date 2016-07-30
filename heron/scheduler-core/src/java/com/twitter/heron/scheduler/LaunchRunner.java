@@ -26,6 +26,7 @@ import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.Runtime;
@@ -112,10 +113,8 @@ public class LaunchRunner implements Callable<Boolean> {
   }
 
   private PackingPlans.PackingPlan createPackingPlan(PackingPlan packingPlan) {
-    PackingPlans.PackingPlan.Builder builder = PackingPlans.PackingPlan.newBuilder();
-    builder.setInstanceDistribution(packingPlan.getInstanceDistribution());
-    builder.setComponentRamDistribution(packingPlan.getComponentRamDistribution());
-    return builder.build();
+    PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
+    return serializer.toProto(packingPlan);
   }
 
   @Override
