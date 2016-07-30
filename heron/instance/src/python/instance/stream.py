@@ -22,6 +22,7 @@ class Stream(object):
 
   It is compatible with StreamParse API.
   """
+  # TODO: http://streamparse.readthedocs.io/en/master/topologies.html#multiple-streams
   DEFAULT_STREAM_ID = "default"
 
   def __init__(self, fields=None, name=DEFAULT_STREAM_ID, direct=False):
