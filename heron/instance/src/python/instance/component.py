@@ -133,10 +133,14 @@ class HeronComponentSpec(object):
   """
   def __init__(self, name, python_class_path, is_spout, par,
                inputs=None, outputs=None, config=None):
+    self._sanitize_args(name, python_class_path, is_spout, par)
+
     self.name = name
     self.python_class_path = python_class_path
     self.is_spout = is_spout
     self.parallelism = par
+
+    # inputs, outputs, config will be sanitized later
     self.inputs = inputs
     self.outputs = outputs
     self.custom_config = config
@@ -148,6 +152,13 @@ class HeronComponentSpec(object):
 
     # serializer used for serializing configuration
     self.config_serializer = PythonSerializer()
+
+  def _sanitize_args(self, name, py_class_path, is_spout, par):
+    # name can be None at the time this spec is initialized
+    assert isinstance(name, (None, str))
+    assert isinstance(py_class_path, str)
+    assert isinstance(is_spout, bool)
+    assert isinstance(par, int) and par > 0
 
   def get_protobuf(self):
     """Returns protobuf message (Spout or Bolt) of this component"""
