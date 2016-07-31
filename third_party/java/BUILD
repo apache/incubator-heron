@@ -78,6 +78,7 @@ java_library(
     exports = [ "@com_esotericsoftware_kryo//jar" ],
     deps = [
         "@com_esotericsoftware_kryo//jar",
+        "@com_esotericsoftware_reflectasm//jar",
         "@com_esotericsoftware_minlog//jar",
         "@org_objenesis_objenesis//jar",
     ],
