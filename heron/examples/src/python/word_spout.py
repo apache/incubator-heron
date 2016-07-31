@@ -16,12 +16,8 @@ from itertools import cycle
 from heron.instance.src.python.instance.spout import Spout
 from heron.instance.src.python.instance.stream import Stream
 
-
 class WordSpout(Spout):
-  #default_stream = Stream(fields=['word'])
-  #another_stream = Stream(fields=['word'], name="another_stream")
-  #outputs = [default_stream, another_stream]
-  outputs = ['word']
+  outputs = ['word', Stream(fields=['error_msg'], name='error')]
 
   def initialize(self, config, context):
     self.logger.info("In initialize() of WordSpout")
@@ -34,14 +30,11 @@ class WordSpout(Spout):
 
   def next_tuple(self):
     word = next(self.words)
-    #another_word = 'another_' + word
-    #self.logger.debug("Will emit: " + word)
     self.emit([word], tup_id='message id')
-    #self.emit([another_word], tup_id='another id', stream="another_stream")
-    #self.emit([word])
     self.emit_count += 1
     if self.emit_count % 100000 == 0:
       self.logger.info("Emitted " + str(self.emit_count))
+      self.emit(["test error"], tup_id='error id', stream='error')
 
   def ack(self, tup_id):
     self.ack_count += 1

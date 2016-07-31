@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from heron.instance.src.python.instance.topology import Topology
-from heron.instance.src.python.instance.stream import Grouping, GlobalStreamId
+from heron.instance.src.python.instance.stream import Grouping
 from heron.examples.src.python.word_spout import WordSpout
 from heron.examples.src.python.count_bolt import CountBolt
 
@@ -26,11 +26,9 @@ class WordCount(Topology):
             constants.TOPOLOGY_AUTO_TASK_HOOKS: task_hooks,
             "topology.wide.config.sample": {"key1": 12, "key2": 34}}
 
-  #another_stream = GlobalStreamId(componentId="word_spout", streamId="another_stream")
   word_spout = WordSpout.spec(par=1)
-  #count_bolt = CountBolt.spec(par=1, inputs={word_spout: Grouping.fields('word'),
-  #                                           another_stream: Grouping.fields('word')})
   count_bolt = CountBolt.spec(par=1,
-                              inputs={word_spout: Grouping.fields('word')},
+                              inputs={word_spout: Grouping.fields('word'),
+                                      word_spout['error']: Grouping.ALL},
                               config={constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS: 10,
                                       "count_bolt.specific": ["123", (12, 34)]})

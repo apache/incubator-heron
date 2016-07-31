@@ -14,9 +14,10 @@
 '''component.py: module for base component (base for spout/bolt) and its spec'''
 
 import logging
+import uuid
 
 from heron.common.src.python.utils.misc import PythonSerializer, OutgoingTupleHelper
-from heron.instance.src.python.instance.stream import Stream, Grouping, GlobalStreamId
+from heron.instance.src.python.instance.stream import Stream, Grouping
 from heron.proto import tuple_pb2, topology_pb2
 
 import heron.common.src.python.constants as constants
@@ -139,6 +140,11 @@ class HeronComponentSpec(object):
     self.inputs = inputs
     self.outputs = outputs
     self.custom_config = config
+
+    # This is used for identification, especially when name is not specified by argument
+    # Note that ``self.name`` might not be available until it is set by TopologyType metaclass
+    # so this is necessary for identification purposes. Used mainly by GlobalStreamId.
+    self.uuid = str(uuid.uuid4())
 
     # serializer used for serializing configuration
     self.config_serializer = PythonSerializer()
@@ -331,13 +337,30 @@ class HeronComponentSpec(object):
         ret[output.stream_id] = output.fields
     return ret
 
+  def get_out_streamids(self):
+    """Returns a set of output stream ids registered for this component"""
+    ret_lst = []
+    for output in self.outputs:
+      if not isinstance(output, (str, Stream)):
+        raise TypeError("Outputs must be a list of strings or Streams, given: %s" % str(output))
+      ret_lst.append(Stream.DEFAULT_STREAM_ID if isinstance(output, str) else output.stream_id)
+    return set(ret_lst)
+
+  def __getitem__(self, stream_id):
+    """Get GlobalStreamId for a given stream_id"""
+    if stream_id not in self.get_out_streamids():
+      raise ValueError("A given stream id does not exist on this component: %s" % stream_id)
+
+    component_id = self.name or self
+    return GlobalStreamId(componentId=component_id, streamId=stream_id)
+
   @staticmethod
   def _get_stream_id(comp_name, stream_id):
     """Returns a StreamId protobuf message"""
-    stream_id = topology_pb2.StreamId()
-    stream_id.id = stream_id
-    stream_id.component_name = comp_name
-    return stream_id
+    proto_stream_id = topology_pb2.StreamId()
+    proto_stream_id.id = stream_id
+    proto_stream_id.component_name = comp_name
+    return proto_stream_id
 
   @staticmethod
   def _get_stream_schema(fields):
@@ -349,3 +372,64 @@ class HeronComponentSpec(object):
       key.type = topology_pb2.Type.Value("OBJECT")
 
     return stream_schema
+
+class GlobalStreamId(object):
+  """Wrapper class to define stream_id and its component name
+
+  Constructor method is compatible with StreamParse's GlobalStreamId class, although
+  the object itself is completely different, as Heron does not use Thrift.
+  This is mainly used for declaring input fields when defining a topology, and internally
+  in HeronComponentSpec.
+
+  Note that topology writers never have to create an instance of this class by themselves,
+  as it is created automatically.
+  """
+  def __init__(self, componentId, streamId):
+    """
+    :type componentId: str or HeronComponentSpec
+    :param componentId: component id from which the tuple is emitted, or HeronComponentSpec object.
+    :type streamId: str
+    :param streamId: stream id through which the tuple is transmitted
+    """
+    if not isinstance(componentId, (str, HeronComponentSpec)):
+      raise ValueError('GlobalStreamId: componentId must be either string or HeronComponentSpec')
+    if not isinstance(streamId, str):
+      raise ValueError('GlobalStreamId: streamId must be string type')
+
+    self._component_id = componentId
+    self.stream_id = streamId
+
+  @property
+  def component_id(self):
+    """Returns component_id of this GlobalStreamId
+
+    Note that if HeronComponentSpec is specified as componentId and its name is not yet
+    available (i.e. when ``name`` argument was not given in ``spec()`` method in Bolt or Spout),
+    this property returns a message with uuid. However, this is provided only for safety
+    with __eq__(), __str__(), and __hash__() methods, and not meant to be called explicitly
+    before TopologyType class finally sets the name attribute of HeronComponentSpec.
+    """
+    if isinstance(self._component_id, HeronComponentSpec):
+      if self._component_id.name is None:
+        # HeronComponentSpec instance's name attribute might not be available until
+        # TopologyType metaclass finally sets it. This statement is to support __eq__(),
+        # __hash__() and __str__() methods with safety, as raising Exception is not
+        # appropriate this case.
+        return "<No name available for HeronComponentSpec yet, uuid: %s>" % self._component_id.uuid
+      return self._component_id.name
+    elif isinstance(self._component_id, str):
+      return self._component_id
+    else:
+      raise ValueError("Component Id for this GlobalStreamId is not properly set: <%s:%s>"
+                       % (str(type(self._component_id)), str(self._component_id)))
+
+  def __eq__(self, other):
+    return hasattr(other, 'component_id') and self.component_id == other.component_id \
+           and hasattr(other, 'stream_id') and self.stream_id == other.stream_id
+
+  def __hash__(self):
+    return hash(self.__str__())
+
+  def __str__(self):
+    return "%s:%s" % (self.component_id, self.stream_id)
+

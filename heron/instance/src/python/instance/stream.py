@@ -22,7 +22,6 @@ class Stream(object):
 
   It is compatible with StreamParse API.
   """
-  # TODO: http://streamparse.readthedocs.io/en/master/topologies.html#multiple-streams
   DEFAULT_STREAM_ID = "default"
 
   def __init__(self, fields=None, name=DEFAULT_STREAM_ID, direct=False):
@@ -58,37 +57,6 @@ class Stream(object):
         raise NotImplementedError("Direct stream is not supported yet.")
     else:
       raise TypeError("'direct' must be either True or False, given: %s" % str(direct))
-
-class GlobalStreamId(object):
-  """Wrapper class to define stream_id and its component name
-
-  Constructor method is compatible with StreamParse's GlobalStreamId class, although
-  the object itself is completely different, as Heron does not use Thrift.
-  This is mainly used for declaring input fields when defining a topology, and internally
-  in HeronComponentSpec.
-  """
-  def __init__(self, componentId, streamId):
-    """
-    :type componentId: str
-    :param componentId: component id from which the tuple is emitted
-    :type streamId: str
-    :param streamId: stream id through which the tuple is transmitted
-    """
-    if not isinstance(componentId, str) or not isinstance(streamId, str):
-      raise ValueError('Both componentId and streamId must be string type')
-
-    self.component_id = componentId
-    self.stream_id = streamId
-
-  def __eq__(self, other):
-    return hasattr(other, 'component_id') and self.component_id == other.component_id \
-           and hasattr(other, 'stream_id') and self.stream_id == other.stream_id
-
-  def __hash__(self):
-    return hash(self.__str__())
-
-  def __str__(self):
-    return self.component_id + ":" + self.stream_id
 
 class Grouping(object):
   """Helper class for defining Grouping for Python topology"""
