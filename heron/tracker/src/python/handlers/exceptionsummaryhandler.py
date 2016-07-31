@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' execeptionsummaryhandler.py '''
-import logging
 import traceback
 import tornado.gen
 import tornado.web
@@ -21,8 +20,7 @@ from heron.proto import common_pb2
 from heron.proto import tmaster_pb2
 from heron.tracker.src.python import constants
 from heron.tracker.src.python.handlers import BaseHandler
-
-LOG = logging.getLogger(__name__)
+from heron.common.src.python.color import Log
 
 # pylint: disable=attribute-defined-outside-init
 class ExceptionSummaryHandler(BaseHandler):
@@ -62,7 +60,7 @@ class ExceptionSummaryHandler(BaseHandler):
                                                   topology.tmaster, component, instances)
       self.write_success_response(exceptions_summary)
     except Exception as e:
-      traceback.print_exc()
+      Log.debug(traceback.format_exc())
       self.write_error_response(e)
 
   # pylint: disable=dangerous-default-value, no-self-use, unused-argument
@@ -82,16 +80,16 @@ class ExceptionSummaryHandler(BaseHandler):
     port = str(tmaster.stats_port)
     host = tmaster.host
     url = "http://{0}:{1}/exceptionsummary".format(host, port)
-    LOG.debug("Creating request object.")
+    Log.debug("Creating request object.")
     request = tornado.httpclient.HTTPRequest(url,
                                              body=request_str,
                                              method='POST',
                                              request_timeout=5)
-    LOG.debug('Making HTTP call to fetch exceptionsummary url: %s', url)
+    Log.debug('Making HTTP call to fetch exceptionsummary url: %s', url)
     try:
       client = tornado.httpclient.AsyncHTTPClient()
       result = yield client.fetch(request)
-      LOG.debug("HTTP call complete.")
+      Log.debug("HTTP call complete.")
     except tornado.httpclient.HTTPError as e:
       raise Exception(str(e))
 
@@ -99,7 +97,7 @@ class ExceptionSummaryHandler(BaseHandler):
     responseCode = result.code
     if responseCode >= 400:
       message = "Error in getting exceptions from Tmaster, code: " + responseCode
-      LOG.error(message)
+      Log.error(message)
       raise tornado.gen.Return({
           "message": message
       })

@@ -18,6 +18,7 @@ import tornado.web
 
 from heron.tracker.src.python.handlers import BaseHandler
 from heron.tracker.src.python.query import Query
+from heron.common.src.python.color import Log
 
 
 class MetricsQueryHandler(BaseHandler):
@@ -62,7 +63,7 @@ class MetricsQueryHandler(BaseHandler):
                                        topology.tmaster, query, int(start_time), int(end_time))
       self.write_success_response(metrics)
     except Exception as e:
-      traceback.print_exc()
+      Log.debug(traceback.format_exc())
       self.write_error_response(e)
 
   # pylint: disable=unused-argument
