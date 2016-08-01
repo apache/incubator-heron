@@ -19,14 +19,14 @@ import traceback
 import signal
 import yaml
 
+from heron.common.src.python.basics import GatewayLooper
 from heron.common.src.python.log import Log, init_rotating_logger
-from heron.common.src.python.basics.gateway_looper import GatewayLooper
 from heron.common.src.python.utils.metrics import GatewayMetrics, MetricsCollector
 from heron.common.src.python.utils.misc import HeronCommunicator
 from heron.common.src.python.network import create_socket_options
 
 from heron.proto import physical_plan_pb2, stmgr_pb2
-from heron.instance.src.python.network.metricsmgr_client import MetricsManagerClient
+from heron.instance.src.python.network import MetricsManagerClient
 
 import heron.common.src.python.pex_loader as pex_loader
 import heron.common.src.python.constants as constants

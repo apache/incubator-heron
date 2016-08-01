@@ -13,8 +13,7 @@
 # limitations under the License.
 
 from itertools import cycle
-from heron.instance.src.python.instance.spout import Spout
-from heron.instance.src.python.instance.stream import Stream
+from heron.instance.src.python.basics import Spout, Stream
 
 class WordSpout(Spout):
   outputs = ['word', Stream(fields=['error_msg'], name='error')]

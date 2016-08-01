@@ -14,7 +14,6 @@
 
 package com.twitter.heron.spi.utils;
 
-import java.io.File;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;

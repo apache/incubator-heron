@@ -1,4 +1,4 @@
-'''module for python heron instance'''
+'''module for basic python heron component'''
 __all__ = ['bolt', 'spout', 'component', 'stream', 'topology']
 
 from bolt import Bolt

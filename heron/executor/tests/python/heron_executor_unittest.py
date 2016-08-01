@@ -81,7 +81,7 @@ class HeronExecutorTest(unittest.TestCase):
   # <instance_distribution> <zknode> <zkroot> <tmaster_binary> <stmgr_binary>
   # <metricsmgr_classpath> <instance_jvm_opts_in_base64> <classpath>
   # <master_port> <tmaster_controller_port> <tmaster_stats_port> <heron_internals_config_file>
-  # <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_jar_file>
+  # <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_bin_file>
   # <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>
   # <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file>
   # <scheduler_classpath> <scheduler_port>
@@ -91,7 +91,7 @@ class HeronExecutorTest(unittest.TestCase):
     1:word:3:0:exclaim1:2:0:exclaim1:1:0 zknode zkroot tmaster_binary stmgr_binary
     metricsmgr_classpath "LVhYOitIZWFwRHVtcE9uT3V0T2ZNZW1vcnlFcnJvcg&equals;&equals;" classpath
     master_port tmaster_controller_port tmaster_stats_port heron/config/src/yaml/conf/test/test_heron_internals.yaml
-    exclaim1:536870912,word:536870912 "" pkg_type topology_jar_file
+    exclaim1:536870912,word:536870912 "" pkg_type topology_bin_file
     heron_java_home shell-port heron_shell_binary metricsmgr_port
     cluster role environ instance_classpath metrics_sinks_config_file
     scheduler_classpath scheduler_port

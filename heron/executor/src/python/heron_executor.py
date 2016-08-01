@@ -33,16 +33,10 @@ def print_usage():
       " <instance_distribution> <zknode> <zkroot> <tmaster_binary> <stmgr_binary> "
       " <metricsmgr_classpath> <instance_jvm_opts_in_base64> <classpath> "
       " <master_port> <tmaster_controller_port> <tmaster_stats_port> <heron_internals_config_file> "
-      " <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_jar_file>"
+      " <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_bin_file>"
       " <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>"
       " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file> "
       " <scheduler_classpath> <scheduler_port>")
-
-  print ("\n" + "To execute a python instance:\n" +
-         "  - <classpath>: the path to the Python Heron Instance executable\n" +
-         "  - <pkg_type>: pex\n" +
-         "  - <topology_jar_file>: the path to the topology pex file\n" +
-         "<instance_jvm_opts>, <component_rammap>, <component_jvm_opts>, <instance_classpath> are ignored")
 
 def do_print(statement):
   timestr = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
@@ -171,7 +165,7 @@ class HeronExecutor(object):
         self.component_jvm_opts[base64.b64decode(k)] = base64.b64decode(v)
 
     self.pkg_type = args[19]
-    self.topology_jar_file = args[20]
+    self.topology_bin_file = args[20]
     self.heron_java_home = args[21]
     self.shell_port = args[22]
     self.heron_shell_binary = args[23]
@@ -201,11 +195,6 @@ class HeronExecutor(object):
 
     # Log itself pid
     log_pid_for_process(get_heron_executor_process_name(self.shard), os.getpid())
-
-    # Prepare for python instance
-    if self.pkg_type == "pex":
-      self.topology_pex = self.topology_jar_file
-      self.py_instance_exec = self.classpath
 
   # pylint: disable=no-self-use
   def _load_logging_dir(self, heron_internals_config_file):
@@ -301,7 +290,7 @@ class HeronExecutor(object):
         self.role,
         self.environ,
         self.topology_name,
-        self.topology_jar_file,
+        self.topology_bin_file,
         self.scheduler_port]
     retval["heron-tscheduler"] = scheduler_cmd
 
@@ -381,7 +370,7 @@ class HeronExecutor(object):
                       self.master_port,
                       self.metricsmgr_port,
                       self.heron_internals_config_file,
-                      self.topology_pex]
+                      self.topology_bin_file]
 
       retval[instance_id] = instance_cmd
 
@@ -429,10 +418,10 @@ class HeronExecutor(object):
 
     if self.pkg_type == 'jar' or self.pkg_type == 'tar':
       retval.update(self._get_java_instance_cmd(instance_info))
-    else:
-      # Python
+    elif self.pkg_type == 'pex':
       retval.update(self.get_python_instance_cmd(instance_info))
-      pass
+    else:
+      raise ValueError("Unrecognized package type: %s" % self.pkg_type)
 
     return retval
 
@@ -450,7 +439,7 @@ class HeronExecutor(object):
 
   def _untar_if_tar(self):
     if self.pkg_type == "tar":
-      os.system("tar -xvf %s" % self.topology_jar_file)
+      os.system("tar -xvf %s" % self.topology_bin_file)
 
   # pylint: disable=no-self-use
   def _wait_process_std_out_err(self, name, process):

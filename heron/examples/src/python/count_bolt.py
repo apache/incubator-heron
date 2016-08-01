@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from collections import Counter
-from heron.instance.src.python.instance.bolt import Bolt
+from heron.instance.src.python.basics import Bolt
 
 class CountBolt(Bolt):
   outputs = ['word', 'count']

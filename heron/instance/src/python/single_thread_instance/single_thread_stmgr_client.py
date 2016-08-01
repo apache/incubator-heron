@@ -12,11 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from heron.common.src.python.log import Log
-
-from heron.proto import stmgr_pb2, common_pb2
-
 from heron.common.src.python.utils.misc import PhysicalPlanHelper
 from heron.common.src.python.network import HeronClient, StatusCode
+from heron.proto import stmgr_pb2, common_pb2
+
 import heron.common.src.python.constants as constants
 
 class SingleThreadStmgrClient(HeronClient):

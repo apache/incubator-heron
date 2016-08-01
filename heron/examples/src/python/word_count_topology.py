@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from heron.instance.src.python.instance.topology import Topology
-from heron.instance.src.python.instance.stream import Grouping
 from heron.examples.src.python.word_spout import WordSpout
 from heron.examples.src.python.count_bolt import CountBolt
+from heron.instance.src.python.basics import Topology, Grouping
 
 import heron.common.src.python.constants as constants
 

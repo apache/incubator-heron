@@ -17,10 +17,11 @@ import logging
 import uuid
 
 from heron.common.src.python.utils.misc import PythonSerializer, OutgoingTupleHelper
-from heron.instance.src.python.instance.stream import Stream, Grouping
 from heron.proto import tuple_pb2, topology_pb2
 
 import heron.common.src.python.constants as constants
+
+from .stream import Stream, Grouping
 
 class Component(object):
   """The base class for heron bolt/spout instance
