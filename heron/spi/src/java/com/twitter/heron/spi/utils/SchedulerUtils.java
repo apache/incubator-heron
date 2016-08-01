@@ -244,6 +244,7 @@ public final class SchedulerUtils {
 
     commands.add(completeSchedulerProcessClassPath);
     commands.add(Integer.toString(schedulerPort));
+    commands.add(Context.pyheronInstanceSandboxBinary(config));
 
     return commands.toArray(new String[0]);
   }

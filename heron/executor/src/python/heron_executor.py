@@ -36,7 +36,7 @@ def print_usage():
       " <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_bin_file>"
       " <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>"
       " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file> "
-      " <scheduler_classpath> <scheduler_port>")
+      " <scheduler_classpath> <scheduler_port> <pyheron_instance_binary>")
 
 def do_print(statement):
   timestr = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
@@ -177,6 +177,7 @@ class HeronExecutor(object):
     self.metrics_sinks_config_file = args[29]
     self.scheduler_classpath = args[30]
     self.scheduler_port = args[31]
+    self.pyheron_instance_binary = args[32]
 
     # Read the heron_internals.yaml for logging dir
     self.log_dir = self._load_logging_dir(self.heron_internals_config_file)
@@ -359,7 +360,7 @@ class HeronExecutor(object):
     for (instance_id, component_name, global_task_id, component_index) in instance_info:
       do_print("Python instance %s component: %s" %(instance_id, component_name))
       # TODO: change this hardcoded cmd
-      instance_cmd = ["/Users/tnojima/workspace/heron/bazel-bin/heron/instance/src/python/instance/pyheron_st_instance",
+      instance_cmd = [self.pyheron_instance_binary,
                       self.topology_name,
                       self.topology_id,
                       instance_id,
@@ -600,7 +601,7 @@ class HeronExecutor(object):
         sys.exit(1)
 
 def main():
-  if len(sys.argv) != 32:
+  if len(sys.argv) != 33:
     print_usage()
     sys.exit(1)
 
