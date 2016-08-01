@@ -47,14 +47,6 @@ CLIENT_YAML = "client.yaml"
 IS_ROLE_REQUIRED = "heron.config.is.role.required"
 IS_ENV_REQUIRED = "heron.config.is.env.required"
 
-class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
-  def _format_action(self, action):
-    # pylint: disable=bad-super-call
-    parts = super(argparse.RawDescriptionHelpFormatter, self)._format_action(action)
-    if action.nargs == argparse.PARSER:
-      parts = "\n".join(parts.split("\n")[1:])
-    return parts
-
 
 def create_tar(tar_filename, files, config_dir, config_files):
   '''
@@ -330,110 +322,11 @@ def check_release_file_exists():
 
   return True
 
-def _all_metric_queries():
-  queries_normal = [
-      'complete-latency', 'execute-latency', 'process-latency',
-      'jvm-uptime-secs', 'jvm-process-cpu-load', 'jvm-memory-used-mb'
-  ]
-  queries = ['__%s' % m for m in queries_normal]
-  count_queries_normal = ['emit-count', 'execute-count', 'ack-count', 'fail-count']
-  count_queries = ['__%s/default' % m for m in count_queries_normal]
-  return queries, queries_normal, count_queries, count_queries_normal
-
-
-def metric_queries():
-  """all metric queries"""
-  qs = _all_metric_queries()
-  return qs[0] + qs[2]
-
-
-def queries_map():
-  """map from query parameter to query name"""
-  qs = _all_metric_queries()
-  return dict(zip(qs[0], qs[1]) + zip(qs[2], qs[3]))
-
-
-def get_clusters():
-  """Synced API call to get all cluster names"""
-  instance = tornado.ioloop.IOLoop.instance()
-  # pylint: disable=unnecessary-lambda
-  try:
-    return instance.run_sync(lambda: API.get_clusters())
-  except Exception:
-    Log.debug(traceback.format_exc())
-    raise
-
-
-def get_logical_plan(cluster, env, topology, role):
-  """Synced API call to get logical plans"""
-  instance = tornado.ioloop.IOLoop.instance()
-  try:
-    return instance.run_sync(lambda: API.get_logical_plan(cluster, env, topology, role))
-  except Exception:
-    Log.debug(traceback.format_exc())
-    raise
-
-
-def get_topology_info(*args):
-  """Synced API call to get topology information"""
-  instance = tornado.ioloop.IOLoop.instance()
-  try:
-    return instance.run_sync(lambda: API.get_topology_info(*args))
-  except Exception:
-    Log.debug(traceback.format_exc())
-    raise
-
-
-def get_topology_metrics(*args):
-  """Synced API call to get topology metrics"""
-  instance = tornado.ioloop.IOLoop.instance()
-  try:
-    return instance.run_sync(lambda: API.get_comp_metrics(*args))
-  except Exception:
-    Log.debug(traceback.format_exc())
-    raise
-
-
-def get_component_metrics(component, cluster, env, topology, role):
-  """Synced API call to get component metrics"""
-  all_queries = metric_queries()
-  try:
-    result = get_topology_metrics(
-        cluster, env, topology, component, [], all_queries, [0, -1], role)
-    return result["metrics"]
-  except Exception:
-    Log.debug(traceback.format_exc())
-    raise
-
-
-def get_cluster_topologies(cluster):
-  """Synced API call to get topologies under a cluster"""
-  instance = tornado.ioloop.IOLoop.instance()
-  try:
-    return instance.run_sync(lambda: API.get_cluster_topologies(cluster))
-  except Exception:
-    Log.debug(traceback.format_exc())
-    raise
-
-
-def get_cluster_role_topologies(cluster, role):
-  """Synced API call to get topologies under a cluster submitted by a role"""
-  instance = tornado.ioloop.IOLoop.instance()
-  try:
-    return instance.run_sync(lambda: API.get_cluster_role_topologies(cluster, role))
-  except Exception:
-    Log.debug(traceback.format_exc())
-    raise
-
-
-def get_cluster_role_env_topologies(cluster, role, env):
-  """Synced API call to get topologies under a cluster submitted by a role under env"""
-  instance = tornado.ioloop.IOLoop.instance()
-  try:
-    return instance.run_sync(lambda: API.get_cluster_role_env_topologies(cluster, role, env))
-  except Exception:
-    Log.debug(traceback.format_exc())
-    raise
+def print_version():
+  release_file = get_heron_release_file()
+  with open(release_file) as release_info:
+    for line in release_info:
+      print line,
 
 def insert_bool(param, command_args):
   '''
@@ -465,8 +358,11 @@ def insert_bool_values(command_line_args):
   args2 = insert_bool('--deploy-deactivated', args1)
   return args2
 
-def print_version():
-  release_file = get_heron_release_file()
-  with open(release_file) as release_info:
-    for line in release_info:
-      print line,
+class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
+  def _format_action(self, action):
+    # pylint: disable=bad-super-call
+    parts = super(argparse.RawDescriptionHelpFormatter, self)._format_action(action)
+    if action.nargs == argparse.PARSER:
+      parts = "\n".join(parts.split("\n")[1:])
+    return parts
+
