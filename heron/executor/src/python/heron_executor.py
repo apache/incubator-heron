@@ -359,7 +359,6 @@ class HeronExecutor(object):
     retval = {}
     for (instance_id, component_name, global_task_id, component_index) in instance_info:
       do_print("Python instance %s component: %s" %(instance_id, component_name))
-      # TODO: change this hardcoded cmd
       instance_cmd = [self.pyheron_instance_binary,
                       self.topology_name,
                       self.topology_id,
