@@ -100,10 +100,10 @@ class Bolt(Component):
     self.cleanup()
     self.looper.exit_loop()
 
-  def _activate(self):
+  def invoke_activate(self):
     pass
 
-  def _deactivate(self):
+  def invoke_deactivate(self):
     pass
 
   def emit(self, tup, stream=Component.DEFAULT_STREAM_ID,

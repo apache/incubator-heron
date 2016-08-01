@@ -124,6 +124,14 @@ class PhysicalPlanHelper(object):
     """Checks whether topology is currently running"""
     return self.pplan.topology.state == topology_pb2.TopologyState.Value("RUNNING")
 
+  def is_topology_paused(self):
+    """Checks whether topology is currently paused"""
+    return self.pplan.topology.state == topology_pb2.TopologyState.Value("PAUSED")
+
+  def is_topology_killed(self):
+    """Checks whether topology is already killed"""
+    return self.pplan.topology.state == topology_pb2.TopologyState.Value("KILLED")
+
   def get_topology_config(self):
     """Returns the topology config"""
     if self.pplan.topology.HasField("topology_config"):

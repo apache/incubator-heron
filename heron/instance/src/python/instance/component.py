@@ -35,7 +35,7 @@ class Component(object):
   :ivar serializer: Implementation of Heron Serializer
   """
 
-  DEFAULT_STREAM_ID = "default"
+  DEFAULT_STREAM_ID = Stream.DEFAULT_STREAM_ID
   make_data_tuple = lambda _: tuple_pb2.HeronDataTuple()
 
   def __init__(self, pplan_helper, in_stream, out_stream, looper,
@@ -114,11 +114,11 @@ class Component(object):
     """Read tuples from a queue and process the tuples"""
     raise NotImplementedError()
 
-  def _activate(self):
+  def invoke_activate(self):
     """Activate the instance"""
     raise NotImplementedError()
 
-  def _deactivate(self):
+  def invoke_deactivate(self):
     """Deactivate the instance"""
     raise NotImplementedError()
 
@@ -155,7 +155,7 @@ class HeronComponentSpec(object):
 
   def _sanitize_args(self, name, py_class_path, is_spout, par):
     # name can be None at the time this spec is initialized
-    assert isinstance(name, (None, str))
+    assert name is None or isinstance(name, str)
     assert isinstance(py_class_path, str)
     assert isinstance(is_spout, bool)
     assert isinstance(par, int) and par > 0

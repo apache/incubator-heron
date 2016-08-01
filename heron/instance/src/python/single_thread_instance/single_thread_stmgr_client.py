@@ -53,13 +53,13 @@ class SingleThreadStmgrClient(HeronClient):
     self._send_register_req()
 
   def on_response(self, status, context, response):
-    Log.debug("In on_response with status: " + str(status))
+    Log.debug("In on_response with status: %s, with context: %s" % (str(status), str(context)))
     if status != StatusCode.OK:
       raise RuntimeError("Response from Stream Manager not OK")
     if isinstance(response, stmgr_pb2.RegisterInstanceResponse):
       self._handle_register_response(response)
     else:
-      Log.error("Weird kind: " + response.DESCRIPTOR.full_name)
+      Log.error("Unknown kind of response received: %s" % response.DESCRIPTOR.full_name)
       raise RuntimeError("Unknown kind of response received from Stream Manager")
 
   def on_incoming_message(self, message):
@@ -109,24 +109,26 @@ class SingleThreadStmgrClient(HeronClient):
 
   def _handle_new_tuples(self, tuple_msg):
     """Called when new TupleMessage arrives"""
-    #self._in_stream.offer(tuple_msg.set)
-
     self.heron_instance_cls.handle_new_tuple_set(tuple_msg.set)
 
   def _handle_assignment_message(self, pplan):
     """Called when new NewInstanceAssignmentMessage arrives"""
-    Log.info("In _handle_assignment_message(): Physical Plan: \n" + str(pplan))
+    Log.info("In handle_assignment_message() of STStmgrClient, Physical Plan: \n" + str(pplan))
     new_helper = PhysicalPlanHelper(pplan, self.instance.instance_id)
 
-    # TODO: handle when pplan_helper already exists
+    if self._pplan_helper is not None and \
+      (self._pplan_helper.my_component_name != new_helper.my_component_name or
+       self._pplan_helper.my_task_id != new_helper.my_task_id):
+      raise RuntimeError("Our Assignment has changed. We will die to pick it.")
 
     if self._pplan_helper is None:
       Log.info("Received a new Physical Plan")
+      Log.info("Push the new pplan_helper to Heron Instance")
+      self.heron_instance_cls.handle_assignment_msg(new_helper)
     else:
       Log.info("Received a new Physical Plan with the same assignment -- State Change")
+      Log.info("Old state: %s, new state: %s."
+               % (self._pplan_helper.get_topology_state(), new_helper.get_topology_state()))
+      self.heron_instance_cls.handle_state_change_msg(new_helper)
 
     self._pplan_helper = new_helper
-
-    Log.info("Push to Slave")
-    #self._control_stream.offer(new_helper)
-    self.heron_instance_cls.handle_assignment_msg(new_helper)

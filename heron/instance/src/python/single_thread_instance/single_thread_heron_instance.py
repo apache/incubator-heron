@@ -72,6 +72,7 @@ class SingleThreadHeronInstance(object):
 
     # my_instance is a LoadedInstance tuple
     self.my_instance = None
+    self.is_instance_started = False
 
     # Debugging purposes
     def go_trace(sig, stack):
@@ -111,23 +112,41 @@ class SingleThreadHeronInstance(object):
       msg.set.CopyFrom(tuple_set)
       self._stmgr_client.send_message(msg)
 
+  def handle_state_change_msg(self, new_helper):
+    """Called when state change is commanded by stream manager"""
+    assert self.my_pplan_helper is not None
+    assert self.my_instance is not None and self.my_instance.py_class is not None
+
+    if self.my_pplan_helper.get_topology_state() != new_helper.get_topology_state():
+      # handle state change
+      if new_helper.is_topology_running():
+        if not self.is_instance_started:
+          self.start_instance()
+        self.my_instance.py_class.invoke_activate()
+      elif new_helper.is_topology_paused():
+        self.my_instance.py_class.invoke_deactivate()
+      else:
+        raise RuntimeError("Unexpected TopologyState update: %s" % new_helper.get_topology_state())
+    else:
+      Log.info("Topology state remains the same.")
+
+    # update the pplan_helper
+    self.my_pplan_helper = new_helper
+
   def handle_assignment_msg(self, pplan_helper):
     """Called when new NewInstanceAssignmentMessage arrives
 
-    Tells this Instance to become either spout/bolt.
-    Should be mostly equivalent to _handle_new_assignment() in slave.py
+    Tells this instance to become either spout/bolt.
 
     :param pplan_helper: PhysicalPlanHelper class to become
     """
-    Log.info("Incarnating ourselves as " + pplan_helper.my_component_name +
-             " with task id " + str(pplan_helper.my_task_id))
-
-    # TODO: bind the metrics collector with topology context
+    Log.info("Incarnating ourselves as %s with task id %s"
+             % (pplan_helper.my_component_name, str(pplan_helper.my_task_id)))
 
     self.my_pplan_helper = pplan_helper
     self.my_pplan_helper.set_topology_context(self.metrics_collector, self.topo_pex_file_path)
 
-    # TODO: handle STATE CHANGE
+    # TODO: initialize communicator for back pressure
 
     try:
       if pplan_helper.is_spout:
@@ -145,7 +164,7 @@ class SingleThreadHeronInstance(object):
                                           protobuf=my_bolt,
                                           py_class=py_bolt_instance)
     except Exception as e:
-      Log.error("Error with loading bolt/spout instance from pex file")
+      Log.error("Error with loading bolt/spout instance from pex file: %s" % e.message)
       Log.error(traceback.format_exc())
 
     if pplan_helper.is_topology_running():
@@ -161,16 +180,24 @@ class SingleThreadHeronInstance(object):
     pex_loader.load_pex(self.topo_pex_file_path)
     if is_spout:
       spout_class = pex_loader.import_and_get_class(self.topo_pex_file_path, python_class_name)
-      my_spout = spout_class(self.my_pplan_helper, self.in_stream, self.out_stream, self.looper, self.sys_config)
+      my_spout = spout_class(self.my_pplan_helper, self.in_stream, self.out_stream,
+                             self.looper, self.sys_config)
       return my_spout
     else:
       bolt_class = pex_loader.import_and_get_class(self.topo_pex_file_path, python_class_name)
-      my_bolt = bolt_class(self.my_pplan_helper, self.in_stream, self.out_stream, self.looper, self.sys_config)
+      my_bolt = bolt_class(self.my_pplan_helper, self.in_stream, self.out_stream,
+                           self.looper, self.sys_config)
       return my_bolt
 
   def start_instance(self):
-    Log.info("Start bolt/spout instance now...")
-    self.my_instance.py_class.start()
+    try:
+      Log.info("Starting bolt/spout instance now...")
+      self.my_instance.py_class.start()
+      self.is_instance_started = True
+      Log.info("Started instance successfully.")
+    except Exception as e:
+      Log.error("Error when starting bolt/spout, bailing out...")
+      self.looper.exit_loop()
 
 def print_usage():
   print("Usage: ./single_thread_heron_instance <topology_name> <topology_id> "
@@ -239,4 +266,3 @@ def main():
 
 if __name__ == '__main__':
   main()
-

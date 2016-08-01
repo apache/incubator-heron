@@ -97,12 +97,12 @@ class Spout(Component):
 
     self.looper.exit_loop()
 
-  def _activate(self):
+  def invoke_activate(self):
     Log.info("Spout is activated")
     self.activate()
     self.topology_state = topology_pb2.TopologyState.Value("RUNNING")
 
-  def _deactivate(self):
+  def invoke_deactivate(self):
     Log.info("Spout is deactivated")
     self.deactivate()
     self.topology_state = topology_pb2.TopologyState.Value("PAUSED")
