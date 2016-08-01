@@ -40,7 +40,6 @@ public class LauncherUtils {
   /**
    * An instance of this utility class to avoid the need of injecting a factory when mocking utils.
    */
-  @VisibleForTesting
   public static LauncherUtils instance = new LauncherUtils();
 
   /**
