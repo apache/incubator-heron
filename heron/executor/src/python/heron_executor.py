@@ -359,7 +359,7 @@ class HeronExecutor(object):
     for (instance_id, component_name, global_task_id, component_index) in instance_info:
       do_print("Python instance %s component: %s" %(instance_id, component_name))
       # TODO: change this hardcoded cmd
-      instance_cmd = ["/Users/tnojima/workspace/heron/bazel-bin/heron/instance/src/python/single_thread_heron_instance",
+      instance_cmd = ["/Users/tnojima/workspace/heron/bazel-bin/heron/instance/src/python/instance/pyheron_st_instance",
                       self.topology_name,
                       self.topology_id,
                       instance_id,

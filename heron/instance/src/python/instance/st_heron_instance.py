@@ -26,12 +26,10 @@ from heron.common.src.python.utils.misc import HeronCommunicator
 from heron.common.src.python.network import create_socket_options
 
 from heron.proto import physical_plan_pb2, stmgr_pb2
-from heron.instance.src.python.network import MetricsManagerClient
+from heron.instance.src.python.network import MetricsManagerClient, SingleThreadStmgrClient
 
 import heron.common.src.python.pex_loader as pex_loader
 import heron.common.src.python.constants as constants
-
-from .single_thread_stmgr_client import SingleThreadStmgrClient
 
 LoadedInstance = collections.namedtuple('LoadedInstance', 'is_spout, protobuf, py_class')
 
