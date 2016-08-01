@@ -38,13 +38,14 @@ class TopologyType(type):
 
     topology_config = TopologyType.class_dict_to_topo_config(class_dict)
 
-    class_dict['_topo_config'] = topology_config
-    class_dict['_protobuf_bolts'] = bolt_specs
-    class_dict['_protobuf_spouts'] = spout_specs
-    class_dict['_heron_specs'] = list(specs.values())
+    if classname != 'Topology':
+      class_dict['_topo_config'] = topology_config
+      class_dict['_protobuf_bolts'] = bolt_specs
+      class_dict['_protobuf_spouts'] = spout_specs
+      class_dict['_heron_specs'] = list(specs.values())
 
-    # create topology protobuf here
-    TopologyType.init_topology(classname, class_dict)
+      # create topology protobuf here
+      TopologyType.init_topology(classname, class_dict)
 
     return type.__new__(mcs, classname, bases, class_dict)
 
@@ -239,3 +240,11 @@ class Topology(object):
 
     with open(path, 'wb') as f:
       f.write(cls.protobuf_topology.SerializeToString())
+
+  @classmethod
+  def deploy_deactivated(cls):
+    """Call this method before write() to indicate that this topology be deployed deactivated"""
+    if cls.__name__ == 'Topology':
+      raise ValueError("The base Topology class cannot be deployed.")
+    cls.protobuf_topology.state = topology_pb2.TopologyState.Value("PAUSED")
+

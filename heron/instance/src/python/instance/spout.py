@@ -227,6 +227,10 @@ class Spout(Component):
   def _add_spout_task(self):
     Log.info("Adding spout task...")
     def spout_task():
+      # don't do anything when topology is paused
+      if not self._is_topology_running():
+        return
+
       if self._should_produce_tuple():
         self._produce_tuple()
         self.output_helper.send_out_tuples()
@@ -245,9 +249,12 @@ class Spout(Component):
 
     self.looper.add_wakeup_task(spout_task)
 
+  def _is_topology_running(self):
+    return self.topology_state == topology_pb2.TopologyState.Value("RUNNING")
+
   def _should_produce_tuple(self):
     # TODO: implement later -- like for Back Pressure
-    return True
+    return self._is_topology_running()
 
   def _is_continue_to_work(self):
     # TODO: implement later

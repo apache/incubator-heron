@@ -62,12 +62,13 @@ class SingleThreadHeronInstance(object):
 
     # Create socket options and socket clients
     socket_options = create_socket_options(self.sys_config)
-    self._stmgr_client = SingleThreadStmgrClient(self.looper, self, self.STREAM_MGR_HOST, stream_port,
-                                                 topology_name, topology_id, instance,
-                                                 self.socket_map, self.gateway_metrics,
-                                                 socket_options, self.sys_config)
-    self._metrics_client = MetricsManagerClient(self.looper, self.METRICS_MGR_HOST, metrics_port, instance,
-                                                self.out_metrics, self.socket_map, socket_options, self.sys_config)
+    self._stmgr_client = \
+      SingleThreadStmgrClient(self.looper, self, self.STREAM_MGR_HOST, stream_port,
+                              topology_name, topology_id, instance, self.socket_map,
+                              self.gateway_metrics, socket_options, self.sys_config)
+    self._metrics_client = \
+      MetricsManagerClient(self.looper, self.METRICS_MGR_HOST, metrics_port, instance,
+                           self.out_metrics, self.socket_map, socket_options, self.sys_config)
     self.my_pplan_helper = None
 
     # my_instance is a LoadedInstance tuple
@@ -93,15 +94,13 @@ class SingleThreadHeronInstance(object):
 
     :param tuple_msg_set: HeronTupleSet type
     """
-    if self.my_pplan_helper is None or \
-        not self.my_pplan_helper.is_topology_running() or \
-            self.my_instance is None:
+    if self.my_pplan_helper is None or self.my_instance is None:
       Log.error("Got tuple set when no instance assigned yet")
     else:
       # First add message to the in_stream
       self.in_stream.offer(tuple_msg_set)
-      # Call run_in_single_thread() method
-      self.my_instance.py_class.process_incoming_tuples()
+      if self.my_pplan_helper.is_topology_running():
+        self.my_instance.py_class.process_incoming_tuples()
 
   def send_buffered_messages(self):
     """Send messages in out_stream to the Stream Manager"""
