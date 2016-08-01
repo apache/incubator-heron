@@ -64,7 +64,7 @@ def get_all_zk_state_managers(conf):
       state_manager.start()
     except Exception:
       LOG.error("Exception while connecting to state_manager.")
-      traceback.print_exc()
+      LOG.debug(traceback.format_exc())
     state_managers.append(state_manager)
 
   return state_managers
