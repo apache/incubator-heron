@@ -44,9 +44,11 @@ public class HeronTopology {
       TopologyAPI.Config.KeyValue.Builder b = TopologyAPI.Config.KeyValue.newBuilder();
       b.setKey(entry.getKey());
       if (apiVars.contains(entry.getKey())) {
+        b.setType(TopologyAPI.ConfigValueType.STRING_VALUE);
         b.setValue(entry.getValue().toString());
       } else {
-        b.setJavaSerializedValue(ByteString.copyFrom(Utils.serialize(entry.getValue())));
+        b.setType(TopologyAPI.ConfigValueType.JAVA_SERIALIZED_VALUE);
+        b.setSerializedValue(ByteString.copyFrom(Utils.serialize(entry.getValue())));
       }
       cBldr.addKvs(b);
     }

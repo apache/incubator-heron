@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-''' utils.py '''
+'''config.py: util functions for config, mainly for heron-cli'''
+
 import argparse
 import contextlib
 import getpass
@@ -20,13 +21,9 @@ import sys
 import subprocess
 import tarfile
 import tempfile
-import traceback
-import tornado.gen
-import tornado.ioloop
 import yaml
 
 from heron.common.src.python.color import Log
-from heron.common.src.python.handler.access import heron as API
 
 # default environ tag, if not provided
 ENVIRON = "default"
@@ -88,10 +85,8 @@ def get_subparser(parser, command):
   Retrieve the given subparser from parser
   '''
   # pylint: disable=protected-access
-  subparsers_actions = [
-      action for action in parser._actions
-      if isinstance(action, argparse._SubParsersAction)
-  ]
+  subparsers_actions = [action for action in parser._actions
+                        if isinstance(action, argparse._SubParsersAction)]
 
   # there will probably only be one subparser_action,
   # but better save than sorry
@@ -141,9 +136,15 @@ def get_classpath(jars):
 def get_heron_dir():
   """
   This will extract heron directory from .pex file.
+
+  For example,
+  when __file__ is '/Users/heron-user/bin/heron/heron/common/src/python/utils/config.pyc', and
+  its real path is '/Users/heron-user/.heron/bin/heron/common/src/python/utils/config.pyc',
+  the internal variable ``path`` would be '/Users/heron-user/.heron', which is the heron directory
+
   :return: root location for heron-cli.
   """
-  path = "/".join(os.path.realpath(__file__).split('/')[:-7])
+  path = "/".join(os.path.realpath(__file__).split('/')[:-8])
   return normalized_class_path(path)
 
 
@@ -156,7 +157,7 @@ def get_heron_dir_explorer():
   From heron-cli with modification since we need to reuse cli's conf
   :return: root location for heron-cli.
   """
-  path_list = os.path.realpath(__file__).split('/')[:-8]
+  path_list = os.path.realpath(__file__).split('/')[:-9]
   path_list.append(CLI_DIR)
   path = "/".join(path_list)
   return normalized_class_path(path)
@@ -258,18 +259,16 @@ def parse_cluster_role_env(cluster_role_env, config_path):
       # if role is required but not provided, raise exception
       if len(parts) == 1:
         if (IS_ROLE_REQUIRED in cli_confs) and (cli_confs[IS_ROLE_REQUIRED] is True):
-          raise Exception(
-              "role required but not provided (cluster/role/env = %s). See %s in %s" %
-              (cluster_role_env, IS_ROLE_REQUIRED, CLIENT_YAML))
+          raise Exception("role required but not provided (cluster/role/env = %s). See %s in %s"
+                          % (cluster_role_env, IS_ROLE_REQUIRED, CLIENT_YAML))
         else:
           parts.append(getpass.getuser())
 
       # if environ is required but not provided, raise exception
       if len(parts) == 2:
         if (IS_ENV_REQUIRED in cli_confs) and (cli_confs[IS_ENV_REQUIRED] is True):
-          raise Exception(
-              "environ required but not provided (cluster/role/env = %s). See %s in %s" %
-              (cluster_role_env, IS_ENV_REQUIRED, CLIENT_YAML))
+          raise Exception("environ required but not provided (cluster/role/env = %s). See %s in %s"
+                          % (cluster_role_env, IS_ENV_REQUIRED, CLIENT_YAML))
         else:
           parts.append(ENVIRON)
 
@@ -331,6 +330,7 @@ def check_release_file_exists():
 
   return True
 
+<<<<<<< HEAD:heron/common/src/python/utils.py
 
 def _all_metric_queries():
   queries_normal = [

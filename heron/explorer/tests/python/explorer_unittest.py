@@ -20,7 +20,7 @@ from mock import Mock
 import heron.explorer.src.python.topologies as topologies
 import heron.explorer.src.python.main as main
 import heron.explorer.src.python.args as args
-import heron.common.src.python.utils as utils
+import heron.common.src.python.utils.tracker_access as tracker_access
 
 
 # pylint: disable=missing-docstring, no-self-use
@@ -33,18 +33,18 @@ class ExplorerTest(unittest.TestCase):
     topo_path = os.path.join(base_path, 'topologies.json')
     metrics_path = os.path.join(base_path, 'metrics.json')
     with open(info_path) as f:
-      utils.get_topology_info = Mock(return_value=json.load(f))
+      tracker_access.get_topology_info = Mock(return_value=json.load(f))
     with open(lp_path) as f:
-      utils.get_logical_plan = Mock(return_value=json.load(f))
+      tracker_access.get_logical_plan = Mock(return_value=json.load(f))
     with open(topo_path) as f:
       j = json.load(f)
-      utils.get_cluster_topologies = Mock(return_value=j)
-      utils.get_cluster_role_topologies = Mock(return_value=j)
-      utils.get_cluster_role_env_topologies = Mock(return_value=j)
+      tracker_access.get_cluster_topologies = Mock(return_value=j)
+      tracker_access.get_cluster_role_topologies = Mock(return_value=j)
+      tracker_access.get_cluster_role_env_topologies = Mock(return_value=j)
     with open(metrics_path) as f:
-      utils.get_topology_metrics = Mock(return_value=json.load(f))
+      tracker_access.get_topology_metrics = Mock(return_value=json.load(f))
     clusters = ['nyc', 'london', 'tokyo']
-    utils.get_clusters = Mock(return_value=clusters)
+    tracker_access.get_clusters = Mock(return_value=clusters)
 
   def sample_topo_result(self):
     info = []

@@ -26,7 +26,7 @@ import heron.explorer.src.python.logicalplan as logicalplan
 import heron.explorer.src.python.opts as opts
 import heron.explorer.src.python.physicalplan as physicalplan
 import heron.explorer.src.python.topologies as topologies
-import heron.common.src.python.utils as utils
+import heron.common.src.python.utils.config as config
 import heron.explorer.src.python.version as version
 from heron.common.src.python.color import Log
 
@@ -130,15 +130,15 @@ def extract_common_args(command, parser, cl_args):
     config_path = cl_args['config_path']
   except KeyError:
     # if some of the arguments are not found, print error and exit
-    subparser = utils.get_subparser(parser, command)
+    subparser = config.get_subparser(parser, command)
     print subparser.format_help()
     return dict()
-  cluster = utils.get_heron_cluster(cluster_role_env)
-  config_path = utils.get_heron_cluster_conf_dir(cluster, config_path)
+  cluster = config.get_heron_cluster(cluster_role_env)
+  config_path = config.get_heron_cluster_conf_dir(cluster, config_path)
 
   new_cl_args = dict()
   try:
-    cluster_tuple = utils.parse_cluster_role_env(cluster_role_env, config_path)
+    cluster_tuple = config.parse_cluster_role_env(cluster_role_env, config_path)
     new_cl_args['cluster'] = cluster_tuple[0]
     new_cl_args['role'] = cluster_tuple[1]
     new_cl_args['environ'] = cluster_tuple[2]

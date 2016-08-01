@@ -17,6 +17,7 @@
 import argparse
 import logging
 import os
+import signal
 import sys
 import tornado.httpserver
 import tornado.ioloop
@@ -28,41 +29,44 @@ from heron.tracker.src.python import handlers
 from heron.tracker.src.python import utils
 from heron.tracker.src.python.config import Config
 from heron.tracker.src.python.tracker import Tracker
-import heron.common.src.python.utils as common_utils
+import heron.common.src.python.utils.config as common_config
 
 LOG = logging.getLogger(__name__)
+from heron.common.src.python.color import Log
 
 class Application(tornado.web.Application):
   """ Tornado server application """
   def __init__(self):
 
     config = Config(options.config_file)
-    tracker = Tracker(config)
-    self.tracker = tracker
-    tracker.synch_topologies()
+    self.tracker = Tracker(config)
+    self.tracker.synch_topologies()
     tornadoHandlers = [
         (r"/", handlers.MainHandler),
-        (r"/clusters", handlers.ClustersHandler, {"tracker":tracker}),
-        (r"/topologies", handlers.TopologiesHandler, {"tracker":tracker}),
-        (r"/topologies/states", handlers.StatesHandler, {"tracker":tracker}),
-        (r"/topologies/info", handlers.TopologyHandler, {"tracker":tracker}),
-        (r"/topologies/logicalplan", handlers.LogicalPlanHandler, {"tracker":tracker}),
-        (r"/topologies/containerfiledata", handlers.ContainerFileDataHandler, {"tracker":tracker}),
+        (r"/clusters", handlers.ClustersHandler, {"tracker":self.tracker}),
+        (r"/topologies", handlers.TopologiesHandler, {"tracker":self.tracker}),
+        (r"/topologies/states", handlers.StatesHandler, {"tracker":self.tracker}),
+        (r"/topologies/info", handlers.TopologyHandler, {"tracker":self.tracker}),
+        (r"/topologies/logicalplan", handlers.LogicalPlanHandler, {"tracker":self.tracker}),
+        (r"/topologies/containerfiledata", handlers.ContainerFileDataHandler,
+         {"tracker":self.tracker}),
         (r"/topologies/containerfilestats",
-         handlers.ContainerFileStatsHandler, {"tracker":tracker}),
-        (r"/topologies/physicalplan", handlers.PhysicalPlanHandler, {"tracker":tracker}),
-        (r"/topologies/executionstate", handlers.ExecutionStateHandler, {"tracker":tracker}),
-        (r"/topologies/schedulerlocation", handlers.SchedulerLocationHandler, {"tracker":tracker}),
-        (r"/topologies/metrics", handlers.MetricsHandler, {"tracker":tracker}),
-        (r"/topologies/metricstimeline", handlers.MetricsTimelineHandler, {"tracker":tracker}),
-        (r"/topologies/metricsquery", handlers.MetricsQueryHandler, {"tracker":tracker}),
-        (r"/topologies/exceptions", handlers.ExceptionHandler, {"tracker":tracker}),
-        (r"/topologies/exceptionsummary", handlers.ExceptionSummaryHandler, {"tracker":tracker}),
-        (r"/machines", handlers.MachinesHandler, {"tracker":tracker}),
-        (r"/topologies/pid", handlers.PidHandler, {"tracker":tracker}),
-        (r"/topologies/jstack", handlers.JstackHandler, {"tracker":tracker}),
-        (r"/topologies/jmap", handlers.JmapHandler, {"tracker":tracker}),
-        (r"/topologies/histo", handlers.MemoryHistogramHandler, {"tracker":tracker}),
+         handlers.ContainerFileStatsHandler, {"tracker":self.tracker}),
+        (r"/topologies/physicalplan", handlers.PhysicalPlanHandler, {"tracker":self.tracker}),
+        (r"/topologies/executionstate", handlers.ExecutionStateHandler, {"tracker":self.tracker}),
+        (r"/topologies/schedulerlocation", handlers.SchedulerLocationHandler,
+         {"tracker":self.tracker}),
+        (r"/topologies/metrics", handlers.MetricsHandler, {"tracker":self.tracker}),
+        (r"/topologies/metricstimeline", handlers.MetricsTimelineHandler, {"tracker":self.tracker}),
+        (r"/topologies/metricsquery", handlers.MetricsQueryHandler, {"tracker":self.tracker}),
+        (r"/topologies/exceptions", handlers.ExceptionHandler, {"tracker":self.tracker}),
+        (r"/topologies/exceptionsummary", handlers.ExceptionSummaryHandler,
+         {"tracker":self.tracker}),
+        (r"/machines", handlers.MachinesHandler, {"tracker":self.tracker}),
+        (r"/topologies/pid", handlers.PidHandler, {"tracker":self.tracker}),
+        (r"/topologies/jstack", handlers.JstackHandler, {"tracker":self.tracker}),
+        (r"/topologies/jmap", handlers.JmapHandler, {"tracker":self.tracker}),
+        (r"/topologies/histo", handlers.MemoryHistogramHandler, {"tracker":self.tracker}),
         (r"(.*)", handlers.DefaultHandler),
     ]
 
@@ -72,10 +76,10 @@ class Application(tornado.web.Application):
         static_path=os.path.dirname(__file__)
     )
     tornado.web.Application.__init__(self, tornadoHandlers, **settings)
-    LOG.info("-" * 100)
-    LOG.info("Tracker started")
-    LOG.info("-" * 100)
+    LOG.info("Tracker has started")
 
+  def stop(self):
+    self.tracker.stop_sync()
 
 # pylint: disable=protected-access
 class _HelpAction(argparse._HelpAction):
@@ -175,10 +179,7 @@ def define_options(port, config_file):
   define("config_file", default=config_file)
 
 def configure_logging(level):
-  """ configure logging format """
-  log_format = "%(asctime)s-%(levelname)s:%(filename)s:%(lineno)s: %(message)s"
-  date_format = '%d %b %Y %H:%M:%S'
-  logging.basicConfig(format=log_format, datefmt=date_format, level=level)
+  Log.setLevel(level)
 
 def main():
   """ main """
@@ -191,7 +192,7 @@ def main():
     parser.exit()
 
   elif remaining == ['version']:
-    common_utils.print_version()
+    common_config.print_version()
     parser.exit()
 
   elif remaining != []:
@@ -205,14 +206,32 @@ def main():
   else:
     configure_logging(logging.INFO)
 
+  # set Tornado global option
+  define_options(namespace['port'], namespace['config_file'])
+
+  # create Tornado application
+  application = Application()
+
+  # pylint: disable=unused-argument
+  # SIGINT handler:
+  # 1. stop all the running zkstatemanager and filestatemanagers
+  # 2. stop the Tornado IO loop
+  def signal_handler(signum, frame):
+    # start a new line after ^C character because this looks nice
+    print '\n',
+    application.stop()
+    tornado.ioloop.IOLoop.instance().stop()
+
+  # associate SIGINT and SIGTERM with a handler
+  signal.signal(signal.SIGINT, signal_handler)
+  signal.signal(signal.SIGTERM, signal_handler)
+
   LOG.info("Running on port: %d", namespace['port'])
   LOG.info("Using config file: %s", namespace['config_file'])
 
-  # TO DO check if the config file exists
-
-  define_options(namespace['port'], namespace['config_file'])
-  http_server = tornado.httpserver.HTTPServer(Application())
+  http_server = tornado.httpserver.HTTPServer(application)
   http_server.listen(namespace['port'])
+
   tornado.ioloop.IOLoop.instance().start()
 
 if __name__ == "__main__":

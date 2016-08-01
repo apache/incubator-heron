@@ -52,7 +52,8 @@ public class LaunchRunnerTest {
   private static final String BUILD_USER = "user";
 
   private static TopologyAPI.Config.KeyValue getConfig(String key, String value) {
-    return TopologyAPI.Config.KeyValue.newBuilder().setKey(key).setValue(value).build();
+    return TopologyAPI.Config.KeyValue.newBuilder().setKey(key).setValue(value).
+        setType(TopologyAPI.ConfigValueType.STRING_VALUE).build();
   }
 
   public static TopologyAPI.Topology createTopology(com.twitter.heron.api.Config heronConfig) {

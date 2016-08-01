@@ -28,6 +28,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.SchedulerUtils;
 
 @RunWith(PowerMockRunner.class)
@@ -49,6 +50,9 @@ public class SlurmLauncherTest {
     return config;
   }
 
+  /**
+   * Test slurm scheduler launcher
+   */
   @Test
   public void testLaunch() throws Exception {
     Config config = createRunnerConfig();
@@ -79,17 +83,32 @@ public class SlurmLauncherTest {
     PowerMockito.doReturn(false).when(SchedulerUtils.class, "onScheduleAsLibrary",
         Mockito.any(Config.class),
         Mockito.any(Config.class),
-        Mockito.any(Config.class),
+        Mockito.any(IScheduler.class),
         Mockito.any(PackingPlan.class));
+    PowerMockito.doReturn(true).when(slurmLauncher).setupWorkingDirectory();
     Assert.assertFalse(slurmLauncher.launch(Mockito.mock(PackingPlan.class)));
+    PowerMockito.verifyStatic();
+    SchedulerUtils.onScheduleAsLibrary(
+        Mockito.any(Config.class),
+        Mockito.any(Config.class),
+        Mockito.any(IScheduler.class),
+        Mockito.any(PackingPlan.class));
 
     // happy path
-    PowerMockito.doReturn(true).when(slurmLauncher).setupWorkingDirectory();
     PowerMockito.mockStatic(SchedulerUtils.class);
     PowerMockito.doReturn(true).when(SchedulerUtils.class, "onScheduleAsLibrary",
-        Mockito.any(Config.class), Mockito.any(Config.class),
-        Mockito.any(Config.class), Mockito.any(PackingPlan.class));
-    Mockito.verify(slurmLauncher, Mockito.times(2)).launch(Mockito.any(PackingPlan.class));
+        Mockito.any(Config.class),
+        Mockito.any(Config.class),
+        Mockito.any(IScheduler.class),
+        Mockito.any(PackingPlan.class));
+    Assert.assertTrue(slurmLauncher.launch(Mockito.mock(PackingPlan.class)));
+    Mockito.verify(slurmLauncher, Mockito.times(3)).launch(Mockito.any(PackingPlan.class));
+    PowerMockito.verifyStatic();
+    SchedulerUtils.onScheduleAsLibrary(
+        Mockito.any(Config.class),
+        Mockito.any(Config.class),
+        Mockito.any(IScheduler.class),
+        Mockito.any(PackingPlan.class));
     slurmLauncher.close();
   }
 }

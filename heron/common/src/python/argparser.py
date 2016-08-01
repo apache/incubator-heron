@@ -20,7 +20,7 @@ import re
 import sys
 import traceback
 from heron.common.src.python.color import Log
-import heron.common.src.python.utils as utils
+import heron.common.src.python.utils.config as config
 
 
 ##########################################################################
@@ -111,7 +111,7 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
           # make sure that all the single args have a boolean value
           # associated so that we can load the args to a key value
           # structure
-          args_list = utils.insert_bool_values(value.split())
+          args_list = config.insert_bool_values(value.split())
           args_list_string = ' '.join(args_list)
           if command is None or command == '':
             continue
@@ -182,7 +182,7 @@ def main():
   parser = HeronRCArgumentParser(
       prog='heron',
       epilog=help_epilog,
-      formatter_class=utils.SubcommandHelpFormatter,
+      formatter_class=config.SubcommandHelpFormatter,
       fromfile_prefix_chars='@',
       add_help=False,
       rcfile="./.heronrc")
