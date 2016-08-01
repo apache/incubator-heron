@@ -338,22 +338,23 @@ public class SchedulerMain {
       SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
       // build the runtime config
+      LauncherUtils launcherUtils = LauncherUtils.getInstance();
       Config runtime = Config.newBuilder()
-          .putAll(LauncherUtils.instance.getPrimaryRuntime(topology, adaptor))
+          .putAll(launcherUtils.getPrimaryRuntime(topology, adaptor))
           .put(Keys.schedulerShutdown(), getShutdown())
           .put(Keys.SCHEDULER_PROPERTIES, properties)
           .build();
 
       // get a packed plan and schedule it
-      PackingPlan packedPlan = LauncherUtils.instance.createPackingPlan(config, runtime);
+      PackingPlan packedPlan = launcherUtils.createPackingPlan(config, runtime);
       if (packedPlan == null) {
         LOG.severe("Failed to pack a valid PackingPlan. Check the config.");
         return false;
       }
-      Config ytruntime = LauncherUtils.instance.createConfigWithPackingDetails(runtime, packedPlan);
+      Config ytruntime = launcherUtils.createConfigWithPackingDetails(runtime, packedPlan);
 
       // invoke scheduler
-      scheduler = LauncherUtils.instance.getSchedulerInstance(config, ytruntime);
+      scheduler = launcherUtils.getSchedulerInstance(config, ytruntime);
       if (scheduler == null) {
         return false;
       }

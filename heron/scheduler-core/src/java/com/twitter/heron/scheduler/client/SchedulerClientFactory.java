@@ -65,7 +65,8 @@ public class SchedulerClientFactory {
           new HttpServiceSchedulerClient(config, runtime, schedulerLocation.getHttpEndpoint());
     } else {
       // create an instance of scheduler
-      final IScheduler scheduler = LauncherUtils.instance.getSchedulerInstance(config, runtime);
+      final IScheduler scheduler = LauncherUtils.getInstance()
+          .getSchedulerInstance(config, runtime);
       if (scheduler == null) {
         return null;
       }

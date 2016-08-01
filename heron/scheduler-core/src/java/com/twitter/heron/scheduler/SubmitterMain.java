@@ -398,7 +398,7 @@ public class SubmitterMain {
           // Secondly, try to submit a topology
           // build the runtime config
           Config runtime = Config.newBuilder()
-              .putAll(LauncherUtils.instance.getPrimaryRuntime(topology, adaptor))
+              .putAll(LauncherUtils.getInstance().getPrimaryRuntime(topology, adaptor))
               .put(Keys.topologyPackageUri(), packageURI)
               .put(Keys.launcherClassInstance(), launcher)
               .build();

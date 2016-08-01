@@ -19,7 +19,11 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.api.bolt.BaseBasicBolt;
@@ -42,6 +46,8 @@ import com.twitter.heron.spi.utils.LauncherUtils;
 import com.twitter.heron.spi.utils.Runtime;
 
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(LauncherUtils.class)
 public class LaunchRunnerTest {
   private static final String TOPOLOGY_NAME = "testTopology";
   private static final String CLUSTER = "testCluster";
@@ -103,7 +109,7 @@ public class LaunchRunnerTest {
     return config;
   }
 
-  private static Config createRunnerRuntime() {
+  private static Config createRunnerRuntime() throws Exception {
     Config runtime = Mockito.spy(Config.newBuilder().build());
     ILauncher launcher = Mockito.mock(ILauncher.class);
     SchedulerStateManagerAdaptor adaptor = Mockito.mock(SchedulerStateManagerAdaptor.class);
@@ -120,7 +126,8 @@ public class LaunchRunnerTest {
     Mockito.when(
         mockLauncherUtils.createPackingPlan(Mockito.any(Config.class), Mockito.any(Config.class)))
         .thenReturn(packingPlan);
-    LauncherUtils.setInstance(mockLauncherUtils);
+    PowerMockito.spy(LauncherUtils.class);
+    PowerMockito.doReturn(mockLauncherUtils).when(LauncherUtils.class, "getInstance");
 
     return runtime;
   }
