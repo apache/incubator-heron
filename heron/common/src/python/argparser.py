@@ -93,7 +93,7 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
     if len(cls.cmdmap) > 0:
       return
     effective_rc = (rcfile, HERON_RC)[rcfile is None]
-    Log.warn('Effective RC file is %s', effective_rc)
+    Log.info('Effective RC file is %s', effective_rc)
     if os.path.exists(effective_rc):
       with open(effective_rc) as f:
         cls.cmdmap['*']['*'] = collections.defaultdict(dict)
@@ -128,7 +128,7 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
             cls.cmdmap[app][command][env] = args_list_string
       Log.debug("RC cmdmap %s", json.dumps(cls.cmdmap))
     else:
-      Log.info("WARN: %s is not an existing file", effective_rc)
+      Log.warn("%s is not an existing file", effective_rc)
 
   # for each command / cluster-role-env combination, get the commands from heronrc
   # remove any duplicates that have already been supplied already  and

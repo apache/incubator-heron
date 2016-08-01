@@ -15,7 +15,7 @@
 import unittest2 as unittest
 import heron.cli.src.python.activate as activate
 import heron.common.src.python.argparser as argparser
-import heron.common.src.python.utils as utils
+import heron.common.src.python.utils.config as config
 import heron.cli.src.python.opts as opts
 import sys
 from heron.common.src.python.color import Log
@@ -39,7 +39,7 @@ class HeronRCTest(unittest.TestCase):
     parser = argparser.HeronRCArgumentParser(
       prog = 'heron',
       epilog = help_epilog,
-      formatter_class=utils.SubcommandHelpFormatter,
+      formatter_class=config.SubcommandHelpFormatter,
       fromfile_prefix_chars='@',
       add_help = False,
       rcfile = "./.heronrc",
@@ -59,7 +59,7 @@ class HeronRCTest(unittest.TestCase):
     parser = argparser.HeronRCArgumentParser(
       prog = 'heron',
       epilog = help_epilog,
-      formatter_class=utils.SubcommandHelpFormatter,
+      formatter_class=config.SubcommandHelpFormatter,
       fromfile_prefix_chars='@',
       add_help = False,
       rcfile = "./.heronrc",

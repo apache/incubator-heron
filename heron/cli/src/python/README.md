@@ -53,7 +53,8 @@ the application has a designated identifier :
 
 
 
-To run/Test : (make sure the __init__.py files are in all places)
+To run/Test : 
+(make sure the __init__.py files are in all places and you have a sample heron rc file in the directory - ex: heron/cli/tests/python/)
 
 
 ``````
@@ -65,12 +66,13 @@ python -m unittest2 heron.cli.tests.python.argparser_unittest
 
 ``````
 ```````
-test_parser_commandline (heron.cli.tests.python.argparser_unittest.HeronRCTest) ... WARNING: Effective RC file is ./.heronrc
+test_parser_commandline (__main__.HeronRCTest) ... INFO: Effective RC file is ./.heronrc
+DEBUG: RC cmdmap {"heron": {"*": {"*": "--config-property command-global"}, "activate": {"devcluster/ads/PROD": "--config-property test-cmd-activate-role", "*": "--config-property test-cmd-activate-*"}, "submit": {"devcluster/ads/PROD": "--config-property test-cmd-submit-role"}}, "*": {"*": {"*": " --config-property test-hello-global"}}}
 ok
-test_parser_rolecmdspecific (heron.cli.tests.python.argparser_unittest.HeronRCTest) ... ok
+test_parser_rolecmdspecific (__main__.HeronRCTest) ... ok
 
 ----------------------------------------------------------------------
-Ran 2 tests in 0.003s
+Ran 2 tests in 0.004s
 
 OK
 

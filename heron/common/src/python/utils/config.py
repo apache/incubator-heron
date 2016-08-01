@@ -330,8 +330,6 @@ def check_release_file_exists():
 
   return True
 
-<<<<<<< HEAD:heron/common/src/python/utils.py
-
 def _all_metric_queries():
   queries_normal = [
       'complete-latency', 'execute-latency', 'process-latency',
