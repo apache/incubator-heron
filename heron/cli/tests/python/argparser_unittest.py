@@ -16,10 +16,11 @@ import unittest2 as unittest
 import heron.cli.src.python.activate as activate
 import heron.common.src.python.argparser as argparser
 import heron.common.src.python.utils.config as config
-import heron.cli.src.python.opts as opts
-import sys
 from heron.common.src.python.color import Log
 import logging
+import heron.cli.src.python.opts as opts
+import os
+import sys
 #pylint: disable=missing-docstring, no-self-use
 help_epilog = '''Getting more help:
   heron help <command> Prints help and options for <command>
@@ -30,6 +31,8 @@ class HeronRCTest(unittest.TestCase):
   logging.basicConfig(level=logging.WARNING)
 
   def setUp(self):
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    self.testrcfile = dir_path + "/.heronrc"
     pass
 
 
@@ -42,7 +45,7 @@ class HeronRCTest(unittest.TestCase):
       formatter_class=config.SubcommandHelpFormatter,
       fromfile_prefix_chars='@',
       add_help = False,
-      rcfile = "./.heronrc",
+      rcfile = self.testrcfile,
       rccommand = "activate",
       rcclusterrole="devcluster/ads/PROD")
 
@@ -62,7 +65,7 @@ class HeronRCTest(unittest.TestCase):
       formatter_class=config.SubcommandHelpFormatter,
       fromfile_prefix_chars='@',
       add_help = False,
-      rcfile = "./.heronrc",
+      rcfile = self.testrcfile,
       rccommand = "activate",
       rcclusterrole="devcluster/ads/PROD")
 

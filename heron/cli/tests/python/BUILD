@@ -2,7 +2,7 @@ load("/tools/rules/pex_rules", "pex_test")
 
 pex_test(
     name = "opts_unittest",
-    srcs = ["opts_unittest.py"],
+    srcs = ["opts_unittest.py", "argparser_unittest.py"],
     deps = [
         "//heron/cli/src/python:heron-lib",
     ],
