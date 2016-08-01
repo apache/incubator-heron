@@ -173,7 +173,7 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
           if val is not None and isinstance(val, list):
             namespace.__dict__[key] = val[0]
       except Exception:
-        Log.warn("heronrc: unable to clobber arguments (%s,%s ) ", namespace, args )
+        Log.warn("heronrc: unable to clobber arguments (%s,%s ) ", namespace, args)
         Log.debug(traceback.format_exc())
     return namespace, args
 
