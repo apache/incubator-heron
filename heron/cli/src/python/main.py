@@ -70,7 +70,7 @@ def create_parser():
   parser = hrc_parse.HeronRCArgumentParser(
       prog='heron',
       epilog=HELP_EPILOG,
-      formatter_class=utils.SubcommandHelpFormatter,
+      formatter_class=config.SubcommandHelpFormatter,
       add_help=False)
 
   subparsers = parser.add_subparsers(
@@ -204,7 +204,7 @@ def main():
     return 0
 
   # insert the boolean values for some of the options
-  sys.argv = utils.insert_bool_values(sys.argv)
+  sys.argv = config.insert_bool_values(sys.argv)
 
   # parse the args
   args, unknown_args = parser.parse_known_args()
