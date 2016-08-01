@@ -128,7 +128,7 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
             cls.cmdmap[app][command][env] = args_list_string
       Log.debug("RC cmdmap %s", json.dumps(cls.cmdmap))
     else:
-      Log.warn("WARN: %s is not an existing file", effective_rc)
+      Log.info("WARN: %s is not an existing file", effective_rc)
 
   # for each command / cluster-role-env combination, get the commands from heronrc
   # remove any duplicates that have already been supplied already  and
@@ -173,10 +173,9 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
           if val is not None and isinstance(val, list):
             namespace.__dict__[key] = val[0]
       except Exception:
-        traceback.print_stack()
+        Log.warn("heronrc: unable to clobber arguments (%s,%s ) ", namespace, args )
+        Log.debug(traceback.format_exc())
     return namespace, args
-# test stub
-
 
 def main():
   parser = HeronRCArgumentParser(

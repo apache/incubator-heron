@@ -35,8 +35,6 @@ class HeronRCTest(unittest.TestCase):
 
   def test_parser_commandline(self):
     sys.argv=[]
-    #print sys.argv
-
 
     parser = argparser.HeronRCArgumentParser(
       prog = 'heron',
@@ -82,7 +80,3 @@ class HeronRCTest(unittest.TestCase):
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(HeronRCTest)
     unittest.TextTestRunner(verbosity=2).run(suite)
-
-    #suite = unittest.TestSuite()
-    #suite.addTest(HeronRCTest('test_parser_commandline'))
-    #unittest.TextTestRunner(verbosity=2).run(suite)
