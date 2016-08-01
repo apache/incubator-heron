@@ -113,7 +113,7 @@ public class LaunchRunner implements Callable<Boolean> {
     TopologyAPI.Topology topology = Runtime.topology(runtime);
     String topologyName = Context.topologyName(config);
 
-    PackingPlan packedPlan = LauncherUtils.instance.createPackingPlan(config, runtime);
+    PackingPlan packedPlan = LauncherUtils.getInstance().createPackingPlan(config, runtime);
     if (packedPlan == null) {
       LOG.severe("Failed to pack a valid PackingPlan. Check the config.");
       return false;

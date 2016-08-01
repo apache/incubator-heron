@@ -17,8 +17,6 @@ package com.twitter.heron.spi.utils;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.common.annotations.VisibleForTesting;
-
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.spi.common.Config;
@@ -37,17 +35,10 @@ import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 public class LauncherUtils {
   private static final Logger LOG = Logger.getLogger(LauncherUtils.class.getName());
 
-  /**
-   * An instance of this utility class to avoid the need of injecting a factory when mocking utils.
-   */
-  public static LauncherUtils instance = new LauncherUtils();
+  private static LauncherUtils instance = new LauncherUtils();
 
-  /**
-   * For testing only. Could be used to setup a mock
-   */
-  @VisibleForTesting
-  public static void setInstance(LauncherUtils instance) {
-    LauncherUtils.instance = instance;
+  public static LauncherUtils getInstance() {
+    return instance;
   }
 
   /**
