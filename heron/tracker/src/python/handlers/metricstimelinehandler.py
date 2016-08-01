@@ -20,6 +20,7 @@ from heron.tracker.src.python import constants
 from heron.tracker.src.python import metricstimeline
 from heron.tracker.src.python.handlers import BaseHandler
 
+from heron.common.src.python.color import Log
 
 class MetricsTimelineHandler(BaseHandler):
   """
@@ -68,5 +69,5 @@ class MetricsTimelineHandler(BaseHandler):
                                        instances, int(start_time), int(end_time))
       self.write_success_response(metrics)
     except Exception as e:
-      traceback.print_exc()
+      Log.debug(traceback.format_exc())
       self.write_error_response(e)

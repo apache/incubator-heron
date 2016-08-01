@@ -17,6 +17,7 @@ import tornado.gen
 import tornado.web
 
 from heron.tracker.src.python.handlers import BaseHandler
+from heron.common.src.python.color import Log
 
 
 class LogicalPlanHandler(BaseHandler):
@@ -46,5 +47,5 @@ class LogicalPlanHandler(BaseHandler):
       logical_plan = topology_info["logical_plan"]
       self.write_success_response(logical_plan)
     except Exception as e:
-      traceback.print_exc()
+      Log.debug(traceback.format_exc())
       self.write_error_response(e)

@@ -16,7 +16,6 @@ import datetime
 import os
 import sys
 import threading
-import time
 
 from collections import defaultdict
 
@@ -73,6 +72,9 @@ class FileStateManager(StateManager):
     # Instantiate the monitoring thread.
     self.monitoring_thread = threading.Thread(target=self.monitor)
 
+    # cancellable sleep
+    self.event = threading.Event()
+
   # pylint: disable=attribute-defined-outside-init
   def start(self):
     """ start monitoring thread """
@@ -82,6 +84,7 @@ class FileStateManager(StateManager):
   def stop(self):
     """" stop monitoring thread """
     self.monitoring_thread_stop_signal = True
+    self.event.set()
 
   def monitor(self):
     """
@@ -152,7 +155,7 @@ class FileStateManager(StateManager):
           self.scheduler_location_directory, SchedulerLocation)
 
       # Sleep for some time
-      time.sleep(5)
+      self.event.wait(timeout=5)
 
   def get_topologies(self, callback=None):
     """get topologies"""

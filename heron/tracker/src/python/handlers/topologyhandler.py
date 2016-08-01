@@ -17,6 +17,7 @@ import tornado.gen
 import tornado.web
 
 from heron.tracker.src.python.handlers import BaseHandler
+from heron.common.src.python.color import Log
 
 
 class TopologyHandler(BaseHandler):
@@ -49,5 +50,5 @@ class TopologyHandler(BaseHandler):
       topology_info = self.tracker.getTopologyInfo(topology_name, cluster, role, environ)
       self.write_success_response(topology_info)
     except Exception as e:
-      traceback.print_exc()
+      Log.debug(traceback.format_exc())
       self.write_error_response(e)

@@ -17,7 +17,7 @@ from heron.common.src.python.color import Log
 import heron.cli.src.python.args as args
 import heron.cli.src.python.execute as execute
 import heron.cli.src.python.jars as jars
-import heron.common.src.python.utils as utils
+import heron.common.src.python.utils.config as config
 
 
 def create_parser(subparsers):
@@ -66,16 +66,16 @@ def run(command, parser, cl_args, unknown_args):
         "--cluster", cl_args['cluster'],
         "--role", cl_args['role'],
         "--environment", cl_args['environ'],
-        "--heron_home", utils.get_heron_dir(),
+        "--heron_home", config.get_heron_dir(),
         "--config_path", cl_args['config_path'],
         "--override_config_file", cl_args['override_config_file'],
-        "--release_file", utils.get_heron_release_file(),
+        "--release_file", config.get_heron_release_file(),
         "--topology_name", topology_name,
         "--command", command,
         "--container_id", str(container_id)
     ]
 
-    lib_jars = utils.get_heron_libs(jars.scheduler_jars() + jars.statemgr_jars())
+    lib_jars = config.get_heron_libs(jars.scheduler_jars() + jars.statemgr_jars())
 
     # invoke the runtime manager to kill the topology
     execute.heron_class(

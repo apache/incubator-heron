@@ -31,8 +31,7 @@ import heron.cli.src.python.deactivate as deactivate
 import heron.cli.src.python.kill as kill
 import heron.cli.src.python.restart as restart
 import heron.cli.src.python.submit as submit
-import heron.cli.src.python.update as update
-import heron.common.src.python.utils as utils
+import heron.common.src.python.utils.config as config
 import heron.cli.src.python.version as version
 
 HELP_EPILOG = '''Getting more help:
@@ -142,10 +141,10 @@ def check_environment():
   Check whether the environment variables are set
   :return:
   '''
-  if not utils.check_java_home_set():
+  if not config.check_java_home_set():
     sys.exit(1)
 
-  if not utils.check_release_file_exists():
+  if not config.check_release_file_exists():
     sys.exit(1)
 
 
@@ -161,22 +160,22 @@ def extract_common_args(command, parser, cl_args):
   try:
     cluster_role_env = cl_args.pop('cluster/[role]/[env]')
     config_path = cl_args['config_path']
-    override_config_file = utils.parse_override_config(cl_args['config_property'])
+    override_config_file = config.parse_override_config(cl_args['config_property'])
   except KeyError:
     # if some of the arguments are not found, print error and exit
-    subparser = utils.get_subparser(parser, command)
+    subparser = config.get_subparser(parser, command)
     print subparser.format_help()
     return dict()
 
-  cluster = utils.get_heron_cluster(cluster_role_env)
-  config_path = utils.get_heron_cluster_conf_dir(cluster, config_path)
+  cluster = config.get_heron_cluster(cluster_role_env)
+  config_path = config.get_heron_cluster_conf_dir(cluster, config_path)
   if not os.path.isdir(config_path):
     Log.error("Config path cluster directory does not exist: %s" % config_path)
     return dict()
 
   new_cl_args = dict()
   try:
-    cluster_tuple = utils.parse_cluster_role_env(cluster_role_env, config_path)
+    cluster_tuple = config.parse_cluster_role_env(cluster_role_env, config_path)
     new_cl_args['cluster'] = cluster_tuple[0]
     new_cl_args['role'] = cluster_tuple[1]
     new_cl_args['environ'] = cluster_tuple[2]
