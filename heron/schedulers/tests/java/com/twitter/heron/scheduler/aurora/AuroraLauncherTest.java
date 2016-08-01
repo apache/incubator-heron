@@ -34,11 +34,11 @@ public class AuroraLauncherTest {
     LauncherUtils launcherUtils = Mockito.mock(LauncherUtils.class);
     LauncherUtils.setInstance(launcherUtils);
 
-    Mockito.doReturn(false).when(launcherUtils.onScheduleAsLibrary(
+    Mockito.when(launcherUtils.onScheduleAsLibrary(
         Mockito.any(Config.class),
         Mockito.any(Config.class),
         Mockito.any(IScheduler.class),
-        Mockito.any(PackingPlan.class)));
+        Mockito.any(PackingPlan.class))).thenReturn(false);
 
     Assert.assertFalse(launcher.launch(Mockito.mock(PackingPlan.class)));
     Mockito.verify(launcherUtils).onScheduleAsLibrary(
@@ -48,11 +48,11 @@ public class AuroraLauncherTest {
         Mockito.any(PackingPlan.class));
 
     // Happy path
-    Mockito.doReturn(true).when(launcherUtils.onScheduleAsLibrary(
+    Mockito.when(launcherUtils.onScheduleAsLibrary(
         Mockito.any(Config.class),
         Mockito.any(Config.class),
         Mockito.any(IScheduler.class),
-        Mockito.any(PackingPlan.class)));
+        Mockito.any(PackingPlan.class))).thenReturn(true);
 
     Assert.assertTrue(launcher.launch(Mockito.mock(PackingPlan.class)));
     Mockito.verify(launcherUtils, Mockito.times(2)).onScheduleAsLibrary(
