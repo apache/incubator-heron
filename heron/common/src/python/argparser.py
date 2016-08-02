@@ -170,7 +170,7 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
       try:
         for key in namespace.__dict__:
           val = namespace.__dict__[key]
-          if val is not None and isinstance(val, list) and len(val)>0:
+          if val is not None and isinstance(val, list) and len(val) > 0:
             namespace.__dict__[key] = val[0]
       except Exception:
         Log.warn("heronrc: unable to clobber arguments (%s,%s ) ", namespace, args)
