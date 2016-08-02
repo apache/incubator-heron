@@ -280,23 +280,6 @@ class HeronExecutor(object):
 
     return retval
 
-  def _get_scheduler_processes(self):
-    retval = {}
-    scheduler_cmd = [
-        'java',
-        '-cp',
-        self.scheduler_classpath,
-        'com.twitter.heron.scheduler.SchedulerMain',
-        self.cluster,
-        self.role,
-        self.environ,
-        self.topology_name,
-        self.topology_bin_file,
-        self.scheduler_port]
-    retval["heron-tscheduler"] = scheduler_cmd
-
-    return retval
-
   # Returns the processes for each Java Heron Instance
   def _get_java_instance_cmd(self, instance_info):
     retval = {}

@@ -35,11 +35,11 @@ import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.uploader.IUploader;
+import com.twitter.heron.spi.utils.LauncherUtils;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
@@ -361,10 +361,6 @@ public class SubmitterMain {
     String launcherClass = Context.launcherClass(config);
     ILauncher launcher;
 
-    // Create an instance of the packing class
-    String packingClass = Context.packingClass(config);
-    IPacking packing;
-
     // create an instance of the uploader class
     String uploaderClass = Context.uploaderClass(config);
     IUploader uploader;
@@ -375,9 +371,6 @@ public class SubmitterMain {
 
       // create an instance of launcher
       launcher = ReflectionUtils.newInstance(launcherClass);
-
-      // create an instance of the packing class
-      packing = ReflectionUtils.newInstance(packingClass);
 
       // create an instance of uploader
       uploader = ReflectionUtils.newInstance(uploaderClass);
@@ -412,14 +405,9 @@ public class SubmitterMain {
           // Secondly, try to submit a topology
           // build the runtime config
           Config runtime = Config.newBuilder()
-              .put(Keys.topologyId(), topology.getId())
-              .put(Keys.topologyName(), topology.getName())
-              .put(Keys.topologyDefinition(), topology)
-              .put(Keys.schedulerStateManagerAdaptor(), adaptor)
-              .put(Keys.numContainers(), 1 + TopologyUtils.getNumContainers(topology))
+              .putAll(LauncherUtils.getInstance().getPrimaryRuntime(topology, adaptor))
               .put(Keys.topologyPackageUri(), packageURI)
               .put(Keys.launcherClassInstance(), launcher)
-              .put(Keys.packingClassInstance(), packing)
               .build();
 
           isSuccessful = callLauncherRunner(runtime);
@@ -436,7 +424,6 @@ public class SubmitterMain {
 
       // 4. Close the resources
       SysUtils.closeIgnoringExceptions(uploader);
-      SysUtils.closeIgnoringExceptions(packing);
       SysUtils.closeIgnoringExceptions(launcher);
       SysUtils.closeIgnoringExceptions(statemgr);
     }
