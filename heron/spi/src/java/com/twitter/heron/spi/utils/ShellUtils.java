@@ -127,7 +127,7 @@ public final class ShellUtils {
     }
 
     if (!stderrString.isEmpty()) {
-      LOG.log(Level.SEVERE, "\nSTDERR:\n {0}", stderrString.toString());
+      LOG.log(Level.FINE, "\nSTDERR:\n {0}", stderrString);
     }
 
     return exitValue;
@@ -234,7 +234,7 @@ public final class ShellUtils {
     File parentDirectory = Paths.get(destination).getParent().toFile();
 
     // using curl copy the url to the target file
-    String cmd = String.format("curl -s %s -o %s", uri, destination);
+    String cmd = String.format("curl %s -o %s", uri, destination);
     int ret = runSyncProcess(isVerbose, isInheritIO,
         cmd, new StringBuilder(), new StringBuilder(), parentDirectory);
 
@@ -251,7 +251,7 @@ public final class ShellUtils {
    */
   public static boolean extractPackage(
       String packageName, String targetFolder, boolean isVerbose, boolean isInheritIO) {
-    String cmd = String.format("tar -xf %s", packageName);
+    String cmd = String.format("tar -xvf %s", packageName);
 
     int ret = runSyncProcess(isVerbose, isInheritIO,
         cmd, new StringBuilder(), new StringBuilder(), new File(targetFolder));
