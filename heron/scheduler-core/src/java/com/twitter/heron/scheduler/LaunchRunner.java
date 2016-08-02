@@ -22,11 +22,10 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
-import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.LauncherUtils;
 import com.twitter.heron.spi.utils.Runtime;
 
 /**
@@ -39,14 +38,12 @@ public class LaunchRunner implements Callable<Boolean> {
   private Config runtime;
 
   private ILauncher launcher;
-  private IPacking packing;
 
   public LaunchRunner(Config config, Config runtime) {
 
     this.config = config;
     this.runtime = runtime;
     this.launcher = Runtime.launcherClassInstance(runtime);
-    this.packing = Runtime.packingClassInstance(runtime);
   }
 
   public ExecutionEnvironment.ExecutionState createExecutionState() {
@@ -116,23 +113,14 @@ public class LaunchRunner implements Callable<Boolean> {
     TopologyAPI.Topology topology = Runtime.topology(runtime);
     String topologyName = Context.topologyName(config);
 
-    // get the packed plan
-    packing.initialize(config, runtime);
-    PackingPlan packedPlan = packing.pack();
+    PackingPlan packedPlan = LauncherUtils.getInstance().createPackingPlan(config, runtime);
     if (packedPlan == null) {
       LOG.severe("Failed to pack a valid PackingPlan. Check the config.");
       return false;
     }
 
-    // Add the instanceDistribution to the runtime
-    Config ytruntime = Config.newBuilder()
-        .putAll(runtime)
-        .put(Keys.instanceDistribution(), packedPlan.getInstanceDistribution())
-        .put(Keys.componentRamMap(), packedPlan.getComponentRamDistribution())
-        .build();
-
     // initialize the launcher
-    launcher.initialize(config, ytruntime);
+    launcher.initialize(config, runtime);
 
     Boolean result;
 

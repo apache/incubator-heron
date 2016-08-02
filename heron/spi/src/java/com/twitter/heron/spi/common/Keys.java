@@ -253,10 +253,6 @@ public class Keys {
     return ConfigKeys.get("SCHEDULER_STATE_MANAGER_ADAPTOR");
   }
 
-  public static String packingClassInstance() {
-    return ConfigKeys.get("PACKING_CLASS_INSTANCE");
-  }
-
   public static String launcherClassInstance() {
     return ConfigKeys.get("LAUNCHER_CLASS_INSTANCE");
   }
