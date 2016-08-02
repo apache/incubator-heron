@@ -62,8 +62,8 @@ public class ClusterDefaultsTest {
     );
 
     Assert.assertEquals(
-        Defaults.pyheronInstanceSandboxBinary(),
-        Context.pyheronInstanceSandboxBinary(props)
+        Defaults.pythonInstanceSandboxBinary(),
+        Context.pythonInstanceSandboxBinary(props)
     );
   }
 

@@ -161,8 +161,8 @@ public class ConfigKeysTest {
         ConfigKeys.get("SANDBOX_SHELL_BINARY")
     );
     Assert.assertEquals(
-        "heron.binaries.sandbox.pyheron.instance",
-        ConfigKeys.get("SANDBOX_PYHERON_INSTANCE_BINARY")
+        "heron.binaries.sandbox.python.instance",
+        ConfigKeys.get("SANDBOX_PYTHON_INSTANCE_BINARY")
     );
     Assert.assertEquals(
         "heron.jars.scheduler",

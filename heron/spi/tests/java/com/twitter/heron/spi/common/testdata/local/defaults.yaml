@@ -10,8 +10,8 @@ heron.binaries.sandbox.tmaster:               heron-tmaster
 # tell the name of heron shell binary
 heron.binaries.sandbox.shell:                 heron-shell
 
-# tell the name of pyheron instance binary
-heron.binaries.sandbox.pyheron.instance:      st_pyheron_instance
+# tell the name of python instance binary
+heron.binaries.sandbox.python.instance:       heron-python-instance
 
 # name of the scheduler jar 
 heron.jars.scheduler:                         heron-scheduler.jar

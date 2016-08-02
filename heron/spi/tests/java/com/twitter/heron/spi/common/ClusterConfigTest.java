@@ -88,8 +88,8 @@ public class ClusterConfigTest {
     );
 
     Assert.assertEquals(
-        "st_pyheron_instance",
-        Context.pyheronInstanceSandboxBinary(props)
+        "heron-python-instance",
+        Context.pythonInstanceSandboxBinary(props)
     );
 
     Assert.assertEquals(
