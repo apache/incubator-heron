@@ -15,7 +15,6 @@
 package com.twitter.heron.statemgr.zookeeper.curator;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -44,7 +43,6 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.statemgr.WatchCallback;
-import com.twitter.heron.spi.utils.ShellUtils;
 import com.twitter.heron.statemgr.FileSystemStateManager;
 import com.twitter.heron.statemgr.zookeeper.ZkContext;
 import com.twitter.heron.statemgr.zookeeper.ZkUtils;

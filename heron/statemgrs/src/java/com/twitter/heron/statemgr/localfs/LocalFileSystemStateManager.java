@@ -143,7 +143,7 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
 
   @Override
   public ListenableFuture<Boolean> setTopology(TopologyAPI.Topology topology, String topologyName) {
-    return setData(getTopologyPath(topologyName), topology.toByteArray(), true);
+    return setData(getTopologyPath(topologyName), topology.toByteArray(), false);
   }
 
   @Override
