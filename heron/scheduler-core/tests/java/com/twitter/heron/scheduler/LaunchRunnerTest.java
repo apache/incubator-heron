@@ -14,6 +14,7 @@
 
 package com.twitter.heron.scheduler;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -116,6 +117,11 @@ public class LaunchRunnerTest {
     Mockito.doReturn(topology).when(runtime).get(Keys.topologyDefinition());
 
     PackingPlan packingPlan = Mockito.mock(PackingPlan.class);
+    Mockito.when(packingPlan.getContainers()).thenReturn(
+        new HashMap<String, PackingPlan.ContainerPlan>());
+    Mockito.when(packingPlan.getComponentRamDistribution()).thenReturn("ramdist");
+    Mockito.when(packingPlan.getId()).thenReturn("packing_plan_id");
+    Mockito.when(packingPlan.getResource()).thenReturn(new PackingPlan.Resource(0, 0, 0));
     Mockito.when(packing.pack()).thenReturn(packingPlan);
     Mockito.when(packingPlan.getInstanceDistribution()).thenReturn(MOCK_PACKING_STRING);
 

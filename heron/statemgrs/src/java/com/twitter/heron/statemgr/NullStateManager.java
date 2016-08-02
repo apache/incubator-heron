@@ -103,7 +103,9 @@ public class NullStateManager implements IStateManager {
   }
 
   @Override
-  public ListenableFuture<Boolean> deletePackingPlan(String topologyName) { return nullFuture; }
+  public ListenableFuture<Boolean> deletePackingPlan(String topologyName) {
+    return nullFuture;
+  }
 
   @Override
   public ListenableFuture<Boolean> deletePhysicalPlan(String topologyName) {

@@ -88,6 +88,14 @@ public class PackingPlan {
     return packingBuilder.toString();
   }
 
+  public String getId() {
+    return id;
+  }
+
+  public Resource getResource() {
+    return resource;
+  }
+
   /**
    * Get the containers created in this packing plan
    *

@@ -139,7 +139,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
   /**
    * Handler to kill a topology
    */
-  private boolean killTopologyHandler(String topologyName) {
+  protected boolean killTopologyHandler(String topologyName) {
     Scheduler.KillTopologyRequest killTopologyRequest = Scheduler.KillTopologyRequest.newBuilder()
         .setTopologyName(topologyName).build();
 
