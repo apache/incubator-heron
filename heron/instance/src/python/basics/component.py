@@ -104,7 +104,6 @@ class Component(object):
 
     Note that this method is not guaranteed to be invoked
     """
-    # TODO: We never actually call this method
     raise NotImplementedError()
 
   def process_incoming_tuples(self):
@@ -154,7 +153,8 @@ class HeronComponentSpec(object):
     # serializer used for serializing configuration
     self.config_serializer = PythonSerializer()
 
-  def _sanitize_args(self, name, py_class_path, is_spout, par):
+  @staticmethod
+  def _sanitize_args(name, py_class_path, is_spout, par):
     # name can be None at the time this spec is initialized
     assert name is None or isinstance(name, str)
     assert isinstance(py_class_path, str)
@@ -444,4 +444,3 @@ class GlobalStreamId(object):
 
   def __str__(self):
     return "%s:%s" % (self.component_id, self.stream_id)
-

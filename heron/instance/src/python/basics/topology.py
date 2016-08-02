@@ -248,4 +248,3 @@ class Topology(object):
     if cls.__name__ == 'Topology':
       raise ValueError("The base Topology class cannot be deployed.")
     cls.protobuf_topology.state = topology_pb2.TopologyState.Value("PAUSED")
-

@@ -26,6 +26,7 @@ import heron.common.src.python.constants as constants
 
 from .component import Component, HeronComponentSpec
 
+# pylint: disable=fixme
 class Bolt(Component):
   """The base class for all heron bolts in Python"""
 
@@ -42,8 +43,6 @@ class Bolt(Component):
     # acking related
     self.acking_enabled = context.get_cluster_config().get(constants.TOPOLOGY_ENABLE_ACKING, False)
     Log.info("Enable ACK: %s" % str(self.acking_enabled))
-
-    # TODO: Topology context, serializer and sys config
 
   @classmethod
   def spec(cls, name=None, inputs=None, par=1, config=None):
@@ -106,6 +105,7 @@ class Bolt(Component):
   def invoke_deactivate(self):
     pass
 
+  # pylint: disable=unused-argument
   def emit(self, tup, stream=Component.DEFAULT_STREAM_ID,
            anchors=None, direct_task=None, need_task_ids=False):
     """Emits a new tuple from this Bolt

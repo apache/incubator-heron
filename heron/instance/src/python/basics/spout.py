@@ -27,6 +27,7 @@ import heron.common.src.python.constants as constants
 
 from .component import Component, HeronComponentSpec
 
+# pylint: disable=fixme
 class Spout(Component):
   """The base class for all heron spouts in Python"""
 
@@ -107,6 +108,7 @@ class Spout(Component):
     self.deactivate()
     self.topology_state = topology_pb2.TopologyState.Value("PAUSED")
 
+  # pylint: disable=unused-argument
   def emit(self, tup, tup_id=None, stream=Component.DEFAULT_STREAM_ID,
            direct_task=None, need_task_ids=False):
     """Emits a new tuple from this Spout
@@ -256,6 +258,7 @@ class Spout(Component):
     # TODO: implement later -- like for Back Pressure
     return self._is_topology_running()
 
+  # pylint: disable=no-self-use
   def _is_continue_to_work(self):
     # TODO: implement later
     return True

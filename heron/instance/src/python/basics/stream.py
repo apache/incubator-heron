@@ -83,6 +83,7 @@ class Grouping(object):
       return gtype.gtype == topology_pb2.Grouping.Value("FIELDS") and \
              gtype.fields is not None
     else:
+      #pylint: disable=fixme
       #TODO: DIRECT, CUSTOM are not supported yet
       return False
 
