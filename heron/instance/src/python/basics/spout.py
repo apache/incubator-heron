@@ -55,6 +55,7 @@ class Spout(Component):
 
     # TODO: topology context, serializer and sys config
 
+  # pylint: disable=no-member
   @classmethod
   def spec(cls, name=None, par=1, config=None):
     """Register this spout to the topology and create ``HeronComponentSpec``
@@ -74,7 +75,6 @@ class Spout(Component):
     """
     python_class_path = cls.get_python_class_path()
 
-    # pylint: disable=no-member
     if hasattr(cls, 'outputs'):
       _outputs = cls.outputs
     else:
@@ -169,6 +169,7 @@ class Spout(Component):
     self.spout_metrics.update_emit_count(stream)
     return ret
 
+  # pylint: disable=no-self-use
   def process_incoming_tuples(self):
     Log.debug("In spout, process_incoming_tuples() don't do anything")
 

@@ -44,6 +44,7 @@ class Bolt(Component):
     self.acking_enabled = context.get_cluster_config().get(constants.TOPOLOGY_ENABLE_ACKING, False)
     Log.info("Enable ACK: %s" % str(self.acking_enabled))
 
+  # pylint: disable=no-member
   @classmethod
   def spec(cls, name=None, inputs=None, par=1, config=None):
     """Register this bolt to the topology and create ``HeronComponentSpec``
@@ -76,7 +77,6 @@ class Bolt(Component):
     """
     python_class_path = cls.get_python_class_path()
 
-    # pylint: disable=no-member
     if hasattr(cls, 'outputs'):
       _outputs = cls.outputs
     else:
