@@ -107,8 +107,7 @@ def heron_pex(topology_pex, topology_class_name, tmp_dir):
     pex_loader.load_pex(topology_pex)
     topology_class = pex_loader.import_and_get_class(topology_pex, topology_class_name)
     if opts.get_config("cmdline.topology.initial.state") == "PAUSED":
-      if opts.verbose():
-        print "Deploying in deactivated mode."
+      Log.debug("Deploying in deactivated mode.")
       topology_class.deploy_deactivated()
     topology_class.write(tmp_dir)
   except Exception:
