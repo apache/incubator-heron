@@ -12,3 +12,12 @@ pex_binary(
     "//heron/instance/src/python/basics:pyheron_lib"
   ],
 )
+
+pex_binary(
+  name = "custom_grouping",
+  srcs = ["custom_grouping_topology.py",
+          "word_spout.py"],
+  deps = [
+    "//heron/instance/src/python/basics:pyheron_lib"
+  ],
+)

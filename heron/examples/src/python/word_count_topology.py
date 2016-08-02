@@ -24,7 +24,7 @@ class WordCount(Topology):
   task_hooks = ["heron.examples.src.python.test_task_hook.TestTaskHook"]
 
   # defining topology-wide config
-  config = {constants.TOPOLOGY_ENABLE_ACKING: "true",
+  config = {constants.TOPOLOGY_ENABLE_ACKING: True,
             constants.TOPOLOGY_MAX_SPOUT_PENDING: 100000000,
             constants.TOPOLOGY_AUTO_TASK_HOOKS: task_hooks,
             "topology.wide.config.sample": {"key1": 12, "key2": 34}}

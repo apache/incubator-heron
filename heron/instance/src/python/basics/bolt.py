@@ -91,6 +91,9 @@ class Bolt(Component):
     self.initialize(config=context.get_cluster_config(), context=context)
     context.invoke_hook_prepare()
 
+    # prepare for custom grouping
+    self.pplan_helper.prepare_custom_grouping(context)
+
     # prepare tick tuple
     self._prepare_tick_tup_timer()
 
@@ -128,11 +131,19 @@ class Bolt(Component):
     # first check whether this tuple is sane
     self.pplan_helper.check_output_schema(stream, tup)
 
-    # TODO: custom grouping
+    # get custom grouping target task ids; get empty list if not custom grouping
+    custom_target_task_ids = self.pplan_helper.choose_tasks_for_custom_grouping(stream, tup)
+
     self.pplan_helper.context.invoke_hook_emit(tup, stream, None)
 
     data_tuple = tuple_pb2.HeronDataTuple()
     data_tuple.key = 0
+
+    if custom_target_task_ids is not None:
+      for task_id in custom_target_task_ids:
+        # for custom grouping
+        to_add = data_tuple.dest_task_ids.add()
+        to_add = task_id
 
     # Set the anchors for a tuple
     if anchors is not None:

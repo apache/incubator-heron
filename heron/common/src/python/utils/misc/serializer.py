@@ -55,3 +55,5 @@ class PythonSerializer(HeronSerializer):
 
   def deserialize(self, input_str):
     return pickle.loads(input_str)
+
+default_serializer = PythonSerializer()

@@ -18,7 +18,8 @@ from heron.proto import topology_pb2
 from heron.common.src.python.log import Log
 from heron.common.src.python.utils.topology import TopologyContext
 
-from .serializer import PythonSerializer
+from .custom_grouping_helper import CustomGroupingHelper
+from .serializer import default_serializer
 
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=fixme
@@ -59,6 +60,7 @@ class PhysicalPlanHelper(object):
     self._output_schema = dict()
     outputs = self._my_spbl.outputs
 
+    # setup output schema
     for out_stream in outputs:
       self._output_schema[out_stream.stream.id] = len(out_stream.schema.keys)
 
@@ -67,7 +69,9 @@ class PhysicalPlanHelper(object):
 
     self.context = None
 
-    # TODO: implement CustomGrouping stuff
+    # setup for custom grouping
+    self.custom_grouper = CustomGroupingHelper()
+    self._setup_custom_grouping(pplan.topology)
 
   def _get_my_spout_or_bolt(self, topology):
     my_spbl = None
@@ -161,7 +165,6 @@ class PhysicalPlanHelper(object):
     - Serialized value is deserialized and inserted as a corresponding Python object
     """
     config = {}
-    config_serializer = PythonSerializer()
     for kv in topology_config.kvs:
       if kv.HasField("value"):
         assert kv.type == topology_pb2.ConfigValueType.Value("STRING_VALUE")
@@ -175,7 +178,7 @@ class PhysicalPlanHelper(object):
       elif kv.HasField("serialized_value") and \
         kv.type == topology_pb2.ConfigValueType.Value("PYTHON_SERIALIZED_VALUE"):
         # deserialize that
-        config[kv.key] = config_serializer.deserialize(kv.serialized_value)
+        config[kv.key] = default_serializer.deserialize(kv.serialized_value)
       else:
         assert kv.HasField("type")
         Log.error("Unsupported config <key:value> found: %s, with type: %s"
@@ -204,3 +207,44 @@ class PhysicalPlanHelper(object):
     for instance in self.pplan.instances:
       ret[instance.info.task_id] = instance.info.component_name
     return ret
+
+  ##### custom grouping related #####
+
+  def _setup_custom_grouping(self, topology):
+    """Checks whether there are any bolts that consume any of my streams using custom grouping"""
+    for i in range(len(topology.bolts)):
+      for in_stream in topology.bolts[i].inputs:
+        if in_stream.stream.component_name == self.my_component_name and \
+          in_stream.gtype == topology_pb2.Grouping.Value("CUSTOM"):
+          # this bolt takes my output in custom grouping manner
+          if in_stream.type == topology_pb2.CustomGroupingObjectType.Value("PYTHON_OBJECT"):
+            custom_grouping_obj = default_serializer.deserialize(in_stream.custom_grouping_object)
+            assert isinstance(custom_grouping_obj, ICustomGrouping)
+            self.custom_grouper.add(in_stream.stream.id,
+                                    self._get_taskids_for_component(topology.bolts[i].comp.name),
+                                    custom_grouping_obj,
+                                    self.my_component_name)
+
+          elif in_stream.type == topology_pb2.CustomGroupingObjectType.Value("JAVA_OBJECT"):
+            raise NotImplementedError("Java-serialized custom grouping is not yet supported "
+                                      "for python topology")
+          else:
+            raise ValueError("Unsupported custom grouping type found: %s" % str(in_stream.type))
+
+  def _get_taskids_for_component(self, component_name):
+    return [instance.info.task_id for instance in self.pplan.instances
+            if instance.info.component_name == component_name]
+
+  def prepare_custom_grouping(self, context):
+    """Prepares for custom grouping for this component
+
+    :param context: Topology context
+    """
+    self.custom_grouper.prepare(context)
+
+  def choose_tasks_for_custom_grouping(self, stream_id, values):
+    """Choose target task ids for custom grouping
+
+    :return: task ids
+    """
+    return self.custom_grouper.choose_tasks(stream_id, values)

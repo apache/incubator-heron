@@ -16,6 +16,8 @@
 import collections
 
 from heron.proto import topology_pb2
+from heron.common.src.python.utils.misc import default_serializer
+from heron.common.src.python.utils.topology import ICustomGrouping
 
 class Stream(object):
   """Heron output stream
@@ -70,6 +72,9 @@ class Grouping(object):
   # gtype should contain topology_pb2.Grouping.Value("FIELDS")
   FIELDS = collections.namedtuple('FieldGrouping', 'gtype, fields')
 
+  # gtype should contain topology_pb2.Grouping.Value("CUSTOM")
+  CUSTOM = collections.namedtuple('CustomGrouping', 'gtype, python_serialized')
+
   # StreamParse compatibility
   GLOBAL = LOWEST
   LOCAL_OR_SHUFFLE = SHUFFLE
@@ -82,6 +87,9 @@ class Grouping(object):
     elif isinstance(gtype, cls.FIELDS):
       return gtype.gtype == topology_pb2.Grouping.Value("FIELDS") and \
              gtype.fields is not None
+    elif isinstance(gtype, cls.CUSTOM):
+      return gtype.gtype == topology_pb2.Grouping.Value("CUSTOM") and \
+             gtype.python_serialized is not None
     else:
       #pylint: disable=fixme
       #TODO: DIRECT, CUSTOM are not supported yet
@@ -89,6 +97,7 @@ class Grouping(object):
 
   @classmethod
   def fields(cls, *fields):
+    """Field grouping"""
     if len(fields) == 1 and isinstance(fields[0], list):
       fields = fields[0]
     else:
@@ -99,3 +108,25 @@ class Grouping(object):
 
     return cls.FIELDS(gtype=topology_pb2.Grouping.Value("FIELDS"),
                       fields=fields)
+
+  @classmethod
+  def custom(cls, grouping):
+    # TODO: serialize and return custom_serialized()
+    if not isinstance(grouping, ICustomGrouping):
+      raise TypeError("Argument to custom() must be an object of ICustomGrouping, given: "
+                      "%s" % str(grouping))
+    serialized = default_serializer.serialize(grouping)
+    return cls.custom_serialized(serialized)
+
+  @classmethod
+  def custom_serialized(cls, python_serialized):
+    """Custom grouping
+
+    :param python_serialized: serialized Python object of CustomGroupingStream
+    """
+    if not isinstance(python_serialized, bytes):
+      raise TypeError("Argument to custom_serialized() must be "
+                      "a serialized Python class as bytes, given: %s" % str(python_serialized))
+    return cls.CUSTOM(gtype=topology_pb2.Grouping.Value("CUSTOM"),
+                      python_serialized=python_serialized)
+
