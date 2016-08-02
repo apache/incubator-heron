@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+'''Stream Manager client for single-thread heron instance in python'''
 from heron.common.src.python.log import Log
 from heron.common.src.python.utils.misc import PhysicalPlanHelper
 from heron.common.src.python.network import HeronClient, StatusCode
@@ -18,6 +19,7 @@ from heron.proto import stmgr_pb2, common_pb2
 
 import heron.common.src.python.constants as constants
 
+# pylint: disable=too-many-arguments
 class SingleThreadStmgrClient(HeronClient):
   """SingleThreadStmgrClient is a Heron Client that communicates with Stream Manager
 
@@ -80,8 +82,9 @@ class SingleThreadStmgrClient(HeronClient):
     self.on_connect(StatusCode.CONNECT_ERROR)
 
   def _register_msg_to_handle(self):
-    new_instance_builder = lambda : stmgr_pb2.NewInstanceAssignmentMessage()
-    tuple_msg_builder = lambda : stmgr_pb2.TupleMessage()
+    # pylint: disable=unnecessary-lambda
+    new_instance_builder = lambda: stmgr_pb2.NewInstanceAssignmentMessage()
+    tuple_msg_builder = lambda: stmgr_pb2.TupleMessage()
     self.register_on_message(new_instance_builder)
     self.register_on_message(tuple_msg_builder)
 

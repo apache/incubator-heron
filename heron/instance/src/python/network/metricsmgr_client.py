@@ -11,13 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+'''metrics manager client'''
 import socket
 
 from heron.common.src.python.log import Log
 from heron.common.src.python.network import HeronClient, StatusCode
 from heron.proto import metrics_pb2, common_pb2
 
+import heron.common.src.python.constants as constants
+
 class MetricsManagerClient(HeronClient):
+  """MetricsManagerClient, responsible for communicating with Metrics Manager"""
   def __init__(self, looper, metrics_host, port, instance,
                out_metrics, sock_map, socket_options, sys_config):
     HeronClient.__init__(self, looper, metrics_host, port, sock_map, socket_options)
@@ -40,20 +44,30 @@ class MetricsManagerClient(HeronClient):
 
   def on_connect(self, status):
     Log.debug("In on_connect of MetricsManagerClient")
+    if status != StatusCode.OK:
+      Log.error("Error connecting to Metrics Manager with status: %s" % str(status))
+      retry_interval = float(self.sys_config[constants.INSTANCE_RECONNECT_METRICSMGR_INTERVAL_SEC])
+      self.looper.register_timer_task_in_sec(self.start_connect, retry_interval)
     self._send_register_req()
 
   def on_response(self, status, context, response):
-    Log.debug("In on_response with status: " + str(status))
+    Log.debug("In on_response with status: %s, with context: %s" % (str(status), str(context)))
     if status != StatusCode.OK:
       raise RuntimeError("Response from Metrics Manager not OK")
     if isinstance(response, metrics_pb2.MetricPublisherRegisterResponse):
       self._handle_register_response(response)
     else:
-      Log.error("Weird kind: " + response.DESCRIPTOR.full_name)
+      Log.error("Unknown kind of response received: %s" % response.DESCRIPTOR.full_name)
       raise RuntimeError("Unknown kind of response received from Metrics Manager")
 
+  # pylint: disable=no-self-use
   def on_incoming_message(self, message):
-    raise RuntimeError("Metrics Client got an unknown message from Metrics Manager")
+    raise RuntimeError("Metrics Client got an unknown message from Metrics Manager: %s"
+                       % str(message))
+
+  def on_error(self):
+    Log.error("Disconnected from Metrics Manager")
+    self.on_connect(StatusCode.CONNECT_ERROR)
 
   def _send_register_req(self):
     hostname = socket.gethostname()
@@ -73,8 +87,8 @@ class MetricsManagerClient(HeronClient):
     self.send_request(request, "MetricsClientContext",
                       metrics_pb2.MetricPublisherRegisterResponse(), 10)
 
+  # pylint: disable=no-self-use
   def _handle_register_response(self, response):
     if response.status.status != common_pb2.StatusCode.Value("OK"):
       raise RuntimeError("Metrics Manager returned a not OK response for register")
     Log.info("We registered ourselves to the Metrics Manager")
-

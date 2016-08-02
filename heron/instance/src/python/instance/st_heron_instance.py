@@ -196,11 +196,11 @@ class SingleThreadHeronInstance(object):
       Log.error("Error when starting bolt/spout, bailing out...")
       self.looper.exit_loop()
 
-def print_usage():
-  print("Usage: ./single_thread_heron_instance <topology_name> <topology_id> "
+def print_usage(argv0):
+  print("Usage: %s <topology_name> <topology_id> "
         "<instance_id> <component_name> <task_id> "
         "<component_index> <stmgr_id> <stmgr_port> <metricsmgr_port> "
-        "<heron_internals_config_filename> <topology_pex_file_path>")
+        "<heron_internals_config_filename> <topology_pex_file_path>" % argv0)
 
 def yaml_config_reader(config_path):
   """Reads yaml config file and returns auto-typed config_dict"""
@@ -214,7 +214,7 @@ def yaml_config_reader(config_path):
 
 def main():
   if len(sys.argv) != 12:
-    print_usage()
+    print_usage(sys.argv[0])
     sys.exit(1)
 
   topology_name = sys.argv[1]
