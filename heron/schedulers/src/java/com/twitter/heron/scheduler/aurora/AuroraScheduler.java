@@ -162,6 +162,8 @@ public class AuroraScheduler implements IScheduler {
     auroraProperties.put("HERON_SANDBOX_JAVA_HOME", Context.javaSandboxHome(config));
 
     auroraProperties.put("SANDBOX_SHELL_BINARY", Context.shellSandboxBinary(config));
+    auroraProperties.put("SANDBOX_PYHERON_INSTANCE_BINARY",
+        Context.pyheronInstanceSandboxBinary(config));
 
     auroraProperties.put("CPUS_PER_CONTAINER", containerResource.cpu + "");
     auroraProperties.put("DISK_PER_CONTAINER", containerResource.disk + "");

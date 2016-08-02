@@ -11,13 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+'''heron executor unittest'''
 
 import unittest2 as unittest
 
 from heron.executor.src.python.heron_executor import ProcessInfo
 from heron.executor.src.python.heron_executor import HeronExecutor
 
-class MockPOpen:
+# pylint: disable=line-too-long
+# pylint: disable=unused-argument
+# pylint: disable=missing-docstring
+class MockPOpen(object):
   """fake subprocess.Popen object that we can use to mock processes and pids"""
   next_pid = 0
 
@@ -35,6 +39,7 @@ class MockExecutor(HeronExecutor):
     self.processes = []
     super(MockExecutor, self).__init__(args, None)
 
+  # pylint: disable=no-self-use
   def _load_logging_dir(self, heron_internals_config_file):
     return "fake_dir"
 
@@ -44,31 +49,33 @@ class MockExecutor(HeronExecutor):
     return popen
 
 class HeronExecutorTest(unittest.TestCase):
-  dist_expected = { 1:[('word', '3', '0'), ('exclaim1', '2', '0'), ('exclaim1', '1', '0')]}
+  """Unittest for Heron Executor"""
+  dist_expected = {1:[('word', '3', '0'), ('exclaim1', '2', '0'), ('exclaim1', '1', '0')]}
   shell_command_expected = 'heron_shell_binary --port=shell-port --log_file_prefix=fake_dir/heron-shell.log'
 
+  # pylint: disable=no-self-argument
   def get_expected_metricsmgr_command(container_id):
     return "heron_java_home/bin/java -Xmx1024M -XX:+PrintCommandLineFlags -verbosegc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintGCCause -XX:+PrintPromotionFailure -XX:+PrintTenuringDistribution -XX:+PrintHeapAtGC -XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+PrintCommandLineFlags -Xloggc:log-files/gc.metricsmgr.log -Djava.net.preferIPv4Stack=true -cp metricsmgr_classpath com.twitter.heron.metricsmgr.MetricsManager metricsmgr-%d metricsmgr_port topname topid heron/config/src/yaml/conf/test/test_heron_internals.yaml metrics_sinks_config_file" % container_id
 
-  def get_expected_instance_command(component_name, instance_id, container_id = 1):
+  def get_expected_instance_command(component_name, instance_id, container_id=1):
     instance_name = "container_%d_%s_%d" % (container_id, component_name, instance_id)
     return "heron_java_home/bin/java -Xmx320M -Xms320M -Xmn160M -XX:MaxPermSize=128M -XX:PermSize=128M -XX:ReservedCodeCacheSize=64M -XX:+CMSScavengeBeforeRemark -XX:TargetSurvivorRatio=90 -XX:+PrintCommandLineFlags -verbosegc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintGCCause -XX:+PrintPromotionFailure -XX:+PrintTenuringDistribution -XX:+PrintHeapAtGC -XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:ParallelGCThreads=4 -Xloggc:log-files/gc.%s.log -XX:+HeapDumpOnOutOfMemoryError -Djava.net.preferIPv4Stack=true -cp instance_classpath:classpath com.twitter.heron.instance.HeronInstance topname topid %s %s %d 0 stmgr-%d master_port metricsmgr_port heron/config/src/yaml/conf/test/test_heron_internals.yaml" % (instance_name, instance_name, component_name, instance_id, container_id)
 
   MockPOpen.set_next_pid(37)
   expected_processes_container_0 = [
-    ProcessInfo(MockPOpen(), 'heron-shell-0', shell_command_expected),
-    ProcessInfo(MockPOpen(), 'metricsmgr-0',  get_expected_metricsmgr_command(0)),
-    ProcessInfo(MockPOpen(), 'heron-tmaster', 'tmaster_binary master_port tmaster_controller_port tmaster_stats_port topname topid zknode zkroot stmgr-1 heron/config/src/yaml/conf/test/test_heron_internals.yaml metrics_sinks_config_file metricsmgr_port'),
+      ProcessInfo(MockPOpen(), 'heron-shell-0', shell_command_expected),
+      ProcessInfo(MockPOpen(), 'metricsmgr-0', get_expected_metricsmgr_command(0)),
+      ProcessInfo(MockPOpen(), 'heron-tmaster', 'tmaster_binary master_port tmaster_controller_port tmaster_stats_port topname topid zknode zkroot stmgr-1 heron/config/src/yaml/conf/test/test_heron_internals.yaml metrics_sinks_config_file metricsmgr_port'),
   ]
 
   MockPOpen.set_next_pid(37)
   expected_processes_container_1 = [
-    ProcessInfo(MockPOpen(), 'stmgr-1', 'stmgr_binary topname topid topdefnfile zknode zkroot stmgr-1 container_1_word_3,container_1_exclaim1_2,container_1_exclaim1_1 master_port metricsmgr_port shell-port heron/config/src/yaml/conf/test/test_heron_internals.yaml'),
-    ProcessInfo(MockPOpen(), 'container_1_word_3', get_expected_instance_command('word', 3)),
-    ProcessInfo(MockPOpen(), 'container_1_exclaim1_1', get_expected_instance_command('exclaim1', 1)),
-    ProcessInfo(MockPOpen(), 'container_1_exclaim1_2', get_expected_instance_command('exclaim1', 2)),
-    ProcessInfo(MockPOpen(), 'heron-shell-1', shell_command_expected),
-    ProcessInfo(MockPOpen(), 'metricsmgr-1', get_expected_metricsmgr_command(1)),
+      ProcessInfo(MockPOpen(), 'stmgr-1', 'stmgr_binary topname topid topdefnfile zknode zkroot stmgr-1 container_1_word_3,container_1_exclaim1_2,container_1_exclaim1_1 master_port metricsmgr_port shell-port heron/config/src/yaml/conf/test/test_heron_internals.yaml'),
+      ProcessInfo(MockPOpen(), 'container_1_word_3', get_expected_instance_command('word', 3)),
+      ProcessInfo(MockPOpen(), 'container_1_exclaim1_1', get_expected_instance_command('exclaim1', 1)),
+      ProcessInfo(MockPOpen(), 'container_1_exclaim1_2', get_expected_instance_command('exclaim1', 2)),
+      ProcessInfo(MockPOpen(), 'heron-shell-1', shell_command_expected),
+      ProcessInfo(MockPOpen(), 'metricsmgr-1', get_expected_metricsmgr_command(1)),
   ]
 
   def setUp(self):
@@ -81,20 +88,21 @@ class HeronExecutorTest(unittest.TestCase):
   # <instance_distribution> <zknode> <zkroot> <tmaster_binary> <stmgr_binary>
   # <metricsmgr_classpath> <instance_jvm_opts_in_base64> <classpath>
   # <master_port> <tmaster_controller_port> <tmaster_stats_port> <heron_internals_config_file>
-  # <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_jar_file>
+  # <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_bin_file>
   # <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>
   # <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file>
-  # <scheduler_classpath> <scheduler_port>
-  def get_args(self, shard_id):
+  # <scheduler_classpath> <scheduler_port> <pyheron_instance_binary>
+  @staticmethod
+  def get_args(shard_id):
     return ("""
     ./heron-executor %d topname topid topdefnfile
     1:word:3:0:exclaim1:2:0:exclaim1:1:0 zknode zkroot tmaster_binary stmgr_binary
     metricsmgr_classpath "LVhYOitIZWFwRHVtcE9uT3V0T2ZNZW1vcnlFcnJvcg&equals;&equals;" classpath
     master_port tmaster_controller_port tmaster_stats_port heron/config/src/yaml/conf/test/test_heron_internals.yaml
-    exclaim1:536870912,word:536870912 "" pkg_type topology_jar_file
+    exclaim1:536870912,word:536870912 "" jar topology_bin_file
     heron_java_home shell-port heron_shell_binary metricsmgr_port
     cluster role environ instance_classpath metrics_sinks_config_file
-    scheduler_classpath scheduler_port
+    scheduler_classpath scheduler_port pyheron_instance_binary
     """ % (shard_id)).replace("\n", '').split()
 
   def test_parse_instance_distribution(self):
@@ -127,10 +135,12 @@ class HeronExecutorTest(unittest.TestCase):
     found_monitored = map(lambda (pid, process_info):
                           (pid, process_info.name, process_info.command_str),
                           monitored_processes.items())
-    print("do_test_commands - found_processes: %s found_monitored: %s" % (found_processes, found_monitored))
+    print "do_test_commands - found_processes: %s found_monitored: %s" \
+          % (found_processes, found_monitored)
     self.assertEquals(found_processes, found_monitored)
 
-    print("do_test_commands - expected_processes: %s monitored_processes: %s" % (expected_processes, monitored_processes))
+    print "do_test_commands - expected_processes: %s monitored_processes: %s" \
+          % (expected_processes, monitored_processes)
     self.assert_processes(expected_processes, monitored_processes)
 
   def test_change_instance_dist_container_1(self):
@@ -139,8 +149,8 @@ class HeronExecutorTest(unittest.TestCase):
     current_commands = self.executor_1.get_commands_to_run()
 
     self.assertEquals(dict(
-      map((lambda (process_info): (process_info.name, process_info.command.split(' '))),
-          self.expected_processes_container_1)), current_commands)
+        map((lambda (process_info): (process_info.name, process_info.command.split(' '))),
+            self.expected_processes_container_1)), current_commands)
 
     # update instance distribution
     new_distribution = self.executor_1.parse_instance_distribution("1:word:3:0:word:2:0:exclaim1:1:0")
@@ -153,8 +163,8 @@ class HeronExecutorTest(unittest.TestCase):
 
     self.assertEquals(['container_1_exclaim1_2', 'stmgr-1'], sorted(commands_to_kill.keys()))
     self.assertEquals(
-      ['container_1_exclaim1_1', 'container_1_word_3', 'heron-shell-1', 'metricsmgr-1'],
-      sorted(commands_to_keep.keys()))
+        ['container_1_exclaim1_1', 'container_1_word_3', 'heron-shell-1', 'metricsmgr-1'],
+        sorted(commands_to_keep.keys()))
     self.assertEquals(['container_1_word_2', 'stmgr-1'], sorted(commands_to_start.keys()))
 
   def assert_processes(self, expected_processes, found_processes):
