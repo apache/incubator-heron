@@ -31,7 +31,10 @@ api_deps_files = proto_deps_files + [
 java_library(
     name = "utils-tests",
     srcs = glob(["**/utils/*.java"]),
-    deps = api_deps_files
+    deps = api_deps_files + [ 
+        "//heron/spi/src/java:packing-spi-java",
+        "//heron/spi/src/java:statemgr-spi-java",
+    ]
 )
 
 java_tests(
@@ -39,6 +42,7 @@ java_tests(
         "com.twitter.heron.spi.utils.ShellUtilsTest",
         "com.twitter.heron.spi.utils.NetworkUtilsTest",
         "com.twitter.heron.spi.utils.SchedulerUtilsTest",
+        "com.twitter.heron.spi.utils.LauncherUtilsTest",
         "com.twitter.heron.spi.utils.TopologyUtilsTest",
         "com.twitter.heron.spi.utils.UploaderUtilsTest",
     ],
