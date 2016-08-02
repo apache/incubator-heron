@@ -110,19 +110,19 @@ class Grouping(object):
                       fields=fields)
 
   @classmethod
-  def custom(cls, grouping):
+  def custom(cls, classpath):
     # TODO: serialize and return custom_serialized()
-    if not isinstance(grouping, ICustomGrouping):
-      raise TypeError("Argument to custom() must be an object of ICustomGrouping, given: "
-                      "%s" % str(grouping))
-    serialized = default_serializer.serialize(grouping)
+    if not isinstance(classpath, str):
+      raise TypeError("Argument to custom() must be classpath string to custom grouping, given: "
+                      "%s" % str(classpath))
+    serialized = default_serializer.serialize(classpath)
     return cls.custom_serialized(serialized)
 
   @classmethod
   def custom_serialized(cls, python_serialized):
     """Custom grouping
 
-    :param python_serialized: serialized Python object of CustomGroupingStream
+    :param python_serialized: serialized classpath to custom grouping class to use
     """
     if not isinstance(python_serialized, bytes):
       raise TypeError("Argument to custom_serialized() must be "

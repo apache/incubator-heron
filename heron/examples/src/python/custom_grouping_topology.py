@@ -46,10 +46,10 @@ class ConsumeBolt(Bolt):
       self.total += 1
 
 class CustomGrouping(Topology):
-  custom_grouping = SampleCustomGrouping()
+  custom_grouping_path = "heron.examples.src.python.custom_grouping_topology.SampleCustomGrouping"
 
-  word_spout = WordSpout(par=1)
-  consume_bolt = ConsumeBolt(par=3,
-                             inputs={word_spout: Grouping.custom(custom_grouping),
-                                     word_spout['error']: Grouping.ALL},
-                             config={constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS: 10})
+  word_spout = WordSpout.spec(par=1)
+  consume_bolt = ConsumeBolt.spec(par=3,
+                                  inputs={word_spout: Grouping.custom(custom_grouping_path),
+                                          word_spout['error']: Grouping.ALL},
+                                  config={constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS: 10})

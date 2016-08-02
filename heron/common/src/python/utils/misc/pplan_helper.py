@@ -16,10 +16,12 @@ import socket
 
 from heron.proto import topology_pb2
 from heron.common.src.python.log import Log
-from heron.common.src.python.utils.topology import TopologyContext
+from heron.common.src.python.utils.topology import TopologyContext, ICustomGrouping
 
 from .custom_grouping_helper import CustomGroupingHelper
 from .serializer import default_serializer
+
+import heron.common.src.python.pex_loader as pex_loader
 
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=fixme
@@ -27,6 +29,7 @@ class PhysicalPlanHelper(object):
   """Helper class for accessing Physical Plan
 
   :ivar pplan: Physical Plan protobuf message
+  :ivar topology_pex_abs_path: Topology pex file's absolute path
   :ivar my_instance_id: instance id for this instance
   :ivar my_instance: Instance protobuf message for this instance
   :ivar my_component_name: component name for this instance
@@ -36,10 +39,11 @@ class PhysicalPlanHelper(object):
   :ivar my_component: Component protobuf message for this instance
   :ivar context: Topology context if set, otherwise ``None``
   """
-  def __init__(self, pplan, instance_id):
+  def __init__(self, pplan, instance_id, topology_pex_abs_path):
     self.pplan = pplan
     self.my_instance_id = instance_id
     self.my_instance = None
+    self.topology_pex_abs_path = topology_pex_abs_path
 
     # get my instance
     for instance in pplan.instances:
@@ -143,14 +147,14 @@ class PhysicalPlanHelper(object):
     else:
       return {}
 
-  def set_topology_context(self, metrics_collector, topo_pex_file_path):
+  def set_topology_context(self, metrics_collector):
     """Sets a new topology context"""
     Log.debug("Setting topology context")
     cluster_config = self.get_topology_config()
     cluster_config.update(self._get_dict_from_config(self.my_component.config))
     task_to_component_map = self._get_task_to_comp_map()
     self.context = TopologyContext(cluster_config, self.pplan.topology, task_to_component_map,
-                                   self.my_task_id, metrics_collector, topo_pex_file_path)
+                                   self.my_task_id, metrics_collector, self.topology_pex_abs_path)
 
   @staticmethod
   def _get_dict_from_config(topology_config):
@@ -218,7 +222,11 @@ class PhysicalPlanHelper(object):
           in_stream.gtype == topology_pb2.Grouping.Value("CUSTOM"):
           # this bolt takes my output in custom grouping manner
           if in_stream.type == topology_pb2.CustomGroupingObjectType.Value("PYTHON_OBJECT"):
-            custom_grouping_obj = default_serializer.deserialize(in_stream.custom_grouping_object)
+            grouping_class_path = default_serializer.deserialize(in_stream.custom_grouping_object)
+            pex_loader.load_pex(self.topology_pex_abs_path)
+            grouping_cls = \
+              pex_loader.import_and_get_class(self.topology_pex_abs_path, grouping_class_path)
+            custom_grouping_obj = grouping_cls()
             assert isinstance(custom_grouping_obj, ICustomGrouping)
             self.custom_grouper.add(in_stream.stream.id,
                                     self._get_taskids_for_component(topology.bolts[i].comp.name),
