@@ -81,36 +81,56 @@ public final class ShellUtils {
         new HashMap<String, String>());
   }
 
+  /**
+   * run sync process
+   */
   public static int runSyncProcess(
       boolean verbose, boolean isInheritIO, String[] cmdline, StringBuilder stdout,
       StringBuilder stderr, File workingDirectory, Map<String, String> envs) {
     StringBuilder pStdOut = stdout;
     StringBuilder pStdErr = stderr;
+
+    // Log the command for debugging
+    LOG.log(Level.FINE, "Process command: `$ {0}`", Arrays.toString(cmdline));
+    ProcessBuilder pb = getProcessBuilder(isInheritIO, cmdline, workingDirectory, envs);
+
+    Process process = null;
     try {
-      // Log the command for debugging
-      LOG.log(Level.FINE, "$> {0}", Arrays.toString(cmdline));
-      Process process = getProcessBuilder(isInheritIO, cmdline, workingDirectory, envs).start();
-
-      int exitValue = process.waitFor();
-      if (pStdOut == null) {
-        pStdOut = new StringBuilder();
-      }
-      if (pStdErr == null) {
-        pStdErr = new StringBuilder();
-      }
-      pStdOut.append(inputstreamToString(process.getInputStream()));
-      pStdErr.append(inputstreamToString(process.getErrorStream()));
-
-      LOG.log(Level.FINE, "\tSTDOUT: {0}", pStdOut.toString());
-
-      // Always log the stderr if there is any
-      LOG.log(Level.SEVERE, "\tSTDERR: {0}", pStdErr.toString());
-
-      return exitValue;
-    } catch (IOException | InterruptedException e) {
-      LOG.severe("Failed to check status of packer " + e);
+      process = pb.start();
+    } catch (IOException e) {
+      LOG.severe("Failed to run Sync Process " + e);
+      return -1;
     }
-    return -1;
+
+    int exitValue = 0;
+
+    try {
+      exitValue = process.waitFor();
+    } catch (InterruptedException e) {
+      LOG.severe("Failed to check status of packer " + e);
+      return -1;
+    }
+
+    if (pStdOut == null) {
+      pStdOut = new StringBuilder();
+    }
+    if (pStdErr == null) {
+      pStdErr = new StringBuilder();
+    }
+    pStdOut.append(inputstreamToString(process.getInputStream()));
+    pStdErr.append(inputstreamToString(process.getErrorStream()));
+
+    String stdoutString = pStdOut.toString();
+    String stderrString = pStdErr.toString();
+    if (!stdoutString.isEmpty()) {
+      LOG.log(Level.FINE, "\nSTDOUT:\n {0}", stdoutString);
+    }
+
+    if (!stderrString.isEmpty()) {
+      LOG.log(Level.SEVERE, "\nSTDERR:\n {0}", stderrString.toString());
+    }
+
+    return exitValue;
   }
 
   public static Process runASyncProcess(
@@ -139,7 +159,8 @@ public final class ShellUtils {
     // be guaranteed alive when children processing trying to flush to
     // parent processes's IO.
     ProcessBuilder pb = getProcessBuilder(false, command, workingDirectory, envs);
-    pb.redirectErrorStream(true);
+    pb.redirectErrorStream();
+
     pb.redirectOutput(ProcessBuilder.Redirect.appendTo(logFile));
 
     Process process = null;
@@ -213,7 +234,7 @@ public final class ShellUtils {
     File parentDirectory = Paths.get(destination).getParent().toFile();
 
     // using curl copy the url to the target file
-    String cmd = String.format("curl %s -o %s", uri, destination);
+    String cmd = String.format("curl -s %s -o %s", uri, destination);
     int ret = runSyncProcess(isVerbose, isInheritIO,
         cmd, new StringBuilder(), new StringBuilder(), parentDirectory);
 
@@ -230,7 +251,7 @@ public final class ShellUtils {
    */
   public static boolean extractPackage(
       String packageName, String targetFolder, boolean isVerbose, boolean isInheritIO) {
-    String cmd = String.format("tar -xvf %s", packageName);
+    String cmd = String.format("tar -xf %s", packageName);
 
     int ret = runSyncProcess(isVerbose, isInheritIO,
         cmd, new StringBuilder(), new StringBuilder(), new File(targetFolder));
