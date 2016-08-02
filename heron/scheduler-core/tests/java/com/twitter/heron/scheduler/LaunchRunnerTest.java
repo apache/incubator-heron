@@ -33,6 +33,7 @@ import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
+import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Keys;
@@ -224,6 +225,10 @@ public class LaunchRunnerTest {
         statemgr.setTopology(Mockito.any(TopologyAPI.Topology.class), Mockito.eq(TOPOLOGY_NAME))).
         thenReturn(true);
     Mockito.when(
+        statemgr.setPackingPlan(
+            Mockito.any(PackingPlans.PackingPlan.class), Mockito.eq(TOPOLOGY_NAME))).
+        thenReturn(true);
+    Mockito.when(
         statemgr.setExecutionState(
             Mockito.any(ExecutionEnvironment.ExecutionState.class), Mockito.eq(TOPOLOGY_NAME))).
         thenReturn(true);
@@ -252,6 +257,10 @@ public class LaunchRunnerTest {
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
     Mockito.when(
         statemgr.setTopology(Mockito.any(TopologyAPI.Topology.class), Mockito.eq(TOPOLOGY_NAME))).
+        thenReturn(true);
+    Mockito.when(
+        statemgr.setPackingPlan(
+            Mockito.any(PackingPlans.PackingPlan.class), Mockito.eq(TOPOLOGY_NAME))).
         thenReturn(true);
     Mockito.when(
         statemgr.setExecutionState(
