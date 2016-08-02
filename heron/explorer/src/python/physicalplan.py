@@ -15,7 +15,7 @@
 import sys
 import heron.explorer.src.python.args as args
 import heron.common.src.python.utils.tracker_access as tracker_access
-from heron.common.src.python.color import Log
+from heron.common.src.python.utils.log import Log
 from tabulate import tabulate
 
 

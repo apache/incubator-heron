@@ -21,6 +21,7 @@ import traceback
 
 import heron.cli.src.python.opts  as opts
 import heron.common.src.python.utils.config as config
+from heron.common.src.python.utils.log import Log
 import heron.cli.src.python.jars  as jars
 import heron.common.src.python.pex_loader as pex_loader
 
@@ -58,15 +59,13 @@ def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=N
   all_args += [class_name] + list(args)
 
   # print the verbose message
-  if opts.verbose():
-    print '$> %s' % ' '.join(all_args)
+  Log.debug('$> %s' % ' '.join(all_args))
 
   # invoke the command with subprocess and print error message, if any
-  if not opts.trace_execution():
-    status = subprocess.call(all_args)
-    if status != 0:
-      err_str = "User main failed with status %d. Bailing out..." % status
-      raise RuntimeError(err_str)
+  status = subprocess.call(all_args)
+  if status != 0:
+    err_str = "User main failed with status %d. Bailing out..." % status
+    raise RuntimeError(err_str)
 
 
 def heron_tar(class_name, topology_tar, arguments, tmpdir_root, java_defines):
@@ -103,8 +102,7 @@ def heron_tar(class_name, topology_tar, arguments, tmpdir_root, java_defines):
   heron_class(class_name, lib_jars, extra_jars, arguments, java_defines)
 
 def heron_pex(topology_pex, topology_class_name, tmp_dir):
-  if opts.verbose():
-    print "Importing " + topology_class_name + " from " + topology_pex
+  Log.debug("Importing %s from %s" % (topology_class_name, topology_pex))
   try:
     pex_loader.load_pex(topology_pex)
     topology_class = pex_loader.import_and_get_class(topology_pex, topology_class_name)

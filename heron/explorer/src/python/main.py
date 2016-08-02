@@ -28,7 +28,7 @@ import heron.explorer.src.python.physicalplan as physicalplan
 import heron.explorer.src.python.topologies as topologies
 import heron.common.src.python.utils.config as config
 import heron.explorer.src.python.version as version
-from heron.common.src.python.color import Log
+import heron.common.src.python.utils.log as log
 
 
 # pylint: disable=bad-super-call
@@ -144,7 +144,7 @@ def extract_common_args(command, parser, cl_args):
     new_cl_args['environ'] = cluster_tuple[2]
     new_cl_args['config_path'] = config_path
   except Exception as e:
-    Log.error("Unable to get valid topology location: %s" % str(e))
+    log.Log.error("Unable to get valid topology location: %s" % str(e))
     return dict()
 
   cl_args.update(new_cl_args)
@@ -173,19 +173,19 @@ def main(args):
   command = command_line_args['subcommand']
 
   if unknown_args:
-    Log.error('Unknown argument: %s' % unknown_args[0])
+    log.Log.error('Unknown argument: %s' % unknown_args[0])
     # show help message
     command_line_args['help-command'] = command
     command = 'help'
 
   if command not in ['help', 'version']:
     opts.set_tracker_url(command_line_args)
-    opts.set_verbose(command_line_args)
+    log.set_verbose(command_line_args)
     if command not in ['topologies', 'clusters']:
       command_line_args = extract_common_args(command, parser, command_line_args)
     if not command_line_args:
       return 1
-    Log.info("Using tracker URL: %s", command_line_args["tracker_url"])
+    log.Log.info("Using tracker URL: %s", command_line_args["tracker_url"])
 
   # timing command execution
   start = time.time()
@@ -194,7 +194,7 @@ def main(args):
 
   if command != 'help':
     sys.stdout.flush()
-    Log.info('Elapsed time: %.3fs.' % (end - start))
+    log.Log.info('Elapsed time: %.3fs.' % (end - start))
 
   return 0 if ret else 1
 
