@@ -30,6 +30,7 @@ import heron.common.src.python.utils.config as config
 import heron.explorer.src.python.version as version
 import heron.common.src.python.utils.log as log
 
+Log = log.Log
 
 # pylint: disable=bad-super-call
 class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
@@ -144,7 +145,7 @@ def extract_common_args(command, parser, cl_args):
     new_cl_args['environ'] = cluster_tuple[2]
     new_cl_args['config_path'] = config_path
   except Exception as e:
-    log.Log.error("Unable to get valid topology location: %s" % str(e))
+    Log.error("Unable to get valid topology location: %s" % str(e))
     return dict()
 
   cl_args.update(new_cl_args)
@@ -173,7 +174,7 @@ def main(args):
   command = command_line_args['subcommand']
 
   if unknown_args:
-    log.Log.error('Unknown argument: %s' % unknown_args[0])
+    Log.error('Unknown argument: %s' % unknown_args[0])
     # show help message
     command_line_args['help-command'] = command
     command = 'help'
@@ -185,7 +186,7 @@ def main(args):
       command_line_args = extract_common_args(command, parser, command_line_args)
     if not command_line_args:
       return 1
-    log.Log.info("Using tracker URL: %s", command_line_args["tracker_url"])
+    Log.info("Using tracker URL: %s", command_line_args["tracker_url"])
 
   # timing command execution
   start = time.time()
@@ -194,7 +195,7 @@ def main(args):
 
   if command != 'help':
     sys.stdout.flush()
-    log.Log.info('Elapsed time: %.3fs.' % (end - start))
+    Log.info('Elapsed time: %.3fs.' % (end - start))
 
   return 0 if ret else 1
 
