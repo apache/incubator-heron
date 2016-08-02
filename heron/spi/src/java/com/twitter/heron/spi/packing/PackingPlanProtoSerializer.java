@@ -22,10 +22,10 @@ public class PackingPlanProtoSerializer {
 
   public PackingPlans.PackingPlan toProto(PackingPlan packingPlan) {
     PackingPlans.PackingPlan.Builder builder = PackingPlans.PackingPlan.newBuilder()
-      .setId(packingPlan.id)
-      .setInstanceDistribution(packingPlan.getInstanceDistribution())
-      .setComponentRamDistribution(packingPlan.getComponentRamDistribution())
-      .setResource(builder(packingPlan.resource));
+        .setId(packingPlan.id)
+        .setInstanceDistribution(packingPlan.getInstanceDistribution())
+        .setComponentRamDistribution(packingPlan.getComponentRamDistribution())
+        .setResource(builder(packingPlan.resource));
 
     for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers().values()) {
       builder.addContainerPlans(builder(containerPlan));
@@ -39,7 +39,7 @@ public class PackingPlanProtoSerializer {
         .setId(containerPlan.id)
         .setResource(builder(containerPlan.resource));
 
-    for(PackingPlan.InstancePlan instancePlan : containerPlan.instances.values()) {
+    for (PackingPlan.InstancePlan instancePlan : containerPlan.instances.values()) {
       builder.addInstancePlans(builder(instancePlan));
     }
 
