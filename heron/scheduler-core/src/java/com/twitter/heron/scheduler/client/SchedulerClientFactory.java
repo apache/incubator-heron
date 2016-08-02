@@ -22,7 +22,7 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
-import com.twitter.heron.spi.utils.ReflectionUtils;
+import com.twitter.heron.spi.utils.LauncherUtils;
 import com.twitter.heron.spi.utils.Runtime;
 
 public class SchedulerClientFactory {
@@ -65,16 +65,13 @@ public class SchedulerClientFactory {
           new HttpServiceSchedulerClient(config, runtime, schedulerLocation.getHttpEndpoint());
     } else {
       // create an instance of scheduler
-      final String schedulerClass = Context.schedulerClass(config);
-      final IScheduler scheduler;
-      try {
-        scheduler = ReflectionUtils.newInstance(schedulerClass);
-      } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-        LOG.log(Level.SEVERE, "Failed to reflect new instance", e);
+      final IScheduler scheduler = LauncherUtils.getInstance()
+          .getSchedulerInstance(config, runtime);
+      if (scheduler == null) {
         return null;
       }
-      LOG.fine("Invoke scheduler as a library");
 
+      LOG.fine("Invoke scheduler as a library");
       schedulerClient = new LibrarySchedulerClient(config, runtime, scheduler);
     }
 
