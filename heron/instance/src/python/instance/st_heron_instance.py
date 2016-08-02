@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+'''module for single-thread Heron Instance in python'''
 import collections
 import logging
 import os
@@ -33,7 +34,9 @@ import heron.common.src.python.constants as constants
 
 LoadedInstance = collections.namedtuple('LoadedInstance', 'is_spout, protobuf, py_class')
 
+# pylint: disable=too-many-instance-attributes
 class SingleThreadHeronInstance(object):
+  """SingleThreadHeronInstance is an implementation of Heron Instance in python"""
   STREAM_MGR_HOST = "127.0.0.1"
   METRICS_MGR_HOST = "127.0.0.1"
   def __init__(self, topology_name, topology_id, instance,
@@ -74,7 +77,7 @@ class SingleThreadHeronInstance(object):
     self.is_instance_started = False
 
     # Debugging purposes
-    def go_trace(sig, stack):
+    def go_trace(_, stack):
       with open("/tmp/trace.log", "w") as f:
         traceback.print_stack(stack, file=f)
       self.looper.register_timer_task_in_sec(self.looper.exit_loop, 0.0)
@@ -102,7 +105,6 @@ class SingleThreadHeronInstance(object):
 
   def send_buffered_messages(self):
     """Send messages in out_stream to the Stream Manager"""
-    Log.debug("send_buffered_messages() called")
     while not self.out_stream.is_empty():
       tuple_set = self.out_stream.poll()
       msg = stmgr_pb2.TupleMessage()
@@ -143,6 +145,7 @@ class SingleThreadHeronInstance(object):
     self.my_pplan_helper = pplan_helper
     self.my_pplan_helper.set_topology_context(self.metrics_collector, self.topo_pex_file_path)
 
+    # pylint: disable=fixme
     # TODO: initialize communicator for back pressure
 
     try:
@@ -193,7 +196,7 @@ class SingleThreadHeronInstance(object):
       self.is_instance_started = True
       Log.info("Started instance successfully.")
     except Exception as e:
-      Log.error("Error when starting bolt/spout, bailing out...")
+      Log.error("Error when starting bolt/spout, bailing out...: %s" % e.message)
       self.looper.exit_loop()
 
 def print_usage(argv0):
@@ -212,6 +215,7 @@ def yaml_config_reader(config_path):
 
   return config
 
+# pylint: disable=missing-docstring
 def main():
   if len(sys.argv) != 12:
     print_usage(sys.argv[0])
