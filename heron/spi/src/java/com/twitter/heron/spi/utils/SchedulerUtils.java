@@ -402,4 +402,20 @@ public final class SchedulerUtils {
 
     return true;
   }
+
+  /**
+   * Get a resource that requires the maximum amount of ram, cpu and disk
+   */
+  public static PackingPlan.Resource getMaxRequiredResource(PackingPlan packingPlan) {
+    PackingPlan.Resource maxResource = new PackingPlan.Resource(0, 0, 0);
+
+    for (PackingPlan.ContainerPlan entry : packingPlan.containers.values()) {
+      PackingPlan.Resource resource = entry.resource;
+      maxResource.ram = Math.max(maxResource.ram, resource.ram);
+      maxResource.cpu = Math.max(maxResource.cpu, resource.cpu);
+      maxResource.disk = Math.max(maxResource.disk, resource.disk);
+    }
+
+    return maxResource;
+  }
 }
