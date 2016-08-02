@@ -113,11 +113,9 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
           # structure
           args_list = config.insert_bool_values(value.split())
           args_list_string = ' '.join(args_list)
-          if command is None or command == '':
-            continue
-          if app is None or app == '':
-            continue
-          if env is None or env == '':
+          if not  command or not app or not env:
+            Log.warn("heronrc config entry %s does not have key parameters (command:app:env) ",
+                     line)
             continue
           if app not in cls.cmdmap:
             cls.cmdmap[app] = collections.defaultdict(dict)
@@ -166,12 +164,13 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
   def parse_known_args(self, args=None, namespace=None):
     namespace, args = super(HeronRCArgumentParser,
                             self).parse_known_args(args, namespace)
+    dict_ns = namespace.__dict__
     if self.prog == 'heron':
       try:
-        for key in namespace.__dict__:
-          val = namespace.__dict__[key]
+        for key in dict_ns:
+          val = dict_ns[key]
           if val is not None and isinstance(val, list) and len(val) > 0:
-            namespace.__dict__[key] = val[0]
+            dict_ns[key] = val[0]
       except Exception:
         Log.warn("heronrc: unable to clobber arguments (%s,%s ) ", namespace, args)
         Log.debug(traceback.format_exc())

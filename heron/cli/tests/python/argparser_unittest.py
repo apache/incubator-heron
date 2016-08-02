@@ -12,15 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' opts_unittest.py '''
+import logging
+import os
+import sys
 import unittest2 as unittest
 import heron.cli.src.python.activate as activate
 import heron.common.src.python.argparser as argparser
 import heron.common.src.python.utils.config as config
-from heron.common.src.python.color import Log
-import logging
 import heron.cli.src.python.opts as opts
-import os
-import sys
+
 #pylint: disable=missing-docstring, no-self-use
 help_epilog = '''Getting more help:
   heron help <command> Prints help and options for <command>
@@ -32,54 +32,79 @@ class HeronRCTest(unittest.TestCase):
 
   def setUp(self):
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    self.testrcfile = dir_path + "/.heronrc"
-    pass
+    self.testrcfile = dir_path + "/heronrc.test"
 
 
   def test_parser_commandline(self):
-    sys.argv=[]
+    sys.argv = []
 
     parser = argparser.HeronRCArgumentParser(
-      prog = 'heron',
-      epilog = help_epilog,
-      formatter_class=config.SubcommandHelpFormatter,
-      fromfile_prefix_chars='@',
-      add_help = False,
-      rcfile = self.testrcfile,
-      rccommand = "activate",
-      rcclusterrole="devcluster/ads/PROD")
+        prog='heron',
+        epilog=help_epilog,
+        formatter_class=config.SubcommandHelpFormatter,
+        fromfile_prefix_chars='@',
+        add_help=False,
+        rcfile=self.testrcfile,
+        rccommand="activate",
+        rcclusterrole="devcluster/ads/PROD")
 
     subparsers = parser.add_subparsers(
-      title = "Available commands", 
-      metavar = '<command> <options>')
+        title="Available commands",
+        metavar='<command> <options>')
     activate.create_parser(subparsers)
-    args, unknown_args = parser.parse_known_args(["activate", "devcluster/ads/PROD", "12313", "--config-property", "this-is-it"])
+    args, _ = parser.parse_known_args(["activate", "devcluster/ads/PROD",
+                                       "12313", "--config-property", "this-is-it"])
 
     self.assertEqual('this-is-it', args.config_property)
 
   def test_parser_rolecmdspecific(self):
 
     parser = argparser.HeronRCArgumentParser(
-      prog = 'heron',
-      epilog = help_epilog,
-      formatter_class=config.SubcommandHelpFormatter,
-      fromfile_prefix_chars='@',
-      add_help = False,
-      rcfile = self.testrcfile,
-      rccommand = "activate",
-      rcclusterrole="devcluster/ads/PROD")
+        prog='heron',
+        epilog=help_epilog,
+        formatter_class=config.SubcommandHelpFormatter,
+        fromfile_prefix_chars='@',
+        add_help=False,
+        rcfile=self.testrcfile,
+        rccommand="activate",
+        rcclusterrole="devcluster/ads/PROD")
 
     subparsers = parser.add_subparsers(
-      title = "Available commands", 
-      metavar = '<command> <options>')
+        title="Available commands",
+        metavar='<command> <options>')
     activate.create_parser(subparsers)
-    args, unknown_args = parser.parse_known_args(["activate", "devcluster/ads/PROD", "12313"])
-    self.assertEqual('test-cmd-activate-role',args.config_property)
+    args, _ = parser.parse_known_args(["activate", "devcluster/ads/PROD",
+                                       "12313"])
+    self.assertEqual('test-cmd-activate-role', args.config_property)
+
+
+  def test_parser_norcfile(self):
+    sys.argv = []
+
+    parser = argparser.HeronRCArgumentParser(
+        prog='heron',
+        epilog=help_epilog,
+        formatter_class=config.SubcommandHelpFormatter,
+        fromfile_prefix_chars='@',
+        add_help=False,
+        rcfile='INVALID',
+        rccommand="activate",
+        rcclusterrole="devcluster/ads/PROD")
+
+    subparsers = parser.add_subparsers(
+        title="Available commands",
+        metavar='<command> <options>')
+    activate.create_parser(subparsers)
+    args, _ = parser.parse_known_args(["activate", "devcluster/ads/PROD",
+                                       "12313", "--config-property", "this-is-it"])
+
+    self.assertEqual('this-is-it', args.config_property)
+
 
   def tearDown(self):
     opts.clear_config()
 
 
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(HeronRCTest)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+  suite = unittest.TestLoader().loadTestsFromTestCase(HeronRCTest)
+  unittest.TextTestRunner(verbosity=2).run(suite)
