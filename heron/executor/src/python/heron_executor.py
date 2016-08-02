@@ -355,6 +355,7 @@ class HeronExecutor(object):
 
   # Returns the processes for each Python Heron Instance
   def get_python_instance_cmd(self, instance_info):
+    # pylint: disable=fixme
     # TODO: currently ignoring ramsize, heap, etc.
     retval = {}
     for (instance_id, component_name, global_task_id, component_index) in instance_info:
@@ -394,26 +395,26 @@ class HeronExecutor(object):
       instance_info.append((instance_id, component_name, global_task_id, component_index))
 
     stmgr_cmd = [
-      self.stmgr_binary,
-      self.topology_name,
-      self.topology_id,
-      self.topology_defn_file,
-      self.zknode,
-      self.zkroot,
-      self.stmgr_ids[self.shard - 1],
-      ','.join(map(lambda x: x[0], instance_info)),
-      self.master_port,
-      self.metricsmgr_port,
-      self.shell_port,
-      self.heron_internals_config_file]
+        self.stmgr_binary,
+        self.topology_name,
+        self.topology_id,
+        self.topology_defn_file,
+        self.zknode,
+        self.zkroot,
+        self.stmgr_ids[self.shard - 1],
+        ','.join(map(lambda x: x[0], instance_info)),
+        self.master_port,
+        self.metricsmgr_port,
+        self.shell_port,
+        self.heron_internals_config_file]
     retval[self.stmgr_ids[self.shard - 1]] = stmgr_cmd
 
     # metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
 
     retval[self.metricsmgr_ids[self.shard]] = self._get_metricsmgr_cmd(
-      self.metricsmgr_ids[self.shard],
-      self.metrics_sinks_config_file,
-      self.metricsmgr_port
+        self.metricsmgr_ids[self.shard],
+        self.metrics_sinks_config_file,
+        self.metricsmgr_port
     )
 
     if self.pkg_type == 'jar' or self.pkg_type == 'tar':
@@ -451,7 +452,8 @@ class HeronExecutor(object):
       do_print("%s stderr: %s" %(name, process_stderr))
 
   def _run_process(self, name, cmd, env_to_exec=None):
-    if 'single_thread_heron_instance' in cmd[0]:
+    if self.pyheron_instance_binary in cmd[0]:
+      # enable profiling for pyheron_instance
       if env_to_exec is None:
         env = {}
       else:
