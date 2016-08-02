@@ -82,7 +82,7 @@ def init_rotating_logger(level, logfile, max_files, max_bytes):
       root_logger.debug("Removing StreamHandler: " + str(handler))
       root_logger.handlers.remove(handler)
 
-def set_verbose(cl_args):
+def set_logging_level(cl_args):
   """Set verbose level based on command-line args
 
   :param cl_args: CLI arguments

@@ -198,7 +198,7 @@ def main():
 
   namespace = vars(args)
 
-  log.set_verbose(namespace)
+  log.set_logging_level(namespace)
 
   # set Tornado global option
   define_options(namespace['port'], namespace['config_file'])

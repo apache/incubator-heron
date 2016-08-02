@@ -230,7 +230,7 @@ def main():
   files = []
 
   if command not in ('help', 'version'):
-    log.set_verbose(command_line_args)
+    log.set_logging_level(command_line_args)
     command_line_args = extract_common_args(command, parser, command_line_args)
     # bail out if args are empty
     if not command_line_args:
