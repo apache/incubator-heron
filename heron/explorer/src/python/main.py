@@ -180,7 +180,7 @@ def main(args):
 
   if command not in ['help', 'version']:
     opts.set_tracker_url(command_line_args)
-    log.set_verbose(command_line_args)
+    log.set_logging_level(command_line_args)
     if command not in ['topologies', 'clusters']:
       command_line_args = extract_common_args(command, parser, command_line_args)
     if not command_line_args:
