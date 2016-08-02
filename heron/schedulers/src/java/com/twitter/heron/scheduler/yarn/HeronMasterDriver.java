@@ -55,7 +55,7 @@ import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyName;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyPackageName;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlan.ContainerPlan;
-import com.twitter.heron.spi.packing.PackingPlan.Resource;
+import com.twitter.heron.spi.packing.Resource;
 
 /**
  * {@link HeronMasterDriver} serves Heron's YARN Scheduler by managing containers / processes for
