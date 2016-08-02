@@ -20,6 +20,7 @@ import heron.cli.src.python.jars as jars
 import heron.cli.src.python.opts as opts
 import heron.common.src.python.utils.config as config
 
+import argparse
 import re
 
 def create_parser(subparsers):
@@ -31,20 +32,24 @@ def create_parser(subparsers):
       'update',
       help='Update a topology',
       usage="%(prog)s [options] cluster/[role]/[env] <topology-name> "
-      + "--component-parallelism <name:value> [name:value]",
+      + "--component-parallelism <name:value>",
       add_help=False)
 
   args.add_titles(parser)
   args.add_cluster_role_env(parser)
   args.add_topology(parser)
 
-  # pylint: disable=fixme
-  # TODO: passing this flag repeated should combine into a list but instead only the last is picked
-  # up and others are ignored
+  def parallelism_type(value):
+    pattern = re.compile(r"^[\w-]+:[\d]+$")
+    if not pattern.match(value):
+      raise argparse.ArgumentTypeError(
+          'Invalid syntax for component parallelism (<component_name>:<value>): %s' % value)
+    return value
+
   parser.add_argument(
       '--component-parallelism',
-      nargs='+',
-      type=str,
+      action='append',
+      type=parallelism_type,
       required=True,
       help='Component name and the new parallelism value '
       + 'colon-delimited: [component_name]:[parallelism]')
@@ -67,14 +72,6 @@ def run(command, parser, cl_args, unknown_args):
   '''
   topology_name = cl_args['topology-name']
   try:
-    pattern = re.compile(r"^[\w-]+:[\d]+$")
-    component_parallelism_list = cl_args['component_parallelism']
-    for component_parallelism in component_parallelism_list:
-      if not pattern.match(component_parallelism):
-        Log.error('Invalid syntax for component parallelism (<component_name>:<value>): %s'
-                  % component_parallelism)
-        return False
-
     new_args = [
         "--cluster", cl_args['cluster'],
         "--role", cl_args['role'],
@@ -85,7 +82,7 @@ def run(command, parser, cl_args, unknown_args):
         "--release_file", config.get_heron_release_file(),
         "--topology_name", topology_name,
         "--command", command,
-        "--component_parallelism", ','.join(component_parallelism_list),
+        "--component_parallelism", ','.join(cl_args['component_parallelism']),
     ]
 
     if opts.verbose():
