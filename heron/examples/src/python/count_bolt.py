@@ -11,41 +11,43 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""module for example bolt: CountBolt"""
 from collections import Counter
 from heron.instance.src.python.basics import Bolt
 
 class CountBolt(Bolt):
-  outputs = ['word', 'count']
+  """CountBolt"""
+  # output field declarer
+  #outputs = ['word', 'count']
 
   def initialize(self, config, context):
-    self.logger.debug("In prepare() of CountBolt")
+    self.logger.info("In prepare() of CountBolt")
     self.counter = Counter()
     self.total = 0
-    self.logger.debug("Bolt context: \n" + str(context))
     self.stream_name = []
-    self.logger.info("Given component-specific config: \n" + str(config))
+
+    self.logger.info("Component-specific config: \n" + str(config))
+    self.logger.info("Context: \n" + str(context))
 
   def _increment(self, word, inc_by):
     self.counter[word] += inc_by
     self.total += inc_by
 
-  def process(self, tuple):
-    if self.is_tick(tuple):
+  def process(self, tup):
+    if self.is_tick(tup):
       self.log("Got tick tuple!")
       self.log("Current map: " + str(self.counter))
       self.log("Stream name: " + str(self.stream_name))
       return
-    word = tuple.values[0]
+    word = tup.values[0]
     self._increment(word, 10 if word == "heron" else 1)
 
-    if tuple.stream not in self.stream_name:
-      self.stream_name.append(tuple.stream)
+    if tup.stream not in self.stream_name:
+      self.stream_name.append(tup.stream)
 
     if self.total % 2 == 0:
-      self.logger.debug("Will fail tuple: " + str(tuple))
-      self.fail(tuple)
+      self.logger.debug("Will fail tuple: " + str(tup))
+      self.fail(tup)
     else:
-      self.logger.debug("Will ack tuple: " + str(tuple))
-      self.ack(tuple)
-
-    #self.emit([word, self.counter[word]])
+      self.logger.debug("Will ack tuple: " + str(tup))
+      self.ack(tup)

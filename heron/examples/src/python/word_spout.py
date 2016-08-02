@@ -11,21 +11,26 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""module for example spout: WordSpout"""
 
 from itertools import cycle
 from heron.instance.src.python.basics import Spout, Stream
 
 class WordSpout(Spout):
+  """WordSpout: emits a set of words repeatedly"""
+  # output field declarer
   outputs = ['word', Stream(fields=['error_msg'], name='error')]
 
   def initialize(self, config, context):
     self.logger.info("In initialize() of WordSpout")
     self.words = cycle(["hello", "bye", "good", "bad", "heron", "storm"])
+
     self.emit_count = 0
-    self.logger.debug("Spout context: \n" + str(context))
     self.ack_count = 0
     self.fail_count = 0
-    self.logger.info("Given component-specific config: \n" + str(config))
+
+    self.logger.info("Component-specific config: \n" + str(config))
+    self.logger.info("Context: \n" + str(context))
 
   def next_tuple(self):
     word = next(self.words)
@@ -38,9 +43,9 @@ class WordSpout(Spout):
   def ack(self, tup_id):
     self.ack_count += 1
     if self.ack_count % 10000 == 0:
-      self.logger.info("Acked " + str(self.ack_count))
+      self.logger.info("Acked %sth tuples, tup_id: %s" % (str(self.ack_count), str(tup_id)))
 
   def fail(self, tup_id):
     self.fail_count += 1
     if self.fail_count % 10000 == 0:
-      self.logger.info("Failed " + str(self.fail_count))
+      self.logger.info("Failed %sth tuples, tup_id: %s" % (str(self.fail_count), str(tup_id)))

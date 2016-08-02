@@ -11,22 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+'''module for example task hook'''
 from collections import Counter
 
 from heron.common.src.python.log import Log
 from heron.common.src.python.utils.topology import ITaskHook
 
+# pylint: disable=unused-argument
 class TestTaskHook(ITaskHook):
+  """TestTaskHook logs event information every 10000 times"""
   CONST = 10000
 
   def prepare(self, conf, context):
     Log.info("In prepare of TestTaskHook")
     self.counter = Counter()
-    pass
 
+  # pylint: disable=no-self-use
   def clean_up(self):
     Log.info("In clean_up of TestTaskHook")
-    pass
 
   def emit(self, emit_info):
     self.counter['emit'] += 1

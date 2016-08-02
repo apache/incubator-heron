@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+'''module for example topology: WordCountTopology'''
 
 from heron.examples.src.python.word_spout import WordSpout
 from heron.examples.src.python.count_bolt import CountBolt
@@ -28,14 +29,14 @@ class WordCount(Topology):
             constants.TOPOLOGY_AUTO_TASK_HOOKS: task_hooks,
             "topology.wide.config.sample": {"key1": 12, "key2": 34}}
 
-  # 1 parallelism for word_spout
-  word_spout = WordSpout.spec(par=1)
+  # 2 parallelism for word_spout
+  word_spout = WordSpout.spec(par=2)
 
-  # 1 parallelism for count_bolt.
+  # 2 parallelism for count_bolt.
   # inputs from word_spout's "default" stream with field grouping and word_spout's "error"
   # stream with all grouping.
   # specifying component-specific config (like tick tuples)
-  count_bolt = CountBolt.spec(par=1,
+  count_bolt = CountBolt.spec(par=2,
                               inputs={word_spout: Grouping.fields('word'),
                                       word_spout['error']: Grouping.ALL},
                               config={constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS: 10,
