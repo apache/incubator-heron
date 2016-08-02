@@ -79,11 +79,13 @@ public final class SchedulerConfig {
    * @param environ, user provided environment/tag
    * @return config, the command line config
    */
-  protected static Config commandLineConfigs(String cluster, String role, String environ) {
+  protected static Config commandLineConfigs(String cluster, String role,
+                                             String environ, Boolean verbose) {
     Config config = Config.newBuilder()
         .put(Keys.cluster(), cluster)
         .put(Keys.role(), role)
         .put(Keys.environ(), environ)
+        .put(Keys.verbose(), verbose)
         .build();
     return config;
   }
@@ -95,12 +97,13 @@ public final class SchedulerConfig {
       String environ,
       String topologyJarFile,
       String topologyDefnFile,
+      Boolean verbose,
       TopologyAPI.Topology topology) {
 
     Config config = Config.expand(
         Config.newBuilder()
             .putAll(sandboxConfigs())
-            .putAll(commandLineConfigs(cluster, role, environ))
+            .putAll(commandLineConfigs(cluster, role, environ, verbose))
             .putAll(topologyConfigs(topologyJarFile, topologyDefnFile, topology))
             .build());
 
