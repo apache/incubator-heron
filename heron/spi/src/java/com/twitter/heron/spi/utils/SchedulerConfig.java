@@ -36,14 +36,14 @@ public final class SchedulerConfig {
   /**
    * Load the topology config
    *
-   * @param topologyJarFile, name of the user submitted topology jar/tar file
+   * @param topologyBinaryFile, name of the user submitted topology jar/tar/pex file
    * @param topologyDefnFile, name of the topology defintion file
    * @param topology, proto in memory version of topology definition
    * @return config, the topology config
    */
-  protected static Config topologyConfigs(String topologyJarFile,
+  protected static Config topologyConfigs(String topologyBinaryFile,
                                           String topologyDefnFile, TopologyAPI.Topology topology) {
-    String basename = FileUtils.getBaseName(topologyJarFile);
+    String basename = FileUtils.getBaseName(topologyBinaryFile);
     String pkgType;
     if (FileUtils.isOriginalPackagePex(basename)) {
       pkgType = "pex";
@@ -57,7 +57,7 @@ public final class SchedulerConfig {
         .put(Keys.topologyId(), topology.getId())
         .put(Keys.topologyName(), topology.getName())
         .put(Keys.topologyDefinitionFile(), topologyDefnFile)
-        .put(Keys.topologyJarFile(), topologyJarFile)
+        .put(Keys.topologyBinaryFile(), topologyBinaryFile)
         .put(Keys.topologyPackageType(), pkgType)
         .build();
 
@@ -101,7 +101,7 @@ public final class SchedulerConfig {
       String cluster,
       String role,
       String environ,
-      String topologyJarFile,
+      String topologyBinaryFile,
       String topologyDefnFile,
       Boolean verbose,
       TopologyAPI.Topology topology) {

@@ -123,8 +123,8 @@ public class Defaults {
     return ConfigDefaults.get("TOPOLOGY_DEFINITION_FILE");
   }
 
-  public static String topologyJarFile() {
-    return ConfigDefaults.get("TOPOLOGY_JAR_FILE");
+  public static String topologyBinaryFile() {
+    return ConfigDefaults.get("TOPOLOGY_BINARY_FILE");
   }
 
   public static String topologyPackageFile() {
@@ -275,8 +275,8 @@ public class Defaults {
     return ConfigDefaults.get("SANDBOX_SHELL_BINARY");
   }
 
-  public static String pyheronInstanceSandboxBinary() {
-    return ConfigDefaults.get("SANDBOX_PYHERON_INSTANCE_BINARY");
+  public static String pythonInstanceSandboxBinary() {
+    return ConfigDefaults.get("SANDBOX_PYTHON_INSTANCE_BINARY");
   }
 
   public static String schedulerSandboxJar() {
