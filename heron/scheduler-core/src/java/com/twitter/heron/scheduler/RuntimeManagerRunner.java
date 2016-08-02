@@ -104,7 +104,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
   /**
    * Handler to restart a topology
    */
-  private boolean restartTopologyHandler(String topologyName) {
+  protected boolean restartTopologyHandler(String topologyName) {
     Integer containerId = Context.topologyContainerId(config);
     Scheduler.RestartTopologyRequest restartTopologyRequest =
         Scheduler.RestartTopologyRequest.newBuilder()
