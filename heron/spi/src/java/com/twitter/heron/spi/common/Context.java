@@ -159,8 +159,8 @@ public class Context {
     return cfg.getStringValue(ConfigKeys.get("TOPOLOGY_DEFINITION_FILE"));
   }
 
-  public static String topologyJarFile(Config cfg) {
-    return cfg.getStringValue(ConfigKeys.get("TOPOLOGY_JAR_FILE"));
+  public static String topologyBinaryFile(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("TOPOLOGY_BINARY_FILE"));
   }
 
   public static String topologyPackageFile(Config cfg) {

@@ -78,7 +78,7 @@ TOPOLOGY_ID:                         heron.topology.id
 TOPOLOGY_NAME:                       heron.topology.name
 TOPOLOGY_DEFINITION_FILE:            heron.topology.definition.file
 TOPOLOGY_DEFINITION:                 heron.topology.definition
-TOPOLOGY_JAR_FILE:                   heron.topology.jar.file
+TOPOLOGY_BINARY_FILE:                heron.topology.binary.file
 TOPOLOGY_PACKAGE_FILE:               heron.topology.package.file
 TOPOLOGY_PACKAGE_TYPE:               heron.topology.package.type
 TOPOLOGY_CONTAINER_ID:               heron.topology.container.id
