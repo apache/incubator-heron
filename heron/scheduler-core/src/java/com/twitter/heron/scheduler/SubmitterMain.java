@@ -53,7 +53,7 @@ public class SubmitterMain {
    * Load the topology config
    *
    * @param topologyPackage, tar ball containing user submitted jar/tar, defn and config
-   * @param topologyJarFile, name of the user submitted topology jar/tar file
+   * @param topologyJarFile, name of the user submitted topology jar/tar/pex file
    * @param topology, proto in memory version of topology definition
    * @return config, the topology config
    */
@@ -61,8 +61,15 @@ public class SubmitterMain {
       String topologyPackage, String topologyJarFile, String topologyDefnFile,
       TopologyAPI.Topology topology) {
 
-    String pkgType = FileUtils.isOriginalPackageJar(
-        FileUtils.getBaseName(topologyJarFile)) ? "jar" : "tar";
+    String pkgType;
+    String basename = FileUtils.getBaseName(topologyJarFile);
+    if (FileUtils.isOriginalPackagePex(basename)) {
+      pkgType = "pex";
+    } else if (FileUtils.isOriginalPackageJar(basename)) {
+      pkgType = "jar";
+    } else {
+      pkgType = "tar";
+    }
 
     Config config = Config.newBuilder()
         .put(Keys.topologyId(), topology.getId())

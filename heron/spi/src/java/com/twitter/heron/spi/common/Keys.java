@@ -357,6 +357,10 @@ public class Keys {
     return ConfigKeys.get("SANDBOX_SHELL_BINARY");
   }
 
+  public static String pyheronInstanceSandboxBinary() {
+    return ConfigKeys.get("SANDBOX_PYHERON_INSTANCE_BINARY");
+  }
+
   public static String schedulerSandboxJar() {
     return ConfigKeys.get("SANDBOX_SCHEDULER_JAR");
   }

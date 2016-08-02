@@ -275,6 +275,10 @@ public class Defaults {
     return ConfigDefaults.get("SANDBOX_SHELL_BINARY");
   }
 
+  public static String pyheronInstanceSandboxBinary() {
+    return ConfigDefaults.get("SANDBOX_PYHERON_INSTANCE_BINARY");
+  }
+
   public static String schedulerSandboxJar() {
     return ConfigDefaults.get("SANDBOX_SCHEDULER_JAR");
   }

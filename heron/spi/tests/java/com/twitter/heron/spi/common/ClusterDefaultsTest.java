@@ -60,6 +60,11 @@ public class ClusterDefaultsTest {
         Defaults.shellSandboxBinary(),
         Context.shellSandboxBinary(props)
     );
+
+    Assert.assertEquals(
+        Defaults.pyheronInstanceSandboxBinary(),
+        Context.pyheronInstanceSandboxBinary(props)
+    );
   }
 
   @Test

@@ -311,6 +311,10 @@ public class Context {
     return cfg.getStringValue(ConfigKeys.get("SANDBOX_SHELL_BINARY"));
   }
 
+  public static final String pyheronInstanceSandboxBinary(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("SANDBOX_PYHERON_INSTANCE_BINARY"));
+  }
+
   public static String schedulerSandboxJar(Config cfg) {
     return cfg.getStringValue(ConfigKeys.get("SANDBOX_SCHEDULER_JAR"));
   }
