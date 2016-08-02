@@ -28,6 +28,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.LauncherUtils;
 
@@ -62,7 +63,7 @@ public class SlurmLauncherTest {
         new PackingPlan(
             "plan.id",
             new HashMap<String, PackingPlan.ContainerPlan>(),
-            Mockito.mock(PackingPlan.Resource.class));
+            Mockito.mock(Resource.class));
 
     PowerMockito.spy(SlurmContext.class);
     PowerMockito.doReturn(WORKING_DIRECTORY).when(SlurmContext.class, "workingDirectory", config);

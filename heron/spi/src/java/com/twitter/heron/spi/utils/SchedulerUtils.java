@@ -29,6 +29,8 @@ import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
@@ -407,11 +409,11 @@ public final class SchedulerUtils {
   /**
    * Get a resource that requires the maximum amount of ram, cpu and disk
    */
-  public static PackingPlan.Resource getMaxRequiredResource(PackingPlan packingPlan) {
-    PackingPlan.Resource maxResource = new PackingPlan.Resource(0, 0, 0);
+  public static Resource getMaxRequiredResource(PackingPlan packingPlan) {
+    Resource maxResource = new Resource(0, 0, 0);
 
     for (PackingPlan.ContainerPlan entry : packingPlan.containers.values()) {
-      PackingPlan.Resource resource = entry.resource;
+      Resource resource = entry.resource;
       maxResource.ram = Math.max(maxResource.ram, resource.ram);
       maxResource.cpu = Math.max(maxResource.cpu, resource.cpu);
       maxResource.disk = Math.max(maxResource.disk, resource.disk);
