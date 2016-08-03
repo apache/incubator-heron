@@ -69,7 +69,8 @@ public class MarathonController {
   public boolean restartApp(int appId) {
     if (appId == -1) {
       // TODO (nlu): implement restart all
-      throw new RuntimeException("Restart all containers not supported yet");
+      throw new RuntimeException("Restart the whole topology not supported yet. " +
+          "Please kill and resubmit the topology.");
     }
 
     // Setup Connection
