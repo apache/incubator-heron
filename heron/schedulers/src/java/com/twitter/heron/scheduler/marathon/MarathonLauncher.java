@@ -18,7 +18,7 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.scheduler.IScheduler;
-import com.twitter.heron.spi.utils.SchedulerUtils;
+import com.twitter.heron.spi.utils.LauncherUtils;
 
 /**
  * Submit topology to Marathon.
@@ -40,7 +40,9 @@ public class MarathonLauncher implements ILauncher {
 
   @Override
   public boolean launch(PackingPlan packing) {
-    return SchedulerUtils.onScheduleAsLibrary(config, runtime, getScheduler(), packing);
+    LauncherUtils launcherUtils = LauncherUtils.getInstance();
+    Config ytruntime = launcherUtils.createConfigWithPackingDetails(runtime, packing);
+    return launcherUtils.onScheduleAsLibrary(config, ytruntime, getScheduler(), packing);
   }
 
   // Get MarathonScheduler

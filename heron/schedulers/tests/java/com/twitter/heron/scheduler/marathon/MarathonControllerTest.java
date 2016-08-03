@@ -189,11 +189,6 @@ public class MarathonControllerTest {
     NetworkUtils.checkHttpResponseCode(Mockito.any(HttpURLConnection.class), Mockito.anyInt());
   }
 
-  @Test(expected = RuntimeException.class)
-  public void testRestartAll() throws Exception {
-    controller.restartApp(-1);
-  }
-
   /***
    * Test MarathonController's submitTopology method
    * @throws Exception
