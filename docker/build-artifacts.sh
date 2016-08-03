@@ -90,18 +90,13 @@ verify_source_exists() {
 }
 
 setup_scratch_dir() {
-  if [ ! -f "$1" ]; then
-    mkdir $1
-  fi
-
+  mkdir -p $1
   cp $DOCKER_DIR/* $1
 }
 
 setup_output_dir() {
-  if [ ! -d $1 ]; then
-    echo "Creating output directory $1"
-    mkdir $1
-  fi
+  echo "Creating output directory $1"
+  mkdir -p $1
 }
 
 run_build() {

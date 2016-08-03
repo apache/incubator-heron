@@ -162,6 +162,11 @@ maven_jar(
 )
 
 maven_jar(
+  name = "com_esotericsoftware_reflectasm",
+  artifact = "com.esotericsoftware:reflectasm:1.11.3",
+)
+
+maven_jar(
   name = "org_apache_mesos_mesos",
   artifact = "org.apache.mesos:mesos:0.22.0",
 )

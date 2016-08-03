@@ -31,6 +31,7 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;
@@ -101,7 +102,7 @@ public class MarathonScheduler implements IScheduler {
 
     // TODO (nlu): use heterogeneous resources
     // Align resources to maximal requested resource
-    PackingPlan.Resource containerResource = SchedulerUtils.getMaxRequiredResource(packing);
+    Resource containerResource = SchedulerUtils.getMaxRequiredResource(packing);
     // Add ram for tmaster container
     packing.resource.ram = containerResource.ram * (packing.containers.size() + 1);
 
@@ -132,7 +133,7 @@ public class MarathonScheduler implements IScheduler {
     return appConf.toString();
   }
 
-  protected  ObjectNode getLabels(ObjectMapper mapper) {
+  protected ObjectNode getLabels(ObjectMapper mapper) {
     ObjectNode labelNode = mapper.createObjectNode();
     labelNode.put(MarathonConstants.ENVIRONMENT, Context.environ(config));
     return labelNode;

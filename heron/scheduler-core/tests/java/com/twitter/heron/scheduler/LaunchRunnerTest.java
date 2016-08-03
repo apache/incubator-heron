@@ -19,7 +19,11 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.api.bolt.BaseBasicBolt;
@@ -35,13 +39,15 @@ import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.LauncherUtils;
 import com.twitter.heron.spi.utils.Runtime;
 
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(LauncherUtils.class)
 public class LaunchRunnerTest {
   private static final String TOPOLOGY_NAME = "testTopology";
   private static final String CLUSTER = "testCluster";
@@ -52,7 +58,8 @@ public class LaunchRunnerTest {
   private static final String BUILD_USER = "user";
 
   private static TopologyAPI.Config.KeyValue getConfig(String key, String value) {
-    return TopologyAPI.Config.KeyValue.newBuilder().setKey(key).setValue(value).build();
+    return TopologyAPI.Config.KeyValue.newBuilder().setKey(key).setValue(value).
+        setType(TopologyAPI.ConfigValueType.STRING_VALUE).build();
   }
 
   public static TopologyAPI.Topology createTopology(com.twitter.heron.api.Config heronConfig) {
@@ -102,21 +109,25 @@ public class LaunchRunnerTest {
     return config;
   }
 
-  private static Config createRunnerRuntime() {
+  private static Config createRunnerRuntime() throws Exception {
     Config runtime = Mockito.spy(Config.newBuilder().build());
     ILauncher launcher = Mockito.mock(ILauncher.class);
-    IPacking packing = Mockito.mock(IPacking.class);
     SchedulerStateManagerAdaptor adaptor = Mockito.mock(SchedulerStateManagerAdaptor.class);
     TopologyAPI.Topology topology = createTopology(new com.twitter.heron.api.Config());
 
     Mockito.doReturn(launcher).when(runtime).get(Keys.launcherClassInstance());
-    Mockito.doReturn(packing).when(runtime).get(Keys.packingClassInstance());
     Mockito.doReturn(adaptor).when(runtime).get(Keys.schedulerStateManagerAdaptor());
     Mockito.doReturn(topology).when(runtime).get(Keys.topologyDefinition());
 
     PackingPlan packingPlan = Mockito.mock(PackingPlan.class);
-    Mockito.when(packing.pack()).thenReturn(packingPlan);
     Mockito.when(packingPlan.getInstanceDistribution()).thenReturn(MOCK_PACKING_STRING);
+
+    LauncherUtils mockLauncherUtils = Mockito.mock(LauncherUtils.class);
+    Mockito.when(
+        mockLauncherUtils.createPackingPlan(Mockito.any(Config.class), Mockito.any(Config.class)))
+        .thenReturn(packingPlan);
+    PowerMockito.spy(LauncherUtils.class);
+    PowerMockito.doReturn(mockLauncherUtils).when(LauncherUtils.class, "getInstance");
 
     return runtime;
   }
@@ -132,19 +143,19 @@ public class LaunchRunnerTest {
     TopologyAPI.Topology topologyAfterTrimmed = launchRunner.trimTopology(topologyBeforeTrimmed);
 
     for (TopologyAPI.Spout spout : topologyBeforeTrimmed.getSpoutsList()) {
-      Assert.assertTrue(spout.getComp().hasJavaObject());
+      Assert.assertTrue(spout.getComp().hasSerializedObject());
     }
 
     for (TopologyAPI.Bolt bolt : topologyBeforeTrimmed.getBoltsList()) {
-      Assert.assertTrue(bolt.getComp().hasJavaObject());
+      Assert.assertTrue(bolt.getComp().hasSerializedObject());
     }
 
     for (TopologyAPI.Spout spout : topologyAfterTrimmed.getSpoutsList()) {
-      Assert.assertFalse(spout.getComp().hasJavaObject());
+      Assert.assertFalse(spout.getComp().hasSerializedObject());
     }
 
     for (TopologyAPI.Bolt bolt : topologyAfterTrimmed.getBoltsList()) {
-      Assert.assertFalse(bolt.getComp().hasJavaObject());
+      Assert.assertFalse(bolt.getComp().hasSerializedObject());
     }
   }
 

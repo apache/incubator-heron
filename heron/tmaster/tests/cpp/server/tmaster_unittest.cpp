@@ -67,6 +67,8 @@ static heron::proto::api::Topology* GenerateDummyTopology(
     sp_string compname = SPOUT_NAME;
     compname += std::to_string(i);
     component->set_name(compname);
+    heron::proto::api::ComponentObjectSpec compspec = heron::proto::api::JAVA_CLASS_NAME;
+    component->set_spec(compspec);
     // Set the stream information
     heron::proto::api::OutputStream* ostream = spout->add_outputs();
     heron::proto::api::StreamId* tstream = ostream->mutable_stream();
@@ -92,6 +94,8 @@ static heron::proto::api::Topology* GenerateDummyTopology(
     sp_string compname = BOLT_NAME;
     compname += std::to_string(i);
     component->set_name(compname);
+    heron::proto::api::ComponentObjectSpec compspec = heron::proto::api::JAVA_CLASS_NAME;
+    component->set_spec(compspec);
     // Set the stream information
     heron::proto::api::InputStream* istream = bolt->add_inputs();
     heron::proto::api::StreamId* tstream = istream->mutable_stream();

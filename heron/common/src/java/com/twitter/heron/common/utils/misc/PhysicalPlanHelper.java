@@ -124,9 +124,10 @@ public class PhysicalPlanHelper {
         if (inputStream.getStream().getComponentName().equals(myComponent)
             && inputStream.getGtype() == TopologyAPI.Grouping.CUSTOM) {
           // This dude takes my output in custom grouping manner
+          // This assumes that this custom grouping object is Java-serialized.
           CustomStreamGrouping customStreamGrouping =
               (CustomStreamGrouping) Utils.deserialize(
-                  inputStream.getCustomGroupingJavaObject().toByteArray());
+                  inputStream.getCustomGroupingObject().toByteArray());
           customGrouper.add(inputStream.getStream().getId(),
               GetTaskIdsAsListForComponent(topo.getBolts(i).getComp().getName()),
               customStreamGrouping, myComponent);
@@ -202,7 +203,7 @@ public class PhysicalPlanHelper {
       if (kv.hasValue()) {
         retval.put(kv.getKey(), kv.getValue());
       } else {
-        retval.put(kv.getKey(), Utils.deserialize(kv.getJavaSerializedValue().toByteArray()));
+        retval.put(kv.getKey(), Utils.deserialize(kv.getSerializedValue().toByteArray()));
       }
     }
     // Override any component specific configs
@@ -210,7 +211,7 @@ public class PhysicalPlanHelper {
       if (kv.hasValue()) {
         retval.put(kv.getKey(), kv.getValue());
       } else {
-        retval.put(kv.getKey(), Utils.deserialize(kv.getJavaSerializedValue().toByteArray()));
+        retval.put(kv.getKey(), Utils.deserialize(kv.getSerializedValue().toByteArray()));
       }
     }
     return retval;

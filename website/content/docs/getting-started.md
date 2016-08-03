@@ -84,11 +84,12 @@ launch an example [topology](../concepts/topologies) locally (on your machine)
 using the [Heron CLI tool](../operators/heron-cli):
 
 ```bash
+# Submit ExclamationTopology locally in deactivated mode.
 $ heron submit local \
-~/.heron/examples/heron-examples.jar \ # The path of the topology's jar file
-com.twitter.heron.examples.ExclamationTopology \ # The topology's Java class
-ExclamationTopology \ # The name of the topology
---deploy-deactivated # Deploy in deactivated mode
+~/.heron/examples/heron-examples.jar \
+com.twitter.heron.examples.ExclamationTopology \
+ExclamationTopology \
+--deploy-deactivated
 
 INFO: Launching topology 'ExclamationTopology'
 ...

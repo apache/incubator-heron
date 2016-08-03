@@ -30,6 +30,7 @@ import com.twitter.heron.proto.system.Common;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
@@ -40,41 +41,6 @@ public final class SchedulerUtils {
   private static final Logger LOG = Logger.getLogger(SchedulerUtils.class.getName());
 
   private SchedulerUtils() {
-  }
-
-  /**
-   * Invoke the onScheduler() in IScheduler directly as a library
-   *
-   * @param config The Config to initialize IScheduler
-   * @param runtime The runtime Config to initialize IScheduler
-   * @param scheduler the IScheduler to invoke
-   * @param packing The PackingPlan to scheduler for OnSchedule()
-   * @return true if scheduling successfully
-   */
-  public static boolean onScheduleAsLibrary(
-      Config config,
-      Config runtime,
-      IScheduler scheduler,
-      PackingPlan packing) {
-    boolean ret = false;
-
-    try {
-      scheduler.initialize(config, runtime);
-      ret = scheduler.onSchedule(packing);
-
-      if (ret) {
-        // Set the SchedulerLocation at last step,
-        // since some methods in IScheduler will provide correct values
-        // only after IScheduler.onSchedule is invoked correctly
-        ret = setLibSchedulerLocation(runtime, scheduler, false);
-      } else {
-        LOG.severe("Failed to invoke IScheduler as library");
-      }
-    } finally {
-      scheduler.close();
-    }
-
-    return ret;
   }
 
   /**
@@ -440,16 +406,16 @@ public final class SchedulerUtils {
   }
 
   /**
-   * This method finds the container with highest resource requirement and returns the resource.
-   * Currently only RAM is used for max identification.
+   * Get a resource that requires the maximum amount of ram, cpu and disk
    */
-  public static PackingPlan.Resource getMaxRequiredResource(PackingPlan packingPlan) {
-    PackingPlan.Resource maxResource = packingPlan.containers.values().iterator().next().resource;
+  public static Resource getMaxRequiredResource(PackingPlan packingPlan) {
+    Resource maxResource = new Resource(0, 0, 0);
+
     for (PackingPlan.ContainerPlan entry : packingPlan.containers.values()) {
-      PackingPlan.Resource resource = entry.resource;
-      if (maxResource.ram < resource.ram) {
-        maxResource = resource;
-      }
+      Resource resource = entry.resource;
+      maxResource.ram = Math.max(maxResource.ram, resource.ram);
+      maxResource.cpu = Math.max(maxResource.cpu, resource.cpu);
+      maxResource.disk = Math.max(maxResource.disk, resource.disk);
     }
 
     return maxResource;

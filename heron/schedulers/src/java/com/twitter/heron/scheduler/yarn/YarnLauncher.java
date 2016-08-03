@@ -146,6 +146,7 @@ public class YarnLauncher implements ILauncher {
         .set(HeronDriverConfiguration.ENV, env)
         .set(HeronDriverConfiguration.CLUSTER, cluster)
         .set(HeronDriverConfiguration.HTTP_PORT, 0)
+        .set(HeronDriverConfiguration.VERBOSE, false)
         .build();
   }
 
