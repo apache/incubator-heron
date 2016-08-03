@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 '''heron executor unittest'''
-
+import os
 import unittest2 as unittest
 
 from heron.executor.src.python.heron_executor import ProcessInfo
@@ -20,6 +20,20 @@ from heron.executor.src.python.heron_executor import HeronExecutor
 
 # pylint: disable=unused-argument
 # pylint: disable=missing-docstring
+
+def get_test_heron_internal_yaml():
+  """Get the path to test_heron_internal.yaml
+
+  For example, __file__ would be
+  /tmp/_bazel_heron/randgen_dir/heron/heron/executor/tests/python/heron_executor_unittest.py
+  """
+  heron_dir = '/'.join(__file__.split('/')[:-5])
+  yaml_path = os.path.join(heron_dir, 'heron/config/src/yaml/conf/test/test_heron_internals.yaml')
+
+  return yaml_path
+
+INTERNAL_CONF_PATH = get_test_heron_internal_yaml()
+
 class MockPOpen(object):
   """fake subprocess.Popen object that we can use to mock processes and pids"""
   next_pid = 0
@@ -61,9 +75,8 @@ class HeronExecutorTest(unittest.TestCase):
            "-XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+PrintCommandLineFlags " \
            "-Xloggc:log-files/gc.metricsmgr.log -Djava.net.preferIPv4Stack=true " \
            "-cp metricsmgr_classpath com.twitter.heron.metricsmgr.MetricsManager metricsmgr-%d " \
-           "metricsmgr_port topname topid " \
-           "heron/config/src/yaml/conf/test/test_heron_internals.yaml " \
-           "metrics_sinks_config_file" % container_id
+           "metricsmgr_port topname topid %s " \
+           "metrics_sinks_config_file" % (container_id, INTERNAL_CONF_PATH)
 
   def get_expected_instance_command(component_name, instance_id, container_id=1):
     instance_name = "container_%d_%s_%d" % (container_id, component_name, instance_id)
@@ -76,8 +89,9 @@ class HeronExecutorTest(unittest.TestCase):
            "-Xloggc:log-files/gc.%s.log -XX:+HeapDumpOnOutOfMemoryError " \
            "-Djava.net.preferIPv4Stack=true -cp instance_classpath:classpath " \
            "com.twitter.heron.instance.HeronInstance topname topid %s %s %d 0 stmgr-%d " \
-           "master_port metricsmgr_port heron/config/src/yaml/conf/test/test_heron_internals.yaml" \
-           % (instance_name, instance_name, component_name, instance_id, container_id)
+           "master_port metricsmgr_port %s" \
+           % (instance_name, instance_name, component_name, instance_id,
+              container_id, INTERNAL_CONF_PATH)
 
   MockPOpen.set_next_pid(37)
   expected_processes_container_0 = [
@@ -87,8 +101,7 @@ class HeronExecutorTest(unittest.TestCase):
                   'tmaster_binary master_port '
                   'tmaster_controller_port tmaster_stats_port '
                   'topname topid zknode zkroot stmgr-1 '
-                  'heron/config/src/yaml/conf/test/test_heron_internals.yaml '
-                  'metrics_sinks_config_file metricsmgr_port'),
+                  '%s metrics_sinks_config_file metricsmgr_port' % INTERNAL_CONF_PATH),
   ]
 
   MockPOpen.set_next_pid(37)
@@ -96,8 +109,7 @@ class HeronExecutorTest(unittest.TestCase):
       ProcessInfo(MockPOpen(), 'stmgr-1',
                   'stmgr_binary topname topid topdefnfile zknode zkroot stmgr-1 '
                   'container_1_word_3,container_1_exclaim1_2,container_1_exclaim1_1 master_port '
-                  'metricsmgr_port shell-port '
-                  'heron/config/src/yaml/conf/test/test_heron_internals.yaml'),
+                  'metricsmgr_port shell-port %s' % INTERNAL_CONF_PATH),
       ProcessInfo(MockPOpen(), 'container_1_word_3', get_expected_instance_command('word', 3)),
       ProcessInfo(MockPOpen(), 'container_1_exclaim1_1',
                   get_expected_instance_command('exclaim1', 1)),
@@ -128,12 +140,11 @@ class HeronExecutorTest(unittest.TestCase):
     1:word:3:0:exclaim1:2:0:exclaim1:1:0 zknode zkroot tmaster_binary stmgr_binary
     metricsmgr_classpath "LVhYOitIZWFwRHVtcE9uT3V0T2ZNZW1vcnlFcnJvcg&equals;&equals;" classpath
     master_port tmaster_controller_port tmaster_stats_port
-    heron/config/src/yaml/conf/test/test_heron_internals.yaml
-    exclaim1:536870912,word:536870912 "" jar topology_bin_file
+    %s exclaim1:536870912,word:536870912 "" jar topology_bin_file
     heron_java_home shell-port heron_shell_binary metricsmgr_port
     cluster role environ instance_classpath metrics_sinks_config_file
     scheduler_classpath scheduler_port python_instance_binary
-    """ % (shard_id)).replace("\n", '').split()
+    """ % (shard_id, INTERNAL_CONF_PATH)).replace("\n", '').split()
 
   def test_parse_instance_distribution(self):
     dist_found = self.executor_0.parse_instance_distribution("1:word:3:0:exclaim1:2:0:exclaim1:1:0")
