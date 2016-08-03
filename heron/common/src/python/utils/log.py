@@ -20,15 +20,12 @@ import colorlog
 # pylint: disable=invalid-name
 Log = logging.getLogger()
 
-# set initial logger level to lowest
-Log.setLevel(logging.NOTSET)
-
 # time formatter - date - time - UTC offset
 # e.g. "08/16/1988 21:30:00 +1030"
 # see time formatter documentation for more
 date_format = "%m/%d/%Y %H:%M:%S %z"
 
-def configure(level, logfile=None, withtime=False):
+def configure(level, logfile=None, with_time=False):
   """ Configure logger which dumps log on terminal
 
   :param level: logging level: info, warning, verbose...
@@ -41,7 +38,7 @@ def configure(level, logfile=None, withtime=False):
   Log.setLevel(level)
   # if logfile is specified, FileHandler is used
   if logfile is not None:
-    if withtime:
+    if with_time:
       log_format = "%(asctime)s:%(levelname)s: %(message)s"
     else:
       log_format = "%(levelname)s: %(message)s"
@@ -51,7 +48,7 @@ def configure(level, logfile=None, withtime=False):
     Log.addHandler(file_handler)
   # otherwise, use StreamHandler to output to stream (stdout, stderr...)
   else:
-    if withtime:
+    if with_time:
       log_format = "%(log_color)s%(levelname)s:%(reset)s %(asctime)s %(message)s"
     else:
       log_format = "%(log_color)s%(levelname)s:%(reset)s %(message)s"
@@ -82,8 +79,8 @@ def init_rotating_logger(level, logfile, max_files, max_bytes):
       root_logger.debug("Removing StreamHandler: " + str(handler))
       root_logger.handlers.remove(handler)
 
-def set_logging_level(cl_args):
-  """Set verbose level based on command-line args
+def set_logging_level(cl_args, with_time=False):
+  """simply set verbose level based on command-line args
 
   :param cl_args: CLI arguments
   :type cl_args: dict
@@ -91,6 +88,6 @@ def set_logging_level(cl_args):
   :rtype: None
   """
   if cl_args['verbose']:
-    configure(logging.DEBUG)
+    configure(logging.DEBUG, with_time=with_time)
   else:
-    configure(logging.INFO)
+    configure(logging.INFO, with_time=with_time)
