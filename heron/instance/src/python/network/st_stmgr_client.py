@@ -116,7 +116,8 @@ class SingleThreadStmgrClient(HeronClient):
   def _handle_assignment_message(self, pplan):
     """Called when new NewInstanceAssignmentMessage arrives"""
     Log.info("In handle_assignment_message() of STStmgrClient, Physical Plan: \n" + str(pplan))
-    new_helper = PhysicalPlanHelper(pplan, self.instance.instance_id)
+    new_helper = PhysicalPlanHelper(pplan, self.instance.instance_id,
+                                    self.heron_instance_cls.topo_pex_file_abs_path)
 
     if self._pplan_helper is not None and \
       (self._pplan_helper.my_component_name != new_helper.my_component_name or
