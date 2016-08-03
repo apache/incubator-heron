@@ -104,10 +104,14 @@ def heron_tar(class_name, topology_tar, arguments, tmpdir_root, java_defines):
 
 def heron_pex(topology_pex, topology_class_name, tmp_dir):
   if opts.verbose():
-    print "Importing " + topology_class_name + " from " + topology_pex
+    print "Importing %s from %s." % (topology_class_name, topology_pex)
   try:
     pex_loader.load_pex(topology_pex)
     topology_class = pex_loader.import_and_get_class(topology_pex, topology_class_name)
+    if opts.get_config("cmdline.topology.initial.state") == "PAUSED":
+      if opts.verbose():
+        print "Deploying in deactivated mode."
+      topology_class.deploy_deactivated()
     topology_class.write(tmp_dir)
   except Exception:
     traceback.print_exc()
