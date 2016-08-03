@@ -14,9 +14,14 @@
 """mock_generator.py: module for creating mock objects for unittesting
                       mainly for common/tests/python/utils"""
 
+# pylint: disable=unused-argument
+# pylint: disable=missing-docstring
+import random
+
 from heron.common.src.python.utils.metrics import MetricsCollector
 from heron.common.src.python.utils.misc import (OutgoingTupleHelper, PhysicalPlanHelper,
                                                 HeronCommunicator, PythonSerializer)
+from heron.common.src.python.utils.topology import ICustomGrouping, ITaskHook
 from heron.proto import tuple_pb2
 
 import heron.common.src.python.constants as constants
@@ -131,3 +136,61 @@ class MockMetricsCollector(MetricsCollector):
 
   def _register_timer_task(self, time_bucket_in_sec):
     self.registered_timers.append(time_bucket_in_sec)
+
+class MockCustomGrouping(ICustomGrouping):
+  ALL_TARGET_MODE = 0   # returns the whole list of target tasks
+  RANDOM_TARGET_MODE = 1
+  WRONG_RETURN_TYPE_MODE = 2
+  WRONG_CHOOSE_TASK_MODE = 3
+
+  def __init__(self, mode):
+    super(MockCustomGrouping, self).__init__()
+    self.mode = mode
+
+  def prepare(self, context, component, stream, target_tasks):
+    self.target_tasks = target_tasks
+
+  def choose_tasks(self, values):
+    if self.mode == self.ALL_TARGET_MODE:
+      return self.target_tasks
+    elif self.mode == self.RANDOM_TARGET_MODE:
+      return [task for task in self.target_tasks if bool(random.getrandbits(1))]
+    elif self.mode == self.WRONG_RETURN_TYPE_MODE:
+      return 'string'
+    elif self.mode == self.WRONG_CHOOSE_TASK_MODE:
+      ret = []
+      while len(ret) < 5:
+        i = random.randint(1, 1000)
+        if i not in self.target_tasks and i not in ret:
+          ret.append(i)
+        else:
+          continue
+      return ret
+
+class MockTaskHook(ITaskHook):
+  def prepare(self, conf, context):
+    self.clean_up_called = False
+    self.emit_called = False
+    self.spout_ack_called = False
+    self.spout_fail_called = False
+    self.bolt_exec_called = False
+    self.bolt_ack_called = False
+    self.bolt_fail_called = False
+
+  def emit(self, emit_info):
+    self.emit_called = True
+
+  def spout_ack(self, spout_ack_info):
+    self.spout_ack_called = True
+
+  def spout_fail(self, spout_fail_info):
+    self.spout_fail_called = True
+
+  def bolt_execute(self, bolt_execute_info):
+    self.bolt_exec_called = True
+
+  def bolt_ack(self, bolt_ack_info):
+    self.bolt_ack_called = True
+
+  def bolt_fail(self, bolt_fail_info):
+    self.bolt_fail_called = True

@@ -15,6 +15,7 @@
 from abc import abstractmethod
 
 class ICustomGrouping(object):
+  '''Interface for custom grouping class'''
 
   @abstractmethod
   def prepare(self, context, component, stream, target_tasks):
