@@ -19,6 +19,7 @@ import java.util.HashMap;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.packing.Resource;
 
 public class NullPacking implements IPacking {
 
@@ -29,7 +30,7 @@ public class NullPacking implements IPacking {
     return new PackingPlan(
         "",
         new HashMap<String, PackingPlan.ContainerPlan>(),
-        new PackingPlan.Resource(0.0, 0L, 0L));
+        new Resource(0.0, 0L, 0L));
   }
 
   @Override

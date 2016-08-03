@@ -39,6 +39,11 @@ enum ComponentObjectSpec {
   PYTHON_CLASS_NAME = 3;
 }
 
+enum CustomGroupingObjectType {
+  JAVA_OBJECT = 1;
+  PYTHON_OBJECT = 2;
+}
+
 enum ConfigValueType {
   STRING_VALUE = 1; //normal string
   JAVA_SERIALIZED_VALUE = 2;
@@ -67,7 +72,10 @@ message InputStream {
   required StreamId stream = 1;
   required Grouping gtype = 2;
   optional StreamSchema grouping_fields = 3;
-  optional bytes custom_grouping_java_object = 4;
+
+  // we should refactor when upgrading to protobuf v3.0 (#1181)
+  optional bytes custom_grouping_object = 4;
+  optional CustomGroupingObjectType type = 5;
 }
 
 message Config {

@@ -25,42 +25,44 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
-import com.twitter.heron.spi.utils.SchedulerUtils;
+import com.twitter.heron.spi.utils.LauncherUtils;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(SchedulerUtils.class)
+@PrepareForTest(LauncherUtils.class)
 public class AuroraLauncherTest {
   @Test
   public void testLaunch() throws Exception {
+    Config config = Config.newBuilder().build();
     AuroraLauncher launcher = Mockito.spy(AuroraLauncher.class);
+    launcher.initialize(config, config);
+
+    LauncherUtils mockLauncherUtils = Mockito.mock(LauncherUtils.class);
+    PowerMockito.spy(LauncherUtils.class);
+    PowerMockito.doReturn(mockLauncherUtils).when(LauncherUtils.class, "getInstance");
 
     // Failed to schedule
-    PowerMockito.spy(SchedulerUtils.class);
-    PowerMockito.doReturn(false).when(SchedulerUtils.class, "onScheduleAsLibrary",
+    Mockito.when(mockLauncherUtils.onScheduleAsLibrary(
         Mockito.any(Config.class),
         Mockito.any(Config.class),
         Mockito.any(IScheduler.class),
-        Mockito.any(PackingPlan.class));
+        Mockito.any(PackingPlan.class))).thenReturn(false);
 
     Assert.assertFalse(launcher.launch(Mockito.mock(PackingPlan.class)));
-    PowerMockito.verifyStatic();
-    SchedulerUtils.onScheduleAsLibrary(
+    Mockito.verify(mockLauncherUtils).onScheduleAsLibrary(
         Mockito.any(Config.class),
         Mockito.any(Config.class),
         Mockito.any(IScheduler.class),
         Mockito.any(PackingPlan.class));
 
     // Happy path
-    PowerMockito.spy(SchedulerUtils.class);
-    PowerMockito.doReturn(true).when(SchedulerUtils.class, "onScheduleAsLibrary",
+    Mockito.when(mockLauncherUtils.onScheduleAsLibrary(
         Mockito.any(Config.class),
         Mockito.any(Config.class),
         Mockito.any(IScheduler.class),
-        Mockito.any(PackingPlan.class));
+        Mockito.any(PackingPlan.class))).thenReturn(true);
 
     Assert.assertTrue(launcher.launch(Mockito.mock(PackingPlan.class)));
-    PowerMockito.verifyStatic();
-    SchedulerUtils.onScheduleAsLibrary(
+    Mockito.verify(mockLauncherUtils, Mockito.times(2)).onScheduleAsLibrary(
         Mockito.any(Config.class),
         Mockito.any(Config.class),
         Mockito.any(IScheduler.class),
