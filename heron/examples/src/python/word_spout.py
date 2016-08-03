@@ -42,10 +42,10 @@ class WordSpout(Spout):
 
   def ack(self, tup_id):
     self.ack_count += 1
-    if self.ack_count % 10000 == 0:
+    if self.ack_count % 100000 == 0:
       self.logger.info("Acked %sth tuples, tup_id: %s" % (str(self.ack_count), str(tup_id)))
 
   def fail(self, tup_id):
     self.fail_count += 1
-    if self.fail_count % 10000 == 0:
+    if self.fail_count % 100000 == 0:
       self.logger.info("Failed %sth tuples, tup_id: %s" % (str(self.fail_count), str(tup_id)))

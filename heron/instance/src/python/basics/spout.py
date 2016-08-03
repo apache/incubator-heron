@@ -146,8 +146,7 @@ class Spout(Component):
     if custom_target_task_ids is not None:
       for task_id in custom_target_task_ids:
         # for custom grouping
-        to_add = data_tuple.dest_task_ids.add()
-        to_add = task_id
+        data_tuple.dest_task_ids.append(task_id)
 
     if tup_id is not None:
       tuple_info = TupleHelper.make_root_tuple_info(stream, tup_id)

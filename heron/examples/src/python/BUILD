@@ -16,6 +16,7 @@ pex_binary(
 pex_binary(
   name = "custom_grouping",
   srcs = ["custom_grouping_topology.py",
+          "consume_bolt.py",
           "word_spout.py"],
   deps = [
     "//heron/instance/src/python/basics:pyheron_lib"

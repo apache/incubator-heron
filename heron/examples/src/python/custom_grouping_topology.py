@@ -13,8 +13,9 @@
 # limitations under the License.
 '''module for example topology: CustomGroupingTopology'''
 
-from heron.instance.src.python.basics import Topology, Bolt, Grouping
+from heron.instance.src.python.basics import Topology, Grouping
 from heron.examples.src.python.word_spout import WordSpout
+from heron.examples.src.python.consume_bolt import ConsumeBolt
 from heron.common.src.python.utils.topology import ICustomGrouping
 from heron.common.src.python.log import Log
 
@@ -32,18 +33,6 @@ class SampleCustomGrouping(ICustomGrouping):
   def choose_tasks(self, values):
     # only emits to the first task id
     return [self.target_tasks[0]]
-
-class ConsumeBolt(Bolt):
-  def initialize(self, config, context):
-    self.logger.info("In prepare() of ConsumerBolt")
-    self.total = 0
-
-  def process(self, tup):
-    if self.is_tick():
-      self.log("Got tick tuple!")
-      self.log("Total received data tuple: %d" % self.total)
-    else:
-      self.total += 1
 
 class CustomGrouping(Topology):
   custom_grouping_path = "heron.examples.src.python.custom_grouping_topology.SampleCustomGrouping"

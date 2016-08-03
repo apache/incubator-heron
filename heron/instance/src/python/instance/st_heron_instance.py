@@ -161,7 +161,7 @@ class SingleThreadHeronInstance(object):
       else:
         # Starting a bolt
         my_bolt = pplan_helper.get_my_bolt()
-        Log.info("Incarnating ourselves as spout: %s with task id %s, loading from: %s"
+        Log.info("Incarnating ourselves as bolt: %s with task id %s, loading from: %s"
                  % (pplan_helper.my_component_name, str(pplan_helper.my_task_id),
                     my_bolt.comp.class_name))
 
