@@ -94,7 +94,7 @@ public final class ShellUtils {
     LOG.log(Level.FINE, "Process command: `$ {0}`", Arrays.toString(cmdline));
     ProcessBuilder pb = getProcessBuilder(isInheritIO, cmdline, workingDirectory, envs);
 
-    Process process = null;
+    Process process;
     try {
       process = pb.start();
     } catch (IOException e) {
@@ -102,7 +102,7 @@ public final class ShellUtils {
       return -1;
     }
 
-    int exitValue = 0;
+    int exitValue;
 
     try {
       exitValue = process.waitFor();
