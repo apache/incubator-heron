@@ -17,6 +17,7 @@ package com.twitter.heron.scheduler.yarn;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -116,9 +117,16 @@ public class HeronExecutorTask implements Task {
     // Log the working directory, this will make people fast locate the
     // directory to find the log files
     File workingDirectory = new File(".");
-    LOG.log(Level.INFO, "working dir: {0}", workingDirectory.getAbsolutePath());
+    String cwdPath = workingDirectory.getAbsolutePath();
+    LOG.log(Level.INFO, "Working dir: {0}", cwdPath);
 
-    final Process regularExecutor = ShellUtils.runASyncProcess(true, executorCmd, workingDirectory);
+    HashMap<String, String> executorEnvironment = getEnvironment(cwdPath);
+
+    final Process regularExecutor = ShellUtils.runASyncProcess(
+        true,
+        executorCmd,
+        workingDirectory,
+        executorEnvironment);
     LOG.log(Level.INFO, "Started heron executor-id: {0}", heronExecutorId);
     try {
       regularExecutor.waitFor();
@@ -127,6 +135,12 @@ public class HeronExecutorTask implements Task {
       regularExecutor.destroy();
     }
     return null;
+  }
+
+  HashMap<String, String> getEnvironment(String cwdPath) {
+    HashMap<String, String> envs = new HashMap<>();
+    envs.put("PEX_ROOT", cwdPath);
+    return envs;
   }
 
   String[] getExecutorCommand() {
