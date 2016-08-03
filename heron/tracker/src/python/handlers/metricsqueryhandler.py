@@ -18,7 +18,7 @@ import tornado.web
 
 from heron.tracker.src.python.handlers import BaseHandler
 from heron.tracker.src.python.query import Query
-from heron.common.src.python.color import Log
+from heron.common.src.python.utils.log import Log
 
 
 class MetricsQueryHandler(BaseHandler):

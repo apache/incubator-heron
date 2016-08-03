@@ -151,6 +151,7 @@ public class HeronExecutorTask implements Task {
         env,
         topologyJar,
         topologyDefFile,
+        verboseMode,
         topology);
 
     List<Integer> freePorts = new ArrayList<>(SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR);

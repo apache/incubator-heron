@@ -14,7 +14,7 @@
 ''' logicalplan.py '''
 from collections import defaultdict
 import heron.explorer.src.python.args as args
-from heron.common.src.python.color import Log
+from heron.common.src.python.utils.log import Log
 import heron.common.src.python.utils.tracker_access as tracker_access
 from tabulate import tabulate
 

@@ -19,7 +19,7 @@ import tornado.web
 from heron.tracker.src.python import utils
 from heron.tracker.src.python.handlers import BaseHandler
 
-from heron.common.src.python.color import Log
+from heron.common.src.python.utils.log import Log
 
 
 @tornado.gen.coroutine

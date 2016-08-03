@@ -14,7 +14,7 @@
 '''communicator.py: module responsible for communication between Python heron modules'''
 import Queue
 
-from heron.common.src.python.log import Log
+from heron.common.src.python.utils.log import Log
 
 class HeronCommunicator(object):
   """HeronCommunicator: a wrapper class for non-blocking queue in Heron."""
