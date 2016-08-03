@@ -18,13 +18,12 @@ from heron.proto import topology_pb2
 from heron.common.src.python.log import Log
 from heron.common.src.python.utils.topology import TopologyContext, ICustomGrouping
 
+import heron.common.src.python.pex_loader as pex_loader
+
 from .custom_grouping_helper import CustomGroupingHelper
 from .serializer import default_serializer
 
-import heron.common.src.python.pex_loader as pex_loader
-
 # pylint: disable=too-many-instance-attributes
-# pylint: disable=fixme
 class PhysicalPlanHelper(object):
   """Helper class for accessing Physical Plan
 
@@ -237,7 +236,7 @@ class PhysicalPlanHelper(object):
             raise NotImplementedError("Java-serialized custom grouping is not yet supported "
                                       "for python topology")
           else:
-            raise ValueError("Unsupported custom grouping type found: %s" % str(in_stream.type))
+            raise ValueError("Unrecognized custom grouping type found: %s" % str(in_stream.type))
 
   def _get_taskids_for_component(self, component_name):
     return [instance.info.task_id for instance in self.pplan.instances
