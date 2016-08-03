@@ -21,11 +21,9 @@ import shutil
 import sys
 import time
 
-from heron.common.src.python.color import Log
 
 import heron.cli.src.python.help as cli_help
 import heron.cli.src.python.args as parse
-import heron.cli.src.python.opts as opts
 import heron.cli.src.python.activate as activate
 import heron.cli.src.python.deactivate as deactivate
 import heron.cli.src.python.kill as kill
@@ -33,6 +31,10 @@ import heron.cli.src.python.restart as restart
 import heron.cli.src.python.submit as submit
 import heron.common.src.python.utils.config as config
 import heron.cli.src.python.version as version
+
+import heron.common.src.python.utils.log as log
+
+Log = log.Log
 
 HELP_EPILOG = '''Getting more help:
   heron help <command> Prints help and options for <command>
@@ -221,21 +223,14 @@ def main():
   args, unknown_args = parser.parse_known_args()
   command_line_args = vars(args)
 
-  try:
-    if command_line_args['verbose']:
-      opts.set_verbose()
-    if command_line_args['trace_execution']:
-      opts.set_trace_execution()
-  except:
-    pass
-
   # command to be execute
   command = command_line_args['subcommand']
 
   # file resources to be cleaned when exit
   files = []
 
-  if command != 'help' and command != 'version':
+  if command not in ('help', 'version'):
+    log.set_logging_level(command_line_args)
     command_line_args = extract_common_args(command, parser, command_line_args)
     # bail out if args are empty
     if not command_line_args:
@@ -246,14 +241,13 @@ def main():
   atexit.register(cleanup, files)
 
   # print the input parameters, if verbose is enabled
-  if opts.verbose():
-    print command_line_args
+  Log.debug(command_line_args)
 
   start = time.time()
   retcode = run(command, parser, command_line_args, unknown_args)
   end = time.time()
 
-  if command != 'help':
+  if command not in ('help', 'version'):
     sys.stdout.flush()
     Log.info('Elapsed time: %.3fs.' % (end - start))
 

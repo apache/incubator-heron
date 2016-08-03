@@ -18,7 +18,7 @@ import sys
 
 from abc import abstractmethod
 from heapq import heappush, heappop
-from heron.common.src.python.log import Log
+from heron.common.src.python.utils.log import Log
 
 class EventLooper(object):
   """EventLooper is a Python implementation of WakeableLooper.java
