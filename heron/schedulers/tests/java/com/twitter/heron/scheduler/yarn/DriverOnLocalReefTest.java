@@ -42,6 +42,7 @@ import com.twitter.heron.scheduler.yarn.DriverOnLocalReefTest.TestDriver.Activat
 import com.twitter.heron.scheduler.yarn.DriverOnLocalReefTest.TestDriver.Allocated;
 import com.twitter.heron.scheduler.yarn.DriverOnLocalReefTest.TestDriver.DriverStarter;
 import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.packing.Resource;
 
 public class DriverOnLocalReefTest {
   @Test
@@ -101,7 +102,7 @@ public class DriverOnLocalReefTest {
                               double cpu,
                               long mem,
                               Map<String, PackingPlan.ContainerPlan> containers) {
-      PackingPlan.Resource resource = new PackingPlan.Resource(cpu, mem * 1024 * 1024, 0L);
+      Resource resource = new Resource(cpu, mem * 1024 * 1024, 0L);
       PackingPlan.ContainerPlan container = new PackingPlan.ContainerPlan(id, null, resource);
       containers.put(container.id, container);
     }

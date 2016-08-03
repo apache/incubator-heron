@@ -22,6 +22,7 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.ILauncher;
+import com.twitter.heron.spi.utils.LauncherUtils;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;
 
@@ -65,7 +66,9 @@ public class SlurmLauncher implements ILauncher {
       return false;
     }
 
-    return SchedulerUtils.onScheduleAsLibrary(config, runtime,
+    LauncherUtils launcherUtils = LauncherUtils.getInstance();
+    Config ytruntime = launcherUtils.createConfigWithPackingDetails(runtime, packing);
+    return launcherUtils.onScheduleAsLibrary(config, ytruntime,
         new SlurmScheduler(topologyWorkingDirectory), packing);
   }
 

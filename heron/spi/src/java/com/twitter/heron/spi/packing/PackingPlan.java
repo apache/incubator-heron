@@ -98,41 +98,6 @@ public class PackingPlan {
     return ramMapBuilder.toString();
   }
 
-  /**
-   * Type definition of packing structure output.
-   */
-  public static class Resource {
-    public double cpu;
-    public long ram;
-    public long disk;
-
-    public Resource(double cpu, long ram, long disk) {
-      this.cpu = cpu;
-      this.ram = ram;
-      this.disk = disk;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (obj instanceof Resource) {
-        Resource r = (Resource) obj;
-        return (this.cpu == r.cpu) && (this.ram == r.ram) && (this.disk == r.disk);
-      } else {
-        return false;
-      }
-    }
-
-    @Override
-    public int hashCode() {
-      return (Long.hashCode(ram) << 2) & (Long.hashCode(disk) << 1) & (Double.hashCode(cpu));
-    }
-
-    @Override
-    public String toString() {
-      return String.format("{cpu: %f, ram: %d, disk: %d}", cpu, ram, disk);
-    }
-  }
-
   public static class InstancePlan {
     public final String id;
     public final String componentName;
