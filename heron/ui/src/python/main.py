@@ -14,6 +14,7 @@
 
 # !/usr/bin/env python2.7
 ''' main.py '''
+import logging
 import os
 import signal
 import socket
@@ -23,13 +24,13 @@ import tornado.options
 import tornado.web
 import tornado.log
 import tornado.template
-
 from tornado.options import define
 
 from heron.ui.src.python import handlers
 from heron.ui.src.python import args
-from heron.ui.src.python import log
-from heron.ui.src.python.log import Log as LOG
+import heron.common.src.python.utils.log as log
+
+Log = log.Log
 
 class Application(tornado.web.Application):
   ''' Application '''
@@ -119,7 +120,7 @@ def main():
   :param argv:
   :return:
   '''
-  log.configure(log.logging.DEBUG)
+  log.configure(logging.DEBUG, with_time=True)
   tornado.log.enable_pretty_logging()
 
   # create the parser and parse the arguments
@@ -134,8 +135,8 @@ def main():
   # log additional information
   command_line_args = vars(parsed_args)
   address = socket.gethostbyname(socket.gethostname())
-  LOG.info("Listening at http://%s:%d", address, command_line_args['port'])
-  LOG.info("Using tracker url: %s", command_line_args['tracker_url'])
+  Log.info("Listening at http://%s:%d", address, command_line_args['port'])
+  Log.info("Using tracker url: %s", command_line_args['tracker_url'])
 
   # pass the options to tornado and start the ui server
   define_options(command_line_args['port'], command_line_args['tracker_url'])
@@ -147,7 +148,7 @@ def main():
   def signal_handler(signum, frame):
     # start a new line after ^C character because this looks nice
     print '\n',
-    LOG.debug('SIGINT received. Stopping UI')
+    Log.debug('SIGINT received. Stopping UI')
     tornado.ioloop.IOLoop.instance().stop()
 
   # associate SIGINT and SIGTERM with a handler

@@ -253,8 +253,6 @@ public final class ShellUtils {
       String packageName, String targetFolder, boolean isVerbose, boolean isInheritIO) {
     String cmd = String.format("tar -xvf %s", packageName);
 
-    LOG.severe(cmd);
-
     int ret = runSyncProcess(isVerbose, isInheritIO,
         cmd, new StringBuilder(), new StringBuilder(), new File(targetFolder));
 
