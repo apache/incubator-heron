@@ -32,7 +32,7 @@ class PhysicalPlanHelperTest(unittest.TestCase):
     pplan, instances = mock_generator.get_a_sample_pplan()
     instance_1 = instances[0]
 
-    pplan_helper = PhysicalPlanHelper(pplan, instance_1["instance_id"])
+    pplan_helper = PhysicalPlanHelper(pplan, instance_1["instance_id"], "topology.pex.path")
     self.assertIsNotNone(pplan_helper.my_instance)
     self.assertTrue(pplan_helper.is_spout)
     self.assertIsInstance(pplan_helper.get_my_spout(), topology_pb2.Spout)

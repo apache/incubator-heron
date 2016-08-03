@@ -116,7 +116,7 @@ class MockOutgoingTupleHelper(OutgoingTupleHelper):
   @staticmethod
   def _prepare_sample_success():
     pplan, instances = get_a_sample_pplan()
-    pplan_helper = PhysicalPlanHelper(pplan, instances[0]["instance_id"])
+    pplan_helper = PhysicalPlanHelper(pplan, instances[0]["instance_id"], "topology.pex.path")
     out_stream = HeronCommunicator(producer_cb=None, consumer_cb=None)
     return pplan_helper, out_stream
 
