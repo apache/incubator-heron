@@ -47,7 +47,8 @@ public class HeronExecutorTaskTest {
         "core",
         "jar",
         "packedPlan",
-        "componentRamMap");
+        "componentRamMap",
+        false);
     HeronExecutorTask spyTask = Mockito.spy(task);
 
     Mockito.doReturn("file").when(spyTask).getTopologyDefnFile();

@@ -52,7 +52,8 @@ public class HeronMasterDriverTest {
         "jar",
         "package",
         "core",
-        0);
+        0,
+        false);
     spyDriver = Mockito.spy(driver);
   }
 
