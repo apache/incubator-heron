@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 '''Stream Manager client for single-thread heron instance in python'''
-from heron.common.src.python.log import Log
+from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.misc import PhysicalPlanHelper
 from heron.common.src.python.network import HeronClient, StatusCode
 from heron.proto import stmgr_pb2, common_pb2

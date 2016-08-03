@@ -19,7 +19,7 @@ import collections
 
 from abc import abstractmethod
 from heron.proto import topology_pb2, tuple_pb2
-from heron.common.src.python.log import Log
+from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.tuple import TupleHelper
 from heron.common.src.python.utils.metrics import SpoutMetrics
 

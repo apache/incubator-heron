@@ -14,7 +14,7 @@
 '''module for example task hook'''
 from collections import Counter
 
-from heron.common.src.python.log import Log
+from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.topology import ITaskHook
 
 # pylint: disable=unused-argument

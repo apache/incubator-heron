@@ -17,7 +17,7 @@ from heron.instance.src.python.basics import Topology, Grouping
 from heron.examples.src.python.word_spout import WordSpout
 from heron.examples.src.python.consume_bolt import ConsumeBolt
 from heron.common.src.python.utils.topology import ICustomGrouping
-from heron.common.src.python.log import Log
+from heron.common.src.python.utils.log import Log
 
 import heron.common.src.python.constants as constants
 

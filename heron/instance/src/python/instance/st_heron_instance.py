@@ -21,7 +21,7 @@ import signal
 import yaml
 
 from heron.common.src.python.basics import GatewayLooper
-from heron.common.src.python.log import Log, init_rotating_logger
+from heron.common.src.python.utils.log import Log, init_rotating_logger
 from heron.common.src.python.utils.metrics import GatewayMetrics, MetricsCollector
 from heron.common.src.python.utils.misc import HeronCommunicator
 from heron.common.src.python.network import create_socket_options
