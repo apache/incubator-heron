@@ -80,7 +80,7 @@ public class LocalLauncher implements ILauncher {
       return false;
     }
 
-    LOG.info(String.format(
+    LOG.log(Level.FINE, String.format(
         "To check the status and logs of the topology, use the working directory %s",
         LocalContext.workingDirectory(config)));
 
