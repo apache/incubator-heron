@@ -43,6 +43,7 @@ import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Role;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyJar;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyName;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyPackageName;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.VerboseLogMode;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.utils.SchedulerConfig;
@@ -64,6 +65,7 @@ public class HeronExecutorTask implements Task {
   private final String topologyJar;
   private final String packedPlan;
   private final String componentRamMap;
+  private final boolean verboseMode;
 
   private REEFFileNames reefFileNames;
   private String localHeronConfDir;
@@ -82,7 +84,8 @@ public class HeronExecutorTask implements Task {
                            @Parameter(HeronCorePackageName.class) String heronCorePackageName,
                            @Parameter(TopologyJar.class) String topologyJar,
                            @Parameter(PackedPlan.class) String packedPlan,
-                           @Parameter(ComponentRamMap.class) String componentRamMap) {
+                           @Parameter(ComponentRamMap.class) String componentRamMap,
+                           @Parameter(VerboseLogMode.class) boolean verboseMode) {
     this.heronExecutorId = Integer.valueOf(heronExecutorId);
     this.cluster = cluster;
     this.role = role;
@@ -93,6 +96,7 @@ public class HeronExecutorTask implements Task {
     this.topologyJar = topologyJar;
     this.packedPlan = packedPlan;
     this.componentRamMap = componentRamMap;
+    this.verboseMode = verboseMode;
 
     reefFileNames = fileNames;
     localHeronConfDir = ".";

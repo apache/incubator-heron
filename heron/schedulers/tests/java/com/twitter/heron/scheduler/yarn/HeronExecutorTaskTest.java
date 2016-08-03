@@ -117,7 +117,8 @@ public class HeronExecutorTaskTest {
         "core",
         "jar",
         "packedPlan",
-        "componentRamMap");
+        "componentRamMap",
+        false);
     return Mockito.spy(task);
   }
 
