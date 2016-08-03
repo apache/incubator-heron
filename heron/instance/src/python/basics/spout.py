@@ -55,6 +55,7 @@ class Spout(Component):
 
     # TODO: topology context, serializer and sys config
 
+  # pylint: disable=no-member
   @classmethod
   def spec(cls, name=None, par=1, config=None):
     """Register this spout to the topology and create ``HeronComponentSpec``
@@ -74,7 +75,6 @@ class Spout(Component):
     """
     python_class_path = cls.get_python_class_path()
 
-    # pylint: disable=no-member
     if hasattr(cls, 'outputs'):
       _outputs = cls.outputs
     else:
@@ -88,6 +88,9 @@ class Spout(Component):
     self.spout_metrics.register_metrics(context, self.sys_config)
     self.initialize(config=context.get_cluster_config(), context=context)
     context.invoke_hook_prepare()
+
+    # prepare for custom grouping
+    self.pplan_helper.prepare_custom_grouping(context)
 
     self._add_spout_task()
     self.topology_state = topology_pb2.TopologyState.Value("RUNNING")
@@ -132,11 +135,18 @@ class Spout(Component):
     # first check whether this tuple is sane
     self.pplan_helper.check_output_schema(stream, tup)
 
-    # TODO: custom grouping
+    # get custom grouping target task ids; get empty list if not custom grouping
+    custom_target_task_ids = self.pplan_helper.choose_tasks_for_custom_grouping(stream, tup)
+
     self.pplan_helper.context.invoke_hook_emit(tup, stream, None)
 
     data_tuple = tuple_pb2.HeronDataTuple()
     data_tuple.key = 0
+
+    if custom_target_task_ids is not None:
+      for task_id in custom_target_task_ids:
+        # for custom grouping
+        data_tuple.dest_task_ids.append(task_id)
 
     if tup_id is not None:
       tuple_info = TupleHelper.make_root_tuple_info(stream, tup_id)
@@ -169,6 +179,7 @@ class Spout(Component):
     self.spout_metrics.update_emit_count(stream)
     return ret
 
+  # pylint: disable=no-self-use
   def process_incoming_tuples(self):
     Log.debug("In spout, process_incoming_tuples() don't do anything")
 

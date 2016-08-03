@@ -16,7 +16,8 @@
 import logging
 import uuid
 
-from heron.common.src.python.utils.misc import PythonSerializer, OutgoingTupleHelper
+from heron.common.src.python.utils.misc import (PythonSerializer, OutgoingTupleHelper,
+                                                default_serializer)
 from heron.proto import tuple_pb2, topology_pb2
 
 import heron.common.src.python.constants as constants
@@ -150,9 +151,6 @@ class HeronComponentSpec(object):
     # so this is necessary for identification purposes. Used mainly by GlobalStreamId.
     self.uuid = str(uuid.uuid4())
 
-    # serializer used for serializing configuration
-    self.config_serializer = PythonSerializer()
-
   @staticmethod
   def _sanitize_args(name, py_class_path, is_spout, par):
     # name can be None at the time this spec is initialized
@@ -223,7 +221,7 @@ class HeronComponentSpec(object):
           # need to serialize
           kvs = proto_config.kvs.add()
           kvs.key = key
-          kvs.serialized_value = self.config_serializer.serialize(value)
+          kvs.serialized_value = default_serializer.serialize(value)
           kvs.type = topology_pb2.ConfigValueType.Value("PYTHON_SERIALIZED_VALUE")
 
     return proto_config
@@ -276,6 +274,11 @@ class HeronComponentSpec(object):
         # it's a field grouping
         in_stream.gtype = gtype.gtype
         in_stream.grouping_fields.CopyFrom(self._get_stream_schema(gtype.fields))
+      elif isinstance(gtype, Grouping.CUSTOM):
+        # it's a custom grouping
+        in_stream.gtype = gtype.gtype
+        in_stream.custom_grouping_object = gtype.python_serialized
+        in_stream.type = topology_pb2.CustomGroupingObjectType.Value("PYTHON_OBJECT")
       else:
         in_stream.gtype = gtype
 
