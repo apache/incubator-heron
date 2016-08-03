@@ -46,10 +46,10 @@ class Spout(Component):
     self.enable_message_timeouts = \
       context.get_cluster_config().get(constants.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS)
     Log.info("Enable ACK: %s" % str(self.acking_enabled))
-    # TODO: implement timeout
     Log.info("Enable Message Timeouts: %s" % str(self.enable_message_timeouts))
 
-    self.in_flight_tuples = dict()
+    # map <tuple_info.key -> tuple_info>, ordered by insertion time
+    self.in_flight_tuples = collections.OrderedDict()
     self.immediate_acks = collections.deque()
     self.total_tuples_emitted = 0
 
@@ -262,6 +262,10 @@ class Spout(Component):
 
     self.looper.add_wakeup_task(spout_task)
 
+    # look for the timeout's tuples
+    if self.enable_message_timeouts:
+      self._look_for_timeouts()
+
   def _is_topology_running(self):
     return self.topology_state == topology_pb2.TopologyState.Value("RUNNING")
 
@@ -274,13 +278,35 @@ class Spout(Component):
     # TODO: implement later
     return True
 
+  def _look_for_timeouts(self):
+    spout_config = self.pplan_helper.context.get_cluster_config()
+    timeout_sec = spout_config.get(constants.TOPOLOGY_MESSAGE_TIMEOUT_SECS)
+    n_bucket = self.sys_config.get(constants.INSTANCE_ACKNOWLEDGEMENT_NBUCKETS)
+    now = time.time()
+
+    timeout_lst = []
+    for key, tuple_info in self.in_flight_tuples.iteritems():
+      if tuple_info.is_expired(now, timeout_sec):
+        timeout_lst.append(tuple_info)
+        self.in_flight_tuples.pop(key)
+      else:
+        # in_flight_tuples are ordered by insertion time
+        break
+
+    for tuple_info in timeout_lst:
+      self.spout_metrics.timeout_tuple(tuple_info.stream_id)
+      self._invoke_fail(tuple_info.tuple_id, tuple_info.stream_id,
+                        timeout_sec * constants.SEC_TO_NS)
+
+    # register this method to timer again
+    self.looper.register_timer_task_in_sec(self._look_for_timeouts, float(timeout_sec) / n_bucket)
+
   # ACK/FAIL related
   def _handle_ack_tuple(self, tup, is_success):
     for rt in tup.roots:
       if rt.taskid != self.pplan_helper.my_task_id:
         raise RuntimeError("Receiving tuple for task: %s in task: %s"
                            % (str(rt.taskid), str(self.pplan_helper.my_task_id)))
-
       try:
         tuple_info = self.in_flight_tuples.pop(rt.key)
       except KeyError:
@@ -408,3 +434,4 @@ class Spout(Component):
     The spout may or may not be reactivated in the future.
     """
     pass
+
