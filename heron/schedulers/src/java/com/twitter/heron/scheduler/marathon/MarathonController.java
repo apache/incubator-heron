@@ -71,7 +71,7 @@ public class MarathonController {
       // TODO (nlu): implement restart all
       String message = "Restarting the whole topology is not supported yet. "
           + "Please kill and resubmit the topology.";
-      LOG.log(Level.SEVERE, "");
+      LOG.log(Level.SEVERE, message);
       return true;
     }
 
