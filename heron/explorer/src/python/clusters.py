@@ -13,10 +13,8 @@
 # limitations under the License.
 ''' clusters.py '''
 import heron.explorer.src.python.args as args
-# from heron.common.src.python.color import Log
-# from tabulate import tabulate
 import heron.common.src.python.utils.tracker_access as tracker_access
-from heron.common.src.python.color import Log
+from heron.common.src.python.utils.log import Log
 
 
 def create_parser(subparsers):

@@ -384,7 +384,7 @@ public final class SchedulerUtils {
     LOG.log(Level.FINE, "Fetching package {0}", packageURI);
     LOG.fine("Fetched package can overwrite old one.");
     if (!ShellUtils.curlPackage(
-        packageURI, packageDestination, isVerbose, true)) {
+        packageURI, packageDestination, isVerbose, false)) {
       LOG.severe("Failed to fetch package.");
       return false;
     }
@@ -392,7 +392,7 @@ public final class SchedulerUtils {
     // untar the heron core release package in the working directory
     LOG.log(Level.FINE, "Extracting the package {0}", packageURI);
     if (!ShellUtils.extractPackage(
-        packageDestination, workingDirectory, isVerbose, true)) {
+        packageDestination, workingDirectory, isVerbose, false)) {
       LOG.severe("Failed to extract package.");
       return false;
     }

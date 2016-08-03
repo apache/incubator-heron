@@ -15,7 +15,6 @@
 #!/usr/bin/env python2.7
 ''' main.py '''
 import argparse
-import logging
 import os
 import signal
 import sys
@@ -31,8 +30,9 @@ from heron.tracker.src.python.config import Config
 from heron.tracker.src.python.tracker import Tracker
 import heron.common.src.python.utils.config as common_config
 
-LOG = logging.getLogger(__name__)
-from heron.common.src.python.color import Log
+import heron.common.src.python.utils.log as log
+
+Log = log.Log
 
 class Application(tornado.web.Application):
   """ Tornado server application """
@@ -76,7 +76,7 @@ class Application(tornado.web.Application):
         static_path=os.path.dirname(__file__)
     )
     tornado.web.Application.__init__(self, tornadoHandlers, **settings)
-    LOG.info("Tracker has started")
+    Log.info("Tracker has started")
 
   def stop(self):
     self.tracker.stop_sync()
@@ -178,9 +178,6 @@ def define_options(port, config_file):
   define("port", default=port)
   define("config_file", default=config_file)
 
-def configure_logging(level):
-  Log.setLevel(level)
-
 def main():
   """ main """
   # create the parser and parse the arguments
@@ -196,15 +193,12 @@ def main():
     parser.exit()
 
   elif remaining != []:
-    LOG.error('Invalid subcommand')
+    Log.error('Invalid subcommand')
     sys.exit(1)
 
   namespace = vars(args)
 
-  if namespace["verbose"]:
-    configure_logging(logging.DEBUG)
-  else:
-    configure_logging(logging.INFO)
+  log.set_logging_level(namespace, with_time=True)
 
   # set Tornado global option
   define_options(namespace['port'], namespace['config_file'])
@@ -226,8 +220,8 @@ def main():
   signal.signal(signal.SIGINT, signal_handler)
   signal.signal(signal.SIGTERM, signal_handler)
 
-  LOG.info("Running on port: %d", namespace['port'])
-  LOG.info("Using config file: %s", namespace['config_file'])
+  Log.info("Running on port: %d", namespace['port'])
+  Log.info("Using config file: %s", namespace['config_file'])
 
   http_server = tornado.httpserver.HTTPServer(application)
   http_server.listen(namespace['port'])

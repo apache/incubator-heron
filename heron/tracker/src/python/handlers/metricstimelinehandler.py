@@ -20,7 +20,7 @@ from heron.tracker.src.python import constants
 from heron.tracker.src.python import metricstimeline
 from heron.tracker.src.python.handlers import BaseHandler
 
-from heron.common.src.python.color import Log
+from heron.common.src.python.utils.log import Log
 
 class MetricsTimelineHandler(BaseHandler):
   """
