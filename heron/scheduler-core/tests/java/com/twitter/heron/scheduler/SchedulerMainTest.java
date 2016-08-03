@@ -35,6 +35,7 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.utils.ReflectionUtils;
@@ -94,7 +95,7 @@ public class SchedulerMainTest {
 
     Map<String, PackingPlan.ContainerPlan> containers = new HashMap<>();
     containers.put("dummy", new PackingPlan.ContainerPlan("dummy", null,
-        new PackingPlan.Resource(1, 1, 1)));
+        new Resource(1, 1, 1)));
 
     Mockito.when(packingPlan.getContainers()).thenReturn(containers);
 
