@@ -47,7 +47,7 @@ class SingleThreadHeronInstance(object):
     self.instance = instance
     self.stream_port = stream_port
     self.metrics_port = metrics_port
-    self.topo_pex_file_path = topo_pex_file_path
+    self.topo_pex_file_abs_path = os.path.abspath(topo_pex_file_path)
     self.sys_config = sys_config
 
     self.in_stream = HeronCommunicator(producer_cb=None, consumer_cb=None)
@@ -139,11 +139,9 @@ class SingleThreadHeronInstance(object):
 
     :param pplan_helper: PhysicalPlanHelper class to become
     """
-    Log.info("Incarnating ourselves as %s with task id %s"
-             % (pplan_helper.my_component_name, str(pplan_helper.my_task_id)))
 
     self.my_pplan_helper = pplan_helper
-    self.my_pplan_helper.set_topology_context(self.metrics_collector, self.topo_pex_file_path)
+    self.my_pplan_helper.set_topology_context(self.metrics_collector)
 
     # pylint: disable=fixme
     # TODO: initialize communicator for back pressure
@@ -152,6 +150,10 @@ class SingleThreadHeronInstance(object):
       if pplan_helper.is_spout:
         # Starting a spout
         my_spout = pplan_helper.get_my_spout()
+        Log.info("Incarnating ourselves as spout: %s with task id %s, loading from: %s"
+                 % (pplan_helper.my_component_name, str(pplan_helper.my_task_id),
+                    my_spout.comp.class_name))
+
         py_spout_instance = self.load_py_instance(True, my_spout.comp.class_name)
         self.my_instance = LoadedInstance(is_spout=True,
                                           protobuf=my_spout,
@@ -159,6 +161,10 @@ class SingleThreadHeronInstance(object):
       else:
         # Starting a bolt
         my_bolt = pplan_helper.get_my_bolt()
+        Log.info("Incarnating ourselves as bolt: %s with task id %s, loading from: %s"
+                 % (pplan_helper.my_component_name, str(pplan_helper.my_task_id),
+                    my_bolt.comp.class_name))
+
         py_bolt_instance = self.load_py_instance(False, my_bolt.comp.class_name)
         self.my_instance = LoadedInstance(is_spout=False,
                                           protobuf=my_bolt,
@@ -166,6 +172,7 @@ class SingleThreadHeronInstance(object):
     except Exception as e:
       Log.error("Error with loading bolt/spout instance from pex file: %s" % e.message)
       Log.error(traceback.format_exc())
+      self.looper.exit_loop()
 
     if pplan_helper.is_topology_running():
       try:
@@ -177,14 +184,14 @@ class SingleThreadHeronInstance(object):
       Log.info("The instance is deployed in deactivated state")
 
   def load_py_instance(self, is_spout, python_class_name):
-    pex_loader.load_pex(self.topo_pex_file_path)
+    pex_loader.load_pex(self.topo_pex_file_abs_path)
     if is_spout:
-      spout_class = pex_loader.import_and_get_class(self.topo_pex_file_path, python_class_name)
+      spout_class = pex_loader.import_and_get_class(self.topo_pex_file_abs_path, python_class_name)
       my_spout = spout_class(self.my_pplan_helper, self.in_stream, self.out_stream,
                              self.looper, self.sys_config)
       return my_spout
     else:
-      bolt_class = pex_loader.import_and_get_class(self.topo_pex_file_path, python_class_name)
+      bolt_class = pex_loader.import_and_get_class(self.topo_pex_file_abs_path, python_class_name)
       my_bolt = bolt_class(self.my_pplan_helper, self.in_stream, self.out_stream,
                            self.looper, self.sys_config)
       return my_bolt
