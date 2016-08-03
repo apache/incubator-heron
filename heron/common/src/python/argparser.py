@@ -27,9 +27,8 @@ import heron.common.src.python.utils.config as config
 # Run the command
 ##########################################################################
 
-HERON_RC_FILE = "~/.heronrc"
-HERON_RC = os.path.expanduser(HERON_RC_FILE)
-HERON_RC_SPL = '@' + HERON_RC
+
+HERON_RC = os.path.join(os.path.expanduser('~'), '.heronrc')
 # pylint: disable=anomalous-backslash-in-string
 heron_command_pattern = re.compile('(^[^:]*):([^:]*):([^\s]*) (.*)')
 filters = ['^@']
@@ -93,7 +92,7 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
     if len(cls.cmdmap) > 0:
       return
     effective_rc = (rcfile, HERON_RC)[rcfile is None]
-    Log.info('Effective RC file is %s', effective_rc)
+    Log.debug('Effective RC file is %s', effective_rc)
     if os.path.exists(effective_rc):
       with open(effective_rc) as f:
         cls.cmdmap['*']['*'] = collections.defaultdict(dict)
