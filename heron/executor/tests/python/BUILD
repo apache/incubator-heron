@@ -1,8 +1,11 @@
 load("/tools/rules/pex_rules", "pex_test")
 
 pex_test(
-    name = "aurora_unittest",
-    srcs = ["aurora_unittest.py"],
+    name = "executor_unittest",
+    srcs = ["heron_executor_unittest.py"],
+    deps = [
+        "//heron/executor/src/python:heron-executor-lib",
+    ],
     reqs = [
         "py==1.4.27",
         "pytest==2.6.4",

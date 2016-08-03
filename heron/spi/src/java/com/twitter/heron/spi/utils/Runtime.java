@@ -20,7 +20,6 @@ import java.util.Properties;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 
@@ -52,10 +51,6 @@ public final class Runtime {
 
   public static SchedulerStateManagerAdaptor schedulerStateManagerAdaptor(Config runtime) {
     return (SchedulerStateManagerAdaptor) runtime.get(Keys.schedulerStateManagerAdaptor());
-  }
-
-  public static IPacking packingClassInstance(Config runtime) {
-    return (IPacking) runtime.get(Keys.packingClassInstance());
   }
 
   public static ILauncher launcherClassInstance(Config runtime) {

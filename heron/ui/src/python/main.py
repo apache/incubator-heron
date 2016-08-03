@@ -15,6 +15,7 @@
 # !/usr/bin/env python2.7
 ''' main.py '''
 import os
+import signal
 import socket
 
 import tornado.ioloop
@@ -29,7 +30,6 @@ from heron.ui.src.python import handlers
 from heron.ui.src.python import args
 from heron.ui.src.python import log
 from heron.ui.src.python.log import Log as LOG
-
 
 class Application(tornado.web.Application):
   ''' Application '''
@@ -125,6 +125,7 @@ def main():
   # create the parser and parse the arguments
   (parser, child_parser) = args.create_parsers()
   (parsed_args, remaining) = parser.parse_known_args()
+
   if remaining:
     child_parser.parse_args(args=remaining, namespace=parsed_args)
     parser.print_help()
@@ -140,6 +141,20 @@ def main():
   define_options(command_line_args['port'], command_line_args['tracker_url'])
   http_server = tornado.httpserver.HTTPServer(Application())
   http_server.listen(command_line_args['port'])
+
+  # pylint: disable=unused-argument
+  # stop Tornado IO loop
+  def signal_handler(signum, frame):
+    # start a new line after ^C character because this looks nice
+    print '\n',
+    LOG.debug('SIGINT received. Stopping UI')
+    tornado.ioloop.IOLoop.instance().stop()
+
+  # associate SIGINT and SIGTERM with a handler
+  signal.signal(signal.SIGINT, signal_handler)
+  signal.signal(signal.SIGTERM, signal_handler)
+
+  # start Tornado IO loop
   tornado.ioloop.IOLoop.instance().start()
 
 

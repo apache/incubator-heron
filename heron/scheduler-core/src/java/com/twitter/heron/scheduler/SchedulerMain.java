@@ -37,11 +37,11 @@ import com.twitter.heron.scheduler.server.SchedulerServer;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.LauncherUtils;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerConfig;
@@ -313,23 +313,14 @@ public class SchedulerMain {
    * @return true if scheduled successfully
    */
   public boolean runScheduler() {
+    IScheduler scheduler = null;
+
     String statemgrClass = Context.stateManagerClass(config);
     IStateManager statemgr;
 
-    String packingClass = Context.packingClass(config);
-    IPacking packing;
-
-    String schedulerClass = Context.schedulerClass(config);
-    IScheduler scheduler;
     try {
       // create an instance of state manager
       statemgr = ReflectionUtils.newInstance(statemgrClass);
-
-      // create an instance of the packing class
-      packing = ReflectionUtils.newInstance(packingClass);
-
-      // create an instance of scheduler
-      scheduler = ReflectionUtils.newInstance(schedulerClass);
     } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
       LOG.log(Level.SEVERE, "Failed to instantiate instances", e);
       return false;
@@ -347,36 +338,27 @@ public class SchedulerMain {
       SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
       // build the runtime config
+      LauncherUtils launcherUtils = LauncherUtils.getInstance();
       Config runtime = Config.newBuilder()
-          .put(Keys.topologyId(), topology.getId())
-          .put(Keys.topologyName(), topology.getName())
-          .put(Keys.topologyDefinition(), topology)
-          .put(Keys.schedulerStateManagerAdaptor(), adaptor)
-          .put(Keys.numContainers(), 1 + TopologyUtils.getNumContainers(topology))
+          .putAll(launcherUtils.getPrimaryRuntime(topology, adaptor))
           .put(Keys.schedulerShutdown(), getShutdown())
           .put(Keys.SCHEDULER_PROPERTIES, properties)
           .build();
 
       // get a packed plan and schedule it
-      packing.initialize(config, runtime);
-      PackingPlan packedPlan = packing.pack();
+      PackingPlan packedPlan = launcherUtils.createPackingPlan(config, runtime);
       if (packedPlan == null) {
         LOG.severe("Failed to pack a valid PackingPlan. Check the config.");
         return false;
       }
+      Config ytruntime = launcherUtils.createConfigWithPackingDetails(runtime, packedPlan);
 
-      // Add the instanceDistribution to the runtime
-      Config ytruntime = Config.newBuilder()
-          .putAll(runtime)
-          .put(Keys.instanceDistribution(), packedPlan.getInstanceDistribution())
-          .put(Keys.componentRamMap(), packedPlan.getComponentRamDistribution())
-          .put(Keys.numContainers(), 1 + packedPlan.getContainers().size())
-          .build();
+      // invoke scheduler
+      scheduler = launcherUtils.getSchedulerInstance(config, ytruntime);
+      if (scheduler == null) {
+        return false;
+      }
 
-      // initialize the scheduler
-      scheduler.initialize(config, ytruntime);
-
-      // schedule the packed plan
       isSuccessful = scheduler.onSchedule(packedPlan);
       if (!isSuccessful) {
         LOG.severe("Failed to schedule topology");
@@ -410,7 +392,6 @@ public class SchedulerMain {
 
       // 4. Close the resources
       SysUtils.closeIgnoringExceptions(scheduler);
-      SysUtils.closeIgnoringExceptions(packing);
       SysUtils.closeIgnoringExceptions(statemgr);
     }
 

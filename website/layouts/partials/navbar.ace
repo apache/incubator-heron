@@ -22,8 +22,7 @@ nav.hn-top-navbar.navbar.navbar-inverse.navbar-fixed-top role=navigation
         li
           a href={{.Site.Params.github.home}} GitHub
         li
-          a.nav-icon href={{.Site.Params.social.googleGroup}}
-            i.fa.fa-comments
+          a href={{.Site.Params.social.googleGroup}} Mailing List
         li
           a.nav-icon href={{.Site.Params.social.twitter}}
             i.fa.fa-twitter

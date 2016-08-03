@@ -35,6 +35,8 @@ sections:
         url: /docs/operators/deployment/uploaders/hdfs
       - name: Amazon S3
         url: /docs/operators/deployment/uploaders/s3
+      - name: Secure Copy (SCP)
+        url: /docs/operators/deployment/uploaders/scp
   - name: Schedulers
     sublinks:
       - name: Aurora Cluster
@@ -43,6 +45,8 @@ sections:
         url: /docs/operators/deployment/schedulers/local
 #      - name: Mesos Cluster
 #        url: /docs/operators/deployment/schedulers/mesos
+      - name: Mesos Cluster Locally
+        url: /docs/operators/deployment/schedulers/mesos-local-mac
       - name: Slurm Cluster
         url: /docs/operators/deployment/schedulers/slurm
       - name: YARN Cluster

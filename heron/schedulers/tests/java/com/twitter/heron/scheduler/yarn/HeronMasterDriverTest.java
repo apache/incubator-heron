@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.packing.Resource;
 
 public class HeronMasterDriverTest {
   private EvaluatorRequestor mockRequestor;
@@ -51,7 +52,8 @@ public class HeronMasterDriverTest {
         "jar",
         "package",
         "core",
-        0);
+        0,
+        false);
     spyDriver = Mockito.spy(driver);
   }
 
@@ -96,7 +98,7 @@ public class HeronMasterDriverTest {
                             double cpu,
                             long mem,
                             Map<String, PackingPlan.ContainerPlan> containers) {
-    PackingPlan.Resource resource = new PackingPlan.Resource(cpu, mem * 1024 * 1024, 0L);
+    Resource resource = new Resource(cpu, mem * 1024 * 1024, 0L);
     PackingPlan.ContainerPlan container = new PackingPlan.ContainerPlan(id, null, resource);
     containers.put(container.id, container);
   }

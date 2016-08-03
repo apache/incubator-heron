@@ -39,6 +39,15 @@ java_test(
 )
 
 java_test(
+    name = "ResourceCompliantRRPackingTest",
+    srcs = glob(
+       ["**/roundrobin/ResourceCompliantRRPackingTest.java"]
+    ),
+    deps = roundrobin_deps_files,
+    size = "small",
+)
+
+java_test(
     name = "FirstFitDecreasingPackingTest",
     srcs = glob(
         ["**/binpacking/FirstFitDecreasingPackingTest.java"]
