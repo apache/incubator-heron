@@ -53,7 +53,7 @@ class Spout(Component):
     self.immediate_acks = collections.deque()
     self.total_tuples_emitted = 0
 
-    # TODO: topology context, serializer and sys config
+    # TODO: custom serializer
 
   # pylint: disable=no-member
   @classmethod
@@ -143,9 +143,15 @@ class Spout(Component):
     data_tuple = tuple_pb2.HeronDataTuple()
     data_tuple.key = 0
 
-    if custom_target_task_ids is not None:
+    if direct_task is not None:
+      if not isinstance(direct_task, int):
+        raise TypeError("direct_task argument needs to be an integer, given: %s"
+                        % str(type(direct_task)))
+      # performing emit-direct
+      data_tuple.dest_task_ids.append(direct_task)
+    elif custom_target_task_ids is not None:
+      # for custom grouping
       for task_id in custom_target_task_ids:
-        # for custom grouping
         data_tuple.dest_task_ids.append(task_id)
 
     if tup_id is not None:
@@ -270,13 +276,34 @@ class Spout(Component):
     return self.topology_state == topology_pb2.TopologyState.Value("RUNNING")
 
   def _should_produce_tuple(self):
-    # TODO: implement later -- like for Back Pressure
-    return self._is_topology_running()
+    """Checks whether we could produce tuples, i.e. invoke spout.next_tuple()"""
+    return self._is_topology_running() and self.output_helper.is_out_queue_available()
 
-  # pylint: disable=no-self-use
   def _is_continue_to_work(self):
-    # TODO: implement later
-    return True
+    """Checks whether we still need to do more work
+
+    When the topology state is RUNNING:
+    1. if the out_queue is not full and ack is not enabled, we could wake up next time to
+       produce more tuples and push to the out_queue
+    2. if the out_queue is not full but the acking is enabled, we need to make sure that
+      the number of pending tuples is smaller than max_spout_pending
+    3. if there are more to read, we will wake up itself next time.
+    """
+    if not self._is_topology_running():
+      return False
+
+    max_spout_pending = \
+      self.pplan_helper.context.get_cluster_config().get(constants.TOPOLOGY_MAX_SPOUT_PENDING)
+
+    if not self.acking_enabled and self.output_helper.is_out_queue_available():
+      return True
+    elif self.acking_enabled and self.output_helper.is_out_queue_available() and \
+        len(self.in_flight_tuples) < max_spout_pending:
+      return True
+    elif self.acking_enabled and not self.in_stream.is_empty():
+      return True
+    else:
+      return False
 
   def _look_for_timeouts(self):
     spout_config = self.pplan_helper.context.get_cluster_config()

@@ -58,6 +58,8 @@ class SingleThreadHeronInstance(object):
 
     # Initialize metrics related
     self.out_metrics = HeronCommunicator()
+    self.out_metrics.\
+      register_capacity(self.sys_config[constants.INSTANCE_INTERNAL_METRICS_WRITE_QUEUE_CAPACITY])
     self.metrics_collector = MetricsCollector(self.looper, self.out_metrics)
     self.gateway_metrics = GatewayMetrics(self.metrics_collector, sys_config)
 
@@ -189,11 +191,19 @@ class SingleThreadHeronInstance(object):
       spout_class = pex_loader.import_and_get_class(self.topo_pex_file_abs_path, python_class_name)
       my_spout = spout_class(self.my_pplan_helper, self.in_stream, self.out_stream,
                              self.looper, self.sys_config)
+      self.in_stream.\
+        register_capacity(self.sys_config[constants.INSTANCE_INTERNAL_SPOUT_READ_QUEUE_CAPACITY])
+      self.out_stream.\
+        register_capacity(self.sys_config[constants.INSTANCE_INTERNAL_SPOUT_WRITE_QUEUE_CAPACITY])
       return my_spout
     else:
       bolt_class = pex_loader.import_and_get_class(self.topo_pex_file_abs_path, python_class_name)
       my_bolt = bolt_class(self.my_pplan_helper, self.in_stream, self.out_stream,
                            self.looper, self.sys_config)
+      self.in_stream. \
+        register_capacity(self.sys_config[constants.INSTANCE_INTERNAL_BOLT_READ_QUEUE_CAPACITY])
+      self.out_stream. \
+        register_capacity(self.sys_config[constants.INSTANCE_INTERNAL_BOLT_WRITE_QUEUE_CAPACITY])
       return my_bolt
 
   def start_instance(self):

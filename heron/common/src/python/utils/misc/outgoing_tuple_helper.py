@@ -134,3 +134,6 @@ class OutgoingTupleHelper(object):
 
   def _push_tuple_to_stream(self, tuple_set):
     self.out_stream.offer(tuple_set)
+
+  def is_out_queue_available(self):
+    return self.out_stream.get_available_capacity() > 0
