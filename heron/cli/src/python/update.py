@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' restart.py '''
-from heron.common.src.python.color import Log
+from heron.common.src.python.utils.log import Log
 
 import heron.cli.src.python.args as args
 import heron.cli.src.python.execute as execute
