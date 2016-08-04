@@ -26,6 +26,7 @@ DARWIN_EXECUTE = "\n".join(COMMON_EXECUTE + [
 ])
 
 LINUX_EXECUTE = "\n".join(COMMON_EXECUTE + [
+     'export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH',
      './configure --prefix=$$INSTALL_DIR --enable-shared=no LIBS="-Wl,--rpath -Wl,$$UNWIND_DIR/lib -L$$UNWIND_DIR/lib" CPPFLAGS=-I$$UNWIND_DIR/include LDFLAGS=-L$$UNWIND_DIR/lib',
      'make install LIBS="-Wl,--rpath -Wl,$$UNWIND_DIR/lib -L$$UNWIND_DIR/lib" CPPFLAGS=-I$$UNWIND_DIR/include LDFLAGS=-L$$UNWIND_DIR/lib',
      'rm -rf $$TMP_DIR',
@@ -63,15 +64,15 @@ genrule(
         "include/gperftools/stacktrace.h",
         "include/gperftools/tcmalloc.h",
 
-        "lib/libprofiler.a", 
+        "lib/libprofiler.a",
         "lib/libtcmalloc.a",
-        "lib/libtcmalloc_and_profiler.a", 
-        "lib/libtcmalloc_debug.a",  
+        "lib/libtcmalloc_and_profiler.a",
+        "lib/libtcmalloc_debug.a",
         "lib/libtcmalloc_minimal.a",
         "lib/libtcmalloc_minimal_debug.a",
     ],
     cmd = select({
-        "//tools/platform:darwin": DARWIN_EXECUTE, 
+        "//tools/platform:darwin": DARWIN_EXECUTE,
         "//conditions:default": LINUX_EXECUTE,
     }),
 )
