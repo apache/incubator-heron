@@ -94,7 +94,9 @@ class SingleThreadStmgrClient(HeronClient):
     request.topology_name = self.topology_name
     request.topology_id = self.topology_id
 
-    self.send_request(request, "Context", stmgr_pb2.RegisterInstanceResponse(), 10)
+    timeout_sec = float(self.sys_config[constants.INSTANCE_RECONNECT_STREAMMGR_INTERVAL_SEC])
+
+    self.send_request(request, "Context", stmgr_pb2.RegisterInstanceResponse(), timeout_sec)
 
   def _handle_register_response(self, response):
     """Called when a register response (RegisterInstanceResponse) arrives"""

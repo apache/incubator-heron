@@ -84,8 +84,9 @@ class MetricsManagerClient(HeronClient):
 
     Log.debug("Sending MetricsCli register request: \n" + str(request))
 
+    timeout_sec = float(self.sys_config[constants.INSTANCE_RECONNECT_METRICSMGR_INTERVAL_SEC])
     self.send_request(request, "MetricsClientContext",
-                      metrics_pb2.MetricPublisherRegisterResponse(), 10)
+                      metrics_pb2.MetricPublisherRegisterResponse(), timeout_sec)
 
   # pylint: disable=no-self-use
   def _handle_register_response(self, response):
