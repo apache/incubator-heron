@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 '''Stream Manager client for single-thread heron instance in python'''
-from heron.common.src.python.log import Log
+from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.misc import PhysicalPlanHelper
 from heron.common.src.python.network import HeronClient, StatusCode
 from heron.proto import stmgr_pb2, common_pb2
@@ -94,7 +94,9 @@ class SingleThreadStmgrClient(HeronClient):
     request.topology_name = self.topology_name
     request.topology_id = self.topology_id
 
-    self.send_request(request, "Context", stmgr_pb2.RegisterInstanceResponse(), 10)
+    timeout_sec = float(self.sys_config[constants.INSTANCE_RECONNECT_STREAMMGR_INTERVAL_SEC])
+
+    self.send_request(request, "Context", stmgr_pb2.RegisterInstanceResponse(), timeout_sec)
 
   def _handle_register_response(self, response):
     """Called when a register response (RegisterInstanceResponse) arrives"""
