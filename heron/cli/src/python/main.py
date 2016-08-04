@@ -24,7 +24,6 @@ import time
 
 import heron.cli.src.python.help as cli_help
 import heron.common.src.python.argparser as hrc_parse
-import heron.cli.src.python.opts as opts
 import heron.cli.src.python.activate as activate
 import heron.cli.src.python.deactivate as deactivate
 import heron.cli.src.python.kill as kill
