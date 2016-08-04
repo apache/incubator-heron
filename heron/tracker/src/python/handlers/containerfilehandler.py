@@ -18,7 +18,7 @@ import tornado.gen
 from heron.tracker.src.python.handlers import BaseHandler
 from heron.tracker.src.python import constants
 from heron.tracker.src.python import utils
-from heron.common.src.python.color import Log
+from heron.common.src.python.utils.log import Log
 
 
 # pylint: disable=attribute-defined-outside-init

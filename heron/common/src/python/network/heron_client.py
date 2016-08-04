@@ -20,7 +20,7 @@ from abc import abstractmethod
 
 import time
 from heron.common.src.python.network import HeronProtocol, REQID, StatusCode, OutgoingPacket
-from heron.common.src.python.log import Log
+from heron.common.src.python.utils.log import Log
 import heron.common.src.python.constants as constants
 
 # pylint: disable=too-many-instance-attributes

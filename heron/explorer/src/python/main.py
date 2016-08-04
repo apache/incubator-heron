@@ -28,8 +28,9 @@ import heron.explorer.src.python.physicalplan as physicalplan
 import heron.explorer.src.python.topologies as topologies
 import heron.common.src.python.utils.config as config
 import heron.explorer.src.python.version as version
-from heron.common.src.python.color import Log
+import heron.common.src.python.utils.log as log
 
+Log = log.Log
 
 # pylint: disable=bad-super-call
 class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
@@ -180,7 +181,7 @@ def main(args):
 
   if command not in ['help', 'version']:
     opts.set_tracker_url(command_line_args)
-    opts.set_verbose(command_line_args)
+    log.set_logging_level(command_line_args)
     if command not in ['topologies', 'clusters']:
       command_line_args = extract_common_args(command, parser, command_line_args)
     if not command_line_args:
