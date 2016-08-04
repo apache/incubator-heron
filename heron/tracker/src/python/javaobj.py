@@ -22,7 +22,7 @@ See: http://download.oracle.com/javase/6/docs/platform/serialization/spec/protoc
 """
 
 import struct
-from heron.common.src.python.color import Log
+from heron.common.src.python.utils.log import Log
 
 def log_debug(message, ident=0):
   """log debugging info"""

@@ -13,7 +13,7 @@
 # limitations under the License.
 '''outgoing_tuple_helper.py: module to provide a helper class for preparing and pushing tuples'''
 
-from heron.common.src.python.log import Log
+from heron.common.src.python.utils.log import Log
 from heron.proto import tuple_pb2, topology_pb2
 
 class OutgoingTupleHelper(object):

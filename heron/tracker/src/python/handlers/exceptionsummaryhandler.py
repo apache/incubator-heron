@@ -20,7 +20,7 @@ from heron.proto import common_pb2
 from heron.proto import tmaster_pb2
 from heron.tracker.src.python import constants
 from heron.tracker.src.python.handlers import BaseHandler
-from heron.common.src.python.color import Log
+from heron.common.src.python.utils.log import Log
 
 # pylint: disable=attribute-defined-outside-init
 class ExceptionSummaryHandler(BaseHandler):
