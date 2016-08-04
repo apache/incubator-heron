@@ -1,3 +1,5 @@
+syntax = "proto3";
+
 package heron.proto.scheduler;
 
 option java_package = "com.twitter.heron.proto.scheduler";
@@ -6,9 +8,11 @@ option java_outer_classname = "Scheduler";
 import "common.proto";
 
 message SchedulerLocation {
-  required string topology_name = 1;
+  string topology_name = 1;
+
   // host:port or DNS address of scheduler which can be reached for runtime management.
-  required string http_endpoint = 2;
+  string http_endpoint = 2;
+
   // Optional links to topology's customized ui page
   // Example: link to the Mesos Slave UI page displaying all scheduled containers
   repeated string job_page_link = 3;
@@ -18,16 +22,16 @@ message SchedulerLocation {
 // Interfaces called by scheduler
 //
 message KillTopologyRequest {
-  required string topology_name = 1;
+  string topology_name = 1;
 }
 
 message RestartTopologyRequest {
-  required string topology_name = 1;
+  string topology_name = 1;
   // container_index would be -1 if no container is specified to restart
   // That means we would restart all containers.
-  required int32 container_index = 2;
+  int32 container_index = 2;
 }
 
 message SchedulerResponse {
-  required heron.proto.system.Status status = 1;
+  heron.proto.system.Status status = 1;
 }

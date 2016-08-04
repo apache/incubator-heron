@@ -200,7 +200,7 @@ public class PhysicalPlanHelper {
                                               TopologyAPI.Component acomponent) {
     Map<String, Object> retval = new HashMap<String, Object>();
     for (TopologyAPI.Config.KeyValue kv : config.getKvsList()) {
-      if (kv.hasValue()) {
+      if (!kv.getValue().isEmpty()) {
         retval.put(kv.getKey(), kv.getValue());
       } else {
         retval.put(kv.getKey(), Utils.deserialize(kv.getSerializedValue().toByteArray()));
@@ -208,7 +208,7 @@ public class PhysicalPlanHelper {
     }
     // Override any component specific configs
     for (TopologyAPI.Config.KeyValue kv : acomponent.getConfig().getKvsList()) {
-      if (kv.hasValue()) {
+      if (!kv.getValue().isEmpty()) {
         retval.put(kv.getKey(), kv.getValue());
       } else {
         retval.put(kv.getKey(), Utils.deserialize(kv.getSerializedValue().toByteArray()));

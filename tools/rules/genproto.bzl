@@ -80,7 +80,7 @@ def proto_library(name, src=None, includes=[], deps=[], visibility=None,
         srcs = [name+"_java_src"],
         deps = java_deps,
         visibility = visibility,
-        javacopts = [ "-Xlint:-static" ],
+        javacopts = [ "-Xlint:-cast", "-Xlint:-static" ],
     )
 
   if not includes:

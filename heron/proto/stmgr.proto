@@ -1,10 +1,11 @@
+syntax = "proto3";
+
 package heron.proto.stmgr;
+
 option java_package = "com.twitter.heron.proto.stmgr";
 option java_outer_classname = "StreamManager";
 
 import "common.proto";
-import "stats.proto";
-import "topology.proto";
 import "physical_plan.proto";
 import "tuple.proto";
 
@@ -13,7 +14,7 @@ import "tuple.proto";
 //
 
 message NewPhysicalPlanMessage {
-  required heron.proto.system.PhysicalPlan new_pplan = 1;
+  heron.proto.system.PhysicalPlan new_pplan = 1;
 }
 
 //
@@ -21,53 +22,54 @@ message NewPhysicalPlanMessage {
 //
 message RegisterInstanceRequest {
   // Information about the instance registering with us
-  required heron.proto.system.Instance instance = 1;
-  required string topology_name = 2;
-  required string topology_id = 3;
+  heron.proto.system.Instance instance = 1;
+  string topology_name = 2;
+  string topology_id = 3;
 }
 
 message RegisterInstanceResponse {
-  required heron.proto.system.Status status = 1;
+  heron.proto.system.Status status = 1;
+
   // If the assignment is known, send it
-  optional heron.proto.system.PhysicalPlan pplan = 2;
+  heron.proto.system.PhysicalPlan pplan = 2;
 }
 
 message NewInstanceAssignmentMessage {
-  required heron.proto.system.PhysicalPlan pplan = 1;
+  heron.proto.system.PhysicalPlan pplan = 1;
 }
 
 // Tuples exchanged between stream managers and instances
 message TupleMessage {
-  required heron.proto.system.HeronTupleSet set = 1;
+  heron.proto.system.HeronTupleSet set = 1;
 }
 
 // messages exchanged between stream managers
 message StrMgrHelloRequest {
-  required string topology_name = 1;
-  required string topology_id = 2;
-  required string stmgr = 3;
+  string topology_name = 1;
+  string topology_id = 2;
+  string stmgr = 3;
 }
 
 message StrMgrHelloResponse {
-  required heron.proto.system.Status status = 1;
+  heron.proto.system.Status status = 1;
 }
 
 // Tuples exchanged between stream managers
 message TupleStreamMessage {
-  required int32 task_id = 1;
-  required heron.proto.system.HeronTupleSet set = 2;
+  int32 task_id = 1;
+  heron.proto.system.HeronTupleSet set = 2;
 }
 
 message StartBackPressureMessage {
-  required string topology_name = 1;
-  required string topology_id = 2;
-  required string stmgr = 3;
-  required string message_id = 4;
+  string topology_name = 1;
+  string topology_id = 2;
+  string stmgr = 3;
+  string message_id = 4;
 }
 
 message StopBackPressureMessage {
-  required string topology_name = 1;
-  required string topology_id = 2;
-  required string stmgr = 3;
-  required string message_id = 4;
+  string topology_name = 1;
+  string topology_id = 2;
+  string stmgr = 3;
+  string message_id = 4;
 }

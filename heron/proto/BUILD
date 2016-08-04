@@ -89,7 +89,6 @@ proto_library(
         ":proto_common",
         ":proto_physical_plan",
         ":proto_stats",
-        ":proto_topology",
     ],
 )
 
@@ -116,8 +115,6 @@ proto_library(
     deps = [
         ":proto_common",
         ":proto_physical_plan",
-        ":proto_stats",
-        ":proto_topology",
         ":proto_tuple",
     ],
 )
@@ -190,7 +187,7 @@ pex_library(
         ":proto_stmgr_py",
     ],
     reqs = [
-        "protobuf==2.5.0",
+        "protobuf==3.0.0",
         "setuptools==18.0.1",
     ],
 )

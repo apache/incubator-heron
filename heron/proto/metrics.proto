@@ -1,3 +1,5 @@
+syntax = "proto3";
+
 package heron.proto.system;
 
 option java_package = "com.twitter.heron.proto.system";
@@ -14,42 +16,53 @@ import "tmaster.proto";
 // MetricPublisherPublishMessage to send out the actual message
 
 message MetricDatum {
-  required string name = 1;
-  required string value = 2;
+  string name = 1;
+  string value = 2;
 }
 
 message ExceptionData {
   // Stack trace of exception. First two lines of stack trace is used for aggregating exception.
-  required string stacktrace = 1;
+  string stacktrace = 1;
+
   // Last time the exception occurred in the metrics collection interval
-  required string lasttime = 2;
+  string lasttime = 2;
+
   // First time the exception occurred in the metrics collection interval
-  required string firsttime = 3;
+  string firsttime = 3;
+
   // Number of time exception occurred in the metrics collection interval
-  required int32 count = 4;
+  int32 count = 4;
+
   // Additional text logged.
-  required string logging = 5;
+  string logging = 5;
 }
 
 message MetricPublisher {
-  required string hostname = 1;
-  required int32 port = 2;
+
+  // Name of the host
+  string hostname = 1;
+
+  // Port to publish to
+  int32 port = 2;
+
   // like Tail-FlatMap or __stmgr__
-  required string component_name = 3;
+  string component_name = 3;
+
   // In case of regular instances, it is their instance_id
   // For stmgr, it is the stmgr id
-  required string instance_id = 4;
+  string instance_id = 4;
+
   // The index of the instance with respect
   // to that component_name
-  required int32 instance_index = 5;
+  int32 instance_index = 5;
 }
 
 message MetricPublisherRegisterRequest {
-  required MetricPublisher publisher = 1;
+  MetricPublisher publisher = 1;
 }
 
 message MetricPublisherRegisterResponse {
-  required Status status = 1;
+  Status status = 1;
 }
 
 message MetricPublisherPublishMessage {
@@ -61,5 +74,5 @@ message MetricPublisherPublishMessage {
 // This is the tmaster location refresh message sent 
 // by the stmgrs to the metricsmgrs
 message TMasterLocationRefreshMessage {
-  required heron.proto.tmaster.TMasterLocation tmaster = 1;
+  heron.proto.tmaster.TMasterLocation tmaster = 1;
 }

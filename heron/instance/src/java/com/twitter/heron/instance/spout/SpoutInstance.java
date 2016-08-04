@@ -92,10 +92,10 @@ public class SpoutInstance implements IInstance {
     }
     serializer = SerializeDeSerializeHelper.getSerializer(config);
     // Get the spout. Notice, in fact, we will always use the deserialization way to get bolt.
-    if (helper.getMySpout().getComp().hasSerializedObject()) {
+    if (!helper.getMySpout().getComp().getSerializedObject().isEmpty()) {
       spout = (ISpout) Utils.deserialize(
           helper.getMySpout().getComp().getSerializedObject().toByteArray());
-    } else if (helper.getMySpout().getComp().hasClassName()) {
+    } else if (!helper.getMySpout().getComp().getClassName().isEmpty()) {
       String spoutClassName = helper.getMySpout().getComp().getClassName();
       try {
         spout = (ISpout) Class.forName(spoutClassName).newInstance();

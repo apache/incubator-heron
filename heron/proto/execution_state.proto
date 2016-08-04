@@ -1,26 +1,33 @@
+syntax = "proto3";
+
 package heron.proto.system;
 
 option java_package = "com.twitter.heron.proto.system";
 option java_outer_classname = "ExecutionEnvironment";
 
 message HeronReleaseState {
-  optional string release_username = 1;
-  optional string release_tag = 2;
+  string release_username = 1;  // the user who made the release
+  string release_tag = 2;       // the tag of the release
+
   // This is the user facing release version
-  optional string release_version = 3;
+  string release_version = 3;
 }
 
 message ExecutionState {
-  required string topology_name = 1;
-  required string topology_id = 2;
-  // The time the topology was submitted
-  // Unix time
-  optional int64 submission_time = 3;
-  // The username who launched the topology
-  optional string submission_user = 4;
 
-  required string cluster = 5;
-  required string environ = 6;
-  required string role = 7;
-  optional HeronReleaseState release_state = 8;
+  string topology_name = 1; // name of topology
+  string topology_id = 2;   // unique id of the topology
+
+  // The time the topology was submitted - Unix time
+  int64 submission_time = 3;
+
+  // The username who launched the topology
+  string submission_user = 4;
+
+  string cluster = 5; // name of the cluster
+  string environ = 6; // name of the environment
+  string role = 7;    // name of the role
+
+  // Heron release information
+  HeronReleaseState release_state = 8;
 }

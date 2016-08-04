@@ -1,3 +1,5 @@
+syntax = "proto3";
+
 package heron.proto.api;
 
 option java_package = "com.twitter.heron.api.generated";
@@ -20,116 +22,117 @@ option java_outer_classname = "TopologyAPI";
 //    For instance, change of TopologyState in runtime will be made in the Topology inside the node pplans/{topology_name}.
 
 enum Grouping {
-  SHUFFLE = 1;
-  FIELDS = 2;
-  ALL = 3;
-  LOWEST = 4;
-  NONE = 5;
-  DIRECT = 6;
-  CUSTOM = 7;
+  SHUFFLE = 0;
+  FIELDS = 1;
+  ALL = 2;
+  LOWEST = 3;
+  NONE = 4;
+  DIRECT = 5;
+  CUSTOM = 6;
 }
 
 enum Type {
-  OBJECT = 1; // generic type
+  OBJECT = 0; // generic type
 }
 
 enum ComponentObjectSpec {
-  JAVA_CLASS_NAME = 1;
-  JAVA_SERIALIZED_OBJECT = 2;
-  PYTHON_CLASS_NAME = 3;
+  JAVA_CLASS_NAME = 0;
+  JAVA_SERIALIZED_OBJECT = 1;
+  PYTHON_CLASS_NAME = 2;
 }
 
 enum CustomGroupingObjectType {
-  JAVA_OBJECT = 1;
-  PYTHON_OBJECT = 2;
+  JAVA_OBJECT = 0;
+  PYTHON_OBJECT = 1;
 }
 
 enum ConfigValueType {
-  STRING_VALUE = 1; //normal string
-  JAVA_SERIALIZED_VALUE = 2;
-  PYTHON_SERIALIZED_VALUE = 3;
+  STRING_VALUE = 0; //normal string
+  JAVA_SERIALIZED_VALUE = 1;
+  PYTHON_SERIALIZED_VALUE = 2;
 }
 
 message StreamSchema {
   message KeyType {
-    required string key = 1;
-    required Type type = 2;
+    string key = 1;
+    Type type = 2;
   }
   repeated KeyType keys = 1;
 }
 
 message StreamId {
-  required string id = 1;
-  required string component_name = 2; // the guy who produced it
+  string id = 1;
+  string component_name = 2; // the guy who produced it
 }
 
 message OutputStream {
-  required StreamId stream = 1;
-  required StreamSchema schema = 2;
+  StreamId stream = 1;
+  StreamSchema schema = 2;
 }
 
 message InputStream {
-  required StreamId stream = 1;
-  required Grouping gtype = 2;
-  optional StreamSchema grouping_fields = 3;
+  StreamId stream = 1;
+  Grouping gtype = 2;
+  StreamSchema grouping_fields = 3;
 
   // we should refactor when upgrading to protobuf v3.0 (#1181)
-  optional bytes custom_grouping_object = 4;
-  optional CustomGroupingObjectType type = 5;
+  bytes custom_grouping_object = 4;
+  CustomGroupingObjectType type = 5;
 }
 
 message Config {
   message KeyValue {
-    required string key = 1;
+    string key = 1;
     // Only one of the below are set
-    optional string value = 2;
-    optional bytes serialized_value = 3;
+    string value = 2;
+    bytes serialized_value = 3;
 
     // This is made optional for backward compatibility (#1179)
-    optional ConfigValueType type = 4;
+    ConfigValueType type = 4;
   }
   repeated KeyValue kvs = 1;
 }
 
 message Component {
   // The name of the component. Like Tail-FlatMap
-  required string name = 1;
+  string name = 1;
+
   // Only one of the below two is set, whose meaning is determined
   // by the value of spec. For example, when spec is JAVA_CLASS_NAME,
   // `class_name` is set and contains Java's class name.
   // When spec is JAVA_SERIALIZED_OBJECT, `serialized_object` is set and
   // contains a serialized Java object.
-  optional string class_name = 2;
-  optional bytes serialized_object = 4;
+  string class_name = 2;
+  bytes serialized_object = 4;
 
-  required Config config = 3;
+  Config config = 3;
 
   // This is made optional for backward compatibility
-  optional ComponentObjectSpec spec = 5;
+  ComponentObjectSpec spec = 5;
 }
 
 message Spout {
-  required Component comp = 1;
+  Component comp = 1;
   repeated OutputStream outputs = 2;
 }
 
 message Bolt {
-  required Component comp = 1;
+  Component comp = 1;
   repeated InputStream inputs = 2;
   repeated OutputStream outputs = 3;
 }
 
 enum TopologyState {
-  RUNNING = 1;
-  PAUSED = 2;
-  KILLED = 3;
+  RUNNING = 0;
+  PAUSED = 1;
+  KILLED = 2;
 }
 
 message Topology {
-  required string id = 1;
-  required string name = 2;
+  string id = 1;
+  string name = 2;
   repeated Spout spouts = 3;
   repeated Bolt bolts = 4;
-  required TopologyState state = 5;
-  optional Config topology_config = 6;
+  TopologyState state = 5;
+  Config topology_config = 6;
 }

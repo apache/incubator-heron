@@ -1,3 +1,5 @@
+syntax = "proto3";
+
 package heron.proto.system;
 
 option java_package = "com.twitter.heron.proto.system";
@@ -9,37 +11,37 @@ import "topology.proto";
 // It reflects the dynamic running state of a topology.
 
 message StMgr {
-  required string id = 1;
-  required string host_name = 2;
-  required int32  data_port = 3;
-  required string local_endpoint = 4;
-  optional string cwd = 5; // current working directory
-  optional int32 pid = 6; // PID of process
+  string id = 1;
+  string host_name = 2;
+  int32  data_port = 3;
+  string local_endpoint = 4;
+  string cwd = 5; // current working directory
+  int32 pid = 6; // PID of process
 
   // Http port to connect to heron-shell.
   // The port is not used by stmgr itself, except to
   // pass it on to tmaster to be included in pplan.
-  optional int32 shell_port = 7;
+  int32 shell_port = 7;
 }
 
 message InstanceInfo {
-  required int32 task_id = 1; // global
-  required int32 component_index = 2; // specific to this component
-  required string component_name = 3;
+  int32 task_id = 1; // global
+  int32 component_index = 2; // specific to this component
+  string component_name = 3;
   repeated string params = 4;
 }
 
 message Instance {
-  required string instance_id = 1;
-  required string stmgr_id = 2;
-  required InstanceInfo info = 3;
+  string instance_id = 1;
+  string stmgr_id = 2;
+  InstanceInfo info = 3;
 }
 
 message PhysicalPlan {
   // Note that heron.proto.api.Topology, included in PhysicalPlan,
   // reflect the actual dynamic running state of the topology.
   // Query this value guarantees the correct running state of the topology.
-  required heron.proto.api.Topology topology = 1;
+  heron.proto.api.Topology topology = 1;
   repeated StMgr stmgrs = 2;
   repeated Instance instances = 3;
 }

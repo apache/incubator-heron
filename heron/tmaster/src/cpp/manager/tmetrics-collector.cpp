@@ -110,14 +110,14 @@ MetricResponse* TMetricsCollector::GetMetrics(const MetricRequest& _request) {
     LOG(ERROR) << "GetMetrics request received for unknown component " << _request.component_name();
     response->mutable_status()->set_status(proto::system::NOTOK);
     response->mutable_status()->set_message("Unknown component");
-  } else if (!_request.has_interval() && !_request.has_explicit_interval()) {
+  } else if (_request.interval() == 0 && !_request.has_explicit_interval()) {
     LOG(ERROR) << "GetMetrics request does not have either interval "
                << " nor explicit interval";
     response->mutable_status()->set_status(proto::system::NOTOK);
     response->mutable_status()->set_message("No interval or explicit interval set");
   } else {
     sp_int64 start_time, end_time;
-    if (_request.has_interval()) {
+    if (_request.interval() != 0) {
       end_time = time(NULL);
       if (_request.interval() <= 0) {
         start_time = 0;

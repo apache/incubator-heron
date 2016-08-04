@@ -3,17 +3,36 @@ licenses(["notice"])
 package(default_visibility = ["//visibility:public"])
 
 package_name = "protobuf"
-package_version = "2.5.0"
+package_version = "3.0.0"
 
 package_file = package_name + "-" + package_version + ".tar.gz"
 package_dir = package_name + "-" + package_version
-package_patch = package_name + "-" + package_version + ".patch"
+
+gmock_name = "gmock"
+gmock_version = "1.7.0"
+
+gmock_file = gmock_name + "-" + gmock_version + ".zip"
+gmock_dir = gmock_name + "-" + gmock_version
 
 genrule(
     name = "protobuf-srcs",
-    srcs = [package_file, package_patch],
+    srcs = [package_file, gmock_file],
     outs = [
         "bin/protoc",
+   
+
+        "include/google/protobuf/arena.h",
+        "include/google/protobuf/arenastring.h",
+        "include/google/protobuf/stubs/atomic_sequence_num.h",
+        "include/google/protobuf/stubs/fastmem.h",
+        "include/google/protobuf/stubs/port.h",
+        "include/google/protobuf/stubs/macros.h",
+        "include/google/protobuf/stubs/logging.h",
+        "include/google/protobuf/stubs/scoped_ptr.h",
+        "include/google/protobuf/stubs/mutex.h",
+        "include/google/protobuf/stubs/callback.h",
+        "include/google/protobuf/stubs/shared_ptr.h",
+        "include/google/protobuf/stubs/casts.h",
 
         "include/google/protobuf/extension_set.h",
         "include/google/protobuf/message_lite.h",
@@ -28,12 +47,14 @@ genrule(
         "include/google/protobuf/wire_format_lite.h",
         "include/google/protobuf/descriptor.proto",
         "include/google/protobuf/generated_message_util.h",
+        "include/google/protobuf/generated_enum_util.h",
         "include/google/protobuf/service.h",
         "include/google/protobuf/wire_format_lite_inl.h",
         "include/google/protobuf/descriptor_database.h",
         "include/google/protobuf/dynamic_message.h",
         "include/google/protobuf/message.h",
         "include/google/protobuf/text_format.h",
+        "include/google/protobuf/metadata.h",
 
         "include/google/protobuf/compiler/code_generator.h",
         "include/google/protobuf/compiler/command_line_interface.h",
@@ -81,8 +102,10 @@ genrule(
         "cp -R $(SRCS) $$TMP_DIR",
         "cd $$TMP_DIR",
         "tar xfz " + package_file,
-        "patch -d " + package_dir + " -p1 < " + package_patch,
         "cd " + package_dir,
+        "unzip -q -o " + "../" + gmock_file,
+        "mv " + gmock_dir + " gmock",
+        "./autogen.sh",
         "./configure --prefix=$$INSTALL_DIR --enable-shared=no",
         "make install",
         "rm -rf $$TMP_DIR",
@@ -120,15 +143,29 @@ cc_library(
         "lib/libprotobuf.a",
     ],
     hdrs = [
+        "include/google/protobuf/arena.h",
+        "include/google/protobuf/arenastring.h",
+        "include/google/protobuf/stubs/atomic_sequence_num.h",
         "include/google/protobuf/stubs/common.h",
+        "include/google/protobuf/stubs/fastmem.h",
         "include/google/protobuf/stubs/once.h",
+        "include/google/protobuf/stubs/port.h",
+        "include/google/protobuf/stubs/macros.h",
+        "include/google/protobuf/stubs/logging.h",
+        "include/google/protobuf/stubs/scoped_ptr.h",
+        "include/google/protobuf/stubs/mutex.h",
+        "include/google/protobuf/stubs/callback.h",
+        "include/google/protobuf/stubs/shared_ptr.h",
+        "include/google/protobuf/stubs/casts.h",
 
         "include/google/protobuf/descriptor.h",
         "include/google/protobuf/extension_set.h",
+        "include/google/protobuf/generated_enum_util.h",
         "include/google/protobuf/generated_message_util.h",
         "include/google/protobuf/generated_message_reflection.h",
         "include/google/protobuf/message.h",
         "include/google/protobuf/message_lite.h",
+        "include/google/protobuf/metadata.h",
         "include/google/protobuf/reflection_ops.h",
         "include/google/protobuf/repeated_field.h",
         "include/google/protobuf/unknown_field_set.h",

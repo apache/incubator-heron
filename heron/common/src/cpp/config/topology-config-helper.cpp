@@ -144,12 +144,12 @@ proto::api::Topology* TopologyConfigHelper::StripComponentObjects(
   proto::api::Topology* ret = new proto::api::Topology();
   ret->CopyFrom(_topology);
   for (sp_int32 i = 0; i < ret->spouts_size(); ++i) {
-    if (ret->mutable_spouts(i)->mutable_comp()->has_serialized_object()) {
+    if (!ret->mutable_spouts(i)->mutable_comp()->serialized_object().empty()) {
       ret->mutable_spouts(i)->mutable_comp()->clear_serialized_object();
     }
   }
   for (sp_int32 i = 0; i < ret->bolts_size(); ++i) {
-    if (ret->mutable_bolts(i)->mutable_comp()->has_serialized_object()) {
+    if (!ret->mutable_bolts(i)->mutable_comp()->serialized_object().empty()) {
       ret->mutable_bolts(i)->mutable_comp()->clear_serialized_object();
     }
   }
