@@ -61,4 +61,8 @@ public class HeronConfigurationOptions {
   @NamedParameter(doc = "Heron Executors Id, 0 = TM, 1 <= worker", default_value = "0")
   public class HeronExecutorId implements Name<String> {
   }
+
+  @NamedParameter(doc = "verbose logs", default_value = "false")
+  public class VerboseLogMode implements Name<Boolean> {
+  }
 }

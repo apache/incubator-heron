@@ -20,7 +20,11 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.api.bolt.BaseBasicBolt;
@@ -39,11 +43,15 @@ import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.LauncherUtils;
 import com.twitter.heron.spi.utils.Runtime;
 
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(LauncherUtils.class)
 public class LaunchRunnerTest {
   private static final String TOPOLOGY_NAME = "testTopology";
   private static final String CLUSTER = "testCluster";
@@ -105,7 +113,7 @@ public class LaunchRunnerTest {
     return config;
   }
 
-  private static Config createRunnerRuntime() {
+  private static Config createRunnerRuntime() throws Exception {
     Config runtime = Mockito.spy(Config.newBuilder().build());
     ILauncher launcher = Mockito.mock(ILauncher.class);
     IPacking packing = Mockito.mock(IPacking.class);
@@ -113,7 +121,6 @@ public class LaunchRunnerTest {
     TopologyAPI.Topology topology = createTopology(new com.twitter.heron.api.Config());
 
     Mockito.doReturn(launcher).when(runtime).get(Keys.launcherClassInstance());
-    Mockito.doReturn(packing).when(runtime).get(Keys.packingClassInstance());
     Mockito.doReturn(adaptor).when(runtime).get(Keys.schedulerStateManagerAdaptor());
     Mockito.doReturn(topology).when(runtime).get(Keys.topologyDefinition());
 
@@ -122,9 +129,16 @@ public class LaunchRunnerTest {
         new HashMap<String, PackingPlan.ContainerPlan>());
     Mockito.when(packingPlan.getComponentRamDistribution()).thenReturn("ramdist");
     Mockito.when(packingPlan.getId()).thenReturn("packing_plan_id");
-    Mockito.when(packingPlan.getResource()).thenReturn(new PackingPlan.Resource(0, 0, 0));
+    Mockito.when(packingPlan.getResource()).thenReturn(new Resource(0, 0, 0));
     Mockito.when(packing.pack()).thenReturn(packingPlan);
     Mockito.when(packingPlan.getInstanceDistribution()).thenReturn(MOCK_PACKING_STRING);
+
+    LauncherUtils mockLauncherUtils = Mockito.mock(LauncherUtils.class);
+    Mockito.when(
+        mockLauncherUtils.createPackingPlan(Mockito.any(Config.class), Mockito.any(Config.class)))
+        .thenReturn(packingPlan);
+    PowerMockito.spy(LauncherUtils.class);
+    PowerMockito.doReturn(mockLauncherUtils).when(LauncherUtils.class, "getInstance");
 
     return runtime;
   }

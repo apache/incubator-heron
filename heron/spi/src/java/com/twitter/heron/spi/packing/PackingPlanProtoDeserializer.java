@@ -54,7 +54,7 @@ public class PackingPlanProtoDeserializer {
         convert(instancePlan.getResource()));
   }
 
-  private PackingPlan.Resource convert(PackingPlans.Resource resource) {
-    return new PackingPlan.Resource(resource.getCpu(), resource.getRam(), resource.getDisk());
+  private Resource convert(PackingPlans.Resource resource) {
+    return new Resource(resource.getCpu(), resource.getRam(), resource.getDisk());
   }
 }

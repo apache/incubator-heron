@@ -38,6 +38,7 @@ import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;
@@ -251,20 +252,20 @@ public class MesosScheduler implements IScheduler {
    */
   protected void fillResourcesRequirementForBaseContainer(
       BaseContainer container, Integer containerIndex, PackingPlan packing) {
+    Resource maxResourceContainer = SchedulerUtils.getMaxRequiredResource(packing);
     double cpu = 0;
     double disk = 0;
     double mem = 0;
     for (PackingPlan.ContainerPlan cp : packing.containers.values()) {
-      PackingPlan.Resource containerResource = cp.resource;
+      Resource containerResource = cp.resource;
       cpu = Math.max(cpu, containerResource.cpu);
       disk = Math.max(disk, containerResource.disk);
       mem = Math.max(mem, containerResource.ram);
     }
-
-    container.cpu = cpu;
+    container.cpu = maxResourceContainer.cpu;
     // Convert them from bytes to MB
-    container.diskInMB = disk / Constants.MB;
-    container.memInMB = mem / Constants.MB;
+    container.diskInMB = maxResourceContainer.disk / Constants.MB;
+    container.memInMB = maxResourceContainer.ram / Constants.MB;
     container.ports = SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR;
   }
 }

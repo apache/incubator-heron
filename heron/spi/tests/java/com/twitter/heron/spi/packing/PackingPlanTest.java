@@ -26,8 +26,8 @@ import com.twitter.heron.spi.common.Constants;
 
 public class PackingPlanTest {
   public static PackingPlan generatePacking(Map<String, List<String>> basePacking) {
-    PackingPlan.Resource resource =
-        new PackingPlan.Resource(1.0, 1 * Constants.GB, 10 * Constants.GB);
+    Resource resource =
+        new Resource(1.0, 1 * Constants.GB, 10 * Constants.GB);
 
     Map<String, PackingPlan.ContainerPlan> containerPlanMap = new HashMap<>();
 

@@ -30,6 +30,7 @@ import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoDeserializer;
 import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
+import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.TMasterUtils;
@@ -256,7 +257,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     // just add instances to the first container for prototype, cloning resources
     PackingPlan.ContainerPlan containerToUse =
         currentPackingPlan.getContainers().values().iterator().next();
-    PackingPlan.Resource resourceToUse =
+    Resource resourceToUse =
         containerToUse.instances.values().iterator().next().resource;
 
     Integer nextGlobalInstanceId = totalInstances + 1; // TODO: don't assume they go from 1 -> N

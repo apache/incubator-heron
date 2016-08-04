@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.packing.binpacking;
+package com.twitter.heron.packing.roundrobin;
+
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,26 +33,24 @@ import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
- * FirstFitDecreasing packing algorithm
+ * ResourceCompliantRoundRobin packing algorithm
  * <p>
- * This IPacking implementation generates a PackingPlan based on the
- * First Fit Decreasing heuristic for the binpacking problem. The algorithm attempts to minimize
- * the amount of resources used.
+ * This IPacking implementation generates a PackingPlan using a round robin algorithm.
  * <p>
  * Following semantics are guaranteed:
- * 1. Supports heterogeneous containers. The number of containers used is determined
- * by the algorithm and not by the config file.
- * The user provides a hint for the maximum container size and a padding percentage.
+ * 1. Supports heterogeneous containers.
+ * The user provides the number of containers to use as well as
+ * the maximum container size and a padding percentage.
  * The padding percentage whose values range from [0, 100], determines the additional per container
  * resources allocated for system-related processes (e.g., the stream manager).
  * The algorithm might produce containers whose size is slightly higher than
  * the maximum container size provided by the user depending on the per-container instance allocation
  * and the padding configuration.
  * <p>
- * 2. The user provides a hint for the maximum CPU, RAM and Disk that can be used by each container through
- * the com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT,
- * com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_RAM_HINT,
- * com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_DISK_HINT parameters.
+ * 2. The user provides the maximum CPU, RAM and Disk that can be used by each container through
+ * the com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_CPU_REQUESTED,
+ * com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED,
+ * com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_DISK_REQUESTED parameters.
  * If the parameters are not specified then a default value is used for the maximum container
  * size.
  * <p>
@@ -78,7 +76,7 @@ import com.twitter.heron.spi.utils.TopologyUtils;
  * (disk for instances in container) + ((paddingPercentage * disk for instances in container)
  * <p>
  * 10. The size of resources required by the whole topology is equal to
- * ((# containers used by FFD)* size of each container
+ * ((# containers used by ResourceCompliantRR)* size of each container
  * + size of a container that includes one instance with default resource requirements).
  * We add some resources to consider the Heron internal container (i.e. the one containing Scheduler
  * and TMaster).
@@ -86,14 +84,13 @@ import com.twitter.heron.spi.utils.TopologyUtils;
  * 11. The pack() return null if PackingPlan fails to pass the safe check, for instance,
  * the size of ram for an instance is less than the minimal required value or .
  */
-
-public class FirstFitDecreasingPacking implements IPacking {
+public class ResourceCompliantRRPacking implements IPacking {
 
   public static final long MIN_RAM_PER_INSTANCE = 192L * Constants.MB;
   public static final int DEFAULT_CONTAINER_PADDING_PERCENTAGE = 10;
   public static final int DEFAULT_NUMBER_INSTANCES_PER_CONTAINER = 4;
 
-  private static final Logger LOG = Logger.getLogger(FirstFitDecreasingPacking.class.getName());
+  private static final Logger LOG = Logger.getLogger(ResourceCompliantRRPacking.class.getName());
   protected TopologyAPI.Topology topology;
 
   protected long instanceRamDefault;
@@ -102,6 +99,8 @@ public class FirstFitDecreasingPacking implements IPacking {
   protected long maxContainerRam;
   protected double maxContainerCpu;
   protected long maxContainerDisk;
+  protected int numContainers;
+  protected int numAdjustments;
 
   public static String getContainerId(int index) {
     return "" + index;
@@ -116,34 +115,48 @@ public class FirstFitDecreasingPacking implements IPacking {
     return instanceId.split(":")[1];
   }
 
+  public void increasenumContainers() {
+    this.numContainers++;
+    this.numAdjustments++;
+  }
+
   @Override
   public void initialize(Config config, Config runtime) {
     this.topology = com.twitter.heron.spi.utils.Runtime.topology(runtime);
+    this.numContainers = TopologyUtils.getNumContainers(topology);
     this.instanceRamDefault = Context.instanceRam(config);
     this.instanceCpuDefault = Context.instanceCpu(config).doubleValue();
     this.instanceDiskDefault = Context.instanceDisk(config);
+    this.numAdjustments = 0;
 
     List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
     this.maxContainerRam = Long.parseLong(TopologyUtils.getConfigWithDefault(
-        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_RAM_HINT,
+        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_RAM_REQUESTED,
         Long.toString(instanceRamDefault * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER)));
 
     this.maxContainerCpu = Double.parseDouble(TopologyUtils.getConfigWithDefault(
-        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT,
+        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_CPU_REQUESTED,
         Double.toString(instanceCpuDefault * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER)));
 
     this.maxContainerDisk = Long.parseLong(TopologyUtils.getConfigWithDefault(
-        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_DISK_HINT,
+        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_DISK_REQUESTED,
         Long.toString(instanceDiskDefault * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER)));
   }
 
   @Override
   public PackingPlan pack() {
-    // Get the instances using FFD allocation
-    Map<String, List<String>> ffdAllocation = getFFDAllocation();
+    int adjustments = this.numAdjustments;
+    // Get the instances using a resource compliant round robin allocation
+    Map<String, List<String>> resourceCompliantRRAllocation
+        = getResourceCompliantRRAllocation();
 
-    if (ffdAllocation == null) {
-      return null;
+    while (resourceCompliantRRAllocation == null) {
+      if (this.numAdjustments > adjustments) {
+        adjustments++;
+        resourceCompliantRRAllocation = getResourceCompliantRRAllocation();
+      } else {
+        return null;
+      }
     }
     // Construct the PackingPlan
     Map<String, PackingPlan.ContainerPlan> containerPlanMap = new HashMap<>();
@@ -158,7 +171,7 @@ public class FirstFitDecreasingPacking implements IPacking {
     long topologyDisk = 0;
     double topologyCpu = 0.0;
 
-    for (Map.Entry<String, List<String>> entry : ffdAllocation.entrySet()) {
+    for (Map.Entry<String, List<String>> entry : resourceCompliantRRAllocation.entrySet()) {
 
       String containerId = entry.getKey();
       List<String> instanceList = entry.getValue();
@@ -230,15 +243,15 @@ public class FirstFitDecreasingPacking implements IPacking {
 
   @Override
   public void close() {
-
   }
 
   /**
-   * Sort the components in decreasing order based on their RAM requirements
+   * Get the RAM requirements of all the components
    *
-   * @return The sorted list of components and their RAM requirements
+   * @return The list of components and their RAM requirements. Returns null if one or more
+   * instances do not have valid resource requirements.
    */
-  protected ArrayList<RamRequirement> getSortedRAMInstances() {
+  protected ArrayList<RamRequirement> getRAMInstances() {
     ArrayList<RamRequirement> ramRequirements = new ArrayList<>();
     Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
     Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
@@ -247,82 +260,92 @@ public class FirstFitDecreasingPacking implements IPacking {
       if (ramMap.containsKey(component)) {
         if (!isValidInstance(new Resource(instanceCpuDefault,
             ramMap.get(component), instanceDiskDefault))) {
-          return null;
+          throw new RuntimeException("The topology configuration does not have "
+              + "valid resource requirements. Please make sure that the instance resource "
+              + "requirements do not exceed the maximum per-container resources.");
         } else {
           ramRequirements.add(new RamRequirement(component, ramMap.get(component)));
         }
       } else {
         if (!isValidInstance(new Resource(instanceCpuDefault,
             instanceRamDefault, instanceDiskDefault))) {
-          return null;
+          throw new RuntimeException("The topology configuration does not have "
+              + "valid resource requirements. Please make sure that the instance resource "
+              + "requirements do not exceed the maximum per-container resources.");
         } else {
           ramRequirements.add(new RamRequirement(component, instanceRamDefault));
         }
       }
     }
-    Collections.sort(ramRequirements, Collections.reverseOrder());
-
     return ramRequirements;
   }
 
   /**
-   * Get the instances' allocation based on the First Fit Decreasing algorithm
+   * Get the instances' allocation based on the Resource Compliant Round Robin algorithm
    *
    * @return Map &lt; containerId, list of InstanceId belonging to this container &gt;
    */
-  protected Map<String, List<String>> getFFDAllocation() {
+  protected Map<String, List<String>> getResourceCompliantRRAllocation() {
+
     Map<String, List<String>> allocation = new HashMap<>();
-
     ArrayList<Container> containers = new ArrayList<>();
+    ArrayList<RamRequirement> ramRequirements = getRAMInstances();
 
+    int totalInstance = TopologyUtils.getTotalInstance(topology);
+
+    if (numContainers > totalInstance) {
+      throw new RuntimeException("More containers allocated than instances."
+          + numContainers + " allocated to host " + totalInstance + " instances.");
+    }
+
+    for (int i = 1; i <= numContainers; ++i) {
+      allocation.put(getContainerId(i), new ArrayList<String>());
+    }
+    for (int i = 0; i <= numContainers - 1; i++) {
+      allocateNewContainer(containers);
+    }
+
+    int containerId = 1;
     int globalTaskIndex = 1;
     Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
-    ArrayList<RamRequirement> ramRequirements = getSortedRAMInstances();
-
-    if (ramRequirements == null) {
-      return null;
-    }
-    for (int i = 0; i < ramRequirements.size(); i++) {
-      String component = ramRequirements.get(i).getComponentName();
+    int componentIndex = 0;
+    for (String component : parallelismMap.keySet()) {
+      long ramRequirement = ramRequirements.get(componentIndex).getRamRequirement();
       int numInstance = parallelismMap.get(component);
-      for (int j = 0; j < numInstance; j++) {
-        int containerId = placeFFDInstance(containers,
-            ramRequirements.get(i).getRamRequirement(),
-            instanceCpuDefault, instanceDiskDefault);
-        if (allocation.containsKey(getContainerId(containerId))) {
-          allocation.get(getContainerId(containerId)).
-              add(getInstanceId(containerId, component, globalTaskIndex, j));
+      for (int i = 0; i < numInstance; ++i) {
+        if (placeResourceCompliantRRInstance(containers, containerId,
+            ramRequirement, instanceCpuDefault, instanceDiskDefault)) {
+          allocation.get(getContainerId(containerId))
+              .add(getInstanceId(containerId, component, globalTaskIndex, i));
         } else {
-          ArrayList<String> instance = new ArrayList<>();
-          instance.add(getInstanceId(containerId, component, globalTaskIndex, j));
-          allocation.put(getContainerId(containerId), instance);
+          List<TopologyAPI.Config.KeyValue> topologyConfig
+              = topology.getTopologyConfig().getKvsList();
+          //Automatically adjust the number of containers
+          increasenumContainers();
+          LOG.info(String.format("Increasing the number of containers to "
+              + this.numContainers + " and attempting packing again."));
+          return null;
         }
+        containerId = (containerId == numContainers) ? 1 : containerId + 1;
         globalTaskIndex++;
       }
+      componentIndex++;
     }
     return allocation;
   }
 
   /**
-   * Assign a particular instance to an existing container or to a new container
+   * Assign a particular instance to a container with a given containerId
    *
-   * @return the container Id that incorporated the instance
+   * @return true if the container incorporated the instance, otherwise return false
    */
-  public int placeFFDInstance(ArrayList<Container> containers, long ramRequirement,
-                              double cpuRequirement, long diskRequirement) {
-    boolean placed = false;
-    int containerId = 0;
-    for (int i = 0; i < containers.size() && !placed; i++) {
-      if (containers.get(i).add(ramRequirement, cpuRequirement, diskRequirement)) {
-        placed = true;
-        containerId = i + 1;
-      }
+  public boolean placeResourceCompliantRRInstance(ArrayList<Container> containers, int containerId,
+                                                  long ramRequirement, double cpuRequirement,
+                                                  long diskRequirement) {
+    if (containers.get(containerId - 1).add(ramRequirement, cpuRequirement, diskRequirement)) {
+      return true;
     }
-    if (!placed) {
-      containerId = allocateNewContainer(containers);
-      containers.get(containerId - 1).add(ramRequirement, cpuRequirement, diskRequirement);
-    }
-    return containerId;
+    return false;
   }
 
   /**
@@ -377,3 +400,5 @@ public class FirstFitDecreasingPacking implements IPacking {
     return true;
   }
 }
+
+

@@ -13,7 +13,7 @@
 # limitations under the License.
 '''metrics_helper: helper classes for managing common metrics'''
 
-from heron.common.src.python.log import Log
+from heron.common.src.python.utils.log import Log
 from heron.proto import metrics_pb2
 import heron.common.src.python.constants as constants
 

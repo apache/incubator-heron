@@ -40,19 +40,19 @@ public final class TMasterUtils {
   public static boolean sendToTMaster(String command, String topologyName,
                                       SchedulerStateManagerAdaptor stateManager) {
     // fetch the TMasterLocation for the topology
-    LOG.info("Fetching TMaster location for topology: " + topologyName);
+    LOG.fine("Fetching TMaster location for topology: " + topologyName);
 
     TopologyMaster.TMasterLocation location = stateManager.getTMasterLocation(topologyName);
     if (location == null) {
       LOG.severe("Failed to fetch TMaster Location for topology: " + topologyName);
       return false;
     }
-    LOG.info("Fetched TMaster location for topology: " + topologyName);
+    LOG.fine("Fetched TMaster location for topology: " + topologyName);
 
     // for the url request to be sent to TMaster
     String endpoint = String.format("http://%s:%d/%s?topologyid=%s",
         location.getHost(), location.getControllerPort(), command, location.getTopologyId());
-    LOG.info("HTTP URL for TMaster: " + endpoint);
+    LOG.fine("HTTP URL for TMaster: " + endpoint);
 
     // create a URL connection
     HttpURLConnection connection = null;
@@ -62,21 +62,21 @@ public final class TMasterUtils {
       LOG.log(Level.SEVERE, "Failed to get a HTTP connection to TMaster: ", e);
       return false;
     }
-    LOG.info("Successfully opened HTTP connection to TMaster");
+    LOG.fine("Successfully opened HTTP connection to TMaster");
 
     // now sent the http request
     NetworkUtils.sendHttpGetRequest(connection);
-    LOG.info("Sent the HTTP payload to TMaster");
+    LOG.fine("Sent the HTTP payload to TMaster");
 
     boolean success = false;
     // get the response and check if it is successful
     try {
       int responseCode = connection.getResponseCode();
       if (responseCode == HttpURLConnection.HTTP_OK) {
-        LOG.info("Successfully got a HTTP response from TMaster for " + command);
+        LOG.fine("Successfully got a HTTP response from TMaster for " + command);
         success = true;
       } else {
-        LOG.info(String.format("Non OK HTTP response %d from TMaster for command %s",
+        LOG.fine(String.format("Non OK HTTP response %d from TMaster for command %s",
             responseCode, command));
       }
     } catch (IOException e) {
