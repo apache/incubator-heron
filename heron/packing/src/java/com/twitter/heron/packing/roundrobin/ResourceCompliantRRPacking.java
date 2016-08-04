@@ -242,6 +242,11 @@ public class ResourceCompliantRRPacking implements IPacking {
   }
 
   @Override
+  public PackingPlan pack(PackingPlan currentPackingPlan, Map<String, Integer> componentChanges) {
+    return null;
+  }
+
+  @Override
   public void close() {
   }
 

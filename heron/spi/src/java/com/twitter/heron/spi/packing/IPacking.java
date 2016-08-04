@@ -14,6 +14,8 @@
 
 package com.twitter.heron.spi.packing;
 
+import java.util.Map;
+
 import com.twitter.heron.spi.common.Config;
 
 /**
@@ -34,6 +36,14 @@ public interface IPacking extends AutoCloseable {
    * @return PackingPlan describing the job to schedule.
    */
   PackingPlan pack();
+
+  /**
+   * Generates a new packing given an existing packing and component changes
+   * Packing algorithm output generates instance id and container id.
+   *
+   * @return PackingPlan describing the new packing plan.
+   */
+  PackingPlan pack(PackingPlan currentPackingPlan, Map<String, Integer> componentChanges);
 
   /**
    * This is to for disposing or cleaning up any internal state accumulated by

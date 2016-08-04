@@ -21,17 +21,19 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoDeserializer;
 import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
-import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.ReflectionUtils;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.TMasterUtils;
 
@@ -255,7 +257,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     Map<String, Integer> componentChanges = parallelismDelta(componentCounts, changeRequests);
 
     // just add instances to the first container for prototype, cloning resources
-    PackingPlan.ContainerPlan containerToUse =
+    /*PackingPlan.ContainerPlan containerToUse =
         currentPackingPlan.getContainers().values().iterator().next();
     Resource resourceToUse =
         containerToUse.instances.values().iterator().next().resource;
@@ -272,9 +274,24 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
             new PackingPlan.InstancePlan(instanceId, component, resourceToUse);
         containerToUse.instances.put(instanceId, instancePlan);
       }
+    }*/
+    // Create an instance of the packing class
+    String packingClass = Context.packingClass(config);
+    IPacking packing;
+    try {
+      // create an instance of the packing class
+      packing = ReflectionUtils.newInstance(packingClass);
+    } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
+      LOG.log(Level.SEVERE, "Failed to instantiate packing instance", e);
+      return null;
     }
-
-    return serializer.toProto(currentPackingPlan);
+    try {
+      packing.initialize(config, runtime);
+      PackingPlan packedPlan = packing.pack(currentPackingPlan, componentChanges);
+      return serializer.toProto(packedPlan);
+    } finally {
+      SysUtils.closeIgnoringExceptions(packing);
+    }
   }
 
   private Map<String, Integer> parallelismDelta(Map<String, Integer> componentCounts,

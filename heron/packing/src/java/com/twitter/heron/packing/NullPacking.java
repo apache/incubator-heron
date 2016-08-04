@@ -15,6 +15,7 @@
 package com.twitter.heron.packing;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.packing.IPacking;
@@ -31,6 +32,11 @@ public class NullPacking implements IPacking {
         "",
         new HashMap<String, PackingPlan.ContainerPlan>(),
         new Resource(0.0, 0L, 0L));
+  }
+
+  @Override
+  public PackingPlan pack(PackingPlan currentPackingPlan, Map<String, Integer> componentChanges) {
+    return null;
   }
 
   @Override

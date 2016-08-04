@@ -91,7 +91,32 @@ public class FirstFitDecreasingPackingTest {
     return output;
   }
 
-  @Test
+  protected PackingPlan getFirstFitDecreasingPackingPlanRepack(
+      TopologyAPI.Topology topology,
+      PackingPlan currentPackingPlan,
+      Map<String, Integer> componentChanges) {
+    Config config = Config.newBuilder()
+        .put(Keys.topologyId(), topology.getId())
+        .put(Keys.topologyName(), topology.getName())
+        .putAll(ClusterDefaults.getDefaults())
+        .build();
+
+    Config runtime = Config.newBuilder()
+        .put(Keys.topologyDefinition(), topology)
+        .build();
+
+    this.instanceRamDefault = Context.instanceRam(config);
+    this.instanceCpuDefault = Context.instanceCpu(config).doubleValue();
+    this.instanceDiskDefault = Context.instanceDisk(config);
+
+    FirstFitDecreasingPacking packing = new FirstFitDecreasingPacking();
+    packing.initialize(config, runtime);
+    PackingPlan output = packing.pack(currentPackingPlan, componentChanges);
+
+    return output;
+  }
+
+  @Test(expected = RuntimeException.class)
   public void testCheckFailure() throws Exception {
     int numContainers = 2;
     int spoutParallelism = 4;
@@ -108,9 +133,8 @@ public class FirstFitDecreasingPackingTest {
 
     TopologyAPI.Topology topology =
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlan =
-        getFirstFitDecreasingPackingPlan(topology);
-    Assert.assertNull(packingPlan);
+
+    getFirstFitDecreasingPackingPlan(topology);
   }
 
   /**
@@ -525,7 +549,7 @@ public class FirstFitDecreasingPackingTest {
   /**
    * Test invalid ram for instance
    */
-  @Test
+  @Test(expected = RuntimeException.class)
   public void testInvalidRamInstance() throws Exception {
     int spoutParallelism = 4;
     int boltParallelism = 3;
@@ -546,9 +570,186 @@ public class FirstFitDecreasingPackingTest {
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
     PackingPlan packingPlanExplicitRamMap =
         getFirstFitDecreasingPackingPlan(topologyExplicitRamMap);
-
-    Assert.assertEquals(packingPlanExplicitRamMap, null);
-
   }
 
+
+  /**
+   * Test the scenario where the max container size is the default
+   * and scaling is requested.
+   */
+  @Test
+  public void testDefaultContainerSizeRepack() throws Exception {
+    int spoutParallelism = 4;
+    int boltParallelism = 3;
+    int totalInstances = spoutParallelism + boltParallelism;
+    // Set up the topology and its config
+    com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
+
+    TopologyAPI.Topology topology =
+        getTopology(spoutParallelism, boltParallelism, topologyConfig);
+
+    topologyConfig.setComponentRam(BOLT_NAME, instanceRamDefault);
+    topologyConfig.setComponentRam(SPOUT_NAME, instanceRamDefault);
+
+    PackingPlan packingPlan =
+        getFirstFitDecreasingPackingPlan(topology);
+
+    Assert.assertEquals(packingPlan.containers.size(), 2);
+
+    long startRam = (totalInstances + HERON_INTERNAL_CONTAINERS)
+        * instanceRamDefault
+        + (long) ((DEFAULT_CONTAINER_PADDING / 100.0
+        * totalInstances * instanceRamDefault));
+
+    Assert.assertEquals(packingPlan.resource.ram, startRam);
+
+    double startCpu = Math.round(spoutParallelism * instanceCpuDefault
+        + (DEFAULT_CONTAINER_PADDING / 100.0 * spoutParallelism * instanceCpuDefault))
+        + Math.round(boltParallelism * instanceCpuDefault
+        + (DEFAULT_CONTAINER_PADDING / 100.0 * boltParallelism * instanceCpuDefault))
+        + instanceCpuDefault;
+
+    Assert.assertEquals((long) packingPlan.resource.cpu, (long) startCpu);
+
+    long startDisk = (totalInstances + HERON_INTERNAL_CONTAINERS)
+        * instanceDiskDefault
+        + (long) ((DEFAULT_CONTAINER_PADDING / 100.0
+        * totalInstances * instanceDiskDefault));
+
+    Assert.assertEquals(packingPlan.resource.disk, startDisk);
+
+    int numScalingInstances = 3;
+    Map<String, Integer> componentChanges = new HashMap<String, Integer>();
+    componentChanges.put(BOLT_NAME, numScalingInstances);
+    PackingPlan newPackingPlan = getFirstFitDecreasingPackingPlanRepack(topology, packingPlan,
+        componentChanges);
+
+    Assert.assertEquals(newPackingPlan.containers.size(), 3);
+
+    long newRam = numScalingInstances * instanceRamDefault
+        + (long) (DEFAULT_CONTAINER_PADDING / 100.0
+        * numScalingInstances * instanceRamDefault);
+
+    Assert.assertEquals(newPackingPlan.resource.ram, startRam + newRam);
+
+    double newCpu = Math.round(numScalingInstances * instanceCpuDefault
+        + (DEFAULT_CONTAINER_PADDING / 100.0 * numScalingInstances * instanceCpuDefault));
+
+    Assert.assertEquals((long) newPackingPlan.resource.cpu, (long) (startCpu + newCpu));
+
+    long newDisk = numScalingInstances * instanceDiskDefault
+        + (long) ((DEFAULT_CONTAINER_PADDING / 100.0
+        * numScalingInstances * instanceDiskDefault));
+
+    Assert.assertEquals(newPackingPlan.resource.disk, startDisk + newDisk);
+  }
+
+  /**
+   * Test the scenario ram map config is partially set and scaling is requested
+   */
+  @Test
+  public void testPartialRamMapScaling() throws Exception {
+    int spoutParallelism = 4;
+    int boltParallelism = 3;
+
+    // Set up the topology and its config
+    com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
+
+    // Explicit set resources for container
+    long maxContainerRam = 10L * Constants.GB;
+
+    // Explicit set component ram map
+    long boltRam = 4L * Constants.GB;
+
+    topologyConfig.setContainerMaxRamHint(maxContainerRam);
+    topologyConfig.setComponentRam(BOLT_NAME, boltRam);
+
+    TopologyAPI.Topology topologyExplicitRamMap =
+        getTopology(spoutParallelism, boltParallelism, topologyConfig);
+    PackingPlan packingPlanExplicitRamMap =
+        getFirstFitDecreasingPackingPlan(topologyExplicitRamMap);
+
+    Assert.assertEquals(packingPlanExplicitRamMap.containers.size(), 2);
+
+    long startRam = 2 * boltRam + 2 * instanceRamDefault
+        + (long) (DEFAULT_CONTAINER_PADDING / 100.0 * (2 * boltRam + 2 * instanceRamDefault))
+        + boltRam + 2 * instanceRamDefault
+        + (long) (DEFAULT_CONTAINER_PADDING / 100.0 * (boltRam + 2 * instanceRamDefault))
+        + instanceRamDefault;
+
+    Assert.assertEquals(startRam, packingPlanExplicitRamMap.resource.ram);
+
+    double startCpu = (long) (Math.round(4 * instanceCpuDefault
+        + DEFAULT_CONTAINER_PADDING / 100.0 * (4 * instanceCpuDefault))
+        + Math.round(3 * instanceCpuDefault
+        + DEFAULT_CONTAINER_PADDING / 100.0 * (3 * instanceCpuDefault))
+        + instanceCpuDefault);
+
+    Assert.assertEquals((long) startCpu, (long) packingPlanExplicitRamMap.resource.cpu);
+
+    long startDisk = 4 * instanceDiskDefault
+        + (long) (DEFAULT_CONTAINER_PADDING / 100.0 * (4 * instanceDiskDefault))
+        + 3 * instanceDiskDefault
+        + (long) (DEFAULT_CONTAINER_PADDING / 100.0 * (3 * instanceDiskDefault))
+        + instanceDiskDefault;
+
+    Assert.assertEquals(startDisk, packingPlanExplicitRamMap.resource.disk);
+
+    for (PackingPlan.ContainerPlan containerPlan
+        : packingPlanExplicitRamMap.containers.values()) {
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.instances.values()) {
+        // Ram for bolt should be the value in component ram map
+        if (instancePlan.componentName.equals(BOLT_NAME)) {
+          Assert.assertEquals(boltRam, instancePlan.resource.ram);
+        }
+        if (instancePlan.componentName.equals(SPOUT_NAME)) {
+          Assert.assertEquals(instanceRamDefault, instancePlan.resource.ram);
+        }
+      }
+    }
+    int numScalingInstances = 3;
+    Map<String, Integer> componentChanges = new HashMap<String, Integer>();
+    componentChanges.put(BOLT_NAME, numScalingInstances);
+    PackingPlan newPackingPlan = getFirstFitDecreasingPackingPlanRepack(topologyExplicitRamMap,
+        packingPlanExplicitRamMap,
+        componentChanges);
+
+    Assert.assertEquals(newPackingPlan.containers.size(), 4);
+
+    long newRam = 2 * boltRam
+        + (long) (DEFAULT_CONTAINER_PADDING / 100.0 * 2 * boltRam)
+        + 1 * boltRam
+        + (long) (DEFAULT_CONTAINER_PADDING / 100.0 * boltRam);
+
+    Assert.assertEquals(newPackingPlan.resource.ram, startRam + newRam);
+
+    double newCpu = Math.round(2 * instanceCpuDefault
+        + (DEFAULT_CONTAINER_PADDING / 100.0 * 2 * instanceCpuDefault))
+        + Math.round(1 * instanceCpuDefault
+        + (DEFAULT_CONTAINER_PADDING / 100.0 * 1 * instanceCpuDefault));
+
+    Assert.assertEquals((long) newPackingPlan.resource.cpu, (long) (startCpu + newCpu));
+
+    long newDisk = 2 * instanceDiskDefault
+        + (long) ((DEFAULT_CONTAINER_PADDING / 100.0
+        * 2 * instanceDiskDefault))
+        + 1 * instanceDiskDefault
+        + (long) (DEFAULT_CONTAINER_PADDING / 100.0
+        * instanceDiskDefault);
+
+    Assert.assertEquals(newPackingPlan.resource.disk, startDisk + newDisk);
+
+    for (PackingPlan.ContainerPlan containerPlan
+        : newPackingPlan.containers.values()) {
+      for (PackingPlan.InstancePlan instancePlan : containerPlan.instances.values()) {
+        // Ram for bolt should be the value in component ram map
+        if (instancePlan.componentName.equals(BOLT_NAME)) {
+          Assert.assertEquals(boltRam, instancePlan.resource.ram);
+        }
+        if (instancePlan.componentName.equals(SPOUT_NAME)) {
+          Assert.assertEquals(instanceRamDefault, instancePlan.resource.ram);
+        }
+      }
+    }
+  }
 }
