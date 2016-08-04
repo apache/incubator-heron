@@ -39,7 +39,7 @@ public class PackingPlanTest {
 
       for (String instanceId : instanceList) {
         String componentName = instanceId.split(":")[1];
-        Resource instanceResource = null;
+        Resource instanceResource;
         if ("bolt".equals(componentName)) {
           instanceResource = new Resource(1.0, 2 * Constants.GB, 10 * Constants.GB);
         } else {
