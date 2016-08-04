@@ -100,7 +100,7 @@ def run(command, parser, command_args, unknown_args):
   :param unknown_args:
   :return:
   '''
-  status = 1
+  status = True
   if command == 'activate':
     status = activate.run(command, parser, command_args, unknown_args)
 
@@ -169,7 +169,7 @@ def extract_common_args(command, parser, cl_args):
   cluster = config.get_heron_cluster(cluster_role_env)
   config_path = config.get_heron_cluster_conf_dir(cluster, config_path)
   if not os.path.isdir(config_path):
-    Log.error("Config path cluster directory does not exist: %s" % config_path)
+    Log.error("Config path cluster directory does not exist: %s", config_path)
     return dict()
 
   new_cl_args = dict()
@@ -181,7 +181,7 @@ def extract_common_args(command, parser, cl_args):
     new_cl_args['config_path'] = config_path
     new_cl_args['override_config_file'] = override_config_file
   except Exception as ex:
-    Log.error("Argument cluster/[role]/[env] is not correct: %s" % str(ex))
+    Log.error("Argument cluster/[role]/[env] is not correct: %s", str(ex))
     return dict()
 
   cl_args.update(new_cl_args)
@@ -238,7 +238,7 @@ def main():
 
   if command not in ('help', 'version'):
     sys.stdout.flush()
-    Log.info('Elapsed time: %.3fs.' % (end - start))
+    Log.info('Elapsed time: %.3fs.', (end - start))
 
   return 0 if retcode else 1
 
