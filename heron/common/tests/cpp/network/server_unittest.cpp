@@ -15,6 +15,7 @@
  */
 
 #include "network/server_unittest.h"
+#include <algorithm>
 #include <iostream>
 #include <vector>
 #include "network/unittests.pb.h"
