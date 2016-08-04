@@ -23,7 +23,7 @@ import tarfile
 import tempfile
 import yaml
 
-from heron.common.src.python.color import Log
+from .log import Log
 
 # default environ tag, if not provided
 ENVIRON = "default"

@@ -347,7 +347,8 @@ public class HeronMasterDriver {
             env,
             topologyJar,
             topologyName,
-            httpPort);
+            httpPort,
+            false);
         schedulerMain.runScheduler();
       } catch (IOException e) {
         throw new RuntimeException("Failed to launch Heron Scheduler", e);

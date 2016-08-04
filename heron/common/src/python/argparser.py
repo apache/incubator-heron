@@ -19,17 +19,18 @@ import os
 import re
 import sys
 import traceback
-from heron.common.src.python.color import Log
 import heron.common.src.python.utils.config as config
-
+import heron.common.src.python.utils.log as log
 
 ##########################################################################
 # Run the command
 ##########################################################################
-
+# pylint: disable=invalid-name
+Log = log.Log
 
 HERON_RC = os.path.join(os.path.expanduser('~'), '.heronrc')
 # pylint: disable=anomalous-backslash-in-string
+# pylint: disable=invalid-name
 heron_command_pattern = re.compile('(^[^:]*):([^:]*):([^\s]*) (.*)')
 filters = ['^@']
 expressions = [re.compile(x) for x in filters]

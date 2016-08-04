@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' cli_helper.py '''
+import logging
 import heron.common.src.python.utils.config as config
-import heron.cli.src.python.opts as opts
 import heron.cli.src.python.execute as execute
 import heron.cli.src.python.jars as jars
 import heron.cli.src.python.args as args
 
-from heron.common.src.python.color import Log
+from heron.common.src.python.utils.log import Log
 
 ################################################################################
 def create_parser(subparsers, action, help_arg):
@@ -72,7 +72,7 @@ def run(command, parser, cl_args, unknown_args, action):
         "--command", command,
     ]
 
-    if opts.verbose():
+    if Log.getEffectiveLevel() == logging.DEBUG:
       new_args.append("--verbose")
 
     lib_jars = config.get_heron_libs(jars.scheduler_jars() + jars.statemgr_jars())
