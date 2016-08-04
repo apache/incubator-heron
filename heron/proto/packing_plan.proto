@@ -1,0 +1,36 @@
+package heron.proto.system;
+
+option java_package = "com.twitter.heron.proto.system";
+option java_outer_classname = "PackingPlans";
+
+// This file defines the packing plan of a topology.
+// It reflects the the instances and containers of a topology.
+
+message Resource {
+  required double cpu = 1;
+  required int64 ram = 2;
+  required int64 disk = 3;
+}
+
+message InstancePlan {
+  required string id = 1;
+  required string component_name = 2;
+  required Resource resource = 3;
+}
+
+message ContainerPlan {
+  required string id = 1;
+  repeated InstancePlan instance_plans = 2;
+  required Resource resource = 3;
+}
+
+message PackingPlan {
+  required string id = 1;
+  repeated ContainerPlan container_plans = 2;
+  required Resource resource = 3;
+
+  // Java should read the packing plan and call the getters to recompute these. They are serialized
+  // only to make it easy for the python impl logic that knows how to parse these strings.
+  required string instance_distribution = 4;
+  required string component_ram_distribution = 5;
+}
