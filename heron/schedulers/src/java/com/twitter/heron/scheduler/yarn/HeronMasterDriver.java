@@ -53,6 +53,7 @@ import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Role;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyJar;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyName;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyPackageName;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.VerboseLogMode;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlan.ContainerPlan;
 import com.twitter.heron.spi.packing.Resource;
@@ -79,6 +80,8 @@ public class HeronMasterDriver {
   private final String env;
   private final String topologyJar;
   private final int httpPort;
+  private final boolean verboseMode;
+
   // TODO: https://github.com/twitter/heron/issues/949: implement Driver HA
   // Once topology is killed, no more activeContexts should be allowed. This could happen when
   // container allocation is happening and topology is killed concurrently.
@@ -109,7 +112,9 @@ public class HeronMasterDriver {
                            @Parameter(TopologyJar.class) String topologyJar,
                            @Parameter(TopologyPackageName.class) String topologyPackageName,
                            @Parameter(HeronCorePackageName.class) String heronCorePackageName,
-                           @Parameter(HttpPort.class) int httpPort) throws IOException {
+                           @Parameter(HttpPort.class) int httpPort,
+                           @Parameter(VerboseLogMode.class) boolean verboseMode)
+      throws IOException {
 
     // REEF related initialization
     this.requestor = requestor;
@@ -125,6 +130,7 @@ public class HeronMasterDriver {
     this.env = env;
     this.topologyJar = topologyJar;
     this.httpPort = httpPort;
+    this.verboseMode = verboseMode;
 
     // This instance of Driver will be used for managing topology containers
     HeronMasterDriverProvider.setInstance(this);
@@ -313,6 +319,7 @@ public class HeronMasterDriver {
         .set(HeronTaskConfiguration.PACKED_PLAN, getPackingAsString())
         .set(HeronTaskConfiguration.COMPONENT_RAM_MAP, getComponentRamMap())
         .set(HeronTaskConfiguration.CONTAINER_ID, id)
+        .set(HeronTaskConfiguration.VERBOSE, verboseMode)
         .build();
     context.submitTask(taskConf);
   }
@@ -340,7 +347,8 @@ public class HeronMasterDriver {
             env,
             topologyJar,
             topologyName,
-            httpPort);
+            httpPort,
+            false);
         schedulerMain.runScheduler();
       } catch (IOException e) {
         throw new RuntimeException("Failed to launch Heron Scheduler", e);

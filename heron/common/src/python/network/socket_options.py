@@ -14,7 +14,7 @@
 '''socket_options.py'''
 
 from collections import namedtuple
-from heron.common.src.python.log import Log
+from heron.common.src.python.utils.log import Log
 import heron.common.src.python.constants as const
 
 SocketOptions = namedtuple('Options', 'nw_write_batch_size_bytes, nw_write_batch_time_ms, '

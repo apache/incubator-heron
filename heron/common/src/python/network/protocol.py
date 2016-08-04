@@ -16,7 +16,7 @@ import random
 import socket
 import struct
 
-from heron.common.src.python.log import Log
+from heron.common.src.python.utils.log import Log
 
 class HeronProtocol(object):
   """Heron's application level network protocol"""

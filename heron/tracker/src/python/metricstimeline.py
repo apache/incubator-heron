@@ -16,7 +16,7 @@ import tornado.gen
 
 from heron.proto import common_pb2
 from heron.proto import tmaster_pb2
-from heron.common.src.python.color import Log
+from heron.common.src.python.utils.log import Log
 
 # pylint: disable=too-many-locals, too-many-branches, unused-argument
 @tornado.gen.coroutine

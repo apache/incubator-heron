@@ -95,7 +95,7 @@ public class DriverOnLocalReefTest {
 
     @Inject
     TestDriver(EvaluatorRequestor requestor) throws IOException {
-      driver = new HeronMasterDriver(requestor, null, "", "", "", "", null, null, null, 0);
+      driver = new HeronMasterDriver(requestor, null, "", "", "", "", null, null, null, 0, false);
     }
 
     private void addContainer(String id,

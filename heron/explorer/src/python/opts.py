@@ -12,18 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' opts.py '''
-import logging
-from heron.common.src.python.color import Log
 from tornado.options import define
-
-
-def set_verbose(cl_args):
-  """ set verbose level """
-  if cl_args['verbose']:
-    Log.setLevel(logging.DEBUG)
-  else:
-    Log.setLevel(logging.INFO)
-
 
 def set_tracker_url(cl_args):
   """ define global Tornado variable """
