@@ -434,4 +434,3 @@ class Spout(Component):
     The spout may or may not be reactivated in the future.
     """
     pass
-
