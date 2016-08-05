@@ -12,12 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 '''communicator.py: module responsible for communication between Python heron modules'''
+import sys
 import Queue
 
 from heron.common.src.python.utils.log import Log
 
 class HeronCommunicator(object):
-  """HeronCommunicator: a wrapper class for non-blocking queue in Heron."""
+  """HeronCommunicator: a wrapper class for non-blocking queue in Heron.
+
+  Note that this class does not yet implement the dynamic tuning of expected available capacity,
+  as it is not necessary for single thread instance.
+  """
   def __init__(self, producer_cb=None, consumer_cb=None):
     """Initialize HeronCommunicator
 
@@ -29,6 +34,17 @@ class HeronCommunicator(object):
     self._producer_callback = producer_cb
     self._consumer_callback = consumer_cb
     self._buffer = Queue.Queue()
+    self.capacity = sys.maxint
+
+  def register_capacity(self, capacity):
+    """Registers the capacity of this communicator
+
+    By default, the capacity of HeronCommunicator is set to be ``sys.maxint``
+    """
+    self.capacity = capacity
+
+  def get_available_capacity(self):
+    return max(self.capacity - self.get_size(), 0)
 
   def get_size(self):
     """Returns the size of the buffer"""

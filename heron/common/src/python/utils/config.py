@@ -25,6 +25,8 @@ import yaml
 
 from .log import Log
 
+# pylint: disable=logging-not-lazy
+
 # default environ tag, if not provided
 ENVIRON = "default"
 
