@@ -25,7 +25,7 @@ import org.junit.Test;
 import com.twitter.heron.spi.common.Constants;
 
 public class PackingPlanTest {
-  public static PackingPlan generatePacking(Map<String, List<String>> basePacking) {
+  private static PackingPlan generatePacking(Map<String, List<String>> basePacking) {
     Resource resource =
         new Resource(1.0, 1 * Constants.GB, 10 * Constants.GB);
 
@@ -39,8 +39,14 @@ public class PackingPlanTest {
 
       for (String instanceId : instanceList) {
         String componentName = instanceId.split(":")[1];
+        Resource instanceResource;
+        if ("bolt".equals(componentName)) {
+          instanceResource = new Resource(1.0, 2 * Constants.GB, 10 * Constants.GB);
+        } else {
+          instanceResource = new Resource(1.0, 3 * Constants.GB, 10 * Constants.GB);
+        }
         PackingPlan.InstancePlan instancePlan =
-            new PackingPlan.InstancePlan(instanceId, componentName, resource);
+            new PackingPlan.InstancePlan(instanceId, componentName, instanceResource);
         instancePlanMap.put(instanceId, instancePlan);
       }
 
@@ -57,26 +63,33 @@ public class PackingPlanTest {
   public void testPackingToString() {
     Map<String, List<String>> packing = new HashMap<>();
     packing.put("1", Arrays.asList("1:spout:1:0", "1:bolt:3:0"));
-    String packingStr = generatePacking(packing).getInstanceDistribution();
     String expectedStr0 = "1:spout:1:0:bolt:3:0";
     String expectedStr1 = "1:bolt:3:0:spout:1:0";
+
+    PackingPlan packingPlan = generatePacking(packing);
+    String packingStr = packingPlan.getInstanceDistribution();
 
     Assert.assertTrue(packingStr.equals(expectedStr0) || packingStr.equals(expectedStr1));
 
     packing.put("2", Arrays.asList("2:spout:2:1"));
-    packingStr = generatePacking(packing).getInstanceDistribution();
+    packingPlan = generatePacking(packing);
+    packingStr = packingPlan.getInstanceDistribution();
 
-    for (String str : packingStr.split(",")) {
-      if (str.startsWith("1:")) {
+    for (String component : packingStr.split(",")) {
+      if (component.startsWith("1:")) {
         // This is the packing str for container 1
-        Assert.assertTrue(str.equals(expectedStr0) || str.equals(expectedStr1));
-      } else if (str.startsWith("2:")) {
+        Assert.assertTrue(component.equals(expectedStr0) || component.equals(expectedStr1));
+      } else if (component.startsWith("2:")) {
         // This is the packing str for container 2
-        Assert.assertEquals("2:spout:2:1", str);
+        Assert.assertEquals("2:spout:2:1", component);
       } else {
         // Unexpected container string
-        throw new RuntimeException("Unexpected results");
+        throw new RuntimeException(String.format(
+            "Unexpected component id found in instance distribution: %s", component));
       }
     }
+
+    String ramDistStr = packingPlan.getComponentRamDistribution();
+    Assert.assertEquals("spout:3221225472,bolt:2147483648", ramDistStr);
   }
 }
