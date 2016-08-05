@@ -114,33 +114,40 @@ public class UpdateTopologyManager {
                                                     String componentName,
                                                     int parallelism) {
     TopologyAPI.Topology.Builder builder = TopologyAPI.Topology.newBuilder().mergeFrom(topology);
-    for (int i = 0; i < builder.getBoltsCount(); i++) {
-      TopologyAPI.Bolt.Builder boltBuilder = builder.getBoltsBuilder(i);
-      TopologyAPI.Component.Builder compBuilder = boltBuilder.getCompBuilder();
-      for (Map.Entry<Descriptors.FieldDescriptor, Object> entry
-          : compBuilder.getAllFields().entrySet()) {
-        if (entry.getKey().getName().equals("name") && componentName.equals(entry.getValue())) {
-          TopologyAPI.Config.Builder confBuilder = compBuilder.getConfigBuilder();
-          boolean keyFound = false;
-          for (TopologyAPI.Config.KeyValue.Builder kvBuilder : confBuilder.getKvsBuilderList()) {
-            if (kvBuilder.getKey().equals(
-                com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_PARALLELISM)) {
-              kvBuilder.setValue(Integer.toString(parallelism));
-              keyFound = true;
-              break;
-            }
-          }
-          if (!keyFound) {
-            TopologyAPI.Config.KeyValue.Builder kvBuilder =
-                TopologyAPI.Config.KeyValue.newBuilder();
-            kvBuilder.setKey(com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_PARALLELISM);
+    for (TopologyAPI.Bolt.Builder boltBuilder : builder.getBoltsBuilderList()) {
+      updateComponent(boltBuilder.getCompBuilder(), componentName, parallelism);
+    }
+    for (TopologyAPI.Spout.Builder spoutBuilder : builder.getSpoutsBuilderList()) {
+      updateComponent(spoutBuilder.getCompBuilder(), componentName, parallelism);
+    }
+    return builder.build();
+  }
+
+  private static void updateComponent(TopologyAPI.Component.Builder compBuilder,
+                                      String componentName,
+                                      int parallelism) {
+    for (Map.Entry<Descriptors.FieldDescriptor, Object> entry
+        : compBuilder.getAllFields().entrySet()) {
+      if (entry.getKey().getName().equals("name") && componentName.equals(entry.getValue())) {
+        TopologyAPI.Config.Builder confBuilder = compBuilder.getConfigBuilder();
+        boolean keyFound = false;
+        for (TopologyAPI.Config.KeyValue.Builder kvBuilder : confBuilder.getKvsBuilderList()) {
+          if (kvBuilder.getKey().equals(
+              com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_PARALLELISM)) {
             kvBuilder.setValue(Integer.toString(parallelism));
-            confBuilder.addKvs(kvBuilder);
+            keyFound = true;
+            break;
           }
+        }
+        if (!keyFound) {
+          TopologyAPI.Config.KeyValue.Builder kvBuilder =
+              TopologyAPI.Config.KeyValue.newBuilder();
+          kvBuilder.setKey(com.twitter.heron.api.Config.TOPOLOGY_COMPONENT_PARALLELISM);
+          kvBuilder.setValue(Integer.toString(parallelism));
+          confBuilder.addKvs(kvBuilder);
         }
       }
     }
-    return builder.build();
   }
 
   private void assertTrue(boolean condition, String message, Object... values) {
