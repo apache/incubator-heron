@@ -50,5 +50,9 @@ public final class MarathonConstants {
   public static final String METRICSMGR_PORT = "$PORT4";
   public static final String SCHEDULER_PORT = "$PORT5";
 
+  public static final String[] PORT_LIST = new String[]{
+      MASTER_PORT, TMASTER_CONTROLLER_PORT, TMASTER_STATS_PORT,
+      SHELL_PORT, METRICSMGR_PORT, SCHEDULER_PORT};
+
   public static final String JOB_LINK = "/ui/#/group/%2F";
 }

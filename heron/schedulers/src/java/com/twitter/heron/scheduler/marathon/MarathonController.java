@@ -46,23 +46,26 @@ public class MarathonController {
       return false;
     }
 
-    // Send kill topology request
-    if (!NetworkUtils.sendHttpDeleteRequest(conn)) {
-      LOG.log(Level.SEVERE, "Failed to set delete request");
-      return false;
-    }
+    try {
+      // Send kill topology request
+      if (!NetworkUtils.sendHttpDeleteRequest(conn)) {
+        LOG.log(Level.SEVERE, "Failed to send delete request");
+        return false;
+      }
 
-    // Check response
-    boolean success = NetworkUtils.checkHttpResponseCode(conn, HttpURLConnection.HTTP_OK);
-    // Disconnect to release resources
-    conn.disconnect();
+      // Check response
+      boolean success = NetworkUtils.checkHttpResponseCode(conn, HttpURLConnection.HTTP_OK);
 
-    if (success) {
-      LOG.log(Level.INFO, "Successfully killed topology");
-      return true;
-    } else {
-      LOG.log(Level.SEVERE, "Failed to kill topology");
-      return false;
+      if (success) {
+        LOG.log(Level.INFO, "Successfully killed topology");
+        return true;
+      } else {
+        LOG.log(Level.SEVERE, "Failed to kill topology");
+        return false;
+      }
+    } finally {
+      // Disconnect to release resources
+      conn.disconnect();
     }
   }
 
@@ -72,7 +75,7 @@ public class MarathonController {
       String message = "Restarting the whole topology is not supported yet. "
           + "Please kill and resubmit the topology.";
       LOG.log(Level.SEVERE, message);
-      return true;
+      return false;
     }
 
     // Setup Connection
@@ -84,25 +87,27 @@ public class MarathonController {
       return false;
     }
 
-    // send post request to restart app
-    byte[] empty = new byte[0];
-    if (!NetworkUtils.sendHttpPostRequest(conn, NetworkUtils.JSON_TYPE, empty)) {
-      LOG.log(Level.SEVERE, "Failed to set post request");
+    try {
+      // send post request to restart app
+      byte[] empty = new byte[0];
+      if (!NetworkUtils.sendHttpPostRequest(conn, NetworkUtils.JSON_TYPE, empty)) {
+        LOG.log(Level.SEVERE, "Failed to send post request");
+        return false;
+      }
+
+      // Check response
+      boolean success = NetworkUtils.checkHttpResponseCode(conn, HttpURLConnection.HTTP_OK);
+
+      if (success) {
+        LOG.log(Level.INFO, "Successfully restarted container {0}", appId);
+        return true;
+      } else {
+        LOG.log(Level.SEVERE, "Failed to restart container {0}", appId);
+        return false;
+      }
+    } finally {
+      // Disconnect to release resources
       conn.disconnect();
-      return false;
-    }
-
-    // Check response
-    boolean success = NetworkUtils.checkHttpResponseCode(conn, HttpURLConnection.HTTP_OK);
-    // Disconnect to release resources
-    conn.disconnect();
-
-    if (success) {
-      LOG.log(Level.INFO, "Successfully restarted container {0}", appId);
-      return true;
-    } else {
-      LOG.log(Level.SEVERE, "Failed to restart container {0}", appId);
-      return false;
     }
   }
 
@@ -120,24 +125,26 @@ public class MarathonController {
       return false;
     }
 
-    // Send post request with marathon conf for topology
-    if (!NetworkUtils.sendHttpPostRequest(conn, NetworkUtils.JSON_TYPE, appConf.getBytes())) {
-      LOG.log(Level.SEVERE, "Failed to ");
+    try {
+      // Send post request with marathon conf for topology
+      if (!NetworkUtils.sendHttpPostRequest(conn, NetworkUtils.JSON_TYPE, appConf.getBytes())) {
+        LOG.log(Level.SEVERE, "Failed to send post request");
+        return false;
+      }
+
+      // Check response
+      boolean success = NetworkUtils.checkHttpResponseCode(conn, HttpURLConnection.HTTP_CREATED);
+
+      if (success) {
+        LOG.log(Level.INFO, "Topology submitted successfully");
+        return true;
+      } else {
+        LOG.log(Level.SEVERE, "Failed to submit topology");
+        return false;
+      }
+    } finally {
+      // Disconnect to release resources
       conn.disconnect();
-      return false;
-    }
-
-    // Check response
-    boolean success = NetworkUtils.checkHttpResponseCode(conn, HttpURLConnection.HTTP_CREATED);
-    // Disconnect to release resources
-    conn.disconnect();
-
-    if (success) {
-      LOG.log(Level.INFO, "Topology submitted successfully");
-      return true;
-    } else {
-      LOG.log(Level.SEVERE, "Failed to submit topology");
-      return false;
     }
   }
 }

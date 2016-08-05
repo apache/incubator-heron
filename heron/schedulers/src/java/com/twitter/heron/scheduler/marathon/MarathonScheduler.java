@@ -14,7 +14,7 @@
 
 package com.twitter.heron.scheduler.marathon;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -24,8 +24,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Joiner;
 
-import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.common.basics.FileUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Constants;
@@ -35,7 +33,6 @@ import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;
-import com.twitter.heron.spi.utils.TopologyUtils;
 
 public class MarathonScheduler implements IScheduler {
   private static final Logger LOG = Logger.getLogger(MarathonScheduler.class.getName());
@@ -175,48 +172,8 @@ public class MarathonScheduler implements IScheduler {
   }
 
   protected String getExecutorCommand(int containerIndex) {
-    List<String> commands = new ArrayList<>();
-    commands.add(Context.executorSandboxBinary(config));
-    commands.add(Integer.toString(containerIndex));
-
-    TopologyAPI.Topology topology = Runtime.topology(runtime);
-    commands.add(topology.getName());
-    commands.add(topology.getId());
-    commands.add(FileUtils.getBaseName(Context.topologyDefinitionFile(config)));
-    commands.add(Runtime.instanceDistribution(runtime));
-    commands.add(Context.stateManagerConnectionString(config));
-    commands.add(Context.stateManagerRootPath(config));
-    commands.add(Context.tmasterSandboxBinary(config));
-    commands.add(Context.stmgrSandboxBinary(config));
-    commands.add(Context.metricsManagerSandboxClassPath(config));
-    commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)));
-    commands.add(TopologyUtils.makeClassPath(topology, Context.topologyJarFile(config)));
-    commands.add(MarathonConstants.MASTER_PORT);
-    commands.add(MarathonConstants.TMASTER_CONTROLLER_PORT);
-    commands.add(MarathonConstants.TMASTER_STATS_PORT);
-    commands.add(Context.systemConfigSandboxFile(config));
-    commands.add(Runtime.componentRamMap(runtime));
-    commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
-    commands.add(Context.topologyPackageType(config));
-    commands.add(Context.topologyJarFile(config));
-    commands.add(Context.javaSandboxHome(config));
-    commands.add(MarathonConstants.SHELL_PORT);
-    commands.add(Context.shellSandboxBinary(config));
-    commands.add(MarathonConstants.METRICSMGR_PORT);
-    commands.add(Context.cluster(config));
-    commands.add(Context.role(config));
-    commands.add(Context.environ(config));
-    commands.add(Context.instanceSandboxClassPath(config));
-    commands.add(Context.metricsSinksSandboxFile(config));
-
-    String completeSchedulerProcessClassPath = new StringBuilder()
-        .append(Context.schedulerSandboxClassPath(config)).append(":")
-        .append(Context.packingSandboxClassPath(config)).append(":")
-        .append(Context.stateManagerSandboxClassPath(config))
-        .toString();
-    commands.add(completeSchedulerProcessClassPath);
-    commands.add(MarathonConstants.SCHEDULER_PORT);
-
+    String[] commands = SchedulerUtils.getExecutorCommand(config, runtime,
+        containerIndex, Arrays.asList(MarathonConstants.PORT_LIST));
     return Joiner.on(" ").join(commands);
   }
 }
