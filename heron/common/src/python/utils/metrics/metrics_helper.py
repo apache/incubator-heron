@@ -13,12 +13,14 @@
 # limitations under the License.
 '''metrics_helper: helper classes for managing common metrics'''
 
-from heron.common.src.python.utils.log import Log
+from heron.common.src.python.utils import log
 from heron.proto import metrics_pb2
 import heron.common.src.python.constants as constants
 
 from .metrics import (CountMetric, MultiCountMetric, MeanReducedMetric,
                       ReducedMetric, MultiMeanReducedMetric, MultiReducedMetric)
+
+Log = log.Log
 
 class BaseMetricsHelper(object):
   """Helper class for metrics management

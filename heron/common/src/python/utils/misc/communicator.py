@@ -15,7 +15,9 @@
 import sys
 import Queue
 
-from heron.common.src.python.utils.log import Log
+from heron.common.src.python.utils import log
+
+Log = log.Log
 
 class HeronCommunicator(object):
   """HeronCommunicator: a wrapper class for non-blocking queue in Heron.

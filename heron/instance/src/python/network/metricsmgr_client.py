@@ -14,11 +14,13 @@
 '''metrics manager client'''
 import socket
 
-from heron.common.src.python.utils.log import Log
+from heron.common.src.python.utils import log
 from heron.common.src.python.network import HeronClient, StatusCode
 from heron.proto import metrics_pb2, common_pb2
 
 import heron.common.src.python.constants as constants
+
+Log = log.Log
 
 class MetricsManagerClient(HeronClient):
   """MetricsManagerClient, responsible for communicating with Metrics Manager"""
@@ -39,7 +41,7 @@ class MetricsManagerClient(HeronClient):
       while not self.out_queue.is_empty():
         message = self.out_queue.poll()
         assert isinstance(message, metrics_pb2.MetricPublisherPublishMessage)
-        Log.debug("Sending metric message: " + str(message))
+        Log.debug("Sending metric message: %s" % str(message))
         self.send_message(message)
 
   def on_connect(self, status):
@@ -82,7 +84,7 @@ class MetricsManagerClient(HeronClient):
     request = metrics_pb2.MetricPublisherRegisterRequest()
     request.publisher.CopyFrom(metric_publisher)
 
-    Log.debug("Sending MetricsCli register request: \n" + str(request))
+    Log.debug("Sending MetricsCli register request: \n%s" % str(request))
 
     timeout_sec = float(self.sys_config[constants.INSTANCE_RECONNECT_METRICSMGR_INTERVAL_SEC])
     self.send_request(request, "MetricsClientContext",

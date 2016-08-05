@@ -21,7 +21,7 @@ import signal
 import yaml
 
 from heron.common.src.python.basics import GatewayLooper
-from heron.common.src.python.utils.log import Log, init_rotating_logger
+from heron.common.src.python.utils import log
 from heron.common.src.python.utils.metrics import GatewayMetrics, MetricsCollector
 from heron.common.src.python.utils.misc import HeronCommunicator
 from heron.common.src.python.network import create_socket_options
@@ -32,6 +32,7 @@ from heron.instance.src.python.network import MetricsManagerClient, SingleThread
 import heron.common.src.python.pex_loader as pex_loader
 import heron.common.src.python.constants as constants
 
+Log = log.Log
 LoadedInstance = collections.namedtuple('LoadedInstance', 'is_spout, protobuf, py_class')
 
 # pylint: disable=too-many-instance-attributes
@@ -267,7 +268,7 @@ def main():
   max_log_bytes = system_config[constants.HERON_LOGGING_MAXIMUM_SIZE_MB] * constants.MB
 
   log_file = os.path.join(log_dir, instance_id + ".log.0")
-  init_rotating_logger(level=logging.INFO, logfile=log_file,
+  log.init_rotating_logger(level=logging.INFO, logfile=log_file,
                        max_files=max_log_files, max_bytes=max_log_bytes)
 
   Log.info("\nStarting instance: " + instance_id + " for topology: " + topology_name +

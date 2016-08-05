@@ -14,10 +14,12 @@
 '''outgoing_tuple_helper.py: module to provide a helper class for preparing and pushing tuples'''
 import sys
 
-from heron.common.src.python.utils.log import Log
+from heron.common.src.python.utils import log
 from heron.proto import tuple_pb2, topology_pb2
 
 import heron.common.src.python.constants as constants
+
+Log = log.Log
 
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=no-value-for-parameter

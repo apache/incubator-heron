@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 '''Stream Manager client for single-thread heron instance in python'''
-from heron.common.src.python.utils.log import Log
+from heron.common.src.python.utils import log
 from heron.common.src.python.utils.misc import PhysicalPlanHelper
 from heron.common.src.python.network import HeronClient, StatusCode
 from heron.proto import stmgr_pb2, common_pb2
 
 import heron.common.src.python.constants as constants
+
+Log = log.Log
 
 # pylint: disable=too-many-arguments
 class SingleThreadStmgrClient(HeronClient):
@@ -46,7 +48,7 @@ class SingleThreadStmgrClient(HeronClient):
   def on_connect(self, status):
     Log.debug("In on_connect of STStmgrClient")
     if status != StatusCode.OK:
-      Log.error("Error connecting to Stream Manager with status: " + str(status))
+      Log.error("Error connecting to Stream Manager with status: %s" % str(status))
       retry_interval = float(self.sys_config[constants.INSTANCE_RECONNECT_STREAMMGR_INTERVAL_SEC])
       self.looper.register_timer_task_in_sec(self.start_connect, retry_interval)
       return
@@ -117,7 +119,7 @@ class SingleThreadStmgrClient(HeronClient):
 
   def _handle_assignment_message(self, pplan):
     """Called when new NewInstanceAssignmentMessage arrives"""
-    Log.info("In handle_assignment_message() of STStmgrClient, Physical Plan: \n" + str(pplan))
+    Log.info("In handle_assignment_message() of STStmgrClient, Physical Plan: \n%s" % str(pplan))
     new_helper = PhysicalPlanHelper(pplan, self.instance.instance_id,
                                     self.heron_instance_cls.topo_pex_file_abs_path)
 

@@ -18,13 +18,15 @@ import Queue
 
 from abc import abstractmethod
 from heron.proto import tuple_pb2
-from heron.common.src.python.utils.log import Log
+from heron.common.src.python.utils import log
 from heron.common.src.python.utils.tuple import TupleHelper, HeronTuple
 from heron.common.src.python.utils.metrics import BoltMetrics
 
 import heron.common.src.python.constants as constants
 
 from .component import Component, HeronComponentSpec
+
+Log = log.Log
 
 # pylint: disable=fixme
 class Bolt(Component):
