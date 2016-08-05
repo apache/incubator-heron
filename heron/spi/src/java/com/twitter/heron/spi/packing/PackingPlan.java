@@ -131,6 +131,30 @@ public class PackingPlan {
     return ramMapBuilder.toString();
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    PackingPlan that = (PackingPlan) o;
+
+    return getId().equals(that.getId())
+        && getContainers().equals(that.getContainers())
+        && getResource().equals(that.getResource());
+  }
+
+  @Override
+  public int hashCode() {
+    int result = getId().hashCode();
+    result = 31 * result + getContainers().hashCode();
+    result = 31 * result + getResource().hashCode();
+    return result;
+  }
+
   public static class InstancePlan {
     public final String id;
     public final String componentName;
@@ -140,6 +164,30 @@ public class PackingPlan {
       this.id = id;
       this.componentName = componentName;
       this.resource = resource;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+
+      InstancePlan that = (InstancePlan) o;
+
+      return id.equals(that.id)
+          && componentName.equals(that.componentName)
+          && resource.equals(that.resource);
+    }
+
+    @Override
+    public int hashCode() {
+      int result = id.hashCode();
+      result = 31 * result + componentName.hashCode();
+      result = 31 * result + resource.hashCode();
+      return result;
     }
 
     @Override
@@ -160,6 +208,30 @@ public class PackingPlan {
       this.id = id;
       this.instances = instances;
       this.resource = resource;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+
+      ContainerPlan that = (ContainerPlan) o;
+
+      return id.equals(that.id)
+          && instances.equals(that.instances)
+          && resource.equals(that.resource);
+    }
+
+    @Override
+    public int hashCode() {
+      int result = id.hashCode();
+      result = 31 * result + instances.hashCode();
+      result = 31 * result + resource.hashCode();
+      return result;
     }
 
     @Override
