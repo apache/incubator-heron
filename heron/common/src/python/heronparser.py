@@ -40,7 +40,7 @@ help_epilog = '''Getting more help:
 
 For detailed documentation, go to http://heronstreaming.io'''
 
-class HeronRCArgumentParser(argparse.ArgumentParser):
+class HeronArgumentParser(argparse.ArgumentParser):
   """
   HERON RC parser support for specifying config level arguments in an RC file.
   check README.md.
@@ -52,13 +52,13 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
   check README.md.
   """
   def __init__(self, *args, **kwargs):
-    rcfile = HeronRCArgumentParser.getAndRemoveKey(kwargs, "rcfile")
-    self.rccommand = HeronRCArgumentParser.getAndRemoveKey(
+    rcfile = HeronArgumentParser.getAndRemoveKey(kwargs, "rcfile")
+    self.rccommand = HeronArgumentParser.getAndRemoveKey(
         kwargs, "rccommand")
-    self.rcclusterrole = HeronRCArgumentParser.getAndRemoveKey(
+    self.rcclusterrole = HeronArgumentParser.getAndRemoveKey(
         kwargs, "rcclusterrole")
-    HeronRCArgumentParser.initializeFromRC(rcfile)
-    super(HeronRCArgumentParser, self).__init__(*args, **kwargs)
+    HeronArgumentParser.initializeFromRC(rcfile)
+    super(HeronArgumentParser, self).__init__(*args, **kwargs)
 
   @classmethod
   def remove_comments(cls, string):
@@ -126,7 +126,7 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
             cls.cmdmap[app][command][env] = args_list_string
       Log.debug("RC cmdmap %s", json.dumps(cls.cmdmap))
     else:
-      Log.warn("%s is not an existing file", effective_rc)
+      Log.debug("%s is not an existing file", effective_rc)
 
   # for each command / cluster-role-env combination, get the commands from heronrc
   # remove any duplicates that have already been supplied already  and
@@ -162,7 +162,7 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
     return arg_strings
 
   def parse_known_args(self, args=None, namespace=None):
-    namespace, args = super(HeronRCArgumentParser,
+    namespace, args = super(HeronArgumentParser,
                             self).parse_known_args(args, namespace)
     dict_ns = namespace.__dict__
     if self.prog == 'heron':
@@ -177,7 +177,7 @@ class HeronRCArgumentParser(argparse.ArgumentParser):
     return namespace, args
 
 def main():
-  parser = HeronRCArgumentParser(
+  parser = HeronArgumentParser(
       prog='heron',
       epilog=help_epilog,
       formatter_class=config.SubcommandHelpFormatter,
