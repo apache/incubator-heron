@@ -58,21 +58,20 @@ To run/Test :
 
 
 ``````
-unit2 -v heron.cli.tests.python.argparser_unittest
+unit2 -v heron.cli.tests.python.heronparser_unittest
 or 
-python -m heron.cli.tests.python.argparser_unittest
+python -m heron.cli.tests.python.heronparser_unittest
 or 
-python -m unittest2 heron.cli.tests.python.argparser_unittest
+python -m unittest2 heron.cli.tests.python.heronparser_unittest
 
 ``````
 ```````
-test_parser_commandline (__main__.HeronRCTest) ... INFO: Effective RC file is ./.heronrc
-DEBUG: RC cmdmap {"heron": {"*": {"*": "--config-property command-global"}, "activate": {"devcluster/ads/PROD": "--config-property test-cmd-activate-role", "*": "--config-property test-cmd-activate-*"}, "submit": {"devcluster/ads/PROD": "--config-property test-cmd-submit-role"}}, "*": {"*": {"*": " --config-property test-hello-global"}}}
-ok
-test_parser_rolecmdspecific (__main__.HeronRCTest) ... ok
+test_parser_commandline (__main__.HeronParserTest) ... ok
+test_parser_norcfile (__main__.HeronParserTest) ... ok
+test_parser_rolecmdspecific (__main__.HeronParserTest) ... ok
 
 ----------------------------------------------------------------------
-Ran 2 tests in 0.004s
+Ran 3 tests in 0.006s
 
 OK
 

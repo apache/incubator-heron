@@ -23,7 +23,7 @@ import time
 
 
 import heron.cli.src.python.help as cli_help
-import heron.common.src.python.argparser as hrc_parse
+import heron.common.src.python.heronparser as hrc_parse
 import heron.cli.src.python.activate as activate
 import heron.cli.src.python.deactivate as deactivate
 import heron.cli.src.python.kill as kill
@@ -31,6 +31,7 @@ import heron.cli.src.python.restart as restart
 import heron.cli.src.python.submit as submit
 import heron.common.src.python.utils.config as config
 import heron.cli.src.python.version as version
+
 
 import heron.common.src.python.utils.log as log
 
@@ -69,7 +70,7 @@ def create_parser():
   :return:
   '''
   #parser = argparse.ArgumentParser(
-  parser = hrc_parse.HeronRCArgumentParser(
+  parser = hrc_parse.HeronArgumentParser(
       prog='heron',
       epilog=HELP_EPILOG,
       formatter_class=config.SubcommandHelpFormatter,

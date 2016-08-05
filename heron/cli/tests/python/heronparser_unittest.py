@@ -17,7 +17,7 @@ import os
 import sys
 import unittest2 as unittest
 import heron.cli.src.python.activate as activate
-import heron.common.src.python.argparser as argparser
+import heron.common.src.python.heronparser as argparser
 import heron.common.src.python.utils.config as config
 import heron.cli.src.python.opts as opts
 
@@ -27,7 +27,7 @@ help_epilog = '''Getting more help:
 
 For detailed documentation, go to http://heronstreaming.io'''
 
-class HeronRCTest(unittest.TestCase):
+class HeronParserTest(unittest.TestCase):
   logging.basicConfig(level=logging.WARNING)
 
   def setUp(self):
@@ -38,7 +38,7 @@ class HeronRCTest(unittest.TestCase):
   def test_parser_commandline(self):
     sys.argv = []
 
-    parser = argparser.HeronRCArgumentParser(
+    parser = argparser.HeronArgumentParser(
         prog='heron',
         epilog=help_epilog,
         formatter_class=config.SubcommandHelpFormatter,
@@ -59,7 +59,7 @@ class HeronRCTest(unittest.TestCase):
 
   def test_parser_rolecmdspecific(self):
 
-    parser = argparser.HeronRCArgumentParser(
+    parser = argparser.HeronArgumentParser(
         prog='heron',
         epilog=help_epilog,
         formatter_class=config.SubcommandHelpFormatter,
@@ -81,7 +81,7 @@ class HeronRCTest(unittest.TestCase):
   def test_parser_norcfile(self):
     sys.argv = []
 
-    parser = argparser.HeronRCArgumentParser(
+    parser = argparser.HeronArgumentParser(
         prog='heron',
         epilog=help_epilog,
         formatter_class=config.SubcommandHelpFormatter,
@@ -106,5 +106,5 @@ class HeronRCTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-  suite = unittest.TestLoader().loadTestsFromTestCase(HeronRCTest)
+  suite = unittest.TestLoader().loadTestsFromTestCase(HeronParserTest)
   unittest.TextTestRunner(verbosity=2).run(suite)
