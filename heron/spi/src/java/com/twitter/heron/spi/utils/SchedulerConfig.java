@@ -110,7 +110,7 @@ public final class SchedulerConfig {
         Config.newBuilder()
             .putAll(sandboxConfigs())
             .putAll(commandLineConfigs(cluster, role, environ, verbose))
-            .putAll(topologyConfigs(topologyJarFile, topologyDefnFile, topology))
+            .putAll(topologyConfigs(topologyBinaryFile, topologyDefnFile, topology))
             .build());
 
     return config;
