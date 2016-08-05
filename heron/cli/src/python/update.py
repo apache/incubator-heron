@@ -17,10 +17,10 @@ from heron.common.src.python.utils.log import Log
 import heron.cli.src.python.args as args
 import heron.cli.src.python.execute as execute
 import heron.cli.src.python.jars as jars
-import heron.cli.src.python.opts as opts
 import heron.common.src.python.utils.config as config
 
 import argparse
+import logging
 import re
 
 def create_parser(subparsers):
@@ -85,7 +85,7 @@ def run(command, parser, cl_args, unknown_args):
         "--component_parallelism", ','.join(cl_args['component_parallelism']),
     ]
 
-    if opts.verbose():
+    if Log.getEffectiveLevel() == logging.DEBUG:
       new_args.append("--verbose")
 
     lib_jars = config.get_heron_libs(jars.scheduler_jars() + jars.statemgr_jars())
