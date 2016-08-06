@@ -5,9 +5,9 @@
 Heron RC is a dictionary of commonly used configurations that doesnt have to be repeatedly supplied via command line
 Developers and Operators can configure standard options to heron-cli or heron-tracker via heronrc  and these will be looked up at run time by the client and attached to existing args supplied via command line.
 
-As is the case with any dictionary , there are a set of attributes that act as  keys, and there are values - which is the argument list.
+As is the case with any dictionary , there are a set of attributes that act as  keys, and there are values - which is the argument list.  
 
-the key attributes are:
+the key attributes are:  
 	1. client application ex: heron (for heron-cli) or heron-tracker   
 	2. sub command : ex. activate , kill  
 	3. cluster/env/role : devcluster/ads/PROD  
@@ -54,7 +54,7 @@ Heron RC supports wild card subsititutions in the above hierarchy. Please note t
              ```  
             the same can be configured in heron rc by the following entry:  
             ````
-   	#conversion of positional arguments to optional
+   	#conversion of positional arguments to optional  
 heron:submit:local --verbose  --topology-file-name ~/.heron/examples/heron-examples.jar  --topology-class-name com.twitter.heron.examples.ExclamationTopology --topology-name ExclamationTopology
 	    ````  
 	    you can get the optional equivalents of a command through help : ex: heron submit help  
