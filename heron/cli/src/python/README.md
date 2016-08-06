@@ -53,9 +53,11 @@ Heron RC supports wild card subsititutions in the above hierarchy. Please note t
                 heron submit local --verbose ~/.heron/examples/heron-examples.jar com.twitter.heron.examples.ExclamationTopology ExclamationTopology
              ```  
             the same can be configured in heron rc by the following entry:  
-            ````  
+            
+            ``` 
 heron:submit:local --verbose  --topology-file-name ~/.heron/examples/heron-examples.jar  --topology-class-name com.twitter.heron.examples.ExclamationTopology --topology-name ExclamationTopology
-	    ````  
+	    ```  
+	    
 	    you can get the optional equivalents of a command through help : ex: heron submit help  
 	        
 
