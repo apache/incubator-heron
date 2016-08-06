@@ -52,6 +52,7 @@ Heron RC supports wild card subsititutions in the above hierarchy. Please note t
              ```  
                 heron submit local --verbose ~/.heron/examples/heron-examples.jar com.twitter.heron.examples.ExclamationTopology ExclamationTopology
              ```  
+             
             the same can be configured in heron rc by the following entry:  
             
             ``` 
