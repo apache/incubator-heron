@@ -150,10 +150,10 @@ class HeronArgumentParser(argparse.ArgumentParser):
     new_arg_strings = []
     command = self.rccommand
     if len(sys.argv) > 1:
-      command = (sys.argv[1], self.rccommand)[self.rccommand != '']
+      command = (sys.argv[1], self.rccommand)[self.rccommand is not None]
     role = self.rcclusterrole
     if len(sys.argv) > 2:
-      role = (sys.argv[2], self.rcclusterrole)[self.rcclusterrole != '']
+      role = (sys.argv[2], self.rcclusterrole)[self.rccommand is not None]
     app = self.prog
     new_arg_strings.extend(
         self.get_args_for_command_role(app, command, role))
@@ -162,6 +162,9 @@ class HeronArgumentParser(argparse.ArgumentParser):
     new_arg_strings.extend(self.get_args_for_command_role(app, '*', '*'))
     new_arg_strings.extend(self.get_args_for_command_role('*', '*', '*'))
     arg_strings.extend(new_arg_strings)
+
+    Log.debug("heronparser: _read_args_from_files : %s %s %d %s %s %s %s", arg_strings,
+              new_arg_strings, len(sys.argv), sys.argv, app, command, role)
     return arg_strings
 
   def parse_known_args(self, args=None, namespace=None):

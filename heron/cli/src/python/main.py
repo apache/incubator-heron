@@ -31,12 +31,9 @@ import heron.cli.src.python.restart as restart
 import heron.cli.src.python.submit as submit
 import heron.common.src.python.utils.config as config
 import heron.cli.src.python.version as version
-import logging
-
 import heron.common.src.python.utils.log as log
 
 Log = log.Log
-logging.basicConfig(level=logging.DEBUG)
 
 HELP_EPILOG = '''Getting more help:
   heron help <command> Prints help and options for <command>
