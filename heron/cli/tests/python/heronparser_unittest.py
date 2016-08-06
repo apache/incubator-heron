@@ -12,14 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' opts_unittest.py '''
+import argparse as argparser
 import logging
 import os
 import sys
 import unittest2 as unittest
 import heron.cli.src.python.activate as activate
-import heron.common.src.python.heronparser as argparser
+import heron.common.src.python.heronparser as hr_argparser
 import heron.common.src.python.utils.config as config
-import heron.cli.src.python.opts as opts
+import heron.cli.src.python.submit as submit
+
 
 #pylint: disable=missing-docstring, no-self-use
 help_epilog = '''Getting more help:
@@ -33,12 +35,53 @@ class HeronParserTest(unittest.TestCase):
   def setUp(self):
     dir_path = os.path.dirname(os.path.realpath(__file__))
     self.testrcfile = dir_path + "/heronrc.test"
+    self.testrc_submit_file = dir_path + "/heronrc.test.submit"
 
+  def test_parser_commandline_norc(self):
+    sys.argv = []
+
+    parser = argparser.ArgumentParser(
+        prog='heron',
+        epilog=help_epilog,
+        formatter_class=config.SubcommandHelpFormatter,
+        fromfile_prefix_chars='@',
+        add_help=False)
+
+    subparsers = parser.add_subparsers(
+        title="Available commands",
+        metavar='<command> <options>')
+    submit.create_parser(subparsers)
+    args, _ = parser.parse_known_args(["submit", "local", "~/.heron/examples/heron-examples.jar",
+                                       "com.twitter.heron.examples.ExclamationTopology",
+                                       "ExclamationTopology"])
+    self.assertEqual('~/.heron/examples/heron-examples.jar', args.__dict__['topology-file-name'])
+
+
+  def test_parser_commandline_positional_withrc(self):
+    sys.argv = []
+
+    parser = hr_argparser.HeronArgumentParser(
+        prog='heron',
+        epilog=help_epilog,
+        formatter_class=config.SubcommandHelpFormatter,
+        fromfile_prefix_chars='@',
+        add_help=False,
+        rcfile=self.testrcfile,
+        rccommand="submit",
+        rcclusterrole="local")
+
+    subparsers = parser.add_subparsers(
+        title="Available commands",
+        metavar='<command> <options>')
+    submit.create_parser(subparsers)
+    args, _ = parser.parse_known_args(["submit", "local"])
+    self.assertEqual('~/.heron/examples/heron-examples.jar', args.__dict__['topology-file-name'])
+    hr_argparser.HeronArgumentParser.clear()
 
   def test_parser_commandline(self):
     sys.argv = []
 
-    parser = argparser.HeronArgumentParser(
+    parser = hr_argparser.HeronArgumentParser(
         prog='heron',
         epilog=help_epilog,
         formatter_class=config.SubcommandHelpFormatter,
@@ -56,10 +99,11 @@ class HeronParserTest(unittest.TestCase):
                                        "12313", "--config-property", "this-is-it"])
 
     self.assertEqual('this-is-it', args.config_property)
+    hr_argparser.HeronArgumentParser.clear()
 
   def test_parser_rolecmdspecific(self):
 
-    parser = argparser.HeronArgumentParser(
+    parser = hr_argparser.HeronArgumentParser(
         prog='heron',
         epilog=help_epilog,
         formatter_class=config.SubcommandHelpFormatter,
@@ -76,12 +120,12 @@ class HeronParserTest(unittest.TestCase):
     args, _ = parser.parse_known_args(["activate", "devcluster/ads/PROD",
                                        "12313"])
     self.assertEqual('test-cmd-activate-role', args.config_property)
-
+    hr_argparser.HeronArgumentParser.clear()
 
   def test_parser_norcfile(self):
     sys.argv = []
 
-    parser = argparser.HeronArgumentParser(
+    parser = hr_argparser.HeronArgumentParser(
         prog='heron',
         epilog=help_epilog,
         formatter_class=config.SubcommandHelpFormatter,
@@ -99,10 +143,10 @@ class HeronParserTest(unittest.TestCase):
                                        "12313", "--config-property", "this-is-it"])
 
     self.assertEqual('this-is-it', args.config_property)
-
+    hr_argparser.HeronArgumentParser.clear()
 
   def tearDown(self):
-    opts.clear_config()
+    hr_argparser.HeronArgumentParser.clear()
 
 
 if __name__ == '__main__':

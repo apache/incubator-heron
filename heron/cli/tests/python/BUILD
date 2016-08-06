@@ -15,8 +15,8 @@ pex_test(
 )
 
 pex_test(
-    name = "argparser_unittest",
-    srcs = [ "argparser_unittest.py"],
+    name = "heronparser_unittest",
+    srcs = [ "heronparser_unittest.py"],
     deps = [
         "//heron/cli/src/python:heron-lib",
     ],

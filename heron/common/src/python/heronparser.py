@@ -84,6 +84,11 @@ class HeronArgumentParser(argparse.ArgumentParser):
       del dictionary[key]
     return val
 
+  # tear down
+  @classmethod
+  def clear(cls):
+    cls.cmdmap.clear()
+
   # initialize the command map from heron rc file in the parser,
   # that can be later used for command substitution during parse_args phase
   # patterns
