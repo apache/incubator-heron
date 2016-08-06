@@ -16,6 +16,9 @@ import logging
 from logging.handlers import RotatingFileHandler
 import colorlog
 
+# Add default handler
+logging.basicConfig()
+
 # Create the logger
 # pylint: disable=invalid-name
 Log = logging.getLogger()
@@ -65,7 +68,6 @@ def init_rotating_logger(level, logfile, max_files, max_bytes):
   It also makes sure that any StreamHandler is removed, so as to avoid stdout/stderr
   constipation issues
   """
-  logging.basicConfig()
 
   root_logger = logging.getLogger()
   log_format = "%(asctime)s:%(levelname)s:%(filename)s: %(message)s"
