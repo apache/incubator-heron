@@ -49,12 +49,11 @@ Heron RC supports wild card subsititutions in the above hierarchy. Please note t
    	* HeronRC parser doesnt support positional arguments at this time. However, if there is a need to configure positional arguments in heron rc, we can do so by configuring their optional equivalents. Let's consider the following example for submitting the example topology to the local cluster via heron-cli
    	   it would be done through the following command line : 
            *
-             ```
+             ```  
                 heron submit local --verbose ~/.heron/examples/heron-examples.jar com.twitter.heron.examples.ExclamationTopology ExclamationTopology
              ```  
             the same can be configured in heron rc by the following entry:  
-            ````
-   	#conversion of positional arguments to optional  
+            ````  
 heron:submit:local --verbose  --topology-file-name ~/.heron/examples/heron-examples.jar  --topology-class-name com.twitter.heron.examples.ExclamationTopology --topology-name ExclamationTopology
 	    ````  
 	    you can get the optional equivalents of a command through help : ex: heron submit help  
