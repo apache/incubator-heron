@@ -5,12 +5,12 @@
 Heron RC is a dictionary of commonly used configurations that doesnt have to be repeatedly supplied via command line
 Developers and Operators can configure standard options to heron-cli or heron-tracker via heronrc  and these will be looked up at run time by the client and attached to existing args supplied via command line.
 
-As is the case with any dictionary , there are a set of attributes that act as  keys, and there are values - which is the argument list.
+As is the case with any dictionary , there are a set of attributes that act as  keys, and there are values - which is the argument list.  
 
-the key attributes are:
-	1. client application ex: heron (for heron-cli) or heron-tracker 
-	2. sub command : ex. activate , kill
-	3. cluster/env/role : devcluster/ads/PROD
+the key attributes are:  
+	1. client application ex: heron (for heron-cli) or heron-tracker   
+	2. sub command : ex. activate , kill  
+	3. cluster/env/role : devcluster/ads/PROD  
 
 
 HeronRC supports an implicit hierarchy so that argument collisions can be handled. 
@@ -45,6 +45,21 @@ Heron RC supports wild card subsititutions in the above hierarchy. Please note t
 	*  global arguments at app level and uber level (pattern #d, #e above)
 
 
+4. support for positional arguments
+   	* HeronRC parser doesnt support positional arguments at this time. However, if there is a need to configure positional arguments in heron rc, we can do so by configuring their optional equivalents. Let's consider the following example for submitting the example topology to the local cluster via heron-cli
+   	   it would be done through the following command line :   
+             ```  
+                heron submit local --verbose ~/.heron/examples/heron-examples.jar com.twitter.heron.examples.ExclamationTopology ExclamationTopology
+             ```  
+             
+            the same can be configured in heron rc by the following entry:  
+            
+            ``` 
+heron:submit:local --verbose  --topology-file-name ~/.heron/examples/heron-examples.jar  --topology-class-name com.twitter.heron.examples.ExclamationTopology --topology-name ExclamationTopology
+	    ```  
+	    
+	    you can get the optional equivalents of a command through help : ex: heron submit help  
+	        
 
 ##Assumptions:
 command and role/cluster/env are positional arguments and are in #1 and #2 to all heron RC supported applications
