@@ -20,13 +20,11 @@ import re
 import sys
 import traceback
 import heron.common.src.python.utils.config as config
-import heron.common.src.python.utils.log as log
-
+from  heron.common.src.python.utils.log import Log
 ##########################################################################
 # Run the command
 ##########################################################################
 # pylint: disable=invalid-name
-Log = log.Log
 
 HERON_RC = os.path.join(os.path.expanduser('~'), '.heronrc')
 # pylint: disable=anomalous-backslash-in-string
