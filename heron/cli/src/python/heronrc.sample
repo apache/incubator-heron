@@ -1,10 +1,19 @@
-*:*:* --config-property test-hello-global   #global
-heron:*:* --config-property  command-global  #app - global
+#global
+*:*:* --config-property test-hello-global
 
-heron:activate:* --config-property test-cmd-activate-*                   #command specific
+#app - global
+heron:*:* --config-property  command-global
 
-heron:submit:devcluster/ads/PROD --config-property test-cmd-submit-role   #role and command specific
-heron:activate:devcluster/ads/PROD --config-property test-cmd-activate-role   #role and command specific
+#command specific
+heron:activate:* --config-property test-cmd-activate-*
 
-:devcluster/ads/PROD --config-property test-cmd-invalid     #invalid
---config-property test-hello   #global
+#role and command specific
+heron:submit:devcluster/ads/PROD --config-property test-cmd-submit-role
+heron:activate:devcluster/ads/PROD --config-property test-cmd-activate-role
+
+#conversion of positional arguments to optional
+heron:submit:local --verbose  --topology-file-name ~/.heron/examples/heron-examples.jar  --topology-class-name com.twitter.heron.examples.ExclamationTopology --topology-name ExclamationTopology
+
+#invalid
+:devcluster/ads/PROD --config-property test-cmd-invalid     
+--config-property test-hello
