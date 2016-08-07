@@ -17,7 +17,6 @@ import collections
 
 from heron.proto import topology_pb2
 from heron.common.src.python.utils.misc import default_serializer
-from heron.common.src.python.utils.topology import ICustomGrouping
 
 class Stream(object):
   """Heron output stream
@@ -43,12 +42,14 @@ class Stream(object):
         if not isinstance(field, str):
           raise TypeError("All field names must be strings, given: %s" % str(field))
     else:
-      raise TypeError("Straem fields must be a list, tuple or None, given: %s" % str(fields))
+      raise TypeError("Stream fields must be a list, tuple or None, given: %s" % str(fields))
 
     # self.fields is always list
     self.fields = fields
 
-    if isinstance(name, str):
+    if name is None:
+      raise TypeError("Stream's name cannot be None")
+    elif isinstance(name, str):
       self.stream_id = name
     else:
       raise TypeError("Stream name must be a string, given: %s" % str(name))
@@ -92,7 +93,7 @@ class Grouping(object):
              gtype.python_serialized is not None
     else:
       #pylint: disable=fixme
-      #TODO: DIRECT, CUSTOM are not supported yet
+      #TODO: DIRECT are not supported yet
       return False
 
   @classmethod
@@ -103,6 +104,10 @@ class Grouping(object):
     else:
       fields = list(fields)
 
+    for i in fields:
+      if not isinstance(i, str):
+        raise TypeError("Non-string cannot be specified in fields")
+
     if not fields:
       raise ValueError("List cannot be empty for fields grouping")
 
@@ -111,22 +116,37 @@ class Grouping(object):
 
   @classmethod
   def custom(cls, classpath):
-    # TODO: serialize and return custom_serialized()
-    if not isinstance(classpath, str):
+    """Custom grouping from a given classpath
+
+    :param classpath: classpath to the ICustomGrouping class to use
+    """
+    if classpath is None or not isinstance(classpath, str):
       raise TypeError("Argument to custom() must be classpath string to custom grouping, given: "
                       "%s" % str(classpath))
     serialized = default_serializer.serialize(classpath)
-    return cls.custom_serialized(serialized)
+    return cls.custom_serialized(serialized, is_java=False)
 
   @classmethod
-  def custom_serialized(cls, python_serialized):
-    """Custom grouping
+  def custom_serialized(cls, serialized, is_java=True):
+    """Custom grouping from a given serialized string
 
-    :param python_serialized: serialized classpath to custom grouping class to use
+    This class is created for compatibility with ``custom_serialized(cls, java_serialized)`` method
+    of StreamParse API, although its functionality is not yet implemented (Java-serialized).
+    Currently only custom grouping implemented in Python is supported, and ``custom()`` method
+    should be used to indicate its classpath, rather than directly to use this method.
+
+    In the future, users can directly specify Java-serialized object with ``is_java=True`` in order
+    to use a custom grouping implemented in Java for python topology.
+
+    :param serialized: serialized classpath to custom grouping class to use (if python)
+    :param is_java: indicate whether this is Java serialized, or python serialized
     """
-    if not isinstance(python_serialized, bytes):
+    if not isinstance(serialized, bytes):
       raise TypeError("Argument to custom_serialized() must be "
-                      "a serialized Python class as bytes, given: %s" % str(python_serialized))
-    return cls.CUSTOM(gtype=topology_pb2.Grouping.Value("CUSTOM"),
-                      python_serialized=python_serialized)
-
+                      "a serialized Python class as bytes, given: %s" % str(serialized))
+    if not is_java:
+      return cls.CUSTOM(gtype=topology_pb2.Grouping.Value("CUSTOM"),
+                        python_serialized=serialized)
+    else:
+      raise NotImplementedError("Custom grouping implemented in Java for Python topology"
+                                "is not yet supported.")

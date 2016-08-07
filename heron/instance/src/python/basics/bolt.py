@@ -18,13 +18,15 @@ import Queue
 
 from abc import abstractmethod
 from heron.proto import tuple_pb2
-from heron.common.src.python.log import Log
+from heron.common.src.python.utils import log
 from heron.common.src.python.utils.tuple import TupleHelper, HeronTuple
 from heron.common.src.python.utils.metrics import BoltMetrics
 
 import heron.common.src.python.constants as constants
 
 from .component import Component, HeronComponentSpec
+
+Log = log.Log
 
 # pylint: disable=fixme
 class Bolt(Component):
@@ -172,9 +174,18 @@ class Bolt(Component):
     return ret
 
   def process_incoming_tuples(self):
-    """Should be called when tuple was buffered into in_stream"""
-    self._read_tuples_and_execute()
-    self.output_helper.send_out_tuples()
+    """Should be called when tuple was buffered into in_stream
+
+    This method is equivalent to ``addBoltTasks()`` but
+    is designed for event-driven single-thread bolt.
+    """
+    # back-pressure
+    if self.output_helper.is_out_queue_available():
+      self._read_tuples_and_execute()
+      self.output_helper.send_out_tuples()
+    else:
+      # update outqueue full count
+      self.bolt_metrics.update_out_queue_full_count()
 
   def _read_tuples_and_execute(self):
     start_cycle_time = time.time()

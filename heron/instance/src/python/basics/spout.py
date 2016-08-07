@@ -19,13 +19,15 @@ import collections
 
 from abc import abstractmethod
 from heron.proto import topology_pb2, tuple_pb2
-from heron.common.src.python.log import Log
+from heron.common.src.python.utils import log
 from heron.common.src.python.utils.tuple import TupleHelper
 from heron.common.src.python.utils.metrics import SpoutMetrics
 
 import heron.common.src.python.constants as constants
 
 from .component import Component, HeronComponentSpec
+
+Log = log.Log
 
 # pylint: disable=fixme
 class Spout(Component):
@@ -46,14 +48,14 @@ class Spout(Component):
     self.enable_message_timeouts = \
       context.get_cluster_config().get(constants.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS)
     Log.info("Enable ACK: %s" % str(self.acking_enabled))
-    # TODO: implement timeout
     Log.info("Enable Message Timeouts: %s" % str(self.enable_message_timeouts))
 
-    self.in_flight_tuples = dict()
+    # map <tuple_info.key -> tuple_info>, ordered by insertion time
+    self.in_flight_tuples = collections.OrderedDict()
     self.immediate_acks = collections.deque()
     self.total_tuples_emitted = 0
 
-    # TODO: topology context, serializer and sys config
+    # TODO: custom serializer
 
   # pylint: disable=no-member
   @classmethod
@@ -143,9 +145,15 @@ class Spout(Component):
     data_tuple = tuple_pb2.HeronDataTuple()
     data_tuple.key = 0
 
-    if custom_target_task_ids is not None:
+    if direct_task is not None:
+      if not isinstance(direct_task, int):
+        raise TypeError("direct_task argument needs to be an integer, given: %s"
+                        % str(type(direct_task)))
+      # performing emit-direct
+      data_tuple.dest_task_ids.append(direct_task)
+    elif custom_target_task_ids is not None:
+      # for custom grouping
       for task_id in custom_target_task_ids:
-        # for custom grouping
         data_tuple.dest_task_ids.append(task_id)
 
     if tup_id is not None:
@@ -262,17 +270,65 @@ class Spout(Component):
 
     self.looper.add_wakeup_task(spout_task)
 
+    # look for the timeout's tuples
+    if self.enable_message_timeouts:
+      self._look_for_timeouts()
+
   def _is_topology_running(self):
     return self.topology_state == topology_pb2.TopologyState.Value("RUNNING")
 
   def _should_produce_tuple(self):
-    # TODO: implement later -- like for Back Pressure
-    return self._is_topology_running()
+    """Checks whether we could produce tuples, i.e. invoke spout.next_tuple()"""
+    return self._is_topology_running() and self.output_helper.is_out_queue_available()
 
-  # pylint: disable=no-self-use
   def _is_continue_to_work(self):
-    # TODO: implement later
-    return True
+    """Checks whether we still need to do more work
+
+    When the topology state is RUNNING:
+    1. if the out_queue is not full and ack is not enabled, we could wake up next time to
+       produce more tuples and push to the out_queue
+    2. if the out_queue is not full but the acking is enabled, we need to make sure that
+      the number of pending tuples is smaller than max_spout_pending
+    3. if there are more to read, we will wake up itself next time.
+    """
+    if not self._is_topology_running():
+      return False
+
+    max_spout_pending = \
+      self.pplan_helper.context.get_cluster_config().get(constants.TOPOLOGY_MAX_SPOUT_PENDING)
+
+    if not self.acking_enabled and self.output_helper.is_out_queue_available():
+      return True
+    elif self.acking_enabled and self.output_helper.is_out_queue_available() and \
+        len(self.in_flight_tuples) < max_spout_pending:
+      return True
+    elif self.acking_enabled and not self.in_stream.is_empty():
+      return True
+    else:
+      return False
+
+  def _look_for_timeouts(self):
+    spout_config = self.pplan_helper.context.get_cluster_config()
+    timeout_sec = spout_config.get(constants.TOPOLOGY_MESSAGE_TIMEOUT_SECS)
+    n_bucket = self.sys_config.get(constants.INSTANCE_ACKNOWLEDGEMENT_NBUCKETS)
+    now = time.time()
+
+    timeout_lst = []
+    for key, tuple_info in self.in_flight_tuples.iteritems():
+      if tuple_info.is_expired(now, timeout_sec):
+        timeout_lst.append(tuple_info)
+        self.in_flight_tuples.pop(key)
+      else:
+        # in_flight_tuples are ordered by insertion time
+        break
+
+    for tuple_info in timeout_lst:
+      self.spout_metrics.timeout_tuple(tuple_info.stream_id)
+      self._invoke_fail(tuple_info.tuple_id, tuple_info.stream_id,
+                        timeout_sec * constants.SEC_TO_NS)
+
+    # register this method to timer again
+    self.looper.register_timer_task_in_sec(self._look_for_timeouts, float(timeout_sec) / n_bucket)
 
   # ACK/FAIL related
   def _handle_ack_tuple(self, tup, is_success):
@@ -280,7 +336,6 @@ class Spout(Component):
       if rt.taskid != self.pplan_helper.my_task_id:
         raise RuntimeError("Receiving tuple for task: %s in task: %s"
                            % (str(rt.taskid), str(self.pplan_helper.my_task_id)))
-
       try:
         tuple_info = self.in_flight_tuples.pop(rt.key)
       except KeyError:

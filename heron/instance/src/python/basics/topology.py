@@ -24,6 +24,13 @@ from .component import HeronComponentSpec
 
 class TopologyType(type):
   """Metaclass to define a Heron topology in Python"""
+  DEFAULT_TOPOLOGY_CONFIG = {constants.TOPOLOGY_DEBUG: "false",
+                             constants.TOPOLOGY_STMGRS: "1",
+                             constants.TOPOLOGY_MESSAGE_TIMEOUT_SECS: "30",
+                             constants.TOPOLOGY_COMPONENT_PARALLELISM: "1",
+                             constants.TOPOLOGY_MAX_SPOUT_PENDING: "100",
+                             constants.TOPOLOGY_ENABLE_ACKING: "false",
+                             constants.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS: "true"}
   def __new__(mcs, classname, bases, class_dict):
     bolt_specs = {}
     spout_specs = {}
@@ -80,14 +87,7 @@ class TopologyType(type):
     topo_config = {}
 
     # add defaults
-    default_topo_config = {constants.TOPOLOGY_DEBUG: "false",
-                           constants.TOPOLOGY_STMGRS: "1",
-                           constants.TOPOLOGY_MESSAGE_TIMEOUT_SECS: "30",
-                           constants.TOPOLOGY_COMPONENT_PARALLELISM: "1",
-                           constants.TOPOLOGY_MAX_SPOUT_PENDING: "100",
-                           constants.TOPOLOGY_ENABLE_ACKING: "false",
-                           constants.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS: "true"}
-    topo_config.update(default_topo_config)
+    topo_config.update(mcs.DEFAULT_TOPOLOGY_CONFIG)
 
     for name, custom_config in class_dict.iteritems():
       if name == 'config' and isinstance(custom_config, dict):
@@ -182,7 +182,7 @@ class TopologyType(type):
     sanitized = {}
     for key, value in custom_config.iteritems():
       if not isinstance(key, str):
-        raise TypeError("Key for component-specific configuration must be string, given: %s: %s"
+        raise TypeError("Key for topology-wide configuration must be string, given: %s: %s"
                         % (str(type(key)), str(key)))
 
       if isinstance(value, bool):

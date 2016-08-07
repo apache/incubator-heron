@@ -297,6 +297,10 @@ class HeronComponentSpec(object):
           raise ValueError('A given grouping is not supported')
         if isinstance(key, HeronComponentSpec):
           # use default streamid
+          if key.name is None:
+            # should not happen as TopologyType metaclass sets name attribute
+            # before calling this method
+            raise RuntimeError("In _sanitize_inputs(): HeronComponentSpec doesn't have a name")
           global_streamid = GlobalStreamId(key.name, Stream.DEFAULT_STREAM_ID)
           ret[global_streamid] = grouping
         elif isinstance(key, GlobalStreamId):
@@ -308,6 +312,10 @@ class HeronComponentSpec(object):
       # will use SHUFFLE grouping
       for input_obj in self.inputs:
         if isinstance(input_obj, HeronComponentSpec):
+          if input_obj.name is None:
+            # should not happen as TopologyType metaclass sets name attribute
+            # before calling this method
+            raise RuntimeError("In _sanitize_inputs(): HeronComponentSpec doesn't have a name")
           global_streamid = GlobalStreamId(input_obj.name, Stream.DEFAULT_STREAM_ID)
           ret[global_streamid] = Grouping.SHUFFLE
         elif isinstance(input_obj, GlobalStreamId):
@@ -338,6 +346,10 @@ class HeronComponentSpec(object):
     if self.outputs is None:
       return
 
+    if not isinstance(self.outputs, (list, tuple)):
+      raise TypeError("Argument to outputs must be either list or tuple, given: %s"
+                      % str(type(self.outputs)))
+
     for output in self.outputs:
       if not isinstance(output, (str, Stream)):
         raise TypeError("Outputs must be a list of strings or Streams, given: %s" % str(output))
@@ -349,11 +361,21 @@ class HeronComponentSpec(object):
         ret[Stream.DEFAULT_STREAM_ID].append(output)
       else:
         # output is a Stream object
-        ret[output.stream_id] = output.fields
+        if output.stream_id == Stream.DEFAULT_STREAM_ID and Stream.DEFAULT_STREAM_ID in ret:
+          # some default stream fields are already in there
+          ret[Stream.DEFAULT_STREAM_ID].extend(output.fields)
+        else:
+          ret[output.stream_id] = output.fields
     return ret
 
   def get_out_streamids(self):
     """Returns a set of output stream ids registered for this component"""
+    if self.outputs is None:
+      return set()
+
+    if not isinstance(self.outputs, (list, tuple)):
+      raise TypeError("Argument to outputs must be either list or tuple, given: %s"
+                      % str(type(self.outputs)))
     ret_lst = []
     for output in self.outputs:
       if not isinstance(output, (str, Stream)):
@@ -407,9 +429,9 @@ class GlobalStreamId(object):
     :param streamId: stream id through which the tuple is transmitted
     """
     if not isinstance(componentId, (str, HeronComponentSpec)):
-      raise ValueError('GlobalStreamId: componentId must be either string or HeronComponentSpec')
+      raise TypeError('GlobalStreamId: componentId must be either string or HeronComponentSpec')
     if not isinstance(streamId, str):
-      raise ValueError('GlobalStreamId: streamId must be string type')
+      raise TypeError('GlobalStreamId: streamId must be string type')
 
     self._component_id = componentId
     self.stream_id = streamId
