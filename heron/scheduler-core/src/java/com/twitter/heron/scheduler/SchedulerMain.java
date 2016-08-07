@@ -140,6 +140,11 @@ public class SchedulerMain {
         .argName("property=value")
         .build();
 
+    Option verbose = Option.builder("v")
+        .desc("Enable debug logs")
+        .longOpt("verbose")
+        .build();
+
     options.addOption(cluster);
     options.addOption(role);
     options.addOption(environment);
@@ -147,6 +152,7 @@ public class SchedulerMain {
     options.addOption(topologyJar);
     options.addOption(schedulerHTTPPort);
     options.addOption(property);
+    options.addOption(verbose);
 
     return options;
   }
@@ -200,6 +206,7 @@ public class SchedulerMain {
         cmd.getOptionValue("topology_jar"),
         topologyName,
         Integer.parseInt(cmd.getOptionValue("http_port")),
+        (Boolean) cmd.hasOption("verbose"),
         schedulerProperties);
 
     LOG.info("Scheduler command line properties override: " + schedulerProperties.toString());
@@ -221,9 +228,11 @@ public class SchedulerMain {
                                              String env,
                                              String topologyJar,
                                              String topologyName,
-                                             int httpPort) throws IOException {
+                                             int httpPort,
+                                             Boolean verbose
+                                             ) throws IOException {
     return createInstance(
-        cluster, role, env, topologyJar, topologyName, httpPort, new Properties());
+        cluster, role, env, topologyJar, topologyName, httpPort, verbose, new Properties());
   }
 
   public static SchedulerMain createInstance(String cluster,
@@ -232,6 +241,7 @@ public class SchedulerMain {
                                              String topologyJar,
                                              String topologyName,
                                              int httpPort,
+                                             Boolean verbose,
                                              Properties schedulerProperties) throws IOException {
     // Look up the topology def file location
     String topologyDefnFile = TopologyUtils.lookUpTopologyDefnFile(".", topologyName);
@@ -246,6 +256,7 @@ public class SchedulerMain {
         env,
         topologyJar,
         topologyDefnFile,
+        verbose,
         topology);
 
     // set up logging with complete Config
@@ -268,6 +279,9 @@ public class SchedulerMain {
     // Init the logging setting and redirect the stdout and stderr to logging
     // For now we just set the logging level as INFO; later we may accept an argument to set it.
     Level loggingLevel = Level.INFO;
+    if (Context.verbose(config).booleanValue()) {
+      loggingLevel = Level.FINE;
+    }
     // TODO(mfu): The folder creation may be duplicated with heron-executor in future
     // TODO(mfu): Remove the creation in future if feasible
     String loggingDir = systemConfig.getHeronLoggingDirectory();

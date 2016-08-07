@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' restart.py '''
-from heron.common.src.python.color import Log
-
+import traceback
+from heron.common.src.python.utils.log import Log
 import heron.cli.src.python.args as args
 import heron.cli.src.python.execute as execute
 import heron.cli.src.python.jars as jars
@@ -86,7 +86,7 @@ def run(command, parser, cl_args, unknown_args):
     )
 
   except Exception as ex:
-    print 'Error: %s' % str(ex)
+    Log.debug(traceback.format_exc(ex))
     Log.error('Failed to restart topology \'%s\'' % topology_name)
     return False
 
