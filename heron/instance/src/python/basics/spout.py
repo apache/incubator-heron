@@ -19,15 +19,13 @@ import collections
 
 from abc import abstractmethod
 from heron.proto import topology_pb2, tuple_pb2
-from heron.common.src.python.utils import log
+from heron.common.src.python.utils.log import Log
 from heron.common.src.python.utils.tuple import TupleHelper
 from heron.common.src.python.utils.metrics import SpoutMetrics
 
 import heron.common.src.python.constants as constants
 
 from .component import Component, HeronComponentSpec
-
-Log = log.Log
 
 # pylint: disable=fixme
 class Spout(Component):
