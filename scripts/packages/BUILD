@@ -214,6 +214,14 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "heron-client-conf-marathon",
+    package_dir = "conf/marathon",
+    files = [
+        "//heron/config/src/yaml:conf-marathon-yaml",
+    ]
+)
+
+pkg_tar(
     name = "heron-client-conf",
     package_dir = "conf",
     files = heron_client_conf_files(),
@@ -237,6 +245,7 @@ pkg_tar(
         ":heron-client-conf-slurm",
         ":heron-client-conf-yarn",
         ":heron-client-conf-mesos",
+        ":heron-client-conf-marathon",
         ":heron-client-dist",
         ":heron-client-examples",
         ":heron-client-lib-third_party",

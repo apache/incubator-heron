@@ -1,0 +1,17 @@
+# scheduler class for distributing the topology for execution
+heron.class.scheduler:                       com.twitter.heron.scheduler.marathon.MarathonScheduler
+
+# launcher class for submitting and launching the topology
+heron.class.launcher:                        com.twitter.heron.scheduler.marathon.MarathonLauncher
+
+# location of java - pick it up from shell environment
+heron.directory.sandbox.java.home:           ${JAVA_HOME}
+
+# The URI of marathon scheduler
+heron.marathon.scheduler.uri: "http://127.0.0.1:8080"
+
+# Invoke the IScheduler as a library directly
+heron.scheduler.is.service:                  False
+
+# location of the core package
+heron.package.core.uri:                      file://${HOME}/.heron/dist/heron-core.tar.gz
