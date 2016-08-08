@@ -66,14 +66,13 @@ To check Heron is successfully installed, run:
 
 ```bash
 $ heron version
-heron.build.version : 0.14.1
-heron.build.time : Tue May 24 22:44:01 PDT 2016
-heron.build.timestamp : 1464155053000
+heron.build.version : 0.14.2
+heron.build.time : Sat Aug  6 12:35:47 PDT 2016
+heron.build.timestamp : 1470512147000
 heron.build.host : ${HOSTNAME}
 heron.build.user : ${USERNAME}
-heron.build.git.revision : be87b09f348e0ed05f45503340a2245a4ef68a35
+heron.build.git.revision : 26bb4096130a05f9799510bbce6c37a69a7342ef
 heron.build.git.status : Clean
-INFO: Elapsed time: 0.001s.
 ```
 
 ## Step 2 --- Launch an example topology
