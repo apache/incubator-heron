@@ -329,3 +329,42 @@ def print_version():
   with open(release_file) as release_info:
     for line in release_info:
       print line,
+
+def insert_bool(param, command_args):
+  '''
+  :param param:
+  :param command_args:
+  :return:
+  '''
+  index = 0
+  found = False
+  for lelem in command_args:
+    if lelem == '--' and not found:
+      break
+    if lelem == param:
+      found = True
+      break
+    index = index + 1
+
+  if found:
+    command_args.insert(index + 1, 'True')
+  return command_args
+
+
+def insert_bool_values(command_line_args):
+  '''
+  :param command_line_args:
+  :return:
+  '''
+  args1 = insert_bool('--verbose', command_line_args)
+  args2 = insert_bool('--deploy-deactivated', args1)
+  return args2
+
+class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
+  def _format_action(self, action):
+    # pylint: disable=bad-super-call
+    parts = super(argparse.RawDescriptionHelpFormatter, self)._format_action(action)
+    if action.nargs == argparse.PARSER:
+      parts = "\n".join(parts.split("\n")[1:])
+    return parts
+
