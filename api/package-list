@@ -65,6 +65,7 @@ com.twitter.heron.metricsmgr.sink
 com.twitter.heron.metricsmgr.sink.tmaster
 com.twitter.heron.network
 com.twitter.heron.packing
+com.twitter.heron.packing.binpacking
 com.twitter.heron.packing.roundrobin
 com.twitter.heron.proto.scheduler
 com.twitter.heron.proto.stmgr
@@ -76,6 +77,8 @@ com.twitter.heron.scheduler
 com.twitter.heron.scheduler.aurora
 com.twitter.heron.scheduler.client
 com.twitter.heron.scheduler.local
+com.twitter.heron.scheduler.mesos
+com.twitter.heron.scheduler.mesos.framework
 com.twitter.heron.scheduler.server
 com.twitter.heron.scheduler.slurm
 com.twitter.heron.scheduler.yarn
@@ -100,8 +103,9 @@ com.twitter.heron.uploader
 com.twitter.heron.uploader.hdfs
 com.twitter.heron.uploader.localfs
 com.twitter.heron.uploader.s3
+com.twitter.heron.uploader.scp
 org.apache.storm
-org.apache.storm.clojure
+org.apache.storm.clojure.lang
 org.apache.storm.generated
 org.apache.storm.grouping
 org.apache.storm.hooks

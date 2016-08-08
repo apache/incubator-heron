@@ -163,11 +163,19 @@
   </url>
   
   <url>
+    <loc>/heron/docs/operators/deployment/uploaders/scp/</loc>
+  </url>
+  
+  <url>
     <loc>/heron/docs/operators/deployment/statemanagers/zookeeper/</loc>
   </url>
   
   <url>
     <loc>/heron/docs/operators/deployment/schedulers/aurora-local-setup/</loc>
+  </url>
+  
+  <url>
+    <loc>/heron/docs/operators/deployment/schedulers/mesos-local-mac/</loc>
   </url>
   
   <url>
@@ -192,6 +200,10 @@
   
   <url>
     <loc>/heron/docs/contributors/testing/</loc>
+  </url>
+  
+  <url>
+    <loc>/heron/docs/developers/packing/ffdpacking/</loc>
   </url>
   
   <url>
