@@ -441,29 +441,43 @@ bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;dar
       <guid>/heron/docs/contributors/community/</guid>
       <description>
 
-&lt;h3 id=&#34;contributing-to-heron:f3b3effc19b97b19aaf2ce392427d255&#34;&gt;Contributing to Heron&lt;/h3&gt;
+&lt;h2 id=&#34;contributing-to-heron:f3b3effc19b97b19aaf2ce392427d255&#34;&gt;Contributing to Heron&lt;/h2&gt;
 
-&lt;p&gt;Community is a critical factor to the success of Heron.  Contributions are welcome! After reviewing
-the &lt;a href=&#34;../../concepts/architecture/&#34;&gt;Heron Architecture&lt;/a&gt;, &lt;a href=&#34;../../developers/compiling/compiling/&#34;&gt;Compiling Heron&lt;/a&gt;,
-and the &lt;a href=&#34;../codebase/&#34;&gt;Heron Codebase&lt;/a&gt;, this page covers how to contribute and, when you&amp;rsquo;ve made a
-patch, how to submit it.&lt;/p&gt;
+&lt;p&gt;Discussion about Heron happens on GitHub and over mailing list.&lt;/p&gt;
 
-&lt;h3 id=&#34;how-can-i-contribute-to-heron:f3b3effc19b97b19aaf2ce392427d255&#34;&gt;How Can I Contribute to Heron?&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;GitHub: &lt;a href=&#34;https://github.com/twitter/heron&#34;&gt;twitter/heron&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Heron User Google Group: &lt;a href=&#34;https://groups.google.com/forum/#!forum/heron-users&#34;&gt;heron-users@googlegroups.com&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Heron on Twitter: &lt;a href=&#34;https://twitter.com/heronstreaming&#34;&gt;@heronstreaming&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 
-&lt;p&gt;In general, contributions that fix bugs or add features (as opposed to stylistic, refactoring, or
-&amp;ldquo;cleanup&amp;rdquo; changes) are preferred. If you&amp;rsquo;re looking for places to contribute, issues labeled
-&lt;a href=&#34;https://github.com/twitter/heron/issues?q=is%3Aopen+is%3Aissue+label%3Ahelp-wanted&#34;&gt;help-wanted&lt;/a&gt;
-are good candidates. Please check the dev list before investing a lot of time in a patch.&lt;/p&gt;
+&lt;p&gt;Community is critical to Heron. Contributions are welcomed!&lt;/p&gt;
 
-&lt;p&gt;Continue to &lt;a href=&#34;../../concepts/architecture/&#34;&gt;Heron Architecture&lt;/a&gt;,
-&lt;a href=&#34;../../developers/compiling/compiling/&#34;&gt;Compiling Heron&lt;/a&gt;, or &lt;a href=&#34;../codebase/&#34;&gt;Heron Codebase&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;how-can-i-contribute-to-heron:f3b3effc19b97b19aaf2ce392427d255&#34;&gt;How Can I Contribute to Heron?&lt;/h2&gt;
 
-&lt;h3 id=&#34;setting-up-idea:f3b3effc19b97b19aaf2ce392427d255&#34;&gt;Setting up IDEA&lt;/h3&gt;
+&lt;p&gt;You can first read the following pages to have a basic understanding
+of Heron:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;../../concepts/architecture/&#34;&gt;Heron Architecture&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;../../developers/compiling/compiling/&#34;&gt;Compiling Heron&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;../codebase/&#34;&gt;Heron Codebase&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;p&gt;Heron includes a script to bootstrap an IntelliJ IDEA project. The project includes support for Heron
 code styles and copyright headers. To bootstrap an IDEA project run the following:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ ./scripts/setup-intellij.sh
 &lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;In general, contributions that fix bugs or add features (as opposed to stylistic, refactoring, or
+&amp;ldquo;cleanup&amp;rdquo; changes) are preferred. If you&amp;rsquo;re looking for places to contribute, issues with label
+&lt;a href=&#34;https://github.com/twitter/heron/issues?q=is%3Aopen+is%3Aissue+label%3Ahelp-wanted&#34;&gt;help-wanted&lt;/a&gt;
+are good candidates. Please check with &lt;a href=&#34;https://groups.google.com/forum/#!forum/heron-users&#34;&gt;mailing list&lt;/a&gt;
+if your patch involves lots of changes.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;If you have any question or issues about troubleshooting,
+you should post on &lt;a href=&#34;https://groups.google.com/forum/#!forum/heron-users&#34;&gt;mailing list&lt;/a&gt; instead
+of opening GitHub issues.&lt;/strong&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;submitting-a-patch:f3b3effc19b97b19aaf2ce392427d255&#34;&gt;Submitting a Patch&lt;/h3&gt;
 
@@ -471,14 +485,15 @@ code styles and copyright headers. To bootstrap an IDEA project run the followin
 &lt;li&gt;&lt;p&gt;Read the Heron &lt;a href=&#34;../governance&#34;&gt;governance plan&lt;/a&gt; and accept the
 &lt;a href=&#34;https://engineering.twitter.com/opensource/cla&#34;&gt;Twitter Contributor License Agreement&lt;/a&gt; (CLA).&lt;/p&gt;&lt;/li&gt;
 
-&lt;li&gt;&lt;p&gt;Discuss your plan and design, and get agreement on our heron-dev@googlegroups.com mailing list.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Discuss your plan and design, and get agreement on
+&lt;a href=&#34;https://groups.google.com/forum/#!forum/heron-users&#34;&gt;mailing list&lt;/a&gt;.&lt;/p&gt;&lt;/li&gt;
 
-&lt;li&gt;&lt;p&gt;Implement the change with unit tests and verify that all tests pass.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Implement proper unit tests along with your change. Verify that all tests can pass.&lt;/p&gt;&lt;/li&gt;
 
-&lt;li&gt;&lt;p&gt;Submit a GitHub pull request that implements the feature. Clearly describe the the change in
-the description. Verify that Travis CI passes.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Submit a GitHub pull request that includes your change and test cases.
+Describe clearly your pull request the change. Verify that Travis CI passes.&lt;/p&gt;&lt;/li&gt;
 
-&lt;li&gt;&lt;p&gt;Complete a code review by addressing comments of the reviewers.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Complete a code review by addressing reviewers&amp;rsquo;s comments.&lt;/p&gt;&lt;/li&gt;
 
 &lt;li&gt;&lt;p&gt;A project committer will merge the patch to the master branch.&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
@@ -1194,6 +1209,55 @@ https://docs.google.com/drawings/d/10d1Q_VO0HFtOHftDV7kK6VbZMVI5EpEYHrD-LR7SczE
 --&gt;
 
 &lt;p&gt;&lt;img src=&#34;/heron/img/topology-submit-sequence-diagram.png&#34; style=&#34;max-width:140%;!important;&#34; alt=&#34;Topology Sequence Diagram&#34;/&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;topology-submit-description:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Topology Submit Description&lt;/h3&gt;
+
+&lt;p&gt;The following describes in more detail how a topology is submitted and
+launched using local scheduler.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Client&lt;/p&gt;
+
+&lt;p&gt;When a topology is submitted using the &lt;code&gt;heron submit&lt;/code&gt; command, it first executes
+the &lt;code&gt;main&lt;/code&gt; of the topology and creates a &lt;code&gt;.defn&lt;/code&gt; file containing the topology&amp;rsquo;s
+logical plan. Then, it runs &lt;code&gt;com.twitter.heron.scheduler.SubmitterMain&lt;/code&gt;, which
+is responsible for invoking an uploader and a launcher for the topology.
+The uploader uploads the topology package to the given location, while the
+launcher registers the topology&amp;rsquo;s logical plan and executor state with
+the State Manager and invokes the main scheduler.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;Shared Services&lt;/p&gt;
+
+&lt;p&gt;When the main scheduler (&lt;code&gt;com.twitter.heron.scheduler.SchedulerMain&lt;/code&gt;) is invoked
+by the launcher, it fetches the submitted topology artifact from the
+topology storage, initializes the State Manager, and prepares a physical plan that
+specifies how multiple instances should be packed into containers. Then, it starts
+the specified scheduler, such as &lt;code&gt;com.twitter.heron.scheduler.local.LocalScheduler&lt;/code&gt;,
+which invokes the &lt;code&gt;heron-executor&lt;/code&gt; for each container.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;Topologies&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;heron-executor&lt;/code&gt; process is started for each container and is responsible for
+executing the Topology Master or Heron Instances (Bolt/Spout) that are
+assigned to the container. Note that the Topology Master is always executed
+on container 0. When &lt;code&gt;heron-executor&lt;/code&gt; executes normal Heron Instances
+(i.e. except for container 0), it first prepares
+the Stream Manager and the Metrics Manager before starting
+&lt;code&gt;com.twitter.heron.instance.HeronInstance&lt;/code&gt; for each instance that is
+assigned to the container.&lt;/p&gt;
+
+&lt;p&gt;Heron Instance has two threads: the gateway thread and the slave thread.
+The gateway thread is mainly responsible for communicating with the Stream Manager
+and the Metrics Manager using &lt;code&gt;StreamManagerClient&lt;/code&gt; and &lt;code&gt;MetricsManagerClient&lt;/code&gt;
+respectively, as well as sending/receiving tuples to/from the slave
+thread. On the other hand, the slave thread runs either spout or bolt
+of the topology based on the physical plan.&lt;/p&gt;
+
+&lt;p&gt;When a new Heron Instance is started, its &lt;code&gt;StreamManagerClient&lt;/code&gt; establishes
+a connection and registers itself with the stream manager.
+After the successful registration, the gateway thread sends its physical plan to
+the slave thread, which then executes the assigned instance accordingly.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
 </description>
     </item>
     
