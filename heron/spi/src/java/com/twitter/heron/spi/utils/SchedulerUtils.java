@@ -109,8 +109,8 @@ public final class SchedulerUtils {
     commands.add(Context.environ(config));
     commands.add("--topology_name");
     commands.add(Context.topologyName(config));
-    commands.add("--topology_jar");
-    commands.add(Context.topologyJarFile(config));
+    commands.add("--topology_bin");
+    commands.add(Context.topologyBinaryFile(config));
     commands.add("--http_port");
     commands.add(Integer.toString(httpPort));
 
@@ -183,7 +183,7 @@ public final class SchedulerUtils {
     commands.add(Context.stmgrSandboxBinary(config));
     commands.add(Context.metricsManagerSandboxClassPath(config));
     commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)));
-    commands.add(TopologyUtils.makeClassPath(topology, Context.topologyJarFile(config)));
+    commands.add(TopologyUtils.makeClassPath(topology, Context.topologyBinaryFile(config)));
     commands.add(Integer.toString(masterPort));
     commands.add(Integer.toString(tmasterControllerPort));
     commands.add(Integer.toString(tmasterStatsPort));
@@ -191,7 +191,7 @@ public final class SchedulerUtils {
     commands.add(Runtime.componentRamMap(runtime));
     commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
     commands.add(Context.topologyPackageType(config));
-    commands.add(Context.topologyJarFile(config));
+    commands.add(Context.topologyBinaryFile(config));
     commands.add(Context.javaSandboxHome(config));
     commands.add(Integer.toString(shellPort));
     commands.add(Context.shellSandboxBinary(config));
@@ -210,6 +210,7 @@ public final class SchedulerUtils {
 
     commands.add(completeSchedulerProcessClassPath);
     commands.add(Integer.toString(schedulerPort));
+    commands.add(Context.pythonInstanceSandboxBinary(config));
 
     return commands.toArray(new String[0]);
   }
