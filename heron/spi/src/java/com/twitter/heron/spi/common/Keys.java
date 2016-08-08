@@ -165,8 +165,8 @@ public class Keys {
     return ConfigKeys.get("TOPOLOGY_DEFINITION_FILE");
   }
 
-  public static String topologyJarFile() {
-    return ConfigKeys.get("TOPOLOGY_JAR_FILE");
+  public static String topologyBinaryFile() {
+    return ConfigKeys.get("TOPOLOGY_BINARY_FILE");
   }
 
   public static String topologyPackageFile() {
@@ -355,6 +355,10 @@ public class Keys {
 
   public static String shellSandboxBinary() {
     return ConfigKeys.get("SANDBOX_SHELL_BINARY");
+  }
+
+  public static String pythonInstanceSandboxBinary() {
+    return ConfigKeys.get("SANDBOX_PYTHON_INSTANCE_BINARY");
   }
 
   public static String schedulerSandboxJar() {
