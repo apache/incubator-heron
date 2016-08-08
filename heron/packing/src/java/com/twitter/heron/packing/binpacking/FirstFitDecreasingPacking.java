@@ -28,6 +28,7 @@ import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IPacking;
+import com.twitter.heron.spi.packing.IRepacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.TopologyUtils;
@@ -87,7 +88,7 @@ import com.twitter.heron.spi.utils.TopologyUtils;
  * the size of ram for an instance is less than the minimal required value or .
  */
 
-public class FirstFitDecreasingPacking implements IPacking {
+public class FirstFitDecreasingPacking implements IPacking, IRepacking {
 
   public static final long MIN_RAM_PER_INSTANCE = 192L * Constants.MB;
   public static final int DEFAULT_CONTAINER_PADDING_PERCENTAGE = 10;
@@ -118,10 +119,17 @@ public class FirstFitDecreasingPacking implements IPacking {
   public static String getComponentName(String instanceId) {
     return instanceId.split(":")[1];
   }
-
+  
   @Override
-  public void initialize(Config config, Config runtime) {
-    this.topology = com.twitter.heron.spi.utils.Runtime.topology(runtime);
+  public void initialize(Config config, TopologyAPI.Topology inputTopology) {
+    this.topology = inputTopology;
+    setPackingConfigs(config);
+  }
+
+  /**
+   * Instatiate the packing algorithm parameters related to this topology.
+   */
+  private void setPackingConfigs(Config config) {
     this.instanceRamDefault = Context.instanceRam(config);
     this.instanceCpuDefault = Context.instanceCpu(config).doubleValue();
     this.instanceDiskDefault = Context.instanceDisk(config);
@@ -168,7 +176,7 @@ public class FirstFitDecreasingPacking implements IPacking {
    *
    * @return new packing plan
    */
-  public PackingPlan pack(PackingPlan currentPackingPlan, Map<String, Integer> componentChanges) {
+  public PackingPlan repack(PackingPlan currentPackingPlan, Map<String, Integer> componentChanges) {
     // Get the instances using FFD allocation
     Map<String, List<String>> ffdAllocation = getFFDAllocation(currentPackingPlan,
         componentChanges);
@@ -190,6 +198,13 @@ public class FirstFitDecreasingPacking implements IPacking {
         resource.getDisk() + currentPackingPlan.getResource().getDisk());
 
     PackingPlan plan = new PackingPlan(topology.getId(), totalContainerPlanMap, total);
+
+    LOG.info("Created a packing plan with " + containerPlanMap.size() + " containers");
+    for (String key : containerPlanMap.keySet()) {
+      LOG.info("Container  " + key + " consists of "
+          + containerPlanMap.get(key).instances.toString());
+    }
+    LOG.info("Topology Resources " + resource.toString());
     return plan;
   }
 
@@ -286,7 +301,7 @@ public class FirstFitDecreasingPacking implements IPacking {
    */
   protected ArrayList<RamRequirement> getSortedRAMInstances(Map<String, Integer> parallelismMap) {
     ArrayList<RamRequirement> ramRequirements = new ArrayList<>();
-    Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology); ///???????????
+    Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
 
     for (String component : parallelismMap.keySet()) {
       if (ramMap.containsKey(component)) {

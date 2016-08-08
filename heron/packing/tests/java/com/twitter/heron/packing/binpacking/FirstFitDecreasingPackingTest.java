@@ -76,16 +76,13 @@ public class FirstFitDecreasingPackingTest {
         .putAll(ClusterDefaults.getDefaults())
         .build();
 
-    Config runtime = Config.newBuilder()
-        .put(Keys.topologyDefinition(), topology)
-        .build();
-
     this.instanceRamDefault = Context.instanceRam(config);
     this.instanceCpuDefault = Context.instanceCpu(config).doubleValue();
     this.instanceDiskDefault = Context.instanceDisk(config);
 
     FirstFitDecreasingPacking packing = new FirstFitDecreasingPacking();
-    packing.initialize(config, runtime);
+
+    packing.initialize(config, topology);
     PackingPlan output = packing.pack();
 
     return output;
@@ -101,17 +98,13 @@ public class FirstFitDecreasingPackingTest {
         .putAll(ClusterDefaults.getDefaults())
         .build();
 
-    Config runtime = Config.newBuilder()
-        .put(Keys.topologyDefinition(), topology)
-        .build();
-
     this.instanceRamDefault = Context.instanceRam(config);
     this.instanceCpuDefault = Context.instanceCpu(config).doubleValue();
     this.instanceDiskDefault = Context.instanceDisk(config);
 
     FirstFitDecreasingPacking packing = new FirstFitDecreasingPacking();
-    packing.initialize(config, runtime);
-    PackingPlan output = packing.pack(currentPackingPlan, componentChanges);
+    packing.initialize(config, topology);
+    PackingPlan output = packing.repack(currentPackingPlan, componentChanges);
 
     return output;
   }
