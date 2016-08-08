@@ -129,6 +129,7 @@ public class AuroraScheduler implements IScheduler {
     Map<String, String> auroraProperties = new HashMap<>();
 
     TopologyAPI.Topology topology = Runtime.topology(runtime);
+
     // Align the cpu, ram, disk to the maximal one
     Resource containerResource = SchedulerUtils.getMaxRequiredResource(packing);
     // Update total topology resource requirement on Aurora clusters
