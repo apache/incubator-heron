@@ -2,7 +2,7 @@
 title: Setting up Heron with Aurora Cluster Locally on Linux
 ---
 
-It is possible to setup a Heron with a locally running Apache Aurora cluster.
+It is possible to setup Heron with a locally running Apache Aurora cluster.
 This is a step by step guide on how to configure and setup all the necessary
 components.
 
@@ -13,7 +13,7 @@ following steps can be found in [A local Cluster with Vagrant](http://aurora.apa
 
 ### Step 1: Install VirtualBox and Vagrant
 
-Download and install VirtualBox and Vagrant in your machine. If vagrant is successfully
+Download and install VirtualBox and Vagrant on your machine. If vagrant is successfully
 installed in your machine the following command should list several common commands
 for this tool
 
