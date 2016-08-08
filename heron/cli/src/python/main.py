@@ -20,7 +20,7 @@ import os
 import shutil
 import sys
 import time
-
+import traceback
 
 import heron.cli.src.python.help as cli_help
 import heron.common.src.python.heronparser as hrc_parse
@@ -31,9 +31,12 @@ import heron.cli.src.python.restart as restart
 import heron.cli.src.python.submit as submit
 import heron.common.src.python.utils.config as config
 import heron.cli.src.python.version as version
+import logging
+
 import heron.common.src.python.utils.log as log
 
 Log = log.Log
+logging.basicConfig(level=logging.DEBUG)
 
 HELP_EPILOG = '''Getting more help:
   heron help <command> Prints help and options for <command>
@@ -208,8 +211,14 @@ def main():
   # insert the boolean values for some of the options
   sys.argv = config.insert_bool_values(sys.argv)
 
-  # parse the args
-  args, unknown_args = parser.parse_known_args()
+  try:
+    # parse the args
+    args, unknown_args = parser.parse_known_args()
+  except ValueError as ex:
+    Log.error("Error while parsing arguments: %s", str(ex))
+    Log.debug(traceback.format_exc())
+    sys.exit(1)
+
   command_line_args = vars(args)
 
   # command to be execute
