@@ -167,10 +167,23 @@ class HeronArgumentParser(argparse.ArgumentParser):
               new_arg_strings, len(sys.argv), sys.argv, app, command, role)
     return arg_strings
 
+  # get the positional arguments for the given sub parser, remove the known obvious
+  def get_positional_args(self):
+    positional_args_map = collections.defaultdict(dict)
+    for key in self._actions:
+      # pylint: disable=protected-access
+      if isinstance(key, argparse._StoreAction) and len(key.option_strings) == 0:
+        if key.dest == 'cluster/[role]/[env]':
+          continue
+        positional_args_map['--'+key.dest] = key.dest
+        Log.debug("get_positional_args : key: %s, dest : %s", key, key.dest)
+    return positional_args_map
+
   def parse_known_args(self, args=None, namespace=None):
     namespace, args = super(HeronArgumentParser,
                             self).parse_known_args(args, namespace)
     dict_ns = namespace.__dict__
+    positional_args_map = self.get_positional_args()
     if self.prog == 'heron':
       try:
         for key in dict_ns:
@@ -180,6 +193,17 @@ class HeronArgumentParser(argparse.ArgumentParser):
       except Exception:
         Log.warn("heronrc: unable to clobber arguments (%s,%s ) ", namespace, args)
         Log.debug(traceback.format_exc())
+    else:
+      ## sub parser specific validation
+      Log.debug('sub parser expansion  %s %s', self.prog, args)
+      ## if the expanded args contains a optional equivalent of a positional argument
+      ## i.e --topology-name xyz for positional argument topology-name
+      ## need to prevent that for that sub parser. bail out
+      for key in args:
+        if key in positional_args_map:
+          raise ValueError(
+              'positional argument for  command {} : {} specified in heronrc'.format(
+                  self.prog, positional_args_map[key]))
     return namespace, args
 
 def main():

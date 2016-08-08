@@ -22,6 +22,8 @@ import heron.common.src.python.heronparser as hr_argparser
 import heron.common.src.python.utils.config as config
 import heron.cli.src.python.submit as submit
 
+logging.basicConfig(level=logging.INFO)
+
 
 #pylint: disable=missing-docstring, no-self-use
 help_epilog = '''Getting more help:
@@ -74,9 +76,37 @@ class HeronParserTest(unittest.TestCase):
         title="Available commands",
         metavar='<command> <options>')
     submit.create_parser(subparsers)
-    args, _ = parser.parse_known_args(["submit", "local"])
-    self.assertEqual('~/.heron/examples/heron-examples.jar', args.__dict__['topology-file-name'])
+    args, _ = parser.parse_known_args(["submit", "local", "~/.heron/examples/heron-examples.jar",
+                                       "com.twitter.heron.examples.ExclamationTopology",
+                                       "ExclamationTopology"])
+    self.assertEqual('True', args.__dict__['verbose'])
     hr_argparser.HeronArgumentParser.clear()
+
+  def test_parser_commandline_positional_error(self):
+    sys.argv = []
+
+    parser = hr_argparser.HeronArgumentParser(
+        prog='heron',
+        epilog=help_epilog,
+        formatter_class=config.SubcommandHelpFormatter,
+        fromfile_prefix_chars='@',
+        add_help=False,
+        rcfile=self.testrcfile,
+        rccommand="submit",
+        rcclusterrole="ilocal")
+
+    subparsers = parser.add_subparsers(
+        title="Available commands",
+        metavar='<command> <options>')
+    submit.create_parser(subparsers)
+    try:
+      _, _ = parser.parse_known_args(["submit", "ilocal"])
+    except ValueError:
+      pass
+    else:
+      self.fail('ValueError expected for test_parser_commandline_positional_error')
+    hr_argparser.HeronArgumentParser.clear()
+
 
   def test_parser_commandline(self):
     sys.argv = []

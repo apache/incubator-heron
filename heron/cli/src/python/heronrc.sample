@@ -17,3 +17,7 @@ heron:submit:local --verbose  --topology-file-name ~/.heron/examples/heron-examp
 #invalid
 :devcluster/ads/PROD --config-property test-cmd-invalid     
 --config-property test-hello
+
+#error for submit parser with ilocal role
+
+heron:submit:ilocal --verbose True --topology-file-name ~/.heron/examples/heron-examples.jar  --topology-class-name com.twitter.heron.examples.ExclamationTopology --topology-name ExclamationTopology
