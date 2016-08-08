@@ -13,11 +13,13 @@
 # limitations under the License.
 ''' submit.py '''
 import glob
+import logging
 import os
 import shutil
 import tempfile
+import traceback
 
-from heron.common.src.python.color import Log
+from heron.common.src.python.utils.log import Log
 from heron.proto import topology_pb2
 
 import heron.cli.src.python.args as cli_args
@@ -89,10 +91,10 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
       "--release_file", release_yaml_file,
       "--topology_package", topology_pkg_path,
       "--topology_defn", topology_defn_file,
-      "--topology_jar", topology_file   # pex file if pex specified
+      "--topology_bin", topology_file   # pex file if pex specified
   ]
 
-  if opts.verbose():
+  if Log.getEffectiveLevel() == logging.DEBUG:
     args.append("--verbose")
 
   lib_jars = config.get_heron_libs(
@@ -178,16 +180,15 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
         args=tuple(unknown_args),
         java_defines=cl_args['topology_main_jvm_property'])
 
-  except Exception:
+  except Exception as ex:
+    Log.debug(traceback.format_exc(ex))
     Log.error("Unable to execute topology main class")
     return False
 
   try:
     launch_topologies(cl_args, topology_file, tmp_dir)
-
-  except Exception:
+  except Exception as ex:
     return False
-
   finally:
     shutil.rmtree(tmp_dir)
 

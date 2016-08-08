@@ -16,8 +16,8 @@ import traceback
 import tornado.gen
 import tornado.ioloop
 
-from heron.common.src.python.color import Log
 from heron.common.src.python.handler.access import heron as API
+from .log import Log
 
 def _all_metric_queries():
   queries_normal = ['complete-latency',
@@ -51,7 +51,7 @@ def get_clusters():
   try:
     return instance.run_sync(lambda: API.get_clusters())
   except Exception:
-    Log.info(traceback.format_exc())
+    Log.debug(traceback.format_exc())
     raise
 
 
@@ -61,7 +61,7 @@ def get_logical_plan(cluster, env, topology, role):
   try:
     return instance.run_sync(lambda: API.get_logical_plan(cluster, env, topology, role))
   except Exception:
-    Log.info(traceback.format_exc())
+    Log.debug(traceback.format_exc())
     raise
 
 
@@ -71,7 +71,7 @@ def get_topology_info(*args):
   try:
     return instance.run_sync(lambda: API.get_topology_info(*args))
   except Exception:
-    Log.info(traceback.format_exc())
+    Log.debug(traceback.format_exc())
     raise
 
 
@@ -81,7 +81,7 @@ def get_topology_metrics(*args):
   try:
     return instance.run_sync(lambda: API.get_comp_metrics(*args))
   except Exception:
-    Log.info(traceback.format_exc())
+    Log.debug(traceback.format_exc())
     raise
 
 
@@ -93,7 +93,7 @@ def get_component_metrics(component, cluster, env, topology, role):
                                   all_queries, [0, -1], role)
     return result["metrics"]
   except Exception:
-    Log.info(traceback.format_exc())
+    Log.debug(traceback.format_exc())
     raise
 
 
@@ -103,7 +103,7 @@ def get_cluster_topologies(cluster):
   try:
     return instance.run_sync(lambda: API.get_cluster_topologies(cluster))
   except Exception:
-    Log.info(traceback.format_exc())
+    Log.debug(traceback.format_exc())
     raise
 
 
@@ -113,7 +113,7 @@ def get_cluster_role_topologies(cluster, role):
   try:
     return instance.run_sync(lambda: API.get_cluster_role_topologies(cluster, role))
   except Exception:
-    Log.info(traceback.format_exc())
+    Log.debug(traceback.format_exc())
     raise
 
 
@@ -123,5 +123,5 @@ def get_cluster_role_env_topologies(cluster, role, env):
   try:
     return instance.run_sync(lambda: API.get_cluster_role_env_topologies(cluster, role, env))
   except Exception:
-    Log.info(traceback.format_exc())
+    Log.debug(traceback.format_exc())
     raise

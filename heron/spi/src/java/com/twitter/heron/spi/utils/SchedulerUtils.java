@@ -110,8 +110,8 @@ public final class SchedulerUtils {
     commands.add(Context.environ(config));
     commands.add("--topology_name");
     commands.add(Context.topologyName(config));
-    commands.add("--topology_jar");
-    commands.add(Context.topologyJarFile(config));
+    commands.add("--topology_bin");
+    commands.add(Context.topologyBinaryFile(config));
     commands.add("--http_port");
     commands.add(Integer.toString(httpPort));
 
@@ -206,7 +206,7 @@ public final class SchedulerUtils {
     commands.add(Context.stmgrSandboxBinary(config));
     commands.add(Context.metricsManagerSandboxClassPath(config));
     commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)));
-    commands.add(TopologyUtils.makeClassPath(topology, Context.topologyJarFile(config)));
+    commands.add(TopologyUtils.makeClassPath(topology, Context.topologyBinaryFile(config)));
     commands.add(masterPort);
     commands.add(tmasterControllerPort);
     commands.add(tmasterStatsPort);
@@ -214,7 +214,7 @@ public final class SchedulerUtils {
     commands.add(Runtime.componentRamMap(runtime));
     commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
     commands.add(Context.topologyPackageType(config));
-    commands.add(Context.topologyJarFile(config));
+    commands.add(Context.topologyBinaryFile(config));
     commands.add(Context.javaSandboxHome(config));
     commands.add(shellPort);
     commands.add(Context.shellSandboxBinary(config));
@@ -233,6 +233,7 @@ public final class SchedulerUtils {
 
     commands.add(completeSchedulerProcessClassPath);
     commands.add(schedulerPort);
+    commands.add(Context.pythonInstanceSandboxBinary(config));
 
     return commands.toArray(new String[commands.size()]);
   }
@@ -407,7 +408,7 @@ public final class SchedulerUtils {
     LOG.log(Level.FINE, "Fetching package {0}", packageURI);
     LOG.fine("Fetched package can overwrite old one.");
     if (!ShellUtils.curlPackage(
-        packageURI, packageDestination, isVerbose, true)) {
+        packageURI, packageDestination, isVerbose, false)) {
       LOG.severe("Failed to fetch package.");
       return false;
     }
@@ -415,7 +416,7 @@ public final class SchedulerUtils {
     // untar the heron core release package in the working directory
     LOG.log(Level.FINE, "Extracting the package {0}", packageURI);
     if (!ShellUtils.extractPackage(
-        packageDestination, workingDirectory, isVerbose, true)) {
+        packageDestination, workingDirectory, isVerbose, false)) {
       LOG.severe("Failed to extract package.");
       return false;
     }

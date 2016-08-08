@@ -93,7 +93,7 @@ EmitInfo = namedtuple('EmitInfo', 'values, stream_id, task_id, out_tasks')
 :ivar values: (list) values emitted
 :ivar stream_id: (str) stream id into which tuple is emitted
 :ivar task_id: (int) task id on which emit() was called
-:ivar out_tasks: (list) tasks that are emitted
+:ivar out_tasks: (list) list of custom grouping target task id
 """
 
 SpoutAckInfo = namedtuple('SpoutAckInfo', 'message_id, spout_task_id, complete_latency_ms')
