@@ -13,7 +13,12 @@
 // limitations under the License.
 package com.twitter.heron.scheduler;
 
+import java.util.Map;
+
+import com.twitter.heron.spi.packing.PackingPlan;
+
 public interface ScalableScheduler {
-  void addContainers(Integer count);
+  void addContainers(Map<String, PackingPlan.ContainerPlan> containers);
+
   void removeContainers(Integer existingContainerCount, Integer count);
 }

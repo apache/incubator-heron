@@ -13,6 +13,7 @@
 // limitations under the License.
 package com.twitter.heron.scheduler;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
@@ -88,8 +89,10 @@ public class UpdateTopologyManager {
 
     // request new resources if necessary. Once containers are allocated we should make the changes
     // to state manager quickly, otherwise the scheduler might penalize for thrashing on start-up
-    if (containerDelta > 0 && scalableScheduler.isPresent()) {
-      scalableScheduler.get().addContainers(containerDelta);
+    Map<String, PackingPlan.ContainerPlan> newContainers = getNewContainers(
+        existingPackingPlan.containers, proposedPackingPlan.containers);
+    if (newContainers.size() > 0) {
+      scalableScheduler.get().addContainers(newContainers);
     }
 
     // update parallelism in updatedTopology since TMaster checks that
@@ -108,6 +111,23 @@ public class UpdateTopologyManager {
     if (containerDelta < 0 && scalableScheduler.isPresent()) {
       scalableScheduler.get().removeContainers(existingContainerCount, -containerDelta);
     }
+  }
+
+  Map<String, PackingPlan.ContainerPlan> getNewContainers(
+      Map<String, PackingPlan.ContainerPlan> currentContainers,
+      Map<String, PackingPlan.ContainerPlan> proposedContainers) {
+    Map<String, PackingPlan.ContainerPlan> delta = new HashMap<>();
+
+    if (proposedContainers.size() <= currentContainers.size()) {
+      return delta;
+    }
+
+    for (Map.Entry<String, PackingPlan.ContainerPlan> container : proposedContainers.entrySet()) {
+      if (!currentContainers.containsKey(container.getKey())) {
+        delta.put(container.getKey(), container.getValue());
+      }
+    }
+    return delta;
   }
 
   private static TopologyAPI.Topology mergeTopology(TopologyAPI.Topology topology,
