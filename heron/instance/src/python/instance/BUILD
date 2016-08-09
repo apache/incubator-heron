@@ -7,7 +7,8 @@ pex_binary(
   name = "heron-python-instance",
   srcs = ["st_heron_instance.py"],
   deps = [
-    "//heron/instance/src/python/basics:pyheron_lib",
+    "//heron/streamparse/src/python:pyheron_lib",
+    "//heron/instance/src/python/basics:pyheron_basics_lib",
     "//heron/instance/src/python/network:pyheron_nw_lib",
     "//heron/common/src/python:common",
     "//heron/proto:proto-py",
