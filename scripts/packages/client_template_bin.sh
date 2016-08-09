@@ -113,14 +113,14 @@ echo -n .
 
 if [ -f "${heronrc}" ]; then
   echo
-  echo "${heronrc} already exists, moving it to ${heronrc}.bak."
-  mv "${heronrc}" "${heronrc}.bak"
+  echo "${heronrc} already exists, not modifying it"
+else
+  touch "${heronrc}"
+  if [ "${UID}" -eq 0 ]; then
+    chmod 0644 "${heronrc}"
+  fi
 fi
 
-touch "${heronrc}"
-if [ "${UID}" -eq 0 ]; then
-  chmod 0644 "${heronrc}"
-fi
 rm "${base}/heron-client.tar.gz"
 
 cat <<EOF
