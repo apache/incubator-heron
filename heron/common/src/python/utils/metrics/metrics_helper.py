@@ -13,7 +13,7 @@
 # limitations under the License.
 '''metrics_helper: helper classes for managing common metrics'''
 
-from heron.common.src.python.log import Log
+from heron.common.src.python.utils.log import Log
 from heron.proto import metrics_pb2
 import heron.common.src.python.constants as constants
 
@@ -188,6 +188,10 @@ class SpoutMetrics(ComponentMetrics):
   def update_pending_tuples_count(self, count):
     """Apply updates to the pending tuples count"""
     self.update_reduced_metric(self.PENDING_ACKED_COUNT, count)
+
+  def timeout_tuple(self, stream_id):
+    """Apply updates to the timeout count"""
+    self.update_count(self.TIMEOUT_COUNT, key=stream_id)
 
 class BoltMetrics(ComponentMetrics):
   """Metrics helper class for Bolt"""

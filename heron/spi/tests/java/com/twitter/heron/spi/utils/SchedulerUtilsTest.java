@@ -63,7 +63,7 @@ public class SchedulerUtilsTest {
 
     // Failed to curl the package
     PowerMockito.
-        when(ShellUtils.curlPackage(TOPOLOGY_URI, TOPOLOGY_DEST, IS_VERBOSE, true)).
+        when(ShellUtils.curlPackage(TOPOLOGY_URI, TOPOLOGY_DEST, IS_VERBOSE, false)).
         thenReturn(false);
     Assert.assertFalse(
         SchedulerUtils.curlAndExtractPackage(
@@ -71,19 +71,22 @@ public class SchedulerUtilsTest {
 
     // Ok to curl package
     PowerMockito.
-        when(ShellUtils.curlPackage(TOPOLOGY_URI, TOPOLOGY_DEST, IS_VERBOSE, true)).
+        when(ShellUtils.curlPackage(TOPOLOGY_URI, TOPOLOGY_DEST, IS_VERBOSE, false)).
         thenReturn(true);
     // Failed to extract package
     PowerMockito.
-        when(ShellUtils.extractPackage(TOPOLOGY_DEST, WORKING_DIR, IS_VERBOSE, true)).
+        when(ShellUtils.extractPackage(TOPOLOGY_DEST, WORKING_DIR, IS_VERBOSE, false)).
         thenReturn(false);
     Assert.assertFalse(
         SchedulerUtils.curlAndExtractPackage(
             WORKING_DIR, TOPOLOGY_URI, TOPOLOGY_DEST, IS_DELETE_PACKAGE, IS_VERBOSE));
 
-    // Ok to extract the package
+    // Ok to curl and extract the package (inheritIO is off)
     PowerMockito.
-        when(ShellUtils.extractPackage(TOPOLOGY_DEST, WORKING_DIR, IS_VERBOSE, true)).
+        when(ShellUtils.curlPackage(TOPOLOGY_URI, TOPOLOGY_DEST, IS_VERBOSE, false)).
+        thenReturn(true);
+    PowerMockito.
+        when(ShellUtils.extractPackage(TOPOLOGY_DEST, WORKING_DIR, IS_VERBOSE, false)).
         thenReturn(true);
 
     // Not required to delete the package
@@ -161,7 +164,7 @@ public class SchedulerUtilsTest {
     String[] expectedArgs =
         {"--cluster", null, "--role", null,
             "--environment", null, "--topology_name", null,
-            "--topology_jar", null, "--http_port", "1"};
+            "--topology_bin", null, "--http_port", "1"};
     Assert.assertArrayEquals(expectedArgs, SchedulerUtils.schedulerCommandArgs(
         Mockito.mock(Config.class), Mockito.mock(Config.class), freePorts));
   }

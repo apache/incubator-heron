@@ -41,6 +41,11 @@ mesos_deps_files = \
        "@org_apache_zookeeper_zookeeper//jar",
    ]
 
+marathon_deps_files = \
+    scheduler_deps_files + [
+       "//third_party/java:jackson",
+    ]
+
 java_library(
     name='local-scheduler-java',
     srcs = glob(["**/local/*.java"]),
@@ -168,5 +173,27 @@ genrule(
     name = "heron-mesos-scheduler",
     srcs = [":mesos-scheduler-unshaded_deploy.jar"],
     outs = ["heron-mesos-scheduler.jar"],
+    cmd  = "cp $< $@",
+)
+
+
+java_library(
+    name='marathon-scheduler-java',
+    srcs = glob(["com/twitter/heron/scheduler/marathon/**/*.java"]),
+    deps = marathon_deps_files,
+    resources = glob(["**/marathon/*.yaml"]),
+)
+
+java_binary(
+    name='marathon-scheduler-unshaded',
+    srcs=glob(["com/twitter/heron/scheduler/marathon/**/*.java"]),
+    deps = marathon_deps_files,
+    resources = glob(["**/marathon/*.yaml"]),
+)
+
+genrule(
+    name = "heron-marathon-scheduler",
+    srcs = [":marathon-scheduler-unshaded_deploy.jar"],
+    outs = ["heron-marathon-scheduler.jar"],
     cmd  = "cp $< $@",
 )

@@ -13,7 +13,7 @@
 # limitations under the License.
 ''' help.py '''
 import heron.common.src.python.utils.config as config
-from heron.common.src.python.color import Log
+from heron.common.src.python.utils.log import Log
 
 
 def create_parser(subparsers):

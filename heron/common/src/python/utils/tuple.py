@@ -52,8 +52,10 @@ HeronTuple = namedtuple('Tuple', StreamParseTuple._fields + ('creation_time', 'r
 :type roots: list
 """
 
-RootTupleInfo = namedtuple('RootTupleInfo', 'stream_id tuple_id insertion_time key')
-
+class RootTupleInfo(namedtuple('RootTupleInfo', 'stream_id tuple_id insertion_time key')):
+  __slots__ = ()
+  def is_expired(self, current_time, timeout_sec):
+    return self.insertion_time + timeout_sec - current_time <= 0
 
 class TupleHelper(object):
   """Tuple generator, returns StreamParse compatible tuple"""

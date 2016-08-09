@@ -36,22 +36,28 @@ public final class SchedulerConfig {
   /**
    * Load the topology config
    *
-   * @param topologyJarFile, name of the user submitted topology jar/tar file
+   * @param topologyBinaryFile, name of the user submitted topology jar/tar/pex file
    * @param topologyDefnFile, name of the topology defintion file
    * @param topology, proto in memory version of topology definition
    * @return config, the topology config
    */
-  protected static Config topologyConfigs(String topologyJarFile,
+  protected static Config topologyConfigs(String topologyBinaryFile,
                                           String topologyDefnFile, TopologyAPI.Topology topology) {
-
-    String pkgType = FileUtils.isOriginalPackageJar(
-        FileUtils.getBaseName(topologyJarFile)) ? "jar" : "tar";
+    String basename = FileUtils.getBaseName(topologyBinaryFile);
+    String pkgType;
+    if (FileUtils.isOriginalPackagePex(basename)) {
+      pkgType = "pex";
+    } else if (FileUtils.isOriginalPackageJar(basename)) {
+      pkgType = "jar";
+    } else {
+      pkgType = "tar";
+    }
 
     Config config = Config.newBuilder()
         .put(Keys.topologyId(), topology.getId())
         .put(Keys.topologyName(), topology.getName())
         .put(Keys.topologyDefinitionFile(), topologyDefnFile)
-        .put(Keys.topologyJarFile(), topologyJarFile)
+        .put(Keys.topologyBinaryFile(), topologyBinaryFile)
         .put(Keys.topologyPackageType(), pkgType)
         .build();
 
@@ -79,11 +85,13 @@ public final class SchedulerConfig {
    * @param environ, user provided environment/tag
    * @return config, the command line config
    */
-  protected static Config commandLineConfigs(String cluster, String role, String environ) {
+  protected static Config commandLineConfigs(String cluster, String role,
+                                             String environ, Boolean verbose) {
     Config config = Config.newBuilder()
         .put(Keys.cluster(), cluster)
         .put(Keys.role(), role)
         .put(Keys.environ(), environ)
+        .put(Keys.verbose(), verbose)
         .build();
     return config;
   }
@@ -93,15 +101,16 @@ public final class SchedulerConfig {
       String cluster,
       String role,
       String environ,
-      String topologyJarFile,
+      String topologyBinaryFile,
       String topologyDefnFile,
+      Boolean verbose,
       TopologyAPI.Topology topology) {
 
     Config config = Config.expand(
         Config.newBuilder()
             .putAll(sandboxConfigs())
-            .putAll(commandLineConfigs(cluster, role, environ))
-            .putAll(topologyConfigs(topologyJarFile, topologyDefnFile, topology))
+            .putAll(commandLineConfigs(cluster, role, environ, verbose))
+            .putAll(topologyConfigs(topologyBinaryFile, topologyDefnFile, topology))
             .build());
 
     return config;

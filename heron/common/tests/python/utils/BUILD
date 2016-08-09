@@ -16,6 +16,20 @@ pex_test(
 )
 
 pex_test(
+  name = "custom_grouping_unittest",
+  srcs = ["custom_grouping_unittest.py", "mock_generator.py"],
+  deps = [
+    "//heron/common/tests/python:pytest-lib"
+  ],
+  reqs = [
+    "py==1.4.27",
+    "pytest==2.6.4",
+    "unittest2==0.5.1",
+  ],
+  size = "small",
+)
+
+pex_test(
   name = "metrics_helper_unittest",
   srcs = ["metrics_helper_unittest.py", "mock_generator.py"],
   deps = [
@@ -74,6 +88,20 @@ pex_test(
 pex_test(
   name = "pplan_helper_unittest",
   srcs = ["pplan_helper_unittest.py", "mock_generator.py"],
+  deps = [
+    "//heron/common/tests/python:pytest-lib"
+  ],
+  reqs = [
+    "py==1.4.27",
+    "pytest==2.6.4",
+    "unittest2==0.5.1",
+  ],
+  size = "small",
+)
+
+pex_test(
+  name = "topology_context_unittest",
+  srcs = ["topology_context_unittest.py", "mock_generator.py"],
   deps = [
     "//heron/common/tests/python:pytest-lib"
   ],

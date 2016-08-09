@@ -20,7 +20,7 @@ from abc import abstractmethod
 
 import time
 from heron.common.src.python.network import HeronProtocol, REQID, StatusCode, OutgoingPacket
-from heron.common.src.python.log import Log
+from heron.common.src.python.utils.log import Log
 import heron.common.src.python.constants as constants
 
 # pylint: disable=too-many-instance-attributes
@@ -77,7 +77,20 @@ class HeronClient(asyncore.dispatcher):
   # called when close is ready
   def handle_close(self):
     Log.info("%s: handle_close() called" % self._get_classname())
+    self._clean_up_state()
     self.close()
+
+  def _clean_up_state(self):
+    self.out_buffer = []
+    self.total_bytes_written = 0
+    self.total_pkt_written = 0
+    self.total_bytes_received = 0
+    self.total_pkt_received = 0
+
+    self.registered_message_map = dict()
+    self.response_message_map = dict()
+    self.context_map = dict()
+    self.incomplete_pkt = None
 
   # read bytes stream from socket and convert them into a list of IncomingPacket
   def handle_read(self):

@@ -19,7 +19,7 @@ import sys
 import zipimport
 import zipfile
 
-from heron.common.src.python.log import Log
+from heron.common.src.python.utils.log import Log
 
 egg_regex = r"^(\.deps\/[^\/\s]*\.(egg|whl))\/"
 

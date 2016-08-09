@@ -21,7 +21,7 @@ from heron.statemgrs.src.python import statemanagerfactory
 from heron.tracker.src.python.topology import Topology
 from heron.tracker.src.python import javaobj
 from heron.tracker.src.python import utils
-from heron.common.src.python.color import Log
+from heron.common.src.python.utils.log import Log
 
 
 class Tracker(object):

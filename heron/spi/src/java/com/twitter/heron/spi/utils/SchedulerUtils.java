@@ -17,6 +17,7 @@ package com.twitter.heron.spi.utils;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -109,8 +110,8 @@ public final class SchedulerUtils {
     commands.add(Context.environ(config));
     commands.add("--topology_name");
     commands.add(Context.topologyName(config));
-    commands.add("--topology_jar");
-    commands.add(Context.topologyJarFile(config));
+    commands.add("--topology_bin");
+    commands.add(Context.topologyBinaryFile(config));
     commands.add("--http_port");
     commands.add(Integer.toString(httpPort));
 
@@ -131,12 +132,44 @@ public final class SchedulerUtils {
       Config runtime,
       int containerIndex,
       List<Integer> freePorts) {
-    // To construct the command aligning to executor interfaces
+    // First let us have some safe checks
+    if (freePorts.size() < PORTS_REQUIRED_FOR_EXECUTOR) {
+      throw new RuntimeException("Failed to find enough ports for executor");
+    }
+    for (int port : freePorts) {
+      if (port == -1) {
+        throw new RuntimeException("Failed to find available ports for executor");
+      }
+    }
+
+    // Convert port to string
+    List<String> ports = new LinkedList<>();
+    for (int port : freePorts) {
+      ports.add(Integer.toString(port));
+    }
+
+    return getExecutorCommand(config, runtime, containerIndex, ports);
+  }
+
+  /**
+   * Utils method to construct the command to start heron-executor
+   *
+   * @param config The static config
+   * @param runtime The runtime config
+   * @param containerIndex the executor/container index
+   * @param ports list of free ports in String
+   * @return String[] representing the command to start heron-executor
+   */
+  public static String[] getExecutorCommand(
+      Config config,
+      Config runtime,
+      int containerIndex,
+      List<String> ports) {
     List<String> commands = new ArrayList<>();
     commands.add(Context.executorSandboxBinary(config));
     commands.add(Integer.toString(containerIndex));
 
-    String[] commandArgs = executorCommandArgs(config, runtime, freePorts);
+    String[] commandArgs = executorCommandArgs(config, runtime, ports);
     commands.addAll(Arrays.asList(commandArgs));
 
     return commands.toArray(new String[0]);
@@ -152,25 +185,15 @@ public final class SchedulerUtils {
    * @return String[] representing the arguments to start heron-executor
    */
   public static String[] executorCommandArgs(
-      Config config, Config runtime, List<Integer> freePorts) {
+      Config config, Config runtime, List<String> freePorts) {
     TopologyAPI.Topology topology = Runtime.topology(runtime);
 
-    // First let us have some safe checks
-    if (freePorts.size() < PORTS_REQUIRED_FOR_EXECUTOR) {
-      throw new RuntimeException("Failed to find enough ports for executor");
-    }
-    for (int port : freePorts) {
-      if (port == -1) {
-        throw new RuntimeException("Failed to find available ports for executor");
-      }
-    }
-
-    int masterPort = freePorts.get(0);
-    int tmasterControllerPort = freePorts.get(1);
-    int tmasterStatsPort = freePorts.get(2);
-    int shellPort = freePorts.get(3);
-    int metricsmgrPort = freePorts.get(4);
-    int schedulerPort = freePorts.get(5);
+    String masterPort = freePorts.get(0);
+    String tmasterControllerPort = freePorts.get(1);
+    String tmasterStatsPort = freePorts.get(2);
+    String shellPort = freePorts.get(3);
+    String metricsmgrPort = freePorts.get(4);
+    String schedulerPort = freePorts.get(5);
 
     List<String> commands = new ArrayList<>();
     commands.add(topology.getName());
@@ -183,19 +206,19 @@ public final class SchedulerUtils {
     commands.add(Context.stmgrSandboxBinary(config));
     commands.add(Context.metricsManagerSandboxClassPath(config));
     commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)));
-    commands.add(TopologyUtils.makeClassPath(topology, Context.topologyJarFile(config)));
-    commands.add(Integer.toString(masterPort));
-    commands.add(Integer.toString(tmasterControllerPort));
-    commands.add(Integer.toString(tmasterStatsPort));
+    commands.add(TopologyUtils.makeClassPath(topology, Context.topologyBinaryFile(config)));
+    commands.add(masterPort);
+    commands.add(tmasterControllerPort);
+    commands.add(tmasterStatsPort);
     commands.add(Context.systemConfigSandboxFile(config));
     commands.add(Runtime.componentRamMap(runtime));
     commands.add(SchedulerUtils.encodeJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
     commands.add(Context.topologyPackageType(config));
-    commands.add(Context.topologyJarFile(config));
+    commands.add(Context.topologyBinaryFile(config));
     commands.add(Context.javaSandboxHome(config));
-    commands.add(Integer.toString(shellPort));
+    commands.add(shellPort);
     commands.add(Context.shellSandboxBinary(config));
-    commands.add(Integer.toString(metricsmgrPort));
+    commands.add(metricsmgrPort);
     commands.add(Context.cluster(config));
     commands.add(Context.role(config));
     commands.add(Context.environ(config));
@@ -209,9 +232,10 @@ public final class SchedulerUtils {
         .toString();
 
     commands.add(completeSchedulerProcessClassPath);
-    commands.add(Integer.toString(schedulerPort));
+    commands.add(schedulerPort);
+    commands.add(Context.pythonInstanceSandboxBinary(config));
 
-    return commands.toArray(new String[0]);
+    return commands.toArray(new String[commands.size()]);
   }
 
   /**
@@ -384,7 +408,7 @@ public final class SchedulerUtils {
     LOG.log(Level.FINE, "Fetching package {0}", packageURI);
     LOG.fine("Fetched package can overwrite old one.");
     if (!ShellUtils.curlPackage(
-        packageURI, packageDestination, isVerbose, true)) {
+        packageURI, packageDestination, isVerbose, false)) {
       LOG.severe("Failed to fetch package.");
       return false;
     }
@@ -392,7 +416,7 @@ public final class SchedulerUtils {
     // untar the heron core release package in the working directory
     LOG.log(Level.FINE, "Extracting the package {0}", packageURI);
     if (!ShellUtils.extractPackage(
-        packageDestination, workingDirectory, isVerbose, true)) {
+        packageDestination, workingDirectory, isVerbose, false)) {
       LOG.severe("Failed to extract package.");
       return false;
     }

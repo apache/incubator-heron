@@ -16,7 +16,7 @@ import traceback
 import uuid
 
 from heron.common.src.python import constants
-from heron.common.src.python.color import Log
+from heron.common.src.python.utils.log import Log
 
 # pylint: disable=too-many-instance-attributes
 class Topology(object):
