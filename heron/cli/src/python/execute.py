@@ -52,17 +52,22 @@ def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=N
   # Construct the command line for the sub process to run
   # Because of the way Python execute works,
   # the java opts must be passed as part of the list
-  all_args = [config.get_java_path(), "-client", "-Xmx1g", opts.get_heron_config()] + \
+  all_args = [config.get_java_path(), "-client", "-Xmx1g"] + \
              java_opts + \
              ["-cp", config.get_classpath(lib_jars + extra_jars)]
 
   all_args += [class_name] + list(args)
 
+  # set heron_config environment variable
+  heron_env = os.environ.copy()
+  heron_env['HERON_OPTIONS'] = opts.get_heron_config()
+
   # print the verbose message
   Log.debug('$> %s' % ' '.join(all_args))
+  Log.debug('Heron options: %s' % str(heron_env["HERON_OPTIONS"]))
 
   # invoke the command with subprocess and print error message, if any
-  status = subprocess.call(all_args)
+  status = subprocess.call(all_args, env=heron_env)
   if status != 0:
     err_str = "User main failed with status %d. Bailing out..." % status
     raise RuntimeError(err_str)
@@ -106,6 +111,10 @@ def heron_pex(topology_pex, topology_class_name, tmp_dir):
   try:
     pex_loader.load_pex(topology_pex)
     topology_class = pex_loader.import_and_get_class(topology_pex, topology_class_name)
+    if opts.get_config("cmdline.topology.initial.state") == "PAUSED":
+      if opts.verbose():
+        print "Deploying in deactivated mode."
+      topology_class.deploy_deactivated()
     topology_class.write(tmp_dir)
   except Exception:
     traceback.print_exc()
