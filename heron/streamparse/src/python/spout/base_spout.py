@@ -13,7 +13,7 @@
 # limitations under the License.
 '''base_spout.py'''
 from ..component import HeronComponentSpec, BaseComponent
-from .. import Stream
+from ..stream import Stream
 
 class BaseSpout(BaseComponent):
   """BaseSpout class

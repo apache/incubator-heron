@@ -16,7 +16,7 @@
 from heron.common.src.python.utils.tuple import TupleHelper
 
 from ..component import HeronComponentSpec, BaseComponent
-from .. import Stream
+from ..stream import Stream
 
 class BaseBolt(BaseComponent):
   """BaseBolt class
