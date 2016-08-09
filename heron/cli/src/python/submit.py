@@ -158,7 +158,7 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
   '''
    We use the packer to make a package for the jar and dump it
   to a well-known location. We then run the main method of class
-  with the specified arguments. We pass arguments as heron.options.
+  with the specified arguments. We pass arguments as an environment variable HERON_OPTIONS.
 
   This will run the jar file with the topology_class_name. The submitter
   inside will write out the topology defn file to a location that
@@ -203,7 +203,7 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
 
   We use the packer to make a package for the tar and dump it
   to a well-known location. We then run the main method of class
-  with the specified arguments. We pass arguments as heron.options.
+  with the specified arguments. We pass arguments as an environment variable HERON_OPTIONS.
   This will run the jar file with the topology class name.
 
   The submitter inside will write out the topology defn file to a location
