@@ -130,6 +130,6 @@ def heron_pex(topology_pex, topology_class_name):
       topology_class = pex_loader.import_and_get_class(topology_pex, topology_class_name)
       topology_class.write()
     except Exception:
-      traceback.print_exc()
+      Log.debug(traceback.print_exc())
       err_str = "Topology pex failed to be loaded dynamically. Bailing out..."
       raise RuntimeError(err_str)
