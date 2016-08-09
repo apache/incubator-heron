@@ -19,7 +19,7 @@ try:
 except:
   import pickle
 
-class HeronSerializer(object):
+class IHeronSerializer(object):
   """Serializer interface for Heron"""
   @abstractmethod
   def initialize(self, config):
@@ -44,8 +44,7 @@ class HeronSerializer(object):
     """
     pass
 
-
-class PythonSerializer(HeronSerializer):
+class PythonSerializer(IHeronSerializer):
   """Default serializer"""
   def initialize(self, config=None):
     pass

@@ -21,7 +21,7 @@ from collections import namedtuple
 StreamParseTuple = namedtuple('Tuple', 'id component stream task values')
 """Storm's primitive data type passed around via streams.
 
-:ivar id: the ID of the Tuple (
+:ivar id: the ID of the Tuple
 :type id: str
 :ivar component: component that the Tuple was generated from.
 :type component: str
