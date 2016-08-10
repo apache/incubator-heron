@@ -100,7 +100,6 @@ class SingleThreadStmgrClient(HeronClient):
 
   def _handle_register_response(self, response):
     """Called when a register response (RegisterInstanceResponse) arrives"""
-    Log.debug("In _handle_register_response()")
     if response.status.status != common_pb2.StatusCode.Value("OK"):
       raise RuntimeError("Stream Manager returned a not OK response for register")
     Log.info("We registered ourselves to the Stream Manager")
@@ -117,7 +116,7 @@ class SingleThreadStmgrClient(HeronClient):
 
   def _handle_assignment_message(self, pplan):
     """Called when new NewInstanceAssignmentMessage arrives"""
-    Log.info("In handle_assignment_message() of STStmgrClient, Physical Plan: \n%s" % str(pplan))
+    Log.debug("In handle_assignment_message() of STStmgrClient, Physical Plan: \n%s" % str(pplan))
     new_helper = PhysicalPlanHelper(pplan, self.instance.instance_id,
                                     self.heron_instance_cls.topo_pex_file_abs_path)
 
