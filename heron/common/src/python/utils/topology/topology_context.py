@@ -104,6 +104,10 @@ class TopologyContext(dict):
     """
     return self[self.CONFIG]
 
+  def get_topology_pex_path(self):
+    """Returns the topology's pex file path"""
+    return self[self.TOPOLOGY_PEX_PATH]
+
   def get_metrics_collector(self):
     """Returns this context's metrics collector"""
     if TopologyContext.METRICS_COLLECTOR not in self or \
@@ -162,7 +166,7 @@ class TopologyContext(dict):
       return
 
     # load pex first
-    topo_pex_path = self[self.TOPOLOGY_PEX_PATH]
+    topo_pex_path = self.get_topology_pex_path()
     pex_loader.load_pex(topo_pex_path)
     for class_name in task_hooks_cls_list:
       try:
