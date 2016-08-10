@@ -246,9 +246,9 @@ def submit_pex(cl_args, unknown_args, tmp_dir):
   topology_file = cl_args['topology-file-name']
   topology_class_name = cl_args['topology-class-name']
   try:
-    execute.heron_pex(topology_file, topology_class_name, tmp_dir)
+    execute.heron_pex(topology_file, topology_class_name)
   except Exception as ex:
-    Log.error("Unable to execute topology main class: " + ex.message)
+    Log.error("Error when loading a topology: %s" % str(ex))
     return False
 
   try:
