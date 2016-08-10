@@ -2,8 +2,9 @@
 title: Implementing a Custom Scheduler
 ---
 
-To run a Heron cluster, you'll need to set up a scheduler that is responsible
-for cluster management. Heron currently supports the following schedulers out of the box:
+To run a Heron topology, you’ll need to set up a scheduler that is responsible 
+for topology management. Note: one scheduler is managing only one topology, 
+for the purpose of better isolation. Heron currently supports the following schedulers out of the box:
 
 * [Aurora](../../operators/deployment/schedulers/aurora)
 * [Local scheduler](../../operators/deployment/schedulers/local)
