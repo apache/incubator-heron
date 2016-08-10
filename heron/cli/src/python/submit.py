@@ -248,7 +248,7 @@ def submit_pex(cl_args, unknown_args, tmp_dir):
   try:
     execute.heron_pex(topology_file, topology_class_name)
   except Exception as ex:
-    Log.error("Error when loading a topology: " + ex.message)
+    Log.error("Error when loading a topology: %s" % str(ex))
     return False
 
   try:

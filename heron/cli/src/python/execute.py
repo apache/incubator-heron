@@ -113,14 +113,15 @@ def heron_pex(topology_pex, topology_class_name):
     heron_env = os.environ.copy()
     heron_env['HERON_OPTIONS'] = opts.get_heron_config()
 
-    args = [topology_pex]
-    Log.debug('$> %s' % ' '.join(args))
+    cmd = [topology_pex]
+    Log.debug('$> %s' % cmd[0])
     Log.debug('Heron options: %s' % str(heron_env['HERON_OPTIONS']))
 
     # invoke the command with subprocess and print error message, if any
-    status = subprocess.call(args, env=heron_env)
+    status = subprocess.call(cmd, env=heron_env)
     if status != 0:
-      err_str = "User main failed with status %d. Bailing out..." % status
+      err_str = "Topology failed to be loaded from the given pex, with status: %d. Bailing out..." \
+                % status
       raise RuntimeError(err_str)
   else:
     try:
@@ -130,6 +131,6 @@ def heron_pex(topology_pex, topology_class_name):
       topology_class = pex_loader.import_and_get_class(topology_pex, topology_class_name)
       topology_class.write()
     except Exception:
-      Log.debug(traceback.print_exc())
-      err_str = "Topology pex failed to be loaded dynamically. Bailing out..."
+      Log.debug(traceback.format_exc())
+      err_str = "Topology failed to be loaded from the given pex. Bailing out..."
       raise RuntimeError(err_str)
