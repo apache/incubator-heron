@@ -54,7 +54,7 @@ def heron_class(class_name, lib_jars, extra_jars=None, args=None, java_defines=N
   # the java opts must be passed as part of the list
   all_args = [config.get_java_path(), "-client", "-Xmx1g"] + \
              java_opts + \
-             ["-cp", config.get_classpath(lib_jars + extra_jars)]
+             ["-cp", config.get_classpath(extra_jars + lib_jars)]
 
   all_args += [class_name] + list(args)
 

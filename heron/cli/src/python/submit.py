@@ -105,8 +105,8 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
 
   # invoke the submitter to submit and launch the topology
   execute.heron_class(
-      'com.twitter.heron.scheduler.SubmitterMain',
-      lib_jars,
+      class_name='com.twitter.heron.scheduler.SubmitterMain',
+      lib_jars=lib_jars,
       extra_jars=extra_jars,
       args=args,
       java_defines=[]
@@ -176,8 +176,8 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
   topology_file = cl_args['topology-file-name']
   try:
     execute.heron_class(
-        cl_args['topology-class-name'],
-        config.get_heron_libs(jars.topology_jars()),
+        class_name=cl_args['topology-class-name'],
+        lib_jars=config.get_heron_libs(jars.topology_jars()),
         extra_jars=[topology_file],
         args=tuple(unknown_args),
         java_defines=cl_args['topology_main_jvm_property'])
