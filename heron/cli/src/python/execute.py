@@ -106,13 +106,31 @@ def heron_tar(class_name, topology_tar, arguments, tmpdir_root, java_defines):
   # Now execute the class
   heron_class(class_name, lib_jars, extra_jars, arguments, java_defines)
 
-def heron_pex(topology_pex, topology_class_name, tmp_dir):
+def heron_pex(topology_pex, topology_class_name):
   Log.debug("Importing %s from %s" % (topology_class_name, topology_pex))
-  try:
-    pex_loader.load_pex(topology_pex)
-    topology_class = pex_loader.import_and_get_class(topology_pex, topology_class_name)
-    topology_class.write(tmp_dir)
-  except Exception:
-    traceback.print_exc()
-    err_str = "Topology pex failed to be loaded. Bailing out..."
-    raise RuntimeError(err_str)
+  if topology_class_name == '-':
+    # loading topology by running its main method (if __name__ == "__main__")
+    heron_env = os.environ.copy()
+    heron_env['HERON_OPTIONS'] = opts.get_heron_config()
+
+    cmd = [topology_pex]
+    Log.debug('$> %s' % cmd[0])
+    Log.debug('Heron options: %s' % str(heron_env['HERON_OPTIONS']))
+
+    # invoke the command with subprocess and print error message, if any
+    status = subprocess.call(cmd, env=heron_env)
+    if status != 0:
+      err_str = "Topology failed to be loaded from the given pex, with status: %d. Bailing out..." \
+                % status
+      raise RuntimeError(err_str)
+  else:
+    try:
+      # loading topology from Topology's subclass (no main method)
+      os.environ["HERON_OPTIONS"] = opts.get_heron_config()
+      pex_loader.load_pex(topology_pex)
+      topology_class = pex_loader.import_and_get_class(topology_pex, topology_class_name)
+      topology_class.write()
+    except Exception:
+      Log.debug(traceback.format_exc())
+      err_str = "Topology failed to be loaded from the given pex. Bailing out..."
+      raise RuntimeError(err_str)
