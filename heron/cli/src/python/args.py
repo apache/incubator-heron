@@ -28,7 +28,6 @@ def add_titles(parser):
   return parser
 
 
-
 def add_verbose(parser):
   '''
   :param parser:
@@ -142,4 +141,16 @@ def add_deactive_deploy(parser):
       '--deploy-deactivated',
       metavar='(a boolean; default: "false")',
       default=False)
+  return parser
+
+
+def add_extra_launch_classpath(parser):
+  '''
+  :param parser:
+  :return:
+  '''
+  parser.add_argument(
+      '--extra-launch-classpath',
+      metavar='(a string; additional JVM class path for launching topology)',
+      default="")
   return parser

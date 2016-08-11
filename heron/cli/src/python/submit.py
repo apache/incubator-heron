@@ -50,6 +50,7 @@ def create_parser(subparsers):
   cli_args.add_topology_class(parser)
   cli_args.add_config(parser)
   cli_args.add_deactive_deploy(parser)
+  cli_args.add_extra_launch_classpath(parser)
   cli_args.add_system_property(parser)
   cli_args.add_verbose(parser)
 
@@ -100,12 +101,13 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
   lib_jars = config.get_heron_libs(
       jars.scheduler_jars() + jars.uploader_jars() + jars.statemgr_jars() + jars.packing_jars()
   )
+  extra_jars = cl_args['extra_launch_classpath'].split(':')
 
   # invoke the submitter to submit and launch the topology
   execute.heron_class(
       'com.twitter.heron.scheduler.SubmitterMain',
       lib_jars,
-      extra_jars=[],
+      extra_jars=extra_jars,
       args=args,
       java_defines=[]
   )
