@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 '''base_bolt.py'''
+import copy
 
 from heron.common.src.python.utils.tuple import TupleHelper
 
@@ -33,18 +34,20 @@ class BaseBolt(BaseComponent):
   """
   # pylint: disable=no-member
   @classmethod
-  def spec(cls, name=None, inputs=None, par=1, config=None):
+  def spec(cls, name=None, inputs=None, par=1, config=None, optional_outputs=None):
     """Register this bolt to the topology and create ``HeronComponentSpec``
 
     The usage of this method is compatible with StreamParse API, although it does not create
     ``ShellBoltSpec`` but instead directly registers to a ``Topology`` class.
 
-    This method does not take a ``outputs`` argument because ``outputs`` should be
+    This method takes an optional ``outputs`` argument for supporting dynamic output fields
+    declaration. However, it is recommended that ``outputs`` should be declared as
     an attribute of your ``Spout`` subclass. Also, some ways of declaring inputs is not supported
     in this implementation; please read the documentation below.
 
     :type name: str
     :param name: Name of this bolt.
+    :type inputs: dict or list
     :param inputs: Streams that feed into this Bolt.
 
                    Two forms of this are acceptable:
@@ -61,13 +64,25 @@ class BaseBolt(BaseComponent):
     :param par: Parallelism hint for this spout.
     :type config: dict
     :param config: Component-specific config settings.
+    :type optional_outputs: list of (str or Stream) or tuple of (str or Stream)
+    :param optional_outputs: Additional output fields for this bolt. These fields are added to
+                             existing ``outputs`` class attributes of your bolt. This is an optional
+                             argument, and exists only for su orting dynamic output field
+                             declaration.
     """
     python_class_path = "%s.%s" % (cls.__module__, cls.__name__)
 
     if hasattr(cls, 'outputs'):
-      _outputs = cls.outputs
+      # avoid modification to cls.outputs
+      _outputs = copy.copy(cls.outputs)
     else:
       _outputs = None
+
+    if optional_outputs is not None:
+      assert isinstance(optional_outputs, (list, tuple))
+      for out in optional_outputs:
+        assert isinstance(out, (str, Stream))
+        _outputs.append(out)
 
     return HeronComponentSpec(name, python_class_path, is_spout=False, par=par,
                               inputs=inputs, outputs=_outputs, config=config)

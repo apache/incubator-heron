@@ -13,6 +13,7 @@
 # limitations under the License.
 '''topology_context.py'''
 import os
+from collections import namedtuple
 
 from heron.common.src.python.utils.metrics import MetricsCollector
 
@@ -119,6 +120,34 @@ class TopologyContext(dict):
     """Registers a new metric to this context"""
     collector = self.get_metrics_collector()
     collector.register_metric(name, metric, time_bucket_in_sec)
+
+  def get_sources(self, component_id):
+    """Returns the declared inputs to specified component
+
+    :return: map <streamId namedtuple (same structure as protobuf msg) -> gtype>, or
+             None if not found
+    """
+    # this is necessary because protobuf message is not hashable
+    StreamId = namedtuple('StreamId', 'id, component_name')
+    if component_id in self[self.INPUTS]:
+      ret = {}
+      for istream in self[self.INPUTS].get(component_id):
+        key = StreamId(id=istream.stream.id, component_name=istream.stream.component_name)
+        ret[key] = istream.gtype
+      return ret
+    else:
+      return None
+
+  def get_this_sources(self):
+    return self.get_sources(self.component_id)
+
+  def get_component_tasks(self, component_id):
+    """Returns the task ids allocated for the given component id"""
+    ret = []
+    for task_id, comp_id in self[self.TASK_TO_COMPONENT_MAP].iteritems():
+      if comp_id == component_id:
+        ret.append(task_id)
+    return ret
 
   ########################################
 
