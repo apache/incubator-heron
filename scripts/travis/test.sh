@@ -25,8 +25,8 @@ start_timer "$T"
 python integration-test/src/python/local_test_runner/main.py
 end_timer "$T"
 
-# run integration test
-T="heron integration-test"
+# run the java integration test
+T="heron integration-test java"
 start_timer "$T"
 ./bazel-bin/integration-test/src/python/http_server/http-server 8080 &
 http_server_id=$!
@@ -36,6 +36,16 @@ trap "kill -9 $http_server_id" SIGINT SIGTERM EXIT
   -hc heron -tj bazel-genfiles/integration-test/src/java/integration-tests.jar \
   -rh localhost -rp 8080\
   -tp integration-test/src/java/com/twitter/heron/integration_test/topology/ \
+  -cl local -rl heron-staging -ev devel
+end_timer "$T"
+
+# run the python integration test
+T="heron integration-test python"
+start_timer "$T"
+./bazel-bin/integration-test/src/python/test_runner/test-runner.pex \
+  -hc heron -tj bazel-bin/integration-test/src/python/pyheron/integration_test/topology/pyheron_integ_topology.pex \
+  -rh localhost -rp 8080\
+  -tp integration-test/src/python/pyheron/integration_test/topology/ \
   -cl local -rl heron-staging -ev devel
 end_timer "$T"
 
