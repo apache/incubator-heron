@@ -195,6 +195,7 @@ class SingleThreadHeronInstance(object):
       self.is_instance_started = True
       Log.info("Started instance successfully.")
     except Exception as e:
+      Log.error(traceback.format_exc())
       Log.error("Error when starting bolt/spout, bailing out...: %s" % e.message)
       self.looper.exit_loop()
 
