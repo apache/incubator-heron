@@ -16,4 +16,3 @@ pex_test(
   ],
   size = "small",
 )
-

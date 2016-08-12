@@ -53,7 +53,7 @@ class TopologyTest(unittest.TestCase):
     os.environ.pop("HERON_OPTIONS", None)
 
   def test_sane_topology(self):
-    self.assertEqual(TestSane.topology_name, "TestSaneTopology")
+    self.assertEqual(TestSane.topology_name, "TestSane")
 
     # topology-wide config
     expecting_topo_config = TopologyType.DEFAULT_TOPOLOGY_CONFIG
@@ -210,12 +210,6 @@ class TopologyBuilderTest(unittest.TestCase):
   def test_constructor(self):
     builder = TopologyBuilder("WordCount")
     self.assertEqual(builder.topology_name, "WordCount")
-
-    builder = TopologyBuilder("WordCountTopology")
-    self.assertEqual(builder.topology_name, "WordCount")
-
-    builder = TopologyBuilder("WordCountTopologyTopology")
-    self.assertEqual(builder.topology_name, "WordCountTopology")
 
     with self.assertRaises(AssertionError):
       TopologyBuilder("Topology")
