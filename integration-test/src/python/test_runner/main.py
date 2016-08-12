@@ -26,7 +26,7 @@ def runTest(topologyName, classPath, expectedResultFilePath, params):
   try:
     args = httpServerUrl + " " + topologyName
     submitTopology(params.heronCliPath, params.cluster, params.role,
-                   params.env, params.testsJarPath, classPath,
+                   params.env, params.testsBinPath, classPath,
                    params.releasePackageUri, args)
   except Exception as e:
     logging.error("Failed to submit %s topology: %s", topologyName, str(e))
@@ -155,14 +155,14 @@ def runAllTests(conf, args):
   failures = []
   timestamp = str(int(time.time()))
 
-  if args.testsJarPath.endswith(".jar"):
+  if args.testsBinPath.endswith(".jar"):
     test_topologies = conf["javaTopologies"]
     pkg_type = "jar"
-  elif args.testsJarPath.endswith(".pex"):
+  elif args.testsBinPath.endswith(".pex"):
     test_topologies = conf["pythonTopologies"]
     pkg_type = "pex"
   else:
-    raise ValueError("Unrecognized binary file type: %s" % args.testsJarPath)
+    raise ValueError("Unrecognized binary file type: %s" % args.testsBinPath)
 
   total = len(test_topologies)
   current = 1
@@ -171,9 +171,11 @@ def runAllTests(conf, args):
     topologyName = ("%s_%s_%s") % (timestamp, topologyConf["topologyName"], str(uuid.uuid4()))
     if pkg_type == 'pex':
       classPath = topologyConf["classPath"]
-    else:
-      # integration tests for Jar
+    elif pkg_type == 'jar':
       classPath = conf["topologyClasspathPrefix"] + topologyConf["classPath"]
+    else:
+      raise ValueError("Unrecognized package type: %s" % pkg_type)
+
     expectedResultFilePath = args.topologiesPath + "/" + topologyConf["expectedResultRelativePath"]
 
     logging.info("==== Starting test %s of %s: %s ====", current, total, topologyName)
@@ -201,7 +203,7 @@ def main():
   parser = argparse.ArgumentParser(description='This is the heron integration test framework')
 
   parser.add_argument('-hc', '--heron-cli-path', dest='heronCliPath', default=conf['heronCliPath'])
-  parser.add_argument('-tj', '--tests-jar-path', dest='testsJarPath')
+  parser.add_argument('-tb', '--tests-bin-path', dest='testsBinPath')
   parser.add_argument('-cl', '--cluster', dest='cluster', default=conf['cluster'])
   parser.add_argument('-ev', '--env', dest='env', default=conf['env'])
   parser.add_argument('-rl', '--role', dest='role', default=conf['role'])
