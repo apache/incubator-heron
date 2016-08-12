@@ -52,7 +52,7 @@ class BaseSpout:
   def spec(cls, name=None, par=1, config=None)
 ```
 
-* The `emit()` method is to emit a given `tup`, which can be a `list` or `tuple` of 
+* The `emit()` method is used to emit a given `tup`, which can be a `list` or `tuple` of 
 any python objects. Unlike the Java implementation, `OutputCollector`
 doesn't exist in the Python implementation.
 

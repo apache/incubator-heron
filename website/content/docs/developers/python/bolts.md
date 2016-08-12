@@ -39,13 +39,13 @@ class BaseBolt:
   def spec(cls, name=None, inputs=None, par=1, config=None)
 ```
 
-* The `emit()` method is to emit a given `tup`, which can be a `list` or `tuple` of 
+* The `emit()` method is used to emit a given `tup`, which can be a `list` or `tuple` of 
 any python objects. Unlike the Java implementation, `OutputCollector`
 doesn't exist in the Python implementation.
 
-* The `ack()` method is to indicate that processing of a tuple has succeeded.
+* The `ack()` method is used to indicate that processing of a tuple has succeeded.
 
-* The `fail()` method is to indicate that processing of a tuple has failed.
+* The `fail()` method is used to indicate that processing of a tuple has failed.
 
 * The `is_tick()` method returns whether a given `tup` of `HeronTuple` type is a tick tuple.
 
