@@ -21,3 +21,11 @@ pex_library(
   deps = [],
 )
 
+pex_library(
+  name = 'common_log',
+  srcs = ["utils/log.py"],
+  reqs = [
+    "colorlog==2.6.1",
+  ]
+)
+

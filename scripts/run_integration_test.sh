@@ -23,7 +23,7 @@ trap "kill -9 $http_server_id" SIGINT SIGTERM EXIT
 
 # run the integration tests
 ${TEST_RUNNER} \
-  -hc heron -tj ${INTEGRATION_TESTS} \
+  -hc heron -tb ${INTEGRATION_TESTS} \
   -rh localhost -rp 8080\
   -tp integration-test/src/java/com/twitter/heron/integration_test/topology/ \
   -cl local -rl heron-staging -ev devel -pi ${CORE_PKG}

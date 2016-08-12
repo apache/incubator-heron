@@ -33,7 +33,7 @@ http_server_id=$!
 trap "kill -9 $http_server_id" SIGINT SIGTERM EXIT
 
 ./bazel-bin/integration-test/src/python/test_runner/test-runner.pex \
-  -hc heron -tj bazel-genfiles/integration-test/src/java/integration-tests.jar \
+  -hc heron -tb bazel-genfiles/integration-test/src/java/integration-tests.jar \
   -rh localhost -rp 8080\
   -tp integration-test/src/java/com/twitter/heron/integration_test/topology/ \
   -cl local -rl heron-staging -ev devel
