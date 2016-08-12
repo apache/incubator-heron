@@ -141,7 +141,7 @@ class TopologyType(type):
     if tmp_directory is None:
       raise RuntimeError("Topology definition temp directory not specified")
 
-    topology_name = classname + 'Topology'
+    topology_name = heron_options.get("cmdline.topology.name", classname)
     topology_id = topology_name + str(uuid.uuid4())
 
     # create protobuf
@@ -283,17 +283,11 @@ class TopologyBuilder(object):
     """Initialize this TopologyBuilder
 
     :type name: str
-    :param name: topology name. if it doesn't end with 'Topology', it's added later. For example, if
-                 ``name = "WordCount"``, the topology name will be ``WordCountTopology``. Note that,
-                 "Topology" cannot be used as name.
+    :param name: topology name
     """
     assert name is not None and isinstance(name, str) and name != "Topology"
 
-    if name.endswith("Topology"):
-      # remove trailing "Topology" because it is added by TopologyType metaclass
-      self.topology_name = name[:-8]
-    else:
-      self.topology_name = name
+    self.topology_name = name
 
     self._specs = []
     self._topology_config = {}
@@ -312,15 +306,17 @@ class TopologyBuilder(object):
         raise ValueError("TopologyBuilder cannot take a spec without name")
       self._specs.append(spec)
 
-  def add_spout(self, name, spout_cls, par, config=None):
+  def add_spout(self, name, spout_cls, par, config=None, optional_outputs=None):
     """Add a spout to the topology"""
-    spout_spec = spout_cls.spec(name=name, par=par, config=config)
+    spout_spec = spout_cls.spec(name=name, par=par, config=config,
+                                optional_outputs=optional_outputs)
     self.add_spec(spout_spec)
     return spout_spec
 
-  def add_bolt(self, name, bolt_cls, par, inputs, config=None):
+  def add_bolt(self, name, bolt_cls, par, inputs, config=None, optional_outputs=None):
     """Add a bolt to the topology"""
-    bolt_spec = bolt_cls.spec(name=name, par=par, inputs=inputs, config=config)
+    bolt_spec = bolt_cls.spec(name=name, par=par, inputs=inputs, config=config,
+                              optional_outputs=optional_outputs)
     self.add_spec(bolt_spec)
     return bolt_spec
 
