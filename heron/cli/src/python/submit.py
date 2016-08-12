@@ -158,7 +158,7 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
   '''
    We use the packer to make a package for the jar and dump it
   to a well-known location. We then run the main method of class
-  with the specified arguments. We pass arguments as heron.options.
+  with the specified arguments. We pass arguments as an environment variable HERON_OPTIONS.
 
   This will run the jar file with the topology_class_name. The submitter
   inside will write out the topology defn file to a location that
@@ -203,7 +203,7 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
 
   We use the packer to make a package for the tar and dump it
   to a well-known location. We then run the main method of class
-  with the specified arguments. We pass arguments as heron.options.
+  with the specified arguments. We pass arguments as an environment variable HERON_OPTIONS.
   This will run the jar file with the topology class name.
 
   The submitter inside will write out the topology defn file to a location
@@ -246,9 +246,9 @@ def submit_pex(cl_args, unknown_args, tmp_dir):
   topology_file = cl_args['topology-file-name']
   topology_class_name = cl_args['topology-class-name']
   try:
-    execute.heron_pex(topology_file, topology_class_name, tmp_dir)
+    execute.heron_pex(topology_file, topology_class_name)
   except Exception as ex:
-    Log.error("Unable to execute topology main class: " + ex.message)
+    Log.error("Error when loading a topology: %s" % str(ex))
     return False
 
   try:

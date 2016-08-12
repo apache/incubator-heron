@@ -10,13 +10,13 @@ source ${DIR}/common.sh
 # build test related jar
 T="heron build integration-test"
 start_timer "$T"
-python ${DIR}/save-logs.py "heron_build_integration_test.txt" bazel --bazelrc=tools/travis-ci/bazel.rc build integration-test/src/...
+python ${DIR}/save-logs.py "heron_build_integration_test.txt" bazel --bazelrc=tools/travis-ci/bazel.rc build --config=ubuntu integration-test/src/...
 end_timer "$T"
 
 # install client
 T="heron client install"
 start_timer "$T"
-python ${DIR}/save-logs.py "heron_client_install.txt" bazel --bazelrc=tools/travis-ci/bazel.rc run -- scripts/packages:heron-client-install.sh --user
+python ${DIR}/save-logs.py "heron_client_install.txt" bazel --bazelrc=tools/travis-ci/bazel.rc run --config=ubuntu -- scripts/packages:heron-client-install.sh --user
 end_timer "$T"
 
 # run local integration test
