@@ -43,9 +43,9 @@ end_timer "$T"
 T="heron integration-test python"
 start_timer "$T"
 ./bazel-bin/integration-test/src/python/test_runner/test-runner.pex \
-  -hc heron -tb bazel-bin/integration-test/src/python/pyheron/integration_test/topology/pyheron_integ_topology.pex \
+  -hc heron -tb bazel-bin/integration-test/src/python/integration_test/topology/pyheron_integ_topology.pex \
   -rh localhost -rp 8080\
-  -tp integration-test/src/python/pyheron/integration_test/topology/ \
+  -tp integration-test/src/python/integration_test/topology/ \
   -cl local -rl heron-staging -ev devel
 end_timer "$T"
 

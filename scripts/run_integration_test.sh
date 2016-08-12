@@ -9,8 +9,8 @@ TEST_RUNNER="./bazel-bin/integration-test/src/python/test_runner/test-runner.pex
 JAVA_INTEGRATION_TESTS="./bazel-genfiles/integration-test/src/java/integration-tests.jar"
 JAVA_TESTS_DIR="integration-test/src/java/com/twitter/heron/integration_test/topology/"
 
-PYTHON_INTEGRATION_TESTS="./bazel-bin/integration-test/src/python/pyheron/integration_test/topology/pyheron_integ_topology.pex"
-PYTHON_TESTS_DIR="integration-test/src/python/pyheron/integration_test/topology/"
+PYTHON_INTEGRATION_TESTS="./bazel-bin/integration-test/src/python/integration_test/topology/pyheron_integ_topology.pex"
+PYTHON_TESTS_DIR="integration-test/src/python/integration_test/topology/"
 
 CORE_PKG="file://`pwd`/bazel-bin/scripts/packages/heron-core.tar.gz"
 
