@@ -11,33 +11,30 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-'''module for example topology: WordCountTopology'''
+'''Example WordCountTopology'''
+import sys
 
-from heron.examples.src.python.word_spout import WordSpout
-from heron.examples.src.python.count_bolt import CountBolt
-from heron.instance.src.python.basics import Topology, Grouping
+from heron.streamparse.src.python import Grouping, TopologyBuilder, constants
 
-import heron.common.src.python.constants as constants
+from heron.examples.src.python.spout import WordSpout
+from heron.examples.src.python.bolt import CountBolt
 
-class WordCount(Topology):
-  # defining task hooks
-  task_hooks = ["heron.examples.src.python.test_task_hook.TestTaskHook"]
+# Topology is defined using a topology builder
+# Refer to multi_stream_topology for defining a topology by subclassing Topology
+if __name__ == '__main__':
+  if len(sys.argv) != 2:
+    print "Topology's name is not specified"
+    sys.exit(1)
 
-  # defining topology-wide config
-  config = {constants.TOPOLOGY_ENABLE_ACKING: "true",
-            constants.TOPOLOGY_MAX_SPOUT_PENDING: 100000000,
-            constants.TOPOLOGY_AUTO_TASK_HOOKS: task_hooks,
-            "topology.wide.config.sample": {"key1": 12, "key2": 34}}
+  builder = TopologyBuilder(name=sys.argv[1])
 
-  # 2 parallelism for word_spout
-  word_spout = WordSpout.spec(par=2)
+  word_spout = builder.add_spout("word_spout", WordSpout, par=2)
+  count_bolt = builder.add_bolt("count_bolt", CountBolt, par=2,
+                                inputs={word_spout: Grouping.fields('word')},
+                                config={constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS: 10})
 
-  # 2 parallelism for count_bolt.
-  # inputs from word_spout's "default" stream with field grouping and word_spout's "error"
-  # stream with all grouping.
-  # specifying component-specific config (like tick tuples)
-  count_bolt = CountBolt.spec(par=2,
-                              inputs={word_spout: Grouping.fields('word'),
-                                      word_spout['error']: Grouping.ALL},
-                              config={constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS: 10,
-                                      "count_bolt.specific": ["123", (12, 34)]})
+  topology_config = {constants.TOPOLOGY_ENABLE_ACKING: True,
+                     constants.TOPOLOGY_MAX_SPOUT_PENDING: 100000000}
+  builder.set_config(topology_config)
+
+  builder.build_and_submit()
