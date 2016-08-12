@@ -2,11 +2,14 @@
 title: Writing and Launching a Topology in Python
 ---
 
-Support for developing a Heron topology in Python is experimentally released.
-Moreover, it is compatible with the Streamparse API, so Python topologies written
+Currently, support for developing a Heron topology in Python is still experimental.
+It is compatible with the Streamparse API, so Python topologies written
 for the Streamparse can be deployed on Heron with ease.
 This page describes how to write and launch a topology in Python, as well as 
 how to convert a Streamparse topology to a PyHeron topology.
+
+Note that a Python topology is known to be approximately 20-40 times slower 
+than a topology written in Java. This performance issue will be resolved in later releases.
 
 You need to first download `PyHeron` library and include it in your project.
 
@@ -16,8 +19,9 @@ You need to first download `PyHeron` library and include it in your project.
 bolts in Python, respectively.
 
 After defining the spouts and bolts, a topology can be composed by two ways:
-either using `TopologyBuilder` (not compatible with the Streamparse API),
-or subclassing `Topology` class (compatible with the Streamparse API).
+
+* Using `TopologyBuilder` (not compatible with the Streamparse API)
+* Subclassing `Topology` class (compatible with the Streamparse API)
 
 ## Defining a topology using a TopologyBuilder
 
@@ -57,6 +61,9 @@ if __name__ == "__main__":
                                 inputs={word_spout: Grouping.fields('word')})
   builder.build_and_submit()
 ```
+
+Note that arguments to the main method can be passed by providing them in the
+`heron submit` command.
 
 ## Defining a topology by subclassing Topology class
 
@@ -99,7 +106,7 @@ you are using `TopologyBuilder`, or by placing `config` containing `dict`
 as the class attribute of your topology. Note that these configuration will be 
 overriden by component-specific configuration at runtime
 
-## Multiple Streams
+## Multiple streams
 To specify that a component has multiple output streams, instead of using a list of
 strings for `outputs`, you can specify a list of `Stream` objects, in the following manner.
 
@@ -124,7 +131,34 @@ For further information about the API, refer to the Streamparse API documentatio
 although there are some methods and functionalities that are not supported or
 are invalid in Heron.
 
-# Launching Your Python Topology
+## Declaring output fields from the spec() method
+In Python topologies, the `declareOutputFields()` method doesn't exist, so
+the output fields of your spout and bolt need to be declared by placing 
+`outputs` class attributes. This is compatible with the Streamparse API, but
+dynamically declaring output fields is more complicated in this way. 
+So, PyHeron provides a way to dynamically declare output fields via the 
+`optional_outputs` argument in the `spec()` method. 
+
+This is useful in a situation like below.
+
+```python
+class IdentityBolt(Bolt):
+  # can't statically declare output fields
+  class process(self, tup):
+    emit([tup.values])
+```
+
+```python
+class DynamicOutputField(Topology):
+  spout = WordSpout.spec()
+  bolt = IdentityBolt.spec(inputs={spout: Grouping.ALL},
+                           optional_outputs=['word'])
+```
+
+You can also declare outputs in the `add_spout()` and the `add_bolt()`
+method for the `TopologyBuilder` in the same way.
+
+# Launching your python topology
 
 You need to first package your Python topology project to a PEX file.
 

@@ -56,14 +56,18 @@ class BaseSpout:
 any python objects. Unlike the Java implementation, `OutputCollector`
 doesn't exist in the Python implementation.
 
-* The `log()` method is to log an arbitrary message, optionally providing a logging level.
-By default, its logging level is `info`. Log outputs are redirected to the log file
-of the component. **Warning:** due to internal issue, you should NOT output anything to
-`sys.stdout` or `sys.stderr`; instead, you should use this method to log anything you want. 
+* The `log()` method is used to log an arbitrary message, and its outputs are redirected
+  to the log file of the component. It accepts an optional argument
+  which specifies the logging level. By default, its logging level is `info`. 
+
+    **Warning:** due to internal issue, you should **NOT** output anything to
+    `sys.stdout` or `sys.stderr`; instead, you should use this method to log anything you want. 
 
 * In order to declare the output fields of this spout, you need to place
 a class attribute `outputs` as a list of `str` or `Stream`. Note that unlike Java,
-`declareOutputFields` do not exist in the Python implementation.
+`declareOutputFields` does not exist in the Python implementation. Moreover, you can
+optionally specify the output fields from the `spec()` method from the `optional_outputs`.
+For further information, refer to [this page](../topologies).
 
 * You will use the `spec()` method to define a topology and specify the location
 of this spout within the topology, as well as to give component-specific configurations.
