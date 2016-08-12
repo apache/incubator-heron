@@ -12,5 +12,8 @@ pex_library(
 pex_binary(
     name = "heron-executor",
     srcs = ["heron_executor.py"],
-    deps = [":heron-executor-lib"],
+    deps = [
+        ":heron-executor-lib",
+        "//heron/common/src/python:common_log",
+    ],
 )
