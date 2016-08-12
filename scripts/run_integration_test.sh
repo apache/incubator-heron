@@ -29,14 +29,14 @@ trap "kill -9 $http_server_id" SIGINT SIGTERM EXIT
 
 # run the java integration tests
 ${TEST_RUNNER} \
-  -hc heron -tj ${JAVA_INTEGRATION_TESTS} \
+  -hc heron -tb ${JAVA_INTEGRATION_TESTS} \
   -rh localhost -rp 8080 \
   -tp ${JAVA_TESTS_DIR} \
   -cl local -rl heron-staging -ev devel -pi ${CORE_PKG}
 
 # run the python integration tests
 ${TEST_RUNNER} \
-  -hc heron -tj ${PYTHON_INTEGRATION_TESTS} \
+  -hc heron -tb ${PYTHON_INTEGRATION_TESTS} \
   -rh localhost -rp 8080 \
   -tp ${PYTHON_TESTS_DIR} \
   -cl local -rl heron-staging -ev devel -pi ${CORE_PKG}
