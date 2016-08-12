@@ -7,8 +7,8 @@ pex_library(
   srcs = glob(["**/*.py"]),
   deps = [
     "//heron/streamparse/src/python:pyheron_lib",
-    "//integration-test/src/python/pyheron/integration_test/common:pyheron_integ_common",
-    "//integration-test/src/python/pyheron/integration_test/core:pyheron_integ_core",
+    "//integration-test/src/python/integration_test/common:pyheron_integration_common",
+    "//integration-test/src/python/integration_test/core:pyheron_integration_core",
   ],
 )
 
