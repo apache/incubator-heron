@@ -32,7 +32,7 @@ def get_heron_config():
   for (key, value) in config_opts.items():
     opt_list.append('%s=%s' % (key, value))
 
-  all_opts = '-Dheron.options=' + (','.join(opt_list)).replace(' ', '%%%%')
+  all_opts = (','.join(opt_list)).replace(' ', '%%%%')
   return all_opts
 
 
@@ -72,24 +72,6 @@ def clear_config():
 
 
 ################################################################################
-def set_verbose():
-  '''
-  Methods to get and set verbose levels
-  :return:
-  '''
-  global verbose_flag
-  verbose_flag = True
-
-
-def verbose():
-  '''
-  :return:
-  '''
-  global verbose_flag
-  return verbose_flag
-
-
-################################################################################
 def set_trace_execution():
   '''
   Methods to get and set trace execution
@@ -97,7 +79,6 @@ def set_trace_execution():
   '''
   global trace_execution_flag
   trace_execution_flag = True
-  set_verbose()
 
 
 def trace_execution():

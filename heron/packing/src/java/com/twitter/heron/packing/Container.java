@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.twitter.heron.packing.utils;
+
+package com.twitter.heron.packing;
 
 /**
  * Class that describes a container used to place Heron Instances with specific memory, CpuCores and disk

@@ -17,6 +17,7 @@ package com.twitter.heron.scheduler.yarn;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,6 +43,7 @@ import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Role;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyJar;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyName;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyPackageName;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.VerboseLogMode;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.utils.SchedulerConfig;
@@ -63,6 +65,7 @@ public class HeronExecutorTask implements Task {
   private final String topologyJar;
   private final String packedPlan;
   private final String componentRamMap;
+  private final boolean verboseMode;
 
   private REEFFileNames reefFileNames;
   private String localHeronConfDir;
@@ -81,7 +84,8 @@ public class HeronExecutorTask implements Task {
                            @Parameter(HeronCorePackageName.class) String heronCorePackageName,
                            @Parameter(TopologyJar.class) String topologyJar,
                            @Parameter(PackedPlan.class) String packedPlan,
-                           @Parameter(ComponentRamMap.class) String componentRamMap) {
+                           @Parameter(ComponentRamMap.class) String componentRamMap,
+                           @Parameter(VerboseLogMode.class) boolean verboseMode) {
     this.heronExecutorId = Integer.valueOf(heronExecutorId);
     this.cluster = cluster;
     this.role = role;
@@ -92,6 +96,7 @@ public class HeronExecutorTask implements Task {
     this.topologyJar = topologyJar;
     this.packedPlan = packedPlan;
     this.componentRamMap = componentRamMap;
+    this.verboseMode = verboseMode;
 
     reefFileNames = fileNames;
     localHeronConfDir = ".";
@@ -112,9 +117,16 @@ public class HeronExecutorTask implements Task {
     // Log the working directory, this will make people fast locate the
     // directory to find the log files
     File workingDirectory = new File(".");
-    LOG.log(Level.INFO, "working dir: {0}", workingDirectory.getAbsolutePath());
+    String cwdPath = workingDirectory.getAbsolutePath();
+    LOG.log(Level.INFO, "Working dir: {0}", cwdPath);
 
-    final Process regularExecutor = ShellUtils.runASyncProcess(true, executorCmd, workingDirectory);
+    HashMap<String, String> executorEnvironment = getEnvironment(cwdPath);
+
+    final Process regularExecutor = ShellUtils.runASyncProcess(
+        true,
+        executorCmd,
+        workingDirectory,
+        executorEnvironment);
     LOG.log(Level.INFO, "Started heron executor-id: {0}", heronExecutorId);
     try {
       regularExecutor.waitFor();
@@ -125,6 +137,12 @@ public class HeronExecutorTask implements Task {
     return null;
   }
 
+  HashMap<String, String> getEnvironment(String cwdPath) {
+    HashMap<String, String> envs = new HashMap<>();
+    envs.put("PEX_ROOT", cwdPath);
+    return envs;
+  }
+
   String[] getExecutorCommand() {
     String topologyDefFile = getTopologyDefnFile();
     Topology topology = getTopology(topologyDefFile);
@@ -133,6 +151,7 @@ public class HeronExecutorTask implements Task {
         env,
         topologyJar,
         topologyDefFile,
+        verboseMode,
         topology);
 
     List<Integer> freePorts = new ArrayList<>(SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR);

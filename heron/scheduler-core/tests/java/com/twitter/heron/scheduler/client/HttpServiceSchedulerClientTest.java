@@ -35,6 +35,7 @@ import com.twitter.heron.spi.utils.SchedulerUtils;
 public class HttpServiceSchedulerClientTest {
   private static final String TOPOLOGY_NAME = "topologyName";
   private static final String SCHEDULER_HTTP_ENDPOINT = "";
+  private static final String COMMAND_ENDPOINT = "http://endpoint/command";
 
   private final Config config = Mockito.mock(Config.class);
   private final Config runtime = Mockito.mock(Config.class);
@@ -97,19 +98,23 @@ public class HttpServiceSchedulerClientTest {
         Mockito.spy(new HttpServiceSchedulerClient(config, runtime, SCHEDULER_HTTP_ENDPOINT));
 
     // Failed to create new http connection
-    Mockito.doReturn(null).when(client).createHttpConnection(Mockito.any(Command.class));
+    PowerMockito.spy(NetworkUtils.class);
+    PowerMockito.doReturn(null).
+        when(NetworkUtils.class, "getHttpConnection", Mockito.any(String.class));
+    Mockito.doReturn(COMMAND_ENDPOINT).
+        when(client).getCommandEndpoint(Mockito.any(String.class), Mockito.any(Command.class));
     Assert.assertFalse(
         client.requestSchedulerService(
             Mockito.any(Command.class), Mockito.any(byte[].class)));
 
     HttpURLConnection connection = Mockito.mock(HttpURLConnection.class);
-    Mockito.doReturn(connection).when(client).createHttpConnection(Mockito.any(Command.class));
+    PowerMockito.doReturn(connection).
+        when(NetworkUtils.class, "getHttpConnection", Mockito.any(String.class));
 
     // Failed to send http post request
-    PowerMockito.spy(NetworkUtils.class);
     PowerMockito.doReturn(false).
         when(NetworkUtils.class, "sendHttpPostRequest",
-            Mockito.eq(connection), Mockito.any(byte[].class));
+            Mockito.eq(connection), Mockito.any(String.class), Mockito.any(byte[].class));
     Assert.assertFalse(
         client.requestSchedulerService(
             Mockito.any(Command.class), Mockito.any(byte[].class)));
@@ -118,7 +123,7 @@ public class HttpServiceSchedulerClientTest {
     // Received non-ok response
     PowerMockito.doReturn(true).
         when(NetworkUtils.class, "sendHttpPostRequest",
-            Mockito.eq(connection), Mockito.any(byte[].class));
+            Mockito.eq(connection), Mockito.any(String.class), Mockito.any(byte[].class));
     Scheduler.SchedulerResponse notOKResponse = SchedulerUtils.constructSchedulerResponse(false);
     PowerMockito.doReturn(notOKResponse.toByteArray()).
         when(NetworkUtils.class, "readHttpResponse", Mockito.eq(connection));

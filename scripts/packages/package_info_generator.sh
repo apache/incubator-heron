@@ -18,7 +18,7 @@
 # by the build status command.
 
 # Store the build status information we care about
-release_name=
+build_version=
 git_hash=
 release_status=
 build_time=
@@ -31,8 +31,8 @@ for i in "${@}"; do
     key=$(echo "$line" | cut -d " " -f 1)
     value="$(echo "$line" | cut -d " " -f 2- | tr '\f' '\n')"
     case $key in
-      HERON_BUILD_SCM_RELEASE)
-        release_name="$value"
+      HERON_BUILD_VERSION)
+        build_version="$value"
         ;;
       HERON_BUILD_SCM_REVISION)
         git_hash="$value"
@@ -56,7 +56,7 @@ for i in "${@}"; do
   done <<<"$(cat $i)"
 done
 
-echo "heron.build.version : '${release_name}'"
+echo "heron.build.version : '${build_version}'"
 echo "heron.build.time : ${build_time}"
 echo "heron.build.timestamp : ${build_timestamp}"
 echo "heron.build.host : ${build_host}"

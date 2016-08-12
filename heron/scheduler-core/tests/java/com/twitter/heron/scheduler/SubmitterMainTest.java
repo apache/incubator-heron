@@ -111,7 +111,6 @@ public class SubmitterMainTest {
         thenReturn(CLASS_NOT_EXIST);
     Assert.assertFalse(submitterMain.submitTopology());
     Mockito.verify(uploader, Mockito.never()).close();
-    Mockito.verify(packing, Mockito.never()).close();
     Mockito.verify(launcher, Mockito.never()).close();
     Mockito.verify(statemgr, Mockito.never()).close();
 
@@ -126,7 +125,6 @@ public class SubmitterMainTest {
     Assert.assertFalse(submitterMain.submitTopology());
     // Resources should be closed even the submission failed
     Mockito.verify(uploader, Mockito.atLeastOnce()).close();
-    Mockito.verify(packing, Mockito.atLeastOnce()).close();
     Mockito.verify(launcher, Mockito.atLeastOnce()).close();
     Mockito.verify(statemgr, Mockito.atLeastOnce()).close();
 

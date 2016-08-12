@@ -33,10 +33,10 @@ def print_usage():
       " <instance_distribution> <zknode> <zkroot> <tmaster_binary> <stmgr_binary> "
       " <metricsmgr_classpath> <instance_jvm_opts_in_base64> <classpath> "
       " <master_port> <tmaster_controller_port> <tmaster_stats_port> <heron_internals_config_file> "
-      " <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_jar_file>"
+      " <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_bin_file>"
       " <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>"
       " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file> "
-      " <scheduler_classpath> <scheduler_port>")
+      " <scheduler_classpath> <scheduler_port> <python_instance_binary>")
 
 def do_print(statement):
   timestr = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
@@ -165,7 +165,7 @@ class HeronExecutor(object):
         self.component_jvm_opts[base64.b64decode(k)] = base64.b64decode(v)
 
     self.pkg_type = args[19]
-    self.topology_jar_file = args[20]
+    self.topology_bin_file = args[20]
     self.heron_java_home = args[21]
     self.shell_port = args[22]
     self.heron_shell_binary = args[23]
@@ -177,6 +177,7 @@ class HeronExecutor(object):
     self.metrics_sinks_config_file = args[29]
     self.scheduler_classpath = args[30]
     self.scheduler_port = args[31]
+    self.python_instance_binary = args[32]
 
     # Read the heron_internals.yaml for logging dir
     self.log_dir = self._load_logging_dir(self.heron_internals_config_file)
@@ -279,71 +280,17 @@ class HeronExecutor(object):
 
     return retval
 
-  def _get_scheduler_processes(self):
+  # Returns the processes for each Java Heron Instance
+  def _get_java_instance_cmd(self, instance_info):
     retval = {}
-    scheduler_cmd = [
-        'java',
-        '-cp',
-        self.scheduler_classpath,
-        'com.twitter.heron.scheduler.SchedulerMain',
-        self.cluster,
-        self.role,
-        self.environ,
-        self.topology_name,
-        self.topology_jar_file,
-        self.scheduler_port]
-    retval["heron-tscheduler"] = scheduler_cmd
-
-    return retval
-
-
-  def _get_streaming_processes(self):
-    '''
-    Returns the processes to handle streams, including the stream-mgr and the user code containing
-    the stream logic of the topology
-    '''
-    retval = {}
-    # First lets make sure that our shard id is a valid one
-    assert self.shard in self.instance_distribution
-    my_instances = self.instance_distribution[self.shard]
-    instance_info = []
-    for (component_name, global_task_id, component_index) in my_instances:
-      instance_id = "container_" + str(self.shard) + "_" + \
-        component_name + "_" + str(global_task_id)
-      instance_info.append((instance_id, component_name, global_task_id, component_index))
-
-    stmgr_cmd = [
-        self.stmgr_binary,
-        self.topology_name,
-        self.topology_id,
-        self.topology_defn_file,
-        self.zknode,
-        self.zkroot,
-        self.stmgr_ids[self.shard - 1],
-        ','.join(map(lambda x: x[0], instance_info)),
-        self.master_port,
-        self.metricsmgr_port,
-        self.shell_port,
-        self.heron_internals_config_file]
-    retval[self.stmgr_ids[self.shard - 1]] = stmgr_cmd
-
-    # metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
-
-    retval[self.metricsmgr_ids[self.shard]] = self._get_metricsmgr_cmd(
-        self.metricsmgr_ids[self.shard],
-        self.metrics_sinks_config_file,
-        self.metricsmgr_port
-    )
-
     # TO DO (Karthik) to be moved into keys and defaults files
     code_cache_size_mb = 64
     perm_gen_size_mb = 128
-
     for (instance_id, component_name, global_task_id, component_index) in instance_info:
       total_jvm_size = int(self.component_rammap[component_name] / (1024 * 1024))
       heap_size_mb = total_jvm_size - code_cache_size_mb - perm_gen_size_mb
-      # pylint: disable=line-too-long
-      do_print("component name: %s, ram request: %d, total jvm size: %dM, cache size: %dM, perm size: %dM"
+      do_print("component name: %s, ram request: %d, total jvm size: %dM, "
+               "cache size: %dM, perm size: %dM"
                % (component_name, self.component_rammap[component_name],
                   total_jvm_size, code_cache_size_mb, perm_gen_size_mb))
       xmn_size = int(heap_size_mb / 2)
@@ -389,6 +336,78 @@ class HeronExecutor(object):
       retval[instance_id] = instance_cmd
     return retval
 
+  # Returns the processes for each Python Heron Instance
+  def get_python_instance_cmd(self, instance_info):
+    # pylint: disable=fixme
+    # TODO: currently ignoring ramsize, heap, etc.
+    retval = {}
+    for (instance_id, component_name, global_task_id, component_index) in instance_info:
+      do_print("Python instance %s component: %s" %(instance_id, component_name))
+      instance_cmd = [self.python_instance_binary,
+                      self.topology_name,
+                      self.topology_id,
+                      instance_id,
+                      component_name,
+                      global_task_id,
+                      component_index,
+                      self.stmgr_ids[self.shard - 1],
+                      self.master_port,
+                      self.metricsmgr_port,
+                      self.heron_internals_config_file,
+                      self.topology_bin_file]
+
+      retval[instance_id] = instance_cmd
+
+    return retval
+
+  # Returns the processes to handle streams, including the stream-mgr and the user code containing
+  # the stream logic of the topology
+  def _get_streaming_processes(self):
+    '''
+    Returns the processes to handle streams, including the stream-mgr and the user code containing
+    the stream logic of the topology
+    '''
+    retval = {}
+    # First lets make sure that our shard id is a valid one
+    assert self.shard in self.instance_distribution
+    my_instances = self.instance_distribution[self.shard]
+    instance_info = []
+    for (component_name, global_task_id, component_index) in my_instances:
+      instance_id = "container_%s_%s_%s" % (str(self.shard), component_name, str(global_task_id))
+      instance_info.append((instance_id, component_name, global_task_id, component_index))
+
+    stmgr_cmd = [
+        self.stmgr_binary,
+        self.topology_name,
+        self.topology_id,
+        self.topology_defn_file,
+        self.zknode,
+        self.zkroot,
+        self.stmgr_ids[self.shard - 1],
+        ','.join(map(lambda x: x[0], instance_info)),
+        self.master_port,
+        self.metricsmgr_port,
+        self.shell_port,
+        self.heron_internals_config_file]
+    retval[self.stmgr_ids[self.shard - 1]] = stmgr_cmd
+
+    # metricsmgr_metrics_sink_config_file = 'metrics_sinks.yaml'
+
+    retval[self.metricsmgr_ids[self.shard]] = self._get_metricsmgr_cmd(
+        self.metricsmgr_ids[self.shard],
+        self.metrics_sinks_config_file,
+        self.metricsmgr_port
+    )
+
+    if self.pkg_type == 'jar' or self.pkg_type == 'tar':
+      retval.update(self._get_java_instance_cmd(instance_info))
+    elif self.pkg_type == 'pex':
+      retval.update(self.get_python_instance_cmd(instance_info))
+    else:
+      raise ValueError("Unrecognized package type: %s" % self.pkg_type)
+
+    return retval
+
   # Returns the common heron support processes that all containers get, like the heron shell
   def _get_heron_support_processes(self):
     """ Get a map from all daemon services' name to the command to start them """
@@ -403,7 +422,7 @@ class HeronExecutor(object):
 
   def _untar_if_tar(self):
     if self.pkg_type == "tar":
-      os.system("tar -xvf %s" % self.topology_jar_file)
+      os.system("tar -xvf %s" % self.topology_bin_file)
 
   # pylint: disable=no-self-use
   def _wait_process_std_out_err(self, name, process):
@@ -555,7 +574,7 @@ class HeronExecutor(object):
         sys.exit(1)
 
 def main():
-  if len(sys.argv) != 32:
+  if len(sys.argv) != 33:
     print_usage()
     sys.exit(1)
 

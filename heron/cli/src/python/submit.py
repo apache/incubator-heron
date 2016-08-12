@@ -13,11 +13,13 @@
 # limitations under the License.
 ''' submit.py '''
 import glob
+import logging
 import os
 import shutil
 import tempfile
+import traceback
 
-from heron.common.src.python.color import Log
+from heron.common.src.python.utils.log import Log
 from heron.proto import topology_pb2
 
 import heron.cli.src.python.args as cli_args
@@ -89,10 +91,10 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
       "--release_file", release_yaml_file,
       "--topology_package", topology_pkg_path,
       "--topology_defn", topology_defn_file,
-      "--topology_jar", topology_file   # pex file if pex specified
+      "--topology_bin", topology_file   # pex file if pex specified
   ]
 
-  if opts.verbose():
+  if Log.getEffectiveLevel() == logging.DEBUG:
     args.append("--verbose")
 
   lib_jars = config.get_heron_libs(
@@ -156,7 +158,7 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
   '''
    We use the packer to make a package for the jar and dump it
   to a well-known location. We then run the main method of class
-  with the specified arguments. We pass arguments as heron.options.
+  with the specified arguments. We pass arguments as an environment variable HERON_OPTIONS.
 
   This will run the jar file with the topology_class_name. The submitter
   inside will write out the topology defn file to a location that
@@ -178,16 +180,15 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
         args=tuple(unknown_args),
         java_defines=cl_args['topology_main_jvm_property'])
 
-  except Exception:
+  except Exception as ex:
+    Log.debug(traceback.format_exc(ex))
     Log.error("Unable to execute topology main class")
     return False
 
   try:
     launch_topologies(cl_args, topology_file, tmp_dir)
-
-  except Exception:
+  except Exception as ex:
     return False
-
   finally:
     shutil.rmtree(tmp_dir)
 
@@ -202,7 +203,7 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
 
   We use the packer to make a package for the tar and dump it
   to a well-known location. We then run the main method of class
-  with the specified arguments. We pass arguments as heron.options.
+  with the specified arguments. We pass arguments as an environment variable HERON_OPTIONS.
   This will run the jar file with the topology class name.
 
   The submitter inside will write out the topology defn file to a location
@@ -245,9 +246,9 @@ def submit_pex(cl_args, unknown_args, tmp_dir):
   topology_file = cl_args['topology-file-name']
   topology_class_name = cl_args['topology-class-name']
   try:
-    execute.heron_pex(topology_file, topology_class_name, tmp_dir)
+    execute.heron_pex(topology_file, topology_class_name, tuple(unknown_args))
   except Exception as ex:
-    Log.error("Unable to execute topology main class: " + ex.message)
+    Log.error("Error when loading a topology: %s" % str(ex))
     return False
 
   try:

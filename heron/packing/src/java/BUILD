@@ -44,13 +44,13 @@ genrule(
 
 java_library(
     name='roundrobin-packing',
-    srcs = glob(["**/roundrobin/**/*.java"]),
+    srcs = glob(["**/roundrobin/**/*.java","**/packing/*.java"]),
     deps = roundrobin_deps_files,
 )
 
 java_binary(
     name='roundrobin-packing-unshaded',
-    srcs = glob(["**/roundrobin/**/*.java"]),
+    srcs = glob(["**/roundrobin/**/*.java","**/packing/*.java"]),
     deps = roundrobin_deps_files,
 )
 
@@ -63,13 +63,13 @@ genrule(
 
 java_library(
     name='binpacking-packing',
-    srcs = glob(["**/binpacking/**/*.java","**/utils/**/*.java"]),
+    srcs = glob(["**/binpacking/**/*.java","**/packing/*.java"]),
     deps = binpacking_deps_files,
 )
 
 java_binary(
     name='binpacking-packing-unshaded',
-    srcs = glob(["**/binpacking/**/*.java","**/utils/**/*.java"]),
+    srcs = glob(["**/binpacking/**/*.java","**/packing/*.java"]),
     deps = binpacking_deps_files,
 )
 

@@ -140,7 +140,6 @@ public class Config extends HashMap<String, Object> {
    */
   public static final String TOPOLOGY_CONTAINER_PADDING_PERCENTAGE
       = "topology.container.padding.percentage";
-
   /**
    * Per component ram requirement.  The format of this flag is something like
    * spout0:12434,spout1:345353,bolt1:545356.

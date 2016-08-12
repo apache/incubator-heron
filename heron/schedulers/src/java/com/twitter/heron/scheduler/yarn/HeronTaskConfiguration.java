@@ -17,6 +17,7 @@ package com.twitter.heron.scheduler.yarn;
 import org.apache.reef.driver.task.TaskConfiguration;
 import org.apache.reef.tang.formats.ConfigurationModule;
 import org.apache.reef.tang.formats.ConfigurationModuleBuilder;
+import org.apache.reef.tang.formats.OptionalParameter;
 import org.apache.reef.tang.formats.RequiredParameter;
 
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Cluster;
@@ -29,6 +30,7 @@ import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.Role;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyJar;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyName;
 import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.TopologyPackageName;
+import com.twitter.heron.scheduler.yarn.HeronConfigurationOptions.VerboseLogMode;
 
 public class HeronTaskConfiguration extends ConfigurationModuleBuilder {
   public static final RequiredParameter<String> TOPOLOGY_NAME = new RequiredParameter<>();
@@ -41,6 +43,7 @@ public class HeronTaskConfiguration extends ConfigurationModuleBuilder {
   public static final RequiredParameter<String> PACKED_PLAN = new RequiredParameter<>();
   public static final RequiredParameter<String> COMPONENT_RAM_MAP = new RequiredParameter<>();
   public static final RequiredParameter<String> CONTAINER_ID = new RequiredParameter<>();
+  public static final OptionalParameter<Boolean> VERBOSE = new OptionalParameter<>();
 
   public static final ConfigurationModule CONF = new HeronTaskConfiguration()
       .merge(TaskConfiguration.CONF)
@@ -54,5 +57,6 @@ public class HeronTaskConfiguration extends ConfigurationModuleBuilder {
       .bindNamedParameter(PackedPlan.class, PACKED_PLAN)
       .bindNamedParameter(ComponentRamMap.class, COMPONENT_RAM_MAP)
       .bindNamedParameter(HeronExecutorId.class, CONTAINER_ID)
+      .bindNamedParameter(VerboseLogMode.class, VERBOSE)
       .build();
 }

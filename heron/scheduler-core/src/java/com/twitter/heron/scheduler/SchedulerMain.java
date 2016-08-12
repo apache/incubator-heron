@@ -37,11 +37,11 @@ import com.twitter.heron.scheduler.server.SchedulerServer;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.LauncherUtils;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerConfig;
@@ -117,10 +117,10 @@ public class SchedulerMain {
         .build();
 
     Option topologyJar = Option.builder("f")
-        .desc("Topology jar file path")
-        .longOpt("topology_jar")
+        .desc("Topology jar/pex file path")
+        .longOpt("topology_bin")
         .hasArgs()
-        .argName("topology jar file")
+        .argName("topology binary file")
         .required()
         .build();
 
@@ -140,6 +140,11 @@ public class SchedulerMain {
         .argName("property=value")
         .build();
 
+    Option verbose = Option.builder("v")
+        .desc("Enable debug logs")
+        .longOpt("verbose")
+        .build();
+
     options.addOption(cluster);
     options.addOption(role);
     options.addOption(environment);
@@ -147,6 +152,7 @@ public class SchedulerMain {
     options.addOption(topologyJar);
     options.addOption(schedulerHTTPPort);
     options.addOption(property);
+    options.addOption(verbose);
 
     return options;
   }
@@ -197,9 +203,10 @@ public class SchedulerMain {
     SchedulerMain schedulerMain = createInstance(cmd.getOptionValue("cluster"),
         cmd.getOptionValue("role"),
         cmd.getOptionValue("environment"),
-        cmd.getOptionValue("topology_jar"),
+        cmd.getOptionValue("topology_bin"),
         topologyName,
         Integer.parseInt(cmd.getOptionValue("http_port")),
+        (Boolean) cmd.hasOption("verbose"),
         schedulerProperties);
 
     LOG.info("Scheduler command line properties override: " + schedulerProperties.toString());
@@ -221,9 +228,11 @@ public class SchedulerMain {
                                              String env,
                                              String topologyJar,
                                              String topologyName,
-                                             int httpPort) throws IOException {
+                                             int httpPort,
+                                             Boolean verbose
+                                             ) throws IOException {
     return createInstance(
-        cluster, role, env, topologyJar, topologyName, httpPort, new Properties());
+        cluster, role, env, topologyJar, topologyName, httpPort, verbose, new Properties());
   }
 
   public static SchedulerMain createInstance(String cluster,
@@ -232,6 +241,7 @@ public class SchedulerMain {
                                              String topologyJar,
                                              String topologyName,
                                              int httpPort,
+                                             Boolean verbose,
                                              Properties schedulerProperties) throws IOException {
     // Look up the topology def file location
     String topologyDefnFile = TopologyUtils.lookUpTopologyDefnFile(".", topologyName);
@@ -246,6 +256,7 @@ public class SchedulerMain {
         env,
         topologyJar,
         topologyDefnFile,
+        verbose,
         topology);
 
     // set up logging with complete Config
@@ -268,6 +279,9 @@ public class SchedulerMain {
     // Init the logging setting and redirect the stdout and stderr to logging
     // For now we just set the logging level as INFO; later we may accept an argument to set it.
     Level loggingLevel = Level.INFO;
+    if (Context.verbose(config).booleanValue()) {
+      loggingLevel = Level.FINE;
+    }
     // TODO(mfu): The folder creation may be duplicated with heron-executor in future
     // TODO(mfu): Remove the creation in future if feasible
     String loggingDir = systemConfig.getHeronLoggingDirectory();
@@ -313,23 +327,14 @@ public class SchedulerMain {
    * @return true if scheduled successfully
    */
   public boolean runScheduler() {
+    IScheduler scheduler = null;
+
     String statemgrClass = Context.stateManagerClass(config);
     IStateManager statemgr;
 
-    String packingClass = Context.packingClass(config);
-    IPacking packing;
-
-    String schedulerClass = Context.schedulerClass(config);
-    IScheduler scheduler;
     try {
       // create an instance of state manager
       statemgr = ReflectionUtils.newInstance(statemgrClass);
-
-      // create an instance of the packing class
-      packing = ReflectionUtils.newInstance(packingClass);
-
-      // create an instance of scheduler
-      scheduler = ReflectionUtils.newInstance(schedulerClass);
     } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
       LOG.log(Level.SEVERE, "Failed to instantiate instances", e);
       return false;
@@ -347,36 +352,27 @@ public class SchedulerMain {
       SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
       // build the runtime config
+      LauncherUtils launcherUtils = LauncherUtils.getInstance();
       Config runtime = Config.newBuilder()
-          .put(Keys.topologyId(), topology.getId())
-          .put(Keys.topologyName(), topology.getName())
-          .put(Keys.topologyDefinition(), topology)
-          .put(Keys.schedulerStateManagerAdaptor(), adaptor)
-          .put(Keys.numContainers(), 1 + TopologyUtils.getNumContainers(topology))
+          .putAll(launcherUtils.getPrimaryRuntime(topology, adaptor))
           .put(Keys.schedulerShutdown(), getShutdown())
           .put(Keys.SCHEDULER_PROPERTIES, properties)
           .build();
 
       // get a packed plan and schedule it
-      packing.initialize(config, runtime);
-      PackingPlan packedPlan = packing.pack();
+      PackingPlan packedPlan = launcherUtils.createPackingPlan(config, runtime);
       if (packedPlan == null) {
         LOG.severe("Failed to pack a valid PackingPlan. Check the config.");
         return false;
       }
+      Config ytruntime = launcherUtils.createConfigWithPackingDetails(runtime, packedPlan);
 
-      // Add the instanceDistribution to the runtime
-      Config ytruntime = Config.newBuilder()
-          .putAll(runtime)
-          .put(Keys.instanceDistribution(), packedPlan.getInstanceDistribution())
-          .put(Keys.componentRamMap(), packedPlan.getComponentRamDistribution())
-          .put(Keys.numContainers(), 1 + packedPlan.getContainers().size())
-          .build();
+      // invoke scheduler
+      scheduler = launcherUtils.getSchedulerInstance(config, ytruntime);
+      if (scheduler == null) {
+        return false;
+      }
 
-      // initialize the scheduler
-      scheduler.initialize(config, ytruntime);
-
-      // schedule the packed plan
       isSuccessful = scheduler.onSchedule(packedPlan);
       if (!isSuccessful) {
         LOG.severe("Failed to schedule topology");
@@ -410,7 +406,6 @@ public class SchedulerMain {
 
       // 4. Close the resources
       SysUtils.closeIgnoringExceptions(scheduler);
-      SysUtils.closeIgnoringExceptions(packing);
       SysUtils.closeIgnoringExceptions(statemgr);
     }
 

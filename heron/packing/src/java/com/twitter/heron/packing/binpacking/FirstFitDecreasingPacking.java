@@ -22,12 +22,14 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
-import com.twitter.heron.packing.utils.Container;
+import com.twitter.heron.packing.Container;
+import com.twitter.heron.packing.RamRequirement;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
@@ -89,6 +91,7 @@ public class FirstFitDecreasingPacking implements IPacking {
 
   public static final long MIN_RAM_PER_INSTANCE = 192L * Constants.MB;
   public static final int DEFAULT_CONTAINER_PADDING_PERCENTAGE = 10;
+  public static final int DEFAULT_NUMBER_INSTANCES_PER_CONTAINER = 4;
 
   private static final Logger LOG = Logger.getLogger(FirstFitDecreasingPacking.class.getName());
   protected TopologyAPI.Topology topology;
@@ -96,7 +99,9 @@ public class FirstFitDecreasingPacking implements IPacking {
   protected long instanceRamDefault;
   protected double instanceCpuDefault;
   protected long instanceDiskDefault;
-
+  protected long maxContainerRam;
+  protected double maxContainerCpu;
+  protected long maxContainerDisk;
 
   public static String getContainerId(int index) {
     return "" + index;
@@ -114,10 +119,22 @@ public class FirstFitDecreasingPacking implements IPacking {
   @Override
   public void initialize(Config config, Config runtime) {
     this.topology = com.twitter.heron.spi.utils.Runtime.topology(runtime);
-
     this.instanceRamDefault = Context.instanceRam(config);
     this.instanceCpuDefault = Context.instanceCpu(config).doubleValue();
     this.instanceDiskDefault = Context.instanceDisk(config);
+
+    List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
+    this.maxContainerRam = Long.parseLong(TopologyUtils.getConfigWithDefault(
+        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_RAM_HINT,
+        Long.toString(instanceRamDefault * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER)));
+
+    this.maxContainerCpu = Double.parseDouble(TopologyUtils.getConfigWithDefault(
+        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT,
+        Double.toString(instanceCpuDefault * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER)));
+
+    this.maxContainerDisk = Long.parseLong(TopologyUtils.getConfigWithDefault(
+        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_DISK_HINT,
+        Long.toString(instanceDiskDefault * DEFAULT_NUMBER_INSTANCES_PER_CONTAINER)));
   }
 
   @Override
@@ -170,8 +187,8 @@ public class FirstFitDecreasingPacking implements IPacking {
         double instanceCpu = instanceCpuDefault;
         containerCpu += instanceCpu;
 
-        PackingPlan.Resource resource =
-            new PackingPlan.Resource(instanceCpu, instanceRam, instanceDisk);
+        Resource resource =
+            new Resource(instanceCpu, instanceRam, instanceDisk);
         PackingPlan.InstancePlan instancePlan =
             new PackingPlan.InstancePlan(
                 instanceId,
@@ -185,8 +202,8 @@ public class FirstFitDecreasingPacking implements IPacking {
       containerRam += (paddingPercentage * containerRam) / 100;
       containerDiskInBytes += (paddingPercentage * containerDiskInBytes) / 100;
 
-      PackingPlan.Resource resource =
-          new PackingPlan.Resource(Math.round(containerCpu), containerRam, containerDiskInBytes);
+      Resource resource =
+          new Resource(Math.round(containerCpu), containerRam, containerDiskInBytes);
 
       PackingPlan.ContainerPlan containerPlan =
           new PackingPlan.ContainerPlan(containerId, instancePlanMap, resource);
@@ -203,7 +220,7 @@ public class FirstFitDecreasingPacking implements IPacking {
     topologyDisk += instanceDiskDefault;
     topologyCpu += instanceCpuDefault;
 
-    PackingPlan.Resource resource = new PackingPlan.Resource(
+    Resource resource = new Resource(
         topologyCpu, topologyRam, topologyDisk);
 
     PackingPlan plan = new PackingPlan(topology.getId(), containerPlanMap, resource);
@@ -228,13 +245,19 @@ public class FirstFitDecreasingPacking implements IPacking {
 
     for (String component : parallelismMap.keySet()) {
       if (ramMap.containsKey(component)) {
-        if (!isValidInstance(ramMap.get(component))) {
+        if (!isValidInstance(new Resource(instanceCpuDefault,
+            ramMap.get(component), instanceDiskDefault))) {
           return null;
         } else {
           ramRequirements.add(new RamRequirement(component, ramMap.get(component)));
         }
       } else {
-        ramRequirements.add(new RamRequirement(component, instanceRamDefault));
+        if (!isValidInstance(new Resource(instanceCpuDefault,
+            instanceRamDefault, instanceDiskDefault))) {
+          return null;
+        } else {
+          ramRequirements.add(new RamRequirement(component, instanceRamDefault));
+        }
       }
     }
     Collections.sort(ramRequirements, Collections.reverseOrder());
@@ -309,19 +332,6 @@ public class FirstFitDecreasingPacking implements IPacking {
    * @return the number of containers
    */
   private int allocateNewContainer(ArrayList<Container> containers) {
-    List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
-    long maxContainerRam = Long.parseLong(TopologyUtils.getConfigWithDefault(
-        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_RAM_HINT,
-        Long.toString(instanceRamDefault * 4)));
-
-    double maxContainerCpu = Double.parseDouble(TopologyUtils.getConfigWithDefault(
-        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_CPU_HINT,
-        Double.toString(instanceCpuDefault * 4)));
-
-    long maxContainerDisk = Long.parseLong(TopologyUtils.getConfigWithDefault(
-        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_DISK_HINT,
-        Long.toString(instanceDiskDefault * 4)));
-
     containers.add(new Container(maxContainerRam, maxContainerCpu, maxContainerDisk));
     return containers.size();
   }
@@ -329,78 +339,41 @@ public class FirstFitDecreasingPacking implements IPacking {
   /**
    * Check whether the Instance has enough RAM and whether it can fit within the container limits.
    *
-   * @param instanceRAM The RAM allocated to the instance
+   * @param instanceResources The resources allocated to the instance
    * @return true if the instance is valid, false otherwise
    */
-  protected boolean isValidInstance(long instanceRAM) {
+  protected boolean isValidInstance(Resource instanceResources) {
 
-    if (instanceRAM < MIN_RAM_PER_INSTANCE) {
+    if (instanceResources.getRam() < MIN_RAM_PER_INSTANCE) {
       LOG.severe(String.format(
           "Require at least %d MB ram per instance",
           MIN_RAM_PER_INSTANCE / Constants.MB));
       return false;
     }
 
-    List<TopologyAPI.Config.KeyValue> topologyConfig = topology.getTopologyConfig().getKvsList();
-    long maxContainerRam = Long.parseLong(TopologyUtils.getConfigWithDefault(
-        topologyConfig, com.twitter.heron.api.Config.TOPOLOGY_CONTAINER_MAX_RAM_HINT,
-        Long.toString(instanceRamDefault * 4)));
-
-    if (instanceRAM > maxContainerRam) {
+    if (instanceResources.getRam() > maxContainerRam) {
       LOG.severe(String.format(
           "This instance requires containers of at least %d MB ram. The current max container"
               + "size is %d MB",
-          instanceRAM, maxContainerRam));
+          instanceResources.getRam(), maxContainerRam));
+      return false;
+    }
+
+    if (instanceResources.getCpu() > maxContainerCpu) {
+      LOG.severe(String.format(
+          "This instance requires containers with at least %d cpu cores. The current max container"
+              + "size is %d cores",
+          instanceResources.getCpu(), maxContainerCpu));
+      return false;
+    }
+
+    if (instanceResources.getDisk() > maxContainerDisk) {
+      LOG.severe(String.format(
+          "This instance requires containers of at least %d MB disk. The current max container"
+              + "size is %d MB",
+          instanceResources.getDisk(), maxContainerDisk));
       return false;
     }
     return true;
-  }
-
-  /**
-   * Helper class that captures the RAM requirements of each component
-   */
-  protected class RamRequirement implements Comparable<RamRequirement> {
-    private String componentName;
-    private long ramRequirement;
-
-    protected RamRequirement(String componentName, long ram) {
-      this.componentName = componentName;
-      this.ramRequirement = ram;
-    }
-
-    protected String getComponentName() {
-      return componentName;
-    }
-
-    protected long getRamRequirement() {
-      return ramRequirement;
-    }
-
-    @Override
-    public int compareTo(RamRequirement other) {
-      return Long.compare(this.ramRequirement, other.ramRequirement);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-
-      if (o == this) {
-        return true;
-      }
-      if (!(o instanceof RamRequirement)) {
-        return false;
-      }
-      RamRequirement c = (RamRequirement) o;
-
-      // Compare the ramRequirement values and return accordingly
-      return Long.compare(ramRequirement, c.ramRequirement) == 0;
-    }
-
-    @Override
-    public int hashCode() {
-      int result = componentName.hashCode();
-      result = 31 * result + (int) (ramRequirement ^ (ramRequirement >>> 32));
-      return result;
-    }
   }
 }

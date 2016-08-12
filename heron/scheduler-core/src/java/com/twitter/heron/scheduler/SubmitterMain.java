@@ -35,11 +35,11 @@ import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
 import com.twitter.heron.spi.common.Keys;
-import com.twitter.heron.spi.packing.IPacking;
 import com.twitter.heron.spi.scheduler.ILauncher;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.uploader.IUploader;
+import com.twitter.heron.spi.utils.LauncherUtils;
 import com.twitter.heron.spi.utils.ReflectionUtils;
 import com.twitter.heron.spi.utils.TopologyUtils;
 
@@ -53,23 +53,30 @@ public class SubmitterMain {
    * Load the topology config
    *
    * @param topologyPackage, tar ball containing user submitted jar/tar, defn and config
-   * @param topologyJarFile, name of the user submitted topology jar/tar file
+   * @param topologyBinaryFile, name of the user submitted topology jar/tar/pex file
    * @param topology, proto in memory version of topology definition
    * @return config, the topology config
    */
   protected static Config topologyConfigs(
-      String topologyPackage, String topologyJarFile, String topologyDefnFile,
+      String topologyPackage, String topologyBinaryFile, String topologyDefnFile,
       TopologyAPI.Topology topology) {
 
-    String pkgType = FileUtils.isOriginalPackageJar(
-        FileUtils.getBaseName(topologyJarFile)) ? "jar" : "tar";
+    String pkgType;
+    String basename = FileUtils.getBaseName(topologyBinaryFile);
+    if (FileUtils.isOriginalPackagePex(basename)) {
+      pkgType = "pex";
+    } else if (FileUtils.isOriginalPackageJar(basename)) {
+      pkgType = "jar";
+    } else {
+      pkgType = "tar";
+    }
 
     Config config = Config.newBuilder()
         .put(Keys.topologyId(), topology.getId())
         .put(Keys.topologyName(), topology.getName())
         .put(Keys.topologyDefinitionFile(), topologyDefnFile)
         .put(Keys.topologyPackageFile(), topologyPackage)
-        .put(Keys.topologyJarFile(), topologyJarFile)
+        .put(Keys.topologyBinaryFile(), topologyBinaryFile)
         .put(Keys.topologyPackageType(), pkgType)
         .build();
     return config;
@@ -211,10 +218,10 @@ public class SubmitterMain {
         .build();
 
     Option topologyJar = Option.builder("j")
-        .desc("user heron topology jar")
-        .longOpt("topology_jar")
+        .desc("user heron topology jar/pex file path")
+        .longOpt("topology_bin")
         .hasArgs()
-        .argName("topology jar")
+        .argName("topology binary file")
         .required()
         .build();
 
@@ -289,7 +296,7 @@ public class SubmitterMain {
     String releaseFile = cmd.getOptionValue("release_file");
     String topologyPackage = cmd.getOptionValue("topology_package");
     String topologyDefnFile = cmd.getOptionValue("topology_defn");
-    String topologyJarFile = cmd.getOptionValue("topology_jar");
+    String topologyBinaryFile = cmd.getOptionValue("topology_bin");
 
     // load the topology definition into topology proto
     TopologyAPI.Topology topology = TopologyUtils.getTopology(topologyDefnFile);
@@ -305,7 +312,7 @@ public class SubmitterMain {
             .putAll(overrideConfigs(overrideConfigFile))
             .putAll(commandLineConfigs(cluster, role, environ, verbose))
             .putAll(topologyConfigs(
-                topologyPackage, topologyJarFile, topologyDefnFile, topology))
+                topologyPackage, topologyBinaryFile, topologyDefnFile, topology))
             .build());
 
     LOG.fine("Static config loaded successfully ");
@@ -354,10 +361,6 @@ public class SubmitterMain {
     String launcherClass = Context.launcherClass(config);
     ILauncher launcher;
 
-    // Create an instance of the packing class
-    String packingClass = Context.packingClass(config);
-    IPacking packing;
-
     // create an instance of the uploader class
     String uploaderClass = Context.uploaderClass(config);
     IUploader uploader;
@@ -368,9 +371,6 @@ public class SubmitterMain {
 
       // create an instance of launcher
       launcher = ReflectionUtils.newInstance(launcherClass);
-
-      // create an instance of the packing class
-      packing = ReflectionUtils.newInstance(packingClass);
 
       // create an instance of uploader
       uploader = ReflectionUtils.newInstance(uploaderClass);
@@ -405,14 +405,9 @@ public class SubmitterMain {
           // Secondly, try to submit a topology
           // build the runtime config
           Config runtime = Config.newBuilder()
-              .put(Keys.topologyId(), topology.getId())
-              .put(Keys.topologyName(), topology.getName())
-              .put(Keys.topologyDefinition(), topology)
-              .put(Keys.schedulerStateManagerAdaptor(), adaptor)
-              .put(Keys.numContainers(), 1 + TopologyUtils.getNumContainers(topology))
+              .putAll(LauncherUtils.getInstance().getPrimaryRuntime(topology, adaptor))
               .put(Keys.topologyPackageUri(), packageURI)
               .put(Keys.launcherClassInstance(), launcher)
-              .put(Keys.packingClassInstance(), packing)
               .build();
 
           isSuccessful = callLauncherRunner(runtime);
@@ -429,7 +424,6 @@ public class SubmitterMain {
 
       // 4. Close the resources
       SysUtils.closeIgnoringExceptions(uploader);
-      SysUtils.closeIgnoringExceptions(packing);
       SysUtils.closeIgnoringExceptions(launcher);
       SysUtils.closeIgnoringExceptions(statemgr);
     }

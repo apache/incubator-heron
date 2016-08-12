@@ -20,12 +20,10 @@ import os
 import shutil
 import sys
 import time
-
-from heron.common.src.python.color import Log
+import traceback
 
 import heron.cli.src.python.help as cli_help
-import heron.cli.src.python.args as parse
-import heron.cli.src.python.opts as opts
+import heron.common.src.python.heronparser as hrc_parse
 import heron.cli.src.python.activate as activate
 import heron.cli.src.python.deactivate as deactivate
 import heron.cli.src.python.kill as kill
@@ -33,6 +31,9 @@ import heron.cli.src.python.restart as restart
 import heron.cli.src.python.submit as submit
 import heron.common.src.python.utils.config as config
 import heron.cli.src.python.version as version
+import heron.common.src.python.utils.log as log
+
+Log = log.Log
 
 HELP_EPILOG = '''Getting more help:
   heron help <command> Prints help and options for <command>
@@ -60,29 +61,19 @@ class _HelpAction(argparse._HelpAction):
         print subparser.format_help()
         return
 
-
-class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
-  ''' SubcommandHelpFormatter '''
-
-  def _format_action(self, action):
-    # pylint: disable=bad-super-call
-    parts = super(argparse.RawDescriptionHelpFormatter, self)._format_action(action)
-    if action.nargs == argparse.PARSER:
-      parts = "\n".join(parts.split("\n")[1:])
-    return parts
-
-
 ################################################################################
 def create_parser():
   '''
   Main parser
   :return:
   '''
-  parser = argparse.ArgumentParser(
+  #parser = argparse.ArgumentParser(
+  parser = hrc_parse.HeronArgumentParser(
       prog='heron',
       epilog=HELP_EPILOG,
-      formatter_class=SubcommandHelpFormatter,
-      add_help=False)
+      formatter_class=config.SubcommandHelpFormatter,
+      add_help=False,
+      fromfile_prefix_chars='@')
 
   subparsers = parser.add_subparsers(
       title="Available commands",
@@ -109,7 +100,7 @@ def run(command, parser, command_args, unknown_args):
   :param unknown_args:
   :return:
   '''
-  status = 1
+  status = True
   if command == 'activate':
     status = activate.run(command, parser, command_args, unknown_args)
 
@@ -178,7 +169,7 @@ def extract_common_args(command, parser, cl_args):
   cluster = config.get_heron_cluster(cluster_role_env)
   config_path = config.get_heron_cluster_conf_dir(cluster, config_path)
   if not os.path.isdir(config_path):
-    Log.error("Config path cluster directory does not exist: %s" % config_path)
+    Log.error("Config path cluster directory does not exist: %s", config_path)
     return dict()
 
   new_cl_args = dict()
@@ -190,7 +181,7 @@ def extract_common_args(command, parser, cl_args):
     new_cl_args['config_path'] = config_path
     new_cl_args['override_config_file'] = override_config_file
   except Exception as ex:
-    Log.error("Argument cluster/[role]/[env] is not correct: %s" % str(ex))
+    Log.error("Argument cluster/[role]/[env] is not correct: %s", str(ex))
     return dict()
 
   cl_args.update(new_cl_args)
@@ -215,19 +206,17 @@ def main():
     return 0
 
   # insert the boolean values for some of the options
-  sys.argv = parse.insert_bool_values(sys.argv)
-
-  # parse the args
-  args, unknown_args = parser.parse_known_args()
-  command_line_args = vars(args)
+  sys.argv = config.insert_bool_values(sys.argv)
 
   try:
-    if command_line_args['verbose']:
-      opts.set_verbose()
-    if command_line_args['trace_execution']:
-      opts.set_trace_execution()
-  except:
-    pass
+    # parse the args
+    args, unknown_args = parser.parse_known_args()
+  except ValueError as ex:
+    Log.error("Error while parsing arguments: %s", str(ex))
+    Log.debug(traceback.format_exc())
+    sys.exit(1)
+
+  command_line_args = vars(args)
 
   # command to be execute
   command = command_line_args['subcommand']
@@ -235,7 +224,8 @@ def main():
   # file resources to be cleaned when exit
   files = []
 
-  if command != 'help' and command != 'version':
+  if command not in ('help', 'version'):
+    log.set_logging_level(command_line_args)
     command_line_args = extract_common_args(command, parser, command_line_args)
     # bail out if args are empty
     if not command_line_args:
@@ -246,16 +236,15 @@ def main():
   atexit.register(cleanup, files)
 
   # print the input parameters, if verbose is enabled
-  if opts.verbose():
-    print command_line_args
+  Log.debug(command_line_args)
 
   start = time.time()
   retcode = run(command, parser, command_line_args, unknown_args)
   end = time.time()
 
-  if command != 'help':
+  if command not in ('help', 'version'):
     sys.stdout.flush()
-    Log.info('Elapsed time: %.3fs.' % (end - start))
+    Log.info('Elapsed time: %.3fs.', (end - start))
 
   return 0 if retcode else 1
 

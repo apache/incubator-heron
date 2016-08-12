@@ -14,11 +14,13 @@
 ''' fetch.py '''
 import json
 import time
-import logging
 
 import tornado.httpclient
 import tornado.gen
 
+from ...utils import log
+
+Log = log.Log
 
 ################################################################################
 
@@ -35,7 +37,7 @@ def fetch_url_as_json(fetch_url, default_value=None):
   if default_value is None:
     default_value = dict()
 
-  logging.info("fetching url %s", fetch_url)
+  Log.debug("fetching url %s", fetch_url)
   ret = default_value
 
   # time the duration of the fetch
@@ -46,13 +48,13 @@ def fetch_url_as_json(fetch_url, default_value=None):
 
   # handle http errors, and return if any
   if http_response.error:
-    logging.error("Unable to get response from %s. Error %s", fetch_url, http_response.error)
+    Log.error("Unable to get response from %s. Error %s", fetch_url, http_response.error)
     raise tornado.gen.Return(ret)
 
   # load response and handle return errors, if any
   response = json.loads(http_response.body)
   if not 'result' in response:
-    logging.error("Empty response from %s", fetch_url)
+    Log.error("Empty response from %s", fetch_url)
     raise tornado.gen.Return(ret)
 
   # get the response and execution time on server side
@@ -63,8 +65,8 @@ def fetch_url_as_json(fetch_url, default_value=None):
   end = time.time()
   duration = 1000 * (end - start)
 
-  logging.info("TIME: url fetch took %.2f ms server time %s", execution, fetch_url)
-  logging.info("TIME: url fetch took %.2f ms round trip  %s", duration, fetch_url)
+  Log.debug("TIME: url fetch took %.2f ms server time %s", execution, fetch_url)
+  Log.debug("TIME: url fetch took %.2f ms round trip  %s", duration, fetch_url)
 
   # convert future to value
   raise tornado.gen.Return(ret)

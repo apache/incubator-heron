@@ -55,6 +55,10 @@ slurm_deps_files = [
     "//heron/schedulers/src/java:slurm-scheduler-java",
 ]
 
+marathon_deps_files = [
+    "//heron/schedulers/src/java:marathon-scheduler-java",
+]
+
 java_library(
   name = "aurora-tests",
   srcs = glob(["**/aurora/*.java"]),
@@ -135,5 +139,21 @@ java_tests(
     "com.twitter.heron.scheduler.mesos.framework.MesosFrameworkTest",
   ],
   runtime_deps = [ ":mesos-tests" ],
+  size = "small",
+)
+
+java_library(
+  name = "marathon-tests",
+  srcs = glob(["**/marathon/*.java"]),
+  deps = scheduler_deps_files + marathon_deps_files,
+)
+
+java_tests(
+  test_classes = [
+    "com.twitter.heron.scheduler.marathon.MarathonSchedulerTest",
+    "com.twitter.heron.scheduler.marathon.MarathonLauncherTest",
+    "com.twitter.heron.scheduler.marathon.MarathonControllerTest",
+  ],
+  runtime_deps = [ ":marathon-tests" ],
   size = "small",
 )
