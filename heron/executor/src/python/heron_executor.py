@@ -15,7 +15,6 @@
 #!/usr/bin/env python2.7
 ''' heron-executor '''
 import atexit
-import datetime
 import os
 import sys
 import signal
@@ -27,6 +26,10 @@ import string
 import random
 import yaml
 
+from heron.common.src.python.utils import log
+
+Log = log.Log
+
 def print_usage():
   print (
       "./heron-executor <shardid> <topname> <topid> <topdefnfile> "
@@ -37,11 +40,6 @@ def print_usage():
       " <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>"
       " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file> "
       " <scheduler_classpath> <scheduler_port> <python_instance_binary>")
-
-def do_print(statement):
-  timestr = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
-  print "%s: %s" % (timestr, statement)
-  sys.stdout.flush()
 
 def extract_triplets(s):
   """
@@ -99,7 +97,7 @@ def atomic_write_file(path, content):
 
 def log_pid_for_process(process_name, pid):
   filename = get_process_pid_filename(process_name)
-  do_print('Logging pid %d to file %s' %(pid, filename))
+  Log.info('Logging pid %d to file %s' %(pid, filename))
   atomic_write_file(filename, str(pid))
 
 class ProcessInfo(object):
@@ -289,7 +287,7 @@ class HeronExecutor(object):
     for (instance_id, component_name, global_task_id, component_index) in instance_info:
       total_jvm_size = int(self.component_rammap[component_name] / (1024 * 1024))
       heap_size_mb = total_jvm_size - code_cache_size_mb - perm_gen_size_mb
-      do_print("component name: %s, ram request: %d, total jvm size: %dM, "
+      Log.info("component name: %s, ram request: %d, total jvm size: %dM, "
                "cache size: %dM, perm size: %dM"
                % (component_name, self.component_rammap[component_name],
                   total_jvm_size, code_cache_size_mb, perm_gen_size_mb))
@@ -342,7 +340,7 @@ class HeronExecutor(object):
     # TODO: currently ignoring ramsize, heap, etc.
     retval = {}
     for (instance_id, component_name, global_task_id, component_index) in instance_info:
-      do_print("Python instance %s component: %s" %(instance_id, component_name))
+      Log.info("Python instance %s component: %s" %(instance_id, component_name))
       instance_cmd = [self.python_instance_binary,
                       self.topology_name,
                       self.topology_id,
@@ -429,17 +427,17 @@ class HeronExecutor(object):
     ''' Wait for the termination of a process and log its stdout & stderr '''
     (process_stdout, process_stderr) = process.communicate()
     if process_stdout:
-      do_print("%s stdout: %s" %(name, process_stdout))
+      Log.info("%s stdout: %s" %(name, process_stdout))
     if process_stderr:
-      do_print("%s stderr: %s" %(name, process_stderr))
+      Log.info("%s stderr: %s" %(name, process_stderr))
 
   def _run_process(self, name, cmd, env_to_exec=None):
-    do_print("Running %s process as %s" % (name, ' '.join(cmd)))
+    Log.info("Running %s process as %s" % (name, ' '.join(cmd)))
     return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                             env=env_to_exec)
 
   def _run_blocking_process(self, cmd, is_shell, env_to_exec=None):
-    do_print("Running blocking process as %s" % cmd)
+    Log.info("Running blocking process as %s" % cmd)
     process = subprocess.Popen(cmd, shell=is_shell, stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE, env=env_to_exec)
 
@@ -455,7 +453,7 @@ class HeronExecutor(object):
       for process_info in self.processes_to_monitor.values():
         if process_info.name == command_name:
           del self.processes_to_monitor[process_info.pid]
-          do_print("Killing %s process with pid %s: %s" %
+          Log.info("Killing %s process with pid %s: %s" %
                    (process_info.name, process_info.pid, ' '.join(command)))
           process_info.process.kill()
 
@@ -484,7 +482,7 @@ class HeronExecutor(object):
           old_process_info = self.processes_to_monitor[pid]
           name = old_process_info.name
           command = old_process_info.command
-          do_print("%s (pid=%s) exited with status %d. command=%s" % (name, pid, status, command))
+          Log.info("%s (pid=%s) exited with status %d. command=%s" % (name, pid, status, command))
           # Log the stdout & stderr of the failed process
           self._wait_process_std_out_err(name, old_process_info.process)
 
@@ -492,7 +490,7 @@ class HeronExecutor(object):
           if os.path.isfile("core.%d" % pid):
             os.system("chmod a+r core.%d" % pid)
           if old_process_info.attempts >= self.max_runs:
-            do_print("%s exited too many times" % name)
+            Log.info("%s exited too many times" % name)
             sys.exit(1)
           time.sleep(self.interval_between_runs)
           p = self._run_process(name, command)
@@ -548,15 +546,15 @@ class HeronExecutor(object):
     commands_to_kill, commands_to_keep, commands_to_start = \
         self.get_command_changes(current_commands, updated_commands)
 
-    do_print("current commands: %s" % sorted(current_commands.keys()))
-    do_print("new commands    : %s" % sorted(updated_commands.keys()))
-    do_print("commands_to_kill: %s" % sorted(commands_to_kill.keys()))
-    do_print("commands_to_keep: %s" % sorted(commands_to_keep.keys()))
-    do_print("commands_to_start: %s" % sorted(commands_to_start.keys()))
+    Log.info("current commands: %s" % sorted(current_commands.keys()))
+    Log.info("new commands    : %s" % sorted(updated_commands.keys()))
+    Log.info("commands_to_kill: %s" % sorted(commands_to_kill.keys()))
+    Log.info("commands_to_keep: %s" % sorted(commands_to_keep.keys()))
+    Log.info("commands_to_start: %s" % sorted(commands_to_start.keys()))
 
     self._kill_processes(commands_to_kill)
     self._start_processes(commands_to_start)
-    do_print("Launch complete - processes killed=%s kept=%s started=%s monitored=%s" %
+    Log.info("Launch complete - processes killed=%s kept=%s started=%s monitored=%s" %
              (len(commands_to_kill), len(commands_to_keep),
               len(commands_to_start), len(self.processes_to_monitor)))
 
@@ -570,7 +568,7 @@ class HeronExecutor(object):
 
     for command in commands:
       if self._run_blocking_process(command, True, self.shell_env) != 0:
-        do_print("Failed to run command: %s. Exiting" % command)
+        Log.info("Failed to run command: %s. Exiting" % command)
         sys.exit(1)
 
 def main():
@@ -600,16 +598,15 @@ def signal_handler(signal_to_handle, frame):
 def setup():
   # Redirect stdout and stderr to files in append mode
   # The filename format is heron-executor.stdxxx
-  sys.stdout = open('heron-executor.stdout', 'a')
-  sys.stderr = open('heron-executor.stderr', 'a')
+  log.configure(logfile='heron-executor.stdout', with_time=True)
 
-  do_print('Set up process group; executor becomes leader')
+  Log.info('Set up process group; executor becomes leader')
   os.setpgrp() # create new process group, become its leader
 
-  do_print('Register the SIGTERM signal handler')
+  Log.info('Register the SIGTERM signal handler')
   signal.signal(signal.SIGTERM, signal_handler)
 
-  do_print('Register the atexit clean up')
+  Log.info('Register the atexit clean up')
   atexit.register(cleanup)
 
 def cleanup():
@@ -617,7 +614,7 @@ def cleanup():
   Do cleanup inside this method, including:
   1. Terminate all children processes
   """
-  do_print('Executor terminated; exiting all process in executor.')
+  Log.info('Executor terminated; exiting all process in executor.')
   # We would not wait or check whether process spawned dead or not
   os.killpg(0, signal.SIGTERM)
 
