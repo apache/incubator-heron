@@ -67,7 +67,7 @@ class BaseBolt(BaseComponent):
     :type optional_outputs: list of (str or Stream) or tuple of (str or Stream)
     :param optional_outputs: Additional output fields for this bolt. These fields are added to
                              existing ``outputs`` class attributes of your bolt. This is an optional
-                             argument, and exists only for su orting dynamic output field
+                             argument, and exists only for supporting dynamic output field
                              declaration.
     """
     python_class_path = "%s.%s" % (cls.__module__, cls.__name__)
