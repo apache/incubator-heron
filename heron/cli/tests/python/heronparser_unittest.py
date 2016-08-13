@@ -134,8 +134,6 @@ class HeronParserTest(unittest.TestCase):
     args, _ = parser.parse_known_args(["activate", "devcluster/ads/PROD",
                                        "12313", "--config-property", "a=b"])
     namespace = vars(args)
-    with open('/Users/rli/a.txt', 'w') as f:
-      f.write(str(namespace))
     self.assertEqual(['a=b', 'e=f', 'ooo=ppp', 'hi=wee', 'foo=bar'], args.config_property)
     hr_argparser.HeronArgumentParser.clear()
 
