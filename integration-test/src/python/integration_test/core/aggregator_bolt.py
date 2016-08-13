@@ -17,8 +17,8 @@ import json
 from urlparse import urlparse
 
 from heron.common.src.python.utils.log import Log
+from ..core import constants as integ_constants
 from .terminal_bolt import TerminalBolt
-from . import constants as integ_constants
 
 class AggregatorBolt(TerminalBolt):
   """Aggregator Bolt: aggregates the result of integration tests and posts it to the server"""

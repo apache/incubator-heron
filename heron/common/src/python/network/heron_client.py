@@ -60,6 +60,9 @@ class HeronClient(asyncore.dispatcher):
     self.total_bytes_received = 0
     self.total_pkt_received = 0
 
+    # for compatibility with 2.7.3
+    self._connecting = False
+
     Log.debug("Initializing %s with endpoint: %s, \nsocket_map: %s, \nsocket_options: %s"
               % (self._get_classname(), str(self.endpoint),
                  str(socket_map), str(self.socket_options)))
@@ -72,6 +75,7 @@ class HeronClient(asyncore.dispatcher):
   # called when connect is ready
   def handle_connect(self):
     Log.info("Connected to %s:%d" % (self.hostname, self.port))
+    self._connecting = False
     self.on_connect(StatusCode.OK)
 
   # called when close is ready
@@ -91,6 +95,7 @@ class HeronClient(asyncore.dispatcher):
     self.response_message_map = dict()
     self.context_map = dict()
     self.incomplete_pkt = None
+    self._connecting = False
 
   # read bytes stream from socket and convert them into a list of IncomingPacket
   def handle_read(self):
@@ -157,7 +162,7 @@ class HeronClient(asyncore.dispatcher):
     self.total_pkt_written += num_pkt_written
 
   def writable(self):
-    if self.connecting:
+    if self._connecting:
       return True
     return len(self.out_buffer) != 0
 
@@ -176,6 +181,7 @@ class HeronClient(asyncore.dispatcher):
     self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
 
     # when ready, handle_connect is called
+    self._connecting = True
     self.connect(self.endpoint)
 
   def stop(self):
@@ -194,7 +200,6 @@ class HeronClient(asyncore.dispatcher):
 
   def send_request(self, request, context, response_type, timeout_sec):
     """Sends a request message (REQID is non-zero)"""
-    # TODO: send request and implement timeout handler
     # generates a unique request id
     reqid = REQID.generate()
     Log.debug("%s: In send_request() with REQID: %s" % (self._get_classname(), str(reqid)))
@@ -231,7 +236,7 @@ class HeronClient(asyncore.dispatcher):
     Log.error("Uncaptured python exception, closing channel %s (%s:%s %s)" %
               (self_msg, t, v, tbinfo))
 
-    if self.connecting:
+    if self._connecting:
       # Error when trying to connect
       # first cleanup by handle_close(), and tells a subclass about this error.
       # the subclass can then call start_connect() again, if appropriate

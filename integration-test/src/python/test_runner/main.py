@@ -13,9 +13,9 @@ from httplib import *
 # The location of default configure file
 DEFAULT_TEST_CONF_FILE = "integration-test/src/python/test_runner/resources/test.conf"
 
-RETRY_ATTEMPTS = 15
+RETRY_ATTEMPTS = 25
 #seconds
-RETRY_INTERVAL = 30
+RETRY_INTERVAL = 10
 
 def runTest(topologyName, classPath, expectedResultFilePath, params):
   ''' Runs the test for one topology '''

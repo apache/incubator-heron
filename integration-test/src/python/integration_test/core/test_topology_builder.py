@@ -15,10 +15,10 @@
 import copy
 from heron.streamparse.src.python import Stream, Grouping, constants
 from heron.streamparse.src.python.topology import TopologyBuilder, Topology, TopologyType
+from ..core import constants as integ_const
 from .aggregator_bolt import AggregatorBolt
 from .integration_test_spout import IntegrationTestSpout
 from .integration_test_bolt import IntegrationTestBolt
-from . import constants as integ_const
 
 class TestTopologyBuilder(TopologyBuilder):
   """Topology Builder for integration tests
