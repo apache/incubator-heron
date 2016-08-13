@@ -19,8 +19,8 @@ from heron.streamparse.src.python import Bolt, Stream
 from heron.streamparse.src.python.component import HeronComponentSpec
 import heron.common.src.python.pex_loader as pex_loader
 
+from ..core import constants as integ_const
 from .batch_bolt import BatchBolt
-from . import constants as integ_const
 
 # pylint: disable=missing-docstring
 class IntegrationTestBolt(Bolt):

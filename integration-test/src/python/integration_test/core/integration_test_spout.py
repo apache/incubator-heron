@@ -18,7 +18,7 @@ from heron.streamparse.src.python import Spout, Stream
 from heron.streamparse.src.python.component import HeronComponentSpec
 import heron.common.src.python.pex_loader as pex_loader
 
-from . import constants as integ_const
+from ..core import constants as integ_const
 
 class IntegrationTestSpout(Spout):
   """Base spout for integration test
