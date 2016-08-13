@@ -10,6 +10,12 @@ pex_library(
   ],
 )
 
+pex_library(
+  name = "pyheron_example_pkg",
+  srcs = glob(['**/*.py']),
+  deps = ['//heron/streamparse/src/python:pyheron_lib']
+)
+
 # with main method
 pex_binary(
   name = "word_count",
