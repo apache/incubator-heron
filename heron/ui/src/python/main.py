@@ -136,7 +136,11 @@ def main():
   # log additional information
   command_line_args = vars(parsed_args)
 
-  address = '0.0.0.0' if command_line_args['address'] is None else command_line_args['address']
+  address = '0.0.0.0'
+  if command_line_args['address']:
+    address = command_line_args['address']
+  else:
+    Log.warn("Bindings wildcard by default")
   Log.info("Listening at http://%s:%d", address, command_line_args['port'])
   Log.info("Using tracker url: %s", command_line_args['tracker_url'])
 
