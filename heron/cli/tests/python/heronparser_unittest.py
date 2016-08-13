@@ -56,7 +56,12 @@ class HeronParserTest(unittest.TestCase):
     args, _ = parser.parse_known_args(["submit", "local", "~/.heron/examples/heron-examples.jar",
                                        "com.twitter.heron.examples.ExclamationTopology",
                                        "ExclamationTopology"])
-    self.assertEqual('~/.heron/examples/heron-examples.jar', args.__dict__['topology-file-name'])
+
+    namespace = vars(args)
+    self.assertEqual('submit', namespace['subcommand'])
+    self.assertEqual('local', namespace['cluster/[role]/[env]'])
+    self.assertEqual('~/.heron/examples/heron-examples.jar', namespace['topology-file-name'])
+    self.assertEqual('com.twitter.heron.examples.ExclamationTopology', namespace['topology-class-name'])
 
 
   def test_parser_commandline_positional_withrc(self):
@@ -79,7 +84,8 @@ class HeronParserTest(unittest.TestCase):
     args, _ = parser.parse_known_args(["submit", "local", "~/.heron/examples/heron-examples.jar",
                                        "com.twitter.heron.examples.ExclamationTopology",
                                        "ExclamationTopology"])
-    self.assertEqual('True', args.__dict__['verbose'])
+    namespace = vars(args)
+    self.assertEqual('True', namespace['verbose'])
     hr_argparser.HeronArgumentParser.clear()
 
   def test_parser_commandline_positional_error(self):
@@ -126,9 +132,9 @@ class HeronParserTest(unittest.TestCase):
         metavar='<command> <options>')
     activate.create_parser(subparsers)
     args, _ = parser.parse_known_args(["activate", "devcluster/ads/PROD",
-                                       "12313", "--config-property", "this-is-it"])
-
-    self.assertEqual('this-is-it', args.config_property)
+                                       "12313", "--config-property", "a=b"])
+    namespace = vars(args)
+    self.assertEqual(['a=b', 'e=f', 'ooo=ppp', 'hi=wee', 'foo=bar'], args.config_property)
     hr_argparser.HeronArgumentParser.clear()
 
   def test_parser_rolecmdspecific(self):
@@ -149,7 +155,7 @@ class HeronParserTest(unittest.TestCase):
     activate.create_parser(subparsers)
     args, _ = parser.parse_known_args(["activate", "devcluster/ads/PROD",
                                        "12313"])
-    self.assertEqual('test-cmd-activate-role', args.config_property)
+    self.assertEqual(['e=f', 'ooo=ppp', 'hi=wee', 'foo=bar'], args.config_property)
     hr_argparser.HeronArgumentParser.clear()
 
   def test_parser_norcfile(self):
@@ -170,15 +176,10 @@ class HeronParserTest(unittest.TestCase):
         metavar='<command> <options>')
     activate.create_parser(subparsers)
     args, _ = parser.parse_known_args(["activate", "devcluster/ads/PROD",
-                                       "12313", "--config-property", "this-is-it"])
+                                       "12313", "--config-property", "a=b"])
 
-    self.assertEqual('this-is-it', args.config_property)
+    self.assertEqual(['a=b'], args.config_property)
     hr_argparser.HeronArgumentParser.clear()
 
   def tearDown(self):
     hr_argparser.HeronArgumentParser.clear()
-
-
-if __name__ == '__main__':
-  suite = unittest.TestLoader().loadTestsFromTestCase(HeronParserTest)
-  unittest.TextTestRunner(verbosity=2).run(suite)

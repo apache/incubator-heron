@@ -1,16 +1,16 @@
 # validate with http://pythex.org/
 #global
-*:*:* --config-property test-hello-global
+*:*:* --config-property foo=bar
 # app - global
-heron:*:* --config-property  command-global
+heron:*:* --config-property hi=wee
 
 #command specific
-heron:activate:* --config-property test-cmd-activate-*                  
+heron:activate:* --config-property ooo=ppp
 
 #role and command specific
 
-heron:submit:devcluster/ads/PROD --config-property test-cmd-submit-role
-heron:activate:devcluster/ads/PROD --config-property test-cmd-activate-role
+heron:submit:devcluster/ads/PROD --config-property a=b --config-property c=d
+heron:activate:devcluster/ads/PROD --config-property e=f
 heron:submit:local --verbose True
 
 #error for submit parser with ilocal role
