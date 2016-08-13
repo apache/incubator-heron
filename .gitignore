@@ -54,6 +54,9 @@ tools/jdk/ijar
 *.iso
 *.zip
 
+# Pyheron's generated egg
+pyheron-*.egg
+
 # Logs and databases #
 ######################
 *.log
