@@ -17,7 +17,6 @@
 import logging
 import os
 import signal
-import socket
 
 import tornado.ioloop
 import tornado.options
@@ -142,7 +141,9 @@ def main():
   Log.info("Using tracker url: %s", command_line_args['tracker_url'])
 
   # pass the options to tornado and start the ui server
-  define_options(command_line_args['address'], command_line_args['port'], command_line_args['tracker_url'])
+  define_options(command_line_args['address'],
+                 command_line_args['port'],
+                 command_line_args['tracker_url'])
   http_server = tornado.httpserver.HTTPServer(Application())
   http_server.listen(command_line_args['port'], address=command_line_args['address'])
 
