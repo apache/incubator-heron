@@ -20,10 +20,10 @@ import os
 import shutil
 import sys
 import time
-
+import traceback
 
 import heron.cli.src.python.help as cli_help
-import heron.cli.src.python.args as parse
+import heron.common.src.python.heronparser as hrc_parse
 import heron.cli.src.python.activate as activate
 import heron.cli.src.python.deactivate as deactivate
 import heron.cli.src.python.kill as kill
@@ -32,7 +32,6 @@ import heron.cli.src.python.submit as submit
 import heron.cli.src.python.update as update
 import heron.common.src.python.utils.config as config
 import heron.cli.src.python.version as version
-
 import heron.common.src.python.utils.log as log
 
 Log = log.Log
@@ -63,29 +62,19 @@ class _HelpAction(argparse._HelpAction):
         print subparser.format_help()
         return
 
-
-class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
-  ''' SubcommandHelpFormatter '''
-
-  def _format_action(self, action):
-    # pylint: disable=bad-super-call
-    parts = super(argparse.RawDescriptionHelpFormatter, self)._format_action(action)
-    if action.nargs == argparse.PARSER:
-      parts = "\n".join(parts.split("\n")[1:])
-    return parts
-
-
 ################################################################################
 def create_parser():
   '''
   Main parser
   :return:
   '''
-  parser = argparse.ArgumentParser(
+  #parser = argparse.ArgumentParser(
+  parser = hrc_parse.HeronArgumentParser(
       prog='heron',
       epilog=HELP_EPILOG,
-      formatter_class=SubcommandHelpFormatter,
-      add_help=False)
+      formatter_class=config.SubcommandHelpFormatter,
+      add_help=False,
+      fromfile_prefix_chars='@')
 
   subparsers = parser.add_subparsers(
       title="Available commands",
@@ -174,7 +163,7 @@ def extract_common_args(command, parser, cl_args):
   cluster = config.get_heron_cluster(cluster_role_env)
   config_path = config.get_heron_cluster_conf_dir(cluster, config_path)
   if not os.path.isdir(config_path):
-    Log.error("Config path cluster directory does not exist: %s" % config_path)
+    Log.error("Config path cluster directory does not exist: %s", config_path)
     return dict()
 
   new_cl_args = dict()
@@ -186,7 +175,7 @@ def extract_common_args(command, parser, cl_args):
     new_cl_args['config_path'] = config_path
     new_cl_args['override_config_file'] = override_config_file
   except Exception as ex:
-    Log.error("Argument cluster/[role]/[env] is not correct: %s" % str(ex))
+    Log.error("Argument cluster/[role]/[env] is not correct: %s", str(ex))
     return dict()
 
   cl_args.update(new_cl_args)
@@ -211,10 +200,16 @@ def main():
     return 0
 
   # insert the boolean values for some of the options
-  sys.argv = parse.insert_bool_values(sys.argv)
+  sys.argv = config.insert_bool_values(sys.argv)
 
-  # parse the args
-  args, unknown_args = parser.parse_known_args()
+  try:
+    # parse the args
+    args, unknown_args = parser.parse_known_args()
+  except ValueError as ex:
+    Log.error("Error while parsing arguments: %s", str(ex))
+    Log.debug(traceback.format_exc())
+    sys.exit(1)
+
   command_line_args = vars(args)
 
   # command to be execute
@@ -243,7 +238,7 @@ def main():
 
   if command not in ('help', 'version'):
     sys.stdout.flush()
-    Log.info('Elapsed time: %.3fs.' % (end - start))
+    Log.info('Elapsed time: %.3fs.', (end - start))
 
   return 0 if retcode else 1
 

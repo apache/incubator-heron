@@ -48,7 +48,7 @@ public final class Utils {
 
   public static Map<String, String> readCommandLineOpts() {
     Map<String, String> ret = new HashMap<>();
-    String commandOptions = System.getProperty("heron.options");
+    String commandOptions = System.getenv("HERON_OPTIONS");
     if (commandOptions != null) {
       commandOptions = commandOptions.replaceAll("%%%%", " ");
       String[] configs = commandOptions.split(",");

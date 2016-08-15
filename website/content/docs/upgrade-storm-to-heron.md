@@ -23,18 +23,26 @@ Once the script is downloaded, run it while setting the `--user` and
 `--maven` flags:
 
 ```bash
-$ chmod +x heron-api-install-0.13.2-PLATFORM.sh
-$ ./heron-api-install-0.13.2-PLATFORM.sh --user --maven
+$ chmod +x heron-api-install-0.14.2-PLATFORM.sh
+$ ./heron-api-install-0.14.2-PLATFORM.sh --user --maven
 Heron API installer
 -------------------
 
-# Binary package at HEAD (@)
-   - [Commit](https://github.com/twitter/heron/commit/)
 Installing jars to local maven repo.
+tar xfz /var/folders/8r/x6dwcnkn4p9_rgwvq_3jg6y00000gn/T/heron.XXXX.EnJDpZNb/heron-api.tar.gz
+-C /var/folders/8r/x6dwcnkn4p9_rgwvq_3jg6y00000gn/T/heron.XXXX.EnJDpZNb
 
 Heron API is now installed!
 
-See https://twitter.github.io/heron/docs/getting-started.html to start a new project!
+See http://heronstreaming.io/docs/getting-started for how to use Heron.
+
+heron.build.version : '0.14.2'
+heron.build.time : Sat Aug  6 12:35:47 PDT 2016
+heron.build.timestamp : 1470512147000
+heron.build.host : ${HOSTNAME}
+heron.build.user : ${USERNAME}
+heron.build.git.revision : 26bb4096130a05f9799510bbce6c37a69a7342ef
+heron.build.git.status : Clean
 ```
 
 The Heron API will now be installed in your local [Maven

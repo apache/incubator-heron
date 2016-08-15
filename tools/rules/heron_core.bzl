@@ -10,6 +10,7 @@ def heron_core_bin_files():
         "//heron/shell/src/python:heron-shell",
         "//heron/stmgr/src/cpp:heron-stmgr",
         "//heron/tmaster/src/cpp:heron-tmaster",
+        "//heron/instance/src/python/instance:heron-python-instance",
     ]
 
 def heron_core_conf_files():
@@ -32,6 +33,7 @@ def heron_core_lib_scheduler_files():
         "//heron/schedulers/src/java:heron-local-scheduler",
         "//heron/schedulers/src/java:heron-slurm-scheduler",
         "//heron/schedulers/src/java:heron-mesos-scheduler",
+        "//heron/schedulers/src/java:heron-marathon-scheduler",
     ]
 
 def heron_core_lib_packing_files():

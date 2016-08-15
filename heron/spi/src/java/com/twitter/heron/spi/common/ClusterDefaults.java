@@ -78,6 +78,7 @@ public final class ClusterDefaults {
     cb.put(Keys.stmgrSandboxBinary(), Defaults.stmgrSandboxBinary());
     cb.put(Keys.tmasterSandboxBinary(), Defaults.tmasterSandboxBinary());
     cb.put(Keys.shellSandboxBinary(), Defaults.shellSandboxBinary());
+    cb.put(Keys.pythonInstanceSandboxBinary(), Defaults.pythonInstanceSandboxBinary());
     return cb.build();
   }
 

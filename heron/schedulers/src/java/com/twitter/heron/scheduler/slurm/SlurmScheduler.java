@@ -125,9 +125,9 @@ public class SlurmScheduler implements IScheduler {
   }
 
   protected String[] getExecutorCommand(PackingPlan packing) {
-    List<Integer> freePorts = new ArrayList<>(SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR);
+    List<String> freePorts = new ArrayList<>(SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR);
     for (int i = 0; i < SchedulerUtils.PORTS_REQUIRED_FOR_EXECUTOR; i++) {
-      freePorts.add(SysUtils.getFreePort());
+      freePorts.add(Integer.toString(SysUtils.getFreePort()));
     }
 
     String[] executorCmd = SchedulerUtils.executorCommandArgs(this.config, this.runtime, freePorts);
