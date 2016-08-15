@@ -22,10 +22,12 @@ package org.apache.storm.task;
 // import org.apache.storm.generated.Grouping;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.storm.generated.GlobalStreamId;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.hooks.ITaskHook;
 import org.apache.storm.hooks.ITaskHookDelegate;
@@ -36,6 +38,8 @@ import org.apache.storm.metric.api.IReducer;
 import org.apache.storm.metric.api.MetricDelegate;
 import org.apache.storm.metric.api.ReducedMetric;
 import org.apache.storm.tuple.Fields;
+
+import com.twitter.heron.api.generated.TopologyAPI;
 
 // import org.apache.storm.state.ISubscribedState;
 
@@ -186,6 +190,14 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
         return getSources(getThisComponentId());
     }
   */
+  public Set<GlobalStreamId> getThisSourceIds() {
+    Set<TopologyAPI.StreamId> streamIds = delegate.getThisSources().keySet();
+    Set<GlobalStreamId> newStreamIds = new HashSet<>();
+    for (TopologyAPI.StreamId streamId: streamIds) {
+      newStreamIds.add(new GlobalStreamId(streamId.getComponentName(), streamId.getId()));
+    }
+    return newStreamIds;
+  }
 
   /*
    * Gets information about who is consuming the outputs of this component, and how.
