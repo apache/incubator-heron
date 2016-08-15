@@ -85,6 +85,7 @@ def create_parser():
   kill.create_parser(subparsers)
   restart.create_parser(subparsers)
   submit.create_parser(subparsers)
+  update.create_parser(subparsers)
   version.create_parser(subparsers)
 
   return parser
@@ -100,30 +101,21 @@ def run(command, parser, command_args, unknown_args):
   :param unknown_args:
   :return:
   '''
-  status = True
-  if command == 'activate':
-    status = activate.run(command, parser, command_args, unknown_args)
+  runners = {
+      'activate':activate,
+      'deactivate':deactivate,
+      'kill':kill,
+      'restart':restart,
+      'submit':submit,
+      'help':cli_help,
+      'version':version,
+  }
 
-  elif command == 'deactivate':
-    status = deactivate.run(command, parser, command_args, unknown_args)
-
-  elif command == 'kill':
-    status = kill.run(command, parser, command_args, unknown_args)
-
-  elif command == 'restart':
-    status = restart.run(command, parser, command_args, unknown_args)
-
-  elif command == 'submit':
-    status = submit.run(command, parser, command_args, unknown_args)
-
-  elif command == 'help':
-    status = cli_help.run(command, parser, command_args, unknown_args)
-
-  elif command == 'version':
-    status = version.run(command, parser, command_args, unknown_args)
-
-  return status
-
+  if command in runners.keys():
+    return runners[command].run(command, parser, command_args, unknown_args)
+  else:
+    Log.error('Unknown subcommand: %s' % command)
+    return 1
 
 def cleanup(files):
   '''
