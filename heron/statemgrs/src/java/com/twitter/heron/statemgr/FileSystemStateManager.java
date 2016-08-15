@@ -210,15 +210,14 @@ public abstract class FileSystemStateManager implements IStateManager {
 
     initialize(config);
 
-    PackingPlans.PackingPlan existingPackingPlan = null;
     if (isTopologyRunning(topologyName).get()) {
       print("==> Topology %s found", topologyName);
+      print("==> Topology %s:", getTopology(null, topologyName).get());
       print("==> ExecutionState:\n%s", getExecutionState(null, topologyName).get());
       print("==> SchedulerLocation:\n%s",
           getSchedulerLocation(null, topologyName).get());
       print("==> TMasterLocation:\n%s", getTMasterLocation(null, topologyName).get());
-      existingPackingPlan = getPackingPlan(null, topologyName).get();
-      print("==> PackingPlan:\n%s", existingPackingPlan);
+      print("==> PackingPlan:\n%s", getPackingPlan(null, topologyName).get());
       print("==> PhysicalPlan:\n%s", getPhysicalPlan(null, topologyName).get());
     } else {
       print("==> Topology %s not found under %s",
