@@ -1,4 +1,4 @@
-# Copyright 2016 Twitter. All rights reserved.
+# copyright 2016 twitter. all rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,13 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-''' consts.py '''
+'''stream aggregator'''
+from collections import Counter
+from heron.streamparse.src.python import Bolt
 
-# default parameter - address for the web to ui to listen on
-DEFAULT_ADDRESS = "0.0.0.0"
+# pylint: disable=unused-argument
+class StreamAggregateBolt(Bolt):
+  """Stream counts are aggregated"""
+  def initialize(self, config, context):
+    self.stream_counter = Counter()
 
-# default parameter - port for the web to ui to listen on
-DEFAULT_PORT = 8889
+  def process(self, tup):
+    self.stream_counter[tup.stream] += 1
 
-# default parameter - url to connect to heron tracker
-DEFAULT_TRACKER_URL = "http://localhost:8888"
+    if self.is_tick(tup):
+      self.log("Got tick tuple!")
+      self.log("Current stream counter: %s" % str(self.stream_counter))

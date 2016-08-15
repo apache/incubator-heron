@@ -1,4 +1,4 @@
-# Copyright 2016 Twitter. All rights reserved.
+# copyright 2016 twitter. all rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,13 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-''' consts.py '''
+'''module for example bolt: Consume Bolt'''
+from heron.streamparse.src.python import Bolt
 
-# default parameter - address for the web to ui to listen on
-DEFAULT_ADDRESS = "0.0.0.0"
+# pylint: disable=unused-argument
+class ConsumeBolt(Bolt):
+  def initialize(self, config, context):
+    self.logger.info("In prepare() of ConsumerBolt")
+    self.total = 0
 
-# default parameter - port for the web to ui to listen on
-DEFAULT_PORT = 8889
-
-# default parameter - url to connect to heron tracker
-DEFAULT_TRACKER_URL = "http://localhost:8888"
+  def process(self, tup):
+    if self.is_tick(tup):
+      self.log("Got tick tuple!")
+      self.log("Total received data tuple: %d" % self.total)
+    else:
+      self.total += 1
