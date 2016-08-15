@@ -17,6 +17,7 @@ package com.twitter.heron.scheduler.local;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +42,7 @@ import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.SchedulerUtils;
 import com.twitter.heron.spi.utils.ShellUtils;
 
-public class LocalScheduler implements IScheduler {
+public class LocalScheduler implements IScheduler, ScalableScheduler {
   private static final Logger LOG = Logger.getLogger(LocalScheduler.class.getName());
   // executor service for monitoring all the containers
   private final ExecutorService monitorService = Executors.newCachedThreadPool();
@@ -58,7 +59,7 @@ public class LocalScheduler implements IScheduler {
     this.config = mConfig;
     this.runtime = mRuntime;
     this.updateTopologyManager =
-        new UpdateTopologyManager(runtime, Optional.<ScalableScheduler>absent());
+        new UpdateTopologyManager(runtime, Optional.<ScalableScheduler>of(this));
   }
 
   @Override
@@ -113,6 +114,9 @@ public class LocalScheduler implements IScheduler {
           if (isTopologyKilled) {
             LOG.info("Topology is killed. Not to start new executors.");
             return;
+          } else if (!processToContainer.containsKey(containerExecutor)) {
+            LOG.log(Level.INFO, "Container {0} is killed. No need to relaunch.", container);
+            return;
           }
           LOG.log(Level.INFO, "Trying to restart container {0}", container);
           // restart the container
@@ -148,9 +152,11 @@ public class LocalScheduler implements IScheduler {
     LOG.info("Starting to deploy topology: " + LocalContext.topologyName(config));
     LOG.info("# of containers: " + numContainers);
 
-    // for each container, run its own executor
-    for (int i = 0; i < numContainers; i++) {
-      startExecutor(i);
+    synchronized (processToContainer) {
+      // for each container, run its own executor
+      for (int i = 0; i < numContainers; i++) {
+        startExecutor(i);
+      }
     }
 
     LOG.info("Executor for each container have been started.");
@@ -176,20 +182,22 @@ public class LocalScheduler implements IScheduler {
     // set the flag that the topology being killed
     isTopologyKilled = true;
 
-    // destroy/kill the process for each container
-    for (Process p : processToContainer.keySet()) {
+    synchronized (processToContainer) {
+      // destroy/kill the process for each container
+      for (Process p : processToContainer.keySet()) {
 
-      // get the container index for the process
-      int index = processToContainer.get(p);
-      LOG.info("Killing executor for container: " + index);
+        // get the container index for the process
+        int index = processToContainer.get(p);
+        LOG.info("Killing executor for container: " + index);
 
-      // destroy the process
-      p.destroy();
-      LOG.info("Killed executor for container: " + index);
+        // destroy the process
+        p.destroy();
+        LOG.info("Killed executor for container: " + index);
+      }
+
+      // clear the mapping between process and container ids
+      processToContainer.clear();
     }
-
-    // clear the mapping between process and container ids
-    processToContainer.clear();
 
     return true;
   }
@@ -244,6 +252,51 @@ public class LocalScheduler implements IScheduler {
     }
     return true;
   }
+
+  @Override
+  public void addContainers(Integer count) {
+    synchronized (processToContainer) {
+      int activeContainerCount = processToContainer.size();
+
+      for (int i = 0; i < count; i++) {
+        // if number of active container is 2, then there is 1 TMaster container (id=0) and 1 worker
+        // (id = 1). Then the next container to be added will have id = 2, same as current container
+        // count
+        startExecutor(activeContainerCount + i);
+      }
+    }
+  }
+
+  @Override
+  public void removeContainers(Integer existingContainerCount, Integer count) {
+    LOG.log(Level.INFO, "Kill {0} of {1} containers", new Object[]{count, existingContainerCount});
+
+    synchronized (processToContainer) {
+      if (existingContainerCount != processToContainer.size()) {
+        LOG.log(Level.SEVERE, "Container count mismatch: expected {0} != active {1}",
+            new Object[]{existingContainerCount, processToContainer.size()});
+        throw new RuntimeException("Container count mismatch");
+      }
+
+      // Create a inverse map to be able to get process instance from container id
+      Map<Integer, Process> containerToProcessMap = new HashMap<>();
+      for (Map.Entry<Process, Integer> entry : processToContainer.entrySet()) {
+        containerToProcessMap.put(entry.getValue(), entry.getKey());
+      }
+
+      int containerIdToRemove = existingContainerCount - 1;
+      for (int countToRemove = count; countToRemove > 0; containerIdToRemove--, countToRemove--) {
+        Process process = containerToProcessMap.get(containerIdToRemove);
+        LOG.info("Killing executor for container: " + containerIdToRemove);
+
+        // remove the process so that it is not monitored and relaunched
+        processToContainer.remove(process);
+        process.destroy();
+        LOG.info("Killed executor for container: " + containerIdToRemove);
+      }
+    }
+  }
+
 
   boolean isTopologyKilled() {
     return isTopologyKilled;
