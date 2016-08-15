@@ -284,15 +284,15 @@ public class LocalScheduler implements IScheduler, ScalableScheduler {
         containerToProcessMap.put(entry.getValue(), entry.getKey());
       }
 
-      int containerToRemove = existingContainerCount - 1;
-      for (int countToRemove = count; countToRemove > 0; containerToRemove--, countToRemove--) {
-        Process process = containerToProcessMap.get(containerToRemove);
-        LOG.info("Killing executor for container: " + containerToRemove);
+      int containerIdToRemove = existingContainerCount - 1;
+      for (int countToRemove = count; countToRemove > 0; containerIdToRemove--, countToRemove--) {
+        Process process = containerToProcessMap.get(containerIdToRemove);
+        LOG.info("Killing executor for container: " + containerIdToRemove);
 
         // remove the process so that it is not monitored and relaunched
         processToContainer.remove(process);
         process.destroy();
-        LOG.info("Killed executor for container: " + containerToRemove);
+        LOG.info("Killed executor for container: " + containerIdToRemove);
       }
     }
   }
