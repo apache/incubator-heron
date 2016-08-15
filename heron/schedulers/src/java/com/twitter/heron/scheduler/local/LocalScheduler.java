@@ -152,9 +152,11 @@ public class LocalScheduler implements IScheduler, ScalableScheduler {
     LOG.info("Starting to deploy topology: " + LocalContext.topologyName(config));
     LOG.info("# of containers: " + numContainers);
 
-    // for each container, run its own executor
-    for (int i = 0; i < numContainers; i++) {
-      startExecutor(i);
+    synchronized (processToContainer) {
+      // for each container, run its own executor
+      for (int i = 0; i < numContainers; i++) {
+        startExecutor(i);
+      }
     }
 
     LOG.info("Executor for each container have been started.");
@@ -180,20 +182,22 @@ public class LocalScheduler implements IScheduler, ScalableScheduler {
     // set the flag that the topology being killed
     isTopologyKilled = true;
 
-    // destroy/kill the process for each container
-    for (Process p : processToContainer.keySet()) {
+    synchronized (processToContainer) {
+      // destroy/kill the process for each container
+      for (Process p : processToContainer.keySet()) {
 
-      // get the container index for the process
-      int index = processToContainer.get(p);
-      LOG.info("Killing executor for container: " + index);
+        // get the container index for the process
+        int index = processToContainer.get(p);
+        LOG.info("Killing executor for container: " + index);
 
-      // destroy the process
-      p.destroy();
-      LOG.info("Killed executor for container: " + index);
+        // destroy the process
+        p.destroy();
+        LOG.info("Killed executor for container: " + index);
+      }
+
+      // clear the mapping between process and container ids
+      processToContainer.clear();
     }
-
-    // clear the mapping between process and container ids
-    processToContainer.clear();
 
     return true;
   }
@@ -251,39 +255,45 @@ public class LocalScheduler implements IScheduler, ScalableScheduler {
 
   @Override
   public void addContainers(Integer count) {
-    int activeContainerCount = processToContainer.size();
+    synchronized (processToContainer) {
+      int activeContainerCount = processToContainer.size();
 
-    for (int i = 0; i < count; i++) {
-      // if number of active container is 2, then there is 1 TMaster container (id=0) and 1 worker
-      // (id = 1). Then the next container to be added will have id = 2, same as current container
-      // count
-      startExecutor(activeContainerCount + i);
+      for (int i = 0; i < count; i++) {
+        // if number of active container is 2, then there is 1 TMaster container (id=0) and 1 worker
+        // (id = 1). Then the next container to be added will have id = 2, same as current container
+        // count
+        startExecutor(activeContainerCount + i);
+      }
     }
   }
 
   @Override
   public void removeContainers(Integer existingContainerCount, Integer count) {
-    LOG.log(Level.INFO, "Kill {0} of {1} containers", new Object[] {count, existingContainerCount});
+    LOG.log(Level.INFO, "Kill {0} of {1} containers", new Object[]{count, existingContainerCount});
 
-    if (existingContainerCount != processToContainer.size()) {
-      LOG.log(Level.SEVERE, "Container count mismatch: expected {0} != active {1}",
-          new Object[]{existingContainerCount, processToContainer.size()});
-      throw new RuntimeException("Container count mismatch");
-    }
+    synchronized (processToContainer) {
+      if (existingContainerCount != processToContainer.size()) {
+        LOG.log(Level.SEVERE, "Container count mismatch: expected {0} != active {1}",
+            new Object[]{existingContainerCount, processToContainer.size()});
+        throw new RuntimeException("Container count mismatch");
+      }
 
-    Map<Integer, Process> containerToProcessMap = new HashMap<>();
-    for (Map.Entry<Process, Integer> entry : processToContainer.entrySet()) {
-      containerToProcessMap.put(entry.getValue(), entry.getKey());
-    }
+      // Create a inverse map to be able to get process instance from container id
+      Map<Integer, Process> containerToProcessMap = new HashMap<>();
+      for (Map.Entry<Process, Integer> entry : processToContainer.entrySet()) {
+        containerToProcessMap.put(entry.getValue(), entry.getKey());
+      }
 
-    for (int i = count, container = existingContainerCount - 1; i > 0; container--, i--) {
-      Process process = containerToProcessMap.get(container);
-      LOG.info("Killing executor for container: " + container);
+      int containerToRemove = existingContainerCount - 1;
+      for (int countToRemove = count; countToRemove > 0; containerToRemove--, countToRemove--) {
+        Process process = containerToProcessMap.get(containerToRemove);
+        LOG.info("Killing executor for container: " + containerToRemove);
 
-      // remove the process so that it is not monitored and relaunched
-      processToContainer.remove(process);
-      process.destroy();
-      LOG.info("Killed executor for container: " + container);
+        // remove the process so that it is not monitored and relaunched
+        processToContainer.remove(process);
+        process.destroy();
+        LOG.info("Killed executor for container: " + containerToRemove);
+      }
     }
   }
 
