@@ -65,7 +65,7 @@ public class ClusterConfigTest {
   public void testDefaultsFile() throws Exception {
     Config props = ClusterConfig.loadDefaultsConfig(Context.defaultsFile(basicConfig));
 
-    Assert.assertEquals(10, props.size());
+    Assert.assertEquals(11, props.size());
 
     Assert.assertEquals(
         "heron-executor",
@@ -85,6 +85,11 @@ public class ClusterConfigTest {
     Assert.assertEquals(
         "heron-shell",
         Context.shellSandboxBinary(props)
+    );
+
+    Assert.assertEquals(
+        "heron-python-instance",
+        Context.pythonInstanceSandboxBinary(props)
     );
 
     Assert.assertEquals(

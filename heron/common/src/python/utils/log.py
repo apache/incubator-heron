@@ -25,7 +25,7 @@ Log = logging.getLogger()
 # see time formatter documentation for more
 date_format = "%m/%d/%Y %H:%M:%S %z"
 
-def configure(level, logfile=None, with_time=False):
+def configure(level=logging.INFO, logfile=None, with_time=False):
   """ Configure logger which dumps log on terminal
 
   :param level: logging level: info, warning, verbose...
@@ -36,6 +36,7 @@ def configure(level, logfile=None, with_time=False):
   :rtype: None
   """
   Log.setLevel(level)
+
   # if logfile is specified, FileHandler is used
   if logfile is not None:
     if with_time:
@@ -65,6 +66,8 @@ def init_rotating_logger(level, logfile, max_files, max_bytes):
   It also makes sure that any StreamHandler is removed, so as to avoid stdout/stderr
   constipation issues
   """
+  logging.basicConfig()
+
   root_logger = logging.getLogger()
   log_format = "%(asctime)s:%(levelname)s:%(filename)s: %(message)s"
 

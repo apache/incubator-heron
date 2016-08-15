@@ -160,6 +160,7 @@ public class AuroraScheduler implements IScheduler, ScalableScheduler {
     Map<String, String> auroraProperties = new HashMap<>();
 
     TopologyAPI.Topology topology = Runtime.topology(runtime);
+
     // Align the cpu, ram, disk to the maximal one
     Resource containerResource = SchedulerUtils.getMaxRequiredResource(packing);
     // Update total topology resource requirement on Aurora clusters
@@ -181,18 +182,20 @@ public class AuroraScheduler implements IScheduler, ScalableScheduler {
     auroraProperties.put("INSTANCE_JVM_OPTS_IN_BASE64",
         formatJavaOpts(TopologyUtils.getInstanceJvmOptions(topology)));
     auroraProperties.put("TOPOLOGY_CLASSPATH",
-        TopologyUtils.makeClassPath(topology, Context.topologyJarFile(config)));
+        TopologyUtils.makeClassPath(topology, Context.topologyBinaryFile(config)));
 
     auroraProperties.put("SANDBOX_SYSTEM_YAML", Context.systemConfigSandboxFile(config));
     auroraProperties.put("COMPONENT_RAMMAP", Runtime.componentRamMap(runtime));
     auroraProperties.put("COMPONENT_JVM_OPTS_IN_BASE64",
         formatJavaOpts(TopologyUtils.getComponentJvmOptions(topology)));
     auroraProperties.put("TOPOLOGY_PACKAGE_TYPE", Context.topologyPackageType(config));
-    auroraProperties.put("TOPOLOGY_JAR_FILE",
-        FileUtils.getBaseName(Context.topologyJarFile(config)));
+    auroraProperties.put("TOPOLOGY_BINARY_FILE",
+        FileUtils.getBaseName(Context.topologyBinaryFile(config)));
     auroraProperties.put("HERON_SANDBOX_JAVA_HOME", Context.javaSandboxHome(config));
 
     auroraProperties.put("SANDBOX_SHELL_BINARY", Context.shellSandboxBinary(config));
+    auroraProperties.put("SANDBOX_PYTHON_INSTANCE_BINARY",
+        Context.pythonInstanceSandboxBinary(config));
 
     auroraProperties.put("CPUS_PER_CONTAINER", containerResource.cpu + "");
     auroraProperties.put("DISK_PER_CONTAINER", containerResource.disk + "");

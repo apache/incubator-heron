@@ -74,7 +74,7 @@ bazel_install() {
 
 build_heron() {
     pushd /tmp
-        wget http://mirror.sdunix.com/gnu/libtool//libtool-2.4.6.tar.gz
+        wget http://ftpmirror.gnu.org/libtool/libtool-2.4.6.tar.gz
         tar xf libtool*
         cd libtool-2.4.6
         sh configure --prefix /usr/local
@@ -131,7 +131,7 @@ echo "deb http://get.docker.com/ubuntu docker main" > /etc/apt/sources.list.d/do
 apt-get -qy update
 
 # install deps
-apt-get install -qy vim zip mc curl wget openjdk-7-jre scala git
+apt-get install -qy vim zip mc curl wget openjdk-7-jre scala git python-setuptools python-dev
 
 install_mesos $mode
 if [ $mode == "master" ]; then 
