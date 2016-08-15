@@ -35,7 +35,7 @@ class CountBolt(Bolt):
   def process(self, tup):
     if self.is_tick(tup):
       self.log("Got tick tuple!")
-      self.log("Current map: " + str(self.counter))
+      self.log("Current map: %s" % str(self.counter))
       return
     word = tup.values[0]
     self._increment(word, 10 if word == "heron" else 1)

@@ -27,8 +27,8 @@ class MultiStreamSpout(Spout):
 
     self.emit_count = 0
 
-    self.logger.info("Component-specific config: \n" + str(config))
-    self.logger.info("Context: \n" + str(context))
+    self.logger.info("Component-specific config: \n%s" % str(config))
+    self.logger.info("Context: \n%s" % str(context))
 
   def next_tuple(self):
     word = next(self.words)
@@ -36,6 +36,6 @@ class MultiStreamSpout(Spout):
     self.emit_count += 1
 
     if self.emit_count % 100000 == 0:
-      self.logger.info("Emitted " + str(self.emit_count))
+      self.logger.info("Emitted %s" % str(self.emit_count))
       self.logger.info("Emitting to error stream")
       self.emit(["test error message"], stream='error')
