@@ -85,7 +85,6 @@ def create_parser():
   kill.create_parser(subparsers)
   restart.create_parser(subparsers)
   submit.create_parser(subparsers)
-  update.create_parser(subparsers)
   version.create_parser(subparsers)
 
   return parser
