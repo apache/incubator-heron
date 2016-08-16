@@ -18,7 +18,6 @@ import json
 import os
 import re
 import sys
-import traceback
 import heron.common.src.python.utils.config as config
 from  heron.common.src.python.utils.log import Log
 ##########################################################################
@@ -182,18 +181,8 @@ class HeronArgumentParser(argparse.ArgumentParser):
   def parse_known_args(self, args=None, namespace=None):
     namespace, args = super(HeronArgumentParser,
                             self).parse_known_args(args, namespace)
-    dict_ns = namespace.__dict__
     positional_args_map = self.get_positional_args()
-    if self.prog == 'heron':
-      try:
-        for key in dict_ns:
-          val = dict_ns[key]
-          if val is not None and isinstance(val, list) and len(val) > 0:
-            dict_ns[key] = val[0]
-      except Exception:
-        Log.warn("heronrc: unable to clobber arguments (%s,%s ) ", namespace, args)
-        Log.debug(traceback.format_exc())
-    else:
+    if self.prog != 'heron':
       ## sub parser specific validation
       Log.debug('sub parser expansion  %s %s', self.prog, args)
       ## if the expanded args contains a optional equivalent of a positional argument

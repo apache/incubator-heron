@@ -16,10 +16,10 @@ import os
 import uuid
 
 from heron.common.src.python.utils.misc import default_serializer
+import heron.common.src.python.constants as constants
 from heron.proto import topology_pb2
 
 from .component import HeronComponentSpec
-from . import constants
 
 class TopologyType(type):
   """Metaclass to define a Heron topology in Python"""

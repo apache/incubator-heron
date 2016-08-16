@@ -13,6 +13,9 @@
 # limitations under the License.
 ''' consts.py '''
 
+# default parameter - address for the web to ui to listen on
+DEFAULT_ADDRESS = "0.0.0.0"
+
 # default parameter - port for the web to ui to listen on
 DEFAULT_PORT = 8889
 
