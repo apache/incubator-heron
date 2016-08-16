@@ -11,6 +11,9 @@ JAVADOC_OUTPUT_DIR=$HERON_ROOT_DIR/website/public/api
 JAVADOC_OUTPUT_LOCAL_DIR=$HERON_ROOT_DIR/website/static/api
 GEN_PROTO_DIR=$HERON_ROOT_DIR/bazel-bin/heron/proto/_javac
 
+# The path of the customized landing page for the Javadocs
+OVERVIEW_HTML_FILE=$HERON_ROOT_DIR/website/scripts/javadocs-overview.html
+
 # Check if this script is run with Travis flag
 if [ $# -eq 1 ] && [ $1 == "--travis" ]; then
     BAZEL_CMD="bazel --bazelrc=$HERON_ROOT_DIR/tools/travis-ci/bazel.rc build"
@@ -39,7 +42,11 @@ CLOSURE_CLASSES="$HERON_ROOT_DIR/bazel-bin/heron/storm/src/java/_javac/storm-com
 
 export CLASSPATH=$BIN_JARS:$GEN_JARS:$SCRIBE_JARS:$PROTO_JARS:$CLOSURE_CLASSES
 
-$JAVADOC $FLAGS -d $JAVADOC_OUTPUT_DIR $GEN_FILES $HERON_SRC_FILES $BACKTYPE_SRC_FILES $APACHE_SRC_FILES
+$JAVADOC $FLAGS \
+  -windowtitle "Heron Java API" \
+  -doctitle "The Heron Java API" \
+  -overview $OVERVIEW_HTML_FILE \
+  -d $JAVADOC_OUTPUT_DIR $GEN_FILES $HERON_SRC_FILES $BACKTYPE_SRC_FILES $APACHE_SRC_FILES
 
 # Generated Java API doc needs to be copied to $JAVADOC_OUTPUT_LOCAL_DIR
 # for the following two reasons:
