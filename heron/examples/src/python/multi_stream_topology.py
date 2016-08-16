@@ -13,7 +13,7 @@
 # limitations under the License.
 '''module for example topology: CustomGroupingTopology'''
 
-from heron.streamparse.src.python import Topology, Grouping, constants
+from heron.pyheron.src.python import Topology, Grouping, constants
 
 from heron.examples.src.python.spout import MultiStreamSpout
 from heron.examples.src.python.bolt import CountBolt, StreamAggregateBolt

@@ -14,7 +14,7 @@
 '''module for example topology: CustomGroupingTopology'''
 
 from heron.common.src.python.utils.log import Log
-from heron.streamparse.src.python import Topology, Grouping, ICustomGrouping, constants
+from heron.pyheron.src.python import Topology, Grouping, ICustomGrouping, constants
 
 from heron.examples.src.python.spout import WordSpout
 from heron.examples.src.python.bolt import ConsumeBolt
