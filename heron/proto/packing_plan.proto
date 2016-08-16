@@ -28,9 +28,4 @@ message PackingPlan {
   required string id = 1;
   repeated ContainerPlan container_plans = 2;
   required Resource resource = 3;
-
-  // Java should read the packing plan and call the getters to recompute these. They are serialized
-  // only to make it easy for the python impl logic that knows how to parse these strings.
-  required string instance_distribution = 4;
-  required string component_ram_distribution = 5;
 }
