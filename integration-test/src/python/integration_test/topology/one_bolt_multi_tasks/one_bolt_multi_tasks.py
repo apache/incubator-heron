@@ -13,7 +13,7 @@
 # limitations under the License.
 # pylint: disable=missing-docstring
 
-from heron.streamparse.src.python import Grouping
+from heron.pyheron.src.python import Grouping
 
 from ...core import TestTopologyBuilder
 from ...common.bolt import IdentityBolt

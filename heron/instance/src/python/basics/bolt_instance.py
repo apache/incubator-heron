@@ -21,7 +21,7 @@ from heron.common.src.python.utils.tuple import TupleHelper, HeronTuple
 from heron.common.src.python.utils.metrics import BoltMetrics
 from heron.common.src.python.utils.misc import SerializerHelper
 from heron.proto import tuple_pb2
-from heron.streamparse.src.python import Stream
+from heron.pyheron.src.python import Stream
 
 import heron.common.src.python.constants as constants
 
