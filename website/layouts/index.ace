@@ -72,5 +72,5 @@ html lang={{.Site.LanguageCode}}
       {{partial "index/twitter-timeline.html" .}}
       {{partial "index/google-analytics.html" .}}
 
-      script src=http://code.jquery.com/jquery-2.2.1.min.js
+      script src=https://code.jquery.com/jquery-2.2.1.min.js
       script src=/js/app.min.js
