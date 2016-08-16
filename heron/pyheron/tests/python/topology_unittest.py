@@ -18,9 +18,9 @@ import os
 import unittest
 
 from heron.common.src.python.utils.misc import default_serializer
-from heron.streamparse.src.python import Topology, Stream, Grouping, TopologyBuilder
-from heron.streamparse.src.python.component import HeronComponentSpec
-from heron.streamparse.src.python.topology import TopologyType
+from heron.pyheron.src.python import Topology, Stream, Grouping, TopologyBuilder
+from heron.pyheron.src.python.component import HeronComponentSpec
+from heron.pyheron.src.python.topology import TopologyType
 from heron.proto import topology_pb2
 
 # required environment variable

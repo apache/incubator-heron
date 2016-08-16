@@ -6,7 +6,7 @@ pex_library(
   name = "integ_topology_lib",
   srcs = glob(["**/*.py"]),
   deps = [
-    "//heron/streamparse/src/python:pyheron_lib",
+    "//heron/pyheron/src/python:pyheron_lib",
     "//integration-test/src/python/integration_test/common:pyheron_integration_common",
     "//integration-test/src/python/integration_test/core:pyheron_integration_core",
   ],
