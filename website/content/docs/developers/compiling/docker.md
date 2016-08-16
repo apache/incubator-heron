@@ -4,9 +4,9 @@ title: Compiling With Docker
 
 For developing Heron, you will need to compile it for the environment that you
 want to use it in. If you'd like to use Docker to create that build environment,
-Heron provides a convenient script to make that process easier.
+Heron provides a convenient script to make that process easier. 
 
-Currently, only Ubuntu 14.04, Ubuntu 15.10, and CentOS 7 are supported, but if you
+Currently, only Ubuntu 14.04, Ubuntu 15.10, and CentOS 7 are supported, but if you 
 need another platform there are instructions for adding new ones
 [below](#contributing-new-environments).
 
@@ -40,14 +40,14 @@ $ docker/build-artifacts.sh
 Running the script by itself will display usage information:
 
 ```
-Usage: docker/build-artifacts.sh <platform> <version_string> [source-tarball] <output-directory>
-
+Usage: docker/build-artifacts.sh <platform> <version_string> [source-tarball] <output-directory> 
+  
 Platforms Supported: darwin, ubuntu14.04, ubuntu15.10, centos7
-
+  
 Example:
   ./build-artifacts.sh ubuntu14.04 0.12.0 .
-
-NOTE: If running on OSX, the output directory will need to
+  
+NOTE: If running on OSX, the output directory will need to 
       be under /Users so virtualbox has access to.
 ```
 
@@ -88,7 +88,7 @@ of the generated artifacts:
 ```bash
 $ ls ~/heron-release
 heron-api-0.12.0-ubuntu14.04.tar.gz
-heron-client-0.12.0-ubuntu14.04.tar.gz
+heron-client-0.12.0-ubuntu14.04.tar.gz 
 heron-tools-0.12.0-ubuntu14.04.tar.gz
 heron-client-install-0.12.0-ubuntu.sh  
 heron-tools-install-0.12.0-ubuntu.sh
@@ -112,25 +112,20 @@ documentation](https://docs.docker.com/engine/articles/dockerfile_best-practices
 You should make sure that your `Dockerfile` specifies *at least* all of the
 following:
 
-### Step 1 --- The OS being used in a [`FROM`](https://docs.docker.com/engine/reference/builder/#from) statement.
-
-Here's an example:
+#### Step 1 - The OS being used in a [`FROM`](https://docs.docker.com/engine/reference/builder/#from) statement.
+   Here's an example:
 
 ```dockerfile
 FROM centos:centos7
  ```
-
-### Step 2 --- A `TARGET_PLATFORM` environment variable using the [`ENV`](https://docs.docker.com/engine/reference/builder/#env) instruction.
-
-Here's an example:
+#### Step 2 - A `TARGET_PLATFORM` environment variable using the [`ENV`](https://docs.docker.com/engine/reference/builder/#env) instruction.
+   Here's an example:
 
 ```dockerfile
 ENV TARGET_PLATFORM centos
 ```
-
-### Step 3 --- A general dependency installation script using a [`RUN`](https://docs.docker.com/engine/reference/builder/#run) instruction.
-
-Here's an example:
+#### Step 3 - A general dependency installation script using a [`RUN`](https://docs.docker.com/engine/reference/builder/#run) instruction.
+   Here's an example:
 
 ```dockerfile
 RUN apt-get update && apt-get -y install \
@@ -152,9 +147,8 @@ RUN apt-get update && apt-get -y install \
          wget
 ```
 
-### Step 4 --- An installation script for Java 8 and a `JAVA_HOME` environment variable
-
-Here's an example:
+#### Step 4 - An installation script for Java 8 and a `JAVA_HOME` environment variable.
+   Here's an example:
 
 ```dockerfile
 RUN \
@@ -177,7 +171,8 @@ RUN wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/
          && /tmp/bazel.sh
 ```
 
-### Step 6 --- Add the `bazelrc` configuration file for Bazel and the `compile.sh` script (from the `docker` folder) that compiles Heron
+#### Step 6 - Add the `bazelrc` configuration file for Bazel and the `compile.sh`
+   script (from the `docker` folder) that compiles Heron:
 
 ```dockerfile
 ADD bazelrc /root/.bazelrc
