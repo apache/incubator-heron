@@ -29,3 +29,10 @@ pex_library(
   ]
 )
 
+# This is common package for pyheron
+pex_library(
+  name = 'pyheron_common',
+  srcs = glob(['**/*.py'],
+              exclude=['utils/config.py', 'utils/tracker_access.py', 'handler/**/*.py']),
+  reqs = ['colorlog==2.6.1'],
+)

@@ -6,8 +6,17 @@ pex_library(
   name = "pyheron_lib",
   srcs = glob(["**/*.py"]),
   deps = [
-    "//heron/common/src/python:common",
+    "//heron/common/src/python:pyheron_common",
     "//heron/proto:proto-py",
   ],
-  reqs = ['colorlog==2.6.1', 'pyyaml==3.10'],
+)
+
+# for pyheron egg production
+pex_binary(
+  name = "pyheron_pkg",
+  srcs = glob(["**/*.py"]),
+  deps = [
+    ":pyheron_lib",
+    "//heron/examples/src/python:pyheron_example_pkg"
+  ]
 )
