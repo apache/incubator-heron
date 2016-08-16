@@ -189,6 +189,10 @@ class SpoutMetrics(ComponentMetrics):
     """Apply updates to the pending tuples count"""
     self.update_reduced_metric(self.PENDING_ACKED_COUNT, count)
 
+  def timeout_tuple(self, stream_id):
+    """Apply updates to the timeout count"""
+    self.update_count(self.TIMEOUT_COUNT, key=stream_id)
+
 class BoltMetrics(ComponentMetrics):
   """Metrics helper class for Bolt"""
   ACK_COUNT = "__ack-count"

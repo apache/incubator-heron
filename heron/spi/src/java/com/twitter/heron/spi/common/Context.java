@@ -159,8 +159,8 @@ public class Context {
     return cfg.getStringValue(ConfigKeys.get("TOPOLOGY_DEFINITION_FILE"));
   }
 
-  public static String topologyJarFile(Config cfg) {
-    return cfg.getStringValue(ConfigKeys.get("TOPOLOGY_JAR_FILE"));
+  public static String topologyBinaryFile(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("TOPOLOGY_BINARY_FILE"));
   }
 
   public static String topologyPackageFile(Config cfg) {
@@ -309,6 +309,10 @@ public class Context {
 
   public static String shellSandboxBinary(Config cfg) {
     return cfg.getStringValue(ConfigKeys.get("SANDBOX_SHELL_BINARY"));
+  }
+
+  public static final String pythonInstanceSandboxBinary(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("SANDBOX_PYTHON_INSTANCE_BINARY"));
   }
 
   public static String schedulerSandboxJar(Config cfg) {

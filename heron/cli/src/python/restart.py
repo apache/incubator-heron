@@ -28,7 +28,7 @@ def create_parser(subparsers):
   parser = subparsers.add_parser(
       'restart',
       help='Restart a topology',
-      usage="%(prog)s [options] cluster/[role]/[env] topology-name [container-id]",
+      usage="%(prog)s [options] cluster/[role]/[env] <topology-name> [container-id]",
       add_help=False)
 
   args.add_titles(parser)
@@ -58,8 +58,8 @@ def run(command, parser, cl_args, unknown_args):
   :param unknown_args:
   :return:
   '''
+  topology_name = cl_args['topology-name']
   try:
-    topology_name = cl_args['topology-name']
     container_id = cl_args['container-id']
 
     new_args = [

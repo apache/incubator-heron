@@ -13,9 +13,9 @@ from httplib import *
 # The location of default configure file
 DEFAULT_TEST_CONF_FILE = "integration-test/src/python/test_runner/resources/test.conf"
 
-RETRY_ATTEMPTS = 15
+RETRY_ATTEMPTS = 25
 #seconds
-RETRY_INTERVAL = 30
+RETRY_INTERVAL = 10
 
 def runTest(topologyName, classPath, expectedResultFilePath, params):
   ''' Runs the test for one topology '''
@@ -26,7 +26,7 @@ def runTest(topologyName, classPath, expectedResultFilePath, params):
   try:
     args = httpServerUrl + " " + topologyName
     submitTopology(params.heronCliPath, params.cluster, params.role,
-                   params.env, params.testsJarPath, classPath,
+                   params.env, params.testsBinPath, classPath,
                    params.releasePackageUri, args)
   except Exception as e:
     logging.error("Failed to submit %s topology: %s", topologyName, str(e))
@@ -74,8 +74,8 @@ def runTest(topologyName, classPath, expectedResultFilePath, params):
     return "success"
   else:
     logging.error("Actual result did not match expected result")
-    logging.info("Actual result ---------- \n" + actualResult)
-    logging.info("Expected result ---------- \n" + expectedResult)
+    logging.info("Actual result ---------- \n" + str(actualResult))
+    logging.info("Expected result ---------- \n" + str(expectedResult))
     return "fail"
 
 def fetchResultFromServer(serverAddress, serverPort, topologyName):
@@ -154,11 +154,28 @@ def runAllTests(conf, args):
   successes = []
   failures = []
   timestamp = str(int(time.time()))
-  total = len(conf["topologies"])
+
+  if args.testsBinPath.endswith(".jar"):
+    test_topologies = conf["javaTopologies"]
+    pkg_type = "jar"
+  elif args.testsBinPath.endswith(".pex"):
+    test_topologies = conf["pythonTopologies"]
+    pkg_type = "pex"
+  else:
+    raise ValueError("Unrecognized binary file type: %s" % args.testsBinPath)
+
+  total = len(test_topologies)
   current = 1
-  for topologyConf in conf["topologies"]:
+
+  for topologyConf in test_topologies:
     topologyName = ("%s_%s_%s") % (timestamp, topologyConf["topologyName"], str(uuid.uuid4()))
-    classPath = conf["topologyClasspathPrefix"] + topologyConf["classPath"]
+    if pkg_type == 'pex':
+      classPath = topologyConf["classPath"]
+    elif pkg_type == 'jar':
+      classPath = conf["topologyClasspathPrefix"] + topologyConf["classPath"]
+    else:
+      raise ValueError("Unrecognized package type: %s" % pkg_type)
+
     expectedResultFilePath = args.topologiesPath + "/" + topologyConf["expectedResultRelativePath"]
 
     logging.info("==== Starting test %s of %s: %s ====", current, total, topologyName)
@@ -186,7 +203,7 @@ def main():
   parser = argparse.ArgumentParser(description='This is the heron integration test framework')
 
   parser.add_argument('-hc', '--heron-cli-path', dest='heronCliPath', default=conf['heronCliPath'])
-  parser.add_argument('-tj', '--tests-jar-path', dest='testsJarPath')
+  parser.add_argument('-tb', '--tests-bin-path', dest='testsBinPath')
   parser.add_argument('-cl', '--cluster', dest='cluster', default=conf['cluster'])
   parser.add_argument('-ev', '--env', dest='env', default=conf['env'])
   parser.add_argument('-rl', '--role', dest='role', default=conf['role'])

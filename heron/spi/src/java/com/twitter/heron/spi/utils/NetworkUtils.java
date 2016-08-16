@@ -40,6 +40,9 @@ public final class NetworkUtils {
   public static final String CONTENT_TYPE = "Content-Type";
   public static final String LOCAL_HOST = "localhost";
 
+  public static final String JSON_TYPE = "application/json";
+  public static final String URL_ENCODE_TYPE = "application/x-www-form-urlencoded";
+
   private static final Logger LOG = Logger.getLogger(NetworkUtils.class.getName());
 
   private NetworkUtils() {
@@ -130,10 +133,12 @@ public final class NetworkUtils {
    * Send Http POST Request to a connection with given data in request body
    *
    * @param connection the connection to send post request to
+   * @param contentType the type of the content to be sent
    * @param data the data to send in post request body
    * @return true if success
    */
   public static boolean sendHttpPostRequest(HttpURLConnection connection,
+                                            String contentType,
                                             byte[] data) {
     try {
       connection.setRequestMethod("POST");
@@ -142,27 +147,32 @@ public final class NetworkUtils {
       return false;
     }
 
-    connection.setRequestProperty(CONTENT_TYPE, "application/x-www-form-urlencoded");
+    if (data.length > 0) {
+      connection.setRequestProperty(CONTENT_TYPE, contentType);
+      connection.setRequestProperty(CONTENT_LENGTH, Integer.toString(data.length));
 
-    connection.setRequestProperty(CONTENT_LENGTH, Integer.toString(data.length));
+      connection.setUseCaches(false);
+      connection.setDoOutput(true);
 
-    connection.setUseCaches(false);
-    connection.setDoOutput(true);
-
-    try {
-      connection.getOutputStream().write(data);
-    } catch (IOException e) {
-      LOG.log(Level.SEVERE, "Failed to send request: ", e);
-      return false;
-    } finally {
+      OutputStream os = null;
       try {
-        connection.getOutputStream().close();
+        os = connection.getOutputStream();
+        os.write(data);
+        os.flush();
       } catch (IOException e) {
-        LOG.log(Level.SEVERE, "Failed to close OutputStream: ", e);
+        LOG.log(Level.SEVERE, "Failed to send request: ", e);
         return false;
+      } finally {
+        try {
+          if (os != null) {
+            os.close();
+          }
+        } catch (IOException e) {
+          LOG.log(Level.SEVERE, "Failed to close OutputStream: ", e);
+          return false;
+        }
       }
     }
-
     return true;
   }
 
@@ -172,6 +182,17 @@ public final class NetworkUtils {
       connection.setDoOutput(true);
     } catch (ProtocolException e) {
       LOG.log(Level.SEVERE, "Failed to send http get request: " + connection);
+      return false;
+    }
+
+    return true;
+  }
+
+  public static boolean sendHttpDeleteRequest(HttpURLConnection connection) {
+    try {
+      connection.setRequestMethod("DELETE");
+    } catch (ProtocolException e) {
+      LOG.log(Level.SEVERE, "Failed to send http delete request: " + connection);
       return false;
     }
 
@@ -229,9 +250,25 @@ public final class NetworkUtils {
     }
   }
 
-  public static HttpURLConnection getConnection(String endpoint) throws IOException {
-    URL url = new URL(endpoint);
-    return (HttpURLConnection) url.openConnection();
+  public static HttpURLConnection getHttpConnection(String endpoint) {
+    // construct the http url connection
+    try {
+      URL url = new URL(endpoint);
+      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+      return connection;
+    } catch (IOException e) {
+      LOG.log(Level.SEVERE, "Failed to connect to scheduler http endpoint: {0}", endpoint);
+      return null;
+    }
+  }
+
+  public static boolean checkHttpResponseCode(HttpURLConnection connection, int expectedCode) {
+    try {
+      return connection.getResponseCode() == expectedCode;
+    } catch (IOException ex) {
+      LOG.log(Level.SEVERE, "Failed to get response code");
+      return false;
+    }
   }
 
   public static String getHostName() {

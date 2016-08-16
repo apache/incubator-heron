@@ -117,10 +117,10 @@ public class SchedulerMain {
         .build();
 
     Option topologyJar = Option.builder("f")
-        .desc("Topology jar file path")
-        .longOpt("topology_jar")
+        .desc("Topology jar/pex file path")
+        .longOpt("topology_bin")
         .hasArgs()
-        .argName("topology jar file")
+        .argName("topology binary file")
         .required()
         .build();
 
@@ -203,7 +203,7 @@ public class SchedulerMain {
     SchedulerMain schedulerMain = createInstance(cmd.getOptionValue("cluster"),
         cmd.getOptionValue("role"),
         cmd.getOptionValue("environment"),
-        cmd.getOptionValue("topology_jar"),
+        cmd.getOptionValue("topology_bin"),
         topologyName,
         Integer.parseInt(cmd.getOptionValue("http_port")),
         (Boolean) cmd.hasOption("verbose"),

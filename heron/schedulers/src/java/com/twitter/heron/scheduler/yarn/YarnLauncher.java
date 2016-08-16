@@ -63,7 +63,7 @@ public class YarnLauncher implements ILauncher {
   @Override
   public void initialize(Config config, Config runtime) {
     topologyName = Context.topologyName(config);
-    topologyJar = Context.topologyJarFile(config);
+    topologyJar = Context.topologyBinaryFile(config);
     topologyPackageLocation = Context.topologyPackageFile(config);
     cluster = Context.cluster(config);
     role = Context.role(config);
