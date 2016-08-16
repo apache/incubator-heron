@@ -16,7 +16,7 @@
       <guid>/heron/docs/operators/deployment/configuration/</guid>
       <description>
 
-&lt;h1 id=&#34;configuring-a-cluster:a66b35d20295cb764719ac8bd35837ec&#34;&gt;Configuring a Cluster&lt;/h1&gt;
+&lt;h1 id=&#34;configuring-a-cluster&#34;&gt;Configuring a Cluster&lt;/h1&gt;
 
 &lt;p&gt;To setup a Heron cluster, you need to configure a few files. Each file configures
 a component of the Heron streaming framework.&lt;/p&gt;
@@ -50,13 +50,13 @@ to Round Robin, if not specified.&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;&lt;strong&gt;client.yaml&lt;/strong&gt; &amp;mdash; This file controls the behavior of the &lt;code&gt;heron&lt;/code&gt; client. This is optional.&lt;/p&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h1 id=&#34;assembling-the-configuration:a66b35d20295cb764719ac8bd35837ec&#34;&gt;Assembling the Configuration&lt;/h1&gt;
+&lt;h1 id=&#34;assembling-the-configuration&#34;&gt;Assembling the Configuration&lt;/h1&gt;
 
 &lt;p&gt;All configuration files are assembled together to form the cluster configuration. For example,
 a cluster named &lt;code&gt;devcluster&lt;/code&gt; that uses the Aurora for scheduler, ZooKeeper for state manager and
 HDFS for uploader will have the following set of configurations.&lt;/p&gt;
 
-&lt;h2 id=&#34;scheduler-yaml-for-aurora:a66b35d20295cb764719ac8bd35837ec&#34;&gt;scheduler.yaml (for Aurora)&lt;/h2&gt;
+&lt;h2 id=&#34;scheduler-yaml-for-aurora&#34;&gt;scheduler.yaml (for Aurora)&lt;/h2&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #75715e&#34;&gt;# scheduler class for distributing the topology for execution&lt;/span&gt;
 &lt;span style=&#34;color: #ae81ff&#34;&gt;heron.class.scheduler&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;com.twitter.heron.scheduler.aurora.AuroraScheduler&lt;/span&gt;
 
@@ -70,7 +70,7 @@ HDFS for uploader will have the following set of configurations.&lt;/p&gt;
 &lt;span style=&#34;color: #ae81ff&#34;&gt;heron.scheduler.is.service&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;False&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h2 id=&#34;statemgr-yaml-for-zookeeper:a66b35d20295cb764719ac8bd35837ec&#34;&gt;statemgr.yaml (for ZooKeeper)&lt;/h2&gt;
+&lt;h2 id=&#34;statemgr-yaml-for-zookeeper&#34;&gt;statemgr.yaml (for ZooKeeper)&lt;/h2&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #75715e&#34;&gt;# zookeeper state manager class for managing state in a persistent fashion&lt;/span&gt;
 &lt;span style=&#34;color: #ae81ff&#34;&gt;heron.class.state.manager&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager&lt;/span&gt;
 
@@ -84,7 +84,7 @@ HDFS for uploader will have the following set of configurations.&lt;/p&gt;
 &lt;span style=&#34;color: #ae81ff&#34;&gt;heron.statemgr.zookeeper.is.initialize.tree&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;True&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h2 id=&#34;uploader-yaml-for-hdfs:a66b35d20295cb764719ac8bd35837ec&#34;&gt;uploader.yaml (for HDFS)&lt;/h2&gt;
+&lt;h2 id=&#34;uploader-yaml-for-hdfs&#34;&gt;uploader.yaml (for HDFS)&lt;/h2&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #75715e&#34;&gt;# Directory of config files for hadoop client to read from&lt;/span&gt;
 &lt;span style=&#34;color: #ae81ff&#34;&gt;heron.uploader.hdfs.config.directory&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt;              &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;/home/hadoop/hadoop/conf/&amp;quot;&lt;/span&gt;
 
@@ -92,12 +92,12 @@ HDFS for uploader will have the following set of configurations.&lt;/p&gt;
 &lt;span style=&#34;color: #ae81ff&#34;&gt;heron.uploader.hdfs.topologies.directory.uri&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt;      &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;hdfs:///heron/topology/&amp;quot;&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h2 id=&#34;packing-yaml-for-round-robin:a66b35d20295cb764719ac8bd35837ec&#34;&gt;packing.yaml (for Round Robin)&lt;/h2&gt;
+&lt;h2 id=&#34;packing-yaml-for-round-robin&#34;&gt;packing.yaml (for Round Robin)&lt;/h2&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #75715e&#34;&gt;# packing algorithm for packing instances into containers&lt;/span&gt;
 &lt;span style=&#34;color: #ae81ff&#34;&gt;heron.class.packing.algorithm&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt;    &lt;span style=&#34;color: #ae81ff&#34;&gt;com.twitter.heron.packing.roundrobin.RoundRobinPacking&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h2 id=&#34;client-yaml-for-heron-cli:a66b35d20295cb764719ac8bd35837ec&#34;&gt;client.yaml (for heron cli)&lt;/h2&gt;
+&lt;h2 id=&#34;client-yaml-for-heron-cli&#34;&gt;client.yaml (for heron cli)&lt;/h2&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #75715e&#34;&gt;# should the role parameter be required&lt;/span&gt;
 &lt;span style=&#34;color: #ae81ff&#34;&gt;heron.config.role.required&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;false&lt;/span&gt;
 
@@ -129,7 +129,7 @@ from the YARN ResourceManager &lt;a href=&#34;http://hadoop.apache.org/docs/curr
 across events like topology restarts.&lt;/p&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;topology-deployment-on-a-yarn-cluster:d35c852e97c6bc7b1a42bb1b90a84abf&#34;&gt;Topology deployment on a YARN Cluster&lt;/h2&gt;
+&lt;h2 id=&#34;topology-deployment-on-a-yarn-cluster&#34;&gt;Topology deployment on a YARN Cluster&lt;/h2&gt;
 
 &lt;p&gt;Using the YARN scheduler is similar to deploying Heron on other clusters, i.e. using the
 &lt;a href=&#34;/heron/docs/operators/heron-cli/&#34;&gt;Heron CLI&lt;/a&gt;.
@@ -145,7 +145,7 @@ This document assumes that the Hadoop yarn client is installed and configured.&l
 containers are allocated for each topology.&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;h3 id=&#34;configuring-the-heron-client-classpath:d35c852e97c6bc7b1a42bb1b90a84abf&#34;&gt;Configuring the Heron client classpath&lt;/h3&gt;
+&lt;h3 id=&#34;configuring-the-heron-client-classpath&#34;&gt;Configuring the Heron client classpath&lt;/h3&gt;
 
 &lt;ol&gt;
 &lt;li&gt;Command &lt;code&gt;hadoop classpath&lt;/code&gt; provides a list of jars needed to submit a hadoop job. Copy all jars
@@ -165,7 +165,7 @@ bundled with the Heron distribution. So, this manual step is needed till this He
 (&lt;a href=&#34;https://github.com/twitter/heron/issues/271&#34;&gt;271&lt;/a&gt;) is fixed.&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;h3 id=&#34;configure-the-yarn-scheduler:d35c852e97c6bc7b1a42bb1b90a84abf&#34;&gt;Configure the YARN scheduler&lt;/h3&gt;
+&lt;h3 id=&#34;configure-the-yarn-scheduler&#34;&gt;Configure the YARN scheduler&lt;/h3&gt;
 
 &lt;p&gt;A set of default configuration files are provided with Heron in the &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/config/src/yaml/conf/yarn&#34;&gt;conf/yarn&lt;/a&gt; directory.
 The default configuration uses the local state manager. This will work with single-node local
@@ -180,40 +180,42 @@ deployment on a multi-node YARN cluster.&lt;/p&gt;
 &lt;li&gt;&lt;code&gt;YarnLauncher&lt;/code&gt; performs the job of uploader also. So &lt;code&gt;NullUploader&lt;/code&gt; is used.&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;h2 id=&#34;topology-management:d35c852e97c6bc7b1a42bb1b90a84abf&#34;&gt;Topology management&lt;/h2&gt;
+&lt;h2 id=&#34;topology-management&#34;&gt;Topology management&lt;/h2&gt;
 
-&lt;h3 id=&#34;topology-submission:d35c852e97c6bc7b1a42bb1b90a84abf&#34;&gt;Topology Submission&lt;/h3&gt;
+&lt;h3 id=&#34;topology-submission&#34;&gt;Topology Submission&lt;/h3&gt;
 
 &lt;p&gt;&lt;strong&gt;Command&lt;/strong&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;code&gt;$ heron submit yarn heron-examples.jar com.twitter.heron.examples.AckingTopology AckingTopology&lt;/code&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;strong&gt;Sample Output&lt;/strong&gt;&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;INFO&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;Launching&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;topology&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;AckingTopology&amp;#39;&lt;/span&gt;
-&lt;span style=&#34;color: #f92672&#34;&gt;...&lt;/span&gt;
-&lt;span style=&#34;color: #f92672&#34;&gt;...&lt;/span&gt;
-&lt;span style=&#34;color: #f8f8f2&#34;&gt;Powered&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;by&lt;/span&gt;
-     &lt;span style=&#34;color: #f8f8f2&#34;&gt;___________&lt;/span&gt;  &lt;span style=&#34;color: #f8f8f2&#34;&gt;______&lt;/span&gt;  &lt;span style=&#34;color: #f8f8f2&#34;&gt;______&lt;/span&gt;  &lt;span style=&#34;color: #f8f8f2&#34;&gt;_______&lt;/span&gt;
-    &lt;span style=&#34;color: #e6db74&#34;&gt;/  ______  / /  ___/ /  ___/ /  ____/&lt;/span&gt;
-   &lt;span style=&#34;color: #e6db74&#34;&gt;/     _____/ /  /__  /  /__  /  /&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;___&lt;/span&gt;
-  &lt;span style=&#34;color: #e6db74&#34;&gt;/  /\  \     /  ___/ /  ___/ /  ____/&lt;/span&gt;
- &lt;span style=&#34;color: #e6db74&#34;&gt;/  /  \  \   /  /__  /  /__  /  /&lt;/span&gt;
-&lt;span style=&#34;color: #e6db74&#34;&gt;/__/    \__\ /_____/ /_____/ /__/&lt;/span&gt;
 
-&lt;span style=&#34;color: #f92672&#34;&gt;...&lt;/span&gt;
-&lt;span style=&#34;color: #f92672&#34;&gt;...&lt;/span&gt;
-&lt;span style=&#34;color: #f8f8f2&#34;&gt;com&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;twitter&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;heron&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;scheduler&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;yarn&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;ReefClientSideHandlers&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;INFO&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;:&lt;/span&gt;  &lt;span style=&#34;color: #f8f8f2&#34;&gt;Topology&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;AckingTopology&lt;/span&gt; &lt;span style=&#34;color: #66d9ef&#34;&gt;is&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;running&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;jobId&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;AckingTopology&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;pre&gt;&lt;code&gt;INFO: Launching topology &#39;AckingTopology&#39;
+...
+...
+Powered by
+     ___________  ______  ______  _______
+    /  ______  / /  ___/ /  ___/ /  ____/
+   /     _____/ /  /__  /  /__  /  /___
+  /  /\  \     /  ___/ /  ___/ /  ____/
+ /  /  \  \   /  /__  /  /__  /  /
+/__/    \__\ /_____/ /_____/ /__/
+
+...
+...
+com.twitter.heron.scheduler.yarn.ReefClientSideHandlers INFO:  Topology AckingTopology is running, jobId AckingTopology.
+&lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;&lt;strong&gt;Verification&lt;/strong&gt;&lt;/p&gt;
 
 &lt;p&gt;Visit the YARN http console or execute command &lt;code&gt;yarn application -list&lt;/code&gt; on a yarn client host.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;Total number of applications (application-types: [] and states: [SUBMITTED, ACCEPTED, RUNNING]):1
+
+&lt;pre&gt;&lt;code&gt;Total number of applications (application-types: [] and states: [SUBMITTED, ACCEPTED, RUNNING]):1
                 Application-Id	    Application-Name	    Application-Type	      User	     Queue	             State	       Final-State	       Progress	                       Tracking-URL
 application_1466548964728_0004	      AckingTopology	                YARN	     heron	   default	           RUNNING	         UNDEFINED	             0%	                                N/A
-&lt;/pre&gt;&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;
 
-&lt;h3 id=&#34;topology-termination:d35c852e97c6bc7b1a42bb1b90a84abf&#34;&gt;Topology termination&lt;/h3&gt;
+&lt;h3 id=&#34;topology-termination&#34;&gt;Topology termination&lt;/h3&gt;
 
 &lt;p&gt;&lt;strong&gt;Command&lt;/strong&gt;&lt;/p&gt;
 
@@ -239,7 +241,7 @@ application_1466548964728_0004	      AckingTopology	                YARN	     he
 &lt;li&gt;&lt;p&gt;Worker logs are created on the remaining containers in the YARN NodeManager&amp;rsquo;s local directory.&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;h2 id=&#34;work-in-progress:d35c852e97c6bc7b1a42bb1b90a84abf&#34;&gt;Work in Progress&lt;/h2&gt;
+&lt;h2 id=&#34;work-in-progress&#34;&gt;Work in Progress&lt;/h2&gt;
 
 &lt;ol&gt;
 &lt;li&gt;The YARN Scheduler will restart any failed workers and TMaster containers. However &lt;a href=&#34;https://hadoop.apache.org/docs/r2.7.1/hadoop-yarn/hadoop-yarn-site/ResourceManagerHA.html&#34;&gt;AM HA&lt;/a&gt;  is not
@@ -264,20 +266,20 @@ the box. A step by step guide on how to setup Heron with Apache Aurora locally
 can be found in &lt;a href=&#34;../aurora-local-setup&#34;&gt;Setting up Heron with Aurora Cluster Locally on Linux&lt;/a&gt;. You can also run Heron on
 a &lt;a href=&#34;../local&#34;&gt;local scheduler&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h2 id=&#34;how-heron-on-aurora-works:387ae9f85e97bfb68065bef3a59cae96&#34;&gt;How Heron on Aurora Works&lt;/h2&gt;
+&lt;h2 id=&#34;how-heron-on-aurora-works&#34;&gt;How Heron on Aurora Works&lt;/h2&gt;
 
 &lt;p&gt;Aurora doesn&amp;rsquo;t have a Heron scheduler &lt;em&gt;per se&lt;/em&gt;. Instead, when a topology is
 submitted to Heron, &lt;code&gt;heron&lt;/code&gt; cli interacts with Aurora to automatically deploy
 all the &lt;a href=&#34;../../../../concepts/architecture&#34;&gt;components&lt;/a&gt; necessary to &lt;a href=&#34;../../../heron-cli&#34;&gt;manage
 topologies&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h2 id=&#34;zookeeper:387ae9f85e97bfb68065bef3a59cae96&#34;&gt;ZooKeeper&lt;/h2&gt;
+&lt;h2 id=&#34;zookeeper&#34;&gt;ZooKeeper&lt;/h2&gt;
 
 &lt;p&gt;To run Heron on Aurora, you&amp;rsquo;ll need to set up a ZooKeeper cluster and configure
 Heron to communicate with it. Instructions can be found in &lt;a href=&#34;../../statemanagers/zookeeper&#34;&gt;Setting up
 ZooKeeper&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h2 id=&#34;hosting-binaries:387ae9f85e97bfb68065bef3a59cae96&#34;&gt;Hosting Binaries&lt;/h2&gt;
+&lt;h2 id=&#34;hosting-binaries&#34;&gt;Hosting Binaries&lt;/h2&gt;
 
 &lt;p&gt;To deploy Heron, the Aurora cluster needs access to the
 Heron core binary, which can be hosted wherever you&amp;rsquo;d like, so long as
@@ -291,7 +293,7 @@ using a &lt;code&gt;curl&lt;/code&gt; command to fetch the binary. For example, 
 HDFS, you need to change the fetch user package command in &lt;code&gt;heron.aurora&lt;/code&gt; to use the
 &lt;code&gt;hdfs&lt;/code&gt; command instead of &lt;code&gt;curl&lt;/code&gt;.&lt;/p&gt;
 
-&lt;h3 id=&#34;heron-aurora-example-binary-fetch-using-hdfs:387ae9f85e97bfb68065bef3a59cae96&#34;&gt;&lt;code&gt;heron.aurora&lt;/code&gt; example binary fetch using HDFS&lt;/h3&gt;
+&lt;h3 id=&#34;heron-aurora-example-binary-fetch-using-hdfs&#34;&gt;&lt;code&gt;heron.aurora&lt;/code&gt; example binary fetch using HDFS&lt;/h3&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;fetch_heron_system&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; Process&lt;span style=&#34;color: #f92672&#34;&gt;(&lt;/span&gt;
   &lt;span style=&#34;color: #f8f8f2&#34;&gt;name&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;fetch_heron_system&amp;#39;&lt;/span&gt;,
   &lt;span style=&#34;color: #f8f8f2&#34;&gt;cmdline&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;hdfs dfs -get %s %s &amp;amp;&amp;amp; tar zxf %s&amp;#39;&lt;/span&gt; % &lt;span style=&#34;color: #f92672&#34;&gt;(&lt;/span&gt;heron_core_release_uri, 
@@ -302,7 +304,7 @@ HDFS, you need to change the fetch user package command in &lt;code&gt;heron.aur
 &lt;p&gt;Once your Heron binaries are hosted somewhere that is accessible to Aurora, you
 should run tests to ensure that Aurora can successfully fetch them.&lt;/p&gt;
 
-&lt;h2 id=&#34;uploading-the-topologies:387ae9f85e97bfb68065bef3a59cae96&#34;&gt;Uploading the Topologies&lt;/h2&gt;
+&lt;h2 id=&#34;uploading-the-topologies&#34;&gt;Uploading the Topologies&lt;/h2&gt;
 
 &lt;p&gt;Heron uses an uploader to upload the topology to a shared location so that a worker can fetch
 the topology to its sandbox. The configuration for an uploader is in the &lt;code&gt;uploader.yaml&lt;/code&gt;
@@ -313,7 +315,7 @@ Details on configuring the uploaders can be found in the documentation for the
 &lt;p&gt;After configuring an uploader, the &lt;code&gt;heron.aurora&lt;/code&gt; config file needs to be modified accordingly to
 fetch the topology.&lt;/p&gt;
 
-&lt;h3 id=&#34;heron-aurora-example-topology-fetch-using-hdfs:387ae9f85e97bfb68065bef3a59cae96&#34;&gt;&lt;code&gt;heron.aurora&lt;/code&gt; example topology fetch using HDFS&lt;/h3&gt;
+&lt;h3 id=&#34;heron-aurora-example-topology-fetch-using-hdfs&#34;&gt;&lt;code&gt;heron.aurora&lt;/code&gt; example topology fetch using HDFS&lt;/h3&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;fetch_user_package&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; Process&lt;span style=&#34;color: #f92672&#34;&gt;(&lt;/span&gt;
   &lt;span style=&#34;color: #f8f8f2&#34;&gt;name&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;fetch_user_package&amp;#39;&lt;/span&gt;,
   &lt;span style=&#34;color: #f8f8f2&#34;&gt;cmdline&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;#39;hdfs dfs -get %s %s &amp;amp;&amp;amp; tar zxf %s&amp;#39;&lt;/span&gt; % &lt;span style=&#34;color: #f92672&#34;&gt;(&lt;/span&gt;heron_topology_jar_uri, 
@@ -321,7 +323,7 @@ fetch the topology.&lt;/p&gt;
 &lt;span style=&#34;color: #f92672&#34;&gt;)&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h2 id=&#34;aurora-scheduler-configuration:387ae9f85e97bfb68065bef3a59cae96&#34;&gt;Aurora Scheduler Configuration&lt;/h2&gt;
+&lt;h2 id=&#34;aurora-scheduler-configuration&#34;&gt;Aurora Scheduler Configuration&lt;/h2&gt;
 
 &lt;p&gt;To configure Heron to use Aurora scheduler, modify the &lt;code&gt;scheduler.yaml&lt;/code&gt;
 config file specific for the Heron cluster. The following must be specified
@@ -345,7 +347,7 @@ be used when running topologies in the containers.&lt;/p&gt;&lt;/li&gt;
 is a service. In the case of Aurora, it should be set to &lt;code&gt;False&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h3 id=&#34;example-aurora-scheduler-configuration:387ae9f85e97bfb68065bef3a59cae96&#34;&gt;Example Aurora Scheduler Configuration&lt;/h3&gt;
+&lt;h3 id=&#34;example-aurora-scheduler-configuration&#34;&gt;Example Aurora Scheduler Configuration&lt;/h3&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #75715e&#34;&gt;# scheduler class for distributing the topology for execution&lt;/span&gt;
 &lt;span style=&#34;color: #ae81ff&#34;&gt;heron.class.scheduler&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;com.twitter.heron.scheduler.aurora.AuroraScheduler&lt;/span&gt;
 
@@ -362,7 +364,7 @@ is a service. In the case of Aurora, it should be set to &lt;code&gt;False&lt;/c
 &lt;span style=&#34;color: #ae81ff&#34;&gt;heron.scheduler.is.service&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;False&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h2 id=&#34;working-with-topologies:387ae9f85e97bfb68065bef3a59cae96&#34;&gt;Working with Topologies&lt;/h2&gt;
+&lt;h2 id=&#34;working-with-topologies&#34;&gt;Working with Topologies&lt;/h2&gt;
 
 &lt;p&gt;After setting up ZooKeeper and generating an Aurora-accessible Heron core binary
 release, any machine that has the &lt;code&gt;heron&lt;/code&gt; cli tool can be used to manage Heron
@@ -375,6 +377,186 @@ can be enabled by specifying the proper configuration when managing topologies.&
     </item>
     
     <item>
+      <title>Building on Linux Platforms</title>
+      <link>/heron/docs/developers/compiling/linux/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/heron/docs/developers/compiling/linux/</guid>
+      <description>
+
+&lt;p&gt;Heron can currently be built on the following Linux platforms:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#building-on-ubuntu-14.04&#34;&gt;Ubuntu 14.04&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#building-on-centos-7&#34;&gt;CentOS 7&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;building-on-ubuntu-14-04&#34;&gt;Building on Ubuntu 14.04&lt;/h2&gt;
+
+&lt;p&gt;To build Heron on a fresh Ubuntu 14.04 installation:&lt;/p&gt;
+
+&lt;h3 id=&#34;step-1-update-ubuntu&#34;&gt;Step 1 &amp;mdash; Update Ubuntu&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ sudo apt-get update -y
+$ sudo apt-get upgrade -y
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3 id=&#34;step-2-install-required-libraries&#34;&gt;Step 2 &amp;mdash; Install required libraries&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ sudo apt-get install git build-essential automake cmake libtool zip &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+  libunwind-setjmp0-dev zlib1g-dev unzip pkg-config -y
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h4 id=&#34;step-3-set-the-following-environment-variables&#34;&gt;Step 3 &amp;mdash; Set the following environment variables&lt;/h4&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;CC&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;/usr/bin/gcc-4.8
+&lt;span style=&#34;color: #f8f8f2&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;CCX&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;/usr/bin/g++-4.8
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3 id=&#34;step-4-install-jdk-8&#34;&gt;Step 4 &amp;mdash; Install JDK 8&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ sudo add-apt-repository ppa:webupd8team/java
+$ sudo apt-get update -y
+$ sudo apt-get install oracle-java8-installer -y
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h4 id=&#34;{#HUGOSHORTCODE-3#&#34;&gt;Step 5 - Install Bazel&lt;/h4&gt;
+
+&lt;p&gt;#}&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.2.3/bazel-0.2.3-installer-linux-x86_64.sh
+chmod +x /tmp/bazel.sh
+/tmp/bazel.sh --user
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Make sure to download the appropriate version of Bazel (currently 0.3.0).&lt;/p&gt;
+
+&lt;h3 id=&#34;step-6-make-sure-the-bazel-executable-is-in-your-path&#34;&gt;Step 6 &amp;mdash; Make sure the Bazel executable is in your &lt;code&gt;PATH&lt;/code&gt;&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ &lt;span style=&#34;color: #f8f8f2&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;PATH&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;$PATH&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;$HOME&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;/bin&amp;quot;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3 id=&#34;step-7-fetch-the-latest-version-of-heron-s-source-code&#34;&gt;Step 7 &amp;mdash; Fetch the latest version of Heron&amp;rsquo;s source code&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ git clone https://github.com/twitter/heron.git &lt;span style=&#34;color: #f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;cd&lt;/span&gt; heron
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3 id=&#34;step-8-configure-heron-for-building-with-bazel&#34;&gt;Step 8 &amp;mdash; Configure Heron for building with Bazel&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ ./bazel_configure.py
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3 id=&#34;step-9-build-the-project&#34;&gt;Step 9 &amp;mdash; Build the project&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;ubuntu heron/...  
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3 id=&#34;step-10-build-the-packages&#34;&gt;Step 10 &amp;mdash; Build the packages&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;ubuntu scripts/packages:binpkgs  
+$ bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;ubuntu scripts/packages:tarpkgs
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This will install Heron packages in the &lt;code&gt;bazel-bin/scripts/packages/&lt;/code&gt; directory.&lt;/p&gt;
+
+&lt;h2 id=&#34;manually-installing-libraries&#34;&gt;Manually Installing Libraries&lt;/h2&gt;
+
+&lt;p&gt;If you encounter errors with &lt;a href=&#34;http://www.nongnu.org/libunwind&#34;&gt;libunwind&lt;/a&gt;, &lt;a href=&#34;https://www.gnu.org/software/libtool&#34;&gt;libtool&lt;/a&gt;, or
+&lt;a href=&#34;https://github.com/gperftools/gperftools/releases&#34;&gt;gperftools&lt;/a&gt;, we recommend
+installing them manually.&lt;/p&gt;
+
+&lt;h3 id=&#34;compling-and-installing-libtool&#34;&gt;Compling and installing libtool&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ wget http://ftpmirror.gnu.org/libtool/libtool-2.4.6.tar.gz
+$ tar -xvf libtool-2.4.6.tar.gz
+$ &lt;span style=&#34;color: #f8f8f2&#34;&gt;cd&lt;/span&gt; libtool-2.4.6
+$ ./configure
+$ make
+$ sudo make install
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3 id=&#34;compiling-and-installing-libunwind&#34;&gt;Compiling and installing libunwind&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ wget http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz
+$ tar -xvf libunwind-1.1.tar.gz
+$ &lt;span style=&#34;color: #f8f8f2&#34;&gt;cd&lt;/span&gt; libunwind-1.1
+$ ./configure
+$ make
+$ sudo make install
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3 id=&#34;compiling-and-installing-gperftools&#34;&gt;Compiling and installing gperftools&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ wget https://github.com/gperftools/gperftools/releases/download/gperftools-2.5/gperftools-2.5.tar.gz
+$ tar -xvf gperftools-2.5.tar.gz
+$ &lt;span style=&#34;color: #f8f8f2&#34;&gt;cd&lt;/span&gt; gperftools-2.5
+$ ./configure
+$ make
+$ sudo make install
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h2 id=&#34;building-on-centos-7&#34;&gt;Building on CentOS 7&lt;/h2&gt;
+
+&lt;p&gt;To build Heron on a fresh CentOS 7 installation:&lt;/p&gt;
+
+&lt;h3 id=&#34;step-1-install-the-required-dependencies&#34;&gt;Step 1 &amp;mdash; Install the required dependencies&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ sudo yum install gcc gcc-c++ kernel-devel wget unzip zlib-devel zip git automake cmake patch libtool -y
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3 id=&#34;step-2-install-libunwind-from-source&#34;&gt;Step 2 &amp;mdash; Install libunwind from source&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ wget http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz
+$ tar xvf libunwind-1.1.tar.gz
+$ &lt;span style=&#34;color: #f8f8f2&#34;&gt;cd&lt;/span&gt; libunwind-1.1
+$ ./configure
+$ make
+$ sudo make install
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3 id=&#34;step-3-set-the-following-environment-variables-1&#34;&gt;Step 3 &amp;mdash; Set the following environment variables&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ &lt;span style=&#34;color: #f8f8f2&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;CC&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;/usr/bin/gcc
+$ &lt;span style=&#34;color: #f8f8f2&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;CCX&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;/usr/bin/g++
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3 id=&#34;step-4-install-jdk-8-1&#34;&gt;Step 4 &amp;mdash; Install JDK 8&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ &lt;span style=&#34;color: #f8f8f2&#34;&gt;cd&lt;/span&gt; /opt/
+$ sudo wget --no-cookies --no-check-certificate &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+  --header &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
+  &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;http://download.oracle.com/otn-pub/java/jdk/8u91-b14/jdk-8u91-linux-x64.tar.gz&amp;quot;&lt;/span&gt;
+$ sudo tar xzf jdk-8u91-linux-x64.tar.gz
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Use &lt;code&gt;alternatives&lt;/code&gt; to configure the Java version:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ sudo &lt;span style=&#34;color: #f8f8f2&#34;&gt;cd&lt;/span&gt; /opt/jdk1.8.0_91/
+$ sudo alternatives --install /usr/bin/java java /opt/jdk1.8.0_91/bin/java 2
+$ sudo alternatives --config java
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Set the &lt;code&gt;javac&lt;/code&gt; and &lt;code&gt;jar&lt;/code&gt; commands:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ sudo alternatives --install /usr/bin/jar jar /opt/jdk1.8.0_91/bin/jar 2
+$ sudo alternatives --install /usr/bin/javac javac /opt/jdk1.8.0_91/bin/javac 2
+$ sudo alternatives --set jar /opt/jdk1.8.0_91/bin/jar
+$ sudo alternatives --set javac /opt/jdk1.8.0_91/bin/javac
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Export Java-related environment variables:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;JAVA_HOME&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;/opt/jdk1.8.0_91
+&lt;span style=&#34;color: #f8f8f2&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;JRE_HOME&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;/opt/jdk1.8.0_91/jre
+&lt;span style=&#34;color: #f8f8f2&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;PATH&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;$PATH&lt;/span&gt;:/opt/jdk1.8.0_91/bin:/opt/jdk1.8.0_91/jre/bin
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h4 id=&#34;{#HUGOSHORTCODE-5#&#34;&gt;Step 5 - Install Bazel&lt;/h4&gt;
+
+&lt;p&gt;#}&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.2.3/bazel-0.2.3-installer-linux-x86_64.sh
+chmod +x /tmp/bazel.sh
+/tmp/bazel.sh --user
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Make sure to download the appropriate version of Bazel (currently 0.3.0).&lt;/p&gt;
+
+&lt;h3 id=&#34;step-6-download-jeron-and-compile-it&#34;&gt;Step 6 &amp;mdash; Download Jeron and compile it&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ git clone https://github.com/twitter/heron.git &lt;span style=&#34;color: #f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;cd&lt;/span&gt; heron
+$ ./bazel_configure.py
+$ bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;centos heron/...
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3 id=&#34;step-7-build-the-binary-packages&#34;&gt;Step 7 &amp;mdash; Build the binary packages&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;centos scripts/packages:binpkgs
+$ bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;centos scripts/packages:tarpkgs
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This will install Heron packages in the &lt;code&gt;bazel-bin/scripts/packages/&lt;/code&gt; directory.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Building on Mac OS X</title>
       <link>/heron/docs/developers/compiling/mac/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -382,54 +564,61 @@ can be enabled by specifying the proper configuration when managing topologies.&
       <guid>/heron/docs/developers/compiling/mac/</guid>
       <description>
 
-&lt;p&gt;This is a step by step guide for building Heron on Mac OS (10.10 and 10.11).&lt;/p&gt;
+&lt;p&gt;This is a step-by-step guide to building Heron on Mac OS X (versions 10.10 and
+  10.11).&lt;/p&gt;
 
-&lt;h4 id=&#34;step-1-install-brew-if-already-not-installed:7be74c584635419861677fc2502187c9&#34;&gt;Step 1 - Install brew, if already not installed&lt;/h4&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;/usr/bin/ruby -e &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #66d9ef&#34;&gt;$(&lt;/span&gt;curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install&lt;span style=&#34;color: #66d9ef&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;&lt;/span&gt;
+&lt;h3 id=&#34;step-1-install-homebrew&#34;&gt;Step 1 &amp;mdash; Install Homebrew&lt;/h3&gt;
+
+&lt;p&gt;If &lt;a href=&#34;http://brew.sh/&#34;&gt;Homebrew&lt;/a&gt; isn&amp;rsquo;t yet installed on your system, you can
+install it using this one-liner:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ /usr/bin/ruby -e &lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #66d9ef&#34;&gt;$(&lt;/span&gt;curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install&lt;span style=&#34;color: #66d9ef&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h4 id=&#34;step-2-install-the-required-libraries:7be74c584635419861677fc2502187c9&#34;&gt;Step 2 - Install the required libraries&lt;/h4&gt;
+&lt;h3 id=&#34;step-2-install-other-required-libraries&#34;&gt;Step 2 &amp;mdash; Install other required libraries&lt;/h3&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;brew install automake
 brew install cmake
 brew install libtool
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h4 id=&#34;step-3-set-the-following-environment-variables:7be74c584635419861677fc2502187c9&#34;&gt;Step 3 - Set the following environment variables&lt;/h4&gt;
+&lt;h3 id=&#34;step-3-set-the-following-environment-variables&#34;&gt;Step 3 &amp;mdash; Set the following environment variables&lt;/h3&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ &lt;span style=&#34;color: #f8f8f2&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;CC&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;/usr/bin/clang
 $ &lt;span style=&#34;color: #f8f8f2&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;CXX&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;/usr/bin/clang++
 $ &lt;span style=&#34;color: #f8f8f2&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;$CC&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;$CXX&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h4 id=&#34;step-4-install-bazel-hugoshortcode-1:7be74c584635419861677fc2502187c9&#34;&gt;Step 4 - Install Bazel 0.2.3&lt;/h4&gt;
+&lt;h4 id=&#34;{#HUGOSHORTCODE-1#&#34;&gt;Step 4 - Install Bazel&lt;/h4&gt;
+
+&lt;p&gt;#}&lt;/p&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;wget -O /tmp/bazel.sh  https://github.com/bazelbuild/bazel/releases/download/0.2.3/bazel-0.2.3-installer-darwin-x86_64.sh
 chmod +x /tmp/bazel.sh
 /tmp/bazel.sh --user
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h4 id=&#34;step-5-make-sure-bazel-bin-is-in-the-path:7be74c584635419861677fc2502187c9&#34;&gt;Step 5 - Make sure Bazel bin is in the PATH&lt;/h4&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;PATH&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;$PATH&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;$HOME&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;/bin&amp;quot;&lt;/span&gt;
+&lt;h3 id=&#34;step-5-make-sure-the-bazel-executable-is-on-your-path&#34;&gt;Step 5 &amp;mdash; Make sure the Bazel executable is on your &lt;code&gt;PATH&lt;/code&gt;&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ &lt;span style=&#34;color: #f8f8f2&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;PATH&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;$PATH&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;$HOME&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt;/bin&amp;quot;&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h4 id=&#34;step-6-get-the-latest-version-of-heron:7be74c584635419861677fc2502187c9&#34;&gt;Step 6 - Get the latest version of heron&lt;/h4&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;git clone https://github.com/twitter/heron.git &lt;span style=&#34;color: #f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;cd&lt;/span&gt; heron
+&lt;h3 id=&#34;step-6-fetch-the-latest-version-of-heron-s-source-code&#34;&gt;Step 6 &amp;mdash; Fetch the latest version of Heron&amp;rsquo;s source code&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ git clone https://github.com/twitter/heron.git &lt;span style=&#34;color: #f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;cd&lt;/span&gt; heron
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h4 id=&#34;step-7-configure-heron-for-build:7be74c584635419861677fc2502187c9&#34;&gt;Step 7 - Configure Heron for build&lt;/h4&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;./bazel_configure.py
+&lt;h3 id=&#34;step-7-configure-heron-for-building-with-bazel&#34;&gt;Step 7 &amp;mdash; Configure Heron for building with Bazel&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ ./bazel_configure.py
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;If the configure scripts fails with missing dependencies, brew can be used to install the dependencies.&lt;/p&gt;
+&lt;p&gt;If this configure script fails with missing dependencies, Homebrew can be used
+to install those dependencies.&lt;/p&gt;
 
-&lt;h4 id=&#34;step-8-build-the-project:7be74c584635419861677fc2502187c9&#34;&gt;Step 8 - Build the project&lt;/h4&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;darwin heron/...
+&lt;h3 id=&#34;step-8-build-the-project&#34;&gt;Step 8 &amp;mdash; Build the project&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;darwin heron/...
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h4 id=&#34;step-9-build-the-packages:7be74c584635419861677fc2502187c9&#34;&gt;Step 9 - Build the packages&lt;/h4&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;darwin scripts/packages:binpkgs
-bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;darwin scripts/packages:tarpkgs
+&lt;h3 id=&#34;step-9-build-the-packages&#34;&gt;Step 9 &amp;mdash; Build the packages&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;darwin scripts/packages:binpkgs
+$ bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;darwin scripts/packages:tarpkgs
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;This will build the packages below the &lt;code&gt;bazel-bin/scripts/packages/&lt;/code&gt; directory.&lt;/p&gt;
+&lt;p&gt;This will install Heron packages in the &lt;code&gt;bazel-bin/scripts/packages/&lt;/code&gt; directory.&lt;/p&gt;
 </description>
     </item>
     
@@ -441,7 +630,7 @@ bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;dar
       <guid>/heron/docs/contributors/community/</guid>
       <description>
 
-&lt;h2 id=&#34;contributing-to-heron:f3b3effc19b97b19aaf2ce392427d255&#34;&gt;Contributing to Heron&lt;/h2&gt;
+&lt;h2 id=&#34;contributing-to-heron&#34;&gt;Contributing to Heron&lt;/h2&gt;
 
 &lt;p&gt;Discussion about Heron happens on GitHub and over mailing list.&lt;/p&gt;
 
@@ -453,7 +642,7 @@ bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;dar
 
 &lt;p&gt;Community is critical to Heron. Contributions are welcomed!&lt;/p&gt;
 
-&lt;h2 id=&#34;how-can-i-contribute-to-heron:f3b3effc19b97b19aaf2ce392427d255&#34;&gt;How Can I Contribute to Heron?&lt;/h2&gt;
+&lt;h2 id=&#34;how-can-i-contribute-to-heron&#34;&gt;How Can I Contribute to Heron?&lt;/h2&gt;
 
 &lt;p&gt;You can first read the following pages to have a basic understanding
 of Heron:&lt;/p&gt;
@@ -479,7 +668,7 @@ if your patch involves lots of changes.&lt;/p&gt;
 you should post on &lt;a href=&#34;https://groups.google.com/forum/#!forum/heron-users&#34;&gt;mailing list&lt;/a&gt; instead
 of opening GitHub issues.&lt;/strong&gt;&lt;/p&gt;
 
-&lt;h3 id=&#34;submitting-a-patch:f3b3effc19b97b19aaf2ce392427d255&#34;&gt;Submitting a Patch&lt;/h3&gt;
+&lt;h3 id=&#34;submitting-a-patch&#34;&gt;Submitting a Patch&lt;/h3&gt;
 
 &lt;ol&gt;
 &lt;li&gt;&lt;p&gt;Read the Heron &lt;a href=&#34;../governance&#34;&gt;governance plan&lt;/a&gt; and accept the
@@ -516,34 +705,33 @@ TODO: links to sourcecode and dev and user groups
       <description>
 
 &lt;p&gt;Heron is currently available for &lt;a href=&#34;../../../developers/compiling/mac&#34;&gt;Mac OS X 10.10&lt;/a&gt;,
-&lt;a href=&#34;../../../developers/compiling/linux&#34;&gt;Ubuntu 12.04, Ubuntu 14.04&lt;/a&gt;,
-and &lt;a href=&#34;../../../developers/compiling/linux&#34;&gt;CentOS 7&lt;/a&gt;.
-This guide describes the basics of Heron build system. For step by step build instructions
-on a specific platform refer the following guides.&lt;/p&gt;
+&lt;a href=&#34;../../../developers/compiling/linux&#34;&gt;Ubuntu 14.04&lt;/a&gt;, and &lt;a href=&#34;../../../developers/compiling/linux&#34;&gt;CentOS
+7&lt;/a&gt;. This guide describes the basics of the
+Heron build system. For step-by-step build instructions for a specific platform,
+the following guides are available:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;../../../developers/compiling/linux&#34;&gt;Build on Linux&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;../../../developers/compiling/mac&#34;&gt;Build on Mac OS X&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;../../../developers/compiling/linux&#34;&gt;Building on Linux Platforms&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;../../../developers/compiling/mac&#34;&gt;Building on Mac OS X&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;Heron can be built either &lt;a href=&#34;#building-all-components:c58322628b54ee0c077e0910dc13c454&#34;&gt;in it&amp;rsquo;s entirety&lt;/a&gt;, as
-&lt;a href=&#34;#building-specific-components:c58322628b54ee0c077e0910dc13c454&#34;&gt;individual components&lt;/a&gt;, or as a &lt;a href=&#34;#building-a-full-release-package:c58322628b54ee0c077e0910dc13c454&#34;&gt;release
-package&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Heron can be built either &lt;a href=&#34;#building-all-components&#34;&gt;in its entirety&lt;/a&gt;, as &lt;a href=&#34;#building-specific-components&#34;&gt;individual components&lt;/a&gt;,
+or as a &lt;a href=&#34;#building-a-full-release-package&#34;&gt;release package&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;Instructions on running unit tests for Heron can also be found in &lt;a href=&#34;../../../contributors/testing&#34;&gt;Testing Heron&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h2 id=&#34;requirements:c58322628b54ee0c077e0910dc13c454&#34;&gt;Requirements&lt;/h2&gt;
+&lt;h2 id=&#34;requirements&#34;&gt;Requirements&lt;/h2&gt;
 
 &lt;p&gt;You must have the following installed to compile Heron:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;http://bazel.io/docs/install.html&#34;&gt;Bazel&lt;/a&gt; = 0.2.3 . Later versions
-might work but have not been tested. See &lt;a href=&#34;#installing-bazel:c58322628b54ee0c077e0910dc13c454&#34;&gt;Installing Bazel&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://bazel.io/docs/install.html&#34;&gt;Bazel&lt;/a&gt; = 0.3.0. Later
+versions might work but have not been tested. See &lt;a href=&#34;#installing-bazel&#34;&gt;Installing Bazel&lt;/a&gt; below.&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html&#34;&gt;Java
 8&lt;/a&gt;
-is required by Bazel but Heron does not use Java 8 features;
-&lt;a href=&#34;../../../concepts/topologies&#34;&gt;topologies&lt;/a&gt; can be written in Java 7 or above and all
-Heron jars are compatible with Java 7.&lt;/li&gt;
+is required by Bazel but Heron does not use Java 8 features; Heron
+&lt;a href=&#34;../../../concepts/topologies&#34;&gt;topologies&lt;/a&gt; can be written in Java 7 or above
+and all Heron jars are compatible with Java 7.&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;http://www.gnu.org/software/autoconf/autoconf.html&#34;&gt;Autoconf&lt;/a&gt; &amp;gt;=
 2.6.3&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;https://www.gnu.org/software/automake/&#34;&gt;Automake&lt;/a&gt; &amp;gt;= 1.11.1&lt;/li&gt;
@@ -555,23 +743,24 @@ Heron jars are compatible with Java 7.&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;https://www.perl.org/&#34;&gt;Perl&lt;/a&gt; &amp;gt;= 5.8.8&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;Export CC and CXX variables with path specific to your machine:&lt;/p&gt;
+&lt;p&gt;Export the &lt;code&gt;CC&lt;/code&gt; and &lt;code&gt;CXX&lt;/code&gt; environment variables with a path specific to your
+machine:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ &lt;span style=&#34;color: #f8f8f2&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;CC&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;/your-path-to/bin/c_compiler
 $ &lt;span style=&#34;color: #f8f8f2&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;CXX&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;/your-path-to/bin/c++_compiler
 $ &lt;span style=&#34;color: #f8f8f2&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;$CC&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;$CXX&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h2 id=&#34;installing-bazel:c58322628b54ee0c077e0910dc13c454&#34;&gt;Installing Bazel&lt;/h2&gt;
+&lt;h2 id=&#34;installing-bazel&#34;&gt;Installing Bazel&lt;/h2&gt;
 
 &lt;p&gt;Heron uses the &lt;a href=&#34;http://bazel.io&#34;&gt;Bazel&lt;/a&gt; build tool. Bazel releases can be found
-&lt;a href=&#34;https://github.com/bazelbuild/bazel/releases/tag/0.2.3&#34;&gt;here&lt;/a&gt;
+&lt;a href=&#34;https://github.com/bazelbuild/bazel/releases/tag/0.3.0&#34;&gt;here&lt;/a&gt;
 and installation instructions can be found &lt;a href=&#34;http://bazel.io/docs/install.html&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;To ensure that Bazel has been installed, run &lt;code&gt;bazel version&lt;/code&gt; and check the
 version (listed next to &lt;code&gt;Build label&lt;/code&gt; in the script&amp;rsquo;s output) to ensure that you
-have Bazel 0.2.3.&lt;/p&gt;
+have Bazel 0.3.0.&lt;/p&gt;
 
-&lt;h2 id=&#34;configuring-bazel:c58322628b54ee0c077e0910dc13c454&#34;&gt;Configuring Bazel&lt;/h2&gt;
+&lt;h2 id=&#34;configuring-bazel&#34;&gt;Configuring Bazel&lt;/h2&gt;
 
 &lt;p&gt;There is a Python script that you can run to configure Bazel on supported
 platforms:&lt;/p&gt;
@@ -579,9 +768,9 @@ platforms:&lt;/p&gt;
 $ ./bazel_configure.py
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h2 id=&#34;building:c58322628b54ee0c077e0910dc13c454&#34;&gt;Building&lt;/h2&gt;
+&lt;h2 id=&#34;building&#34;&gt;Building&lt;/h2&gt;
 
-&lt;h3 id=&#34;bazel-os-environments:c58322628b54ee0c077e0910dc13c454&#34;&gt;Bazel OS Environments&lt;/h3&gt;
+&lt;h3 id=&#34;bazel-os-environments&#34;&gt;Bazel OS Environments&lt;/h3&gt;
 
 &lt;p&gt;Bazel builds are specific to a given OS. When building you must specify an
 OS-specific configuration using the &lt;code&gt;--config&lt;/code&gt; flag. The following OS values
@@ -593,34 +782,37 @@ are supported:&lt;/p&gt;
 &lt;li&gt;&lt;code&gt;centos5&lt;/code&gt; (CentOS 5)&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;For example, on Darwin, the following command will build all packages:&lt;/p&gt;
+&lt;p&gt;For example, on Mac OS X (&lt;code&gt;darwin&lt;/code&gt;), the following command will build all
+packages:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;darwin heron/...
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h3 id=&#34;building-all-components:c58322628b54ee0c077e0910dc13c454&#34;&gt;Building All Components&lt;/h3&gt;
+&lt;h3 id=&#34;building-all-components&#34;&gt;Building All Components&lt;/h3&gt;
 
-&lt;p&gt;The bazel build process can produce either executable install scripts, or
+&lt;p&gt;The Bazel build process can produce either executable install scripts or
 bundled tars. To build executables or tars for all Heron components at once,
-use the following &lt;code&gt;bazel build&lt;/code&gt; commands, respectively.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;darwin scripts/packages:binpkgs
-$ bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;darwin scripts/packages:tarpkgs
+use the following &lt;code&gt;bazel build&lt;/code&gt; commands, respectively:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;PLATFORM scripts/packages:binpkgs
+$ bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;PLATFORM scripts/packages:tarpkgs
 &lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Resulting artifacts can be found in subdirectories below the &lt;code&gt;bazel-bin&lt;/code&gt;
 directory. The &lt;code&gt;heron-tracker&lt;/code&gt; executable, for example, can be found at
 &lt;code&gt;bazel-bin/heron/tracker/src/python/heron-tracker&lt;/code&gt;.&lt;/p&gt;
 
-&lt;h3 id=&#34;building-specific-components:c58322628b54ee0c077e0910dc13c454&#34;&gt;Building Specific Components&lt;/h3&gt;
+&lt;h3 id=&#34;building-specific-components&#34;&gt;Building Specific Components&lt;/h3&gt;
 
-&lt;p&gt;As an alternative to building a full release, you can build Heron executables for
-a single component by passing a target to the &lt;code&gt;bazel build&lt;/code&gt; command. For example
-the following command will build the &lt;a href=&#34;../../../operators/heron-tracker&#34;&gt;Heron Tracker&lt;/a&gt;:&lt;/p&gt;
+&lt;p&gt;As an alternative to building a full release, you can build Heron executables
+for a single Heron component (such as the &lt;a href=&#34;../../../operators/heron-tracker&#34;&gt;Heron
+Tracker&lt;/a&gt;) by passing a target to the &lt;code&gt;bazel
+build&lt;/code&gt; command. For example, the following command would build the &lt;a href=&#34;../../../operators/heron-tracker&#34;&gt;Heron Tracker&lt;/a&gt;:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ bazel build --config&lt;span style=&#34;color: #f92672&#34;&gt;=&lt;/span&gt;darwin heron/tracker/src/python:heron-tracker
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h2 id=&#34;testing-heron:c58322628b54ee0c077e0910dc13c454&#34;&gt;Testing Heron&lt;/h2&gt;
+&lt;h2 id=&#34;testing-heron&#34;&gt;Testing Heron&lt;/h2&gt;
 
-&lt;p&gt;Instructions for running Heron unit tests can be found at &lt;a href=&#34;../../../contributors/testing&#34;&gt;Testing Heron&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Instructions for running Heron unit tests can be found at &lt;a href=&#34;../../../contributors/testing&#34;&gt;Testing
+Heron&lt;/a&gt;.&lt;/p&gt;
 </description>
     </item>
     
@@ -640,13 +832,13 @@ Heron provides a convenient script to make that process easier.&lt;/p&gt;
 need another platform there are instructions for adding new ones
 &lt;a href=&#34;#contributing-new-environments&#34;&gt;below&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h3 id=&#34;requirements:69e60651f42783a7df723575c4088b5b&#34;&gt;Requirements&lt;/h3&gt;
+&lt;h3 id=&#34;requirements&#34;&gt;Requirements&lt;/h3&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;https://docs.docker.com&#34;&gt;Docker&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h3 id=&#34;running-docker-in-a-virtual-machine:69e60651f42783a7df723575c4088b5b&#34;&gt;Running Docker in a Virtual Machine&lt;/h3&gt;
+&lt;h3 id=&#34;running-docker-in-a-virtual-machine&#34;&gt;Running Docker in a Virtual Machine&lt;/h3&gt;
 
 &lt;p&gt;If you are running Docker in a virtual machine (VM), it is recommended that you
 adjust your settings to help speed up the build. To do this, open
@@ -659,7 +851,7 @@ create the VM), click on the VM, and then click on &lt;strong&gt;Settings&lt;/st
 &lt;p&gt;&lt;img src=&#34;/heron/img/virtual-box-processors.png&#34; alt=&#34;VirtualBox Processors&#34; /&gt;
 &lt;img src=&#34;/heron/img/virtual-box-memory.png&#34; alt=&#34;VirtualBox Memory&#34; /&gt;&lt;/p&gt;
 
-&lt;h2 id=&#34;building-heron:69e60651f42783a7df723575c4088b5b&#34;&gt;Building Heron&lt;/h2&gt;
+&lt;h2 id=&#34;building-heron&#34;&gt;Building Heron&lt;/h2&gt;
 
 &lt;p&gt;Heron provides a &lt;code&gt;build-arfifacts.sh&lt;/code&gt; script for Docker located in the
 &lt;code&gt;docker&lt;/code&gt; folder. To run that script:&lt;/p&gt;
@@ -668,16 +860,17 @@ $ docker/build-artifacts.sh
 &lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Running the script by itself will display usage information:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;Usage&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;docker&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;build&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;artifacts&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;sh&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;platform&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;version_string&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;source&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;tarball&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;output&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;directory&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;&amp;gt;&lt;/span&gt; 
-  
-&lt;span style=&#34;color: #f8f8f2&#34;&gt;Platforms&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;Supported&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;darwin&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;ubuntu14&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;04&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;ubuntu15&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;10&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;centos7&lt;/span&gt;
-  
-&lt;span style=&#34;color: #f8f8f2&#34;&gt;Example&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;:&lt;/span&gt;
-  &lt;span style=&#34;color: #f92672&#34;&gt;./&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;build&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;artifacts&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #a6e22e&#34;&gt;sh&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;ubuntu14&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;04&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;0.12&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #ae81ff&#34;&gt;0&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;
-  
-&lt;span style=&#34;color: #f8f8f2&#34;&gt;NOTE&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;If&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;running&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;on&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;OSX&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;the&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;output&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;directory&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;will&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;need&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;to&lt;/span&gt; 
-      &lt;span style=&#34;color: #f8f8f2&#34;&gt;be&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;under&lt;/span&gt; &lt;span style=&#34;color: #f92672&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color: #f8f8f2&#34;&gt;Users&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;so&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;virtualbox&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;has&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;access&lt;/span&gt; &lt;span style=&#34;color: #f8f8f2&#34;&gt;to&lt;/span&gt;&lt;span style=&#34;color: #f92672&#34;&gt;.&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+
+&lt;pre&gt;&lt;code&gt;Usage: docker/build-artifacts.sh &amp;lt;platform&amp;gt; &amp;lt;version_string&amp;gt; [source-tarball] &amp;lt;output-directory&amp;gt;
+
+Platforms Supported: darwin, ubuntu14.04, ubuntu15.10, centos7
+
+Example:
+  ./build-artifacts.sh ubuntu14.04 0.12.0 .
+
+NOTE: If running on OSX, the output directory will need to
+      be under /Users so virtualbox has access to.
+&lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;The following arguments are required:&lt;/p&gt;
 
@@ -714,7 +907,7 @@ automatically linked in to the VM and can be accessed normally.&lt;/p&gt;
 of the generated artifacts:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ ls ~/heron-release
 heron-api-0.12.0-ubuntu14.04.tar.gz
-heron-client-0.12.0-ubuntu14.04.tar.gz 
+heron-client-0.12.0-ubuntu14.04.tar.gz
 heron-tools-0.12.0-ubuntu14.04.tar.gz
 heron-client-install-0.12.0-ubuntu.sh  
 heron-tools-install-0.12.0-ubuntu.sh
@@ -722,7 +915,7 @@ heron-api-install-0.12.0-ubuntu.sh
 heron-core-0.12.0-ubuntu.tar.gz
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h2 id=&#34;contributing-new-environments:69e60651f42783a7df723575c4088b5b&#34;&gt;Contributing New Environments&lt;/h2&gt;
+&lt;h2 id=&#34;contributing-new-environments&#34;&gt;Contributing New Environments&lt;/h2&gt;
 
 &lt;p&gt;You&amp;rsquo;ll notice that there are multiple
 &lt;a href=&#34;https://docs.docker.com/engine/reference/builder/&#34;&gt;Dockerfiles&lt;/a&gt; in the &lt;code&gt;docker&lt;/code&gt;
@@ -738,19 +931,19 @@ documentation&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;You should make sure that your &lt;code&gt;Dockerfile&lt;/code&gt; specifies &lt;em&gt;at least&lt;/em&gt; all of the
 following:&lt;/p&gt;
 
-&lt;h4 id=&#34;step-1-the-os-being-used-in-a-from-https-docs-docker-com-engine-reference-builder-from-statement:69e60651f42783a7df723575c4088b5b&#34;&gt;Step 1 - The OS being used in a &lt;a href=&#34;https://docs.docker.com/engine/reference/builder/#from&#34;&gt;&lt;code&gt;FROM&lt;/code&gt;&lt;/a&gt; statement.&lt;/h4&gt;
+&lt;h3 id=&#34;step-1-the-os-being-used-in-a-from-https-docs-docker-com-engine-reference-builder-from-statement&#34;&gt;Step 1 &amp;mdash; The OS being used in a &lt;a href=&#34;https://docs.docker.com/engine/reference/builder/#from&#34;&gt;&lt;code&gt;FROM&lt;/code&gt;&lt;/a&gt; statement.&lt;/h3&gt;
 
 &lt;p&gt;Here&amp;rsquo;s an example:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #66d9ef&#34;&gt;FROM&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt; centos:centos7&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h4 id=&#34;step-2-a-target-platform-environment-variable-using-the-env-https-docs-docker-com-engine-reference-builder-env-instruction:69e60651f42783a7df723575c4088b5b&#34;&gt;Step 2 - A &lt;code&gt;TARGET_PLATFORM&lt;/code&gt; environment variable using the &lt;a href=&#34;https://docs.docker.com/engine/reference/builder/#env&#34;&gt;&lt;code&gt;ENV&lt;/code&gt;&lt;/a&gt; instruction.&lt;/h4&gt;
+&lt;h3 id=&#34;step-2-a-target-platform-environment-variable-using-the-env-https-docs-docker-com-engine-reference-builder-env-instruction&#34;&gt;Step 2 &amp;mdash; A &lt;code&gt;TARGET_PLATFORM&lt;/code&gt; environment variable using the &lt;a href=&#34;https://docs.docker.com/engine/reference/builder/#env&#34;&gt;&lt;code&gt;ENV&lt;/code&gt;&lt;/a&gt; instruction.&lt;/h3&gt;
 
 &lt;p&gt;Here&amp;rsquo;s an example:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #66d9ef&#34;&gt;ENV&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt; TARGET_PLATFORM centos&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h4 id=&#34;step-3-a-general-dependency-installation-script-using-a-run-https-docs-docker-com-engine-reference-builder-run-instruction:69e60651f42783a7df723575c4088b5b&#34;&gt;Step 3 - A general dependency installation script using a &lt;a href=&#34;https://docs.docker.com/engine/reference/builder/#run&#34;&gt;&lt;code&gt;RUN&lt;/code&gt;&lt;/a&gt; instruction.&lt;/h4&gt;
+&lt;h3 id=&#34;step-3-a-general-dependency-installation-script-using-a-run-https-docs-docker-com-engine-reference-builder-run-instruction&#34;&gt;Step 3 &amp;mdash; A general dependency installation script using a &lt;a href=&#34;https://docs.docker.com/engine/reference/builder/#run&#34;&gt;&lt;code&gt;RUN&lt;/code&gt;&lt;/a&gt; instruction.&lt;/h3&gt;
 
 &lt;p&gt;Here&amp;rsquo;s an example:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #66d9ef&#34;&gt;RUN&lt;/span&gt; apt-get update &lt;span style=&#34;color: #f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; apt-get -y install &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
@@ -772,7 +965,7 @@ following:&lt;/p&gt;
          wget
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h4 id=&#34;step-4-an-installation-script-for-java-8-and-a-java-home-environment-variable:69e60651f42783a7df723575c4088b5b&#34;&gt;Step 4 - An installation script for Java 8 and a &lt;code&gt;JAVA_HOME&lt;/code&gt; environment variable.&lt;/h4&gt;
+&lt;h3 id=&#34;step-4-an-installation-script-for-java-8-and-a-java-home-environment-variable&#34;&gt;Step 4 &amp;mdash; An installation script for Java 8 and a &lt;code&gt;JAVA_HOME&lt;/code&gt; environment variable&lt;/h3&gt;
 
 &lt;p&gt;Here&amp;rsquo;s an example:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #66d9ef&#34;&gt;RUN&lt;/span&gt; &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
@@ -786,17 +979,16 @@ following:&lt;/p&gt;
 &lt;span style=&#34;color: #66d9ef&#34;&gt;ENV&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt; JAVA_HOME /usr/lib/jvm/java-8-oracle&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h4 id=&#34;step-5-an-installation-script-for-bazel-http-bazel-io-version-hugoshortcode-1-or-above:69e60651f42783a7df723575c4088b5b&#34;&gt;Step 5 - An installation script for &lt;a href=&#34;http://bazel.io/&#34;&gt;Bazel&lt;/a&gt; version 0.2.3 or above.&lt;/h4&gt;
+&lt;h4 id=&#34;{#HUGOSHORTCODE-1#&#34;&gt;Step 5 - An installation script for &lt;a href=&#34;http://bazel.io/&#34;&gt;Bazel&lt;/a&gt; version&lt;/h4&gt;
 
-&lt;p&gt;Here&amp;rsquo;s an example:&lt;/p&gt;
+&lt;p&gt;#} or above.
+Here&amp;rsquo;s an example:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #66d9ef&#34;&gt;RUN&lt;/span&gt; wget -O /tmp/bazel.sh https://github.com/bazelbuild/bazel/releases/download/0.2.3/bazel-0.2.3-installer-linux-x86_64.sh &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
          &lt;span style=&#34;color: #f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; chmod +x /tmp/bazel.sh &lt;span style=&#34;color: #ae81ff&#34;&gt;\&lt;/span&gt;
          &lt;span style=&#34;color: #f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; /tmp/bazel.sh
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h4 id=&#34;step-6-add-the-bazelrc-configuration-file-for-bazel-and-the-compile-sh:69e60651f42783a7df723575c4088b5b&#34;&gt;Step 6 - Add the &lt;code&gt;bazelrc&lt;/code&gt; configuration file for Bazel and the &lt;code&gt;compile.sh&lt;/code&gt;&lt;/h4&gt;
-
-&lt;p&gt;script (from the &lt;code&gt;docker&lt;/code&gt; folder) that compiles Heron:&lt;/p&gt;
+&lt;h3 id=&#34;step-6-add-the-bazelrc-configuration-file-for-bazel-and-the-compile-sh-script-from-the-docker-folder-that-compiles-heron&#34;&gt;Step 6 &amp;mdash; Add the &lt;code&gt;bazelrc&lt;/code&gt; configuration file for Bazel and the &lt;code&gt;compile.sh&lt;/code&gt; script (from the &lt;code&gt;docker&lt;/code&gt; folder) that compiles Heron&lt;/h3&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #272822&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #66d9ef&#34;&gt;ADD&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt; bazelrc /root/.bazelrc&lt;/span&gt;
 &lt;span style=&#34;color: #66d9ef&#34;&gt;ADD&lt;/span&gt;&lt;span style=&#34;color: #e6db74&#34;&gt; compile.sh /compile.sh&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
@@ -893,7 +1085,7 @@ histograms, show metrics, etc.&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;An external &lt;a href=&#34;https://github.com/twitter/heron&#34;&gt;GitHub repository&lt;/a&gt;, containing only the Heron code.&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;h3 id=&#34;feature-list:cd4a1b36ed2b93cfc52abf77a7d25d03&#34;&gt;Feature list&lt;/h3&gt;
+&lt;h3 id=&#34;feature-list&#34;&gt;Feature list&lt;/h3&gt;
 
 &lt;p&gt;In the following list, each feature is associated with a corresponding milestone. The convention for the priorities are:&lt;/p&gt;
 
@@ -927,11 +1119,11 @@ TODO - add feature Roadmap
 
 &lt;p&gt;Twitter uses the open source Heron project release builds in production and remains committed to contributing to the open source project roadmap.  Therefore, core contributors will roll back changes if, for example, they break the internal Twitter production processes.&lt;/p&gt;
 
-&lt;h3 id=&#34;accepting-contributions:898e7f1ceacb493c024554f5a7c87bdf&#34;&gt;Accepting Contributions&lt;/h3&gt;
+&lt;h3 id=&#34;accepting-contributions&#34;&gt;Accepting Contributions&lt;/h3&gt;
 
 &lt;p&gt;Please also see our &lt;a href=&#34;../community&#34;&gt;contribution guidelines&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h3 id=&#34;policy:898e7f1ceacb493c024554f5a7c87bdf&#34;&gt;Policy&lt;/h3&gt;
+&lt;h3 id=&#34;policy&#34;&gt;Policy&lt;/h3&gt;
 
 &lt;p&gt;Heron is supported by &lt;em&gt;core contributors&lt;/em&gt;, a group of people who cooperatively and actively support the overall project.  In contrast, general contributors are not actively supporting the overall project, but instead are contributing individual changes. At this time, the majority of core contributors are currently employed by Twitter or have previously been employed by Twitter (see below for the full list).&lt;/p&gt;
 
@@ -955,15 +1147,15 @@ TODO - add feature Roadmap
 &lt;li&gt;&lt;p&gt;We will work with interested parties to improve existing extension points and to establish new extension points if they do not run counter to the internal requirements of any of the core contributors.&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;h3 id=&#34;are-you-done-open-sourcing-heron:898e7f1ceacb493c024554f5a7c87bdf&#34;&gt;Are you done open sourcing Heron?&lt;/h3&gt;
+&lt;h3 id=&#34;are-you-done-open-sourcing-heron&#34;&gt;Are you done open sourcing Heron?&lt;/h3&gt;
 
 &lt;p&gt;We hope the open source process is complete.  We currently have all code reviews, bug tracking, and design decisions happening publicly, with the Heron community involved. However, as Heron is used in production at Twitter, some changes may simply appear in the Heron repository based on Twitter’s needs, at Twitter’s discretion.. Despite this occasional need to remain flexible in updating the project, we want to support external developers and collaborate to develop and support additional features. Thus, we are opening up the code, even though some of the development is still happening internal to Twitter. Please let us know if anything seems unclear or unjustified as we transition to an open model.&lt;/p&gt;
 
-&lt;h3 id=&#34;are-there-parts-of-heron-that-will-never-be-open-sourced:898e7f1ceacb493c024554f5a7c87bdf&#34;&gt;Are there parts of Heron that will never be open sourced?&lt;/h3&gt;
+&lt;h3 id=&#34;are-there-parts-of-heron-that-will-never-be-open-sourced&#34;&gt;Are there parts of Heron that will never be open sourced?&lt;/h3&gt;
 
 &lt;p&gt;No - all components of Heron will be fully open sourced and able to be supported by open source tools.  Twitter will use the open source releases in production.  As with others who may implement and contribute to the Heron project, Twitter may use Heron with  some functionality, or employ technology complementing Heron, that is not currently planned to become open sourced.&lt;/p&gt;
 
-&lt;h3 id=&#34;core-committers:898e7f1ceacb493c024554f5a7c87bdf&#34;&gt;Core Committers&lt;/h3&gt;
+&lt;h3 id=&#34;core-committers&#34;&gt;Core Committers&lt;/h3&gt;
 
 &lt;p&gt;Contact the core team at: heron-dev@googlegroups.com.&lt;/p&gt;
 
@@ -981,7 +1173,7 @@ TODO - add feature Roadmap
 &lt;a href=&#34;https://github.com/kramasamy&#34;&gt;Karthik Ramasamy (Twitter)&lt;/a&gt; &lt;br/&gt;
 &lt;a href=&#34;https://github.com/jingwei&#34;&gt;Jingwei Wu (Twitter)&lt;/a&gt; &lt;br/&gt;&lt;/p&gt;
 
-&lt;h3 id=&#34;collaborators-and-contributors:898e7f1ceacb493c024554f5a7c87bdf&#34;&gt;Collaborators and Contributors&lt;/h3&gt;
+&lt;h3 id=&#34;collaborators-and-contributors&#34;&gt;Collaborators and Contributors&lt;/h3&gt;
 
 &lt;p&gt;&lt;a href=&#34;https://github.com/ashvina&#34;&gt;Ashvin Agarwal (Microsoft)&lt;/a&gt; &lt;br/&gt;
 &lt;a href=&#34;https://github.com/avflor&#34;&gt;Avrilla Floratou (Microsoft)&lt;/a&gt; &lt;br/&gt;
@@ -1016,23 +1208,23 @@ TODO - add feature Roadmap
 an architectural perspective it is markedly different from Storm but fully
 backwards compatible with it from an API perspective.&lt;/p&gt;
 
-&lt;p&gt;The sections below clarify the distinction between &lt;a href=&#34;#relationship-with-apache-storm:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Heron and
-Storm&lt;/a&gt;, describe the &lt;a href=&#34;#heron-design-goals:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;design
+&lt;p&gt;The sections below clarify the distinction between &lt;a href=&#34;#relationship-with-apache-storm&#34;&gt;Heron and
+Storm&lt;/a&gt;, describe the &lt;a href=&#34;#heron-design-goals&#34;&gt;design
 goals&lt;/a&gt; behind Heron, and explain major
-&lt;a href=&#34;#topology-components:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;components&lt;/a&gt; of its architecture.&lt;/p&gt;
+&lt;a href=&#34;#topology-components&#34;&gt;components&lt;/a&gt; of its architecture.&lt;/p&gt;
 
-&lt;h2 id=&#34;codebase:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Codebase&lt;/h2&gt;
+&lt;h2 id=&#34;codebase&#34;&gt;Codebase&lt;/h2&gt;
 
 &lt;p&gt;A detailed guide to the Heron codebase can be found
 &lt;a href=&#34;/heron/docs/contributors/codebase/&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h2 id=&#34;topologies:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Topologies&lt;/h2&gt;
+&lt;h2 id=&#34;topologies&#34;&gt;Topologies&lt;/h2&gt;
 
 &lt;p&gt;You can think of a Heron cluster as a mechanism for managing the lifecycle of
 stream-processing entities called &lt;strong&gt;topologies&lt;/strong&gt;. More information can be found
 in the &lt;a href=&#34;../topologies&#34;&gt;Heron Topologies&lt;/a&gt; document.&lt;/p&gt;
 
-&lt;h2 id=&#34;relationship-with-apache-storm:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Relationship with Apache Storm&lt;/h2&gt;
+&lt;h2 id=&#34;relationship-with-apache-storm&#34;&gt;Relationship with Apache Storm&lt;/h2&gt;
 
 &lt;p&gt;Heron is the direct successor of &lt;a href=&#34;http://storm.apache.org&#34;&gt;Apache Storm&lt;/a&gt; but
 built with two goals in mind:&lt;/p&gt;
@@ -1047,30 +1239,30 @@ API&lt;/a&gt;.&lt;/li&gt;
 &lt;p&gt;For a more in-depth discussion of Heron and Storm, see the &lt;a href=&#34;http://dl.acm.org/citation.cfm?id=2742788&#34;&gt;Twitter Heron:
 Stream Processing at Scale&lt;/a&gt; paper.&lt;/p&gt;
 
-&lt;h2 id=&#34;heron-design-goals:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Heron Design Goals&lt;/h2&gt;
+&lt;h2 id=&#34;heron-design-goals&#34;&gt;Heron Design Goals&lt;/h2&gt;
 
 &lt;p&gt;For a description of the principles that Heron was designed to fulfill, see
 &lt;a href=&#34;/heron/docs/concepts/design-goals&#34;&gt;Heron Design Goals&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h2 id=&#34;topology-components:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Topology Components&lt;/h2&gt;
+&lt;h2 id=&#34;topology-components&#34;&gt;Topology Components&lt;/h2&gt;
 
 &lt;p&gt;The following core components of Heron topologies are discussed in depth in
 the sections below:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#topology-master:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Topology Master&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;#container:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Container&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;#stream-manager:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Stream Manager&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;#heron-instance:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Heron Instance&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;#metrics-manager:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Metrics Manager&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;#heron-tracker:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Heron Tracker&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#topology-master&#34;&gt;Topology Master&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#container&#34;&gt;Container&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#stream-manager&#34;&gt;Stream Manager&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#heron-instance&#34;&gt;Heron Instance&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#metrics-manager&#34;&gt;Metrics Manager&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#heron-tracker&#34;&gt;Heron Tracker&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h3 id=&#34;topology-master:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Topology Master&lt;/h3&gt;
+&lt;h3 id=&#34;topology-master&#34;&gt;Topology Master&lt;/h3&gt;
 
 &lt;p&gt;The Topology Master (TM) manages a topology throughout its entire lifecycle,
 from the time it&amp;rsquo;s submitted until it&amp;rsquo;s ultimately killed. When &lt;code&gt;heron&lt;/code&gt; deploys
-a topology it starts a single TM and multiple &lt;a href=&#34;#container:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;containers&lt;/a&gt;.
+a topology it starts a single TM and multiple &lt;a href=&#34;#container&#34;&gt;containers&lt;/a&gt;.
 The TM creates an ephemeral &lt;a href=&#34;http://zookeeper.apache.org&#34;&gt;ZooKeeper&lt;/a&gt; node to
 ensure that there&amp;rsquo;s only one TM for the topology and that the TM is easily
 discoverable by any process in the topology. The TM also constructs the &lt;a href=&#34;../topologies#physical-plan&#34;&gt;physical
@@ -1079,27 +1271,27 @@ components.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&#34;/heron/img/tmaster.png&#34; alt=&#34;Topology Master&#34; /&gt;&lt;/p&gt;
 
-&lt;h4 id=&#34;topology-master-configuration:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Topology Master Configuration&lt;/h4&gt;
+&lt;h4 id=&#34;topology-master-configuration&#34;&gt;Topology Master Configuration&lt;/h4&gt;
 
 &lt;p&gt;TMs have a variety of &lt;a href=&#34;../../operators/configuration/tmaster&#34;&gt;configurable
 parameters&lt;/a&gt; that you can adjust at each
 phase of a topology&amp;rsquo;s &lt;a href=&#34;../topologies#topology-lifecycle&#34;&gt;lifecycle&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h3 id=&#34;container:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Container&lt;/h3&gt;
+&lt;h3 id=&#34;container&#34;&gt;Container&lt;/h3&gt;
 
 &lt;p&gt;Each Heron topology consists of multiple &lt;strong&gt;containers&lt;/strong&gt;, each of which houses
-multiple &lt;a href=&#34;#heron-instance:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Heron Instances&lt;/a&gt;, a &lt;a href=&#34;#stream-manager:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Stream
-Manager&lt;/a&gt;, and a &lt;a href=&#34;#metrics-manager:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Metrics Manager&lt;/a&gt;. Containers
+multiple &lt;a href=&#34;#heron-instance&#34;&gt;Heron Instances&lt;/a&gt;, a &lt;a href=&#34;#stream-manager&#34;&gt;Stream
+Manager&lt;/a&gt;, and a &lt;a href=&#34;#metrics-manager&#34;&gt;Metrics Manager&lt;/a&gt;. Containers
 communicate with the topology&amp;rsquo;s TM to ensure that the topology forms a fully
 connected graph.&lt;/p&gt;
 
-&lt;p&gt;For an illustration, see the figure in the &lt;a href=&#34;#topology-master:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Topology Master&lt;/a&gt;
+&lt;p&gt;For an illustration, see the figure in the &lt;a href=&#34;#topology-master&#34;&gt;Topology Master&lt;/a&gt;
 section above.&lt;/p&gt;
 
-&lt;h3 id=&#34;stream-manager:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Stream Manager&lt;/h3&gt;
+&lt;h3 id=&#34;stream-manager&#34;&gt;Stream Manager&lt;/h3&gt;
 
 &lt;p&gt;The &lt;strong&gt;Stream Manager&lt;/strong&gt; (SM) manages the routing of tuples between topology
-components. Each &lt;a href=&#34;#heron-instance:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Heron Instance&lt;/a&gt; in a topology connects to its
+components. Each &lt;a href=&#34;#heron-instance&#34;&gt;Heron Instance&lt;/a&gt; in a topology connects to its
 local SM, while all of the SMs in a given topology connect to one another to
 form a network. Below is a visual illustration of a network of SMs:&lt;/p&gt;
 
@@ -1129,13 +1321,13 @@ bolt &lt;strong&gt;B3&lt;/strong&gt; (in this case spout &lt;strong&gt;S1&lt;/st
 &lt;strong&gt;A&lt;/strong&gt; will notify the other SMs and stream routing within the topology will
 return to normal.&lt;/p&gt;
 
-&lt;h4 id=&#34;stream-manger-configuration:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Stream Manger Configuration&lt;/h4&gt;
+&lt;h4 id=&#34;stream-manger-configuration&#34;&gt;Stream Manger Configuration&lt;/h4&gt;
 
 &lt;p&gt;SMs have a variety of &lt;a href=&#34;../../operators/configuration/stmgr&#34;&gt;configurable
 parameters&lt;/a&gt; that you can adjust at each
 phase of a topology&amp;rsquo;s &lt;a href=&#34;../topologies#topology-lifecycle&#34;&gt;lifecycle&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h3 id=&#34;heron-instance:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Heron Instance&lt;/h3&gt;
+&lt;h3 id=&#34;heron-instance&#34;&gt;Heron Instance&lt;/h3&gt;
 
 &lt;p&gt;A &lt;strong&gt;Heron Instance&lt;/strong&gt; (HI) is a process that handles a single task of a
 &lt;a href=&#34;../topologies#spouts&#34;&gt;spout&lt;/a&gt; or &lt;a href=&#34;../topologies#bolts&#34;&gt;bolt&lt;/a&gt;, which allows
@@ -1145,36 +1337,36 @@ for easy debugging and profiling.&lt;/p&gt;
 HIs are &lt;a href=&#34;https://en.wikipedia.org/wiki/Java_virtual_machine&#34;&gt;JVM&lt;/a&gt; processes, but
 this will change in the future.&lt;/p&gt;
 
-&lt;h4 id=&#34;heron-instance-configuration:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Heron Instance Configuration&lt;/h4&gt;
+&lt;h4 id=&#34;heron-instance-configuration&#34;&gt;Heron Instance Configuration&lt;/h4&gt;
 
 &lt;p&gt;HIs have a variety of &lt;a href=&#34;../../operators/configuration/instance&#34;&gt;configurable
 parameters&lt;/a&gt; that you can adjust at
 each phase of a topology&amp;rsquo;s &lt;a href=&#34;../topologies#topology-lifecycle&#34;&gt;lifecycle&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h3 id=&#34;metrics-manager:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Metrics Manager&lt;/h3&gt;
+&lt;h3 id=&#34;metrics-manager&#34;&gt;Metrics Manager&lt;/h3&gt;
 
 &lt;p&gt;Each topology runs a Metrics Manager (MM) that collects and exports metrics from
-all components in a &lt;a href=&#34;#container:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;container&lt;/a&gt;. It then routes those metrics to
-both the &lt;a href=&#34;#topology-master:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Topology Master&lt;/a&gt; and to external collectors, such as
+all components in a &lt;a href=&#34;#container&#34;&gt;container&lt;/a&gt;. It then routes those metrics to
+both the &lt;a href=&#34;#topology-master&#34;&gt;Topology Master&lt;/a&gt; and to external collectors, such as
 &lt;a href=&#34;https://github.com/facebookarchive/scribe&#34;&gt;Scribe&lt;/a&gt;,
 &lt;a href=&#34;http://graphite.wikidot.com/&#34;&gt;Graphite&lt;/a&gt;, or analogous systems.&lt;/p&gt;
 
 &lt;p&gt;You can adapt Heron to support additional systems by implementing your own
 &lt;a href=&#34;../../contributors/custom-metrics-sink&#34;&gt;custom metrics sink&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h2 id=&#34;cluster-level-components:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Cluster-level Components&lt;/h2&gt;
+&lt;h2 id=&#34;cluster-level-components&#34;&gt;Cluster-level Components&lt;/h2&gt;
 
 &lt;p&gt;All of the components listed in the sections above can be found in each
 topology. The components listed below are cluster-level components that function
 outside of particular topologies.&lt;/p&gt;
 
-&lt;h3 id=&#34;heron-cli:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Heron CLI&lt;/h3&gt;
+&lt;h3 id=&#34;heron-cli&#34;&gt;Heron CLI&lt;/h3&gt;
 
 &lt;p&gt;Heron has a CLI tool called &lt;code&gt;heron&lt;/code&gt; that is used to manage topologies.
 Documentation can be found in &lt;a href=&#34;../../operators/heron-cli&#34;&gt;Managing
 Topologies&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h3 id=&#34;heron-tracker:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Heron Tracker&lt;/h3&gt;
+&lt;h3 id=&#34;heron-tracker&#34;&gt;Heron Tracker&lt;/h3&gt;
 
 &lt;p&gt;The &lt;strong&gt;Heron Tracker&lt;/strong&gt; (or just Tracker) is a centralized gateway for
 cluster-wide information about topologies, including which topologies are
@@ -1187,7 +1379,7 @@ Heron &lt;a href=&#34;../../operators/deployment&#34;&gt;scheduler&lt;/a&gt;) or
 &lt;p&gt;Instructions on running the tracker including JSON API docs can be found in &lt;a href=&#34;../../operators/heron-tracker&#34;&gt;Heron
 Tracker&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h3 id=&#34;heron-ui:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Heron UI&lt;/h3&gt;
+&lt;h3 id=&#34;heron-ui&#34;&gt;Heron UI&lt;/h3&gt;
 
 &lt;p&gt;&lt;strong&gt;Heron UI&lt;/strong&gt; is a rich visual interface that you can use to interact with
 topologies. Through Heron UI you can see color-coded visual representations of
@@ -1196,7 +1388,7 @@ the &lt;a href=&#34;../topologies#logical-plan&#34;&gt;logical&lt;/a&gt; and
 
 &lt;p&gt;For more information, see the &lt;a href=&#34;../../operators/heron-ui&#34;&gt;Heron UI&lt;/a&gt; document.&lt;/p&gt;
 
-&lt;h2 id=&#34;topology-submit-sequence:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Topology Submit Sequence&lt;/h2&gt;
+&lt;h2 id=&#34;topology-submit-sequence&#34;&gt;Topology Submit Sequence&lt;/h2&gt;
 
 &lt;p&gt;&lt;a href=&#34;../topologies#topology-lifecycle&#34;&gt;Topology Lifecycle&lt;/a&gt; describes the lifecycle states of a Heron
 topology. The diagram below illustrates the sequence of interactions amongst the Heron architectural
@@ -1210,7 +1402,7 @@ https://docs.google.com/drawings/d/10d1Q_VO0HFtOHftDV7kK6VbZMVI5EpEYHrD-LR7SczE
 
 &lt;p&gt;&lt;img src=&#34;/heron/img/topology-submit-sequence-diagram.png&#34; style=&#34;max-width:140%;!important;&#34; alt=&#34;Topology Sequence Diagram&#34;/&gt;&lt;/p&gt;
 
-&lt;h3 id=&#34;topology-submit-description:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;Topology Submit Description&lt;/h3&gt;
+&lt;h3 id=&#34;topology-submit-description&#34;&gt;Topology Submit Description&lt;/h3&gt;
 
 &lt;p&gt;The following describes in more detail how a topology is submitted and
 launched using local scheduler.&lt;/p&gt;
@@ -1276,7 +1468,7 @@ for developers who want to contribute to Heron. The Heron codebase lives on
 &lt;p&gt;If you&amp;rsquo;re looking for documentation about developing topologies for a Heron
 cluster, see &lt;a href=&#34;../../developers/topologies&#34;&gt;Building Topologies&lt;/a&gt; instead.&lt;/p&gt;
 
-&lt;h2 id=&#34;languages:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Languages&lt;/h2&gt;
+&lt;h2 id=&#34;languages&#34;&gt;Languages&lt;/h2&gt;
 
 &lt;p&gt;The primary programming languages for Heron are C++, Java, and Python.&lt;/p&gt;
 
@@ -1298,7 +1490,7 @@ UI&lt;/a&gt; and the &lt;a href=&#34;../../operators/heron-tracker&#34;&gt;Heron
 Tracker&lt;/a&gt;.&lt;/p&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;main-tools:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Main Tools&lt;/h2&gt;
+&lt;h2 id=&#34;main-tools&#34;&gt;Main Tools&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;p&gt;&lt;strong&gt;Build tool&lt;/strong&gt; &amp;mdash; Heron uses &lt;a href=&#34;http://bazel.io/&#34;&gt;Bazel&lt;/a&gt; as its build tool.
@@ -1317,13 +1509,13 @@ components in the codebase can be found in the &lt;a href=&#34;#state-management
 Management&lt;/a&gt; section below.&lt;/p&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;common-utilities:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Common Utilities&lt;/h2&gt;
+&lt;h2 id=&#34;common-utilities&#34;&gt;Common Utilities&lt;/h2&gt;
 
 &lt;p&gt;The &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/common&#34;&gt;&lt;code&gt;heron/common&lt;/code&gt;&lt;/a&gt; contains a variety of
 utilities for each of Heron&amp;rsquo;s languages, including useful constants, file
 utilities, networking interfaces, and more.&lt;/p&gt;
 
-&lt;h2 id=&#34;cluster-scheduling:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Cluster Scheduling&lt;/h2&gt;
+&lt;h2 id=&#34;cluster-scheduling&#34;&gt;Cluster Scheduling&lt;/h2&gt;
 
 &lt;p&gt;Heron supports two cluster schedulers out of the box:
 &lt;a href=&#34;../../operators/deployment/schedulers/aurora&#34;&gt;Aurora&lt;/a&gt; and a &lt;a href=&#34;../../operators/deployment/schedulers/local&#34;&gt;local
@@ -1337,7 +1529,7 @@ can be found in &lt;a href=&#34;../../operators/deployment/schedulers/aurora&#34
 Aurora&lt;/a&gt; and &lt;a href=&#34;../../operators/deployment/schedulers/local&#34;&gt;Local
 Deployment&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h2 id=&#34;state-management:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;State Management&lt;/h2&gt;
+&lt;h2 id=&#34;state-management&#34;&gt;State Management&lt;/h2&gt;
 
 &lt;p&gt;The parts of Heron&amp;rsquo;s codebase related to
 &lt;a href=&#34;http://zookeeper.apache.org/&#34;&gt;ZooKeeper&lt;/a&gt; are mostly contained in
@@ -1347,27 +1539,27 @@ interfaces for &lt;a href=&#34;https://github.com/twitter/heron/tree/master/hero
 &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/state/src/python&#34;&gt;Python&lt;/a&gt; that are used in a variety of
 Heron components.&lt;/p&gt;
 
-&lt;h2 id=&#34;topology-components:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Topology Components&lt;/h2&gt;
+&lt;h2 id=&#34;topology-components&#34;&gt;Topology Components&lt;/h2&gt;
 
-&lt;h3 id=&#34;topology-master:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Topology Master&lt;/h3&gt;
+&lt;h3 id=&#34;topology-master&#34;&gt;Topology Master&lt;/h3&gt;
 
 &lt;p&gt;The C++ code for Heron&amp;rsquo;s &lt;a href=&#34;../../concepts/architecture#topology-master&#34;&gt;Topology
 Master&lt;/a&gt; is written in C++ can be
 found in &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/tmaster&#34;&gt;&lt;code&gt;heron/tmaster&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h3 id=&#34;stream-manager:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Stream Manager&lt;/h3&gt;
+&lt;h3 id=&#34;stream-manager&#34;&gt;Stream Manager&lt;/h3&gt;
 
 &lt;p&gt;The C++ code for Heron&amp;rsquo;s &lt;a href=&#34;../../concepts/architecture#stream-manager&#34;&gt;Stream
 Manager&lt;/a&gt; can be found in
 &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/stmgr&#34;&gt;&lt;code&gt;heron/stmgr&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h3 id=&#34;heron-instance:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Heron Instance&lt;/h3&gt;
+&lt;h3 id=&#34;heron-instance&#34;&gt;Heron Instance&lt;/h3&gt;
 
 &lt;p&gt;The Java code for &lt;a href=&#34;../../concepts/architecture#heron-instance&#34;&gt;Heron
 instances&lt;/a&gt; can be found in
 &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/instance&#34;&gt;&lt;code&gt;heron/instance&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h3 id=&#34;metrics-manager:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Metrics Manager&lt;/h3&gt;
+&lt;h3 id=&#34;metrics-manager&#34;&gt;Metrics Manager&lt;/h3&gt;
 
 &lt;p&gt;The Java code for Heron&amp;rsquo;s &lt;a href=&#34;../../concepts/architecture#metrics-manager&#34;&gt;Metrics
 Manager&lt;/a&gt; can be found in
@@ -1376,9 +1568,9 @@ Manager&lt;/a&gt; can be found in
 &lt;p&gt;If you&amp;rsquo;d like to implement your own custom metrics handler (known as a &lt;strong&gt;metrics
 sink&lt;/strong&gt;), see &lt;a href=&#34;../custom-metrics-sink&#34;&gt;Implementing a Custom Metrics Sink&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h2 id=&#34;developer-apis:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Developer APIs&lt;/h2&gt;
+&lt;h2 id=&#34;developer-apis&#34;&gt;Developer APIs&lt;/h2&gt;
 
-&lt;h3 id=&#34;topology-api:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Topology API&lt;/h3&gt;
+&lt;h3 id=&#34;topology-api&#34;&gt;Topology API&lt;/h3&gt;
 
 &lt;p&gt;Heron&amp;rsquo;s API for writing topologies is written in Java. The code for this API can
 be found in &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/api&#34;&gt;&lt;code&gt;heron/api&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
@@ -1387,7 +1579,7 @@ be found in &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/a
 Topologies&lt;/a&gt;, while API documentation can be found
 &lt;a href=&#34;/heron/api/com/twitter/heron/api/topology/package-summary.html&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h3 id=&#34;simulator:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Simulator&lt;/h3&gt;
+&lt;h3 id=&#34;simulator&#34;&gt;Simulator&lt;/h3&gt;
 
 &lt;p&gt;Heron enables you to run topologies in &lt;a href=&#34;../../developers/simulator-mode&#34;&gt;&lt;code&gt;Simulator&lt;/code&gt;&lt;/a&gt;
 for debugging purposes.&lt;/p&gt;
@@ -1395,16 +1587,16 @@ for debugging purposes.&lt;/p&gt;
 &lt;p&gt;The Java API for simulator can be found in
 &lt;a href=&#34;/heron/api/com/twitter/heron/simulator/package-summary.html&#34;&gt;&lt;code&gt;heron/simulator&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h3 id=&#34;example-topologies:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Example Topologies&lt;/h3&gt;
+&lt;h3 id=&#34;example-topologies&#34;&gt;Example Topologies&lt;/h3&gt;
 
 &lt;p&gt;Heron&amp;rsquo;s codebase includes a wide variety of example
 &lt;a href=&#34;../../concepts/topologies&#34;&gt;topologies&lt;/a&gt; built using Heron&amp;rsquo;s topology API for
 Java. Those examples can be found in
 &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/examples&#34;&gt;&lt;code&gt;heron/examples&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h2 id=&#34;user-interface-components:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;User Interface Components&lt;/h2&gt;
+&lt;h2 id=&#34;user-interface-components&#34;&gt;User Interface Components&lt;/h2&gt;
 
-&lt;h3 id=&#34;heron-cli:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Heron CLI&lt;/h3&gt;
+&lt;h3 id=&#34;heron-cli&#34;&gt;Heron CLI&lt;/h3&gt;
 
 &lt;p&gt;Heron has a tool called &lt;code&gt;heron&lt;/code&gt; that is used to both provide a CLI interface
 for &lt;a href=&#34;../../operators/heron-cli&#34;&gt;managing topologies&lt;/a&gt; and to perform much of
@@ -1419,7 +1611,7 @@ The Python code for &lt;code&gt;heron&lt;/code&gt; can be found in
 &lt;li&gt;&lt;a href=&#34;../../operators/deployment/schedulers/aurora&#34;&gt;Aurora scheduler&lt;/a&gt; config can be found &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/config/src/yaml/conf/aurora&#34;&gt;&lt;code&gt;heron/config/src/yaml/conf/aurora&lt;/code&gt;&lt;/a&gt;.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h3 id=&#34;heron-tracker:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Heron Tracker&lt;/h3&gt;
+&lt;h3 id=&#34;heron-tracker&#34;&gt;Heron Tracker&lt;/h3&gt;
 
 &lt;p&gt;The Python code for the &lt;a href=&#34;../../operators/heron-tracker&#34;&gt;Heron Tracker&lt;/a&gt; can be
 found in &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/tracker&#34;&gt;&lt;code&gt;heron/tracker&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
@@ -1431,7 +1623,7 @@ routes to the Tracker in
 corresponding handlers in the
 &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/tracker/src/python/handlers&#34;&gt;&lt;code&gt;handlers&lt;/code&gt;&lt;/a&gt; directory.&lt;/p&gt;
 
-&lt;h3 id=&#34;heron-ui:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Heron UI&lt;/h3&gt;
+&lt;h3 id=&#34;heron-ui&#34;&gt;Heron UI&lt;/h3&gt;
 
 &lt;p&gt;The Python code for the &lt;a href=&#34;../../operators/heron-ui&#34;&gt;Heron UI&lt;/a&gt; can be found in
 &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/ui&#34;&gt;&lt;code&gt;heron/ui&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
@@ -1443,7 +1635,7 @@ HTTP routes to Heron UI in
 handlers in the &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/web/source/python/handlers&#34;&gt;&lt;code&gt;handlers&lt;/code&gt;&lt;/a&gt;
 directory.&lt;/p&gt;
 
-&lt;h3 id=&#34;heron-shell:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Heron Shell&lt;/h3&gt;
+&lt;h3 id=&#34;heron-shell&#34;&gt;Heron Shell&lt;/h3&gt;
 
 &lt;p&gt;The Python code for the &lt;a href=&#34;../../operators/heron-shell&#34;&gt;Heron Shell&lt;/a&gt; can be
 found in &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/shell&#34;&gt;&lt;code&gt;heron/shell&lt;/code&gt;&lt;/a&gt;. The HTTP handlers and
@@ -1452,7 +1644,7 @@ web server are defined in
 JavaScript, CSS, and images for the web UI can be found in the
 &lt;a href=&#34;https://github.com/twitter/heron/tree/master/heron/shell/assets&#34;&gt;&lt;code&gt;assets&lt;/code&gt;&lt;/a&gt; directory.&lt;/p&gt;
 
-&lt;h2 id=&#34;tests:8b02a39a96f0b96cdaa66e5ca2ffdb72&#34;&gt;Tests&lt;/h2&gt;
+&lt;h2 id=&#34;tests&#34;&gt;Tests&lt;/h2&gt;
 
 &lt;p&gt;There are a wide variety of tests for Heron that are scattered throughout the
 codebase. For more info see &lt;a href=&#34;../testing&#34;&gt;Testing Heron&lt;/a&gt;.&lt;/p&gt;
@@ -1476,12 +1668,12 @@ data that is fed into a Heron topology via
 interface for working with tuples. Heron &lt;code&gt;Tuple&lt;/code&gt;s can hold values of any type;
 values are accessible either by providing an index or a field name.&lt;/p&gt;
 
-&lt;h2 id=&#34;using-tuples:907d70eb0b7602a322a01d2263664ad7&#34;&gt;Using Tuples&lt;/h2&gt;
+&lt;h2 id=&#34;using-tuples&#34;&gt;Using Tuples&lt;/h2&gt;
 
 &lt;p&gt;Heron&amp;rsquo;s &lt;code&gt;Tuple&lt;/code&gt; interface contains the methods listed in the &lt;a href=&#34;/heron/api/com/twitter/heron/api/tuple/Tuple.html&#34;&gt;Javadoc
 definition&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h3 id=&#34;accessing-primitive-types-by-index:907d70eb0b7602a322a01d2263664ad7&#34;&gt;Accessing Primitive Types By Index&lt;/h3&gt;
+&lt;h3 id=&#34;accessing-primitive-types-by-index&#34;&gt;Accessing Primitive Types By Index&lt;/h3&gt;
 
 &lt;p&gt;Heron &lt;code&gt;Tuple&lt;/code&gt;s support a wide variety of primitive Java types, including
 strings, Booleans, byte arrays, and more.
@@ -1490,7 +1682,7 @@ method, for example, takes an integer index and returns either a string or
 &lt;code&gt;null&lt;/code&gt; if no string value is present at that index. Analogous methods can be
 found in the Javadoc.&lt;/p&gt;
 
-&lt;h3 id=&#34;accessing-primitive-types-by-field:907d70eb0b7602a322a01d2263664ad7&#34;&gt;Accessing Primitive Types By Field&lt;/h3&gt;
+&lt;h3 id=&#34;accessing-primitive-types-by-field&#34;&gt;Accessing Primitive Types By Field&lt;/h3&gt;
 
 &lt;p&gt;In addition to being accessible via index, values stored in Heron tuples are
 accessible via field name as well. The
@@ -1499,7 +1691,7 @@ method, for example, takes a field name string and returns either a string or
 &lt;code&gt;null&lt;/code&gt; if no string value is present for that field name. Analogous methods can
 be found in the Javadoc.&lt;/p&gt;
 
-&lt;h3 id=&#34;using-non-primitive-types:907d70eb0b7602a322a01d2263664ad7&#34;&gt;Using Non-primitive Types&lt;/h3&gt;
+&lt;h3 id=&#34;using-non-primitive-types&#34;&gt;Using Non-primitive Types&lt;/h3&gt;
 
 &lt;p&gt;In addition to primitive types, you can access any value in a Heron &lt;code&gt;Tuple&lt;/code&gt; as a
 Java &lt;code&gt;Object&lt;/code&gt;. As for primitive types, you can access &lt;code&gt;Object&lt;/code&gt;s on the basis of
@@ -1516,7 +1708,7 @@ an index or a field name. The following methods return either an &lt;code&gt;Obj
 &lt;a href=&#34;/heron/api/com/twitter/heron/api/tuple/Tuple.html#getValues--&#34;&gt;&lt;code&gt;getValues&lt;/code&gt;&lt;/a&gt;
 method.&lt;/p&gt;
 
-&lt;h3 id=&#34;user-defined-types:907d70eb0b7602a322a01d2263664ad7&#34;&gt;User-defined Types&lt;/h3&gt;
+&lt;h3 id=&#34;user-defined-types&#34;&gt;User-defined Types&lt;/h3&gt;
 
 &lt;p&gt;You use Heron tuples in conjunction with more complex, user-defined types using
 &lt;a href=&#34;http://www.studytonight.com/java/type-casting-in-java&#34;&gt;type casting&lt;/a&gt;, provided
@@ -1534,21 +1726,21 @@ Here&amp;rsquo;s an example (which assumes that a serializer for the type
 &lt;p&gt;More info on custom serialization can be found in &lt;a href=&#34;../serialization&#34;&gt;Creating Custom Tuple
 Serializers&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h3 id=&#34;fields:907d70eb0b7602a322a01d2263664ad7&#34;&gt;Fields&lt;/h3&gt;
+&lt;h3 id=&#34;fields&#34;&gt;Fields&lt;/h3&gt;
 
 &lt;p&gt;The &lt;code&gt;getFields&lt;/code&gt; method returns a
 &lt;a href=&#34;http://heronproject.github.io/topology-api/com/twitter/heron/api/tuple/Fields&#34;&gt;&lt;code&gt;Fields&lt;/code&gt;&lt;/a&gt;
 object that contains all of the fields in the tuple. More on fields can be found
-&lt;a href=&#34;#Fields:907d70eb0b7602a322a01d2263664ad7&#34;&gt;below&lt;/a&gt;.&lt;/p&gt;
+&lt;a href=&#34;#Fields&#34;&gt;below&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h3 id=&#34;other-methods:907d70eb0b7602a322a01d2263664ad7&#34;&gt;Other Methods&lt;/h3&gt;
+&lt;h3 id=&#34;other-methods&#34;&gt;Other Methods&lt;/h3&gt;
 
 &lt;p&gt;There are additional methods available for determining the size of Heron
 &lt;code&gt;Tuple&lt;/code&gt;s, extracting contextual information, and more. For a full listing of
 methods, see the
 &lt;a href=&#34;/heron/api/com/twitter/heron/api/tuple/Tuple.html&#34;&gt;Javadoc&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h2 id=&#34;fields-1:907d70eb0b7602a322a01d2263664ad7&#34;&gt;Fields&lt;/h2&gt;
+&lt;h2 id=&#34;fields-1&#34;&gt;Fields&lt;/h2&gt;
 
 &lt;p&gt;From the methods in the list above you can see that you can retrieve single
 values from a Heron tuple on the basis of their index. You can also retrieve
@@ -1587,348 +1779,46 @@ which can be initialized either using varargs or a list of strings:&lt;/p&gt;
 &lt;p&gt;From its very conception, Heron was built to fulfill a set of core design goals,
 including:&lt;/p&gt;
 
-&lt;h3 id=&#34;isolation:bce6205dbf0cc8cc2c7641348bebb77f&#34;&gt;Isolation&lt;/h3&gt;
+&lt;h3 id=&#34;isolation&#34;&gt;Isolation&lt;/h3&gt;
 
 &lt;p&gt;&lt;a href=&#34;/heron/docs/concepts/topologies&#34;&gt;Topologies&lt;/a&gt; should be process based rather than
 thread based, and each process should run in isolation for the sake of easy
 debugging, profiling, and troubleshooting.&lt;/p&gt;
 
-&lt;h3 id=&#34;resource-constraints:bce6205dbf0cc8cc2c7641348bebb77f&#34;&gt;Resource constraints&lt;/h3&gt;
+&lt;h3 id=&#34;resource-constraints&#34;&gt;Resource constraints&lt;/h3&gt;
 
 &lt;p&gt;Topologies should use only those resources that they are initially allocated and
 never exceed those bounds. This makes Heron safe to run in shared infrastructure.&lt;/p&gt;
 
-&lt;h3 id=&#34;compatibility:bce6205dbf0cc8cc2c7641348bebb77f&#34;&gt;Compatibility&lt;/h3&gt;
+&lt;h3 id=&#34;compatibility&#34;&gt;Compatibility&lt;/h3&gt;
 
 &lt;p&gt;Heron is fully API and data model compatible with &lt;a href=&#34;http://storm.apache.org&#34;&gt;Apache
 Storm&lt;/a&gt;, making it easy for developers to transition
 between systems.&lt;/p&gt;
 
-&lt;h3 id=&#34;back-pressure:bce6205dbf0cc8cc2c7641348bebb77f&#34;&gt;Back pressure&lt;/h3&gt;
+&lt;h3 id=&#34;back-pressure&#34;&gt;Back pressure&lt;/h3&gt;
 
 &lt;p&gt;In a distributed system like Heron, there are no guarantees that all system
-components will execute at the same speed. Heron has built-in &lt;a href=&#34;/heron/docs/concepts/architecture/#stream-manager:1bf455b3a3c6e1e40be41ef6023b75eb&#34;&gt;back pressure
+components will execute at the same speed. Heron has built-in &lt;a href=&#34;/heron/docs/concepts/architecture/#stream-manager&#34;&gt;back pressure
 mechanisms&lt;/a&gt; to ensure that
 topologies can self-adjust in case components lag.&lt;/p&gt;
 
-&lt;h3 id=&#34;performance:bce6205dbf0cc8cc2c7641348bebb77f&#34;&gt;Performance&lt;/h3&gt;
+&lt;h3 id=&#34;performance&#34;&gt;Performance&lt;/h3&gt;
 
 &lt;p&gt;Many of Heron&amp;rsquo;s design choices have enabled Heron to achieve higher throughput
 and lower latency than Storm while also offering enhanced configurability to
 fine-tune potential latency/throughput trade-offs.&lt;/p&gt;
 
-&lt;h3 id=&#34;semantic-guarantees:bce6205dbf0cc8cc2c7641348bebb77f&#34;&gt;Semantic guarantees&lt;/h3&gt;
+&lt;h3 id=&#34;semantic-guarantees&#34;&gt;Semantic guarantees&lt;/h3&gt;
 
 &lt;p&gt;Heron provides support for both &lt;a href=&#34;https://kafka.apache.org/08/design.html#semantics&#34;&gt;at-most-once and
 at-least-once&lt;/a&gt; processing
 semantics.&lt;/p&gt;
 
-&lt;h3 id=&#34;efficiency:bce6205dbf0cc8cc2c7641348bebb77f&#34;&gt;Efficiency&lt;/h3&gt;
+&lt;h3 id=&#34;efficiency&#34;&gt;Efficiency&lt;/h3&gt;
 
 &lt;p&gt;Heron was built with the goal of achieving all of the above with the minumim
 possible resource usage.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Heron Instance</title>
-      <link>/heron/docs/operators/configuration/instance/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/heron/docs/operators/configuration/instance/</guid>
-      <description>
-
-&lt;p&gt;You can configure the behavior of the &lt;a href=&#34;../../../concepts/architecture#heron-instance&#34;&gt;Heron
-Instances&lt;/a&gt; (HIs) in a
-topology using the parameters below.&lt;/p&gt;
-
-&lt;h2 id=&#34;internal-configuration:275a03659b3b3115944e8df00a6db60f&#34;&gt;Internal Configuration&lt;/h2&gt;
-
-&lt;p&gt;These parameters deal with the TCP write and read queue for each instance.&lt;/p&gt;
-
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;Meaning&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;Default&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.internal.bolt.read.queue.capacity&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The queue capacity (number of items) in bolt for buffer packets to read from stream manager&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;128&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.internal.bolt.write.queue.capacity&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The queue capacity (number of items) in bolt for buffer packets to write to stream manager&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;128&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.internal.spout.read.queue.capacity&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The queue capacity (number of items) in spout for buffer packets to read from stream manager&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;1024&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.internal.spout.write.queue.capacity&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The queue capacity (number of items) in spout for buffer packets to write to stream manager&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;128&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.internal.metrics.write.queue.capacity&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The queue capacity (number of items) for metrics packets to write to metrics manager&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;128&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;h2 id=&#34;network-configuration:275a03659b3b3115944e8df00a6db60f&#34;&gt;Network Configuration&lt;/h2&gt;
-
-&lt;p&gt;You can configure how HIs collect and transmit data in one (but only one) of
-two ways: &lt;strong&gt;time based&lt;/strong&gt; or &lt;strong&gt;size based&lt;/strong&gt;. If you choose time based, you can
-specify the maximum batch time (in milliseconds) for reading from and writing
-to the HI&amp;rsquo;s socket; if you choose size based, you can specify maximum batch
-sizes (in bytes) instead.&lt;/p&gt;
-
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;Meaning&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;Default&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.network.read.batch.time.ms&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Time based, the maximum batch time in ms for instance to read from stream manager per attempt&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;16&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.network.read.batch.size.bytes&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Size based, the maximum batch size in bytes to read from stream manager&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;32768&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.network.write.batch.time.ms&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Time based, the maximum batch time in ms for instance to write to stream manager per attempt&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;16&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.network.write.batch.size.bytes&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Size based, the maximum batch size in bytes to write to stream manager&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;32768&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;h3 id=&#34;other-network-parameters:275a03659b3b3115944e8df00a6db60f&#34;&gt;Other Network Parameters&lt;/h3&gt;
-
-&lt;p&gt;The following parameters do not need to be set in accordance with a time- or
-size-based system.&lt;/p&gt;
-
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;Meaning&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;Default&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.network.options.socket.send.buffer.size.bytes&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The maximum socket&amp;rsquo;s send buffer size in bytes&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;6553600&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.network.options.socket.received.buffer.size.bytes&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The maximum socket&amp;rsquo;s received buffer size in bytes of instance&amp;rsquo;s network options&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;8738000&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.reconnect.streammgr.interval.sec&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Interval in seconds to reconnect to the stream manager, including the request timeout in connecting&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;5&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.reconnect.streammgr.times&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The maximum number of connection attempts made to the SM before the SM is forcibly restarted&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;60&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;h2 id=&#34;metrics-manager-configuration:275a03659b3b3115944e8df00a6db60f&#34;&gt;Metrics Manager Configuration&lt;/h2&gt;
-
-&lt;p&gt;These parameters deal with how each HI interacts with the topology&amp;rsquo;s &lt;a href=&#34;../../../concepts/architecture#stream-manager&#34;&gt;Stream
-Manager&lt;/a&gt;.&lt;/p&gt;
-
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;Meaning&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;Default&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.metrics.system.sample.interval.sec&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The interval, in seconds, at which an instance samples its system metrics, e.g. CPU load.&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;10&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.reconnect.metricsmgr.interval.sec&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Interval in seconds to reconnect to the metrics manager, including the request timeout in connecting&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;5&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.reconnect.metricsmgr.times&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The maximum number of connection attempts to the MM before the MM is forcibly restarted&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;60&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;h2 id=&#34;tuning:275a03659b3b3115944e8df00a6db60f&#34;&gt;Tuning&lt;/h2&gt;
-
-&lt;p&gt;These parameters are used to dynamically tune the available sizes in read and
-write queues to maintain high performance while avoiding garbage collection
-issues.&lt;/p&gt;
-
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;Meaning&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;Default&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.tuning.expected.bolt.read.queue.size&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The expected size on read queue in bolt&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;5&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.tuning.expected.bolt.write.queue.size&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The expected size on write queue in bolt&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;5&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.tuning.expected.spout.read.queue.size&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The expected size on read queue in spout&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;512&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.tuning.expected.spout.write.queue.size&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The expected size on write queue in spout&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;5&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.tuning.expected.metrics.write.queue.size&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The expected size on metrics write queue&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;5&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.tuning.current.sample.weight&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;TODO&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;0.8&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;h2 id=&#34;other-parameters:275a03659b3b3115944e8df00a6db60f&#34;&gt;Other Parameters&lt;/h2&gt;
-
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;Meaning&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;Default&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.set.data.tuple.capacity&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The maximum number of data tuples to batch in a &lt;code&gt;HeronDataTupleSet&lt;/code&gt; protobuf message&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;256&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.set.control.tuple.capacity&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The maximum number of control tuples to batch in a &lt;code&gt;HeronControlTupleSet&lt;/code&gt; protobuf message&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;256&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.ack.batch.time.ms&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The maximum time in ms for an spout to do acknowledgement per attempt, the ack batch could also break if there are no more ack tuples to process&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;128&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.emit.batch.time.ms&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The maximum time in ms for an spout instance to emit tuples per attempt&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;16&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.emit.batch.size.bytes&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The maximum batch size in bytes for an spout to emit tuples per attempt&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;32768&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.execute.batch.time.ms&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The maximum time in ms for an bolt instance to execute tuples per attempt&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;16&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.execute.batch.size.bytes&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The maximum batch size in bytes for an bolt instance to execute tuples per attempt&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;32768&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.state.check.interval.sec&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The time interval for an instance to check the state change, for instance, the interval a spout using to check whether activate/deactivate is invoked&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;5&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;code&gt;heron.instance.acknowledgement.nbuckets&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;TODO&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;10&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
 </description>
     </item>
     
