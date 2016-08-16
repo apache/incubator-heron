@@ -41,26 +41,13 @@ STATEMGRS_KEY = "statemgrs"
 def print_usage():
   print (
       "./heron-executor <shardid> <topname> <topid> <topdefnfile> "
-      " <instance_distribution> <zknode> <zkroot> <tmaster_binary> <stmgr_binary> "
+      " <instance_distribution_ignored> <zknode> <zkroot> <tmaster_binary> <stmgr_binary> "
       " <metricsmgr_classpath> <instance_jvm_opts_in_base64> <classpath> "
       " <master_port> <tmaster_controller_port> <tmaster_stats_port> <heron_internals_config_file> "
       " <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_bin_file>"
       " <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>"
       " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file> "
       " <scheduler_classpath> <scheduler_port> <python_instance_binary>")
-
-def extract_triplets(s):
-  """
-  given a string s of the form "a:b:c:d:e:f...", extract triplets
-  [('a', 'b', 'c'), ('d', 'e', 'f')]
-  """
-  t = s.split(':')
-  assert len(t) % 3 == 0
-  result = []
-  while len(t) > 0:
-    result.append((t[0], t[1], t[2]))
-    t = t[3:]
-  return result
 
 def id_list(prefix, start, count):
   ids = []
@@ -188,8 +175,8 @@ class HeronExecutor(object):
     # Read the heron_internals.yaml for logging dir
     self.log_dir = self._load_logging_dir(self.heron_internals_config_file)
 
-    # these get set when we call update_instance_distribution
-    self.instance_distribution = {}
+    # these get set when we call update_packing_plan
+    self.packing_plan = None
     self.stmgr_ids = []
     self.metricsmgr_ids = []
     self.heron_shell_ids = []
@@ -202,27 +189,18 @@ class HeronExecutor(object):
     # Log itself pid
     log_pid_for_process(get_heron_executor_process_name(self.shard), os.getpid())
 
+  def update_packing_plan(self, new_packing_plan):
+    self.packing_plan = new_packing_plan
+    num_containers = len(self.packing_plan.container_plans)
+    self.stmgr_ids = stmgr_list(num_containers)
+    self.metricsmgr_ids = metricsmgr_list(num_containers)
+    self.heron_shell_ids = heron_shell_list(num_containers)
+
   # pylint: disable=no-self-use
   def _load_logging_dir(self, heron_internals_config_file):
     with open(heron_internals_config_file, 'r') as stream:
       heron_internals_config = yaml.load(stream)
     return heron_internals_config['heron.logging.directory']
-
-  def update_instance_distribution(self, new_distribution):
-    self.instance_distribution = new_distribution
-    self.stmgr_ids = stmgr_list(len(self.instance_distribution))
-    self.metricsmgr_ids = metricsmgr_list(len(self.instance_distribution))
-    self.heron_shell_ids = heron_shell_list(len(self.instance_distribution))
-
-  # pylint: disable=no-self-use
-  def parse_instance_distribution(self, encoded_distribution):
-    # First get the container id to distribution encoding
-    f1 = map(lambda z: (int(z[0]), ':'.join(z[1:])),
-             map(lambda x: x.split(':'), encoded_distribution.split(',')))
-    # Next get the triplets
-    f2 = map(lambda x: {x[0] : extract_triplets(x[1])}, f1)
-    # Finally convert that into a map
-    return reduce(lambda x, y: dict(x.items() + y.items()), f2)
 
   def _get_metricsmgr_cmd(self, metricsManagerId, sink_config_file, port):
     ''' get the command to start the metrics manager processes '''
@@ -342,7 +320,7 @@ class HeronExecutor(object):
     return retval
 
   # Returns the processes for each Python Heron Instance
-  def get_python_instance_cmd(self, instance_info):
+  def _get_python_instance_cmd(self, instance_info):
     # pylint: disable=fixme
     # TODO: currently ignoring ramsize, heap, etc.
     retval = {}
@@ -373,11 +351,13 @@ class HeronExecutor(object):
     the stream logic of the topology
     '''
     retval = {}
-    # First lets make sure that our shard id is a valid one
-    assert self.shard in self.instance_distribution
-    my_instances = self.instance_distribution[self.shard]
+    instance_plans = self._get_instance_plans(self.packing_plan, self.shard)
     instance_info = []
-    for (component_name, global_task_id, component_index) in my_instances:
+    for instance_plan in instance_plans:
+      tokens = instance_plan.id.split(":")
+      global_task_id = tokens[2]
+      component_index = tokens[3]
+      component_name = instance_plan.component_name
       instance_id = "container_%s_%s_%s" % (str(self.shard), component_name, str(global_task_id))
       instance_info.append((instance_id, component_name, global_task_id, component_index))
 
@@ -407,11 +387,21 @@ class HeronExecutor(object):
     if self.pkg_type == 'jar' or self.pkg_type == 'tar':
       retval.update(self._get_java_instance_cmd(instance_info))
     elif self.pkg_type == 'pex':
-      retval.update(self.get_python_instance_cmd(instance_info))
+      retval.update(self._get_python_instance_cmd(instance_info))
     else:
       raise ValueError("Unrecognized package type: %s" % self.pkg_type)
 
     return retval
+
+  def _get_instance_plans(self, packing_plan, container_id):
+    this_container_plan = None
+    for container_plan in packing_plan.container_plans:
+      if container_plan.id == str(container_id):
+        this_container_plan = container_plan
+
+    # make sure that our shard id is a valid one
+    assert this_container_plan is not None
+    return this_container_plan.instance_plans
 
   # Returns the common heron support processes that all containers get, like the heron shell
   def _get_heron_support_processes(self):
@@ -624,25 +614,25 @@ class HeronExecutor(object):
     state_managers = statemanagerfactory.get_all_state_managers(statemgr_config)
 
     # pylint: disable=unused-argument
-    def on_packing_plan_watch(state_manager, packing_plan):
+    def on_packing_plan_watch(state_manager, new_packing_plan):
       Log.info(
-          "State watch triggered for packing plan change. New PackingPlan: %s" % str(packing_plan))
+          "State watch triggered for packing plan change. New PackingPlan: %s" %
+          str(new_packing_plan))
 
-      current_distribution = self.instance_distribution
-      new_distribution = self.parse_instance_distribution(packing_plan.instance_distribution)
-
-      if current_distribution != new_distribution:
-        Log.info("Instance distribution change detected on shard %s, relaunching. "\
-                 "Existing: %s, new: %s" % (self.shard, current_distribution, new_distribution))
-        self.update_instance_distribution(new_distribution)
+      if self.packing_plan != new_packing_plan:
+        Log.info("State watch triggered for PackingPlan update, PackingPlan change detected on "\
+                 "shard %s, relaunching. Existing: %s, new: %s" %
+                 (self.shard, str(self.packing_plan), str(new_packing_plan)))
+        self.update_packing_plan(new_packing_plan)
 
         # pylint: disable=fixme
         # TODO: handle relaunch of running topology scenario
         Log.info("Relaunching shard %s" % self.shard)
         executor.launch()
       else:
-        Log.info("Instance distribution not changed, not relaunching. existing: %s, new: %s" %
-                 (current_distribution, new_distribution))
+        Log.info("State watch triggered for PackingPlan update but PackingPlan not changed so "\
+                 "not relaunching. Existing: %s, new: %s" %
+                 (str(self.packing_plan), str(new_packing_plan)))
 
     for state_manager in state_managers:
       # The callback function with the bound

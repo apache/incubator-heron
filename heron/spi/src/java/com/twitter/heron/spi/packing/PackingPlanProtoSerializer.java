@@ -23,8 +23,6 @@ public class PackingPlanProtoSerializer {
   public PackingPlans.PackingPlan toProto(PackingPlan packingPlan) {
     PackingPlans.PackingPlan.Builder builder = PackingPlans.PackingPlan.newBuilder()
         .setId(packingPlan.getId())
-        .setInstanceDistribution(packingPlan.getInstanceDistribution())
-        .setComponentRamDistribution(packingPlan.getComponentRamDistribution())
         .setResource(builder(packingPlan.getResource()));
 
     for (PackingPlan.ContainerPlan containerPlan : packingPlan.getContainers().values()) {
