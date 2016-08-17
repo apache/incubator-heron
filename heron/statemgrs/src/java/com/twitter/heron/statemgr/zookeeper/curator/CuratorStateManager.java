@@ -323,9 +323,15 @@ public class CuratorStateManager extends FileSystemStateManager {
 
   public static void main(String[] args) throws ExecutionException, InterruptedException,
       IllegalAccessException, ClassNotFoundException, InstantiationException {
+    if (args.length < 2) {
+      System.out.println("Expects arguments: <topology_name> <zookeeper_hostname>");
+      System.exit(1);
+    }
+
+    String zookeeperHostname = args[1];
     Config config = Config.newBuilder()
         .put(Keys.stateManagerRootPath(), "/storm/heron/states")
-        .put(Keys.stateManagerConnectionString(), "szookeeper.smf1.twitter.com")
+        .put(Keys.stateManagerConnectionString(), zookeeperHostname)
         .build();
     CuratorStateManager stateManager = new CuratorStateManager();
     stateManager.doMain(args, config);
