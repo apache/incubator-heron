@@ -119,7 +119,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
   public static String getComponentName(String instanceId) {
     return instanceId.split(":")[1];
   }
-  
+
   @Override
   public void initialize(Config config, TopologyAPI.Topology inputTopology) {
     this.topology = inputTopology;
