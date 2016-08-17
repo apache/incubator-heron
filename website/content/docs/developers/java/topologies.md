@@ -1,5 +1,5 @@
 ---
-title: Writing a Topology
+title: Writing and Launching a Topology in Java
 ---
 
 A topology specifies components like spouts and bolts, as well as the relation

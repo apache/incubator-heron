@@ -82,7 +82,7 @@ sections:
   - name: Topology Writers
     sublinks:
       - name: Writing Java Topologies
-        url: /docs/developers/topologies
+        url: /docs/developers/java/topologies
       - name: Writing Python Topologies
         url: /docs/developers/python/topologies
       - name: Heron Data Model
