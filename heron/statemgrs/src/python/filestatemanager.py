@@ -12,18 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' filestatemanager.py '''
+import datetime
 import os
+import sys
 import threading
+import time
 
 from collections import defaultdict
 
 from heron.statemgrs.src.python.statemanager import StateManager
 
 from heron.proto.execution_state_pb2 import ExecutionState
+from heron.proto.packing_plan_pb2 import PackingPlan
 from heron.proto.physical_plan_pb2 import PhysicalPlan
 from heron.proto.scheduler_pb2 import SchedulerLocation
 from heron.proto.tmaster_pb2 import TMasterLocation
 from heron.proto.topology_pb2 import Topology
+
+def do_print(statement):
+  """print statement to stdout with timestamp"""
+  timestr = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+  print "%s (FileStateManager): %s" % (timestr, statement)
+  sys.stdout.flush()
 
 # pylint: disable=too-many-instance-attributes
 class FileStateManager(StateManager):
@@ -40,6 +50,7 @@ class FileStateManager(StateManager):
     # This is the cache of the state directories.
     self.topologies_directory = {}
     self.execution_state_directory = {}
+    self.packing_plan_directory = {}
     self.pplan_directory = {}
     self.tmaster_directory = {}
     self.scheduler_location_directory = {}
@@ -54,6 +65,7 @@ class FileStateManager(StateManager):
     # to the callback.
     self.topology_watchers = defaultdict(lambda: [])
     self.execution_state_watchers = defaultdict(lambda: [])
+    self.packing_plan_watchers = defaultdict(lambda: [])
     self.pplan_watchers = defaultdict(lambda: [])
     self.tmaster_watchers = defaultdict(lambda: [])
     self.scheduler_location_watchers = defaultdict(lambda: [])
@@ -120,6 +132,11 @@ class FileStateManager(StateManager):
           self.execution_state_watchers, execution_state_path,
           self.execution_state_directory, ExecutionState)
 
+      # Get the directory name for packing_plan
+      packing_plan_path = os.path.dirname(self.get_packing_plan_path(""))
+      trigger_watches_based_on_files(
+          self.packing_plan_watchers, packing_plan_path, self.packing_plan_directory, PackingPlan)
+
       # Get the directory name for pplan
       pplan_path = os.path.dirname(self.get_pplan_path(""))
       trigger_watches_based_on_files(
@@ -173,6 +190,17 @@ class FileStateManager(StateManager):
     Delete path is currently not supported in file based state manager.
     """
     pass
+
+  def get_packing_plan(self, topologyName, callback=None):
+    """ get packing plan """
+    if callback:
+      self.packing_plan_watchers[topologyName].append(callback)
+    else:
+      packing_plan_path = self.get_packing_plan_path(topologyName)
+      with open(packing_plan_path) as f:
+        data = f.read()
+        packing_plan = PackingPlan()
+        packing_plan.ParseFromString(data)
 
   def get_pplan(self, topologyName, callback=None):
     """
