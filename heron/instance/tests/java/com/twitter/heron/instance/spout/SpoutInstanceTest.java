@@ -275,9 +275,9 @@ public class SpoutInstanceTest {
         setNewPhysicalPlanHelper(physicalPlanHelper).
         build();
 
-    inControlQueue.offer(instanceControlMsg);
-
     SingletonRegistry.INSTANCE.registerSingleton(Constants.ACK_COUNT, ackCount);
+
+    inControlQueue.offer(instanceControlMsg);
 
     Runnable task = new Runnable() {
       @Override
@@ -323,9 +323,9 @@ public class SpoutInstanceTest {
         setNewPhysicalPlanHelper(physicalPlanHelper).
         build();
 
-    inControlQueue.offer(instanceControlMsg);
-
     SingletonRegistry.INSTANCE.registerSingleton(Constants.FAIL_COUNT, failCount);
+
+    inControlQueue.offer(instanceControlMsg);
 
     Runnable task = new Runnable() {
       @Override
@@ -361,11 +361,10 @@ public class SpoutInstanceTest {
         setNewPhysicalPlanHelper(physicalPlanHelper).
         build();
 
-    inControlQueue.offer(instanceControlMsg);
-
     SingletonRegistry.INSTANCE.registerSingleton(Constants.ACK_COUNT, ackCount);
     SingletonRegistry.INSTANCE.registerSingleton(Constants.FAIL_COUNT, failCount);
 
+    inControlQueue.offer(instanceControlMsg);
 
     Runnable task = new Runnable() {
       @Override

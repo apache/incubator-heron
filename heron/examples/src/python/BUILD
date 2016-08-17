@@ -6,14 +6,14 @@ pex_library(
   name = "example_lib",
   srcs = glob(['bolt/*.py', 'spout/*.py', 'misc/*.py']),
   deps = [
-    '//heron/streamparse/src/python:pyheron_lib',
+    '//heron/pyheron/src/python:pyheron_lib',
   ],
 )
 
 pex_library(
   name = "pyheron_example_pkg",
   srcs = glob(['**/*.py']),
-  deps = ['//heron/streamparse/src/python:pyheron_lib']
+  deps = ['//heron/pyheron/src/python:pyheron_lib']
 )
 
 # with main method

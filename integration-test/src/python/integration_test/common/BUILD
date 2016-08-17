@@ -6,6 +6,6 @@ pex_library(
   name = "pyheron_integration_common",
   srcs = glob(["**/*.py"]),
   deps = [
-    "//heron/streamparse/src/python:pyheron_lib"
+    "//heron/pyheron/src/python:pyheron_lib"
   ],
 )
