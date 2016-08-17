@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' pidhandler.py '''
-import logging
 import traceback
 import tornado.gen
 import tornado.web
@@ -20,7 +19,7 @@ import tornado.web
 from heron.tracker.src.python import utils
 from heron.tracker.src.python.handlers import BaseHandler
 
-LOG = logging.getLogger(__name__)
+from heron.common.src.python.utils.log import Log
 
 
 @tornado.gen.coroutine
@@ -34,7 +33,7 @@ def getInstancePid(topology_info, instance_id):
     http_client = tornado.httpclient.AsyncHTTPClient()
     endpoint = utils.make_shell_endpoint(topology_info, instance_id)
     url = "%s/pid/%s" % (endpoint, instance_id)
-    LOG.debug("HTTP call for url: %s", url)
+    Log.debug("HTTP call for url: %s", url)
     response = yield http_client.fetch(url)
     raise tornado.gen.Return(response.body)
   except tornado.httpclient.HTTPError as e:
@@ -81,5 +80,5 @@ class PidHandler(BaseHandler):
       result = yield getInstancePid(topology_info, instance)
       self.write_success_response(result)
     except Exception as e:
-      traceback.print_exc()
+      Log.debug(traceback.format_exc())
       self.write_error_response(e)

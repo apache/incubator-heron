@@ -21,18 +21,16 @@ library marshal, pickle and json modules.
 See: http://download.oracle.com/javase/6/docs/platform/serialization/spec/protocol.html
 """
 
-import logging
 import struct
-
-LOG = logging.getLogger(__name__)
+from heron.common.src.python.utils.log import Log
 
 def log_debug(message, ident=0):
   """log debugging info"""
-  LOG.debug(" " * (ident * 2) + str(message))
+  Log.debug(" " * (ident * 2) + str(message))
 
 def log_error(message, ident=0):
   """log error info"""
-  LOG.error(" " * (ident * 2) + str(message))
+  Log.error(" " * (ident * 2) + str(message))
 
 __version__ = "$Revision: 20 $"
 

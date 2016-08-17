@@ -13,9 +13,8 @@
 # limitations under the License.
 ''' clusters.py '''
 import heron.explorer.src.python.args as args
-# from heron.common.src.python.color import Log
-# from tabulate import tabulate
-import heron.common.src.python.utils as utils
+import heron.common.src.python.utils.tracker_access as tracker_access
+from heron.common.src.python.utils.log import Log
 
 
 def create_parser(subparsers):
@@ -33,7 +32,11 @@ def create_parser(subparsers):
 # pylint: disable=unused-argument
 def run(command, parser, cl_args, unknown_args):
   """ run command """
-  clusters = utils.get_clusters()
+  try:
+    clusters = tracker_access.get_clusters()
+  except:
+    Log.error("Fail to connect to tracker: \'%s\'", cl_args["tracker_url"])
+    return False
   print 'Available clusters:'
   for cluster in clusters:
     print '  %s' % cluster

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """ metrichandler.py """
-import logging
 import traceback
 import tornado.gen
 import tornado.web
@@ -22,7 +21,7 @@ from heron.proto import tmaster_pb2
 from heron.tracker.src.python import constants
 from heron.tracker.src.python.handlers import BaseHandler
 
-LOG = logging.getLogger(__name__)
+from heron.common.src.python.utils.log import Log
 
 
 class MetricsHandler(BaseHandler):
@@ -72,7 +71,7 @@ class MetricsHandler(BaseHandler):
 
       self.write_success_response(metrics)
     except Exception as e:
-      traceback.print_exc()
+      Log.debug(traceback.format_exc())
       self.write_error_response(e)
 
   # pylint: disable=too-many-locals, no-self-use, unused-argument
@@ -126,12 +125,12 @@ class MetricsHandler(BaseHandler):
                                              method='POST',
                                              request_timeout=5)
 
-    LOG.debug("Making HTTP call to fetch metrics")
-    LOG.debug("url: " + url)
+    Log.debug("Making HTTP call to fetch metrics")
+    Log.debug("url: " + url)
     try:
       client = tornado.httpclient.AsyncHTTPClient()
       result = yield client.fetch(request)
-      LOG.debug("HTTP call complete.")
+      Log.debug("HTTP call complete.")
     except tornado.httpclient.HTTPError as e:
       raise Exception(str(e))
 
@@ -139,7 +138,7 @@ class MetricsHandler(BaseHandler):
     responseCode = result.code
     if responseCode >= 400:
       message = "Error in getting metrics from Tmaster, code: " + responseCode
-      LOG.error(message)
+      Log.error(message)
       raise Exception(message)
 
     # Parse the response from tmaster.
@@ -148,7 +147,7 @@ class MetricsHandler(BaseHandler):
 
     if metricResponse.status.status == common_pb2.NOTOK:
       if metricResponse.status.HasField("message"):
-        raise Exception(metricResponse.status.message)
+        Log.error(metricResponse.status.message)
 
     # Form the response.
     ret = {}

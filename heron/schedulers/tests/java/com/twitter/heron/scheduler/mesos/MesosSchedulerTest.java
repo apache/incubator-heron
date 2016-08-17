@@ -33,6 +33,7 @@ import com.twitter.heron.spi.common.ConfigKeys;
 import com.twitter.heron.spi.common.Constants;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.utils.SchedulerUtils;
 
 
@@ -122,7 +123,7 @@ public class MesosSchedulerTest {
     final long MEM = 100 * Constants.MB;
     final long DISK = 100 * Constants.MB;
 
-    PackingPlan.Resource containerResources = new PackingPlan.Resource(CPU, MEM, DISK);
+    Resource containerResources = new Resource(CPU, MEM, DISK);
     PackingPlan.ContainerPlan containerPlan =
         new PackingPlan.ContainerPlan(
             "id", new HashMap<String, PackingPlan.InstancePlan>(), containerResources);

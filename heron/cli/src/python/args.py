@@ -14,7 +14,7 @@
 ''' args.py '''
 import os
 
-import heron.common.src.python.utils as utils
+import heron.common.src.python.utils.config as config
 
 
 def add_titles(parser):
@@ -27,36 +27,6 @@ def add_titles(parser):
   parser._optionals.title = "Optional arguments"
   return parser
 
-
-def insert_bool(param, command_args):
-  '''
-  :param param:
-  :param command_args:
-  :return:
-  '''
-  index = 0
-  found = False
-  for lelem in command_args:
-    if lelem == '--' and not found:
-      break
-    if lelem == param:
-      found = True
-      break
-    index = index + 1
-
-  if found:
-    command_args.insert(index + 1, 'True')
-  return command_args
-
-
-def insert_bool_values(command_line_args):
-  '''
-  :param command_line_args:
-  :return:
-  '''
-  args1 = insert_bool('--verbose', command_line_args)
-  args2 = insert_bool('--deploy-deactivated', args1)
-  return args2
 
 
 def add_verbose(parser):
@@ -134,12 +104,12 @@ def add_config(parser):
   :return:
   '''
   # the default config path
-  default_config_path = utils.get_heron_conf_dir()
+  default_config_path = config.get_heron_conf_dir()
 
   parser.add_argument(
       '--config-path',
       metavar='(a string; path to cluster config; default: "' + default_config_path + '")',
-      default=os.path.join(utils.get_heron_dir(), default_config_path))
+      default=os.path.join(config.get_heron_dir(), default_config_path))
 
   parser.add_argument(
       '--config-property',

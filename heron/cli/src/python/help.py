@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' help.py '''
-import heron.common.src.python.utils as utils
-from heron.common.src.python.color import Log
+import heron.common.src.python.utils.config as config
+from heron.common.src.python.utils.log import Log
 
 
 def create_parser(subparsers):
@@ -58,7 +58,7 @@ def run(command, parser, args, unknown_args):
     return True
 
   # get the subparser for the specific command
-  subparser = utils.get_subparser(parser, command_help)
+  subparser = config.get_subparser(parser, command_help)
   if subparser:
     print subparser.format_help()
     return True

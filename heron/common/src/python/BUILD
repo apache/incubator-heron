@@ -11,6 +11,7 @@ pex_library(
   reqs = [
     'colorlog==2.6.1',
     'tornado==4.0.2',
+    'pyyaml==3.10',
   ]
 )
 
@@ -19,3 +20,12 @@ pex_library(
   srcs = glob(['**/handler/access/*.py']),
   deps = [],
 )
+
+pex_library(
+  name = 'common_log',
+  srcs = ["utils/log.py"],
+  reqs = [
+    "colorlog==2.6.1",
+  ]
+)
+

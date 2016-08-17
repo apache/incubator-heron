@@ -35,6 +35,8 @@ sections:
         url: /docs/operators/deployment/uploaders/hdfs
       - name: Amazon S3
         url: /docs/operators/deployment/uploaders/s3
+      - name: Secure Copy (SCP)
+        url: /docs/operators/deployment/uploaders/scp
   - name: Schedulers
     sublinks:
       - name: Aurora Cluster
@@ -43,6 +45,8 @@ sections:
         url: /docs/operators/deployment/schedulers/local
 #      - name: Mesos Cluster
 #        url: /docs/operators/deployment/schedulers/mesos
+      - name: Mesos Cluster Locally
+        url: /docs/operators/deployment/schedulers/mesos-local-mac
       - name: Slurm Cluster
         url: /docs/operators/deployment/schedulers/slurm
       - name: YARN Cluster
@@ -77,8 +81,10 @@ sections:
         url: /docs/operators/heron-ui
   - name: Topology Writers
     sublinks:
-      - name: Writing Topologies
-        url: /docs/developers/topologies
+      - name: Writing Java Topologies
+        url: /docs/developers/java/topologies
+      - name: Writing Python Topologies
+        url: /docs/developers/python/topologies
       - name: Heron Data Model
         url: /docs/developers/data-model
       - name: Tuple Serialization
@@ -87,7 +93,7 @@ sections:
         url: /docs/developers/ui-guide
       - name: Tuning Guide
         url: /docs/developers/tuning
-      - name: Packing Algorithms 
+      - name: Packing Algorithms
         url: /docs/developers/packing/ffdpacking
       - name: Simulator Mode
         url: /docs/developers/simulator-mode

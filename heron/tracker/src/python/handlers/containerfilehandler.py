@@ -18,6 +18,7 @@ import tornado.gen
 from heron.tracker.src.python.handlers import BaseHandler
 from heron.tracker.src.python import constants
 from heron.tracker.src.python import utils
+from heron.common.src.python.utils.log import Log
 
 
 # pylint: disable=attribute-defined-outside-init
@@ -69,7 +70,7 @@ class ContainerFileDataHandler(BaseHandler):
       self.write_success_response(json.loads(response.body))
       self.finish()
     except Exception as e:
-      traceback.print_exc()
+      Log.debug(traceback.format_exc())
       self.write_error_response(e)
 
 
@@ -116,5 +117,5 @@ class ContainerFileStatsHandler(BaseHandler):
       self.write_success_response(json.loads(response.body))
       self.finish()
     except Exception as e:
-      traceback.print_exc()
+      Log.debug(traceback.format_exc())
       self.write_error_response(e)

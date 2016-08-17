@@ -39,12 +39,12 @@ docker run \
     -e SOURCE_TARBALL="/src.tar.gz" \
     -e OUTPUT_DIRECTORY="/dist" \
     -e HERON_VERSION=$HERON_VERSION \
-    -e HERON_GIT_RELEASE="${HERON_GIT_RELEASE}" \
     -e HERON_GIT_REV="${HERON_GIT_REV}" \
+    -e HERON_BUILD_VERSION="${HERON_BUILD_VERSION}" \
     -e HERON_BUILD_HOST="${HERON_BUILD_HOST}" \
     -e HERON_BUILD_USER="${HERON_BUILD_USER}" \
     -e HERON_BUILD_TIME="${HERON_BUILD_TIME}" \
     -e HERON_TREE_STATUS="${HERON_TREE_STATUS}" \
     -v "$SOURCE_TARBALL:/src.tar.gz:ro" \
     -v "$OUTPUT_DIRECTORY:/dist" \
-    -it heron-compiler:$TARGET_PLATFORM /compile-platform.sh
+    -t heron-compiler:$TARGET_PLATFORM /compile-platform.sh

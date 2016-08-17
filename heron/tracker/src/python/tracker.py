@@ -13,7 +13,6 @@
 # limitations under the License.
 ''' tracker.py '''
 import json
-import logging
 
 from functools import partial
 
@@ -22,8 +21,7 @@ from heron.statemgrs.src.python import statemanagerfactory
 from heron.tracker.src.python.topology import Topology
 from heron.tracker.src.python import javaobj
 from heron.tracker.src.python import utils
-
-LOG = logging.getLogger(__name__)
+from heron.common.src.python.utils.log import Log
 
 
 class Tracker(object):
@@ -60,14 +58,14 @@ class Tracker(object):
     # pylint: disable=deprecated-lambda
     def on_topologies_watch(state_manager, topologies):
       """watch topologies"""
-      LOG.info("State watch triggered for topologies.")
-      LOG.debug("Topologies: " + str(topologies))
+      Log.info("State watch triggered for topologies.")
+      Log.debug("Topologies: " + str(topologies))
       existingTopologies = self.getTopologiesForStateLocation(state_manager.name)
       existingTopNames = map(lambda t: t.name, existingTopologies)
-      LOG.debug("Existing topologies: " + str(existingTopNames))
+      Log.debug("Existing topologies: " + str(existingTopNames))
       for name in existingTopNames:
         if name not in topologies:
-          LOG.info("Removing topology: %s in rootpath: %s",
+          Log.info("Removing topology: %s in rootpath: %s",
                    name, state_manager.rootpath)
           self.removeTopology(name, state_manager.name)
 
@@ -80,6 +78,10 @@ class Tracker(object):
       # state_manager as first variable.
       onTopologiesWatch = partial(on_topologies_watch, state_manager)
       state_manager.get_topologies(onTopologiesWatch)
+
+  def stop_sync(self):
+    for state_manager in self.state_managers:
+      state_manager.stop()
 
   # pylint: disable=deprecated-lambda
   def getTopologyByClusterRoleEnvironAndName(self, cluster, role, environ, topologyName):
@@ -115,7 +117,7 @@ class Tracker(object):
     on any changes on the topology.
     """
     topology = Topology(topologyName, state_manager.name)
-    LOG.info("Adding new topology: %s, state_manager: %s",
+    Log.info("Adding new topology: %s, state_manager: %s",
              topologyName, state_manager.name)
     self.topologies.append(topology)
 
@@ -125,31 +127,31 @@ class Tracker(object):
 
     def on_topology_pplan(data):
       """watch physical plan"""
-      LOG.info("Watch triggered for topology pplan: " + topologyName)
+      Log.info("Watch triggered for topology pplan: " + topologyName)
       topology.set_physical_plan(data)
       if not data:
-        LOG.debug("No data to be set")
+        Log.debug("No data to be set")
 
     def on_topology_execution_state(data):
       """watch execution state"""
-      LOG.info("Watch triggered for topology execution state: " + topologyName)
+      Log.info("Watch triggered for topology execution state: " + topologyName)
       topology.set_execution_state(data)
       if not data:
-        LOG.debug("No data to be set")
+        Log.debug("No data to be set")
 
     def on_topology_tmaster(data):
       """set tmaster"""
-      LOG.info("Watch triggered for topology tmaster: " + topologyName)
+      Log.info("Watch triggered for topology tmaster: " + topologyName)
       topology.set_tmaster(data)
       if not data:
-        LOG.debug("No data to be set")
+        Log.debug("No data to be set")
 
     def on_topology_scheduler_location(data):
       """set scheduler location"""
-      LOG.info("Watch triggered for topology scheduler location: " + topologyName)
+      Log.info("Watch triggered for topology scheduler location: " + topologyName)
       topology.set_scheduler_location(data)
       if not data:
-        LOG.debug("No data to be set")
+        Log.debug("No data to be set")
 
     # Set watches on the pplan, execution_state, tmaster and scheduler_location.
     state_manager.get_pplan(topologyName, on_topology_pplan)
@@ -333,20 +335,23 @@ class Tracker(object):
       for kvs in topology.physical_plan.topology.topology_config.kvs:
         if kvs.value:
           physicalPlan["config"][kvs.key] = kvs.value
-        elif kvs.java_serialized_value:
+        elif kvs.serialized_value:
+          # currently assumes that serialized_value is Java serialization
+          # when multi-language support is added later, ConfigValueType should be checked
+
           # Hexadecimal byte array for Serialized objects
           try:
-            pobj = javaobj.loads(kvs.java_serialized_value)
+            pobj = javaobj.loads(kvs.serialized_value)
             physicalPlan["config"][kvs.key] = {
                 'value' : json.dumps(pobj,
                                      default=lambda custom_field: custom_field.__dict__,
                                      sort_keys=True,
                                      indent=2),
-                'raw' : utils.hex_escape(kvs.java_serialized_value)}
+                'raw' : utils.hex_escape(kvs.serialized_value)}
           except Exception:
             physicalPlan["config"][kvs.key] = {
                 'value' : 'A Java Object',
-                'raw' : utils.hex_escape(kvs.java_serialized_value)}
+                'raw' : utils.hex_escape(kvs.serialized_value)}
     for spout in spouts:
       spout_name = spout.comp.name
       physicalPlan["spouts"][spout_name] = []
@@ -407,10 +412,10 @@ class Tracker(object):
     # If there is no execution state, just return
     # as the rest of the things don't matter.
     if not topology.execution_state:
-      LOG.info("No execution state found for: " + topology.name)
+      Log.info("No execution state found for: " + topology.name)
       return
 
-    LOG.info("Setting topology info for topology: " + topology.name)
+    Log.info("Setting topology info for topology: " + topology.name)
     has_physical_plan = True
     if not topology.physical_plan:
       has_physical_plan = False
@@ -463,10 +468,10 @@ class Tracker(object):
         if not role or executionState.get("role") == role:
           return topologyInfo
     if role is not None:
-      LOG.info("Could not find topology info for topology: %s," \
+      Log.info("Could not find topology info for topology: %s," \
                "cluster: %s, role: %s, and environ: %s",
                topologyName, cluster, role, environ)
     else:
-      LOG.info("Could not find topology info for topology: %s," \
+      Log.info("Could not find topology info for topology: %s," \
                "cluster: %s and environ: %s", topologyName, cluster, environ)
     raise Exception("No topology found")

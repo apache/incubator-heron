@@ -83,11 +83,9 @@ public final class ExclamationTopology {
 
     @Override
     public void execute(Tuple tuple) {
-      // System.out.println(tuple.getString(0));
-      // collector.emit(tuple, new Values(tuple.getString(0) + "!!!"));
-      // collector.ack(tuple);
       if (++nItems % 100000 == 0) {
         long latency = System.currentTimeMillis() - startTime;
+        System.out.println(tuple.getString(0) + "!!!");
         System.out.println("Bolt processed " + nItems + " tuples in " + latency + " ms");
         GlobalMetrics.incr("selected_items");
       }

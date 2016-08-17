@@ -14,22 +14,22 @@
 
 # !/usr/bin/env python2.7
 ''' main.py '''
+import logging
 import os
-import socket
+import signal
 
 import tornado.ioloop
 import tornado.options
 import tornado.web
 import tornado.log
 import tornado.template
-
 from tornado.options import define
 
 from heron.ui.src.python import handlers
 from heron.ui.src.python import args
-from heron.ui.src.python import log
-from heron.ui.src.python.log import Log as LOG
+import heron.common.src.python.utils.log as log
 
+Log = log.Log
 
 class Application(tornado.web.Application):
   ''' Application '''
@@ -104,12 +104,14 @@ class Application(tornado.web.Application):
     tornado.web.Application.__init__(self, callbacks, **settings)
 
 
-def define_options(port, tracker_url):
+def define_options(address, port, tracker_url):
   '''
+  :param address:
   :param port:
   :param tracker_url:
   :return:
   '''
+  define("address", default=address)
   define("port", default=port)
   define("tracker_url", default=tracker_url)
 
@@ -119,12 +121,13 @@ def main():
   :param argv:
   :return:
   '''
-  log.configure(log.logging.DEBUG)
+  log.configure(logging.DEBUG, with_time=True)
   tornado.log.enable_pretty_logging()
 
   # create the parser and parse the arguments
   (parser, child_parser) = args.create_parsers()
   (parsed_args, remaining) = parser.parse_known_args()
+
   if remaining:
     child_parser.parse_args(args=remaining, namespace=parsed_args)
     parser.print_help()
@@ -132,14 +135,30 @@ def main():
 
   # log additional information
   command_line_args = vars(parsed_args)
-  address = socket.gethostbyname(socket.gethostname())
-  LOG.info("Listening at http://%s:%d", address, command_line_args['port'])
-  LOG.info("Using tracker url: %s", command_line_args['tracker_url'])
+
+  Log.info("Listening at http://%s:%d", command_line_args['address'], command_line_args['port'])
+  Log.info("Using tracker url: %s", command_line_args['tracker_url'])
 
   # pass the options to tornado and start the ui server
-  define_options(command_line_args['port'], command_line_args['tracker_url'])
+  define_options(command_line_args['address'],
+                 command_line_args['port'],
+                 command_line_args['tracker_url'])
   http_server = tornado.httpserver.HTTPServer(Application())
-  http_server.listen(command_line_args['port'])
+  http_server.listen(command_line_args['port'], address=command_line_args['address'])
+
+  # pylint: disable=unused-argument
+  # stop Tornado IO loop
+  def signal_handler(signum, frame):
+    # start a new line after ^C character because this looks nice
+    print '\n',
+    Log.debug('SIGINT received. Stopping UI')
+    tornado.ioloop.IOLoop.instance().stop()
+
+  # associate SIGINT and SIGTERM with a handler
+  signal.signal(signal.SIGINT, signal_handler)
+  signal.signal(signal.SIGTERM, signal_handler)
+
+  # start Tornado IO loop
   tornado.ioloop.IOLoop.instance().start()
 
 

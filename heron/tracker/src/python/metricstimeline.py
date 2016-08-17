@@ -12,13 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """ metricstimeline.py """
-import logging
 import tornado.gen
 
 from heron.proto import common_pb2
 from heron.proto import tmaster_pb2
-
-LOG = logging.getLogger(__name__)
+from heron.common.src.python.utils.log import Log
 
 # pylint: disable=too-many-locals, too-many-branches, unused-argument
 @tornado.gen.coroutine
@@ -89,12 +87,12 @@ def getMetricsTimeline(tmaster,
                                            method='POST',
                                            request_timeout=5)
 
-  LOG.debug("Making HTTP call to fetch metrics")
-  LOG.debug("url: " + url)
+  Log.debug("Making HTTP call to fetch metrics")
+  Log.debug("url: " + url)
   try:
     client = tornado.httpclient.AsyncHTTPClient()
     result = yield client.fetch(request)
-    LOG.debug("HTTP call complete.")
+    Log.debug("HTTP call complete.")
   except tornado.httpclient.HTTPError as e:
     raise Exception(str(e))
 
@@ -103,7 +101,7 @@ def getMetricsTimeline(tmaster,
   responseCode = result.code
   if responseCode >= 400:
     message = "Error in getting metrics from Tmaster, code: " + responseCode
-    LOG.error(message)
+    Log.error(message)
     raise Exception(message)
 
   # Parse the response from tmaster.
@@ -112,7 +110,7 @@ def getMetricsTimeline(tmaster,
 
   if metricResponse.status.status == common_pb2.NOTOK:
     if metricResponse.status.HasField("message"):
-      raise Exception(metricResponse.status.message)
+      Log.error(metricResponse.status.message)
 
   # Form the response.
   ret = {}

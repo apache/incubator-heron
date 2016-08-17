@@ -109,6 +109,10 @@ public class ConfigDefaultsTest {
         ConfigDefaults.get("SANDBOX_SHELL_BINARY")
     );
     Assert.assertEquals(
+        "${HERON_SANDBOX_BIN}/heron-python-instance",
+        ConfigDefaults.get("SANDBOX_PYTHON_INSTANCE_BINARY")
+    );
+    Assert.assertEquals(
         "heron.jars.scheduler",
         "${HERON_LIB}/scheduler/heron-scheduler.jar",
         ConfigDefaults.get("SCHEDULER_JAR")

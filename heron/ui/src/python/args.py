@@ -71,6 +71,11 @@ def add_arguments(parser):
       default=consts.DEFAULT_TRACKER_URL)
 
   parser.add_argument(
+      '--address',
+      metavar='(an string; address to listen; default: "' + consts.DEFAULT_ADDRESS + '")',
+      default=consts.DEFAULT_ADDRESS)
+
+  parser.add_argument(
       '--port',
       metavar='(an integer; port to listen; default: ' + str(consts.DEFAULT_PORT) + ')',
       type=int,

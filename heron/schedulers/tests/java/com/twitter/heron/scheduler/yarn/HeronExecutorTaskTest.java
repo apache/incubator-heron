@@ -14,11 +14,19 @@
 
 package com.twitter.heron.scheduler.yarn;
 
+import java.io.File;
+import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.reef.runtime.common.files.REEFFileNames;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.twitter.heron.api.HeronTopology;
 import com.twitter.heron.api.bolt.BaseBasicBolt;
@@ -31,24 +39,16 @@ import com.twitter.heron.api.topology.OutputFieldsDeclarer;
 import com.twitter.heron.api.topology.TopologyBuilder;
 import com.twitter.heron.api.topology.TopologyContext;
 import com.twitter.heron.api.tuple.Tuple;
+import com.twitter.heron.spi.utils.ShellUtils;
 
+@RunWith(PowerMockRunner.class)
+@PowerMockIgnore("javax.swing.*")
 public class HeronExecutorTaskTest {
   @Test
   public void providesConfigsNeededForExecutorCmd() throws Exception {
     Topology testTopology = createTestTopology("testTopology");
 
-    HeronExecutorTask task = new HeronExecutorTask(null,
-        "5",
-        "cluster",
-        "role",
-        "testTopology",
-        "env",
-        "package",
-        "core",
-        "jar",
-        "packedPlan",
-        "componentRamMap");
-    HeronExecutorTask spyTask = Mockito.spy(task);
+    HeronExecutorTask spyTask = getSpyOnHeronExecutorTask(null);
 
     Mockito.doReturn("file").when(spyTask).getTopologyDefnFile();
     Mockito.doReturn(testTopology).when(spyTask).getTopology("file");
@@ -62,6 +62,64 @@ public class HeronExecutorTaskTest {
       }
     }
     Assert.assertEquals(0, nullCounter);
+  }
+
+  /**
+   * Tests launcher execution by yarn task
+   */
+  @Test
+  @PrepareForTest({ShellUtils.class, HeronReefUtils.class, REEFFileNames.class})
+  public void setsEnvironmentForExecutor() throws Exception {
+    PowerMockito.spy(HeronReefUtils.class);
+    PowerMockito.doNothing().when(HeronReefUtils.class,
+        "extractPackageInSandbox",
+        Mockito.anyString(),
+        Mockito.anyString(),
+        Mockito.anyString());
+
+    REEFFileNames mockFiles = PowerMockito.mock(REEFFileNames.class);
+    File global = new File(".");
+    PowerMockito.when(mockFiles.getGlobalFolder()).thenReturn(global);
+    HeronExecutorTask spyTask = getSpyOnHeronExecutorTask(mockFiles);
+    String[] testCmd = {"cmd"};
+    Mockito.doReturn(testCmd).when(spyTask).getExecutorCommand();
+
+    HashMap<String, String> env = spyTask.getEnvironment("testCWD");
+    Assert.assertEquals(1, env.size());
+    String pexRoot = env.get("PEX_ROOT");
+    Assert.assertNotNull(pexRoot);
+    Assert.assertEquals("testCWD", pexRoot);
+
+    Mockito.when(spyTask.getEnvironment(Mockito.anyString())).thenReturn(env);
+    Process mockProcess = Mockito.mock(Process.class);
+    Mockito.doReturn(0).when(mockProcess).waitFor();
+
+    PowerMockito.spy(ShellUtils.class);
+    PowerMockito.doReturn(mockProcess).when(
+        ShellUtils.class,
+        "runASyncProcess",
+        Mockito.eq(true),
+        Mockito.eq(testCmd),
+        Mockito.any(File.class),
+        Mockito.eq(env));
+    spyTask.call(null);
+    Mockito.verify(mockProcess).waitFor();
+  }
+
+  private HeronExecutorTask getSpyOnHeronExecutorTask(REEFFileNames mockFiles) {
+    HeronExecutorTask task = new HeronExecutorTask(mockFiles,
+        "5",
+        "cluster",
+        "role",
+        "testTopology",
+        "env",
+        "package",
+        "core",
+        "jar",
+        "packedPlan",
+        "componentRamMap",
+        false);
+    return Mockito.spy(task);
   }
 
   Topology createTestTopology(String name) {

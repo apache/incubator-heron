@@ -2,8 +2,18 @@ package(default_visibility = ["//visibility:public"])
 
 load("/tools/rules/pex_rules", "pex_library", "pex_binary")
 
+pex_library(
+    name = "heron-executor-lib",
+    srcs = ["heron_executor.py"],
+    deps = ["//heron/statemgrs/src/python:zk-statemgr-py",
+            "//heron/common/src/python:common_log"],
+    reqs = ["pyyaml==3.10"],
+)
+
 pex_binary(
     name = "heron-executor",
-    srcs = ["heron-executor.py"],
-    reqs = ["pyyaml==3.10"],
+    srcs = ["heron_executor.py"],
+    deps = [
+        ":heron-executor-lib",
+    ],
 )

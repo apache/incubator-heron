@@ -13,18 +13,20 @@
 # limitations under the License.
 ''' submit.py '''
 import glob
+import logging
 import os
 import shutil
 import tempfile
+import traceback
 
-from heron.common.src.python.color import Log
+from heron.common.src.python.utils.log import Log
 from heron.proto import topology_pb2
 
 import heron.cli.src.python.args as cli_args
 import heron.cli.src.python.execute as execute
 import heron.cli.src.python.jars as jars
 import heron.cli.src.python.opts as opts
-import heron.common.src.python.utils as utils
+import heron.common.src.python.utils.config as config
 
 
 ################################################################################
@@ -66,36 +68,36 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
   :return:
   '''
   # get the normalized path for topology.tar.gz
-  topology_pkg_path = utils.normalized_class_path(os.path.join(tmp_dir, 'topology.tar.gz'))
+  topology_pkg_path = config.normalized_class_path(os.path.join(tmp_dir, 'topology.tar.gz'))
 
   # get the release yaml file
-  release_yaml_file = utils.get_heron_release_file()
+  release_yaml_file = config.get_heron_release_file()
 
   # create a tar package with the cluster configuration and generated config files
   config_path = cl_args['config_path']
   tar_pkg_files = [topology_file, topology_defn_file]
   generated_config_files = [release_yaml_file, cl_args['override_config_file']]
 
-  utils.create_tar(topology_pkg_path, tar_pkg_files, config_path, generated_config_files)
+  config.create_tar(topology_pkg_path, tar_pkg_files, config_path, generated_config_files)
 
   # pass the args to submitter main
   args = [
       "--cluster", cl_args['cluster'],
       "--role", cl_args['role'],
       "--environment", cl_args['environ'],
-      "--heron_home", utils.get_heron_dir(),
+      "--heron_home", config.get_heron_dir(),
       "--config_path", config_path,
       "--override_config_file", cl_args['override_config_file'],
       "--release_file", release_yaml_file,
       "--topology_package", topology_pkg_path,
       "--topology_defn", topology_defn_file,
-      "--topology_jar", topology_file
+      "--topology_bin", topology_file   # pex file if pex specified
   ]
 
-  if opts.verbose():
+  if Log.getEffectiveLevel() == logging.DEBUG:
     args.append("--verbose")
 
-  lib_jars = utils.get_heron_libs(
+  lib_jars = config.get_heron_libs(
       jars.scheduler_jars() + jars.uploader_jars() + jars.statemgr_jars() + jars.packing_jars()
   )
 
@@ -156,7 +158,7 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
   '''
    We use the packer to make a package for the jar and dump it
   to a well-known location. We then run the main method of class
-  with the specified arguments. We pass arguments as heron.options.
+  with the specified arguments. We pass arguments as an environment variable HERON_OPTIONS.
 
   This will run the jar file with the topology_class_name. The submitter
   inside will write out the topology defn file to a location that
@@ -173,21 +175,20 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
   try:
     execute.heron_class(
         cl_args['topology-class-name'],
-        utils.get_heron_libs(jars.topology_jars()),
+        config.get_heron_libs(jars.topology_jars()),
         extra_jars=[topology_file],
         args=tuple(unknown_args),
         java_defines=cl_args['topology_main_jvm_property'])
 
-  except Exception:
+  except Exception as ex:
+    Log.debug(traceback.format_exc(ex))
     Log.error("Unable to execute topology main class")
     return False
 
   try:
     launch_topologies(cl_args, topology_file, tmp_dir)
-
-  except Exception:
+  except Exception as ex:
     return False
-
   finally:
     shutil.rmtree(tmp_dir)
 
@@ -202,7 +203,7 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
 
   We use the packer to make a package for the tar and dump it
   to a well-known location. We then run the main method of class
-  with the specified arguments. We pass arguments as heron.options.
+  with the specified arguments. We pass arguments as an environment variable HERON_OPTIONS.
   This will run the jar file with the topology class name.
 
   The submitter inside will write out the topology defn file to a location
@@ -235,6 +236,31 @@ def submit_tar(cl_args, unknown_args, tmp_dir):
 
   return True
 
+################################################################################
+#  Execute the pex file to create topology definition file by running
+#  the topology's main class.
+################################################################################
+# pylint: disable=unused-argument
+def submit_pex(cl_args, unknown_args, tmp_dir):
+  # execute main of the topology to create the topology definition
+  topology_file = cl_args['topology-file-name']
+  topology_class_name = cl_args['topology-class-name']
+  try:
+    execute.heron_pex(topology_file, topology_class_name, tuple(unknown_args))
+  except Exception as ex:
+    Log.error("Error when loading a topology: %s" % str(ex))
+    return False
+
+  try:
+    launch_topologies(cl_args, topology_file, tmp_dir)
+
+  except Exception as ex:
+    return False
+
+  finally:
+    shutil.rmtree(tmp_dir)
+
+  return True
 
 ################################################################################
 # pylint: disable=unused-argument
@@ -257,14 +283,15 @@ def run(command, parser, cl_args, unknown_args):
 
   # check to see if the topology file exists
   if not os.path.isfile(topology_file):
-    Log.error("Topology jar|tar file %s does not exist" % topology_file)
+    Log.error("Topology jar|tar|pex file %s does not exist" % topology_file)
     return False
 
   # check if it is a valid file type
   jar_type = topology_file.endswith(".jar")
   tar_type = topology_file.endswith(".tar") or topology_file.endswith(".tar.gz")
-  if not jar_type and not tar_type:
-    Log.error("Unknown file type. Please use .tar or .tar.gz or .jar file")
+  pex_type = topology_file.endswith(".pex")
+  if not jar_type and not tar_type and not pex_type:
+    Log.error("Unknown file type. Please use .tar or .tar.gz or .jar or .pex file")
     return False
 
   # create a temporary directory for topology definition file
@@ -286,5 +313,8 @@ def run(command, parser, cl_args, unknown_args):
 
   elif tar_type:
     return submit_tar(cl_args, unknown_args, tmp_dir)
+
+  elif pex_type:
+    return submit_pex(cl_args, unknown_args, tmp_dir)
 
   return False

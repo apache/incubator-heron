@@ -1,0 +1,23 @@
+# validate with http://pythex.org/
+#global
+*:*:* --config-property foo=bar
+# app - global
+heron:*:* --config-property hi=wee
+
+#command specific
+heron:activate:* --config-property ooo=ppp
+
+#role and command specific
+
+heron:submit:devcluster/ads/PROD --config-property a=b --config-property c=d
+heron:activate:devcluster/ads/PROD --config-property e=f
+heron:submit:local --verbose True
+
+#error for submit parser with ilocal role
+
+heron:submit:ilocal --verbose True --topology-file-name ~/.heron/examples/heron-examples.jar  --topology-class-name com.twitter.heron.examples.ExclamationTopology --topology-name ExclamationTopology
+
+#invalid
+
+:devcluster/ads/PROD --config-property test-cmd-invalid
+--config-property test-hello   #global

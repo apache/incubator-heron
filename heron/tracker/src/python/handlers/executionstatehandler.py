@@ -17,6 +17,7 @@ import tornado.gen
 import tornado.web
 
 from heron.tracker.src.python.handlers import BaseHandler
+from heron.common.src.python.utils.log import Log
 
 # pylint: disable=attribute-defined-outside-init
 class ExecutionStateHandler(BaseHandler):
@@ -48,5 +49,5 @@ class ExecutionStateHandler(BaseHandler):
       execution_state = topology_info["execution_state"]
       self.write_success_response(execution_state)
     except Exception as e:
-      traceback.print_exc()
+      Log.debug(traceback.format_exc())
       self.write_error_response(e)

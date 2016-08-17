@@ -17,6 +17,7 @@ import tornado.gen
 import tornado.web
 
 from heron.tracker.src.python.handlers import BaseHandler
+from heron.common.src.python.utils.log import Log
 
 
 class SchedulerLocationHandler(BaseHandler):
@@ -49,5 +50,5 @@ class SchedulerLocationHandler(BaseHandler):
       scheduler_location = topology_info["scheduler_location"]
       self.write_success_response(scheduler_location)
     except Exception as e:
-      traceback.print_exc()
+      Log.debug(traceback.format_exc())
       self.write_error_response(e)

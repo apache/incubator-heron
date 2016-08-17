@@ -33,6 +33,23 @@ enum Type {
   OBJECT = 1; // generic type
 }
 
+enum ComponentObjectSpec {
+  JAVA_CLASS_NAME = 1;
+  JAVA_SERIALIZED_OBJECT = 2;
+  PYTHON_CLASS_NAME = 3;
+}
+
+enum CustomGroupingObjectType {
+  JAVA_OBJECT = 1;
+  PYTHON_OBJECT = 2;
+}
+
+enum ConfigValueType {
+  STRING_VALUE = 1; //normal string
+  JAVA_SERIALIZED_VALUE = 2;
+  PYTHON_SERIALIZED_VALUE = 3;
+}
+
 message StreamSchema {
   message KeyType {
     required string key = 1;
@@ -55,7 +72,10 @@ message InputStream {
   required StreamId stream = 1;
   required Grouping gtype = 2;
   optional StreamSchema grouping_fields = 3;
-  optional bytes custom_grouping_java_object = 4;
+
+  // we should refactor when upgrading to protobuf v3.0 (#1181)
+  optional bytes custom_grouping_object = 4;
+  optional CustomGroupingObjectType type = 5;
 }
 
 message Config {
@@ -63,7 +83,10 @@ message Config {
     required string key = 1;
     // Only one of the below are set
     optional string value = 2;
-    optional bytes java_serialized_value = 3;
+    optional bytes serialized_value = 3;
+
+    // This is made optional for backward compatibility (#1179)
+    optional ConfigValueType type = 4;
   }
   repeated KeyValue kvs = 1;
 }
@@ -71,10 +94,18 @@ message Config {
 message Component {
   // The name of the component. Like Tail-FlatMap
   required string name = 1;
-  // Only one of the below two are set
-  optional string java_class_name = 2;
-  optional bytes java_object = 4;
+  // Only one of the below two is set, whose meaning is determined
+  // by the value of spec. For example, when spec is JAVA_CLASS_NAME,
+  // `class_name` is set and contains Java's class name.
+  // When spec is JAVA_SERIALIZED_OBJECT, `serialized_object` is set and
+  // contains a serialized Java object.
+  optional string class_name = 2;
+  optional bytes serialized_object = 4;
+
   required Config config = 3;
+
+  // This is made optional for backward compatibility
+  optional ComponentObjectSpec spec = 5;
 }
 
 message Spout {
