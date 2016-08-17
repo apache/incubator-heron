@@ -16,15 +16,16 @@
 
 ''' heron-executor '''
 import atexit
-import os
-import sys
-import signal
-import subprocess
-import time
-import json
 import base64
-import string
+import json
+import os
 import random
+import signal
+import string
+import subprocess
+import sys
+import threading
+import time
 import yaml
 
 from functools import partial
@@ -40,13 +41,13 @@ STATEMGRS_KEY = "statemgrs"
 
 def print_usage():
   print (
-      "./heron-executor <shardid> <topname> <topid> <topdefnfile> "
-      " <instance_distribution_ignored> <zknode> <zkroot> <tmaster_binary> <stmgr_binary> "
-      " <metricsmgr_classpath> <instance_jvm_opts_in_base64> <classpath> "
-      " <master_port> <tmaster_controller_port> <tmaster_stats_port> <heron_internals_config_file> "
+      "./heron-executor <shardid> <topname> <topid> <topdefnfile>"
+      " <instance_distribution_ignored> <zknode> <zkroot> <tmaster_binary> <stmgr_binary>"
+      " <metricsmgr_classpath> <instance_jvm_opts_in_base64> <classpath>"
+      " <master_port> <tmaster_controller_port> <tmaster_stats_port> <heron_internals_config_file>"
       " <component_rammap> <component_jvm_opts_in_base64> <pkg_type> <topology_bin_file>"
       " <heron_java_home> <shell-port> <heron_shell_binary> <metricsmgr_port>"
-      " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file> "
+      " <cluster> <role> <environ> <instance_classpath> <metrics_sinks_config_file>"
       " <scheduler_classpath> <scheduler_port> <python_instance_binary>")
 
 def id_list(prefix, start, count):
@@ -181,9 +182,9 @@ class HeronExecutor(object):
     self.metricsmgr_ids = []
     self.heron_shell_ids = []
 
-    # This gets set once processes are launched
-    # pylint: disable=fixme
-    # TODO: we need to synchronize rw to this dict since is used by multiple threads
+    # processes_to_monitor gets set once processes are launched. we need to synchronize rw to this
+    # dict since is used by multiple threads
+    self.process_lock = threading.RLock()
     self.processes_to_monitor = {}
 
     # Log itself pid
@@ -446,13 +447,14 @@ class HeronExecutor(object):
 
   def _kill_processes(self, commands):
     # remove the command from processes_to_monitor and kill the process
-    for command_name, command in commands.iteritems():
-      for process_info in self.processes_to_monitor.values():
-        if process_info.name == command_name:
-          del self.processes_to_monitor[process_info.pid]
-          Log.info("Killing %s process with pid %s: %s" %
-                   (process_info.name, process_info.pid, ' '.join(command)))
-          process_info.process.kill()
+    with self.process_lock:
+      for command_name, command in commands.iteritems():
+        for process_info in self.processes_to_monitor.values():
+          if process_info.name == command_name:
+            del self.processes_to_monitor[process_info.pid]
+            Log.info("Killing %s process with pid %s: %s" %
+                     (process_info.name, process_info.pid, ' '.join(command)))
+            process_info.process.kill()
 
   def _start_processes(self, commands):
     """Start all commands and add them to the dict of processes to be monitored """
@@ -465,7 +467,8 @@ class HeronExecutor(object):
       # Log down the pid file
       log_pid_for_process(name, p.pid)
 
-    self.processes_to_monitor.update(processes_to_monitor)
+    with self.process_lock:
+      self.processes_to_monitor.update(processes_to_monitor)
 
   def monitor_processes(self):
     """ Monitor all processes in processes_to_monitor dict,
@@ -475,28 +478,30 @@ class HeronExecutor(object):
     while True:
       if len(self.processes_to_monitor) > 0:
         (pid, status) = os.wait()
-        if pid in self.processes_to_monitor.keys():
-          old_process_info = self.processes_to_monitor[pid]
-          name = old_process_info.name
-          command = old_process_info.command
-          Log.info("%s (pid=%s) exited with status %d. command=%s" % (name, pid, status, command))
-          # Log the stdout & stderr of the failed process
-          self._wait_process_std_out_err(name, old_process_info.process)
 
-          # Just make it world readable
-          if os.path.isfile("core.%d" % pid):
-            os.system("chmod a+r core.%d" % pid)
-          if old_process_info.attempts >= self.max_runs:
-            Log.info("%s exited too many times" % name)
-            sys.exit(1)
-          time.sleep(self.interval_between_runs)
-          p = self._run_process(name, command)
-          del self.processes_to_monitor[pid]
-          self.processes_to_monitor[p.pid] =\
-            ProcessInfo(p, name, command, old_process_info.attempts + 1)
+        with self.process_lock:
+          if pid in self.processes_to_monitor.keys():
+            old_process_info = self.processes_to_monitor[pid]
+            name = old_process_info.name
+            command = old_process_info.command
+            Log.info("%s (pid=%s) exited with status %d. command=%s" % (name, pid, status, command))
+            # Log the stdout & stderr of the failed process
+            self._wait_process_std_out_err(name, old_process_info.process)
 
-          # Log down the pid file
-          log_pid_for_process(name, p.pid)
+            # Just make it world readable
+            if os.path.isfile("core.%d" % pid):
+              os.system("chmod a+r core.%d" % pid)
+            if old_process_info.attempts >= self.max_runs:
+              Log.info("%s exited too many times" % name)
+              sys.exit(1)
+            time.sleep(self.interval_between_runs)
+            p = self._run_process(name, command)
+            del self.processes_to_monitor[pid]
+            self.processes_to_monitor[p.pid] =\
+              ProcessInfo(p, name, command, old_process_info.attempts + 1)
+
+            # Log down the pid file
+            log_pid_for_process(name, p.pid)
 
   def get_commands_to_run(self):
     if self.shard == 0:
@@ -536,25 +541,29 @@ class HeronExecutor(object):
     return commands_to_kill, commands_to_keep, commands_to_start
 
   def launch(self):
-    current_commands = dict(map((lambda process: (process.name, process.command)),
-                                self.processes_to_monitor.values()))
-    updated_commands = self.get_commands_to_run()
+    ''' Determines the commands to be run and compares them with the existing running commands.
+    Then starts new ones required and kills old ones no longer required.
+    '''
+    with self.process_lock:
+      current_commands = dict(map((lambda process: (process.name, process.command)),
+                                  self.processes_to_monitor.values()))
+      updated_commands = self.get_commands_to_run()
 
-    # get the commands to kill, keep and start
-    commands_to_kill, commands_to_keep, commands_to_start = \
-        self.get_command_changes(current_commands, updated_commands)
+      # get the commands to kill, keep and start
+      commands_to_kill, commands_to_keep, commands_to_start = \
+          self.get_command_changes(current_commands, updated_commands)
 
-    Log.info("current commands: %s" % sorted(current_commands.keys()))
-    Log.info("new commands    : %s" % sorted(updated_commands.keys()))
-    Log.info("commands_to_kill: %s" % sorted(commands_to_kill.keys()))
-    Log.info("commands_to_keep: %s" % sorted(commands_to_keep.keys()))
-    Log.info("commands_to_start: %s" % sorted(commands_to_start.keys()))
+      Log.info("current commands: %s" % sorted(current_commands.keys()))
+      Log.info("new commands    : %s" % sorted(updated_commands.keys()))
+      Log.info("commands_to_kill: %s" % sorted(commands_to_kill.keys()))
+      Log.info("commands_to_keep: %s" % sorted(commands_to_keep.keys()))
+      Log.info("commands_to_start: %s" % sorted(commands_to_start.keys()))
 
-    self._kill_processes(commands_to_kill)
-    self._start_processes(commands_to_start)
-    Log.info("Launch complete - processes killed=%s kept=%s started=%s monitored=%s" %
-             (len(commands_to_kill), len(commands_to_keep),
-              len(commands_to_start), len(self.processes_to_monitor)))
+      self._kill_processes(commands_to_kill)
+      self._start_processes(commands_to_start)
+      Log.info("Launch complete - processes killed=%s kept=%s started=%s monitored=%s" %
+               (len(commands_to_kill), len(commands_to_keep),
+                len(commands_to_start), len(self.processes_to_monitor)))
 
   def prepare_launch(self):
     create_folders = 'mkdir -p %s' % self.log_dir
