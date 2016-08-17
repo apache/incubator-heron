@@ -11,7 +11,7 @@ pex_library(
 )
 
 pex_library(
-  name = "pyheron_example_pkg",
+  name = "pyheron_examples",
   srcs = glob(['**/*.py']),
   deps = ['//heron/pyheron/src/python:pyheron_lib']
 )
