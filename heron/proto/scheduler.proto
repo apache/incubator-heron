@@ -4,6 +4,7 @@ option java_package = "com.twitter.heron.proto.scheduler";
 option java_outer_classname = "Scheduler";
 
 import "common.proto";
+import "packing_plan.proto";
 
 message SchedulerLocation {
   required string topology_name = 1;
@@ -26,6 +27,11 @@ message RestartTopologyRequest {
   // container_index would be -1 if no container is specified to restart
   // That means we would restart all containers.
   required int32 container_index = 2;
+}
+
+message UpdateTopologyRequest {
+  required heron.proto.system.PackingPlan currentPackingPlan = 1;
+  required heron.proto.system.PackingPlan proposedPackingPlan = 2;
 }
 
 message SchedulerResponse {
