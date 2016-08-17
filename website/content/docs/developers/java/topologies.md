@@ -1,12 +1,10 @@
 ---
-title: Writing a Topology
+title: Writing and Launching a Topology in Java
 ---
 
 A topology specifies components like spouts and bolts, as well as the relation
 between components and proper configurations.
 
-Note that this page is for writing a topology in Java. For those who want to
-write a Heron topology in Python, go to this [page](../python/topologies).
 
 ### Install Heron APIs for development
 
