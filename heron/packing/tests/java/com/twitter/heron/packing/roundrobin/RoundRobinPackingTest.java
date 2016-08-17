@@ -71,12 +71,8 @@ public class RoundRobinPackingTest {
         .putAll(ClusterDefaults.getDefaults())
         .build();
 
-    Config runtime = Config.newBuilder()
-        .put(Keys.topologyDefinition(), topology)
-        .build();
-
     RoundRobinPacking packing = new RoundRobinPacking();
-    packing.initialize(config, runtime);
+    packing.initialize(config, topology);
     PackingPlan output = packing.pack();
 
     return output;

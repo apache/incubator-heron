@@ -21,25 +21,26 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.common.basics.SysUtils;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.scheduler.client.ISchedulerClient;
 import com.twitter.heron.spi.common.Command;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.packing.IRepacking;
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.packing.PackingPlanProtoDeserializer;
 import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
-import com.twitter.heron.spi.packing.Resource;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
+import com.twitter.heron.spi.utils.ReflectionUtils;
 import com.twitter.heron.spi.utils.Runtime;
 import com.twitter.heron.spi.utils.TMasterUtils;
 
+
 public class RuntimeManagerRunner implements Callable<Boolean> {
-  private static final Logger LOG = Logger.getLogger(RuntimeManagerRunner.class.getName());
-
   static final String NEW_COMPONENT_PARALLELISM_KEY = "NEW_COMPONENT_PARALLELISM";
-
+  private static final Logger LOG = Logger.getLogger(RuntimeManagerRunner.class.getName());
   private final Config config;
   private final Config runtime;
   private final Command command;
@@ -112,14 +113,12 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
             .setTopologyName(topologyName)
             .setContainerIndex(containerId)
             .build();
-
     // If we restart the container including TMaster, wee need to clean TMasterLocation,
     // since when starting up, TMaster expects no other existing TMaster,
     // i.e. TMasterLocation does not exist
     if (containerId == -1 || containerId == 0) {
       // get the instance of state manager to clean state
       SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
-
       Boolean result = stateManager.deleteTMasterLocation(topologyName);
       if (result == null || !result) {
         // We would not return false since it is possible that TMaster didn't write physical plan
@@ -167,10 +166,11 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     LOG.fine(String.format("updateTopologyHandler called for %s with %s",
         topologyName, newParallelism));
     SchedulerStateManagerAdaptor manager = Runtime.schedulerStateManagerAdaptor(runtime);
-
+    TopologyAPI.Topology topology = manager.getTopology(topologyName);
     Map<String, Integer> changeRequests = parallelismChangeRequests(newParallelism);
     PackingPlans.PackingPlan currentPlan = manager.getPackingPlan(topologyName);
-    PackingPlans.PackingPlan proposedPlan = buildNewPackingPlan(currentPlan, changeRequests);
+    PackingPlans.PackingPlan proposedPlan = buildNewPackingPlan(currentPlan, changeRequests,
+        topology);
 
     Scheduler.UpdateTopologyRequest updateTopologyRequest =
         Scheduler.UpdateTopologyRequest.newBuilder()
@@ -242,39 +242,32 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
     return true;
   }
 
-  // *** all below should be replaced with the proper way to compute a new packing plan ***
   private PackingPlans.PackingPlan buildNewPackingPlan(PackingPlans.PackingPlan currentProtoPlan,
-                                                       Map<String, Integer> changeRequests) {
+                                                       Map<String, Integer> changeRequests,
+                                                       TopologyAPI.Topology topology) {
     PackingPlanProtoDeserializer deserializer = new PackingPlanProtoDeserializer();
     PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
     PackingPlan currentPackingPlan = deserializer.fromProto(currentProtoPlan);
 
     Map<String, Integer> componentCounts = currentPackingPlan.getComponentCounts();
-    Integer totalInstances = currentPackingPlan.getInstanceCount();
-
     Map<String, Integer> componentChanges = parallelismDelta(componentCounts, changeRequests);
 
-    // just add instances to the first container for prototype, cloning resources
-    PackingPlan.ContainerPlan containerToUse =
-        currentPackingPlan.getContainers().values().iterator().next();
-    Resource resourceToUse =
-        containerToUse.instances.values().iterator().next().resource;
-
-    Integer nextGlobalInstanceId = totalInstances + 1; // TODO: don't assume they go from 1 -> N
-    for (String component : componentChanges.keySet()) {
-      Integer delta = componentChanges.get(component);
-      assertTrue(delta > 0,
-          "Component reductions (%s) for %s not supported.", delta, component);
-      for (int i = 0; i < delta; i++) {
-        String instanceId =
-            String.format("%s:%s:%d:0", containerToUse.id, component, nextGlobalInstanceId++);
-        PackingPlan.InstancePlan instancePlan =
-            new PackingPlan.InstancePlan(instanceId, component, resourceToUse);
-        containerToUse.instances.put(instanceId, instancePlan);
-      }
+    // Create an instance of the packing class
+    String repackingClass = Context.repackingClass(config);
+    IRepacking packing;
+    try {
+      // create an instance of the packing class
+      packing = ReflectionUtils.newInstance(repackingClass);
+    } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
+      throw new RuntimeException("Failed to instantiate packing instance " + e);
     }
-
-    return serializer.toProto(currentPackingPlan);
+    try {
+      packing.initialize(config, topology);
+      PackingPlan packedPlan = packing.repack(currentPackingPlan, componentChanges);
+      return serializer.toProto(packedPlan);
+    } finally {
+      SysUtils.closeIgnoringExceptions(packing);
+    }
   }
 
   private Map<String, Integer> parallelismDelta(Map<String, Integer> componentCounts,

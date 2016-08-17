@@ -47,13 +47,16 @@ public class LauncherUtilsTest {
     PowerMockito.spy(ReflectionUtils.class);
     PowerMockito.doReturn(mockPacking).when(ReflectionUtils.class, "newInstance", PACKING_CLASS);
 
+    TopologyAPI.Topology mockTopology = PowerMockito.mock(TopologyAPI.Topology.class);
+
     Config mockConfig = Mockito.mock(Config.class);
     Mockito.when(mockConfig.getStringValue(Keys.packingClass())).thenReturn(PACKING_CLASS);
+    Mockito.when(mockConfig.get(Keys.topologyDefinition())).thenReturn(mockTopology);
 
-    PackingPlan resultPacking = LauncherUtils.getInstance().createPackingPlan(mockConfig, null);
+    PackingPlan resultPacking = LauncherUtils.getInstance().createPackingPlan(mockConfig,
+        mockConfig);
     Assert.assertEquals(mockPackingPlan, resultPacking);
-
-    Mockito.verify(mockPacking).initialize(Mockito.any(Config.class), Mockito.any(Config.class));
+    Mockito.verify(mockPacking).initialize(Mockito.any(Config.class), Mockito.eq(mockTopology));
     Mockito.verify(mockPacking).pack();
     Mockito.verify(mockPacking).close();
   }
