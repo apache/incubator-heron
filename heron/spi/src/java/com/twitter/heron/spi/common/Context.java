@@ -83,6 +83,10 @@ public class Context {
     return cfg.getStringValue(ConfigKeys.get("PACKING_CLASS"));
   }
 
+  public static String repackingClass(Config cfg) {
+    return cfg.getStringValue(ConfigKeys.get("REPACKING_CLASS"));
+  }
+
   public static String stateManagerClass(Config cfg) {
     return cfg.getStringValue(ConfigKeys.get("STATE_MANAGER_CLASS"));
   }

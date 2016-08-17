@@ -57,7 +57,8 @@ public class LauncherUtils {
     }
 
     try {
-      packing.initialize(config, runtime);
+      TopologyAPI.Topology topology = com.twitter.heron.spi.utils.Runtime.topology(runtime);
+      packing.initialize(config, topology);
       PackingPlan packedPlan = packing.pack();
       return packedPlan;
     } finally {

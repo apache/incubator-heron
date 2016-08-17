@@ -347,7 +347,6 @@ public class RuntimeManagerMain {
       // 4. Close the resources
       SysUtils.closeIgnoringExceptions(statemgr);
     }
-
     return isSuccessful;
   }
 
