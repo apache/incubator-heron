@@ -3,7 +3,6 @@
   
   <url>
     <loc>/heron/</loc>
-    <priority>0</priority>
   </url>
   
   <url>
@@ -16,6 +15,10 @@
   
   <url>
     <loc>/heron/docs/operators/deployment/schedulers/aurora/</loc>
+  </url>
+  
+  <url>
+    <loc>/heron/docs/developers/compiling/linux/</loc>
   </url>
   
   <url>
@@ -107,15 +110,19 @@
   </url>
   
   <url>
+    <loc>/heron/docs/developers/python/bolts/</loc>
+  </url>
+  
+  <url>
+    <loc>/heron/docs/developers/python/spouts/</loc>
+  </url>
+  
+  <url>
     <loc>/heron/docs/developers/java/spouts/</loc>
   </url>
   
   <url>
     <loc>/heron/docs/operators/configuration/config-intro/</loc>
-  </url>
-  
-  <url>
-    <loc>/heron/docs/developers/compiling/linux/</loc>
   </url>
   
   <url>
@@ -231,7 +238,11 @@
   </url>
   
   <url>
-    <loc>/heron/docs/developers/topologies/</loc>
+    <loc>/heron/docs/developers/java/topologies/</loc>
+  </url>
+  
+  <url>
+    <loc>/heron/docs/developers/python/topologies/</loc>
   </url>
   
 </urlset>

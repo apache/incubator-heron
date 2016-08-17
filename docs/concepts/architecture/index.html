@@ -1,26 +1,26 @@
-<!DOCTYPE html><html lang="en-us"><head><link rel="shortcut icon" type="image/png" sizes="16x16" href="/heron/img/favicon-16x16.png"><link rel="shortcut icon" type="image/png" sizes="32x32" href="/heron/img/favicon-32x32.png"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="Hugo 0.15" /><meta property="og:locale" content="en_US"><meta property="og:type" content="article"><meta property="og:title" content="Heron"><meta property="og:image" content="/img/logo54x54.png"><meta property="og:url" content="/heron"><meta name="twitter:card" content="summary"><meta name="twitter:site" content="@heronstreaming"><meta name="twitter:title" content="Heron"><meta name="twitter:image" content=""><meta property="og:site_name" content="Heron Architecture"><meta property="og:url" content=""><meta property="og:description" content=""><meta name="twitter:description" content=""><title>Heron Documentation - Heron Architecture</title><link rel="stylesheet" href="/heron/css/style.min.css"><link rel="stylesheet" href="/heron/css/font-awesome.min.css"><link rel="stylesheet" href="/heron/css/pygments.css"></head><body><nav class="hn-top-navbar navbar navbar-inverse navbar-fixed-top" role="navigation"><div class="hn-navbar-container container-fluid"><div class="navbar-header"><button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#hn-navbar" aria-controls="hn-navbar" aria-expanded="false"><span class="sr-only"><Toggle>navigation</Toggle></span><i class="hn-toggle-button fa fa-bars"></i></button><a class="hn-navbar-logo navbar-brand" href="/heron/"><img class="pull-left" src="/heron/img/HeronTextLogo-small.png"></a></div><div id="hn-navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav navbar-right"><li><a href="/heron/docs/getting-started">Docs</a></li><li><a href="/heron/api">API</a></li><li><a href="/heron/docs/resources">Resources</a></li><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="https://github.com/twitter/heron">GitHub</a></li><li><a href="https://groups.google.com/forum/#!forum/heron-users">Mailing List</a></li><li><a class="nav-icon" href="https://twitter.com/heronstreaming"><i class="fa fa-twitter"></i></a></li></ul></div></div></nav><div class="hn-main"><div class="container"><div class="row"><aside class="hn-sidebar hidden-xs col-sm-4 col-md-3 col-lg-2 collapse"><nav class="hn-sidebar-nav"><div id="hn-accordion" class="panel-group" role="tablist" aria-multiselectable="true"><div class="panel panel-default"><section id="getting-started" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-getting-started" aria-labelledby="getting-started"><i class="fa fa-caret-right"></i>Getting Started</a></h4></section><div id="collapse-getting-started" class="panel-collapse collapse" aria-labelledby="getting-started"><div class="panel-body"><ul><li><a href="/heron/docs/getting-started">Local (Single Node)</a></li><li><a href="/heron/docs/upgrade-storm-to-heron">Upgrade Storm Topologies</a></li><li><a href="/heron/docs/getting-started-troubleshooting">Troubleshooting Guide</a></li></ul></div></div></div><div class="panel panel-default"><section id="heron-concepts" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-heron-concepts" aria-labelledby="heron-concepts"><i class="fa fa-caret-right"></i>Heron Concepts</a></h4></section><div id="collapse-heron-concepts" class="panel-collapse collapse" aria-labelledby="heron-concepts"><div class="panel-body"><ul><li><a href="/heron/docs/concepts/design-goals">Heron Design Goals</a></li><li><a href="/heron/docs/concepts/topologies">Heron Topology</a></li><li><a href="/heron/docs/concepts/architecture">Heron Architecture</a></li></ul></div></div></div><div class="panel panel-default"><section id="deployment" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-deployment" aria-labelledby="deployment"><i class="fa fa-caret-right"></i>Deployment</a></h4></section><div id="collapse-deployment" class="panel-collapse collapse" aria-labelledby="deployment"><div class="panel-body"><ul><li><a href="/heron/docs/operators/deployment">Overview</a></li><li><a href="/heron/docs/operators/deployment/configuration">Configuration</a></li></ul></div></div></div><div class="panel panel-default"><section id="state-managers" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-state-managers" aria-labelledby="state-managers"><i class="fa fa-caret-right"></i>State Managers</a></h4></section><div id="collapse-state-managers" class="panel-collapse collapse" aria-labelledby="state-managers"><div class="panel-body"><ul><li><a href="/heron/docs/operators/deployment/statemanagers/zookeeper">Zookeeper</a></li><li><a href="/heron/docs/operators/deployment/statemanagers/localfs">Local FS</a></li></ul></div></div></div><div class="panel panel-default"><section id="uploaders" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-uploaders" aria-labelledby="uploaders"><i class="fa fa-caret-right"></i>Uploaders</a></h4></section><div id="collapse-uploaders" class="panel-collapse collapse" aria-labelledby="uploaders"><div class="panel-body"><ul><li><a href="/heron/docs/operators/deployment/uploaders/localfs">Local FS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/hdfs">HDFS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/s3">Amazon S3</a></li><li><a href="/heron/docs/operators/deployment/uploaders/scp">Secure Copy (SCP)</a></li></ul></div></div></div><div class="panel panel-default"><section id="schedulers" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-schedulers" aria-labelledby="schedulers"><i class="fa fa-caret-right"></i>Schedulers</a></h4></section><div id="collapse-schedulers" class="panel-collapse collapse" aria-labelledby="schedulers"><div class="panel-body"><ul><li><a href="/heron/docs/operators/deployment/schedulers/aurora">Aurora Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/local">Local Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/mesos-local-mac">Mesos Cluster Locally</a></li><li><a href="/heron/docs/operators/deployment/schedulers/slurm">Slurm Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/yarn">YARN Cluster</a></li></ul></div></div></div><div class="panel panel-default"><section id="cluster-configuration" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-cluster-configuration" aria-labelledby="cluster-configuration"><i class="fa fa-caret-right"></i>Cluster Configuration</a></h4></section><div id="collapse-cluster-configuration" class="panel-collapse collapse" aria-labelledby="cluster-configuration"><div class="panel-body"><ul><li><a href="/heron/docs/operators/configuration/config-intro">Overview</a></li><li><a href="/heron/docs/operators/configuration/system">System-Level</a></li><li><a href="/heron/docs/operators/configuration/instance">Heron Instance</a></li><li><a href="/heron/docs/operators/configuration/metrics-manager">Metrics Manager</a></li><li><a href="/heron/docs/operators/configuration/stmgr">Stream Manager</a></li><li><a href="/heron/docs/operators/configuration/tmaster">Topology Master</a></li></ul></div></div></div><div class="panel panel-default"><section id="observability" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-observability" aria-labelledby="observability"><i class="fa fa-caret-right"></i>Observability</a></h4></section><div id="collapse-observability" class="panel-collapse collapse" aria-labelledby="observability"><div class="panel-body"><ul><li><a href="/heron/docs/operators/observability/graphite">Graphite</a></li></ul></div></div></div><div class="panel panel-default"><section id="user-manuals" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-user-manuals" aria-labelledby="user-manuals"><i class="fa fa-caret-right"></i>User Manuals</a></h4></section><div id="collapse-user-manuals" class="panel-collapse collapse" aria-labelledby="user-manuals"><div class="panel-body"><ul><li><a href="/heron/docs/operators/heron-cli">Heron Client</a></li><li><a href="/heron/docs/operators/heron-tracker-api">Heron Tracker REST API</a></li><li><a href="/heron/docs/operators/heron-tracker">Heron Tracker Runbook</a></li><li><a href="/heron/docs/operators/heron-ui">Heron UI Runbook</a></li></ul></div></div></div><div class="panel panel-default"><section id="topology-writers" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-topology-writers" aria-labelledby="topology-writers"><i class="fa fa-caret-right"></i>Topology Writers</a></h4></section><div id="collapse-topology-writers" class="panel-collapse collapse" aria-labelledby="topology-writers"><div class="panel-body"><ul><li><a href="/heron/docs/developers/topologies">Writing Topologies</a></li><li><a href="/heron/docs/developers/data-model">Heron Data Model</a></li><li><a href="/heron/docs/developers/serialization">Tuple Serialization</a></li><li><a href="/heron/docs/developers/ui-guide">Heron UI Guide</a></li><li><a href="/heron/docs/developers/tuning">Tuning Guide</a></li><li><a href="/heron/docs/developers/packing/ffdpacking">Packing Algorithms</a></li><li><a href="/heron/docs/developers/simulator-mode">Simulator Mode</a></li><li><a href="/heron/docs/developers/troubleshooting">Troubleshooting Guide</a></li><li><a href="/heron/api">Javadoc</a></li></ul></div></div></div><div class="panel panel-default"><section id="heron-developers" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-heron-developers" aria-labelledby="heron-developers"><i class="fa fa-caret-right"></i>Heron Developers</a></h4></section><div id="collapse-heron-developers" class="panel-collapse collapse" aria-labelledby="heron-developers"><div class="panel-body"><ul><li><a href="/heron/docs/developers/compiling/compiling">Compiling</a></li><li><a href="/heron/docs/developers/compiling/linux">Compiling on Linux</a></li><li><a href="/heron/docs/developers/compiling/mac">Compiling on Mac OS X</a></li><li><a href="/heron/docs/developers/compiling/docker">Compiling With Docker</a></li><li><a href="/heron/docs/contributors/testing">Running Tests</a></li><li><a href="/heron/docs/contributors/codebase">Code Organization</a></li></ul></div></div></div><div class="panel panel-default"><section id="extending-heron" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-extending-heron" aria-labelledby="extending-heron"><i class="fa fa-caret-right"></i>Extending Heron</a></h4></section><div id="collapse-extending-heron" class="panel-collapse collapse" aria-labelledby="extending-heron"><div class="panel-body"><ul><li><a href="/heron/docs/contributors/custom-scheduler">Custom Scheduler</a></li><li><a href="/heron/docs/contributors/custom-metrics-sink">Custom Metrics Sink</a></li></ul></div></div></div><div class="panel panel-default"><section id="heron-resources" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-heron-resources" aria-labelledby="heron-resources"><i class="fa fa-caret-right"></i>Heron Resources</a></h4></section><div id="collapse-heron-resources" class="panel-collapse collapse" aria-labelledby="heron-resources"><div class="panel-body"><ul><li><a href="/heron/docs/resources">Heron Resources</a></li></ul></div></div></div><div class="panel panel-default"><section id="contributors" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-contributors" aria-labelledby="contributors"><i class="fa fa-caret-right"></i>Contributors</a></h4></section><div id="collapse-contributors" class="panel-collapse collapse" aria-labelledby="contributors"><div class="panel-body"><ul><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="/heron/docs/contributors/governance">Governance</a></li></ul></div></div></div></div></nav></aside><section class="hn-docs-main col-sm-8 col-md-9 col-lg-10 col-sm-offset-4 col-md-offset-3 col-lg-offset-2"><header class="hn-docs-header page-header"><h1>Heron Architecture</h1><div class="hn-docs-description"></div></header><article class="hn-docs-content">
+<!DOCTYPE html><html lang="en-us"><head><link rel="shortcut icon" type="image/png" sizes="16x16" href="/heron/img/favicon-16x16.png"><link rel="shortcut icon" type="image/png" sizes="32x32" href="/heron/img/favicon-32x32.png"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="Hugo 0.16" /><meta property="og:locale" content="en_US"><meta property="og:type" content="article"><meta property="og:title" content="Heron"><meta property="og:image" content="/img/logo54x54.png"><meta property="og:url" content="/heron"><meta name="twitter:card" content="summary"><meta name="twitter:site" content="@heronstreaming"><meta name="twitter:title" content="Heron"><meta name="twitter:image" content=""><meta property="og:site_name" content="Heron Architecture"><meta property="og:url" content=""><meta property="og:description" content=""><meta name="twitter:description" content=""><title>Heron Documentation - Heron Architecture</title><link rel="stylesheet" href="/heron/css/style.min.css"><link rel="stylesheet" href="/heron/css/font-awesome.min.css"><link rel="stylesheet" href="/heron/css/pygments.css"></head><body><nav class="hn-top-navbar navbar navbar-inverse navbar-fixed-top" role="navigation"><div class="hn-navbar-container container-fluid"><div class="navbar-header"><button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#hn-navbar" aria-controls="hn-navbar" aria-expanded="false"><span class="sr-only"><Toggle>navigation</Toggle></span><i class="hn-toggle-button fa fa-bars"></i></button><a class="hn-navbar-logo navbar-brand" href="/heron/"><img class="pull-left" src="/heron/img/HeronTextLogo-small.png"></a></div><div id="hn-navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav navbar-right"><li><a href="/heron/docs/getting-started">Docs</a></li><li><a href="/heron/api">API</a></li><li><a href="/heron/docs/resources">Resources</a></li><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="https://github.com/twitter/heron">GitHub</a></li><li><a href="https://groups.google.com/forum/#!forum/heron-users">Mailing List</a></li><li><a class="nav-icon" href="https://twitter.com/heronstreaming"><i class="fa fa-twitter"></i></a></li></ul></div></div></nav><div class="hn-main"><div class="container"><div class="row"><aside class="hn-sidebar hidden-xs col-sm-4 col-md-3 col-lg-2 collapse"><nav class="hn-sidebar-nav"><div id="hn-accordion" class="panel-group" role="tablist" aria-multiselectable="true"><div class="panel panel-default"><section id="getting-started" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-getting-started" aria-labelledby="getting-started"><i class="fa fa-caret-right"></i>Getting Started</a></h4></section><div id="collapse-getting-started" class="panel-collapse collapse" aria-labelledby="getting-started"><div class="panel-body"><ul><li><a href="/heron/docs/getting-started">Local (Single Node)</a></li><li><a href="/heron/docs/upgrade-storm-to-heron">Upgrade Storm Topologies</a></li><li><a href="/heron/docs/getting-started-troubleshooting">Troubleshooting Guide</a></li></ul></div></div></div><div class="panel panel-default"><section id="heron-concepts" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-heron-concepts" aria-labelledby="heron-concepts"><i class="fa fa-caret-right"></i>Heron Concepts</a></h4></section><div id="collapse-heron-concepts" class="panel-collapse collapse" aria-labelledby="heron-concepts"><div class="panel-body"><ul><li><a href="/heron/docs/concepts/design-goals">Heron Design Goals</a></li><li><a href="/heron/docs/concepts/topologies">Heron Topology</a></li><li><a href="/heron/docs/concepts/architecture">Heron Architecture</a></li></ul></div></div></div><div class="panel panel-default"><section id="deployment" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-deployment" aria-labelledby="deployment"><i class="fa fa-caret-right"></i>Deployment</a></h4></section><div id="collapse-deployment" class="panel-collapse collapse" aria-labelledby="deployment"><div class="panel-body"><ul><li><a href="/heron/docs/operators/deployment">Overview</a></li><li><a href="/heron/docs/operators/deployment/configuration">Configuration</a></li></ul></div></div></div><div class="panel panel-default"><section id="state-managers" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-state-managers" aria-labelledby="state-managers"><i class="fa fa-caret-right"></i>State Managers</a></h4></section><div id="collapse-state-managers" class="panel-collapse collapse" aria-labelledby="state-managers"><div class="panel-body"><ul><li><a href="/heron/docs/operators/deployment/statemanagers/zookeeper">Zookeeper</a></li><li><a href="/heron/docs/operators/deployment/statemanagers/localfs">Local FS</a></li></ul></div></div></div><div class="panel panel-default"><section id="uploaders" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-uploaders" aria-labelledby="uploaders"><i class="fa fa-caret-right"></i>Uploaders</a></h4></section><div id="collapse-uploaders" class="panel-collapse collapse" aria-labelledby="uploaders"><div class="panel-body"><ul><li><a href="/heron/docs/operators/deployment/uploaders/localfs">Local FS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/hdfs">HDFS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/s3">Amazon S3</a></li><li><a href="/heron/docs/operators/deployment/uploaders/scp">Secure Copy (SCP)</a></li></ul></div></div></div><div class="panel panel-default"><section id="schedulers" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-schedulers" aria-labelledby="schedulers"><i class="fa fa-caret-right"></i>Schedulers</a></h4></section><div id="collapse-schedulers" class="panel-collapse collapse" aria-labelledby="schedulers"><div class="panel-body"><ul><li><a href="/heron/docs/operators/deployment/schedulers/aurora">Aurora Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/local">Local Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/mesos-local-mac">Mesos Cluster Locally</a></li><li><a href="/heron/docs/operators/deployment/schedulers/slurm">Slurm Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/yarn">YARN Cluster</a></li></ul></div></div></div><div class="panel panel-default"><section id="cluster-configuration" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-cluster-configuration" aria-labelledby="cluster-configuration"><i class="fa fa-caret-right"></i>Cluster Configuration</a></h4></section><div id="collapse-cluster-configuration" class="panel-collapse collapse" aria-labelledby="cluster-configuration"><div class="panel-body"><ul><li><a href="/heron/docs/operators/configuration/config-intro">Overview</a></li><li><a href="/heron/docs/operators/configuration/system">System-Level</a></li><li><a href="/heron/docs/operators/configuration/instance">Heron Instance</a></li><li><a href="/heron/docs/operators/configuration/metrics-manager">Metrics Manager</a></li><li><a href="/heron/docs/operators/configuration/stmgr">Stream Manager</a></li><li><a href="/heron/docs/operators/configuration/tmaster">Topology Master</a></li></ul></div></div></div><div class="panel panel-default"><section id="observability" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-observability" aria-labelledby="observability"><i class="fa fa-caret-right"></i>Observability</a></h4></section><div id="collapse-observability" class="panel-collapse collapse" aria-labelledby="observability"><div class="panel-body"><ul><li><a href="/heron/docs/operators/observability/graphite">Graphite</a></li></ul></div></div></div><div class="panel panel-default"><section id="user-manuals" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-user-manuals" aria-labelledby="user-manuals"><i class="fa fa-caret-right"></i>User Manuals</a></h4></section><div id="collapse-user-manuals" class="panel-collapse collapse" aria-labelledby="user-manuals"><div class="panel-body"><ul><li><a href="/heron/docs/operators/heron-cli">Heron Client</a></li><li><a href="/heron/docs/operators/heron-tracker-api">Heron Tracker REST API</a></li><li><a href="/heron/docs/operators/heron-tracker">Heron Tracker Runbook</a></li><li><a href="/heron/docs/operators/heron-ui">Heron UI Runbook</a></li></ul></div></div></div><div class="panel panel-default"><section id="topology-writers" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-topology-writers" aria-labelledby="topology-writers"><i class="fa fa-caret-right"></i>Topology Writers</a></h4></section><div id="collapse-topology-writers" class="panel-collapse collapse" aria-labelledby="topology-writers"><div class="panel-body"><ul><li><a href="/heron/docs/developers/java/topologies">Writing Java Topologies</a></li><li><a href="/heron/docs/developers/python/topologies">Writing Python Topologies</a></li><li><a href="/heron/docs/developers/data-model">Heron Data Model</a></li><li><a href="/heron/docs/developers/serialization">Tuple Serialization</a></li><li><a href="/heron/docs/developers/ui-guide">Heron UI Guide</a></li><li><a href="/heron/docs/developers/tuning">Tuning Guide</a></li><li><a href="/heron/docs/developers/packing/ffdpacking">Packing Algorithms</a></li><li><a href="/heron/docs/developers/simulator-mode">Simulator Mode</a></li><li><a href="/heron/docs/developers/troubleshooting">Troubleshooting Guide</a></li><li><a href="/heron/api">Javadoc</a></li></ul></div></div></div><div class="panel panel-default"><section id="heron-developers" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-heron-developers" aria-labelledby="heron-developers"><i class="fa fa-caret-right"></i>Heron Developers</a></h4></section><div id="collapse-heron-developers" class="panel-collapse collapse" aria-labelledby="heron-developers"><div class="panel-body"><ul><li><a href="/heron/docs/developers/compiling/compiling">Compiling</a></li><li><a href="/heron/docs/developers/compiling/linux">Compiling on Linux</a></li><li><a href="/heron/docs/developers/compiling/mac">Compiling on Mac OS X</a></li><li><a href="/heron/docs/developers/compiling/docker">Compiling With Docker</a></li><li><a href="/heron/docs/contributors/testing">Running Tests</a></li><li><a href="/heron/docs/contributors/codebase">Code Organization</a></li></ul></div></div></div><div class="panel panel-default"><section id="extending-heron" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-extending-heron" aria-labelledby="extending-heron"><i class="fa fa-caret-right"></i>Extending Heron</a></h4></section><div id="collapse-extending-heron" class="panel-collapse collapse" aria-labelledby="extending-heron"><div class="panel-body"><ul><li><a href="/heron/docs/contributors/custom-scheduler">Custom Scheduler</a></li><li><a href="/heron/docs/contributors/custom-metrics-sink">Custom Metrics Sink</a></li></ul></div></div></div><div class="panel panel-default"><section id="heron-resources" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-heron-resources" aria-labelledby="heron-resources"><i class="fa fa-caret-right"></i>Heron Resources</a></h4></section><div id="collapse-heron-resources" class="panel-collapse collapse" aria-labelledby="heron-resources"><div class="panel-body"><ul><li><a href="/heron/docs/resources">Heron Resources</a></li></ul></div></div></div><div class="panel panel-default"><section id="contributors" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-contributors" aria-labelledby="contributors"><i class="fa fa-caret-right"></i>Contributors</a></h4></section><div id="collapse-contributors" class="panel-collapse collapse" aria-labelledby="contributors"><div class="panel-body"><ul><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="/heron/docs/contributors/governance">Governance</a></li></ul></div></div></div></div></nav></aside><section class="hn-docs-main col-sm-8 col-md-9 col-lg-10 col-sm-offset-4 col-md-offset-3 col-lg-offset-2"><header class="hn-docs-header page-header"><h1>Heron Architecture</h1><div class="hn-docs-description"></div></header><article class="hn-docs-content">
 
 <p>Heron is the direct successor of <a href="http://storm.apache.org">Apache Storm</a>. From
 an architectural perspective it is markedly different from Storm but fully
 backwards compatible with it from an API perspective.</p>
 
-<p>The sections below clarify the distinction between <a href="#relationship-with-apache-storm:1bf455b3a3c6e1e40be41ef6023b75eb">Heron and
-Storm</a>, describe the <a href="#heron-design-goals:1bf455b3a3c6e1e40be41ef6023b75eb">design
+<p>The sections below clarify the distinction between <a href="#relationship-with-apache-storm">Heron and
+Storm</a>, describe the <a href="#heron-design-goals">design
 goals</a> behind Heron, and explain major
-<a href="#topology-components:1bf455b3a3c6e1e40be41ef6023b75eb">components</a> of its architecture.</p>
+<a href="#topology-components">components</a> of its architecture.</p>
 
-<h2 id="codebase:1bf455b3a3c6e1e40be41ef6023b75eb">Codebase</h2>
+<h2 id="codebase">Codebase</h2>
 
 <p>A detailed guide to the Heron codebase can be found
 <a href="/heron/docs/contributors/codebase/">here</a>.</p>
 
-<h2 id="topologies:1bf455b3a3c6e1e40be41ef6023b75eb">Topologies</h2>
+<h2 id="topologies">Topologies</h2>
 
 <p>You can think of a Heron cluster as a mechanism for managing the lifecycle of
 stream-processing entities called <strong>topologies</strong>. More information can be found
 in the <a href="../topologies">Heron Topologies</a> document.</p>
 
-<h2 id="relationship-with-apache-storm:1bf455b3a3c6e1e40be41ef6023b75eb">Relationship with Apache Storm</h2>
+<h2 id="relationship-with-apache-storm">Relationship with Apache Storm</h2>
 
 <p>Heron is the direct successor of <a href="http://storm.apache.org">Apache Storm</a> but
 built with two goals in mind:</p>
@@ -35,30 +35,30 @@ API</a>.</li>
 <p>For a more in-depth discussion of Heron and Storm, see the <a href="http://dl.acm.org/citation.cfm?id=2742788">Twitter Heron:
 Stream Processing at Scale</a> paper.</p>
 
-<h2 id="heron-design-goals:1bf455b3a3c6e1e40be41ef6023b75eb">Heron Design Goals</h2>
+<h2 id="heron-design-goals">Heron Design Goals</h2>
 
 <p>For a description of the principles that Heron was designed to fulfill, see
 <a href="/heron/docs/concepts/design-goals">Heron Design Goals</a>.</p>
 
-<h2 id="topology-components:1bf455b3a3c6e1e40be41ef6023b75eb">Topology Components</h2>
+<h2 id="topology-components">Topology Components</h2>
 
 <p>The following core components of Heron topologies are discussed in depth in
 the sections below:</p>
 
 <ul>
-<li><a href="#topology-master:1bf455b3a3c6e1e40be41ef6023b75eb">Topology Master</a></li>
-<li><a href="#container:1bf455b3a3c6e1e40be41ef6023b75eb">Container</a></li>
-<li><a href="#stream-manager:1bf455b3a3c6e1e40be41ef6023b75eb">Stream Manager</a></li>
-<li><a href="#heron-instance:1bf455b3a3c6e1e40be41ef6023b75eb">Heron Instance</a></li>
-<li><a href="#metrics-manager:1bf455b3a3c6e1e40be41ef6023b75eb">Metrics Manager</a></li>
-<li><a href="#heron-tracker:1bf455b3a3c6e1e40be41ef6023b75eb">Heron Tracker</a></li>
+<li><a href="#topology-master">Topology Master</a></li>
+<li><a href="#container">Container</a></li>
+<li><a href="#stream-manager">Stream Manager</a></li>
+<li><a href="#heron-instance">Heron Instance</a></li>
+<li><a href="#metrics-manager">Metrics Manager</a></li>
+<li><a href="#heron-tracker">Heron Tracker</a></li>
 </ul>
 
-<h3 id="topology-master:1bf455b3a3c6e1e40be41ef6023b75eb">Topology Master</h3>
+<h3 id="topology-master">Topology Master</h3>
 
 <p>The Topology Master (TM) manages a topology throughout its entire lifecycle,
 from the time it&rsquo;s submitted until it&rsquo;s ultimately killed. When <code>heron</code> deploys
-a topology it starts a single TM and multiple <a href="#container:1bf455b3a3c6e1e40be41ef6023b75eb">containers</a>.
+a topology it starts a single TM and multiple <a href="#container">containers</a>.
 The TM creates an ephemeral <a href="http://zookeeper.apache.org">ZooKeeper</a> node to
 ensure that there&rsquo;s only one TM for the topology and that the TM is easily
 discoverable by any process in the topology. The TM also constructs the <a href="../topologies#physical-plan">physical
@@ -67,27 +67,27 @@ components.</p>
 
 <p><img src="/heron/img/tmaster.png" alt="Topology Master" /></p>
 
-<h4 id="topology-master-configuration:1bf455b3a3c6e1e40be41ef6023b75eb">Topology Master Configuration</h4>
+<h4 id="topology-master-configuration">Topology Master Configuration</h4>
 
 <p>TMs have a variety of <a href="../../operators/configuration/tmaster">configurable
 parameters</a> that you can adjust at each
 phase of a topology&rsquo;s <a href="../topologies#topology-lifecycle">lifecycle</a>.</p>
 
-<h3 id="container:1bf455b3a3c6e1e40be41ef6023b75eb">Container</h3>
+<h3 id="container">Container</h3>
 
 <p>Each Heron topology consists of multiple <strong>containers</strong>, each of which houses
-multiple <a href="#heron-instance:1bf455b3a3c6e1e40be41ef6023b75eb">Heron Instances</a>, a <a href="#stream-manager:1bf455b3a3c6e1e40be41ef6023b75eb">Stream
-Manager</a>, and a <a href="#metrics-manager:1bf455b3a3c6e1e40be41ef6023b75eb">Metrics Manager</a>. Containers
+multiple <a href="#heron-instance">Heron Instances</a>, a <a href="#stream-manager">Stream
+Manager</a>, and a <a href="#metrics-manager">Metrics Manager</a>. Containers
 communicate with the topology&rsquo;s TM to ensure that the topology forms a fully
 connected graph.</p>
 
-<p>For an illustration, see the figure in the <a href="#topology-master:1bf455b3a3c6e1e40be41ef6023b75eb">Topology Master</a>
+<p>For an illustration, see the figure in the <a href="#topology-master">Topology Master</a>
 section above.</p>
 
-<h3 id="stream-manager:1bf455b3a3c6e1e40be41ef6023b75eb">Stream Manager</h3>
+<h3 id="stream-manager">Stream Manager</h3>
 
 <p>The <strong>Stream Manager</strong> (SM) manages the routing of tuples between topology
-components. Each <a href="#heron-instance:1bf455b3a3c6e1e40be41ef6023b75eb">Heron Instance</a> in a topology connects to its
+components. Each <a href="#heron-instance">Heron Instance</a> in a topology connects to its
 local SM, while all of the SMs in a given topology connect to one another to
 form a network. Below is a visual illustration of a network of SMs:</p>
 
@@ -117,13 +117,13 @@ bolt <strong>B3</strong> (in this case spout <strong>S1</strong>).</p>
 <strong>A</strong> will notify the other SMs and stream routing within the topology will
 return to normal.</p>
 
-<h4 id="stream-manger-configuration:1bf455b3a3c6e1e40be41ef6023b75eb">Stream Manger Configuration</h4>
+<h4 id="stream-manger-configuration">Stream Manger Configuration</h4>
 
 <p>SMs have a variety of <a href="../../operators/configuration/stmgr">configurable
 parameters</a> that you can adjust at each
 phase of a topology&rsquo;s <a href="../topologies#topology-lifecycle">lifecycle</a>.</p>
 
-<h3 id="heron-instance:1bf455b3a3c6e1e40be41ef6023b75eb">Heron Instance</h3>
+<h3 id="heron-instance">Heron Instance</h3>
 
 <p>A <strong>Heron Instance</strong> (HI) is a process that handles a single task of a
 <a href="../topologies#spouts">spout</a> or <a href="../topologies#bolts">bolt</a>, which allows
@@ -133,36 +133,36 @@ for easy debugging and profiling.</p>
 HIs are <a href="https://en.wikipedia.org/wiki/Java_virtual_machine">JVM</a> processes, but
 this will change in the future.</p>
 
-<h4 id="heron-instance-configuration:1bf455b3a3c6e1e40be41ef6023b75eb">Heron Instance Configuration</h4>
+<h4 id="heron-instance-configuration">Heron Instance Configuration</h4>
 
 <p>HIs have a variety of <a href="../../operators/configuration/instance">configurable
 parameters</a> that you can adjust at
 each phase of a topology&rsquo;s <a href="../topologies#topology-lifecycle">lifecycle</a>.</p>
 
-<h3 id="metrics-manager:1bf455b3a3c6e1e40be41ef6023b75eb">Metrics Manager</h3>
+<h3 id="metrics-manager">Metrics Manager</h3>
 
 <p>Each topology runs a Metrics Manager (MM) that collects and exports metrics from
-all components in a <a href="#container:1bf455b3a3c6e1e40be41ef6023b75eb">container</a>. It then routes those metrics to
-both the <a href="#topology-master:1bf455b3a3c6e1e40be41ef6023b75eb">Topology Master</a> and to external collectors, such as
+all components in a <a href="#container">container</a>. It then routes those metrics to
+both the <a href="#topology-master">Topology Master</a> and to external collectors, such as
 <a href="https://github.com/facebookarchive/scribe">Scribe</a>,
 <a href="http://graphite.wikidot.com/">Graphite</a>, or analogous systems.</p>
 
 <p>You can adapt Heron to support additional systems by implementing your own
 <a href="../../contributors/custom-metrics-sink">custom metrics sink</a>.</p>
 
-<h2 id="cluster-level-components:1bf455b3a3c6e1e40be41ef6023b75eb">Cluster-level Components</h2>
+<h2 id="cluster-level-components">Cluster-level Components</h2>
 
 <p>All of the components listed in the sections above can be found in each
 topology. The components listed below are cluster-level components that function
 outside of particular topologies.</p>
 
-<h3 id="heron-cli:1bf455b3a3c6e1e40be41ef6023b75eb">Heron CLI</h3>
+<h3 id="heron-cli">Heron CLI</h3>
 
 <p>Heron has a CLI tool called <code>heron</code> that is used to manage topologies.
 Documentation can be found in <a href="../../operators/heron-cli">Managing
 Topologies</a>.</p>
 
-<h3 id="heron-tracker:1bf455b3a3c6e1e40be41ef6023b75eb">Heron Tracker</h3>
+<h3 id="heron-tracker">Heron Tracker</h3>
 
 <p>The <strong>Heron Tracker</strong> (or just Tracker) is a centralized gateway for
 cluster-wide information about topologies, including which topologies are
@@ -175,7 +175,7 @@ Heron <a href="../../operators/deployment">scheduler</a>) or outside of it.</p>
 <p>Instructions on running the tracker including JSON API docs can be found in <a href="../../operators/heron-tracker">Heron
 Tracker</a>.</p>
 
-<h3 id="heron-ui:1bf455b3a3c6e1e40be41ef6023b75eb">Heron UI</h3>
+<h3 id="heron-ui">Heron UI</h3>
 
 <p><strong>Heron UI</strong> is a rich visual interface that you can use to interact with
 topologies. Through Heron UI you can see color-coded visual representations of
@@ -184,7 +184,7 @@ the <a href="../topologies#logical-plan">logical</a> and
 
 <p>For more information, see the <a href="../../operators/heron-ui">Heron UI</a> document.</p>
 
-<h2 id="topology-submit-sequence:1bf455b3a3c6e1e40be41ef6023b75eb">Topology Submit Sequence</h2>
+<h2 id="topology-submit-sequence">Topology Submit Sequence</h2>
 
 <p><a href="../topologies#topology-lifecycle">Topology Lifecycle</a> describes the lifecycle states of a Heron
 topology. The diagram below illustrates the sequence of interactions amongst the Heron architectural
@@ -198,7 +198,7 @@ https://docs.google.com/drawings/d/10d1Q_VO0HFtOHftDV7kK6VbZMVI5EpEYHrD-LR7SczE
 
 <p><img src="/heron/img/topology-submit-sequence-diagram.png" style="max-width:140%;!important;" alt="Topology Sequence Diagram"/></p>
 
-<h3 id="topology-submit-description:1bf455b3a3c6e1e40be41ef6023b75eb">Topology Submit Description</h3>
+<h3 id="topology-submit-description">Topology Submit Description</h3>
 
 <p>The following describes in more detail how a topology is submitted and
 launched using local scheduler.</p>
@@ -246,4 +246,4 @@ a connection and registers itself with the stream manager.
 After the successful registration, the gateway thread sends its physical plan to
 the slave thread, which then executes the assigned instance accordingly.</p></li>
 </ul>
-</article></section></div></div></div><script src="http://code.jquery.com/jquery-2.2.1.min.js"></script><script src="/heron/js/app.min.js"></script></body></html>
+</article></section></div></div></div><script src="https://code.jquery.com/jquery-2.2.1.min.js"></script><script src="/heron/js/app.min.js"></script></body></html>

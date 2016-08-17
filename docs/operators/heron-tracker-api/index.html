@@ -1,6 +1,6 @@
-<!DOCTYPE html><html lang="en-us"><head><link rel="shortcut icon" type="image/png" sizes="16x16" href="/heron/img/favicon-16x16.png"><link rel="shortcut icon" type="image/png" sizes="32x32" href="/heron/img/favicon-32x32.png"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="Hugo 0.15" /><meta property="og:locale" content="en_US"><meta property="og:type" content="article"><meta property="og:title" content="Heron"><meta property="og:image" content="/img/logo54x54.png"><meta property="og:url" content="/heron"><meta name="twitter:card" content="summary"><meta name="twitter:site" content="@heronstreaming"><meta name="twitter:title" content="Heron"><meta name="twitter:image" content=""><meta property="og:site_name" content="Heron Tracker REST API"><meta property="og:url" content=""><meta property="og:description" content=""><meta name="twitter:description" content=""><title>Heron Documentation - Heron Tracker REST API</title><link rel="stylesheet" href="/heron/css/style.min.css"><link rel="stylesheet" href="/heron/css/font-awesome.min.css"><link rel="stylesheet" href="/heron/css/pygments.css"></head><body><nav class="hn-top-navbar navbar navbar-inverse navbar-fixed-top" role="navigation"><div class="hn-navbar-container container-fluid"><div class="navbar-header"><button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#hn-navbar" aria-controls="hn-navbar" aria-expanded="false"><span class="sr-only"><Toggle>navigation</Toggle></span><i class="hn-toggle-button fa fa-bars"></i></button><a class="hn-navbar-logo navbar-brand" href="/heron/"><img class="pull-left" src="/heron/img/HeronTextLogo-small.png"></a></div><div id="hn-navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav navbar-right"><li><a href="/heron/docs/getting-started">Docs</a></li><li><a href="/heron/api">API</a></li><li><a href="/heron/docs/resources">Resources</a></li><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="https://github.com/twitter/heron">GitHub</a></li><li><a href="https://groups.google.com/forum/#!forum/heron-users">Mailing List</a></li><li><a class="nav-icon" href="https://twitter.com/heronstreaming"><i class="fa fa-twitter"></i></a></li></ul></div></div></nav><div class="hn-main"><div class="container"><div class="row"><aside class="hn-sidebar hidden-xs col-sm-4 col-md-3 col-lg-2 collapse"><nav class="hn-sidebar-nav"><div id="hn-accordion" class="panel-group" role="tablist" aria-multiselectable="true"><div class="panel panel-default"><section id="getting-started" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-getting-started" aria-labelledby="getting-started"><i class="fa fa-caret-right"></i>Getting Started</a></h4></section><div id="collapse-getting-started" class="panel-collapse collapse" aria-labelledby="getting-started"><div class="panel-body"><ul><li><a href="/heron/docs/getting-started">Local (Single Node)</a></li><li><a href="/heron/docs/upgrade-storm-to-heron">Upgrade Storm Topologies</a></li><li><a href="/heron/docs/getting-started-troubleshooting">Troubleshooting Guide</a></li></ul></div></div></div><div class="panel panel-default"><section id="heron-concepts" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-heron-concepts" aria-labelledby="heron-concepts"><i class="fa fa-caret-right"></i>Heron Concepts</a></h4></section><div id="collapse-heron-concepts" class="panel-collapse collapse" aria-labelledby="heron-concepts"><div class="panel-body"><ul><li><a href="/heron/docs/concepts/design-goals">Heron Design Goals</a></li><li><a href="/heron/docs/concepts/topologies">Heron Topology</a></li><li><a href="/heron/docs/concepts/architecture">Heron Architecture</a></li></ul></div></div></div><div class="panel panel-default"><section id="deployment" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-deployment" aria-labelledby="deployment"><i class="fa fa-caret-right"></i>Deployment</a></h4></section><div id="collapse-deployment" class="panel-collapse collapse" aria-labelledby="deployment"><div class="panel-body"><ul><li><a href="/heron/docs/operators/deployment">Overview</a></li><li><a href="/heron/docs/operators/deployment/configuration">Configuration</a></li></ul></div></div></div><div class="panel panel-default"><section id="state-managers" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-state-managers" aria-labelledby="state-managers"><i class="fa fa-caret-right"></i>State Managers</a></h4></section><div id="collapse-state-managers" class="panel-collapse collapse" aria-labelledby="state-managers"><div class="panel-body"><ul><li><a href="/heron/docs/operators/deployment/statemanagers/zookeeper">Zookeeper</a></li><li><a href="/heron/docs/operators/deployment/statemanagers/localfs">Local FS</a></li></ul></div></div></div><div class="panel panel-default"><section id="uploaders" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-uploaders" aria-labelledby="uploaders"><i class="fa fa-caret-right"></i>Uploaders</a></h4></section><div id="collapse-uploaders" class="panel-collapse collapse" aria-labelledby="uploaders"><div class="panel-body"><ul><li><a href="/heron/docs/operators/deployment/uploaders/localfs">Local FS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/hdfs">HDFS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/s3">Amazon S3</a></li><li><a href="/heron/docs/operators/deployment/uploaders/scp">Secure Copy (SCP)</a></li></ul></div></div></div><div class="panel panel-default"><section id="schedulers" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-schedulers" aria-labelledby="schedulers"><i class="fa fa-caret-right"></i>Schedulers</a></h4></section><div id="collapse-schedulers" class="panel-collapse collapse" aria-labelledby="schedulers"><div class="panel-body"><ul><li><a href="/heron/docs/operators/deployment/schedulers/aurora">Aurora Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/local">Local Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/mesos-local-mac">Mesos Cluster Locally</a></li><li><a href="/heron/docs/operators/deployment/schedulers/slurm">Slurm Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/yarn">YARN Cluster</a></li></ul></div></div></div><div class="panel panel-default"><section id="cluster-configuration" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-cluster-configuration" aria-labelledby="cluster-configuration"><i class="fa fa-caret-right"></i>Cluster Configuration</a></h4></section><div id="collapse-cluster-configuration" class="panel-collapse collapse" aria-labelledby="cluster-configuration"><div class="panel-body"><ul><li><a href="/heron/docs/operators/configuration/config-intro">Overview</a></li><li><a href="/heron/docs/operators/configuration/system">System-Level</a></li><li><a href="/heron/docs/operators/configuration/instance">Heron Instance</a></li><li><a href="/heron/docs/operators/configuration/metrics-manager">Metrics Manager</a></li><li><a href="/heron/docs/operators/configuration/stmgr">Stream Manager</a></li><li><a href="/heron/docs/operators/configuration/tmaster">Topology Master</a></li></ul></div></div></div><div class="panel panel-default"><section id="observability" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-observability" aria-labelledby="observability"><i class="fa fa-caret-right"></i>Observability</a></h4></section><div id="collapse-observability" class="panel-collapse collapse" aria-labelledby="observability"><div class="panel-body"><ul><li><a href="/heron/docs/operators/observability/graphite">Graphite</a></li></ul></div></div></div><div class="panel panel-default"><section id="user-manuals" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-user-manuals" aria-labelledby="user-manuals"><i class="fa fa-caret-right"></i>User Manuals</a></h4></section><div id="collapse-user-manuals" class="panel-collapse collapse" aria-labelledby="user-manuals"><div class="panel-body"><ul><li><a href="/heron/docs/operators/heron-cli">Heron Client</a></li><li><a href="/heron/docs/operators/heron-tracker-api">Heron Tracker REST API</a></li><li><a href="/heron/docs/operators/heron-tracker">Heron Tracker Runbook</a></li><li><a href="/heron/docs/operators/heron-ui">Heron UI Runbook</a></li></ul></div></div></div><div class="panel panel-default"><section id="topology-writers" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-topology-writers" aria-labelledby="topology-writers"><i class="fa fa-caret-right"></i>Topology Writers</a></h4></section><div id="collapse-topology-writers" class="panel-collapse collapse" aria-labelledby="topology-writers"><div class="panel-body"><ul><li><a href="/heron/docs/developers/topologies">Writing Topologies</a></li><li><a href="/heron/docs/developers/data-model">Heron Data Model</a></li><li><a href="/heron/docs/developers/serialization">Tuple Serialization</a></li><li><a href="/heron/docs/developers/ui-guide">Heron UI Guide</a></li><li><a href="/heron/docs/developers/tuning">Tuning Guide</a></li><li><a href="/heron/docs/developers/packing/ffdpacking">Packing Algorithms</a></li><li><a href="/heron/docs/developers/simulator-mode">Simulator Mode</a></li><li><a href="/heron/docs/developers/troubleshooting">Troubleshooting Guide</a></li><li><a href="/heron/api">Javadoc</a></li></ul></div></div></div><div class="panel panel-default"><section id="heron-developers" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-heron-developers" aria-labelledby="heron-developers"><i class="fa fa-caret-right"></i>Heron Developers</a></h4></section><div id="collapse-heron-developers" class="panel-collapse collapse" aria-labelledby="heron-developers"><div class="panel-body"><ul><li><a href="/heron/docs/developers/compiling/compiling">Compiling</a></li><li><a href="/heron/docs/developers/compiling/linux">Compiling on Linux</a></li><li><a href="/heron/docs/developers/compiling/mac">Compiling on Mac OS X</a></li><li><a href="/heron/docs/developers/compiling/docker">Compiling With Docker</a></li><li><a href="/heron/docs/contributors/testing">Running Tests</a></li><li><a href="/heron/docs/contributors/codebase">Code Organization</a></li></ul></div></div></div><div class="panel panel-default"><section id="extending-heron" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-extending-heron" aria-labelledby="extending-heron"><i class="fa fa-caret-right"></i>Extending Heron</a></h4></section><div id="collapse-extending-heron" class="panel-collapse collapse" aria-labelledby="extending-heron"><div class="panel-body"><ul><li><a href="/heron/docs/contributors/custom-scheduler">Custom Scheduler</a></li><li><a href="/heron/docs/contributors/custom-metrics-sink">Custom Metrics Sink</a></li></ul></div></div></div><div class="panel panel-default"><section id="heron-resources" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-heron-resources" aria-labelledby="heron-resources"><i class="fa fa-caret-right"></i>Heron Resources</a></h4></section><div id="collapse-heron-resources" class="panel-collapse collapse" aria-labelledby="heron-resources"><div class="panel-body"><ul><li><a href="/heron/docs/resources">Heron Resources</a></li></ul></div></div></div><div class="panel panel-default"><section id="contributors" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-contributors" aria-labelledby="contributors"><i class="fa fa-caret-right"></i>Contributors</a></h4></section><div id="collapse-contributors" class="panel-collapse collapse" aria-labelledby="contributors"><div class="panel-body"><ul><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="/heron/docs/contributors/governance">Governance</a></li></ul></div></div></div></div></nav></aside><section class="hn-docs-main col-sm-8 col-md-9 col-lg-10 col-sm-offset-4 col-md-offset-3 col-lg-offset-2"><header class="hn-docs-header page-header"><h1>Heron Tracker REST API</h1><div class="hn-docs-description"></div></header><article class="hn-docs-content">
+<!DOCTYPE html><html lang="en-us"><head><link rel="shortcut icon" type="image/png" sizes="16x16" href="/heron/img/favicon-16x16.png"><link rel="shortcut icon" type="image/png" sizes="32x32" href="/heron/img/favicon-32x32.png"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="generator" content="Hugo 0.16" /><meta property="og:locale" content="en_US"><meta property="og:type" content="article"><meta property="og:title" content="Heron"><meta property="og:image" content="/img/logo54x54.png"><meta property="og:url" content="/heron"><meta name="twitter:card" content="summary"><meta name="twitter:site" content="@heronstreaming"><meta name="twitter:title" content="Heron"><meta name="twitter:image" content=""><meta property="og:site_name" content="Heron Tracker REST API"><meta property="og:url" content=""><meta property="og:description" content=""><meta name="twitter:description" content=""><title>Heron Documentation - Heron Tracker REST API</title><link rel="stylesheet" href="/heron/css/style.min.css"><link rel="stylesheet" href="/heron/css/font-awesome.min.css"><link rel="stylesheet" href="/heron/css/pygments.css"></head><body><nav class="hn-top-navbar navbar navbar-inverse navbar-fixed-top" role="navigation"><div class="hn-navbar-container container-fluid"><div class="navbar-header"><button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#hn-navbar" aria-controls="hn-navbar" aria-expanded="false"><span class="sr-only"><Toggle>navigation</Toggle></span><i class="hn-toggle-button fa fa-bars"></i></button><a class="hn-navbar-logo navbar-brand" href="/heron/"><img class="pull-left" src="/heron/img/HeronTextLogo-small.png"></a></div><div id="hn-navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav navbar-right"><li><a href="/heron/docs/getting-started">Docs</a></li><li><a href="/heron/api">API</a></li><li><a href="/heron/docs/resources">Resources</a></li><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="https://github.com/twitter/heron">GitHub</a></li><li><a href="https://groups.google.com/forum/#!forum/heron-users">Mailing List</a></li><li><a class="nav-icon" href="https://twitter.com/heronstreaming"><i class="fa fa-twitter"></i></a></li></ul></div></div></nav><div class="hn-main"><div class="container"><div class="row"><aside class="hn-sidebar hidden-xs col-sm-4 col-md-3 col-lg-2 collapse"><nav class="hn-sidebar-nav"><div id="hn-accordion" class="panel-group" role="tablist" aria-multiselectable="true"><div class="panel panel-default"><section id="getting-started" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-getting-started" aria-labelledby="getting-started"><i class="fa fa-caret-right"></i>Getting Started</a></h4></section><div id="collapse-getting-started" class="panel-collapse collapse" aria-labelledby="getting-started"><div class="panel-body"><ul><li><a href="/heron/docs/getting-started">Local (Single Node)</a></li><li><a href="/heron/docs/upgrade-storm-to-heron">Upgrade Storm Topologies</a></li><li><a href="/heron/docs/getting-started-troubleshooting">Troubleshooting Guide</a></li></ul></div></div></div><div class="panel panel-default"><section id="heron-concepts" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-heron-concepts" aria-labelledby="heron-concepts"><i class="fa fa-caret-right"></i>Heron Concepts</a></h4></section><div id="collapse-heron-concepts" class="panel-collapse collapse" aria-labelledby="heron-concepts"><div class="panel-body"><ul><li><a href="/heron/docs/concepts/design-goals">Heron Design Goals</a></li><li><a href="/heron/docs/concepts/topologies">Heron Topology</a></li><li><a href="/heron/docs/concepts/architecture">Heron Architecture</a></li></ul></div></div></div><div class="panel panel-default"><section id="deployment" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-deployment" aria-labelledby="deployment"><i class="fa fa-caret-right"></i>Deployment</a></h4></section><div id="collapse-deployment" class="panel-collapse collapse" aria-labelledby="deployment"><div class="panel-body"><ul><li><a href="/heron/docs/operators/deployment">Overview</a></li><li><a href="/heron/docs/operators/deployment/configuration">Configuration</a></li></ul></div></div></div><div class="panel panel-default"><section id="state-managers" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-state-managers" aria-labelledby="state-managers"><i class="fa fa-caret-right"></i>State Managers</a></h4></section><div id="collapse-state-managers" class="panel-collapse collapse" aria-labelledby="state-managers"><div class="panel-body"><ul><li><a href="/heron/docs/operators/deployment/statemanagers/zookeeper">Zookeeper</a></li><li><a href="/heron/docs/operators/deployment/statemanagers/localfs">Local FS</a></li></ul></div></div></div><div class="panel panel-default"><section id="uploaders" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-uploaders" aria-labelledby="uploaders"><i class="fa fa-caret-right"></i>Uploaders</a></h4></section><div id="collapse-uploaders" class="panel-collapse collapse" aria-labelledby="uploaders"><div class="panel-body"><ul><li><a href="/heron/docs/operators/deployment/uploaders/localfs">Local FS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/hdfs">HDFS</a></li><li><a href="/heron/docs/operators/deployment/uploaders/s3">Amazon S3</a></li><li><a href="/heron/docs/operators/deployment/uploaders/scp">Secure Copy (SCP)</a></li></ul></div></div></div><div class="panel panel-default"><section id="schedulers" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-schedulers" aria-labelledby="schedulers"><i class="fa fa-caret-right"></i>Schedulers</a></h4></section><div id="collapse-schedulers" class="panel-collapse collapse" aria-labelledby="schedulers"><div class="panel-body"><ul><li><a href="/heron/docs/operators/deployment/schedulers/aurora">Aurora Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/local">Local Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/mesos-local-mac">Mesos Cluster Locally</a></li><li><a href="/heron/docs/operators/deployment/schedulers/slurm">Slurm Cluster</a></li><li><a href="/heron/docs/operators/deployment/schedulers/yarn">YARN Cluster</a></li></ul></div></div></div><div class="panel panel-default"><section id="cluster-configuration" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-cluster-configuration" aria-labelledby="cluster-configuration"><i class="fa fa-caret-right"></i>Cluster Configuration</a></h4></section><div id="collapse-cluster-configuration" class="panel-collapse collapse" aria-labelledby="cluster-configuration"><div class="panel-body"><ul><li><a href="/heron/docs/operators/configuration/config-intro">Overview</a></li><li><a href="/heron/docs/operators/configuration/system">System-Level</a></li><li><a href="/heron/docs/operators/configuration/instance">Heron Instance</a></li><li><a href="/heron/docs/operators/configuration/metrics-manager">Metrics Manager</a></li><li><a href="/heron/docs/operators/configuration/stmgr">Stream Manager</a></li><li><a href="/heron/docs/operators/configuration/tmaster">Topology Master</a></li></ul></div></div></div><div class="panel panel-default"><section id="observability" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-observability" aria-labelledby="observability"><i class="fa fa-caret-right"></i>Observability</a></h4></section><div id="collapse-observability" class="panel-collapse collapse" aria-labelledby="observability"><div class="panel-body"><ul><li><a href="/heron/docs/operators/observability/graphite">Graphite</a></li></ul></div></div></div><div class="panel panel-default"><section id="user-manuals" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-user-manuals" aria-labelledby="user-manuals"><i class="fa fa-caret-right"></i>User Manuals</a></h4></section><div id="collapse-user-manuals" class="panel-collapse collapse" aria-labelledby="user-manuals"><div class="panel-body"><ul><li><a href="/heron/docs/operators/heron-cli">Heron Client</a></li><li><a href="/heron/docs/operators/heron-tracker-api">Heron Tracker REST API</a></li><li><a href="/heron/docs/operators/heron-tracker">Heron Tracker Runbook</a></li><li><a href="/heron/docs/operators/heron-ui">Heron UI Runbook</a></li></ul></div></div></div><div class="panel panel-default"><section id="topology-writers" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-topology-writers" aria-labelledby="topology-writers"><i class="fa fa-caret-right"></i>Topology Writers</a></h4></section><div id="collapse-topology-writers" class="panel-collapse collapse" aria-labelledby="topology-writers"><div class="panel-body"><ul><li><a href="/heron/docs/developers/java/topologies">Writing Java Topologies</a></li><li><a href="/heron/docs/developers/python/topologies">Writing Python Topologies</a></li><li><a href="/heron/docs/developers/data-model">Heron Data Model</a></li><li><a href="/heron/docs/developers/serialization">Tuple Serialization</a></li><li><a href="/heron/docs/developers/ui-guide">Heron UI Guide</a></li><li><a href="/heron/docs/developers/tuning">Tuning Guide</a></li><li><a href="/heron/docs/developers/packing/ffdpacking">Packing Algorithms</a></li><li><a href="/heron/docs/developers/simulator-mode">Simulator Mode</a></li><li><a href="/heron/docs/developers/troubleshooting">Troubleshooting Guide</a></li><li><a href="/heron/api">Javadoc</a></li></ul></div></div></div><div class="panel panel-default"><section id="heron-developers" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-heron-developers" aria-labelledby="heron-developers"><i class="fa fa-caret-right"></i>Heron Developers</a></h4></section><div id="collapse-heron-developers" class="panel-collapse collapse" aria-labelledby="heron-developers"><div class="panel-body"><ul><li><a href="/heron/docs/developers/compiling/compiling">Compiling</a></li><li><a href="/heron/docs/developers/compiling/linux">Compiling on Linux</a></li><li><a href="/heron/docs/developers/compiling/mac">Compiling on Mac OS X</a></li><li><a href="/heron/docs/developers/compiling/docker">Compiling With Docker</a></li><li><a href="/heron/docs/contributors/testing">Running Tests</a></li><li><a href="/heron/docs/contributors/codebase">Code Organization</a></li></ul></div></div></div><div class="panel panel-default"><section id="extending-heron" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-extending-heron" aria-labelledby="extending-heron"><i class="fa fa-caret-right"></i>Extending Heron</a></h4></section><div id="collapse-extending-heron" class="panel-collapse collapse" aria-labelledby="extending-heron"><div class="panel-body"><ul><li><a href="/heron/docs/contributors/custom-scheduler">Custom Scheduler</a></li><li><a href="/heron/docs/contributors/custom-metrics-sink">Custom Metrics Sink</a></li></ul></div></div></div><div class="panel panel-default"><section id="heron-resources" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-heron-resources" aria-labelledby="heron-resources"><i class="fa fa-caret-right"></i>Heron Resources</a></h4></section><div id="collapse-heron-resources" class="panel-collapse collapse" aria-labelledby="heron-resources"><div class="panel-body"><ul><li><a href="/heron/docs/resources">Heron Resources</a></li></ul></div></div></div><div class="panel panel-default"><section id="contributors" class="panel-heading" role="tab"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#hn-accordion" href="#collapse-contributors" aria-labelledby="contributors"><i class="fa fa-caret-right"></i>Contributors</a></h4></section><div id="collapse-contributors" class="panel-collapse collapse" aria-labelledby="contributors"><div class="panel-body"><ul><li><a href="/heron/docs/contributors/community">Community</a></li><li><a href="/heron/docs/contributors/governance">Governance</a></li></ul></div></div></div></div></nav></aside><section class="hn-docs-main col-sm-8 col-md-9 col-lg-10 col-sm-offset-4 col-md-offset-3 col-lg-offset-2"><header class="hn-docs-header page-header"><h1>Heron Tracker REST API</h1><div class="hn-docs-description"></div></header><article class="hn-docs-content">
 
-<h3 id="json-interface:a835b0b91c76de6fe740dc315fd5529d">JSON Interface</h3>
+<h3 id="json-interface">JSON Interface</h3>
 
 <p>All Heron Tracker endpoints return a JSON object with the following information:</p>
 
@@ -15,7 +15,7 @@ the endpoint.</li>
 <li><code>version</code> &mdash; The Tracker API version.</li>
 </ul>
 
-<h3 id="endpoints:a835b0b91c76de6fe740dc315fd5529d">Endpoints</h3>
+<h3 id="endpoints">Endpoints</h3>
 
 <ul>
 <li><code>/</code> (redirects to <code>/topologies</code>)</li>
@@ -45,19 +45,19 @@ the endpoint.</li>
 
 <hr />
 
-<h3 id="a-name-clusters-clusters-a:a835b0b91c76de6fe740dc315fd5529d"><a name="clusters">/clusters</a></h3>
+<h3 id="a-name-clusters-clusters-a"><a name="clusters">/clusters</a></h3>
 
 <p>Returns JSON list of all the clusters.</p>
 
 <hr />
 
-<h3 id="a-name-topologies-topologies-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies">/topologies</a></h3>
+<h3 id="a-name-topologies-topologies-a"><a name="topologies">/topologies</a></h3>
 
 <p>Returns JSON describing all currently available topologies</p>
 <div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ curl <span style="color: #e6db74">&quot;http://heron-tracker-url/topologies?cluster=cluster1&amp;environ=devel&quot;</span>
 </pre></div>
 
-<h4 id="parameters:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+<h4 id="parameters">Parameters</h4>
 
 <ul>
 <li><code>cluster</code> (optional) &mdash; The cluster parameter can be used to filter
@@ -68,13 +68,13 @@ topologies that are running in this environment.</li>
 
 <hr />
 
-<h3 id="a-name-topologies-logicalplan-topologies-logicalplan-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_logicalplan">/topologies/logicalplan</a></h3>
+<h3 id="a-name-topologies-logicalplan-topologies-logicalplan-a"><a name="topologies_logicalplan">/topologies/logicalplan</a></h3>
 
 <p>Returns a JSON representation of the <a href="../../concepts/topologies#logical-plan">logical plan</a> of a topology.</p>
 <div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ curl <span style="color: #e6db74">&quot;http://heron-tracker-url/topologies/logicalplan?cluster=cluster1&amp;environ=devel&amp;topology=topologyName&quot;</span>
 </pre></div>
 
-<h4 id="parameters-1:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+<h4 id="parameters-1">Parameters</h4>
 
 <ul>
 <li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
@@ -110,13 +110,13 @@ JSON dictionary containing following information.
 
 <hr />
 
-<h3 id="a-name-topologies-physicalplan-topologies-physicalplan-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_physicalplan">/topologies/physicalplan</a></h3>
+<h3 id="a-name-topologies-physicalplan-topologies-physicalplan-a"><a name="topologies_physicalplan">/topologies/physicalplan</a></h3>
 
 <p>Returns a JSON representation of the <a href="../../concepts/topologies#physical-plan">physical plan</a> of a topology.</p>
 <div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ curl <span style="color: #e6db74">&quot;http://heron-tracker-url/topologies/physicalplan?cluster=datacenter1&amp;environ=prod&amp;topology=topologyName&quot;</span>
 </pre></div>
 
-<h4 id="parameters-2:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+<h4 id="parameters-2">Parameters</h4>
 
 <ul>
 <li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
@@ -159,13 +159,13 @@ JSON dictionary containing following information.
 
 <hr />
 
-<h3 id="a-name-topologies-schedulerlocation-topologies-schedulerlocation-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_schedulerlocation">/topologies/schedulerlocation</a></h3>
+<h3 id="a-name-topologies-schedulerlocation-topologies-schedulerlocation-a"><a name="topologies_schedulerlocation">/topologies/schedulerlocation</a></h3>
 
 <p>Returns a JSON representation of the scheduler location of the topology.</p>
 <div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ curl <span style="color: #e6db74">&quot;http://heron-tracker-url/topologies/schedulerlocation?cluster=datacenter1&amp;environ=prod&amp;topology=topologyName&quot;</span>
 </pre></div>
 
-<h4 id="parameters-3:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+<h4 id="parameters-3">Parameters</h4>
 
 <ul>
 <li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
@@ -178,13 +178,13 @@ for example, the Aurora page for the job.</p>
 
 <hr />
 
-<h3 id="a-name-topologies-executionstate-topologies-executionstate-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_executionstate">/topologies/executionstate</a></h3>
+<h3 id="a-name-topologies-executionstate-topologies-executionstate-a"><a name="topologies_executionstate">/topologies/executionstate</a></h3>
 
 <p>Returns a JSON representation of the execution state of the topology.</p>
 <div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ curl <span style="color: #e6db74">&quot;http://heron-tracker-url/topologies/executionstate?cluster=datacenter1&amp;environ=prod&amp;topology=topologyName&quot;</span>
 </pre></div>
 
-<h4 id="parameters-4:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+<h4 id="parameters-4">Parameters</h4>
 
 <ul>
 <li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
@@ -212,13 +212,13 @@ topology</li>
 
 <hr />
 
-<h3 id="a-name-topologies-states-topologies-states-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_states">/topologies/states</a></h3>
+<h3 id="a-name-topologies-states-topologies-states-a"><a name="topologies_states">/topologies/states</a></h3>
 
 <p>Returns a JSON list of execution states of topologies in all the cluster.</p>
 <div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ curl <span style="color: #e6db74">&quot;http://heron-tracker-url/topologies/states?cluster=cluster1&amp;environ=devel&quot;</span>
 </pre></div>
 
-<h4 id="parameters-5:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+<h4 id="parameters-5">Parameters</h4>
 
 <ul>
 <li><code>cluster</code> (optional) &mdash; The cluster parameter can be used to filter
@@ -229,14 +229,14 @@ topologies that are running in this environment.</li>
 
 <hr />
 
-<h3 id="a-name-topologies-info-topologies-info-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_info">/topologies/info</a></h3>
+<h3 id="a-name-topologies-info-topologies-info-a"><a name="topologies_info">/topologies/info</a></h3>
 
 <p>Returns a JSON representation of a dictionary containing logical plan, physical plan,
 execution state, scheduler location and TMaster location for a topology, as described above.
 <code>TMasterLocation</code> is the location of the TMaster, including its host,
 port, and the heron-shell port that it exposes.</p>
 
-<h4 id="parameters-6:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+<h4 id="parameters-6">Parameters</h4>
 
 <ul>
 <li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
@@ -246,14 +246,14 @@ port, and the heron-shell port that it exposes.</p>
 
 <hr />
 
-<h3 id="a-name-topologies-containerfilestats-topologies-containerfilestats-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_containerfilestats">/topologies/containerfilestats</a></h3>
+<h3 id="a-name-topologies-containerfilestats-topologies-containerfilestats-a"><a name="topologies_containerfilestats">/topologies/containerfilestats</a></h3>
 
 <p>Returns the file stats for a container. This is the output of the command <code>ls -lh</code> when run
 in the directory where the heron-controller launched all the processes.</p>
 
 <p>This endpoint is mainly used by ui for exploring files in a container.</p>
 
-<h4 id="parameters-7:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+<h4 id="parameters-7">Parameters</h4>
 
 <ul>
 <li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
@@ -266,13 +266,13 @@ Paths are not allowed to start with a <code>/</code> or contain a <code>..</code
 
 <hr />
 
-<h3 id="a-name-topologies-containerfiledata-topologies-containerfiledata-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_containerfiledata">/topologies/containerfiledata</a></h3>
+<h3 id="a-name-topologies-containerfiledata-topologies-containerfiledata-a"><a name="topologies_containerfiledata">/topologies/containerfiledata</a></h3>
 
 <p>Returns the file data for a file of a container.</p>
 
 <p>This endpoint is mainly used by ui for exploring files in a container.</p>
 
-<h4 id="parameters-8:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+<h4 id="parameters-8">Parameters</h4>
 
 <ul>
 <li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
@@ -287,7 +287,7 @@ Paths are not allowed to start with a <code>/</code> or contain a <code>..</code
 
 <hr />
 
-<h3 id="a-name-topologies-metrics-topologies-metrics-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_metrics">/topologies/metrics</a></h3>
+<h3 id="a-name-topologies-metrics-topologies-metrics-a"><a name="topologies_metrics">/topologies/metrics</a></h3>
 
 <p>Returns a JSON map of instances of the topology to their respective metrics.
 To filter instances returned use the <code>instance</code> parameter discussed below.</p>
@@ -296,7 +296,7 @@ To filter instances returned use the <code>instance</code> parameter discussed b
 for last 3 hours minutely data, as well as cumulative values. If the <code>interval</code>
 is greater than <code>10800</code> seconds, the values will be for all-time metrics.</p>
 
-<h4 id="parameters-9:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+<h4 id="parameters-9">Parameters</h4>
 
 <ul>
 <li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
@@ -310,7 +310,7 @@ is greater than <code>10800</code> seconds, the values will be for all-time metr
 
 <hr />
 
-<h3 id="a-name-topologies-metricstimeline-topologies-metricstimeline-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_metricstimeline">/topologies/metricstimeline</a></h3>
+<h3 id="a-name-topologies-metricstimeline-topologies-metricstimeline-a"><a name="topologies_metricstimeline">/topologies/metricstimeline</a></h3>
 
 <p>Returns a JSON map of instances of the topology to their respective metrics timeline.
 To filter instances returned use the <code>instance</code> parameter discussed below.</p>
@@ -323,7 +323,7 @@ endpoint will report minutely values for each metricname for each instance.</p>
 for last 3 hours minutely data, as well as cumulative all-time values. If the starttime
 is older than 3 hours ago, those minutes would not be part of the response.</p>
 
-<h4 id="parameters-10:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+<h4 id="parameters-10">Parameters</h4>
 
 <ul>
 <li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
@@ -337,7 +337,7 @@ and greater than <code>starttime</code>)</li>
 <li><code>instance</code> (optional) &mdash; IDs of the instances. If not present, return for all the instances.</li>
 </ul>
 
-<h3 id="a-name-topologies-metricsquery-topologies-metricsquery-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_metricsquery">/topologies/metricsquery</a></h3>
+<h3 id="a-name-topologies-metricsquery-topologies-metricsquery-a"><a name="topologies_metricsquery">/topologies/metricsquery</a></h3>
 
 <p>Executes the metrics query for the topology and returns the result in form of minutely timeseries.
 A detailed description of query language is given <a href="#metricsquery">below</a>.</p>
@@ -346,7 +346,7 @@ A detailed description of query language is given <a href="#metricsquery">below<
 for last 3 hours minutely data, as well as cumulative all-time values. If the starttime
 is older than 3 hours ago, those minutes would not be part of the response.</p>
 
-<h4 id="parameters-11:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+<h4 id="parameters-11">Parameters</h4>
 
 <ul>
 <li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
@@ -360,13 +360,13 @@ and greater than <code>starttime</code>)</li>
 
 <hr />
 
-<h3 id="a-name-topologies-exceptionsummary-topologies-exceptionsummary-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_exceptionsummary">/topologies/exceptionsummary</a></h3>
+<h3 id="a-name-topologies-exceptionsummary-topologies-exceptionsummary-a"><a name="topologies_exceptionsummary">/topologies/exceptionsummary</a></h3>
 
 <p>Returns summary of the exceptions for the component of the topology.
 Duplicated exceptions are combined together and includes the number of
 occurances, first occurance time and latest occurance time.</p>
 
-<h4 id="parameters-12:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+<h4 id="parameters-12">Parameters</h4>
 
 <ul>
 <li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
@@ -378,11 +378,11 @@ occurances, first occurance time and latest occurance time.</p>
 
 <hr />
 
-<h3 id="a-name-topologies-exceptions-topologies-exceptions-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_exceptions">/topologies/exceptions</a></h3>
+<h3 id="a-name-topologies-exceptions-topologies-exceptions-a"><a name="topologies_exceptions">/topologies/exceptions</a></h3>
 
 <p>Returns all exceptions for the component of the topology.</p>
 
-<h4 id="parameters-13:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+<h4 id="parameters-13">Parameters</h4>
 
 <ul>
 <li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
@@ -394,11 +394,11 @@ occurances, first occurance time and latest occurance time.</p>
 
 <hr />
 
-<h3 id="a-name-topologies-pid-topologies-pid-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_pid">/topologies/pid</a></h3>
+<h3 id="a-name-topologies-pid-topologies-pid-a"><a name="topologies_pid">/topologies/pid</a></h3>
 
 <p>Returns the PID of the instance jvm process.</p>
 
-<h4 id="parameters-14:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+<h4 id="parameters-14">Parameters</h4>
 
 <ul>
 <li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
@@ -409,11 +409,11 @@ occurances, first occurance time and latest occurance time.</p>
 
 <hr />
 
-<h3 id="a-name-topologies-jstack-topologies-jstack-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_jstack">/topologies/jstack</a></h3>
+<h3 id="a-name-topologies-jstack-topologies-jstack-a"><a name="topologies_jstack">/topologies/jstack</a></h3>
 
 <p>Returns the thread dump of the instance jvm process.</p>
 
-<h4 id="parameters-15:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+<h4 id="parameters-15">Parameters</h4>
 
 <ul>
 <li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
@@ -424,12 +424,12 @@ occurances, first occurance time and latest occurance time.</p>
 
 <hr />
 
-<h3 id="a-name-topologies-jmap-topologies-jmap-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_jmap">/topologies/jmap</a></h3>
+<h3 id="a-name-topologies-jmap-topologies-jmap-a"><a name="topologies_jmap">/topologies/jmap</a></h3>
 
 <p>Issues the <code>jmap</code> command for the instance, and saves the result in a file.
 Returns the path to the file that can be downloaded externally.</p>
 
-<h4 id="parameters-16:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+<h4 id="parameters-16">Parameters</h4>
 
 <ul>
 <li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
@@ -440,11 +440,11 @@ Returns the path to the file that can be downloaded externally.</p>
 
 <hr />
 
-<h3 id="a-name-topologies-histo-topologies-histo-a:a835b0b91c76de6fe740dc315fd5529d"><a name="topologies_histo">/topologies/histo</a></h3>
+<h3 id="a-name-topologies-histo-topologies-histo-a"><a name="topologies_histo">/topologies/histo</a></h3>
 
 <p>Returns histogram for the instance jvm process.</p>
 
-<h4 id="parameters-17:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+<h4 id="parameters-17">Parameters</h4>
 
 <ul>
 <li><code>cluster</code> (required) &mdash; The cluster in which the topology is running</li>
@@ -455,13 +455,13 @@ Returns the path to the file that can be downloaded externally.</p>
 
 <hr />
 
-<h3 id="a-name-machines-machines-a:a835b0b91c76de6fe740dc315fd5529d"><a name="machines">/machines</a></h3>
+<h3 id="a-name-machines-machines-a"><a name="machines">/machines</a></h3>
 
 <p>Returns JSON describing all machines that topologies are running on.</p>
 <div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>$ curl <span style="color: #e6db74">&quot;http://heron-tracker-url/machines?topology=mytopology1&amp;cluster=cluster1&amp;environ=prod&quot;</span>
 </pre></div>
 
-<h4 id="parameters-18:a835b0b91c76de6fe740dc315fd5529d">Parameters</h4>
+<h4 id="parameters-18">Parameters</h4>
 
 <ul>
 <li><code>cluster</code> (optional) &mdash; The cluster parameter can be used to filter
@@ -474,13 +474,13 @@ and <code>environ</code> are required if the <code>topology</code> parameter is 
 
 <hr />
 
-<h3 id="a-name-metricsquery-metrics-query-language-a:a835b0b91c76de6fe740dc315fd5529d"><a name="metricsquery">Metrics Query Language</a></h3>
+<h3 id="a-name-metricsquery-metrics-query-language-a"><a name="metricsquery">Metrics Query Language</a></h3>
 
 <p>Metrics queries are useful when some kind of aggregated values are required. For example,
 to find the total number of tuples emitted by a spout, <code>SUM</code> operator can be used, instead
 of fetching metrics for all the instances of the corresponding component, and then summing them.</p>
 
-<h4 id="terminology:a835b0b91c76de6fe740dc315fd5529d">Terminology</h4>
+<h4 id="terminology">Terminology</h4>
 
 <ol>
 <li>Univariate Timeseries &mdash; A timeseries is called univariate if there is only one set
@@ -490,15 +490,17 @@ would be a univariate timeseries.</li>
 Note that these timeseries are associated with their instances.</li>
 </ol>
 
-<h4 id="operators:a835b0b91c76de6fe740dc315fd5529d">Operators</h4>
+<h4 id="operators">Operators</h4>
 
-<h5 id="ts:a835b0b91c76de6fe740dc315fd5529d">TS</h5>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>TS(componentName, instance, metricName)
-</pre></div>
+<h5 id="ts">TS</h5>
+
+<pre><code>TS(componentName, instance, metricName)
+</code></pre>
 
 <p>Example:</p>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>TS(component1, *, __emit-count/stream1)
-</pre></div>
+
+<pre><code>TS(component1, *, __emit-count/stream1)
+</code></pre>
 
 <p>Time Series Operator. This is the basic operator that is responsible for getting metrics from TMaster.
 Accepts a list of 3 elements:</p>
@@ -514,11 +516,12 @@ a multivariate time series.</p>
 
 <hr />
 
-<h5 id="default:a835b0b91c76de6fe740dc315fd5529d">DEFAULT</h5>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>DEFAULT(0, TS(component1, *, __emit-count/stream1))      &lt;-- If the second operator returns more than one timeline, so will the DEFAULT operator.
+<h5 id="default">DEFAULT</h5>
+
+<pre><code>DEFAULT(0, TS(component1, *, __emit-count/stream1))      &lt;-- If the second operator returns more than one timeline, so will the DEFAULT operator.
 
 DEFAULT(100.0, SUM(TS(component2, *, __emit-count/default)))     &lt;-- Second operator can be any operator
-</pre></div>
+</code></pre>
 
 <p>Default Operator. This operator is responsible for filling missing values in the metrics timeline.
 Must have 2 arguments</p>
@@ -532,9 +535,10 @@ Must have 2 arguments</p>
 
 <hr />
 
-<h5 id="sum:a835b0b91c76de6fe740dc315fd5529d">SUM</h5>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>SUM(TS(component1, instance1, metric1), DEFAULT(0, TS(component1, *, metric2)))
-</pre></div>
+<h5 id="sum">SUM</h5>
+
+<pre><code>SUM(TS(component1, instance1, metric1), DEFAULT(0, TS(component1, *, metric2)))
+</code></pre>
 
 <p>Sum Operator. This operator is used to take sum of all argument time series. It can have any number of arguments,
 each of which must be one of the following two types:</p>
@@ -549,9 +553,10 @@ Note that &ldquo;instance&rdquo; attribute is not there in the result.</p>
 
 <hr />
 
-<h5 id="max:a835b0b91c76de6fe740dc315fd5529d">MAX</h5>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>MAX(100, TS(component1, *, metric1))
-</pre></div>
+<h5 id="max">MAX</h5>
+
+<pre><code>MAX(100, TS(component1, *, metric1))
+</code></pre>
 
 <p>Max Operator. This operator is used to find max of all argument operators for each individual timestamp.
 Each argument must be one of the following types:</p>
@@ -566,9 +571,10 @@ Note that &ldquo;instance&rdquo; attribute is not included in the result.</p>
 
 <hr />
 
-<h5 id="percentile:a835b0b91c76de6fe740dc315fd5529d">PERCENTILE</h5>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>PERCENTILE(99, TS(component1, *, metric1))
-</pre></div>
+<h5 id="percentile">PERCENTILE</h5>
+
+<pre><code>PERCENTILE(99, TS(component1, *, metric1))
+</code></pre>
 
 <p>Percentile Operator. This operator is used to find a quantile of all timelines retuned by the arguments, for each timestamp.
 This is a more general type of query similar to MAX. Note that <code>PERCENTILE(100, TS...)</code> is equivalent to <code>Max(TS...)</code>.
@@ -586,9 +592,10 @@ for each timestamp. Note that &ldquo;instance&rdquo; attribute is not there in t
 
 <hr />
 
-<h5 id="divide:a835b0b91c76de6fe740dc315fd5529d">DIVIDE</h5>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>DIVIDE(TS(component1, *, metrics1), 100)
-</pre></div>
+<h5 id="divide">DIVIDE</h5>
+
+<pre><code>DIVIDE(TS(component1, *, metrics1), 100)
+</code></pre>
 
 <p>Divide Operator. Accepts two arguments, both can be univariate or multivariate.
 Each can be of one of the following types:</p>
@@ -626,9 +633,10 @@ Each can be of one of the following types:</p>
 
 <hr />
 
-<h5 id="multiply:a835b0b91c76de6fe740dc315fd5529d">MULTIPLY</h5>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>MULTIPLY(10, TS(component1, *, metrics1))
-</pre></div>
+<h5 id="multiply">MULTIPLY</h5>
+
+<pre><code>MULTIPLY(10, TS(component1, *, metrics1))
+</code></pre>
 
 <p>Multiply Operator. Has same conditions as division operator. This is to keep the API simple.
 Accepts two arguments, both can be univariate or multivariate. Each can be of one of the following types:</p>
@@ -667,11 +675,12 @@ on the two corresponding time series.</li>
 
 <hr />
 
-<h5 id="subtract:a835b0b91c76de6fe740dc315fd5529d">SUBTRACT</h5>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>SUBTRACT(TS(component1, instance1, metrics1), TS(componet1, instance1, metrics2))
+<h5 id="subtract">SUBTRACT</h5>
+
+<pre><code>SUBTRACT(TS(component1, instance1, metrics1), TS(componet1, instance1, metrics2))
 
 SUBTRACT(TS(component1, instance1, metrics1), 100)
-</pre></div>
+</code></pre>
 
 <p>Subtract Operator. Has same conditions as division operator. This is to keep the API simple.
 Accepts two arguments, both can be univariate or multivariate. Each can be of one of the following types:</p>
@@ -710,14 +719,15 @@ on the two corresponding time series.</li>
 
 <hr />
 
-<h5 id="rate:a835b0b91c76de6fe740dc315fd5529d">RATE</h5>
-<div class="highlight" style="background: #272822"><pre style="line-height: 125%"><span></span>RATE(SUM(TS(component1, *, metrics1)))
+<h5 id="rate">RATE</h5>
+
+<pre><code>RATE(SUM(TS(component1, *, metrics1)))
 
 RATE(TS(component1, *, metrics2))
-</pre></div>
+</code></pre>
 
 <p>Rate Operator. This operator is used to find rate of change for all timeseries.
 Accepts a only a single argument, which must be an Operators which returns univariate or multivariate time series.
 Returns univariate or multivariate time series based on the argument, with each timestamp value
 corresponding to the rate of change for that timestamp.</p>
-</article></section></div></div></div><script src="http://code.jquery.com/jquery-2.2.1.min.js"></script><script src="/heron/js/app.min.js"></script></body></html>
+</article></section></div></div></div><script src="https://code.jquery.com/jquery-2.2.1.min.js"></script><script src="/heron/js/app.min.js"></script></body></html>
