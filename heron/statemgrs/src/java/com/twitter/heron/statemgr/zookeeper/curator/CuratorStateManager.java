@@ -324,8 +324,7 @@ public class CuratorStateManager extends FileSystemStateManager {
   public static void main(String[] args) throws ExecutionException, InterruptedException,
       IllegalAccessException, ClassNotFoundException, InstantiationException {
     if (args.length < 2) {
-      System.out.println("Expects arguments: <topology_name> <zookeeper_hostname>");
-      System.exit(1);
+      throw new RuntimeException("Expects arguments: <topology_name> <zookeeper_hostname>");
     }
 
     String zookeeperHostname = args[1];
