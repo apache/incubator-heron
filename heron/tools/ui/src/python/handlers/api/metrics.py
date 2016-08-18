@@ -13,7 +13,7 @@
 # limitations under the License.
 ''' metrics.py '''
 from heron.tools.ui.src.python.handlers import base
-import heron.tools.common.src.python.handler.access as access
+import heron.tools.common.src.python.access as access
 
 import tornado.gen
 

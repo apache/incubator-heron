@@ -21,8 +21,8 @@ import sys
 import tornado.httpserver
 import tornado.ioloop
 import tornado.web
-
 from tornado.options import define, options
+
 import heron.tools.common.src.python.utils.config as common_config
 import heron.common.src.python.utils.log as log
 from heron.tools.tracker.src.python import constants

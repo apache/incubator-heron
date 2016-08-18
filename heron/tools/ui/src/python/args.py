@@ -14,7 +14,7 @@
 ''' args.py '''
 import argparse
 
-import heron.ui.src.python.consts as consts
+import heron.tools.ui.src.python.consts as consts
 
 
 # pylint: disable=protected-access
