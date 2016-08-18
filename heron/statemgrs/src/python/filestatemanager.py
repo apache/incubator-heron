@@ -29,12 +29,6 @@ from heron.proto.scheduler_pb2 import SchedulerLocation
 from heron.proto.tmaster_pb2 import TMasterLocation
 from heron.proto.topology_pb2 import Topology
 
-def do_print(statement):
-  """print statement to stdout with timestamp"""
-  timestr = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
-  print "%s (FileStateManager): %s" % (timestr, statement)
-  sys.stdout.flush()
-
 # pylint: disable=too-many-instance-attributes
 class FileStateManager(StateManager):
   """
