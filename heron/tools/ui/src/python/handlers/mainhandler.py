@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' mainhandler.py '''
-from heron.ui.src.python.handlers import base
+from heron.tools.ui.src.python.handlers import base
 
 
 class MainHandler(base.BaseHandler):

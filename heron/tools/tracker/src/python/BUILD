@@ -10,6 +10,7 @@ pex_library(
     ),
     deps = [
         "//heron/common/src/python:common-py",
+        "//heron/tools/common/src/python:common-py",
         "//heron/statemgrs/src/python:zk-statemgr-py",
         "//heron/proto:proto-py",
     ],

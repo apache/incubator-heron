@@ -19,6 +19,7 @@ import colorlog
 # Create the logger
 # pylint: disable=invalid-name
 Log = logging.getLogger()
+logging.basicConfig()
 
 # time formatter - date - time - UTC offset
 # e.g. "08/16/1988 21:30:00 +1030"

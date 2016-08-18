@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' metrics.py '''
-from heron.ui.src.python.handlers import base
-import heron.common.src.python.handler.access as access
+from heron.tools.ui.src.python.handlers import base
+import heron.tools.common.src.python.handler.access as access
 
 import tornado.gen
 

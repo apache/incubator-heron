@@ -25,8 +25,8 @@ import tornado.log
 import tornado.template
 from tornado.options import define
 
-from heron.ui.src.python import handlers
-from heron.ui.src.python import args
+from heron.tools.ui.src.python import handlers
+from heron.tools.ui.src.python import args
 import heron.common.src.python.utils.log as log
 
 Log = log.Log

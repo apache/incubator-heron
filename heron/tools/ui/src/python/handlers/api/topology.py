@@ -18,9 +18,9 @@ import tornado.escape
 import tornado.web
 import tornado.gen
 
-from heron.ui.src.python.handlers import base
-import heron.common.src.python.handler.access as access
-from heron.ui.src.python.handlers import common
+from heron.tools.ui.src.python.handlers import base
+import heron.tools.common.src.python.handler.access as access
+from heron.tools.ui.src.python.handlers import common
 
 
 class TopologyExceptionSummaryHandler(base.BaseHandler):
