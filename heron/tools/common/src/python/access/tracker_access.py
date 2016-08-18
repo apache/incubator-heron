@@ -16,7 +16,7 @@ import traceback
 import tornado.gen
 import tornado.ioloop
 
-from heron.common.src.python.handler.access import heron as API
+from heron.tools.common.src.python.access import heron_api as API
 from heron.common.src.python.utils.log import Log
 
 def _all_metric_queries():

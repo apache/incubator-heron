@@ -13,7 +13,7 @@
 # limitations under the License.
 ''' args.py '''
 import os
-import heron.common.src.python.utils.config as config
+import heron.tools.common.src.python.utils.config as config
 
 # default parameter - url to connect to heron tracker
 DEFAULT_TRACKER_URL = "http://localhost:8888"

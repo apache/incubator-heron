@@ -18,7 +18,7 @@ import time
 import tornado.httpclient
 import tornado.gen
 
-from heron.common.src.python.utils.log import log
+from heron.common.src.python.utils import log
 
 Log = log.Log
 
