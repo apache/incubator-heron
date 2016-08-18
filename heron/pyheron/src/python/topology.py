@@ -169,6 +169,12 @@ class TopologyType(type):
     {"cmdline.topologydefn.tmpdirectory": "/var/folders/tmpdir",
      "cmdline.topology.initial.state": "PAUSED"}
 
+    Currently supporting the following options natively:
+
+    - cmdline.topologydefn.tmpdirectory: directory to which this topology's defn file is written
+    - cmdline.topology.initial.state: initial state of the topology
+    - cmdline.topology.name: topology name on deployment
+
     :return: map mapping from key to value
     """
     heron_options_raw = os.environ.get("HERON_OPTIONS", None)
@@ -278,6 +284,24 @@ class TopologyBuilder(object):
 
   This class dynamically creates a subclass of Topology with given spouts and bolts and
   writes its definition files when ``build_and_submit()`` is called.
+
+  :Example: A sample WordCountTopology can be defined as follows:
+  ::
+    import sys
+    from pyheron import TopologyBuilder
+    from heron.examples.spout import WordSpout
+    from heron.examples.bolt import CountBolt
+
+    if __name__ == '__main__':
+      builder = TopologyBuilder(name=sys.argv[1])
+      word_spout = builder.add_spout("word-spout", WordSpout, 2)
+
+      builder.add_bolt("count-bolt", CountBolt, 2,
+                       inputs={word_spout: Grouping.fields('word')},
+                       config={"count_bolt.specific.config": "some value"})
+
+      builder.build_and_submit()
+  ::
   """
   def __init__(self, name):
     """Initialize this TopologyBuilder
