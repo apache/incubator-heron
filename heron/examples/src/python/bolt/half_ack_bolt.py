@@ -21,11 +21,6 @@ class HalfAckBolt(Bolt):
     self.total = 0
 
   def process(self, tup):
-    if self.is_tick(tup):
-      self.log("Got tick tuple!")
-      self.log("Total received: %d" % self.total)
-      return
-
     self.total += 1
     if self.total % 2 == 0:
       self.logger.debug("Failing a tuple: %s" % str(tup))
@@ -33,3 +28,7 @@ class HalfAckBolt(Bolt):
     else:
       self.logger.debug("Acking a tuple: %s" % str(tup))
       self.ack(tup)
+
+  def process_tick(self, tup):
+    self.log("Got tick tuple!")
+    self.log("Total received: %d" % self.total)

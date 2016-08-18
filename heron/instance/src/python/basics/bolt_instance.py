@@ -218,7 +218,7 @@ class BoltInstance(BaseInstance):
       def send_tick():
         tick = TupleHelper.make_tick_tuple()
         start_time = time.time()
-        self.bolt_impl.process(tick)
+        self.bolt_impl.process_tick(tick)
         tick_execute_latency_ns = (time.time() - start_time) * constants.SEC_TO_NS
         self.bolt_metrics.execute_tuple(tick.id, tick.component, tick_execute_latency_ns)
         self.output_helper.send_out_tuples()
