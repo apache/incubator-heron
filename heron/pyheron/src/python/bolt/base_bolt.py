@@ -42,7 +42,7 @@ class BaseBolt(BaseComponent):
 
     This method takes an optional ``outputs`` argument for supporting dynamic output fields
     declaration. However, it is recommended that ``outputs`` should be declared as
-    an attribute of your ``Spout`` subclass. Also, some ways of declaring inputs is not supported
+    an attribute of your ``Bolt`` subclass. Also, some ways of declaring inputs is not supported
     in this implementation; please read the documentation below.
 
     :type name: str
@@ -76,7 +76,7 @@ class BaseBolt(BaseComponent):
       # avoid modification to cls.outputs
       _outputs = copy.copy(cls.outputs)
     else:
-      _outputs = None
+      _outputs = []
 
     if optional_outputs is not None:
       assert isinstance(optional_outputs, (list, tuple))
@@ -95,7 +95,7 @@ class BaseBolt(BaseComponent):
 
     :type tup: list or tuple
     :param tup: the new output Tuple to send from this bolt,
-                should only contain only serializable data.
+                which should contain only serializable data.
     :type stream: str
     :param stream: the ID of the stream to emit this Tuple to.
                    Leave empty to emit to the default stream.
@@ -110,7 +110,7 @@ class BaseBolt(BaseComponent):
 
   @staticmethod
   def is_tick(tup):
-    """Returns whether or not the given HeronTuple is a tick Tuple
+    """Returns whether or not a given HeronTuple is a tick Tuple
 
     It is compatible with StreamParse API.
     """
