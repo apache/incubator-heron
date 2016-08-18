@@ -16,7 +16,7 @@ import copy
 
 from heron.common.src.python.utils.tuple import TupleHelper
 
-from ..component import HeronComponentSpec, BaseComponent
+from ..component import HeronComponentSpec, BaseComponent, NotCompatibleError
 from ..stream import Stream
 
 class BaseBolt(BaseComponent):
@@ -129,3 +129,8 @@ class BaseBolt(BaseComponent):
     It is compatible with StreamParse API.
     """
     self.delegate.fail(tup)
+
+  # pylint: disable=no-self-use
+  def read_tuple(self):
+    """Streamparse API that is not applicable for PyHeron"""
+    raise NotCompatibleError("run() method is not applicable in Heron.")

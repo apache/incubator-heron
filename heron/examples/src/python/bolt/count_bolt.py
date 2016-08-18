@@ -15,6 +15,7 @@
 from collections import Counter
 from heron.pyheron.src.python import Bolt
 
+# pylint: disable=unused-argument
 class CountBolt(Bolt):
   """CountBolt"""
   # output field declarer
@@ -33,9 +34,9 @@ class CountBolt(Bolt):
     self.total += inc_by
 
   def process(self, tup):
-    if self.is_tick(tup):
-      self.log("Got tick tuple!")
-      self.log("Current map: %s" % str(self.counter))
-      return
     word = tup.values[0]
     self._increment(word, 10 if word == "heron" else 1)
+
+  def process_tick(self, tup):
+    self.log("Got tick tuple!")
+    self.log("Current map: %s" % str(self.counter))
