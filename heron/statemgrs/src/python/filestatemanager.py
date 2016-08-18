@@ -12,11 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ''' filestatemanager.py '''
-import datetime
 import os
-import sys
 import threading
-import time
 
 from collections import defaultdict
 
