@@ -18,7 +18,19 @@ import java.util.Map;
 import com.twitter.heron.spi.packing.PackingPlan;
 
 public interface ScalableScheduler {
+  /**
+   * Requests new containers for scaling a topology
+   *
+   * @param containers ContainerId to ContainerPlan map
+   */
   void addContainers(Map<String, PackingPlan.ContainerPlan> containers);
 
-  void removeContainers(Integer existingContainerCount, Integer count);
+  /**
+   * Requests containers to be released for down-scaling a topology
+   *
+   * @param existingContainers Map of containers currently managed by the scheduler
+   * @param containersToRemove ContainerId to ContainerPlan map
+   */
+  void removeContainers(Map<String, PackingPlan.ContainerPlan> existingContainers,
+                        Map<String, PackingPlan.ContainerPlan> containersToRemove);
 }

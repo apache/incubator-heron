@@ -256,11 +256,11 @@ public class LocalScheduler implements IScheduler, ScalableScheduler {
   }
 
   @Override
-  public void addContainers(Integer count) {
+  public void addContainers(Map<String, PackingPlan.ContainerPlan> containers) {
     synchronized (processToContainer) {
       int activeContainerCount = processToContainer.size();
 
-      for (int i = 0; i < count; i++) {
+      for (int i = 0; i < containers.size(); i++) {
         // if number of active container is 2, then there is 1 TMaster container (id=0) and 1 worker
         // (id = 1). Then the next container to be added will have id = 2, same as current container
         // count
@@ -270,13 +270,16 @@ public class LocalScheduler implements IScheduler, ScalableScheduler {
   }
 
   @Override
-  public void removeContainers(Integer existingContainerCount, Integer count) {
-    LOG.log(Level.INFO, "Kill {0} of {1} containers", new Object[]{count, existingContainerCount});
+  public void removeContainers(Map<String, PackingPlan.ContainerPlan> existingContainers,
+                               Map<String, PackingPlan.ContainerPlan> containersToRemove) {
+    LOG.log(Level.INFO,
+        "Kill {0} of {1} containers",
+        new Object[]{containersToRemove.size(), existingContainers.size()});
 
     synchronized (processToContainer) {
-      if (existingContainerCount != processToContainer.size()) {
+      if (existingContainers.size() != processToContainer.size()) {
         LOG.log(Level.SEVERE, "Container count mismatch: expected {0} != active {1}",
-            new Object[]{existingContainerCount, processToContainer.size()});
+            new Object[]{existingContainers.size(), processToContainer.size()});
         throw new RuntimeException("Container count mismatch");
       }
 
@@ -286,12 +289,15 @@ public class LocalScheduler implements IScheduler, ScalableScheduler {
         containerToProcessMap.put(entry.getValue(), entry.getKey());
       }
 
-      int containerIdToRemove = existingContainerCount - 1;
-      for (int countToRemove = count; countToRemove > 0; containerIdToRemove--, countToRemove--) {
-        Process process = containerToProcessMap.get(containerIdToRemove);
-        LOG.info("Killing executor for container: " + containerIdToRemove);
+      for (String containerIdToRemove : containersToRemove.keySet()) {
+        Process process = containerToProcessMap.get(Integer.valueOf(containerIdToRemove));
+        if (process == null) {
+          LOG.log(Level.WARNING, "Container for id:{0} not found.", containerIdToRemove);
+          continue;
+        }
 
         // remove the process so that it is not monitored and relaunched
+        LOG.info("Killing executor for container: " + containerIdToRemove);
         processToContainer.remove(process);
         process.destroy();
         LOG.info("Killed executor for container: " + containerIdToRemove);
