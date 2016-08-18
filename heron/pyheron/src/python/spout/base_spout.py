@@ -47,10 +47,10 @@ class BaseSpout(BaseComponent):
     :type config: dict
     :param config: Component-specific config settings.
     :type optional_outputs: list of (str or Stream) or tuple of (str or Stream)
-    :param optional_outputs: Additional output fields for this bolt. These fields are added to
-                             existing ``outputs`` class attributes of your bolt. This is an optional
-                             argument, and exists only for supporting dynamic output field
-                             declaration.
+    :param optional_outputs: Additional output fields for this spout. These fields are added to
+                             existing ``outputs`` class attributes of your spout.
+                             This is an optional argument, and exists only for supporting dynamic
+                             output field declaration.
     """
     python_class_path = "%s.%s" % (cls.__module__, cls.__name__)
 
@@ -58,7 +58,7 @@ class BaseSpout(BaseComponent):
       # avoid modification to cls.outputs
       _outputs = copy.copy(cls.outputs)
     else:
-      _outputs = None
+      _outputs = []
 
     if optional_outputs is not None:
       assert isinstance(optional_outputs, (list, tuple))

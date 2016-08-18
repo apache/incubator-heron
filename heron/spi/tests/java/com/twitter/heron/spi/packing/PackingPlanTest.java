@@ -92,4 +92,25 @@ public class PackingPlanTest {
     String ramDistStr = packingPlan.getComponentRamDistribution();
     Assert.assertEquals("spout:3221225472,bolt:2147483648", ramDistStr);
   }
+
+  @Test
+  public void testPackingPlanSerde() {
+    Map<String, List<String>> packing = new HashMap<>();
+    packing.put("1", Arrays.asList("1:spout:1:0", "1:bolt:3:0"));
+    packing.put("2", Arrays.asList("2:spout:2:1"));
+    PackingPlan packingPlan = generatePacking(packing);
+
+    PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
+    PackingPlanProtoDeserializer deserializer = new PackingPlanProtoDeserializer();
+
+    PackingPlan newPackingPlan = deserializer.fromProto(serializer.toProto(packingPlan));
+    Assert.assertEquals("Packing plan not the same after converting to protobuf object and back",
+        newPackingPlan, packingPlan);
+    Assert.assertEquals("Packing plan instance distribution not the same after converting to "
+            + "protobuf object and back",
+        newPackingPlan.getInstanceDistribution(), packingPlan.getInstanceDistribution());
+    Assert.assertEquals("Packing plan ram distribution not the same after converting to "
+            + "protobuf object and back",
+        newPackingPlan.getComponentRamDistribution(), packingPlan.getComponentRamDistribution());
+  }
 }

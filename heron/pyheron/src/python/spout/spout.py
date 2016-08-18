@@ -50,6 +50,7 @@ class Spout(BaseSpout):
     """
     pass
 
+  @abstractmethod
   def close(self):
     """Called when this spout is going to be shutdown
 
@@ -101,6 +102,7 @@ class Spout(BaseSpout):
     """
     pass
 
+  @abstractmethod
   def activate(self):
     """Called when a spout has been activated out of a deactivated mode
 
@@ -110,6 +112,7 @@ class Spout(BaseSpout):
     """
     pass
 
+  @abstractmethod
   def deactivate(self):
     """Called when a spout has been deactivated
 
