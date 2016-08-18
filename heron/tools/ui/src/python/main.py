@@ -24,6 +24,7 @@ import tornado.web
 import tornado.log
 import tornado.template
 from tornado.options import define
+from pkg_resources import resource_filename
 
 import heron.common.src.python.utils.log as log
 from heron.tools.ui.src.python import handlers
@@ -91,6 +92,8 @@ class Application(tornado.web.Application):
         (r"/topologies/([^\/]+)/([^\/]+)/([^\/]+)/([^\/]+)/histo",
          handlers.api.MemoryHistogramHandler),
     ]
+
+    print os.path.abspath(resource_filename('heron.tools.ui', 'resources/templates'))
 
     settings = dict(
         template_path=os.path.join(os.path.dirname(os.path.abspath(__file__)),
