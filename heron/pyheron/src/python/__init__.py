@@ -20,3 +20,28 @@ from .topology import Topology, TopologyBuilder
 # Load spout and bolt
 from .bolt import Bolt
 from .spout import Spout
+
+###### Not yet implemented classes ######
+class BatchingBolt(object):
+  def __init__(self, *args, **kwargs):
+    raise NotImplementedError("BatchingBolt is not yet implemented in PyHeron")
+
+class JavaBolt(object):
+  def __init__(self, *args, **kwargs):
+    raise NotImplementedError("JavaBolt is not yet implemented in PyHeron")
+
+class JavaSpout(object):
+  def __init__(self, *args, **kwargs):
+    raise NotImplementedError("JavaSpout is not yet implemented in PyHeron")
+
+class ShellBolt(object):
+  def __init__(self, *args, **kwargs):
+    raise NotImplementedError("ShellBolt is not yet implemented in PyHeron")
+
+class ShellSpout(object):
+  def __init__(self, *args, **kwargs):
+    raise NotImplementedError("ShellSpout is not yet implemented in PyHeron")
+
+class StormHandler(object):
+  def __init__(self, serializer):
+    raise NotImplementedError("StormHandler is not yet implemented in PyHeron")
