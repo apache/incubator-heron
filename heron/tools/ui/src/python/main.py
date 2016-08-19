@@ -18,6 +18,7 @@ import logging
 import os
 import signal
 
+import sys
 import tornado.ioloop
 import tornado.options
 import tornado.web
@@ -93,13 +94,13 @@ class Application(tornado.web.Application):
          handlers.api.MemoryHistogramHandler),
     ]
 
-    print os.path.abspath(resource_filename('heron.tools.ui', 'resources/templates'))
-
+    # pylint: disable=fixme
+    # TODO: hacky solution
+    # sys.path[0] should be the path to the extracted files for heron-ui, as it is added
+    # when bootstrapping the pex file
     settings = dict(
-        template_path=os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                   "../../resources/templates"),
-        static_path=os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                 "../../resources/static"),
+        template_path=os.path.join(sys.path[0], "heron/tools/ui/resources/templates"),
+        static_path=os.path.join(sys.path[0], "heron/tools/ui/resources/static"),
         gzip=True,
         debug=True,
         default_handler_class=handlers.NotFoundHandler,
