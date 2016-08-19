@@ -14,6 +14,7 @@
 
 package com.twitter.heron.statemgr;
 
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,10 +24,12 @@ import com.google.protobuf.Message;
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
+import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.statemgr.IStateManager;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 
@@ -76,6 +79,10 @@ public abstract class FileSystemStateManager implements IStateManager {
     return concatPath(getTopologyDir(), topologyName);
   }
 
+  protected String getPackingPlanPath(String topologyName) {
+    return concatPath(getPackingPlanDir(), topologyName);
+  }
+
   protected String getPhysicalPlanPath(String topologyName) {
     return concatPath(getPhysicalPlanDir(), topologyName);
   }
@@ -115,6 +122,11 @@ public abstract class FileSystemStateManager implements IStateManager {
   }
 
   @Override
+  public ListenableFuture<Boolean> deletePackingPlan(String topologyName) {
+    return deleteNode(getPackingPlanPath(topologyName));
+  }
+
+  @Override
   public ListenableFuture<Boolean> deletePhysicalPlan(String topologyName) {
     return deleteNode(getPhysicalPlanPath(topologyName));
   }
@@ -140,6 +152,13 @@ public abstract class FileSystemStateManager implements IStateManager {
   }
 
   @Override
+  public ListenableFuture<PackingPlans.PackingPlan> getPackingPlan(
+      WatchCallback watcher, String topologyName) {
+    return getNodeData(watcher, getPackingPlanPath(topologyName),
+        PackingPlans.PackingPlan.newBuilder());
+  }
+
+  @Override
   public ListenableFuture<PhysicalPlans.PhysicalPlan> getPhysicalPlan(
       WatchCallback watcher, String topologyName) {
     return getNodeData(watcher, getPhysicalPlanPath(topologyName),
@@ -160,5 +179,53 @@ public abstract class FileSystemStateManager implements IStateManager {
 
   private static String concatPath(String basePath, String appendPath) {
     return String.format("%s/%s", basePath, appendPath);
+  }
+
+  /**
+   * Returns all information stored in the StateManager. This is a utility method used for debugging
+   * while developing. To invoke, run:
+   *
+   *  bazel run heron/statemgrs/src/java:localfs-statemgr-unshaded -- \
+   *    &lt;topology-name&gt; [new_instance_distribution]
+   *
+   * If a new_instance_distribution is provided, the instance distribution will be updated to
+   * trigger a scaling event. For example:
+   *
+   *  bazel run heron/statemgrs/src/java:localfs-statemgr-unshaded -- \
+   *    ExclamationTopology 1:word:3:0:exclaim1:2:0:exclaim1:1:0
+   *
+   */
+  protected void doMain(String[] args, Config config)
+      throws ExecutionException, InterruptedException, InstantiationException,
+      IllegalAccessException, ClassNotFoundException {
+
+    if (args.length < 1) {
+      throw new RuntimeException(String.format(
+          "Usage: java %s <topology_name> - view state manager details for a topology",
+          this.getClass().getCanonicalName()));
+    }
+
+    String topologyName = args[0];
+    print("==> State Manager root path: %s", config.get(Keys.stateManagerRootPath()));
+
+    initialize(config);
+
+    if (isTopologyRunning(topologyName).get()) {
+      print("==> Topology %s found", topologyName);
+      print("==> Topology %s:", getTopology(null, topologyName).get());
+      print("==> ExecutionState:\n%s", getExecutionState(null, topologyName).get());
+      print("==> SchedulerLocation:\n%s",
+          getSchedulerLocation(null, topologyName).get());
+      print("==> TMasterLocation:\n%s", getTMasterLocation(null, topologyName).get());
+      print("==> PackingPlan:\n%s", getPackingPlan(null, topologyName).get());
+      print("==> PhysicalPlan:\n%s", getPhysicalPlan(null, topologyName).get());
+    } else {
+      print("==> Topology %s not found under %s",
+          topologyName, config.get(Keys.stateManagerRootPath()));
+    }
+  }
+
+  protected void print(String format, Object... values) {
+    System.out.println(String.format(format, values));
   }
 }

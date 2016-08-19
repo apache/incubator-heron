@@ -16,6 +16,7 @@ package com.twitter.heron.statemgr.zookeeper.curator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -35,10 +36,12 @@ import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
+import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Context;
+import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.statemgr.WatchCallback;
 import com.twitter.heron.statemgr.FileSystemStateManager;
 import com.twitter.heron.statemgr.zookeeper.ZkContext;
@@ -282,6 +285,13 @@ public class CuratorStateManager extends FileSystemStateManager {
   }
 
   @Override
+  public ListenableFuture<Boolean> setPackingPlan(
+      PackingPlans.PackingPlan packingPlan,
+      String topologyName) {
+    return createNode(getPackingPlanPath(topologyName), packingPlan.toByteArray(), false);
+  }
+
+  @Override
   public ListenableFuture<Boolean> setSchedulerLocation(
       Scheduler.SchedulerLocation location,
       String topologyName) {
@@ -309,5 +319,20 @@ public class CuratorStateManager extends FileSystemStateManager {
     } else {
       return deleteNode(getSchedulerLocationPath(topologyName));
     }
+  }
+
+  public static void main(String[] args) throws ExecutionException, InterruptedException,
+      IllegalAccessException, ClassNotFoundException, InstantiationException {
+    if (args.length < 2) {
+      throw new RuntimeException("Expects arguments: <topology_name> <zookeeper_hostname>");
+    }
+
+    String zookeeperHostname = args[1];
+    Config config = Config.newBuilder()
+        .put(Keys.stateManagerRootPath(), "/storm/heron/states")
+        .put(Keys.stateManagerConnectionString(), zookeeperHostname)
+        .build();
+    CuratorStateManager stateManager = new CuratorStateManager();
+    stateManager.doMain(args, config);
   }
 }
