@@ -40,7 +40,7 @@ class Bolt(BaseBolt):
                    Note that types of string values in the config have been automatically converted,
                    meaning that number strings and boolean strings are converted to the appropriate
                    types.
-    :type context: dict (``heron.common.src.python.utils.topology.TopologyContext``)
+    :type context: :class:`pyheron.TopologyContext`
     :param context: This object can be used to get information about this task's place within the
                     topology, including the task id and component id of this task, input and output
                     information, etc.
@@ -51,12 +51,35 @@ class Bolt(BaseBolt):
   def process(self, tup):
     """Process a single tuple of input
 
+    It is compatible with StreamParse API.
+
     The Tuple object contains metadata on it about which component/stream/task it came from.
     To emit a tuple, call ``self.emit(tuple)``.
+    Note that tick tuples are not passed to this method, as the ``process_tick()`` method is
+    responsible for processing them.
 
     **Must be implemented by a subclass, otherwise NotImplementedError is raised.**
 
-    :type tup: heron.common.src.python.utils.tuple.HeronTuple
+    :type tup: :class:`pyheron.HeronTuple`
     :param tup: HeronTuple to process
     """
     raise NotImplementedError("Bolt not implementing process() method.")
+
+  @abstractmethod
+  def process_tick(self, tup):
+    """Process special tick tuple
+
+    It is compatible with StreamParse API.
+
+    Tick tuples allow time-based behavior to be included in bolts. They will be sent to the bolts
+    for which `topology.tick.tuple.freq.secs``
+    (or, ``pyheron.constants.TOPOLOGY_TICK_TUPLE_FREQ_SECS`` key) is set to an integer value, the
+    number of seconds.
+
+    Default behavior is to ignore tick tuples. This method should be overridden by subclasses
+    if you want to react to timer events via tick tuples.
+
+    :type tup: :class:`pyheron.HeronTuple`
+    :param tup: the tick tuple to be processed
+    """
+    pass
