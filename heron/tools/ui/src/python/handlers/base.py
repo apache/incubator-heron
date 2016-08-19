@@ -17,6 +17,7 @@ import tornado.web
 import tornado.httpserver
 
 
+# pylint: disable=abstract-method
 class BaseHandler(tornado.web.RequestHandler):
   ''' BaseHandler '''
 

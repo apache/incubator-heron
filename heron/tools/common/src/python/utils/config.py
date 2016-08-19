@@ -367,4 +367,3 @@ class SubcommandHelpFormatter(argparse.RawDescriptionHelpFormatter):
     if action.nargs == argparse.PARSER:
       parts = "\n".join(parts.split("\n")[1:])
     return parts
-

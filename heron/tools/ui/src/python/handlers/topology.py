@@ -24,6 +24,8 @@ import heron.tools.common.src.python.access as access
 
 
 ################################################################################
+# pylint: disable=abstract-method
+# pylint: disable=arguments-differ
 class TopologyConfigHandler(base.BaseHandler):
   ''' Handler for displaying the config for a topology '''
 

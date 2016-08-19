@@ -19,6 +19,7 @@ import tornado.web
 from heron.tools.tracker.src.python import constants
 
 # pylint: disable=too-many-public-methods
+# pylint: disable=abstract-method
 class BaseHandler(tornado.web.RequestHandler):
   """
   Base Handler. All the other handlers derive from

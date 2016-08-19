@@ -25,7 +25,6 @@ import tornado.web
 import tornado.log
 import tornado.template
 from tornado.options import define
-from pkg_resources import resource_filename
 
 import heron.common.src.python.utils.log as log
 from heron.tools.ui.src.python import handlers
