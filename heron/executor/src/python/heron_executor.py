@@ -41,7 +41,7 @@ STATEMGRS_KEY = "statemgrs"
 
 def print_usage():
   print (
-      "./heron-executor <shardid> <topname> <topid> <topdefnfile>"
+      "Usage: ./heron-executor <shardid> <topname> <topid> <topdefnfile>"
       " <instance_distribution_ignored> <zknode> <zkroot> <tmaster_binary> <stmgr_binary>"
       " <metricsmgr_classpath> <instance_jvm_opts_in_base64> <classpath>"
       " <master_port> <tmaster_controller_port> <tmaster_stats_port> <heron_internals_config_file>"
@@ -582,37 +582,40 @@ class HeronExecutor(object):
     """ reads configs to determine which state manager to use """
     with open(state_manager_config_file, 'r') as stream:
       config = yaml.load(stream)
-    state_manager_class = config['heron.class.state.manager']
 
-    # pylint: disable=fixme
-    # TODO: replace with proper config loading. only for prototyping!
-    if state_manager_class == 'com.twitter.heron.statemgr.localfs.LocalFileSystemStateManager':
-      return \
-        [
-            {
-                'type': 'file',
-                'name': 'local',
-                # this doesn't work since root path is
-                # ${HOME}/.herondata/repository/state/${CLUSTER}
-                #'rootpath': config['heron.statemgr.root.path'],
-                'rootpath': '~/.herondata/repository/state/local',
-                'tunnelhost': 'localhost',
-            }
-        ]
-    elif state_manager_class == 'com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager':
-      return \
-        [
-            {
-                'type': 'zookeeper',
-                'name': 'zk',
-                'hostport': config['heron.statemgr.connection.string'],
-                'rootpath': config['heron.statemgr.root.path'],
-                'tunnelhost': config['heron.statemgr.tunnel.host'],
-            }
-        ]
-    Log.error("FATAL: unrecognized heron.class.state.manager found in %s: %s" %
-              (state_manager_config_file, config))
-    sys.exit(1)
+    # need to convert from the format in statemgr.yaml to the format that the python state managers
+    # takes, which is unfortunate. first, set reasonable defaults
+    state_manager_location =\
+      {
+          'type': 'file',
+          'name': 'local',
+          'tunnelhost': 'localhost',
+          # this doesn't work since root path is
+          # ${HOME}/.herondata/repository/state/${CLUSTER}
+          #'rootpath': config['heron.statemgr.root.path'],
+          'rootpath': '~/.herondata/repository/state/local',
+      }
+
+    if 'heron.statemgr.connection.string' in config:
+      state_manager_location['hostport'] = config['heron.statemgr.connection.string']
+    if 'heron.statemgr.tunnel.host' in config:
+      state_manager_location['tunnelhost'] = config['heron.statemgr.tunnel.host']
+
+    state_manager_class = config['heron.class.state.manager']
+    if state_manager_class == 'com.twitter.heron.statemgr.zookeeper.curator.CuratorStateManager':
+      state_manager_location['type'] = 'zookeeper'
+      state_manager_location['name'] = 'zk'
+      if 'heron.statemgr.root.path' in config:
+        state_manager_location['rootpath'] = config['heron.statemgr.root.path']
+
+    elif state_manager_class != 'com.twitter.heron.statemgr.localfs.LocalFileSystemStateManager':
+      Log.error("FATAL: unrecognized heron.class.state.manager found in %s: %s" %
+                (state_manager_config_file, config))
+      sys.exit(1)
+
+    Log.info("state manager configs: %s " % state_manager_location)
+
+    return [state_manager_location]
 
   def register_packing_plan_watcher(self, executor):
     """
@@ -652,7 +655,9 @@ class HeronExecutor(object):
                str(state_manager))
 
 def main():
-  if len(sys.argv) != 33:
+  expected = 33
+  if len(sys.argv) != expected:
+    Log.error("Expected %s arguments but received %s: %s" % (expected, len(sys.argv), sys.argv))
     print_usage()
     sys.exit(1)
 
