@@ -46,7 +46,7 @@ import com.twitter.heron.spi.utils.TopologyUtils;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
-    TopologyUtils.class, ReflectionUtils.class, SchedulerUtils.class})
+    TopologyUtils.class, ReflectionUtils.class, SchedulerUtils.class, TopologyAPI.Topology.class})
 public class SchedulerMainTest {
   private static final String STATE_MANAGER_CLASS = "STATE_MANAGER_CLASS";
   private static final String PACKING_CLASS = "PACKING_CLASS";
@@ -140,8 +140,10 @@ public class SchedulerMainTest {
         when(ReflectionUtils.class, "newInstance", STATE_MANAGER_CLASS);
     Assert.assertFalse(schedulerMain.runScheduler());
     Mockito.verify(stateManager, Mockito.never()).initialize(Mockito.any(Config.class));
+
+    TopologyAPI.Topology mockTopology = PowerMockito.mock(TopologyAPI.Topology.class);
     Mockito.verify(packing, Mockito.never()).
-        initialize(Mockito.any(Config.class), Mockito.any(Config.class));
+        initialize(Mockito.any(Config.class), Mockito.eq(mockTopology));
     Mockito.verify(scheduler, Mockito.never()).
         initialize(Mockito.any(Config.class), Mockito.any(Config.class));
   }
