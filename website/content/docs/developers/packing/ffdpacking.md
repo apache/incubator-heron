@@ -88,7 +88,7 @@ containers as input.
 
    Here's an example code snippet for setting these parameters when defining a topology:
 
-   ````java
+   ```java
 
      // Set up the topology and its config
      com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
@@ -97,4 +97,4 @@ containers as input.
 
      topologyConfig.setContainerMaxRamHint(maxContainerRam);
      topologyConfig.setContainerPaddingPercentage(5);
-   ````
+   ```
