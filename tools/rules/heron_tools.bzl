@@ -6,13 +6,13 @@ def heron_tools_files():
 
 def heron_tools_bin_files():
     return [
-        "//heron/tracker/src/python:heron-tracker",
-        "//heron/ui/src/python:heron-ui",
+        "//heron/tools/tracker/src/python:heron-tracker",
+        "//heron/tools/ui/src/python:heron-ui",
     ]
 
 def heron_tools_conf_files():
     return [
-        "//heron/config/src/yaml:tracker-yaml",
+        "//heron/tools/config/src/yaml:tracker-yaml",
     ]
 
 def heron_tools_lib_files():
