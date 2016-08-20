@@ -56,7 +56,7 @@ of 4 Heron instances.
 Note that these values take into account only the resources allocated for the user's instances.
 Additional per container resources for system-related processes such as the stream manager can be
 added to the maximum container size defined above. Thus, the algorithm might eventually produce
-containers slighltly bigger that the boundary determined by parameters 2-4. The amount of the
+containers slightly bigger that the boundary determined by parameters 2-4. The amount of the
 additional resources allocated to each container to account for additional internal Heron resource
 requirements, is determined by the padding percentage specified in parameter 5. If the user does
 not specify the padding percentage, then the system will use a default value of 10.
