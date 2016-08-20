@@ -139,20 +139,33 @@ public final class ShellUtils {
   }
 
   public static Process runASyncProcess(
+      boolean verbose, String[] command, File workingDirectory, String logFileUuid) {
+    return runASyncProcess(command, workingDirectory, new HashMap<String, String>(), logFileUuid);
+  }
+
+  public static Process runASyncProcess(
       boolean verbose, String[] command, File workingDirectory) {
     return runASyncProcess(verbose, command, workingDirectory, new HashMap<String, String>());
   }
 
   public static Process runASyncProcess(
       boolean verbose, String[] command, File workingDirectory, Map<String, String> envs) {
+    return runASyncProcess(command, workingDirectory, envs, null);
+  }
+
+  private static Process runASyncProcess(String[] command, File workingDirectory,
+      Map<String, String> envs, String logFileUuid) {
     // Log the command for debugging
     LOG.log(Level.FINE, "$> {0}", Arrays.toString(command));
 
     // the log file can help people to find out what happened between pb.start()
     // and the async process started
     String commandFileName = Paths.get(command[0]).getFileName().toString();
-    String uuid = UUID.randomUUID().toString().substring(0, 8);
-    String logFilePath = workingDirectory + "/" + commandFileName + "-" + uuid + "-started.stderr";
+    if (logFileUuid == null) {
+      logFileUuid = UUID.randomUUID().toString().substring(0, 8) + "-started";
+    }
+    String logFilePath = String.format("%s/%s-%s.stderr",
+        workingDirectory, commandFileName, logFileUuid);
     File logFile = new File(logFilePath);
 
     // For AsyncProcess, we will never inherit IO, since parent process will not

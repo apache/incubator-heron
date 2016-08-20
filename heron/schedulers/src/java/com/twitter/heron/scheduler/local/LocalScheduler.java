@@ -76,7 +76,9 @@ public class LocalScheduler implements IScheduler, ScalableScheduler {
    */
   protected Process startExecutorProcess(int container) {
     return ShellUtils.runASyncProcess(true,
-        getExecutorCommand(container), new File(LocalContext.workingDirectory(config)));
+        getExecutorCommand(container),
+        new File(LocalContext.workingDirectory(config)),
+        Integer.toString(container));
   }
 
   /**
