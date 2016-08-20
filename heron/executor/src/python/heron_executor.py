@@ -595,10 +595,10 @@ def signal_handler(signal_to_handle, frame):
   # Just catch the SIGTERM and then cleanup(), registered with atexit, would invoke
   sys.exit(signal_to_handle)
 
-def setup():
+def setup(shardid):
   # Redirect stdout and stderr to files in append mode
   # The filename format is heron-executor.stdxxx
-  log.configure(logfile='heron-executor.stdout', with_time=True)
+  log.configure(logfile='heron-executor-%s.stdout' % shardid, with_time=True)
 
   Log.info('Set up process group; executor becomes leader')
   os.setpgrp() # create new process group, become its leader
@@ -619,5 +619,5 @@ def cleanup():
   os.killpg(0, signal.SIGTERM)
 
 if __name__ == "__main__":
-  setup()
+  setup(sys.argv[1])
   main()
