@@ -197,7 +197,7 @@ chmod +x /tmp/bazel.sh
 Make sure to download the appropriate version of Bazel (currently {{%
 bazelVersion %}}).
 
-### Step 6 --- Download Jeron and compile it
+### Step 6 --- Download Heron and compile it
 
 ```bash
 $ git clone https://github.com/twitter/heron.git && cd heron
