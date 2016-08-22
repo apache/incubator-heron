@@ -23,7 +23,7 @@ if [ ! -d $DIR/../bazel-genfiles ]; then
     exit 1
 fi
 
-# generate .project file
+echo generate .project file
 readonly project_file=$DIR/../.project
 rm -rf $project_file
 cat >> $project_file <<EOH
@@ -46,7 +46,7 @@ cat >> $project_file <<EOH
 </projectDescription>
 EOH
 
-# generate .classpath file
+echo generate .classpath file
 readonly classpath_file=$DIR/../.classpath
 rm -rf $classpath_file
 cat >> $classpath_file <<EOH
@@ -102,3 +102,6 @@ cat >> $classpath_file << 'EOF'
   <classpathentry kind="output" path="target/classes"/>
 </classpath>
 EOF
+
+echo "Set Java code formatter file in Eclipse as following steps:"
+echo "Properties –> Java Code Style –> Formatter –> Enable project specific settings and load 'scripts/resources/eclipse/JavaCodeFormatter.xml'"
