@@ -161,11 +161,12 @@ public final class ShellUtils {
     // the log file can help people to find out what happened between pb.start()
     // and the async process started
     String commandFileName = Paths.get(command[0]).getFileName().toString();
-    if (logFileUuid == null) {
-      logFileUuid = UUID.randomUUID().toString().substring(0, 8) + "-started";
+    String uuid = logFileUuid;
+    if (uuid == null) {
+      uuid = UUID.randomUUID().toString().substring(0, 8) + "-started";
     }
     String logFilePath = String.format("%s/%s-%s.stderr",
-        workingDirectory, commandFileName, logFileUuid);
+        workingDirectory, commandFileName, uuid);
     File logFile = new File(logFilePath);
 
     // For AsyncProcess, we will never inherit IO, since parent process will not
