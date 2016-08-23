@@ -31,6 +31,7 @@ java_library(
   deps = scheduler_deps_files + [
     "//heron/statemgrs/src/java:null-statemgr-java",
     "//heron/schedulers/src/java:null-scheduler-java",
+    "//heron/packing/src/java:roundrobin-packing",
   ],
 )
 
@@ -41,6 +42,7 @@ java_tests(
     "com.twitter.heron.scheduler.RuntimeManagerMainTest",
     "com.twitter.heron.scheduler.SubmitterMainTest",
     "com.twitter.heron.scheduler.SchedulerMainTest",
+    "com.twitter.heron.scheduler.UpdateTopologyManagerTest",
     "com.twitter.heron.scheduler.server.SchedulerServerTest",
     "com.twitter.heron.scheduler.client.LibrarySchedulerClientTest",
     "com.twitter.heron.scheduler.client.HttpServiceSchedulerClientTest",

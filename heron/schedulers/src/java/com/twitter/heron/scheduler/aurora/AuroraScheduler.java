@@ -131,13 +131,14 @@ public class AuroraScheduler implements IScheduler, ScalableScheduler {
   }
 
   @Override
-  public void addContainers(Integer count) {
-    controller.addContainers(count);
+  public void addContainers(Map<String, PackingPlan.ContainerPlan> containersToAdd) {
+    controller.addContainers(containersToAdd.size());
   }
 
   @Override
-  public void removeContainers(Integer existingContainerCount, Integer count) {
-    controller.removeContainers(existingContainerCount, count);
+  public void removeContainers(Map<String, PackingPlan.ContainerPlan> existingContainers,
+                               Map<String, PackingPlan.ContainerPlan> containersToRemove) {
+    controller.removeContainers(existingContainers.size(), containersToRemove.size());
   }
 
   /**

@@ -13,10 +13,13 @@
 // limitations under the License.
 package com.twitter.heron.scheduler;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.protobuf.Descriptors;
 
@@ -40,74 +43,15 @@ public class UpdateTopologyManager {
   private PackingPlanProtoDeserializer deserializer;
 
   public UpdateTopologyManager(Config runtime, Optional<ScalableScheduler> scalableScheduler) {
-    this.runtime = runtime;
-    this.scalableScheduler = scalableScheduler;
-    this.deserializer = new PackingPlanProtoDeserializer();
+    this(runtime, scalableScheduler, new PackingPlanProtoDeserializer());
   }
 
-  /**
-   * Scales the topology out or in based on the proposedPackingPlan
-   * @param existingProtoPackingPlan the current plan. If this isn't what's found in the state manager,
-   * the update will fail
-   * @param proposedProtoPackingPlan packing plan to change the topology to
-   */
-  public void updateTopology(final PackingPlans.PackingPlan existingProtoPackingPlan,
-                             final PackingPlans.PackingPlan proposedProtoPackingPlan)
-      throws ExecutionException, InterruptedException {
-    String topologyName = Runtime.topologyName(runtime);
-    PackingPlan existingPackingPlan = deserializer.fromProto(existingProtoPackingPlan);
-    PackingPlan proposedPackingPlan = deserializer.fromProto(proposedProtoPackingPlan);
-
-    Integer proposedContainerCount = proposedPackingPlan.getContainers().size();
-    Integer existingContainerCount = existingPackingPlan.getContainers().size();
-    Integer containerDelta = proposedContainerCount - existingContainerCount;
-
-    assertTrue(proposedContainerCount > 0,
-        "proposed packing plan must have at least 1 container %s", proposedPackingPlan);
-    assertTrue(containerDelta == 0 || scalableScheduler.isPresent(),
-        "Topology change requires scaling containers by %s but scheduler does not support "
-        + "scaling, aborting. Existing packing plan: %s, proposed packing plan: %s",
-        containerDelta, existingPackingPlan, proposedPackingPlan);
-
-    SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
-
-    // assert found PackingPlan is same as existing PackingPlan.
-    PackingPlans.PackingPlan foundPackingPlan = stateManager.getPackingPlan(topologyName);
-    assertTrue(foundPackingPlan.equals(existingProtoPackingPlan),
-        "Existing packing plan received does not equal the packing plan found in the state "
-        + "manager. Not updating updatedTopology. Received: %s, Found: %s",
-        existingProtoPackingPlan, foundPackingPlan);
-
-    // fetch the topology, which will need to be updated
-    TopologyAPI.Topology updatedTopology = stateManager.getTopology(topologyName);
-    Map<String, Integer> proposedComponentCounts = proposedPackingPlan.getComponentCounts();
-    for (String componentName : proposedComponentCounts.keySet()) {
-      Integer parallelism = proposedComponentCounts.get(componentName);
-      updatedTopology = mergeTopology(updatedTopology, componentName, parallelism);
-    }
-
-    // request new resources if necessary. Once containers are allocated we should make the changes
-    // to state manager quickly, otherwise the scheduler might penalize for thrashing on start-up
-    if (containerDelta > 0 && scalableScheduler.isPresent()) {
-      scalableScheduler.get().addContainers(containerDelta);
-    }
-
-    // update parallelism in updatedTopology since TMaster checks that
-    // Sum(parallelism) == Sum(instances)
-    logFine("Deleted existing Topology: %s", stateManager.deleteTopology(topologyName));
-    logFine("Set new Topology: %s", stateManager.setTopology(updatedTopology, topologyName));
-
-    // update packing plan to trigger the scaling event
-    logFine("Deleted existing packing plan: %s", stateManager.deletePackingPlan(topologyName));
-    logFine("Set new PackingPlan: %s",
-        stateManager.setPackingPlan(proposedProtoPackingPlan, topologyName));
-
-    // delete the physical plan so TMaster doesn't try to re-establish it on start-up.
-    logFine("Deleted Physical Plan: %s", stateManager.deletePhysicalPlan(topologyName));
-
-    if (containerDelta < 0 && scalableScheduler.isPresent()) {
-      scalableScheduler.get().removeContainers(existingContainerCount, -containerDelta);
-    }
+  public UpdateTopologyManager(Config runtime,
+                               Optional<ScalableScheduler> scalableScheduler,
+                               PackingPlanProtoDeserializer deserializer) {
+    this.runtime = runtime;
+    this.scalableScheduler = scalableScheduler;
+    this.deserializer = deserializer;
   }
 
   private static TopologyAPI.Topology mergeTopology(TopologyAPI.Topology topology,
@@ -150,6 +94,101 @@ public class UpdateTopologyManager {
     }
   }
 
+  /**
+   * Scales the topology out or in based on the proposedPackingPlan
+   *
+   * @param existingProtoPackingPlan the current plan. If this isn't what's found in the state manager,
+   * the update will fail
+   * @param proposedProtoPackingPlan packing plan to change the topology to
+   */
+  public void updateTopology(final PackingPlans.PackingPlan existingProtoPackingPlan,
+                             final PackingPlans.PackingPlan proposedProtoPackingPlan)
+      throws ExecutionException, InterruptedException {
+    String topologyName = Runtime.topologyName(runtime);
+    PackingPlan existingPackingPlan = deserializer.fromProto(existingProtoPackingPlan);
+    PackingPlan proposedPackingPlan = deserializer.fromProto(proposedProtoPackingPlan);
+
+    assertTrue(proposedPackingPlan.containers.size() > 0,
+        "proposed packing plan must have at least 1 container %s", proposedPackingPlan);
+
+    ContainerDelta containerDelta = getContainerDelta(
+        existingPackingPlan.containers, proposedPackingPlan.containers);
+    int newContainerCount = containerDelta.getContainersToAdd().size();
+    int removableContainerCount = containerDelta.getContainersToRemove().size();
+
+    String message = String.format("Topology change requires %s new containers and removing %s "
+            + "existing containers, but the scheduler does not support scaling, aborting. "
+            + "Existing packing plan: %s, proposed packing plan: %s",
+        newContainerCount, removableContainerCount, existingPackingPlan, proposedPackingPlan);
+    assertTrue(newContainerCount + removableContainerCount == 0 || scalableScheduler.isPresent(),
+        message);
+
+    SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
+
+    // assert found PackingPlan is same as existing PackingPlan.
+    validateCurrentPackingPlan(existingProtoPackingPlan, topologyName, stateManager);
+
+    // fetch the topology, which will need to be updated
+    TopologyAPI.Topology updatedTopology =
+        getUpdatedTopology(topologyName, proposedPackingPlan, stateManager);
+
+    // request new resources if necessary. Once containers are allocated we should make the changes
+    // to state manager quickly, otherwise the scheduler might penalize for thrashing on start-up
+    if (newContainerCount > 0) {
+      scalableScheduler.get().addContainers(containerDelta.getContainersToAdd());
+    }
+
+    // update parallelism in updatedTopology since TMaster checks that
+    // Sum(parallelism) == Sum(instances)
+    logFine("Deleted existing Topology: %s", stateManager.deleteTopology(topologyName));
+    logFine("Set new Topology: %s", stateManager.setTopology(updatedTopology, topologyName));
+
+    // update packing plan to trigger the scaling event
+    logFine("Deleted existing packing plan: %s", stateManager.deletePackingPlan(topologyName));
+    logFine("Set new PackingPlan: %s",
+        stateManager.setPackingPlan(proposedProtoPackingPlan, topologyName));
+
+    // delete the physical plan so TMaster doesn't try to re-establish it on start-up.
+    logFine("Deleted Physical Plan: %s", stateManager.deletePhysicalPlan(topologyName));
+
+    if (removableContainerCount > 0) {
+      scalableScheduler.get().removeContainers(
+          existingPackingPlan.containers,
+          containerDelta.getContainersToRemove());
+    }
+  }
+
+  @VisibleForTesting
+  TopologyAPI.Topology getUpdatedTopology(String topologyName,
+                                          PackingPlan proposedPackingPlan,
+                                          SchedulerStateManagerAdaptor stateManager) {
+    TopologyAPI.Topology updatedTopology = stateManager.getTopology(topologyName);
+    Map<String, Integer> proposedComponentCounts = proposedPackingPlan.getComponentCounts();
+    for (String componentName : proposedComponentCounts.keySet()) {
+      Integer parallelism = proposedComponentCounts.get(componentName);
+      updatedTopology = mergeTopology(updatedTopology, componentName, parallelism);
+    }
+    return updatedTopology;
+  }
+
+  @VisibleForTesting
+  void validateCurrentPackingPlan(PackingPlans.PackingPlan existingProtoPackingPlan,
+                                  String topologyName,
+                                  SchedulerStateManagerAdaptor stateManager) {
+    PackingPlans.PackingPlan foundPackingPlan = stateManager.getPackingPlan(topologyName);
+    assertTrue(foundPackingPlan.equals(existingProtoPackingPlan),
+        "Existing packing plan received does not equal the packing plan found in the state "
+            + "manager. Not updating updatedTopology. Received: %s, Found: %s",
+        existingProtoPackingPlan, foundPackingPlan);
+  }
+
+  @VisibleForTesting
+  ContainerDelta getContainerDelta(Map<String, PackingPlan.ContainerPlan> currentContainers,
+                                   Map<String, PackingPlan.ContainerPlan> proposedContainers) {
+    ContainerDelta containerDelta = new ContainerDelta(currentContainers, proposedContainers);
+    return containerDelta;
+  }
+
   private void assertTrue(boolean condition, String message, Object... values) {
     if (!condition) {
       throw new RuntimeException("ERROR: " + String.format(message, values));
@@ -158,5 +197,38 @@ public class UpdateTopologyManager {
 
   private void logFine(String format, Object... values) {
     LOG.fine(String.format(format, values));
+  }
+
+  @VisibleForTesting
+  class ContainerDelta {
+    private final Map<String, PackingPlan.ContainerPlan> containersToAdd;
+    private final Map<String, PackingPlan.ContainerPlan> containersToRemove;
+
+    ContainerDelta(Map<String, PackingPlan.ContainerPlan> currentContainers,
+                   Map<String, PackingPlan.ContainerPlan> proposedContainers) {
+      Map<String, PackingPlan.ContainerPlan> toAdd = new HashMap<>();
+      for (String containerId : proposedContainers.keySet()) {
+        if (!currentContainers.containsKey(containerId)) {
+          toAdd.put(containerId, proposedContainers.get(containerId));
+        }
+      }
+      this.containersToAdd = Collections.unmodifiableMap(toAdd);
+
+      Map<String, PackingPlan.ContainerPlan> toRemove = new HashMap<>();
+      for (String containerId : currentContainers.keySet()) {
+        if (!proposedContainers.containsKey(containerId)) {
+          toRemove.put(containerId, currentContainers.get(containerId));
+        }
+      }
+      this.containersToRemove = Collections.unmodifiableMap(toRemove);
+    }
+
+    public Map<String, PackingPlan.ContainerPlan> getContainersToRemove() {
+      return containersToRemove;
+    }
+
+    public Map<String, PackingPlan.ContainerPlan> getContainersToAdd() {
+      return containersToAdd;
+    }
   }
 }
