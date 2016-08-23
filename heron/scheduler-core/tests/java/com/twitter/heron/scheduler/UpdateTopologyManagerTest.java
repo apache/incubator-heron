@@ -55,7 +55,6 @@ public class UpdateTopologyManagerTest {
     UpdateTopologyManager manager = new UpdateTopologyManager(null, null);
     ContainerDelta result = manager.getContainerDelta(currentPlan, updatedPlan);
     Assert.assertNotNull(result);
-    Assert.assertEquals(4, result.size());
     Assert.assertEquals(2, result.getContainersToAdd().size());
     Assert.assertTrue(result.getContainersToAdd().containsKey("new-1"));
     Assert.assertTrue(result.getContainersToAdd().containsKey("new-2"));
@@ -64,6 +63,9 @@ public class UpdateTopologyManagerTest {
     Assert.assertTrue(result.getContainersToRemove().containsKey("current-4"));
   }
 
+  /**
+   * Test scalable scheduler invocation
+   */
   @Test
   public void requestsToAddAndRemoveContainers() throws Exception {
     PackingPlanProtoDeserializer deserializer = Mockito.mock(PackingPlanProtoDeserializer.class);
@@ -104,8 +106,7 @@ public class UpdateTopologyManagerTest {
     Mockito.when(mockContainerDelta.getContainersToRemove()).thenReturn(containersToRemove);
 
     Mockito.doReturn(mockContainerDelta).when(spyUpdateManager).getContainerDelta(
-        Mockito.anyMapOf(String.class, PackingPlan.ContainerPlan.class),
-        Mockito.anyMapOf(String.class, PackingPlan.ContainerPlan.class));
+        currentContainers, proposedContainers);
 
     spyUpdateManager.updateTopology(currentPlan, proposedPlan);
 

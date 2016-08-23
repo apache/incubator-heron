@@ -113,11 +113,15 @@ public class UpdateTopologyManager {
 
     ContainerDelta containerDelta = getContainerDelta(
         existingPackingPlan.containers, proposedPackingPlan.containers);
+    int newContainerCount = containerDelta.getContainersToAdd().size();
+    int removableContainerCount = containerDelta.getContainersToRemove().size();
 
-    assertTrue(containerDelta.size() == 0 || scalableScheduler.isPresent(),
-        "Topology change requires scaling containers by %s but scheduler does not support "
-            + "scaling, aborting. Existing packing plan: %s, proposed packing plan: %s",
-        containerDelta.size(), existingPackingPlan, proposedPackingPlan);
+    String message = String.format("Topology change requires %s new containers and removing %s "
+            + "existing containers, but the scheduler does not support scaling, aborting. "
+            + "Existing packing plan: %s, proposed packing plan: %s",
+        newContainerCount, removableContainerCount, existingPackingPlan, proposedPackingPlan);
+    assertTrue(newContainerCount + removableContainerCount == 0 || scalableScheduler.isPresent(),
+        message);
 
     SchedulerStateManagerAdaptor stateManager = Runtime.schedulerStateManagerAdaptor(runtime);
 
@@ -130,7 +134,7 @@ public class UpdateTopologyManager {
 
     // request new resources if necessary. Once containers are allocated we should make the changes
     // to state manager quickly, otherwise the scheduler might penalize for thrashing on start-up
-    if (containerDelta.getContainersToAdd().size() > 0) {
+    if (newContainerCount > 0) {
       scalableScheduler.get().addContainers(containerDelta.getContainersToAdd());
     }
 
@@ -147,7 +151,7 @@ public class UpdateTopologyManager {
     // delete the physical plan so TMaster doesn't try to re-establish it on start-up.
     logFine("Deleted Physical Plan: %s", stateManager.deletePhysicalPlan(topologyName));
 
-    if (containerDelta.getContainersToRemove().size() > 0) {
+    if (removableContainerCount > 0) {
       scalableScheduler.get().removeContainers(
           existingPackingPlan.containers,
           containerDelta.getContainersToRemove());
@@ -225,10 +229,6 @@ public class UpdateTopologyManager {
 
     public Map<String, PackingPlan.ContainerPlan> getContainersToAdd() {
       return containersToAdd;
-    }
-
-    int size() {
-      return containersToRemove.size() + containersToAdd.size();
     }
   }
 }

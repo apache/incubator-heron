@@ -395,6 +395,11 @@ class HeronExecutor(object):
     return retval
 
   def _get_instance_plans(self, packing_plan, container_id):
+    """
+    For the given packing_plan, return the container plan with the given container_id. If protobufs
+    supported maps, we could just get the plan by id, but it doesn't so we have a collection of
+    containers to iterate over.
+    """
     this_container_plan = None
     for container_plan in packing_plan.container_plans:
       if container_plan.id == str(container_id):
