@@ -77,8 +77,11 @@ def runTest(test, topologyName, params):
   except Exception as e:
     logging.error("Failed to write to temp.txt file")
     return False
+
   # extra time to start up, write to .pid file, connect to tmaster, etc.
-  time.sleep(30)
+  seconds = 30
+  logging.info("Sleeping for %s seconds to allow time for startup", seconds)
+  time.sleep(seconds)
 
   # execute test case
   if test == 'KILL_TMASTER':
@@ -117,8 +120,10 @@ def runTest(test, topologyName, params):
   # which increases the determinism
   os.rename('temp.txt', params['readFile'])
 
-  # sleep for 15 seconds before attempting to get results
-  time.sleep(15)
+  # sleep before attempting to get results
+  seconds = 15
+  logging.info("Sleeping for %s seconds before checking for results", seconds)
+  time.sleep(seconds)
 
   # get actual and expected result
   # retry if results are not equal a predesignated amount of times
@@ -141,7 +146,7 @@ def runTest(test, topologyName, params):
     if expectedResult == actualResult:
       break
     if retriesLeft > 0:
-      logging.info("Failed to get proper results, retrying")
+      logging.info("Failed to get proper results, retrying after %s seconds", RETRY_INTERVAL)
       time.sleep(RETRY_INTERVAL)
 
   # kill topology
