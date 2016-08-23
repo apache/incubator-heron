@@ -28,7 +28,16 @@ Server::Server(EventLoop* eventLoop, const NetworkOptions& _options)
   request_rid_gen_ = new REQID_Generator();
 }
 
-Server::~Server() { delete request_rid_gen_; }
+Server::~Server() {
+  delete request_rid_gen_;
+
+  for (auto& m : _heron_message_pool) {
+    for (auto& n : m.second) {
+      delete n;
+    }
+    m.second.clear();
+  }
+}
 
 sp_int32 Server::Start() { return Start_Base(); }
 

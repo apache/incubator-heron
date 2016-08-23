@@ -66,6 +66,7 @@
 #include <string>
 #include <unordered_map>
 #include <utility>
+#include <typeindex>
 #include "basics/basics.h"
 #include "glog/logging.h"
 #include "network/connection.h"
@@ -200,6 +201,36 @@ class Server : public BaseServer {
   // Called when the connection is closed
   virtual void HandleConnectionClose_Base(BaseConnection* connection, NetworkErrorCode _status);
 
+   // TODO(mfu):
+   // TODO(mfu): Figure out a way to clean it when to shutdown the process
+  std::unordered_map<std::type_index, std::list<void*>> _heron_message_pool;
+
+//  template<typename M>
+//  inline M* acquire(std::type_index t)
+//  {
+//    if (_heron_message_pool[t].empty()) {
+//      return new M();
+//    }
+//
+//    M* m = (M*)_heron_message_pool[t].front();
+//    _heron_message_pool[t].pop_front();
+//    return m;
+//  }
+
+//  template<typename M>
+//  inline M* acquire_clean_set(std::type_index t)
+//  {
+//   M* m = acquire(t);
+//   m->Clear();
+//
+//   return m;
+//  }
+
+  template<typename M>
+  inline void release(M* m) {
+    _heron_message_pool[typeid(M)].push_back((void*)m);
+  }
+
  private:
   // When a new packet arrives on the connection, this is invoked by the Connection
   void OnNewPacket(Connection* connection, IncomingPacket* packet);
@@ -231,11 +262,20 @@ class Server : public BaseServer {
                        IncomingPacket* _ipkt) {
     REQID rid;
     CHECK(_ipkt->UnPackREQID(&rid) == 0) << "REQID unpacking failed";
-    M* m = new M();
+    M* m;
+    std::type_index t = typeid(M);
+
+    if (_heron_message_pool[t].empty()) {
+      m = new M();
+    }  else {
+      m = (M*)_heron_message_pool[t].front();
+      _heron_message_pool[t].pop_front();
+    }
+
     if (_ipkt->UnPackProtocolBuffer(m) != 0) {
       // We could not decode the pb properly
       std::cerr << "Could not decode protocol buffer of type " << m->GetTypeName();
-      delete m;
+      release(m);
       CloseConnection(_conn);
       return;
     }

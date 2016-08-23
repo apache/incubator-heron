@@ -34,7 +34,7 @@ class FieldsGrouping : public Grouping {
   virtual ~FieldsGrouping();
 
   virtual void GetListToSend(const proto::system::HeronDataTuple& _tuple,
-                             std::list<sp_int32>& _return);
+                             std::vector<sp_int32>& _return);
 
  private:
   std::list<sp_int32> fields_grouping_indices_;

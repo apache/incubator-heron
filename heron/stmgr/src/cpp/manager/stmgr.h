@@ -22,6 +22,7 @@
 #include <utility>
 #include <vector>
 #include <chrono>
+#include <typeindex>
 #include "proto/messages.h"
 #include "network/network.h"
 #include "basics/basics.h"
@@ -96,7 +97,7 @@ class StMgr {
   void CopyDataOutBound(sp_int32 _src_task_id, bool _local_spout,
                         const proto::api::StreamId& _streamid,
                         const proto::system::HeronDataTuple& _tuple,
-                        const std::list<sp_int32>& _out_tasks);
+                        const std::vector<sp_int32>& _out_tasks);
   void CopyControlOutBound(const proto::system::AckTuple& _control, bool _is_fail);
 
   sp_int32 ExtractTopologyTimeout(const proto::api::Topology& _topology);
@@ -150,6 +151,11 @@ class StMgr {
   sp_string zkroot_;
   sp_int32 metricsmgr_port_;
   sp_int32 shell_port_;
+
+  // TODO(mfu):
+  proto::stmgr::TupleMessage current_data_out_;
+  proto::stmgr::TupleMessage current_control_out_;
+  std::vector<sp_int32> out_tasks;
 };
 
 }  // namespace stmgr

@@ -102,7 +102,14 @@ TupleCache::TupleList::TupleList() {
   last_drained_count_ = 0;
 }
 
-TupleCache::TupleList::~TupleList() { CHECK(tuples_.empty()); }
+TupleCache::TupleList::~TupleList() {
+  CHECK(tuples_.empty());
+
+  for (auto& n : _heron_tuple_set_pool) {
+    delete n;
+  }
+  _heron_tuple_set_pool.clear();
+}
 
 sp_int64 TupleCache::TupleList::add_data_tuple(const proto::api::StreamId& _streamid,
                                                const proto::system::HeronDataTuple& _tuple,
@@ -114,7 +121,7 @@ sp_int64 TupleCache::TupleList::add_data_tuple(const proto::api::StreamId& _stre
     if (current_) {
       tuples_.push_front(current_);
     }
-    current_ = new proto::system::HeronTupleSet();
+    current_ = acquire_clean_set();
     current_->mutable_data()->mutable_stream()->CopyFrom(_streamid);
     current_size_ = 0;
   }
@@ -135,7 +142,7 @@ void TupleCache::TupleList::add_ack_tuple(const proto::system::AckTuple& _tuple,
     if (current_) {
       tuples_.push_front(current_);
     }
-    current_ = new proto::system::HeronTupleSet();
+    current_ = acquire_clean_set();
     current_size_ = 0;
   }
   sp_int64 tuple_size = _tuple.ByteSize();
@@ -150,7 +157,7 @@ void TupleCache::TupleList::add_fail_tuple(const proto::system::AckTuple& _tuple
     if (current_) {
       tuples_.push_front(current_);
     }
-    current_ = new proto::system::HeronTupleSet();
+    current_ = acquire_clean_set();
     current_size_ = 0;
   }
   sp_int64 tuple_size = _tuple.ByteSize();
@@ -166,7 +173,7 @@ void TupleCache::TupleList::add_emit_tuple(const proto::system::AckTuple& _tuple
     if (current_) {
       tuples_.push_front(current_);
     }
-    current_ = new proto::system::HeronTupleSet();
+    current_ = acquire_clean_set();
     current_size_ = 0;
   }
   sp_int64 tuple_size = _tuple.ByteSize();

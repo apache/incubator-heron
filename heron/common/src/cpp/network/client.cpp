@@ -26,7 +26,16 @@ Client::Client(EventLoop* eventLoop, const NetworkOptions& _options)
   Init();
 }
 
-Client::~Client() { delete message_rid_gen_; }
+Client::~Client() {
+  delete message_rid_gen_;
+
+  for (auto& m : _heron_message_pool) {
+    for (auto& n : m.second) {
+      delete n;
+    }
+    m.second.clear();
+  }
+}
 
 void Client::Start() { Start_Base(); }
 
@@ -130,7 +139,7 @@ void Client::InternalSendRequest(google::protobuf::Message* _request, void* _ctx
 void Client::InternalSendMessage(google::protobuf::Message* _message) {
   if (state_ != CONNECTED) {
     LOG(ERROR) << "Client is not connected. Dropping message" << std::endl;
-    delete _message;
+    release(_message);
     return;
   }
 
@@ -147,7 +156,7 @@ void Client::InternalSendMessage(google::protobuf::Message* _message) {
   CHECK_EQ(opkt->PackProtocolBuffer(*_message, byte_size), 0);
 
   // delete the message
-  delete _message;
+  release(_message);
 
   Connection* conn = static_cast<Connection*>(conn_);
   if (conn->sendPacket(opkt, NULL) != 0) {

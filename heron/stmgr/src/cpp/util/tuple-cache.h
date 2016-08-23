@@ -45,6 +45,11 @@ class TupleCache {
   void add_fail_tuple(sp_int32 _task_id, const proto::system::AckTuple& _tuple);
   void add_emit_tuple(sp_int32 _task_id, const proto::system::AckTuple& _tuple);
 
+  // TODO(mfu):
+  inline void release(sp_int32 _task_id, proto::system::HeronTupleSet* set) {
+    get(_task_id)->release(set);
+  }
+
  private:
   void drain(EventLoop::Status);
   void drain_impl();
@@ -66,6 +71,32 @@ class TupleCache {
 
     void drain(sp_int32 _task_id,
                std::function<void(sp_int32, proto::system::HeronTupleSet*)> _drainer);
+
+     // TODO(mfu):
+     // TODO(mfu): Figure out a way to clean it when to shutdown the process
+    std::list<proto::system::HeronTupleSet*> _heron_tuple_set_pool;
+    inline proto::system::HeronTupleSet* acquire()
+    {
+      if (_heron_tuple_set_pool.empty()) {
+        return new proto::system::HeronTupleSet();
+      }
+
+      proto::system::HeronTupleSet* set = _heron_tuple_set_pool.front();
+      _heron_tuple_set_pool.pop_front();
+      return set;
+    }
+
+    inline proto::system::HeronTupleSet* acquire_clean_set()
+    {
+     proto::system::HeronTupleSet* set = acquire();
+     set->Clear();
+
+     return set;
+    }
+
+    inline void release(proto::system::HeronTupleSet* set) {
+      _heron_tuple_set_pool.push_back(set);
+    }
 
    private:
     std::list<proto::system::HeronTupleSet*> tuples_;

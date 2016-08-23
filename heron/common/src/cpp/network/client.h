@@ -35,6 +35,7 @@
 #include <string>
 #include <unordered_map>
 #include <utility>
+#include <typeindex>
 #include "basics/basics.h"
 #include "glog/logging.h"
 #include "network/connection.h"
@@ -171,6 +172,36 @@ class Client : public BaseClient {
   // Return the underlying EventLoop.
   EventLoop* getEventLoop() { return eventLoop_; }
 
+   // TODO(mfu):
+   // TODO(mfu): Figure out a way to clean it when to shutdown the process
+  std::unordered_map<std::type_index, std::list<void*>> _heron_message_pool;
+
+//  template<typename M>
+//  inline M* acquire(std::type_index t)
+//  {
+//    if (_heron_message_pool[t].empty()) {
+//      return new M();
+//    }
+//
+//    M* m = (M*)_heron_message_pool[t].front();
+//    _heron_message_pool[t].pop_front();
+//    return m;
+//  }
+
+//  template<typename M>
+//  inline M* acquire_clean_set(std::type_index t)
+//  {
+//   M* m = acquire(t);
+//   m->Clear();
+//
+//   return m;
+//  }
+
+  template<typename M>
+  inline void release(M* m) {
+    _heron_message_pool[typeid(M)].push_back((void*)m);
+  }
+
  protected:
   // Derived class should implement this method to handle Connection
   // establishment. a status of OK implies that the Client was
@@ -252,11 +283,21 @@ class Client : public BaseClient {
   void dispatchRequest(T* _t, void (T::*method)(REQID id, M*), IncomingPacket* _ipkt) {
     REQID rid;
     CHECK(_ipkt->UnPackREQID(&rid) == 0) << "REQID unpacking failed";
-    M* m = new M();
+
+    M* m;
+    std::type_index t = typeid(M);
+
+    if (_heron_message_pool[t].empty()) {
+      m = new M();
+    }  else {
+      m = (M*)_heron_message_pool[t].front();
+      _heron_message_pool[t].pop_front();
+    }
+
     if (_ipkt->UnPackProtocolBuffer(m) != 0) {
       // We could not decode the pb properly
       std::cerr << "Could not decode protocol buffer of type " << m->GetTypeName();
-      delete m;
+      release(m);
       return;
     }
     CHECK(m->IsInitialized());

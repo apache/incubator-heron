@@ -18,7 +18,7 @@ build:centos --workspace_status_command scripts/release/status.sh
 # To use it: bazel build --config=darwin
 build:darwin --python2_path /usr/bin/python2.7
 build:darwin --java_toolchain=//tools/java:heron_java_toolchain
-build:darwin --experimental_action_listener=tools/cpp:compile_cpp
+# build:darwin --experimental_action_listener=tools/cpp:compile_cpp
 build:darwin --experimental_action_listener=tools/java:compile_java
 build:darwin --experimental_action_listener=tools/python:compile_python
 build:darwin --workspace_status_command scripts/release/status.sh

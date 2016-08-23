@@ -269,7 +269,7 @@ void StMgrServer::HandleTupleStreamMessage(Connection* _conn,
     }
     stmgr_->HandleStreamManagerData(iter->second, _message);
   }
-  delete _message;
+   release(_message);
 }
 
 void StMgrServer::HandleRegisterInstanceRequest(REQID _reqid, Connection* _conn,
@@ -354,7 +354,7 @@ void StMgrServer::HandleTupleSetMessage(Connection* _conn, proto::stmgr::TupleMe
   auto iter = active_instances_.find(_conn);
   if (iter == active_instances_.end()) {
     LOG(ERROR) << "Received TupleSet from unknown instance connection. Dropping.." << std::endl;
-    delete _message;
+    release(_message);
     return;
   }
   stmgr_server_metrics_->scope(METRIC_BYTES_FROM_INSTANCES)->incr_by(_message->ByteSize());
@@ -368,7 +368,7 @@ void StMgrServer::HandleTupleSetMessage(Connection* _conn, proto::stmgr::TupleMe
         ->incr_by(_message->set().control().fails_size());
   }
   stmgr_->HandleInstanceData(iter->second, instance_info_[iter->second]->local_spout_, _message);
-  delete _message;
+  release(_message);
 }
 
 void StMgrServer::SendToInstance(sp_int32 _task_id, const proto::stmgr::TupleMessage& _message) {
