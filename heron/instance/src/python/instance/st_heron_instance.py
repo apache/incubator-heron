@@ -72,7 +72,8 @@ class SingleThreadHeronInstance(object):
                               self.gateway_metrics, socket_options, self.sys_config)
     self._metrics_client = \
       MetricsManagerClient(self.looper, self.METRICS_MGR_HOST, metrics_port, instance,
-                           self.out_metrics, self.socket_map, socket_options, self.sys_config)
+                           self.out_metrics, self.socket_map, socket_options, self.gateway_metrics,
+                           self.sys_config)
     self.my_pplan_helper = None
 
     # my_instance is a AssignedInstance tuple
@@ -250,7 +251,7 @@ def main():
   max_log_bytes = system_config[constants.HERON_LOGGING_MAXIMUM_SIZE_MB] * constants.MB
 
   log_file = os.path.join(log_dir, instance_id + ".log.0")
-  log.init_rotating_logger(level=logging.INFO, logfile=log_file,
+  log.init_rotating_logger(level=logging.DEBUG, logfile=log_file,
                            max_files=max_log_files, max_bytes=max_log_bytes)
 
   Log.info("\nStarting instance: " + instance_id + " for topology: " + topology_name +

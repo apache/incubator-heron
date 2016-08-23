@@ -22,17 +22,30 @@ import heron.common.src.python.constants as constants
 
 class MetricsManagerClient(HeronClient):
   """MetricsManagerClient, responsible for communicating with Metrics Manager"""
+  # pylint: disable=too-many-arguments
   def __init__(self, looper, metrics_host, port, instance,
-               out_metrics, sock_map, socket_options, sys_config):
+               out_metrics, in_stream, out_stream, sock_map, socket_options,
+               gateway_metrics, sys_config):
     HeronClient.__init__(self, looper, metrics_host, port, sock_map, socket_options)
     self.instance = instance
     self.out_queue = out_metrics
+    self.in_stream = in_stream
+    self.out_stream = out_stream
+    self.gateway_metrics = gateway_metrics
     self.sys_config = sys_config
 
     self._add_metrics_client_tasks()
+    self._update_in_out_stream_metrics_tasks()
 
   def _add_metrics_client_tasks(self):
     self.looper.add_wakeup_task(self._send_metrics_messages)
+
+  def _update_in_out_stream_metrics_tasks(self):
+    in_size, out_size = self.in_stream.get_size(), self.out_stream.get_size()
+    Log.debug("updating in out stream metrics, %d, %d", in_size, out_size)
+    self.gateway_metrics.update_in_out_stream_metrics(in_size, out_size, in_size, out_size)
+    interval = float(self.sys_config[constants.INSTANCE_METRICS_SYSTEM_SAMPLE_INTERVAL_SEC])
+    self.looper.register_timer_task_in_sec(self._update_in_out_stream_metrics_tasks, interval)
 
   def _send_metrics_messages(self):
     if self.connected:
@@ -41,6 +54,8 @@ class MetricsManagerClient(HeronClient):
         assert isinstance(message, metrics_pb2.MetricPublisherPublishMessage)
         Log.debug("Sending metric message: %s" % str(message))
         self.send_message(message)
+        self.gateway_metrics.update_sent_metrics_size(message.ByteSize())
+        self.gateway_metrics.update_sent_metrics(len(message.metrics), len(message.exceptions))
 
   def on_connect(self, status):
     Log.debug("In on_connect of MetricsManagerClient")
