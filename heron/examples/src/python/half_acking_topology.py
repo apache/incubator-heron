@@ -36,7 +36,7 @@ if __name__ == '__main__':
   topology_config = {constants.TOPOLOGY_ENABLE_ACKING: True,
                      constants.TOPOLOGY_MAX_SPOUT_PENDING: 100000000,
                      constants.TOPOLOGY_MESSAGE_TIMEOUT_SECS: 300}
-  
+
   builder.set_config(topology_config)
 
   builder.build_and_submit()

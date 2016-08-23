@@ -35,6 +35,7 @@ class MetricsManagerClient(HeronClient):
     self.sys_config = sys_config
 
     self._add_metrics_client_tasks()
+    Log.info('start updating in and out stream metrics')
     self._update_in_out_stream_metrics_tasks()
 
   def _add_metrics_client_tasks(self):
@@ -42,7 +43,7 @@ class MetricsManagerClient(HeronClient):
 
   def _update_in_out_stream_metrics_tasks(self):
     in_size, out_size = self.in_stream.get_size(), self.out_stream.get_size()
-    Log.debug("updating in out stream metrics, %d, %d", in_size, out_size)
+    Log.info("updating in and out stream metrics, %d, %d", in_size, out_size)
     self.gateway_metrics.update_in_out_stream_metrics(in_size, out_size, in_size, out_size)
     interval = float(self.sys_config[constants.INSTANCE_METRICS_SYSTEM_SAMPLE_INTERVAL_SEC])
     self.looper.register_timer_task_in_sec(self._update_in_out_stream_metrics_tasks, interval)
@@ -52,7 +53,7 @@ class MetricsManagerClient(HeronClient):
       while not self.out_queue.is_empty():
         message = self.out_queue.poll()
         assert isinstance(message, metrics_pb2.MetricPublisherPublishMessage)
-        Log.debug("Sending metric message: %s" % str(message))
+        Log.info("Sending metric message: %s" % str(message))
         self.send_message(message)
         self.gateway_metrics.update_sent_metrics_size(message.ByteSize())
         self.gateway_metrics.update_sent_metrics(len(message.metrics), len(message.exceptions))
