@@ -75,25 +75,6 @@ class BaseMetricsHelper(object):
     else:
       Log.error("In update_count(): %s is registered but not supported with this method" % name)
 
-  def update_mean_reduced_metric(self, name, value, key=None):
-    """Update the value of MeanReducedMetric or MultiMeanReducedMetric
-
-    :type name: str
-    :param name: name of the registered metric to be updated.
-    :param value: specifies a value to be reduced.
-    :type key: str or None
-    :param key: specifies a key for MeanMultiReducedMetric. Needs to be `None` for updating
-                MeanReducedMetric.
-    """
-    if name not in self.metrics:
-      Log.error("In update_reduced_metric(): %s is not registered in the metric" % name)
-
-    if key is None and isinstance(self.metrics[name], MeanReducedMetric):
-      self.metrics[name].update(value)
-    elif key is not None and isinstance(self.metrics[name], MultiMeanReducedMetric):
-      self.metrics[name].update(key, value)
-    else:
-      Log.error("In update_count(): %s is registered but not supported with this method" % name)
 
 class GatewayMetrics(BaseMetricsHelper):
   """Metrics helper class for Gateway metric"""
@@ -149,10 +130,10 @@ class GatewayMetrics(BaseMetricsHelper):
     self.update_count(self.SENT_EXCEPTION_COUNT, exceptions_count)
 
   def update_in_out_stream_metrics(self, in_size, out_size, in_expect_size, out_expect_size):
-    self.update_mean_reduced_metric(self.IN_STREAM_QUEUE_SIZE, in_size)
-    self.update_mean_reduced_metric(self.OUT_STREAM_QUEUE_SIZE, out_size)
-    self.update_mean_reduced_metric(self.IN_STREAM_QUEUE_EXPECTED_CAPACITY, in_expect_size)
-    self.update_mean_reduced_metric(self.OUT_STREAM_QUEUE_EXPECTED_CAPACITY, out_expect_size)
+    self.update_reduced_metric(self.IN_STREAM_QUEUE_SIZE, in_size)
+    self.update_reduced_metric(self.OUT_STREAM_QUEUE_SIZE, out_size)
+    self.update_reduced_metric(self.IN_STREAM_QUEUE_EXPECTED_CAPACITY, in_expect_size)
+    self.update_reduced_metric(self.OUT_STREAM_QUEUE_EXPECTED_CAPACITY, out_expect_size)
 
 
 class ComponentMetrics(BaseMetricsHelper):
