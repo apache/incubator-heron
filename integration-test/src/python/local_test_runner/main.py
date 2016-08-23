@@ -196,7 +196,6 @@ def submitTopology(heronCliPath, testCluster, testJarPath, topologyClassPath,
       '%d' % (len(TEST_INPUT))
   ]
   logging.info("Submitting topology: %s", splitcmd)
-  logging.info(splitcmd)
   p = subprocess.Popen(splitcmd)
   p.wait()
   logging.info("Submitted topology %s", topologyName)
@@ -211,7 +210,6 @@ def killTopology(heronCliPath, testCluster, topologyName):
       '%s' % (topologyName),
   ]
   logging.info("Killing topology: %s", splitcmd)
-  logging.info(splitcmd)
   # this call can be blocking, no need for subprocess
   if subprocess.call(splitcmd) != 0:
     raise RuntimeError("Unable to kill the topology: %s" % topologyName)
@@ -241,7 +239,6 @@ def restartShard(heronCliPath, testCluster, topologyName, shardNum):
       '%d' % shardNum
   ]
   logging.info("Killing TMaster: %s", splitcmd)
-  logging.info(splitcmd)
   if subprocess.call(splitcmd) != 0:
     raise RuntimeError("Unable to kill TMaster")
   logging.info("Killed TMaster")
