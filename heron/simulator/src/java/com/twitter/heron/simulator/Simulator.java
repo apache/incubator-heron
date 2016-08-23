@@ -32,7 +32,7 @@ import com.twitter.heron.simulator.executors.InstanceExecutor;
 import com.twitter.heron.simulator.executors.MetricsExecutor;
 import com.twitter.heron.simulator.executors.StreamExecutor;
 import com.twitter.heron.simulator.utils.PhysicalPlanUtil;
-
+import com.twitter.heron.spi.utils.TopologyUtils;
 
 /**
  * One Simulator instance can only submit one topology. Please have multiple Simulator instances
@@ -101,6 +101,10 @@ public class Simulator {
             setName(name).
             setState(TopologyAPI.TopologyState.RUNNING).
             getTopology();
+
+    if (!TopologyUtils.verifyTopology(topologyToRun)) {
+      throw new RuntimeException("Topology object is Malformed");
+    }
 
     PhysicalPlans.PhysicalPlan pPlan = PhysicalPlanUtil.getPhysicalPlan(topologyToRun);
 
