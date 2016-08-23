@@ -25,7 +25,7 @@ TEST_CASES = [
 ]
 # Retry variables in case the output is different from the input
 RETRY_COUNT = 5
-RETRY_INTERVAL = 60
+RETRY_INTERVAL = 30
 # Topology shard definitions
 TMASTER_SHARD = 0
 NON_TMASTER_SHARD = 1
@@ -62,7 +62,6 @@ def runTest(test, topologyName, params):
   except Exception as e:
     logging.error("Failed to submit %s topology: %s", topologyName, str(e))
     return False
-  logging.info("Successfully submitted %s topology", topologyName)
 
   # block until ./heron-stmgr exists
   processList = getProcesses()
@@ -77,24 +76,26 @@ def runTest(test, topologyName, params):
   except Exception as e:
     logging.error("Failed to write to temp.txt file")
     return False
+
   # extra time to start up, write to .pid file, connect to tmaster, etc.
-  time.sleep(30)
+  seconds = 10
+  logging.info("Sleeping for %s seconds to allow time for startup", seconds)
+  time.sleep(seconds)
 
   # execute test case
   if test == 'KILL_TMASTER':
-    print "Executing kill tmaster"
     restartShard(params['cliPath'], params['cluster'], params['topologyName'], TMASTER_SHARD)
   elif test == 'KILL_STMGR':
-    print "Executing kill stmgr"
+    logging.info("Executing kill stmgr")
     stmgrPid = getPid('%s-%d' % (STMGR, NON_TMASTER_SHARD), params['workingDirectory'])
     killProcess(stmgrPid)
   elif test == 'KILL_METRICSMGR':
-    print "Executing kill metrics manager"
+    logging.info("Executing kill metrics manager")
     metricsmgrPid = getPid('%s-%d' % (HERON_METRICSMGR, NON_TMASTER_SHARD),
                            params['workingDirectory'])
     killProcess(metricsmgrPid)
   elif test == 'KILL_STMGR_METRICSMGR':
-    print "Executing kill stmgr metrics manager"
+    logging.info("Executing kill stmgr metrics manager")
     stmgrPid = getPid('%s-%d' % (STMGR, NON_TMASTER_SHARD), params['workingDirectory'])
     killProcess(stmgrPid)
 
@@ -102,7 +103,7 @@ def runTest(test, topologyName, params):
                            params['workingDirectory'])
     killProcess(metricsmgrPid)
   elif test == 'KILL_BOLT':
-    print "Executing kill bolt"
+    logging.info("Executing kill bolt")
     boltPid = getPid('container_%d_%s' % (NON_TMASTER_SHARD, HERON_BOLT),
                      params['workingDirectory'])
     killProcess(boltPid)
@@ -117,8 +118,26 @@ def runTest(test, topologyName, params):
   # which increases the determinism
   os.rename('temp.txt', params['readFile'])
 
-  # sleep for 15 seconds before attempting to get results
-  time.sleep(15)
+  # sleep before attempting to get results
+  seconds = 30
+  logging.info("Sleeping for %s seconds before checking for results", seconds)
+  time.sleep(seconds)
+
+  def cleanup_test():
+    # kill topology
+    try:
+      killTopology(params['cliPath'], params['cluster'], params['topologyName'])
+    except Exception as e:
+      logging.error("Failed to kill %s topology: %s", topologyName, str(e))
+      return False
+
+    # delete test files
+    try:
+      os.remove(params['readFile'])
+      os.remove(params['outputFile'])
+    except Exception as e:
+      logging.error("Failed to delete test files")
+      return False
 
   # get actual and expected result
   # retry if results are not equal a predesignated amount of times
@@ -135,30 +154,17 @@ def runTest(test, topologyName, params):
       with open(params['outputFile'], 'r') as g:
         actualResult = g.read()
     except Exception as e:
-      logging.error("Failed to get expected and actual results")
+      logging.error("Failed to read expected or actual results from file: %s", e)
+      cleanup_test()
       return False
     # if we get expected result, no need to retry
     if expectedResult == actualResult:
       break
     if retriesLeft > 0:
-      logging.info("Failed to get proper results, retrying")
+      logging.info("Failed to get expected results, retrying after %s seconds", RETRY_INTERVAL)
       time.sleep(RETRY_INTERVAL)
 
-  # kill topology
-  try:
-    killTopology(params['cliPath'], params['cluster'], params['topologyName'])
-  except Exception as e:
-    logging.error("Failed to kill %s topology: %s", topologyName, str(e))
-    return False
-  logging.info("Successfully killed %s topology", topologyName)
-
-  # delete test files
-  try:
-    os.remove(params['readFile'])
-    os.remove(params['outputFile'])
-  except Exception as e:
-    logging.error("Failed to delete test files")
-    return False
+  cleanup_test()
 
   # Compare the actual and expected result
   if actualResult == expectedResult:
@@ -175,7 +181,6 @@ def runTest(test, topologyName, params):
 def submitTopology(heronCliPath, testCluster, testJarPath, topologyClassPath,
                    topologyName, inputFile, outputFile):
   ''' Submit topology using heron-cli '''
-  logging.info("Submitting topology")
   # unicode string messes up subprocess.call quotations, must change into string type
   splitcmd = [
       '%s' % (heronCliPath),
@@ -190,15 +195,14 @@ def submitTopology(heronCliPath, testCluster, testJarPath, topologyClassPath,
       '%s' % (outputFile),
       '%d' % (len(TEST_INPUT))
   ]
-  logging.info("Submitting topology: ")
+  logging.info("Submitting topology: %s", splitcmd)
   logging.info(splitcmd)
   p = subprocess.Popen(splitcmd)
   p.wait()
-  logging.info("Submitted topology")
+  logging.info("Submitted topology %s", topologyName)
 
 def killTopology(heronCliPath, testCluster, topologyName):
   ''' Kill a topology using heron-cli '''
-  logging.info("Killing topology")
   splitcmd = [
       '%s' % (heronCliPath),
       'kill',
@@ -206,18 +210,20 @@ def killTopology(heronCliPath, testCluster, topologyName):
       '%s' % (testCluster),
       '%s' % (topologyName),
   ]
-  logging.info("Killing topology:")
+  logging.info("Killing topology: %s", splitcmd)
   logging.info(splitcmd)
   # this call can be blocking, no need for subprocess
   if subprocess.call(splitcmd) != 0:
     raise RuntimeError("Unable to kill the topology: %s" % topologyName)
-  logging.info("Successfully killed topology")
+  logging.info("Successfully killed topology %s", topologyName)
 
 def runAllTests(args):
   ''' Run the test for each topology specified in the conf file '''
   successes = []
   failures = []
   for test in TEST_CASES:
+    logging.info("==== Starting test %s of %s: %s ====",
+                 len(successes) + len(failures) + 1, len(TEST_CASES), test)
     if runTest(test, test, args): # testcase passed
       successes += [test]
     else:
@@ -226,7 +232,6 @@ def runAllTests(args):
 
 def restartShard(heronCliPath, testCluster, topologyName, shardNum):
   ''' restart tmaster '''
-  logging.info("Killing topology TMaster")
   splitcmd = [
       '%s' % (heronCliPath),
       'restart',
@@ -235,11 +240,11 @@ def restartShard(heronCliPath, testCluster, topologyName, shardNum):
       '%s' % (topologyName),
       '%d' % shardNum
   ]
-  logging.info("Killing TMaster command:")
+  logging.info("Killing TMaster: %s", splitcmd)
   logging.info(splitcmd)
   if subprocess.call(splitcmd) != 0:
     raise RuntimeError("Unable to kill TMaster")
-  logging.info("Killed tmaster")
+  logging.info("Killed TMaster")
 
 def getProcesses():
   '''
@@ -334,15 +339,17 @@ def main():
   start_time = time.time()
   (successes, failures) = runAllTests(args)
   elapsed_time = time.time() - start_time
+  total = len(failures) + len(successes)
 
   if not failures:
     logging.info("Success: %s (all) tests passed", len(successes))
     logging.info("Elapsed time: %s", elapsed_time)
     sys.exit(0)
   else:
-    logging.error("Fail: %s test failed", len(failures))
-    logging.info("Failed Tests: ")
-    logging.info("\n".join(failures))
+    logging.error("Fail: %s/%s test failed:", len(failures), total)
+    for test in failures:
+      logging.error("  - %s", test)
+      logging.info("\n".join(failures))
     sys.exit(1)
 
 if __name__ == '__main__':
