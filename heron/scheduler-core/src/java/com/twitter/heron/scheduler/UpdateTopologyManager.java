@@ -43,9 +43,15 @@ public class UpdateTopologyManager {
   private PackingPlanProtoDeserializer deserializer;
 
   public UpdateTopologyManager(Config runtime, Optional<ScalableScheduler> scalableScheduler) {
+    this(runtime, scalableScheduler, new PackingPlanProtoDeserializer());
+  }
+
+  public UpdateTopologyManager(Config runtime,
+                               Optional<ScalableScheduler> scalableScheduler,
+                               PackingPlanProtoDeserializer deserializer) {
     this.runtime = runtime;
     this.scalableScheduler = scalableScheduler;
-    this.deserializer = new PackingPlanProtoDeserializer();
+    this.deserializer = deserializer;
   }
 
   private static TopologyAPI.Topology mergeTopology(TopologyAPI.Topology topology,
@@ -119,8 +125,8 @@ public class UpdateTopologyManager {
     validateCurrentPackingPlan(existingProtoPackingPlan, topologyName, stateManager);
 
     // fetch the topology, which will need to be updated
-    TopologyAPI.Topology updatedTopology;
-    updatedTopology = getUpdatedTopology(topologyName, proposedPackingPlan, stateManager);
+    TopologyAPI.Topology updatedTopology =
+        getUpdatedTopology(topologyName, proposedPackingPlan, stateManager);
 
     // request new resources if necessary. Once containers are allocated we should make the changes
     // to state manager quickly, otherwise the scheduler might penalize for thrashing on start-up

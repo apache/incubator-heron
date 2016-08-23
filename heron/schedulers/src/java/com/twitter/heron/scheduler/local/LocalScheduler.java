@@ -278,9 +278,8 @@ public class LocalScheduler implements IScheduler, ScalableScheduler {
 
     synchronized (processToContainer) {
       if (existingContainers.size() != processToContainer.size()) {
-        LOG.log(Level.SEVERE, "Container count mismatch: expected {0} != active {1}",
-            new Object[]{existingContainers.size(), processToContainer.size()});
-        throw new RuntimeException("Container count mismatch");
+        throw new RuntimeException(String.format("Container count error: expected %d != active %d",
+            existingContainers.size(), processToContainer.size()));
       }
 
       // Create a inverse map to be able to get process instance from container id

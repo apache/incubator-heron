@@ -20,7 +20,6 @@ import com.google.common.base.Optional;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import com.twitter.heron.api.generated.TopologyAPI;
@@ -31,6 +30,7 @@ import com.twitter.heron.spi.common.ClusterDefaults;
 import com.twitter.heron.spi.common.Config;
 import com.twitter.heron.spi.common.Keys;
 import com.twitter.heron.spi.packing.PackingPlan;
+import com.twitter.heron.spi.packing.PackingPlanProtoDeserializer;
 import com.twitter.heron.spi.packing.PackingPlanProtoSerializer;
 import com.twitter.heron.spi.statemgr.SchedulerStateManagerAdaptor;
 import com.twitter.heron.spi.utils.TopologyTests;
@@ -66,24 +66,33 @@ public class UpdateTopologyManagerTest {
 
   @Test
   public void requestsToAddAndRemoveContainers() throws Exception {
+    PackingPlanProtoDeserializer deserializer = Mockito.mock(PackingPlanProtoDeserializer.class);
+
+    Map<String, PackingPlan.ContainerPlan> currentContainers = new HashMap<>();
+    PackingPlans.PackingPlan currentPlan = createTestTopology();
+    PackingPlan currentPacking = new PackingPlan("current", currentContainers, null);
+    Mockito.when(deserializer.fromProto(currentPlan)).thenReturn(currentPacking);
+
+    Map<String, PackingPlan.ContainerPlan> proposedContainers = new HashMap<>();
+    proposedContainers.put("container", null);
+    PackingPlans.PackingPlan proposedPlan = createTestTopology();
+    PackingPlan proposedPacking = new PackingPlan("proposed", proposedContainers, null);
+    Mockito.when(deserializer.fromProto(proposedPlan)).thenReturn(proposedPacking);
+
     SchedulerStateManagerAdaptor mockStateMgr = Mockito.mock(SchedulerStateManagerAdaptor.class);
     Config mockRuntime = Mockito.mock(Config.class);
     Mockito.when(mockRuntime.get(Keys.schedulerStateManagerAdaptor())).thenReturn(mockStateMgr);
 
     ScalableScheduler mockScheduler = Mockito.mock(ScalableScheduler.class);
-    UpdateTopologyManager updateManager;
-    updateManager = new UpdateTopologyManager(mockRuntime, Optional.of(mockScheduler));
+
+    UpdateTopologyManager updateManager
+        = new UpdateTopologyManager(mockRuntime, Optional.of(mockScheduler), deserializer);
     UpdateTopologyManager spyUpdateManager = Mockito.spy(updateManager);
 
-    PackingPlans.PackingPlan currentPlan = createTestTopology(2, 2, 0);
-    PackingPlans.PackingPlan proposedPlan = createTestTopology(2, 3, 1);
-
-    Mockito.doNothing().when(spyUpdateManager).
-        validateCurrentPackingPlan(currentPlan, null, mockStateMgr);
+    Mockito.doNothing().when(spyUpdateManager)
+        .validateCurrentPackingPlan(currentPlan, null, mockStateMgr);
     Mockito.doReturn(null).when(spyUpdateManager).
-        getUpdatedTopology(Mockito.anyString(),
-            Mockito.any(PackingPlan.class),
-            Mockito.eq(mockStateMgr));
+        getUpdatedTopology(null, proposedPacking, mockStateMgr);
 
     Map<String, PackingPlan.ContainerPlan> containersToAdd = new HashMap<>();
     containersToAdd.put("a1", null);
@@ -101,22 +110,18 @@ public class UpdateTopologyManagerTest {
     spyUpdateManager.updateTopology(currentPlan, proposedPlan);
 
     Mockito.verify(mockScheduler).addContainers(containersToAdd);
-    Mockito.verify(mockScheduler).removeContainers(
-        Matchers.anyMapOf(String.class, PackingPlan.ContainerPlan.class),
-        Mockito.eq(containersToRemove));
+    Mockito.verify(mockScheduler).removeContainers(currentContainers, containersToRemove);
   }
 
-  /* offset will be added to container id to simulate deletion of existing containers
-   */
-  PackingPlans.PackingPlan createTestTopology(int parallelism, int numContainers, int offset) {
+  PackingPlans.PackingPlan createTestTopology() {
     Map<String, Integer> spouts = new HashMap<>();
-    spouts.put("testSpout", parallelism);
+    spouts.put("testSpout", 1);
 
     Map<String, Integer> bolts = new HashMap<>();
     bolts.put("testBolt", 1);
 
     com.twitter.heron.api.Config topologyConfig = new com.twitter.heron.api.Config();
-    topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, numContainers);
+    topologyConfig.put(com.twitter.heron.api.Config.TOPOLOGY_STMGRS, 1);
 
     TopologyAPI.Topology topology =
         TopologyTests.createTopology("testTopology", topologyConfig, spouts, bolts);
@@ -130,18 +135,6 @@ public class UpdateTopologyManagerTest {
     RoundRobinPacking packing = new RoundRobinPacking();
     packing.initialize(config, topology);
     PackingPlan plan = packing.pack();
-    if (offset > 0) {
-      Map<String, PackingPlan.ContainerPlan> containers = plan.containers;
-      for (String containerId : plan.containers.keySet()) {
-        PackingPlan.ContainerPlan container = plan.containers.get(containerId);
-        String newId = String.valueOf(Integer.valueOf(containerId) + offset);
-        PackingPlan.ContainerPlan newContainer = new PackingPlan.ContainerPlan(
-            newId, container.instances, container.resource);
-        containers.put(newId, newContainer);
-      }
-      plan = new PackingPlan(plan.id, containers, plan.resource);
-    }
-
     PackingPlanProtoSerializer serializer = new PackingPlanProtoSerializer();
     return serializer.toProto(plan);
   }
