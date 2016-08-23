@@ -82,19 +82,19 @@ def runTest(test, topologyName, params):
 
   # execute test case
   if test == 'KILL_TMASTER':
-    print "Executing kill tmaster"
+    logging.info("Executing kill tmaster")
     restartShard(params['cliPath'], params['cluster'], params['topologyName'], TMASTER_SHARD)
   elif test == 'KILL_STMGR':
-    print "Executing kill stmgr"
+    logging.info("Executing kill stmgr")
     stmgrPid = getPid('%s-%d' % (STMGR, NON_TMASTER_SHARD), params['workingDirectory'])
     killProcess(stmgrPid)
   elif test == 'KILL_METRICSMGR':
-    print "Executing kill metrics manager"
+    logging.info("Executing kill metrics manager")
     metricsmgrPid = getPid('%s-%d' % (HERON_METRICSMGR, NON_TMASTER_SHARD),
                            params['workingDirectory'])
     killProcess(metricsmgrPid)
   elif test == 'KILL_STMGR_METRICSMGR':
-    print "Executing kill stmgr metrics manager"
+    logging.info("Executing kill stmgr metrics manager")
     stmgrPid = getPid('%s-%d' % (STMGR, NON_TMASTER_SHARD), params['workingDirectory'])
     killProcess(stmgrPid)
 
@@ -102,7 +102,7 @@ def runTest(test, topologyName, params):
                            params['workingDirectory'])
     killProcess(metricsmgrPid)
   elif test == 'KILL_BOLT':
-    print "Executing kill bolt"
+    logging.info("Executing kill bolt")
     boltPid = getPid('container_%d_%s' % (NON_TMASTER_SHARD, HERON_BOLT),
                      params['workingDirectory'])
     killProcess(boltPid)
@@ -135,7 +135,7 @@ def runTest(test, topologyName, params):
       with open(params['outputFile'], 'r') as g:
         actualResult = g.read()
     except Exception as e:
-      logging.error("Failed to get expected and actual results")
+      logging.error("Failed to read expected or actual results from file: %s", e)
       return False
     # if we get expected result, no need to retry
     if expectedResult == actualResult:
