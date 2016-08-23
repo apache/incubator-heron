@@ -22,6 +22,8 @@ public interface IRepacking extends AutoCloseable {
 
   /**
    * Initialize the packing algorithm with the static config and the associated topology
+   * @param config topology config
+   * @param topology topology to repack
    */
   void initialize(Config config, TopologyAPI.Topology topology);
 
@@ -29,7 +31,7 @@ public interface IRepacking extends AutoCloseable {
    * Generates a new packing given an existing packing and component changes
    * Packing algorithm output generates instance id and container id.
    * @param currentPackingPlan Existing packing plan
-   * @param componentChanges Map &lt; componentName, new component parallelism &gt
+   * @param componentChanges Map &lt; componentName, new component parallelism &gt;
    * that contains the parallelism for each component whose parallelism has changed.
    * @return PackingPlan describing the new packing plan.
    */
