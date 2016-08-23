@@ -349,7 +349,6 @@ def main():
     logging.error("Fail: %s/%s test failed:", len(failures), total)
     for test in failures:
       logging.error("  - %s", test)
-      logging.info("\n".join(failures))
     sys.exit(1)
 
 if __name__ == '__main__':
