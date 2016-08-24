@@ -14,6 +14,7 @@
 '''metrics manager client'''
 import socket
 
+from heron.common.src.python.config import system_config
 from heron.common.src.python.utils.log import Log
 from heron.common.src.python.network import HeronClient, StatusCode
 from heron.proto import metrics_pb2, common_pb2
@@ -25,14 +26,14 @@ class MetricsManagerClient(HeronClient):
   # pylint: disable=too-many-arguments
   def __init__(self, looper, metrics_host, port, instance,
                out_metrics, in_stream, out_stream, sock_map, socket_options,
-               gateway_metrics, sys_config):
+               gateway_metrics):
     HeronClient.__init__(self, looper, metrics_host, port, sock_map, socket_options)
     self.instance = instance
     self.out_queue = out_metrics
     self.in_stream = in_stream
     self.out_stream = out_stream
     self.gateway_metrics = gateway_metrics
-    self.sys_config = sys_config
+    self.sys_config = system_config.get_sys_config()
 
     self._add_metrics_client_tasks()
     Log.debug('start updating in and out stream metrics')

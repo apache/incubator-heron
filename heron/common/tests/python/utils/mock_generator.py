@@ -111,7 +111,7 @@ class MockOutgoingTupleHelper(OutgoingTupleHelper):
 
     if mode == MockOutgoingTupleHelper.SAMPLE_SUCCESS:
       pplan_helper, out_stream = self._prepare_sample_success()
-      super(MockOutgoingTupleHelper, self).__init__(pplan_helper, out_stream, sample_sys_config)
+      super(MockOutgoingTupleHelper, self).__init__(pplan_helper, out_stream)
 
   @staticmethod
   def _prepare_sample_success():

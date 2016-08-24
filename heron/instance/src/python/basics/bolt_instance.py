@@ -30,8 +30,8 @@ from .base_instance import BaseInstance
 class BoltInstance(BaseInstance):
   """The base class for all heron bolts in Python"""
 
-  def __init__(self, pplan_helper, in_stream, out_stream, looper, sys_config):
-    super(BoltInstance, self).__init__(pplan_helper, in_stream, out_stream, looper, sys_config)
+  def __init__(self, pplan_helper, in_stream, out_stream, looper):
+    super(BoltInstance, self).__init__(pplan_helper, in_stream, out_stream, looper)
 
     if self.pplan_helper.is_spout:
       raise RuntimeError("No bolt in physical plan")

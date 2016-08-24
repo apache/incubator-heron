@@ -17,6 +17,7 @@ import logging
 import traceback
 from abc import abstractmethod
 
+from heron.common.src.python.config import system_config
 from heron.common.src.python.utils.misc import OutgoingTupleHelper
 from heron.proto import tuple_pb2
 
@@ -36,12 +37,12 @@ class BaseInstance(object):
   """
   make_data_tuple = lambda _: tuple_pb2.HeronDataTuple()
 
-  def __init__(self, pplan_helper, in_stream, out_stream, looper, sys_config):
+  def __init__(self, pplan_helper, in_stream, out_stream, looper):
     self.pplan_helper = pplan_helper
     self.in_stream = in_stream
-    self.output_helper = OutgoingTupleHelper(self.pplan_helper, out_stream, sys_config)
+    self.output_helper = OutgoingTupleHelper(self.pplan_helper, out_stream)
     self.looper = looper
-    self.sys_config = sys_config
+    self.sys_config = system_config.get_sys_config()
 
     # will set a root logger here
     self.logger = logging.getLogger()
