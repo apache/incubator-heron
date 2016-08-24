@@ -17,6 +17,7 @@
 # pylint: disable=unused-argument
 # pylint: disable=missing-docstring
 import random
+from mock import patch
 
 from heron.common.src.python.utils.metrics import MetricsCollector
 from heron.common.src.python.utils.misc import (OutgoingTupleHelper, PhysicalPlanHelper,
@@ -111,7 +112,9 @@ class MockOutgoingTupleHelper(OutgoingTupleHelper):
 
     if mode == MockOutgoingTupleHelper.SAMPLE_SUCCESS:
       pplan_helper, out_stream = self._prepare_sample_success()
-      super(MockOutgoingTupleHelper, self).__init__(pplan_helper, out_stream)
+      with patch("heron.common.src.python.config.system_config.get_sys_config",
+                 side_effect=lambda: sample_sys_config):
+        super(MockOutgoingTupleHelper, self).__init__(pplan_helper, out_stream)
 
   @staticmethod
   def _prepare_sample_success():
