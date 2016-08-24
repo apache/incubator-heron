@@ -130,6 +130,7 @@ public class HeronExecutorTask implements Task {
     LOG.log(Level.INFO, "Started heron executor-id: {0}", heronExecutorId);
     try {
       regularExecutor.waitFor();
+      LOG.log(Level.WARNING, "Heron executor process terminate");
     } catch (InterruptedException e) {
       LOG.log(Level.INFO, "Destroy heron executor-id: {0}", heronExecutorId);
       regularExecutor.destroy();
