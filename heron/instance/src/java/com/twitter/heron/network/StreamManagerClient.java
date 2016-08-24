@@ -17,6 +17,8 @@ package com.twitter.heron.network;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 
 import com.twitter.heron.common.basics.Communicator;
@@ -105,6 +107,7 @@ public class StreamManagerClient extends HeronClient {
   private void registerMessagesToHandle() {
     registerOnMessage(StreamManager.NewInstanceAssignmentMessage.newBuilder());
     registerOnMessage(StreamManager.TupleMessage.newBuilder());
+    registerOnMessage(HeronTuples.HeronTupleSet2.newBuilder());
   }
 
 
@@ -184,6 +187,8 @@ public class StreamManagerClient extends HeronClient {
       handleAssignmentMessage(m.getPplan());
     } else if (message instanceof StreamManager.TupleMessage) {
       handleNewTuples((StreamManager.TupleMessage) message);
+    } else if (message instanceof HeronTuples.HeronTupleSet2) {
+      handleNewTuples2((HeronTuples.HeronTupleSet2) message);
     } else {
       throw new RuntimeException("Unknown kind of message received from Stream Manager");
     }
@@ -265,6 +270,32 @@ public class StreamManagerClient extends HeronClient {
 
   private void handleNewTuples(StreamManager.TupleMessage message) {
     inStreamQueue.offer(message.getSet());
+  }
+
+  private void handleNewTuples2(HeronTuples.HeronTupleSet2 set) {
+//    HeronTuples.HeronTupleSet2 set = message.getSet();
+    HeronTuples.HeronTupleSet.Builder toFeed = HeronTuples.HeronTupleSet.newBuilder();
+    if (set.hasControl()) {
+      toFeed.setControl(set.getControl());
+    }
+
+    HeronTuples.HeronDataTupleSet.Builder builder = HeronTuples.HeronDataTupleSet.newBuilder();
+    builder.setStream(set.getData().getStream());
+    try {
+      for (ByteString bs : set.getData().getTuplesList()) {
+//        if (new Random().nextInt(100) == 0) {
+//          LOG.info("data received: " + bs);
+//        }
+        builder.addTuples(HeronTuples.HeronDataTuple.parseFrom(bs));
+      }
+    } catch (InvalidProtocolBufferException e) {
+      LOG.log(Level.SEVERE, "Failed to parse protobuf", e);
+    }
+    toFeed.setData(builder);
+
+    HeronTuples.HeronTupleSet s = toFeed.build();
+//    LOG.info("data to feed: " + s);
+    inStreamQueue.offer(s);
   }
 
   private void handleAssignmentMessage(PhysicalPlans.PhysicalPlan pplan) {

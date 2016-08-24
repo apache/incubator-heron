@@ -462,15 +462,17 @@ const proto::system::PhysicalPlan* StMgr::GetPhysicalPlan() const { return pplan
 void StMgr::HandleStreamManagerData(const sp_string&, proto::stmgr::TupleStreamMessage* _message) {
   // We received message from another stream manager
   sp_int32 task_id = _message->task_id();
-  SendInBound(task_id, _message->mutable_set());
+//  SendInBound(task_id, _message->mutable_set());
 }
 
-void StMgr::SendInBound(sp_int32 _task_id, proto::system::HeronTupleSet* _message) {
+void StMgr::SendInBound(sp_int32 _task_id, proto::system::HeronTupleSet2* _message) {
   // TODO(mfu): No need Clear the current_data_out_
   if (_message->has_data()) {
 //    current_data_out_.mutable_set()->set_allocated_data(_message->release_data());  // avoids copying
-    current_data_out_.mutable_set()->CopyFrom(*_message);  // avoids copying
-    server_->SendToInstance(_task_id, current_data_out_);
+//    current_data_out_.mutable_set()->CopyFrom(*_message);  // avoids copying
+//    server_->SendToInstance2(_task_id, current_data_out_);
+//    current_data_out_.mutable_set()->CopyFrom(*_message);  // avoids copying
+    server_->SendToInstance2(_task_id, *_message);
   }
   if (_message->has_control()) {
     // We got a bunch of acks/fails
@@ -560,7 +562,7 @@ void StMgr::HandleInstanceData(const sp_int32 _src_task_id, bool _local_spout,
           LOG(ERROR) << "Nobody to send the tuple to";
         }
         // TODO(vikasr) Do a fast path that does not involve copying
-        CopyDataOutBound(_src_task_id, _local_spout, d->stream(), d->tuples(i), out_tasks);
+        CopyDataOutBound(_src_task_id, _local_spout, d->stream(), d->mutable_tuples(i), out_tasks);
       }
     } else {
       LOG(ERROR) << "Nobody consumes stream " << stream.second << " from component "
@@ -580,21 +582,22 @@ void StMgr::HandleInstanceData(const sp_int32 _src_task_id, bool _local_spout,
 }
 
 // Called to drain cached instance data
-void StMgr::DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet* _tuple) {
+void StMgr::DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet2* _tuple) {
   const sp_string& dest_stmgr_id = task_id_to_stmgr_[_task_id];
   if (dest_stmgr_id == stmgr_id_) {
+//    LOG(INFO) << "tuple has control? " << _tuple->has_control() << std::endl;
     // Our own loopback
     SendInBound(_task_id, _tuple);
     //delete _tuple;
     tuple_cache_->release(_task_id, _tuple);
   } else {
-    auto out = new proto::stmgr::TupleStreamMessage();
-    out->set_task_id(_task_id);
-    out->mutable_set()->CopyFrom(*_tuple);
-    clientmgr_->SendTupleStreamMessage(dest_stmgr_id, out);
-
-//    delete _tuple;
-    tuple_cache_->release(_task_id, _tuple);
+//    proto::stmgr::TupleStreamMessage* out = new proto::stmgr::TupleStreamMessage();
+//    out->set_task_id(_task_id);
+//    out->mutable_set()->CopyFrom(*_tuple);
+//    clientmgr_->SendTupleStreamMessage(dest_stmgr_id, out);
+//
+////    delete _tuple;
+//    tuple_cache_->release(_task_id, _tuple);
   }
 }
 
@@ -613,28 +616,28 @@ void StMgr::CopyControlOutBound(const proto::system::AckTuple& _control, bool _i
 
 void StMgr::CopyDataOutBound(sp_int32 _src_task_id, bool _local_spout,
                              const proto::api::StreamId& _streamid,
-                             const proto::system::HeronDataTuple& _tuple,
+                             proto::system::HeronDataTuple* _tuple,
                              const std::vector<sp_int32>& _out_tasks) {
   bool first_iteration = true;
   for (auto iter = _out_tasks.begin(); iter != _out_tasks.end(); ++iter) {
     sp_int64 tuple_key = tuple_cache_->add_data_tuple(*iter, _streamid, _tuple);
-    if (_tuple.roots_size() > 0) {
+    if (_tuple->roots_size() > 0) {
       // Anchored tuple
       if (_local_spout) {
         // This is a local spout. We need to maintain xors
-        CHECK_EQ(_tuple.roots_size(), 1);
+        CHECK_EQ(_tuple->roots_size(), 1);
         if (first_iteration) {
-          xor_mgrs_->create(_src_task_id, _tuple.roots(0).key(), tuple_key);
+          xor_mgrs_->create(_src_task_id, _tuple->roots(0).key(), tuple_key);
         } else {
-          CHECK(!xor_mgrs_->anchor(_src_task_id, _tuple.roots(0).key(), tuple_key));
+          CHECK(!xor_mgrs_->anchor(_src_task_id, _tuple->roots(0).key(), tuple_key));
         }
       } else {
         // Anchored emits from local bolt
-        for (sp_int32 i = 0; i < _tuple.roots_size(); ++i) {
+        for (sp_int32 i = 0; i < _tuple->roots_size(); ++i) {
           proto::system::AckTuple t;
-          t.add_roots()->CopyFrom(_tuple.roots(i));
+          t.add_roots()->CopyFrom(_tuple->roots(i));
           t.set_ackedtuple(tuple_key);
-          tuple_cache_->add_emit_tuple(_tuple.roots(i).taskid(), t);
+          tuple_cache_->add_emit_tuple(_tuple->roots(i).taskid(), t);
         }
       }
     }

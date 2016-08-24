@@ -62,7 +62,7 @@ class StMgr {
                                proto::stmgr::TupleStreamMessage* _message);
   void HandleInstanceData(sp_int32 _task_id, bool _local_spout,
                           proto::stmgr::TupleMessage* _message);
-  void DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet* _tuple);
+  void DrainInstanceData(sp_int32 _task_id, proto::system::HeronTupleSet2* _tuple);
   const proto::system::PhysicalPlan* GetPhysicalPlan() const;
 
   // Forward the call to the StmgrServer
@@ -92,11 +92,11 @@ class StMgr {
       const std::map<sp_string, std::vector<sp_int32> >& _component_to_task_ids);
   void CleanupXorManagers();
 
-  void SendInBound(sp_int32 _task_id, proto::system::HeronTupleSet* _message);
+  void SendInBound(sp_int32 _task_id, proto::system::HeronTupleSet2* _message);
   void ProcessAcksAndFails(sp_int32 _task_id, const proto::system::HeronControlTupleSet& _control);
   void CopyDataOutBound(sp_int32 _src_task_id, bool _local_spout,
                         const proto::api::StreamId& _streamid,
-                        const proto::system::HeronDataTuple& _tuple,
+                        proto::system::HeronDataTuple* _tuple,
                         const std::vector<sp_int32>& _out_tasks);
   void CopyControlOutBound(const proto::system::AckTuple& _control, bool _is_fail);
 
@@ -153,8 +153,8 @@ class StMgr {
   sp_int32 shell_port_;
 
   // TODO(mfu):
-  proto::stmgr::TupleMessage current_data_out_;
-  proto::stmgr::TupleMessage current_control_out_;
+  proto::stmgr::TupleMessage2 current_data_out_;
+  proto::stmgr::TupleMessage2 current_control_out_;
   std::vector<sp_int32> out_tasks;
 };
 

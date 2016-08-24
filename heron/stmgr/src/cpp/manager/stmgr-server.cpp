@@ -357,7 +357,7 @@ void StMgrServer::HandleTupleSetMessage(Connection* _conn, proto::stmgr::TupleMe
     release(_message);
     return;
   }
-  stmgr_server_metrics_->scope(METRIC_BYTES_FROM_INSTANCES)->incr_by(_message->ByteSize());
+//  stmgr_server_metrics_->scope(METRIC_BYTES_FROM_INSTANCES)->incr_by(_message->ByteSize());
   if (_message->set().has_data()) {
     stmgr_server_metrics_->scope(METRIC_DATA_TUPLES_FROM_INSTANCES)
         ->incr_by(_message->set().data().tuples_size());
@@ -371,7 +371,7 @@ void StMgrServer::HandleTupleSetMessage(Connection* _conn, proto::stmgr::TupleMe
   release(_message);
 }
 
-void StMgrServer::SendToInstance(sp_int32 _task_id, const proto::stmgr::TupleMessage& _message) {
+void StMgrServer::SendToInstance(sp_int32 _task_id, const proto::stmgr::TupleMessage2& _message) {
   bool drop = false;
   auto iter = instance_info_.find(_task_id);
   if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
@@ -380,7 +380,7 @@ void StMgrServer::SendToInstance(sp_int32 _task_id, const proto::stmgr::TupleMes
     drop = true;
   }
   if (drop) {
-    stmgr_server_metrics_->scope(METRIC_BYTES_TO_INSTANCES_LOST)->incr_by(_message.ByteSize());
+//    stmgr_server_metrics_->scope(METRIC_BYTES_TO_INSTANCES_LOST)->incr_by(_message.ByteSize());
     if (_message.set().has_data()) {
       stmgr_server_metrics_->scope(METRIC_DATA_TUPLES_TO_INSTANCES_LOST)
           ->incr_by(_message.set().data().tuples_size());
@@ -391,7 +391,7 @@ void StMgrServer::SendToInstance(sp_int32 _task_id, const proto::stmgr::TupleMes
           ->incr_by(_message.set().control().fails_size());
     }
   } else {
-    stmgr_server_metrics_->scope(METRIC_BYTES_TO_INSTANCES)->incr_by(_message.ByteSize());
+//    stmgr_server_metrics_->scope(METRIC_BYTES_TO_INSTANCES)->incr_by(_message.ByteSize());
     if (_message.set().has_data()) {
       stmgr_server_metrics_->scope(METRIC_DATA_TUPLES_TO_INSTANCES)
           ->incr_by(_message.set().data().tuples_size());
@@ -400,6 +400,40 @@ void StMgrServer::SendToInstance(sp_int32 _task_id, const proto::stmgr::TupleMes
           ->incr_by(_message.set().control().acks_size());
       stmgr_server_metrics_->scope(METRIC_FAIL_TUPLES_TO_INSTANCES)
           ->incr_by(_message.set().control().fails_size());
+    }
+    SendMessage(iter->second->conn_, _message);
+  }
+}
+
+void StMgrServer::SendToInstance2(sp_int32 _task_id, const proto::system::HeronTupleSet2& _message) {
+  bool drop = false;
+  TaskIdInstanceDataMap::iterator iter = instance_info_.find(_task_id);
+  if (iter == instance_info_.end() || iter->second->conn_ == NULL) {
+    LOG(ERROR) << "task_id " << _task_id << " has not yet connected to us. Dropping..."
+               << std::endl;
+    drop = true;
+  }
+  if (drop) {
+//    stmgr_server_metrics_->scope(METRIC_BYTES_TO_INSTANCES_LOST)->incr_by(_message.ByteSize());
+    if (_message.has_data()) {
+      stmgr_server_metrics_->scope(METRIC_DATA_TUPLES_TO_INSTANCES_LOST)
+          ->incr_by(_message.data().tuples_size());
+    } else if (_message.has_control()) {
+      stmgr_server_metrics_->scope(METRIC_ACK_TUPLES_TO_INSTANCES_LOST)
+          ->incr_by(_message.control().acks_size());
+      stmgr_server_metrics_->scope(METRIC_FAIL_TUPLES_TO_INSTANCES_LOST)
+          ->incr_by(_message.control().fails_size());
+    }
+  } else {
+//    stmgr_server_metrics_->scope(METRIC_BYTES_TO_INSTANCES)->incr_by(_message.ByteSize());
+    if (_message.has_data()) {
+      stmgr_server_metrics_->scope(METRIC_DATA_TUPLES_TO_INSTANCES)
+          ->incr_by(_message.data().tuples_size());
+    } else if (_message.has_control()) {
+      stmgr_server_metrics_->scope(METRIC_ACK_TUPLES_TO_INSTANCES)
+          ->incr_by(_message.control().acks_size());
+      stmgr_server_metrics_->scope(METRIC_FAIL_TUPLES_TO_INSTANCES)
+          ->incr_by(_message.control().fails_size());
     }
     SendMessage(iter->second->conn_, _message);
   }
