@@ -272,7 +272,7 @@ public class Config extends com.twitter.heron.api.Config {
   /**
    * The root directory in ZooKeeper for metadata about TransactionalSpouts.
    */
-  public static final String TRANSACTIONAL_ZOOKEEPER_ROOT="transactional.zookeeper.root";
+  public static final String TRANSACTIONAL_ZOOKEEPER_ROOT = "transactional.zookeeper.root";
 
   /**
    * The session timeout for clients to ZooKeeper.
