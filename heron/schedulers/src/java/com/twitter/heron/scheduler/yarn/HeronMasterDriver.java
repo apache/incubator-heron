@@ -21,8 +21,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
@@ -86,6 +88,9 @@ public class HeronMasterDriver {
   private final String topologyJar;
   private final int httpPort;
   private final boolean verboseMode;
+
+  // This map contains all the active workers managed my this scheduler. The workers can be
+  // looked up by heron's executor id or REEF's container id.
   private MultiKeyWorkerMap multiKeyWorkerMap;
 
   // TODO: https://github.com/twitter/heron/issues/949: implement Driver HA
@@ -137,37 +142,30 @@ public class HeronMasterDriver {
   /**
    * Requests container for TMaster as container/executor id 0.
    */
-  void scheduleTMasterContainer() {
+  boolean scheduleTMasterContainer() {
     LOG.log(Level.INFO, "Scheduling container for TM: {0}", topologyName);
-    try {
-      // TODO: https://github.com/twitter/heron/issues/951: colocate TMaster and Scheduler
-      launchContainerForExecutor(new HeronWorker(TMASTER_CONTAINER_ID, 1, TM_MEM_SIZE_MB));
-    } catch (InterruptedException e) {
-      // Deployment of topology fails if there is a error starting TMaster
-      throw new RuntimeException("Error while waiting for topology master container allocation", e);
-    }
+    // TODO: https://github.com/twitter/heron/issues/951: colocate TMaster and Scheduler
+    AllocatedEvaluator container =
+        launchContainerForExecutor(new HeronWorker(TMASTER_CONTAINER_ID, 1, TM_MEM_SIZE_MB));
+    return container != null;
   }
 
   /**
    * Container allocation is asynchronous. Request containers serially to ensure allocated resources
    * match the required resources
    */
-  void scheduleHeronWorkers(PackingPlan topologyPacking) {
+  boolean scheduleHeronWorkers(PackingPlan topologyPacking) {
     this.packing = topologyPacking;
     for (Entry<String, ContainerPlan> entry : topologyPacking.containers.entrySet()) {
       Resource reqResource = entry.getValue().resource;
-
       int mem = getMemInMBForExecutor(reqResource);
-      try {
-        launchContainerForExecutor(entry.getKey(), getCpuForExecutor(reqResource), mem);
-      } catch (InterruptedException e) {
-        // Fail deployment of topology if there is a error starting any worker
-        LOG.log(Level.SEVERE, "Container allocation for id:{0} failed. Attempting to close "
-            + "currently allocated resources for {1}", new Object[]{entry.getKey(), topologyName});
-        killTopology();
-        throw new RuntimeException("Failed to allocate container for workers", e);
+      int cores = getCpuForExecutor(reqResource);
+      AllocatedEvaluator container = launchContainerForExecutor(entry.getKey(), cores, mem);
+      if (container == null) {
+        return false;
       }
     }
+    return true;
   }
 
   public void killTopology() {
@@ -181,14 +179,16 @@ public class HeronMasterDriver {
     }
   }
 
-  public void restartTopology() {
+  public boolean restartTopology() {
+    boolean result = true;
     for (HeronWorker worker : multiKeyWorkerMap.getHeronWorkers()) {
-      restartWorker(worker.workerId);
+      result &= restartWorker(worker.workerId);
     }
+    return result;
   }
 
-  public void restartWorker(String id) {
-    LOG.log(Level.INFO, "Find & restart container for id={0}", topologyName);
+  public boolean restartWorker(String id) {
+    LOG.log(Level.INFO, "Find & restart container for id={0}", id);
 
     HeronWorker worker = multiKeyWorkerMap.lookupByWorkerId(id);
     if (worker == null) {
@@ -196,7 +196,7 @@ public class HeronMasterDriver {
       ContainerPlan containerPlan = packing.containers.get(id);
       if (containerPlan == null) {
         LOG.log(Level.WARNING, "There is no container for {0} in packing plan.", id);
-        return;
+        return false;
       }
       Resource resource = containerPlan.resource;
       worker = new HeronWorker(id, getCpuForExecutor(resource), getMemInMBForExecutor(resource));
@@ -206,30 +206,27 @@ public class HeronMasterDriver {
       evaluator.close();
     }
 
-    try {
-      launchContainerForExecutor(worker);
-    } catch (InterruptedException e) {
-      handleInterruptException(e);
-    }
-  }
-
-  private void handleInterruptException(InterruptedException e) {
-    // check if topology is initialized
-    // check if topology is getting killed
+    AllocatedEvaluator container = launchContainerForExecutor(worker);
+    return container != null;
   }
 
   @VisibleForTesting
-  void launchContainerForExecutor(final String executorId, final int cpu, final int mem)
-      throws InterruptedException {
-    launchContainerForExecutor(new HeronWorker(executorId, cpu, mem));
+  AllocatedEvaluator launchContainerForExecutor(final String executorId,
+                                                        final int cpu,
+                                                        final int mem) {
+    return launchContainerForExecutor(new HeronWorker(executorId, cpu, mem));
   }
 
-  private void launchContainerForExecutor(final HeronWorker worker)
-      throws InterruptedException {
-    executor.submit(new Callable<AllocatedEvaluator>() {
+  private AllocatedEvaluator launchContainerForExecutor(final HeronWorker worker) {
+    Future<AllocatedEvaluator> result = executor.submit(new Callable<AllocatedEvaluator>() {
       @Override
       public AllocatedEvaluator call() throws Exception {
         AllocatedEvaluator evaluator = allocateContainer(worker.workerId, worker.cores, worker.mem);
+        if (evaluator == null) {
+          LOG.log(Level.WARNING, "Could not allocate container for id {0}", worker.workerId);
+          return null;
+        }
+
         Configuration context = createContextConfig(worker.workerId);
 
         LOG.log(Level.INFO,
@@ -240,20 +237,34 @@ public class HeronMasterDriver {
         return evaluator;
       }
     });
+
+    try {
+      return result.get();
+    } catch (InterruptedException e) {
+      LOG.log(Level.SEVERE, "Interrupted while waiting for container", e);
+    } catch (ExecutionException e) {
+      LOG.log(Level.SEVERE, "Error while waiting for container", e);
+    }
+    return null;
   }
 
-  AllocatedEvaluator allocateContainer(String id, int cpu, int mem) throws InterruptedException {
+  AllocatedEvaluator allocateContainer(String id, int cpu, int mem) {
     EvaluatorRequest evaluatorRequest = createEvaluatorRequest(cpu, mem);
 
     LOG.log(Level.INFO, "Requesting container for executor, id: {0}, mem: {1}, cpu: {2}",
         new Object[]{id, mem, cpu});
     requestor.submit(evaluatorRequest);
 
-    AllocatedEvaluator evaluator = allocatedContainerQ.take();
-    LOG.log(Level.INFO,
-        "Container {0} is allocated for executor, id: {1}",
-        new Object[]{evaluator.getId(), id});
-    return evaluator;
+    try {
+      AllocatedEvaluator evaluator = allocatedContainerQ.take();
+      LOG.log(Level.INFO,
+          "Container {0} is allocated for executor, id: {1}",
+          new Object[]{evaluator.getId(), id});
+      return evaluator;
+    } catch (InterruptedException e) {
+      LOG.log(Level.WARNING, "Interrupted while waiting for container allocation", e);
+      return null;
+    }
   }
 
   Configuration createContextConfig(String executorId) {
@@ -319,7 +330,12 @@ public class HeronMasterDriver {
     worker.context.submitTask(taskConf);
   }
 
-  private final static class HeronWorker {
+  /**
+   * {@link HeronWorker} is a data class which connects reef ids, heron ids and related objects.
+   * All the pointers in an instance are related to one container. A container is a reef object,
+   * owns one heron worker id and its handlers
+   */
+  private static final class HeronWorker {
     private String workerId;
     private int cores;
     private int mem;
@@ -333,7 +349,11 @@ public class HeronMasterDriver {
     }
   }
 
-  private final static class MultiKeyWorkerMap {
+  /**
+   * {@link MultiKeyWorkerMap} is a helper class to provide multi key lookup of a
+   * {@link HeronWorker} instance. It also ensures thread safety and update order.
+   */
+  private static final class MultiKeyWorkerMap {
     private Map<String, HeronWorker> workerMap = new HashMap<>();
     private Map<String, HeronWorker> evaluatorWorkerMap = new HashMap<>();
 
@@ -352,7 +372,7 @@ public class HeronMasterDriver {
     }
 
     HeronWorker lookupByWorkerId(String workerId) {
-      HeronWorker worker = null;
+      HeronWorker worker;
       synchronized (workerMap) {
         worker = workerMap.get(workerId);
       }
@@ -449,12 +469,7 @@ public class HeronMasterDriver {
           new Object[]{worker.workerId, evaluator.getId()});
       multiKeyWorkerMap.detachEvaluatorAndRemove(worker);
 
-      try {
-        launchContainerForExecutor(worker);
-      } catch (InterruptedException e) {
-        LOG.log(Level.WARNING, "Error waiting for container allocation for failed executor; "
-            + "Assuming request was submitted and continuing" + worker.workerId, e);
-      }
+      launchContainerForExecutor(worker);
     }
   }
 

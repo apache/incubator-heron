@@ -41,9 +41,12 @@ public class YarnScheduler implements IScheduler {
   public boolean onSchedule(PackingPlan packing) {
     LOG.log(Level.INFO, "Launching topology master for packing: {0}", packing.id);
     HeronMasterDriver driver = HeronMasterDriverProvider.getInstance();
-    driver.scheduleTMasterContainer();
-    driver.scheduleHeronWorkers(packing);
-    return true;
+
+    if (!driver.scheduleTMasterContainer()) {
+      return false;
+    }
+
+    return driver.scheduleHeronWorkers(packing);
   }
 
   @Override
@@ -63,15 +66,14 @@ public class YarnScheduler implements IScheduler {
     int containerId = request.getContainerIndex();
 
     if (containerId == -1) {
-      HeronMasterDriverProvider.getInstance().restartTopology();
+      return HeronMasterDriverProvider.getInstance().restartTopology();
     } else {
-      HeronMasterDriverProvider.getInstance().restartWorker(String.valueOf(containerId));
+      return HeronMasterDriverProvider.getInstance().restartWorker(String.valueOf(containerId));
     }
-
-    return true;
   }
 
   @Override
   public void close() {
+    HeronMasterDriverProvider.getInstance().killTopology();
   }
 }
