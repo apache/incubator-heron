@@ -65,7 +65,7 @@ public class YarnScheduler implements IScheduler {
     if (containerId == -1) {
       HeronMasterDriverProvider.getInstance().restartTopology();
     } else {
-      HeronMasterDriverProvider.getInstance().restartContainer(String.valueOf(containerId));
+      HeronMasterDriverProvider.getInstance().restartWorker(String.valueOf(containerId));
     }
 
     return true;

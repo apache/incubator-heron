@@ -127,7 +127,7 @@ public class DriverOnLocalReefTest {
     class Allocated implements EventHandler<AllocatedEvaluator> {
       @Override
       public void onNext(AllocatedEvaluator evaluator) {
-        driver.new HeronContainerAllocationHandler().onNext(evaluator);
+        driver.new ContainerAllocationHandler().onNext(evaluator);
       }
     }
 
