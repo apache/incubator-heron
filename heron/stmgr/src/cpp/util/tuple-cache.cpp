@@ -122,7 +122,7 @@ sp_int64 TupleCache::TupleList::add_data_tuple(const proto::api::StreamId& _stre
       tuples_.push_front(current_);
     }
     current_ = acquire_clean_set();
-    current_->mutable_data()->mutable_stream()->CopyFrom(_streamid);
+    current_->mutable_data()->mutable_stream()->MergeFrom(_streamid);
     current_size_ = 0;
   }
 

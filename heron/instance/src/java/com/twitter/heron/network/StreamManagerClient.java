@@ -17,8 +17,6 @@ package com.twitter.heron.network;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 
 import com.twitter.heron.common.basics.Communicator;
@@ -216,20 +214,40 @@ public class StreamManagerClient extends HeronClient {
     }
   }
 
+  StreamManager.TupleMessage toSend = null;
+
   private void sendStreamMessageIfNeeded() {
     if (isStreamMgrReadyReceiveTuples()) {
-      if (getOutstandingPackets() == 0) {
-        // In order to avoid packets back up in Client side,
-        // We would poll message from queue and send them only when there are no outstanding packets
-        while (!outStreamQueue.isEmpty()) {
+//      if (getOutstandingPackets() <= 0) {
+//        // In order to avoid packets back up in Client side,
+//        // We would poll message from queue and send them only when there are no outstanding packets
+//        while (!outStreamQueue.isEmpty()) {
+//          HeronTuples.HeronTupleSet tupleSet = outStreamQueue.poll();
+//          StreamManager.TupleMessage msg = StreamManager.TupleMessage.newBuilder()
+//              .setSet(tupleSet).build();
+//
+//          gatewayMetrics.updateSentPacketsCount(1);
+//          gatewayMetrics.updateSentPacketsSize(msg.getSerializedSize());
+//
+//          // For performance benchmark
+//          int rep = 20;
+//          for (int i = 0; i < rep; i++) {
+//            sendMessage(msg);
+//          }
+//        }
+//      }
+      if (toSend == null) {
+        if (!outStreamQueue.isEmpty()) {
           HeronTuples.HeronTupleSet tupleSet = outStreamQueue.poll();
-          StreamManager.TupleMessage msg = StreamManager.TupleMessage.newBuilder()
+          toSend = StreamManager.TupleMessage.newBuilder()
               .setSet(tupleSet).build();
+        }
+      }
 
-          gatewayMetrics.updateSentPacketsCount(1);
-          gatewayMetrics.updateSentPacketsSize(msg.getSerializedSize());
-
-          sendMessage(msg);
+      if (toSend != null) {
+        int rep = 10;
+        for (int i = 0; i < rep; i++) {
+          sendMessage(toSend);
         }
       }
 
@@ -273,29 +291,31 @@ public class StreamManagerClient extends HeronClient {
   }
 
   private void handleNewTuples2(HeronTuples.HeronTupleSet2 set) {
-//    HeronTuples.HeronTupleSet2 set = message.getSet();
-    HeronTuples.HeronTupleSet.Builder toFeed = HeronTuples.HeronTupleSet.newBuilder();
-    if (set.hasControl()) {
-      toFeed.setControl(set.getControl());
-    }
-
-    HeronTuples.HeronDataTupleSet.Builder builder = HeronTuples.HeronDataTupleSet.newBuilder();
-    builder.setStream(set.getData().getStream());
-    try {
-      for (ByteString bs : set.getData().getTuplesList()) {
-//        if (new Random().nextInt(100) == 0) {
-//          LOG.info("data received: " + bs);
-//        }
-        builder.addTuples(HeronTuples.HeronDataTuple.parseFrom(bs));
-      }
-    } catch (InvalidProtocolBufferException e) {
-      LOG.log(Level.SEVERE, "Failed to parse protobuf", e);
-    }
-    toFeed.setData(builder);
-
-    HeronTuples.HeronTupleSet s = toFeed.build();
-//    LOG.info("data to feed: " + s);
-    inStreamQueue.offer(s);
+////    HeronTuples.HeronTupleSet2 set = message.getSet();
+//    HeronTuples.HeronTupleSet.Builder toFeed = HeronTuples.HeronTupleSet.newBuilder();
+//    if (set.hasControl()) {
+//      toFeed.setControl(set.getControl());
+//    }
+//
+//    HeronTuples.HeronDataTupleSet.Builder builder = HeronTuples.HeronDataTupleSet.newBuilder();
+//    builder.setStream(set.getData().getStream());
+//    try {
+//      for (ByteString bs : set.getData().getTuplesList()) {
+////        if (new Random().nextInt(100) == 0) {
+////          LOG.info("data received: " + bs);
+////        }
+//        builder.addTuples(HeronTuples.HeronDataTuple.parseFrom(bs));
+//      }
+//    } catch (InvalidProtocolBufferException e) {
+//      LOG.log(Level.SEVERE, "Failed to parse protobuf", e);
+//    }
+//    toFeed.setData(builder);
+//
+//    HeronTuples.HeronTupleSet s = toFeed.build();
+////    LOG.info("data to feed: " + s);
+//    inStreamQueue.offer(s);
+    // Just throw this message for benchmark..
+    return;
   }
 
   private void handleAssignmentMessage(PhysicalPlans.PhysicalPlan pplan) {
