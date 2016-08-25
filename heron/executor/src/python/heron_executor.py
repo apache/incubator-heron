@@ -116,9 +116,6 @@ class ProcessInfo(object):
     self.attempts += 1
     return self
 
-# these have to be defined at the root level to allow us to catch the signal and stop them
-state_managers = []
-
 # pylint: disable=too-many-instance-attributes
 class HeronExecutor(object):
   """ Heron executor is a class that is responsible for running each of the process on a given
@@ -189,6 +186,26 @@ class HeronExecutor(object):
     # dict since is used by multiple threads
     self.process_lock = threading.RLock()
     self.processes_to_monitor = {}
+
+    self.state_managers = []
+
+  def initialize(self):
+    """
+    Initialize the environment. Done with a method call outside of the constructor for 2 reasons:
+    1. Unit tests probably won't want/need to do this
+    2. We don't initialize the logger (also something unit tests don't want) until after the
+    constructor
+    """
+    create_folders = 'mkdir -p %s' % self.log_dir
+    chmod_binaries = 'chmod a+rx . && chmod a+x %s && chmod +x %s %s %s' \
+        % (self.log_dir, self.tmaster_binary, self.stmgr_binary, self.heron_shell_binary)
+
+    commands = [create_folders, chmod_binaries]
+
+    for command in commands:
+      if self._run_blocking_process(command, True, self.shell_env) != 0:
+        Log.info("Failed to run command: %s. Exiting" % command)
+        sys.exit(1)
 
     # Log itself pid
     log_pid_for_process(get_heron_executor_process_name(self.shard), os.getpid())
@@ -478,7 +495,7 @@ class HeronExecutor(object):
     with self.process_lock:
       self.processes_to_monitor.update(processes_to_monitor)
 
-  def monitor_processes(self):
+  def start_process_monitor(self):
     """ Monitor all processes in processes_to_monitor dict,
     restarting any if they fail, up to max_runs times.
     """
@@ -577,19 +594,6 @@ class HeronExecutor(object):
                (len(commands_to_kill), len(commands_to_keep),
                 len(commands_to_start), len(self.processes_to_monitor)))
 
-  def prepare_launch(self):
-    create_folders = 'mkdir -p %s' % self.log_dir
-    chmod_binaries = \
-        'chmod a+rx . && chmod a+x %s && chmod +x %s && chmod +x %s && chmod +x %s' \
-        % (self.log_dir, self.tmaster_binary, self.stmgr_binary, self.heron_shell_binary)
-
-    commands = [create_folders, chmod_binaries]
-
-    for command in commands:
-      if self._run_blocking_process(command, True, self.shell_env) != 0:
-        Log.info("Failed to run command: %s. Exiting" % command)
-        sys.exit(1)
-
   def __get_state_manager_locations(self, state_manager_config_file='heron-conf/statemgr.yaml'):
     """ reads configs to determine which state manager to use """
     with open(state_manager_config_file, 'r') as stream:
@@ -630,14 +634,13 @@ class HeronExecutor(object):
     return [state_manager_location]
 
   # pylint: disable=global-statement
-  def register_packing_plan_watcher(self, executor):
+  def start_state_manager_watches(self):
     """
     Receive updates to the packing plan from the statemgrs and update processes as needed.
     """
-    global state_managers
     statemgr_config = StateMgrConfig()
     statemgr_config.set_state_locations(self.__get_state_manager_locations())
-    state_managers = statemanagerfactory.get_all_state_managers(statemgr_config)
+    self.state_managers = statemanagerfactory.get_all_state_managers(statemgr_config)
 
     # pylint: disable=unused-argument
     def on_packing_plan_watch(state_manager, new_packing_plan):
@@ -654,13 +657,13 @@ class HeronExecutor(object):
         # pylint: disable=fixme
         # TODO: handle relaunch of running topology scenario
         Log.info("Updating executor processes")
-        executor.launch()
+        self.launch()
       else:
         Log.info("State watch triggered for PackingPlan update but PackingPlan not changed so "\
                  "not relaunching. Existing: %s, New: %s" %
                  (str(self.packing_plan), str(new_packing_plan)))
 
-    for state_manager in state_managers:
+    for state_manager in self.state_managers:
       # The callback function with the bound
       # state_manager as first variable.
       onPackingPlanWatch = partial(on_packing_plan_watch, state_manager)
@@ -668,7 +671,14 @@ class HeronExecutor(object):
       Log.info("Registered state watch for packing plan changes with state manager %s." %
                str(state_manager))
 
+  def stop_state_manager_watches(self):
+    Log.info("Stopping state managers")
+    for state_manager in self.state_managers:
+      state_manager.stop()
+
+
 def main():
+  """Register exit handlers, initialize the executor and run it."""
   expected = 33
   if len(sys.argv) != expected:
     Log.error("Expected %s arguments but received %s: %s" % (expected, len(sys.argv), sys.argv))
@@ -682,48 +692,45 @@ def main():
   shell_env = os.environ.copy()
   shell_env["PEX_ROOT"] = os.path.join(os.path.abspath('.'), ".pex")
 
-  # Instantiate the executor and launch it
+  # Instantiate the executor, bind it to signal handlers and launch it
   executor = HeronExecutor(sys.argv, shell_env)
-  executor.prepare_launch()
-  executor.register_packing_plan_watcher(executor)
-  executor.monitor_processes()
 
-def stop_state_manager_watches():
-  Log.info("Stopping state managers")
-  for state_manager in state_managers:
-    state_manager.stop()
+  # pylint: disable=unused-argument
+  def signal_handler(signal_to_handle, frame):
+    # We would do nothing here but just exit
+    # Just catch the SIGTERM and then cleanup(), registered with atexit, would invoke
+    Log.info('signal_handler invoked with signal %s', signal_to_handle)
+    executor.stop_state_manager_watches()
+    sys.exit(signal_to_handle)
 
-# pylint: disable=unused-argument
-def signal_handler(signal_to_handle, frame):
-  # We would do nothing here but just exit
-  # Just catch the SIGTERM and then cleanup(), registered with atexit, would invoke
-  Log.info('signal_handler invoked with signal %s', signal_to_handle)
-  stop_state_manager_watches()
-  sys.exit(signal_to_handle)
+  def setup(shardid):
+    # Redirect stdout and stderr to files in append mode
+    # The filename format is heron-executor-<container_id>.stdxxx
+    log.configure(logfile='heron-executor-%s.stdout' % shardid, with_time=True)
 
-def setup(shardid):
-  # Redirect stdout and stderr to files in append mode
-  # The filename format is heron-executor.stdxxx
-  log.configure(logfile='heron-executor-%s.stdout' % shardid, with_time=True)
+    Log.info('Set up process group; executor becomes leader')
+    os.setpgrp() # create new process group, become its leader
 
-  Log.info('Set up process group; executor becomes leader')
-  os.setpgrp() # create new process group, become its leader
+    Log.info('Register the SIGTERM signal handler')
+    signal.signal(signal.SIGTERM, signal_handler)
 
-  Log.info('Register the SIGTERM signal handler')
-  signal.signal(signal.SIGTERM, signal_handler)
+    Log.info('Register the atexit clean up')
+    atexit.register(cleanup)
 
-  Log.info('Register the atexit clean up')
-  atexit.register(cleanup)
+  def cleanup():
+    """Handler to trigger when receiving the SIGTERM signal
+    Do cleanup inside this method, including:
+    1. Terminate all children processes
+    """
+    Log.info('Executor terminated; exiting all process in executor.')
+    # We would not wait or check whether process spawned dead or not
+    os.killpg(0, signal.SIGTERM)
 
-def cleanup():
-  """Handler to trigger when receiving the SIGTERM signal
-  Do cleanup inside this method, including:
-  1. Terminate all children processes
-  """
-  Log.info('Executor terminated; exiting all process in executor.')
-  # We would not wait or check whether process spawned dead or not
-  os.killpg(0, signal.SIGTERM)
+  setup(executor.shard)
+
+  executor.initialize()
+  executor.start_state_manager_watches()
+  executor.start_process_monitor()
 
 if __name__ == "__main__":
-  setup(sys.argv[1])
   main()
