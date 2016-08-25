@@ -236,18 +236,20 @@ public class StreamManagerClient extends HeronClient {
 //          }
 //        }
 //      }
-      if (toSend == null) {
-        if (!outStreamQueue.isEmpty()) {
-          HeronTuples.HeronTupleSet tupleSet = outStreamQueue.poll();
-          toSend = StreamManager.TupleMessage.newBuilder()
-              .setSet(tupleSet).build();
+      if (getOutstandingPackets() <= 2) {
+        if (toSend == null) {
+          if (!outStreamQueue.isEmpty()) {
+            HeronTuples.HeronTupleSet tupleSet = outStreamQueue.poll();
+            toSend = StreamManager.TupleMessage.newBuilder()
+                .setSet(tupleSet).build();
+          }
         }
-      }
 
-      if (toSend != null) {
-        int rep = 10;
-        for (int i = 0; i < rep; i++) {
-          sendMessage(toSend);
+        if (toSend != null) {
+          int rep = 5;
+          for (int i = 0; i < rep; i++) {
+            sendMessage(toSend);
+          }
         }
       }
 

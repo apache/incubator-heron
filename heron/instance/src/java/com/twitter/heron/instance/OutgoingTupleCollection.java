@@ -15,6 +15,7 @@
 package com.twitter.heron.instance;
 
 import com.twitter.heron.api.generated.TopologyAPI;
+import com.twitter.heron.api.utils.Utils;
 import com.twitter.heron.common.basics.Communicator;
 import com.twitter.heron.common.basics.SingletonRegistry;
 import com.twitter.heron.common.config.SystemConfig;
@@ -151,6 +152,8 @@ public class OutgoingTupleCollection {
                                 Communicator<HeronTuples.HeronTupleSet> out) {
     // The Communicator has un-bounded capacity so the offer will always be successful
     out.offer(bldr.build());
+    System.out.println("Sleep. Not to produce more tuples");
+    Utils.sleep(3600 * 1000);
   }
 
   // Return true we could offer item to outQueue

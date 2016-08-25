@@ -134,7 +134,7 @@ sp_int64 TupleCache::TupleList::add_data_tuple(const proto::api::StreamId& _stre
   _tuple->set_key(tuple_key);
 
   std::string* added_tuple = current_->mutable_data()->add_tuples();
-  _tuple->SerializeToString(added_tuple);
+  _tuple->SerializePartialToString(added_tuple);
 
 //  LOG(INFO) << "tuple has control? " << current_->has_control() << std::endl;
 

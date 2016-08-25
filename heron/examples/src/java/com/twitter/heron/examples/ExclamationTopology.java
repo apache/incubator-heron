@@ -40,15 +40,15 @@ public final class ExclamationTopology {
     TopologyBuilder builder = new TopologyBuilder();
 
     builder.setSpout("word", new TestWordSpout(), 3);
-    builder.setBolt("exclaim1", new ExclamationBolt(), 1)
+    builder.setBolt("exclaim1", new ExclamationBolt(), 3)
         .shuffleGrouping("word");
 
     Config conf = new Config();
     conf.setDebug(true);
     conf.setMaxSpoutPending(10);
     conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+HeapDumpOnOutOfMemoryError");
-    conf.setComponentRam("word", 2L * 1024 * 1024 * 1024);
-    conf.setComponentRam("exclaim1", 512L * 1024 * 1024);
+    conf.setComponentRam("word", 1L * 1024 * 1024 * 1024);
+    conf.setComponentRam("exclaim1", 1L * 1024 * 1024 * 1024);
     conf.setContainerDiskRequested(1024L * 1024 * 1024);
     conf.setContainerCpuRequested(1);
 

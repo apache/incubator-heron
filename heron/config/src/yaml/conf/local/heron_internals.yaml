@@ -65,7 +65,7 @@ heron.streammgr.client.reconnect.interval.sec: 1
 heron.streammgr.client.reconnect.tmaster.interval.sec: 10
 
 # The maximum packet size in MB of stream manager's network options
-heron.streammgr.network.options.maximum.packet.mb: 100
+heron.streammgr.network.options.maximum.packet.mb: 16
 
 # The interval in seconds to send heartbeat
 heron.streammgr.tmaster.heartbeat.interval.sec: 10
@@ -145,10 +145,10 @@ heron.metricsmgr.network.write.batch.time.ms: 16
 heron.metricsmgr.network.write.batch.size.bytes: 32768
 
 # The maximum socket's send buffer size in bytes
-heron.metricsmgr.network.options.socket.send.buffer.size.bytes: 6553600
+heron.metricsmgr.network.options.socket.send.buffer.size.bytes: 655360
 
 # The maximum socket's received buffer size in bytes of metricsmgr's network options
-heron.metricsmgr.network.options.socket.received.buffer.size.bytes: 8738000
+heron.metricsmgr.network.options.socket.received.buffer.size.bytes: 873800
 
 ################################################################################
 # Configs related to Heron Instance, starts with heron.instance.*
@@ -199,7 +199,7 @@ heron.instance.network.options.socket.received.buffer.size.bytes: 8738000
 heron.instance.set.data.tuple.capacity: 1024
 
 # The maximum size in bytes of data tuple to batch in a HeronDataTupleSet protobuf
-heron.instance.set.data.tuple.size.bytes: 8388608
+heron.instance.set.data.tuple.size.bytes: 131072
 
 # The maximum # of control tuple to batch in a HeronControlTupleSet protobuf
 heron.instance.set.control.tuple.capacity: 1024
