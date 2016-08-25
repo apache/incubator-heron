@@ -81,7 +81,7 @@ def runTest(test, topologyName, params):
     return False
 
   # extra time to start up, write to .pid file, connect to tmaster, etc.
-  seconds = 10
+  seconds = 30
   logging.info("Sleeping for %s seconds to allow time for startup", seconds)
   time.sleep(seconds)
 
@@ -89,7 +89,7 @@ def runTest(test, topologyName, params):
   if test == 'KILL_TMASTER':
     restartShard(params['cliPath'], params['cluster'], params['topologyName'], TMASTER_SHARD)
   elif test == 'KILL_STMGR':
-    logging.info("Executing kill stmgr")
+    logging.info("Executing kill stream manager")
     stmgrPid = getPid('%s-%d' % (STMGR, NON_TMASTER_SHARD), params['workingDirectory'])
     killProcess(stmgrPid)
   elif test == 'KILL_METRICSMGR':
@@ -98,7 +98,7 @@ def runTest(test, topologyName, params):
                            params['workingDirectory'])
     killProcess(metricsmgrPid)
   elif test == 'KILL_STMGR_METRICSMGR':
-    logging.info("Executing kill stmgr metrics manager")
+    logging.info("Executing kill stream manager and metrics manager")
     stmgrPid = getPid('%s-%d' % (STMGR, NON_TMASTER_SHARD), params['workingDirectory'])
     killProcess(stmgrPid)
 
