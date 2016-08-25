@@ -17,17 +17,16 @@ package com.twitter.heron.scheduler.yarn;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 
 import com.twitter.heron.spi.packing.PackingPlan;
 import com.twitter.heron.spi.scheduler.IScheduler;
 
 public class YarnSchedulerTest {
   @Test
-  @PrepareForTest(HeronMasterDriverProvider.class)
   public void delegatesToDriverOnSchedule() {
     HeronMasterDriver mockHeronDriver = Mockito.mock(HeronMasterDriver.class);
     HeronMasterDriverProvider.setInstance(mockHeronDriver);
+    Mockito.when(mockHeronDriver.scheduleTMasterContainer()).thenReturn(true);
 
     IScheduler scheduler = new YarnScheduler();
     PackingPlan mockPacking = Mockito.mock(PackingPlan.class);
@@ -39,7 +38,6 @@ public class YarnSchedulerTest {
   }
 
   @Test
-  @PrepareForTest(HeronMasterDriverProvider.class)
   public void delegatesToDriverOnKill() {
     HeronMasterDriver mockHeronDriver = Mockito.mock(HeronMasterDriver.class);
     HeronMasterDriverProvider.setInstance(mockHeronDriver);
