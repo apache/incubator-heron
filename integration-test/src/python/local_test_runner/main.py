@@ -140,41 +140,43 @@ def runTest(test, topologyName, params):
 
   # get actual and expected result
   # retry if results are not equal a predesignated amount of times
-  expectedResult = ""
-  actualResult = ""
+  expected_result = ""
+  actual_result = ""
   retriesLeft = RETRY_COUNT
   while retriesLeft > 0:
     retriesLeft -= 1
-    expectedResult = ""
-    actualResult = ""
     try:
       with open(params['readFile'], 'r') as f:
-        expectedResult = f.read()
+        expected_result = f.read()
       with open(params['outputFile'], 'r') as g:
-        actualResult = g.read()
+        actual_result = g.read()
     except Exception as e:
-      logging.error("Failed to read expected or actual results from file: %s", e)
+      logging.error("Failed to read expected or actual results from file for test %s: %s", test, e)
       cleanup_test()
       return False
     # if we get expected result, no need to retry
-    if expectedResult == actualResult:
+    if expected_result == actual_result:
       break
     if retriesLeft > 0:
-      logging.info("Failed to get expected results, retrying after %s seconds", RETRY_INTERVAL)
+      expected_result = ""
+      actual_result = ""
+      logging.info("Failed to get expected results for test %s (attempt %s/%s), "\
+                   + "retrying after %s seconds",
+                   test, RETRY_COUNT - retriesLeft, RETRY_COUNT, RETRY_INTERVAL)
       time.sleep(RETRY_INTERVAL)
 
   cleanup_test()
 
   # Compare the actual and expected result
-  if actualResult == expectedResult:
-    logging.info("Actual result matched expected result")
-    logging.info("Actual result ---------- \n" + actualResult)
-    logging.info("Expected result ---------- \n" + expectedResult)
+  if actual_result == expected_result:
+    logging.info("Actual result matched expected result for test %s", test)
+    logging.info("Actual result ---------- \n" + actual_result)
+    logging.info("Expected result ---------- \n" + expected_result)
     return True
   else:
-    logging.error("Actual result did not match expected result")
-    logging.info("Actual result ---------- \n" + actualResult)
-    logging.info("Expected result ---------- \n" + expectedResult)
+    logging.error("Actual result did not match expected result for test %s", test)
+    logging.info("Actual result ---------- \n" + actual_result)
+    logging.info("Expected result ---------- \n" + expected_result)
     return False
 
 def submitTopology(heronCliPath, testCluster, testJarPath, topologyClassPath,
