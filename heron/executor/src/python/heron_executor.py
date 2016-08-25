@@ -116,6 +116,9 @@ class ProcessInfo(object):
     self.attempts += 1
     return self
 
+# these have to be defined at the root level to allow us to catch the signal and stop them
+state_managers = []
+
 # pylint: disable=too-many-instance-attributes
 class HeronExecutor(object):
   """ Heron executor is a class that is responsible for running each of the process on a given
@@ -509,6 +512,10 @@ class HeronExecutor(object):
             log_pid_for_process(name, p.pid)
 
   def get_commands_to_run(self):
+    # During shutdown the watch might get triggered with the empty packing plan
+    if len(self.packing_plan.container_plans) == 0:
+      return {}
+
     if self.shard == 0:
       commands = self._get_tmaster_processes()
     else:
@@ -622,10 +629,12 @@ class HeronExecutor(object):
 
     return [state_manager_location]
 
+  # pylint: disable=global-statement
   def register_packing_plan_watcher(self, executor):
     """
     Receive updates to the packing plan from the statemgrs and update processes as needed.
     """
+    global state_managers
     statemgr_config = StateMgrConfig()
     statemgr_config.set_state_locations(self.__get_state_manager_locations())
     state_managers = statemanagerfactory.get_all_state_managers(statemgr_config)
@@ -638,17 +647,17 @@ class HeronExecutor(object):
 
       if self.packing_plan != new_packing_plan:
         Log.info("State watch triggered for PackingPlan update, PackingPlan change detected on "\
-                 "shard %s, relaunching. Existing: %s, new: %s" %
+                 "shard %s, relaunching. Existing: %s, New: %s" %
                  (self.shard, str(self.packing_plan), str(new_packing_plan)))
         self.update_packing_plan(new_packing_plan)
 
         # pylint: disable=fixme
         # TODO: handle relaunch of running topology scenario
-        Log.info("Relaunching shard %s" % self.shard)
+        Log.info("Updating executor processes")
         executor.launch()
       else:
         Log.info("State watch triggered for PackingPlan update but PackingPlan not changed so "\
-                 "not relaunching. Existing: %s, new: %s" %
+                 "not relaunching. Existing: %s, New: %s" %
                  (str(self.packing_plan), str(new_packing_plan)))
 
     for state_manager in state_managers:
@@ -679,10 +688,17 @@ def main():
   executor.register_packing_plan_watcher(executor)
   executor.monitor_processes()
 
+def stop_state_manager_watches():
+  Log.info("Stopping state managers")
+  for state_manager in state_managers:
+    state_manager.stop()
+
 # pylint: disable=unused-argument
 def signal_handler(signal_to_handle, frame):
   # We would do nothing here but just exit
   # Just catch the SIGTERM and then cleanup(), registered with atexit, would invoke
+  Log.info('signal_handler invoked with signal %s', signal_to_handle)
+  stop_state_manager_watches()
   sys.exit(signal_to_handle)
 
 def setup(shardid):
