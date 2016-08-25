@@ -68,6 +68,9 @@ def runTest(test, topologyName, params):
   while not processExists(processList, HERON_STMGR_CMD):
     processList = getProcesses()
 
+  _safe_delete_file(params['readFile'])
+  _safe_delete_file(params['outputFile'])
+
   # insert lines into temp file and then move to read file
   try:
     with open('temp.txt', 'w') as f:
@@ -132,12 +135,8 @@ def runTest(test, topologyName, params):
       return False
 
     # delete test files
-    try:
-      os.remove(params['readFile'])
-      os.remove(params['outputFile'])
-    except Exception as e:
-      logging.error("Failed to delete test files")
-      return False
+    _safe_delete_file(params['readFile'])
+    _safe_delete_file(params['outputFile'])
 
   # get actual and expected result
   # retry if results are not equal a predesignated amount of times
@@ -298,6 +297,14 @@ def processExists(processList, processCmd):
     if processCmd in process.cmd:
       return True
   return False
+
+def _safe_delete_file(file):
+  if os.path.isfile(file) and os.path.exists(file):
+    try:
+      os.remove(file)
+    except Exception as e:
+      logging.error("Failed to delete file: %s: %s", file, e)
+      return False
 
 def main():
   ''' main '''
