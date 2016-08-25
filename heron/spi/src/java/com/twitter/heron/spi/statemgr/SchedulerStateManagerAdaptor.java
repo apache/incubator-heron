@@ -218,56 +218,47 @@ public class SchedulerStateManagerAdaptor {
   }
 
   /**
-   * Clean all states of a heron topology.
+   * Clean all states of a heron topology. This goes through each piece of state that needs
+   * to be cleaned up and will log out a warning if it could not be cleaned up properly.
    * TMasterLocation, PackingPlan, PhysicalPlan, SchedulerLocation, ExecutionState, and Topology
+   * @param topologyName the name of the topology that we should clean the state for
    */
-  public Boolean cleanState(String topologyName) {
+  public void cleanState(String topologyName) {
     LOG.fine("Cleaning up topology state");
 
     Boolean result;
 
-    // It is possible that  TMasterLocation, PhysicalPlan and SchedulerLocation are not set
-    // Just log but don't consider them failure
     result = deleteTMasterLocation(topologyName);
     if (result == null || !result) {
-      // We would not return false since it is possible that TMaster didn't write physical plan
       LOG.warning("Failed to clear TMaster location.");
     }
 
     result = deletePackingPlan(topologyName);
     if (result == null || !result) {
-      // We would not return false since it is possible that TMaster didn't write physical plan
       LOG.warning("Failed to clear packing plan.");
     }
 
     result = deletePhysicalPlan(topologyName);
     if (result == null || !result) {
-      // We would not return false since it is possible that TMaster didn't write physical plan
       LOG.warning("Failed to clear physical plan.");
     }
 
     result = deleteSchedulerLocation(topologyName);
     if (result == null || !result) {
-      // We would not return false since it is possible that TMaster didn't write physical plan
       LOG.warning("Failed to clear scheduler location.");
     }
 
     result = deleteExecutionState(topologyName);
     if (result == null || !result) {
       LOG.severe("Failed to clear execution state");
-      return false;
     }
 
-    // Set topology def at last since we determine whether a topology is running
-    // by checking the existence of topology def
     result = deleteTopology(topologyName);
     if (result == null || !result) {
       LOG.severe("Failed to clear topology definition");
-      return false;
     }
 
     LOG.fine("Cleaned up topology state");
-    return true;
   }
 
   /**

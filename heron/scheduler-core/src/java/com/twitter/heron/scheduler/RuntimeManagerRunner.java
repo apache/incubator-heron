@@ -138,10 +138,7 @@ public class RuntimeManagerRunner implements Callable<Boolean> {
 
     // clean up the state of the topology in state manager
     SchedulerStateManagerAdaptor statemgr = Runtime.schedulerStateManagerAdaptor(runtime);
-    if (!statemgr.cleanState(topologyName)) {
-      LOG.severe("Failed to clean topology state");
-      return false;
-    }
+    statemgr.cleanState(topologyName);
 
     // Clean the connection when we are done.
     LOG.fine("Scheduler killed topology successfully.");

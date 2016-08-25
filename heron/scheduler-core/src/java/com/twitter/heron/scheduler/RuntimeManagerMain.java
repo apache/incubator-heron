@@ -303,7 +303,8 @@ public class RuntimeManagerMain {
       // TODO(mfu): timeout should read from config
       SchedulerStateManagerAdaptor adaptor = new SchedulerStateManagerAdaptor(statemgr, 5000);
 
-      boolean isValid = (Command.KILL.equals(command)) || validateRuntimeManage(adaptor, topologyName);
+      boolean isValid = (Command.KILL.equals(command))
+          || validateRuntimeManage(adaptor, topologyName);
 
       // 2. Try to manage topology if valid
       if (isValid) {

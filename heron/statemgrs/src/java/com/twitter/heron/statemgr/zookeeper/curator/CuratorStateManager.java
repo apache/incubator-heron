@@ -218,7 +218,8 @@ public class CuratorStateManager extends FileSystemStateManager {
       result.set(true);
 
     } catch (KeeperException.NoNodeException e) {
-      LOG.warning(path + " does not exist so there's nothing to delete");
+      LOG.warning("deleteNode called for " + path
+          + " but it does not exist so there's nothing to delete");
       result.set(true);
 
       // Suppress it since forPath() throws Exception
