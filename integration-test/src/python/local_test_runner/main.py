@@ -298,12 +298,12 @@ def processExists(processList, processCmd):
       return True
   return False
 
-def _safe_delete_file(file):
-  if os.path.isfile(file) and os.path.exists(file):
+def _safe_delete_file(file_name):
+  if os.path.isfile(file_name) and os.path.exists(file_name):
     try:
-      os.remove(file)
+      os.remove(file_name)
     except Exception as e:
-      logging.error("Failed to delete file: %s: %s", file, e)
+      logging.error("Failed to delete file: %s: %s", file_name, e)
       return False
 
 def main():
