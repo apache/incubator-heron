@@ -255,7 +255,6 @@ public class ResourceCompliantRRPacking implements IPacking {
     ArrayList<RamRequirement> ramRequirements = new ArrayList<>();
     Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
     Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
-
     for (String component : parallelismMap.keySet()) {
       if (ramMap.containsKey(component)) {
         if (!isValidInstance(new Resource(instanceCpuDefault,

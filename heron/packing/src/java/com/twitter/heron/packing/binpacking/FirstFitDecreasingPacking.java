@@ -108,7 +108,7 @@ public class FirstFitDecreasingPacking implements IPacking, IRepacking {
   protected int paddingPercentage;
 
   public static String getContainerId(int index) {
-    return "" + index;
+    return Integer.toString(index);
   }
 
   public static String getInstanceId(
