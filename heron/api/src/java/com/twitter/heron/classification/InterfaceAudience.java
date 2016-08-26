@@ -20,7 +20,7 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Annotation to inform users of a package, class or method's intended audience.
  * Currently the audience can be {@link Public}, {@link LimitedPrivate} or
- * {@link Private}. <br>
+ * {@link Private}.<br>
  * All public classes must have InterfaceAudience annotation. <br>
  * <ul>
  * <li>Public classes that are not marked with this annotation must be
