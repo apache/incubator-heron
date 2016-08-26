@@ -76,22 +76,19 @@ public class FirstFitDecreasingPackingTest {
         .putAll(ClusterDefaults.getDefaults())
         .build();
 
-    Config runtime = Config.newBuilder()
-        .put(Keys.topologyDefinition(), topology)
-        .build();
-
     this.instanceRamDefault = Context.instanceRam(config);
     this.instanceCpuDefault = Context.instanceCpu(config).doubleValue();
     this.instanceDiskDefault = Context.instanceDisk(config);
 
     FirstFitDecreasingPacking packing = new FirstFitDecreasingPacking();
-    packing.initialize(config, runtime);
+
+    packing.initialize(config, topology);
     PackingPlan output = packing.pack();
 
     return output;
   }
 
-  @Test
+  @Test(expected = RuntimeException.class)
   public void testCheckFailure() throws Exception {
     int numContainers = 2;
     int spoutParallelism = 4;
@@ -108,9 +105,8 @@ public class FirstFitDecreasingPackingTest {
 
     TopologyAPI.Topology topology =
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
-    PackingPlan packingPlan =
-        getFirstFitDecreasingPackingPlan(topology);
-    Assert.assertNull(packingPlan);
+
+    getFirstFitDecreasingPackingPlan(topology);
   }
 
   /**
@@ -525,7 +521,7 @@ public class FirstFitDecreasingPackingTest {
   /**
    * Test invalid ram for instance
    */
-  @Test
+  @Test(expected = RuntimeException.class)
   public void testInvalidRamInstance() throws Exception {
     int spoutParallelism = 4;
     int boltParallelism = 3;
@@ -546,9 +542,5 @@ public class FirstFitDecreasingPackingTest {
         getTopology(spoutParallelism, boltParallelism, topologyConfig);
     PackingPlan packingPlanExplicitRamMap =
         getFirstFitDecreasingPackingPlan(topologyExplicitRamMap);
-
-    Assert.assertEquals(packingPlanExplicitRamMap, null);
-
   }
-
 }

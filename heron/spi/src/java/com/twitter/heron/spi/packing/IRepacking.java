@@ -11,39 +11,32 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package com.twitter.heron.spi.packing;
 
-import com.twitter.heron.classification.InterfaceAudience;
-import com.twitter.heron.classification.InterfaceStability;
+import java.util.Map;
+
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.Config;
 
-/**
- * Packing algorithm to use for packing multiple instances into containers. Packing hints like
- * number of container may be passed through scheduler config.
- */
-@InterfaceAudience.LimitedPrivate
-@InterfaceStability.Unstable
-public interface IPacking extends AutoCloseable {
+public interface IRepacking extends AutoCloseable {
 
   /**
-   * Initialize the packing algorithm with the static config and the topology
+   * Initialize the packing algorithm with the static config and the associated topology
    */
   void initialize(Config config, TopologyAPI.Topology topology);
 
   /**
-   * Called by scheduler to generate container packing.
+   * Generates a new packing given an existing packing and component changes
    * Packing algorithm output generates instance id and container id.
-   *
-   * @return PackingPlan describing the job to schedule.
+   * @param currentPackingPlan Existing packing plan
+   * @param componentChanges Map &lt; componentName, new component parallelism &gt;
+   * that contains the parallelism for each component whose parallelism has changed.
+   * @return PackingPlan describing the new packing plan.
    */
-  PackingPlan pack();
+  PackingPlan repack(PackingPlan currentPackingPlan, Map<String, Integer> componentChanges);
 
   /**
-   * This is to for disposing or cleaning up any internal state accumulated by
-   * the uploader
-   * <p>
+   * This is to for disposing or cleaning up any internal state.
    * Closes this stream and releases any system resources associated
    * with it. If the stream is already closed then invoking this
    * method has no effect.

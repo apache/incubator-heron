@@ -69,10 +69,12 @@ scheduler_deps_files = \
     ]
 
 packing_deps_files = [
+    "//heron/api/src/java:api-java",
     ":common-spi-java",
     "//heron/api/src/java:classification",
     "//heron/common/src/java:config-java",
     "//heron/proto:proto_packing_plan_java",
+    "//heron/proto:proto_topology_java"
 ]
 
 uploader_deps_files = [
