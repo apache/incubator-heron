@@ -196,10 +196,10 @@ heron.instance.network.options.socket.send.buffer.size.bytes: 6553600
 heron.instance.network.options.socket.received.buffer.size.bytes: 8738000
 
 # The maximum # of data tuple to batch in a HeronDataTupleSet protobuf
-heron.instance.set.data.tuple.capacity: 1024
+heron.instance.set.data.tuple.capacity: 10240
 
 # The maximum size in bytes of data tuple to batch in a HeronDataTupleSet protobuf
-heron.instance.set.data.tuple.size.bytes: 131072
+heron.instance.set.data.tuple.size.bytes: 1310720
 
 # The maximum # of control tuple to batch in a HeronControlTupleSet protobuf
 heron.instance.set.control.tuple.capacity: 1024
@@ -209,10 +209,10 @@ heron.instance.set.control.tuple.capacity: 1024
 heron.instance.ack.batch.time.ms: 128
 
 # The maximum time in ms for an spout instance to emit tuples per attempt
-heron.instance.emit.batch.time.ms: 16
+heron.instance.emit.batch.time.ms: 160
 
 # The maximum batch size in bytes for an spout to emit tuples per attempt
-heron.instance.emit.batch.size.bytes: 32768
+heron.instance.emit.batch.size.bytes: 327680
 
 # The maximum time in ms for an bolt instance to execute tuples per attempt
 heron.instance.execute.batch.time.ms: 16
