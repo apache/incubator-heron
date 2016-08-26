@@ -39,6 +39,39 @@ public abstract class FileSystemStateManager implements IStateManager {
   // Store the root address of the hierarchical file system
   protected String rootAddress;
 
+  protected enum StateLocation {
+    TMASTER_LOCATION("tmasters", "TMaster location"),
+    TOPOLOGY("topologies", "Topologies"),
+    PACKING_PLAN("packingplans", "Packing plan"),
+    PHYSICAL_PLAN("pplans", "Physical plan"),
+    EXECUTION_STATE("executionstate", "Execution state"),
+    SCHEDULER_LOCATION("schedulers", "Scheduler location");
+
+    private final String dir;
+    private final String name;
+
+    StateLocation(String dir, String name) {
+      this.dir = dir;
+      this.name = name;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public String getDirectory(String rootAddress) {
+      return concatPath(rootAddress, dir);
+    }
+
+    public String getNodePath(String rootAddress, String topology) {
+      return concatPath(getDirectory(rootAddress), topology);
+    }
+
+    private static String concatPath(String basePath, String appendPath) {
+      return String.format("%s/%s", basePath, appendPath);
+    }
+  }
+
   protected abstract ListenableFuture<Boolean> nodeExists(String path);
 
   protected abstract ListenableFuture<Boolean> deleteNode(String path);
@@ -47,52 +80,12 @@ public abstract class FileSystemStateManager implements IStateManager {
                                                                          String path,
                                                                          Message.Builder builder);
 
-  protected String getTMasterLocationDir() {
-    return concatPath(rootAddress, "tmasters");
+  protected String getStateDirectory(StateLocation location) {
+    return location.getDirectory(rootAddress);
   }
 
-  protected String getTopologyDir() {
-    return concatPath(rootAddress, "topologies");
-  }
-
-  protected String getPackingPlanDir() {
-    return concatPath(rootAddress, "packingplans");
-  }
-
-  protected String getPhysicalPlanDir() {
-    return concatPath(rootAddress, "pplans");
-  }
-
-  protected String getExecutionStateDir() {
-    return concatPath(rootAddress, "executionstate");
-  }
-
-  protected String getSchedulerLocationDir() {
-    return concatPath(rootAddress, "schedulers");
-  }
-
-  protected String getTMasterLocationPath(String topologyName) {
-    return concatPath(getTMasterLocationDir(), topologyName);
-  }
-
-  protected String getTopologyPath(String topologyName) {
-    return concatPath(getTopologyDir(), topologyName);
-  }
-
-  protected String getPackingPlanPath(String topologyName) {
-    return concatPath(getPackingPlanDir(), topologyName);
-  }
-
-  protected String getPhysicalPlanPath(String topologyName) {
-    return concatPath(getPhysicalPlanDir(), topologyName);
-  }
-
-  protected String getExecutionStatePath(String topologyName) {
-    return concatPath(getExecutionStateDir(), topologyName);
-  }
-
-  protected String getSchedulerLocationPath(String topologyName) {
-    return concatPath(getSchedulerLocationDir(), topologyName);
+  protected String getStatePath(StateLocation location, String topologyName) {
+    return location.getNodePath(rootAddress, topologyName);
   }
 
   @Override
@@ -103,82 +96,90 @@ public abstract class FileSystemStateManager implements IStateManager {
 
   @Override
   public ListenableFuture<Boolean> deleteTMasterLocation(String topologyName) {
-    return deleteNode(getTMasterLocationPath(topologyName));
+    return deleteNode(StateLocation.TMASTER_LOCATION, topologyName);
   }
 
   @Override
   public ListenableFuture<Boolean> deleteSchedulerLocation(String topologyName) {
-    return deleteNode(getSchedulerLocationPath(topologyName));
+    return deleteNode(StateLocation.SCHEDULER_LOCATION, topologyName);
   }
 
   @Override
   public ListenableFuture<Boolean> deleteExecutionState(String topologyName) {
-    return deleteNode(getExecutionStatePath(topologyName));
+    return deleteNode(StateLocation.EXECUTION_STATE, topologyName);
   }
 
   @Override
   public ListenableFuture<Boolean> deleteTopology(String topologyName) {
-    return deleteNode(getTopologyPath(topologyName));
+    return deleteNode(StateLocation.TOPOLOGY, topologyName);
   }
 
   @Override
   public ListenableFuture<Boolean> deletePackingPlan(String topologyName) {
-    return deleteNode(getPackingPlanPath(topologyName));
+    return deleteNode(StateLocation.PACKING_PLAN, topologyName);
   }
 
   @Override
   public ListenableFuture<Boolean> deletePhysicalPlan(String topologyName) {
-    return deleteNode(getPhysicalPlanPath(topologyName));
+    return deleteNode(StateLocation.PHYSICAL_PLAN, topologyName);
   }
 
   @Override
   public ListenableFuture<Scheduler.SchedulerLocation> getSchedulerLocation(
       WatchCallback watcher, String topologyName) {
-    return getNodeData(watcher, getSchedulerLocationPath(topologyName),
+    return getNodeData(watcher, StateLocation.SCHEDULER_LOCATION, topologyName,
         Scheduler.SchedulerLocation.newBuilder());
   }
 
   @Override
   public ListenableFuture<TopologyAPI.Topology> getTopology(
       WatchCallback watcher, String topologyName) {
-    return getNodeData(watcher, getTopologyPath(topologyName), TopologyAPI.Topology.newBuilder());
+    return getNodeData(watcher, StateLocation.TOPOLOGY, topologyName,
+        TopologyAPI.Topology.newBuilder());
   }
 
   @Override
   public ListenableFuture<ExecutionEnvironment.ExecutionState> getExecutionState(
       WatchCallback watcher, String topologyName) {
-    return getNodeData(watcher, getExecutionStatePath(topologyName),
+    return getNodeData(watcher, StateLocation.EXECUTION_STATE, topologyName,
         ExecutionEnvironment.ExecutionState.newBuilder());
   }
 
   @Override
   public ListenableFuture<PackingPlans.PackingPlan> getPackingPlan(
       WatchCallback watcher, String topologyName) {
-    return getNodeData(watcher, getPackingPlanPath(topologyName),
+    return getNodeData(watcher, StateLocation.PACKING_PLAN, topologyName,
         PackingPlans.PackingPlan.newBuilder());
   }
 
   @Override
   public ListenableFuture<PhysicalPlans.PhysicalPlan> getPhysicalPlan(
       WatchCallback watcher, String topologyName) {
-    return getNodeData(watcher, getPhysicalPlanPath(topologyName),
+    return getNodeData(watcher, StateLocation.PHYSICAL_PLAN, topologyName,
         PhysicalPlans.PhysicalPlan.newBuilder());
   }
 
   @Override
   public ListenableFuture<TopologyMaster.TMasterLocation> getTMasterLocation(
       WatchCallback watcher, String topologyName) {
-    return getNodeData(watcher, getTMasterLocationPath(topologyName),
+    return getNodeData(watcher, StateLocation.TMASTER_LOCATION, topologyName,
         TopologyMaster.TMasterLocation.newBuilder());
   }
 
   @Override
   public ListenableFuture<Boolean> isTopologyRunning(String topologyName) {
-    return nodeExists(getTopologyPath(topologyName));
+    return nodeExists(getStatePath(StateLocation.TOPOLOGY, topologyName));
   }
 
-  private static String concatPath(String basePath, String appendPath) {
-    return String.format("%s/%s", basePath, appendPath);
+  private ListenableFuture<Boolean> deleteNode(StateLocation location, String topologyName) {
+    return deleteNode(getStatePath(location, topologyName));
+  }
+
+  private <M extends Message> ListenableFuture<M> getNodeData(WatchCallback watcher,
+                                                              StateLocation location,
+                                                              String topologyName,
+                                                              Message.Builder builder) {
+    return getNodeData(watcher, getStatePath(location, topologyName), builder);
   }
 
   /**
