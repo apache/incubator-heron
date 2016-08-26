@@ -125,6 +125,7 @@ public class CuratorStateManager extends FileSystemStateManager {
     // Make necessary directories
     LOG.info("Topologies directory: " + getTopologyDir());
     LOG.info("Tmaster location directory: " + getTMasterLocationDir());
+    LOG.info("Packing plan directory: " + getPackingPlanDir());
     LOG.info("Physical plan directory: " + getPhysicalPlanDir());
     LOG.info("Execution state directory: " + getExecutionStateDir());
     LOG.info("Scheduler location directory: " + getSchedulerLocationDir());
@@ -132,6 +133,7 @@ public class CuratorStateManager extends FileSystemStateManager {
     try {
       client.createContainers(getTopologyDir());
       client.createContainers(getTMasterLocationDir());
+      client.createContainers(getPackingPlanDir());
       client.createContainers(getPhysicalPlanDir());
       client.createContainers(getExecutionStateDir());
       client.createContainers(getSchedulerLocationDir());

@@ -189,37 +189,37 @@ genrule(
 
 filegroup(
     name = "conf-local-heron-internals",
-    srcs = ["//heron/config/src/yaml:conf-local-heron-internals"],
+    srcs = ["//heron/tools/config/src/yaml:conf-local-heron-internals"],
 )
 
 filegroup(
     name = "conf-local-metrics-sinks",
-    srcs = ["//heron/config/src/yaml:conf-local-metrics-sinks"],
+    srcs = ["//heron/tools/config/src/yaml:conf-local-metrics-sinks"],
 )
 
 filegroup(
     name = "conf-local-client",
-    srcs = ["//heron/config/src/yaml:conf-local-client"],
+    srcs = ["//heron/tools/config/src/yaml:conf-local-client"],
 )
 
 filegroup(
     name = "conf-local-packing",
-    srcs = ["//heron/config/src/yaml:conf-local-packing"],
+    srcs = ["//heron/tools/config/src/yaml:conf-local-packing"],
 )
 
 filegroup(
     name = "conf-local-scheduler",
-    srcs = ["//heron/config/src/yaml:conf-local-scheduler"],
+    srcs = ["//heron/tools/config/src/yaml:conf-local-scheduler"],
 )
 
 filegroup(
     name = "conf-local-statemgr",
-    srcs = ["//heron/config/src/yaml:conf-local-statemgr"],
+    srcs = ["//heron/tools/config/src/yaml:conf-local-statemgr"],
 )
 
 filegroup(
     name = "conf-local-uploader",
-    srcs = ["//heron/config/src/yaml:conf-local-uploader"],
+    srcs = ["//heron/tools/config/src/yaml:conf-local-uploader"],
 )
 
 filegroup(
@@ -284,12 +284,12 @@ filegroup(
 
 filegroup(
     name = "hcli",
-    srcs = ["//heron/cli/src/python:heron"],
+    srcs = ["//heron/tools/cli/src/python:heron"],
 )
 
 filegroup(
     name = "haurora-job",
-    srcs = ["//heron/cli/src/python:heron-aurora"],
+    srcs = ["//heron/tools/cli/src/python:heron-aurora"],
 )
 
 filegroup(
@@ -374,12 +374,12 @@ filegroup(
 
 filegroup(
     name = "htracker",
-    srcs = ["//heron/tracker/src/python:heron-tracker"],
+    srcs = ["//heron/tools/tracker/src/python:heron-tracker"],
 )
 
 filegroup(
     name = "hui",
-    srcs = ["//heron/ui/src/python:heron-ui"],
+    srcs = ["//heron/tools/ui/src/python:heron-ui"],
 )
 
 filegroup(
