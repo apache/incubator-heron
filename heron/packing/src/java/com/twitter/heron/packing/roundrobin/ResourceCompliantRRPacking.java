@@ -121,8 +121,8 @@ public class ResourceCompliantRRPacking implements IPacking {
   }
 
   @Override
-  public void initialize(Config config, Config runtime) {
-    this.topology = com.twitter.heron.spi.utils.Runtime.topology(runtime);
+  public void initialize(Config config, TopologyAPI.Topology inputTopology) {
+    this.topology = inputTopology;
     this.numContainers = TopologyUtils.getNumContainers(topology);
     this.instanceRamDefault = Context.instanceRam(config);
     this.instanceCpuDefault = Context.instanceCpu(config).doubleValue();
@@ -255,7 +255,6 @@ public class ResourceCompliantRRPacking implements IPacking {
     ArrayList<RamRequirement> ramRequirements = new ArrayList<>();
     Map<String, Integer> parallelismMap = TopologyUtils.getComponentParallelism(topology);
     Map<String, Long> ramMap = TopologyUtils.getComponentRamMapConfig(topology);
-
     for (String component : parallelismMap.keySet()) {
       if (ramMap.containsKey(component)) {
         if (!isValidInstance(new Resource(instanceCpuDefault,
