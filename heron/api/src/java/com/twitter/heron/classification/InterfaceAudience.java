@@ -1,4 +1,4 @@
-//  Copyright 6 Twitter. All rights reserved.
+//  Copyright 2016 Twitter. All rights reserved.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -24,44 +24,44 @@ import java.lang.annotation.RetentionPolicy;
  * All public classes must have InterfaceAudience annotation. <br>
  * <ul>
  * <li>Public classes that are not marked with this annotation must be
- * considered by default as {@link Private}.</li> 
- * 
+ * considered by default as {@link Private}.</li>
+ *
  * <li>External applications must only use classes that are marked
  * {@link Public}. Avoid using non public classes as these classes
  * could be removed or change in incompatible ways.</li>
- * 
+ *
  * <li>Hadoop projects must only use classes that are marked
  * {@link LimitedPrivate} or {@link Public}</li>
- * 
+ *
  * <li> Methods may have a different annotation that it is more restrictive
- * compared to the audience classification of the class. Example: A class 
+ * compared to the audience classification of the class. Example: A class
  * might be {@link Public}, but a method may be {@link LimitedPrivate}
  * </li></ul>
  */
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
-public class InterfaceAudience {
+public final class InterfaceAudience {
 
   /**
    * Intended for use by any project or application (i.e. Topology implementations).
    */
   @Documented
   @Retention(RetentionPolicy.RUNTIME)
-  public @interface Public {}
+  public @interface Public { }
 
   /**
    * Intended only for code that extends Heron itself (i.e. spi implementations).
    */
   @Documented
   @Retention(RetentionPolicy.RUNTIME)
-  public @interface LimitedPrivate {}
+  public @interface LimitedPrivate { }
 
   /**
    * Intended for use only within Heron itself.
    */
   @Documented
   @Retention(RetentionPolicy.RUNTIME)
-  public @interface Private {}
+  public @interface Private { }
 
-  private InterfaceAudience() {} // Audience can't exist on its own
+  private InterfaceAudience() { } // Audience can't exist on its own
 }

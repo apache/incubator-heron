@@ -1,4 +1,4 @@
-//  Copyright 6 Twitter. All rights reserved.
+//  Copyright 2016 Twitter. All rights reserved.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.lang.annotation.RetentionPolicy;
  * Annotation to inform users of how much to rely on a particular package,
  * class or method not changing over time. Currently the stability can be
  * {@link Stable}, {@link Evolving} or {@link Unstable}. <br>
- * 
+ *
  * <ul><li>All classes that are annotated with {@link Public} or
  * {@link LimitedPrivate} must have InterfaceStability annotation. </li>
  * <li>Classes that are {@link Private} are to be considered unstable unless
@@ -39,14 +39,14 @@ public class InterfaceStability {
    */
   @Documented
   @Retention(RetentionPolicy.RUNTIME)
-  public @interface Stable {}
+  public @interface Stable { }
 
   /**
    * Evolving, but can break compatibility at minor release (i.e. m.x)
    */
   @Documented
   @Retention(RetentionPolicy.RUNTIME)
-  public @interface Evolving {}
+  public @interface Evolving { }
 
   /**
    * No guarantee is provided as to reliability or stability across any
@@ -54,5 +54,5 @@ public class InterfaceStability {
    */
   @Documented
   @Retention(RetentionPolicy.RUNTIME)
-  public @interface Unstable {}
+  public @interface Unstable { }
 }
