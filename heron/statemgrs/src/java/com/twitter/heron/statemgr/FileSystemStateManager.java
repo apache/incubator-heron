@@ -59,12 +59,12 @@ public abstract class FileSystemStateManager implements IStateManager {
       return name;
     }
 
-    public String getDirectory(String rootAddress) {
-      return concatPath(rootAddress, dir);
+    public String getDirectory(String root) {
+      return concatPath(root, dir);
     }
 
-    public String getNodePath(String rootAddress, String topology) {
-      return concatPath(getDirectory(rootAddress), topology);
+    public String getNodePath(String root, String topology) {
+      return concatPath(getDirectory(root), topology);
     }
 
     private static String concatPath(String basePath, String appendPath) {
