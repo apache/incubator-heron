@@ -87,7 +87,7 @@ public class ResourceCompliantRRPackingTest {
         .build();
 
     ResourceCompliantRRPacking packing = new ResourceCompliantRRPacking();
-    packing.initialize(config, runtime);
+    packing.initialize(config, topology);
     PackingPlan output = packing.pack();
 
     return output;

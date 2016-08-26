@@ -76,7 +76,7 @@ public class RoundRobinPackingTest {
         .build();
 
     RoundRobinPacking packing = new RoundRobinPacking();
-    packing.initialize(config, runtime);
+    packing.initialize(config, topology);
     PackingPlan output = packing.pack();
 
     return output;
