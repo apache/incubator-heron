@@ -23,6 +23,7 @@ java_library(
         "//heron/proto:proto_scheduler_java",
         "//heron/proto:proto_tmaster_java",
         "//heron/proto:proto_topology_java",
+        "//heron/proto:proto_packing_plan_java",
         "//heron/proto:proto_physical_plan_java",
         "@org_yaml_snakeyaml//jar",
         "@com_google_guava_guava//jar",
@@ -69,6 +70,7 @@ scheduler_deps_files = \
 packing_deps_files = [
     ":common-spi-java",
     "//heron/common/src/java:config-java",
+    "//heron/proto:proto_packing_plan_java",
 ]
 
 uploader_deps_files = [

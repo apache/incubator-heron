@@ -18,6 +18,7 @@ import colorlog
 
 # Create the logger
 # pylint: disable=invalid-name
+logging.basicConfig()
 Log = logging.getLogger()
 
 # time formatter - date - time - UTC offset
@@ -25,7 +26,7 @@ Log = logging.getLogger()
 # see time formatter documentation for more
 date_format = "%m/%d/%Y %H:%M:%S %z"
 
-def configure(level, logfile=None, with_time=False):
+def configure(level=logging.INFO, logfile=None, with_time=False):
   """ Configure logger which dumps log on terminal
 
   :param level: logging level: info, warning, verbose...
@@ -35,7 +36,14 @@ def configure(level, logfile=None, with_time=False):
   :return: None
   :rtype: None
   """
+
+  # Remove all the existing StreamHandlers to avoid duplicate
+  for handler in Log.handlers:
+    if isinstance(handler, logging.StreamHandler):
+      Log.handlers.remove(handler)
+
   Log.setLevel(level)
+
   # if logfile is specified, FileHandler is used
   if logfile is not None:
     if with_time:

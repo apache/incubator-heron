@@ -14,6 +14,8 @@
 
 package com.twitter.heron.statemgr.localfs;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,8 +27,10 @@ import com.google.protobuf.Message;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
+import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
+import com.twitter.heron.proto.system.PackingPlans;
 import com.twitter.heron.proto.system.PhysicalPlans;
 import com.twitter.heron.proto.tmaster.TopologyMaster;
 import com.twitter.heron.spi.common.Config;
@@ -52,30 +56,25 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   }
 
   protected boolean initTree() {
+    List<Pair<String, String>> dirNamesAndPaths = new ArrayList<>();
+    dirNamesAndPaths.add(Pair.create("Topologies", getTopologyDir()));
+    dirNamesAndPaths.add(Pair.create("Tmaster location", getTMasterLocationDir()));
+    dirNamesAndPaths.add(Pair.create("Packing plan", getPackingPlanDir()));
+    dirNamesAndPaths.add(Pair.create("Physical plan", getPhysicalPlanDir()));
+    dirNamesAndPaths.add(Pair.create("Execution state", getExecutionStateDir()));
+    dirNamesAndPaths.add(Pair.create("Scheduler location", getSchedulerLocationDir()));
+
     // Make necessary directories
-    LOG.log(Level.FINE, "Topologies directory: {0}", getTopologyDir());
-    LOG.log(Level.FINE, "Tmaster location directory: {0}", getTMasterLocationDir());
-    LOG.log(Level.FINE, "Physical plan directory: {0}", getPhysicalPlanDir());
-    LOG.log(Level.FINE, "Execution state directory: {0}", getExecutionStateDir());
-    LOG.log(Level.FINE, "Scheduler location directory: {0}", getSchedulerLocationDir());
+    for (Pair<String, String> dirNamesAndPath : dirNamesAndPaths) {
+      LOG.log(Level.FINE,
+          String.format("%s directory: %s", dirNamesAndPath.first, dirNamesAndPath.second));
+      if (!FileUtils.isDirectoryExists(dirNamesAndPath.second)
+          && !FileUtils.createDirectory(dirNamesAndPath.second)) {
+        return false;
+      }
+    }
 
-    boolean topologyDir = FileUtils.isDirectoryExists(getTopologyDir())
-        || FileUtils.createDirectory(getTopologyDir());
-
-    boolean tmasterLocationDir = FileUtils.isDirectoryExists(getTMasterLocationDir())
-        || FileUtils.createDirectory(getTMasterLocationDir());
-
-    boolean physicalPlanDir = FileUtils.isDirectoryExists(getPhysicalPlanDir())
-        || FileUtils.createDirectory(getPhysicalPlanDir());
-
-    boolean executionStateDir = FileUtils.isDirectoryExists(getExecutionStateDir())
-        || FileUtils.createDirectory(getExecutionStateDir());
-
-    boolean schedulerLocationDir = FileUtils.isDirectoryExists(getSchedulerLocationDir())
-        || FileUtils.createDirectory(getSchedulerLocationDir());
-
-    return topologyDir && tmasterLocationDir && physicalPlanDir && executionStateDir
-        && schedulerLocationDir;
+    return true;
   }
 
   // Make utils class protected for easy unit testing
@@ -154,6 +153,12 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   }
 
   @Override
+  public ListenableFuture<Boolean> setPackingPlan(
+      PackingPlans.PackingPlan packingPlan, String topologyName) {
+    return setData(getPackingPlanPath(topologyName), packingPlan.toByteArray(), true);
+  }
+
+  @Override
   public ListenableFuture<Boolean> setSchedulerLocation(
       Scheduler.SchedulerLocation location, String topologyName) {
     // Note: Unlike Zk statemgr, we overwrite the location even if there is already one.
@@ -168,47 +173,13 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     // Scheduler kill interface should take care of the cleaning
   }
 
-  /**
-   * Returns all information stored in the StateManager. This is a utility method used for debugging
-   * while developing. To invoke, run:
-   *
-   *   bazel run heron/statemgrs/src/java:localfs-statemgr-unshaded -- &lt;topology-name&gt;
-   */
-  public static void main(String[] args) throws ExecutionException, InterruptedException {
-    if (args.length < 1) {
-      throw new RuntimeException(String.format(
-          "Usage: java %s <topology_name> - view state manager details for a topology",
-          LocalFileSystemStateManager.class.getCanonicalName()));
-    }
-
-    String topologyName = args[0];
+  public static void main(String[] args) throws ExecutionException, InterruptedException,
+      IllegalAccessException, ClassNotFoundException, InstantiationException {
     Config config = Config.newBuilder()
         .put(Keys.stateManagerRootPath(),
             System.getProperty("user.home") + "/.herondata/repository/state/local")
         .build();
-
-    print("==> State Manager root path: %s", config.get(Keys.stateManagerRootPath()));
-
-    com.twitter.heron.spi.statemgr.IStateManager stateManager = new LocalFileSystemStateManager();
-    stateManager.initialize(config);
-
-    if (stateManager.isTopologyRunning(topologyName).get()) {
-      print("==> Topology %s found", topologyName);
-      print("==> ExecutionState:\n%s",
-          stateManager.getExecutionState(null, topologyName).get());
-      print("==> SchedulerLocation:\n%s",
-          stateManager.getSchedulerLocation(null, topologyName).get());
-      print("==> TMasterLocation:\n%s",
-          stateManager.getTMasterLocation(null, topologyName).get());
-      print("==> PhysicalPlan:\n%s",
-          stateManager.getPhysicalPlan(null, topologyName).get());
-    } else {
-      print("==> Topology %s not found under %s",
-          topologyName, config.get(Keys.stateManagerRootPath()));
-    }
-  }
-
-  private static void print(String format, Object... values) {
-    System.out.println(String.format(format, values));
+    LocalFileSystemStateManager stateManager = new LocalFileSystemStateManager();
+    stateManager.doMain(args, config);
   }
 }
