@@ -14,9 +14,9 @@
 
 package com.twitter.heron.spi.packing;
 
+import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.classification.InterfaceAudience;
 import com.twitter.heron.classification.InterfaceStability;
-import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.spi.common.Config;
 
 /**
