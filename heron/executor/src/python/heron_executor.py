@@ -676,7 +676,6 @@ class HeronExecutor(object):
     for state_manager in self.state_managers:
       state_manager.stop()
 
-
 def main():
   """Register exit handlers, initialize the executor and run it."""
   expected = 33
