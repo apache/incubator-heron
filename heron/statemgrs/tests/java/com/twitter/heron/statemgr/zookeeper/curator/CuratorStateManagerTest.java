@@ -107,7 +107,7 @@ public class CuratorStateManagerTest {
     // Verify curator client is invoked
     Mockito.verify(mockClient).start();
     Mockito.verify(mockClient).blockUntilConnected(Mockito.anyInt(), Mockito.any(TimeUnit.class));
-    Mockito.verify(mockClient, Mockito.times(5)).createContainers(Mockito.anyString());
+    Mockito.verify(mockClient, Mockito.times(6)).createContainers(Mockito.anyString());
 
     // Verify initTree is called
     Mockito.verify(spyStateManager).initTree();
