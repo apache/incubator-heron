@@ -1,7 +1,7 @@
 This directory (integration-test) contains all the source code and scripts for the
 integration test framework and tests.
 
-The main components are,
+The main components are:
 
  * Test framework (src/java/.../(core, common))
    - this forms the core framework which ensures the output of the topology is
@@ -21,12 +21,12 @@ The main components are,
      Test topologies `post` the result, and test runner `get`s the result.
 
  * Local test runner (src/python/local_test_runner)
-   - Local test runner launches topology locally, and polls for the actual results (from local file
-     system).
+   - Local test runner launches topologies locally, and polls for the actual results (from the
+     local file system).
 
-To run the local integration tests on your mac, at heron repo's top dir:
+To run the local integration tests on your mac run the following from the heron repo's top dir:
 
-  bazel build --config=dawrin integration-test/src/...
+  bazel build --config=darwin integration-test/src/...
 
   bazel run --config=darwin -- scripts/packages:heron-client-install.sh --user
 

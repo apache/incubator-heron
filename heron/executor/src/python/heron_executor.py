@@ -15,15 +15,16 @@
 #!/usr/bin/env python2.7
 ''' heron-executor '''
 import atexit
-import os
-import sys
-import signal
-import subprocess
-import time
-import json
 import base64
-import string
+import json
+import os
 import random
+import signal
+import string
+import subprocess
+import sys
+import threading
+import time
 import yaml
 
 from heron.common.src.python.utils import log
@@ -189,8 +190,28 @@ class HeronExecutor(object):
     # this will soon be refactored to get instance dist dynamically at runtime instead of args
     self.update_instance_distribution(self.parse_instance_distribution(args[5]))
 
-    # This gets set once processes are launched
+    # processes_to_monitor gets set once processes are launched. we need to synchronize rw to this
+    # dict since is used by multiple threads
+    self.process_lock = threading.RLock()
     self.processes_to_monitor = {}
+
+  def initialize(self):
+    """
+    Initialize the environment. Done with a method call outside of the constructor for 2 reasons:
+    1. Unit tests probably won't want/need to do this
+    2. We don't initialize the logger (also something unit tests don't want) until after the
+    constructor
+    """
+    create_folders = 'mkdir -p %s' % self.log_dir
+    chmod_binaries = 'chmod a+rx . && chmod a+x %s && chmod +x %s %s %s' \
+        % (self.log_dir, self.tmaster_binary, self.stmgr_binary, self.heron_shell_binary)
+
+    commands = [create_folders, chmod_binaries]
+
+    for command in commands:
+      if self._run_blocking_process(command, True, self.shell_env) != 0:
+        Log.info("Failed to run command: %s. Exiting" % command)
+        sys.exit(1)
 
     # Log itself pid
     log_pid_for_process(get_heron_executor_process_name(self.shard), os.getpid())
@@ -335,7 +356,7 @@ class HeronExecutor(object):
     return retval
 
   # Returns the processes for each Python Heron Instance
-  def get_python_instance_cmd(self, instance_info):
+  def _get_python_instance_cmd(self, instance_info):
     # pylint: disable=fixme
     # TODO: currently ignoring ramsize, heap, etc.
     retval = {}
@@ -400,7 +421,7 @@ class HeronExecutor(object):
     if self.pkg_type == 'jar' or self.pkg_type == 'tar':
       retval.update(self._get_java_instance_cmd(instance_info))
     elif self.pkg_type == 'pex':
-      retval.update(self.get_python_instance_cmd(instance_info))
+      retval.update(self._get_python_instance_cmd(instance_info))
     else:
       raise ValueError("Unrecognized package type: %s" % self.pkg_type)
 
@@ -449,13 +470,14 @@ class HeronExecutor(object):
 
   def _kill_processes(self, commands):
     # remove the command from processes_to_monitor and kill the process
-    for command_name, command in commands.iteritems():
-      for process_info in self.processes_to_monitor.values():
-        if process_info.name == command_name:
-          del self.processes_to_monitor[process_info.pid]
-          Log.info("Killing %s process with pid %s: %s" %
-                   (process_info.name, process_info.pid, ' '.join(command)))
-          process_info.process.kill()
+    with self.process_lock:
+      for command_name, command in commands.iteritems():
+        for process_info in self.processes_to_monitor.values():
+          if process_info.name == command_name:
+            del self.processes_to_monitor[process_info.pid]
+            Log.info("Killing %s process with pid %s: %s" %
+                     (process_info.name, process_info.pid, ' '.join(command)))
+            process_info.process.kill()
 
   def _start_processes(self, commands):
     """Start all commands and add them to the dict of processes to be monitored """
@@ -468,9 +490,10 @@ class HeronExecutor(object):
       # Log down the pid file
       log_pid_for_process(name, p.pid)
 
-    self.processes_to_monitor.update(processes_to_monitor)
+    with self.process_lock:
+      self.processes_to_monitor.update(processes_to_monitor)
 
-  def monitor_processes(self):
+  def start_process_monitor(self):
     """ Monitor all processes in processes_to_monitor dict,
     restarting any if they fail, up to max_runs times.
     """
@@ -478,28 +501,30 @@ class HeronExecutor(object):
     while True:
       if len(self.processes_to_monitor) > 0:
         (pid, status) = os.wait()
-        if pid in self.processes_to_monitor.keys():
-          old_process_info = self.processes_to_monitor[pid]
-          name = old_process_info.name
-          command = old_process_info.command
-          Log.info("%s (pid=%s) exited with status %d. command=%s" % (name, pid, status, command))
-          # Log the stdout & stderr of the failed process
-          self._wait_process_std_out_err(name, old_process_info.process)
 
-          # Just make it world readable
-          if os.path.isfile("core.%d" % pid):
-            os.system("chmod a+r core.%d" % pid)
-          if old_process_info.attempts >= self.max_runs:
-            Log.info("%s exited too many times" % name)
-            sys.exit(1)
-          time.sleep(self.interval_between_runs)
-          p = self._run_process(name, command)
-          del self.processes_to_monitor[pid]
-          self.processes_to_monitor[p.pid] =\
-            ProcessInfo(p, name, command, old_process_info.attempts + 1)
+        with self.process_lock:
+          if pid in self.processes_to_monitor.keys():
+            old_process_info = self.processes_to_monitor[pid]
+            name = old_process_info.name
+            command = old_process_info.command
+            Log.info("%s (pid=%s) exited with status %d. command=%s" % (name, pid, status, command))
+            # Log the stdout & stderr of the failed process
+            self._wait_process_std_out_err(name, old_process_info.process)
 
-          # Log down the pid file
-          log_pid_for_process(name, p.pid)
+            # Just make it world readable
+            if os.path.isfile("core.%d" % pid):
+              os.system("chmod a+r core.%d" % pid)
+            if old_process_info.attempts >= self.max_runs:
+              Log.info("%s exited too many times" % name)
+              sys.exit(1)
+            time.sleep(self.interval_between_runs)
+            p = self._run_process(name, command)
+            del self.processes_to_monitor[pid]
+            self.processes_to_monitor[p.pid] =\
+              ProcessInfo(p, name, command, old_process_info.attempts + 1)
+
+            # Log down the pid file
+            log_pid_for_process(name, p.pid)
 
   def get_commands_to_run(self):
     if self.shard == 0:
@@ -539,40 +564,32 @@ class HeronExecutor(object):
     return commands_to_kill, commands_to_keep, commands_to_start
 
   def launch(self):
-    current_commands = dict(map((lambda x: (x[1], x[2])), self.processes_to_monitor.values()))
-    updated_commands = self.get_commands_to_run()
+    with self.process_lock:
+      current_commands = dict(map((lambda x: (x[1], x[2])), self.processes_to_monitor.values()))
+      updated_commands = self.get_commands_to_run()
 
-    # get the commands to kill, keep and start
-    commands_to_kill, commands_to_keep, commands_to_start = \
-        self.get_command_changes(current_commands, updated_commands)
+      # get the commands to kill, keep and start
+      commands_to_kill, commands_to_keep, commands_to_start = \
+          self.get_command_changes(current_commands, updated_commands)
 
-    Log.info("current commands: %s" % sorted(current_commands.keys()))
-    Log.info("new commands    : %s" % sorted(updated_commands.keys()))
-    Log.info("commands_to_kill: %s" % sorted(commands_to_kill.keys()))
-    Log.info("commands_to_keep: %s" % sorted(commands_to_keep.keys()))
-    Log.info("commands_to_start: %s" % sorted(commands_to_start.keys()))
+      Log.info("current commands: %s" % sorted(current_commands.keys()))
+      Log.info("new commands    : %s" % sorted(updated_commands.keys()))
+      Log.info("commands_to_kill: %s" % sorted(commands_to_kill.keys()))
+      Log.info("commands_to_keep: %s" % sorted(commands_to_keep.keys()))
+      Log.info("commands_to_start: %s" % sorted(commands_to_start.keys()))
 
-    self._kill_processes(commands_to_kill)
-    self._start_processes(commands_to_start)
-    Log.info("Launch complete - processes killed=%s kept=%s started=%s monitored=%s" %
-             (len(commands_to_kill), len(commands_to_keep),
-              len(commands_to_start), len(self.processes_to_monitor)))
+      self._kill_processes(commands_to_kill)
+      self._start_processes(commands_to_start)
+      Log.info("Launch complete - processes killed=%s kept=%s started=%s monitored=%s" %
+               (len(commands_to_kill), len(commands_to_keep),
+                len(commands_to_start), len(self.processes_to_monitor)))
 
-  def prepare_launch(self):
-    create_folders = 'mkdir -p %s' % self.log_dir
-    chmod_binaries = \
-        'chmod a+rx . && chmod a+x %s && chmod +x %s && chmod +x %s && chmod +x %s' \
-        % (self.log_dir, self.tmaster_binary, self.stmgr_binary, self.heron_shell_binary)
-
-    commands = [create_folders, chmod_binaries]
-
-    for command in commands:
-      if self._run_blocking_process(command, True, self.shell_env) != 0:
-        Log.info("Failed to run command: %s. Exiting" % command)
-        sys.exit(1)
 
 def main():
-  if len(sys.argv) != 33:
+  """Register exit handlers, initialize the executor and run it."""
+  expected = 33
+  if len(sys.argv) != expected:
+    Log.error("Expected %s arguments but received %s: %s" % (expected, len(sys.argv), sys.argv))
     print_usage()
     sys.exit(1)
 
@@ -583,41 +600,44 @@ def main():
   shell_env = os.environ.copy()
   shell_env["PEX_ROOT"] = os.path.join(os.path.abspath('.'), ".pex")
 
-  # Instantiate the executor and launch it
+  # Instantiate the executor, bind it to signal handlers and launch it
   executor = HeronExecutor(sys.argv, shell_env)
-  executor.prepare_launch()
+
+  # pylint: disable=unused-argument
+  def signal_handler(signal_to_handle, frame):
+    # We would do nothing here but just exit
+    # Just catch the SIGTERM and then cleanup(), registered with atexit, would invoke
+    Log.info('signal_handler invoked with signal %s', signal_to_handle)
+    sys.exit(signal_to_handle)
+
+  def setup(shardid):
+    # Redirect stdout and stderr to files in append mode
+    # The filename format is heron-executor-<container_id>.stdxxx
+    log.configure(logfile='heron-executor-%s.stdout' % shardid, with_time=True)
+
+    Log.info('Set up process group; executor becomes leader')
+    os.setpgrp() # create new process group, become its leader
+
+    Log.info('Register the SIGTERM signal handler')
+    signal.signal(signal.SIGTERM, signal_handler)
+
+    Log.info('Register the atexit clean up')
+    atexit.register(cleanup)
+
+  def cleanup():
+    """Handler to trigger when receiving the SIGTERM signal
+    Do cleanup inside this method, including:
+    1. Terminate all children processes
+    """
+    Log.info('Executor terminated; exiting all process in executor.')
+    # We would not wait or check whether process spawned dead or not
+    os.killpg(0, signal.SIGTERM)
+
+  setup(executor.shard)
+
+  executor.initialize()
   executor.launch()
-  executor.monitor_processes()
-
-# pylint: disable=unused-argument
-def signal_handler(signal_to_handle, frame):
-  # We would do nothing here but just exit
-  # Just catch the SIGTERM and then cleanup(), registered with atexit, would invoke
-  sys.exit(signal_to_handle)
-
-def setup():
-  # Redirect stdout and stderr to files in append mode
-  # The filename format is heron-executor.stdxxx
-  log.configure(logfile='heron-executor.stdout', with_time=True)
-
-  Log.info('Set up process group; executor becomes leader')
-  os.setpgrp() # create new process group, become its leader
-
-  Log.info('Register the SIGTERM signal handler')
-  signal.signal(signal.SIGTERM, signal_handler)
-
-  Log.info('Register the atexit clean up')
-  atexit.register(cleanup)
-
-def cleanup():
-  """Handler to trigger when receiving the SIGTERM signal
-  Do cleanup inside this method, including:
-  1. Terminate all children processes
-  """
-  Log.info('Executor terminated; exiting all process in executor.')
-  # We would not wait or check whether process spawned dead or not
-  os.killpg(0, signal.SIGTERM)
+  executor.start_process_monitor()
 
 if __name__ == "__main__":
-  setup()
   main()
