@@ -14,10 +14,7 @@
 
 package com.twitter.heron.statemgr.localfs;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -27,7 +24,6 @@ import com.google.protobuf.Message;
 
 import com.twitter.heron.api.generated.TopologyAPI;
 import com.twitter.heron.common.basics.FileUtils;
-import com.twitter.heron.common.basics.Pair;
 import com.twitter.heron.proto.scheduler.Scheduler;
 import com.twitter.heron.proto.system.ExecutionEnvironment;
 import com.twitter.heron.proto.system.PackingPlans;
@@ -56,20 +52,10 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   }
 
   protected boolean initTree() {
-    List<Pair<String, String>> dirNamesAndPaths = new ArrayList<>();
-    dirNamesAndPaths.add(Pair.create("Topologies", getTopologyDir()));
-    dirNamesAndPaths.add(Pair.create("Tmaster location", getTMasterLocationDir()));
-    dirNamesAndPaths.add(Pair.create("Packing plan", getPackingPlanDir()));
-    dirNamesAndPaths.add(Pair.create("Physical plan", getPhysicalPlanDir()));
-    dirNamesAndPaths.add(Pair.create("Execution state", getExecutionStateDir()));
-    dirNamesAndPaths.add(Pair.create("Scheduler location", getSchedulerLocationDir()));
-
-    // Make necessary directories
-    for (Pair<String, String> dirNamesAndPath : dirNamesAndPaths) {
-      LOG.log(Level.FINE,
-          String.format("%s directory: %s", dirNamesAndPath.first, dirNamesAndPath.second));
-      if (!FileUtils.isDirectoryExists(dirNamesAndPath.second)
-          && !FileUtils.createDirectory(dirNamesAndPath.second)) {
+    for (StateLocation location : StateLocation.values()) {
+      String dir = getStateDirectory(location);
+      LOG.fine(String.format("%s directory: %s", location.getName(), dir));
+      if (!FileUtils.isDirectoryExists(dir) && !FileUtils.createDirectory(dir)) {
         return false;
       }
     }
@@ -84,6 +70,13 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     future.set(ret);
 
     return future;
+  }
+
+  private ListenableFuture<Boolean> setData(StateLocation location,
+                                            String topologyName,
+                                            byte[] bytes,
+                                            boolean overwrite) {
+    return setData(getStatePath(location, topologyName), bytes, overwrite);
   }
 
   @Override
@@ -129,7 +122,8 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
   @Override
   public ListenableFuture<Boolean> setExecutionState(
       ExecutionEnvironment.ExecutionState executionState, String topologyName) {
-    return setData(getExecutionStatePath(topologyName), executionState.toByteArray(), false);
+    return setData(
+        StateLocation.EXECUTION_STATE, topologyName, executionState.toByteArray(), false);
   }
 
   @Override
@@ -138,24 +132,24 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     // Note: Unlike Zk statemgr, we overwrite the location even if there is already one.
     // This is because when running in simulator we control when a tmaster dies and
     // comes up deterministically.
-    return setData(getTMasterLocationPath(topologyName), location.toByteArray(), true);
+    return setData(StateLocation.TMASTER_LOCATION, topologyName, location.toByteArray(), true);
   }
 
   @Override
   public ListenableFuture<Boolean> setTopology(TopologyAPI.Topology topology, String topologyName) {
-    return setData(getTopologyPath(topologyName), topology.toByteArray(), false);
+    return setData(StateLocation.TOPOLOGY, topologyName, topology.toByteArray(), false);
   }
 
   @Override
   public ListenableFuture<Boolean> setPhysicalPlan(
       PhysicalPlans.PhysicalPlan physicalPlan, String topologyName) {
-    return setData(getPhysicalPlanPath(topologyName), physicalPlan.toByteArray(), false);
+    return setData(StateLocation.PHYSICAL_PLAN, topologyName, physicalPlan.toByteArray(), false);
   }
 
   @Override
   public ListenableFuture<Boolean> setPackingPlan(
       PackingPlans.PackingPlan packingPlan, String topologyName) {
-    return setData(getPackingPlanPath(topologyName), packingPlan.toByteArray(), true);
+    return setData(StateLocation.PACKING_PLAN, topologyName, packingPlan.toByteArray(), true);
   }
 
   @Override
@@ -164,7 +158,7 @@ public class LocalFileSystemStateManager extends FileSystemStateManager {
     // Note: Unlike Zk statemgr, we overwrite the location even if there is already one.
     // This is because when running in simulator we control when a scheduler dies and
     // comes up deterministically.
-    return setData(getSchedulerLocationPath(topologyName), location.toByteArray(), true);
+    return setData(StateLocation.SCHEDULER_LOCATION, topologyName, location.toByteArray(), true);
   }
 
   @Override
