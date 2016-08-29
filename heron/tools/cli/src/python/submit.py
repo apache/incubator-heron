@@ -27,7 +27,9 @@ import heron.tools.cli.src.python.execute as execute
 import heron.tools.cli.src.python.jars as jars
 import heron.tools.cli.src.python.opts as opts
 import heron.tools.common.src.python.utils.config as config
+import heron.tools.common.src.python.utils.classpath as classpath
 
+# pylint: disable=too-many-return-statements
 
 ################################################################################
 def create_parser(subparsers):
@@ -50,6 +52,7 @@ def create_parser(subparsers):
   cli_args.add_topology_class(parser)
   cli_args.add_config(parser)
   cli_args.add_deactive_deploy(parser)
+  cli_args.add_extra_launch_classpath(parser)
   cli_args.add_system_property(parser)
   cli_args.add_verbose(parser)
 
@@ -100,12 +103,13 @@ def launch_a_topology(cl_args, tmp_dir, topology_file, topology_defn_file):
   lib_jars = config.get_heron_libs(
       jars.scheduler_jars() + jars.uploader_jars() + jars.statemgr_jars() + jars.packing_jars()
   )
+  extra_jars = cl_args['extra_launch_classpath'].split(':')
 
   # invoke the submitter to submit and launch the topology
   execute.heron_class(
-      'com.twitter.heron.scheduler.SubmitterMain',
-      lib_jars,
-      extra_jars=[],
+      class_name='com.twitter.heron.scheduler.SubmitterMain',
+      lib_jars=lib_jars,
+      extra_jars=extra_jars,
       args=args,
       java_defines=[]
   )
@@ -174,8 +178,8 @@ def submit_fatjar(cl_args, unknown_args, tmp_dir):
   topology_file = cl_args['topology-file-name']
   try:
     execute.heron_class(
-        cl_args['topology-class-name'],
-        config.get_heron_libs(jars.topology_jars()),
+        class_name=cl_args['topology-class-name'],
+        lib_jars=config.get_heron_libs(jars.topology_jars()),
         extra_jars=[topology_file],
         args=tuple(unknown_args),
         java_defines=cl_args['topology_main_jvm_property'])
@@ -293,6 +297,13 @@ def run(command, parser, cl_args, unknown_args):
   if not jar_type and not tar_type and not pex_type:
     Log.error("Unknown file type. Please use .tar or .tar.gz or .jar or .pex file")
     return False
+
+  # check if extra launch classpath is provided and if it is validate
+  if cl_args['extra_launch_classpath']:
+    valid_classpath = classpath.valid_java_classpath(cl_args['extra_launch_classpath'])
+    if not valid_classpath:
+      Log.error("One of jar or directory in extra launch classpath does not exist")
+      return False
 
   # create a temporary directory for topology definition file
   tmp_dir = tempfile.mkdtemp()
