@@ -14,6 +14,7 @@
 package com.twitter.heron.classification;
 
 import java.lang.annotation.Documented;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -39,6 +40,7 @@ public class InterfaceStability {
    */
   @Documented
   @Retention(RetentionPolicy.RUNTIME)
+  @Inherited
   public @interface Stable { }
 
   /**
@@ -46,6 +48,7 @@ public class InterfaceStability {
    */
   @Documented
   @Retention(RetentionPolicy.RUNTIME)
+  @Inherited
   public @interface Evolving { }
 
   /**
@@ -54,5 +57,6 @@ public class InterfaceStability {
    */
   @Documented
   @Retention(RetentionPolicy.RUNTIME)
+  @Inherited
   public @interface Unstable { }
 }

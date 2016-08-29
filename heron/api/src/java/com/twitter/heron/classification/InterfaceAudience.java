@@ -14,6 +14,7 @@
 package com.twitter.heron.classification;
 
 import java.lang.annotation.Documented;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -47,6 +48,7 @@ public final class InterfaceAudience {
    */
   @Documented
   @Retention(RetentionPolicy.RUNTIME)
+  @Inherited
   public @interface Public { }
 
   /**
@@ -54,6 +56,7 @@ public final class InterfaceAudience {
    */
   @Documented
   @Retention(RetentionPolicy.RUNTIME)
+  @Inherited
   public @interface LimitedPrivate { }
 
   /**
@@ -61,6 +64,7 @@ public final class InterfaceAudience {
    */
   @Documented
   @Retention(RetentionPolicy.RUNTIME)
+  @Inherited
   public @interface Private { }
 
   private InterfaceAudience() { } // Audience can't exist on its own

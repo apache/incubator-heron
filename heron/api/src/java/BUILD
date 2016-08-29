@@ -32,4 +32,5 @@ genrule(
 java_library(
     name = "classification",
     srcs = glob(["com/twitter/heron/classification/**/*.java"]),
+    resources = ["//heron/api/src:processor-service-conf"],
 )
