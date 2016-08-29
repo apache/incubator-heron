@@ -5,7 +5,9 @@ import logging
 import os
 import pkgutil
 import time
+import urllib
 import signal
+import socket
 import subprocess
 import sys
 from collections import namedtuple
@@ -141,6 +143,31 @@ def runTest(test, topologyName, params):
     _safe_delete_file(params['readFile'])
     _safe_delete_file(params['outputFile'])
 
+  if test == 'SCALE_UP':
+    url = 'http://localhost:%s/topologies/physicalplan?cluster=local&environ=default&topology=IntegrationTest_LocalReadWriteTopology' % params['trackerPort']
+    response = urllib.urlopen(url)
+    physical_plan_json = json.loads(response.read())
+    expected_instance_count = 5
+    def assert_scaling():
+      if 'result' not in physical_plan_json:
+        log.error("Could not find result json in physical plan request to tracker: %s" % url)
+        return False
+
+      instances = physical_plan_json['result']['instances']
+      instance_count = len(instances)
+      if instance_count != expected_instance_count:
+        log.error("Found %s instances but expected %s: %s" %
+                  (instance_count, expected_instance_count, instances))
+        return False
+
+      return True
+
+    scaling_asserted = assert_scaling()
+    if not scaling_asserted:
+      cleanup_test()
+
+    return scaling_asserted
+
   # get actual and expected result
   # retry if results are not equal a predesignated amount of times
   expected_result = ""
@@ -219,10 +246,24 @@ def killTopology(heronCliPath, testCluster, topologyName):
     raise RuntimeError("Unable to kill the topology: %s" % topologyName)
   logging.info("Successfully killed topology %s", topologyName)
 
+def startTracker(heronTrackerPath, heronTrackerPort):
+  splitcmd = [
+      '%s' % (heronTrackerPath),
+      '--verbose',
+      '--port=%s' % (heronTrackerPort),
+  ]
+  logging.info("Starting heron tracker: %s", splitcmd)
+  # this call can be blocking, no need for subprocess
+  popen = subprocess.Popen(splitcmd)
+  logging.info("Successfully started heron tracker on port %s", heronTrackerPort)
+  return popen
+
 def runAllTests(args):
   ''' Run the test for each topology specified in the conf file '''
   successes = []
   failures = []
+  tracker_process = startTracker(args['trackerPath'], args['trackerPort'])
+
   for test in TEST_CASES:
     logging.info("==== Starting test %s of %s: %s ====",
                  len(successes) + len(failures) + 1, len(TEST_CASES), test)
@@ -230,6 +271,8 @@ def runAllTests(args):
       successes += [test]
     else:
       failures += [test]
+
+  tracker_process.kill()
   return (successes, failures)
 
 def restartShard(heronCliPath, testCluster, topologyName, shardNum):
@@ -326,6 +369,14 @@ def _safe_delete_file(file_name):
       logging.error("Failed to delete file: %s: %s", file_name, e)
       return False
 
+def _random_port():
+  s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+  s.bind(("", 0))
+  s.listen(1)
+  port = s.getsockname()[1]
+  s.close()
+  return port
+
 def main():
   ''' main '''
   root = logging.getLogger()
@@ -356,6 +407,8 @@ def main():
       args['topologyName']
   )
   args['cliPath'] = os.path.expanduser(conf['heronCliPath'])
+  args['trackerPath'] = os.path.expanduser(conf['heronTrackerPath'])
+  args['trackerPort'] = _random_port()
   args['outputFile'] = os.path.join(args['workingDirectory'], conf['topology']['outputFile'])
   args['readFile'] = os.path.join(args['workingDirectory'], conf['topology']['readFile'])
   args['testJarPath'] = os.path.join(heronRepoDirectory, conf['testJarPath'])

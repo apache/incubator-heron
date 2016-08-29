@@ -600,15 +600,12 @@ class HeronExecutor(object):
       config = yaml.load(stream)
 
     # need to convert from the format in statemgr.yaml to the format that the python state managers
-    # takes, which is unfortunate. first, set reasonable defaults
+    # takes. first, set reasonable defaults to local
     state_manager_location =\
       {
           'type': 'file',
           'name': 'local',
           'tunnelhost': 'localhost',
-          # this doesn't work since root path is
-          # ${HOME}/.herondata/repository/state/${CLUSTER}
-          #'rootpath': config['heron.statemgr.root.path'],
           'rootpath': '~/.herondata/repository/state/local',
       }
 
